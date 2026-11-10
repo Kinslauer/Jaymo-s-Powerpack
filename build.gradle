@@ -504,7 +504,7 @@ tasks.register("buildKitchen", GradleBuild) {
 	dir = file("kitchen")
 	tasks = ["build"]
 }
-def kitchenLibs = file(file("E:/").exists() ? "E:/jaymos-kitchen-build/libs" : "kitchen/build/libs")
+def kitchenLibs = file(file("E:/").exists() ? "E:/jaymos-kitchen-build/${rootDir.name.replace(' ', '-')}/libs" : "kitchen/build/libs")
 def kitchenShipJar = fileTree(kitchenLibs) { include kitchenWanted }.builtBy("buildKitchen")
 // Minecraft Comes Alive (GPL-3.0, by Luke100000 and team): human villagers to befriend, marry and raise children with,
 // village ranks up to monarch. Its newest CurseForge/Modrinth file is for 26.2, so until a 26.3 one comes out the pack
@@ -520,7 +520,7 @@ tasks.register("buildKingdoms", GradleBuild) {
 	dir = file("kingdoms")
 	tasks = ["build"]
 }
-def kingdomsLibs = file(file("E:/").exists() ? "E:/jaymos-kingdoms-build/libs" : "kingdoms/build/libs")
+def kingdomsLibs = file(file("E:/").exists() ? "E:/jaymos-kingdoms-build/${rootDir.name.replace(' ', '-')}/libs" : "kingdoms/build/libs")
 def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsProps.version}.jar" }.builtBy("buildKingdoms")
 // The Roads More Travelled (CC BY-NC 4.0, by milkucha; github.com/milkucha/trmt): paths wear into grass, dirt and sand
 // where people and mounts walk most, and grow back when left alone. It has no 26.3 build, so ports/trmt is its 26.1.x
@@ -621,6 +621,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// GeckoLib 5.5.7 (MIT): the android mech's shared Blockbench model and keyframed animations.
+	implementation "maven.modrinth:geckolib:kSxHvs99"
 	// (0.20.34) MixinSquared, shipped inside our jar: mixin/lithostitched skips Lithostitched's clay-band hook when One
 	// Dimension builds a layer without a region (it threw, and a new world hung at "Selecting global world spawn")
 	include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7")))

@@ -131,11 +131,10 @@ public final class SpiritArms {
 
 	/**
 	 * What one being's spirit looks like this frame: its {@code kind}, how far manifest it is (0-1), the {@code pose} it holds
-	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}),
-	 * and how strong its {@code figure} is (0-1, {@link SpiritFigure#strength}).
+	 * with that pose's strength ({@code poseWeight} 0-1) and age in ticks, whether it has {@code arms} one or two, and the {@code size} of them as conjured ({@link Spirit#size(SpiritState)}).
+	 * The figure they hang from is drawn by {@link SpiritManifest}.
 	 */
-	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach, int style, long shown,
-		float figure) {
+	record Look(int kind, float manifest, int pose, float poseWeight, float poseAge, int arms, float size, int reach, int style, long shown) {
 	}
 
 	/**
@@ -277,6 +276,11 @@ public final class SpiritArms {
 	/** From the living renderer's extractRenderState (called by {@link ManaClient#extract}): this being's arms, if it has a spirit. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(LOOK, look(entity));
+		// the Grue's bodies in its trial are drawn as the Grue ({@link SpiritManifest}): the mob it wears is hidden
+		if (SpiritManifest.grueBody(entity) > 0.0F) {
+			state.isInvisible = true;
+			state.isInvisibleToPlayer = true;
+		}
 		// (0.7.465) how far the Grue has it
 		state.setData(GRUE, com.jaymoskingdoms.spirits.Grue.hold(entity));
 		// (Andy, 2026-11-01) Thessaly's mana wings
@@ -290,7 +294,7 @@ public final class SpiritArms {
 		if (spirit == null) {
 			TRACKS.remove(entity.getId());
 			if (flickerLeft > 0 && entity == minecraft.player) {
-				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0, style(flickerKind, 100), 0L, 0.0F);
+				return new Look(flickerKind, FLICKER_MANIFEST, Poses.IDLE, 0.0F, 0.0F, 1, Spirits.of(flickerKind).size(), 0, style(flickerKind, 100), 0L);
 			}
 			return null;
 		}
@@ -323,10 +327,8 @@ public final class SpiritArms {
 			weight = age < POSE_TICKS ? in : 1.0F - (age - POSE_TICKS) / POSE_OUT;
 			weight = Mth.clamp(weight, 0.0F, 1.0F);
 		}
-		// the figure shows each time the projection forms, and fades while the arms go on
-		float figure = spirit.show() != 0L ? manifest * SpiritFigure.strength(age) : 0.0F;
 		return new Look(spirit.kind(), manifest, pose, weight, age, spirit.arms(), Spirits.of(spirit.kind()).size(spirit), spirit.reach(),
-			style(spirit.kind(), spirit.scale()), spirit.shownAt(), figure);
+			style(spirit.kind(), spirit.scale()), spirit.shownAt());
 	}
 
 	/** How far beyond its keeper's box a being's spirit hand reaches now (blocks), for the culling box; 0 for none. */
@@ -340,6 +342,10 @@ public final class SpiritArms {
 
 	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
 	static float presence(SpiritState spirit, double now) {
+		// while it speaks the whole figure stands out in front of you, its own arms talking: these stay away meanwhile
+		if (SpiritManifest.speaking(spirit, now)) {
+			return 0.0F;
+		}
 		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR) || alwaysUp(style(spirit.kind(), spirit.scale()))) {
 			return 1.0F;
 		}
@@ -515,7 +521,7 @@ public final class SpiritArms {
 	static final int SLAM_RING = 28;
 
 	/** Whether this client may see the aura of {@code entity} (the arms are made of it): attuned, or reading magic. */
-	private static boolean visibleToAttuned(LivingEntity entity) {
+	static boolean visibleToAttuned(LivingEntity entity) {
 		LocalPlayer viewer = Minecraft.getInstance().player;
 		return viewer != null && Mana.attuned(entity) && (Mana.attuned(viewer) || com.jaymoskingdoms.ManaAlchemy.readsMagic(viewer));
 	}
@@ -570,7 +576,7 @@ public final class SpiritArms {
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.scale(PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 		poseStack.translate(0.0F, MODEL_DROP, 0.0F);
-		arms.submit(poseStack, collector, avatar.lightCoords, avatar, false);
+		arms.submit(poseStack, collector, avatar.lightCoords, avatar);
 		poseStack.popPose();
 	}
 
@@ -593,7 +599,7 @@ public final class SpiritArms {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			this.arms.submit(poseStack, collector, lightCoords, state, true);
+			this.arms.submit(poseStack, collector, lightCoords, state);
 		}
 	}
 
@@ -608,7 +614,7 @@ public final class SpiritArms {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			this.arms.submit(poseStack, collector, lightCoords, state, true);
+			this.arms.submit(poseStack, collector, lightCoords, state);
 		}
 	}
 
@@ -617,7 +623,6 @@ public final class SpiritArms {
 		private final Supplier<HumanoidModel<?>> wearer;
 		private final ArmModel[][] models = new ArmModel[Spirits.QUIET + 1][ARM_SHELLS.length];
 		private final ArmModel[][] trails = new ArmModel[Spirits.QUIET + 1][TRAIL_LAG.length];
-		private final SpiritFigure.Model[][] figures = new SpiritFigure.Model[Spirits.QUIET + 1][SpiritFigure.SHELLS.length];
 
 		Arms(Supplier<HumanoidModel<?>> wearer) {
 			this.wearer = wearer;
@@ -638,20 +643,12 @@ public final class SpiritArms {
 			return this.trails[kind][ghost];
 		}
 
-		private SpiritFigure.Model figure(int kind, int shell) {
-			if (this.figures[kind][shell] == null) {
-				this.figures[kind][shell] = new SpiritFigure.Model(LayerDefinition.create(SpiritFigure.mesh(kind, SpiritFigure.SHELLS[shell]), 64, 64)
-					.bakeRoot(), kind);
-			}
-			return this.figures[kind][shell];
-		}
-
 		private static ModelPart bake(int kind, int shell) {
 			return LayerDefinition.create(SpiritRig.mesh(kind, ARM_SHELLS[shell]), 64, 64).bakeRoot();
 		}
 
-		/** Draws the arms, and the figure behind them unless {@code withFigure} is false (first person: it would stand round the camera). */
-		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state, boolean withFigure) {
+		/** Draws the arms (the figure they hang from is {@link SpiritManifest}'s). */
+		void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, HumanoidRenderState state) {
 			Look look = state.getData(LOOK);
 			Glow glow = state.getData(ManaClient.KEY);
 			if (look == null || glow == null || state.isInvisible || look.manifest() <= 0.01F) {
@@ -676,16 +673,6 @@ public final class SpiritArms {
 			float strike = look.pose() == Poses.IDLE ? 0.0F : look.poseWeight();
 			// the projection is called up at its full: only a little dimmer for a dim glow
 			float strength = Math.max(glow.strength(), MIN_STRENGTH);
-			if (withFigure && look.figure() > 0.01F) {
-				// the figure first, behind its arms: pulsing, pale at the core, fading as it goes
-				float pulse = SpiritFigure.pulse(state.ageInTicks);
-				for (int i = 0; i < SpiritFigure.SHELLS.length; i++) {
-					float light = Mth.clamp(SpiritFigure.SHELL_LIGHT[i] * strength * pulse * look.figure(), 0.0F, 1.0F);
-					collector.order(ORDER + i).submitModel(this.figure(kind, i), state, poseStack,
-						RenderTypes.energySwirl(ManaClient.TEXTURE, i * 0.37F + 0.21F, -rise * (1 + i)), lightCoords, OverlayTexture.NO_OVERLAY,
-						ManaClient.tint(i == 0 ? GrueClient.core(ghost(color), grue) : color, light), null, 0);
-				}
-			}
 			for (int i = 0; i < ARM_SHELLS.length; i++) {
 				float light = Mth.clamp(ARM_SHELL_LIGHT[i] * strength * breathe * fade, 0.0F, 1.0F);
 				if (i > 0) {

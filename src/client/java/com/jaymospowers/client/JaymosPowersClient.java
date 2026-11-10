@@ -200,6 +200,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		com.jaymospowers.client.armory.MusketSights.init();
+		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
@@ -210,6 +211,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.wounds.WoundsHud.init();
 		com.jaymospowers.client.wounds.DownedHud.init();
 		com.jaymospowers.client.wounds.MedicineHud.init();
+		com.jaymospowers.client.wounds.HeartHud.init();
 		LedgeClient.init();
 		MeditateClient.init();
 		SwallowedPowerClient.init();

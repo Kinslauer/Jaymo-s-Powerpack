@@ -42,7 +42,11 @@ $0.08 an hour of sandbox time), with a cap of $20 a session (`BUDGET_CENTS` in `
 ```
 py tools/cloud-agent/run.py task <inbox-task>      # e.g. run.py task ore-hearts
 py tools/cloud-agent/run.py prompt "<what to do>"
+py tools/cloud-agent/run.py next                   # the oldest open task for `cloud` or `prometheus`
 ```
+
+`next` shares Prometheus's tasks: whichever claims a task first does it (exit 3: nothing waiting). `task` and
+`next` never take a task someone else has claimed.
 
 `task` claims the Inbox task as `claude-cloud`, gives the agent the task's text, and afterwards sets it `in-review`
 with the PR number, `blocked` with the agent's question for Andy, or back to `open` if it ended without a PR. The rest
@@ -51,15 +55,60 @@ of the pipeline (Quill's text pass, the reviewer, Andy) is unchanged. Exit codes
 While it runs, the agent may only open a PR on this repository: `run.py` refuses every other call that asks for
 permission. It never merges.
 
+### Showing an agent a picture
+
+The Console's message box sends text only. `py tools/cloud-agent/run.py image <sesn_...> <file> "what to look at"`
+uploads the picture into the running session and tells the agent where it is. Discord picture links
+(`cdn.discordapp.com`, `media.discordapp.net`) also open in the sandbox now.
+
+### When a push is refused (403)
+
+`remote: Permission to Kinslauer/Jaymo-s-Powerpack.git denied to Kinslauer` means the token git uses can read the
+repo but not write to it. The branch name has nothing to do with it.
+
+1. `py tools/cloud-agent/run.py checktoken` asks GitHub whether `GITHUB_TOKEN` may push, without pushing anything.
+   If it can't, give the token **Contents: Read and write** on this repository (fine-grained), or the `repo` scope
+   (classic), and run it again.
+2. A session keeps the token it started with, so fixing the token doesn't reach a session that's already running:
+   `py tools/cloud-agent/run.py retoken <sesn_...>` gives that session the current `GITHUB_TOKEN` (the ID is on its
+   Console page). Then tell the agent to push again.
+3. Sessions started from the Console attach the repo with whatever token was typed in there, often one that can't
+   push (`git push` then just hangs). Start sessions with `run.py`, which always uses `GITHUB_TOKEN`; for one already
+   started from the Console, `run.py retoken <sesn_...>` fixes it.
+
 ### For YOUTH
 
 Add to YOUTH's instructions (Hermes):
 
-> When Andy asks for work to be done in the cloud, or an Inbox task has `for: cloud`, run
-> `py tools/cloud-agent/run.py task <task-name>` from the Jaymo's Powerpack checkout (for a request that isn't an
-> Inbox task: `run.py prompt "<the request, with all its detail>"`). It can take an hour; post Andy the Console link it
+> When Andy asks for work to be done in the cloud, run `py tools/cloud-agent/run.py task <task-name>` from the
+> Jaymo's Powerpack checkout (for a request that isn't an Inbox task: `run.py prompt "<the request, with all its
+> detail>"`). When no cloud run is going and Andy has said the cloud may pick up work, run `run.py next`: it takes the
+> oldest open task for `cloud` or `prometheus` (exit 3: nothing waiting). It can take an hour; post Andy the Console link it
 > prints. When it ends, tell Andy the PR number (exit 0), the agent's question (exit 2), or that it stopped without a PR
 > (exit 1), with the session link. One cloud run at a time. Never put a key in a command line or a file.
+
+## Bug hunter (on demand only)
+
+A second agent, `agents/bug-hunter.md` (Andy's definition, 2026-11-09), in its own sandbox `environments/bug-hunt.yaml`
+(GitHub only, nothing installed). It reads an area of the code with many agents at once (a workflow run: readers, a
+second look at every slice, then one prover per suspicion), and reports only bugs a separate agent proved or confirmed
+by reading. Each confirmed bug becomes an Inbox task `for: hephaestus`, with the failing test and the suggested fix;
+Hephaestus (hermes-fixer) takes those when nothing is waiting in review fixes, and they go through review as usual.
+
+```
+py tools/cloud-agent/run.py hunt Downed --dry-run     # what it would read: files and lines, no cost
+py tools/cloud-agent/run.py hunt Downed               # a word from docs/codemap, a folder, or a .java file
+py tools/cloud-agent/run.py hunt kitchen/src --big --budget 120
+```
+
+Run it only when Andy asks. Cost grows with the lines read: one ordinary run is up to 30,000 lines (20 slices of
+~1,500), capped at $50 a session (`HUNT_BUDGET_CENTS`). A whole mod is far bigger (Powers ~380,000 lines, Kingdoms
+~340,000, Kitchen ~48,000), so hunt one area at a time; `--big` lifts the line cap, and needs Andy's OK and a higher
+`--budget`. The report and `bugs.json` are saved in `tools/cloud-agent/hunts/` (not committed). Exit 0 with the tasks
+made (or none), 1 if the hunt didn't finish.
+
+Setup, once, from this folder: `ant apply agents/bug-hunter.md environments/bug-hunt.yaml` and commit
+`claude-lock.json`.
 
 ## Changing it
 

@@ -114,7 +114,10 @@ public final class FallingTree extends Entity {
 	 * {@link #LEAF_FALL_TICKS}; a leaf further than {@link #LEAF_HOLD} from any of its wood falls at once.
 	 */
 	static final int LOG_CHOPS = 3, LEAF_FALL = 2, LEAF_FALL_TICKS = 10, LEAF_HOLD = 3;
-	/** (0.7.588) A tree caught leaning looks again this often (ticks) whether what held it is gone, and falls on if so. */
+	/**
+	 * (0.7.588) A tree that's down looks again this often (ticks) whether what holds it up is gone: free to turn further
+	 * about its foot, it falls on; with none of its wood resting on anything, it drops.
+	 */
 	static final int PROP_CHECK = 20;
 	/** (0.7.588) A part broken off a leaning tree falls free, turning this many degrees a tick. */
 	static final float SPLIT_TUMBLE = 3.0F;
@@ -190,6 +193,8 @@ public final class FallingTree extends Entity {
 	private float landFlat, landTurning;
 	/** (0.7.456) Whether it came to rest still half standing. */
 	private boolean propped;
+	/** How far (blocks) it was raised as it came to lie, so its wood rests on the ground; taken back off if it falls on. */
+	private float lift;
 	/** (0.7.586) How many standing trees it has knocked over. */
 	private int knocks;
 	/** (0.7.588) Held in a giant's hand (and when it was last held there), and who threw it (never struck by it). */
@@ -450,7 +455,8 @@ public final class FallingTree extends Entity {
 		this.propped = at < LYING;
 		if (!this.propped) {
 			// (0.7.588) lying, its wood rests on the ground, not half sunk in it (it turned about the foot of its cut)
-			this.setPos(this.getX(), this.getY() + 0.5 * Mth.sin(at * Mth.DEG_TO_RAD), this.getZ());
+			this.lift = 0.5F * Mth.sin(at * Mth.DEG_TO_RAD);
+			this.setPos(this.getX(), this.getY() + this.lift, this.getZ());
 		}
 		this.comeDown(level);
 	}
@@ -465,25 +471,62 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.7.588) At rest: its leaves drop off a few at a time, and caught leaning, it falls on once what held it is gone.
-	 * It stays until it's chopped up ({@link #skipAttackInteraction}).
+	 * (0.7.588) At rest: its leaves drop off a few at a time, and it stays until it's chopped up
+	 * ({@link #skipAttackInteraction}). Andy: "unsupported fallen trees should fall, there shouldnt be hanging trees like
+	 * this". Whatever its lean, once nothing stops it turning further about its foot it falls on, and once none of its
+	 * wood rests on anything (what held it chopped, burned or knocked away, a part broken off it, or it lay flat out over
+	 * a drop) it falls free until it strikes something.
 	 */
 	private void rest(ServerLevel level, List<Piece> pieces) {
 		int since = this.tickCount - this.downAt;
 		if (since % LEAF_FALL_TICKS == 0) {
 			this.shedLeaves(level, pieces);
 		}
-		if (this.propped && since % PROP_CHECK == 0 && !this.strikes(level, pieces, Math.min(FLAT, this.lean() + 1.0F), 2)) {
+		if (since % PROP_CHECK != 0) {
+			return;
+		}
+		float lean = this.lean();
+		if (lean >= 0.0F && lean < FLAT && !this.strikes(level, pieces, Math.min(FLAT, lean + 1.0F), 2)) {
 			this.fallOn();
+		} else if (!this.rests(level, pieces)) {
+			hurl(this, Vec3.ZERO, lean >= 0.0F && lean < FLAT ? SPLIT_TUMBLE : 0.0F, null);
 		}
 	}
 
-	/** (0.7.588) Down no longer: it starts over from where it leans. */
+	/** Whether any of its wood rests on something: a block under a log, or one it lies sunk in. Leaves hold nothing up. */
+	private boolean rests(ServerLevel level, List<Piece> pieces) {
+		Quaternionf turn = turn(this.lean(), this.heading());
+		boolean wood = false;
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			wood = true;
+			BlockPos at = this.cell(this.where(p, turn));
+			if (holds(level, at) || holds(level, at.below())) {
+				return true;
+			}
+		}
+		// (no wood left, nothing of it could strike the ground to land again)
+		return !wood;
+	}
+
+	/** Whether the block at {@code pos} can hold up a fallen tree's wood: anything solid to stand on but leaves. */
+	private static boolean holds(ServerLevel level, BlockPos pos) {
+		BlockState there = level.getBlockState(pos);
+		return !there.isAir() && !(there.getBlock() instanceof LeavesBlock) && !there.getCollisionShape(level, pos).isEmpty();
+	}
+
+	/** (0.7.588) Down no longer: it starts over from where it leans (lowered back onto its foot if it was raised to lie). */
 	private void fallOn() {
 		this.down = false;
 		this.propped = false;
 		this.downAt = -1;
 		this.speed = START_SPEED;
+		if (this.lift != 0.0F) {
+			this.setPos(this.getX(), this.getY() - this.lift, this.getZ());
+			this.lift = 0.0F;
+		}
 	}
 
 	/** (0.6.12) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
@@ -813,6 +856,7 @@ public final class FallingTree extends Entity {
 		tree.held = false;
 		tree.down = false;
 		tree.propped = false;
+		tree.lift = 0.0F;
 		tree.flying = true;
 		tree.hurled = velocity.lengthSqr() > 1.0E-4;
 		tree.flown = FLY_CLEAR + 1;
@@ -1228,6 +1272,7 @@ public final class FallingTree extends Entity {
 		this.down = input.getBooleanOr("down", false);
 		this.downAt = -1;
 		this.propped = input.getBooleanOr("propped", false);
+		this.lift = input.getFloatOr("lift", 0.0F);
 		this.flying = input.getBooleanOr("flying", false);
 		this.flown = input.getIntOr("flown", 0);
 		this.tumble = input.getFloatOr("tumble", 0.0F);
@@ -1241,6 +1286,7 @@ public final class FallingTree extends Entity {
 		output.putFloat("lean", this.lean());
 		output.putBoolean("down", this.down);
 		output.putBoolean("propped", this.propped);
+		output.putFloat("lift", this.lift);
 		output.putBoolean("flying", this.flying || this.held);
 		output.putInt("flown", this.flown);
 		output.putFloat("tumble", this.tumble);

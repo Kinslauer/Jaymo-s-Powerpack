@@ -269,12 +269,20 @@ public class Rat extends PathfinderMob {
 		}
 
 		private void moveToTarget() {
+			if (target == null) {
+				return;
+			}
 			Vec3 at = target.at();
 			getNavigation().moveTo(at.x, at.y, at.z, CREEP_SPEED);
 		}
 
 		@Override
 		public void tick() {
+			// the target can be cleared between the selector's continue check and this tick (the goal stopped by
+			// something else, or the store gone): a null here crashed the server, so just wait for the next check
+			if (target == null) {
+				return;
+			}
 			Vec3 at = target.at();
 			getLookControl().setLookAt(at.x, at.y, at.z);
 			if (target.trap()) {

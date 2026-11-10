@@ -1891,3 +1891,35 @@ The double-tap Sneak (within 6 ticks) to activate OK Zoomer's zoom is removed. T
 
 ## Not tested in game
 Zoom behavior with OK Zoomer mod not verified in multiplayer.
+
+## 0.21.82 (2026-11-09): Android mechs move with GeckoLib (#1195)
+
+- **Four animated builds**: Warden, Bulwark, Strider and Reclaimer keep their original geometry, skins, optional equipment and glowing visor/core/lights on one shared Blockbench rig.
+- **Original motion**: coolant-breathing idle, the old leg/knee/arm walk, target-following cannon aim, shot recoil, shoulder-shell fire, a double-fisted smash, hit flinch and a held collapsing death pose. Editable projects and inspected old/new renders are in `art/`; no outside art was used.
+- Built and render-checked; not played in game. Two dev-server boot attempts stopped before world load on unrelated missing mod dependencies (Stormie's Spiders needing Fabric API, then It Takes a Pillage needing Resourceful Lib).
+
+## 0.21.83 (2026-11-10): Animated flintlock guns: musket, blunderbuss and flintlock with fire and smoke (#1207)
+
+- **Muskets, blunderbuss, flintlocks move now.** In first and third person, WeaponMod's musket (bayonet muskets too), blunderbuss and flintlock pistol, and the Void Armory's flintlock, are drawn by GeckoLib: they swing up into the hand when drawn, sway slightly while aimed, and on the shot the hammer snaps forward, a muzzle flash bursts (full-bright) and the gun kicks back and lifts before settling. On reload the gun tips muzzle-up and the ramrod goes down the barrel, then the hammer is cocked again. A fired gun shows its hammer down until it's reloaded. The musket is heavier and slower than the pistol; the blunderbuss kicks hardest.
+- **New blunderbuss model**: bell-mouthed barrel, brass bands and butt plate, walnut stock, lock, hammer and ramrod (our own art).
+- **Bayonet muskets** keep the rifle model with a socket bayonet whose blade is the tier's metal (wood to netherite).
+- **Much more fire and smoke** (`armory/GunBlast`): every shot sends out a flash, an explosion puff, a cone of flame (pistol 14 + 7, musket 22 + 11, blunderbuss 34 + 17), thick smoke (16 / 24 / 36), fine smoke (20 / 30 / 40) and lava sparks (3 / 5 / 8), then smoke keeps rolling out of the muzzle and drifting up for 1 s / 1.5 s / 2 s. Counts and lengths are constants at the top of `GunBlast`.
+- Inventory, ground and item-frame pictures are unchanged. Damage, range, reload time and dual wielding are unchanged.
+- Code: `armory/GunBlast` (blast, synced `gun_shot` attachment), `mixin/WeaponModGunBlastMixin`, `client/armory/guns/*` (item model type `jaymospowers:animated_gun`), `tools/gen_guns_geckolib.py`, art in `art/guns/`.
+- Built; not tested in game (no client run here, and `runServer` can't boot in the cloud session).
+
+## 0.21.84 (2026-11-10): Knives carry their metal's effect (#1204)
+
+Tinkering: a tinkered knife's head metal leaves its mark on a hit - cobalt poisons, slimesteel slows, manyullyn
+weakens, queen's slime burns, hepatizon withers - at a low chance, so a knife stays a knife, not a wand. Added the
+knife metals (materials, ingots, traits), the knife tool type, and the on-hit mark effect; repaired or recast blades
+keep it, as it belongs to the tool's metal.
+
+## 0.21.85 (2026-11-10): ore hearts - permanent half-hearts mined from deep deepslate (#1210)
+
+- **Heart crystal ore**: a rare ore in deep deepslate drops a heart crystal; using one raises max health by one permanent half-heart, up to ten half-hearts (five full hearts above base), shown quietly as a faint extra run under the health bar.
+- **A life in your pocket**: a found heart is lost on death, but each one burns to turn one death aside - your extra sure wake before the cause roll. With none left, the cause roll runs as today, and reincarnation clears the hearts and the extra health.
+- **New**: `core.wounds.HeartCrystals` (the hearts attachment, the heart crystal item, both ore blocks, worldgen and loot tables), registered from `JaymosPowers` and listed in `registerAttachments()`. Hooks: `Downed`'s `AFTER_RESPAWN` re-applies the extra health on respawn, and `Mortality`'s death roll burns a heart via `tryBurnHeartOnDeath` to turn a death aside instead of spending one of the three sure wakes (the heart *is* the wake - only one increment).
+- **Client**: `HeartHud` draws the faint extra run under the health bar showing the half-hearts held.
+- **Compat**: stacks with the `crystal_heart` artifact (both raise max health) - say so in the PR body, and ask Andy if it reads as too much health.
+- Not tested in game.

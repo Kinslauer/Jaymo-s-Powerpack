@@ -5,9 +5,9 @@ import sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from figures import FIG, ARM_INNER, ARM_SIZE, NAMES, GRIMSBY, VARRO, AMBROSE, THESSALY, QUIET
+from figures import FIG, ARM_INNER, ARM_SIZE, NAMES, GRIMSBY, VARRO, AMBROSE, THESSALY, QUIET, GRUE
 
-COLOR = {GRIMSBY: 0x9AB8FF, VARRO: 0xFFB347, AMBROSE: 0x9BE08F, THESSALY: 0xFF9ED8, QUIET: 0xC8C8DC}
+COLOR = {GRIMSBY: 0x9AB8FF, VARRO: 0xFFB347, AMBROSE: 0x9BE08F, THESSALY: 0xFF9ED8, QUIET: 0xC8C8DC, GRUE: 0xFF1030}
 MANA = 0x5AA0FF  # mana's blue (approx ManaClient.COLOR)
 # anchors: up, back, right, idle, open
 ANCH = {
@@ -179,6 +179,49 @@ def scene(k, g_arm, g_fig, pose="idle", t=0.0):
     return arms, fig
 
 
+def swing(p):
+    p -= math.floor(p)
+    if p < 0.45:
+        k = p / 0.45
+        return 0.7 * k * k * (3 - 2 * k)
+    k = (p - 0.45) / 0.55
+    out = k / 0.2 if k < 0.2 else 1 - (k - 0.2) / 0.8
+    return 0.7 + (-1.95 * out - 0.7) * min(k / 0.2, 1.0)
+
+
+def staged(k, g, talk=0.0, t=0.0, up=0.0, strike=None):
+    """The manifested figure standing on the ground (feet at y 24), its own arms out (SpiritFigure.Model, staged)."""
+    F = FIG[k]
+    out = []
+    sc = F["stage"]
+    fm = part(np.eye(4), 0, 24 - F["foot"] * sc - 3.0, 0, 0, 0, 0, (sc,) * 3)
+    for b in F["torso"]: box(out, fm, *b[:6], g)
+    sk = part(fm, 0, 0, 0, talk * 0.08 * math.sin(t * 0.54), 0, talk * 0.06 * math.sin(t * 0.31))
+    for b in F["skull"]: box(out, sk, *b[:6], g)
+    tm = part(fm, 0, F["tail_y"], 0, 0.03 * math.sin(t * 0.07))
+    for b in F["tail"]: box(out, tm, *b[:6], g)
+    ax, ay = F["arm_at"]
+    rx = (1 - talk) * -0.1 + talk * (-0.85 - 0.28 * math.sin(t * 0.3))
+    ry = talk * 0.35
+    rz = (1 - talk) * 0.12 + talk * -0.1
+    lx = 0.05 - talk * 0.25
+    rx, lx = rx + (-2.75 - rx) * up, lx + (-2.75 - lx) * up
+    rz, lz = rz + (0.45 - rz) * up, -0.12 + (-0.45 + 0.12) * up
+    if strike is not None:
+        rx, lx = swing(strike), swing(strike + 0.5)
+    if F["wing"]:
+        wx, wy, wz = F["wing_at"]
+        for side in (1, -1):
+            wm = part(fm, wx * side, wy, wz, 0, 0.45 * side, (0.3 - 0.25) * side)
+            for (cx, y, cz, w, h, d, c) in F["wing"]:
+                box(out, wm, cx * side, y, cz, w, h, d, g)
+    for side, (x, y_, z_) in ((1, (rx, ry, rz)), (-1, (lx, 0.0, lz))):
+        am = part(fm, ax * side, ay, 0, x, y_, z_)
+        for (cx, y, cz, w, h, d, c) in F["arm"]:
+            box(out, am, cx * side, y, cz, w, h, d, g)
+    return out
+
+
 def player():
     out = []
     m = np.eye(4)
@@ -225,7 +268,7 @@ def render(k, yaw, pitch, figure_alpha, arms_alpha=1.0, pose="idle", t=0.0, scal
                 yield fidx, poly
 
     # the player, opaque, with depth (bigger z is nearer the camera here: v[2] toward the viewer)
-    for fidx, poly in sorted(faces_of(player()), key=lambda fp: sum(p[2] for p in fp[1]) / 4):
+    for fidx, poly in sorted(faces_of([] if pose in ("stage", "talk", "level", "strike") else player()), key=lambda fp: sum(p[2] for p in fp[1]) / 4):
         mask = Image.new("L", (W, H), 0)
         ImageDraw.Draw(mask).polygon([(p[0], p[1]) for p in poly], fill=255)
         mk = np.array(mask) > 0
@@ -249,6 +292,15 @@ def render(k, yaw, pitch, figure_alpha, arms_alpha=1.0, pose="idle", t=0.0, scal
     pale = col * 0.6 + 0.4
     fig_shells = [(0.0, 0.10), (0.5, 0.04), (1.2, 0.016)]
     arm_shells = [(0.0, 0.14), (0.45, 0.05), (1.0, 0.02)]
+    if pose in ("stage", "talk", "level", "strike"):
+        talk = 1.0 if pose == "talk" else 0.0
+        for g, light in fig_shells:
+            glow(staged(k, g, talk, t, 1.0 if pose == "level" else 0.0, 0.55 if pose == "strike" else None), pale if g == 0 else col,
+                 light * 0.8 * figure_alpha)
+        im = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8))
+        if label:
+            ImageDraw.Draw(im).text((12, 10), label, fill=(230, 230, 230), font=FONT)
+        return im
     if figure_alpha > 0.01:
         for g, light in fig_shells:
             _, fig = scene(k, None, g, pose, t)
@@ -270,11 +322,25 @@ except Exception:
 
 
 def sheet(k, path):
+    if k == GRUE:
+        tiles = [render(k, math.radians(160), math.radians(-12), 1.0, pose="stage", scale=7.0, label="the Grue: hovering"),
+                 render(k, math.radians(110), math.radians(-8), 1.0, pose="strike", scale=7.0, label="the Grue: striking"),
+                 render(k, math.radians(20), math.radians(-15), 1.0, pose="stage", scale=7.0, label="from behind: the wings")]
+        out = Image.new("RGB", (W * len(tiles), H + 40), (20, 20, 24))
+        for i, tl in enumerate(tiles):
+            out.paste(tl, (i * W, 40))
+        ImageDraw.Draw(out).text((14, 8), NAMES[k], fill=(255, 255, 255), font=FONT)
+        out.save(path)
+        return
     tiles = [
         render(k, math.radians(35), math.radians(-18), 1.0, label="formed: figure + arms"),
         render(k, math.radians(35), math.radians(-18), 0.4, t=1.5, label="figure fading"),
         render(k, math.radians(35), math.radians(-18), 0.0, label="arms stay"),
         render(k, math.radians(95), math.radians(-5), 1.0, pose="blow", label="side, mid-blow"),
+        render(k, math.radians(160), math.radians(-12), 1.0, pose="stage", scale=9.0, label="manifested: facing you"),
+        render(k, math.radians(165), math.radians(-8), 1.0, pose="talk", t=4.0, scale=9.0, label="manifested: talking"),
+        render(k, math.radians(180), math.radians(-8), 1.0, pose="level", scale=9.0, label="manifested: level up"),
+        render(k, math.radians(110), math.radians(-8), 1.0, pose="strike", scale=9.0, label="fighting the Grue"),
     ]
     out = Image.new("RGB", (W * len(tiles), H + 40), (20, 20, 24))
     for i, tl in enumerate(tiles):
@@ -284,6 +350,6 @@ def sheet(k, path):
 
 
 if __name__ == "__main__":
-    ks = [int(a) for a in sys.argv[2:]] or range(5)
+    ks = [int(a) for a in sys.argv[2:]] or range(6)
     for k in ks:
         sheet(k, "%s/%s.png" % (sys.argv[1], NAMES[k].lower().replace(" ", "-")))

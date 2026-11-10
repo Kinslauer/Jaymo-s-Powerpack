@@ -20,11 +20,21 @@ Use dark sepia outlines and hard-edged parallel hatching to describe volume. Kee
 
 ## Telescope deliverable
 
-- `telescope.bbmodel`: editable 64×64 java-block model, with named tripod, mount, barrel and optics groups. Its long walnut tube has stepped octagonal sides, brass binding rings, a glass objective, an eyepiece and a focus screw. Three jointed legs meet at a timber head; the mount carries an engraved altitude scale.
+- `telescope.bbmodel`: editable 64×64 GeckoLib block model, centred with its feet at y=0. A fixed `base` carries the
+  tripod; `azimuth` yaws the mount and the child `elevation` joint tilts the complete walnut barrel and optics around
+  the brass axle. Includes editable `idle`, `azimuth`, `elevation` and combined `aim` animations. Its long walnut tube
+  has stepped octagonal sides, brass binding rings, a glass objective, an eyepiece and a focus screw. Three jointed
+  legs meet at a timber head; the mount carries an engraved altitude scale.
 - `telescope_item.bbmodel`: editable source for the original 16×16 inventory icon. The icon uses one hatch direction and only suggests the tripod at pixel scale.
 - `telescope_preview.png`: front, right side, back and left side renders of the placed model.
+- `telescope_rig_preview.png`: direct-front checks of idle, 90° azimuth, raised elevation and combined aim.
 - `telescope_item_preview.png`: matching renders of the icon source.
-- `generate_telescope.py`: deterministic source for the PNGs, `.bbmodel` files and exported Minecraft JSON.
+- `generate_telescope.py`: deterministic source for the PNGs, `.bbmodel` files, static fallback and GeckoLib block JSON.
 - `render_previews.py`: exact front/right/back/left checks using the repository renderer; the flat item's two sides are separated to avoid the renderer overprinting them.
 
-The exported block model uses only Minecraft's permitted single-axis 22.5° rotations. Registration, blockstates, aiming and observation behaviour deliberately remain with `astronomy-telescope`; this change contains no gameplay Java.
+GeckoLib 5 reads `geckolib/models/block/telescope.geo.json` and `geckolib/animations/block/telescope.animation.json`,
+with the existing `textures/block/telescope.png`. The old Java block JSON remains only as a static fallback while
+registration is being wired. One telescope is enough: the Altazimuth Mount can use this same rig and its physical
+scales, rather than adding basic/mounted/brass tiers that duplicate the instrument. Registration, saved aim, skill
+checks, blockstates and observation behaviour deliberately remain with the gameplay implementation; this change
+contains no gameplay Java.

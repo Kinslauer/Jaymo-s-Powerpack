@@ -2,6 +2,12 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -9,11 +15,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
@@ -50,6 +58,16 @@ public final class FarmhandHome {
 	static final int FAMILY_HEARTS = 40;
 	/** How far round the house its folk are counted (blocks). */
 	static final double HOUSE_REACH = 6.0;
+
+	/** The farmhand the family took in, kept on each family villager: they never hold that blood against them. */
+	static final AttachmentType<UUID> FARMHAND_FAMILY = AttachmentRegistry.create(JaymosKingdoms.id("farmhand_family"),
+		builder -> builder.persistent(UUIDUtil.CODEC).syncWith(UUIDUtil.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** {@code v} is one of {@code player}'s farmhand family: they never hold the farmhand's blood against them. */
+	static boolean familyOf(Villager v, Player p) {
+		UUID id = v.getAttached(FARMHAND_FAMILY);
+		return id != null && id.equals(p.getUUID());
+	}
 
 	/** A farmhouse found for a farmhand: where to stand, the house's bounds, and the bed they wake in (its head; null with none). */
 	record House(BlockPos wake, BoundingBox box, @Nullable BlockPos bed) {
@@ -154,6 +172,18 @@ public final class FarmhandHome {
 		}
 		for (Villager v : folk) {
 			McaCompat.hearts(v, player, FAMILY_HEARTS);
+		}
+		for (Villager v : folk) {
+			v.setAttached(FARMHAND_FAMILY, player.getUUID());
+		}
+		// (they may notice your blood, and say so kindly: it never costs anything)
+		if (!folk.isEmpty()) {
+			Villager speaker = folk.stream().filter(v -> !v.isBaby()).findFirst().orElseGet(() -> folk.get(0));
+			Heritage.Kind kind = Heritage.of(player);
+			Component line = Prejudice.degree(kind) > 0
+				? Component.translatable("talk.jaymoskingdoms.farm_family.notice", Identities.shownName(player))
+				: Component.translatable("talk.jaymoskingdoms.farm_family.welcome", Identities.shownName(player));
+			Speech.say(level, speaker, line, Speech.GOLD, 16.0);
 		}
 		// (Andy: "they need some kind of utility or function": their farm round, their fear of monsters, their nights indoors)
 		FarmFamily.adopt(level, house.wake(), folk);

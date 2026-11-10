@@ -1,16 +1,25 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import net.conczin.mca.Config;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.ai.Genetics;
+import net.conczin.mca.entity.ai.Memories;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.conczin.mca.entity.ai.Messenger;
 import net.conczin.mca.entity.ai.Pregnancy;
+import net.conczin.mca.entity.ai.brain.VillagerBrain;
 import net.conczin.mca.entity.ai.relationship.AgeState;
 import net.conczin.mca.entity.ai.relationship.EntityRelationship;
 import net.conczin.mca.entity.ai.relationship.Gender;
+import net.conczin.mca.entity.ai.relationship.RelationshipState;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
 import net.conczin.mca.network.Network;
@@ -428,6 +437,12 @@ final class McaBridge {
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
 		// (0.7.490) and a money-changer (Currencies sets its offers)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
+		// a villager that was unloaded when a player was reborn forgets them as it loads
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof VillagerEntityMCA v) {
+				forgetOnLoad(v, level);
+			}
+		});
 	}
 
 	/** (0.7.498) {@code v}'s job is one MCA keeps from trading (guards, archers, outlaws, mercenaries, our workers). */
@@ -2100,5 +2115,79 @@ final class McaBridge {
 		save.setEntityDataSet(false);
 		net.conczin.mca.server.ServerInteractionManager.launchDestiny(player);
 		return true;
+	}
+
+	/**
+	 * Reborn players (UUID) and the game time of their latest rebirth, kept on the Overworld so a villager that was
+	 * unloaded at the time forgets them when it next loads ({@link #forgetOnLoad}).
+	 */
+	static final AttachmentType<Map<String, Long>> REBORN = AttachmentRegistry.create(JaymosKingdoms.id("mca_reborn"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+	/** On a villager: the rebirth (player UUID to its game time) it has already forgotten, so a new life's memories stay. */
+	static final AttachmentType<Map<String, Long>> FORGOTTEN = AttachmentRegistry.create(JaymosKingdoms.id("mca_forgotten"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+
+	/**
+	 * A new life is a stranger to MCA's villagers: the player's own MCA data is reset, any MCA marriage, engagement or
+	 * promise is ended, they leave the family tree, and every villager's memory of them (hearts, dialogue, last seen) is
+	 * replaced with a stranger's. Villagers loaded now forget at once; the rest forget when they next load. Runs before
+	 * {@link #newDestiny}, so the creator it opens starts from this clean state. From LifeStory's reincarnation only.
+	 */
+	static void forgetPlayer(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		java.util.UUID id = player.getUUID();
+		PlayerSaveData save = PlayerSaveData.get(player);
+		RelationshipState state = save.getRelationshipState();
+		if (state != RelationshipState.SINGLE) {
+			save.endRelationShip(state);
+		}
+		save.reset();
+		save.setEntityDataSet(false);
+		FamilyTree.get(player.level()).remove(id);
+		ServerLevel overworld = Factions.level(server);
+		long now = overworld.getGameTime();
+		Map<String, Long> reborn = new HashMap<>(overworld.getAttachedOrElse(REBORN, Map.of()));
+		reborn.put(id.toString(), now);
+		overworld.setAttached(REBORN, Map.copyOf(reborn));
+		for (ServerLevel level : server.getAllLevels()) {
+			AABB box = new AABB(-3.0E7, level.getMinY() - 1, -3.0E7, 3.0E7, level.getMinY() + level.getHeight() + 1, 3.0E7);
+			for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, box)) {
+				forget(v, id, now);
+			}
+		}
+	}
+
+	/** A villager loading in: it forgets any player reborn since it last checked (it was unloaded when they were). */
+	static void forgetOnLoad(VillagerEntityMCA v, ServerLevel level) {
+		Map<String, Long> reborn = Factions.level(level.getServer()).getAttachedOrElse(REBORN, Map.of());
+		if (reborn.isEmpty()) {
+			return;
+		}
+		Map<String, Long> done = v.getAttachedOrElse(FORGOTTEN, Map.of());
+		for (Map.Entry<String, Long> e : reborn.entrySet()) {
+			if (done.getOrDefault(e.getKey(), Long.MIN_VALUE) < e.getValue()) {
+				forget(v, java.util.UUID.fromString(e.getKey()), e.getValue());
+			}
+		}
+	}
+
+	/**
+	 * {@code v} forgets player {@code id}, reborn at game time {@code at}: a stranger's memory in place of the old one
+	 * (MCA's getMemories() is a copy, so the memory is written back through updateMemories), and a marriage, engagement
+	 * or promise to them ended. Marked done so the new life's memories aren't wiped on a later load.
+	 */
+	private static void forget(VillagerEntityMCA v, java.util.UUID id, long at) {
+		VillagerBrain<?> brain = v.getVillagerBrain();
+		if (brain.getMemories().containsKey(id)) {
+			brain.updateMemories(new Memories(brain, v.level().getGameTime(), id));
+		}
+		EntityRelationship r = v.getRelationships();
+		RelationshipState rs = r.getRelationshipState();
+		if (rs != RelationshipState.SINGLE && (r.isMarriedTo(id) || r.isEngagedWith(id) || r.isPromisedTo(id))) {
+			r.endRelationShip(rs);
+		}
+		Map<String, Long> done = new HashMap<>(v.getAttachedOrElse(FORGOTTEN, Map.of()));
+		done.put(id.toString(), at);
+		v.setAttached(FORGOTTEN, Map.copyOf(done));
 	}
 }

@@ -54,3 +54,17 @@ textures/item/sunfang_blade.png, sunfang_fx.png (models/item/sunfang): the Sunfa
   "Ancient Blasting Sword", Blockbench Workshop (tools/bbmodels/ancient-blasting-sword.bbmodel; maker's name not in the file)
   Changes: turned into an item model (tools/blockbench/sunfang.py), its two animated textures kept (renamed), turned a quarter so
   it lies like a sprite, its sheet drawn at full light; our name and display, not the model's.
+
+Original project art (no third-party art or licence):
+geckolib/models/entity/android_mech.geo.json, geckolib/animations/entity/android_mech.animation.json and
+textures/entity/future/android_mech_<warden|bulwark|strider|reclaimer>(_eyes).png: the android war mech and test unit
+  Existing geometry and skins: tools/gen_android_mech.py. Shared rig and original keyframes: Prometheus
+  (hermes-modeller), tools/gen_android_mech_gecko.py. Editable sources, provenance and inspected renders are
+  art/android_mech*.bbmodel, art/android_mech-CREDITS.md and art/android_mech-*.png.
+
+textures/entity/gun_musket*.png, geckolib/*/entity/gun_musket.*: WeaponMod's musket and bayonet muskets, held and animated
+  "Flintlock/Musket Rifle" by 9greenworks, https://blockbenchworkshop.com/model/9greenworks/flintlock-musket-rifle-commission
+  Changes: a GeckoLib model with our animations and a bayonet (tools/gen_guns_geckolib.py, art/guns/CREDITS.md).
+textures/entity/gun_flintlock*.png, geckolib/*/entity/gun_flintlock.*: WeaponMod's flintlock and the Void Flintlock, held and animated
+  "Dueling Pistol", Blockbench Workshop (maker's name not in the file)
+  Changes: a GeckoLib model with our animations; the void sheet recoloured (tools/gen_guns_geckolib.py).

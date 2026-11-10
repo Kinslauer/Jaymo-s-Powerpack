@@ -1,6 +1,8 @@
 {
   "values": [
-    "jaymoskitchen:waterskin",
+    "jaymoskitchen:waterskin_leather",
+    "jaymoskitchen:waterskin_iron",
+    "jaymoskitchen:waterskin_dragon",
     "minecraft:water_bucket"
   ]
 }

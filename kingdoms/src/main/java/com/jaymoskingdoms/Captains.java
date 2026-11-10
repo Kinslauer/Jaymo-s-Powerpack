@@ -535,6 +535,31 @@ public final class Captains {
 		Factions.level(server).setAttached(CAPTAINS, Map.copyOf(all));
 	}
 
+	/**
+	 * {@code player} is born again: no captain remembers having met them — their meetings are forgotten in
+	 * every captain's memory (captains_known on the player goes with Mortality's wipe). From LifeStory's
+	 * reincarnation only.
+	 */
+	static void forgetPlayer(MinecraftServer server, ServerPlayer player) {
+		String id = player.getUUID().toString();
+		Map<String, Captain> all = new HashMap<>(all(server));
+		boolean changed = false;
+		for (java.util.Map.Entry<String, Captain> e : all.entrySet()) {
+			Captain c = e.getValue();
+			if (!c.met().containsKey(id)) {
+				continue;
+			}
+			Map<String, Meeting> met = new HashMap<>(c.met());
+			met.remove(id);
+			all.put(c.id(), new Captain(c.id(), c.tribe(), c.name(), c.rank(), c.traits(), c.post(), c.body(), c.chief(),
+					c.fallen(), c.trophy(), c.slain(), Map.copyOf(met), c.back(), c.scars(), c.brother()));
+			changed = true;
+		}
+		if (changed) {
+			Factions.level(server).setAttached(CAPTAINS, Map.copyOf(all));
+		}
+	}
+
 	/** {@code tribe}'s captains still standing, strongest first. */
 	static List<Captain> of(MinecraftServer server, String tribe) {
 		List<Captain> out = new ArrayList<>();

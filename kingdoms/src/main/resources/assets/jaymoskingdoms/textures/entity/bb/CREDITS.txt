@@ -1,5 +1,6 @@
 Blockbench Workshop models drawn by Kingdoms (baked by tools/bbmodel_bake.py into assets/jaymoskingdoms/bbmodels/,
-their textures here). All are licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+their textures here). Except where an entry says otherwise, these Workshop models are licensed under CC BY 4.0:
+https://creativecommons.org/licenses/by/4.0/
 The makers claim them as their own work; we've changed them only as noted.
 
 chieftain.png, chieftain_1.png (bbmodels/chieftain.json): the orc warchief's body
@@ -21,6 +22,13 @@ and dragon/notus/ and dragon/boreas/ hide_*.png, marks_*.png: Notus and Boreas
   (Boreas) size. Notus's hides are its texture and three re-shadings of it; Boreas's are it recoloured to ice; both
   species' glowing markings are its glow half (kingdoms/tools/gen_fire_dragons.py).
 
+geckolib/models/entity/aetherion.geo.json, geckolib/animations/entity/aetherion.animation.json,
+and dragon/aetherion/hide_*.png, marks_*.png: Aetherion
+  Body-plan reference: the public-domain/CC0 GeckoLib Aetherion supplied by Andy (its author and URL weren't recorded).
+  The model, hides, markings and animations are rebuilt as our own art; no external model, texture or animation is used.
+  kingdoms/art/aetherion.bbmodel and kingdoms/tools/gen_aetherion_geo.py: idle, walk, fly, glide, landing, sitting,
+  crashed, bite, Cataclysm and tail sweep; drawn at 1.25 size, hatchlings at the usual 0.35 of that.
+
 clockwork_golem.png, clockwork_golem_1.png (bbmodels/clockwork_golem.json), and textures/item/clockwork_golem.png:
 the clockwork golem
   "Mech Golem" by octopusstudio, https://blockbenchworkshop.com/model/octopusstudio/mech-golem
@@ -40,10 +48,6 @@ kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/, dragon/aeolus/ and dra
   markings its gold seams glowing (gold, the four winds' colours, white-gold, silver); Eurus's hides are it turned
   storm-blue and violet, his markings its seams in electric cyan; Ignivorus (drawn at 0.55) has it in obsidian, basalt
   ash, ember and crimson, its seams glowing as lava cracks (kingdoms/tools/gen_kintsugi_dragons.py).
-
-minotaur.png (bbmodels/minotaur.json): the minotaur
-  "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur
-  Changes: baked to our loader's format; drawn at 0.85 size; walks with its run (it came without a walk).
 
 piglin_king.png (bbmodels/piglin_king.json): the Piglin King
   "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
@@ -125,3 +129,11 @@ bbmodels/valor_wings_eurus.json, textures/entity/valor/wings_eurus_*.png: a Skyw
   "Kintsugi" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/kintsugi
   Changes: only its two wings, turned to lie along the shoulders and drawn small on a player's back; its texture halved
   and recoloured into each Valor look, its gold seams picked out (kingdoms/tools/gen_valor_wing_designs.py).
+
+Original project art (no third-party art or licence):
+geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.animation.json and dragon/atroxiia/
+  hide_*.png, marks_*.png: Atroxiia, the frost wyrm
+  Existing geometry, UVs and hides: kingdoms/tools/gen_atroxiia.py and the former AtroxiiaDragonModel. Editable rig
+  and original keyframes sampled from our old pose equations: Prometheus (hermes-modeller),
+  kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
+  or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.

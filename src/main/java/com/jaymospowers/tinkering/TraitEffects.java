@@ -2,6 +2,7 @@ package com.jaymospowers.tinkering;
 
 import com.jaymospowers.armory.Armory;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Direction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
@@ -21,6 +23,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
@@ -62,6 +67,9 @@ public final class TraitEffects {
 	 * spends them all, this much extra damage each. */
 	static final int WAR_CHARGE_MAX = 5, WAR_CHARGE_TICKS = 100;
 	static final float WAR_CHARGE_DAMAGE = 1.5F;
+
+	/** A knife's head metal leaves its mark on what it hits: how likely, per hit. */
+	static final float KNIFE_MARK_CHANCE = 0.10F;
 
 	/** Players with a magnet on: until when, and how far it reaches. */
 	private static final Map<UUID, long[]> MAGNETS = new HashMap<>();
@@ -194,6 +202,15 @@ public final class TraitEffects {
 					: level.damageSources().mobAttack(attacker), charges[0] * stats.level(Trait.WAR_CHARGE) * WAR_CHARGE_DAMAGE);
 			}
 		}
+		/** A knife's head metal leaves its mark on what it hits: cobalt poisons, slimesteel slows,
+		 * manyullyn weakens, queen's slime burns, hepatizon withers. Rare and short-lived, knives only. */
+		if (stack.getItem() instanceof TinkerTool tool && tool.type() == ToolType.KNIFE && target.isAlive()
+			&& attacker.level() instanceof ServerLevel) {
+			List<TinkerMaterial> materials = ToolStats.materials(stack);
+			if (!materials.isEmpty()) {
+				metalMark(materials.get(0), target, level);
+			}
+		}
 		ToolActions.afterHit(stats, target, attacker);
 		tasty(stack, attacker, stats);
 		gainXp(stack, attacker, XP_PER_HIT);
@@ -214,6 +231,25 @@ public final class TraitEffects {
 				gainXp(stack, owner, XP_PER_BLOCK);
 			}
 		}
+	}
+
+	/** A knife's head metal leaves its mark: poison, slowness, weakness, fire or wither, per metal. */
+	private static void metalMark(TinkerMaterial head, LivingEntity target, ServerLevel level) {
+		switch (head) {
+		case COBALT -> mark(target, MobEffects.POISON, 100, level);
+		case SLIMESTEEL -> mark(target, MobEffects.SLOWNESS, 120, level);
+		case MANYULLYN -> mark(target, MobEffects.WEAKNESS, 160, level);
+		case QUEEN_SLIME -> target.igniteForSeconds(4);
+		case HEPATIZON -> mark(target, MobEffects.WITHER, 100, level);
+		default -> {}
+		}
+	}
+
+	private static void mark(LivingEntity target, Holder<MobEffect> effect, int ticks, ServerLevel level) {
+		if (level.getRandom().nextFloat() >= KNIFE_MARK_CHANCE) {
+			return;
+		}
+		target.addEffect(new MobEffectInstance(effect, ticks, 0));
 	}
 
 	/** Tasty: a hungry player sometimes takes a bite of the tool, at the cost of some durability. */
