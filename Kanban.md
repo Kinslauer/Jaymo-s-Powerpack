@@ -33,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Being built
@@ -48,6 +49,7 @@ kanban-plugin: board
 
 ## Text pass
 
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🪶 Quill · #1204 · writing
 
 
 ## In review
