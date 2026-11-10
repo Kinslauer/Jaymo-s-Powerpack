@@ -1,6 +1,8 @@
 {
   "entity.jaymoskingdoms.barrow_beetle": "Barrow Beetle",
+  "entity.jaymoskingdoms.bogre": "Bogre",
   "entity.jaymoskingdoms.draugr": "Draugr",
   "item.jaymoskingdoms.barrow_beetle_spawn_egg": "Barrow Beetle Spawn Egg",
+  "item.jaymoskingdoms.bogre_spawn_egg": "Bogre Spawn Egg",
   "item.jaymoskingdoms.draugr_spawn_egg": "Draugr Spawn Egg"
 }
