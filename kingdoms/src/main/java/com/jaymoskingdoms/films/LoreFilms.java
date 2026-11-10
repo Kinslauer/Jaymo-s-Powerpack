@@ -48,6 +48,17 @@ public final class LoreFilms {
 	/** Lore books that carry a film: the book's id ({@link LoreBooks#idOf}) to the film it plays the first time it's opened. */
 	static final Map<String, String> BOOK_FILMS = Map.of(JaymosKingdoms.id("the_long_defence").toString(), LONG_DEFENCE);
 
+	/**
+	 * How long a film runs on the player's game (ticks; {@code LoreFilmClient.LENGTH}). Andy's rule for our films: the
+	 * player takes no harm while one plays, since their keys don't answer. The protection ends early once they strike a blow
+	 * or walk off from where it began (a skipped film), so it can't be used as a shield.
+	 */
+	public static final int FILM_TICKS = 780;
+	static final double LEFT_SPOT = 1.5;
+	/** (Server) players in a film just now: until when (game time), and where they stood. */
+	private static final Map<java.util.UUID, Long> WATCHING = new java.util.HashMap<>();
+	private static final Map<java.util.UUID, net.minecraft.world.phys.Vec3> WATCHING_AT = new java.util.HashMap<>();
+
 	/** On a player: the films they have seen from a book. Saved, kept through death. */
 	static final AttachmentType<List<String>> SEEN = AttachmentRegistry.create(JaymosKingdoms.id("lore_films_seen"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
@@ -69,6 +80,11 @@ public final class LoreFilms {
 	public static void register() {
 		JaymosKingdoms.LOGGER.debug("lore film attachment: {}", SEEN);
 		PayloadTypeRegistry.clientboundPlay().register(Play.TYPE, Play.CODEC);
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register(LoreFilms::harm);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			WATCHING.remove(handler.player.getUUID());
+			WATCHING_AT.remove(handler.player.getUUID());
+		});
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
 			if (!stack.is(Items.WRITTEN_BOOK)) {
@@ -129,7 +145,30 @@ public final class LoreFilms {
 	public static void play(ServerPlayer player, String film) {
 		if (canPlay(player)) {
 			ServerPlayNetworking.send(player, new Play(film));
+			WATCHING.put(player.getUUID(), player.level().getGameTime() + FILM_TICKS);
+			WATCHING_AT.put(player.getUUID(), player.position());
 		}
+	}
+
+	/** No harm to a player while their film plays; a blow they strike, or walking away from the spot, ends that. */
+	private static boolean harm(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (WATCHING.isEmpty()) {
+			return true;
+		}
+		if (source.getEntity() instanceof ServerPlayer striker) {
+			WATCHING.remove(striker.getUUID());
+		}
+		Long until = WATCHING.get(victim.getUUID());
+		if (until == null) {
+			return true;
+		}
+		net.minecraft.world.phys.Vec3 at = WATCHING_AT.get(victim.getUUID());
+		if (victim.level().getGameTime() >= until || at == null || victim.position().distanceTo(at) > LEFT_SPOT) {
+			WATCHING.remove(victim.getUUID());
+			WATCHING_AT.remove(victim.getUUID());
+			return true;
+		}
+		return false;
 	}
 
 	/** An elder mage or a demon tells {@code player} the story: the old war, as a film. */

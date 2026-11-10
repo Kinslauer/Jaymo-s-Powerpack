@@ -68,7 +68,7 @@ import org.jspecify.annotations.Nullable;
 public final class LoreFilmClient {
 	/** The film's beats (ticks): fade in, the reveal, the sorcerer, the clash, the spells, the fifth, the end. */
 	static final int REVEAL = 50, SORCERER = 214, CLASH = 272, OVER_SHOULDER = 345, SPELLS = 422, CAST_TICKS = 36, ROUT = 566, QUIET = 572,
-		FACE_OFF = 650, BANISH = 662, END = 708, LENGTH = 780;
+		FACE_OFF = 650, BANISH = 662, END = 708, LENGTH = LoreFilms.FILM_TICKS;
 	/** The flickers: the first, how far apart, how many, and how long each lasts (ticks). */
 	static final int FLICKER_FIRST = 62, FLICKER_EVERY = 25, FLICKERS = 6, FLICKER_TICKS = 8;
 	/** Fading in and out (ticks), and how long sneak is held to skip. */
@@ -337,7 +337,11 @@ public final class LoreFilmClient {
 			return;
 		}
 		if (minecraft.level != f.level || minecraft.player == null) {
+			// a new level (a dimension change, a respawn): its actors went with the old one; give the camera back
 			film = null;
+			if (f.viewBefore != null) {
+				minecraft.options.setCameraType(f.viewBefore);
+			}
 			return;
 		}
 		if (minecraft.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
