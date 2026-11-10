@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 17:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 17:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,11 +16,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · claimed
+- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · 🪶 Quill · #1256 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · in-review
 
 
 ## Needs Andy
