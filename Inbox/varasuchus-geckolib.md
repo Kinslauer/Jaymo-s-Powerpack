@@ -48,3 +48,4 @@ writer: hermes-writer
 - 2026-11-10 (prometheus): PR #1239. Separate finding, outside this track: gen_atroxiia_geo.py leaves out the +24 in its Blockbench y (it writes (-x,-y,z), not (-x,24-y,z)), so Atroxiia is likely drawn about 1.5 blocks underground. Needs its own fix.
 - 2026-11-10 00:18 Cloud agent session sesn_0165Np5QFFty3nV9WywnemtY ended without a PR; see its transcript.
 - 2026-11-10 05:16 Cloud agent session sesn_01Y8aSJ1r7givv7YS15R7rby: PR #1239.
+- 2026-11-10 05:32 Text pass: reviewed entity.json ('Varasuchus'), item.json ('Varasuchus Spawn Egg'), and changes/kingdoms/varasuchus-geckolib.md — all clear, in voice, no rewrites needed.
