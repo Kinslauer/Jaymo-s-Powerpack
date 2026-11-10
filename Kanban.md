@@ -11,7 +11,6 @@ kanban-plugin: board
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
-- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 
 
 ## Being built
