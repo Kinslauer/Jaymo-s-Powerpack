@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,8 +44,8 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 
 
 ## In review
