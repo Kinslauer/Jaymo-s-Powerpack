@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · 🪽 any Hermes bot · #1215 · claimed
+- [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · for 🪽 any Hermes bot · #1215 · changes · fixing review notes
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
