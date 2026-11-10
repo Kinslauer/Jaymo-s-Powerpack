@@ -1,0 +1,475 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"idle": {
+			"loop": true,
+			"animation_length": 0.5,
+			"bones": {
+				"gun": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		},
+		"spent": {
+			"loop": true,
+			"animation_length": 0.5,
+			"bones": {
+				"gun": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							40.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		},
+		"aim": {
+			"loop": true,
+			"animation_length": 2.0,
+			"bones": {
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"gun": {
+					"rotation": {
+						"0.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.5": {
+							"vector": [
+								0.35,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"1.5": {
+							"vector": [
+								-0.25,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"2.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		},
+		"draw": {
+			"animation_length": 0.945,
+			"bones": {
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"gun": {
+					"rotation": {
+						"0.0": {
+							"vector": [
+								-55.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.525": {
+							"vector": [
+								6.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.756": {
+							"vector": [
+								-2.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.945": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [
+								0.0,
+								0.0,
+								3.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.525": {
+							"vector": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.945": {
+							"vector": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		},
+		"fire": {
+			"animation_length": 0.84,
+			"bones": {
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"0.03": [
+							53.2,
+							-0.0,
+							0.0
+						],
+						"0.12": [
+							40.0,
+							0.0,
+							0.0
+						],
+						"0.84": [
+							40.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"gun": {
+					"rotation": {
+						"0.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.05": {
+							"vector": [
+								12.6,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.231": {
+							"vector": [
+								25.2,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.63": {
+							"vector": [
+								6.3,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.84": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.04": {
+							"vector": [
+								-0.0,
+								0.0,
+								3.36
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.42": {
+							"vector": [
+								-0.0,
+								0.0,
+								0.84
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.84": {
+							"vector": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.2,
+							0.2,
+							0.2
+						],
+						"0.025": [
+							2.3,
+							2.3,
+							2.3
+						],
+						"0.07": [
+							1.725,
+							1.725,
+							1.725
+						],
+						"0.294": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"0.84": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		},
+		"reload": {
+			"loop": true,
+			"animation_length": 1.0,
+			"bones": {
+				"gun": {
+					"rotation": {
+						"0.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.2": {
+							"vector": [
+								48.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"0.8": {
+							"vector": [
+								48.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"vector": [
+								0.0,
+								-0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"hammer": {
+					"rotation": {
+						"0.0": [
+							40.0,
+							0.0,
+							0.0
+						],
+						"0.85": [
+							40.0,
+							0.0,
+							0.0
+						],
+						"0.95": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"1.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"ramrod": {
+					"position": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"0.25": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"0.4": [
+							0.0,
+							2.2,
+							-16.0
+						],
+						"0.5": [
+							-0.0,
+							0.88,
+							-6.4
+						],
+						"0.6": [
+							0.0,
+							2.2,
+							-16.0
+						],
+						"0.75": [
+							0.0,
+							0.0,
+							0.0
+						],
+						"1.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				},
+				"flash": {
+					"scale": {
+						"0.0": [
+							0.0,
+							0.0,
+							0.0
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
