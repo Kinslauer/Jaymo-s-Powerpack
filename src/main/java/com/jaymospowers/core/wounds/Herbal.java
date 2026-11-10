@@ -43,6 +43,14 @@ public final class Herbal {
 	public static final int SALVE_TICKS = 400;
 	/** (0.19.24) A part cleaned with garlic can't fester for this long (ticks). */
 	public static final int GARLIC_WARD_TICKS = 12000;
+	/**
+	 * Wild garlic eaten raw (it eats like sweet berries: used on soil it's planted, used in the air it's eaten; a remedy, so
+	 * even on a full stomach): what it feeds, and how much of a parasite (Jaymo's Kitchen's, from foul water) each one drives
+	 * out, in ticks off it. Kitchen's lasts two days (48000 ticks), so three cloves clear a fresh one.
+	 */
+	public static final net.minecraft.world.food.FoodProperties GARLIC_FOOD = new net.minecraft.world.food.FoodProperties.Builder().nutrition(1)
+		.saturationModifier(0.1F).alwaysEdible().build();
+	public static final int GARLIC_PURGE_TICKS = 16000;
 	/** (0.19.24) Bone broth: heals this much (health points) over the worst parts, and cools a fever this long (ticks). */
 	public static final float BROTH_HEAL = 3.0F;
 	public static final int BROTH_COOL_TICKS = 6000;
@@ -123,6 +131,22 @@ public final class Herbal {
 		salve[0][i] = SALVE_HEAL;
 		salve[1][i] = SALVE_HEAL * EVERY / Math.max(EVERY, SALVE_TICKS);
 		TRACKED.add(body);
+	}
+
+	// ---- raw garlic -------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy: "another way to clear parasites ... a player can actually reach". {@code player} ate a clove of wild garlic: a
+	 * parasite in them loses {@link #GARLIC_PURGE_TICKS}, and is gone once it has none left. Nothing without one.
+	 */
+	static void garlicEaten(ServerPlayer player) {
+		int left = com.jaymospowers.power.web.KitchenCompat.purgeParasite(player, GARLIC_PURGE_TICKS);
+		if (left < 0) {
+			return;
+		}
+		player.sendOverlayMessage(left == 0
+			? Component.translatable("message.jaymospowers.garlic.parasite_gone").withStyle(ChatFormatting.GREEN)
+			: Component.translatable("message.jaymospowers.garlic.parasite_weaker").withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	// ---- fever and sleep --------------------------------------------------------------------------------------------------

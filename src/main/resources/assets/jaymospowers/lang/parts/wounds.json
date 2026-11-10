@@ -152,7 +152,7 @@
 	"tooltip.jaymospowers.comfrey": "Knitbone. Right click a grown plant to pick it; plant it on grass or dirt to grow more.",
 	"tooltip.jaymospowers.yarrow": "Stops bleeding. Right click a grown plant to pick it; plant it to grow more.",
 	"tooltip.jaymospowers.plantain": "Soothes burns. Right click a grown plant to pick it; plant it to grow more.",
-	"tooltip.jaymospowers.wild_garlic": "Cleans wounds. Right click a grown plant to pick it; plant it to grow more.",
+	"tooltip.jaymospowers.wild_garlic": "Cleans wounds. Eaten raw, it drives out a parasite (three cloves for a fresh one). Right click a grown plant to pick it; plant it to grow more.",
 	"tooltip.jaymospowers.chamomile": "Calms. Right click a grown plant to pick it; plant it to grow more.",
 	"tooltip.jaymospowers.yarrow_powder": "Packed into a cut, stops the bleeding at once. Not a stump.",
 	"tooltip.jaymospowers.knitbone_poultice": "On a broken limb: the bone knits faster for ten minutes. Best over a splint.",
@@ -187,7 +187,7 @@
 	"jei.jaymospowers.medicine.herb.comfrey": "For knitbone poultices",
 	"jei.jaymospowers.medicine.herb.yarrow": "For yarrow powder",
 	"jei.jaymospowers.medicine.herb.plantain": "For burn salve",
-	"jei.jaymospowers.medicine.herb.wild_garlic": "For garlic poultices",
+	"jei.jaymospowers.medicine.herb.wild_garlic": "For garlic poultices; eaten raw, drives out parasites",
 	"jei.jaymospowers.medicine.herb.chamomile": "For chamomile tea",
 	"jei.jaymospowers.medicine.yarrow.1": "Stops a cut's bleeding at once",
 	"jei.jaymospowers.medicine.yarrow.2": "Not a stump: that wants cautery",
@@ -265,5 +265,7 @@
 	"message.jaymospowers.downed.struggle": "Struggling with it... [%s]",
 	"message.jaymospowers.downed.bed": "You haul yourself up into the bed.",
 	"message.jaymospowers.downed.bed_resting": "Resting. Your %s is still too hurt to get up.",
-	"message.jaymospowers.downed.bed_ready": "Rested enough: hold sneak to get up, or lie on and keep mending."
+	"message.jaymospowers.downed.bed_ready": "Rested enough: hold sneak to get up, or lie on and keep mending.",
+	"message.jaymospowers.garlic.parasite_weaker": "The raw garlic burns going down. The parasite squirms.",
+	"message.jaymospowers.garlic.parasite_gone": "The garlic drives the parasite out."
 }

@@ -113,8 +113,13 @@ public final class Awareness {
 	/** Blood: how loud it counts as fresh (fading to a third as it dries); at most this many spots per level. */
 	static final double SCENT_LOUDNESS = 7.0;
 	static final int MAX_SCENTS = 96;
-	/** Blood: the colour on the ground, and how often it is shown (ticks). */
-	static final int BLOOD_COLOUR = 0x6E0A0A, BLOOD_SHOW_TICKS = 20;
+	/** Blood: the colour of the drops as it's spilled. */
+	static final int BLOOD_COLOUR = 0x6E0A0A;
+	/**
+	 * Blood: the size of the stain it leaves on the ground (Powers' lasting stains, {@link PowersCompat#trailDrop}), for a
+	 * drip and for a wound. It's laid once and lies still; the scent itself is not shown again.
+	 */
+	static final float DRIP_STAIN = 0.2F, WOUND_STAIN = 0.35F;
 
 	/** The horde: how far a groan carries (blocks), how loud it counts as, and how often a chasing zombie calls again (ticks). */
 	static final double HORDE_RANGE = 16.0, HORDE_LOUDNESS = 9.0;
@@ -227,11 +232,11 @@ public final class Awareness {
 				long now = level.getGameTime();
 				if (NEXT_DRIP.getOrDefault(player.getUUID(), 0L) <= now) {
 					NEXT_DRIP.put(player.getUUID(), now + DRIP_TICKS / 2 + player.getRandom().nextInt(DRIP_TICKS));
-					spill(level, player, 2);
+					spill(level, player, 2, DRIP_STAIN);
 				}
 			}
 		}
-		if (tick % BLOOD_SHOW_TICKS == 0 || tick % SNIFF_TICKS == 0) {
+		if (tick % SNIFF_TICKS == 0) {
 			for (ServerLevel level : server.getAllLevels()) {
 				Deque<Scent> scents = SCENTS.get(level);
 				if (scents == null || scents.isEmpty()) {
@@ -239,15 +244,7 @@ public final class Awareness {
 				}
 				long now = level.getGameTime();
 				scents.removeIf(s -> s.dries <= now);
-				if (tick % BLOOD_SHOW_TICKS == 0) {
-					var blood = PowersCompat.blood(BLOOD_COLOUR, 1.2F);
-					for (Scent s : scents) {
-						level.sendParticles(blood, s.at.x, s.at.y + 0.05, s.at.z, 2, 0.2, 0.0, 0.2, 0.0);
-					}
-				}
-				if (tick % SNIFF_TICKS == 0) {
-					smell(level, scents, now);
-				}
+				smell(level, scents, now);
 			}
 		}
 	}
@@ -287,11 +284,14 @@ public final class Awareness {
 			|| source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.GENERIC_KILL)) {
 			return;
 		}
-		spill(level, player, 4 + (int) Math.min(8.0F, taken));
+		spill(level, player, 4 + (int) Math.min(8.0F, taken), WOUND_STAIN);
 	}
 
-	/** Blood on the ground under {@code player} ({@code drops} of it shown at once), for zombies to smell. */
-	private static void spill(ServerLevel level, ServerPlayer player, int drops) {
+	/**
+	 * Blood on the ground under {@code player}, for zombies to smell: {@code drops} of it falling at once, and a stain this
+	 * big where it lands that stays put (Andy: blood that has landed stays still; it used to be shown again every second).
+	 */
+	private static void spill(ServerLevel level, ServerPlayer player, int drops, float stain) {
 		long now = level.getGameTime();
 		int lasts = SCENT_TICKS / (Skills.rank(player, Skills.Perk.SLIP_THE_NET) > 0 ? Senses.SLIP_THE_NET_DIVISOR : 1);
 		Deque<Scent> scents = SCENTS.computeIfAbsent(level, l -> new ArrayDeque<>());
@@ -301,6 +301,7 @@ public final class Awareness {
 			scents.removeFirst();
 		}
 		level.sendParticles(PowersCompat.blood(BLOOD_COLOUR, 1.4F), at.x, at.y + 0.6, at.z, drops, 0.25, 0.3, 0.25, 0.0);
+		PowersCompat.trailDrop(level, player, stain);
 	}
 
 	/** Each idle zombie near blood goes to the freshest spot it smells that is fresher than the last it followed and not underfoot. */
