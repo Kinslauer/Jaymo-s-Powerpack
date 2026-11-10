@@ -1,6 +1,43 @@
 {
 	"model": {
-		"type": "minecraft:model",
-		"model": "jaymospowers:item/flintlock_3d"
+		"type": "minecraft:select",
+		"property": "minecraft:display_context",
+		"cases": [
+			{
+				"when": [
+					"gui",
+					"ground",
+					"fixed"
+				],
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymospowers:item/flintlock_3d"
+				}
+			}
+		],
+		"fallback": {
+			"type": "jaymospowers:animated_gun",
+			"gun": "flintlock",
+			"base": "jaymospowers:item/flintlock_3d",
+			"transformation": [
+				-0.601041,
+				0.601041,
+				0.0,
+				0.644043,
+				0.601041,
+				0.601041,
+				0.0,
+				0.145593,
+				0.0,
+				0.0,
+				-0.85,
+				0.9335,
+				0,
+				0,
+				0,
+				1
+			],
+			"texture": "jaymospowers:textures/entity/gun_flintlock_void.png"
+		}
 	}
 }

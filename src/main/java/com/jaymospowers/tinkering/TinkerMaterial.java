@@ -41,6 +41,11 @@ public enum TinkerMaterial {
 	AMETHYST_BRONZE("amethyst_bronze", Stats.AMETHYST_BRONZE, Trait.CRUMBLING, true),
 	PIG_IRON("pig_iron", Stats.PIG_IRON, Trait.TASTY, true),
 	SLIMESTEEL("slimesteel", Stats.SLIMESTEEL, Trait.OVERSLIME, true),
+	/** Knife metals: cobalt poisons, slimesteel slows, manyullyn weakens, queen's slime burns, hepatizon withers. */
+	COBALT("cobalt", Stats.COBALT, Trait.POISONOUS, true),
+	MANYULLYN("manyullyn", Stats.MANYULLYN, Trait.WEAKENING, true),
+	QUEEN_SLIME("queen_slime", Stats.QUEEN_SLIME, Trait.BURNING, true),
+	HEPATIZON("hepatizon", Stats.HEPATIZON, Trait.WITHERING, true),
 	/** (Smithing) Iron and pig iron alloyed, or crucible steel fired in a kiln: netherite-tier, Tempered. */
 	STEEL("steel", Stats.STEEL, Trait.TEMPERED, true),
 	/**
@@ -102,6 +107,12 @@ public enum TinkerMaterial {
 		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 1.5F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);
 		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
 		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
+
+		/** Knife metals: cobalt, manyullyn, queen's slime and hepatizon - their knives carry their own mark on a hit. */
+		static final Stats COBALT = new Stats(450, 6.5F, 2.5F, Tier.IRON, 0.0F, 0.0F, 0.05F, 0.0F);
+		static final Stats MANYULLYN = new Stats(750, 7.0F, 3.5F, Tier.DIAMOND, 0.0F, -0.05F, 0.10F, 0.0F);
+		static final Stats QUEEN_SLIME = new Stats(520, 6.0F, 2.0F, Tier.IRON, 0.10F, 0.05F, 0.0F, 0.0F);
+		static final Stats HEPATIZON = new Stats(600, 7.0F, 2.5F, Tier.DIAMOND, -0.10F, 0.10F, 0.05F, 0.05F);
 		static final Stats STEEL = new Stats(1500, 7.0F, 3.0F, Tier.NETHERITE, 0.15F, 0.05F, 0.1F, 0.0F);
 		/** (0.18.56) Star metal: diamond-tier, middling durability, light in the hand (a faster handle, no weight in the blow). */
 		static final Stats STAR_METAL = new Stats(640, 7.5F, 2.0F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.1F);

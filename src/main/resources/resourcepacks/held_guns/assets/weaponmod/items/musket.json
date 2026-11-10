@@ -19,8 +19,62 @@
         }
       ],
       "fallback": {
-        "type": "minecraft:model",
-        "model": "jaymospowers:item/gun/musket"
+        "type": "minecraft:condition",
+        "property": "weaponmod:reloaded",
+        "on_true": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "musket",
+          "base": "jaymospowers:item/gun/musket",
+          "transformation": [
+            0.0,
+            0.424264,
+            0.424264,
+            0.462121,
+            0.0,
+            0.424264,
+            -0.424264,
+            -0.142083,
+            -0.6,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "hide": [
+            "bayonet"
+          ],
+          "pose": "loaded"
+        },
+        "on_false": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "musket",
+          "base": "jaymospowers:item/gun/musket",
+          "transformation": [
+            0.0,
+            0.424264,
+            0.424264,
+            0.462121,
+            0.0,
+            0.424264,
+            -0.424264,
+            -0.142083,
+            -0.6,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "hide": [
+            "bayonet"
+          ],
+          "pose": "spent"
+        }
       }
     },
     "on_true": {
@@ -40,8 +94,31 @@
         }
       ],
       "fallback": {
-        "type": "minecraft:model",
-        "model": "jaymospowers:item/gun/musket_reload"
+        "type": "jaymospowers:animated_gun",
+        "gun": "musket",
+        "base": "jaymospowers:item/gun/musket",
+        "transformation": [
+          0.0,
+          0.424264,
+          0.424264,
+          0.462121,
+          0.0,
+          0.424264,
+          -0.424264,
+          -0.142083,
+          -0.6,
+          0.0,
+          0.0,
+          0.5,
+          0,
+          0,
+          0,
+          1
+        ],
+        "hide": [
+          "bayonet"
+        ],
+        "pose": "reload"
       }
     }
   }
