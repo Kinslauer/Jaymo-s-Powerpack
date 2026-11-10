@@ -1,14 +1,14 @@
 ---
-updated: 2026-11-10 01:06
+updated: 2026-11-10 01:12
 ---
 # Open PRs
 
-4 open, as of 2026-11-10 01:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-10 01:12. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1193](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1193) Kingdoms: a real night sky -- HYG star catalog and constellations
-- **Branch:** `claude/astronomy-sky` · **Updated:** 2026-11-09 (today)
-- **Checks:** ❌ failing: Build Kingdoms
+- **Branch:** `claude/astronomy-sky` · **Updated:** 2026-11-10 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** [[astronomy-sky]]
 
 ## [#1203](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1203) Kingdoms: family farmhand start is kind to every blood
