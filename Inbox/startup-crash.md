@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: done
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / bug fixes thread)
 asked: 2026-11-09
