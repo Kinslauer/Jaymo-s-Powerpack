@@ -15,6 +15,18 @@ FORM_SPREAD, FADE_BOW, RISE_FROM = 0.8, 0.35, 4.0
 STRIKE_BACK, STRIKE_OUT, STRIKE_DRAW, STRIKE_LEAN = 0.7, -1.95, 0.45, 0.18
 WING_SPREAD, WING_BEAT, WING_SPEED, WING_TIP = 0.45, 0.55, 0.35, 0.25
 CLASH_BLOW = 14.0
+ELBOW_REST, ELBOW_TALK, ELBOW_TALK_SWING, ELBOW_DRAWN, ELBOW_THROWN, ELBOW_UP = -0.25, -0.95, 0.3, -1.7, -0.08, -0.2
+
+
+def elbow_swing(phase):
+    p = phase - math.floor(phase)
+    if p < STRIKE_DRAW:
+        k = p / STRIKE_DRAW
+        return ELBOW_REST + (ELBOW_DRAWN - ELBOW_REST) * k * k * (3 - 2 * k)
+    k = (p - STRIKE_DRAW) / (1 - STRIKE_DRAW)
+    if k < 0.15:
+        return ELBOW_DRAWN + (ELBOW_THROWN - ELBOW_DRAWN) * k / 0.15
+    return ELBOW_THROWN + (ELBOW_REST - ELBOW_THROWN) * (k - 0.15) / 0.85
 
 
 def swing(phase):
@@ -61,9 +73,13 @@ def poses(name, t):
     rz += FORM_SPREAD * unformed
     lz -= FORM_SPREAD * unformed
     lean = 0.0
+    re = (1 - talk) * ELBOW_REST + talk * (ELBOW_TALK + ELBOW_TALK_SWING * math.sin(ticks * TALK_SPEED * 1.3))
+    le = (1 - talk) * ELBOW_REST + talk * ELBOW_REST * 1.6
+    re, le = re + (ELBOW_UP - re) * up, le + (ELBOW_UP - le) * up
     if name == "strike":
         ph = ticks / CLASH_BLOW
         rx, lx, ry = swing(ph), swing(ph + 0.5), -0.2
+        re, le = elbow_swing(ph), elbow_swing(ph + 0.5)
         lean = STRIKE_LEAN * math.sin(ph * 2 * math.pi * 2)
     beat = math.sin(ticks * WING_SPEED * 1.7) if name in ("flap", "strike", "idle") else 0.0
     sx = talk * NOD * math.sin(ticks * TALK_SPEED * 1.8) + (FADE_BOW * unformed if name == "fade" else 0.0)
@@ -74,6 +90,8 @@ def poses(name, t):
         "left_arm": rot(lx, 0, lz),
         "tail": rot(0.03 * math.sin(ticks * 0.07), 0, 0.015 * math.sin(ticks * 0.049)),
         # (model y is down, Blockbench's up: the rise from a crouch is a drop here)
+        "right_forearm": rot(re, 0, 0),
+        "left_forearm": rot(le, 0, 0),
         "right_wing": rot(0, WING_SPREAD, WING_BEAT * beat - WING_TIP),
         "left_wing": rot(0, -WING_SPREAD, -WING_BEAT * beat + WING_TIP),
         "torso_lean": rot(lean, 0, 0),
@@ -89,7 +107,7 @@ def animations(groups, k):
         length = spec["length"]
         steps = max(4, int(round(length * 10)))
         animators = {}
-        for bone in ("skull", "right_arm", "left_arm", "tail", "figure", "right_wing", "left_wing"):
+        for bone in ("skull", "right_arm", "left_arm", "right_forearm", "left_forearm", "tail", "figure", "right_wing", "left_wing"):
             if bone not in groups:
                 continue
             frames = []
@@ -138,9 +156,13 @@ for k in range(KINDS):
         for n, (cx, y, cz, w, h, d, c) in enumerate(F[grp]):
             add(g, c or "%s %d" % (grp, n), cx, y + off, cz, w, h, d)
     if k != QUIET:
-        for side, g in ((1.0, arm_r), (-1.0, arm_l)):
+        el = F["elbow"]
+        fore_r = group("right_forearm", [-ax, 24 - ay - el, 0])
+        fore_l = group("left_forearm", [ax, 24 - ay - el, 0])
+        for side, g, fg in ((1.0, arm_r, fore_r), (-1.0, arm_l, fore_l)):
             for n, (cx, y, cz, w, h, d, c) in enumerate(F["arm"]):
-                add(g, c or "arm %d" % n, side * (ax + cx), ay + y, cz, w, h, d)
+                add(fg if y >= el else g, c or "arm %d" % n, side * (ax + cx), ay + y, cz, w, h, d)
+            g["children"].append(fg)
         fig["children"] += [skull, tail, arm_r, arm_l]
         if F["wing"]:
             wx, wy, wz = F["wing_at"]

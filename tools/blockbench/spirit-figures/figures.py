@@ -5,6 +5,7 @@
 #   skull  pivot at the neck (0, 0, 0)
 #   tail   the lower body (legs, robe or skirt), pivot at the waist (0, TAIL_Y, 0)
 #   arm    the right arm, in its own frame, pivot at ARM_AT (x, y) on the figure; the left arm mirrors it (x negated).
+#          Jointed at ELBOW (y in the arm's frame): boxes from there down hang from the forearm, which bends.
 #          Only the manifested figure shows its own arms: over your back the spirit's real arms (SpiritRig) hang from there.
 # foot:  the sole, model pixels below the shoulder line (where the manifested figure stands on the ground).
 # stage: the manifested figure's scale (a player is 1): near your own size, so it reads as a person standing with you.
@@ -16,7 +17,7 @@ KINDS = 6
 FIG = {
     # a dead traveller: a gaunt swordsman's bones under a tattered cowl and cloak, a scabbard at his hip
     GRIMSBY: dict(
-        scale=1.6, half=3.5, front=3.3, tail_y=11.0, foot=19.8, stage=1.1, arm_at=(-4.4, 0.8),
+        scale=1.6, half=3.5, front=3.3, tail_y=11.0, foot=19.8, stage=1.1, elbow=5.6, arm_at=(-4.4, 0.8),
         torso=[
             (0, 0, 0, 7, 11, 3.5, "the gaunt chest"),
             (0, 0.2, 0, 8, 1, 3, "the collarbones"),
@@ -72,7 +73,7 @@ FIG = {
         ]),
     # a warlord of the old wars in plate: great pauldrons, a crested helm with a visor slit, tassets and sabatons
     VARRO: dict(
-        scale=1.9, half=6.0, front=5.0, tail_y=12.0, foot=33.4, stage=1.05, arm_at=(-8.0, 0.6),
+        scale=1.9, half=6.0, front=5.0, tail_y=12.0, foot=33.4, stage=1.05, elbow=4.8, arm_at=(-8.0, 0.6),
         torso=[
             (0, 0, 0, 12, 12, 6, "the plated chest"),
             (0, 1, -3.2, 10, 7, 1.0, "the breastplate, standing proud"),
@@ -117,7 +118,7 @@ FIG = {
         ]),
     # an elder in a hooded robe: a long beard, bushy brows, mantle and stole, wide sleeves, a satchel of scrolls
     AMBROSE: dict(
-        scale=1.8, half=5.0, front=4.0, tail_y=12.0, foot=22.0, stage=1.1, arm_at=(-6.4, 0.8),
+        scale=1.8, half=5.0, front=4.0, tail_y=12.0, foot=22.0, stage=1.1, elbow=6.0, arm_at=(-6.4, 0.8),
         torso=[
             (0, 0, 0, 10, 12, 5, "the robed chest"),
             (0, -0.6, 0, 11.4, 3, 6.2, "the mantle"),
@@ -162,7 +163,7 @@ FIG = {
         ]),
     # a scholar: slim, a collar and shawl, hair long down her back and in side locks under a circlet, bell sleeves, a long skirt
     THESSALY: dict(
-        scale=1.2, half=3.2, front=3.6, tail_y=11.0, foot=20.6, stage=1.0, arm_at=(-4.2, 0.8),
+        scale=1.2, half=3.2, front=3.6, tail_y=11.0, foot=20.6, stage=1.0, elbow=5.2, arm_at=(-4.2, 0.8),
         torso=[
             (0, 0, 0, 6.4, 6, 3.4, "the slim chest"),
             (0, 6, 0, 5, 5, 3, "the waist"),
@@ -203,7 +204,7 @@ FIG = {
         ]),
     # never manifests a body (Andy: "only animating the large arms for the quiet one"): kept for its arms' frame
     QUIET: dict(
-        scale=1.7, half=4.0, front=3.45, tail_y=12.0, foot=24.0, stage=1.0, arm_at=(-5.0, 0.8),
+        scale=1.7, half=4.0, front=3.45, tail_y=12.0, foot=24.0, stage=1.0, elbow=6.0, arm_at=(-5.0, 0.8),
         torso=[
             (0, 0, 0, 8, 8, 4, "the smooth chest"),
             (0, 8, 0, 6.6, 4, 3.4, "the waist"),
@@ -224,12 +225,13 @@ FIG = {
         ],
         wing=[],
         arm=[
-            (0, 0, 0, 3, 12, 3, "the smooth arm"),
+            (0, 0, 0, 3, 6.2, 3, "the smooth arm"),
+            (0, 6.0, 0, 3, 6, 3, "its forearm"),
         ]),
     # The Grue: a vile wizard's ghost, ghastly and winged. Gaunt and tall, a horned skull under a torn hood, long clawed arms,
     # great ragged wings of skin and bone, and below the waist only smoke. Its arms are its own; it never stands over a back.
     GRUE: dict(
-        scale=1.6, half=4.0, front=3.4, tail_y=12.0, foot=24.0, stage=1.55, arm_at=(-5.0, 0.8), wing_at=(-1.6, 1.2, 2.2),
+        scale=1.6, half=4.0, front=3.4, tail_y=12.0, foot=24.0, stage=1.55, elbow=6.6, arm_at=(-5.0, 0.8), wing_at=(-1.6, 1.2, 2.2),
         torso=[
             (0, 0, 0, 8, 12, 4, "the starved chest"),
             (0, 0.2, 0, 9.4, 1.2, 3.6, "collarbones like blades"),
@@ -325,9 +327,18 @@ def fmt(v):
     return s + "F"
 
 
+def arm_split(kind):
+    """The arm's boxes above the elbow, and below it (in the forearm's frame, y from the elbow)."""
+    e = FIG[kind]["elbow"]
+    up = [b for b in FIG[kind]["arm"] if b[1] < e]
+    fore = [(b[0], b[1] - e) + tuple(b[2:]) for b in FIG[kind]["arm"] if b[1] >= e]
+    return up, fore
+
+
 def java(kind, group, mirror=False):
     out = []
-    for (cx, y, cz, w, h, d, c) in FIG[kind][group]:
+    boxes = arm_split(kind)[0] if group == "arm" else arm_split(kind)[1] if group == "fore" else FIG[kind][group]
+    for (cx, y, cz, w, h, d, c) in boxes:
         line = "box(c, %s, %s, %s, %s, %s, %s, g);" % tuple(fmt(v) for v in (cx, y, cz, w, h, d))
         if mirror:
             line = line.replace("box(c, ", "box(c, side * ", 1)

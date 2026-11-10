@@ -26,6 +26,13 @@
   key to call a move. Grimsby's blade and Thessaly's glove stay as they were: always up while the spirit is out, at their own rest angle (so their faint figure stays up with them).
 - **Speech bubble**: while a spirit stands out talking, its line floats over its head in a bubble in its colour (as well as
   in chat). Only its keeper is sent the line, so only they see the bubble.
+- **Joints**: every figure's own arms now bend at the elbow: folded as a blow is drawn back and snapped straight as it
+  lands, the talking hand folded up and turning, a little bent at rest. The Grue no longer swings stiff like a skeleton.
+- **The Grue's takeover heads for a village** (Andy: "should always track you toward a village. it will try its best to cause
+  destruction"): possessed, you're walked to the nearest kingdom, fiefdom or village seat (else the nearest village within
+  48 chunks). There it rampages: villagers, golems, folk and other players are its foes, and it smashes doors, glass, beds,
+  fences, crops, lights and the bell round you, and sets wood alight. The smashing and fire follow mobGriefing. With no
+  village anywhere it keeps to your routine as before.
 - **The Quiet One** never shows a body: only its large arms, as before.
 - **Upgraded figures**: Grimsby is a dead traveller (bones, a tattered cowl and cloak, a scabbard); Varro a plated
   warlord (pauldrons, a plumed helm with a visor slit, sabatons); Ambrose an elder in a hooded robe (brows, beard, wide
