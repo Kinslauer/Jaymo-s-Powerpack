@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 12:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 12:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,8 +14,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/bogre-mob|bogre-mob]] · 🪶 Quill · #1251 · writing
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · claimed
+- [ ] [[Inbox/bogre-mob|bogre-mob]] · 🪶 Quill · #1251 · writing
 
 
 ## In review
