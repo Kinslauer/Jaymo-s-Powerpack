@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 00:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · open
@@ -34,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 🔥 Prometheus · open
 
 
 ## Being built
