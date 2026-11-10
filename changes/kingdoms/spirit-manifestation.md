@@ -19,7 +19,7 @@
 - **The Grue itself** is ghastly and winged: a horned skull under a torn hood, a starved ribcage, long clawed arms, great
   ragged bat wings and smoke below the waist, a dark see-through body with a glowing red edge. In its trial the boss and its
   shades are drawn as the Grue (the evoker and vexes it wears are hidden; the name and boss bar stay), hovering on its
-  wingbeats and clawing at you when you're close, glitching when hit, the same way the spirits animate.
+  wingbeats and clawing at you when you're close, glitching when hit, the same way the spirits animate. In its barrage finale its clawed fists pound as fast as your spirit's.
 - **The Quiet One** never shows a body: only its large arms, as before.
 - **Upgraded figures**: Grimsby is a dead traveller (bones, a tattered cowl and cloak, a scabbard); Varro a plated
   warlord (pauldrons, a plumed helm with a visor slit, sabatons); Ambrose an elder in a hooded robe (brows, beard, wide

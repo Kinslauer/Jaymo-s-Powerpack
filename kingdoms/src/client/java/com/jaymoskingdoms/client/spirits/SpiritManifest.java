@@ -439,6 +439,8 @@ public final class SpiritManifest {
 	static final float CLASH_TICKS = 56.0F;
 	/** Ticks per blow, how far ahead of the keeper the fight is, how far apart the two stand, and how high the Grue hovers (blocks). */
 	static final float CLASH_BLOW = 14.0F;
+	/** Ticks per pair of blows when the Grue's body is locked in a barrage (its fists a blur, as the spirit's are). */
+	static final float BARRAGE_BLOW = 5.0F;
 	static final double CLASH_AHEAD = 2.8, CLASH_APART = 0.95, CLASH_HOVER = 0.35, CLASH_PUSH = 0.6;
 	/** The Grue's colours: its glowing edge, and its body, dark and see-through (ghastly). */
 	static final int GRUE_EDGE = 0xFFE0142E, GRUE_CORE = 0xFF2A0006;
@@ -572,9 +574,16 @@ public final class SpiritManifest {
 		long step = (long)Math.floor(now / GLITCH_STEP);
 		float glitch = noise(step, entity.getId(), 5) < BLIP_CHANCE * 2.0F ? 0.7F : entity.hurtTime > 0 ? 0.5F : 0.0F;
 		float headPitch = entity.getXRot(partial) * Mth.DEG_TO_RAD;
+		// its finale: locked fist to fist with the keeper's spirit in the barrage, it pounds as fast as they do
+		var barrage = entity.getAttached(com.jaymoskingdoms.spirits.SpiritBarrage.BARRAGE);
+		boolean pounding = barrage != null && !barrage.over();
+		if (pounding) {
+			near = 1.0F;
+			glitch = Math.max(glitch, noise(step, entity.getId(), 8) < 0.3F ? 0.5F : 0.0F);
+		}
 		SpiritFigure.Frame frame = new SpiritFigure.Frame(SpiritFigure.GRUE, true, SpiritFigure.GRUE, 1.0F, 1.0F, 0.0F, -1.0F,
 			Mth.wrapDegrees(Mth.rotLerp(partial, entity.yHeadRotO, entity.yHeadRot) - bodyRot) * Mth.DEG_TO_RAD, headPitch, false,
-			near, (float)(now / CLASH_BLOW), BOSS_FLAP / Math.max(scale, 0.3F) * 0.6F + 0.4F, false);
+			near, (float)(now / (pounding ? BARRAGE_BLOW : CLASH_BLOW)), BOSS_FLAP / Math.max(scale, 0.3F) * 0.6F + 0.4F, false);
 		PoseStack pose = context.poseStack();
 		pose.pushPose();
 		pose.translate(at.x - camera.x, at.y - camera.y, at.z - camera.z);
