@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by: hermes-b
 pr: 1203
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/FarmhandHome.java, kingdoms/src/main/java/com/jaymoskingdoms/Peoples.java, kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/talk.json]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Family farmhand: a good-natured Heartlander family takes you in
