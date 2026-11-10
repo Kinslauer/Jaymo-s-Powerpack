@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / bug fixes thread)
 asked: 2026-11-09
 thread: 1569184077720850462
 claimed_by: hermes-a
-pr:
+pr: 1245
 suggested_owns:
 ---
 
