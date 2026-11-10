@@ -10,7 +10,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
+- [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
