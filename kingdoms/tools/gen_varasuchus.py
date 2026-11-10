@@ -4,7 +4,8 @@ Its moves are ported from Saint's Dragons by Leon Saint (MIT code); none of that
 A crocodile dragon, high on long sprawling legs: a broad armoured body under two rows of bony scutes, a thick short
 neck, a long-jawed head with eyes on its crown and horns swept back from it (a nose horn on some), and a great tail
 with a double crest that runs into one.
-- the body plan (GEOMETRY), printed as the Java for VarasuchusDragonModel's createBodyLayer;
+- the body plan (GEOMETRY), which tools/gen_varasuchus_geo.py turns into the Blockbench model kingdoms/art/varasuchus.bbmodel
+  and its GeckoLib files (it still prints it as Java, ModelPart boxes, for reference);
 - four hides (swamp olive, river brown, mangrove black, pale sand) and four glowing patterns (bands, spots, scute rims,
   jaw line), a marsh-light green;
 - the spawn egg's icon and item model, and the loot table;
