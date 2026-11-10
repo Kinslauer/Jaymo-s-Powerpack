@@ -16,7 +16,6 @@ kanban-plugin: board
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
@@ -30,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
 
 
 ## Being built
