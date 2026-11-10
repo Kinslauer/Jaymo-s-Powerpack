@@ -35,6 +35,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
