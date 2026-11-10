@@ -4,18 +4,18 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 12:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 12:31). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/bogre-mob|bogre-mob]] · 🪶 Quill · #1251 · writing
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · claimed
 
 
 ## In review
