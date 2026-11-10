@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,13 +21,13 @@ kanban-plugin: board
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🪶 Quill · #1244 · writing
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · 🪶 Quill · #1239 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
 
 
 ## Needs Andy
