@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:33). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · #1239 · open
@@ -18,6 +17,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/startup-crash|startup-crash]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/astronomy-sun-moon|astronomy-sun-moon]] · 💻 Odysseus · running
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
