@@ -11,7 +11,6 @@ kanban-plugin: board
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 
 
 ## Being built
