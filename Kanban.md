@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 12:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 18:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,17 +14,17 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🪶 Quill · writing
 
 
 ## In review
 
-- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · in-review
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
+- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · sent
 
 
 ## Done
@@ -33,11 +33,11 @@ kanban-plugin: board
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
 - [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
 - [x] [[Inbox/Done/jujujutsu-mod-checklist|jujujutsu-mod-checklist]]
-- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
-- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
-- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/unique-starts|unique-starts]]
 
 
 %% kanban:settings
