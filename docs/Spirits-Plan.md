@@ -371,3 +371,21 @@ Andy (2026-10-28), after Mage Hand (GPL-3.0, ideas only): "the hands shouldnt st
 wispy ki glow texture, and only use it for the far reach, and catch." `spirits/SpiritHand` (never saved) and
 `client/spirits/SpiritHandRenderer` (the ki glow's texture and shells on `SpiritRig`'s hand): Far hand flies it out and
 acts on arrival; Catch hovers one ahead and closes one on each shot. The arms don't show for these two (pose IDLE).
+
+## The faint warrior (spirit-manifestation)
+
+Andy (2026-11-08), after Johnny Silverhand: "a faint but visible warrior ... fully manifested as you level up when they
+speak", seen by every mana attuned viewer, the first-person framing in front of you, and "only animating the large arms
+for the quiet one". `client/spirits/SpiritManifest` draws the figure in the world (`LevelRenderEvents.COLLECT_SUBMITS`)
+from the synced `SpiritState`: faint over its keeper's back while it is out; on a `SPEAK` stamp or a level rise it stands
+in front of its keeper, facing them, gesturing (`SpiritFigure.Model`, staged), solid and long by level, with a glitch in and
+out and data rain. `SpiritArms.presence` keeps the shoulder arms away while it stands there. Figures:
+`tools/blockbench/spirit-figures/figures.py` -> `gen.py` (Java mesh), `bbexport.py` (.bbmodels with the animations),
+`render.py` (previews). Design calls: the chat line stays (it survives distance and looking away); the figure stands in
+front, to one side, facing you, rather than at your shoulder.
+
+Andy (follow-up): "none of them should have legs, the lower half should be wispy, and they should all have an effect when
+the grue is attacking, maybe an animated fight, the grue should be ghastly and winged and animate the same way for the
+bossfight". Every figure's lower body is smoke; a `Grue.Lash` (client) starts `SpiritManifest.lash`, a staged fight between
+the spirit and the Grue figure (`SpiritFigure.GRUE`, wings) in front of the keeper; the trial's boss (an Evoker) and shades
+(Vexes), found by their translatable custom names, are hidden and drawn as the Grue figure.
