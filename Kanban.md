@@ -4,35 +4,31 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:24). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for quill · open
-- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for quill · open
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for quill · open
-- [ ] [[Inbox/mod-checklists|mod-checklists]] · for quill · open
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for hephaestus · open
+- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
+- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
 ## Being built
 
 
 
-## Text pass
-
-
-
 ## In review
 
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · hermes-b · #1241 · in-review
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
-- [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for quill · blocked
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 
 
 ## Done
