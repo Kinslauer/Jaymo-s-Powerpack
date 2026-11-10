@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: hermes
 from: Andy (Claude chat, 2026-11-09 10:45 PM)
 asked: 2026-11-09
@@ -53,3 +53,4 @@ look like.
 - 2026-11-10 05:25 Andy, 2026-11-10: the API credits ran out, so Hermes finishes this. Continue from the cloud agent's pushed branch cloud/apes-xeno-voices-parasites-blood (git fetch, worktree from origin/cloud/apes-xeno-voices-parasites-blood), don't start over; the cloud agent said Kingdoms had a duplicate lang key from master (fixed on master by #1243, so merge origin/master first).
 - 2026-11-10 06:27 Text pass: 4 files rewritten. changes/kingdoms/...md: fixed 'Simple Voice Voice Changer' typo, smoothed Not tested line. changes/powers/...md: 'eats like' -> 'works like', added 'steps up' to wild ape line. kingdoms/lang/parts/training-weights.json hint.125: 3 sentences -> 2, parenthetical slowdown. kingdoms/lang/parts/unique-starts.json hint.126: 3 sentences -> 2, concise. Kingdoms and Powers build, pushed 8af2ccd4a.
 - 2026-11-10 16:26 Review (cloud, head 8af2ccd): passes. Checks green, merges cleanly with master. Read VoiceRange (SVC VoiceDistanceEvent + EntitySoundPacketEvent re-send for tall listeners; re-sent packets come back as plugin source so no loop), VoiceMasks TITAN/grown maps (concurrent, cleared on disconnect/stop), PowersCompat.xenoForm (reflective, safe without Powers), Awareness (re-shown scent particles removed; one lasting stain per spill), garlic (food via AfflictionCureMixin -> KitchenCompat.purgeParasite by id; infinite effect left alone), ape step height (grows with size; wild ape 5). No bugs found. Nit only: the Powers note says hot chocolate and milk clear a parasite at once; the two teas (#1233) do too. Not tested: SVC on the Deck, titan voice on a xeno form, stains under a bleeding player, ape step on hills.
+- 2026-11-10 19:18 PR #1241 is merged into master; moved to Inbox/Done.
