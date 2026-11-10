@@ -11,11 +11,11 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Being built
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · 🪶 Quill · claimed
 
 
 ## In review
