@@ -25,3 +25,4 @@ Tiv, in the Tasks thread: "F5 should only toggle between first and 3rd person, t
 - F6 may already be taken by something in the pack or a mod in it — `KeyConflicts` is the existing place where the pack moves another mod's binding off a key it wants. Check what's on F6 before claiming it, and don't silently break someone else's key.
 - Cinematics and powers that force a camera (`UltimateCinematic`, `BeamCinematic`, `GiantCamera`) set the camera type directly; make sure the new toggle doesn't fight them mid-cutscene, and that the front camera survives a cinematic ending.
 - No lang churn beyond the one new key name.
+- 2026-11-09 23:56 Cloud agent session sesn_01MPUYWbeHeGYBs9PRyVgJTX opened PR #1228.
