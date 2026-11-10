@@ -4,17 +4,17 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:31). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · claimed
 
 
 ## Text pass
