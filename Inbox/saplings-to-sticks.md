@@ -7,6 +7,7 @@ thread: 1569170499680870560
 claimed_by: hermes-a
 pr: 1213
 suggested_owns: [src/main/resources/data/jaymospowers/recipe/, src/main/java/com/jaymospowers/core/wounds/Breaks.java]
+text_pass: none
 ---
 
 # Saplings turn into sticks, so splints are within reach
