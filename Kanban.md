@@ -4,33 +4,37 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 08:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:18). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
-- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
-- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for quill · open
+- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for quill · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for quill · open
+- [ ] [[Inbox/mod-checklists|mod-checklists]] · for quill · open
 
 
 ## Being built
 
 
 
+## Text pass
+
+
+
 ## In review
 
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
-- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🍇 Bacchus · #1248 · in-review
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · hermes-b · #1241 · in-review
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · claude-cloud · #1236 · in-review
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · hermes-b · #1248 · in-review
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
+- [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · claude-cloud · #1239 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for quill · blocked
 
 
 ## Done
@@ -38,12 +42,12 @@ kanban-plugin: board
 **Complete**
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 - [x] [[Inbox/Done/structure-buttons-to-debris|structure-buttons-to-debris]]
-- [x] [[Inbox/Done/redstone-golem-geckolib|redstone-golem-geckolib]]
-- [x] [[Inbox/Done/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]]
-- [x] [[Inbox/Done/heart-crystal-ore-block|heart-crystal-ore-block]]
-- [x] [[Inbox/Done/future-dead-warrior-born|future-dead-warrior-born]]
+- [x] [[Inbox/Done/stegonaut-geckolib|stegonaut-geckolib]]
 
 
 %% kanban:settings
