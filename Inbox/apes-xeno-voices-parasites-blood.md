@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: Andy (Claude chat, 2026-11-09 10:45 PM)
 asked: 2026-11-09
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 
