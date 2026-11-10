@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:46). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -56,12 +56,12 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · ready
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/musket-flintlock-geckolib|musket-flintlock-geckolib]]
 - [x] [[Inbox/Done/astronomy-sky|astronomy-sky]]
 - [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
 - [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
@@ -69,7 +69,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
 - [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
-- [x] [[Inbox/Done/aetherion-geckolib|aetherion-geckolib]]
 
 
 %% kanban:settings
