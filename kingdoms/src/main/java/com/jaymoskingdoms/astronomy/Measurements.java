@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * ({@link Celestial}); the client only asks for it ({@link ArmillaryNet.Measure}).
  * <p>
  * A reading can fail, and says why in one line on the sphere's screen: no journal to write in, not under the
- * Overworld's sky, daylight, clouds, no open sky above the sphere, or none of your stars above the horizon. One that
+ * Overworld's sky, daylight, dazzled or blinded ({@link SunMoon#blinded}), clouds, no open sky above the sphere, or none of your stars above the horizon. One that
  * works writes down what is new:
  * <ul>
  * <li>the altitude and bearing of each discovered star above the horizon not yet measured ({@link #STARS_PER_READING} at
@@ -238,6 +238,9 @@ public final class Measurements {
 		}
 		if (!level.isDarkOutside()) {
 			return "daylight";
+		}
+		if (SunMoon.blinded(player)) {
+			return "dazzled";
 		}
 		if (level.isRaining() || level.isThundering()) {
 			return "clouds";

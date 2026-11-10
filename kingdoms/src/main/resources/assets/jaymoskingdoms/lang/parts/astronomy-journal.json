@@ -11,6 +11,7 @@
   "gui.jaymoskingdoms.armillary.reading.no_journal": "No reading without an Astronomer's Journal on you to write it in.",
   "gui.jaymoskingdoms.armillary.reading.not_overworld": "This is not the sky the catalogue describes. Readings work only in the Overworld.",
   "gui.jaymoskingdoms.armillary.reading.daylight": "Too bright: stars can only be read at night.",
+  "gui.jaymoskingdoms.armillary.reading.dazzled": "Your eyes are still dazzled. Wait until you can see the sky again.",
   "gui.jaymoskingdoms.armillary.reading.clouds": "Clouds cover the sky. Wait for it to clear.",
   "gui.jaymoskingdoms.armillary.reading.roofed": "The sphere needs open sky above it.",
   "gui.jaymoskingdoms.armillary.reading.no_stars": "None of the stars you have discovered are above the horizon here.",

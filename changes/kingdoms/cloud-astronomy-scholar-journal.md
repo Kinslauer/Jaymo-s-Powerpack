@@ -9,7 +9,8 @@
   Polaris (once), the longitude (once per 0.25° band, 500 blocks east or west, from Astrometry rank 4) and the sky's
   yearly drift (once in each of its 12 months). Only something not yet in the journal counts, so repeating a reading
   earns nothing. When a reading fails, the sphere's screen says why in one line: no journal, not the Overworld,
-  daylight, clouds, no open sky above the sphere, or none of your stars above the horizon.
+  daylight, still dazzled by the Sun (or blinded), clouds, no open sky above the sphere, or none of your stars above
+  the horizon.
 - **The Scholar, a fourth pillar of the skill tree.** The scholar side had no ladder to carry this, so astronomy goes
   into the skill tree's own progression instead of a ladder of its own: each new measurement is Scholar experience
   (a star's place 6, the latitude 40, a longitude band 25, a month 30), up to level 20, with a point every level and a
@@ -37,8 +38,9 @@
   `art/astronomy/generate_journal.py`.
 - The idea of a measuring journal with a skill ladder and study pages comes from Jubileu_13's Astronomy mod (MIT);
   nothing of its code, text or art is used.
-- Not in this change: telescope readings (the telescope has art and a rig but no gameplay yet), and the Altazimuth
-  Mount and Optics skills, which belong in this pillar when the telescope and the Sun and Moon arrive. The armillary
-  sphere itself still has no recipe, blockstate or item model, so outside creative it can't be had yet.
+- Not in this change: telescope readings (the telescope has art and a rig but no gameplay yet), the Altazimuth
+  Mount and Optics skills (Optics, which lets you look at the Sun unharmed, still reads as unlearned), and showing
+  the Sun and Moon observations in the journal. The armillary sphere itself still has no recipe, blockstate or item
+  model, so outside creative it can't be had yet.
 - Built; not played, and no dev server or client was started. Unchecked in game: the book's layout and legibility at
   each GUI scale, the readings and their failure lines, the Learn link, and the corrected star field.
