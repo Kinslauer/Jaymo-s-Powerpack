@@ -4,12 +4,13 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:08). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
 
 
 ## Being built
