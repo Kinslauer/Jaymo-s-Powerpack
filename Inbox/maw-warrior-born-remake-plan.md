@@ -52,3 +52,4 @@ Maw), plus the Kingdoms side that reads it: `tier.feat.maw_salvage`, `story-road
 - Andy said "build all this" on 2026-11-09, so the lore shape is settled enough to work from. If the code cannot do
   something the lore page says, say so in the PR body rather than quietly shrinking the design.
 - Anything that would contradict the lore page goes to Andy as a question, not a silent rewrite.
+- 2026-11-10 00:22 Cloud agent session sesn_01CsHsTooJGMwThLVeajzUx8 opened PR #1240.
