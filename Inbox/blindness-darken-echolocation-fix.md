@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: claude-cloud
-pr:
+pr: 1231
 suggested_owns: [src/main/java/com/jaymospowers/power/resonance/, src/client/java/com/jaymospowers/client/power/resonance/, src/main/java/com/jaymospowers/power/smoke/SmokeSmother.java, src/client/java/com/jaymospowers/client/]
 ---
 
