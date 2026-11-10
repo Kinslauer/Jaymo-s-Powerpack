@@ -644,6 +644,12 @@ public final class Mortality {
 			chance = Math.min(1.0F, chance * ZFighterRealism.finalOdds());
 		}
 		boolean ends = !sure && (Boolean.TRUE.equals(executed) || openInjury(player) || chance > 0.0F && player.getRandom().nextFloat() < chance);
+		// Heart crystals: if the death would be final but isn't unturnable, burn a heart and turn it away
+		if (ends && !unturnable && HeartCrystals.tryBurnHeartOnDeath(player)) {
+			JaymosPowers.LOGGER.info("{} burned a heart crystal to survive {}", player.getScoreboardName(), cause.key());
+			leftForDead(player, cause, sub(source, felled), by, null, null);
+			return false;
+		}
 		JaymosPowers.LOGGER.info("{} fell to {} ({}): {}{}", player.getScoreboardName(), cause.key(), source.getMsgId(),
 			ends ? "final" : "left for dead", sure ? " (sure wake " + (woken + 1) + " of " + SURE_WAKES + ")" : "");
 		if (ends) {
@@ -1235,6 +1241,7 @@ public final class Mortality {
 	public static void endLife(ServerPlayer player) {
 		player.removeAttached(FINAL);
 		player.removeAttached(SURVIVOR);
+		HeartCrystals.onFinalDeath(player);
 		Afflictions.clear(player);
 		Scars.clear(player);
 		Breaks.clearAll(player);

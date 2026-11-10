@@ -458,19 +458,20 @@ public final class Downed {
 		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
 		Powers.addSilencer(Downed::isDowned);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			limbo(server);
-			players(server);
-			revives(server);
-		});
-		// the body that comes back is whole and on its feet (out of the End, still down if they went in down)
-		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-			if (!alive) {
-				forget(newPlayer);
-			} else if (!isDowned(newPlayer)) {
-				newPlayer.removeTag(DOWNED_TAG);
-			}
-		});
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+				limbo(server);
+				players(server);
+				revives(server);
+			});
+			// the body that comes back is whole and on its feet (out of the End, still down if they went in down)
+			ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+				if (!alive) {
+					forget(newPlayer);
+				} else if (!isDowned(newPlayer)) {
+					newPlayer.removeTag(DOWNED_TAG);
+				}
+				HeartCrystals.onRespawn(newPlayer);
+			});
+			ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer) {
 				entity.setAttached(DIED, true);
 			}
