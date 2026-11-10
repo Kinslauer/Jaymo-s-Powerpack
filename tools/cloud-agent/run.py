@@ -5,6 +5,8 @@ sandbox (README.md beside this). Meant for YOUTH (Hermes) on Andy's PC; works fr
     py tools/cloud-agent/run.py task <inbox-task>      # do an Inbox task; keeps its status in the vault
     py tools/cloud-agent/run.py next                   # do the oldest open task for `cloud` or `prometheus`
     py tools/cloud-agent/run.py prompt "<what to do>"  # do something that isn't an Inbox task
+    py tools/cloud-agent/run.py checktoken             # can GITHUB_TOKEN push to the repo? (pushes nothing)
+    py tools/cloud-agent/run.py retoken <session-id>   # give a running session the current GITHUB_TOKEN for git
     py tools/cloud-agent/run.py hunt <area> [...]      # Bug hunter, only when Andy asks: an area is a folder, a
                                                        # file, or a word from docs/codemap (e.g. `hunt Downed`);
                                                        # each confirmed bug becomes an Inbox task for Hephaestus.
@@ -88,6 +90,40 @@ def load_keys():
     still = [k for k in KEYS if not os.environ.get(k)]
     if still:
         raise SystemExit(f"Missing {', '.join(still)}: set it as a user environment variable (README.md, One-time setup)")
+
+
+def checktoken():
+    """Whether GITHUB_TOKEN may push to the repo, asked of GitHub the way `git push` asks (the receive-pack handshake,
+    which GitHub refuses with a 403 when the token can't write), without sending anything. The token goes in an
+    environment-only git setting, never on the command line."""
+    import base64
+    basic = base64.b64encode(f"x-access-token:{os.environ['GITHUB_TOKEN']}".encode()).decode()
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_CONFIG_COUNT="1",
+               GIT_CONFIG_KEY_0="http.https://github.com/.extraheader", GIT_CONFIG_VALUE_0=f"AUTHORIZATION: basic {basic}")
+    out = subprocess.run(["git", "-c", "credential.helper=", "push", "--dry-run", "--porcelain",
+                          f"https://github.com/{REPO}.git", "HEAD:refs/heads/cloud/token-check"],
+                         cwd=ROOT, env=env, capture_output=True, text=True, encoding="utf-8")
+    if out.returncode == 0:
+        print(f"GITHUB_TOKEN can push to {REPO}.")
+        return 0
+    print(f"GITHUB_TOKEN can't push to {REPO}:\n{(out.stderr or out.stdout).strip()}\n"
+          "Give it Contents: Read and write on this repository (README.md, One-time setup), then run this again.")
+    return 1
+
+
+def retoken(client, session_id):
+    """Swaps the token git uses for the repo in a running session for the current GITHUB_TOKEN (a session keeps the
+    token it was started with, so fixing the token's permissions afterwards doesn't reach it)."""
+    done = 0
+    for r in client.beta.sessions.resources.list(session_id):
+        if getattr(r, "type", "") == "github_repository":
+            client.beta.sessions.resources.update(r.id, session_id=session_id, authorization_token=os.environ["GITHUB_TOKEN"])
+            print(f"{session_id}: {getattr(r, 'url', r.id)} now uses the current GITHUB_TOKEN")
+            done += 1
+    if not done:
+        print(f"{session_id} has no GitHub repository attached, so git there doesn't use a token we can swap.")
+        return 1
+    return 0
 
 
 def lock_id(path):
@@ -404,7 +440,7 @@ def hunt_results(client, session_id, label):
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt", "next", "hunt"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt", "next", "hunt", "checktoken", "retoken"):
         raise SystemExit(__doc__)
     if sys.argv[1] == "hunt":
         args = sys.argv[2:]
@@ -421,7 +457,13 @@ def main():
         load_keys()
         return hunt(anthropic.Anthropic(), words, big="--big" in args, budget_cents=budget)
     load_keys()
+    if sys.argv[1] == "checktoken":
+        return checktoken()
     client = anthropic.Anthropic()
+    if sys.argv[1] == "retoken":
+        if len(sys.argv) < 3:
+            raise SystemExit("run.py retoken <session-id>: the sesn_... ID from the session's Console page")
+        return retoken(client, sys.argv[2])
     if sys.argv[1] == "credentials":
         return credentials(client)
     if sys.argv[1] == "prompt":
