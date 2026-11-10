@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: blocked
 for: claude-cloud
 from: cloud thread (session ...DopwiG2E2RYHAfak), found on the Bogre branch 2026-11-10
 asked: 2026-11-10
