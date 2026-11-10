@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -8,7 +8,7 @@ claimed_by: hermes-b
 pr: 1204
 suggested_owns: [src/main/java/com/jaymospowers/tinkering/, kitchen/src/main/java/com/jaymoskitchen/delight/Chopping.java]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Knives carry their metal's effect
