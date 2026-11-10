@@ -105,6 +105,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
 		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
 		com.jaymoskingdoms.astronomy.StarDiscovery.register();
+		// the Moon's orbit and phases, observing them, and the Sun's glare (and the records' attachment)
+		com.jaymoskingdoms.astronomy.SunMoon.register();
 		// the Astronomer's Journal: the armillary's readings, the Scholar pillar's points, the study pages
 		com.jaymoskingdoms.astronomy.AstronomersJournal.register();
 		Cafe.register();

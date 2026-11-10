@@ -343,8 +343,9 @@ public final class FarWorlds {
 	}
 
 	/**
-	 * The Maw is flat void with built wrecks (no chunk pass reaches it): a deck's underside holds two veiled ores (blackstone
-	 * for a host) and its top a couple of the Maw's rocks. {@code centre} is the wreck's middle.
+	 * The Maw's ore and rocks are on its built wrecks, not its ground (its wasteland gets no rocks in {@link #chunkLoaded}): a
+	 * deck's underside holds two veiled ores (blackstone for a host) and its top a couple of the Maw's rocks. {@code centre} is
+	 * the wreck's middle.
 	 */
 	public static void mawDeck(ServerLevel level, BlockPos centre, int index) {
 		VeiledOreBlock.Kind[] kinds = {VeiledOreBlock.Kind.IRON, VeiledOreBlock.Kind.GOLD, VeiledOreBlock.Kind.DIAMOND, VeiledOreBlock.Kind.REDSTONE,

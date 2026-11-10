@@ -1923,3 +1923,151 @@ keep it, as it belongs to the tool's metal.
 - **Client**: `HeartHud` draws the faint extra run under the health bar showing the half-hearts held.
 - **Compat**: stacks with the `crystal_heart` artifact (both raise max health) - say so in the PR body, and ask Andy if it reads as too much health.
 - Not tested in game.
+
+## 0.21.86 (2026-11-10): Saplings turn into sticks (#1213)
+
+Any sapling (vanilla or Aether) can now be crafted into 2 sticks in the crafting grid. This makes splints accessible when you're far from trees - just break a sapling you can't plant and turn it into sticks for a splint.
+
+## 0.21.87 (2026-11-10): The Omen animated by GeckoLib (#1219)
+
+The Omens (red and blue) are now animated by GeckoLib instead of posed in code. They breathe while standing, walk with
+the old stride, break into a leaning run when they chase, shuffle round on the spot when they turn, wind up and slam
+both arms down in a smash, kick back with every cannon round, flinch when hit, and on death jolt as the hatch pops and
+buckle into their model's own pose (red and blue each their own). Heads still follow where they look and the cannon arms
+still come up on a target, now tilting with its height and turning a little toward it. Same models and skins
+(excalibur_style still reskins them). Not yet seen in game.
+
+## 0.21.88 (2026-11-10): Training weights: shadowbox in them to build Might, whatever your power (#1220)
+
+Tiv: "they should build might for everyone, wearing them should turn your meditate into shadowboxing. non gravity or z fighters are REALLY slow and bad at it". Wearing either pair of Training Weights now turns the Meditate key (I) into shadowboxing for every player, not only a Z Fighter or a Gravity user (the key still needs the Meditation perk, as it always has). Every second of shadowboxing in them builds Might, Jaymo's Kingdoms' attribute: 10 points an hour for a Z Fighter or a Gravity user in the light pair (13.3 in the heavy pair, half again with a Weighted Gi on as well, the same multipliers a Z Fighter's training has), and always a tenth of that for anyone else, about one point an hour, so a hundred-odd hours to the top. Nothing about a Z Fighter's Training Points, ki or mastery changes. Someone shadowboxing in weights also counts as a partner for a Gravity user's shadowboxing.
+- `Meditate#kind` (weights make anyone a shadowboxer) and its tick (`Training#weightsMight` every second settled in), `Training.WEIGHTS_MIGHT_PER_HOUR`/`OUTSIDER_MIGHT`, `ZFighterItems#wearsWeights` (`weightRate` and `LIGHT_RATE` now public), `KingdomsCompat#trainMight` (reflection on Kingdoms' `Stats.trainMight`; nothing without Kingdoms).
+- Built; not played.
+
+## 0.21.89 (2026-11-10): sleeping sets your broken bones (#1223)
+
+- Tiv: "sleeping should set your broken bones. after hitting the sleep button and waiting, longer per break". A
+  broken arm or leg no longer needs a splint, a cleric or a priest to be set: sleep in a bed does it. The splint stays
+  for when there's no bed to be had.
+- **How long**: each break takes 10,000 ticks of the clock asleep (`Breaks.SLEEP_SET_TICKS`). The times add up, one
+  break after another: a whole night in bed (about 11,000) sets one break, two breaks take two nights, three take
+  three. What a night doesn't finish carries over to the next sleep, even after logging out. A leg is set first,
+  since two broken legs leave you crawling. The time is measured on the clock, so a night that's skipped or run by as
+  Kingdoms' timelapse counts in full. A player sleeping while the others stay up takes the full night in real time.
+- **Only real sleep counts**: Kingdoms' bed rest (lying down by day, sneaking into bed, or lying there before you
+  press Sleep) sets nothing. Sleep at night (a bed used at night, or the Sleep button from rest) and the counting
+  starts once you're fully asleep, the same rule as a sleep ending Battered or a chamomile sleep healing you. The
+  morning wakes you as usual: the sleep doesn't run longer, a second night is needed.
+- **A set bone shows as splinted**, as if a splint had been put on: the slats show on the limb, the break keeps only a
+  quarter of its slowness and weakness, and it counts as tended when the game checks whether you're patched up (what
+  lets natural healing run at full speed). The splint comes off as the bone knits, as before. Messages: "Your Left leg
+  has set in your sleep"; on waking with a break still to go, "Your Right arm is 40% set: sleep in a bed again to
+  finish setting it". The "broken" message now says a splint or sleep in a bed will set it.
+- **The downed bed rest** (hauling yourself into a bed while downed) still sets every break after a minute, now
+  through the same `Breaks.bedSet`, so those breaks show splinted too instead of hanging untended.
+- `Breaks`: `SLEEP_SET_TICKS`, the saved `SLEPT` attachment, `bedSet`, the sleep counting (each tick while
+  `isSleepingLongEnough`, and on `EntitySleepEvents.STOP_SLEEPING` for the morning a skipped night jumps to).
+  `DownedStruggle` calls `Breaks.bedSet`. Lang: `wounds.slept_set`, `wounds.sleep_setting`.
+- Built; not played.
+
+## 0.21.90 (2026-11-10): F5 goes between first person and behind; the front camera moves to F6 (#1228)
+
+Tiv: "F5 should only toggle between first and 3rd person, the front facing camera should be toggled on w/ f6."
+- **F5** now goes between first person and the view from behind (Shoulder Surfing's over-the-shoulder view in the pack). It never lands on the view from the front. From the front view, F5 goes to first person.
+- **F6** turns the camera round to look at your face. Press it again and you're back in the view you had before (first person or from behind). If the game doesn't know what that was, you go to the view from behind. It's in Options > Controls > Key Binds under Miscellaneous ("Toggle Front Camera"), next to Toggle Perspective, and can be rebound there.
+- **Cutscenes**: while an ultimate's film, a beam battle's film, Time Flow's shoulder view or a finisher seen from behind has the camera, F6 does nothing. Each of these gives back the view it found when it ends, so the front view comes back after them and F6 still takes you back to the view you had before it.
+- **Nothing else moved**: nothing in the pack was on F6. First-person Model's toggle is meant to start on F6, but on 26.3 it starts on a key code no key sends. Vanilla only uses F6 as F3+F6, which doesn't trigger key binds. So `KeyConflicts` is unchanged.
+- `FrontCamera` (the key and the toggle), `mixin/FrontCameraCycleMixin` (vanilla's F5), `mixin/shouldersurfing/ShoulderSurfingFrontMixin` (Shoulder Surfing's F5; its "third person front" setting stays on so F6 still works), `ChronoFlowClient#holdsView`, `FinisherPose#holdsView`. Shoulder Surfing Reloaded is now a compile-only dependency. Lang: `lang/parts/camera.json`.
+- Built; not played.
+
+## 0.21.91 (2026-11-10): modelled amethyst heart crystal ore (#1230)
+
+- **Heart crystal ore**: the flat red-heart textures are replaced by raised purple amethyst crystals: one large central crystal inside a smaller heart-shaped cluster, on both stone and deepslate.
+- Bright violet/lilac facets make the ore read lit in the dark like amethyst; it does not emit light. Full opaque rock hosts keep ordinary neighbour culling and need no cut-out blockstate or item variant.
+- Includes original editable Blockbench sources, deterministic generator and inspected front/side/back renders. Registration, worldgen and drops remain with the separate ore-hearts gameplay task.
+- Not tested in game.
+
+## 0.21.92 (2026-11-10): Blinded means dark: Blindness darkens your whole view (#1231)
+
+- **Blindness is dark now.** Being blinded (Smoke's Smother and bombs, Xenoform's band flash, Z Fighter's flash, Cryo's snow, any Blindness from anything) used to pull vanilla's black fog in to 5 blocks and leave what was close fully lit. Now the whole view goes dark too: about three quarters dark in the middle, so what's right in front of you is barely there, closing to near black at the edges. It closes in over a third of a second and lifts with the effect's last second, as the fog does. It stacks on vanilla's fog (which still hides everything further off) rather than replacing it.
+- The crosshair, hotbar and every other HUD piece stay on top of the darkness, so the Resonance ring, the Blindness power's echo rings and the power chips still show while blind. Hiding the HUD (F1) hides the darkness too, as it does vanilla's own screen overlays.
+- Tuning: `client/BlindedHud` (`WASH`, `RIM`, `REACH`, `FADE_IN_TICKS`).
+- Built; not played. How dark it looks in game, and how it sits with the pack's shaders (Iris, Complementary), hasn't been seen.
+
+## 0.21.93 (2026-11-10): V works again: the voice chat menu moves off the power keys (#1232)
+
+- **Echolocation (and every power's V) works again.** Simple Voice Chat opens its menu on V. That screen opened before the power key was read, so pressing V never reached your power: Resonance's Echolocation never fired (no outline, no ripple, no chime) and the voice chat menu popped up instead. The same went for every power's V, and for G (Voice Chat's group screen, when groups are on).
+- Once per install, as the pack already does for other clashing keys (`KeyConflicts`, now v8): the **voice chat menu moves to F7**, and its **group** (G) and **hide icons** (H) keys are unbound; both are buttons inside the voice chat menu. Only keys still on those defaults are moved; your own rebinds are kept.
+- Resonance's own code is unchanged: read against the 26.3 sources, the ping, its packet, the outline mixin (Sodium's culling lets outlined creatures through) and the heartbeat ring hold up. The ring still only shows while a creature is within 12 blocks.
+- Built; not played. Simple Voice Chat's defaults are from its README and public source, not checked in the 26.3 jar.
+
+## 0.21.94 (2026-11-10): The future's dead are Warrior-born: mangled tails, 32 skins, dried husks (#1234)
+
+Andy: "husks zombies and player zombies all with mangled tails in various conditions (12+ at least) and 30+ different
+skins".
+- **Tails**: every grown zombie, husk and stranger's zombie player in the future drags a Warrior-born tail, mangled one
+  of 16 ways: bent hard to one side, snapped and hanging from the break, cut through halfway, gone at the root, hanging
+  limp, broken twice, the fur torn away in patches, the tip rotted to bone, charred and short, crushed flat, split into
+  two strands, coiled tight, gone stiff, hanging by a strand, cut short with an old rag knotted on, broken with the
+  bone through. Dead tails barely sway; a snapped one swings from its break. Each mob keeps its own, picked by its id.
+- **Skins**: plain zombies there now wear one of 32 civilian skins (16 new outfits: leather jacket, tracksuit, chef's
+  whites, paramedic, security, blouse and skirt, overalls, raincoat, dojo gi, bomber jacket, coveralls, lab coat,
+  cardigan, puffer jacket, delivery uniform, fight trunks), and husks one of 32 dried skins of their own instead of
+  the game's husk. About half carry a Warpainted's ochre bands or a Battle-scarred's old scars on the face.
+- Babies, and a real player's zombie, are left as they were; nothing changes outside the future.
+- `client/power/chrono/FutureDeadLooks` (skins, the tail's 16 conditions and its render layer), `FutureZombieRendererMixin`,
+  new `FutureHuskRendererMixin`, `ChronoLivingEntityRendererMixin`. Art: `tools/gen_future_zombies.py` writes
+  `textures/entity/future/civilian_<n>.png`, `husk_<n>.png` and `dead_tail.png`.
+- Built; not played. The tail shapes were checked in a Python mock of the drawing code and the skins as images, not in
+  game; check the tails' place on the back, the husks' skins and the zombie players' tails in the future.
+
+## 0.21.95 (2026-11-10): The life story's starts in Powers' worlds are each player's own (#1235)
+
+Tiv: "Every player should have their own start, it should search for another if they are already taken." Jaymo's Kingdoms now remembers every player's start. The starts Powers places itself take a check from Kingdoms of which places are nobody else's, and use it:
+- **Pale Moon**: a crash site nobody else woke at (out to twice as far if the ring is full). **Rustfall**: a mine mouth nobody else escaped from (the same).
+- **Verdant World**: the village nearest the Lookout that nobody else was raised in, looked past up to three taken ones; with none free, a spot of your own further out.
+- **The Maw**: if the pad is someone else's start, a deck of your own (a pad and its pod) on a ring 70 blocks round the hole, past the wrecks and still in its pull. With all ten taken (39 blocks apart), the pad.
+- **Raised by a demon master**: a demon hall nobody else was raised in; a taken one is passed over and the next raised.
+- **Back from the afterlife**: a free spot on the Other World's platform when the arrival spot is someone else's start.
+- **Lost in time**: the future's arrival square, else a street round it (16-96 blocks out, near the square's height). A newcomer who waited for the future to form is checked when they're sent.
+- **Escaped the alchemist's lab, Fresh off the bench**: the room is built where nobody else started, out to twice as far if it must be.
+- Kingdoms calls the new overloads: `ZFighterStarts.land(..., BiPredicate)`, `Future.strand(..., BiPredicate)`, `LabEscape.start(..., BiPredicate)` and `ZFighterAndroidStart.start(..., BiPredicate)`. Also `WildRoom.find`, `ZFighterDemonRealm.raiseHome` and `ZFighterAfterlife.strand` with a free check, and `ZFighterSpace.deck`. The old signatures stay. Tuning: `ZFighterStarts.FREE_TRIES`, `FREE_STEP`, `DEMON_FREE_STEP`, `MAW_DECK_RADIUS`, `MAW_DECKS`; `Future.ARRIVAL_FREE_*`; `ZFighterAfterlife.FREE_TRIES`, `FREE_REACH`.
+- Built; not played. Not tried with two players on a server.
+
+## 0.21.96 (2026-11-10): Xenoform: Asterion, the minotaur alien (#1238)
+
+- **Asterion** (Tiv's ask): scanning Kingdoms' minotaur now teaches its own alien, a bull-headed brute with the
+  minotaur's own build and moves, in a slate hide with the band's green glow and its great hammer. The minotaur is off
+  Tusk's DNA list. 1.6x, 48 health, hammer blows of 8, a little slow, hard to knock about.
+- **Charge** (hold R): head down, it runs where it faced and only leans a little to steer (never more than 12° off its
+  line). It smashes through dirt, wood and leaves, whoever placed them; stone and anything else solid stops it dead. The
+  first creature it meets is caught on its horns and carried in front: stunned at every impact, hurt harder for every
+  block it's put through, and run through when a wall stops the charge (a torso wound that bleeds). Others in the way
+  are flung aside. Nothing can hurt Asterion while it charges (and half a second after) except the carried creature's
+  own blows: a carried mob swings back with whatever it holds, a carried player can just hit it. Let go to throw the
+  catch off ahead.
+- **Roar** (hold G): the longer it's held (up to 2.5 s), the further (3 to 14 blocks) and harder the shockwave that runs
+  out when you let go; whoever it reaches is thrown back limp. You crawl while you hold it, and a long roar takes longer
+  to come back.
+- **Slam** (V): the hammer comes down and everyone round it is hurt and thrown off their feet. **Gore** (B): the horns
+  into the creature in reach, a bleeding cut and a toss.
+- **Big weapons**: Asterion swings its great hammer, or any Better Combat two-handed weapon in your main hand (claymores,
+  war axes, glaives, spears, scythes...) with that weapon's own damage and moves; every other alien stays fists-only.
+- Look: "Minotaur" by eanncrod (Blockbench Workshop, CC BY 4.0), the model Kingdoms' minotaur uses, baked with its
+  animations and its texture repainted (`tools/gen_xenoform_asterion.py`; credit in `art/xenoform_asterion-CREDITS.md`
+  and `textures/entity/bb/CREDITS.txt`). Its Ultimate is the plain fallback for now (Labyrinth).
+- Classes: `forms/Asterion` (all its numbers at the top), `XenoForm.wields`, `XenoformHandsMixin`, `XenoDna`; client
+  `AsterionModel`, `XenoformClient` (act clock, held weapon), `XenoformLayer`.
+- Built; not played. Not seen in game: the model's size and animations, the weapon in its hand, the first-person arm,
+  the charge through walls, carrying a player, and Better Combat weapons while changed.
+
+## 0.21.97 (2026-11-10): The Maw remade: a broken world hung over a ruined country (#1240)
+
+- **No black hole any more.** The Maw is a world in pieces, 44 blocks across, hanging in its own pull at y 190: scorched soil over rock over deep rock, cracked through into eight pieces that have drifted apart, so you see in to a smouldering heart of magma and crying obsidian. Inside the cracks the rock is fused in patches to orange and yellow glass (it still sheds Maw dust when broken), the rest showing the world's layers of soil, stone and deep rock. The piece facing the pad is gone, its rubble flung out on that side. Broken stone-brick walls stand on its top and hang upside down from its underside, rubble hangs all round it, and a trail of rubble the pull holds up runs down toward the ground.
+- **No void under it.** About 100 blocks below lies a wasteland that runs to the horizon: low rolling ground of scorched coarse dirt, gravel drifts, burnt soul-soil patches and bare tuff, the odd canyon, ash on the air and the low groan of the broken world overhead. The Lost Cities (MIT, McJty; already in the pack for the future) build their ruins on it: big cities running into each other, nearly every building broken off low, rubble in the streets, bomb craters in and out of town, fountains run dry, no green anywhere. Nothing lives there, no spawners, and the chests were emptied long ago: the salvage is still up on the wrecks.
+- **The nine wrecks** stay where the pod sets down, each with its part set, its wrecked pod, its veiled ore and rocks, its lantern and mast, and its stores of the same rare loot. The even ones are ships' hulks (a long plated deck, ragged bow and stern, a keel, a broken bulwark, chains hanging under it, the stores in a barrel); the odd ones are pieces of the world's own ground (a slab of soil and paving on a root of earth and rock, two walls of a house still standing at a corner, the stores in a chest).
+- **Kept as it was:** the deck plates, the part sets, the slow pull (now to the world's heart) and the tide at the heart that throws you out and hurts you, Maw dust and the Starlit Lens, the airless Maw, the salvager's start on the pad.
+- **The star map** draws the Maw as a world in pieces round a glowing heart, one piece gone, a slow ring of rubble round it (it was a black disc in a ring of fire). Its chart, its star map text and the Maw dust's JEI page read the new way.
+- **Light and air:** ashen light and fog instead of the old purple, and the dimension is the Overworld's height (y -64 to 320) so the ruins have room under the world.
+- Code: `power/zfighter/MawWorld` (the world, its ruins and rubble, the wrecks: tuning at the top), `power/zfighter/MawCities` (Lost Cities: the Maw's own profile, `RUINS`, handed to Lost Cities at each server start, its city feature on the Maw's biome alone), `ZFighterSpace` (the pad's height, the pull; `Kind.VOID` is now `Kind.WRECKS`), `ZFighterSpaceArt.maw`, `BackHome` (dust from the fused glass). Worldgen from `tools/gen_zfighter_space.py` (`maw_type`, `maw_ground`: our own density function for the ground, its noise, surface rule and noise settings; the biome keeps the id `maw_void`, so chunks saved under it keep it). The generator also writes the moon's surface rule and the pod's block state as they are in the repo again.
+- **Worlds that already went to the Maw:** the broken world is built at its new height the first time anyone lands, and the Maw's pad moves up with it. The Maw's chunks that were already made stay as they were: void, with the old hole, ring and wrecks still floating at y 80. Chunks not made yet get the new ground. A new world, or the Maw's folder moved aside, gets all of it.
+- Checked: both mods build; the Maw's dimension type, biome, noise settings, ground, noises, surface rule and dimension load through 26.3's own registry loader (vanilla plus these files), and the ground comes out at y 60-93 for three seeds (70-80 under the world); the Lost Cities profile's 28 fields set cleanly on Lost Cities' class; the nine wrecks clear the world, each other and the pad. Not played: not seen in game, no server booted.

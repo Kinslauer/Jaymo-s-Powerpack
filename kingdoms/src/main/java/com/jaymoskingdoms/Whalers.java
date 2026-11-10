@@ -427,7 +427,7 @@ public final class Whalers {
 	 * if no realm's is in port (whatever its treasury or the time since its last voyage). Returns where they stand on her
 	 * deck, or null (no realm has a harbour, or she couldn't be fitted out).
 	 */
-	static @Nullable Vec3 signOn(ServerPlayer player, BlockPos near) {
+	static @Nullable Vec3 signOn(ServerPlayer player, BlockPos near, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
@@ -437,8 +437,10 @@ public final class Whalers {
 		for (Faction f : Factions.all(server)) {
 			Navies.Harbour h = f.type().isRealm() && !f.fallen() ? Navies.harbour(server, f.id()) : null;
 			Voyage v = h == null ? null : voyage(server, f.id());
-			// a realm with a voyage already out at sea can't fit out another
-			if (h == null || v != null && now - v.launched >= FIT_OUT) {
+			// a realm with a voyage already out at sea can't fit out another; (Tiv) nor one whose harbour is someone else's start,
+			// unless hers was made ready for this story (StoryGround.harbour passed over the taken ones)
+			if (h == null || v != null && now - v.launched >= FIT_OUT
+				|| f.id() != StoryGround.whalerRealm(player) && !free.test(level, h.mooring())) {
 				continue;
 			}
 			// (0.7.235) the realm whose whaler was made ready for their story, before any nearer

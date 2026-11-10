@@ -645,9 +645,9 @@ public final class ZFighterPodTrip {
 	/** Open ground anywhere on a far world: a random flat dry spot (a cave floor on Cinder, a wreck's deck in the Maw). */
 	private static BlockPos ground(ServerLevel level, ZFighterSpace.Dest dest) {
 		RandomSource random = level.getRandom();
-		if (dest.kind() == ZFighterSpace.Kind.VOID) {
-			ZFighterSpace.buildMaw(level);
-			List<BlockPos> decks = ZFighterSpace.mawDecks();
+		if (dest.kind() == ZFighterSpace.Kind.WRECKS) {
+			MawWorld.build(level);
+			List<BlockPos> decks = MawWorld.decks();
 			return decks.get(random.nextInt(decks.size()));
 		}
 		for (int i = 0; i < LAND_TRIES; i++) {

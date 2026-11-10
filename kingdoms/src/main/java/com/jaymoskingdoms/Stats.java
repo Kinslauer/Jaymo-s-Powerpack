@@ -1,12 +1,17 @@
 package com.jaymoskingdoms;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,6 +48,11 @@ import org.jspecify.annotations.Nullable;
  * point is a tenth of the old one, times {@link #TOP_SHARE} so a full 100 is half again what the old 10 gave. How high an
  * attribute may go is your world tier's ({@link WorldTiers}): {@link #TIER_CAP}, the highest tier you have opened (or are
  * in). Each opened tier also adds {@link #TIER_POINTS}. Saved points from before are scaled by {@link #migrate} once.
+ *
+ * <p>Tiv: "they should build might for everyone ... its only good if you keep at it". Might can also be trained: Jaymo's
+ * Powers hands over Might for shadowboxing in its training weights ({@link #trainMight}, by reflection), a little every
+ * second, kept in {@link #TRAINED_MIGHT}. Each whole point counts on top of the rest, up to the tier's cap like any
+ * other; it was never spent, so a respec leaves it.
  */
 public final class Stats {
 	/** (0.7.540) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
@@ -77,6 +87,15 @@ public final class Stats {
 	static final String SCALED_KEY = "stat_scale";
 	/** (0.7.540) Points a shift-click puts in at once. */
 	public static final int SHIFT_STEP = 10;
+	/** The sparks' colour when a trained point of Might lands. */
+	static final int MIGHT_COLOR = 0xC0503A;
+
+	/**
+	 * Might trained in Jaymo's Powers' training weights ({@link #trainMight}): the whole points count, the fraction is the
+	 * next one on its way. Saved, kept through death, synced to its player (the K screen shows it).
+	 */
+	public static final AttachmentType<Double> TRAINED_MIGHT = AttachmentRegistry.create(JaymosKingdoms.id("trained_might"),
+		builder -> builder.persistent(Codec.DOUBLE).copyOnDeath().syncWith(ByteBufCodecs.DOUBLE, AttachmentSyncPredicate.targetOnly()));
 
 	public enum Stat {
 		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA;
@@ -196,9 +215,19 @@ public final class Stats {
 		return LifeStory.points(player, stat) * STEP;
 	}
 
-	/** {@code stat}'s points before the cap: spent, heritage, class and (0.7.216) story. */
+	/** Might trained in the weights so far, the fraction included (0 for none). */
+	public static double trained(Player player) {
+		return player.getAttachedOrElse(TRAINED_MIGHT, 0.0);
+	}
+
+	/** Free points in {@code stat} from training in the weights: whole points of Might ({@link #trainMight}), none in anything else. */
+	public static int fromTraining(Player player, Stat stat) {
+		return stat == Stat.MIGHT ? (int)Math.floor(trained(player)) : 0;
+	}
+
+	/** {@code stat}'s points before the cap: spent, heritage, class, (0.7.216) story and training. */
 	public static int total(Player player, Skills.Progress p, Stat stat) {
-		return spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) + fromStory(player, stat);
+		return spent(p, stat) + fromHeritage(player, stat) + fromClass(player, stat) + fromStory(player, stat) + fromTraining(player, stat);
 	}
 
 	/** {@code stat}'s value for {@code player}: {@link #total}, at most (0.7.540) their tier's {@link #cap}. */
@@ -274,6 +303,24 @@ public final class Stats {
 		Skills.modifier(player, Attributes.ARMOR, "stat_grit", GRIT_ARMOR * grit, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.KNOCKBACK_RESISTANCE, "stat_grit", GRIT_KNOCKBACK * grit, AttributeModifier.Operation.ADD_VALUE);
 		Skills.modifier(player, Attributes.LUCK, "stat_wits", WITS_LUCK * value(player, p, Stat.WITS), AttributeModifier.Operation.ADD_VALUE);
+	}
+
+	/**
+	 * {@code points} of Might trained (a fraction of one, mostly): called every second of shadowboxing in training weights by
+	 * Jaymo's Powers ({@code core.Training}, by reflection), which sets the pace. Nothing once Might is at the world tier's
+	 * cap. A whole point landing goes on at once, with the small fanfare.
+	 */
+	public static void trainMight(ServerPlayer player, double points) {
+		if (points <= 0.0 || total(player, Skills.of(player), Stat.MIGHT) >= cap(player)) {
+			return;
+		}
+		double before = trained(player), after = before + points;
+		player.setAttached(TRAINED_MIGHT, after);
+		if ((int)Math.floor(after) > (int)Math.floor(before)) {
+			attributes(player);
+			Fanfare.fanfare(player, Component.translatable("message.jaymoskingdoms.stats.trained_might"),
+				Component.translatable("message.jaymoskingdoms.stats.trained_might.value", value(player, Stat.MIGHT), MAX), null, MIGHT_COLOR, Fanfare.MINOR);
+		}
 	}
 
 	/** If {@code player} has spent more points than they've earned (their heritage changed), the points come back. */

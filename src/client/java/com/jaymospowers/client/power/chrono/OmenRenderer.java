@@ -1,30 +1,40 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.geckolib.constant.dataticket.DataTicket;
+import com.geckolib.model.DefaultedEntityGeoModel;
+import com.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.client.bb.BbModel;
 import com.jaymospowers.power.chrono.future.FutureOmen;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.EntityModel;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * An Omen ({@link FutureOmen}) on its Blockbench model (Blockbench Workshop, CC BY 4.0, credits in
- * textures/entity/bb/CREDITS.txt), red or blue: its own models, baked by tools/bbmodel_bake.py. It stands in the model's
- * rest pose and moves in code: legs stride with its walk, the cannon arms come up when it aims, both arms smash down when
- * it strikes, and its head follows where it looks. Dying, it holds the model's own "pose_1" stance (buckled, arms
- * thrown) as it goes down. The model stands 4.5 blocks, its entity's own height.
+ * An Omen ({@link FutureOmen}) drawn by GeckoLib: "The Omen Red" or "The Omen Blue" (Blockbench Workshop, CC BY 4.0,
+ * credits in art/the_omen-CREDITS.md and textures/entity/bb/CREDITS.txt), each its own geometry
+ * ({@code geckolib/models/entity/omen_<build>.geo.json}) in its old skin ({@code textures/entity/bb/omen_<build>.png}),
+ * both on one animation file ({@code omen.animation.json}; tools/gen_omen_geo.py writes them all). The entity picks and
+ * triggers the animations; on top of them this turns its head where it looks, brings the cannon arms up on its target
+ * while it fires, and rolls it with a heavy stride. Dying it goes down as it stands, not tipped over. The model stands
+ * 4.5 blocks, its entity's own height.
  */
-public final class OmenRenderer extends MobRenderer<FutureOmen, OmenRenderer.State, OmenRenderer.Model> {
-	private final Identifier texture;
+public final class OmenRenderer extends GeoEntityRenderer<FutureOmen, LivingEntityRenderState> {
+	/** The cannon arms' angles held up on a target (the old renderer's, radians), and their tremor. */
+	static final float AIM_LEFT = -1.35F, AIM_RIGHT = -1.45F, AIM_TREMOR = 0.02F;
+	/** How much of the head's yaw the cannon arms follow, and how far the aim follows its pitch (degrees). */
+	static final float CANNON_YAW = 0.5F, AIM_PITCH = 25.0F;
+	/** How far the head turns (degrees): side to side, up and down. */
+	static final float LOOK_YAW = 50.0F, LOOK_PITCH = 25.0F;
+	/** The whole mech's roll in a heavy stride (degrees). */
+	static final float WALK_ROLL = 1.8F;
 
-	public static final class State extends LivingEntityRenderState {
-		boolean aiming;
-		float attackTicks;
-	}
+	static final DataTicket<Boolean> AIMING = DataTicket.create("jaymospowers_omen_aiming", Boolean.class);
+	static final DataTicket<Boolean> SMASHING = DataTicket.create("jaymospowers_omen_smashing", Boolean.class);
 
 	public static OmenRenderer red(EntityRendererProvider.Context context) {
 		return new OmenRenderer(context, "omen_red");
@@ -35,92 +45,54 @@ public final class OmenRenderer extends MobRenderer<FutureOmen, OmenRenderer.Sta
 	}
 
 	private OmenRenderer(EntityRendererProvider.Context context, String name) {
-		super(context, new Model(BbModel.load(JaymosPowers.MOD_ID, name)), 1.4F);
-		this.texture = JaymosPowers.id("textures/entity/bb/" + name + ".png");
+		super(context, new DefaultedEntityGeoModel<FutureOmen>(JaymosPowers.id(name))
+			.withAltAnimations(JaymosPowers.id("omen"))
+			.withAltTexture(JaymosPowers.id("bb/" + name)));
+		this.shadowRadius = 1.4F;
 	}
 
 	@Override
-	public State createRenderState() {
-		return new State();
-	}
-
-	@Override
-	public void extractRenderState(FutureOmen omen, State state, float partialTicks) {
-		super.extractRenderState(omen, state, partialTicks);
-		state.aiming = omen.aiming();
-		state.attackTicks = omen.getAttackAnimationTick() > 0 ? omen.getAttackAnimationTick() - partialTicks : 0.0F;
-	}
-
-	@Override
-	public Identifier getTextureLocation(State state) {
-		return this.texture;
+	public void addRenderData(FutureOmen omen, Void related, LivingEntityRenderState state, float partialTick) {
+		super.addRenderData(omen, related, state, partialTick);
+		state.addGeckolibData(AIMING, omen.aiming());
+		state.addGeckolibData(SMASHING, omen.getAttackAnimationTick() > 0);
 	}
 
 	/** It goes down as it stands, not tipped over. */
 	@Override
-	protected float getFlipDegrees() {
+	protected float getDeathMaxRotation(GeoRenderState state) {
 		return 0.0F;
 	}
 
 	@Override
-	protected void setupRotations(State state, PoseStack poseStack, float bodyRot, float entityScale) {
-		super.setupRotations(state, poseStack, bodyRot, entityScale);
-		if (state.walkAnimationSpeed >= 0.01F) {
-			// a heavy, swaying stride
+	protected void applyRotations(RenderPassInfo<LivingEntityRenderState> info, PoseStack poseStack, float bodyRot) {
+		super.applyRotations(info, poseStack, bodyRot);
+		LivingEntityRenderState state = info.renderState();
+		if (state.walkAnimationSpeed >= 0.01F && state.deathTime <= 0.0F) {
 			float wave = (Math.abs((state.walkAnimationPos + 6.0F) % 13.0F - 6.5F) - 3.25F) / 3.25F;
-			poseStack.rotateDegrees(com.mojang.math.Axis.ZP, 1.8F * wave);
+			poseStack.rotateDegrees(Axis.ZP, WALK_ROLL * wave);
 		}
 	}
 
-	static final class Model extends EntityModel<State> {
-		private final BbModel bb;
-
-		Model(BbModel bb) {
-			super(bb.root);
-			this.bb = bb;
+	@Override
+	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
+		super.adjustModelBonesForRender(info, snapshots);
+		LivingEntityRenderState state = info.renderState();
+		if (state.deathTime > 0.0F) {
+			return;
 		}
-
-		@Override
-		public void setupAnim(State state) {
-			super.setupAnim(state);
-			if (state.deathTime > 0.0F) {
-				// the model's own stance, eased in over the first moments of the fall
-				this.bb.play("pose_1", 0.0F, Math.min(1.0F, state.deathTime / 8.0F));
-				return;
-			}
-			float swing = state.walkAnimationPos * 0.5F;
-			float amount = Math.min(1.0F, state.walkAnimationSpeed * 2.2F);
-			float stride = Mth.cos(swing) * 0.75F * amount;
-			// legs: the thigh swings (negative is forward), the knee bends as it comes through
-			this.bb.part("left_thigh_joint").xRot += -stride;
-			this.bb.part("right_thigh_joint").xRot += stride;
-			this.bb.part("left_calf_joint").xRot += Math.max(0.0F, stride) * 0.9F;
-			this.bb.part("right_calf_joint").xRot += Math.max(0.0F, -stride) * 0.9F;
-			// arms: they counter-swing, or come up level on the target, or smash
-			float leftArm = stride * 0.5F;
-			float rightArm = -stride * 0.5F;
-			if (state.aiming) {
-				leftArm = -1.35F + Mth.sin(state.ageInTicks * 0.9F) * 0.02F;
-				rightArm = -1.45F + Mth.sin(state.ageInTicks * 0.9F + 1.0F) * 0.02F;
-			}
-			if (state.attackTicks > 0.0F) {
-				float p = 1.0F - state.attackTicks / 12.0F;
-				float slam = -2.5F * Mth.sin(p * Mth.PI);
-				leftArm = slam;
-				rightArm = slam;
-			}
-			this.bb.part("left_arm_joint").xRot += leftArm;
-			this.bb.part("right_arm_joint").xRot += rightArm;
-			// the head follows where it looks
-			ModelHead.look(this.bb.part("head"), state.yRot, state.xRot);
-		}
-	}
-
-	/** Turns a head to where the entity looks, as the vanilla models do. */
-	private static final class ModelHead {
-		static void look(net.minecraft.client.model.geom.ModelPart head, float yRot, float xRot) {
-			head.yRot += Mth.clamp(yRot, -50.0F, 50.0F) * Mth.DEG_TO_RAD;
-			head.xRot += Mth.clamp(xRot, -25.0F, 25.0F) * Mth.DEG_TO_RAD;
+		// GeckoLib turns x and y the other way round from a ModelPart: these are the old model's angles, negated
+		float yaw = Mth.clamp(state.yRot, -LOOK_YAW, LOOK_YAW) * Mth.DEG_TO_RAD;
+		float pitch = Mth.clamp(state.xRot, -LOOK_PITCH, LOOK_PITCH) * Mth.DEG_TO_RAD;
+		snapshots.ifPresent("head", b -> b.setRotY(b.getRotY() - yaw).setRotX(b.getRotX() - pitch));
+		if (info.getOrDefaultGeckolibData(AIMING, false) && !info.getOrDefaultGeckolibData(SMASHING, false)) {
+			// level on the target: held up, following its pitch and half its yaw, with the old tremor
+			float age = (float) state.ageInTicks;
+			float aimPitch = Mth.clamp(state.xRot, -AIM_PITCH, AIM_PITCH) * Mth.DEG_TO_RAD;
+			float left = AIM_LEFT + aimPitch + Mth.sin(age * 0.9F) * AIM_TREMOR;
+			float right = AIM_RIGHT + aimPitch + Mth.sin(age * 0.9F + 1.0F) * AIM_TREMOR;
+			snapshots.ifPresent("left_arm_joint", b -> b.setRotX(-left).setRotY(-yaw * CANNON_YAW).setRotZ(0.0F));
+			snapshots.ifPresent("right_arm_joint", b -> b.setRotX(-right).setRotY(-yaw * CANNON_YAW).setRotZ(0.0F));
 		}
 	}
 }

@@ -22,6 +22,12 @@ and dragon/notus/ and dragon/boreas/ hide_*.png, marks_*.png: Notus and Boreas
   (Boreas) size. Notus's hides are its texture and three re-shadings of it; Boreas's are it recoloured to ice; both
   species' glowing markings are its glow half (kingdoms/tools/gen_fire_dragons.py).
 
+geckolib/models/entity/zephyrus.geo.json, geckolib/animations/entity/zephyrus.animation.json,
+and dragon/zephyrus/hide_*.png, marks_*.png: Zephyrus
+  Our own model and art (no external source). kingdoms/art/zephyrus.bbmodel and kingdoms/tools/gen_zephyrus_geo.py:
+  the old ZephyrusDragonModel's body and poses as idle, walk, fly, hover, glide, landing, sitting, crashed and
+  swimming, plus a bite, a tail sweep and a death; hides and markings from kingdoms/tools/gen_zephyrus.py.
+
 geckolib/models/entity/aetherion.geo.json, geckolib/animations/entity/aetherion.animation.json,
 and dragon/aetherion/hide_*.png, marks_*.png: Aetherion
   Body-plan reference: the public-domain/CC0 GeckoLib Aetherion supplied by Andy (its author and URL weren't recorded).
@@ -52,11 +58,6 @@ kintsugi.png (bbmodels/kintsugi.json), and dragon/eurus/, dragon/aeolus/ and dra
 piglin_king.png (bbmodels/piglin_king.json): the Piglin King
   "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
   Changes: baked to our loader's format; drawn at 0.96 size; its ice-themed moves play as fire attacks.
-
-redstone_golem.png, redstone_golem_1.png (bbmodels/redstone_golem.json): the redstone golem
-  "Redstone Golem (Minecraft Dungeons)" by polyjo, https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons
-  Changes: baked to our loader's format; drawn at 0.94 size; its glow texture drawn bright in the dark; its pound and
-  eruption posed by our own code (it came with an idle and a walk). The design is Mojang's Minecraft Dungeons mob.
 
 scalebane_archer.png (bbmodels/scalebane_archer.json): the scalebane sellswords
   "Scalebane Archer" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/scalebane-archer
@@ -137,3 +138,9 @@ geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.an
   and original keyframes sampled from our old pose equations: Prometheus (hermes-modeller),
   kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
   or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.
+geckolib/models/entity/stegonaut.geo.json, geckolib/animations/entity/stegonaut.animation.json and dragon/stegonaut/
+  hide_*.png, marks_*.png: Stegonaut, the plated lesser dragon
+  Geometry, UVs and hides: kingdoms/tools/gen_stegonaut.py (as the former StegonautDragonModel). Editable rig and
+  keyframes sampled from that model's own pose equations: Prometheus, kingdoms/tools/gen_stegonaut_geo.py. Saint's
+  Dragons is a gameplay reference only; none of its All Rights Reserved art or animation data is used.
+  Sources and renders: kingdoms/art/stegonaut*.

@@ -339,6 +339,12 @@ public final class ZFighterDemonRealm {
 	 * biome stands too (as the first layer's), so long as it has a floor: the start's last resort before the overworld.
 	 */
 	static @Nullable BlockPos raiseHome(ServerLevel level, BlockPos near, int cells, boolean anyGround) {
+		return raiseHome(level, near, cells, anyGround, (l, at) -> true);
+	}
+
+	/** The same, (Tiv, a life story's) passing over a village {@code free} says is someone else's start (and not raising one there). */
+	static @Nullable BlockPos raiseHome(ServerLevel level, BlockPos near, int cells, boolean anyGround,
+		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		int cx = Math.floorDiv(near.getX(), CELL), cz = Math.floorDiv(near.getZ(), CELL);
 		List<int[]> spots = new ArrayList<>();
 		for (int dx = -cells; dx <= cells; dx++) {
@@ -351,6 +357,9 @@ public final class ZFighterDemonRealm {
 		int offBiome = 0, noFloor = 0;
 		for (int[] spot : spots) {
 			int x = spot[0], z = spot[1];
+			if (!free.test(level, new BlockPos(x, 0, z))) {
+				continue;
+			}
 			for (BlockPos village : known) {
 				if (village.getX() == x && village.getZ() == z && village.getY() != 0) {
 					return village;

@@ -42,7 +42,7 @@ public final class PodWrecks {
 	static final int PLAIN_SCRAP = 6;
 	/** The tag a wreck's pod carries, with its deck's number after it. */
 	static final String TAG_PREFIX = "jaymospowers.wreck_deck.";
-	/** The most wreck decks there are to remember (the Maw builds {@code ZFighterSpace.MAW_WRECKS}). */
+	/** The most wreck decks there are to remember (the Maw builds {@code MawWorld.WRECKS}). */
 	static final int MAX_DECKS = 30;
 
 	/** What a player has salvaged: the sets they hold and the wrecks they have been through (bit masks). */

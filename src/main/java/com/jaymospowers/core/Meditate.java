@@ -55,6 +55,9 @@ import org.jspecify.annotations.Nullable;
  * mastery comes as it always did); without it, it's only a rest. The Meditate key (I) is the shadowboxers' now (a Z
  * Fighter or a Gravity user, still opened by the Meditation perk); anyone else pressing it is told how to sit.
  *
+ * <p>Tiv: "wearing them should turn your meditate into shadowboxing". Anyone in Training Weights (either pair) shadowboxes
+ * on the key too, whatever their power, and every second of it builds Might ({@link Training#weightsMight}).
+ *
  * <p>(0.19.67) <b>Seats and the Sit key</b> ({@link Sitting}): right-click a stair, a bottom slab or a block in
  * {@code #jaymospowers:seats} with an empty hand, or press the Sit key, and you sit at once (on the seat you look at,
  * else on the ground). Pressing it again while sat changes how you sit ({@link #POSES} of each); pressing Sneak gets you
@@ -285,6 +288,10 @@ public final class Meditate {
 			// his own field doesn't weigh on him; someone else's does
 			return com.jaymospowers.power.gravity.GravityTrainingField.inField(player) ? SHADOWBOXING_HEAVY : SHADOWBOXING;
 		}
+		if (com.jaymospowers.power.zfighter.ZFighterItems.wearsWeights(player)) {
+			// training weights make anyone a shadowboxer
+			return com.jaymospowers.power.zfighter.ZFighterTraining.heavyGravity(player) ? SHADOWBOXING_HEAVY : SHADOWBOXING;
+		}
 		return MEDITATING;
 	}
 
@@ -374,6 +381,10 @@ public final class Meditate {
 			if (time < SETTLE) {
 				continue;
 			}
+			if (!sat && (time - SETTLE) % 20 == 19 && com.jaymospowers.power.zfighter.ZFighterItems.wearsWeights(player)) {
+				// a second of shadowboxing in training weights: Might, for everyone
+				Training.weightsMight(player);
+			}
 			int rank = rank(player);
 			int perPoint = TICKS_PER_POINT[Math.min(TICKS_PER_POINT.length - 1, rank)];
 			// a Gravity user's shadowboxing only pays beside a partner (another shadowboxer); a plain sit only with the perk
@@ -440,7 +451,7 @@ public final class Meditate {
 		return false;
 	}
 
-	/** Whether this player is shadowboxing (settled in): a Z Fighter or a Gravity user. */
+	/** Whether this player is shadowboxing (settled in): a Z Fighter, a Gravity user, or anyone in Training Weights. */
 	public static boolean shadowboxing(Player player) {
 		State state = of(player);
 		return state != null && state.kind() != MEDITATING && ticks(player) >= SETTLE;

@@ -120,6 +120,18 @@ public final class Training {
 	static final double GI_SLOW = -0.1, GI_JUMP = -0.08;
 	public static final float GI_RATE = 1.5F;
 
+	// ---- Training Weights: Might for everyone (Jaymo's Kingdoms' attribute) ----
+	/**
+	 * Might a Z Fighter or a Gravity user builds in an hour of shadowboxing in the light Training Weights. The heavy pair and
+	 * a Weighted Gi on top raise it as they raise a Z Fighter's training ({@code ZFighterItems.weightRate}).
+	 */
+	public static final double WEIGHTS_MIGHT_PER_HOUR = 10.0;
+	/**
+	 * Anyone else gets this share of it, always (Tiv: "non gravity or z fighters are REALLY slow and bad at it"): about one
+	 * point an hour in the light pair, a hundred-odd hours to the top.
+	 */
+	public static final double OUTSIDER_MIGHT = 0.1;
+
 	public static final ResourceKey<EquipmentAsset> GI_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("weighted_gi"));
 	public static Item WEIGHTED_GI, TRAINING_HOURGLASS, TUNING_FORK;
 
@@ -281,6 +293,19 @@ public final class Training {
 	public static boolean weighted(Player player) {
 		return player.getItemBySlot(EquipmentSlot.CHEST).is(WEIGHTED_GI)
 			|| player.getItemBySlot(EquipmentSlot.FEET).is(com.jaymospowers.power.zfighter.ZFighterItems.HEAVY_TRAINING_WEIGHTS);
+	}
+
+	/**
+	 * A second of shadowboxing in Training Weights ({@link Meditate}): Might toward Jaymo's Kingdoms' attribute, at
+	 * {@link #WEIGHTS_MIGHT_PER_HOUR} for a Z Fighter or a Gravity user, {@link #OUTSIDER_MIGHT} of that for anyone else.
+	 * Kingdoms keeps the fraction, so every session adds up. Nothing without Kingdoms.
+	 */
+	static void weightsMight(ServerPlayer player) {
+		boolean theirs = Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)
+			|| Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE);
+		double perSecond = WEIGHTS_MIGHT_PER_HOUR / 3600.0 * com.jaymospowers.power.zfighter.ZFighterItems.weightRate(player)
+			/ com.jaymospowers.power.zfighter.ZFighterItems.LIGHT_RATE;
+		com.jaymospowers.compat.KingdomsCompat.trainMight(player, theirs ? perSecond : perSecond * OUTSIDER_MIGHT);
 	}
 
 	/** How much faster a Z Fighter trains for the Gi on his chest (1 without). */

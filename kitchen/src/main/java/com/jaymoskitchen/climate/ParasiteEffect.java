@@ -7,18 +7,20 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 
 import java.util.Random;
 
 /**
  * The parasite from dirty water: instead of a straight potion hit, it ticks damage at random - slow,
  * survivable, a reason to boil water rather than a death sentence. It lasts two in-game days and deals a point of
- * damage on random ticks (roughly once every 15 seconds). A mug of hot chocolate clears it ({@link Thirst#consumed}).
+ * damage on random ticks (roughly once every 15 seconds). A drink in {@link #CURES} clears it ({@link Thirst#consumed}).
  */
 public final class ParasiteEffect extends MobEffect {
 	/** How long the parasite lasts (ticks): two in-game days, so curing it is worth the walk back to a fire. */
@@ -32,6 +34,10 @@ public final class ParasiteEffect extends MobEffect {
 
 	/** The damage type the parasite's damage is recorded as: data/jaymoskitchen/damage_type/parasite.json. */
 	static final ResourceKey<DamageType> PARASITE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKitchen.id("parasite"));
+
+	/** Drinks that wash it out: hot chocolate, and Jaymo's Powers' willow bark tea and chamomile tea when it's loaded
+	 * (data/jaymoskitchen/tags/item/cures_parasite.json). */
+	public static final TagKey<Item> CURES = TagKey.create(Registries.ITEM, JaymosKitchen.id("cures_parasite"));
 
 	public static Holder<MobEffect> PARASITE;
 
