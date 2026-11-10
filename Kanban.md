@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 22:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 22:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
 
 
 ## Being built
