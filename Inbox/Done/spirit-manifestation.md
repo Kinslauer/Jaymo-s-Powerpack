@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: hermes (Andy, Discord, 2026-11-08)
 asked: 2026-11-08
@@ -38,3 +38,4 @@ In the vault, `Assets/`: `spirit-faint-look.png` (the translucent, wrongly-lit w
 - **Art:** the warrior's body comes from Prometheus once the shape is agreed; ask for it against the same "faint aura" material the arms already use.
 - 2026-11-09 16:35 2026-11-09, Andy wants all models without animations animated ('I want tasks set for all the models with no animations'). The spirit figures (tools/blockbench/spirit-figures/*.bbmodel, SpiritFigure.java, posed in code) are among them: whoever builds this task should key the figures' moves (idle, speaking gestures, manifesting and fading) as Blockbench animations, by the method in docs/AI-HANDBOOK.md, or hand the art to Prometheus. No separate task, so the two don't collide.
 - 2026-11-09 21:53 Built by the 3D Modeler Agent cloud session (sesn_018fnEZE2rsh2TNSTNycxXub); its sandbox couldn't push, so Task Hub pushed its branch from the saved bundle as PR #1209.
+- 2026-11-09 21:55 PR #1209 is merged into master; moved to Inbox/Done.
