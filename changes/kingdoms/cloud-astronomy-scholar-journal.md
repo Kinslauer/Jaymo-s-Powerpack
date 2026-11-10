@@ -1,4 +1,4 @@
-# Astronomy 4: the Astronomer's Journal, on the scholar side
+# The Astronomer's Journal: record readings, grow the Scholar pillar, study the sky
 
 - **The Astronomer's Journal** (crafted from a book and a spyglass): an open book of sepia ink on aged paper, with
   faint construction diagrams (the celestial sphere at latitude 45°, armillary rings, a quadrant) and margin notes in a
