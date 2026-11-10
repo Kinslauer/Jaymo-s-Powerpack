@@ -1,5 +1,5 @@
 ---
-status: running
+status: ready
 task: astronomy-sky
 branch: claude/astronomy-sky, claude/reincarnation-wipe-fixes
 with: 
@@ -35,3 +35,4 @@ built on invented APIs, and take over #1193 (night sky) after its third red roun
   (armillary's own task), worth a follow-up.
 
 ## Done
+Both green on GitHub. #1205: villagers really forget a reborn player (loaded now, unloaded on next load), wipe before MCA's creator. #1193: real night sky with server-side discovery and stars hidden behind far terrain. vault.py refuses red hand-ins (tested on #1193's old head: exit 4). Not tested in game.

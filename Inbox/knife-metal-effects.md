@@ -7,6 +7,7 @@ thread: 1569144710264791172
 claimed_by: hermes-b
 pr: 1204
 suggested_owns: [src/main/java/com/jaymospowers/tinkering/, kitchen/src/main/java/com/jaymoskitchen/delight/Chopping.java]
+writer: hermes-writer
 ---
 
 # Knives carry their metal's effect
@@ -25,3 +26,4 @@ Andy ticked it. Our knives already cut straw and board items; the per-metal effe
 - Same rule as modifiers: the effect belongs on the tool's metal, so a repaired or recast blade keeps it.
 - Keep the chances low enough that a knife is a knife, not a wand.
 - 2026-11-08 22:56 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 20:11 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
