@@ -1,48 +1,90 @@
 package com.jaymoskingdoms.client.astronomy;
 
-import com.jaymoskingdoms.JaymosKingdoms;
-import com.jaymoskingdoms.astronomy.DiscoveryAttachment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import com.jaymoskingdoms.astronomy.StarDiscovery;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import java.util.BitSet;
+import org.jspecify.annotations.Nullable;
 
-/** Which stars a player has discovered, stored on the server and synced to the client.
- * A star is discovered by keeping it in view at night for LOOK_TICKS ticks;
- * constellation figures connect once all their stars are discovered.
- * Server side: the discovery state lives as a player attachment, synced to every client.
- * Client side: only reports the look; the server owns the authoritative state.
+/**
+ * The client's view of the stars this player has discovered. The list itself is the server's
+ * ({@link StarDiscovery#DISCOVERED}, synced to this player); here the client only counts how long the player has kept
+ * each star in view, and after {@link #LOOK_TICKS} ticks reports it ({@link StarDiscovery.Looked}). Constellation figures
+ * connect once all their stars are discovered.
  */
 public final class Discovery {
+	/** Ticks of steady looking at a star before it is reported (about 4 seconds). */
+	static final int LOOK_TICKS = 80;
 
-    private static final BitSet EMPTY = BitSet.valueOf(new long[0])[0];
+	private static final Discovery INSTANCE = new Discovery();
 
-    private Discovery() {
-    }
+	/** Star HIP to ticks the player has looked at it (this session). */
+	private final Map<Integer, Integer> looking = new HashMap<>();
+	/** Reported and not yet confirmed by the server, so a star isn't reported every tick while the sync is on its way. */
+	private final Set<Integer> reported = new HashSet<>();
+	private @Nullable List<Integer> seenList;
+	private Set<Integer> stars = Set.of();
 
-    public static BitSet getDiscovered() {
-        // Discovery state lives on the server as a player attachment, synced to clients.
-        // The client only reports looks; the server owns the authoritative state.
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
-            return EMPTY;
-        }
-        return DiscoveryAttachment.getDiscovered(player);
-        }
+	private Discovery() {
+	}
 
-    public static void reportLook(int hip) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
-            return;
-        }
-        if (!(player.level() instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        ServerPlayer serverPlayer = serverLevel.getPlayerList().getPlayer(player.getUUID());
-        if (serverPlayer == null) {
-            return;
-        }
-        ServerPlayNetworking.send(serverPlayer, new DiscoveryC2SPacket(hip));
-    }
+	/** The discovery view for the player in the game; null with no player. */
+	static @Nullable Discovery getOrCreate(Minecraft minecraft) {
+		return minecraft.player == null ? null : INSTANCE.refresh(minecraft.player);
+	}
+
+	/** Re-reads the synced list when the server has sent a new one. */
+	private Discovery refresh(LocalPlayer player) {
+		List<Integer> list = player.getAttachedOrElse(StarDiscovery.DISCOVERED, List.of());
+		if (list != this.seenList) {
+			this.seenList = list;
+			this.stars = Set.copyOf(list);
+			this.reported.removeAll(this.stars);
+		}
+		return this;
+	}
+
+	boolean isDiscovered(int hip) {
+		return this.stars.contains(hip);
+	}
+
+	/**
+	 * Call once per tick while the player keeps {@code hip} in view at night. Reports it to the server once it has been
+	 * watched for {@link #LOOK_TICKS} ticks; returns true that tick.
+	 */
+	boolean noteLook(int hip) {
+		if (this.stars.contains(hip) || this.reported.contains(hip)) {
+			return false;
+		}
+		int ticks = this.looking.merge(hip, 1, Integer::sum);
+		if (ticks < LOOK_TICKS) {
+			return false;
+		}
+		this.looking.remove(hip);
+		this.reported.add(hip);
+		ClientPlayNetworking.send(new StarDiscovery.Looked(hip));
+		return true;
+	}
+
+	/**
+	 * The player is no longer looking at {@code hip}: its count starts again, and a report the server turned down
+	 * (under a roof, out of turns) can be made again next time.
+	 */
+	void stopLook(int hip) {
+		this.looking.remove(hip);
+		this.reported.remove(hip);
+	}
+
+	/** Leaving a world: nothing carries over to the next one (the next server sends its own list). */
+	static void clear() {
+		INSTANCE.looking.clear();
+		INSTANCE.reported.clear();
+		INSTANCE.seenList = null;
+		INSTANCE.stars = Set.of();
+	}
 }
