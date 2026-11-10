@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,16 +18,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · 🍇 Bacchus · claimed
-- [ ] [[Agents/astronomy-sun-moon|astronomy-sun-moon]] · 💻 Odysseus · running
-- [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
-- [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
-- [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
-- [ ] [[Agents/knife-metal-effects|knife-metal-effects]] · 💻 Odysseus · running
-- [ ] [[Agents/omen-geckolib|omen-geckolib]] · 💻 Odysseus · running
-- [ ] [[Agents/redstone-golem-geckolib|redstone-golem-geckolib]] · 💻 Odysseus · running
-- [ ] [[Agents/training-weights-might|training-weights-might]] · 💻 Odysseus · running
-- [ ] [[Agents/unique-starts|unique-starts]] · 💻 Odysseus · running
-- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
 ## Text pass
