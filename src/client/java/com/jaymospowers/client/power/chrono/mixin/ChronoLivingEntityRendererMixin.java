@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Creatures reel from Time Flow blows (see ChronoReelPose): the reel is read, and the body jolted. */
+/**
+ * Creatures reel from Time Flow blows (see ChronoReelPose): the reel is read, and the body jolted. The future's dead get
+ * their mangled tails ({@link com.jaymospowers.client.power.chrono.FutureDeadLooks}).
+ */
 @Mixin(LivingEntityRenderer.class)
 abstract class ChronoLivingEntityRendererMixin {
 	@Inject(method = "setupRotations", at = @At("TAIL"))
@@ -25,5 +28,6 @@ abstract class ChronoLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$chronoReel(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		ChronoReelPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.chrono.FutureDeadLooks.extractTail(entity, state);
 	}
 }
