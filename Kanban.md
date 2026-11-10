@@ -4,18 +4,18 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 14:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 15:01). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · claimed
 
 
 ## In review
