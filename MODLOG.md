@@ -2098,3 +2098,8 @@ Tiv: "Every player should have their own start, it should search for another if 
 - Built; not played. Not tested: eating garlic with Kitchen's stomach, the parasite messages, how the ape's step feels
   on a hillside and in a village, a tall step on the server (the attribute is synced, so client and server should
   agree).
+
+## 0.21.100 (2026-11-10): Loose sticks: right click picks one up even with sticks in hand (#1249)
+
+- **Loose sticks**: a right click on a pile now picks up a stick whatever you're holding. Before, it did nothing while you held sticks, which after the first pickup was most of the time. A stick can't be put back on a pile (it isn't a placeable block).
+- Built; not played.
