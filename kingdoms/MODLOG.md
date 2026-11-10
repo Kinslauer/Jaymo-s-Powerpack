@@ -10973,3 +10973,8 @@ comment on this" (`Stench`, reading Powers' smell).
 
 - **Free view while the night runs by (`NightCam`, `CameraNightMixin`):** once everyone needed is fast asleep and the night starts running by, the camera leaves the pillow and drifts up and out over the bed (about 3.5 s), then circles it slowly so you watch the village hurry about and the sky turn until sunrise. You see yourself asleep in bed. Drag the mouse to swing it round and up or down, scroll to bring it nearer (6 blocks) or further (48 blocks); it climbs clear of walls and hillsides. Leaving bed, or the morning, puts the view straight back in your eyes. The pull-out and circling run on real time, so they stay smooth while the world's ticks are sped up. Tuning at the top of `NightCam`.
 - Server side checked on a Kingdoms dev server with a test sleeper: the night ran 6x at 100 ticks a second and woke them at dawn in about 17 s. The camera compiles but wasn't seen in game (no GPU in the cloud).
+
+## 0.7.712 (2026-11-10): Aether Giants: shake and dust scale with size (#1260)
+
+- An Aether Giant's footfalls, slams and stamps shake the screen harder and farther, and kick up bigger dust clouds, the bigger the giant is (`AetherGiant.getScaleFactor`, its height against a player's). Stamps now shake the screen too.
+- Not tested in game.

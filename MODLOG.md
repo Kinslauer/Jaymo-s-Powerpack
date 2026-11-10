@@ -2184,3 +2184,9 @@ closed: with Kingdoms installed, a tier it can't read counts as not Dread (befor
 - `logs/latest.log` now says whether the cleanup is on (and the Aether band's heights) once per server start, and names any
   fall it finds but can't stop, with the reason ("no source found in the Aether above it", too big, or a heavenfall kept).
 Built, not played.
+
+## 0.21.109 (2026-11-10): Giants: sprinting into a tree throws it, ape stomp shake scales with size (#1260)
+
+- **Sprint hits throw trees**: a giant (Great Ape or other scaled-up player or mob) sprinting into a tree tears it up and throws it ahead. With Jaymo's Kingdoms the whole tree is thrown as a falling tree (`FallingTree.take`/`hurl`); without it the trunk breaks and its logs fly forward. Same build rules as walking into trees (players only where they may build, mobs only with mob griefing). `GiantTrample.sprintHit`, tuning in `SPRINT_*` constants.
+- **Great Ape stomp shake** scales with the ape's size (`ZFighterLineage`).
+- Not tested in game.
