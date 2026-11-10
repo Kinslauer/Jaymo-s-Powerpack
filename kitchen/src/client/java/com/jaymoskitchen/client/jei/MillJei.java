@@ -111,6 +111,7 @@ public final class MillJei implements IModPlugin {
 		// (Hardrock picks) food that doesn't keep: rot, salting, smoking, cellars
 		registration.addIngredientInfo(com.jaymoskitchen.fresh.Freshness.SPOILED_FOOD, note("spoiled_food"));
 		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.SALT, note("spoiled_food"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Cheese.CHEESE_WHEEL, note("cheese_wheel"));
 	}
 
 	private static Component title(String id) {

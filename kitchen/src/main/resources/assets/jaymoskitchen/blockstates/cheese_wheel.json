@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0,cut=0": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_0"
+    },
+    "age=0,cut=1": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_1"
+    },
+    "age=0,cut=2": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_2"
+    },
+    "age=0,cut=3": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_3"
+    },
+    "age=1,cut=0": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_0"
+    },
+    "age=1,cut=1": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_1"
+    },
+    "age=1,cut=2": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_2"
+    },
+    "age=1,cut=3": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_3"
+    },
+    "age=2,cut=0": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_0"
+    },
+    "age=2,cut=1": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_1"
+    },
+    "age=2,cut=2": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_2"
+    },
+    "age=2,cut=3": {
+      "model": "jaymoskitchen:block/cheese_wheel_young_3"
+    },
+    "age=3,cut=0": {
+      "model": "jaymoskitchen:block/cheese_wheel_aged_0"
+    },
+    "age=3,cut=1": {
+      "model": "jaymoskitchen:block/cheese_wheel_aged_1"
+    },
+    "age=3,cut=2": {
+      "model": "jaymoskitchen:block/cheese_wheel_aged_2"
+    },
+    "age=3,cut=3": {
+      "model": "jaymoskitchen:block/cheese_wheel_aged_3"
+    }
+  }
+}

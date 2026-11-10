@@ -225,7 +225,7 @@ public final class Freshness {
 	}
 
 	/** Cool and dark enough to keep food: dark and out of the sky, and deep down or beside ice or an icebox. */
-	static boolean cellar(ServerLevel level, BlockPos pos) {
+	public static boolean cellar(ServerLevel level, BlockPos pos) {
 		if (level.canSeeSky(pos.above()) || level.getBrightness(LightLayer.BLOCK, pos.above()) >= CELLAR_DARK) {
 			return false;
 		}

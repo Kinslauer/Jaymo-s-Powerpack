@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:milk_bucket",
+    "minecraft:milk_bucket",
+    "minecraft:milk_bucket",
+    "jaymoskitchen:salt"
+  ],
+  "result": {
+    "id": "jaymoskitchen:cheese_wheel",
+    "count": 1
+  }
+}

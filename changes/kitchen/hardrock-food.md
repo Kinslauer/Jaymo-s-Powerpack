@@ -14,5 +14,13 @@ Andy's TFC Hardrock picks (ideas after TerraFirmaCraft, our own code and art, `t
   ingredients do). Four or more groups in your stomach's slots at once add two hearts, three add one, and two or more
   meals of one group alone take a heart off. Five pips beside the stomach slots light up for the groups you've eaten, and
   a food's tooltip names its groups. This adds on top of Survivalist health and every other bonus.
-- JEI info pages on Spoiled Food and salt.
+- **Cheese** (`fresh/Cheese`): three buckets of milk and salt make a Cheese Wheel. Set down in a cold cellar it ages over
+  about three days (young to aged, it darkens). Use it with an empty hand for a slice, four to a wheel: Cheese (3 food),
+  or Aged Cheese (6 food, never goes off) once it's aged. An uncut wheel picks back up young; a cut one breaks.
+- **Tired fields** (`farm/TiredSoil`): farmland keeps three nutrients, for grain, roots (carrots, potatoes, beetroot) and
+  everything else. Each ripe harvest wears that one and lets the other two recover a step, so rotating crops pays. After 3
+  harvests of one kind more than the soil has recovered, that kind grows at half speed, after 6 at a quarter. Fertilizer
+  (bone meal or manure) rests the soil at once.
+- The clay oven and greenhouse in the plan already exist (Kitchen's oven, Seasons' `#jaymoskitchen:greenhouse_roof`).
+- JEI info pages on Spoiled Food, salt and the cheese wheel.
 - Compile-checked; not played.

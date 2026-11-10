@@ -1031,5 +1031,9 @@
 	"food_group.jaymoskitchen.fruit": "Fruit",
 	"food_group.jaymoskitchen.vegetable": "Vegetables",
 	"food_group.jaymoskitchen.protein": "Protein",
-	"food_group.jaymoskitchen.dairy": "Dairy"
+	"food_group.jaymoskitchen.dairy": "Dairy",
+	"block.jaymoskitchen.cheese_wheel": "Cheese Wheel",
+	"item.jaymoskitchen.cheese": "Cheese",
+	"item.jaymoskitchen.aged_cheese": "Aged Cheese",
+	"jei.jaymoskitchen.cheese_wheel": "Three buckets of milk and salt make a wheel. Set it down in a cold cellar (dark, out of the sky, and deep down or beside ice or an icebox) and it ages over about three days. Use it with an empty hand for a slice: young cheese, or aged cheese once it has aged, which fills far more and never goes off. Four slices to a wheel."
 }
