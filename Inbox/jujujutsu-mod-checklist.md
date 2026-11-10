@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: quill
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -23,3 +23,4 @@ A checklist for the Jujutsu mod — similar in scope to the mod-checklists task 
 - Reference any existing Jujutsu mod files under `docs/codemap/`, `docs/ai-bundle/memory/`, or the mod's own repo for context.
 - Write each checklist item as a concise, player-facing description of what the mod adds/changed, with a "not tested in game" line at the end.
 - Say back the task name and that Quill is starting it, and add it to the todo list as `in_progress`.
+- 2026-11-10 16:28 Duplicate of jujutsu-mod-checklist (the misspelled copy, Andy 2026-11-10). Closed.

@@ -4,43 +4,41 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 11:31). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
-- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
+- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 
 
 ## Being built
 
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · claimed
 
 
 ## In review
 
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
-- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · blocked
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
+- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
+- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/unique-starts|unique-starts]]
-- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
+- [x] [[Inbox/Done/structure-buttons-to-debris|structure-buttons-to-debris]]
+- [x] [[Inbox/Done/redstone-golem-geckolib|redstone-golem-geckolib]]
 
 
 %% kanban:settings
