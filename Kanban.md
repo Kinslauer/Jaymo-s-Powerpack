@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:28). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:29). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☁️ Cloud · #1244 · open
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · open
 
 
 ## Being built
@@ -25,6 +24,7 @@ kanban-plugin: board
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
 
 
 ## Needs Andy
