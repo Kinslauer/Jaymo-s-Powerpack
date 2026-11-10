@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · open
-- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
@@ -30,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · 🔥 Prometheus · open
+- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
