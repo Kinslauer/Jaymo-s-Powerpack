@@ -25,7 +25,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · blocked
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
 
 
