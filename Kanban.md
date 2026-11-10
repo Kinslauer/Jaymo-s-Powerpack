@@ -23,13 +23,13 @@ kanban-plugin: board
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
 
 
 ## Being built
