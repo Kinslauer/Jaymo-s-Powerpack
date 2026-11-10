@@ -476,7 +476,3 @@ All Otectus unless noted; none have a Fabric 26.3 build, so ideas only. Checklis
 - Raiiiden (Zarra Studios). All rights reserved ("code requestable"): ship unchanged, never copy. Fabric 26.3 file 9305152 (0.1.5).
 - Needs Zarith (1720181, Fabric 26.3 file 9284445, Jolt via jolt-jni natives). Jolt rigid-body trees: tip, roll, snap, float, walkable.
 - Fells on PlayerBlockBreakEvents.BEFORE (default phase); public FellingHandler.fellFrom(ServerLevel, BlockPos, Player, Vec3). Kingdoms FelledCompat calls it (PR #1071).
-
-- MedalTVMinecraft20261109221931865, ...222132195, ...223153885, ...223521344 (Andy, 2026-11-09 10:19-10:35 PM, 30 s each; Inbox `apes-xeno-voices-parasites-blood`):
-  1-2: a player's Great Ape crawling through a dark-oak forest and pinned on a village hillside, the voice HUD saying "Nobody in range hears you". 3: blood spatters replaying on a temple floor while the viewer is on 2 hearts. 4: Raivo with Kitchen's Parasite.
-  Found: the ape had no step height (0.6 at 30 blocks tall) and voice chat hears from his camera ~40 blocks up; the replaying blood was Kingdoms' zombie scent re-sending drops every second. Fixed in PR #1241 (garlic for parasites, ape step and hearing, titan voices, still blood).
