@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -12,6 +12,7 @@ suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/beasts/SkulkGolem.java
   - BeastsClient.java (its line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
 ---
 # Skulk golem: full animations, on GeckoLib (modelling bot)
 
