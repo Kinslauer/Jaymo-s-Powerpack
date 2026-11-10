@@ -46,7 +46,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🪶 Quill · #1204 · writing
 
 
 ## In review
