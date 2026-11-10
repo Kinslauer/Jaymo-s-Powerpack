@@ -45,12 +45,12 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
 
 
 ## In review
 
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
 
 
 ## Needs Andy
