@@ -1714,3 +1714,9 @@ The `tanning_water` item tag referenced `jaymoskitchen:waterskin`, but that item
 The tag now lists all three waterskin tiers plus `minecraft:water_bucket`, and `gen_hides.py` was updated to match.
 
 Not tested in game.
+
+## 0.5.100 (2026-11-10): fix the server crash when a rat finishes raiding food (#1211)
+
+- A rat that finished eating or stealing from a food store cleared its target, but its raid could tick once more before
+  the game noticed it was over, and that tick crashed the server ("Ticking entity", `Rat$RaidGoal.tick`). The raid now
+  waits out that tick instead. Built; not played.
