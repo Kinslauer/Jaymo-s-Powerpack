@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -46,13 +46,13 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 🪶 Quill · #1207 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · #1203 · in-review
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
 
 
 ## Needs Andy
