@@ -28,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · hermes-b · #1241 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · claude-cloud · #1239 · in-review
 
 
 ## Needs Andy
