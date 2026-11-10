@@ -133,3 +133,11 @@ geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.an
   and original keyframes sampled from our old pose equations: Prometheus (hermes-modeller),
   kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
   or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.
+
+Original project art (no third-party art or licence):
+geckolib/models/entity/varasuchus.geo.json, geckolib/animations/entity/varasuchus.animation.json and dragon/varasuchus/
+  hide_*.png, marks_*.png: Varasuchus, the crocodile dragon
+  Existing geometry, UVs and hides: kingdoms/tools/gen_varasuchus.py. Editable rig and keyframes sampled from the
+  former VarasuchusDragonModel's pose code: Prometheus, kingdoms/tools/gen_varasuchus_geo.py. Saint's Dragons is a
+  motion reference only; none of its All Rights Reserved art or animation data is used. Provenance and renders:
+  kingdoms/art/varasuchus*.
