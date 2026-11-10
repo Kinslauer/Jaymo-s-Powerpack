@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "jaymoskitchen:block/hearth_front",
+    "side": "jaymoskitchen:block/hearth_side",
+    "top": "jaymoskitchen:block/hearth_top",
+    "bottom": "jaymoskitchen:block/hearth_side",
+    "particle": "jaymoskitchen:block/hearth_side"
+  }
+}

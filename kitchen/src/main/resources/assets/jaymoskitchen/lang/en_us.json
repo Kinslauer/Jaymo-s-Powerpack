@@ -1005,5 +1005,19 @@
 	"item.jaymoskitchen.caged_rat": "Caged Rat",
 	"subtitles.jaymoskitchen.entity.rat.ambient": "Rat squeaks",
 	"subtitles.jaymoskitchen.entity.rat.hurt": "Rat hurts",
-	"subtitles.jaymoskitchen.entity.rat.death": "Rat dies"
-	}
+	"subtitles.jaymoskitchen.entity.rat.death": "Rat dies",
+	"block.jaymoskitchen.hearth": "Hearth",
+	"block.jaymoskitchen.icebox": "Icebox",
+	"item.jaymoskitchen.thermometer": "Thermometer",
+	"tooltip.jaymoskitchen.thermometer": "Hold it to see how warm the air is here",
+	"tooltip.jaymoskitchen.waterskin.hot": "Hot off the fire",
+	"tooltip.jaymoskitchen.waterskin.cold": "Chilled",
+	"tooltip.jaymoskitchen.lining.wool": "Lined with wool: keeps the cold out",
+	"tooltip.jaymoskitchen.lining.rabbit_hide": "Lined with rabbit hide: keeps the heat off",
+	"tooltip.jaymoskitchen.lining.leather": "Lined with leather: a little against cold and heat",
+	"jei.jaymoskitchen.hearth": "Feed it coal, charcoal, logs, planks or sticks. While it burns it warms the closed room around it: the air it can reach through open doors, but not out under the open sky. In a warmed room the cold can't push you past comfortable. A great hall needs more than one.",
+	"jei.jaymoskitchen.icebox": "Feed it ice, packed ice, blue ice, snow blocks or snowballs. While it holds cold it cools the closed room around it, the way a hearth warms one. In a cooled room the heat can't push you past comfortable.",
+	"jei.jaymoskitchen.thermometer": "Hold it in either hand and a brass-framed tube beside your body heat shows how warm or cold this place is, before what you wear. The land grows colder the further north you travel.",
+	"jei.jaymoskitchen.lining": "Sew a lining into armour or clothes: hold the piece in your main hand and wool, rabbit hide or leather in your other hand, then use the loom. Wool keeps the cold out, rabbit hide keeps the heat off, and leather does a little of both. A new lining replaces the old one.",
+	"jei.jaymoskitchen.waterskin_temp": "Use it on a lit campfire and its water comes off hot (and clean). Use it on snow or ice and its water comes away cold. For a few minutes after, a drink of it warms you or cools you for a while."
+}

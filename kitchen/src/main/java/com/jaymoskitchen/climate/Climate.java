@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -71,6 +72,7 @@ public final class Climate {
 		WATERSKIN_DRAGON = item("waterskin_dragon", p -> new WaterskinItem(WaterskinItem.Tier.DRAGON, p), new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		ParasiteEffect.register();
+		Warmth.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(CLEAN_WATER);
 			output.accept(WATERSKIN_LEATHER);
@@ -102,6 +104,13 @@ public final class Climate {
 				}
 				return InteractionResult.SUCCESS;
 			}
+			// (Hardrock picks) a waterskin pressed into snow or ice: its water comes away cold
+			if (chills(player.getMainHandItem()) && (level.getBlockState(pos).is(BlockTags.ICE) || level.getBlockState(pos).is(BlockTags.SNOW))) {
+				if (player instanceof ServerPlayer server) {
+					chill(server, pos);
+				}
+				return InteractionResult.SUCCESS;
+			}
 			// sneaking empty-handed at water over a block (a shallow pond): drink, rather than whatever the block does
 			if (player.isShiftKeyDown() && player.getMainHandItem().isEmpty()
 				&& (Thirst.lookingAtWater(player) || Thirst.inRainLookingUp(player)
@@ -121,15 +130,30 @@ public final class Climate {
 		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
 	}
 
-	/** A bottle of water, or a waterskin of dirty water: what a lit campfire boils clean. */
+	/** A waterskin with water in it. */
+	static boolean chills(ItemStack held) {
+		return (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) && WaterskinItem.water(held).sips() > 0;
+	}
+
+	/** Its water comes away cold, for a while. */
+	private static void chill(ServerPlayer player, BlockPos pos) {
+		ItemStack held = player.getMainHandItem();
+		WaterskinItem.Water water = WaterskinItem.water(held);
+		held.set(WATERSKIN_WATER, new WaterskinItem.Water(water.sips(), water.clean(), -1, player.level().getGameTime() + Warmth.SKIN_KEEPS));
+		player.level().playSound(null, pos, SoundEvents.POWDER_SNOW_STEP, SoundSource.BLOCKS, 0.8F, 1.2F);
+	}
+
+	/**
+	 * A bottle of water, or a waterskin with water in it: what a lit campfire boils clean. (Hardrock picks) a waterskin
+	 * comes off the fire hot as well, so clean water can go back on to warm up.
+	 */
 	static boolean boils(ItemStack held) {
 		if (held.is(Items.POTION)) {
 			PotionContents contents = held.get(DataComponents.POTION_CONTENTS);
 			return contents != null && contents.is(Potions.WATER);
 		}
 		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
-			WaterskinItem.Water water = WaterskinItem.water(held);
-			return water.sips() > 0 && !water.clean();
+			return WaterskinItem.water(held).sips() > 0;
 		}
 		return false;
 	}
@@ -138,7 +162,8 @@ public final class Climate {
 	private static void boil(ServerPlayer player, BlockPos pos) {
 		ItemStack held = player.getMainHandItem();
 		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
-			held.set(WATERSKIN_WATER, new WaterskinItem.Water(WaterskinItem.water(held).sips(), true));
+			held.set(WATERSKIN_WATER, new WaterskinItem.Water(WaterskinItem.water(held).sips(), true, 1,
+				player.level().getGameTime() + Warmth.SKIN_KEEPS));
 		} else {
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemUtils.createFilledResult(held, player, new ItemStack(CLEAN_WATER)));
 		}

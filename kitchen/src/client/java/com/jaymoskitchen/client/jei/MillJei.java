@@ -99,6 +99,15 @@ public final class MillJei implements IModPlugin {
 				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
 		}
 		registration.addRecipes(DRYING, drying);
+		// (Hardrock picks) warmth you build: how the hearth, icebox, thermometer, linings and warm or cold water work
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.HEARTH_BLOCK, note("hearth"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("thermometer"));
+		registration.addIngredientInfo(Items.LOOM, note("lining"));
+		for (Item skin : List.of(com.jaymoskitchen.climate.Climate.WATERSKIN_LEATHER, com.jaymoskitchen.climate.Climate.WATERSKIN_IRON,
+			com.jaymoskitchen.climate.Climate.WATERSKIN_DRAGON)) {
+			registration.addIngredientInfo(skin, note("waterskin_temp"));
+		}
 	}
 
 	private static Component title(String id) {
