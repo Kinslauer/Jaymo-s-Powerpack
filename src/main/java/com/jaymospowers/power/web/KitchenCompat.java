@@ -281,6 +281,34 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.spirits(stack);
 	}
 
+	/** Kitchen's parasite from foul water ({@code jaymoskitchen:parasite}), looked up by id. */
+	private static final net.minecraft.resources.Identifier PARASITE = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "parasite");
+
+	/**
+	 * Takes {@code ticks} off the parasite in {@code body} (Kitchen's, from foul water): the ticks it has left after (0:
+	 * driven out), or -1 if it has none (or there's no Kitchen). One with no end can't be shortened.
+	 */
+	public static int purgeParasite(net.minecraft.world.entity.LivingEntity body, int ticks) {
+		if (!LOADED) {
+			return -1;
+		}
+		var parasite = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(PARASITE).orElse(null);
+		net.minecraft.world.effect.MobEffectInstance had = parasite == null ? null : body.getEffect(parasite);
+		if (had == null) {
+			return -1;
+		}
+		if (had.isInfiniteDuration()) {
+			return Integer.MAX_VALUE;
+		}
+		int left = Math.max(0, had.getDuration() - ticks);
+		body.removeEffect(parasite);
+		if (left > 0) {
+			body.addEffect(new net.minecraft.world.effect.MobEffectInstance(parasite, left, had.getAmplifier(), had.isAmbient(), had.isVisible(),
+				had.showIcon()));
+		}
+		return left;
+	}
+
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
 		static java.util.@Nullable UUID owner(Entity entity) {

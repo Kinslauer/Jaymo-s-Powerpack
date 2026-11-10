@@ -2,5 +2,5 @@
   "message.jaymoskingdoms.stats.trained_might": "Your Might grows",
   "message.jaymoskingdoms.stats.trained_might.value": "(%s/%s)",
   "gui.jaymoskingdoms.stats.trained_might": "Trained in weights: %s (the next point %s%% there)",
-  "gui.jaymoskingdoms.story.hint.125": "Wear Training Weights and the Meditate key has you shadowboxing, whatever your power. It slowly builds Might, slower still unless you're a Z Fighter or a Gravity user, but every hour of it adds up."
+  "gui.jaymoskingdoms.story.hint.125": "Wear Training Weights and the Meditate key has you shadowboxing, whatever your power. It slowly builds Might (slower unless you're a Z Fighter or Gravity user), but every hour adds up."
 }

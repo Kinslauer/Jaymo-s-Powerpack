@@ -49,7 +49,8 @@ public final class Herbs {
 		COMFREY = herb("comfrey", COMFREY_BUSH);
 		YARROW = herb("yarrow", YARROW_BUSH);
 		PLANTAIN = herb("plantain", PLANTAIN_BUSH);
-		WILD_GARLIC = herb("wild_garlic", WILD_GARLIC_BUSH);
+		// eaten raw, it drives out a parasite (Herbal#garlicEaten); planted on soil, as the rest
+		WILD_GARLIC = MedicineItems.item("wild_garlic", p -> new BlockItem(WILD_GARLIC_BUSH, p.food(com.jaymospowers.core.wounds.Herbal.GARLIC_FOOD)));
 		CHAMOMILE = herb("chamomile", CHAMOMILE_BUSH);
 
 		// where each grows (the patch's own numbers are in its placed feature)

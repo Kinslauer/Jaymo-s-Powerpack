@@ -175,9 +175,11 @@ public final class Afflictions {
 		return cure(player, Kind.POISONED) | cure(player, Kind.WET_LUNGS) | cure(player, Kind.WITHERING);
 	}
 
-	/** {@code stack} (as it was before) was eaten or drunk by {@code player}: honey, milk, the Potion of Cleansing, water. */
+	/** {@code stack} (as it was before) was eaten or drunk by {@code player}: honey, milk, the Potion of Cleansing, water, raw garlic. */
 	public static void consumed(ServerPlayer player, ItemStack stack) {
-		if (stack.is(Items.HONEY_BOTTLE)) {
+		if (stack.is(com.jaymospowers.core.wounds.herbs.Herbs.WILD_GARLIC)) {
+			Herbal.garlicEaten(player);
+		} else if (stack.is(Items.HONEY_BOTTLE)) {
 			boolean any = cure(player, Kind.VENOM) | cure(player, Kind.POISONED) | cure(player, Kind.WITHERING);
 			if (!any) {
 				return;

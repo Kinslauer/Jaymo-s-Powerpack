@@ -113,6 +113,12 @@ public final class ZFighterLineage {
 	static final float APE_FOOT_DAMAGE = 8.0F;
 	/** His jump (added to vanilla's 0.42) and how much of his weight he sheds, so he leaps ~20 blocks and drifts down slow. */
 	static final double APE_JUMP = 0.58, APE_LIGHT = 0.85;
+	/**
+	 * Andy: "great apes get stuck". How high the Great Ape steps up without jumping, once full grown (blocks added to a
+	 * player's 0.6; grown in with him): at a player's step he stuck on every one-block rise, path edge and wall, and could
+	 * only hop. The wild ape's is the villager's ape's ({@code VillagerApe.STEP}), to its smaller size.
+	 */
+	static final double APE_STEP = 6.0, WILD_STEP = 5.0;
 	/** A drop this far (blocks) lands as a stomp. */
 	static final double APE_LANDING = 5.0;
 	/** How far across the ground his fists reach (blocks), measured out from his body rather than his eyes up high. */
@@ -534,6 +540,11 @@ public final class ZFighterLineage {
 		return APE_SCALE * t * t * (3.0F - 2.0F * t);
 	}
 
+	/** The step height (added to a player's) at this far grown: {@link #APE_STEP}, grown in and out with his size. */
+	static double apeStep(float size) {
+		return APE_STEP * apeScale(size) / APE_SCALE;
+	}
+
 	/** Grows him into the Great Ape (or shrinks him back) a little every tick, the ground shaking while he does. */
 	private static void grow(ServerPlayer player, ZFighterPower.Live live, ServerLevel level) {
 		boolean ape = ape(player);
@@ -808,6 +819,7 @@ public final class ZFighterLineage {
 	private static final Identifier WILD_GRAVITY_ID = JaymosPowers.id("zfighter_wild_ape_gravity");
 	private static final Identifier WILD_FALL_ID = JaymosPowers.id("zfighter_wild_ape_fall");
 	private static final Identifier WILD_REACH_ID = JaymosPowers.id("zfighter_wild_ape_reach");
+	private static final Identifier WILD_STEP_ID = JaymosPowers.id("zfighter_wild_ape_step");
 	private static final Identifier CRIPPLE_SPEED_ID = JaymosPowers.id("zfighter_ape_crippled_speed");
 	private static final Identifier CRIPPLE_JUMP_ID = JaymosPowers.id("zfighter_ape_crippled_jump");
 
@@ -821,6 +833,8 @@ public final class ZFighterLineage {
 		float t = Mth.clamp(live.apeSize, 0.0F, 1.0F);
 		double scale = wild ? WILD_SCALE * t * t * (3.0F - 2.0F * t) : 0.0;
 		ZFighterPower.set(player, Attributes.SCALE, WILD_SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		ZFighterPower.set(player, Attributes.STEP_HEIGHT, WILD_STEP_ID, wild ? WILD_STEP * t * t * (3.0F - 2.0F * t) : 0.0,
+			AttributeModifier.Operation.ADD_VALUE);
 		ZFighterPower.set(player, Attributes.ATTACK_DAMAGE, WILD_FIST_ID, ape ? APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ZFighterPower.set(player, Attributes.MAX_HEALTH, WILD_HEALTH_ID, ape ? APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, WILD_SPEED_ID, ape ? APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);

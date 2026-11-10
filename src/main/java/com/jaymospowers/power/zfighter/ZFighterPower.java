@@ -234,6 +234,7 @@ public final class ZFighterPower implements Power {
 	private static final Identifier APE_JUMP_ID = JaymosPowers.id("zfighter_ape_jump");
 	private static final Identifier APE_GRAVITY_ID = JaymosPowers.id("zfighter_ape_gravity");
 	private static final Identifier APE_FALL_ID = JaymosPowers.id("zfighter_ape_fall");
+	private static final Identifier APE_STEP_ID = JaymosPowers.id("zfighter_ape_step");
 
 	/** The owner's HUD state (ki, cooldowns, what he's doing). Not saved: a relog clears it. */
 	public static final AttachmentType<ZFighterState> STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_state"),
@@ -614,6 +615,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID);
 		remove(player, Attributes.GRAVITY, APE_GRAVITY_ID);
 		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID);
+		remove(player, Attributes.STEP_HEIGHT, APE_STEP_ID);
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
 		remove(player, Attributes.SCALE, ZFighterFusion.SCALE_ID);
@@ -1658,6 +1660,8 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID, ape ? ZFighterLineage.APE_JUMP : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.GRAVITY, APE_GRAVITY_ID, ape ? -ZFighterLineage.APE_LIGHT : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID, ape ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// he steps up as he grows (and still while he shrinks back), so a one-block rise no longer stops him
+		set(player, Attributes.STEP_HEIGHT, APE_STEP_ID, ZFighterLineage.apeStep(live.apeSize), AttributeModifier.Operation.ADD_VALUE);
 		ZFighterCorruption.attributes(player, live);
 		ZFighterBranchForms.attributes(player, live);
 		// fused: the partner's fists and health added, and a little more
