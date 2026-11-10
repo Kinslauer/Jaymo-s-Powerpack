@@ -1,5 +1,5 @@
 --- 
-status: claimed
+status: open
 for: quill
 from: cloud vault review of #1251 (2026-11-10)
 asked: 2026-11-10
@@ -20,3 +20,4 @@ Go over the film's player-visible text against `Lore.md` (see lore-read-the-cano
 Keep the lang keys. The film itself has no words on screen.
 
 ## Notes
+- 2026-11-10 17:25 someone's claim had no sign of work for 30 min: handed back as open.
