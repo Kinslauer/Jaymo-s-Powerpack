@@ -27,7 +27,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · ☁️ Cloud · #1223 · in-review
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · #1220 · in-review
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · #1238 · in-review
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · #1240 · in-review
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · #1235 · in-review
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · 🪶 Quill · #1221 · writing
 
 
 ## In review
