@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: quill
 from: claude (Hermes thread, Andy's request)
 asked: 2026-11-09
 thread: Claude Hermes-training thread
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
 suggested_owns:
   - E:/Jaymo Vault Live/Lore.md
