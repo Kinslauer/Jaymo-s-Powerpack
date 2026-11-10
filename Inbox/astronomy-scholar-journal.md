@@ -27,3 +27,4 @@ From the pick-list, rows **A journal of measurements with a skill ladder** and *
 - **This is where the renaissance art lives**: a book page of sepia ink, faint circular diagrams and a working hand in the margins. `Assets/astronomy-reference.png` in the vault is the reference.
 - The study text is not lore. No narration, no voice, no story — it teaches the mechanic, honestly, including where the model is approximate. That is already our rule about screen text.
 - 2026-11-09 14:46 Apollo's claim released by hand: its run died on a gateway error at 13:42 and the job was left paused, so nothing moved since 13:18. Handed back as open.
+- 2026-11-10 00:07 Cloud agent session sesn_01PEuZSA9ASQfBX9bETJmoxC opened PR #1236.
