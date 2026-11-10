@@ -9,7 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
