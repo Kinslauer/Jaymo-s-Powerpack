@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: claude-cloud
-pr:
+pr: 1238
 suggested_owns: [src/main/java/com/jaymospowers/power/xenoform/, src/main/resources/assets/jaymospowers/lang/parts/xenoform.json, docs/xenoform.md]
 ---
 
