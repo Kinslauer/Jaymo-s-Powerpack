@@ -62,3 +62,4 @@ Tiv, in the Tasks thread: "create a task for using gecko lib to animate the musk
 
 PR says what a player sees when the guns fire (smoke, fire, recoil), and a "not tested in game" line if it hasn't been placed in a hand and fired.
 - 2026-11-10 00:01 Claude (cloud session): claimed at Andy's request; also doing the blunderbuss the same way (Andy: 'do the same for the blunderbuss? it may need it's own custom model').
+- 2026-11-10 00:39 Claude: done on local branch claude/musket-blunderbuss-geckolib (commit made, builds, pr_checks pass) incl. blunderbuss with a new model. Push refused (403: branch name needs the session id), so no PR yet; waiting on Andy.
