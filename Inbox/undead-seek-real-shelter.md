@@ -12,6 +12,8 @@ text_pass: none
 
 # Undead seek real shelter from the sun
 
+Andy (follow-up): "https://www.curseforge.com/minecraft/mc-mods/realisticsunburn this is the mod, i thought we had added it"
+
 Andy: "because we made the sun more deadly to the undead, they should now seek shelter underground in caves or otherwise when the day comes, its no longer enough for them to hide under a tree's shade if the rays can reach them."
 
 ## What's wanted
@@ -22,7 +24,8 @@ Andy: "because we made the sun more deadly to the undead, they should now seek s
 
 ## Where to look
 
-- First find where the sun was made deadlier to the undead. The cloud check couldn't find it in master on 2026-11-10 (searched for sun/burn/daylight code; only `power/chrono/mixin/FutureSunMixin` and `WebHostZombieMixin` touch undead burning). It may be unmerged work or vanilla `Mob.isSunBurnTick` behaviour. If it isn't in master, say so in the PR and ask on the task before building on a guess.
+- **Build the deadlier sun first; it was never added.** Andy (2026-11-10) thought RealisticSunBurn (https://www.curseforge.com/minecraft/mc-mods/realisticsunburn, project 1485037) was in the pack, but it isn't, and it's All Rights Reserved, so remake the idea in our own code (no copying). What it does: instead of vanilla's straight-up sky check, cast a ray from the mob's head toward the Sun's real position. The mob burns if nothing opaque blocks it. Low morning/evening sun casts long shadows from walls, deep holes and canyons shade mobs, and glass, flowers and torches let the ray through. Leaves must let it through too (Andy: tree shade no longer counts). Hook `Mob.isSunBurnTick` (check 26.3); Kingdoms' `astronomy/SunMoon.direction/sun` already gives the Sun's direction, so use it when Kingdoms is loaded and fall back to the day-time angle otherwise. Keep FutureSunMixin and WebHostZombieMixin working.
+- Then the shelter search below uses the same ray test, so a spot counts as shelter only if the sun ray can't reach it now or for the next while (roof, cave, deep shadow).
 - Vanilla: `FleeSunGoal` (skeletons, strays) picks a random spot where `!level.canSeeSky(pos)`. Leaves block `canSeeSky`, which is why tree shade works today. Check both against the 26.3 sources.
 - The new shelter test should treat leaves (and other non-solid blocks like glass, fences, slabs with gaps) as letting rays through. Prefer a short upward scan for a solid, full-face block, or a cave test (dark, under stone).
 - Search a wider radius than vanilla's 10 blocks, path toward the nearest cave mouth or building, and dig down/stay put as a last resort only if Andy wants that (ask).
