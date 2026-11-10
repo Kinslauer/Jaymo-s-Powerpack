@@ -12,8 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
@@ -36,6 +34,8 @@ kanban-plugin: board
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -45,12 +45,12 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
 
 
 ## In review
 
+- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
 
 
 ## Needs Andy
