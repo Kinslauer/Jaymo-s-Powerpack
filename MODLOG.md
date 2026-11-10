@@ -1992,3 +1992,70 @@ Tiv: "F5 should only toggle between first and 3rd person, the front facing camer
 - The crosshair, hotbar and every other HUD piece stay on top of the darkness, so the Resonance ring, the Blindness power's echo rings and the power chips still show while blind. Hiding the HUD (F1) hides the darkness too, as it does vanilla's own screen overlays.
 - Tuning: `client/BlindedHud` (`WASH`, `RIM`, `REACH`, `FADE_IN_TICKS`).
 - Built; not played. How dark it looks in game, and how it sits with the pack's shaders (Iris, Complementary), hasn't been seen.
+
+## 0.21.93 (2026-11-10): V works again: the voice chat menu moves off the power keys (#1232)
+
+- **Echolocation (and every power's V) works again.** Simple Voice Chat opens its menu on V. That screen opened before the power key was read, so pressing V never reached your power: Resonance's Echolocation never fired (no outline, no ripple, no chime) and the voice chat menu popped up instead. The same went for every power's V, and for G (Voice Chat's group screen, when groups are on).
+- Once per install, as the pack already does for other clashing keys (`KeyConflicts`, now v8): the **voice chat menu moves to F7**, and its **group** (G) and **hide icons** (H) keys are unbound; both are buttons inside the voice chat menu. Only keys still on those defaults are moved; your own rebinds are kept.
+- Resonance's own code is unchanged: read against the 26.3 sources, the ping, its packet, the outline mixin (Sodium's culling lets outlined creatures through) and the heartbeat ring hold up. The ring still only shows while a creature is within 12 blocks.
+- Built; not played. Simple Voice Chat's defaults are from its README and public source, not checked in the 26.3 jar.
+
+## 0.21.94 (2026-11-10): The future's dead are Warrior-born: mangled tails, 32 skins, dried husks (#1234)
+
+Andy: "husks zombies and player zombies all with mangled tails in various conditions (12+ at least) and 30+ different
+skins".
+- **Tails**: every grown zombie, husk and stranger's zombie player in the future drags a Warrior-born tail, mangled one
+  of 16 ways: bent hard to one side, snapped and hanging from the break, cut through halfway, gone at the root, hanging
+  limp, broken twice, the fur torn away in patches, the tip rotted to bone, charred and short, crushed flat, split into
+  two strands, coiled tight, gone stiff, hanging by a strand, cut short with an old rag knotted on, broken with the
+  bone through. Dead tails barely sway; a snapped one swings from its break. Each mob keeps its own, picked by its id.
+- **Skins**: plain zombies there now wear one of 32 civilian skins (16 new outfits: leather jacket, tracksuit, chef's
+  whites, paramedic, security, blouse and skirt, overalls, raincoat, dojo gi, bomber jacket, coveralls, lab coat,
+  cardigan, puffer jacket, delivery uniform, fight trunks), and husks one of 32 dried skins of their own instead of
+  the game's husk. About half carry a Warpainted's ochre bands or a Battle-scarred's old scars on the face.
+- Babies, and a real player's zombie, are left as they were; nothing changes outside the future.
+- `client/power/chrono/FutureDeadLooks` (skins, the tail's 16 conditions and its render layer), `FutureZombieRendererMixin`,
+  new `FutureHuskRendererMixin`, `ChronoLivingEntityRendererMixin`. Art: `tools/gen_future_zombies.py` writes
+  `textures/entity/future/civilian_<n>.png`, `husk_<n>.png` and `dead_tail.png`.
+- Built; not played. The tail shapes were checked in a Python mock of the drawing code and the skins as images, not in
+  game; check the tails' place on the back, the husks' skins and the zombie players' tails in the future.
+
+## 0.21.95 (2026-11-10): The life story's starts in Powers' worlds are each player's own (#1235)
+
+Tiv: "Every player should have their own start, it should search for another if they are already taken." Jaymo's Kingdoms now remembers every player's start. The starts Powers places itself take a check from Kingdoms of which places are nobody else's, and use it:
+- **Pale Moon**: a crash site nobody else woke at (out to twice as far if the ring is full). **Rustfall**: a mine mouth nobody else escaped from (the same).
+- **Verdant World**: the village nearest the Lookout that nobody else was raised in, looked past up to three taken ones; with none free, a spot of your own further out.
+- **The Maw**: if the pad is someone else's start, a deck of your own (a pad and its pod) on a ring 70 blocks round the hole, past the wrecks and still in its pull. With all ten taken (39 blocks apart), the pad.
+- **Raised by a demon master**: a demon hall nobody else was raised in; a taken one is passed over and the next raised.
+- **Back from the afterlife**: a free spot on the Other World's platform when the arrival spot is someone else's start.
+- **Lost in time**: the future's arrival square, else a street round it (16-96 blocks out, near the square's height). A newcomer who waited for the future to form is checked when they're sent.
+- **Escaped the alchemist's lab, Fresh off the bench**: the room is built where nobody else started, out to twice as far if it must be.
+- Kingdoms calls the new overloads: `ZFighterStarts.land(..., BiPredicate)`, `Future.strand(..., BiPredicate)`, `LabEscape.start(..., BiPredicate)` and `ZFighterAndroidStart.start(..., BiPredicate)`. Also `WildRoom.find`, `ZFighterDemonRealm.raiseHome` and `ZFighterAfterlife.strand` with a free check, and `ZFighterSpace.deck`. The old signatures stay. Tuning: `ZFighterStarts.FREE_TRIES`, `FREE_STEP`, `DEMON_FREE_STEP`, `MAW_DECK_RADIUS`, `MAW_DECKS`; `Future.ARRIVAL_FREE_*`; `ZFighterAfterlife.FREE_TRIES`, `FREE_REACH`.
+- Built; not played. Not tried with two players on a server.
+
+## 0.21.96 (2026-11-10): Xenoform: Asterion, the minotaur alien (#1238)
+
+- **Asterion** (Tiv's ask): scanning Kingdoms' minotaur now teaches its own alien, a bull-headed brute with the
+  minotaur's own build and moves, in a slate hide with the band's green glow and its great hammer. The minotaur is off
+  Tusk's DNA list. 1.6x, 48 health, hammer blows of 8, a little slow, hard to knock about.
+- **Charge** (hold R): head down, it runs where it faced and only leans a little to steer (never more than 12° off its
+  line). It smashes through dirt, wood and leaves, whoever placed them; stone and anything else solid stops it dead. The
+  first creature it meets is caught on its horns and carried in front: stunned at every impact, hurt harder for every
+  block it's put through, and run through when a wall stops the charge (a torso wound that bleeds). Others in the way
+  are flung aside. Nothing can hurt Asterion while it charges (and half a second after) except the carried creature's
+  own blows: a carried mob swings back with whatever it holds, a carried player can just hit it. Let go to throw the
+  catch off ahead.
+- **Roar** (hold G): the longer it's held (up to 2.5 s), the further (3 to 14 blocks) and harder the shockwave that runs
+  out when you let go; whoever it reaches is thrown back limp. You crawl while you hold it, and a long roar takes longer
+  to come back.
+- **Slam** (V): the hammer comes down and everyone round it is hurt and thrown off their feet. **Gore** (B): the horns
+  into the creature in reach, a bleeding cut and a toss.
+- **Big weapons**: Asterion swings its great hammer, or any Better Combat two-handed weapon in your main hand (claymores,
+  war axes, glaives, spears, scythes...) with that weapon's own damage and moves; every other alien stays fists-only.
+- Look: "Minotaur" by eanncrod (Blockbench Workshop, CC BY 4.0), the model Kingdoms' minotaur uses, baked with its
+  animations and its texture repainted (`tools/gen_xenoform_asterion.py`; credit in `art/xenoform_asterion-CREDITS.md`
+  and `textures/entity/bb/CREDITS.txt`). Its Ultimate is the plain fallback for now (Labyrinth).
+- Classes: `forms/Asterion` (all its numbers at the top), `XenoForm.wields`, `XenoformHandsMixin`, `XenoDna`; client
+  `AsterionModel`, `XenoformClient` (act clock, held weapon), `XenoformLayer`.
+- Built; not played. Not seen in game: the model's size and animations, the weapon in its hand, the first-person arm,
+  the charge through walls, carrying a player, and Better Combat weapons while changed.

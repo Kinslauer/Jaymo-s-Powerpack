@@ -10698,3 +10698,50 @@ Tiv: "Alot of buttons are placed in structures [...] They can all be removed in 
 - Where it looks, its pitch with a climb or dive and its jaw and neck while it breathes still follow the game every frame (`ZephyrusDragonRenderer`).
 - Classes: `ZephyrusAnimations`, `ZephyrusDragonRenderer` (new), `ZephyrusDragon` (a `GeoEntity`; `bitten`/`swept` trigger the moves); `ZephyrusDragonModel` removed. Script: `kingdoms/tools/gen_zephyrus_geo.py` (`--compare <dir>` renders old poses beside the new animations).
 - Built and `runServer` booted; **not yet seen in game** (the animations were only checked in offline renders).
+
+## 0.7.692 (2026-11-10): The old dead: villager zombies and husks in the Overworld; the draugr are Warrior-born (#1234)
+
+Andy: "Zombies and husks should have villager like skins on the overworld too, as they are meant to be dead villagers
+from time past ... much older and much more deteriorated" than MCA's zombies, "like the draugr, who are all undead
+warriorborn ancestors".
+- **The Overworld's dead**: grown zombies wear one of 32 old-villager skins and husks one of 16: villager robes of
+  their land (plains, taiga, snow, swamp, jungle, savanna; the husks the desert's and the savanna's) faded almost to
+  dun and torn, now and then a trade's apron, hat or collar, the heavy brow, empty sockets, the long nose rotted to a
+  hole, bare teeth, the skull through the scalp, finger bones and shins down to bone, earth and moss on them (the
+  husks leathery, in grave-wraps and sand). No green in them: MCA's zombie villagers, the recently dead, keep their own
+  looks, so the two read apart. Picked by the mob's id. Babies, drowned, other mods' zombies and zombies outside the
+  Overworld are left as they were.
+- **Draugr**: each wears a Warrior-born's tail from under its mail, rimed with frost toward the tip, swaying as it stands
+  and walks, and mangled its own way (whole, bent, snapped and hanging, cut through, a stump, hanging limp, broken
+  twice, the tip gone). They're bound where they first stood: a draugr keeps within 24 blocks of that spot
+  (`Draugr.HOME_RADIUS`), gives up a foe who leaves that ground and walks back to it, so the tomb's dead never leave the
+  tomb. Draugr already in a world are bound where they stand on their first tick after this.
+- `client/OldDeadSkins`, `mixin/OldDeadSkinMixin`, `mixin/OldDeadHuskSkinMixin`; `inhabitants/Draugr`,
+  `client/inhabitants/InhabitantsClient` (`DraugrRenderer`). Art: `kingdoms/tools/gen_old_dead.py` writes
+  `textures/entity/old_dead/zombie_<n>.png` and `husk_<n>.png`; `kingdoms/tools/gen_tomb_undead.py draugr` adds the
+  tail to `kingdoms/art/draugr.bbmodel` (then `tools/bbmodel_geckolib.py` for the game's files).
+- Built; not played. The skins were checked as images and the draugr's tail in renders of its model, not in game:
+  check the draugr tail's place and states, and that draugr still fight well in their halls.
+
+## 0.7.693 (2026-11-10): Every player's start is their own (#1235)
+
+Tiv: "Every player should have their own start, it should search for another if they are already taken." Settled with Tiv: the *place* is exclusive, not the card. Two players can both take Shipwreck, but they don't wash up at the same wreck. Each start the life story sets down is now remembered for the world (one per player; a new life's start replaces the last, and a reincarnation or `/kingdom story reset` frees it). The next newcomer's road looks past every place someone else started in:
+- **Capital**: a kingdom's (else a realm's) capital nobody else started in. With every capital taken, the wild.
+- **Banished, Sworn, Sentenced, Evicted**: when the realm you name already has someone's start in its seat, your road goes to the nearest realm that has none, and a line tells you so. A party mate on the same road and realm still shares it. With every realm taken, the one you named, and a waking spot of your own there.
+- **Shipwreck**: a wreck nobody else washed up at (a beached one first). **Family farmhand**: a farmhouse nobody else was taken in at, then a free settlement of your blood, then a free village. Up to three more searches past taken ones, each further out, so the loading screen never waits on a long hunt.
+- **Escaped captive, Still in chains, Rock bottom, Hideout's camp**: a camp nobody else started at. With none free, a new camp is raised, as for a world with none. **Hideout**: a speakeasy den nobody else woke in comes first. **Greenskin**: an orc camp or goblin village nobody else was raised in. **Cast out**: a haven nobody else was turned from. **Trader**: a milestone nobody else set out from. **Drawn to a monolith**: a monolith nobody else was drawn to, else a new one is raised.
+- **Whalers**: the whaler is fitted out at a harbour no other whaling start began from (StoryGround passes over taken ones, and raises a shore town if none is left). A party mate who signs on within the window shares the ship.
+- **Jaymo's Powers' own starts** (the other worlds, Lost in time, the lab, the workshop) now ask Kingdoms which places are free. Powers then picks a crash site, mine mouth, Verdant village, demon hall, Maw deck, spot among the dead, arrival street in the future, or a lab or workshop site nobody else started at (see Powers' note). The future's arrival is recorded when the player gets there, even after a wait. An older Powers ignores the check (`PowersCompat.withFree`).
+- **Everywhere**: nobody wakes within 32 blocks of where someone else woke. With no free spot near the start's place, one up to 64 blocks further out. A place counts as taken when someone else started within 96 blocks of it (a settlement's land); in the small single places (the Maw, the afterlife, the future's square) it's 32.
+- When nothing free can be found, the start falls back to the next free thing, then the wild, as it already did for a place it couldn't find. A party mate who takes the same road within the window still wakes beside you (Start Together), and single player is unchanged.
+- New loading-screen hint (125), and the line for a realm that was taken (`message.jaymoskingdoms.story.realm_taken`).
+- `LifeStory` (`BORN`, `freePlace`/`freeSpot`/`freeFor`, `freeRealm`, `lookPast`, `spot`, `TIMELOST_PENDING`). Free filters on `StoryHomes.standing`, `GreenskinLife.home`, `StoryHard.denRealm`, `Roads.stoneNear`, `Monoliths.nearestFoot`, `StoryGround.harbour`/`coastalRealm` and `Whalers.signOn`. Tuning: `LifeStory.PLACE_APART`, `START_APART`, `FREE_TRIES`, `FREE_STEP`, `FREE_WIDEN`.
+- Built; not played. Not tried with two players on a server.
+
+## 0.7.694 (2026-11-10): Redstone golem moves to GeckoLib (#1237)
+
+The redstone golem keeps its stats, AI, moves, size, shadow and glowing core and veins, but is now drawn by GeckoLib. Its pound and eruption are proper keyframed animations instead of two arms swung in code: it rears back with both fists overhead, then leans in and brings them down on the ground on the same tick the blow lands; in the eruption it holds its fists on the ground, trembling, while the rock under its foes burns. It also flinches when hit (not mid-move, so a blow never cancels a pound) and, when killed, its knees give and it topples forward onto its face instead of tipping onto its side. Its head still turns toward what it looks at.
+
+The animations are written by `kingdoms/tools/gen_redstone_golem_geo.py` into the editable `kingdoms/art/redstone_golem.bbmodel`. Model, textures, idle and walk: "Redstone Golem (Minecraft Dungeons)" by polyjo (https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons), CC BY 4.0; credit, licence and renders (old pose beside new) are in `kingdoms/art/`.
+
+The Kingdoms build passes, and `runServer` reaches `Done`. Not seen in game: facing, timing against the server's blows, the glow and the death fall still need a visual playtest.
