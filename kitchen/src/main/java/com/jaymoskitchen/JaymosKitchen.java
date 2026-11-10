@@ -93,6 +93,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
+		com.jaymoskitchen.fresh.Freshness.register();
 		com.jaymoskitchen.season.Seasons.register();
 		// (0.5.25) thirst and body heat (their attachments are class-loaded there; its block use goes before the kitchen's)
 		com.jaymoskitchen.climate.Climate.register();

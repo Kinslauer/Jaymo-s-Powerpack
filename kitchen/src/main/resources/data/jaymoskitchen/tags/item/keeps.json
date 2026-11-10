@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:honey_bottle",
+    "minecraft:dried_kelp",
+    "minecraft:spider_eye",
+    "minecraft:poisonous_potato",
+    "minecraft:chorus_fruit",
+    "minecraft:suspicious_stew",
+    {
+      "id": "#c:foods/candy",
+      "required": false
+    }
+  ]
+}

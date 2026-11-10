@@ -1019,5 +1019,11 @@
 	"jei.jaymoskitchen.icebox": "Feed it ice, packed ice, blue ice, snow blocks or snowballs. While it holds cold it cools the closed room around it, the way a hearth warms one. In a cooled room the heat can't push you past comfortable.",
 	"jei.jaymoskitchen.thermometer": "Hold it in either hand and a brass-framed tube beside your body heat shows how warm or cold this place is, before what you wear. The land grows colder the further north you travel.",
 	"jei.jaymoskitchen.lining": "Sew a lining into armour or clothes: hold the piece in your main hand and wool, rabbit hide or leather in your other hand, then use the loom. Wool keeps the cold out, rabbit hide keeps the heat off, and leather does a little of both. A new lining replaces the old one.",
-	"jei.jaymoskitchen.waterskin_temp": "Use it on a lit campfire and its water comes off hot (and clean). Use it on snow or ice and its water comes away cold. For a few minutes after, a drink of it warms you or cools you for a while."
+	"jei.jaymoskitchen.waterskin_temp": "Use it on a lit campfire and its water comes off hot (and clean). Use it on snow or ice and its water comes away cold. For a few minutes after, a drink of it warms you or cools you for a while.",
+	"item.jaymoskitchen.spoiled_food": "Spoiled Food",
+	"tooltip.jaymoskitchen.fresh.fresh": "Fresh",
+	"tooltip.jaymoskitchen.fresh.stale": "Going stale",
+	"tooltip.jaymoskitchen.fresh.off": "Nearly off",
+	"tooltip.jaymoskitchen.fresh.preserved": "Preserved: keeps four times as long",
+	"jei.jaymoskitchen.spoiled_food": "Food rots: raw meat in a week, fish in 4 days, cooked food in 2 weeks, bread in a season (its bar shows how long it has left). Rotten meat turns to rotten flesh, anything else to this. Salt it (salt in your hand, the food in the other, use) or smoke it well to keep it four times as long, and store it in a dark cellar, deep down or beside ice or an icebox, where it ages half as fast. It goes into organic compost like rotten flesh."
 }

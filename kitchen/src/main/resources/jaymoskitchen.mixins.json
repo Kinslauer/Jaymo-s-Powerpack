@@ -17,6 +17,7 @@
 		"CropSeasonMixin",
 		"EntityMixin",
 		"FishingHookMixin",
+		"FreshBarMixin",
 		"IceMeltMixin",
 		"ItemAccessor",
 		"KitchenMenuMixin",

@@ -108,6 +108,9 @@ public final class MillJei implements IModPlugin {
 			com.jaymoskitchen.climate.Climate.WATERSKIN_DRAGON)) {
 			registration.addIngredientInfo(skin, note("waterskin_temp"));
 		}
+		// (Hardrock picks) food that doesn't keep: rot, salting, smoking, cellars
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Freshness.SPOILED_FOOD, note("spoiled_food"));
+		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.SALT, note("spoiled_food"));
 	}
 
 	private static Component title(String id) {
