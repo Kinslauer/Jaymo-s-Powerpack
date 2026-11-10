@@ -38,7 +38,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -48,6 +47,7 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🪶 Quill · #1204 · writing
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
 
 
 ## In review
