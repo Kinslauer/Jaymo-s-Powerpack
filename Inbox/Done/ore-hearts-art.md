@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: hermes (Andy, 2026-11-08)
 asked: 2026-11-08
@@ -49,3 +49,4 @@ missing faces, no muddy pixels.
 
 - The mechanics (survive death or not, the cap, where it shows) are Andy's calls and are still open on the ore-hearts
   task; they change nothing about the art, so this can run now.
+- 2026-11-10 16:18 PR #1167 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: writing
+status: done
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -26,3 +26,4 @@ Andy ticked it. For us it belongs in the monster roster, not as a new system.
 - Reuse existing mobs (the pack's own monsters first). No new entities for this unless Andy asks.
 - Worth saying in the PR: drop table, whether they are rarer at night, and whether they can be seen through walls (no).
 - 2026-11-08 22:50 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-10 16:18 PR #1166 is merged into master; moved to Inbox/Done.
