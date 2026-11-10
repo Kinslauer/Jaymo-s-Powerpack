@@ -31,7 +31,6 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 
 
 ## Being built
@@ -56,6 +55,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · blocked
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 
 
 ## Done
