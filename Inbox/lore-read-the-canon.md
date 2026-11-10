@@ -22,3 +22,4 @@ suggested_owns: []
 - The page is younger than the game: if Quill finds a line in the mod that contradicts it, say so under this task rather than quietly changing the lore page. Andy is adding to the page in the thread; read it again at the start of each run.
 - Andy's standing rule still holds: patch notes for testers stay short and leave out most lore detail unless he asks.
 - 2026-11-09 21:41 Held until Quill's free Claude Fable 5.2 allowance resets (10:31 PM, Andy: 'let quill do it on fable when that resets'); reopened automatically at 10:33 PM.
+- 2026-11-10 16:27 Still blocked on Nov 10 although Quill's Fable allowance reset at 10:31 PM Nov 9 (the automatic reopen didn't happen). Reopened by the cloud vault check, per Andy's 'let quill do it on fable when that resets'.
