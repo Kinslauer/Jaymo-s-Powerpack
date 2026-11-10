@@ -173,7 +173,7 @@ def tags():
         {"id": "jaymospowers:bone_knife", "required": False},
         {"id": "#jaymospowers:fiber_knives", "required": False},
         {"id": "#c:tools/knife", "required": False}]})
-    write_json(tag / "tanning_water.json", {"values": ["jaymoskitchen:waterskin", "minecraft:water_bucket"]})
+    write_json(tag / "tanning_water.json", {"values": ["jaymoskitchen:waterskin_leather", "jaymoskitchen:waterskin_iron", "jaymoskitchen:waterskin_dragon", "minecraft:water_bucket"]})
     write_json(tag / "cords.json", {"values": ["minecraft:string", {"id": "jaymospowers:plant_string", "required": False}]})
 
 
