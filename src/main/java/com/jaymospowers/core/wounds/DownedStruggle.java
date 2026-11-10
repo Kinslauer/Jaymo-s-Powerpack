@@ -42,9 +42,10 @@ import org.jspecify.annotations.Nullable;
  * ({@link SpookyDoorsCompat}) a door swings a little further every moment it's pushed, shut ones open and open ones shut.</li>
  * <li><b>A bed:</b> the struggle ends with them hauled up onto it, resting. Lying there (within {@link #REST_REACH} of the
  * spot) they never pass out, and every {@link #REST_INTERVAL} ticks their most hurt part mends {@link #REST_HEAL}, up to
- * {@link #REST_CAP} of it, so the more hurt, the longer it takes. After {@link #REST_SET_TICKS} in bed a broken bone sets
- * itself (no splint needed). Getting up is the usual sneak, any time they're well enough
- * ({@link Downed#tooHurt}); they rise with what the parts hold ({@link Wounds#restedHealth}). Crawling off ends the rest.</li>
+ * {@link #REST_CAP} of it, so the more hurt, the longer it takes. After {@link #REST_SET_TICKS} in bed every broken bone
+ * sets itself, as a bed sets one in sleep ({@link Breaks#bedSet}: no splint needed, it shows as one). Getting up is the
+ * usual sneak, any time they're well enough ({@link Downed#tooHurt}); they rise with what the parts hold
+ * ({@link Wounds#restedHealth}). Crawling off ends the rest.</li>
  * </ul>
  * Fires are {@link Resting}'s (the campfire rest of the standing); a downed player resting by one is not this class.
  */
@@ -298,7 +299,7 @@ public final class DownedStruggle {
 		if (REST_SET_TICKS > 0 && lain == REST_SET_TICKS) {
 			BodyPlan plan = Wounds.plan(player);
 			for (int i = 0; plan != null && i < plan.size(); i++) {
-				Breaks.setPart(player, plan.part(i));
+				Breaks.bedSet(player, plan.part(i));
 			}
 		}
 		if (now % REST_HINT_TICKS == 0) {
