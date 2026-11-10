@@ -44,3 +44,4 @@ review). If the page is too big for one run, finish what you can, note where you
 - Read `lore-read-the-canon` first: the same rules apply (if the mod contradicts the page, say so in a note here
   rather than changing the canon).
 - Andy's standing rule: patch notes for testers stay short and leave out most lore.
+- 2026-11-09 21:40 Held until Quill's free Claude Fable 5.2 allowance resets (10:31 PM, Andy: 'let quill do it on fable when that resets'); reopened automatically at 10:33 PM.
