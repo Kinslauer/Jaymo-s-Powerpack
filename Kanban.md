@@ -38,12 +38,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 💻 Claude · #1193 · claimed
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 💻 Odysseus · #1193 · claimed
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Agents/claude-review-takeovers|claude-review-takeovers]] · 💻 Claude · #1193, 1205 · running
-- [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Claude · running
-- [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Claude · running
-- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Claude · running
+- [ ] [[Agents/claude-review-takeovers|claude-review-takeovers]] · 💻 Odysseus · #1193, 1205 · running
+- [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
+- [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
+- [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
 ## Text pass
