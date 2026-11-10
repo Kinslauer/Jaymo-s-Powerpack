@@ -739,6 +739,11 @@ public final class ZFighterSpace {
 	}
 
 	/** The pad: a floor of {@link Dest#floor}, a lamp at each corner, the air above cleared, and a pod (a complete one, no fuel) in the middle. */
+	/** (Tiv, from {@link ZFighterStarts}) A Maw salvager's deck of their own at {@code spot}: a pad and its pod, as the Maw's own. */
+	static void deck(ServerLevel level, Dest dest, BlockPos spot) {
+		build(level, dest, spot);
+	}
+
 	private static void build(ServerLevel level, Dest dest, BlockPos spot) {
 		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx++) {
 			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz++) {

@@ -919,6 +919,11 @@ public final class Roads {
 
 	/** The set-up milestone nearest {@code from} whose sign still stands (null: none yet). */
 	static @Nullable Stone stoneNear(ServerLevel level, BlockPos from) {
+		return stoneNear(level, from, sign -> true);
+	}
+
+	/** The same, among the signs that are {@code free} (a trader's life story: nobody else's start). */
+	static @Nullable Stone stoneNear(ServerLevel level, BlockPos from, java.util.function.Predicate<BlockPos> free) {
 		MinecraftServer server = level.getServer();
 		Stone best = null;
 		double bestD = Double.MAX_VALUE;
@@ -930,7 +935,7 @@ public final class Roads {
 				}
 				BlockPos sign = BlockPos.of(packed);
 				double d = sign.distSqr(from);
-				if (d >= bestD) {
+				if (d >= bestD || !free.test(sign)) {
 					continue;
 				}
 				level.getChunk(sign.getX() >> 4, sign.getZ() >> 4);
