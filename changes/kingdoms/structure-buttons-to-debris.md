@@ -1,0 +1,6 @@
+# Stormborn Tomb: real rubble instead of buttons
+
+Tiv: "Alot of buttons are placed in structures [...] They can all be removed in place of random amounts of our rocks and pebbles. They all are trying to go for a debris effect, but now we have real debris." The Stormborn Tomb's floors were strewn with about 400 stone buttons standing in for rubble. They're gone: most spots are bare floor now, and here and there (about one in four) lies a pile of one to three of Jaymo's Powers' loose rocks, mossy rocks on the mossy floors and plain stone rocks elsewhere. They can be picked up like any other rocks. Only new tombs change: a tomb already generated in a world keeps its buttons.
+- Eight buttons stay. Two do something: the spruce button beside the cell in the first hallway opens its iron bars, and one stone "rubble" button in that hallway is the hidden trigger of a wall door (its wire runs under the floor to the torches and pistons). The other six are studs on the main hall's banner standards, part of the carving rather than rubble.
+- The templates (`structure/stormborn_tomb/*.nbt`) are edited by `kingdoms/tools/tomb_rubble.py` (seeded, so a rerun gives the same tomb; the kept buttons, the pile chance and the pile sizes are constants at its top). The rocks are Powers blocks: without Jaymo's Powers they load as air.
+- Built; not played. No new blocks or items.
