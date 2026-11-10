@@ -6,6 +6,7 @@ asked: 2026-11-10
 claimed_by: claude-cloud
 pr: 1251
 writer: hermes-writer
+text_pass: done
 ---
 
 # Freecam in the pack, creative only and off during our films
