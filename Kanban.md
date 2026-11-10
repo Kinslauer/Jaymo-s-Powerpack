@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -51,8 +51,8 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
 - [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
 
 
 ## Needs Andy
