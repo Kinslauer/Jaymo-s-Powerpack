@@ -6,13 +6,13 @@
   `PowersCompat#xenoForm`.
 - **A titan's voice reaches the ground** (Andy: "audible to everyone on the ground: their voice range must reach players
   far below them"). The ape and every xeno form now speak 16 blocks further than everyone else, plus 2 blocks for every
-  block they stand taller than a man (a full Great Ape: about 74 more, so 122 blocks with the server's usual 48). A
-  whisper stays a whisper.
+  block they stand taller than a man (a full Great Ape: about 74 more, so about 122 blocks with Simple Voice Chat's
+  default 48). A whisper stays a whisper.
 - **A giant hears the ground** (Andy: "make sure a transformed great ape still hears the players on the ground"). Voice
   chat listens from the camera, and a full ape's camera rides about 40 blocks from his feet, so the players around him
-  were too far to hear. Every voice that reaches a player taller than a man now reaches him with 1.4 blocks more range
-  for every block of his extra height, so he hears the ground about as a man standing at his feet would. This goes for
-  any giant player, not only the ape.
+  were too far to hear. Every voice that reaches a player a block or more taller than a man now reaches him with 1.4
+  blocks more range for every block of his extra height, so he hears the ground about as a man standing at his feet
+  would. This goes for any giant player, not only the ape.
 - Both go through `VoiceRange`, a plugin on Simple Voice Chat's server API (its `VoiceDistanceEvent`, and its
   per-listener sound packet event), made only by Simple Voice Chat itself (Kingdoms' `voicechat` entrypoint). Simple
   Voice Chat is all rights reserved: only its published API is used, compiled against and never shipped by Kingdoms.
