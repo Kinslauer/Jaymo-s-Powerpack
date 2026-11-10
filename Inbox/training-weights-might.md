@@ -30,3 +30,4 @@ Tiv, in the Questions thread: "okay, they should build might for everyone, weari
 - Cross-mod: Might lives in Kingdoms (`Stats`, `Skills`), the meditate/shadowboxing hook in Powers core. The rule is one PR per project, so this is likely two linked PRs — the Powers half reaching Kingdoms' Might the way `KitchenCompat` already does, rather than importing across mods.
 - Both items already exist, so there is no new item to clear with Andy first.
 - 2026-11-09 21:12 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 23:53 Cloud agent session sesn_01MWdwmmjReNbb2Tay8XAwom opened PR #1220.
