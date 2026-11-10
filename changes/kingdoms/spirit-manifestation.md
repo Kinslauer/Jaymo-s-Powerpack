@@ -23,7 +23,7 @@
 - **Arms and figure together**: the figure over your back now shows only while its arms do and goes with them, the arms
   held out from it at rest so they never hang into you. They fade shortly after a move, show for a moment now and then on
   their own (about one glimpse every 1-2 minutes, the same for every viewer), and come up as soon as you hold the spirit
-  key to call a move. Grimsby's blade and Thessaly's glove are no longer up all the time: they follow the same rule.
+  key to call a move. Grimsby's blade and Thessaly's glove stay as they were: always up while the spirit is out, at their own rest angle (so their faint figure stays up with them).
 - **Speech bubble**: while a spirit stands out talking, its line floats over its head in a bubble in its colour (as well as
   in chat). Only its keeper is sent the line, so only they see the bubble.
 - **The Quiet One** never shows a body: only its large arms, as before.

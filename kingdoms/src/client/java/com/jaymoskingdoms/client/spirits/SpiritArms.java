@@ -149,6 +149,11 @@ public final class SpiritArms {
 		return ANCHORS[Math.clamp(style, 0, Spirits.QUIET)];
 	}
 
+	/** Whether {@code style}'s arms are always up while the spirit is out (Andy: "Grimsby's blade, and Thessaly should always be visible"; kept, 2026-11-10). */
+	static boolean alwaysUp(int style) {
+		return style == Spirits.GRIMSBY || style == Spirits.THESSALY;
+	}
+
 	/** Arm angle offsets (x, y, z in radians, for the right arm; the left mirrors y and z) added to the wearer's own arm for each pose. */
 	private static final float[][] TABLE = new float[Poses.COUNT][];
 
@@ -341,7 +346,7 @@ public final class SpiritArms {
 		if (SpiritManifest.speaking(spirit, now)) {
 			return 0.0F;
 		}
-		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR)) {
+		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR) || alwaysUp(style(spirit.kind(), spirit.scale()))) {
 			return 1.0F;
 		}
 		// (Andy, 2026-11-10: "they disappear shortly after not being used. and reappear randomly or before being called to
@@ -817,7 +822,10 @@ public final class SpiritArms {
 				SpiritRig.frame(f, waits ? Poses.IDLE : poseId, age, waits ? 0.0F : w, idle, target, true, i, time);
 				float drift = SWAY * Mth.sin(time * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
 				// (Andy: "it needs to be out at that angle. it clips into the user if not") held out from the figure at rest
-				f.sz = Mth.lerp(1.0F - w, f.sz, Math.max(f.sz, REST_OUT));
+				// (Grimsby's blade and Thessaly's glove keep their own rest: Andy, "keep grim and thessaly's hands how they were")
+				if (!alwaysUp(look.style())) {
+					f.sz = Mth.lerp(1.0F - w, f.sz, Math.max(f.sz, REST_OUT));
+				}
 				f.sx += w * poseAdjust(poseId, age, i) + drift;
 				if (anchor.open()) {
 					// at rest the hand hangs open, fingers spread and the wrist cocked back: ready to grab
