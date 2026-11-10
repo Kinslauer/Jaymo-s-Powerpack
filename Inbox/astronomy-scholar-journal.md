@@ -29,3 +29,4 @@ From the pick-list, rows **A journal of measurements with a skill ladder** and *
 - The study text is not lore. No narration, no voice, no story — it teaches the mechanic, honestly, including where the model is approximate. That is already our rule about screen text.
 - 2026-11-09 14:46 Apollo's claim released by hand: its run died on a gateway error at 13:42 and the job was left paused, so nothing moved since 13:18. Handed back as open.
 - 2026-11-10 00:07 Cloud agent session sesn_01PEuZSA9ASQfBX9bETJmoxC opened PR #1236.
+- 2026-11-10 04:59 Text pass: rewrote change note title (cloud-astronomy-scholar-journal.md) — player-facing title
