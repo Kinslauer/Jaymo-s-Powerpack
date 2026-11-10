@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,12 +33,12 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
+- [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
