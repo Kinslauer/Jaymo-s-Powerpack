@@ -367,12 +367,13 @@ public final class ArmourGrime {
 		}
 		ItemStack held = player.getItemInHand(hand);
 		if (held.isEmpty() && hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown()) {
-			// scrub what you're wearing, a level of water each time
-			if (!anyDirt(player)) {
+			// scrub what you're wearing, a level of water each time; (Hardrock picks) and yourself (Smell)
+			if (!anyDirt(player) && Smell.stink(player) <= 0.0F) {
 				return InteractionResult.PASS;
 			}
 			if (level instanceof ServerLevel server) {
 				washAll(player, SCRUB);
+				Smell.scrub(player);
 				LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 				splash(server, player.position().add(0.0, player.getBbHeight() * 0.5, 0.0), player.getBbWidth());
 			}

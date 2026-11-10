@@ -304,6 +304,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Smell.smell(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle smellOf;
+	private static boolean lookedForSmell;
+
+	/** How bad {@code player} smells by Jaymo's Powers (0 clean to 100), or 0 without Powers. */
+	public static float smell(Player player) {
+		if (!lookedForSmell) {
+			lookedForSmell = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					smellOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wet.Smell"),
+						"smell", java.lang.invoke.MethodType.methodType(float.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' smell (older Powers?)", e);
+				}
+			}
+		}
+		if (smellOf == null) {
+			return 0.0F;
+		}
+		try {
+			return (float)smellOf.invoke(player);
+		} catch (Throwable e) {
+			return 0.0F;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;
