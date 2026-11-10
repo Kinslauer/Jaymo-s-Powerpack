@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,7 +16,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · changes · fixing review notes
+- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · claimed
 
 
 ## In review
