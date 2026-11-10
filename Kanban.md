@@ -45,7 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1226 · in-review
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · #1220 · in-review
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · #1224 · in-review
-- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1222 · in-review
+- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #1222 · in-review
 
 
 ## In review
