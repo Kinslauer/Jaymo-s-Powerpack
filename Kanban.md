@@ -39,6 +39,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · #1203 · changes · fixing review notes
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
@@ -52,7 +53,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
 - [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · #1203 · in-review
 
 
 ## Needs Andy
