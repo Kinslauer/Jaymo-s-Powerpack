@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -25,3 +25,4 @@ From the pick-list, rows **Eight lunar phases and a Sun you can observe** and **
 - The blindness should reuse the feel of our existing blindness work (a darkening, a moment of not being able to read the sky) rather than a new full-screen effect. Do not promise it protects a real player's eyes anywhere in the text; the source mod was careful about that and so are we.
 - 2026-11-09 16:15 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 23:54 Cloud agent session sesn_01T4vzYTRBFzTN5etRzmAk7d opened PR #1225.
+- 2026-11-10 04:31 PR #1225 is merged into master; moved to Inbox/Done.

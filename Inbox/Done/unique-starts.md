@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -26,3 +26,4 @@ Tiv, in the Tasks thread: "Every player should have their own start, it should s
 - Single player is unaffected — there's no one to be taken by.
 - 2026-11-09 17:50 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-10 00:31 Cloud agent session sesn_015TZomZFAYTS8Q7F6rqwpLA opened PR #1235.
+- 2026-11-10 04:31 PR #1235 is merged into master; moved to Inbox/Done.

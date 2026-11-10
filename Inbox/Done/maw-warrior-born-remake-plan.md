@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: youth (Andy in #quill-class, 2026-11-09)
 asked: 2026-11-09
@@ -53,3 +53,4 @@ Maw), plus the Kingdoms side that reads it: `tier.feat.maw_salvage`, `story-road
   something the lore page says, say so in the PR body rather than quietly shrinking the design.
 - Anything that would contradict the lore page goes to Andy as a question, not a silent rewrite.
 - 2026-11-10 00:22 Cloud agent session sesn_01CsHsTooJGMwThLVeajzUx8 opened PR #1240.
+- 2026-11-10 04:31 PR #1240 is merged into master; moved to Inbox/Done.

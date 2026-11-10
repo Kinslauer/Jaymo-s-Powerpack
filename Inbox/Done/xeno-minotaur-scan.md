@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -49,3 +49,4 @@ A bull-headed brute, heavy through the shoulders, horns, the same build as the t
 - How the roar's growth is measured — reach, force, or both — and what it costs to hold that long.
 - How long invulnerability lasts (whole charge, or a moment past its end).
 - 2026-11-10 00:14 Cloud agent session sesn_01FLXthEJrQxJDY1rTXMBF4m opened PR #1238.
+- 2026-11-10 04:31 PR #1238 is merged into master; moved to Inbox/Done.

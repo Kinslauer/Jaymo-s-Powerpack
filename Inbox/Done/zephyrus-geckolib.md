@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -44,3 +44,4 @@ suggested_owns:
 - The five dragon tasks run as separate tracks. Each touches only its own dragon's files and its own line in `DragonsClient.java`. Don't edit `WindDragon.java` or `WindDragonRenderer.java`; if you need a shared change there, ask under this task's Notes.
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
 - 2026-11-10 00:00 Cloud agent session sesn_01LH1wA498KHMmrU6mh6JmRc opened PR #1229.
+- 2026-11-10 04:31 PR #1229 is merged into master; moved to Inbox/Done.

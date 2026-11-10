@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -27,3 +27,4 @@ Tiv, in the Tasks thread: "Alot of buttons are placed in structures, maybe for a
 - Whatever is done, old worlds keep their old buttons: say whether this only fixes new generation.
 - No new blocks or items — this is a swap to what already exists.
 - 2026-11-09 23:59 Cloud agent session sesn_01CsHsTossr1hmRgAU8FgGJu opened PR #1227.
+- 2026-11-10 04:31 PR #1227 is merged into master; moved to Inbox/Done.

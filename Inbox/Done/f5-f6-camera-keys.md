@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -26,3 +26,4 @@ Tiv, in the Tasks thread: "F5 should only toggle between first and 3rd person, t
 - Cinematics and powers that force a camera (`UltimateCinematic`, `BeamCinematic`, `GiantCamera`) set the camera type directly; make sure the new toggle doesn't fight them mid-cutscene, and that the front camera survives a cinematic ending.
 - No lang churn beyond the one new key name.
 - 2026-11-09 23:56 Cloud agent session sesn_01MPUYWbeHeGYBs9PRyVgJTX opened PR #1228.
+- 2026-11-10 04:31 PR #1228 is merged into master; moved to Inbox/Done.

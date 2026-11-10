@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -42,3 +42,4 @@ suggested_owns:
 - The skulk golem is a separate task. Each task edits only its own line in `BeastsClient.java`.
 - 2026-11-09 23:29 Andy called off all Hermes bots (2026-11-09 11:30 PM): released for the Claude API agents.
 - 2026-11-10 00:11 Cloud agent session sesn_01BGBf4aVR77UdwjFj2HgzW5 opened PR #1237.
+- 2026-11-10 04:31 PR #1237 is merged into master; moved to Inbox/Done.

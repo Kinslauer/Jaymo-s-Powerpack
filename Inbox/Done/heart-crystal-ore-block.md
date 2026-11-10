@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -38,3 +38,4 @@ PR says what a player will see when they find the ore in the dark, and a "not te
 - 2026-11-10 Resumed: full ./gradlew build passed on JDK 25; PR #1226 opened. Emits no light (looks lit only). Not tested in game.
 - 2026-11-10 Moved to the task branch cloud/heart-crystal-ore-block; PR #1230 replaces #1226 (closed). Head c189cf7d: build passed, pr_checks passed.
 - 2026-11-09 23:56 Cloud agent session sesn_013rTbNKhj45WLgq4PxSU8dh opened PR #1230.
+- 2026-11-10 04:31 PR #1230 is merged into master; moved to Inbox/Done.
