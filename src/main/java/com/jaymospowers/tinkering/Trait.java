@@ -42,6 +42,11 @@ public enum Trait {
 	BONKING("bonking", ChatFormatting.YELLOW),
 	TIMBER("timber", ChatFormatting.GREEN),
 	VEIN("vein", ChatFormatting.AQUA),
+	// knife metals: their mark on a hit, knives only (TraitEffects)
+	POISONOUS("poisonous", ChatFormatting.GREEN),
+	WEAKENING("weakening", ChatFormatting.GRAY),
+	BURNING("burning", ChatFormatting.RED),
+	WITHERING("withering", ChatFormatting.DARK_PURPLE),
 	// (0.15.x) feather: arrows and bows fly truer
 	AERODYNAMIC("aerodynamic", ChatFormatting.WHITE),
 	// (0.18.56) back home: star metal's own trait, and the two edges a quench in a far world's cold or ember gives
