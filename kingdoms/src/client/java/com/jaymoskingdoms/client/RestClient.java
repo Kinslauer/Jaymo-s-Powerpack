@@ -16,7 +16,8 @@ import org.jspecify.annotations.Nullable;
  * how dark the screen is in bed. Falling asleep fades to black as in vanilla, but once the night runs by as a timelapse
  * the screen clears to {@link #TIMELAPSE_DIM} so you can watch it, and resting only dims it to {@link #REST_DIM}. The
  * Sleep button over Leave Bed shows while you rest at night. Dragging the mouse across the bed screen looks around from
- * the pillow (vanilla holds the view straight along the bed), so you can watch the village work while the night runs by.
+ * the pillow (vanilla holds the view straight along the bed); while the night runs by the camera leaves the pillow
+ * altogether ({@link NightCam}).
  */
 public final class RestClient {
 	/** How dark the screen is (0-1, vanilla's full sleep is 1) while resting, and while the night runs by. */
@@ -60,7 +61,7 @@ public final class RestClient {
 		return resting && minecraft.level != null && minecraft.level.isDarkOutside();
 	}
 
-	private static boolean timelapse(@Nullable ClientLevel level) {
+	static boolean timelapse(@Nullable ClientLevel level) {
 		return level != null && level.dimensionType().defaultClock().map(c -> level.clockManager().getInstance(c).rate() > 1.0F).orElse(false);
 	}
 

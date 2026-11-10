@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.sleep;
 
+import com.jaymoskingdoms.client.NightCam;
 import com.jaymoskingdoms.client.RestClient;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -11,7 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.5) A Sleep button above Leave Bed, shown while you rest at night, and dragging to look around ({@link RestClient}). */
+/**
+ * (0.7.5) A Sleep button above Leave Bed, shown while you rest at night, and dragging to look around ({@link RestClient}); while
+ * the night runs by the drag swings the free view round the bed and the wheel zooms it ({@link NightCam}).
+ */
 @Mixin(InBedChatScreen.class)
 abstract class InBedChatScreenMixin extends ChatScreen {
 	private InBedChatScreenMixin() {
@@ -25,6 +29,16 @@ abstract class InBedChatScreenMixin extends ChatScreen {
 			.build();
 		this.addRenderableWidget(sleep);
 		RestClient.sleepButton(sleep);
+	}
+
+	/** While the night runs by, the wheel brings the free view nearer or further ({@link NightCam}). */
+	@Override
+	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+		if (NightCam.active()) {
+			NightCam.zoom(scrollY);
+			return true;
+		}
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
