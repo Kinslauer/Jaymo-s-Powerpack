@@ -36,6 +36,8 @@
   (the `SCHOLAR` pillar, the `ASTROMETRY` perk, `Pillar#web`), `Stats`, `Renown`, `SkillWeb`, `SkillScreen`,
   `ArmillaryNet`, `ArmillaryScreen`. Lang in `lang/parts/astronomy-journal.json`. Art from
   `art/astronomy/generate_journal.py`.
+- **Loading-screen hint fix:** the unique-starts hint and the training-weights hint were both number 125, which
+  stopped Kingdoms building; the unique-starts one is now 126.
 - The idea of a measuring journal with a skill ladder and study pages comes from Jubileu_13's Astronomy mod (MIT);
   nothing of its code, text or art is used.
 - Not in this change: telescope readings (the telescope has art and a rig but no gameplay yet), the Altazimuth
