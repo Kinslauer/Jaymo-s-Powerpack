@@ -1907,3 +1907,10 @@ Zoom behavior with OK Zoomer mod not verified in multiplayer.
 - Inventory, ground and item-frame pictures are unchanged. Damage, range, reload time and dual wielding are unchanged.
 - Code: `armory/GunBlast` (blast, synced `gun_shot` attachment), `mixin/WeaponModGunBlastMixin`, `client/armory/guns/*` (item model type `jaymospowers:animated_gun`), `tools/gen_guns_geckolib.py`, art in `art/guns/`.
 - Built; not tested in game (no client run here, and `runServer` can't boot in the cloud session).
+
+## 0.21.84 (2026-11-10): Knives carry their metal's effect (#1204)
+
+Tinkering: a tinkered knife's head metal leaves its mark on a hit - cobalt poisons, slimesteel slows, manyullyn
+weakens, queen's slime burns, hepatizon withers - at a low chance, so a knife stays a knife, not a wand. Added the
+knife metals (materials, ingots, traits), the knife tool type, and the on-hit mark effect; repaired or recast blades
+keep it, as it belongs to the tool's metal.
