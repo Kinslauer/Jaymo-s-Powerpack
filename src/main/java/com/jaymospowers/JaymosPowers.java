@@ -171,8 +171,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.web.KitchenCompat.registerNoCorpseZone();
 		com.jaymospowers.core.wounds.HeartCrystals.register();
 		registerAttachments();
-
-		}
+	}
 
 	/**
 	 * Attachment types register when their class first loads, which on a dedicated server can be long after the client

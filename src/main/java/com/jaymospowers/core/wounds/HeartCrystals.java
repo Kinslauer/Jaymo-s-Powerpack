@@ -5,34 +5,41 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.material.MapColor;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -61,14 +68,23 @@ public final class HeartCrystals {
 
     /** The attribute modifier ID for the extra max health from heart crystals. */
     private static final Identifier EXTRA_HEALTH_ID = JaymosPowers.id("heart_crystals_extra_health");
+    /** Placed feature resource key for heart crystal ore worldgen. */
+    public static final ResourceKey<net.minecraft.world.level.levelgen.placement.PlacedFeature> ORE_HEART_CRYSTAL_PLACED =
+            ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_heart_crystal"));
 
     private static final List<Item> ALL = new ArrayList<>();
     public static Item HEART_CRYSTAL;
+    public static Block HEART_CRYSTAL_ORE;
+    public static Block HEART_CRYSTAL_ORE_DEEPSLATE;
 
     private HeartCrystals() {
     }
 
-    static void register() {
+    public static void register() {
+        // Ore blocks (plain Block, models and textures on master)
+        HEART_CRYSTAL_ORE = block("heart_crystal_ore", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE).mapColor(MapColor.COLOR_RED));
+        HEART_CRYSTAL_ORE_DEEPSLATE = block("heart_crystal_ore_deepslate", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_DIAMOND_ORE).mapColor(MapColor.COLOR_RED));
+
         HEART_CRYSTAL = item("heart_crystal", p -> new HeartCrystalItem(p.stacksTo(16)));
 
         ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("hearts"));
@@ -77,6 +93,18 @@ public final class HeartCrystals {
                 .icon(() -> new ItemStack(HEART_CRYSTAL))
                 .build());
         CreativeModeTabEvents.modifyOutputEvent(tab).register(output -> ALL.forEach(output::accept));
+
+        // Worldgen: rare heart crystal ore in deep deepslate
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES, ORE_HEART_CRYSTAL_PLACED);
+    }
+
+    /** A block and its block item. */
+    private static Block block(String id, java.util.function.Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
+        ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosPowers.id(id));
+        Block block = Registry.register(BuiltInRegistries.BLOCK, key, factory.apply(properties.setId(key)));
+        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
+        Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
+        return block;
     }
 
     /** An item with its one line of lore (from lang {@code tooltip.jaymospowers.<id>}). */
@@ -92,9 +120,9 @@ public final class HeartCrystals {
     /** Heart crystal item: consumed to grant a permanent half-heart. */
     public static final class HeartCrystalItem extends Item {
         HeartCrystalItem(Item.Properties properties) {
-            super(properties.component(DataComponents.CONSUMABLE, Consumables.builder()
+            super(properties.component(DataComponents.CONSUMABLE, Consumable.builder()
                     .consumeSeconds(1.6F)
-                    .sound(SoundEvents.AMETHYST_BLOCK_RESONATE)
+                    .sound(Holder.direct(SoundEvents.AMETHYST_BLOCK_RESONATE))
                     .build()));
         }
 
@@ -128,7 +156,7 @@ public final class HeartCrystals {
         player.setAttached(HEARTS, current + 1);
         applyExtraHealth(player);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
-        player.sendSystemMessage(Component.translatable("message.jaymospowers.hearts.granted", current + 2).withStyle(ChatFormatting.LIGHT_PURPLE));
+        player.sendSystemMessage(Component.translatable("message.jaymospowers.hearts.granted", current + 1).withStyle(ChatFormatting.LIGHT_PURPLE));
         return true;
     }
 
@@ -178,9 +206,7 @@ public final class HeartCrystals {
             // Burn one heart
             player.setAttached(HEARTS, current - 1);
             applyExtraHealth(player);
-            // Increment Mortality's woken counter so this counts as one of the SURE_WAKES
-            player.setAttached(Mortality.WOKEN, player.getAttachedOrElse(Mortality.WOKEN, 0) + 1);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HEART_EXTRA_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 0.8F);
             player.sendSystemMessage(Component.translatable("message.jaymospowers.hearts.burned", current - 1).withStyle(ChatFormatting.RED));
             return true;
         }

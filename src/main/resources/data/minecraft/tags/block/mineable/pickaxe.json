@@ -144,6 +144,8 @@
     "jaymospowers:veiled_ore",
     "jaymospowers:seamed_stone",
     "jaymospowers:seamed_deepslate",
-    "jaymospowers:updraft_vent"
+    "jaymospowers:updraft_vent",
+    "jaymospowers:heart_crystal_ore",
+    "jaymospowers:heart_crystal_ore_deepslate"
   ]
 }

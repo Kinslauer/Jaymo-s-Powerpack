@@ -5,7 +5,6 @@ import com.jaymospowers.armory.Lodged;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
-import com.jaymospowers.core.wounds.HeartCrystals;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
 import com.jaymospowers.power.zfighter.ZFighterRealism;
 import com.mojang.serialization.Codec;
