@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -7,7 +7,7 @@ thread: 1569170499680870560
 claimed_by: hermes-a
 pr: 1218
 suggested_owns: [kingdoms/src/main/resources/data/jaymoskingdoms/structure/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
-text_pass: none
+text_pass: 
 ---
 
 # The new dungeons come out filled with stone, and with trial chamber rooms
