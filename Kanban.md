@@ -29,7 +29,6 @@ kanban-plugin: board
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · claude-cloud · #1239 · in-review
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · hermes-b · #1248 · in-review
 
 
 ## Needs Andy
