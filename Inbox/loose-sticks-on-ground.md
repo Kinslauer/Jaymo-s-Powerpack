@@ -1,5 +1,5 @@
 --- 
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
