@@ -24,7 +24,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · sent
 
 
 ## Done
