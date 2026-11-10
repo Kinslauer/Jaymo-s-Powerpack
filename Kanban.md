@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:56). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,8 +44,8 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · #1224 · in-review
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #1222 · in-review
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · ☁️ Cloud · #1225 · in-review
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · #1228 · in-review
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
 
 
 ## In review
