@@ -1685,3 +1685,24 @@ mobs should be possible".
 - Kitchen names the block by id (`jaymospowers:seared_bricks`), so Kitchen keeps no compile dependency on Powers; with Powers absent the board simply has nothing to split. The table of sturdy blocks lives in `Chopping.split` and the tool choice in `CuttingBoardBlock.cut`.
 - Cooking pot, frying pan and saucepan already melt back to their iron at the smeltery — no change needed there, the melting table derives them from their crafting recipes.
 - Not tested in game.
+
+## 0.5.96 (2026-11-09): Animal meat and hides only from butchering (#1171)
+
+- Andy: "Deer also drop their venison and hide immediately, it should only be acquired from butchery." Meat or a hide that a dying animal drops by any path other than its normal death loot, before its body appears, now goes into its body, so it only comes from butchering (meat hook, butcher block, knife). Applies to every animal that leaves a body, not only deer.
+- `mixin/EntityMixin` (`strayCarcassLoot`). Built; not played. The path that dropped the deer's loot wasn't found in the code (its normal death loot already goes into the body), so this may not be the cause: check in game that a killed deer leaves a body and drops nothing.
+
+## 0.5.97 (2026-11-09): dirty water gives a slow parasite, hot chocolate cures it (#1165)
+
+- **Dirty water** (river/pond bottles and bank sips) no longer turns your stomach with nausea: it gives a parasite instead - slow damage at random ticks over a couple of in-game days, survivable, a reason to boil water rather than a death sentence.
+- **Hot chocolate** (an existing Kitchen drink) clears the parasite when drunk.
+- Kitchen: `climate/Thirst.java` applies the parasite on dirty drinks and cures it on hot chocolate in `consumed()`, new `climate/ParasiteEffect` (a Kitchen mob effect: HARMFUL, random tick damage, never lethal), registered in `climate/Climate.java`, new `data/jaymoskitchen/damage_type/parasite.json`, lang keys `effect.jaymoskitchen.parasite` and `message.jaymoskitchen.thirst.cured`.
+- Built with `./gradlew buildKitchen` and `tools/pr_checks.py` pass; not tested in game.
+
+## 0.5.98 (2026-11-09): waterskin tiers - leather, iron, dragon canteens (#1176)
+
+- The waterskin now comes in three tiers instead of one item:
+  - **Leather Waterskin** (3 sips) — crafted with leather and string
+  - **Iron Canteen** (6 sips) — crafted with iron ingots and string
+  - **Dragon Canteen** (8 sips, cleans water as it fills) — crafted with dragon breath and string
+- Each tier has its own texture and tooltip showing the correct capacity. The dragon tier automatically cleans water when filled.
+- Built; not played.

@@ -1,0 +1,41 @@
+# Keeps the Gradle download in the cache that every pull request can read.
+# GitHub lets a PR restore caches saved on master (or on its own branch) only, and pr-checks.yml runs on PRs alone, so
+# without this the shared cache stayed empty: every PR's first run fetched Gradle from services.gradle.org and failed
+# whenever that answered 504. This runs on each push to master (Release's own [skip ci] commits are skipped), once a
+# day, and by hand, and saves the wrapper's Gradle (and, while it's there, Kitchen's and Kingdoms').
+name: Gradle cache
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: gradle-cache
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      - name: Fetch Gradle (a few tries)
+        run: |
+          for dir in . kingdoms kitchen; do
+            ok=0
+            for try in 1 2 3 4 5; do
+              (cd "$dir" && sh ./gradlew --version --no-daemon) && { ok=1; break; }
+              echo "Gradle download failed in $dir (try $try), waiting before the next one"
+              sleep $((try * 20))
+            done
+            [ "$ok" = 1 ] || exit 1
+          done

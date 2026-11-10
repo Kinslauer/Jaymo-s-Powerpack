@@ -108,7 +108,12 @@ public final class HollowBlight {
 
 	private static boolean immune(ServerPlayer player) {
 		return player.isCreative() || player.isSpectator() || Heritage.of(player) == Heritage.Kind.HOLLOW || PowersCompat.android(player)
-			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player);
+			|| Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN) || Lycans.cursed(player) || SkeletonCurse.cursed(player);
+	}
+
+	/** A skeleton's blight, taken before only the Skeleton Lord's curse made skeletons ({@link SkeletonCurse}): it fades. */
+	private static boolean stale(Blight blight) {
+		return blight.variant() == HeritageVariants.Variant.SKELETON;
 	}
 
 	/** A blow on {@code player} they lived through: one of the turners' may leave the blight. */
@@ -143,13 +148,15 @@ public final class HollowBlight {
 			// Passed out waiting to rise turned: wake at wakeAt and rise.
 			if (blight.passedOut()) {
 				if (player.level().getGameTime() >= blight.wakeAt()) {
-					Hollows.turn(player, blight.turn());
+					if (!stale(blight)) {
+						Hollows.turn(player, blight.turn());
+					}
 					player.removeAttached(BLIGHT);
 				}
 				continue;
 			}
 
-			if (immune(player) && !player.isCreative() && !player.isSpectator()) {
+			if (immune(player) && !player.isCreative() && !player.isSpectator() || stale(blight)) {
 				// turned some other way meanwhile (or already Hollow): nothing left for it to make
 				player.removeAttached(BLIGHT);
 				continue;
@@ -227,7 +234,7 @@ public final class HollowBlight {
 	/** For Powers' death by cause: one dying with the blight in them rises the Hollow it was making ({@code Mortality.MID_TURNS}). */
 	static Map.@Nullable Entry<Integer, Runnable> midTurn(ServerPlayer player) {
 		Blight blight = player.getAttached(BLIGHT);
-		if (blight == null || immune(player)) {
+		if (blight == null || immune(player) || stale(blight)) {
 			return null;
 		}
 		return Map.entry(tint(blight.variant()), () -> {

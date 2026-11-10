@@ -1,0 +1,7 @@
+Android mech geometry, textures and animations: original Jaymo's Powers project art.
+No third-party art is incorporated, so no upstream art licence applies.
+This provenance file does not relicense the project's existing assets.
+
+External library used at runtime, not bundled in the art:
+GeckoLib 5.5.7, Copyright Tslat and contributors, MIT License.
+https://github.com/bernie-g/geckolib

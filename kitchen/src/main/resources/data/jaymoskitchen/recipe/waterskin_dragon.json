@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " s ",
+    "d d",
+    " d "
+  ],
+  "key": {
+    "s": "minecraft:string",
+    "d": "minecraft:dragon_breath"
+  },
+  "result": {
+    "id": "jaymoskitchen:waterskin_dragon"
+  }
+}

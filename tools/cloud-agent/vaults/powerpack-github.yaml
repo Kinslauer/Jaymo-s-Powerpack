@@ -1,0 +1,4 @@
+# Holds the GitHub token the GitHub MCP server uses to open PRs. Only the container lives here: the credential is
+# added with `py tools/cloud-agent/run.py credentials` and is never written to a file.
+type: vault
+display_name: Powerpack GitHub

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "origin": {
+    "base_url": "https://api.anthropic.com",
+    "organization_id": "d7080dcc-1e63-49b3-8873-b2eb572aef3b",
+    "workspace_id": "wrkspc_01S5dmRpm54qToiokLjJoUEq"
+  },
+  "resources": {
+    "./agents/bug-hunter.md": {
+      "kind": "agent",
+      "id": "agent_01B92Fm15AXviNJmFAWcKLvW",
+      "version": "1",
+      "hash": "94d0645893eb0d7c227fd84b38cd33fe",
+      "remote_hash": "d4591203afdf91b88ea45186974cc53b",
+      "stamp": "1"
+    },
+    "./agents/powerpack-builder.md": {
+      "kind": "agent",
+      "id": "agent_01C8KTpD7f5C6i5t71ccSToB",
+      "version": "2",
+      "hash": "41fd67ea83918757a5ed2c889a86369f",
+      "remote_hash": "4dd215077d11ecec1efdbfc0e3b34f8e",
+      "stamp": "2"
+    },
+    "./environments/bug-hunt.yaml": {
+      "kind": "environment",
+      "id": "env_01RaXiDYLDwzqeTr6TakNAqs",
+      "hash": "50b2140ac30efa6a49343d68fe940c5b",
+      "remote_hash": "111617b2b6447a5bfea62b1614eae646",
+      "stamp": "2026-11-09T20:11:27.221845Z"
+    },
+    "./environments/powerpack-build.yaml": {
+      "kind": "environment",
+      "id": "env_01QyFfWz2CwN12Sx2jCMQC7g",
+      "hash": "d471df1b5811f6d26fd23113c0b6a16b",
+      "remote_hash": "bc559ef634280de1641ddb7e4af253c7",
+      "stamp": "2026-11-09T12:38:20.822999Z"
+    },
+    "./vaults/powerpack-github.yaml": {
+      "kind": "vault",
+      "id": "vlt_011CgsNFuncgHznU9hcJgYiv",
+      "hash": "162620638c8555eab30d23647811ba0f",
+      "remote_hash": "162620638c8555eab30d23647811ba0f",
+      "stamp": "2026-11-09T12:38:21.011038Z"
+    }
+  }
+}

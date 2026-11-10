@@ -1,0 +1,7 @@
+{
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/telescope"
+  }
+}

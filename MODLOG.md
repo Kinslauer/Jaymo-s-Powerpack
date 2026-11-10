@@ -1818,3 +1818,82 @@ Seven new Ultimate alien forms for the Xeno-Band, each with its own model, textu
 - **Nightfall** (Lurk's Ultimate): tall stalker at 1.3x, bone-black plated arms, spined ridge, four eye domes. R: Mark of Night (up to 3 creatures within 64 blocks glow, lose track of you). G: Nightstep (step behind target or first mark within 32 blocks, strike doubled if unseen, G again chains to next mark). V: Terror (everything looking at you and all marks: Darkness, Slowness II, Weakness II, Blindness, monsters drop target and shoved). B: Deep Fade (unseen with Speed I, first strike doesn't break it, second does). C: Nightfall (16 blocks for 160s: everything else Blinded, glows on your screen alone).
 
 Each Ultimate has its own model (Ultimate<Name>.java in client/power/xenoform/ultimate/) and its own 128x128 skin with glow map (tools/ultimates/<id>.py). Health bar sits on top of the base form's bar. All effects respect pvp and team protection. Nothing persists when the Ultimate ends, the player dies, changes dimension or quits, or the server stops.
+
+## 0.21.76 (2026-11-09): Blood pools grow, drag trails as wide as the body (#1169)
+
+- **Blood pools as it gathers** (Andy: puddles "should increase in size the more it accumulates"). Blood landing on or at
+  the edge of a pool of the same blood (rain of blood, a body bleeding on one spot, repeated hits, drips) now soaks into
+  it: the pool spreads out, lies thicker and darker the bigger it gets (up to a cap), and lies fresh again, instead of
+  many small puddles stacking. A pool grown into another of the same blood runs together with it into one. Holds for
+  the server's lasting stains and the client's splash pools alike; fewer decals lie about as a result. Heritage colours
+  only pool with their own (magma keeps its glow).
+- **Drag trails like the rest of the blood** (Andy: "a large body will drag and a single tiny trail of blood will be
+  there"). A dragged or crawling body, and a Kitchen carcass dragged behind a player, now leaves a smear as wide as its
+  hitbox (a man's broad, a cow's wide, a chicken's thin) made of overlapping blotchy pieces, with drops shaken off beside
+  it, a denser blot where it turned, and a pool where it lay still. Dragging back over the same trail darkens and widens
+  it rather than stacking pieces. A downed body's trail still thins as it weakens.
+- Tuning: `BloodTrail.TOUCH` / `GROW` / `MAX_SCALE` / `DRAG_*`, `BloodSmears.TRAIL_WIDTH` and the step, drop, turn and
+  stop constants, `BloodPuddle.THICK_*` / `POOL_*` / `DRAG_ALPHA`, `BloodClient.POOL_*`.
+
+## 0.21.77 (2026-11-09): Dying mid-turn no longer locks you in the black (#1172)
+
+- **The lock** (Andy: "I was locked in the revive screen"): a body rising turned (dying mid-turn, or a turned kill) wasn't spared like one lying left for dead, so a skeleton kept executing it in the black. Each death rolled a new mid-turn death and began the 14 s black again (the server log had five in 35 s). Now mobs spare and lose interest in any body that is waking, and a death while the wake is under way is turned away without restarting it (`Mortality#stillWaking`).
+- **Safety**: a wake under way that runs 30 s past its moment (`WAKE_LIMIT`) is done where they lie, whatever held it up. A knock-out long enough to be a lying body's, with no wake behind it any more, is cut short every second, not only on joining.
+- **Relogging** while rising turned: they're woken where they lie as they leave, the turning done, rather than losing the turn and coming back to the black.
+- **Struggle up with a healing item** (Andy: "if you are too damaged to get up, you can struggle with a healing item in hand to get yourself back up"): downed, awake and too hurt to rise, hold use with a healing item (`#jaymospowers:self_revive`: golden apples, linen bandages, the healer's satchel, Draught of Vigour, Bone-Knitting Elixir; and any potion of healing, drunk or splash) for 4 s. The bar fills, the item is used up and you're up with at least 2 hearts (`HealStruggle`). Let go and the bar keeps its place; a blow breaks it off. The downed screen doesn't mention it: it still says only "Hold sneak to give up".
+- Built; not played.
+
+## 0.21.78 (2026-11-09): Heart crystal ore artwork (#1167)
+
+- **Heart crystals**: original stone and deepslate ore artwork with matching clusters of small, deep rusty-red crystal hearts, plus a cut-crystal drop with a heart visible inside.
+- Art and models only; registration, generation, drops and health mechanics belong to the ore-hearts task. Editable Blockbench projects are in `art/heart-crystal/`; no third-party art used.
+- Built and visually rendered; not tested in game.
+
+## 0.21.79 (2026-11-09): Blight mobs - elite variants of existing mobs (#1166)
+
+- **Elites**: a small share of natural spawns come in blighted - more health, damage, speed, a little armour and a
+  longer chase range, a green haze around them and a name over their head (Blighted / Corrupted / Plagueborn, then
+  the Tainted / Risen / Hollow / Festering). The share scales with local difficulty, so a spot that has been fought
+  over for a while sends harder ones.
+- **Which mobs**: the pack's own monsters first (sky warden, zephyr, tempest, blue and golden swet, skephid,
+  gravitite taluton, cockatrice, carrion sprout, flux wisp, frostbite, xeno stalker) plus the usual vanilla hostiles;
+  the `can_be_blighted` entity type tag decides, so a data pack can change the list.
+- **Drops**: the same as the plain mob - no extra loot yet.
+- **Night**: no night weighting; the chance follows local difficulty only.
+- **Not seen through walls**: they are ordinary mobs that path to you like any other, so no tracking through blocks.
+- Built and the server starts with it; not played in game.
+
+## 0.21.80 (2026-11-09): Chrono: Time Stop (sneak + C), the whole world frozen on vanilla's tick freeze (#1175)
+
+- **Time Stop** (Timeless Chrono, sneak + C; plain C is still Chrono Punch): for 5 s the whole server stands still on vanilla's own tick freeze (`/tick freeze`). Mobs, arrows and other shots in mid-air, falling blocks, water, lava, fire, redstone, crops, the sun and the weather all stop, and every screen holds its particles and animations mid-motion. Only the Chrono moves and acts. 3 minute cooldown of its own (Chrono Punch keeps its 8 s).
+- Every other player is held where time caught them: no gravity, no movement keys, no attacking, mining, building, using items or powers (they can still look around). Nothing hurts them while it lasts but the Chrono's own blows. The freeze is one switch for the whole server (vanilla has no per-area freeze), so the stop is too.
+- The Chrono's blows don't land at once: each one thuds and is banked (64 at most), and they all land when time resumes, knockback and all (capped). Arrows they fire hang in front of the bow and fly on afterwards.
+- Everyone's screen goes grey while it lasts (held players a darker blue-grey closing in from the edges), a clock ticks through it, and time resumes with a bright flash and a chime.
+- It always ends: when its 5 s run out, or the Chrono dies, goes down, logs out, loses the power or turns spectator, or someone runs `/tick unfreeze`, and when the server stops. One at a time: it won't start while the server is already frozen (another Chrono's stop or `/tick freeze`). Held players' flying-kick counter is reset every tick, so nobody is kicked for floating.
+- `ChronoTimeStop`, `ChronoTimeStopSync`, `ChronoTimeStopClient`; `StasisField`'s locks and `ChronoStunInputMixin` also hold Time Stop's players. Tuning: `ChronoTimeStop.DURATION`, `COOLDOWN`, `MAX_HITS`, `MAX_RELEASE_SPEED`.
+- Built; not played.
+
+## 0.21.81 (2026-11-09): Remove double-tap Sneak zoom gesture (#1186)
+
+The double-tap Sneak (within 6 ticks) to activate OK Zoomer's zoom is removed. The Shift+Left Alt zoom gesture remains unchanged.
+
+## What the player will see
+- Double-tapping Shift no longer zooms the camera.
+- Holding Shift + Left Alt together still zooms until Alt is released.
+- Alt alone still rolls (dodges).
+- The slide gesture (holding Sneak for 1.5s in a sprint) is unaffected.
+
+## Changes
+- `SneakZoom.java`: Removed `DOUBLE_TAP_TICKS` constant and `sinceLastTap` field. Removed the double-tap detection logic in `tick()`. The Shift+Alt zoom path and cling/bar/slide blocking logic remain.
+- `Slide.java`: Updated javadoc to remove reference to "zoom's double-tap".
+- `FreerunClient.java`: Updated javadocs in `trySlide()` and `slideWindup()` to remove references to the zoom double-tap.
+- `docs/AI-HANDBOOK.md`: Updated Controls section to remove "tap then hold Shift" from the Zoom description.
+
+## Not tested in game
+Zoom behavior with OK Zoomer mod not verified in multiplayer.
+
+## 0.21.82 (2026-11-09): Android mechs move with GeckoLib (#1195)
+
+- **Four animated builds**: Warden, Bulwark, Strider and Reclaimer keep their original geometry, skins, optional equipment and glowing visor/core/lights on one shared Blockbench rig.
+- **Original motion**: coolant-breathing idle, the old leg/knee/arm walk, target-following cannon aim, shot recoil, shoulder-shell fire, a double-fisted smash, hit flinch and a held collapsing death pose. Editable projects and inspected old/new renders are in `art/`; no outside art was used.
+- Built and render-checked; not played in game. Two dev-server boot attempts stopped before world load on unrelated missing mod dependencies (Stormie's Spiders needing Fabric API, then It Takes a Pillage needing Resourceful Lib).

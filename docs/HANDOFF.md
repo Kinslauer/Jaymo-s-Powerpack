@@ -31,6 +31,8 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
 ## Building (in a cloud session)
 - JDK 25 and Gradle wrapper 9.7.1. `./gradlew build` in the root (or in `kingdoms/`, `kitchen/`). Build output goes
   to `build/` (on the home PC it goes to `E:\...`, kept out of OneDrive).
+- Cloud sessions: use the **Jaymo-s-Powerpack** environment (its hosts and JDK 25 setup are in `docs/AI-HANDBOOK.md`,
+  "3. Building"); run `bash gradlew`, since `gradlew` is not executable in git.
 - 26.3 ships unobfuscated (Mojang names, no mappings). There are no decompiled sources in the repo; on the home PC
   they were at `E:\mcsrc-26.3`. In a cloud session, `./gradlew genSources` (Loom) gives them; **always check an API
   in the 26.3 sources before using it**: much has changed since older versions.
@@ -38,7 +40,7 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   write to the CurseForge profile and the friends' server folder, `../Serverfiles`, which isn't in the repo).
 
 ## 26.3 API facts learned the hard way
-`ModelPart` has no `copyFrom`: use `part.loadPose(other.storePose())`; `EntityTypes.PLAYER` (not `EntityType.PLAYER`); Kitchen's jar builds to `E:\jaymos-kitchen-build\libs\`;
+`ModelPart` has no `copyFrom`: use `part.loadPose(other.storePose())`; `EntityTypes.PLAYER` (not `EntityType.PLAYER`); Kitchen's jar builds to `E:\jaymos-kitchen-build\<checkout folder>\libs\` (e.g. `Origins-Mod`; one folder per checkout since 2026-11-09);
 `Entity.syncVelocity = true` (no hurtMarked); `ServerPlayer.drop(stack, false, Prediction.SERVER_ONLY)`;
 `new ItemStack(item).getHoverName()`; `Vec3.STREAM_CODEC`; `EntityType.builtInRegistryHolder().is(tag)`;
 `PushReaction.IMMOVEABLE`; `collector.submitMovingBlock(poseStack, MovingBlockRenderState, outlineColor)`;
@@ -64,7 +66,7 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
   0.5 b/t, and Gravity's Weightless which they asked for).
 - Movement powers feel physical: hunger cost, inertia, crash damage scaling with speed².
 - Power HUDs sit bottom-right, right of the hotbar, in Wind's chip style; never mid-screen. (0.19.79) Every HUD piece now goes through `client/hud/HudZones` and `HudStyle`: see `docs/HUD-Layout.md`.
-- Natural awakenings start with one ability; the rest unlock through Mastery: 3 in-game days an ability from time alone, ability use and meditating (I) bring it down to 1 day, training in someone else's Immense Field to half a day (the field's owner only while shadowboxing in it beside another shadowboxer; a Gravity user's shadowboxing pays only with a partner). Creative gets all.
+- Natural awakenings start with one ability; the rest unlock through Mastery: 3 in-game days an ability from time alone; ability use and meditating (I) bring it down to 1 day, training in someone else's Immense Field to half a day (the field's owner only while shadowboxing in it beside another shadowboxer; a Gravity user's shadowboxing pays only with a partner). Creative gets all.
 - Ascension/corruption is discovered in play; messages stay vague; cures are circumstances in the world.
 - Every release gets a new `version` (new packets break old clients); since 2026-11-08 the Release workflow bumps it
   after each merge from the PR's change note (`changes/README.md`). After a release on the home PC:

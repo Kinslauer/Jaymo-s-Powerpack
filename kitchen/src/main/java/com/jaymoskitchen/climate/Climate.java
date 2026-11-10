@@ -39,10 +39,14 @@ import net.minecraft.world.level.gamerules.GameRuleCategory;
  * (0.5.25) Thirst ({@link Thirst}) and body heat ({@link BodyHeat}): their items, rules and server loop. Water is
  * boiled clean by using a bottle of it or a {@link WaterskinItem} on a lit campfire. Ops can switch either off with
  * the game rules {@code jaymoskitchen:thirst} and {@code jaymoskitchen:body_heat}.
+ * <p>
+ * (0.5.80) Waterskins come in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
  */
 public final class Climate {
 	public static Item CLEAN_WATER;
-	public static Item WATERSKIN;
+	public static Item WATERSKIN_LEATHER;
+	public static Item WATERSKIN_IRON;
+	public static Item WATERSKIN_DRAGON;
 	public static DataComponentType<WaterskinItem.Water> WATERSKIN_WATER;
 	public static GameRule<Boolean> THIRST;
 	public static GameRule<Boolean> BODY_HEAT;
@@ -60,11 +64,18 @@ public final class Climate {
 				.build());
 		CLEAN_WATER = item("clean_water", Item::new, new Item.Properties().stacksTo(16)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK).usingConvertsTo(Items.GLASS_BOTTLE));
-		WATERSKIN = item("waterskin", WaterskinItem::new, new Item.Properties().stacksTo(1)
+		WATERSKIN_LEATHER = item("waterskin_leather", p -> new WaterskinItem(WaterskinItem.Tier.LEATHER, p), new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		WATERSKIN_IRON = item("waterskin_iron", p -> new WaterskinItem(WaterskinItem.Tier.IRON, p), new Item.Properties().stacksTo(1)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		WATERSKIN_DRAGON = item("waterskin_dragon", p -> new WaterskinItem(WaterskinItem.Tier.DRAGON, p), new Item.Properties().stacksTo(1)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		ParasiteEffect.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(CLEAN_WATER);
-			output.accept(WATERSKIN);
+			output.accept(WATERSKIN_LEATHER);
+			output.accept(WATERSKIN_IRON);
+			output.accept(WATERSKIN_DRAGON);
 		});
 
 		// class-load the synced attachments on both sides (a dedicated server's clients must know them)
@@ -116,7 +127,7 @@ public final class Climate {
 			PotionContents contents = held.get(DataComponents.POTION_CONTENTS);
 			return contents != null && contents.is(Potions.WATER);
 		}
-		if (held.is(WATERSKIN)) {
+		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
 			WaterskinItem.Water water = WaterskinItem.water(held);
 			return water.sips() > 0 && !water.clean();
 		}
@@ -126,7 +137,7 @@ public final class Climate {
 	/** It comes off the fire clean. */
 	private static void boil(ServerPlayer player, BlockPos pos) {
 		ItemStack held = player.getMainHandItem();
-		if (held.is(WATERSKIN)) {
+		if (held.is(WATERSKIN_LEATHER) || held.is(WATERSKIN_IRON) || held.is(WATERSKIN_DRAGON)) {
 			held.set(WATERSKIN_WATER, new WaterskinItem.Water(WaterskinItem.water(held).sips(), true));
 		} else {
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemUtils.createFilledResult(held, player, new ItemStack(CLEAN_WATER)));

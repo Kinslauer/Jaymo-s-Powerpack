@@ -98,6 +98,7 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
+		ChronoTimeStopClient.init();
 		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
 		MuzzleFlashParticle.register();
@@ -191,7 +192,8 @@ public final class ChronoPowerClient implements PowerClient {
 
 	@Override
 	public void onUltimate(LocalPlayer player, boolean down) {
-		if (down && ultimateLeft > 0) {
+		// sneaking it's Time Stop, which has its own cooldown (the server says if it isn't ready)
+		if (down && ultimateLeft > 0 && !player.isShiftKeyDown()) {
 			ultimateDenied = 6;
 			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
 		}

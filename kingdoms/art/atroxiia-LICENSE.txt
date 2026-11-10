@@ -1,0 +1,10 @@
+Atroxiia geometry, textures and animation keyframes: original Jaymo's Kingdoms project art.
+No third-party art is incorporated, so no upstream art licence applies.
+This provenance file does not relicense the project's existing assets.
+
+Motion/gameplay reference only: Saint's Dragons by Leon Saint.
+Its code is MIT; its art is All Rights Reserved. No art or extracted animation data was used.
+
+External library used at runtime, not bundled in the art:
+GeckoLib, Copyright Tslat and contributors, MIT License.
+https://github.com/bernie-g/geckolib
