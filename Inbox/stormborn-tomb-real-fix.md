@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: done
 for: hephaestus
 from: Andy (vault thread, 2026-11-10: reopen the #1218 follow-up)
 asked: 2026-11-10
 claimed_by: 
-pr: 
+pr: 1254
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/dungeon/StormbornTomb.java, kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
 writer: hermes-writer
 text_pass: none
