@@ -24,7 +24,7 @@ Inbox tasks (each syncs first and after, so everyone sees the change at once):
 Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
 Kanban.md: every sync rewrites a board of the Inbox (Waiting / Being built / In review / Needs Andy / Done) for
 Obsidian's Kanban plugin. It is read-only: change tasks with --set, not by dragging cards.
-Stale work: a claim or running agent note with no change for 12 hours is handed back or marked stalled, and a running
+Stale work: a claim or running agent note with no sign of work for 30 minutes is handed back or marked stalled, and a running
 note whose task is done is moved to Done (tidy_stale), so dead runs don't sit in Being built.
 Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
 Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it.
@@ -161,16 +161,45 @@ def tidy_merged(live):
     tidy_stale(live)
 
 
-STALE_HOURS = 12  # a claim or a running note with no change for this long belongs to work that died
+# (Andy, 2026-11-10: "claims should clear after being stale for 30m") minutes with no sign of work before a claim or
+# a running note counts as dead. Signs of work: the note itself, the agent's note for it, and the task's worktree
+# (E:/wt/<task>, E:/wt/<task>-text: last commit or any uncommitted file), so a long build doesn't count as stale.
+STALE_MINUTES = 30
+CLOUD_STALE_MINUTES = 120  # cloud runs (claude-cloud) leave no local worktree to watch: give them longer
+WORKTREES = "E:/wt"
+
+
+def last_activity(live, task, *paths):
+    """Newest sign of work on `task` (epoch seconds): the given note files, its agent note, its worktrees."""
+    times = [os.path.getmtime(p) for p in paths if os.path.isfile(p)]
+    agent = os.path.join(live, "Agents", task + ".md")
+    if os.path.isfile(agent):
+        times.append(os.path.getmtime(agent))
+    for wt in (os.path.join(WORKTREES, task), os.path.join(WORKTREES, task + "-text")):
+        if not os.path.isdir(wt):
+            continue
+        last = run(["git", "-C", wt, "log", "-1", "--format=%ct"], check=False).stdout.strip()
+        if last.isdigit():
+            times.append(int(last))
+        changed = run(["git", "-C", wt, "status", "--porcelain"], check=False).stdout.splitlines()
+        for line in changed[:200]:
+            f = os.path.join(wt, line[3:].strip().strip('"').split(" -> ")[-1])
+            if os.path.exists(f):
+                times.append(os.path.getmtime(f))
+    return max(times) if times else 0
+
+
+def stale(live, task, path, props):
+    limit = CLOUD_STALE_MINUTES if props.get("claimed_by") == "claude-cloud" else STALE_MINUTES
+    return time.time() - last_activity(live, task, path) > limit * 60
 
 
 def tidy_stale(live):
     """Clears what dead work leaves behind (Andy, 2026-11-10: "lots of mistakes and wasted time on stale processes"):
     - an agent note still `running` whose Inbox task is already done: done, moved to Agents/Done/;
-    - an agent note `running` with no change for STALE_HOURS: `stalled` (shown under Needs Andy, not Being built);
-    - an Inbox task `claimed`/`writing` with no change for STALE_HOURS: handed back (`open`, or `changes` when it has
+    - an agent note `running` with no sign of work for STALE_MINUTES: `stalled` (shown under Needs Andy, not Being built);
+    - an Inbox task `claimed`/`writing` with no sign of work for STALE_MINUTES: handed back (`open`, or `changes` when it has
       a PR) with its claim cleared, so the next bot or agent takes it instead of everyone skipping it."""
-    now = time.time()
     agents, inbox = os.path.join(live, "Agents"), os.path.join(live, "Inbox")
     done_tasks = {n[:-3] for n in os.listdir(os.path.join(inbox, "Done"))} if os.path.isdir(os.path.join(inbox, "Done")) else set()
     for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
@@ -186,20 +215,20 @@ def tidy_stale(live):
             add_note(path, f"Its Inbox task `{task}` is done; moved to Agents/Done.")
             os.makedirs(os.path.join(agents, "Done"), exist_ok=True)
             os.replace(path, os.path.join(agents, "Done", name))
-        elif now - os.path.getmtime(path) > STALE_HOURS * 3600:
+        elif stale(live, task, path, props):
             set_props(path, {"status": "stalled"})
-            add_note(path, f"No change for {STALE_HOURS} h: marked stalled (whoever ran it stopped).")
+            add_note(path, f"No sign of work for {STALE_MINUTES} min: marked stalled (whoever ran it stopped).")
     for name in sorted(os.listdir(inbox)) if os.path.isdir(inbox) else []:
         path = os.path.join(inbox, name)
         if not name.endswith(".md") or not os.path.isfile(path):
             continue
         props = frontmatter(path)
-        if props.get("status") not in ("claimed", "writing") or now - os.path.getmtime(path) <= STALE_HOURS * 3600:
+        if props.get("status") not in ("claimed", "writing") or not stale(live, name[:-3], path, props):
             continue
         back = "changes" if props.get("pr", "").strip() else "open"
         who = props.get("claimed_by") or props.get("writer") or "someone"
         set_props(path, {"status": back, "claimed_by": ""})
-        add_note(path, f"{who}'s claim had no change for {STALE_HOURS} h: handed back as {back}.")
+        add_note(path, f"{who}'s claim had no sign of work for {STALE_MINUTES} min: handed back as {back}.")
 
 
 KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanban.md as a board
