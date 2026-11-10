@@ -17,7 +17,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · claimed
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
