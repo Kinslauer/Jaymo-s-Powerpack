@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:48). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,7 +25,6 @@ kanban-plugin: board
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · claimed
@@ -46,6 +45,7 @@ kanban-plugin: board
 
 ## Text pass
 
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 
 
 ## In review
