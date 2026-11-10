@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
-- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · #1237 · in-review
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · #1238 · in-review
+- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · #1240 · in-review
 
 
 ## In review
