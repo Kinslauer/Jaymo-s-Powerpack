@@ -135,7 +135,10 @@ geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.an
   kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
   or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80b98cf10507fa2d0d30b7d4af45e96c3bd1d8de
 Original project art (no third-party art or licence):
 geckolib/models/entity/varasuchus.geo.json, geckolib/animations/entity/varasuchus.animation.json and dragon/varasuchus/
   hide_*.png, marks_*.png: Varasuchus, the crocodile dragon
@@ -143,6 +146,7 @@ geckolib/models/entity/varasuchus.geo.json, geckolib/animations/entity/varasuchu
   former VarasuchusDragonModel's pose code: Prometheus, kingdoms/tools/gen_varasuchus_geo.py. Saint's Dragons is a
   motion reference only; none of its All Rights Reserved art or animation data is used. Provenance and renders:
   kingdoms/art/varasuchus*.
+<<<<<<< HEAD
 
 geckolib/models/entity/stegonaut.geo.json, geckolib/animations/entity/stegonaut.animation.json and dragon/stegonaut/
   hide_*.png, marks_*.png: Stegonaut, the plated lesser dragon
@@ -151,3 +155,5 @@ geckolib/models/entity/stegonaut.geo.json, geckolib/animations/entity/stegonaut.
   Dragons is a gameplay reference only; none of its All Rights Reserved art or animation data is used.
   Sources and renders: kingdoms/art/stegonaut*.
 
+=======
+>>>>>>> 80b98cf10507fa2d0d30b7d4af45e96c3bd1d8de
