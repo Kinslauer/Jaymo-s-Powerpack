@@ -10940,3 +10940,25 @@ comment on this" (`Stench`, reading Powers' smell).
 - A villager near enough to catch a whiff now and then says so (6 lines; goblins and orcs approve, 3 lines), at most
   once every 2 minutes.
 - Compile-checked; not played.
+
+## 0.7.708 (2026-11-10): The Bogre: a solitary swamp ogre (#1251)
+
+- **The Bogre** now lives in the mangrove swamps: a huge, slow ogre with Inhabitants' model, texture and animations (JeremySeq / Team Synapse, art by Catalyst, MIT; credit in `kingdoms/art/bogre-CREDITS.md`). The behaviour is our own, written after Inhabitants'.
+- It leaves unarmed people alone. Come within 12 blocks with a weapon out (sword, axe, spear, bow, crossbow, trident, or anything that hits harder than a stone tool) and it stands and roars once, shaking your view. Stay armed within 6 blocks after that, or hit it, and it roars again and fights you. It forgets a warning after a minute.
+- Its only blow is a hammer slam: it runs at you, swings when you're within 4.5 blocks, and the slam sends a shockwave 6 blocks around the hammer (18 damage at the centre, less at the edge, throws you up and away). Jump it and it misses.
+- It keeps to itself: it walks away from villagers and other Bogres, and never spawns within 96 blocks of another Bogre or near a village. One at a time, persistent, 200 health.
+- It sleeps through the night when no one's near (sneaking lets you get within 2.5 blocks before it wakes), wakes at dawn or when hit, and dances while a jukebox plays near it.
+- Drops bones, bone blocks, leather and mushrooms. Spawn egg added. Its cooking and the Giant Bone Club are separate patches.
+- Classes: `inhabitants/Bogre` (new), `Inhabitants`, `client/inhabitants/InhabitantsClient` (`BogreRenderer`). Tuning numbers are the constants at the top of `Bogre`.
+- Built; not played. Spawning, the slam's reach against the model's swing and the animations haven't been seen in game.
+
+## 0.7.709 (2026-11-10): The Long Defence, a lore film (#1251)
+
+- **A lore film, played on your own game.** It's the old war, told without a word on screen. It's staged on the ground in front of you, as a memory: dim, with letterbox bars and the HUD cleared. It runs about 39 seconds, and holding sneak for a second skips it.
+- **The story:** a line of hearthlanders stands at night with five mages behind them: Grimsby, Thessaly, Ambrose and Varro as the living people their spirits were, and a fifth in plain grey. Black flame flickers up out of the ground, and each flicker shows more of the dead standing in it. The last one shows the sorcerer behind them. They clash and some of the line falls. Then each mage casts in turn: Varro's fire, Thessaly's ward, Grimsby's blade, Ambrose's light. The fifth walks out alone, the dead fall as he passes, and the sorcerer sinks into shadow. Nobody says who the fifth was.
+- **Where it plays:**
+  - The first time you open the lore book *The Long Defence*, the film plays instead of the pages; after that it reads as a book. The book drops from Draugr now and then and lies in camp stores.
+  - A court wizard offers "Ask About the Old War" on the Interact page.
+  - A demon master asks whether you came for the work or the old war.
+  - Ops can use `/kingdom film long_defence [players]`.
+- The actors are only on your own game, and their skins are our own (`tools/gen_film_skins.py`). Players without Kingdoms on their client just get the book.

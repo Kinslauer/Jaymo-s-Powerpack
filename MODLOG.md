@@ -2165,3 +2165,11 @@ Andy's TFC Hardrock picks ("if you stink you'll be caught"): `core/wet/Smell` ke
 living adds a little (filthy in about three days), sprinting more, and grimy armour adds up to 40 on top. Going under
 water washes it all off, wading or standing in the rain slowly, and the scrub at a water cauldron (sneak, empty hand)
 now scrubs you as well as your armour. Kept through death. Jaymo's Kingdoms reads it for mob senses and villager remarks.
+
+## 0.21.107 (2026-11-10): Freecam, creative only (#1251)
+
+- **Freecam** (MIT, shipped unchanged) is in the pack: press its key and the camera flies free of your body to line up shots, then snaps back. Picked from the Jujutsu Five list.
+- Creative only: out of creative or spectator, a Freecam left on turns itself off with a line on the action bar. Freecam is client-only, so the rule runs on each player's own game.
+- It also turns off while one of our films plays (an ultimate's film, a beam clash), so it can't fight the film camera.
+- Classes: `client/compat/FreecamCompat` (new, by reflection, so nothing breaks without Freecam). `build.gradle` packModsNoCf entry (CurseForge id still to look up from the home PC).
+- Built; not played.
