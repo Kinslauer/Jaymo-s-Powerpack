@@ -1,6 +1,6 @@
 # Titan voices for the Great Ape and every xeno form, carrying to the ground; giants hear the ground; spilt blood lies still
 - **Titan voice** (Andy: "a transformed great ape, and every xeno form, gets a titan voice changer turned on"). In any of
-  the Xeno-Band's alien forms, Simple Voice Voice Changer's own Titan voice is now forced on, as the werewolf's and the
+  the Xeno-Band's alien forms, Simple Voice Chat's Titan voice is now forced on, as the werewolf's and the
   Great Ape's voices are (the ape keeps its deeper, growling titan). It's the voice changer's own effect on the
   speaker's client, so nothing new had to be written for the sound. `VoiceMasks.Mask.TITAN`, `VoiceChangerCompat`,
   `PowersCompat#xenoForm`.
@@ -23,6 +23,5 @@
   2 hearts). The scent is no longer shown again: where the blood falls it now leaves one of Powers' lasting stains, in
   the player's own blood, which lies still, dries darker and can be tracked like the rest. Zombies still smell it as
   before. Tuning: `Awareness.DRIP_STAIN` / `WOUND_STAIN`.
-- Built; not played. Not tested: voices with Simple Voice Chat on the Deck (how loud a titan sounds from far off, and
-  how the ape hears the ground in third person and in first), the Titan voice on a xeno form, the stains under a
-  bleeding player.
+- Built; not played. Not tested: Simple Voice Chat voices on the Deck (how loud a titan sounds from far off, how the
+  ape hears the ground in third and first person), the Titan voice on a xeno form, the stains under a bleeding player.
