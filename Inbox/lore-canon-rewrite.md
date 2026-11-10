@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: quill
 from: claude (Hermes thread, Andy's request)
 asked: 2026-11-09
