@@ -233,8 +233,7 @@ def tidy_stale(live):
 
 KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanban.md as a board
     ("Waiting for a bot", ("open",)),
-    ("Being built", ("claimed", "changes")),
-    ("Text pass", ("text-pass", "writing")),  # in-review but the writer bot hasn't gone over its text yet
+    ("Being built", ("claimed", "changes", "writing")),  # being built or text-pass being written
     ("In review", ("in-review",)),
     ("Needs Andy", ("ready", "sent", "blocked")),
 )
@@ -281,7 +280,7 @@ def write_kanban(live):
     for _, name, p in sorted(tasks(live)):
         tasks_seen.add(name)
         for lane, statuses in KANBAN_LANES:
-            status = "text-pass" if awaiting_text_pass(p) else p.get("status")
+            status = p.get("status")  # no text-pass lane: tasks keep their real status
             if status in statuses:
                 lanes[lane].append(card("Inbox", name, p, "fixing review notes" if status == "changes" else ""))
     agents = os.path.join(live, "Agents")
