@@ -27,6 +27,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -56,6 +57,11 @@ import org.jspecify.annotations.Nullable;
  * A rider may come to help: he rides over, gets down {@link #DISMOUNT_REACH} off, tends them on foot while his horse
  * waits, and climbs back up when he's done (or called away). The horse he left is kept for him meanwhile: no other
  * rider takes it and a lent one doesn't vanish ({@link #waiting}).
+ * <p>
+ * Tiv (2026-11-08): "When players are downed they should not still be attacked by villagers, guards, or those that have
+ * them captive ... death is real and close." Those who'd leave a body on the ground ({@link #holdsFire}) don't take a
+ * downed player for a target, and a blow of theirs already on its way doesn't land; whatever hunts the downed is as
+ * deadly as ever.
  */
 public final class Downed {
 	/** (0.7.84) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
@@ -114,6 +120,12 @@ public final class Downed {
 				return true;
 			}
 			if (isDowned(entity)) {
+				if (source.getEntity() instanceof Mob mob && holdsFire(mob, entity)) {
+					// (Tiv: they leave a downed player lying there) a swing or an arrow already on its way lands for nothing,
+					// here, before Powers' three-heart blow could finish them; and it lets go of them
+					letGo(mob, entity);
+					return false;
+				}
 				Tending tending = TENDED.get(entity);
 				if (tending != null && source.getEntity() instanceof Player) {
 					// (a player's blow: whoever was tending them starts over)
@@ -234,6 +246,57 @@ public final class Downed {
 	/** (0.7.84) {@code v} is tending someone downed just now. */
 	public static boolean helping(LivingEntity v) {
 		return v instanceof Villager villager && HELPING.containsKey(villager);
+	}
+
+	/**
+	 * Tiv (2026-11-08): whether {@code attacker} leaves the downed player {@code body} lying there rather than finish them,
+	 * in a war, in the wild or at sea as much as at home:
+	 * <ul>
+	 * <li>their captors, while they're held in a camp's shackle ({@link #heldCaptive}), even after they've acted up;</li>
+	 * <li>a settlement's people ({@link HeldBack#townsperson}): every grown villager (MCA's guards and rulers too), the
+	 * realms' guards and archers, the sworn, and the settled factions' folk;</li>
+	 * <li>iron golems, and clockwork golems but a dungeon's rogue one.</li>
+	 * </ul>
+	 * Not those who hunt: monsters, illagers, a camp's people (raiders, pirates, greenskins, ogres), outlaws (looters,
+	 * assassins, the masked: {@link Outlaws#is}) and a vampire at night. They don't take a downed player for a target
+	 * ({@code ThrallTargetMixin}, {@code McaGuardFoesMixin}) and their blows don't land ({@link #register}). Powers'
+	 * execution is still for a hothead alone, by the town's law ({@link HeldBack#spares}). Server side.
+	 */
+	public static boolean holdsFire(LivingEntity attacker, LivingEntity body) {
+		if (!(attacker instanceof Mob mob) || !(body instanceof ServerPlayer player) || !isDowned(player)) {
+			return false;
+		}
+		if (heldCaptive(mob, player)) {
+			return true;
+		}
+		if (mob instanceof IronGolem) {
+			return !(mob instanceof ClockworkGolem clockwork && clockwork.rogue());
+		}
+		if (!HeldBack.townsperson(mob) || Outlaws.is(mob) || Captors.sentient(mob)) {
+			return false;
+		}
+		return !(Vampires.isVampire(mob) && Vampires.night(mob.level().getOverworldClockTime()));
+	}
+
+	/**
+	 * {@code mob} is one of the captors of {@code body}, a player held in a camp's shackle: anyone who takes captives, or
+	 * that camp's own people ({@link CaptiveConduct#captor}). They took them alive and keep them so; one who slipped
+	 * their chains is hunted as before. Powers' executions ask it too ({@link PowersCompat#spareRighteousGuards}).
+	 */
+	static boolean heldCaptive(Mob mob, LivingEntity body) {
+		return body instanceof ServerPlayer player && StoryHard.shackled(player) && CaptiveConduct.captor(mob, StoryHard.shackleCamp(player));
+	}
+
+	/** {@code mob} lets go of downed {@code body}: no longer its target. */
+	private static void letGo(Mob mob, LivingEntity body) {
+		if (mob.getTarget() == body) {
+			mob.setTarget(null);
+		}
+		// (as Rulers.target: a brain without the memory throws on getMemory)
+		if (mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+			&& mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) == body) {
+			mob.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+		}
 	}
 
 	/** (0.7.98) Down, by Jaymo's Powers' tag. Server side only (scoreboard tags aren't sent to the clients). */

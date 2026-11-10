@@ -650,7 +650,8 @@ public final class PowersCompat {
 	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer
 	 * ({@link Downed#isGuard}) or a village's own iron golem never finishes off a downed player, unless the guard is
 	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. (0.7.570) Any of a town's people now, and a
-	 * hothead only alone and only over a real enemy ({@link HeldBack#spares}). Nothing without that Powers.
+	 * hothead only alone and only over a real enemy ({@link HeldBack#spares}). Nor does a downed captive's captor
+	 * ({@link Downed#heldCaptive}). Nothing without that Powers.
 	 */
 	@SuppressWarnings("unchecked")
 	static void spareRighteousGuards() {
@@ -661,6 +662,8 @@ public final class PowersCompat {
 			Object list = Class.forName("com.jaymospowers.core.wounds.MobExecutions").getField("SPARE").get(null);
 			// (0.7.570) a town's people hold each other to the law: HeldBack
 			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(HeldBack::spares);
+			// (and a captive's captors keep them alive)
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Downed::heldCaptive);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
 		}

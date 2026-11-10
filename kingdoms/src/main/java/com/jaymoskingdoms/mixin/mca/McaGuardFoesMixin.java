@@ -21,8 +21,9 @@ abstract class McaGuardFoesMixin {
 	private static void jaymoskingdoms$foes(LivingEntity entity, LivingEntity guard, Optional<Player> followed, Optional<Integer> configured,
 		CallbackInfoReturnable<Integer> cir) {
 		if (guard != null && (com.jaymoskingdoms.SwornCaptains.spares(guard, entity) || com.jaymoskingdoms.InBalming.spares(guard, entity)
-			|| com.jaymoskingdoms.OgreHolds.spares(guard, entity))) {
-			// (0.7.433) a sworn captain never goes for his lord; (0.7.474) a goblin or an orc never for an ogre
+			|| com.jaymoskingdoms.OgreHolds.spares(guard, entity) || com.jaymoskingdoms.Downed.holdsFire(guard, entity))) {
+			// (0.7.433) a sworn captain never goes for his lord; (0.7.474) a goblin or an orc never for an ogre; and a guard
+			// never for a downed player (Downed#holdsFire)
 			cir.setReturnValue(-1);
 			return;
 		}
