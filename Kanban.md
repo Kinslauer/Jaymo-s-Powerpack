@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
@@ -39,6 +38,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/ore-hearts|ore-hearts]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
