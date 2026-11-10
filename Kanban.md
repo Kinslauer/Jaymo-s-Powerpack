@@ -16,12 +16,12 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☁️ Cloud · #1244 · in-review
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
 
 
 ## In review
