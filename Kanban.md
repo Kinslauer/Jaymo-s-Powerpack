@@ -28,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
-- [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #1222 · in-review
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · ☁️ Cloud · #1225 · in-review
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
+- [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · #1228 · in-review
 
 
 ## In review
