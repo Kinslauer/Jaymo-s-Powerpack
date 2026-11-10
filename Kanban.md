@@ -46,7 +46,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 🪶 Quill · #1207 · writing
 
 
 ## In review
