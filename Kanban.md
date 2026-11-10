@@ -33,11 +33,11 @@ kanban-plugin: board
 ## Text pass
 
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · 🪶 Quill · #1221 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 
 
 ## Needs Andy
