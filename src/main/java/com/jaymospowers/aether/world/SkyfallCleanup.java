@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -31,7 +32,9 @@ import net.minecraft.world.level.material.FluidState;
  * theirs: water poured on from an Aether spring, down through the Overworld's sky. Now, in a One Dimension world, every
  * chunk that loads is checked at the Aether's floor: water running on down out of it is traced back up through the Aether to the source blocks
  * feeding it, and each source is sealed with the stone beside it (or air), so the fall drains away by itself. A heavenfall
- * chunk's own fall is left alone once someone online has reached Dread, as for new chunks.
+ * chunk's own fall is left alone once someone online has reached Dread, as for new chunks. Andy still saw them on
+ * 2026-11-10: a chunk can load before its spring's water has run, so the chunks round every player are checked again every
+ * {@link #SWEEP_TICKS} ticks as well.
  * <p>
  * Only water that leaves the bottom of the Aether is touched, so pools and springs that land on the islands stay. That
  * includes a waterfall a player poured off an edge on purpose before Dread.
@@ -39,7 +42,14 @@ import net.minecraft.world.level.material.FluidState;
 public final class SkyfallCleanup {
 	// ---- tuning ----
 	/** Chunks checked per server tick. */
-	static final int PER_TICK = 4;
+	static final int PER_TICK = 8;
+	/**
+	 * How often (ticks) the chunks round each player are queued again. A spring in a chunk that loaded before its water had
+	 * run (made at the edge of sight, ticked later) only pours after the load check, so falls are looked for again here.
+	 */
+	static final int SWEEP_TICKS = 200;
+	/** Chunks out from each player that the sweep queues. */
+	static final int SWEEP_RADIUS = 10;
 	/** Water blocks a trace may visit before it gives up (a whole leaking lake is left as it is). */
 	static final int BUDGET = 8000;
 
@@ -66,10 +76,23 @@ public final class SkyfallCleanup {
 	}
 
 	private static void tick(MinecraftServer server) {
+		ServerLevel level = server.overworld();
+		if (server.getTickCount() % SWEEP_TICKS == 0 && Stacked.joined(server, WindAether.AETHER)) {
+			for (ServerPlayer player : level.players()) {
+				ChunkPos at = player.chunkPosition();
+				for (int dx = -SWEEP_RADIUS; dx <= SWEEP_RADIUS; dx++) {
+					for (int dz = -SWEEP_RADIUS; dz <= SWEEP_RADIUS; dz++) {
+						ChunkPos pos = new ChunkPos(at.x() + dx, at.z() + dz);
+						if (QUEUED.add(pos)) {
+							QUEUE.add(pos);
+						}
+					}
+				}
+			}
+		}
 		if (QUEUE.isEmpty()) {
 			return;
 		}
-		ServerLevel level = server.overworld();
 		int floor = Stacked.minY(server, WindAether.AETHER), top = Stacked.maxY(server, WindAether.AETHER);
 		for (int i = 0; i < PER_TICK && !QUEUE.isEmpty(); i++) {
 			ChunkPos pos = QUEUE.poll();

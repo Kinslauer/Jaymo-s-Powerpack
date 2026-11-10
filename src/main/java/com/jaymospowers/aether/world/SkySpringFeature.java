@@ -66,7 +66,7 @@ public record SkySpringFeature(SpringFeature spring) implements Feature {
 	}
 
 	private static boolean dreadReached(MinecraftServer server) {
-		if (!ZFighterKingdoms.present()) {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			// no world tiers to wait for
 			return true;
 		}
