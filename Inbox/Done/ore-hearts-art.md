@@ -15,6 +15,8 @@ suggested_owns:
   - src/main/resources/assets/jaymospowers/models/item/heart_crystal.json
   - src/main/resources/assets/jaymospowers/blockstates/heart_crystal_ore.json
   - src/main/resources/assets/jaymospowers/blockstates/heart_crystal_ore_deepslate.json
+writer: hermes-writer
+text_pass: none
 ---
 # Heart crystal ore: art for the ore hearts (modelling bot)
 

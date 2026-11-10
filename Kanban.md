@@ -4,62 +4,46 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 03:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 08:47). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/worldbound-gap-pass|worldbound-gap-pass]] · for hermes · open
-- [ ] [[Inbox/ore-hearts|ore-hearts]] · for hermes · open
-- [ ] [[Inbox/waterskin-tiers|waterskin-tiers]] · hermes-a · open
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for hermes · open
-- [ ] [[Inbox/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]] · for hermes · open
-- [ ] [[Inbox/astronomy-armillary|astronomy-armillary]] · for hermes · open
-- [ ] [[Inbox/astronomy-art|astronomy-art]] · for prometheus · open
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for hermes · open
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · for hermes · open
-- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for hermes · open
-- [ ] [[Inbox/astronomy-telescope|astronomy-telescope]] · for hermes · open
-- [ ] [[Inbox/reincarnation-full-reset|reincarnation-full-reset]] · for hermes · open
-- [ ] [[Inbox/skilltree-sidebar-reflow|skilltree-sidebar-reflow]] · for hermes · open
-- [ ] [[Inbox/unique-starts|unique-starts]] · for hermes · open
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · for hermes · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for hermes · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
+- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
 
 
 ## Being built
 
-- [ ] [[Inbox/journal-refresh|journal-refresh]] · hermes-modeller · claimed
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · hermes-b · claimed
-- [ ] [[Inbox/startup-crash|startup-crash]] · hermes · claimed
-
-
-## Text pass
-
-- [ ] [[Inbox/ore-hearts-art|ore-hearts-art]] · hermes-modeller · #1167 · in-review
-- [ ] [[Inbox/realistic-water-trial|realistic-water-trial]] · hermes-a · in-review
-- [ ] [[Inbox/blight-mobs|blight-mobs]] · hermes-a · #1166 · writing
-- [ ] [[Inbox/parasites-and-cures|parasites-and-cures]] · hermes-b · #1165 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
+- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🍇 Bacchus · #1248 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/kitchen-brick-split|kitchen-brick-split]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/mimic|mimic]]
-- [x] [[Inbox/Done/blindness|blindness]]
-- [x] [[Inbox/Done/impaler-model|impaler-model]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/bogre-model|bogre-model]]
-- [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/structure-buttons-to-debris|structure-buttons-to-debris]]
+- [x] [[Inbox/Done/redstone-golem-geckolib|redstone-golem-geckolib]]
+- [x] [[Inbox/Done/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]]
+- [x] [[Inbox/Done/heart-crystal-ore-block|heart-crystal-ore-block]]
+- [x] [[Inbox/Done/future-dead-warrior-born|future-dead-warrior-born]]
 
 
 %% kanban:settings

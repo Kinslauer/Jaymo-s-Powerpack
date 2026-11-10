@@ -1,22 +1,37 @@
 ---
-updated: 2026-11-08 22:31
+updated: 2026-11-10 11:17
 ---
 # Open PRs
 
-3 open, as of 2026-11-08 22:31. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-10 11:17. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-## [#1165](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1165) Kitchen: dirty water gives a slow parasite instead of nausea
-- **Branch:** `claude/parasites-and-cures` · **Updated:** 2026-11-09 (today)
+## [#1221](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1221) Kingdoms: animate the skulk golem with GeckoLib (idle, wake, settle, hurt, death)
+- **Branch:** `cloud/skulk-golem-geckolib` · **Updated:** 2026-11-10 (today)
 - **Checks:** ✅ 4 passed
-- **Agent:** [[parasites-and-cures]]
+- **Agent:** no agent note
 
-## [#1166](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1166) Blight mobs: elite variants of existing mobs
-- **Branch:** `claude/blight-mobs` · **Updated:** 2026-11-09 (today)
-- **Checks:** ❌ failing: Change notes, libs jars, item models
-- **Agent:** [[blight-mobs]]
-
-## [#1167](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1167) Add heart crystal ore and drop artwork
-- **Branch:** `claude/ore-hearts-art` · **Updated:** 2026-11-09 (today)
+## [#1236](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1236) Astronomy 4: the Astronomer's Journal, on the scholar side
+- **Branch:** `cloud/astronomy-scholar-journal` · **Updated:** 2026-11-10 (today)
 - **Checks:** ✅ 4 passed
-- **Agent:** [[ore-hearts-art]]
+- **Agent:** no agent note
+
+## [#1239](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1239) Varasuchus: editable Blockbench body and full GeckoLib animations
+- **Branch:** `cloud/varasuchus-geckolib` · **Updated:** 2026-11-10 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1241](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1241) Great apes unstuck and hearing the ground, titan voices for xeno forms, garlic for parasites, still blood
+- **Branch:** `cloud/apes-xeno-voices-parasites-blood` · **Updated:** 2026-11-10 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** [[apes-xeno-voices-parasites-blood]]
+
+## [#1245](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1245) Kitchen: fix rat RaidGoal null target crash (startup crash)
+- **Branch:** `claude/startup-crash` · **Updated:** 2026-11-10 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1248](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1248) Loose sticks on the ground, beside the pebbles
+- **Branch:** `claude/loose-sticks-on-ground-v2` · **Updated:** 2026-11-10 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note

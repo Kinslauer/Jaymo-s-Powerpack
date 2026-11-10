@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: waterskin-tiers
 branch: claude/waterskin-tiers
 with:
