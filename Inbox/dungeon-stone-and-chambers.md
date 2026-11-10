@@ -7,6 +7,7 @@ thread: 1569170499680870560
 claimed_by: hermes-a
 pr: 1218
 suggested_owns: [kingdoms/src/main/resources/data/jaymoskingdoms/structure/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
+text_pass: none
 ---
 
 # The new dungeons come out filled with stone, and with trial chamber rooms
@@ -28,3 +29,4 @@ Tiv, in the Tasks thread: "also some of the new generated dungeon is filled with
 - Check both worlds: a dungeon generated before the fix keeps its damage, so say whether old ones need regenerating or whether only new generation is fixed.
 - Also check whether vanilla trial chambers are simply generating into the same spot — that would be a structure set/spacing problem, not a piece problem.
 - Fix what is actually broken, one cause at a time, and say in the PR which of the two faults was which.
+- 2026-11-09 23:38 Andy skipped the text pass (2026-11-09); ready for review.

@@ -25,3 +25,4 @@ Tiv, in the Tasks thread: "saplings should turn into sticks, so that you can get
 - Keep it shapeless and simple so it reads in the recipe book.
 - A recipe only: no new items, no changes to the splint itself.
 - If a sapling already has another use somewhere in the pack, leave that alone and just add this.
+- 2026-11-09 23:38 Andy skipped the text pass (2026-11-09); ready for review.
