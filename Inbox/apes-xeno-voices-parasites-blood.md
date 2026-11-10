@@ -1,11 +1,12 @@
 ---
-status: open
+status: in-review
 for: hermes
 from: Andy (Claude chat, 2026-11-09 10:45 PM)
 asked: 2026-11-09
 claimed_by: hermes-b
 pr: 1241
 writer: hermes-writer
+text_pass: done
 ---
 
 # Great apes, xeno voices, clearing parasites, still blood
