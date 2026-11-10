@@ -50,12 +50,12 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
-- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
+- [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · ready
 
 
 ## Done
