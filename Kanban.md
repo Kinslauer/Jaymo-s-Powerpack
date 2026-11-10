@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · 🍇 Bacchus · open
 - [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 🔥 Prometheus · open
+- [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
