@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: done
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -39,3 +39,4 @@ From the astronomy pick-list ("add this but in the high renaissance artstyle"), 
 - 2026-11-09 18:52 Text pass: rewrote change note (changes/kingdoms/claude-astronomy-sky.md) for player focus - simplified title, made text more direct ('your position' vs 'the player's position', 'looking up at night' vs 'the player discovers them by looking at them at night'), removed implementation details (render pass, class list), kept credits concise
 - 2026-11-09 19:05 Review (head 3f6d3ba), third round: BLOCKED, needs Andy. Same problem three rounds running: it doesn't build (Build Kingdoms red again) and the server-side discovery still isn't real. This round: DiscoveryC2SPacket.java:20-22 and ArmillarySphereBlock.java:72-74 don't compile (the receiver passes the payload where a RegistryFriendlyByteBuf is wanted; context.player().ifPresent isn't Fabric's API, it's context.player()); the server handler would replace the player's whole discovered set with readDiscovered() of a one-star packet, with no check that it's night or the star is up; client/astronomy/Discovery.reportLook casts the client's level to ServerLevel, which never works on a real client, so no packet is ever sent; the networking is registered inside ArmillarySphereBlock. The two bots that tried (hermes-b, hermes-fixer) are inventing APIs instead of checking the 26.3 and Fabric sources. Suggest Andy hands this to a stronger builder (a Claude thread or the cloud agent): one synced player attachment (pattern: Banes.java:135), one C2S payload with a server-side check, registered in Kingdoms' networking setup; then the round-one points (sky render pass, pollution per tick) still need checking. The PR is mergeable but must not merge while red.
 - 2026-11-09 19:29 Andy (2026-11-09): Claude takes this one over from the bots ('you take that too'). Working on branch claude/astronomy-sky (PR #1193).
+- 2026-11-10 01:35 PR #1193 is merged into master; moved to Inbox/Done.
