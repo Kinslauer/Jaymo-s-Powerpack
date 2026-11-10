@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 21:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 21:14). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · in-review
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · in-review
 
 
 ## Needs Andy
