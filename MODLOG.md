@@ -1923,3 +1923,7 @@ keep it, as it belongs to the tool's metal.
 - **Client**: `HeartHud` draws the faint extra run under the health bar showing the half-hearts held.
 - **Compat**: stacks with the `crystal_heart` artifact (both raise max health) - say so in the PR body, and ask Andy if it reads as too much health.
 - Not tested in game.
+
+## 0.21.86 (2026-11-10): Saplings turn into sticks (#1213)
+
+Any sapling (vanilla or Aether) can now be crafted into 2 sticks in the crafting grid. This makes splints accessible when you're far from trees - just break a sapling you can't plant and turn it into sticks for a splint.

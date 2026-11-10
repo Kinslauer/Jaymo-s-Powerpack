@@ -1720,3 +1720,10 @@ Not tested in game.
 - A rat that finished eating or stealing from a food store cleared its target, but its raid could tick once more before
   the game noticed it was over, and that tick crashed the server ("Ticking entity", `Rat$RaidGoal.tick`). The raid now
   waits out that tick instead. Built; not played.
+
+## 0.5.101 (2026-11-10): Dirty water's parasite is cured by hot chocolate or either tea (#1215)
+
+Dirty water gives a slow, survivable parasite instead of vanilla poison. Hot chocolate already washed it out; now Jaymo's Powers' willow bark tea and chamomile tea do too, so any of the three drinks clears it ("The warm drink washes the parasite out.").
+
+- The cures are the item tag `jaymoskitchen:cures_parasite` (`ParasiteEffect.CURES`, checked in `Thirst.consumed`). The two teas are optional entries, so Kitchen still loads without Powers and never compiles against it.
+- Built; not played in game.
