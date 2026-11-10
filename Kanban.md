@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -52,11 +52,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · #1207 · ready
 
 
 ## Done
