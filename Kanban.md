@@ -30,7 +30,6 @@ kanban-plugin: board
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · claude-cloud · #1239 · in-review
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · claude-cloud · #1236 · in-review
 
 
 ## Needs Andy
