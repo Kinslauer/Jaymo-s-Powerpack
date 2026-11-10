@@ -102,7 +102,7 @@ a third builder only once two have run for a day without hitting them.
 
 **Quill's scheduled prompt** (every 15 minutes; its persona is its SOUL.md):
 
-> Run `python tools/vault_sync.py --claim hermes-writer --writes`. If it printed a task, make a worktree from its
+> Run `python tools/vault_sync.py --claim hermes-writer --writes` (it hands back a pass you left unfinished first). If it printed a task, make a worktree from its
 > PR's branch (`git pull` first) and go through every player-visible string the PR adds or changes: lang parts,
 > dialogue, hints, item and ability text, chat lines, screens, change notes. Rewrite what needs it in the speaker's
 > voice, keep the lang keys and format codes, build the mod you touched, commit and push normally (never force-push:
