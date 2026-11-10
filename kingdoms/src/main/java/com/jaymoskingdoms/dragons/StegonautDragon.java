@@ -1,5 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +17,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -32,7 +35,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.7.522) Stegonaut, the first of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and numbers are
  * ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the model is our
- * own, {@code StegonautDragonModel}, painted by {@code tools/gen_stegonaut.py}). A walker ({@link WindDragon#flies}):
+ * own, {@code kingdoms/art/stegonaut.bbmodel}, painted by {@code tools/gen_stegonaut.py} and animated by GeckoLib,
+ * {@link StegonautAnimations}). A walker ({@link WindDragon#flies}):
  * a tall, plated dragon on long pillar legs with a long neck held high, of the jungles and plains. It never flies,
  * grazes about its home in ones and twos and only fights whoever hurts it.
  * <p>
@@ -48,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
  * Tamed and ridden it's steered like a horse; R stamps a ground slam with its line of spikes where the rider looks. Its
  * favourite is raw beef; Stoneborn win it over twice as fast.
  */
-public class StegonautDragon extends WindDragon {
+public class StegonautDragon extends WindDragon implements GeoEntity {
 	static final double HEALTH = 100.0, ARMOR = 15.0, TOUGHNESS = 4.0, SPEED = 0.2, BITE = 5.0;
 	/** The chin slam: damage, reach past the bite, pace, the throw up. */
 	static final float CHIN = 8.0F;
@@ -74,9 +78,9 @@ public class StegonautDragon extends WindDragon {
 	/** Ridden: the slam's pace (ticks). */
 	static final int RIDER_SLAM_EVERY = 100;
 
-	/** Its moves, for the model ({@link #action}). */
+	/** Its moves ({@link #action}); each is played by GeckoLib's {@code action} controller as it starts. */
 	public static final int NONE = 0, CHIN_SLAM = 1, GROUND_SLAM = 2, CHEW = 3, ROAR = 4, BITE_MOVE = 5, GRAZE = 6;
-	/** How long the model plays each (ticks). (0.7.531) The roar is held longer, a show of its plates, and the bite and
+	/** How long each lasts (ticks; its animation is as long). (0.7.531) The roar is held longer, a show of its plates, and the bite and
 	 * the grazing are moves of their own. */
 	static final int[] ACTION_TICKS = {0, 16, SLAM_WINDUP + 10, SPIT_CHEW + 8, 60, 20, 30};
 
@@ -91,6 +95,7 @@ public class StegonautDragon extends WindDragon {
 	/** The spikes on their way, and the clods in the air. */
 	private final List<Pillar> pillars = new ArrayList<>();
 	private final List<Clod> clods = new ArrayList<>();
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	private record Pillar(Vec3 at, int when, boolean ridden) {
 	}
@@ -110,6 +115,17 @@ public class StegonautDragon extends WindDragon {
 	public StegonautDragon(EntityType<? extends StegonautDragon> type, Level level) {
 		super(type, level);
 		this.xpReward = 25;
+	}
+
+	/** Drawn and animated by GeckoLib from our own Blockbench model ({@link StegonautAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		StegonautAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -187,6 +203,7 @@ public class StegonautDragon extends WindDragon {
 	private void act(int action) {
 		this.entityData.set(DATA_ACTION, action);
 		this.actionLeft = ACTION_TICKS[action];
+		this.triggerAnim("action", StegonautAnimations.name(action));
 	}
 
 	/** It grazes: a wild one stays about where it was born, as cattle do. */
@@ -241,6 +258,12 @@ public class StegonautDragon extends WindDragon {
 		if (action() == NONE) {
 			act(BITE_MOVE);
 		}
+	}
+
+	/** Its tail sweep: the body and tail swung round. */
+	@Override
+	protected void swept() {
+		this.triggerAnim("action", "sweep");
 	}
 
 	// ---- fighting -------------------------------------------------------------------------------------------------------
@@ -418,6 +441,9 @@ public class StegonautDragon extends WindDragon {
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		boolean hurt = super.hurtServer(level, source, damage);
+		if (hurt && this.isAlive()) {
+			this.triggerAnim("hurt", "hurt");
+		}
 		if (hurt && this.isAlive() && !grounded() && this.roarIn <= 0
 			&& (this.getHealth() < this.getMaxHealth() * ROAR_AT || this.isTamed() && this.isVehicle())) {
 			roar(level);
@@ -435,9 +461,11 @@ public class StegonautDragon extends WindDragon {
 		windSlam(Vec3.directionFromRotation(0.0F, yaw));
 	}
 
-	/** How far through {@code action} its model is after {@code age} ticks (0 to 1). */
-	public static float actionShare(int action, float age) {
-		int length = action <= 0 || action >= ACTION_TICKS.length ? 1 : ACTION_TICKS[action];
-		return Mth.clamp(age / length, 0.0F, 1.0F);
+	@Override
+	public void die(DamageSource source) {
+		if (this.level() instanceof ServerLevel) {
+			this.triggerAnim("action", "death");
+		}
+		super.die(source);
 	}
 }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -47,6 +48,19 @@ public final class SpiritPunch implements Move {
 	static final int TRAVEL = 3;
 	/** The chance a folk keeper answers a punch with its own (a barrage), and how well it keeps the beat (0-1, by its level). */
 	static final float FOLK_ANSWER = 0.5F, FOLK_SKILL = 0.3F, FOLK_SKILL_PER_LEVEL = 0.03F, FOLK_SKILL_MAX = 0.85F;
+
+	/**
+	 * The barrage (Andy: "a barrage attack activated by holding the strong strike"): hold the key {@link #RUSH_HOLD} ticks or
+	 * more and let go, and the spirit's fists pound ahead for {@link #RUSH_TICKS}, a blow every {@link #RUSH_EVERY} at whatever
+	 * is first in line along your aim, each for {@link #RUSH_SHARE} of a punch's hurt and a little push; {@link #RUSH_COST} more
+	 * mana, and the punch then rests {@link #RUSH_REST} ticks.
+	 */
+	static final int RUSH_HOLD = 14, RUSH_TICKS = 32, RUSH_EVERY = 3, RUSH_REST = 120;
+	static final float RUSH_SHARE = 0.35F, RUSH_COST = 14.0F;
+	static final double RUSH_KNOCK = 0.15;
+
+	/** Barrages under way: by thrower, the game time it ends. */
+	private static final Map<UUID, Long> RUSHES = new HashMap<>();
 
 	/** A punch on its way: who threw it, at whom, when it was thrown, when it lands, and how hard. */
 	private record Pending(UUID from, LivingEntity target, long thrown, long lands, float damage, double knock, Vec3 look) {
@@ -93,9 +107,25 @@ public final class SpiritPunch implements Move {
 	}
 
 	@Override
+	public boolean charges() {
+		return true;
+	}
+
+	@Override
 	public boolean cast(ServerPlayer player, SpiritState state, int charge) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return false;
+		}
+		if (charge >= RUSH_HOLD && !RUSHES.containsKey(player.getUUID())) {
+			if (!Mana.canPay(player, COST + RUSH_COST)) {
+				return false;
+			}
+			Mana.pay(player, RUSH_COST, intent());
+			RUSHES.put(player.getUUID(), level.getServer().overworld().getGameTime() + RUSH_TICKS);
+			CastHints.setCooldown(player, RUSH_REST);
+			CastHints.setReach(player, REACH[kind(state)] * 0.6);
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 1.6F);
+			return true;
 		}
 		int kind = kind(state);
 		float size = size(state);
@@ -165,8 +195,43 @@ public final class SpiritPunch implements Move {
 		}
 	}
 
+	/** Every tick: each barrage's next blow, at whatever is first along its thrower's aim. */
+	private static void rushes(MinecraftServer server, long now) {
+		RUSHES.entrySet().removeIf(e -> {
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+			SpiritState state = player == null ? null : Spirits.state(player);
+			if (player == null || state == null || !state.out() || !player.isAlive() || SpiritBarrage.busy(player) || now >= e.getValue()) {
+				return true;
+			}
+			if ((now - e.getValue()) % RUSH_EVERY != 0L || !(player.level() instanceof ServerLevel level)) {
+				return false;
+			}
+			int kind = kind(state);
+			double reach = REACH[kind] * 0.6;
+			Vec3 eye = player.getEyePosition(), look = player.getLookAngle(), end = eye.add(look.scale(reach));
+			HitResult wall = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+			if (wall.getType() != HitResult.Type.MISS) {
+				end = wall.getLocation();
+			}
+			AABB box = player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.2);
+			EntityHitResult found = ProjectileUtil.getEntityHitResult(level, player, eye, end, box,
+				t -> t instanceof LivingEntity l && l.isAlive() && !l.isSpectator() && !HandMoves.ally(player, l), 0.6F);
+			// the fists stay a blur in front of you
+			Spirits.show(player, Poses.BARRAGE, reach);
+			if (found != null && found.getEntity() instanceof LivingEntity target) {
+				land(level, player, target, DAMAGE[kind] * Spirits.damageScale(state) * size(state) * RUSH_SHARE, RUSH_KNOCK, look);
+			} else {
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.4F, 1.6F);
+			}
+			return false;
+		});
+	}
+
 	/** Every tick ({@link SpiritBarrage}'s): the punches thrown at keepers that are due land, unless a barrage took them. */
-	static void tick(long now) {
+	static void tick(MinecraftServer server, long now) {
+		if (!RUSHES.isEmpty()) {
+			rushes(server, now);
+		}
 		if (PENDING.isEmpty()) {
 			return;
 		}
@@ -197,6 +262,7 @@ public final class SpiritPunch implements Move {
 	/** {@code id} left the game. */
 	static void forget(UUID id) {
 		PENDING.remove(id);
+		RUSHES.remove(id);
 	}
 
 	static void clear() {

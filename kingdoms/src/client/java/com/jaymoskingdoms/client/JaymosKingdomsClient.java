@@ -195,6 +195,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
 		// drawn as camera-centred sky geometry at night (never replaces the vanilla sky renderer)
 		com.jaymoskingdoms.client.astronomy.SkyClient.register();
+		// a click on the Sun (dazzling before Optics)
+		com.jaymoskingdoms.client.astronomy.SunMoonClient.register();
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(DarkNights::tick);
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();

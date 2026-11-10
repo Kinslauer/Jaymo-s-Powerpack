@@ -18,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * go for someone who's down ({@link Temperaments#spares}). (0.7.535) Nor does one of The Truth's folk go for the unarmed
  * and innocent ({@link com.jaymoskingdoms.Commandments#spares}). Nor anyone at someone hidden inside their werewolf
  * ({@link com.jaymoskingdoms.Lycans#hidden}). (0.7.584) Nor a captor at a captive keeping their place
- * ({@link com.jaymoskingdoms.CaptiveConduct#spares}).
+ * ({@link com.jaymoskingdoms.CaptiveConduct#spares}). Nor a villager, guard, golem or captor at a downed player
+ * ({@link Downed#holdsFire}).
  */
 @Mixin(LivingEntity.class)
 public abstract class ThrallTargetMixin {
@@ -26,6 +27,7 @@ public abstract class ThrallTargetMixin {
 	private void jaymoskingdoms$spareOwnSide(LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
 		if (Thralls.refuses((LivingEntity)(Object)this, target) || NightbornBlood.spares((LivingEntity)(Object)this, target)
 			|| (Object)this instanceof Mob mob && Downed.isDowned(target) && Temperaments.spares(mob, target)
+			|| Downed.holdsFire((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Commandments.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Lycans.hidden(target)
 			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)) {

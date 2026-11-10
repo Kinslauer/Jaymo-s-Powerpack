@@ -1,0 +1,13 @@
+{
+  "values": [
+    "jaymoskitchen:hot_chocolate",
+    {
+      "id": "jaymospowers:willow_bark_tea",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:chamomile_tea",
+      "required": false
+    }
+  ]
+}

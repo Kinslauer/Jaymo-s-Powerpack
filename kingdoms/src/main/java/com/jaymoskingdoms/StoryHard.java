@@ -483,10 +483,16 @@ public final class StoryHard {
 
 	/** The realm nearest {@code from} that keeps a speakeasy dug, or null. */
 	static @Nullable Faction denRealm(MinecraftServer server, BlockPos from) {
+		return denRealm(server, from, d -> true);
+	}
+
+	/** The same, among realms whose built den is {@code free} (LifeStory: nobody else's start). */
+	static @Nullable Faction denRealm(MinecraftServer server, BlockPos from, java.util.function.Predicate<Underworld.Den> free) {
 		Faction best = null;
 		double bestD = Double.MAX_VALUE;
 		for (Faction f : Factions.all(server)) {
-			if (f.type().isRealm() && !f.fallen() && Underworld.builtDen(server, f) != null) {
+			Underworld.Den den = f.type().isRealm() && !f.fallen() ? Underworld.builtDen(server, f) : null;
+			if (den != null && free.test(den)) {
 				double d = f.seat().distSqr(from);
 				if (d < bestD) {
 					bestD = d;

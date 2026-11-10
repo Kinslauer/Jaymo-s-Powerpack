@@ -40,12 +40,21 @@ public final class WildRoom {
 	 * inside the world border. Chunks that are already generated are tried first.
 	 */
 	public static @Nullable BlockPos find(ServerLevel level, BlockPos near, int min, int max, int w, int d, int h, RandomSource random) {
+		return find(level, near, min, max, w, d, h, random, (l, at) -> true);
+	}
+
+	/** The same, only where {@code free} says the corner is nobody else's (a life story's start: Kingdoms keeps them). */
+	public static @Nullable BlockPos find(ServerLevel level, BlockPos near, int min, int max, int w, int d, int h, RandomSource random,
+		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		for (int pass = 0; pass < 2; pass++) {
 			for (int i = 0; i < TRIES; i++) {
 				double angle = random.nextDouble() * Math.PI * 2.0;
 				int dist = min + random.nextInt(Math.max(1, max - min + 1));
 				int x0 = near.getX() + Mth.floor(Math.cos(angle) * dist), z0 = near.getZ() + Mth.floor(Math.sin(angle) * dist);
 				if (!level.getWorldBorder().isWithinBounds(new BlockPos(x0 - 2, 0, z0 - 2)) || !level.getWorldBorder().isWithinBounds(new BlockPos(x0 + w + 2, 0, z0 + d + 2))) {
+					continue;
+				}
+				if (!free.test(level, new BlockPos(x0, 0, z0))) {
 					continue;
 				}
 				if (pass == 0 && !(level.getChunkSource().hasChunk(x0 >> 4, z0 >> 4) && level.getChunkSource().hasChunk(x0 + w >> 4, z0 + d >> 4))) {

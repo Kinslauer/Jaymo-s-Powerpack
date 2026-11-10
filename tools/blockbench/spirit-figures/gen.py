@@ -8,7 +8,7 @@ def cases(group, ind="\t\t\t"):
     for k, name in enumerate(KINDS):
         label = "default" if name == "GRUE" else "case Spirits." + name
         out.append(ind + label + " -> {")
-        for l in java(k, group, mirror=(group in ("arm", "wing"))):
+        for l in java(k, group, mirror=(group in ("arm", "fore", "wing"))):
             out.append(ind + "\t" + l)
         out.append(ind + "}")
     return "\n".join(out)
@@ -23,5 +23,5 @@ W = lambda i: ", ".join(fmt(FIG[k].get("wing_at", (0.0, 0.0, 0.0))[i]) for k in 
 T = T.replace("@WINGX@", W(0)).replace("@WINGY@", W(1)).replace("@WINGZ@", W(2)).replace("@WINGS@", cases("wing"))
 T = T.replace("@FOOT@", arr("foot")).replace("@STAGE@", arr("stage"))
 T = T.replace("@ARMX@", ", ".join(fmt(FIG[k]["arm_at"][0]) for k in range(6))).replace("@ARMY@", ", ".join(fmt(FIG[k]["arm_at"][1]) for k in range(6)))
-T = T.replace("@TORSO@", cases("torso")).replace("@SKULL@", cases("skull")).replace("@TAILS@", cases("tail")).replace("@ARMS@", cases("arm"))
+T = T.replace("@TORSO@", cases("torso")).replace("@SKULL@", cases("skull")).replace("@TAILS@", cases("tail")).replace("@ARMS@", cases("arm")).replace("@FORES@", cases("fore")).replace("@ELBOW@", arr("elbow"))
 open(os.path.join(HERE, "../../../kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/SpiritFigure.java"), "w").write(T)

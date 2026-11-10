@@ -461,7 +461,7 @@ public final class SpiritBarrage {
 
 	private static void tick(MinecraftServer server) {
 		long clock = server.overworld().getGameTime();
-		SpiritPunch.tick(clock);
+		SpiritPunch.tick(server, clock);
 		if (!LINGER.isEmpty()) {
 			List<Entity> done = new ArrayList<>();
 			for (Map.Entry<Entity, Long> e : LINGER.entrySet()) {

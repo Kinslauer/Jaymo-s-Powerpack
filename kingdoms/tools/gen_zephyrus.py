@@ -1,10 +1,10 @@
 """Zephyrus' art and data (kingdoms/src/main/java/com/jaymoskingdoms/dragons/ZephyrusDragon), all our own design:
 - four hides (swamp green, murky teal, mud brown-green, mottled olive; a pale yellow-green belly, soft blotches, a
   wet sheen) picked per dragon by its DragonLook, and four glowing marking patterns (spots, stripes, a lateral line,
-  rings; toxic yellow-green, with the eyes in every one) for the client's ZephyrusDragonModel;
+  rings; toxic yellow-green, with the eyes in every one) for Zephyrus's GeckoLib model (kingdoms/art/zephyrus.bbmodel, gen_zephyrus_geo.py);
 - the spawn egg's icon and item model, and the loot table.
-The UV table (PARTS, packed into 256x256 by pack()) is the one ZephyrusDragonModel's texOffs come from: change a size
-here and the printed table tells you the texOffs to put there. It uses gen_dragons.py's helpers (not its UV table).
+The UV table (PARTS, packed into 256x256 by pack()) is the one zephyrus.bbmodel's box UVs come from (gen_zephyrus_geo.py checks its
+TEX table against it: change a size here, then update TEX and rerun that script). It uses gen_dragons.py's helpers (not its UV table).
 Run from kingdoms/: python3 tools/gen_zephyrus.py"""
 import os, random, sys
 

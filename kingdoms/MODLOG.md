@@ -10590,3 +10590,164 @@ leaving is allowed, idling is what sours it, not who you are.
 Andy: "unsupported fallen trees should fall, there shouldnt be hanging trees like this." A felled tree that came to rest leaning at 45 degrees or more (against a house, another tree, a hillside) never looked again at what held it, so once that was chopped, burned or knocked away it hung in the air at its angle for good; so did a piece broken off a leaning tree by chopping, and a tree that lay flat out over a drop. Now every fallen tree checks every second: free to turn further about its foot, it falls on; with none of its wood resting on anything, it drops until it strikes the ground. Trees already hanging in the world come down once their chunk is loaded.
 - `FallingTree#rest` (support check for every down tree, `rests`/`holds`), `lift` kept with the world so a tree falling on is lowered back onto its foot.
 - Built; not played.
+
+## 0.7.684 (2026-11-10): Spirits: jointed figures, the spirit's own duel with the Grue, a held-punch barrage, the takeover wrecks a village (#1217)
+
+- **Arms and figure together**: the faint figure over your back shows only while its arms do and goes with them. The arms
+  fade shortly after a move, show for a moment now and then on their own (about one glimpse every 1-2 minutes, the same
+  for every viewer), and come up as soon as you hold the spirit key. At rest Varro's, Ambrose's and the Quiet One's arms are
+  held out from the figure so they never hang into you; Grimsby's blade and Thessaly's glove stay as they were, always up.
+- **Speech bubble**: while a spirit stands out talking, its line floats over its head in its colour (as well as in chat).
+  Only its keeper is sent the line, so only they see it.
+- **Joints**: every figure's own arms bend at the elbow: folded as a blow is drawn back and snapped straight as it lands,
+  the talking hand folded up and turning. The Grue no longer swings stiff like a skeleton.
+- **The spirit's own duel in the Grue's trial** (Andy: "your spirit should detach from the fight ... watch their animated
+  battle"): the spirit leaves you and fights the Grue on its own, between it and you, in its own way: Grimsby fast cuts left
+  and right, Varro slow two-handed blows, Ambrose a two-palmed shove, Thessaly quick flicks from further off, the Quiet One
+  its arms alone. It dodges aside now and then and the Grue's claws go through where it stood. Its blows really land
+  (by kind, growing with level) but never past the finale, which is still yours to win in the barrage. The spirit doesn't
+  answer the key in the trial; the Grue's shades come from the start and are yours to fight, and the Grue doesn't strike
+  you up close while your spirit holds it (it still grasps).
+- **Barrage strike** (Andy: "a barrage attack activated by holding the strong strike"): hold the key on the strong strike
+  for 0.7 s and let go: the fists pound ahead for 1.6 s, a blow every 3 ticks at whatever is first along your aim (a third
+  of a punch each), 14 more mana, then the punch rests 6 s. A tap is still the single punch.
+- **The Grue's takeover heads for a village** (Andy: "should always track you toward a village. it will try its best to cause
+  destruction"): possessed, you're walked to the nearest kingdom, fiefdom or village seat (else the nearest village within 48
+  chunks). There it rampages: villagers, golems, folk and other players are its foes, and it smashes doors, glass, beds,
+  fences, crops, lights and the bell round you and sets wood alight (following mobGriefing). With no village anywhere it
+  keeps to your routine.
+- `SpiritManifest`, `SpiritFigure` (from `tools/blockbench/spirit-figures/`; the .bbmodels gain forearms), `SpiritArms`,
+  `Grue`, `GrueTrial`, `SpiritPunch`, `Spirits`; lang `spirit-duel.json`.
+- Built; not played.
+
+## 0.7.685 (2026-11-10): Fix Stormborn Tomb: missing template pools and namespace mismatch (#1218)
+
+The Stormborn Tomb (PR #1137) was merged but its template pools were lost during the merge. Additionally, the template pool names used underscores (`stormborn_tomb_spawn`) while the Java code expects slashes (`stormborn_tomb/spawn`), causing the structure to fall back to vanilla trial chambers and generate solid stone fill.
+
+## Changes
+- Restored 12 missing template pools for all Stormborn Tomb pieces from the PR's merge commit (eeb8d0239)
+- Fixed template pool names to use slashes (`stormborn_tomb/spawn`) instead of underscores (`stormborn_tomb_spawn`) to match the Java code in `StormbornTomb.java`
+- Fixed the start pool (`overworld_stormborn_tomb.json`) to use the correct namespace
+
+## Root causes identified
+1. **Missing template pools**: The PR merge commit (0ad4bd9c6) didn't include the template pools that were added in a later PR commit (eeb8d0239) but lost in a subsequent rework commit (152223750).
+2. **Namespace mismatch**: Template pools used `jaymoskingdoms:stormborn_tomb_spawn` but Java code references `jaymoskingdoms:stormborn_tomb/spawn`. This caused the structure to not find its pieces and fall back to vanilla trial chambers.
+
+## Not tested in game
+Template pools compile and names match Java code, but dungeon generation not verified in a live world.
+
+## 0.7.686 (2026-11-10): Might can be trained: shadowboxing in Training Weights (#1220)
+
+Tiv: "they should build might for everyone ... its only good if you keep at it". Jaymo's Powers' Training Weights now build Might while you shadowbox in them (slowly, about one point an hour, unless you're a Z Fighter or a Gravity user). Those points are free Might on top of what you spend: each whole one lands with the small fanfare ("Your Might grows"), counts toward the world tier's cap like any other point (training stops at the cap and picks up again once a higher tier opens it), and stays through a respec, since it was never spent. The K screen's Attributes tab shows trained Might as a red share of the bar, and hovering Might says how many points were trained and how far the next one has come. A new loading-screen tip tells of it.
+- `Stats.TRAINED_MIGHT` (saved, kept through death, synced to its player), `Stats#trainMight` (called by Powers by reflection), `Stats#fromTraining` counted in `Stats#total`; `SkillScreen` bar and tooltip; lang in `lang/parts/training-weights.json`; `StoryHoldScreen.HINTS` 125.
+- Built; not played.
+
+## 0.7.687 (2026-11-10): Stegonaut moves smoothly now (#1222)
+
+- Stegonaut, the plated lesser dragon, is drawn and animated with GeckoLib from a Blockbench model of its own (`kingdoms/art/stegonaut.bbmodel`). Its look is unchanged: the same body, hides, glowing lichen markings, horn styles, broken plates, saddle, girth and pillion pad, size, hatchling size and rider seats.
+- Every pose it had is kept: standing with its three grumbles (head toss, head tilt, neck lifted), the diagonal plod and the gallop, sitting and dozing, crashed on its belly, paddling in water, the flinch when struck and its death. Its moves play when it makes them: chin slam, ground slam, ground eating (scoop, chew, spit), roar with its plates flared, bite and grazing. New: its tail sweep now swings the body and tail round (it hit before, but nothing moved).
+- It still turns its neck and head to look about, except while dozing.
+- Kingdoms builds and the dev server starts; Stegonaut hasn't been spawned or watched in game yet.
+
+## 0.7.688 (2026-11-10): Downed players aren't finished off by villagers, guards or captors (#1224)
+
+Tiv: "When players are downed they should not still be attacked by villagers, guards, or those that have them captive ... death is real and close." In Tiv's clip the chat said "You're down. They leave you lying there." and an MCA guard went on hitting until the player died on the ground. Now a downed player is left lying by the people who wouldn't finish a body on the ground, everywhere: in a war, in the wild, at sea, not only in a safe town. They stop going for you, and a swing or an arrow already on its way does nothing. That leaves your second life for a revive, your own rise, or the guards taking you in.
+- **Who holds back:** every grown villager (MCA's guards and rulers too), the realms' guards and archers, the sworn, the settled factions' people, iron golems and clockwork golems (not a dungeon's rogue one), and your captors while you're in their shackle, even after you've acted up (they took you alive and keep you so, executions included).
+- **Who doesn't:** monsters, illagers, a camp's people (barbarians, pirates, orcs, goblins, ogres), outlaws (looters, assassins, anyone masked), a vampire at night, wild animals and other players are as deadly to the downed as ever. Fire, falls and drowning still count. A captive who slipped their chains is hunted as before.
+- Powers' executions are unchanged: the town's law (`HeldBack`) still lets only a lone hothead execute a real enemy. Since a hothead no longer keeps a downed player as a target, in practice that's one the player struck themselves.
+- `Downed#holdsFire` (the list), `Downed#heldCaptive`, the early damage check in `Downed`; `ThrallTargetMixin` (`canAttack`), `McaGuardFoesMixin` (MCA guards' enemy sensor), `PowersCompat#spareRighteousGuards` (captors spare executions).
+- Built; not played.
+
+## 0.7.689 (2026-11-10): Astronomy 5: the Moon's orbit, its eight phases, and the Sun's glare (#1225)
+
+- **The Moon keeps its own hours**: it goes once round the sky in eight days, so it no longer sits opposite the Sun
+  every night. A new moon stays beside the Sun and is lost in its glare. A waxing crescent hangs in the west after
+  sunset, and a first quarter is high at dusk and sets around midnight. The full moon is up from dusk to dawn, and a
+  last quarter rises at midnight and is still up in the morning, even in daylight.
+- **Moonlit nights have a rhythm**: the moon's light (the dark nights already follow the phase) now also follows
+  whether the moon is up. A first-quarter night is bright until moonset and then goes dark. A last-quarter night
+  starts dark and brightens when the moon rises. The full moon lights the whole night, and a new moon's night is pitch
+  black from dusk to dawn. Blood, harvest and blue moons still rise where a full moon would and light the whole night.
+- **Observing the Moon**: hold your gaze on the moon for about four seconds, under open sky with no rain, and its
+  phase goes into your records with the scratch of a quill. Each of the eight phases counts once. You can't see the new
+  moon, so you record it by watching the dark night sky on its night. Records stay with your character for the scholar
+  journal to read.
+- **The Sun's glare**: clicking on the Sun before you know Optics leaves you dazzled. The screen goes dark for a few
+  seconds (the same Blindness as our other blinding effects), and until it clears you can't read the sky: no stars are
+  discovered and nothing is recorded. Once you know Optics, the click records the Sun instead. The Optics skill comes
+  with the scholar journal's skill ladder, which isn't in yet, so for now everyone is dazzled and the Sun can't be
+  recorded.
+- Our own take on the Astronomy mod's idea (MIT, NeoForge 1.21.1). None of its code or art is used.
+- `astronomy/SunMoon` (the orbit as the game's own moon angle, observing, the glare, the records),
+  `client/astronomy/SunMoonClient` (the click), `DarkNights` (moonlight while the moon is up), and the star discovery
+  pauses while you're blinded (`SkyClient`, `StarDiscovery`).
+- Built only. Not played, and no server run. Check in game that the moon shows in the right place for each phase,
+  including under shader packs, that moonset darkens the night, and that a click on the Sun dazzles.
+
+## 0.7.690 (2026-11-10): Stormborn Tomb: real rubble instead of buttons (#1227)
+
+Tiv: "Alot of buttons are placed in structures [...] They can all be removed in place of random amounts of our rocks and pebbles. They all are trying to go for a debris effect, but now we have real debris." The Stormborn Tomb's floors were strewn with about 400 stone buttons standing in for rubble. They're gone: most spots are bare floor now, and here and there (about one in four) lies a pile of one to three of Jaymo's Powers' loose rocks, mossy rocks on the mossy floors and plain stone rocks elsewhere. They can be picked up like any other rocks. Only new tombs change: a tomb already generated in a world keeps its buttons.
+- Eight buttons stay. Two do something: the spruce button beside the cell in the first hallway opens its iron bars, and one stone "rubble" button in that hallway is the hidden trigger of a wall door (its wire runs under the floor to the torches and pistons). The other six are studs on the main hall's banner standards, part of the carving rather than rubble.
+- The templates (`structure/stormborn_tomb/*.nbt`) are edited by `kingdoms/tools/tomb_rubble.py` (seeded, so a rerun gives the same tomb; the kept buttons, the pile chance and the pile sizes are constants at its top). The rocks are Powers blocks: without Jaymo's Powers they load as air.
+- Built; not played. No new blocks or items.
+
+## 0.7.691 (2026-11-10): Zephyrus on GeckoLib: a Blockbench model and animations (#1229)
+
+- **Zephyrus** is now drawn and animated by GeckoLib from an editable Blockbench model (`kingdoms/art/zephyrus.bbmodel`), the same body box for box, so its four hides, four glowing marking patterns, horns, lost spikes, saddle, size, seats and the hatchling's size are unchanged.
+- Animations, sampled from the old model's own posing code: idle, walk (kept in step with its pace), fly (kept in time with its wingbeat), hover (beating hard while it spits acid in the air), glide, landing (wings flared, feet reaching), sitting, crashed and swimming (legs paddling, the flat tail sculling). New: a **bite** when its bite lands, a **tail sweep** when its sweep lands, and a **death** of its own (it rears with its jaw wide, its legs buckle and it rolls onto its side) instead of the vanilla sideways flip.
+- Where it looks, its pitch with a climb or dive and its jaw and neck while it breathes still follow the game every frame (`ZephyrusDragonRenderer`).
+- Classes: `ZephyrusAnimations`, `ZephyrusDragonRenderer` (new), `ZephyrusDragon` (a `GeoEntity`; `bitten`/`swept` trigger the moves); `ZephyrusDragonModel` removed. Script: `kingdoms/tools/gen_zephyrus_geo.py` (`--compare <dir>` renders old poses beside the new animations).
+- Built and `runServer` booted; **not yet seen in game** (the animations were only checked in offline renders).
+
+## 0.7.692 (2026-11-10): The old dead: villager zombies and husks in the Overworld; the draugr are Warrior-born (#1234)
+
+Andy: "Zombies and husks should have villager like skins on the overworld too, as they are meant to be dead villagers
+from time past ... much older and much more deteriorated" than MCA's zombies, "like the draugr, who are all undead
+warriorborn ancestors".
+- **The Overworld's dead**: grown zombies wear one of 32 old-villager skins and husks one of 16: villager robes of
+  their land (plains, taiga, snow, swamp, jungle, savanna; the husks the desert's and the savanna's) faded almost to
+  dun and torn, now and then a trade's apron, hat or collar, the heavy brow, empty sockets, the long nose rotted to a
+  hole, bare teeth, the skull through the scalp, finger bones and shins down to bone, earth and moss on them (the
+  husks leathery, in grave-wraps and sand). No green in them: MCA's zombie villagers, the recently dead, keep their own
+  looks, so the two read apart. Picked by the mob's id. Babies, drowned, other mods' zombies and zombies outside the
+  Overworld are left as they were.
+- **Draugr**: each wears a Warrior-born's tail from under its mail, rimed with frost toward the tip, swaying as it stands
+  and walks, and mangled its own way (whole, bent, snapped and hanging, cut through, a stump, hanging limp, broken
+  twice, the tip gone). They're bound where they first stood: a draugr keeps within 24 blocks of that spot
+  (`Draugr.HOME_RADIUS`), gives up a foe who leaves that ground and walks back to it, so the tomb's dead never leave the
+  tomb. Draugr already in a world are bound where they stand on their first tick after this.
+- `client/OldDeadSkins`, `mixin/OldDeadSkinMixin`, `mixin/OldDeadHuskSkinMixin`; `inhabitants/Draugr`,
+  `client/inhabitants/InhabitantsClient` (`DraugrRenderer`). Art: `kingdoms/tools/gen_old_dead.py` writes
+  `textures/entity/old_dead/zombie_<n>.png` and `husk_<n>.png`; `kingdoms/tools/gen_tomb_undead.py draugr` adds the
+  tail to `kingdoms/art/draugr.bbmodel` (then `tools/bbmodel_geckolib.py` for the game's files).
+- Built; not played. The skins were checked as images and the draugr's tail in renders of its model, not in game:
+  check the draugr tail's place and states, and that draugr still fight well in their halls.
+
+## 0.7.693 (2026-11-10): Every player's start is their own (#1235)
+
+Tiv: "Every player should have their own start, it should search for another if they are already taken." Settled with Tiv: the *place* is exclusive, not the card. Two players can both take Shipwreck, but they don't wash up at the same wreck. Each start the life story sets down is now remembered for the world (one per player; a new life's start replaces the last, and a reincarnation or `/kingdom story reset` frees it). The next newcomer's road looks past every place someone else started in:
+- **Capital**: a kingdom's (else a realm's) capital nobody else started in. With every capital taken, the wild.
+- **Banished, Sworn, Sentenced, Evicted**: when the realm you name already has someone's start in its seat, your road goes to the nearest realm that has none, and a line tells you so. A party mate on the same road and realm still shares it. With every realm taken, the one you named, and a waking spot of your own there.
+- **Shipwreck**: a wreck nobody else washed up at (a beached one first). **Family farmhand**: a farmhouse nobody else was taken in at, then a free settlement of your blood, then a free village. Up to three more searches past taken ones, each further out, so the loading screen never waits on a long hunt.
+- **Escaped captive, Still in chains, Rock bottom, Hideout's camp**: a camp nobody else started at. With none free, a new camp is raised, as for a world with none. **Hideout**: a speakeasy den nobody else woke in comes first. **Greenskin**: an orc camp or goblin village nobody else was raised in. **Cast out**: a haven nobody else was turned from. **Trader**: a milestone nobody else set out from. **Drawn to a monolith**: a monolith nobody else was drawn to, else a new one is raised.
+- **Whalers**: the whaler is fitted out at a harbour no other whaling start began from (StoryGround passes over taken ones, and raises a shore town if none is left). A party mate who signs on within the window shares the ship.
+- **Jaymo's Powers' own starts** (the other worlds, Lost in time, the lab, the workshop) now ask Kingdoms which places are free. Powers then picks a crash site, mine mouth, Verdant village, demon hall, Maw deck, spot among the dead, arrival street in the future, or a lab or workshop site nobody else started at (see Powers' note). The future's arrival is recorded when the player gets there, even after a wait. An older Powers ignores the check (`PowersCompat.withFree`).
+- **Everywhere**: nobody wakes within 32 blocks of where someone else woke. With no free spot near the start's place, one up to 64 blocks further out. A place counts as taken when someone else started within 96 blocks of it (a settlement's land); in the small single places (the Maw, the afterlife, the future's square) it's 32.
+- When nothing free can be found, the start falls back to the next free thing, then the wild, as it already did for a place it couldn't find. A party mate who takes the same road within the window still wakes beside you (Start Together), and single player is unchanged.
+- New loading-screen hint (125), and the line for a realm that was taken (`message.jaymoskingdoms.story.realm_taken`).
+- `LifeStory` (`BORN`, `freePlace`/`freeSpot`/`freeFor`, `freeRealm`, `lookPast`, `spot`, `TIMELOST_PENDING`). Free filters on `StoryHomes.standing`, `GreenskinLife.home`, `StoryHard.denRealm`, `Roads.stoneNear`, `Monoliths.nearestFoot`, `StoryGround.harbour`/`coastalRealm` and `Whalers.signOn`. Tuning: `LifeStory.PLACE_APART`, `START_APART`, `FREE_TRIES`, `FREE_STEP`, `FREE_WIDEN`.
+- Built; not played. Not tried with two players on a server.
+
+## 0.7.694 (2026-11-10): Redstone golem moves to GeckoLib (#1237)
+
+The redstone golem keeps its stats, AI, moves, size, shadow and glowing core and veins, but is now drawn by GeckoLib. Its pound and eruption are proper keyframed animations instead of two arms swung in code: it rears back with both fists overhead, then leans in and brings them down on the ground on the same tick the blow lands; in the eruption it holds its fists on the ground, trembling, while the rock under its foes burns. It also flinches when hit (not mid-move, so a blow never cancels a pound) and, when killed, its knees give and it topples forward onto its face instead of tipping onto its side. Its head still turns toward what it looks at.
+
+The animations are written by `kingdoms/tools/gen_redstone_golem_geo.py` into the editable `kingdoms/art/redstone_golem.bbmodel`. Model, textures, idle and walk: "Redstone Golem (Minecraft Dungeons)" by polyjo (https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons), CC BY 4.0; credit, licence and renders (old pose beside new) are in `kingdoms/art/`.
+
+The Kingdoms build passes, and `runServer` reaches `Done`. Not seen in game: facing, timing against the server's blows, the glow and the death fall still need a visual playtest.
+
+## 0.7.695 (2026-11-10): The Maw remade: the salvager's road and the lens hint read as a broken world (#1240)
+
+- **Salvager at the Maw**: the road's tale and waking text no longer speak of a black hole: the pull took your crew, the wrecks hang round the broken world with what is left in them, the tide at the hole still kills, and far below lie streets no one walks. Its card's backdrop is a black sky over an ember-dark horizon and ash-grey ground instead of purple.
+- **The hermit's Starlit Lens hint**: the dust is grit off the Maw's broken stone, still shining a little long after everything round it went cold (it was "the Maw's rim").
+- Goes with Powers' Maw remake. Lang (`story-road.json`, `talk-hermit_alchemy.json`) and `LifeStoryScreen.BACKDROPS`. Built; not played.

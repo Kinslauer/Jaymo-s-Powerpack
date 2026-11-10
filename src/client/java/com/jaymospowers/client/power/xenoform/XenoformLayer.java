@@ -101,6 +101,10 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// (0.20.9) the Ultimate model's own passes (wings, comet, ...)
 			model.submitExtras(state, poseStack, collector, lightCoords);
 		}
+		if (model instanceof AsterionModel asterion) {
+			// a big weapon in its hand, in place of its hammer
+			asterion.submitHeld(state, poseStack, collector, lightCoords);
+		}
 		if (model instanceof XenoFormModels.Wyrm) {
 			// Wyrm's wings: the ender dragon's, small, from the game's own dragon texture
 			WyrmWings wings = WyrmWings.get();

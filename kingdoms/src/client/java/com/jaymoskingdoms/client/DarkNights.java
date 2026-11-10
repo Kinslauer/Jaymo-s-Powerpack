@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Moons;
+import com.jaymoskingdoms.astronomy.SunMoon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.LightmapRenderState;
 import net.minecraft.util.Mth;
@@ -11,8 +12,9 @@ import net.minecraft.world.level.MoonPhase;
  * (0.7.17) Total Darkness / True Darkness's idea (LGPL-3.0, grondag; remade here, none of its code): moonlight follows
  * the moon. Under a full moon a night looks as it always has; under a new moon the sky gives no light at all, and
  * whatever has no torch or fire near it is pitch black. Unlit caves already are in 26.3. Only where there's a sky
- * (the Overworld), and a lunar event's moon (Blood, Harvest, Blue...) always shines full. Applied to the lightmap
- * each time it's worked out (mixin.moons.DarkNightsMixin).
+ * (the Overworld), and a lunar event's moon (Blood, Harvest, Blue...) always shines full. The Moon lights the night
+ * only while it's up ({@link SunMoon#moonlight}): a first quarter's light goes when it sets at midnight, a last
+ * quarter's comes when it rises. Applied to the lightmap each time it's worked out (mixin.moons.DarkNightsMixin).
  *
  * <p>Shader packs light the world themselves and would undo it. (0.7.164) So under Iris the sky light each pack is
  * handed (its lmcoord) is scaled by the same moonlight ({@link ShaderSkyLight}), and shaders stay on all night (Andy:
@@ -187,6 +189,7 @@ public final class DarkNights {
 			MoonPhase phase = minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);
 			moon = MOONLIGHT[Math.floorMod(phase.index(), MOONLIGHT.length)];
 		}
+		moon *= SunMoon.moonlight(minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_ANGLE, partialTicks));
 		// how far into the night it is: 0 by day, 1 once the sky is at its darkest
 		float night = Mth.clamp((1.0F - state.skyFactor) / (1.0F - NIGHT_SKY_FACTOR), 0.0F, 1.0F);
 		lastNight = night;

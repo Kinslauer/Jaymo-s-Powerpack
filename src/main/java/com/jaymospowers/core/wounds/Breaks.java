@@ -7,10 +7,13 @@ import com.jaymospowers.core.Fractures;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -27,6 +30,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -95,6 +99,16 @@ public final class Breaks {
 	 * a later Kingdoms patch, whose hidden blade does 10x on a Crippled foe (Kingdoms never compiles against Powers).
 	 */
 	public static final String CRIPPLED_TAG = "jaymospowers_crippled";
+	/**
+	 * Tiv: "sleeping should set your broken bones. after hitting the sleep button and waiting, longer per break". Sleep in a
+	 * bed (asleep, not Kingdoms' bed rest) sets one break for every this many ticks of the Overworld's clock slept through,
+	 * one break after another ({@link #bedSet}); what's left over counts toward the next, that night or another. A night
+	 * in bed runs about 11,000, so a full night sets one break and two breaks take two nights. On the clock, so a night
+	 * skipped or run by as a timelapse counts in full.
+	 */
+	public static final int SLEEP_SET_TICKS = 10000;
+	/** The most one count of sleep adds (clock ticks): a day, whatever the clock was moved by. */
+	static final long SLEEP_MOST_AT_ONCE = 24000L;
 
 	/** (0.14.2) The broken parts (a bit per {@link BodyPart#ordinal()}). Saved, synced to everyone (limps, hanging arms), not kept through death. */
 	public static final AttachmentType<Integer> BROKEN = AttachmentRegistry.create(JaymosPowers.id("wounds_broken"),
@@ -106,6 +120,10 @@ public final class Breaks {
 	/** (0.14.4) The broken parts in a splint (set, most of their effects lifted). Saved, synced to everyone (a splinted leg shows), not kept through death. */
 	public static final AttachmentType<Integer> SPLINTED = AttachmentRegistry.create(JaymosPowers.id("wounds_splinted"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	/** Sleep counted toward setting the next unset break (clock ticks, {@link #SLEEP_SET_TICKS} a break). Saved, server side only, not kept through death. */
+	public static final AttachmentType<Integer> SLEPT = AttachmentRegistry.create(JaymosPowers.id("wounds_slept_on"),
+		builder -> builder.persistent(Codec.INT));
 
 	private static final Identifier SPLINT_SPEED_ID = JaymosPowers.id("wounds_splint_speed");
 	private static final Identifier ARM_DAMAGE_ID = JaymosPowers.id("wounds_arm_damage");
@@ -127,6 +145,8 @@ public final class Breaks {
 
 	/** Everyone with a break (or whose break just went), until their effects are gone. Not saved: a reload finds them again. */
 	private static final Set<LivingEntity> TRACKED = new HashSet<>();
+	/** Players asleep with a break to set, and the Overworld's clock when their sleep was last counted. */
+	private static final Map<ServerPlayer, Long> SLEEP_CLOCK = new WeakHashMap<>();
 
 	private Breaks() {
 	}
@@ -162,8 +182,17 @@ public final class Breaks {
 			&& !consumable(player.getItemInHand(hand)) ? InteractionResult.FAIL : InteractionResult.PASS);
 		UseItemCallback.EVENT.register((player, level, hand) -> armless(player) && !consumable(player.getItemInHand(hand))
 			|| armBroken(player, hand) && twoHanded(player.getItemInHand(hand)) ? InteractionResult.FAIL : InteractionResult.PASS);
+		// waking: vanilla moves the clock to the morning before it wakes the sleepers, so a skipped night counts here
+		EntitySleepEvents.STOP_SLEEPING.register((entity, pos) -> {
+			if (entity instanceof ServerPlayer player) {
+				woke(player);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(Breaks::tick);
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> TRACKED.clear());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			TRACKED.clear();
+			SLEEP_CLOCK.clear();
+		});
 	}
 
 	// ---- queries (both sides: BROKEN is synced) ---------------------------------------------------------------------------
@@ -512,6 +541,100 @@ public final class Breaks {
 		return true;
 	}
 
+	/**
+	 * A bed sets {@code part}'s break (a night's sleep, {@link #SLEEP_SET_TICKS}; a downed rest, {@link DownedStruggle}) as a
+	 * splint does, so it shows splinted, keeps only {@link #SPLINT_KEEP} of its effects and counts as patched up
+	 * ({@link Wounds#patchedUp}). A part no splint fits is only set. True if it was broken and unset.
+	 */
+	static boolean bedSet(LivingEntity entity, BodyPart part) {
+		return splint(entity, part) || setPart(entity, part);
+	}
+
+	/** The breaks a night's sleep can set: unset, and still there. */
+	private static int settable(LivingEntity entity) {
+		int mask = unset(entity);
+		for (BodyPart part : BodyPart.values()) {
+			if ((mask & bit(part)) != 0 && missing(entity, part)) {
+				mask &= ~bit(part);
+			}
+		}
+		return mask;
+	}
+
+	/** The break sleep sets next: a leg first (two keep you crawling), then the rest. Null if none. */
+	private static @Nullable BodyPart nextToSet(LivingEntity entity) {
+		int settable = settable(entity);
+		for (BodyPart part : LEGS) {
+			if ((settable & bit(part)) != 0) {
+				return part;
+			}
+		}
+		for (BodyPart part : BodyPart.values()) {
+			if ((settable & bit(part)) != 0) {
+				return part;
+			}
+		}
+		return null;
+	}
+
+	/** A sleeping player's tick: asleep long enough with a break to set, their sleep counts; otherwise it doesn't. */
+	private static void sleepTick(ServerPlayer player) {
+		if (player.isSleepingLongEnough() && settable(player) != 0) {
+			countSleep(player);
+		} else {
+			SLEEP_CLOCK.remove(player);
+		}
+	}
+
+	/** The clock slept through since the last count (at least a tick) goes toward the next break, setting each in turn. */
+	private static void countSleep(ServerPlayer player) {
+		long now = player.level().getOverworldClockTime();
+		Long last = SLEEP_CLOCK.put(player, now);
+		if (last == null) {
+			// (counting starts here)
+			return;
+		}
+		int slept = player.getAttachedOrElse(SLEPT, 0) + (int) Math.max(1L, Math.min(now - last, SLEEP_MOST_AT_ONCE));
+		while (slept >= SLEEP_SET_TICKS) {
+			BodyPart part = nextToSet(player);
+			if (part == null) {
+				break;
+			}
+			bedSet(player, part);
+			slept -= SLEEP_SET_TICKS;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.slept_set", part.displayName()).withStyle(ChatFormatting.GREEN));
+		}
+		if (settable(player) == 0) {
+			player.removeAttached(SLEPT);
+		} else {
+			player.setAttached(SLEPT, slept);
+		}
+	}
+
+	/** Out of bed: the last of the sleep counted (the morning a skipped night jumped to), and how far the next break has come. */
+	private static void woke(ServerPlayer player) {
+		if (!SLEEP_CLOCK.containsKey(player)) {
+			return;
+		}
+		if (player.isAlive()) {
+			countSleep(player);
+		}
+		SLEEP_CLOCK.remove(player);
+		BodyPart next = nextToSet(player);
+		int slept = player.getAttachedOrElse(SLEPT, 0);
+		if (next != null && slept > 0 && player.isAlive()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.sleep_setting", next.displayName(),
+				slept * 100 / SLEEP_SET_TICKS).withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	/** Sleep counted toward a break goes once there's none left to set. */
+	private static void forgetSleep(LivingEntity entity) {
+		if (entity.hasAttached(SLEPT) && settable(entity) == 0) {
+			entity.removeAttached(SLEPT);
+		}
+	}
+
 	/** Sets every break. True if any was unset. */
 	static boolean mendAll(LivingEntity entity) {
 		int unset = unset(entity);
@@ -532,6 +655,7 @@ public final class Breaks {
 		int mask = broken(entity);
 		entity.removeAttached(BROKEN);
 		entity.removeAttached(SET);
+		entity.removeAttached(SLEPT);
 		unsplint(entity, -1);
 		clearTags(entity, mask);
 		crippled(entity, 0);
@@ -571,6 +695,7 @@ public final class Breaks {
 			crippled(entity, 0);
 			unsplint(entity, -1);
 			apply(entity, 0, Dismember.missing(entity));
+			forgetSleep(entity);
 			return;
 		}
 		boolean crawled = crawlOnly(entity);
@@ -613,6 +738,7 @@ public final class Breaks {
 		apply(entity, mask, Dismember.missing(entity));
 		crippled(entity, mask);
 		uncrawl(entity, crawled);
+		forgetSleep(entity);
 		if (entity instanceof Player player && crawlOnly(player) && !player.hasAttached(Crawl.CRAWLING) && Crawl.canCrawl(player)
 			&& !com.jaymospowers.core.Carry.isCarried(player)) {
 			// both legs broken: down on the ground
@@ -760,6 +886,9 @@ public final class Breaks {
 			int mask = broken(body);
 			if (mask == 0) {
 				continue;
+			}
+			if (body instanceof ServerPlayer player) {
+				sleepTick(player);
 			}
 			// (no sprinting on a broken leg; (0.20.110) unless on adrenaline)
 			if (body.isSprinting() && !Adrenaline.active(body) && (mask & (bit(BodyPart.LEFT_LEG) | bit(BodyPart.RIGHT_LEG) | bit(BodyPart.FRONT_LEGS)

@@ -526,7 +526,7 @@ public final class Moons {
 		return level.isClientSide() ? clientShown : shown;
 	}
 
-	private static float fadeFor(Level level) {
+	public static float fadeFor(Level level) {
 		return level.isClientSide() ? clientFade : shown == Moon.NONE ? 0.0F : 1.0F;
 	}
 

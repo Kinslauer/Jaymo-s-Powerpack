@@ -126,6 +126,9 @@ public final class ZFighterAfterlife {
 	static final int PLATFORM_HZ = 46;
 	/** How far the platform hangs below its top at the middle, and how high the air is cleared over it. */
 	static final int PLATFORM_DEPTH = 6;
+	/** (Tiv) A story newcomer whose arrival spot is someone else's start: spots tried for one of their own, within this share of the platform's half-widths. */
+	static final int FREE_TRIES = 32;
+	static final double FREE_REACH = 0.8;
 	static final int CLEAR_HEIGHT = 12;
 	/** Within this many blocks of the platform's middle in the Aether, you are at the Other World. */
 	public static final double SITE_RADIUS = 64.0;
@@ -465,6 +468,14 @@ public final class ZFighterAfterlife {
 	 * long wait); {@code home} is where they come back to among the living. False if the Aether isn't there.
 	 */
 	static boolean strand(ServerPlayer player, ServerLevel homeLevel, BlockPos home) {
+		return strand(player, homeLevel, home, (level, at) -> true);
+	}
+
+	/**
+	 * The same, (Tiv: every player's start their own) waking on a spot of the platform {@code free} says is nobody else's
+	 * start, if there is one ({@link #FREE_TRIES} looked at); else where the dead arrive.
+	 */
+	static boolean strand(ServerPlayer player, ServerLevel homeLevel, BlockPos home, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		MinecraftServer server = player.level().getServer();
 		if (server.getLevel(WindAether.AETHER) == null) {
 			return false;
@@ -475,6 +486,21 @@ public final class ZFighterAfterlife {
 		player.removeAttached(CHAMPION);
 		player.removeAttached(PAID);
 		arrive(server, player);
+		ServerLevel world = server.getLevel(WindAether.AETHER);
+		if (world != null && player.level() == world && !free.test(world, player.blockPosition())) {
+			net.minecraft.util.RandomSource random = player.getRandom();
+			for (int i = 0; i < FREE_TRIES; i++) {
+				// a spot inside the platform's ellipse, on its floor with room to stand
+				double angle = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * FREE_REACH;
+				int x = SITE_X + PLATFORM_CX + Mth.floor(Math.cos(angle) * PLATFORM_HX * r), z = SITE_Z + PLATFORM_CZ + Mth.floor(Math.sin(angle) * PLATFORM_HZ * r);
+				BlockPos at = new BlockPos(x, FLOOR, z);
+				if (free.test(world, at) && world.getBlockState(at.below()).isFaceSturdy(world, at.below(), net.minecraft.core.Direction.UP)
+					&& world.getBlockState(at).isAir() && world.getBlockState(at.above()).isAir()) {
+					player.teleportTo(world, x + 0.5, FLOOR, z + 0.5, Set.of(), player.getYRot(), 0.0F, true);
+					break;
+				}
+			}
+		}
 		return inOtherWorld(player);
 	}
 

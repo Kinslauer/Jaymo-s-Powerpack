@@ -1,5 +1,12 @@
 package com.jaymoskingdoms.beasts;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -34,8 +41,10 @@ import net.minecraft.world.phys.Vec3;
  * a great foe of the deep mines, a hulk of stone and live redstone that walks the caves below the world's zero. It
  * pounds the ground with both fists, and sets the rock under its foes alight with redstone that bursts a moment later.
  * Its core glows in the dark. It shrugs off knockback and falls, and leaves redstone and, now and then, a diamond.
+ * Drawn by GeckoLib: the model's idle and walk, and keyframed pound, eruption, flinch and death of ours
+ * ({@code kingdoms/tools/gen_redstone_golem_geo.py}).
  */
-public class RedstoneGolem extends ActingMonster {
+public class RedstoneGolem extends ActingMonster implements GeoEntity {
 	static final double HEALTH = 220.0, ARMOR = 14.0, DAMAGE = 18.0, SPEED = 0.22;
 	/** It only comes below this height, and in the dark. */
 	static final int MAX_Y = 0;
@@ -50,9 +59,19 @@ public class RedstoneGolem extends ActingMonster {
 	static final double ERUPT_RANGE = 14.0, ERUPT_RADIUS = 1.8;
 	static final float ERUPT_DAMAGE = 10.0F;
 	static final int GAP = 20;
+	/** The animation cross-fades (ticks). */
+	static final int ANIMATION_BLEND = 4;
 	static final DustParticleOptions REDSTONE = new DustParticleOptions(0xFF2010, 1.6F);
 
 	private static final String[] ACTIONS = {"pound", "erupt"};
+	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	private static final RawAnimation POUND = RawAnimation.begin().thenPlay("pound");
+	private static final RawAnimation ERUPTION = RawAnimation.begin().thenPlay("eruption");
+	private static final RawAnimation HIT = RawAnimation.begin().thenPlay("hit");
+	private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	private int gap, eruptCooldown = ERUPT_COOLDOWN / 2;
 	private final List<Vec3> spots = new ArrayList<>();
@@ -76,6 +95,41 @@ public class RedstoneGolem extends ActingMonster {
 	@Override
 	protected String[] actions() {
 		return ACTIONS;
+	}
+
+	/** Keep GeckoLib's pound and eruption in step with the server move that lands them. */
+	@Override
+	protected void act(String anim, int ticks) {
+		super.act(anim, ticks);
+		if (!this.level().isClientSide()) {
+			this.triggerAnim("action", "pound".equals(anim) ? "pound" : "eruption");
+		}
+	}
+
+	/** It flinches when hurt, unless mid-move (a blow doesn't stop a pound) or killed (it falls instead). */
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt && !this.acting() && this.isAlive()) {
+			this.triggerAnim("action", "hit");
+		}
+		return hurt;
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<RedstoneGolem>("move", ANIMATION_BLEND,
+			test -> test.setAndContinue(test.isMoving() ? WALK : IDLE)));
+		controllers.add(new AnimationController<RedstoneGolem>("action", ANIMATION_BLEND, test -> PlayState.STOP)
+			.triggerableAnim("pound", POUND).triggerableAnim("eruption", ERUPTION).triggerableAnim("hit", HIT));
+		// last, so it wins over a move it died in
+		controllers.add(new AnimationController<RedstoneGolem>("death", 0,
+			test -> test.animatable().isDeadOrDying() ? test.setAndContinue(DEATH) : PlayState.STOP));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override

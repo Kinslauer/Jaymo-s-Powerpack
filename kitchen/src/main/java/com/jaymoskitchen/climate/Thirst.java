@@ -240,8 +240,8 @@ public final class Thirst {
 		if (water != 0) {
 			set(player, water(player) + water);
 		}
-		// an existing drink clears it: hot chocolate washes the parasite out
-		if (stack.is(KitchenBlocks.FOODS.get("hot_chocolate")) && player.removeEffect(ParasiteEffect.PARASITE)) {
+		// a warm drink clears it: hot chocolate, willow bark tea or chamomile tea washes the parasite out
+		if (stack.is(ParasiteEffect.CURES) && player.removeEffect(ParasiteEffect.PARASITE)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.cured").withStyle(ChatFormatting.GREEN));
 		}
 	}
