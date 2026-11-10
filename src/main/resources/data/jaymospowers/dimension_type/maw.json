@@ -30,10 +30,10 @@
         "translate": "block.minecraft.bed.no_sleep"
       }
     },
-    "minecraft:visual/ambient_light_color": "#6a5cff",
+    "minecraft:visual/ambient_light_color": "#8a7468",
     "minecraft:visual/cloud_color": "#00000000",
     "minecraft:visual/cloud_height": 192.33,
-    "minecraft:visual/fog_color": "#05030c",
+    "minecraft:visual/fog_color": "#140e0b",
     "minecraft:visual/sky_color": "#000000"
   },
   "coordinate_scale": 1.0,
@@ -41,10 +41,10 @@
   "has_ceiling": false,
   "has_ender_dragon_fight": false,
   "has_skylight": false,
-  "height": 256,
+  "height": 384,
   "infiniburn": "#minecraft:infiniburn_overworld",
-  "logical_height": 256,
-  "min_y": 0,
+  "logical_height": 384,
+  "min_y": -64,
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": 0,
   "has_fixed_time": true

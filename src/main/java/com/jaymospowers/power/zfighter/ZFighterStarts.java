@@ -81,8 +81,8 @@ import org.jspecify.annotations.Nullable;
  * where the Lookout floats over it, with a compass the village keyed to the gate back ({@link ZFighterSites#verdantGate}).</li>
  * <li><b>Escaped the Iron-Master's mines</b> ({@code rustfall}): you break out at a mine mouth under Rustfall's weight, the
  * Iron-Master's overseers ({@link #HUNTED}) hunt you for a day, and the way home is the pod on their pad.</li>
- * <li><b>Salvager at the Maw</b> ({@code maw}): your crew is gone into the black hole; you wake on the Maw's pad by a working
- * pod, with deck plates to reach the wrecks.</li>
+ * <li><b>Salvager at the Maw</b> ({@code maw}): the pull has taken your crew; you wake on the Maw's pad by a working pod, with
+ * deck plates to reach the wrecks.</li>
  * <li><b>Raised by a demon master</b> ({@code demon}): you leave a demon village's hall in the Nether's demon biomes, its army
  * leaving you be ({@link #WARD}) till you first leave the Nether, with an old portal close by.</li>
  * <li><b>Back from the afterlife</b> ({@code afterlife}): you wake among the dead in the Other World

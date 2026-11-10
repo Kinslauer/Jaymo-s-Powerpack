@@ -7,7 +7,8 @@ Run it from the root:
 
 26.3 item models name their faces through texture variables (``layer0``), never raw sprite ids, or they render purple. Dimension
 types copy the verdant world's, the Nether's and the Arsenal pocket's shapes; noise settings copy the Overworld's and the Nether's with
-only the block, fluid, sea level and material rule changed (vanilla density functions are referenced by name, not copied).
+only the block, fluid, sea level and material rule changed (vanilla density functions are referenced by name, not copied). The
+Maw's ground is a density function of our own (``maw_ground``), low enough to stay in sight of the broken world over it.
 """
 import json
 import os
@@ -120,7 +121,7 @@ def flag_texture():
 
 
 def models():
-    write_json(os.path.join(ASSETS, "blockstates", "space_pod.json"), {"variants": {"": {"model": f"{NS}:block/space_pod"}}})
+    write_json(os.path.join(ASSETS, "blockstates", "space_pod.json"), {"multipart": [{"apply": {"model": f"{NS}:block/space_pod"}}]})
     write_json(os.path.join(ASSETS, "items", "space_pod.json"), {"model": {"type": "minecraft:model", "model": f"{NS}:block/space_pod"}})
     tex = f"{NS}:block/space_pod"
     write_json(os.path.join(ASSETS, "models", "block", "space_pod.json"), {
@@ -219,8 +220,13 @@ def forge_type():
     }
 
 
-def void_type():
-    """The Maw's: the Arsenal pocket's shape (no sky light, a fixed time) with a black sky."""
+# the Maw's light on the blocks and its fog: ash, not space
+MAW_LIGHT, MAW_FOG = "#8a7468", "#140e0b"
+
+
+def maw_type():
+    """The Maw's: the Arsenal pocket's light (no sky light, a fixed time) under a black sky, with the Overworld's height so the
+    ruined country below has room under the broken world (MawWorld hangs it at y 190)."""
     return {
         "ambient_light": 0.25,
         "attributes": {
@@ -235,10 +241,10 @@ def void_type():
             "minecraft:gameplay/straw_bed_rule": {
                 "can_set_spawn": "never", "can_sleep": "when_dark", "destroy_on_leave": True,
                 "error_message": {"translate": "block.minecraft.bed.no_sleep"}},
-            "minecraft:visual/ambient_light_color": "#6a5cff",
+            "minecraft:visual/ambient_light_color": MAW_LIGHT,
             "minecraft:visual/cloud_color": "#00000000",
             "minecraft:visual/cloud_height": 192.33,
-            "minecraft:visual/fog_color": "#05030c",
+            "minecraft:visual/fog_color": MAW_FOG,
             "minecraft:visual/sky_color": "#000000",
         },
         "coordinate_scale": 1.0,
@@ -246,10 +252,10 @@ def void_type():
         "has_ceiling": False,
         "has_ender_dragon_fight": False,
         "has_skylight": False,
-        "height": 256,
+        "height": 384,
         "infiniburn": "#minecraft:infiniburn_overworld",
-        "logical_height": 256,
-        "min_y": 0,
+        "logical_height": 384,
+        "min_y": -64,
         "monster_spawn_block_light_limit": 0,
         "monster_spawn_light_level": 0,
         "has_fixed_time": True,
@@ -361,6 +367,59 @@ def ore(name, state, size, count, low, high, discard=0.0, rare=0):
     write_json(os.path.join(DATA, "worldgen", "placed_feature", name + ".json"), {"feature": f"{NS}:{name}", "placement": placement})
 
 
+# the Maw's ground: where it lies (y), how far it rises and falls, how steeply it gives way to air, and how broken it is up close.
+# Low and gentle on purpose: the broken world hangs at y 190 (MawWorld) and has to stay in sight of the ruins under it.
+MAW_GROUND, MAW_ROLL, MAW_FALLOFF, MAW_BREAK = 76.0, 18.0, 0.08, 0.25
+NOISE_MAX = 1.7976931348623157e308
+
+
+def maw_ground():
+    """The wasteland under the Maw: a low rolling country (our own density function, the Aether's way) that the Lost Cities build
+    their ruins on (MawCities), dry, bare and scorched on top."""
+    d = lambda *p: os.path.join(DATA, *p)
+    write_json(d("worldgen", "noise", "maw", "rolling.json"), {"base_octave": -7, "octave_count": 3, "amplitude_modifiers": [1.0, 0.5, 0.25]})
+    write_json(d("worldgen", "noise", "maw", "rough.json"), {"base_octave": -4, "octave_count": 2, "amplitude_modifiers": [1.0, 0.5]})
+    surface = {"type": "minecraft:add", "left": MAW_GROUND, "right": {
+        "type": "minecraft:mul", "left": {"type": "minecraft:noise", "noise": f"{NS}:maw/rolling", "xz_scale": 1.0, "y_scale": 0.0}, "right": MAW_ROLL}}
+    write_json(d("worldgen", "density_function", "maw", "ground.json"), {
+        "type": "minecraft:add",
+        "left": {"type": "minecraft:mul", "left": {"type": "minecraft:sub", "left": surface, "right": "minecraft:y"}, "right": MAW_FALLOFF},
+        "right": {"type": "minecraft:mul", "left": {"type": "minecraft:noise", "noise": f"{NS}:maw/rough", "xz_scale": 1.0, "y_scale": 1.0},
+                  "right": MAW_BREAK},
+    })
+    write_json(d("worldgen", "noise_settings", "maw.json"), {
+        "default_block": "minecraft:stone", "default_fluid": "minecraft:air", "disable_mob_generation": False, "legacy_random_source": False,
+        "material_rule": f"{NS}:maw", "noise": {"height": 384, "min_y": -64},
+        "noise_router": {"chunk_surface_level": 0.0, "continents": 0.0, "depth": 0.0, "erosion": 0.0,
+                         "final_density": f"{NS}:maw/ground", "ridges": 0.0, "temperature": 0.0, "vegetation": 0.0},
+        "sea_level": -64, "spawn_target": [],
+    })
+
+    def block(name):
+        return {"type": "minecraft:block", "result_state": name}
+
+    def patch(noise, low, high, name):
+        return {"type": "minecraft:condition", "if_true": {"type": "minecraft:noise_threshold", "noise": noise, "min_threshold": low,
+                                                           "max_threshold": high}, "then_run": block(name)}
+
+    # scorched dirt, with drifts of gravel, burnt patches of soul soil and bare tuff showing through
+    write_json(d("worldgen", "material_rule", "maw.json"), {
+        "type": "minecraft:sequence",
+        "sequence": [
+            "minecraft:bedrock_floor",
+            {"type": "minecraft:condition", "if_true": "minecraft:on_floor", "then_run": {"type": "minecraft:sequence", "sequence": [
+                patch("minecraft:surface", 0.3, NOISE_MAX, "minecraft:gravel"),
+                patch("minecraft:patch", 0.15, NOISE_MAX, "minecraft:soul_soil"),
+                patch("minecraft:surface", -NOISE_MAX, -0.35, "minecraft:tuff"),
+                block("minecraft:coarse_dirt")]}},
+            {"type": "minecraft:condition", "if_true": "minecraft:under_floor", "then_run": {"type": "minecraft:sequence", "sequence": [
+                patch("minecraft:surface", 0.3, NOISE_MAX, "minecraft:gravel"),
+                block("minecraft:dirt")]}},
+            {"type": "minecraft:condition", "if_true": "minecraft:deep_under_floor", "then_run": block("minecraft:tuff")},
+        ],
+    })
+
+
 def worldgen():
     d = lambda *p: os.path.join(DATA, *p)
     # ---- dimension types
@@ -368,7 +427,7 @@ def worldgen():
     write_json(d("dimension_type", "rustfall.json"), light_type("#d9805f", "#b9684a", "#80d8a090", "#2a1a14"))
     write_json(d("dimension_type", "glacia.json"), light_type("#a9d6ff", "#dff0ff", "#e0ffffff", "#1c2230"))
     write_json(d("dimension_type", "cinder.json"), forge_type())
-    write_json(d("dimension_type", "maw.json"), void_type())
+    write_json(d("dimension_type", "maw.json"), maw_type())
     # ---- the moon's noise settings (the Overworld's shape, dry, grey) and surface
     moon = {
         "aquifers": DRY_AQUIFERS, "default_block": "minecraft:stone", "default_fluid": "minecraft:air",
@@ -389,11 +448,11 @@ def worldgen():
         "sequence": [
             "minecraft:bedrock_floor",
             {"type": "minecraft:condition", "if_true": "minecraft:on_floor",
-             "then_run": {"type": "minecraft:block", "result_state": {"Name": "minecraft:calcite"}}},
+             "then_run": {"type": "minecraft:block", "result_state": "minecraft:calcite"}},
             {"type": "minecraft:condition", "if_true": "minecraft:under_floor",
-             "then_run": {"type": "minecraft:block", "result_state": {"Name": "minecraft:andesite"}}},
+             "then_run": {"type": "minecraft:block", "result_state": "minecraft:andesite"}},
             {"type": "minecraft:condition", "if_true": "minecraft:deep_under_floor",
-             "then_run": {"type": "minecraft:block", "result_state": {"Name": "minecraft:tuff"}}},
+             "then_run": {"type": "minecraft:block", "result_state": "minecraft:tuff"}},
         ],
     })
     # ---- biomes
@@ -413,7 +472,18 @@ def worldgen():
         monsters=[{"type": "minecraft:magma_cube", "count": 4, "weight": 60}, {"type": "minecraft:blaze", "count": 3, "weight": 40},
                   {"type": "minecraft:zombified_piglin", "count": 4, "weight": 30}],
         carvers=["minecraft:nether_cave"], temperature=2.0))
-    write_json(d("worldgen", "biome", "maw_void.json"), biome("#000000", "#05030c", "#1a0b2e", padded({})))
+    # the Maw's wasteland (the id is the old void's, so chunks saved under it keep their biome): no life, ash on the air, the
+    # broken world groaning overhead, and the odd canyon torn through the ground
+    write_json(d("worldgen", "biome", "maw_void.json"), biome(
+        "#000000", MAW_FOG, "#1a0b2e", padded({}), carvers=["minecraft:canyon"], extra={
+            "minecraft:visual/ambient_particles": {"argument": [
+                {"particle": {"type": "minecraft:white_ash"}, "probability": 0.02},
+                {"particle": {"type": "minecraft:ash"}, "probability": 0.006}], "modifier": "append"},
+            "minecraft:audio/ambient_sounds": {
+                "additions": {"sound": "minecraft:ambient.basalt_deltas.additions", "tick_chance": 0.0111},
+                "loop": "minecraft:ambient.basalt_deltas.loop",
+                "mood": {"block_search_extent": 8, "offset": 2.0, "sound": "minecraft:ambient.cave", "tick_delay": 6000}},
+        }))
     ore("cinder_iron", "minecraft:iron_ore", 10, 16, 8, 118)
     ore("cinder_diamond", "minecraft:diamond_ore", 5, 5, 8, 100, discard=0.4)
     ore("cinder_emerald", "minecraft:emerald_ore", 2, 6, 8, 110, discard=0.2)
@@ -431,9 +501,8 @@ def worldgen():
     write_json(d("dimension", "cinder.json"), {"type": f"{NS}:cinder", "generator": {
         "type": "minecraft:noise", "settings": "minecraft:nether", "biome_source": {"type": "minecraft:fixed", "biome": f"{NS}:cinder_forge"}}})
     write_json(d("dimension", "maw.json"), {"type": f"{NS}:maw", "generator": {
-        "type": "minecraft:flat", "settings": {
-            "biome": f"{NS}:maw_void", "features": False, "lakes": False,
-            "layers": [{"block": "minecraft:air", "height": 1}], "structure_overrides": []}}})
+        "type": "minecraft:noise", "settings": f"{NS}:maw", "biome_source": {"type": "minecraft:fixed", "biome": f"{NS}:maw_void"}}})
+    maw_ground()
     # ---- the Maw's wrecks
     def item(name, weight, low=1, high=1):
         entry = {"type": "minecraft:item", "name": name, "weight": weight}
