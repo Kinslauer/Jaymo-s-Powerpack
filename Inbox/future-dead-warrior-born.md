@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: youth (Andy in #quill-class, 2026-11-09)
 asked: 2026-11-09
 thread: 1569356185964904578
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
 suggested_owns: []
 ---

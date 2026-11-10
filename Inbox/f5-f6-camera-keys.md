@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: claude-cloud
 pr:
 suggested_owns: [src/client/java/com/jaymospowers/client/KeyConflicts.java, src/client/java/com/jaymospowers/client/mixin/, src/main/resources/assets/jaymospowers/lang/parts/]
 ---
