@@ -7,6 +7,7 @@ claimed_by:
 pr: 
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/dungeon/StormbornTomb.java, kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
 writer: hermes-writer
+text_pass: none
 ---
 
 # Stormborn Tomb: fix the stone fill and the trial-chamber look for real
