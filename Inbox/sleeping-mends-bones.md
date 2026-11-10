@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: claude-cloud
-pr:
+pr: 1223
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Breaks.java, kingdoms/src/main/java/com/jaymoskingdoms/BedRest.java]
 ---
 
@@ -26,3 +26,4 @@ Tiv, in the Tasks thread: "sleeping should set your broken bones. after hitting 
 - Don't remove the splint: it's what you use when there's no bed to be had.
 - There is already a "beds mend" change in Kingdoms 0.7.646 — look at what a bed already does before writing new code, and extend it to breaks rather than building a second path.
 - The break must still show as set, so the body renderer, the debuffs and the "patched up" check all agree afterwards.
+- 2026-11-09 23:53 Cloud agent session sesn_01Pysy1BqwTTojCAGKUww4U9 opened PR #1223.
