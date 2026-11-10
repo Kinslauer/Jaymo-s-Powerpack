@@ -1,5 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,6 +14,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
@@ -29,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * puddle ({@link DragonAcid}; it never changes blocks). Its favourite is tropical fish; Verdant and Tideborn players win
  * it over twice as fast.
  */
-public class ZephyrusDragon extends WindDragon {
+public class ZephyrusDragon extends WindDragon implements GeoEntity {
 	// ---- body ----
 	static final double HEALTH = 190.0, ARMOR = 8.0, TOUGHNESS = 2.0, SPEED = 0.22, BITE = 10.0;
 	/** Its riders' seat: height (the model's back top is about 1.06 blocks), forward and back; where its mouth is. */
@@ -60,6 +65,7 @@ public class ZephyrusDragon extends WindDragon {
 	static final double SURFACE_FILL = 0.9;
 
 	private final DragonAcid acid = new DragonAcid();
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	public ZephyrusDragon(EntityType<? extends ZephyrusDragon> type, Level level) {
 		super(type, level);
@@ -77,6 +83,27 @@ public class ZephyrusDragon extends WindDragon {
 	@Override
 	protected float bondFactor(Player player) {
 		return Heritage.is(player, Heritage.Kind.VERDANT) || Heritage.is(player, Heritage.Kind.TIDEBORN) ? BOND_FACTOR : 1.0F;
+	}
+
+	/** Drawn and animated by GeckoLib ({@link ZephyrusAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		ZephyrusAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
+	}
+
+	@Override
+	protected void bitten(LivingEntity target) {
+		this.triggerAnim("action", "bite");
+	}
+
+	@Override
+	protected void swept() {
+		this.triggerAnim("action", "sweep");
 	}
 
 	@Override

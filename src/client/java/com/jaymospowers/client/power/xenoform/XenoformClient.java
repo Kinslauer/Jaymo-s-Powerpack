@@ -54,6 +54,11 @@ public final class XenoformClient {
 	 * (Andy: "attacking with bulwark should alternate between all arms").
 	 */
 	public static final RenderStateDataKey<Integer> BULWARK_ARM = RenderStateDataKey.create(() -> "jaymospowers:xenoform_bulwark_arm");
+	/** Asterion: how many ticks its act ({@link #ACT}) has gone on, the big weapon in its hand (null: none, it swings its hammer), and its swings so far. */
+	public static final RenderStateDataKey<Float> ACT_TICKS = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act_ticks");
+	public static final RenderStateDataKey<net.minecraft.client.renderer.item.ItemStackRenderState> HELD =
+		RenderStateDataKey.create(() -> "jaymospowers:xenoform_held");
+	public static final RenderStateDataKey<Integer> SWING_COUNT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_swing_count");
 	/** How much of a stride's error is taken up each tick, once a footfall shows where a foot should be. */
 	private static final double STRIDE_CATCH_UP = 0.3;
 
@@ -73,6 +78,16 @@ public final class XenoformClient {
 	}
 
 	private static final java.util.Map<Player, Stride> STRIDES = new java.util.WeakHashMap<>();
+
+	/** One player's act on this client, and the game time it was first seen. */
+	private static final class ActClock {
+		@Nullable String act;
+		long since;
+	}
+
+	private static final java.util.Map<Player, ActClock> ACT_CLOCKS = new java.util.WeakHashMap<>();
+	/** Asterion's weapon, drawn in its hand: one render state per player, refilled each frame. */
+	private static final java.util.Map<Player, net.minecraft.client.renderer.item.ItemStackRenderState> HELD_ITEMS = new java.util.WeakHashMap<>();
 
 	private XenoformClient() {
 	}
@@ -122,6 +137,10 @@ public final class XenoformClient {
 		state.setData(SNEAK, form != null && XenoformState.lowBox(player) && player.isShiftKeyDown() && !player.isInWater());
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
 		state.setData(BULWARK_ARM, "bulwark".equals(form) ? bulwarkArm(player, state.swingAnimation) : null);
+		boolean asterion = "asterion".equals(form);
+		state.setData(SWING_COUNT, asterion ? bulwarkArm(player, state.swingAnimation) : null);
+		state.setData(ACT_TICKS, asterion ? actTicks(player, state.getData(ACT), partialTicks) : null);
+		state.setData(HELD, asterion ? held(player) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
@@ -139,6 +158,31 @@ public final class XenoformClient {
 			}
 		}
 		hideBody(state);
+	}
+
+	/** How many ticks {@code act} has gone on for {@code player}, counted from when this client first saw it. */
+	private static float actTicks(Player player, @Nullable String act, float partialTicks) {
+		ActClock clock = ACT_CLOCKS.computeIfAbsent(player, p -> new ActClock());
+		long now = player.level().getGameTime();
+		if (!java.util.Objects.equals(clock.act, act)) {
+			clock.act = act;
+			clock.since = now;
+		}
+		return now - clock.since + partialTicks;
+	}
+
+	/** What Asterion holds (its hands are empty unless it wields a big weapon), ready to draw; null when empty. */
+	private static net.minecraft.client.renderer.item.@Nullable ItemStackRenderState held(Player player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty()) {
+			HELD_ITEMS.remove(player);
+			return null;
+		}
+		net.minecraft.client.renderer.item.ItemStackRenderState held = HELD_ITEMS.computeIfAbsent(player,
+			p -> new net.minecraft.client.renderer.item.ItemStackRenderState());
+		net.minecraft.client.Minecraft.getInstance().getItemModelResolver().updateForLiving(held, stack,
+			net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, player);
+		return held;
 	}
 
 	/**

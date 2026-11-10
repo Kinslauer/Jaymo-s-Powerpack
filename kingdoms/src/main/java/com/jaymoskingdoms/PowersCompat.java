@@ -677,7 +677,8 @@ public final class PowersCompat {
 	 * you because unless they are of a certain temperament they try to be righteous and just". A realm's guard or archer
 	 * ({@link Downed#isGuard}) or a village's own iron golem never finishes off a downed player, unless the guard is
 	 * hotheaded or spiteful ({@link Temperaments}); they arrest as before. (0.7.570) Any of a town's people now, and a
-	 * hothead only alone and only over a real enemy ({@link HeldBack#spares}). Nothing without that Powers.
+	 * hothead only alone and only over a real enemy ({@link HeldBack#spares}). Nor does a downed captive's captor
+	 * ({@link Downed#heldCaptive}). Nothing without that Powers.
 	 */
 	@SuppressWarnings("unchecked")
 	static void spareRighteousGuards() {
@@ -688,6 +689,8 @@ public final class PowersCompat {
 			Object list = Class.forName("com.jaymospowers.core.wounds.MobExecutions").getField("SPARE").get(null);
 			// (0.7.570) a town's people hold each other to the law: HeldBack
 			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(HeldBack::spares);
+			// (and a captive's captors keep them alive)
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Downed::heldCaptive);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
 		}
@@ -1027,92 +1030,99 @@ public final class PowersCompat {
 		}
 	}
 
-	/** Powers' {@code Future.strand(ServerPlayer)}. */
+	/**
+	 * Powers' {@code className.name(params..., BiPredicate<ServerLevel, BlockPos> free)}: a life story's start that Powers places,
+	 * told which places are free (Tiv: nobody else's start). An older Powers without it: its {@code name(params...)}, the check
+	 * dropped. Null without Powers or either.
+	 */
+	private static java.lang.invoke.@Nullable MethodHandle withFree(String className, String name, Class<?>... params) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return null;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		Class<?>[] more = java.util.Arrays.copyOf(params, params.length + 1);
+		more[params.length] = java.util.function.BiPredicate.class;
+		try {
+			Class<?> owner = Class.forName(className);
+			try {
+				return lookup.findStatic(owner, name, java.lang.invoke.MethodType.methodType(boolean.class, more));
+			} catch (NoSuchMethodException e) {
+				java.lang.invoke.MethodHandle old = lookup.findStatic(owner, name, java.lang.invoke.MethodType.methodType(boolean.class, params));
+				return java.lang.invoke.MethodHandles.dropArguments(old, params.length, java.util.function.BiPredicate.class);
+			}
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find {}.{} in Jaymo's Powers (older Powers?)", className, name, e);
+			return null;
+		}
+	}
+
+	/** Powers' {@code Future.strand(ServerPlayer, BiPredicate)}. */
 	private static java.lang.invoke.@Nullable MethodHandle strand;
 	private static boolean lookedForStrand;
 
 	/**
-	 * (0.7.223) A life story's "lost in time" start: {@code player} wakes alone in Powers' future. False without Powers,
-	 * or while the future isn't in place yet.
+	 * (0.7.223) A life story's "lost in time" start: {@code player} wakes alone in Powers' future, (Tiv) at an arrival spot that
+	 * is {@code free}. False without Powers, or while the future isn't in place yet.
 	 */
-	public static boolean strand(net.minecraft.server.level.ServerPlayer player) {
+	public static boolean strand(net.minecraft.server.level.ServerPlayer player,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos> free) {
 		if (!lookedForStrand) {
 			lookedForStrand = true;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				try {
-					strand = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.chrono.future.Future"), "strand",
-						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
-				} catch (ReflectiveOperationException | LinkageError e) {
-					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' future (older Powers?)", e);
-				}
-			}
+			strand = withFree("com.jaymospowers.power.chrono.future.Future", "strand", net.minecraft.server.level.ServerPlayer.class);
 		}
 		if (strand == null) {
 			return false;
 		}
 		try {
-			return (boolean)strand.invoke(player);
+			return (boolean)strand.invoke(player, free);
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the future", player.getGameProfile().name(), e);
 			return false;
 		}
 	}
 
-	/** (0.7.349) Powers' {@code ZFighterStarts.land(ServerPlayer, String, BlockPos)}. */
+	/** (0.7.349) Powers' {@code ZFighterStarts.land(ServerPlayer, String, BlockPos, BiPredicate)}. */
 	private static java.lang.invoke.@Nullable MethodHandle land;
 	private static boolean lookedForLand;
 
 	/**
 	 * (0.7.349) A life story's start on one of Powers' other worlds ({@code moon}, {@code verdant}, {@code rustfall},
 	 * {@code maw}, {@code demon}, {@code afterlife}): {@code player} is put there, and what it needs is made. {@code back}:
-	 * a spot in the overworld for one who'll come back to it (the afterlife's way home). False without Powers, or if the
-	 * place couldn't be made.
+	 * a spot in the overworld for one who'll come back to it (the afterlife's way home). (Tiv) {@code free}: whether a place
+	 * there is nobody else's start. False without Powers, or if the place couldn't be made.
 	 */
-	public static boolean otherWorld(net.minecraft.server.level.ServerPlayer player, String start, net.minecraft.core.BlockPos back) {
+	public static boolean otherWorld(net.minecraft.server.level.ServerPlayer player, String start, net.minecraft.core.BlockPos back,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos> free) {
 		if (!lookedForLand) {
 			lookedForLand = true;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				try {
-					land = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterStarts"), "land",
-						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, String.class, net.minecraft.core.BlockPos.class));
-				} catch (ReflectiveOperationException | LinkageError e) {
-					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' other-world starts (older Powers?)", e);
-				}
-			}
+			land = withFree("com.jaymospowers.power.zfighter.ZFighterStarts", "land", net.minecraft.server.level.ServerPlayer.class, String.class,
+				net.minecraft.core.BlockPos.class);
 		}
 		if (land == null) {
 			return false;
 		}
 		try {
-			return (boolean)land.invoke(player, start, back);
+			return (boolean)land.invoke(player, start, back, free);
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't send {} to the {} start", player.getGameProfile().name(), start, e);
 			return false;
 		}
 	}
 
-	/** (0.7.415) Powers' one-player start entries ({@code start(ServerPlayer)}), by class; null for one that isn't there. */
+	/** (0.7.415) Powers' one-player start entries ({@code start(ServerPlayer, BiPredicate)}), by class; null for one that isn't there. */
 	private static final java.util.Map<String, java.lang.invoke.@Nullable MethodHandle> STARTS = new java.util.HashMap<>();
 
-	private static boolean callStart(String className, net.minecraft.server.level.ServerPlayer player) {
+	private static boolean callStart(String className, net.minecraft.server.level.ServerPlayer player,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos> free) {
 		if (!STARTS.containsKey(className)) {
-			java.lang.invoke.MethodHandle found = null;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				try {
-					found = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName(className), "start",
-						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
-				} catch (ReflectiveOperationException | LinkageError e) {
-					JaymosKingdoms.LOGGER.warn("Couldn't find {}.start in Jaymo's Powers (older Powers?)", className, e);
-				}
-			}
-			STARTS.put(className, found);
+			STARTS.put(className, withFree(className, "start", net.minecraft.server.level.ServerPlayer.class));
 		}
 		java.lang.invoke.MethodHandle handle = STARTS.get(className);
 		if (handle == null) {
 			return false;
 		}
 		try {
-			return (boolean)handle.invoke(player);
+			return (boolean)handle.invoke(player, free);
 		} catch (Throwable e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't run {}.start for {}", className, player.getGameProfile().name(), e);
 			return false;
@@ -1123,19 +1133,23 @@ public final class PowersCompat {
 	 * (0.7.415) Life story road "Escaped the alchemist's lab" (Powers' {@code LabEscape.start}): {@code player} wakes in a hermit
 	 * alchemist's small lab built in the wild, with one infusion (a gift and a price, until a Potion of Cleansing or healing
 	 * magic washes it out), and the alchemist's clockwork golems stir and hunt them. For the Bio-built, Rubber-folk, Emberborn,
-	 * Stoneborn and Sylvan only (the caller gates it). False without Powers, or if no ground could be found.
+	 * Stoneborn and Sylvan only (the caller gates it). False without Powers, or if no ground could be found. (Tiv) Built where
+	 * {@code free} says nobody else started.
 	 */
-	public static boolean labEscape(net.minecraft.server.level.ServerPlayer player) {
-		return callStart("com.jaymospowers.alchemy.LabEscape", player);
+	public static boolean labEscape(net.minecraft.server.level.ServerPlayer player,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos> free) {
+		return callStart("com.jaymospowers.alchemy.LabEscape", player, free);
 	}
 
 	/**
 	 * (0.7.415) Life story road "Fresh off the bench" (Powers' {@code ZFighterAndroidStart.start}): {@code player} wakes on the Mad
 	 * Tinkerer's bench in a small workshop built in the wild, already an android (endless ki, no hunger, metal repairs; given the
 	 * Z Fighter's power if they have none), with a strange note in their pocket. False without Powers, or if no ground could be found.
+	 * (Tiv) Built where {@code free} says nobody else started.
 	 */
-	public static boolean androidStart(net.minecraft.server.level.ServerPlayer player) {
-		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player);
+	public static boolean androidStart(net.minecraft.server.level.ServerPlayer player,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos> free) {
+		return callStart("com.jaymospowers.power.zfighter.ZFighterAndroidStart", player, free);
 	}
 
 	/** (0.7.501) The entity tag of Jaymo's Powers' Mad Tinkerer (its {@code ZFighterAndroid.TAG}): meeting him wakes the Bio-built. */

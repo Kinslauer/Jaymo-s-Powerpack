@@ -70,7 +70,8 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   forgets the count.
 - **Fists only**: while changed both hands read as empty to everything that asks the entity (`XenoformHandsMixin` on
   `LivingEntity.getItemBySlot`), so no item can be used, mined with or shown, and punches hit for the alien's attack
-  damage. The inventory itself is untouched.
+  damage. The inventory itself is untouched. The one exception is an alien whose `XenoForm.wields` takes what's in the
+  main hand: Asterion's big weapons (below).
 - The body is attribute modifiers: `SCALE`, `MAX_HEALTH`, `ATTACK_DAMAGE`, `MOVEMENT_SPEED`, `KNOCKBACK_RESISTANCE`,
   `STEP_HEIGHT`, all removed on turning back, a relog (`DISCONNECT` reverts first) or losing the power.
 - Attachments: `xenoform_band` (unlocked list + dial; saved, kept on death, synced to the owner), `xenoform_form` (the
@@ -112,7 +113,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Blight** | the Wither; hidden | a floating Wither, three skulls over a ribbed spine (0.19.82); 1.4x, 60 hp, fists 7, slower, heavy; the Wither effect and its own skulls can't touch it; at half health or less the dark shield rises and shots can't touch it | Skull: one wither skull (1 s) | Volley: three fanned, the middle one blue (4 s) | Rot Touch: 6 and Wither II 6 s on the creature in reach (4); grass, leaves, flowers and crops round it rot (mob griefing on) (3 s) | Dark Pulse: 4, Wither 4 s and a throw to all within 6 (10 s) |
 | **Howl** | wolf; Kingdoms werewolf, feral wolf, coyote | a four-legged wolf (0.19.62); 1x, 26 hp, fists 5, quick; Strength and Speed at night | Pounce: a 1.2 leap; the first creature landed on takes 6 and is tripped 2 s (3 s) | Howl: untamed wolves, feral wolves and coyotes within 32 hunt what you hit (or what hit you) for 60 s, never you (90 s) | Scent: 10 s, blood stains within 48 shown only to you, bleeders glow (20 s) | Lockjaw: 4 and a dirty cut, then held 4 s: dragged, Slowness IV, 2 a second; B again lets go (8 s) |
 | **Prowl** | ocelot; Naturalist tiger, lion | a big cat, belly-low stalk (0.19.62); 1x, 24 hp, fists 5, quickest; silent; Invisibility while sneaking; falls under 12 blocks don't hurt | Long Pounce: a 1.7 low leap; first creature landed on takes 6 and is pinned 3 s (5 s) | Rake: 5 and a dirty cut (2 s) | Stalk: the aimed creature (32) glows 20 s; within 6 of it you get Strength II (15 s) | Roar: mobs within 12 drop their target and run (20 s) |
-| **Tusk** | hoglin; Naturalist boar, rhino; Kingdoms wild boar, minotaur; Aether burrukai, kirrid, taegore | a boar, head-down charge (0.19.62); 1.15x, 34 hp, fists 6, a little slow, 60% knockback resist | Charge: 25 ticks at 0.7 where you face; first creature met takes 7 and is tossed (5 s) | Gore: 6, a dirty cut, a shove (2.5 s) | Root Out: grass, dirt, podzol, mycelium, rooted dirt or mud at your feet or aimed (4) turns to coarse dirt and gives 1-2 potatoes, carrots, beetroots, brown mushrooms or sweet berries, 40% also a seed or bone meal (10 s) | Thick Hide: 10 s of full knockback resistance and Resistance I (25 s) |
+| **Tusk** | hoglin; Naturalist boar, rhino; Kingdoms wild boar; Aether burrukai, kirrid, taegore | a boar, head-down charge (0.19.62); 1.15x, 34 hp, fists 6, a little slow, 60% knockback resist | Charge: 25 ticks at 0.7 where you face; first creature met takes 7 and is tossed (5 s) | Gore: 6, a dirty cut, a shove (2.5 s) | Root Out: grass, dirt, podzol, mycelium, rooted dirt or mud at your feet or aimed (4) turns to coarse dirt and gives 1-2 potatoes, carrots, beetroots, brown mushrooms or sweet berries, 40% also a seed or bone meal (10 s) | Thick Hide: 10 s of full knockback resistance and Resistance I (25 s) |
 | **Talon** | parrot; Naturalist vulture, bluejay, canary, cardinal, robin, finch, sparrow | a hawk, perched upright, wings spread and beating in the air (0.19.75); 0.9x, 20 hp, fists 4; flies (jump held in the air beats up and where you look, let go glides, sneak drops); no fall damage | Stoop: a 1.4 dive; the first creature met takes 4, and a mob no wider than 1.4 and no taller than 2.2 is carried under you up to 8 s (6 s) | Drop what you carry; with nothing held, a talon strike of 5 (1.5 s) | Far Sight: monsters within 96 glow 10 s, Night Vision (30 s) | Feather Darts: five fanned quills, 2.5 each (4 s) |
 | **Murk** | squid, glow squid; Naturalist anglerfish, Friends & Foes barnacle | a squid that drags itself on its tentacles and swims mantle-first (0.19.82); 0.95x, 22 hp, fists 4; in water Dolphin's Grace II, water breathing, Night Vision | Ink: Blindness 5 s to all within 5, mobs lose you (10 s) | Tentacles: the aimed creature and the nearest, up to 4 within 6, held round you 4 s (Slowness IV, 1 a second); G again lets go (12 s) | Jet: 1.6 dash in water, 0.8 on land (2.5 s) | Lure: 10 s, mobs in water within 24 swim to you (20 s) |
 | **Gnasher** | dolphin; sharks, Naturalist alligator, piranha, Friends & Foes mauler | a shark that swims level and drags itself on its fins on land (0.19.82); 1.1x, 30 hp, fists 6, 40% knockback resist; in water Dolphin's Grace II, water breathing; bleeders in water within 48 glow | Clamp: 6 and a dirty cut, held 4 s (dragged, Slowness IV); R again lets go (5 s) | Lunge: a 1.5 leap, 0.6 up; first creature met takes 5 (4 s) | Frenzy: 10 s, Speed and Strength one level per bleeder within 16 (max 3) (20 s) | Death Roll: only while clamped: 2 s, 3 and a cut every half second, then tripped 3 s and let go (10 s) |
@@ -128,6 +129,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | **Thornwild** | creaking; Enderscape rustle | a treant on root feet (0.19.84); 1.1x, 28 hp, fists 5, 40% knockback resist; heals 1 every 2 s in sunlight | Roots: the aimed creature (16) held 4 s, 1 a second (10 s) | Thorn Volley: five thorns, 2.5 each (3 s) | Hedge: a 5x2 wall of leaves two blocks ahead; withers after 30 s; needs build rights (15 s) | Bloom: 10 s, three bone-meal tries every half second round your feet (30 s) |
 | **Billow** | happy ghast; Aether aerwhale | 1.6x, 40 hp, fists 2, slow, 50% knockback resist; a real cloud (0.19.34): a block high (the swimming box), seeps through anything short of a full block except what it rests on, shots and creatures pass through it, sheds wisps; floats (jump rises, sneak sinks); no fall damage; up to 3 players ride on its back (right-click it, sneak off) | Downpour: 6 s, fire blocks within 4 (and 8 below) and burning creatures put out (15 s) | Thunderhead: a bolt (no fire) and 8 on the aimed creature (32) (8 s) | Gust: everything within 8 in front blown 1.6 back (3 s) | Fog: 10 s, creatures within 8 (not players or riders) blinded and lose you and your riders (25 s) |
 | **Towerback** | Kingdoms Highfield, Arctic and Irradiated Giants, war elephant | 5x (about 9 blocks), 120 hp, fists 12, slow, full knockback resist; Z tap: monolith size 16x (open sky only; +80 hp, +8 fists, 60% faster, step 4; walks through what it meets, never block entities or unbreakables); every step stomps (cracks, a shockwave 1.6 per scale for 5, jump it); falls land as stomps, no fall damage | Grab: the aimed creature no taller than half you, the Giants' grab (1.5 s wind-up, squeeze 4 every 0.5 s, slam 30; x1.6 at monolith size), with the film (15 s) | Stomp: a shockwave twice a step's, 10, thrown up (6 s) | Swat: 12 to everything in front, flung aside 2.4 (4 s) | Roar: monsters (and mobs after you) within 3 per scale get Weakness II, Slowness III 8 s and lose you (20 s) |
+| **Asterion** | Kingdoms minotaur | the minotaur's own body and animations, in a slate hide with the band's green for its gold and a chest-plate insignia, carrying its great hammer; 1.6x, 48 hp, fists (the hammer) 8, a little slow, 80% knockback resist, steps up a block. Big weapons: holding a Better Combat two-handed weapon (`core/TwoHanded`: claymores, war axes, glaives, spears, scythes...) it wields that instead of the hammer, with the weapon's own damage and moves | Charge (hold): 0.62 a tick where it faced, leaning at most 1° a tick and never more than 12° off its first line; breaks dirt, wood (what an axe takes) and leaves whoever placed them (no block entities); anything else solid stops it dead. The first creature met (no wider than 1.6, no taller than 2.6) is caught on the horns (6) and held in front, stunned 0.6 s after every impact; each tick it's put through blocks it takes 3 + 1.5 a block broken so far this charge (max 18; creatures flung aside on the way hit it at that level but don't raise it); a wall runs it through: 14 + the ramp, a 6-point torso wound and a bleeding cut, stunned 2 s. A carried mob that can fight swings back once a second; a carried player just swings. Anything bigger is gored (10) and stops it. Up to 3.5 s; let go to throw the catch off ahead, limp. Nothing but the carried creature's own melee blows can hurt Asterion through the charge and 0.5 s after (7 s) | Roar (hold): held up to 2.5 s (slowed to a crawl; at 5 s it lets go by itself), then a shockwave runs out 1 block a tick, 3 to 14 blocks, throwing whoever it reaches back limp (0.6-2.0 out, harder the nearer) for 1-4; the wait grows 5-20 s with the hold | Slam: after 0.75 s, the hammer comes down: 9 to all within 4.5, thrown off their feet (limp) (8 s) | Gore: 9, a dirty cut, tossed limp (2.5 s) |
 
 ### More DNA [XenoDna] (0.18.100)
 
@@ -152,7 +154,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Marrow | Kingdoms silver skeleton, Skeleton Lord |
 | Howl | Kingdoms werewolf, feral wolf, coyote |
 | Prowl | Naturalist tiger, lion |
-| Tusk | Naturalist boar, rhino; Kingdoms wild boar, minotaur; Aether burrukai, kirrid, taegore |
+| Tusk | Naturalist boar, rhino; Kingdoms wild boar; Aether burrukai, kirrid, taegore |
+| Asterion | Kingdoms minotaur (only by it) |
 | Talon | Naturalist vulture and songbirds (bluejay, canary, cardinal, robin, finch, sparrow) |
 | Murk | Naturalist anglerfish, Friends & Foes barnacle |
 | Gnasher | sharks, Naturalist alligator, piranha, Friends & Foes mauler |
@@ -173,6 +176,33 @@ hornkin, the old giant; pillagers, vindicators, evokers, witches, vexes; piglins
 villagers, wandering traders, every MCA villager and Kingdoms folk (ids ending `_of`/`_titled`, caravan folk), hornkin
 and their brutes, hurlers and warlords, the Night Bleeder; our people (Judge, Keeper, Hermit, raiders and so on), demon
 soldiers and captains, the aerbunny.
+
+## Asterion [forms/Asterion, client AsterionModel]
+
+Tiv's minotaur alien (Tasks thread, 2026-11-08): scanning a minotaur teaches Asterion, no longer Tusk. Numbers are the
+constants at the top of `Asterion` (server) and `AsterionModel` (client).
+
+- **Look.** Kingdoms' minotaur reused: "Minotaur" by eanncrod (Blockbench Workshop, CC BY 4.0), its cubes and its eight
+  animations, baked for our loader (`client/bb/BbModel`) by `tools/gen_xenoform_asterion.py` into
+  `bbmodels/xenoform_asterion.json`. The same script repaints the minotaur's texture as the alien's skin (the hide a dark
+  slate, the gold trim and red eyes the band's exact greens so the band's glow colour repaints them, the horns kept, the
+  insignia on its chest plate) and paints its fallback Ultimate's plates and seams from it. Credit and the list of
+  changes: `art/xenoform_asterion-CREDITS.md`, licence beside it, and `textures/entity/bb/CREDITS.txt`.
+- **Animation.** The minotaur hangs on the model's root beside the man's (hidden, empty) parts. Idle blends into walk by
+  the walk's speed; an attack plays its hammer swings in turn; a Charge plays its run with the head down; a Slam plays its
+  slam, timed so the hammer lands with the server's blow (`SLAM_HIT_SECONDS`, `Asterion.SLAM_WINDUP`). The Roar (head
+  back, arms spread, a shudder, then the bellow) and the Gore (dip and toss) are posed in code. How long an act has gone
+  on is counted on each client from when it first sees it (`XenoformClient.ACT_TICKS`).
+- **Big weapons.** `Asterion.wields` lets a Better Combat two-handed weapon through the hands mixin, on both sides, so
+  its damage, attribute modifiers and Better Combat's moves apply. In third person the minotaur's own hammer is hidden and
+  the weapon is drawn along the hammer's haft (`AsterionModel.submitHeld`), so the minotaur's swings swing it. Bare
+  handed it swings the hammer for its fists' 8. First person: the minotaur's right arm without the hammer (a second copy,
+  hanging straight), or the weapon as any held item is drawn.
+- **Settled in the build** (the task left these open): the catch is held on the horns, lifted in front of it, and is
+  dropped early by letting go of R (thrown off ahead, limp); the ramp counts blocks only and starts at nothing each charge;
+  the run-through is a torso wound (`Wounds.hurtPart` on the body, the torso can't break) plus a bleeding cut; the
+  carried creature's blows land at their own full damage; the roar grows both reach and force (and a little damage),
+  costs a crawl while held and a longer wait after; invulnerability lasts the whole charge and half a second past it.
 
 ## Earning aliens [XenoFinds, StarWreckBlock] (0.18.122, Xeno-Band patch 6)
 

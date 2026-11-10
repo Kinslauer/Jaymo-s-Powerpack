@@ -253,6 +253,20 @@ public final class Monoliths {
 		return m == null ? null : m.pos();
 	}
 
+	/** The same, among the feet that are {@code free} (a life story's: nobody else's start), or null with none. */
+	public static @Nullable BlockPos nearestFoot(ServerLevel level, BlockPos pos, java.util.function.Predicate<BlockPos> free) {
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Monolith m : all(level)) {
+			double d = horizontal(m.pos(), pos);
+			if (d < bestD && free.test(m.pos())) {
+				best = m.pos();
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
 	static double horizontal(BlockPos a, BlockPos b) {
 		double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
 		return dx * dx + dz * dz;

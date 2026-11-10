@@ -49,6 +49,8 @@ final class SpiritFigure {
 	/** Where the figure's own right arm hangs from (model pixels at scale 1; the left mirrors it). */
 	static final float[] ARM_X = {-4.4F, -8.0F, -6.4F, -4.2F, -5.0F, -5.0F};
 	static final float[] ARM_Y = {0.8F, 0.6F, 0.8F, 0.8F, 0.8F, 0.8F};
+	/** Where the figure's arm bends: the elbow, below its shoulder (model pixels at scale 1). */
+	static final float[] ELBOW = {5.6F, 4.8F, 6.0F, 5.2F, 6.0F, 6.6F};
 	/** Where the right wing grows from its back (model pixels at scale 1; only the Grue has wings). */
 	static final float[] WING_X = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -1.6F};
 	static final float[] WING_Y = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.2F};
@@ -77,6 +79,8 @@ final class SpiritFigure {
 	static final float FORM_SPREAD = 0.8F, FADE_BOW = 0.35F;
 	/** A blow (the fight with the Grue, the Grue's own): the arm drawn back, then thrown forward (radians), and the share of the swing spent drawing back. */
 	static final float STRIKE_BACK = 0.7F, STRIKE_OUT = -1.95F, STRIKE_DRAW = 0.45F, STRIKE_LEAN = 0.18F;
+	/** The elbow (radians, negative bends the forearm forward and up): at rest, talking, drawn back for a blow, thrown out, and arms up. */
+	static final float ELBOW_REST = -0.25F, ELBOW_TALK = -0.95F, ELBOW_TALK_SWING = 0.3F, ELBOW_DRAWN = -1.7F, ELBOW_THROWN = -0.08F, ELBOW_UP = -0.2F;
 	/** The wings: how far spread at rest (radians back from the body), how far they beat, and how fast at a flap of 1. */
 	static final float WING_SPREAD = 0.45F, WING_BEAT = 0.55F, WING_SPEED = 0.35F, WING_TIP = 0.25F;
 	/** Its shells: thinner and dimmer than the arms', so the arms read over it. */
@@ -92,11 +96,28 @@ final class SpiritFigure {
 	 * {@code headYaw} and {@code headPitch} where its head turns (radians).
 	 */
 	record Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch,
-		boolean fading, float strike, float strikePhase, float flap, boolean armsOnly) {
+		boolean fading, float strike, float strikePhase, float flap, boolean armsOnly, float strikeLag) {
 		/** A frame with no fighting in it. */
 		Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch, boolean fading) {
-			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, 0.0F, 0.0F, 0.0F, false);
+			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, 0.0F, 0.0F, 0.0F, false, 0.5F);
 		}
+
+		/** Fighting, the arms trading blows (the left half a blow behind). */
+		Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch, boolean fading,
+			float strike, float strikePhase, float flap, boolean armsOnly) {
+			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, strike, strikePhase, flap, armsOnly, 0.5F);
+		}
+	}
+
+	/** The elbow at {@code phase} (0-1) of a blow: folded as the arm draws back, snapped straight as it lands, then easing to rest. */
+	static float elbowSwing(float phase) {
+		float p = phase - (float)Math.floor(phase);
+		if (p < STRIKE_DRAW) {
+			float k = p / STRIKE_DRAW;
+			return Mth.lerp(k * k * (3.0F - 2.0F * k), ELBOW_REST, ELBOW_DRAWN);
+		}
+		float k = (p - STRIKE_DRAW) / (1.0F - STRIKE_DRAW);
+		return k < 0.15F ? Mth.lerp(k / 0.15F, ELBOW_DRAWN, ELBOW_THROWN) : Mth.lerp((k - 0.15F) / 0.85F, ELBOW_THROWN, ELBOW_REST);
 	}
 
 	/** The arm's swing at {@code phase} (0-1) of a blow: drawn back, thrown forward, recovered (radians on x). */
@@ -165,7 +186,7 @@ final class SpiritFigure {
 	 */
 	static final class Model extends HumanoidModel<HumanoidRenderState> {
 		private final int kind;
-		private final ModelPart skull, tail, armR, armL, wingR, wingL;
+		private final ModelPart skull, tail, armR, armL, foreR, foreL, wingR, wingL;
 
 		Model(ModelPart root, int kind) {
 			super(root);
@@ -174,6 +195,8 @@ final class SpiritFigure {
 			this.tail = this.body.getChild("tail");
 			this.armR = this.body.getChild("figure_right_arm");
 			this.armL = this.body.getChild("figure_left_arm");
+			this.foreR = this.armR.getChild("forearm");
+			this.foreL = this.armL.getChild("forearm");
 			this.wingR = this.body.getChild("figure_right_wing");
 			this.wingL = this.body.getChild("figure_left_wing");
 		}
@@ -253,11 +276,16 @@ final class SpiritFigure {
 			float ry = talk * (POINT_TURN + 0.15F * Mth.sin(t * TALK_SPEED * 0.7F));
 			float rz = Mth.lerp(talk, 0.12F, -0.1F);
 			float lx = 0.05F - breath - talk * (0.25F + HANG_SWAY * Mth.sin(t * TALK_SPEED + 1.0F));
+			// the elbows: a little bent at rest, the talking hand's folded up and turning, both near straight flung up
+			float re = Mth.lerp(talk, ELBOW_REST, ELBOW_TALK + ELBOW_TALK_SWING * Mth.sin(t * TALK_SPEED * 1.3F));
+			float le = Mth.lerp(talk, ELBOW_REST, ELBOW_REST * 1.6F);
 			float lz = -0.12F;
 			float up = levelRaise(frame.levelAge());
 			rx = Mth.lerp(up, rx, LEVEL_RAISE);
 			lx = Mth.lerp(up, lx, LEVEL_RAISE);
 			rz = Mth.lerp(up, rz, LEVEL_SPREAD);
+			re = Mth.lerp(up, re, ELBOW_UP);
+			le = Mth.lerp(up, le, ELBOW_UP);
 			lz = Mth.lerp(up, lz, -LEVEL_SPREAD);
 			// forming, the arms are spread wide and close in
 			rz += FORM_SPREAD * unformed;
@@ -266,8 +294,10 @@ final class SpiritFigure {
 			float w = frame.strike();
 			if (w > 0.0F) {
 				rx = Mth.lerp(w, rx, swing(frame.strikePhase()));
-				lx = Mth.lerp(w, lx, swing(frame.strikePhase() + 0.5F));
+				lx = Mth.lerp(w, lx, swing(frame.strikePhase() + frame.strikeLag()));
 				ry = Mth.lerp(w, ry, -0.2F);
+				re = Mth.lerp(w, re, elbowSwing(frame.strikePhase()));
+				le = Mth.lerp(w, le, elbowSwing(frame.strikePhase() + frame.strikeLag()));
 				this.body.xRot = w * STRIKE_LEAN * Mth.sin(frame.strikePhase() * Mth.TWO_PI * 2.0F);
 			}
 			this.armR.xRot = rx;
@@ -275,6 +305,8 @@ final class SpiritFigure {
 			this.armR.zRot = rz;
 			this.armL.xRot = lx;
 			this.armL.zRot = lz;
+			this.foreR.xRot = re;
+			this.foreL.xRot = le;
 		}
 	}
 
@@ -294,8 +326,10 @@ final class SpiritFigure {
 		PartDefinition body = root.addOrReplaceChild("body", torso(kind, g), PartPose.ZERO);
 		body.addOrReplaceChild("skull", skull(kind, g), PartPose.ZERO);
 		body.addOrReplaceChild("tail", tail(kind, g), PartPose.offset(0.0F, TAIL_Y[kind], 0.0F));
-		body.addOrReplaceChild("figure_right_arm", arm(kind, g, 1.0F), PartPose.offset(ARM_X[kind], ARM_Y[kind], 0.0F));
-		body.addOrReplaceChild("figure_left_arm", arm(kind, g, -1.0F), PartPose.offset(-ARM_X[kind], ARM_Y[kind], 0.0F));
+		PartDefinition armR = body.addOrReplaceChild("figure_right_arm", arm(kind, g, 1.0F), PartPose.offset(ARM_X[kind], ARM_Y[kind], 0.0F));
+		PartDefinition armL = body.addOrReplaceChild("figure_left_arm", arm(kind, g, -1.0F), PartPose.offset(-ARM_X[kind], ARM_Y[kind], 0.0F));
+		armR.addOrReplaceChild("forearm", fore(kind, g, 1.0F), PartPose.offset(0.0F, ELBOW[kind], 0.0F));
+		armL.addOrReplaceChild("forearm", fore(kind, g, -1.0F), PartPose.offset(0.0F, ELBOW[kind], 0.0F));
 		body.addOrReplaceChild("figure_right_wing", wing(kind, g, 1.0F), PartPose.offset(WING_X[kind], WING_Y[kind], WING_Z[kind]));
 		body.addOrReplaceChild("figure_left_wing", wing(kind, g, -1.0F), PartPose.offset(-WING_X[kind], WING_Y[kind], WING_Z[kind]));
 		return mesh;
@@ -521,56 +555,77 @@ final class SpiritFigure {
 		return c;
 	}
 
-	/** The figure's own arm, from its shoulder down; {@code side} 1 the right, -1 the left (mirrored across). */
+	/** The figure's upper arm, from its shoulder to the elbow; {@code side} 1 the right, -1 the left (mirrored across). */
 	private static CubeListBuilder arm(int kind, CubeDeformation g, float side) {
 		CubeListBuilder c = CubeListBuilder.create().texOffs(0, 0);
 		switch (kind) {
 			case Spirits.GRIMSBY -> {
 				box(c, side * 0.0F, -1.0F, 0.0F, 3.2F, 3.4F, 3.4F, g); // the ragged sleeve
 				box(c, side * 0.0F, 0.0F, 0.0F, 1.6F, 6.0F, 1.6F, g); // the upper bone
-				box(c, side * 0.0F, 5.6F, 0.0F, 2.0F, 1.0F, 2.0F, g); // the elbow
-				box(c, side * 0.0F, 6.4F, 0.0F, 1.4F, 5.0F, 1.4F, g); // the forearm
-				box(c, side * 0.0F, 11.2F, -0.2F, 2.0F, 2.2F, 1.2F, g); // the hand
-				box(c, side * 0.4F, 13.2F, -0.2F, 0.5F, 1.6F, 0.5F, g); // finger bones
-				box(c, side * -0.4F, 13.2F, -0.2F, 0.5F, 1.8F, 0.5F, g);
 			}
 			case Spirits.VARRO -> {
 				box(c, side * 0.0F, -2.0F, 0.0F, 6.4F, 3.6F, 7.0F, g); // the pauldron
 				box(c, side * 0.0F, 1.0F, 0.0F, 5.6F, 1.4F, 6.4F, g); // its lower lame
 				box(c, side * 0.0F, 0.0F, 0.0F, 4.0F, 5.4F, 4.0F, g); // the rerebrace
-				box(c, side * 0.0F, 4.8F, -0.2F, 4.8F, 1.8F, 4.8F, g); // the couter
-				box(c, side * 0.0F, 6.4F, 0.0F, 4.0F, 5.0F, 4.0F, g); // the vambrace
-				box(c, side * 0.0F, 11.0F, 0.0F, 4.8F, 3.4F, 4.8F, g); // the gauntlet
-				box(c, side * 0.0F, 14.0F, -1.8F, 4.2F, 0.9F, 1.2F, g); // its knuckle studs
 			}
 			case Spirits.AMBROSE -> {
 				box(c, side * 0.0F, -1.0F, 0.0F, 4.4F, 3.0F, 4.4F, g); // the shoulder of the robe
 				box(c, side * 0.0F, 0.0F, 0.0F, 4.0F, 6.4F, 4.0F, g); // the sleeve
-				box(c, side * 0.0F, 6.0F, 0.0F, 5.6F, 4.6F, 5.6F, g); // its wide cuff
-				box(c, side * 0.0F, 9.8F, -0.2F, 2.6F, 2.6F, 2.6F, g); // the hand
-				box(c, side * 0.8F, 12.2F, -0.6F, 0.7F, 1.4F, 0.7F, g); // fingers
-				box(c, side * -0.4F, 12.2F, -0.6F, 0.7F, 1.6F, 0.7F, g);
 			}
 			case Spirits.THESSALY -> {
 				box(c, side * 0.0F, -0.6F, 0.0F, 2.6F, 2.4F, 2.6F, g); // the shoulder
 				box(c, side * 0.0F, 0.0F, 0.0F, 2.0F, 5.6F, 2.0F, g); // the slim sleeve
-				box(c, side * 0.0F, 5.2F, 0.0F, 3.4F, 3.0F, 3.4F, g); // the bell cuff
-				box(c, side * 0.0F, 8.0F, 0.0F, 1.6F, 3.2F, 1.6F, g); // the forearm
-				box(c, side * 0.0F, 11.0F, -0.2F, 1.8F, 1.8F, 1.2F, g); // the hand
-				box(c, side * 0.0F, 11.6F, -0.2F, 2.0F, 0.4F, 1.4F, g); // a ring
 			}
 			case Spirits.QUIET -> {
-				box(c, side * 0.0F, 0.0F, 0.0F, 3.0F, 12.0F, 3.0F, g); // the smooth arm
+				box(c, side * 0.0F, 0.0F, 0.0F, 3.0F, 6.2F, 3.0F, g); // the smooth arm
 			}
 			default -> {
 				box(c, side * 0.0F, -1.0F, 0.0F, 3.2F, 3.0F, 3.2F, g); // the bony shoulder
 				box(c, side * 0.0F, 0.0F, 0.0F, 2.0F, 7.0F, 2.0F, g); // the long upper arm
-				box(c, side * 0.0F, 6.6F, 0.0F, 2.4F, 1.2F, 2.4F, g); // the elbow
-				box(c, side * 0.0F, 7.6F, 0.0F, 1.8F, 6.0F, 1.8F, g); // the forearm
-				box(c, side * 0.0F, 13.4F, -0.2F, 2.8F, 2.2F, 1.6F, g); // the hand
-				box(c, side * -0.9F, 15.4F, -0.6F, 0.6F, 3.4F, 0.6F, g); // long claws
-				box(c, side * 0.0F, 15.4F, -0.6F, 0.6F, 4.0F, 0.6F, g);
-				box(c, side * 0.9F, 15.4F, -0.6F, 0.6F, 3.4F, 0.6F, g);
+			}
+		}
+		return c;
+	}
+
+	/** The figure's forearm, from its elbow down; {@code side} 1 the right, -1 the left. */
+	private static CubeListBuilder fore(int kind, CubeDeformation g, float side) {
+		CubeListBuilder c = CubeListBuilder.create().texOffs(0, 0);
+		switch (kind) {
+			case Spirits.GRIMSBY -> {
+				box(c, side * 0.0F, 0.0F, 0.0F, 2.0F, 1.0F, 2.0F, g); // the elbow
+				box(c, side * 0.0F, 0.8F, 0.0F, 1.4F, 5.0F, 1.4F, g); // the forearm
+				box(c, side * 0.0F, 5.6F, -0.2F, 2.0F, 2.2F, 1.2F, g); // the hand
+				box(c, side * 0.4F, 7.6F, -0.2F, 0.5F, 1.6F, 0.5F, g); // finger bones
+				box(c, side * -0.4F, 7.6F, -0.2F, 0.5F, 1.8F, 0.5F, g);
+			}
+			case Spirits.VARRO -> {
+				box(c, side * 0.0F, 0.0F, -0.2F, 4.8F, 1.8F, 4.8F, g); // the couter
+				box(c, side * 0.0F, 1.6F, 0.0F, 4.0F, 5.0F, 4.0F, g); // the vambrace
+				box(c, side * 0.0F, 6.2F, 0.0F, 4.8F, 3.4F, 4.8F, g); // the gauntlet
+				box(c, side * 0.0F, 9.2F, -1.8F, 4.2F, 0.9F, 1.2F, g); // its knuckle studs
+			}
+			case Spirits.AMBROSE -> {
+				box(c, side * 0.0F, 0.0F, 0.0F, 5.6F, 4.6F, 5.6F, g); // its wide cuff
+				box(c, side * 0.0F, 3.8F, -0.2F, 2.6F, 2.6F, 2.6F, g); // the hand
+				box(c, side * 0.8F, 6.2F, -0.6F, 0.7F, 1.4F, 0.7F, g); // fingers
+				box(c, side * -0.4F, 6.2F, -0.6F, 0.7F, 1.6F, 0.7F, g);
+			}
+			case Spirits.THESSALY -> {
+				box(c, side * 0.0F, 0.0F, 0.0F, 3.4F, 3.0F, 3.4F, g); // the bell cuff
+				box(c, side * 0.0F, 2.8F, 0.0F, 1.6F, 3.2F, 1.6F, g); // the forearm
+				box(c, side * 0.0F, 5.8F, -0.2F, 1.8F, 1.8F, 1.2F, g); // the hand
+				box(c, side * 0.0F, 6.4F, -0.2F, 2.0F, 0.4F, 1.4F, g); // a ring
+			}
+			case Spirits.QUIET -> {
+				box(c, side * 0.0F, 0.0F, 0.0F, 3.0F, 6.0F, 3.0F, g); // its forearm
+			}
+			default -> {
+				box(c, side * 0.0F, 0.0F, 0.0F, 2.4F, 1.2F, 2.4F, g); // the elbow
+				box(c, side * 0.0F, 1.0F, 0.0F, 1.8F, 6.0F, 1.8F, g); // the forearm
+				box(c, side * 0.0F, 6.8F, -0.2F, 2.8F, 2.2F, 1.6F, g); // the hand
+				box(c, side * -0.9F, 8.8F, -0.6F, 0.6F, 3.4F, 0.6F, g); // long claws
+				box(c, side * 0.0F, 8.8F, -0.6F, 0.6F, 4.0F, 0.6F, g);
+				box(c, side * 0.9F, 8.8F, -0.6F, 0.6F, 3.4F, 0.6F, g);
 			}
 		}
 		return c;

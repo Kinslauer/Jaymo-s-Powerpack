@@ -233,6 +233,7 @@ public final class XenoFormModels {
 			MODELS.put("thornwild", new Thornwild());
 			MODELS.put("billow", new Billow());
 			MODELS.put("towerback", new Towerback());
+			MODELS.put("asterion", new AsterionModel());
 		}
 		return MODELS.get(form);
 	}

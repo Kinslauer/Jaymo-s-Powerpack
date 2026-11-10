@@ -180,6 +180,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		BlindedHud.init();
 		com.jaymospowers.client.sound.Blasts.init();
 		com.jaymospowers.client.sound.ShellWhistle.init();
 		PanicCam.init();
@@ -187,6 +188,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
+		FrontCamera.init();
 		AimCrosshair.init();
 		Ambience.init();
 		LeafRustle.init();

@@ -88,16 +88,15 @@ public final class DragonsClient {
 		// saddle, Boreas smaller
 		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new FireDragonRenderer<>(c, "notus", NOTUS_SHADOW, NOTUS_SCALE));
 		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new FireDragonRenderer<>(c, "boreas", BOREAS_SHADOW, BOREAS_SCALE));
-		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
-			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
+		// our own model, drawn and animated by GeckoLib (kingdoms/art/zephyrus.bbmodel)
+		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new ZephyrusDragonRenderer(c, ZEPHYRUS_SHADOW));
 		// (0.7.329) both eanncrod's Kintsugi wyvern: Eurus small enough to ride, Aeolus vast
 		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new KintsugiDragonModel(), EURUS_SHADOW, EURUS_SCALE,
 			KINTSUGI_REACH).ownDeath());
 		EntityRenderers.register(Dragons.AEOLUS_DRAGON, c -> new WindDragonRenderer<>(c, "aeolus", new KintsugiDragonModel(), AEOLUS_SHADOW, AEOLUS_SCALE,
 			KINTSUGI_REACH).ownDeath());
-		// (0.7.522) our own model of Saint's Dragons' Stegonaut (its art isn't used)
-		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new WindDragonRenderer<>(c, "stegonaut", new StegonautDragonModel(StegonautDragonModel
-			.createBodyLayer().bakeRoot()), STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
+		// our own model of Saint's Dragons' Stegonaut (its art isn't used), drawn and animated by GeckoLib
+		EntityRenderers.register(Dragons.STEGONAUT_DRAGON, c -> new StegonautDragonRenderer(c, STEGONAUT_SHADOW, STEGONAUT_SCALE, STEGONAUT_REACH));
 		EntityRenderers.register(Dragons.ATROXIIA_DRAGON, c -> new AtroxiiaDragonRenderer(c, ATROXIIA_SHADOW, ATROXIIA_SCALE,
 			ATROXIIA_REACH));
 		EntityRenderers.register(Dragons.VARASUCHUS_DRAGON, c -> new WindDragonRenderer<>(c, "varasuchus", new VarasuchusDragonModel(VarasuchusDragonModel

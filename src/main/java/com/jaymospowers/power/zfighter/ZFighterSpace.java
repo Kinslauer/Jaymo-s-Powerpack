@@ -7,13 +7,10 @@ import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.jaymospowers.power.zfighter.pod.PodGrades;
-import com.jaymospowers.power.zfighter.pod.PodWrecks;
 import com.jaymospowers.power.zfighter.sky.Charts;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -39,11 +36,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -65,7 +60,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -76,7 +70,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.17.62, Andy's NOEA picks) The space pod: a craftable ship, placed like a block. Right-click it to open the star map and pick
  * where to fly: the Pale Moon (low gravity), Rustfall (a heavy red world), Glacia (a frozen sea), Cinder (a forge world of lava and
- * ore), the Maw (a black hole in a void, with wrecks to loot) and the Verdant World. (0.18.4, Andy) You ride the pod there
+ * ore), the Maw (a broken world hung in its own pull over a ruined country, with wrecks to salvage: {@link MawWorld}) and the Verdant
+ * World. (0.18.4, Andy) You ride the pod there
  * ({@link ZFighterPodTrip}): a countdown, a lift-off, a flight shown on screen, and a landing on open ground anywhere on the far
  * world; the pod you came in stands there for the way back. A pod holds fuel ({@link #FUEL}, coal or blaze powder used on it) and
  * each trip burns some by distance ({@link #COSTS}). The pads ({@link #PAD}) are now only the life-story starts' ports.
@@ -111,25 +106,26 @@ public final class ZFighterSpace {
 	public static final float RUSTFALL_TRAINING = 2.0F;
 	/** Cinder's heat: extra hunger every second. */
 	static final float CINDER_EXHAUSTION = 0.15F;
-	/** The Maw: the hole's height, radius, where the pad is, how far its pull reaches, and the pull far out and at the rim. */
-	static final int MAW_Y = 80, MAW_HOLE = 5, MAW_RING_IN = 10, MAW_RING_OUT = 13;
+	/**
+	 * The Maw: the pad's height (the broken world's heart is 2 above it, high enough over the ruined ground to hang clear of its
+	 * tallest ruins and low enough to stay in sight of them), where the pad is, how far the pull reaches, and the pull far out and
+	 * near the heart. The world itself, its rubble and the wrecks are {@link MawWorld}.
+	 */
+	static final int MAW_Y = 188;
 	static final int MAW_PAD_X = -44;
 	static final double MAW_PULL_RANGE = 90.0, MAW_PULL_FAR = 0.008, MAW_PULL_NEAR = 0.03;
-	/** Inside this many blocks of the hole's middle the tide throws you out and hurts you ({@link #MAW_TIDE_DAMAGE} every half second). */
+	/** Inside this many blocks of the heart the tide throws you out and hurts you ({@link #MAW_TIDE_DAMAGE} every half second). */
 	static final double MAW_TIDE_RANGE = 9.0, MAW_TIDE_PUSH = 1.3;
 	static final float MAW_TIDE_DAMAGE = 6.0F;
-	/** The wrecks round the hole: how many, how far out (min, max), and how high above or below the hole's middle. */
-	static final int MAW_WRECKS = 9, MAW_WRECK_MIN = 22, MAW_WRECK_MAX = 54, MAW_WRECK_RISE = 14;
-	static final long MAW_SEED = 0x4D4157L;
 
 	/** The star map's commands. */
 	public static final int GO = 0, BEGIN_MISSION = 1, ABANDON_MISSION = 2, SKIP = 3;
 	/** Home, as a destination index. */
 	public static final int HOME_INDEX = -1;
 
-	/** What a place is made of, which sets how a landing is found. */
+	/** What a place is made of, which sets how a landing is found (the Maw's: on a wreck's deck). */
 	public enum Kind {
-		SURFACE, FORGE, VOID, FUTURE
+		SURFACE, FORGE, WRECKS, FUTURE
 	}
 
 	/** A place the pod flies to: its key (lang), its dimension, how a landing is found, the pad's floor and light blocks. */
@@ -147,7 +143,7 @@ public final class ZFighterSpace {
 		new Dest("rustfall", dimension("rustfall"), Kind.SURFACE, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.SEA_LANTERN),
 		new Dest("glacia", dimension("glacia"), Kind.SURFACE, Blocks.QUARTZ_BRICKS, Blocks.SEA_LANTERN),
 		new Dest("cinder", dimension("cinder"), Kind.FORGE, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.SHROOMLIGHT),
-		new Dest("maw", dimension("maw"), Kind.VOID, Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN),
+		new Dest("maw", dimension("maw"), Kind.WRECKS, Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN),
 		new Dest("verdant", ZFighterSites.VERDANT_WORLD, Kind.SURFACE, Blocks.MOSSY_STONE_BRICKS, Blocks.SEA_LANTERN),
 		new Dest("future", Future.FUTURE, Kind.FUTURE, Blocks.STONE_BRICKS, Blocks.SEA_LANTERN),
 	};
@@ -206,7 +202,6 @@ public final class ZFighterSpace {
 	private static final Identifier SAFE_FALL_ID = JaymosPowers.id("space_safe_fall");
 	private static final Identifier SPEED_ID = JaymosPowers.id("space_speed");
 	private static final Identifier JUMP_ID = JaymosPowers.id("space_jump");
-	private static final ResourceKey<LootTable> WRECK_LOOT = ResourceKey.create(Registries.LOOT_TABLE, JaymosPowers.id("chests/maw_wreck"));
 
 	/** A star map a player has open: the pod (its entity's id) and when. */
 	private record Opened(UUID pod, long at) {
@@ -233,6 +228,7 @@ public final class ZFighterSpace {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterSpace::tick);
 		ZFighterSpaceMissions.init();
 		ZFighterPodTrip.init();
+		MawCities.init();
 	}
 
 	// ---------------------------------------------------------------- the pod
@@ -497,19 +493,16 @@ public final class ZFighterSpace {
 		}
 	}
 
-	// ---------------------------------------------------------------- the black hole
+	// ---------------------------------------------------------------- the broken world's pull
 
-	private static BlockState vanilla(String id) {
-		return BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(id)).defaultBlockState();
-	}
-
-	private static Vec3 holeMiddle() {
+	/** The middle of the Maw's broken world: its heart, where the pull draws to and the tide throws out from. */
+	static Vec3 mawHeart() {
 		return new Vec3(0.5, MAW_Y + 2.5, 0.5);
 	}
 
-	/** The Maw's slow pull on everyone in it, and the tide at its rim. */
+	/** The Maw's slow pull on everyone in it, and the tide at its heart. */
 	private static void pull(ServerLevel maw) {
-		Vec3 middle = holeMiddle();
+		Vec3 middle = mawHeart();
 		for (ServerPlayer player : maw.players()) {
 			if (!player.isAlive() || player.isSpectator() || player.getAbilities().flying || ZFighterPodTrip.flying(player)) {
 				continue;
@@ -541,104 +534,6 @@ public final class ZFighterSpace {
 		}
 	}
 
-	/** The hole itself, the glowing ring round it, and the wrecks to loot: built the first time anyone lands, if not there. */
-	static void buildMaw(ServerLevel level) {
-		BlockPos middle = BlockPos.containing(holeMiddle());
-		if (level.getBlockState(middle).is(vanilla("black_concrete").getBlock())) {
-			return;
-		}
-		for (int dx = -MAW_RING_OUT; dx <= MAW_RING_OUT; dx++) {
-			for (int dy = -MAW_HOLE; dy <= MAW_HOLE; dy++) {
-				for (int dz = -MAW_RING_OUT; dz <= MAW_RING_OUT; dz++) {
-					double flat = Math.sqrt(dx * dx + dz * dz);
-					double round = Math.sqrt(dx * dx + dy * dy + dz * dz);
-					BlockPos at = middle.offset(dx, dy, dz);
-					if (round <= MAW_HOLE) {
-						level.setBlock(at, vanilla("black_concrete"), Block.UPDATE_CLIENTS);
-					} else if (dy == 0 && flat >= MAW_RING_IN && flat <= MAW_RING_OUT && (dx + dz) % 2 == 0) {
-						level.setBlock(at, vanilla(flat > MAW_RING_IN + 1 ? "orange_stained_glass" : "yellow_stained_glass"), Block.UPDATE_CLIENTS);
-					}
-				}
-			}
-		}
-		RandomSource random = RandomSource.create(MAW_SEED);
-		wrecks(random, (centre, deck) -> wreck(level, centre, random, deck));
-		// (0.18.55) the decks hold veiled ore under them and the Maw's rocks on top (after the wrecks, so their random draws stay in step)
-		List<BlockPos> decks = mawDecks();
-		for (int i = 0; i < decks.size(); i++) {
-			com.jaymospowers.power.zfighter.farworld.FarWorlds.mawDeck(level, decks.get(i).offset(-1, -1, 2), i);
-		}
-	}
-
-	/** The wrecks' middles, the same every time ({@link #MAW_SEED}), each handed to {@code each} with the random still in step. */
-	private static void wrecks(RandomSource random, java.util.function.ObjIntConsumer<BlockPos> each) {
-		for (int i = 0; i < MAW_WRECKS; i++) {
-			double angle = Math.PI * 2.0 * i / MAW_WRECKS + random.nextDouble() * 0.5;
-			double distance = MAW_WRECK_MIN + random.nextDouble() * (MAW_WRECK_MAX - MAW_WRECK_MIN);
-			BlockPos centre = new BlockPos((int)Math.round(Math.cos(angle) * distance), MAW_Y + random.nextInt(MAW_WRECK_RISE * 2 + 1) - MAW_WRECK_RISE,
-				(int)Math.round(Math.sin(angle) * distance));
-			if (Math.abs(centre.getX() - MAW_PAD_X) < 12 && Math.abs(centre.getZ()) < 12) {
-				continue;
-			}
-			each.accept(centre, i);
-		}
-	}
-
-	/** (0.18.6) Where a pod may come down in the Maw: on a wreck's deck, clear of its chest, lantern, mast and (0.18.50) wrecked pod. */
-	static List<BlockPos> mawDecks() {
-		List<BlockPos> decks = new ArrayList<>();
-		RandomSource random = RandomSource.create(MAW_SEED);
-		// the same draws as building them, so the middles match: each wreck takes its own random draws after its middle
-		wrecks(random, (centre, deck) -> {
-			decks.add(centre.offset(1, 1, -2));
-			wreckDraws(random);
-		});
-		if (decks.isEmpty()) {
-			decks.add(new BlockPos(MAW_PAD_X, MAW_Y, 0));
-		}
-		return decks;
-	}
-
-	/** The random draws {@link #wreck} makes, made without building (keep the two in step). */
-	private static void wreckDraws(RandomSource random) {
-		for (int dx = -3; dx <= 3; dx++) {
-			for (int dz = -3; dz <= 3; dz++) {
-				if (dx * dx + dz * dz > 10 || (Math.abs(dx) == 3 && random.nextInt(2) == 0)) {
-					continue;
-				}
-				random.nextInt(4);
-			}
-		}
-		// the chest's loot seed
-		random.nextLong();
-	}
-
-	/** One wreck: a ragged floating deck of blackstone with a chest of the Maw's loot, a lantern and a broken mast. */
-	private static void wreck(ServerLevel level, BlockPos centre, RandomSource random, int deck) {
-		for (int dx = -3; dx <= 3; dx++) {
-			for (int dz = -3; dz <= 3; dz++) {
-				if (dx * dx + dz * dz > 10 || (Math.abs(dx) == 3 && random.nextInt(2) == 0)) {
-					continue;
-				}
-				level.setBlock(centre.offset(dx, 0, dz), (random.nextInt(4) == 0 ? Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS : Blocks.POLISHED_BLACKSTONE_BRICKS)
-					.defaultBlockState(), Block.UPDATE_CLIENTS);
-				if (Math.abs(dx) < 2 && Math.abs(dz) < 2) {
-					level.setBlock(centre.offset(dx, -1, dz), Blocks.BLACKSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
-				}
-			}
-		}
-		BlockPos chest = centre.above();
-		level.setBlock(chest, Blocks.CHEST.defaultBlockState(), Block.UPDATE_ALL);
-		RandomizableContainer.setBlockEntityLootTable(level, random, chest, WRECK_LOOT);
-		level.setBlock(centre.offset(2, 1, 1), Blocks.LANTERN.defaultBlockState(), Block.UPDATE_CLIENTS);
-		for (int up = 1; up <= 3; up++) {
-			level.setBlock(centre.offset(-2, up, -1), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_CLIENTS);
-		}
-		// (0.18.47) and a pod that came down with the ship; (0.18.52) it holds its deck's own set of parts, worn in part, for a hammer to salvage
-		// (its own random: the wrecks' draws stay in step)
-		PodWrecks.build(level, Vec3.atBottomCenterOf(centre.offset(-1, 1, 2)), deck, RandomSource.create(MAW_SEED ^ centre.asLong()).nextFloat() * 360.0F);
-	}
-
 	// ---------------------------------------------------------------- arriving
 
 	/** Down on {@code dest} (null: home): told where, weighed for the place, and any mission there spoken of. */
@@ -653,20 +548,24 @@ public final class ZFighterSpace {
 
 	// ---------------------------------------------------------------- the landing pad
 
-	/** The place's pad: where its pod stands. Found and built the first time (or again, if the pod is gone), then kept. */
+	/**
+	 * The place's pad: where its pod stands. Found and built the first time (or again, if the pod is gone), then kept. The Maw's
+	 * is always at {@link #MAW_PAD_X}, {@link #MAW_Y} (a pad saved anywhere else is from before the Maw was remade, and left behind).
+	 */
 	static BlockPos pad(ServerLevel level, Dest dest) {
 		BlockPos saved = level.getAttached(PAD);
-		if (saved != null) {
+		BlockPos fixed = dest.kind() == Kind.WRECKS ? new BlockPos(MAW_PAD_X, MAW_Y, 0) : null;
+		if (saved != null && (fixed == null || saved.equals(fixed))) {
 			level.getChunk(saved.getX() >> 4, saved.getZ() >> 4);
 			if (level.getBlockState(saved).is(POD) || !level.getEntitiesOfClass(PodEntity.class, new AABB(saved).inflate(PAD_RADIUS)).isEmpty()) {
 				return saved;
 			}
 		}
-		BlockPos spot = saved != null ? saved : dest.kind() == Kind.VOID ? new BlockPos(MAW_PAD_X, MAW_Y, 0) : find(level, dest);
+		BlockPos spot = fixed != null ? fixed : saved != null ? saved : find(level, dest);
 		build(level, dest, spot);
 		level.setAttached(PAD, spot);
-		if (dest.kind() == Kind.VOID) {
-			buildMaw(level);
+		if (dest.kind() == Kind.WRECKS) {
+			MawWorld.build(level);
 		}
 		return spot;
 	}
@@ -739,6 +638,11 @@ public final class ZFighterSpace {
 	}
 
 	/** The pad: a floor of {@link Dest#floor}, a lamp at each corner, the air above cleared, and a pod (a complete one, no fuel) in the middle. */
+	/** (Tiv, from {@link ZFighterStarts}) A Maw salvager's deck of their own at {@code spot}: a pad and its pod, as the Maw's own. */
+	static void deck(ServerLevel level, Dest dest, BlockPos spot) {
+		build(level, dest, spot);
+	}
+
 	private static void build(ServerLevel level, Dest dest, BlockPos spot) {
 		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx++) {
 			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz++) {
@@ -747,7 +651,7 @@ public final class ZFighterSpace {
 				level.setBlock(floor, (corner ? dest.light() : dest.floor()).defaultBlockState(), Block.UPDATE_CLIENTS);
 				BlockPos under = floor.below();
 				BlockState underState = level.getBlockState(under);
-				if (dest.kind() != Kind.VOID && (underState.isAir() || !underState.getFluidState().isEmpty())) {
+				if (dest.kind() != Kind.WRECKS && (underState.isAir() || !underState.getFluidState().isEmpty())) {
 					level.setBlock(under, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
 				}
 				for (int up = 0; up <= 4; up++) {
