@@ -1,5 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -30,7 +34,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.522) Varasuchus, the crocodile dragon of the lesser dragons ({@code docs/SaintsDragons-Plan.md}): its moves and
  * numbers are ported from Saint's Dragons by Leon Saint (MIT licence; none of its art, models or sounds are used: the
- * model is our own, {@code VarasuchusDragonModel}, painted by {@code tools/gen_varasuchus.py}). A walker and a swimmer
+ * model is our own, {@code kingdoms/art/varasuchus.bbmodel} animated by GeckoLib ({@link VarasuchusAnimations}), painted by
+ * {@code tools/gen_varasuchus.py}). A walker and a swimmer
  * ({@link WindDragon#swims}) of the beaches and the swamps, high on long sprawling legs, armoured in bony scutes, with a
  * heavy blocky head and a crested tail long enough to wrap round to its front. Unlike the grazers it hunts: it goes for anyone who comes near, and it is quick in the water.
  * <p>
@@ -50,7 +55,9 @@ import org.jspecify.annotations.Nullable;
  * Tamed and ridden it's steered like a horse on land and swims where the rider looks in water; R charges where the
  * rider looks, goring at the end. Its favourite is raw salmon; Tideborn win it over twice as fast.
  */
-public class VarasuchusDragon extends WindDragon {
+public class VarasuchusDragon extends WindDragon implements GeoEntity {
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
 	static final double HEALTH = 200.0, ARMOR = 8.0, TOUGHNESS = 3.0, SPEED = 0.24, BITE = 15.0, RAGE_BITE = 25.0;
 	/** Claws: damage (raging), pace. */
 	static final float CLAW = 8.0F, RAGE_CLAW = 12.0F;
@@ -100,6 +107,17 @@ public class VarasuchusDragon extends WindDragon {
 	public VarasuchusDragon(EntityType<? extends VarasuchusDragon> type, Level level) {
 		super(type, level);
 		this.xpReward = 40;
+	}
+
+	/** Drawn and animated by GeckoLib from our editable Blockbench model ({@link VarasuchusAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		VarasuchusAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -193,6 +211,7 @@ public class VarasuchusDragon extends WindDragon {
 		Vec3 flat = aim.multiply(1.0, 0.0, 1.0);
 		this.moveAim = flat.lengthSqr() < 0.01 ? Vec3.directionFromRotation(0.0F, this.getYRot()) : flat.normalize();
 		this.entityData.set(DATA_ACTION, move);
+		this.triggerAnim("action", VarasuchusAnimations.name(move, standing()));
 	}
 
 	/**
@@ -427,6 +446,10 @@ public class VarasuchusDragon extends WindDragon {
 			return false;
 		}
 		boolean hurt = super.hurtServer(level, source, damage);
+		if (hurt && this.isAlive() && this.move == NONE) {
+			// (a flinch; a move under way plays on, as it did over the old model's flinch)
+			this.triggerAnim("action", "hurt");
+		}
 		if (!hurt || !this.isAlive() || grounded()) {
 			return hurt;
 		}
@@ -497,6 +520,14 @@ public class VarasuchusDragon extends WindDragon {
 		super.readAdditionalSaveData(input);
 		this.raging = input.getBooleanOr("Raging", false);
 		this.entityData.set(DATA_RAGING, this.raging);
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		if (level() instanceof ServerLevel) {
+			this.triggerAnim("action", "death");
+		}
+		super.die(source);
 	}
 
 	/** How far through {@code action} its model is after {@code age} ticks (0 to 1). */
