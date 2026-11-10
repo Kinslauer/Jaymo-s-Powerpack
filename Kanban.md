@@ -38,9 +38,9 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 💻 Odysseus · #1193 · claimed
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/musket-flintlock-geckolib|musket-flintlock-geckolib]] · 💻 Odysseus · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
