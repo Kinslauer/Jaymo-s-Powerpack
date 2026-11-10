@@ -30,7 +30,14 @@ Andy's Medal clips from 10:19 to 10:35 PM, Nov 9 (on his PC at `E:\Medal\Clips\M
 - MedalTVMinecraft20261109223153885.mp4 (10:31 PM)
 - MedalTVMinecraft20261109223521344.mp4 (10:35 PM)
 
-Links to download them will be added here once they're uploaded. He's putting more videos and pictures together for
+They're private (not on GitHub): uploaded to Andy's Anthropic account. `run.py task` attaches every `file_...` id in
+this section to the cloud session, mounted at `/mnt/session/uploads/clips/<name>`:
+- `file_01YBbJv4jXkKbaGJjhNoNEP6` MedalTVMinecraft20261109221931865.mp4
+- `file_011Ys47HjXF8jbAjyWyKdqEe` MedalTVMinecraft20261109222132195.mp4
+- `file_014NbAYD8XnYjWaRzdaA9qwk` MedalTVMinecraft20261109223153885.mp4
+- `file_01QZZFWtCQ2itkhSVms2ebYD` MedalTVMinecraft20261109223521344.mp4
+
+To look at them, pull frames with ffmpeg (install it in the sandbox) into /tmp and read the images. He's putting more videos and pictures together for
 this task; check this note for new links before starting. Watch them before deciding what "stuck" and "re-animating"
 look like.
 
