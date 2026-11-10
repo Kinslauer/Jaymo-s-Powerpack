@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:spyglass"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:astronomers_journal"
+  }
+}

@@ -67,6 +67,7 @@ public final class ArmillarySphereBlock extends BaseEntityBlock {
                 .register(output -> output.insertAfter(Items.SMOKER, ITEM));
         PayloadTypeRegistry.clientboundPlay().register(ArmillaryNet.Open.TYPE, ArmillaryNet.Open.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ArmillaryNet.Measure.TYPE, ArmillaryNet.Measure.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ArmillaryNet.Reading.TYPE, ArmillaryNet.Reading.CODEC);
     }
 
     @Override
