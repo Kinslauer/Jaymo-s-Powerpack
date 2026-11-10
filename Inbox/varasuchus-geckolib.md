@@ -45,3 +45,4 @@ suggested_owns:
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
 
 - 2026-11-10 (prometheus): PR #1239. Separate finding, outside this track: gen_atroxiia_geo.py leaves out the +24 in its Blockbench y (it writes (-x,-y,z), not (-x,24-y,z)), so Atroxiia is likely drawn about 1.5 blocks underground. Needs its own fix.
+- 2026-11-10 00:18 Cloud agent session sesn_0165Np5QFFty3nV9WywnemtY ended without a PR; see its transcript.
