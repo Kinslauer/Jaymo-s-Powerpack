@@ -71,6 +71,7 @@
 		"HeadCamMixin",
 		"GiantCameraMixin",
 		"GiantPickMixin",
+		"FrontCameraCycleMixin",
 		"BeamCinematicCameraMixin",
 		"UltimateCinematicCameraMixin",
 		"UltimateCinematicFovMixin",

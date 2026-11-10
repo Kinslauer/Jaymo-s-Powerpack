@@ -650,6 +650,7 @@ dependencies {
 	// (0.20.52) compiled against to keep the Aether out of its chunk culling from under the clouds; touched only via
 	// client/aether/SodiumVeil and client/mixin/sodium (an optional mixin config)
 	compileOnly "maven.modrinth:sodium:bAZQdGpg"
+	compileOnly "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
