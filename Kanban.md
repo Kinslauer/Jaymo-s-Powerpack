@@ -4,36 +4,36 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:53). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Being built
 
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
-- [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
-- [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -43,8 +43,8 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1222 · in-review
 
 
@@ -61,14 +61,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/tomb-no-build-rule|tomb-no-build-rule]]
-- [x] [[Inbox/Done/stormborn-tomb-structures|stormborn-tomb-structures]]
+- [x] [[Inbox/Done/ore-hearts|ore-hearts]]
 - [x] [[Inbox/Done/spirit-manifestation|spirit-manifestation]]
-- [x] [[Inbox/Done/sneak-zoom-no-doubletap|sneak-zoom-no-doubletap]]
+- [x] [[Inbox/Done/farmhand-kind-family|farmhand-kind-family]]
+- [x] [[Inbox/Done/knife-metal-effects|knife-metal-effects]]
+- [x] [[Inbox/Done/musket-flintlock-geckolib|musket-flintlock-geckolib]]
+- [x] [[Inbox/Done/astronomy-sky|astronomy-sky]]
+- [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
+- [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
 
 
 %% kanban:settings
