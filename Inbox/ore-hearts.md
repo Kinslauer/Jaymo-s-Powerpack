@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: hermes (Andy's pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
-claimed_by: 
+claimed_by: hermes-b
 pr:
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/]
 ---
