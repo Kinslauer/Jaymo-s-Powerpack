@@ -137,3 +137,9 @@ geckolib/models/entity/atroxiia.geo.json, geckolib/animations/entity/atroxiia.an
   and original keyframes sampled from our old pose equations: Prometheus (hermes-modeller),
   kingdoms/tools/gen_atroxiia_geo.py. Saint's Dragons is a motion reference only; none of its All Rights Reserved art
   or animation data is used. Sources, provenance and renders: kingdoms/art/atroxiia*.
+geckolib/models/entity/stegonaut.geo.json, geckolib/animations/entity/stegonaut.animation.json and dragon/stegonaut/
+  hide_*.png, marks_*.png: Stegonaut, the plated lesser dragon
+  Geometry, UVs and hides: kingdoms/tools/gen_stegonaut.py (as the former StegonautDragonModel). Editable rig and
+  keyframes sampled from that model's own pose equations: Prometheus, kingdoms/tools/gen_stegonaut_geo.py. Saint's
+  Dragons is a gameplay reference only; none of its All Rights Reserved art or animation data is used.
+  Sources and renders: kingdoms/art/stegonaut*.
