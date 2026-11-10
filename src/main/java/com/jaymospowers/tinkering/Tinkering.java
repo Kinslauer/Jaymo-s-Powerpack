@@ -189,6 +189,7 @@ public final class Tinkering {
 			new MenuType<>(ToolStationMenu::new, FeatureFlags.VANILLA_SET));
 
 		registerSmeltery();
+		registerKnifeMetals();
 		com.jaymospowers.tinkering.smeltery.MeltingRecipes.register();
 		com.jaymospowers.tinkering.kiln.Kiln.register();
 		com.jaymospowers.tinkering.forge.Forge.register();
@@ -392,6 +393,19 @@ public final class Tinkering {
 		Melting.silver(SILVER_INGOT, SILVER_NUGGET, SILVER_BLOCK.asItem(), RAW_SILVER, RAW_SILVER_BLOCK.asItem(),
 			SILVER_ORE.asItem(), DEEPSLATE_SILVER_ORE.asItem());
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES, SILVER_ORE_FEATURE);
+	}
+
+	/** Cobalt, manyullyn, queen's slime and hepatizon: the knife metals. Their ingots are their material,
+	 * so the Part Builder and the Tool Station recognise them; there is no ore or melting for them yet. */
+	private static void registerKnifeMetals() {
+		Item cobaltIngot = item("cobalt_ingot", Item::new, Function.identity());
+		Item manyullynIngot = item("manyullyn_ingot", Item::new, Function.identity());
+		Item queenSlimeIngot = item("queen_slime_ingot", Item::new, Function.identity());
+		Item hepatizonIngot = item("hepatizon_ingot", Item::new, Function.identity());
+		TinkerMaterial.own(TinkerMaterial.COBALT, 1, cobaltIngot);
+		TinkerMaterial.own(TinkerMaterial.MANYULLYN, 1, manyullynIngot);
+		TinkerMaterial.own(TinkerMaterial.QUEEN_SLIME, 1, queenSlimeIngot);
+		TinkerMaterial.own(TinkerMaterial.HEPATIZON, 1, hepatizonIngot);
 	}
 
 	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
