@@ -4,13 +4,8 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:42). Don't edit. -->
-
 ## Waiting for a bot
 
-- [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Being built
@@ -56,6 +51,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 - [ ] [[Inbox/saplings-to-sticks|saplings-to-sticks]] · ☀️ Apollo · #1213 · ready
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 
 
 ## Done
@@ -69,6 +65,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/astronomy-sky|astronomy-sky]]
 - [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
 - [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
+
+
 
 
 %% kanban:settings
