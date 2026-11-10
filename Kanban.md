@@ -13,6 +13,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
 
 
 ## Being built
@@ -27,7 +28,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · blocked
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 
 
 ## Done
