@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 18:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 18:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,12 +19,12 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · in-review
-- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
+- [ ] [[Inbox/bogre-mob|bogre-mob]] · ☁️ Cloud · #1251 · sent
 
 
 ## Done
