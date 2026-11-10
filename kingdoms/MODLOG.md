@@ -10542,3 +10542,10 @@ Built; not tested in game.
 - Shader packs keep their own sky; these stars are drawn alongside it.
 - Data credits: star positions from the HYG Database v4.1 (The Astronomy Nexus, CC BY-SA 4.0); constellation lines from ConstellationLines (MarcvdSluys, CC BY 4.0). Notices in `licenses/astronomy/NOTICE.txt`.
 - Built; not tested in game.
+
+## 0.7.681 (2026-11-10): Family farmhand start is kind to every blood (#1203)
+
+The family that takes you in at the Family farmhand start never holds your heritage against you: no hearts lost,
+no dearer trades, no fear, no distaste — plain folk who welcome a stranger whatever their blood. They may notice
+your race and say so kindly, but it never carries a cost. The bargain stays "as long as you help if you stay":
+leaving is allowed, idling is what sours it, not who you are.
