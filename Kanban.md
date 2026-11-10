@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,7 +47,7 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · in-review
+- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🪶 Quill · #1204 · writing
 
 
 ## In review
