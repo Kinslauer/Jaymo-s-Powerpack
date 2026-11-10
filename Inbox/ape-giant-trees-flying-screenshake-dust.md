@@ -30,3 +30,10 @@ Tiv, in the Tasks thread: "The apes and giants should send trees flying when the
 - Dust particles: use `ParticleTypes.SMOKE_NORMAL` / `ParticleTypes.DUST` with appropriate `ParticleOptions` and `double` values for speed/lifetime scaled to entity size.
 - Keep changes modular: each feature (tree-flying, shake, dust) can be a separate PR, but they share the same entity touch/step events.
 - Say back the task name and that it's open for Hermes, and add it to the todo list as `pending`.
+- 2026-11-10 21:14 Review of #1256 (head aeccdfe), cloud reviewer, changes needed:
+1. The branch was cut from cloud/astronomy-scholar-journal and carries two old pr-1236/pr-1239 merges, so the PR would also ship the unmerged Astronomer's Journal and Varasuchus GeckoLib work (49 files, 574k lines). Rebuild the branch from origin/master with only commit aeccdfe (GiantTrample, ZFighterLineage, AetherGiant) plus GiantTrees.java if that is new.
+2. No PR checks ran on the head, and there is no change note for this feature (changes/powers/<branch>.md and changes/kingdoms/<branch>.md). The two notes on the branch belong to the astronomy and Varasuchus work.
+3. GiantTrample.sprintHit: the search box runs from getEyePosition() along the look vector, so a tall giant looking ahead checks only at head height and misses trunks at its feet. Search from the feet (giant.position()) up SPRINT_HEIGHT, along the travel direction (getDeltaMovement, horizontal) instead of the look.
+4. Mob giants (AetherGiant etc.) rarely report isSprinting(), so the tree throw would almost only happen for player giants. Use horizontal speed above a threshold instead.
+5. GiantTrample: the Javadoc adds '(0.21.XX)'; CLAUDE.md says no version numbers in comments. The indentation of tick/sprintHit/kingdoms() is off by one tab.
+Not tested in game.
