@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
