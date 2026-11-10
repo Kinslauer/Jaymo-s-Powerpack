@@ -116,6 +116,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.BigVeins.init();
 		com.jaymospowers.ground.Panning.init();
+		com.jaymospowers.rough.SleepingBag.init();
+		com.jaymospowers.rough.ParagliderItem.init();
 		// Andy's TFC Hardrock picks: tamed dogs learn skills
 		com.jaymospowers.dogs.Dogs.init();
 		// how bad you smell (Kingdoms' mob senses read it)

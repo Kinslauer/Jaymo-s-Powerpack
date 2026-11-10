@@ -73,6 +73,7 @@ public final class Climate {
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		ParasiteEffect.register();
 		Warmth.register();
+		Soot.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(CLEAN_WATER);
 			output.accept(WATERSKIN_LEATHER);
