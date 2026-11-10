@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,12 +32,12 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · 🪶 Quill · #1236 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
 
 
 ## Needs Andy
