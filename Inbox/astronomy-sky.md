@@ -1,10 +1,10 @@
 ---
-status: blocked
+status: claimed
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
-claimed_by: hermes-fixer
+claimed_by: claude
 pr: 1193
 suggested_owns: []
 writer: hermes-writer
