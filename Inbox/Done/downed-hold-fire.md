@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -34,3 +34,4 @@ Tiv posted a clip of it happening (message 1569172190673248330 in the Tasks thre
 - So the message says they leave you lying there and the guard/Villager finishes the job regardless. That contradiction is the bug in one line.
 - 2026-11-09 09:44 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 23:53 Cloud agent session sesn_01UBPbtzhYeN3NeDy6e1eDpE opened PR #1224.
+- 2026-11-10 04:28 PR #1224 is merged into master; moved to Inbox/Done.
