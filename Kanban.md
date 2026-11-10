@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,13 +34,13 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/unique-starts|unique-starts]]
 - [x] [[Inbox/Done/training-weights-might|training-weights-might]]
-- [x] [[Inbox/Done/structure-buttons-to-debris|structure-buttons-to-debris]]
-- [x] [[Inbox/Done/stegonaut-geckolib|stegonaut-geckolib]]
 
 
 %% kanban:settings
