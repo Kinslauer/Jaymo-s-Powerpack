@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,9 +40,9 @@ kanban-plugin: board
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · #1203 · changes · fixing review notes
-- [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · #1204 · changes · fixing review notes
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
+- [ ] [[Agents/knife-metal-effects|knife-metal-effects]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
@@ -61,6 +61,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/knife-metal-effects|knife-metal-effects]]
 - [x] [[Inbox/Done/musket-flintlock-geckolib|musket-flintlock-geckolib]]
 - [x] [[Inbox/Done/astronomy-sky|astronomy-sky]]
 - [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
@@ -68,7 +69,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
 - [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 - [x] [[Inbox/Done/astronomy-telescope|astronomy-telescope]]
-- [x] [[Inbox/Done/astronomy-armillary|astronomy-armillary]]
 
 
 %% kanban:settings
