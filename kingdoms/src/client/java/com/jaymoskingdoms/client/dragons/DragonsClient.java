@@ -88,8 +88,8 @@ public final class DragonsClient {
 		// saddle, Boreas smaller
 		EntityRenderers.register(Dragons.NOTUS_DRAGON, c -> new FireDragonRenderer<>(c, "notus", NOTUS_SHADOW, NOTUS_SCALE));
 		EntityRenderers.register(Dragons.BOREAS_DRAGON, c -> new FireDragonRenderer<>(c, "boreas", BOREAS_SHADOW, BOREAS_SCALE));
-		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new WindDragonRenderer<>(c, "zephyrus", new ZephyrusDragonModel(ZephyrusDragonModel
-			.createBodyLayer().bakeRoot()), ZEPHYRUS_SHADOW));
+		// our own model, drawn and animated by GeckoLib (kingdoms/art/zephyrus.bbmodel)
+		EntityRenderers.register(Dragons.ZEPHYRUS_DRAGON, c -> new ZephyrusDragonRenderer(c, ZEPHYRUS_SHADOW));
 		// (0.7.329) both eanncrod's Kintsugi wyvern: Eurus small enough to ride, Aeolus vast
 		EntityRenderers.register(Dragons.EURUS_DRAGON, c -> new WindDragonRenderer<>(c, "eurus", new KintsugiDragonModel(), EURUS_SHADOW, EURUS_SCALE,
 			KINTSUGI_REACH).ownDeath());
