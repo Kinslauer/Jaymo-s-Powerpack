@@ -1,10 +1,10 @@
 ---
-status: changes
+status: claimed
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-10)
 asked: 2026-11-10
 thread: 1569189294512537671
-claimed_by: 
+claimed_by: claude-cloud
 pr: 1215
 suggested_owns: [kitchen/src/main/java/com/jaymoskitchen/climate/Thirst.java]
 text_pass: 
