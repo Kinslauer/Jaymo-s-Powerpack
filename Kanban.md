@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,8 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
@@ -36,6 +34,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · for 🪽 any Hermes bot · #1215 · changes · fixing review notes
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
