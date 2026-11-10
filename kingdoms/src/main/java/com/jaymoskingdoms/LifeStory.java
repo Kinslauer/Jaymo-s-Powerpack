@@ -623,6 +623,8 @@ public final class LifeStory {
 	 * the start looks past their places. Empty otherwise, and in single player.
 	 */
 	private static java.util.Map<String, Born> OTHERS = java.util.Map.of();
+	/** (Tiv) Lost in time, not in Powers' future yet: their start is noted where they arrive there ({@link #leftWorld}). */
+	private static final Set<java.util.UUID> TIMELOST_PENDING = new java.util.HashSet<>();
 	/** (0.7.356) Players asked for their road since they joined. */
 	private static final Set<java.util.UUID> ROAD_ASKED = new java.util.HashSet<>();
 	/** (0.7.304) Players whose road is being made ready (a capital, a harbour), so it's set out on once. */
@@ -769,6 +771,7 @@ public final class LifeStory {
 			DEPARTED.clear();
 			ROAD_ASKED.clear();
 			LANDINGS.clear();
+			TIMELOST_PENDING.clear();
 		});
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			DEPARTED.remove(handler.player.getUUID());
@@ -1207,7 +1210,9 @@ public final class LifeStory {
 			StoryGround.capital(server, player, () -> go.accept(Start.CITY));
 		} else if (road0 == Start.WHALERS) {
 			// (0.7.235) always made ready first, even with a berth in port: her sea must be ticking for her to float
-			StoryGround.harbour(player, () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
+			// (Tiv) at a harbour nobody else's whaler story started from (a party mate's on this road is shared)
+			Landing crewMate = together(player, Start.WHALERS, null);
+			StoryGround.harbour(player, freeFor(player, crewMate == null ? null : crewMate.who, PLACE_APART), () -> go.accept(Start.WHALERS), () -> go.accept(Start.WILD));
 		} else if (road0 == Start.TRADER) {
 			// (0.7.414) a milestone to wake beside: a capital, a second town and the road between them are raised if the world has none
 			StoryGround.milestone(player, () -> go.accept(Start.TRADER), () -> go.accept(Start.WILD));
@@ -1223,10 +1228,24 @@ public final class LifeStory {
 		Start landed;
 		// (Tiv) everyone else's start, so this one looks past their places
 		OTHERS = others(player);
+		Faction asked = null;
 		try {
+			// (Tiv) a realm's road whose seat is already someone else's start goes to the nearest realm whose isn't (a party mate
+			// on the same road and realm shares it); with every realm taken, the one named, and a spot of their own there
+			if (start.realm && roadRealm != null && together(player, start, roadRealm) == null && !freePlace(Factions.level(player.level().getServer()), roadRealm.seat())) {
+				Faction free = freeRealm(player.level().getServer(), roadRealm.seat());
+				if (free != null) {
+					asked = roadRealm;
+					roadRealm = free;
+				}
+			}
 			landed = begin(player, start, roadRealm, bornAs, random);
 		} finally {
 			OTHERS = java.util.Map.of();
+		}
+		if (asked != null && landed == start) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.realm_taken", asked.name(), roadRealm.name())
+				.withStyle(ChatFormatting.GRAY));
 		}
 		if (landed == Start.UNARMED || landed == Start.ROCK_BOTTOM) {
 			// an old loss, long healed over: one arm or one leg
@@ -1335,6 +1354,23 @@ public final class LifeStory {
 		return capital(server, random, f -> true);
 	}
 
+	/** (Tiv) The standing realm whose seat is nearest {@code from} and nobody else's start ({@link #freePlace}), or null. */
+	private static @Nullable Faction freeRealm(MinecraftServer server, BlockPos from) {
+		ServerLevel level = Factions.level(server);
+		Faction best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Faction f : Factions.all(server)) {
+			if (f.type().isRealm() && !f.fallen() && f.seat() != null && freePlace(level, f.seat())) {
+				double d = f.seat().distSqr(from);
+				if (d < bestD) {
+					bestD = d;
+					best = f;
+				}
+			}
+		}
+		return best;
+	}
+
 	/** The same, among the realms that are {@code free} (nobody else's start). */
 	private static @Nullable Faction capital(MinecraftServer server, RandomSource random, java.util.function.Predicate<Faction> free) {
 		List<Faction> kingdoms = new ArrayList<>(), realms = new ArrayList<>();
@@ -1382,6 +1418,8 @@ public final class LifeStory {
 			}
 			case BANISHED -> {
 				if (named != null) {
+					// (Tiv) the realm you were driven out of is your start's place, as a realm's other roads' is
+					place = named.seat();
 					to = spot(level, mate, named.seat(), BANISHED_MIN, BANISHED_MAX, random);
 					if (to != null) {
 						atMost(player, named, BANISHED_REPUTATION);
@@ -1489,10 +1527,13 @@ public final class LifeStory {
 				}
 			}
 			case TIMELOST -> {
-				// Powers puts them in its future itself (or holds them till it's in place); the wild only without Powers
-				if (PowersCompat.strand(player)) {
+				// Powers puts them in its future itself (or holds them till it's in place); the wild only without Powers.
+				// (Tiv) At an arrival spot nobody else's, noted as theirs once they're there (leftWorld)
+				TIMELOST_PENDING.add(player.getUUID());
+				if (PowersCompat.strand(player, freeFor(player, mate == null ? null : mate.who, START_APART))) {
 					return Start.TIMELOST;
 				}
+				TIMELOST_PENDING.remove(player.getUUID());
 			}
 			case BURNED -> {
 				to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
@@ -1650,7 +1691,9 @@ public final class LifeStory {
 						player.teleportTo(level, by.getX() + 0.5, by.getY(), by.getZ() + 0.5, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), 0.0F, false);
 					}
 				}
-				if (start == Start.LAB ? PowersCompat.labEscape(player) : PowersCompat.androidStart(player)) {
+				// (Tiv) raised where nobody else started
+				java.util.function.BiPredicate<ServerLevel, BlockPos> free = freeFor(player, mate == null ? null : mate.who, PLACE_APART);
+				if (start == Start.LAB ? PowersCompat.labEscape(player, free) : PowersCompat.androidStart(player, free)) {
 					landSafely(player);
 					home(player, player.level(), player.blockPosition());
 					landedAt(player, start, -1, player.blockPosition(), -1, player.blockPosition());
@@ -1698,20 +1741,25 @@ public final class LifeStory {
 			}
 			case WHALERS -> {
 				// (0.7.228) signed on a realm's whaler fitting out, standing on her deck (she sails when she's fitted out)
-				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn);
+				net.minecraft.world.phys.Vec3 deck = Whalers.signOn(player, spawn, freeFor(player, mate == null ? null : mate.who, PLACE_APART));
 				if (deck != null) {
 					player.teleportTo(level, deck.x, deck.y, deck.z, Set.<net.minecraft.world.entity.Relative>of(), random.nextFloat() * 360.0F, 0.0F, false);
 					landSafely(player);
+					// (Tiv) her harbour is their start's place: the next whaler's story fits out at another (StoryGround.harbour)
+					landedAt(player, Start.WHALERS, -1, player.blockPosition(), -1, player.blockPosition());
 					return Start.WHALERS;
 				}
 			}
 			case MOON, VERDANT, RUSTFALL, MAW, DEMON, AFTERLIFE -> {
-				// (0.7.349) Powers puts them there and makes what the start needs; the wild if it can't
-				BlockPos back = ground(level, spawn, WILD_MIN, WILD_MAX, random);
+				// (0.7.349) Powers puts them there and makes what the start needs; the wild if it can't. (Tiv) Where nobody else
+				// started there, and the way back (the afterlife's) a spot nobody else woke at
+				BlockPos back = spot(level, null, spawn, WILD_MIN, WILD_MAX, random);
 				if (back == null) {
 					back = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spawn);
 				}
-				if (PowersCompat.otherWorld(player, start.name().toLowerCase(Locale.ROOT), back)) {
+				// (the Maw and the afterlife are each one small place: a spot of your own there is START_APART from anyone else's)
+				int apart = start == Start.MAW || start == Start.AFTERLIFE ? START_APART : PLACE_APART;
+				if (PowersCompat.otherWorld(player, start.name().toLowerCase(Locale.ROOT), back, freeFor(player, mate == null ? null : mate.who, apart))) {
 					landSafely(player);
 					if (mate != null && mate.dimension.equals(player.level().dimension())) {
 						// (0.7.417) the same world as the mate, wherever Powers set you down: by them
@@ -1810,6 +1858,10 @@ public final class LifeStory {
 	 * left it now, and their respawn there (if it's still that) goes back to the world's spawn (or a bed they sleep in).
 	 */
 	private static void leftWorld(ServerPlayer player, ServerLevel from, ServerLevel to) {
+		if (from != to && TIMELOST_PENDING.remove(player.getUUID())) {
+			// (Tiv) the lost in time arrive in the future: that's their start
+			born(player, to, player.blockPosition(), player.blockPosition());
+		}
 		String stranded = player.getAttached(STRANDED);
 		if (stranded == null || from == to || !stranded.equals(from.dimension().identifier().toString())) {
 			return;
@@ -2350,10 +2402,38 @@ public final class LifeStory {
 	private static void landedAt(ServerPlayer player, Start start, int realm, BlockPos pos, int camp, BlockPos place) {
 		LANDINGS.put(player.getUUID(), new Landing(start, realm, player.level().dimension(), pos.immutable(), player.level().getServer().getTickCount(), camp,
 			player.getUUID(), place.immutable()));
+		born(player, player.level(), place, pos);
+	}
+
+	/** (Tiv) Notes for good that {@code player}'s start was {@code place} on {@code level}, where they woke at {@code wake} ({@link #BORN}). */
+	private static void born(ServerPlayer player, ServerLevel level, BlockPos place, BlockPos wake) {
 		ServerLevel overworld = player.level().getServer().overworld();
 		java.util.Map<String, Born> all = new java.util.HashMap<>(overworld.getAttachedOrElse(BORN, java.util.Map.of()));
-		all.put(player.getUUID().toString(), new Born(player.level().dimension().identifier().toString(), place.asLong(), pos.asLong()));
+		all.put(player.getUUID().toString(), new Born(level.dimension().identifier().toString(), place.asLong(), wake.asLong()));
 		overworld.setAttached(BORN, java.util.Map.copyOf(all));
+	}
+
+	/**
+	 * (Tiv) For the starts placed elsewhere (Jaymo's Powers' other worlds, its future, lab and workshop; a whaler's harbour):
+	 * whether a place on a level is free of everyone's start but {@code player}'s own and their mate's ({@code mate}, null:
+	 * none), none within {@code apart} blocks. It reads the starts each time it's asked, so one placed after a wait (the
+	 * future's, a whaler's) sees those made meanwhile.
+	 */
+	private static java.util.function.BiPredicate<ServerLevel, BlockPos> freeFor(ServerPlayer player, java.util.@Nullable UUID mate, int apart) {
+		MinecraftServer server = player.level().getServer();
+		String self = player.getUUID().toString(), shared = mate == null ? "" : mate.toString();
+		return (level, at) -> {
+			java.util.Map<String, Born> all = server.overworld().getAttachedOrElse(BORN, java.util.Map.of());
+			String dimension = level.dimension().identifier().toString();
+			for (java.util.Map.Entry<String, Born> e : all.entrySet()) {
+				Born b = e.getValue();
+				if (!e.getKey().equals(self) && !e.getKey().equals(shared) && b.dimension.equals(dimension)
+					&& flat(BlockPos.of(b.place), at) < (double) apart * apart) {
+					return false;
+				}
+			}
+			return true;
+		};
 	}
 
 	/** Everyone's start but {@code player}'s own (a copy to take a mate's out of). */
@@ -2558,6 +2638,7 @@ public final class LifeStory {
 		DEPARTED.remove(p.getUUID());
 		ROAD_ASKED.remove(p.getUUID());
 		LANDINGS.remove(p.getUUID());
+		TIMELOST_PENDING.remove(p.getUUID());
 		// (Tiv) the old life's start is free for someone else
 		ServerLevel overworld = p.level().getServer().overworld();
 		java.util.Map<String, Born> born = overworld.getAttachedOrElse(BORN, java.util.Map.of());
