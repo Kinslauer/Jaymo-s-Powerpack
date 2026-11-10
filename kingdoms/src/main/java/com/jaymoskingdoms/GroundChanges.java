@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.383, Andy's SevTech picks: "The Ground Changes") Nobody needs fresh land for the next metal. When a player opens a
- * world tier, the chunks already loaded round them get that tier's veins, a few pockets of ore laid over deep stone: iron and
+ * world tier, the chunks already loaded round them get that tier's veins, now and then a big vein of ore laid over deep stone: iron and
  * copper for Borderlands, gold and lapis for Wildlands, diamond for Dread and, in the Nether, ancient debris for Legend.
  * Each chunk remembers the highest tier it has been seeded for ({@link #SEEDED}, saved with the chunk) so a tier is
  * seeded once per chunk however many players pass through. It runs lazily: every {@link #SCAN_TICKS} ticks each player's
@@ -46,25 +46,26 @@ public final class GroundChanges {
 	static final float TELL_CHANCE = 0.4F, TELL_NUGGET_SHARE = 0.5F;
 
 	/**
-	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), how many pockets a chunk gets,
-	 * how many blocks a pocket is, the height range they sit in, and whether a block touching air is passed over (buried ore).
+	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), one chunk in how many gets
+	 * one, how many blocks it is, the height range it sits in, and whether a block touching air is passed over (buried ore).
+	 * Andy's Hardrock picks: few big veins, as Powers' BigVeins lays at worldgen, and diamond and debris all but never.
 	 */
-	record Vein(Block stone, @Nullable Block deep, int pockets, int size, int minY, int maxY, boolean buried) {
+	record Vein(Block stone, @Nullable Block deep, int chance, int size, int minY, int maxY, boolean buried) {
 	}
 
 	/** The Overworld's veins by tier (index 0 is Hearth's: none). */
 	static final List<List<Vein>> OVERWORLD = List.of(
 		List.of(),
-		List.of(new Vein(Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, 4, 7, -24, 56, false),
-			new Vein(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, 3, 8, -16, 48, false)),
-		List.of(new Vein(Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, 3, 6, -48, 32, false),
-			new Vein(Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE, 2, 5, -32, 32, false)),
-		List.of(new Vein(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, 2, 4, -60, 16, true)),
+		List.of(new Vein(Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE, 24, 90, -32, 72, false),
+			new Vein(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, 20, 110, -16, 96, false)),
+		List.of(new Vein(Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, 48, 60, -64, 32, false),
+			new Vein(Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE, 12, 20, -32, 32, false)),
+		List.of(new Vein(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, 900, 3, -64, -24, true)),
 		List.of());
 	/** The Nether's veins by tier. */
 	static final List<List<Vein>> NETHER = List.of(
 		List.of(), List.of(), List.of(), List.of(),
-		List.of(new Vein(Blocks.ANCIENT_DEBRIS, null, 2, 3, 8, 118, true)));
+		List.of(new Vein(Blocks.ANCIENT_DEBRIS, null, 1200, 2, 8, 118, true)));
 
 	/** The highest tier a chunk has been seeded for. Saved with the chunk. */
 	static final AttachmentType<Integer> SEEDED = AttachmentRegistry.create(JaymosKingdoms.id("ground_seeded"), builder -> builder.persistent(Codec.INT));
@@ -129,13 +130,13 @@ public final class GroundChanges {
 		for (int t = done + 1; t <= tier && t < table.size(); t++) {
 			RandomSource random = RandomSource.create(Mth.getSeed(pos.x(), t * 7919, pos.z()) ^ level.getSeed());
 			for (Vein vein : table.get(t)) {
-				for (int p = 0; p < vein.pockets(); p++) {
+				if (random.nextInt(vein.chance()) == 0) {
 					laid |= pocket(level, chunk, vein, random, 0);
 				}
 			}
 			if (nether && t < NETHER.size()) {
 				for (Vein vein : NETHER.get(t)) {
-					for (int p = 0; p < vein.pockets(); p++) {
+					if (random.nextInt(vein.chance()) == 0) {
 						laid |= pocket(level, chunk, vein, random, shift);
 					}
 				}

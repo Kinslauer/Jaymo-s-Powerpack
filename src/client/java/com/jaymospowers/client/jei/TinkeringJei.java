@@ -129,6 +129,11 @@ public final class TinkeringJei implements IModPlugin {
 		for (com.jaymospowers.power.zfighter.farworld.FarWorld world : com.jaymospowers.power.zfighter.farworld.FarWorld.values()) {
 			registration.addIngredientInfo(world.ingot(), Component.translatable("jei.jaymospowers.first_metal." + world.molten.id));
 		}
+		// Andy's TFC Hardrock picks: the rock-and-ore tools (ground/Panning)
+		registration.addIngredientInfo(com.jaymospowers.ground.Panning.PROSPECTOR_PICK, Component.translatable("jei.jaymospowers.prospector_pick"));
+		registration.addIngredientInfo(com.jaymospowers.ground.Panning.PAN, Component.translatable("jei.jaymospowers.pan"));
+		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SLUICE, Component.translatable("jei.jaymospowers.sluice"));
+		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SUPPORT_BEAM, Component.translatable("jei.jaymospowers.support_beam"));
 		// (Havens patch 5) the kings' weapon heads: where each is taken
 		for (String part : WeaponParts.KINGS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
