@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: open
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
-claimed_by: claude-cloud
+claimed_by: 
 pr: 1239
 suggested_owns:
   - kingdoms/art/varasuchus.bbmodel (+ the script that writes it)
