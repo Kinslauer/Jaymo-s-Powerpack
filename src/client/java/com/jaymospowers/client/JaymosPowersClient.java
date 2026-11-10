@@ -189,6 +189,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		BeamClashClient.init();
 		BeamCinematic.init();
 		UltimateCinematic.init();
+		com.jaymospowers.client.compat.FreecamCompat.init();
 		FrontCamera.init();
 		AimCrosshair.init();
 		Ambience.init();
