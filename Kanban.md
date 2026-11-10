@@ -23,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · 🤖 Apollo · #1218 · changes · fixing review notes
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1222 · in-review
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1226 · in-review
 
 
 ## In review
