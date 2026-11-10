@@ -1,5 +1,5 @@
 --- 
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ pr: 1247
 suggested_owns: [src/main/java/com/jaymospowers/ground/, src/main/resources/data/jaymospowers/worldgen/, src/main/resources/assets/jaymospowers/models/item/, src/main/resources/assets/jaymospowers/textures/item/]
 writer: hermes-writer
 claimed_by: hermes-b
+text_pass: done
 ---
 
 # Loose sticks on the ground, like pebbles
