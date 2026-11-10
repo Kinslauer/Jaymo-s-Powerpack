@@ -20,6 +20,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · ☁️ Cloud · #1251 · in-review
 
 
 ## Needs Andy
