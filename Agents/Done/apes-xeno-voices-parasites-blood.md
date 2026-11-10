@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: apes-xeno-voices-parasites-blood
 branch: claude/apes-xeno-voices-parasites-blood
 with: 
@@ -41,3 +41,4 @@ owns:
 
 ## Done
 What a player will see: wild garlic clears parasites a third at a time; Great Apes step over rises and hear players on the ground; xeno forms speak with the titan voice carried farther; blood spatters lie still and dry. Not tested in game (no dev client/server was booted; the voice plugin is compiled only, never loaded by Simple Voice Chat).
+- 2026-11-10 19:33 PR #1241 is merged into master; moved to Agents/Done.
