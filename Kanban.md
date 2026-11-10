@@ -24,13 +24,13 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · for 🔥 Prometheus · open
 
 
 ## Being built
