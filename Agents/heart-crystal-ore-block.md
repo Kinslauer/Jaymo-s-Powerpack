@@ -1,9 +1,9 @@
 ---
 status: done
 task: heart-crystal-ore-block
-branch: claude/heart-crystal-ore-block
+branch: cloud/heart-crystal-ore-block
 with:
-pr: 1226
+pr: 1230
 mods: powers
 versions:
 started: 2026-11-09
