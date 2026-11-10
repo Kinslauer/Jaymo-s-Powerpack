@@ -24,6 +24,8 @@ Inbox tasks (each syncs first and after, so everyone sees the change at once):
 Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
 Kanban.md: every sync rewrites a board of the Inbox (Waiting / Being built / In review / Needs Andy / Done) for
 Obsidian's Kanban plugin. It is read-only: change tasks with --set, not by dragging cards.
+Stale work: a claim or running agent note with no change for 12 hours is handed back or marked stalled, and a running
+note whose task is done is moved to Done (tidy_stale), so dead runs don't sit in Being built.
 Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
 Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it.
 
@@ -156,6 +158,48 @@ def tidy_merged(live):
             add_note(path, f"PR #{hit[0]} is merged into master; moved to {folder}/Done.")
             os.makedirs(os.path.join(root, "Done"), exist_ok=True)
             os.replace(path, os.path.join(root, "Done", name))
+    tidy_stale(live)
+
+
+STALE_HOURS = 12  # a claim or a running note with no change for this long belongs to work that died
+
+
+def tidy_stale(live):
+    """Clears what dead work leaves behind (Andy, 2026-11-10: "lots of mistakes and wasted time on stale processes"):
+    - an agent note still `running` whose Inbox task is already done: done, moved to Agents/Done/;
+    - an agent note `running` with no change for STALE_HOURS: `stalled` (shown under Needs Andy, not Being built);
+    - an Inbox task `claimed`/`writing` with no change for STALE_HOURS: handed back (`open`, or `changes` when it has
+      a PR) with its claim cleared, so the next bot or agent takes it instead of everyone skipping it."""
+    now = time.time()
+    agents, inbox = os.path.join(live, "Agents"), os.path.join(live, "Inbox")
+    done_tasks = {n[:-3] for n in os.listdir(os.path.join(inbox, "Done"))} if os.path.isdir(os.path.join(inbox, "Done")) else set()
+    for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
+        path = os.path.join(agents, name)
+        if not name.endswith(".md") or not os.path.isfile(path):
+            continue
+        props = frontmatter(path)
+        if props.get("status") != "running":
+            continue
+        task = (props.get("task", "").split() or [name[:-3]])[0]
+        if task in done_tasks or name[:-3] in done_tasks:
+            set_props(path, {"status": "done"})
+            add_note(path, f"Its Inbox task `{task}` is done; moved to Agents/Done.")
+            os.makedirs(os.path.join(agents, "Done"), exist_ok=True)
+            os.replace(path, os.path.join(agents, "Done", name))
+        elif now - os.path.getmtime(path) > STALE_HOURS * 3600:
+            set_props(path, {"status": "stalled"})
+            add_note(path, f"No change for {STALE_HOURS} h: marked stalled (whoever ran it stopped).")
+    for name in sorted(os.listdir(inbox)) if os.path.isdir(inbox) else []:
+        path = os.path.join(inbox, name)
+        if not name.endswith(".md") or not os.path.isfile(path):
+            continue
+        props = frontmatter(path)
+        if props.get("status") not in ("claimed", "writing") or now - os.path.getmtime(path) <= STALE_HOURS * 3600:
+            continue
+        back = "changes" if props.get("pr", "").strip() else "open"
+        who = props.get("claimed_by") or props.get("writer") or "someone"
+        set_props(path, {"status": back, "claimed_by": ""})
+        add_note(path, f"{who}'s claim had no change for {STALE_HOURS} h: handed back as {back}.")
 
 
 KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanban.md as a board
@@ -216,8 +260,9 @@ def write_kanban(live):
         if name.endswith(".md") and name[:-3] not in tasks_seen:
             p = frontmatter(os.path.join(agents, name))
             # (a thread's PR that passed review is "ready" or "sent": it waits on Andy like a blocked one)
-            if p.get("status") in ("running", "in-review", "ready", "sent", "blocked"):
+            if p.get("status") in ("running", "in-review", "ready", "sent", "blocked", "stalled"):
                 lane = {"running": "Being built", "in-review": "In review", "ready": "Needs Andy", "sent": "Needs Andy",
+                        "stalled": "Needs Andy",
                         "blocked": "Needs Andy"}[p["status"]]
                 lanes[lane].append(card("Agents", name[:-3], p))
     done_dir = os.path.join(live, "Inbox", "Done")
