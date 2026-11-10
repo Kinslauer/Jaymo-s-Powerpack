@@ -94,7 +94,7 @@ public final class StormbornTomb extends Structure {
 	                        BlockPos piecePos = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
 	                        int pieceGround = context.chunkGenerator().getFirstFreeHeight(piecePos.getX(), piecePos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - part.y();
             BlockPos position = anchor.offset(turn(new BlockPos(part.x(), pieceGround, part.z()), turn));
-	            SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb/" + part.name()).toString())
+	            SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb_" + part.name()).toString())
 	                .apply(StructureTemplatePool.Projection.RIGID);
 	            BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), position, rotation);
 	            builder.addPiece(new PoolElementStructurePiece(context.structureTemplateManager(), element, position, element.getGroundLevelDelta(),
