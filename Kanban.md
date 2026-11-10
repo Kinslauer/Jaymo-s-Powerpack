@@ -29,14 +29,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
+- [x] [[Inbox/Done/jujujutsu-mod-checklist|jujujutsu-mod-checklist]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/unique-starts|unique-starts]]
 
 
 %% kanban:settings
