@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,6 +18,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · claimed
 
 
 ## Text pass
@@ -26,7 +27,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
 
 
