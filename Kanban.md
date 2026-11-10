@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:28). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 04:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,29 +18,21 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
+- [ ] [[Agents/astronomy-sun-moon|astronomy-sun-moon]] · 💻 Odysseus · running
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/knife-metal-effects|knife-metal-effects]] · 💻 Odysseus · running
 - [ ] [[Agents/omen-geckolib|omen-geckolib]] · 💻 Odysseus · running
+- [ ] [[Agents/redstone-golem-geckolib|redstone-golem-geckolib]] · 💻 Odysseus · running
 - [ ] [[Agents/training-weights-might|training-weights-might]] · 💻 Odysseus · running
+- [ ] [[Agents/unique-starts|unique-starts]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
 
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · ☁️ Cloud · #1225 · in-review
-- [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · #1228 · in-review
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
-- [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · ☁️ Cloud · #1227 · in-review
-- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · #1229 · in-review
-- [ ] [[Inbox/blindness-darken-echolocation-fix|blindness-darken-echolocation-fix]] · ☁️ Cloud · #1231 · in-review
-- [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · ☁️ Cloud · #1234 · in-review
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
-- [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · #1237 · in-review
-- [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · #1238 · in-review
-- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · #1240 · in-review
-- [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · #1235 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · 🪶 Quill · #1221 · writing
 
 
@@ -56,14 +48,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/downed-hold-fire|downed-hold-fire]]
-- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
-- [x] [[Inbox/Done/stegonaut-geckolib|stegonaut-geckolib]]
-- [x] [[Inbox/Done/sleeping-mends-bones|sleeping-mends-bones]]
-- [x] [[Inbox/Done/saplings-to-sticks|saplings-to-sticks]]
-- [x] [[Inbox/Done/parasites-all-three-cures|parasites-all-three-cures]]
-- [x] [[Inbox/Done/omen-geckolib|omen-geckolib]]
-- [x] [[Inbox/Done/dungeon-stone-and-chambers|dungeon-stone-and-chambers]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/structure-buttons-to-debris|structure-buttons-to-debris]]
+- [x] [[Inbox/Done/redstone-golem-geckolib|redstone-golem-geckolib]]
+- [x] [[Inbox/Done/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]]
+- [x] [[Inbox/Done/heart-crystal-ore-block|heart-crystal-ore-block]]
+- [x] [[Inbox/Done/future-dead-warrior-born|future-dead-warrior-born]]
 
 
 %% kanban:settings
