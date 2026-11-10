@@ -53,11 +53,6 @@ piglin_king.png (bbmodels/piglin_king.json): the Piglin King
   "Musclebound Piglin King" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/piglin-king
   Changes: baked to our loader's format; drawn at 0.96 size; its ice-themed moves play as fire attacks.
 
-redstone_golem.png, redstone_golem_1.png (bbmodels/redstone_golem.json): the redstone golem
-  "Redstone Golem (Minecraft Dungeons)" by polyjo, https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons
-  Changes: baked to our loader's format; drawn at 0.94 size; its glow texture drawn bright in the dark; its pound and
-  eruption posed by our own code (it came with an idle and a walk). The design is Mojang's Minecraft Dungeons mob.
-
 scalebane_archer.png (bbmodels/scalebane_archer.json): the scalebane sellswords
   "Scalebane Archer" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/scalebane-archer
   Changes: baked to our loader's format; drawn at 0.96 size.
