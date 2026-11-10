@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,11 +21,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · ☁️ Cloud · #1251 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · ☁️ Cloud · #1251 · blocked
 
 
 ## Done
