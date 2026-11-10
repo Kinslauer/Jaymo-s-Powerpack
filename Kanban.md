@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,7 +24,6 @@ kanban-plugin: board
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · 🔥 Prometheus · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · 🍇 Bacchus · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
@@ -46,6 +45,7 @@ kanban-plugin: board
 
 ## Text pass
 
+- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · ☁️ Cloud · #1209 · in-review
 
 
 ## In review
