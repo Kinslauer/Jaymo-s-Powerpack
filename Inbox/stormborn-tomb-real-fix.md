@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hephaestus
 from: Andy (vault thread, 2026-11-10: reopen the #1218 follow-up)
 asked: 2026-11-10
@@ -7,6 +7,7 @@ claimed_by: hermes-fixer
 pr: 
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/dungeon/StormbornTomb.java, kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
 writer: hermes-writer
+text_pass: 
 ---
 
 # Stormborn Tomb: fix the stone fill and the trial-chamber look for real
@@ -32,3 +33,4 @@ Find and fix the real causes, one at a time, and say in the PR which fault was w
 - Say whether tombs generated before the fix keep their damage.
 
 ## Notes
+- 2026-11-10 18:14 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
