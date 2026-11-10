@@ -407,7 +407,8 @@ def skeleton_lord():
 	return model
 
 
-EGGS = {"draugr": ((84, 94, 104), (160, 232, 255)), "barrow_beetle": ((36, 50, 44), (120, 160, 140))}
+EGGS = {"draugr": ((84, 94, 104), (160, 232, 255)), "barrow_beetle": ((36, 50, 44), (120, 160, 140)),
+		"bogre": ((92, 110, 70), (150, 112, 74))}
 
 
 def eggs():
