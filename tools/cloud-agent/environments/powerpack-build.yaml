@@ -31,3 +31,6 @@ config:
       - github.com
       - release-assets.githubusercontent.com
       - objects.githubusercontent.com
+      # Discord pictures Andy links to (Andy, 2026-11-09): these hosts serve only uploaded images and files
+      - cdn.discordapp.com
+      - media.discordapp.net

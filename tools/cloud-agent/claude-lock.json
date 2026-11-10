@@ -32,9 +32,9 @@
     "./environments/powerpack-build.yaml": {
       "kind": "environment",
       "id": "env_01QyFfWz2CwN12Sx2jCMQC7g",
-      "hash": "d471df1b5811f6d26fd23113c0b6a16b",
-      "remote_hash": "bc559ef634280de1641ddb7e4af253c7",
-      "stamp": "2026-11-09T12:38:20.822999Z"
+      "hash": "c974ffc28651376fb2225a7bbbfa7c4e",
+      "remote_hash": "5916ca8228b944e2e1d52e1511136a5a",
+      "stamp": "2026-11-10T04:09:54.933092Z"
     },
     "./vaults/powerpack-github.yaml": {
       "kind": "vault",

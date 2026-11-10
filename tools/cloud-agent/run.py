@@ -7,6 +7,8 @@ sandbox (README.md beside this). Meant for YOUTH (Hermes) on Andy's PC; works fr
     py tools/cloud-agent/run.py prompt "<what to do>"  # do something that isn't an Inbox task
     py tools/cloud-agent/run.py checktoken             # can GITHUB_TOKEN push to the repo? (pushes nothing)
     py tools/cloud-agent/run.py retoken <session-id>   # give a running session the current GITHUB_TOKEN for git
+    py tools/cloud-agent/run.py image <session-id> <file> ["message"]   # show a running session a screenshot
+                                                       # (the Console's message box can't send pictures)
     py tools/cloud-agent/run.py hunt <area> [...]      # Bug hunter, only when Andy asks: an area is a folder, a
                                                        # file, or a word from docs/codemap (e.g. `hunt Downed`);
                                                        # each confirmed bug becomes an Inbox task for Hephaestus.
@@ -449,8 +451,27 @@ def hunt_results(client, session_id, label):
     return 0
 
 
+def image(client, session_id, path, message=""):
+    """Uploads a picture (a screenshot of the game, say) into a running session and tells the agent where it is: the
+    Console's message box sends text only. The file is mounted read-only under /mnt/session/uploads/images/."""
+    if not os.path.isfile(path):
+        print(f"No such file: {path}")
+        return 1
+    name = os.path.basename(path)
+    with open(path, "rb") as f:
+        uploaded = client.files.upload(file=(name, f.read()))
+    mount = f"/images/{name}"
+    client.beta.sessions.resources.add(session_id, type="file", file_id=uploaded.id, mount_path=mount)
+    text = (f"Andy sent you a picture: /mnt/session/uploads{mount} (open it with the read tool)."
+            + (f"\n\n{message}" if message else ""))
+    client.beta.sessions.events.send(session_id, events=[{"type": "user.message", "content": [{"type": "text", "text": text}]}])
+    print(f"{session_id}: sent {name} (at /mnt/session/uploads{mount})")
+    return 0
+
+
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt", "next", "hunt", "checktoken", "retoken"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("credentials", "task", "prompt", "next", "hunt", "checktoken", "retoken",
+                                                "image"):
         raise SystemExit(__doc__)
     if sys.argv[1] == "hunt":
         args = sys.argv[2:]
@@ -474,6 +495,10 @@ def main():
         if len(sys.argv) < 3:
             raise SystemExit("run.py retoken <session-id>: the sesn_... ID from the session's Console page")
         return retoken(client, sys.argv[2])
+    if sys.argv[1] == "image":
+        if len(sys.argv) < 4:
+            raise SystemExit('run.py image <session-id> <file> ["message"]: the sesn_... ID and a picture file')
+        return image(client, sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "")
     if sys.argv[1] == "credentials":
         return credentials(client)
     if sys.argv[1] == "prompt":
