@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 00:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 00:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,7 +26,6 @@ kanban-plugin: board
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
-- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · #1228 · in-review
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · ☁️ Cloud · #1227 · in-review
+- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · ☁️ Cloud · #1229 · in-review
 
 
 ## In review
