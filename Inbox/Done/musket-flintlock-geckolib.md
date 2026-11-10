@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -69,3 +69,4 @@ PR says what a player sees when the guns fire (smoke, fire, recoil), and a "not 
 - 2026-11-09 20:41 Text pass: reviewed changes/powers/musket-blunderbuss-geckolib-*.md (detailed, clear, 'not tested in game' line present), art/guns/CREDITS.md and textures/entity/bb/CREDITS.txt (proper attributions). No lang changes. No rewrites needed.
 - 2026-11-09 20:46 Review (head 2907c88): pass. WeaponMod's musket (and bayonet muskets), blunderbuss (new model of our own) and flintlock, and the Void Armory flintlock, are drawn by GeckoLib with draw, aim sway, fire (hammer snap, flash, kick), reload and spent poses; every shot throws a flash, flame cone, thick smoke and sparks, with smoke rolling from the muzzle afterwards, bigger for the musket and biggest for the blunderbuss. The WeaponMod hook follows the existing WeaponMod mixins, gun_shot is listed in registerAttachments, particles are server-sent. Not tested in game; the PR notes the off-hand flintlock may play the main-hand's fire animation. Particle counts are high by design (Tiv asked for lots); worth a look on the Deck's frame rate with several guns firing.
 - 2026-11-09 20:46 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 20:50 PR #1207 is merged into master; moved to Inbox/Done.
