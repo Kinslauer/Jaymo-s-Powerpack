@@ -156,5 +156,5 @@ for k in range(KINDS):
                  elements=elements, outliner=[fig], textures=[],
                  animations=animations(groups, k) if k != QUIET else [])
     with open(os.path.join(out, "spirit_figure_%s.bbmodel" % slug), "w") as fh:
-        json.dump(model, fh, indent=1)
+        json.dump(model, fh, separators=(",", ":"))
     print(slug, len(elements), "elements,", len(model["animations"]), "animations")

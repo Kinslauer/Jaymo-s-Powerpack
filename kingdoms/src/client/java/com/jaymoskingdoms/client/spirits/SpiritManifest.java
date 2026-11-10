@@ -1,6 +1,5 @@
 package com.jaymoskingdoms.client.spirits;
 
-import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.ManaClient;
 import com.jaymoskingdoms.spirits.Poses;
 import com.jaymoskingdoms.spirits.SpiritState;
@@ -55,8 +54,8 @@ import net.minecraft.world.phys.Vec3;
  * survives distance and looking away; the figure is the line's body, not its replacement.
  */
 public final class SpiritManifest {
-	/** The figure's translucent body: white with scanlines (its alpha carries the lines), tinted per spirit. */
-	static final Identifier TEXTURE = JaymosKingdoms.id("textures/entity/spirit_figure.png");
+	/** The figure's translucent body: the mana glow's own texture, tinted per spirit (its streaks read as the hologram's lines). */
+	static final Identifier TEXTURE = ManaClient.TEXTURE;
 	/** How far away a spirit is drawn at all (blocks). */
 	static final double VIEW_RANGE = 48.0;
 	/** The faint figure's light, as a share of the manifested one's, and its body's alpha. */

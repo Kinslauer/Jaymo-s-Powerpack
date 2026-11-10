@@ -28,7 +28,6 @@
   `tools/blockbench/spirit-figures/` carry the moves as animations (idle, speak, manifest, level_up, fade, strike; the Grue's file adds flap); the game
   poses the same curves in code.
 - `client/spirits/SpiritManifest` (new, drawn in the world from the synced spirit state; nothing new on the server),
-  `SpiritFigure` (written by `tools/blockbench/spirit-figures/gen.py`), `SpiritArms` (no longer draws the figure; hides the Grue's borrowed bodies), `GrueClient` (a lash starts the fight),
-  `textures/entity/spirit_figure.png` (the body's scanlines).
+  `SpiritFigure` (written by `tools/blockbench/spirit-figures/gen.py`), `SpiritArms` (no longer draws the figure; hides the Grue's borrowed bodies), `GrueClient` (a lash starts the fight).
 - Built; not played. Every number (faintness, solidity, holds, glitch, where it stands) is a constant at the top of
   `SpiritManifest` and `SpiritFigure`.
