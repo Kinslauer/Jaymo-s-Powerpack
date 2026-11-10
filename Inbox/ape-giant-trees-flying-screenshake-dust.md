@@ -37,3 +37,4 @@ Tiv, in the Tasks thread: "The apes and giants should send trees flying when the
 4. Mob giants (AetherGiant etc.) rarely report isSprinting(), so the tree throw would almost only happen for player giants. Use horizontal speed above a threshold instead.
 5. GiantTrample: the Javadoc adds '(0.21.XX)'; CLAUDE.md says no version numbers in comments. The indentation of tick/sprintHit/kingdoms() is off by one tab.
 Not tested in game.
+- 2026-11-10 17:21 Text pass: Added change notes for ape/giant sprint-hit trees flying, scaling screenshake, and scaled dust particles. No player-facing strings in code changes (only particle/sound/shake scaling logic). Created changes/powers/ape-giant-trees-flying-screenshake-dust.md and changes/kingdoms/ape-giant-trees-flying-screenshake-dust.md. Build passes for both mods. PR checks pass.
