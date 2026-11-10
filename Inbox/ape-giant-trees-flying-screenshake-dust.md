@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,7 +8,7 @@ claimed_by: hermes-a
 pr: 1256
 suggested_owns: [src/main/java/com/jaymospowers/entity/ape/, src/main/java/com/jaymoskingdoms/beast/]
 writer: hermes-writer
-text_pass: none
+text_pass: 
 ---
 
 # Ape/giant trees-flying, screenshake and dust on steps/landings
