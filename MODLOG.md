@@ -1942,3 +1942,29 @@ still come up on a target, now tilting with its height and turning a little towa
 Tiv: "they should build might for everyone, wearing them should turn your meditate into shadowboxing. non gravity or z fighters are REALLY slow and bad at it". Wearing either pair of Training Weights now turns the Meditate key (I) into shadowboxing for every player, not only a Z Fighter or a Gravity user (the key still needs the Meditation perk, as it always has). Every second of shadowboxing in them builds Might, Jaymo's Kingdoms' attribute: 10 points an hour for a Z Fighter or a Gravity user in the light pair (13.3 in the heavy pair, half again with a Weighted Gi on as well, the same multipliers a Z Fighter's training has), and always a tenth of that for anyone else, about one point an hour, so a hundred-odd hours to the top. Nothing about a Z Fighter's Training Points, ki or mastery changes. Someone shadowboxing in weights also counts as a partner for a Gravity user's shadowboxing.
 - `Meditate#kind` (weights make anyone a shadowboxer) and its tick (`Training#weightsMight` every second settled in), `Training.WEIGHTS_MIGHT_PER_HOUR`/`OUTSIDER_MIGHT`, `ZFighterItems#wearsWeights` (`weightRate` and `LIGHT_RATE` now public), `KingdomsCompat#trainMight` (reflection on Kingdoms' `Stats.trainMight`; nothing without Kingdoms).
 - Built; not played.
+
+## 0.21.89 (2026-11-10): sleeping sets your broken bones (#1223)
+
+- Tiv: "sleeping should set your broken bones. after hitting the sleep button and waiting, longer per break". A
+  broken arm or leg no longer needs a splint, a cleric or a priest to be set: sleep in a bed does it. The splint stays
+  for when there's no bed to be had.
+- **How long**: each break takes 10,000 ticks of the clock asleep (`Breaks.SLEEP_SET_TICKS`). The times add up, one
+  break after another: a whole night in bed (about 11,000) sets one break, two breaks take two nights, three take
+  three. What a night doesn't finish carries over to the next sleep, even after logging out. A leg is set first,
+  since two broken legs leave you crawling. The time is measured on the clock, so a night that's skipped or run by as
+  Kingdoms' timelapse counts in full. A player sleeping while the others stay up takes the full night in real time.
+- **Only real sleep counts**: Kingdoms' bed rest (lying down by day, sneaking into bed, or lying there before you
+  press Sleep) sets nothing. Sleep at night (a bed used at night, or the Sleep button from rest) and the counting
+  starts once you're fully asleep, the same rule as a sleep ending Battered or a chamomile sleep healing you. The
+  morning wakes you as usual: the sleep doesn't run longer, a second night is needed.
+- **A set bone shows as splinted**, as if a splint had been put on: the slats show on the limb, the break keeps only a
+  quarter of its slowness and weakness, and it counts as tended when the game checks whether you're patched up (what
+  lets natural healing run at full speed). The splint comes off as the bone knits, as before. Messages: "Your Left leg
+  has set in your sleep"; on waking with a break still to go, "Your Right arm is 40% set: sleep in a bed again to
+  finish setting it". The "broken" message now says a splint or sleep in a bed will set it.
+- **The downed bed rest** (hauling yourself into a bed while downed) still sets every break after a minute, now
+  through the same `Breaks.bedSet`, so those breaks show splinted too instead of hanging untended.
+- `Breaks`: `SLEEP_SET_TICKS`, the saved `SLEPT` attachment, `bedSet`, the sleep counting (each tick while
+  `isSleepingLongEnough`, and on `EntitySleepEvents.STOP_SLEEPING` for the morning a skipped night jumps to).
+  `DownedStruggle` calls `Breaks.bedSet`. Lang: `wounds.slept_set`, `wounds.sleep_setting`.
+- Built; not played.

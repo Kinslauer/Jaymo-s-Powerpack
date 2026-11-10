@@ -10648,3 +10648,45 @@ Tiv: "they should build might for everyone ... its only good if you keep at it".
 - Every pose it had is kept: standing with its three grumbles (head toss, head tilt, neck lifted), the diagonal plod and the gallop, sitting and dozing, crashed on its belly, paddling in water, the flinch when struck and its death. Its moves play when it makes them: chin slam, ground slam, ground eating (scoop, chew, spit), roar with its plates flared, bite and grazing. New: its tail sweep now swings the body and tail round (it hit before, but nothing moved).
 - It still turns its neck and head to look about, except while dozing.
 - Kingdoms builds and the dev server starts; Stegonaut hasn't been spawned or watched in game yet.
+
+## 0.7.688 (2026-11-10): Downed players aren't finished off by villagers, guards or captors (#1224)
+
+Tiv: "When players are downed they should not still be attacked by villagers, guards, or those that have them captive ... death is real and close." In Tiv's clip the chat said "You're down. They leave you lying there." and an MCA guard went on hitting until the player died on the ground. Now a downed player is left lying by the people who wouldn't finish a body on the ground, everywhere: in a war, in the wild, at sea, not only in a safe town. They stop going for you, and a swing or an arrow already on its way does nothing. That leaves your second life for a revive, your own rise, or the guards taking you in.
+- **Who holds back:** every grown villager (MCA's guards and rulers too), the realms' guards and archers, the sworn, the settled factions' people, iron golems and clockwork golems (not a dungeon's rogue one), and your captors while you're in their shackle, even after you've acted up (they took you alive and keep you so, executions included).
+- **Who doesn't:** monsters, illagers, a camp's people (barbarians, pirates, orcs, goblins, ogres), outlaws (looters, assassins, anyone masked), a vampire at night, wild animals and other players are as deadly to the downed as ever. Fire, falls and drowning still count. A captive who slipped their chains is hunted as before.
+- Powers' executions are unchanged: the town's law (`HeldBack`) still lets only a lone hothead execute a real enemy. Since a hothead no longer keeps a downed player as a target, in practice that's one the player struck themselves.
+- `Downed#holdsFire` (the list), `Downed#heldCaptive`, the early damage check in `Downed`; `ThrallTargetMixin` (`canAttack`), `McaGuardFoesMixin` (MCA guards' enemy sensor), `PowersCompat#spareRighteousGuards` (captors spare executions).
+- Built; not played.
+
+## 0.7.689 (2026-11-10): Astronomy 5: the Moon's orbit, its eight phases, and the Sun's glare (#1225)
+
+- **The Moon keeps its own hours**: it goes once round the sky in eight days, so it no longer sits opposite the Sun
+  every night. A new moon stays beside the Sun and is lost in its glare. A waxing crescent hangs in the west after
+  sunset, and a first quarter is high at dusk and sets around midnight. The full moon is up from dusk to dawn, and a
+  last quarter rises at midnight and is still up in the morning, even in daylight.
+- **Moonlit nights have a rhythm**: the moon's light (the dark nights already follow the phase) now also follows
+  whether the moon is up. A first-quarter night is bright until moonset and then goes dark. A last-quarter night
+  starts dark and brightens when the moon rises. The full moon lights the whole night, and a new moon's night is pitch
+  black from dusk to dawn. Blood, harvest and blue moons still rise where a full moon would and light the whole night.
+- **Observing the Moon**: hold your gaze on the moon for about four seconds, under open sky with no rain, and its
+  phase goes into your records with the scratch of a quill. Each of the eight phases counts once. You can't see the new
+  moon, so you record it by watching the dark night sky on its night. Records stay with your character for the scholar
+  journal to read.
+- **The Sun's glare**: clicking on the Sun before you know Optics leaves you dazzled. The screen goes dark for a few
+  seconds (the same Blindness as our other blinding effects), and until it clears you can't read the sky: no stars are
+  discovered and nothing is recorded. Once you know Optics, the click records the Sun instead. The Optics skill comes
+  with the scholar journal's skill ladder, which isn't in yet, so for now everyone is dazzled and the Sun can't be
+  recorded.
+- Our own take on the Astronomy mod's idea (MIT, NeoForge 1.21.1). None of its code or art is used.
+- `astronomy/SunMoon` (the orbit as the game's own moon angle, observing, the glare, the records),
+  `client/astronomy/SunMoonClient` (the click), `DarkNights` (moonlight while the moon is up), and the star discovery
+  pauses while you're blinded (`SkyClient`, `StarDiscovery`).
+- Built only. Not played, and no server run. Check in game that the moon shows in the right place for each phase,
+  including under shader packs, that moonset darkens the night, and that a click on the Sun dazzles.
+
+## 0.7.690 (2026-11-10): Stormborn Tomb: real rubble instead of buttons (#1227)
+
+Tiv: "Alot of buttons are placed in structures [...] They can all be removed in place of random amounts of our rocks and pebbles. They all are trying to go for a debris effect, but now we have real debris." The Stormborn Tomb's floors were strewn with about 400 stone buttons standing in for rubble. They're gone: most spots are bare floor now, and here and there (about one in four) lies a pile of one to three of Jaymo's Powers' loose rocks, mossy rocks on the mossy floors and plain stone rocks elsewhere. They can be picked up like any other rocks. Only new tombs change: a tomb already generated in a world keeps its buttons.
+- Eight buttons stay. Two do something: the spruce button beside the cell in the first hallway opens its iron bars, and one stone "rubble" button in that hallway is the hidden trigger of a wall door (its wire runs under the floor to the torches and pistons). The other six are studs on the main hall's banner standards, part of the carving rather than rubble.
+- The templates (`structure/stormborn_tomb/*.nbt`) are edited by `kingdoms/tools/tomb_rubble.py` (seeded, so a rerun gives the same tomb; the kept buttons, the pile chance and the pile sizes are constants at its top). The rocks are Powers blocks: without Jaymo's Powers they load as air.
+- Built; not played. No new blocks or items.
