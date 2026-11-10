@@ -34,3 +34,4 @@ Tiv, in the Tasks thread: "the blinding in game isnt dark enough and the echoloc
 - These are two separate faults on the same theme (seeing, or not seeing). Don't bundle the fix into one PR unless they share code — the blindness fix is client rendering, echolocation is resonance networking + rendering.
 - A full-screen blindness overlay is a new thing in Powers; check `docs/AI-HANDBOOK.md` for how overlays are attached (`HudElementRegistry.attachElementAfter`, `VanillaHudElements.MISC_OVERLAYS`) and reuse that pattern.
 - Say plainly in the PR what was tested: whether echolocation's outline and ring now appear, whether the blast of darkness is darker, and what was not bootable in game.
+- 2026-11-10 00:01 Cloud agent session sesn_01BGBf4ajgMJ2WcELaZpbdjv opened PR #1231.
