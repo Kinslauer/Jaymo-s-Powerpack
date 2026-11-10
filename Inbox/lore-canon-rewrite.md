@@ -34,6 +34,12 @@ directly (the vault sync keeps its history).
 5. At the end of the page, keep a short `## Not yet placed` list: elements you found but couldn't place without
    inventing something big, each with one line on why.
 
+**Fable only (Andy, 2026-11-09):** do this task only on Claude Fable 5.2 (`claude-fable-5.2:free`). Check the
+model you're running on before you start and before each section. If it's anything else (the free allowance ran out
+and you were moved to a fallback model), stop right there: save what you have, then run
+`... vault.py --note lore-canon-rewrite "Fable allowance ran out at <section>; done so far: <list>. Ready for the API agent to take over."`
+and `... vault.py --set lore-canon-rewrite status=blocked`, and end the run. Another agent on Andy's API key finishes it.
+
 **When done:** run `C:/Users/toopo/AppData/Local/Programs/Python/Python312/python.exe E:/hermes/powerpack/vault.py
 --note lore-canon-rewrite "Lore rewrite: <how many sections rewritten, how many (new) entries, how many not placed>"`
 then `... vault.py --set lore-canon-rewrite status=blocked` (blocked = waiting on Andy to read it; there is no PR to
