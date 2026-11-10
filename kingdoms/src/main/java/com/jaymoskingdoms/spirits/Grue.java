@@ -137,6 +137,18 @@ public final class Grue {
 	/** Speaking as you: least and most ticks between, someone within this range to hear it, and how many of your lines it keeps. */
 	static final int MIMIC_MIN = 7200, MIMIC_MAX = 14400, HEARD_KEEP = 16;
 	static final double MIMIC_NEAR = 32.0;
+	/**
+	 * (Andy, 2026-11-10: "the takeover when you lose to it, should always track you toward a village. it will try its best to
+	 * cause destruction like the red blob") Possessed, it walks its host to the nearest village (a kingdom's, fiefdom's or
+	 * village's seat, else the nearest village structure within {@link #VILLAGE_SEARCH_CHUNKS} chunks; looked for again every
+	 * {@link #VILLAGE_LOOK_EVERY} ticks), and once within {@link #IN_VILLAGE} blocks of it, it rampages: villagers, golems, folk
+	 * and other players are all its foes, and every {@link #WRECK_EVERY} ticks it smashes what is near (doors, glass, beds,
+	 * fences, crops, lights, the bell) or sets wood alight ({@link #FIRE_CHANCE}), {@link #WRECK_RADIUS} blocks round it. The
+	 * smashing and burning follow the mobGriefing rule. No village anywhere: it keeps to your routine, as before.
+	 */
+	static final int VILLAGE_LOOK_EVERY = 1200, VILLAGE_SEARCH_CHUNKS = 48, WRECK_EVERY = 16, WRECK_TRIES = 6;
+	static final double IN_VILLAGE = 40.0, WRECK_RADIUS = 6.0, VICTIM_RANGE = 16.0;
+	static final float FIRE_CHANCE = 0.2F;
 	/** Your own words don't come out while it has you. */
 	static final boolean MUTE_HOST = true;
 	/** Lingering corruption the exorcism burns away. */
@@ -200,6 +212,9 @@ public final class Grue {
 		NEXT_STRIKE = new HashMap<>(), NEXT_GRASP = new HashMap<>(), NEXT_MIMIC = new HashMap<>(), NEXT_WANDER = new HashMap<>(),
 		PULLING = new HashMap<>();
 	private static final Map<UUID, Vec3> WANDER_TO = new HashMap<>();
+	/** The village each host is being walked to (null: none found), and when to look again. */
+	private static final Map<UUID, BlockPos> VILLAGE = new HashMap<>();
+	private static final Map<UUID, Long> NEXT_VILLAGE_LOOK = new HashMap<>(), NEXT_WRECK = new HashMap<>();
 	private static final Map<UUID, Integer> LAST_CORRUPTION = new HashMap<>();
 
 	private Grue() {
@@ -240,6 +255,9 @@ public final class Grue {
 	}
 
 	private static void forget(UUID id) {
+		VILLAGE.remove(id);
+		NEXT_VILLAGE_LOOK.remove(id);
+		NEXT_WRECK.remove(id);
 		NEXT_WARN.remove(id);
 		NEXT_LASH.remove(id);
 		NEXT_TAUNT.remove(id);
@@ -546,9 +564,18 @@ public final class Grue {
 			NEXT_MIMIC.put(id, now + MIMIC_MIN + player.getRandom().nextInt(MIMIC_MAX - MIMIC_MIN + 1));
 			mimic(player, level);
 		}
+		BlockPos village = village(player, level, now);
+		boolean rampage = village != null && village.distSqr(player.blockPosition()) < IN_VILLAGE * IN_VILLAGE;
 		LivingEntity threat = threat(player, level);
+		if (threat == null && rampage) {
+			threat = victim(player, level);
+		}
 		if (threat != null) {
 			fight(player, level, threat, spirit, now);
+		}
+		if (rampage && now >= NEXT_WRECK.getOrDefault(id, 0L)) {
+			NEXT_WRECK.put(id, now + WRECK_EVERY);
+			wreck(player, level);
 		}
 		if ((now + player.getId()) % DRIVE_EVERY != 0L) {
 			return;
@@ -564,8 +591,16 @@ public final class Grue {
 			}
 			return;
 		}
-		Vec3 spot = routineSpot(player, level);
-		if (spot != null && spot.distanceTo(player.position()) > ARRIVED) {
+		if (village != null && !rampage) {
+			// always toward the village: a point some way along the road there, so the steering stays short
+			Vec3 to = Vec3.atBottomCenterOf(village);
+			Vec3 way = to.subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			Vec3 step = way.length() > 24.0 ? player.position().add(way.normalize().scale(24.0)) : to;
+			drive(player, step.add(0.0, player.getEyeHeight(), 0.0), -1, RUSH);
+			return;
+		}
+		Vec3 spot = rampage ? Vec3.atBottomCenterOf(village) : routineSpot(player, level);
+		if (spot != null && spot.distanceTo(player.position()) > (rampage ? WANDER * 2.0 : ARRIVED)) {
 			drive(player, spot.add(0.0, player.getEyeHeight(), 0.0), -1, WALK);
 			return;
 		}
@@ -633,6 +668,98 @@ public final class Grue {
 			}
 			level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 1.2F, 0.5F);
 		}
+	}
+
+	/** The village the Grue is walking its host to: the nearest living seat, else the nearest village structure; null for none. */
+	private static @Nullable BlockPos village(ServerPlayer player, ServerLevel level, long now) {
+		UUID id = player.getUUID();
+		if (now < NEXT_VILLAGE_LOOK.getOrDefault(id, 0L)) {
+			return VILLAGE.get(id);
+		}
+		NEXT_VILLAGE_LOOK.put(id, now + VILLAGE_LOOK_EVERY);
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		if (level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+			for (com.jaymoskingdoms.Faction f : com.jaymoskingdoms.Factions.all(level.getServer())) {
+				if (f.fallen() || f.type() == com.jaymoskingdoms.FactionType.BARBARIAN) {
+					continue;
+				}
+				double d = f.seat().distSqr(player.blockPosition());
+				if (d < bestD) {
+					bestD = d;
+					best = f.seat();
+				}
+			}
+		}
+		if (best == null && level.structureManager().shouldGenerateStructures()) {
+			var villages = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE).get(net.minecraft.tags.StructureTags.VILLAGE);
+			if (villages.isPresent()) {
+				var found = level.getChunkSource().getGenerator().findNearestMapStructure(level, villages.get(), player.blockPosition(), VILLAGE_SEARCH_CHUNKS, false);
+				if (found != null) {
+					best = found.getFirst();
+				}
+			}
+		}
+		if (best == null) {
+			VILLAGE.remove(id);
+		} else {
+			VILLAGE.put(id, best);
+		}
+		return best;
+	}
+
+	/** In a village: the nearest villager, golem, folk or other player to tear into. */
+	private static @Nullable LivingEntity victim(ServerPlayer player, ServerLevel level) {
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(VICTIM_RANGE),
+			e -> e != player && e.isAlive() && !e.isInvisible()
+				&& (e instanceof net.minecraft.world.entity.npc.Npc || e instanceof net.minecraft.world.entity.animal.golem.AbstractGolem
+					|| e instanceof Player p && !p.isCreative() && !p.isSpectator()))) {
+			double d = e.distanceToSqr(player);
+			if (d < bestD) {
+				bestD = d;
+				best = e;
+			}
+		}
+		return best;
+	}
+
+	/** Smashes what is near its host (doors, glass, beds, fences, crops, lights, the bell), or sets wood alight. */
+	private static void wreck(ServerPlayer player, ServerLevel level) {
+		if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+			return;
+		}
+		var random = player.getRandom();
+		for (int t = 0; t < WRECK_TRIES; t++) {
+			BlockPos pos = player.blockPosition().offset((int)Math.round((random.nextDouble() * 2.0 - 1.0) * WRECK_RADIUS),
+				random.nextInt(5) - 1, (int)Math.round((random.nextDouble() * 2.0 - 1.0) * WRECK_RADIUS));
+			var state = level.getBlockState(pos);
+			if (smashable(state)) {
+				Spirits.show(player, Poses.SLAM, Math.sqrt(pos.distSqr(player.blockPosition())));
+				level.destroyBlock(pos, true, player);
+				redBurst(level, Vec3.atCenterOf(pos), 16, 0.4);
+				level.playSound(null, pos, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 0.8F, 0.6F);
+				return;
+			}
+			if (random.nextFloat() < FIRE_CHANCE && (state.is(net.minecraft.tags.BlockTags.PLANKS) || state.is(net.minecraft.tags.BlockTags.LOGS)
+				|| state.is(net.minecraft.tags.BlockTags.WOOL)) && level.getBlockState(pos.above()).isAir()) {
+				Spirits.show(player, Poses.PULL, Math.sqrt(pos.distSqr(player.blockPosition())));
+				level.setBlockAndUpdate(pos.above(), net.minecraft.world.level.block.Blocks.FIRE.defaultBlockState());
+				redBurst(level, Vec3.atCenterOf(pos.above()), 10, 0.3);
+				return;
+			}
+		}
+	}
+
+	/** What the Grue smashes in a village. */
+	private static boolean smashable(net.minecraft.world.level.block.state.BlockState state) {
+		return state.is(net.minecraft.tags.BlockTags.DOORS) || state.is(net.minecraft.tags.BlockTags.TRAPDOORS) || state.is(net.minecraft.tags.BlockTags.BEDS)
+			|| state.is(net.minecraft.tags.BlockTags.FENCES) || state.is(net.minecraft.tags.BlockTags.FENCE_GATES) || state.is(net.minecraft.tags.BlockTags.CROPS)
+			|| state.is(net.minecraft.tags.BlockTags.IMPERMEABLE) || state.is(net.minecraft.world.level.block.Blocks.GLASS_PANE)
+			|| state.is(net.minecraft.world.level.block.Blocks.TORCH) || state.is(net.minecraft.world.level.block.Blocks.WALL_TORCH)
+			|| state.is(net.minecraft.world.level.block.Blocks.LANTERN) || state.is(net.minecraft.world.level.block.Blocks.BELL)
+			|| state.is(net.minecraft.world.level.block.Blocks.COMPOSTER) || state.is(net.minecraft.world.level.block.Blocks.HAY_BLOCK);
 	}
 
 	/** Every {@link #ROUTINE_EVERY} ticks while free: where the keeper is at this hour (the Grue keeps to it later). */
