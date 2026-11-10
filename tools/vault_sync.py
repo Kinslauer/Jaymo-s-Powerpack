@@ -198,8 +198,9 @@ def tidy_stale(live):
     """Clears what dead work leaves behind (Andy, 2026-11-10: "lots of mistakes and wasted time on stale processes"):
     - an agent note still `running` whose Inbox task is already done: done, moved to Agents/Done/;
     - an agent note `running` with no sign of work for STALE_MINUTES: `stalled` (shown under Needs Andy, not Being built);
-    - an Inbox task `claimed`/`writing` with no sign of work for STALE_MINUTES: handed back (`open`, or `changes` when it has
-      a PR) with its claim cleared, so the next bot or agent takes it instead of everyone skipping it."""
+    - an Inbox task `claimed` with no sign of work for STALE_MINUTES: handed back (`open`, or `changes` when it has
+      a PR) with its claim cleared, so the next bot or agent takes it instead of everyone skipping it;
+    - one `writing` (a text pass) with no sign of work: back to `in-review` with no text pass, so the writer takes it again."""
     agents, inbox = os.path.join(live, "Agents"), os.path.join(live, "Inbox")
     done_tasks = {n[:-3] for n in os.listdir(os.path.join(inbox, "Done"))} if os.path.isdir(os.path.join(inbox, "Done")) else set()
     for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
@@ -225,9 +226,13 @@ def tidy_stale(live):
         props = frontmatter(path)
         if props.get("status") not in ("claimed", "writing") or not stale(live, name[:-3], path, props):
             continue
-        back = "changes" if props.get("pr", "").strip() else "open"
-        who = props.get("claimed_by") or props.get("writer") or "someone"
-        set_props(path, {"status": back, "claimed_by": ""})
+        if props.get("status") == "writing":  # a text pass that died: back in the writer's queue, not a builder's
+            back, who = "in-review", props.get("writer") or "the writer"
+            set_props(path, {"status": back, "text_pass": ""})
+        else:
+            back = "changes" if props.get("pr", "").strip() else "open"
+            who = props.get("claimed_by") or "someone"
+            set_props(path, {"status": back, "claimed_by": ""})
         add_note(path, f"{who}'s claim had no sign of work for {STALE_MINUTES} min: handed back as {back}.")
 
 
@@ -465,9 +470,11 @@ def review_queue(live):
 
 
 def claim_text_pass(live, agent):
-    """The writer bot: the oldest in-review task with no text pass yet. Sets status `writing` so no reviewer
+    """The writer bot: its own unfinished pass (a run that died mid-pass), else the oldest in-review task with no
+    text pass yet. Sets status `writing` so no reviewer
     takes it mid-edit; the writer sets it back to in-review with text_pass=done (or none). Exit 3 if none."""
-    waiting = sorted(t for t in tasks(live, ("in-review",)) if awaiting_text_pass(t[2]))
+    mine = sorted(t for t in tasks(live, ("writing",)) if t[2].get("writer") == agent)  # a pass it didn't finish
+    waiting = mine or sorted(t for t in tasks(live, ("in-review",)) if awaiting_text_pass(t[2]))
     if not waiting:
         print("No task waiting.")
         sys.exit(3)

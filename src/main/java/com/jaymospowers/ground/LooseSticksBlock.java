@@ -36,7 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /**
  * A few loose sticks lying on the ground, stacked in one block like candles: 1-4 sticks. Walk-through,
  * gone with a punch (the loot table drops one stick per stick), right click picks one up into the inventory.
- * Holding a stick adds it to the pile. Pops off when its ground goes.
+ * Pops off when its ground goes.
  */
 public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 	public static final IntegerProperty STICKS = IntegerProperty.create("sticks", 1, 4);
@@ -72,10 +72,8 @@ public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		// a stick in hand goes on the pile (the item's own placing does it, through canBeReplaced)
-		if (stack.is(net.minecraft.world.item.Items.STICK) && state.getValue(STICKS) < 4) {
-			return InteractionResult.PASS;
-		}
+		// whatever is in hand (sticks too: a stick isn't a block item, so it can't be placed back on the pile),
+		// a right click picks one stick up
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
@@ -100,7 +98,8 @@ public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 
 	@Override
 	protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
-		return !context.isSecondaryUseActive() && context.getItemInHand().is(net.minecraft.world.item.Items.STICK) && state.getValue(STICKS) < 4
+		// the pile's own block item (creative) adds a stick to it
+		return !context.isSecondaryUseActive() && context.getItemInHand().is(this.asItem()) && state.getValue(STICKS) < 4
 			|| super.canBeReplaced(state, context);
 	}
 

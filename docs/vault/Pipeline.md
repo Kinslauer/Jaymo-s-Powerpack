@@ -102,11 +102,15 @@ a third builder only once two have run for a day without hitting them.
 
 **Quill's scheduled prompt** (every 15 minutes; its persona is its SOUL.md):
 
-> Run `python tools/vault_sync.py --claim hermes-writer --writes`. If it printed a task, make a worktree from its
-> PR's branch (`git pull` first) and go through every player-visible string the PR adds or changes: lang parts,
-> dialogue, hints, item and ability text, chat lines, screens, change notes. Rewrite what needs it in the speaker's
-> voice, keep the lang keys and format codes, build the mod you touched, commit and push normally (never force-push:
-> it is another bot's branch). Add a `--note` listing what you rewrote, then
+> Run `python tools/vault_sync.py --claim hermes-writer --writes` (it hands back a pass you left unfinished first). If it printed a task, make a worktree from its
+> PR's head branch (read it with `gh pr view <pr> --json headRefName`; `git fetch` first, then
+> `git worktree add E:/wt/<task>-text origin/<head>`) and go through every player-visible string the PR adds or changes,
+> and only those (`git diff origin/master...HEAD`): lang parts, dialogue, hints, item and ability text, chat lines,
+> screens, change notes. Leave text the PR didn't touch alone, even if you'd word it better. Rewrite what needs it in
+> the speaker's voice, keep the lang keys and format codes, build the mod you touched, commit, and push to the PR's own
+> branch: `git push origin HEAD:<head>` (never a new `-text` branch: a pass on another branch never reaches the PR;
+> never force-push: it is another bot's branch). Check the PR's commit list shows your commit. Add a `--note` listing
+> what you rewrote, then
 > `python tools/vault_sync.py --set <task> status=in-review text_pass=done` (`text_pass=none` if there was nothing to
 > read). If it said "No task waiting", run `python tools/vault_sync.py --claim hermes-writer` for a writing task of
 > your own, and do that one as a normal task.
