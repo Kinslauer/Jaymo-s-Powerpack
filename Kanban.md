@@ -36,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/unique-starts|unique-starts]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · changes · fixing review notes
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
@@ -49,7 +50,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/dungeon-stone-and-chambers|dungeon-stone-and-chambers]] · ☀️ Apollo · #1218 · in-review
 
 
 ## Needs Andy
