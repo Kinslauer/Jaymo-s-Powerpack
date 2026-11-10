@@ -167,12 +167,12 @@ public final class ArsenalFlintlock {
 				return InteractionResult.SUCCESS;
 			}
 			stack.set(SPENT, true);
-			fire(server, player);
+			fire(server, player, hand);
 			player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			return InteractionResult.SUCCESS;
 		}
 
-		private static void fire(ServerLevel level, Player player) {
+		private static void fire(ServerLevel level, Player player, InteractionHand hand) {
 			Vec3 eye = player.getEyePosition();
 			Vec3 dir = player.getLookAngle();
 			HitResult block = level.clip(new ClipContext(eye, eye.add(dir.scale(RANGE)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
@@ -206,10 +206,9 @@ public final class ArsenalFlintlock {
 				Vec3 at = eye.add(dir.scale(d));
 				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
+			// the flash, fire and smoke every flintlock makes (and the pistol's fire animation), with the void's own sparks
+			com.jaymospowers.armory.GunBlast.fired(player, hand, com.jaymospowers.armory.GunBlast.Gun.FLINTLOCK);
 			Vec3 muzzle = eye.add(dir.scale(0.9)).add(0.0, -0.2, 0.0);
-			level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE0A0), muzzle.x, muzzle.y, muzzle.z,
-				1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 8, 0.1, 0.1, 0.1, 0.03);
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, muzzle.x, muzzle.y, muzzle.z, 10, 0.1, 0.1, 0.1, 0.05);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.9F);
 			if (player instanceof net.minecraft.server.level.ServerPlayer shooter) {
