@@ -11,11 +11,11 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · for 🪽 any Hermes bot · #1244 · open
 
 
 ## Being built
 
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☀️ Apollo · #1244 · claimed
 
 
 ## In review
