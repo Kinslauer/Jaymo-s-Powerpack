@@ -55,6 +55,12 @@ of the pipeline (Quill's text pass, the reviewer, Andy) is unchanged. Exit codes
 While it runs, the agent may only open a PR on this repository: `run.py` refuses every other call that asks for
 permission. It never merges.
 
+### Showing an agent a picture
+
+The Console's message box sends text only. `py tools/cloud-agent/run.py image <sesn_...> <file> "what to look at"`
+uploads the picture into the running session and tells the agent where it is. Discord picture links
+(`cdn.discordapp.com`, `media.discordapp.net`) also open in the sandbox now.
+
 ### When a push is refused (403)
 
 `remote: Permission to Kinslauer/Jaymo-s-Powerpack.git denied to Kinslauer` means the token git uses can read the
@@ -66,8 +72,9 @@ repo but not write to it. The branch name has nothing to do with it.
 2. A session keeps the token it started with, so fixing the token doesn't reach a session that's already running:
    `py tools/cloud-agent/run.py retoken <sesn_...>` gives that session the current `GITHUB_TOKEN` (the ID is on its
    Console page). Then tell the agent to push again.
-3. Sessions started from the Console attach the repo with whatever token was typed in there. Prefer `run.py`, which
-   always uses `GITHUB_TOKEN`.
+3. Sessions started from the Console attach the repo with whatever token was typed in there, often one that can't
+   push (`git push` then just hangs). Start sessions with `run.py`, which always uses `GITHUB_TOKEN`; for one already
+   started from the Console, `run.py retoken <sesn_...>` fixes it.
 
 ### For YOUTH
 
