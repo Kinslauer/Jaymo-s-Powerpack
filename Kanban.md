@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 18:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -51,11 +51,11 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · blocked
 
 
 ## Done
