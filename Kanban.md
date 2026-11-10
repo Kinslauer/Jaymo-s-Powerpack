@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -54,8 +54,8 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · blocked
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · blocked
 
 
 ## Done
