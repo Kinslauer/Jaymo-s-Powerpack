@@ -104,6 +104,7 @@ final class SkillScreen extends Screen {
 			case SURVIVAL -> Ui.SURVIVAL;
 			case STEALTH -> Ui.STEALTH;
 			case STRENGTH -> Ui.STRENGTH;
+			case SCHOLAR -> 0xFF000000 | Skills.Pillar.SCHOLAR.color;
 		};
 	}
 
@@ -298,6 +299,9 @@ final class SkillScreen extends Screen {
 		}
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			SkillWeb.Spot spot = SkillWeb.CRESTS.get(p);
+			if (spot == null) {
+				continue;
+			}
 			double r = Math.max(5, 9 * zoom);
 			if (Math.abs(sx(spot) - mouseX) <= r && Math.abs(sy(spot) - mouseY) <= r) {
 				return p;
@@ -397,6 +401,9 @@ final class SkillScreen extends Screen {
 		// the borders between pillars
 		double outer = (SkillWeb.R0 + (SkillWeb.RINGS - 0.5) * SkillWeb.STEP) * zoom, inner = (SkillWeb.CREST_R + 14) * zoom;
 		for (Skills.Pillar p : Skills.Pillar.values()) {
+			if (!p.web()) {
+				continue;
+			}
 			double a = Math.toRadians(SkillWeb.from(p));
 			segment(graphics, cx + inner * Math.cos(a), cy + inner * Math.sin(a), cx + outer * Math.cos(a), cy + outer * Math.sin(a), 1, COLOR_BORDER);
 		}
@@ -405,6 +412,9 @@ final class SkillScreen extends Screen {
 		// the middle to each crest, each crest to its gates
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			SkillWeb.Spot crest = SkillWeb.CRESTS.get(p);
+			if (crest == null) {
+				continue;
+			}
 			segment(graphics, cx, cy, sx(crest), sy(crest), thick, Ui.GOLD);
 		}
 		for (java.util.Map.Entry<SkillWeb.Branch, SkillWeb.Spot> e : SkillWeb.GATES.entrySet()) {
@@ -494,6 +504,9 @@ final class SkillScreen extends Screen {
 		Skills.Pillar crestHover = crestAt(mouseX, mouseY);
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			SkillWeb.Spot crest = SkillWeb.CRESTS.get(p);
+			if (crest == null) {
+				continue;
+			}
 			int r = (int)Math.max(4, Math.round(8 * zoom));
 			tile(graphics, (int)Math.round(sx(crest)), (int)Math.round(sy(crest)), r, p == crestHover ? COLOR_PATH : accent(p), darker(accent(p), 0.35F));
 		}

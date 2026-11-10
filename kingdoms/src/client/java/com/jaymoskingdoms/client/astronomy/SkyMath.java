@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.astronomy;
 
+import com.jaymoskingdoms.astronomy.Celestial;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -13,12 +14,8 @@ import net.minecraft.world.phys.Vec3;
  * by time of day and day count.
  */
 public final class SkyMath {
-    /** Observer latitude (radians): fixed for the whole world. */
-    static final double LATITUDE = Math.toRadians(45.0);
-    /** Degrees of sky longitude per block traveled east. */
-    static final double LON_DEG_PER_BLOCK = 1.0 / 2000.0;
-    /** Degrees the stars shift per in-game day (about one turn per year). */
-    static final double DAY_SHIFT_DEG = 0.9856;
+    /** Degrees of sky longitude per block traveled east ({@link Celestial}, shared with the server's readings). */
+    static final double LON_DEG_PER_BLOCK = Celestial.LON_DEG_PER_BLOCK;
     /** The sun is overhead at turn 0, under the world at pi. */
     static final float DUSK_AT = 0.05F;
     static final float DUSK_SPAN = 0.25F;
@@ -39,13 +36,9 @@ public final class SkyMath {
      * observer's sky-longitude and {@code days} the elapsed in-game day count.
      */
     public static Vec3 direction(Star star, long time, float partial, double lonDeg, int days) {
-        double lstDeg = ((time - 6000L + partial) / 24000.0) * 360.0 + lonDeg + days * DAY_SHIFT_DEG;
-        double ha = Math.toRadians(lstDeg - star.ra());
-        double dec = Math.toRadians(star.dec());
-        double alt = Math.asin(Mth.clamp(
-                (float) (Math.sin(dec) * Math.sin(LATITUDE) + Math.cos(dec) * Math.cos(LATITUDE) * Math.cos(ha)),
-                -1.0F, 1.0F));
-        double az = Math.atan2(Math.sin(ha), Math.cos(ha) * Math.sin(LATITUDE) - Math.tan(dec) * Math.cos(LATITUDE));
+        double lstDeg = Celestial.lstDeg(time, partial, lonDeg, days);
+        double alt = Celestial.altitude(star.ra(), star.dec(), lstDeg);
+        double az = Celestial.azimuthFromSouth(star.ra(), star.dec(), lstDeg);
         double h = Math.cos(alt);
         return new Vec3(-h * Math.sin(az), Math.sin(alt), h * Math.cos(az));
     }

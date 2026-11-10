@@ -28,12 +28,16 @@ final class SkillWeb {
 	/** The most rings drawn. */
 	static final int RINGS = 10;
 
-	/** Each pillar's wedge (degrees, clockwise from the right, y down): Strength on top, Survival lower right, Stealth lower left. */
+	/**
+	 * Each pillar's wedge (degrees, clockwise from the right, y down): Strength on top, Survival lower right, Stealth lower
+	 * left. The Scholar's pillar has none: it is learned in the Astronomer's Journal ({@link Skills.Pillar#web()}).
+	 */
 	static double from(Skills.Pillar pillar) {
 		return switch (pillar) {
 			case STRENGTH -> -155.0;
 			case SURVIVAL -> -25.0;
 			case STEALTH -> 90.0;
+			case SCHOLAR -> throw new IllegalArgumentException("the Scholar pillar is not on the web");
 		};
 	}
 
@@ -42,6 +46,7 @@ final class SkillWeb {
 			case STRENGTH -> -25.0;
 			case SURVIVAL -> 90.0;
 			case STEALTH -> 205.0;
+			case SCHOLAR -> throw new IllegalArgumentException("the Scholar pillar is not on the web");
 		};
 	}
 
@@ -108,6 +113,7 @@ final class SkillWeb {
 			case SURVIVAL -> page >= 3 ? Branch.SPELLCRAFT : page == 2 ? Branch.ARCHERY : page == 1 ? Branch.MEDICINE : Branch.FORAGING;
 			case STEALTH -> page >= 4 ? Branch.KNIFE_ARTS : page == 3 ? Branch.ROGUES_ARTS : page == 1 ? Branch.FREERUNNING
 				: page == 2 ? Branch.SHADOWS : Branch.THIEVERY;
+			case SCHOLAR -> throw new IllegalArgumentException("the Scholar pillar is not on the web");
 		};
 	}
 
@@ -155,6 +161,9 @@ final class SkillWeb {
 
 	static {
 		for (Skills.Pillar pillar : Skills.Pillar.values()) {
+			if (!pillar.web()) {
+				continue;
+			}
 			CRESTS.put(pillar, polar((from(pillar) + to(pillar)) / 2.0, CREST_R));
 			List<Branch> branches = new ArrayList<>();
 			for (Branch b : Branch.values()) {
@@ -169,7 +178,7 @@ final class SkillWeb {
 				GATES.put(b, polar(mid, GATE_R));
 				int deepest = 0, deepestWill = 0;
 				for (Skills.Perk perk : Skills.Perk.values()) {
-					if (perk.bridge() || branch(perk) != b) {
+					if (perk.bridge() || !perk.pillar.web() || branch(perk) != b) {
 						continue;
 					}
 					BRANCHES.put(perk, b);

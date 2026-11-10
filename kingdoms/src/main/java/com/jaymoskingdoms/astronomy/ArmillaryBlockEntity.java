@@ -9,16 +9,14 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The block entity behind an armillary sphere: it remembers when the sky was
- * last read here (world time, day, place) and keeps the client's measurement
- * record until the scholar journal takes it.
+ * last read here (world time, day). The readings themselves are written in the
+ * reader's Astronomer's Journal ({@link Measurements}).
  */
 public final class ArmillaryBlockEntity extends BlockEntity {
     /** World time of day of the last reading. */
     public long measureTime;
     /** Which in-game day the last reading was taken. */
     public long measureDay;
-    /** The client's measurement record (JSON), or null. */
-    public String measurement;
 
     public ArmillaryBlockEntity(BlockPos pos, BlockState state) {
         super(ArmillarySphereBlock.ENTITY, pos, state);
@@ -28,7 +26,6 @@ public final class ArmillaryBlockEntity extends BlockEntity {
     public void record(ServerLevel level) {
         this.measureTime = level.getGameTime();
         this.measureDay = level.getGameTime() / 24000L;
-        this.measurement = null;
         setChanged();
     }
 
@@ -37,7 +34,6 @@ public final class ArmillaryBlockEntity extends BlockEntity {
         super.saveAdditional(output);
         output.putLong("MeasureTime", measureTime);
         output.putLong("MeasureDay", measureDay);
-        output.putString("Measurement", measurement == null ? "" : measurement);
     }
 
     @Override
@@ -45,7 +41,5 @@ public final class ArmillaryBlockEntity extends BlockEntity {
         super.loadAdditional(input);
         this.measureTime = input.getLongOr("MeasureTime", 0L);
         this.measureDay = input.getLongOr("MeasureDay", 0L);
-        String measurement = input.getStringOr("Measurement", "");
-        this.measurement = measurement.isEmpty() ? null : measurement;
     }
 }

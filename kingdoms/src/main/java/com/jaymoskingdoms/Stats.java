@@ -116,11 +116,13 @@ public final class Stats {
 
 	// ---- reading -----------------------------------------------------------------------------------------------
 
-	/** Your character level: every pillar's level added up. */
+	/** Your character level: every pillar's level added up (the Scholar's study aside: {@link Skills.Pillar#web()}). */
 	public static int characterLevel(Skills.Progress p) {
 		int n = 0;
 		for (Skills.Pillar pillar : Skills.Pillar.values()) {
-			n += p.level(pillar);
+			if (pillar.web()) {
+				n += p.level(pillar);
+			}
 		}
 		return n;
 	}

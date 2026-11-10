@@ -88,6 +88,14 @@ public final class Skills {
 	 * Powers' Wounds, which reads the ranks by reflection on {@link #rank(Player, String)}), is paid for here.
 	 */
 	public static final int SURVIVAL_MAX_LEVEL = 25;
+	/**
+	 * The Scholar pillar's highest level: its points pay for Astrometry's ranks (and the astronomy skills still to come).
+	 * Its experience is fundamental astronomy, earned only by new measurements in an Astronomer's Journal
+	 * ({@code astronomy.Measurements}).
+	 */
+	public static final int SCHOLAR_MAX_LEVEL = 20;
+	/** The Scholar pillar's colour (the astronomy art's aged brass). */
+	static final int SCHOLAR_COLOR = 0xA47C36;
 	/** Stealth experience: a pocket picked clean with something in it, an empty one, a theft nobody saw. */
 	static final int XP_LIFT = 10, XP_EMPTY = 2, XP_THEFT = 4;
 	/** A guard's pocket counts this many times over; a sleeper's this share. */
@@ -136,9 +144,13 @@ public final class Skills {
 	/** Respec: a court wizard asks this much silver, and this many more per rank you've learned. */
 	static final int RESPEC_SILVER = 5, RESPEC_PER_RANK = 1;
 
-	/** The three pillars of the tree. Only the open ones have perks yet. */
+	/**
+	 * The pillars of the tree. Only the open ones have perks yet. The Scholar's is learned in the Astronomer's Journal
+	 * rather than on the web ({@link #web()}); last, so no ordinal moves.
+	 */
 	public enum Pillar {
-		SURVIVAL(true, SURVIVAL_MAX_LEVEL, 0x6DBE45), STEALTH(true, STEALTH_MAX_LEVEL, 0x7A6FD0), STRENGTH(true, STRENGTH_MAX_LEVEL, 0xD0452F);
+		SURVIVAL(true, SURVIVAL_MAX_LEVEL, 0x6DBE45), STEALTH(true, STEALTH_MAX_LEVEL, 0x7A6FD0), STRENGTH(true, STRENGTH_MAX_LEVEL, 0xD0452F),
+		SCHOLAR(true, SCHOLAR_MAX_LEVEL, SCHOLAR_COLOR);
 
 		public final boolean open;
 		/** The pillar's highest level. */
@@ -154,6 +166,15 @@ public final class Skills {
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
+		}
+
+		/**
+		 * Whether this pillar is drawn on the skill web and counts toward your character level and alignment. The
+		 * Scholar's doesn't: it is study, not the body's training, so it gives no attribute points or title, and its
+		 * skills are learned in the Astronomer's Journal.
+		 */
+		public boolean web() {
+			return this != SCHOLAR;
 		}
 	}
 
@@ -321,7 +342,10 @@ public final class Skills {
 		PINNING_THROW(Pillar.STRENGTH, 1, 2, 8, 22, 2, COUCHED_LANCE),
 		// (0.7.517) Spellcraft's crown, Enchanted Storage (Mage; Andy): enchant a chest into a Bag of Holding, then up a tier
 		// a rank ({@link StorageEnchanting})
-		ENCHANTED_STORAGE(Pillar.SURVIVAL, 3, 2, 15, 18, 0, ARCANE_EVOCATION);
+		ENCHANTED_STORAGE(Pillar.SURVIVAL, 3, 2, 15, 18, 0, ARCANE_EVOCATION),
+		// the Scholar's first skill, learned in the Astronomer's Journal: each rank makes its readings finer
+		// (astronomy.Measurements#resolution); last, so no ordinal moves
+		ASTROMETRY(Pillar.SCHOLAR, 20, 1, 0, 0, 1);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -767,7 +791,7 @@ public final class Skills {
 	}
 
 	/** Gives {@code player} {@code amount} experience in {@code pillar}; a level reached is announced. */
-	static void grant(ServerPlayer player, Pillar pillar, int amount) {
+	public static void grant(ServerPlayer player, Pillar pillar, int amount) {
 		if (amount <= 0) {
 			return;
 		}
@@ -796,9 +820,11 @@ public final class Skills {
 			boolean top = now >= pillar.maxLevel;
 			boolean milestone = now / MILESTONE_EVERY > was / MILESTONE_EVERY;
 			int size = top ? Fanfare.GRAND : milestone ? Fanfare.MAJOR : Fanfare.MINOR;
+			// (the Scholar's points are spent in the Astronomer's Journal, not on K)
+			String where = pillar.web() ? "" : ".journal";
 			Component chat = milestone
-				? Component.translatable("message.jaymoskingdoms.skills.milestone", name, now)
-				: Component.translatable("message.jaymoskingdoms.skills.level", name, now);
+				? Component.translatable("message.jaymoskingdoms.skills.milestone" + where, name, now)
+				: Component.translatable("message.jaymoskingdoms.skills.level" + where, name, now);
 			Fanfare.fanfare(player, Component.translatable(top ? "message.jaymoskingdoms.skills.top_title" : "message.jaymoskingdoms.skills.level_title", name),
 				Component.translatable("message.jaymoskingdoms.skills.level_subtitle", now), chat, pillar.color, size);
 		}

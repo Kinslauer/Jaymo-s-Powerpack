@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.astronomy.Celestial;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +20,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * The star catalog: every HYG v4.1 star down to magnitude 6.5 (8,870 of them
  * in v4.1), loaded from {@code assets/jaymoskingdoms/astronomy/stars.json}.
- * Star positions are right ascension and declination in degrees; magnitudes
- * are visual magnitudes.
+ * The file gives right ascension in hours (as HYG does) and declination in
+ * degrees; {@link Star} holds both in degrees. Magnitudes are visual magnitudes.
  */
 public final class StarCatalog {
     private static List<Star> stars;
@@ -70,7 +71,7 @@ public final class StarCatalog {
                     JsonObject row = element.getAsJsonObject();
                     out.add(new Star(
                             row.get("hip").getAsInt(),
-                            row.get("ra").getAsFloat(),
+                            (float) (row.get("ra").getAsDouble() * Celestial.DEG_PER_HOUR),
                             row.get("dec").getAsFloat(),
                             row.get("mag").getAsFloat(),
                             row.get("con").getAsString(),

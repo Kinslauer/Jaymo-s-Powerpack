@@ -154,6 +154,7 @@ public final class ChatPrompts {
 				case SURVIVAL -> "living off the land";
 				case STEALTH -> "stealth and thievery";
 				case STRENGTH -> "strength at arms";
+				case SCHOLAR -> "the study of the stars";
 			}).append('.');
 		}
 		for (Quest q : Quests.log(player)) {
