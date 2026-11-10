@@ -12,12 +12,12 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · #1239 · open
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/startup-crash|startup-crash]] · 🍇 Bacchus · claimed
 
 
 ## Text pass
