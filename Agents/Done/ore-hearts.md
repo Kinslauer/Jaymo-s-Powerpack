@@ -31,7 +31,7 @@ owns:
 **Task:** Add rare heart crystal ore in deep deepslate dropping heart crystals; each crystal raises max health by one permanent half-heart (cap ten), shown as a faint extra run under the health bar; a found heart burns to turn one death aside (extra sure wake) and is lost otherwise; reincarnation clears them.
 
 ## Plan
-- HeartCrystals: attachment, consumable item, ore blocks, worldgen + placed feature, loot tables, grant/burn/respawn/clear (commit 1ac4fec67)
+- HeartCrystals: attachment, consumable item, ore blocks, worldgen + placed feature, loot tables, grant/burn/respawn/clear
 - Hooks: Downed AFTER_RESPAWN re-applies extra health; Mortality.decide burns a heart via tryBurnHeartOnDeath (heart is the extra sure wake - single WOKEN increment)
 - Tags: both ores in pickaxe + needs_iron_tool tags; item definitions; lang part hearts.json per the text review
 - Client: HeartHud faint extra run under the health bar, registered in JaymosPowersClient
@@ -43,5 +43,5 @@ owns:
 - Stacks with the crystal_heart artifact (both raise max health) - flag in PR body; ask Andy if it reads as too much health.
 
 ## Done
-PR #1210 opened: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1210 — compiles, build green, not playtested. Waiting for review; set to in-review once the vault note lands.
-- 2026-11-09 21:57 PR #1210 is merged into master; moved to Agents/Done.
+PR #1210 opened: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1210 — compiles, build green, not playtested. Set to in-review.
+- 2026-11-09 22:04 PR #1210 is merged into master; moved to Agents/Done.
