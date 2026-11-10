@@ -1968,3 +1968,27 @@ Tiv: "they should build might for everyone, wearing them should turn your medita
   `isSleepingLongEnough`, and on `EntitySleepEvents.STOP_SLEEPING` for the morning a skipped night jumps to).
   `DownedStruggle` calls `Breaks.bedSet`. Lang: `wounds.slept_set`, `wounds.sleep_setting`.
 - Built; not played.
+
+## 0.21.90 (2026-11-10): F5 goes between first person and behind; the front camera moves to F6 (#1228)
+
+Tiv: "F5 should only toggle between first and 3rd person, the front facing camera should be toggled on w/ f6."
+- **F5** now goes between first person and the view from behind (Shoulder Surfing's over-the-shoulder view in the pack). It never lands on the view from the front. From the front view, F5 goes to first person.
+- **F6** turns the camera round to look at your face. Press it again and you're back in the view you had before (first person or from behind). If the game doesn't know what that was, you go to the view from behind. It's in Options > Controls > Key Binds under Miscellaneous ("Toggle Front Camera"), next to Toggle Perspective, and can be rebound there.
+- **Cutscenes**: while an ultimate's film, a beam battle's film, Time Flow's shoulder view or a finisher seen from behind has the camera, F6 does nothing. Each of these gives back the view it found when it ends, so the front view comes back after them and F6 still takes you back to the view you had before it.
+- **Nothing else moved**: nothing in the pack was on F6. First-person Model's toggle is meant to start on F6, but on 26.3 it starts on a key code no key sends. Vanilla only uses F6 as F3+F6, which doesn't trigger key binds. So `KeyConflicts` is unchanged.
+- `FrontCamera` (the key and the toggle), `mixin/FrontCameraCycleMixin` (vanilla's F5), `mixin/shouldersurfing/ShoulderSurfingFrontMixin` (Shoulder Surfing's F5; its "third person front" setting stays on so F6 still works), `ChronoFlowClient#holdsView`, `FinisherPose#holdsView`. Shoulder Surfing Reloaded is now a compile-only dependency. Lang: `lang/parts/camera.json`.
+- Built; not played.
+
+## 0.21.91 (2026-11-10): modelled amethyst heart crystal ore (#1230)
+
+- **Heart crystal ore**: the flat red-heart textures are replaced by raised purple amethyst crystals: one large central crystal inside a smaller heart-shaped cluster, on both stone and deepslate.
+- Bright violet/lilac facets make the ore read lit in the dark like amethyst; it does not emit light. Full opaque rock hosts keep ordinary neighbour culling and need no cut-out blockstate or item variant.
+- Includes original editable Blockbench sources, deterministic generator and inspected front/side/back renders. Registration, worldgen and drops remain with the separate ore-hearts gameplay task.
+- Not tested in game.
+
+## 0.21.92 (2026-11-10): Blinded means dark: Blindness darkens your whole view (#1231)
+
+- **Blindness is dark now.** Being blinded (Smoke's Smother and bombs, Xenoform's band flash, Z Fighter's flash, Cryo's snow, any Blindness from anything) used to pull vanilla's black fog in to 5 blocks and leave what was close fully lit. Now the whole view goes dark too: about three quarters dark in the middle, so what's right in front of you is barely there, closing to near black at the edges. It closes in over a third of a second and lifts with the effect's last second, as the fog does. It stacks on vanilla's fog (which still hides everything further off) rather than replacing it.
+- The crosshair, hotbar and every other HUD piece stay on top of the darkness, so the Resonance ring, the Blindness power's echo rings and the power chips still show while blind. Hiding the HUD (F1) hides the darkness too, as it does vanilla's own screen overlays.
+- Tuning: `client/BlindedHud` (`WASH`, `RIM`, `REACH`, `FADE_IN_TICKS`).
+- Built; not played. How dark it looks in game, and how it sits with the pack's shaders (Iris, Complementary), hasn't been seen.

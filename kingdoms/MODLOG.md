@@ -10690,3 +10690,11 @@ Tiv: "Alot of buttons are placed in structures [...] They can all be removed in 
 - Eight buttons stay. Two do something: the spruce button beside the cell in the first hallway opens its iron bars, and one stone "rubble" button in that hallway is the hidden trigger of a wall door (its wire runs under the floor to the torches and pistons). The other six are studs on the main hall's banner standards, part of the carving rather than rubble.
 - The templates (`structure/stormborn_tomb/*.nbt`) are edited by `kingdoms/tools/tomb_rubble.py` (seeded, so a rerun gives the same tomb; the kept buttons, the pile chance and the pile sizes are constants at its top). The rocks are Powers blocks: without Jaymo's Powers they load as air.
 - Built; not played. No new blocks or items.
+
+## 0.7.691 (2026-11-10): Zephyrus on GeckoLib: a Blockbench model and animations (#1229)
+
+- **Zephyrus** is now drawn and animated by GeckoLib from an editable Blockbench model (`kingdoms/art/zephyrus.bbmodel`), the same body box for box, so its four hides, four glowing marking patterns, horns, lost spikes, saddle, size, seats and the hatchling's size are unchanged.
+- Animations, sampled from the old model's own posing code: idle, walk (kept in step with its pace), fly (kept in time with its wingbeat), hover (beating hard while it spits acid in the air), glide, landing (wings flared, feet reaching), sitting, crashed and swimming (legs paddling, the flat tail sculling). New: a **bite** when its bite lands, a **tail sweep** when its sweep lands, and a **death** of its own (it rears with its jaw wide, its legs buckle and it rolls onto its side) instead of the vanilla sideways flip.
+- Where it looks, its pitch with a climb or dive and its jaw and neck while it breathes still follow the game every frame (`ZephyrusDragonRenderer`).
+- Classes: `ZephyrusAnimations`, `ZephyrusDragonRenderer` (new), `ZephyrusDragon` (a `GeoEntity`; `bitten`/`swept` trigger the moves); `ZephyrusDragonModel` removed. Script: `kingdoms/tools/gen_zephyrus_geo.py` (`--compare <dir>` renders old poses beside the new animations).
+- Built and `runServer` booted; **not yet seen in game** (the animations were only checked in offline renders).
