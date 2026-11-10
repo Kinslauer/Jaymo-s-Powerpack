@@ -22,7 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/unique-starts|unique-starts]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
