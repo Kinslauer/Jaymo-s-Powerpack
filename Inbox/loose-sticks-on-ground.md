@@ -1,0 +1,28 @@
+---
+status: open
+for: hermes
+from: tiv (Discord, Tasks thread, 2026-11-08)
+asked: 2026-11-08
+thread: 1569170499680870560
+claimed_by:
+pr:
+suggested_owns: [src/main/java/com/jaymospowers/ground/, src/main/resources/data/jaymospowers/worldgen/, src/main/resources/assets/jaymospowers/models/item/, src/main/resources/assets/jaymospowers/textures/item/]
+---
+
+# Loose sticks on the ground, like pebbles
+
+Sticks scattered on the ground so starting out doesn't need a tree.
+
+## What's wanted
+
+Tiv, in the Tasks thread: "this mod has sticks on the ground you can grab. alongside the pebbles. we need the same so starting is more manageable."
+
+Reference: the "Surviving the Alaskan Wilderness in Minecraft" video (Chano) shows sticks lying on the ground to pick up — that's the feel.
+
+## Notes
+
+- Powers already has pebbles and loose rocks as ground features (`PebblePilesFeature`, `loose_rocks`, `ground/OrePebbleBlock`) — this is the same thing but sticks: a single stick block/item on the ground you break and grab.
+- Don't change pebbles or loose rocks themselves; add sticks alongside them.
+- Say where they generate (grass, dirt, leaf litter — not inside stone) and how common.
+- A stick on the ground is one stick you break and pick up; random amounts per pile, same as pebbles.
+- Don't touch the saplings-to-sticks recipe (that's done, PR #1213) — this is a separate, complementary source.
