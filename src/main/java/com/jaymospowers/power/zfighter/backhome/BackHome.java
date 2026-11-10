@@ -36,8 +36,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.18.56, Andy's SevTech picks: "Back home") What the far worlds send home, besides metal:
  * <ul>
- * <li><b>Maw dust</b>, the Starlight essence's body: a wreck's first salvage leaves {@link #WRECK_DUST} of it, and the glass of the
- * black hole's rim sheds a little when broken ({@link #RIM_CHANCE}). The sky hermits of Jaymo's Kingdoms sell it.</li>
+ * <li><b>Maw dust</b>, the Starlight essence's body: a wreck's first salvage leaves {@link #WRECK_DUST} of it, and the glass the Maw's
+ * broken world is fused to along its cracks sheds a little when broken ({@link #RIM_CHANCE}). The sky hermits of Jaymo's Kingdoms
+ * sell it.</li>
  * <li>The <b>Starlit Lens</b>, made at the infusion altar ({@code data/jaymospowers/alchemy/infusion/starlit_lens.json}, taught by
  * {@link #LENS_RESEARCH}): set in a pod's beacon mast by using it on the pod ({@link #fitLens}); the flight then shows the
  * mission zones of the world ahead.</li>
@@ -49,7 +50,7 @@ public final class BackHome {
 	// ---- tuning ----
 	/** Maw dust a wreck's first salvage leaves for each player. */
 	public static final int WRECK_DUST = 2;
-	/** The chance a rim glass broken in the Maw sheds dust, and the most it sheds. */
+	/** The chance a fused glass broken in the Maw sheds dust, and the most it sheds. */
 	public static final float RIM_CHANCE = 0.35F;
 	public static final int RIM_MAX = 2;
 	/** The chance a leaf block broken on the Verdant World drops a fruit; an ice, snow or stone block on Glacia a pinch of salt. */
@@ -104,14 +105,14 @@ public final class BackHome {
 				Block.popResource(level, pos, new ItemStack(GLACIA_SALT));
 			}
 		} else if (world == ZFighterSpace.DESTS[ZFighterSpace.MAW].level()) {
-			if (rimGlass(state) && level.getRandom().nextFloat() < RIM_CHANCE) {
+			if (fusedGlass(state) && level.getRandom().nextFloat() < RIM_CHANCE) {
 				Block.popResource(level, pos, new ItemStack(MAW_DUST, 1 + level.getRandom().nextInt(RIM_MAX)));
 			}
 		}
 	}
 
-	/** The glass ring round the black hole (the Maw builds it orange and yellow; coloured blocks have no fields, so by name). */
-	private static boolean rimGlass(BlockState state) {
+	/** The glass along the broken world's cracks (MawWorld fuses them orange and yellow; coloured blocks have no fields, so by name). */
+	private static boolean fusedGlass(BlockState state) {
 		String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
 		return path.equals("orange_stained_glass") || path.equals("yellow_stained_glass");
 	}

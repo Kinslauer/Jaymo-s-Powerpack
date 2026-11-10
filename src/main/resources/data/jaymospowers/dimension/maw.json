@@ -1,18 +1,11 @@
 {
   "type": "jaymospowers:maw",
   "generator": {
-    "type": "minecraft:flat",
-    "settings": {
-      "biome": "jaymospowers:maw_void",
-      "features": false,
-      "lakes": false,
-      "layers": [
-        {
-          "block": "minecraft:air",
-          "height": 1
-        }
-      ],
-      "structure_overrides": []
+    "type": "minecraft:noise",
+    "settings": "jaymospowers:maw",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jaymospowers:maw_void"
     }
   }
 }

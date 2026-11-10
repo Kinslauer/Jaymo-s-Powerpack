@@ -808,8 +808,8 @@ public final class ZFighterPatrol {
 	private static @Nullable ZFighterRogue criminal(ServerLevel level, ServerPlayer player, ZFighterSpace.Dest dest) {
 		RandomSource random = level.getRandom();
 		BlockPos at = null;
-		if (dest.kind() == ZFighterSpace.Kind.VOID) {
-			List<BlockPos> decks = ZFighterSpace.mawDecks();
+		if (dest.kind() == ZFighterSpace.Kind.WRECKS) {
+			List<BlockPos> decks = MawWorld.decks();
 			at = decks.get(random.nextInt(decks.size()));
 		}
 		for (int tries = 0; tries < 10 && at == null; tries++) {

@@ -7,7 +7,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
  * (0.18.6) The pixel-art bodies of the star map and the flight screen: the sun, Home, the worlds the pod flies to and the Maw. A
  * world is drawn as a grid of square cells (bigger cells for a bigger world, so it keeps the blocky look), lit from the sun's side,
  * each with its own surface: Home's seas and land, the moon's craters, Rustfall's rust bands, Glacia's ice cracks, Cinder's lava,
- * the Verdant World's forests. The Maw is a black disc in a burning ring.
+ * the Verdant World's forests. The Maw is a world broken into pieces that have drifted apart round a smouldering heart, one piece
+ * gone, its rubble hanging round it.
  */
 final class ZFighterSpaceArt {
 	/** How many cells across a world is drawn at most (above that the cells grow). */
@@ -37,7 +38,7 @@ final class ZFighterSpaceArt {
 	/** A world: the disc at ({@code cx}, {@code cy}) of radius {@code r}, lit from ({@code lightX}, {@code lightY}). */
 	static void world(GuiGraphicsExtractor graphics, int index, float cx, float cy, float r, float lightX, float lightY) {
 		if (index == ZFighterSpace.MAW) {
-			maw(graphics, cx, cy, r, System.currentTimeMillis() / 1000.0F);
+			maw(graphics, cx, cy, r, lightX, lightY, System.currentTimeMillis() / 1000.0F);
 			return;
 		}
 		Look look = look(index);
@@ -114,22 +115,105 @@ final class ZFighterSpaceArt {
 		disc(graphics, cx - r * 0.2F, cy - r * 0.2F, r * 0.55F, 0xFFFFF0A0);
 	}
 
-	/** The Maw: a black disc in a turning ring of fire. */
-	static void maw(GuiGraphicsExtractor graphics, float cx, float cy, float r, float time) {
-		disc(graphics, cx, cy, r * 1.5F, 0x20FF7020);
-		int dots = Math.max(24, Math.round(r * 6.0F));
-		for (int k = 0; k < dots; k++) {
-			double a = Math.PI * 2.0 * k / dots + time * 0.8;
-			float rr = r * (1.25F + 0.25F * (float)Math.sin(k * 1.7 + time * 2.0));
-			// a tilted ring: squashed top to bottom
-			float x = cx + (float)Math.cos(a) * rr * 1.6F;
-			float y = cy + (float)Math.sin(a) * rr * 0.45F;
-			int size = Math.max(1, Math.round(r / 10.0F));
-			int colour = k % 3 == 0 ? 0xFFFFE070 : k % 3 == 1 ? 0xFFFF9030 : 0xFFE04818;
-			graphics.fill(Math.round(x), Math.round(y), Math.round(x) + size, Math.round(y) + size, colour);
+	/** Where the Maw's pieces split (angles from its middle, radians), and the one piece that is gone (index into the gaps between them). */
+	private static final float[] MAW_CRACKS = {0.35F, 1.45F, 2.55F, 3.95F, 5.15F};
+	private static final int MAW_TORN = 2;
+	/** How far its pieces have drifted from the middle (share of its radius), and how far they sway (pixels): almost static. */
+	private static final float MAW_DRIFT = 0.05F, MAW_SWAY = 0.6F;
+
+	/**
+	 * The Maw: a world in pieces that have drifted apart round its smouldering heart, the rock along every crack fused orange, one
+	 * piece gone with its rubble flung out on that side, and a slow ring of rubble round it all, lit from ({@code lightX}, {@code lightY}).
+	 */
+	static void maw(GuiGraphicsExtractor graphics, float cx, float cy, float r, float lightX, float lightY, float time) {
+		mawRubble(graphics, cx, cy, r, time, true);
+		disc(graphics, cx, cy, r * 0.36F, 0x40FF6A1A);
+		disc(graphics, cx, cy, r * 0.26F, 0xFFE0501A);
+		disc(graphics, cx, cy, r * 0.13F, 0xFFFFC870);
+		int cells = Math.max(5, Math.min(CELLS, Math.round(r * 2.0F)));
+		float cell = r * 2.0F / cells;
+		float lx = lightX - cx, ly = lightY - cy;
+		float ll = (float)Math.sqrt(lx * lx + ly * ly);
+		if (ll > 0.001F) {
+			lx /= ll;
+			ly /= ll;
 		}
-		disc(graphics, cx, cy, r, 0xFF000000);
-		ring(graphics, cx, cy, r, 0xFFFFB040, Math.max(1, Math.round(r / 8.0F)));
+		float glass = 1.1F / cells;
+		for (int i = 0; i < cells; i++) {
+			for (int j = 0; j < cells; j++) {
+				float px = (i + 0.5F) / cells * 2.0F - 1.0F;
+				float py = (j + 0.5F) / cells * 2.0F - 1.0F;
+				float d = px * px + py * py;
+				if (d > 1.0F || d < 0.1F) {
+					continue;
+				}
+				float angle = (float)Math.atan2(py, px);
+				if (angle < 0.0F) {
+					angle += (float)(Math.PI * 2.0);
+				}
+				int piece = MAW_CRACKS.length - 1;
+				float nearest = Float.MAX_VALUE;
+				for (int k = 0; k < MAW_CRACKS.length; k++) {
+					if (angle >= MAW_CRACKS[k] && (k + 1 == MAW_CRACKS.length || angle < MAW_CRACKS[k + 1])) {
+						piece = k;
+					}
+					float off = Math.abs(angle - MAW_CRACKS[k]);
+					off = Math.min(off, (float)(Math.PI * 2.0) - off);
+					nearest = Math.min(nearest, off * (float)Math.sqrt(d));
+				}
+				if (piece == MAW_TORN) {
+					continue;
+				}
+				int h = hash(i, j, 4021);
+				int colour = nearest < glass ? (h % 2 == 0 ? 0xFFFF9A2A : 0xFFFFD050)
+					: d > 0.72F ? (h % 5 == 0 ? 0xFF4E4036 : 0xFF6B5A4A) : d > 0.4F ? 0xFF55504C : d > 0.2F ? 0xFF3A3532 : h % 4 == 0 ? 0xFFB0401A : 0xFF4A2A1E;
+				float light = px * lx + py * ly;
+				if (nearest >= glass) {
+					if (light < -0.25F) {
+						colour = blend(colour, 0xFF120E0C, 0.75F);
+					} else if (light < 0.05F) {
+						colour = blend(colour, 0xFF120E0C, 0.4F);
+					}
+				}
+				float[] shift = mawDrift(piece, r, time);
+				float x0 = cx - r + i * cell + shift[0], y0 = cy - r + j * cell + shift[1];
+				int ix = Math.round(x0), iy = Math.round(y0);
+				graphics.fill(ix, iy, Math.max(ix + 1, Math.round(x0 + cell)), Math.max(iy + 1, Math.round(y0 + cell)), colour);
+			}
+		}
+		// the piece that is gone, in rubble flung out on its side
+		float mid = (MAW_CRACKS[MAW_TORN] + MAW_CRACKS[MAW_TORN + 1]) * 0.5F;
+		for (int k = 0; k < 9; k++) {
+			float a = mid + ((hash(k, 1, 4022) % 100) / 100.0F - 0.5F) * 0.9F;
+			float out = r * (1.1F + (hash(k, 2, 4022) % 70) / 100.0F) + (float)Math.sin(time * 0.3F + k) * MAW_SWAY;
+			int size = Math.max(1, Math.round(cell * (k % 3 == 0 ? 1.5F : 1.0F)));
+			int x = Math.round(cx + (float)Math.cos(a) * out), y = Math.round(cy + (float)Math.sin(a) * out);
+			graphics.fill(x, y, x + size, y + size, k % 4 == 0 ? 0xFFFF9A2A : 0xFF55504C);
+		}
+		mawRubble(graphics, cx, cy, r, time, false);
+	}
+
+	/** How far piece {@code piece} of the Maw has drifted from its middle (x, y pixels), swaying a little. */
+	private static float[] mawDrift(int piece, float r, float time) {
+		float mid = (MAW_CRACKS[piece] + (piece + 1 < MAW_CRACKS.length ? MAW_CRACKS[piece + 1] : MAW_CRACKS[0] + (float)(Math.PI * 2.0))) * 0.5F;
+		float out = r * MAW_DRIFT * (piece % 2 == 0 ? 1.0F : 1.5F) + (float)Math.sin(time * 0.4F + piece * 1.7F) * MAW_SWAY;
+		return new float[] {(float)Math.cos(mid) * out, (float)Math.sin(mid) * out};
+	}
+
+	/** The slow tilted ring of rubble round the Maw: its far half ({@code back}, drawn behind) or its near half. */
+	private static void mawRubble(GuiGraphicsExtractor graphics, float cx, float cy, float r, float time, boolean back) {
+		int count = Math.max(14, Math.round(r * 2.5F));
+		int size = Math.max(1, Math.round(r / 10.0F));
+		for (int k = 0; k < count; k++) {
+			double a = Math.PI * 2.0 * k / count + time * 0.05 + (hash(k, 3, 4023) % 100) / 400.0;
+			if ((Math.sin(a) < 0.0) != back) {
+				continue;
+			}
+			float rr = r * (1.3F + (hash(k, 4, 4023) % 40) / 100.0F);
+			int x = Math.round(cx + (float)Math.cos(a) * rr * 1.25F), y = Math.round(cy + (float)Math.sin(a) * rr * 0.4F);
+			int shade = hash(k, 5, 4023) % 3;
+			graphics.fill(x, y, x + size, y + size, shade == 0 ? 0xFF6B5A4A : shade == 1 ? 0xFF55504C : 0xFF3A3532);
+		}
 	}
 
 	/** A filled disc in one colour (rows of fills). */

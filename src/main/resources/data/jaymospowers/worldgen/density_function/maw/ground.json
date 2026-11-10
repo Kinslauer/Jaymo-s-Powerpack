@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:add",
+  "left": {
+    "type": "minecraft:mul",
+    "left": {
+      "type": "minecraft:sub",
+      "left": {
+        "type": "minecraft:add",
+        "left": 76.0,
+        "right": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:noise",
+            "noise": "jaymospowers:maw/rolling",
+            "xz_scale": 1.0,
+            "y_scale": 0.0
+          },
+          "right": 18.0
+        }
+      },
+      "right": "minecraft:y"
+    },
+    "right": 0.08
+  },
+  "right": {
+    "type": "minecraft:mul",
+    "left": {
+      "type": "minecraft:noise",
+      "noise": "jaymospowers:maw/rough",
+      "xz_scale": 1.0,
+      "y_scale": 1.0
+    },
+    "right": 0.25
+  }
+}
