@@ -8,6 +8,7 @@
 		"ChronoLivingEntityRendererMixin",
 		"ChronoModelFeatureRendererMixin",
 		"ChronoStunInputMixin",
+		"FutureHuskRendererMixin",
 		"FutureZombieRendererMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

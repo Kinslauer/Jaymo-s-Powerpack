@@ -3,7 +3,6 @@ package com.jaymoskingdoms.client.beasts;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.beasts.Beasts;
 import com.jaymoskingdoms.beasts.Minotaur;
-import com.jaymoskingdoms.beasts.SkulkGolem;
 import com.jaymoskingdoms.client.bb.BbModel;
 import com.jaymoskingdoms.client.inhabitants.InhabitantRenderer;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,8 +11,9 @@ import net.minecraft.util.Mth;
 
 /**
  * (0.7.329) How the second batch of Blockbench Workshop creatures ({@link Beasts}) are drawn: each by its own model and
- * animations ({@link BbMobRenderer}), scaled to its box (the minotaur and the skulk golem by GeckoLib). The redstone
- * golem's model has only an idle and a walk, so its pound and eruption are posed here.
+ * animations ({@link BbMobRenderer}), scaled to its box. The skulk golem has no idle: awake it stands in its rest pose,
+ * and as a statue it holds its "estatue" move. The redstone golem's model has only an idle and a walk, so its pound
+ * and eruption are posed here.
  */
 public final class BeastsClient {
 	/** The redstone golem's moves (as the server's RedstoneGolem): the tick its fists come down. */
@@ -37,13 +37,7 @@ public final class BeastsClient {
 		look(Beasts.REDSTONE_GOLEM, new BbMobRenderer.Look("redstone_golem", 0.94F, 1.5F, "redstone_golem_idle_animation_1",
 			"redstone_golem_walk_animation_1", null, null, 0.4F, 1.0F, "redstone_golem_head")
 			.withGlow(JaymosKingdoms.id("textures/entity/bb/redstone_golem_1.png")).withExtra(BeastsClient::golemArms));
-		// the skulk golem topples forward in its own death animation, so it doesn't also fall over sideways
-		EntityRenderers.register(Beasts.SKULK_GOLEM, context -> new InhabitantRenderer<SkulkGolem>(context, "skulk_golem", 1.0F, 0.9F, "head") {
-			@Override
-			protected float getDeathMaxRotation(com.geckolib.renderer.base.GeoRenderState state) {
-				return 0.0F;
-			}
-		});
+		look(Beasts.SKULK_GOLEM, new BbMobRenderer.Look("skulk_golem", 1.0F, 0.9F, "none", "walk", null, null, 0.4F, 1.0F, "head"));
 		look(Beasts.WILD_BOAR, new BbMobRenderer.Look("wild_boar", 0.9F, 0.6F, "idle", "walk", "run", "death", 0.4F, 0.6F, "h_head"));
 		// (0.7.339) the third batch: the haunted stand has no walk (it glides) and no idle (it stands dead still)
 		look(Beasts.GORGON, new BbMobRenderer.Look("gorgon", 0.8F, 0.6F, "rest", "running", null, null, 0.45F, 1.0F, "head"));

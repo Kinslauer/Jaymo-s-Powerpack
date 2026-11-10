@@ -102,6 +102,17 @@ public final class GrueTrial {
 	static final int SHADES = 3, SHADE_EVERY = 400, SHADE_LIFE = 600, DARK_EVERY = 300, DARK_TICKS = 80;
 	/** Phase three (below a third): a blink this often; the spirit holds it this often, for this long (ticks). */
 	static final int BLINK_EVERY = 120, SPIRIT_EVERY = 200, SPIRIT_HOLD = 60;
+	/**
+	 * The spirit's own fight (Andy, 2026-11-10: "your spirit should detach from the fight so that you can attack the mobs the
+	 * grue spawns and watch their animated battle ... but you are now unable to directly use your spirit in the fight"): in the
+	 * trial the spirit leaves its keeper and duels the Grue on its own, each in its own way (the client draws it), landing a blow
+	 * every {@link #DUEL_EVERY} ticks for {@link #DUEL_DAMAGE} (by kind: Grimsby, Varro, Ambrose, Thessaly, the Quiet One;
+	 * grown with its level). It never takes the Grue past the finale: the barrage is still theirs to win. While the spirit holds
+	 * it, the Grue doesn't strike the keeper up close (it still grasps from afar), and the keeper fights its shades, called from
+	 * the start.
+	 */
+	static final int[] DUEL_EVERY = {18, 40, 32, 22, 24};
+	static final float[] DUEL_DAMAGE = {4.0F, 9.0F, 6.0F, 4.5F, 5.0F};
 	/** Hold left after a trial cut short (it comes back for them at {@link Grue#TAKEN}). */
 	static final float RETRY_HOLD = 95.0F;
 	/** Health they're left with when they fall in it (they don't die there: the Grue wants the body). */
@@ -147,7 +158,7 @@ public final class GrueTrial {
 		boolean inside;
 		@Nullable UUID boss;
 		@Nullable ServerBossEvent bar;
-		long nextStrike, nextGrasp, nextShades, nextDark, nextBlink, nextSpirit;
+		long nextStrike, nextGrasp, nextShades, nextDark, nextBlink, nextSpirit, nextDuel;
 		/** The finale barrage: {@link #FINALE_NONE} not yet, running, won, or it couldn't start (then it just dies). */
 		int finale;
 		int draws;
@@ -377,6 +388,7 @@ public final class GrueTrial {
 		trial.nextDark = now + DARK_EVERY / 2;
 		trial.nextBlink = now + BLINK_EVERY;
 		trial.nextSpirit = now + SPIRIT_EVERY;
+		trial.nextDuel = now + RISE_TICKS;
 		ServerBossEvent bar = new ServerBossEvent(UUID.randomUUID(), boss.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
 		bar.setDarkenScreen(true);
 		bar.addPlayer(player);
@@ -402,7 +414,11 @@ public final class GrueTrial {
 		}
 		boolean held = boss.hasEffect(MobEffects.SLOWNESS) && boss.getEffect(MobEffects.SLOWNESS).getAmplifier() >= 4;
 		double d = boss.distanceTo(player);
-		if (!held && d <= STRIKE_REACH && now >= trial.nextStrike) {
+		SpiritState dueller = Spirits.state(player);
+		if (dueller != null) {
+			duel(player, level, trial, boss, dueller, now);
+		}
+		if (!held && dueller == null && d <= STRIKE_REACH && now >= trial.nextStrike) {
 			trial.nextStrike = now + STRIKE_EVERY;
 			player.hurtServer(level, level.damageSources().indirectMagic(boss, boss), STRIKE_HURT);
 			player.knockback(1.0, boss.getX() - player.getX(), boss.getZ() - player.getZ(), level.damageSources().indirectMagic(boss, boss), STRIKE_HURT);
@@ -417,11 +433,12 @@ public final class GrueTrial {
 			line(level, boss.getEyePosition(), player.getBoundingBox().getCenter());
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_CLICKING, SoundSource.HOSTILE, 1.2F, 0.5F);
 		}
+		// (its shades from the start: they are the keeper's to fight while the spirit holds the Grue)
+		if (now >= trial.nextShades) {
+			trial.nextShades = now + SHADE_EVERY;
+			shades(level, boss, player);
+		}
 		if (share < 2.0F / 3.0F) {
-			if (now >= trial.nextShades) {
-				trial.nextShades = now + SHADE_EVERY;
-				shades(level, boss, player);
-			}
 			if (now >= trial.nextDark) {
 				trial.nextDark = now + DARK_EVERY;
 				player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, DARK_TICKS, 0, false, false));
@@ -458,6 +475,24 @@ public final class GrueTrial {
 				}
 			}
 		}
+	}
+
+	/** The spirit's blow on the Grue in their duel, never past the finale's share. */
+	private static void duel(ServerPlayer player, ServerLevel level, Trial trial, Evoker boss, SpiritState spirit, long now) {
+		if (now < trial.nextDuel) {
+			return;
+		}
+		int kind = Math.clamp(spirit.kind(), 0, DUEL_EVERY.length - 1);
+		trial.nextDuel = now + DUEL_EVERY[kind];
+		float most = boss.getHealth() - boss.getMaxHealth() * FINALE_AT - 0.5F;
+		float hurt = Math.min(DUEL_DAMAGE[kind] * Spirits.damageScale(spirit), most);
+		if (hurt <= 0.0F) {
+			return;
+		}
+		boss.hurtServer(level, level.damageSources().indirectMagic(player, player), hurt);
+		int color = Spirits.of(spirit.kind()).color() & 0xFFFFFF;
+		level.sendParticles(new DustParticleOptions(color, 1.4F), boss.getX(), boss.getY() + 1.4, boss.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
+		level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.9F + 0.1F * kind);
 	}
 
 	private static void shades(ServerLevel level, Evoker boss, ServerPlayer player) {

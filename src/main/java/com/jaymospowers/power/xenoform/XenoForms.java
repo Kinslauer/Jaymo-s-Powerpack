@@ -75,6 +75,8 @@ public final class XenoForms {
 	public static final XenoForm BILLOW = register(new com.jaymospowers.power.xenoform.forms.Billow());
 	// (0.18.119, Scan G)
 	public static final XenoForm TOWERBACK = register(new com.jaymospowers.power.xenoform.forms.Towerback());
+	/** Asterion, the bull-headed brute (from Kingdoms' minotaur). */
+	public static final XenoForm ASTERION = register(new com.jaymospowers.power.xenoform.forms.Asterion());
 	/** (0.18.96) The stalker's own shape, scanned from its shed skin ({@link XenoStalker}); hidden, but kept once found. */
 	public static final XenoForm LURK = register(new com.jaymospowers.power.xenoform.forms.Lurk());
 	/** (0.18.103, patch 5) Dud, the one that can't be hurt: never scanned, only a corrupted band's glitch teaches it; hidden. */

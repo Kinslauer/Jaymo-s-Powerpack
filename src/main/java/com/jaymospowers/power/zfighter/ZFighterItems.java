@@ -60,7 +60,8 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
  * <li><b>Hermit Beans</b>: a slow, rare crop (seeds turn up in jungle temple chests). One bean heals you fully, fills your
  * stomach and a Z Fighter's ki, and clears what ails you. Anyone can eat one.</li>
  * <li><b>Training Weights</b>, worn on the feet (ankle weights and wristbands): slower, lower jumps; a Z Fighter
- * wearing them trains faster ({@link #LIGHT_RATE}, heavy {@link #HEAVY_RATE}).</li>
+ * wearing them trains faster ({@link #LIGHT_RATE}, heavy {@link #HEAVY_RATE}). Either pair turns anyone's Meditate key into
+ * shadowboxing, which builds Might in Jaymo's Kingdoms ({@code core.Training#weightsMight}).</li>
  * <li>The <b>Sparring Dummy</b> ({@link ZFighterSparring}) and the <b>Training Post</b>, whose drills are played on the
  * client and paid for by {@link ZFighterDrills}.</li>
  * </ul>
@@ -72,7 +73,7 @@ public final class ZFighterItems {
 	static final float BEAN_TEMPLE_CHANCE = 0.12F;
 	static final int BEAN_COOLDOWN_SECONDS = 5;
 
-	static final float LIGHT_RATE = 1.5F;
+	public static final float LIGHT_RATE = 1.5F;
 	static final float HEAVY_RATE = 2.0F;
 	static final double LIGHT_SLOW = -0.12;
 	static final double HEAVY_SLOW = -0.25;
@@ -157,8 +158,14 @@ public final class ZFighterItems {
 			.attributes(modifiers)));
 	}
 
+	/** Whether {@code player} wears either pair of Training Weights. */
+	public static boolean wearsWeights(Player player) {
+		ItemStack feet = player.getItemBySlot(EquipmentSlot.FEET);
+		return feet.is(TRAINING_WEIGHTS) || feet.is(HEAVY_TRAINING_WEIGHTS);
+	}
+
 	/** How much faster {@code player} trains for what's on his feet (1 with no weights). */
-	static float weightRate(Player player) {
+	public static float weightRate(Player player) {
 		ItemStack feet = player.getItemBySlot(EquipmentSlot.FEET);
 		// (0.19.29) a Weighted Gi on top stacks with what's on the feet
 		float gi = com.jaymospowers.core.Training.giRate(player);

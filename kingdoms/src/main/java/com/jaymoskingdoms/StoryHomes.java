@@ -76,8 +76,9 @@ public final class StoryHomes {
 		return haven.isEmpty() && f.type() == FactionType.VILLAGE && !Purists.outsider(Emigrants.ruler(server, f), player);
 	}
 
-	/** The nearest standing settlement to {@code from} that suits {@code player}'s blood, or null. */
-	static @Nullable Faction standing(MinecraftServer server, ServerPlayer player, Heritage.@Nullable Kind kind, BlockPos from) {
+	/** The nearest standing settlement to {@code from} that suits {@code player}'s blood and is {@code free} (LifeStory: nobody else's start), or null. */
+	static @Nullable Faction standing(MinecraftServer server, ServerPlayer player, Heritage.@Nullable Kind kind, BlockPos from,
+		java.util.function.Predicate<Faction> free) {
 		Faction best = null;
 		double bestDist = STANDING_RANGE * STANDING_RANGE;
 		for (Faction f : Factions.all(server)) {
@@ -85,7 +86,7 @@ public final class StoryHomes {
 				continue;
 			}
 			double d = f.seat().distSqr(from);
-			if (d < bestDist && suits(server, f, kind, player)) {
+			if (d < bestDist && suits(server, f, kind, player) && free.test(f)) {
 				best = f;
 				bestDist = d;
 			}

@@ -81,8 +81,8 @@ import org.jspecify.annotations.Nullable;
  * where the Lookout floats over it, with a compass the village keyed to the gate back ({@link ZFighterSites#verdantGate}).</li>
  * <li><b>Escaped the Iron-Master's mines</b> ({@code rustfall}): you break out at a mine mouth under Rustfall's weight, the
  * Iron-Master's overseers ({@link #HUNTED}) hunt you for a day, and the way home is the pod on their pad.</li>
- * <li><b>Salvager at the Maw</b> ({@code maw}): your crew is gone into the black hole; you wake on the Maw's pad by a working
- * pod, with deck plates to reach the wrecks.</li>
+ * <li><b>Salvager at the Maw</b> ({@code maw}): the pull has taken your crew; you wake on the Maw's pad by a working pod, with
+ * deck plates to reach the wrecks.</li>
  * <li><b>Raised by a demon master</b> ({@code demon}): you leave a demon village's hall in the Nether's demon biomes, its army
  * leaving you be ({@link #WARD}) till you first leave the Nether, with an old portal close by.</li>
  * <li><b>Back from the afterlife</b> ({@code afterlife}): you wake among the dead in the Other World
@@ -116,6 +116,13 @@ public final class ZFighterStarts {
 	static final int DEMON_SEARCH = 4096, DEMON_STEP = 32, DEMON_CELLS = 3, PORTAL_MIN = 14, PORTAL_MAX = 24;
 	/** Spots tried for the portal. */
 	static final int PORTAL_TRIES = 16;
+	/**
+	 * (Tiv: every player's start their own) A Verdant village someone else started in is looked past this many times, each
+	 * from this much further off (blocks); a demon hall someone else started in, for a new one this far off (blocks, each try).
+	 */
+	static final int FREE_TRIES = 3, FREE_STEP = 480, DEMON_FREE_STEP = 160;
+	/** (Tiv) A Maw salvager whose pad is taken gets a deck of their own on a ring this far round the hole (blocks: past the wrecks, inside its pull), one of this many. */
+	static final int MAW_DECK_RADIUS = 70, MAW_DECKS = 10;
 
 	static final String OVERSEER_TAG = "jaymospowers_overseer";
 
@@ -163,16 +170,25 @@ public final class ZFighterStarts {
 	 * way home). False if the start's world isn't there or no place could be found (Kingdoms falls back to the wild).
 	 */
 	public static boolean land(ServerPlayer player, String start, BlockPos back) {
+		return land(player, start, back, (level, at) -> true);
+	}
+
+	/**
+	 * The same, (Tiv: "Every player should have their own start") only where {@code free} says a place on a level is nobody
+	 * else's start (Kingdoms keeps the starts): a crash site, a mine mouth, a Verdant village, a demon hall, a deck in the Maw,
+	 * a spot among the dead. With none free, the next thing that is, else what it always was.
+	 */
+	public static boolean land(ServerPlayer player, String start, BlockPos back, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		MinecraftServer server = player.level().getServer();
 		RandomSource random = player.getRandom();
 		try {
 			return switch (start.toLowerCase(Locale.ROOT)) {
-				case "moon" -> moon(server, player, random);
-				case "verdant" -> verdant(server, player, random);
-				case "rustfall" -> rustfall(server, player, random);
-				case "maw" -> maw(server, player);
-				case "demon" -> demon(server, player, random);
-				case "afterlife" -> ZFighterAfterlife.strand(player, server.overworld(), back);
+				case "moon" -> moon(server, player, random, free);
+				case "verdant" -> verdant(server, player, random, free);
+				case "rustfall" -> rustfall(server, player, random, free);
+				case "maw" -> maw(server, player, free);
+				case "demon" -> demon(server, player, random, free);
+				case "afterlife" -> ZFighterAfterlife.strand(player, server.overworld(), back, free);
 				default -> false;
 			};
 		} catch (RuntimeException e) {
@@ -212,11 +228,20 @@ public final class ZFighterStarts {
 
 	/** Open ground {@code min}-{@code max} blocks from {@code centre}, flat enough for a pad if it can be; null if none. */
 	private static @Nullable BlockPos spotNear(ServerLevel level, BlockPos centre, int min, int max, RandomSource random, boolean flat) {
+		return spotNear(level, centre, min, max, random, flat, (l, at) -> true);
+	}
+
+	/** The same, only where {@code free} (a column: its y unused); tested before the ground there is made. */
+	private static @Nullable BlockPos spotNear(ServerLevel level, BlockPos centre, int min, int max, RandomSource random, boolean flat,
+		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		BlockPos rough = null;
 		for (int i = 0; i < SPOT_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
 			int x = centre.getX() + Mth.floor(Math.cos(angle) * d), z = centre.getZ() + Mth.floor(Math.sin(angle) * d);
+			if (!free.test(level, new BlockPos(x, 0, z))) {
+				continue;
+			}
 			BlockPos feet = open(level, x, z);
 			if (feet == null) {
 				continue;
@@ -233,12 +258,16 @@ public final class ZFighterStarts {
 
 	// ---------------------------------------------------------------- the Pale Moon
 
-	private static boolean moon(MinecraftServer server, ServerPlayer player, RandomSource random) {
+	private static boolean moon(MinecraftServer server, ServerPlayer player, RandomSource random, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		ServerLevel moon = server.getLevel(ZFighterSpace.DESTS[ZFighterSpace.MOON].level());
 		if (moon == null) {
 			return false;
 		}
-		BlockPos spot = spotNear(moon, BlockPos.ZERO, WRECK_MIN, WRECK_MAX, random, true);
+		// (Tiv) a crash site nobody else woke at, further out if the ring is full
+		BlockPos spot = spotNear(moon, BlockPos.ZERO, WRECK_MIN, WRECK_MAX, random, true, free);
+		if (spot == null) {
+			spot = spotNear(moon, BlockPos.ZERO, WRECK_MAX, WRECK_MAX * 2, random, true, free);
+		}
 		if (spot == null) {
 			return false;
 		}
@@ -358,18 +387,38 @@ public final class ZFighterStarts {
 
 	// ---------------------------------------------------------------- the Verdant World
 
-	private static boolean verdant(MinecraftServer server, ServerPlayer player, RandomSource random) {
+	private static boolean verdant(MinecraftServer server, ServerPlayer player, RandomSource random, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		ServerLevel verdant = server.getLevel(ZFighterSites.VERDANT_WORLD);
 		if (verdant == null) {
 			return false;
 		}
 		BlockPos tower = ZFighterSites.data(server).tower().orElseThrow();
 		BlockPos below = new BlockPos(tower.getX(), verdant.getSeaLevel(), tower.getZ());
-		BlockPos village = verdant.findNearestMapStructure(StructureTags.VILLAGE, below, VILLAGE_SEARCH, false);
-		BlockPos home = village == null ? below : village;
-		BlockPos feet = spotNear(verdant, home, 0, VILLAGE_NEAR, random, false);
+		// (Tiv) the village nearest the Lookout that nobody else was raised in, looked past a few taken ones (each search from
+		// further off); with none free, a plain spot of their own further out from the first
+		BlockPos village = null, first = null, from = below;
+		for (int i = 0; i <= FREE_TRIES; i++) {
+			BlockPos found = verdant.findNearestMapStructure(StructureTags.VILLAGE, from, VILLAGE_SEARCH, false);
+			if (found == null) {
+				break;
+			}
+			if (first == null) {
+				first = found;
+			}
+			if (free.test(verdant, found)) {
+				village = found;
+				break;
+			}
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			from = below.offset(Mth.floor(Math.cos(angle) * FREE_STEP * (i + 1)), 0, Mth.floor(Math.sin(angle) * FREE_STEP * (i + 1)));
+		}
+		BlockPos home = village != null ? village : first != null ? first : below;
+		BlockPos feet = spotNear(verdant, home, 0, VILLAGE_NEAR, random, false, free);
 		if (feet == null) {
-			feet = spotNear(verdant, home, VILLAGE_NEAR, VILLAGE_NEAR * 4, random, false);
+			feet = spotNear(verdant, home, VILLAGE_NEAR, VILLAGE_NEAR * 4, random, false, free);
+		}
+		if (feet == null) {
+			feet = spotNear(verdant, home, VILLAGE_NEAR * 4, VILLAGE_NEAR * 16, random, false, free);
 		}
 		if (feet == null) {
 			return false;
@@ -393,14 +442,18 @@ public final class ZFighterStarts {
 
 	// ---------------------------------------------------------------- Rustfall
 
-	private static boolean rustfall(MinecraftServer server, ServerPlayer player, RandomSource random) {
+	private static boolean rustfall(MinecraftServer server, ServerPlayer player, RandomSource random, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		ZFighterSpace.Dest dest = ZFighterSpace.DESTS[ZFighterSpace.RUSTFALL];
 		ServerLevel rustfall = server.getLevel(dest.level());
 		if (rustfall == null) {
 			return false;
 		}
 		BlockPos pad = ZFighterSpace.pad(rustfall, dest);
-		BlockPos feet = spotNear(rustfall, pad, MINE_MIN, MINE_MAX, random, false);
+		// (Tiv) a mine mouth nobody else escaped from, further out if the ring is full
+		BlockPos feet = spotNear(rustfall, pad, MINE_MIN, MINE_MAX, random, false, free);
+		if (feet == null) {
+			feet = spotNear(rustfall, pad, MINE_MAX, MINE_MAX * 2, random, false, free);
+		}
 		if (feet == null) {
 			return false;
 		}
@@ -505,14 +558,28 @@ public final class ZFighterStarts {
 
 	// ---------------------------------------------------------------- the Maw
 
-	private static boolean maw(MinecraftServer server, ServerPlayer player) {
+	private static boolean maw(MinecraftServer server, ServerPlayer player, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		ZFighterSpace.Dest dest = ZFighterSpace.DESTS[ZFighterSpace.MAW];
 		ServerLevel maw = server.getLevel(dest.level());
 		if (maw == null) {
 			return false;
 		}
 		BlockPos pad = ZFighterSpace.pad(maw, dest);
-		put(player, maw, pad.offset(0, 0, 2));
+		BlockPos deck = pad;
+		if (!free.test(maw, pad)) {
+			// (Tiv) the pad is someone else's start: a deck of their own (a pad and its pod) on a ring round the hole, from the
+			// pad's side on round; with every one taken, the pad after all
+			for (int i = 1; i <= MAW_DECKS; i++) {
+				double angle = Math.atan2(pad.getZ(), pad.getX()) + Math.PI * 2.0 * i / (MAW_DECKS + 1);
+				BlockPos at = new BlockPos(Mth.floor(Math.cos(angle) * MAW_DECK_RADIUS), pad.getY(), Mth.floor(Math.sin(angle) * MAW_DECK_RADIUS));
+				if (free.test(maw, at)) {
+					ZFighterSpace.deck(maw, dest, at);
+					deck = at;
+					break;
+				}
+			}
+		}
+		put(player, maw, deck.offset(0, 0, 2));
 		give(player, new ItemStack(Items.POLISHED_BLACKSTONE_BRICKS, DECK_PLATES));
 		give(player, new ItemStack(Items.LANTERN));
 		return true;
@@ -520,7 +587,7 @@ public final class ZFighterStarts {
 
 	// ---------------------------------------------------------------- the demon realm
 
-	private static boolean demon(MinecraftServer server, ServerPlayer player, RandomSource random) {
+	private static boolean demon(MinecraftServer server, ServerPlayer player, RandomSource random, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		ServerLevel nether = Stacked.level(server, Level.NETHER);
 		if (nether == null) {
 			JaymosPowers.LOGGER.warn("Demon master start for {}: no Nether level", player.getGameProfile().name());
@@ -539,14 +606,21 @@ public final class ZFighterStarts {
 			gloam = demonBiome(nether, from, b -> ZFighterDemonRealm.BIOMES.stream().anyMatch(b::is));
 		}
 		BlockPos near = gloam != null ? gloam : from;
-		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false);
+		// (Tiv) a hall nobody else was raised in: one someone else's is passed over for the next, or a new one raised
+		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false, free);
 		if (village == null) {
 			// (0.21.3) Andy's singleplayer log: a demon biome was found, but no village spot near it had a floor, and the wider
 			// searches that followed generated chunk after chunk for minutes while he waited. Now the hall goes up right
 			// where the biome was found (or under spawn without one), carved out of the rock if there's no floor there.
 			JaymosPowers.LOGGER.warn("Demon master start for {}: {} near {} (stacked: {}); raising the hall right there",
 				player.getGameProfile().name(), gloam == null ? "no demon biome" : "no village spot", near, stacked);
-			village = ZFighterDemonRealm.raiseAt(nether, near.getX(), near.getZ());
+			BlockPos at = near;
+			for (int i = 1; i <= FREE_TRIES && !free.test(nether, at); i++) {
+				// (Tiv) not on top of a hall someone else started in: a little further off each try
+				double angle = random.nextDouble() * Math.PI * 2.0;
+				at = near.offset(Mth.floor(Math.cos(angle) * DEMON_FREE_STEP * i), 0, Mth.floor(Math.sin(angle) * DEMON_FREE_STEP * i));
+			}
+			village = ZFighterDemonRealm.raiseAt(nether, at.getX(), at.getZ());
 		}
 		JaymosPowers.LOGGER.info("Demon master start for {}: the hall at {}", player.getGameProfile().name(), village);
 		// before the master's door, the fire at your back

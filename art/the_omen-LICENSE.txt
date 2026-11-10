@@ -1,0 +1,5 @@
+"The Omen Red" and "The Omen Blue" (Blockbench Workshop, https://blockbenchworkshop.com) are licensed under the
+Creative Commons Attribution 4.0 International licence (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/legalcode
+
+You are free to share and adapt them for any purpose, provided you give appropriate credit, link to the licence, and
+indicate if changes were made. Changes made here are listed in the_omen-CREDITS.md.

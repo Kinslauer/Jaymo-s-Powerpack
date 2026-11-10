@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.astronomy;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.astronomy.SunMoon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
@@ -106,7 +107,7 @@ public final class SkyClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		ClientLevel level = minecraft.level;
 		LocalPlayer player = minecraft.player;
-		if (level == null || player == null || level.dimension() != Level.OVERWORLD) {
+		if (level == null || player == null || level.dimension() != Level.OVERWORLD || SunMoon.blinded(player)) {
 			return;
 		}
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
@@ -195,7 +196,7 @@ public final class SkyClient {
 		if (ticks % POLLUTION_EVERY == 0) {
 			pollution = pollution(level, player);
 		}
-		if (SkyMath.night(level, 0.0F) <= 0.0F || minecraft.gui.screen() != null) {
+		if (SkyMath.night(level, 0.0F) <= 0.0F || minecraft.gui.screen() != null || SunMoon.blinded(player)) {
 			return;
 		}
 		Discovery discovery = Discovery.getOrCreate(minecraft);

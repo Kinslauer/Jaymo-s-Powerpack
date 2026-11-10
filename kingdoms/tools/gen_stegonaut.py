@@ -1,8 +1,8 @@
 """Stegonaut's art and data (kingdoms/src/main/java/com/jaymoskingdoms/dragons/StegonautDragon), all our own design.
 Its moves are ported from Saint's Dragons by Leon Saint (MIT code); none of that mod's art, models or sounds are used
 (they are All Rights Reserved), see docs/SaintsDragons-Plan.md.
-- the body plan (GEOMETRY: every box, its parent, its pose), printed as the Java for StegonautDragonModel's
-  createBodyLayer, so the model and the texture can't drift apart;
+- the body plan (GEOMETRY: every box, its parent, its pose), which tools/gen_stegonaut_geo.py turns into the GeckoLib
+  model (kingdoms/art/stegonaut.bbmodel), so the model and the texture can't drift apart;
 - four hides (moss stone, jungle green, sandstone, slate; plates of a darker horn with pale worn rims, a pale belly,
   scale rows) picked per dragon by its DragonLook, and four glowing marking patterns (glow-lichen teal: plate rims,
   cracks, spots, a spine line; the eyes in every one);
@@ -331,34 +331,6 @@ def marks_texture(pattern):
     return img
 
 
-# ---- the Java ------------------------------------------------------------------------------------------------------
-
-def jf(v):
-    s = ('%.3f' % v).rstrip('0').rstrip('.')
-    if s in ('-0', ''):
-        s = '0'
-    return s + ('.0F' if '.' not in s else 'F')
-
-
-def java():
-    out = []
-    var = {None: 'root'}
-    for name, parent, uv, (x, y, z, w, h, d), (px, py, pz, rx, ry, rz), mirror in GEOMETRY:
-        u, v = UV[uv]
-        fn = 'mirrored' if mirror else 'box'
-        if rx or ry or rz:
-            pose = 'PartPose.offsetAndRotation(%s, %s, %s, %s, %s, %s)' % tuple(jf(a) for a in (px, py, pz, rx, ry, rz))
-        else:
-            pose = 'PartPose.offset(%s, %s, %s)' % tuple(jf(a) for a in (px, py, pz))
-        call = '%s.addOrReplaceChild("%s", %s(%d, %d, %s, %s, %s, %d, %d, %d), %s);' % (var[parent], name, fn, u, v, jf(x), jf(y), jf(z),
-                                                                                        int(math.ceil(w)), int(math.ceil(h)), int(math.ceil(d)), pose)
-        if any(p[1] == name for p in GEOMETRY):
-            var[name] = name.replace('_', '')
-            call = 'PartDefinition %s = %s' % (var[name], call)
-        out.append('\t\t' + call)
-    return '\n'.join(out)
-
-
 # ---- the preview ---------------------------------------------------------------------------------------------------
 
 def rotm(rx, ry, rz):
@@ -505,4 +477,3 @@ if __name__ == '__main__':
     out = sys.argv[1] if len(sys.argv) > 1 else 'tools/out/stegonaut-preview.png'
     os.makedirs(os.path.dirname(out) or '.', exist_ok=True)
     preview(out, hides, marks)
-    print(java())

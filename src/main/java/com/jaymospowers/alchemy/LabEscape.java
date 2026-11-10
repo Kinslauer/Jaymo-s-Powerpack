@@ -129,11 +129,23 @@ public final class LabEscape {
 	 * mark, and sets the golems to stir. False if no ground could be found (Kingdoms falls back to the wild).
 	 */
 	public static boolean start(ServerPlayer player) {
+		return start(player, (level, at) -> true);
+	}
+
+	/**
+	 * The same, (Tiv: every player's start their own) on ground {@code free} says is nobody else's start; with none in reach,
+	 * up to twice as far out.
+	 */
+	public static boolean start(ServerPlayer player, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = player.level().dimension() == Level.OVERWORLD ? player.level() : server.overworld();
 		RandomSource random = player.getRandom();
 		try {
-			BlockPos origin = WildRoom.find(level, player.level() == level ? player.blockPosition() : level.getRespawnData().pos(), SITE_MIN, SITE_MAX, W, D, H, random);
+			BlockPos near = player.level() == level ? player.blockPosition() : level.getRespawnData().pos();
+			BlockPos origin = WildRoom.find(level, near, SITE_MIN, SITE_MAX, W, D, H, random, free);
+			if (origin == null) {
+				origin = WildRoom.find(level, near, SITE_MAX, SITE_MAX * 2, W, D, H, random, free);
+			}
 			if (origin == null) {
 				return false;
 			}

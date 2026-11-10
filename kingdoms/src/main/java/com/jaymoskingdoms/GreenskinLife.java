@@ -94,13 +94,13 @@ public final class GreenskinLife {
 		return toneColor(p.getAttachedOrElse(TONE, TONE_DEFAULT));
 	}
 
-	/** The standing goblin village or orc camp nearest {@code from}, or null. */
-	static @Nullable Faction home(MinecraftServer server, BlockPos from) {
+	/** The standing goblin village or orc camp nearest {@code from} that is {@code free} (LifeStory: nobody else's start), or null. */
+	static @Nullable Faction home(MinecraftServer server, BlockPos from, java.util.function.Predicate<Faction> free) {
 		Faction best = null;
 		double bestD = Double.MAX_VALUE;
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = f.fallen() ? null : Camps.data(server, f.id());
-			if (data == null || data.clearedAt() >= 0 || Tribes.of(server, f.id()) == null) {
+			if (data == null || data.clearedAt() >= 0 || Tribes.of(server, f.id()) == null || !free.test(f)) {
 				continue;
 			}
 			double d = f.seat().distSqr(from);

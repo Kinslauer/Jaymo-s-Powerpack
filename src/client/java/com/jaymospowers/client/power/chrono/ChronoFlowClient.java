@@ -160,6 +160,11 @@ public final class ChronoFlowClient {
 		}
 	}
 
+	/** Whether Time Flow holds the view now (it puts back the one it found when it ends). */
+	public static boolean holdsView() {
+		return viewBefore != null;
+	}
+
 	private static final boolean SHOULDER_SURFING = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("shouldersurfing");
 
 	/**
