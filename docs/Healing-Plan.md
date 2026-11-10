@@ -24,7 +24,7 @@ Five herbs grow wild as small bushy plants, common enough that a new player find
 | Comfrey (knitbone) | plains, meadows, forest edges, riverbanks | knitbone poultice |
 | Yarrow | plains, meadows, savanna, hills | yarrow powder |
 | Plantain | almost every grassy biome | burn salve |
-| Wild garlic | forests, dark forests, swamps, taiga | garlic poultice |
+| Wild garlic | forests, dark forests, swamps, taiga | garlic poultice; eaten raw, drives out a parasite (Kitchen's, from foul water: three cloves clear a fresh one) |
 | Chamomile | plains, meadows, flower forests | chamomile tea |
 
 - Worldgen: scattered patches like vanilla flowers, in every temperate biome, a patch every few chunks.
