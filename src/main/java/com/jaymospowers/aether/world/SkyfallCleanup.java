@@ -55,6 +55,8 @@ public final class SkyfallCleanup {
 
 	private static final ArrayDeque<ChunkPos> QUEUE = new ArrayDeque<>();
 	private static final Set<ChunkPos> QUEUED = new HashSet<>();
+	/** Whether this server's start was logged (on or off, and the Aether band's heights). */
+	private static boolean announced;
 
 	private SkyfallCleanup() {
 	}
@@ -66,6 +68,8 @@ public final class SkyfallCleanup {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			QUEUE.clear();
 			QUEUED.clear();
+			NOTED.clear();
+			announced = false;
 		});
 	}
 
@@ -77,6 +81,12 @@ public final class SkyfallCleanup {
 
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = server.overworld();
+		if (!announced) {
+			announced = true;
+			JaymosPowers.LOGGER.info(Stacked.joined(server, WindAether.AETHER)
+				? "Skyfall cleanup on: Aether band from Y " + Stacked.minY(server, WindAether.AETHER) + " to " + Stacked.maxY(server, WindAether.AETHER)
+				: "Skyfall cleanup off: the Aether isn't a band of this world");
+		}
 		if (server.getTickCount() % SWEEP_TICKS == 0 && Stacked.joined(server, WindAether.AETHER)) {
 			for (ServerPlayer player : level.players()) {
 				ChunkPos at = player.chunkPosition();
@@ -126,6 +136,7 @@ public final class SkyfallCleanup {
 		int budget = BUDGET;
 		while (!queue.isEmpty()) {
 			if (--budget < 0) {
+				note(start, "more than " + BUDGET + " water blocks above it; left alone");
 				return;
 			}
 			BlockPos pos = queue.poll();
@@ -151,8 +162,21 @@ public final class SkyfallCleanup {
 			level.setBlock(source, stoneBeside(level, source), 3);
 			sealed++;
 		}
+		if (sealed == 0) {
+			note(start, sources.isEmpty() ? "no source found in the Aether above it" : "a heavenfall, kept (Dread reached)");
+		}
 		if (sealed > 0) {
 			JaymosPowers.LOGGER.info("Sealed {} Aether water source(s) pouring into the Overworld's sky at {}", sealed, start);
+		}
+	}
+
+	/** Columns already reported as left pouring, so a sweep doesn't log them again and again. */
+	private static final Set<BlockPos> NOTED = new HashSet<>();
+
+	/** Logs, once per column, a fall this couldn't stop and why (for Andy's logs/latest.log). */
+	private static void note(BlockPos start, String why) {
+		if (NOTED.size() < 256 && NOTED.add(start)) {
+			JaymosPowers.LOGGER.info("Skyfall at {} still pouring: {}", start, why);
 		}
 	}
 
