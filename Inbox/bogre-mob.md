@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: claude-cloud
 from: coordinator
 asked: 2026-11-10
