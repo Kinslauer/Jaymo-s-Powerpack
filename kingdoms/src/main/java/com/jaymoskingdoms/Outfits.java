@@ -70,6 +70,8 @@ public final class Outfits {
 	static final int ARMOURY_REALMS = 2;
 	/** (0.7.105) A guard's chance of fencing with a rapier from Jaymo's Powers (a lord always does), when it's there. */
 	static final float GUARD_RAPIER_CHANCE = 0.2F;
+	/** One realm in this many has iron enough to arm its folk (Andy's TFC Hardrock picks: iron is scarce). */
+	static final int IRON_REALMS = 4;
 	/** (0.5.30) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
 	static final float RAIDER_HORNS_CHANCE = 0.3F;
 
@@ -200,11 +202,42 @@ public final class Outfits {
 				}
 			}
 			fencer(folk, random);
+			if (folk.role() != Folk.KING && folk.role() != Folk.LORD && !ironRich(faction)) {
+				ironPoor(folk);
+			}
 		} catch (RuntimeException e) {
 			// a registry without one of the vanilla trims or patterns (a data pack took it out): the role's plain gear stays
 			JaymosKingdoms.LOGGER.debug("Folk outfit skipped", e);
 		}
 	}
+
+	/**
+	 * Andy's TFC Hardrock picks: "most villages will not have iron armor or tools and will be more encouraged to trade for
+	 * it". Only one realm in {@link #IRON_REALMS} sits near enough iron to arm its folk with it; the rest make do with
+	 * copper (bronze) plate and copper blades, mail and leather. Its rulers keep their iron either way.
+	 */
+	static boolean ironRich(Faction faction) {
+		return Math.floorMod(faction.id() * 0x9E3779B9L >>> 7, (long)IRON_REALMS) == 0;
+	}
+
+	/** Swaps {@code folk}'s iron plate and blades for copper ones, trims and dye kept. */
+	static void ironPoor(net.minecraft.world.entity.Mob folk) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			ItemStack worn = folk.getItemBySlot(slot);
+			Item copper = IRON_TO_COPPER.get(worn.getItem());
+			if (copper != null) {
+				folk.setItemSlot(slot, worn.transmuteCopy(copper));
+			} else if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath().startsWith("iron_")
+				&& slot == EquipmentSlot.MAINHAND) {
+				// another mod's iron weapon (a rapier, a glaive): a copper sword instead
+				folk.setItemSlot(slot, new ItemStack(Items.COPPER_SWORD));
+			}
+		}
+	}
+
+	private static final java.util.Map<Item, Item> IRON_TO_COPPER = java.util.Map.of(Items.IRON_HELMET, Items.COPPER_HELMET,
+		Items.IRON_CHESTPLATE, Items.COPPER_CHESTPLATE, Items.IRON_LEGGINGS, Items.COPPER_LEGGINGS, Items.IRON_BOOTS, Items.COPPER_BOOTS,
+		Items.IRON_SWORD, Items.COPPER_SWORD, Items.IRON_SPEAR, Items.COPPER_SPEAR, Items.IRON_AXE, Items.COPPER_AXE);
 
 	/**
 	 * (0.7.105) A realm's duellists: a lord, and now and then a guard, fence with a rapier of their sword's metal (Jaymo's

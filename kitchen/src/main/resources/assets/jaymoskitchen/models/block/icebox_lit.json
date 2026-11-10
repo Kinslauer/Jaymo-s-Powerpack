@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "jaymoskitchen:block/icebox_front_lit",
+    "side": "jaymoskitchen:block/icebox_side",
+    "top": "jaymoskitchen:block/icebox_top",
+    "bottom": "jaymoskitchen:block/icebox_top",
+    "particle": "jaymoskitchen:block/icebox_side"
+  }
+}

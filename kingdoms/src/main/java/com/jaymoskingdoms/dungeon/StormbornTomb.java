@@ -72,30 +72,35 @@ public final class StormbornTomb extends Structure {
 
 	@Override
 	protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
-		Rotation turn = Rotation.getRandom(context.random());
-		BlockPos mid = turn(new BlockPos(MID_X, 0, MID_Z), turn);
-		int ax = context.chunkPos().getMinBlockX() + 8 - mid.getX();
-		int az = context.chunkPos().getMinBlockZ() + 8 - mid.getZ();
-		BlockPos barrow = turn(new BlockPos(BARROW_X, 0, BARROW_Z), turn);
-		int bx = ax + barrow.getX(), bz = az + barrow.getZ();
-		int ground = context.chunkGenerator().getFirstFreeHeight(bx, bz, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(),
-			context.randomState());
-		int ay = ground - SINK - BARROW_Y;
-		if (ay + LOWEST < context.heightAccessor().getMinY() + FLOOR_MARGIN) {
-			return Optional.empty();
-		}
-		BlockPos anchor = new BlockPos(ax, ay, az);
-		return Optional.of(new GenerationStub(new BlockPos(bx, ground, bz), builder -> {
-			for (Part part : LAYOUT) {
-				Rotation rotation = turns(part.turns()).getRotated(turn);
-				BlockPos position = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
-				SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb/" + part.name()).toString())
-					.apply(StructureTemplatePool.Projection.RIGID);
-				BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), position, rotation);
-				builder.addPiece(new PoolElementStructurePiece(context.structureTemplateManager(), element, position, element.getGroundLevelDelta(),
-					rotation, box, LiquidSettings.IGNORE_WATERLOGGING));
-			}
-		}));
+	    Rotation turn = Rotation.getRandom(context.random());
+	    BlockPos mid = turn(new BlockPos(MID_X, 0, MID_Z), turn);
+	    int ax = context.chunkPos().getMinBlockX() + 8 - mid.getX();
+	    int az = context.chunkPos().getMinBlockZ() + 8 - mid.getZ();
+	    BlockPos barrow = turn(new BlockPos(BARROW_X, 0, BARROW_Z), turn);
+	    int bx = ax + barrow.getX(), bz = az + barrow.getZ();
+	    int ground = context.chunkGenerator().getFirstFreeHeight(bx, bz, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(),
+	        context.randomState());
+	    int ay = ground - SINK - BARROW_Y;
+	    if (ay + LOWEST < context.heightAccessor().getMinY() + FLOOR_MARGIN) {
+	        return Optional.empty();
+	    }
+	    BlockPos anchor = new BlockPos(ax, ay, az);
+	    return Optional.of(new GenerationStub(new BlockPos(bx, ground, bz), builder -> {
+	        for (Part part : LAYOUT) {
+	            Rotation rotation = turns(part.turns()).getRotated(turn);
+	            BlockPos basePos = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
+	            // Use heightmap to ensure piece sits on terrain rather than floating or leaving solid stone gaps
+	                        // Compute the ground height at the piece's position using the same method as the barrow base
+	                        BlockPos piecePos = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
+	                        int pieceGround = context.chunkGenerator().getFirstFreeHeight(piecePos.getX(), piecePos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - part.y();
+            BlockPos position = anchor.offset(turn(new BlockPos(part.x(), pieceGround, part.z()), turn));
+	            SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb_" + part.name()).toString())
+	                .apply(StructureTemplatePool.Projection.RIGID);
+	            BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), position, rotation);
+	            builder.addPiece(new PoolElementStructurePiece(context.structureTemplateManager(), element, position, element.getGroundLevelDelta(),
+	                rotation, box, LiquidSettings.IGNORE_WATERLOGGING));
+	        }
+	    }));
 	}
 
 	/** {@code pos} turned about the layout's origin the way a template turns about its own. */

@@ -275,6 +275,8 @@ public final class Senses {
 		}
 		// (0.7.513) the old patron's trial and scar: the dead at night and wild beasts see you farther
 		f *= Turning.sight(player, looker, level);
+		// (Hardrock picks) a smelly player is noticed further off, keen noses most (Stench)
+		f *= Stench.factor(player, looker);
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 

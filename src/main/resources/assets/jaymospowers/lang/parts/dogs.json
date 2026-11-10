@@ -1,0 +1,11 @@
+{
+  "dog_skill.jaymospowers.hunter": "Hunter",
+  "dog_skill.jaymospowers.tracker": "Tracker",
+  "dog_skill.jaymospowers.guard": "Guard",
+  "dog_skill.jaymospowers.pack_dog": "Pack Dog",
+  "dog_skill.jaymospowers.herder": "Herder",
+  "message.jaymospowers.dog.nothing": "It hasn't learned anything yet. Hunt, fight and walk with it.",
+  "message.jaymospowers.dog.knows": "It knows: %s",
+  "message.jaymospowers.dog.learned": "%s has learned to be a %s.",
+  "container.jaymospowers.dog_pack": "%s's Pack"
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:cheese_wheel"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskitchen:cheese_wheel",
+          "properties": {
+            "cut": "0"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2103,3 +2103,73 @@ Tiv: "Every player should have their own start, it should search for another if 
 
 - **Loose sticks**: a right click on a pile now picks up a stick whatever you're holding. Before, it did nothing while you held sticks, which after the first pickup was most of the time. A stick can't be put back on a pile (it isn't a placeable block).
 - Built; not played.
+
+## 0.21.101 (2026-11-10): Hardrock patch 2 - Thirsty Bottles (#1253)
+
+- **Thirsty Bottles** (Darkhax, all rights reserved; downloaded by id from CurseForge/Modrinth, never copied) joins
+  packMods: filling a glass bottle drinks up the water block it came from, so a lone pool runs dry and cauldrons become
+  the way to store water. Kitchen's waterskins follow the same rule.
+- `docs/Hardrock-Plan.md`: Andy's 34 TFC Hardrock picks split into 8 patches; this is patch 2.
+- Not played.
+
+## 0.21.102 (2026-11-10): Hardrock patch 3 - river currents and splashes (#1253)
+
+Andy's TFC Hardrock picks (after Dynamic Waters and Realistic Water Engine, our own code). Running water now has a
+current: swimmers, boats (ships too), dropped items and mobs drift downstream on top of the game's own push, half again
+as fast in rain and twice in a storm. Something big coming down into water (a giant, a breaching great whale, a ship)
+sends out a ring of waves that rocks boats and pushes swimmers away. Rivers still freeze in winter through the seasons.
+
+## 0.21.103 (2026-11-10): Hardrock patch 6 - dogs that learn (#1253)
+
+Andy's TFC Hardrock picks (`dogs/Dogs`): a tamed wolf learns from what it does with you.
+- **Hunter** (10 animals killed): bites 2 harder. **Tracker** (25 animals killed): follows the blood trail of a wounded
+  beast or monster to it, as wild hunters do (never people or pets).
+- **Guard** (10 monsters killed): 10 more health and 4 armour.
+- **Pack Dog** (2000 blocks walked at your side): carries a 9-slot pack, dropped if it dies.
+- **Herder** (20 minutes among farm animals): while you sneak near it, the animals round it walk to you.
+- Sneak and use your dog with an empty hand to hear what it knows, and open its pack. You're told in chat when it learns.
+- Compile-checked; not played.
+
+## 0.21.104 (2026-11-10): Hardrock patch 7 - sleeping bag and paraglider (#1253)
+
+Andy's TFC Hardrock picks (Comforts and the paraglider, our own versions). The **Sleeping Bag** (leather, wool and
+string) lies flat on the ground and sleeps, rests and skips the night like a bed, but never moves your spawn, so a
+night on the road leaves home where it is; it breaks at a touch to pack up again. The **Paraglider** (wool over sticks
+and string) opens in mid-air with right-click, like the aercloud gliders: a slow sink, sneak to dive, steer by walking,
+no fall damage. It has no time limit but costs a half-feather of stamina every second and folds when you run out.
+Heat below lifts you: lit campfires, fires, lava, magma, lit furnaces and Advanced Chimneys chimneys up to 24 blocks
+down make an updraft, and riding one costs no stamina.
+
+## 0.21.105 (2026-11-10): Hardrock patch 4 - rock and ore (#1253)
+
+Andy's TFC Hardrock picks ("make veins bigger and rarer... diamond and netherite become IMPOSSIBLY rare"; ideas only,
+our own code and art, `tools/gen_rock_and_ore.py`):
+- **Big, rare veins** (`ground/BigVeins`, `BigVeinFeature`): vanilla's iron, copper, gold, diamond and ancient debris ore
+  blobs are gone. In their place a chunk now and then holds one big wandering vein: iron about 1 chunk in 24 (90 ore),
+  copper 1 in 20 (110), gold 1 in 48 (60), our silver 1 in 40 (50). Diamond is 3 buried ore in about 1 chunk in 900,
+  ancient debris 2 in about 1 in 1200. Rarities are in `worldgen/placed_feature/big_vein_*.json`. New chunks only.
+- **Prospector's Pick**: forged at the Tool Station from a copper Prospector's Pick Head, a Tool Handle and a Tool
+  Binding. Tapped on rock it says what ore lies within 12 blocks (the commonest two): nothing, traces, or a lot.
+- **Cave-ins** (`ground/CaveIns`): mining stone under a roof shakes it 1 time in 100: dust falls for 2 s, then up to 8
+  blocks of the roof come down as cobblestone. A **Support Beam** (2 logs, makes 3; set upright or on its side) within
+  4 blocks holds the roof, even one put up while the dust falls.
+- **Wooden Pan** (stick, bowl, stick): used on gravel or sand that water touches, now and then turns up a gold or
+  copper nugget, rarely iron, or flint; the bank washes away in time. **Sluice** (5 wooden slabs, a trough): load it with
+  up to 8 gravel or sand beside running water and it washes them by itself, a little better than a pan.
+- JEI info pages for all four.
+- Compile-checked; not played.
+
+## 0.21.106 (2026-11-10): Hardrock patch 7 - how bad you smell (#1253)
+
+Andy's TFC Hardrock picks ("if you stink you'll be caught"): `core/wet/Smell` keeps how bad you smell, 0 to 100. Just
+living adds a little (filthy in about three days), sprinting more, and grimy armour adds up to 40 on top. Going under
+water washes it all off, wading or standing in the rain slowly, and the scrub at a water cauldron (sneak, empty hand)
+now scrubs you as well as your armour. Kept through death. Jaymo's Kingdoms reads it for mob senses and villager remarks.
+
+## 0.21.107 (2026-11-10): Freecam, creative only (#1251)
+
+- **Freecam** (MIT, shipped unchanged) is in the pack: press its key and the camera flies free of your body to line up shots, then snaps back. Picked from the Jujutsu Five list.
+- Creative only: out of creative or spectator, a Freecam left on turns itself off with a line on the action bar. Freecam is client-only, so the rule runs on each player's own game.
+- It also turns off while one of our films plays (an ultimate's film, a beam clash), so it can't fight the film camera.
+- Classes: `client/compat/FreecamCompat` (new, by reflection, so nothing breaks without Freecam). `build.gradle` packModsNoCf entry (CurseForge id still to look up from the home PC).
+- Built; not played.

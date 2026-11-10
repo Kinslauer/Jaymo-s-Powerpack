@@ -45,7 +45,9 @@ final class BloodTracking extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if (this.mob.getTarget() != null || this.mob instanceof TamableAnimal tame && tame.isTame() || this.mob.isPassenger()
+		// (Hardrock picks) a tame dog only tracks once it has learned to (com.jaymospowers.dogs.Dogs, Tracker)
+		if (this.mob.getTarget() != null || this.mob instanceof TamableAnimal tame && tame.isTame() && !com.jaymospowers.dogs.Dogs.tracks(tame)
+			|| this.mob.isPassenger()
 			|| !(this.mob.level() instanceof ServerLevel level)) {
 			return false;
 		}
@@ -76,6 +78,11 @@ final class BloodTracking extends Goal {
 		if (prey == null || prey == this.mob || prey.getType() == this.mob.getType() || !this.mob.canAttack(prey)
 			|| prey instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return false;
+		}
+		if (this.mob instanceof TamableAnimal dog && dog.isTame()) {
+			// a tracking dog runs down wounded game and monsters, never people or anyone's pet
+			return !(prey instanceof Player) && !(prey instanceof Npc) && !(prey instanceof TamableAnimal pet && pet.isTame())
+				&& (prey instanceof Enemy || prey instanceof Animal);
 		}
 		if (this.mob instanceof Enemy) {
 			return prey instanceof Player || prey instanceof Npc;

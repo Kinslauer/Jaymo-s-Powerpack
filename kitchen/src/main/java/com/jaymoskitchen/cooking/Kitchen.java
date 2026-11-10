@@ -238,6 +238,11 @@ public final class Kitchen {
 		}
 		ItemStack stack = new ItemStack(ModItems.dish(dish), dish.batch());
 		quality.apply(stack, dish);
+		// Andy's TFC Hardrock picks: well smoked food is preserved, and keeps far longer (fresh/Freshness)
+		if ((quality == Quality.GOOD || quality == Quality.PERFECT)
+			&& player.level().getBlockState(pos).is(net.minecraft.world.level.block.Blocks.SMOKER)) {
+			com.jaymoskitchen.fresh.Freshness.preserve(stack);
+		}
 		// (0.5.71) the "Jaymo's Powerpack" advancement tab (Powers' data): a dish cooked, and a perfect one
 		advance(player, "cooked");
 		if (quality == Quality.PERFECT) {

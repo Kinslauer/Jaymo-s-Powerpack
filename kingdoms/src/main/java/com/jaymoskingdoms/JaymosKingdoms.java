@@ -70,6 +70,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
 		Senses.register();
+		Stench.register();
 		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
 		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
@@ -105,13 +106,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
 		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
 		com.jaymoskingdoms.astronomy.StarDiscovery.register();
-
 		// the Astronomer's Journal: the armillary's readings, the Scholar pillar's points, the study pages
 		com.jaymoskingdoms.astronomy.AstronomersJournal.register();
-
-		// the Moon's orbit and phases, observing them, and the Sun's glare (and the records' attachment)
-		com.jaymoskingdoms.astronomy.SunMoon.register();
-
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
@@ -327,6 +323,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		WarJournal.register();
 		LoreCodex.register();
 		LoreBooks.register();
+		com.jaymoskingdoms.films.LoreFilms.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jaymospowers:block/support_beam"
+    },
+    "axis=z": {
+      "model": "jaymospowers:block/support_beam",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jaymospowers:block/support_beam",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

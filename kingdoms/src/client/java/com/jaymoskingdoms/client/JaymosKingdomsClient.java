@@ -58,6 +58,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
 		com.jaymoskingdoms.client.inhabitants.InhabitantsClient.register();
+		com.jaymoskingdoms.client.films.LoreFilmClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
 		EntityRenderers.register(com.jaymoskingdoms.spirits.SpiritJavelin.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -195,13 +196,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
 		// drawn as camera-centred sky geometry at night (never replaces the vanilla sky renderer)
 		com.jaymoskingdoms.client.astronomy.SkyClient.register();
-
 		// the Astronomer's Journal, and the armillary's reading answers
 		com.jaymoskingdoms.client.astronomy.AstronomersJournalClient.register();
-
-		// a click on the Sun (dazzling before Optics)
-		com.jaymoskingdoms.client.astronomy.SunMoonClient.register();
-
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(DarkNights::tick);
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();

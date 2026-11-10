@@ -2,9 +2,11 @@ package com.jaymoskingdoms.client.inhabitants;
 
 import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
 import com.jaymoskingdoms.SkeletonLord;
 import com.jaymoskingdoms.inhabitants.BarrowBeetle;
+import com.jaymoskingdoms.inhabitants.Bogre;
 import com.jaymoskingdoms.inhabitants.Draugr;
 import com.jaymoskingdoms.inhabitants.Inhabitants;
 import com.jaymoskingdoms.monsters.Monsters;
@@ -22,6 +24,8 @@ import net.minecraft.util.Mth;
 public final class InhabitantsClient {
 	/** The barrow beetle and the draugr are drawn at their models' size. */
 	static final float BEETLE_SHADOW = 0.3F, DRAUGR_SHADOW = 0.5F, SILVER_SHADOW = 0.6F;
+	/** The Bogre is drawn a quarter over its model's size (as Inhabitants draws it), with a wide shadow. */
+	static final float BOGRE_SCALE = 1.25F, BOGRE_SHADOW = 1.25F;
 	/** The Skeleton Lord's model stands 5 blocks to its crown (8 to the staff's tip): drawn to his 2.9-block height. */
 	static final float LORD_SCALE = 0.55F, LORD_SHADOW = 0.9F;
 	/** The Skeleton Lord's crystal bones, shown only while he sleeps as a statue. */
@@ -52,6 +56,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.BARROW_BEETLE,
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
+		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
 		EntityRenderers.register(Monsters.SILVER_SKELETON,
 			context -> new InhabitantRenderer<SilverSkeleton>(context, "silver_skeleton", 1.0F, SILVER_SHADOW, "head"));
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
@@ -114,6 +119,18 @@ public final class InhabitantsClient {
 		/** The tail ends before this segment. */
 		private static void cut(BoneSnapshots snapshots, int segment) {
 			snapshots.ifPresent(DRAUGR_TAIL[segment], bone -> bone.skipRender(true).skipChildrenRender(true));
+		}
+	}
+
+	/** It falls by its own death animation, so it isn't tipped over on its side as well. */
+	static final class BogreRenderer extends InhabitantRenderer<Bogre> {
+		BogreRenderer(EntityRendererProvider.Context context) {
+			super(context, "bogre", BOGRE_SCALE, BOGRE_SHADOW, "head");
+		}
+
+		@Override
+		protected float getDeathMaxRotation(GeoRenderState state) {
+			return 0.0F;
 		}
 	}
 

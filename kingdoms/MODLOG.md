@@ -10843,3 +10843,122 @@ Not seen in game: timing, blends and the death fall still need a playtest.
   before. Tuning: `Awareness.DRIP_STAIN` / `WOUND_STAIN`.
 - Built; not played. Not tested: Simple Voice Chat voices on the Deck (how loud a titan sounds from far off, how the
   ape hears the ground in third and first person), the Titan voice on a xeno form, the stains under a bleeding player.
+
+## 0.7.701 (2026-11-10): The Bogre: a solitary swamp ogre (#1252)
+
+- **The Bogre** now lives in the mangrove swamps: a huge, slow ogre with Inhabitants' model, texture and animations (JeremySeq / Team Synapse, art by Catalyst, MIT; credit in `kingdoms/art/bogre-CREDITS.md`). The behaviour is our own, written after Inhabitants'.
+- It leaves unarmed people alone. Come within 12 blocks with a weapon out (sword, axe, spear, bow, crossbow, trident, or anything that hits harder than a stone tool) and it stands and roars once, shaking your view. Stay armed within 6 blocks after that, or hit it, and it roars again and fights you. It forgets a warning after a minute.
+- Its only blow is a hammer slam: it runs at you, swings when you're within 4.5 blocks, and the slam sends a shockwave 6 blocks around the hammer (18 damage at the centre, less at the edge, throws you up and away). Jump it and it misses.
+- It keeps to itself: it walks away from villagers and other Bogres, and never spawns within 96 blocks of another Bogre or near a village. One at a time, persistent, 200 health.
+- It sleeps through the night when no one's near (sneaking lets you get within 2.5 blocks before it wakes), wakes at dawn or when hit, and dances while a jukebox plays near it.
+- Drops bones, bone blocks, leather and mushrooms. Spawn egg added. Its cooking and the Giant Bone Club are separate patches.
+- Classes: `inhabitants/Bogre` (new), `Inhabitants`, `client/inhabitants/InhabitantsClient` (`BogreRenderer`). Tuning numbers are the constants at the top of `Bogre`.
+- Built; not played. Spawning, the slam's reach against the model's swing and the animations haven't been seen in game.
+
+## 0.7.702 (2026-11-10): Stormborn Tomb pool loads again (#1255)
+
+- **Worlds load again:** the Stormborn Tomb's start pool (`overworld_stormborn_tomb`) wrote its ignored structure block the old way (`"Name"`); 26.3's block state codec wants `"id"`, so the datapack failed to load and the server stopped with "Failed to load datapacks, can't proceed with server load". It now says `"id"`.
+- Checked by starting a Kingdoms dev server: it failed on this file before and starts with the fix.
+
+## 0.7.703 (2026-11-10): Astronomy 4: the Astronomer's Journal, on the scholar side (#1254)
+
+- **The Astronomer's Journal** (crafted from a book and a spyglass): an open book of sepia ink on aged paper, with
+  faint construction diagrams (the celestial sphere at latitude 45°, armillary rings, a quadrant) and margin notes in a
+  working hand. Three parts: **Record**, **Skills** and **Study**. Scroll or click the arrows to turn pages.
+- **Readings at the armillary sphere are written in it.** Press *Record reading* at night, under open sky, with the
+  journal on you. The server takes the reading at the sphere, from the stars you have discovered, and writes down
+  what is new: each discovered star's altitude and bearing (8 at most a reading, highest first), the latitude from
+  Polaris (once), the longitude (once per 0.25° band, 500 blocks east or west, from Astrometry rank 4) and the sky's
+  yearly drift (once in each of its 12 months). Only something not yet in the journal counts, so repeating a reading
+  earns nothing. When a reading fails, the sphere's screen says why in one line: no journal, not the Overworld,
+  daylight, clouds, no open sky above the sphere, or none of your stars above the horizon.
+- **The Scholar, a fourth pillar of the skill tree.** The scholar side had no ladder to carry this, so astronomy goes
+  into the skill tree's own progression instead of a ladder of its own: each new measurement is Scholar experience
+  (a star's place 6, the latitude 40, a longitude band 25, a month 30), up to level 20, with a point every level and a
+  bonus point every fifth, as the other pillars have. Its points are spent in the journal on **Astrometry** (20 ranks,
+  1 point each): every rank makes readings finer, rounding them to 1° / (1 + rank), down to 0.048° at rank 20. A
+  court wizard's unmaking or a bottle o' enchanting returns Scholar points like any others. The Scholar is not drawn
+  on the K web (whose three-way layout is unchanged), and adds nothing to character level, attribute points,
+  Survivalist hearts or alignment titles: it is study, not training. The character menu lists its level beside the
+  other pillars.
+- **Study pages** teach the sky's model with its units, formulas and worked examples (Vega, Sirius, Polaris): the
+  celestial sphere, hour angle and the altitude/bearing formulas, the sidereal time from the world clock, latitude from
+  the pole star, longitude from the sidereal time, the sky's year, precision and what counts, and a page of where the
+  model stops being the real sky (flat world, no refraction or precession, the game's own Sun and Moon, linear
+  brightness, simple light pollution). No story or narration; the quoted tuning numbers follow the constants.
+- **Sky fix (needed for the readings to agree with the sky):** the star catalogue gives right ascension in hours, and
+  the sky used it as degrees, squeezing every star into 24° of the sky's turn. Both the drawn sky and the readings now
+  convert it (×15) and share one model (`astronomy/Celestial`).
+- **Armillary screen fixes:** its text had no alpha and drew invisible; its clock now reads the world's clock (6:00 at
+  sunrise, as the sky uses it) instead of the game-tick count; the client no longer sends its own reading as JSON.
+- Classes: `astronomy/AstronomersJournal` (item, open payload), `astronomy/Measurements` (the journal's record, the
+  server-side reading, tuning at its top), `astronomy/Celestial` (the shared sky model), `astronomy/StarPositions` (the
+  catalogue on the server), `client/astronomy/AstronomersJournalScreen` and `AstronomersJournalClient`; `Skills`
+  (the `SCHOLAR` pillar, the `ASTROMETRY` perk, `Pillar#web`), `Stats`, `Renown`, `SkillWeb`, `SkillScreen`,
+  `ArmillaryNet`, `ArmillaryScreen`. Lang in `lang/parts/astronomy-journal.json`. Art from
+  `art/astronomy/generate_journal.py`.
+- The idea of a measuring journal with a skill ladder and study pages comes from Jubileu_13's Astronomy mod (MIT);
+  nothing of its code, text or art is used.
+- Not in this change: telescope readings (the telescope has art and a rig but no gameplay yet), and the Altazimuth
+  Mount and Optics skills, which belong in this pillar when the telescope and the Sun and Moon arrive. The armillary
+  sphere itself still has no recipe, blockstate or item model, so outside creative it can't be had yet.
+- Built; not played, and no dev server or client was started. Unchecked in game: the book's layout and legibility at
+  each GUI scale, the readings and their failure lines, the Learn link, and the corrected star field.
+
+## 0.7.704 (2026-11-10): Stormborn Tomb: real fix for stone fill and trial-chamber look (#1254)
+
+The Stormborn Tomb structure was generating with solid stone gaps and looking like vanilla trial chambers because the template pool IDs used `stormborn_tomb/part` (with a slash) but the actual template files are named `stormborn_tomb_part` (with underscore). In 26.3, the pool `name` field is ignored and the file path ID is used, so the pieces referenced non-existent pools and turned into air or wrong blocks.
+
+The fix changes the pool element ID construction from `stormborn_tomb/` to `stormborn_tomb_` to match the template file names, so the correct templates are loaded and placed.
+
+Not tested in game.
+
+## 0.7.705 (2026-11-10): Varasuchus moves smoothly now (#1254)
+
+- Varasuchus, the crocodile dragon of the lesser dragons, is now drawn and animated with GeckoLib. It looks the same as before: same hides, glowing markings, horns, scutes, saddle, size, hatchling size, rider seats and reach.
+- Every pose and move it had is still there. Idle, it hisses, shakes its head, swishes its tail and sniffs. It walks, gallops, basks sitting, lies crashed, swims and rears up raging. Its moves are the claws, horn gore, dash, slash barrage, phase shift, tailguard and parry, rage roar, bite and tail sweep, along with a flinch and its death. Moves it makes while reared up use their own upright versions.
+- Kingdoms builds and the dev server starts, but Varasuchus hasn't been spawned or watched in game yet.
+
+## 0.7.706 (2026-11-10): Hardrock patch 4 - iron is scarce (#1253)
+
+Andy's TFC Hardrock picks: "most villages will not have iron armor or tools and will be more encouraged to trade for it".
+- Only 1 realm in 4 has iron for its folk (`Outfits.IRON_REALMS`). Everywhere else guards, archers, builders and camp
+  folk wear copper plate where they wore iron and carry copper swords, spears and axes (trims and dye kept). Kings and
+  lords keep their iron.
+- Iron and diamond are dearer on the trade routes: an iron ingot is worth 14 coppers (was 6), raw iron 8, a diamond 160
+  (was 48), gold 12.
+- The Ground Changes tier veins match Powers' new big rare veins: one big vein in some chunks instead of several small
+  pockets in every one (iron 1 in 24, copper 1 in 20, gold 1 in 48, lapis 1 in 12; diamond and debris almost never).
+- Compile-checked; not played.
+
+## 0.7.707 (2026-11-10): Hardrock patch 7 - caught by the smell (#1253)
+
+Andy's TFC Hardrock picks: "if you stink youll be caught, especially among non humans with better noses. Villagers will
+comment on this" (`Stench`, reading Powers' smell).
+- A smelly player is noticed from further off (Senses): keen noses (beasts, monsters, goblins and orcs, vampires,
+  werewolves) up to twice as far at the worst, villagers and illagers a quarter further.
+- A villager near enough to catch a whiff now and then says so (6 lines; goblins and orcs approve, 3 lines), at most
+  once every 2 minutes.
+- Compile-checked; not played.
+
+## 0.7.708 (2026-11-10): The Bogre: a solitary swamp ogre (#1251)
+
+- **The Bogre** now lives in the mangrove swamps: a huge, slow ogre with Inhabitants' model, texture and animations (JeremySeq / Team Synapse, art by Catalyst, MIT; credit in `kingdoms/art/bogre-CREDITS.md`). The behaviour is our own, written after Inhabitants'.
+- It leaves unarmed people alone. Come within 12 blocks with a weapon out (sword, axe, spear, bow, crossbow, trident, or anything that hits harder than a stone tool) and it stands and roars once, shaking your view. Stay armed within 6 blocks after that, or hit it, and it roars again and fights you. It forgets a warning after a minute.
+- Its only blow is a hammer slam: it runs at you, swings when you're within 4.5 blocks, and the slam sends a shockwave 6 blocks around the hammer (18 damage at the centre, less at the edge, throws you up and away). Jump it and it misses.
+- It keeps to itself: it walks away from villagers and other Bogres, and never spawns within 96 blocks of another Bogre or near a village. One at a time, persistent, 200 health.
+- It sleeps through the night when no one's near (sneaking lets you get within 2.5 blocks before it wakes), wakes at dawn or when hit, and dances while a jukebox plays near it.
+- Drops bones, bone blocks, leather and mushrooms. Spawn egg added. Its cooking and the Giant Bone Club are separate patches.
+- Classes: `inhabitants/Bogre` (new), `Inhabitants`, `client/inhabitants/InhabitantsClient` (`BogreRenderer`). Tuning numbers are the constants at the top of `Bogre`.
+- Built; not played. Spawning, the slam's reach against the model's swing and the animations haven't been seen in game.
+
+## 0.7.709 (2026-11-10): The Long Defence, a lore film (#1251)
+
+- **A lore film, played on your own game.** It's the old war, told without a word on screen. It's staged on the ground in front of you, as a memory: dim, with letterbox bars and the HUD cleared. It runs about 39 seconds, and holding sneak for a second skips it.
+- **The story:** a line of hearthlanders stands at night with five mages behind them: Grimsby, Thessaly, Ambrose and Varro as the living people their spirits were, and a fifth in plain grey. Black flame flickers up out of the ground, and each flicker shows more of the dead standing in it. The last one shows the sorcerer behind them. They clash and some of the line falls. Then each mage casts in turn: Varro's fire, Thessaly's ward, Grimsby's blade, Ambrose's light. The fifth walks out alone, the dead fall as he passes, and the sorcerer sinks into shadow. Nobody says who the fifth was.
+- **Where it plays:**
+  - The first time you open the lore book *The Long Defence*, the film plays instead of the pages; after that it reads as a book. The book drops from Draugr now and then and lies in camp stores.
+  - A court wizard offers "Ask About the Old War" on the Interact page.
+  - A demon master asks whether you came for the work or the old war.
+  - Ops can use `/kingdom film long_defence [players]`.
+- The actors are only on your own game, and their skins are our own (`tools/gen_film_skins.py`). Players without Kingdoms on their client just get the book.

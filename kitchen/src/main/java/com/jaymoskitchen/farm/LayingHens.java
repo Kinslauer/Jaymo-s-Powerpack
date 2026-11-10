@@ -48,7 +48,8 @@ public final class LayingHens {
 			hen.eggTime = Math.min(hen.eggTime, 1);
 			return;
 		}
-		float rate = fedOn != null ? FED_RATE : UNFED_RATE;
+		// (Hardrock picks) a familiar hen lays faster
+		float rate = (fedOn != null ? FED_RATE : UNFED_RATE) * (1.0F + Familiarity.HEN_BONUS * Familiarity.of(hen));
 		if (rate < 1.0F && hen.getRandom().nextFloat() >= rate) {
 			hen.eggTime++;
 		} else if (rate > 1.0F && hen.getRandom().nextFloat() < rate - 1.0F) {

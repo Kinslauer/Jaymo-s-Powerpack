@@ -123,13 +123,16 @@ final class TradeRoutes {
 		/** What one {@code x} is worth (coppers): by its kind, but ore and gems have their own prices. */
 		static int unit(ItemStack x) {
 			Item i = x.getItem();
+			// Andy's TFC Hardrock picks: iron is scarce (few, big veins) and diamond all but never found, so they're dear
 			if (i == Items.DIAMOND) {
-				return 48;
+				return 160;
 			} else if (i == Items.GOLD_INGOT) {
-				return 10;
+				return 12;
 			} else if (i == Items.IRON_INGOT) {
-				return 6;
-			} else if (i == Items.COAL || i == Items.COPPER_INGOT || i == Items.RAW_IRON || i == Items.RAW_COPPER || i == Items.RAW_GOLD || i == Items.REDSTONE
+				return 14;
+			} else if (i == Items.RAW_IRON) {
+				return 8;
+			} else if (i == Items.COAL || i == Items.COPPER_INGOT || i == Items.RAW_COPPER || i == Items.RAW_GOLD || i == Items.REDSTONE
 				|| i == Items.LAPIS_LAZULI) {
 				return 3;
 			}
