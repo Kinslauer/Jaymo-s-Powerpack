@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 14:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 14:40). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,12 +15,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · 🪶 Quill · #1251 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · in-review
+- [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · ☁️ Cloud · #1251 · in-review
 
 
 ## Needs Andy
