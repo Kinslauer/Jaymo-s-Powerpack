@@ -186,6 +186,16 @@ def approve(event):
     return f"{args.get('owner', '')}/{args.get('repo', '')}".lower() == REPO and args.get("base", BRANCH) == BRANCH
 
 
+def task_files(task_text):
+    """Private files a task names (`file_...` ids from the Files API, e.g. Andy's video clips), mounted read-only at
+    /mnt/session/uploads/clips/<name>. A line reads: - `file_01ABC...` name.mp4"""
+    files = []
+    for m in re.finditer(r"`(file_[A-Za-z0-9]+)` *([^\s`]+)?", task_text):
+        name = m.group(2) or m.group(1)
+        files.append({"type": "file", "file_id": m.group(1), "mount_path": f"/clips/{os.path.basename(name)}"})
+    return files
+
+
 def run(client, title, task_text):
     session = client.beta.sessions.create(
         agent=lock_id("agents/powerpack-builder.md"),
@@ -197,7 +207,7 @@ def run(client, title, task_text):
             "url": f"https://github.com/{REPO}",
             "authorization_token": os.environ["GITHUB_TOKEN"],
             "checkout": {"type": "branch", "name": BRANCH},
-        }],
+        }] + task_files(task_text),
         budget={"type": "limit", "max_list_cost": {"amount": BUDGET_CENTS, "currency": "USD"}},
     )
     print(f"Session {session.id}: https://platform.claude.com/workspaces/default/sessions/{session.id}", flush=True)
