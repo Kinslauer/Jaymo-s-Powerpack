@@ -13,3 +13,4 @@ writer: hermes-writer
 Commit 693d94a was pushed onto the Bogre PR's branch (claude/project-thread-r3tzqk) after the Bogre was reviewed. The Bogre went in separately as #1252, so PR #1251 now holds only this Freecam change. It hasn't been reviewed or given a text pass.
 
 ## Notes
+- 2026-11-10 14:38 Text pass: tightened Freecam action bar messages in camera.json (creative_only: 'Freecam requires creative mode', film: 'Freecam disabled during films')
