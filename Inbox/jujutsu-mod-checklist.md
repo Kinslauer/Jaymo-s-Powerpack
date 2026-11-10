@@ -85,3 +85,6 @@ Write a single Fable script that:
 5. Does NOT include any code from the source mods — only the names, the category, and the licence verdict from this checklist.
 
 When the script is done, send it to Andy in chat; he will tell you whether it is ready for Fable or whether any rows need to be dropped.
+
+## Notes
+- 2026-11-10 17:12 Rewritten as Picklists/Jujutsu five mods pick-list.md (Andy 2026-11-10: make a new checklist). Closed.
