@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,11 +41,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · #1219 · in-review
-- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1222 · in-review
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · ☁️ Cloud · #1223 · in-review
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1226 · in-review
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · ☁️ Cloud · #1220 · in-review
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · #1224 · in-review
+- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1222 · in-review
 
 
 ## In review
