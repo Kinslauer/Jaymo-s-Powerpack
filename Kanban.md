@@ -16,11 +16,11 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · changes · fixing review notes
 
 
 ## In review
 
-- [ ] [[Inbox/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · ☀️ Apollo · #1256 · in-review
 
 
 ## Needs Andy
