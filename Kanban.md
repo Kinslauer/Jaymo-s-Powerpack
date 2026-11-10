@@ -4,18 +4,18 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:43). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · for 🪽 any Hermes bot · #1244 · open
 
 
 ## Being built
 
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🍇 Bacchus · #1244 · claimed
 
 
 ## In review
