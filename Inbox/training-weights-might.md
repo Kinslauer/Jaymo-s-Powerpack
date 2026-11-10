@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569189294512537671
-claimed_by:
+claimed_by: hermes-b
 pr:
 suggested_owns: [src/main/java/com/jaymospowers/power/zfighter/ZFighterItems.java, src/main/java/com/jaymospowers/core/Training.java, src/main/java/com/jaymospowers/core/Meditate.java, kingdoms/src/main/java/com/jaymoskingdoms/Skills.java, kingdoms/src/main/java/com/jaymoskingdoms/Stats.java]
 ---
