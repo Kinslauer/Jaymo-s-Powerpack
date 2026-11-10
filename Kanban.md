@@ -22,8 +22,8 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · in-review
 
 
 ## Needs Andy
