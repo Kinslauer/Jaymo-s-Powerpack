@@ -275,6 +275,12 @@ public class Rat extends PathfinderMob {
 
 		@Override
 		public void tick() {
+			// A goal is ticked on an off tick without canContinueToUse being asked first, so a rat that ate or stole
+			// on the tick before can still be ticked once more with its target cleared: stop, don't crash the server.
+			if (target == null) {
+				stop();
+				return;
+			}
 			Vec3 at = target.at();
 			getLookControl().setLookAt(at.x, at.y, at.z);
 			if (target.trap()) {
