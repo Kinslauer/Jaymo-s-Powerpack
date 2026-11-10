@@ -17,8 +17,10 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -33,6 +35,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -240,8 +243,8 @@ public final class Thirst {
 		if (water != 0) {
 			set(player, water(player) + water);
 		}
-		// an existing drink clears it: hot chocolate washes the parasite out
-		if (stack.is(KitchenBlocks.FOODS.get("hot_chocolate")) && player.removeEffect(ParasiteEffect.PARASITE)) {
+		// an existing drink clears it: hot chocolate, willow bark tea and chamomile tea all wash the parasite out
+		if (curesParasite(stack) && player.removeEffect(ParasiteEffect.PARASITE)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.cured").withStyle(ChatFormatting.GREEN));
 		}
 	}
@@ -274,6 +277,20 @@ public final class Thirst {
 		}
 		Dish dish = ModItems.dishOf(stack.getItem());
 		return dish != null && dish.bowlFood() ? STEW : 0;
+}
+
+	/** Willow bark tea, chamomile tea and hot chocolate all clear the parasite from dirty water. Powers' items are
+	 * resolved by id at runtime: Kitchen never compiles against Powers. */
+	private static boolean curesParasite(ItemStack stack) {
+		if (stack.is(KitchenBlocks.FOODS.get("hot_chocolate"))) {
+			return true;
+		}
+		Item willowBarkTea = BuiltInRegistries.ITEM
+				.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "willow_bark_tea")).orElse(null);
+		Item chamomileTea = BuiltInRegistries.ITEM
+				.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "chamomile_tea")).orElse(null);
+		return (willowBarkTea != null && stack.is(willowBarkTea))
+				|| (chamomileTea != null && stack.is(chamomileTea));
 	}
 
 	/**
