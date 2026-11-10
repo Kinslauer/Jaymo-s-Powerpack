@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,8 +20,8 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☁️ Cloud · #1244 · in-review
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🪶 Quill · #1244 · writing
 
 
 ## In review
