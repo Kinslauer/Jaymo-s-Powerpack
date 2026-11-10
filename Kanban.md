@@ -19,6 +19,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · claimed
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · claimed
 
 
 ## Text pass
@@ -27,7 +28,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · in-review
 
 
 ## Needs Andy
