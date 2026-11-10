@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/ground/sticks_1",
+  "textures": {
+    "all": "jaymospowers:block/ground/loose_sticks"
+  }
+}
