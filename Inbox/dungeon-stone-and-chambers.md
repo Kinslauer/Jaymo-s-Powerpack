@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
+claimed_by: hermes-a
 pr:
 suggested_owns: [kingdoms/src/main/resources/data/jaymoskingdoms/structure/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
 ---
