@@ -108,6 +108,12 @@ final class ZephyrusDragonRenderer extends GeoEntityRenderer<ZephyrusDragon, Liv
 		}
 	}
 
+	/** It plays its own death ({@code death}: it rolls onto its side), so it isn't flipped as well. */
+	@Override
+	protected float getDeathMaxRotation(GeoRenderState state) {
+		return 0.0F;
+	}
+
 	@Override
 	protected AABB getBoundingBoxForCulling(ZephyrusDragon dragon, float partialTicks) {
 		return dragon.getBoundingBox().inflate(WindDragonRenderer.REACH, WindDragonRenderer.REACH_UP, WindDragonRenderer.REACH);

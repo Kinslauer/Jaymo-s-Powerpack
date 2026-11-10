@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
  * client-side easing: flying (its wingbeat kept in time with its stroke; beating hard to hover while it breathes),
  * gliding, crashed, swimming, sitting, landing, walking or standing. An {@code action} controller plays the bite and the
  * tail sweep when the server starts them. Where it looks, its pitch with a climb and its jaw at the breath are added in
- * the renderer. It has no death of its own: it tips over as before.
+ * the renderer. Dying, it plays its own death (rolling onto its side) instead of the vanilla flip.
  */
 public final class ZephyrusAnimations {
 	/** Over this much of an easing (0 to 1), its animation is the one played. */
@@ -36,6 +36,7 @@ public final class ZephyrusAnimations {
 	static final RawAnimation GLIDE = RawAnimation.begin().thenLoop("glide");
 	static final RawAnimation BITE = RawAnimation.begin().thenPlay("bite");
 	static final RawAnimation SWEEP = RawAnimation.begin().thenPlay("sweep");
+	static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
 
 	private ZephyrusAnimations() {
 	}
@@ -51,7 +52,10 @@ public final class ZephyrusAnimations {
 		float stroke = dragon.flapPhase - dragon.flapPhaseO;
 		float speed = 1.0F;
 		RawAnimation anim;
-		if (dragon.flyAnim > SHOWN) {
+		if (dragon.isDeadOrDying()) {
+			// it rolls onto its side (the renderer doesn't flip it)
+			anim = DEATH;
+		} else if (dragon.flyAnim > SHOWN) {
 			if (dragon.breathAnim > SHOWN) {
 				anim = HOVER;
 				speed = stroke / HOVER_RATE;

@@ -5,8 +5,8 @@ The geometry is the old ZephyrusDragonModel.createBodyLayer(), box for box, and 
 
 The old ZephyrusDragonModel.setupAnim is the animation spec: pose() below is it, line for line, and every animation is
 sampled from it: idle, walk, fly (a wingbeat), hover (beating hard while it breathes in the air), glide, land, sit,
-crash, swim. bite and sweep are new (the old model had none) for WindDragon.bitten / swept. It has no death of its own:
-it tips over as before. What followed the game every frame (where it looks, its pitch with a climb, the breath's jaw
+crash, swim. bite, sweep and death are new (the old model had none): the first two for WindDragon.bitten / swept,
+the death in place of the vanilla sideways flip. What followed the game every frame (where it looks, its pitch with a climb, the breath's jaw
 and neck) stays in ZephyrusDragonRenderer.
 
 Keyframes are the game's way (degrees as ModelPart angles; positions with x and y turned round), as a "free" project
@@ -49,7 +49,7 @@ IDLE_TICKS = 40.0 * PI                                      # 6.28 s
 FLY_BEATS = 4
 FLY_TICKS, HOVER_TICKS, GLIDE_TICKS = FLY_BEATS * 2 * PI / FLAP_RATE, FLY_BEATS * 2 * PI / HOVER_RATE, 2 * PI / GLIDE_RATE
 WALK_TICKS = 4 * PI / STEP / WALK_AT                        # two strides (its roll is half the stride)
-BITE_LEN, SWEEP_LEN = 0.6, 1.0
+BITE_LEN, SWEEP_LEN, DEATH_LEN = 0.6, 1.0, 1.0
 
 LEGS = ["left_front", "right_front", "left_hind", "right_hind"]
 NECK = ["neck0", "neck1", "neck2"]
@@ -348,6 +348,25 @@ def build():
 			a[seg][1] += lag * (i + 1) / len(TAIL)
 		sweep.key(time, a, bones=SWEEP_BONES)
 	anims.append(sweep)
+	# death (new; the old model was flipped onto its side by the vanilla renderer): it rears its head with the jaw
+	# wide, its legs buckle, then it rolls onto its side (the roll ends with its flank on the ground: the body's pivot
+	# is 12 px up and its half width 11), its neck and tail going limp, and holds there as it fades
+	death = Anim("death", DEATH_LEN, "hold")
+	for time, k, rear in ((0.0, 0.0, 0.0), (0.3, 0.15, 1.0), (0.7, 0.85, 0.3), (DEATH_LEN, 1.0, 0.0)):
+		a = {b: list(v) for b, v in base.items()}
+		a["body"][2] += k * 1.45
+		a["neck0"][0] += -0.35 * rear + 0.35 * k
+		a["neck1"][0] += 0.2 * k
+		a["head"][0] += -0.3 * rear + 0.25 * k
+		a["jaw"][0] += 0.6 * rear + 0.3 * k
+		for leg in LEGS:
+			a[leg + "_leg"][0] += 0.4 * rear * (1 - k)
+			a[leg + "_shin"][0] += 0.6 * (rear + k) * 0.5
+		for i, seg in enumerate(TAIL):
+			a[seg][0] -= TAIL_GROUND[i] * k
+			a[seg][1] += 0.15 * k * (i + 1) / len(TAIL)
+		death.key(time, a, drop=lerp(k, 0.0, 1.0) + 1.5 * rear * (1 - k))
+	anims.append(death)
 	return anims
 
 
@@ -358,7 +377,7 @@ def compare(out_dir):
 	scratch = os.path.join(out_dir, "scratch")
 	subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_bake.py"), MODEL, scratch, NAME], check=True, stdout=subprocess.DEVNULL)
 	shots = [("idle", 1.0), ("walk", 0.4), ("fly", 0.25), ("fly", 0.75), ("hover", 0.4), ("glide", 0.5), ("land", 0.2), ("sit", 0.0),
-			 ("crash", 0.0), ("swim", 0.5), ("bite", 0.15), ("sweep", 0.55)]
+			 ("crash", 0.0), ("swim", 0.5), ("bite", 0.15), ("sweep", 0.55), ("death", 1.0)]
 	rows = []
 	for anim, sec in shots:
 		new = os.path.join(out_dir, "%s_%s_new.png" % (anim, sec))

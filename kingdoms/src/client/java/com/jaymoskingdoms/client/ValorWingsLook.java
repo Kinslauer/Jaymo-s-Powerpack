@@ -308,7 +308,7 @@ public final class ValorWingsLook {
 			return new ModelPart(List.of(), new HashMap<>());
 		}
 
-		/** Zephyrus's wings (ZephyrusDragonModel's own boxes, on its sheet), small. */
+		/** Zephyrus's wings (Zephyrus's own wing boxes, zephyrus.geo.json, on its sheet), small. */
 		private static void zephyrus(PartDefinition body) {
 			float s = SCALE[2];
 			PartDefinition left = body.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(94, 95).addBox(0.0F, -1.5F, -1.5F, 18, 3, 3)

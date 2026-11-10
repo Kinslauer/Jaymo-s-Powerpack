@@ -26,7 +26,7 @@ geckolib/models/entity/zephyrus.geo.json, geckolib/animations/entity/zephyrus.an
 and dragon/zephyrus/hide_*.png, marks_*.png: Zephyrus
   Our own model and art (no external source). kingdoms/art/zephyrus.bbmodel and kingdoms/tools/gen_zephyrus_geo.py:
   the old ZephyrusDragonModel's body and poses as idle, walk, fly, hover, glide, landing, sitting, crashed and
-  swimming, plus a bite and a tail sweep; hides and markings from kingdoms/tools/gen_zephyrus.py.
+  swimming, plus a bite, a tail sweep and a death; hides and markings from kingdoms/tools/gen_zephyrus.py.
 
 geckolib/models/entity/aetherion.geo.json, geckolib/animations/entity/aetherion.animation.json,
 and dragon/aetherion/hide_*.png, marks_*.png: Aetherion
