@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -29,3 +29,4 @@ Tiv, in the Tasks thread: "The family farmhand start should be a good natured he
 - Don't change who spawns where or the 40 hearts; this is about their temperament and what they say.
 - 2026-11-09 19:20 Text pass: talk.json (farm_family.welcome, farm_family.notice) - removed em dash, tightened phrasing to sound like Heartlander farmers; changes/kingdoms/farmhand-kind-family.md - removed em dash, made player-facing. Note: PR branch has pre-existing Java compile errors (AttachmentType, Codec.UUID) unrelated to text changes.
 - 2026-11-09 20:44 Review (head 1277d4a): changes needed. Build Kingdoms is red: FarmhandHome.java:60-61 won't compile. Add 'import net.fabricmc.fabric.api.attachment.v1.AttachmentType;' and use 'UUIDUtil.CODEC' (net.minecraft.core.UUIDUtil, as BioBud.java:36 does) instead of 'Codec.UUID', which doesn't exist. Build kingdoms/ before pushing; vault.py now refuses a hand-in while the checks are red. I didn't review the rest past the compile error.
+- 2026-11-09 21:03 PR #1203 is merged into master; moved to Inbox/Done.
