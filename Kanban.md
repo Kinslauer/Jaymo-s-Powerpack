@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 20:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/knife-metal-effects|knife-metal-effects]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 💻 Odysseus · #1193 · claimed
+- [ ] [[Agents/claude-review-takeovers|claude-review-takeovers]] · 💻 Odysseus · #1193, 1205 · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
