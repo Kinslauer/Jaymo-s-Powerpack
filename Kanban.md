@@ -4,19 +4,19 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 06:28). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☁️ Cloud · #1244 · open
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · open
 
 
 ## Being built
 
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🪶 Quill · #1244 · writing
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🪶 Quill · #1241 · writing
 
 
 ## In review
