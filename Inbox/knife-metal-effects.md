@@ -27,3 +27,4 @@ Andy ticked it. Our knives already cut straw and board items; the per-metal effe
 - Keep the chances low enough that a knife is a knife, not a wand.
 - 2026-11-08 22:56 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 20:11 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 20:38 Text pass: reviewed lang/parts/tinkering.json (4 new trait entries: poisonous, weakening, burning, withering - all consistent 'A [metal] knife sometimes [effect] what it hits.' pattern), changes/powers/knife-metal-effects.md (clear, complete). No rewrites needed. Slimesteel slowing effect lacks trait entry (code gap, not text).
