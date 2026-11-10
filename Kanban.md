@@ -9,8 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 
 
@@ -20,6 +18,8 @@ kanban-plugin: board
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · ☁️ Cloud · #1221 · claimed
 - [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · ☁️ Cloud · #1236 · claimed
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · claimed
+- [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 
 
 ## Text pass
