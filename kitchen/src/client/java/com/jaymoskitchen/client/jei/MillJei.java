@@ -112,6 +112,8 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymoskitchen.fresh.Freshness.SPOILED_FOOD, note("spoiled_food"));
 		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.SALT, note("spoiled_food"));
 		registration.addIngredientInfo(com.jaymoskitchen.fresh.Cheese.CHEESE_WHEEL, note("cheese_wheel"));
+		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.SNAP_TRAP, note("traps_small_game"));
+		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.CAGE_TRAP, note("traps_small_game"));
 	}
 
 	private static Component title(String id) {

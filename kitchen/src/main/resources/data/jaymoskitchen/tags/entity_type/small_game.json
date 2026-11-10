@@ -1,0 +1,23 @@
+{
+  "values": [
+    "minecraft:rabbit",
+    "minecraft:chicken",
+    "minecraft:fox",
+    {
+      "id": "naturalist:squirrel",
+      "required": false
+    },
+    {
+      "id": "naturalist:duck",
+      "required": false
+    },
+    {
+      "id": "naturalist:snail",
+      "required": false
+    },
+    {
+      "id": "naturalist:lizard",
+      "required": false
+    }
+  ]
+}

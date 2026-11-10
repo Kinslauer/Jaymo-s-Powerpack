@@ -92,6 +92,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.rats.Rats.register();
 		com.jaymoskitchen.farm.Manure.register();
 		com.jaymoskitchen.farm.TiredSoil.register();
+		com.jaymoskitchen.farm.Familiarity.register();
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
 		com.jaymoskitchen.fresh.Freshness.register();

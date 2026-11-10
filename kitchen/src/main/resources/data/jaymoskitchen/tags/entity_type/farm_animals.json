@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:cow",
+    "minecraft:sheep",
+    "minecraft:pig",
+    "minecraft:chicken",
+    "minecraft:goat",
+    "minecraft:mooshroom",
+    {
+      "id": "minecraft:rabbit",
+      "required": false
+    }
+  ]
+}

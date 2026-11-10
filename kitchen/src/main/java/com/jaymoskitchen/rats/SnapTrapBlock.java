@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -102,6 +103,11 @@ public class SnapTrapBlock extends TrapBlock {
 				trap.eatBait();
 			}
 			scatter(server, pos, rat);
+		} else if (smallGame(entity) && level.getBlockEntity(pos) instanceof SnapTrapEntity trap && !trap.bait().isEmpty()) {
+			// (Hardrock picks) a baited snap trap is a snare for small game too: it breaks its neck, and it lies there
+			snap(server, pos, state);
+			trap.eatBait();
+			((LivingEntity)entity).hurtServer(server, server.damageSources().generic(), Float.MAX_VALUE);
 		} else if (entity instanceof Player player && !player.isShiftKeyDown() && !player.isCreative() && !player.isSpectator()) {
 			snap(server, pos, state);
 			player.hurtServer(server, server.damageSources().generic(), FOOT_DAMAGE);
