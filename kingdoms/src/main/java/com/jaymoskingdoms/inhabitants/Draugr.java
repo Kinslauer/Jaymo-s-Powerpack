@@ -33,6 +33,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -58,6 +59,10 @@ import org.jspecify.annotations.Nullable;
  * then it takes blows and arrows from in front on its shield now and then (an axe knocks its guard down for a while); or
  * a two-handed bearded axe, slow and heavy, which knocks a player's raised shield aside as any axe does. Its blows carry
  * the grave's cold (a short slowness).
+ *
+ * <p>Every draugr is a Warrior-born ancestor (it wears a Warrior-born's tail, mangled its own way: the client's
+ * {@code InhabitantsClient.DraugrRenderer}), bound where it stands: it keeps within {@link #HOME_RADIUS} of the spot it
+ * first stood on, gives up a foe who leaves that ground and walks back to it, so the tomb's dead never leave the tomb.
  */
 public class Draugr extends Monster implements GeoEntity {
 	/** Base damage: a sword (+5) makes it 7, an axe (+8) 10. */
@@ -70,6 +75,8 @@ public class Draugr extends Monster implements GeoEntity {
 	static final int GUARD_BROKEN_TICKS = 100, BLOCK_SHOWN_TICKS = 12;
 	/** The cold of its blows: slowness, for this long (ticks), this strong (0 = I). */
 	static final int CHILL_TICKS = 50, CHILL_AMPLIFIER = 0;
+	/** How far from where it first stood a draugr will go, chasing or wandering (blocks). */
+	static final int HOME_RADIUS = 24;
 	public static final byte BLOCKED = 94;
 
 	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
@@ -131,6 +138,7 @@ public class Draugr extends Monster implements GeoEntity {
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
+		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.7));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 10.0F));
 		this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -143,6 +151,10 @@ public class Draugr extends Monster implements GeoEntity {
 		super.customServerAiStep(level);
 		if (!this.armed) {
 			this.arm(this.random.nextFloat() < AXE_SHARE);
+		}
+		if (!this.hasHome()) {
+			// bound where it first stands (draugr from before this have none yet: theirs is where they are now)
+			this.setHomeTo(this.blockPosition(), HOME_RADIUS);
 		}
 		if (this.guardBroken > 0) {
 			this.guardBroken--;
