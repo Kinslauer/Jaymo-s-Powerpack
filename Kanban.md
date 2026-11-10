@@ -15,12 +15,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · claimed
 - [ ] [[Inbox/freecam-creative-only|freecam-creative-only]] · 🪶 Quill · #1251 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · in-review
 
 
 ## Needs Andy
