@@ -48,3 +48,4 @@ look like.
   plainly if it needs a client-side voice effect we must add ourselves.
 - Blood: the blood pools/decals (PR #1169 and the drag trails) are the likely source of the re-animating.
 - One PR per item is fine if they touch different files. Don't merge.
+- 2026-11-10 05:25 Andy, 2026-11-10: the API credits ran out, so Hermes finishes this. Continue from the cloud agent's pushed branch cloud/apes-xeno-voices-parasites-blood (git fetch, worktree from origin/cloud/apes-xeno-voices-parasites-blood), don't start over; the cloud agent said Kingdoms had a duplicate lang key from master (fixed on master by #1243, so merge origin/master first).
