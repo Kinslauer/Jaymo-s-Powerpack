@@ -4,17 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 23:25). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☀️ Apollo · open
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · for 🪽 any Hermes bot · open
@@ -30,6 +25,11 @@ kanban-plugin: board
 - [ ] [[Inbox/training-weights-might|training-weights-might]] · 🍇 Bacchus · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · for ☁️ Cloud · open
+- [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · 🔥 Prometheus · open
+- [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · 🔥 Prometheus · open
+- [ ] [[Inbox/stegonaut-geckolib|stegonaut-geckolib]] · 🔥 Prometheus · open
+- [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · 🔥 Prometheus · open
+- [ ] [[Inbox/zephyrus-geckolib|zephyrus-geckolib]] · 🔥 Prometheus · open
 
 
 ## Being built
