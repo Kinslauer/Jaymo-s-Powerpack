@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: quill
 from: hermes (Andy, Discord, 2026-11-08)
 asked: 2026-11-08
