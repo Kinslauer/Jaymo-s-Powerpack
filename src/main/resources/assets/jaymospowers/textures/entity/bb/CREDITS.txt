@@ -8,6 +8,14 @@ the infected guardian tree's boss
   Changes: baked to our loader's format (it was made for GeckoLib); drawn at 1.5 size; its animations played by our
   own boss's moves. The spawn egg is the Slider's egg recoloured gold, not part of the model.
 
+bbmodels/xenoform_asterion.json, textures/entity/xenoform_asterion.png and xenoform_asterion_ultimate(_glow).png: the
+Xeno-Band's Asterion, the minotaur alien
+  "Minotaur" by eanncrod, https://blockbenchworkshop.com/model/eanncrod/minotaur (the model Kingdoms' minotaur uses)
+  Changes: baked to our loader's format with its animations; its texture repainted as the alien's skin (slate hide, the
+  gold and eyes in the band's green, the insignia on its chest plate) and a plated copy for its Ultimate
+  (tools/gen_xenoform_asterion.py, art/xenoform_asterion-CREDITS.md); drawn at about half size, its hammer hidden while
+  a big weapon is held.
+
 Item and costume models (also CC BY 4.0, https://creativecommons.org/licenses/by/4.0/):
 
 models/item/armory/iron_dagger.json and textures/item/armory/iron_dagger.png: the Armory's iron dagger
