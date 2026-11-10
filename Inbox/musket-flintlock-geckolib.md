@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -17,6 +17,7 @@ suggested_owns:
   - build.gradle (Powers)
   - src/main/resources/fabric.mod.json
 writer: hermes-writer
+text_pass: done
 ---
 
 # Musket and flintlock: GeckoLib animations with smoke and fire on the blast
