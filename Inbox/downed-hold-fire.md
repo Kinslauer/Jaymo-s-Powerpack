@@ -4,7 +4,7 @@ for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by: hermes-a
+claimed_by: 
 pr:
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Downed.java, kingdoms/src/main/java/com/jaymoskingdoms/Downed.java]
 ---
