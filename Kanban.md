@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,9 +25,9 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · blocked
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 
 
 ## Done
