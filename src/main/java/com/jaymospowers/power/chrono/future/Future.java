@@ -40,6 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Chronokinesis's leap into the future: a lifetime on, the world is a ruined city overrun by feral dead
@@ -115,6 +116,14 @@ public final class Future {
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** How often a waiting newcomer is checked on and told how far along the future is (ticks). */
 	static final int WAIT_CHECK = 20;
+	/**
+	 * (Tiv: every player's start their own) A lost-in-time newcomer whose arrival square is someone else's start lands on a
+	 * street round it: looked for this many blocks further out each ring, out to this far, at this many points a ring, no more
+	 * than this many blocks above or below the square.
+	 */
+	static final int ARRIVAL_FREE_STEP = 16, ARRIVAL_FREE_MAX = 96, ARRIVAL_FREE_POINTS = 12, ARRIVAL_FREE_RISE = 4;
+	/** (Tiv) A waiting newcomer's check of which arrival spots are free (Kingdoms'), till they're sent. Not saved: a restart sends them to the square. */
+	private static final Map<UUID, java.util.function.BiPredicate<ServerLevel, net.minecraft.core.BlockPos>> STORY_FREE = new HashMap<>();
 
 	private static final Map<UUID, Long> READY_AT = new HashMap<>();
 	/** When each Chrono in the future (with room for one) has their next echo turn up. */
@@ -130,6 +139,7 @@ public final class Future {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			READY_AT.clear();
 			ECHO_DUE.clear();
+			STORY_FREE.clear();
 			FutureRuins.clear();
 		});
 		ServerChunkEvents.CHUNK_LOAD.register(FutureRuins::onLoad);
@@ -187,11 +197,20 @@ public final class Future {
 	 * unhurt and held still ({@link #WAITING}), and go the moment it's ready. Always true: they're sent, or on their way.
 	 */
 	public static boolean strand(ServerPlayer player) {
+		return strand(player, (level, at) -> true);
+	}
+
+	/**
+	 * The same, (Tiv) arriving where {@code free} says nobody else's start was: the square, else a street round it
+	 * ({@link #freeArrival}). Asked when they're sent, so a wait for the future sees the starts made meanwhile.
+	 */
+	public static boolean strand(ServerPlayer player, java.util.function.BiPredicate<ServerLevel, net.minecraft.core.BlockPos> free) {
 		player.setAttached(STRANDED, true);
 		if (sendable(player.level().getServer())) {
-			goForward(player, 0, 1);
+			goForward(player, 0, 1, free);
 			return true;
 		}
+		STORY_FREE.put(player.getUUID(), free);
 		player.setAttached(WAITING, player.blockPosition());
 		player.setPermanentlyInvulnerable(true);
 		return true;
@@ -221,6 +240,34 @@ public final class Future {
 		player.teleportTo(future, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
 		burst(future, player.position());
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.woke_again").withStyle(ChatFormatting.GOLD));
+	}
+
+	/**
+	 * (Tiv) The arrival square if {@code free} says it's nobody else's start, else the nearest street round it that is (rings
+	 * {@link #ARRIVAL_FREE_STEP} apart, near the square's height, room to stand); the square with none.
+	 */
+	private static Vec3 freeArrival(ServerLevel future, java.util.function.BiPredicate<ServerLevel, net.minecraft.core.BlockPos> free) {
+		Vec3 square = arrival(future, 0, 1);
+		if (free.test(future, net.minecraft.core.BlockPos.containing(square))) {
+			return square;
+		}
+		for (int r = ARRIVAL_FREE_STEP; r <= ARRIVAL_FREE_MAX; r += ARRIVAL_FREE_STEP) {
+			for (int k = 0; k < ARRIVAL_FREE_POINTS; k++) {
+				double angle = Math.PI * 2.0 * k / ARRIVAL_FREE_POINTS;
+				int x = LosPerrito.SPAWN_X + (int) Math.round(Math.cos(angle) * r), z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * r);
+				if (!free.test(future, new net.minecraft.core.BlockPos(x, 0, z))) {
+					continue;
+				}
+				future.getChunk(x >> 4, z >> 4);
+				int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+				net.minecraft.core.BlockPos feet = new net.minecraft.core.BlockPos(x, y, z);
+				if (Math.abs(y - square.y) <= ARRIVAL_FREE_RISE && future.getBlockState(feet.below()).isFaceSturdy(future, feet.below(), net.minecraft.core.Direction.UP)
+					&& future.getBlockState(feet.below()).getFluidState().isEmpty() && future.getBlockState(feet).isAir() && future.getBlockState(feet.above()).isAir()) {
+					return new Vec3(x + 0.5, y, z + 0.5);
+				}
+			}
+		}
+		return square;
 	}
 
 	/** Where the {@code index}th of {@code of} newcomers stands in the arrival square. */
@@ -259,7 +306,7 @@ public final class Future {
 			if (sendable(server)) {
 				player.removeAttached(WAITING);
 				player.setPermanentlyInvulnerable(false);
-				goForward(player, 0, 1);
+				goForward(player, 0, 1, STORY_FREE.remove(player.getUUID()));
 				continue;
 			}
 			if (player.blockPosition().distManhattan(hold) > 1) {
@@ -347,6 +394,12 @@ public final class Future {
 	}
 
 	static void goForward(ServerPlayer player, int index, int of) {
+		goForward(player, index, of, null);
+	}
+
+	/** The same; {@code free}: (Tiv, a lost-in-time newcomer's) which arrival spots are nobody else's start (null: the square as usual). */
+	private static void goForward(ServerPlayer player, int index, int of,
+		java.util.function.@Nullable BiPredicate<ServerLevel, net.minecraft.core.BlockPos> free) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel future = server.getLevel(FUTURE);
 		if (future == null) {
@@ -361,7 +414,7 @@ public final class Future {
 			FutureStart.restore(future);
 		}
 		burst(from, player.position());
-		Vec3 at = arrival(future, index, of);
+		Vec3 at = free == null ? arrival(future, index, of) : freeArrival(future, free);
 		player.teleportTo(future, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
 		burst(future, player.position());
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.arrived").withStyle(ChatFormatting.GOLD));

@@ -112,8 +112,8 @@ II within 6) rather than adding damage to each blow; Root Out's "truffles" are v
   - V is a stalk mark.
   - B is a roar that makes mobs flee.
   - It always lands on its feet (no fall damage under 12 blocks).
-- **Tusk, the war boar:** scanned from a hoglin, a Naturalist boar or rhino, the Kingdoms minotaur, or the Aether
-  burrukai, kirrid or taegore.
+- **Tusk, the war boar:** scanned from a hoglin, a Naturalist boar or rhino, or the Aether burrukai, kirrid or taegore.
+  (The Kingdoms minotaur was on this list; it now teaches its own alien, Asterion: see `docs/xenoform.md`.)
   - R is a head-down charge that tosses mobs.
   - G is a gore that bleeds.
   - V is Root Out. It digs up truffles and roots: food, plus a random seed or bone meal.

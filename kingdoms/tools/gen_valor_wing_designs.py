@@ -91,7 +91,7 @@ def bake(design, source, wings, turns):
 
 
 def zephyrus_uvs():
-    # ZephyrusDragonModel's wing boxes on its 256x256 sheet: (u, v, w, h, d)
+    # Zephyrus's wing boxes (zephyrus.geo.json) on its 256x256 sheet: (u, v, w, h, d)
     boxes = ((94, 95, 18, 3, 3), (112, 0, 18, 0, 26), (0, 103, 20, 2, 2), (0, 44, 20, 0, 22))
     rects = []
     for u, v, w, h, d in boxes:

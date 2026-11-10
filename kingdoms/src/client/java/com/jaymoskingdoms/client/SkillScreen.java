@@ -48,6 +48,8 @@ final class SkillScreen extends Screen {
 		TREE_Y = 56, DETAIL_LINES = 5, DETAIL_H = 54, FOOTER = 22, XP_BAR_W = 120;
 	/** (0.7.540) The attribute bar: ten segments of ten points each. */
 	static final int SEG_W = 13, SEG_GAP = 2, SEGMENTS = 10, LOCKED = 0xFF0E0E14;
+	/** The bar's share trained in the weights (Might only, {@link Stats#trainMight}). */
+	static final int TRAINED = 0xFFC0503A;
 
 	private static KeyMapping key;
 	/** (0.7.514) The web's header and footer heights, its zoom range and how much a scroll notch zooms. */
@@ -707,17 +709,21 @@ final class SkillScreen extends Screen {
 			int spent = Stats.spent(shown, stat), fromHeritage = player == null ? 0 : Stats.fromHeritage(player, stat);
 			int fromClass = player == null ? 0 : Stats.fromClass(player, stat);
 			int fromStory = player == null ? 0 : Stats.fromStory(player, stat);
-			int value = Math.min(cap, spent + fromHeritage + fromClass + fromStory);
+			int fromTraining = player == null ? 0 : Stats.fromTraining(player, stat);
+			int value = Math.min(cap, spent + fromHeritage + fromClass + fromStory + fromTraining);
 			String blocked = player == null ? "" : Stats.blocked(player, shown, stat);
 			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, barX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
-			// heritage's (teal), then class's (gold), then (0.7.216) your story's (parchment), then yours (white); empty to the cap, dark past it
+			// heritage's (teal), then class's (gold), then (0.7.216) your story's (parchment), then trained in the weights (red), then
+			// yours (white); empty to the cap, dark past it
 			int y0 = ry + 4, y1 = ry + 10, h = Math.min(value, fromHeritage), c = Math.min(value, h + fromClass), st = Math.min(value, c + fromStory);
+			int tr = Math.min(value, st + fromTraining);
 			barFill(graphics, barX, y0, y1, 0, cap, Ui.BAR_BACK);
 			barFill(graphics, barX, y0, y1, cap, Stats.MAX, LOCKED);
 			barFill(graphics, barX, y0, y1, 0, h, HeritageScreen.ACCENT);
 			barFill(graphics, barX, y0, y1, h, c, Ui.GOLD);
 			barFill(graphics, barX, y0, y1, c, st, LifeStoryScreen.ACCENT);
-			barFill(graphics, barX, y0, y1, st, value, Ui.TEXT);
+			barFill(graphics, barX, y0, y1, st, tr, TRAINED);
+			barFill(graphics, barX, y0, y1, tr, value, Ui.TEXT);
 			if (cap < Stats.MAX) {
 				int nx = barX(barX, cap) - (cap % (Stats.MAX / SEGMENTS) == 0 ? SEG_GAP / 2 + 1 : 0);
 				graphics.fill(nx, ry + 2, nx + 1, ry + 12, accent);
@@ -746,6 +752,12 @@ final class SkillScreen extends Screen {
 			}
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.from", Stats.spent(shown, hovered), Stats.fromHeritage(player, hovered),
 				Stats.fromClass(player, hovered), Stats.fromStory(player, hovered)).withColor(Ui.DIM));
+			if (hovered == Stats.Stat.MIGHT && Stats.trained(player) > 0.0) {
+				// trained in the weights: the points, and how far the next one has come
+				double trained = Stats.trained(player);
+				text.add(Component.translatable("gui.jaymoskingdoms.stats.trained_might", Stats.fromTraining(player, hovered),
+					(int)Math.floor((trained - Math.floor(trained)) * 100.0)).withColor(TRAINED));
+			}
 			String blocked = Stats.blocked(player, shown, hovered);
 			if (blocked == null) {
 				text.add(Component.translatable("gui.jaymoskingdoms.stats.raise", Stats.SHIFT_STEP).withColor(Ui.GOOD));

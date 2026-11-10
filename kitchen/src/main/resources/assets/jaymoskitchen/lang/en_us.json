@@ -637,7 +637,7 @@
 	"tooltip.jaymoskitchen.waterskin.clean": "Clean water (%s/%s)",
 	"message.jaymoskitchen.thirst.dirty": "That water was foul. Your stomach turns.",
 	"message.jaymoskitchen.thirst.steam": "The water hisses to steam on your tongue.",
-	"message.jaymoskitchen.thirst.cured": "The hot chocolate washes the parasite out.",
+	"message.jaymoskitchen.thirst.cured": "The warm drink washes the parasite out.",
 	"message.jaymoskitchen.body_heat.chilly": "You're shivering.",
 	"message.jaymoskitchen.body_heat.freezing": "You're freezing. Find a fire, or warmer clothes.",
 	"message.jaymoskitchen.body_heat.frostbite": "The cold is biting into you!",

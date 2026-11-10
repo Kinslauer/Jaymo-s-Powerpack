@@ -12,13 +12,15 @@ tools/bbmodel_geckolib.py on a project to update the game's files):
 Blockbench space: y up, feet at 0, the front at -z, the model's right at +x. Rotations as Blockbench shows them: +x
 swings a hanging limb forward and up (and tips an upright part back), +z lifts the right arm (at +x) out to the side.
 
-Run from the project root: py -3 -I kingdoms/tools/gen_tomb_undead.py   (needs Pillow)
+Run from the project root: py -3 -I kingdoms/tools/gen_tomb_undead.py [draugr ...]   (needs Pillow; names: only those)
 """
 import base64
 import io
 import json
+import math
 import os
 import random
+import sys
 import uuid
 
 from PIL import Image
@@ -78,7 +80,7 @@ PALETTE = {
 	"skin": (108, 104, 86), "bone": (214, 202, 160), "iron": (104, 110, 116), "mail": (82, 88, 96), "fur": (98, 78, 60),
 	"cloth": (58, 82, 104), "leather": (88, 62, 40), "wood": (104, 72, 42), "gold": (184, 145, 58), "horn": (205, 191, 156),
 	"rust": (122, 74, 44), "shell": (36, 50, 44), "shell_hi": (64, 88, 76), "leg": (22, 26, 24), "eye": (160, 232, 255),
-	"steel": (168, 176, 184),
+	"steel": (168, 176, 184), "rime": (178, 196, 206),
 }
 
 
@@ -107,6 +109,8 @@ def paint_face(img, box, mat, face, rng):
 				c = PALETTE["bone"] if rng.random() < 0.3 else shade(base, 0.7)
 			elif mat == "shell" and ly == 0:
 				c = PALETTE["shell_hi"]
+			elif mat == "rime" and rng.random() < 0.45:
+				c = PALETTE["fur"] if rng.random() < 0.6 else (226, 238, 244)  # fur under the frost, and the frost's glitter
 			img.putpixel((x, y), shade(c, k) + (255,))
 
 
@@ -201,6 +205,25 @@ def eyes(color, at, px=1):
 
 # ---------------------------------------------------------------- the draugr
 
+# The tail: each segment's width and length (Blockbench units), the first one's droop and the rest's curl (degrees,
+# +x hangs it lower), and how far it sways side to side (degrees) standing and walking.
+TAIL = [(2.0, 3.0), (1.8, 3.0), (1.6, 2.8), (1.4, 2.6), (1.2, 2.4)]
+TAIL_DROOP, TAIL_CURL = 55, -10
+TAIL_IDLE_SWAY, TAIL_WALK_SWAY = 4, 7
+
+
+def tail_sway(length, degrees):
+	"""Side to side, each segment a little after the one before."""
+	tracks = {}
+	for i in range(1, len(TAIL)):
+		lag = length * 0.12 * i
+		keys = [(0, (0, degrees * math.sin(-lag / length * 2 * math.pi), 0))]
+		for k in (0.25, 0.5, 0.75, 1.0):
+			keys.append((round(length * k, 4), (0, degrees * math.sin((k - lag / length) * 2 * math.pi), 0)))
+		tracks[f"tail_{i}"] = {"rotation": keys}
+	return tracks
+
+
 def draugr():
 	b = Builder(128, 128, 11)
 	b.bone("root", None, (0, 0, 0))
@@ -237,6 +260,13 @@ def draugr():
 	b.cube("shield", (-10.6, 12, -6), (-9.4, 13, 6), "iron")
 	b.cube("shield", (-10.6, 24, -6), (-9.4, 25, 6), "iron")
 	b.cube("shield", (-11.5, 16.5, -1.5), (-8.5, 19.5, 1.5), "iron")
+	# (last, so the rest of the sheet stays where it was) a Warrior-born's tail from under the mail, rimed with frost
+	# toward the tip; each draugr's own is mangled in its own way (InhabitantsClient.DraugrRenderer)
+	z, parent = 3.0, "waist"
+	for i, (w, length) in enumerate(TAIL):
+		b.bone(f"tail_{i}", parent, (0, 11, z), (TAIL_DROOP if i == 0 else TAIL_CURL, 0, 0))
+		b.cube(f"tail_{i}", (-w / 2, 11 - w / 2, z), (w / 2, 11 + w / 2, z + length), "fur" if i < 2 else "rime")
+		z, parent = z + length, f"tail_{i}"
 	model = b.project("draugr")
 	R = "root"
 	walk = {
@@ -248,8 +278,10 @@ def draugr():
 		"body": {"rotation": [(0, (-4, -4, 0)), (0.5, (-4, 4, 0)), (1.0, (-4, -4, 0))]},
 		R: {"position": [(0, Z), (0.25, (0, 0.6, 0)), (0.5, Z), (0.75, (0, 0.6, 0)), (1.0, Z)]},
 	}
+	walk.update(tail_sway(1.0, TAIL_WALK_SWAY))
 	anims = [
 		anim("idle", 3.0, "loop", {
+			**tail_sway(3.0, TAIL_IDLE_SWAY),
 			"body": {"rotation": [(0, (-3, 0, 0)), (1.5, (-6, 0, 0)), (3.0, (-3, 0, 0))]},
 			"head": {"rotation": [(0, (6, 0, 0)), (1.5, (10, 4, 2)), (3.0, (6, 0, 0))]},
 			"right_arm": {"rotation": [(0, (25, 0, 6)), (1.5, (28, 0, 8)), (3.0, (25, 0, 6))]},
@@ -401,14 +433,18 @@ def eggs():
 		print("wrote the " + name + " spawn egg")
 
 
-def main():
-	eggs()
+def main(only=()):
+	"""Writes every project, or only those named on the command line (and the spawn eggs only with all of them)."""
+	if not only:
+		eggs()
 	os.makedirs(ART, exist_ok=True)
 	for name, make in (("draugr", draugr), ("barrow_beetle", beetle), ("silver_skeleton", silver_skeleton), ("skeleton_lord", skeleton_lord)):
+		if only and name not in only:
+			continue
 		with open(os.path.join(ART, name + ".bbmodel"), "w", encoding="utf-8", newline="\n") as f:
 			json.dump(make(), f)
 		print("wrote kingdoms/art/" + name + ".bbmodel")
 
 
 if __name__ == "__main__":
-	main()
+	main(sys.argv[1:])

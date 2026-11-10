@@ -21,6 +21,8 @@ public final class KingdomsCompat {
 	private static boolean grabbedLooked;
 	private static Method fished;
 	private static boolean fishedLooked;
+	private static Method trainMight;
+	private static boolean trainMightLooked;
 
 	private KingdomsCompat() {
 	}
@@ -158,6 +160,32 @@ public final class KingdomsCompat {
 			fished.invoke(null, player, hook);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			// (an older Kingdoms, or one that threw: the fishing goes on)
+		}
+	}
+
+	/**
+	 * {@code points} of Might trained by {@code player} (shadowboxing in Training Weights, {@code core.Training}): Kingdoms'
+	 * {@code Stats.trainMight} keeps them toward its Might attribute. Nothing without Kingdoms.
+	 */
+	public static void trainMight(net.minecraft.server.level.ServerPlayer player, double points) {
+		if (!LOADED || player == null) {
+			return;
+		}
+		if (!trainMightLooked) {
+			trainMightLooked = true;
+			try {
+				trainMight = Class.forName("com.jaymoskingdoms.Stats").getMethod("trainMight", net.minecraft.server.level.ServerPlayer.class, double.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				trainMight = null;
+			}
+		}
+		if (trainMight == null) {
+			return;
+		}
+		try {
+			trainMight.invoke(null, player, points);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms, or one that threw: the shadowboxing goes on)
 		}
 	}
 }

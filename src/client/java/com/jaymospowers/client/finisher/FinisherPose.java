@@ -437,6 +437,11 @@ public final class FinisherPose {
 		ClientTickEvents.END_CLIENT_TICK.register(FinisherPose::tick);
 	}
 
+	/** Whether our own finisher has the view from behind now (first person comes back after it). */
+	public static boolean holdsView() {
+		return viewTaken;
+	}
+
 	/** Our own finisher watched from behind, and first person given back after. */
 	private static void tick(Minecraft minecraft) {
 		if (!CINEMATIC) {

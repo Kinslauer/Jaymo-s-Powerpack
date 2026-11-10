@@ -84,7 +84,7 @@
   "gui.jaymoskingdoms.stats.caps": "Caps by tier: %s.",
   "gui.jaymoskingdoms.stats.blocked.points": "No attribute points left: level a pillar.",
   "gui.jaymoskingdoms.stats.hint": "Your character level is Survival, Stealth and Strength added up. Every level earns %s attribute points, and each world tier you open adds more. A respec gives them back with your perks.",
-  "gui.jaymoskingdoms.stats.legend": "The bar: teal from your heritage, gold from your class, parchment from your story, white your own. The dark end past the notch waits for a higher world tier. Hearts come from eating well, not from here.",
+  "gui.jaymoskingdoms.stats.legend": "The bar: teal from your heritage, gold from your class, parchment from your story, red trained in weights, white your own. The dark end past the notch waits for a higher world tier. Hearts come from eating well, not from here.",
   "gui.jaymoskingdoms.heritage.title": "Heritage",
   "gui.jaymoskingdoms.heritage.sub": "Where your blood comes from",
   "gui.jaymoskingdoms.heritage.picked": "Your heritage, once you choose it. It's for life.",

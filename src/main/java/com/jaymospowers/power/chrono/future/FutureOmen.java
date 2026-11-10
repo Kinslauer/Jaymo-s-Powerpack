@@ -1,5 +1,12 @@
 package com.jaymospowers.power.chrono.future;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -13,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.Filterable;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -47,8 +55,31 @@ import net.minecraft.world.phys.Vec3;
  * it comes apart like an iron golem) holding scrap, now and then a cockpit log, and its pilot climbs out of the hatch (a curious survivor from the future, an MCA villager: {@link FutureOmenPilots}).
  * <p>Squads turn up rarely, with their drones, in the future only ({@link FutureOmens}). Nothing its own kind fires
  * (or its drones) does it harm.
+ * <p>Animated by GeckoLib (art/the_omen_red.bbmodel and the blue one, written by tools/gen_omen_geo.py; the two builds
+ * share one animation file). A {@code move} controller picks idle, walk, run (chasing) or a shuffle round on the spot
+ * from what the client sees it doing; the cannons' kick plays on {@code fire} with every round, and the smash, the
+ * flinch and the death (each build buckles into its own Workshop pose) on {@code action}, all started by the server.
  */
-public class FutureOmen extends PathfinderMob {
+public class FutureOmen extends PathfinderMob implements GeoEntity {
+	/** GeckoLib blends (ticks). */
+	static final int ANIMATION_BLEND = 4, ACTION_BLEND = 2;
+	/** The walk plays at its own speed at this walk-animation speed; never slower than the floor. */
+	static final float WALK_AT = 0.6F, WALK_FLOOR = 0.5F;
+	/** Faster than this over the ground (blocks a tick) it runs, at its own speed at RUN_REF (a chase is about 0.47). */
+	static final double RUN_AT = 0.38, RUN_REF = 0.47;
+	/** Standing, its body turning faster than this (degrees a tick) shuffles its feet round. */
+	static final float TURN_AT = 1.5F;
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	static final RawAnimation RUN = RawAnimation.begin().thenLoop("run");
+	static final RawAnimation TURN_LEFT = RawAnimation.begin().thenLoop("turn_left");
+	static final RawAnimation TURN_RIGHT = RawAnimation.begin().thenLoop("turn_right");
+	static final RawAnimation SMASH = RawAnimation.begin().thenPlay("smash");
+	static final RawAnimation FIRE = RawAnimation.begin().thenPlay("fire");
+	static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
+	static final RawAnimation DEATH_RED = RawAnimation.begin().thenPlayAndHold("death_red");
+	static final RawAnimation DEATH_BLUE = RawAnimation.begin().thenPlayAndHold("death_blue");
+
 	static final double HEALTH = 320.0, DAMAGE = 22.0, SPEED = 0.22, FOLLOW = 56.0, ARMOR = 22.0, TOUGHNESS = 10.0;
 	/** Its arm cannon's bursts out to here, and closer than this it smashes instead. */
 	static final double CANNON_RANGE = 40.0, CANNON_NEAREST = 4.0;
@@ -69,6 +100,7 @@ public class FutureOmen extends PathfinderMob {
 	private int attackAnimationTick;
 	private int aimingFor;
 	private boolean pilotOut;
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 	public FutureOmen(EntityType<? extends FutureOmen> type, Level level) {
 		super(type, level);
@@ -116,6 +148,41 @@ public class FutureOmen extends PathfinderMob {
 			(target, level) -> hostileTo(target)));
 	}
 
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<FutureOmen>("move", ANIMATION_BLEND, test -> {
+			FutureOmen omen = test.animatable();
+			double moved = Math.sqrt(Mth.square(omen.getX() - omen.xo) + Mth.square(omen.getZ() - omen.zo));
+			float turned = Mth.wrapDegrees(omen.yBodyRot - omen.yBodyRotO);
+			RawAnimation anim;
+			float speed = 1.0F;
+			if (test.isMoving() && moved > RUN_AT) {
+				anim = RUN;
+				speed = (float) (moved / RUN_REF);
+			} else if (test.isMoving()) {
+				anim = WALK;
+				speed = Math.max(WALK_FLOOR, omen.walkAnimation.speed() / WALK_AT);
+			} else if (Math.abs(turned) > TURN_AT) {
+				// the body's yaw going up turns it to its right
+				anim = turned > 0.0F ? TURN_RIGHT : TURN_LEFT;
+			} else {
+				anim = IDLE;
+			}
+			test.setControllerSpeed(Mth.clamp(speed, 0.25F, 2.0F));
+			return test.setAndContinue(anim);
+		}));
+		// before "action", so a smash or a death wins the forearms over a round's kick
+		controllers.add(new AnimationController<FutureOmen>("fire", 0, test -> PlayState.STOP).triggerableAnim("fire", FIRE));
+		controllers.add(new AnimationController<FutureOmen>("action", ACTION_BLEND, test -> PlayState.STOP)
+			.triggerableAnim("smash", SMASH).triggerableAnim("hurt", HURT)
+			.triggerableAnim("death_red", DEATH_RED).triggerableAnim("death_blue", DEATH_BLUE));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
+	}
+
 	/** Are its arm cannons up? */
 	public boolean aiming() {
 		return this.entityData.get(DATA_AIMING);
@@ -144,7 +211,9 @@ public class FutureOmen extends PathfinderMob {
 				getLookControl().setLookAt(foe, 30.0F, 30.0F);
 				this.entityData.set(DATA_AIMING, true);
 				aimingFor = 30;
-				FutureGuns.tickWith(level, this, foe, CANNON);
+				if (FutureGuns.tickWith(level, this, foe, CANNON)) {
+					this.triggerAnim("fire", "fire");
+				}
 			}
 		}
 		if (getHealth() < getMaxHealth() * 0.3F && this.tickCount % 6 == 0) {
@@ -159,11 +228,16 @@ public class FutureOmen extends PathfinderMob {
 		if (source.getEntity() instanceof FutureOmen || source.getEntity() instanceof FutureWorky) {
 			return false;
 		}
-		return super.hurtServer(level, source, amount);
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt && isAlive()) {
+			this.triggerAnim("action", "hurt");
+		}
+		return hurt;
 	}
 
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		this.triggerAnim("action", "smash");
 		this.attackAnimationTick = 12;
 		level.broadcastEntityEvent(this, (byte) 4);
 		float damage = (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
@@ -206,6 +280,9 @@ public class FutureOmen extends PathfinderMob {
 	/** The hatch pops and the pilot climbs out (after the blast, so they are clear of it). */
 	@Override
 	public void die(DamageSource source) {
+		if (!pilotOut && level() instanceof ServerLevel) {
+			this.triggerAnim("action", blue() ? "death_blue" : "death_red");
+		}
 		super.die(source);
 		if (!pilotOut && level() instanceof ServerLevel level) {
 			pilotOut = true;

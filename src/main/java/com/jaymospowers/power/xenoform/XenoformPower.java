@@ -384,6 +384,8 @@ public final class XenoformPower implements Power {
 		public int grabPrey = -1;
 		public net.minecraft.world.phys.@Nullable Vec3 grabFrom, grabTo;
 		public final java.util.List<com.jaymospowers.power.xenoform.forms.Towerback.Wave> waves = new java.util.ArrayList<>();
+		/** Asterion: its charge, roar, slam and gore. */
+		public final com.jaymospowers.power.xenoform.forms.Asterion.Scratch asterion = new com.jaymospowers.power.xenoform.forms.Asterion.Scratch();
 		/** Nadir: the Rift's, Graviton's and Command's scratch (G V B). */
 		public final com.jaymospowers.power.xenoform.nadir.NadirState nadir = new com.jaymospowers.power.xenoform.nadir.NadirState();
 
@@ -480,6 +482,7 @@ public final class XenoformPower implements Power {
 			grabPrey = -1;
 			grabFrom = grabTo = null;
 			waves.clear();
+			asterion.clear();
 			spin = whirlTicks = leapCharge = 0;
 			spun.clear();
 			whirl = null;
@@ -1950,6 +1953,7 @@ public final class XenoformPower implements Power {
 				// (0.21.37) the Ultimates' big-move poses come before the base alien's own
 				case "rivet" -> act = live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Ironpour && com.jaymospowers.power.xenoform.forms.ultimate.Ironpour.slamming(player) ? "slam" : live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
 				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;
+				case "asterion" -> act = com.jaymospowers.power.xenoform.forms.Asterion.act(live);
 				default -> act = null;
 			}
 		}

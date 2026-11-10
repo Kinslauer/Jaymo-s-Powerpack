@@ -3,7 +3,8 @@
 	"package": "com.jaymospowers.client.mixin.shouldersurfing",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ShoulderSurfingGiantMixin"
+		"ShoulderSurfingGiantMixin",
+		"ShoulderSurfingFrontMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

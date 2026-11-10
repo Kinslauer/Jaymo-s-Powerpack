@@ -434,13 +434,13 @@ public final class StoryGround {
 	 * loaded round her.) The realm is the one nearest spawn with a harbour that has a berth, else the coastal realm
 	 * nearest spawn (a harbour built for it), else a new kingdom raised on the shore nearest spawn; its land is kept
 	 * loaded and ticking till she floats. A realm whose harbour can't be built or whose whaler won't float is passed
-	 * over for the next.
+	 * over for the next. (Tiv) So is one whose harbour isn't {@code free} (someone else's start: LifeStory).
 	 */
-	static void harbour(ServerPlayer player, Runnable then, Runnable fallback) {
+	static void harbour(ServerPlayer player, java.util.function.BiPredicate<ServerLevel, BlockPos> free, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = Factions.level(server);
 		BlockPos spawn = level.getRespawnData().pos();
-		Whaler w = new Whaler(player.getUUID(), spawn);
+		Whaler w = new Whaler(player.getUUID(), spawn, free);
 		w.realm = w.next(level);
 		Faction first = w.realm < 0 ? null : Factions.get(server, w.realm);
 		if (first == null) {
@@ -536,19 +536,21 @@ public final class StoryGround {
 		final UUID player;
 		final BlockPos spawn;
 		final java.util.Set<Integer> passed = new java.util.HashSet<>();
+		final java.util.function.BiPredicate<ServerLevel, BlockPos> free;
 		int realm = -1, misses;
 		boolean founded, made, settled;
 		Job job;
 
-		Whaler(UUID player, BlockPos spawn) {
+		Whaler(UUID player, BlockPos spawn, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 			this.player = player;
 			this.spawn = spawn;
+			this.free = free;
 		}
 
 		/** The next realm to try (-1: none left, and no shore to raise one on). */
 		int next(ServerLevel level) {
 			misses = 0;
-			Faction f = coastalRealm(level, spawn, passed);
+			Faction f = coastalRealm(level, spawn, passed, free);
 			if (f == null && !founded) {
 				founded = true;
 				BlockPos seat = shore(level, spawn);
@@ -616,9 +618,10 @@ public final class StoryGround {
 
 	/**
 	 * The standing realm nearest {@code from}, not in {@code passed}, with a harbour whose whaler is in or fitting out,
-	 * or with no harbour yet and its seat within a harbour's reach of the sea.
+	 * or with no harbour yet and its seat within a harbour's reach of the sea; (Tiv) its harbour (else its seat) {@code free}.
 	 */
-	private static @Nullable Faction coastalRealm(ServerLevel level, BlockPos from, java.util.Set<Integer> passed) {
+	private static @Nullable Faction coastalRealm(ServerLevel level, BlockPos from, java.util.Set<Integer> passed,
+		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		MinecraftServer server = level.getServer();
 		List<Faction> realms = new ArrayList<>();
 		for (Faction f : Factions.all(server)) {
@@ -628,7 +631,11 @@ public final class StoryGround {
 		}
 		realms.sort(Comparator.comparingDouble(f -> f.seat().distSqr(from)));
 		for (Faction f : realms) {
-			if (Navies.harbour(server, f.id()) != null) {
+			Navies.Harbour harbour = Navies.harbour(server, f.id());
+			if (!free.test(level, harbour != null ? harbour.mooring() : f.seat())) {
+				continue;
+			}
+			if (harbour != null) {
 				if (Whalers.free(server, f)) {
 					return f;
 				}

@@ -1101,7 +1101,7 @@ final class LifeStoryScreen extends Screen {
 		java.util.Map.entry("moon", new int[] {0xFF000004, 0xFF10101A, 0xFFB8B8C0}),
 		java.util.Map.entry("verdant", new int[] {0xFF2A6A2A, 0xFF9AD07A, 0xFF4A8A2A}),
 		java.util.Map.entry("rustfall", new int[] {0xFF3A1A0A, 0xFFA05A2A, 0xFF5A3A2A}),
-		java.util.Map.entry("maw", new int[] {0xFF000000, 0xFF2A0A3A, 0xFF1A1A1A}),
+		java.util.Map.entry("maw", new int[] {0xFF000000, 0xFF3A1E12, 0xFF242020}),
 		java.util.Map.entry("demon", new int[] {0xFF1A0000, 0xFF8A1A1A, 0xFF3A1010}),
 		java.util.Map.entry("afterlife", new int[] {0xFFB0C8E8, 0xFFF8F0D0, 0xFFF0F0F0}),
 		java.util.Map.entry("fate", new int[] {0xFF0A0A2A, 0xFF4A2A7A, 0xFF2A2A3A}));
