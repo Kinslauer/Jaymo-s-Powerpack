@@ -10814,3 +10814,32 @@ Not seen in game: timing, blends and the death fall still need a playtest.
 - Varasuchus, the crocodile dragon of the lesser dragons, is now drawn and animated with GeckoLib. It looks the same as before: same hides, glowing markings, horns, scutes, saddle, size, hatchling size, rider seats and reach.
 - Every pose and move it had is still there. Idle, it hisses, shakes its head, swishes its tail and sniffs. It walks, gallops, basks sitting, lies crashed, swims and rears up raging. Its moves are the claws, horn gore, dash, slash barrage, phase shift, tailguard and parry, rage roar, bite and tail sweep, along with a flinch and its death. Moves it makes while reared up use their own upright versions.
 - Kingdoms builds and the dev server starts, but Varasuchus hasn't been spawned or watched in game yet.
+
+## 0.7.700 (2026-11-10): Titan voices for the Great Ape and every xeno form, carrying to the ground; giants hear the ground; spilt blood lies still (#1241)
+
+- **Titan voice** (Andy: "a transformed great ape, and every xeno form, gets a titan voice changer turned on"). In any of
+  the Xeno-Band's alien forms, Simple Voice Chat's Titan voice is now forced on, as the werewolf's and the
+  Great Ape's voices are (the ape keeps its deeper, growling titan). It's the voice changer's own effect on the
+  speaker's client, so nothing new had to be written for the sound. `VoiceMasks.Mask.TITAN`, `VoiceChangerCompat`,
+  `PowersCompat#xenoForm`.
+- **A titan's voice reaches the ground** (Andy: "audible to everyone on the ground: their voice range must reach players
+  far below them"). The ape and every xeno form now speak 16 blocks further than everyone else, plus 2 blocks for every
+  block they stand taller than a man (a full Great Ape: about 74 more, so about 122 blocks with Simple Voice Chat's
+  default 48). A whisper stays a whisper.
+- **A giant hears the ground** (Andy: "make sure a transformed great ape still hears the players on the ground"). Voice
+  chat listens from the camera, and a full ape's camera rides about 40 blocks from his feet, so the players around him
+  were too far to hear. Every voice that reaches a player a block or more taller than a man now reaches him with 1.4
+  blocks more range for every block of his extra height, so he hears the ground about as a man standing at his feet
+  would. This goes for any giant player, not only the ape.
+- Both go through `VoiceRange`, a plugin on Simple Voice Chat's server API (its `VoiceDistanceEvent`, and its
+  per-listener sound packet event), made only by Simple Voice Chat itself (Kingdoms' `voicechat` entrypoint). Simple
+  Voice Chat is all rights reserved: only its published API is used, compiled against and never shipped by Kingdoms.
+  Tuning: `VoiceRange.TITAN_RANGE` / `SPEAK_PER_BLOCK` / `HEAR_FROM` / `HEAR_PER_BLOCK`.
+- **Spilt blood lies still** (Andy: "blood particles on the ground keep re-animating every few seconds"). The zombies'
+  blood scent (`Awareness`) sent two drops at every spot of a hurt player's blood once a second for a minute, and since
+  Powers turned those drops into small spatters, each played its splat again on the ground over and over (Andy's clip at
+  2 hearts). The scent is no longer shown again: where the blood falls it now leaves one of Powers' lasting stains, in
+  the player's own blood, which lies still, dries darker and can be tracked like the rest. Zombies still smell it as
+  before. Tuning: `Awareness.DRIP_STAIN` / `WOUND_STAIN`.
+- Built; not played. Not tested: Simple Voice Chat voices on the Deck (how loud a titan sounds from far off, how the
+  ape hears the ground in third and first person), the Titan voice on a xeno form, the stains under a bleeding player.
