@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.UUID;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -58,7 +61,7 @@ public final class FarmhandHome {
 
 	/** The farmhand the family took in, kept on each family villager: they never hold that blood against them. */
 	static final AttachmentType<UUID> FARMHAND_FAMILY = AttachmentRegistry.create(JaymosKingdoms.id("farmhand_family"),
-		builder -> builder.persistent(Codec.UUID));
+		builder -> builder.persistent(UUIDUtil.CODEC).syncWith(UUIDUtil.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** {@code v} is one of {@code player}'s farmhand family: they never hold the farmhand's blood against them. */
 	static boolean familyOf(Villager v, Player p) {
