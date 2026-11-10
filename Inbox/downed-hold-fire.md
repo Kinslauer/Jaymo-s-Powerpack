@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: claude-cloud
-pr:
+pr: 1224
 suggested_owns: [src/main/java/com/jaymospowers/core/wounds/Downed.java, kingdoms/src/main/java/com/jaymoskingdoms/Downed.java]
 ---
 
@@ -33,3 +33,4 @@ Tiv posted a clip of it happening (message 1569172190673248330 in the Tasks thre
 - The player is then killed anyway, a few seconds later, while still on the ground: "Marcellino was slain by Mile", then the death screen ("You lie where you fell, left for dead...").
 - So the message says they leave you lying there and the guard/Villager finishes the job regardless. That contradiction is the bug in one line.
 - 2026-11-09 09:44 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-09 23:53 Cloud agent session sesn_01UBPbtzhYeN3NeDy6e1eDpE opened PR #1224.
