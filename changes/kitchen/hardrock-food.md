@@ -10,5 +10,9 @@ Andy's TFC Hardrock picks (ideas after TerraFirmaCraft, our own code and art, `t
   or perfect) in the smoker's minigame comes out preserved too. Preserved food keeps four times as long.
 - **Cold cellars**: a chest or barrel somewhere dark and out of the sky, and below height 40 or within 2 blocks of ice,
   packed or blue ice or an icebox, ages its food half as fast (counted each time it's opened).
+- **Food groups**: grain, fruit, vegetables, protein and dairy (`stomach/FoodGroups`; a Kitchen dish counts every group its
+  ingredients do). Four or more groups in your stomach's slots at once add two hearts, three add one, and two or more
+  meals of one group alone take a heart off. Five pips beside the stomach slots light up for the groups you've eaten, and
+  a food's tooltip names its groups. This adds on top of Survivalist health and every other bonus.
 - JEI info pages on Spoiled Food and salt.
 - Compile-checked; not played.

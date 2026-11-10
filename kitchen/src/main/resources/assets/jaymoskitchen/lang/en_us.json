@@ -1025,5 +1025,11 @@
 	"tooltip.jaymoskitchen.fresh.stale": "Going stale",
 	"tooltip.jaymoskitchen.fresh.off": "Nearly off",
 	"tooltip.jaymoskitchen.fresh.preserved": "Preserved: keeps four times as long",
-	"jei.jaymoskitchen.spoiled_food": "Food rots: raw meat in a week, fish in 4 days, cooked food in 2 weeks, bread in a season (its bar shows how long it has left). Rotten meat turns to rotten flesh, anything else to this. Salt it (salt in your hand, the food in the other, use) or smoke it well to keep it four times as long, and store it in a dark cellar, deep down or beside ice or an icebox, where it ages half as fast. It goes into organic compost like rotten flesh."
+	"jei.jaymoskitchen.spoiled_food": "Food rots: raw meat in a week, fish in 4 days, cooked food in 2 weeks, bread in a season (its bar shows how long it has left). Rotten meat turns to rotten flesh, anything else to this. Salt it (salt in your hand, the food in the other, use) or smoke it well to keep it four times as long, and store it in a dark cellar, deep down or beside ice or an icebox, where it ages half as fast. It goes into organic compost like rotten flesh.",
+	"tooltip.jaymoskitchen.food_groups": "Food groups: %s",
+	"food_group.jaymoskitchen.grain": "Grain",
+	"food_group.jaymoskitchen.fruit": "Fruit",
+	"food_group.jaymoskitchen.vegetable": "Vegetables",
+	"food_group.jaymoskitchen.protein": "Protein",
+	"food_group.jaymoskitchen.dairy": "Dairy"
 }
