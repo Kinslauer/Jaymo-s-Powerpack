@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -16,6 +16,7 @@ suggested_owns:
   - src/main/resources/resourcepacks/held_guns/assets/weaponmod/items/musketbayonet*.json
   - build.gradle (Powers)
   - src/main/resources/fabric.mod.json
+writer: hermes-writer
 ---
 
 # Musket and flintlock: GeckoLib animations with smoke and fire on the blast
