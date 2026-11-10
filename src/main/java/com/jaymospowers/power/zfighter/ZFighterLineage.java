@@ -717,9 +717,9 @@ public final class ZFighterLineage {
 			}
 		}
 		if (hit) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
-			shake(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE);
-		}
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
+				shake(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE * (player instanceof ServerPlayer p && ZFighterLineage.ape(p) ? ZFighterPower.live(p).apeSize : 1.0F));
+			}
 	}
 
 	/** The Great Ape's blow: a player's attack, or (a villager's wild ape, {@link VillagerApe}) a mob's. */
