@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-10)
 asked: 2026-11-10
@@ -26,3 +26,4 @@ Tiv, in the Questions thread: "make all three remove parasites" — hot chocolat
 - Extends the merged parasites-and-cures task (PR #1165) which only had hot chocolate as the cure.
 - One point an hour type grind isn't relevant here — this is just widening the cure to all three existing drinks, no new items.
 - 2026-11-10 00:02 Cloud agent session sesn_01UoCcCrNZoyhRjftYXytx1a opened PR #1215.
+- 2026-11-10 04:28 PR #1215 is merged into master; moved to Inbox/Done.

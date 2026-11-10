@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Questions thread, 2026-11-08)
 asked: 2026-11-08
@@ -31,3 +31,4 @@ Tiv, in the Questions thread: "okay, they should build might for everyone, weari
 - Both items already exist, so there is no new item to clear with Andy first.
 - 2026-11-09 21:12 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 23:53 Cloud agent session sesn_01MWdwmmjReNbb2Tay8XAwom opened PR #1220.
+- 2026-11-10 04:28 PR #1220 is merged into master; moved to Inbox/Done.

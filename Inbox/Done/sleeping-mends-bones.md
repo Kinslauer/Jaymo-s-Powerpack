@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -27,3 +27,4 @@ Tiv, in the Tasks thread: "sleeping should set your broken bones. after hitting 
 - There is already a "beds mend" change in Kingdoms 0.7.646 — look at what a bed already does before writing new code, and extend it to breaks rather than building a second path.
 - The break must still show as set, so the body renderer, the debuffs and the "patched up" check all agree afterwards.
 - 2026-11-09 23:53 Cloud agent session sesn_01Pysy1BqwTTojCAGKUww4U9 opened PR #1223.
+- 2026-11-10 04:28 PR #1223 is merged into master; moved to Inbox/Done.

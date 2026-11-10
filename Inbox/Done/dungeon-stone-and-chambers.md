@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -32,3 +32,4 @@ Tiv, in the Tasks thread: "also some of the new generated dungeon is filled with
 - 2026-11-09 23:38 Andy skipped the text pass (2026-11-09); ready for review.
 - 2026-11-09 23:42 Review (head aad23cc): changes needed. 1. The new template pools can't change generation: StormbornTomb.java:89-95 doesn't use pools at all; it places each piece directly with StructurePoolElement.single("jaymoskingdoms:stormborn_tomb/<part>") at fixed offsets (LAYOUT). So both symptoms are still there. 2. The pools' "name" field is ignored in 26.3 (a pool's id is its file path), so stormborn_tomb/stormborn_tomb_main.json is jaymoskingdoms:stormborn_tomb/stormborn_tomb_main, not stormborn_tomb/main; the "slash fix" changes nothing either. 3. The pieces' jigsaws already target jaymoskingdoms:stormborn_tomb/... pools and turn into air (final_state minecraft:air); no nordic_structure or trial_chambers ids remain in the .nbt files. 4. Find the real causes: (a) stone fill: check whether placing a piece leaves terrain where the template has air (the piece's place settings/processors, or pieces cut off by chunk bounding boxes for a 270-block layout), using /place template on a test world underground; (b) trial-chamber look: main.nbt and boss.nbt contain chiseled_deepslate, so the screenshot at 3293/-16/5071 may be the tomb's own masonry, or a vanilla trial chamber overlapping (check its structure set spacing against minecraft:trial_chambers there with /locate). Drop the unused pool files unless something uses them.
 - 2026-11-10 04:17 hermes-fixer took over the review fixes from hermes-a.
+- 2026-11-10 04:28 PR #1218 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -28,3 +28,4 @@ Tiv, in the Tasks thread: "saplings should turn into sticks, so that you can get
 - 2026-11-09 23:38 Andy skipped the text pass (2026-11-09); ready for review.
 - 2026-11-09 23:42 Review (head ef9680c): pass. Every sapling (the 9 vanilla ones incl. mangrove propagule and pale oak, and the 11 Aether ones, all ids checked against master) crafts shapeless into 2 sticks, so one sapling makes a splint; same recipe format as the pack's other shapeless recipes, change note only, checks green. Not played; saplings from other pack mods (none found) aren't covered.
 - 2026-11-09 23:42 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-10 04:28 PR #1213 is merged into master; moved to Inbox/Done.

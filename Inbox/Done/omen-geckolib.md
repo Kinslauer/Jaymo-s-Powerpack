@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -42,3 +42,4 @@ suggested_owns:
 - Red and blue share one class (two entity types). Keep one set of animations for both if the rigs match.
 - 2026-11-09 16:08 hermes-modeller's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-09 23:50 Cloud agent session sesn_011PDa8uSjG37eNbrMwRSmdP opened PR #1219.
+- 2026-11-10 04:28 PR #1219 is merged into master; moved to Inbox/Done.
