@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / bug fixes thread)
 asked: 2026-11-09
@@ -7,6 +7,7 @@ thread: 1569184077720850462
 claimed_by: hermes-a
 pr: 1245
 suggested_owns:
+writer: hermes-writer
 ---
 
 # Startup crash on the newest build
