@@ -45,3 +45,4 @@ text_pass: done
 - 2026-11-09 23:49 Cloud agent session sesn_01AthTH4jh3CQic5hWuiVc6k opened PR #1221.
 - 2026-11-10 04:28 Text pass: rewrote change note (cloud-skulk-golem-geckolib.md) — player-voice title and description, kept all facts, removed code-class list
 - 2026-11-10 05:15 Cloud agent session sesn_01GhKJbeqFFt2csNtJHWfLFB: PR #1221.
+- 2026-11-10 16:24 Already in master (0cae55eb8, released in Kingdoms 0.7.699); the GitHub PR #1221 was left open. Marked done by the cloud vault check.
