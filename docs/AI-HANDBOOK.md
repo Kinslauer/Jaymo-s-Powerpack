@@ -82,6 +82,10 @@ Check every Minecraft API against the 26.3 sources (`sh ./gradlew genSources`) b
 - "Network Protocol Error" on join usually means a client packet handler threw an exception.
 - Every class holding an attachment type must be listed in `JaymosPowers.registerAttachments()`.
 - CurseForge file lists: `www.curseforge.com/api/v1/mods/<id>/files`.
+- Where the sky draws the sun, moon and stars is in environment attributes (`EnvironmentAttributes.SUN_ANGLE`,
+  `MOON_ANGLE`, `STAR_ANGLE`, in degrees; the direction is `(-sin a, cos a, 0)`, rising in +x). A layer added in
+  Kingdoms' `EnvironmentAttributeSystemBuilderMixin` changes them on both sides, so the server reads the same sky
+  (`astronomy/SunMoon` moves the moon this way).
 
 ### Adding a GeckoLib mob to Kingdoms
 

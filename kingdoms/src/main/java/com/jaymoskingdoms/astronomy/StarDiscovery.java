@@ -72,7 +72,7 @@ public final class StarDiscovery {
 
 	private static void looked(ServerPlayer player, int hip) {
 		if (hip <= 0 || hip > MAX_HIP || !(player.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD
-			|| !level.isDarkOutside() || !level.canSeeSky(player.blockPosition().above())) {
+			|| !level.isDarkOutside() || !level.canSeeSky(player.blockPosition().above()) || SunMoon.blinded(player)) {
 			return;
 		}
 		List<Integer> known = discovered(player);
