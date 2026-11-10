@@ -187,6 +187,14 @@ public abstract class XenoForm {
 		return true;
 	}
 
+	/**
+	 * Whether this alien takes up {@code stack} from the main hand instead of fighting bare-fisted (the hands mixin asks, on
+	 * both sides). No alien does but Asterion, with big weapons.
+	 */
+	public boolean wields(net.minecraft.world.item.ItemStack stack) {
+		return false;
+	}
+
 	// ---- helpers for the forms --------------------------------------------------------------------------------------
 
 	/** Whether the move in {@code slot} is off cooldown. */

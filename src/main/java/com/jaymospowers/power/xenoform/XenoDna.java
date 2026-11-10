@@ -54,8 +54,9 @@ public final class XenoDna {
 		Map.entry("jaymoskingdoms:werewolf", "howl"), Map.entry("jaymoskingdoms:feral_wolf", "howl"), Map.entry("jaymoskingdoms:coyote", "howl"),
 		Map.entry("naturalist:tiger", "prowl"), Map.entry("naturalist:lion", "prowl"),
 		Map.entry("naturalist:boar", "tusk"), Map.entry("naturalist:rhino", "tusk"), Map.entry("jaymoskingdoms:wild_boar", "tusk"),
-		Map.entry("jaymoskingdoms:minotaur", "tusk"), Map.entry("jaymospowers:burrukai", "tusk"), Map.entry("jaymospowers:kirrid", "tusk"),
-		Map.entry("jaymospowers:taegore", "tusk"),
+		Map.entry("jaymospowers:burrukai", "tusk"), Map.entry("jaymospowers:kirrid", "tusk"), Map.entry("jaymospowers:taegore", "tusk"),
+		// Asterion: the minotaur (Tiv: a bull-headed giant teaches its own alien, not Tusk's boar)
+		Map.entry("jaymoskingdoms:minotaur", "asterion"),
 		Map.entry("naturalist:vulture", "talon"), Map.entry("naturalist:bluejay", "talon"), Map.entry("naturalist:canary", "talon"),
 		Map.entry("naturalist:cardinal", "talon"), Map.entry("naturalist:robin", "talon"), Map.entry("naturalist:finch", "talon"),
 		Map.entry("naturalist:sparrow", "talon"),
