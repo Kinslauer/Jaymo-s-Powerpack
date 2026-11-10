@@ -19,6 +19,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -28,6 +30,9 @@ import net.minecraft.world.phys.HitResult;
  * drink one. Boil it over a lit campfire like a bottle and what's in it is clean. Its bar shows how much is left.
  * <p>
  * (0.5.80) Comes in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
+ * <p>
+ * Filling it drinks up the water block it came from, the way Thirsty Bottles makes glass bottles do (Andy's Hardrock
+ * picks): a lone pool runs dry, while a river or the sea, where water flows back in, keeps giving.
  */
 public final class WaterskinItem extends Item {
 
@@ -58,6 +63,8 @@ public final class WaterskinItem extends Item {
 	/** Water from a drink of it, dirty or boiled, and the chance dirty water turns your stomach. */
 	static final int DIRTY = 4, CLEAN = 6;
 	static final float SICK_CHANCE = 0.25F;
+	/** Whether filling up takes the water block (a source, or a waterlogged block's water) with it. */
+	static final boolean DRINKS_SOURCE = true;
 
 	/** What's in it. */
 	public record Water(int sips, boolean clean) {
@@ -108,6 +115,12 @@ public final class WaterskinItem extends Item {
 				// topping up clean water with river water makes it all dirty, unless this tier cleans on fill
 				boolean clean = cleansOnFill();
 				stack.set(Climate.WATERSKIN_WATER, new Water(maxSips(), clean));
+				if (DRINKS_SOURCE && !level.isClientSide()) {
+					BlockState state = level.getBlockState(pos);
+					if (state.getBlock() instanceof BucketPickup pickup) {
+						pickup.pickupBlock(player, level, pos, state);
+					}
+				}
 				return InteractionResult.SUCCESS;
 			}
 		}
