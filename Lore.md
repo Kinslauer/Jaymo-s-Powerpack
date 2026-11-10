@@ -27,6 +27,18 @@ around them — and they are taking back the world they once knew. This is the p
 starts as a farmhand and ends up in the tier of songs: the world is not lost, it is being retaken, one village, one
 ruin and one raider at a time.
 
+## Ki and mana are the same thing
+
+There is one energy in the world, and two words for it. **Ki** is what a Z Fighter calls it, and **mana** is what
+everyone else calls it — the same well, drawn the same way, only by different hands.
+
+A Z Fighter is not a different kind of creature. They are simply far more skilled at pushing that energy out as ki than
+at shaping it as mana: it leaves them as an aura, a blast, a flight, a form. That is why the aura is the mark of a
+fighter and not of a mage — it is the same energy a spell is made of, held in the body and let out raw.
+
+Everything else draws on that one well too: mana spirits share it with you, blessings spend it, shrines bank it. A
+Warrior-born's ki and a priest's mana are not two forces in opposition — they are two hands on the same rope.
+
 ## The shape of the world
 
 The world is graded in tiers, and the tiers are its history as much as its difficulty:

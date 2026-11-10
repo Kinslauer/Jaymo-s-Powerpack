@@ -1,12 +1,14 @@
 ---
-status: open
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by:
-pr:
+claimed_by: hermes-b
+pr: 1203
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/FarmhandHome.java, kingdoms/src/main/java/com/jaymoskingdoms/Peoples.java, kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/talk.json]
+writer: hermes-writer
+text_pass: done
 ---
 
 # Family farmhand: a good-natured Heartlander family takes you in
@@ -25,3 +27,4 @@ Tiv, in the Tasks thread: "The family farmhand start should be a good natured he
 - The bargain is "as long as you help if you stay": the farmhand job is what keeps you fed and welcome. Leaving is allowed; staying idle is what sours it, not your blood.
 - Watch `Peoples.distaste`: peoples' inherited dislike of other heritages is exactly what must not reach this household. Give the start its own exception rather than relying on defaults.
 - Don't change who spawns where or the 40 hearts; this is about their temperament and what they say.
+- 2026-11-09 19:20 Text pass: talk.json (farm_family.welcome, farm_family.notice) - removed em dash, tightened phrasing to sound like Heartlander farmers; changes/kingdoms/farmhand-kind-family.md - removed em dash, made player-facing. Note: PR branch has pre-existing Java compile errors (AttachmentType, Codec.UUID) unrelated to text changes.

@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: done
 for: prometheus
 from: coordinator
 asked: 2026-11-09
 thread: Claude Code cloud session (Andy: "I want tasks set for all the models with no animations, the omen, redstone and sculk, and all the dragins need models and animations.")
 claimed_by: hermes-modeller
-pr: 
+pr: 1198
 suggested_owns:
   - kingdoms/art/atroxiia.bbmodel (+ the script that writes it)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/geckolib/**/atroxiia.*
@@ -13,6 +13,8 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/dragons/AtroxiiaDragonModel.java (removed) and its new renderer
   - DragonsClient.java (its register line only)
   - changes/kingdoms/<branch-name>.md
+writer: hermes-writer
+text_pass: done
 ---
 # Atroxiia: a Blockbench model and animations, on GeckoLib (modelling bot)
 
@@ -43,3 +45,9 @@ suggested_owns:
 - Hides, glowing markings, looks, sizes, seats and the hatchling's size must not change. Riders must still sit where they sit now.
 - The five dragon tasks run as separate tracks. Each touches only its own dragon's files and its own line in `DragonsClient.java`. Don't edit `WindDragon.java` or `WindDragonRenderer.java`; if you need a shared change there, ask under this task's Notes.
 - The Kintsugi wyverns (Eurus, Aeolus, Ignivorus) already have a full Blockbench model with 28 animations, so they aren't part of this.
+- 2026-11-09 16:08 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-09 16:35 Text pass: rewrote changes/kingdoms/atroxiia-geckolib.md (change note) to be player-focused
+- 2026-11-09 16:35 Text pass: rewrote changes/kingdoms/atroxiia-geckolib.md (change note) to be player-focused
+- 2026-11-09 16:57 Review (head 829b970): pass. Atroxiia now draws from an editable atroxiia.bbmodel through GeckoLib with the same body, hides, markings, headdress, spines, tack, sizes and reach; 19 animations keyed from the old pose equations (breathing with a taunt/sniff/grumble every 16 s like the old 320-tick fidget, walk, run, sit, crash, swim, the eight moves from begin(), flinch, held death), shown side by side with the old poses. Not tested in game. Small follow-ups, not worth another round: kingdoms/tools/gen_atroxiia.py and the AtroxiiaDragon.java:35 javadoc still point at the deleted AtroxiiaDragonModel; the move-name switch is written twice (AtroxiiaAnimations.name and AtroxiiaDragon.begin), so keep one; GeoEntityRenderer may tip the corpse 90 degrees on top of the held death (getDeathMaxRotation); the hurt flinch shares the action controller and can cut off a move.
+- 2026-11-09 16:57 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 17:50 PR #1198 is merged into master; moved to Inbox/Done.
