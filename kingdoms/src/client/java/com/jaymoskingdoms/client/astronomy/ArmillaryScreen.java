@@ -12,18 +12,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The armillary sphere's screen: it reads off the sky - the stars the player
  * has already discovered that are overhead, the world time and the player's
- * place - and records the measurement on the block entity.
+ * place - and asks the server to take a reading, which is written in the
+ * player's Astronomer's Journal ({@link com.jaymoskingdoms.astronomy.Measurements}).
+ * The server's answer shows as one line: what was written, or why it failed.
  */
 public final class ArmillaryScreen extends Screen {
     private final BlockPos pos;
-    /** The last measurement the client recorded, as JSON. */
-    private String measurement = "";
+    /** How the last reading went, from the server, or null before one is asked for. */
+    private @Nullable Component result;
 
     public ArmillaryScreen(BlockPos pos) {
         super(Component.translatable("gui.jaymoskingdoms.armillary.title"));
@@ -39,44 +42,14 @@ public final class ArmillaryScreen extends Screen {
                 button -> Minecraft.getInstance().gui.setScreen(null)).bounds(cx + 6, cy + 52, 100, 20).build());
     }
 
-    /** Read off the sky now and send the measurement to be recorded. */
+    /** Ask the server to take a reading here; its answer comes back to {@link #reading}. */
     private void record() {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientLevel level = minecraft.level;
-        LocalPlayer player = minecraft.player;
-        if (level == null || player == null) {
-            return;
-        }
-        float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-        Discovery discovery = Discovery.getOrCreate(minecraft);
-        long time = Math.floorMod(level.getGameTime(), 24000L);
-        long day = level.getGameTime() / 24000L;
-        double lonDeg = player.getX() * SkyMath.LON_DEG_PER_BLOCK;
-        int days = (int) (level.getGameTime() / 24000L);
-        List<Integer> overhead = new ArrayList<>();
-        for (Star star : StarCatalog.stars()) {
-            if (discovery == null || !discovery.isDiscovered(star.hip())) {
-                continue;
-            }
-            Vec3 dir = SkyMath.direction(star, time, partial, lonDeg, days);
-            if (dir.y > 0.0) {
-                overhead.add(star.hip());
-            }
-        }
-        StringBuilder json = new StringBuilder("{\"day\":");
-        json.append(day).append(",\"time\":").append(time);
-        json.append(",\"x\":").append(player.getBlockX()).append(",\"y\":").append(player.getBlockY());
-        json.append(",\"z\":").append(player.getBlockZ()).append(",\"stars\":[");
-        for (int i = 0; i < overhead.size(); i++) {
-            if (i > 0) {
-                json.append(',');
-            }
-            json.append(overhead.get(i));
-        }
-        json.append("]}");
-        String record = json.toString();
-        ClientPlayNetworking.send(new ArmillaryNet.Measure(pos, record));
-        this.measurement = record;
+        ClientPlayNetworking.send(new ArmillaryNet.Measure(pos));
+    }
+
+    /** The server's answer to a reading. */
+    void reading(ArmillaryNet.Reading reading) {
+        this.result = Component.translatable("gui.jaymoskingdoms.armillary.reading." + reading.outcome(), reading.count(), reading.xp());
     }
 
     @Override
@@ -87,25 +60,25 @@ public final class ArmillaryScreen extends Screen {
         int cx = this.width / 2;
         int cy = this.height / 2;
         graphics.fill(cx - 110, cy - 92, cx + 110, cy + 64, 0xFF2B211A);
-        graphics.centeredText(minecraft.font, this.title.getString(), cx, cy - 80, 0xD4C8A8);
+        graphics.centeredText(minecraft.font, this.title.getString(), cx, cy - 80, 0xFFD4C8A8);
         int y = cy - 62;
         if (level != null && player != null) {
             float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
             float night = SkyMath.night(level, partial);
-            long time = Math.floorMod(level.getGameTime(), 24000L);
-            graphics.text(minecraft.font, "Position: " + player.getBlockX() + ", " + player.getBlockY() + ", " + player.getBlockZ(), cx - 100, y, 0xE0E0C0);
+            long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
+            graphics.text(minecraft.font, "Position: " + player.getBlockX() + ", " + player.getBlockY() + ", " + player.getBlockZ(), cx - 100, y, 0xFFE0E0C0);
             y += 11;
-            graphics.text(minecraft.font, String.format("World time: %02d:%02d", (time / 1000) % 24, (time % 1000) * 60 / 1000), cx - 100, y, 0xE0E0C0);
+            graphics.text(minecraft.font, String.format("World time: %02d:%02d", (time / 1000 + 6) % 24, (time % 1000) * 60 / 1000), cx - 100, y, 0xFFE0E0C0);
             y += 11;
-            graphics.text(minecraft.font, "Day: " + (level.getGameTime() / 24000L + 1), cx - 100, y, 0xE0E0C0);
+            graphics.text(minecraft.font, "Day: " + (level.getGameTime() / 24000L + 1), cx - 100, y, 0xFFE0E0C0);
             y += 11;
-            graphics.text(minecraft.font, String.format("Sky darkness: %.0f%%", night * 100.0F), cx - 100, y, 0xE0E0C0);
+            graphics.text(minecraft.font, String.format("Sky darkness: %.0f%%", night * 100.0F), cx - 100, y, 0xFFE0E0C0);
             y += 14;
             Discovery discovery = Discovery.getOrCreate(minecraft);
             int overhead = 0;
             List<Integer> listed = new ArrayList<>();
             float p2 = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-            long t = Math.floorMod(level.getGameTime(), 24000L);
+            long t = Math.floorMod(level.getOverworldClockTime(), 24000L);
             double lon = player.getX() * SkyMath.LON_DEG_PER_BLOCK;
             int d = (int) (level.getGameTime() / 24000L);
             for (Star star : StarCatalog.stars()) {
@@ -120,7 +93,7 @@ public final class ArmillaryScreen extends Screen {
                     }
                 }
             }
-            graphics.text(minecraft.font, "Discovered stars overhead: " + overhead, cx - 100, y, 0xE0E0C0);
+            graphics.text(minecraft.font, "Discovered stars overhead: " + overhead, cx - 100, y, 0xFFE0E0C0);
             y += 11;
             if (!listed.isEmpty()) {
                 StringBuilder names = new StringBuilder();
@@ -134,11 +107,14 @@ public final class ArmillaryScreen extends Screen {
                 if (overhead > listed.size()) {
                     names.append(" ...").append(overhead - listed.size());
                 }
-                graphics.text(minecraft.font, names.toString(), cx - 100, y, 0xB0A890);
+                graphics.text(minecraft.font, names.toString(), cx - 100, y, 0xFFB0A890);
                 y += 11;
             }
-            if (measurement != null && !measurement.isEmpty()) {
-                graphics.text(minecraft.font, "Last record: " + measurement, cx - 100, y, 0x8D7351);
+            if (result != null) {
+                for (net.minecraft.util.FormattedCharSequence line : minecraft.font.split(result, 200)) {
+                    graphics.text(minecraft.font, line, cx - 100, y, 0xFFD0AB5A);
+                    y += 10;
+                }
             }
         }
         super.extractRenderState(graphics, mouseX, mouseY, delta);

@@ -38,3 +38,17 @@ registration is being wired. One telescope is enough: the Altazimuth Mount can u
 scales, rather than adding basic/mounted/brass tiers that duplicate the instrument. Registration, saved aim, skill
 checks, blockstates and observation behaviour deliberately remain with the gameplay implementation; this change
 contains no gameplay Java.
+
+## Scholar journal deliverable
+
+- `generate_journal.py`: deterministic source for the Astronomer's Journal art. It writes
+  `textures/gui/astronomy/journal_spread.png` (384×240, the open book the journal screen draws 1:1),
+  `textures/item/astronomers_journal.png` (16×16) and `journal_preview.png` (both, enlarged, for inspection).
+- The spread: warm study paper (lifted a little from `#c2a77a` so the screen's ink text reads), the walnut boards and
+  stacked page edges, the fold drawn with broken parallel hatching, never a gradient. Faint construction studies sit
+  under the text: on the left the celestial sphere seen from latitude 45° (horizon, the pole axis at 45°, the equator,
+  a star's daily circle, the latitude angle, a 10° scale, the bounding square and its diagonals) with a quadrant; on
+  the right nested armillary rings on a stand and a right triangle with its angle. A working hand of illegible notes
+  fills the margins, with a few numerals in rubric red.
+- The icon: a walnut-bound journal with a brass armillary ring on its board, cream page edges, one hatch direction.
+- Original art; nothing was copied from the reference image or from the Astronomy mod.

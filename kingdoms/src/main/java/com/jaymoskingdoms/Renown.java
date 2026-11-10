@@ -57,6 +57,10 @@ public final class Renown {
 		Skills.Pillar best = null;
 		boolean tied = false;
 		for (Skills.Pillar pillar : Skills.Pillar.values()) {
+			if (!pillar.web()) {
+				// (the Scholar's study earns no title: Skills.Pillar#web)
+				continue;
+			}
 			if (best == null || standing(p, pillar) > standing(p, best)) {
 				best = pillar;
 				tied = false;
