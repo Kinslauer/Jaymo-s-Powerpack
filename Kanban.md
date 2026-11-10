@@ -21,13 +21,13 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · blocked
 - [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · blocked
+- [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · 🍇 Bacchus · #1241 · sent
 
 
 ## Done
