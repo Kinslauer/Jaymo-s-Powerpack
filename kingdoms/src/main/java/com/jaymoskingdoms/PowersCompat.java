@@ -479,6 +479,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code XenoformState.transformed(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle xeno;
+	private static boolean lookedForXeno;
+
+	/** Whether {@code player} is in one of the Xeno-Band's alien forms now; false without Powers. */
+	public static boolean xenoForm(Player player) {
+		if (!lookedForXeno) {
+			lookedForXeno = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					xeno = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.xenoform.XenoformState"),
+						"transformed", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Xeno-Band forms (older Powers?)", e);
+				}
+			}
+		}
+		if (xeno == null) {
+			return false;
+		}
+		try {
+			return (boolean)xeno.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.386) Powers' {@code EightSignCircle.sealed(Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle sealed;
 	private static boolean lookedForSealed;

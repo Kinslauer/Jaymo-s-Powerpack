@@ -11,7 +11,8 @@
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
 		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"],
 		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"],
-		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei"]
+		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei"],
+		"voicechat": ["com.jaymoskingdoms.VoiceRange"]
 	},
 	"mixins": [
 		"jaymoskingdoms.combat.mixins.json",

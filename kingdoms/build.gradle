@@ -82,6 +82,9 @@ dependencies {
 	// Simple Voice Voice Changer (CC BY-NC-SA 4.0, sawiq; in Powers' pack): client/VoiceChangerCompat turns a player's
 	// voice for a werewolf, a Great Ape or a disguise (VoiceMasks) through its API. Compiled against, never required.
 	compileOnly "maven.modrinth:simple-voice-voice-changer:acFxvUQp"
+	// Simple Voice Chat (all rights reserved, henkelmax; in Powers' pack): VoiceRange, a plugin on its server API, carries
+	// the big forms' voices further and lets a giant hear the ground. Only its API is used; compiled against, never required.
+	compileOnly "maven.modrinth:simple-voice-chat:x9jLR94Q"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 

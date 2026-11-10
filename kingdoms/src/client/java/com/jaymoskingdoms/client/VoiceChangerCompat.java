@@ -14,7 +14,7 @@ import org.sawiq.svvoicechanger.client.model.VoiceProfile;
  */
 public final class VoiceChangerCompat {
 	static final String OWNER = "jaymoskingdoms:voice_mask";
-	/** Override priorities (the voice changer's scale: 100-499 equipment, 500+ what you can't opt out of). */
+	/** Override priorities (the voice changer's scale: 100-499 equipment, 500+ what you can't opt out of): a curse's or a titan's is forced. */
 	static final int DISGUISE_PRIORITY = 300, CURSE_PRIORITY = 600;
 	/** A werewolf: deep, big and growling. */
 	static final double BEAST_PITCH = 0.7, BEAST_FORMANT = 0.75, BEAST_GROWL = 0.7;
@@ -48,12 +48,14 @@ public final class VoiceChangerCompat {
 				.with(VoiceParameter.GROWL, BEAST_GROWL);
 			case APE -> base(api, "titan").with(VoiceParameter.PITCH, APE_PITCH).with(VoiceParameter.FORMANT, APE_FORMANT)
 				.with(VoiceParameter.GROWL, APE_GROWL).with(VoiceParameter.REVERB_MIX, APE_REVERB);
+			// a xeno form: the voice changer's own Titan, as it comes
+			case TITAN -> base(api, "titan");
 			case GOBLIN -> base(api, "kid").with(VoiceParameter.PITCH, GOBLIN_PITCH).with(VoiceParameter.FORMANT, GOBLIN_FORMANT)
 				.with(VoiceParameter.GROWL, GOBLIN_GROWL);
 			default -> VoiceProfile.builder().set(VoiceParameter.MIX, 1.0).set(VoiceParameter.PITCH, MASKED_PITCH)
 				.set(VoiceParameter.FORMANT, MASKED_FORMANT).set(VoiceParameter.HIGH_EQ, MASKED_HIGH_EQ).build();
 		};
-		boolean curse = mask == VoiceMasks.Mask.BEAST || mask == VoiceMasks.Mask.APE;
+		boolean curse = mask == VoiceMasks.Mask.BEAST || mask == VoiceMasks.Mask.APE || mask == VoiceMasks.Mask.TITAN;
 		VoiceOverride.Builder request = VoiceOverride.request(OWNER, curse ? CURSE_PRIORITY : DISGUISE_PRIORITY).profile(profile);
 		if (curse) {
 			request.forceEnabled();
