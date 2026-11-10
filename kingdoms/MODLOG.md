@@ -10962,3 +10962,9 @@ comment on this" (`Stench`, reading Powers' smell).
   - A demon master asks whether you came for the work or the old war.
   - Ops can use `/kingdom film long_defence [players]`.
 - The actors are only on your own game, and their skins are our own (`tools/gen_film_skins.py`). Players without Kingdoms on their client just get the book.
+
+## 0.7.710 (2026-11-10): The Long Defence film keeps you safe while it plays (#1257)
+
+- **No harm during a lore film.** While The Long Defence plays your keys don't answer, and nothing could stop a mob hitting you: a first read of the book dropped by a Draugr in the Stormborn Tomb left you standing still in the fight. Now you take no harm for the length of the film, like the orc captain's films. The protection ends as soon as you strike a blow or walk off from where it started (after skipping it with sneak), so it can't be used as a shield. `LoreFilms.FILM_TICKS` / `LEFT_SPOT`.
+- **Camera back after a dimension change.** A film cut short by changing dimension or respawning used to leave the camera stuck in third person. It now goes back to what you had. `LoreFilmClient.tick`.
+- Built; not played.
