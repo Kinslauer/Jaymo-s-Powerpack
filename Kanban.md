@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 13:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 13:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,11 +14,11 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🪶 Quill · writing
 
 
 ## In review
 
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 🔨 Hephaestus · in-review
 
 
 ## Needs Andy
