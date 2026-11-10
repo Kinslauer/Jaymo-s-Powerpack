@@ -1,5 +1,5 @@
 ---
-status: open
+status: in-review
 for: hephaestus
 from: Andy (vault thread, 2026-11-10: reopen the #1218 follow-up)
 asked: 2026-11-10
@@ -34,4 +34,4 @@ Find and fix the real causes, one at a time, and say in the PR which fault was w
 
 ## Notes
 - 2026-11-10 19:06 hermes-fixer's claim had no sign of work for 30 min: handed back as open.
-- 2026-11-10 20:14 hermes-fixer's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-10 20:28 hermes-fixer's claim had no sign of work for 30 min: handed back as open.
