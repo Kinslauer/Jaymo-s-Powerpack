@@ -29,7 +29,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · #1224 · in-review
 - [ ] [[Inbox/astronomy-sun-moon|astronomy-sun-moon]] · ☁️ Cloud · #1225 · in-review
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · #1228 · in-review
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · #1230 · in-review
@@ -57,6 +56,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/downed-hold-fire|downed-hold-fire]]
 - [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 - [x] [[Inbox/Done/stegonaut-geckolib|stegonaut-geckolib]]
 - [x] [[Inbox/Done/sleeping-mends-bones|sleeping-mends-bones]]
@@ -64,7 +64,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/parasites-all-three-cures|parasites-all-three-cures]]
 - [x] [[Inbox/Done/omen-geckolib|omen-geckolib]]
 - [x] [[Inbox/Done/dungeon-stone-and-chambers|dungeon-stone-and-chambers]]
-- [x] [[Inbox/Done/ore-hearts|ore-hearts]]
 
 
 %% kanban:settings
