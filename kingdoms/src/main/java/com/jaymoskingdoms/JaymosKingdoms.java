@@ -101,6 +101,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		MasonTable.register();
 		// (0.7.578) the cafe: menu boards, customers, the innkeeper's trade
 		CafeBoard.register();
+		// the armillary sphere: an observatory instrument that reads the discovered sky
+		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
+		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
+		com.jaymoskingdoms.astronomy.StarDiscovery.register();
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
@@ -228,6 +232,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
+		// zombies of every kind beat on and break the doors between them and their prey
+		DoorPounding.register();
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
@@ -376,6 +382,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Hollows.register();
 		// (0.7.643) and the blight that turns one slowly, and the death mid-turn that finishes it
 		HollowBlight.register();
+		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
+		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
+		SkeletonCurse.register();
 		// 0.7.414: the kit roads (the heirloom blade, the pup) and the watch recruit's manacles
 		LOGGER.debug("story kit attachments: {} {}", StoryKit.HEIRLOOM_DUE, StoryKit.PUP);
 		StoryKit.register();

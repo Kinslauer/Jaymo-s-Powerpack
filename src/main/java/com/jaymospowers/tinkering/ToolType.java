@@ -61,6 +61,10 @@ public enum ToolType {
 	BATTLESIGN("battlesign", parts(PartType.LARGE_PLATE, 1, PartType.TOUGH_HANDLE, 1),
 		2.0F, 1.2F, 1.0F, 1.0F, 1.0F, List.of(), Map.of(Trait.BLOCKING, 1, Trait.BONKING, 1, Trait.KNOCKBACK, 1), Style.WEAPON, 0.0F),
 
+	// a tinkered knife: a blade and a handle, quick and light; its head's metal leaves its mark on a hit
+	KNIFE("knife", parts(PartType.SMALL_BLADE, 1, PartType.TOOL_HANDLE, 1),
+		2.5F, -2.2F, 1.0F, 1.0F, 1.0F, List.of(), Map.of(), Style.SWORD, 0.0F),
+
 	// (0.15.x) Tinkers' ranged weapons (docs/Tinkering-Weapons.md), their numbers from its tool definitions. Bows and the crossbow
 	// shoot arrows; the javelin is thrown (and strikes in the hand); throwing axes and shuriken are thrown by the stack
 	LONGBOW("longbow", parts(PartType.BOW_LIMB, 1, PartType.BOW_LIMB, 1, PartType.BOW_GRIP, 1, PartType.BOWSTRING, 1),

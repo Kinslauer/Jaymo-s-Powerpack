@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "format_version": "5.0",
+    "model_format": "java_block",
+    "box_uv": false
+  },
+  "name": "heart_crystal",
+  "java_block_version": "26.3",
+  "ambientocclusion": true,
+  "front_gui_light": false,
+  "resolution": {
+    "width": 16,
+    "height": 16
+  },
+  "elements": [
+    {
+      "name": "heart_crystal_sprite",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "from": [
+        0,
+        0,
+        7.75
+      ],
+      "to": [
+        16,
+        16,
+        8.25
+      ],
+      "autouv": 0,
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            8.5,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            8.5,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            8,
+            16,
+            8.5
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            8,
+            16,
+            8.5
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "4ab26943-894c-5b72-9e7a-f93499d77aa9"
+    }
+  ],
+  "outliner": [
+    "4ab26943-894c-5b72-9e7a-f93499d77aa9"
+  ],
+  "textures": [
+    {
+      "name": "heart_crystal",
+      "id": "0",
+      "width": 16,
+      "height": 16,
+      "uv_width": 16,
+      "uv_height": 16,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA/0lEQVR4nGNgoBAw4pJ4tm/Jf2S+lFMMVrWM2DSKyIsybJiyDkX8yuP3DHcevWZYdmo/ih4mdM08fOwMR7acwOoqFTlRhigzx/9YDXi2b8n/76/eMJw5eo3BQuYfA9fFs2Dxh7uOMKxctQ+nISzIpj18+ZHh28bNDDDlJzceZJDgZAazrx4/zyCmJM8gKi7EgNMLhAC6ZqwGcPn7Mux/8AWMQeDF979gWtvSEKuhTMicNw+egbG5vz3Dg59/4Tg8zAmnq5hwScA04dMMAozIHFBMrFywDavC99/+gGn0tMDEQCFgQuaAkmt4ghdOxQRTIj5DsGkmCEApDj3pUh0AAL1ibuDoPRUQAAAAAElFTkSuQmCC"
+    }
+  ]
+}

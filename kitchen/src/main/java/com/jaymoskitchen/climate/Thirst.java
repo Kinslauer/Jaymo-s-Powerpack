@@ -78,8 +78,6 @@ public final class Thirst {
 	static final float HURT = 1.0F;
 	/** Chance a drink of dirty water turns your stomach, by how much of it you drank. */
 	static final float SICK_CHANCE = 0.35F, SIP_SICK_CHANCE = 0.15F;
-	/** How long a turned stomach lasts (ticks): nausea and hunger. */
-	static final int SICK_NAUSEA = 200, SICK_HUNGER = 400;
 	/** A sip from the bank or the sky: water it gives, and ticks before another. */
 	static final int SIP = 1, SIP_COOLDOWN = 10;
 	/** Water from the drinks themselves. */
@@ -242,6 +240,10 @@ public final class Thirst {
 		if (water != 0) {
 			set(player, water(player) + water);
 		}
+		// an existing drink clears it: hot chocolate washes the parasite out
+		if (stack.is(KitchenBlocks.FOODS.get("hot_chocolate")) && player.removeEffect(ParasiteEffect.PARASITE)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.cured").withStyle(ChatFormatting.GREEN));
+		}
 	}
 
 	/** Water in a food or drink that isn't water itself (0 for most). */
@@ -291,8 +293,8 @@ public final class Thirst {
 			listener.accept(player);
 		}
 		if (!clean && player.getRandom().nextFloat() < sickChance && !ironGut(player)) {
-			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SICK_NAUSEA, 0));
-			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, SICK_HUNGER, 0));
+			// dirty water gives a parasite: slow damage at random, not a straight potion hit
+			player.addEffect(new MobEffectInstance(ParasiteEffect.PARASITE, ParasiteEffect.TICKS, 0));
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.dirty").withStyle(ChatFormatting.DARK_GREEN));
 		}
 	}

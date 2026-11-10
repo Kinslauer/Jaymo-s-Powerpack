@@ -19,8 +19,56 @@
         }
       ],
       "fallback": {
-        "type": "minecraft:model",
-        "model": "jaymospowers:item/gun/blunderbuss"
+        "type": "minecraft:condition",
+        "property": "weaponmod:reloaded",
+        "on_true": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "blunderbuss",
+          "base": "jaymospowers:item/gun/blunderbuss",
+          "transformation": [
+            0.0,
+            0.39598,
+            0.39598,
+            0.301884,
+            0.0,
+            0.39598,
+            -0.39598,
+            0.178643,
+            -0.56,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "pose": "loaded"
+        },
+        "on_false": {
+          "type": "jaymospowers:animated_gun",
+          "gun": "blunderbuss",
+          "base": "jaymospowers:item/gun/blunderbuss",
+          "transformation": [
+            0.0,
+            0.39598,
+            0.39598,
+            0.301884,
+            0.0,
+            0.39598,
+            -0.39598,
+            0.178643,
+            -0.56,
+            0.0,
+            0.0,
+            0.5,
+            0,
+            0,
+            0,
+            1
+          ],
+          "pose": "spent"
+        }
       }
     },
     "on_true": {
@@ -40,8 +88,28 @@
         }
       ],
       "fallback": {
-        "type": "minecraft:model",
-        "model": "jaymospowers:item/gun/blunderbuss_reload"
+        "type": "jaymospowers:animated_gun",
+        "gun": "blunderbuss",
+        "base": "jaymospowers:item/gun/blunderbuss",
+        "transformation": [
+          0.0,
+          0.39598,
+          0.39598,
+          0.301884,
+          0.0,
+          0.39598,
+          -0.39598,
+          0.178643,
+          -0.56,
+          0.0,
+          0.0,
+          0.5,
+          0,
+          0,
+          0,
+          1
+        ],
+        "pose": "reload"
       }
     }
   }

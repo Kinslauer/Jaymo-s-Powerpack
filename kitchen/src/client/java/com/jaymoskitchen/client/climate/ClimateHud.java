@@ -60,11 +60,11 @@ public final class ClimateHud {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("body_heat"), ClimateHud::heat);
 		ClientTickEvents.END_CLIENT_TICK.register(ClimateHud::tick);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
-			if (stack.is(Climate.WATERSKIN)) {
+			if (stack.is(Climate.WATERSKIN_LEATHER) || stack.is(Climate.WATERSKIN_IRON) || stack.is(Climate.WATERSKIN_DRAGON)) {
 				WaterskinItem.Water water = WaterskinItem.water(stack);
 				lines.add(water.sips() <= 0 ? Component.translatable("tooltip.jaymoskitchen.waterskin.empty").withStyle(ChatFormatting.GRAY)
 					: Component.translatable(water.clean() ? "tooltip.jaymoskitchen.waterskin.clean" : "tooltip.jaymoskitchen.waterskin.dirty",
-						water.sips(), WaterskinItem.SIPS).withStyle(water.clean() ? ChatFormatting.AQUA : ChatFormatting.DARK_GREEN));
+						water.sips(), ((WaterskinItem) stack.getItem()).maxSips()).withStyle(water.clean() ? ChatFormatting.AQUA : ChatFormatting.DARK_GREEN));
 			} else if (stack.is(Climate.CLEAN_WATER)) {
 				lines.add(Component.translatable("tooltip.jaymoskitchen.clean_water").withStyle(ChatFormatting.AQUA));
 			}

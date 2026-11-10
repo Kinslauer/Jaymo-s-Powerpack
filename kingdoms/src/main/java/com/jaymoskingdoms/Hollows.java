@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * turned death is never final and leaves no new injury; the Hollow is unlocked for their children too.
  * <ul>
  * <li><b>Zombie:</b> zombies of every kind (husks, the drowned, zombie villagers, zombified piglins), and witches.</li>
- * <li><b>Skeleton:</b> skeletons of every kind (strays, bogged, wither skeletons).</li>
+ * <li><b>Skeleton:</b> only the Skeleton Lord's curse ({@link SkeletonCurse}); skeletons themselves turn nobody.</li>
  * <li><b>Wraith:</b> enthralled by a vampire (any, players too), or taken by a phantom or a vex.</li>
  * <li><b>Reaper:</b> a necromancer's work, or the Wither's.</li>
  * <li>Any other undead: the Pallid, the Hollow's first look.</li>
@@ -59,8 +59,10 @@ public final class Hollows {
 		if (by instanceof Zombie) {
 			return new Turn(HeritageVariants.Variant.ZOMBIE, UNDEAD_CHANCE, "zombie");
 		}
-		if (by instanceof AbstractSkeleton) {
-			return new Turn(HeritageVariants.Variant.SKELETON, UNDEAD_CHANCE, "skeleton");
+		if (by instanceof AbstractSkeleton || by instanceof SkeletonLord) {
+			// (Andy: "you shouldn't be able to become a skeleton unless you are cursed by the skeleton lord": skeletons turn
+			// nobody, and leave no blight; the Lord's curse is its own, SkeletonCurse)
+			return null;
 		}
 		if (by instanceof Phantom || by instanceof Vex) {
 			return new Turn(HeritageVariants.Variant.WRAITH, UNDEAD_CHANCE, "wraith");

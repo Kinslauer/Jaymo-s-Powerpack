@@ -421,6 +421,11 @@ public final class Downed {
 			if (eat != null) {
 				return eat;
 			}
+			// and the struggle up with a healing item, too hurt to rise ({@link HealStruggle})
+			InteractionResult heal = HealStruggle.use(player, hand);
+			if (heal != null) {
+				return heal;
+			}
 			return DOWNED_USE_BLOCKS && hand == InteractionHand.MAIN_HAND && awake(player) ? InteractionResult.PASS : InteractionResult.FAIL;
 		});
 		UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
@@ -443,25 +448,30 @@ public final class Downed {
 			}
 			// (0.15.49) but Second Wind's eating to rise ({@link SelfRevive})
 			InteractionResult eat = SelfRevive.use(player, hand);
+			if (eat == null) {
+				// and the struggle up with a healing item ({@link HealStruggle})
+				eat = HealStruggle.use(player, hand);
+			}
 			return eat != null ? eat : InteractionResult.FAIL;
 		});
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isDowned(player));
 		// (0.15.31) and no powers: every check that asks whether a player's power keys are live says no
 		Powers.addSilencer(Downed::isDowned);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			limbo(server);
-			players(server);
-			revives(server);
-		});
-		// the body that comes back is whole and on its feet (out of the End, still down if they went in down)
-		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
-			if (!alive) {
-				forget(newPlayer);
-			} else if (!isDowned(newPlayer)) {
-				newPlayer.removeTag(DOWNED_TAG);
-			}
-		});
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+				limbo(server);
+				players(server);
+				revives(server);
+			});
+			// the body that comes back is whole and on its feet (out of the End, still down if they went in down)
+			ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+				if (!alive) {
+					forget(newPlayer);
+				} else if (!isDowned(newPlayer)) {
+					newPlayer.removeTag(DOWNED_TAG);
+				}
+				HeartCrystals.onRespawn(newPlayer);
+			});
+			ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer) {
 				entity.setAttached(DIED, true);
 			}
@@ -1291,6 +1301,7 @@ public final class Downed {
 				.withStyle(ChatFormatting.RED));
 		}
 		SelfRevive.struck(player, most);
+		HealStruggle.struck(player);
 	}
 
 	/**

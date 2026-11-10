@@ -5,7 +5,9 @@ plugins {
 // build output lives outside OneDrive on the home PC (its syncing locks files and breaks rebuilds); elsewhere
 // (a cloud session) the usual build/ folder
 if (file("E:/").exists()) {
-	layout.buildDirectory = file("E:/jaymos-kitchen-build")
+	// one folder per checkout (the repo folder's name), so a bot's worktree build and the main checkout's deploy
+	// never clean each other's outputs ("Failed to clean up stale outputs", 2026-11-09)
+	layout.buildDirectory = file("E:/jaymos-kitchen-build/${projectDir.parentFile.name.replace(' ', '-')}")
 }
 
 repositories {

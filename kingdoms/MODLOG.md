@@ -10393,3 +10393,200 @@ Andy: "noone plays it as is", then "add everything you thought up, and everythin
 - **Races** (anyone, Riders win more): a stablehand's screen has a Races section, a 160-block sprint and a 320-block long run. Pay 1 emerald's worth on your own horse and a finish post (a column of light) goes up across open land; the action bar shows how far, which way and the time. Gold, silver or just finishing each pay a prize (Riders 1.5x); too slow and it's lost. (`Races`)
 - A downed horse is brought round by a Rider twice as fast and with no treat (Powers' side; the `jaymoskingdoms.rider` tag tells it).
 - Built; not played. The two new mixins (`Mob.isSaddled`, `RunAroundLikeCrazyGoal.tick`) are only checked at launch.
+
+## 0.7.664 (2026-11-09): Zombies beat down doors (#1168)
+
+Andy: "zombies should beat and break doors." Every zombie (husks, the drowned on land, zombie villagers, Kitchen's risen
+players, the Frostbite; not zombified piglins, thralls or Bio-built buds) now beats on a shut door between it and what
+it hunts, on every difficulty but Peaceful: arm swings, the door-bang sound, splinters, and cracks growing over the door
+until it gives (nothing dropped). One zombie breaks a wooden door in about 5 seconds; each other zombie on the same door
+adds 60% more, up to six. Iron and copper doors take about 45 seconds; a locked lock makes it take as much longer as it
+slows a player. With Spooky Doors each blow jars the door open a crack and it creaks shut. Villagers within 16 blocks
+hear it and run from the door. The mob_griefing rule turns it off. (`DoorPounding`, `SpookyDoors`)
+
+## 0.7.665 (2026-11-09): Deer herds of 3 to 10 (#1171)
+
+- Naturalist's deer now spawn in herds of 3 to 10 (any size in between as likely), never more than 10 at once. Before, a herd was 3-5 and stopped at 4. A herd can still come a deer or two short when some of its spots aren't grass it can stand on, as with any animal.
+- The "no new herd once 6 deer are nearby" rule no longer counts the herd that is arriving, so a herd isn't cut short halfway.
+- Only deer spawning on their own; spawn eggs, spawners and commands are unchanged. Nothing changes without Naturalist.
+- `ShyDeer.registerHerds` (biome spawn entry, `HERD_LEAST`/`HERD_MOST`), `mixin/tweaks/DeerHerdMixin` (cluster cap). Built; not played.
+
+## 0.7.666 (2026-11-09): Only the Skeleton Lord's curse makes skeletons (#1172)
+
+- Andy: "you shouldn't be able to become a skeleton unless you are cursed by the skeleton lord". Skeletons (and the Lord himself) no longer turn anyone when they kill or leave a blight. A skeleton blight someone already carries fades.
+- **The Skeleton Lord's Curse** (`SkeletonCurse`): his spell (half the time) and a blow of his staff (15%) put it on a player. It shows as an effect icon and is kept by a mark of its own, so milk doesn't wash it off. Die with it on you (anything but the void, lava, losing your head or an execution) and you get the long black with bone-grey edges, then rise a skeleton Hollow. A golden apple eaten while Weakened lifts it, the same as the blight. A real death takes it with them.
+- Zombie, wraith, reaper and pallid turnings and vampire bites are unchanged.
+- Built; not played.
+
+## 0.7.667 (2026-11-09): GeckoLib mobs' animations the right way round: the Skeleton Lord faces forward and holds his staff (#1174)
+
+- Andy's playtest: the Skeleton Lord's head and feet faced backward while his body faced forward, and his staff floated
+  off to one side behind him. The models were right; their animations were turned round. Blockbench projects in the
+  free / modded-entity formats (the Workshop models and ours) keep keyframes the Java model way, and
+  `tools/bbmodel_geckolib.py` wrote them unchanged, so GeckoLib read every animated rotation's x and y and every
+  position's x the other way. The converter now turns those round (Bedrock and GeckoLib projects stay as they are), and
+  the four GeckoLib mobs' animation files are rewritten with it.
+- The Skeleton Lord's idle, walk, statue and laugh now keep his face, feet and body facing where he walks, with the staff
+  in his left hand (it hangs from his hand bone, moved into the grip by its own animation). The same fix turns the silver
+  skeleton's, the draugr's and the barrow beetle's moves the right way: swords forward, the draugr's shield raised in
+  front, the skeleton's buckler and coffin rise.
+- Checked with GeckoLib 5.5.7's own bone math (from its jar) on each mob's file; built. Not seen in game.
+
+## 0.7.668 (2026-11-09): Notus and Boreas animated with GeckoLib (#1177)
+
+- **Notus and Boreas** (nyxaris' Fire Dragon, CC BY 4.0) are now drawn and animated by GeckoLib, not posed in our
+  own code. Andy asked for it as a test beside the minotaur's move to GeckoLib, to compare the two.
+- The model came with only its wingbeat. These keyframed animations of ours are added to it in
+  `kingdoms/art/fire_dragon.bbmodel` (made by `kingdoms/tools/gen_fire_dragon_geo.py`, and you can open it in
+  Blockbench): standing (its folded wings breathing, its tail swaying), walking, sitting, crashed, landing (wings
+  flared, then folding), gliding, a **bite** (the neck lunges, the jaw snaps) and a **tail sweep** (it winds up, then
+  swings its body and tail round). The bite and the sweep are new: before, its model didn't move for them. The
+  standing, sitting and crashed poses are the ones the old code worked out.
+- The wingbeat still keeps time with its stroke (faster climbing, slower breathing). In code on top of the
+  animations, as before: its neck and head turn where it looks, its body tips with a climb or a dive, and its jaw
+  opens to breathe.
+- Hides, glowing markings, sizes, seats and the hatchling's size are unchanged (`FireDragonRenderer`,
+  `dragons/FireDragonAnimations`). `FireDragonModel` and the old baked model are removed.
+- Built only. Not played, and no server run. Check in game that the animations face the right way and match the old
+  ones, and that the bite, sweep and landing play.
+
+## 0.7.669 (2026-11-09): astronomy art - the telescope study (#1185)
+
+- **Telescope artwork**: original walnut, aged-brass and glass telescope model with a jointed tripod and engraved altitude scale, plus a 16x16 inventory icon and the shared Renaissance-study palette.
+- Includes editable Blockbench sources and inspected front/side/back renders; no outside art assets used.
+- Art and model JSON only. Telescope registration, aiming and observations come with their gameplay change.
+- Built and asset-checked; not tested in game.
+
+## 0.7.670 (2026-11-09): Minotaur moves to GeckoLib (#1188)
+
+The minotaur keeps its stats, AI, hammer, scale and shadow, but is now rendered by GeckoLib with its calm and hostile idles, previously unused walk, charge run, alternating hammer swings and overhead ground slam. Its head still turns toward what it is looking at.
+
+The editable Blockbench source, CC BY 4.0 licence, credit and inspected renders are in `kingdoms/art/`. Original model, texture and animations: “Minotaur” by eanncrod (https://blockbenchworkshop.com/model/eanncrod/minotaur). The rig and geometry were raised together to put its feet at y=0, animation names were shortened, and `swing_2` was made one-shot; no cubes or texture pixels were removed.
+
+The Kingdoms and root builds pass, and a dedicated development server reaches `Done` with GeckoLib 5.5.7 loaded.
+
+Not tested in game: facing, final size, ground contact, hammer placement and animation timing still need a visual playtest.
+
+## 0.7.671 (2026-11-09): Articulated GeckoLib telescope (#1189)
+
+The telescope block now animates smoothly when aimed. Its mount turns and its barrel tilts to track the sky, ready for the Altazimuth Mount skill. One telescope tier covers it — the skill uses the same instrument and its engraved scales. The static model stays as a fallback.
+
+Not tested in game: block registration, per-telescope saved aim, Altazimuth Mount skill checks, observations and failure messages remain with the gameplay implementation and the separate astronomy-sky dependency. No gameplay Java is changed here.
+
+## 0.7.672 (2026-11-09): traveller's journal refresh (#1192)
+
+- The journal opens on a larger, window-fitting panel with illustrated Quests, Map and Reputation tabs, gold selection and hover highlights, striped rows and sunken content wells.
+- Quests, orders, promises, captains, roads, map markers and reputation details stay unchanged; the map and lists adapt to the available screen space.
+- Original tab artwork by Prometheus, with an editable Blockbench model and generator in `kingdoms/art/journal/`.
+- Built and render-checked; not tested in game.
+
+## 0.7.673 (2026-11-09): skill tree: the Attributes/Jobs panel can get out of the way (#1190)
+
+- **Collapse**: a small arrow on the panel's left edge tucks the Attributes (or Jobs) panel away, and the skill web
+  fills the screen - the perks that were behind the panel can be seen, moved and learned while it is away.
+- **Back again**: a strip on the left edge, with a gold arrow and the panel's height, brings it back with one click.
+- **Why**: the panel covers a third of the screen and the web is dragged and zoomed under it, so perks behind it were
+  in reach only by panning the whole web away first.
+- **Nothing else changed**: the panel shows exactly what it did before, and only its position is different.
+- Built; not played. How the arrow reads in game and whether the strip is easy to find are unverified.
+
+## 0.7.674 (2026-11-09): Aetherion: an editable model and GeckoLib animations (#1194)
+
+- Aetherion keeps its star-dragon body, four hides, glowing markings, horns, spines, saddle, rider seats and hatchling scale, now drawn from an editable Blockbench model instead of Java-built parts.
+- Idle, walking, wingbeats, gliding, landing, sitting, crashing, biting, Cataclysm and tail sweeps are keyed animations; its head still follows its look and its jaw opens with the starlight beam.
+- Original project geometry and keyframes from `kingdoms/tools/gen_aetherion_geo.py`; the body-plan reference supplied by Andy was public-domain/CC0. No Saint's Dragons art or animation is used.
+- Geometry matched against all 88 original cubes; front/side/back and eleven old/new pose renders inspected. Kingdoms clean build and root build pass. A dedicated server boot was attempted, but concurrent Gradle activity deleted shared build output before startup; not tested in a client.
+
+## 0.7.675 (2026-11-09): Astronomy 3: the armillary sphere (#1196)
+
+An armillary sphere block for the observatory: a placed instrument whose brass rings turn in the world, and a
+screen opened by right-clicking it that reads off the night sky - which of the player's discovered stars are
+overhead, the world time and the player's place - and records the measurement on the block entity.
+
+Drawn as additive block-entity geometry (cord lines for the rings); the world render and the vanilla sky are
+never touched, so shader packs keep their own sky.
+
+Built on astronomy-sky's catalog and discovery (PR 1193).
+
+Built; not tested in game.
+
+## 0.7.676 (2026-11-09): Atroxiia moves smoothly now (#1198)
+
+- Atroxiia, the frost wyrm of the lesser dragons, is drawn and animated with GeckoLib. Its look is unchanged: the same two-armed serpent body, glowing markings, headdress variants, spinal ridges, saddle and straps, sizes, rider seats and reach.
+- Every pose and move is preserved: idle fidgets (taunt, sniff, grumble), the crutching walk and bounding run, sitting, crashed and swimming states, plus all attacks — slam, swipe, precise strike, Gungnir, devastating sweep, Helheim quake, bite, tail lash, hurt and the held death pose.
+- Kingdoms builds and the dev server starts; Atroxiia was not spawned or watched in game.
+
+## 0.7.677 (2026-11-09): reincarnation wipes the whole character (#1201)
+
+- **Reincarnating now wipes the old life completely**: a fresh MCA look and name, villagers who no longer remember the player (hearts, memories, relationships, marriage and family ties), a clean exit from their party with no stale roster, invites or leadership, and captains who no longer remember having met them - the captain journal is clean in the new life.
+- Kingdoms: `McaBridge.newDestiny` forgets the player from every loaded villager's memories and ends their MCA marriage/engagement/promise; `Parties.reborn` makes the player leave their party (disbanding it if alone, else electing a new leader) and lapses their invites; `Captains.forgetPlayer` removes the player from every captain's meeting memory; `LifeStory.reincarnateAnew` calls all three on the final death's rebirth path.
+- Built and compile-checked; not tested in game.
+
+## 0.7.678 (2026-11-09): fix the server crash at startup from the armillary sphere (#1202)
+
+- The armillary sphere block was registered without its id, so the server stopped at startup with "Block id not set"
+  (`ArmillarySphereBlock.register`). It now sets its id like every other block. Built and started on a dev server.
+
+## 0.7.679 (2026-11-10): reincarnation - villagers really forget the old life (#1205)
+
+- **Villagers forget you**: after a reincarnation, MCA villagers now really drop the old life's hearts, dialogue and memories (the last change cleared a copy of their memories, so nothing was forgotten). Villagers that were in unloaded chunks or another dimension forget you the next time they load, and villagers you meet in the new life keep remembering the new you.
+- **The new character is safe**: the reset now runs before MCA's "Who are you?" creator opens, so it can't wipe the look and name being chosen.
+- `McaBridge.forgetPlayer` writes a stranger's memory back through MCA's `updateMemories` and records the rebirth on the Overworld (`mca_reborn`); each villager marks the rebirths it has forgotten (`mca_forgotten`) and checks on load. `LifeStory.reincarnateAnew` wipes first, then calls `newDestiny`.
+- Built; not played.
+
+## 0.7.680 (2026-11-10): A real night sky (#1193)
+
+- **Real stars**: the overworld night sky shows 8,870 real stars from the HYG catalog, turning with the world's time and with how far east or west you stand (the latitude is fixed at 45 degrees). Rain and daylight fade them; far hills and mountains hide the stars behind them.
+- **Constellations you find**: keep a star in view for about four seconds at night, under open sky, and you've discovered it; the 88 constellation figures draw their lines between the stars you know. What you've discovered is kept on the server with your character (through death, cleared by reincarnation), so the armillary sphere reads the same sky.
+- **Light pollution**: the stars dim near villages.
+- Shader packs keep their own sky; these stars are drawn alongside it.
+- Data credits: star positions from the HYG Database v4.1 (The Astronomy Nexus, CC BY-SA 4.0); constellation lines from ConstellationLines (MarcvdSluys, CC BY 4.0). Notices in `licenses/astronomy/NOTICE.txt`.
+- Built; not tested in game.
+
+## 0.7.681 (2026-11-10): Family farmhand start is kind to every blood (#1203)
+
+The family that takes you in at the Family farmhand start never holds your heritage against you: no hearts lost,
+no dearer trades, no fear, no distaste — plain folk who welcome a stranger whatever their blood. They may notice
+your race and say so kindly, but it never carries a cost. The bargain stays "as long as you help if you stay":
+leaving is allowed, idling is what sours it, not who you are.
+
+## 0.7.682 (2026-11-10): Spirits: a faint warrior that manifests when it speaks (#1209)
+
+- **The look** (Andy, after Johnny Silverhand in Cyberpunk 2077: "a faint but visible warrior"): every spirit that is out
+  now shows as a whole figure you can half-see, standing over its keeper's back, a translucent body under the aura's shells
+  so it reads in daylight, flaring when its arms strike. Only the mana attuned (or those reading magic) see it, any
+  attuned player sees anyone's spirit, the same rule as the arms.
+- **Manifesting**: when a spirit speaks, and when it levels up, it steps out and floats in front of its
+  keeper, a little to one side, facing them at about a person's size, nodding and making its point with its own hands
+  while the line is said. It forms and goes with a glitch: it jolts, drops out, splits into cyan and magenta, and data
+  rain falls through it. The higher its level the more solid it is (half at level 1, full at 20) and the longer it holds
+  (3.5 s, plus 0.2 s a level). A level up holds longest, fully solid, with both arms flung up, a ring of light and a
+  chime. It keeps its spot while it talks, and blinks back in front of you if you walk off. In first person you see it
+  in front of you; its arms over your back stay away while it stands there. The chat line still prints.
+- **No legs** (Andy: "the lower half should be wispy"): below the waist every figure thins into trails of smoke, and
+  manifested it floats with the last wisp just off the ground.
+- **The Grue fights back where you can see it**: each time it lashes at you, your spirit and the Grue appear in front of
+  you and trade blows for about three seconds, both glitching, a crack and red sparks at each blow. The stronger the lash,
+  the redder your spirit turns and the further the Grue drives it back toward you. The Quiet One fights with its arms alone.
+  Only the keeper sees it (the lash is sent to them alone); the darkness the Grue throws in its trial sets it off too.
+- **The Grue itself** is ghastly and winged: a horned skull under a torn hood, a starved ribcage, long clawed arms, great
+  ragged bat wings and smoke below the waist, a dark see-through body with a glowing red edge. In its trial the boss and its
+  shades are drawn as the Grue (the evoker and vexes it wears are hidden; the name and boss bar stay), hovering on its
+  wingbeats and clawing at you when you're close, glitching when hit, the same way the spirits animate. In its barrage finale its clawed fists pound as fast as your spirit's.
+- **The Quiet One** never shows a body: only its large arms, as before.
+- **Upgraded figures**: Grimsby is a dead traveller (bones, a tattered cowl and cloak, a scabbard); Varro a plated
+  warlord (pauldrons, a plumed helm with a visor slit, sabatons); Ambrose an elder in a hooded robe (brows, beard, wide
+  sleeves, a satchel of scrolls); Thessaly a scholar (collar, side locks, circlet, spectacles, bell sleeves, a long
+  skirt). Each now has arms of its own. The Blockbench files in
+  `tools/blockbench/spirit-figures/` carry the moves as animations (idle, speak, manifest, level_up, fade, strike; the Grue's file adds flap); the game
+  poses the same curves in code.
+- `client/spirits/SpiritManifest` (new, drawn in the world from the synced spirit state; nothing new on the server),
+  `SpiritFigure` (written by `tools/blockbench/spirit-figures/gen.py`), `SpiritArms` (no longer draws the figure; hides the Grue's borrowed bodies), `GrueClient` (a lash starts the fight).
+- Built; not played. Every number (faintness, solidity, holds, glitch, where it stands) is a constant at the top of
+  `SpiritManifest` and `SpiritFigure`.
+
+## 0.7.683 (2026-11-10): Unsupported fallen trees come down (#1212)
+
+Andy: "unsupported fallen trees should fall, there shouldnt be hanging trees like this." A felled tree that came to rest leaning at 45 degrees or more (against a house, another tree, a hillside) never looked again at what held it, so once that was chopped, burned or knocked away it hung in the air at its angle for good; so did a piece broken off a leaning tree by chopping, and a tree that lay flat out over a drop. Now every fallen tree checks every second: free to turn further about its foot, it falls on; with none of its wood resting on anything, it drops until it strikes the ground. Trees already hanging in the world come down once their chunk is loaded.
+- `FallingTree#rest` (support check for every down tree, `rests`/`holds`), `lift` kept with the world so a tree falling on is lowered back onto its foot.
+- Built; not played.

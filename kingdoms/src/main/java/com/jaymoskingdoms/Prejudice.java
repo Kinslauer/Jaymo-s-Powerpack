@@ -181,7 +181,8 @@ public final class Prejudice {
 		// ((0.7.381) never by the village that took them in on their story's start: StoryHomes)
 		// ((0.7.443) a mask hides a tied-down tail's blood from no one who smells it: Tails)
 		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) && Tails.smells(who, p) == null
-			|| StoryHomes.takenIn(who, whom)) {
+			|| StoryHomes.takenIn(who, whom)
+			|| whom instanceof Player pl && who instanceof Villager vl && FarmhandHome.familyOf(vl, pl)) {
 			return 0.0F;
 		}
 		// ((0.7.412) a cast-out start: their own kind turn them away for the first days, StoryHard)

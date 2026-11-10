@@ -1,5 +1,9 @@
 package com.jaymoskingdoms.dragons;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Heritage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -11,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -47,7 +52,9 @@ import org.jspecify.annotations.Nullable;
  * Tamed and ridden it's steered like a horse on land and swims where the rider looks in water; R drives Gungnir where
  * the rider looks. Its favourite is raw cod; Frostborn win it over twice as fast.
  */
-public class AtroxiiaDragon extends WindDragon {
+public class AtroxiiaDragon extends WindDragon implements GeoEntity {
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
 	static final double HEALTH = 200.0, ARMOR = 10.0, TOUGHNESS = 4.0, SPEED = 0.22, BITE = 10.0;
 	/** The slam: damage, how far ahead it lands and its reach there, pace, the tick it lands. */
 	static final float SLAM = 16.0F;
@@ -97,6 +104,17 @@ public class AtroxiiaDragon extends WindDragon {
 	public AtroxiiaDragon(EntityType<? extends AtroxiiaDragon> type, Level level) {
 		super(type, level);
 		this.xpReward = 40;
+	}
+
+	/** Drawn and animated by GeckoLib from our editable Blockbench model ({@link AtroxiiaAnimations}). */
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		AtroxiiaAnimations.register(controllers);
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -199,6 +217,20 @@ public class AtroxiiaDragon extends WindDragon {
 		Vec3 flat = aim.multiply(1.0, 0.0, 1.0);
 		this.moveAim = flat.lengthSqr() < 0.01 ? Vec3.directionFromRotation(0.0F, this.getYRot()) : flat.normalize();
 		this.entityData.set(DATA_ACTION, move);
+		String animation = switch (move) {
+			case SLAM_MOVE -> "slam";
+			case SWIPE_MOVE -> "swipe";
+			case STRIKE_MOVE -> "strike";
+			case GUNGNIR_MOVE -> "gungnir";
+			case SWEEP_MOVE -> "sweep";
+			case QUAKE_MOVE -> "quake";
+			case BITE_MOVE -> "bite";
+			case LASH_MOVE -> "lash";
+			default -> null;
+		};
+		if (animation != null) {
+			this.triggerAnim("action", animation);
+		}
 	}
 
 	// ---- ticking ----------------------------------------------------------------------------------------------------
@@ -510,6 +542,23 @@ public class AtroxiiaDragon extends WindDragon {
 		this.riderIn = RIDER_GUNGNIR_EVERY;
 		this.setYRot(yaw);
 		begin(GUNGNIR_MOVE, null, Vec3.directionFromRotation(0.0F, yaw));
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt && this.isAlive()) {
+			this.triggerAnim("action", "hurt");
+		}
+		return hurt;
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		if (level() instanceof ServerLevel) {
+			this.triggerAnim("action", "death");
+		}
+		super.die(source);
 	}
 
 	/** How far through {@code action} its model is after {@code age} ticks (0 to 1). */

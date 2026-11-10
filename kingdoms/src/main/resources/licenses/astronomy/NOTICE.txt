@@ -1,0 +1,15 @@
+Jaymo's Kingdoms - astronomy data credits
+
+Star positions: HYG Database v4.1, The Astronomy Nexus
+  Source: https://www.astronexus.com/projects/hyg (also codeberg.org/astronexus)
+  Licence: CC BY-SA-4.0, https://creativecommons.org/licenses/by-sa/4.0/
+  Subset shipped: every catalog star down to magnitude 6.5 (8,870 stars in v4.1), with right ascension,
+  declination, magnitude, constellation and traditional names.
+
+Constellation lines: ConstellationLines, MarcvdSluys
+  Source: https://github.com/MarcvdSluys/ConstellationLines
+  Licence: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+  88 IAU constellation figures; line segments whose endpoints fall outside the catalog are omitted.
+
+These data files are assets of Jaymo's Kingdoms; the code that draws them is original. Attribution is kept here
+and in the source files of kingdoms/src/client/java/com/jaymoskingdoms/client/astronomy/.

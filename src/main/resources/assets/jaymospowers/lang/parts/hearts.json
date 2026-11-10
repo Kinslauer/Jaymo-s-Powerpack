@@ -1,0 +1,10 @@
+{
+  "itemGroup.jaymospowers.hearts": "Heart Crystals",
+  "block.jaymospowers.heart_crystal_ore": "Heart Crystal Ore",
+  "block.jaymospowers.heart_crystal_ore_deepslate": "Deepslate Heart Crystal Ore",
+  "item.jaymospowers.heart_crystal": "Heart Crystal",
+  "tooltip.jaymospowers.heart_crystal": "Consume for a permanent half-heart. Lost on death, but each grants an extra life.",
+  "message.jaymospowers.hearts.granted": "A heart crystal takes root in you. (%s half-hearts)",
+  "message.jaymospowers.hearts.full": "You cannot hold more heart crystals.",
+  "message.jaymospowers.hearts.burned": "A heart crystal shatters, turning death aside. (%s half-hearts remain)"
+}

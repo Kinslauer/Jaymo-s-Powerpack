@@ -269,6 +269,9 @@ public class Rat extends PathfinderMob {
 		}
 
 		private void moveToTarget() {
+			if (target == null) {
+				return;
+			}
 			Vec3 at = target.at();
 			getNavigation().moveTo(at.x, at.y, at.z, CREEP_SPEED);
 		}

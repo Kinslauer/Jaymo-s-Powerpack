@@ -459,6 +459,21 @@ public final class Parties {
 		return 1;
 	}
 
+	/**
+	 * {@code player} is born again: they leave their party, any invite they made or took lapses, and the
+	 * rest are told once (an empty list to them, so the party list clears on every client). From LifeStory's
+	 * reincarnation only.
+	 */
+	static void reborn(ServerPlayer player) {
+		INVITES.remove(player.getUUID());
+		INVITES.values().removeIf(invite -> invite.from().equals(player.getUUID()));
+		LISTED.remove(player.getUUID());
+		PlayerTeam team = team(player);
+		if (team != null) {
+			leave(player);
+		}
+	}
+
 	private static int kick(ServerPlayer leader, String who) {
 		MinecraftServer server = leader.level().getServer();
 		PlayerTeam team = team(leader);

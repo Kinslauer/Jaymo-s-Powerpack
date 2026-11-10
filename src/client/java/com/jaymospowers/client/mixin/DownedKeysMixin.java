@@ -70,7 +70,7 @@ abstract class DownedKeysMixin {
 		}
 		LocalPlayer player = Minecraft.getInstance().player;
 		// (0.15.49) use stays live for Second Wind's eating to rise, with food in hand
-		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && (SelfRevive.canEat(player) || atBlock(player)))
+		return player != null && Downed.isDowned(player) && !("key.use".equals(this.name) && (SelfRevive.canEat(player) || com.jaymospowers.core.wounds.HealStruggle.canStruggle(player) || atBlock(player)))
 			&& !this.powerKeepsLive(player);
 	}
 

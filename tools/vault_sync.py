@@ -9,11 +9,13 @@
 Inbox tasks (each syncs first and after, so everyone sees the change at once):
     python tools/vault_sync.py --claim hermes-a        # take the oldest task sent back to hermes-a, else the oldest
                                                        # open one for hermes-a, hermes or any; print it; exit 3 if none
-    python tools/vault_sync.py --claim hermes-fixer --fixes   # a fixer bot: the oldest task sent back to anyone
+    python tools/vault_sync.py --claim hermes-fixer --fixes   # a fixer bot: the oldest task sent back to anyone, else
+                                                       # the oldest open one for it (hermes-fixer or hephaestus)
     python tools/vault_sync.py --tasks in-review       # task names with that status, one per line
     python tools/vault_sync.py --show <task>           # print a task
     python tools/vault_sync.py --set <task> status=in-review pr=1234   # change a task's properties
     python tools/vault_sync.py --note <task> "Reviewer: ..."           # add a line under the task's Notes
+    python tools/vault_sync.py --new <task> for=hephaestus from=... < body.md   # a new open task, body from stdin
     python tools/vault_sync.py --send <task>           # reviewed and passed: hand it to the coordinator (status: ready)
     python tools/vault_sync.py --reviewer-seen         # the PC reviewer, every round: "I'm here" (Reviewer.md)
     python tools/vault_sync.py --reviewer-away [30]    # in-review tasks, but only if the reviewer hasn't been seen
@@ -43,7 +45,7 @@ import sys
 import time
 
 BRANCH = "vault-live"
-TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--reviewer-seen", "--reviewer-away")
+TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--new", "--reviewer-seen", "--reviewer-away")
 REVIEWER_AWAY_MINUTES = 30  # no reviewer round for this long: the coordinator reviews in-review tasks itself
 SEED = {  # written by --setup when the branch doesn't exist yet
     ".gitattributes": "Decisions.md merge=union\n*.md text eol=lf\n",
@@ -164,13 +166,41 @@ KANBAN_LANES = (  # (lane, Inbox statuses); Obsidian's Kanban plugin shows Kanba
     ("Needs Andy", ("ready", "sent", "blocked")),
 )
 KANBAN_DONE = 8  # how many finished tasks the Done lane shows
+# Who's on a card, at a glance (Andy, 2026-11-09: "the api and youth's bots need differentiators"): Hermes bots by
+# the names Andy gave them, the cloud agent (Anthropic API, tools/cloud-agent) and Claude Code threads each marked.
+# Each worker has its own emoji (Andy: "each should have a different emoji").
+HERMES_BOTS = {"hermes-a": "☀️ Apollo", "hermes-b": "🍇 Bacchus", "hermes-fixer": "🔨 Hephaestus",
+               "hermes-modeller": "🔥 Prometheus", "hermes-writer": "🪶 Quill"}
+CLOUD_AGENT = "claude-cloud"
+
+
+def worker_label(who):
+    """`hermes-a` -> `☀️ Apollo`, `claude-cloud` -> `☁️ Cloud`, `claude` -> `💻 Odysseus`; anything else unchanged."""
+    key = (who or "").strip().lower()
+    names = {**HERMES_BOTS, **{v.split(" ", 1)[1].lower(): v for v in HERMES_BOTS.values()}}
+    if key in names:
+        return names[key]
+    if key in (CLOUD_AGENT, "cloud"):
+        return "☁️ Cloud"
+    if key == "hermes":
+        return "🪽 any Hermes bot"
+    if key.startswith("claude"):
+        return "💻 Odysseus"  # Andy named the cloud Claude Odysseus (2026-11-09)
+    return who
 
 
 def write_kanban(live):
     """Rewrite Kanban.md (a read-only board for Obsidian's Kanban plugin) from the Inbox tasks and running agents.
     It is regenerated on every sync, so drag-and-drop changes on it don't stick: change tasks with --set."""
     def card(folder, name, p, extra=""):
-        who = p.get("claimed_by") or (("for " + p["for"]) if p.get("for") else "")
+        if p.get("status") == "writing" and p.get("writer"):
+            who = worker_label(p["writer"])  # Quill's text pass: the writer has it, not the builder
+        elif p.get("claimed_by"):
+            who = worker_label(p["claimed_by"])
+        elif folder == "Agents":
+            who = "💻 Odysseus"  # an agent note is a Claude Code thread's own work (Odysseus, the cloud Claude)
+        else:
+            who = ("for " + worker_label(p["for"])) if p.get("for") else ""
         bits = [b for b in (who, f"#{p['pr']}" if p.get("pr") else "", p.get("status", ""), extra) if b]
         return f"- [ ] [[{folder}/{name}|{name}]] · " + " · ".join(bits)
     lanes = {lane: [] for lane, _ in KANBAN_LANES}
@@ -339,6 +369,7 @@ def tasks(live, wanted=None):
 
 
 SPECIALISTS = {"hermes-modeller": "prometheus", "hermes-writer": "quill"}  # bot name -> the name Andy calls it
+FIXER_NAMES = ("hermes-fixer", "hephaestus")  # open tasks the fixer bot takes when nothing was sent back (Bug hunter)
 
 
 def meant_for(props, agent):
@@ -384,7 +415,8 @@ def claim(live, agent, fixes=False):
     bot), the oldest task sent back to anyone, which it takes over. Exit 3 if none."""
     back = tasks(live, ("changes",))
     if fixes:
-        pick = sorted(back)[0] if back else None
+        mine = [t for t in tasks(live, ("open",)) if (t[2].get("for") or "").strip().lower() in FIXER_NAMES]
+        pick = sorted(back)[0] if back else (sorted(mine)[0] if mine else None)
     else:
         mine = [t for t in back if t[2].get("claimed_by", "") == agent]
         fresh = [t for t in tasks(live, ("open",)) if meant_for(t[2], agent)]
@@ -404,6 +436,20 @@ def claim(live, agent, fixes=False):
     sys.stdout.reconfigure(encoding="utf-8")
     print(f"Task: {pick[1]}  ({path})\n")
     print(open(path, encoding="utf-8").read())
+
+
+def new_task(live, name, props, body):
+    """A new open Inbox task (for scripts such as tools/cloud-agent/run.py hunt). Refuses a name already taken."""
+    name = re.sub(r"[^a-z0-9-]+", "-", name.lower()).strip("-")[:60]
+    path = os.path.join(live, "Inbox", name + ".md")
+    if os.path.exists(path) or os.path.exists(os.path.join(live, "Inbox", "Done", name + ".md")):
+        raise SystemExit(f"An Inbox task called {name} already exists")
+    head = {"status": "open", "for": "any", "from": "", "asked": time.strftime("%Y-%m-%d"), "claimed_by": "", "pr": ""}
+    head.update({k: v.replace("\n", " ") for k, v in props.items()})
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("---\n" + "".join(f"{k}: {v}\n" for k, v in head.items()) + "---\n\n" + body.strip() + "\n")
+    sync(live)
+    print(f"{name}: open")
 
 
 def task_command(live):
@@ -439,6 +485,8 @@ def task_command(live):
         for _, name, _ in sorted(tasks(live, tuple(rest) or None)):
             print(name)
         return
+    if cmd == "--new":
+        return new_task(live, rest[0], dict(kv.split("=", 1) for kv in rest[1:]), sys.stdin.read())
     path = task_path(live, rest[0])
     if cmd == "--show":
         sys.stdout.reconfigure(encoding="utf-8")

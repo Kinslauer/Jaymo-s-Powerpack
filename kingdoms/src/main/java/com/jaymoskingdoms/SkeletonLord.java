@@ -91,6 +91,8 @@ public class SkeletonLord extends Monster implements GeoEntity {
 	static final int SPELL_COOLDOWN = 120, CAST_TICKS = 19, CAST_LANDS = 10;
 	static final double SPELL_RANGE = 7.0, SPELL_RADIUS = 6.0, SPELL_PUSH = 2.2, SPELL_LIFT = 0.55;
 	static final float SPELL_DAMAGE = 6.0F;
+	/** The chance his spell, and a blow of his staff, leaves his curse on a player it lands on (SkeletonCurse). */
+	static final float CURSE_SPELL = 0.5F, CURSE_STAFF = 0.15F;
 	/** What he drops: bones, amethyst shards, silver coins (0.7.486; once emeralds), (min, max of each). */
 	static final int BONES_MIN = 6, BONES_MAX = 10, AMETHYST_MIN = 4, AMETHYST_MAX = 8, SILVER_MIN = 3, SILVER_MAX = 6;
 	public static final byte WAKE = 96, CAST = 97;
@@ -341,6 +343,9 @@ public class SkeletonLord extends Monster implements GeoEntity {
 			if (e instanceof Player) {
 				this.engaged = true;
 			}
+			if (e instanceof ServerPlayer player && this.random.nextFloat() < CURSE_SPELL) {
+				SkeletonCurse.curse(player);
+			}
 		}
 		for (int i = 0; i < 40; i++) {
 			double a = i * Math.PI * 2.0 / 40.0;
@@ -392,6 +397,9 @@ public class SkeletonLord extends Monster implements GeoEntity {
 		}
 		if (hit && target instanceof Player) {
 			this.engaged = true;
+		}
+		if (hit && target instanceof ServerPlayer player && this.random.nextFloat() < CURSE_STAFF) {
+			SkeletonCurse.curse(player);
 		}
 		return hit;
 	}

@@ -13,13 +13,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Stunned by a Time Flow blow, or held on the barrage's target: no movement keys answer until it's over. */
+/** Stunned by a Time Flow blow, held on the barrage's target, or held by a Time Stop: no movement keys answer until it's over. */
 @Mixin(KeyboardInput.class)
 abstract class ChronoStunInputMixin extends ClientInput {
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void jaymospowers$chronoStunned(CallbackInfo ci) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player != null && (ChronoFlow.stunned(player) || ChronoFlowClient.inputLocked())) {
+		if (player != null && (ChronoFlow.stunned(player) || ChronoFlowClient.inputLocked() || com.jaymospowers.client.power.chrono.ChronoTimeStopClient.held())) {
 			this.keyPresses = Input.EMPTY;
 			this.moveVector = Vec2.ZERO;
 		}

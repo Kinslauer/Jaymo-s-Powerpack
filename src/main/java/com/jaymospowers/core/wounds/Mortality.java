@@ -132,6 +132,11 @@ public final class Mortality {
 	static final double SAFE_RANGE = 12.0;
 	/** (0.21.7) How far round a lying body (blocks) mobs are made to lose interest in it, and how often (ticks). */
 	static final double IGNORE_RANGE = 32.0;
+	/**
+	 * Andy: "I was locked in the revive screen". The most a wake already under way (dying mid-turn, turned, or come to) may
+	 * run past its moment before it's done where they lie, whatever was holding it up (ticks).
+	 */
+	static final int WAKE_LIMIT = 20 * 30;
 
 	/** What put a player down, and its chance (0 to 1) that the death is final. */
 	public enum Cause {
@@ -302,18 +307,15 @@ public final class Mortality {
 			REBIRTHS.remove(handler.player.getUUID());
 			// (0.21.7) logging out while lying left for dead: they come to where they lie
 			cameToWhereLying(handler.player);
+			// and one whose wake was already under way (rising turned) is woken where they lie now, turned, not left to be
+			// forgotten with the server's memory of it
+			wokeOnLeaving(handler.player);
 		});
 		// (0.21.7) one who left (or the server stopped) while lying isn't held out cold for a day once back
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			ServerPlayer player = handler.player;
-			Long knocked = player.getAttached(Downed.KNOCKED);
-			long now = player.level().getGameTime();
-			if (knocked != null && !WAKES.containsKey(player.getUUID()) && (knocked >> 1) - now > LIE_TICKS / 2) {
-				player.setAttached(Downed.KNOCKED, (now + OUT_AFTER) << 1 | (knocked & 1L));
-			}
-		});
-		// (0.21.7) a body left for dead is dead as far as mobs can tell: none finishes it off
-		MobExecutions.SPARE.add((mob, victim) -> victim instanceof Player player && lying(player));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> unheld(handler.player));
+		// (0.21.7) a body left for dead is dead as far as mobs can tell: none finishes it off. Nor one rising turned: a
+		// skeleton kept executing a body in the black of a mid-turn death, and each death began that black again
+		MobExecutions.SPARE.add((mob, victim) -> victim instanceof Player player && waking(player));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAKES.clear();
 			REBIRTHS.clear();
@@ -443,6 +445,57 @@ public final class Mortality {
 		player.setAttached(Downed.KNOCKED, (player.level().getGameTime() + OUT_AFTER) << 1);
 	}
 
+	/**
+	 * Left while their wake was under way (rising turned, or come to and waiting on the roll): woken where they lie now, the
+	 * turning done, so the turn isn't lost with the server's memory of the wake and they aren't left out cold once back.
+	 */
+	private static void wokeOnLeaving(ServerPlayer player) {
+		Wake wake = WAKES.get(player.getUUID());
+		if (wake == null || !wake.chosen) {
+			return;
+		}
+		WAKES.remove(player.getUUID());
+		ServerLevel level = player.level().getServer().getLevel(wake.dimension);
+		release(level, wake);
+		if (Carry.carrierOf(player) instanceof ServerPlayer carrier) {
+			Carry.slip(carrier);
+		}
+		try {
+			wakeAt(player, player.level(), player.blockPosition(), wake, wake.turn != null ? "risen" : wake.cause.key());
+		} catch (RuntimeException e) {
+			JaymosPowers.LOGGER.warn("{} couldn't be woken on leaving", player.getScoreboardName(), e);
+		}
+	}
+
+	/**
+	 * Held out cold with no wake behind it any more (the server forgot it, or they left): a knock-out long enough to be a
+	 * lying body's is cut short, so nobody is kept in the black waiting for a wake that will never come.
+	 */
+	private static void unheld(ServerPlayer player) {
+		Long knocked = player.getAttached(Downed.KNOCKED);
+		long now = player.level().getGameTime();
+		if (knocked != null && !WAKES.containsKey(player.getUUID()) && (knocked >> 1) - now > LIE_TICKS / 2) {
+			player.setAttached(Downed.KNOCKED, (now + OUT_AFTER) << 1 | (knocked & 1L));
+		}
+	}
+
+	/**
+	 * Struck dead again while their wake is under way (bled out, or something kept hitting the body): the death is turned away
+	 * and the wake goes on as it was, its black not begun again. Without this a body dying again every few seconds never woke.
+	 */
+	private static void stillWaking(ServerPlayer player, Wake wake) {
+		ServerLevel level = player.level();
+		player.setHealth(Math.max(1.0F, player.getMaxHealth() * WAKE_HEALTH));
+		player.clearFire();
+		player.setAirSupply(player.getMaxAirSupply());
+		player.resetFallDistance();
+		Wounds.settle(player);
+		long left = Math.max(0L, Math.max(wake.moveAt, wake.moveAtChosen) - level.getServer().getTickCount());
+		String line = player.getAttachedOrElse(WAKE_LINE, "message.jaymospowers.mortality.fading");
+		Downed.knockOut(level, player, wake.chosen ? (int) Math.min(Integer.MAX_VALUE, left) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, line, false);
+		player.setAttached(WAKE_LINE, line);
+	}
+
 	/** (0.21.7) Mobs near a lying body lose interest in it: as far as they can tell, it's dead. */
 	private static void ignored(ServerPlayer player) {
 		for (net.minecraft.world.entity.Mob mob : player.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
@@ -561,6 +614,13 @@ public final class Mortality {
 		Entity by = (felled != null ? felled : source).getEntity();
 		// (0.20.27) the dead, a witch, a vampire may make one of their own of them instead
 		boolean unturnable = Boolean.TRUE.equals(executed) || cause == Cause.LAVA || cause == Cause.VOID || cause == Cause.BEHEADED;
+		// already lying out cold on their way to waking (or rising turned): this death doesn't begin it all again
+		Wake waking = WAKES.get(player.getUUID());
+		if (waking != null && !unturnable) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}) while waking: the wake goes on", player.getScoreboardName(), cause.key(), source.getMsgId());
+			stillWaking(player, waking);
+			return false;
+		}
 		// (0.21.42) already turning: they rise the rest of the way, whatever killed them
 		java.util.Map.Entry<Integer, Runnable> mid = unturnable ? null : midTurn(player);
 		if (mid != null) {
@@ -584,6 +644,12 @@ public final class Mortality {
 			chance = Math.min(1.0F, chance * ZFighterRealism.finalOdds());
 		}
 		boolean ends = !sure && (Boolean.TRUE.equals(executed) || openInjury(player) || chance > 0.0F && player.getRandom().nextFloat() < chance);
+		// Heart crystals: if the death would be final but isn't unturnable, burn a heart and turn it away
+		if (ends && !unturnable && HeartCrystals.tryBurnHeartOnDeath(player)) {
+			JaymosPowers.LOGGER.info("{} burned a heart crystal to survive {}", player.getScoreboardName(), cause.key());
+			leftForDead(player, cause, sub(source, felled), by, null, null);
+			return false;
+		}
 		JaymosPowers.LOGGER.info("{} fell to {} ({}): {}{}", player.getScoreboardName(), cause.key(), source.getMsgId(),
 			ends ? "final" : "left for dead", sure ? " (sure wake " + (woken + 1) + " of " + SURE_WAKES + ")" : "");
 		if (ends) {
@@ -806,7 +872,20 @@ public final class Mortality {
 					}
 					continue;
 				}
-				if (now < Math.max(wake.moveAt, wake.moveAtChosen) || !place(server, player, level, wake)) {
+				long moveAt = Math.max(wake.moveAt, wake.moveAtChosen);
+				if (now % 20 == 0) {
+					// (mobs lose interest in one rising turned as in one lying: they don't stand over the body)
+					ignored(player);
+				}
+				if (now >= moveAt + WAKE_LIMIT) {
+					// (whatever held it up, a far spot that never loaded: they wake where they lie)
+					JaymosPowers.LOGGER.warn("{}'s wake ran {} ticks over: waking them where they lie", player.getScoreboardName(), now - moveAt);
+					it.remove();
+					release(level, wake);
+					wakeAt(player, player.level(), player.blockPosition(), wake, wake.turn != null ? "risen" : wake.cause.key());
+					continue;
+				}
+				if (now < moveAt || !place(server, player, level, wake)) {
 					continue;
 				}
 				it.remove();
@@ -828,6 +907,7 @@ public final class Mortality {
 				}
 				if (player.isAlive()) {
 					lighten(server, player);
+					unheld(player);
 				}
 				if (player.hasAttached(WAKE_LINE) && !WAKES.containsKey(player.getUUID()) && !Downed.isDowned(player)) {
 					player.removeAttached(WAKE_LINE);
@@ -1161,6 +1241,7 @@ public final class Mortality {
 	public static void endLife(ServerPlayer player) {
 		player.removeAttached(FINAL);
 		player.removeAttached(SURVIVOR);
+		HeartCrystals.onFinalDeath(player);
 		Afflictions.clear(player);
 		Scars.clear(player);
 		Breaks.clearAll(player);
