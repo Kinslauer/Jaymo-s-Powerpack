@@ -8,12 +8,12 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
 - [ ] [[Inbox/jujutsu-mod-checklist|jujutsu-mod-checklist]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
+- [ ] [[Inbox/jujujutsu-mod-checklist|jujujutsu-mod-checklist]] · for 🪶 Quill · open
 
 
 ## Being built
