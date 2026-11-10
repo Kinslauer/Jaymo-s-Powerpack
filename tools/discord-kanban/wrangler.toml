@@ -1,0 +1,17 @@
+name = "vault-kanban"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "public"
+binding = "ASSETS"
+run_worker_first = true
+
+[vars]
+DISCORD_CLIENT_ID = ""            # the Discord app's Application ID (public), filled in at setup
+MOVER_IDS = ""                    # Discord user ids (comma-separated) who may drag cards: Andy's, at setup
+VIEWER_IDS = ""                   # Discord user ids who may only look (friends); everyone else is turned away
+REPO = "Kinslauer/Jaymo-s-Powerpack"
+BRANCH = "vault-live"
+TIME_ZONE = "America/New_York"
+# Secrets, never here: npx wrangler secret put DISCORD_CLIENT_SECRET / GITHUB_TOKEN

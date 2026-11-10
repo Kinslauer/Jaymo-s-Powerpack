@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vault Kanban</title>
+<style>
+  :root {
+    --bg: #1e1f22; --lane: #2b2d31; --card: #383a40; --card-hover: #404249; --text: #dbdee1; --muted: #949ba4;
+    --accent: #5865f2; --bad: #da373c; --good: #23a55a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #hint { margin: 0; padding: 10px 16px 0; color: var(--muted); font-size: 12px; }
+  #board { display: flex; gap: 10px; padding: 10px 16px 16px; overflow-x: auto; height: calc(100vh - 30px);
+           align-items: flex-start; scroll-snap-type: x proximity; }
+  .lane { flex: 0 0 230px; max-height: 100%; display: flex; flex-direction: column; background: var(--lane);
+          border-radius: 8px; scroll-snap-align: start; }
+  .lane header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 6px; }
+  .lane h2 { margin: 0; font-size: 13px; font-weight: 600; }
+  .count { color: var(--muted); font-size: 12px; }
+  .lane.bots-only h2::after { content: " · bots only"; color: var(--muted); font-weight: 400; }
+  .lane ul { list-style: none; margin: 0; padding: 4px 8px 10px; min-height: 48px; overflow-y: auto; }
+  .card { background: var(--card); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; cursor: grab;
+          user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+  .card:hover { background: var(--card-hover); }
+  .card.fixed { cursor: pointer; }
+  .card.done strong { color: var(--muted); }
+  .card strong { display: block; color: #c9cdfb; font-weight: 500; overflow-wrap: anywhere; }
+  .card span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .card.saving { opacity: .5; }
+  .ghost { opacity: .35; outline: 2px dashed var(--accent); }
+  #toast { position: fixed; left: 50%; bottom: 16px; transform: translate(-50%, 80px); background: var(--good);
+           color: #fff; padding: 8px 14px; border-radius: 6px; transition: transform .2s; max-width: calc(100% - 32px); }
+  #toast.bad { background: var(--bad); }
+  #toast.show { transform: translate(-50%, 0); }
+  dialog { background: var(--lane); color: var(--text); border: 0; border-radius: 8px; width: min(640px, calc(100% - 32px));
+           max-height: 80vh; padding: 0; }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+  dialog h3 { margin: 0; font-size: 15px; }
+  dialog button { background: var(--card); color: var(--text); border: 0; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+  dialog pre { margin: 0; padding: 0 16px 16px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Consolas, monospace;
+               overflow-y: auto; max-height: calc(80vh - 56px); }
+</style>
+</head>
+<body>
+<p id="hint">Signing in through Discord…</p>
+<main id="board"></main>
+<dialog id="task"><header><h3></h3><button type="button">Close</button></header><pre></pre></dialog>
+<div id="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
