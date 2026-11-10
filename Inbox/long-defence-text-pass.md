@@ -1,5 +1,5 @@
----
-status: open
+--- 
+status: claimed
 for: quill
 from: cloud vault review of #1251 (2026-11-10)
 asked: 2026-11-10
