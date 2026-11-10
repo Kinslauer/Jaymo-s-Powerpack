@@ -39,6 +39,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · claimed
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-tiers|waterskin-tiers]] · 💻 Odysseus · running
@@ -46,11 +47,11 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🪶 Quill · #1193 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/astronomy-sky|astronomy-sky]] · 🔨 Hephaestus · #1193 · in-review
 
 
 ## Needs Andy
