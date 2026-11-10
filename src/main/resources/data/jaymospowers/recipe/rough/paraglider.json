@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "WWW",
+    "SCS",
+    " S "
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:stick",
+    "C": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymospowers:paraglider",
+    "count": 1
+  }
+}

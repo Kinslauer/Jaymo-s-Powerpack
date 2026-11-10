@@ -90,6 +90,34 @@ public abstract class TrapBlock extends BaseEntityBlock {
 		return InteractionResult.PASS;
 	}
 
+	/** Small game a baited trap catches (Andy's TFC Hardrock picks): rabbits, chickens, foxes, Naturalist's critters. */
+	public static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> SMALL_GAME = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, com.jaymoskitchen.JaymosKitchen.id("small_game"));
+	/** How far a baited trap draws small game from, and one random tick in how many it does. */
+	static final double LURE_RANGE = 12.0;
+	static final int LURE_CHANCE = 6;
+
+	static boolean smallGame(Entity entity) {
+		return entity.getType().builtInRegistryHolder().is(SMALL_GAME) && entity instanceof net.minecraft.world.entity.Mob mob && mob.isAlive() && !mob.isBaby()
+			&& !(entity instanceof net.minecraft.world.entity.TamableAnimal tame && tame.isTame()) && !mob.isLeashed();
+	}
+
+	@Override
+	protected boolean isRandomlyTicking(BlockState state) {
+		return open(state);
+	}
+
+	/** Now and then a baited trap draws small game near it in to the bait. */
+	@Override
+	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+		if (!open(state) || random.nextInt(LURE_CHANCE) != 0 || !(level.getBlockEntity(pos) instanceof BaitTrapEntity trap) || trap.bait().isEmpty()) {
+			return;
+		}
+		level.getEntitiesOfClass(net.minecraft.world.entity.PathfinderMob.class, new net.minecraft.world.phys.AABB(pos).inflate(LURE_RANGE),
+			TrapBlock::smallGame).stream().findFirst()
+			.ifPresent(game -> game.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 1.0));
+	}
+
 	/** Every other rat near a trap that just went off runs for it. */
 	static void scatter(ServerLevel level, BlockPos pos, Rat caught) {
 		Vec3 at = Vec3.atCenterOf(pos);

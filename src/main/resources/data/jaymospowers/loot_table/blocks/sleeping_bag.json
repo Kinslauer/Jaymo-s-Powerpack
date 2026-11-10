@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:sleeping_bag",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:sleeping_bag",
+            "state": {
+              "part": "head"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/sleeping_bag"
+}

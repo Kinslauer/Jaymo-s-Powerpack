@@ -255,6 +255,9 @@ def packMods = [
 	// Streams Reflowing (all rights reserved, but "You can add this to any modpack, anywhere"): rivers and streams that
 	// run downhill from springs through lakes to the sea, and water that keeps flowing. Worldgen, so new chunks only.
 	[dep: "maven.modrinth:streams-reflowing:1PyyzYS1", cf: [1581408, 9216745]],
+	// Thirsty Bottles (all rights reserved, Darkhax; downloaded by id, never copied or taken apart): filling a glass bottle
+	// drinks up the water block it came from, so a lone pool runs dry. Kitchen's waterskins do the same (WaterskinItem).
+	[dep: "maven.modrinth:thirsty-bottles:KYrS8t6q", cf: [263498, 8996170]],
 	// Jade (CC BY-NC-SA 4.0, Snownee; shipped unchanged in a free pack): the little panel naming the mob, player or
 	// dropped item under your crosshair, with its mod, health and what it's doing. Works with JEI. Blocks show nothing
 	// (0.15.47, client/compat/JadeEntitiesOnly).

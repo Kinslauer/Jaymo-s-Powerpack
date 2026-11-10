@@ -383,7 +383,8 @@ public final class Stomach {
 	private static void apply(ServerPlayer player, List<Meal> meals) {
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
-			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) + leftover(player), foodCap(player));
+			// Andy's TFC Hardrock picks: a balanced diet adds up to two hearts, one food group alone takes one off (FoodGroups)
+			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) + leftover(player), foodCap(player)) + FoodGroups.bonus(meals);
 			AttributeModifier current = health.getModifier(HEALTH_ID);
 			if (current == null || current.amount() != bonus) {
 				health.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, bonus, AttributeModifier.Operation.ADD_VALUE));

@@ -1,0 +1,139 @@
+{
+  "variants": {
+    "facing=north,load=0": {
+      "model": "jaymospowers:block/sluice"
+    },
+    "facing=north,load=1": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=2": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=3": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=4": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=5": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=6": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=7": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=north,load=8": {
+      "model": "jaymospowers:block/sluice_loaded"
+    },
+    "facing=east,load=0": {
+      "model": "jaymospowers:block/sluice",
+      "y": 90
+    },
+    "facing=east,load=1": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=2": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=3": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=4": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=5": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=6": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=7": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=east,load=8": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 90
+    },
+    "facing=south,load=0": {
+      "model": "jaymospowers:block/sluice",
+      "y": 180
+    },
+    "facing=south,load=1": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=2": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=3": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=4": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=5": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=6": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=7": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=south,load=8": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 180
+    },
+    "facing=west,load=0": {
+      "model": "jaymospowers:block/sluice",
+      "y": 270
+    },
+    "facing=west,load=1": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=2": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=3": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=4": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=5": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=6": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=7": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    },
+    "facing=west,load=8": {
+      "model": "jaymospowers:block/sluice_loaded",
+      "y": 270
+    }
+  }
+}

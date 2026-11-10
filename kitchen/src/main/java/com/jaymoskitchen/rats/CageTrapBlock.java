@@ -103,6 +103,14 @@ public class CageTrapBlock extends TrapBlock {
 
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effects, boolean precise) {
+		if (level instanceof ServerLevel game && !state.getValue(CAUGHT) && smallGame(entity) && level.getBlockEntity(pos) instanceof CageTrapEntity bait
+			&& bait.baited()) {
+			// (Hardrock picks) small game in a cage trap: shut in, it dies of fright and is there to take out
+			bait.eatBait();
+			level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0F, 1.2F);
+			((net.minecraft.world.entity.LivingEntity)entity).hurtServer(game, game.damageSources().generic(), Float.MAX_VALUE);
+			return;
+		}
 		if (!(level instanceof ServerLevel server) || state.getValue(CAUGHT) || !(entity instanceof Rat rat) || !rat.isAlive()
 			|| !(level.getBlockEntity(pos) instanceof CageTrapEntity cage) || !cage.baited()) {
 			return;
