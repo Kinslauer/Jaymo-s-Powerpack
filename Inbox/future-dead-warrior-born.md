@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: youth (Andy in #quill-class, 2026-11-09)
 asked: 2026-11-09
 thread: 1569356185964904578
 claimed_by: claude-cloud
-pr: 
+pr: 1234
 suggested_owns: []
 ---
 
