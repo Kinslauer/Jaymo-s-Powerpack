@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 19:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,11 +47,11 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🪶 Quill · #1203 · writing
 
 
 ## In review
 
+- [ ] [[Inbox/farmhand-kind-family|farmhand-kind-family]] · 🍇 Bacchus · #1203 · in-review
 
 
 ## Needs Andy
