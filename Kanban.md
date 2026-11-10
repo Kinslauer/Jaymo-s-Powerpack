@@ -10,7 +10,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/startup-crash|startup-crash]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/xeno-minotaur-scan|xeno-minotaur-scan]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/sleeping-mends-bones|sleeping-mends-bones]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-buttons-to-debris|structure-buttons-to-debris]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/mod-checklists|mod-checklists]] · for 🪶 Quill · open
@@ -21,7 +20,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · for 🪽 any Hermes bot · #1215 · changes · fixing review notes
 - [ ] [[Inbox/heart-crystal-ore-block|heart-crystal-ore-block]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/omen-geckolib|omen-geckolib]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/redstone-golem-geckolib|redstone-golem-geckolib]] · ☁️ Cloud · claimed
@@ -36,6 +34,8 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-hold-fire|downed-hold-fire]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/future-dead-warrior-born|future-dead-warrior-born]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/f5-f6-camera-keys|f5-f6-camera-keys]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/maw-warrior-born-remake-plan|maw-warrior-born-remake-plan]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/parasites-all-three-cures|parasites-all-three-cures]] · ☁️ Cloud · #1215 · claimed
 - [ ] [[Agents/farmhand-kind-family|farmhand-kind-family]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-asset-audit|geckolib-asset-audit]] · 💻 Odysseus · running
 - [ ] [[Agents/geckolib-coverage-audit|geckolib-coverage-audit]] · 💻 Odysseus · running
