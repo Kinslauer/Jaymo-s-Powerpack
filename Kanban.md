@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-09 21:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,7 +45,6 @@ kanban-plugin: board
 
 ## Text pass
 
-- [ ] [[Inbox/spirit-manifestation|spirit-manifestation]] · ☁️ Cloud · #1209 · in-review
 
 
 ## In review
@@ -61,6 +60,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/spirit-manifestation|spirit-manifestation]]
 - [x] [[Inbox/Done/farmhand-kind-family|farmhand-kind-family]]
 - [x] [[Inbox/Done/knife-metal-effects|knife-metal-effects]]
 - [x] [[Inbox/Done/musket-flintlock-geckolib|musket-flintlock-geckolib]]
@@ -68,7 +68,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/reincarnation-full-reset|reincarnation-full-reset]]
 - [x] [[Inbox/Done/atroxiia-geckolib|atroxiia-geckolib]]
 - [x] [[Inbox/Done/skilltree-sidebar-reflow|skilltree-sidebar-reflow]]
-- [x] [[Inbox/Done/minotaur-geckolib|minotaur-geckolib]]
 
 
 %% kanban:settings
