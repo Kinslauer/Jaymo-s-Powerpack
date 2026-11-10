@@ -9,6 +9,7 @@ import com.mojang.math.Axis;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
@@ -105,11 +106,16 @@ public final class SpiritManifest {
 		float hold, solid;
 		double levelAt = -1.0E9;
 		boolean placed;
+		/** The line it is saying (its bubble), and when it came. */
+		java.util.@org.jspecify.annotations.Nullable List<net.minecraft.util.FormattedCharSequence> words;
+		double wordsAt = -1.0E9;
+		float wordsFor;
 	}
 
 	public static void register() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(SpiritManifest::render);
 		ClientTickEvents.END_CLIENT_TICK.register(SpiritManifest::tick);
+		ClientReceiveMessageEvents.GAME.register(SpiritManifest::heard);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			STAGES.clear();
 			clashStart = -1.0E9;
@@ -265,7 +271,9 @@ public final class SpiritManifest {
 			float m = stage.placed ? manifest(stage, now) : 0.0F;
 			float age = (float)(now - spirit.shownAt());
 			float flare = spirit.show() != 0L && spirit.pose() > Poses.IDLE && spirit.pose() != Poses.SPEAK ? SpiritFigure.strength(age) : 0.0F;
-			float faint = (FAINT + (1.0F - FAINT) * flare) * (1.0F - m);
+			// it shows with its arms, and goes with them (Andy: "the arms stay attached as long as they are visible")
+			float shown = SpiritArms.presence(spirit, now, entity);
+			float faint = (FAINT + (1.0F - FAINT) * flare) * (1.0F - m) * shown;
 			if (faint > 0.01F && !(entity == cameraEntity && firstPerson)) {
 				drawFaint(context, entity, spirit, partial, camera, faint, now);
 			}
@@ -348,6 +356,7 @@ public final class SpiritManifest {
 		int color = GrueClient.tint(entity, SpiritArms.mix(Spirits.of(kind).color()));
 		submit(context.submitNodeCollector(), pose, entity, frame, kind, light * STAGE_LIGHT, CORE_ALPHA * light, now, glitch, color, SpiritArms.ghost(color));
 		pose.popPose();
+		bubble(context, stage, kind, camera, m, now, color);
 	}
 
 	/** One figure: its translucent body, then the aura's shells over it, and while it glitches, its colours split either side. */
@@ -424,6 +433,69 @@ public final class SpiritManifest {
 					stage.z + (random.nextDouble() - 0.5) * 2.0 * RAIN_WIDTH, 0.0, -RAIN_FALL, 0.0);
 			}
 		}
+	}
+
+	// ---- the bubble -------------------------------------------------------------------------------------------------------
+
+	/** The bubble over a speaking spirit: text size (blocks per font pixel), wrap width (font pixels), its gap over the head (blocks), how long it stays (ticks: a base and per letter), and its background. */
+	static final float BUBBLE_SCALE = 0.022F;
+	static final int BUBBLE_WRAP = 160, BUBBLE_BACK_ALPHA = 0xA0;
+	static final double BUBBLE_GAP = 0.35, HEAD_PX = 11.0;
+	static final float BUBBLE_TICKS = 50.0F, BUBBLE_PER_CHAR = 1.2F, BUBBLE_MAX = 160.0F;
+
+	/**
+	 * A chat line from the keeper's own spirit ({@code SpiritVoice}: its name, ": ", the line) is caught here and shown in a bubble
+	 * over its head while it stands out (Andy: "it should also show a chat bubble above the spirit when they speak"). The line
+	 * still prints in chat. Only its keeper is sent the line, so only they see the bubble.
+	 */
+	private static void heard(net.minecraft.network.chat.Component message, boolean overlay) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (overlay || minecraft.player == null || minecraft.level == null || message.getSiblings().size() < 3) {
+			return;
+		}
+		if (!(message.getSiblings().get(0).getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents name)
+			|| !name.getKey().startsWith("spirit.jaymoskingdoms.") || !name.getKey().endsWith(".name")) {
+			return;
+		}
+		net.minecraft.network.chat.Component line = message.getSiblings().get(2);
+		Stage stage = STAGES.computeIfAbsent(minecraft.player.getId(), id -> new Stage());
+		stage.words = minecraft.font.split(line, BUBBLE_WRAP);
+		stage.wordsAt = minecraft.level.getGameTime();
+		stage.wordsFor = Math.min(BUBBLE_MAX, BUBBLE_TICKS + BUBBLE_PER_CHAR * line.getString().length());
+	}
+
+	private static void bubble(LevelRenderContext context, Stage stage, int kind, Vec3 camera, float m, double now, int color) {
+		if (stage.words == null) {
+			return;
+		}
+		float a = (float)(now - stage.wordsAt);
+		if (a < 0.0F || a > stage.wordsFor) {
+			if (a > stage.wordsFor) {
+				stage.words = null;
+			}
+			return;
+		}
+		float alpha = m * Math.min(1.0F, Math.min(a / 4.0F, (stage.wordsFor - a) / 10.0F));
+		if (alpha < 0.05F) {
+			return;
+		}
+		var font = Minecraft.getInstance().font;
+		PoseStack pose = context.poseStack();
+		double top = (SpiritFigure.FOOT[kind] + HEAD_PX) * SpiritFigure.STAGE[kind] * SpiritArms.PX + SpiritFigure.HOVER * SpiritArms.PX + BUBBLE_GAP;
+		int n = stage.words.size();
+		pose.pushPose();
+		pose.translate(stage.x - camera.x, stage.y + top - camera.y, stage.z - camera.z);
+		pose.rotate(context.levelState().cameraRenderState.orientation);
+		pose.scale(BUBBLE_SCALE, -BUBBLE_SCALE, BUBBLE_SCALE);
+		int text = ARGB.color((int)(alpha * 255.0F), SpiritArms.ghost(color));
+		int back = ARGB.color((int)(alpha * BUBBLE_BACK_ALPHA), 0x0A0A14);
+		for (int i = 0; i < n; i++) {
+			var row = stage.words.get(i);
+			float x = -font.width(row) / 2.0F;
+			float y = (i - n + 1) * (font.lineHeight + 1);
+			context.submitNodeCollector().submitText(pose, x, y, row, false, net.minecraft.client.gui.Font.DisplayMode.NORMAL, FULL_BRIGHT, text, back, 0);
+		}
+		pose.popPose();
 	}
 
 	// ---- the Grue -----------------------------------------------------------------------------------------------------------

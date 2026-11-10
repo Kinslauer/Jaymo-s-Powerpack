@@ -20,6 +20,12 @@
   ragged bat wings and smoke below the waist, a dark see-through body with a glowing red edge. In its trial the boss and its
   shades are drawn as the Grue (the evoker and vexes it wears are hidden; the name and boss bar stay), hovering on its
   wingbeats and clawing at you when you're close, glitching when hit, the same way the spirits animate. In its barrage finale its clawed fists pound as fast as your spirit's.
+- **Arms and figure together**: the figure over your back now shows only while its arms do and goes with them, the arms
+  held out from it at rest so they never hang into you. They fade shortly after a move, show for a moment now and then on
+  their own (about one glimpse every 1-2 minutes, the same for every viewer), and come up as soon as you hold the spirit
+  key to call a move. Grimsby's blade and Thessaly's glove are no longer up all the time: they follow the same rule.
+- **Speech bubble**: while a spirit stands out talking, its line floats over its head in a bubble in its colour (as well as
+  in chat). Only its keeper is sent the line, so only they see the bubble.
 - **The Quiet One** never shows a body: only its large arms, as before.
 - **Upgraded figures**: Grimsby is a dead traveller (bones, a tattered cowl and cloak, a scabbard); Varro a plated
   warlord (pauldrons, a plumed helm with a visor slit, sabatons); Ambrose an elder in a hooded robe (brows, beard, wide

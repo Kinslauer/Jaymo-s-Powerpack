@@ -149,11 +149,6 @@ public final class SpiritArms {
 		return ANCHORS[Math.clamp(style, 0, Spirits.QUIET)];
 	}
 
-	/** Whether {@code style}'s arms are always up while the spirit is out (Andy: "Grimsby's blade, and Thessaly should always be visible"). */
-	static boolean alwaysUp(int style) {
-		return style == Spirits.GRIMSBY || style == Spirits.THESSALY;
-	}
-
 	/** Arm angle offsets (x, y, z in radians, for the right arm; the left mirrors y and z) added to the wearer's own arm for each pose. */
 	private static final float[][] TABLE = new float[Poses.COUNT][];
 
@@ -225,12 +220,12 @@ public final class SpiritArms {
 		boolean carried;
 		float lastPresence;
 
-		float presence(SpiritState spirit, double now) {
+		float presence(SpiritState spirit, double now, LivingEntity entity) {
 			if (spirit.show() != this.seenShow) {
 				this.seenShow = spirit.show();
 				this.carried = this.lastPresence >= 0.5F;
 			}
-			float p = SpiritArms.presence(spirit, now);
+			float p = SpiritArms.presence(spirit, now, entity);
 			if (this.carried && now - spirit.shownAt() < APPEAR_TICKS) {
 				p = Math.max(p, this.lastPresence);
 			}
@@ -314,7 +309,7 @@ public final class SpiritArms {
 			TRACKS.remove(entity.getId());
 			return null;
 		}
-		float manifest = called * track.presence(spirit, now);
+		float manifest = called * track.presence(spirit, now, entity);
 		if (manifest <= 0.001F) {
 			return null;
 		}
@@ -334,23 +329,29 @@ public final class SpiritArms {
 	/** How far beyond its keeper's box a being's spirit hand reaches now (blocks), for the culling box; 0 for none. */
 	public static float cullingReach(Entity entity) {
 		SpiritState spirit = entity instanceof LivingEntity living ? living.getAttached(Spirits.SPIRIT) : null;
-		if (spirit == null || !spirit.out() || spirit.reach() == 0 || presence(spirit, entity.level().getGameTime()) <= 0.0F) {
+		if (spirit == null || !spirit.out() || spirit.reach() == 0 || presence(spirit, entity.level().getGameTime(), (LivingEntity)entity) <= 0.0F) {
 			return 0.0F;
 		}
 		return spirit.reach() + 1.0F;
 	}
 
 	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
-	static float presence(SpiritState spirit, double now) {
+	static float presence(SpiritState spirit, double now, LivingEntity entity) {
 		// while it speaks the whole figure stands out in front of you, its own arms talking: these stay away meanwhile
 		if (SpiritManifest.speaking(spirit, now)) {
 			return 0.0F;
 		}
-		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR) || alwaysUp(style(spirit.kind(), spirit.scale()))) {
+		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR)) {
 			return 1.0F;
 		}
+		// (Andy, 2026-11-10: "they disappear shortly after not being used. and reappear randomly or before being called to
+		// attack or use an ability") a glimpse now and then, and up while its keeper holds the key to call a move
+		float glimpse = glimpse(entity.getId(), now);
+		if (entity == Minecraft.getInstance().player && SpiritKey.held() > 0) {
+			glimpse = 1.0F;
+		}
 		if (spirit.show() == 0L || spirit.pose() <= Poses.IDLE || spirit.pose() >= Poses.COUNT) {
-			return 0.0F;
+			return glimpse;
 		}
 		float age = (float)(now - spirit.shownAt());
 		if (age < 0.0F) {
@@ -361,8 +362,38 @@ public final class SpiritArms {
 			return k * k * (3.0F - 2.0F * k);
 		}
 		float gone = age - (spirit.pose() == Poses.SPEAK ? SPEAK_TICKS : POSE_TICKS + POSE_OUT + LINGER_TICKS);
-		return gone <= 0.0F ? 1.0F : Mth.clamp(1.0F - gone / FADE_TICKS, 0.0F, 1.0F);
+		return Math.max(glimpse, gone <= 0.0F ? 1.0F : Mth.clamp(1.0F - gone / FADE_TICKS, 0.0F, 1.0F));
 	}
+
+	/**
+	 * The odd glimpse of a resting spirit: time is cut into windows of {@link #GLIMPSE_WINDOW} ticks; in one window in
+	 * {@link #GLIMPSE_ODDS} it shows itself (figure and arms together) for {@link #GLIMPSE_TICKS}, at a point in the window picked
+	 * by a hash of the window and the being, so every viewer sees the same glimpse.
+	 */
+	static float glimpse(int id, double now) {
+		long window = (long)Math.floor(now / GLIMPSE_WINDOW);
+		long h = window * 0x9E3779B97F4A7C15L + id * 0xC2B2AE3D27D4EB4FL;
+		h ^= h >>> 31;
+		h *= 0xBF58476D1CE4E5B9L;
+		h ^= h >>> 29;
+		if (Math.floorMod(h, GLIMPSE_ODDS) != 0) {
+			return 0.0F;
+		}
+		double at = (Math.floorMod(h >>> 8, (long)(GLIMPSE_WINDOW - GLIMPSE_TICKS)));
+		float a = (float)(now - window * GLIMPSE_WINDOW - at);
+		if (a < 0.0F || a > GLIMPSE_TICKS) {
+			return 0.0F;
+		}
+		float in = Mth.clamp(a / FADE_TICKS, 0.0F, 1.0F), out = Mth.clamp((GLIMPSE_TICKS - a) / FADE_TICKS, 0.0F, 1.0F);
+		return Math.min(in, out);
+	}
+
+	/** Glimpses: the window (ticks), one window in how many has one, and how long it shows. */
+	static final double GLIMPSE_WINDOW = 400.0;
+	static final long GLIMPSE_ODDS = 3L;
+	static final float GLIMPSE_TICKS = 50.0F;
+	/** At rest the arms are held out from the figure at least this far (radians), so they never hang into their keeper. */
+	static final float REST_OUT = 0.6F;
 
 	/** Each client tick: the sickness flicker's timing, and wisps rising from the hands of every spirit in view. */
 	private static void tick(Minecraft minecraft) {
@@ -416,7 +447,7 @@ public final class SpiritArms {
 			size = Spirits.of(kind).size(spirit);
 			long now = entity.level().getGameTime();
 			float called = track == null ? 0.0F : track.value(now);
-			manifest = called * (track == null ? 0.0F : SpiritArms.presence(spirit, now));
+			manifest = called * (track == null ? 0.0F : SpiritArms.presence(spirit, now, entity));
 			if (manifest < WISP_FROM && called >= 0.99F && entity.getRandom().nextFloat() < WAIT_WISP_CHANCE && !entity.isInvisible()
 				&& visibleToAttuned(entity)) {
 				// waiting unseen: now and then a wisp at the shoulder, so the keeper knows it's there
@@ -785,6 +816,8 @@ public final class SpiritArms {
 				boolean waits = mode == REACHING && i == 1;
 				SpiritRig.frame(f, waits ? Poses.IDLE : poseId, age, waits ? 0.0F : w, idle, target, true, i, time);
 				float drift = SWAY * Mth.sin(time * SWAY_SPEED + i * 2.1F) * (1.0F - 0.6F * w);
+				// (Andy: "it needs to be out at that angle. it clips into the user if not") held out from the figure at rest
+				f.sz = Mth.lerp(1.0F - w, f.sz, Math.max(f.sz, REST_OUT));
 				f.sx += w * poseAdjust(poseId, age, i) + drift;
 				if (anchor.open()) {
 					// at rest the hand hangs open, fingers spread and the wrist cocked back: ready to grab
