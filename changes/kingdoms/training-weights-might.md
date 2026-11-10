@@ -1,5 +1,0 @@
-# Might can be trained: shadowboxing in Training Weights
-
-Tiv: "they should build might for everyone ... its only good if you keep at it". Jaymo's Powers' Training Weights now build Might while you shadowbox in them (slowly, about one point an hour, unless you're a Z Fighter or a Gravity user). Those points are free Might on top of what you spend: each whole one lands with the small fanfare ("Your Might grows"), counts toward the world tier's cap like any other point (training stops at the cap and picks up again once a higher tier opens it), and stays through a respec, since it was never spent. The K screen's Attributes tab shows trained Might as a red share of the bar, and hovering Might says how many points were trained and how far the next one has come. A new loading-screen tip tells of it.
-- `Stats.TRAINED_MIGHT` (saved, kept through death, synced to its player), `Stats#trainMight` (called by Powers by reflection), `Stats#fromTraining` counted in `Stats#total`; `SkillScreen` bar and tooltip; lang in `lang/parts/training-weights.json`; `StoryHoldScreen.HINTS` 125.
-- Built; not played.

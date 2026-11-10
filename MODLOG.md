@@ -1927,3 +1927,18 @@ keep it, as it belongs to the tool's metal.
 ## 0.21.86 (2026-11-10): Saplings turn into sticks (#1213)
 
 Any sapling (vanilla or Aether) can now be crafted into 2 sticks in the crafting grid. This makes splints accessible when you're far from trees - just break a sapling you can't plant and turn it into sticks for a splint.
+
+## 0.21.87 (2026-11-10): The Omen animated by GeckoLib (#1219)
+
+The Omens (red and blue) are now animated by GeckoLib instead of posed in code. They breathe while standing, walk with
+the old stride, break into a leaning run when they chase, shuffle round on the spot when they turn, wind up and slam
+both arms down in a smash, kick back with every cannon round, flinch when hit, and on death jolt as the hatch pops and
+buckle into their model's own pose (red and blue each their own). Heads still follow where they look and the cannon arms
+still come up on a target, now tilting with its height and turning a little toward it. Same models and skins
+(excalibur_style still reskins them). Not yet seen in game.
+
+## 0.21.88 (2026-11-10): Training weights: shadowbox in them to build Might, whatever your power (#1220)
+
+Tiv: "they should build might for everyone, wearing them should turn your meditate into shadowboxing. non gravity or z fighters are REALLY slow and bad at it". Wearing either pair of Training Weights now turns the Meditate key (I) into shadowboxing for every player, not only a Z Fighter or a Gravity user (the key still needs the Meditation perk, as it always has). Every second of shadowboxing in them builds Might, Jaymo's Kingdoms' attribute: 10 points an hour for a Z Fighter or a Gravity user in the light pair (13.3 in the heavy pair, half again with a Weighted Gi on as well, the same multipliers a Z Fighter's training has), and always a tenth of that for anyone else, about one point an hour, so a hundred-odd hours to the top. Nothing about a Z Fighter's Training Points, ki or mastery changes. Someone shadowboxing in weights also counts as a partner for a Gravity user's shadowboxing.
+- `Meditate#kind` (weights make anyone a shadowboxer) and its tick (`Training#weightsMight` every second settled in), `Training.WEIGHTS_MIGHT_PER_HOUR`/`OUTSIDER_MIGHT`, `ZFighterItems#wearsWeights` (`weightRate` and `LIGHT_RATE` now public), `KingdomsCompat#trainMight` (reflection on Kingdoms' `Stats.trainMight`; nothing without Kingdoms).
+- Built; not played.

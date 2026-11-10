@@ -10619,3 +10619,32 @@ Andy: "unsupported fallen trees should fall, there shouldnt be hanging trees lik
 - `SpiritManifest`, `SpiritFigure` (from `tools/blockbench/spirit-figures/`; the .bbmodels gain forearms), `SpiritArms`,
   `Grue`, `GrueTrial`, `SpiritPunch`, `Spirits`; lang `spirit-duel.json`.
 - Built; not played.
+
+## 0.7.685 (2026-11-10): Fix Stormborn Tomb: missing template pools and namespace mismatch (#1218)
+
+The Stormborn Tomb (PR #1137) was merged but its template pools were lost during the merge. Additionally, the template pool names used underscores (`stormborn_tomb_spawn`) while the Java code expects slashes (`stormborn_tomb/spawn`), causing the structure to fall back to vanilla trial chambers and generate solid stone fill.
+
+## Changes
+- Restored 12 missing template pools for all Stormborn Tomb pieces from the PR's merge commit (eeb8d0239)
+- Fixed template pool names to use slashes (`stormborn_tomb/spawn`) instead of underscores (`stormborn_tomb_spawn`) to match the Java code in `StormbornTomb.java`
+- Fixed the start pool (`overworld_stormborn_tomb.json`) to use the correct namespace
+
+## Root causes identified
+1. **Missing template pools**: The PR merge commit (0ad4bd9c6) didn't include the template pools that were added in a later PR commit (eeb8d0239) but lost in a subsequent rework commit (152223750).
+2. **Namespace mismatch**: Template pools used `jaymoskingdoms:stormborn_tomb_spawn` but Java code references `jaymoskingdoms:stormborn_tomb/spawn`. This caused the structure to not find its pieces and fall back to vanilla trial chambers.
+
+## Not tested in game
+Template pools compile and names match Java code, but dungeon generation not verified in a live world.
+
+## 0.7.686 (2026-11-10): Might can be trained: shadowboxing in Training Weights (#1220)
+
+Tiv: "they should build might for everyone ... its only good if you keep at it". Jaymo's Powers' Training Weights now build Might while you shadowbox in them (slowly, about one point an hour, unless you're a Z Fighter or a Gravity user). Those points are free Might on top of what you spend: each whole one lands with the small fanfare ("Your Might grows"), counts toward the world tier's cap like any other point (training stops at the cap and picks up again once a higher tier opens it), and stays through a respec, since it was never spent. The K screen's Attributes tab shows trained Might as a red share of the bar, and hovering Might says how many points were trained and how far the next one has come. A new loading-screen tip tells of it.
+- `Stats.TRAINED_MIGHT` (saved, kept through death, synced to its player), `Stats#trainMight` (called by Powers by reflection), `Stats#fromTraining` counted in `Stats#total`; `SkillScreen` bar and tooltip; lang in `lang/parts/training-weights.json`; `StoryHoldScreen.HINTS` 125.
+- Built; not played.
+
+## 0.7.687 (2026-11-10): Stegonaut moves smoothly now (#1222)
+
+- Stegonaut, the plated lesser dragon, is drawn and animated with GeckoLib from a Blockbench model of its own (`kingdoms/art/stegonaut.bbmodel`). Its look is unchanged: the same body, hides, glowing lichen markings, horn styles, broken plates, saddle, girth and pillion pad, size, hatchling size and rider seats.
+- Every pose it had is kept: standing with its three grumbles (head toss, head tilt, neck lifted), the diagonal plod and the gallop, sitting and dozing, crashed on its belly, paddling in water, the flinch when struck and its death. Its moves play when it makes them: chin slam, ground slam, ground eating (scoop, chew, spit), roar with its plates flared, bite and grazing. New: its tail sweep now swings the body and tail round (it hit before, but nothing moved).
+- It still turns its neck and head to look about, except while dozing.
+- Kingdoms builds and the dev server starts; Stegonaut hasn't been spawned or watched in game yet.
