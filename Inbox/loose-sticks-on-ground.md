@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: claude-cloud
-pr:
+pr: 1244
 suggested_owns: [src/main/java/com/jaymospowers/ground/, src/main/resources/data/jaymospowers/worldgen/, src/main/resources/assets/jaymospowers/models/item/, src/main/resources/assets/jaymospowers/textures/item/]
 ---
 
@@ -26,3 +26,4 @@ Reference: the "Surviving the Alaskan Wilderness in Minecraft" video (Chano) sho
 - Say where they generate (grass, dirt, leaf litter — not inside stone) and how common.
 - A stick on the ground is one stick you break and pick up; random amounts per pile, same as pebbles.
 - Don't touch the saplings-to-sticks recipe (that's done, PR #1213) — this is a separate, complementary source.
+- 2026-11-10 05:15 Cloud agent session sesn_016CYDN8UPNUuUk9p8APUqFS opened PR #1244.
