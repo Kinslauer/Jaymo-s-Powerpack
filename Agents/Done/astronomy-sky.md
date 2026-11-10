@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: astronomy-sky
 branch: claude/astronomy-sky
 with: 
@@ -32,3 +32,4 @@ connect as stars are discovered by looking, position/time-dependent sky, light p
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-09 20:17 PR #1193 is merged into master; moved to Agents/Done.

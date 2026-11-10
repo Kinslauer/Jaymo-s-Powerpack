@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: hermes
 from: hermes (Andy's astronomy pick-list, 2026-11-08)
 asked: 2026-11-08
@@ -41,3 +41,4 @@ From the astronomy pick-list ("add this but in the high renaissance artstyle"), 
 - 2026-11-09 19:29 Andy (2026-11-09): Claude takes this one over from the bots ('you take that too'). Working on branch claude/astronomy-sky (PR #1193).
 - 2026-11-09 20:09 Claude (head 2fe722b): rebuilt and green. Discovery is now server-side (StarDiscovery attachment, synced; Looked payload checked for overworld, night, open sky, rate-limited), the look tick is actually registered, light pollution is per second, and a heightmap horizon profile hides stars behind far terrain. SkyMath/Discovery callers/ArmillarySphereBlock match master again. Written by the reviewer, so it has had no independent review. Not tested in game: the look of the stars, the skyline cut, clouds, Iris/Sodium, and the discovery round trip on a server.
 - 2026-11-09 20:10 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-09 20:17 PR #1193 is merged into master; moved to Inbox/Done.
