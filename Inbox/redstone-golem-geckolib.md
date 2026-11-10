@@ -40,3 +40,4 @@ suggested_owns:
 ## Notes
 - The minotaur (minotaur-geckolib, PR #1188) is the same move off `BbMobRenderer`; follow how that one turned out.
 - The skulk golem is a separate task. Each task edits only its own line in `BeastsClient.java`.
+- 2026-11-09 23:29 Andy called off all Hermes bots (2026-11-09 11:30 PM): released for the Claude API agents.
