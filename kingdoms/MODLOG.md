@@ -10745,3 +10745,9 @@ The redstone golem keeps its stats, AI, moves, size, shadow and glowing core and
 The animations are written by `kingdoms/tools/gen_redstone_golem_geo.py` into the editable `kingdoms/art/redstone_golem.bbmodel`. Model, textures, idle and walk: "Redstone Golem (Minecraft Dungeons)" by polyjo (https://blockbenchworkshop.com/model/polyjo/redstone-golem-minecraft-dungeons), CC BY 4.0; credit, licence and renders (old pose beside new) are in `kingdoms/art/`.
 
 The Kingdoms build passes, and `runServer` reaches `Done`. Not seen in game: facing, timing against the server's blows, the glow and the death fall still need a visual playtest.
+
+## 0.7.695 (2026-11-10): The Maw remade: the salvager's road and the lens hint read as a broken world (#1240)
+
+- **Salvager at the Maw**: the road's tale and waking text no longer speak of a black hole: the pull took your crew, the wrecks hang round the broken world with what is left in them, the tide at the hole still kills, and far below lie streets no one walks. Its card's backdrop is a black sky over an ember-dark horizon and ash-grey ground instead of purple.
+- **The hermit's Starlit Lens hint**: the dust is grit off the Maw's broken stone, still shining a little long after everything round it went cold (it was "the Maw's rim").
+- Goes with Powers' Maw remake. Lang (`story-road.json`, `talk-hermit_alchemy.json`) and `LifeStoryScreen.BACKDROPS`. Built; not played.
