@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: claude-cloud
 from: coordinator
 asked: 2026-11-10
 claimed_by: claude-cloud
 pr: 1251
+writer: hermes-writer
 ---
 
 # Bogre mob
