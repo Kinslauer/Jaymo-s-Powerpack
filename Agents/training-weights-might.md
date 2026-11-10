@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: training-weights-might
 branch: claude/training-weights-might
 pr:

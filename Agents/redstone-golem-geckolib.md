@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: redstone-golem-geckolib
 branch: claude/redstone-golem-geckolib
 with: 

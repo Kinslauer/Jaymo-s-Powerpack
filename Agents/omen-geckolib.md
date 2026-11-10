@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: omen-geckolib
 branch: claude/omen-geckolib
 with: 
