@@ -1,0 +1,72 @@
+{
+  "variants": {
+    "sticks=1": [
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_1"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_1",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_1",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_1",
+        "y": 270
+      }
+    ],
+    "sticks=2": [
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_2"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_2",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_2",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_2",
+        "y": 270
+      }
+    ],
+    "sticks=3": [
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_3"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_3",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_3",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_3",
+        "y": 270
+      }
+    ],
+    "sticks=4": [
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_4"
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_4",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_4",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/loose_sticks_4",
+        "y": 270
+      }
+    ]
+  }
+}

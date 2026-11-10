@@ -114,6 +114,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
+		// sticks on the ground beside the rocks, so a start needn't fell a tree for its first sticks
+		com.jaymospowers.ground.GroundSticks.init();
 		// (0.20.89) seamed stone and rocky dirt round ore veins
 		com.jaymospowers.ground.OreTells.init();
 		com.jaymospowers.ground.FirstTools.init();

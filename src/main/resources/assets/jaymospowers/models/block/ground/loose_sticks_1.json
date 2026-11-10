@@ -1,0 +1,164 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "all": "jaymospowers:block/ground/loose_sticks",
+    "particle": "jaymospowers:block/ground/loose_sticks"
+  },
+  "elements": [
+    {
+      "from": [
+        3.0,
+        0,
+        9.875
+      ],
+      "to": [
+        14.0,
+        1.25,
+        11.125
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            11,
+            1
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            0,
+            8,
+            11,
+            9
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            0,
+            4,
+            11,
+            5
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            0,
+            4,
+            11,
+            5
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ],
+          "texture": "#all"
+        }
+      },
+      "rotation": {
+        "origin": [
+          3.0,
+          0,
+          10.5
+        ],
+        "axis": "y",
+        "angle": 20
+      }
+    },
+    {
+      "from": [
+        9.108,
+        0,
+        7.902
+      ],
+      "to": [
+        12.108,
+        0.75,
+        8.652
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            3,
+            1
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            0,
+            8,
+            3,
+            9
+          ],
+          "texture": "#all"
+        },
+        "north": {
+          "uv": [
+            0,
+            4,
+            3,
+            5
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            0,
+            4,
+            3,
+            5
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0,
+            12,
+            1,
+            13
+          ],
+          "texture": "#all"
+        }
+      },
+      "rotation": {
+        "origin": [
+          9.108,
+          0,
+          8.277
+        ],
+        "axis": "y",
+        "angle": -30
+      }
+    }
+  ]
+}
