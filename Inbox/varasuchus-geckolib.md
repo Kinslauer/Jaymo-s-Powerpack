@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -14,6 +14,7 @@ suggested_owns:
   - DragonsClient.java (its register line only)
   - changes/kingdoms/<branch-name>.md
 writer: hermes-writer
+text_pass: done
 ---
 # Varasuchus: a Blockbench model and animations, on GeckoLib (modelling bot)
 
