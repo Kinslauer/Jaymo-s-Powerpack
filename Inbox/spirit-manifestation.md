@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: hermes
 from: hermes (Andy, Discord, 2026-11-08)
 asked: 2026-11-08
 thread: 1569144710264791172
-claimed_by:
-pr:
+claimed_by: claude-cloud
+pr: 1209
 suggested_owns: [kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/SpiritArms.java, kingdoms/src/client/java/com/jaymoskingdoms/client/spirits/]
 ---
 
