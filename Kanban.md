@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 16:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,11 +26,11 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]] · hermes-b · #1241 · in-review
-- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · claude-cloud · #1236 · in-review
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · hermes-b · #1248 · in-review
 - [ ] [[Inbox/skulk-golem-geckolib|skulk-golem-geckolib]] · claude-cloud · #1221 · in-review
 - [ ] [[Inbox/startup-crash|startup-crash]] · hermes-a · #1245 · in-review
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · claude-cloud · #1239 · in-review
+- [ ] [[Inbox/astronomy-scholar-journal|astronomy-scholar-journal]] · claude-cloud · #1236 · in-review
 
 
 ## Needs Andy
