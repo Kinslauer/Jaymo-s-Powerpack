@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 for: claude-cloud
 from: coordinator
 asked: 2026-11-10
