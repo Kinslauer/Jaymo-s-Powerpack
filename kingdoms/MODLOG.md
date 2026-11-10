@@ -10755,3 +10755,62 @@ The Kingdoms build passes, and `runServer` reaches `Done`. Not seen in game: fac
 ## 0.7.696 (2026-11-10): Loading-screen hints: the unique-starts hint gets its own number (#1243)
 
 - **Fixed** Kingdoms failing to build after Training Weights and Unique Starts both added loading-screen hint 125. The unique-starts hint is now hint 126, so both show in the rotation.
+
+## 0.7.697 (2026-11-10): The skulk golem breathes, wakes, flinches and falls
+
+The skulk golem now moves like a living thing. Standing awake, it breathes, its antennae twitching and its arms held forward (before, it stood stiff with its fists sunk into the floor). Woken, it shudders in the stone, rears up with its arms flung out and drops into its stance. Left alone for a while, it bows back down into its statue pose. It flinches when hit, and dies by reeling back and toppling onto its face instead of tipping over sideways. Its head still turns toward what it's looking at. Its stats, statue guard, darkness blow, sounds, size and shadow are unchanged.
+
+It is now drawn by GeckoLib, with these new animations beside its model's own walk, statue pose and blow. The animations are written by `kingdoms/tools/gen_skulk_golem_geo.py` into the editable `kingdoms/art/skulk_golem.bbmodel`, with its CC BY 4.0 licence, credit and side-by-side renders of old and new poses. Original model, texture and animations: "Skulk golem" by elma_taburlas (https://blockbenchworkshop.com/model/elma_taburlas/skulk-golem).
+
+Not seen in game: timing, blends and the death fall still need a playtest.
+
+## 0.7.698 (2026-11-10): Astronomy 4: the Astronomer's Journal, on the scholar side
+
+- **The Astronomer's Journal** (crafted from a book and a spyglass): an open book of sepia ink on aged paper, with
+  faint construction diagrams (the celestial sphere at latitude 45°, armillary rings, a quadrant) and margin notes in a
+  working hand. Three parts: **Record**, **Skills** and **Study**. Scroll or click the arrows to turn pages.
+- **Readings at the armillary sphere are written in it.** Press *Record reading* at night, under open sky, with the
+  journal on you. The server takes the reading at the sphere, from the stars you have discovered, and writes down
+  what is new: each discovered star's altitude and bearing (8 at most a reading, highest first), the latitude from
+  Polaris (once), the longitude (once per 0.25° band, 500 blocks east or west, from Astrometry rank 4) and the sky's
+  yearly drift (once in each of its 12 months). Only something not yet in the journal counts, so repeating a reading
+  earns nothing. When a reading fails, the sphere's screen says why in one line: no journal, not the Overworld,
+  daylight, clouds, no open sky above the sphere, or none of your stars above the horizon.
+- **The Scholar, a fourth pillar of the skill tree.** The scholar side had no ladder to carry this, so astronomy goes
+  into the skill tree's own progression instead of a ladder of its own: each new measurement is Scholar experience
+  (a star's place 6, the latitude 40, a longitude band 25, a month 30), up to level 20, with a point every level and a
+  bonus point every fifth, as the other pillars have. Its points are spent in the journal on **Astrometry** (20 ranks,
+  1 point each): every rank makes readings finer, rounding them to 1° / (1 + rank), down to 0.048° at rank 20. A
+  court wizard's unmaking or a bottle o' enchanting returns Scholar points like any others. The Scholar is not drawn
+  on the K web (whose three-way layout is unchanged), and adds nothing to character level, attribute points,
+  Survivalist hearts or alignment titles: it is study, not training. The character menu lists its level beside the
+  other pillars.
+- **Study pages** teach the sky's model with its units, formulas and worked examples (Vega, Sirius, Polaris): the
+  celestial sphere, hour angle and the altitude/bearing formulas, the sidereal time from the world clock, latitude from
+  the pole star, longitude from the sidereal time, the sky's year, precision and what counts, and a page of where the
+  model stops being the real sky (flat world, no refraction or precession, the game's own Sun and Moon, linear
+  brightness, simple light pollution). No story or narration; the quoted tuning numbers follow the constants.
+- **Sky fix (needed for the readings to agree with the sky):** the star catalogue gives right ascension in hours, and
+  the sky used it as degrees, squeezing every star into 24° of the sky's turn. Both the drawn sky and the readings now
+  convert it (×15) and share one model (`astronomy/Celestial`).
+- **Armillary screen fixes:** its text had no alpha and drew invisible; its clock now reads the world's clock (6:00 at
+  sunrise, as the sky uses it) instead of the game-tick count; the client no longer sends its own reading as JSON.
+- Classes: `astronomy/AstronomersJournal` (item, open payload), `astronomy/Measurements` (the journal's record, the
+  server-side reading, tuning at its top), `astronomy/Celestial` (the shared sky model), `astronomy/StarPositions` (the
+  catalogue on the server), `client/astronomy/AstronomersJournalScreen` and `AstronomersJournalClient`; `Skills`
+  (the `SCHOLAR` pillar, the `ASTROMETRY` perk, `Pillar#web`), `Stats`, `Renown`, `SkillWeb`, `SkillScreen`,
+  `ArmillaryNet`, `ArmillaryScreen`. Lang in `lang/parts/astronomy-journal.json`. Art from
+  `art/astronomy/generate_journal.py`.
+- The idea of a measuring journal with a skill ladder and study pages comes from Jubileu_13's Astronomy mod (MIT);
+  nothing of its code, text or art is used.
+- Not in this change: telescope readings (the telescope has art and a rig but no gameplay yet), and the Altazimuth
+  Mount and Optics skills, which belong in this pillar when the telescope and the Sun and Moon arrive. The armillary
+  sphere itself still has no recipe, blockstate or item model, so outside creative it can't be had yet.
+- Built; not played, and no dev server or client was started. Unchecked in game: the book's layout and legibility at
+  each GUI scale, the readings and their failure lines, the Learn link, and the corrected star field.
+
+## 0.7.699 (2026-11-10): Varasuchus moves smoothly now
+
+- Varasuchus, the crocodile dragon of the lesser dragons, is now drawn and animated with GeckoLib. It looks the same as before: same hides, glowing markings, horns, scutes, saddle, size, hatchling size, rider seats and reach.
+- Every pose and move it had is still there. Idle, it hisses, shakes its head, swishes its tail and sniffs. It walks, gallops, basks sitting, lies crashed, swims and rears up raging. Its moves are the claws, horn gore, dash, slash barrage, phase shift, tailguard and parry, rage roar, bite and tail sweep, along with a flinch and its death. Moves it makes while reared up use their own upright versions.
+- Kingdoms builds and the dev server starts, but Varasuchus hasn't been spawned or watched in game yet.
