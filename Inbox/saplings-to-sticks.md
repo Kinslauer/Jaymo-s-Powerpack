@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: hermes-a
-pr:
+pr: 1213
 suggested_owns: [src/main/resources/data/jaymospowers/recipe/, src/main/java/com/jaymospowers/core/wounds/Breaks.java]
 ---
 
