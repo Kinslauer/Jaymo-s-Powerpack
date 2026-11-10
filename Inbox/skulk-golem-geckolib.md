@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: coordinator
 asked: 2026-11-09
@@ -13,6 +13,7 @@ suggested_owns:
   - BeastsClient.java (its line only)
   - changes/kingdoms/<branch-name>.md
 writer: hermes-writer
+text_pass: done
 ---
 # Skulk golem: full animations, on GeckoLib (modelling bot)
 
