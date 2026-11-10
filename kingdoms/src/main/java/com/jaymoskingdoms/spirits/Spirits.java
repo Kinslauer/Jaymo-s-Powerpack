@@ -383,6 +383,11 @@ public final class Spirits {
 			}
 			return;
 		}
+		if (GrueTrial.active(player) && key.action() != DISMISS) {
+			// (in the Grue's trial the spirit fights it on its own: it doesn't answer the key)
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.spirit.dueling").withStyle(s -> s.withColor(of(state.kind()).color() & 0xFFFFFF)));
+			return;
+		}
 		switch (key.action()) {
 			case SUMMON -> {
 				if (!SpiritClash.inClash(player)) {

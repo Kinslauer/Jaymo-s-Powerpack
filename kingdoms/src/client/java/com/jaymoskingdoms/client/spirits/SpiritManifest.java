@@ -260,11 +260,23 @@ public final class SpiritManifest {
 				continue;
 			}
 			SpiritState spirit = entity.getAttached(Spirits.SPIRIT);
-			if (spirit == null || spirit.kind() < 0 || spirit.kind() >= Spirits.QUIET) {
-				// (no spirit, or the Quiet One: no body, ever)
+			if (spirit == null || spirit.kind() < 0 || spirit.kind() > Spirits.QUIET) {
+				continue;
+			}
+			if (spirit.kind() == Spirits.QUIET) {
+				// (the Quiet One: no body, ever; in the trial its arms alone fight the Grue)
+				LivingEntity boss = duelBoss(entity);
+				if (boss != null) {
+					drawDuel(context, entity, spirit, boss, partial, camera, now);
+				}
 				continue;
 			}
 			Stage stage = stage(entity, spirit, now);
+			LivingEntity boss = duelBoss(entity);
+			if (boss != null) {
+				drawDuel(context, entity, spirit, boss, partial, camera, now);
+				continue;
+			}
 			if (!spirit.out() || entity.isInvisible() || !SpiritArms.visibleToAttuned(entity)) {
 				continue;
 			}
@@ -410,6 +422,7 @@ public final class SpiritManifest {
 		}
 		double now = level.getGameTime();
 		clashTick(minecraft, level, now);
+		duelTick(minecraft, level, now);
 		if (STAGES.isEmpty()) {
 			return;
 		}
@@ -498,6 +511,103 @@ public final class SpiritManifest {
 		pose.popPose();
 	}
 
+	// ---- the duel ---------------------------------------------------------------------------------------------------------
+
+	/**
+	 * In the Grue's trial the spirit leaves its keeper and fights the Grue on its own (Andy: "watch their animated battle. each
+	 * spirit using their unique attacks and dodging"), while its keeper fights the shades. It stands between the Grue and you,
+	 * facing it, and fights in its own way: Grimsby fast cuts, left and right; Varro slow two-handed blows; Ambrose a
+	 * two-palmed shove; Thessaly quick flicks from further off, nimble; the Quiet One its arms alone, echoing. Now and then it
+	 * dodges aside (a glitch, a sidestep) and the Grue's claws go through where it stood. By kind: ticks per blow, the left
+	 * arm's lag behind the right (0: both together), how far from the Grue it stands, ticks between dodges.
+	 */
+	static final float[] DUEL_BLOW = {9.0F, 22.0F, 16.0F, 11.0F, 12.0F};
+	static final float[] DUEL_LAG = {0.5F, 0.0F, 0.0F, 0.5F, 0.5F};
+	static final double[] DUEL_GAP = {1.5, 1.8, 1.6, 2.3, 1.6};
+	static final float[] DODGE_EVERY = {50.0F, 95.0F, 60.0F, 34.0F, 45.0F};
+	/** A dodge: how long (ticks) and how far aside (blocks); how far off its keeper a Grue body counts as theirs to fight (blocks). */
+	static final float DODGE_TICKS = 10.0F;
+	static final double DODGE_SIDE = 1.0, DUEL_RANGE = 40.0;
+
+	private static int duelBlows;
+	private static @org.jspecify.annotations.Nullable LivingEntity duelCache;
+	private static long duelCacheAt = -1L;
+
+	/** The Grue's body {@code keeper}'s spirit is fighting now: only for the local player, in its trial. */
+	static @org.jspecify.annotations.Nullable LivingEntity duelBoss(LivingEntity keeper) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (keeper != minecraft.player || minecraft.level == null) {
+			return null;
+		}
+		long now = minecraft.level.getGameTime();
+		if (now != duelCacheAt) {
+			duelCacheAt = now;
+			duelCache = null;
+			for (LivingEntity e : minecraft.level.getEntitiesOfClass(LivingEntity.class, keeper.getBoundingBox().inflate(DUEL_RANGE),
+				e -> e.isAlive() && grueBody(e) >= 1.0F)) {
+				duelCache = e;
+				break;
+			}
+		}
+		return keeper.getAttached(Spirits.SPIRIT) == null ? null : duelCache;
+	}
+
+	/** Whether {@code entity}'s spirit is away fighting the Grue (its arms don't show on it meanwhile). */
+	static boolean duelling(LivingEntity entity) {
+		return duelBoss(entity) != null;
+	}
+
+	private static void drawDuel(LevelRenderContext context, LivingEntity keeper, SpiritState spirit, LivingEntity boss, float partial, Vec3 camera, double now) {
+		int kind = Math.clamp(spirit.kind(), 0, Spirits.QUIET);
+		Vec3 g = boss.getPosition(partial);
+		Vec3 k = keeper.getPosition(partial);
+		Vec3 toward = new Vec3(k.x - g.x, 0.0, k.z - g.z);
+		toward = toward.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : toward.normalize();
+		Vec3 aside = new Vec3(-toward.z, 0.0, toward.x);
+		// the dodge: aside and back, glitching, at its own rhythm
+		float t = (float)now;
+		float since = t % DODGE_EVERY[kind];
+		float dodge = since < DODGE_TICKS ? Mth.sin(since / DODGE_TICKS * Mth.PI) : 0.0F;
+		double side = ((long)(t / DODGE_EVERY[kind]) & 1L) == 0L ? 1.0 : -1.0;
+		Vec3 at = g.add(toward.scale(DUEL_GAP[kind])).add(aside.scale(DODGE_SIDE * dodge * side));
+		float glitch = Math.max(dodge, noise((long)Math.floor(now / GLITCH_STEP), keeper.getId(), 9) < BLIP_CHANCE ? 0.6F : 0.0F);
+		// while it dodges it doesn't strike
+		float strike = 1.0F - dodge;
+		float levelSolid = solid(spirit.level());
+		int color = GrueClient.tint(keeper, SpiritArms.mix(Spirits.of(kind).color()));
+		SpiritFigure.Frame frame = new SpiritFigure.Frame(kind, true, kind, Spirits.of(kind).size(spirit), 1.0F, 0.0F, -1.0F, 0.0F, 0.0F, false,
+			strike, t / DUEL_BLOW[kind], 0.0F, kind == Spirits.QUIET, DUEL_LAG[kind]);
+		figureAt(context, camera, keeper, frame, kind, at.x, at.y, at.z, g.x, g.z, 0.0F, levelSolid * STAGE_LIGHT, CORE_ALPHA * levelSolid, now, glitch, color,
+			SpiritArms.ghost(color));
+	}
+
+	/** Each tick of the duel: a crack at each of the spirit's blows (not while it dodges). */
+	private static void duelTick(Minecraft minecraft, ClientLevel level, double now) {
+		var player = minecraft.player;
+		LivingEntity boss = player == null ? null : duelBoss(player);
+		SpiritState spirit = player == null ? null : player.getAttached(Spirits.SPIRIT);
+		if (boss == null || spirit == null) {
+			return;
+		}
+		int kind = Math.clamp(spirit.kind(), 0, Spirits.QUIET);
+		float since = (float)now % DODGE_EVERY[kind];
+		int blows = (int)Math.floor(now / DUEL_BLOW[kind] - SpiritFigure.STRIKE_DRAW);
+		if (blows != duelBlows) {
+			duelBlows = blows;
+			if (since >= DODGE_TICKS) {
+				level.playLocalSound(boss.getX(), boss.getY() + 1.4, boss.getZ(), kind == Spirits.VARRO ? SoundEvents.WARDEN_ATTACK_IMPACT : SoundEvents.PLAYER_ATTACK_STRONG,
+					SoundSource.PLAYERS, 0.5F, kind == Spirits.VARRO ? 0.8F : 1.3F, false);
+				DustParticleOptions mote = new DustParticleOptions(SpiritArms.mix(Spirits.of(kind).color()) & 0xFFFFFF, 1.1F);
+				for (int n = 0; n < 6; n++) {
+					level.addParticle(mote, boss.getX(), boss.getY() + 1.4, boss.getZ(), (player.getRandom().nextDouble() - 0.5) * 0.3, 0.05,
+						(player.getRandom().nextDouble() - 0.5) * 0.3);
+				}
+			} else {
+				level.playLocalSound(boss.getX(), boss.getY() + 1.4, boss.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.5F, 1.4F, false);
+			}
+		}
+	}
+
 	// ---- the Grue -----------------------------------------------------------------------------------------------------------
 
 	/**
@@ -534,6 +644,10 @@ public final class SpiritManifest {
 			return;
 		}
 		var player = minecraft.player;
+		if (duelling(player)) {
+			// (in its trial the spirit is already at the Grue's throat)
+			return;
+		}
 		double now = minecraft.level.getGameTime();
 		if (now - clashStart < CLASH_TICKS * 0.6) {
 			// already fighting: it only gets harder
@@ -648,6 +762,10 @@ public final class SpiritManifest {
 		// its finale: locked fist to fist with the keeper's spirit in the barrage, it pounds as fast as they do
 		var barrage = entity.getAttached(com.jaymoskingdoms.spirits.SpiritBarrage.BARRAGE);
 		boolean pounding = barrage != null && !barrage.over();
+		if (viewer.getAttached(Spirits.SPIRIT) != null && duelBoss(viewer) == entity) {
+			// locked with the spirit: always at it
+			near = 1.0F;
+		}
 		if (pounding) {
 			near = 1.0F;
 			glitch = Math.max(glitch, noise(step, entity.getId(), 8) < 0.3F ? 0.5F : 0.0F);

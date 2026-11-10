@@ -343,7 +343,7 @@ public final class SpiritArms {
 	/** How far the projection is up ({@link #APPEAR_TICKS}): 1 while a move is going or something is held, 0 once it has faded. */
 	static float presence(SpiritState spirit, double now, LivingEntity entity) {
 		// while it speaks the whole figure stands out in front of you, its own arms talking: these stay away meanwhile
-		if (SpiritManifest.speaking(spirit, now)) {
+		if (SpiritManifest.speaking(spirit, now) || SpiritManifest.duelling(entity)) {
 			return 0.0F;
 		}
 		if (spirit.toggled(SpiritState.STEADY) || spirit.toggled(SpiritState.ARMOUR) || alwaysUp(style(spirit.kind(), spirit.scale()))) {

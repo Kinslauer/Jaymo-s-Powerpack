@@ -96,10 +96,16 @@ final class SpiritFigure {
 	 * {@code headYaw} and {@code headPitch} where its head turns (radians).
 	 */
 	record Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch,
-		boolean fading, float strike, float strikePhase, float flap, boolean armsOnly) {
+		boolean fading, float strike, float strikePhase, float flap, boolean armsOnly, float strikeLag) {
 		/** A frame with no fighting in it. */
 		Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch, boolean fading) {
-			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, 0.0F, 0.0F, 0.0F, false);
+			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, 0.0F, 0.0F, 0.0F, false, 0.5F);
+		}
+
+		/** Fighting, the arms trading blows (the left half a blow behind). */
+		Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch, boolean fading,
+			float strike, float strikePhase, float flap, boolean armsOnly) {
+			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, strike, strikePhase, flap, armsOnly, 0.5F);
 		}
 	}
 
@@ -288,10 +294,10 @@ final class SpiritFigure {
 			float w = frame.strike();
 			if (w > 0.0F) {
 				rx = Mth.lerp(w, rx, swing(frame.strikePhase()));
-				lx = Mth.lerp(w, lx, swing(frame.strikePhase() + 0.5F));
+				lx = Mth.lerp(w, lx, swing(frame.strikePhase() + frame.strikeLag()));
 				ry = Mth.lerp(w, ry, -0.2F);
 				re = Mth.lerp(w, re, elbowSwing(frame.strikePhase()));
-				le = Mth.lerp(w, le, elbowSwing(frame.strikePhase() + 0.5F));
+				le = Mth.lerp(w, le, elbowSwing(frame.strikePhase() + frame.strikeLag()));
 				this.body.xRot = w * STRIKE_LEAN * Mth.sin(frame.strikePhase() * Mth.TWO_PI * 2.0F);
 			}
 			this.armR.xRot = rx;
