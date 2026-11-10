@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 05:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,13 +15,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · claimed
 
 
 ## Text pass
 
 - [ ] [[Inbox/varasuchus-geckolib|varasuchus-geckolib]] · ☁️ Cloud · #1239 · in-review
 - [ ] [[Inbox/loose-sticks-on-ground|loose-sticks-on-ground]] · 🪶 Quill · #1244 · writing
+- [ ] [[Inbox/startup-crash|startup-crash]] · ☀️ Apollo · #1245 · in-review
 
 
 ## In review
