@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: cloud
 from: Andy (Claude chat, 2026-11-09 10:45 PM)
 asked: 2026-11-09
-claimed_by: claude-cloud
+claimed_by: 
 pr: 
 ---
 
