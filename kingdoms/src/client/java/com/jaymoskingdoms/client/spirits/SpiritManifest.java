@@ -92,7 +92,7 @@ public final class SpiritManifest {
 	/** Where each being's spirit last manifested, by entity id. */
 	private static final Map<Integer, Stage> STAGES = new HashMap<>();
 	/** The figure models, by kind and shell, baked when first needed. */
-	private static final SpiritFigure.Model[][] MODELS = new SpiritFigure.Model[Spirits.QUIET + 1][SpiritFigure.SHELLS.length];
+	private static final SpiritFigure.Model[][] MODELS = new SpiritFigure.Model[SpiritFigure.KINDS][SpiritFigure.SHELLS.length];
 
 	private SpiritManifest() {
 	}
@@ -111,7 +111,10 @@ public final class SpiritManifest {
 	public static void register() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(SpiritManifest::render);
 		ClientTickEvents.END_CLIENT_TICK.register(SpiritManifest::tick);
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> STAGES.clear());
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			STAGES.clear();
+			clashStart = -1.0E9;
+		});
 	}
 
 	/** How long a line keeps {@code spirit} manifested (ticks): longer as it grows. */
@@ -228,7 +231,13 @@ public final class SpiritManifest {
 	private static void render(LevelRenderContext context) {
 		Minecraft minecraft = Minecraft.getInstance();
 		ClientLevel level = minecraft.level;
-		if (level == null || minecraft.player == null || STAGES.isEmpty() && !anySpirit(level)) {
+		if (level == null || minecraft.player == null) {
+			return;
+		}
+		if (clashStart > -1.0E8) {
+			drawClash(context, minecraft, level);
+		}
+		if (STAGES.isEmpty() && !anySpirit(level)) {
 			return;
 		}
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
@@ -238,6 +247,11 @@ public final class SpiritManifest {
 		boolean firstPerson = minecraft.options.getCameraType().isFirstPerson();
 		for (Entity e : level.entitiesForRendering()) {
 			if (!(e instanceof LivingEntity entity) || entity.distanceToSqr(camera) > VIEW_RANGE * VIEW_RANGE) {
+				continue;
+			}
+			float grue = grueBody(entity);
+			if (grue > 0.0F) {
+				drawGrueBody(context, entity, grue, partial, camera, now);
 				continue;
 			}
 			SpiritState spirit = entity.getAttached(Spirits.SPIRIT);
@@ -264,7 +278,7 @@ public final class SpiritManifest {
 
 	private static boolean anySpirit(ClientLevel level) {
 		for (Entity e : level.entitiesForRendering()) {
-			if (e instanceof LivingEntity living && living.getAttached(Spirits.SPIRIT) != null) {
+			if (e instanceof LivingEntity living && (living.getAttached(Spirits.SPIRIT) != null || grueBody(living) > 0.0F)) {
 				return true;
 			}
 		}
@@ -287,7 +301,8 @@ public final class SpiritManifest {
 		int kind = spirit.kind();
 		SpiritFigure.Frame frame = new SpiritFigure.Frame(kind, false, SpiritArms.style(kind, spirit.scale()), Spirits.of(kind).size(spirit), 1.0F, 0.0F, -1.0F,
 			Mth.wrapDegrees(headRot - bodyRot) * Mth.DEG_TO_RAD, entity.getXRot(partial) * Mth.DEG_TO_RAD, false);
-		submit(context.submitNodeCollector(), pose, entity, frame, kind, light, FAINT_CORE_ALPHA * light / FAINT, now, 0.0F);
+		int color = GrueClient.tint(entity, SpiritArms.mix(Spirits.of(kind).color()));
+		submit(context.submitNodeCollector(), pose, entity, frame, kind, light, FAINT_CORE_ALPHA * light / FAINT, now, 0.0F, color, SpiritArms.ghost(color));
 		pose.popPose();
 	}
 
@@ -331,18 +346,17 @@ public final class SpiritManifest {
 		pose.scale(-1.0F, -1.0F, 1.0F);
 		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
 		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
-		submit(context.submitNodeCollector(), pose, entity, frame, kind, light * STAGE_LIGHT, CORE_ALPHA * light, now, glitch);
+		int color = GrueClient.tint(entity, SpiritArms.mix(Spirits.of(kind).color()));
+		submit(context.submitNodeCollector(), pose, entity, frame, kind, light * STAGE_LIGHT, CORE_ALPHA * light, now, glitch, color, SpiritArms.ghost(color));
 		pose.popPose();
 	}
 
 	/** One figure: its translucent body, then the aura's shells over it, and while it glitches, its colours split either side. */
 	private static void submit(SubmitNodeCollector collector, PoseStack pose, LivingEntity entity, SpiritFigure.Frame frame, int kind, float light, float coreAlpha,
-		double now, float glitch) {
+		double now, float glitch, int color, int pale) {
 		HumanoidRenderState state = new HumanoidRenderState();
 		state.ageInTicks = (float)(now % 100000.0) + (entity.getId() & 63);
 		state.setData(SpiritFigure.FRAME, frame);
-		int color = GrueClient.tint(entity, SpiritArms.mix(Spirits.of(kind).color()));
-		int pale = SpiritArms.ghost(color);
 		if (coreAlpha > 0.01F) {
 			int alpha = (int)(Mth.clamp(coreAlpha, 0.0F, 1.0F) * 255.0F);
 			collector.order(ORDER).submitModel(model(kind, 0), state, pose, RenderTypes.entityTranslucent(TEXTURE), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
@@ -383,10 +397,14 @@ public final class SpiritManifest {
 	/** Each tick: data rain through every manifested figure in view, and stages forgotten for beings that are gone. */
 	private static void tick(Minecraft minecraft) {
 		ClientLevel level = minecraft.level;
-		if (level == null || minecraft.isPaused() || STAGES.isEmpty()) {
+		if (level == null || minecraft.isPaused()) {
 			return;
 		}
 		double now = level.getGameTime();
+		clashTick(minecraft, level, now);
+		if (STAGES.isEmpty()) {
+			return;
+		}
 		if (level.getGameTime() % 100L == 0L) {
 			STAGES.keySet().removeIf(id -> !(level.getEntity(id) instanceof LivingEntity living) || living.getAttached(Spirits.SPIRIT) == null);
 		}
@@ -407,5 +425,183 @@ public final class SpiritManifest {
 					stage.z + (random.nextDouble() - 0.5) * 2.0 * RAIN_WIDTH, 0.0, -RAIN_FALL, 0.0);
 			}
 		}
+	}
+
+	// ---- the Grue -----------------------------------------------------------------------------------------------------------
+
+	/**
+	 * The Grue fights the spirit (Andy: "they should all have an effect when the grue is attacking, maybe an animated fight"):
+	 * each time it lashes at its keeper ({@code Grue.Lash}, which only the keeper is sent), the two appear in front of them and
+	 * trade blows for {@link #CLASH_TICKS}: the spirit (the Quiet One only its arms) against the Grue, ghastly, winged and
+	 * hovering on its wingbeats, both glitching, a crack at every blow. The stronger the lash, the redder the spirit and the
+	 * harder the Grue presses (it drives the spirit back); at the end it breaks off and both fade.
+	 */
+	static final float CLASH_TICKS = 56.0F;
+	/** Ticks per blow, how far ahead of the keeper the fight is, how far apart the two stand, and how high the Grue hovers (blocks). */
+	static final float CLASH_BLOW = 14.0F;
+	static final double CLASH_AHEAD = 2.8, CLASH_APART = 0.95, CLASH_HOVER = 0.35, CLASH_PUSH = 0.6;
+	/** The Grue's colours: its glowing edge, and its body, dark and see-through (ghastly). */
+	static final int GRUE_EDGE = 0xFFE0142E, GRUE_CORE = 0xFF2A0006;
+	static final float GRUE_CORE_ALPHA = 0.62F, GRUE_LIGHT = 1.5F;
+	/** The boss's wingbeat, its shades' size against its own, and how close the keeper must be for it to strike at them (blocks). */
+	static final float BOSS_FLAP = 1.0F, CLASH_FLAP = 1.7F, SHADE_SCALE = 0.42F;
+	static final double BOSS_STRIKE_RANGE = 4.5;
+	/** Lang keys the Grue's bodies are named by (GrueTrial names them; names are synced, tags are not). */
+	static final String BOSS_NAME = "spirit.jaymoskingdoms.grue.name", SHADE_NAME = "entity.jaymoskingdoms.grue_shade";
+
+	private static double clashStart = -1.0E9;
+	private static float clashStrength;
+	private static double clashX, clashY, clashZ, clashYaw;
+	private static int clashBlows;
+
+	/** The Grue lashed at the local player: its fight with their spirit plays out in front of them. */
+	public static void lash(float strength) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player == null || minecraft.level == null || minecraft.player.getAttached(Spirits.SPIRIT) == null) {
+			return;
+		}
+		var player = minecraft.player;
+		double now = minecraft.level.getGameTime();
+		if (now - clashStart < CLASH_TICKS * 0.6) {
+			// already fighting: it only gets harder
+			clashStrength = Math.max(clashStrength, strength);
+			return;
+		}
+		float yaw = player.getYHeadRot() * Mth.DEG_TO_RAD;
+		clashX = player.getX() - Mth.sin(yaw) * CLASH_AHEAD;
+		clashZ = player.getZ() + Mth.cos(yaw) * CLASH_AHEAD;
+		clashY = player.getY();
+		clashYaw = yaw;
+		clashStart = now;
+		clashStrength = strength;
+		clashBlows = 0;
+	}
+
+	/** Which of the Grue's bodies {@code entity} is: its scale (1 the boss, less for a shade), or 0 for none. */
+	static float grueBody(LivingEntity entity) {
+		var name = entity.getCustomName();
+		if (name != null && name.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t) {
+			if (BOSS_NAME.equals(t.getKey())) {
+				return 1.0F;
+			}
+			if (SHADE_NAME.equals(t.getKey())) {
+				return SHADE_SCALE;
+			}
+		}
+		return 0.0F;
+	}
+
+	private static void drawClash(LevelRenderContext context, Minecraft minecraft, ClientLevel level) {
+		var player = minecraft.player;
+		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		double now = level.getGameTime() + partial;
+		float a = (float)(now - clashStart);
+		SpiritState spirit = player.getAttached(Spirits.SPIRIT);
+		if (a > CLASH_TICKS || spirit == null) {
+			if (a > CLASH_TICKS) {
+				clashStart = -1.0E9;
+			}
+			return;
+		}
+		Vec3 camera = context.levelState().cameraRenderState.pos;
+		float m = Math.min(smooth(a / IN_TICKS), 1.0F - smooth((a - (CLASH_TICKS - OUT_TICKS)) / OUT_TICKS));
+		long step = (long)Math.floor(now / GLITCH_STEP);
+		float glitch = Math.max(Math.max(1.0F - a / GLITCH_TICKS, 1.0F - (CLASH_TICKS - a) / GLITCH_TICKS), noise(step, 7, 4) < 0.25F ? 0.7F : 0.0F);
+		float phase = a / CLASH_BLOW;
+		// the Grue presses as hard as it lashed: the spirit is driven back toward its keeper
+		float push = (float)CLASH_PUSH * clashStrength * smooth(a / CLASH_TICKS);
+		double rx = -Mth.cos((float)clashYaw), rz = -Mth.sin((float)clashYaw);
+		double fx = -Mth.sin((float)clashYaw), fz = Mth.cos((float)clashYaw);
+		double sx = clashX - rx * CLASH_APART - fx * push, sz = clashZ - rz * CLASH_APART - fz * push;
+		double gx = clashX + rx * CLASH_APART - fx * push * 0.5, gz = clashZ + rz * CLASH_APART - fz * push * 0.5;
+		int kind = spirit.kind();
+		float levelSolid = solid(spirit.level());
+		// the spirit: its colours going to the Grue's red as the lash is stronger
+		int color = ARGB.srgbLerp(clashStrength * 0.5F, GrueClient.tint(player, SpiritArms.mix(Spirits.of(kind).color())), GRUE_EDGE);
+		SpiritFigure.Frame you = new SpiritFigure.Frame(kind, true, kind, Spirits.of(kind).size(spirit), m, 0.0F, -1.0F, 0.0F, 0.0F, false,
+			1.0F, phase, 0.0F, kind == Spirits.QUIET);
+		figureAt(context, camera, player, you, kind, sx, clashY, sz, gx, gz, 0.0F, m * levelSolid * STAGE_LIGHT, CORE_ALPHA * m * levelSolid, now, glitch, color,
+			SpiritArms.ghost(color));
+		// the Grue: half a blow out of step, so they trade
+		SpiritFigure.Frame it = new SpiritFigure.Frame(SpiritFigure.GRUE, true, SpiritFigure.GRUE, 1.0F, m, 0.0F, -1.0F, 0.0F, 0.0F, false,
+			1.0F, phase + 0.5F, CLASH_FLAP, false);
+		figureAt(context, camera, player, it, SpiritFigure.GRUE, gx, clashY + CLASH_HOVER, gz, sx, sz, 0.0F, m * GRUE_LIGHT, GRUE_CORE_ALPHA * m, now,
+			glitch, GRUE_EDGE, GRUE_CORE);
+	}
+
+	/** Each tick of the fight: a crack at every blow, and red motes thrown off. */
+	private static void clashTick(Minecraft minecraft, ClientLevel level, double now) {
+		if (clashStart < -1.0E8 || minecraft.player == null) {
+			return;
+		}
+		float a = (float)(now - clashStart);
+		if (a > CLASH_TICKS) {
+			return;
+		}
+		// a blow lands at each half swing (one side's, then the other's), just after its draw
+		int blows = (int)Math.floor(a / CLASH_BLOW * 2.0F - SpiritFigure.STRIKE_DRAW * 2.0F + 1.0F);
+		if (blows > clashBlows && a > IN_TICKS && a < CLASH_TICKS - OUT_TICKS) {
+			clashBlows = blows;
+			boolean grueHits = (blows & 1) == 0;
+			level.playLocalSound(clashX, clashY + 1.2, clashZ, grueHits ? SoundEvents.WARDEN_ATTACK_IMPACT : SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS,
+				0.6F, grueHits ? 0.6F : 1.2F, false);
+			level.playLocalSound(clashX, clashY + 1.2, clashZ, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.4F, grueHits ? 0.5F : 1.5F, false);
+			DustParticleOptions red = new DustParticleOptions(GRUE_EDGE & 0xFFFFFF, 1.2F);
+			var random = minecraft.player.getRandom();
+			for (int n = 0; n < 12; n++) {
+				level.addParticle(red, clashX, clashY + 1.3, clashZ, (random.nextDouble() - 0.5) * 0.4, (random.nextDouble() - 0.3) * 0.3,
+					(random.nextDouble() - 0.5) * 0.4);
+				if (n % 3 == 0) {
+					level.addParticle(ParticleTypes.CRIT, clashX, clashY + 1.3, clashZ, (random.nextDouble() - 0.5) * 0.6, random.nextDouble() * 0.3,
+						(random.nextDouble() - 0.5) * 0.6);
+				}
+			}
+		}
+	}
+
+	/** The boss (or a shade) drawn as the Grue: hovering on its wings, striking at the keeper when they're close, glitching now and then. */
+	private static void drawGrueBody(LevelRenderContext context, LivingEntity entity, float scale, float partial, Vec3 camera, double now) {
+		Minecraft minecraft = Minecraft.getInstance();
+		var viewer = minecraft.player;
+		if (viewer == null) {
+			return;
+		}
+		Vec3 at = entity.getPosition(partial);
+		float bodyRot = Mth.rotLerp(partial, entity.yBodyRotO, entity.yBodyRot);
+		float near = (float)Mth.clamp(1.0 - (entity.distanceTo(viewer) - BOSS_STRIKE_RANGE) / 2.0, 0.0, 1.0);
+		long step = (long)Math.floor(now / GLITCH_STEP);
+		float glitch = noise(step, entity.getId(), 5) < BLIP_CHANCE * 2.0F ? 0.7F : entity.hurtTime > 0 ? 0.5F : 0.0F;
+		float headPitch = entity.getXRot(partial) * Mth.DEG_TO_RAD;
+		SpiritFigure.Frame frame = new SpiritFigure.Frame(SpiritFigure.GRUE, true, SpiritFigure.GRUE, 1.0F, 1.0F, 0.0F, -1.0F,
+			Mth.wrapDegrees(Mth.rotLerp(partial, entity.yHeadRotO, entity.yHeadRot) - bodyRot) * Mth.DEG_TO_RAD, headPitch, false,
+			near, (float)(now / CLASH_BLOW), BOSS_FLAP / Math.max(scale, 0.3F) * 0.6F + 0.4F, false);
+		PoseStack pose = context.poseStack();
+		pose.pushPose();
+		pose.translate(at.x - camera.x, at.y - camera.y, at.z - camera.z);
+		pose.scale(scale, scale, scale);
+		pose.rotateDegrees(Axis.YP, 180.0F - bodyRot);
+		pose.translate((noise(step, entity.getId(), 6) - 0.5F) * 2.0F * JOLT * glitch, 0.0F, 0.0F);
+		pose.scale(-1.0F, -1.0F, 1.0F);
+		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
+		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
+		submit(context.submitNodeCollector(), pose, entity, frame, SpiritFigure.GRUE, GRUE_LIGHT, GRUE_CORE_ALPHA, now, glitch, GRUE_EDGE, GRUE_CORE);
+		pose.popPose();
+	}
+
+	/** One staged figure at ({@code x}, {@code y}, {@code z}), facing ({@code lookX}, {@code lookZ}). */
+	private static void figureAt(LevelRenderContext context, Vec3 camera, LivingEntity owner, SpiritFigure.Frame frame, int kind, double x, double y, double z,
+		double lookX, double lookZ, float extraYaw, float light, float coreAlpha, double now, float glitch, int color, int pale) {
+		float yaw = (float)(Mth.atan2(lookZ - z, lookX - x) * Mth.RAD_TO_DEG) - 90.0F + extraYaw;
+		long step = (long)Math.floor(now / GLITCH_STEP);
+		PoseStack pose = context.poseStack();
+		pose.pushPose();
+		pose.translate(x - camera.x, y - camera.y, z - camera.z);
+		pose.rotateDegrees(Axis.YP, 180.0F - yaw);
+		pose.translate((noise(step, kind, 2) - 0.5F) * 2.0F * JOLT * glitch, 0.0F, 0.0F);
+		pose.scale(-1.0F, -1.0F, 1.0F);
+		pose.scale(SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE, SpiritArms.PLAYER_SCALE);
+		pose.translate(0.0F, SpiritArms.MODEL_DROP, 0.0F);
+		submit(context.submitNodeCollector(), pose, owner, frame, kind, light, coreAlpha, now, glitch, color, pale);
+		pose.popPose();
 	}
 }

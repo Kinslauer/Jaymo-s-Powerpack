@@ -19,7 +19,7 @@
   {
    "name": "the smooth chest",
    "type": "cube",
-   "uuid": "40fef80b-7583-46e2-bca5-2c5d345ca703",
+   "uuid": "57375e9d-b4ce-409d-a731-6cbe2ce9cb9b",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -99,7 +99,7 @@
   {
    "name": "the waist",
    "type": "cube",
-   "uuid": "0e6fac83-f1b8-445d-82c2-d73d47fc301b",
+   "uuid": "7ef87e56-e40d-4841-ae8b-f4fbeb87ec9e",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -179,7 +179,7 @@
   {
    "name": "the neck",
    "type": "cube",
-   "uuid": "665649c9-ec5f-4c04-9ddb-0d54ea5c7ae6",
+   "uuid": "b500a676-e689-433b-834a-3d11d924857a",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -259,7 +259,7 @@
   {
    "name": "the long faceless head",
    "type": "cube",
-   "uuid": "cd93c5e5-b28a-47f6-8f62-5a50e1832f51",
+   "uuid": "13c469d1-bfe9-48d6-bb06-f04b100a10d4",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -339,7 +339,7 @@
   {
    "name": "a ring over it",
    "type": "cube",
-   "uuid": "c3bf4755-9cde-473f-bd42-26edd28954a4",
+   "uuid": "2fc5e0e5-a563-4080-8713-0e0e104cb4c6",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -419,7 +419,7 @@
   {
    "name": "skull 3",
    "type": "cube",
-   "uuid": "569c7250-9173-4306-a56f-c6cce179e35b",
+   "uuid": "33a0d7da-cf4d-44f6-9000-ee6a68cddc30",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -499,7 +499,7 @@
   {
    "name": "skull 4",
    "type": "cube",
-   "uuid": "dc5402da-6ee0-48ea-b200-6081d4726597",
+   "uuid": "ba5265d1-ab6c-4a9a-8cb8-3ecec504d52d",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -579,7 +579,7 @@
   {
    "name": "skull 5",
    "type": "cube",
-   "uuid": "bc76e052-deb1-4c89-bb26-84280c344852",
+   "uuid": "9b2af997-95aa-452c-9299-ad3ce7c99f0b",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -659,7 +659,7 @@
   {
    "name": "the tail",
    "type": "cube",
-   "uuid": "3d800ce2-b64c-4c4e-9f1f-bba2c7cc066e",
+   "uuid": "584b449a-3df7-4b86-9c6a-7986732ad847",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -739,7 +739,7 @@
   {
    "name": "tail 1",
    "type": "cube",
-   "uuid": "011cc065-fa31-44d0-9188-4ea531b91c12",
+   "uuid": "6f0d19d1-d097-482e-89e4-dcc893795497",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -819,7 +819,7 @@
   {
    "name": "tail 2",
    "type": "cube",
-   "uuid": "e4435df9-baae-4157-a955-e77d741dee7a",
+   "uuid": "38a50e55-c42e-4e6d-8324-4f85d1ae95b9",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -899,7 +899,7 @@
   {
    "name": "tail 3",
    "type": "cube",
-   "uuid": "6f1e5140-5da0-4a79-b626-62fb3487122e",
+   "uuid": "c8366ca7-bd7d-4e84-afca-452d63c95d10",
    "box_uv": false,
    "rescale": false,
    "locked": false,
@@ -991,13 +991,13 @@
     0
    ],
    "color": 0,
-   "uuid": "238518fb-a828-4126-9dee-d65146f0edaf",
+   "uuid": "0b4f1d3c-4f94-42e0-8d08-076265e70d63",
    "export": true,
    "isOpen": true,
    "visibility": true,
    "children": [
-    "40fef80b-7583-46e2-bca5-2c5d345ca703",
-    "0e6fac83-f1b8-445d-82c2-d73d47fc301b",
+    "57375e9d-b4ce-409d-a731-6cbe2ce9cb9b",
+    "7ef87e56-e40d-4841-ae8b-f4fbeb87ec9e",
     {
      "name": "skull",
      "origin": [
@@ -1011,17 +1011,17 @@
       0
      ],
      "color": 0,
-     "uuid": "ba8d8187-c48c-4dac-8d9c-fdf50e8c926d",
+     "uuid": "ef5b4658-e5b2-4807-ab29-f6573010bbac",
      "export": true,
      "isOpen": true,
      "visibility": true,
      "children": [
-      "665649c9-ec5f-4c04-9ddb-0d54ea5c7ae6",
-      "cd93c5e5-b28a-47f6-8f62-5a50e1832f51",
-      "c3bf4755-9cde-473f-bd42-26edd28954a4",
-      "569c7250-9173-4306-a56f-c6cce179e35b",
-      "dc5402da-6ee0-48ea-b200-6081d4726597",
-      "bc76e052-deb1-4c89-bb26-84280c344852"
+      "b500a676-e689-433b-834a-3d11d924857a",
+      "13c469d1-bfe9-48d6-bb06-f04b100a10d4",
+      "2fc5e0e5-a563-4080-8713-0e0e104cb4c6",
+      "33a0d7da-cf4d-44f6-9000-ee6a68cddc30",
+      "ba5265d1-ab6c-4a9a-8cb8-3ecec504d52d",
+      "9b2af997-95aa-452c-9299-ad3ce7c99f0b"
      ]
     },
     {
@@ -1037,15 +1037,15 @@
       0
      ],
      "color": 0,
-     "uuid": "16608d9b-a1ff-4453-b3b1-9fb7f31f38b3",
+     "uuid": "8558615f-a6c5-4033-9aa1-a2cbc7e88113",
      "export": true,
      "isOpen": true,
      "visibility": true,
      "children": [
-      "3d800ce2-b64c-4c4e-9f1f-bba2c7cc066e",
-      "011cc065-fa31-44d0-9188-4ea531b91c12",
-      "e4435df9-baae-4157-a955-e77d741dee7a",
-      "6f1e5140-5da0-4a79-b626-62fb3487122e"
+      "584b449a-3df7-4b86-9c6a-7986732ad847",
+      "6f0d19d1-d097-482e-89e4-dcc893795497",
+      "38a50e55-c42e-4e6d-8324-4f85d1ae95b9",
+      "c8366ca7-bd7d-4e84-afca-452d63c95d10"
      ]
     }
    ]

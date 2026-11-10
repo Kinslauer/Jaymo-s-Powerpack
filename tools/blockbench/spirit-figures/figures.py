@@ -9,13 +9,14 @@
 # foot:  the sole, model pixels below the shoulder line (where the manifested figure stands on the ground).
 # stage: the manifested figure's scale (a player is 1): near your own size, so it reads as a person standing with you.
 
-GRIMSBY, VARRO, AMBROSE, THESSALY, QUIET = range(5)
-NAMES = ["Grimsby", "Varro", "Ambrose", "Thessaly", "The Quiet One"]
+GRIMSBY, VARRO, AMBROSE, THESSALY, QUIET, GRUE = range(6)
+NAMES = ["Grimsby", "Varro", "Ambrose", "Thessaly", "The Quiet One", "The Grue"]
+KINDS = 6
 
 FIG = {
     # a dead traveller: a gaunt swordsman's bones under a tattered cowl and cloak, a scabbard at his hip
     GRIMSBY: dict(
-        scale=1.6, half=3.5, front=3.3, tail_y=11.0, foot=23.6, stage=1.1, arm_at=(-4.4, 0.8),
+        scale=1.6, half=3.5, front=3.3, tail_y=11.0, foot=19.8, stage=1.1, arm_at=(-4.4, 0.8),
         torso=[
             (0, 0, 0, 7, 11, 3.5, "the gaunt chest"),
             (0, 0.2, 0, 8, 1, 3, "the collarbones"),
@@ -50,16 +51,16 @@ FIG = {
         ],
         tail=[
             (0, 0, 0, 6, 2.4, 3, "the hips"),
-            (0, 1.0, -1.9, 5.6, 6, 0.6, "tatters in front"),
-            (-2.0, 7.0, -1.9, 1.2, 3, 0.6, None),
-            (1.4, 7.0, -1.9, 1.0, 4, 0.6, None),
-            (-1.6, 2.2, 0, 1.4, 10, 1.4, "the leg bones"),
-            (1.6, 2.2, 0, 1.4, 10, 1.4, None),
-            (-1.6, 6.4, -0.3, 2.0, 1.2, 2.0, "knees"),
-            (1.6, 6.4, -0.3, 2.0, 1.2, 2.0, None),
-            (-1.6, 12.0, -0.8, 2.0, 0.8, 3.0, "the feet"),
-            (1.6, 12.0, -0.8, 2.0, 0.8, 3.0, None),
+            (0, 2.2, 0.3, 6.4, 4, 3.4, "no legs: the cloak's hem thinning to smoke"),
+            (0, 6.0, 0.6, 4.6, 4, 2.6, None),
+            (-1.8, 10.0, 0.8, 1.2, 5, 1.2, "ragged strands of it"),
+            (0.2, 10.0, 0.9, 1.4, 7, 1.4, None),
+            (1.9, 10.0, 0.8, 1.0, 4, 1.0, None),
+            (0.4, 16.8, 1.1, 0.7, 3, 0.7, "the last wisp"),
+            (-2.0, 1.0, -1.9, 1.2, 6, 0.6, "tatters in front"),
+            (1.6, 1.0, -1.9, 1.0, 8, 0.6, None),
         ],
+        wing=[],
         arm=[
             (0, -1.0, 0, 3.2, 3.4, 3.4, "the ragged sleeve"),
             (0, 0, 0, 1.6, 6, 1.6, "the upper bone"),
@@ -71,7 +72,7 @@ FIG = {
         ]),
     # a warlord of the old wars in plate: great pauldrons, a crested helm with a visor slit, tassets and sabatons
     VARRO: dict(
-        scale=1.9, half=6.0, front=5.0, tail_y=12.0, foot=28.0, stage=1.05, arm_at=(-8.0, 0.6),
+        scale=1.9, half=6.0, front=5.0, tail_y=12.0, foot=33.4, stage=1.05, arm_at=(-8.0, 0.6),
         torso=[
             (0, 0, 0, 12, 12, 6, "the plated chest"),
             (0, 1, -3.2, 10, 7, 1.0, "the breastplate, standing proud"),
@@ -98,13 +99,13 @@ FIG = {
             (0, 0, 0, 11, 4, 6.2, "the mail skirt"),
             (-3, 0, -0.5, 5.4, 5, 6.4, "the tassets"),
             (3, 0, -0.5, 5.4, 5, 6.4, None),
-            (-2.6, 4, 0, 4, 9, 4.4, "the cuisses"),
-            (2.6, 4, 0, 4, 9, 4.4, None),
-            (-2.6, 7.2, -2.4, 3.4, 2.2, 0.8, "the knee cops"),
-            (2.6, 7.2, -2.4, 3.4, 2.2, 0.8, None),
-            (-2.6, 13, -0.8, 4.6, 3, 6, "the sabatons"),
-            (2.6, 13, -0.8, 4.6, 3, 6, None),
+            (0, 4.6, 0.5, 9.4, 4.4, 5, "no legs: the war-ghost's smoke"),
+            (0, 9.0, 1.0, 6.6, 4.4, 3.6, None),
+            (-1.4, 13.4, 1.4, 2.4, 4, 2.2, None),
+            (1.6, 13.4, 1.4, 1.8, 5.4, 1.8, "two trails of it"),
+            (1.6, 18.8, 1.6, 0.8, 2.6, 0.8, "the last wisp"),
         ],
+        wing=[],
         arm=[
             (0, -2.0, 0, 6.4, 3.6, 7, "the pauldron"),
             (0, 1.0, 0, 5.6, 1.4, 6.4, "its lower lame"),
@@ -116,7 +117,7 @@ FIG = {
         ]),
     # an elder in a hooded robe: a long beard, bushy brows, mantle and stole, wide sleeves, a satchel of scrolls
     AMBROSE: dict(
-        scale=1.8, half=5.0, front=4.0, tail_y=12.0, foot=24.4, stage=1.1, arm_at=(-6.4, 0.8),
+        scale=1.8, half=5.0, front=4.0, tail_y=12.0, foot=22.0, stage=1.1, arm_at=(-6.4, 0.8),
         torso=[
             (0, 0, 0, 10, 12, 5, "the robed chest"),
             (0, -0.6, 0, 11.4, 3, 6.2, "the mantle"),
@@ -142,13 +143,15 @@ FIG = {
         ],
         tail=[
             (0, 0, 0.3, 11, 6, 6.4, "the robe"),
-            (0, 6, 0.3, 12, 5.6, 7, "flaring"),
-            (0, 11.4, 0.4, 12.8, 1.0, 7.6, "the hem"),
-            (-2.2, 11.6, -3.8, 2.4, 0.8, 1.6, "the toes of his boots"),
-            (2.2, 11.6, -3.8, 2.4, 0.8, 1.6, None),
-            (-2.4, 2, -3.0, 1.6, 9, 0.6, "the stole hanging on"),
-            (2.4, 2, -3.0, 1.6, 9, 0.6, None),
+            (0, 6, 0.6, 10.4, 5, 6, "no feet: the robe thinning to a wisp"),
+            (0, 11, 1.1, 7.4, 4.4, 4.4, None),
+            (-1.2, 15.4, 1.5, 3.6, 4, 2.6, None),
+            (1.4, 15.4, 1.5, 2.0, 5.6, 1.6, "curling trails"),
+            (-1.4, 19.4, 1.8, 1.2, 2.6, 1.2, "the last wisp"),
+            (-2.4, 2, -3.0, 1.6, 7, 0.6, "the stole hanging on"),
+            (2.4, 2, -3.0, 1.6, 7, 0.6, None),
         ],
+        wing=[],
         arm=[
             (0, -1.0, 0, 4.4, 3, 4.4, "the shoulder of the robe"),
             (0, 0, 0, 4, 6.4, 4, "the sleeve"),
@@ -159,7 +162,7 @@ FIG = {
         ]),
     # a scholar: slim, a collar and shawl, hair long down her back and in side locks under a circlet, bell sleeves, a long skirt
     THESSALY: dict(
-        scale=1.2, half=3.2, front=3.6, tail_y=11.0, foot=24.0, stage=1.0, arm_at=(-4.2, 0.8),
+        scale=1.2, half=3.2, front=3.6, tail_y=11.0, foot=20.6, stage=1.0, arm_at=(-4.2, 0.8),
         torso=[
             (0, 0, 0, 6.4, 6, 3.4, "the slim chest"),
             (0, 6, 0, 5, 5, 3, "the waist"),
@@ -182,13 +185,14 @@ FIG = {
         ],
         tail=[
             (0, 0, 0.2, 7, 5, 4.4, "the skirt"),
-            (0, 5, 0.2, 8, 5, 5.2, None),
-            (0, 10, 0.3, 9, 2.4, 6, "its hem"),
-            (-1.2, 2, 3.0, 0.8, 9, 0.8, "ribbons trailing"),
-            (1.2, 2, 3.0, 0.8, 10.5, 0.8, None),
-            (-1.4, 12.2, -2.6, 1.6, 0.8, 1.6, "slippers"),
-            (1.4, 12.2, -2.6, 1.6, 0.8, 1.6, None),
+            (0, 5, 0.6, 6.4, 5, 3.8, "no feet: the skirt thinning to a wisp"),
+            (0, 10, 1.0, 4.2, 4.6, 2.6, None),
+            (-1.1, 14.6, 1.2, 1.4, 4.6, 1.2, "two trails"),
+            (1.1, 14.6, 1.2, 1.0, 6.0, 1.0, None),
+            (-1.4, 2, 3.0, 0.8, 11, 0.8, "ribbons trailing"),
+            (1.4, 2, 3.0, 0.8, 13, 0.8, None),
         ],
+        wing=[],
         arm=[
             (0, -0.6, 0, 2.6, 2.4, 2.6, "the shoulder"),
             (0, 0, 0, 2.0, 5.6, 2.0, "the slim sleeve"),
@@ -218,14 +222,81 @@ FIG = {
             (0, 10, 1.2, 3, 5, 2, None),
             (0, 15, 1.5, 1.6, 5, 1.4, None),
         ],
+        wing=[],
         arm=[
             (0, 0, 0, 3, 12, 3, "the smooth arm"),
+        ]),
+    # The Grue: a vile wizard's ghost, ghastly and winged. Gaunt and tall, a horned skull under a torn hood, long clawed arms,
+    # great ragged wings of skin and bone, and below the waist only smoke. Its arms are its own; it never stands over a back.
+    GRUE: dict(
+        scale=1.6, half=4.0, front=3.4, tail_y=12.0, foot=24.0, stage=1.55, arm_at=(-5.0, 0.8), wing_at=(-1.6, 1.2, 2.2),
+        torso=[
+            (0, 0, 0, 8, 12, 4, "the starved chest"),
+            (0, 0.2, 0, 9.4, 1.2, 3.6, "collarbones like blades"),
+            (0, 2.6, -2.2, 7, 0.8, 0.6, "ribs"),
+            (0, 4.6, -2.2, 6.4, 0.8, 0.6, None),
+            (0, 6.6, -2.2, 5.6, 0.8, 0.6, None),
+            (0, 8.6, -2.2, 4.4, 0.8, 0.6, None),
+            (0, 1.4, 2.4, 1.6, 9, 1.4, "the spine"),
+            (0, 1.0, 2.6, 1.0, 10, 2.6, "its ridge of spurs"),
+            (-4.2, -0.8, 0.2, 2.8, 2.0, 5, "the torn hood's shoulders"),
+            (4.2, -0.8, 0.2, 2.8, 2.0, 5, None),
+        ],
+        skull=[
+            (0, -1.8, 0.4, 2.6, 2.0, 2.6, "the neck"),
+            (0, -9.4, -0.4, 7, 7.6, 7.4, "the long skull"),
+            (0, -7.0, -4.2, 6.6, 1.0, 0.6, "the brow, heavy over hollow eyes"),
+            (0, -3.4, -1.2, 5.2, 1.8, 5.6, "the jaw, hanging open"),
+            (-1.6, -2.0, -3.9, 0.6, 1.4, 0.6, "fangs"),
+            (1.6, -2.0, -3.9, 0.6, 1.4, 0.6, None),
+            (-3.8, -12.4, 0.6, 1.4, 3.6, 1.4, "the horns, sweeping back"),
+            (3.8, -12.4, 0.6, 1.4, 3.6, 1.4, None),
+            (-4.6, -14.6, 2.4, 1.0, 2.6, 2.6, None),
+            (4.6, -14.6, 2.4, 1.0, 2.6, 2.6, None),
+            (0, -10.4, 1.6, 8.6, 1.2, 8, "the torn hood"),
+            (-4.0, -9.6, 1.8, 0.8, 8, 7, None),
+            (4.0, -9.6, 1.8, 0.8, 8, 7, None),
+            (0, -9.6, 5.4, 8.6, 11, 0.8, "its back, hanging to the waist"),
+        ],
+        tail=[
+            (0, 0, 0.3, 7.4, 4, 4, "no legs: rags of smoke"),
+            (0, 4, 0.8, 6, 4.4, 3.2, None),
+            (-1.6, 8.4, 1.2, 2.6, 5, 2.2, None),
+            (1.4, 8.4, 1.2, 2.0, 7, 1.8, None),
+            (-1.8, 13.4, 1.5, 1.0, 4, 1.0, "trailing to nothing"),
+            (1.4, 15.4, 1.6, 0.8, 4, 0.8, None),
+        ],
+        wing=[
+            (0, -0.8, 0, 1.6, 1.6, 1.6, "the wing's root"),
+            (-4.0, -2.4, 0, 8, 1.4, 1.4, "its arm bone, reaching out and up"),
+            (-9.0, -5.0, 0, 3, 1.2, 1.2, None),
+            (-10.6, -5.6, 0, 1.4, 1.4, 1.4, "the wrist knuckle"),
+            (-11.2, -11.0, 0, 1.0, 6.0, 1.0, "a finger bone, raised"),
+            (-12.0, -13.2, 0, 1.6, 2.2, 1.0, "its hooked claw"),
+            (-15.6, -6.0, 0, 9, 1.0, 1.0, "a finger bone, out"),
+            (-14.4, -3.6, 0, 1.0, 12, 1.0, "a finger bone, down"),
+            (-7.0, -1.4, 0.3, 12, 7, 0.4, "the membrane, torn"),
+            (-13.6, -10.4, 0.3, 3.4, 15, 0.4, None),
+            (-17.6, -5.4, 0.3, 4.6, 10, 0.4, None),
+            (-4.0, 5.6, 0.3, 6, 4, 0.4, "its scalloped trailing edge"),
+            (-10.4, 5.6, 0.3, 4, 6, 0.4, None),
+            (-15.0, 4.6, 0.3, 3, 4, 0.4, None),
+        ],
+        arm=[
+            (0, -1.0, 0, 3.2, 3.0, 3.2, "the bony shoulder"),
+            (0, 0, 0, 2.0, 7, 2.0, "the long upper arm"),
+            (0, 6.6, 0, 2.4, 1.2, 2.4, "the elbow"),
+            (0, 7.6, 0, 1.8, 6, 1.8, "the forearm"),
+            (0, 13.4, -0.2, 2.8, 2.2, 1.6, "the hand"),
+            (-0.9, 15.4, -0.6, 0.6, 3.4, 0.6, "long claws"),
+            (0.0, 15.4, -0.6, 0.6, 4.0, 0.6, None),
+            (0.9, 15.4, -0.6, 0.6, 3.4, 0.6, None),
         ]),
 }
 
 # the arms' inner reach from their pivot toward the body, per unit of arm size (upper arm width / 2 - 1)
-ARM_INNER = {GRIMSBY: 0.5, VARRO: 1.5, AMBROSE: 1.0, THESSALY: 0.5, QUIET: 1.0}
-ARM_SIZE = {GRIMSBY: 1.0, VARRO: 2.4, AMBROSE: 2.0, THESSALY: 0.6, QUIET: 1.0}
+ARM_INNER = {GRIMSBY: 0.5, VARRO: 1.5, AMBROSE: 1.0, THESSALY: 0.5, QUIET: 1.0, GRUE: 1.0}
+ARM_SIZE = {GRIMSBY: 1.0, VARRO: 2.4, AMBROSE: 2.0, THESSALY: 0.6, QUIET: 1.0, GRUE: 1.0}
 
 # Keyed moves of the manifested figure, the same curves SpiritFigure.Model poses in code (radians, model pixels; t in ticks).
 # Blockbench gets them as animations in bbexport.py so Andy can see and change them; the code is what the game runs.
@@ -240,6 +311,10 @@ ANIMATIONS = {
     "level_up": dict(length=1.5, loop=False),
     # fading: sinking a little, the arms dropping, the head bowing
     "fade": dict(length=0.6, loop=False),
+    # the fight with the Grue (spirits) and the Grue's own attack: a wind-up and a blow, again
+    "strike": dict(length=1.0, loop=True),
+    # the Grue's wings beating (it hovers on them, in the clash and the boss fight)
+    "flap": dict(length=1.2, loop=True),
 }
 
 
@@ -263,7 +338,7 @@ def java(kind, group, mirror=False):
 
 
 if __name__ == "__main__":
-    for k in range(5):
-        for grp in ("torso", "skull", "tail", "arm"):
+    for k in range(KINDS):
+        for grp in ("torso", "skull", "tail", "arm", "wing"):
             print("//", NAMES[k], grp)
             print("\n".join(java(k, grp)))

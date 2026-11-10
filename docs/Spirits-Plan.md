@@ -383,3 +383,9 @@ out and data rain. `SpiritArms.presence` keeps the shoulder arms away while it s
 `tools/blockbench/spirit-figures/figures.py` -> `gen.py` (Java mesh), `bbexport.py` (.bbmodels with the animations),
 `render.py` (previews). Design calls: the chat line stays (it survives distance and looking away); the figure stands in
 front, to one side, facing you, rather than at your shoulder.
+
+Andy (follow-up): "none of them should have legs, the lower half should be wispy, and they should all have an effect when
+the grue is attacking, maybe an animated fight, the grue should be ghastly and winged and animate the same way for the
+bossfight". Every figure's lower body is smoke; a `Grue.Lash` (client) starts `SpiritManifest.lash`, a staged fight between
+the spirit and the Grue figure (`SpiritFigure.GRUE`, wings) in front of the keeper; the trial's boss (an Evoker) and shades
+(Vexes), found by their translatable custom names, are hidden and drawn as the Grue figure.

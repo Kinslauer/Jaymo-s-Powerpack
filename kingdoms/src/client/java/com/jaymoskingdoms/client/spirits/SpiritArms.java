@@ -276,6 +276,11 @@ public final class SpiritArms {
 	/** From the living renderer's extractRenderState (called by {@link ManaClient#extract}): this being's arms, if it has a spirit. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		state.setData(LOOK, look(entity));
+		// the Grue's bodies in its trial are drawn as the Grue ({@link SpiritManifest}): the mob it wears is hidden
+		if (SpiritManifest.grueBody(entity) > 0.0F) {
+			state.isInvisible = true;
+			state.isInvisibleToPlayer = true;
+		}
 		// (0.7.465) how far the Grue has it
 		state.setData(GRUE, com.jaymoskingdoms.spirits.Grue.hold(entity));
 		// (Andy, 2026-11-01) Thessaly's mana wings

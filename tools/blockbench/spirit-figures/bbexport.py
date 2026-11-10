@@ -2,7 +2,7 @@
 # with the manifested figure's moves keyed as animations: idle, speak, manifest, level_up, fade. The curves are the ones
 # SpiritFigure.Model poses in code (figures.ANIMATIONS names them); Blockbench rotations are the model's with x and y negated.
 import json, math, uuid, os, sys
-from figures import FIG, NAMES, ANIMATIONS, QUIET
+from figures import FIG, NAMES, ANIMATIONS, QUIET, GRUE, KINDS
 
 out = sys.argv[1]
 os.makedirs(out, exist_ok=True)
@@ -12,6 +12,20 @@ NOD, TILT, POINT_X, POINT_SWING, POINT_TURN, HANG_SWAY, TALK_SPEED = 0.08, 0.06,
 BREATH, BREATH_SPEED = 0.035, 0.08
 LEVEL_RAISE, LEVEL_SPREAD = -2.75, 0.45
 FORM_SPREAD, FADE_BOW, RISE_FROM = 0.8, 0.35, 4.0
+STRIKE_BACK, STRIKE_OUT, STRIKE_DRAW, STRIKE_LEAN = 0.7, -1.95, 0.45, 0.18
+WING_SPREAD, WING_BEAT, WING_SPEED, WING_TIP = 0.45, 0.55, 0.35, 0.25
+CLASH_BLOW = 14.0
+
+
+def swing(phase):
+    p = phase - math.floor(phase)
+    if p < STRIKE_DRAW:
+        k = p / STRIKE_DRAW
+        return STRIKE_BACK * k * k * (3 - 2 * k)
+    k = (p - STRIKE_DRAW) / (1 - STRIKE_DRAW)
+    out = k / 0.2 if k < 0.2 else 1 - (k - 0.2) / 0.8
+    w = min(k / 0.2, 1.0)
+    return STRIKE_BACK + (STRIKE_OUT * out - STRIKE_BACK) * w
 
 
 def rot(xr, yr, zr):
@@ -46,6 +60,12 @@ def poses(name, t):
     rz, lz = rz + (LEVEL_SPREAD - rz) * up, lz + (-LEVEL_SPREAD - lz) * up
     rz += FORM_SPREAD * unformed
     lz -= FORM_SPREAD * unformed
+    lean = 0.0
+    if name == "strike":
+        ph = ticks / CLASH_BLOW
+        rx, lx, ry = swing(ph), swing(ph + 0.5), -0.2
+        lean = STRIKE_LEAN * math.sin(ph * 2 * math.pi * 2)
+    beat = math.sin(ticks * WING_SPEED * 1.7) if name in ("flap", "strike", "idle") else 0.0
     sx = talk * NOD * math.sin(ticks * TALK_SPEED * 1.8) + (FADE_BOW * unformed if name == "fade" else 0.0)
     sz = talk * TILT * math.sin(ticks * TALK_SPEED * 1.03)
     return {
@@ -54,17 +74,24 @@ def poses(name, t):
         "left_arm": rot(lx, 0, lz),
         "tail": rot(0.03 * math.sin(ticks * 0.07), 0, 0.015 * math.sin(ticks * 0.049)),
         # (model y is down, Blockbench's up: the rise from a crouch is a drop here)
+        "right_wing": rot(0, WING_SPREAD, WING_BEAT * beat - WING_TIP),
+        "left_wing": rot(0, -WING_SPREAD, -WING_BEAT * beat + WING_TIP),
+        "torso_lean": rot(lean, 0, 0),
         "figure": {"x": 0, "y": round(-RISE_FROM * unformed * unformed + 0.25 * math.sin(ticks * BREATH_SPEED), 3), "z": 0},
     }
 
 
-def animations(groups):
+def animations(groups, k):
     anims = []
     for name, spec in ANIMATIONS.items():
+        if name == "flap" and not FIG[k]["wing"]:
+            continue
         length = spec["length"]
         steps = max(4, int(round(length * 10)))
         animators = {}
-        for bone in ("skull", "right_arm", "left_arm", "tail", "figure"):
+        for bone in ("skull", "right_arm", "left_arm", "tail", "figure", "right_wing", "left_wing"):
+            if bone not in groups:
+                continue
             frames = []
             for i in range(steps + 1):
                 t = length * i / steps
@@ -77,7 +104,7 @@ def animations(groups):
     return anims
 
 
-for k in range(5):
+for k in range(KINDS):
     slug = NAMES[k].lower().replace("the ", "").replace(" ", "_")
     elements = []
     groups = {}
@@ -94,6 +121,10 @@ for k in range(5):
     tail = group("tail", [0, 24 - F["tail_y"], 0])
     arm_r = group("right_arm", [-ax, 24 - ay, 0])
     arm_l = group("left_arm", [ax, 24 - ay, 0])
+    if F["wing"]:
+        wx, wy, wz = F["wing_at"]
+        wing_r = group("right_wing", [-wx, 24 - wy, wz])
+        wing_l = group("left_wing", [wx, 24 - wy, wz])
 
     def add(g, name, cx, y, cz, w, h, d):
         u = str(uuid.uuid4())
@@ -111,13 +142,19 @@ for k in range(5):
             for n, (cx, y, cz, w, h, d, c) in enumerate(F["arm"]):
                 add(g, c or "arm %d" % n, side * (ax + cx), ay + y, cz, w, h, d)
         fig["children"] += [skull, tail, arm_r, arm_l]
+        if F["wing"]:
+            wx, wy, wz = F["wing_at"]
+            for side, g in ((1.0, wing_r), (-1.0, wing_l)):
+                for n, (cx, y, cz, w, h, d, c) in enumerate(F["wing"]):
+                    add(g, c or "wing %d" % n, side * (wx + cx), wy + y, wz + cz, w, h, d)
+            fig["children"] += [wing_r, wing_l]
     else:
         fig["children"] += [skull, tail]
     model = dict(meta=dict(format_version="4.10", model_format="bedrock", box_uv=False),
                  name="spirit_figure_" + slug, model_identifier="spirit_figure_" + slug,
                  visible_box=[2, 3, 0], resolution=dict(width=16, height=16),
                  elements=elements, outliner=[fig], textures=[],
-                 animations=animations(groups) if k != QUIET else [])
+                 animations=animations(groups, k) if k != QUIET else [])
     with open(os.path.join(out, "spirit_figure_%s.bbmodel" % slug), "w") as fh:
         json.dump(model, fh, indent=1)
     print(slug, len(elements), "elements,", len(model["animations"]), "animations")

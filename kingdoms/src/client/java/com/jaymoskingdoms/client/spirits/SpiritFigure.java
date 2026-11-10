@@ -24,28 +24,37 @@ import net.minecraft.util.Mth;
  * <li>Varro: a warlord in plate, great pauldrons, a crested and plumed helm with a visor slit, tassets and sabatons.</li>
  * <li>Ambrose: an elder in a hooded robe, a long beard under bushy brows, mantle and stole, wide sleeves, a satchel of scrolls.</li>
  * <li>Thessaly: slim, a high collar and shawl, hair long down her back and in side locks under a circlet, bell sleeves.</li>
- * <li>The Quiet One: never drawn (Andy: "only animating the large arms for the quiet one"); its numbers place its arms.</li>
+ * <li>The Quiet One: never a body (Andy: "only animating the large arms for the quiet one"): only its arms, when it fights.</li>
+ * <li>The Grue ({@link #GRUE}, not a spirit): ghastly and winged, a horned skull under a torn hood, long clawed arms, great
+ * ragged wings. It fights the spirits when it lashes at their keeper, and is the body of the boss in its trial.</li>
  * </ul>
+ * None of them has legs (Andy: "the lower half should be wispy"): below the waist each thins into smoke that trails away.
  * The mesh is written from {@code tools/blockbench/spirit-figures/figures.py} by {@code gen.py} (edit those, not this file);
  * the same script writes the .bbmodels, with the moves below keyed as Blockbench animations.
  */
 final class SpiritFigure {
 	/** On a figure's own render state: how to pose it this frame. */
 	static final RenderStateDataKey<Frame> FRAME = RenderStateDataKey.create(() -> "jaymoskingdoms:spirit_figure");
+	/** The Grue's figure, after the five spirits' (by the same index in every table here). */
+	static final int GRUE = Spirits.QUIET + 1, KINDS = GRUE + 1;
 
 	/** Each kind's figure, by kind: its scale over your back (a player's is 1), its torso's half width and how far it reaches forward of its middle (model pixels at scale 1), and the lower body's root below the shoulder line. */
-	static final float[] SCALE = {1.6F, 1.9F, 1.8F, 1.2F, 1.7F};
-	static final float[] HALF = {3.5F, 6.0F, 5.0F, 3.2F, 4.0F};
-	static final float[] FRONT = {3.3F, 5.0F, 4.0F, 3.6F, 3.45F};
-	static final float[] TAIL_Y = {11.0F, 12.0F, 12.0F, 11.0F, 12.0F};
+	static final float[] SCALE = {1.6F, 1.9F, 1.8F, 1.2F, 1.7F, 1.6F};
+	static final float[] HALF = {3.5F, 6.0F, 5.0F, 3.2F, 4.0F, 4.0F};
+	static final float[] FRONT = {3.3F, 5.0F, 4.0F, 3.6F, 3.45F, 3.4F};
+	static final float[] TAIL_Y = {11.0F, 12.0F, 12.0F, 11.0F, 12.0F, 12.0F};
 	/** The sole below the shoulder line (model pixels at scale 1), and the manifested figure's scale. */
-	static final float[] FOOT = {23.6F, 28.0F, 24.4F, 24.0F, 24.0F};
-	static final float[] STAGE = {1.1F, 1.25F, 1.1F, 1.0F, 1.0F};
+	static final float[] FOOT = {19.8F, 33.4F, 22.0F, 20.6F, 24.0F, 24.0F};
+	static final float[] STAGE = {1.1F, 1.05F, 1.1F, 1.0F, 1.0F, 1.55F};
 	/** Where the figure's own right arm hangs from (model pixels at scale 1; the left mirrors it). */
-	static final float[] ARM_X = {-4.4F, -8.0F, -6.4F, -4.2F, -5.0F};
-	static final float[] ARM_Y = {0.8F, 0.6F, 0.8F, 0.8F, 0.8F};
+	static final float[] ARM_X = {-4.4F, -8.0F, -6.4F, -4.2F, -5.0F, -5.0F};
+	static final float[] ARM_Y = {0.8F, 0.6F, 0.8F, 0.8F, 0.8F, 0.8F};
+	/** Where the right wing grows from its back (model pixels at scale 1; only the Grue has wings). */
+	static final float[] WING_X = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, -1.6F};
+	static final float[] WING_Y = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.2F};
+	static final float[] WING_Z = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 2.2F};
 	/** How far each kind's arm reaches in toward the body from its pivot, per unit of arm size (half its upper arm's width, less the vanilla 1). */
-	static final float[] ARM_INNER = {0.5F, 1.5F, 1.0F, 0.5F, 1.0F};
+	static final float[] ARM_INNER = {0.5F, 1.5F, 1.0F, 0.5F, 1.0F, 1.0F};
 	/** Model pixels the figure keeps clear of your back and head (a player's head reaches 4 behind the middle). */
 	static final float BEHIND = 4.5F;
 	/** How long the figure holds after a move shows it, then how long it takes to fade back to faint (ticks). The arms keep their own time. */
@@ -57,7 +66,7 @@ final class SpiritFigure {
 	/** How far the figure's head turns with yours, over your back. */
 	static final float HEAD_FOLLOW = 0.5F;
 	/** How far the manifested figure hovers off the ground, and how far it rises from as it forms (model pixels). */
-	static final float HOVER = 0.6F, RISE_FROM = 4.0F;
+	static final float HOVER = 3.0F, RISE_FROM = 4.0F, BOB = 0.8F;
 	/** Talking: the head's nod and tilt, the right hand making its point, the left hand's sway (radians), and how fast. */
 	static final float NOD = 0.08F, TILT = 0.06F, POINT_X = -0.85F, POINT_SWING = 0.28F, POINT_TURN = 0.35F, HANG_SWAY = 0.08F, TALK_SPEED = 0.3F;
 	/** Breathing at rest: how far the arms drift, and how fast. */
@@ -66,6 +75,10 @@ final class SpiritFigure {
 	static final float LEVEL_RAISE = -2.75F, LEVEL_SPREAD = 0.45F, LEVEL_UP = 6.0F, LEVEL_HOLD = 18.0F, LEVEL_DOWN = 10.0F;
 	/** Forming: how far the arms are spread as it rises (radians). Fading: how far the head bows. */
 	static final float FORM_SPREAD = 0.8F, FADE_BOW = 0.35F;
+	/** A blow (the fight with the Grue, the Grue's own): the arm drawn back, then thrown forward (radians), and the share of the swing spent drawing back. */
+	static final float STRIKE_BACK = 0.7F, STRIKE_OUT = -1.95F, STRIKE_DRAW = 0.45F, STRIKE_LEAN = 0.18F;
+	/** The wings: how far spread at rest (radians back from the body), how far they beat, and how fast at a flap of 1. */
+	static final float WING_SPREAD = 0.45F, WING_BEAT = 0.55F, WING_SPEED = 0.35F, WING_TIP = 0.25F;
 	/** Its shells: thinner and dimmer than the arms', so the arms read over it. */
 	static final float[] SHELLS = {0.0F, 0.5F, 1.2F}, SHELL_LIGHT = {0.45F, 0.16F, 0.06F};
 
@@ -79,7 +92,24 @@ final class SpiritFigure {
 	 * {@code headYaw} and {@code headPitch} where its head turns (radians).
 	 */
 	record Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch,
-		boolean fading) {
+		boolean fading, float strike, float strikePhase, float flap, boolean armsOnly) {
+		/** A frame with no fighting in it. */
+		Frame(int kind, boolean staged, int style, float size, float manifest, float talk, float levelAge, float headYaw, float headPitch, boolean fading) {
+			this(kind, staged, style, size, manifest, talk, levelAge, headYaw, headPitch, fading, 0.0F, 0.0F, 0.0F, false);
+		}
+	}
+
+	/** The arm's swing at {@code phase} (0-1) of a blow: drawn back, thrown forward, recovered (radians on x). */
+	static float swing(float phase) {
+		float p = phase - (float)Math.floor(phase);
+		if (p < STRIKE_DRAW) {
+			float k = p / STRIKE_DRAW;
+			return STRIKE_BACK * k * k * (3.0F - 2.0F * k);
+		}
+		float k = (p - STRIKE_DRAW) / (1.0F - STRIKE_DRAW);
+		// the snap: most of the way out in the first fifth, then easing back toward rest
+		float out = k < 0.2F ? k / 0.2F : 1.0F - (k - 0.2F) / 0.8F;
+		return Mth.lerp(Math.min(k / 0.2F, 1.0F), STRIKE_BACK, STRIKE_OUT * out);
 	}
 
 	/** How strong the figure's flare is {@code since} ticks after a move showed it: up at once, held, then faded out. */
@@ -135,7 +165,7 @@ final class SpiritFigure {
 	 */
 	static final class Model extends HumanoidModel<HumanoidRenderState> {
 		private final int kind;
-		private final ModelPart skull, tail, armR, armL;
+		private final ModelPart skull, tail, armR, armL, wingR, wingL;
 
 		Model(ModelPart root, int kind) {
 			super(root);
@@ -144,6 +174,8 @@ final class SpiritFigure {
 			this.tail = this.body.getChild("tail");
 			this.armR = this.body.getChild("figure_right_arm");
 			this.armL = this.body.getChild("figure_left_arm");
+			this.wingR = this.body.getChild("figure_right_wing");
+			this.wingL = this.body.getChild("figure_left_wing");
 		}
 
 		@Override
@@ -175,17 +207,34 @@ final class SpiritFigure {
 				this.body.zScale = s;
 				this.armR.visible = false;
 				this.armL.visible = false;
+				this.wingR.visible = false;
+				this.wingL.visible = false;
 				this.skull.yRot = frame.headYaw() * HEAD_FOLLOW;
 				this.skull.xRot = frame.headPitch() * HEAD_FOLLOW;
 				this.tail.xRot = TAIL_SWAY * (0.5F + 0.5F * Mth.sin(t * TAIL_SPEED));
 				this.tail.zRot = TAIL_SWAY * 0.5F * Mth.sin(t * TAIL_SPEED * 0.7F);
 				return;
 			}
-			// manifested: standing on the ground (the model's feet are at y 24), rising into place as it forms
+			// manifested: floating over the ground (the model's ground is at y 24), its smoke's tip just clear, rising as it forms
 			float s = STAGE[this.kind] * (1.0F + SURGE * 0.5F * unformed);
 			this.body.x = 0.0F;
 			this.body.z = 0.0F;
-			this.body.y = 24.0F - (FOOT[this.kind] * s) - HOVER + RISE_FROM * unformed * unformed + 0.25F * Mth.sin(t * BREATH_SPEED);
+			this.body.y = 24.0F - (FOOT[this.kind] * s) - HOVER + RISE_FROM * unformed * unformed + BOB * Mth.sin(t * BREATH_SPEED);
+			// the Quiet One has no body: only its arms show, hanging where its shoulders would be
+			this.skull.visible = !frame.armsOnly();
+			this.tail.visible = !frame.armsOnly();
+			this.body.skipDraw = frame.armsOnly();
+			this.wingR.visible = frame.flap() > 0.0F;
+			this.wingL.visible = frame.flap() > 0.0F;
+			if (frame.flap() > 0.0F) {
+				float beat = Mth.sin(t * WING_SPEED * frame.flap());
+				this.wingR.yRot = WING_SPREAD;
+				this.wingL.yRot = -WING_SPREAD;
+				this.wingR.zRot = WING_BEAT * beat - WING_TIP;
+				this.wingL.zRot = -WING_BEAT * beat + WING_TIP;
+				// it rides its wingbeats
+				this.body.y -= 0.6F * beat;
+			}
 			this.body.xScale = s;
 			this.body.yScale = s;
 			this.body.zScale = s;
@@ -213,6 +262,14 @@ final class SpiritFigure {
 			// forming, the arms are spread wide and close in
 			rz += FORM_SPREAD * unformed;
 			lz -= FORM_SPREAD * unformed;
+			// fighting: the arms trade blows, the right then the left, the body leaning into each
+			float w = frame.strike();
+			if (w > 0.0F) {
+				rx = Mth.lerp(w, rx, swing(frame.strikePhase()));
+				lx = Mth.lerp(w, lx, swing(frame.strikePhase() + 0.5F));
+				ry = Mth.lerp(w, ry, -0.2F);
+				this.body.xRot = w * STRIKE_LEAN * Mth.sin(frame.strikePhase() * Mth.TWO_PI * 2.0F);
+			}
 			this.armR.xRot = rx;
 			this.armR.yRot = ry;
 			this.armR.zRot = rz;
@@ -239,6 +296,8 @@ final class SpiritFigure {
 		body.addOrReplaceChild("tail", tail(kind, g), PartPose.offset(0.0F, TAIL_Y[kind], 0.0F));
 		body.addOrReplaceChild("figure_right_arm", arm(kind, g, 1.0F), PartPose.offset(ARM_X[kind], ARM_Y[kind], 0.0F));
 		body.addOrReplaceChild("figure_left_arm", arm(kind, g, -1.0F), PartPose.offset(-ARM_X[kind], ARM_Y[kind], 0.0F));
+		body.addOrReplaceChild("figure_right_wing", wing(kind, g, 1.0F), PartPose.offset(WING_X[kind], WING_Y[kind], WING_Z[kind]));
+		body.addOrReplaceChild("figure_left_wing", wing(kind, g, -1.0F), PartPose.offset(-WING_X[kind], WING_Y[kind], WING_Z[kind]));
 		return mesh;
 	}
 
@@ -298,9 +357,21 @@ final class SpiritFigure {
 				box(c, 0.0F, 9.6F, 0.0F, 5.6F, 1.0F, 3.4F, g); // the sash
 				box(c, 1.8F, 10.4F, -1.7F, 1.0F, 4.0F, 0.4F, g); // its trailing end
 			}
-			default -> {
+			case Spirits.QUIET -> {
 				box(c, 0.0F, 0.0F, 0.0F, 8.0F, 8.0F, 4.0F, g); // the smooth chest
 				box(c, 0.0F, 8.0F, 0.0F, 6.6F, 4.0F, 3.4F, g); // the waist
+			}
+			default -> {
+				box(c, 0.0F, 0.0F, 0.0F, 8.0F, 12.0F, 4.0F, g); // the starved chest
+				box(c, 0.0F, 0.2F, 0.0F, 9.4F, 1.2F, 3.6F, g); // collarbones like blades
+				box(c, 0.0F, 2.6F, -2.2F, 7.0F, 0.8F, 0.6F, g); // ribs
+				box(c, 0.0F, 4.6F, -2.2F, 6.4F, 0.8F, 0.6F, g);
+				box(c, 0.0F, 6.6F, -2.2F, 5.6F, 0.8F, 0.6F, g);
+				box(c, 0.0F, 8.6F, -2.2F, 4.4F, 0.8F, 0.6F, g);
+				box(c, 0.0F, 1.4F, 2.4F, 1.6F, 9.0F, 1.4F, g); // the spine
+				box(c, 0.0F, 1.0F, 2.6F, 1.0F, 10.0F, 2.6F, g); // its ridge of spurs
+				box(c, -4.2F, -0.8F, 0.2F, 2.8F, 2.0F, 5.0F, g); // the torn hood's shoulders
+				box(c, 4.2F, -0.8F, 0.2F, 2.8F, 2.0F, 5.0F, g);
 			}
 		}
 		return c;
@@ -360,13 +431,29 @@ final class SpiritFigure {
 				box(c, 0.0F, -6.9F, -3.4F, 1.0F, 1.0F, 0.4F, g); // its stone
 				box(c, 0.0F, -4.4F, -3.1F, 2.4F, 0.4F, 0.3F, g); // spectacles
 			}
-			default -> {
+			case Spirits.QUIET -> {
 				box(c, 0.0F, -1.6F, 0.0F, 2.0F, 1.8F, 2.0F, g); // the neck
 				box(c, 0.0F, -10.0F, 0.0F, 6.4F, 8.6F, 6.4F, g); // the long faceless head
 				box(c, 0.0F, -12.6F, -3.2F, 6.0F, 0.5F, 0.5F, g); // a ring over it
 				box(c, 0.0F, -12.6F, 3.2F, 6.0F, 0.5F, 0.5F, g);
 				box(c, -3.2F, -12.6F, 0.0F, 0.5F, 0.5F, 6.0F, g);
 				box(c, 3.2F, -12.6F, 0.0F, 0.5F, 0.5F, 6.0F, g);
+			}
+			default -> {
+				box(c, 0.0F, -1.8F, 0.4F, 2.6F, 2.0F, 2.6F, g); // the neck
+				box(c, 0.0F, -9.4F, -0.4F, 7.0F, 7.6F, 7.4F, g); // the long skull
+				box(c, 0.0F, -7.0F, -4.2F, 6.6F, 1.0F, 0.6F, g); // the brow, heavy over hollow eyes
+				box(c, 0.0F, -3.4F, -1.2F, 5.2F, 1.8F, 5.6F, g); // the jaw, hanging open
+				box(c, -1.6F, -2.0F, -3.9F, 0.6F, 1.4F, 0.6F, g); // fangs
+				box(c, 1.6F, -2.0F, -3.9F, 0.6F, 1.4F, 0.6F, g);
+				box(c, -3.8F, -12.4F, 0.6F, 1.4F, 3.6F, 1.4F, g); // the horns, sweeping back
+				box(c, 3.8F, -12.4F, 0.6F, 1.4F, 3.6F, 1.4F, g);
+				box(c, -4.6F, -14.6F, 2.4F, 1.0F, 2.6F, 2.6F, g);
+				box(c, 4.6F, -14.6F, 2.4F, 1.0F, 2.6F, 2.6F, g);
+				box(c, 0.0F, -10.4F, 1.6F, 8.6F, 1.2F, 8.0F, g); // the torn hood
+				box(c, -4.0F, -9.6F, 1.8F, 0.8F, 8.0F, 7.0F, g);
+				box(c, 4.0F, -9.6F, 1.8F, 0.8F, 8.0F, 7.0F, g);
+				box(c, 0.0F, -9.6F, 5.4F, 8.6F, 11.0F, 0.8F, g); // its back, hanging to the waist
 			}
 		}
 		return c;
@@ -378,50 +465,57 @@ final class SpiritFigure {
 		switch (kind) {
 			case Spirits.GRIMSBY -> {
 				box(c, 0.0F, 0.0F, 0.0F, 6.0F, 2.4F, 3.0F, g); // the hips
-				box(c, 0.0F, 1.0F, -1.9F, 5.6F, 6.0F, 0.6F, g); // tatters in front
-				box(c, -2.0F, 7.0F, -1.9F, 1.2F, 3.0F, 0.6F, g);
-				box(c, 1.4F, 7.0F, -1.9F, 1.0F, 4.0F, 0.6F, g);
-				box(c, -1.6F, 2.2F, 0.0F, 1.4F, 10.0F, 1.4F, g); // the leg bones
-				box(c, 1.6F, 2.2F, 0.0F, 1.4F, 10.0F, 1.4F, g);
-				box(c, -1.6F, 6.4F, -0.3F, 2.0F, 1.2F, 2.0F, g); // knees
-				box(c, 1.6F, 6.4F, -0.3F, 2.0F, 1.2F, 2.0F, g);
-				box(c, -1.6F, 12.0F, -0.8F, 2.0F, 0.8F, 3.0F, g); // the feet
-				box(c, 1.6F, 12.0F, -0.8F, 2.0F, 0.8F, 3.0F, g);
+				box(c, 0.0F, 2.2F, 0.3F, 6.4F, 4.0F, 3.4F, g); // no legs: the cloak's hem thinning to smoke
+				box(c, 0.0F, 6.0F, 0.6F, 4.6F, 4.0F, 2.6F, g);
+				box(c, -1.8F, 10.0F, 0.8F, 1.2F, 5.0F, 1.2F, g); // ragged strands of it
+				box(c, 0.2F, 10.0F, 0.9F, 1.4F, 7.0F, 1.4F, g);
+				box(c, 1.9F, 10.0F, 0.8F, 1.0F, 4.0F, 1.0F, g);
+				box(c, 0.4F, 16.8F, 1.1F, 0.7F, 3.0F, 0.7F, g); // the last wisp
+				box(c, -2.0F, 1.0F, -1.9F, 1.2F, 6.0F, 0.6F, g); // tatters in front
+				box(c, 1.6F, 1.0F, -1.9F, 1.0F, 8.0F, 0.6F, g);
 			}
 			case Spirits.VARRO -> {
 				box(c, 0.0F, 0.0F, 0.0F, 11.0F, 4.0F, 6.2F, g); // the mail skirt
 				box(c, -3.0F, 0.0F, -0.5F, 5.4F, 5.0F, 6.4F, g); // the tassets
 				box(c, 3.0F, 0.0F, -0.5F, 5.4F, 5.0F, 6.4F, g);
-				box(c, -2.6F, 4.0F, 0.0F, 4.0F, 9.0F, 4.4F, g); // the cuisses
-				box(c, 2.6F, 4.0F, 0.0F, 4.0F, 9.0F, 4.4F, g);
-				box(c, -2.6F, 7.2F, -2.4F, 3.4F, 2.2F, 0.8F, g); // the knee cops
-				box(c, 2.6F, 7.2F, -2.4F, 3.4F, 2.2F, 0.8F, g);
-				box(c, -2.6F, 13.0F, -0.8F, 4.6F, 3.0F, 6.0F, g); // the sabatons
-				box(c, 2.6F, 13.0F, -0.8F, 4.6F, 3.0F, 6.0F, g);
+				box(c, 0.0F, 4.6F, 0.5F, 9.4F, 4.4F, 5.0F, g); // no legs: the war-ghost's smoke
+				box(c, 0.0F, 9.0F, 1.0F, 6.6F, 4.4F, 3.6F, g);
+				box(c, -1.4F, 13.4F, 1.4F, 2.4F, 4.0F, 2.2F, g);
+				box(c, 1.6F, 13.4F, 1.4F, 1.8F, 5.4F, 1.8F, g); // two trails of it
+				box(c, 1.6F, 18.8F, 1.6F, 0.8F, 2.6F, 0.8F, g); // the last wisp
 			}
 			case Spirits.AMBROSE -> {
 				box(c, 0.0F, 0.0F, 0.3F, 11.0F, 6.0F, 6.4F, g); // the robe
-				box(c, 0.0F, 6.0F, 0.3F, 12.0F, 5.6F, 7.0F, g); // flaring
-				box(c, 0.0F, 11.4F, 0.4F, 12.8F, 1.0F, 7.6F, g); // the hem
-				box(c, -2.2F, 11.6F, -3.8F, 2.4F, 0.8F, 1.6F, g); // the toes of his boots
-				box(c, 2.2F, 11.6F, -3.8F, 2.4F, 0.8F, 1.6F, g);
-				box(c, -2.4F, 2.0F, -3.0F, 1.6F, 9.0F, 0.6F, g); // the stole hanging on
-				box(c, 2.4F, 2.0F, -3.0F, 1.6F, 9.0F, 0.6F, g);
+				box(c, 0.0F, 6.0F, 0.6F, 10.4F, 5.0F, 6.0F, g); // no feet: the robe thinning to a wisp
+				box(c, 0.0F, 11.0F, 1.1F, 7.4F, 4.4F, 4.4F, g);
+				box(c, -1.2F, 15.4F, 1.5F, 3.6F, 4.0F, 2.6F, g);
+				box(c, 1.4F, 15.4F, 1.5F, 2.0F, 5.6F, 1.6F, g); // curling trails
+				box(c, -1.4F, 19.4F, 1.8F, 1.2F, 2.6F, 1.2F, g); // the last wisp
+				box(c, -2.4F, 2.0F, -3.0F, 1.6F, 7.0F, 0.6F, g); // the stole hanging on
+				box(c, 2.4F, 2.0F, -3.0F, 1.6F, 7.0F, 0.6F, g);
 			}
 			case Spirits.THESSALY -> {
 				box(c, 0.0F, 0.0F, 0.2F, 7.0F, 5.0F, 4.4F, g); // the skirt
-				box(c, 0.0F, 5.0F, 0.2F, 8.0F, 5.0F, 5.2F, g);
-				box(c, 0.0F, 10.0F, 0.3F, 9.0F, 2.4F, 6.0F, g); // its hem
-				box(c, -1.2F, 2.0F, 3.0F, 0.8F, 9.0F, 0.8F, g); // ribbons trailing
-				box(c, 1.2F, 2.0F, 3.0F, 0.8F, 10.5F, 0.8F, g);
-				box(c, -1.4F, 12.2F, -2.6F, 1.6F, 0.8F, 1.6F, g); // slippers
-				box(c, 1.4F, 12.2F, -2.6F, 1.6F, 0.8F, 1.6F, g);
+				box(c, 0.0F, 5.0F, 0.6F, 6.4F, 5.0F, 3.8F, g); // no feet: the skirt thinning to a wisp
+				box(c, 0.0F, 10.0F, 1.0F, 4.2F, 4.6F, 2.6F, g);
+				box(c, -1.1F, 14.6F, 1.2F, 1.4F, 4.6F, 1.2F, g); // two trails
+				box(c, 1.1F, 14.6F, 1.2F, 1.0F, 6.0F, 1.0F, g);
+				box(c, -1.4F, 2.0F, 3.0F, 0.8F, 11.0F, 0.8F, g); // ribbons trailing
+				box(c, 1.4F, 2.0F, 3.0F, 0.8F, 13.0F, 0.8F, g);
 			}
-			default -> {
+			case Spirits.QUIET -> {
 				box(c, 0.0F, 0.0F, 0.4F, 6.0F, 5.0F, 3.2F, g); // the tail
 				box(c, 0.0F, 5.0F, 0.8F, 4.4F, 5.0F, 2.6F, g);
 				box(c, 0.0F, 10.0F, 1.2F, 3.0F, 5.0F, 2.0F, g);
 				box(c, 0.0F, 15.0F, 1.5F, 1.6F, 5.0F, 1.4F, g);
+			}
+			default -> {
+				box(c, 0.0F, 0.0F, 0.3F, 7.4F, 4.0F, 4.0F, g); // no legs: rags of smoke
+				box(c, 0.0F, 4.0F, 0.8F, 6.0F, 4.4F, 3.2F, g);
+				box(c, -1.6F, 8.4F, 1.2F, 2.6F, 5.0F, 2.2F, g);
+				box(c, 1.4F, 8.4F, 1.2F, 2.0F, 7.0F, 1.8F, g);
+				box(c, -1.8F, 13.4F, 1.5F, 1.0F, 4.0F, 1.0F, g); // trailing to nothing
+				box(c, 1.4F, 15.4F, 1.6F, 0.8F, 4.0F, 0.8F, g);
 			}
 		}
 		return c;
@@ -465,8 +559,52 @@ final class SpiritFigure {
 				box(c, side * 0.0F, 11.0F, -0.2F, 1.8F, 1.8F, 1.2F, g); // the hand
 				box(c, side * 0.0F, 11.6F, -0.2F, 2.0F, 0.4F, 1.4F, g); // a ring
 			}
-			default -> {
+			case Spirits.QUIET -> {
 				box(c, side * 0.0F, 0.0F, 0.0F, 3.0F, 12.0F, 3.0F, g); // the smooth arm
+			}
+			default -> {
+				box(c, side * 0.0F, -1.0F, 0.0F, 3.2F, 3.0F, 3.2F, g); // the bony shoulder
+				box(c, side * 0.0F, 0.0F, 0.0F, 2.0F, 7.0F, 2.0F, g); // the long upper arm
+				box(c, side * 0.0F, 6.6F, 0.0F, 2.4F, 1.2F, 2.4F, g); // the elbow
+				box(c, side * 0.0F, 7.6F, 0.0F, 1.8F, 6.0F, 1.8F, g); // the forearm
+				box(c, side * 0.0F, 13.4F, -0.2F, 2.8F, 2.2F, 1.6F, g); // the hand
+				box(c, side * -0.9F, 15.4F, -0.6F, 0.6F, 3.4F, 0.6F, g); // long claws
+				box(c, side * 0.0F, 15.4F, -0.6F, 0.6F, 4.0F, 0.6F, g);
+				box(c, side * 0.9F, 15.4F, -0.6F, 0.6F, 3.4F, 0.6F, g);
+			}
+		}
+		return c;
+	}
+
+	/** The figure's wing, out from its back; {@code side} 1 the right, -1 the left. Only the Grue has any. */
+	private static CubeListBuilder wing(int kind, CubeDeformation g, float side) {
+		CubeListBuilder c = CubeListBuilder.create().texOffs(0, 0);
+		switch (kind) {
+			case Spirits.GRIMSBY -> {
+			}
+			case Spirits.VARRO -> {
+			}
+			case Spirits.AMBROSE -> {
+			}
+			case Spirits.THESSALY -> {
+			}
+			case Spirits.QUIET -> {
+			}
+			default -> {
+				box(c, side * 0.0F, -0.8F, 0.0F, 1.6F, 1.6F, 1.6F, g); // the wing's root
+				box(c, side * -4.0F, -2.4F, 0.0F, 8.0F, 1.4F, 1.4F, g); // its arm bone, reaching out and up
+				box(c, side * -9.0F, -5.0F, 0.0F, 3.0F, 1.2F, 1.2F, g);
+				box(c, side * -10.6F, -5.6F, 0.0F, 1.4F, 1.4F, 1.4F, g); // the wrist knuckle
+				box(c, side * -11.2F, -11.0F, 0.0F, 1.0F, 6.0F, 1.0F, g); // a finger bone, raised
+				box(c, side * -12.0F, -13.2F, 0.0F, 1.6F, 2.2F, 1.0F, g); // its hooked claw
+				box(c, side * -15.6F, -6.0F, 0.0F, 9.0F, 1.0F, 1.0F, g); // a finger bone, out
+				box(c, side * -14.4F, -3.6F, 0.0F, 1.0F, 12.0F, 1.0F, g); // a finger bone, down
+				box(c, side * -7.0F, -1.4F, 0.3F, 12.0F, 7.0F, 0.4F, g); // the membrane, torn
+				box(c, side * -13.6F, -10.4F, 0.3F, 3.4F, 15.0F, 0.4F, g);
+				box(c, side * -17.6F, -5.4F, 0.3F, 4.6F, 10.0F, 0.4F, g);
+				box(c, side * -4.0F, 5.6F, 0.3F, 6.0F, 4.0F, 0.4F, g); // its scalloped trailing edge
+				box(c, side * -10.4F, 5.6F, 0.3F, 4.0F, 6.0F, 0.4F, g);
+				box(c, side * -15.0F, 4.6F, 0.3F, 3.0F, 4.0F, 0.4F, g);
 			}
 		}
 		return c;

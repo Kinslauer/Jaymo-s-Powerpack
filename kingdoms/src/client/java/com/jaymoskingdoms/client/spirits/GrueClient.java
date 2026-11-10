@@ -62,6 +62,8 @@ public final class GrueClient {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(Grue.Lash.TYPE, (payload, context) -> {
 			lash = Math.max(lash, payload.strength());
+			// its fight with the spirit, played out in front of them
+			SpiritManifest.lash(payload.strength());
 			LocalPlayer player = context.client().player;
 			if (player != null) {
 				player.setYRot(player.getYRot() + (player.getRandom().nextFloat() - 0.5F) * 2.0F * LASH_JOLT * payload.strength());
