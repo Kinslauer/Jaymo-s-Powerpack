@@ -2813,3 +2813,10 @@ Ideas from Yo Fadda's Danny Phantom mod (All Rights Reserved: nothing taken, our
 
 - **Smoke, Gravity and Cryokinesis users read weakest to ki** (Andy: "elemental power users have the weakest ki auras"): their scouter power level is 0.4 of anyone else's with the same health and attack, so ki sense shows them dimmer, as weaker than they are (`ZFighterScouter.ELEMENTAL_AURA`, `elemental`).
 - Built; not played.
+
+## 0.22.41 (2026-11-11): costumed gifted villagers, and a Cryo's cold house (#1332)
+
+- **Costumed gifted villagers** (Andy: "npc costumed power users ... either wreaking havoc or trying to help their people"): a gifted villager can own a costume of their own (`core/gifted/GiftedCostume`), made for their power and side: a vigilante's in the power's bright colours, a villain's in black with red, purple, green or grey, always with a mask that hides the face, the power's own cut, mask or cape where it has one, and a name the folk would give them ("the Gale", "Black Ice", "the Undertow"...). Kingdoms decides who gets one and when it's worn.
+- While suited they're drawn as a player body in that costume (`client/costume/GiftedCostumeClient`, `GiftedCostumeEntityRenderDispatcherMixin`), the costume's name over their head instead of theirs. The mask hides MCA's look and the villager's size and blood under it.
+- **Everyday Cryo** (Andy: "putting fires out or keeping a food store or home cold"): a gifted Cryo villager's everyday use now smothers fire near them in frost and leaves the air round their home cold for 2 minutes (`power/cryo/CryoChill`). With Jaymo's Kitchen: a chest or barrel in that cold keeps food as a cold cellar does (needs this patch's Kitchen), and a player indoors there in a hot land is cooled by 20.
+- Built; not played. Not seen in game: how the costume sits on a villager drawn as a player body, and whether any other mod's player layer minds a villager drawn that way.

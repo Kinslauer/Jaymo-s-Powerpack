@@ -11383,3 +11383,14 @@ Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise
 
 - **Smoke, Gravity and Cryo users are blind to mana** (Andy: "cannot view mana abilities or spirits because of the way their ki manifests"): even attuned or reading magic, they see no one else's mana glow, mana wings, spirit arms, spirit figure or mage hands, and get no clash bars. Their own mana still shows to them. Valor works for them as for any other power user (`Mana.blindToMana`, `seesMana`, used by `ManaClient`, `ManaWings`, `SpiritArms`, `SpiritHandRenderer`, `ClashCinematic`).
 - Built; not played.
+
+## 0.7.750 (2026-11-11): costumed gifted: vigilantes and villains (#1332)
+
+- **Who** (`CostumedFolk`): a grown gifted villager who hides their gift and isn't a ruler is weighed once: the brave, kindhearted, dutiful and devout become vigilantes and the spiteful, greedy and hotheaded villains (35% each), anyone else either side at 8%. The open gifted never take one (they use their power plainly, as before). Needs Powers with this patch.
+- **When**: the costume goes on after dark and comes off at dawn, only while no player within 16 blocks can see who is under it.
+- **Vigilantes**, suited, go after the nearest monster within 16 blocks ("Get behind me!"). **Villains**, suited, now and then (0.3% a second) pick on a player within 20 blocks (never family), or else a grown villager who isn't one of their own, for 12 seconds ("You'll do.").
+- **Rivals** (Andy: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even get involved"): a suited vigilante goes after a suited villain within 16 blocks before any monster ("Leave them be, the Squall. It's me you want."). From then on they're rivals: the vigilante goes after them from 32 blocks, and a villain with a rival about goes looking for them (2% a second). A player who hits one of them mid-fight hears from the other: the vigilante thanks them grudgingly ("Didn't need the help. ...Thanks."), the villain crows ("Ha! Even they're sick of you.").
+- **Folk talk about them** ("the villagers will talk about the ones they have seen"): villagers who see a suited one, or two rivals fighting, remember the names (their last 4), and by day now and then tell a player near ("The Gale and Black Ice were at it again last night.").
+- **Nobody likes them**: folk near a suited one grumble at a vigilante ("Go home. We managed before you lot.") or cry out at a villain ("Someone fetch the guard!"), in speech bubbles. Lines in `lang/parts/costumed-folk.json`.
+- Lore.md has the placement as a (new) paragraph for Andy to approve.
+- Built; not played.

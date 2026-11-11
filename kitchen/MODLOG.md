@@ -1849,3 +1849,8 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
   two ingredients (a peach is a Fruit and the Peach of a Fruit Salad).
 - Naturalist's Fat renders to tallow and goes into supple leather and blood sausage like our Animal Fat (tag
   `jaymoskitchen:animal_fats`).
+
+## 0.5.111 (2026-11-11): other mods' cold cellars (#1332)
+
+- `Freshness.addCold` (for other mods, by reflection): more places cold enough to keep food, still only where it's dark and out of the sky. Jaymo's Powers uses it for a gifted Cryo villager's cold larder.
+- Built; not played.
