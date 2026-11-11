@@ -2386,3 +2386,10 @@ will still have to fight in the tournament as a non z fighter)".
 - **Raider's Tally**: a beaten raider band leaves a short book at its pod, the worlds the band has taken in its own few words. It files in the lore codex.
 - Powers leaves a `jaymospowers.retaking.<deed>` tag on the player (`PackAdvancements.deed`); Jaymo's Kingdoms turns it into the milestone. Hooks in ZFighterRaiders, FallenStarBlock, StarWreckBlock, ZFighterPodTrip, ZFighterSpaceMissions.
 - Built; not played.
+
+## 0.22.12 (2026-11-11): The Retaking, Act IV: The Dark Below (#1302)
+
+- **Five new milestones** in the Jaymo's Powerpack advancement tab, hanging off the Skeleton Lord before the Piglin King: A Voice Behind You (a spirit wakes for you), Back in the Ground (end your Bane with its own marks), The Deepest Dark (walk into the Abyss), A Page in His Book (ask the Judge how your page reads), Leashed (beat the Grue in its own dark). They count only once Act IV has begun.
+- **Muster-Roll**: every demon village chest holds the village's muster-roll for the sorcerer's battle: who went up, what they were promised, who came home, and that they have not been called again. Yet. It files in the lore codex.
+- New `core/LoreBook` makes these written lore books (the Raider's Tally uses it too). Asking the Judge leaves the `weighed` deed tag.
+- Built; not played.
