@@ -8,4 +8,5 @@
 - Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
 - The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) are in among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
 - A new run of shots near the start takes each hero from the front, at a different distance each: the camera goes out after their bolt to what it bursts (an imp, or for Grimsby an orc), and out of the burst the next hero's light forms and carries the camera back to that one's face. Thessaly, then Ambrose, Grimsby, Varro
+- The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
 - The film is 11 seconds longer; its tape is recorded again with all of this

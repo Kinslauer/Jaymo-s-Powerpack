@@ -157,6 +157,16 @@ public final class LoreFilmClient {
 	 * each of them at a time, how often a cut of theirs kills that early, and how often Thessaly's and Ambrose's bolts
 	 * go up at an imp (one in this many).
 	 */
+	/**
+	 * The imps come through rifts. Andy: "The imps can also open portals like the arsenal uses to travel through, that
+	 * should be how they make their entrance to the overworld in the long defence scene". A tear of nether light opens in
+	 * the air where each will fly (GATE_OPENS ticks to its full GATE_SIZE across, half as tall again), the imp comes out
+	 * of it, and GATE_STAYS ticks after it began the tear draws shut behind it over GATE_SHUTS. The sorcerer's four come
+	 * from GATE_FIRST, one every GATE_EVERY ticks; the three the heroes bring down from GATE_PREY.
+	 */
+	static final int GATE_OPENS = 8, GATE_STAYS = 20, GATE_SHUTS = 8, GATE_FIRST = 6, GATE_EVERY = 9, GATE_PREY = 44, GATE_IDS = 900_000;
+	static final float GATE_SIZE = 2.4F;
+	static final int RIFT_RIM = 0xF2D8FF;
 	static final double[] QUIET_FIGHTS = {10.0, -7.5};
 	static final int VARRO_READY = 44, QUIET_READY = 56, EARLY_FOES = 1, BOLT_AT_IMP = 3;
 	static final float EARLY_KILLS = 0.06F;
@@ -481,6 +491,8 @@ public final class LoreFilmClient {
 		double ring;
 		int chargeAt = -1;
 		double @Nullable [] aim;
+		/** An imp's way in: where its rift opens ({f, s, how high}); it comes through at {@code riseAt}. */
+		double @Nullable [] gate;
 		/** The burning tree it has gone to beat out. */
 		@Nullable Fire dousing;
 		@Nullable Actor foe, facing;
@@ -1122,9 +1134,12 @@ public final class LoreFilmClient {
 		for (int i = 0; i < IMP_RINGS.length; i++) {
 			double[] ring = IMP_RINGS[i];
 			Actor imp = cast(f, new FilmTape.Cast(2, IMP_SKINS[i], 0, 0, false, Role.IMP.ordinal(), Flesh.ORC.ordinal(), false, "", "",
-				new float[] {(float)(ring[0] + ring[2] * Math.cos(ring[3])), (float)(ring[1] + ring[2] * Math.sin(ring[3])), (float)(IMP_HIGH + i * IMP_STEP),
+				new float[] {(float)(ring[0] + ring[2] * Math.cos(ring[3])), (float)(ring[1] + ring[2] * Math.sin(ring[3])), (float)-HIDDEN,
 					facingBack, 1.0F}));
 			if (imp != null) {
+				// (not here yet: it comes through its rift)
+				imp.gate = new double[] {imp.f, imp.s, IMP_HIGH + i * IMP_STEP};
+				imp.riseAt = GATE_FIRST + i * GATE_EVERY + GATE_OPENS;
 				imp.team = 1;
 				imp.scripted = true;
 				imp.ring = ring[3];
@@ -1137,12 +1152,16 @@ public final class LoreFilmClient {
 		for (int i = 0; i < Relay.PREY.length; i++) {
 			double[] mark = Relay.PREY[i];
 			Actor prey = mark[2] > 0.0 ? cast(f, new FilmTape.Cast(2, i % 2 == 0 ? "imp" : "zombified_imp", 0, 0, false, Role.IMP.ordinal(), Flesh.ORC.ordinal(), false, "", "",
-				new float[] {(float)mark[0], (float)mark[1], (float)mark[2], facingBack, 1.0F}))
+				new float[] {(float)mark[0], (float)mark[1], (float)-HIDDEN, facingBack, 1.0F}))
 				: orc(f, "orc_1", 1, Role.GUARD, Flesh.ORC, Items.IRON_AXE, mark[0], mark[1], 0.0, facingBack);
 			if (prey != null) {
 				prey.team = 1;
 				prey.scripted = true;
 				prey.restYaw = f.yaw + facingBack;
+				if (prey.role == Role.IMP) {
+					prey.gate = new double[] {mark[0], mark[1], mark[2]};
+					prey.riseAt = GATE_PREY + i * GATE_EVERY + GATE_OPENS;
+				}
 			}
 			f.prey[i] = prey;
 		}
@@ -1514,9 +1533,14 @@ public final class LoreFilmClient {
 
 	/** Flame {@code id} takes at the stage point {@code at}, turned {@code turn}: nothing to see until it's given a size. */
 	private static void flame(Film f, int id, float[] at, float turn) {
-		tape(f, FilmTape.IGNITE, id, 0, new float[] {at[0], at[1], at[2], turn}, "");
+		flame(f, id, at, turn, false);
+	}
+
+	/** ...or, for {@code rift}, a pane of nether-portal light in its place (an imp's way in), sized the same way. */
+	private static void flame(Film f, int id, float[] at, float turn, boolean rift) {
+		tape(f, FilmTape.IGNITE, id, rift ? 1 : 0, new float[] {at[0], at[1], at[2], turn}, "");
 		Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
-		e.setBlockState(Blocks.FIRE.defaultBlockState());
+		e.setBlockState((rift ? Blocks.NETHER_PORTAL : Blocks.FIRE).defaultBlockState());
 		e.setViewRange(SET_VIEW_RANGE);
 		e.setBrightnessOverride(new Brightness(15, 15));
 		e.setTransformation(new Transformation(new Vector3f(), null, new Vector3f(0.0F), null));
@@ -1743,7 +1767,7 @@ public final class LoreFilmClient {
 			case FilmTape.UNGIB -> ungib(f, e.a());
 			case FilmTape.IGNITE -> {
 				if (v.length >= 4) {
-					flame(f, e.a(), new float[] {v[0], v[1], v[2]}, v[3]);
+					flame(f, e.a(), new float[] {v[0], v[1], v[2]}, v[3], e.b() == 1);
 				}
 			}
 			case FilmTape.FLAME -> {
@@ -2036,7 +2060,7 @@ public final class LoreFilmClient {
 				if (mage != f.grimsby && f.rnd.nextInt(BOLT_AT_IMP) == 0) {
 					// up at one of the imps (it takes more than one to bring one down)
 					for (Actor imp : f.imps) {
-						if (!imp.fled && distance(imp.f, imp.s, mage.f, mage.s) < IMP_BOLT_REACH) {
+						if (!imp.fled && imp.up() && distance(imp.f, imp.s, mage.f, mage.s) < IMP_BOLT_REACH) {
 							d = imp;
 						}
 					}
@@ -2050,6 +2074,7 @@ public final class LoreFilmClient {
 		if (t >= VARRO_CAST && t < DUO1 && f.varro != null) {
 			spell(f, 0, f.varro, t - VARRO_CAST);
 		}
+		gates(f, t);
 		relay(f, t);
 		early(f, t);
 		pairs(f, t);
@@ -2378,6 +2403,50 @@ public final class LoreFilmClient {
 		}
 	}
 
+	/** The imps' way in: each one's rift opens, it comes through, and the rift draws shut behind it. */
+	private static void gates(Film f, int t) {
+		for (Actor a : f.actors) {
+			double[] gate = a.gate;
+			if (gate == null) {
+				continue;
+			}
+			int g = t - (a.riseAt - GATE_OPENS), id = GATE_IDS + a.index;
+			if (g < 0 || g > GATE_STAYS + GATE_SHUTS) {
+				continue;
+			}
+			float tall = GATE_SIZE * 1.25F;
+			if (g == 0) {
+				flame(f, id, new float[] {(float)gate[0], (float)gate[1], (float)gate[2] - tall * 0.35F}, 0.0F, true);
+				sound(f, SoundEvents.PORTAL_TRIGGER, 1.6F, 0.25F);
+			}
+			float open = g <= GATE_OPENS ? g / (float)GATE_OPENS : g <= GATE_STAYS ? 1.0F : 1.0F - (g - GATE_STAYS) / (float)GATE_SHUTS;
+			if (g == GATE_STAYS + GATE_SHUTS) {
+				quench(f, id);
+				continue;
+			}
+			flameSize(f, id, Math.max(0.02F, GATE_SIZE * smooth(open)));
+			// its rim, bright, and the motes it sheds
+			Vec3 middle = f.at(gate[0], gate[1], gate[2] - tall * 0.35 + tall * smooth(open) * 0.5);
+			for (int i = 0; i < 12; i++) {
+				double turn = t * 0.3 + i * Math.PI / 6.0, wide = GATE_SIZE * 0.55 * smooth(open), high = tall * 0.55 * smooth(open);
+				Vec3 p = middle.add(f.right.scale(Math.cos(turn) * wide)).add(0.0, Math.sin(turn) * high, 0.0);
+				particle(f, i % 3 == 0 ? ParticleTypes.PORTAL : new DustParticleOptions(RIFT_RIM, 1.0F), p, 0.0, 0.0, 0.0);
+			}
+			if (g == GATE_OPENS) {
+				// through it
+				a.f = a.toF = gate[0];
+				a.s = a.toS = gate[1];
+				a.sink = a.sinkTo = -gate[2];
+				a.snap = true;
+				sound(f, SoundEvents.ENDERMAN_TELEPORT, 0.7F, 0.5F);
+				sound(f, SoundEvents.PHANTOM_FLAP, 1.2F, 0.5F);
+				for (int i = 0; i < 14; i++) {
+					particle(f, ParticleTypes.PORTAL, middle.add(spread(f, 0.6), spread(f, 0.8), spread(f, 0.3)), 0.0, 0.0, 0.0);
+				}
+			}
+		}
+	}
+
 	/** {@code hero} breaks off its fight and goes to {@code to}: whoever was on it looks for someone else. */
 	private static void leave(Film f, Actor hero, double[] to) {
 		hero.scripted = true;
@@ -2422,7 +2491,7 @@ public final class LoreFilmClient {
 		// what they will be thrown at: the imps hang on the wing, the orc stands bellowing
 		for (int i = 0; i < f.prey.length; i++) {
 			Actor prey = f.prey[i];
-			if (prey != null && prey.role == Role.IMP && prey.up()) {
+			if (prey != null && prey.role == Role.IMP && !prey.fled && t > prey.riseAt) {
 				prey.sink = prey.sinkTo = -(Relay.PREY[i][2] + Relay.BOB * Math.sin(t * 0.21 + i * 1.7));
 			}
 		}
@@ -3123,6 +3192,10 @@ public final class LoreFilmClient {
 	private static void imps(Film f, int t) {
 		for (int i = 0; i < f.imps.size(); i++) {
 			Actor a = f.imps.get(i);
+			if (t <= a.riseAt) {
+				// (not through its rift yet)
+				continue;
+			}
 			if (f.lungeAt >= 0) {
 				if (!a.fled) {
 					// no one to fly for
