@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,12 +20,12 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🪶 Quill · #1262 · writing
 - [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · running
 
 
 ## In review
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
