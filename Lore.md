@@ -26,7 +26,7 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
-(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and (new) Grimsby, a Sylvan, carries the wind on his blade: it runs along the steel in lit currents.
 Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
 the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
 whatever leather, mail and iron they had, filthy and bloodied by then.
@@ -107,7 +107,9 @@ bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's 
 shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
 place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
 power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
-which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+which rolls as murk because light cannot be black). *(new, second pass, 2026-11-11)* Two more: **sparks** (power that
+has not settled: lightning, charge, a crackle that forks and jumps) and **runes** (power written down: the marks of the
+sigil's circle, seen loose where something is enchanted, warded or read). Blood drawn out by the forbidden Blood element stays blood, not
 light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
 goo, gunpowder, festival fireworks).
 
@@ -228,17 +230,36 @@ touch, with a halo of blue or white light at the neck for the Starlit and the Se
 (new) **Those who stay** (four-mods thread, 2026-11-11; Andy: "some live there perpetually after reaching the
 otherworld with righteous karma, and choosing to stay there at the judge. This keeps your halo and you are free to
 roam"). One of the dead whose page weighed just may ask the Judge to stay. He writes it down and that is the end of
-it: no road home, no tournament, no second asking. They keep the ring, are Divine-born from then on, and walk the
-Aether as its own people do. This is the second way the blood wakes, and the commoner one among the devout of the
-Truth.
+it: no road home, no tournament, no second asking. They keep the ring and their own blood (Andy, later that day: "they just get the buffs and the halo, no change in
+heritage otherwise"), carry the Divine-born's gifts on top of it, and walk the Aether as its own people do.
 
 (new) **How the Divine-born carry themselves** (same thread; Andy: "like z fighters but without the raging raw ki,
 it is controlled and elegant, they gain a web like sense that allows them to dodge incoming attacks and counter, as
 long as they have feathers"). Their strength is the same stuff a fighter burns as ki, but held still. It shows as
-breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. It costs
+breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. The answer
+is a thing practised: it lands harder the more seasoned they are and the more they have used it. It costs
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
+
+(new) **The sky villages** (four-mods thread, 2026-11-11; Andy: "should all instead spawn in the aether proper, and be
+filled with divine born, any other heritage has a reason for not only having traveled but being accepted"). The
+Divine-born live in villages on the Aether's islands: a round green with a well, homes of the island's own wood
+under cloth roofs, a windmill, a kitchen that feeds guests because its owners are never hungry, and a mast with a
+balloon skiff tied to it. Each land builds in its own wood (skyroot in the highfields, wisproot in the magnetic
+lands, greatroot in the cold). A sky lord keeps a holystone castle here and there. No kingdom claims any of it, and
+nobody's blood is held against them up there. Some villages have stood empty since the scattering, their roofs
+fallen in, swets and cockatrices in the houses.
+
+(new) **The halfway folk** (same thread; Andy: "This will be what the dawnborn culture becomes"). A few in every
+sky village are Dawnborn. Their people walked up after the sun generations ago and were let stay because they came
+on their own feet. They praise the sun where their neighbours keep the Truth, mend the windmills, and call
+themselves halfway: high enough for the light, not high enough for the ring. They are the "wizards on the floating
+rocks" of the ground folk's riddles. Anyone else found living there is one of the devout who made the climb, or one
+of the just who asked the Judge to stay.
+
+(new) **Things that fall.** Now and then something drops out of a clear sky onto the land below: a tuft of
+cloudwool, a feather, a hat, a letter never meant for whoever finds it. Nobody below can say where from.
 
 ## The shape of the world
 
@@ -314,6 +335,16 @@ starlight and a cataclysm of falling stars.
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
 cold lands (Frostborn), and the crocodile dragon **Varasuchus**, which roosts on beaches and swamps (Tideborn).
+
+(new) **Where the dragons keep, and when they come down** (Andy, 2026-11-11). The dragons live in the sky: the wind
+dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus over the basalt deltas) keeps to the
+Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
+killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
+
+(new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
+its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
+the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
 
 ## The dead
 
