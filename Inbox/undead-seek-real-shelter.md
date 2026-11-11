@@ -1,9 +1,9 @@
 ---
-status: changes
+status: claimed
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-b
+claimed_by: hermes-fixer
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
@@ -40,3 +40,5 @@ Andy: "because we made the sun more deadly to the undead, they should now seek s
 3. Change note: its first line says 'a ray from their head'; update it to match 1.
 OK: vanilla isSunBurnTick is mirrored faithfully (checked against 26.3 bytecode: MONSTERS_BURN, the light/random gate, rain, powder snow), SunMoon.sun(Level, Vec3) exists, FutureSunMixin and WebHostZombieMixin (isSunSensitive) keep working, leaves/glass are not isSolidRender.
 Not tested in game.
+- 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
+- 2026-11-11 01:54 Review (head 025ce16), second pass: still changes needed; the 01:19 list (whole-body rays, search cost, change note) is not fixed yet. One more: 4. Skeletons may not be able to leave tree shade: vanilla RestrictSunGoal turns on avoidSun, and GroundPathNavigation trims a path at the first open-sky node whenever the mob's own spot can't see sky. Under leaves canSeeSky is false, so SeekShelterGoal's moveTo (SeekShelterGoal.java:67) gets cut at the tree's edge and the skeleton keeps burning in place. Check trimPath in the 26.3 sources; if so, turn avoidSun off while this goal runs (or replace RestrictSunGoal for these mobs). Not tested in game.

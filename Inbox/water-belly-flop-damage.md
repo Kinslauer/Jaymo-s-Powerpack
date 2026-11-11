@@ -1,13 +1,13 @@
 ---
-status: claimed
+status: changes
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-b
-pr: 
+claimed_by: 
+pr: 1263
 suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer
-text_pass: none
+text_pass: 
 ---
 
 # Belly flops into water hurt
@@ -38,3 +38,5 @@ Today only the falls are posed: FreefallPose (flailing, and the head-first dive 
 - Cannonball: knees hugged to the chest, tucked into a ball.
 - Belly flop: flat and spread at the moment of hitting, a short wince after.
 Each starts when Sneak marks the entry in the air (or the flop when you hit) and eases out under water.
+- 2026-11-11 01:29 hermes-b's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-11 01:53 Review (head ff16783), cloud reviewer: checks green, changes needed. 1. Poses never show: Dives.java:127 stores level.getGameTime() but DivePose.java:47 compares it with player.tickCount (the player's age), so age is hugely negative and extract() always clears the pose. Use player.level().getGameTime() + partialTicks on the client. 2. Leap of Faith's head-first dive now hurts: Dives.java:118 makes every no-Sneak entry a FLOP, so Freerun.dives(player) (and Wind users' head-first fall) take up to 8 HP; the task says they stay safe. Treat Freerun.dives / looking down past DIVE_LOOK_DOWN as DIVE. 3. Speed term is ~0: Dives.java:170 reads the server player's getDeltaMovement(), which stays near zero for players (see Standstill.java:340); use getKnownMovement() (as Armory/Leaves do), then re-check the PR's numbers (as is a 12-block flop is 4 HP, not about 6). 4. Dives.java:92 calls setAttached(ENTRY, 0L) every tick for every player out of water; only set it when it isn't already 0, so it doesn't sync each tick. 5. Loading-screen hint Andy asked for is still missing (ok to do as a small Kingdoms change note in this PR). Not tested in game.

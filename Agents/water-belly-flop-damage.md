@@ -3,7 +3,7 @@ status: stalled
 task: water-belly-flop-damage
 branch: claude/water-belly-flop-damage
 with:
-pr:
+pr: 1263
 mods: powers
 versions: Powers 0.21.109, Kingdoms 0.7.712
 started: 2026-11-10
