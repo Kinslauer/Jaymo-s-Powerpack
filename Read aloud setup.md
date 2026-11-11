@@ -139,3 +139,24 @@ The silence was two readings at once (YOUTH's background full-Lore read, process
 over the bot's one voice connection (4006 drops, DAVE never ready). PR #1280 (merged): a new reading now stops the one
 still running before it joins. Pull master into E:/Origins Mod. Still open: the gateway watchdog logging "restarted
 the gateway" every minute since 11:29 PM while the gateway was up (may start extra YOUTH logins).
+
+## 2026-11-11 5:25 AM: why nobody hears it (cloud thread)
+Andy still hears nothing. The cause: davey 0.2.0 (what discord.py[voice] installs now) needs prepare_transition /
+execute_transition calls that discord.py 2.7.1 never makes, so Discord's voice encryption never gets ready
+(ready=False in the debug log) and every packet is dropped. Fix, for Claude Code on the PC:
+1. With the Python YOUTH uses (3.12): `py -3 -m pip install "davey==0.1.7"`. That's the whole fix; PR #1283 only
+   makes --check catch it.
+2. `py -3 tools/discord_read_aloud.py --status` and --stop anything running, then with Andy in General:
+   `py -3 tools/discord_read_aloud.py Lore --section="The ages of the world" --only --debug 2> read_debug.log`
+   Andy listens. Write here whether he heard it and whether `ready` turned True.
+
+**Done (Claude Code on the PC, 5:21-5:25 AM): fixed. Andy heard it clearly in General.**
+- **Cause confirmed:** discord.py 2.7.1 was installed with davey 0.2.0. davey 0.2.0's `DaveSession` has
+  `prepare_transition` / `execute_transition`, and discord.py's gateway.py never calls them on the session.
+- **Fix:** `py -3 -m pip install "davey==0.1.7"` (Python 3.12.10). It uninstalled 0.2.0, and `pip check` shows no
+  conflicts.
+- **Before the read:** `--status` (from #1281, now on master) said "Nothing is being read", so there was nothing to stop.
+- **The read:** "The ages of the world" (11 paragraphs) played in Hotspot > General from 5:21 to 5:25 AM, exit 0.
+  `ready=True can_encrypt=True` from paragraph 1 on, and there were 0 voice drops (4006) in `read_debug.log`.
+- **Still needed:** the pin isn't in any requirements file. A new `pip install "discord.py[voice]"` brings davey 0.2.0
+  back. PR #1283 (`--check` catches it) is the guard.
