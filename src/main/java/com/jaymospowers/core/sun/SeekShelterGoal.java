@@ -90,10 +90,16 @@ public class SeekShelterGoal extends Goal {
         this.cooldown = 200; // search once every 200 ticks (about 10 seconds), not every time burning
         this.shelter = this.findShelter();
         if (this.shelter == null) {
-            // No shelter found within REACH - walk away and keep searching
+            // No shelter found within REACH - back off significantly before next search
+            // to avoid scanning 24 rings x 5 heights every cycle on open plains
+            this.cooldown = 600; // 200+ ticks after empty search, cap rays per search
             // Set shelter to a position offset from the mob to prevent staying put
             BlockPos mobPos = this.mob.blockPosition();
             this.shelter = mobPos.offset(-1, 0, 0); // walk 1 block away from current position
+        } else {
+            // Keep the found spot until the sun ray reaches it - only re-search
+            // when the shelter becomes exposed to sun
+            this.cooldown = 200;
         }
         return this.shelter != null;
     }
