@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-g31te8
 with: cloud thread "Redesign the village golems"
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 Three GeckoLib bodies (lamp warden with a lantern head, mossy mender, throne golem as a walking keep that folds into a throne over 1.5 s). Kingdoms builds; not played, seat height and the fold only seen in tool renders. Lore.md has a (new) paragraph on their looks for Andy to approve.
+- 2026-11-11 17:26 PR #1300 is merged into master; moved to Agents/Done.
