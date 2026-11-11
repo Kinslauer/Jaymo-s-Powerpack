@@ -89,6 +89,12 @@ public class SeekShelterGoal extends Goal {
         }
         this.cooldown = 200; // search once every 200 ticks (about 10 seconds), not every time burning
         this.shelter = this.findShelter();
+        if (this.shelter == null) {
+            // No shelter found within REACH - walk away and keep searching
+            // Set shelter to a position offset from the mob to prevent staying put
+            BlockPos mobPos = this.mob.blockPosition();
+            this.shelter = mobPos.offset(-1, 0, 0); // walk 1 block away from current position
+        }
         return this.shelter != null;
     }
 
@@ -98,17 +104,10 @@ public class SeekShelterGoal extends Goal {
         // Disable avoidSun while this goal is active, allowing mobs to path through
         // leaf shade to reach real shelter (fixes skeletons getting stuck under trees)
         if (!this.avoidSunDisabled) {
-            try {
-                net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
-                    (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
-                if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
-                    Field avoidSunField = nav.getClass().getDeclaredField("avoidSun");
-                    avoidSunField.setAccessible(true);
-                    this.originalAvoidSun = avoidSunField.getBoolean(nav);
-                    avoidSunField.setBoolean(nav, false);
-                }
-            } catch (Exception e) {
-                // If reflection fails, just continue without toggling
+            net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
+                (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
+            if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
+                nav.setAvoidSun(false);
             }
             this.avoidSunDisabled = true;
         }
@@ -118,17 +117,10 @@ public class SeekShelterGoal extends Goal {
     public void stop() {
         this.shelter = null;
         if (this.avoidSunDisabled) {
-            try {
-                net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
-                    (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
-                if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
-                    Field avoidSunField = nav.getClass().getDeclaredField("avoidSun");
-                    avoidSunField.setAccessible(true);
-                    avoidSunField.setBoolean(nav, this.originalAvoidSun);
-                }
-            } catch (Exception e) {
-                // If reflection fails, just reset the flag
-                this.avoidSunDisabled = false;
+            net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
+                (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
+            if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
+                nav.setAvoidSun(this.originalAvoidSun);
             }
             this.avoidSunDisabled = false;
         }
