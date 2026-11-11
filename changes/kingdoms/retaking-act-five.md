@@ -1,5 +1,0 @@
-# The Retaking, Act V: Legend, and the Second Defence
-- **The Second Defence**: once in a world, at night, with a light burning in the old keep and a player whose Act V has begun at the ford, the dead of the old legion come back. They rise a few at a time across the water under strokes of lightning, risen orcs and zombified piglins, in four growing waves (more with more defenders), then a Shade of the Grue at the back with the last of them. When it falls the rest sink back into the ground, and everyone who stood at the ford gets the milestone. If nobody stands near the ford for 30 seconds, the legion sinks back and comes again another night. Ops: `/kingdom ford defend`.
-- **Risen Orc**: a new undead mob, an orc grunt's body gone grave-grey (tusks and all), tougher than a zombie and unburnt by the sun. Only the Second Defence raises them.
-- The Story tab's Act V lists three goals before the Wither: keep a light in the old keep at night, bring down the End's dragon (vanilla's advancement counts), hold the ford.
-- Built; not played.

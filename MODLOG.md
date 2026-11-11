@@ -2411,3 +2411,8 @@ will still have to fight in the tournament as a non z fighter)".
   the danger is in view, lasts at most 12 ticks and waits 50 ticks between glances.
 - Compiled (`compileClientJava`); not played. ImmersiveFX has not been run beside Sound Physics Remastered, Subtle
   Effects or Iris yet, and its doubled effects (fireflies, waterfalls, footprints) may want turning down in its config.
+
+## 0.22.14 (2026-11-11): The Retaking, Act V: Legend (#1304)
+
+- Three new milestones in the Jaymo's Powerpack advancement tab, hanging off the Piglin King before the Wither: A Light in the Keep, The End's Dragon, The Second Defence (Jaymo's Kingdoms awards them).
+- Built; not played.
