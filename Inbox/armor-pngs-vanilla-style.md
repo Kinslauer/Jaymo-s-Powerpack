@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by: 
+claimed_by: hermes-modeller
 pr:
 suggested_owns: [src/main/resources/assets/jaymospowers/textures/item/armory/, src/main/resources/assets/jaymospowers/models/item/armory/]
 ---
