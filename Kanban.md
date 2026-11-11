@@ -4,12 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 02:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 02:30). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · claude (cloud) · claimed
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
@@ -18,6 +17,7 @@ kanban-plugin: board
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · claimed
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · claimed
 
 
 ## In review
