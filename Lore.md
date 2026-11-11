@@ -284,6 +284,13 @@ through time ever since, wreaking havoc on events and warping the timeline, and 
 If he is ever killed he cheats death the same way: his **echoes** reappear and act in his place, which is why he seems
 to be in several places at once.
 
+(new) **How his echoes cheat death** (tinkerer thread, 2026-11-11). He can be hurt and killed, unlike the other
+masters you meet. The body falls like anyone's. A breath later one of his echoes steps out of the air where he fell, in
+the same violet burst and pale shards a Chrono's own echo arrives in, and carries on at his bench as if nothing
+happened ("Hm? Oh, him. One of me."), mid-operation included. Wherever else he is standing just then, he flinches and
+mutters that somebody, somewhere, has just killed him. Ask him about Los Perrito's androids and he blames shoddy
+copies, the city's orders, or "a bug, every machine has one", and changes the subject.
+
 **His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
 his.** Nobody knew it was him, nobody knows now, and he will never tell you.
