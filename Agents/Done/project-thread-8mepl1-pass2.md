@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Magic FX second pass, sparks, runes, real beams (Andy, project thread, 2026-11-11)
 branch: claude/project-thread-8mepl1
 with: claude-cloud
@@ -28,3 +28,4 @@ lines and circles into real beams and rings.
 
 ## Done
 Compiles for Powers and Kingdoms; not played.
+- 2026-11-11 19:01 PR #1310 is merged into master; moved to Agents/Done.
