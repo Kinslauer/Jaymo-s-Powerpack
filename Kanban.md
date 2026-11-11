@@ -11,6 +11,7 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · for ☁️ Cloud · open
+- [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 
 
 ## Being built
