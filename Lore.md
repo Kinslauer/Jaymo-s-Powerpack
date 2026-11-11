@@ -568,7 +568,7 @@ hunter drops his orders as he runs: find the band ("it hums when it is near its 
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
-(new, proposed in docs/Galvan-Moon-Plan.md, waiting on Andy) **The city under the dust.** The Galvan live hidden
+(new) **The city under the dust** (Andy, 2026-11-11: "hidden"). The Galvan live hidden
 beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
 moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
 believes the pod crews' rumour. The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed
