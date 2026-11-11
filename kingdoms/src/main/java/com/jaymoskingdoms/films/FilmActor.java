@@ -41,6 +41,8 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 	public static EntityType<FilmActor> TYPE;
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	/** {@link #orc} for a Sylvan elf's ears instead of an orc's features. */
+	public static final int ELF = 3;
 	/** Its skin ({@code textures/entity/film/<skin>.png}), body, an orc's features (0 none, 1 or 2), what's gone, and whether it wears the cloak. */
 	public String skin = "soldier_0";
 	public int body = WIDE, orc, gone;

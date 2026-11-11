@@ -108,6 +108,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 		int orc = info.getOrDefaultGeckolibData(ORC, 0), gone = info.getOrDefaultGeckolibData(GONE, 0);
 		snapshots.ifPresent("orc_0", bone -> bone.skipRender(orc != 1));
 		snapshots.ifPresent("orc_1", bone -> bone.skipRender(orc != 2));
+		snapshots.ifPresent("elf", bone -> bone.skipRender(orc != FilmActor.ELF));
 		if ((gone & FilmActor.NO_HEAD) != 0) {
 			snapshots.ifPresent("head", bone -> bone.skipRender(true).skipChildrenRender(true));
 		}

@@ -137,6 +137,8 @@ public final class LoreFilmClient {
 	 */
 	static final double[][] HEROES_AT = {{15.0, -8.0}, {12.5, -3.0}, {13.5, 3.0}};
 	static final double HERO_LEASH = 6.0, HERO_ROOM = 2.6;
+	/** A Sylvan is drawn smaller than a man (BodySizes: the smallest of the heritages). */
+	static final double SYLVAN_SCALE = 0.92;
 	/**
 	 * What the heroes wear. Andy: "ichorcloth robes on thessaly, steel armor on varro, no helmet, ambrose in the wizard
 	 * robes, grimsby with the ranger hood and armor". Thessaly, Varro, Ambrose, Grimsby; head, chest, legs, feet.
@@ -868,7 +870,14 @@ public final class LoreFilmClient {
 		forest(f);
 		keep(f);
 		// the four heroes in among the fighting, and the fifth off to one side
-		f.grimsby = mage(f, "grimsby", FilmActor.WIDE, HEROES_AT[0], Items.IRON_SWORD, null);
+		// (Grimsby is a Sylvan elf, the others hearthlanders: long ears, and slighter than a man as the Sylvan are)
+		f.grimsby = cast(f, new FilmTape.Cast(0, "grimsby", FilmActor.WIDE, FilmActor.ELF, false, Role.MAGE.ordinal(), Flesh.MAN.ordinal(), false, id(Items.IRON_SWORD), "",
+			new float[] {(float)HEROES_AT[0][0], (float)HEROES_AT[0][1], 0.0F, 0.0F, (float)SYLVAN_SCALE}));
+		if (f.grimsby != null) {
+			f.grimsby.restYaw = f.yaw;
+			f.grimsby.homeF = HEROES_AT[0][0];
+			f.grimsby.homeS = HEROES_AT[0][1];
+		}
 		f.thessaly = mage(f, "thessaly", FilmActor.SLIM, HEROES_AT[1], null, null);
 		f.ambrose = mage(f, "ambrose", FilmActor.WIDE, HEROES_AT[2], Items.BLAZE_ROD, null);
 		// (Varro's axe in his left hand: his right is the one he marks with)
