@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-g31te8
 with: cloud thread "Redesign the village golems"
