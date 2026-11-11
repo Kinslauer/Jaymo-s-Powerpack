@@ -139,7 +139,13 @@ kit.
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
   their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
-  when they heal (Andy, 2026-11-11). What they are given is not their eyes back: living things burn
+  when they heal (Andy, 2026-11-11).
+  (new) **The Unseeing** (Claude's name for them, for Andy to approve): the devout who carve the eyes keep together as
+  the Unseeing, and they take followers. Out in the wild at night a traveller may come on one of their services: the
+  members, blindfolded, in a ring of candles round a follower; the chant ("What the eye takes in, it lies about"), the
+  eldest's cut, the binding, and the follower given their new sight. A watcher is left a blindfold for when they are
+  ready (Andy, 2026-11-11: "you should be able to stumble on a service of the members performing this on one of their
+  followers"). What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
@@ -168,6 +174,13 @@ whole time"; their ki "went to the cold, or the smoke, or the weight of things, 
 go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
 when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
+**What an elemental user sees** (Andy approved, 2026-11-11). A Smoke, Gravity or Cryo user's ki
+went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
+body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
+sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
+mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
+any other power user.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -185,6 +198,11 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
   monsters that come at their own people, by the legend of the old heroes, each in their own way.
 - **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
   or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
 - **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
   villain; neither is thanked.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
@@ -265,6 +283,13 @@ player does, by messing about with time, but he **conquered his echo, and conque
 through time ever since, wreaking havoc on events and warping the timeline, and he seems to get away with all of it.
 If he is ever killed he cheats death the same way: his **echoes** reappear and act in his place, which is why he seems
 to be in several places at once.
+
+(new) **How his echoes cheat death** (tinkerer thread, 2026-11-11). He can be hurt and killed, unlike the other
+masters you meet. The body falls like anyone's. A breath later one of his echoes steps out of the air where he fell, in
+the same violet burst and pale shards a Chrono's own echo arrives in, and carries on at his bench as if nothing
+happened ("Hm? Oh, him. One of me."), mid-operation included. Wherever else he is standing just then, he flinches and
+mutters that somebody, somewhere, has just killed him. Ask him about Los Perrito's androids and he blames shoddy
+copies, the city's orders, or "a bug, every machine has one", and changes the subject.
 
 **His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
@@ -664,6 +689,13 @@ Some still fight in the hope of someday taking back what was.
 
 **The three-sided war** (Andy, 2026-11-11). Frostborn troopers in rigs fight in the future too, so the streets are a
 three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
+
+(new) **The troopers** (future-three-sided-war, 2026-11-11). The Frostborn come in squads, each trooper in a whole Rig,
+firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
+Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
+the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
+hurting one turns the whole squad; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
+and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
