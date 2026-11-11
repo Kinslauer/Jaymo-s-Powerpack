@@ -30,7 +30,6 @@ kanban-plugin: board
 - [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · in-review
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
-- [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · #1286 · in-review
 
 
 ## Needs Andy
