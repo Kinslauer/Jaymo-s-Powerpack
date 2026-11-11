@@ -199,6 +199,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		CarryClient.init();
 		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
+		// boxing: the evades' movement and the blur
+		com.jaymospowers.client.boxing.BoxingClient.init();
 		com.jaymospowers.client.combat.TakedownClient.init();
 		SneakZoom.init();
 		com.jaymospowers.client.stamina.FeathersHud.init();
