@@ -12,7 +12,7 @@
     python tools/discord_read_aloud.py "Lore" --debug          # also log the voice connection (no sound? run this)
     python tools/discord_read_aloud.py --check                 # is everything installed for THIS Python? (no Discord)
 
-Setup on the PC (once):  pip install "discord.py[voice]>=2.7" edge-tts   and have ffmpeg on PATH (or set FFMPEG).
+Setup on the PC (once):  pip install "discord.py[voice]>=2.7" "davey==0.1.7" edge-tts   and have ffmpeg on PATH (or set FFMPEG).
 
 Finding the document: a path, or a name looked up in the live vault (docs/vault/Live), then docs/vault, then docs/.
 An exact file name wins, then a name that starts with it, then one that contains it. More than one equal match: it lists
@@ -430,6 +430,25 @@ def missing_packages():
     return sorted({pip for mod, pip in NEEDED if importlib.util.find_spec(mod) is None})
 
 
+def davey_mismatch():
+    """davey 0.2 needs the caller to run prepare_transition/execute_transition after each MLS commit or welcome;
+    discord.py 2.7.1 (written for davey 0.1) never does. The E2EE session then never gets ready, every packet goes out
+    unencrypted, and Discord clients silently drop it: the bot's ring lights up and nobody hears a thing.
+    Returns the pip fix when this Python has that pair, else None."""
+    try:
+        from importlib import metadata
+        import importlib.util
+        dv = metadata.version("davey")
+        spec = importlib.util.find_spec("discord.voice_state")
+        src = open(spec.origin, encoding="utf-8").read() if spec and spec.origin else ""
+    except Exception:
+        return None
+    major_minor = tuple(int(x) for x in re.findall(r"\d+", dv)[:2])
+    if major_minor >= (0, 2) and "prepare_transition" not in src:
+        return f"davey {dv} doesn't work with this discord.py (E2EE never gets ready, so nobody hears it)", "davey==0.1.7"
+    return None
+
+
 def check():
     """What this Python is missing, and the exact command that installs it into this same Python."""
     ok = True
@@ -441,6 +460,11 @@ def check():
         print(f'  "{sys.executable}" -m pip install ' + " ".join(f'"{m}"' for m in miss))
     else:
         print("Packages: discord.py, PyNaCl, davey, edge-tts all found.")
+    bad = davey_mismatch()
+    if bad:
+        ok = False
+        print(f"Voice encryption: {bad[0]}. Fix with:")
+        print(f'  "{sys.executable}" -m pip install "{bad[1]}"')
     exe = os.environ.get("FFMPEG") or shutil.which("ffmpeg")
     if exe and (os.path.isfile(exe) or shutil.which(exe)):
         print(f"ffmpeg: {exe}")
@@ -708,7 +732,7 @@ def main(argv=None):
             print(f"[{i + 1}] {pieces[i]}")
         return 0
 
-    if missing_packages():
+    if missing_packages() or davey_mismatch():
         return check()
     token = os.environ.get("KANBAN_BOT_TOKEN") or os.environ.get("DISCORD_BOT_TOKEN")
     if not token:
