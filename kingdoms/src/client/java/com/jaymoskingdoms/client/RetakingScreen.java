@@ -28,9 +28,12 @@ import org.jspecify.annotations.Nullable;
  */
 final class RetakingScreen extends Screen {
 	static final int MAX_W = 360, MAX_H = 210, LIST_W = 118, LIST_ROW = 19, HEADER = 34, GOAL_ROW = 4, ROAD_GAP = 6, ROAD_BUTTON_W = 96;
-	static final ItemStack ROAD_ICON = new ItemStack(Items.COMPASS);
-	static final ItemStack[] ICONS = {new ItemStack(Items.CAMPFIRE), new ItemStack(Items.CHISELED_STONE_BRICKS), new ItemStack(Items.FIREWORK_ROCKET),
-		new ItemStack(Items.SOUL_LANTERN), new ItemStack(Items.NETHER_STAR)};
+	/** The icons, made on first draw: an ItemStack built during client init (before components are bound) crashes the game. */
+	private static final class Icons {
+		static final ItemStack ROAD = new ItemStack(Items.COMPASS);
+		static final ItemStack[] ACTS = {new ItemStack(Items.CAMPFIRE), new ItemStack(Items.CHISELED_STONE_BRICKS), new ItemStack(Items.FIREWORK_ROCKET),
+			new ItemStack(Items.SOUL_LANTERN), new ItemStack(Items.NETHER_STAR)};
+	}
 
 	/** The server's last answer. */
 	static Retaking.@Nullable State state;
@@ -218,7 +221,7 @@ final class RetakingScreen extends Screen {
 				graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, Ui.GOLD);
 			}
 			if (reached(act)) {
-				graphics.item(ICONS[i], x + 8, ry + 1);
+				graphics.item(Icons.ACTS[i], x + 8, ry + 1);
 			}
 			int color = !reached(act) ? Ui.HINT : closed(act) ? Ui.GOOD : act == shown ? Ui.GOLD : Ui.TEXT;
 			Ui.line(graphics, this.font, actName(act), x + 27, ry + 5, LIST_W - 34, color);
@@ -232,7 +235,7 @@ final class RetakingScreen extends Screen {
 			String key = roads.get(i);
 			int ry = roadY(i);
 			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2, key.equals(this.roadPicked) ? Ui.ROW_PICKED : key.equals(roadHover) ? Ui.ROW_HOVER : Ui.ROW_ALT);
-			graphics.item(ROAD_ICON, x + 8, ry + 1);
+			graphics.item(Icons.ROAD, x + 8, ry + 1);
 			Ui.line(graphics, this.font, roadTitle(key), x + 27, ry + 5, LIST_W - 34, key.equals(roadShown) ? Ui.GOLD : Ui.TEXT);
 		}
 		this.roadOpen = roadShown != null && roadShown.startsWith(POWERS_ROAD) && RoadCompat.hasScreen(roadShown.substring(POWERS_ROAD.length()))
