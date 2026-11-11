@@ -24,14 +24,13 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
@@ -39,6 +38,7 @@ kanban-plugin: board
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 - [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 
 
 %% kanban:settings
