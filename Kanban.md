@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Agents/karmic-alignment|karmic-alignment]] · 💻 Odysseus · running
 
 
 ## In review
