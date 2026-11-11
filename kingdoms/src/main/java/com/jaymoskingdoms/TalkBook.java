@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
@@ -242,10 +243,19 @@ final class TalkBook {
 
 	private static final Gate READ_DEFENCE = c -> LoreCodex.holds(c.player(), Retaking.LONG_DEFENCE_BOOK)
 		|| com.jaymoskingdoms.films.LoreFilms.seen(c.player(), com.jaymoskingdoms.films.LoreFilms.LONG_DEFENCE);
-	private static final Gate FORD_STANDS = c -> Ford.site(c.level().getServer()) != null;
+	/** How far (blocks) the keep is before the ford talk calls it a long way, and a very long way. */
+	static final double FORD_NEAR = 800.0, FORD_FAR = 2500.0;
+	private static final Gate FORD_STANDS = c -> Ford.where(c.level().getServer()) != null;
 	private static final Args FORD_WAY = c -> {
-		Ford.Site site = Ford.site(c.level().getServer());
-		return new Object[] {site == null ? "" : Sightings.direction(c.v().blockPosition(), site.keep())};
+		BlockPos keep = Ford.where(c.level().getServer());
+		if (keep == null) {
+			return new Object[] {"", ""};
+		}
+		double dx = keep.getX() - c.v().getX(), dz = keep.getZ() - c.v().getZ();
+		double far = Math.sqrt(dx * dx + dz * dz);
+		return new Object[] {Sightings.direction(c.v().blockPosition(), keep),
+			Component.translatable(far < FORD_NEAR ? "talk.jaymoskingdoms.word.retaking_ford.near" : far < FORD_FAR ? "talk.jaymoskingdoms.word.retaking_ford.far"
+				: "talk.jaymoskingdoms.word.retaking_ford.very_far")};
 	};
 	private static final Gate CROOK_NEAR = c -> Bearings.trust(c.v(), c.player()) >= Bearings.SECRET_TRUST && Talks.crookNear(c.v()) != null;
 

@@ -12,6 +12,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -32,24 +33,32 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The field of The Long Defence (Lore.md, "The field of the long defence"): a wooded forest, a Keep the defenders held, and
- * below it the ford where the forest road crosses water. One per world, raised the first time someone who has reached the
- * Retaking's second act ({@link Retaking}) is out in the wild near a river with woods on its bank: a ruined keep of mossy and
- * cracked stone with a broken corner tower and its gate toward the water, a worn road down to a shallow gravel crossing,
- * rubble, vines and cobwebs, and in the keep a chest holding a page in the gate-warden's hand ({@code lore/the_wardens_page}).
+ * below it the ford where the forest road crosses water. One per world, and it has always been there: Andy (2026-11-11), "the
+ * keep should only ever form in a forest biome ... it should never generate near just because, if it ends up being far out
+ * then so be it". So the first time a world starts, its site is chosen from the world's own biome map ({@link #plan}): a
+ * forest beside a river, somewhere between {@link #PLAN_NEAREST} and {@link #PLAN_FURTHEST} blocks from spawn, wherever the
+ * map puts one. Nothing is built until someone comes near ({@link #BUILD_NEAR}); then the keep goes up as it always stood: a
+ * ruined keep of mossy and cracked stone with a broken corner tower and its gate toward the water, a worn road down to a
+ * shallow gravel crossing, rubble, vines and cobwebs, and in the keep a chest holding a page in the gate-warden's hand
+ * ({@code lore/the_wardens_page}).
  * <p>
- * Standing at the ford is the Act II milestone {@code pack/ford}; the first time it counts, the book's wordless film plays
- * again ({@link LoreFilms#LONG_DEFENCE}), now where it happened. Village talk can point the way once the keep stands
- * ({@code TalkBook}'s {@code retaking_ford}). The Second Defence (Act V) comes back here.
+ * Standing at the ford is the Act II milestone {@code pack/ford} (the Retaking, {@link Retaking}); the first time it counts,
+ * the book's wordless film plays again ({@link LoreFilms#LONG_DEFENCE}), now where it happened. Village talk can point the way
+ * ({@code TalkBook}'s {@code retaking_ford}), as to a place long forgotten. The Second Defence (Act V) comes back here.
  */
 public final class Ford {
 	/** How often (ticks) the world is looked at. */
 	static final int CHECK_TICKS = 200;
-	/** The chance per check that a player in Act II out in the wild has the keep raised near them, while none stands. */
-	static final float RAISE_CHANCE = 0.2F;
-	/** How far from the player (blocks) a river crossing is looked for, and how many columns are tried. */
-	static final int RAISE_NEAREST = 64, RAISE_FURTHEST = 192, SPOT_TRIES = 40;
-	/** How far from the river's edge the keep stands, and how far from a settlement it must be. */
+	/** How far from spawn (blocks) the site may be, how many places are sampled per ring, and how many rings out. */
+	static final int PLAN_NEAREST = 1200, PLAN_FURTHEST = 6000, PLAN_SAMPLES = 400, PLAN_RINGS = 4;
+	/** How far (blocks) from a forest column a river is looked for on the map, and the step. */
+	static final int RIVER_REACH = 48, RIVER_STEP = 4;
+	/** A player this near (blocks) the planned site has the keep built, once the ground round it is loaded. */
+	static final double BUILD_NEAR = 112.0;
+	/** How far from the river's edge the keep stands, and how far from a settlement it must be (only for ops raising one). */
 	static final int KEEP_BACK = 14;
+	/** (Ops) How many columns near the player are tried for a river. */
+	static final int SPOT_TRIES = 40;
 	static final double SETTLEMENT_CLEARANCE = 128.0;
 	/** The keep's half-width, its walls' height (before breaking), its corner tower's height. */
 	static final int HALF = 5, WALL = 8, TOWER = 13;
@@ -66,6 +75,17 @@ public final class Ford {
 
 	static final AttachmentType<Site> SITE = AttachmentRegistry.create(JaymosKingdoms.id("long_defence_ford"), builder -> builder.persistent(Site.CODEC));
 
+	/** Where the keep is to stand before it is built: a forest column, and which way the river lies from it. */
+	public record Plan(BlockPos column, Direction toWater) {
+		static final com.mojang.serialization.Codec<Plan> CODEC = com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+			BlockPos.CODEC.fieldOf("column").forGetter(Plan::column), Direction.CODEC.fieldOf("to_water").forGetter(Plan::toWater)).apply(i, Plan::new));
+	}
+
+	static final AttachmentType<Plan> PLAN = AttachmentRegistry.create(JaymosKingdoms.id("long_defence_plan"), builder -> builder.persistent(Plan.CODEC));
+	/** Set once no site could be found on the map, so the search isn't run on every start. */
+	static final AttachmentType<Boolean> NO_SITE = AttachmentRegistry.create(JaymosKingdoms.id("long_defence_no_site"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
+
 	private Ford() {
 	}
 
@@ -78,25 +98,127 @@ public final class Ford {
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom").then(command())));
 	}
 
-	/** The site, or null if it hasn't been raised in this world. */
+	/** The site, or null if it hasn't been built in this world. */
 	public static @Nullable Site site(MinecraftServer server) {
 		return Factions.level(server).getAttached(SITE);
+	}
+
+	/** Where the keep stands, or will once someone goes near: built or only planned; null if the world has no site. */
+	public static @Nullable BlockPos where(MinecraftServer server) {
+		ServerLevel level = Factions.level(server);
+		Site site = level.getAttached(SITE);
+		if (site != null) {
+			return site.keep();
+		}
+		Plan plan = level.getAttached(PLAN);
+		return plan == null ? null : plan.column();
 	}
 
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Site site = level.getAttached(SITE);
-		RandomSource random = level.getRandom();
-		for (ServerPlayer player : level.players()) {
-			if (site == null) {
-				if (Knowledge.level(player) >= Retaking.Act.OLD_STONES.ordinal() && random.nextFloat() < RAISE_CHANCE
-					&& Encounters.inTheWild(server, level, player)) {
-					site = raiseNear(level, player.blockPosition(), RAISE_NEAREST, RAISE_FURTHEST, random);
+		if (site == null) {
+			Plan plan = level.getAttached(PLAN);
+			if (plan == null) {
+				if (!level.getAttachedOrElse(NO_SITE, false)) {
+					plan(level);
 				}
-			} else if (player.blockPosition().closerThan(site.ford(), AT_FORD)) {
+				return;
+			}
+			for (ServerPlayer player : level.players()) {
+				if (horizontal(player.blockPosition(), plan.column()) < BUILD_NEAR * BUILD_NEAR && loadedAround(level, plan.column())) {
+					build(level, plan);
+					return;
+				}
+			}
+			return;
+		}
+		for (ServerPlayer player : level.players()) {
+			if (player.blockPosition().closerThan(site.ford(), AT_FORD)) {
 				atFord(player);
 			}
 		}
+	}
+
+	private static double horizontal(BlockPos a, BlockPos b) {
+		double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
+		return dx * dx + dz * dz;
+	}
+
+	/** The keep's ground, the road and the far bank are all loaded. */
+	private static boolean loadedAround(ServerLevel level, BlockPos column) {
+		int reach = HALF * 2 + KEEP_BACK + FORD_LONGEST;
+		for (int dx = -reach; dx <= reach; dx += reach) {
+			for (int dz = -reach; dz <= reach; dz += reach) {
+				if (!level.isLoaded(column.offset(dx, 0, dz))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Chooses the site from the world's biome map without loading anything: rings out from spawn, a forest column with a
+	 * river in reach of it on the map, the river's side remembered. Run once per world.
+	 */
+	static void plan(ServerLevel level) {
+		RandomSource random = RandomSource.create(level.getSeed() ^ 0x1F0DDEFEC1L);
+		BlockPos spawn = level.getRespawnData().pos();
+		int sea = level.getSeaLevel();
+		int span = (PLAN_FURTHEST - PLAN_NEAREST) / PLAN_RINGS;
+		for (int ring = 0; ring < PLAN_RINGS; ring++) {
+			for (int i = 0; i < PLAN_SAMPLES; i++) {
+				double angle = random.nextDouble() * Math.PI * 2.0;
+				int r = PLAN_NEAREST + ring * span + random.nextInt(span);
+				BlockPos column = new BlockPos(spawn.getX() + Mth.floor(Math.cos(angle) * r), sea, spawn.getZ() + Mth.floor(Math.sin(angle) * r));
+				if (!biome(level, column).is(BiomeTags.IS_FOREST)) {
+					continue;
+				}
+				for (Direction d : Direction.Plane.HORIZONTAL.shuffledCopy(random)) {
+					for (int step = RIVER_STEP * 2; step <= RIVER_REACH; step += RIVER_STEP) {
+						BlockPos at = column.relative(d, step);
+						Holder<Biome> b = biome(level, at);
+						if (b.is(BiomeTags.IS_RIVER)) {
+							// the keep stands well back in the trees, the river ahead of its gate
+							level.setAttached(PLAN, new Plan(column, d));
+							JaymosKingdoms.LOGGER.info("The keep above the ford will stand at {} (river to the {})", column, d.getSerializedName());
+							return;
+						}
+						if (!b.is(BiomeTags.IS_FOREST)) {
+							break;
+						}
+					}
+				}
+			}
+		}
+		level.setAttached(NO_SITE, true);
+		JaymosKingdoms.LOGGER.warn("No forest beside a river found for the keep above the ford");
+	}
+
+	private static Holder<Biome> biome(ServerLevel level, BlockPos at) {
+		return level.getUncachedNoiseBiome(QuartPos.fromBlock(at.getX()), QuartPos.fromBlock(at.getY()), QuartPos.fromBlock(at.getZ()));
+	}
+
+	/** Builds the planned keep now that someone is near, facing the river; the ford wherever the water is found. */
+	static Site build(ServerLevel level, Plan plan) {
+		BlockPos keep = surface(level, plan.column());
+		// walk toward the river to the last dry ground before it, and stand the gate a little way back from that
+		BlockPos at = keep;
+		for (int i = 0; i < RIVER_REACH + FORD_LONGEST; i++) {
+			BlockPos next = surface(level, at.relative(plan.toWater()));
+			if (!level.getFluidState(next).isEmpty()) {
+				break;
+			}
+			at = next;
+		}
+		BlockPos gate = surface(level, at.relative(plan.toWater().getOpposite(), Math.min(KEEP_BACK, Math.max(4, horizontalBlocks(keep, at)))));
+		level.removeAttached(PLAN);
+		return raise(level, gate, plan.toWater(), level.getRandom());
+	}
+
+	private static int horizontalBlocks(BlockPos a, BlockPos b) {
+		return (int)Math.sqrt(horizontal(a, b));
 	}
 
 	/** {@code player} stands at the ford: the milestone, and the first time it counts, the film. */
@@ -111,7 +233,7 @@ public final class Ford {
 
 	// ---- raising it ---------------------------------------------------------------------------------------------------
 
-	/** Looks for a river with woods on a bank between {@code nearest} and {@code furthest} blocks of {@code from}; raises it there. */
+	/** (Ops) Looks for a river with forest on a bank between {@code nearest} and {@code furthest} blocks of {@code from}; raises it there. */
 	static @Nullable Site raiseNear(ServerLevel level, BlockPos from, int nearest, int furthest, RandomSource random) {
 		for (int i = 0; i < SPOT_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
@@ -141,7 +263,7 @@ public final class Ford {
 	}
 
 	private static boolean wooded(Holder<Biome> biome) {
-		return biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA);
+		return biome.is(BiomeTags.IS_FOREST);
 	}
 
 	/** The top block of a column: water's surface, or the first solid ground (leaves and trees ignored). */
@@ -293,8 +415,10 @@ public final class Ford {
 		return Commands.literal("ford").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 			.then(Commands.literal("where").executes(c -> {
 				Site site = site(c.getSource().getServer());
-				c.getSource().sendSuccess(() -> site == null ? Component.literal("The keep above the ford hasn't risen yet.")
-					: Component.literal("Keep at " + site.keep().toShortString() + ", ford at " + site.ford().toShortString()), false);
+				BlockPos planned = where(c.getSource().getServer());
+				c.getSource().sendSuccess(() -> site != null ? Component.literal("Keep at " + site.keep().toShortString() + ", ford at " + site.ford().toShortString())
+					: planned != null ? Component.literal("The keep will stand at " + planned.getX() + " " + planned.getZ() + " (built when someone comes near).")
+					: Component.literal("This world has no forest beside a river for the keep."), false);
 				return 1;
 			}))
 			.then(Commands.literal("raise").executes(c -> {
