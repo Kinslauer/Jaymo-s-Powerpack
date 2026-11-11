@@ -1,15 +1,15 @@
-"""The Galvan, the Pale Moon's small bug-eyed people who made the Xeno-Band: the skins for client/GalvanBody.java.
+"""The Ocellan, the Pale Moon's small bug-eyed people who made the Xeno-Band: the skins for client/OcellanBody.java.
 
-A Galvan has the body of Powers' Gremlin (tools/gen_xenoform.py gremlin_paint: grey hide, wide flat head, two great
+An Ocellan has the body of Powers' Gremlin (tools/gen_xenoform.py gremlin_paint: grey hide, wide flat head, two great
 yellow-green eyes that shine) dressed as the high-born folk they are: a robe to the ankles with a trimmed hem and a line
 of trim down the front, a sash, wide cuffs, a short mantle over the shoulders, and a monocle on a chain over the right eye. Three robes
-(plum, teal, umber), picked per Galvan. Everything is drawn from code; nothing is copied.
+(plum, teal, umber), picked per Ocellan. Everything is drawn from code; nothing is copied.
 
 Sheet 64x64: the Gremlin's boxes where the Gremlin has them (head 8x7x6 at (0,0), eye 4x4x3 at (32,0), body 5x7x3 at
 (16,16), arm 2x7x2 at (40,16), leg 2x6x2 at (0,16), foot 3x1x4 at (0,32)), then monocle 5x5x1 at (48,0), chain 1x3x1 at
 (60,0), cuff 3x2x3 at (48,16), skirt 7x6x5 at (16,32), mantle 7x2x5 at (0,44).
 
-    python3 kingdoms/tools/gen_galvan.py        (from the repo root)
+    python3 kingdoms/tools/gen_ocellan.py        (from the repo root)
 """
 import sys
 from pathlib import Path
@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO / "tools"))
 import gen_xenoform as gx  # noqa: E402
 from gen_xenoform import CLEAR, faces, rect, shade  # noqa: E402
 
-OUT = REPO / "kingdoms" / "src" / "main" / "resources" / "assets" / "jaymoskingdoms" / "textures" / "entity" / "galvan"
+OUT = REPO / "kingdoms" / "src" / "main" / "resources" / "assets" / "jaymoskingdoms" / "textures" / "entity" / "ocellan"
 SIZE = 64
 MONOCLE = (48, 0, 5, 5, 1)
 CHAIN = (60, 0, 1, 3, 1)
@@ -109,14 +109,14 @@ def main():
         lit = Image.new("RGBA", (64, 128))
         gx.gremlin_paint(base, lit)
         img = base.crop((0, 0, SIZE, SIZE))
-        # (no jaw on a Galvan: its patch is left clear)
+        # (no jaw on an Ocellan: its patch is left clear)
         rect(img, (32, 8, 64, 16), CLEAR)
-        gx.rng.seed("galvan%d" % i)
+        gx.rng.seed("ocellan%d" % i)
         robe(img, colour, trim)
         monocle(img)
-        img.save(OUT / ("galvan_%d.png" % i))
+        img.save(OUT / ("ocellan_%d.png" % i))
         glow = lit.crop((0, 0, SIZE, SIZE))
-    glow.save(OUT / "galvan_glow.png")
+    glow.save(OUT / "ocellan_glow.png")
 
 
 if __name__ == "__main__":

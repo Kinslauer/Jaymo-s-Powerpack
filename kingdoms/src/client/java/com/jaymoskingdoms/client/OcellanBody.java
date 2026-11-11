@@ -28,43 +28,43 @@ import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Andy: the people who build and upgrade the Xeno-Band are the Galvan: "very small with bug eyes", the same body as
- * Powers' Gremlin, and "the npc galvan wear robes like the picture, and monocles, and are a high class society". A
- * villager whose part is one of {@link ZFighterFolk#GALVAN} (the star forge's smith) is still an MCA villager, so its
- * menu and its talk are unchanged, but it is drawn as a Galvan:
+ * Andy: the people who build and upgrade the Xeno-Band are the Ocellan: "very small with bug eyes", the same body as
+ * Powers' Gremlin, and they "wear robes like the picture, and monocles, and are a high class society". A
+ * villager whose part is one of {@link ZFighterFolk#OCELLAN} (the star forge's smith) is still an MCA villager, so its
+ * menu and its talk are unchanged, but it is drawn as an Ocellan:
  * <ul>
  * <li>every man's body drawn for it (MCA's skin, face, clothes and hair, any armour or look of ours) is shrunk to
  * nothing ({@link #apply}), and</li>
- * <li>the Galvan is drawn in its place ({@link Layer}): a slim grey body on thin legs with broad feet, a wide flat head
+ * <li>the Ocellan is drawn in its place ({@link Layer}): a slim grey body on thin legs with broad feet, a wide flat head
  * with two great eyes that shine in the dark and blink, in a robe to its ankles, a mantle, wide cuffs and a monocle on
  * a chain, its hands folded in front of it. One of {@link #ROBES} robes, by its id.</li>
  * </ul>
- * The villager itself is made small on the server ({@code ZFighterFolk#GALVAN_SCALE}), so the model here is drawn at
- * its own size inside that. The skins are {@code tools/gen_galvan.py}; the boxes are the Gremlin's
+ * The villager itself is made small on the server ({@code ZFighterFolk#OCELLAN_SCALE}), so the model here is drawn at
+ * its own size inside that. The skins are {@code tools/gen_ocellan.py}; the boxes are the Gremlin's
  * ({@code XenoFormModels.Gremlin} in Powers), kept in step by hand.
  */
-public final class GalvanBody {
-	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:galvan_robe");
-	/** How many robes there are ({@code galvan_<n>.png}). */
+public final class OcellanBody {
+	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:ocellan_robe");
+	/** How many robes there are ({@code ocellan_<n>.png}). */
 	static final int ROBES = 3;
 	private static final Identifier[] SKINS = new Identifier[ROBES];
-	private static final Identifier GLOW = JaymosKingdoms.id("textures/entity/galvan/galvan_glow.png");
+	private static final Identifier GLOW = JaymosKingdoms.id("textures/entity/ocellan/ocellan_glow.png");
 
 	static {
 		for (int i = 0; i < ROBES; i++) {
-			SKINS[i] = JaymosKingdoms.id("textures/entity/galvan/galvan_" + i + ".png");
+			SKINS[i] = JaymosKingdoms.id("textures/entity/ocellan/ocellan_" + i + ".png");
 		}
 	}
 
-	private static @Nullable GalvanModel model;
+	private static @Nullable OcellanModel model;
 
-	private GalvanBody() {
+	private OcellanBody() {
 	}
 
-	/** From the living renderer's extractRenderState ({@link VillagerLooks#extract}): a Galvan's robe, or none. True if it is one. */
+	/** From the living renderer's extractRenderState ({@link VillagerLooks#extract}): an Ocellan's robe, or none. True if it is one. */
 	static boolean extract(LivingEntity entity, LivingEntityRenderState state) {
 		String part = entity.getAttached(ZFighterFolk.PART);
-		if (part == null || !ZFighterFolk.GALVAN.contains(part)) {
+		if (part == null || !ZFighterFolk.OCELLAN.contains(part)) {
 			state.setData(KEY, null);
 			return false;
 		}
@@ -72,16 +72,16 @@ public final class GalvanBody {
 		return true;
 	}
 
-	static boolean galvan(Object state) {
+	static boolean ocellan(Object state) {
 		return state instanceof LivingEntityRenderState living && living.getData(KEY) != null;
 	}
 
 	/**
-	 * Right after a body was posed for {@code state} ({@link ModelPoses#after}): a man's body drawn for a Galvan is
+	 * Right after a body was posed for {@code state} ({@link ModelPoses#after}): a man's body drawn for an Ocellan is
 	 * shrunk to nothing, bone by bone (the scale is put back the next time the body is posed).
 	 */
 	public static void apply(Model<?> model, Object state) {
-		if (!(model instanceof HumanoidModel<?> m) || !galvan(state)) {
+		if (!(model instanceof HumanoidModel<?> m) || !ocellan(state)) {
 			return;
 		}
 		for (ModelPart part : new ModelPart[] {m.head, m.hat, m.body, m.rightArm, m.leftArm, m.rightLeg, m.leftLeg}) {
@@ -110,7 +110,7 @@ public final class GalvanBody {
 				return;
 			}
 			if (model == null) {
-				model = new GalvanModel(GalvanModel.mesh().bakeRoot());
+				model = new OcellanModel(OcellanModel.mesh().bakeRoot());
 			}
 			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(SKINS[Mth.clamp(robe, 0, ROBES - 1)]), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
@@ -119,8 +119,8 @@ public final class GalvanBody {
 		}
 	}
 
-	/** The Galvan: the Gremlin's boxes, and over them a robe's skirt, a mantle, cuffs and a monocle on its chain. */
-	static final class GalvanModel extends EntityModel<HumanoidRenderState> {
+	/** The Ocellan: the Gremlin's boxes, and over them a robe's skirt, a mantle, cuffs and a monocle on its chain. */
+	static final class OcellanModel extends EntityModel<HumanoidRenderState> {
 		// ---- tuning ----
 		/** The hips' height and half width (model pixels), the leg's length to the foot, and the body's height. */
 		static final float HIP_Y = 17.0F, HIP_X = 1.5F, LEG = 6.0F, BODY = 7.0F;
@@ -141,7 +141,7 @@ public final class GalvanBody {
 
 		private final ModelPart head, body, skirt, rightArm, leftArm, rightLeg, leftLeg, rightFoot, leftFoot, rightEye, leftEye, chain;
 
-		GalvanModel(ModelPart root) {
+		OcellanModel(ModelPart root) {
 			super(root);
 			this.head = root.getChild("head");
 			this.body = root.getChild("body");

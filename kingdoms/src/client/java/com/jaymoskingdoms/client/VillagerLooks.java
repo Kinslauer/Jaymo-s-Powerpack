@@ -69,7 +69,7 @@ public final class VillagerLooks {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (!(renderer instanceof AvatarRenderer<?>) && renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer));
-				helper.register(galvan(renderer));
+				helper.register(ocellan(renderer));
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(VillagerLooks::tick);
@@ -81,14 +81,14 @@ public final class VillagerLooks {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private static GalvanBody.Layer<?> galvan(RenderLayerParent<?, ?> renderer) {
-		return new GalvanBody.Layer((RenderLayerParent) renderer);
+	private static OcellanBody.Layer<?> ocellan(RenderLayerParent<?, ?> renderer) {
+		return new OcellanBody.Layer((RenderLayerParent) renderer);
 	}
 
 	/** From the living renderer's extractRenderState: a villager's heritage look (nothing for players or plain Heartlanders). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		if (GalvanBody.extract(entity, state)) {
-			// one of the band's makers: drawn whole by GalvanBody, with no look of a blood on it
+		if (OcellanBody.extract(entity, state)) {
+			// one of the band's makers: drawn whole by OcellanBody, with no look of a blood on it
 			state.setData(GreenskinLooks.KEY, null);
 			state.setData(KEY, null);
 			return;

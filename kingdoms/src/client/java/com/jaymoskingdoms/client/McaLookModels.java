@@ -146,11 +146,11 @@ final class McaLookModels {
 		return model;
 	}
 
-	/** A Galvan has no chest of a woman's ({@link GalvanBody#apply}): MCA's extra parts for one, shrunk to nothing. */
+	/** An Ocellan has no chest of a woman's ({@link OcellanBody#apply}): MCA's extra parts for one, shrunk to nothing. */
 	static void hideChest(HumanoidModel<?> model) {
 		if (model instanceof CommonVillagerModel<?> villager) {
 			for (net.minecraft.client.model.geom.ModelPart part : villager.getBreastParts()) {
-				GalvanBody.hide(part);
+				OcellanBody.hide(part);
 			}
 		}
 	}

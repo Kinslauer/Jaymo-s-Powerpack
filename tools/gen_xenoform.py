@@ -987,7 +987,7 @@ def gremlin_paint(img, glow):
     bulge out past the sides of it, yellow-green with a slit pupil lying on its side. The insignia is on its chest.
     Boxes: head 8x7x6 at (0,0), eye 4x4x3 at (32,0), jaw 6x1x5 at (32,8), body 5x7x3 at (16,16), arm 2x7x2 at (40,16),
     leg 2x6x2 at (0,16), foot 3x1x4 at (0,32); the left limbs and eye mirror the right's. Seeded by itself, so it paints
-    the same skin alone or in a full run. Kingdoms' Galvan (kingdoms/tools/gen_galvan.py) are painted over this."""
+    the same skin alone or in a full run. Kingdoms' Ocellan (kingdoms/tools/gen_ocellan.py) are painted over this."""
     rng.seed("gremlin")
     grey = (118, 120, 126)
     belly = (168, 166, 164)

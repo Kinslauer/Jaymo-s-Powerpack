@@ -10,5 +10,5 @@
   hunched plated build.
 - `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
   `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
-- The Gremlin is the shape of the Galvan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
+- The Gremlin is the shape of the Ocellan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
 - Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.

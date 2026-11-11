@@ -28,7 +28,7 @@ public final class ModelPoses {
 		MobAnimations.apply(model, state);
 		HiddenBladeClient.pose(model, state);
 		GoblinBody.apply(model, state);
-		GalvanBody.apply(model, state);
+		OcellanBody.apply(model, state);
 	}
 
 	/** {@code model} posed now from {@code state}, exactly as it will be when drawn. */
