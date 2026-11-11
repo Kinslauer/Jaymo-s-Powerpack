@@ -44,3 +44,55 @@ Times on a 12-hour clock. Never print or log a token or key. Restart the gateway
    "## Done" below, then run `python tools/vault_sync.py` in E:/Origins Mod.
 
 ## Done
+
+Claude Code on Andy's PC, Nov 11, 12:39-12:46 AM.
+
+**Real cause:** the watchdog's check (`gateway_watchdog.ps1`) looked for a `python.exe` whose command line has
+`gateway run`. The gateway that `hermes gateway restart` started at 11:31 PM (PID 16940, launcher 10176) runs
+elevated, and Windows gives a non-elevated script a blank command line for an elevated process. So the check never
+matched, the script ran `schtasks /run Hermes_Gateway` and logged "restarted" every minute (73 lines from 11:29 PM to
+12:39 AM). Each run did nothing: the task already has MultipleInstancesPolicy = IgnoreNew, the task's run exited with
+result 0, and it started no second gateway. The re-registered task wasn't the cause.
+
+**Extra gateways: none.** One gateway the whole time (16940, started 11:31 PM, `hermes gateway status` agrees).
+- **The other YOUTH login:** the second YOUTH login that broke the read-aloud voice was **not** a gateway. It is
+  python PID 21480, a `discord_read_aloud.py` that Hermes started at 12:06:49 AM for Tiv ("can you read the lore in
+  the vault?").
+- **It's still reading:** it is still reading the whole Lore note (paragraph ~162 at 12:42 AM).
+- **I couldn't stop it:** it's elevated, so Stop-Process gets "Access is denied" from Claude's shell. Andy needs to end
+  it from an admin Task Manager.
+
+**Changed:**
+- **Backup:** `E:/hermes/backups/gateway_watchdog.ps1.2026-11-11.bak`.
+- **New check:** `gateway_watchdog.ps1` now treats the gateway as running if any of these is true:
+  - a pid in `gateway.pid`, `gateway_state.json` or `state/gateway.lifecycle.json` is a live `python.exe` (whose command
+    line, when readable, says `gateway run`). This works for elevated processes;
+  - any `python.exe` command line has `hermes` + `gateway run` (gateways started by hand from a normal shell).
+- **Second check:** if neither finds it, it checks again 20 s later and only then runs the task. It never restarts while
+  a gateway process is alive.
+- **No repeat restarts:** after a restart it waits 10 min before trying again, so a slow start isn't restarted every
+  minute.
+- **Logging:** it logs only state changes: `down ... restarted it at h:mm AM`, `still down after 10 min: restarted it
+  again`, and `gateway is back up (h:mm AM, after about N min)`.
+- **Alerts:** the Discord webhook alerts (HERMES_ALERT_WEBHOOK) are unchanged: same texts, 12-hour times. The file is
+  still UTF-8 with BOM, so Windows PowerShell reads the emoji.
+- **Stale state:** I deleted the stale `gateway_watchdog.state` from 11:29 PM. Otherwise the first run would have posted
+  a "back up after 0 min" alert an hour late.
+- **Task settings:** the Hermes_Gateway task already had IgnoreNew, so I didn't change it. The watchdog task still runs
+  every minute.
+- **Freeze tolerance:** there was no "~3 min freeze tolerance" in any script. The 20 s second check plus "never restart
+  a live process" stand in for it.
+
+**Tests:**
+- **By hand:** a run with the gateway up found 16940 in 1 s and logged nothing.
+- **Watchdog back on:** with `watchdog.off` deleted, the watchdog ran several times from 12:41 to 12:44 AM. There were no
+  new log lines, Hermes_Gateway didn't run, and there was still exactly one gateway.
+- **Down path:** not tested (that needs stopping the gateway; Andy didn't ask).
+- **bot_health.py:** `watchdog_restarts()` (regex `^(\S+ \S+) (.*restart.*)$`) counts both new restart lines and
+  skips the "back up" line, so it still reads the log correctly.
+
+**Left over:**
+- `hermes gateway status` warns "Scheduled Task registration predates the current template (launcher arguments
+  differs)". The fix is `hermes gateway install`; I left it alone (not part of this task).
+- The read-aloud script lost track of 21480 because a second reading overwrote and then removed the PID file.
+  PR #1280 (a new reading stops the old one first) helps only when the old one isn't elevated.
