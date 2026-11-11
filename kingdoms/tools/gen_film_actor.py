@@ -8,7 +8,8 @@ Three bodies, one set of animations (the bones are named alike):
   small swept ears) and orc_1 (an underbite with long tusks, a heavier brow, one ear torn short), after
   client/GreenskinLooks' shapes; they're painted from two patches the orc skins carry in the layout's unused corner
   (flesh at 56,16 and ivory at 56,24) and hidden on everyone else.
-Every body also has the fifth's cloak (cape_0-3) and its four tethers (tether_0-3), hidden on everyone but him.
+Every body also has the fifth's cloak (cape_0-3), the same cloak in three ribbons (ribbon_0-2_0-3) and its four tethers
+(tether_0-3), hidden on everyone but him.
 - film_actor_slim: 3-wide arms (Thessaly).
 - film_actor_piglin: a piglin's head (10 wide, snout, tusks, ears), wearing the game's own zombified piglin texture.
 
@@ -166,6 +167,20 @@ def body(arm=4, piglin=False):
 			cloth[fn] = (CLOTH[0], v0, CLOTH[0] + 1, v0 + 4)
 		r.cube("cape_%d" % i, (-half, y - drop, 2.4), (half, y, 3.0), cloth)
 		parent, y = "cape_%d" % i, y - drop
+	# the same cloak come apart: three ribbons of it side by side, each hinged like the cloak (ribbon_<j>_<i>). The renderer
+	# draws these in place of the whole cloak while it is at work (FilmActorRenderer)
+	for j in range(3):
+		parent, y = "body", 24.0
+		for i, (drop, half) in enumerate(((6.0, 4.6), (6.0, 5.2), (6.0, 5.8), (5.0, 6.4))):
+			x0, x1 = -half + j * half * 2.0 / 3.0 + 0.15, -half + (j + 1) * half * 2.0 / 3.0 - 0.15
+			name = "ribbon_%d_%d" % (j, i)
+			r.bone(name, parent, ((x0 + x1) / 2.0, y, 2.4))
+			v0 = CLOTH[1] + i * 4
+			cloth = {"north": (CLOTH[0] + j * 2, v0, CLOTH[0] + j * 2 + 3, v0 + 4), "south": (CLOTH[0] + j * 2, v0, CLOTH[0] + j * 2 + 3, v0 + 4)}
+			for fn in ("east", "west", "up", "down"):
+				cloth[fn] = (CLOTH[0], v0, CLOTH[0] + 1, v0 + 4)
+			r.cube(name, (x0, y - drop, 2.4), (x1, y, 3.0), cloth)
+			parent, y = name, y - drop
 	# and its tethers: four cords that come off the shoulders of the cloak on their own. Each is one block long, lying
 	# forward from its root (hung on a bone of their own that no move turns, so a flip or a kneel doesn't swing them off
 	# what they hold); the renderer turns it at what it has hold of and stretches it there (FilmActorRenderer)

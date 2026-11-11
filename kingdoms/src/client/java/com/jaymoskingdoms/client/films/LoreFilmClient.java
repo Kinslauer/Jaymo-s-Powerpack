@@ -218,6 +218,8 @@ public final class LoreFilmClient {
 	 * does, and the sorcerer is gone GLIDE_MISS ticks before. The camera stays behind the sorcerer for the first GLIDE_CUT
 	 * ticks of it. He comes down at GLIDE_DROP a tick and walks on (GLIDE_LAND) through the smoke.
 	 */
+	/** His cloak sets whole again this long after the sorcerer is gone (ticks). */
+	static final int CLOAK_SETS = 14;
 	static final double[][] SLING_TREES = {{45.0, 3.6}, {45.0, -3.6}};
 	static final int SLING_TICKS = 12, GLIDE_TICKS = 54, GLIDE_CUT = 20, GLIDE_REACH = 8, GLIDE_MISS = 3;
 	static final double SLING_BACK = 1.4, GLIDE_END = SORCERER_F - 1.3, GLIDE_HIGH = 0.6, GLIDE_ARC = 0.5, GLIDE_LAND = 0.3, GLIDE_DROP = 0.14;
@@ -1017,6 +1019,14 @@ public final class LoreFilmClient {
 		f.flash = Math.max(f.flash, much);
 	}
 
+	/** {@code a}'s cloak comes apart into its ribbons ({@code loose}), or winds back over it and sets whole. */
+	private static void cloak(Film f, Actor a, boolean loose) {
+		tape(f, FilmTape.CLOAK, a.index, loose ? 1 : 0, NONE, "");
+		if (a.e instanceof FilmActor actor) {
+			actor.cloak(loose);
+		}
+	}
+
 	/** Flame {@code id} takes at the stage point {@code at}, turned {@code turn}: nothing to see until it's given a size. */
 	private static void flame(Film f, int id, float[] at, float turn) {
 		tape(f, FilmTape.IGNITE, id, 0, new float[] {at[0], at[1], at[2], turn}, "");
@@ -1257,6 +1267,11 @@ public final class LoreFilmClient {
 				}
 			}
 			case FilmTape.QUENCH -> quench(f, e.a());
+			case FilmTape.CLOAK -> {
+				if (a != null) {
+					cloak(f, a, e.b() != 0);
+				}
+			}
 			default -> {
 			}
 		}
@@ -1842,6 +1857,9 @@ public final class LoreFilmClient {
 			quiet.restYaw = Float.NaN;
 			grue.facing = quiet;
 			swingTo(f, quiet, 1);
+			// his cloak goes to work: it winds over him and comes apart
+			cloak(f, quiet, true);
+			sound(f, SoundEvents.WOOL_BREAK, 0.7F, 0.6F);
 		}
 		if (t < QUIET) {
 			return;
@@ -1953,6 +1971,11 @@ public final class LoreFilmClient {
 					rout(f, guard);
 				}
 			}
+		}
+		if (since == CLOAK_SETS) {
+			// and done: it winds back over him and sets whole
+			cloak(f, quiet, false);
+			sound(f, SoundEvents.WOOL_PLACE, 0.7F, 0.6F);
 		}
 		if (since == 8) {
 			act(f, quiet, "look_about");

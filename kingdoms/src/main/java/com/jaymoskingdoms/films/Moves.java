@@ -41,6 +41,16 @@ public final class Moves {
 	}
 
 	/** Gives an "action" controller every one-off and held move of the library, each started by its name. */
+	/** The cloak coming apart into its ribbons (they wind round the body and fly loose), and winding back over it to set whole: how long each takes (ticks). */
+	public static final String CLOAK_PART = "cloak_part", CLOAK_FORM = "cloak_form";
+	public static final int CLOAK_PART_TICKS = 12, CLOAK_FORM_TICKS = 14;
+
+	/** Gives a "cloak" controller the cloak's two moves. */
+	public static <T extends GeoAnimatable> AnimationController<T> cloak(AnimationController<T> controller) {
+		return controller.triggerableAnim(CLOAK_PART, RawAnimation.begin().thenPlay(CLOAK_PART))
+			.triggerableAnim(CLOAK_FORM, RawAnimation.begin().thenPlayAndHold(CLOAK_FORM));
+	}
+
 	public static <T extends GeoAnimatable> AnimationController<T> actions(AnimationController<T> controller) {
 		for (String name : ONCE) {
 			controller.triggerableAnim(name, RawAnimation.begin().thenPlay(name));

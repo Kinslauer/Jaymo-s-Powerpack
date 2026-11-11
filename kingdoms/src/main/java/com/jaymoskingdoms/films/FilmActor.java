@@ -45,6 +45,9 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 	public String skin = "soldier_0";
 	public int body = WIDE, orc, gone;
 	public boolean cloak;
+	/** The cloak is in its ribbons (at work), not whole; and how long until it has set whole again (ticks; 0 not setting). */
+	public boolean ribbons;
+	private int setting;
 	/** The loops it stands and moves in. */
 	public String still = Moves.IDLE, moving = Moves.RUN;
 	private String gait = Moves.IDLE;
@@ -70,6 +73,21 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 		TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
 			EntityType.Builder.<FilmActor>of(FilmActor::new, MobCategory.MISC).sized(0.6F, 1.8F).noSave().noSummon().clientTrackingRange(8).build(key));
 		FabricDefaultAttributeRegistry.register(TYPE, PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 20.0));
+	}
+
+	/**
+	 * The cloak comes apart into its ribbons ({@code loose}: they wind round the body and fly free), or winds back over the
+	 * body and sets whole again.
+	 */
+	public void cloak(boolean loose) {
+		if (loose) {
+			this.ribbons = true;
+			this.setting = 0;
+			this.triggerAnim("cloak", Moves.CLOAK_PART);
+		} else if (this.ribbons && this.setting == 0) {
+			this.setting = Moves.CLOAK_FORM_TICKS;
+			this.triggerAnim("cloak", Moves.CLOAK_FORM);
+		}
 	}
 
 	/** Throws tether {@code which} at {@code to} (null lets go: it comes back in). */
@@ -98,6 +116,10 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 		boolean going = speed > STILL;
 		this.gait = going ? this.moving : this.still;
 		this.gaitRate = going ? Moves.rate(this.moving, speed, this.getScale()) : 1.0F;
+		if (this.setting > 0 && --this.setting == 0) {
+			this.ribbons = false;
+			this.stopTriggeredAnim("cloak", null);
+		}
 		for (int i = 0; i < TETHERS; i++) {
 			this.reachO[i] = this.reach[i];
 			this.reach[i] += this.tetherTo[i] != null ? (1.0F - this.reach[i]) * TETHER_OUT : -this.reach[i] * TETHER_IN;
@@ -112,6 +134,7 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 			return test.setAndContinue(Moves.loop(actor.gait));
 		}));
 		controllers.add(Moves.actions(new AnimationController<FilmActor>("action", 2, test -> PlayState.STOP)));
+		controllers.add(Moves.cloak(new AnimationController<FilmActor>("cloak", 0, test -> PlayState.STOP)));
 	}
 
 	@Override

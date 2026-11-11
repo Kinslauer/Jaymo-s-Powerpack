@@ -32,6 +32,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 	static final DataTicket<Integer> ORC = DataTicket.create("jaymoskingdoms_film_orc", Integer.class);
 	static final DataTicket<Integer> GONE = DataTicket.create("jaymoskingdoms_film_gone", Integer.class);
 	static final DataTicket<Boolean> CLOAK = DataTicket.create("jaymoskingdoms_film_cloak", Boolean.class);
+	static final DataTicket<Boolean> RIBBONS = DataTicket.create("jaymoskingdoms_film_ribbons", Boolean.class);
 	/** Each tether's {turn, tilt (radians, the model's way), length (blocks; 0 is in)}. */
 	static final DataTicket<float[]> TETHERS = DataTicket.create("jaymoskingdoms_film_tethers", float[].class);
 
@@ -74,6 +75,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 		state.addGeckolibData(ORC, actor.orc);
 		state.addGeckolibData(GONE, actor.gone);
 		state.addGeckolibData(CLOAK, actor.cloak);
+		state.addGeckolibData(RIBBONS, actor.ribbons);
 		float[] tethers = new float[FilmActor.TETHERS * 3];
 		if (actor.cloak) {
 			double scale = actor.getScale();
@@ -109,7 +111,11 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 			snapshots.ifPresent("right_arm", bone -> bone.skipRender(true).skipChildrenRender(true));
 		}
 		boolean cloak = info.getOrDefaultGeckolibData(CLOAK, false);
-		snapshots.ifPresent("cape_0", bone -> bone.skipRender(!cloak).skipChildrenRender(!cloak));
+		boolean whole = cloak && !info.getOrDefaultGeckolibData(RIBBONS, false), ribbons = cloak && !whole;
+		snapshots.ifPresent("cape_0", bone -> bone.skipRender(!whole).skipChildrenRender(!whole));
+		for (int j = 0; j < 3; j++) {
+			snapshots.ifPresent("ribbon_" + j + "_0", bone -> bone.skipRender(!ribbons).skipChildrenRender(!ribbons));
+		}
 		float[] tethers = info.getOrDefaultGeckolibData(TETHERS, null);
 		for (int i = 0; i < FilmActor.TETHERS; i++) {
 			float turn = tethers == null ? 0.0F : tethers[i * 3], tilt = tethers == null ? 0.0F : tethers[i * 3 + 1],

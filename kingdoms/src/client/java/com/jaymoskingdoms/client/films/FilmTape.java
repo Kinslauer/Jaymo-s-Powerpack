@@ -35,7 +35,7 @@ final class FilmTape {
 	static final int MAGIC = 0x4A4B4654, VERSION = 1;
 	/** What can happen in a tick ({@link Event#type}). */
 	static final byte ACT = 0, REST = 1, ITEM = 2, MAIM = 3, HURT = 4, HIDE = 5, SOUND = 6, PARTICLE = 7, BOLT = 8, FLASH = 9, GIB = 10, UNGIB = 11,
-		TETHER = 12, GAIT = 13, PLACE = 14, IGNITE = 15, FLAME = 16, QUENCH = 17;
+		TETHER = 12, GAIT = 13, PLACE = 14, IGNITE = 15, FLAME = 16, QUENCH = 17, CLOAK = 18;
 
 	/**
 	 * How finely a tape keeps things (steps to a block, or to a degree): where actors stand, which way they face, where a

@@ -23,6 +23,10 @@ Z = (0, 0, 0)
 SHORT = {"ra": "right_arm", "rf": "right_forearm", "la": "left_arm", "lf": "left_forearm", "rl": "right_leg", "rs": "right_shin",
 		 "ll": "left_leg", "ls": "left_shin", "b": "body", "w": "waist", "h": "head", "c0": "cape_0", "c1": "cape_1", "c2": "cape_2",
 		 "c3": "cape_3"}
+SHORT.update({"k%d%d" % (j, i): "ribbon_%d_%d" % (j, i) for j in range(3) for i in range(4)})
+# the cloak in ribbons: each follows what the whole cloak does in a move, the outer two swung a little more and splayed
+# apart, more toward their ends (degrees a link), and further by a pose's "fan"
+RIBBON_SWING, RIBBON_SPLAY = 0.18, (3.0, 5.0, 7.0, 9.0)
 
 
 def anim(name, length, loop, tracks):
@@ -43,10 +47,21 @@ def move(name, loop, frames, leg=12.0, cape=True):
 				tracks.setdefault("root", {}).setdefault("position", []).append((t, val))
 			elif k == "rr":
 				tracks.setdefault("root", {}).setdefault("rotation", []).append((t, v(val)))
-			elif k[0] == "c" and not cape:
+			elif k == "fan" or (k[0] in "ck" and not cape):
 				continue
 			else:
 				tracks.setdefault(SHORT[k], {}).setdefault("rotation", []).append((t, v(val)))
+	if cape:
+		for t, pose in frames:
+			for i in range(4):
+				if "c%d" % i not in pose or "k0%d" % i in pose:
+					continue
+				x, y, z = v(pose["c%d" % i])
+				for j in range(3):
+					side = j - 1
+					splay = side * (RIBBON_SPLAY[i] * (1.0 + abs(x) / 60.0) + (pose.get("fan", 0.0) if i == 0 else 0.0))
+					tracks.setdefault("ribbon_%d_%d" % (j, i), {}).setdefault("rotation", []).append(
+						(t, (x * (1.0 + RIBBON_SWING * side), y, z + splay)))
 	return anim(name, frames[-1][0], loop, tracks)
 
 
@@ -403,11 +418,24 @@ def moves(leg=12.0, cape=True):
 		(1.4, dict(dive, rr=(-90, 0, 520), pos=(0, 5.0, 14.0), c0=(-4, 0, 16), c1=(-8, 0, 24), c2=(8, 0, -26), c3=(-10, 0, 30))),
 		(1.95, dict(dive, rr=(-88, 0, 720), pos=(0, 5.0, 14.0), c0=(-12, 0, 0), c1=(6, 0, -10), c2=(-6, 0, 12), c3=(4, 0, -8))),
 		(2.3, {"rr": (-50, 0, 720), "pos": (0, 1.0, 6.0), "ra": (40, 0, 10), "rf": 90, "la": (-30, 0, -40), "lf": 20, "b": (-10, 20, 0),
-			   "w": (-4, 6, 0), "h": (40, -14, 0), "rl": 30, "rs": -70, "ll": -10, "ls": -40, "c0": -70, "c1": -30, "c2": -16, "c3": -8}),
+			   "w": (-4, 6, 0), "h": (40, -14, 0), "rl": 30, "rs": -70, "ll": -10, "ls": -40, "c0": -70, "c1": -30, "c2": -16, "c3": -8, "fan": 34}),
 		(2.56, {"rr": (-18, 0, 720), "pos": (0, -3.0, -1.0), "ra": (104, 0, 0), "rf": 2, "la": (-50, 0, -26), "lf": 10, "b": (-36, -26, 0),
-				"w": (-10, -8, 0), "h": (36, 22, 0), "ll": 66, "ls": -70, "rl": -44, "rs": -4, "c0": -96, "c1": -10, "c2": -4, "c3": -2}),
+				"w": (-10, -8, 0), "h": (36, 22, 0), "ll": 66, "ls": -70, "rl": -44, "rs": -4, "c0": -96, "c1": -10, "c2": -4, "c3": -2, "fan": 40}),
 		(2.7, {"rr": (-14, 0, 720), "pos": (0, -3.3, -2.4), "ra": (100, 0, 0), "rf": 4, "la": (-48, 0, -26), "lf": 12, "b": (-38, -24, 0),
 			   "w": (-10, -8, 0), "h": (34, 20, 0), "ll": 64, "ls": -68, "rl": -44, "rs": -4, "c0": -80, "c1": -16, "c2": 6, "c3": 8})]))
+	# the cloak comes apart and sets again (the "cloak" controller; only the ribbons are keyed). Andy: "it forms over him
+	# like the suit does to form the full cloak, and falls away the same way". Hung together as the whole cloak, the
+	# ribbons wind round his body (one round each side at the chest, one lower), then fly loose; and the same back
+	hung = {"k%d%d" % (j, i): Z for j in range(3) for i in range(4)}
+	wound = {"k00": (0, 0, 82), "k01": (86, 0, 0), "k02": (88, 0, 0), "k03": (80, 0, 0),
+			 "k20": (0, 0, -82), "k21": (86, 0, 0), "k22": (88, 0, 0), "k23": (80, 0, 0),
+			 "k10": (0, 0, 48), "k11": (70, 0, 0), "k12": (76, 0, 0), "k13": (70, 0, 0)}
+	loose = {"k00": (-46, 0, 12), "k01": (-20, 0, 8), "k02": (-10, 0, 10), "k03": (-6, 0, 12),
+			 "k10": (-40, 0, 0), "k11": (-18, 0, 0), "k12": (-8, 0, 0), "k13": (-4, 0, 0),
+			 "k20": (-46, 0, -12), "k21": (-20, 0, -8), "k22": (-10, 0, -10), "k23": (-6, 0, -12)}
+	if cape:
+		out.append(m("cloak_part", "once", [(0, hung), (0.3, wound), (0.4, wound), (0.6, loose)]))
+		out.append(m("cloak_form", "hold", [(0, loose), (0.3, wound), (0.45, wound), (0.7, hung)]))
 	# stood up out of it, the blade lowered, looking round for someone who isn't there (the root stays the two turns round
 	# the glide left it, so nothing spins back)
 	out.append(m("look_about", "hold", [
