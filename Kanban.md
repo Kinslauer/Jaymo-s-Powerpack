@@ -27,6 +27,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · #1325 · in-review
+- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Agents/claude-cloud-arsenal-anywhere|claude-cloud-arsenal-anywhere]] · 💻 Odysseus · #1326 · in-review
 - [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
 

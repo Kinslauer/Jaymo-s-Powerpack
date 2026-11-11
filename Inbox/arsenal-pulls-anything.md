@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
 claimed_by: claude-cloud
-pr: 
+pr: 1326
 ---
 
 # Pocket Arsenal pulls from anywhere
