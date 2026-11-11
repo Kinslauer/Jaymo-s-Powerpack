@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
@@ -22,6 +21,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
+- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🔥 Prometheus · claimed
 
 
 ## In review
