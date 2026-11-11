@@ -15,35 +15,27 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Sentry Ruins' other boss. Andy: the minotaur (Jaymo's Kingdoms' {@code jaymoskingdoms:minotaur}) "should spawn in the
- * aether as one of the dungeon bosses". With Kingdoms in the pack, {@link #MINOTAUR_CHANCE} of the ruins keep a minotaur in
- * the boss room in place of the Slider ({@code RuinPiece}). It keeps to its room; while it lives, a player inside shuts the
- * room's doors and they open again once nobody is in it; its bar shows to the players in the room; and its death opens the
- * doors, breaks the way to the boss's crates and unlocks the walls, as the Slider's does.
+ * A Sentry Ruins boss that isn't the Slider. For a while some ruins were built with the minotaur (Jaymo's Kingdoms'
+ * {@code jaymoskingdoms:minotaur}) in the boss room; no new ruin is (it keeps the labyrinths under the Overworld now,
+ * Kingdoms' {@code Labyrinths}), but the ones already standing in a world still work: the boss keeps to its room; while it
+ * lives, a player inside shuts the room's doors and they open again once nobody is in it; its bar shows to the players in
+ * the room; and its death opens the doors, breaks the way to the boss's crates and unlocks the walls, as the Slider's does.
  */
 public final class RuinBoss {
 	// ---- tuning ----
-	/** Of the ruins built with Kingdoms in the pack, how many keep a minotaur in place of the Slider. */
-	static final float MINOTAUR_CHANCE = 0.35F;
 	/** How often the loaded bosses are looked over (ticks). */
 	static final int CHECK_TICKS = 10;
-
-	static final Identifier MINOTAUR = Identifier.fromNamespaceAndPath("jaymoskingdoms", "minotaur");
 
 	/** On a ruin's boss that isn't the Slider: its room's interior (min x, y, z, max x, y, z). */
 	public static final AttachmentType<List<Integer>> ROOM = AttachmentRegistry.create(JaymosPowers.id("ruin_boss_room"),
@@ -75,21 +67,6 @@ public final class RuinBoss {
 			BARS.values().forEach(ServerBossEvent::removeAllPlayers);
 			BARS.clear();
 			SHUT.clear();
-		});
-	}
-
-	/** The minotaur's type, if Kingdoms is in the pack. */
-	@SuppressWarnings("unchecked")
-	static @Nullable EntityType<Mob> minotaur() {
-		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(MINOTAUR).orElse(null);
-		return type != null && type.getCategory() == MobCategory.MONSTER ? (EntityType<Mob>) type : null;
-	}
-
-	/** Places {@code type} in the boss room {@code room} of the piece {@code s} builds, at the spot given, as the ruin's boss. */
-	static void place(RuinSite s, EntityType<Mob> type, double x, double y, double z, float yaw, BoundingBox room) {
-		s.spawn(type, x, y, z, yaw, boss -> {
-			boss.setAttached(ROOM, List.of(room.minX(), room.minY(), room.minZ(), room.maxX(), room.maxY(), room.maxZ()));
-			boss.setHomeTo(room.getCenter(), Math.max(1, Math.min(room.getXSpan(), room.getZSpan()) / 2));
 		});
 	}
 
