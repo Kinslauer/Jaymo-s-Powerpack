@@ -8,7 +8,7 @@ mods: none (plan only)
 versions: 
 started: 2026-11-11
 owns:
-  - docs/Galvan-Moon-Plan.md
+  - docs/Ocellan-Moon-Plan.md
 ---
 # The band's elder and the moon kingdom (plan)
 
@@ -16,7 +16,7 @@ owns:
 
 ## Plan
 - Read Lore.md (far worlds, fallen stars, who made the bands, the Galvan, the hunter's orders) and the code (BandForge, RivalHunter, ZFighterSpace, SkyTowns, EpicTowns).
-- Write docs/Galvan-Moon-Plan.md: 4 tracks, open questions for Andy.
+- Write docs/Ocellan-Moon-Plan.md: 4 tracks, open questions for Andy.
 
 ## Notes
 - 
