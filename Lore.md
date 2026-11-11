@@ -87,8 +87,12 @@ kit.
 (new) **The twelve powers known in the world**, as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
-  a while. Corrupted, the reach becomes the Void.
-- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time.
+  a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
+  the future, a thing out of someone else's pack, even something hazardous that hurts the holder. Until the power is
+  mastered, the holder can't command what comes.
+- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
+  choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
+  within the blindness. At its height, the ultimate grants an almost bird's-eye view.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
@@ -99,11 +103,38 @@ kit.
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
-- **Web Slinger**: a spider's body, webs to swing on, and in time a symbiote that bonds with its host (see *The
-  dark*, and *Not yet placed*).
+- **Web Slinger**: a spider's body, webs to swing on, and in time a symbiote that bonds with its host. The web is a
+  side effect of the Quiet One's passing: it binds to those who gain an affinity for it during their life (see *The
+  symbiote*).
 - **Wind Control**: flight, and the wind held in a fist. Ascended it is the Tempest, corrupted Stormbound.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
+
+**The elemental powers** (Andy, 2026-11-11). Smoke, Gravity and Cryokinesis come from ki attuning to an element the
+holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
+itself they cannot see mana abilities or spirits. They can still develop valor.
+
+**Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
+outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
+
+**Costumes and masks** (Andy, 2026-11-11). Power users first made costumes to hide what they did. Today's costumed
+vigilantes work on the legend of the old heroes, but each has their own methods, some better than others, so they are
+widely disliked. Costumed power users turn up in the world, some wreaking havoc, some trying to help their people. A
+masked hero goes by the costume's name while masked.
+
+(new) **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
+the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
+wizards (who teach the making of a staff), the **Archer** from the Green Huntsman's hunters, the **Survivalist** from
+the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' gunners and the guards of the realms,
+the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
+**Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
+
+**Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
+each is acquired in its own way.
+
+(new) How that reads in the world: a temper is what a childhood leaves (the soft-hearted, the greedy, the hard), and
+valor is what a life earns by living it (a survivor's, a veteran's). Villagers name them in each other as ordinary
+traits, never as a system.
 
 (new) **The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
@@ -144,6 +175,16 @@ comes for a town, fighters hold the line at its wall of light and share the priz
 who beats his test unit wakes on his table an **android**, with endless ki that burns with no aura, no need for food,
 and wounds mended with iron or copper ingots rather than bandages. A wish can make them flesh again. (His Bio-built are
 under *The peoples*.)
+
+**Who the Tinkerer is** (Andy, 2026-11-11). The Mad Tinkerer is the only other Chrono user. He found it the way a
+player does, by messing about with time, but he **conquered his echo, and conquered death**. He has been running
+through time ever since, wreaking havoc on events and warping the timeline, and he seems to get away with all of it.
+If he is ever killed he cheats death the same way: his **echoes** reappear and act in his place, which is why he seems
+to be in several places at once.
+
+**His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
+years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
+his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 
 (new) **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
@@ -294,8 +335,9 @@ forged.
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
-(new) **The pods.** Nobody makes pods any more. The Mad Tinkerer designed them, "every rivet", and the drawings went
-with his big clock-machine when it vanished; now he cannot remember how. The ones flying are the ones that are left,
+(new) **The pods.** Nobody makes pods any more. The Mad Tinkerer designed them, "every rivet", working from the
+Frostborn's own void-ships as he did with his androids, and the drawings went with his big clock-machine when it
+vanished; now he says he cannot remember how. (A man who runs through time and never tells may be lying.) The ones flying are the ones that are left,
 and the Warrior-born raiders have most of them. A wrecked pod's log tells of salvagers who heard the Maw's dust "hum
 like the great stones back home do in a storm".
 
@@ -319,6 +361,11 @@ a while: forty-odd of them, from Bulwark and Gremlin to Wyrm, Lurk and the rule-
 scanning creatures and reading tablets. Bands corrupt and glitch. There is also a **rival band** that never falls from
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
 darkened aliens; mechs hunt band wearers at night too.
+
+**Who made the bands** (Andy, 2026-11-11). An **elder alien** on the **Pale Moon** developed the band, and the band's
+upgrades are done there, at the elder's forge. The elder's people have an extremely advanced society, a kingdom of
+their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
+the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
 ## The future: Los Perrito
 
@@ -344,8 +391,16 @@ district; the androids that swept the streets "stopped answering and started mar
 why; then the dead got up, a few more every night; the last stand was the east bridge. **Worky** drones map the
 streets and are "the only ones left who still ask if you're okay".
 
+**What happened to Los Perrito** (Andy, 2026-11-11). Los Perrito was the largest city on Earth. It was just another
+place the Warrior-born invaded, but this time they failed. The war went on for years, until the city's people left.
+Some still fight in the hope of someday taking back what was.
+
+**The three-sided war** (Andy, 2026-11-11). Frostborn troopers in rigs fight in the future too, so the streets are a
+three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
+
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
-travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow.
+travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
+the city, corrupted by the Tinkerer's bug.
 
 **Earth.** In the future they started calling the Overworld **Earth** (a dead rig's log: "It's just more Earth,
 burning"). Now, folk say the Overworld. Only future voices use the word.
@@ -464,6 +519,12 @@ outskirts), **the Ash** (their heartland) and **the Abyss** (their deepest dark)
 of the Gloam, of the Ash, of the Abyss), who teaches only "those who walk the shadowed path", once a day, in blood.
 Demon soldiers and captains serve them. There is no portal to any of it beyond the Nether's own.
 
+**The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
+joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
+too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
+blow can set off early, killing the imp. Their fireballs set trees and everything around them ablaze. (Imps are not in
+the game yet.)
+
 (new) **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
 and there are zombified Hornkin too.
@@ -498,6 +559,12 @@ Warrior-born, the orcs and the Grue came at it. That is what they were made for,
   inspiration, for the artists only: the Moon Knight take on Peter Parker in Marvel's Warp World. The look and the name
   in the game are our own; nothing of Marvel's is copied.)
 
+  **The symbiote and the anti** (Andy, 2026-11-11). The **black symbiote** was the original. It came from its own
+  world, farther even than Hail, and reached the Overworld on a meteorite. The Quiet One's mana dominated it,
+  purifying its nature and turning it to good and to healing, while it kept all its lethality: that is the white suit,
+  the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
+  is a side effect of his passing, binding to those who gain an affinity for it during their life.
+
 (new) **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
@@ -519,6 +586,12 @@ Twenty-two heritages. The plain folk and the elemental bloods:
 - **Frostborn**: they came to the Overworld from far past our sun, and brought with them technology the Overworld has
   never seen (Andy, 2026-11-11). They settled the snowfields and peaks, and the heat wears them thin. Crossing the
   void between worlds was theirs first: the Warrior-born learned it from them.
+
+  **Hail** (Andy, 2026-11-11) is their home world, constantly frozen and unwelcoming, and they love it. (It is a place
+  in the lore only, not a world you can travel to.) The Frostborn made the scouters, rigs, mechs, prosthetics and the
+  other tech found in the otherwise medieval Overworld, and people talk about it: everyone loves having Frostborn tech.
+  They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
+  they were born and raised on the Overworld, far removed from Hail.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -719,34 +792,10 @@ what is learned, from hermits who guide the way.
 
 Elements found in the mods that can't be placed without inventing something big. Each needs Andy's word.
 
-- **Pocket Arsenal's "other dimensions".** Where the summoned weapons come from (and the Void its corruption opens)
-  would be a new realm, and there are no new realms.
-- **Chronokinesis' source.** Why a Chrono can reach the future at all, and whether the Tinkerer's vanished clock-machine
-  has anything to do with it, is a big tie to make.
-- **The symbiote.** The web began with the Quiet One, and his white suit is the mana of purity, the anti of the
-  black. Where the black symbiote itself comes from, and how the web passed from him to today's Web Slingers, is
-  still open.
-- **Blindness, Smoke and Gravity's place.** Nothing in the game says why these powers exist beyond the one well; any
-  faith, people or event behind them would be new.
-- **The Xeno-Band's makers.** Who made the bands, where the forty-odd aliens came from, and who the band hunter is cast
-  out from.
-- **The Tinkerer's pods and the Frostborn's way.** The Warrior-born crossed the void the Frostborn way (Andy,
-  2026-11-11), and every pod flying now is the Tinkerer's design. Whether he built his pods from Frostborn craft, and
-  what the Frostborn's own ships were, is still open.
-- **The Frostborn's home.** "Far past our sun" is canon; its name, what became of it, and which of their technology
-  the game shows (the Z Fighter who sealed the draugr in the Stormborn Tomb was Frostborn) are open.
-- **The Tinkerer's androids and Los Perrito's.** The Tinkerer rebuilds fighters into androids; the androids came from
-  Los Perrito and travel in time. Whether he learned the work from them is open.
-- **The Omen pilots' blood.** "Earth" is the future's word for the Overworld, so Los Perrito is an Overworld city of the
-  future and a pilot calls herself "a plain Earthling". Every zombie there is still Warrior-born; how the dead of a
-  Warrior-born war came to fill an Earthling city is left unsaid.
-- **What turned the androids.** The pilots say the city's androids "stopped answering and started marching" and nobody
-  knows why. Whether that was the same androids who now travel in time is open.
-- **The demon masters' side.** "We were there" in the old war: whether the demons were the Grue's legion (the legion
-  that rose from the dark at the ford) or stood against it.
-- **Costumes and masks.** Masked heroes take a costume's name while masked; who wears costumes in the world and why is
-  unsaid.
-- **The classes** (Thief, Warlord, Mage, Archer, Survivalist, Brute, Marksman, Sorcerer, Rider). They read as trades
-  and need no lore, unless Andy wants schools or orders behind them.
-- **Valor and temperaments.** Each person's temper and valor shape how they act; they are systems rather than lore.
-- **The Excalibur look and the other art toggles.** Presentation, not lore.
+- **The elder alien's people.** Their species, their kingdom's name and look, and the ruler's name wait on the models
+  Andy is finding inspiration for.
+- **Hail's name in the game.** Whether any line names Hail, or only Frostborn talk of "home", is open.
+
+The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
+powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,
+costumes, the classes, valor and temperaments. The Excalibur look and the other art toggles stay out of the lore.
