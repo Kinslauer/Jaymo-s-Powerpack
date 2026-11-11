@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/story",
+  "display": {
+    "icon": {
+      "id": "minecraft:emerald"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.errands.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.errands.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

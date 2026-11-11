@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -21,7 +22,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -285,7 +285,7 @@ public final class ArsenalPower implements Power {
 	public void onCorrupted(ServerPlayer player) {
 		// the rift opens onto the void now
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_SCREAM, SoundSource.PLAYERS, 1.0F, 0.5F);
-		player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.6, 1.0, 0.6, 0.1);
+		player.level().sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.6, 1.0, 0.6, 0.1);
 	}
 
 	/** (0.15.31) Downed: what was running ends. */
@@ -341,7 +341,7 @@ public final class ArsenalPower implements Power {
 		long t = level.getGameTime() - pending.start();
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		if (t < ArsenalReach.PULL_END && t % 3 == 0) {
-			level.sendParticles(ParticleTypes.PORTAL, rift.x, rift.y, rift.z, 3, 0.2, 0.2, 0.2, 0.4);
+			level.sendParticles(MagicFx.VOID, rift.x, rift.y, rift.z, 3, 0.2, 0.2, 0.2, 0.4);
 		}
 		if (t == ArsenalReach.REACH_END) {
 			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.35F, 1.6F);
@@ -352,7 +352,7 @@ public final class ArsenalPower implements Power {
 		if (t >= ArsenalReach.CLOSE_END) {
 			PENDING.remove(player.getUUID());
 			player.removeAttached(ArsenalReach.REACH);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 16, 0.1, 0.1, 0.1, 0.12);
+			level.sendParticles(MagicFx.VOID, rift.x, rift.y, rift.z, 16, 0.1, 0.1, 0.1, 0.12);
 			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 0.5F, 1.5F);
 		}
 	}
@@ -389,6 +389,9 @@ public final class ArsenalPower implements Power {
 			List<ItemStack> future = pair == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
 			stacks = pair != null ? pair : future != null ? future
 				: new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
+			if (pair == null && future != null) {
+				com.jaymospowers.core.PowerRoads.arsenalFuture(player);
+			}
 		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
@@ -479,9 +482,9 @@ public final class ArsenalPower implements Power {
 		for (int i = 0; i < 8; i++) {
 			double a = spin + i * Math.PI / 4;
 			Vec3 p = center.add(right.scale(Math.cos(a) * radius)).add(up.scale(Math.sin(a) * radius));
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+			level.sendParticles(MagicFx.VOID, p.x, p.y, p.z, 1, 0, 0, 0, 0);
 		}
-		level.sendParticles(ParticleTypes.PORTAL, center.x, center.y, center.z, 4, 0.1, 0.1, 0.1, 0.6);
+		level.sendParticles(MagicFx.VOID, center.x, center.y, center.z, 4, 0.1, 0.1, 0.1, 0.6);
 	}
 
 	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks, int life,
@@ -497,8 +500,8 @@ public final class ArsenalPower implements Power {
 				} else {
 					player.getInventory().placeItemBackInInventory(special, Prediction.SERVER_ONLY);
 				}
-				level.sendParticles(ParticleTypes.END_ROD, rift.x, rift.y, rift.z, 14, 0.15, 0.15, 0.15, 0.08);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 30, 0.25, 0.25, 0.25, 0.05);
+				level.sendParticles(MagicFx.LIGHT, rift.x, rift.y, rift.z, 14, 0.15, 0.15, 0.15, 0.08);
+				level.sendParticles(MagicFx.VOID, rift.x, rift.y, rift.z, 30, 0.25, 0.25, 0.25, 0.05);
 				level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 0.9F, 0.8F);
 				level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 0.6F);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pulled", special.getHoverName())
@@ -521,8 +524,8 @@ public final class ArsenalPower implements Power {
 			}
 		}
 
-		level.sendParticles(ParticleTypes.END_ROD, rift.x, rift.y, rift.z, 14, 0.15, 0.15, 0.15, 0.08);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 30, 0.25, 0.25, 0.25, 0.05);
+		level.sendParticles(MagicFx.LIGHT, rift.x, rift.y, rift.z, 14, 0.15, 0.15, 0.15, 0.08);
+		level.sendParticles(MagicFx.VOID, rift.x, rift.y, rift.z, 30, 0.25, 0.25, 0.25, 0.05);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 0.9F, 0.8F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 0.6F);
 		if (!stacks.isEmpty()) {
@@ -655,8 +658,8 @@ public final class ArsenalPower implements Power {
 				blade.makeVoid();
 			}
 			level.addFreshEntity(blade);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 16, 0.25, 0.25, 0.25, 0.03);
-			level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 10, 0.1, 0.1, 0.1, 0.5);
+			level.sendParticles(MagicFx.VOID, pos.x, pos.y, pos.z, 16, 0.25, 0.25, 0.25, 0.03);
+			level.sendParticles(MagicFx.VOID, pos.x, pos.y, pos.z, 10, 0.1, 0.1, 0.1, 0.5);
 			level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.35F, 0.6F + level.getRandom().nextFloat() * 0.3F);
 		}
 		if (queue.isEmpty()) {

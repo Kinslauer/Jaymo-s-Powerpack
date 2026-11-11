@@ -544,6 +544,8 @@ public final class Quests {
 			Speech.GOLD);
 		// (0.7.109) and they remember it
 		Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
+		// a town errand toward the story's first act, for the party near too
+		Retaking.errand(player);
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.complete", title(q)).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, player.blockPosition(), q.royal() ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
 			1.0F, 1.0F);

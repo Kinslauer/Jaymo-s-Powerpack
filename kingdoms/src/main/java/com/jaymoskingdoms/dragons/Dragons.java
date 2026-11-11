@@ -50,7 +50,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.137) The wind dragons ({@code docs/Dragons-Plan.md}, {@link WindDragon}): Notus, Boreas and Zephyrus, and (0.7.141)
- * Eurus and Aeolus, who go about disguised as villagers ({@link Disguises}). In
+ * Eurus and Aeolus, who go about disguised as villagers ({@link Disguises}). They live in the Aether, flying about its
+ * islands ({@link #aether}), with Ignivorus and Notus in the Nether; they come to the Overworld only once someone in the
+ * world has killed a dragon ({@link DragonRecords#worldSlain}, {@link #overworldOpen}). From then, in
  * the Overworld each comes as a rare wilderness encounter ({@code Encounters}, biome tags
  * {@code jaymoskingdoms:has_<species>_dragon}): Notus over the badlands, Boreas over the frozen peaks, Zephyrus in the
  * swamps. In the Nether, where encounters don't reach, this looks for Notus over the basalt deltas (its tag). The
@@ -94,7 +96,9 @@ public final class Dragons {
 	/** (0.7.522) Aetherion, the star dragon over the Aether (Powers' {@code jaymospowers:aether}): its body, and how often each player
 	 * there is weighed for one (about once in two hours), how far off it turns up, and none comes while one is this near already. */
 	static final float AETHERION_WIDTH = 3.2F, AETHERION_HEIGHT = 3.8F;
-	static final float AETHERION_CHANCE = 1.0F / 240.0F;
+	/** How often a player in the Aether is weighed for any of its dragons (about once an hour), and how they share it: Aetherion, Notus, Boreas, Zephyrus. */
+	static final float AETHER_CHANCE = 1.0F / 120.0F;
+	static final int[] AETHER_WEIGHTS = {4, 2, 2, 2};
 	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
 
 	public static final TagKey<Biome> HAS_NOTUS = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_notus_dragon"));
@@ -150,7 +154,8 @@ public final class Dragons {
 		// grazes in the jungles and plains and spawns with the herds
 		STEGONAUT_DRAGON = dragon("stegonaut", StegonautDragon::new, STEGONAUT_WIDTH, STEGONAUT_HEIGHT, false, StegonautDragon.createAttributes());
 		STEGONAUT_DRAGON_SPAWN_EGG = egg(STEGONAUT_DRAGON);
-		SpawnPlacements.register(STEGONAUT_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
+		SpawnPlacements.register(STEGONAUT_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			(type, level, reason, pos, random) -> overworldOpen(reason) && Animal.checkAnimalSpawnRules(type, level, reason, pos, random));
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_STEGONAUT), MobCategory.CREATURE, STEGONAUT_DRAGON, STEGONAUT_WEIGHT, STEGONAUT_MIN,
 			STEGONAUT_MAX);
 		// (0.7.522) Atroxiia and Varasuchus, walkers that swim: alone, on the snow and the cold shores, and the beaches and swamps
@@ -158,7 +163,7 @@ public final class Dragons {
 		ATROXIIA_DRAGON = dragon("atroxiia", AtroxiiaDragon::new, ATROXIIA_WIDTH, ATROXIIA_HEIGHT, false, AtroxiiaDragon.createAttributes());
 		ATROXIIA_DRAGON_SPAWN_EGG = egg(ATROXIIA_DRAGON);
 		SpawnPlacements.register(ATROXIIA_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-			(type, level, reason, pos, random) -> Mob.checkMobSpawnRules(type, level, reason, pos, random)
+			(type, level, reason, pos, random) -> overworldOpen(reason) && Mob.checkMobSpawnRules(type, level, reason, pos, random)
 				&& (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || random.nextInt(ATROXIIA_RARITY) == 0));
 		// (0.7.536) Andy: Atroxiia is pulled until it has a proper walk (ATROXIIA_ON): no biome spawns, no op command, and
 		// any already in a world are cleared away (AtroxiiaDragon.tick). Its type, model and art stay for when it's fixed.
@@ -170,7 +175,8 @@ public final class Dragons {
 		}
 		VARASUCHUS_DRAGON = dragon("varasuchus", VarasuchusDragon::new, VARASUCHUS_WIDTH, VARASUCHUS_HEIGHT, false, VarasuchusDragon.createAttributes());
 		VARASUCHUS_DRAGON_SPAWN_EGG = egg(VARASUCHUS_DRAGON);
-		SpawnPlacements.register(VARASUCHUS_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mob::checkMobSpawnRules);
+		SpawnPlacements.register(VARASUCHUS_DRAGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			(type, level, reason, pos, random) -> overworldOpen(reason) && Mob.checkMobSpawnRules(type, level, reason, pos, random));
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_VARASUCHUS), MobCategory.CREATURE, VARASUCHUS_DRAGON, VARASUCHUS_WEIGHT, VARASUCHUS_MIN,
 			VARASUCHUS_MAX);
 		// (0.7.522) Ignivorus, the Nether's fire dragon on the Kintsugi wyvern: it turns up flying about the Nether (nether())
@@ -180,6 +186,7 @@ public final class Dragons {
 		AETHERION_DRAGON = dragon("aetherion", AetherionDragon::new, AETHERION_WIDTH, AETHERION_HEIGHT, false, AetherionDragon.createAttributes());
 		AETHERION_DRAGON_SPAWN_EGG = egg(AETHERION_DRAGON);
 		JaymosKingdoms.LOGGER.debug("dragon records: {} {}", DragonRecords.SLAIN, DragonRecords.TAMER);
+		DragonRecords.register();
 		Disguises.register();
 		DragonEggs.register();
 		// (0.7.158) Andy: the dragons' spawn eggs are out of creative (tab and search); /give still has them
@@ -278,7 +285,11 @@ public final class Dragons {
 		}
 	}
 
-	/** (0.7.522) Over the Aether, now and then an Aetherion comes flying about some way off from a player (unless one's near already). */
+	/**
+	 * (0.7.522) Over the Aether, now and then a dragon comes flying about some way off from a player (unless one's near
+	 * already): the star dragon Aetherion most often, else one of the wind dragons, Notus, Boreas or Zephyrus. The Aether
+	 * is where the dragons live (Andy): they come to the Overworld only once someone has killed one ({@link DragonRecords#worldSlain}).
+	 */
 	private static void aether(MinecraftServer server) {
 		ServerLevel level = Stacked.level(server, AETHER);
 		if (level == null || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
@@ -286,10 +297,22 @@ public final class Dragons {
 		}
 		RandomSource random = level.getRandom();
 		for (ServerPlayer player : Stacked.players(server, AETHER)) {
-			if (!player.isSpectator() && random.nextFloat() < AETHERION_CHANCE) {
-				aloft(level, player, random, AETHERION_DRAGON, AetherionDragon.class);
+			if (player.isSpectator() || random.nextFloat() >= AETHER_CHANCE) {
+				continue;
 			}
+			int roll = random.nextInt(AETHER_WEIGHTS[0] + AETHER_WEIGHTS[1] + AETHER_WEIGHTS[2] + AETHER_WEIGHTS[3]);
+			EntityType<? extends WindDragon> type = (roll -= AETHER_WEIGHTS[0]) < 0 ? AETHERION_DRAGON
+				: (roll -= AETHER_WEIGHTS[1]) < 0 ? NOTUS_DRAGON : (roll -= AETHER_WEIGHTS[2]) < 0 ? BOREAS_DRAGON : ZEPHYRUS_DRAGON;
+			aloft(level, player, random, type);
 		}
+	}
+
+	/**
+	 * Whether a dragon may spawn by {@code reason} in the Overworld: always by an egg, a spawner or a command, by nature only
+	 * once someone in the world has killed a dragon.
+	 */
+	static boolean overworldOpen(EntitySpawnReason reason) {
+		return reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || DragonRecords.worldSlain();
 	}
 
 	/**
@@ -300,12 +323,12 @@ public final class Dragons {
 		if (player.isSpectator() || !level.getBiome(player.blockPosition()).is(BiomeTags.IS_NETHER) || random.nextFloat() >= IGNIVORUS_CHANCE) {
 			return;
 		}
-		aloft(level, player, random, IGNIVORUS_DRAGON, IgnivorusDragon.class);
+		aloft(level, player, random, IGNIVORUS_DRAGON);
 	}
 
-	/** (0.7.522) A flier of {@code type} turned up in the air some way off from {@code player}, unless one's near already. */
-	private static <T extends WindDragon> void aloft(ServerLevel level, ServerPlayer player, RandomSource random, EntityType<T> type, Class<T> kind) {
-		if (!level.getEntitiesOfClass(kind, player.getBoundingBox().inflate(IGNIVORUS_CROWD)).isEmpty()) {
+	/** (0.7.522) A flier of {@code type} turned up in the air some way off from {@code player}, unless a wild dragon's near already. */
+	private static <T extends WindDragon> void aloft(ServerLevel level, ServerPlayer player, RandomSource random, EntityType<T> type) {
+		if (!level.getEntitiesOfClass(WindDragon.class, player.getBoundingBox().inflate(IGNIVORUS_CROWD), d -> !d.isTamed()).isEmpty()) {
 			return;
 		}
 		for (int i = 0; i < 16; i++) {

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.wounds.Bleeding;
@@ -8,7 +9,7 @@ import com.jaymospowers.core.wounds.Tripped;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -263,7 +264,7 @@ public final class Howl extends XenoForm {
 
 	/** The blood near you shows, to you alone, and every bleeder in reach glows. */
 	private static void scent(ServerPlayer player, ServerLevel level) {
-		DustParticleOptions red = new DustParticleOptions(0xB01818, 1.2F);
+		ParticleOptions red = MagicFx.wisp(0xB01818, 1.2F);
 		for (BloodTrail.Mark mark : BloodTrail.near(level, player.position(), SCENT_RANGE, m -> true)) {
 			level.sendParticles(player, red, true, false, mark.x, mark.y + 0.15, mark.z, 2, 0.15, 0.05, 0.15, 0.0);
 		}

@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/ogre_king",
+  "display": {
+    "icon": {
+      "id": "minecraft:skeleton_skull"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.skeleton_lord.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.skeleton_lord.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

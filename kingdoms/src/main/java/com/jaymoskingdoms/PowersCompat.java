@@ -67,6 +67,67 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
+	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
+	private static boolean lookedForClash;
+
+	private static void lookForClash() {
+		if (lookedForClash) {
+			return;
+		}
+		lookedForClash = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> fx = Class.forName("com.jaymospowers.combat.ClashFx");
+			clashSparks = java.lang.invoke.MethodHandles.publicLookup().findStatic(fx, "sparks", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, net.minecraft.world.phys.Vec3.class, int.class, float.class));
+			clashMet = java.lang.invoke.MethodHandles.publicLookup().findStatic(fx, "met", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, LivingEntity.class, net.minecraft.world.item.ItemStack.class, LivingEntity.class,
+				net.minecraft.world.phys.Vec3.class, int.class, float.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' clash sparks", e);
+		}
+	}
+
+	/**
+	 * Andy: "when swords clash or when parries occur there should be particle sparks". Jaymo's Powers' shower of hot
+	 * sparks at {@code at}, thrown across {@code line} (the way the blow ran): {@code count} of them, {@code scale} big.
+	 * False without Powers, and the caller draws its old vanilla sparks.
+	 */
+	public static boolean clashSparks(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, net.minecraft.world.phys.Vec3 line,
+		int count, float scale) {
+		lookForClash();
+		if (clashSparks == null) {
+			return false;
+		}
+		try {
+			clashSparks.invoke(level, at, line, count, scale);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * {@code attacker}'s blow met {@code defender}'s {@code guard} (a blade or a shield): Jaymo's Powers' sparks if steel
+	 * met steel, shards of wood ({@code chips}) off a wooden shield. False without Powers.
+	 */
+	public static boolean guardMet(net.minecraft.server.level.ServerLevel level, LivingEntity defender, net.minecraft.world.item.ItemStack guard,
+		LivingEntity attacker, int sparks, float scale, int chips) {
+		lookForClash();
+		if (clashMet == null) {
+			return false;
+		}
+		try {
+			clashMet.invoke(level, defender, guard, attacker, (net.minecraft.world.phys.Vec3)null, sparks, scale, chips);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (PvP indicator) Powers' {@code IncomingBlows.aimed(LivingEntity, LivingEntity, int, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle incoming;
 	private static boolean lookedForIncoming;
@@ -328,6 +389,62 @@ public final class PowersCompat {
 			return (float)smellOf.invoke(player);
 		} catch (Throwable e) {
 			return 0.0F;
+		}
+	}
+
+	/** Powers' {@code DivineSense.stayed(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle stayedDivine;
+	private static boolean lookedForStayed;
+
+	/** Whether {@code player} is one of the just who stayed at the Judge (both sides: Powers syncs it); false without Powers. */
+	public static boolean stayedDivine(Player player) {
+		if (!lookedForStayed) {
+			lookedForStayed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					stayedDivine = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.divine.DivineSense"),
+						"stayed", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stay at the Judge (older Powers?)", e);
+				}
+			}
+		}
+		if (stayedDivine == null) {
+			return false;
+		}
+		try {
+			return (boolean) stayedDivine.invokeExact(player);
+		} catch (Throwable e) {
+			stayedDivine = null;
+			return false;
+		}
+	}
+
+	/** Powers' {@code DivineSense.alight(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle alight;
+	private static boolean lookedForAlight;
+
+	/** A Divine-born's heritage key: Jaymo's Powers' Alight (the feathers come back). False without Powers, or if it won't have them. */
+	public static boolean alight(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForAlight) {
+			lookedForAlight = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					alight = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.divine.DivineSense"),
+						"alight", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Alight (older Powers?)", e);
+				}
+			}
+		}
+		if (alight == null) {
+			return false;
+		}
+		try {
+			return (boolean) alight.invokeExact(player);
+		} catch (Throwable e) {
+			alight = null;
+			return false;
 		}
 	}
 
@@ -2787,6 +2904,51 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code Karma.add}, or null without Powers (or an older one). */
+	private static java.lang.reflect.@Nullable Method karmaAdd;
+	private static boolean karmaLooked;
+
+	/**
+	 * {@code by} more (or less) on the weight of {@code player}'s life (Powers' {@code Karma}: what they are weighed by when
+	 * the life ends). Nothing happens without Powers (or an older one).
+	 */
+	static void karma(net.minecraft.server.level.ServerPlayer player, float by) {
+		if (!karmaLooked) {
+			karmaLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					karmaAdd = Class.forName("com.jaymospowers.core.wounds.Karma").getMethod("add", net.minecraft.server.level.ServerPlayer.class, float.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma (older Powers?)", e);
+				}
+			}
+		}
+		if (karmaAdd != null) {
+			try {
+				karmaAdd.invoke(null, player, by);
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// (a deed that goes unweighed)
+			}
+		}
+	}
+
+	/**
+	 * Tells Powers' {@code Karma.GUILTY} who is no innocent whatever they look like ({@link Outlaws#is}): killing one doesn't
+	 * weigh against a player as killing a villager does. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellGuilty(java.util.function.Predicate<net.minecraft.world.entity.Entity> guilty) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Karma").getField("GUILTY").get(null);
+			((java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>>)list).add(guilty);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma (older Powers?)", e);
+		}
+	}
+
 	/**
 	 * (0.7.524) Tells Powers' death by cause ({@code Mortality.BOSS_TESTS}) what Kingdoms counts as a boss: whatever shows a
 	 * boss bar ({@link BossBars#boss}), so a death to one is a boss's. Nothing happens without Powers (or an older one).
@@ -2899,6 +3061,16 @@ public final class PowersCompat {
 			return (boolean)waking.invoke(player);
 		} catch (Throwable e) {
 			return false;
+		}
+	}
+
+	/** The limbs {@code entity} has lost (Powers' {@code Dismember.missing}: its head, arm and leg bits); 0 without Powers. */
+	public static int missingLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForHealing();
+		try {
+			return missingLimbs == null ? 0 : (int)missingLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
 		}
 	}
 

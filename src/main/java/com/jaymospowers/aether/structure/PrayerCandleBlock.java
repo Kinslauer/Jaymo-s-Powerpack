@@ -1,8 +1,8 @@
 package com.jaymospowers.aether.structure;
 
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -123,7 +123,7 @@ public class PrayerCandleBlock extends Block {
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(LIT) && random.nextInt(5) == 0) {
 			Direction f = state.getValue(FACING);
-			level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5 + f.getStepX() * 0.1, pos.getY() + 0.9, pos.getZ() + 0.5 + f.getStepZ() * 0.1, 0.0, 0.02, 0.0);
+			level.addParticle(MagicFx.LIGHT, pos.getX() + 0.5 + f.getStepX() * 0.1, pos.getY() + 0.9, pos.getZ() + 0.5 + f.getStepZ() * 0.1, 0.0, 0.02, 0.0);
 		}
 	}
 }

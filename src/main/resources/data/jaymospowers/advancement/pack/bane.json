@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/skeleton_lord",
+  "display": {
+    "icon": {
+      "id": "minecraft:wither_rose"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.bane.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.bane.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

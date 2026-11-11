@@ -1,5 +1,12 @@
 package com.jaymoskingdoms;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -82,48 +89,59 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.529) Andy (2026-11-04), after Special Golems (ideas only, none of its files): "a magically attuned kingdom using golems
- * like these". A town golem is our own rune golem (a stone body with a carved core in its chest, eyes and core glowing, drawn
- * by {@code client/TownGolemRenderer}), in one of three kinds:
+ * Andy (2026-11-04), after Special Golems (ideas only, none of its files): "a magically attuned kingdom using golems
+ * like these". A town golem is a rune golem of our own, each kind with a body of its own (GeckoLib models, paint and
+ * animations from {@code kingdoms/tools/gen_town_golems.py}, drawn by {@code client/TownGolemRenderer}; Andy, 2026-11-11:
+ * "The village golems all need redesigns, the throne golem NEEDS to turn into a throne"):
  * <ul>
- * <li>{@link Kind#GILT} the <b>lamp warden</b>, an iron golem's ally: glows through the night and burns monsters (undead
- * twice over) with a beam.</li>
- * <li>{@link Kind#VERDANT} the <b>mender</b>: knits the hurt of those it looks after, and once in a while keeps one from
- * dying ({@link Golemworks#sparedByMender}).</li>
- * <li>{@link Kind#DIAMOND} the <b>throne golem</b>: a big, slow guard that on its maker's word kneels and folds itself into
- * a great throne (its back the chest and head, its arms the armrests, its legs the seat). Andy: "I want the diamond one to be
- * a throne, that takes the damage from the seat holder ... it just needs to transform into a giant throne", then: "this
- * should only answer to the realm's king, so noone else can use it. and it will always absorb the damage from the king or
- * queen, not just while they sit. If it takes more than 20 damage, it will transform into the guard mode, and attack
- * whoever was attacking the royal." So it serves its realm's ruler alone ({@link #ruler}): only they bid it kneel or rise,
- * sit in it, or fold it up; every blow the ruler takes within {@link #GUARD_RANGE} of it, the golem takes instead
- * ({@link #shieldRuler}); and once it has taken more than {@link #RISE_AT} so, it rises out of its throne and goes for whoever
- * struck, kneeling back into its throne at home once the fight is done.</li>
+ * <li>{@link Kind#GILT} the <b>lamp warden</b>, an iron golem's ally: a sandstone lamplighter whose head is a lantern. It
+ * glows through the night and burns monsters (undead twice over) with a beam from the lantern.</li>
+ * <li>{@link Kind#VERDANT} the <b>mender</b>: a mossy boulder with emerald crystals on its back. It holds out its hands
+ * and knits the hurt of those it looks after, and once in a while keeps one from dying
+ * ({@link Golemworks#sparedByMender}).</li>
+ * <li>{@link Kind#DIAMOND} the <b>throne golem</b>: a walking keep of dark masonry set with diamond that on its ruler's
+ * word sits and folds itself into a great throne (its thighs the seat and its shins the step before it, its keep slid
+ * back and a plinth let down under it as the back, its forearms the armrests, a crenellated crest raised behind its head
+ * as the high back). Andy: "I want the diamond one to be a throne, that takes the damage from the seat holder ... it just
+ * needs to transform into a giant throne", then: "this should only answer to the realm's king, so noone else can use it.
+ * and it will always absorb the damage from the king or queen, not just while they sit. If it takes more than 20 damage,
+ * it will transform into the guard mode, and attack whoever was attacking the royal." So it serves its realm's ruler
+ * alone ({@link #ruler}): only they bid it kneel or rise, sit in it, or fold it up; every blow the ruler takes within
+ * {@link #GUARD_RANGE} of it, the golem takes instead ({@link #shieldRuler}); and once it has taken more than
+ * {@link #RISE_AT} so, it rises out of its throne and goes for whoever struck, kneeling back into its throne at home once
+ * the fight is done.</li>
  * </ul>
  * An attuned realm keeps its own ({@link Golemworks}); anyone who knows Golemancy can make one on the infusion altar and set
  * it down where it should work (a throne golem serves the realm its maker rules, else the realm it's set down in, and stands
  * up nowhere else). Its maker sneaks and uses a lamp warden or mender with an empty hand to fold it back into its item; a
  * throne golem, only its ruler: use it to have it kneel into its throne, use the throne to sit (sneak to get up), sneak and
  * use the throne to have it stand, sneak and use it standing to fold it up.
+ *
+ * <p>Animations: a "move" controller picks the loop from what the golem is doing (idle, walk, the throne and the fold into
+ * or out of it, death); the server starts the one-off moves as they happen (the warden's beam, the mender's mending, the
+ * throne golem's blow, a flinch when hurt).
  */
-public class TownGolem extends AbstractGolem {
+public class TownGolem extends AbstractGolem implements GeoEntity {
 	public static EntityType<TownGolem> TYPE;
 
 	public enum Kind {
-		GILT("gilt", 160.0, 0.18, 1.15F),
-		VERDANT("verdant", 90.0, 0.24, 0.95F),
-		DIAMOND("diamond", 300.0, 0.16, 1.35F);
+		GILT("gilt", 160.0, 0.18, 1.15F, 0.86F),
+		VERDANT("verdant", 90.0, 0.24, 0.95F, 0.45F),
+		DIAMOND("diamond", 300.0, 0.16, 1.25F, 0.68F);
 
 		public final String id;
 		final double health, speed;
 		final float scale;
+		/** Where its light leaves it, as a share of its height: the warden's lantern, the mender's hands, the throne golem's core. */
+		final float beamFrom;
 		public Item item;
 
-		Kind(String id, double health, double speed, float scale) {
+		Kind(String id, double health, double speed, float scale, float beamFrom) {
 			this.id = id;
 			this.health = health;
 			this.speed = speed;
 			this.scale = scale;
+			this.beamFrom = beamFrom;
 		}
 
 		public static Kind byId(int i) {
@@ -153,9 +171,10 @@ public class TownGolem extends AbstractGolem {
 	static final int MEND_TICKS = 100, MEND_EVERY = 400;
 	/** Throne golem: its armour, blow; how long kneeling into the throne or rising out of it takes (ticks). */
 	static final double THRONE_ARMOR = 14.0, THRONE_DAMAGE = 14.0;
-	static final int FOLD_TICKS = 30;
-	/** Where a sitter sits, in the throne's own blocks before its scale: above its feet, and forward of its middle. */
-	static final double SEAT_Y = 0.32, SEAT_Z = 0.25;
+	public static final int FOLD_TICKS = 30;
+	/** Where a sitter sits, in the throne's own blocks before its scale: above its feet (the seat's top, 13 of the model's
+	 * 16ths), and forward of its middle. */
+	static final double SEAT_Y = 0.8125, SEAT_Z = 0.1;
 	/** Throne golem: it shields its ruler this near; rises to fight once it has taken more than this for them; the tally
 	 * clears after this long with no blow (ticks); and with nothing to fight this long it goes home and kneels again. */
 	static final double GUARD_RANGE = 48.0;
@@ -233,13 +252,13 @@ public class TownGolem extends AbstractGolem {
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
 			@Override
 			public boolean canUse() {
-				return TownGolem.this.kind() == Kind.DIAMOND && !TownGolem.this.throne() && super.canUse();
+				return TownGolem.this.kind() == Kind.DIAMOND && TownGolem.this.afoot() && super.canUse();
 			}
 		});
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8) {
 			@Override
 			public boolean canUse() {
-				return !TownGolem.this.throne() && super.canUse();
+				return TownGolem.this.afoot() && super.canUse();
 			}
 		});
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F) {
@@ -286,6 +305,11 @@ public class TownGolem extends AbstractGolem {
 		return this.entityData.get(THRONE);
 	}
 
+	/** On its feet and done unfolding: free to walk and strike. */
+	boolean afoot() {
+		return !this.throne() && this.tickCount - this.risenAt >= FOLD_TICKS;
+	}
+
 	/** (Client) how long since it last knelt into its throne or rose from it (ticks). */
 	public int sinceChanged() {
 		return this.tickCount - this.changedAt;
@@ -307,23 +331,27 @@ public class TownGolem extends AbstractGolem {
 		this.entityData.set(THRONE, throne);
 		if (throne) {
 			this.kneltAt = this.tickCount;
+		} else {
+			this.risenAt = this.tickCount;
 		}
 		this.getNavigation().stop();
 		this.setTarget(null);
 		if (!throne) {
 			this.ejectPassengers();
 		}
-		this.level().broadcastEntityEvent(this, throne ? KNEEL : RISE);
+		this.level().broadcastEntityEvent(this, throne ? KNEEL_EVENT : RISE_EVENT);
 		this.playSound(throne ? SoundEvents.DEEPSLATE_BRICKS_PLACE : SoundEvents.DEEPSLATE_BRICKS_BREAK, 1.4F, 0.6F);
 		this.playSound(SoundEvents.AMETHYST_BLOCK_RESONATE, 1.0F, throne ? 0.7F : 0.9F);
 	}
 
-	public static final byte KNEEL = 96, RISE = 97;
+	public static final byte KNEEL_EVENT = 96, RISE_EVENT = 97;
 
 	@Override
 	public void handleEntityEvent(byte id) {
-		if (id == KNEEL || id == RISE) {
+		if (id == KNEEL_EVENT || id == RISE_EVENT) {
 			this.changedAt = this.tickCount;
+			this.sawKneel = id == KNEEL_EVENT;
+			this.sawRise = id == RISE_EVENT;
 		} else {
 			super.handleEntityEvent(id);
 		}
@@ -396,7 +424,7 @@ public class TownGolem extends AbstractGolem {
 		this.lastBlow = now;
 		this.tally += amount;
 		this.hurtServer(level, source, amount);
-		this.beam(level, ruler, new DustParticleOptions(0x7FEFE0, 1.2F));
+		this.beam(level, ruler, 0x7FEFE0);
 		level.playSound(null, ruler.blockPosition(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		LivingEntity by = source.getEntity() instanceof LivingEntity l && l != ruler && l != this ? l : null;
 		if (this.tally > RISE_AT && this.isAlive()) {
@@ -448,7 +476,7 @@ public class TownGolem extends AbstractGolem {
 			long now = level.getGameTime();
 			GUARDED.values().removeIf(t -> now - t > 200);
 		}
-		if (this.throne()) {
+		if (!this.afoot()) {
 			this.getNavigation().stop();
 			return;
 		}
@@ -474,7 +502,7 @@ public class TownGolem extends AbstractGolem {
 
 	private void lamp(ServerLevel level) {
 		if (this.lit() && this.tickCount % 8 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
+			level.sendParticles(Fx.LIGHT, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
 		}
 		Mob foe = this.nearestFoe(level, BEAM_RANGE);
 		if (foe == null || this.cooldown > 0) {
@@ -482,8 +510,9 @@ public class TownGolem extends AbstractGolem {
 		}
 		this.cooldown = BEAM_EVERY;
 		this.getLookControl().setLookAt(foe);
+		this.triggerAnim("action", "beam");
 		boolean undead = foe.is(EntityTypeTags.UNDEAD);
-		this.beam(level, foe, new DustParticleOptions(0xFFE36A, 1.2F));
+		this.beam(level, foe, 0xFFE36A);
 		foe.hurtServer(level, this.damageSources().indirectMagic(this, this), undead ? BEAM_HARM * 2.0F : BEAM_HARM);
 		if (undead) {
 			foe.igniteForSeconds(3.0F);
@@ -503,8 +532,10 @@ public class TownGolem extends AbstractGolem {
 				continue;
 			}
 			e.setAttached(Golemworks.MENDED, now);
+			this.getLookControl().setLookAt(e);
+			this.triggerAnim("action", "mend");
 			e.addEffect(new MobEffectInstance(MobEffects.REGENERATION, MEND_TICKS, 1), this);
-			this.beam(level, e, new DustParticleOptions(0x7FF09A, 1.0F));
+			this.beam(level, e, 0x7FF09A);
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.4, 0.3, 0.0);
 			return;
 		}
@@ -517,15 +548,9 @@ public class TownGolem extends AbstractGolem {
 	}
 
 	/** A line of motes from its core to {@code to}. */
-	private void beam(ServerLevel level, Entity to, ParticleOptions mote) {
-		Vec3 from = this.position().add(0, this.getBbHeight() * 0.6, 0);
-		Vec3 end = to.position().add(0, to.getBbHeight() * 0.5, 0);
-		Vec3 step = end.subtract(from);
-		int n = Math.max(4, (int)(step.length() * 3));
-		for (int i = 0; i <= n; i++) {
-			Vec3 p = from.add(step.scale(i / (double)n));
-			level.sendParticles(mote, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
-		}
+	private void beam(ServerLevel level, Entity to, int colour) {
+		Vec3 from = this.position().add(0, this.getBbHeight() * this.kind().beamFrom, 0);
+		Fx.beam(level, from, to.position().add(0, to.getBbHeight() * 0.5, 0), Sorcery.BEAM_RADIUS * 1.3F, colour, Sorcery.BEAM_TICKS);
 	}
 
 	/** Whom it looks after: its maker and their party and pets, the town's folk, other golems, and players in good standing with its realm. */
@@ -625,7 +650,7 @@ public class TownGolem extends AbstractGolem {
 		return this.tickCount - this.kneltAt;
 	}
 
-	private int kneltAt = -1000;
+	private int kneltAt = -1000, risenAt = -1000;
 
 	// ---- body ------------------------------------------------------------------------------------------------------
 
@@ -663,12 +688,65 @@ public class TownGolem extends AbstractGolem {
 
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		this.triggerAnim("action", "smash");
 		boolean hit = super.doHurtTarget(level, target);
 		if (hit) {
 			target.setDeltaMovement(target.getDeltaMovement().add(0.0, 0.4, 0.0));
 			this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 0.7F);
 		}
 		return hit;
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt && this.isAlive() && !this.throne()) {
+			this.triggerAnim("action", "hurt");
+		}
+		return hurt;
+	}
+
+	// ---- animations (GeckoLib) -------------------------------------------------------------------------------------
+
+	/** The move controller's cross-fade (ticks). */
+	static final int ANIMATION_BLEND = 4;
+	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
+	private static final RawAnimation THRONE_HELD = RawAnimation.begin().thenLoop("throne");
+	private static final RawAnimation KNEEL = RawAnimation.begin().thenPlay("kneel").thenLoop("throne");
+	private static final RawAnimation RISE = RawAnimation.begin().thenPlay("rise").thenLoop("idle");
+	private static final RawAnimation BEAM = RawAnimation.begin().thenPlay("beam");
+	private static final RawAnimation MEND = RawAnimation.begin().thenPlay("mend");
+	private static final RawAnimation SMASH = RawAnimation.begin().thenPlay("smash");
+	private static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	/** (Client) it was seen to kneel or rise (one that comes into view already a throne is drawn folded at once). */
+	private boolean sawKneel, sawRise;
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<TownGolem>("move", ANIMATION_BLEND, test -> {
+			TownGolem golem = test.animatable();
+			if (golem.isDeadOrDying()) {
+				return test.setAndContinue(DEATH);
+			}
+			if (golem.throne()) {
+				return test.setAndContinue(golem.sawKneel ? KNEEL : THRONE_HELD);
+			}
+			if (golem.sawRise && golem.sinceChanged() < FOLD_TICKS) {
+				return test.setAndContinue(RISE);
+			}
+			return test.setAndContinue(test.isMoving() ? WALK : IDLE);
+		}));
+		controllers.add(new AnimationController<TownGolem>("action", 2, test -> PlayState.STOP).triggerableAnim("beam", BEAM)
+			.triggerableAnim("mend", MEND).triggerableAnim("smash", SMASH).triggerableAnim("hurt", HURT));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override
@@ -690,6 +768,8 @@ public class TownGolem extends AbstractGolem {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(KIND, input.getIntOr("kind", 0));
+		// one saved at an older size takes its kind's size as it is now
+		this.getAttribute(Attributes.SCALE).setBaseValue(this.kind().scale);
 		this.entityData.set(THRONE, input.getBooleanOr("throne", false));
 		this.faction = input.getIntOr("faction", -1);
 		this.owner = input.getString("owner").map(UUID::fromString).orElse(null);
@@ -737,7 +817,7 @@ public class TownGolem extends AbstractGolem {
 			}
 			level.addFreshEntity(golem);
 			level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
+			level.sendParticles(Fx.GLYPH, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
 			context.getItemInHand().consume(1, player);
 			return InteractionResult.SUCCESS;
 		}

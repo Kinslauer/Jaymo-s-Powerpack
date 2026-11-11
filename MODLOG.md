@@ -2250,3 +2250,349 @@ Built, not played.
 - `client/wounds/DownedPose` (kinds and styles, the person and machine poses), new `client/wounds/DownedBodies` (the
   rest). Tuning numbers at the top of both.
 - Built (compileClientJava); not played.
+
+## 0.22.3 (2026-11-11): sparks off clashing steel, splintering shields
+
+Andy (2026-11-11): "when swords clash or when parries occur there should be particle sparks", and "splintering wood from
+shattering shields", in real fights as well as the film.
+- **Sparks** (`combat/ClashFx`, `client/combat/ClashFxClient`): our own spark, in place of vanilla's crit stars. A shower
+  flies out from the point the steel met, mostly to the sides of the blow, falls, bounces once and cools from white through
+  orange to dull red, with a small flash at the meeting point. Every parry throws one (the shared weapon and shield parry,
+  a Darktide's blade), bigger for a perfect parry, and a guard that breaks throws one too.
+- **Every blocked blow** shows what it hit (`BlockFxMixin`): a few sparks off a blade's guard or a metal shield, chips of
+  wood off a wooden one, for players and mobs alike. Arrows chip wooden shields too.
+- **Wooden shields break apart** (`combat/ShieldShatter`): a player's shield that runs out of durability bursts into
+  tumbling shards that lie on the ground a moment. A mob's wooden shield breaks after 28 points blocked (an axe counts
+  double), the mob reels, and it takes up a spare four minutes later once it's out of the fight. Metal shields never break
+  this way. What counts as wood: the `jaymospowers:wooden_shields` item tag, else any shield with no metal or stone in its name.
+- For the films and other mods: `ClashFx.sparks`, `ClashFx.splinters`, `ClashFx.met`, `ShieldShatter.shatter` on the
+  server; `ClashFxClient.sparks` and `ClashFxClient.splinters` with no packet on the client. Sprites from `tools/gen_clash_fx.py`.
+- Compiled; not played. The spark and shard sizes, counts and speeds are constants at the top of `ClashFx` and `ClashFxClient`.
+
+## 0.22.4 (2026-11-11): symbiote suit takes a worn costume's shape
+
+- **The costume is the suit** (Andy: "any symbiote user with a costume has the symbiote take that shape for its suit
+  instead, so it can be called on and off at will like the default suit does"). Anyone bonded to a symbiote (any strain,
+  web slinger or not) who puts a costume on no longer wears cloth: the symbiote takes the design. The X menu's Suit tile
+  calls it and withdraws it. Withdrawn, you look like yourself and your armour shows; called, you wear the costume in
+  its own colours, with its mask, cape, emblem and suit-editor pieces.
+- **Forming**: called, the tendrils wrap and the goo covers you as before, then the costume folds over the goo part by
+  part where the plain suit used to. Withdrawn calmly, it goes back the same way. Torn off (the menu toggle, a
+  rejection, a fight for it) it turns back into the strain's plain suit and tears away as it always did.
+- **Bigger forms**: Living Armor keeps the costume with its tendrils and weapon arm; the big suit swallows it and it
+  comes back when the big suit goes.
+- **Mask and identity**: the mask key and the X menu's Mask chip both lift the costume's head piece. A face-hiding mask
+  or hood only hides who you are while the suit is called (`SecretIdentity` follows the Suit flag).
+- **First person**: your sleeve is the costume's while the suit is called, bare while it is withdrawn.
+- Unchanged: `/costume off` and the Costume Table still hand the costume back; dying still leaves it on your body;
+  a host whose symbiote leaves wears it as plain cloth again.
+- Classes: `costume/Costume` (`symbioteShape`, `shown`), `client/costume/CostumeClient` (`SHAPE`, `forming`, `laid`),
+  `CostumeModels.Worn`, `WebSymbioteLayer`, `WebSymbioteHand`, `WebSuitGrowth.suitLaid`, `WebSymbiote.set/toggleMask/unmasked`,
+  `BodyCover.ownArms`.
+- Compiled; not played. Expect tuning on how the costume folds over the goo, and the jump from costume to plain suit
+  when it is torn off.
+
+## 0.22.5 (2026-11-11): shields break by durability, axes wear them faster
+
+Andy (2026-11-11): "The shields break when their durability is gone, and axe hits deal more damage to its durability than swords".
+- **Durability only** (`combat/ShieldShatter`): a mob's wooden shield no longer has a hidden strength of 28 blocked
+  points. Every shield, a player's or a mob's, breaks when its durability runs out and at no other time. A wooden one
+  still bursts into shards when it does, and a mob that lost its shield still reels and takes up a whole spare four
+  minutes later.
+- **Axes** (`ShieldShatter.axe`, `AXE_FACTOR`): a blow from an axe (any weapon that knocks a shield aside) wears a raised
+  shield three times as fast as a sword's of the same weight, wooden or metal, whoever holds it. Weapon guards are untouched.
+- Compiled; not played.
+
+## 0.22.6 (2026-11-11): karma - a life is weighed when it ends (#1291)
+
+Andy: "a karmic alignment system, meaning your actions are weighed against you after death ... If you were evil you
+reincarnate in the nether, one last chance to continue your life, however it will be extremely difficult. Or if you were
+just you end up in the otherworld, allowed the chance to respawn instead of reincarnating, so good karma pays off. (You
+will still have to fight in the tournament as a non z fighter)".
+- **The weight** (`core/wounds/Karma`): a hidden score per life, -100 to 100, never shown. Up: monsters (+0.15), the
+  undead (+0.25), bosses (+4), outlaws (+0.3), getting the fallen up (a player +5, a villager +3), a good name with lawful
+  settlements (Kingdoms). Down: killing a villager (-8, a child -14), a player (-12; +2 if they were wicked), someone
+  else's tamed animal (-4), and whatever costs a settlement's good name. Crossing into just (25) or wicked (-25) shows one
+  vague line above the hotbar. The Judge will say how your page reads (five answers, no numbers).
+- **When a life ends for good** (the death-by-cause roll is lost, or a timer runs out), it is weighed first:
+  - **Just**: you wake in the Other World with a halo, Z Fighter or not. The fortune teller takes no coin from you; win
+    the tournament of the dead and she sends you back as you were (to where you fell), at the cost of half your weight.
+    One who never trained is lent a Borrowed Blade (an iron sword) and meets spirit fighters with 60% of their health.
+    Not won when the Other World lets go (30 minutes): the life is over and you are born again.
+  - **Wicked**, once in a life: the screen stays black ("You don't wake. You sink.") and you wake in the Nether at 30%
+    health and 6 food, 140 to 220 blocks from a lit portal (the nearest one standing within 128 blocks of the spot under
+    where you fell, or one built there). Every 45 seconds a line says which way its cold draught blows from. Piglins and
+    everything hostile within 24 blocks come for you every 5 seconds. A death down there is final, with no roll and no
+    wake. Leave the Nether alive and the life goes on as it was.
+  - **Anything between**: born again, as before.
+- A new life starts at 0. `/karma [player]` and `/karma <player> set <weight>` for ops.
+- Rides on `death_by_cause`; the Other World needs `afterlife=true`. Lore: "The weighing" under The dead in Lore.md.
+- Compiles (Gradle); not played. The numbers are first guesses.
+
+## 0.22.7 (2026-11-11): Wind: Spiral Dive
+
+- **Spiral Dive (Jung):** a Wind user with 2 or more abilities unlocked who taps X in the air, looking steeply down
+  (50 degrees or more) with 6 blocks of clear air below, plunges in a spin with a spiral of cloud winding round them,
+  steering a little with their aim. It works out of wind flight (the flight is dropped). Where they land a ring of wind
+  runs out along the ground: everything near is shoved away and lifted, harder after a longer fall (full at 30 blocks),
+  for light wind damage (2 to 5), and fire in the ring is blown out. Allies are spared.
+- **Costs:** one hunger point, a 20 s cooldown (longer in the cold) that is spent even if the ring catches nothing, and
+  the landing leaves the diver winded: rooted, no walking or jumping, for 0.6 to 1.5 s. Taking flight again more than
+  half a second into the dive pulls out of it, with no ring.
+- Fall rules are untouched: the dive only sets the diver's speed (as the Thunder Dive does), and it needs the same 2
+  unlocked abilities from which a Wind user's falls stop hurting.
+- **Changed for fully mastered Wind users:** a Tempest Kick aimed steeply down from 6 or more blocks up is now the
+  dive. When the dive can't start (too low, cooling down) the tap is the kick as before. The Thunderhead's Thunder Dive
+  stays on C.
+- The X key's description mentions it. No new key, packet or client code: the tap is read in `WindKick`'s handler.
+- Classes: `WindSpiralDive` (new), `WindKick` (the tap), `WindPower` (`dropFlight`, registration, stop on downed and on
+  losing the power, `/powerdebug wind cooldowns`). `docs/wind.md` has the numbers and test steps.
+- **Not built and not played.** The session that wrote it could not reach the build's download hosts, so
+  `gradlew build` has not been run on this change; the PR checks are its first compile. No HUD chip for the cooldown.
+
+## 0.22.8 (2026-11-11): cobalt ore and the knife metals - the four ingots nobody could get (#1297)
+
+- **Why**: Andy: "All items need crafting routes that make sense". Cobalt, Manyullyn, Queen's Slime and Hepatizon ingots
+  had knives, stats and traits but no ore, recipe, loot or trade: survival could not get one.
+- **Cobalt Ore**: blue spots in the Nether's netherrack (`Tinkering.COBALT_ORE`, feature `ore_cobalt`: veins of 5, 4 a
+  chunk, y 8 to 118). Iron pickaxe; drops itself. Smelts or blasts to a Cobalt Ingot, or melts in the smeltery for two.
+- **Alloys** (`Melting.ALLOYS`, cast into ingots on a casting table):
+  - Manyullyn: 3 cobalt + 1 steel makes 4.
+  - Queen's Slime: 1 cobalt + 1 gold + slime makes 2.
+  - Hepatizon: 2 copper + 1 cobalt + amethyst makes 2.
+- Four new liquids (`Molten.COBALT`, `MANYULLYN`, `QUEEN_SLIME`, `HEPATIZON`): ingots only, no cast parts, since their
+  parts are knife parts made from the ingot at the Part Builder.
+- Assets from `tools/gen_knife_metals.py` (the ore is vanilla's nether gold ore with its spots recoloured).
+- Tinkers' own Manyullyn takes ancient debris and its Queen's Slime magma cream; ours use steel and slime so no new
+  liquid is needed. Change the lines in `Melting.ALLOYS` to retune.
+- Lore: a `(new)` Cobalt paragraph under "The Nether and the demons" for Andy to approve.
+- Built (Gradle compileClientJava clean); not played, the ore's spawn rate is a first guess.
+
+## 0.22.9 (2026-11-11): The Retaking - advancement tab as the story (#1296)
+
+- The "Jaymo's Powerpack" advancement tab is now **The Retaking**: the five Knowledge kings run down the middle as the acts (The Hearth, The Old Stones, Lights in the Sky, The Dark Below, Legend), each act's milestones hang off the king before it. Side branches (cooking, ships, alchemy, forging, executions) are unchanged.
+- New advancements: Odd Jobs (three town errands), The Long Defence (find the book), and one per king. Sworn, the monolith, the Aether and Not the Last moved to their acts. Reaching the Aether is awarded by Kingdoms now (same criterion, so it stays earned).
+- Data and lang only; not played.
+- The Z Fighter training screen's **Story button is gone** (Andy): the story is the H menu's Story tab for everyone now. Sagas already under way still finish; side jobs still come from masters and the Keeper. The sagas return later as the fighter's own road in the Story tab.
+
+## 0.22.10 (2026-11-11): The Retaking - Where the Five Stood (#1299)
+
+- New Act II advancement **Where the Five Stood**: find the ford below the old keep in the wood (awarded by Kingdoms).
+- Data and lang only; not played.
+
+## 0.22.11 (2026-11-11): The Retaking, Act III: Lights in the Sky (#1301)
+
+- **Five new milestones** in the Jaymo's Powerpack advancement tab, hanging off the Ogre King: Lights Put Out (beat a raider band), Fallen Star (break open a fallen star or star wreck), Above the Sky (fly a pod), The Maw (set foot in it), Not Our Sky (free or conquer a far world). They count only once Act III has begun; one done earlier has to be done again.
+- **Raider's Tally**: a beaten raider band leaves a short book at its pod, the worlds the band has taken in its own few words. It files in the lore codex.
+- Powers leaves a `jaymospowers.retaking.<deed>` tag on the player (`PackAdvancements.deed`); Jaymo's Kingdoms turns it into the milestone. Hooks in ZFighterRaiders, FallenStarBlock, StarWreckBlock, ZFighterPodTrip, ZFighterSpaceMissions.
+- Built; not played.
+
+## 0.22.12 (2026-11-11): The Retaking, Act IV: The Dark Below (#1302)
+
+- **Five new milestones** in the Jaymo's Powerpack advancement tab, hanging off the Skeleton Lord before the Piglin King: A Voice Behind You (a spirit wakes for you), Back in the Ground (end your Bane with its own marks), The Deepest Dark (walk into the Abyss), A Page in His Book (ask the Judge how your page reads), Leashed (beat the Grue in its own dark). They count only once Act IV has begun.
+- **Muster-Roll**: every demon village chest holds the village's muster-roll for the sorcerer's battle: who went up, what they were promised, who came home, and that they have not been called again. Yet. It files in the lore codex.
+- New `core/LoreBook` makes these written lore books (the Raider's Tally uses it too). Asking the Judge leaves the `weighed` deed tag.
+- Built; not played.
+
+## 0.22.13 (2026-11-11): sound - ImmersiveFX in, varied sounds, the web sense turns your head (#1303)
+
+- **ImmersiveFX: Resurrected** 1.9.0 (AGPL-3.0, Fabric 26.3, client-only) joins the pack unchanged: footsteps for each
+  kind of ground, armour, wading and swimming sounds, biome ambience heard from where it is, crafting and workstation
+  sounds, a stomach growl, auroras, fog, jets, and a sound browser (Ctrl+I). **AmbientSounds 6 and CreativeCore leave**
+  (Andy's pick), so there is one ambience system; the build moves them out of the CurseForge profile. Its blood,
+  fireflies and waterfalls are left on beside ours (Andy: "the more blood the better").
+- **Varied sounds** (`client/sound/Varied`, `VariedSoundEngineMixin`): every one-shot sound in the world plays one of
+  seven pitch steps around what was asked (2% apart), never the step it had last time, so the same clink or hit doesn't
+  repeat note for note. Loops, music, voices, menu sounds, note blocks, bells, horns, records and Chronokinesis' clock
+  ticks are untouched.
+- **Web sense glance** (`client/power/web/WebSenseGlance`): when an ascended web slinger's Spider-Sense picks up a new
+  danger out of sight (a creature that has just turned on you, a creeper starting to swell, a skeleton drawing), the
+  look snaps round to it: the first-person view swings and others see the head turn. It adds to the mouse, stops once
+  the danger is in view, lasts at most 12 ticks and waits 50 ticks between glances.
+- Compiled (`compileClientJava`); not played. ImmersiveFX has not been run beside Sound Physics Remastered, Subtle
+  Effects or Iris yet, and its doubled effects (fireflies, waterfalls, footprints) may want turning down in its config.
+
+## 0.22.14 (2026-11-11): The Retaking, Act V: Legend (#1304)
+
+- Three new milestones in the Jaymo's Powerpack advancement tab, hanging off the Piglin King before the Wither: A Light in the Keep, The End's Dragon, The Second Defence (Jaymo's Kingdoms awards them).
+- Built; not played.
+
+## 0.22.15 (2026-11-11): TEST: ImmersiveVFX in place of Iris and Complementary (#1305)
+
+- A trial Andy asked for ("We can test this to see if it runs better, if not it gets scrapped"). **ImmersiveVFX 2.0.5**
+  (all rights reserved, alpha, Fabric 26.3, client-only, shipped unchanged) joins the pack: pixel shadows, shore foam
+  and caustics, clouds and sky, fire, ground fog, sand winds, auroras, heavier rain.
+- Its page says it does not work with Iris, so **Iris and the Complementary Unbound default leave** while it is in
+  (the build moves Iris out of the CurseForge profile), and **Sodium goes from 0.9.2 to 0.9.3-beta.4**, which it needs.
+- No code changes. `ShaderPreset`, `LowEndMode` and Kingdoms' dark-night Iris mixins all check for Iris and do nothing
+  without it; the Aether veil's Sodium mixin compiles against the beta.
+- What to look at in game: frame rate against the old shaders, dark nights (they were dimmed through Iris), the Aether
+  staying hidden from the ground, `/lowend`, and whether Bobby and the other Sodium mods still load on the beta.
+- To scrap it, revert this PR: the comments in `build.gradle` say which lines.
+- Compiled; not run. Nothing here has been started with ImmersiveVFX or the Sodium beta.
+
+## 0.22.16 (2026-11-11): Magic FX: every effect has a type (#1306)
+
+- Andy: "Every effect should have a type, (beam, blast, miasma, etc) and go to the same asset for each one, like the
+  beacon for beams". New `core/fx/MagicFx` with `client/fx/MagicFxClient`: **beam** (the beacon beam: core and glow),
+  **blast** (a swelling shell round a white-hot heart), **ring** (a shockwave over the ground), **orb**, **sigil** (a
+  turning circle of marks on the ground), and two particles, **mote** (a glint of light) and **miasma** (a soft dark
+  puff). Only colour, size and time vary. Dark colours draw as murk in every type.
+- Every recoloured redstone dust in the powers, alchemy, baubles and Aether guardians is now a mote, or miasma if its
+  colour is dark (Darktide's ink, gravity's shadow, flux, blight, gas). 22 one-off dust clouds (transformations,
+  surges, wave impacts, self-destruct) and 27 recoloured firework flashes are blasts. The god ritual's pad beams are
+  real beams; the full-ki burst and milestones throw a ring.
+- Left alone because they aren't magic: the symbiote's goo, Hive, redstone charging the Rig, attack tells, leaves, gun
+  muzzle flashes, tournament fireworks.
+- Rules for new effects and what is still to move: `docs/MagicFx.md`. Textures: `tools/gen_magic_fx.py`.
+- Compiles (Gradle, `compileJava compileClientJava`); not played. Lines and circles drawn as rows of dust inside loops
+  are rows of motes for now, and END_ROD / ELECTRIC_SPARK style particles are a later pass.
+
+## 0.22.17 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Two new effect types: **spark** (a jagged fork that jumps every tick, for lightning and charge) and **rune** (marks
+  from the sigil's alphabet, for enchanting and written magic).
+- Vanilla particles that stood in for magic (end rod, electric spark, enchant glyphs, portal specks, witch, glow, wax,
+  dragon breath, tinted potion swirls) now use the typed looks: about 540 places across the powers. Machines, rigs,
+  sentries and real portals keep the vanilla ones.
+- Dotted lines and circles from the shared helpers are now real beams and rings: the Xeno form's beams and rings,
+  Rivet's lines, the Z Fighter gift line, the Arsenal streak, and the Sun patron's column.
+- `docs/MagicFx.md` lists the new types, the stock looks (`MagicFx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`, `MURK`) and `MagicFx.line` / `circle`.
+- Built; not played.
+
+## 0.22.18 (2026-11-11): the minotaur, a boss of the Sentry Ruins (#1311)
+
+- Andy: the minotaur "should spawn in the aether as one of the dungeon bosses".
+- With Jaymo's Kingdoms in the pack, about a third of newly generated Sentry Ruins (35%) have Kingdoms' minotaur in the boss room in place of the Slider. It keeps to its room. While it lives, a player in the room shuts the doors, and they open again once the room is empty. Its boss bar shows to the players in the room. Its death opens the doors, breaks the way to the boss's crates and unlocks the walls, the same as the Slider's. Without Kingdoms every ruin keeps its Slider. Ruins already generated keep the boss they have. `aether/dungeon/RuinBoss`, `RuinPiece` (boss room).
+- Built (`compileJava`). Not played: no ruin with a minotaur has been seen in game.
+
+## 0.22.19 (2026-11-11): The Retaking: the Chrono's Road (#1307)
+
+- **The Chrono's Road** in the Story tab, for every Chrono: end your own echo for good; go forward into the future; find one of the last Omen pilots and let them talk; spend long enough outside time and sleep through to morning (the Stopped Clock). Steps already done (an echo ended, a clock held) tick themselves.
+- The first pilot you talk to presses some folded **Drawings** into your hand: four sheets of a great clock and the sweepers' parts, the maker's name scraped off every one.
+- `StoryRoads` now gives Jaymo's Kingdoms several roads (the Fighter's and the Chrono's); only the Fighter's has its own screen behind Open.
+- Built; not played.
+
+## 0.22.20 (2026-11-11): The Retaking: the Fighter's Road (#1307)
+
+- The Z Fighter sagas are back, folded into the Retaking: the character menu's Story tab shows **The Fighter's Road** under the five acts, listing each saga (done, the step you're on with its count, ready to begin, or not yet). Its Open button brings up the saga screen (now called Sagas) to pick a difficulty, start or give up a saga, and see side jobs.
+- New client `StoryRoads` is what Jaymo's Kingdoms' Story tab reads (by reflection) for a player's own road; other powers' and callings' roads will join it.
+- Built; not played.
+
+## 0.22.21 (2026-11-11): The Retaking: the Web Slinger's, Xenoform's and Arsenal's roads (#1314)
+
+- Three more roads in the Story tab, each for whoever has the power (steps already done tick themselves):
+  - **The Web Slinger's Road**: bond with a symbiote at a meteor crater; grow close enough (bond 60) that it stops fighting you; purify it white. At bond 60 it writes **What It Remembers** on a blank page for you.
+  - **The Xenoform's Road**: hear a star-reader out; set foot on the Pale Moon; have your band reforged; tear the rival band off the band hunter, who drops his **Orders** as he runs.
+  - **The Arsenal's Road**: claim a relic; mark a place; pull something from the future (the first time, a Los Perrito parade **Notice** comes through the rift with it); pin a weapon.
+- New `PowerRoads` holds these roads and their saved, synced progress (`power_roads`).
+- Built; not played.
+
+## 0.22.22 (2026-11-11): sky villages, ruined villages and the sky lord's castle in the Aether (#1312)
+
+Andy, on the Sky Villages mod's ideas (ARR, nothing of it used): "should all instead spawn in the aether proper, and be
+filled with divine born", "Yes but now aether material", castle "in that scale, out of the relevant material".
+- **Sky village** (`aether/structure/SkyVillages.village`, 47 by 47): a round green with paths and a flagged plaza, a well
+  of light, four homes (two villagers each, bedrolls, a chest), a kitchen (Kitchen's stove, cabinet, pot and crates when
+  Kitchen is installed; smoker, barrel, cauldron and hay if not), a workshop (crafting station, part and pattern chests,
+  layer blocks), a windmill with cloth sails, two farm plots, and a mooring mast with a balloon skiff tied to it (a chest
+  in its hold). Three palettes by the land: skyroot (highfields), wisproot (magnetic), greatroot and icestone (arctic).
+- **Ruined village** (variants 3 to 5): the same village abandoned. Walls and roofs fallen in more the higher up, moss on
+  the stone, vases where the furniture was, no skiff, three swets and two cockatrices living in it.
+- **Sky castle** (`SkyVillages.castle`, 49 by 49): a two-thick curtain wall with a walk and merlons, four corner towers
+  with ladders and cloth caps, an arched gate, a keep with the lord's hall and seat, rooms above, a walled roof and a
+  spire. Eight villagers, one tagged as the lord.
+- New plans `village` and `castle` on `jaymospowers:aether_structure`; one structure set `sky_villages` (spacing 30,
+  separation 14, kept 6 chunks from outposts). Loot: `chests/sky_village/home`, `skiff`, `keep`. Data written by
+  `tools/gen_aether_structures.py`.
+- Villagers are plain villagers tagged `jaymospowers_sky_villager` (`jaymospowers_sky_lord`); MCA turns them into its own,
+  and Kingdoms gives them their blood.
+- The skiff hangs a step clear of the landing and, with Jaymo's Kingdoms installed, has a ship's wheel by the gap in
+  her rail: use it to cast her off as a balloon ship. Kingdoms also crews her, names the castle's lord and wardens, and
+  dresses the sky folk.
+- Compiled; never generated in a world, so the layout has not been seen in game.
+
+## 0.22.23 (2026-11-11): Divine-born: the feather sense, Alight, hover, and staying at the Judge (#1308)
+
+Andy: "Divine born should be like z fighters but without the raging raw ki, it is controlled and elegant, they gain a
+web like sense that allows them to dodge incoming attacks and counter, as long as they have feathers. They can directly
+replenish feathers by using their heritage key."
+- **The sense** (`divine/DivineSense`): every Divine-born, Z Fighter or not. A melee blow or a projectile that would
+  land misses instead, for 2 feathers, and they drift a step aside. Nothing is pressed. Not more than once in 10 ticks,
+  and not at all once the feathers are spent. Explosions, falls, fire and the like still hurt. A web slinger keeps the
+  web sense instead.
+- **The answer**: for 2 seconds after a slipped blow, their next melee hit on whoever threw it does 1.5x and gives
+  2 feathers back (`DivineCounterMixin`).
+- **Scaling** (Andy: "they deal more damage with the counters as they increase in level and they can train it for higher
+  increases"): the answer gains 1% per experience level (up to +50%) and 15% per rank of practice. Practice comes from
+  use: 1 for a blow slipped, 3 for an answer landed; five ranks at 40, 120, 280, 560 and 1000, each with a line over
+  the hotbar. At best the answer is 2.75x.
+- **Alight** (the heritage key `;`, sent by Kingdoms): they rise a little, hang still, feathers of light wind down round
+  them and the row refills, one half-feather every 4 ticks (every 2 under open sky or in the Aether). Sneak, the key
+  again, being hit or a full row ends it; 20 s before the next. The sense is shut while it lasts.
+- **Hover**: Jump pressed again in the air and held slows the fall to a drift, for a half-feather every 8 ticks, with
+  no fall damage (`client/divine/DivineSenseClient`).
+- **Staying**: one of the dead whose page weighed just gets a new choice at the Judge, "Ask to stay". Saying yes ends
+  the stay among the dead (no hold at the hall, no road home, no tournament) and keeps the page's weight. Their
+  heritage does not change (Andy: "they just get the buffs and the halo"): they keep the ring over the head, get all of
+  the above, and Kingdoms gives them the Divine-born's buffs. They are free to walk the Aether.
+- All numbers are constants at the top of `DivineSense`. Compiled; not played.
+
+## 0.22.24 (2026-11-11): Epic igloos and jungle temples; the Sentry Ruins are the Slider's again (#1320)
+
+- **New in the pack**: Epic Structures: Igloo 1.0.5 (5 large and 7 small igloos, cellars under the large ones) and
+  Epic Structures: Jungle Temples 1.0.3 (temples, large temples and temple ruins). Both are all rights reserved with
+  modpack use invited, so they are linked unchanged, like Epic Villages, Dungeons and Witch Huts. They only add to
+  chunks nobody has visited yet.
+- **Sentry Ruins**: new ruins always hold the Slider. The minotaur has moved to the Epic dungeons under the Overworld
+  (Kingdoms' `Labyrinths`). A ruin already built with a minotaur keeps it, and its doors and crates still work.
+- Compiled; not played.
+
+## 0.22.25 (2026-11-11): sky towns - whole towns on Aether islands (#1321)
+
+Andy asked for Epic-village-scale towns in the Aether's style. Epic Villages itself is all rights reserved, so these are
+our own.
+- **Sky towns** (`SkyTowns`, structures `sky_town_highfields`, `sky_town_magnetic`, `sky_town_arctic`): laid out lot by
+  lot around a paved plaza with a bell, a well and stalls. Each has a galleried great hall with a spire, a library, a
+  smithy, a tavern, a workshop, a windmill, tall and low houses, terraced farms and a mooring mast with a skiff, built
+  from the island's own stone and wood. A town needs at least 14 level lots, so it only stands on big islands.
+- Rare: one try per 48 chunks, and never within 8 chunks of a sky village.
+- The pieces name themselves (`great_hall`, `library`, `weaponsmith`, `farm`...), so Jaymo's Kingdoms reads a sky town
+  like any Epic village and founds a kingdom there.
+- `/place structure jaymospowers:sky_town_highfields` puts one where you stand.
+
+## 0.22.26 (2026-11-11): Gremlin is a tiny bug-eyed imp (#1323)
+
+- **Gremlin's look** (Andy: "very small with bug eyes"): the Xeno-Band's Gremlin is no longer a hunched knuckle-walker with
+  a huge skull and floppy ears. It is a tiny upright imp about half a block tall: a slim grey body on thin legs with
+  broad pale feet, thin arms, and a wide flat head with two big yellow-green eyes that bulge out past the sides of it.
+  The eyes shine in the dark and blink.
+- **How it moves**: it patters on quick little steps and throws its arms back at a run, its head wobbles and tilts when
+  it stands still, a bite darts the head and drops the jaw with a swipe of the right arm, a leap throws the arms up, and
+  sneaking it squats on splayed legs. The insignia is on its chest now (it was on its back).
+- Its moves, size (a third of a player, fits one-block gaps) and health are unchanged. Swarm, its Ultimate, keeps its
+  hunched plated build.
+- `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
+  `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+- The Gremlin is the shape of the Ocellan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
+- Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.
+
+## 0.22.27 (2026-11-11): the Verdant World's far country - mycotic forests, the pulse forest, the stone garden and a ringed giant in the sky (#1324)
+
+Andy's Eden Ring picks, part 1. Eden Ring (paulevs) is MIT, so its art is used, with its licence in
+`tools/eden_ring_license.txt`. No portal and no new world: these are regions of the Verdant World.
+- **The Verdant World has regions now** (`dimension/verdant_world.json`): plains as before, with four new biomes laid
+  out by climate. Only chunks made after this update get them.
+- **Mycotic Forest and Old Mycotic Forest**: pink mycelium turf, mycotic grass, balloon mushrooms (thin stem, domed cap),
+  and in the old forest huge branched ones on full logs with glowing lanterns hanging under their caps. A small balloon
+  mushroom grows into a tree with bone meal. Lanterns come in 16 colours: craft one with any dye to recolour it.
+- **Pulse Forest**: pulse trees, thin glowing stems carrying a big, a medium and a small cap, some on a glowing log trunk.
+  All of them brighten and dim together. They stand like bamboo: cut the foot and the rest comes down.
+- **Stone Garden**: turf worn through to moss-capped stone and gravel, wind-worn banded pillars and layered boulders.
+- **Wood**: balloon mushroom and pulse tree logs and planks (planks also from stems). Stairs, doors and the rest of the
+  sets come in a later part.
+- **The sky** (`VerdantSkyClient`): a blue giant with a ring hangs in the same place over the Verdant World, faint by
+  day and bright at night.
+- Code: `eden/Eden` (blocks), `eden/EdenFeature` (ground, trees, rocks; tuning constants at the top),
+  `eden/PulseTreeBlock`, `tools/gen_eden.py` (all models and data).

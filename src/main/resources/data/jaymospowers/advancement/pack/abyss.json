@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/skeleton_lord",
+  "display": {
+    "icon": {
+      "id": "minecraft:soul_lantern"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.abyss.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.abyss.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -184,6 +184,12 @@ public final class DarkNights {
 			lastNight = 0.0F;
 			return;
 		}
+		if (com.jaymoskingdoms.client.films.LoreFilmClient.night()) {
+			// a lore film's night is its own: bright enough under the moon to read the fight, whatever the real one is
+			state.skyFactor = com.jaymoskingdoms.client.films.LoreFilmClient.MOONLIGHT;
+			lastNight = 0.0F;
+			return;
+		}
 		float moon = MOONLIGHT[0];
 		if (Moons.clientShown == Moons.Moon.NONE) {
 			MoonPhase phase = minecraft.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.MOON_PHASE, partialTicks);

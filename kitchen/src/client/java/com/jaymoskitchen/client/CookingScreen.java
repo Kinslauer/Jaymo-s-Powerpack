@@ -690,7 +690,8 @@ public class CookingScreen extends Screen {
 			graphics.text(this.font, Component.translatable("screen.jaymoskitchen.method." + d.method().name().toLowerCase()),
 				x + METHOD_X, ry + 6, can ? 0xFFC8A070 : 0xFF706050);
 			for (Map.Entry<Step, Integer> need : d.ingredients().entrySet()) {
-				ItemStack stack = need.getKey().icon(need.getValue());
+				// an ingredient any of several meats will do for shows each in turn, a second apiece
+				ItemStack stack = need.getKey().icon(need.getValue(), System.currentTimeMillis() / 1000L);
 				graphics.item(stack, iconX, ry + 1);
 				graphics.itemDecorations(this.font, stack, iconX, ry + 1, null);
 				iconX += 17;

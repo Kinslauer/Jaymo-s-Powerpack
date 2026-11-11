@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
 import java.util.Map;
@@ -188,7 +189,7 @@ public final class ZFighterWeapons {
 			double length = 2.5 + reach;
 			for (double d = 0.0; d <= length; d += 1.0) {
 				Vec3 at = from.add(look.scale(d));
-				level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 	}

@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/goblin_king",
+  "display": {
+    "icon": {
+      "id": "minecraft:iron_axe"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.ogre_king.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.ogre_king.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

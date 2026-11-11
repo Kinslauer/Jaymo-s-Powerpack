@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": "minecraft:tool/can_shear",
+          "name": "jaymospowers:mycotic_grass"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/mycotic_grass"
+}

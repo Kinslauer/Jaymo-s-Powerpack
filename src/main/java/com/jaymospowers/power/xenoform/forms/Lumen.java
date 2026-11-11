@@ -1,10 +1,10 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -86,7 +86,7 @@ public final class Lumen extends XenoForm {
 						e.heal(MEND_HEAL);
 						level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.4, 0.3, 0.0);
 					}
-					ring(level, ParticleTypes.GLOW, player.position().add(0.0, 0.2, 0.0), MEND_RADIUS * 0.5, 24);
+					ring(level, MagicFx.GLOW, player.position().add(0.0, 0.2, 0.0), MEND_RADIUS * 0.5, 24);
 					sound(player, SoundEvents.ALLAY_ITEM_GIVEN, 1.2F, 1.0F);
 					cooldown(player, live, R, MEND_COOLDOWN);
 				}
@@ -100,8 +100,8 @@ public final class Lumen extends XenoForm {
 						}
 					}
 					Vec3 at = player.getEyePosition();
-					level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-					burst(level, ParticleTypes.END_ROD, at, 30, 0.6, 0.15);
+					MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
+					burst(level, MagicFx.LIGHT, at, 30, 0.6, 0.15);
 					sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 2.0F, 1.6F);
 					cooldown(player, live, G, FLARE_COOLDOWN);
 				}
@@ -145,7 +145,7 @@ public final class Lumen extends XenoForm {
 		}
 		level.setBlockAndUpdate(at, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15));
 		live.lights.put(at.asLong(), level.getGameTime() + LIGHT_TICKS);
-		level.sendParticles(ParticleTypes.GLOW, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 12, 0.2, 0.2, 0.2, 0.02);
+		level.sendParticles(MagicFx.GLOW, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 12, 0.2, 0.2, 0.2, 0.02);
 		sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.0F, 1.2F);
 		return true;
 	}
@@ -178,7 +178,7 @@ public final class Lumen extends XenoForm {
 			player.syncVelocity = true;
 		}
 		if (player.tickCount % 6 == 0) {
-			level.sendParticles(ParticleTypes.GLOW, player.getX(), player.getY() + 0.9, player.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
+			level.sendParticles(MagicFx.GLOW, player.getX(), player.getY() + 0.9, player.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
 		}
 		if (!live.lights.isEmpty() && player.tickCount % 20 == 0) {
 			douse(level, live, level.getGameTime());
@@ -191,7 +191,7 @@ public final class Lumen extends XenoForm {
 				Vec3 pull = player.position().add(0.0, 0.8, 0.0).subtract(item.position());
 				item.setDeltaMovement(pull.normalize().scale(FETCH_PULL));
 				if (player.tickCount % 5 == 0) {
-					level.sendParticles(ParticleTypes.GLOW, item.getX(), item.getY() + 0.2, item.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
+					level.sendParticles(MagicFx.GLOW, item.getX(), item.getY() + 0.2, item.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
 				}
 			}
 		}
@@ -204,7 +204,7 @@ public final class Lumen extends XenoForm {
 
 	@Override
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.END_ROD, player.position().add(0.0, 1.0, 0.0), 50, 1.0, 0.05);
+		burst(player.level(), MagicFx.LIGHT, player.position().add(0.0, 1.0, 0.0), 50, 1.0, 0.05);
 		sound(player, SoundEvents.BEACON_ACTIVATE, 1.4F, 1.4F);
 		return true;
 	}

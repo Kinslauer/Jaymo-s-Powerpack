@@ -487,7 +487,7 @@ public final class PatronWrath {
 		ItemEntity item = new ItemEntity(level, sp.getX(), sp.getY() + 0.3, sp.getZ(), gift, 0.0, 0.05, 0.0);
 		item.setPickUpDelay(10);
 		level.addFreshEntity(item);
-		level.sendParticles(ParticleTypes.END_ROD, sp.getX(), sp.getY() + 0.5, sp.getZ(), 10, 0.3, 0.3, 0.3, 0.01);
+		level.sendParticles(Fx.LIGHT, sp.getX(), sp.getY() + 0.5, sp.getZ(), 10, 0.3, 0.3, 0.3, 0.01);
 		level.playSound(null, sp.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
@@ -544,7 +544,7 @@ public final class PatronWrath {
 		BlockPos from = sp.blockPosition();
 		for (BlockPos p : BlockPos.betweenClosed(from.offset(-8, -6, -8), from.offset(8, 6, 8))) {
 			if (level.getBlockState(p).is(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags.ORES)) {
-				level.sendParticles(sp, ParticleTypes.WAX_ON, true, false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 3, 0.4, 0.4, 0.4, 0.0);
+				level.sendParticles(sp, Fx.EMBER, true, false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 3, 0.4, 0.4, 0.4, 0.0);
 				any = true;
 			}
 		}
@@ -637,7 +637,7 @@ public final class PatronWrath {
 
 	/** Crowned Sun: a halo of light about you, and a chime. */
 	private static boolean halo(ServerLevel level, ServerPlayer sp) {
-		ring(level, ParticleTypes.END_ROD, sp.position().add(0.0, sp.getBbHeight() + 0.6, 0.0), 0.7, 16);
+		ring(level, Fx.LIGHT, sp.position().add(0.0, sp.getBbHeight() + 0.6, 0.0), 0.7, 16);
 		level.playSound(null, sp.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.5F, 1.8F);
 		return true;
 	}
@@ -684,7 +684,7 @@ public final class PatronWrath {
 		for (BlockPos p : BlockPos.betweenClosed(from.offset(-10, -3, -10), from.offset(10, 3, 10))) {
 			BlockState st = level.getBlockState(p);
 			if (st.is(Blocks.LECTERN) || st.is(Blocks.BOOKSHELF)) {
-				level.sendParticles(ParticleTypes.ENCHANT, p.getX() + 0.5, p.getY() + 1.0, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.5);
+				level.sendParticles(Fx.GLYPH, p.getX() + 0.5, p.getY() + 1.0, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.5);
 				any = true;
 			}
 		}

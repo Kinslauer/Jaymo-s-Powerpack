@@ -23,6 +23,8 @@ import random
 import sys
 import uuid
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -80,7 +82,7 @@ PALETTE = {
 	"skin": (108, 104, 86), "bone": (214, 202, 160), "iron": (104, 110, 116), "mail": (82, 88, 96), "fur": (98, 78, 60),
 	"cloth": (58, 82, 104), "leather": (88, 62, 40), "wood": (104, 72, 42), "gold": (184, 145, 58), "horn": (205, 191, 156),
 	"rust": (122, 74, 44), "shell": (36, 50, 44), "shell_hi": (64, 88, 76), "leg": (22, 26, 24), "eye": (160, 232, 255),
-	"steel": (168, 176, 184), "rime": (178, 196, 206),
+	"steel": (168, 176, 184), "rime": (178, 196, 206), "hair": (38, 34, 36), "tail": (150, 112, 74),
 }
 
 
@@ -99,7 +101,7 @@ def paint_face(img, box, mat, face, rng):
 			lx, ly = x - x0, y - y0
 			if mat == "mail" and (lx + ly) % 2 == 0:
 				k *= 1.25
-			elif mat == "fur" and rng.random() < 0.35:
+			elif mat in ("fur", "tail") and rng.random() < 0.35:
 				k *= 0.78 if lx % 2 else 1.2
 			elif mat in ("wood", "leather") and lx % 3 == 0:
 				k *= 0.85
@@ -110,7 +112,7 @@ def paint_face(img, box, mat, face, rng):
 			elif mat == "shell" and ly == 0:
 				c = PALETTE["shell_hi"]
 			elif mat == "rime" and rng.random() < 0.45:
-				c = PALETTE["fur"] if rng.random() < 0.6 else (226, 238, 244)  # fur under the frost, and the frost's glitter
+				c = PALETTE["tail"] if rng.random() < 0.6 else (226, 238, 244)  # fur under the frost, and the frost's glitter
 			img.putpixel((x, y), shade(c, k) + (255,))
 
 
@@ -205,68 +207,122 @@ def eyes(color, at, px=1):
 
 # ---------------------------------------------------------------- the draugr
 
-# The tail: each segment's width and length (Blockbench units), the first one's droop and the rest's curl (degrees,
-# +x hangs it lower), and how far it sways side to side (degrees) standing and walking.
-TAIL = [(2.0, 3.0), (1.8, 3.0), (1.6, 2.8), (1.4, 2.6), (1.2, 2.4)]
-TAIL_DROOP, TAIL_CURL = 55, -10
-TAIL_IDLE_SWAY, TAIL_WALK_SWAY = 4, 7
+# The draugr is a long-dead Warrior-born, a Z Fighter of the old raids (Andy, 2026-11-10: "a long undead z fighter
+# wearing the same armor, but with the tail wrapped around"): a fighter's build gone to sinew (broad shoulders, a narrow
+# waist, long arms in wristbands), wild hair out from under the horned helm, the same mail, fur, leather and iron, and
+# the tail wrapped round the waist the way a fighter keeps it, its tip hanging at the back.
+# The tail ring: each segment's start and end corners (Blockbench units; back, right side, front, left side, the tip),
+# the root of each its bone's pivot. Cut back at a segment (InhabitantsClient.DraugrRenderer) it ends there.
+TAIL_Y, TAIL_W = 17.4, (1.8, 1.7, 1.6, 1.5, 1.3)
+TAIL = [((0.0, 2.7), (5.2, 4.4)), ((4.3, 4.4), (6.0, -4.4)), ((6.0, -4.4), (-6.0, -2.7)), ((-6.0, -2.7), (-4.3, 4.4)),
+		((-4.3, 2.7), (-0.6, 4.3))]
 
 
-def tail_sway(length, degrees):
-	"""Side to side, each segment a little after the one before."""
-	tracks = {}
-	for i in range(1, len(TAIL)):
-		lag = length * 0.12 * i
-		keys = [(0, (0, degrees * math.sin(-lag / length * 2 * math.pi), 0))]
-		for k in (0.25, 0.5, 0.75, 1.0):
-			keys.append((round(length * k, 4), (0, degrees * math.sin((k - lag / length) * 2 * math.pi), 0)))
-		tracks[f"tail_{i}"] = {"rotation": keys}
-	return tracks
+def gaunt_face(img, r):
+	"""Pale lit eyes deep in the sockets, the cheeks fallen in, lips drawn back off the teeth."""
+	x0, y0, x1, y1 = r
+	for ex in (x0 + 1, x1 - 3):
+		for dx in range(2):
+			img.putpixel((ex + dx, y0 + 3), shade(PALETTE["skin"], 0.45) + (255,))
+			img.putpixel((ex + dx, y0 + 4), PALETTE["eye"] + (255,) if dx == (0 if ex == x0 + 1 else 1) else shade(PALETTE["skin"], 0.5) + (255,))
+	for cx in (x0 + 1, x1 - 2):
+		for cy in (y0 + 5, y0 + 6):
+			img.putpixel((cx, cy), shade(PALETTE["skin"], 0.62) + (255,))
+	for x in range(x0 + 2, x1 - 2):
+		img.putpixel((x, y0 + 6), shade(PALETTE["bone"], 0.95 if x % 2 else 0.75) + (255,))
+		img.putpixel((x, y0 + 7), shade(PALETTE["skin"], 0.55) + (255,))
+
+
+def ribs(img, r):
+	"""The mail torn open over the ribs."""
+	x0, y0, x1, y1 = r
+	for y in range(y0, y1):
+		for x in range(x0, x1):
+			c = PALETTE["bone"] if (y - y0) % 2 == 0 and x not in (x0 + (x1 - x0) // 2 - 1, x0 + (x1 - x0) // 2) else shade(PALETTE["skin"], 0.6)
+			img.putpixel((x, y), shade(c, 0.9) + (255,))
+
+
+# The draugr's three looks (Andy, 2026-11-10: "up to 3 variations of each new model"): the same model and sheet, painted
+# over in other metals, furs and hair. 0 is the project's own (iron, brown fur, black hair); 1 a chieftain's bronze, a
+# grey wolf's fur, hair gone white (and its left horn broken off: InhabitantsClient.DraugrRenderer); 2 blackened iron,
+# black fur, red-brown hair. Written as textures/entity/draugr_1.png and draugr_2.png beside the project's draugr.png.
+DRAUGR_LOOKS = [{}, {"iron": (150, 112, 62), "steel": (196, 170, 120), "fur": (128, 126, 120), "hair": (206, 204, 198),
+					 "gold": (200, 196, 190)},
+				{"iron": (58, 60, 66), "mail": (60, 64, 70), "steel": (120, 124, 130), "fur": (40, 36, 34), "hair": (112, 50, 32),
+				 "leather": (64, 40, 30)}]
+
+
+def draugr_looks():
+	"""Paints the draugr's other looks onto its sheet's layout (the same cubes, so the same UVs)."""
+	assets = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms", "textures", "entity")
+	base = dict(PALETTE)
+	for i, look in enumerate(DRAUGR_LOOKS):
+		if not look:
+			continue
+		PALETTE.update(look)
+		try:
+			src = draugr()["textures"][0]["source"].split(",", 1)[1]
+		finally:
+			PALETTE.clear()
+			PALETTE.update(base)
+		Image.open(io.BytesIO(base64.b64decode(src))).save(os.path.join(assets, "draugr_%d.png" % i))
+		print("wrote draugr_%d.png" % i)
 
 
 def draugr():
 	b = Builder(128, 128, 11)
 	b.bone("root", None, (0, 0, 0))
-	mirror(b, "leg", "root", (2.5, 14, 0), [((0.5, 0, -2), (4.5, 14, 2), "skin"), ((0.25, 0, -2.5), (4.75, 5, 2.25), "fur", 0.25),
-											  ((0.4, 9, -2.2), (4.6, 14, 2.2), "leather")])
-	b.bone("waist", "root", (0, 14, 0))
-	b.cube("waist", (-5, 13, -3), (5, 16, 3), "leather", 0.1)
-	b.cube("waist", (-1, 13.5, -3.6), (1, 15.5, -3.1), "gold")
-	b.cube("waist", (-5, 8, -3), (5, 13, 3), "mail", 0.05)
-	b.bone("body", "waist", (0, 16, 0))
-	b.cube("body", (-5, 16, -3), (5, 27, 3), "mail")
-	b.cube("body", (-4, 18, -3.3), (4, 26, -3.0), "skin")
-	b.cube("body", (-6, 24, -4), (6, 28, 4), "fur", 0.2)
-	b.bone("head", "body", (0, 27, 0))
-	face = eyes(PALETTE["eye"], (2, 4))
-	b.cube("head", (-4, 27, -4), (4, 35, 4), "skin", faces_paint={"north": face})
-	b.cube("head", (-3, 25.5, -4.6), (3, 28.5, -3.4), "fur")
-	b.cube("head", (-4.5, 31, -4.5), (4.5, 36, 4.5), "iron", 0.1)
-	b.cube("head", (-0.5, 28.5, -5.2), (0.5, 32, -4.6), "iron")
-	mirror(b, "horn", "head", (4.5, 34, 0), [((4.5, 33, -1), (7, 35, 1), "horn"), ((6, 35, -0.75), (7.5, 39, 0.75), "horn")],
+	# long legs gone to sinew, fur-wrapped boots, leather breeches
+	# (each limb in two, hinged at the knee and the elbow, so it can take humanoid_moves.py's animations)
+	mirror(b, "leg", "root", (2.2, 15, 0), [((0.4, 7.5, -1.8), (4.0, 15, 1.8), "skin"), ((0.3, 9, -2.0), (4.1, 15, 2.0), "leather")])
+	mirror(b, "shin", ("leg",), (2.2, 7.5, 0), [((0.4, 0, -1.8), (4.0, 7.5, 1.8), "skin"), ((0.2, 0, -2.3), (4.2, 5, 2.1), "fur", 0.25)])
+	b.bone("waist", "root", (0, 15, 0))
+	b.cube("waist", (-4, 14, -2.5), (4, 17, 2.5), "leather", 0.1)
+	b.cube("waist", (-1, 14.5, -3.1), (1, 16.5, -2.6), "gold")
+	b.cube("waist", (-4.5, 9.5, -2.6), (4.5, 14, 2.6), "mail", 0.05)
+	b.bone("body", "waist", (0, 17, 0))
+	# a fighter's taper: the waist narrow, the chest broad
+	b.cube("body", (-4.5, 17, -2.8), (4.5, 22, 2.8), "mail")
+	b.cube("body", (-5.5, 22, -3.2), (5.5, 28, 3.2), "mail")
+	# (its own bone, so the living Warrior-born of the lore film can leave it off: InhabitantsClient.DraugrRenderer)
+	b.bone("ribs", "body", (0, 21, -2.9))
+	b.cube("ribs", (-2, 19, -3.0), (2, 23, -2.7), "skin", faces_paint={"north": ribs})
+	b.cube("body", (-6.5, 25.5, -4), (6.5, 29, 4), "fur", 0.2)
+	b.bone("head", "body", (0, 28, 0))
+	b.cube("head", (-4, 28, -4), (4, 36, 4), "skin", faces_paint={"north": gaunt_face})
+	b.cube("head", (-4.5, 32, -4.5), (4.5, 37, 4.5), "iron", 0.1)
+	b.cube("head", (-0.5, 29.5, -5.2), (0.5, 33, -4.6), "iron")
+	# wild hair out from under the helm, at the back and over the ears
+	for x0, x1, top, back in ((-3.2, -1.2, 33.5, 6.2), (-0.9, 0.9, 33.0, 6.8), (1.2, 3.2, 33.5, 6.2)):
+		b.cube("head", (x0, 30, 4.2), (x1, top, back), "hair")
+	mirror(b, "hair", "head", (4.2, 31, 0), [((4.2, 29.5, -0.5), (5.6, 33.0, 2.5), "hair")])
+	mirror(b, "horn", "head", (4.5, 35, 0), [((4.5, 34, -1), (7, 36, 1), "horn"), ((6, 36, -0.75), (7.5, 40, 0.75), "horn")],
 		   (0, 0, -15))
-	mirror(b, "arm", "body", (6, 25, 0), [((5, 14, -2), (9, 27, 2), "skin"), ((4.5, 23, -2.5), (9.5, 28.5, 2.5), "iron", 0.1),
-										  ((5, 14, -2.2), (9, 17, 2.2), "leather", 0.15)])
-	b.bone("sword", "right_arm", (7, 15, 0))
-	b.cube("sword", (6.5, 13.5, -1.5), (7.5, 14.75, 1.5), "leather")
-	b.cube("sword", (5, 13.5, -2.5), (9, 15, -1.5), "gold")
-	b.cube("sword", (6.25, 13.75, -16), (7.75, 14.75, -2.5), "steel")
-	b.bone("axe", "right_arm", (7, 15, 0))
-	b.cube("axe", (6.5, 13.5, -16), (7.5, 14.5, 4), "wood")
-	b.cube("axe", (6.25, 14.5, -16), (7.75, 18, -12), "steel")
-	b.cube("axe", (6.25, 10, -16), (7.75, 14.5, -13.5), "steel")
-	b.bone("shield", "left_arm", (-7, 19, 0))
-	b.cube("shield", (-10.5, 12, -6), (-9.5, 25, 6), "wood")
-	b.cube("shield", (-10.6, 12, -6), (-9.4, 13, 6), "iron")
-	b.cube("shield", (-10.6, 24, -6), (-9.4, 25, 6), "iron")
-	b.cube("shield", (-11.5, 16.5, -1.5), (-8.5, 19.5, 1.5), "iron")
-	# (last, so the rest of the sheet stays where it was) a Warrior-born's tail from under the mail, rimed with frost
-	# toward the tip; each draugr's own is mangled in its own way (InhabitantsClient.DraugrRenderer)
-	z, parent = 3.0, "waist"
-	for i, (w, length) in enumerate(TAIL):
-		b.bone(f"tail_{i}", parent, (0, 11, z), (TAIL_DROOP if i == 0 else TAIL_CURL, 0, 0))
-		b.cube(f"tail_{i}", (-w / 2, 11 - w / 2, z), (w / 2, 11 + w / 2, z + length), "fur" if i < 2 else "rime")
-		z, parent = z + length, f"tail_{i}"
+	# long arms, iron pauldrons, a fighter's wristbands
+	mirror(b, "arm", "body", (6.5, 26, 0), [((5, 20, -1.8), (8.6, 27, 1.8), "skin"), ((4.6, 24, -2.6), (9.4, 29.5, 2.6), "iron", 0.1)])
+	mirror(b, "forearm", ("arm",), (6.8, 20, 0), [((5, 13.5, -1.8), (8.6, 20, 1.8), "skin"), ((5, 13.5, -2.1), (8.6, 17.5, 2.1), "leather", 0.15)])
+	b.bone("sword", "right_forearm", (6.8, 14.5, 0))
+	b.cube("sword", (6.3, 13, -1.5), (7.3, 14.25, 1.5), "leather")
+	b.cube("sword", (4.8, 13, -2.5), (8.8, 14.5, -1.5), "gold")
+	b.cube("sword", (6.05, 13.25, -16), (7.55, 14.25, -2.5), "steel")
+	b.bone("axe", "right_forearm", (6.8, 14.5, 0))
+	b.cube("axe", (6.3, 13, -16), (7.3, 14, 4), "wood")
+	b.cube("axe", (6.05, 14, -16), (7.55, 17.5, -12), "steel")
+	b.cube("axe", (6.05, 9.5, -16), (7.55, 14, -13.5), "steel")
+	b.bone("shield", "left_forearm", (-6.8, 19, 0))
+	b.cube("shield", (-10.1, 11.5, -6), (-9.1, 24.5, 6), "wood")
+	b.cube("shield", (-10.2, 11.5, -6), (-9.0, 12.5, 6), "iron")
+	b.cube("shield", (-10.2, 23.5, -6), (-9.0, 24.5, 6), "iron")
+	b.cube("shield", (-11.1, 16, -1.5), (-8.1, 19, 1.5), "iron")
+	# the tail, wrapped round the waist over the belt, rimed with frost toward the tip; each draugr's own is cut short
+	# its own way (InhabitantsClient.DraugrRenderer)
+	parent = "waist"
+	for i, ((ax, az), (bx, bz)) in enumerate(TAIL):
+		w = TAIL_W[i]
+		b.bone(f"tail_{i}", parent, (ax, TAIL_Y, az))
+		y0 = TAIL_Y - w / 2 - (0.6 if i == len(TAIL) - 1 else 0.0)
+		b.cube(f"tail_{i}", (min(ax, bx), y0, min(az, bz)), (max(ax, bx), y0 + w, max(az, bz)), "tail" if i < 3 else "rime")
+		parent = f"tail_{i}"
 	model = b.project("draugr")
 	R = "root"
 	walk = {
@@ -278,10 +334,8 @@ def draugr():
 		"body": {"rotation": [(0, (-4, -4, 0)), (0.5, (-4, 4, 0)), (1.0, (-4, -4, 0))]},
 		R: {"position": [(0, Z), (0.25, (0, 0.6, 0)), (0.5, Z), (0.75, (0, 0.6, 0)), (1.0, Z)]},
 	}
-	walk.update(tail_sway(1.0, TAIL_WALK_SWAY))
 	anims = [
 		anim("idle", 3.0, "loop", {
-			**tail_sway(3.0, TAIL_IDLE_SWAY),
 			"body": {"rotation": [(0, (-3, 0, 0)), (1.5, (-6, 0, 0)), (3.0, (-3, 0, 0))]},
 			"head": {"rotation": [(0, (6, 0, 0)), (1.5, (10, 4, 2)), (3.0, (6, 0, 0))]},
 			"right_arm": {"rotation": [(0, (25, 0, 6)), (1.5, (28, 0, 8)), (3.0, (25, 0, 6))]},
@@ -312,6 +366,10 @@ def draugr():
 			"head": {"rotation": [(0, Z), (0.2, (15, 0, 0)), (1.0, Z)]},
 		}),
 	]
+	# and every move of the humanoid library it has no move of its own for (the lore films' Warrior-born use them)
+	import humanoid_moves
+	own = {a["name"] for a in anims}
+	anims += [a for a in humanoid_moves.moves(leg=15.0, cape=False) if a["name"] not in own]
 	add_animations(model, anims, bone_uuids_of(model))
 	return model
 
@@ -444,6 +502,8 @@ def main(only=()):
 			continue
 		with open(os.path.join(ART, name + ".bbmodel"), "w", encoding="utf-8", newline="\n") as f:
 			json.dump(make(), f)
+		if name == "draugr":
+			draugr_looks()
 		print("wrote kingdoms/art/" + name + ".bbmodel")
 
 

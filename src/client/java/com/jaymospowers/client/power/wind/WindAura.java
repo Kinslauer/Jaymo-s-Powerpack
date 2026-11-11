@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindPower;
@@ -7,7 +8,7 @@ import com.jaymospowers.power.wind.WindStorm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -31,7 +32,7 @@ final class WindAura {
 	/** Stormbound: dark motes per tick at full static, and the chance of a spark per tick. */
 	private static final float STATIC_MOTES = 1.5F;
 	private static final float STATIC_SPARK_CHANCE = 0.35F;
-	private static final DustParticleOptions STATIC_DUST = new DustParticleOptions(0x2B1D3A, 1.3F);
+	private static final ParticleOptions STATIC_DUST = MagicFx.wisp(0x2B1D3A, 1.3F);
 	/** Stormbound crackle: about every this many ticks, at this volume (fading with the calm). */
 	private static final int CRACKLE_TICKS = 50;
 	private static final float CRACKLE_VOLUME = 0.25F;
@@ -87,7 +88,7 @@ final class WindAura {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = 0.45 + random.nextDouble() * 0.25;
 			double y = player.getY() + random.nextDouble() * player.getBbHeight();
-			level.addParticle(ParticleTypes.ELECTRIC_SPARK, player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r,
+			level.addParticle(MagicFx.CRACKLE, player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r,
 				-Math.sin(a) * 0.25, (random.nextDouble() - 0.5) * 0.2, Math.cos(a) * 0.25);
 		}
 		if (!self && player.tickCount % 3 == 0) {
@@ -116,7 +117,7 @@ final class WindAura {
 			x += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.x * 0.4;
 			y += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.y * 0.4;
 			z += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.z * 0.4;
-			level.addParticle(i % 2 == 0 ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.END_ROD, x, y, z, 0.0, 0.0, 0.0);
+			level.addParticle(i % 2 == 0 ? MagicFx.CRACKLE : MagicFx.LIGHT, x, y, z, 0.0, 0.0, 0.0);
 		}
 		if (random.nextInt(12) == 0) {
 			level.playLocalSound(player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS,
@@ -171,7 +172,7 @@ final class WindAura {
 			double x = player.getX() + (random.nextDouble() - 0.5) * 1.0;
 			double y = player.getY() + random.nextDouble() * player.getBbHeight();
 			double z = player.getZ() + (random.nextDouble() - 0.5) * 1.0;
-			level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, (random.nextDouble() - 0.5) * 0.4, (random.nextDouble() - 0.5) * 0.4,
+			level.addParticle(MagicFx.CRACKLE, x, y, z, (random.nextDouble() - 0.5) * 0.4, (random.nextDouble() - 0.5) * 0.4,
 				(random.nextDouble() - 0.5) * 0.4);
 		}
 		if (random.nextInt(CRACKLE_TICKS) == 0) {

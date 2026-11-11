@@ -1,10 +1,11 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -52,7 +53,7 @@ final class AntleredHunterMoves implements Moves {
 			Vec3 dir = target.position().add(0.0, 1.0, 0.0).subtract(this.spearFrom).normalize();
 			this.spearTo = this.spearFrom.add(dir.scale(SPEAR_MAX));
 		}
-		DustParticleOptions dust = new DustParticleOptions(c.patron().colour & 0xFFFFFF, 1.0F);
+		ParticleOptions dust = Fx.wisp(c.patron().colour & 0xFFFFFF, 1.0F);
 		for (double d = 0.0; d <= SPEAR_MAX; d += 1.0) {
 			Vec3 p = this.spearFrom.add(this.spearTo.subtract(this.spearFrom).scale(d / SPEAR_MAX));
 			level.sendParticles(dust, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -97,7 +98,7 @@ final class AntleredHunterMoves implements Moves {
 			this.charge = d.lengthSqr() < 1.0E-4 ? c.getLookAngle() : d.normalize();
 		}
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, c.getX(), c.getY() + 0.1, c.getZ(), 2, 0.4, 0.0, 0.4, 0.01);
-		DustParticleOptions dust = new DustParticleOptions(c.patron().colour & 0xFFFFFF, 1.0F);
+		ParticleOptions dust = Fx.wisp(c.patron().colour & 0xFFFFFF, 1.0F);
 		for (double d = 1.0; d <= STAMPEDE_MAX; d += 1.0) {
 			level.sendParticles(dust, c.getX() + this.charge.x * d, c.getY() + 0.2, c.getZ() + this.charge.z * d, 1, 0.2, 0.0, 0.2, 0.0);
 		}

@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.cauldron;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.brewing.BrewGrade;
 import com.jaymospowers.alchemy.brewing.BrewGrades;
@@ -21,7 +22,6 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -312,7 +312,7 @@ public final class CauldronBrewing {
 
 	static void puff(ServerLevel level, BlockPos pos, ItemStack potion, int count) {
 		int colour = potion.getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor();
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, colour | 0xFF000000), pos.getX() + 0.5, pos.getY() + 1.0,
+		level.sendParticles(MagicFx.wisp(colour | 0xFF000000, 1.0F), pos.getX() + 0.5, pos.getY() + 1.0,
 			pos.getZ() + 0.5, count, 0.2, 0.15, 0.2, 0.0);
 	}
 

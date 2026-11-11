@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Fate;
 import java.util.ArrayList;
@@ -307,7 +308,7 @@ final class GravityOrbit {
 						if (target != null && owner != null) {
 							GravityPower.touch(target, owner);
 						}
-						level.sendParticles(ParticleTypes.REVERSE_PORTAL, over.x, over.y + 0.5, over.z, 8, 0.3, 0.3, 0.3, 0.05);
+						level.sendParticles(MagicFx.VOID, over.x, over.y + 0.5, over.z, 8, 0.3, 0.3, 0.3, 0.05);
 						level.playSound(null, over.x, over.y, over.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 1.8F);
 						rain.aligning = -1;
 					}

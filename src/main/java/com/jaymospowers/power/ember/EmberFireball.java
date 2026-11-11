@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.smoke.SmokeField;
@@ -133,7 +134,7 @@ public final class EmberFireball {
 		ball.pos = to;
 		// a white-hot ball with a fiery tail
 		level.sendParticles(ParticleTypes.FLAME, to.x, to.y, to.z, 4, 0.15, 0.15, 0.15, 0.01);
-		level.sendParticles(ParticleTypes.END_ROD, to.x, to.y, to.z, 1, 0.05, 0.05, 0.05, 0.0);
+		level.sendParticles(MagicFx.LIGHT, to.x, to.y, to.z, 1, 0.05, 0.05, 0.05, 0.0);
 		level.sendParticles(ParticleTypes.SMOKE, from.x, from.y, from.z, 1, 0.05, 0.05, 0.05, 0.0);
 		// through the thrower's own thick smoke: the cloud goes up
 		if (Powers.has(ball.owner, SmokePower.INSTANCE)) {

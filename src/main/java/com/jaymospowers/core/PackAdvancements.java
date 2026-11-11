@@ -50,6 +50,19 @@ public final class PackAdvancements {
 		return false;
 	}
 
+	/** The tag a Retaking deed leaves on a player until Jaymo's Kingdoms reads it ({@link #deed}). */
+	public static final String DEED = "jaymospowers.retaking.";
+
+	/**
+	 * A deed toward the Retaking, Jaymo's Kingdoms' main story, that only Powers sees (a raider band beaten, a fallen star
+	 * broken, a pod flown, a far world freed or conquered). It is left as a tag: Kingdoms awards its milestone if the player's
+	 * act has begun and takes the tag off either way, so a deed done too early has to be done again. Without Kingdoms the
+	 * tag just sits there.
+	 */
+	public static void deed(ServerPlayer player, String name) {
+		player.addTag(DEED + name);
+	}
+
 	/** {@code pack/<name>}'s one criterion, "done", for {@code player} (nothing if it's done already). */
 	public static void award(ServerPlayer player, String name) {
 		AdvancementHolder holder = player.level().getServer().getAdvancements().get(JaymosPowers.id("pack/" + name));

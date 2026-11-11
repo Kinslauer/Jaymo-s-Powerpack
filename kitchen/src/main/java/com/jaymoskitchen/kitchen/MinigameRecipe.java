@@ -29,6 +29,7 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A minigame dish as a recipe, so it's listed in Cooking for Blockheads' cooking table with its ingredients (see
@@ -49,18 +50,12 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 	public static final RecipeSerializer<MinigameRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
 	private final Dish dish;
-	private final List<Ingredient> ingredients;
+	/** Worked out when first asked for: an ingredient's group is an item tag, and tags are not loaded yet when recipes are read. */
+	private @Nullable List<Ingredient> ingredients;
 
 	public MinigameRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, String dish) {
 		super(commonInfo, bookInfo);
 		this.dish = Dish.valueOf(dish.toUpperCase());
-		List<Ingredient> list = new ArrayList<>();
-		for (Map.Entry<Step, Integer> need : this.dish.ingredients().entrySet()) {
-			for (int n = 0; n < need.getValue(); n++) {
-				list.add(Ingredient.of(need.getKey().items().stream()));
-			}
-		}
-		this.ingredients = List.copyOf(list);
 	}
 
 	public static void register() {
@@ -72,7 +67,17 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 	}
 
 	public List<Ingredient> ingredients() {
-		return ingredients;
+		List<Ingredient> list = ingredients;
+		if (list == null) {
+			list = new ArrayList<>();
+			for (Map.Entry<Step, Integer> need : dish.ingredients().entrySet()) {
+				for (int n = 0; n < need.getValue(); n++) {
+					list.add(Ingredient.of(need.getKey().items().stream()));
+				}
+			}
+			ingredients = list = List.copyOf(list);
+		}
+		return list;
 	}
 
 	public ItemStackTemplate result() {
@@ -88,7 +93,7 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 	protected PlacementInfo createPlacementInfo() {
 		// a real placement (unplaceable recipes get no display id, and the cooking table finds recipes by display id);
 		// it still never crafts, see matches
-		return PlacementInfo.create(ingredients);
+		return PlacementInfo.create(ingredients());
 	}
 
 	@Override
@@ -105,7 +110,7 @@ public class MinigameRecipe extends NormalCraftingRecipe {
 	@Override
 	public List<RecipeDisplay> display() {
 		return List.of(new ShapelessCraftingRecipeDisplay(
-			ingredients.stream().map(Ingredient::display).toList(),
+			ingredients().stream().map(Ingredient::display).toList(),
 			new SlotDisplay.ItemStackSlotDisplay(result()),
 			new SlotDisplay.ItemSlotDisplay(Items.CAMPFIRE)));
 	}

@@ -8,7 +8,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -420,7 +419,7 @@ public final class RoyalRemains {
 						d.dead.name()), Speech.GOLD, SAY_RANGE);
 				}
 				Vec3 at = corpse.position();
-				level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.4, at.z, 2, 0.4, 0.2, 0.4, 0.01);
+				level.sendParticles(Fx.LIGHT, at.x, at.y + 0.4, at.z, 2, 0.4, 0.2, 0.4, 0.01);
 				d.rite += STEP;
 				if (d.rite >= RITE_TICKS) {
 					d.stage = Stage.INTER;

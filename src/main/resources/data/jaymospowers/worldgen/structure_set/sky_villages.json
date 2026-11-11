@@ -1,0 +1,43 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:sky_village_highfields",
+      "weight": 6
+    },
+    {
+      "structure": "jaymospowers:sky_village_magnetic",
+      "weight": 6
+    },
+    {
+      "structure": "jaymospowers:sky_village_arctic",
+      "weight": 6
+    },
+    {
+      "structure": "jaymospowers:sky_village_ruin_highfields",
+      "weight": 2
+    },
+    {
+      "structure": "jaymospowers:sky_village_ruin_magnetic",
+      "weight": 2
+    },
+    {
+      "structure": "jaymospowers:sky_village_ruin_arctic",
+      "weight": 2
+    },
+    {
+      "structure": "jaymospowers:sky_castle",
+      "weight": 2
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 30,
+    "separation": 14,
+    "salt": 1380213110,
+    "spread_type": "linear",
+    "exclusion_zone": {
+      "other_set": "jaymospowers:outposts",
+      "chunk_count": 6
+    }
+  }
+}

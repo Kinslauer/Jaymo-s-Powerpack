@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
@@ -18,7 +19,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -660,13 +661,13 @@ final class ZFighterTournaments {
 	/** The ring: a circle of gold motes on the ground, brighter while sign-up is open. */
 	private static void ring(Tourney t) {
 		Vec3 c = Vec3.atBottomCenterOf(t.center);
-		DustParticleOptions dust = new DustParticleOptions(RING_COLOR, 1.6F);
+		ParticleOptions dust = MagicFx.wisp(RING_COLOR, 1.6F);
 		for (int i = 0; i < 48; i++) {
 			double a = i * Math.PI * 2.0 / 48.0;
 			t.level.sendParticles(dust, true, false, c.x + Math.cos(a) * RADIUS, c.y + 0.15, c.z + Math.sin(a) * RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (t.signingUp()) {
-			t.level.sendParticles(ParticleTypes.END_ROD, true, false, c.x, c.y + 0.5, c.z, 6, 0.2, 2.0, 0.2, 0.02);
+			t.level.sendParticles(MagicFx.LIGHT, true, false, c.x, c.y + 0.5, c.z, 6, 0.2, 2.0, 0.2, 0.02);
 		}
 	}
 

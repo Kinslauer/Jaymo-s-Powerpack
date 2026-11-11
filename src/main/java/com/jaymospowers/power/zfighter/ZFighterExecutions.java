@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.GroundCracks;
 import com.jaymospowers.core.Powers;
@@ -20,8 +21,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -241,13 +240,13 @@ public final class ZFighterExecutions {
 			default -> hand(player, body, HAND_STANDING);
 		};
 		float size = 0.6F + fill * 1.2F;
-		level.sendParticles(new DustParticleOptions(color, size), at.x, at.y, at.z, 2 + (int) (fill * 4), 0.08, 0.08, 0.08, 0.0);
+		level.sendParticles(MagicFx.wisp(color, size), at.x, at.y, at.z, 2 + (int) (fill * 4), 0.08, 0.08, 0.08, 0.0);
 		if (t % 2 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 1 + (int) (fill * 3), 0.15, 0.15, 0.15, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 1 + (int) (fill * 3), 0.15, 0.15, 0.15, 0.05);
 		}
 		if (kind == Kind.Z_NOVA) {
 			// the aura swells round him
-			level.sendParticles(new DustParticleOptions(color, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 3 + (int) (fill * 6), 0.4, 0.7, 0.4, 0.0);
+			level.sendParticles(MagicFx.wisp(color, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 3 + (int) (fill * 6), 0.4, 0.7, 0.4, 0.0);
 		}
 		if (t % 5 == 0) {
 			level.playSound(null, at.x, at.y, at.z, kind == Kind.Z_LANCE ? SoundEvents.BEACON_AMBIENT : SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS,
@@ -292,8 +291,8 @@ public final class ZFighterExecutions {
 			case Z_NOVA -> {
 				level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.5F);
 				level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.2F, 0.6F);
-				level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(ParticleTypes.END_ROD, x, y, z, 40, 0.3, 0.5, 0.3, 0.15);
+				MagicFx.blast(level, x, y, z, MagicFx.FLASH_RADIUS, color);
+				level.sendParticles(MagicFx.LIGHT, x, y, z, 40, 0.3, 0.5, 0.3, 0.15);
 				level.sendParticles(ParticleTypes.WHITE_ASH, x, y, z, 60, 0.4, 0.4, 0.4, 0.05);
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 12, 0.3, 0.3, 0.3, 0.02);
 				// (burned away: no corpse; Kitchen reads the tag as it would swap the dying body for one)
@@ -421,8 +420,8 @@ public final class ZFighterExecutions {
 
 	/** A flash of his ki where it lands. */
 	private static void flare(ServerLevel level, Vec3 at, int color) {
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(new DustParticleOptions(color, 2.0F), at.x, at.y, at.z, 16, 0.4, 0.3, 0.4, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, color);
+		level.sendParticles(MagicFx.wisp(color, 2.0F), at.x, at.y, at.z, 16, 0.4, 0.3, 0.4, 0.0);
 	}
 
 	/** The ground cracks under them. */

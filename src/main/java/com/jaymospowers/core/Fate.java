@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.mojang.serialization.Codec;
@@ -143,7 +144,7 @@ public final class Fate {
 		title(player, Component.translatable("message.jaymospowers.purified"), Component.translatable("message.jaymospowers.purified_sub"),
 			0xFFFFFF);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.5F, 1.2F);
-		player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 1.0, 0.5, 0.1);
+		player.level().sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 1.0, 0.5, 0.1);
 		return true;
 	}
 

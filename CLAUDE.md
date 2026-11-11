@@ -24,6 +24,10 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   version). After the merge the Release workflow (`tools/release.py`) bumps the version, appends the MODLOG entry and
   deletes the note. `changes/README.md` explains; `tools/pr_checks.py` enforces it. MODLOGs hold only recent entries;
   older ones are in `docs/modlog/`.
+- **Lore first.** Everything new (features, mobs, items, structures, dialogue, art) must fit the lore canon, `Lore.md`
+  in the live vault (`E:/Jaymo Vault Live/Lore.md`; cloud: `python3 tools/vault_sync.py --setup`, then `docs/vault/Live/Lore.md`).
+  Read it before planning, place the new thing in it (who made it, where it lives, whose people or faith), and reshape
+  anything that doesn't fit, or ask Andy. Add the placement to Lore.md as a `(new)` paragraph for him to approve.
 - Check every Minecraft API against the 26.3 sources (`./gradlew genSources`) before using it.
 - Keep each power in its own package and `lang/parts/<power>.json`; list every class that holds an attachment in
   `JaymosPowers.registerAttachments()`.
@@ -35,6 +39,8 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
 - Default keys: R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu, ' = costume mask. "G+B" means G, then B (e.g. Crush
   released inside your own Gravity Well).
 - Tuning numbers live in `static final` constants at the top of each class; change balance there.
+- Magic and ki effects are typed (`docs/MagicFx.md`): beam, blast, ring, orb, sigil, mote, miasma, through `MagicFx`
+  (Kingdoms: `Fx`). Never recoloured redstone dust or firework flashes; vary only colour, size and time.
 - Optional mods (Kitchen, WeaponMod) only through a compat class that checks they're loaded (`KitchenCompat`).
   Don't copy other mods' code or art unless their license allows it.
 - The symbiote never feeds on anything living: kill, grab with tendrils, carry as a corpse, then feed. Every

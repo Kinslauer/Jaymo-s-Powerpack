@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     "jaymoskitchen:tanned_leather",
-    "jaymoskitchen:animal_fat"
+    "#jaymoskitchen:animal_fats"
   ],
   "result": {
     "id": "jaymoskitchen:supple_leather"

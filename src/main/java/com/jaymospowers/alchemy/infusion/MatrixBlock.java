@@ -1,8 +1,8 @@
 package com.jaymospowers.alchemy.infusion;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Alchemy;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -80,7 +80,7 @@ public class MatrixBlock extends Block implements EntityBlock {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (random.nextInt(10) == 0) {
-			level.addParticle(new DustParticleOptions(CALM_COLOUR, 0.6F), pos.getX() + 0.3 + random.nextDouble() * 0.4,
+			level.addParticle(MagicFx.wisp(CALM_COLOUR, 0.6F), pos.getX() + 0.3 + random.nextDouble() * 0.4,
 				pos.getY() + 0.3 + random.nextDouble() * 0.4, pos.getZ() + 0.3 + random.nextDouble() * 0.4, 0.0, 0.0, 0.0);
 		}
 	}

@@ -233,7 +233,7 @@ final class StoryFigure {
 		jobs("fletcher", "acrobats");
 		jobs("cartographer", "ringmaster");
 		jobs("cleric", "keepers", "grovekeepers", "elders", "barrows", "sunpriests");
-		jobs("armorer", "hornkin");
+		jobs("armorer", "hornkin", "starwrights");
 		jobs("shepherd", "wolves");
 		jobs("guard", "chieftain", "master");
 	}

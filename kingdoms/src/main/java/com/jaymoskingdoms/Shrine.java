@@ -173,7 +173,7 @@ public final class Shrine extends Block {
 			}
 			server.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.9F, 1.2F);
 			server.sendParticles(ParticleTypes.SOUL, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.02);
-			server.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.03);
+			server.sendParticles(Fx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.03);
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.dedicated", Patrons.coloured(p)));
 			Patrons.met(sp, p, pos);
 		} else if (given.patron() == p) {
@@ -219,7 +219,7 @@ public final class Shrine extends Block {
 		PRAYERS.put(sp.getUUID(), new Prayer(prayer.pos(), prayer.began(), now));
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.praying", (PRAY_TICKS - held + 19) / 20));
 		if (held % 20 < BREAK_TICKS) {
-			server.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 1, 0.15, 0.1, 0.15, 0.01);
+			server.sendParticles(Fx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 1, 0.15, 0.1, 0.15, 0.01);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -242,7 +242,7 @@ public final class Shrine extends Block {
 		PowersCompat.easeFever(player);
 		level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 0.8F, 1.1F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 0.8, player.getZ(), 12, 0.4, 0.5, 0.4, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 10, 0.2, 0.3, 0.2, 0.02);
+		level.sendParticles(Fx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 10, 0.2, 0.3, 0.2, 0.02);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.answered"));
 		// (0.7.509) at a patron's shrine, the prayer counts towards swearing and favour
 		Patrons.prayed(player, state.getValue(DEDICATION).patron(), pos, today);

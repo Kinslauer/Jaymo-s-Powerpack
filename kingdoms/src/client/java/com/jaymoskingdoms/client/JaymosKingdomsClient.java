@@ -58,6 +58,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
 		com.jaymoskingdoms.client.inhabitants.InhabitantsClient.register();
+		EntityRenderers.register(com.jaymoskingdoms.films.FilmActor.TYPE, com.jaymoskingdoms.client.films.FilmActorRenderer::new);
 		com.jaymoskingdoms.client.films.LoreFilmClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		// (0.7.237) a spirit's javelin is its trail: nothing to draw
@@ -67,6 +68,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		// (0.7.310) a Bio-built's buds, small copies of their maker
 		BioBudRenderer.register();
+		RisenOrcRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -84,6 +86,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
+		com.jaymoskingdoms.client.nether.ImpRenderer.register();
 		// (0.7.518) the patron champions
 		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
@@ -234,6 +237,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VillagerLooks.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
+		FrostTechLayer.register();
 		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers

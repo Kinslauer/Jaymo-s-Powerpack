@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.divine;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,8 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -48,7 +48,7 @@ public final class EightSignCircle {
 	public static final float KI_COST = 35.0F;
 	public static final int COOLDOWN = 400;
 	private static final int SIGNS = 8, RING_POINTS = 48;
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xF2D26B, 1.0F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xF2D26B, 1.0F);
 
 	private record Ring(ResourceKey<Level> dimension, Vec3 centre, UUID caster, long until) {
 	}
@@ -141,8 +141,8 @@ public final class EightSignCircle {
 			double a = i * Math.PI * 2.0 / SIGNS;
 			double x = centre.x + Math.cos(a) * RADIUS, z = centre.z + Math.sin(a) * RADIUS;
 			double y = groundY(level, x, centre.y, z);
-			level.sendParticles(ParticleTypes.END_ROD, true, false, x, y + 0.4, z, 2, 0.05, 0.4 * strength, 0.05, 0.01);
-			level.sendParticles(ParticleTypes.ENCHANT, true, false, x, y + 1.0, z, 3, 0.2, 0.4, 0.2, 0.3);
+			level.sendParticles(MagicFx.LIGHT, true, false, x, y + 0.4, z, 2, 0.05, 0.4 * strength, 0.05, 0.01);
+			level.sendParticles(MagicFx.GLYPH, true, false, x, y + 1.0, z, 3, 0.2, 0.4, 0.2, 0.3);
 			// the sign's inward stroke, toward the centre
 			double ix = centre.x + Math.cos(a) * RADIUS * 0.8, iz = centre.z + Math.sin(a) * RADIUS * 0.8;
 			level.sendParticles(GOLD, true, false, ix, groundY(level, ix, centre.y, iz) + 0.1, iz, 1, 0.1, 0.0, 0.1, 0.0);

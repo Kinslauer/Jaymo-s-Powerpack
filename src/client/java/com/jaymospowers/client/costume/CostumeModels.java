@@ -105,6 +105,8 @@ public final class CostumeModels {
 	 * vanilla cape from the render state's cape motion.
 	 */
 	static class Worn extends PlayerModel implements com.jaymospowers.client.PosedCopy.Holder {
+		/** How thin a part starts as a symbiote lays it (see {@link CostumeClient#laid}). */
+		private static final float FORMING_THIN = 0.9F;
 		private final Supplier<PlayerModel> wearer;
 		private final ModelPart cape;
 		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
@@ -185,6 +187,21 @@ public final class CostumeModels {
 					.rotateX((6.0F + state.capeLean / 2.0F + state.capeFlap) * (float)(Math.PI / 180.0))
 					.rotateZ(state.capeLean2 / 2.0F * (float)(Math.PI / 180.0))
 					.rotateY((180.0F - state.capeLean2 / 2.0F) * (float)(Math.PI / 180.0)));
+			}
+			float[] laid = CostumeClient.laid(state);
+			if (laid != null) {
+				// a symbiote's suit in this shape, being called or withdrawn: each part folds out from its joint as the
+				// plain suit's would (WebSuitGrowth), what hangs off the body once the body is covered
+				ModelPart[] limbs = {this.body, this.rightArm, this.leftArm, this.head, this.rightLeg, this.leftLeg};
+				for (int i = 0; i < limbs.length; i++) {
+					float cover = laid[i];
+					limbs[i].yScale *= cover;
+					limbs[i].xScale *= net.minecraft.util.Mth.lerp(cover, FORMING_THIN, 1.0F);
+					limbs[i].zScale *= net.minecraft.util.Mth.lerp(cover, FORMING_THIN, 1.0F);
+					if (cover <= 0.02F) {
+						limbs[i].visible = false;
+					}
+				}
 			}
 			if (this.after != null) {
 				this.after.accept(this, state);

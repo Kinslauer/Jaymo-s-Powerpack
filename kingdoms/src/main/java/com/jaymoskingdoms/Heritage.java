@@ -22,7 +22,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -856,6 +855,10 @@ public final class Heritage {
 	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
+		// one who stayed at the Judge: Alight when there are feathers to bring back, else their own heritage's key
+		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
+			return;
+		}
 		if (kind == Kind.WARRIORBORN) {
 			if (player.isShiftKeyDown()) {
 				// (0.7.490) sneaking, the key is the war cry instead
@@ -869,10 +872,23 @@ public final class Heritage {
 		} else if (kind == Kind.RUBBERFOLK) {
 			// (0.7.288) starts (or stops) swallowing a weak foe
 			RubberFolk.press(player);
+		} else if (kind == Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.alight(player)) {
+			// Alight (Jaymo's Powers): the feathers come back; sneaking, the key is still the kit's ability
 		} else {
 			// (0.7.490) every other heritage and look: its kit's ability (or, for a left-mouse hold, a word on how to use it)
 			HeritageKits.press(player);
 		}
+	}
+
+	/**
+	 * Jaymo's Powers calls this by name: one of the just chose to stay in the high places at the Judge. Their own blood
+	 * stays what it is (Andy: "they just get the buffs and the halo, no change in heritage otherwise"): Powers marks them,
+	 * {@link DivineBorn} counts them as its own, and here the Divine-born heritage and the afterlife's road open to them
+	 * as for one who died there.
+	 */
+	public static void stayed(ServerPlayer player) {
+		unlock(player, Kind.DIVINE);
+		Deeds.done(player, RoadLocks.DIVINE_DEED);
 	}
 
 	/** Sylvan: the share off how far sneaking is seen. */
@@ -988,7 +1004,7 @@ public final class Heritage {
 	private static boolean charged(ServerPlayer player) {
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, STORM_CHARGED_TICKS, 1));
 		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, STORM_CHARGED_TICKS, 0));
-		player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY(0.5), player.getZ(), 12, 0.3, 0.6, 0.3, 0.1);
+		player.level().sendParticles(Fx.CRACKLE, player.getX(), player.getY(0.5), player.getZ(), 12, 0.3, 0.6, 0.3, 0.1);
 		return true;
 	}
 
@@ -1035,7 +1051,7 @@ public final class Heritage {
 			double tx = nearest.getX(), ty = nearest.getY(0.6), tz = nearest.getZ();
 			for (int i = 0; i <= 8; i++) {
 				double t = i / 8.0;
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(Fx.CRACKLE, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
 			}
 			level.playSound(null, tx, ty, tz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
 			nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);

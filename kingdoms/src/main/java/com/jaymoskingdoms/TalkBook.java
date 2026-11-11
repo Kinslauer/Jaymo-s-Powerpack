@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
@@ -235,6 +236,27 @@ final class TalkBook {
 	private static final Gate SEEKS = c -> Heavens.seeks(c.v());
 	private static final Gate CLEAR_NIGHT = c -> Vampires.night(c.clock()) && !c.level().isRaining() && c.level().canSeeSky(c.v().blockPosition().above());
 	private static final Gate POCKETS = c -> Heavens.carriesAether(c.player());
+	// the Retaking (Retaking): what folk say shifts with the act the player has reached; hints only, never said outright
+	private static Gate act(int least, int most) {
+		return c -> grown(c) && Knowledge.level(c.player()) >= least && Knowledge.level(c.player()) <= most;
+	}
+
+	private static final Gate READ_DEFENCE = c -> LoreCodex.holds(c.player(), Retaking.LONG_DEFENCE_BOOK)
+		|| com.jaymoskingdoms.films.LoreFilms.seen(c.player(), com.jaymoskingdoms.films.LoreFilms.LONG_DEFENCE);
+	/** How far (blocks) the keep is before the ford talk calls it a long way, and a very long way. */
+	static final double FORD_NEAR = 800.0, FORD_FAR = 2500.0;
+	private static final Gate FORD_STANDS = c -> Ford.where(c.level().getServer()) != null;
+	private static final Args FORD_WAY = c -> {
+		BlockPos keep = Ford.where(c.level().getServer());
+		if (keep == null) {
+			return new Object[] {"", ""};
+		}
+		double dx = keep.getX() - c.v().getX(), dz = keep.getZ() - c.v().getZ();
+		double far = Math.sqrt(dx * dx + dz * dz);
+		return new Object[] {Sightings.direction(c.v().blockPosition(), keep),
+			Component.translatable(far < FORD_NEAR ? "talk.jaymoskingdoms.word.retaking_ford.near" : far < FORD_FAR ? "talk.jaymoskingdoms.word.retaking_ford.far"
+				: "talk.jaymoskingdoms.word.retaking_ford.very_far")};
+	};
 	private static final Gate CROOK_NEAR = c -> Bearings.trust(c.v(), c.player()) >= Bearings.SECRET_TRUST && Talks.crookNear(c.v()) != null;
 
 	private static Gate mem(Recollections.Kind... kinds) {
@@ -465,6 +487,18 @@ final class TalkBook {
 			r("a", 1, 0, 3, bring(Items.COAL, 6, 2)), r("b", 0, 0, -1), r("c", 1, 0, 1)));
 		t.add(life("blood_frost_heat", blood(Heritage.Kind.FROSTBORN), NO_ARGS,
 			r("a", 0, 0, 3, give(Items.SNOWBALL, 4), Need.item(Items.SNOWBALL, 4)), r("b", 0, 0, 1), r("c", 0, 0, -3)));
+		// the Frostborn's work (FrostTech): one who wears it is proud of it, and everyone else would like some
+		t.add(life("blood_frost_tech", c -> grown(c) && c.blood() == Heritage.Kind.FROSTBORN && FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 2, 3), r("b", 0, 1, 1), r("c", -1, -2, -3)));
+		// anyone else who came by some of it, and one who lost a limb and got a wooden one
+		t.add(life("frost_tech_owner", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 1, 1), r("c", -1, -1, -2)));
+		t.add(life("wooden_limb", c -> grown(c) && FrostTech.wooden(c.v()), NO_ARGS,
+			r("a", 1, 0, 3), r("b", 0, 1, -1), r("c", 0, 0, 1)));
+		t.add(lifeOnce("frost_tech_want", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && c.mine() != Heritage.Kind.FROSTBORN && !FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 1, 0), r("c", 0, -1, -1)));
+		t.add(lifeOnce("frost_tech_yours", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && c.mine() == Heritage.Kind.FROSTBORN, NO_ARGS,
+			r("a", 1, 1, 3), r("b", 0, 1, 0), r("c", 0, 0, -2)));
 		// ---- faith
 		t.add(life("faith_same", SAME_FAITH, c -> new Object[] {c.faith().named()},
 			r("a", 2, 0, 3), r("b", 0, -1, -1), r("c", 1, 0, 2)));
@@ -523,6 +557,21 @@ final class TalkBook {
 			r("a", -1, 0, 0), r("b", 3, 1, 2, Outcome.of(Out.RIDDLE)), r("c", 1, 0, 1, Outcome.of(Out.RIDDLE))));
 		t.add(life("heavens_tower", SEEKS, c -> new Object[] {8, name(Items.SCAFFOLDING)},
 			r("a", 2, 0, 4, bring(Items.SCAFFOLDING, 8, 3)), r("b", 0, 0, 1, Outcome.of(Out.RIDDLE)), r("c", 0, -1, -3)));
+		// ---- the Retaking (Retaking): one or two per act, for anyone grown
+		t.add(lifeOnce("retaking_watch", act(0, 0), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, -1, -1), r("c", 1, 1, 2)));
+		t.add(lifeOnce("retaking_book", act(0, 1).and(READ_DEFENCE), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 0, -1), r("c", 1, 0, 1)));
+		t.add(lifeOnce("retaking_ford", act(1, 1).and(FORD_STANDS), FORD_WAY,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 2, 0, 1)));
+		t.add(lifeOnce("retaking_hardier", act(1, 1), NO_ARGS,
+			r("a", 0, 0, 1), r("b", 0, -1, 0), r("c", 1, 0, 1)));
+		t.add(lifeOnce("retaking_lights", act(2, 2), NO_ARGS,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 1, 1, 2)));
+		t.add(lifeOnce("retaking_counting", act(3, 3), NO_ARGS,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 1, 0, 2)));
+		t.add(lifeOnce("retaking_songs", act(4, 5), NO_ARGS,
+			r("a", 1, 1, 2), r("b", 0, 1, 1), r("c", 1, 2, 1)));
 		// ---- trust
 		t.add(talk("money_loan", LENDER, c -> new Object[] {com.jaymoskingdoms.money.Money.text(c.player(), com.jaymoskingdoms.money.Money.worth(Talks.LOAN_EMERALDS))}, Talks.WEIGHT_LENDER, false, false,
 			r("a", 1, 0, 1, Outcome.of(Out.LOAN)), r("b", 0, 1, 0), r("c", 0, 0, -2)));

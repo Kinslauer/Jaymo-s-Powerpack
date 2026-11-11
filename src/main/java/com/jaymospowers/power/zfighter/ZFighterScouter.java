@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
@@ -162,7 +163,7 @@ public final class ZFighterScouter {
 		double x = player.getX(), y = player.getEyeY(), z = player.getZ();
 		level.playSound(null, x, y, z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 1.5F);
 		level.playSound(null, x, y, z, SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.8F, 1.0F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, x, y, z, 24, 0.3, 0.25, 0.3, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, true, false, x, y, z, 24, 0.3, 0.25, 0.3, 0.3);
 		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, SCOUTER), true, false, x, y, z, 12, 0.25, 0.2, 0.25, 0.1);
 		Shakes.send(player, 0.5F);
 		if (!player.isCreative()) {

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -17,7 +18,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -157,9 +158,9 @@ public final class ChronoFlow {
 	/** The mode's hunger, per tick. */
 	static final float EXHAUSTION = 0.006F;
 
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
-	private static final DustParticleOptions CLOCK_FACE = new DustParticleOptions(0xFFE8A0, 0.45F);
-	private static final DustParticleOptions CLOCK_HAND = new DustParticleOptions(0xFFFFFF, 0.5F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xFFE08A, 1.0F);
+	private static final ParticleOptions CLOCK_FACE = MagicFx.wisp(0xFFE8A0, 0.45F);
+	private static final ParticleOptions CLOCK_HAND = MagicFx.wisp(0xFFFFFF, 0.5F);
 	private static final ColorParticleOption FLASH = ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF);
 	private static final ColorParticleOption GOLD_FLASH = ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFD27A);
 
@@ -482,7 +483,7 @@ public final class ChronoFlow {
 		}
 		if (now < fighter.intangibleUntil && player.tickCount % 2 == 0) {
 			// out of step with time: a faint golden afterimage
-			ChronoFx.particles(player.level(), player, ParticleTypes.WAX_OFF, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.3, 0.6, 0.3, 0.0);
+			ChronoFx.particles(player.level(), player, MagicFx.PALE, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.3, 0.6, 0.3, 0.0);
 		}
 	}
 
@@ -686,7 +687,7 @@ public final class ChronoFlow {
 				SoundEvents.NOTE_BLOCK_BASEDRUM, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 0.7F,
 				level.getRandom().nextLong()));
 		}
-		ChronoFx.particles(level, player, ParticleTypes.WAX_OFF, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.35, 0.6, 0.35, 0.0);
+		ChronoFx.particles(level, player, MagicFx.PALE, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.35, 0.6, 0.35, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6F, 1.7F);
 		return true;
 	}
@@ -773,7 +774,7 @@ public final class ChronoFlow {
 				continue;
 			}
 			Vec3 to = dir.normalize().scale(GLYPH_BURST_RADIUS * (0.35 + random.nextDouble() * 0.65));
-			level.sendParticles(ParticleTypes.ENCHANT, center.x + to.x, center.y + to.y, center.z + to.z, 0, -to.x, -to.y, -to.z, 1.0);
+			level.sendParticles(MagicFx.GLYPH, center.x + to.x, center.y + to.y, center.z + to.z, 0, -to.x, -to.y, -to.z, 1.0);
 		}
 	}
 
@@ -1076,7 +1077,7 @@ public final class ChronoFlow {
 			attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false, false), player);
 			BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, CROWD, now + HIT_AT[COUNTER]));
 			Vec3 at = attacker.getEyePosition();
-			ChronoFx.particles(level, player, ParticleTypes.END_ROD, at.x, at.y + 0.3, at.z, 8, 0.2, 0.2, 0.2, 0.05);
+			ChronoFx.particles(level, player, MagicFx.LIGHT, at.x, at.y + 0.3, at.z, 8, 0.2, 0.2, 0.2, 0.05);
 		}
 	}
 
@@ -1099,7 +1100,7 @@ public final class ChronoFlow {
 		attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false, false), player);
 		stun(attacker, move.hitAt() + COUNTER_STUN_SLACK);
 		Vec3 eye = attacker.getEyePosition();
-		ChronoFx.particles(level, player, ParticleTypes.END_ROD, eye.x, eye.y + 0.3, eye.z, 8, 0.2, 0.2, 0.2, 0.05);
+		ChronoFx.particles(level, player, MagicFx.LIGHT, eye.x, eye.y + 0.3, eye.z, 8, 0.2, 0.2, 0.2, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.7F, 1.8F);
 		switch (variant) {
 			case CIRCLE -> {
@@ -1133,7 +1134,7 @@ public final class ChronoFlow {
 
 	private static void flash(ServerLevel level, ServerPlayer player, LivingEntity attacker) {
 		ChronoFx.particles(level, player, FLASH, attacker.getX(), attacker.getY() + attacker.getBbHeight() + 0.6, attacker.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-		ChronoFx.particles(level, player, ParticleTypes.END_ROD, attacker.getX(), attacker.getY() + attacker.getBbHeight() + 0.6, attacker.getZ(), 3, 0.1, 0.1, 0.1, 0.01);
+		ChronoFx.particles(level, player, MagicFx.LIGHT, attacker.getX(), attacker.getY() + attacker.getBbHeight() + 0.6, attacker.getZ(), 3, 0.1, 0.1, 0.1, 0.01);
 	}
 
 	/** Everything held on {@code player} lands now (the mode ended). */

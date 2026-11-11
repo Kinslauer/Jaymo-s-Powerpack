@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.wind.SorasDagger;
 import com.jaymospowers.power.wind.SorasLineage;
 import java.util.HashSet;
@@ -8,7 +9,6 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -272,14 +272,14 @@ public final class ArsenalQuestItems {
 
 	/** The spot the item left opens a flash of portal (and a thread of motes runs from it to the player's rift, in the same world). */
 	private static void flash(ServerLevel from, Vec3 at, ServerLevel to, Vec3 rift) {
-		from.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, FLASH_MOTES, 0.3, 0.4, 0.3, 0.6);
-		from.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, FLASH_MOTES / 2, 0.2, 0.3, 0.2, 0.1);
+		from.sendParticles(MagicFx.VOID, at.x, at.y, at.z, FLASH_MOTES, 0.3, 0.4, 0.3, 0.6);
+		from.sendParticles(MagicFx.VOID, at.x, at.y, at.z, FLASH_MOTES / 2, 0.2, 0.3, 0.2, 0.1);
 		from.playSound(null, at.x, at.y, at.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 0.6F);
 		from.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.12F, 1.8F);
 		if (from == to && at.distanceTo(rift) <= THREAD_RANGE) {
 			for (int i = 1; i <= THREAD_STEPS; i++) {
 				Vec3 p = at.lerp(rift, i / (double)THREAD_STEPS);
-				from.sendParticles(ParticleTypes.PORTAL, p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.2);
+				from.sendParticles(MagicFx.VOID, p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.2);
 			}
 		}
 	}

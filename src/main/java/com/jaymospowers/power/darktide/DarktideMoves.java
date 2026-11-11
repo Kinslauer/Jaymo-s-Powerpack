@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fate;
@@ -14,8 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -277,7 +276,7 @@ final class DarktideMoves {
 			Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
 			if (empowered) {
 				level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 24, 0.3, 0.4, 0.3, 0.12);
-				level.sendParticles(new DustParticleOptions(0x0A0F2A, 2.0F), at.x, at.y, at.z, 16, 0.4, 0.4, 0.4, 0.0);
+				level.sendParticles(MagicFx.wisp(0x0A0F2A, 2.0F), at.x, at.y, at.z, 16, 0.4, 0.4, 0.4, 0.0);
 				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.8F, 1.2F);
 			} else {
 				level.sendParticles(ParticleTypes.SPLASH, at.x, at.y, at.z, 6 + Math.round(12 * charge), 0.3, 0.3, 0.3, 0.2);
@@ -340,7 +339,7 @@ final class DarktideMoves {
 		for (int i = 0; i <= 16; i++) {
 			float yaw = player.getYRot() - (float) CRESCENT_ARC / 2.0F + (float) CRESCENT_ARC * i / 16.0F;
 			Vec3 p = center.add(Vec3.directionFromRotation(0.0F, yaw).scale(2.6));
-			level.sendParticles(new DustParticleOptions(CRESCENT_COLOR, 1.8F), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(MagicFx.wisp(CRESCENT_COLOR, 1.8F), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
 			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		level.sendParticles(ParticleTypes.SWEEP_ATTACK, center.x + look.x * 1.5, center.y, center.z + look.z * 1.5, 1, 0.0, 0.0, 0.0, 0.0);
@@ -371,7 +370,7 @@ final class DarktideMoves {
 			double t = i / 8.0 - 0.5;
 			for (int s = -1; s <= 1; s += 2) {
 				Vec3 p = mid.add(right.scale(t * 1.2)).add(0.0, s * t * 1.2, 0.0);
-				level.sendParticles(new DustParticleOptions(0x05070F, 1.4F), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.wisp(0x05070F, 1.4F), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, mid.x, mid.y, mid.z, 10, 0.2, 0.3, 0.2, 0.05);
@@ -483,7 +482,7 @@ final class DarktideMoves {
 			double t = (i / 10.0 - 0.5) * TIDE_WIDTH;
 			Vec3 p = front.add(side.scale(t));
 			level.sendParticles(ParticleTypes.SPLASH, p.x, p.y + 0.4, p.z, 3, 0.15, 0.3, 0.15, 0.2);
-			level.sendParticles(new DustParticleOptions(0x0A1838, 1.8F), p.x, p.y + 0.3 + level.getRandom().nextDouble() * 1.2, p.z, 1, 0.1, 0.2, 0.1, 0.0);
+			level.sendParticles(MagicFx.wisp(0x0A1838, 1.8F), p.x, p.y + 0.3 + level.getRandom().nextDouble() * 1.2, p.z, 1, 0.1, 0.2, 0.1, 0.0);
 			if (i % 2 == 0) {
 				level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y + 0.6, p.z, 1, 0.1, 0.2, 0.1, 0.01);
 			}
@@ -709,7 +708,7 @@ final class DarktideMoves {
 				dash.hits++;
 				swing(player);
 				Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
-				level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFCFE8FF), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xCFE8FF);
 				level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 6, 0.3, 0.3, 0.3, 0.05);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.6F, 1.3F + dash.hits * 0.05F);
 				DarktideNet.fx(player, target, new DarktideNet.Fx(DarktideNet.Fx.HIT, player.getId(), target.getId()));
@@ -771,7 +770,7 @@ final class DarktideMoves {
 		// empowered: the hands (or blade) wreathed in dark energy, for everyone to see
 		if (now < live.empoweredUntil && now % 3 == 0) {
 			Vec3 hand = player.position().add(0.0, 1.0, 0.0).add(Vec3.directionFromRotation(0.0F, player.getYRot() + 40.0F).scale(0.45));
-			level.sendParticles(new DustParticleOptions(0x0B0820, 1.2F), hand.x, hand.y, hand.z, 3, 0.1, 0.15, 0.1, 0.0);
+			level.sendParticles(MagicFx.wisp(0x0B0820, 1.2F), hand.x, hand.y, hand.z, 3, 0.1, 0.15, 0.1, 0.0);
 			level.sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 1, 0.05, 0.1, 0.05, 0.0);
 		}
 	}
@@ -793,7 +792,7 @@ final class DarktideMoves {
 						double x = a.minX + random.nextDouble() * a.getXsize();
 						double z = a.minZ + random.nextDouble() * a.getZsize();
 						puddle.level.sendParticles(ParticleTypes.SPLASH, x, a.minY + 1.05, z, 1, 0.0, 0.0, 0.0, 0.0);
-						puddle.level.sendParticles(new DustParticleOptions(0x0A1838, 1.0F), x, a.minY + 1.02, z, 1, 0.1, 0.0, 0.1, 0.0);
+						puddle.level.sendParticles(MagicFx.wisp(0x0A1838, 1.0F), x, a.minY + 1.02, z, 1, 0.1, 0.0, 0.1, 0.0);
 					}
 				}
 			}

@@ -1,10 +1,11 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import java.util.List;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -77,13 +78,7 @@ final class ZFighterGift implements GiftKit {
 
 	/** A line of ki motes from {@code from} to {@code to}. */
 	private static void line(ServerLevel level, Vec3 from, Vec3 to, int color, float size, double perBlock) {
-		Vec3 step = to.subtract(from);
-		int steps = Math.max(1, (int)(step.length() * perBlock));
-		DustParticleOptions dust = new DustParticleOptions(color, size);
-		for (int i = 1; i <= steps; i++) {
-			Vec3 p = from.add(step.scale((double)i / steps));
-			level.sendParticles(dust, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
-		}
+		MagicFx.line(level, from, to, MagicFx.wisp(color, size), Math.max(1, (int)(to.distanceTo(from) * perBlock)));
 	}
 
 	private static boolean blast(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
@@ -92,8 +87,8 @@ final class ZFighterGift implements GiftKit {
 		Vec3 from = ZFighterHands.mainPalm(caster, aim.lengthSqr() < 1.0E-6 ? caster.getLookAngle() : aim.normalize());
 		ZFighterHands.thrust(caster, ZFighterHands.hand(caster, true), ZFighterHands.JAB);
 		line(level, from, to, BLAST_COLOR, 1.2F, 2.0);
-		level.sendParticles(new DustParticleOptions(BLAST_COLOR, 1.8F), to.x, to.y, to.z, 16, 0.3, 0.3, 0.3, 0.1);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.2);
+		level.sendParticles(MagicFx.wisp(BLAST_COLOR, 1.8F), to.x, to.y, to.z, 16, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.CRACKLE, to.x, to.y, to.z, 6, 0.2, 0.2, 0.2, 0.2);
 		level.playSound(null, caster.getX(), caster.getEyeY(), caster.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.7F, 1.8F);
 		level.playSound(null, caster.getX(), caster.getEyeY(), caster.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.NEUTRAL, 0.7F, 1.5F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.NEUTRAL, 0.35F, 1.9F);
@@ -105,9 +100,9 @@ final class ZFighterGift implements GiftKit {
 		Vec3 c = foe.getBoundingBox().getCenter();
 		for (int i = 0; i < FLURRY_BLOWS; i++) {
 			level.sendParticles(ParticleTypes.CRIT, c.x, c.y, c.z, 3, 0.35, 0.35, 0.35, 0.2);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.x, c.y, c.z, 2, 0.35, 0.35, 0.35, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, c.x, c.y, c.z, 2, 0.35, 0.35, 0.35, 0.2);
 		}
-		level.sendParticles(new DustParticleOptions(BLAST_COLOR, 1.2F), caster.getX(), caster.getY(0.6), caster.getZ(), 10, 0.3, 0.4, 0.3, 0.0);
+		level.sendParticles(MagicFx.wisp(BLAST_COLOR, 1.2F), caster.getX(), caster.getY(0.6), caster.getZ(), 10, 0.3, 0.4, 0.3, 0.0);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 0.8F, 1.8F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		// separate blows would be soaked up by the invulnerable frames, so they land together
@@ -120,7 +115,7 @@ final class ZFighterGift implements GiftKit {
 		away = away.lengthSqr() < 1.0E-4 ? caster.getLookAngle().horizontal() : away;
 		Vec3 c = foe.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.EXPLOSION, c.x, c.y, c.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(new DustParticleOptions(WAVE_COLOR, 1.5F), c.x, c.y, c.z, 14, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.wisp(WAVE_COLOR, 1.5F), c.x, c.y, c.z, 14, 0.3, 0.3, 0.3, 0.1);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.NEUTRAL, 0.4F, 1.8F);
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), PALM_DAMAGE);
@@ -135,7 +130,7 @@ final class ZFighterGift implements GiftKit {
 		Vec3 away = caster.position().subtract(foe.position()).horizontal();
 		away = away.lengthSqr() < 1.0E-4 ? caster.getLookAngle().horizontal().reverse() : away;
 		// the afterimage: a column of fading motes where they stood
-		DustParticleOptions image = new DustParticleOptions(BLAST_COLOR, 1.0F);
+		ParticleOptions image = MagicFx.wisp(BLAST_COLOR, 1.0F);
 		for (double h = 0.1; h < caster.getBbHeight(); h += 0.3) {
 			level.sendParticles(image, caster.getX(), caster.getY() + h, caster.getZ(), 3, 0.15, 0.05, 0.15, 0.0);
 		}
@@ -151,10 +146,10 @@ final class ZFighterGift implements GiftKit {
 		// shadowboxing: punches in the air in front of them, sparks off their fists
 		Vec3 look = mob.getLookAngle().horizontal();
 		look = look.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : look.normalize();
-		DustParticleOptions ki = new DustParticleOptions(BLAST_COLOR, 0.8F);
+		ParticleOptions ki = MagicFx.wisp(BLAST_COLOR, 0.8F);
 		for (int i = 0; i < SHADOWBOX_PUNCHES; i++) {
 			Vec3 fist = mob.position().add(look.scale(SHADOWBOX_REACH)).add(0.0, mob.getBbHeight() * (0.55 + 0.1 * (i % 2)), 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fist.x, fist.y, fist.z, 2, 0.1, 0.1, 0.1, 0.1);
+			level.sendParticles(MagicFx.CRACKLE, fist.x, fist.y, fist.z, 2, 0.1, 0.1, 0.1, 0.1);
 			level.sendParticles(ki, fist.x, fist.y, fist.z, 2, 0.1, 0.1, 0.1, 0.0);
 		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 0.5F, 1.6F);
@@ -200,8 +195,8 @@ final class ZFighterGift implements GiftKit {
 		ZFighterHands.shout(caster);
 		// the beam: a thick blue coil from the hands to its end, bursting where it stops (no block is touched)
 		line(level, from, end, WAVE_COLOR, 3.0F, 2.0);
-		level.sendParticles(new DustParticleOptions(WAVE_COLOR, 1.5F), end.x, end.y, end.z, 24, 0.4, 0.4, 0.4, 0.2);
-		level.sendParticles(ParticleTypes.END_ROD, end.x, end.y, end.z, 10, 0.2, 0.2, 0.2, 0.15);
+		MagicFx.burst(level, end.x, end.y, end.z, WAVE_COLOR, 1.5F, 24, 0.4, 0.4, 0.4);
+		level.sendParticles(MagicFx.LIGHT, end.x, end.y, end.z, 10, 0.2, 0.2, 0.2, 0.15);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.NEUTRAL, 1.5F, 1.2F);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 1.2F, 1.8F);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(WAVE_WIDTH),

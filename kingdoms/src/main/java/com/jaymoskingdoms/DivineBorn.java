@@ -1,7 +1,7 @@
 package com.jaymoskingdoms;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +34,7 @@ public final class DivineBorn {
 	/** Healing magic: the share more it heals when they cast it, and the share off its mana cost. */
 	static final float HEAL_BONUS = 0.3F, SPELL_DISCOUNT = 0.25F;
 	/** A mote of light off the skin when they mend. */
-	private static final DustParticleOptions MOTE = new DustParticleOptions(0xFFE9A0, 0.7F);
+	private static final ParticleOptions MOTE = Fx.wisp(0xFFE9A0, 0.7F);
 
 	private DivineBorn() {
 	}
@@ -49,7 +49,8 @@ public final class DivineBorn {
 	}
 
 	static boolean is(Player player) {
-		return Heritage.is(player, Heritage.Kind.DIVINE);
+		// by blood, or one of the just who stayed at the Judge (Jaymo's Powers): the buffs are theirs too
+		return Heritage.is(player, Heritage.Kind.DIVINE) || PowersCompat.stayedDivine(player);
 	}
 
 	private static void tick(MinecraftServer server) {

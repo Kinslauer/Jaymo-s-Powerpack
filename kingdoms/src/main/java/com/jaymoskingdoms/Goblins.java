@@ -56,6 +56,7 @@ public final class Goblins {
 			base(folk, GOBLIN_HEALTH, GOBLIN_DAMAGE, GOBLIN_SPEED, SCALE);
 			Item[] weapons = {Items.WOODEN_SWORD, Items.STONE_SWORD, Items.STONE_SWORD, Items.STONE_AXE, Items.IRON_SWORD, Items.WOODEN_AXE};
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapons[folk.getRandom().nextInt(weapons.length)]));
+			ShieldBearers.arm(folk, ShieldBearers.GOBLIN, null);
 			folk.setItemSlot(EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, folk.getRandom().nextBoolean() ? RAG : HIDE));
 			if (folk.getRandom().nextInt(CAP_ONE_IN) == 0) {
 				folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, MOSS));

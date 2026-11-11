@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/goblin_king",
+  "display": {
+    "icon": {
+      "id": "minecraft:mossy_stone_bricks"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.ford.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.ford.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -113,6 +113,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
+		Retaking.register();
+		// the field of The Long Defence: the keep above the ford (Act II of the Retaking)
+		Ford.register();
+		SecondDefence.register();
+		StoryRoads.register();
 		// (0.7.580) mice that raid pantries, chased by cats
 		Mice.register();
 		Commissions.register();
@@ -352,7 +357,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tails.register();
 		GreenskinLife.register();
 		FrostPrison.register();
-		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
+		FrostTech.register();
+		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
 		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
 			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE);
@@ -637,6 +643,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		StarFolk.register();
 		// 0.7.547: some villagers know of the heavens overhead, and some try to get there
 		Heavens.register();
+		SkyFolk.register();
+		SkyCourt.register();
+		SkyFerries.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();

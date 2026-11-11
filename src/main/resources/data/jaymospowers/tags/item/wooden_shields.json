@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:shield",
+    { "id": "magistuarmory:wood_roundshield", "required": false },
+    { "id": "magistuarmory:wood_buckler", "required": false },
+    { "id": "magistuarmory:wood_pavese", "required": false },
+    { "id": "magistuarmory:wood_tartsche", "required": false },
+    { "id": "magistuarmory:wood_target", "required": false }
+  ]
+}

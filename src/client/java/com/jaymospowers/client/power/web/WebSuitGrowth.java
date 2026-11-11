@@ -384,6 +384,19 @@ public final class WebSuitGrowth {
 		return growth.to() > growth.from() ? growth.t() : 1.0F - growth.t();
 	}
 
+	/**
+	 * How far the suit itself is laid over each part of a change between bare skin and the suit (0-1; body, right arm,
+	 * left arm, head, right leg, left leg): for a costume worn as the suit's shape, laid the same way (CostumeClient).
+	 */
+	public static float[] suitLaid(Growth growth) {
+		float built = built(growth);
+		float[] laid = new float[6];
+		for (int i = 0; i < laid.length; i++) {
+			laid[i] = layered(built, i, true, false);
+		}
+		return laid;
+	}
+
 	/** Each part's start (share of the change): body, arms, head, legs; for the big body ({@code big}) the head last. */
 	static float start(int part, boolean big) {
 		return switch (part) {

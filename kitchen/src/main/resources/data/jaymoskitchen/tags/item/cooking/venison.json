@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "naturalist:venison",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_venison",
+      "required": false
+    }
+  ]
+}

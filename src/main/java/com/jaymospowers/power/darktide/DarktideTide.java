@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Oddities;
 import com.jaymospowers.power.arsenal.Summoned;
@@ -15,7 +16,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -264,7 +264,7 @@ final class DarktideTide {
 			// the water blade dissolves back into what you held
 			Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.5, 0.0);
 			level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y, at.z, 20, 0.25, 0.3, 0.25, 0.0);
-			level.sendParticles(new DustParticleOptions(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
+			level.sendParticles(MagicFx.wisp(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
 		}
 	}
@@ -601,7 +601,7 @@ final class DarktideTide {
 	private static void melt(Mob mob) {
 		if (mob.level() instanceof ServerLevel level) {
 			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ(), 30, 0.3, 0.5, 0.3, 0.04);
-			level.sendParticles(new DustParticleOptions(0x050510, 1.6F), mob.getX(), mob.getY() + 0.5, mob.getZ(), 20, 0.3, 0.5, 0.3, 0.0);
+			level.sendParticles(MagicFx.wisp(0x050510, 1.6F), mob.getX(), mob.getY() + 0.5, mob.getZ(), 20, 0.3, 0.5, 0.3, 0.0);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
 		RISEN_OWNER.remove(mob.getUUID());
@@ -731,7 +731,7 @@ final class DarktideTide {
 				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * DROWN_RADIUS));
 				level.sendParticles(ParticleTypes.BUBBLE_POP, inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
 				if (i % 3 == 0) {
-					level.sendParticles(new DustParticleOptions(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
+					level.sendParticles(MagicFx.wisp(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}
 			}
 			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(zone.center, zone.center).inflate(DROWN_RADIUS + 1.0),

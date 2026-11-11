@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -211,10 +212,10 @@ public final class Keen extends XenoForm {
 			e -> e != player && e.isAlive() && e.distanceTo(player) <= SONAR_RANGE)) {
 			AABB b = e.getBoundingBox();
 			for (double y : new double[] {b.minY, b.maxY}) {
-				level.sendParticles(player, ParticleTypes.END_ROD, true, false, b.minX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.END_ROD, true, false, b.maxX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.END_ROD, true, false, b.minX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.END_ROD, true, false, b.maxX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.LIGHT, true, false, b.minX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.LIGHT, true, false, b.maxX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.LIGHT, true, false, b.minX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.LIGHT, true, false, b.maxX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 	}

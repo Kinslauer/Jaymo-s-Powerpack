@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -313,7 +313,7 @@ public class PatronChampion extends Monster {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
-		DustParticleOptions dust = new DustParticleOptions(this.patron.colour & 0xFFFFFF, 1.5F);
+		ParticleOptions dust = Fx.wisp(this.patron.colour & 0xFFFFFF, 1.5F);
 		level.sendParticles(dust, this.getX(), this.getY() + 1.2, this.getZ(), 30, 0.4, 0.8, 0.4, 0.02);
 		this.getNavigation().stop();
 		this.teleportTo(to.x, to.y, to.z);
@@ -544,7 +544,7 @@ public class PatronChampion extends Monster {
 
 	private void sleepTick(ServerLevel level) {
 		if (this.tickCount % 40 == 0) {
-			level.sendParticles(new DustParticleOptions(this.patron.colour & 0xFFFFFF, 1.0F), this.getX(), this.getY() + 1.6, this.getZ(), 4, 0.4, 0.9, 0.4, 0.0);
+			level.sendParticles(Fx.wisp(this.patron.colour & 0xFFFFFF, 1.0F), this.getX(), this.getY() + 1.6, this.getZ(), 4, 0.4, 0.9, 0.4, 0.0);
 		}
 		if (this.tickCount % 10 != 0 || (this.kind != Temples.WILD && this.kind != Temples.RUIN) || this.quarry != null) {
 			return;

@@ -107,6 +107,6 @@ public final class BodyCover {
 		if (player == null || player.isInvisible()) {
 			return false;
 		}
-		return WebSymbiote.suitShown(player) || WebSymbiote.bulked(player) || Costume.worn(player) != null;
+		return WebSymbiote.suitShown(player) || WebSymbiote.bulked(player) || Costume.shown(player) != null;
 	}
 }

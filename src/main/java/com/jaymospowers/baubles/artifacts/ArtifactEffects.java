@@ -1,5 +1,6 @@
 package com.jaymospowers.baubles.artifacts;
 
+import com.jaymospowers.core.fx.MagicFx;
 import static com.jaymospowers.baubles.artifacts.ArtifactBaubles.*;
 
 import com.jaymospowers.JaymosPowers;
@@ -12,7 +13,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -422,7 +422,7 @@ public final class ArtifactEffects {
 		new TeleportRandomlyConsumeEffect(CHORUS_RANGE, true).apply(player.level(), new ItemStack(Items.CHORUS_FRUIT), player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		if (player.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.3);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.3);
 		}
 		return false;
 	}

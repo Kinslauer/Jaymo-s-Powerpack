@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.Soundscape;
@@ -8,7 +9,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,10 +73,10 @@ final class ZFighterDrillBeam {
 			double ox = (level.getRandom().nextDouble() - 0.5) * 1.2;
 			double oy = (level.getRandom().nextDouble() - 0.5) * 1.2;
 			double oz = (level.getRandom().nextDouble() - 0.5) * 1.2;
-			level.sendParticles(new DustParticleOptions(color, 0.7F + charge * 0.5F), true, false, tip.x + ox, tip.y + oy, tip.z + oz, 0, -ox, -oy, -oz, 0.12);
+			level.sendParticles(MagicFx.wisp(color, 0.7F + charge * 0.5F), true, false, tip.x + ox, tip.y + oy, tip.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, tip.x, tip.y, tip.z, 2, 0.1, 0.1, 0.1, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, tip.x, tip.y, tip.z, 2, 0.1, 0.1, 0.1, 0.2);
 		}
 		if (Soundscape.due(player, "ki.drill", 6, 10)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(0.7F).pitched(1.3F + charge * 0.7F), ZFighterKi.KI_SURGE);
@@ -143,7 +144,7 @@ final class ZFighterDrillBeam {
 			ZFighterKi.push(near, near.position().subtract(end), 0.6, 0.3);
 		}
 		level.explode(player, source, ZFighterKi.GROUND_ONLY, end.x, end.y, end.z, BLAST_POWER, false, Level.ExplosionInteraction.NONE);
-		level.sendParticles(new DustParticleOptions(color, 2.0F), true, false, end.x, end.y, end.z, 24, 0.5, 0.5, 0.5, 0.25);
+		MagicFx.burst(level, end.x, end.y, end.z, color, 2.0F, 24, 0.5, 0.5, 0.5);
 
 		draw(level, from, end, look, color);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -188,7 +189,7 @@ final class ZFighterDrillBeam {
 		}
 		Vec3 side = look.cross(Math.abs(look.y) < 0.95 ? new Vec3(0.0, 1.0, 0.0) : new Vec3(1.0, 0.0, 0.0)).normalize();
 		Vec3 up = side.cross(look).normalize();
-		DustParticleOptions glow = new DustParticleOptions(color, 0.9F);
+		ParticleOptions glow = MagicFx.wisp(color, 0.9F);
 		double length = from.distanceTo(end);
 		for (double d = 0.0; d <= length; d += COIL_STEP) {
 			double t = d * COIL_TURNS;

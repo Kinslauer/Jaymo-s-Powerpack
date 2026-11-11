@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.GiantTrees;
 import com.jaymospowers.core.UltimateFilm;
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -188,7 +188,7 @@ public final class ApeGrab {
 			}
 			if (t % 3 == 0) {
 				Vec3 hand = hand(ape, 0.0);
-				level.sendParticles(new DustParticleOptions(0xC03020, 2.5F), true, false, hand.x, hand.y, hand.z, 6, 0.6, 0.6, 0.6, 0.05);
+				level.sendParticles(MagicFx.wisp(0xC03020, 2.5F), true, false, hand.x, hand.y, hand.z, 6, 0.6, 0.6, 0.6, 0.05);
 			}
 			if (t == WINDUP - 1) {
 				snatch(ape, live, level, grab, target);

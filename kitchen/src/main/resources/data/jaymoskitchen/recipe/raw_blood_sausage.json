@@ -11,7 +11,7 @@
       "jaymoskitchen:raw_bacon"
     ],
     "minecraft:wheat",
-    "jaymoskitchen:animal_fat"
+    "#jaymoskitchen:animal_fats"
   ],
   "result": {
     "id": "jaymoskitchen:raw_blood_sausage",

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Flames;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -219,7 +220,7 @@ public enum WindCycloneElement {
 			case WATER -> ParticleTypes.SPLASH;
 			case SNOW -> ParticleTypes.SNOWFLAKE;
 			case SAND -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.SAND.defaultBlockState());
-			case STORM -> ParticleTypes.ELECTRIC_SPARK;
+			case STORM -> MagicFx.CRACKLE;
 			case GALE -> ParticleTypes.SMALL_GUST;
 			case NONE -> null;
 		};
@@ -251,7 +252,7 @@ public enum WindCycloneElement {
 				}
 				case SAND -> level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SAND.defaultBlockState()), x, y, z, 3, 0.4, 0.4, 0.4,
 					0.1);
-				case STORM -> level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 2, 0.2, 0.2, 0.2, 0.2);
+				case STORM -> level.sendParticles(MagicFx.CRACKLE, x, y, z, 2, 0.2, 0.2, 0.2, 0.2);
 				default -> {
 				}
 			}

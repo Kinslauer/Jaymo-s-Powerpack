@@ -1208,5 +1208,85 @@
     "id": "jaymoskingdoms:skins/clothing/poor/rags_5.png",
     "profession": "jaymoskingdoms:uniform",
     "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/divine_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/divine_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/divine_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/divine_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/halfway_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/halfway_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/halfway_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/halfway_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/lord_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/lord_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/lord_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/lord_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/warden_0.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/warden_1.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/warden_2.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
+  },
+  {
+    "id": "jaymoskingdoms:skins/clothing/sky/warden_3.png",
+    "profession": "jaymoskingdoms:uniform",
+    "chance": 1.0
   }
 ]

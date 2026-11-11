@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -149,7 +150,7 @@ public final class ZFighterFrostForms {
 			bolt.setVisualOnly(true);
 			level.addFreshEntity(bolt);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.25);
+		level.sendParticles(MagicFx.LIGHT, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.25);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 1.5F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.8F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 24.0, 1.0F);
@@ -186,7 +187,7 @@ public final class ZFighterFrostForms {
 			live.charging = false;
 			if (level.getGameTime() % 3 == 0) {
 				level.sendParticles(ParticleTypes.SNOWFLAKE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.4, 0.8, 0.4, 0.02);
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.8, 0.4, 0.2);
+				level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.8, 0.4, 0.2);
 			}
 			if (left[0] % 20 == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.6F, 1.4F);

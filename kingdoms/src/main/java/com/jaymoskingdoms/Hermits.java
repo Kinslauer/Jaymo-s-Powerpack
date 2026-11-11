@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -101,7 +100,7 @@ public final class Hermits {
 	/** {@code mob} just became a hermit: their home where they stand, a shimmer. */
 	static void settled(ServerLevel level, PathfinderMob mob) {
 		mob.setPersistenceRequired();
-		level.sendParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getY() + 1.2, mob.getZ(), 30, 0.4, 0.8, 0.4, 0.6);
+		level.sendParticles(Fx.GLYPH, mob.getX(), mob.getY() + 1.2, mob.getZ(), 30, 0.4, 0.8, 0.4, 0.6);
 		JaymosKingdoms.LOGGER.debug("{} is a hermit on a floating island ({})", mob.getName().getString(), story(mob));
 	}
 
@@ -111,7 +110,7 @@ public final class Hermits {
 		if (mob.fallDistance > FALL_CATCH && !mob.hasEffect(MobEffects.SLOW_FALLING)) {
 			// (off the edge: a word and they drift down like a feather)
 			mob.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SLOW_FALL_TICKS, 0, false, false));
-			level.sendParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getY() + 1.0, mob.getZ(), 20, 0.3, 0.6, 0.3, 0.4);
+			level.sendParticles(Fx.GLYPH, mob.getX(), mob.getY() + 1.0, mob.getZ(), 20, 0.3, 0.6, 0.3, 0.4);
 		}
 		if (mob.tickCount % 20 != 0 || mob.isSleeping() || McaCompat.busy(mob) || mob.getTarget() != null) {
 			return;
@@ -146,5 +145,6 @@ public final class Hermits {
 		}
 		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hermit.gift", mob.getDisplayName()).withColor(COLOR));
+		StoryRoads.hermit(player);
 	}
 }

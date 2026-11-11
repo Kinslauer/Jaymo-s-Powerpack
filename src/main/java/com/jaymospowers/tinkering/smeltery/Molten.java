@@ -32,7 +32,13 @@ public enum Molten {
 	// ---- (0.18.56) back home (keep apart when merging far-world metals) ----
 	STAR_METAL("star_metal", 0xFFC9C2FF, TinkerMaterial.STAR_METAL),
 	// ---- (0.18.102) bog iron (Jaymo's Kingdoms' raw bog iron melts into it: data/jaymoskingdoms/tinkering_melting) ----
-	BOG_IRON("bog_iron", 0xFF9A5428, TinkerMaterial.BOG_IRON);
+	BOG_IRON("bog_iron", 0xFF9A5428, TinkerMaterial.BOG_IRON),
+	// ---- the knife metals: cobalt from its Nether ore, the other three alloyed from it. They cast into ingots only
+	// (no material here, so no cast parts: their parts are knife parts, made from the ingot at the Part Builder) ----
+	COBALT("cobalt", 0xFF2E6FD9, null),
+	MANYULLYN("manyullyn", 0xFF9B45C9, null),
+	QUEEN_SLIME("queen_slime", 0xFF4FC07A, null),
+	HEPATIZON("hepatizon", 0xFF6A5A8A, null);
 
 	/** mB in an ingot, a nugget and a block of metal (Tinkers' numbers). */
 	public static final int INGOT = 90, NUGGET = 10, BLOCK = 810;

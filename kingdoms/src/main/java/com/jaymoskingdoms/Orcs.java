@@ -85,6 +85,7 @@ public final class Orcs {
 			RandomSource random = folk.getRandom();
 			Item[] weapons = {Items.IRON_AXE, Items.STONE_AXE, Items.IRON_AXE, Items.IRON_SWORD, Items.STONE_SWORD, Items.IRON_AXE};
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapons[random.nextInt(weapons.length)]));
+			ShieldBearers.arm(folk, ShieldBearers.ORC_GRUNT, random.nextBoolean() ? net.minecraft.world.item.DyeColor.BLACK : net.minecraft.world.item.DyeColor.RED);
 			folk.setItemSlot(EquipmentSlot.CHEST, random.nextInt(MAIL_ONE_IN) == 0 ? new ItemStack(Items.CHAINMAIL_CHESTPLATE)
 				: dyed(Items.LEATHER_CHESTPLATE, random.nextBoolean() ? BLACK_HIDE : BLOOD_HIDE));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, BLACK_HIDE));

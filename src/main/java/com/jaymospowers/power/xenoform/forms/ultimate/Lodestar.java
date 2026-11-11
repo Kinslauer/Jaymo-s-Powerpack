@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -143,7 +144,7 @@ public final class Lodestar extends XenoUltimate {
 			release(player, live, old); // a leftover from a change that never reached onExit
 		}
 		live.field = false;
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), 3.0, 40);
+		ring(level, MagicFx.CRACKLE, player.position(), 3.0, 40);
 		ring(level, ParticleTypes.CRIT, player.position(), 2.0, 24);
 		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.6F, 0.5F);
 		sound(player, SoundEvents.ANVIL_LAND, 0.8F, 0.5F);
@@ -237,8 +238,8 @@ public final class Lodestar extends XenoUltimate {
 		ServerLevel level = player.level();
 		work.poleUntil = level.getGameTime() + POLE_TICKS;
 		work.caught.clear();
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), POLE_RADIUS * 0.5, 40);
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), POLE_RADIUS, 64);
+		ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS * 0.5, 40);
+		ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS, 64);
 		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.6F, 0.4F);
 		sound(player, SoundEvents.BEACON_ACTIVATE, 1.0F, 1.6F);
 		Shakes.heavy(player, player.position(), POLE_SHAKE_RANGE, POLE_SHAKE);
@@ -287,7 +288,7 @@ public final class Lodestar extends XenoUltimate {
 			e.setDeltaMovement(e.getDeltaMovement().add(dragged.x, 0.25, dragged.z));
 			e.syncVelocity = true;
 			work.pulled.put(e.getId(), now + PULL_WATCH);
-			beam(level, eye.subtract(0.0, 0.3, 0.0), e.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 14);
+			beam(level, eye.subtract(0.0, 0.3, 0.0), e.getBoundingBox().getCenter(), MagicFx.CRACKLE, 14);
 			pulled++;
 		}
 		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(PULL_REACH), i -> Polestar.irony(i.getItem()))) {
@@ -295,7 +296,7 @@ public final class Lodestar extends XenoUltimate {
 			item.setDeltaMovement(to.normalize().scale(PULL_ITEM).add(0.0, 0.2, 0.0));
 			pulled++;
 		}
-		burst(level, ParticleTypes.ELECTRIC_SPARK, eye, 16, 0.4, 0.1);
+		burst(level, MagicFx.CRACKLE, eye, 16, 0.4, 0.1);
 		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.2F, pulled > 0 ? 1.0F : 0.6F);
 	}
 
@@ -341,9 +342,9 @@ public final class Lodestar extends XenoUltimate {
 			a -> a.getOwner() != player && a.getDeltaMovement().lengthSqr() > 0.04 && a.distanceToSqr(player) <= REPEL_RADIUS * REPEL_RADIUS)) {
 			turn(arrow, player, 1.2);
 		}
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), REPEL_RADIUS * 0.35, 24);
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), REPEL_RADIUS * 0.65, 40);
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), REPEL_RADIUS * 0.95, 56);
+		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.35, 24);
+		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.65, 40);
+		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.95, 56);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.4F, 0.5F);
 		Shakes.heavy(player, player.position(), POLE_SHAKE_RANGE, 0.8F);
 	}
@@ -366,7 +367,7 @@ public final class Lodestar extends XenoUltimate {
 		}
 		arrow.setDeltaMovement(back);
 		arrow.syncVelocity = true;
-		player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, arrow.getX(), arrow.getY(), arrow.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
+		player.level().sendParticles(MagicFx.CRACKLE, arrow.getX(), arrow.getY(), arrow.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
 	}
 
 	// ---- V: Triple Lift ----
@@ -381,7 +382,7 @@ public final class Lodestar extends XenoUltimate {
 		}
 		level.removeBlock(at, false);
 		work.orbit.add(dry(state));
-		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), ParticleTypes.ELECTRIC_SPARK, 10);
+		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), MagicFx.CRACKLE, 10);
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
 		sound(player, SoundEvents.CHAIN_BREAK, 1.0F, 0.6F);
 		return true;
@@ -454,7 +455,7 @@ public final class Lodestar extends XenoUltimate {
 			double a = player.tickCount * 0.15 + i * Math.PI * 2.0 / n;
 			Vec3 at = player.position().add(Math.cos(a) * 1.7, player.getBbHeight() * 0.7 + Math.sin(player.tickCount * 0.1 + i) * 0.2, Math.sin(a) * 1.7);
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, work.orbit.get(i)), at.x, at.y, at.z, 2, 0.12, 0.12, 0.12, 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 1, 0.2, 0.2, 0.2, 0.0);
+			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 1, 0.2, 0.2, 0.2, 0.0);
 		}
 	}
 
@@ -511,8 +512,8 @@ public final class Lodestar extends XenoUltimate {
 			}
 		}
 		if (player.tickCount % 6 == 0) {
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.5, 14);
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS, 24);
+			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.5, 14);
+			ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS, 24);
 		}
 	}
 
@@ -563,7 +564,7 @@ public final class Lodestar extends XenoUltimate {
 				mob.getNavigation().stop();
 			}
 			if ((now + i) % 5 == 0) {
-				beam(level, e.getBoundingBox().getCenter(), player.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 6);
+				beam(level, e.getBoundingBox().getCenter(), player.getBoundingBox().getCenter(), MagicFx.CRACKLE, 6);
 			}
 		}
 		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(POLE_RADIUS), i -> Polestar.irony(i.getItem()))) {
@@ -572,7 +573,7 @@ public final class Lodestar extends XenoUltimate {
 		}
 		if (now % 4 == 0) {
 			double shrink = 1.0 - (now % 20) / 20.0;
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), POLE_RADIUS * shrink, 48);
+			ring(level, MagicFx.CRACKLE, player.position(), POLE_RADIUS * shrink, 48);
 		}
 		if (now % 20 == 0) {
 			sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 0.7F, 0.5F);
@@ -600,7 +601,7 @@ public final class Lodestar extends XenoUltimate {
 				out = out.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : out.normalize();
 				item.setDeltaMovement(out.scale(ITEM_FLING).add(0.0, 0.3, 0.0));
 			}
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), 3.0, 40);
+			ring(level, MagicFx.CRACKLE, player.position(), 3.0, 40);
 			ring(level, ParticleTypes.POOF, player.position(), 6.0, 32);
 			sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.4F, 0.4F);
 			sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.8F, 1.2F);
@@ -641,7 +642,7 @@ public final class Lodestar extends XenoUltimate {
 		}
 		// it walks heavy, planted: a spark off the ground at each step
 		if (player.tickCount % 4 == 0 && player.getDeltaMovement().horizontalDistanceSqr() > 0.01 && player.onGround()) {
-			burst(level, ParticleTypes.ELECTRIC_SPARK, player.position(), 2, 0.5, 0.02);
+			burst(level, MagicFx.CRACKLE, player.position(), 2, 0.5, 0.02);
 		}
 	}
 }

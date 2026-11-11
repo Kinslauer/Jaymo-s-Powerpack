@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "pantryforblockheads:chili_pepper",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:bell_pepper",
+      "required": false
+    }
+  ]
+}

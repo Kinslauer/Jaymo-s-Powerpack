@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -176,7 +177,7 @@ public final class ArsenalCannons {
 			long held = now - battery.start();
 			if (held % GROW_TICKS == 0 && held / GROW_TICKS < MAX) {
 				Vec3 at = slot(player, battery, (int) (held / GROW_TICKS), 1.0F);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.03);
+				level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.03);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.3F, 0.5F + held / (float) GROW_TICKS * 0.05F);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.6F, 0.6F);
 			}

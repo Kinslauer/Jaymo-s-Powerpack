@@ -324,6 +324,7 @@ public final class Mortality {
 		});
 		Afflictions.register();
 		Scars.register();
+		Karma.register();
 	}
 
 	// ---- told by the downed state -----------------------------------------------------------------------------------------
@@ -333,6 +334,7 @@ public final class Mortality {
 		if (entity instanceof Player && felled != null) {
 			FELLED.put(entity, felled);
 		}
+		Karma.felled(entity, felled);
 	}
 
 	/** (0.20.50) Whether {@code entity} is being executed right now (its death let through by Chrono's rewind). */
@@ -607,7 +609,14 @@ public final class Mortality {
 		DamageSource felled = FELLED.remove(player);
 		Boolean executed = EXECUTED.remove(player);
 		if (!on() || player.isCreative() || player.isSpectator() || isFinal(player) || ZFighterAfterlife.among(player)
+			|| Karma.pending(player)
 			|| player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
+			return true;
+		}
+		if (Karma.below(player)) {
+			// on their last chance in the Nether: no roll, no waking, nothing turns it away
+			JaymosPowers.LOGGER.info("{} died on their last chance below ({}): final", player.getScoreboardName(), source.getMsgId());
+			player.setAttached(FINAL, cause(player, source, felled).key());
 			return true;
 		}
 		Cause cause = cause(player, source, felled);
@@ -653,7 +662,7 @@ public final class Mortality {
 		JaymosPowers.LOGGER.info("{} fell to {} ({}): {}{}", player.getScoreboardName(), cause.key(), source.getMsgId(),
 			ends ? "final" : "left for dead", sure ? " (sure wake " + (woken + 1) + " of " + SURE_WAKES + ")" : "");
 		if (ends) {
-			player.setAttached(FINAL, cause.key());
+			ended(player, cause);
 			return true;
 		}
 		leftForDead(player, cause, sub(source, felled), by, null, null);
@@ -1220,13 +1229,23 @@ public final class Mortality {
 	// ---- the end of a life ------------------------------------------------------------------------------------------------
 
 	/**
+	 * The life is over, unless its weight earns one more chance ({@link Karma#weigh}): the just are let into the Other World
+	 * to win it back, the wicked wake in the Nether, and everyone else is born again ({@link #FINAL}).
+	 */
+	private static void ended(ServerPlayer player, Cause cause) {
+		if (Karma.below(player) || Karma.weigh(player) == Karma.Verdict.EVEN) {
+			player.setAttached(FINAL, cause.key());
+		}
+	}
+
+	/**
 	 * A timer ran out ({@link Afflictions}): {@code player} dies of it, for good, with no going down first.
 	 */
 	static void succumb(ServerPlayer player, Cause cause) {
 		if (!player.isAlive()) {
 			return;
 		}
-		player.setAttached(FINAL, cause.key());
+		ended(player, cause);
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}

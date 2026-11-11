@@ -11015,3 +11015,339 @@ comment on this" (`Stench`, reading Powers' smell).
 - **Frostborn**: the heritage text now says their people came from far past the sun with crafts no Overworld smith has seen, and settled the snowfields and peaks. A Frostborn villager's blood line now hints at it (a box of humming heirlooms) instead of "came down from the ice".
 - **Varro**: his orc lines now say he beat the orcs down and marked them, and that his orc legions served him unwillingly. The spirits dominated the orcs; the orcs were never their allies.
 - Text only (lang parts spirit-varro, heritage, dialogue). Built; not played.
+
+## 0.7.716 (2026-11-11): Nether imps - flying demons with a fireball you can set off in their hands
+
+- **Imps** (`nether/Imp`, `Imps`): small flying demons of a piglin-like make, in flights of 2-4 over the Nether wastes, the crimson forest and the basalt deltas. They circle whoever they hunt (players, villagers, iron golems) and lunge in from a new side each pass, rake with their claws up close (3 damage and a short burn), and land to rest and shuffle about when there is no one to hunt. 14 health; drop blaze powder and gold nuggets.
+- **The fireball**: every 8-15 s an imp hangs in the air and gathers a great fireball over its head for 3 s. In the last 0.6 s the ball throbs, a fuse hisses and it spits lava sparks: a blow then (melee or shot) sets the ball off in its hands. The imp dies, and the blast burns everything within 3.5 blocks but the one who struck, other imps too; an imp caught by any blast while it holds a ball goes off as well. A thrown fireball can be knocked back like a ghast's.
+- **Ablaze** (`ImpFireball`, `Imps.blaze`): where a fireball lands it burns those within 3 blocks, breaks nothing, and lights up to 16 fires within 4 blocks, on leaves, logs and anything else that burns first. Townsfolk answer the fires as they do any other. Nothing is lit where mob griefing is off.
+- **Zombified imps**: tougher (22 health) and slower, over the wastes and the soul sand valleys. They leave people alone until one of their flight is hurt (`Imp.ZOMBIFIED_NEUTRAL`). Drop rotten flesh and gold nuggets.
+- **Model and animations** (GeckoLib; `kingdoms/tools/gen_imp.py`, `kingdoms/art/imp.bbmodel`, `docs/Imp-Model-Spec.md`): our own model, 26 bones: jointed arms and legs, two-part wings, three-part tail, ears, horns, tusks, and the fireball. Animations: idle, walk, fly, swing, swoop, charge, throw, hurt, death. Spawn eggs for both.
+- Lore: the demons' flying kin, who came with them to the sorcerer's battle (Lore.md, "The Nether and the demons"). No new dimension.
+- Built (`compileJava`, `compileClientJava`). On a dev server (no client): imps flew, lunged and hit an iron golem, threw fireballs that lit fires, and two charging imps went off together when struck in the opening. Poses checked in renders (`kingdoms/art/imp-render.png`). Not seen in a client: the animations in motion, the spawn rates in the Nether.
+
+## 0.7.717 (2026-11-11): Frostborn wear their tech, and talk about it
+
+Andy (2026-11-11): the Frostborn "made all the scouters, rigs, mechs, prosthetics and various other tech you find in the otherwise medieval overworld. The people speak on it. They love having frostborn tech. They are a proud people, and will often have their heritage's inventions unless they are born and raised on the overworld... Frostborn should be shown with their scouters and prosthetics more often."
+
+- **Worn tech**: about two in three grown Frostborn villagers now wear their people's work. Most of those have a scouter over one eye (Jaymo's Powers' own scouter, so it needs Powers), some a Frostborn-made arm, a few a made leg, and some more than one. The made limbs are grey plating with small green lamps that stay lit in the dark. The other third were born and raised on the Overworld. It is fixed per villager (from their UUID), children never have any, a helmet or hood hides the scouter and a costume hides a limb. It is a look only: the scouter reads nothing for them and the limb works like their own.
+- **Any villager** (Andy: "Any of the villagers can now have these, at different rates"): everyone else, Overworld-raised Frostborn included, now and then has some too: a scouter on about 1 in 20, a made arm on 1 in 33, a made leg on 1 in 66. Warrior-born and Earthlings have them twice as often. One of them may tell you what it cost and that it was worth it.
+- **Lost limbs** (Andy: villagers "will seek out prosthetics if they lose limbs"): a villager who loses an arm or a leg (Powers' dismemberment) waits a minute and a half, then walks to the nearest smith within 48 blocks (armorer, toolsmith or weaponsmith) and is fitted there with a wooden limb or, 4 times in 10, an iron one. A Frostborn who carries their people's work, or anyone fitted by one, gets a Frostborn-made limb. With no smith in reach, or none reached in two minutes, they whittle a wooden one themselves. A limb that grows back takes its stand-in off. The stand-in is saved with the villager and drawn with Powers' wooden and iron limb art. It does not change how the villager moves or fights, and nothing drops from it.
+- **Wooden limbs** (Andy: "They complain about not having a nicer one if its wooden"): one with a wooden limb grumbles about it in gossip (four lines) and has a talk about it.
+- **Galactic patrolmen** (Andy: they "all need a scouter and are rarely without it"): every patrolman wears a scouter, bar about 1 in 25.
+- **Their own talk**: asked about their blood (or chatting, or gossiping), a Frostborn with a scouter or a made limb now talks about it, proudly. Overworld-raised Frostborn keep the older lines (the cold, the heat, the box of humming heirlooms). A new talk has a tech-wearing Frostborn invite you to ask about it.
+- **Everyone else**: neighbours of a tech-wearing Frostborn gossip about what the Frostborn carry (four lines). Any non-Frostborn villager without any may once bring up a Frostborn eyeglass they wanted to buy, and may once ask a Frostborn player whether their people really build working arms.
+- **Frostborn players**: a new life-story answer for the Frostborn only, "Kin who kept the old crafts" (+1 Wits, proud, leans to the smith's trade). It starts you wearing a scouter with a spare iron arm in your pack (both from Powers). The other Frostborn upbringings are the Overworld-raised ones and give no tech. The narrator has no recording for the new line yet, so it is read in silence.
+- No line names the Frostborn home world: villagers say "where my people come from" or look up.
+- Classes: `FrostTech`, client `FrostTechLayer`, `VillagerHeritage` (talk kind, neighbours, gossip, the once-a-second beat), `PowersCompat.missingLimbs`, `TalkBook`, `LifeStory`, `PlayerTemperaments`, `Careers`, `StoryFigure`; lang part `frost_tech`; art from `tools/gen_frost_tech.py`.
+- New saved attachment `jaymoskingdoms:fitted_limbs` on villagers.
+- Built (compiles); not played. The look on villagers and the walk to the smith have not been seen in game.
+
+## 0.7.718 (2026-11-11): clash sparks, more shield bearers
+
+Andy (2026-11-11): "some of the fighters should have shields so the fight looks realistic", with sparks from clashes and parries.
+- **Blade clashes and fighters' parries** (`BladeClash`, `MobParry`) throw Jaymo's Powers' new shower of sparks (chips of
+  wood when a fighter parries with a wooden shield), through `PowersCompat.clashSparks` and `guardMet`. Without Powers the
+  old vanilla sparks stay.
+- **More shields in the wild** (`ShieldBearers`): 45% of barbarians carry a plain plank shield, 40% of orc grunts one
+  daubed black or blood red, 25% of goblins a plain one, each beside a one-handed weapon. They keep them as MCA villagers.
+- **The risen dead** (`MonsterGear`): an armed zombie's shield chance per world tier goes from 5/12/20/30% to
+  12/22/32/42%, and a skeleton that traded its bow for a blade may carry one too. Never beside a trident or a bow.
+- **Shields are raised more** (`MobShields`): 65% of chances instead of 55%, with a shorter rest between raises (20 to 50 ticks, was 25 to 60).
+- Compiled; not played.
+
+## 0.7.719 (2026-11-11): the wild's shields start battered
+
+- Shields now break only when their durability runs out (Jaymo's Powers), so the plain shields barbarians, orc grunts and
+  goblins carry (`ShieldBearers`) start 50 to 90% worn: some break in the fight you have with them, sooner under an axe.
+  Realm guards' and the undead's shields are whole, as before.
+- Compiled; not played.
+
+## 0.7.720 (2026-11-11): The Long Defence: the sorcerer's host, Grimsby's spells, a new draugr, text pass (#1284)
+
+- **The film, restaged** (40 seconds). It is set in a wooded forest at night, on a road with a Keep at its far end (trees and Keep are block displays only your game sees). The fight is already joined when it opens, hearthlanders against the sorcerer's living host of orcs and Warrior-born, and it goes on in every shot: each fighter finds a new foe when theirs falls.
+- **Finishers** go off all through it: a foe beaten to its knees and beheaded, a weapon arm taken off and the foe cut down, a foe run through. Heads, arms and blood fly; the first six happen where the first two shots are looking.
+- **The summons:** the sorcerer raises both arms, lightning strikes behind him, and the dead (dead orcs and zombified piglins, no zombies, skeletons or draugr) come up out of black flame in random groups of 1 to 6, anywhere on the field, at random times, each at its own speed, some under a lightning bolt of their own.
+- **Varro's own move:** an orc charges him and chops. He slips inside the blow, catches the wrist, wrenches the axe out of its hand (it flies off), kicks its knee from under it, takes its head in his hand as it kneels and sets his ki mark burning on its brow. It bows, gets up, takes its axe back and hunts the dead for him. No one else in the film fights this way.
+- **The fifth** now runs at the sorcerer blade in hand, turning at tree after tree while the sorcerer throws bolts of mana that go past him and burst on the trunks. He lunges, and the sorcerer fades into smoke. The dead drop and the host runs.
+- **The camera** keeps the 180 degree rule (every shot is taken from the same side of the battle line, so the defenders are on the left and the host on the right) and the rule of thirds (the Keep, the sorcerer, the mages and the fifth sit on a third line, not the middle).
+- **Poses:** film actors can now be posed (kneeling, an axe overhead, a thrust, a lunge, arms raised) and lose a head or an arm (`FilmPose`; the Warrior-born by `Draugr.stageMaim`).
+- **Grimsby** still carries his sword but now casts too. All battle long he throws bolts of light from his free hand. On his turn, glyphs turn around him before his cut of light runs the length of the field.
+- **The Warrior-born of the host** wear the draugr's own gear (horned helm, mail, fur), in better condition: they are draugr drawn alive, with living skin, cleaner mail and a whole tail (from `tools/gen_draugr_living.py`).
+- **The film's orcs** look like the real ones: an orc's green under an orc war camp grunt's clothes, drawn bigger than a man, with the real orcs' tusks, brow, ears, marks and scars (GreenskinLooks). The dead orcs are the same, ashen and rotten, in rags.
+- **The draugr's new model** (`kingdoms/art/draugr.bbmodel`, from `tools/gen_tomb_undead.py`): a long-dead Warrior-born Z Fighter gone to sinew (broad shoulders, narrow waist, long arms in wristbands, wild hair out from under the helm, gaunt face, ribs through torn mail), in the same horned helm, mail, fur and iron, with the tail wrapped round the waist and its frosted tip at the back. Its tail is now whole on most, or cut at the root, halfway round, or at the tip (the old bends are gone with the wrap).
+- **Three looks each:** the draugr is iron with brown fur and black hair, a chieftain's bronze with grey fur, white hair and the left horn broken off, or blackened iron with black fur and red-brown hair (`draugr_1/2.png`, painted by `tools/gen_tomb_undead.py`). The film's living Warrior-born wear the same three, each with its own living skin (`draugr_living_0-2.png`). The film has 3 orcs and 3 dead orcs.
+- **Demon master:** no longer says the demons "were there" for the old war. He says they kept the story the surface forgot.
+- **The Long Defence (book):** page 2 says they came first as men and orcs, then the dead rose. Page 6 no longer counts "the five" and then "the fifth too", and hints that the fifth never had much to say.
+- Compiles (`compileClientJava`); the film has not been watched in game.
+
+## 0.7.721 (2026-11-11): The Long Defence: jointed actors, a move library, and the film on tape (#1284)
+
+- **Every actor in the film is a GeckoLib model now** (`FilmActor`, drawn by `FilmActorRenderer`): men, slim women, orcs and zombified piglins share one jointed body with elbows, knees, hands and a waist (`art/film_actor*.bbmodel`, from `tools/gen_film_actor.py`). The host's Warrior-born are the draugr drawn alive, which got the same joints. The old posed player models (`FilmPose` and its hooks) are gone.
+- **A move library anyone can draw on** (`tools/humanoid_moves.py`, 44 moves, written into both the film actor's and the draugr's animation files; names in `Moves`): the gaits the game plays (idle, walk, run), swings (slash, backhand, overhead, chop, thrust, lunge), block, stagger, disarm and being disarmed, point, four casts, kneel, kneel up, bow, rise, flip, roll, three deaths, and the dead clawing up out of the ground. Any GeckoLib humanoid with the same bone names can play them (`triggerAnim`).
+- **The film is recorded once and replayed.** The performance is staged in the game one time and written to a tape (`FilmTape`: the cast, the set, where every actor stood and faced each tick, and every move, weapon change, wound, sound, particle, lightning bolt, thrown head and tether). The tape shipped with the mod (`assets/jaymoskingdoms/films/long_defence.tape`, about 1.9 MB) is what every player now sees, the same every time, on any ground. With no tape the film is staged live as before.
+- **Re-recording:** in creative, `/kingdomfilm record long_defence` stages it afresh and writes `<game folder>/jaymoskingdoms/films/long_defence.tape`, which is played in place of the shipped one. `/kingdomfilm play long_defence` plays it.
+- **The Quiet One** is the white-hooded, white-cloaked first thief. His cloak has five cords with a mind of their own, each three strands of the cloth braided thick: they throw themselves at the trees ahead and carry him between them off the ground, two trees held at a time (he flips and rolls off the trunks; the loop `hang`), and two take the sorcerer's guards by the chest and throw them aside without his looking. He carries a rapier (the pack's, where Jaymo's Powers is loaded; an iron sword otherwise).
+- **The slingshot:** at the end of his run the cloak takes a tree either side of his way and draws him back on them (the move `sling`), then lets him fly: a slow glide laid out head first, turning over twice with the cloak streaming behind, then level with the blade arm out (the move `glide`). Two tethers reach the sorcerer before he does, and the sorcerer is smoke a hand's breadth before the blade. The camera stays behind the sorcerer for the first second of it, then goes side on. The film is 46 seconds (`LoreFilms.FILM_TICKS` 926).
+- **The cloak forms over him and falls away** (Andy: "it forms over him like the suit does to form the full cloak, and falls away the same way"): at rest it is a solid white hooded cloak. When he breaks into his run it winds round his body and comes apart into three ribbons (`FilmActor.cloak`, the moves `cloak_part` and `cloak_form` on a `cloak` controller; the ribbons are bones `ribbon_0-2_0-3` that follow what the whole cloak does in every move). In the glide the ribbons stream behind him and fan open before the strike. After it they wind back over him and set solid.
+- **Fights read better:** blows are blocked on shields and blades, finishers use the library's moves, Varro's disarm has room between him and the orc, and you no longer stand in your own shot (`FilmHidesViewerMixin`).
+- **The forest burns** (brought over from the other film branch and put on the tape): lightning and the sorcerer's bolts light the trees, the fire climbs and spreads all battle long, and once the sorcerer is gone the defenders still standing run to the burning trees and beat the flames down.  Anything else that throws fire in the film can light trees with `LoreFilmClient.igniteNear`.
+- **Imps** (Andy: "add the new imps too when they are ready, their fireballs also catch the trees and surroundings in a blaze"): four of the game's own imps (one zombified) fly rings over the field on the sorcerer's side all battle long. In turn each hangs in the air, gathers a fireball over its head for 3 seconds and throws it into the crown of a tree, which lights the trees around where it lands (`LoreFilmClient.imps`, `igniteNear`). Now and then one dives low over the fighting. When the sorcerer is gone they fly off. `Imp.stageCharge` shows the ball on a film's imp.
+- **Golems:** the redstone and skulk golems' GeckoLib renderers are registered again (`BeastsClient`). A merge had put back the old ones, which load Blockbench models that no longer exist and failed the client's resource load.
+- **Night, fog and hills** (Andy's notes on the clip): the film is always at night under its own moonlight, whatever the hour is (`FilmNightMixin`, `LoreFilmClient.MOONLIGHT`). A low bank of fog rolls over the field from the sorcerer's side (soft storm-cloud puffs kept at ground level, `StormsClient.fog`; it thins close to the camera). The film lays rolling hills of earth and grass over the ground where you stand, on your screen only, and takes them away when it ends (`LoreFilmClient.lay`): the sorcerer stands on a knoll, the Keep on a rise, wooded ridges close the field in, a worn track runs down from the gate, and grass and ferns grow over it. It is a built set, not a copy of a generated kingdom seat.
+- **The heroes fight in the battle, not behind it.** Grimsby's sword is in the melee from the start; Thessaly and Ambrose stand among the pairs and throw bolts in their own colours; after the disarm and the mark Varro takes his axe in his right hand and charges the dead with his orc. Each hero's spell shot is taken from their own side, so the camera line may swap from one hero to the next.
+- **Shields, clashes, sparks and splinters:** some orcs carry shields as well as the hearthlanders. Blows are caught on shields (chips fly), turned on blades (sparks) or met by the other's cut (a bigger shower); a shield that has taken enough blows shatters into splinters and flying boards and its bearer staggers. The film stages these itself with vanilla particles for now; the gameplay sparks and splinters are PR #1288.
+- **Real armour on the heroes** (`FilmGear`): what a film actor wears in its armour slots is drawn onto its skin's outer layer from that armour's own textures as the game has them loaded, so it bends with the elbows and knees. Varro wears steel plate with no helmet; Thessaly the ichorcloth robe, leggings and boots when Jaymo's Powers is loaded; Ambrose and Grimsby are given the Wizards mod's wizard robes and the Archers mod's ranger armour, which show only if those are drawn as plain armour (otherwise their painted robes and hood stay).
+- **Shadowflame is black soulfire** (Andy: "soulfire, but black, retaining the blue soul wisps, and the black particles, but make sure the smoke is added"): a new particle `jaymoskingdoms:shadowflame` (the soul fire flame drawn black), with black motes, smoke off the top and blue souls let go. Used wherever the sorcerer's shadowflame was.
+- **The Quiet One waits in rags** (Andy: "stand in the back until his time comes, then he dons the suit with the anti symbiote. Before then he is just in tattered cloths"): he stands at the back in torn clothes, bare-headed and barefoot, through the whole battle. When the spells are spent the white comes up over him from the ground, legs and trunk first, then all of him, the cloak winds out of it and sets, and the rapier is in his hand (two seconds, its own shot; tape event DRESS, skins `stranger_rags` and `stranger_half`). The suit is still the film's own white hooded cloak, not the Costume Table's costume (that needs PR #1287).
+- Staged and recorded in a dev client, then the shipped tape was played back in a fresh client and matched the recording shot for shot. Jaymo's Powers, Wizards and Archers are not in that dev client, so only Varro's armour was seen drawn; not watched in the full pack, and the dev client has no sound.
+
+## 0.7.722 (2026-11-11): karma - reputation and outlaws feed the weighing (#1291)
+
+- Every change of reputation with a kingdom, fiefdom or village also moves the weight of your life (Powers' `Karma`): 1 for
+  every 20 reputation, at most -5 or +3 for one deed, in a mask or not. A barbarian camp's opinion weighs nothing.
+- Outlaws (looters, assassins, camp raiders, anyone in a bandit's mask) are no innocents: killing one doesn't weigh
+  against you as killing a villager does (`PowersCompat.tellGuilty`).
+- Compiles (Gradle); not played.
+
+## 0.7.723 (2026-11-11): The Retaking - story core (#1296)
+
+- **The Retaking**, one main story for every player, in five acts, each closed by a Knowledge king: The Hearth (Goblin King), The Old Stones (an Ogre King), Lights in the Sky (the Skeleton Lord), The Dark Below (the Piglin King), Legend (the Wither).
+- **Story tab** on the character menu (H): the five acts down the left (acts not reached show as ???), the picked act's milestones as plain goals, ticked when done. It says what to do, never what it means.
+- **Acts can't be skipped:** a milestone of a later act only counts once the act before it is closed. Something done early has to be done again (already earned advancements are kept).
+- New Act I milestones: three town errands handed in (errands handed in count for party members within 64 blocks), and finding The Long Defence (filed in the codex or read). Reaching the Aether is now awarded by Kingdoms so it can wait for Act II.
+- Classes: `Retaking` (acts, milestones, gating, journal payloads), `RetakingScreen`; hooks in `PackAdvancements`, `Quests.turnIn`, `MenuCompat`.
+- Compiled (main + client); not played.
+
+## 0.7.724 (2026-11-11): town golems redesigned - three bodies of their own, the throne golem folds into a real throne (#1300)
+
+- Andy: "The village golems all need redesigns, the throne golem NEEDS to turn into a throne among the other previous descriptors." The one shared rune-golem body is gone; each kind has its own GeckoLib model, skin and keyframed animations.
+- **Lamp warden**: a lean sandstone lamplighter banded in gold whose head is a lantern cage with a crystal flame turning in it. The flame and the light in its chest burn only at night. It bows the lantern as it fires its beam, and the beam now leaves from the lantern.
+- **Mender**: a squat, mossy boulder with long arms, a small head and emerald crystals on its back. It holds both hands out to whoever it mends while the crystals swell.
+- **Throne golem**: a walking keep of dark masonry set with diamond (turret shoulders, bracer forearms, crenellated head), a little smaller than before (1.25x, was 1.35x). On its ruler's word it folds over 1.5 s into a throne: it sits (thighs the seat, shins the step in front), the keep slides back and lets a plinth down to the ground (the back), the forearms swing level (the armrests) and a crenellated crest rises behind its head (the high back). Rising plays it backwards, and it doesn't walk or strike until it is up. As a throne its head slowly looks from side to side. The sitter sits on the seat (higher than the old kneeling pose).
+- Everything else about them is as it was: who they serve, the ruler's damage going to the throne golem, rising to fight past 20 damage, items and recipes. New item icons.
+- Each golem has walk, idle, hurt and death animations (they fall by their own animation instead of tipping over).
+- `TownGolem` (now a GeoEntity), `client/TownGolemRenderer`, `kingdoms/tools/gen_town_golems.py`, `kingdoms/art/town_golem_*.bbmodel`, `docs/TownGolems-Spec.md`.
+- Built; not played. The models and poses were only seen in the tool's renders, so the seat height and how the fold reads in game are unchecked.
+
+## 0.7.725 (2026-11-11): The Retaking - the ford, and village talk by act (#1299)
+
+- **The keep above the ford** (the field of The Long Defence): one per world, and it has always stood there. When a world first starts, its site is picked from the world's own biome map: a forest beside a river, 1,200 to 6,000 blocks from spawn, wherever that turns out to be. It is only built when someone first comes within about 110 blocks of it, never just because someone is nearby. It's a ruined keep of mossy, cracked stone with a broken corner tower and its gate facing the water, a worn road down to a shallow gravel ford, rubble, vines and cobwebs. A chest in the keep holds **A Loose Page** from the gate-warden, plus a lantern, arrows and nuggets.
+- **Where the Five Stood**, an Act II milestone: stand at the ford. The first time it counts, The Long Defence's wordless film plays again, there.
+- **Village talk by act**: seven new talks for any grown villager, each heard once, which shift as you reach each act. In Act I a father who watched the sky, and someone who can tell you've read the warden's book. In Act II, which way the old keep lies and roughly how far (spoken of as a place long forgotten), and beasts grown hardier since a giant "came down". Then lights that come down slow, something at the bottom of the dark that keeps count, and songs being made about you. They're hints only; nothing is said outright.
+- Ops: `/kingdom ford where` shows where the keep stands or will stand; `/kingdom ford raise` builds one at a forest river near you, for testing.
+- Classes: `Ford` (new), `Retaking` (ford milestone), `TalkBook` (retaking_* talks).
+- Compiled (main + client); not played.
+
+## 0.7.726 (2026-11-11): The Retaking, Act III: Lights in the Sky (#1301)
+
+- The Story tab's Act III lists five goals before the Skeleton Lord: beat a raider band from the sky, break open a fallen star, fly a pod past the clouds, set foot in the Maw, free or conquer a far world.
+- `Retaking.look` reads the deed tags Jaymo's Powers leaves (raiders, star, pod, far_world), awards the milestone if Act III has begun and takes the tag off either way; the Maw is checked by dimension.
+- Built; not played.
+
+## 0.7.727 (2026-11-11): The Retaking, Act IV: The Dark Below (#1302)
+
+- The Story tab's Act IV lists five goals before the Piglin King: a spirit woken, your Bane ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
+- A woken spirit and a subjugated Grue count whenever Act IV is open (they can't be done twice); the Bane counts when it's ended or sworn with its marks; the Abyss is checked by biome; the Judge by Powers' deed tag.
+- Built; not played.
+
+## 0.7.728 (2026-11-11): The Retaking, Act V: Legend, and the Second Defence (#1304)
+
+- **The Second Defence**: once in a world, at night, with a light burning in the old keep and a player whose Act V has begun at the ford, the dead of the old legion come back. They rise a few at a time across the water under strokes of lightning, risen orcs and zombified piglins, in four growing waves (more with more defenders), then a Shade of the Grue at the back with the last of them. When it falls the rest sink back into the ground, and everyone who stood at the ford gets the milestone. If nobody stands near the ford for 30 seconds, the legion sinks back and comes again another night. Ops: `/kingdom ford defend`.
+- **Risen Orc**: a new undead mob, an orc grunt's body gone grave-grey (tusks and all), tougher than a zombie and unburnt by the sun. Only the Second Defence raises them.
+- The Story tab's Act V lists three goals before the Wither: keep a light in the old keep at night, bring down the End's dragon (vanilla's advancement counts), hold the ford.
+- Built; not played.
+
+## 0.7.729 (2026-11-11): Magic FX: spells, golems and spirits use the typed effects (#1306)
+
+- New `Fx`: Kingdoms' door to Powers' typed magic effects (beam, blast, ring, orb, sigil, mote, miasma), looked up at
+  run time; without Powers it falls back to the old dust.
+- Spell beams are the one shared beam: Sorcerer drain, hex and bolt, Restoration's healing, Necromancy, Hemomancy's
+  dark bolt, the scroll bolt, town golems' rays and the Grue's grasp. Blood drawn out by Hemomancy stays a line of
+  blood.
+- Restoration's rings are shockwave rings; a Sanctuary is a sigil on the ground for as long as it stands.
+- Patron blessings, turning, in-balming, soul flares, champions' arrivals and the Grue's bursts are blasts; a
+  Giant's Ambrosium flare and a king's soul flare no longer use a recoloured firework flash.
+- Every other recoloured dust (spirits, mana wings, heritage and variant looks, Valor, vampires, champions) is a mote,
+  or miasma when dark.
+- Not touched: `LoreFilmClient` (the film thread's), attack tells, the redstone golem, lycan fur, Rubber-folk.
+- Compiles; not played.
+
+## 0.7.730 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Spells, patrons, champions and rituals that used end rod, electric spark, enchant, portal, witch, glow or wax
+  particles as magic now use Powers' typed looks through `Fx` (`Fx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`): about 130 places. Without Powers they fall back to the old vanilla particles.
+- The Sun Marshal's landing beam is a real beam.
+- Parries, clashes, horses, villagers' everyday marks, real portals and enchanting storage keep their vanilla particles.
+- Built; not played.
+
+## 0.7.731 (2026-11-11): life story lines rewritten for the lore canon (#1309)
+
+- **Life story** (the character creator's questions): 82 lines now follow the canon page. The Frostborn are born in "the snowfields your people settled" (from far past the sun), not "the frozen north"; a warband's old ones never say where the band came from; the vat-born are the Mad Tinkerer's unfinished work; Sylvan elders remember the old trees as saplings.
+- **Raised by**: families keep the faith their trade keeps (the Anvil-Father, the Deep Mother, the Green Huntsman, the Hearthkeeper, the Ash Whisperer); the Dawnborn's priests are the Crowned Sun's, the Nightborn's barrow-keepers the Lantern Warden's, and the Emberborn's Hornkin fosterers were paid off in gold.
+- **As you grew up**: each class is learned from the people the canon says teach it (the Ash Whisperer's cutpurses, a war camp, an old elemental school, the Green Huntsman's folk, the wild, a ship's guns, a realm's stables and tilt-yard). The class descriptions end with who teaches the trade.
+- **Then one day**: the spider's bite leaves you quieter, the weapon is one you reached for that wasn't there, the dark water holds you up, the won fight comes off you like heat. No power is named.
+- **Roads**: the afterlife road is the Judge's weighing, the demon master's people "do not go up any more", the Pale Moon has a rumour about who lives there, the monolith is one of the old stones, and the stone lab is somebody's unfinished work. Five villager greetings for those roads follow.
+- **Heritages**: Sylvan are long-lived, the Warrior-born are why folk watch the sky, the Nightborn name the Dawnborn's distrust, and the Divine-born hint adds those the Judge finds just who ask to stay.
+- The narrator's clips for the 25 changed tales are removed, so those tales are read in silence until `python tools/voices/make_voices.py narrator` remakes them. Question titles and the lines under them are unchanged, so their clips still match.
+- Lang only; not played.
+
+## 0.7.732 (2026-11-11): The Long Defence: heroes in full frame, armoured soldiers, Grimsby the Sylvan elf (#1290)
+
+- Each hero's shots in the film are pulled back so the whole figure is in frame, and fighters are kept out from between the hero and the camera
+- The Warrior-born soldiers wear real armour and helmets (iron, chainmail, steel plate helms), drawn the way the draugr's gear is
+- Grimsby is a Sylvan elf: long pointed ears, a slighter build, no beard
+- The soldiers each wear their own mix of leather, chainmail and iron, caked in mud and old blood, not shiny
+- Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
+- Varro throws his fire after the in-balming and runs in after it in the same shot; a shot of Thessaly and Ambrose from the front comes between, then the cut to him crossing to Grimsby, who is blade on blade with an orc, and one long side shot of the two back to back
+- Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) each have a foe on them from the first frame and fight among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
+- The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
+- The film is 11 seconds longer; its tape is recorded again with all of this
+- When the Quiet One flips off a tree or rolls under a bolt, his cloak comes back onto him whole and goes over with him, then comes apart and throws for the next tree
+- Varro's steel stays bright in the dark and glints, and Grimsby's blade is wind-imbued: lit currents run along it and curl off it, so the two can be picked out of the crowd in the wide shots
+- Beheadings are a level cut: the blade drawn back low to the side and swept through at neck height with the whole body turning, the head going the way of the cut; the cut that follows a severed arm comes down across from the shoulder (new moves in the library: wind_side, behead, wind_high, hew; the draugr's animation file is regenerated with the whole library)
+
+## 0.7.733 (2026-11-11): mob homes: ogres and Bogres in orc camps, witches' mud golems, jungle tarantulas, dragons wait for a kill (#1311)
+
+- Andy: "Ogres should be found in orc encampments as heavy duty units, same with Bogres. Mud golem should spawn in witch huts as their allies, in the swamp as regular threats and the minotaur should spawn in the aether as one of the dungeon bosses. Tarantula should only spawn in the jungle at night, the 3% is a bug and can be reverted to day only.. They can only appear in the overworld after youve killed one. Any dragon counts. Besides that they either fly around in the aether or the nether w ignovorius".
+- **Orc camps' heavy hands.** Every orc camp now has a band of ogres (a two-headed brute, an armoured ogre and an ogre) and a Bogre living by its fire from the day it's founded. An older camp gets its band and Bogre once, the first time it's looked over with no band. A camp's Bogre keeps to the camp instead of walking off from the orcs, goes back to the fire when it strays, and spares whoever the camp's ogres spare. Ogres and Bogres never set on each other or on greenskins. Wild ogres and the mangrove Bogres still spawn as before. `OgreHolds.joinCamp/bogre/everBanded/spares`, `OrcCamps.found/tick`, `Bogre`.
+- **Mud golems.** No longer a monster of legend: one of the swamps' common threats, weight 15 among the swamp and mangrove monsters (a zombie is 95). They're no longer in rumours or beast quests. **Witch huts**: when a player is near a witch in a swamp hut, a mud golem now and then rises out of the mud by the hut, at most 2 per hut. They keep near the hut, a witch's potions don't hurt them, and they go for anyone who strikes a witch near them. `monsters/WitchHuts`. Hint 127.
+- **The 3% cut is daytime-only again.** Monsters that walk by day (the ogre, the mud golem) were cut to 3% of their spawns at every hour. They now get that cut only in daylight. `Encounters.wildSpawn`.
+- **Tarantulas** spawn only in jungles, and only at night, under the canopy too (`has_tarantula`).
+- **The minotaur** no longer spawns in the mountains, in rumours or in beast quests. It's one of the bosses of the Aether's Sentry Ruins (Powers). The `has_minotaur` tag is gone.
+- **Dragons stay out of the Overworld until a dragon is killed.** Until someone in the world kills a dragon (any dragon: ours, the Ender Dragon, another mod's; not a tamed one), no dragon spawns there. That covers the Notus, Boreas and Zephyrus encounters, Stegonaut, Atroxiia and Varasuchus, and Eurus and Aeolus in their disguises. Eggs, spawners and the op command still work. Until then the dragons are met in the Aether, where Notus, Boreas and Zephyrus now fly about beside Aetherion (a dragon about once an hour per player, Aetherion most often), and in the Nether (Ignivorus anywhere, Notus over the basalt deltas). The kill is saved with the world. `DragonRecords.worldSlain/markSlain`, `Dragons.aether/overworldOpen`, `Disguises.spawns`.
+- Lore.md: two (new) paragraphs, "Where the dragons keep" and "Who keeps company with whom".
+- Built (Kingdoms `build`, Powers `compileJava`). Not played: the camp bands, the hut golems and the Aether dragons haven't been seen in game.
+
+## 0.7.734 (2026-11-11): The Retaking: the Thief's Road and the Old Campaign (#1307)
+
+- **The Thief's Road** (Thieves): pick a pocket clean; pick a lock; find a den; then, once the Dark Below has begun, a locked chest you pick may hold a contract left under a black candle (**Paid For**) and the book someone paid to have buried, a copy of *The Long Defence* (a third of picked chests, until you have read it).
+- **The Old Campaign** (Warlords, Brutes, Riders, Marksmen, Archers, Survivalists): every 5 levels in your trade's skill (Survival for Archers and Survivalists, Strength for the rest), up to 20, is a step, and each hands you the next part of an old campaigner's account, four short books from the river farms to the ford.
+- The Story tab lists every road Jaymo's Powers gives (the Fighter's and the Chrono's), and shows Open only for a road with its own screen.
+- Built; not played.
+
+## 0.7.735 (2026-11-11): The Retaking: the Arcanist's and the Faithful roads (#1307)
+
+- Two more roads in the Story tab, under the acts, for whoever they fit (each step counts only once its act has begun):
+  - **The Arcanist's Road** (Mages and Sorcerers): carry a caster's staff; ask a court wizard about the old war; find a court wizard's margin notes; learn a second spell for good.
+  - **The Faithful Road** (anyone sworn to a patron): swear; rise to the second tier of favour; bring down your patron's champion; stand against a rival faith's champion; bring your own champion down three times.
+- **Margins**: a court wizard's margin notes, a new lore book (now and then on a witch, 6%): the elements, why Death and Blood are forbidden, and what the crucible does when the flux runs high.
+- `StoryRoads` (roads, steps, saved progress) and the Story tab now list several roads; a step of an act not yet reached shows only "Later in the story."
+- Built; not played.
+
+## 0.7.736 (2026-11-11): The Retaking: your own road in the Story tab (#1307)
+
+- The Story tab has a row under the five acts for the player's own road when their power has one (the Z Fighter's sagas for now, from Jaymo's Powers): its goals listed the same plain way as an act's, and an Open button to the road's own screen.
+- `RoadCompat` reaches Powers' `StoryRoads` by reflection; without Powers there is no road row.
+- Built; not played.
+
+## 0.7.737 (2026-11-11): The Second Defence ends with a short film at the ford (#1315)
+
+- When the Second Defence is held, everyone who stood at the ford sees a short wordless film (16 seconds) set at the ford itself: dawn, the last of the old legion on the far bank bowing and going back into the ground one by one, a slow look across the water, then the keep with its light still burning
+- It is played from a recorded tape like The Long Defence, with nothing laid over the world; the weather is clear on your screen while it plays
+- `/kingdom film second_defence` plays it for testing (where you stand, if you are not at the ford)
+
+## 0.7.738 (2026-11-11): Story tab no longer crashes the game at launch (#1314)
+
+- The Story tab's act and road icons were item stacks made while the client was starting, before items could be built ("Components not bound yet"), which crashed the game on launch. They are now made the first time the tab is drawn.
+
+## 0.7.739 (2026-11-11): sky folk - who lives in the Aether, the sky lord's court, and balloon ships (#1312)
+
+Andy: the sky villages are "filled with divine born, any other heritage has a reason for not only having traveled but being
+accepted"; the halfway folk are "what the dawnborn culture becomes".
+- **Blood** (`SkyFolk.born`, from `VillagerHeritage.roll`): everyone born in the Aether is Divine-born, but for 15% who
+  are Dawnborn, the halfway folk.
+- **Nobody is minded up there** (`Prejudice.minds`): a villager standing in the Aether holds no one's blood against them.
+- **Their talk**: five lines each for the Divine-born and the Dawnborn of the sky, used while they are in the Aether
+  (`lang/parts/sky_folk.json`). Hints only.
+- **Things that fall off** (`SkyFolk.fall`): about once in six days spent under an open sky in the Overworld, something
+  drops near you: a dropped letter (five of them), somebody's hat, cloudwool, a moa feather or cloudtwine.
+- **Their clothes** (`SkyFolk.outfits`, art from `tools/gen_sky_folk.py`, 16 new outfits): the Divine-born of the
+  Aether wear white robes with gold at the collar, cord and hem; the halfway folk sun-coloured tunics with a white sash
+  and a sun on the chest; the sky lord a blue mantle over the robe; his wardens a white tabard over deep blue. A villager
+  is dressed as soon as their blood is settled. Travellers from below keep their own clothes.
+- **The sky lord's court** (`SkyCourt`): each sky castle near a player in the Aether gets a lord (the one seated on the
+  throne when it was built if he can still be told, else whoever stands nearest the keep) and three wardens, who take
+  up MCA's guard trade. They have their own lines. A dead lord is replaced from the castle's people at the next look.
+  The court is not a kingdom: factions live only in the Overworld and their wars, caravans and envoys walk, so the
+  castle holds no land and takes no part in them.
+- **Balloon ships** (`Ship`, `Hull.airworthy`): a ship with at least 24 blocks of wool hung over her, enough to lift her
+  weight (half a block of water's weight per block of wool), flies. Her wheel casts her off with no water under her;
+  at the wheel Space takes her up and Sprint down (0.12 blocks a tick), W/S set her cloth and A/D steer as at sea. She
+  holds her height with nobody at the wheel, moors in mid-air when you sneak off a still wheel, settles onto water if
+  brought down on it, and is never becalmed head to wind. Enough of her cloth shot away and she falls. The readout
+  shows her height.
+- **Sky ferries** (`SkyFerries`): in daylight, about every five minutes, two villagers of a sky village near a player go
+  aboard the skiff at its mast, take her up 22 blocks, cross 110 to 200 blocks of sky, come about, return and haul her
+  in onto her mooring, where she is blocks again. You can ride along on her deck or take her wheel. Something in her
+  way sends her 6 blocks higher; a trip that runs past four minutes turns for home.
+- Compiled; not played. Not seen: whether MCA villagers sit quietly as a ferry's crew, and how the skiff looks under way.
+
+## 0.7.740 (2026-11-11): Divine-born: heritage key is Alight, and staying at the Judge makes you one (#1308)
+
+- The heritage key `;` for a Divine-born is now Alight (Jaymo's Powers refills the feathers). Sneak + `;` is Halo Pulse,
+  as the key alone was before. Without Powers the key is still Halo Pulse.
+- One of the just who stays at the Judge keeps their heritage. `DivineBorn.is` counts them (mending, no hunger or sleep,
+  harder blows on the wicked, the healing bonus), `Heritage.stayed` unlocks Divine-born and the afterlife road's deed,
+  and their own heritage key becomes Alight whenever there are feathers to bring back.
+- The Divine-born gift text lists the sense, the hover and Alight; the hint mentions the Judge.
+- Compiled; not played.
+
+## 0.7.741 (2026-11-11): The Retaking: the Hermit's Road and the Common Road (#1319)
+
+- **The Hermit's Road** (Smoke, Gravity and Cryo users): meet a hermit wizard on a floating island, who writes you **A Letter** the first time (you looked straight through the spirit at their shoulder; your ki went to your element; "you will grow something of your own instead"); then grow your Valor to Kindled, Tempered and Steeled.
+- **The Common Road** (anyone with no power): take a job in a town; take up a class; swear to a patron; become a Master at your job; grow your Valor to Steeled.
+- With these, every power, class and faith has a road in the Story tab.
+- Built; not played.
+
+## 0.7.742 (2026-11-11): the minotaur's labyrinths - it keeps the Epic dungeons (#1320)
+
+- **Labyrinths**: every large Epic Structures dungeon (plains, snow and desert) holds one minotaur in its biggest hall,
+  and about one in three medium ones does too. Small dungeons have none. It is stood there the first time a player
+  comes within 40 blocks of the hall, once per dungeon, never in peaceful, and it keeps to within 14 blocks of the spot.
+  Dungeons in worlds that already exist get theirs the same way, the first time someone goes back in.
+- Nothing in the Epic Structures files is changed: `beasts/Labyrinths` reads the dungeon's rooms from the world and picks
+  a roofed, clear floor near the middle of the biggest one. Which dungeons count is two structure tags,
+  `jaymoskingdoms:minotaur_labyrinths` (always) and `minotaur_labyrinths_some` (`SOME_CHANCE`, 35%).
+- Compiled; not played. The room check was run against the mod's room files (each large dungeon's first hall has dozens
+  of spots that fit), but no dungeon has been walked in game.
+
+## 0.7.743 (2026-11-11): sky kingdoms and blossom towns (#1321)
+
+Andy: "if there is room for an epic village kingdom ... spawn one and maybe we could design some in the aether and
+blossom biome styles".
+- **Sky kingdoms**: Jaymo's Powers' sky towns count as Epic villages (`Seats.epic`), so in a stacked world (the
+  default) a kingdom is founded at a sky town's bell the usual way: great hall as the seat, library or smithy as the
+  storehouse, farms taken on. Its people are sky folk.
+- **No road down** (`Stacked.band`, `Raids.horizontal`): a place in the Aether band and one below it count as endlessly
+  far apart, so wars, raids, rivalries, caravans and spacing never reach between a sky kingdom and a ground realm.
+  Declaring such a war answers that no army can march there. Sky kingdoms deal with each other normally.
+- **Land by band** (`Factions.at`, `KingdomEvents.claim`): a realm's land is only its own height band of a chunk, so the
+  ground under a sky kingdom is not its land, and a ground realm does not own the islands above it.
+- **Blossom towns** (`BlossomVillages.foundTown`, `Blossom.tenshu`): on a wide, level cherry grove with no realm within
+  900 blocks, a town rises instead of a village: torii, lantern road, ten houses, four job halls, stalls, a shrine and
+  a three-storey keep with flared roofs. It is a kingdom from the start, with the keep as its seat and a Blossom name.
+  `/kingdom found blossomtown` raises one where you stand.
+- Sky village skiffs are no longer crewed by guards or people at work.
+
+## 0.7.744 (2026-11-11): Art credits file cleaned up
+
+The dragon art credits file had leftover merge markers from an old merge; they are gone and the Stegonaut credit is kept. Nothing changes in game.
+
+## 0.7.745 (2026-11-11): The band's smith is an Ocellan (#1323)
+
+- **The Ocellan** (Andy: "the race of aliens that build and upgrade the watch ... very small with bug eyes ... robes ...
+  and monocles, and are a high class society"): the smith who keeps the star forge is no longer drawn as a man. He is a
+  Ocellan, about half a block tall, with the body of Powers' Gremlin: grey, a wide flat head and two big yellow-green
+  eyes that shine in the dark and blink. He wears a long trimmed robe with a short mantle and wide cuffs, a monocle on a
+  chain over his right eye, and keeps his hands folded in front of him. There are three robes (plum, teal, umber).
+- He is still the same villager: his menu, his talk and the reforge are unchanged. He is small now, so aim lower to
+  click him. Smiths already in a world change the next time they are loaded.
+- `OcellanBody` (new: hides the man's body, draws the Ocellan), `ZFighterFolk.OCELLAN` (which parts are Ocellan; add a part
+  there to make another villager one) and `OCELLAN_SCALE`, `VillagerLooks`, `ModelPoses`, `McaLookModels.hideChest`,
+  `tools/gen_ocellan.py` (skins in `textures/entity/ocellan/`).
+- Compiled (`compileClientJava`) and rendered from the skins outside the game; not played. Not checked in game: that
+  every MCA layer on the smith (hair, clothes, held things) is hidden, and how his name tag sits.

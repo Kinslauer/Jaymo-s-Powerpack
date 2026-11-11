@@ -459,9 +459,10 @@ public final class Guard {
 		if (from == null) {
 			from = attacker != null ? attacker.getEyePosition() : player.getEyePosition().add(player.getLookAngle());
 		}
-		Vec3 at = player.getEyePosition().add(from.subtract(player.getEyePosition()).normalize().scale(0.7)).add(0.0, -0.3, 0.0);
-		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, perfect ? 18 : 10, 0.15, 0.15, 0.15, 0.45);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, perfect ? 14 : 6, 0.1, 0.1, 0.1, 0.25);
+		// sparks off the two blades (or shards off a wooden shield), thrown from where they met
+		ItemStack guard = raised(player) ? player.getUseItem() : player.getMainHandItem();
+		ClashFx.met(level, player, guard, attacker, from, perfect ? ClashFx.CLASH_SPARKS : ClashFx.PARRY_SPARKS,
+			perfect ? ClashFx.CLASH_SCALE : ClashFx.PARRY_SCALE, perfect ? 4 : 3);
 		// Steel ring: "Updated Parry Sound" (MIT), from Eelke's CC0 freesound 523521.
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
@@ -511,6 +512,7 @@ public final class Guard {
 		player.stopUsingItem();
 		stagger(player, BREAK_STAGGER);
 		player.level().sendParticles(ParticleTypes.CRIT, player.getX(), player.getEyeY() - 0.3, player.getZ(), 8, 0.3, 0.2, 0.3, 0.2);
+		ClashFx.sparks(player.level(), player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.3, 0.0), null, ClashFx.PARRY_SPARKS, ClashFx.BLOCK_SCALE);
 	}
 
 	/** Reeling: a mob's mind stops (Darktide's stun), a player is slowed and weakened for as long. */

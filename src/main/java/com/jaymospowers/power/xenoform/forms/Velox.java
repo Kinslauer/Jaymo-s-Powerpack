@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.chrono.ChronoSpeed;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -182,7 +183,7 @@ public final class Velox extends XenoForm {
 		velocitySpeed(player);
 		ChronoSpeed.tick(player, player.level(), true, ChronoSpeed.SKY);
 		burst(player.level(), ChronoSpeed.SKY_DUST, player.position().add(0.0, 1.0, 0.0), 20, 0.4, 0.05);
-		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 1.0, 0.0), 12, 0.4, 0.2);
+		burst(player.level(), MagicFx.CRACKLE, player.position().add(0.0, 1.0, 0.0), 12, 0.4, 0.2);
 		sound(player, SoundEvents.BEACON_POWER_SELECT, 0.8F, 2.0F);
 		sound(player, SoundEvents.HORSE_GALLOP, 1.0F, 1.5F);
 	}

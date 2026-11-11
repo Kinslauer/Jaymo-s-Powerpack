@@ -94,6 +94,7 @@
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
 		"BlastSoundEngineMixin",
+		"VariedSoundEngineMixin",
 		"ChannelSourceAccessor",
 		"TerrainAheadMixin",
 		"FallingLeavesInvoker",

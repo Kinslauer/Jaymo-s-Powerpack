@@ -37,6 +37,9 @@ public final class BladeClash {
 	static final double FACING = 0.25;
 	/** After a clash, neither fighter clashes again for this long (ticks). */
 	static final int COOLDOWN_TICKS = 20;
+	/** The shower of sparks where the blades meet (Jaymo's Powers' {@code ClashFx}): how many, how big. */
+	static final int SPARKS = 26;
+	static final float SPARK_SCALE = 1.2F;
 	/** How hard each is pushed back (blocks/tick) and up. */
 	static final double PUSH = 0.45, PUSH_UP = 0.15;
 
@@ -93,8 +96,10 @@ public final class BladeClash {
 			}
 		}
 		Vec3 mid = a.getEyePosition().add(b.getEyePosition()).scale(0.5).add(0.0, -0.3, 0.0);
-		level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 14, 0.15, 0.15, 0.15, 0.4);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mid.x, mid.y, mid.z, 8, 0.1, 0.1, 0.1, 0.3);
+		if (!PowersCompat.clashSparks(level, mid, b.getEyePosition().subtract(a.getEyePosition()), SPARKS, SPARK_SCALE)) {
+			level.sendParticles(ParticleTypes.CRIT, mid.x, mid.y, mid.z, 14, 0.15, 0.15, 0.15, 0.4);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mid.x, mid.y, mid.z, 8, 0.1, 0.1, 0.1, 0.3);
+		}
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.45F, 1.8F + level.getRandom().nextFloat() * 0.2F);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8F, 1.4F);
 		push(a, b);

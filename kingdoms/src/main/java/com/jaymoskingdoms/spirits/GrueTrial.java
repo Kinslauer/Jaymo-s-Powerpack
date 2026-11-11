@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -24,7 +25,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -410,7 +410,7 @@ public final class GrueTrial {
 		}
 		boss.setTarget(player);
 		if ((now & 3L) == 0L) {
-			level.sendParticles(new DustParticleOptions(Grue.COLOR, 1.6F), boss.getX(), boss.getY() + 1.2, boss.getZ(), 4, 0.4, 0.7, 0.4, 0.01);
+			level.sendParticles(Fx.wisp(Grue.COLOR, 1.6F), boss.getX(), boss.getY() + 1.2, boss.getZ(), 4, 0.4, 0.7, 0.4, 0.01);
 		}
 		boolean held = boss.hasEffect(MobEffects.SLOWNESS) && boss.getEffect(MobEffects.SLOWNESS).getAmplifier() >= 4;
 		double d = boss.distanceTo(player);
@@ -468,7 +468,7 @@ public final class GrueTrial {
 				boss.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SPIRIT_HOLD, 5, false, true));
 				boss.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SPIRIT_HOLD, 2, false, true));
 				int color = spirit == null ? 0x9AD8FF : Spirits.of(spirit.kind()).color() & 0xFFFFFF;
-				level.sendParticles(new DustParticleOptions(color, 1.8F), boss.getX(), boss.getY() + 1.0, boss.getZ(), 40, 0.5, 0.8, 0.5, 0.02);
+				Fx.burst(level, boss.getX(), boss.getY() + 1.0, boss.getZ(), color, 1.8F, 40, 0.5, 0.8, 0.5);
 				level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5F, 0.6F);
 				if (spirit != null) {
 					SpiritVoice.sayNow(player, spirit.kind(), "grue.fight");
@@ -491,7 +491,7 @@ public final class GrueTrial {
 		}
 		boss.hurtServer(level, level.damageSources().indirectMagic(player, player), hurt);
 		int color = Spirits.of(spirit.kind()).color() & 0xFFFFFF;
-		level.sendParticles(new DustParticleOptions(color, 1.4F), boss.getX(), boss.getY() + 1.4, boss.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
+		level.sendParticles(Fx.wisp(color, 1.4F), boss.getX(), boss.getY() + 1.4, boss.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.9F + 0.1F * kind);
 	}
 
@@ -593,7 +593,7 @@ public final class GrueTrial {
 		Grue.speakTo(player, "beaten");
 		SpiritVoice.sayNow(player, spirit.kind(), "grue.won");
 		ServerLevel level = (ServerLevel)player.level();
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.6, 0.9, 0.6, 0.08);
+		level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.6, 0.9, 0.6, 0.08);
 		burst(level, player.position().add(0.0, 1.0, 0.0), 60, 1.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.grue.subjugated").withStyle(s -> s.withColor(Grue.COLOR).withBold(true)));
@@ -713,15 +713,12 @@ public final class GrueTrial {
 	}
 
 	private static void burst(ServerLevel level, Vec3 at, int count, double spread) {
-		level.sendParticles(new DustParticleOptions(Grue.COLOR, 1.8F), at.x, at.y, at.z, count, spread, spread, spread, 0.02);
+		level.sendParticles(Fx.wisp(Grue.COLOR, 1.8F), at.x, at.y, at.z, count, spread, spread, spread, 0.02);
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, count / 3, spread, spread, spread, 0.02);
 	}
 
 	private static void line(ServerLevel level, Vec3 from, Vec3 to) {
-		for (int i = 0; i <= 12; i++) {
-			Vec3 p = from.lerp(to, i / 12.0);
-			level.sendParticles(new DustParticleOptions(Grue.COLOR, 1.4F), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
-		}
+		Fx.beam(level, from, to, Grue.GRASP_BEAM, Grue.COLOR, Grue.GRASP_BEAM_TICKS);
 	}
 
 	// ---- the moves of one who mastered it -----------------------------------------------------------------------------
