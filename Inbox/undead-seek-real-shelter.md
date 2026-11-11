@@ -7,7 +7,7 @@ claimed_by:
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Undead seek real shelter from the sun
@@ -44,3 +44,4 @@ Not tested in game.
 - 2026-11-11 01:54 Review (head 025ce16), second pass: still changes needed; the 01:19 list (whole-body rays, search cost, change note) is not fixed yet. One more: 4. Skeletons may not be able to leave tree shade: vanilla RestrictSunGoal turns on avoidSun, and GroundPathNavigation trims a path at the first open-sky node whenever the mob's own spot can't see sky. Under leaves canSeeSky is false, so SeekShelterGoal's moveTo (SeekShelterGoal.java:67) gets cut at the tree's edge and the skeleton keeps burning in place. Check trimPath in the 26.3 sources; if so, turn avoidSun off while this goal runs (or replace RestrictSunGoal for these mobs). Not tested in game.
 - 2026-11-11 03:13 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-11 11:31 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-11 12:39 Andy 2026-11-11 12:39Z: 'It should keep searching till it finds shelter.' Change SeekShelterGoal: when nothing is found within REACH, don't stay put; walk away (e.g. downhill or toward the darkest/most covered direction, or a widening search) and keep searching every back-off until it finds shelter. Held from merge for this.
