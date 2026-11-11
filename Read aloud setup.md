@@ -53,11 +53,47 @@ For Claude Code on the PC:
 3. Tell YOUTH (and put it in his read-aloud skill): if the script is missing, run `git -C "E:/Origins Mod" pull origin
    master` once and try again. Never write the script himself and never fall back to text_to_speech.
 
+### Done (Claude Code, 2026-11-10, 11:50 PM)
+- Why it was missing: at 11:00 PM something switched E:/Origins Mod from master to `claude/project-thread-1ly3a2`
+  (PR #1274, already merged; its one commit was pushed). That branch is older than #1273, so the script wasn't
+  there.
+- That branch had no unpushed or unmerged work, so the checkout went back to master and pulled. It is now at
+  43938b86c, and `Test-Path` is True. The two old local deletions ("Build Modpack.bat", the kitchen jar) and the
+  untracked deck files are untouched.
+- Dry run OK: 9 paragraphs for "The ages of the world".
+- The missing-script rule is in YOUTH's skill (discord-read-aloud, "If it fails") and in his SOUL "Reading aloud"
+  section.
+- Still to do: Andy asks YOUTH again in voice. Whatever switched the main checkout to a PR branch may do it again.
+  If it does, YOUTH's pull goes to that branch and won't bring the script.
+
+### What switched E:/Origins Mod off master (found 2026-11-11, 12:10 AM)
+- At 11:04 PM Andy opened PR #1274's cloud session (`claude/project-thread-1ly3a2`) from the Claude desktop app. To
+  open it on the PC, the app ran `git fetch origin claude/project-thread-1ly3a2` (11:04:36 PM) and then
+  `git checkout claude/project-thread-1ly3a2` (11:04:37 PM) in the main checkout. Andy confirmed it.
+- It wasn't a bot. No Hermes session ran a checkout then, and powerpack_guard blocks them from doing it in
+  E:/Origins Mod. (The "11:00 PM" above was the commit's date, not the time of the switch.)
+- To avoid it: open cloud sessions in a worktree (E:\Origins Mod\.claude\worktrees\...), not in the main checkout.
+  When done with one that did switch it: `git -C "E:/Origins Mod" checkout master`, then pull.
+
+### A script is missing from E:/Origins Mod: check the branch first
+For YOUTH, Claude Code or anyone who finds a tool from master missing (like tools/discord_read_aloud.py):
+1. `git -C "E:/Origins Mod" branch --show-current`. If it isn't `master`, someone opened a session on a PR branch.
+   Pulling won't help: it updates that branch, not master.
+2. YOUTH: tell Andy which branch E:/Origins Mod is on and that the script is missing, and stop there. Don't switch
+   branches, don't write the script, don't use text_to_speech.
+3. Claude Code on the PC: check the branch has nothing unpushed (`git log origin/<branch>..HEAD` is empty) and
+   no uncommitted changes besides the old "Build Modpack.bat" / kitchen-jar deletions. Then
+   `git checkout master` and `git pull --ff-only origin master`.
+- Watch out: powerpack_guard blocks every mutating git command in E:/Origins Mod for the Hermes bots and YOUTH,
+  `pull` included. So the "pull master once" rule in YOUTH's skill and SOUL couldn't work as written.
+- Changed (Andy, 2026-11-11): YOUTH no longer pulls. If the script is missing he checks the branch, tells Andy, and
+  stops (SOUL "Reading aloud" section and skill discord-read-aloud, "If it fails"). The guard is unchanged.
+
 ## 2026-11-10 11:55 PM: YOUTH's Python is missing the packages, and no ffmpeg
 YOUTH found the script but said discord.py and edge-tts aren't installed "in the Python available here" and ffmpeg
 isn't on PATH. Step 1 installed them into a different Python than the one YOUTH's terminal tool runs. The bot sitting
 deafened in General was not the reader (it never started); the reader no longer self-deafens anyway.
-For Claude Code on the PC, after Andy merges the follow-up PR (adds --check):
+For Claude Code on the PC (the follow-up PR #1278, which adds --check, is merged; pull master first):
 1. Ask YOUTH to run `py -3 tools/discord_read_aloud.py --check` from E:/Origins Mod, the same way he runs the reader,
    and paste the output. Its first line names the interpreter he really uses, and it prints the exact pip command for
    that interpreter. Wheels exist for Python 3.14 on Windows (PyNaCl 1.5 abi3, davey 0.2 cp314).
