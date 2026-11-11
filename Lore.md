@@ -107,7 +107,9 @@ bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's 
 shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
 place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
 power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
-which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+which rolls as murk because light cannot be black). *(new, second pass, 2026-11-11)* Two more: **sparks** (power that
+has not settled: lightning, charge, a crackle that forks and jumps) and **runes** (power written down: the marks of the
+sigil's circle, seen loose where something is enchanted, warded or read). Blood drawn out by the forbidden Blood element stays blood, not
 light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
 goo, gunpowder, festival fireworks).
 
@@ -333,6 +335,16 @@ starlight and a cataclysm of falling stars.
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
 cold lands (Frostborn), and the crocodile dragon **Varasuchus**, which roosts on beaches and swamps (Tideborn).
+
+(new) **Where the dragons keep, and when they come down** (Andy, 2026-11-11). The dragons live in the sky: the wind
+dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus over the basalt deltas) keeps to the
+Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
+killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
+
+(new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
+its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
+the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
 
 ## The dead
 
@@ -565,6 +577,13 @@ the Shade of the Grue is one of them.
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
 becomes corruption on the land.
+
+(new) **A court wizard's margins** (Retaking, the Arcanist's Road, 2026-11-11). A few pages of a court wizard's notes, now
+and then found on a witch: the four elements and their angry cousins, Mending "the fifth, and nobody argues with it"; that
+every court forbids Death and Blood and none remembers why (the old master "looked at the door before he answered, and
+then he did not answer"); that the crucible does not talk when the flux runs high, "it listens, which is worse"; and "if
+you hear your own name in it, put the lid on and go outside. Do not answer. Somebody answered, once, a long time ago."
+It hints at the sorcerer who became the Grue without naming him.
 
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
@@ -843,6 +862,17 @@ Barbarian camps take raiders and captives, and spare those the realms have outla
 **Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
+
+(new) **How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
+this page, and it only ever hints. Families keep the faith of their trade: miners and smiths the Anvil-Father, fisherfolk
+the Deep Mother, hunters the Green Huntsman, healers the Hearthkeeper, outlaws the Ash Whisperer. Among the Nightborn,
+some families are **lantern-keepers of the barrows**, who keep the Lantern Warden's lights on the moor's old graves.
+The Dawnborn's priests are the Crowned Sun's. The Emberborn expedition at the Nether's edge **paid the Hornkin off in
+gold**, and a child fostered to a Hornkin war-band was part of such a bargain. The **Sylvan are long-lived**, so their
+elders remember old trees as saplings. A warband's old ones never say where the band came from, "only that it was a long
+way up". Pod crews trade a rumour that **somebody lives on the Pale Moon**, and nobody believes it. A stone lab's
+escapee is "somebody's unfinished work". The spider's bite leaves a person quieter. None of it names the old war, the
+Quiet One, the Tinkerer's labs or the elder.
 
 ## The sea
 

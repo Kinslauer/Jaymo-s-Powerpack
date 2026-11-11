@@ -25,3 +25,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots) in a pure 
 - Do not change the model JSON files or the item model definitions — only the PNG texture files.
 - Say back the task name and that Prometheus is starting it, and add it to the todo list as `in_progress`.
 - Reference image: vanilla leather helmet at `https://textures.minecraft.net/texture/leather_helmet.png` as the visual style guide (solid brown with white border).
+- 2026-11-11 18:39 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
