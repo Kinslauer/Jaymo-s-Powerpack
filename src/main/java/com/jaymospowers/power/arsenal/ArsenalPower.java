@@ -139,9 +139,10 @@ public final class ArsenalPower implements Power {
 		builder -> builder.persistent(Cooldowns.CODEC).copyOnDeath().syncWith(Cooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/** A rift being reached into: when it opened, and what's coming out. Server memory only. */
-	private record Pending(long start, List<ItemStack> stacks, int life, ArsenalQuestItems.@org.jspecify.annotations.Nullable Entry quest) {
+	private record Pending(long start, List<ItemStack> stacks, int life, ArsenalQuestItems.@org.jspecify.annotations.Nullable Entry quest,
+		ArsenalAnywhere.@org.jspecify.annotations.Nullable Wild wild) {
 		Pending(long start, List<ItemStack> stacks, int life) {
-			this(start, stacks, life, null);
+			this(start, stacks, life, null, null);
 		}
 	}
 
@@ -155,6 +156,7 @@ public final class ArsenalPower implements Power {
 	public static void init() {
 		ArsenalRelics.init();
 		ArsenalReach.init();
+		ArsenalAnywhere.init();
 		Summoned.TYPE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("arsenal_summoned"),
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
 		ArsenalEntities.init();
@@ -347,7 +349,14 @@ public final class ArsenalPower implements Power {
 			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.35F, 1.6F);
 		}
 		if (t == ArsenalReach.PULL_END) {
-			pull(player, rift, pending.stacks(), pending.life(), pending.quest());
+			if (pending.wild() != null && pending.wild().hazard() != null) {
+				ArsenalAnywhere.strike(player, rift, pending.wild().hazard());
+			} else {
+				pull(player, rift, pending.stacks(), pending.life(), pending.quest());
+				if (pending.wild() != null) {
+					ArsenalAnywhere.announcePick(player, pending.wild());
+				}
+			}
 		}
 		if (t >= ArsenalReach.CLOSE_END) {
 			PENDING.remove(player.getUUID());
@@ -379,6 +388,7 @@ public final class ArsenalPower implements Power {
 		boolean first = heldBatches(player) == 0;
 		ItemStack relic = first && ArsenalArmory.pinned(player) == null ? ArsenalRelics.takeFromStash(player) : ItemStack.EMPTY;
 		List<ItemStack> stacks;
+		ArsenalAnywhere.Wild wild = null;
 		if (!relic.isEmpty()) {
 			// the relic itself, with whatever it fires (arrows for a bow, say)
 			stacks = new ArrayList<>(ArsenalPool.stacksFor(level, player.getRandom(), relic.getItem()));
@@ -387,7 +397,10 @@ public final class ArsenalPower implements Power {
 			List<ItemStack> pair = ArsenalFlintlock.pairFor(player, player.getRandom());
 			// (0.19.26) now and then a handgun from the future, one magazine in it (ArsenalFutureGun)
 			List<ItemStack> future = pair == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
+			// until it's mastered the rift pulls from anywhere: someone's pack, or something that hurts (ArsenalAnywhere)
+			wild = pair == null && future == null ? ArsenalAnywhere.roll(player, level, player.getRandom(), SUMMON_TICKS) : null;
 			stacks = pair != null ? pair : future != null ? future
+				: wild != null ? (wild.hazard() != null ? new ArrayList<>() : ArsenalAnywhere.stacksFor(wild))
 				: new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
 			if (pair == null && future != null) {
 				com.jaymospowers.core.PowerRoads.arsenalFuture(player);
@@ -397,10 +410,11 @@ public final class ArsenalPower implements Power {
 			stacks.forEach(ArsenalVoid::voidTouched);
 		}
 		// now and then the rift goes for a special quest item instead (found or made when it arrives; the weapons are the fallback)
-		ArsenalQuestItems.Entry quest = relic.isEmpty() && (!first || ArsenalArmory.pinned(player) == null) && level.getServer() != null
+		ArsenalQuestItems.Entry quest = relic.isEmpty() && wild == null && (!first || ArsenalArmory.pinned(player) == null) && level.getServer() != null
 			? ArsenalQuestItems.roll(player.getRandom()) : null;
-		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS, quest));
+		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS, quest, wild));
 		ItemStack shown = quest != null ? ArsenalQuestItems.preview(quest, level.getServer())
+			: wild != null ? wild.shown()
 			: stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy();
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, shown));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
@@ -724,6 +738,8 @@ public final class ArsenalPower implements Power {
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			long now = player.level().getGameTime();
+			// whatever an Arsenal took from this player's pack comes home when its time is up
+			ArsenalAnywhere.tickLender(player, now);
 			List<Component> names = new ArrayList<>();
 			forEachHeld(player, (stack, setter) -> {
 				Summoned s = Summoned.of(stack);

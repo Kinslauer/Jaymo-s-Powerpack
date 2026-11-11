@@ -1,0 +1,6 @@
+# Pocket Arsenal pulls from anywhere
+- **Someone's pack**: until the power is ascended, about 1 Reach in 25 with another player within 24 blocks goes into their inventory instead and comes back with one of their weapons, tools or armour pieces (never what they're holding, nothing stackable or placeable). They see "Something reached into your pack and took your ...". The thief gets it as an ordinary summon; the owner gets the real one back when that summon's time is up (75 s after the pull, or on their next login if they left), whatever happened to the summon (sent back early, broken, dropped).
+- **Hazards**: about 1 Reach in 30 (not yet ascended) the hand closes on something that hurts: embers (fire), a pufferfish (poison and nausea), a wither rose (wither), a cactus, powder snow (freezing) or a lit charge that goes off in the hand (breaks no blocks). Nothing is kept.
+- Once ascended (the Armory's pin) neither happens: the rift answers to you. Future handguns stay as they were (1 Reach in 600).
+- `ArsenalAnywhere` (new), `ArsenalPower` (reach roll, pull, lender tick), lang `arsenal.json`.
+- Built; not played. Not tested: the return after a server restart, the charge's damage on armoured players.
