@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,27 +16,26 @@ kanban-plugin: board
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
+- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 
 
 ## Being built
 
-- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
-- [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · running
-- [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
+- [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
 
 
 ## Done
