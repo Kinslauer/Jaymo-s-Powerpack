@@ -116,3 +116,5 @@ hermes-b config.yaml, vault.py, quill config.yaml and .env). No key printed or w
 - **The stray branch:** delete it (`git branch -D origin/master` in the voice-pilot repo) so bots' own
   `pr_checks.py` runs compare against the real master.
 - **Master's CREDITS.txt:** it has conflict markers committed.
+
+**2:30 PM, Andy's follow-up:** Quill's primary is now NVIDIA Super (fallbacks: Gemini, Groq, NVIDIA ultra; `hermes -p quill fallback list` confirms). The stray `origin/master` branch in the voice-pilot repo is deleted; `origin/master` in E:/wt now resolves to the real master (db653ab3f).
