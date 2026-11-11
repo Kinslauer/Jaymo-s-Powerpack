@@ -261,6 +261,11 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 (Andy, Blindness devout path, PR #1328): players can stumble on a service where the order's members carve a follower's eyes.
 - 2026-11-11 5:10 PM ET: Andy 'merge': PR #1326 (Arsenal pulls from anywhere) merged.
 - 2026-11-11 (four-mods thread): the Eden Ring field guide is 'A Far Country Herbal' (PR #1331), a written book in a traveller's voice (hints only, per the lore-delivery rule), crafted from a book + dried limphium leaf + gravilite shards. Claude's call, unconfirmed: crafted rather than found or given.
+- 2026-11-11 5:13 PM ET (Andy, four-mods thread): on the Ninja Castle, "I believe its MIT but it doesnt say. i sent the download link". The link is blocked from the cloud; no licence stated, so the plan is our own Blossom seat in its style once he uploads the file and a screenshot.
 - 2026-11-11: Andy on the Rig Forge: "they deserve a costume style UI" (RigForgeScreen, PR #1322).
 - 2026-11-11 5:10 PM ET (Andy): merge PR #1325 (Ocellan moon plan). Merged.
 - 2026-11-11: Andy: vigilantes fight villains (rivalries a player can join), and villagers talk about the costumed ones they've seen (PR #1332).
+
+- 2026-11-11 (future-three-sided-war, PR #1335): Frostborn troopers in the future are hostile to everyone, players included (Andy, decision card).
+- 2026-11-11: Andy approved and merged PR #1333 (elemental powers: weakest ki aura, blind to mana and spirits) and its Lore.md paragraph "What an elemental user sees".
+- 2026-11-11: Andy approved the four Flame Avatar/Smoke lore paragraphs (skull under the fire, burning chain, Judgement, burning steeds); (new) markers removed.
