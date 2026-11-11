@@ -52,3 +52,16 @@ For Claude Code on the PC:
 2. Check `Test-Path "E:/Origins Mod/tools/discord_read_aloud.py"` is True, then run the dry run from step 3 above.
 3. Tell YOUTH (and put it in his read-aloud skill): if the script is missing, run `git -C "E:/Origins Mod" pull origin
    master` once and try again. Never write the script himself and never fall back to text_to_speech.
+
+## 2026-11-10 11:55 PM: YOUTH's Python is missing the packages, and no ffmpeg
+YOUTH found the script but said discord.py and edge-tts aren't installed "in the Python available here" and ffmpeg
+isn't on PATH. Step 1 installed them into a different Python than the one YOUTH's terminal tool runs. The bot sitting
+deafened in General was not the reader (it never started); the reader no longer self-deafens anyway.
+For Claude Code on the PC, after Andy merges the follow-up PR (adds --check):
+1. Ask YOUTH to run `py -3 tools/discord_read_aloud.py --check` from E:/Origins Mod, the same way he runs the reader,
+   and paste the output. Its first line names the interpreter he really uses, and it prints the exact pip command for
+   that interpreter. Wheels exist for Python 3.14 on Windows (PyNaCl 1.5 abi3, davey 0.2 cp314).
+2. Run that pip command yourself (YOUTH's skill says not to install things; keep it that way).
+3. ffmpeg: `winget install ffmpeg` if missing, then set a user env var FFMPEG to ffmpeg.exe's full path and restart
+   the gateway with `schtasks /run /tn Hermes_Gateway` (a running gateway doesn't see new PATH entries).
+4. Have YOUTH run --check again until it says Ready, then the reading. Append the result here and run vault_sync.
