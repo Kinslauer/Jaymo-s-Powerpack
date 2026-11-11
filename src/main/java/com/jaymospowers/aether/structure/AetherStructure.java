@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
  */
 public final class AetherStructure extends Structure {
 	public enum Plan implements StringRepresentable {
-		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINESHAFT, IRRADIATED, GUARDIAN;
+		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINESHAFT, IRRADIATED, GUARDIAN, VILLAGE, CASTLE;
 
 		public static final Codec<Plan> CODEC = StringRepresentable.fromEnum(Plan::values);
 
@@ -52,6 +52,9 @@ public final class AetherStructure extends Structure {
 	public static final int BREXALLEN_SIZE = 21, BREXALLEN_H = 8;
 	public static final int IRRADIATED_SIZE = 23, IRRADIATED_H = 10, BUNKER_DEPTH = 4;
 	public static final int GUARDIAN_SIZE = 33, GUARDIAN_H = 80;
+	/** The sky villages (variants 0 to 2 lived in, 3 to 5 the same in ruins) and the sky lord's castle. */
+	public static final int VILLAGE_SIZE = 47, VILLAGE_H = 19, VILLAGE_TOLERANCE = 6;
+	public static final int CASTLE_SIZE = 49, CASTLE_H = 25, CASTLE_TOLERANCE = 8;
 	/** How uneven (blocks, highest column to lowest of nine) the ground under a surface structure may be. */
 	public static final int TOLERANCE = 3, WIDE_TOLERANCE = 5, AQUEDUCT_TOLERANCE = 12;
 	/** The mineshaft: corridors from the hub, branches and the farthest a piece may reach, and how deep (below ground) it lies. */
@@ -121,6 +124,8 @@ public final class AetherStructure extends Structure {
 					variant == 0 ? BUNKER_DEPTH : 0);
 			}
 			case GUARDIAN -> surface(ground, AetherPiece.Kind.GUARDIAN, cx, cz, GUARDIAN_SIZE, GUARDIAN_SIZE, GUARDIAN_H, WIDE_TOLERANCE, facing, seed, 0, 0);
+			case VILLAGE -> surface(ground, AetherPiece.Kind.SKY_VILLAGE, cx, cz, VILLAGE_SIZE, VILLAGE_SIZE, VILLAGE_H, VILLAGE_TOLERANCE, facing, seed, Math.max(variant, 0), 0);
+			case CASTLE -> surface(ground, AetherPiece.Kind.SKY_CASTLE, cx, cz, CASTLE_SIZE, CASTLE_SIZE, CASTLE_H, CASTLE_TOLERANCE, facing, seed, 0, 0);
 			case LIBRARY -> library(ground, cx, cz, facing, seed, Math.max(variant, 0));
 			case AQUEDUCT -> aqueduct(ground, cx, cz, facing, seed);
 			case BREXALLEN -> brexallen(ground, random, cx, cz, facing, seed);

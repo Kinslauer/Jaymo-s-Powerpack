@@ -53,6 +53,9 @@ public final class Uniforms {
 	 * six plain wools ({@code tools/gen_nobody_rags.py}); Nobodies still in a deckhand's slops change when they load.
 	 */
 	static final List<String> POOR = ids("poor/rags", 6);
+	/** The sky folk's ({@link SkyFolk#outfits}, art from tools/gen_sky_folk.py). */
+	static final List<String> SKY_DIVINE = ids("sky/divine"), SKY_HALFWAY = ids("sky/halfway"), SKY_LORDS = ids("sky/lord"),
+		SKY_WARDENS = ids("sky/warden");
 
 	private Uniforms() {
 	}
@@ -109,7 +112,7 @@ public final class Uniforms {
 	/** {@code villager} wears a ruler's robe or gown of ours. */
 	static boolean royal(VillagerEntityMCA villager) {
 		String c = villager.getClothes();
-		return ours(c) && (c.contains("/royal/") || c.contains("/lord/") || c.contains("/lady/"));
+		return ours(c) && (c.contains("/royal/") || c.contains("/lord/") || c.contains("/lady/") || c.contains("/sky/lord"));
 	}
 
 	/** What {@code villager} may wear, or nothing for anyone who isn't one of our named characters (MCA dresses them). */
@@ -148,6 +151,11 @@ public final class Uniforms {
 				return SHIPWRIGHTS;
 			}
 			return side == Crew.Side.PIRATE || role == Pirates.DECKHAND ? DECKHANDS : SEAMEN;
+		}
+		List<String> sky = SkyFolk.outfits(villager, role, villager.isGuard());
+		if (sky != null) {
+			// the Aether's own people: robes, the halfway folk's sun tunics, the sky lord's mantle
+			return sky;
 		}
 		MinecraftServer server = villager.level().getServer();
 		Faction f = server == null || !(villager instanceof Worker w) ? null : Factions.get(server, w.factionId());

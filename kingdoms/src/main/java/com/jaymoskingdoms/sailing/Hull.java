@@ -30,6 +30,12 @@ public final class Hull {
 	static final float MOST_LOAD = 0.9F;
 	/** (0.7.112) Wool hung in her rigging (not laid on a floor) catches the wind too: this many blocks of it make one sail's worth. */
 	static final int CLOTH_PER_SAIL = 3;
+	/**
+	 * A balloon: a ship with at least this much wool hung over her (the same cloth that counts as sail), each block of it
+	 * lifting this much weight, flies ({@link #airworthy}).
+	 */
+	static final int BALLOON_LEAST = 24;
+	static final float LIFT_PER_CLOTH = 0.5F;
 
 	public final List<Ship.Piece> pieces;
 	/** Each piece's index by its packed local position. */
@@ -60,6 +66,8 @@ public final class Hull {
 	public final boolean floats;
 	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.18) its oars. */
 	public final int waterline, sails, oars;
+	/** Whether the cloth over her is balloon enough to carry her weight through the air. */
+	public final boolean airworthy;
 	/** (0.7.18) Its guns' pieces, and its oars'; (0.7.28) the pieces that give light (torches, lanterns, glowstone...). */
 	public final int[] cannons, oarPieces, lights;
 	/** The pieces on its outside (walls, bottom and ends), which run into land first. */
@@ -156,6 +164,7 @@ public final class Hull {
 			}
 		}
 		this.sails = sailCount + cloth / CLOTH_PER_SAIL;
+		this.airworthy = cloth >= BALLOON_LEAST && cloth * LIFT_PER_CLOTH >= m;
 		this.radius = r;
 		this.mass = m;
 		// layer by layer: the walls, and the dry space they close in (what the water can't reach from outside)

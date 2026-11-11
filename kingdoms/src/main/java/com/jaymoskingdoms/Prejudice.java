@@ -182,6 +182,8 @@ public final class Prejudice {
 		// ((0.7.443) a mask hides a tied-down tail's blood from no one who smells it: Tails)
 		if (who == whom || !VillagerHeritage.eligible(who) || whom instanceof Player p && masked(p) && Tails.smells(who, p) == null
 			|| StoryHomes.takenIn(who, whom)
+			// (no one's blood is held against them in the Aether: SkyFolk)
+			|| SkyFolk.in(who)
 			|| whom instanceof Player pl && who instanceof Villager vl && FarmhandHome.familyOf(vl, pl)) {
 			return 0.0F;
 		}

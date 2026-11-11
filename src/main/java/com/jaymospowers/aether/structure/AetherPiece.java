@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 /** One built-in-code piece of an Aether II structure; {@link #kind} says which builder draws it, a chunk at a time. */
 public final class AetherPiece extends StructurePiece {
 	public enum Kind {
-		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINE_HUB, MINE_TUNNEL, MINE_ROOM, IRRADIATED, GUARDIAN
+		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINE_HUB, MINE_TUNNEL, MINE_ROOM, IRRADIATED, GUARDIAN, SKY_VILLAGE, SKY_CASTLE
 	}
 
 	public static StructurePieceType TYPE;
@@ -72,6 +72,8 @@ public final class AetherPiece extends StructurePiece {
 				case MINE_ROOM -> Deep.mineRoom(s);
 				case IRRADIATED -> Irradiated.build(s);
 				case GUARDIAN -> GuardianTree.build(s);
+				case SKY_VILLAGE -> SkyVillages.village(s);
+				case SKY_CASTLE -> SkyVillages.castle(s);
 			}
 		} catch (RuntimeException e) {
 			JaymosPowers.LOGGER.error("Aether structure {} failed at {}", this.kind, this.boundingBox, e);

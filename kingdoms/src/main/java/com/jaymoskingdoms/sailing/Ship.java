@@ -124,6 +124,16 @@ public final class Ship extends Entity {
 	/** (0.7.28) How often (ticks) its torches and lanterns move their light along with it. */
 	static final int LIGHT_EVERY = 2;
 	static final int BROADSIDE_GAP = 3;
+	/**
+	 * A balloon ship ({@link Hull#airworthy}) in the air: how fast she climbs or comes down (blocks a tick, Space and
+	 * Sprint at her wheel), the most she makes per block of her length, and how near the top of the sky she may go.
+	 */
+	static final double CLIMB = 0.12, AIR_PER_LENGTH = 0.045;
+	/** The least of the wind a balloon catches, whatever her heading. */
+	static final float AIR_CATCH = 0.5F;
+	static final int SKY_HEADROOM = 4;
+	/** A balloon shot out of the air: the fastest she falls (blocks a tick), and how quickly she gathers that (a tick). */
+	static final double FALL = 0.45, FALL_GATHER = 0.01;
 
 	/** One block of the ship, in its own frame. */
 	public record Piece(int state, int x, int y, int z) {
@@ -163,6 +173,14 @@ public final class Ship extends Entity {
 
 	public static @Nullable Captaincy captaincy;
 
+	/** Who flies a balloon ship that has no pilot and no sea crew (the sky folk's ferries). */
+	public interface Skyfaring {
+		/** Her helm this tick, or null if she isn't one of theirs (she drifts, then moors herself where she is). */
+		@Nullable Input helm(ServerLevel level, Ship ship);
+	}
+
+	public static @Nullable Skyfaring skyfaring;
+
 	public static EntityType<Ship> TYPE;
 	/** The client's part each tick (carrying you with the deck), set by the client. */
 	public static Consumer<Ship> clientTick = ship -> {
@@ -179,6 +197,8 @@ public final class Ship extends Entity {
 	private static final EntityDataAccessor<Boolean> FOUNDERING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
 	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
 	private int sinking;
+	/** A balloon ship in the air: the height her keel is making for (NaN: she isn't flying). */
+	private double aloft = Double.NaN;
 	private final List<int[]> volley = new ArrayList<>();
 	/** (0.7.490) Guns run back by their recoil: {piece index, tick they're run out again}. */
 	private final List<long[]> recoiled = new ArrayList<>();
@@ -371,9 +391,10 @@ public final class Ship extends Entity {
 				}
 			}
 		}
-		if (!wetKeel || sea == Integer.MIN_VALUE) {
-			tell(player, Component.translatable("ship.jaymoskingdoms.not_afloat"));
-			return null;
+		// (a balloon needs no water: looked at once her hull is worked out)
+		boolean afloat = wetKeel && sea != Integer.MIN_VALUE;
+		if (!afloat) {
+			sea = Integer.MIN_VALUE;
 		}
 		// into its own frame: the helm's facing becomes forward (+z)
 		Direction facing = helmState.getValue(HelmBlock.FACING);
@@ -416,11 +437,19 @@ public final class Ship extends Entity {
 			pieces.add(new Piece(Block.getId(state), local.getX(), local.getY() - keel, local.getZ()));
 		}
 		Hull hull = new Hull(List.copyOf(pieces));
-		if (!hull.floats) {
+		if (!afloat && !hull.airworthy) {
+			tell(player, Component.translatable("ship.jaymoskingdoms.not_afloat"));
+			return null;
+		}
+		if (!hull.floats && !hull.airworthy) {
 			tell(player, Component.translatable("ship.jaymoskingdoms.too_heavy"));
 			return null;
 		}
 		Ship ship = new Ship(TYPE, level);
+		if (!afloat || !hull.floats) {
+			// she hangs where she was moored
+			ship.aloft = origin.getY() + keel;
+		}
 		ship.setAttached(PIECES, hull.pieces);
 		ship.hull();
 		ship.cargoTags.putAll(tags);
@@ -445,7 +474,7 @@ public final class Ship extends Entity {
 		if (player != null) {
 			player.startRiding(ship);
 			level.playSound(null, helm, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 0.6F);
-			level.playSound(null, helm, SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 1.4F, 0.7F);
+			level.playSound(null, helm, afloat ? SoundEvents.BOAT_PADDLE_WATER : SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.4F, 0.7F);
 		}
 		return ship;
 	}
@@ -497,9 +526,25 @@ public final class Ship extends Entity {
 		ServerPlayer pilot = this.pilot();
 		// (0.7.42) a crewed ship with nobody at her wheel is sailed by her captain, if she still has one
 		Input steered = pilot == null && this.crew != null && captaincy != null ? captaincy.helm(level, this, this.crew) : null;
+		if (steered == null && pilot == null && this.crew == null && skyfaring != null && this.flying()) {
+			// one of the sky folk's ferries, flown by her own
+			steered = skyfaring.helm(level, this);
+		}
 		Input input = pilot != null ? pilot.getLastClientInput() : steered != null ? steered : Input.EMPTY;
 		boolean helmed = pilot != null || steered != null;
 		boolean sails = h.sails > 0, oars = h.oars > 0;
+		// a balloon: Space lets her up (off the water too, if she has no oars to row with it), Sprint brings her down
+		if (h.airworthy && helmed) {
+			if (input.jump() && (this.flying() || !oars)) {
+				this.aloft = Math.min((this.flying() ? this.aloft : from.y) + CLIMB, level.getMaxY() - SKY_HEADROOM - (h.maxY - h.minY));
+			} else if (input.sprint() && this.flying()) {
+				this.aloft = Math.max(this.aloft - CLIMB, level.getMinY() + SKY_HEADROOM);
+			}
+		}
+		boolean flying = this.flying();
+		if (flying) {
+			oars = false;
+		}
 		// the sails (W/S), the oars (W/S with no sails; Space with them, S astern once they're furled) and the rudder
 		int row = 0;
 		if (sails || !oars) {
@@ -523,7 +568,7 @@ public final class Ship extends Entity {
 		}
 		this.entityData.set(SET, (float)this.sail);
 		this.entityData.set(ROWING, (byte)row);
-		double top = this.topSpeed(h), rowTop = this.rowSpeed(h);
+		double top = flying ? this.airSpeed(h) : this.topSpeed(h), rowTop = flying ? 0.0 : this.rowSpeed(h);
 		if (steered != null && oars) {
 			// (0.7.285) a whole crew at her sweeps moves even a big ship
 			rowTop = Math.max(rowTop, CREW_SWEEPS);
@@ -608,6 +653,10 @@ public final class Ship extends Entity {
 				yaw = yawFrom;
 				this.speed = 0.0;
 				this.turn = 0.0F;
+				if (flying) {
+					// set down on something (or under it): she holds the height she has
+					this.aloft = from.y;
+				}
 			}
 		}
 		this.setYRot(yaw);
@@ -616,7 +665,7 @@ public final class Ship extends Entity {
 		this.carry(level, h, from, yawFrom);
 		this.shine(level, h);
 		// the wake and the creak of her timbers
-		if (this.speed > 0.1 && this.tickCount % 4 == 0) {
+		if (!flying && this.speed > 0.1 && this.tickCount % 4 == 0) {
 			Vec3 bow = this.toWorld(0.0, h.draft, h.maxZ + 0.5);
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SPLASH, bow.x, bow.y, bow.z, 6, 0.6, 0.1, 0.6, 0.1);
 		}
@@ -624,7 +673,7 @@ public final class Ship extends Entity {
 			level.playSound(null, this.getX(), this.getY() + h.draft, this.getZ(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.6F, 0.5F);
 		}
 		if (pilot != null && this.tickCount % 10 == 0) {
-			pilot.sendOverlayMessage(this.readout(level, h, row, sails ? top : oars ? rowTop : PADDLE));
+			pilot.sendOverlayMessage(this.readout(level, h, row, sails || flying ? top : oars ? rowTop : PADDLE));
 		}
 		// with no one aboard a while, it anchors itself (not a crewed ship under way: her captain keeps her at sea)
 		boolean manned = helmed;
@@ -649,6 +698,36 @@ public final class Ship extends Entity {
 		return Math.min(FASTEST, Math.min(PER_LENGTH * h.waterline, push));
 	}
 
+	/** A balloon's top speed in the air: her cloth's push on the wind, or her length, whichever is less. */
+	double airSpeed(Hull h) {
+		// (she is never in irons: up there, there is always some wind going her way)
+		double push = PER_SAIL * Math.sqrt(Math.max(1, h.sails)) * Math.max(AIR_CATCH, Winds.catches(this.getYRot()))
+			* Winds.strength(this.level(), this.getX(), this.getZ());
+		return Math.min(FASTEST, Math.min(AIR_PER_LENGTH * (h.maxZ - h.minZ + 1), push));
+	}
+
+	/** Whether she's a balloon ship in the air (not afloat). */
+	public boolean flying() {
+		return !Double.isNaN(this.aloft);
+	}
+
+	/** The height a flying balloon ship's keel is making for (NaN: she isn't flying). */
+	public double aloft() {
+		return this.aloft;
+	}
+
+	/** A flying balloon ship makes for this height (her pilot's Space and Sprint do the same). */
+	public void climbTo(double y) {
+		if (this.flying()) {
+			this.aloft = Mth.clamp(y, this.level().getMinY() + SKY_HEADROOM, this.level().getMaxY() - SKY_HEADROOM);
+		}
+	}
+
+	/** Drops her where she lies (her blocks back in the world), as her own would. */
+	public boolean moor() {
+		return this.anchor(null);
+	}
+
 	/** (0.7.18) Its top speed under oars (blocks/tick): more oars row faster, a heavier ship slower (none: no oars). */
 	double rowSpeed(Hull h) {
 		if (h.oars == 0) {
@@ -664,7 +743,7 @@ public final class Ship extends Entity {
 		String dot = "  ·  ";
 		// lying still, the keys take turns with the rest
 		if (Math.abs(this.speed) < STILL && this.tickCount / 60 % 2 == 1) {
-			String keys = h.sails > 0 ? h.oars > 0 ? "sails_oars" : "sails" : h.oars > 0 ? "oars" : "paddle";
+			String keys = h.airworthy && (this.flying() || h.oars == 0) ? "balloon" : h.sails > 0 ? h.oars > 0 ? "sails_oars" : "sails" : h.oars > 0 ? "oars" : "paddle";
 			line.append(Component.translatable("ship.jaymoskingdoms.keys." + keys));
 			if (h.cannons.length > 0) {
 				line.append(dot).append(Component.translatable("ship.jaymoskingdoms.keys.broadside"));
@@ -673,6 +752,9 @@ public final class Ship extends Entity {
 		}
 		if (h.sails > 0) {
 			line.append(Component.translatable("ship.jaymoskingdoms.hud.sails", Mth.floor(this.sail * 100.0))).append(dot);
+		}
+		if (this.flying()) {
+			line.append(Component.translatable("ship.jaymoskingdoms.hud.height", Mth.floor(this.getY()))).append(dot);
 		}
 		if (row != 0) {
 			line.append(Component.translatable(row > 0 ? "ship.jaymoskingdoms.hud.rowing" : "ship.jaymoskingdoms.hud.backing")).append(dot);
@@ -692,6 +774,17 @@ public final class Ship extends Entity {
 		for (double z : new double[] {0.0, h.minZ + 0.5, h.maxZ - 0.5}) {
 			Vec3 w = this.toWorld(0.0, 0.0, z);
 			surface = Math.max(surface, surface(level, w.x, at.y + h.draft + 3.0, w.z));
+		}
+		if (this.flying()) {
+			// a balloon: toward the height she's making for, and onto the water if that's under it
+			if (surface != Double.NEGATIVE_INFINITY) {
+				double afloat = h.floats ? surface - h.draft - h.minY : surface - h.minY;
+				if (this.aloft <= afloat) {
+					this.aloft = h.floats ? Double.NaN : afloat;
+					return at.y + Mth.clamp((afloat - at.y) * SETTLE, -CLIMB, CLIMB);
+				}
+			}
+			return at.y + Mth.clamp((this.aloft - at.y) * SETTLE, -CLIMB, CLIMB);
 		}
 		if (surface == Double.NEGATIVE_INFINITY) {
 			return at.y;
@@ -1584,7 +1677,9 @@ public final class Ship extends Entity {
 		this.setAttached(PIECES, List.copyOf(left));
 		Hull now = this.hull();
 		// holed at the waterline, her hold floods and she founders (and so does one too heavy to float at all)
-		if (now != null && (!now.floats || dryBefore > 0 && dryBelowWaterline(now) * 2 < dryBefore) && this.sinking == 0) {
+		// (a balloon in the air comes down once too much of her cloth is shot away to carry her)
+		boolean lost = now != null && (this.flying() ? !now.airworthy : !now.floats || dryBefore > 0 && dryBelowWaterline(now) * 2 < dryBefore);
+		if (lost && this.sinking == 0) {
 			this.sinking = 1;
 			this.entityData.set(FOUNDERING, true);
 			// (0.7.42) her crew go down with her
@@ -1619,15 +1714,21 @@ public final class Ship extends Entity {
 		Vec3 from = this.position();
 		float yaw = this.getYRot();
 		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
-		Vec3 to = from.add(ahead.x, -SINK, ahead.z);
-		if (this.sinking > SINKING_MOST || this.strikes(level, h, to, yaw, 0)) {
+		boolean air = this.flying();
+		Vec3 to = from.add(ahead.x, air ? -Math.min(FALL, this.sinking * FALL_GATHER) : -SINK, ahead.z);
+		if (air && to.y < level.getMinY()) {
+			// out of the bottom of the sky
+			this.discard();
+			return;
+		}
+		if (!air && this.sinking > SINKING_MOST || this.strikes(level, h, to, yaw, 0)) {
 			this.wreck(level, h);
 			return;
 		}
 		this.setPos(to);
 		this.carry(level, h, from, yaw);
 		this.shine(level, h);
-		if (this.sinking % 3 == 0) {
+		if (!air && this.sinking % 3 == 0) {
 			Vec3 at = this.toWorld((this.random.nextFloat() - 0.5) * (h.maxX - h.minX), h.draft, (this.random.nextFloat() - 0.5) * (h.maxZ - h.minZ));
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, at.x, at.y, at.z, 6, 0.4, 0.2, 0.4, 0.05);
 		}
@@ -1831,6 +1932,7 @@ public final class Ship extends Entity {
 		this.sail = input.getDoubleOr("Sail", 0.0);
 		this.crew = input.read("Crew", Crew.CODEC).orElse(null);
 		this.sinking = input.getIntOr("Sinking", 0);
+		this.aloft = input.getDoubleOr("Aloft", Double.NaN);
 		this.lit.clear();
 		for (long key : input.read("Lit", com.mojang.serialization.Codec.LONG.listOf()).orElse(List.of())) {
 			// level 0 matches no light it has: the first shine takes it up
@@ -1877,6 +1979,9 @@ public final class Ship extends Entity {
 			output.store("Crew", Crew.CODEC, this.crew);
 		}
 		output.putInt("Sinking", this.sinking);
+		if (this.flying()) {
+			output.putDouble("Aloft", this.aloft);
+		}
 		// (0.7.28) where its lights are, so a reload takes up any the save caught in the world
 		output.store("Lit", com.mojang.serialization.Codec.LONG.listOf(), List.copyOf(this.lit.keySet()));
 	}
