@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · running
 
 
 ## In review
@@ -28,6 +27,7 @@ kanban-plugin: board
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-costumed-folk|claude-cloud-costumed-folk]] · 💻 Odysseus · #1332 · in-review
 - [ ] [[Agents/claude-cloud-frostborn-troopers|claude-cloud-frostborn-troopers]] · 💻 Odysseus · #1335 · in-review
+- [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 
 
 ## Needs Andy
