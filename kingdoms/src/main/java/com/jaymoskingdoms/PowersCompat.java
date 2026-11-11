@@ -1686,7 +1686,7 @@ public final class PowersCompat {
 
 	// ---- costumed gifted: Powers' core/gifted/GiftedCostume (a villager's own costume, CostumedFolk) -------------------
 
-	private static java.lang.invoke.@Nullable MethodHandle costumeDress, costumeSuit, costumeSuited;
+	private static java.lang.invoke.@Nullable MethodHandle costumeDress, costumeSuit, costumeSuited, costumeName;
 	private static boolean lookedForCostumes;
 
 	private static void lookForCostumes() {
@@ -1701,6 +1701,7 @@ public final class PowersCompat {
 			costumeDress = lookup.findStatic(costumes, "dress", java.lang.invoke.MethodType.methodType(boolean.class, entity, boolean.class));
 			costumeSuit = lookup.findStatic(costumes, "suit", java.lang.invoke.MethodType.methodType(boolean.class, entity, boolean.class));
 			costumeSuited = lookup.findStatic(costumes, "suited", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			costumeName = lookup.findStatic(costumes, "name", java.lang.invoke.MethodType.methodType(String.class, entity));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			costumeDress = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no costumes for gifted villagers (older Powers?)", e);
@@ -1724,6 +1725,16 @@ public final class PowersCompat {
 			return costumeDress != null && (boolean)costumeSuit.invoke(entity, on);
 		} catch (Throwable e) {
 			return false;
+		}
+	}
+
+	/** The name of gifted {@code entity}'s own costume ("the Gale"...), or null without one. Either side. */
+	public static @Nullable String costumeName(net.minecraft.world.entity.Entity entity) {
+		lookForCostumes();
+		try {
+			return costumeDress == null ? null : (String)costumeName.invoke(entity);
+		} catch (Throwable e) {
+			return null;
 		}
 	}
 
