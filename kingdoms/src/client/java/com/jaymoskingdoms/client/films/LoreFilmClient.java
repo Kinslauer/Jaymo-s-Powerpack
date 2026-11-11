@@ -124,6 +124,19 @@ public final class LoreFilmClient {
 	/** The forest: how far it reaches behind, ahead and aside, how many trees, how far apart, and how near one a fighter can stand. */
 	static final double FOREST_BACK = -16.0, FOREST_FRONT = 70.0, FOREST_HALF = 40.0, TREE_GAP = 4.6, TREE_BODY = 0.8;
 	static final int TREES = 76;
+	/**
+	 * The forest burns. Andy: "the trees should also catch fire over the course of the battle and be in a blaze by the end,
+	 * the surviving warriors rushing to put it out after the threat retreats". Lightning lights the trees within
+	 * STRIKE_LIGHTS of where it lands, and a bolt of mana the tree it hits ({@link #igniteNear}: whatever else throws fire
+	 * calls that too). A tree is full ablaze BURN_TICKS after it catches, and from half ablaze it lights another within
+	 * SPREAD_REACH about every SPREAD_EVERY ticks (from SPREADS_FROM ablaze); every EMBER_EVERY ticks the wind carries an ember
+	 * from one burning tree to another within EMBER_REACH, so the whole forest is alight before the end. DOUSE_AFTER ticks after the sorcerer is gone, each defender still
+	 * standing runs (DOUSE_RUN) to the nearest burning tree, no more than DOUSE_CREW to a tree, and beats it out: one man
+	 * puts a full blaze out in DOUSE_TICKS, so by the film's end they have beaten a few down and the rest still burn.
+	 */
+	static final int BURN_TICKS = 110, SPREAD_EVERY = 60, EMBER_EVERY = 20, FLAMES = 4, DOUSE_AFTER = 18, DOUSE_TICKS = 160, DOUSE_CREW = 2, DOUSE_SWING = 9;
+	static final double STRIKE_LIGHTS = 7.0, SPREAD_REACH = 9.0, EMBER_REACH = 18.0, SPREADS_FROM = 0.35, DOUSE_RUN = 0.3, DOUSE_STAND = 1.5;
+	static final float FLAME_FOOT = 1.3F, FLAME_CROWN = 2.8F;
 	/** The road to the Keep: kept clear of trees this far either side of the middle, up to where the woods close over it. */
 	static final double ROAD_HALF = 3.6, ROAD_END = 36.0;
 	/** The Keep: how far behind you its wall stands, and how far above the ground its foot is. */
@@ -263,6 +276,8 @@ public final class LoreFilmClient {
 		float flip, flipO;
 		/** 0 the defenders, 1 the sorcerer's. */
 		int team;
+		/** The burning tree it has gone to beat out. */
+		@Nullable Fire dousing;
 		/** Left to its own script (the battle doesn't move it). */
 		boolean scripted;
 		@Nullable Actor foe, facing;
@@ -353,6 +368,20 @@ public final class LoreFilmClient {
 		}
 	}
 
+	/** A tree on fire: its flames (one at its foot, the rest in its crown), how far ablaze it is, and who is beating it out. */
+	static final class Fire {
+		final double[] tree;
+		final Display.BlockDisplay[] flames = new Display.BlockDisplay[FLAMES];
+		final Vec3[] at = new Vec3[FLAMES];
+		double burn = 0.05;
+		int crew, helpers;
+		boolean out;
+
+		Fire(double[] tree) {
+			this.tree = tree;
+		}
+	}
+
 	/** A film playing: the stage (where you stood, which way you faced), how far in, its actors and its set. */
 	static final class Film {
 		final ClientLevel level;
@@ -370,12 +399,15 @@ public final class LoreFilmClient {
 		final Map<LivingEntity, Integer> orcs = new IdentityHashMap<>();
 		/** The set and everything else that isn't an actor: trees, the Keep, lightning, what's sent flying. */
 		final List<Entity> props = new ArrayList<>();
-		/** The trees' trunks ({f, s}), and the ones the fifth turns at. */
+		/** The trees ({f, s, where the crown starts, where it tops out, how far out it reaches}), and the ones the fifth turns at. */
 		final List<double[]> trees = new ArrayList<>(), dartTrees = new ArrayList<>();
 		final List<Finish> finishes = new ArrayList<>();
 		final List<Rise> rises = new ArrayList<>();
 		final List<Gib> gibs = new ArrayList<>();
 		final List<Mana> mana = new ArrayList<>();
+		/** The trees on fire, in the order they caught. */
+		final List<Fire> fires = new ArrayList<>();
+		final Map<double[], Fire> fireOf = new IdentityHashMap<>();
 		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer, marked;
 		@Nullable Gib axe;
 		/** The fifth's cloak: its strips' links and where each link's end is; its tethers out now. */
@@ -809,9 +841,9 @@ public final class LoreFilmClient {
 
 	/** A tree at {@code (tf, ts)}: a spruce (a tall trunk, three tiers of needles) or an oak (two of leaves). */
 	private static void tree(Film f, double tf, double ts, boolean spruce) {
-		f.trees.add(new double[] {tf, ts});
 		double y = f.at(tf, ts, 0.0).y;
 		float tall = 7.0F + f.rnd.nextFloat() * 4.0F, girth = 0.8F + f.rnd.nextFloat() * 0.25F;
+		f.trees.add(spruce ? new double[] {tf, ts, tall - 3.2, tall + 2.8, 2.2} : new double[] {tf, ts, tall - 2.9, tall + 1.5, 2.6});
 		if (spruce) {
 			box(f, Blocks.SPRUCE_LOG, tf, ts, y, girth, tall, girth, null);
 			box(f, Blocks.SPRUCE_LEAVES, tf, ts, y + tall - 3.2, 4.4F, 2.0F, 4.4F, null);
@@ -909,6 +941,8 @@ public final class LoreFilmClient {
 		int t = f.tick;
 		beats(f, t);
 		battle(f, t);
+		douse(f, t);
+		fire(f, t);
 		for (Iterator<Finish> it = f.finishes.iterator(); it.hasNext(); ) {
 			if (finish(f, it.next(), t)) {
 				it.remove();
@@ -1015,6 +1049,7 @@ public final class LoreFilmClient {
 		f.level.addEntity(bolt);
 		f.props.add(bolt);
 		f.flash = Math.max(f.flash, 0.55F);
+		igniteNear(f, fwd, side, STRIKE_LIGHTS);
 	}
 
 	/** The mage casting {@code which} (0 Varro, 1 Thessaly, 2 Grimsby, 3 Ambrose). */
@@ -1597,6 +1632,166 @@ public final class LoreFilmClient {
 
 	// ---- the battle ---------------------------------------------------------------------------------------------------------
 
+	/** Fire lands at {@code (fwd, side)}: every tree within {@code reach} catches, or the nearest one within twice that. */
+	private static void igniteNear(Film f, double fwd, double side, double reach) {
+		double[] nearest = null;
+		double near = reach * 2.0;
+		boolean any = false;
+		for (double[] tree : f.trees) {
+			double d = distance(tree[0], tree[1], fwd, side);
+			if (d < reach) {
+				ignite(f, tree);
+				any = true;
+			} else if (d < near && !f.fireOf.containsKey(tree)) {
+				near = d;
+				nearest = tree;
+			}
+		}
+		if (!any && nearest != null) {
+			ignite(f, nearest);
+		}
+	}
+
+	private static void ignite(Film f, double[] tree) {
+		if (f.fireOf.containsKey(tree)) {
+			return;
+		}
+		Fire fire = new Fire(tree);
+		for (int i = 0; i < FLAMES; i++) {
+			double out = i == 0 ? 0.7 : tree[4] * 0.7;
+			fire.at[i] = f.at(tree[0] + spread(f, out), tree[1] + spread(f, out), i == 0 ? 0.0 : tree[2] + f.rnd.nextDouble() * (tree[3] - tree[2]));
+			Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
+			e.setBlockState(Blocks.FIRE.defaultBlockState());
+			e.setViewRange(SET_VIEW_RANGE);
+			e.setBrightnessOverride(Brightness.FULL_BRIGHT);
+			e.setTransformation(new Transformation(new Vector3f(), null, new Vector3f(0.0F), null));
+			e.setId(nextId--);
+			e.snapTo(fire.at[i].x, fire.at[i].y, fire.at[i].z, f.yaw + i * 45.0F, 0.0F);
+			f.level.addEntity(e);
+			f.props.add(e);
+			fire.flames[i] = e;
+		}
+		f.fires.add(fire);
+		f.fireOf.put(tree, fire);
+	}
+
+	/** The fire, each tick: every burning tree burns up (or down, under the men at it), throws flame and smoke, and lights its neighbours. */
+	private static void fire(Film f, int t) {
+		int live = 0;
+		for (int n = 0, count = f.fires.size(); n < count; n++) {
+			Fire fire = f.fires.get(n);
+			if (fire.out) {
+				continue;
+			}
+			double[] tree = fire.tree;
+			Vec3 foot = f.at(tree[0], tree[1], 0.0);
+			fire.burn = fire.helpers > 0 ? fire.burn - fire.helpers / (double)DOUSE_TICKS : Math.min(1.0, fire.burn + 1.0 / BURN_TICKS);
+			if (fire.helpers > 0) {
+				for (int i = 0; i < 3; i++) {
+					particle(f, ParticleTypes.CLOUD, foot.add(spread(f, 1.0), 0.3 + f.rnd.nextDouble() * 2.0, spread(f, 1.0)), 0.0, 0.05, 0.0);
+				}
+			}
+			fire.helpers = 0;
+			if (fire.burn <= 0.0) {
+				fire.out = true;
+				sound(SoundEvents.FIRE_EXTINGUISH, 0.9F + f.rnd.nextFloat() * 0.3F, 0.5F);
+				for (Display.BlockDisplay flame : fire.flames) {
+					f.level.removeEntity(flame.getId(), Entity.RemovalReason.DISCARDED);
+				}
+				for (int i = 0; i < 14; i++) {
+					particle(f, ParticleTypes.LARGE_SMOKE, foot.add(spread(f, tree[4]), f.rnd.nextDouble() * tree[3], spread(f, tree[4])), 0.0, 0.06, 0.0);
+				}
+				continue;
+			}
+			live++;
+			if ((t + n) % 3 == 0) {
+				for (int i = 0; i < FLAMES; i++) {
+					float size = (i == 0 ? FLAME_FOOT : FLAME_CROWN) * (float)(0.25 + 0.75 * fire.burn) * (0.9F + 0.2F * f.rnd.nextFloat());
+					fire.flames[i].setTransformationInterpolationDuration(3);
+					fire.flames[i].setTransformationInterpolationDelay(0);
+					fire.flames[i].setTransformation(new Transformation(new Vector3f(-size / 2.0F, 0.0F, -size / 2.0F), null, new Vector3f(size, size * 1.25F, size), null));
+				}
+			}
+			for (int i = 0, flames = 1 + (int)(fire.burn * 3.0); i < flames; i++) {
+				Vec3 at = fire.at[f.rnd.nextInt(FLAMES)];
+				particle(f, ParticleTypes.FLAME, at.add(spread(f, 1.2), f.rnd.nextDouble() * 2.0, spread(f, 1.2)), spread(f, 0.02), 0.04 + f.rnd.nextDouble() * 0.08, spread(f, 0.02));
+			}
+			if ((t + n) % 2 == 0) {
+				particle(f, f.rnd.nextInt(4) == 0 ? ParticleTypes.CAMPFIRE_COSY_SMOKE : ParticleTypes.LARGE_SMOKE,
+					foot.add(spread(f, tree[4] * 0.6), tree[3] + f.rnd.nextDouble(), spread(f, tree[4] * 0.6)), spread(f, 0.02), 0.07, spread(f, 0.02));
+			}
+			if (f.rnd.nextInt(14) == 0) {
+				particle(f, ParticleTypes.LAVA, fire.at[1 + f.rnd.nextInt(FLAMES - 1)], 0.0, 0.0, 0.0);
+			}
+			if (fire.burn > SPREADS_FROM && f.rnd.nextInt(SPREAD_EVERY) == 0) {
+				spreadFrom(f, tree, SPREAD_REACH);
+			}
+		}
+		if (live > 0 && t % EMBER_EVERY == 0 && f.lungeAt < 0) {
+			Fire from = f.fires.get(f.rnd.nextInt(f.fires.size()));
+			if (!from.out) {
+				spreadFrom(f, from.tree, EMBER_REACH);
+			}
+		}
+		if (live > 0 && t % 24 == 0) {
+			sound(SoundEvents.FIRE_AMBIENT, 0.8F + f.rnd.nextFloat() * 0.4F, Math.min(0.9F, 0.15F + live * 0.02F));
+		}
+	}
+
+	/** One tree not yet alight within {@code reach} of {@code tree} catches from it. */
+	private static void spreadFrom(Film f, double[] tree, double reach) {
+		List<double[]> near = new ArrayList<>();
+		for (double[] other : f.trees) {
+			if (!f.fireOf.containsKey(other) && distance(other[0], other[1], tree[0], tree[1]) < reach) {
+				near.add(other);
+			}
+		}
+		if (!near.isEmpty()) {
+			ignite(f, near.get(f.rnd.nextInt(near.size())));
+		}
+	}
+
+	/** Once the sorcerer is gone and his host with him: the defenders still standing run for the burning trees and beat at them. */
+	private static void douse(Film f, int t) {
+		if (f.lungeAt < 0 || t < f.lungeAt + DOUSE_AFTER) {
+			return;
+		}
+		for (Actor a : f.soldiers) {
+			if (!a.up() || a.scripted || t < a.busyUntil) {
+				continue;
+			}
+			Fire fire = a.dousing;
+			if (fire == null || fire.out) {
+				fire = null;
+				double nearest = 200.0;
+				for (Fire other : f.fires) {
+					double d = distance(other.tree[0], other.tree[1], a.f, a.s);
+					if (!other.out && other.crew < DOUSE_CREW && d < nearest) {
+						nearest = d;
+						fire = other;
+					}
+				}
+				a.dousing = fire;
+				if (fire == null) {
+					continue;
+				}
+				fire.crew++;
+			}
+			a.foe = null;
+			a.speed = DOUSE_RUN;
+			double df = a.f - fire.tree[0], ds = a.s - fire.tree[1], d = Math.max(0.01, Math.sqrt(df * df + ds * ds));
+			a.toF = fire.tree[0] + df / d * DOUSE_STAND;
+			a.toS = fire.tree[1] + ds / d * DOUSE_STAND;
+			if (d < DOUSE_STAND + 0.5) {
+				fire.helpers++;
+				if (t >= a.nextSwing) {
+					swing(a);
+					a.nextSwing = t + DOUSE_SWING;
+				}
+			}
+		}
+	}
+
 	/**
 	 * The fight, the whole film through: everyone standing finds a foe, closes with it and trades blows; now and then one
 	 * pair's fight ends in a finisher. The defenders hold their ground and meet what comes; the host and the dead go
@@ -1904,6 +2099,10 @@ public final class LoreFilmClient {
 			if (--m.left <= 0) {
 				it.remove();
 				sound(m.tree ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.FIRECHARGE_USE, m.tree ? 1.4F : 0.6F, 0.45F);
+				if (m.tree) {
+					Vec3 hit = m.at.subtract(f.origin);
+					igniteNear(f, hit.x * f.fwd.x + hit.z * f.fwd.z, hit.x * f.right.x + hit.z * f.right.z, 1.5);
+				}
 				for (int i = 0; i < 16; i++) {
 					particle(f, ParticleTypes.WITCH, m.at.add(spread(f, 0.4), spread(f, 0.4), spread(f, 0.4)), spread(f, 0.15), f.rnd.nextDouble() * 0.2, spread(f, 0.15));
 					if (m.tree) {
