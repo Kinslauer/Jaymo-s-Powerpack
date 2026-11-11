@@ -110,6 +110,21 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
   now (the world's other band).
 - A story beat (open question 8): bringing the hunter's orders to the elder, to show the ruler broke the elder's word.
 
+## Track 5: the seat (later, after Tracks 1-3)
+
+Andy (2026-11-11): "if he is given the band and killed, the new wearer can take the seat, becoming the king, and opening
+intergalactic trade and warfare. The Oscellans had it figured out before."
+
+- Kill the ruler while he wears the band (the hand-over fight, Track 3) and the one who picks the band up may sit in
+  his seat in the court: they become the Galvan's king (or queen), and the city takes them as its ruler.
+- Only then does the city open to the worlds: **intergalactic trade and warfare**. While the Galvan ruler holds the
+  seat the city stays shut (no war or trade with kingdoms, Track 2); a player king opens it.
+- What that opens is not designed yet (open question 11). A first idea: the king's pods fly Galvan goods to the far
+  worlds and the Overworld kingdoms and bring trade back; the king can send Galvan guards against a far world's
+  captains (it counts toward freeing or conquering it, `ZFighterSpaceMissions`) or against a realm.
+- The **Oscellans** "had it figured out before": a people who once held this kind of power between the worlds. They
+  are not in Lore.md yet (open question 12).
+
 ## Track 4: art (Prometheus / 3D modeller)
 
 - The elder: a Galvan with a longer, darker robe, a staff or tools at the belt, two monocles or a lens rig.
@@ -120,7 +135,7 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 ## Order
 
 Two tracks at a time (CLAUDE.md). First **Track 1** (small, Powers only) with **Track 4** (art, can start on the elder
-and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3**, which needs the city's court.
+and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3**, which needs the city's court, then **Track 5**.
 
 ---
 
@@ -133,10 +148,13 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 5. ~~Kingdom or town~~ Answered: a city with a ruler and court; no war or trading with other kingdoms.
 6. ~~The elder's upgrades~~ Answered: all upgrades require a trip to him (Track 3, the elder).
 7. ~~The ruler's ask~~ Answered: yes; he puts it on, becomes a boss and turns on you (Track 3, the ruler).
-8. **Ending:** should there be a way to bring the ruler down (with the elder's help, or the Patrol's), or does he stay
-   on his seat?
+8. ~~Ending~~ Answered: whoever kills the ruler while he wears the band can take his seat (Track 5).
 9. **Names:** the elder's and the ruler's names, and the city's. ("Galvan" is your working name; no line in the game
    says it yet.)
 10. **Size:** how big a city? Recommended: about 150 blocks across, towers up to 60-80 blocks, in a hollow whose
     false sky sits just above the tallest tower (the moon's build height allows it). Bigger is grander but slower to
     generate.
+11. **Intergalactic trade and warfare:** what should a player king be able to do? Trade with which worlds and
+    kingdoms, and war against whom (far world captains, Overworld realms, the raiders, the Patrol)?
+12. **The Oscellans:** who were they? Another people of the Pale Moon or a far world, the Galvan's old rulers, or the
+    band's first wearers? Where are they now?
