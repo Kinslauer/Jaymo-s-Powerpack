@@ -199,3 +199,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-11 (Andy): imps open rifts like Arsenal's to travel; in The Long Defence film they enter the overworld through them. Film change handed to the GeckoLib film thread.
 - 2026-11-11 17:30 UTC (story thread, built in the film thread, PR #1290): Andy: "The imps can also open portals like the arsenal uses to travel through, that should be how they make their entrance to the overworld in the long defence scene". Each film imp comes out of its own rift over the field in the opening shot (a pane of nether-portal light with a pale rim; Kingdoms can't draw Powers' RiftPortals).
+- 2026-11-11 12:31 PM (Andy, PC Claude): "make those changes to the models": hermes-modeller now falls back to free NVIDIA nemotron-3.5-super-vl, then Gemini, then Groq, before its Ollama models (Ollama is at its monthly limit). See Logs/hermes-stall.md.

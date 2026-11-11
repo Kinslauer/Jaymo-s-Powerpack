@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 05:25
+updated: 2026-11-11 12:42
 ---
 # Open PRs
 
-8 open, as of 2026-11-11 05:25. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-11 12:42. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -16,21 +16,6 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** [[water-belly-flop-damage]]
 
-## [#1268](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1268) The Long Defence: the sorcerer's host, Grimsby's spells, and a text pass
-- **Branch:** `claude/project-thread-0nu9tv` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** [[long-defence-text-pass]]
-
-## [#1272](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1272) CLAUDE.md: every new addition must fit the lore canon
-- **Branch:** `claude/project-thread-c2juvk` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1276](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1276) Wind: Spiral Dive (tap X in the air, looking steeply down)
-- **Branch:** `jung/wind-spiral-dive` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
 ## [#1277](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1277) Wind: airflow sense (streaks round the crosshair for what moves nearby)
 - **Branch:** `jung/wind-air-sense` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
@@ -41,7 +26,32 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1283](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1283) read aloud: detect davey 0.2 + discord.py 2.7.1 (the silent-voice cause)
-- **Branch:** `claude/project-thread-iwe61z` · **Updated:** 2026-11-11 (today)
+## [#1290](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1290) The Long Defence: heroes in pairs and in full frame, grimy mixed armour, Grimsby the Sylvan elf
+- **Branch:** `claude/project-thread-9yvqn9` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1293](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1293) Boxing: Hand Wraps and the punch (Jung, part 1)
+- **Branch:** `jung/boxing-gear-punches` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1294](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1294) Boxing: the cestus and the bracers (Jung, part 2, stacked on #1293)
+- **Branch:** `jung/boxing-cestus-bracers` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1295](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1295) Boxing: evades, strong attacks, blur and the combo breaker (Jung, part 3, stacked on #1294)
+- **Branch:** `jung/boxing-evades` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1298](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1298) Vault: cloud VMs leave Hermes claims alone
+- **Branch:** `claude/project-thread-qp0izy` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1302](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1302) The Retaking, Act IV: The Dark Below
+- **Branch:** `claude/project-thread-lrvits` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
