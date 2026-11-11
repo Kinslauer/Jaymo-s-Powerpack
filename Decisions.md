@@ -268,3 +268,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-11 (future-three-sided-war, PR #1335): Frostborn troopers in the future are hostile to everyone, players included (Andy, decision card).
 - 2026-11-11: Andy approved and merged PR #1333 (elemental powers: weakest ki aura, blind to mana and spirits) and its Lore.md paragraph "What an elemental user sees".
+- 2026-11-11: Andy approved the four Flame Avatar/Smoke lore paragraphs (skull under the fire, burning chain, Judgement, burning steeds); (new) markers removed.
