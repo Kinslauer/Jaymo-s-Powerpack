@@ -218,3 +218,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 2:11 PM: Andy chose all four Hermes stall fixes (10 min build limit for fixer/a/b, push check before in-review, rescue #1263 commits, Quill fallbacks). Steps: 'Fix Hermes stalls.md'.
 - 2026-11-11 2:30 PM (Andy, PC Claude): "make NVIDIA Super quill's primary and delete the stray branch": Quill's primary is now NVIDIA nemotron-3.5-super-vl-120b-a12b (Fable's free tier ended), falling back to Gemini, Groq, then NVIDIA ultra. The stray local branch origin/master (e35a3eb27) in the voice-pilot repo behind E:/wt is deleted, so pr_checks.py there compares against the real master.
 - 2026-11-11 19:40 UTC (film thread, PR #1315): Andy chose "At the real ford and keep" for the Second Defence closing film (over laying the Long Defence set there, or skipping it). Built that way.
+
+- 2026-11-11 (Andy, Retaking roads): the elder on the Pale Moon meant the band to be given away; the ruler sent the band hunter against that. The Web/Xeno/Arsenal road books are all correct.

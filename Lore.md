@@ -495,7 +495,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
-it home, do not come home". Andy to confirm: this hints that the elder meant the band to be given away.
+it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
 ## The future: Los Perrito
 
