@@ -972,16 +972,23 @@ GREMLIN_FOOT = (0, 32, 3, 1, 4)
 
 
 def gremlin():
-    """A tiny grey bug-eyed imp that stands upright: a mottled, warty hide with a pale belly, thin arms and legs with
-    black claws, broad pale feet, and a wide flat head with a thin toothy mouth and two great eyes that bulge out past
-    the sides of it, yellow-green with a slit pupil lying on its side. The eyes shine in the dark: their lit pixels are
-    saved again as xenoform_gremlin_glow (drawn fullbright). The insignia is on its chest. Boxes: head 8x7x6 at (0,0),
-    eye 4x4x3 at (32,0), jaw 6x1x5 at (32,8), body 5x7x3 at (16,16), arm 2x7x2 at (40,16), leg 2x6x2 at (0,16), foot
-    3x1x4 at (0,32); the left limbs and eye mirror the right's. Seeded by itself, so `gremlin()` alone and a full run
-    paint the same skin."""
-    rng.seed("gremlin")
+    """A tiny grey bug-eyed imp that stands upright (gremlin_paint); its eyes' lit pixels are saved again as
+    xenoform_gremlin_glow (drawn fullbright)."""
     img = new_skin()
     glow = new_skin()
+    gremlin_paint(img, glow)
+    save(img, "entity/xenoform_gremlin.png")
+    save(glow, "entity/xenoform_gremlin_glow.png")
+
+
+def gremlin_paint(img, glow):
+    """Gremlin's skin onto `img` and its eyes' lit pixels onto `glow`: a mottled grey hide with a pale belly, thin arms
+    and legs with black claws, broad pale feet, and a wide flat head with a thin toothy mouth and two great eyes that
+    bulge out past the sides of it, yellow-green with a slit pupil lying on its side. The insignia is on its chest.
+    Boxes: head 8x7x6 at (0,0), eye 4x4x3 at (32,0), jaw 6x1x5 at (32,8), body 5x7x3 at (16,16), arm 2x7x2 at (40,16),
+    leg 2x6x2 at (0,16), foot 3x1x4 at (0,32); the left limbs and eye mirror the right's. Seeded by itself, so it paints
+    the same skin alone or in a full run. Kingdoms' Galvan (kingdoms/tools/gen_galvan.py) are painted over this."""
+    rng.seed("gremlin")
     grey = (118, 120, 126)
     belly = (168, 166, 164)
     pale = (150, 152, 150)
@@ -1060,8 +1067,6 @@ def gremlin():
                 px = img.getpixel((x, y))
                 if px != pupil:
                     glow.putpixel((x, y), px)
-    save(img, "entity/xenoform_gremlin.png")
-    save(glow, "entity/xenoform_gremlin_glow.png")
 
 
 def knell():

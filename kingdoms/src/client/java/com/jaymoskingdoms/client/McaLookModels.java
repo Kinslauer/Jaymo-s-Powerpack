@@ -146,6 +146,15 @@ final class McaLookModels {
 		return model;
 	}
 
+	/** A Galvan has no chest of a woman's ({@link GalvanBody#apply}): MCA's extra parts for one, shrunk to nothing. */
+	static void hideChest(HumanoidModel<?> model) {
+		if (model instanceof CommonVillagerModel<?> villager) {
+			for (net.minecraft.client.model.geom.ModelPart part : villager.getBreastParts()) {
+				GalvanBody.hide(part);
+			}
+		}
+	}
+
 	/**
 	 * (0.7.321) A goblin's breasts ({@link GoblinBody#apply}): MCA poses them as parts of their own off a man's chest
 	 * (each time, from its own dimensions); they go onto the goblin's, scaled with its body and leant into its hunch.

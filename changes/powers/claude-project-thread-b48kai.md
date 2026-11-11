@@ -9,5 +9,6 @@
 - Its moves, size (a third of a player, fits one-block gaps) and health are unchanged. Swarm, its Ultimate, keeps its
   hunched plated build.
 - `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
-  `tools/gen_xenoform.py` (`gremlin()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+  `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+- The Gremlin is the shape of the Galvan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
 - Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.

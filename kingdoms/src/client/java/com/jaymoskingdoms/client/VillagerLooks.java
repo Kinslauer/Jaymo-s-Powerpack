@@ -69,6 +69,7 @@ public final class VillagerLooks {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (!(renderer instanceof AvatarRenderer<?>) && renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(create(renderer));
+				helper.register(galvan(renderer));
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(VillagerLooks::tick);
@@ -79,8 +80,19 @@ public final class VillagerLooks {
 		return new Layer((RenderLayerParent) renderer);
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static GalvanBody.Layer<?> galvan(RenderLayerParent<?, ?> renderer) {
+		return new GalvanBody.Layer((RenderLayerParent) renderer);
+	}
+
 	/** From the living renderer's extractRenderState: a villager's heritage look (nothing for players or plain Heartlanders). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		if (GalvanBody.extract(entity, state)) {
+			// one of the band's makers: drawn whole by GalvanBody, with no look of a blood on it
+			state.setData(GreenskinLooks.KEY, null);
+			state.setData(KEY, null);
+			return;
+		}
 		if (GreenskinLooks.extract(entity, state)) {
 			// (0.7.292) a goblin or an orc: its look is GreenskinLooks'
 			state.setData(KEY, null);

@@ -91,6 +91,13 @@ public final class ZFighterFolk {
 	public static final AttachmentType<String> PART = AttachmentRegistry.create(JaymosKingdoms.id("zfighter_part"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
+	/**
+	 * The parts played by Galvan, the small bug-eyed people of the Pale Moon who made the Xeno-Band: drawn as one
+	 * ({@code GalvanBody}) and made this small against a man ({@link #step}).
+	 */
+	public static final Set<String> GALVAN = Set.of("star_smith");
+	static final double GALVAN_SCALE = 0.4;
+
 	/** A town's (or a camp's) Z Fighter masters: their own villagers, picked by Powers. */
 	static final Set<String> MASTERS = Set.of("jaymospowers_master", "jaymospowers_dark_master");
 
@@ -157,6 +164,12 @@ public final class ZFighterFolk {
 		String kind = kind(mob);
 		if (kind != null && !kind.equals(mob.getAttached(PART))) {
 			mob.setAttached(PART, kind);
+		}
+		if (kind != null && GALVAN.contains(kind)) {
+			net.minecraft.world.entity.ai.attributes.AttributeInstance scale = mob.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+			if (scale != null && scale.getBaseValue() != GALVAN_SCALE) {
+				scale.setBaseValue(GALVAN_SCALE);
+			}
 		}
 		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG) || mob.entityTags().contains(HUNTER_TAG)
 			|| mob.entityTags().contains(HUNTER_FLED_TAG)) {
