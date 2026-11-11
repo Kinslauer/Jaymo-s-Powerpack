@@ -114,6 +114,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
 		Retaking.register();
+		// the field of The Long Defence: the keep above the ford (Act II of the Retaking)
+		Ford.register();
 		// (0.7.580) mice that raid pantries, chased by cats
 		Mice.register();
 		Commissions.register();

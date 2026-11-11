@@ -66,13 +66,14 @@ public final class Retaking {
 
 	/**
 	 * Every milestone, act by act, the king that closes each act last. Later acts gain theirs as they are built
-	 * (the ford, the far worlds, the dark below, the Second Defence).
+	 * (the far worlds, the dark below, the Second Defence). The ford is {@link Ford}'s.
 	 */
 	public static final List<Milestone> MILESTONES = List.of(
 		new Milestone("story", Act.HEARTH), new Milestone("awakened", Act.HEARTH), new Milestone("first_rank", Act.HEARTH),
 		new Milestone("sworn", Act.HEARTH), new Milestone("errands", Act.HEARTH), new Milestone("long_defence", Act.HEARTH),
 		new Milestone("goblin_king", Act.HEARTH),
 		new Milestone("monolith", Act.OLD_STONES), new Milestone("giant", Act.OLD_STONES), new Milestone("aether", Act.OLD_STONES),
+		new Milestone("ford", Act.OLD_STONES),
 		new Milestone("giant_two", Act.OLD_STONES), new Milestone("giant_all", Act.OLD_STONES), new Milestone("ogre_king", Act.OLD_STONES),
 		new Milestone("skeleton_lord", Act.LIGHTS),
 		new Milestone("piglin_king", Act.DARK_BELOW),
