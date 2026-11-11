@@ -166,6 +166,8 @@ public final class FlameAvatar {
 			AvatarMoves.clear();
 		});
 		AvatarMoves.init();
+		AvatarJudgement.init();
+		BurningSteed.init();
 	}
 
 	/** Whether {@code player} is a Flame Avatar now (either side): consumed, and still of Emberborn blood. */

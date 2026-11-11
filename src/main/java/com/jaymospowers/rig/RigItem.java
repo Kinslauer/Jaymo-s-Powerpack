@@ -23,6 +23,9 @@ public class RigItem extends Item {
 		String base = "tooltip.jaymospowers.rig." + this.piece.id();
 		builder.accept(Component.translatable(base + ".passive").withStyle(ChatFormatting.GRAY));
 		builder.accept(Component.translatable(base + ".set").withStyle(ChatFormatting.DARK_AQUA));
+		RigFrame frame = RigFrame.of(stack);
+		builder.accept(Component.translatable("tooltip.jaymospowers.rig.frame", Component.translatable("rig.jaymospowers.frame." + frame.id()))
+			.withStyle(ChatFormatting.DARK_AQUA));
 		if (this.piece == Rig.Piece.CORE) {
 			int charge = stack.getOrDefault(Rig.CHARGE, 0);
 			builder.accept(Component.translatable("tooltip.jaymospowers.rig.charge", Math.round(charge * 100.0F / Rig.MAX_CHARGE))

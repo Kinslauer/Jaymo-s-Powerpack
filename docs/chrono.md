@@ -583,3 +583,20 @@ show from both sides, and that the lean doesn't clip the feet into the ground.
   table chime under the bell.
 - Its Stasis Field lasts `TIME_STOP_SCALE` (2) times as long as G's: 6 s on a fresh power, up to 12 s with all four
   abilities. G's own field is unchanged (3-6 s).
+
+## Speed track: gears, momentum, hands, rings, slow time, marked run
+
+Overclock (V) and Velox's Velocity (R) share one speedster core (`ChronoSpeed`); everything below applies to both, except
+the held phase, which is Overclock's. Ideas only from another mod's speedster; all code is ours.
+
+- **Gears** (`ChronoGears`, `ChronoGearsClient`, `ChronoScrollMixin`): the wheel while sprinting at speed shifts 5 gears
+  (the hotbar keeps the wheel otherwise). Gear 3 is the old speed. Higher: faster, wider turns, more hunger, longer streak, faster healing.
+  The chip is bottom right in the right dock (row 12, `ChronoSpeedHud`).
+- **Momentum** (`ChronoMomentumClient`): speed builds over 30 ticks of straight running, a sharp view turn sheds speed and
+  leans the body, letting go of every key slides you to a stop in ground dust.
+- **Speed healing** (`ChronoGears.tick`): gear 3 and up close wounds through `Mending.mend` (the wounds system), at a hunger price.
+- **Running blow, rapid bows, catch and hurl, weapon snatch** (`ChronoRapid`, three mixins, `ChronoRapidClient`).
+- **Held phase** (`ChronoPhase`, `ChronoHeldPhaseMixin`): hold V at a wall; the meter shows under the gear chip.
+- **Running rings** (`ChronoRings`): a closed circle of radius 2 to 6 raises a vortex.
+- **Slow time** (`ChronoSlowTime`, `.` held): vanilla's tick freeze plus one stepped world tick in five.
+- **Marked run** (`ChronoSpeedKeys`, `ChronoMarkRun`): Sneak + `/` marks, `/` runs there.

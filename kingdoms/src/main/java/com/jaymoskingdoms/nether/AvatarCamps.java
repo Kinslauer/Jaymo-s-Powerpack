@@ -3,6 +3,7 @@ package com.jaymoskingdoms.nether;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
+import com.jaymoskingdoms.PowersCompat;
 import com.jaymoskingdoms.Speech;
 import com.jaymoskingdoms.Stacked;
 import com.jaymoskingdoms.VillagerHeritage;
@@ -115,6 +116,10 @@ public final class AvatarCamps {
 	static final int DEFEND_HURT_TICKS = 100;
 	/** (0.7.502) The chance a camp rises near an Emberborn (others: {@link #FOUND_CHANCE}). */
 	static final float EMBERBORN_FOUND_CHANCE = 0.6F;
+	/** Burning steeds (Powers' horses of fire) a camp keeps: a new camp's, the most it keeps, how near its hearth they graze, and the chance each 10 s (while a player is near) it raises another. */
+	static final int STEEDS_FIRST = 2, STEEDS_MOST = 3;
+	static final double STEED_RADIUS = 14.0;
+	static final float STEED_CHANCE = 0.1F;
 	/** How many greeting lines there are ({@code message.jaymoskingdoms.avatar.welcome.<n>}). */
 	static final int WELCOME_LINES = 3;
 
@@ -412,6 +417,9 @@ public final class AvatarCamps {
 			camp = camp.withRecruit(now);
 			put(nether, camp);
 		}
+		if (nether.getRandom().nextFloat() < STEED_CHANCE && steeds(nether, camp) < STEEDS_MOST) {
+			spawnSteed(nether, camp);
+		}
 		if (target != null && now - camp.lastBand() >= BAND_EVERY) {
 			int sent = 0;
 			for (Mob m : people) {
@@ -493,8 +501,24 @@ public final class AvatarCamps {
 		for (int i = 0; i < FIRST; i++) {
 			spawnAvatar(nether, camp, site.above().offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
 		}
+		for (int i = 0; i < STEEDS_FIRST; i++) {
+			spawnSteed(nether, camp);
+		}
 		JaymosKingdoms.LOGGER.info("A Flame Avatars' camp, {}, rose at {}", camp.name(), site);
 		return camp;
+	}
+
+	/** How many burning steeds graze at {@code camp}'s hearth now. */
+	private static int steeds(ServerLevel nether, Camp camp) {
+		return nether.getEntitiesOfClass(net.minecraft.world.entity.animal.equine.AbstractHorse.class,
+			new net.minecraft.world.phys.AABB(camp.center()).inflate(STEED_RADIUS * 2.0), h -> h.entityTags().contains(PowersCompat.STEED_TAG)).size();
+	}
+
+	/** One burning steed at the camp's hearth (nothing without Jaymo's Powers). */
+	private static void spawnSteed(ServerLevel nether, Camp camp) {
+		RandomSource random = nether.getRandom();
+		BlockPos at = camp.center().above().offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
+		PowersCompat.burningSteed(nether, Vec3.atBottomCenterOf(at));
 	}
 
 	/** One avatar at {@code at}: an MCA guard of Emberborn blood, marked, tougher, armed (null without MCA). */

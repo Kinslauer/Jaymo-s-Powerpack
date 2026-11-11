@@ -242,12 +242,18 @@ public final class WebSwing {
 	// zip / yank-to
 	WebNet.@Nullable Pull pull;
 	private int pullTicks;
+	/** The zip is aimed at a ledge: it rides all the way in and throws you over it ({@link WebLedge}). */
+	private boolean pullLedge;
 	private int stuckTicks;
 	/** Jump was down last tick of the zip (a press, not a held Jump from before it began, cuts it). */
 	private boolean pullJumpHeld;
 	private Vec3 lastPos = Vec3.ZERO;
 	/** Flips and twirls off the webs, on them, and on landing. */
 	private final WebTrickClient tricks = new WebTrickClient();
+	/** Hanging head down from a line above ({@link WebUpsideClient}). */
+	private final WebUpsideClient upside = new WebUpsideClient();
+	/** Settled into a balanced crouch on a narrow top ({@link WebPerchClient}). */
+	private final WebPerchClient perch = new WebPerchClient();
 
 	void reset() {
 		for (Strand strand : strands) {
@@ -266,6 +272,8 @@ public final class WebSwing {
 		wingsNeedRelease = false;
 		swingLockout = 0;
 		tricks.reset();
+		upside.reset();
+		perch.reset();
 	}
 
 	private static LocalPlayer player() {
@@ -501,6 +509,7 @@ public final class WebSwing {
 		stuckTicks = 0;
 		pullJumpHeld = player.input.keyPresses.jump();
 		lastPos = player.position();
+		pullLedge = WebLedge.launch(player, pull) != null;
 	}
 
 	// ---- per tick -------------------------------------------------------------------------------------------------
@@ -510,8 +519,12 @@ public final class WebSwing {
 			detachAll(player, false);
 			flying = false;
 			pull = null;
+			upside.reset();
+			perch.reset();
 			return;
 		}
+		upside.tick(player, strands);
+		perch.tick(player, attached() || pull != null || wingsTicks > 0);
 		if (swingLockout > 0) {
 			swingLockout--;
 		}
@@ -1327,7 +1340,7 @@ public final class WebSwing {
 			finishPull(player, pull);
 			return;
 		}
-		if (flingOut || pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
+		if (flingOut || pull.entityId() < 0 && !pullLedge && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
 			// let go early: momentum carries on, with a kick up
 			this.pull = null;
 			Vec3 v = player.getDeltaMovement();
@@ -1346,6 +1359,14 @@ public final class WebSwing {
 		this.pull = null;
 		Direction face = pull.face() >= 0 && pull.face() < Direction.values().length ? Direction.values()[pull.face()] : null;
 		Vec3 v = player.getDeltaMovement();
+		Vec3 thrown = WebLedge.launch(player, pull);
+		if (thrown != null) {
+			// a ledge: thrown up and over the lip, high enough for the wings to open
+			player.setDeltaMovement(thrown);
+			play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.7F, 1.2F);
+			puff(player, player.position().add(0.0, 1.0, 0.0), 6);
+			return;
+		}
 		if (face != null && face.getAxis().isHorizontal()) {
 			// perch: hop up and onto the ledge above the hit point, if there's one within reach
 			BlockPos wall = BlockPos.containing(pull.anchor().subtract(face.getUnitVec3().scale(0.05)));
