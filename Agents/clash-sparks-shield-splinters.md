@@ -3,7 +3,7 @@ status: stalled
 task: 
 branch: claude/project-thread-76m9kc
 with: Claude (cloud thread "Add sparks to blade clashes and parries")
-pr: 
+pr: 1288, 1289 (both merged)
 mods: powers, kingdoms
 versions: 
 started: 2026-11-11
