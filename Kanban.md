@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:15). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 
 
