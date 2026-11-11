@@ -536,6 +536,9 @@ a voice of their own and keeps it. Each was a talent in their own right before t
 wizard, a scholar, a soldier, and one nobody can describe), and together they held the Overworld when the
 Warrior-born, the orcs and the Grue came at it. That is what they were made for, and they have not stopped.
 
+**Their bloods** (Andy, 2026-11-11). Grimsby is a **Sylvan** elf, which is why he lived long enough to study for four
+hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were **Heartlanders**.
+
 - **Ambrose, the Warden**: gentle, calls you "little one". He calms rather than kills; a beaten ogre walks with you
   after he lays a hand on it.
 - **Grimsby**: a wizard of four hundred years' study, sour and dry. "Four hundred years of study and the first thing I
