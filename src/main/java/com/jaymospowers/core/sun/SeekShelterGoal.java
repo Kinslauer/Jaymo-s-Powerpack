@@ -25,6 +25,7 @@ public class SeekShelterGoal extends Goal {
     private int cooldown;
     private BlockPos shelter;
     private boolean avoidSunDisabled;
+    private boolean originalAvoidSun;
 
     public SeekShelterGoal(PathfinderMob mob) {
         this.mob = mob;
@@ -45,18 +46,6 @@ public class SeekShelterGoal extends Goal {
         }
         if (this.mob.isInWaterOrRain()) {
             return false;
-        }
-        // Disable avoidSun while this goal is active, allowing mobs to path through
-        // leaf shade to reach real shelter (fixes skeletons getting stuck under trees)
-        if (!this.avoidSunDisabled) {
-            try {
-                Field avoidSunField = this.mob.getNavigation().getClass().getDeclaredField("avoidSun");
-                avoidSunField.setAccessible(true);
-                avoidSunField.set(this.mob.getNavigation(), false);
-                this.avoidSunDisabled = true;
-            } catch (Exception e) {
-                // If reflection fails, just continue without toggling
-            }
         }
         // Check multiple body points (feet, chest, head) and hitbox corners - burn if any is exposed
         Vec3 eye = this.mob.getEyePosition();
@@ -104,15 +93,43 @@ public class SeekShelterGoal extends Goal {
     }
 
     @Override
+    public void start() {
+        super.start();
+        // Disable avoidSun while this goal is active, allowing mobs to path through
+        // leaf shade to reach real shelter (fixes skeletons getting stuck under trees)
+        if (!this.avoidSunDisabled) {
+            try {
+                net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
+                    (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
+                if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
+                    Field avoidSunField = nav.getClass().getDeclaredField("avoidSun");
+                    avoidSunField.setAccessible(true);
+                    this.originalAvoidSun = avoidSunField.getBoolean(nav);
+                    avoidSunField.setBoolean(nav, false);
+                }
+            } catch (Exception e) {
+                // If reflection fails, just continue without toggling
+            }
+            this.avoidSunDisabled = true;
+        }
+    }
+
+    @Override
     public void stop() {
         this.shelter = null;
-        try {
-            Field avoidSunField = this.mob.getNavigation().getClass().getDeclaredField("avoidSun");
-            avoidSunField.setAccessible(true);
-            avoidSunField.set(this.mob.getNavigation(), true);
-            this.avoidSunDisabled = false;
-        } catch (Exception e) {
-            // If reflection fails, just reset the flag
+        if (this.avoidSunDisabled) {
+            try {
+                net.minecraft.world.entity.ai.navigation.GroundPathNavigation nav = 
+                    (net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.mob.getNavigation();
+                if (nav instanceof net.minecraft.world.entity.ai.navigation.GroundPathNavigation) {
+                    Field avoidSunField = nav.getClass().getDeclaredField("avoidSun");
+                    avoidSunField.setAccessible(true);
+                    avoidSunField.setBoolean(nav, this.originalAvoidSun);
+                }
+            } catch (Exception e) {
+                // If reflection fails, just reset the flag
+                this.avoidSunDisabled = false;
+            }
             this.avoidSunDisabled = false;
         }
     }
