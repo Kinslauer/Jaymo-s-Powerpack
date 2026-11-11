@@ -42,6 +42,8 @@ public final class XenoformClient {
 	 * legs keep to the ground it covers. Null: not Towerback.
 	 */
 	public static final RenderStateDataKey<Float> TOWER_STRIDE = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_stride");
+	/** Whether Towerback is hauling (sprinting): its arms hardly swing and it leans in ({@code XenoFormModels.Towerback}). */
+	public static final RenderStateDataKey<Boolean> TOWER_HAUL = RenderStateDataKey.create(() -> "jaymospowers:xenoform_tower_haul");
 	/** (0.19.62) A four-legged alien's ability pose from {@code XenoformState.ACT}: "charge", "roll", "spin" or null. */
 	public static final RenderStateDataKey<String> ACT = RenderStateDataKey.create(() -> "jaymospowers:xenoform_act");
 	/** (0.19.66) A low-box alien (Croaker) holding sneak, which its pose can't show. */
@@ -136,6 +138,7 @@ public final class XenoformClient {
 		// (0.19.66) a low-box alien's pose never crouches, so its sneak is read off the key (Croaker's flat crouch)
 		state.setData(SNEAK, form != null && XenoformState.lowBox(player) && player.isShiftKeyDown() && !player.isInWater());
 		state.setData(TOWER_STRIDE, "towerback".equals(form) ? stride(player, partialTicks) : null);
+		state.setData(TOWER_HAUL, "towerback".equals(form) && player.isSprinting() ? Boolean.TRUE : null);
 		state.setData(BULWARK_ARM, "bulwark".equals(form) ? bulwarkArm(player, state.swingAnimation) : null);
 		boolean asterion = "asterion".equals(form);
 		state.setData(SWING_COUNT, asterion ? bulwarkArm(player, state.swingAnimation) : null);
@@ -208,7 +211,7 @@ public final class XenoformClient {
 		long now = player.level().getGameTime();
 		if (s.tick != now) {
 			s.prev = s.phase;
-			double step = com.jaymospowers.power.xenoform.forms.Towerback.STRIDE_PER_SCALE * Math.max(1.0F, player.getScale());
+			double step = com.jaymospowers.power.xenoform.forms.Towerback.stride(player, Math.max(1.0F, player.getScale()));
 			double moved = Math.sqrt(net.minecraft.util.Mth.square(player.getX() - player.xo) + net.minecraft.util.Mth.square(player.getZ() - player.zo));
 			if (s.tick != Long.MIN_VALUE && moved < step) {
 				// (a teleport doesn't spin the legs)

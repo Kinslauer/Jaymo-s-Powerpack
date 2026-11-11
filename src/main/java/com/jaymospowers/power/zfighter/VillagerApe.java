@@ -64,6 +64,11 @@ final class VillagerApe {
 	static final int SCAN_EVERY = 20;
 	/** At full size it walks this fast (blocks a tick) and flat out from a blow this much faster. */
 	static final double WALK = 0.32, FLEE_FACTOR = 1.5;
+	/**
+	 * Andy: giants haul "when you get too far": with its quarry farther off than this (blocks, plus its own width) it
+	 * breaks into its lumbering haul ({@link com.jaymospowers.core.GiantTrample}), this much faster than its walk.
+	 */
+	static final double HAUL_FROM = 16.0, HAUL_FACTOR = 1.8;
 	/** Its jump when blocked (motion up), and how high it steps without one at full size (added to the villager's own). */
 	static final double JUMP = 0.9, STEP = 5.0;
 	/** Its fists, at full size (a villager has no attack of its own to scale). */
@@ -204,6 +209,8 @@ final class VillagerApe {
 		}
 		long now = level.getGameTime();
 		boolean ape = raging(mob);
+		// it hauls only while it chases something far off (berserk sets it again each tick it does)
+		mob.setSprinting(false);
 		grow(mob, live, level, ape);
 		if (!ape) {
 			if (live.apeSize <= 0.0F) {
@@ -252,7 +259,7 @@ final class VillagerApe {
 		} else {
 			live.apePeak = Math.max(live.apePeak, mob.getY());
 		}
-		if (mob.moveDist - live.apeStepAt >= ZFighterLineage.APE_STRIDE * Math.max(0.5F, live.apeSize)) {
+		if (mob.moveDist - live.apeStepAt >= ZFighterLineage.apeStride(mob, live)) {
 			live.apeStepAt = mob.moveDist;
 			if (mob.onGround() && live.apeSize >= 0.5F) {
 				ZFighterLineage.footfall(mob, live, level);
@@ -394,17 +401,22 @@ final class VillagerApe {
 				}
 			}
 		} else {
-			steer(mob, live, target.position(), false);
+			boolean haul = mob.distanceTo(target) > HAUL_FROM + mob.getBbWidth();
+			mob.setSprinting(haul);
+			steer(mob, live, target.position(), haul);
 		}
 	}
 
-	/** Walks it straight at {@code to}, facing that way, jumping when it runs into something too tall to step over. */
+	/**
+	 * Walks it straight at {@code to}, facing that way, jumping when it runs into something too tall to step over;
+	 * {@code flat} out (running from a blow, or hauling after its quarry) it goes faster.
+	 */
 	private static void steer(Mob mob, ZFighterPower.Live live, Vec3 to, boolean flat) {
 		Vec3 along = to.subtract(mob.position()).multiply(1.0, 0.0, 1.0);
 		if (along.lengthSqr() < 1.0E-4) {
 			return;
 		}
-		double speed = WALK * Math.max(0.3F, live.apeSize) * (flat ? FLEE_FACTOR : 1.0);
+		double speed = WALK * Math.max(0.3F, live.apeSize) * (!flat ? 1.0 : mob.isSprinting() ? HAUL_FACTOR : FLEE_FACTOR);
 		Vec3 v = along.normalize().scale(speed);
 		double up = mob.getDeltaMovement().y;
 		if (mob.horizontalCollision && mob.onGround()) {

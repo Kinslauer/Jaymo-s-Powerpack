@@ -1,0 +1,4 @@
+# Aether Giants haul after you, and shake at their old strength again
+- **The haul**: an Aether Giant whose target is more than 32 blocks off breaks into a lumbering haul. It moves faster, takes long strides with its arms hardly swinging, hunches lower, and smashes through everything in its way (`AetherGiant.HAUL_FROM`/`HAUL_SPEED`/`HAUL_STEP`).
+- **Fix**: the last patch multiplied each Aether Giant's shake and dust by its height against a player's, about 17 times. Every step shook the screen by about 19 degrees for everyone within roughly 476 blocks. Now a normal Aether Giant shakes and kicks up dust as it did before. Only one bigger or smaller than its kind scales, at most twice as hard and as far (`AetherGiant.sizeScale`, `SIZE_SCALE_MIN`/`MAX`). Its stamp still shakes the ground, at `STAMP_SHAKE`.
+- Not tested in game.

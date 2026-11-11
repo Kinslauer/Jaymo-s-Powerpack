@@ -39,6 +39,8 @@ final class GiantModel extends EntityModel<GiantState> {
 	 */
 	private static final float LEG_SWING = 0.6F, ARM_SWING = 0.55F, ARM_TWIST = 0.18F, ARM_FLARE = 0.2F, ARM_FLARE_PEAK = 0.18F,
 		ROLL = 0.07F, SHOULDER_TWIST = 0.09F, LEG_LENGTH = 14.0F;
+	/** Hauling ({@link GiantState#hauling}): its arms swing and twist this share of a walk's, and it hunches this much more. */
+	private static final float HAUL_ARMS = 0.3F, HAUL_HUNCH = 0.15F;
 	/** How it flinches when hit (body, head, arms). */
 	private static final float FLINCH_BODY = 0.42F, FLINCH_HEAD = 0.6F, FLINCH_ARM = 0.6F;
 	/** Its death: when it hits the ground and breaks up (vanilla takes the body away at 20 ticks). */
@@ -129,16 +131,18 @@ final class GiantModel extends EntityModel<GiantState> {
 		this.body.yRot = walk * SHOULDER_TWIST * amount;
 		// its head keeps level as it rolls
 		this.head.zRot = walk * ROLL * 0.6F * amount;
-		// arms swing against the legs, twist, and flare out wide of the chest, more at the height of each swing
-		this.rightArm.xRot = (walk * ARM_SWING - 0.2F) * amount;
-		this.rightArm.yRot = -walk * ARM_TWIST * amount;
+		// arms swing against the legs, twist, and flare out wide of the chest, more at the height of each swing (hauling,
+		// hardly at all: it doesn't flail)
+		float arms = state.hauling ? HAUL_ARMS : 1.0F;
+		this.rightArm.xRot = (walk * ARM_SWING * arms - 0.2F) * amount;
+		this.rightArm.yRot = -walk * ARM_TWIST * arms * amount;
 		this.rightArm.zRot = ARM_FLARE + Math.abs(walk) * ARM_FLARE_PEAK * amount;
-		this.leftArm.xRot = (-walk * ARM_SWING - 0.2F) * amount;
-		this.leftArm.yRot = walk * ARM_TWIST * amount;
+		this.leftArm.xRot = (-walk * ARM_SWING * arms - 0.2F) * amount;
+		this.leftArm.yRot = walk * ARM_TWIST * arms * amount;
 		this.leftArm.zRot = -ARM_FLARE - Math.abs(walk) * ARM_FLARE_PEAK * amount;
 		// a slow breath
 		float breath = Mth.sin(state.ageInTicks * 0.09F) * 0.025F;
-		this.body.xRot = HUNCH + breath;
+		this.body.xRot = HUNCH + (state.hauling ? HAUL_HUNCH * amount : 0.0F) + breath;
 		this.rightArm.zRot += breath;
 		this.leftArm.zRot -= breath;
 		if (state.aggressive && state.leftAttack <= 0.0F && state.rightAttack <= 0.0F) {

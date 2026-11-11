@@ -83,6 +83,12 @@ public final class Towerback extends XenoForm {
 	 */
 	public static final double STRIDE_PER_SCALE = 1.0;
 	/**
+	 * Andy: "the giant sprint is a lumbering haul ... they cover alot of ground but dont flail their limbs". Sprinting, it
+	 * hauls: each step this many times as long (its legs keep their slow swing; the model's arms hardly swing), this much
+	 * faster than its walk, smashing what's in its way ({@code GiantTrample#smash}), the ground shaking under every step.
+	 */
+	public static final double HAUL_STRIDE = 1.8, HAUL_SPEED = 0.6;
+	/**
 	 * Each step's shockwave, as the Giants': it runs out along the ground this fast (blocks a tick, per scale) to this
 	 * far (per scale), hurting whoever stands on the ground in its way, most near the foot and this share of that at the
 	 * edge, with a jolt up and away. It follows steps up or down this tall.
@@ -130,6 +136,7 @@ public final class Towerback extends XenoForm {
 	private static final Identifier DAMAGE_ID = com.jaymospowers.JaymosPowers.id("xenoform_towerback_damage");
 	private static final Identifier SPEED_ID = com.jaymospowers.JaymosPowers.id("xenoform_towerback_speed");
 	private static final Identifier STEP_ID = com.jaymospowers.JaymosPowers.id("xenoform_towerback_step");
+	private static final Identifier HAUL_ID = com.jaymospowers.JaymosPowers.id("xenoform_towerback_haul");
 
 	/** One step's shockwave running out along the ground. */
 	public static final class Wave {
@@ -163,6 +170,7 @@ public final class Towerback extends XenoForm {
 		endGrab(player, live);
 		endSwat(player, live);
 		monolith(player, false);
+		haul(player, false);
 		live.towering = false;
 		live.waves.clear();
 	}
@@ -238,6 +246,24 @@ public final class Towerback extends XenoForm {
 		AttributeInstance instance = player.getAttribute(attribute);
 		if (instance != null) {
 			instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, operation));
+		}
+	}
+
+	/** How far one of its steps goes at {@code scale} (blocks): longer hauling (sprinting). The client's legs keep to it. */
+	public static double stride(net.minecraft.world.entity.player.Player player, double scale) {
+		return STRIDE_PER_SCALE * scale * (player.isSprinting() ? HAUL_STRIDE : 1.0);
+	}
+
+	/** Its haul's speed on or off. */
+	private static void haul(ServerPlayer player, boolean on) {
+		AttributeInstance instance = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (instance == null) {
+			return;
+		}
+		if (on) {
+			instance.addOrUpdateTransientModifier(new AttributeModifier(HAUL_ID, HAUL_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		} else {
+			instance.removeModifier(HAUL_ID);
 		}
 	}
 
@@ -410,11 +436,12 @@ public final class Towerback extends XenoForm {
 		if (live.grabStart >= 0L) {
 			grabTick(player, live, level, now);
 		} else {
-			// every stride shakes the ground (sprinting it skims over it instead)
-			double stride = STRIDE_PER_SCALE * size(player);
+			// every stride shakes the ground, walking or hauling
+			haul(player, player.isSprinting());
+			double stride = stride(player, size(player));
 			if (player.moveDist - live.strideAt >= stride) {
 				live.strideAt = player.moveDist;
-				if (player.onGround() && !player.isSprinting()) {
+				if (player.onGround()) {
 					footfall(player, live, level, 1.0, WAVE_DAMAGE, WAVE_JOLT_UP);
 				}
 			}
