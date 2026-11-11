@@ -124,6 +124,8 @@ public class JaymosPowers implements ModInitializer {
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
 		com.jaymospowers.ground.GroundRocks.init();
 		com.jaymospowers.ground.BigVeins.init();
+		// the Verdant World's strange growth: mycotic and pulse forests, the stone garden
+		com.jaymospowers.eden.Eden.init();
 		com.jaymospowers.ground.Panning.init();
 		com.jaymospowers.rough.SleepingBag.init();
 		com.jaymospowers.rough.ParagliderItem.init();

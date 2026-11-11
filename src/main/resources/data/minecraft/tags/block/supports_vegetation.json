@@ -1,6 +1,6 @@
 {
-  "replace": false,
   "values": [
-    "jaymospowers:blighted_soil"
+    "jaymospowers:blighted_soil",
+    "jaymospowers:eden_mycelium"
   ]
 }
