@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
