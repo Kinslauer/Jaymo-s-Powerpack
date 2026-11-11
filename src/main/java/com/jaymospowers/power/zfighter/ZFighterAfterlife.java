@@ -812,7 +812,8 @@ public final class ZFighterAfterlife {
 		ZFighterKingdoms.stayed(player);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), net.minecraft.sounds.SoundEvents.BEACON_POWER_SELECT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.4F);
-		level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.9, 0.4, 0.03);
+		com.jaymospowers.core.fx.MagicFx.blast(level, player.getX(), player.getY() + 1.0, player.getZ(), 1.2F, com.jaymospowers.divine.DivineSense.LIGHT);
+		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), 3.0F, com.jaymospowers.divine.DivineSense.LIGHT);
 		ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.stay_done"), List.of());
 	}
 

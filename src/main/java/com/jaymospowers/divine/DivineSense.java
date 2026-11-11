@@ -2,6 +2,7 @@ package com.jaymospowers.divine;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.wind.aether.WindAether;
@@ -25,7 +26,6 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The answer.</b> For {@link #COUNTER_TICKS} after a blow slipped that way, the next melee hit on whoever threw it
  * lands {@link #COUNTER_BONUS} times as hard and gives {@link #COUNTER_REFUND} feathers back.</li>
  * <li><b>Alight</b> (the heritage key, through Kingdoms: {@link #alight}). Lifted a little off the ground and held still,
- * feathers of light wind down round them and the row fills, one every {@link #ALIGHT_EVERY} ticks (faster under an open
+ * a sigil turns under them, motes of light wind down round them and the row fills, one every {@link #ALIGHT_EVERY} ticks (faster under an open
  * sky or in the Aether). Being hit, sneaking or the key again ends it; the sense is shut while it lasts.</li>
  * <li><b>Hover.</b> Jump pressed again in the air and held: the fall slows to a drift, for a feather every
  * {@link #HOVER_EVERY} ticks, and no fall is counted.</li>
@@ -77,6 +77,8 @@ public final class DivineSense {
 	/** Hover: ticks per half-feather, and the fall it slows to (blocks/tick; read by the client). */
 	public static final int HOVER_EVERY = 8;
 	public static final double HOVER_FALL = -0.07;
+	/** The light all of it is drawn in (MagicFx): a pale gold. */
+	public static final int LIGHT = 0xFFF2C8;
 	// ================================================================================================================
 
 	/** On a Divine-born player, synced to them alone: their client needs to know (heritage tags aren't sent). */
@@ -182,7 +184,7 @@ public final class DivineSense {
 		ServerPlayNetworking.send(player, new WebNet.Nudge(side.scale(SENSE_GLIDE).add(flat.scale(SENSE_GLIDE * 0.25)).add(0.0, SENSE_LIFT, 0.0)));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.5F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.5F, 1.7F);
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.25, 0.5, 0.25, 0.01);
+		level.sendParticles(MagicFx.mote(LIGHT, 0.8F), player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.25, 0.5, 0.25, 0.01);
 		return false;
 	}
 
@@ -205,7 +207,7 @@ public final class DivineSense {
 		}
 		Feathers.refund(player, COUNTER_REFUND);
 		level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.9F, 1.6F);
-		level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 12, 0.2, 0.3, 0.2, 0.08);
+		MagicFx.blast(level, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 0.7F, LIGHT);
 		return damage * COUNTER_BONUS;
 	}
 
@@ -237,6 +239,7 @@ public final class DivineSense {
 		ALIGHTING.put(player.getUUID(), new Alighting(now, player.position()));
 		HOVERING.remove(player.getUUID());
 		player.setAttached(ALIGHT, true);
+		MagicFx.sigil(level, player.position().add(0.0, 0.05, 0.0), 1.4F, LIGHT, 30);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5F, 1.8F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundSource.PLAYERS, 0.6F, 1.3F);
 		return true;
@@ -255,7 +258,7 @@ public final class DivineSense {
 		ServerLevel level = player.level();
 		ALIGHT_READY.put(player.getUUID(), level.getGameTime() + ALIGHT_COOLDOWN);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.6F, 1.2F);
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.4, 0.6, 0.4, 0.04);
+		MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), 2.0F, LIGHT);
 	}
 
 	private static void tickAlight(ServerPlayer player, Alighting alighting, long now) {
@@ -274,7 +277,11 @@ public final class DivineSense {
 		double turn = age * (Math.PI / 10.0), drop = 2.4 - age % 20 / 20.0 * 2.2;
 		for (int arm = 0; arm < 2; arm++) {
 			double angle = turn + arm * Math.PI;
-			level.sendParticles(ParticleTypes.END_ROD, player.getX() + Math.cos(angle) * 0.8, player.getY() + drop, player.getZ() + Math.sin(angle) * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.mote(LIGHT, 1.0F), player.getX() + Math.cos(angle) * 0.8, player.getY() + drop, player.getZ() + Math.sin(angle) * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		if (age > 0 && age % 20 == 0) {
+			// the sigil is sent a second at a time, so it goes when they come down
+			MagicFx.sigil(level, alighting.at.add(0.0, 0.05, 0.0), 1.4F, LIGHT, 30);
 		}
 		if (age % 10 == 0) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.5F,
@@ -332,7 +339,7 @@ public final class DivineSense {
 			}
 			player.resetFallDistance();
 			if (player.tickCount % 4 == 0) {
-				player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() - 0.1, player.getZ(), 1, 0.2, 0.0, 0.2, 0.0);
+				player.level().sendParticles(MagicFx.mote(LIGHT, 0.6F), player.getX(), player.getY() - 0.1, player.getZ(), 1, 0.2, 0.0, 0.2, 0.0);
 			}
 		}
 	}
