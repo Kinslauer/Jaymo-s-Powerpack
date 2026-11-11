@@ -1,5 +1,15 @@
 {
   "item.jaymospowers.hand_wraps": "Hand Wraps",
+  "item.jaymospowers.leather_cestus": "Leather Cestus",
+  "item.jaymospowers.iron_cestus": "Iron Cestus",
+  "item.jaymospowers.steel_cestus": "Steel Cestus",
+  "item.jaymospowers.leather_bracers": "Leather Bracers",
+  "item.jaymospowers.iron_bracers": "Iron Bracers",
+  "item.jaymospowers.steel_bracers": "Steel Bracers",
+  "item.jaymospowers.cestus_studs": "Cestus Studs",
+  "item.jaymospowers.steel_cestus_studs": "Steel Cestus Studs",
+  "item.jaymospowers.bracer_plates": "Bracer Plates",
+  "item.jaymospowers.steel_bracer_plates": "Steel Bracer Plates",
   "boxing.jaymospowers.style.arrow_slit": "Arrow Slit",
   "boxing.jaymospowers.style.long_guard": "Long Guard",
   "boxing.jaymospowers.style.bastion": "Bastion"
