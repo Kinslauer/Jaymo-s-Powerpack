@@ -27,8 +27,9 @@ import org.jspecify.annotations.Nullable;
  * Aether Giants'), and the falling wood crushes whatever it lands on; without it the trunk just breaks. A player giant
  * only fells where they may build; a mob giant only with mob griefing on.
  * <p>
- * Running into a tree is harder still: the tree is torn out whole and thrown on ahead of the giant ({@link GiantTrees#ram});
- * one too big to lift is pushed over as a walk would, and without Kingdoms the broken trunk's logs fly on ahead.
+ * Running into a tree is harder still: instead of toppling, the tree is knocked flying, whole from its roots, on ahead of
+ * the giant and tumbling as it goes (Kingdoms' {@code Trees.uproot}, as a tornado's). One too big for the giant to send
+ * flying ({@link GiantTrees#mostLogs}) topples as a walk would; without Kingdoms the broken trunk's logs fly on ahead.
  */
 public final class GiantTrample {
 	/** How far past its body a step reaches for trees (blocks, plus this per scale), and how high up its legs it looks for a trunk. */
@@ -45,14 +46,19 @@ public final class GiantTrample {
 	public static final double RAM_SPEED = 0.2;
 	/** How far ahead of its body a run reaches for trees (blocks, plus this per scale). */
 	public static final double RAM_REACH = 1.0, RAM_REACH_PER_SCALE = 0.15;
-	/** A tree run into flies on at this share of the giant's speed, at least {@link #RAM_THROW_MIN}, with this lift (blocks a tick). */
-	public static final double RAM_THROW_SHARE = 1.5, RAM_THROW_MIN = 0.4, RAM_THROW_LIFT = 0.3;
+	/**
+	 * A tree run into flies on at this share of the giant's speed, at least {@link #RAM_THROW_MIN}, with this lift (blocks a
+	 * tick), both times the root of the giant's height in people, at most {@link #RAM_THROW_FASTEST}.
+	 */
+	public static final double RAM_THROW_SHARE = 2.0, RAM_THROW_MIN = 0.45, RAM_THROW_LIFT = 0.4, RAM_THROW_FASTEST = 2.0;
+	/** A tree knocked flying turns end over end this fast (degrees a tick). */
+	public static final float RAM_TUMBLE = 8.0F;
 	/** Without Kingdoms: the logs of a trunk run into fly ahead at about this speed (blocks a tick). */
 	public static final double RAM_LOG_SPEED = 0.4;
 	/** Without Kingdoms: the most logs one broken trunk drops. */
 	public static final int FALLBACK_LOGS = 24;
 
-	private static @Nullable Method trample;
+	private static @Nullable Method trample, uproot;
 	private static boolean looked;
 
 	private GiantTrample() {
@@ -96,8 +102,12 @@ public final class GiantTrample {
 				continue;
 			}
 			BlockPos log = pos.immutable();
-			Vec3 throwAt = ahead.scale(Math.max(RAM_THROW_MIN, speed * RAM_THROW_SHARE)).add(0.0, RAM_THROW_LIFT, 0.0);
-			if (GiantTrees.ram(level, giant, Vec3.atCenterOf(log), 0.5, throwAt)) {
+			double size = Math.sqrt(Math.max(1.0, giant.getBbHeight() / 1.8));
+			Vec3 v = ahead.scale(Math.max(RAM_THROW_MIN, speed * RAM_THROW_SHARE) * size).add(0.0, RAM_THROW_LIFT * size, 0.0);
+			if (v.length() > RAM_THROW_FASTEST) {
+				v = v.scale(RAM_THROW_FASTEST / v.length());
+			}
+			if (knockFlying(level, log, giant, v)) {
 				level.playSound(null, log, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 2.0F, 0.5F);
 				return true;
 			}
@@ -109,6 +119,24 @@ public final class GiantTrample {
 			return true;
 		}
 		return false;
+	}
+
+	/** Kingdoms' {@code Trees.uproot}: the tree on {@code log} flies off whole at {@code v}. False if it can't (too big, not a living tree, no Kingdoms). */
+	private static boolean knockFlying(ServerLevel level, BlockPos log, LivingEntity giant, Vec3 v) {
+		kingdoms();
+		if (uproot == null) {
+			return false;
+		}
+		BlockPos foot = log;
+		while (foot.getY() > level.getMinY() && level.getBlockState(foot.below()).is(BlockTags.LOGS)) {
+			foot = foot.below();
+		}
+		try {
+			return uproot.invoke(null, level, foot, GiantTrees.mostLogs(giant), v, (float)Math.atan2(v.z, v.x), RAM_TUMBLE) != null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			uproot = null;
+			return false;
+		}
 	}
 
 	/** Without Kingdoms: the logs a broken trunk dropped fly on ahead of the giant that ran into it. */
@@ -181,6 +209,12 @@ public final class GiantTrample {
 					net.minecraft.world.entity.Entity.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				trample = null;
+			}
+			try {
+				uproot = Class.forName("com.jaymoskingdoms.Trees").getMethod("uproot", ServerLevel.class, BlockPos.class, int.class,
+					Vec3.class, float.class, float.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				uproot = null;
 			}
 		}
 		return trample;
