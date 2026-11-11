@@ -4,12 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:33). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
@@ -23,6 +22,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · claimed
 
 
 ## In review
