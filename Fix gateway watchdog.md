@@ -58,6 +58,30 @@ Times on a 12-hour clock. Never print or log a token or key. Restart the gateway
 
 Claude Code on Andy's PC, Nov 11, 12:39-12:46 AM.
 
+**12:43 AM YOUTH stuck in voice (done first, ~12:47 AM):**
+- **Processes:** `discord_read_aloud|gateway` matched nothing. The gateway and the reader both hide their command
+  lines from a normal shell because they run elevated.
+- **What kept YOUTH in voice:** reader 21480, started 12:06:49 AM from Hermes's shell for Tiv. Its temp folder
+  `read_aloud_3zmgtysb` was created at 12:06:53 AM, and it was on Lore paragraph ~162 at 12:42 AM.
+- **Gone now:** by 12:47 AM it had ended (Andy, or the reading finished), and `--stop` said "Nothing is being read."
+- **Not a gateway:** Discord's API says YOUTH has no voice state now (404 Unknown Voice State), so no gateway holds a
+  voice connection of its own.
+- **Hermes voice settings:** the Hermes config has no Discord voice-channel setting. The gateway's `/voice` join feature
+  exists in its code, but no `gateway_voice_mode.json` exists, so it has never been turned on.
+- **Why YOUTH said "nothing is reading":** `--stop` only read `~/.discord_read_aloud.pid`, which my test runs had
+  overwritten and then deleted.
+- **Fix (PR #1281, `claude/read-aloud-find-every-reading`):**
+  - each reading also writes `~/.discord_read_aloud/<pid>`;
+  - `--stop` and the new `--status` find every reading by those files, the old pid file and a scan of python command
+    lines;
+  - `--stop` names any reading it can't end (elevated);
+  - a new reading stops every older one.
+  - Tested with two dummy readers: one found only by command line, one only by its pid file.
+- **YOUTH's instructions:** `E:/hermes/skills/media/discord-read-aloud/SKILL.md` and `E:/hermes/SOUL.md` now say: run
+  `--status` before answering "are you reading?", never say nothing is reading without it, and pass on a "Could not
+  stop process N".
+- **Until #1281 merges:** `--status` isn't on master yet, so YOUTH gets an "unrecognized arguments" error from it.
+
 **Real cause:** the watchdog's check (`gateway_watchdog.ps1`) looked for a `python.exe` whose command line has
 `gateway run`. The gateway that `hermes gateway restart` started at 11:31 PM (PID 16940, launcher 10176) runs
 elevated, and Windows gives a non-elevated script a blank command line for an elevated process. So the check never
