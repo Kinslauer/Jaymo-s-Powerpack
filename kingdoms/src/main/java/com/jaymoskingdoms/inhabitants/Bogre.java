@@ -66,6 +66,9 @@ import org.jspecify.annotations.Nullable;
  * <p>It keeps to itself: it walks away from villagers and other Bogres, never spawns near a village or another Bogre,
  * sleeps through the night when no one's about, and dances when a jukebox plays near it. Its cooking and the Giant Bone
  * Club are their own tasks (bogre-cooking, bone-club); this is the mob they build on.
+ *
+ * <p>Every orc camp also keeps one by its fire as its heaviest hand ({@code OgreHolds#joinCamp}): that one has a home, keeps
+ * to the camp instead of walking off from its folk, walks back when it strays, and spares whoever the camp's ogres spare.
  */
 public class Bogre extends Monster implements GeoEntity {
 	static final double HEALTH = 200.0, SPEED = 0.17, ARMOR = 6.0, KNOCKBACK_RESISTANCE = 1.0, FOLLOW = 32.0;
@@ -213,6 +216,11 @@ public class Bogre extends Monster implements GeoEntity {
 			this.slamCooldown--;
 		}
 		this.forgetFoe();
+		// one living in an orc camp walks back to its fire when it has strayed and has no foe
+		if (this.getTarget() == null && this.hasHome() && !this.isWithinHome() && this.tickCount % 40 == 0 && !this.busy()) {
+			BlockPos home = this.getHomePosition();
+			this.getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 1.0);
+		}
 		if (this.roarLeft > 0) {
 			this.roaring(level);
 		} else if (this.swingLeft > 0) {
@@ -282,7 +290,7 @@ public class Bogre extends Monster implements GeoEntity {
 		Player best = null;
 		double bestDist = Double.MAX_VALUE;
 		for (Player player : level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(WARN_RANGE),
-			p -> !p.isCreative() && !p.isSpectator() && p.isAlive() && armed(p))) {
+			p -> !p.isCreative() && !p.isSpectator() && p.isAlive() && armed(p) && !com.jaymoskingdoms.OgreHolds.spares(this, p))) {
 			double d = this.distanceToSqr(player);
 			if (d < bestDist && d <= WARN_RANGE * WARN_RANGE && this.hasLineOfSight(player)) {
 				best = player;
@@ -598,7 +606,8 @@ public class Bogre extends Monster implements GeoEntity {
 
 		@Override
 		public boolean canUse() {
-			if (Bogre.this.busy() || Bogre.this.getTarget() != null || Bogre.this.random.nextInt(reducedTickDelay(40)) != 0) {
+			// (one living in an orc camp keeps to the camp instead: its orcs and ogres are its company)
+			if (Bogre.this.hasHome() || Bogre.this.busy() || Bogre.this.getTarget() != null || Bogre.this.random.nextInt(reducedTickDelay(40)) != 0) {
 				return false;
 			}
 			AABB around = Bogre.this.getBoundingBox().inflate(COMPANY_RANGE);
