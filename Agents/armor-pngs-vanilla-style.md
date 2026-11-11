@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: armor-pngs-vanilla-style
 branch: claude/armor-pngs-vanilla-style
 with: hermes-modeller
@@ -31,3 +31,4 @@ Remake the mod's armor textures in pure vanilla Minecraft style — solid 1-pixe
 - Task claimed via vault.py --claim hermes-modeller (tiv, Tasks thread, 2026-11-08); claim printed at 2026-11-11 13:40 EST.
 - Worn equipment textures (textures/entity/equipment/humanoid/bog_iron.png etc., 64x32) left untouched — out of the task's item-texture scope.
 - No bbmodel: flat item textures, verified with vision_analyze instead of bbrender.
+- 2026-11-11 19:42 No sign of work for 30 min: marked stalled (whoever ran it stopped).
