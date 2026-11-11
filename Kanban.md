@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 19:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 19:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,12 +12,12 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
 ## Being built
 
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🍇 Bacchus · claimed
 
 
 ## In review
