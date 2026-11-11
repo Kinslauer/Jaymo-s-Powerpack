@@ -83,6 +83,7 @@
 		"CarryUseMixin",
 		"ContainerScreenAccessor",
 		"CostumeAvatarRendererMixin",
+		"GiftedCostumeEntityRenderDispatcherMixin",
 		"CostumeCoverModelFeatureRendererMixin",
 		"LivingEntityRendererLayersAccessor",
 		"TextureManagerAccessor",

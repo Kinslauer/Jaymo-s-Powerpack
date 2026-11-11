@@ -303,6 +303,8 @@ public final class GiftedFolk {
 			level.sendParticles(Fx.CRACKLE, mob.getX(), mob.getY(0.6), mob.getZ(), 30, 0.4, 0.7, 0.4, 0.3);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 1.2F);
 		}
+		// the costumed: vigilantes and villains, out after dark
+		CostumedFolk.step(level, mob);
 	}
 
 	/** (0.7.384) A grown MCA villager is weighed once for stargazing: about one in {@link #STARGAZER_ODDS} watches the sky and sells star charts. */

@@ -212,6 +212,7 @@ public final class Gifted {
 	/** Takes {@code entity}'s gift away. */
 	public static void take(Entity entity) {
 		entity.removeAttached(GIFT);
+		GiftedCostume.strip(entity);
 	}
 
 	public static @Nullable Gift of(Entity entity) {

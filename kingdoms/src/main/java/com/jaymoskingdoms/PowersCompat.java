@@ -1684,6 +1684,70 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- costumed gifted: Powers' core/gifted/GiftedCostume (a villager's own costume, CostumedFolk) -------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle costumeDress, costumeSuit, costumeSuited, costumeName;
+	private static boolean lookedForCostumes;
+
+	private static void lookForCostumes() {
+		if (lookedForCostumes) {
+			return;
+		}
+		lookedForCostumes = true;
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> entity = net.minecraft.world.entity.Entity.class;
+			Class<?> costumes = Class.forName("com.jaymospowers.core.gifted.GiftedCostume");
+			costumeDress = lookup.findStatic(costumes, "dress", java.lang.invoke.MethodType.methodType(boolean.class, entity, boolean.class));
+			costumeSuit = lookup.findStatic(costumes, "suit", java.lang.invoke.MethodType.methodType(boolean.class, entity, boolean.class));
+			costumeSuited = lookup.findStatic(costumes, "suited", java.lang.invoke.MethodType.methodType(boolean.class, entity));
+			costumeName = lookup.findStatic(costumes, "name", java.lang.invoke.MethodType.methodType(String.class, entity));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			costumeDress = null;
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no costumes for gifted villagers (older Powers?)", e);
+		}
+	}
+
+	/** Has Powers make gifted {@code entity} a costume of their own, a {@code villain}'s or a vigilante's; false without one. */
+	public static boolean costumeDress(net.minecraft.world.entity.Entity entity, boolean villain) {
+		lookForCostumes();
+		try {
+			return costumeDress != null && (boolean)costumeDress.invoke(entity, villain);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Puts gifted {@code entity}'s own costume on or takes it off; false without one, or if it already was. */
+	public static boolean costumeSuit(net.minecraft.world.entity.Entity entity, boolean on) {
+		lookForCostumes();
+		try {
+			return costumeDress != null && (boolean)costumeSuit.invoke(entity, on);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** The name of gifted {@code entity}'s own costume ("the Gale"...), or null without one. Either side. */
+	public static @Nullable String costumeName(net.minecraft.world.entity.Entity entity) {
+		lookForCostumes();
+		try {
+			return costumeDress == null ? null : (String)costumeName.invoke(entity);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	/** Whether gifted {@code entity} has their own costume on just now. Either side. */
+	public static boolean costumeSuited(net.minecraft.world.entity.Entity entity) {
+		lookForCostumes();
+		try {
+			return costumeDress != null && (boolean)costumeSuited.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Gives {@code entity} (a villager) the power {@code power} ("wind"...), fighting as {@code style}; false without Powers. */
 	public static boolean give(net.minecraft.world.entity.Entity entity, String power, int style) {
 		lookForGifts();
