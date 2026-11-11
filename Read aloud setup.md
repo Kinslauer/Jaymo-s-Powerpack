@@ -133,3 +133,9 @@ the PC, after Andy merges PR #1279 (adds --debug) and you pull master into E:/Or
    newest if they aren't already, and try again.
 4. Copy the stdout lines (dave_version / ready / can_encrypt) and the last ~80 lines of read_debug.log (no token is
    logged, but check) into a new section here and run vault_sync.
+
+## 2026-11-11 12:31 AM: cause found and fixed (cloud thread)
+The silence was two readings at once (YOUTH's background full-Lore read, process 21480, plus the next run) fighting
+over the bot's one voice connection (4006 drops, DAVE never ready). PR #1280 (merged): a new reading now stops the one
+still running before it joins. Pull master into E:/Origins Mod. Still open: the gateway watchdog logging "restarted
+the gateway" every minute since 11:29 PM while the gateway was up (may start extra YOUTH logins).
