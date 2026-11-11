@@ -498,6 +498,15 @@ public abstract class WindDragon extends AbstractHorse {
 		return !swims() && super.isPushedByFluid();
 	}
 
+	/**
+	 * Vanilla's own number, kept here so Horseman's faster-in-the-air mounts (it adds to {@code LivingEntity}'s) never
+	 * reach a dragon: its flight is tuned on these, and a horse's jump boost would make it several times quicker aloft.
+	 */
+	@Override
+	protected float getFlyingSpeed() {
+		return this.getControllingPassenger() instanceof Player ? this.getSpeed() * 0.1F : 0.02F;
+	}
+
 	@Override
 	public void travel(Vec3 input) {
 		if (!swims() || !this.isInWater()) {
