@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
-claimed_by: claude-cloud-imps-thread
+claimed_by: 
 pr: 
 ---
 
@@ -17,3 +17,4 @@ Also (Long Defence thread): their fireballs catch the trees and surroundings in 
 
 ## Notes
 - 2026-11-11 12:33 Being built in the project thread 'Build the Nether imps' (Andy's request, 2026-11-11). Andy also wants every part animated: arms, legs, wings, fireball, swoop attack, basic swing.
+- 2026-11-11 14:07 claude-cloud-imps-thread's claim had no sign of work for 30 min: handed back as open.
