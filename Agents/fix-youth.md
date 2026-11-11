@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: fix-youth
 branch: claude/waterskin-old-id
 with:
-pr:
+pr: 1266
 mods: [kitchen]
 versions:
 started: 2026-11-10
@@ -26,6 +26,13 @@ owns:
 - Writer list, model, cap, checklists PR, worktree cleanup, vault cards, memory pending
 
 ## Notes
--
+- Gateway: `schtasks /run` doesn't restart a running gateway (IgnoreNew). SOUL.md reaches live sessions through
+  `hermes sessions refresh-prompts`; config.yaml model changes apply on the next message.
+- 0.22.0 was already done in the cloud as PR #1264. My duplicate #1267 is closed.
 
 ## Done
+- **#1266** (Kitchen): a waterskin from before the tier update turns into a Leather Waterskin with its water (up to
+  3 sips) instead of disappearing. Not tested in game: load a pre-0.5.98 world.
+- **#1265**: Andy's 4 pick-lists in `docs/checklists/`.
+- Hermes: SOUL.md hard rules; model back to Super; Quill the only writer; Prometheus counts toward the cap;
+  leftover worktrees and the duplicate skill cleaned up. Details in `Fix YOUTH.md`.
