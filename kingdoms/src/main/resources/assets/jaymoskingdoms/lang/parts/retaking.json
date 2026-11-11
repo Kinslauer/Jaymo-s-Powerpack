@@ -112,5 +112,15 @@
 	"retaking.jaymoskingdoms.road.faith.favour": "Rise to your patron's second tier of favour.",
 	"retaking.jaymoskingdoms.road.faith.champion": "Bring down your patron's champion.",
 	"retaking.jaymoskingdoms.road.faith.rival": "Stand against a rival faith's champion.",
-	"retaking.jaymoskingdoms.road.faith.champion_three": "Bring down your patron's champion three times."
+	"retaking.jaymoskingdoms.road.faith.champion_three": "Bring down your patron's champion three times.",
+	"retaking.jaymoskingdoms.road.thief": "The Thief's Road",
+	"retaking.jaymoskingdoms.road.thief.lift": "Pick a pocket clean.",
+	"retaking.jaymoskingdoms.road.thief.lock": "Pick a lock.",
+	"retaking.jaymoskingdoms.road.thief.den": "Find a den.",
+	"retaking.jaymoskingdoms.road.thief.buried": "Pick the right lock, and find what someone paid to have buried.",
+	"retaking.jaymoskingdoms.road.campaign": "The Old Campaign",
+	"retaking.jaymoskingdoms.road.campaign.first": "Rise in your trade: reach level 5 in its skill.",
+	"retaking.jaymoskingdoms.road.campaign.second": "Rise in your trade: reach level 10 in its skill.",
+	"retaking.jaymoskingdoms.road.campaign.third": "Rise in your trade: reach level 15 in its skill.",
+	"retaking.jaymoskingdoms.road.campaign.fourth": "Rise in your trade: reach level 20 in its skill."
 }

@@ -2,12 +2,18 @@ package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -21,6 +27,12 @@ import org.jspecify.annotations.Nullable;
  * good.</li>
  * <li><b>The Faithful Road</b> (anyone sworn to a patron): swear; reach your patron's second tier of favour; bring down
  * your patron's champion; stand against a rival faith's champion; bring down your own champion three times.</li>
+ * <li><b>The Thief's Road</b> (Thieves, taught by the Ash Whisperer's quick-handed faithful): pick a pocket clean; pick a
+ * lock; find a den; and, behind a lock picked in the Dark Below, a contract under a black candle and the book someone paid
+ * to have buried ({@code a_contract}, with a copy of {@code the_long_defence}).</li>
+ * <li><b>The Old Campaign</b> (Warlords, Brutes, Riders, Marksmen, Archers and Survivalists): rise in your trade's skill
+ * (Survival for Archers and Survivalists, Strength for the rest), each {@link #CAMPAIGN_EVERY} levels a step, and each step
+ * hands you the next part of an old campaigner's account ({@code the_old_campaign_1..4}).</li>
  * </ul>
  */
 public final class StoryRoads {
@@ -36,6 +48,15 @@ public final class StoryRoads {
 	static final String MARGINS = JaymosKingdoms.id("a_wizards_margins").toString();
 	/** The patron favour tier the Faithful Road's second step asks for, and the champion kills its last. */
 	static final int FAITH_TIER = 2, OWN_CHAMPIONS = 3;
+	/** The contract under a black candle (a lore book), found with the book it is about behind a picked lock. */
+	static final String CONTRACT = JaymosKingdoms.id("a_contract").toString();
+	/** The chance a locked chest picked on the Thief's last step holds the contract. */
+	static final double CONTRACT_CHANCE = 0.34;
+	/** The trade skill levels between the Old Campaign's steps. */
+	static final int CAMPAIGN_EVERY = 5;
+	static final List<String> CAMPAIGN_STEPS = List.of("first", "second", "third", "fourth");
+	static final Set<Classes.PlayerClass> CAMPAIGNERS = EnumSet.of(Classes.PlayerClass.WARLORD, Classes.PlayerClass.BRUTE,
+		Classes.PlayerClass.RIDER, Classes.PlayerClass.MARKSMAN, Classes.PlayerClass.ARCHER, Classes.PlayerClass.SURVIVALIST);
 
 	public static final List<Road> ROADS = List.of(
 		new Road("arcana", p -> Classes.is(p, Classes.PlayerClass.MAGE) || Classes.is(p, Classes.PlayerClass.SORCERER), List.of(
@@ -43,7 +64,13 @@ public final class StoryRoads {
 			new Step("learned", Retaking.Act.DARK_BELOW))),
 		new Road("faith", p -> Patrons.of(p) != null, List.of(
 			new Step("sworn", Retaking.Act.HEARTH), new Step("favour", Retaking.Act.OLD_STONES), new Step("champion", Retaking.Act.LIGHTS),
-			new Step("rival", Retaking.Act.DARK_BELOW), new Step("champion_three", Retaking.Act.LEGEND))));
+			new Step("rival", Retaking.Act.DARK_BELOW), new Step("champion_three", Retaking.Act.LEGEND))),
+		new Road("thief", p -> Classes.is(p, Classes.PlayerClass.THIEF), List.of(
+			new Step("lift", Retaking.Act.HEARTH), new Step("lock", Retaking.Act.OLD_STONES), new Step("den", Retaking.Act.LIGHTS),
+			new Step("buried", Retaking.Act.DARK_BELOW))),
+		new Road("campaign", p -> CAMPAIGNERS.contains(Classes.classOf(p)), List.of(
+			new Step("first", Retaking.Act.HEARTH), new Step("second", Retaking.Act.OLD_STONES), new Step("third", Retaking.Act.LIGHTS),
+			new Step("fourth", Retaking.Act.DARK_BELOW))));
 
 	/** The road steps done, as {@code road.step}. Saved, kept through death. */
 	static final AttachmentType<List<String>> DONE = AttachmentRegistry.create(JaymosKingdoms.id("retaking_roads"),
@@ -83,11 +110,11 @@ public final class StoryRoads {
 		return player.getAttachedOrElse(DONE, List.of());
 	}
 
-	/** {@code road}'s {@code step} is done by {@code player}, if the road is theirs and its act has begun. */
-	static void mark(ServerPlayer player, String road, String step) {
+	/** {@code road}'s {@code step} is done by {@code player}, if the road is theirs and its act has begun; true if newly. */
+	static boolean mark(ServerPlayer player, String road, String step) {
 		Road r = road(road);
 		if (r == null || !r.yours().test(player)) {
-			return;
+			return false;
 		}
 		for (Step s : r.steps()) {
 			if (s.name().equals(step) && Knowledge.level(player) >= s.act().ordinal()) {
@@ -97,10 +124,16 @@ public final class StoryRoads {
 					List<String> more = new ArrayList<>(done);
 					more.add(id);
 					player.setAttached(DONE, List.copyOf(more));
+					return true;
 				}
-				return;
+				return false;
 			}
 		}
+		return false;
+	}
+
+	static boolean isDone(ServerPlayer player, String road, String step) {
+		return done(player).contains(road + "." + step);
 	}
 
 	/** Looked at with the act milestones: the steps that are a state rather than a deed. */
@@ -114,6 +147,24 @@ public final class StoryRoads {
 			}
 			if (Classes.of(player).spells().size() >= 2) {
 				mark(player, "arcana", "learned");
+			}
+		}
+		if (Classes.is(player, Classes.PlayerClass.THIEF)) {
+			if (!player.getAttachedOrElse(Underworld.FOUND, List.of()).isEmpty()) {
+				mark(player, "thief", "den");
+			}
+			if (LoreCodex.holds(player, CONTRACT)) {
+				mark(player, "thief", "buried");
+			}
+		}
+		Classes.PlayerClass cls = Classes.classOf(player);
+		if (cls != null && CAMPAIGNERS.contains(cls)) {
+			Skills.Pillar pillar = cls == Classes.PlayerClass.ARCHER || cls == Classes.PlayerClass.SURVIVALIST ? Skills.Pillar.SURVIVAL : Skills.Pillar.STRENGTH;
+			int level = Skills.of(player).level(pillar);
+			for (int i = 0; i < CAMPAIGN_STEPS.size() && level >= (i + 1) * CAMPAIGN_EVERY; i++) {
+				if (mark(player, "campaign", CAMPAIGN_STEPS.get(i))) {
+					give(player, LoreBooks.book("the_old_campaign_" + (i + 1)));
+				}
 			}
 		}
 		Patron sworn = Patrons.of(player);
@@ -133,6 +184,38 @@ public final class StoryRoads {
 			}
 		}
 		return false;
+	}
+
+	private static void give(ServerPlayer player, ItemStack stack) {
+		if (!stack.isEmpty() && !player.getInventory().add(stack)) {
+			player.drop(stack, false, Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** (From a pocket picked with something in it, or a lock picked.) {@code step}: "lift" or "lock". */
+	public static void thief(ServerPlayer player, String step) {
+		mark(player, "thief", step);
+	}
+
+	/**
+	 * (From a locked chest picked, before it opens.) On the Thief's last step, now and then the chest holds the contract
+	 * and the book it is about.
+	 */
+	static void pickedChest(ServerPlayer player, BlockEntity chest) {
+		if (!(chest instanceof Container box) || !Classes.is(player, Classes.PlayerClass.THIEF) || isDone(player, "thief", "buried")
+			|| Knowledge.level(player) < Retaking.Act.DARK_BELOW.ordinal() || LoreCodex.holds(player, CONTRACT)
+			|| player.getRandom().nextDouble() >= CONTRACT_CHANCE) {
+			return;
+		}
+		for (ItemStack book : List.of(LoreBooks.book("a_contract"), LoreBooks.book("the_long_defence"))) {
+			for (int i = 0; i < box.getContainerSize() && !book.isEmpty(); i++) {
+				if (box.getItem(i).isEmpty()) {
+					box.setItem(i, book);
+					book = ItemStack.EMPTY;
+				}
+			}
+		}
+		box.setChanged();
 	}
 
 	/** (From the court wizard's or a demon's telling of the old war.) */

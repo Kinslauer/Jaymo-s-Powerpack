@@ -2,6 +2,8 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.client.power.zfighter.ZFighterStoryScreen;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.chrono.ChronoPower;
+import com.jaymospowers.power.chrono.ChronoRoad;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterSagas;
 import java.util.AbstractMap;
@@ -12,34 +14,61 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import org.jspecify.annotations.Nullable;
 
 /**
- * The player's own road through the Retaking (Jaymo's Kingdoms' story), for its Story tab, which reaches here by
- * reflection (Kingdoms never compiles against Powers). One road for now: the Z Fighter's, the three sagas folded in
- * (Ashes, then Sky and Crown). The tab lists its goals as plain lines and opens the saga screen ({@link #open}) to pick
- * one up or give it up.
+ * The player's own roads through the Retaking (Jaymo's Kingdoms' story), for its Story tab, which reaches here by
+ * reflection (Kingdoms never compiles against Powers). The Z Fighter's road (the three sagas folded in: Ashes, then Sky
+ * and Crown), with the saga screen to pick one up or give it up ({@link #open}); and the Chrono's road
+ * ({@link ChronoRoad}). The tab lists their goals as plain lines.
  * <p>
- * The contract Kingdoms calls: {@link #title()}, {@link #goals()}, {@link #open(Screen)}.
+ * The contract Kingdoms calls: {@link #keys()}, {@link #title(String)}, {@link #goals(String)}, {@link #hasScreen(String)},
+ * {@link #open(String, Screen)}.
  */
 public final class StoryRoads {
+	static final String ZFIGHTER = "zfighter", CHRONO = "chrono";
+
 	private StoryRoads() {
 	}
 
-	/** The local player's road's name, or null if they have none. */
-	public static @Nullable Component title() {
+	/** The local player's roads, by key. */
+	public static List<String> keys() {
+		List<String> keys = new ArrayList<>();
 		Player player = Minecraft.getInstance().player;
-		if (player != null && Powers.has(player, ZFighterPower.INSTANCE)) {
-			return Component.translatable("road.jaymospowers.zfighter");
+		if (player != null) {
+			if (Powers.has(player, ZFighterPower.INSTANCE)) {
+				keys.add(ZFIGHTER);
+			}
+			if (Powers.has(player, ChronoPower.INSTANCE)) {
+				keys.add(CHRONO);
+			}
 		}
-		return null;
+		return keys;
 	}
 
-	/** The road's goals, in order: each done or not, and its line. */
-	public static List<Map.Entry<Boolean, Component>> goals() {
+	/** Road {@code key}'s name. */
+	public static Component title(String key) {
+		return Component.translatable("road.jaymospowers." + key);
+	}
+
+	/** Whether road {@code key} has its own screen ({@link #open}). */
+	public static boolean hasScreen(String key) {
+		return ZFIGHTER.equals(key);
+	}
+
+	/** Road {@code key}'s goals, in order: each done or not, and its line. */
+	public static List<Map.Entry<Boolean, Component>> goals(String key) {
 		List<Map.Entry<Boolean, Component>> goals = new ArrayList<>();
 		Player player = Minecraft.getInstance().player;
-		if (player == null || !Powers.has(player, ZFighterPower.INSTANCE)) {
+		if (player == null) {
+			return goals;
+		}
+		if (CHRONO.equals(key)) {
+			for (String step : ChronoRoad.STEPS) {
+				goals.add(new AbstractMap.SimpleEntry<>(ChronoRoad.done(player, step), Component.translatable("road.jaymospowers.chrono." + step)));
+			}
+			return goals;
+		}
+		if (!ZFIGHTER.equals(key) || !Powers.has(player, ZFighterPower.INSTANCE)) {
 			return goals;
 		}
 		ZFighterSagas.Data data = ZFighterSagas.of(player);
@@ -64,8 +93,10 @@ public final class StoryRoads {
 		return goals;
 	}
 
-	/** Opens the saga screen (start, difficulty, give up, side jobs), coming back to {@code parent}. */
-	public static void open(Screen parent) {
-		Minecraft.getInstance().gui.setScreen(new ZFighterStoryScreen(parent));
+	/** Opens road {@code key}'s own screen (the sagas: start, difficulty, give up, side jobs), coming back to {@code parent}. */
+	public static void open(String key, Screen parent) {
+		if (ZFIGHTER.equals(key)) {
+			Minecraft.getInstance().gui.setScreen(new ZFighterStoryScreen(parent));
+		}
 	}
 }

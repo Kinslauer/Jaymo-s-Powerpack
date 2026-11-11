@@ -22,8 +22,8 @@ import org.jspecify.annotations.Nullable;
  * down the left (done, yours, or not reached, which show no name); on the right the picked act's milestones as plain
  * goals, ticked when done. It says what to do, never what it means. Asks the server when it opens.
  * <p>
- * Below the acts, the player's own roads ({@link com.jaymoskingdoms.StoryRoads}: the Arcanist's, the Faithful; and from
- * Jaymo's Powers through {@link RoadCompat}, the Z Fighter's sagas, with a button to its own screen), their goals the same
+ * Below the acts, the player's own roads ({@link com.jaymoskingdoms.StoryRoads}: the Arcanist's, the Faithful, the Thief's, the Old Campaign; and from
+ * Jaymo's Powers through {@link RoadCompat}, the Z Fighter's sagas, with a button to its own screen, and the Chrono's), their goals the same
  * plain way, a step of an act not yet reached shown only as "later".
  */
 final class RetakingScreen extends Screen {
@@ -38,9 +38,11 @@ final class RetakingScreen extends Screen {
 	private Retaking.@Nullable Act picked;
 	/** The road row picked instead of an act (its key), or null. */
 	private @Nullable String roadPicked;
-	/** The key Jaymo's Powers' road goes by here. */
-	static final String POWERS_ROAD = "powers";
+	/** Jaymo's Powers' roads go by their own key with this in front here. */
+	static final String POWERS_ROAD = "powers:";
 	private @Nullable Button roadButton;
+	/** The road the Open button opens (a Powers road with a screen of its own). */
+	private @Nullable String roadOpen;
 
 	RetakingScreen() {
 		super(Component.translatable("menu.jaymoskingdoms.story.title"));
@@ -56,20 +58,20 @@ final class RetakingScreen extends Screen {
 		if (ClientPlayNetworking.canSend(Retaking.Ask.TYPE)) {
 			ClientPlayNetworking.send(new Retaking.Ask());
 		}
-		this.roadButton = null;
-		if (RoadCompat.title() != null) {
-			int px = left() + LIST_W, pw = panelW() - LIST_W;
-			this.roadButton = addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> RoadCompat.open(this))
-				.bounds(px + pw - ROAD_BUTTON_W - 8, top() + panelH() - 22, ROAD_BUTTON_W, 16).build());
-			this.roadButton.visible = false;
-		}
+		int px = left() + LIST_W, pw = panelW() - LIST_W;
+		this.roadButton = addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> {
+			if (this.roadOpen != null) {
+				RoadCompat.open(this.roadOpen, this);
+			}
+		}).bounds(px + pw - ROAD_BUTTON_W - 8, top() + panelH() - 22, ROAD_BUTTON_W, 16).build());
+		this.roadButton.visible = false;
 	}
 
-	/** The player's roads, by key: Powers' first if they have one, then Kingdoms'. */
+	/** The player's roads, by key: Powers' first if they have any, then Kingdoms'. */
 	private List<String> roads() {
 		List<String> keys = new ArrayList<>();
-		if (this.roadButton != null && RoadCompat.title() != null) {
-			keys.add(POWERS_ROAD);
+		for (String key : RoadCompat.keys()) {
+			keys.add(POWERS_ROAD + key);
 		}
 		if (state != null) {
 			keys.addAll(state.roads());
@@ -93,17 +95,16 @@ final class RetakingScreen extends Screen {
 	}
 
 	private Component roadTitle(String key) {
-		if (POWERS_ROAD.equals(key)) {
-			Component t = RoadCompat.title();
-			return t == null ? Component.empty() : t;
+		if (key.startsWith(POWERS_ROAD)) {
+			return RoadCompat.title(key.substring(POWERS_ROAD.length()));
 		}
 		return Component.translatable("retaking.jaymoskingdoms.road." + key);
 	}
 
 	/** A road's goals: done or not, and the line (a step of an act not reached yet only says "later"). */
 	private List<java.util.Map.Entry<Boolean, Component>> roadGoals(String key) {
-		if (POWERS_ROAD.equals(key)) {
-			return RoadCompat.goals();
+		if (key.startsWith(POWERS_ROAD)) {
+			return RoadCompat.goals(key.substring(POWERS_ROAD.length()));
 		}
 		List<java.util.Map.Entry<Boolean, Component>> goals = new ArrayList<>();
 		com.jaymoskingdoms.StoryRoads.Road road = com.jaymoskingdoms.StoryRoads.road(key);
@@ -234,8 +235,10 @@ final class RetakingScreen extends Screen {
 			graphics.item(ROAD_ICON, x + 8, ry + 1);
 			Ui.line(graphics, this.font, roadTitle(key), x + 27, ry + 5, LIST_W - 34, key.equals(roadShown) ? Ui.GOLD : Ui.TEXT);
 		}
+		this.roadOpen = roadShown != null && roadShown.startsWith(POWERS_ROAD) && RoadCompat.hasScreen(roadShown.substring(POWERS_ROAD.length()))
+			? roadShown.substring(POWERS_ROAD.length()) : null;
 		if (this.roadButton != null) {
-			this.roadButton.visible = POWERS_ROAD.equals(roadShown);
+			this.roadButton.visible = this.roadOpen != null;
 		}
 		if (roadShown != null) {
 			road(graphics, roadShown, x + LIST_W, y, w - LIST_W, h);
