@@ -52,7 +52,8 @@ import net.minecraft.world.item.Items;
  * bar, then R G B with their cooldowns.</li>
  * <li><b>The look, for everyone:</b> the body burnt to char ({@link #CHAR}, over the skin), lava veins glowing through
  * it in the dark ({@link #VEINS}), and the whole body wreathed in vanilla's own flames (not round your own
- * first-person camera, not in water). Embers and smoke rise off them; with the flame bar low they gutter (fewer
+ * first-person camera, not in water). As the flame bar burns high ({@link #SKULL_FROM} to {@link #SKULL_FULL}) the face
+ * burns away to a bare skull ({@link #SKULL}, fading in over the char) and comes back as the flame drops. Embers and smoke rise off them; with the flame bar low they gutter (fewer
  * flames, more smoke).</li>
  * </ul>
  * Textures from {@code tools/gen_flame_avatar.py}.
@@ -62,6 +63,10 @@ public final class FlameAvatarClient {
 	public static final RenderStateDataKey<Float> KEY = RenderStateDataKey.create(() -> "jaymospowers:flame_avatar");
 	static final Identifier CHAR = JaymosPowers.id("textures/entity/ember/avatar_char.png");
 	static final Identifier VEINS = JaymosPowers.id("textures/entity/ember/avatar_veins.png");
+	/** The bare skull under the face (head only; the rest of the sheet is clear). */
+	static final Identifier SKULL = JaymosPowers.id("textures/entity/ember/avatar_skull.png");
+	/** The flame (0-1) above which the face begins to burn away, and at which it is wholly a skull. */
+	static final float SKULL_FROM = 0.55F, SKULL_FULL = 0.85F;
 	/** The veins' brightest glow (the full flame), and how dim they get as it gutters (share). */
 	static final float VEIN_LOW = 0.35F;
 	/** An ember off the body in this many ticks (full flame; guttering, it's rarer), and smoke with one in this many. */
@@ -205,11 +210,18 @@ public final class FlameAvatarClient {
 			PlayerModel model = com.jaymospowers.client.McaLooks.skinBody(this.getParentModel());
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityTranslucent(CHAR), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
 				state.outlineColor);
+			// the face burns away to a skull as the flame burns high, and comes back as it drops
+			float bare = Mth.clamp((flame - SKULL_FROM) / (SKULL_FULL - SKULL_FROM), 0.0F, 1.0F);
+			if (bare > 0.0F) {
+				int alpha = (int)(bare * 255.0F);
+				collector.order(2).submitModel(model, state, poseStack, RenderTypes.entityTranslucent(SKULL), lightCoords, OverlayTexture.NO_OVERLAY,
+					alpha << 24 | 0xFFFFFF, null, state.outlineColor);
+			}
 			// the veins dim as the flame gutters
 			float glow = VEIN_LOW + (1.0F - VEIN_LOW) * Mth.clamp(flame, 0.0F, 1.0F);
 			int shade = (int)(glow * 255.0F);
 			int color = 0xFF000000 | shade << 16 | shade << 8 | shade;
-			collector.order(2).submitModel(com.jaymospowers.client.McaLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(VEINS), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
+			collector.order(3).submitModel(com.jaymospowers.client.McaLooks.glowBody(this.getParentModel()), state, poseStack, RenderTypes.eyes(VEINS), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
 				state.outlineColor);
 		}
 	}
