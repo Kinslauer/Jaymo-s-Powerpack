@@ -224,6 +224,11 @@ to be in several places at once.
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
 his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 
+(new) **The drawings** (Retaking, the Chrono's Road, 2026-11-11). The first of the last pilots a Chrono talks to hands
+over some folded sheets found in the city: a great wheel "every rivet", the same wheel small enough for a sweeper's
+chest plate ("they will want to keep time"), the city's streets with a mark where every sweeper stands, and the maker's
+name scraped off every sheet, neatly. Nothing says whose they are.
+
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
@@ -858,6 +863,16 @@ take tribute, and hold festivals.
 you"): dice, bookies, fight pits, and goods the watch would rather not see. Assassins take contracts; a black candle in
 a tavern window is the guild's mark that someone has been paid for. Looters and bandits do not give their names.
 Barbarian camps take raiders and captives, and spare those the realms have outlawed.
+
+(new) **Paid For** (Retaking, the Thief's Road, 2026-11-11). Now and then a locked chest holds a contract left under a
+black candle: a book is in the chest, do not read it, put it in the ground where no road goes, "nobody sent you"; and
+"whoever pays for this has paid for it before. The book keeps turning up again. Bury it deeper this time." The book
+beside it is a copy of *The Long Defence*. Nobody says who pays.
+
+(new) **The Old Campaign** (Retaking, the trades' road, 2026-11-11). An old campaigner's account in four short parts,
+handed to fighters as they rise in their trade: the goblins at the river farms ("they were the small ones"), the orc
+king at the high pass and the stone at its top that "something had walked away from", a slow light beyond the ridge and
+the one man back with a notched stick, and the buried who did not stay buried: "Burn them. And keep a light at the ford."
 
 **Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
