@@ -156,6 +156,12 @@ kit.
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
 itself they cannot see mana abilities or spirits. They can still develop valor.
 
+(new) **A hermit's letter** (Retaking, the Hermit's Road, 2026-11-11). A hermit wizard who meets a Smoke, Gravity or Cryo
+user for the first time writes them a short letter: "You looked straight through her. She stood at my shoulder the
+whole time"; their ki "went to the cold, or the smoke, or the weight of things, whichever found you first. It does not
+go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
+when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -285,6 +291,20 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+(new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
+one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
+carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
+tall houses and terraced plots, all in the island's own stone and wood, with a mooring mast at the far edge. A town
+that size takes a king as any great town below does, so there are kingdoms in the sky. They are Divine-born realms
+with the halfway folk among them. A sky kingdom holds its own islands and nothing under them, and the ground below a
+sky town is still whoever's it was. It and the realms below cannot go to war, raid or send caravans to one another:
+there is no road, and nobody below has the ships. Sky kingdoms deal with each other as kingdoms do.
+
+(new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
+village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
+the head of the road a three-storey keep with flared roofs, which is the lord's seat. A blossom town is a kingdom like
+any other great town, and keeps its own style of name.
+
 ## The shape of the world
 
 The world is graded in tiers, and the tiers are its history as much as its difficulty:
@@ -367,8 +387,17 @@ killed a dragon, any dragon, the Ender Dragon too. After the first one dies the 
 
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
-witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
-the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
+no longer held in the Aether's Sentry Ruins either: those are the Slider's alone again (see the labyrinths, next).
+
+(new) **The labyrinths, the snow houses and the jungle temples** (Epic Structures thread, 2026-11-11; Andy: the Epic
+dungeons "should spawn the minotaur instead of the slider dungeon"). Under the plains, the deserts and the snow lie
+great dungeons older than any kingdom standing, halls and stairs cut by nobody the songs name. Each of the great ones
+is a labyrinth with a **minotaur** in its biggest hall, and about one in three of the middling ones has one too; the
+small ones hold only the usual dead. It does not leave its hall. In the cold lands stand snow houses, small ones and
+large ones with a cellar dug under them, the winter camps of hunters who are mostly not at home. In the jungles stand
+stepped stone temples and their ruins, raised by the same forgotten hands as the labyrinths and long since emptied of
+priests. (Claude's placement, for Andy to approve: who built them is left unnamed on purpose.)
 
 ## The dead
 

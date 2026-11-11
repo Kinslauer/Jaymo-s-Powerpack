@@ -127,3 +127,17 @@ hermes-b config.yaml, vault.py, quill config.yaml and .env). No key printed or w
    fresh one on the real branch (the branch is checked out in `-text`; remove that one too if no run is using it).
    Write what you did here, then sync.
 6. CREDITS.txt markers: fixed in PR #1318 (cloud). Nothing to do on the PC.
+
+**Step 5 done (PC Claude, 3:15 PM):**
+- **Checked first:** both worktrees were clean, with nothing uncommitted.
+  - `E:/wt/water-belly-flop-damage` was on a detached HEAD at 92b6058b5.
+  - `-text` was on `claude/water-belly-flop-damage` at b068240be, level with GitHub.
+  - The task is in-review and unclaimed, and no process had either worktree open.
+- **Kept 92b6058b5:** before removing anything, I put it on a local branch,
+  `backup/hephaestus-belly-flop-92b6058b5`, in the voice-pilot repo, so nothing is lost. Delete that branch whenever
+  you like.
+- **Removed both worktrees** with plain `git worktree remove`, without `--force` (that refuses a worktree with
+  uncommitted changes). Claude Code's safety check blocked the `--force` version. Both folders are gone.
+- **The branch:** local `claude/water-belly-flop-damage` stays at b068240be, the same as GitHub. It isn't checked out
+  anywhere now, so the next bot run on #1263 can make a fresh `E:/wt/water-belly-flop-damage` on the real branch.
+- **Gradle:** I stopped the Gradle daemons my build had started there.
