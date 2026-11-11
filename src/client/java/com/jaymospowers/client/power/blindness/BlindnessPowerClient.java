@@ -37,6 +37,9 @@ public final class BlindnessPowerClient implements PowerClient {
     /** Total blindness vignette colour (near-black) and max alpha. */
     private static final int TOTAL_BLIND_COLOUR = 0x0A0A12;
     private static final int TOTAL_BLIND_ALPHA = 0xF0; // almost opaque
+    /** The devout's (BlindnessDevotion) thinner dark, and thinner still from up in Sky Sight. */
+    private static final int DEVOUT_BLIND_ALPHA = 0xB4;
+    private static final int SKY_SIGHT_BLIND_ALPHA = 0x8C;
     /** One-eye Borrado (blur) - we simulate with a dark translucent overlay on one side. */
     private static final int BORRADO_COLOUR = 0x1A1A2E;
     private static final int BORRADO_ALPHA = 0xC0;
@@ -149,7 +152,11 @@ public final class BlindnessPowerClient implements PowerClient {
 
         // 1. Total blindness vignette (base layer - covers everything)
         if (totalBlindShade > 0.01F) {
-            int alpha = Mth.clamp((int) (TOTAL_BLIND_ALPHA * totalBlindShade), 0, 255);
+            // the devout's dark is thinner, so what lives burns through it, and thinner again from up in Sky Sight
+            LocalPlayer self = Minecraft.getInstance().player;
+            int full = BlindnessDevoutSight.devout(self)
+                    ? (int) Mth.lerp(BlindnessDevoutSight.raised(), DEVOUT_BLIND_ALPHA, SKY_SIGHT_BLIND_ALPHA) : TOTAL_BLIND_ALPHA;
+            int alpha = Mth.clamp((int) (full * totalBlindShade), 0, 255);
             int colour = alpha << 24 | TOTAL_BLIND_COLOUR;
             graphics.fill(0, 0, w, h, colour);
         }

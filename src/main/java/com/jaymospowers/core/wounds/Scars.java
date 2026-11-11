@@ -32,6 +32,7 @@ import net.minecraft.world.entity.player.Player;
  * <li><b>Frostbite</b> (frozen): stiff fingers, slower swings and digging.</li>
  * <li><b>Lightning scars</b>, <b>wasting</b> (starved): less most health.</li>
  * <li><b>Crushed ribs</b> (anything else the world did: walls, cactus, crowding): a slower step.</li>
+ * <li><b>Carved-out eyes</b>: not from dying but chosen, by Blindness's devout; Blindness reads it.</li>
  * </ul>
  * Synced so the wounds screen (and a later skin layer for the burns) can show them.
  */
@@ -43,7 +44,9 @@ public final class Scars {
 	static final double CRUSHED_SPEED = -0.05;
 
 	public enum Kind {
-		BURNS, WEAK_LUNGS, FROSTBITE, LIGHTNING, WASTING, CRUSHED;
+		BURNS, WEAK_LUNGS, FROSTBITE, LIGHTNING, WASTING, CRUSHED,
+		/** The eyes carved out by one of Blindness's devout ({@code BlindnessDevotion}): nothing here, the power reads it. */
+		CARVED_EYES;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);

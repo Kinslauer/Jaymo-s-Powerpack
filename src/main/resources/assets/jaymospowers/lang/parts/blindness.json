@@ -1,6 +1,6 @@
 {
 	"power.jaymospowers.blindness": "Blindness",
-	"power.jaymospowers.blindness.desc": "You cannot see. Sound paints the world for a moment at a time: rings ripple out from every noise and reveal what lies near.",
+	"power.jaymospowers.blindness.desc": "You cannot see. Sound paints the world for a moment at a time: rings ripple out from every noise and reveal what lies near. The devout take it on: they wear a blindfold, or carve out their own eyes, and see living things through the dark.",
 	"power.jaymospowers.blindness.key.ability_1": "Echolocation: send out a sonar ring that reveals the world around you for a moment.",
 	"power.jaymospowers.blindness.key.ability_1.name": "Echolocation",
 	"power.jaymospowers.blindness.key.ability_2": "One-Eye Blind (hold): close one eye; that side of the screen blurs (Borrado) or darkens (Escuro), the rest stretches to fill the screen and your aim drifts toward the blind side.",
@@ -11,7 +11,7 @@
 	"power.jaymospowers.blindness.key.ability_4.name": "Deafen",
 	"power.jaymospowers.blindness.key.mode": "Variant Toggle: switch the one-eye blind between Borrado (blur) and Escuro (darken).",
 	"power.jaymospowers.blindness.key.mode.name": "Variant Toggle",
-	"power.jaymospowers.blindness.key.ultimate": "C: Void Sight when ascended, Blackout when corrupted, Abyssal Echo when both - a pulse that blinds everyone nearby.",
+	"power.jaymospowers.blindness.key.ultimate": "C: Void Sight when ascended (Sky Sight for the devout: your view rises high over you), Blackout when corrupted, Abyssal Echo when both - a pulse that blinds everyone nearby.",
 	"power.jaymospowers.blindness.key.ultimate.name": "True Sight",
 	"blindness.jaymospowers.variant.borrado": "Borrado",
 	"blindness.jaymospowers.variant.escuro": "Escuro",
@@ -22,5 +22,10 @@
 	"message.jaymospowers.blindness.blackout.on": "Blackout on.",
 	"message.jaymospowers.blindness.blackout.off": "Blackout off.",
 	"message.jaymospowers.blindness.void_sight.on": "Void Sight on.",
-	"message.jaymospowers.blindness.void_sight.off": "Void Sight off."
+	"message.jaymospowers.blindness.void_sight.off": "Void Sight off.",
+	"item.jaymospowers.blindfold": "Blindfold",
+	"message.jaymospowers.blindness.sky_sight.on": "Sky Sight on. You see yourself from far above.",
+	"message.jaymospowers.blindness.sky_sight.off": "Sky Sight off.",
+	"message.jaymospowers.blindness.carve_warn": "Again, to carve out your eyes. There is no undoing it.",
+	"message.jaymospowers.scar.carved_eyes": "Your eyes are gone. Something else looks out in their place."
 }
