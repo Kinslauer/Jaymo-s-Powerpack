@@ -177,6 +177,10 @@ public final class VillagerHeritage {
 		if (level.dimension().identifier().equals(Verdants.WORLD)) {
 			return Heritage.Kind.VERDANT;
 		}
+		// the Aether's own people: Divine-born, and the halfway folk among them (SkyFolk)
+		if (SkyFolk.at(level, pos)) {
+			return SkyFolk.born(random);
+		}
 		if (level instanceof ServerLevel server) {
 			// (0.7.130) on a purist king's land, most are born to his blood
 			Heritage.Kind proud = Purists.lean(server, pos, random);
@@ -552,7 +556,9 @@ public final class VillagerHeritage {
 			return FrostTech.talk(villager, random);
 		}
 		if (kind != Heritage.Kind.WARRIORBORN) {
-			return kind.key();
+			// up in the Aether, the sky folk's own lines
+			String sky = SkyFolk.talk(villager, kind);
+			return sky != null ? sky : kind.key();
 		}
 		Set<String> tags = villager.entityTags();
 		if (tags.contains(TAIL_CUT)) {
@@ -635,6 +641,7 @@ public final class VillagerHeritage {
 			case "cut" -> CUT_LINES;
 			case "cut_rampage" -> CUT_RAMPAGE_LINES;
 			case "dawnborn" -> DAWNBORN_LINES;
+			case "sky_divine", "sky_dawnborn" -> SkyFolk.LINES;
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);

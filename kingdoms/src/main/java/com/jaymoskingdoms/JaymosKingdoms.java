@@ -642,6 +642,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		StarFolk.register();
 		// 0.7.547: some villagers know of the heavens overhead, and some try to get there
 		Heavens.register();
+		SkyFolk.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();

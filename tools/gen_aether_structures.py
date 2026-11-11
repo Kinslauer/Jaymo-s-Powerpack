@@ -486,6 +486,24 @@ def loot():
         pool((1, 3), [item(jp("cloudtwine"), 1, 3, 3), item(jp("moa_feather"), 1, 4, 3), item(jp("cockatrice_feather"), 1, 2, 1)]),
         pool((0, 1), [item(mc("crossbow"), weight=4), item(mc("bow"), weight=2)]),
     ])
+    # the sky villages: a home's chest (and what a ruined home's vases still hold), the skiff's hold, the keep
+    table("chests", "sky_village/home", [
+        pool((2, 4), fruit),
+        pool((1, 3), [item(jp("cloudwool"), 1, 4, 3), item(jp("cloudtwine"), 1, 3, 3), item(jp("moa_feather"), 1, 3, 2), item(mc("paper"), 1, 2, 2)]),
+        pool((1, 2), [item(jp("ambrosium_shard"), 1, 4, 3), item(jp("ambrosium_torch"), 2, 5, 3), item(jp("golden_amber"), 1, 2, 2)]),
+        pool((0, 1), [item(jp("glint_coin"), 1, 3, 4), item(mc("book"), weight=2), item(mc("bucket"), weight=1)]),
+    ])
+    table("chests", "sky_village/skiff", [
+        pool((2, 4), [item(jp("cloudtwine"), 2, 5, 4), item(jp("cloudwool"), 2, 6, 4), item(jp("skyroot_planks"), 3, 8, 3), item(mc("string"), 2, 5, 2)]),
+        pool((1, 2), [item(jp("ambrosium_shard"), 2, 6, 3), item(jp("golden_amber"), 1, 3, 2), item(jp("zanite_gemstone"), 1, 2, 1)]),
+        pool((1, 2), fruit),
+        pool((0, 1), [item(mc("compass"), weight=2), item(mc("spyglass"), weight=1), item(mc("map"), weight=2)]),
+    ])
+    table("chests", "sky_village/keep", [
+        pool((2, 4), [item(jp("glint_coin"), 2, 6, 6), item(jp("zanite_gemstone"), 1, 3, 3), item(jp("golden_amber"), 1, 4, 3), item(jp("ambrosium_shard"), 2, 6, 3)]),
+        pool((1, 2), [item(jp("scatterglass"), 1, 3, 3), item(jp("blue_cloudwool"), 2, 5, 2), item(mc("amethyst_shard"), 1, 3, 2), item(mc("book"), 1, 2, 2)]),
+        pool((0, 1), [gear("zanite_sword", weight=2), gear("zanite_pickaxe", weight=2), item(mc("shield"), weight=2)]),
+    ])
     # watchtower
     table("chests", "watchtower", [
         pool(1, [item(mc("crossbow"), weight=4), item(mc("crossbow"), weight=2), item(mc("bow"), weight=1)]),
@@ -656,6 +674,14 @@ STRUCTURES = {
     "irradiated_settlement_remnants": ("irradiated", 1, ["contaminated_jungle", "battleground_wastes"], "surface_structures"),
     "infected_guardian_tree": ("guardian", None, ["flourishing_field", "verdant_woods", "shrouded_forest", "magnetic_scar", "violet_highwoods", "enduring_woodland",
                                                   "sheer_tundra"], "surface_structures"),
+    # the sky villages (SkyVillages): lived in by the land's palette, the same in ruins, and the sky lord's castle
+    "sky_village_highfields": ("village", 0, ["flourishing_field", "verdant_woods"], "surface_structures"),
+    "sky_village_magnetic": ("village", 1, ["magnetic_scar", "turquoise_forest", "violet_highwoods"], "surface_structures"),
+    "sky_village_arctic": ("village", 2, ARCTIC, "surface_structures"),
+    "sky_village_ruin_highfields": ("village", 3, ["flourishing_field", "verdant_woods", "shrouded_forest"], "surface_structures"),
+    "sky_village_ruin_magnetic": ("village", 4, ["magnetic_scar", "turquoise_forest", "violet_highwoods", "glistening_swamp"], "surface_structures"),
+    "sky_village_ruin_arctic": ("village", 5, ARCTIC, "surface_structures"),
+    "sky_castle": ("castle", None, SURFACE_MID, "surface_structures"),
 }
 
 # set id: (spacing, separation, salt, [(structure, weight)], frequency, exclusion (other set, chunks) or None, spread)
@@ -670,6 +696,9 @@ SETS = {
     "irradiated_remnants": (8, 3, 1380213107, [("irradiated_bunker_remnants", 1), ("irradiated_settlement_remnants", 1)], 1.0, ("sentry_ruins", 4), "linear"),
     "outposts": (28, 18, 1380213108, [("outpost", 1)], 1.0, None, "linear"),
     "infected_guardian_trees": (22, 10, 1380213109, [("infected_guardian_tree", 1)], 1.0, ("outposts", 5), "linear"),
+    "sky_villages": (30, 14, 1380213110, [("sky_village_highfields", 6), ("sky_village_magnetic", 6), ("sky_village_arctic", 6),
+                                          ("sky_village_ruin_highfields", 2), ("sky_village_ruin_magnetic", 2), ("sky_village_ruin_arctic", 2),
+                                          ("sky_castle", 2)], 1.0, ("outposts", 6), "linear"),
 }
 
 
