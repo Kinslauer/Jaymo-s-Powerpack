@@ -11129,3 +11129,12 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - Each golem has walk, idle, hurt and death animations (they fall by their own animation instead of tipping over).
 - `TownGolem` (now a GeoEntity), `client/TownGolemRenderer`, `kingdoms/tools/gen_town_golems.py`, `kingdoms/art/town_golem_*.bbmodel`, `docs/TownGolems-Spec.md`.
 - Built; not played. The models and poses were only seen in the tool's renders, so the seat height and how the fold reads in game are unchecked.
+
+## 0.7.725 (2026-11-11): The Retaking - the ford, and village talk by act (#1299)
+
+- **The keep above the ford** (the field of The Long Defence): one per world, and it has always stood there. When a world first starts, its site is picked from the world's own biome map: a forest beside a river, 1,200 to 6,000 blocks from spawn, wherever that turns out to be. It is only built when someone first comes within about 110 blocks of it, never just because someone is nearby. It's a ruined keep of mossy, cracked stone with a broken corner tower and its gate facing the water, a worn road down to a shallow gravel ford, rubble, vines and cobwebs. A chest in the keep holds **A Loose Page** from the gate-warden, plus a lantern, arrows and nuggets.
+- **Where the Five Stood**, an Act II milestone: stand at the ford. The first time it counts, The Long Defence's wordless film plays again, there.
+- **Village talk by act**: seven new talks for any grown villager, each heard once, which shift as you reach each act. In Act I a father who watched the sky, and someone who can tell you've read the warden's book. In Act II, which way the old keep lies and roughly how far (spoken of as a place long forgotten), and beasts grown hardier since a giant "came down". Then lights that come down slow, something at the bottom of the dark that keeps count, and songs being made about you. They're hints only; nothing is said outright.
+- Ops: `/kingdom ford where` shows where the keep stands or will stand; `/kingdom ford raise` builds one at a forest river near you, for testing.
+- Classes: `Ford` (new), `Retaking` (ford milestone), `TalkBook` (retaking_* talks).
+- Compiled (main + client); not played.

@@ -2374,3 +2374,8 @@ will still have to fight in the tournament as a non z fighter)".
 - New advancements: Odd Jobs (three town errands), The Long Defence (find the book), and one per king. Sworn, the monolith, the Aether and Not the Last moved to their acts. Reaching the Aether is awarded by Kingdoms now (same criterion, so it stays earned).
 - Data and lang only; not played.
 - The Z Fighter training screen's **Story button is gone** (Andy): the story is the H menu's Story tab for everyone now. Sagas already under way still finish; side jobs still come from masters and the Keeper. The sagas return later as the fighter's own road in the Story tab.
+
+## 0.22.10 (2026-11-11): The Retaking - Where the Five Stood (#1299)
+
+- New Act II advancement **Where the Five Stood**: find the ford below the old keep in the wood (awarded by Kingdoms).
+- Data and lang only; not played.
