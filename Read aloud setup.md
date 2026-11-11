@@ -119,3 +119,17 @@ into Hermes' Python 3.14.
   --stop, --list, --dry-run). They never use python3/python/py, and say not to test with `python3 -c "import discord"`.
   The skill also lists `--check` and says to report its result, not install things.
 - Still to do: Andy asks YOUTH to read again. The bot should now join undeafened.
+
+## 2026-11-11 12:15 AM: it plays, the ring is green, Andy hears nothing
+Not muted, user volume fine, all permissions. Most likely Discord's E2EE voice (DAVE) dropping frames. For Claude Code on
+the PC, after Andy merges PR #1279 (adds --debug) and you pull master into E:/Origins Mod:
+1. `--stop` any reading still running. Check nothing else holds YOUTH's voice: the Hermes gateway may have its own
+   Discord voice feature (YOUTH sat in General before the script ever ran, at 11:47 PM). If it does, turn that off,
+   or two connections fight over one bot.
+2. With Andy in General, run it yourself with the Python 3.12 that worked:
+   `py -3 tools/discord_read_aloud.py Lore --section="The ages of the world" --only --debug 2> read_debug.log`
+   Ask Andy if he hears it.
+3. `py -3 -m pip show discord.py davey PyNaCl` and note the versions. Upgrade discord.py[voice] and davey to the
+   newest if they aren't already, and try again.
+4. Copy the stdout lines (dave_version / ready / can_encrypt) and the last ~80 lines of read_debug.log (no token is
+   logged, but check) into a new section here and run vault_sync.
