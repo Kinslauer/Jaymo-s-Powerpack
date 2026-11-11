@@ -556,6 +556,13 @@ outskirts), **the Ash** (their heartland) and **the Abyss** (their deepest dark)
 of the Gloam, of the Ash, of the Abyss), who teaches only "those who walk the shadowed path", once a day, in blood.
 Demon soldiers and captains serve them. There is no portal to any of it beyond the Nether's own.
 
+(new) **The muster-rolls** (Retaking Act IV, 2026-11-11). Every demon village keeps the roll it sent up to the
+sorcerer's battle: "for the one at the back" (never named), the Gloam's four hundred, the Ash's nine hundred, "the Abyss:
+what the Abyss would give". Promised: the light, the fields, the warm houses and what was in them. Came home: "the imps,
+mostly. They fly." The last page: the Master says they do not go up again until they are called. "We have not been
+called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
+ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
+
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
 too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
