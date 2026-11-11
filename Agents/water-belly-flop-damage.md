@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: water-belly-flop-damage
 branch: claude/water-belly-flop-damage
 with:
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-11 02:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
