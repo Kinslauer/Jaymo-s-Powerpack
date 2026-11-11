@@ -55,6 +55,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
@@ -83,9 +84,14 @@ import org.jspecify.annotations.Nullable;
  * its head, gets up, takes its axe back and turns on the dead for him.</li>
  * <li>The mages, each in turn, each in their own colour: Varro's fire, Thessaly's ward, Grimsby's spell-cut (he carries a
  * sword and casts with the other hand, bolts all battle long), Ambrose's light.</li>
- * <li>The fifth, in plain grey, blade in hand, runs at the sorcerer, "darting back and forth through trees and past bolts
- * of mana from the sorcerer as he approaches quickly ... and he lunges, but the sorcerer fades away". The dead drop where
- * they stand, the host runs. Nobody says who he was; he looks like none of the spirits.</li>
+ * <li>The fifth, hooded and cloaked in white, blade in hand, runs at the sorcerer, "darting back and forth through trees
+ * and past bolts of mana from the sorcerer as he approaches quickly ... and he lunges, but the sorcerer fades away". His
+ * cloak is the white suit (the first web, the anti of the black symbiote) and has a mind of its own, Andy: "flipping
+ * dodging off the trees, using his cloak to attach to an orc nearby almost autonomously ... the tendrils are now more
+ * tethers, wrapping around targets and anchor points". It throws a tether round each trunk he turns at (he swings round
+ * on it, or kicks off the bark and flips), takes hold of the sorcerer's as he passes and throws them down behind him, and
+ * reaches the sorcerer before his blade does. The dead drop where they stand, the host runs. Nobody says who he was; he
+ * looks like none of the spirits.</li>
  * <li>The road, wide, the Keep still standing. Fade.</li>
  * </ol>
  * <b>The camera</b> (Andy: "consider the 180 degree rule and the rule of thirds") never crosses the battle line: every
@@ -173,6 +179,34 @@ public final class LoreFilmClient {
 	/** The chase camera runs this far behind him and to his side, its way kept clear of trees. */
 	static final double CHASE_BACK = 3.0, CHASE_SIDE = 2.6;
 
+	// ---- his cloak ----
+	/**
+	 * The fifth's cloak (the white suit: a hooded cloak with a mind of its own): strips of cloth down his back, each of so
+	 * many links this long (blocks), this wide and thick; and how restlessly they stir when he stands.
+	 */
+	static final int CLOAK_STRIPS = 3, CLOAK_LINKS = 4;
+	static final double CLOAK_LINK = 0.4, CLOAK_STIR = 0.3;
+	static final float CLOAK_WIDTH = 0.3F, CLOAK_THICK = 0.05F;
+	/**
+	 * Its tethers: cords of the same cloth that throw themselves out, wrap what they reach (a trunk to swing him round, one
+	 * of the sorcerer's to pull it off its feet) and come back. How many links, how thick, how many ticks to reach and to
+	 * come back, and the ring it closes round what it holds.
+	 */
+	static final int TETHER_LINKS = 4, TETHER_REACH = 3, TETHER_BACK = 4, TETHER_RING = 4;
+	static final float TETHER_THICK = 0.09F;
+	/** A tether goes for a trunk when he is this near his turn at it, at this height, and lets go this long after. */
+	static final double ANCHOR_NEAR = 3.2, ANCHOR_HIGH = 3.4;
+	static final int ANCHOR_HOLD = 9;
+	/**
+	 * It takes hold of one of the sorcerer's within this reach, no sooner than this many ticks after the last and this many
+	 * times in all; holds it this long, then throws it this high and this far before it lets go.
+	 */
+	static final double GRAB_REACH = 5.5, GRAB_LIFT = 1.7, GRAB_THROW = 3.0;
+	static final int GRAB_EVERY = 12, GRABS = 6, GRAB_HOLD = 4, GRAB_FLIGHT = 9;
+	/** His turns off the trees: how long he is off the ground (ticks), how high a kick-off flip goes and how high a swing. */
+	static final int HOP_TICKS = 9;
+	static final double FLIP_HIGH = 1.35, SWING_HIGH = 0.55;
+
 	// ---- the screen ----
 	/** The dark over the screen: the memory's dim, and as the sorcerer calls. */
 	static final float DIM = 0.3F, SUMMONING = 0.6F;
@@ -216,6 +250,9 @@ public final class LoreFilmClient {
 		Flesh flesh = Flesh.MAN;
 		double f, s, toF, toS;
 		double sink, sinkTo, sinkRate = SINK_RATE, speed = WALK, scale = 1.0;
+		/** How far off the ground it is (a hop, a throw), and how far turned over in a flip (radians). */
+		double lift;
+		float flip, flipO;
 		/** 0 the defenders, 1 the sorcerer's. */
 		int team;
 		/** Left to its own script (the battle doesn't move it). */
@@ -271,6 +308,28 @@ public final class LoreFilmClient {
 		}
 	}
 
+	/**
+	 * One of the cloak's tethers: its links and the ring it closes, which shoulder it leaves from, what it's thrown at (a
+	 * point, or one of the sorcerer's to take hold of), and when it went, takes hold and lets go.
+	 */
+	static final class Tether {
+		final Display.BlockDisplay[] links = new Display.BlockDisplay[TETHER_LINKS], ring = new Display.BlockDisplay[TETHER_RING];
+		final int side, start, release;
+		final Vec3 anchor;
+		final @Nullable Actor held;
+		final double round;
+		boolean thrown;
+
+		Tether(int side, int start, int release, Vec3 anchor, @Nullable Actor held, double round) {
+			this.side = side;
+			this.start = start;
+			this.release = release;
+			this.anchor = anchor;
+			this.held = held;
+			this.round = round;
+		}
+	}
+
 	/** One of the sorcerer's bolts of mana: where it is, how it moves a tick, how long it has left, and whether it ends in a tree. */
 	static final class Mana {
 		Vec3 at;
@@ -311,6 +370,12 @@ public final class LoreFilmClient {
 		final List<Mana> mana = new ArrayList<>();
 		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer, marked;
 		@Nullable Gib axe;
+		/** The fifth's cloak: its strips' links and where each link's end is; its tethers out now. */
+		final Display.BlockDisplay[][] cloak = new Display.BlockDisplay[CLOAK_STRIPS][CLOAK_LINKS];
+		final Vec3[][] cloakAt = new Vec3[CLOAK_STRIPS][CLOAK_LINKS];
+		final List<Tether> tethers = new ArrayList<>();
+		int anchored, hopAt = -100, nextGrab, grabs;
+		boolean hopFlips;
 		@Nullable CameraType viewBefore;
 		int tick, skip, quietAt = 1, lungeAt = -1;
 		float flash, flashO;
@@ -415,6 +480,11 @@ public final class LoreFilmClient {
 			f.stranger = cast(f, quiet, Role.STRANGER, STRANGER_AT[0], STRANGER_AT[1], facing);
 			f.stranger.restYaw = facing;
 			f.stranger.speed = QUIET_RUN;
+			for (int j = 0; j < CLOAK_STRIPS; j++) {
+				for (int i = 0; i < CLOAK_LINKS; i++) {
+					f.cloak[j][i] = cloth(f);
+				}
+			}
 		}
 		// the fight, already joined: a hearthlander and one of the host to each pair, all over the field
 		List<double[]> spots = new ArrayList<>();
@@ -837,6 +907,7 @@ public final class LoreFilmClient {
 		for (Actor a : f.actors) {
 			move(f, a, t);
 		}
+		cloak(f, t);
 		things(f);
 		if (++f.tick >= LENGTH) {
 			stop(minecraft);
@@ -1214,7 +1285,56 @@ public final class LoreFilmClient {
 		if (t < QUIET) {
 			return;
 		}
+		// his turn off each tree: a tether thrown round its trunk as he comes up to it, then a swing round on it, or a kick
+		// off the bark and a flip
+		int turnTree = f.quietAt - 1;
+		if (f.lungeAt < 0 && turnTree < f.dartTrees.size() && f.anchored <= turnTree && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < ANCHOR_NEAR) {
+			f.anchored = turnTree + 1;
+			double[] tree = f.dartTrees.get(turnTree);
+			tether(f, turnTree % 2 == 0 ? -1 : 1, t, t + TETHER_REACH + ANCHOR_HOLD, f.at(tree[0], tree[1], ANCHOR_HIGH), null, 0.62);
+			sound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.6F, 0.35F);
+		}
+		int hop = t - f.hopAt;
+		quiet.flipO = quiet.flip;
+		if (hop >= 0 && hop <= HOP_TICKS) {
+			double u = hop / (double)HOP_TICKS;
+			quiet.lift = Math.sin(u * Math.PI) * (f.hopFlips ? FLIP_HIGH : SWING_HIGH);
+			quiet.flip = f.hopFlips && hop < HOP_TICKS ? (float)(u * Math.PI * 2.0) : 0.0F;
+			if (quiet.flip == 0.0F) {
+				quiet.flipO = 0.0F;
+			}
+		}
+		// the cloak takes hold of whoever of the sorcerer's is near, hardly asking him
+		if (f.lungeAt < 0 && t >= f.nextGrab && f.grabs < GRABS) {
+			Actor near = null;
+			double nearest = GRAB_REACH;
+			for (Actor a : f.legion) {
+				double d = distance(a.f, a.s, quiet.f, quiet.s);
+				if (a.up() && a.sink <= 0.0 && t >= a.busyUntil && !a.scripted && d < nearest && d > 1.2) {
+					nearest = d;
+					near = a;
+				}
+			}
+			if (near != null) {
+				f.grabs++;
+				f.nextGrab = t + GRAB_EVERY;
+				near.busyUntil = near.stunUntil = t + TETHER_REACH + GRAB_HOLD + GRAB_FLIGHT + 2;
+				near.foe = null;
+				near.toF = near.f;
+				near.toS = near.s;
+				tether(f, near.s > quiet.s ? 1 : -1, t, t + TETHER_REACH + GRAB_HOLD + GRAB_FLIGHT, Vec3.ZERO, near, 0.45 * near.scale);
+				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.4F, 0.4F);
+			}
+		}
 		if (f.lungeAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
+			if (f.quietAt < QUIET_PATH.length - 1) {
+				// off the trunk
+				f.hopAt = t;
+				f.hopFlips = f.quietAt % 2 == 0;
+				if (f.hopFlips) {
+					sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.3F, 0.4F);
+				}
+			}
 			if (f.quietAt + 1 < QUIET_PATH.length) {
 				f.quietAt++;
 				quiet.toF = QUIET_PATH[f.quietAt][0];
@@ -1227,6 +1347,10 @@ public final class LoreFilmClient {
 				quiet.toS = 0.0;
 				pose(quiet, FilmPose.LUNGE, 0.8F);
 				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.0F);
+				// the cloak gets there before the blade, and closes on smoke
+				Vec3 where = f.at(SORCERER_F, 0.0, 1.1);
+				tether(f, -1, t, t + TETHER_REACH + 7, where, null, 0.4);
+				tether(f, 1, t + 1, t + TETHER_REACH + 8, where, null, 0.55);
 			}
 		}
 		// the sorcerer's bolts
@@ -1306,6 +1430,148 @@ public final class LoreFilmClient {
 		if (since == 22) {
 			// he looks about for him
 			quiet.restYaw = f.yaw + 150.0F;
+		}
+	}
+
+	// ---- his cloak ---------------------------------------------------------------------------------------------------------
+
+	/** One link of the cloak or of a tether: a strip of white cloth, stretched where it's wanted each tick. */
+	private static Display.BlockDisplay cloth(Film f) {
+		Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
+		e.setBlockState(Blocks.WOOL.white().defaultBlockState());
+		e.setViewRange(SET_VIEW_RANGE);
+		e.setTransformation(new Transformation(new Vector3f(), null, new Vector3f(0.0F), null));
+		e.setId(nextId--);
+		e.snapTo(f.origin.x, f.origin.y, f.origin.z, 0.0F, 0.0F);
+		f.level.addEntity(e);
+		f.props.add(e);
+		return e;
+	}
+
+	/** Lays {@code e} from {@code a} to {@code b}, {@code wide} across and {@code thick} through. */
+	private static void stretch(Display.BlockDisplay e, Vec3 a, Vec3 b, float wide, float thick) {
+		Vec3 d = b.subtract(a);
+		float length = (float)Math.max(0.01, d.length());
+		Quaternionf turn = new Quaternionf().rotationTo(0.0F, 0.0F, 1.0F, (float)d.x / length, (float)d.y / length, (float)d.z / length);
+		Vector3f corner = turn.transform(new Vector3f(-wide / 2.0F, -thick / 2.0F, 0.0F));
+		e.setTransformationInterpolationDuration(1);
+		e.setTransformationInterpolationDelay(0);
+		e.setTransformation(new Transformation(corner, turn, new Vector3f(wide, thick, length), null));
+		e.setPos(a.x, a.y, a.z);
+	}
+
+	/** Throws a tether from the fifth's shoulder ({@code side}) at {@code anchor}, or at {@code held} to take hold of it. */
+	private static void tether(Film f, int side, int start, int release, Vec3 anchor, @Nullable Actor held, double round) {
+		Tether tether = new Tether(side, start, release, anchor, held, round);
+		for (int i = 0; i < TETHER_LINKS; i++) {
+			tether.links[i] = cloth(f);
+		}
+		for (int i = 0; i < TETHER_RING; i++) {
+			tether.ring[i] = cloth(f);
+		}
+		f.tethers.add(tether);
+	}
+
+	/**
+	 * The cloak, each tick: its strips hang from his shoulders and trail behind as he runs, and stir on their own when he
+	 * doesn't; its tethers reach, wrap what they reach, throw what they hold, and come back.
+	 */
+	private static void cloak(Film f, int t) {
+		Actor quiet = f.stranger;
+		if (quiet == null) {
+			return;
+		}
+		Vec3 feet = quiet.e.position(), was = new Vec3(quiet.e.xo, quiet.e.yo, quiet.e.zo);
+		Vec3 ahead = Vec3.directionFromRotation(0.0F, quiet.yaw), side = new Vec3(-ahead.z, 0.0, ahead.x);
+		double pace = Math.min(1.0, feet.subtract(was).horizontalDistance() / QUIET_RUN);
+		Vec3 up = new Vec3(0.0, 1.0, 0.0);
+		// the body's own up and back while he is turned over in a flip
+		double over = quiet.flip;
+		Vec3 spine = up.scale(Math.cos(over)).add(ahead.scale(Math.sin(over)));
+		Vec3 chest = feet.add(0.0, 0.75, 0.0);
+		for (int j = 0; j < CLOAK_STRIPS; j++) {
+			double across = (j - (CLOAK_STRIPS - 1) / 2.0) * 0.26;
+			Vec3 from = chest.add(spine.scale(0.67)).subtract(ahead.scale(0.2 * Math.cos(over))).add(side.scale(across));
+			for (int i = 0; i < CLOAK_LINKS; i++) {
+				double stir = Math.sin(t * 0.45 + i * 1.1 + j * 2.1), lift = Math.sin(t * 0.31 + i * 0.8 + j * 1.3);
+				Vec3 way = up.scale(-1.0 + pace * 0.55 + CLOAK_STIR * 0.5 * lift * (1.0 - pace))
+					.subtract(ahead.scale(0.3 + pace * 2.0 + CLOAK_STIR * stir * (1.0 - pace) * (i + 1) / CLOAK_LINKS))
+					.add(side.scale(across * 0.5 + (0.12 + 0.3 * pace) * stir * (i + 1) / CLOAK_LINKS)).normalize();
+				Vec3 want = from.add(way.scale(CLOAK_LINK)), had = f.cloakAt[j][i];
+				// each link follows the one above it, a little late
+				Vec3 to = had == null ? want : had.lerp(want, 0.55);
+				Vec3 reach = to.subtract(from);
+				to = from.add(reach.lengthSqr() < 1.0E-6 ? way.scale(CLOAK_LINK) : reach.normalize().scale(CLOAK_LINK));
+				f.cloakAt[j][i] = to;
+				stretch(f.cloak[j][i], from, to, CLOAK_WIDTH - i * 0.03F, CLOAK_THICK);
+				from = to;
+			}
+		}
+		for (Iterator<Tether> it = f.tethers.iterator(); it.hasNext(); ) {
+			Tether tether = it.next();
+			if (t < tether.start) {
+				continue;
+			}
+			double out = t < tether.release ? Math.min(1.0, (t - tether.start + 1) / (double)TETHER_REACH) : 1.0 - (t - tether.release + 1) / (double)TETHER_BACK;
+			if (out <= 0.0) {
+				for (Display.BlockDisplay link : tether.links) {
+					f.level.removeEntity(link.getId(), Entity.RemovalReason.DISCARDED);
+				}
+				for (Display.BlockDisplay link : tether.ring) {
+					f.level.removeEntity(link.getId(), Entity.RemovalReason.DISCARDED);
+				}
+				it.remove();
+				continue;
+			}
+			Actor held = tether.held;
+			Vec3 end = held != null ? held.e.position().add(0.0, 1.0 * held.scale, 0.0) : tether.anchor;
+			Vec3 from = chest.add(spine.scale(0.6)).add(side.scale(tether.side * 0.3));
+			Vec3 tip = from.lerp(end, out * out * (3.0 - 2.0 * out));
+			Vec3 line = tip.subtract(from);
+			Vec3 sideways = line.cross(up).lengthSqr() < 1.0E-6 ? side : line.cross(up).normalize();
+			Vec3 last = from;
+			for (int i = 1; i <= TETHER_LINKS; i++) {
+				double k = i / (double)TETHER_LINKS, slack = Math.sin(k * Math.PI) * (1.2 - out);
+				Vec3 point = from.add(line.scale(k)).add(sideways.scale(Math.sin(t * 0.9 + i * 1.7 + tether.side) * 0.22 * slack))
+					.add(0.0, Math.sin(t * 0.7 + i * 1.3) * 0.16 * slack, 0.0);
+				stretch(tether.links[i - 1], last, point, TETHER_THICK, TETHER_THICK);
+				last = point;
+			}
+			// closed round what it holds, turning
+			boolean wrapped = t >= tether.start + TETHER_REACH && t < tether.release;
+			for (int i = 0; i < TETHER_RING; i++) {
+				double a0 = t * 0.5 + i * Math.PI * 2.0 / TETHER_RING, a1 = a0 + Math.PI * 2.0 / TETHER_RING;
+				Vec3 p0 = end.add(Math.cos(a0) * tether.round, (i % 2) * 0.12, Math.sin(a0) * tether.round);
+				Vec3 p1 = end.add(Math.cos(a1) * tether.round, ((i + 1) % 2) * 0.12, Math.sin(a1) * tether.round);
+				stretch(tether.ring[i], wrapped ? p0 : end, wrapped ? p1 : end, TETHER_THICK, TETHER_THICK);
+			}
+			if (held == null) {
+				continue;
+			}
+			// what it holds: caught, then swung up off its feet and thrown down
+			int since = t - tether.start - TETHER_REACH;
+			if (since == 0) {
+				held.e.hurtTime = held.e.hurtDuration = 10;
+				pose(held, FilmPose.STAGGER, 0.6F);
+			}
+			if (since == GRAB_HOLD) {
+				double df = quiet.f - held.f, ds = quiet.s - held.s, d = Math.max(0.01, Math.sqrt(df * df + ds * ds));
+				// back the way he came, behind him
+				held.toF = held.f + df / d * GRAB_THROW - 1.5;
+				held.toS = held.s + ds / d * GRAB_THROW;
+				held.speed = GRAB_THROW / GRAB_FLIGHT * 1.2;
+				sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.9F, 0.5F);
+			}
+			if (since > GRAB_HOLD && since <= GRAB_HOLD + GRAB_FLIGHT) {
+				held.lift = Math.sin((since - GRAB_HOLD) / (double)GRAB_FLIGHT * Math.PI) * GRAB_LIFT;
+			}
+			if (since == GRAB_HOLD + GRAB_FLIGHT && !tether.thrown) {
+				tether.thrown = true;
+				held.lift = 0.0;
+				held.fallAt = t;
+				sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.6F);
+				blood(f, held.e.position().add(0.0, 0.6, 0.0), up, 6, held.flesh.dark);
+			}
 		}
 	}
 
@@ -1649,7 +1915,7 @@ public final class LoreFilmClient {
 	public static float @Nullable [] pose(Entity e, float partialTicks) {
 		Film f = film;
 		Actor a = f == null ? null : f.byEntity.get(e);
-		if (a == null || (a.weight < 0.005F && a.weightO < 0.005F && a.gone == 0)) {
+		if (a == null || (a.weight < 0.005F && a.weightO < 0.005F && a.gone == 0 && a.flip == 0.0F && a.flipO == 0.0F)) {
 			return null;
 		}
 		float[] out = new float[FilmPose.LENGTH];
@@ -1658,6 +1924,7 @@ public final class LoreFilmClient {
 		}
 		out[FilmPose.WEIGHT] = Mth.lerp(partialTicks, a.weightO, a.weight);
 		out[FilmPose.GONE] = a.gone;
+		out[FilmPose.FLIP] = Mth.lerp(partialTicks, a.flipO, a.flip);
 		return out;
 	}
 
@@ -1694,7 +1961,7 @@ public final class LoreFilmClient {
 		if (a.sink != a.sinkTo) {
 			a.sink = a.sink < a.sinkTo ? Math.min(a.sinkTo, a.sink + a.sinkRate) : Math.max(a.sinkTo, a.sink - a.sinkRate);
 		}
-		Vec3 at = f.at(a.f, a.s, -a.sink);
+		Vec3 at = f.at(a.f, a.s, a.lift - a.sink);
 		e.setPos(at.x, at.y, at.z);
 		// facing: whoever its scene has it face, its foe, the way it's going, or as it stood
 		Actor toward = a.facing != null ? a.facing : a.foe != null && distance(a.f, a.s, a.foe.f, a.foe.s) < 7.0 ? a.foe : null;

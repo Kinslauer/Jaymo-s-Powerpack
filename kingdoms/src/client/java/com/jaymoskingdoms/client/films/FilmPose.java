@@ -21,8 +21,11 @@ public final class FilmPose {
 	 * a number as the walk has it.
 	 */
 	static final int HEAD_X = 0, HEAD_Y = 1, LEAN = 2, RIGHT_ARM = 3, LEFT_ARM = 6, RIGHT_LEG = 9, LEFT_LEG = 10, NUMBERS = 11;
-	/** After the numbers: how much of the pose is on (0 to 1), and what's gone ({@link #NO_HEAD}, {@link #NO_RIGHT_ARM}). */
-	static final int WEIGHT = NUMBERS, GONE = NUMBERS + 1, LENGTH = NUMBERS + 2;
+	/**
+	 * After the numbers: how much of the pose is on (0 to 1), what's gone ({@link #NO_HEAD}, {@link #NO_RIGHT_ARM}), and how
+	 * far over the whole body is turned in a flip (radians, head first, about its middle).
+	 */
+	static final int WEIGHT = NUMBERS, GONE = NUMBERS + 1, FLIP = NUMBERS + 2, LENGTH = NUMBERS + 3;
 	static final int NO_HEAD = 1, NO_RIGHT_ARM = 2;
 	static final float NO = Float.NaN;
 
@@ -67,6 +70,14 @@ public final class FilmPose {
 		float[] p = living.getData(KEY);
 		if (p == null) {
 			return;
+		}
+		float flip = p[FLIP];
+		if (flip != 0.0F) {
+			// the whole body turned over about its middle (the model's own origin is at the neck, its feet 24 below)
+			var root = model.root();
+			root.xRot += flip;
+			root.y += 12.0F * (1.0F - Mth.cos(flip));
+			root.z -= 12.0F * Mth.sin(flip);
 		}
 		float w = Mth.clamp(p[WEIGHT], 0.0F, 1.0F);
 		if (w > 0.001F) {

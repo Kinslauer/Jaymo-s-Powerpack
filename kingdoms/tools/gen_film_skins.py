@@ -358,13 +358,14 @@ def sorcerer():
 def stranger():
     rnd = random.Random(9106)
     img = blank()
-    cloth = (104, 104, 102)
+    # the white suit: a hooded cloak cut like a knight's (the loose cloth of it is drawn by the film, LoreFilmClient.cloak)
+    cloth = (226, 226, 220)
     face(img, rnd, (176, 140, 112), (60, 56, 52), (60, 60, 60), shadow=True)
     robe(img, rnd, cloth)
-    hood(img, rnd, shade(cloth, -10), open_face=False)
-    belt(img, rnd, (80, 78, 74), (80, 78, 74))
-    hands(img, rnd, (176, 140, 112))
-    boots(img, rnd, (70, 66, 60))
+    hood(img, rnd, shade(cloth, -14), open_face=False)
+    belt(img, rnd, (150, 150, 144), (176, 176, 170))
+    hands(img, rnd, (200, 200, 194))
+    boots(img, rnd, (168, 166, 158))
     save(img, "stranger")
 
 
