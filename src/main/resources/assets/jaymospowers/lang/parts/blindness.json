@@ -27,5 +27,7 @@
 	"message.jaymospowers.blindness.sky_sight.on": "Sky Sight on. You see yourself from far above.",
 	"message.jaymospowers.blindness.sky_sight.off": "Sky Sight off.",
 	"message.jaymospowers.blindness.carve_warn": "Again, to carve out your eyes. There is no undoing it.",
-	"message.jaymospowers.scar.carved_eyes": "Your eyes are gone. Something else looks out in their place."
+	"message.jaymospowers.scar.carved_eyes": "Your eyes are gone. Something else looks out in their place.",
+	"message.jaymospowers.blindness.sockets_bleed": "The sockets won't stop bleeding. Bandage your eyes or bleed out.",
+	"message.jaymospowers.blindness.sockets_healed": "The sockets have closed over. Your eyes are not coming back."
 }

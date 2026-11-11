@@ -9,6 +9,9 @@ import com.jaymospowers.core.wounds.Scars;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -50,8 +53,11 @@ import net.minecraft.world.item.equipment.Equippable;
  * A powerless survival player who keeps it on for {@link #VIGIL_SECONDS} s in a row is called to Blindness: a day off
  * the wait, once a day.</li>
  * <li><b>Carving out the eyes</b>: sneak and use shears on nothing, twice within {@link #CONFIRM_TICKS} (the first
- * use only warns). The eyes are gone for the rest of that life ({@link Scars.Kind#CARVED_EYES}), the head bleeds, and a
- * powerless player awakens to Blindness at once. Only the powerless (whom no other power has called) and those who
+ * use only warns). The eyes are gone for the rest of that life ({@link Scars.Kind#CARVED_EYES}) and a powerless
+ * player awakens to Blindness at once. Andy: "you must bandage your eyes to prevent bleeding out, but your vision is
+ * gone even after they heal. leaving sockets where your eyes were." The fresh sockets ({@link #FRESH}) bleed as hard as
+ * a stump and never close by themselves until a bandage (or a rag) goes on the head; then they're healed for good, empty
+ * sockets on the face (drawn by {@code BlindnessSockets}). Only the powerless (whom no other power has called) and those who
  * already hold Blindness can do it.</li>
  * <li>Either way the holder is <b>devout</b> ({@link #devout}): the dark thins and living things near them burn through
  * it (drawn on their own screen), and Void Sight, their ultimate, lifts the view high over them: Sky Sight.</li>
@@ -70,6 +76,9 @@ public final class BlindnessDevotion {
 
 	public static final ResourceKey<EquipmentAsset> ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("blindfold"));
 	public static Item BLINDFOLD;
+	/** The sockets are fresh: they bleed until bandaged. Saved; a death ends it (whoever gets up again is healed). */
+	public static final AttachmentType<Boolean> FRESH = AttachmentRegistry.create(JaymosPowers.id("blindness_fresh_sockets"),
+		builder -> builder.persistent(Codec.BOOL));
 
 	/** Seconds in a row each powerless player has worn the blindfold, and the day it last called them. */
 	private static final Map<UUID, Integer> VIGIL = new HashMap<>();
@@ -90,6 +99,7 @@ public final class BlindnessDevotion {
 				.build())));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(BLINDFOLD));
 		ServerTickEvents.END_SERVER_TICK.register(BlindnessDevotion::tick);
+		Bleeding.holdOpen((body, part) -> part == BodyPart.HEAD && body.hasAttached(FRESH));
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			if (level.isClientSide() || !(player instanceof ServerPlayer server) || !player.isShiftKeyDown()
 				|| !player.getItemInHand(hand).is(Items.SHEARS)) {
@@ -124,6 +134,11 @@ public final class BlindnessDevotion {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			// the sockets heal once the head stops bleeding (a bandage on it)
+			if (player.hasAttached(FRESH) && (Bleeding.bleeding(player) & 1 << BodyPart.HEAD.ordinal()) == 0) {
+				player.removeAttached(FRESH);
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.blindness.sockets_healed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			}
 			boolean holder = Powers.has(player, BlindnessPower.INSTANCE);
 			if (!blindfolded(player) || holder) {
 				VIGIL.remove(player.getUUID());
@@ -167,7 +182,9 @@ public final class BlindnessDevotion {
 		WARNED.remove(player.getUUID());
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1.0F, 0.6F);
 		player.hurtServer(level, player.damageSources().generic(), Math.min(CARVE_DAMAGE, player.getHealth() - 1.0F));
+		player.setAttached(FRESH, true);
 		Bleeding.open(player, BodyPart.HEAD, false);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.blindness.sockets_bleed").withStyle(ChatFormatting.DARK_RED));
 		player.getItemInHand(hand).hurtAndBreak(1, player, hand);
 		Scars.add(player, Scars.Kind.CARVED_EYES);
 		if (!holder) {
