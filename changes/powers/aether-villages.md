@@ -16,5 +16,7 @@ filled with divine born", "Yes but now aether material", castle "in that scale, 
   `tools/gen_aether_structures.py`.
 - Villagers are plain villagers tagged `jaymospowers_sky_villager` (`jaymospowers_sky_lord`); MCA turns them into its own,
   and Kingdoms gives them their blood.
-- Not in this patch: flying crewed ships, a way to take the castle as a seat, new outfits for the sky folk.
+- The skiff hangs a step clear of the landing and, with Jaymo's Kingdoms installed, has a ship's wheel by the gap in
+  her rail: use it to cast her off as a balloon ship. Kingdoms also crews her, names the castle's lord and wardens, and
+  dresses the sky folk.
 - Compiled; never generated in a world, so the layout has not been seen in game.

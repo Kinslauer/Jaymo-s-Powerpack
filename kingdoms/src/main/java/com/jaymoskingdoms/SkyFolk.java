@@ -82,8 +82,34 @@ public final class SkyFolk {
 		return random.nextFloat() < HALFWAY_SHARE ? Heritage.Kind.DAWNBORN : Heritage.Kind.DIVINE;
 	}
 
+	/**
+	 * What one of the sky folk wears (art from tools/gen_sky_folk.py): the sky lord his mantle, his wardens their tabards,
+	 * and in the Aether the Divine-born their white robes and the halfway folk their sun-coloured tunics. Null for anyone
+	 * else (a traveller from below keeps their own clothes, and so does a guard who is nobody's warden).
+	 */
+	static @Nullable List<String> outfits(Entity villager, int role, boolean guard) {
+		java.util.Set<String> tags = villager.entityTags();
+		if (tags.contains(SkyCourt.LORD_TAG)) {
+			return Uniforms.SKY_LORDS;
+		}
+		if (tags.contains(SkyCourt.WARDEN_TAG)) {
+			return Uniforms.SKY_WARDENS;
+		}
+		if (role >= 0 || guard || !in(villager)) {
+			return null;
+		}
+		Heritage.Kind kind = VillagerHeritage.of(villager);
+		return kind == Heritage.Kind.DIVINE ? Uniforms.SKY_DIVINE : kind == Heritage.Kind.DAWNBORN ? Uniforms.SKY_HALFWAY : null;
+	}
+
 	/** Which of the sky folk's own lines {@code villager} speaks while in the Aether; null for anyone else. */
 	static @Nullable String talk(Entity villager, Heritage.Kind kind) {
+		if (villager.entityTags().contains(SkyCourt.LORD_TAG)) {
+			return "sky_lord";
+		}
+		if (villager.entityTags().contains(SkyCourt.WARDEN_TAG)) {
+			return "sky_warden";
+		}
 		if (kind != Heritage.Kind.DIVINE && kind != Heritage.Kind.DAWNBORN || !in(villager)) {
 			return null;
 		}

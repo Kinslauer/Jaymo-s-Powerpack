@@ -272,6 +272,8 @@ public final class VillagerHeritage {
 			McaBridge.keepSkin(villager, kind);
 			// (0.7.290) and their height and width to its body (BodySizes)
 			McaBridge.keepBody(villager, kind);
+			// the sky folk dress by their blood (SkyFolk.outfits)
+			McaBridge.dress(villager);
 		}
 		if (kind == Heritage.Kind.VERDANT && !Verdants.is(villager)) {
 			villager.setAttached(Verdants.SHADE, (villager.getRandom().nextFloat() + villager.getRandom().nextFloat()) / 2.0F);
@@ -641,7 +643,7 @@ public final class VillagerHeritage {
 			case "cut" -> CUT_LINES;
 			case "cut_rampage" -> CUT_RAMPAGE_LINES;
 			case "dawnborn" -> DAWNBORN_LINES;
-			case "sky_divine", "sky_dawnborn" -> SkyFolk.LINES;
+			case "sky_divine", "sky_dawnborn", "sky_lord", "sky_warden" -> SkyFolk.LINES;
 			default -> BLOOD_LINES;
 		};
 		int n = 1 + Mth.floor(level.getRandom().nextFloat() * lines);

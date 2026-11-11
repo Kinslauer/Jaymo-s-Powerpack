@@ -302,15 +302,20 @@ final class SkyVillages {
 		s.fill(mu - 1, deck + 1, mv + 1, mu + 1, deck + 1, mv + 1, fence);
 		s.set(mu, deck + 1, mv, fence);
 		s.set(mu, deck + 2, mv, Kit.b("ambrosium_torch"));
-		// the skiff: a hull eight long and three wide, off the landing's -u side, a plank between them
+		// the skiff: a hull eight long and three wide, off the landing's -u side, a step of open air between them (she's
+		// joined to nothing, so with Jaymo's Kingdoms her wheel casts her off as a balloon ship)
 		int hu1 = mu - 3, hu0 = hu1 - 7, hv0 = mv - 1, hv1 = mv + 1;
-		s.set(mu - 2, deck, mv, planks);
 		s.fill(hu0, deck - 1, hv0, hu1, deck - 1, hv1, (u, y, v) -> (u == hu0 || u == hu1) && v != mv ? null : planks);
 		s.fill(hu0, deck, hv0, hu1, deck, hv1, (u, y, v) -> {
 			boolean side = v == hv0 || v == hv1 || u == hu0 || u == hu1;
 			return side && !(u == hu1 && v == mv) ? Kit.b(p.wood + "_slab") : null;
 		});
 		s.chest(hu0 + 1, deck, mv, 1, "chests/sky_village/skiff");
+		BlockState wheel = Kit.other("jaymoskingdoms:ship_helm", Kit.air());
+		if (!wheel.isAir()) {
+			// her wheel, by the gap in her rail, her bow away from the mast
+			s.set(hu1 - 1, deck, mv, Kit.with(wheel, BlockStateProperties.HORIZONTAL_FACING, s.dir(3)));
+		}
 		// the balloon over it, and four lines up to it
 		double cu = (hu0 + hu1) / 2.0, cy = deck + 6.5;
 		BlockState bag = Kit.b(p.roofA), band = Kit.b(p.roofB);
