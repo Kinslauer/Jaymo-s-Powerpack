@@ -31,8 +31,8 @@ import net.minecraft.world.phys.Vec3;
  * causing a three pronged battle between them the androids and zombie warrior born"). A Frostborn in a whole Rig, in
  * squads ({@link FutureMachines#check}), at war with the androids, the mechs and the Warrior-born dead; the androids
  * and the dead fight them back and fight each other. They keep their distance and fire the Rig's palm blast, and fall
- * slowly on their thrusters. A player they leave alone (they have a war to fight), until one is hurt: then the whole
- * squad turns on whoever did it. The Omens (the city's own last pilots) and they leave each other be.
+ * slowly on their thrusters. They shoot players on sight too (Andy: hostile to everyone), and whoever hurts one draws
+ * the whole squad. The Omens (the city's own last pilots) and they leave each other be.
  * <p>The Rig they wear stays on them (it doesn't drop); a beaten trooper leaves some Rig Salvage, the same as the
  * Dead Rigs in the ruins, which are troopers who fell.
  */
@@ -76,8 +76,9 @@ public class FutureTrooper extends PathfinderMob implements RangedAttackMob {
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.7));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 16.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-		// whoever hurts one (a player included) draws its squad; a trooper's stray blast doesn't turn another on it
+		// whoever hurts one draws its squad; a trooper's stray blast doesn't turn another on it
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, FutureTrooper.class).setAlertOthers(FutureTrooper.class));
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, SCAN_EVERY, true, false,
 			(target, level) -> hostileTo(target)));
 	}
