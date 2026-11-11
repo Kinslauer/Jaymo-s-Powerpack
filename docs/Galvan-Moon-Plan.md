@@ -79,8 +79,9 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
   pick fights with Galvan. A player who brings a stolen block back to its gap, or kills the thief, earns the city's
   thanks (a small trade discount, or a line from the elder). Files: an `EndermanHoldable` tag entry for the Galvan
   blocks (moon only, checked in a small mixin or goal), Galvan guard targeting.
-- **Realm or town?** Phase 1: a town with a ruler and court, not a Kingdoms realm (no war, raids or trade with Overworld
-  realms, like the sky towns). Phase 2, if Andy wants it: realms that carry a dimension. (Open question 5.)
+- **Not a realm** (Andy, 2026-11-11: "no war or trading with other kingdoms"): a city with a ruler and court, outside
+  Kingdoms' realm machinery, so no war, raids, alliances or trade with Overworld kingdoms. Players can still trade
+  with Galvan citizens themselves.
 
 ## Track 3: the elder, the ruler and the hunter (Powers + Kingdoms)
 
@@ -118,8 +119,7 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 2. ~~Hidden or open?~~ Answered: hidden, under the dust behind a door only a band opens.
 3. ~~Look~~ Answered: like Viltrum's cities (Track 2, Look).
 4. ~~The Endermen~~ Answered: they and the Galvan fight all the time; Endermen steal Galvan blocks for the mischief (Track 2, Endermen).
-5. **Kingdom or town:** a city with a ruler and court that can't war or trade with Overworld kingdoms (recommended, for
-   now), or a full Kingdoms realm you can raid, ally with or conquer?
+5. ~~Kingdom or town~~ Answered: a city with a ruler and court; no war or trading with other kingdoms.
 6. **The elder's upgrades:** does the elder do only the reforge (as the smith does now), or do later band upgrades
    (more slots, band skills, new aliens) also need a trip back to him?
 7. **The ruler's ask:** can a player actually hand the band to the ruler, and what happens then (the band is gone; the
