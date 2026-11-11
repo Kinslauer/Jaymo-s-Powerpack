@@ -6,4 +6,6 @@
 - Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
 - Varro throws his fire after the in-balming, then runs in to stand back to back with Grimsby, who is blade on blade with an orc; one long side shot of the two
 - Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
-- The film is 4 seconds longer; its tape is recorded again with all of this
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) are in among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes each hero from the front, at a different distance each: the camera goes out after their bolt to what it bursts (an imp, or for Grimsby an orc), and out of the burst the next hero's light forms and carries the camera back to that one's face. Thessaly, then Ambrose, Grimsby, Varro
+- The film is 11 seconds longer; its tape is recorded again with all of this
