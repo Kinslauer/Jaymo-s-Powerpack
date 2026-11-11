@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 04:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 23:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,13 +13,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · changes · fixing review notes
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
 
 
 ## In review
 
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
@@ -37,9 +37,9 @@ kanban-plugin: board
 - [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
 - [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
+- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
+- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
 
 
 %% kanban:settings
