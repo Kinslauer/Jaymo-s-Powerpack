@@ -65,16 +65,27 @@ public final class InhabitantsClient {
 
 	/**
 	 * Its sword and shield, or its axe; its tail, cut short its own way. A lore film's living Warrior-born
-	 * ({@link Draugr#stageLiving}) wears {@code draugr_living.png} (the same gear in better condition) and a whole tail.
+	 * ({@link Draugr#stageLiving}) wears its look's {@code draugr_living_<n>.png} (the same gear in better condition) and a
+	 * whole tail.
 	 */
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
-		static final Identifier LIVING = JaymosKingdoms.id("textures/entity/draugr_living.png");
+		/** Its three looks (tools/gen_tomb_undead.py DRAUGR_LOOKS), dead and alive, picked by its id. */
+		static final int LOOKS = 3;
+		static final Identifier[] DEAD = new Identifier[LOOKS], LIVING = new Identifier[LOOKS];
+
+		static {
+			for (int i = 0; i < LOOKS; i++) {
+				DEAD[i] = JaymosKingdoms.id(i == 0 ? "textures/entity/draugr.png" : "textures/entity/draugr_" + i + ".png");
+				LIVING[i] = JaymosKingdoms.id("textures/entity/draugr_living_" + i + ".png");
+			}
+		}
 
 		DraugrRenderer(EntityRendererProvider.Context context) {
 			super(context, new DefaultedEntityGeoModel<Draugr>(JaymosKingdoms.id("draugr")) {
 				@Override
 				public Identifier getTextureResource(GeoRenderState state) {
-					return state.getOrDefaultGeckolibData(DRAUGR_LIVING, false) ? LIVING : super.getTextureResource(state);
+					int look = look(state.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0));
+					return (state.getOrDefaultGeckolibData(DRAUGR_LIVING, false) ? LIVING : DEAD)[look];
 				}
 			}, 1.0F, DRAUGR_SHADOW, "head");
 		}
@@ -94,6 +105,8 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("axe", bone -> bone.skipRender(!axe));
 			snapshots.ifPresent("sword", bone -> bone.skipRender(axe));
 			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
+			// the bronze chieftain's left horn broken off
+			snapshots.ifPresent("left_horn", bone -> bone.skipRender(look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
 			if (info.getOrDefaultGeckolibData(DRAUGR_LIVING, false)) {
 				// alive: no ribs through the mail, the tail whole
 				snapshots.ifPresent("ribs", bone -> bone.skipRender(true));
@@ -107,6 +120,11 @@ public final class InhabitantsClient {
 				default -> {
 				}
 			}
+		}
+
+		/** Which of its looks a draugr wears, from its id (apart from the bits its tail is cut by). */
+		static int look(int roll) {
+			return Math.floorMod(roll >>> 12, LOOKS);
 		}
 
 		/** The tail ends before this segment. */

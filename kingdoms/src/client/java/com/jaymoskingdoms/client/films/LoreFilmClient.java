@@ -86,7 +86,7 @@ public final class LoreFilmClient {
 	/** Orcs are drawn bigger than a man (as BodySizes draws the real ones). */
 	static final double ORC_SCALE = 1.12;
 	/** The film's orcs' greens (as tools/gen_film_skins.py paints them), and the dead ones', for GreenskinLooks to tint by. */
-	static final int[] ORC_GREENS = {0xFF7C8A62, 0xFF687854, 0xFF566646}, DEAD_GREENS = {0xFF5E6452, 0xFF545C48};
+	static final int[] ORC_GREENS = {0xFF7C8A62, 0xFF687854, 0xFF566646}, DEAD_GREENS = {0xFF5E6452, 0xFF545C48, 0xFF4E5444};
 	static final double HOST_NEAR = 40.5, HOST_FAR = 43.5;
 	/** How often Grimsby throws a bolt in the clash (ticks). */
 	static final int BOLT_EVERY = 22;
@@ -353,7 +353,7 @@ public final class LoreFilmClient {
 	/** One of the dead the sorcerer raises: dead orcs and zombified piglins, half and half. */
 	private static @Nullable LivingEntity dead(Film f, int i) {
 		if (i % 2 == 0) {
-			LivingEntity e = orc(f, "dead_orc_" + (i / 2) % 2);
+			LivingEntity e = orc(f, "dead_orc_" + (i / 2) % 3);
 			if (e != null && i % 6 == 0) {
 				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_AXE));
 			}

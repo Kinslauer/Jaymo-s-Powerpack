@@ -1,11 +1,13 @@
-"""Draws textures/entity/draugr_living.png from draugr.png: the same horned helm, mail and fur, on a living Warrior-born
+"""Draws textures/entity/draugr_living_<n>.png from each of the draugr's three looks (draugr.png, draugr_1.png,
+draugr_2.png), each with its own living skin: the same horned helm, mail and fur, on a living Warrior-born
 in better days (The Long Defence film's host). Grave-grey skin becomes warm living skin with the grave specks gone; the
 mail and helm are brighter and cleaner (less pitting); the fur and leather are richer; the pale dead eyes go dark.
 Run from the kingdoms project root: python -I tools/gen_draugr_living.py"""
 from PIL import Image
 
 TEX = "src/main/resources/assets/jaymoskingdoms/textures/entity/"
-SKIN = (196, 150, 112)
+SKINS = [(196, 150, 112), (222, 184, 150), (150, 104, 72)]
+SOURCES = ["draugr.png", "draugr_1.png", "draugr_2.png"]
 EYES = (44, 32, 24)
 
 
@@ -38,7 +40,12 @@ def pale_eye(c):
 
 
 def main():
-    src = Image.open(TEX + "draugr.png").convert("RGBA")
+    for n, name in enumerate(SOURCES):
+        living(name, SKINS[n], "draugr_living_%d.png" % n)
+
+
+def living(name, SKIN, out_name):
+    src = Image.open(TEX + name).convert("RGBA")
     out = src.copy()
     w, h = src.size
     px = src.load()
@@ -75,7 +82,7 @@ def main():
             around = sum((x + dx, y + dy) in skin_at for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
             if around >= 5:
                 o[x, y] = tuple(clamp(v * 0.95) for v in SKIN) + (px[x, y][3],)
-    out.save(TEX + "draugr_living.png")
+    out.save(TEX + out_name)
 
 
 if __name__ == "__main__":

@@ -240,6 +240,33 @@ def ribs(img, r):
 			img.putpixel((x, y), shade(c, 0.9) + (255,))
 
 
+# The draugr's three looks (Andy, 2026-11-10: "up to 3 variations of each new model"): the same model and sheet, painted
+# over in other metals, furs and hair. 0 is the project's own (iron, brown fur, black hair); 1 a chieftain's bronze, a
+# grey wolf's fur, hair gone white (and its left horn broken off: InhabitantsClient.DraugrRenderer); 2 blackened iron,
+# black fur, red-brown hair. Written as textures/entity/draugr_1.png and draugr_2.png beside the project's draugr.png.
+DRAUGR_LOOKS = [{}, {"iron": (150, 112, 62), "steel": (196, 170, 120), "fur": (128, 126, 120), "hair": (206, 204, 198),
+					 "gold": (200, 196, 190)},
+				{"iron": (58, 60, 66), "mail": (60, 64, 70), "steel": (120, 124, 130), "fur": (40, 36, 34), "hair": (112, 50, 32),
+				 "leather": (64, 40, 30)}]
+
+
+def draugr_looks():
+	"""Paints the draugr's other looks onto its sheet's layout (the same cubes, so the same UVs)."""
+	assets = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms", "textures", "entity")
+	base = dict(PALETTE)
+	for i, look in enumerate(DRAUGR_LOOKS):
+		if not look:
+			continue
+		PALETTE.update(look)
+		try:
+			src = draugr()["textures"][0]["source"].split(",", 1)[1]
+		finally:
+			PALETTE.clear()
+			PALETTE.update(base)
+		Image.open(io.BytesIO(base64.b64decode(src))).save(os.path.join(assets, "draugr_%d.png" % i))
+		print("wrote draugr_%d.png" % i)
+
+
 def draugr():
 	b = Builder(128, 128, 11)
 	b.bone("root", None, (0, 0, 0))
@@ -468,6 +495,8 @@ def main(only=()):
 			continue
 		with open(os.path.join(ART, name + ".bbmodel"), "w", encoding="utf-8", newline="\n") as f:
 			json.dump(make(), f)
+		if name == "draugr":
+			draugr_looks()
 		print("wrote kingdoms/art/" + name + ".bbmodel")
 
 

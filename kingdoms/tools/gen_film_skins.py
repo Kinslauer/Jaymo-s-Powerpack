@@ -12,7 +12,7 @@ The sorcerer's living host, and the dead he raises:
 - Orcs (orc_0-2): an in-game orc's green under an orc war camp grunt's clothes; the tusks, brow, ears, marks and scars
   are drawn on them by GreenskinLooks, as on the real orcs (LoreFilmClient#orcLook).
 (The Warrior-born of the host are draugr drawn alive: tools/gen_draugr_living.py.)
-- Dead orcs (dead_orc_0-1): the same, gone ashen and rotten, the clothes in rags, ribs showing, pale dead eyes.
+- Dead orcs (dead_orc_0-2): the same, gone ashen and rotten, the clothes in rags, ribs showing, pale dead eyes.
 Run from the kingdoms project root: python -I tools/gen_film_skins.py"""
 from PIL import Image
 import os
@@ -430,7 +430,7 @@ def dead_orc(i):
         for x in range(bx + 1, bx + 7):
             if x not in (bx + 3, bx + 4):
                 px(img, x, y, (196, 188, 164))
-    clothes(img, "orc_grunt_%d" % (i + 2), dead=True, rnd=rnd)
+    clothes(img, "orc_grunt_%d" % ((i + 2) % 4), dead=True, rnd=rnd)
     save(img, "dead_orc_%d" % i)
 
 
@@ -448,5 +448,5 @@ if __name__ == "__main__":
     stranger()
     for i in range(3):
         orc(i)
-    for i in range(2):
+    for i in range(3):
         dead_orc(i)
