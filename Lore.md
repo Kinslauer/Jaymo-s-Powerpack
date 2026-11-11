@@ -491,6 +491,13 @@ Warrior-born, the orcs and the Grue came at it. That is what they were made for,
   him." "He's here."), warns you off it ("No." "Don't." "Stop."), and thanks you when it is beaten. He speaks fully
   only once, at the deepest bond. Sickness silences him down to dots.
 
+  **Who he was** (Andy, 2026-11-11). In life he was the **first to use the web**, long before any Web Slinger. He
+  attuned to the mana that imbues purity: the **white suit**, the anti of the black one. On him it shows as a hooded
+  cloak, cut like a knight's, and the cloak itself becomes his webbing and his tendrils. He uses them to move and to
+  fight alike, but for quick work up close he prefers a blade: a dagger, a rapier or a hidden blade. (Design
+  inspiration, for the artists only: the Moon Knight take on Peter Parker in Marvel's Warp World. The look and the name
+  in the game are our own; nothing of Marvel's is copied.)
+
 (new) **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
@@ -716,8 +723,9 @@ Elements found in the mods that can't be placed without inventing something big.
   would be a new realm, and there are no new realms.
 - **Chronokinesis' source.** Why a Chrono can reach the future at all, and whether the Tinkerer's vanished clock-machine
   has anything to do with it, is a big tie to make.
-- **The symbiote.** The Web Slinger's symbiote has no origin in the game (where it comes from, what it is), and the
-  spider body has none either.
+- **The symbiote.** The web began with the Quiet One, and his white suit is the mana of purity, the anti of the
+  black. Where the black symbiote itself comes from, and how the web passed from him to today's Web Slingers, is
+  still open.
 - **Blindness, Smoke and Gravity's place.** Nothing in the game says why these powers exist beyond the one well; any
   faith, people or event behind them would be new.
 - **The Xeno-Band's makers.** Who made the bands, where the forty-odd aliens came from, and who the band hunter is cast

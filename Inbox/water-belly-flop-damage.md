@@ -3,7 +3,7 @@ status: in-review
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1263
 suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer
