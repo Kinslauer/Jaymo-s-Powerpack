@@ -240,3 +240,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 (four-mods thread): PR #1324 (Eden Ring part 1) merged on Andy's "merge"; part 2 opened as PR #1327.
 - 2026-11-11 (four-mods thread): Eden Ring part 3 built on branch claude/project-thread-5dj9k7-eden-ring-3 from Andy's picks (wood sets, Gravilite + lamps, Gravity Compressor). Claude's calls, unconfirmed: gravilite shards grow in every Verdant biome incl. the plains (1 chunk in 5); the compressor lifts (Levitation III for the living, upward push for items) rather than truly inverting gravity, 2 blocks of column per redstone level; recipes (2x2 shards = block; shard + 4 glass = lamp; shard + 8 iron nuggets = lantern; iron, gravilite block, redstone, stone = compressor); the lantern is one block tall (Eden Ring's tall lantern left out).
 - 2026-11-11 4:48 PM ET (Andy, Galvan moon plan): the Galvan city is "hidden": under the dust of the Pale Moon, behind a gate only a band opens.
+
+- 2026-11-11 (Andy, Blindness devout path, PR #1328): carved-out eyes must be bandaged or the player bleeds out; vision stays gone after they heal, leaving empty sockets on the face.

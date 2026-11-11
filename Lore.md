@@ -138,7 +138,8 @@ kit.
   (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
-  their eyes out do it once and never speak of it. What they are given is not their eyes back: living things burn
+  their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
+  when they heal (Andy, 2026-11-11). What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
