@@ -216,7 +216,7 @@ def blocks():
           states={"variants": {"stage=0": {"model": f"{NS}:block/eden/aquatus_sapling"}, "stage=1": {"model": f"{NS}:block/eden/aquatus_sapling"}}})
 
 
-WOODS = ["balloon_mushroom", "pulse_tree", "brain_tree"]
+WOODS = ["balloon_mushroom", "pulse_tree", "brain_tree", "sunroot"]
 SIDES = ("north", "south", "west", "east")
 
 
@@ -458,6 +458,30 @@ def diskwing():
         f.write(json.dumps(sounds, indent="\t") + "\n")
 
 
+def aether_share():
+    """What went to the Aether: the sunroot of the golden grove (Eden Ring's auritis under our own name) and the volvox of the high sky.
+    The grove itself, and where the colonies and hollow islands drift, are in tools/gen_aether_world.py."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import gen_aether as G
+    block("sunroot_log", column("sunroot_log_side", "sunroot_log_top"), states=pillar_states("sunroot_log"))
+    block("sunroot_planks", cube("sunroot_planks"))
+    block("sunroot_leaves", {"parent": "minecraft:block/leaves", "textures": {"all": TEX + "sunroot_leaves"}}, drop=False)
+    write(f"{DATA}/loot_table/blocks/sunroot_leaves.json", G.leaves_table("sunroot_leaves", sapling="sunroot_sapling"))
+    block("sunroot_sapling", cross("sunroot_sapling"), item_model=flat("sunroot_sapling"),
+          states={"variants": {"stage=0": {"model": f"{NS}:block/eden/sunroot_sapling"}, "stage=1": {"model": f"{NS}:block/eden/sunroot_sapling"}}})
+    block("volvox_block", cube("volvox_block"), "Volvox")
+    block("volvox_block_dense", cube("volvox_block_dense"), "Dense Volvox")
+    write(f"{DATA}/recipe/eden/sunroot_planks.json", {"type": "minecraft:crafting_shapeless", "category": "building", "group": "planks",
+                                                      "ingredients": [f"{NS}:sunroot_log"], "result": {"id": f"{NS}:sunroot_planks", "count": 4}})
+    tag(f"{MC}/tags/block/mineable/axe.json", [f"{NS}:sunroot_log", f"{NS}:sunroot_planks"])
+    tag(f"{MC}/tags/block/mineable/hoe.json", [f"{NS}:sunroot_leaves", f"{NS}:volvox_block", f"{NS}:volvox_block_dense"])
+    for kind in ("block", "item"):
+        tag(f"{MC}/tags/{kind}/planks.json", [f"{NS}:sunroot_planks"])
+        tag(f"{MC}/tags/{kind}/logs.json", [f"{NS}:sunroot_log"])
+        tag(f"{MC}/tags/{kind}/leaves.json", [f"{NS}:sunroot_leaves"])
+        tag(f"{MC}/tags/{kind}/saplings.json", [f"{NS}:sunroot_sapling"])
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -632,6 +656,7 @@ def worldgen():
 
 def main():
     blocks()
+    aether_share()
     shaped_wood()
     gravilite()
     small_plants()

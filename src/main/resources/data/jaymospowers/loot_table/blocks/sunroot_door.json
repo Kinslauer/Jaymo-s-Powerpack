@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:sunroot_door",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:sunroot_door",
+            "state": {
+              "half": "lower"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/sunroot_door"
+}

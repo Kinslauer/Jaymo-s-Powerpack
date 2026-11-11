@@ -1,5 +1,6 @@
 package com.jaymospowers.eden;
 
+import com.jaymospowers.aether.AetherBlocks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Locale;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -29,7 +31,8 @@ public record EdenFeature(Kind kind) implements Feature {
 	public enum Kind {
 		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER,
 		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS, GRAVILITE,
-		VIOLUM, LONLIX, PARIGNUM, EDEN_MOSS, LIMPHIUM, EDEN_VINES, SYMBIOTIC_MOLD;
+		VIOLUM, LONLIX, PARIGNUM, EDEN_MOSS, LIMPHIUM, EDEN_VINES, SYMBIOTIC_MOLD,
+		SUNROOT_TREE, VOLVOX_COLONY, HOLLOW_ISLAND;
 
 		static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)), k -> k.name().toLowerCase(Locale.ROOT));
 	}
@@ -66,6 +69,14 @@ public record EdenFeature(Kind kind) implements Feature {
 	/** Hanging growth: columns tried, spread, how far below the surface an underside is looked for, a vine's length (most), share of mould that glows. */
 	public static final int HANG_TRIES = 12, HANG_SPREAD = 5, HANG_SEARCH = 24, VINE_LENGTH = 5;
 	public static final float MOLD_GLOW_SHARE = 0.25F;
+	/** A sunroot: trunk height (least, spread) and the radius of its crown's widest layer. */
+	public static final int SUNROOT_TRUNK = 6, SUNROOT_TRUNK_SPREAD = 4, SUNROOT_CROWN = 3;
+	/** A volvox colony: radius (least, spread), the share of its skin that is dense, and its dense heart's share of the radius. */
+	public static final int VOLVOX_RADIUS = 3, VOLVOX_RADIUS_SPREAD = 4;
+	public static final float VOLVOX_DENSE_SHARE = 0.15F, VOLVOX_HEART = 0.35F;
+	/** A hollow island: radius (least, spread), its height as a share of that, the hollow's share of the shell, and the doors broken into it (most). */
+	public static final int HOLLOW_RADIUS = 7, HOLLOW_RADIUS_SPREAD = 5, HOLLOW_DOORS = 3;
+	public static final float HOLLOW_HEIGHT = 0.6F, HOLLOW_INSIDE = 0.72F;
 	/** The colours lanterns grow in wild (builders dye the rest). */
 	private static final DyeColor[] WILD_LANTERNS = {DyeColor.WHITE, DyeColor.YELLOW, DyeColor.LIGHT_BLUE, DyeColor.LIME, DyeColor.PINK, DyeColor.ORANGE,
 		DyeColor.MAGENTA, DyeColor.CYAN};
@@ -99,6 +110,9 @@ public record EdenFeature(Kind kind) implements Feature {
 			case EDEN_MOSS -> scatter(level, random, origin, Eden.EDEN_MOSS, COVER_TRIES);
 			case EDEN_VINES -> hang(level, random, origin, true);
 			case SYMBIOTIC_MOLD -> hang(level, random, origin, false);
+			case SUNROOT_TREE -> sunroot(level, random, origin);
+			case VOLVOX_COLONY -> volvox(level, random, origin);
+			case HOLLOW_ISLAND -> hollowIsland(level, random, origin);
 		};
 	}
 
@@ -601,5 +615,153 @@ public record EdenFeature(Kind kind) implements Feature {
 			}
 		}
 		return placed;
+	}
+
+	// ---------------------------------------------------------------- the Aether's share
+
+	/** A sunroot: a straight trunk under a broad, flat-topped golden crown. */
+	private static boolean sunroot(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int height = SUNROOT_TRUNK + random.nextInt(SUNROOT_TRUNK_SPREAD + 1);
+		BlockState ground = level.getBlockState(origin.below());
+		if (!(ground.is(BlockTags.DIRT) || ground.is(AetherBlocks.AETHER_GRASS_BLOCK)) || !room(level, origin, height + 2)) {
+			return false;
+		}
+		BlockState log = Eden.SUNROOT_LOG.defaultBlockState();
+		for (int dy = 0; dy < height; dy++) {
+			level.setBlock(origin.above(dy), log, Block.UPDATE_CLIENTS);
+		}
+		// the crown, bottom to top: a fringe, two wide layers, a narrower one and a cap
+		int[] radii = {SUNROOT_CROWN - 1, SUNROOT_CROWN, SUNROOT_CROWN, SUNROOT_CROWN - 1, 1};
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int layer = 0; layer < radii.length; layer++) {
+			int y = origin.getY() + height - 3 + layer;
+			int radius = radii[layer];
+			for (int dx = -radius; dx <= radius; dx++) {
+				for (int dz = -radius; dz <= radius; dz++) {
+					int far = Math.abs(dx) + Math.abs(dz);
+					boolean corner = Math.abs(dx) == radius && Math.abs(dz) == radius;
+					if (corner && (radius > 1 || random.nextBoolean()) || layer == 0 && far < 2) {
+						continue;
+					}
+					pos.set(origin.getX() + dx, y, origin.getZ() + dz);
+					if (free(level, pos) && !level.getBlockState(pos).is(Eden.SUNROOT_LOG)) {
+						// the distance a leaf would count to the trunk, so none withers before it is first looked at
+						int distance = Math.max(1, Math.min(6, far + Math.max(0, y - (origin.getY() + height - 1))));
+						level.setBlock(pos, Eden.SUNROOT_LEAVES.defaultBlockState().setValue(LeavesBlock.DISTANCE, distance), Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Whether a ball of this radius about {@code middle} is open sky (looked at in its middle and at its six ends). */
+	private static boolean openSky(WorldGenLevel level, BlockPos middle, int radius) {
+		if (middle.getY() - radius <= level.getMinY() + 1 || middle.getY() + radius >= level.getMaxY() - 1 || !level.getBlockState(middle).isAir()) {
+			return false;
+		}
+		for (Direction side : Direction.values()) {
+			if (!level.getBlockState(middle.relative(side, radius)).isAir()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** A volvox colony: a hollow drifting ball of jelly, patched with denser growth, round a dense heart. */
+	private static boolean volvox(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int radius = VOLVOX_RADIUS + random.nextInt(VOLVOX_RADIUS_SPREAD + 1);
+		if (!openSky(level, origin, radius + 1)) {
+			return false;
+		}
+		float heart = Math.max(1.0F, radius * VOLVOX_HEART);
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dy = -radius; dy <= radius; dy++) {
+				for (int dz = -radius; dz <= radius; dz++) {
+					double far = Math.sqrt(dx * dx + dy * dy + dz * dz);
+					boolean skin = far <= radius + 0.3 && far > radius - 0.9;
+					if (!skin && far > heart) {
+						continue;
+					}
+					pos.setWithOffset(origin, dx, dy, dz);
+					if (level.getBlockState(pos).isAir()) {
+						Block block = !skin || random.nextFloat() < VOLVOX_DENSE_SHARE ? Eden.DENSE_VOLVOX : Eden.VOLVOX;
+						level.setBlock(pos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * A hollow island: a shell of holystone adrift on its own, turfed on top, with a chamber inside that a few doors
+	 * open on. Gravilite stands on the chamber's floor and vines hang from its roof.
+	 */
+	private static boolean hollowIsland(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int radius = HOLLOW_RADIUS + random.nextInt(HOLLOW_RADIUS_SPREAD + 1);
+		if (!openSky(level, origin, radius + 1)) {
+			return false;
+		}
+		double tall = radius * HOLLOW_HEIGHT;
+		BlockState stone = AetherBlocks.HOLYSTONE.defaultBlockState();
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		int high = (int)Math.ceil(tall);
+		// the doors: straight ways in from the rim, at chamber-floor height
+		int doors = 1 + random.nextInt(HOLLOW_DOORS);
+		double[] doorAngles = new double[doors];
+		for (int i = 0; i < doors; i++) {
+			doorAngles[i] = random.nextDouble() * Math.PI * 2.0;
+		}
+		int floor = -(int)Math.floor(tall * HOLLOW_INSIDE) + 1;
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dz = -radius; dz <= radius; dz++) {
+				for (int dy = -high; dy <= high; dy++) {
+					double x = dx / (double)radius, y = dy / tall, z = dz / (double)radius;
+					double far = Math.sqrt(x * x + y * y + z * z);
+					if (far > 1.0 || far < HOLLOW_INSIDE) {
+						continue;
+					}
+					boolean door = false;
+					if (dy >= floor && dy <= floor + 2) {
+						double angle = Math.atan2(dz, dx);
+						for (double at : doorAngles) {
+							double off = Math.abs(Math.atan2(Math.sin(angle - at), Math.cos(angle - at)));
+							door |= off * Math.sqrt(dx * dx + dz * dz) < 1.5;
+						}
+					}
+					pos.setWithOffset(origin, dx, dy, dz);
+					if (!door && level.getBlockState(pos).isAir()) {
+						level.setBlock(pos, stone, Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+		}
+		// turf the top, and dress the chamber
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dz = -radius; dz <= radius; dz++) {
+				for (int dy = high; dy >= -high; dy--) {
+					pos.setWithOffset(origin, dx, dy, dz);
+					if (!level.getBlockState(pos).is(AetherBlocks.HOLYSTONE)) {
+						continue;
+					}
+					boolean top = dy > 0;
+					if (top && level.getBlockState(pos.above()).isAir() && level.canSeeSky(pos.above())) {
+						level.setBlock(pos, AetherBlocks.AETHER_GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+						if (level.getBlockState(pos.below()).is(AetherBlocks.HOLYSTONE)) {
+							level.setBlock(pos.below(), AetherBlocks.AETHER_DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+						}
+						continue;
+					}
+					if (top && level.getBlockState(pos.below()).isAir() && random.nextInt(5) == 0) {
+						level.setBlock(pos.below(), Eden.EDEN_VINE.defaultBlockState(), Block.UPDATE_CLIENTS);
+					} else if (!top && level.getBlockState(pos.above()).isAir() && random.nextInt(7) == 0) {
+						level.setBlock(pos.above(), Eden.GRAVILITE_SHARDS.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+		}
+		return true;
 	}
 }

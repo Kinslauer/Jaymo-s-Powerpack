@@ -614,6 +614,36 @@
             ],
             "humidity": [
               -2.0,
+              0.1
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ],
+            "erosion": [
+              -2.0,
+              0.485
+            ],
+            "weirdness": [
+              0.55,
+              2.0
+            ],
+            "depth": [
+              0.3,
+              2.0
+            ],
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "jaymospowers:sunroot_grove",
+          "parameters": {
+            "temperature": [
+              -0.4,
+              0.65
+            ],
+            "humidity": [
+              0.1,
               2.0
             ],
             "continentalness": [

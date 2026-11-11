@@ -104,6 +104,16 @@
     "jaymospowers:brain_tree_door",
     "jaymospowers:brain_tree_trapdoor",
     "jaymospowers:brain_tree_button",
-    "jaymospowers:brain_tree_pressure_plate"
+    "jaymospowers:brain_tree_pressure_plate",
+    "jaymospowers:sunroot_log",
+    "jaymospowers:sunroot_planks",
+    "jaymospowers:sunroot_stairs",
+    "jaymospowers:sunroot_slab",
+    "jaymospowers:sunroot_fence",
+    "jaymospowers:sunroot_fence_gate",
+    "jaymospowers:sunroot_door",
+    "jaymospowers:sunroot_trapdoor",
+    "jaymospowers:sunroot_button",
+    "jaymospowers:sunroot_pressure_plate"
   ]
 }

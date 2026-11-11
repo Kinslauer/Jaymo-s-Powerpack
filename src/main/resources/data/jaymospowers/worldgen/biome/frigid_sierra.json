@@ -93,7 +93,9 @@
       "jaymospowers:upfalls",
       "jaymospowers:updraft_vents",
       "jaymospowers:updraft_vents_high",
-      "jaymospowers:sky_arena"
+      "jaymospowers:sky_arena",
+      "jaymospowers:hollow_islands",
+      "jaymospowers:volvox_colonies"
     ]
   ],
   "has_precipitation": true,

@@ -281,7 +281,7 @@ def build_dimension_type():
 
 ARCTIC = ['frozen_lakes', 'sheer_tundra', 'enduring_woodland', 'frigid_sierra']
 MAGNETIC = ['violet_highwoods', 'turquoise_forest', 'glistening_swamp', 'magnetic_scar', 'rustworks']
-HIGHFIELDS = ['shimmering_basin', 'flourishing_field', 'verdant_woods', 'shrouded_forest', 'hanging_roots', 'mistsea', 'gilded_ridge']
+HIGHFIELDS = ['shimmering_basin', 'flourishing_field', 'verdant_woods', 'shrouded_forest', 'hanging_roots', 'mistsea', 'gilded_ridge', 'sunroot_grove']
 IRRADIATED = ['battleground_wastes', 'contaminated_jungle']
 
 ARCTIC_MAX_T, IRRADIATED_MIN_T, MAGNETIC_MIN_E = -0.4, 0.65, 0.485
@@ -291,6 +291,8 @@ DRY_MAX, WET_MIN = -0.35, 0.45    # humidity bands inside a zone
 # hanging roots and rustworks from the low end of the woods, mistsea from the top of the lowland lakes, gilded ridge from the
 # top of the upper lakes
 ROOTS_WEIRD, MIST_WEIRD, GILDED_WEIRD = -0.55, 0.75, 0.55
+# the golden grove (four-mods plan, Eden Ring): the wetter half of the gilded ridge
+GROVE_MIN_H = 0.1
 
 
 def build_dimension():
@@ -318,7 +320,11 @@ def build_dimension():
         t = (ARCTIC_MAX_T, IRRADIATED_MIN_T)
         top = GILDED_WEIRD if mid else MIST_WEIRD
         box('shimmering_basin', t, ANY, non_mag_e, (LAKE_WEIRD, top), d)
-        box('gilded_ridge' if mid else 'mistsea', t, ANY, non_mag_e, (top, 2.0), d)
+        if mid:
+            box('gilded_ridge', t, (-2.0, GROVE_MIN_H), non_mag_e, (top, 2.0), d)
+            box('sunroot_grove', t, (GROVE_MIN_H, 2.0), non_mag_e, (top, 2.0), d)
+        else:
+            box('mistsea', t, ANY, non_mag_e, (top, 2.0), d)
         box('flourishing_field', t, (-2.0, DRY_MAX), non_mag_e, (-2.0, LAKE_WEIRD), d)
         box('verdant_woods', t, (DRY_MAX, WET_MIN), non_mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
         box('shrouded_forest', t, (WET_MIN, 2.0), non_mag_e, (ROOTS_WEIRD, LAKE_WEIRD), d)
@@ -401,6 +407,7 @@ BIOME_DATA = {
     # (0.20.96) the sky biomes
     'hanging_roots': (0.6, 0.9, HIGH_COL, '#8fdcaa'), 'mistsea': (0.4, 0.9, MIST_COL, '#c2f2dc'),
     'rustworks': (0.7, 0.2, RUST_COL, '#c8c89a'), 'gilded_ridge': (0.8, 0.3, GILD_COL, '#d8f0a0'),
+    'sunroot_grove': (0.8, 0.6, GILD_COL, '#e6d878'),
 }
 MIST_FOG = (2.0, 40.0)            # Mistsea: fog from this near to this far (blocks)
 MIST_PARTICLE_CHANCE = 0.012
@@ -456,6 +463,7 @@ NAMES = {
     'glistening_swamp': 'Glistening Swamp', 'magnetic_scar': 'Magnetic Scar', 'battleground_wastes': 'Battleground Wastes',
     'contaminated_jungle': 'Contaminated Jungle', 'hestveil_caverns': 'Hestveil Caverns', 'expanse': 'Expanse',
     'hanging_roots': 'Hanging Roots', 'mistsea': 'Mistsea', 'rustworks': 'Rustworks', 'gilded_ridge': 'Gilded Ridge',
+    'sunroot_grove': 'Sunroot Grove',
 }
 
 
