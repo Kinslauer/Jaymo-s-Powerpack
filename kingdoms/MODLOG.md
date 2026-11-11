@@ -11009,3 +11009,9 @@ comment on this" (`Stench`, reading Powers' smell).
   `overworld_stormborn_tomb.json`) were never read, since the tomb places its pieces itself; deleted.
 - Tombs and trial chambers already generated keep what they have. Chunks not yet generated get the fixed tomb.
 - Built; checked on a dev server with `/place` (see the PR). Not played.
+
+## 0.7.715 (2026-11-11): Lore text: Frostborn from past the sun, Varro's dominated orcs (#1271)
+
+- **Frostborn**: the heritage text now says their people came from far past the sun with crafts no Overworld smith has seen, and settled the snowfields and peaks. A Frostborn villager's blood line now hints at it (a box of humming heirlooms) instead of "came down from the ice".
+- **Varro**: his orc lines now say he beat the orcs down and marked them, and that his orc legions served him unwillingly. The spirits dominated the orcs; the orcs were never their allies.
+- Text only (lang parts spirit-varro, heritage, dialogue). Built; not played.
