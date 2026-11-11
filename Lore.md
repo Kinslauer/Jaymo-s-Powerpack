@@ -174,7 +174,7 @@ whole time"; their ki "went to the cold, or the smoke, or the weight of things, 
 go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
 when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
-(new) **What an elemental user sees** (Claude's placement, for Andy to approve). A Smoke, Gravity or Cryo user's ki
+**What an elemental user sees** (Andy approved, 2026-11-11). A Smoke, Gravity or Cryo user's ki
 went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
 body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
 sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
