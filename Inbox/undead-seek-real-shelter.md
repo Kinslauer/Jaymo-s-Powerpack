@@ -40,3 +40,4 @@ Andy: "because we made the sun more deadly to the undead, they should now seek s
 3. Change note: its first line says 'a ray from their head'; update it to match 1.
 OK: vanilla isSunBurnTick is mirrored faithfully (checked against 26.3 bytecode: MONSTERS_BURN, the light/random gate, rain, powder snow), SunMoon.sun(Level, Vec3) exists, FutureSunMixin and WebHostZombieMixin (isSunSensitive) keep working, leaves/glass are not isSolidRender.
 Not tested in game.
+- 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
