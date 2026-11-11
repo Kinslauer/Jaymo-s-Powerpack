@@ -9,7 +9,7 @@ the bar drops; a Smoke user's flail and whip light what they hit; sneak + Z on a
   you. The head glows with embers (`Lash`).
 - **Judgement**: an Emberborn who has become a Flame Avatar and has Smoke can seize a creature's eyes (sneak + Z, held, 16
   blocks) and let the harm it has done burn it, through armour, for up to 3 seconds. A player burns by the weight of
-  their life (killing villagers and players, crimes against a realm, outlaw standing); an outlaw burns for half;
+  their life (killing villagers and players, crimes against a realm, outlaw standing); an outlaw burns for half, an illager or anyone riding with a raid (not the ravager) for three quarters;
   everyone else feels nothing, and the move does not start (`AvatarJudgement`, `Karma.guilt`).
 - **Burning steeds**: horses with a mane and hooves of fire, found at the Flame Avatars' camps in the Nether (Kingdoms
   raises two at each new camp and keeps up to three). They are tame, saddled, 35% faster, immune to fire, leave a trail
