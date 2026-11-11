@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -126,7 +127,7 @@ public final class Billow extends XenoForm {
 					level.addFreshEntity(bolt);
 				}
 				target.hurtServer(level, player.damageSources().lightningBolt(), BOLT_DAMAGE);
-				beam(level, player.position().add(0.0, player.getBbHeight() * 0.5, 0.0), target.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 12);
+				beam(level, player.position().add(0.0, player.getBbHeight() * 0.5, 0.0), target.getBoundingBox().getCenter(), MagicFx.CRACKLE, 12);
 				cooldown(player, live, G, BOLT_COOLDOWN);
 			}
 			case ABILITY_3 -> {

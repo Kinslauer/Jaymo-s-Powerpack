@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.core.KingdomsMoney;
@@ -442,7 +443,7 @@ public final class ZFighterAfterlife {
 		player.teleportTo(world, ax, FLOOR, az, Set.of(), 180.0F, 0.0F, true);
 		player.resetFallDistance();
 		player.setDeltaMovement(Vec3.ZERO);
-		world.sendParticles(ParticleTypes.END_ROD, ax, FLOOR + 1.0, az, 20, 0.4, 0.8, 0.4, 0.05);
+		world.sendParticles(MagicFx.LIGHT, ax, FLOOR + 1.0, az, 20, 0.4, 0.8, 0.4, 0.05);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_held").withStyle(ChatFormatting.AQUA));
 	}
 
@@ -470,7 +471,7 @@ public final class ZFighterAfterlife {
 		player.teleportTo(world, ax, FLOOR, az, Set.of(), 180.0F, 0.0F, true);
 		player.setHealth(player.getMaxHealth());
 		player.getFoodData().setFoodLevel(20);
-		world.sendParticles(ParticleTypes.END_ROD, ax, FLOOR + 1.0, az, 40, 0.4, 0.8, 0.4, 0.05);
+		world.sendParticles(MagicFx.LIGHT, ax, FLOOR + 1.0, az, 40, 0.4, 0.8, 0.4, 0.05);
 		world.playSound(null, ax, FLOOR, az, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.7F);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_wake").withStyle(ChatFormatting.AQUA));
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_halo").withStyle(ChatFormatting.AQUA));
@@ -578,7 +579,7 @@ public final class ZFighterAfterlife {
 		player.getFoodData().setFoodLevel(20);
 		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, WAKE_REGEN, 1));
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, WAKE_RESISTANCE, 1));
-		to.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.05);
+		to.sendParticles(MagicFx.LIGHT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 40, 0.4, 0.8, 0.4, 0.05);
 		to.playSound(null, at, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.4F);
 		// (0.19.33) born again: Kingdoms tells the life story anew (back as he was if it can't)
 		if (com.jaymospowers.core.wounds.Mortality.isFinal(player)) {
@@ -732,7 +733,7 @@ public final class ZFighterAfterlife {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_master_teaches", master.getDisplayName(), lesson,
 			ZFighterMasters.LESSON_TP + MASTER_TP).withStyle(ChatFormatting.AQUA));
 		ServerLevel level = player.level();
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
+		level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.0F);
 	}
 

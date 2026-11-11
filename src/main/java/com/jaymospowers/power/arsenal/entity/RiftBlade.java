@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal.entity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.arsenal.Summoned;
 import java.util.Collection;
 import java.util.List;
@@ -132,7 +133,7 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 			if (hoverTicks > 0) {
 				hoverTicks--;
 				if (this.tickCount % 3 == 0 && !isSkyBlade()) {
-					level.sendParticles(ParticleTypes.PORTAL, this.getX(), this.getY(), this.getZ(), 3, 0.15, 0.15, 0.15, 0.3);
+					level.sendParticles(MagicFx.VOID, this.getX(), this.getY(), this.getZ(), 3, 0.15, 0.15, 0.15, 0.3);
 				}
 				Entity target = targetId < 0 ? null : level.getEntity(targetId);
 				if (target != null && target.isAlive()) {
@@ -160,19 +161,19 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 				if (isSkyBlade()) {
 					if (lyingTicks > SKY_LINGER_TICKS) {
 						// quietly: twenty of these land in two seconds
-						level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 6, 0.1, 0.1, 0.1, 0.03);
+						level.sendParticles(MagicFx.VOID, this.getX(), this.getY(), this.getZ(), 6, 0.1, 0.1, 0.1, 0.03);
 						this.discard();
 					}
 				} else if (lyingTicks > LYING_TICKS) {
 					dissolve(level);
 				} else if (lyingTicks % 20 == 0) {
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 0.2, this.getZ(), 2, 0.1, 0.1, 0.1, 0.01);
+					level.sendParticles(MagicFx.VOID, this.getX(), this.getY() + 0.2, this.getZ(), 2, 0.1, 0.1, 0.1, 0.01);
 				}
 			} else if (this.tickCount > MAX_LIFE) {
 				dissolve(level);
 			}
 		} else if (!this.isInGround() && this.tickCount % 2 == 0) {
-			this.level().addParticle(isVoid() ? ParticleTypes.SQUID_INK : ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
+			this.level().addParticle(isVoid() ? ParticleTypes.SQUID_INK : MagicFx.VOID, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
 		}
 	}
 

@@ -168,7 +168,7 @@ public final class ZFighterInstinct {
 		live.silver = true;
 		ServerLevel level = player.level();
 		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), COLOR, 1.8F, 40, 0.5, 0.9, 0.5);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
+		level.sendParticles(MagicFx.LIGHT, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_instinct_on").withStyle(ChatFormatting.AQUA));

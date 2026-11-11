@@ -1,10 +1,10 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.chrono.ChronoSpeed;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -46,7 +46,7 @@ public final class ChronoSpeedClient {
 			now = player.getDirection();
 			player.setDeltaMovement(now.getStepX() * ChronoSpeed.WALL_STICK, ChronoSpeed.WALL_CLIMB, now.getStepZ() * ChronoSpeed.WALL_STICK);
 			if (player.tickCount % 2 == 0) {
-				player.level().addParticle(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, -0.05, 0.0);
+				player.level().addParticle(MagicFx.CRACKLE, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, -0.05, 0.0);
 			}
 		} else if (able && was != null && !player.onGround()) {
 			// ran off the top: hop up and over onto it

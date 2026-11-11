@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
@@ -82,7 +81,7 @@ public final class EarthlingSurge {
 		if (entity.level() instanceof ServerLevel level && shows(entity)) {
 			level.playSound(null, entity.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 			level.playSound(null, entity.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 0.7F);
-			level.sendParticles(ParticleTypes.END_ROD, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 24, 0.4, 0.6, 0.4, 0.08);
+			level.sendParticles(Fx.LIGHT, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(), 24, 0.4, 0.6, 0.4, 0.08);
 		}
 		if (entity instanceof ServerPlayer player) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.earthling_surge", Component.translatable(buff.effect().value().getDescriptionId()))

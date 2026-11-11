@@ -72,7 +72,7 @@ final class ZFighterTriangleCannon {
 			level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, centre.x, centre.y, centre.z, 2, 0.2, 0.2, 0.2, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, centre.x, centre.y, centre.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (Soundscape.due(player, "ki.triangle", 8, 13)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(0.9F).pitched(0.7F + charge * 0.6F), ZFighterKi.KI_SURGE);

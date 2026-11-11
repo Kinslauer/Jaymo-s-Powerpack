@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.monster;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -85,7 +86,7 @@ public final class AetherEffects {
 	/** Crackling: weaker blows and a small sting now and then. */
 	private static final class Shock extends MobEffect {
 		Shock() {
-			super(MobEffectCategory.HARMFUL, 0xe8e060, ParticleTypes.ELECTRIC_SPARK);
+			super(MobEffectCategory.HARMFUL, 0xe8e060, MagicFx.CRACKLE);
 			this.addAttributeModifier(Attributes.ATTACK_DAMAGE, JaymosPowers.id("effect.electric_shock.weakness"), -SHOCK_WEAKNESS,
 				AttributeModifier.Operation.ADD_VALUE);
 		}

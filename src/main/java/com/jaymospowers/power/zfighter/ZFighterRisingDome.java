@@ -138,7 +138,7 @@ final class ZFighterRisingDome {
 			level.sendParticles(dust, true, false, base.x, base.y + 0.2, base.z, 0, dir.x, dir.y, dir.z, 0.5);
 		}
 		for (double y = base.y; y < top.y; y += 1.0) {
-			level.sendParticles(ParticleTypes.END_ROD, true, false, over.x, y, over.z, 2, PILLAR_RADIUS * 0.4, 0.4, PILLAR_RADIUS * 0.4, 0.05);
+			level.sendParticles(MagicFx.LIGHT, true, false, over.x, y, over.z, 2, PILLAR_RADIUS * 0.4, 0.4, PILLAR_RADIUS * 0.4, 0.05);
 		}
 		level.playSound(null, base.x, base.y, base.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 1.1F);
 		level.playSound(null, over.x, over.y, over.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.8F, 1.3F);

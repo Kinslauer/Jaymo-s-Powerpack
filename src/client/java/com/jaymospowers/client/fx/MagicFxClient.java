@@ -30,7 +30,8 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>Beam, blast, ring and orb are all the beacon beam's texture, scrolling: a tube, a swelling shell, a running band
  * and a ball. The sigil is our own circle of marks, turning on the ground.</li>
- * <li>{@link Mote} and {@link Miasma} are the two particles: a glint of light and a puff of murk.</li>
+ * <li>{@link Mote}, {@link Miasma}, {@link Spark} and {@link Rune} are the particles: a glint of light, a puff of murk,
+ * a crackle and a written mark.</li>
  * </ul>
  * {@link #beam}, {@link #blast}, {@link #ring}, {@link #orb} and {@link #sigil} make the same shapes with no packet, for
  * what plays on the client alone (a film, a look drawn from synced state).
@@ -79,6 +80,10 @@ public final class MagicFxClient {
 			new Mote(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
 		ParticleProviderRegistry.getInstance().register(MagicFx.MIASMA, sprites -> (options, level, x, y, z, xd, yd, zd, random) ->
 			new Miasma(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
+		ParticleProviderRegistry.getInstance().register(MagicFx.SPARK, sprites -> (options, level, x, y, z, xd, yd, zd, random) ->
+			new Spark(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
+		ParticleProviderRegistry.getInstance().register(MagicFx.RUNE, sprites -> (options, level, x, y, z, xd, yd, zd, random) ->
+			new Rune(level, x, y, z, xd, yd, zd, options.color(), options.size(), sprites));
 		ClientPlayNetworking.registerGlobalReceiver(MagicFx.Shape.TYPE, (shape, context) -> add(shape));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (minecraft.level == null) {
@@ -500,6 +505,137 @@ public final class MagicFxClient {
 		public float getQuadSize(float partial) {
 			float t = Mth.clamp((this.age + partial) / this.lifetime, 0.0F, 1.0F);
 			return this.fullSize * (1.0F + SWELL * t);
+		}
+
+		@Override
+		protected SingleQuadParticle.Layer getLayer() {
+			return SingleQuadParticle.Layer.TRANSLUCENT;
+		}
+	}
+
+	/**
+	 * A spark: power crackling. A jagged fleck, full bright and near white, that jumps to a new shape and angle every
+	 * tick, darts a short way and is gone.
+	 */
+	static final class Spark extends SingleQuadParticle {
+		/** Half a quad for size 1, its life in ticks (between these), how much of the speed it was sent with it keeps. */
+		static final float SIZE = 0.12F, WHITEN = 0.5F;
+		static final int LIFE_MIN = 4, LIFE_MAX = 9;
+		static final double SPEED = 0.5;
+
+		private final SpriteSet sprites;
+
+		Spark(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, int color, float size, SpriteSet sprites) {
+			super(level, x, y, z, sprites.get(level.getRandom()));
+			this.sprites = sprites;
+			this.xd = xd * SPEED;
+			this.yd = yd * SPEED;
+			this.zd = zd * SPEED;
+			this.gravity = 0.0F;
+			this.friction = 0.8F;
+			this.hasPhysics = false;
+			this.quadSize = SIZE * size * (0.7F + this.random.nextFloat() * 0.7F);
+			this.lifetime = LIFE_MIN + this.random.nextInt(LIFE_MAX - LIFE_MIN + 1);
+			this.roll = this.random.nextFloat() * Mth.TWO_PI;
+			this.oRoll = this.roll;
+			int c = mix(color, 0xFFFFFF, WHITEN);
+			this.setColor((c >> 16 & 0xFF) / 255.0F, (c >> 8 & 0xFF) / 255.0F, (c & 0xFF) / 255.0F);
+			this.alpha = 1.0F;
+		}
+
+		@Override
+		public void tick() {
+			super.tick();
+			// a new fork at a new angle each tick: it never turns smoothly
+			this.setSprite(this.sprites.get(this.random));
+			this.roll = this.random.nextFloat() * Mth.TWO_PI;
+			this.oRoll = this.roll;
+			this.alpha = this.age >= this.lifetime - 2 ? 0.55F : 1.0F;
+		}
+
+		@Override
+		protected int getLightCoords(float partial) {
+			return 0xF000F0;
+		}
+
+		@Override
+		protected SingleQuadParticle.Layer getLayer() {
+			return SingleQuadParticle.Layer.TRANSLUCENT;
+		}
+	}
+
+	/**
+	 * A rune: a working being written. One of our marks, full bright. Sent with a direction it starts that far from the
+	 * point and is drawn in to it along a falling curve (the enchanting table's letters' own path); sent with none it
+	 * hangs, drifts up a little and fades.
+	 */
+	static final class Rune extends SingleQuadParticle {
+		/** Half a quad for size 1, its life in ticks (between these), and how far a still one drifts up a tick. */
+		static final float SIZE = 0.09F, WHITEN = 0.2F;
+		static final int LIFE_MIN = 22, LIFE_MAX = 34;
+		static final double DRIFT = 0.006;
+
+		private final double toX, toY, toZ, fromX, fromY, fromZ;
+		private final boolean drawn;
+		private final float fullSize;
+
+		Rune(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, int color, float size, SpriteSet sprites) {
+			super(level, x, y, z, sprites.get(level.getRandom()));
+			this.toX = x;
+			this.toY = y;
+			this.toZ = z;
+			this.fromX = xd;
+			this.fromY = yd;
+			this.fromZ = zd;
+			this.drawn = xd * xd + yd * yd + zd * zd > 1.0E-4;
+			this.xd = 0.0;
+			this.yd = 0.0;
+			this.zd = 0.0;
+			this.gravity = 0.0F;
+			this.hasPhysics = false;
+			this.fullSize = SIZE * size * (0.8F + this.random.nextFloat() * 0.4F);
+			this.quadSize = this.fullSize;
+			this.lifetime = LIFE_MIN + this.random.nextInt(LIFE_MAX - LIFE_MIN + 1);
+			int c = mix(color, 0xFFFFFF, WHITEN);
+			this.setColor((c >> 16 & 0xFF) / 255.0F, (c >> 8 & 0xFF) / 255.0F, (c & 0xFF) / 255.0F);
+			this.alpha = 1.0F;
+			if (this.drawn) {
+				this.setPos(x + xd, y + yd, z + zd);
+				this.xo = this.x;
+				this.yo = this.y;
+				this.zo = this.z;
+			}
+		}
+
+		@Override
+		public void tick() {
+			this.xo = this.x;
+			this.yo = this.y;
+			this.zo = this.z;
+			if (this.age++ >= this.lifetime) {
+				this.remove();
+				return;
+			}
+			float t = this.age / (float)this.lifetime;
+			if (this.drawn) {
+				// out at the start, in at the end, dipping on the way
+				float left = 1.0F - t;
+				float fall = left * left;
+				this.setPos(this.toX + this.fromX * left, this.toY + this.fromY * left - (1.0F - fall) * left * 0.6F, this.toZ + this.fromZ * left);
+			} else {
+				this.setPos(this.x, this.y + DRIFT, this.z);
+			}
+			this.alpha = t < 0.15F ? t / 0.15F : t > 0.75F ? Mth.clamp((1.0F - t) / 0.25F, 0.0F, 1.0F) : 1.0F;
+		}
+
+		@Override
+		public float getQuadSize(float partial) {
+			return this.fullSize;
+		}
+
+		@Override
+		protected int getLightCoords(float partial) {
+			return 0xF000F0;
 		}
 
 		@Override

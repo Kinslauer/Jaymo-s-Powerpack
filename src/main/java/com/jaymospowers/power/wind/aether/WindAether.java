@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind.aether;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.compat.Stacked;
@@ -334,7 +335,7 @@ public final class WindAether {
 
 	private static void burst(ServerLevel level, Vec3 at) {
 		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 1.0, at.z, 40, 0.5, 0.9, 0.5, 0.05);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.0, at.z, 20, 0.4, 0.8, 0.4, 0.04);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y + 1.0, at.z, 20, 0.4, 0.8, 0.4, 0.04);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 0.6F, 1.4F);
 	}
 }

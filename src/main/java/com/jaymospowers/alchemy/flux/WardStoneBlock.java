@@ -1,8 +1,8 @@
 package com.jaymospowers.alchemy.flux;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Flux;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -29,7 +29,7 @@ public class WardStoneBlock extends Block {
 	@Override
 	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		if (Flux.take(level, pos, FluxEffects.WARD_DRAIN) > 0) {
-			level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 2, 0.25, 0.1, 0.25, 0.01);
+			level.sendParticles(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 2, 0.25, 0.1, 0.25, 0.01);
 		}
 		level.scheduleTick(pos, this, FluxEffects.WARD_INTERVAL);
 	}
@@ -37,7 +37,7 @@ public class WardStoneBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (random.nextInt(24) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, pos.getX() + random.nextDouble(), pos.getY() + 1.05, pos.getZ() + random.nextDouble(), 0.0, 0.01, 0.0);
+			level.addParticle(MagicFx.LIGHT, pos.getX() + random.nextDouble(), pos.getY() + 1.05, pos.getZ() + random.nextDouble(), 0.0, 0.01, 0.0);
 		}
 	}
 }

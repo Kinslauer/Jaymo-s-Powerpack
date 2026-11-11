@@ -1117,7 +1117,7 @@ public final class Valor {
 			}
 			case HOLLOW -> {
 				// (the enchanting glyphs fly from where they're sent to their point: here, the hands)
-				level.sendParticles(ParticleTypes.ENCHANT, hx, hy, hz, 0, (r.nextDouble() - 0.5) * 2.0, r.nextDouble(), (r.nextDouble() - 0.5) * 2.0, 1.0);
+				level.sendParticles(Fx.GLYPH, hx, hy, hz, 0, (r.nextDouble() - 0.5) * 2.0, r.nextDouble(), (r.nextDouble() - 0.5) * 2.0, 1.0);
 			}
 			case UNDYING -> {
 				if (r.nextInt(5) == 0) {

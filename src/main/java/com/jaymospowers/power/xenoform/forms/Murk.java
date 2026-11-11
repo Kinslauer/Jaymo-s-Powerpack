@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -143,7 +144,7 @@ public final class Murk extends XenoForm {
 		if (live.lure > 0) {
 			live.lure--;
 			if (player.tickCount % 4 == 0) {
-				level.sendParticles(ParticleTypes.GLOW, player.getX(), player.getY() + 1.4, player.getZ(), 3, 0.4, 0.4, 0.4, 0.01);
+				level.sendParticles(MagicFx.GLOW, player.getX(), player.getY() + 1.4, player.getZ(), 3, 0.4, 0.4, 0.4, 0.01);
 			}
 			if (live.lure % 10 == 0) {
 				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LURE_RADIUS),

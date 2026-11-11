@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -97,7 +96,7 @@ public final class Cures {
 		if (Lycans.cursed(player)) {
 			WerewolfPlayers.cure(player);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY(1.0), player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
+		level.sendParticles(Fx.LIGHT, player.getX(), player.getY(1.0), player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		if (priest instanceof Villager v) {
 			v.getLookControl().setLookAt(player);

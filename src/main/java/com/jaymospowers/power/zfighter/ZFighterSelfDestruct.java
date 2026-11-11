@@ -163,7 +163,7 @@ final class ZFighterSelfDestruct {
 		level.sendParticles(MagicFx.wisp(color, 1.2F + charge * 1.4F), true, false, at.x, at.y, at.z, 3 + (int)(charge * 8),
 			spread, player.getBbHeight() * 0.4, spread, 0.0);
 		if (level.getGameTime() % 4 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 2 + (int)(charge * 6), spread, spread, spread, 0.3);
+			level.sendParticles(MagicFx.CRACKLE, true, false, at.x, at.y, at.z, 2 + (int)(charge * 6), spread, spread, spread, 0.3);
 		}
 		if (level.getGameTime() % 10 == 0) {
 			Shakes.send(player, 0.2F + charge * 0.5F, at);

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.power.arsenal.entity.FrostLance;
 import com.jaymospowers.power.arsenal.entity.RiftBlade;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -144,8 +144,8 @@ final class ArsenalRicochet {
 	}
 
 	private static void puff(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 12, 0.25, 0.4, 0.25, 0.08);
-		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 10, 0.2, 0.4, 0.2, 0.4);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 12, 0.25, 0.4, 0.25, 0.08);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 10, 0.2, 0.4, 0.2, 0.4);
 	}
 
 	/** The lock-on, else what the owner last struck, else the nearest foe near the exit gate; null if none. */

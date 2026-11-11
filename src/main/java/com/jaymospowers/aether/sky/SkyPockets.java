@@ -182,7 +182,7 @@ public final class SkyPockets {
 
 	private static void signs(ServerPlayer sp, ServerLevel level, Pocket pocket) {
 		if (pocket == Pocket.LIGHT && level.getRandom().nextInt(3) == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, sp.getX(), sp.getY() + 0.3, sp.getZ(), 4, 3.0, 0.5, 3.0, 0.02);
+			level.sendParticles(MagicFx.LIGHT, sp.getX(), sp.getY() + 0.3, sp.getZ(), 4, 3.0, 0.5, 3.0, 0.02);
 		} else if (pocket == Pocket.HEAVY && level.getRandom().nextInt(3) == 0) {
 			level.sendParticles(ParticleTypes.ASH, sp.getX(), sp.getY() + 3.0, sp.getZ(), 12, 3.0, 1.0, 3.0, 0.0);
 		}

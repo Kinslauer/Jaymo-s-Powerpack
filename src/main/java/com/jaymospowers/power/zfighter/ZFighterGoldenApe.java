@@ -5,7 +5,6 @@ import com.jaymospowers.JaymosPowers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -102,7 +101,7 @@ public final class ZFighterGoldenApe {
 		double w = player.getBbWidth() * 0.5, h = player.getBbHeight();
 		level.sendParticles(MagicFx.wisp(COLOR, 2.5F), true, false, player.getX(), player.getY() + h * 0.5, player.getZ(), MOTES, w, h * 0.4, w, 0.02);
 		if (player.getRandom().nextInt(SPARK_ODDS) == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + h * 0.5, player.getZ(), 2, w, h * 0.4, w, 0.1);
+			level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + h * 0.5, player.getZ(), 2, w, h * 0.4, w, 0.1);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,8 +74,8 @@ public final class GravityForward {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.3F, 2.0F);
 		Vec3 look = player.getLookAngle();
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.1);
-		level.sendParticles(ParticleTypes.END_ROD, player.getX() - look.x, player.getY() + 1.0 - look.y, player.getZ() - look.z, 8, 0.2, 0.2, 0.2, 0.02);
+		level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.1);
+		level.sendParticles(MagicFx.LIGHT, player.getX() - look.x, player.getY() + 1.0 - look.y, player.getZ() - look.z, 8, 0.2, 0.2, 0.2, 0.02);
 		return true;
 	}
 
@@ -127,7 +127,7 @@ public final class GravityForward {
 		} else if (run.ticks >= TICKS || player.isInWater() || player.isPassenger()) {
 			stop(player);
 		} else if (run.ticks % 2 == 0) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 0.9, player.getZ(), 3, 0.25, 0.4, 0.25, 0.02);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 0.9, player.getZ(), 3, 0.25, 0.4, 0.25, 0.02);
 		}
 	}
 

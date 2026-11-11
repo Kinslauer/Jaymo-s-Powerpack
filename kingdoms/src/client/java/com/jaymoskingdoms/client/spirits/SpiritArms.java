@@ -540,7 +540,7 @@ public final class SpiritArms {
 			double vx = (random.nextDouble() - 0.5) * BURST_SPEED, vy = (random.nextDouble() - 0.5) * BURST_SPEED, vz = (random.nextDouble() - 0.5) * BURST_SPEED;
 			level.addParticle(dust, at.x, at.y, at.z, vx, vy, vz);
 			if (n % 2 == 0) {
-				level.addParticle(ParticleTypes.END_ROD, at.x, at.y, at.z, vx * 0.6, vy * 0.6, vz * 0.6);
+				level.addParticle(Fx.LIGHT, at.x, at.y, at.z, vx * 0.6, vy * 0.6, vz * 0.6);
 			}
 			if (n % 3 == 0) {
 				level.addParticle(ParticleTypes.CRIT, at.x, at.y, at.z, vx * 1.5, vy * 1.5, vz * 1.5);

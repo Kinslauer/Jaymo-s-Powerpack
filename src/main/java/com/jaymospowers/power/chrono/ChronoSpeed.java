@@ -181,12 +181,12 @@ public final class ChronoSpeed {
 			if (moved.lengthSqr() > 0.04) {
 				for (int i = 0; i < 3; i++) {
 					Vec3 at = was.add(moved.scale(i / 3.0));
-					ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+					ChronoFx.particles(level, player, MagicFx.CRACKLE, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 				}
 				if (palette == SKY) {
 					ChronoFx.particles(level, player, SKY_DUST, was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
 				} else {
-					ChronoFx.particles(level, player, ParticleTypes.WAX_ON, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
+					ChronoFx.particles(level, player, MagicFx.EMBER, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
 				}
 			}
 			FluidState under = level.getFluidState(player.blockPosition().below());
@@ -352,11 +352,11 @@ public final class ChronoSpeed {
 		if (out == null) {
 			return false;
 		}
-		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 25, 0.3, 0.7, 0.3, 0.15);
+		ChronoFx.particles(level, player, MagicFx.CRACKLE, here.x, here.y + 1.0, here.z, 25, 0.3, 0.7, 0.3, 0.15);
 		level.playSound(null, here.x, here.y, here.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 2.0F);
 		player.teleportTo(level, out.x, out.y, out.z, Set.of(), player.getYRot(), player.getXRot(), false);
-		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, out.x, out.y + 1.0, out.z, 25, 0.3, 0.7, 0.3, 0.15);
-		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, out.x, out.y + 1.0, out.z, 12, 0.3, 0.7, 0.3, 0.3);
+		ChronoFx.particles(level, player, MagicFx.CRACKLE, out.x, out.y + 1.0, out.z, 25, 0.3, 0.7, 0.3, 0.15);
+		ChronoFx.particles(level, player, MagicFx.EMBER, out.x, out.y + 1.0, out.z, 12, 0.3, 0.7, 0.3, 0.3);
 		level.playSound(null, out.x, out.y, out.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 2.0F);
 		return true;
 	}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -17,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -258,10 +258,10 @@ public final class Nadir extends XenoForm {
 		NadirRules.tick(player, st);
 		// the void about it
 		if (player.tickCount % 2 == 0) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.0);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.0);
 		}
 		if (player.tickCount % 7 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.5, 0.8, 0.5, 0.0);
+			level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.5, 0.8, 0.5, 0.0);
 		}
 		if (live.beaconHeld > 0) {
 			ServerPlayer target = target(player, live);
@@ -386,7 +386,7 @@ public final class Nadir extends XenoForm {
 		ServerPlayer target = others.get(index);
 		live.beaconTarget = target.getUUID();
 		target.addEffect(new MobEffectInstance(MobEffects.GLOWING, GLOW_TICKS, 0, false, false));
-		target.level().sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + 1.0, target.getZ(), 20, 0.3, 0.6, 0.3, 0.05);
+		target.level().sendParticles(MagicFx.VOID, target.getX(), target.getY() + 1.0, target.getZ(), 20, 0.3, 0.6, 0.3, 0.05);
 		sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.0F, 0.5F);
 	}
 
@@ -400,7 +400,7 @@ public final class Nadir extends XenoForm {
 		if (!to.noCollision(player, player.getBoundingBox().move(behind.subtract(player.position())))) {
 			behind = target.position();
 		}
-		from.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.2);
+		from.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.2);
 		from.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.5F);
 		if (from != to) {
 			// what Nadir holds open stays in the world it was made in: let it go quietly
@@ -409,7 +409,7 @@ public final class Nadir extends XenoForm {
 		}
 		player.teleportTo(to, behind.x, behind.y, behind.z, Set.of(), target.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
-		to.sendParticles(ParticleTypes.REVERSE_PORTAL, behind.x, behind.y + 1.0, behind.z, 60, 0.4, 0.8, 0.4, 0.2);
+		to.sendParticles(MagicFx.VOID, behind.x, behind.y + 1.0, behind.z, 60, 0.4, 0.8, 0.4, 0.2);
 		to.playSound(null, behind.x, behind.y, behind.z, SoundEvents.ENDERMAN_TELEPORT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.5F);
 		to.playSound(null, behind.x, behind.y, behind.z, SoundEvents.WARDEN_HEARTBEAT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.8F);
 		target.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.beacon_arrived", player.getDisplayName()).withStyle(ChatFormatting.DARK_PURPLE));

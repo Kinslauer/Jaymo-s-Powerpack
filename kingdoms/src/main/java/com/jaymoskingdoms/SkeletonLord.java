@@ -352,7 +352,7 @@ public class SkeletonLord extends Monster implements GeoEntity {
 			level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX() + Math.cos(a) * 1.5, this.getY() + 0.3, this.getZ() + Math.sin(a) * 1.5, 0,
 				Math.cos(a), 0.05, Math.sin(a), 0.4);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 1.5, this.getZ(), 60, 0.5, 1.0, 0.5, 0.3);
+		level.sendParticles(Fx.VOID, this.getX(), this.getY() + 1.5, this.getZ(), 60, 0.5, 1.0, 0.5, 0.3);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 2.0F, 0.6F);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8F, 1.4F);
 	}

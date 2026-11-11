@@ -7,7 +7,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -143,7 +142,7 @@ final class ZFighterTechniques {
 			}
 		}
 		MagicFx.blast(level, eye.x, eye.y, eye.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, eye.x, eye.y, eye.z, 40, 0.3, 0.3, 0.3, 0.5);
+		level.sendParticles(MagicFx.LIGHT, true, false, eye.x, eye.y, eye.z, 40, 0.3, 0.3, 0.3, 0.5);
 		level.playSound(null, eye.x, eye.y, eye.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 2.0F);
 		level.playSound(null, eye.x, eye.y, eye.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 		return true;

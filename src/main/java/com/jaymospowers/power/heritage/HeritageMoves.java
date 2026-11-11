@@ -1,5 +1,6 @@
 package com.jaymospowers.power.heritage;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
@@ -231,7 +232,7 @@ public final class HeritageMoves {
 		Vec3 at = blood(player) == STORM ? player.position().add(0.0, player.getBbHeight() + 0.5, 0.0)
 			: player.getEyePosition().add(player.getViewVector(1.0F).scale(0.7)).add(0.0, -0.4, 0.0);
 		if ((now - live.since) % 2 == 0) {
-			level.sendParticles(blood(player) == STORM ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.END_ROD, at.x, at.y, at.z,
+			level.sendParticles(blood(player) == STORM ? MagicFx.CRACKLE : MagicFx.LIGHT, at.x, at.y, at.z,
 				1 + (int)(charge * 3), 0.15, 0.15, 0.15, 0.02);
 		}
 		if (charge >= 1.0F && live.sent < 1.0F) {
@@ -308,10 +309,10 @@ public final class HeritageMoves {
 		// a ring of light thrown out, and a burst at the hands
 		for (int i = 0; i < 48; i++) {
 			double a = i * Math.PI * 2.0 / 48.0;
-			level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.45);
+			level.sendParticles(MagicFx.LIGHT, center.x, center.y, center.z, 0, Math.cos(a), 0.05, Math.sin(a), 0.45);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, center.x, center.y + 0.3, center.z, 20, 0.2, 0.2, 0.2, 0.15);
-		level.sendParticles(ParticleTypes.WAX_ON, center.x, center.y, center.z, 30, 2.0, 1.0, 2.0, 0.0);
+		level.sendParticles(MagicFx.LIGHT, center.x, center.y + 0.3, center.z, 20, 0.2, 0.2, 0.2, 0.15);
+		level.sendParticles(MagicFx.EMBER, center.x, center.y, center.z, 30, 2.0, 1.0, 2.0, 0.0);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.2F, 1.5F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -163,7 +164,7 @@ public final class VoidCrown {
 		player.getInventory().placeItemBackInInventory(crown, Prediction.SERVER_ONLY);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, rift.x, rift.y, rift.z, 12, 0.2, 0.2, 0.2, 0.02);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 40, 0.3, 0.3, 0.3, 0.08);
+		level.sendParticles(MagicFx.VOID, rift.x, rift.y, rift.z, 40, 0.3, 0.3, 0.3, 0.08);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_STARE, SoundSource.PLAYERS, 0.6F, 0.5F);
 		ArsenalVoid.whisper(player, "message.jaymospowers.arsenal.crown_found", SoundEvents.AMETHYST_BLOCK_RESONATE, 1.0F, 0.4F);
 	}
@@ -205,7 +206,7 @@ public final class VoidCrown {
 			player.drop(crown, false, Prediction.SERVER_ONLY);
 		}
 		ServerLevel level = player.level();
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getEyeY(), player.getZ(), 20, 0.3, 0.2, 0.3, 0.05);
+		level.sendParticles(MagicFx.VOID, player.getX(), player.getEyeY(), player.getZ(), 20, 0.3, 0.2, 0.3, 0.05);
 		ArsenalVoid.whisper(player, "message.jaymospowers.arsenal.crown_slips", SoundEvents.ENDERMAN_AMBIENT, 0.6F, 0.5F);
 	}
 
@@ -247,8 +248,8 @@ public final class VoidCrown {
 			double z = from.z + (player.getRandom().nextDouble() - 0.5) * 2.0 * STEP_RANGE;
 			if (player.randomTeleport(x, y, z, true, BlockTags.ENDERMAN_DOES_NOT_TELEPORT_TO)) {
 				player.resetFallDistance();
-				level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 48, 0.3, 0.9, 0.3, 0.8);
-				level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 48, 0.3, 0.9, 0.3, 0.8);
+				level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 48, 0.3, 0.9, 0.3, 0.8);
+				level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 48, 0.3, 0.9, 0.3, 0.8);
 				level.playSound(null, from.x, from.y, from.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
 				return true;

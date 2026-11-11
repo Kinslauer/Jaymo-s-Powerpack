@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
@@ -277,8 +278,8 @@ public final class ArsenalVoid {
 				player.resetFallDistance();
 				level.playSound(null, from.x, from.y, from.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.8F);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.8F);
-				level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 40, 0.3, 0.8, 0.3, 0.6);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.3, 0.8, 0.3, 0.05);
+				level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 40, 0.3, 0.8, 0.3, 0.6);
+				level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.3, 0.8, 0.3, 0.05);
 				return true;
 			}
 		}
@@ -351,7 +352,7 @@ public final class ArsenalVoid {
 			double py = y + 0.2 + (t % 10) * 0.18;
 			// count 0: the "spread" is the exact velocity, so these fly up and out
 			level.sendParticles(ParticleTypes.SQUID_INK, px, py, pz, 0, Math.cos(a) * 0.08, 0.35 + progress * 0.3, Math.sin(a) * 0.08, 1.0);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, px, py + 0.4, pz, 0, Math.cos(a) * 0.05, 0.25, Math.sin(a) * 0.05, 1.0);
+			level.sendParticles(MagicFx.VOID, px, py + 0.4, pz, 0, Math.cos(a) * 0.05, 0.25, Math.sin(a) * 0.05, 1.0);
 		}
 		if (t % 4 == 0) {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 1.0, z, 4, 0.25, 0.5, 0.25, 0.08);
@@ -372,8 +373,8 @@ public final class ArsenalVoid {
 		for (int i = 0; i < 40; i++) {
 			level.sendParticles(ParticleTypes.SQUID_INK, x, y + 1.0 + i * 0.25, z, 3, 0.15, 0.1, 0.15, 0.02);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y + 1.0, z, 160, 0.2, 0.2, 0.2, 0.6);
-		level.sendParticles(ParticleTypes.END_ROD, x, y + 1.0, z, 60, 0.1, 0.1, 0.1, 0.35);
+		level.sendParticles(MagicFx.VOID, x, y + 1.0, z, 160, 0.2, 0.2, 0.2, 0.6);
+		level.sendParticles(MagicFx.LIGHT, x, y + 1.0, z, 60, 0.1, 0.1, 0.1, 0.35);
 		level.playSound(null, x, y, z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 1.0F, 1.4F);
 		level.playSound(null, x, y, z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 1.5F, 0.5F);
 		player.removeEffect(MobEffects.SLOWNESS);

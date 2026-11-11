@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
@@ -7,7 +8,6 @@ import java.util.List;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -416,7 +416,7 @@ final class ChronoEchoWork {
 		if (++this.step >= steps.size()) {
 			this.step = 0;
 			this.loopPause = LOOP_PAUSE;
-			ChronoFx.particles(level, owner, ParticleTypes.REVERSE_PORTAL, this.echo.getX(), this.echo.getY() + 1.0, this.echo.getZ(), 12, 0.3, 0.6, 0.3, 0.05);
+			ChronoFx.particles(level, owner, MagicFx.VOID, this.echo.getX(), this.echo.getY() + 1.0, this.echo.getZ(), 12, 0.3, 0.6, 0.3, 0.05);
 		}
 	}
 

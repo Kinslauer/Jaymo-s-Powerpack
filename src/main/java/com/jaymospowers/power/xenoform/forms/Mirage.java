@@ -1,12 +1,12 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoDouble;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -104,7 +104,7 @@ public final class Mirage extends XenoForm {
 				if (target instanceof Mob mob && mob.getTarget() == player) {
 					mob.setTarget(null);
 				}
-				beam(level, player.getEyePosition(), target.getEyePosition(), ParticleTypes.WITCH, 10);
+				beam(level, player.getEyePosition(), target.getEyePosition(), MagicFx.HEX, 10);
 				sound(player, SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, 1.2F, 1.0F);
 				cooldown(player, live, G, BLIND_COOLDOWN);
 			}
@@ -114,7 +114,7 @@ public final class Mirage extends XenoForm {
 					for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(UNSEEN_RANGE), m -> m.getTarget() == player)) {
 						mob.setTarget(null);
 					}
-					burst(level, ParticleTypes.WITCH, player.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.05);
+					burst(level, MagicFx.HEX, player.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.05);
 					sound(player, SoundEvents.ILLUSIONER_CAST_SPELL, 1.2F, 1.2F);
 					cooldown(player, live, V, UNSEEN_COOLDOWN);
 				}
@@ -145,7 +145,7 @@ public final class Mirage extends XenoForm {
 			if (level.addFreshEntity(copy)) {
 				live.doubles.add(copy.getId());
 				made.add(copy);
-				level.sendParticles(ParticleTypes.WITCH, at.x, at.y + 1.0, at.z, 10, 0.3, 0.5, 0.3, 0.05);
+				level.sendParticles(MagicFx.HEX, at.x, at.y + 1.0, at.z, 10, 0.3, 0.5, 0.3, 0.05);
 			}
 		}
 		if (made.isEmpty()) {
@@ -183,8 +183,8 @@ public final class Mirage extends XenoForm {
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, pick.getBoundingBox().inflate(LURE_RANGE), m -> m.getTarget() == player)) {
 			mob.setTarget(pick);
 		}
-		burst(level, ParticleTypes.WITCH, mine.add(0.0, 1.0, 0.0), 12, 0.3, 0.05);
-		burst(level, ParticleTypes.WITCH, theirs.add(0.0, 1.0, 0.0), 12, 0.3, 0.05);
+		burst(level, MagicFx.HEX, mine.add(0.0, 1.0, 0.0), 12, 0.3, 0.05);
+		burst(level, MagicFx.HEX, theirs.add(0.0, 1.0, 0.0), 12, 0.3, 0.05);
 		sound(player, SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.0F, 1.3F);
 		return true;
 	}
@@ -192,7 +192,7 @@ public final class Mirage extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		if (player.tickCount % 8 == 0) {
-			player.level().sendParticles(ParticleTypes.WITCH, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
+			player.level().sendParticles(MagicFx.HEX, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 		}
 		if (!live.doubles.isEmpty() && player.tickCount % 20 == 0) {
 			copies(player.level(), live);
@@ -201,7 +201,7 @@ public final class Mirage extends XenoForm {
 
 	@Override
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.WITCH, player.position().add(0.0, 1.0, 0.0), 50, 1.0, 0.05);
+		burst(player.level(), MagicFx.HEX, player.position().add(0.0, 1.0, 0.0), 50, 1.0, 0.05);
 		sound(player, SoundEvents.ILLUSIONER_CAST_SPELL, 1.6F, 0.7F);
 		return true;
 	}

@@ -1,4 +1,5 @@
-"""Paints the Magic FX textures (core/fx/MagicFx): the mote's glint, the miasma's puff and the sigil's circle of marks.
+"""Paints the Magic FX textures (core/fx/MagicFx): the mote's glint, the miasma's puff, the spark's crackle, the
+rune's marks and the sigil's circle of marks.
 All white or grey: the game tints them. Run from the root: python -I tools/gen_magic_fx.py"""
 import math
 import os
@@ -109,6 +110,48 @@ def sigil():
     return img
 
 
+def spark(frame, rnd):
+    """A crackle, 9x9: a short jagged fork of light, a different one each frame."""
+    img = Image.new("RGBA", (9, 9), (0, 0, 0, 0))
+    px = img.load()
+    x, y = rnd.choice((1, 2)), rnd.choice((0, 1))
+    path = [(x, y)]
+    while y < 8 and x < 8:
+        step = rnd.choice(((1, 1), (1, 1), (0, 1), (1, 0), (-1, 1)))
+        x, y = max(0, min(8, x + step[0])), min(8, y + step[1])
+        path.append((x, y))
+    # a fork off the middle
+    fx, fy = path[len(path) // 2]
+    fork = []
+    for _ in range(3):
+        fx, fy = min(8, fx + 1), max(0, fy + rnd.choice((-1, 0)))
+        fork.append((fx, fy))
+    for qx, qy in fork:
+        px[qx, qy] = (255, 255, 255, 170)
+    for qx, qy in path:
+        px[qx, qy] = (255, 255, 255, 255)
+    return img
+
+
+def rune(index):
+    """A mark, 7x7: strokes only (uprights, bars, slants, dots), never a letter of any alphabet."""
+    marks = [
+        ["..#....", "..#....", ".###...", "..#..#.", "..#.#..", "..##...", "..#...."],
+        ["#.....#", ".#...#.", "..#.#..", "...#...", "...#...", "...#...", ".#####."],
+        [".#####.", ".#.....", ".#.###.", ".#...#.", ".###.#.", ".....#.", ".#####."],
+        ["...#...", "..#.#..", ".#...#.", "#..#..#", ".#...#.", "..#.#..", "...#..."],
+        ["#..#..#", "#..#..#", "#..#..#", "#######", "...#...", "...#...", "..###.."],
+        ["..###..", ".#...#.", ".#.#.#.", ".#...#.", "..###..", "...#...", ".#.#.#."],
+    ]
+    img = Image.new("RGBA", (7, 7), (0, 0, 0, 0))
+    px = img.load()
+    for y, row in enumerate(marks[index]):
+        for x, ch in enumerate(row):
+            if ch == "#":
+                px[x, y] = (255, 255, 255, 255)
+    return img
+
+
 def main():
     for f in range(4):
         save(mote(f), "particle", "magic", "mote_%d.png" % f)
@@ -117,6 +160,11 @@ def main():
         rnd.seed(26)  # the same lumps every frame, so it thins rather than jumps
         save(miasma(f, rnd), "particle", "magic", "miasma_%d.png" % f)
     save(sigil(), "fx", "sigil.png")
+    rnd = random.Random(63)
+    for f in range(4):
+        save(spark(f, rnd), "particle", "magic", "spark_%d.png" % f)
+    for f in range(6):
+        save(rune(f), "particle", "magic", "rune_%d.png" % f)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.mojang.serialization.Codec;
@@ -209,7 +210,7 @@ public final class ArsenalFlintlock {
 			// the flash, fire and smoke every flintlock makes (and the pistol's fire animation), with the void's own sparks
 			com.jaymospowers.armory.GunBlast.fired(player, hand, com.jaymospowers.armory.GunBlast.Gun.FLINTLOCK);
 			Vec3 muzzle = eye.add(dir.scale(0.9)).add(0.0, -0.2, 0.0);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, muzzle.x, muzzle.y, muzzle.z, 10, 0.1, 0.1, 0.1, 0.05);
+			level.sendParticles(MagicFx.VOID, muzzle.x, muzzle.y, muzzle.z, 10, 0.1, 0.1, 0.1, 0.05);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.9F);
 			if (player instanceof net.minecraft.server.level.ServerPlayer shooter) {
 				com.jaymospowers.core.Shakes.send(shooter, 0.5F, muzzle);

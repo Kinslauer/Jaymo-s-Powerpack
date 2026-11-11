@@ -6,6 +6,7 @@ import java.lang.invoke.MethodType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -24,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Fx {
 	private static boolean looked;
-	private static @Nullable MethodHandle wisp, mote, miasma, beam, blast, ring, orb, sigil, burst;
+	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst;
 
 	private Fx() {
 	}
@@ -44,6 +45,8 @@ public final class Fx {
 			wisp = lookup.findStatic(fx, "wisp", particle);
 			mote = lookup.findStatic(fx, "mote", particle);
 			miasma = lookup.findStatic(fx, "miasma", particle);
+			spark = lookup.findStatic(fx, "spark", particle);
+			rune = lookup.findStatic(fx, "rune", particle);
 			beam = lookup.findStatic(fx, "beam", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, Vec3.class, float.class, int.class, int.class));
 			blast = lookup.findStatic(fx, "blast", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class));
 			ring = lookup.findStatic(fx, "ring", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class));
@@ -52,7 +55,7 @@ public final class Fx {
 			burst = lookup.findStatic(fx, "burst", MethodType.methodType(void.class, ServerLevel.class, double.class, double.class, double.class, int.class,
 				float.class, int.class, double.class, double.class, double.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
-			wisp = mote = miasma = beam = blast = ring = orb = sigil = burst = null;
+			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = null;
 		}
 	}
 
@@ -83,6 +86,49 @@ public final class Fx {
 	public static ParticleOptions miasma(int color, float size) {
 		look();
 		return particle(miasma, color, size);
+	}
+
+	/** A spark: power crackling (lightning, static, a charge). The electric spark without Powers. */
+	public static ParticleOptions spark(int color, float size) {
+		look();
+		return stock(spark, color, size, ParticleTypes.ELECTRIC_SPARK);
+	}
+
+	/** A rune: a working being written, drawn in to its point. The enchanting table's letters without Powers. */
+	public static ParticleOptions rune(int color, float size) {
+		look();
+		return stock(rune, color, size, ParticleTypes.ENCHANT);
+	}
+
+	private static ParticleOptions stock(@Nullable MethodHandle handle, int color, float size, ParticleOptions without) {
+		if (handle != null) {
+			try {
+				return (ParticleOptions)handle.invoke(color & 0xFFFFFF, size);
+			} catch (Throwable e) {
+				// fall through
+			}
+		}
+		return without;
+	}
+
+	/**
+	 * The stock particles, for where a vanilla one stood (and what they are without Powers): {@link #LIGHT} a white
+	 * mote (the end rod's glint), {@link #CRACKLE} a spark, {@link #VOID} a violet mote (the portal's specks),
+	 * {@link #GLYPH} a rune, {@link #EMBER} and {@link #PALE} an orange and a white mote (the wax sparkles),
+	 * {@link #GLOW} a sea-green mote, {@link #HEX} a witch's violet mote.
+	 */
+	public static final ParticleOptions LIGHT, CRACKLE, VOID, GLYPH, EMBER, PALE, GLOW, HEX;
+
+	static {
+		look();
+		LIGHT = stock(mote, 0xFFF6E0, 1.0F, ParticleTypes.END_ROD);
+		CRACKLE = stock(spark, 0xFFF7B0, 1.0F, ParticleTypes.ELECTRIC_SPARK);
+		VOID = stock(mote, 0xB26BFF, 0.8F, ParticleTypes.REVERSE_PORTAL);
+		GLYPH = stock(rune, 0xE4DCFF, 1.0F, ParticleTypes.ENCHANT);
+		EMBER = stock(mote, 0xFFA040, 0.8F, ParticleTypes.WAX_ON);
+		PALE = stock(mote, 0xFFFFFF, 0.8F, ParticleTypes.WAX_OFF);
+		GLOW = stock(mote, 0x60F0D0, 0.9F, ParticleTypes.GLOW);
+		HEX = stock(mote, 0x8A3FC8, 0.9F, ParticleTypes.WITCH);
 	}
 
 	/** A beam from {@code from} to {@code to}, {@code radius} thick, for {@code ticks}. */

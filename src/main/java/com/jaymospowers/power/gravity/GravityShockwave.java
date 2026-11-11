@@ -159,7 +159,7 @@ final class GravityShockwave {
 				level.sendParticles(BUBBLE, at.x + Math.cos(a) * c * r, at.y + Math.sin(up) * r, at.z + Math.sin(a) * c * r, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 			if (t % 2 == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 0.5, at.z, 20, r * 0.5, 0.6, r * 0.5, 0.15);
+				level.sendParticles(MagicFx.VOID, at.x, at.y + 0.5, at.z, 20, r * 0.5, 0.6, r * 0.5, 0.15);
 			}
 			// the ground's debris blasted up where the shell meets it
 			int bursts = 6 + (int)(r * 1.5);

@@ -219,7 +219,7 @@ public final class SpiritManifest {
 		if (stage.placed) {
 			for (int n = 0; n < LEVEL_RING; n++) {
 				double a = n * Mth.TWO_PI / LEVEL_RING;
-				level.addParticle(ParticleTypes.END_ROD, stage.x, stage.y + 0.1, stage.z, Math.cos(a) * LEVEL_RING_SPEED, 0.04, Math.sin(a) * LEVEL_RING_SPEED);
+				level.addParticle(Fx.LIGHT, stage.x, stage.y + 0.1, stage.z, Math.cos(a) * LEVEL_RING_SPEED, 0.04, Math.sin(a) * LEVEL_RING_SPEED);
 			}
 			level.playLocalSound(stage.x, stage.y + 1.0, stage.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 0.7F, false);
 		}

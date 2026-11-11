@@ -1,6 +1,6 @@
 package com.jaymospowers.alchemy.flux;
 
-import net.minecraft.core.particles.ParticleTypes;
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -24,7 +24,7 @@ public class BlightedEffect extends MobEffect {
 	public static final int INTERVAL = 20;
 
 	public BlightedEffect() {
-		super(MobEffectCategory.HARMFUL, 0x6D5A86, ParticleTypes.WITCH);
+		super(MobEffectCategory.HARMFUL, 0x6D5A86, MagicFx.HEX);
 	}
 
 	@Override

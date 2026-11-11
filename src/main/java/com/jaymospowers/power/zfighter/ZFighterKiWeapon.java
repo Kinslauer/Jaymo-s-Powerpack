@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -7,7 +8,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
@@ -77,7 +77,7 @@ public final class ZFighterKiWeapon {
 		ServerLevel level = player.level();
 		Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		level.sendParticles(ZFighterPower.dust(live), true, false, hand.x, hand.y, hand.z, 12, 0.3, 0.4, 0.3, 0.05);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, hand.x, hand.y, hand.z, 6, 0.2, 0.3, 0.2, 0.05);
+		level.sendParticles(MagicFx.LIGHT, true, false, hand.x, hand.y, hand.z, 6, 0.2, 0.3, 0.2, 0.05);
 		level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.9F, 1.4F);
 		level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5F, 2.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ki_weapon_out",

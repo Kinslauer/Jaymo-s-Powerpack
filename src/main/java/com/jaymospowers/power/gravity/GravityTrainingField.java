@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -234,7 +233,7 @@ public final class GravityTrainingField {
 			double a = now * 0.15;
 			for (int i = 0; i < 8; i++) {
 				double t = a + i * Math.PI / 4.0;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x + Math.cos(t) * RADIUS, c.y + 0.1, c.z + Math.sin(t) * RADIUS, 1, 0.0, 0.0, 0.0,
+				level.sendParticles(MagicFx.VOID, c.x + Math.cos(t) * RADIUS, c.y + 0.1, c.z + Math.sin(t) * RADIUS, 1, 0.0, 0.0, 0.0,
 					0.0);
 			}
 		}

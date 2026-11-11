@@ -1,5 +1,6 @@
 package com.jaymospowers.core.gifted;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -257,7 +258,7 @@ public final class GiftedAI {
 
 	/** A master's mark on their signature: a glint of light round them. */
 	private static void flourish(ServerLevel level, PathfinderMob mob) {
-		level.sendParticles(ParticleTypes.END_ROD, mob.getX(), mob.getY(0.6), mob.getZ(), 6, 0.3, 0.5, 0.3, 0.02);
+		level.sendParticles(MagicFx.LIGHT, mob.getX(), mob.getY(0.6), mob.getZ(), 6, 0.3, 0.5, 0.3, 0.02);
 	}
 
 	private static void think(ServerLevel level, PathfinderMob mob, Gifted.Gift gift, GiftKit kit) {

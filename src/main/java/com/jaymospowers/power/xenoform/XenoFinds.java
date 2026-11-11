@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.chrono.future.FutureMachines;
 import com.jaymospowers.power.chrono.future.FutureMech;
@@ -215,7 +216,7 @@ public final class XenoFinds {
 			}
 			stack.shrink(1);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.DECORATED_POT_SHATTER, SoundSource.PLAYERS, 1.0F, 1.2F);
-			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.4, 0.3, 0.05);
+			level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.4, 0.3, 0.05);
 			XenoformPower.unlock(player, unread.get(player.getRandom().nextInt(unread.size())));
 			return true;
 		}
@@ -236,7 +237,7 @@ public final class XenoFinds {
 		give(player, new ItemStack(TABLET));
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SMITHING_TABLE_USE, SoundSource.PLAYERS, 1.0F, 1.6F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
 		return true;
 	}
 

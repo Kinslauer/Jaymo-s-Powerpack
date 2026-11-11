@@ -1,10 +1,10 @@
 package com.jaymospowers.power.zfighter.sky;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.zfighter.ZFighterLookout;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -87,7 +87,7 @@ public class StarBench extends Block {
 		}
 		if (awake) {
 			level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, HUM_VOLUME, HUM_PITCH);
-			level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, MOTES, 0.15, 0.2, 0.15, 0.01);
+			level.sendParticles(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, MOTES, 0.15, 0.2, 0.15, 0.01);
 		}
 	}
 

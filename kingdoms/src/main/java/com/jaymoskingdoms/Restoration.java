@@ -418,7 +418,7 @@ public final class Restoration {
 			target.addTag(Downed.REVIVE_TAG);
 		}
 		ring(level, target.position().add(0.0, 0.1, 0.0), 1.5, GOLD);
-		level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.6), target.getZ(), 24, 0.4, 0.7, 0.4, 0.05);
+		level.sendParticles(Fx.LIGHT, target.getX(), target.getY(0.6), target.getZ(), 24, 0.4, 0.7, 0.4, 0.05);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 30, 0.4, 0.7, 0.4, 0.03);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.4F);
 		if (player instanceof ServerPlayer sp) {
@@ -476,7 +476,7 @@ public final class Restoration {
 				up = true;
 			}
 			if (up) {
-				level.sendParticles(ParticleTypes.END_ROD, body.getX(), body.getY(0.6), body.getZ(), 20, 0.4, 0.6, 0.4, 0.06);
+				level.sendParticles(Fx.LIGHT, body.getX(), body.getY(0.6), body.getZ(), 20, 0.4, 0.6, 0.4, 0.06);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 1.5F);
 				if (r.by() != null) {
 					credit(level, r.by(), body, true);

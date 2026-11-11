@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoDouble;
@@ -126,7 +127,7 @@ public final class CopperStorm extends XenoUltimate {
 			Duplex.announce(player, 1 + live.doubles.size());
 		}
 		bolt(level, player.position());
-		burst(level, ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 1.4, 0.0), 40, 0.4, 0.25);
+		burst(level, MagicFx.CRACKLE, player.position().add(0.0, 1.4, 0.0), 40, 0.4, 0.25);
 		sound(player, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.2F, 1.4F);
 		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 0.6F);
 		Shakes.heavy(player, player.position(), SHAKE_RANGE, ENTER_SHAKE);
@@ -181,7 +182,7 @@ public final class CopperStorm extends XenoUltimate {
 							target.hurtServer(level, level.damageSources().lightningBolt(), RALLY_DAMAGE);
 						}
 						Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
-						burst(level, ParticleTypes.ELECTRIC_SPARK, at, 24, 0.35, 0.2);
+						burst(level, MagicFx.CRACKLE, at, 24, 0.35, 0.2);
 						sound(player, SoundEvents.COPPER_BULB_TURN_ON, 1.0F, 1.8F);
 						it.remove();
 						break;
@@ -195,7 +196,7 @@ public final class CopperStorm extends XenoUltimate {
 		if (player.tickCount % 6 == 0) {
 			// sparks crawl along the belt
 			double a = player.tickCount * 0.35;
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX() + Math.cos(a) * 0.35, player.getY() + 0.55, player.getZ() + Math.sin(a) * 0.35, 1, 0.02,
+			level.sendParticles(MagicFx.CRACKLE, player.getX() + Math.cos(a) * 0.35, player.getY() + 0.55, player.getZ() + Math.sin(a) * 0.35, 1, 0.02,
 				0.02, 0.02, 0.0);
 		}
 	}
@@ -304,7 +305,7 @@ public final class CopperStorm extends XenoUltimate {
 		}
 		if (target != null) {
 			RALLIES.computeIfAbsent(player.getUUID(), id -> new ArrayList<>()).add(new Rally(target.getId(), level.getGameTime() + RALLY_WATCH_TICKS));
-			burst(level, ParticleTypes.ELECTRIC_SPARK, target.position().add(0.0, target.getBbHeight() + 0.3, 0.0), 14, 0.25, 0.08);
+			burst(level, MagicFx.CRACKLE, target.position().add(0.0, target.getBbHeight() + 0.3, 0.0), 14, 0.25, 0.08);
 			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 1.6F);
 		} else {
 			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 0.9F);
@@ -347,17 +348,17 @@ public final class CopperStorm extends XenoUltimate {
 		// the arc between the two spots
 		Vec3 from = mine.add(0.0, 1.0, 0.0);
 		Vec3 to = theirs.add(0.0, 1.0, 0.0);
-		beam(level, from, to, ParticleTypes.ELECTRIC_SPARK, Math.max(4, (int)(from.distanceTo(to) * 2.0)));
+		beam(level, from, to, MagicFx.CRACKLE, Math.max(4, (int)(from.distanceTo(to) * 2.0)));
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(ARC_WIDTH + 1.0),
 			e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !Duplex.mine(player, e) && !spared(player, e)
 			&& harmable(player, e))) {
 			if (e.getBoundingBox().inflate(ARC_WIDTH).clip(from, to).isPresent()) {
 				e.hurtServer(level, level.damageSources().lightningBolt(), ARC_DAMAGE);
-				burst(level, ParticleTypes.ELECTRIC_SPARK, e.position().add(0.0, e.getBbHeight() * 0.5, 0.0), 10, 0.3, 0.12);
+				burst(level, MagicFx.CRACKLE, e.position().add(0.0, e.getBbHeight() * 0.5, 0.0), 10, 0.3, 0.12);
 			}
 		}
-		burst(level, ParticleTypes.ELECTRIC_SPARK, mine.add(0.0, 1.0, 0.0), 14, 0.3, 0.1);
-		burst(level, ParticleTypes.ELECTRIC_SPARK, theirs.add(0.0, 1.0, 0.0), 14, 0.3, 0.1);
+		burst(level, MagicFx.CRACKLE, mine.add(0.0, 1.0, 0.0), 14, 0.3, 0.1);
+		burst(level, MagicFx.CRACKLE, theirs.add(0.0, 1.0, 0.0), 14, 0.3, 0.1);
 		sound(player, SoundEvents.COPPER_BULB_TURN_ON, 1.0F, 1.4F);
 		sound(player, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.5F, 2.0F);
 		return true;
@@ -376,7 +377,7 @@ public final class CopperStorm extends XenoUltimate {
 			if (twin.distanceToSqr(player) > MERGE_RANGE * MERGE_RANGE) {
 				continue;
 			}
-			beam(level, twin.position().add(0.0, 1.0, 0.0), player.position().add(0.0, 1.0, 0.0), ParticleTypes.ELECTRIC_SPARK,
+			beam(level, twin.position().add(0.0, 1.0, 0.0), player.position().add(0.0, 1.0, 0.0), MagicFx.CRACKLE,
 				Math.max(2, (int)(twin.distanceTo(player) * 2.0)));
 			twin.pop(level);
 			it.remove();
@@ -399,8 +400,8 @@ public final class CopperStorm extends XenoUltimate {
 					e.hurtServer(level, level.damageSources().lightningBolt(), RING_DAMAGE);
 				}
 			}
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), RING_RADIUS, 28);
-			ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), RING_RADIUS * 0.5, 14);
+			ring(level, MagicFx.CRACKLE, player.position(), RING_RADIUS, 28);
+			ring(level, MagicFx.CRACKLE, player.position(), RING_RADIUS * 0.5, 14);
 			sound(player, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.8F, 1.6F);
 			Shakes.heavy(player, player.position(), SHAKE_RANGE * 0.5, STORM_SHAKE * 0.6F);
 		}
@@ -440,7 +441,7 @@ public final class CopperStorm extends XenoUltimate {
 				}
 			}
 			Duplex.charge(twin, CHARGE_TICKS);
-			burst(level, ParticleTypes.ELECTRIC_SPARK, twin.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.2);
+			burst(level, MagicFx.CRACKLE, twin.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.2);
 		}
 		for (LivingEntity e : shocked) {
 			e.hurtServer(level, level.damageSources().lightningBolt(), STORM_DAMAGE);
@@ -455,8 +456,8 @@ public final class CopperStorm extends XenoUltimate {
 	/** A bolt for show: a column of sparks and a thunderclap, with no lightning entity, so no copper is scraped and no rod is lit (0.21.37). */
 	private static void bolt(ServerLevel level, Vec3 at) {
 		Vec3 top = at.add(0.0, BOLT_HEIGHT, 0.0);
-		beam(level, top, at, ParticleTypes.ELECTRIC_SPARK, BOLT_HEIGHT * 2);
-		beam(level, top, at, ParticleTypes.END_ROD, BOLT_HEIGHT);
+		beam(level, top, at, MagicFx.CRACKLE, BOLT_HEIGHT * 2);
+		beam(level, top, at, MagicFx.LIGHT, BOLT_HEIGHT);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.0F, 1.2F);
 	}
 

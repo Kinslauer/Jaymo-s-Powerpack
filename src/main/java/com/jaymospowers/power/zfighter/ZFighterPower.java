@@ -1474,7 +1474,7 @@ public final class ZFighterPower implements Power {
 			crackle(player, random, live.tier() + 1);
 		}
 		if (now % Math.max(2, 8 - live.tier() * 2) == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+			level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
 				IDLE_SPARKS_PER_FORM * live.tier() + 1, 0.5, 0.7, 0.5, 0.15);
 		}
 		if (live.form == ApeRage.SUPER_4) {
@@ -1502,7 +1502,7 @@ public final class ZFighterPower implements Power {
 		if (now % SETTLED_SPARK_EVERY == 0) {
 			for (int i = 0; i < live.tier(); i++) {
 				double a = random.nextDouble() * Math.PI * 2.0, r = 0.8 + 0.1 * live.tier();
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * 2.0,
+				level.sendParticles(MagicFx.CRACKLE, true, false, player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * 2.0,
 					player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.1);
 			}
 		}
@@ -1579,7 +1579,7 @@ public final class ZFighterPower implements Power {
 			}
 			at = next;
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.1);
+		level.sendParticles(MagicFx.CRACKLE, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.1);
 		if (random.nextInt(4) == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.12F + 0.04F * tier, 1.8F);
 		}

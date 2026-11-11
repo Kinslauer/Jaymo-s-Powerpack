@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.CarryBlock;
 import java.util.Comparator;
@@ -248,13 +249,13 @@ public class XenoDouble extends PathfinderMob {
 	public void pop(ServerLevel level) {
 		if (this.fake()) {
 			// (0.18.113) a false copy: a shimmer, and nothing there
-			level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
+			level.sendParticles(MagicFx.HEX, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
 			level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.NEUTRAL, 0.6F, 1.4F);
 			this.discard();
 			return;
 		}
-		level.sendParticles(ParticleTypes.WAX_OFF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 10, 0.3, 0.5, 0.3, 0.05);
+		level.sendParticles(MagicFx.PALE, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 10, 0.3, 0.5, 0.3, 0.05);
 		level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
 		this.discard();
 	}
@@ -287,7 +288,7 @@ public class XenoDouble extends PathfinderMob {
 		target.syncVelocity = true;
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 4 + swarm * 2, 0.3, 0.3, 0.3, 0.2);
 		if (swarm > 1) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), swarm * 2, 0.3, 0.3, 0.3, 0.1);
+			level.sendParticles(MagicFx.CRACKLE, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), swarm * 2, 0.3, 0.3, 0.3, 0.1);
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.6F,
 			1.1F + swarm * 0.08F + this.random.nextFloat() * 0.1F);
@@ -396,7 +397,7 @@ public class XenoDouble extends PathfinderMob {
 			}
 			Entity display = CarryBlock.takeOut(level, pos, state, this, true);
 			display.startRiding(this, true, false);
-			level.sendParticles(ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.05);
+			level.sendParticles(MagicFx.EMBER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.3, 0.3, 0.3, 0.05);
 			level.playSound(null, this, SoundEvents.COPPER_GOLEM_ITEM_GET, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			return true;
 		}

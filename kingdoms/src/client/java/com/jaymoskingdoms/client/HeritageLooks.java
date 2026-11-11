@@ -682,12 +682,12 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				case FROSTBORN -> level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
 				case STORMBORN -> {
 					if (level.isThundering()) {
-						level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0.0, 0.05, 0.0);
+						level.addParticle(Fx.CRACKLE, x, y, z, 0.0, 0.05, 0.0);
 					}
 				}
 				case ENDBORN -> {
 					if (level.isDarkOutside() && !player.isInWaterOrRain()) {
-						level.addParticle(ParticleTypes.PORTAL, x, y, z, (random.nextDouble() - 0.5) * 0.5, -random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.5);
+						level.addParticle(Fx.VOID, x, y, z, (random.nextDouble() - 0.5) * 0.5, -random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.5);
 					}
 				}
 				case DEEPBORN -> {

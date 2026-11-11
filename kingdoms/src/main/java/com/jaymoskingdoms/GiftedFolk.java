@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -228,7 +227,7 @@ public final class GiftedFolk {
 		}
 		mob.addTag(ROLLED);
 		mob.addTag(WAYS_ROLLED);
-		level.sendParticles(ParticleTypes.END_ROD, mob.getX(), mob.getY(0.6), mob.getZ(), 24, 0.3, 0.6, 0.3, 0.08);
+		level.sendParticles(Fx.LIGHT, mob.getX(), mob.getY(0.6), mob.getZ(), 24, 0.3, 0.6, 0.3, 0.08);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		JaymosKingdoms.LOGGER.info("{} awakened to {}", mob.getName().getString(), power);
 		return true;
@@ -301,7 +300,7 @@ public final class GiftedFolk {
 		}
 		if ("wind".equals(PowersCompat.gift(mob)) && PowersCompat.giftCorrupted(mob) && VillagerHeritage.of(mob) != Heritage.Kind.STORMBORN) {
 			VillagerHeritage.born(mob, Heritage.Kind.STORMBORN, null);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mob.getX(), mob.getY(0.6), mob.getZ(), 30, 0.4, 0.7, 0.4, 0.3);
+			level.sendParticles(Fx.CRACKLE, mob.getX(), mob.getY(0.6), mob.getZ(), 30, 0.4, 0.7, 0.4, 0.3);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 1.2F);
 		}
 	}

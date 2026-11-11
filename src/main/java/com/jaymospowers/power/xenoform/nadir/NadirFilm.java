@@ -133,7 +133,7 @@ public final class NadirFilm {
 			case AETHER -> ParticleTypes.CLOUD;
 		};
 		level.sendParticles(detail, mid.x, mid.y - 1.0, mid.z, 60, PANEL_HALF_WIDTH * 0.6, 2.0, 0.6, 0.02);
-		level.sendParticles(ParticleTypes.END_ROD, mid.x, mid.y, mid.z, 20, PANEL_HALF_WIDTH * 0.6, 2.0, 0.6, 0.05);
+		level.sendParticles(MagicFx.LIGHT, mid.x, mid.y, mid.z, 20, PANEL_HALF_WIDTH * 0.6, 2.0, 0.6, 0.05);
 		level.playSound(null, mid.x, mid.y, mid.z, world.sound, SoundSource.PLAYERS, 1.4F, world.pitch);
 		Shakes.around(level, mid, WITNESS_RANGE, 0.5F);
 	}
@@ -152,7 +152,7 @@ public final class NadirFilm {
 			}
 		}
 		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 80, 0.5, 0.8, 0.5, 0.4);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 80, 0.5, 0.8, 0.5, 0.4);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.6F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);

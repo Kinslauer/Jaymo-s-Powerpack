@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -484,7 +483,7 @@ public class ChronoEcho extends Monster {
 				this.getY() + random.nextDouble() * 1.9, this.getZ() + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.01, 0.0);
 		}
 		if (random.nextInt(50) == 0) {
-			ChronoFx.particle(level, this.ownerPlayer(), ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 1.0 + random.nextDouble() * 0.6, this.getZ(),
+			ChronoFx.particle(level, this.ownerPlayer(), MagicFx.CRACKLE, this.getX(), this.getY() + 1.0 + random.nextDouble() * 0.6, this.getZ(),
 				(random.nextDouble() - 0.5) * 0.1, 0.02, (random.nextDouble() - 0.5) * 0.1);
 		}
 		if (this.tickRun == 0 && random.nextInt(200) == 0) {

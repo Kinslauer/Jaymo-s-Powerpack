@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.gear;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Knowledge;
@@ -68,7 +69,7 @@ public class SpellbindingClothItem extends Item {
 		}
 		FluxEffects.burst(server, sp.blockPosition(), FLUX);
 		server.playSound(null, sp.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.8F, 1.6F);
-		server.sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT, sp.getX(), sp.getEyeY(), sp.getZ(), 20, 0.4, 0.3, 0.4, 0.5);
+		server.sendParticles(MagicFx.GLYPH, sp.getX(), sp.getEyeY(), sp.getZ(), 20, 0.4, 0.3, 0.4, 0.5);
 		cloth.hurtAndBreak(1, sp, hand);
 		return InteractionResult.SUCCESS;
 	}
