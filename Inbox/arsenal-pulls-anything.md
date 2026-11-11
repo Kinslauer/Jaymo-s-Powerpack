@@ -16,3 +16,4 @@ pr: 1326
 ## Notes
 - 2026-11-11 21:38 PR #1326 up. Question for Andy: should a mastered (ascended) Arsenal be able to take from a player's pack on purpose? For now it just stops happening.
 - 2026-11-11 22:01 Andy answered: mastered Arsenal looks at a player and holds Reach to grab a random item. Added to PR #1326.
+- 2026-11-11 22:10 Merged on Andy's word (5:10 PM ET). PR Merges post still needed.

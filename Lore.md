@@ -139,7 +139,13 @@ kit.
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
   their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
-  when they heal (Andy, 2026-11-11). What they are given is not their eyes back: living things burn
+  when they heal (Andy, 2026-11-11).
+  (new) **The Unseeing** (Claude's name for them, for Andy to approve): the devout who carve the eyes keep together as
+  the Unseeing, and they take followers. Out in the wild at night a traveller may come on one of their services: the
+  members, blindfolded, in a ring of candles round a follower; the chant ("What the eye takes in, it lies about"), the
+  eldest's cut, the binding, and the follower given their new sight. A watcher is left a blindfold for when they are
+  ready (Andy, 2026-11-11: "you should be able to stumble on a service of the members performing this on one of their
+  followers"). What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
@@ -192,6 +198,11 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
   monsters that come at their own people, by the legend of the old heroes, each in their own way.
 - **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
   or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
 - **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
   villain; neither is thanked.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
