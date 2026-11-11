@@ -124,6 +124,7 @@ public final class WindPower implements Power {
 		WindDagger.register();
 		WindKick.init();
 		WindThunderDive.register();
+		WindSpiralDive.register();
 		WindCyclone.init();
 		WindMoves.init();
 		WindJet.init();
@@ -229,12 +230,14 @@ public final class WindPower implements Power {
 		// the cyclone and the jet stop (flight ends by WindFlight.canFly, next tick)
 		WindCyclone.stop(player);
 		WindJet.stop(player);
+		WindSpiralDive.stop(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
 		WindCyclone.stop(player);
 		WindJet.stop(player);
+		WindSpiralDive.stop(player);
 		player.removeTag(KINGDOMS_TAG);
 		forgetLance(player);
 		WindMoves.clear(player);
@@ -325,8 +328,18 @@ public final class WindPower implements Power {
 		return s != null && s.flight.flying();
 	}
 
+	/** Drops {@code player} out of wind flight now and tells their client, for a move that takes over the fall (the Spiral Dive). */
+	void dropFlight(ServerPlayer player) {
+		State s = this.states.get(player.getUUID());
+		if (s != null && s.flight.flying()) {
+			this.setFlight(player, s, WindFlight.NONE, false);
+			this.sendStatus(player, s, 0.0F, true);
+		}
+	}
+
 	/** Debug: every cooldown back to zero. */
 	void clearCooldowns(ServerPlayer player) {
+		WindSpiralDive.clearCooldown(player);
 		State s = this.state(player);
 		java.util.Arrays.fill(s.cooldowns, 0);
 		s.lanceCooldown = 0;

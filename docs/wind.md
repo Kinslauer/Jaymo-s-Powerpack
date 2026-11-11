@@ -668,3 +668,52 @@ scattered remnants of itself across the Overworld (Kingdoms' Aether monoliths an
   Arsenal standing portals (`ArsenalStanding`) search for safe ground around remembered positions and have no heights of
   their own, so the new dimension needs no change there.
 - Tuning: constants at the top of `WindAether`. Not playtested; the dimension needs a fresh world or a datapack reload to exist.
+
+## Spiral Dive (tap X in the air, looking steeply down; `WindSpiralDive`)
+
+Jung's move: a way down and a way to clear a landing, not a damage move.
+
+- **Starting it:** tap X while in the air, looking down at least `MIN_PITCH` 50 degrees, with `MIN_HEIGHT` 6 blocks of
+  clear air under you, from `MIN_MASTERY` 2 unlocked abilities on (the same point from which a Wind user's falls stop
+  hurting, `WindFall.SAFE_MASTERY`). It works out of wind flight: the flight is dropped first
+  (`WindPower.dropFlight`, the same "stop flying" the server already sends). When it can't start (too low, cooling
+  down, not mastered enough) the tap is the Tempest Kick as before.
+- **The tap is read on the server**, in `WindKick`'s handler for the X tap, before the kick's own mastery check. No new
+  packet, key or client code. For a fully mastered Wind user this takes one thing away: a Tempest Kick aimed steeply
+  down from 6 or more blocks up is now the dive.
+- **The plunge:** the server sets your speed every tick, down from `DIVE_SPEED_START` 0.7 to `DIVE_SPEED` 1.6 b/t
+  (`DIVE_ACCEL` 0.09 a tick), with `STEER` 0.45 of your aim's sideways heading. You spin (the Zephyr's spin pose,
+  `WindMoves.SPIN`, renewed while the dive lasts) and two strands of cloud wind round you, with a breeze whirl every
+  10 ticks. It runs at most `MAX_TICKS` 100.
+- **Pulling out:** taking flight again (R) later than `FLIGHT_GRACE` 10 ticks into the dive ends it with no ring.
+  Water, a mount, being picked up or going down end it too.
+- **The landing:** a ring of wind runs out along the ground. By how far you fell (full at `FULL_DROP` 30 blocks):
+  radius `RADIUS_MIN` 3.5 to `RADIUS_MAX` 7, wind-charge damage `DAMAGE_MIN` 2 to `DAMAGE_MAX` 5 (times the mode's
+  ability scale), shove `PUSH_MIN` 0.7 to `PUSH_MAX` 1.6 (times the weather factor) and `LIFT` 0.45 up. At the ring's
+  edge the damage and shove are `EDGE_SHARE` 40% of the middle's. Knockback resistance scales the shove. Allies are
+  spared. Fire in the ring is blown out (`WindDouse`).
+- **Costs:** `EXHAUSTION` 4 (one hunger point); a `COOLDOWN` of 400 ticks (20 s, longer in the cold) that is spent
+  whether or not the ring catches anything; and the landing leaves you **winded**, rooted (no walking, no jumping)
+  for `WINDED_MIN` 12 to `WINDED_MAX` 30 ticks, longer after a longer fall. It fumbles, feeds the storm and counts as a
+  cast like any other ability.
+- **Fall rules are untouched**, as with the Thunder Dive: the dive only sets your speed, and the game and `WindFall`
+  decide what the landing costs.
+- The Thunderhead's Thunder Dive stays on C.
+- There is no HUD chip for its cooldown yet.
+
+### Testing (Spiral Dive)
+1. `/power set @s wind`, survival. Fly up 30 blocks or more, look straight down and tap X: the flight drops, you plunge
+   spinning with the cloud spiral round you, and land in a ring of wind. You can't walk or jump for about 1.5 s.
+2. Zombies near the landing: thrown outward and up, a little damage. A fire near the landing goes out.
+3. Tap X again at once from the air: a Tempest Kick (the dive is cooling down). `/powerdebug wind cooldowns` makes it
+   ready again.
+4. Dive, then press R after half a second: you're flying again, and there is no ring.
+5. From 5 blocks up, or looking level: a Tempest Kick, no dive.
+6. `/power level @s 1`: no dive (and no kick). `/power level @s 2`: the dive, and no fall damage from it.
+7. A second client sees the spin, the spiral and the ring, and hears them.
+8. A snowy biome: the cooldown is 3 s longer.
+
+### Risky or untested (Spiral Dive)
+- Not built and not played: see the change note.
+- Dropping the flight from the server and setting the speed in the same tick relies on the client honouring "stop
+  flying" before its next flight report; `FLIGHT_GRACE` covers a report already on its way.

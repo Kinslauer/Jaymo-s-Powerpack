@@ -42,7 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * wind out sideways-flat ahead of you. It flies {@link #RANGE} blocks for {@link #DAMAGE}; ascended (the Tempest),
  * {@link #RANGE_ASCENDED} blocks for {@link #DAMAGE_ASCENDED}. It cuts through everything in its path (each once) and
  * stops at walls. It flies where you look as the leg snaps: in the air, up or down at anything; on the ground, level
- * or up (looking down at your feet doesn't drive it into the floor).
+ * or up (looking down at your feet doesn't drive it into the floor). A tap in the air looking steeply down, well clear
+ * of the ground, is the {@link WindSpiralDive} instead.
  */
 public final class WindKick {
 	static final double RANGE = 5.0, RANGE_ASCENDED = 20.0;
@@ -159,8 +160,14 @@ public final class WindKick {
 	}
 
 	private static void kick(ServerPlayer player) {
-		if (!Powers.has(player, WindPower.INSTANCE) || Mastery.unlocked(player) < Mastery.ALL || !player.isAlive() || player.isSpectator()
-			|| WindCyclone.isActive(player)) {
+		if (!Powers.has(player, WindPower.INSTANCE) || !player.isAlive() || player.isSpectator() || WindCyclone.isActive(player)) {
+			return;
+		}
+		// in the air, looking steeply down: the tap is the Spiral Dive (which comes before the kick is mastered)
+		if (WindSpiralDive.wants(player) && WindSpiralDive.start(player)) {
+			return;
+		}
+		if (Mastery.unlocked(player) < Mastery.ALL) {
 			return;
 		}
 		if (!com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.LEGS)) {
