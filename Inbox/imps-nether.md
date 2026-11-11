@@ -1,10 +1,10 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
-claimed_by: 
-pr: 
+claimed_by: claude-cloud-imps-nether
+pr: 1286
 ---
 
 # Imps: flying Nether demons
