@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:07). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🪶 Quill · #1262 · writing
 - [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · running
-- [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · running
 
 
 ## In review
@@ -32,6 +31,7 @@ kanban-plugin: board
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/epic-structures-minotaur|epic-structures-minotaur]] · 💻 Odysseus · #1320 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
+- [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
 
 
 ## Needs Andy
