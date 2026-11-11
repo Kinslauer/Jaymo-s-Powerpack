@@ -9,8 +9,7 @@
   on feathers (one icon a punch down to four punches an icon), never stronger. From level 8 a boxer's punches land
   faster than the usual hit immunity allows.
 - **Gassed:** out of feathers, a boxer punches once every 1.6 s for 45% less (2 at most) until the row is 30% back.
-- **Names:** Andy's brief had Close Guard and Shoulder Guard; Jung asked for Arrow Slit and Bastion, which is what the
-  lang file has. Andy to rule.
+- **Names:** Arrow Slit, Long Guard and Bastion (Jung's names, kept by Andy).
 - Classes: `boxing/Boxing` (styles, levels, the punch), `boxing/BoxingGear` (Hand Wraps, the `boxing_gear` tag),
   `boxing/BoxingDebug`. `docs/boxing.md` has the numbers and test steps.
 - Not in it: evades, strong attacks, blocks, blur, the combo breaker, looks, cestus and bracers, teachers, HUD, hints.
