@@ -34,7 +34,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1284 · sent
 - [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · #1288, 1289 (both merged) · stalled
 
 
