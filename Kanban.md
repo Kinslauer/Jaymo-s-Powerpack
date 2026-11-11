@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:07). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
@@ -18,6 +17,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
+- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · ☁️ Cloud · claimed
 
 
 ## In review
