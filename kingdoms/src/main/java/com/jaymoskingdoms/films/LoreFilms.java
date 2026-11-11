@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.films;
 
+import com.jaymoskingdoms.Ford;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.LoreBooks;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -44,7 +46,12 @@ import net.minecraft.world.item.Items;
 public final class LoreFilms {
 	/** The films there are. */
 	public static final String LONG_DEFENCE = "long_defence";
-	public static final List<String> ALL = List.of(LONG_DEFENCE);
+	/**
+	 * The closing of the Second Defence ({@code SecondDefence}): dawn over the ford that was held, the light still burning
+	 * in the keep, the last of the old legion going back into the ground. No words. It plays at the ford itself.
+	 */
+	public static final String SECOND_DEFENCE = "second_defence";
+	public static final List<String> ALL = List.of(LONG_DEFENCE, SECOND_DEFENCE);
 	/** Lore books that carry a film: the book's id ({@link LoreBooks#idOf}) to the film it plays the first time it's opened. */
 	static final Map<String, String> BOOK_FILMS = Map.of(JaymosKingdoms.id("the_long_defence").toString(), LONG_DEFENCE);
 
@@ -53,7 +60,10 @@ public final class LoreFilms {
 	 * player takes no harm while one plays, since their keys don't answer. The protection ends early once they strike a blow
 	 * or walk off from where it began (a skipped film), so it can't be used as a shield.
 	 */
-	public static final int FILM_TICKS = 1144;
+	public static final int FILM_TICKS = 1144, SECOND_TICKS = 320;
+	/** The Second Defence's closing is set at the ford when the player is within this of it; else where they stand, a keep taken to be this far behind them. */
+	static final double SITE_NEAR = 96.0;
+	static final int NO_KEEP_BACK = 30;
 	static final double LEFT_SPOT = 1.5;
 	/** (Server) players in a film just now: until when (game time), and where they stood. */
 	private static final Map<java.util.UUID, Long> WATCHING = new java.util.HashMap<>();
@@ -64,9 +74,10 @@ public final class LoreFilms {
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
 	/** Tells a player's game to play a film. */
-	public record Play(String film) implements CustomPacketPayload {
+	public record Play(String film, BlockPos ford, BlockPos keep) implements CustomPacketPayload {
 		public static final Type<Play> TYPE = new Type<>(JaymosKingdoms.id("lore_film"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Play::film, Play::new);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Play::film,
+			BlockPos.STREAM_CODEC, Play::ford, BlockPos.STREAM_CODEC, Play::keep, Play::new);
 
 		@Override
 		public Type<Play> type() {
@@ -147,11 +158,23 @@ public final class LoreFilms {
 		return ServerPlayNetworking.canSend(player, Play.TYPE);
 	}
 
+	/** How long {@code film} runs (ticks). */
+	public static int ticks(String film) {
+		return SECOND_DEFENCE.equals(film) ? SECOND_TICKS : FILM_TICKS;
+	}
+
 	/** Plays {@code film} for {@code player}. */
 	public static void play(ServerPlayer player, String film) {
 		if (canPlay(player)) {
-			ServerPlayNetworking.send(player, new Play(film));
-			WATCHING.put(player.getUUID(), player.level().getGameTime() + FILM_TICKS);
+			// (a film set at a place of the world's is told where: the ford and the keep, when the player is there)
+			BlockPos ford = player.blockPosition(), keep = ford.relative(player.getDirection().getOpposite(), NO_KEEP_BACK);
+			Ford.Site site = Ford.site(player.level().getServer());
+			if (site != null && player.level().dimension() == net.minecraft.world.level.Level.OVERWORLD && site.ford().closerToCenterThan(player.position(), SITE_NEAR)) {
+				ford = site.ford();
+				keep = site.keep();
+			}
+			ServerPlayNetworking.send(player, new Play(film, ford, keep));
+			WATCHING.put(player.getUUID(), player.level().getGameTime() + ticks(film));
 			WATCHING_AT.put(player.getUUID(), player.position());
 		}
 	}

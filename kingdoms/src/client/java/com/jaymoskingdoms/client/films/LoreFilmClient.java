@@ -668,6 +668,12 @@ public final class LoreFilmClient {
 		@Nullable Gib axe;
 		@Nullable CameraType viewBefore;
 		int tick, skip, quietAt = 1, lungeAt = -1, gibIds;
+		/** How long it runs (ticks). The Second Defence's closing ({@link Morning}): set at the ford, the keep this far behind the stage's origin. */
+		int length = LENGTH;
+		boolean second;
+		double keepBack;
+		/** The weather as it was when a film that clears it began. */
+		float rain, thunder;
 		/** When the fifth's slingshot took hold, when it let him fly, and where he stood when it took hold. */
 		int slingAt = -1, glideAt = -1, flipUntil = -1;
 		double slingF, slingS;
@@ -751,7 +757,7 @@ public final class LoreFilmClient {
 	public static void register() {
 		ShadowFlameParticle.register();
 		ClientPlayNetworking.registerGlobalReceiver(LoreFilms.Play.TYPE,
-			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY))));
+			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY), payload.ford(), payload.keep())));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				tick(minecraft);
@@ -782,7 +788,7 @@ public final class LoreFilmClient {
 			return 0;
 		}
 		// (once the chat screen has closed)
-		minecraft.execute(() -> start(minecraft, name, record));
+		minecraft.execute(() -> start(minecraft, name, record, null, null));
 		return 1;
 	}
 
@@ -792,13 +798,20 @@ public final class LoreFilmClient {
 	}
 
 	/** The hour a film is set at (ticks into the day: night, the moon well up), and a day's length. */
-	static final long NIGHT = 15500L, DAY = 24000L;
+	static final long NIGHT = 15500L, DAY = 24000L, DAWN = 23350L;
 	/** How bright the film's night is under its moon (the lightmap's sky factor: 1 is day, about a quarter a plain night). */
 	public static final float MOONLIGHT = 0.85F;
 
 	/** The hour this game's clocks read while a film plays, on the day {@code time} is in (FilmNightMixin). */
 	public static long nightTime(long time) {
-		return time - Math.floorMod(time, DAY) + NIGHT;
+		Film f = film;
+		return time - Math.floorMod(time, DAY) + (f != null && f.second ? DAWN : NIGHT);
+	}
+
+	/** Whether a film set at night is playing (its night is lit its own way, DarkNights). */
+	public static boolean night() {
+		Film f = film;
+		return f != null && !f.second;
 	}
 
 	/**
@@ -814,6 +827,9 @@ public final class LoreFilmClient {
 	static final float FOG_SIZE = 1.0F, FOG_GREY = 0.62F, FOG_ALPHA = 0.3F;
 
 	private static void fog(Film f) {
+		if (f.second) {
+			return;
+		}
 		double front = Mth.lerp(Math.min(1.0, f.tick / (double)(LENGTH - FADE)), FOG_FROM, FOG_TO);
 		var rnd = f.level.getRandom();
 		for (int i = 0; i < FOG_PUFFS; i++) {
@@ -946,11 +962,15 @@ public final class LoreFilmClient {
 	 * Plays {@code name} where you stand: off its tape (this game's own recording, else the one shipped), or staged
 	 * afresh when there's none or {@code record} asks for a new tape to be made of it.
 	 */
-	private static void start(Minecraft minecraft, String name, boolean record) {
-		if (!LoreFilms.LONG_DEFENCE.equals(name) || minecraft.level == null || minecraft.player == null) {
+	private static void start(Minecraft minecraft, String name, boolean record, @Nullable BlockPos ford, @Nullable BlockPos keep) {
+		if (!LoreFilms.ALL.contains(name) || minecraft.level == null || minecraft.player == null) {
 			return;
 		}
 		stop(minecraft);
+		if (LoreFilms.SECOND_DEFENCE.equals(name)) {
+			startMorning(minecraft, name, record, ford, keep);
+			return;
+		}
 		Film f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
 		f.viewBefore = minecraft.options.getCameraType();
 		film = f;
@@ -971,6 +991,125 @@ public final class LoreFilmClient {
 			f.rec = new FilmTape();
 		}
 		stage(f);
+	}
+
+	/**
+	 * The Second Defence's closing, set where it was fought: the stage's origin is the ford, and it faces away from the
+	 * keep, over the water, at the ground the legion rose from. Nothing is laid over the world. (Staged from a command with
+	 * no ford to go by: where you stand, the keep taken to be behind you.)
+	 */
+	private static void startMorning(Minecraft minecraft, String name, boolean record, @Nullable BlockPos ford, @Nullable BlockPos keep) {
+		Vec3 origin = ford == null ? minecraft.player.position() : Vec3.atBottomCenterOf(ford);
+		float yaw = minecraft.player.getYRot();
+		double back = Morning.NO_KEEP;
+		if (ford != null && keep != null && (ford.getX() != keep.getX() || ford.getZ() != keep.getZ())) {
+			double dx = ford.getX() - keep.getX(), dz = ford.getZ() - keep.getZ();
+			yaw = (float)Math.toDegrees(Math.atan2(-dx, dz));
+			back = Math.sqrt(dx * dx + dz * dz);
+		}
+		Film f = new Film(name, minecraft.level, origin, yaw);
+		f.second = true;
+		f.length = LoreFilms.SECOND_TICKS;
+		f.keepBack = back;
+		f.rain = minecraft.level.getRainLevel(1.0F);
+		f.thunder = minecraft.level.getThunderLevel(1.0F);
+		f.viewBefore = minecraft.options.getCameraType();
+		film = f;
+		FilmTape tape = record ? null : FilmTape.find(name);
+		if (tape != null && load(f, tape)) {
+			return;
+		}
+		if (tape != null) {
+			stop(minecraft);
+			Film again = new Film(name, minecraft.level, origin, yaw);
+			again.second = true;
+			again.length = f.length;
+			again.keepBack = back;
+			again.rain = f.rain;
+			again.thunder = f.thunder;
+			again.viewBefore = f.viewBefore;
+			film = f = again;
+		}
+		if (record) {
+			f.rec = new FilmTape();
+		}
+		Morning.stage(f);
+	}
+
+	/**
+	 * The morning after the Second Defence (the story thread's ask: "the same wood and ford, dawn, the keep's light
+	 * burning, the dead going back into the ground, a slow look across the water"; no words). DEAD of the old legion still
+	 * stand on the far bank (FAR_NEAR to FAR_FAR past the ford, FAR_HALF either side), turned to the keep. From FIRST on,
+	 * one every EVERY ticks or so bows and goes down into the ground (SINK a tick) with its soul let go. Three shots: from
+	 * among them back over the water (until WATER), a slow look across the water (until KEEP), then the keep and its light.
+	 */
+	static final class Morning {
+		static final int DEAD = 16, FIRST = 24, EVERY = 9, EVERY_SPREAD = 7, WATER = 120, KEEP = 220, BELL = 232;
+		/** Where the first shot's camera goes ({f, s}), and how far the dead are kept from it. */
+		static final double[] LENS = {25.5, 5.0, 4.0};
+		static final double FAR_NEAR = 8.0, FAR_FAR = 25.0, FAR_HALF = 13.0, APART = 2.2, SINK = 0.04, UNDER = 3.0, NO_KEEP = 30.0, LIGHT_UP = 5.0;
+
+		private Morning() {
+		}
+
+		static void stage(Film f) {
+			List<double[]> stood = new ArrayList<>();
+			for (int tries = 0; stood.size() < DEAD && tries < 400; tries++) {
+				double df = FAR_NEAR + f.rnd.nextDouble() * (FAR_FAR - FAR_NEAR), ds = (f.rnd.nextDouble() * 2.0 - 1.0) * FAR_HALF;
+				// (not where the first shot's camera stands)
+				boolean room = distance(df, ds, LENS[0], LENS[1]) > LENS[2];
+				for (double[] other : stood) {
+					room &= distance(df, ds, other[0], other[1]) > APART;
+				}
+				if (!room) {
+					continue;
+				}
+				stood.add(new double[] {df, ds});
+				Actor a = dead(f, stood.size() - 1, df, ds, 180.0F + (float)spread(f, 25.0));
+				if (a == null) {
+					continue;
+				}
+				// (standing, not under the ground waiting)
+				a.sink = a.sinkTo = 0.0;
+				a.clawing = false;
+				a.sinkRate = SINK;
+				a.riseAt = FIRST + (stood.size() - 1) * EVERY + f.rnd.nextInt(EVERY_SPREAD);
+				gait(f, a, Moves.IDLE, Moves.SHAMBLE);
+				place(f, a);
+			}
+			sound(f, SoundEvents.BELL_RESONATE, 0.7F, 0.5F);
+		}
+	}
+
+	/** One tick of the morning after: each of the dead, at its turn, bows and goes down. */
+	private static void morning(Film f, int t) {
+		BlockParticleOption earth = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DIRT.defaultBlockState());
+		for (Actor a : f.actors) {
+			if (t == a.riseAt) {
+				act(f, a, "kneel_bow");
+				a.sinkTo = Morning.UNDER;
+				sound(f, SoundEvents.SOUL_ESCAPE.value(), 0.6F + f.rnd.nextFloat() * 0.3F, 0.35F);
+				sound(f, SoundEvents.ROOTED_DIRT_BREAK, 0.6F, 0.3F);
+			}
+			if (a.sink != a.sinkTo) {
+				a.sink = Math.min(a.sinkTo, a.sink + a.sinkRate);
+				Vec3 feet = f.at(a.f, a.s, 0.0);
+				if (t % 2 == 0) {
+					particle(f, earth, feet.add(spread(f, 0.4), 0.1, spread(f, 0.4)), 0.0, 0.05, 0.0);
+				}
+				if (t % 5 == 0) {
+					particle(f, ParticleTypes.SOUL, feet.add(spread(f, 0.3), 0.4 + f.rnd.nextDouble() * 0.8, spread(f, 0.3)), 0.0, 0.04, 0.0);
+				}
+				if (a.sink >= a.sinkTo) {
+					hide(f, a);
+				}
+			}
+			place(f, a);
+			record(f, a, false);
+		}
+		if (t == Morning.BELL) {
+			sound(f, SoundEvents.BELL_BLOCK, 0.6F, 0.4F);
+		}
 	}
 
 	/** Sets up a tape's set and cast; false if it can't be. */
@@ -1420,6 +1559,10 @@ public final class LoreFilmClient {
 		}
 		film = null;
 		if (minecraft.level == f.level) {
+			if (f.second) {
+				f.level.setRainLevel(f.rain);
+				f.level.setThunderLevel(f.thunder);
+			}
 			for (Actor a : f.actors) {
 				f.level.removeEntity(a.e.getId(), Entity.RemovalReason.DISCARDED);
 			}
@@ -2076,15 +2219,22 @@ public final class LoreFilmClient {
 		}
 		// (a tape being made is never cut short)
 		f.skip = minecraft.options.keyShift.isDown() && f.rec == null ? f.skip + 1 : 0;
-		if (f.skip == SKIP_HOLD && f.tick < LENGTH - FADE) {
-			f.tick = LENGTH - FADE;
+		if (f.skip == SKIP_HOLD && f.tick < f.length - FADE) {
+			f.tick = f.length - FADE;
 		}
 		f.flashO = f.flash;
 		f.flash *= 0.82F;
+		if (f.second) {
+			// a clear morning on this screen, whatever the weather is doing
+			f.level.setRainLevel(0.0F);
+			f.level.setThunderLevel(0.0F);
+		}
 		fog(f);
 		int t = f.tick;
 		if (f.play != null) {
 			replay(f, f.play, t);
+		} else if (f.second) {
+			morning(f, t);
 		} else {
 			beats(f, t);
 			battle(f, t);
@@ -2104,7 +2254,7 @@ public final class LoreFilmClient {
 			}
 		}
 		things(f);
-		if (++f.tick >= LENGTH) {
+		if (++f.tick >= f.length) {
 			if (f.rec != null) {
 				try {
 					f.rec.save(f.name);
@@ -4084,11 +4234,28 @@ public final class LoreFilmClient {
 		if (f == null || minecraft.player == null || minecraft.getCameraEntity() != minecraft.player || minecraft.level != f.level) {
 			return null;
 		}
-		float t = Math.min(f.tick + partialTicks, LENGTH);
+		float t = Math.min(f.tick + partialTicks, f.length);
 		Vec3 pos;
 		Vec3 look;
 		float third = 0.0F, tilt = 0.0F;
-		if (t < MELEE) {
+		if (f.second) {
+			if (t < Morning.WATER) {
+				// from among the last of them on the far bank, back over the water at the keep
+				float k = smooth(t / Morning.WATER);
+				pos = f.at(27.0 - 3.0 * k, 5.0, 1.7);
+				look = f.at(11.0, -2.0, 1.0);
+			} else if (t < Morning.KEEP) {
+				// a slow look across the water, bank to bank, as the last go under
+				float k = smooth((t - Morning.WATER) / (Morning.KEEP - Morning.WATER));
+				pos = f.at(-5.0 + k, 0.0, 1.6);
+				look = f.at(16.0, -11.0 + 22.0 * k, 0.8);
+			} else {
+				// the keep, its light still burning, and away
+				float k = smooth((t - Morning.KEEP) / (f.length - Morning.KEEP));
+				pos = f.at(7.0 + 4.0 * k, 3.0, 1.5 + 2.0 * k);
+				look = f.at(-f.keepBack, 0.0, Morning.LIGHT_UP);
+			}
+		} else if (t < MELEE) {
 			// from the woods' edge back down the road: the fight across the frame, the Keep on the right third, the ground the lower third
 			float k = smooth(t / MELEE);
 			pos = f.at(37.0 - 3.0 * k, 5.5, 3.6 - 1.4 * k);
@@ -4211,7 +4378,7 @@ public final class LoreFilmClient {
 			look = f.at(50.3 - 2.2 * (1.0F - k), 0.0, 1.4);
 		} else {
 			// the road again, wide, drawing up and away, the Keep still on its third
-			float k = smooth((t - END) / (LENGTH - END));
+			float k = smooth((t - END) / (f.length - END));
 			pos = f.at(38.0 + 3.0 * k, 6.0, 2.4 + 2.4 * k);
 			look = keepTop(f);
 			third = -1.0F;
@@ -4280,13 +4447,13 @@ public final class LoreFilmClient {
 		if (f != null) {
 			HudZones.hideFor(100);
 			float t = f.tick + partial;
-			float dark = DIM;
-			if (t >= SUMMON && t < RISING + 30) {
+			float dark = f.second ? 0.0F : DIM;
+			if (!f.second && t >= SUMMON && t < RISING + 30) {
 				// the dark gathers as he raises his arms, and lets go once the dead are coming
 				float in = smooth((t - SUMMON) / (STRIKE - SUMMON)), out = smooth((t - RISING) / 30.0F);
 				dark = Mth.lerp(in * (1.0F - out), DIM, SUMMONING);
 			}
-			float fade = Math.max(1.0F - t / FADE, (t - (LENGTH - FADE)) / FADE);
+			float fade = Math.max(1.0F - t / FADE, (t - (f.length - FADE)) / FADE);
 			dark = Math.max(dark, Mth.clamp(fade, 0.0F, 1.0F));
 			graphics.fill(0, 0, width, height, (Math.round(dark * 255.0F) << 24) | 0x05060C);
 			float light = Mth.lerp(partial, f.flashO, f.flash);
