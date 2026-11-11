@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 23:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 04:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,20 +26,19 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · #1271 · sent
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
 - [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
 - [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
 - [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
 - [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
-- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
-- [x] [[Inbox/Done/blight-mobs|blight-mobs]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 
 
 %% kanban:settings
