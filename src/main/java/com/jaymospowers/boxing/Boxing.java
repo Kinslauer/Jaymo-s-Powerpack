@@ -77,7 +77,7 @@ public final class Boxing {
 	public static final float GASSED_CUT = 0.45F, GASSED_CAP = 2.0F;
 	/** This long (ticks) without a punch and the string starts again. */
 	static final int STRING_RESET = 30;
-	/** The game's own hit immunity: damage is refused while more than this is left of it. */
+	/** The game's own hit immunity lasts this long (ticks) after a hit. */
 	static final int IMMUNITY_GATE = 10;
 
 	/** The punches of the strings. The lead hand is the left, but the Bastion stands southpaw: its lead is the right. */
@@ -309,9 +309,9 @@ public final class Boxing {
 		if (gassed) {
 			damage = Math.min(GASSED_CAP, damage * (1.0F - GASSED_CUT));
 		}
-		if (target.invulnerableTime > IMMUNITY_GATE && state.victim == target.getId() && now - state.landed <= IMMUNITY_GATE) {
+		if (state.victim == target.getId() && now - state.landed <= IMMUNITY_GATE) {
 			// the immunity this boxer's own last punch left never swallows the next one
-			target.invulnerableTime = IMMUNITY_GATE;
+			target.setInvulnerableTime(0);
 		}
 		Vec3 before = target.getDeltaMovement();
 		if (!target.hurtServer(level, level.damageSources().playerAttack(boxer), damage)) {
