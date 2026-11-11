@@ -101,6 +101,16 @@ Warrior-born's ki and a priest's mana are not two forces in opposition; they are
 Sorcerer's Restoration element, the court wizards' staves and the spells read off scrolls are all the same well,
 shaped by hand.
 
+**(new) What power looks like** (magic FX thread, 2026-11-11, for Andy to approve). Because it is one well, power takes
+the same few shapes whoever draws it, and only its colour and size tell you whose it is: a **beam** (a line of power, a
+bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's ray and a rite's light), a **blast** (a
+shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
+place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
+power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
+which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
+goo, gunpowder, festival fireworks).
+
 ## The powers
 
 **How a power comes.** Every Overworlder may carry a power, asleep. It wakes on its own after a few days of
@@ -214,6 +224,21 @@ his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
+
+(new) **Those who stay** (four-mods thread, 2026-11-11; Andy: "some live there perpetually after reaching the
+otherworld with righteous karma, and choosing to stay there at the judge. This keeps your halo and you are free to
+roam"). One of the dead whose page weighed just may ask the Judge to stay. He writes it down and that is the end of
+it: no road home, no tournament, no second asking. They keep the ring, are Divine-born from then on, and walk the
+Aether as its own people do. This is the second way the blood wakes, and the commoner one among the devout of the
+Truth.
+
+(new) **How the Divine-born carry themselves** (same thread; Andy: "like z fighters but without the raging raw ki,
+it is controlled and elegant, they gain a web like sense that allows them to dodge incoming attacks and counter, as
+long as they have feathers"). Their strength is the same stuff a fighter burns as ki, but held still. It shows as
+breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. It costs
+them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
+ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
+but they fall slowly when they choose to.
 
 ## The shape of the world
 
