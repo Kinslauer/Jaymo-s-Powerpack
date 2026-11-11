@@ -25,6 +25,9 @@ final class WispKi {
 	static final float[] SHELL_LIGHT = {0.55F, 0.25F};
 	/** How opaque its skin is over the ki (0-255). */
 	static final int SKIN_ALPHA = 170;
+	/** Holding Phase ({@link WispPhaseClient}): its skin all but gone, and this share of the ki's light left. */
+	static final int PHASE_SKIN_ALPHA = 45;
+	static final float PHASE_KI = 0.55F;
 	/** How high it floats (blocks), and its slow bob. */
 	static final float FLOAT = 0.3F, BOB = 0.06F, BOB_SPEED = 0.09F;
 	/** How fast the ki's wisps rise, and its breathing. */
@@ -43,13 +46,15 @@ final class WispKi {
 	}
 
 	static void submit(XenoFormModels.Wisp wisp, AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector) {
+		Float phased = state.getData(WispPhaseClient.KEY);
+		float phase = phased == null ? 0.0F : phased;
 		collector.order(1).submitModel(wisp, state, poseStack, RenderTypes.entityTranslucentEmissive(wisp.texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-			ARGB.color(SKIN_ALPHA, 255, 255, 255), null, 0);
+			ARGB.color(Math.round(Mth.lerp(phase, SKIN_ALPHA, PHASE_SKIN_ALPHA)), 255, 255, 255), null, 0);
 		float rise = (state.ageInTicks * RISE) % 1.0F;
 		for (int i = 0; i < wisp.shells.length; i++) {
 			// each shell takes the body's pose when it's drawn (setupAnim, then the glide's and the band's poses)
 			collector.order(2 + i).submitModel(wisp.shells[i], state, poseStack, RenderTypes.energySwirl(KI_TEXTURE, i * 0.31F, -rise * (1 + i)), FULL_BRIGHT,
-				OverlayTexture.NO_OVERLAY, tint(i, state.ageInTicks), null, 0);
+				OverlayTexture.NO_OVERLAY, tint(i, state.ageInTicks, Mth.lerp(phase, 1.0F, PHASE_KI)), null, 0);
 		}
 	}
 
@@ -63,13 +68,13 @@ final class WispKi {
 			arm.loadPose(limb.storePose());
 			arm.visible = true;
 			collector.submitModelPart(arm, poseStack, RenderTypes.energySwirl(KI_TEXTURE, i * 0.31F, -rise * (1 + i)), FULL_BRIGHT,
-				OverlayTexture.NO_OVERLAY, null, tint(i, time));
+				OverlayTexture.NO_OVERLAY, null, tint(i, time, 1.0F));
 		}
 	}
 
 	/** Additive, so the colour's brightness is how strongly it shows. */
-	private static int tint(int shell, float time) {
-		float light = Mth.clamp(SHELL_LIGHT[shell] * (1.0F + BREATHE * Mth.sin(time * BREATHE_SPEED + shell)), 0.0F, 1.0F);
+	private static int tint(int shell, float time, float share) {
+		float light = Mth.clamp(SHELL_LIGHT[shell] * share * (1.0F + BREATHE * Mth.sin(time * BREATHE_SPEED + shell)), 0.0F, 1.0F);
 		return ARGB.color(255, (int)(ARGB.red(KI_COLOR) * light), (int)(ARGB.green(KI_COLOR) * light), (int)(ARGB.blue(KI_COLOR) * light));
 	}
 }

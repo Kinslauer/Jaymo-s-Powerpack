@@ -39,6 +39,12 @@ public record WebPose(int kind, long start, int side) {
 	 * the symbiote's two, so nothing saved moves).
 	 */
 	public static final int BACK_FLIP = 15;
+	/** Glide kick ({@link WebGlideKick}): both feet thrown out ahead, body laid back, arms swept behind. */
+	public static final int GLIDE_KICK = 16;
+	/** Hanging head down from a line above ({@link WebHanging}); lasts as long as the attachment {@link WebPower#UPSIDE} does, not a set time. */
+	public static final int UPSIDE = 17;
+	/** A balanced crouch on a narrow top ({@link WebPerch}); lasts as long as the attachment {@link WebPower#PERCH} does. */
+	public static final int PERCH = 18;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -56,6 +62,7 @@ public record WebPose(int kind, long start, int side) {
 			case FRONT_FLIP, BACK_FLIP, CARTWHEEL, LAND_ROLL -> 14;
 			case CORKSCREW, GIANT -> 16;
 			case TWIRL -> 12;
+			case GLIDE_KICK -> 16;
 			case HERO_LAND -> 28;
 			case WINGS_LAND -> 20;
 			case ROAR -> WebSymbiote.ROAR_TICKS;

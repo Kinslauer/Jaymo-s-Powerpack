@@ -179,7 +179,12 @@ public final class HoodedCloakLayer {
 			float idle = Mth.sin(state.ageInTicks * 0.09F);
 			back.xRot = REST + RUN_LIFT * pace + FLUTTER * pace * Mth.sin(stride * 2.0F) + IDLE * idle
 				+ (state.isCrouching ? CROUCH_LIFT : 0.0F);
-			hem.xRot = HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);
+			// (the hem is cloth: it lags the back, swings on turns, billows in a fall)
+			if (ClothCape.sample(state, 2, 1) >= 0.0F) {
+				hem.xRot += ClothCape.REL_PITCH[1];
+				hem.zRot += ClothCape.REL_ROLL[1];
+			}
+			hem.xRot += HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);
 		}
 	}
 

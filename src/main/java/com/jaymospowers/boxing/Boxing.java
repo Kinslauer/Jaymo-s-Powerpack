@@ -80,6 +80,8 @@ public final class Boxing {
 	public static final float GASSED_CUT = 0.45F, GASSED_CAP = 2.0F;
 	/** This long (ticks) without a punch and the string starts again. */
 	static final int STRING_RESET = 30;
+	/** A boxer's block, per blow stopped (half-feathers; one icon), and the Arrow Slit's tight guard (an icon and a half). */
+	public static final float BLOCK_COST = 2.0F, ARROW_SLIT_BLOCK_COST = 3.0F;
 	/** With this many half-feathers or fewer left in the row (four icons), a boxer is tiring: a warning, nothing more. */
 	public static final int TIRING_FEATHERS = 8;
 	/** Gassed: Mining Fatigue is kept up in spells this long (ticks), renewed this often. */
@@ -288,8 +290,26 @@ public final class Boxing {
 
 	// ---- the punch ---------------------------------------------------------------------------------------------------
 
+	/**
+	 * What one blocked blow costs {@code boxer} (half-feathers): by the blow, whatever its weight, more in the Arrow Slit's
+	 * tight guard, less the better the gear raised ({@link BoxingGear#blockCostShare}). For {@code combat/Guard}.
+	 */
+	public static float blockCost(Player boxer) {
+		return (style(boxer) == Style.ARROW_SLIT ? ARROW_SLIT_BLOCK_COST : BLOCK_COST) * BoxingGear.blockCostShare(boxer.getMainHandItem());
+	}
+
+	/** Whether {@code target} has a guard up that {@code boxer}'s punch runs into (a block, from their front). */
+	private static boolean blockedBy(LivingEntity target, ServerPlayer boxer) {
+		if (!target.isBlocking()) {
+			return false;
+		}
+		Vec3 facing = target.getLookAngle().multiply(1.0, 0.0, 1.0);
+		Vec3 toBoxer = boxer.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+		return facing.dot(toBoxer) > 0.0;
+	}
+
 	/** Spends {@code cost} half-feathers of {@code boxer}'s stamina, fractions carried over; false if there is none to spend. */
-	static boolean spend(ServerPlayer boxer, float cost) {
+	public static boolean spend(ServerPlayer boxer, float cost) {
 		if (gassed(boxer)) {
 			return false;
 		}
@@ -354,6 +374,8 @@ public final class Boxing {
 			// the immunity this boxer's own last punch left never swallows the next one
 			target.setInvulnerableTime(0);
 		}
+		// (a punch into a raised guard still lands what gets through, but it isn't one of the combo breaker's row)
+		boolean blocked = blockedBy(target, boxer);
 		Vec3 before = target.getDeltaMovement();
 		if (!target.hurtServer(level, level.damageSources().playerAttack(boxer), damage)) {
 			return;
@@ -368,7 +390,9 @@ public final class Boxing {
 		if (strong != null) {
 			BoxingEvades.strongLanded(boxer, target, strong, now);
 		}
-		BoxingEvades.landed(boxer, target, now);
+		if (!blocked) {
+			BoxingEvades.landed(boxer, target, now);
+		}
 		ItemStack gear = boxer.getMainHandItem();
 		if (BoxingGear.isGear(gear)) {
 			gear.hurtAndBreak(1, boxer, InteractionHand.MAIN_HAND);

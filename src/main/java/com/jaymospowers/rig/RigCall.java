@@ -36,6 +36,14 @@ public final class RigCall {
 		builder -> builder.persistent(ItemStack.OPTIONAL_CODEC.listOf()).copyOnDeath()
 			.syncWith(ItemStack.OPTIONAL_LIST_STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
+	/** The suit is flying in plate by plate (synced to everyone: client RigSuit scatters the plates and brings them home). */
+	public static final AttachmentType<Boolean> FLYING_IN = AttachmentRegistry.create(JaymosPowers.id("rig_flying_in"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** How long a landed piece's plates take to fly home and lock on (ticks; the client RigSuit uses the same). */
+	public static final int FLY_TICKS = 10;
+	/** Where a call from a sentry post starts. */
+	private static final Map<UUID, Vec3> FROM = new HashMap<>();
+
 	/** The streak of sparks coming in before the first piece lands (ticks). */
 	static final int INBOUND_TICKS = 12;
 	/**
@@ -86,13 +94,14 @@ public final class RigCall {
 		}
 	}
 
-	private static void park(ServerPlayer player) {
+	/** Parks the worn suit (the Core and the Mind's level 3 needed); false if it did not. */
+	static boolean park(ServerPlayer player) {
 		if (Rig.core(player).isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.park_needs_core"));
-			return;
+			return false;
 		}
 		if (!RigActives.needs(player, Rig.CALL_LEVEL)) {
-			return;
+			return false;
 		}
 		// the Mind says goodbye while it still has a voice
 		RigMind.sayAlways(player, "park", 1.0F);
@@ -115,9 +124,16 @@ public final class RigCall {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
+		return true;
 	}
 
-	private static void call(ServerPlayer player) {
+	static void call(ServerPlayer player) {
+		// a suit standing sentry leaves its post: the plates come from where it stood
+		Vec3 post = RigSentry.recall(player);
+		if (post != null) {
+			FROM.put(player.getUUID(), post);
+		}
+		player.setAttached(FLYING_IN, true);
 		CALLING.put(player.getUUID(), new int[1]);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.calling"));
@@ -131,13 +147,16 @@ public final class RigCall {
 		}
 		if (!player.isAlive() || player.isSpectator()) {
 			CALLING.remove(player.getUUID());
+			FROM.remove(player.getUUID());
+			player.removeAttached(FLYING_IN);
 			return;
 		}
 		int t = calling[0]++;
 		ServerLevel level = player.level();
 		double yaw = Math.toRadians(player.getYRot());
 		Vec3 back = new Vec3(Math.sin(yaw), 0.0, -Math.cos(yaw)).scale(FROM_BACK);
-		Vec3 source = player.position().add(back).add(0.0, FROM_UP, 0.0);
+		Vec3 post = FROM.get(player.getUUID());
+		Vec3 source = post != null ? post.add(0.0, 1.0, 0.0) : player.position().add(back).add(0.0, FROM_UP, 0.0);
 		Vec3 body = player.position().add(0.0, 1.0, 0.0);
 		int last = INBOUND_TICKS + LAND_AT[LAND_AT.length - 1];
 		if (t < last) {
@@ -150,8 +169,10 @@ public final class RigCall {
 			}
 			level.sendParticles(ParticleTypes.FLAME, head.x, head.y, head.z, 2, 0.05, 0.05, 0.05, 0.01);
 		}
-		if (t > last) {
+		if (t > last + FLY_TICKS) {
 			CALLING.remove(player.getUUID());
+			FROM.remove(player.getUUID());
+			player.removeAttached(FLYING_IN);
 			player.removeAttached(PARKED);
 			RigMind.sayAlways(player, "call", 1.2F);
 			return;

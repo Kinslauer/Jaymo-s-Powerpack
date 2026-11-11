@@ -1,5 +1,5 @@
-"""Writes boxing's item art (boxing/BoxingGear): the Hand Wraps, the cestus and the bracers, and the forged heads of
-the metal ones (the cestus's studs, the bracers' plates), drawn here pixel by pixel. Placeholder art until someone
+"""Writes boxing's item art (boxing/BoxingGear): the Hand Wraps, the cestus and the bracers, how each looks worn on the
+hand, and the forged heads of the metal ones (the cestus's studs, the bracers' plates), drawn here pixel by pixel. Placeholder art until someone
 draws better; nothing is copied from another mod.
 
     python -I tools/boxing_assets.py
@@ -140,8 +140,27 @@ def save(img, path):
     img.save(full)
 
 
+def worn(body, trim):
+    """The gear as it is worn on the hand (client FangGauntletsClient.buildBoxing), 32x32: the wrap's box at (0, 0),
+    a cestus's knuckle band at (0, 8), a bracer's guard at (0, 16); each box 4 wide and deep, so 16 across."""
+    out = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    strap, shine = trim if trim else (body["s"], body["c"])
+    for x in range(16):
+        for y in range(0, 8):
+            # the wrap: bands wound round the hand
+            out.putpixel((x, y), body["s" if (x + y * 2) % 4 == 0 else "h" if y == 4 else "c"] + (255,))
+        for y in range(8, 13):
+            # the knuckle band: a stud, a gap
+            out.putpixel((x, y), (shine if x % 2 == 0 else strap) + (255,))
+        for y in range(16, 26):
+            # the bracer: its body, a strap near each end
+            out.putpixel((x, y), (strap if y in (21, 24) else body["h"] if x % 4 == 1 else body["c"]) + (255,))
+    return out
+
+
 def main():
     for item, rows, body, trim in GEAR:
+        save(worn(body, trim), "entity/boxing/" + item)
         colours = dict(body)
         if trim:
             colours["m"], colours["M"] = trim
