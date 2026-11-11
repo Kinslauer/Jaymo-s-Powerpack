@@ -85,11 +85,15 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 
 ## Track 3: the elder, the ruler and the hunter (Powers + Kingdoms)
 
-**Files:** `BandForge` (elder talk), `RivalHunter`, new `kingdoms/.../galvan/GalvanCourt`, lang parts `xenoform` and
+**Files:** `BandForge` (elder talk), `BandUpgrades` (the forge check on `Action`), the band screen, `RivalHunter`, new `kingdoms/.../galvan/GalvanCourt`, lang parts `xenoform` and
 `galvan`.
 
 - **The elder:** an old Galvan who made the band, at the forge. Talking: he knew the band would be found ("it was made
-  to be given"), he reforges it as the smith does now, and later upgrades are his (open question 6). He never speaks
+  to be given"), he reforges it as the smith does now, and every upgrade after it is his too (Andy, 2026-11-11: "all upgrades require a
+  trip"). Read as: learning a module from its plan, fitting or swapping modules and buying band skills all happen at
+  the elder's forge (`BandUpgrades.Action` is refused unless the player is near the forge, with a line saying the band
+  must go back to its maker); away from it the band screen shows them but greys the buttons. Learning new aliens by
+  scanning and tablets stays out in the world, since that is the band's own doing, not an upgrade. He never speaks
   against the ruler in the open; his lines hint.
 - **The ruler:** holds the court. He greets a band wearer warmly and asks for the band "for safe keeping". Refuse and
   he is polite and cold; from then on hunters come more often (`RivalHunter.COME_GAP` shortened for that player).
@@ -120,8 +124,7 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 3. ~~Look~~ Answered: like Viltrum's cities (Track 2, Look).
 4. ~~The Endermen~~ Answered: they and the Galvan fight all the time; Endermen steal Galvan blocks for the mischief (Track 2, Endermen).
 5. ~~Kingdom or town~~ Answered: a city with a ruler and court; no war or trading with other kingdoms.
-6. **The elder's upgrades:** does the elder do only the reforge (as the smith does now), or do later band upgrades
-   (more slots, band skills, new aliens) also need a trip back to him?
+6. ~~The elder's upgrades~~ Answered: all upgrades require a trip to him (Track 3, the elder).
 7. **The ruler's ask:** can a player actually hand the band to the ruler, and what happens then (the band is gone; the
    ruler becomes a boss who wears it)?
 8. **Ending:** should there be a way to bring the ruler down (with the elder's help, or the Patrol's), or does he stay
