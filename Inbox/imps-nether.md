@@ -14,3 +14,6 @@ Also (Long Defence thread): their fireballs catch the trees and surroundings in 
 
 **Build:** new Kingdoms mob in the Nether (own model, piglin-like make, GeckoLib), plus a zombified variant. Flies, lunges from varied angles, 3 s fireball charge; a well-timed hit during the charge detonates it early and kills the imp. Fireballs set blocks alight. Lore: Lore.md "The Nether and the demons".
 **After merge:** tell the "Pass over the long defence text" thread (PR #1268) so the imps join the film.
+
+## Notes
+- 2026-11-11 12:33 Being built in the project thread 'Build the Nether imps' (Andy's request, 2026-11-11). Andy also wants every part animated: arms, legs, wings, fireball, swoop attack, basic swing.
