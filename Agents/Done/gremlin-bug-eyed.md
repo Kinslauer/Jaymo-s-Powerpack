@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-b48kai
 with: Claude (cloud thread "Make the Galvan tiny and bug-eyed")
@@ -27,3 +27,4 @@ big-eyed gremlins). Read as: the Xeno-Band's Gremlin (our small grey tinkerer al
 ## Done
 Gremlin is a tiny upright grey imp, about half a block tall, with big yellow-green eyes that shine in the dark and blink.
 Compiled and rendered outside the game; not played.
+- 2026-11-11 16:40 PR #1323 is merged into master; moved to Agents/Done.
