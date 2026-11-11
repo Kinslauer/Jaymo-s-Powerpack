@@ -9,6 +9,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -154,7 +155,11 @@ public final class Boxing {
 
 	public static void init() {
 		BoxingGear.init();
-		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+		// the punch takes the left click only after every other rule has had its say (a downed or armless player, a
+		// finisher, Kingdoms' tag with a child, the fight pit, captives...), so in a later phase than theirs
+		Identifier late = JaymosPowers.id("boxing_punch");
+		AttackEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, late);
+		AttackEntityCallback.EVENT.register(late, (player, level, hand, entity, hit) -> {
 			if (level.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer boxer)
 				|| !(entity instanceof LivingEntity target) || !boxing(boxer)) {
 				// (the client's own swing and attack indicator run as usual; the server decides the punch)
