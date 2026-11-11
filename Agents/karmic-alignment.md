@@ -24,3 +24,6 @@ owns:
 - Lore.md: "(new) The weighing" under The dead, for Andy to approve.
 
 ## Done
+Built, compiles, not played. A hidden weight per life; a life that ends is weighed. Just: Other World, win the tournament
+to go back as you were (lent blade, weaker spirits, no paying). Wicked: once, wake in the Nether far from a lit portal,
+hunted, death there final. Numbers are Claude's first guesses (thresholds 25 / -25).
