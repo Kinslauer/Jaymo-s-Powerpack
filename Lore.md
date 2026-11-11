@@ -517,6 +517,15 @@ of the aquatus on its shore, a plant that drinks the soil dry around it. Plant o
 **wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
 swings slowly round, and carries off anything thrown or let fall.
 
+(new) **Gravilite** (four-mods thread, 2026-11-11, Eden Ring part 3). All over the Verdant World, in every country,
+small blue crystals stand out of the ground and glow. The Verdant call it gravilite and say it fell from the ring of
+the giant overhead, the same stuff that holds the ring up. On its own it only shines, so they light their halls with
+it, in lamps and lanterns. Bound in iron over a core of redstone it does what the ring does: the **Gravity
+Compressor** turns weight upside down in the air above it, higher the harder it is driven. The Verdant use them as
+lifts and to keep stores off the ground. It is a craft of theirs, not a power, and it has nothing to do with the
+Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
+balloon mushroom, pulse tree and brain tree each give a full joiner's set.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
