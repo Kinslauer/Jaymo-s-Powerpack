@@ -21,7 +21,7 @@ public final class Moves {
 	/** Moves that end held. */
 	public static final String[] HOLD = {"overhead", "chop", "thrust", "kneel", "kneel_up", "kneel_bow", "maimed", "impaled", "death_back",
 		"death_front", "death_drop", "death_headless", "summon", "cast_both", "cast_ward", "cast_high", "cast_blade", "point", "disarm",
-		"disarmed", "lunge", "look_about"};
+		"disarmed", "lunge", "look_about", "sling", "glide"};
 	/** How fast each moving loop carries a body of ordinary size at its own pace (blocks a second). */
 	private static final Map<String, Double> PACE = Map.of(WALK, 1.4, RUN, 3.5, SPRINT, 5.6, SHAMBLE, 1.6, FLEE, 4.0);
 	private static final Map<String, RawAnimation> LOOPS = new HashMap<>();
