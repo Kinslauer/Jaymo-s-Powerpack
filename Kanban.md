@@ -13,7 +13,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 
 
@@ -22,6 +21,7 @@ kanban-plugin: board
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 💻 Odysseus · #1270 · in-review
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · #1271 · in-review
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
