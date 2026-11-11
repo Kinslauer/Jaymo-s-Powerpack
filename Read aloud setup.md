@@ -42,3 +42,13 @@ and it's on master in E:/Origins Mod, do these steps:
   - Two restarts cut off a claude-writer kanban worker (t_3e3fded7, waiting on a retry) and two idle sessions.
 - Step 5 still to do: Andy joins voice and asks YOUTH to read Lore from "The ages of the world". Check that the bot
   has Connect and Speak in that channel. If it says "ffmpeg isn't on PATH", the gateway didn't get FFMPEG.
+
+## 2026-11-10 11:45 PM: YOUTH says the script doesn't exist
+YOUTH looked for `E:/Origins Mod/tools/discord_read_aloud.py` and didn't find it. It is on master (merged in #1273).
+For Claude Code on the PC:
+1. In E:/Origins Mod: `git status` and `git branch --show-current`. If it's on master, `git pull origin master`. If it's
+   on another branch with work in it, don't switch: `git fetch origin master` then
+   `git checkout origin/master -- tools/discord_read_aloud.py` (a tools-only file, safe to bring in alone).
+2. Check `Test-Path "E:/Origins Mod/tools/discord_read_aloud.py"` is True, then run the dry run from step 3 above.
+3. Tell YOUTH (and put it in his read-aloud skill): if the script is missing, run `git -C "E:/Origins Mod" pull origin
+   master` once and try again. Never write the script himself and never fall back to text_to_speech.
