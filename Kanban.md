@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,8 +16,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 
 
