@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · #1288 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
-- [ ] [[Agents/symbiote-costume-shape|symbiote-costume-shape]] · 💻 Odysseus · #1287 · in-review
 
 
 ## Needs Andy
