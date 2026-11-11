@@ -239,3 +239,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:35 PM ET (Andy, same thread): picked "Ocellan" on the name card for the band's makers.
 - 2026-11-11 (four-mods thread): PR #1324 (Eden Ring part 1) merged on Andy's "merge"; part 2 opened as PR #1327.
 - 2026-11-11 4:48 PM ET (Andy, Galvan moon plan): the Galvan city is "hidden": under the dust of the Pale Moon, behind a gate only a band opens.
+- 2026-11-11 4:49 PM ET (Andy, Galvan moon plan): the Galvan city looks "kind of like the viltrumite cities" (Invincible): tall curved white towers, dark seams, lit windows, roof gardens, ring rails. Our own build; under the dust in a hollow with a built false sky.
