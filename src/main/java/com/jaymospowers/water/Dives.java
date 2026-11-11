@@ -2,6 +2,7 @@ package com.jaymospowers.water;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.freerun.Freerun;
+import com.jaymospowers.freerun.moves.SkyDive;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -71,6 +72,7 @@ public final class Dives {
 		double fall;
 		boolean inWater;
 		int sneakTicks;
+		boolean wasSkydiving;
 	}
 
 	private static final Map<UUID, Watch> WATCH = new HashMap<>();
@@ -87,16 +89,17 @@ public final class Dives {
 			Watch w = WATCH.computeIfAbsent(player.getUUID(), id -> new Watch());
 			boolean inWater = player.isInWater();
 			if (inWater && !w.inWater && w.fall >= MIN_FALL && !player.isSpectator() && !player.isPassenger() && deep(player)) {
-				Entry entry = entry(player, w.sneakTicks);
-				enter(player, entry, w.fall);
+					Entry entry = entry(player, w.sneakTicks);
+					enter(player, entry, w.fall);
+				}
+				if ((!inWater || player.onGround()) && player.getAttachedOrElse(ENTRY, 0L) != 0L) {
+					player.setAttached(ENTRY, 0L); // only when it changes, so it isn't synced every tick
+				}
+				w.inWater = inWater;
+				w.fall = inWater || player.onGround() ? 0.0 : player.fallDistance;
+				w.sneakTicks = player.isShiftKeyDown() ? w.sneakTicks + 1 : 0;
+				w.wasSkydiving = SkyDive.active(player);
 			}
-			if ((!inWater || player.onGround()) && player.getAttachedOrElse(ENTRY, 0L) != 0L) {
-				player.setAttached(ENTRY, 0L); // only when it changes, so it isn't synced every tick
-			}
-			w.inWater = inWater;
-			w.fall = inWater || player.onGround() ? 0.0 : player.fallDistance;
-			w.sneakTicks = player.isShiftKeyDown() ? w.sneakTicks + 1 : 0;
-		}
 		if (server.getTickCount() % 1200 == 0) {
 			WATCH.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
 		}
@@ -117,9 +120,12 @@ public final class Dives {
 	/** How the player went in: sneak-held is a cannonball, sneak just before the water is a dive (head first only,
 	 * otherwise a belly flop). */
 	private static Entry entry(ServerPlayer player, int sneakTicks) {
-		if (Freerun.dives(player) || player.getLookAngle().y <= -DIVE_LOOK_DOWN && !player.isShiftKeyDown()) {
-			return Entry.DIVE; // head first without Sneak (Leap of Faith, a Wind user's dive, or just looking down)
-		}
+			if (SkyDive.active(player)) {
+				return Entry.FLOP; // sky dive landing = belly flop with damage
+			}
+			if (Freerun.dives(player) || player.getLookAngle().y <= -DIVE_LOOK_DOWN && !player.isShiftKeyDown()) {
+				return Entry.DIVE; // head first without Sneak (Leap of Faith, a Wind user's dive, or just looking down)
+			}
 		Entry entry = !player.isShiftKeyDown() ? Entry.FLOP : sneakTicks >= TUCK_TICKS ? Entry.CANNONBALL : Entry.DIVE;
 		if (entry == Entry.DIVE && player.getLookAngle().y > -DIVE_LOOK_DOWN) {
 			entry = Entry.FLOP; // not head first: a flop
