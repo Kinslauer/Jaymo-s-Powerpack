@@ -16,11 +16,20 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 | Sigil | `MagicFx.sigil(level, at, radius, color, ticks)` | Our circle of marks, turning on the ground | A working laid on the ground |
 | Mote | `MagicFx.mote(color, size)` (a particle) | A four-point glint, full bright | Loose power in the air; where a redstone dust was |
 | Miasma | `MagicFx.miasma(color, size)` (a particle) | A soft puff lit by the world | Dark or heavy power, gas, smoke, blight |
+| Spark | `MagicFx.spark(color, size)` (a particle) | A short jagged fork that jumps shape every tick, full bright | Lightning, crackle, charge, static |
+| Rune | `MagicFx.rune(color, size)` (a particle) | One of six marks from the sigil's alphabet; drifts, or is drawn in to its point when sent with a direction | Enchanting, wards, knowledge, written magic |
 
 - `MagicFx.wisp(color, size)` picks mote or miasma by how dark the colour is (light can't be black). Use it when the
   colour is only known at run time.
 - `MagicFx.burst(level, x, y, z, color, size, count, dx, dy, dz)` is what a one-off cloud of dust was: a blast that
   size with motes.
+- Stock looks, for where a vanilla particle stood in for magic: `MagicFx.LIGHT` (was END_ROD), `CRACKLE`
+  (ELECTRIC_SPARK), `GLYPH` (ENCHANT), `VOID` (PORTAL, REVERSE_PORTAL), `HEX` (WITCH), `GLOW`, `EMBER` (WAX_ON), `PALE`
+  (WAX_OFF), `MURK` (DRAGON_BREATH). Kingdoms has the same names on `Fx` (no `MURK`). Use them wherever you'd pass a
+  particle.
+- `MagicFx.line(level, from, to, particle, points)` and `MagicFx.circle(level, particle, at, radius, points)` are for
+  helpers that used to dot a line or a circle with one particle: a mote, spark or rune becomes a thin beam or a ring in
+  its colour; anything else (miasma, vanilla) is still dotted.
 - On the client alone (films, looks drawn from synced state): `MagicFxClient.beam/blast/ring/orb/sigil`, and
   `level.addParticle(MagicFx.wisp(...), ...)`.
 - Sizes of motes and miasma are on redstone dust's scale, so old numbers carried over.
@@ -47,12 +56,24 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 - **Motes and miasma**: every other recoloured dust in the powers, alchemy, baubles, spirits, heritage looks and
   champions (about 230 places). Dark colours became miasma by themselves; gas, smoke, flux and blight were set to it.
 
-## Not moved yet
+## Second pass (2026-11-11)
+
+- **Spark and rune** added. Vanilla particles standing in for magic were swapped for the stock looks above: about 540
+  uses in 202 Powers files and 130 in 61 Kingdoms files (END_ROD, ELECTRIC_SPARK, ENCHANT, PORTAL, REVERSE_PORTAL,
+  WITCH, GLOW, WAX_ON, WAX_OFF, DRAGON_BREATH, and tinted ENTITY_EFFECT, which is now a wisp).
+- **Dotted lines and circles to beams and rings**: the shared helpers (`XenoForm.beam/ring`, `Rivet.line`,
+  `ZFighterGift.line`, `ArsenalGift.streak`), the Sun patron's column (`PatronWeaponHits`) and the Sun Marshal's
+  landing beam (`SunMarshalMoves`).
+
+## Not moved
 
 - `kingdoms/.../client/films/LoreFilmClient.java` (8 dusts): the film thread owns it (PR #1284).
-- Lines and rings still drawn as rows of motes inside loops (Z Fighter ring arenas, ki rain, Chrono's clock, gravity
-  wave, spirit arms, attuned-only mana lines through `Mana.sendSeen`). They now use the mote asset; turning each into a
-  real beam or ring is a per-ability pass.
-- Other vanilla particles used as magic (END_ROD, ELECTRIC_SPARK, ENCHANT, REVERSE_PORTAL, WITCH, ENTITY_EFFECT:
-  about 800 uses). Same approach, next pass.
+- Loops that dot their own line or circle without a shared helper (Z Fighter ring arenas, ki rain, Chrono's clock,
+  gravity wave, spirit arms, champion tell rings in `MoveKit`, `PatronWrath`, `HeritageKits`, the Aetherion dragon).
+  They use the typed particles; each is a per-ability change to a beam or ring.
+- Attuned-only mana lines through `Mana.sendSeen`: only some players may see them, and shapes go to everyone in range.
+- Vanilla particles that are the real thing, not a stand-in: electric sparks on machines, rigs, sentries and android
+  malfunctions, portal specks at real portals and raids, enchant glyphs at enchanting storage, wax on jewellery, glow
+  on beasts and squid, parry and clash sparks (`MobParry`, `BladeClash`, `AttackTells`, the clash thread's), horses,
+  MCA villagers' everyday marks, souls, crits, totems, sonic booms.
 - The symbiote's goo specks (`power/web`), Hive, Rubber-folk and Bio-built body specks: not magic, left as they are.

@@ -15,7 +15,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.17.61, Andy's NOEA picks) The Story screen, opened from the training screen: the sagas and what each needs, a
+ * (0.17.61, Andy's NOEA picks) The saga screen, opened from the Fighter's Road in the Story tab (StoryRoads): the sagas and what each needs, a
  * difficulty to start one at, the step you are on and its count, and your side jobs. Everything it shows is the
  * player's synced saga and job data; the buttons ask the server ({@link ZFighterNet}).
  */

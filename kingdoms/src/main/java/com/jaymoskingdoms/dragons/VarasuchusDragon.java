@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -471,7 +472,7 @@ public class VarasuchusDragon extends WindDragon implements GeoEntity {
 	private void parry(ServerLevel level, LivingEntity attacker) {
 		Vec3 at = this.position().add(attacker.position().subtract(this.position()).normalize().scale(this.getBbWidth() * 0.6)).add(0.0, 1.2, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 16, 0.3, 0.3, 0.3, 0.5);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 12, 0.2, 0.2, 0.2, 0.3);
+		level.sendParticles(Fx.CRACKLE, at.x, at.y, at.z, 12, 0.2, 0.2, 0.2, 0.3);
 		level.playSound(null, this.blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.HOSTILE, 1.4F, 0.7F);
 		level.playSound(null, this.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.4F, 1.4F);
 		attacker.hurtServer(level, this.damageSources().mobAttack(this), PARRY);

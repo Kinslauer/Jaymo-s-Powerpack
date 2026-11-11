@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -147,7 +148,7 @@ final class GravityPush {
 				other.syncVelocity = true;
 			}
 			level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 2, 0.2, 0.2, 0.2, 0.01);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 3, 0.2, 0.2, 0.2, 0.05);
+			level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 3, 0.2, 0.2, 0.2, 0.05);
 		}
 	}
 

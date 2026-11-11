@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.backhome;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
@@ -13,7 +14,6 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -135,7 +135,7 @@ public final class BackHome {
 			ServerLevel level = player.level();
 			Vec3 at = pod.getBoundingBox().getCenter();
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 1.6F);
-			level.sendParticles(ParticleTypes.END_ROD, at.x, pod.getY() + pod.getBbHeight(), at.z, 16, 0.2, 0.4, 0.2, 0.03);
+			level.sendParticles(MagicFx.LIGHT, at.x, pod.getY() + pod.getBbHeight(), at.z, 16, 0.2, 0.4, 0.2, 0.03);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.lens_set").withStyle(ChatFormatting.AQUA));
 		}
 		return true;

@@ -37,11 +37,14 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link #sigil}: a working laid on the ground. A turning circle of marks.</li>
  * <li>{@link #mote}: loose power in the air. A small bright glint that drifts, twinkles and goes out. Takes the place
  * of every recoloured redstone dust.</li>
+ * <li>{@link #spark}: power crackling. A jagged fleck that flickers and is gone. Takes the place of the electric spark.</li>
+ * <li>{@link #rune}: a working being written. One of our marks, drawn in to a point. Takes the place of the enchanting
+ * table's letters.</li>
  * <li>{@link #miasma}: dark or heavy power. A soft rolling puff, lit by the world, that thins away. Takes the place of
  * every dark dust (ink, shadow, blight, gas).</li>
  * </ul>
  * The shapes (beam, blast, ring, orb, sigil) go out as one {@link Shape} packet each and are drawn by
- * {@code client/fx/MagicFxClient}; motes and miasma are particles ({@link Wisp}), so they drop in wherever a dust did.
+ * {@code client/fx/MagicFxClient}; motes, miasma, sparks and runes are particles ({@link Wisp}), so they drop in wherever a dust did.
  * Kingdoms reaches all of this through its own {@code Fx} class (it never compiles against this mod).
  */
 public final class MagicFx {
@@ -58,36 +61,59 @@ public final class MagicFx {
 	/** The most motes a blast throws out with it. */
 	public static final int BLAST_MOTES = 24;
 
-	/**
-	 * A mote or a puff of miasma: {@code color} 0xRRGGBB, {@code size} on redstone dust's scale (1 = a dust's size), so
-	 * the old numbers carry over.
-	 */
-	public record Wisp(int color, float size, boolean miasma) implements ParticleOptions {
-		public static final MapCodec<Wisp> MOTE_CODEC = codec(false);
-		public static final MapCodec<Wisp> MIASMA_CODEC = codec(true);
-		public static final StreamCodec<RegistryFriendlyByteBuf, Wisp> MOTE_STREAM = stream(false);
-		public static final StreamCodec<RegistryFriendlyByteBuf, Wisp> MIASMA_STREAM = stream(true);
+	/** The particles a {@link Wisp} can be. */
+	public static final int KIND_MOTE = 0, KIND_MIASMA = 1, KIND_SPARK = 2, KIND_RUNE = 3;
 
-		private static MapCodec<Wisp> codec(boolean miasma) {
+	/**
+	 * One of the particles (a mote, a puff of miasma, a spark, a rune): {@code color} 0xRRGGBB, {@code size} on redstone
+	 * dust's scale (1 = a dust's size), so the old numbers carry over.
+	 */
+	public record Wisp(int color, float size, int kind) implements ParticleOptions {
+		static MapCodec<Wisp> codec(int kind) {
 			return RecordCodecBuilder.mapCodec(i -> i.group(
 				Codec.INT.optionalFieldOf("color", 0xFFFFFF).forGetter(Wisp::color),
-				Codec.FLOAT.optionalFieldOf("size", 1.0F).forGetter(Wisp::size)).apply(i, (color, size) -> new Wisp(color, size, miasma)));
+				Codec.FLOAT.optionalFieldOf("size", 1.0F).forGetter(Wisp::size)).apply(i, (color, size) -> new Wisp(color, size, kind)));
 		}
 
-		private static StreamCodec<RegistryFriendlyByteBuf, Wisp> stream(boolean miasma) {
-			return StreamCodec.composite(ByteBufCodecs.INT, Wisp::color, ByteBufCodecs.FLOAT, Wisp::size, (color, size) -> new Wisp(color, size, miasma));
+		static StreamCodec<RegistryFriendlyByteBuf, Wisp> stream(int kind) {
+			return StreamCodec.composite(ByteBufCodecs.INT, Wisp::color, ByteBufCodecs.FLOAT, Wisp::size, (color, size) -> new Wisp(color, size, kind));
 		}
 
 		@Override
 		public ParticleType<?> getType() {
-			return miasma ? MIASMA : MOTE;
+			return switch (kind) {
+				case KIND_MIASMA -> MIASMA;
+				case KIND_SPARK -> SPARK;
+				case KIND_RUNE -> RUNE;
+				default -> MOTE;
+			};
 		}
 	}
 
-	public static final ParticleType<Wisp> MOTE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("magic_mote"),
-		FabricParticleTypes.complex(false, Wisp.MOTE_CODEC, Wisp.MOTE_STREAM));
-	public static final ParticleType<Wisp> MIASMA = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("magic_miasma"),
-		FabricParticleTypes.complex(false, Wisp.MIASMA_CODEC, Wisp.MIASMA_STREAM));
+	public static final ParticleType<Wisp> MOTE = register("magic_mote", KIND_MOTE);
+	public static final ParticleType<Wisp> MIASMA = register("magic_miasma", KIND_MIASMA);
+	public static final ParticleType<Wisp> SPARK = register("magic_spark", KIND_SPARK);
+	public static final ParticleType<Wisp> RUNE = register("magic_rune", KIND_RUNE);
+
+	private static ParticleType<Wisp> register(String name, int kind) {
+		return Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id(name),
+			FabricParticleTypes.complex(false, Wisp.codec(kind), Wisp.stream(kind)));
+	}
+
+	/** The colours of power whose caller gave none: plain light, a crackle, the void's violet, a rune, an ember, a glow. */
+	public static final int LIGHT_COLOR = 0xFFF6E0, CRACKLE_COLOR = 0xFFF7B0, VOID_COLOR = 0xB26BFF, RUNE_COLOR = 0xE4DCFF, EMBER_COLOR = 0xFFA040,
+		GLOW_COLOR = 0x60F0D0, HEX_COLOR = 0x8A3FC8;
+	/**
+	 * The stock particles, for where a vanilla one stood: {@link #LIGHT} a white mote (the end rod's glint),
+	 * {@link #CRACKLE} a spark (the electric spark), {@link #VOID} a violet mote (the portal's specks), {@link #GLYPH}
+	 * a rune (the enchanting table's letters), {@link #EMBER} an orange mote and {@link #PALE} a white one (the wax
+	 * sparkles), {@link #GLOW} a sea-green mote (the glow squid's), {@link #HEX} a witch's violet mote, {@link #MURK}
+	 * a violet miasma (dragon's breath).
+	 */
+	public static final ParticleOptions LIGHT = new Wisp(LIGHT_COLOR, 1.0F, KIND_MOTE), CRACKLE = new Wisp(CRACKLE_COLOR, 1.0F, KIND_SPARK),
+		VOID = new Wisp(VOID_COLOR, 0.8F, KIND_MOTE), GLYPH = new Wisp(RUNE_COLOR, 1.0F, KIND_RUNE), EMBER = new Wisp(EMBER_COLOR, 0.8F, KIND_MOTE),
+		PALE = new Wisp(0xFFFFFF, 0.8F, KIND_MOTE), GLOW = new Wisp(GLOW_COLOR, 0.9F, KIND_MOTE), HEX = new Wisp(HEX_COLOR, 0.9F, KIND_MOTE),
+		MURK = new Wisp(0xC040E0, 1.6F, KIND_MIASMA);
 
 	/**
 	 * Server to client: one shape. {@code kind} is {@link #BEAM} and the rest; ({@code x}, {@code y}, {@code z}) where
@@ -130,12 +156,25 @@ public final class MagicFx {
 
 	/** A mote: loose power in the air. Drops in wherever a redstone dust of this colour and size was. */
 	public static ParticleOptions mote(int color, float size) {
-		return new Wisp(color & 0xFFFFFF, size, false);
+		return new Wisp(color & 0xFFFFFF, size, KIND_MOTE);
 	}
 
 	/** A puff of miasma: dark or heavy power. Drops in wherever a dark dust of this colour and size was. */
 	public static ParticleOptions miasma(int color, float size) {
-		return new Wisp(color & 0xFFFFFF, size, true);
+		return new Wisp(color & 0xFFFFFF, size, KIND_MIASMA);
+	}
+
+	/** A spark: power crackling (lightning, static, a charge). A jagged fleck that flickers and is gone. */
+	public static ParticleOptions spark(int color, float size) {
+		return new Wisp(color & 0xFFFFFF, size, KIND_SPARK);
+	}
+
+	/**
+	 * A rune: a working being written. One of our marks, drifting. Sent with no count and a direction, it starts that
+	 * far from the point and is drawn in to it, as the enchanting table's letters are.
+	 */
+	public static ParticleOptions rune(int color, float size) {
+		return new Wisp(color & 0xFFFFFF, size, KIND_RUNE);
 	}
 
 	/** A mote, or miasma if the colour is dark (light can't be black). For colours only known when the game runs. */
@@ -197,6 +236,42 @@ public final class MagicFx {
 		float radius = (float)Math.max(0.4, Math.max(dx, Math.max(dy, dz)) * 2.0);
 		blast(level, new Vec3(x, y, z), radius, color, BLAST_TICKS);
 		level.sendParticles(wisp(color, size), x, y, z, Mth.clamp(count / 3, 2, BLAST_MOTES), dx, dy, dz, 0.02);
+	}
+
+	/** How thick (blocks) and how long (ticks) the beam is that stands where a row of particles drew a line. */
+	public static final float LINE_RADIUS = 0.06F;
+	public static final int LINE_TICKS = 7;
+
+	/**
+	 * What a row of {@code particle} from {@code from} to {@code to} was. If it is one of our lights (a mote, a spark,
+	 * a rune) the line is a beam of its colour; anything else (miasma, flame, notes, another mod's) stays a row of
+	 * {@code points} particles.
+	 */
+	public static void line(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions particle, int points) {
+		if (particle instanceof Wisp wisp && wisp.kind() != KIND_MIASMA) {
+			beam(level, from, to, LINE_RADIUS * Math.max(0.6F, wisp.size()), wisp.color(), LINE_TICKS);
+			return;
+		}
+		Vec3 step = to.subtract(from).scale(1.0 / Math.max(1, points));
+		for (int i = 1; i <= points; i++) {
+			Vec3 p = from.add(step.scale(i));
+			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+		}
+	}
+
+	/**
+	 * What a circle of {@code particle} on the ground round {@code at} was: a shockwave ring of its colour if it is one
+	 * of ours (miasma too: murk rolls out as well as light does), else the circle of {@code points} particles.
+	 */
+	public static void circle(ServerLevel level, ParticleOptions particle, Vec3 at, double radius, int points) {
+		if (particle instanceof Wisp wisp) {
+			ring(level, at.add(0.0, 0.1, 0.0), (float)radius, wisp.color());
+			return;
+		}
+		for (int i = 0; i < points; i++) {
+			double a = i / (double)points * Math.PI * 2.0;
+			level.sendParticles(particle, at.x + Math.cos(a) * radius, at.y + 0.2, at.z + Math.sin(a) * radius, 1, 0.1, 0.05, 0.1, 0.0);
+		}
 	}
 
 	private static void send(ServerLevel level, Vec3 at, Shape shape) {

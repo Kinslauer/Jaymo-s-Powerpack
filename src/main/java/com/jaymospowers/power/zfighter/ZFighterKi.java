@@ -834,7 +834,7 @@ public final class ZFighterKi {
 			Vec3 from = at.add(dir.scale(size * 0.2));
 			level.sendParticles(random.nextInt(3) == 0 ? pale : blue, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, speed);
 			if (i % 5 == 0) {
-				level.sendParticles(ParticleTypes.END_ROD, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, Math.min(1.2, speed * 0.06));
+				level.sendParticles(MagicFx.LIGHT, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, Math.min(1.2, speed * 0.06));
 			}
 		}
 		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, NOVA_PALE);
@@ -865,7 +865,7 @@ public final class ZFighterKi {
 				Vec3 p = from.lerp(to, k / (double)dots);
 				level.sendParticles(crack, true, false, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, to.x, to.y, to.z, 2, 0.1, 0.1, 0.1, 0.15);
+			level.sendParticles(MagicFx.CRACKLE, true, false, to.x, to.y, to.z, 2, 0.1, 0.1, 0.1, 0.15);
 			if (random.nextInt(6) == 0) {
 				// a crack forks
 				nova.headings()[i] = nova.headings()[i].add(jag.scale(1.5)).normalize();
@@ -888,7 +888,7 @@ public final class ZFighterKi {
 		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size, glow);
 		RandomSource random = level.getRandom();
 		int flashes = (int)(2 + glow * glow * 16);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y, at.z, flashes, bolt.size * 0.5, bolt.size * 0.5, bolt.size * 0.5,
+		level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y, at.z, flashes, bolt.size * 0.5, bolt.size * 0.5, bolt.size * 0.5,
 			0.1 + glow * 0.4);
 		if (glow > 0.6F) {
 			level.sendParticles(MagicFx.wisp(0xFFFFFF, 4.0F), true, false, at.x, at.y + bolt.size * 0.5, at.z, 1, bolt.size * 0.3, 0.2, bolt.size * 0.3,
@@ -919,7 +919,7 @@ public final class ZFighterKi {
 
 	private static void pop(ServerLevel level, Vec3 at, ParticleOptions dust) {
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, 5, 0.25, 0.25, 0.25, 0.1);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.3);
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 2, 0.15, 0.15, 0.15, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
 	}
@@ -1091,7 +1091,7 @@ public final class ZFighterKi {
 			level.sendParticles(dust, true, false, hands.x + ox, hands.y + oy, hands.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
 		if (charge >= 1.0F && now % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (Soundscape.due(player, "ki.wave", 8, 13)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, KI_HUM.pitched(0.8F + charge), KI_SURGE);

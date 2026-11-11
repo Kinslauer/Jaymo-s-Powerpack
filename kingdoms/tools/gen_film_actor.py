@@ -155,8 +155,17 @@ def body(arm=4, piglin=False):
 			r.cube("orc_1", (-4, 28.5, -5), (4, 30.5, -4), patch(FLESH, 6, 2))
 			r.cube("orc_1", (4, 27.5, -0.5), (5, 29.5, 1.5), patch(FLESH), 0, (0, sweep, 0), (4, 28.5, -0.5))
 			r.cube("orc_1", (-5, 27, -0.5), (-4, 30, 1.5), patch(FLESH), 0, (0, -sweep, 0), (-4, 28.5, -0.5))
+			# a Sylvan elf's ears (Grimsby): long, laid back along the head and rising to a point past its crown, out
+			# through his hood
+			r.bone("elf", "head", (0, 24, 0))
+			for sx in (1, -1):
+				x0, x1 = (4, 4.7) if sx > 0 else (-4.7, -4)
+				r.cube("elf", (x0, 27, -1), (x1, 29.5, 2.5), patch(FLESH), 0, (-28, sx * 14, 0), (sx * 4, 28, -1))
+				r.cube("elf", (x0, 28.2, 2.5), (x1, 29.5, 4.3), patch(FLESH, 2, 1), 0, (-28, sx * 14, 0), (sx * 4, 28, -1))
 	limb(r, "right_arm", "right_forearm", "right_hand", "body", 4, 4 + arm, 24, 18, (40, 16), (40, 32), arm, 5, 1)
 	limb(r, "left_arm", "left_forearm", "left_hand", "body", -4 - arm, -4, 24, 18, (32, 48), (48, 48), arm, -5, -1)
+	# where the point of a held blade is (nothing drawn: the renderer reads where it has got to, FilmActorRenderer)
+	r.bone("blade_tip", "right_hand", (4 + arm / 2.0, 13.5 + BLADE[0], -0.5 - BLADE[1]))
 	# the fifth's cloak (hidden on everyone else): four lengths down the back, each hinged on the one above, wider
 	# toward the hem, painted from the cloth patch his skin carries (56,32, 8 by 16)
 	parent, y = "body", 24.0
@@ -202,6 +211,8 @@ def body(arm=4, piglin=False):
 	return r
 
 
+# a held blade's point from the fist: up and forward of it (model units, the arm hung)
+BLADE = (3.0, 15.0)
 # the cloak's cords: where each comes out of it (x, y), and how each is wound
 CORDS = ((3.6, 24.6), (-3.6, 24.6), (4.4, 21.0), (-4.4, 21.0), (0.0, 25.0))
 CORD_STRANDS, CORD_LINKS, CORD_TURN, CORD_WIDE, CORD_STRAND = 3, 8, 45.0, 0.62, 0.8

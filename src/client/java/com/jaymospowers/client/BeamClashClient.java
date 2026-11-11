@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.BeamClash;
 import java.util.HashMap;
@@ -150,7 +151,7 @@ public final class BeamClashClient {
 			if (random.nextInt(2) == 0) {
 				Vec3 from = mouth(minecraft, player);
 				Vec3 p = from.lerp(state.knot(), random.nextDouble());
-				level.addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1);
+				level.addParticle(MagicFx.CRACKLE, p.x, p.y, p.z, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1, random.nextGaussian() * 0.1);
 			}
 			return;
 		}
@@ -201,7 +202,7 @@ public final class BeamClashClient {
 				// round and in, toward the heart of it
 				Vec3 vel = tangent.scale(0.18).add(radial.scale(-0.08)).add(u.scale(-toward * 0.05));
 				ParticleOptions particle = kind == BeamClash.KIND_WIND ? (i % 3 == 0 ? ParticleTypes.CLOUD : ParticleTypes.WHITE_SMOKE)
-					: kind == BeamClash.KIND_KI ? (i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK)
+					: kind == BeamClash.KIND_KI ? (i % 3 == 0 ? MagicFx.LIGHT : MagicFx.CRACKLE)
 					: kind == BeamClash.KIND_SOOT ? (i % 3 == 0 ? ParticleTypes.SQUID_INK : ParticleTypes.LARGE_SMOKE)
 					: (i % 2 == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE);
 				if (particle == ParticleTypes.CAMPFIRE_COSY_SMOKE && random.nextInt(3) != 0) {
@@ -214,7 +215,7 @@ public final class BeamClashClient {
 		int sparks = 1 + Math.round(3 * strain);
 		for (int i = 0; i < sparks; i++) {
 			Vec3 s = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize().scale(0.35 + random.nextDouble() * 0.3);
-			level.addParticle(random.nextBoolean() ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.CRIT, k.x, k.y, k.z, s.x, s.y, s.z);
+			level.addParticle(random.nextBoolean() ? MagicFx.CRACKLE : ParticleTypes.CRIT, k.x, k.y, k.z, s.x, s.y, s.z);
 		}
 		if (random.nextInt(4) == 0) {
 			level.addParticle(ParticleTypes.SMALL_GUST, k.x + random.nextGaussian() * 0.3, k.y + random.nextGaussian() * 0.3, k.z + random.nextGaussian() * 0.3, 0.0, 0.0, 0.0);

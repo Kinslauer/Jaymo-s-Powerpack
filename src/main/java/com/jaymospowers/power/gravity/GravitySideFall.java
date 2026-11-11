@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +92,7 @@ final class GravitySideFall {
 		for (int i = 0; i < 24; i++) {
 			double a = i * Mth.TWO_PI / 24.0;
 			double dx = Math.cos(a), dz = Math.sin(a);
-			level.sendParticles(net.minecraft.core.particles.ParticleTypes.REVERSE_PORTAL, me.x + dx, me.y + 1.0, me.z + dz, 0, dx, 0.0, dz, 0.6);
+			level.sendParticles(MagicFx.VOID, me.x + dx, me.y + 1.0, me.z + dz, 0, dx, 0.0, dz, 0.6);
 		}
 		com.jaymospowers.core.Debris.ring(level, player.blockPosition().below(), 2, 1.0F);
 	}

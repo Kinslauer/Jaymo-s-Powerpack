@@ -1,8 +1,8 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.gravity.GravityForward;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -26,6 +26,6 @@ final class GravityForwardClient {
 		player.setDeltaMovement(velocity);
 		player.resetFallDistance();
 		Vec3 behind = player.position().add(0.0, 0.9, 0.0).subtract(velocity.normalize().scale(0.6));
-		player.level().addParticle(ParticleTypes.REVERSE_PORTAL, behind.x, behind.y, behind.z, 0.0, 0.0, 0.0);
+		player.level().addParticle(MagicFx.VOID, behind.x, behind.y, behind.z, 0.0, 0.0, 0.0);
 	}
 }

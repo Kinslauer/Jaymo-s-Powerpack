@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.WildRoom;
@@ -8,7 +9,6 @@ import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -88,7 +88,7 @@ public final class ZFighterAndroidStart {
 			player.getInventory().placeItemBackInInventory(note(), Prediction.SERVER_ONLY);
 			player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, WAKE_BLUR, 0, true, false, false));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.7, 0.4, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.7, 0.4, 0.2);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.android_start.wake").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
 			return true;
 		} catch (RuntimeException e) {

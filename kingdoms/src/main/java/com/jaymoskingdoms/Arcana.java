@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -237,7 +236,7 @@ public final class Arcana {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 				return InteractionResult.FAIL;
 			}
-			server.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 30, 0.4, 0.5, 0.4, 0.6);
+			server.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 30, 0.4, 0.5, 0.4, 0.6);
 			server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
 			player.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
 			stack.consume(1, player);
@@ -294,7 +293,7 @@ public final class Arcana {
 	private static boolean warding(ServerLevel level, Player player, float power) {
 		for (Player p : level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(SCROLL_WARD_RANGE), Entity::isAlive)) {
 			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL), player);
-			level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
+			level.sendParticles(Fx.LIGHT, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.4F);
 		return true;
@@ -310,7 +309,7 @@ public final class Arcana {
 		Fx.beam(level, start, start.add(step), Sorcery.BEAM_RADIUS, Sorcery.BOLT_COLOUR, Sorcery.BEAM_TICKS);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player),
 			(target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? SCROLL_BOLT * 2.0F : SCROLL_BOLT) * power);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 12, 0.2, 0.3, 0.2, 0.2);
+		level.sendParticles(Fx.CRACKLE, target.getX(), target.getY(0.6), target.getZ(), 12, 0.2, 0.3, 0.2, 0.2);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 1.3F);
 		return true;
 	}

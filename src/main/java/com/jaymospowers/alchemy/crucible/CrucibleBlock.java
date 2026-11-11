@@ -1,12 +1,12 @@
 package com.jaymospowers.alchemy.crucible;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Alchemy;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Knowledge;
 import com.jaymospowers.alchemy.Phials;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -214,7 +214,7 @@ public class CrucibleBlock extends Block implements EntityBlock {
 				0.0, 0.0, 0.0);
 		}
 		if (random.nextInt(5) == 0) {
-			level.addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, colour), x + (random.nextDouble() - 0.5) * 0.5,
+			level.addParticle(MagicFx.wisp(colour, 1.0F), x + (random.nextDouble() - 0.5) * 0.5,
 				top + 0.1, z + (random.nextDouble() - 0.5) * 0.5, 0.0, 0.0, 0.0);
 		}
 	}

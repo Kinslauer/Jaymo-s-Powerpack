@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.nightfall;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.money.Money;
 import com.jaymoskingdoms.money.Coinage;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -9,7 +10,6 @@ import java.util.Locale;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -106,7 +106,7 @@ final class Callings {
 			}
 			mob.setAttached(CALLING, badge.id());
 			held.consume(1, player);
-			level.sendParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getEyeY(), mob.getZ(), 20, 0.3, 0.3, 0.3, 0.5);
+			level.sendParticles(Fx.GLYPH, mob.getX(), mob.getEyeY(), mob.getZ(), 20, 0.3, 0.3, 0.3, 0.5);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.VILLAGER_WORK_CLERIC, SoundSource.NEUTRAL, 1.0F, 0.8F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightfall.calling." + badge.id(), mob.getDisplayName()));
 			return true;

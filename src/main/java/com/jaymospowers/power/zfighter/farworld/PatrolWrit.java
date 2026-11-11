@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.farworld;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.power.zfighter.ZFighterNpcs;
@@ -310,7 +311,7 @@ public final class PatrolWrit {
 		}
 		man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(ParticleTypes.EXPLOSION, spot.x, spot.y + 1.0, spot.z, 2, 0.5, 0.5, 0.5, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, spot.x, spot.y + 1.0, spot.z, 30, 0.6, 0.8, 0.6, 0.15);
+		level.sendParticles(MagicFx.LIGHT, spot.x, spot.y + 1.0, spot.z, 30, 0.6, 0.8, 0.6, 0.15);
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 		if (bolt != null) {
 			bolt.snapTo(spot.x, spot.y, spot.z);

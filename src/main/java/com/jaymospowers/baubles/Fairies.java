@@ -309,6 +309,6 @@ public final class Fairies {
 		level.playSound(null, entity.getX(), y, entity.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 1.2F);
 		level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(new ItemStack(CRACKED_BOTTLE))),
 			entity.getX(), y, entity.getZ(), 16, 0.2, 0.2, 0.2, 0.12);
-		level.sendParticles(ParticleTypes.END_ROD, entity.getX(), y, entity.getZ(), 20, 0.4, 0.6, 0.4, 0.05);
+		level.sendParticles(MagicFx.LIGHT, entity.getX(), y, entity.getZ(), 20, 0.4, 0.6, 0.4, 0.05);
 	}
 }

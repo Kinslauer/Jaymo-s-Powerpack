@@ -168,7 +168,7 @@ public final class ZFighterFalseSuper {
 		ServerLevel level = player.level();
 		Vec3 c = player.position();
 		MagicFx.burst(level, c.x, c.y + 1.0, c.z, ZFighterForms.color(ZFighterForms.FALSE_SUPER), 2.0F, 50, 0.9, 1.0, 0.9);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, c.x, c.y + 1.0, c.z, 30, 0.6, 0.9, 0.6, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, true, false, c.x, c.y + 1.0, c.z, 30, 0.6, 0.9, 0.6, 0.3);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.7F);
 		com.jaymospowers.core.Shakes.heavy(player, c, 16.0, 1.2F);
@@ -201,14 +201,14 @@ public final class ZFighterFalseSuper {
 			flare.nextFlicker = flare.flickerUntil + (last ? FLICKER_MIN / 3 : FLICKER_MIN) + player.getRandom().nextInt(last ? FLICKER_SPREAD / 3 : FLICKER_SPREAD);
 			ZFighterPower.refresh(player, live);
 			ServerLevel level = player.level();
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.5, 0.8, 0.5, 0.25);
+			level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.5, 0.8, 0.5, 0.25);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.35F, 1.9F);
 			com.jaymospowers.core.Shakes.send(player, 0.35F, null);
 		} else if (now == flare.flickerUntil) {
 			ZFighterPower.refresh(player, live);
 		}
 		if (now % 4 == 0) {
-			player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.8, 0.4, 0.1);
+			player.level().sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.8, 0.4, 0.1);
 		}
 	}
 

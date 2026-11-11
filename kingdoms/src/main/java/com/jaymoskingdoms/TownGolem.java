@@ -502,7 +502,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 
 	private void lamp(ServerLevel level) {
 		if (this.lit() && this.tickCount % 8 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
+			level.sendParticles(Fx.LIGHT, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
 		}
 		Mob foe = this.nearestFoe(level, BEAM_RANGE);
 		if (foe == null || this.cooldown > 0) {
@@ -817,7 +817,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 			}
 			level.addFreshEntity(golem);
 			level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
+			level.sendParticles(Fx.GLYPH, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
 			context.getItemInHand().consume(1, player);
 			return InteractionResult.SUCCESS;
 		}

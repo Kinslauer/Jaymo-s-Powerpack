@@ -113,7 +113,7 @@ public final class CourtWizards {
 		if (f == null || !inPlace(f, folk.role())) {
 			return false;
 		}
-		level.sendParticles(ParticleTypes.ENCHANT, folk.getX(), folk.getY() + 1.0, folk.getZ(), 30, 0.4, 0.8, 0.4, 0.5);
+		level.sendParticles(Fx.GLYPH, folk.getX(), folk.getY() + 1.0, folk.getZ(), 30, 0.4, 0.8, 0.4, 0.5);
 		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 		Economy.lost(level.getServer(), f.id(), folk.role());
 		folk.discard();

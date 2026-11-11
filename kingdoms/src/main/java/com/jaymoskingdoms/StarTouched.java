@@ -180,11 +180,11 @@ public final class StarTouched {
 
 	private static ParticleOptions mote(int world) {
 		return switch (world) {
-			case 0 -> ParticleTypes.END_ROD;
+			case 0 -> Fx.LIGHT;
 			case 1 -> ParticleTypes.SMOKE;
 			case 2 -> ParticleTypes.SNOWFLAKE;
 			case 3 -> ParticleTypes.FLAME;
-			case 4 -> ParticleTypes.PORTAL;
+			case 4 -> Fx.VOID;
 			default -> ParticleTypes.HAPPY_VILLAGER;
 		};
 	}

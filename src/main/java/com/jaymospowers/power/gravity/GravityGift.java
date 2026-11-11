@@ -82,9 +82,9 @@ final class GravityGift implements GiftKit {
 		int steps = Math.max(1, (int)(step.length() * 2.0));
 		for (int i = 1; i <= steps; i++) {
 			Vec3 p = from.add(step.scale((double)i / steps));
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.01);
+			level.sendParticles(MagicFx.VOID, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.01);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, to.x, to.y, to.z, 15, 0.3, 0.4, 0.3, 0.1);
+		level.sendParticles(MagicFx.VOID, to.x, to.y, to.z, 15, 0.3, 0.4, 0.3, 0.1);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.NEUTRAL, 0.9F, 0.6F);
 		push(foe, in.normalize().scale(PULL_SPEED), Math.max(foe.getDeltaMovement().y, 0.0) + PULL_LIFT);
 		return true;
@@ -95,7 +95,7 @@ final class GravityGift implements GiftKit {
 			double a = i * Math.PI / 8.0;
 			level.sendParticles(SHADOW, foe.getX() + Math.cos(a) * 1.0, foe.getY() + 0.1, foe.getZ() + Math.sin(a) * 1.0, 1, 0.05, 0.0, 0.05, 0.0);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, foe.getX(), foe.getY(1.0), foe.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
+		level.sendParticles(MagicFx.VOID, foe.getX(), foe.getY(1.0), foe.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.ANVIL_LAND, SoundSource.NEUTRAL, 0.6F, 0.5F);
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), CRUSH_DAMAGE);
@@ -108,8 +108,8 @@ final class GravityGift implements GiftKit {
 		if (!foe.onGround()) {
 			return false;
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, foe.getX(), foe.getY() + 0.2, foe.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
-		level.sendParticles(ParticleTypes.PORTAL, foe.getX(), foe.getY() + 0.2, foe.getZ(), 15, 0.4, 0.1, 0.4, 0.3);
+		level.sendParticles(MagicFx.VOID, foe.getX(), foe.getY() + 0.2, foe.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
+		level.sendParticles(MagicFx.VOID, foe.getX(), foe.getY() + 0.2, foe.getZ(), 15, 0.4, 0.1, 0.4, 0.3);
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.NEUTRAL, 1.0F, 0.4F);
 		push(foe, Vec3.ZERO, LIFT_SPEED);
 		return true;
@@ -121,7 +121,7 @@ final class GravityGift implements GiftKit {
 		}
 		Vec3 away = caster.position().subtract(foe.position()).horizontal();
 		away = away.lengthSqr() < 1.0E-4 ? caster.getLookAngle().horizontal().reverse() : away;
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, caster.getX(), caster.getY() + 0.2, caster.getZ(), 20, 0.3, 0.2, 0.3, 0.1);
+		level.sendParticles(MagicFx.VOID, caster.getX(), caster.getY() + 0.2, caster.getZ(), 20, 0.3, 0.2, 0.3, 0.1);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.SHULKER_BULLET_HURT, SoundSource.NEUTRAL, 0.8F, 1.6F);
 		push(caster, away.normalize().scale(LEAP_SPEED), LEAP_LIFT);
 		caster.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, LEAP_FEATHER, 0), caster);
@@ -135,10 +135,10 @@ final class GravityGift implements GiftKit {
 		double base = mob.tickCount * 0.15;
 		for (int i = 0; i < MOTES; i++) {
 			double a = base + i * Math.PI * 2.0 / MOTES;
-			level.sendParticles(ParticleTypes.END_ROD, mob.getX() + Math.cos(a) * 0.8, mob.getY(0.6) + Math.sin(a * 2.0) * 0.3,
+			level.sendParticles(MagicFx.LIGHT, mob.getX() + Math.cos(a) * 0.8, mob.getY(0.6) + Math.sin(a * 2.0) * 0.3,
 				mob.getZ() + Math.sin(a) * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, mob.getX(), mob.getY(0.5), mob.getZ(), 4, 0.5, 0.4, 0.5, 0.02);
+		level.sendParticles(MagicFx.VOID, mob.getX(), mob.getY(0.5), mob.getZ(), 4, 0.5, 0.4, 0.5, 0.02);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,7 +24,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -229,7 +229,7 @@ public final class ArsenalPocket {
 			ArsenalEmber.opened(level, at);
 			return;
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
+		level.sendParticles(MagicFx.VOID, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.7F, 0.6F);
 	}
@@ -328,7 +328,7 @@ public final class ArsenalPocket {
 	}
 
 	private static void burst(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 40, 0.3, 0.8, 0.3, 0.06);
+		level.sendParticles(MagicFx.VOID, at.x, at.y + 1.0, at.z, 40, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.7F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 0.6F, 1.3F);
 	}
@@ -413,7 +413,7 @@ public final class ArsenalPocket {
 			ArsenalEmber.flames(level, c, 3);
 			return;
 		}
-		level.sendParticles(rift.voidRift ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.PORTAL, c.x, c.y, c.z, 3, 0.3, 0.7, 0.3, 0.2);
+		level.sendParticles(rift.voidRift ? MagicFx.VOID : MagicFx.VOID, c.x, c.y, c.z, 3, 0.3, 0.7, 0.3, 0.2);
 	}
 
 	/** Every few ticks, each player is told the doorways near them (and their own void gates). */

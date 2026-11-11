@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.Downed;
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public final class ChronoTimeStop {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.4F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		// these hang in the air for the whole stop (the clients' particles are frozen too)
-		ChronoFx.particles(level, player, ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 1.5, 1.0, 1.5, 0.3);
+		ChronoFx.particles(level, player, MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 60, 1.5, 1.0, 1.5, 0.3);
 		return true;
 	}
 

@@ -83,7 +83,7 @@ final class TimeBloom {
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.BONE_MEAL_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, RADIUS * 0.5, 0.6, RADIUS * 0.5, 0.0);
-		ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
+		ChronoFx.particles(level, fx, MagicFx.EMBER, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
 		scan();
 	}
 
@@ -167,7 +167,7 @@ final class TimeBloom {
 				// it grew (or otherwise changed): a little green-gold puff
 				ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
 				if (random.nextInt(3) == 0) {
-					ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
+					ChronoFx.particles(level, fx, MagicFx.EMBER, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
 				}
 			}
 		}
@@ -184,7 +184,7 @@ final class TimeBloom {
 				}
 			}
 			if ((age + i) % 10 == 0) {
-				ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
+				ChronoFx.particles(level, fx, MagicFx.EMBER, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
 				ChronoFx.particles(level, fx, GOLD_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.45, 0.45, 0.45, 0.0);
 			}
 		}
@@ -238,7 +238,7 @@ final class TimeBloom {
 			double a0 = age * 0.05;
 			for (int h = 0; h < 12; h++) {
 				double a = a0 + h / 12.0 * Math.PI * 2.0;
-				ChronoFx.particles(level, fx, h % 3 == 0 ? ParticleTypes.WAX_ON : ParticleTypes.COMPOSTER,
+				ChronoFx.particles(level, fx, h % 3 == 0 ? MagicFx.EMBER : ParticleTypes.COMPOSTER,
 					center.getX() + 0.5 + Math.sin(a) * RADIUS, center.getY() + 0.15, center.getZ() + 0.5 - Math.cos(a) * RADIUS,
 					1, 0.0, 0.0, 0.0, 0.0);
 			}

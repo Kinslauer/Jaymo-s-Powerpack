@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.monster;
 
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -123,8 +124,8 @@ public class AetherShot extends ThrowableItemProjectile {
 	private static ParticleOptions trail(Kind kind) {
 		return switch (kind) {
 			case ZEPHYR_WEB, SKEPHID_WEB -> ParticleTypes.ITEM_COBWEB;
-			case THUNDERBALL -> ParticleTypes.ELECTRIC_SPARK;
-			case VENOMOUS_DART -> ParticleTypes.WITCH;
+			case THUNDERBALL -> MagicFx.CRACKLE;
+			case VENOMOUS_DART -> MagicFx.HEX;
 			case TOXIC_DART -> ParticleTypes.SPORE_BLOSSOM_AIR;
 			case DEBRIS -> ParticleTypes.CRIT;
 		};
@@ -195,7 +196,7 @@ public class AetherShot extends ThrowableItemProjectile {
 		field.setDuration(FIELD_TICKS);
 		field.setWaitTime(FIELD_DELAY);
 		field.setRadiusPerTick(-FIELD_RADIUS / (2.0F * FIELD_TICKS));
-		field.setCustomParticle(ParticleTypes.ELECTRIC_SPARK);
+		field.setCustomParticle(MagicFx.CRACKLE);
 		field.addEffect(new MobEffectInstance(AetherEffects.ELECTRIC_SHOCK, SHOCK_TICKS));
 		field.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FIELD_SLOW_TICKS, 1));
 		level.addFreshEntity(field);

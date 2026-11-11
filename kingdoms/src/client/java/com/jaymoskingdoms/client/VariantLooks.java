@@ -60,12 +60,12 @@ public final class VariantLooks {
 		style(Variant.OBSIDIAN, 0xFFC49CFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_OBSIDIAN_TEAR, 40, When.ALWAYS);
 		style(Variant.MAGMAVEIN, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_LAVA, 30, When.DRY);
 		style(Variant.REEFCROWNED, 0xFFFFB49C, null, REEF_MOTE, 24, When.WET);
-		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 28, When.WET);
+		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, Fx.GLOW, 28, When.WET);
 		// (0.7.486) the thirteen sea-blooded Tideborn looks (their model parts are SeaParts')
 		style(Variant.GREYFIN, 0xFFE8EEF2, null, null, 0, When.WET);
 		style(Variant.MANTAWING, 0xFFB8E0FF, null, null, 0, When.WET);
 		style(Variant.EIGHTARM, 0xFFFFC060, null, INK_MOTE, 40, When.WET);
-		style(Variant.LANTERNJAW, 0xFFF0FFE0, null, ParticleTypes.GLOW, 30, When.ALWAYS);
+		style(Variant.LANTERNJAW, 0xFFF0FFE0, null, Fx.GLOW, 30, When.ALWAYS);
 		style(Variant.DRIFTBELL, 0xFFF0C8FF, null, JELLY_MOTE, 18, When.ALWAYS);
 		style(Variant.MORAY, 0xFFFFE060, null, null, 0, When.WET);
 		style(Variant.SHELLCLAW, 0xFFFFD040, null, null, 0, When.WET);
@@ -93,17 +93,17 @@ public final class VariantLooks {
 		style(Variant.GALEBORN, 0xFFF0F8FF, HeritageLooks.Eyes.STORM, ParticleTypes.CLOUD, 40, When.ALWAYS);
 		style(Variant.TWILIGHT, 0xFFFFE6C8, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
 		style(Variant.GILDED, 0xFFFFE08A, HeritageLooks.Eyes.DAY, GILT_MOTE, 24, When.ALWAYS);
-		style(Variant.CHORUSGROWN, 0xFFF0B4FF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.REVERSE_PORTAL, 16, When.DRY);
-		style(Variant.VOIDPALE, 0xFF2A1440, HeritageLooks.Eyes.ALWAYS, ParticleTypes.PORTAL, 14, When.DRY);
+		style(Variant.CHORUSGROWN, 0xFFF0B4FF, HeritageLooks.Eyes.ALWAYS, Fx.VOID, 16, When.DRY);
+		style(Variant.VOIDPALE, 0xFF2A1440, HeritageLooks.Eyes.ALWAYS, Fx.VOID, 14, When.DRY);
 		style(Variant.GOLDSCALE, 0xFFFFD060, HeritageLooks.Eyes.NIGHT, GILT_MOTE, 40, When.ALWAYS);
 		style(Variant.RIMEWYRM, 0xFFB8E8FF, HeritageLooks.Eyes.NIGHT, ParticleTypes.SNOWFLAKE, 18, When.ALWAYS);
 		style(Variant.HOLLOW, 0xFFF0FFFC, HeritageLooks.Eyes.ALWAYS, ParticleTypes.SCULK_SOUL, 50, When.DARK_PLACE);
 		style(Variant.GEODE, 0xFFD6AAFF, HeritageLooks.Eyes.ALWAYS, GEODE_GLINT, 20, When.ALWAYS);
 		// (0.7.262) the Divine-born's, the Bio-built's and the Rubber-folk's
-		style(Variant.STARLIT, 0xFFCFE0FF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.END_ROD, 40, When.NIGHT);
+		style(Variant.STARLIT, 0xFFCFE0FF, HeritageLooks.Eyes.ALWAYS, Fx.LIGHT, 40, When.NIGHT);
 		style(Variant.SERAPHIC, 0xFFFFF4D0, HeritageLooks.Eyes.ALWAYS, ParticleTypes.WHITE_ASH, 36, When.ALWAYS);
 		style(Variant.BRASSBOUND, 0xFFFFB050, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
-		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 60, When.DARK_PLACE);
+		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, Fx.GLOW, 60, When.DARK_PLACE);
 		style(Variant.CANDYSTRIPE, 0, null, null, 0, When.ALWAYS);
 		style(Variant.BERRYGLOSS, 0, null, null, 0, When.ALWAYS);
 		// (0.7.490) the Sylvan's fae and elves
@@ -183,7 +183,7 @@ public final class VariantLooks {
 			y = entity.getY() + random.nextDouble() * entity.getBbHeight();
 			z = entity.getZ() + (random.nextDouble() - 0.5) * 1.2;
 		}
-		double up = particle == ParticleTypes.CLOUD ? 0.01 : particle == ParticleTypes.PORTAL ? -0.2 : 0.02;
+		double up = particle == ParticleTypes.CLOUD ? 0.01 : particle == Fx.VOID ? -0.2 : 0.02;
 		level.addParticle(particle, x, y, z, 0.0, up, 0.0);
 	}
 }

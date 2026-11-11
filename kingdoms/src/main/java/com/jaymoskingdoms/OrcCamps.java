@@ -31,6 +31,7 @@ import org.jspecify.annotations.Nullable;
  * its own hands (more orcs, more tents), and its war bands raid the nearest kingdom ({@link Raids}). Kill its warchief and
  * it is cleared like any camp ({@link Camps#chiefSlain}). (0.7.474) A band of ogres may live in one ({@link OgreHolds#joinCamp}),
  * or raise a new one with the orcs ({@link #foundNear}); each of its ogres lets the camp raise another building a day.
+ * Every camp now has its band, and a Bogre with it, from the day it is founded: its heavy hands.
  */
 final class OrcCamps {
 	/** {@link Camps.CampData#kind} of an orc camp. */
@@ -116,6 +117,11 @@ final class OrcCamps {
 			spawn(level, id, Orcs.GRUNT, spot(level, fire, random), fire, OrcBuildings.HOME_RADIUS);
 		}
 		spawn(level, id, Orcs.SHAMAN, fire.offset(2, 0, 2), fire, OrcBuildings.HOME_RADIUS / 2);
+		// its heavy hands: a band of ogres and a Bogre live by its fire from the start (OgreHolds#joinCamp)
+		Faction manned = Factions.get(server, id);
+		if (manned != null) {
+			OgreHolds.joinCamp(level, manned, OgreHolds.region(fire));
+		}
 		JaymosKingdoms.LOGGER.info("An orc camp, {}, rose at {}", camp.name(), fire);
 		return Factions.get(server, id);
 	}
@@ -263,6 +269,10 @@ final class OrcCamps {
 			MISSING.remove(camp.id());
 			crown(level, camp, OrcBuildings.throne(data.center(), data.gate()), data.gate());
 			JaymosKingdoms.LOGGER.info("{} has a new warchief (the last was lost)", camp.name());
+		}
+		// a camp from before every camp had its heavy hands gets its band of ogres and its Bogre once
+		if (!OgreHolds.everBanded(server, data.center()) && wholeCampLoaded(level, data.center())) {
+			OgreHolds.joinCamp(level, camp, OgreHolds.region(data.center()));
 		}
 		// (0.7.490) now and then it takes another goblin slave
 		Slaves.restock(level, camp, data);

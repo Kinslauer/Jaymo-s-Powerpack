@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.MapCodec;
@@ -15,7 +16,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -261,8 +261,8 @@ public final class SwordStone {
 			}
 			serverLevel.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.6F, 1.6F);
 			serverLevel.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 0.7F, 0.6F);
-			serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 50, 0.3, 0.8, 0.3, 0.1);
-			serverLevel.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.4, pos.getZ() + 0.5, 20, 0.2, 0.6, 0.2, 0.05);
+			serverLevel.sendParticles(MagicFx.VOID, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 50, 0.3, 0.8, 0.3, 0.1);
+			serverLevel.sendParticles(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.4, pos.getZ() + 0.5, 20, 0.2, 0.6, 0.2, 0.05);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.sword_stone.drawn", sword.getHoverName()).withStyle(ChatFormatting.GOLD));
 			return InteractionResult.SUCCESS;
 		}

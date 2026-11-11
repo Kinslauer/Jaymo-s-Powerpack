@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.Shakes;
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public final class GravityCometRam {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.9F, 0.5F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.2);
+		level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.2);
 		drive(player, dir.scale(START_SPEED));
 		return true;
 	}
@@ -191,8 +192,8 @@ public final class GravityCometRam {
 
 	private static void trail(ServerLevel level, ServerPlayer player, Run run) {
 		Vec3 back = player.position().subtract(run.heading.scale(0.8)).add(0.0, player.getBbHeight() * 0.5, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, back.x, back.y, back.z, 6, 0.25, 0.3, 0.25, 0.15);
-		level.sendParticles(ParticleTypes.END_ROD, back.x, back.y, back.z, 2, 0.15, 0.2, 0.15, 0.02);
+		level.sendParticles(MagicFx.VOID, back.x, back.y, back.z, 6, 0.25, 0.3, 0.25, 0.15);
+		level.sendParticles(MagicFx.LIGHT, back.x, back.y, back.z, 2, 0.15, 0.2, 0.15, 0.02);
 		if (run.ticks % 3 == 0) {
 			level.sendParticles(ParticleTypes.SMOKE, back.x, back.y, back.z, 4, 0.3, 0.3, 0.3, 0.02);
 		}
@@ -246,7 +247,7 @@ public final class GravityCometRam {
 		}
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.sendParticles(ParticleTypes.EXPLOSION, centre.x, centre.y + 0.5, centre.z, 2, 0.5, 0.3, 0.5, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, centre.x, centre.y + 0.5, centre.z, 40, 1.0, 0.6, 1.0, 0.3);
+		level.sendParticles(MagicFx.VOID, centre.x, centre.y + 0.5, centre.z, 40, 1.0, 0.6, 1.0, 0.3);
 		Debris.puff(level, at, level.getBlockState(at), 2.0F);
 		Debris.ring(level, at, 3, 1.0F);
 		Shakes.heavy(player, centre, 16.0, (float)Mth.clamp(speed * 0.45, 0.3, 0.9));

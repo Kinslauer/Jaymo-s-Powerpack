@@ -135,7 +135,7 @@ final class ZFighterRingOfOrbs {
 			}
 		}
 		if (ring.age == 1) {
-			level.sendParticles(ParticleTypes.ENCHANT, true, false, ring.centre.x, ring.centre.y, ring.centre.z, 20, RING_RADIUS * 0.5, 0.5, RING_RADIUS * 0.5, 0.3);
+			level.sendParticles(MagicFx.GLYPH, true, false, ring.centre.x, ring.centre.y, ring.centre.z, 20, RING_RADIUS * 0.5, 0.5, RING_RADIUS * 0.5, 0.3);
 		}
 		if (closed < 1.0) {
 			return true;

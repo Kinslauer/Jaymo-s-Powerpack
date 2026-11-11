@@ -56,6 +56,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import com.jaymoskingdoms.inhabitants.Bogre;
+import com.jaymoskingdoms.inhabitants.Inhabitants;
 
 /**
  * (0.7.426) Havens patch 2, the ogre tribe (ideas from King's Monsters, ARR, and Shadow of War: our own names, code and
@@ -629,15 +631,20 @@ public final class OgreHolds {
 	 * each other unless struck, and a band in an orc camp spares those its orcs spare (one raised among them).
 	 */
 	public static boolean spares(LivingEntity a, LivingEntity b) {
-		LivingEntity ogre = a instanceof Ogre ? a : b instanceof Ogre ? b : null;
+		LivingEntity ogre = ogreKind(a) ? a : ogreKind(b) ? b : null;
 		LivingEntity other = ogre == a ? b : a;
-		if (ogre == null || other instanceof Ogre || other == ogre.getLastHurtByMob()) {
+		if (ogre == null || ogreKind(other) || other == ogre.getLastHurtByMob()) {
 			return false;
 		}
 		if (Greenskins.of(other) != null || other instanceof Folk folk && (Goblins.isGoblin(folk.role()) || Orcs.isOrc(folk.role()))) {
 			return true;
 		}
 		return other instanceof Player p && camped(ogre) && GreenskinLife.raised(p);
+	}
+
+	/** An ogre, or a Bogre: the two keep the peace with each other and with the greenskins alike. */
+	private static boolean ogreKind(Entity e) {
+		return e instanceof Ogre || e instanceof Bogre;
 	}
 
 	/** The standing orc camp of {@code region} nearest {@code player} with no band of ogres yet (and loaded), or null. */
@@ -660,6 +667,16 @@ public final class OgreHolds {
 		return best;
 	}
 
+	/** Whether a band (standing or since broken) ever lived round the fire at {@code fire}. */
+	static boolean everBanded(MinecraftServer server, BlockPos fire) {
+		for (Site s : sites(server)) {
+			if (!s.hold() && s.at().equals(fire)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** The standing band living round the fire at {@code fire}, or null. */
 	static @Nullable Site band(MinecraftServer server, BlockPos fire) {
 		for (Site s : sites(server)) {
@@ -670,11 +687,15 @@ public final class OgreHolds {
 		return null;
 	}
 
-	/** A band comes to live in {@code camp}: a two-headed brute and his ogres by its fire, tagged with the camp. */
+	/**
+	 * A band comes to live in {@code camp}: a two-headed brute and his ogres by its fire, tagged with the camp, and a Bogre
+	 * with them, the camp's heaviest hand. Every orc camp gets one when it is founded (and an older camp the first time it
+	 * is looked over without one, {@link OrcCamps#tick}); a camp that has its band already gets no second.
+	 */
 	static void joinCamp(ServerLevel level, Faction camp, String region) {
 		MinecraftServer server = level.getServer();
 		Camps.CampData data = Camps.data(server, camp.id());
-		if (data == null) {
+		if (data == null || band(server, data.center()) != null) {
 			return;
 		}
 		BlockPos fire = data.center();
@@ -695,7 +716,28 @@ public final class OgreHolds {
 			}
 		}
 		put(server, Site.fresh(id, false, fire, region, leader.getUUID(), List.of()));
+		bogre(level, camp, fire, id, random);
 		JaymosKingdoms.LOGGER.info("A band of ogres came to live in {}", camp.name());
+	}
+
+	/** The camp's Bogre: kept near the fire with the band, tagged with the camp and the band's site like its ogres. */
+	private static void bogre(ServerLevel level, Faction camp, BlockPos fire, int site, RandomSource random) {
+		if (Inhabitants.BOGRE == null) {
+			return;
+		}
+		Bogre bogre = Inhabitants.BOGRE.create(level, EntitySpawnReason.EVENT);
+		if (bogre == null) {
+			return;
+		}
+		BlockPos at = OrcCamps.spot(level, fire, random);
+		bogre.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+		bogre.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
+		bogre.setPersistenceRequired();
+		bogre.setHomeTo(fire, BAND_HOME);
+		bogre.addTag(OGRE_TAG);
+		bogre.addTag(SITE_PREFIX + site);
+		bogre.addTag(CAMP_PREFIX + camp.id());
+		level.addFreshEntity(bogre);
 	}
 
 	/** {@code camp}'s ogres about its fire just now (alive and loaded): its builders' haulers. */

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.chrono.ChronoSpeed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -25,7 +26,6 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -215,7 +215,7 @@ public final class ChronoStreak {
 				.scale(GLYPH_DRIFT * (0.5 + random.nextDouble() * 0.5));
 			Vec3 to = from.add(drift);
 			// the glyph starts at (position + motion) and flies to its position: from the trail, out to where it fades
-			level.addParticle(ParticleTypes.ENCHANT, to.x, to.y, to.z, from.x - to.x, from.y - to.y, from.z - to.z);
+			level.addParticle(MagicFx.GLYPH, to.x, to.y, to.z, from.x - to.x, from.y - to.y, from.z - to.z);
 		}
 	}
 

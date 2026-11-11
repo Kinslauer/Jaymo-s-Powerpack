@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.codex;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Knowledge;
@@ -11,7 +12,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -184,8 +184,8 @@ public final class Lens {
 
 		if (player.level() instanceof ServerLevel level) {
 			Essence main = list.main();
-			level.sendParticles(ParticleTypes.ENCHANT, thing.at().x, thing.at().y, thing.at().z, 14, 0.3, 0.3, 0.3, 0.6);
-			level.sendParticles(ParticleTypes.END_ROD, thing.at().x, thing.at().y, thing.at().z, 3, 0.2, 0.2, 0.2, 0.02);
+			level.sendParticles(MagicFx.GLYPH, thing.at().x, thing.at().y, thing.at().z, 14, 0.3, 0.3, 0.3, 0.6);
+			level.sendParticles(MagicFx.LIGHT, thing.at().x, thing.at().y, thing.at().z, 3, 0.2, 0.2, 0.2, 0.02);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
 				0.7F, found.isEmpty() ? 1.3F : 1.0F + (main == null ? 0.0F : main.tier() * 0.05F));
 		}

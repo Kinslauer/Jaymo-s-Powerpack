@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -150,6 +151,7 @@ public final class ChronoPower implements Power {
 		// Time Stop (sneak + C, Timeless): the whole server's tick freeze
 		ChronoTimeStop.init();
 		com.jaymospowers.power.chrono.future.Future.init();
+		ChronoRoad.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {
@@ -505,11 +507,11 @@ public final class ChronoPower implements Power {
 		net.minecraft.world.entity.LivingEntity target = player.isShiftKeyDown() ? lookedAt(player, NUDGE_RANGE) : null;
 		if (target != null) {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, NUDGE_TICKS, 0), player);
-			ChronoFx.particles(level, player, ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
+			ChronoFx.particles(level, player, MagicFx.GLYPH, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 0.6F);
 		} else {
 			player.addEffect(new MobEffectInstance(MobEffects.SPEED, NUDGE_TICKS, 0), player);
-			ChronoFx.particles(level, player, ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.4);
+			ChronoFx.particles(level, player, MagicFx.GLYPH, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.4);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 1.6F);
 		}
 		return true;
@@ -633,7 +635,7 @@ public final class ChronoPower implements Power {
 		var path = state.path(chosen);
 
 		level.playSound(null, here.x, here.y, here.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 1.5F);
-		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, player, MagicFx.CRACKLE, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
 
 		if (downed) {
 			// (0.15.83) back to before the fall: up off the ground (out of any arms that carried you), and not battered
@@ -700,7 +702,7 @@ public final class ChronoPower implements Power {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F);
-		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
+		ChronoFx.particles(level, player, MagicFx.EMBER, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		return true;
 	}
 
@@ -752,7 +754,7 @@ public final class ChronoPower implements Power {
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, OVERCLOCK_DRAG_EVERY + 10, OVERCLOCK_DRAG_AMPLIFIER, false, false, true), player);
 			if (level.getRandom().nextInt(3) == 0) {
-				ChronoFx.particles(level, player, ParticleTypes.ENCHANT, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.3, 0.3, 0.2);
+				ChronoFx.particles(level, player, MagicFx.GLYPH, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.3, 0.3, 0.2);
 			}
 		}
 	}
@@ -784,10 +786,10 @@ public final class ChronoPower implements Power {
 		}
 		double a = left * 0.55;
 		double r = 0.55;
-		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX() + Math.cos(a) * r, player.getY() + 0.3 + (left % 10) * 0.15,
+		ChronoFx.particles(level, player, MagicFx.EMBER, player.getX() + Math.cos(a) * r, player.getY() + 0.3 + (left % 10) * 0.15,
 			player.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		if (left % 6 == 0) {
-			ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
+			ChronoFx.particles(level, player, MagicFx.CRACKLE, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
 		}
 		if (left % 20 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COMPARATOR_CLICK, SoundSource.PLAYERS, 0.35F, 2.0F);

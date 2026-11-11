@@ -1,9 +1,9 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Fx;
 import com.mojang.math.Transformation;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -200,7 +200,7 @@ public final class MonolithHeart {
 		Vec3 p = hit.getLocation();
 		Vec3 in = at.subtract(p).normalize();
 		level.sendParticles(m.element().mote, p.x, p.y, p.z, 0, in.x, in.y, in.z, RAY_SPEED);
-		level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 0, in.x, in.y, in.z, RAY_SPEED * 0.5);
+		level.sendParticles(Fx.LIGHT, p.x, p.y, p.z, 0, in.x, in.y, in.z, RAY_SPEED * 0.5);
 	}
 
 	/**

@@ -888,7 +888,7 @@ public final class Grue {
 		forget(host.getUUID());
 		ServerPlayNetworking.send(host, new Drive(0.0, 0.0, 0.0, -1, 0.0F, 0, true));
 		redBurst(level, host.position().add(0.0, 1.0, 0.0), 120, 1.5);
-		level.sendParticles(ParticleTypes.END_ROD, host.getX(), host.getY() + 1.0, host.getZ(), 40, 0.6, 0.8, 0.6, 0.1);
+		level.sendParticles(Fx.LIGHT, host.getX(), host.getY() + 1.0, host.getZ(), 40, 0.6, 0.8, 0.6, 0.1);
 		level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_DEATH, SoundSource.PLAYERS, 1.2F, 0.6F);
 		host.sendSystemMessage(Component.translatable("message.jaymoskingdoms.grue.freed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}

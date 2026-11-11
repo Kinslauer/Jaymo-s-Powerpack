@@ -76,7 +76,7 @@ final class ZFighterDrillBeam {
 			level.sendParticles(MagicFx.wisp(color, 0.7F + charge * 0.5F), true, false, tip.x + ox, tip.y + oy, tip.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, tip.x, tip.y, tip.z, 2, 0.1, 0.1, 0.1, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, tip.x, tip.y, tip.z, 2, 0.1, 0.1, 0.1, 0.2);
 		}
 		if (Soundscape.due(player, "ki.drill", 6, 10)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(0.7F).pitched(1.3F + charge * 0.7F), ZFighterKi.KI_SURGE);

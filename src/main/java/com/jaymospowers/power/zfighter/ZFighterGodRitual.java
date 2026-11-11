@@ -361,7 +361,7 @@ public final class ZFighterGodRitual {
 	private static void hint(ServerLevel level, ServerPlayer viewer, Vec3 middle) {
 		for (int i = 0; i < PAD_COUNT; i++) {
 			Vec3 p = pad(middle, i);
-			level.sendParticles(viewer, ParticleTypes.END_ROD, true, false, p.x, p.y + 0.2, p.z, 1, 0.1, 0.1, 0.1, 0.0);
+			level.sendParticles(viewer, MagicFx.LIGHT, true, false, p.x, p.y + 0.2, p.z, 1, 0.1, 0.1, 0.1, 0.0);
 		}
 		level.sendParticles(viewer, MagicFx.wisp(GOLD, 1.0F), true, false, middle.x, middle.y + 0.2, middle.z, 2, 0.4, 0.1, 0.4, 0.0);
 	}
@@ -469,7 +469,7 @@ public final class ZFighterGodRitual {
 				MagicFx.beam(level, from, heart, BEAM_THIN + (BEAM_THICK - BEAM_THIN) * fill, fill > 0.5F ? RED : GOLD, BEAM_EVERY + 2);
 			}
 			if (spirit(m, rite.candidate) && t % 4 == 0) {
-				level.sendParticles(ParticleTypes.END_ROD, true, false, from.x, from.y + 0.6, from.z, 3, 0.1, 0.7, 0.1, 0.01);
+				level.sendParticles(MagicFx.LIGHT, true, false, from.x, from.y + 0.6, from.z, 3, 0.1, 0.7, 0.1, 0.01);
 			}
 		}
 		level.sendParticles(MagicFx.wisp(RED, 1.6F), true, false, candidate.getX(), candidate.getY() + 1.0, candidate.getZ(), 2 + Math.round(6 * fill), 0.4,
@@ -500,7 +500,7 @@ public final class ZFighterGodRitual {
 			}
 		}
 		MagicFx.burst(level, middle.x, middle.y + 2.0, middle.z, RED, 2.4F, 120, 1.5, 2.5, 1.5);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, middle.x, middle.y + 2.0, middle.z, 60, 1.0, 2.0, 1.0, 0.2);
+		level.sendParticles(MagicFx.LIGHT, true, false, middle.x, middle.y + 2.0, middle.z, 60, 1.0, 2.0, 1.0, 0.2);
 		level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.9F);
 		level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		com.jaymospowers.core.Shakes.heavy(candidate, middle, 48.0, 2.0F);

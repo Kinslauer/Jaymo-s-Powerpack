@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Mastery;
@@ -547,7 +548,7 @@ public final class ZFighterCombo {
 	/** The chi palm's puff of light off the open hand (bigger as a finisher). */
 	private static void chi(ServerLevel level, ZFighterPower.Live live, Vec3 at, Vec3 look, boolean finisher) {
 		Vec3 puff = at.subtract(look.scale(0.4));
-		level.sendParticles(ParticleTypes.END_ROD, true, false, puff.x, puff.y, puff.z, finisher ? 14 : 6, 0.15, 0.15, 0.15, 0.06);
+		level.sendParticles(MagicFx.LIGHT, true, false, puff.x, puff.y, puff.z, finisher ? 14 : 6, 0.15, 0.15, 0.15, 0.06);
 		level.sendParticles(ZFighterPower.dust(live), true, false, puff.x, puff.y, puff.z, finisher ? 10 : 5, 0.2, 0.2, 0.2, 0.02);
 		level.playSound(null, puff.x, puff.y, puff.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, finisher ? 1.0F : 0.6F, 1.6F);
 	}

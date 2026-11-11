@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.arsenal.ArsenalVoid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -55,7 +56,7 @@ final class ArsenalAura {
 					double ox = Math.cos(a) * r, oz = Math.sin(a) * r;
 					double py = player.getY() + random.nextDouble() * top;
 					double oy = py - cy;
-					level.addParticle(ParticleTypes.REVERSE_PORTAL, cx + ox, py, cz + oz, -ox * MOTE_SPEED, -oy * MOTE_SPEED, -oz * MOTE_SPEED);
+					level.addParticle(MagicFx.VOID, cx + ox, py, cz + oz, -ox * MOTE_SPEED, -oy * MOTE_SPEED, -oz * MOTE_SPEED);
 				}
 			}
 			if (phase % HAZE_INTERVAL == 0) {

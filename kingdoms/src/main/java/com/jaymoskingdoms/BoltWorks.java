@@ -332,8 +332,8 @@ final class BoltWorks {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(range),
 			e -> e != caster && e.isAlive() && e.isInWater() && e.distanceToSqr(at) <= range * range)) {
 			e.hurtServer(level, level.damageSources().indirectMagic(caster, caster), damage);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, e.getX(), e.getY(0.5), e.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
+			level.sendParticles(Fx.CRACKLE, e.getX(), e.getY(0.5), e.getZ(), 10, 0.3, 0.3, 0.3, 0.2);
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 30, range * 0.3, 0.2, range * 0.3, 0.3);
+		level.sendParticles(Fx.CRACKLE, at.x, at.y, at.z, 30, range * 0.3, 0.2, range * 0.3, 0.3);
 	}
 }

@@ -1,11 +1,11 @@
 package com.jaymospowers.power.zfighter.pod;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -150,7 +150,7 @@ public final class PodGrades {
 			Vec3 at = pod.getBoundingBox().getCenter();
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8F, 1.5F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 1.2F);
-			level.sendParticles(ParticleTypes.WAX_ON, at.x, at.y, at.z, 24, 0.7, 1.0, 0.7, 0.3);
+			level.sendParticles(MagicFx.EMBER, at.x, at.y, at.z, 24, 0.7, 1.0, 0.7, 0.3);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.graded", roman(grade)).withStyle(ChatFormatting.GOLD));
 		}
 		return true;

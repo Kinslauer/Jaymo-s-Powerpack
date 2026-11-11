@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -240,7 +241,7 @@ public final class NadirRules {
 			st.ruling = false;
 		}
 		if (!self && what != BURSTS) {
-			level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 6, 0.25, 0.1, 0.25, 0.4);
+			level.sendParticles(MagicFx.GLYPH, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 6, 0.25, 0.1, 0.25, 0.4);
 		}
 	}
 
@@ -252,7 +253,7 @@ public final class NadirRules {
 	private static void burst(ServerPlayer player, Vec3 at) {
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.2);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.2);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.3F);
 		for (LivingEntity e : NadirAim.around(player, at, BURST_RADIUS)) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), BURST_DAMAGE);

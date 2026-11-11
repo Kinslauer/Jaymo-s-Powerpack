@@ -1,12 +1,12 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.PowerParticleOption;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -125,7 +125,7 @@ public final class Wyrm extends XenoForm {
 			player.resetFallDistance();
 			if (player.tickCount % 12 == 0) {
 				sound(player, SoundEvents.ENDER_DRAGON_FLAP, 0.8F, 1.3F);
-				level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.6, 0.3, 0.6, 0.1);
+				level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.6, 0.3, 0.6, 0.1);
 			}
 		}
 		ambient(player);
@@ -135,7 +135,7 @@ public final class Wyrm extends XenoForm {
 	public static void ambient(ServerPlayer player) {
 		ServerLevel level = player.level();
 		if (player.tickCount % 4 == 0) {
-			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.6, 0.4, 0.02);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.6, 0.4, 0.02);
 		}
 		if (player.isInWaterOrRain() && !player.isCreative()) {
 			if (player.tickCount % 5 == 0) {
@@ -188,7 +188,7 @@ public final class Wyrm extends XenoForm {
 		}
 		AreaEffectCloud cloud = new AreaEffectCloud(level, at.x, at.y, at.z);
 		cloud.setOwner(player);
-		cloud.setCustomParticle(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F));
+		cloud.setCustomParticle(MagicFx.MURK);
 		cloud.setRadius(BREATH_RADIUS);
 		int ticks = (int)(BREATH_TICKS * linger);
 		cloud.setDuration(ticks);
@@ -198,7 +198,7 @@ public final class Wyrm extends XenoForm {
 		level.addFreshEntity(cloud);
 		for (double d = 1.0; d < BREATH_AHEAD; d += 0.5) {
 			Vec3 p = eye.add(look.scale(d));
-			level.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), p.x, p.y - 0.2, p.z, 3, 0.15, 0.15, 0.15, 0.02);
+			level.sendParticles(MagicFx.MURK, p.x, p.y - 0.2, p.z, 3, 0.15, 0.15, 0.15, 0.02);
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		sound(player, SoundEvents.ENDER_DRAGON_SHOOT, 1.2F, 1.1F);
@@ -236,8 +236,8 @@ public final class Wyrm extends XenoForm {
 				Vec3 from = player.position();
 				player.teleportTo(level, feet.x, feet.y, feet.z, Set.of(), player.getYRot(), player.getXRot(), false);
 				player.resetFallDistance();
-				level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 30, 0.3, 0.6, 0.3, 0.3);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, feet.x, feet.y + 1.0, feet.z, 30, 0.3, 0.6, 0.3, 0.3);
+				level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 30, 0.3, 0.6, 0.3, 0.3);
+				level.sendParticles(MagicFx.VOID, feet.x, feet.y + 1.0, feet.z, 30, 0.3, 0.6, 0.3, 0.3);
 				sound(player, SoundEvents.ENDERMAN_TELEPORT, 1.0F, 0.8F);
 				return true;
 			}

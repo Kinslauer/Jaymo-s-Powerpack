@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -292,7 +293,7 @@ public final class Swarm extends XenoUltimate {
 		}
 		if (flipped > 0) {
 			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 24, r * 0.4, r * 0.3, r * 0.4, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, centre.getX() + 0.5, centre.getY() + 0.5, centre.getZ() + 0.5, 24, r * 0.4, r * 0.3, r * 0.4, 0.05);
 			level.playSound(null, centre, SoundEvents.SILVERFISH_AMBIENT, SoundSource.PLAYERS, 1.0F, 1.7F);
 		}
 		return flipped > 0;
@@ -321,7 +322,7 @@ public final class Swarm extends XenoUltimate {
 			return false;
 		}
 		if (loud) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.05);
 		}
 		return true;
 	}

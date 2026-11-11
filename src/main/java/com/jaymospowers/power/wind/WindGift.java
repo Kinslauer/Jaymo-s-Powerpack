@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.core.UltimateFilm;
@@ -311,7 +312,7 @@ final class WindGift implements GiftKit {
 		}
 		bolt(level, foe.position());
 		foe.hurtServer(level, level.damageSources().lightningBolt(), THUNDER_DAMAGE);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, caster.getX(), caster.getY(0.7), caster.getZ(), 14, 0.3, 0.5, 0.3, 0.2);
+		level.sendParticles(MagicFx.CRACKLE, caster.getX(), caster.getY(0.7), caster.getZ(), 14, 0.3, 0.5, 0.3, 0.2);
 		return true;
 	}
 
@@ -328,7 +329,7 @@ final class WindGift implements GiftKit {
 	@Override
 	public void passive(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
 		if (gift.corrupted() && level.isRainingAt(mob.blockPosition()) && mob.getRandom().nextFloat() < CRACKLE_CHANCE) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mob.getX(), mob.getY(0.6), mob.getZ(), 4, 0.3, 0.4, 0.3, 0.1);
+			level.sendParticles(MagicFx.CRACKLE, mob.getX(), mob.getY(0.6), mob.getZ(), 4, 0.3, 0.4, 0.3, 0.1);
 		}
 	}
 

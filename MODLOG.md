@@ -2447,3 +2447,68 @@ will still have to fight in the tournament as a non z fighter)".
 - Rules for new effects and what is still to move: `docs/MagicFx.md`. Textures: `tools/gen_magic_fx.py`.
 - Compiles (Gradle, `compileJava compileClientJava`); not played. Lines and circles drawn as rows of dust inside loops
   are rows of motes for now, and END_ROD / ELECTRIC_SPARK style particles are a later pass.
+
+## 0.22.17 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Two new effect types: **spark** (a jagged fork that jumps every tick, for lightning and charge) and **rune** (marks
+  from the sigil's alphabet, for enchanting and written magic).
+- Vanilla particles that stood in for magic (end rod, electric spark, enchant glyphs, portal specks, witch, glow, wax,
+  dragon breath, tinted potion swirls) now use the typed looks: about 540 places across the powers. Machines, rigs,
+  sentries and real portals keep the vanilla ones.
+- Dotted lines and circles from the shared helpers are now real beams and rings: the Xeno form's beams and rings,
+  Rivet's lines, the Z Fighter gift line, the Arsenal streak, and the Sun patron's column.
+- `docs/MagicFx.md` lists the new types, the stock looks (`MagicFx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`, `MURK`) and `MagicFx.line` / `circle`.
+- Built; not played.
+
+## 0.22.18 (2026-11-11): the minotaur, a boss of the Sentry Ruins (#1311)
+
+- Andy: the minotaur "should spawn in the aether as one of the dungeon bosses".
+- With Jaymo's Kingdoms in the pack, about a third of newly generated Sentry Ruins (35%) have Kingdoms' minotaur in the boss room in place of the Slider. It keeps to its room. While it lives, a player in the room shuts the doors, and they open again once the room is empty. Its boss bar shows to the players in the room. Its death opens the doors, breaks the way to the boss's crates and unlocks the walls, the same as the Slider's. Without Kingdoms every ruin keeps its Slider. Ruins already generated keep the boss they have. `aether/dungeon/RuinBoss`, `RuinPiece` (boss room).
+- Built (`compileJava`). Not played: no ruin with a minotaur has been seen in game.
+
+## 0.22.19 (2026-11-11): The Retaking: the Chrono's Road (#1307)
+
+- **The Chrono's Road** in the Story tab, for every Chrono: end your own echo for good; go forward into the future; find one of the last Omen pilots and let them talk; spend long enough outside time and sleep through to morning (the Stopped Clock). Steps already done (an echo ended, a clock held) tick themselves.
+- The first pilot you talk to presses some folded **Drawings** into your hand: four sheets of a great clock and the sweepers' parts, the maker's name scraped off every one.
+- `StoryRoads` now gives Jaymo's Kingdoms several roads (the Fighter's and the Chrono's); only the Fighter's has its own screen behind Open.
+- Built; not played.
+
+## 0.22.20 (2026-11-11): The Retaking: the Fighter's Road (#1307)
+
+- The Z Fighter sagas are back, folded into the Retaking: the character menu's Story tab shows **The Fighter's Road** under the five acts, listing each saga (done, the step you're on with its count, ready to begin, or not yet). Its Open button brings up the saga screen (now called Sagas) to pick a difficulty, start or give up a saga, and see side jobs.
+- New client `StoryRoads` is what Jaymo's Kingdoms' Story tab reads (by reflection) for a player's own road; other powers' and callings' roads will join it.
+- Built; not played.
+
+## 0.22.21 (2026-11-11): The Retaking: the Web Slinger's, Xenoform's and Arsenal's roads (#1314)
+
+- Three more roads in the Story tab, each for whoever has the power (steps already done tick themselves):
+  - **The Web Slinger's Road**: bond with a symbiote at a meteor crater; grow close enough (bond 60) that it stops fighting you; purify it white. At bond 60 it writes **What It Remembers** on a blank page for you.
+  - **The Xenoform's Road**: hear a star-reader out; set foot on the Pale Moon; have your band reforged; tear the rival band off the band hunter, who drops his **Orders** as he runs.
+  - **The Arsenal's Road**: claim a relic; mark a place; pull something from the future (the first time, a Los Perrito parade **Notice** comes through the rift with it); pin a weapon.
+- New `PowerRoads` holds these roads and their saved, synced progress (`power_roads`).
+- Built; not played.
+
+## 0.22.22 (2026-11-11): sky villages, ruined villages and the sky lord's castle in the Aether (#1312)
+
+Andy, on the Sky Villages mod's ideas (ARR, nothing of it used): "should all instead spawn in the aether proper, and be
+filled with divine born", "Yes but now aether material", castle "in that scale, out of the relevant material".
+- **Sky village** (`aether/structure/SkyVillages.village`, 47 by 47): a round green with paths and a flagged plaza, a well
+  of light, four homes (two villagers each, bedrolls, a chest), a kitchen (Kitchen's stove, cabinet, pot and crates when
+  Kitchen is installed; smoker, barrel, cauldron and hay if not), a workshop (crafting station, part and pattern chests,
+  layer blocks), a windmill with cloth sails, two farm plots, and a mooring mast with a balloon skiff tied to it (a chest
+  in its hold). Three palettes by the land: skyroot (highfields), wisproot (magnetic), greatroot and icestone (arctic).
+- **Ruined village** (variants 3 to 5): the same village abandoned. Walls and roofs fallen in more the higher up, moss on
+  the stone, vases where the furniture was, no skiff, three swets and two cockatrices living in it.
+- **Sky castle** (`SkyVillages.castle`, 49 by 49): a two-thick curtain wall with a walk and merlons, four corner towers
+  with ladders and cloth caps, an arched gate, a keep with the lord's hall and seat, rooms above, a walled roof and a
+  spire. Eight villagers, one tagged as the lord.
+- New plans `village` and `castle` on `jaymospowers:aether_structure`; one structure set `sky_villages` (spacing 30,
+  separation 14, kept 6 chunks from outposts). Loot: `chests/sky_village/home`, `skiff`, `keep`. Data written by
+  `tools/gen_aether_structures.py`.
+- Villagers are plain villagers tagged `jaymospowers_sky_villager` (`jaymospowers_sky_lord`); MCA turns them into its own,
+  and Kingdoms gives them their blood.
+- The skiff hangs a step clear of the landing and, with Jaymo's Kingdoms installed, has a ship's wheel by the gap in
+  her rail: use it to cast her off as a balloon ship. Kingdoms also crews her, names the castle's lord and wardens, and
+  dresses the sky folk.
+- Compiled; never generated in a world, so the layout has not been seen in game.

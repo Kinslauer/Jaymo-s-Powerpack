@@ -1,10 +1,10 @@
 package com.jaymospowers.aether.sky;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -89,7 +89,7 @@ public class VaultHeartEntity extends BlockEntity {
 			server.setBlock(to, st.setValue(AmethystClusterBlock.FACING, Direction.UP), Block.UPDATE_ALL);
 		}
 		server.playSound(null, to, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.4F, 0.6F);
-		server.sendParticles(ParticleTypes.REVERSE_PORTAL, to.getX() + 0.5, to.getY() + 0.5, to.getZ() + 0.5, 6, 0.2, 0.2, 0.2, 0.01);
+		server.sendParticles(MagicFx.VOID, to.getX() + 0.5, to.getY() + 0.5, to.getZ() + 0.5, 6, 0.2, 0.2, 0.2, 0.01);
 	}
 
 	/** Whether any of {@code players} looks at the block at {@code p}. */

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.pod;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
@@ -275,7 +276,7 @@ public final class PodParts {
 		ServerLevel level = carrier.level();
 		Vec3 at = pod.getBoundingBox().getCenter();
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.7F, 1.2F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 14, 0.5, 0.7, 0.5, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 14, 0.5, 0.7, 0.5, 0.3);
 		carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.attached", nameOf(part)).withStyle(ChatFormatting.GOLD));
 		return Attach.DONE;
 	}
@@ -314,8 +315,8 @@ public final class PodParts {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.2F, 1.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.7F, 1.6F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 30, 0.7, 1.0, 0.7, 0.4);
-		level.sendParticles(ParticleTypes.END_ROD, pod.getX(), pod.getY() + HEIGHT_OF_MAST, pod.getZ(), 12, 0.1, 0.4, 0.1, 0.05);
+		level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 30, 0.7, 1.0, 0.7, 0.4);
+		level.sendParticles(MagicFx.LIGHT, pod.getX(), pod.getY() + HEIGHT_OF_MAST, pod.getZ(), 12, 0.1, 0.4, 0.1, 0.05);
 		hitter.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.finished").withStyle(ChatFormatting.GOLD));
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.BodyPart;
@@ -113,7 +114,7 @@ final class GravityGutPunch {
 				if (target instanceof ServerPlayer held) {
 					net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(held, new com.jaymospowers.power.web.WebNet.Nudge(v));
 				}
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 4,
+				level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 4,
 					0.2, 0.2, 0.2, 0.02);
 			}
 		}
@@ -160,7 +161,7 @@ final class GravityGutPunch {
 		}
 		Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
 		level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 30, 0.3, 0.3, 0.3, 0.4);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 30, 0.3, 0.3, 0.3, 0.4);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 1.0F, 0.5F);

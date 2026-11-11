@@ -1,5 +1,6 @@
 package com.jaymospowers.power.resonance;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.PowerInput;
 import java.util.HashMap;
@@ -138,7 +139,7 @@ final class ResonanceShatter {
 				(tune + 2) / 4.0);
 		}
 		if (hum.entityTicks % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 2,
+			level.sendParticles(MagicFx.CRACKLE, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 2,
 				living.getBbWidth() * 0.4, living.getBbHeight() * 0.3, living.getBbWidth() * 0.4, 0.02);
 		}
 	}

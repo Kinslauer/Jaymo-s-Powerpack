@@ -459,7 +459,7 @@ public final class WindCyclone {
 			DamageSource shock = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
 			target.hurtServer(level, shock, damage);
 			com.jaymospowers.core.Flames.touch(level, target, SHOCK_BURN_SECONDS, player);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), y, target.getZ(), 12, target.getBbWidth() * 0.6, target.getBbHeight() * 0.4,
+			level.sendParticles(MagicFx.CRACKLE, target.getX(), y, target.getZ(), 12, target.getBbWidth() * 0.6, target.getBbHeight() * 0.4,
 				target.getBbWidth() * 0.6, 0.3);
 			level.playSound(null, target.getX(), y, target.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
 		} else {
@@ -532,7 +532,7 @@ public final class WindCyclone {
 				double h = player.getRandom().nextDouble() * height;
 				double b = player.getRandom().nextDouble() * Math.PI * 2.0;
 				double r = Mth.lerp(h / height, radius * FOOT_SHARE, radius);
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x0 + Math.cos(b) * r, y0 + h, z0 + Math.sin(b) * r, 2, 0.2, 0.2, 0.2, 0.2);
+				level.sendParticles(MagicFx.CRACKLE, x0 + Math.cos(b) * r, y0 + h, z0 + Math.sin(b) * r, 2, 0.2, 0.2, 0.2, 0.2);
 			}
 			if (age % 23 == 0) {
 				level.playSound(null, x0, y0 + height * 0.5, z0, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.5F, 1.6F);

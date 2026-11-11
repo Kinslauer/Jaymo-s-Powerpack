@@ -7,9 +7,7 @@ import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -134,7 +132,7 @@ public final class ValorKings {
 	/** A flash of the soul colour round {@code e} and its glow rising off them. */
 	static void soulFlare(ServerLevel level, LivingEntity e, int color) {
 		Fx.blast(level, new Vec3(e.getX(), e.getY(0.5), e.getZ()), SOUL_FLARE, color);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color), e.getX(), e.getY(0.5), e.getZ(), 60, 0.4, 1.0, 0.4,
+		level.sendParticles(Fx.wisp(0xFF000000 | color, 1.0F), e.getX(), e.getY(0.5), e.getZ(), 60, 0.4, 1.0, 0.4,
 			0.6);
 	}
 
@@ -264,7 +262,7 @@ public final class ValorKings {
 		if (db != null) {
 			Fx.burst(level, mid.x, mid.y, mid.z, db.soulColor(), 1.8F, 30, 0.4, 0.4, 0.4);
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mid.x, mid.y, mid.z, 40, 0.5, 0.5, 0.5, 0.4);
+		level.sendParticles(Fx.CRACKLE, mid.x, mid.y, mid.z, 40, 0.5, 0.5, 0.5, 0.4);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 2.0F, 1.1F);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 0.5F);
 		RandomSource r = level.getRandom();

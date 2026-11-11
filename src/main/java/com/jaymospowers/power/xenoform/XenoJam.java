@@ -1,9 +1,9 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -34,7 +34,7 @@ public final class XenoJam extends MobEffect {
 	public static Holder<Potion> POTION, LONG_POTION;
 
 	private XenoJam() {
-		super(MobEffectCategory.HARMFUL, 0x6A2CA0, ParticleTypes.ELECTRIC_SPARK);
+		super(MobEffectCategory.HARMFUL, 0x6A2CA0, MagicFx.CRACKLE);
 	}
 
 	static void register() {
@@ -57,7 +57,7 @@ public final class XenoJam extends MobEffect {
 	public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
 		// (the change back happens in XenoformPower.tick; here only the static round the band)
 		if (entity instanceof ServerPlayer player && XenoformPower.has(player) && entity.tickCount % 10 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, entity.getX(), entity.getY() + entity.getBbHeight() * 0.55, entity.getZ(), 3, 0.25, 0.2, 0.25, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, entity.getX(), entity.getY() + entity.getBbHeight() * 0.55, entity.getZ(), 3, 0.25, 0.2, 0.25, 0.05);
 		}
 		return true;
 	}

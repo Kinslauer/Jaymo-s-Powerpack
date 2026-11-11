@@ -12,5 +12,6 @@ public final class Dungeon {
 		DungeonBlocks.init();
 		DungeonMobs.init();
 		SentryRuins.init();
+		RuinBoss.init();
 	}
 }

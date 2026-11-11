@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.structure;
 
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -86,7 +87,7 @@ public class AmbrosiumCampfireBlock extends Block {
 					0.0, 0.03, 0.0);
 			}
 			if (random.nextInt(8) == 0) {
-				level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 0.0, 0.06, 0.0);
+				level.addParticle(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 0.0, 0.06, 0.0);
 			}
 		}
 	}

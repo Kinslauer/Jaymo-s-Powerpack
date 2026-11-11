@@ -456,7 +456,7 @@ public final class Blessings {
 	private static void huntersEye(ServerPlayer sp, ServerLevel level) {
 		AABB box = sp.getBoundingBox().inflate(HUNTERS_EYE_SENSE);
 		for (Mob m : level.getEntitiesOfClass(Mob.class, box, x -> x.isAlive() && com.jaymoskingdoms.monsters.Monsters.legend(x.getType()))) {
-			level.sendParticles(sp, ParticleTypes.GLOW, true, false, m.getX(), m.getY(1.0), m.getZ(), 2, 0.3, 0.4, 0.3, 0.0);
+			level.sendParticles(sp, Fx.GLOW, true, false, m.getX(), m.getY(1.0), m.getZ(), 2, 0.3, 0.4, 0.3, 0.0);
 		}
 	}
 
@@ -552,9 +552,9 @@ public final class Blessings {
 			&& !Thralls.isThrall(x) && !friendlyFolk(sp, x) && (x.is(EntityTypeTags.UNDEAD) || Vampires.isVampire(x)))) {
 			e.igniteForSeconds(DAWNLIGHT_BURN);
 			e.hurtServer(level, light, DAWNLIGHT_DAMAGE);
-			level.sendParticles(ParticleTypes.END_ROD, e.getX(), e.getY(0.6), e.getZ(), 8, 0.3, 0.5, 0.3, 0.05);
+			level.sendParticles(Fx.LIGHT, e.getX(), e.getY(0.6), e.getZ(), 8, 0.3, 0.5, 0.3, 0.05);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, sp.getX(), sp.getY(1.0), sp.getZ(), 40, DAWNLIGHT_RANGE * 0.2, 0.8, DAWNLIGHT_RANGE * 0.2, 0.1);
+		level.sendParticles(Fx.LIGHT, sp.getX(), sp.getY(1.0), sp.getZ(), 40, DAWNLIGHT_RANGE * 0.2, 0.8, DAWNLIGHT_RANGE * 0.2, 0.1);
 	}
 
 	/** Folk of the caster's realm (vampires among them) are spared by Dawnlight. */
@@ -585,7 +585,7 @@ public final class Blessings {
 		for (LivingEntity e : near) {
 			e.addEffect(new MobEffectInstance(MobEffects.STRENGTH, SUN_MUSTER_TICKS, 0));
 			e.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, SUN_MUSTER_TICKS, 0));
-			level.sendParticles(ParticleTypes.WAX_ON, e.getX(), e.getY(1.0), e.getZ(), 8, 0.4, 0.6, 0.4, 0.0);
+			level.sendParticles(Fx.EMBER, e.getX(), e.getY(1.0), e.getZ(), 8, 0.4, 0.6, 0.4, 0.0);
 		}
 	}
 
@@ -616,6 +616,6 @@ public final class Blessings {
 				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, e.getX(), e.getY(1.0), e.getZ(), 10, 0.3, 0.6, 0.3, 0.02);
 			}
 		}
-		level.sendParticles(ParticleTypes.END_ROD, sp.getX(), sp.getY(1.0), sp.getZ(), 30, 0.6, 0.9, 0.6, 0.1);
+		level.sendParticles(Fx.LIGHT, sp.getX(), sp.getY(1.0), sp.getZ(), 30, 0.6, 0.9, 0.6, 0.1);
 	}
 }

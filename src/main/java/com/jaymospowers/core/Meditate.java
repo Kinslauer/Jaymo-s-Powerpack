@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.lang.reflect.Method;
@@ -405,7 +406,7 @@ public final class Meditate {
 			}
 			if (kind == MEDITATING) {
 				if (pays && time % 20 == 0) {
-					level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.3, 0.4, 0.15);
+					level.sendParticles(MagicFx.GLYPH, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.3, 0.4, 0.15);
 				}
 			} else {
 				Shadowbox.Step step = Shadowbox.step(time, state.combos());
@@ -416,7 +417,7 @@ public final class Meditate {
 					float pitch = (kind == SHADOWBOXING_HEAVY ? 0.7F : 1.1F) * (kick ? 0.8F : 1.0F);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(),
 						kick ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, kick ? 0.3F : 0.35F, pitch);
-					level.sendParticles(kind == SHADOWBOXING_HEAVY ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.CLOUD,
+					level.sendParticles(kind == SHADOWBOXING_HEAVY ? MagicFx.VOID : ParticleTypes.CLOUD,
 						player.getX() + look.x * (kick ? 1.1 : 0.8), player.getY() + (kick ? 0.9 : 1.3), player.getZ() + look.z * (kick ? 1.1 : 0.8), 1,
 						0.05, 0.05, 0.05, 0.01);
 				}

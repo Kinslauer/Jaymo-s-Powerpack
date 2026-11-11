@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -244,12 +245,12 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 		double length = end.distanceTo(mouth);
 		for (double d = 0.0; d < length; d += 0.6) {
 			Vec3 p = mouth.add(aim.scale(d));
-			level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(Fx.LIGHT, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
 			if (this.random.nextInt(4) == 0) {
-				level.sendParticles(ParticleTypes.GLOW, p.x, p.y, p.z, 1, 0.15, 0.15, 0.15, 0.0);
+				level.sendParticles(Fx.GLOW, p.x, p.y, p.z, 1, 0.15, 0.15, 0.15, 0.0);
 			}
 		}
-		level.sendParticles(ParticleTypes.END_ROD, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.08);
+		level.sendParticles(Fx.LIGHT, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.08);
 		if (this.tickCount % BEAM_EVERY != 0) {
 			return;
 		}
@@ -308,7 +309,7 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 			}
 			if (this.move == CATACLYSM_MOVE && age < CATACLYSM_FALL && age % 4 == 0) {
 				// gathering: light drawn in from the sky about it
-				level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 6.0, this.getZ(), 12, 4.0, 3.0, 4.0, 0.05);
+				level.sendParticles(Fx.LIGHT, this.getX(), this.getY() + 6.0, this.getZ(), 12, 4.0, 3.0, 4.0, 0.05);
 			}
 			if (age >= ACTION_TICKS[this.move]) {
 				this.move = NONE;
@@ -324,7 +325,7 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 			}
 			if (star.in == 6) {
 				// the star itself, streaking down
-				level.sendParticles(ParticleTypes.END_ROD, star.at.x, star.at.y + 12.0, star.at.z, 20, 0.2, 6.0, 0.2, 0.0);
+				level.sendParticles(Fx.LIGHT, star.at.x, star.at.y + 12.0, star.at.z, 20, 0.2, 6.0, 0.2, 0.0);
 			}
 			if (star.in <= 0) {
 				land(level, star.at);
@@ -369,7 +370,7 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 	private static void ring(ServerLevel level, Vec3 at) {
 		for (int i = 0; i < 12; i++) {
 			double a = i * Math.PI * 2.0 / 12.0;
-			level.sendParticles(ParticleTypes.GLOW, at.x + Math.cos(a) * STAR_RADIUS, at.y + 0.1, at.z + Math.sin(a) * STAR_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(Fx.GLOW, at.x + Math.cos(a) * STAR_RADIUS, at.y + 0.1, at.z + Math.sin(a) * STAR_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -377,7 +378,7 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 	private void land(ServerLevel level, Vec3 at) {
 		level.playSound(null, BlockPos.containing(at), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 2.5F, 1.3F);
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 2, 0.5, 0.3, 0.5, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.5, at.z, 30, 0.6, 0.6, 0.6, 0.25);
+		level.sendParticles(Fx.LIGHT, at.x, at.y + 0.5, at.z, 30, 0.6, 0.6, 0.6, 0.25);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(STAR_RADIUS, 2.5, STAR_RADIUS),
 			e -> spareable(e) && !(e instanceof WindDragon))) {
 			if (e.hurtServer(level, this.damageSources().indirectMagic(this, this), STAR_DAMAGE)) {
