@@ -5,11 +5,11 @@ advanced, (id like to import a kingdom on their planet that uses a futuristic ae
 modeled species, i will look for inspiration but you can make models for it.) The band hunter was developed on the
 moon/planet to get the band back, for the ruler who desires the power for himself." The planet is the Pale Moon.
 
-Settled since: the species are the **Galvan** (tiny, bug-eyed, robed, monocled, a high-class society, on the Gremlin's
+Settled since: the species are the **Ocellan** (Andy's working name was "Galvan", which is taken; tiny, bug-eyed, robed, monocled, a high-class society, on the Gremlin's
 model; PR #1323 draws the star forge smith as one, Kingdoms `GalvanBody`). The elder meant the band to be given away;
 the ruler sent the hunter against that (Lore.md, *The hunter's orders*).
 
-This is a plan only. Nothing is built until Andy answers the open questions at the end. Class names are the real ones.
+This is a plan only. Andy has answered all its open questions (2026-11-11); building waits for his go. Class names are the real ones.
 
 ---
 
@@ -18,7 +18,7 @@ This is a plan only. Nothing is built until Andy answers the open questions at t
 - **The Star Forge** (`power/xenoform/BandForge`): each save picks one far world at random from `CHOICES` (Moon,
   Rustfall, Glacia, Cinder, Verdant) and keeps it in the `WORLD` attachment. The first time a band wearer walks that
   world, a stone hut with the forge is raised 40-64 blocks off (`AT`), with an alien smith (`SMITH_TAG`, drawn as a
-  Galvan by #1323) when Kingdoms and MCA are loaded. The band hums toward it. A reforge takes 4 star metal, a wreck core
+  Ocellan by #1323) when Kingdoms and MCA are loaded. The band hums toward it. A reforge takes 4 star metal, a wreck core
   and 4 of Bulwark's dust, and gives the band its module slots (`BandUpgrades`).
 - **The Pale Moon** (`dimension/moon.json`, one biome `moon_plains`): grey dust, a third of your weight
   (`ZFighterSpace.MOON_GRAVITY`), veiled ore and pale alloy (`farworld/FarWorld`), Endermen. No structures of its own.
@@ -30,10 +30,10 @@ This is a plan only. Nothing is built until Andy answers the open questions at t
 ## How it fits the lore
 
 The canon says the Pale Moon has "nothing on it" (the raiders' tally) and pod crews' rumour that "somebody lives on
-the Pale Moon" is not believed. So the Galvan city is **hidden** (Andy, 2026-11-11: "hidden"): it lies **under the dust**, in a great
+the Pale Moon" is not believed. So the Ocellan city is **hidden** (Andy, 2026-11-11: "hidden"): it lies **under the dust**, in a great
 domed hollow beneath one crater, its doors shut to anyone without a band. The band "hums when it is near its maker's
-work": that hum is what leads a wearer down. The Galvan build in **pale alloy**, the moon's own metal, which explains
-why the moon's ore is there at all. The Endermen are the one thing the Galvan do not explain (open question 4).
+work": that hum is what leads a wearer down. The Ocellan build in **pale alloy**, the moon's own metal, which explains
+why the moon's ore is there at all. The Endermen are the one thing the Ocellan do not explain (open question 4).
 
 ---
 
@@ -49,10 +49,10 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
   through `PowersCompat` when it raises the city).
 - The band's hum gets a second stage: on the Moon, near the hidden city, it says the band "knows this place".
 
-## Track 2: the Galvan city (Kingdoms)
+## Track 2: the Ocellan city (Kingdoms)
 
-**Files:** new `kingdoms/.../galvan/GalvanCity` (layout, pieces), structure templates under
-`data/jaymoskingdoms/structure/galvan/`, `lang/parts/galvan.json`, `ZFighterFolk` (Galvan citizens).
+**Files:** new `kingdoms/.../ocellan/OcellanCity` (layout, pieces), structure templates under
+`data/jaymoskingdoms/structure/ocellan/`, `lang/parts/ocellan.json`, `ZFighterFolk` (Ocellan citizens).
 
 - **Undersky**: one city per save, under the dust of a large crater some distance from where pods land, built like `SkyTowns`:
   lots on a grid round a central plaza, every piece named so Kingdoms can read it.
@@ -65,31 +65,31 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
     quartz for the walls; black and grey concrete with tinted glass for the seams; cyan stained glass over sea lanterns
     and warm yellow froglights for windows; moss, azalea and grass for the gardens. No wood or cobble.
   - **Under the dust:** towers need room, so the city stands in a vast hollow under the crater, and its roof is a
-    false sky the Galvan built themselves: light blue glass and lamps high overhead, with pale "clouds". From outside
+    false sky the Ocellan built themselves: light blue glass and lamps high overhead, with pale "clouds". From outside
     it is only a crater. Size (Andy agreed): about 150 blocks across, towers 60-80 blocks tall, the
     false sky just above the tallest.
 - **Pieces:** the dome gate (shut until a band wearer comes near), the plaza with a tall ring instead of a bell, homes,
   a hall of records (tablets, the alien bodies the band holds shown as statues), **the elder's forge** (the Star Forge
   and the elder), **the ruler's court** (the seat), and a sealed workshop where the rival band was made.
-- **Citizens:** MCA villagers given the Galvan part (`ZFighterFolk.GALVAN`, from PR #1323, not merged yet), in robes; they speak only to band wearers
-  and are aloof to anyone else. Guards are Galvan in fitted suits rather than robes.
+- **Citizens:** MCA villagers given the Ocellan part (`ZFighterFolk.GALVAN`, from PR #1323, not merged yet), in robes; they speak only to band wearers
+  and are aloof to anyone else. Guards are Ocellan in fitted suits rather than robes.
 - **Endermen** (Andy, 2026-11-11: "they fight all the time, and steal important galvan blocks. the endermen have no
   idea what they do, they just seem to enjoy the mischief"): moon Endermen may pick up the city's own blocks (pale alloy
   lamps and panels, the false sky's lamps, forge parts), which vanilla Endermen never take, and carry them off over the
-  dust; a gap left in a tower or a dark patch of sky shows where. Galvan guards fight Endermen on sight, and Endermen
-  pick fights with Galvan. A player who brings a stolen block back to its gap, or kills the thief, earns the city's
-  thanks (a small trade discount, or a line from the elder). Files: an `EndermanHoldable` tag entry for the Galvan
-  blocks (moon only, checked in a small mixin or goal), Galvan guard targeting.
+  dust; a gap left in a tower or a dark patch of sky shows where. Ocellan guards fight Endermen on sight, and Endermen
+  pick fights with Ocellan. A player who brings a stolen block back to its gap, or kills the thief, earns the city's
+  thanks (a small trade discount, or a line from the elder). Files: an `EndermanHoldable` tag entry for the Ocellan
+  blocks (moon only, checked in a small mixin or goal), Ocellan guard targeting.
 - **Not a realm** (Andy, 2026-11-11: "no war or trading with other kingdoms"): a city with a ruler and court, outside
   Kingdoms' realm machinery, so no war, raids, alliances or trade with Overworld kingdoms. Players can still trade
-  with Galvan citizens themselves.
+  with Ocellan citizens themselves.
 
 ## Track 3: the elder, the ruler and the hunter (Powers + Kingdoms)
 
-**Files:** `BandForge` (elder talk), `BandUpgrades` (the forge check on `Action`), the band screen, `RivalHunter`, new `kingdoms/.../galvan/GalvanCourt`, lang parts `xenoform` and
-`galvan`.
+**Files:** `BandForge` (elder talk), `BandUpgrades` (the forge check on `Action`), the band screen, `RivalHunter`, new `kingdoms/.../ocellan/OcellanCourt`, lang parts `xenoform` and
+`ocellan`.
 
-- **The elder, Ammet Thrum** ("the Old Maker"): an old Galvan who made the band, at the forge. Talking: he knew the band would be found ("it was made
+- **The elder, Ammet Thrum** ("the Old Maker"): an old Ocellan who made the band, at the forge. Talking: he knew the band would be found ("it was made
   to be given"), he reforges it as the smith does now, and every upgrade after it is his too (Andy, 2026-11-11: "all upgrades require a
   trip"). Read as: learning a module from its plan, fitting or swapping modules and buying band skills all happen at
   the elder's forge (`BandUpgrades.Action` is refused unless the player is near the forge, with a line saying the band
@@ -117,35 +117,35 @@ Andy (2026-11-11): "if he is given the band and killed, the new wearer can take 
 intergalactic trade and warfare. The Oscellans had it figured out before."
 
 - Kill the ruler while he wears the band (the hand-over fight, Track 3) and the one who picks the band up may sit in
-  his seat in the court: they become the Galvan's king (or queen), and the city takes them as its ruler.
-- Only then does the city open to the worlds: **intergalactic trade and warfare**. While the Galvan ruler holds the
+  his seat in the court: they become the Ocellan's king (or queen), and the city takes them as its ruler.
+- Only then does the city open to the worlds: **intergalactic trade and warfare**. While the Ocellan ruler holds the
   seat the city stays shut (no war or trade with kingdoms, Track 2); a player king opens it.
 - What the king can do (Andy, 2026-11-11: "they can muster armies that attack overworld kingdoms with space pod
   invasions, or they can take the fight to the warrior born, drawing them to the moon, and having large sclae warfare
   on the moon itself"):
-  - **Muster an army:** Galvan guards in fitted suits, raised at the court for star metal and pale alloy, kept in
+  - **Muster an army:** Ocellan guards in fitted suits, raised at the court for star metal and pale alloy, kept in
     barracks in Undersky.
   - **Pod invasions:** the king names an Overworld kingdom; the army comes down in pods near its seat and fights as a
     Kingdoms raid does (it uses Kingdoms' war and raid rules, as a realm with no land of its own on the Overworld).
     Beaten, the pods stay where they landed.
   - **War with the Warrior-born:** the king can call out the raider bands; they come to the Pale Moon in their pods and
-    a large battle is fought on the dust outside Undersky, Galvan army against raiders, waves and a raider chief at the
+    a large battle is fought on the dust outside Undersky, Ocellan army against raiders, waves and a raider chief at the
     end. Winning stops raider pod landings in the Overworld for a while.
   - Trade between worlds stays open as an idea for later.
-- The **Oscellans** "had it figured out before": a people who once held this kind of power between the worlds. They
-  are not in Lore.md yet (open question 12).
+- "The Oscellans had it figured out before": before Vorrel, the Ocellan traded and made war between the worlds from
+  Undersky. A player king brings that back.
 
 ## Track 4: art (Prometheus / 3D modeller)
 
-- The elder: a Galvan with a longer, darker robe, a staff or tools at the belt, two monocles or a lens rig.
-- The ruler: a Galvan in a high collar and a heavier mantle, a circlet; his guards in fitted suits.
+- The elder: a Ocellan with a longer, darker robe, a staff or tools at the belt, two monocles or a lens rig.
+- The ruler: a Ocellan in a high collar and a heavier mantle, a circlet; his guards in fitted suits.
 - Block textures for the pale alloy family and the dome glass.
 - Waits for Andy's inspiration pictures (open question 3).
 
 ## Order
 
 Two tracks at a time (CLAUDE.md). First **Track 1** (small, Powers only) with **Track 4** (art, can start on the elder
-and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3**, which needs the city's court, then **Track 5**.
+and ruler from the Ocellan model). Then **Track 2** (the big one), then **Track 3**, which needs the city's court, then **Track 5**.
 
 ---
 
@@ -154,14 +154,13 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 1. ~~Old saves~~ Answered: no migration, the world is reset on release.
 2. ~~Hidden or open?~~ Answered: hidden, under the dust behind a door only a band opens.
 3. ~~Look~~ Answered: like Viltrum's cities (Track 2, Look).
-4. ~~The Endermen~~ Answered: they and the Galvan fight all the time; Endermen steal Galvan blocks for the mischief (Track 2, Endermen).
+4. ~~The Endermen~~ Answered: they and the Ocellan fight all the time; Endermen steal Ocellan blocks for the mischief (Track 2, Endermen).
 5. ~~Kingdom or town~~ Answered: a city with a ruler and court; no war or trading with other kingdoms.
 6. ~~The elder's upgrades~~ Answered: all upgrades require a trip to him (Track 3, the elder).
 7. ~~The ruler's ask~~ Answered: yes; he puts it on, becomes a boss and turns on you (Track 3, the ruler).
 8. ~~Ending~~ Answered: whoever kills the ruler while he wears the band can take his seat (Track 5).
 9. ~~Names~~ Andy: "surprise me". Claude's picks (change any): the elder is **Ammet Thrum**, called the Old Maker;
-   the ruler is **Sovereign Vorrel**; the city is **Undersky**. The people stay the Galvan.
+   the ruler is **Sovereign Vorrel**; the city is **Undersky**. The people stay the Ocellan.
 10. ~~Size~~ Answered: about 150 blocks across, towers 60-80 blocks, the false sky just above the tallest.
 11. ~~Intergalactic trade and warfare~~ Answered: pod invasions of Overworld kingdoms, or war with the Warrior-born on the moon (Track 5).
-12. **The Oscellans:** who were they? Another people of the Pale Moon or a far world, the Galvan's old rulers, or the
-    band's first wearers? Where are they now?
+12. ~~The Oscellans~~ Answered: the Ocellan are the elder's people (Lore.md's name in place of the working name "Galvan"). Before Vorrel they traded and warred between the worlds.
