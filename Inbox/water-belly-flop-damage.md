@@ -5,7 +5,7 @@ from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
 claimed_by: 
 pr: 
-suggested_owns: [src/main/java/com/jaymospowers/freerun/]
+suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer
 text_pass: none
 ---
@@ -21,6 +21,8 @@ Andy: "https://www.curseforge.com/minecraft/data-packs/realistic-damage-water-fa
 3. Short drops stay harmless. Scale the damage with fall distance and speed. Pick the numbers yourself (as constants at the top of the class) and say them in the PR.
 
 ## Notes
+
+- **Build on what's there: `water/Dives.java` already has the entries.** Falling 4+ blocks into water 2+ deep: Sneak held early = cannonball, Sneak pressed just before = clean dive, neither = belly flop, which today only stings 1-2 damage from 12+ blocks. This task makes the flop (and other non-dive entries) hurt for real: raise FLOP_DAMAGE/FLOP_MAX into real fall damage scaled by height. A clean dive and Leap of Faith's head-first dive (`Freerun.dives`, looking down) stay safe or near-safe. Decide where a cannonball sits (it's feet first, so a middle case) and say it in the PR. Don't add a second system beside Dives.
 
 - The data pack is 1.20.1 and All Rights Reserved, and its page gives no numbers. Remake only the idea in our own code; copy nothing.
 - Check how the player is falling. Use the pitch and the freerun pose: `freerun/moves/RunMoves` (synced POSE), `SkyDive` (spread-out sky dive: landing in that pose is the belly flop), and any dive pose there. Look straight down near the water = dive. Feet first (a "pencil" drop) should be a middle case: less than a flop, more than a dive.
