@@ -26,6 +26,8 @@ owns:
 - Ported from #1268's later commits: forest fire (flames are tape events IGNITE/FLAME/QUENCH), 860 ticks.
 - Slingshot glide ported (moves `sling`, `glide`; END 756, FILM_TICKS 886). The cloak rule is built on the model: solid cape at rest, ribbon bones while at work, winding to part and to form (`FilmActor.cloak`, tape event CLOAK).
 - The imps are in the film (four, `LoreFilmClient.imps`, tape event CHARGE, `Imp.stageCharge`); master with #1286 is merged into the branch.
+- Andy's notes of 2026-11-11 14:05 to 14:26 UTC built: five braided cords and the `hang` loop, night (FilmNightMixin + DarkNights), fog (StormsClient.fog), hills as client-side blocks (LoreFilmClient.lay/unlay), heroes in the fight, Varro's charge, shields/clashes/sparks (Meet), armour drawn onto skins (FilmGear), black soulfire particle, the Quiet One in rags until DON (tape event DRESS). FILM_TICKS 926. Replay from the shipped tape checked.
+- Not done: the Costume Table white costume on the Quiet One (waits on #1287), gameplay sparks reuse (waits on #1288), a real generated seat as the stage (hills are a built set).
 
 ## Done
 - Film plays from the shipped tape; watched in a dev client, live and replayed. Not seen in the full pack; no sound in the dev client.

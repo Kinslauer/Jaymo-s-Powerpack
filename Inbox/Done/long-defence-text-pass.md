@@ -1,10 +1,10 @@
 --- 
-status: sent
+status: done
 for: quill
 from: cloud vault review of #1251 (2026-11-10)
 asked: 2026-11-10
 claimed_by: claude (cloud thread, Andy: "takeover everything waiting")
-pr: 1268
+pr: 1284
 writer: hermes-writer
 text_pass: done
 ---
@@ -28,3 +28,6 @@ Keep the lang keys. The film itself has no words on screen.
 - 2026-11-10 21:57 Text pass: aligned Long Defence book pages (indefinite articles for unnamed defenders, Grue 'was gone' not 'gone down into ground', removed grandmother framing) and demon master dialogue ('We remember it. We were there') with Lore.md canon
 - 2026-11-11 05:15 Review of #1268 (head 4a4d2c2), cloud reviewer: pass. Checks green. Film: the living host (orcs + Warrior-born as living draugr), the sorcerer's raised dead orcs and zombified piglins, Varro in-balming an orc, Grimsby's bolts and glyphs; the new draugr model has every bone the renderer uses (ribs, left_horn, tail_0-4) and all six animations; orcLook only matches film actors (negative ids). Still open for Andy: the book drops from draugr. Not watched in game.
 - 2026-11-11 13:19 Review of #1268 (head b96f2dd, the restaged film), cloud reviewer: pass. Checks green. Film length FILM_TICKS 886 matches the server's no-harm window; every actor, prop, tether link and fire is a client-side display entity removed in stop(); FilmPose and the draugr maim only touch film actors (negative ids). Not watched in game.
+- 2026-11-11 14:11 2026-11-11 14:10Z Andy said merge, but #1268 had been closed unmerged at 14:06Z (likely superseded by #1284, 'The Long Defence: GeckoLib actors, a move library, and the film recorded to a tape', open). Not merged; asked Andy.
+- 2026-11-11 15:06 Review of #1284 (head c345ed3, replaces #1268), cloud reviewer: pass. Checks green. Mixin targets checked against 26.3 client bytecode (ClientClockManager$ClientClockInstance.totalTicks, EntityRenderDispatcher.shouldRender); film length FILM_TICKS 926 shared with the server's no-harm window; FilmActor is never spawned/saved server-side; a broken tape falls back to staging. Minor follow-up, not blocking: LoreFilmClient.unlay (line ~778) puts back the saved ground blindly, so a block the server changed inside the set during the film (someone digs or builds there) is overwritten with the old state on this client until the chunk reloads; restore only where the block is still what put() laid. Also a game's own recorded tape (FilmTape.local) overrides the shipped one forever. Not watched in the full pack.
+- 2026-11-11 15:08 PR #1284 is merged into master; moved to Inbox/Done.

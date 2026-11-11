@@ -29,3 +29,6 @@ Trees catch from lightning and mana bolts, spread, blaze by the end; surviving s
 
 ## 2026-11-11 slingshot and glide (Andy)
 Last jump: cloak grabs two SLING_TREES, draws him back, slow spiral glide (FilmPose.ROLL), cloak streams then opens, sorcerer turns to smoke just before contact (`glide`). FILM_TICKS 886. Note: the "Record the film with GeckoLib actors" thread (branch claude/project-thread-9yvqn9) is rebuilding this film on GeckoLib actors and a tape; it ports what is added here. Further film changes should go on its branch once it says so.
+
+## 2026-11-11 closed
+PR #1268 closed unmerged on Andy's choice; PR #1284 (GeckoLib thread) contains its commits up to 938baad3 and rebuilds the rest. This agent owns no files now.
