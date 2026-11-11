@@ -8,7 +8,8 @@ No keys printed or written.
 The PC and Hermes never went down. Hermes looked stalled for two reasons:
 - **Most bots couldn't get a model.** From 5:48 AM nothing on the PC got far enough to claim a task or sync the vault:
   - **hermes-modeller** failed every run (Ollama 429 "monthly usage limit" on all 3 of its models);
-  - **Quill** got 403 "model alias is not granted";
+  - **Quill** got 403 "model alias is not granted" (correction, 2:20 PM: Hermes did fall back to NVIDIA's ultra 550b
+    model, but its calls took 7-90 min each, so the 5:46 AM run crawled until about 8:41 AM);
   - **Apollo (hermes-a)** got empty replies at 7:19-7:23 AM.
 - **Hephaestus works but can't finish.** It runs fine on NVIDIA, but the terminal's 180 s limit on each command kills
   its Gradle builds. It also never pushed its belly-flop commits (they're on a detached HEAD) and still set the task

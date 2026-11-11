@@ -53,7 +53,7 @@ they did in *The Long Defence*, a few at a time and here and there, under lightn
 the ground, grey, tusked, still carrying the iron they were buried with) and zombified piglins, never zombies or
 skeletons. Behind them, at the back, stands a **Shade of the Grue** in the sorcerer's red. When it falls, the rest go back
 into the ground, and the ford holds. Nothing on screen says who they were or why they came. If nobody stands at the ford,
-they sink back and come again another night.
+they sink back and come again another night. (new) When it is held, a short wordless film plays at the ford: dawn, the light still burning in the keep, the last of the old legion going back into the ground on the far bank.
 
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
@@ -128,6 +128,10 @@ kit.
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
   the future, a thing out of someone else's pack, even something hazardous that hurts the holder. Until the power is
   mastered, the holder can't command what comes.
+  (new) **The parade notice** (Retaking, the Arsenal's Road, 2026-11-11). The first time the rift pulls something from
+  the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
+  not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
+  off. the bridge is the line now. if you find this don't come".
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
@@ -265,6 +269,21 @@ of the just who asked the Judge to stay.
 
 (new) **Things that fall.** Now and then something drops out of a clear sky onto the land below: a tuft of
 cloudwool, a feather, a hat, a letter never meant for whoever finds it. Nobody below can say where from.
+
+(new) **The high house** (four-mods thread, 2026-11-11; Andy: "Yep do them next"). The sky castle has a lord and three
+wardens, drawn from its own people. The lord wears a blue mantle over the white robe and says he holds the hall for
+someone who has not come back; he does not say who. The court is no kingdom: it claims no land, sends no envoys and
+goes to no war, because the realms below settle things on foot and there is no road up. If the lord dies another of the
+house takes the mantle; if the house is emptied the seat stands empty.
+
+(new) **How the sky folk dress.** The Divine-born of the Aether wear white robes to the ankle with gold at the collar,
+cord and hem. The halfway folk wear tunics in the colours of sunrise with a white sash and a small sun on the chest.
+Wardens wear a white tabard with a gold sun over deep blue.
+
+(new) **The skiffs.** Each sky village keeps one balloon skiff at its mooring mast: a small hull hung under a bag of
+cloudwool. In daylight two of the village take her out across the open sky and bring her home, and haul her in on the
+line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
+below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
 ## The shape of the world
 
@@ -472,6 +491,11 @@ darkened aliens; mechs hunt band wearers at night too.
 upgrades are done there, at the elder's forge. The elder's people have an extremely advanced society, a kingdom of
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
+
+(new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
+hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
+explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
+it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
 ## The future: Los Perrito
 
@@ -698,6 +722,11 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   purifying its nature and turning it to good and to healing, while it kept all its lethality: that is the white suit,
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
+
+  (new) **What It Remembers** (Retaking, the Web Slinger's Road, 2026-11-11). Once a symbiote is close enough to stop
+  fighting its host, it leaks onto a blank page and writes: cold, dark, falling and burning; a hole in the ground and
+  hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
+  was left of him went out into the world, fine as dust. Some of it found you." It never names him.
 
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
