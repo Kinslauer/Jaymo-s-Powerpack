@@ -962,107 +962,106 @@ def wisp():
     save(img, "entity/xenoform_wisp.png")
 
 
+GREMLIN_HEAD = (0, 0, 8, 7, 6)
+GREMLIN_EYE = (32, 0, 4, 4, 3)
+GREMLIN_JAW = (32, 8, 6, 1, 5)
+GREMLIN_BODY = (16, 16, 5, 7, 3)
+GREMLIN_ARM = (40, 16, 2, 7, 2)
+GREMLIN_LEG = (0, 16, 2, 6, 2)
+GREMLIN_FOOT = (0, 32, 3, 1, 4)
+
+
 def gremlin():
-    """(0.19.66) A grey, warty imp that goes on its knuckles: mottled hide, a pale belly, spines down the back, black
-    claws and calloused fists, a huge skull with yellow eyes and a jagged grin on a hinged jaw, notched pink-lined ears,
-    and the insignia on its back. Boxes: skull 10x10x10 at (0,64), jaw 7x3x6 at (0,0), torso 7x6x9 at (16,16), upper
-    arm 3x8x3 at (48,16), forearm 2x8x2 at (48,32), fist 3x3x4 at (48,44), thigh 3x6x3 at (0,16), shin 2x7x2 at (0,32),
-    foot 3x2x5 at (0,44), ear 5x6x1 at (40,64), tail 1x1x6 at (40,72), spine 1x2x1 at (56,64); the left limbs and ear
-    mirror the right's."""
+    """A tiny grey bug-eyed imp that stands upright: a mottled, warty hide with a pale belly, thin arms and legs with
+    black claws, broad pale feet, and a wide flat head with a thin toothy mouth and two great eyes that bulge out past
+    the sides of it, yellow-green with a slit pupil lying on its side. The eyes shine in the dark: their lit pixels are
+    saved again as xenoform_gremlin_glow (drawn fullbright). The insignia is on its chest. Boxes: head 8x7x6 at (0,0),
+    eye 4x4x3 at (32,0), jaw 6x1x5 at (32,8), body 5x7x3 at (16,16), arm 2x7x2 at (40,16), leg 2x6x2 at (0,16), foot
+    3x1x4 at (0,32); the left limbs and eye mirror the right's. Seeded by itself, so `gremlin()` alone and a full run
+    paint the same skin."""
+    rng.seed("gremlin")
     img = new_skin()
+    glow = new_skin()
     grey = (118, 120, 126)
     belly = (168, 166, 164)
+    pale = (150, 152, 150)
     wart = shade(grey, 0.72)
-    spine = (60, 58, 62, 255)
-    skull = (0, 64, 10, 10, 10)
-    jaw = (0, 0, 7, 3, 6)
-    torso = (16, 16, 7, 6, 9)
-    uarm = (48, 16, 3, 8, 3)
-    farm = (48, 32, 2, 8, 2)
-    fist = (48, 44, 3, 3, 4)
-    thigh = (0, 16, 3, 6, 3)
-    shin = (0, 32, 2, 7, 2)
-    foot = (0, 44, 3, 2, 5)
-    ears = (40, 64, 5, 6, 1)
-    tail = (40, 72, 1, 1, 6)
-    spike = (56, 64, 1, 2, 1)
-    body_parts = (torso, uarm, farm, fist, thigh, shin, foot)
+    rim = (34, 36, 40, 255)
+    lit = (196, 240, 58, 255)
+    lit_pale = (236, 255, 150, 255)
+    lit_deep = (150, 200, 40, 255)
+    pupil = (22, 28, 14, 255)
+    mouth = (50, 22, 26, 255)
+    tooth = (240, 236, 220, 255)
+    head, eye, jaw = GREMLIN_HEAD, GREMLIN_EYE, GREMLIN_JAW
+    body, arm, leg, foot = GREMLIN_BODY, GREMLIN_ARM, GREMLIN_LEG, GREMLIN_FOOT
+    hide = (body, arm, leg)
     # warts and mottling everywhere
-    parts(img, grey, 0.26, which=body_parts)
-    for part in body_parts:
+    parts(img, grey, 0.12, which=hide)
+    for part in hide:
         for name, b in faces(*part).items():
-            speckle(img, b, wart, (b[2] - b[0]) * (b[3] - b[1]) // 6)
-            speckle(img, b, shade(grey, 1.2), (b[2] - b[0]) * (b[3] - b[1]) // 10)
-    # a pale belly: the torso's underside, and the lower rows of its sides and chest
-    bx0, by0, bx1, by1 = faces(*torso)["bottom"]
-    vgrad(img, (bx0, by0, bx1, by1), belly, shade(belly, 0.85), 0.12)
-    for name in ("front", "left", "right"):
-        x0, y0, x1, y1 = faces(*torso)[name]
-        rect(img, (x0, y1 - 2, x1, y1), shade(belly, 0.92))
-    # the back (the torso's top): a dark spine-line down it, the insignia on top
-    tx0, ty0, tx1, ty1 = faces(*torso)["top"]
-    for y in range(ty0, ty1, 2):
-        rect(img, (tx0, y, tx0 + 1, y + 1), spine)
-        rect(img, (tx1 - 1, y, tx1, y + 1), spine)
-    insignia(img, 28, 17, rim=(40, 40, 44, 255))
-    # knobbly joints at the elbows and knees, calloused fists, black claws
-    for part in (farm, shin):
+            speckle(img, b, shade(grey, 0.84), (b[2] - b[0]) * (b[3] - b[1]) // 9)
+    # a pale belly, the insignia on the chest over it, a dark line down the spine
+    x0, y0, x1, y1 = front(body)
+    vgrad(img, (x0, y0 + 2, x1, y1), belly, shade(belly, 0.86), 0.08)
+    insignia(img, x0 + 2, y0 + 1, small=True, rim=shade(grey, 0.5))
+    x0, y0, x1, y1 = faces(*body)["back"]
+    rect(img, (x0 + 2, y0, x0 + 3, y1), shade(grey, 0.6))
+    # knobbly elbows and knees, black claws on the hands, broad pale feet with dark toes
+    for part, row in ((arm, 3), (leg, 2)):
         for name, (x0, y0, x1, y1) in faces(*part).items():
             if name in ("front", "back", "left", "right"):
-                rect(img, (x0, y0, x1, y0 + 1), wart)
-    for part in (uarm, thigh):
-        for name, (x0, y0, x1, y1) in faces(*part).items():
-            if name in ("front", "back", "left", "right"):
-                rect(img, (x0, y1 - 1, x1, y1), wart)
-    for name, b in faces(*fist).items():
-        speckle(img, b, shade(grey, 0.55), 5)
-    claws(img, (28, 26, 30, 255), which=(fist, foot))
-    # the skull: mottled, a brow ridge, huge yellow eyes with slit pupils, nostrils, a wide grin of white teeth
-    box(img, skull, shade(grey, 1.04), 0.22)
-    for name, b in faces(*skull).items():
-        speckle(img, b, wart, 12)
-        speckle(img, b, shade(grey, 1.25), 6)
-    sx0, sy0, sx1, sy1 = front(skull)
-    rect(img, (sx0 + 1, sy0 + 1, sx1 - 1, sy0 + 2), wart)
-    rect(img, (sx0 + 1, sy0 + 2, sx0 + 4, sy0 + 6), (250, 230, 80, 255))
-    rect(img, (sx1 - 4, sy0 + 2, sx1 - 1, sy0 + 6), (250, 230, 80, 255))
-    rect(img, (sx0 + 2, sy0 + 3, sx0 + 3, sy0 + 6), (20, 20, 20, 255))
-    rect(img, (sx1 - 3, sy0 + 3, sx1 - 2, sy0 + 6), (20, 20, 20, 255))
-    img.putpixel((sx0 + 1, sy0 + 2), (255, 250, 200, 255))
-    img.putpixel((sx1 - 2, sy0 + 2), (255, 250, 200, 255))
-    img.putpixel((sx0 + 4, sy0 + 7), (40, 36, 40, 255))
-    img.putpixel((sx1 - 5, sy0 + 7), (40, 36, 40, 255))
-    rect(img, (sx0 + 1, sy0 + 8, sx1 - 1, sy0 + 10), (50, 22, 26, 255))
-    for x in range(sx0 + 1, sx1 - 1):
-        if x % 2 == 0:
-            img.putpixel((x, sy0 + 8), (240, 236, 220, 255))
-        else:
-            img.putpixel((x, sy0 + 9), (240, 236, 220, 255))
-    speckle(img, faces(*skull)["top"], wart, 14)
-    # the jaw: grey chin, a dark mouth inside it and a row of lower fangs
-    box(img, jaw, shade(grey, 0.95), 0.2)
-    for name, b in faces(*jaw).items():
-        speckle(img, b, wart, 4)
-    rect(img, faces(*jaw)["top"], (50, 22, 26, 255))
-    jx0, jy0, jx1, jy1 = front(jaw)
-    for x in range(jx0, jx1):
-        if x % 2 == 1:
-            img.putpixel((x, jy0), (240, 236, 220, 255))
-    # the ears: notched, lined with pink
-    box(img, ears, shade(grey, 0.95), 0.2)
-    ex0, ey0, ex1, ey1 = front(ears)
-    rect(img, (ex0 + 1, ey0 + 1, ex1 - 1, ey1 - 1), (214, 150, 150, 255))
-    rect(img, (ex0, ey0, ex0 + 1, ey0 + 1), CLEAR)
-    rect(img, (ex0 + 2, ey1 - 2, ex0 + 3, ey1 - 1), CLEAR)
-    # the tail and the spines on its back
-    box(img, tail, grey, 0.2)
-    for name, (x0, y0, x1, y1) in faces(*tail).items():
-        if name in ("left", "right", "top", "bottom"):
-            for x in range(x0, x1, 2):
-                img.putpixel((x, y0), wart)
-    box(img, spike, spine, 0.1)
-    clear_hat(img)
+                rect(img, (x0, y0 + row, x1, y0 + row + 1), wart)
+    claws(img, (28, 26, 30, 255), which=(arm,))
+    box(img, foot, pale, 0.16)
+    x0, y0, x1, y1 = faces(*foot)["top"]
+    for x in range(x0, x1):
+        img.putpixel((x, y1 - 1), shade(pale, 0.55) if (x - x0) % 2 == 0 else shade(pale, 0.9))
+    x0, y0, x1, y1 = front(foot)
+    for x in range(x0, x1, 2):
+        img.putpixel((x, y0), shade(pale, 0.5))
+    # the head: a shade lighter, mottled, a dark brow line, two nostrils and a wide thin mouth with small teeth
+    box(img, head, shade(grey, 1.08), 0.1)
+    for name, b in faces(*head).items():
+        speckle(img, b, shade(grey, 0.86), 5)
+    x0, y0, x1, y1 = front(head)
+    img.putpixel((x0 + 3, y0 + 3), shade(grey, 0.5))
+    img.putpixel((x0 + 4, y0 + 3), shade(grey, 0.5))
+    rect(img, (x0 + 1, y0 + 5, x1 - 1, y0 + 6), mouth)
+    img.putpixel((x0 + 2, y0 + 5), tooth)
+    img.putpixel((x0 + 5, y0 + 5), tooth)
+    img.putpixel((x0, y0 + 4), shade(grey, 0.6))
+    img.putpixel((x1 - 1, y0 + 4), shade(grey, 0.6))
+    rect(img, (x0, y1 - 1, x1, y1), shade(belly, 0.95))
+    # the jaw that drops on a bite: a pale chin, the dark of the mouth on top, lower teeth along its front
+    box(img, jaw, shade(belly, 0.9), 0.14)
+    rect(img, faces(*jaw)["top"], mouth)
+    x0, y0, x1, y1 = front(jaw)
+    for x in range(x0 + 1, x1, 2):
+        img.putpixel((x, y0), tooth)
+    # the eyes: dark bulbs, lit across the front (and round onto the outer side and the top), a slit pupil on its side
+    box(img, eye, rim[:3], 0.12)
+    f = faces(*eye)
+    x0, y0, x1, y1 = f["front"]
+    rect(img, (x0, y0, x1, y1), lit)
+    rect(img, (x0, y1 - 1, x1, y1), lit_deep)
+    img.putpixel((x0, y0), lit_pale)
+    img.putpixel((x0 + 1, y0), lit_pale)
+    rect(img, (x0 + 1, y0 + 2, x0 + 3, y0 + 3), pupil)
+    sx0, sy0, sx1, sy1 = f["right"]
+    rect(img, (sx1 - 2, sy0, sx1, sy1), lit)
+    rect(img, (sx1 - 2, sy1 - 1, sx1, sy1), lit_deep)
+    img.putpixel((sx1 - 2, sy0 + 2), pupil)
+    tx0, ty0, tx1, ty1 = f["top"]
+    rect(img, (tx0, ty1 - 1, tx1, ty1), lit_deep)
+    for b in (f["front"], (sx1 - 2, sy0, sx1, sy1), (tx0, ty1 - 1, tx1, ty1)):
+        for y in range(b[1], b[3]):
+            for x in range(b[0], b[2]):
+                px = img.getpixel((x, y))
+                if px != pupil:
+                    glow.putpixel((x, y), px)
     save(img, "entity/xenoform_gremlin.png")
+    save(glow, "entity/xenoform_gremlin_glow.png")
 
 
 def knell():
@@ -4360,7 +4359,6 @@ EXTRAS_IN_FRONT = {
     "pyre": (((12, 78, 5, 5, 1), (10, 10)),),
     "blur": (((34, 68, 4, 2, 3), (10, 6)), ((34, 64, 9, 3, 1), (7, 3)), ((0, 76, 4, 3, 4), (8, 29)), ((16, 76, 4, 3, 4), (12, 29))),
     "wisp": (((0, 64, 10, 10, 10), (7, 0)), ((0, 86, 8, 7, 4), (8, 20))),
-    "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
 }
 
 
@@ -4381,6 +4379,25 @@ def duplex_card(skin, card):
     put(DUPLEX_NOSE, 11, 15)
 
 
+def gremlin_card(skin, card):
+    """Gremlin's front view: its own small parts stood on the card's feet line, the eyes out past the head."""
+    def put(part, x, y, flip=False):
+        face = skin.crop(front(part))
+        if flip:
+            face = face.transpose(Image.FLIP_LEFT_RIGHT)
+        card.paste(face, (x, y), face)
+    put(GREMLIN_LEG, 9, 29)
+    put(GREMLIN_LEG, 12, 29, True)
+    put(GREMLIN_FOOT, 8, 35)
+    put(GREMLIN_FOOT, 12, 35, True)
+    put(GREMLIN_BODY, 9, 22)
+    put(GREMLIN_ARM, 7, 23)
+    put(GREMLIN_ARM, 14, 23, True)
+    put(GREMLIN_HEAD, 8, 15)
+    put(GREMLIN_EYE, 5, 15)
+    put(GREMLIN_EYE, 15, 15, True)
+
+
 def preview(out):
     """A contact sheet: each alien's front view assembled from its skin's front faces (no extras), 8x scale."""
     k = 8
@@ -4390,6 +4407,10 @@ def preview(out):
         card = Image.new("RGBA", (24, 36))
         if form == "duplex":
             duplex_card(skin, card)
+            sheet.paste(card.resize((24 * k, 36 * k), Image.NEAREST), (i * 24 * k, 0))
+            continue
+        if form == "gremlin":
+            gremlin_card(skin, card)
             sheet.paste(card.resize((24 * k, 36 * k), Image.NEAREST), (i * 24 * k, 0))
             continue
         card.paste(skin.crop(front(HEAD)), (8, 0))
