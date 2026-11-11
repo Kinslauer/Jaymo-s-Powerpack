@@ -128,6 +128,10 @@ kit.
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
   the future, a thing out of someone else's pack, even something hazardous that hurts the holder. Until the power is
   mastered, the holder can't command what comes.
+  (new) **The parade notice** (Retaking, the Arsenal's Road, 2026-11-11). The first time the rift pulls something from
+  the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
+  not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
+  off. the bridge is the line now. if you find this don't come".
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
@@ -223,6 +227,11 @@ to be in several places at once.
 **His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
 his.** Nobody knew it was him, nobody knows now, and he will never tell you.
+
+(new) **The drawings** (Retaking, the Chrono's Road, 2026-11-11). The first of the last pilots a Chrono talks to hands
+over some folded sheets found in the city: a great wheel "every rivet", the same wheel small enough for a sweeper's
+chest plate ("they will want to keep time"), the city's streets with a mark where every sweeper stands, and the maker's
+name scraped off every sheet, neatly. Nothing says whose they are.
 
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
@@ -483,6 +492,11 @@ upgrades are done there, at the elder's forge. The elder's people have an extrem
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
+(new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
+hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
+explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
+it home, do not come home". Andy to confirm: this hints that the elder meant the band to be given away.
+
 ## The future: Los Perrito
 
 The future a Chrono can leap to is Los Perrito City in ruins: always night, the streets wrecked, feral hordes in them,
@@ -709,6 +723,11 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
 
+  (new) **What It Remembers** (Retaking, the Web Slinger's Road, 2026-11-11). Once a symbiote is close enough to stop
+  fighting its host, it leaks onto a blank page and writes: cold, dark, falling and burning; a hole in the ground and
+  hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
+  was left of him went out into the world, fine as dust. Some of it found you." It never names him.
+
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
   beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
@@ -874,11 +893,21 @@ you"): dice, bookies, fight pits, and goods the watch would rather not see. Assa
 a tavern window is the guild's mark that someone has been paid for. Looters and bandits do not give their names.
 Barbarian camps take raiders and captives, and spare those the realms have outlawed.
 
+(new) **Paid For** (Retaking, the Thief's Road, 2026-11-11). Now and then a locked chest holds a contract left under a
+black candle: a book is in the chest, do not read it, put it in the ground where no road goes, "nobody sent you"; and
+"whoever pays for this has paid for it before. The book keeps turning up again. Bury it deeper this time." The book
+beside it is a copy of *The Long Defence*. Nobody says who pays.
+
+(new) **The Old Campaign** (Retaking, the trades' road, 2026-11-11). An old campaigner's account in four short parts,
+handed to fighters as they rise in their trade: the goblins at the river farms ("they were the small ones"), the orc
+king at the high pass and the stone at its top that "something had walked away from", a slow light beyond the ridge and
+the one man back with a notched stick, and the buried who did not stay buried: "Burn them. And keep a light at the ford."
+
 **Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
 
-(new) **How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
+**How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
 this page, and it only ever hints. Families keep the faith of their trade: miners and smiths the Anvil-Father, fisherfolk
 the Deep Mother, hunters the Green Huntsman, healers the Hearthkeeper, outlaws the Ash Whisperer. Among the Nightborn,
 some families are **lantern-keepers of the barrows**, who keep the Lantern Warden's lights on the moor's old graves.

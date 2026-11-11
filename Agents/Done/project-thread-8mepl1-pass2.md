@@ -28,4 +28,4 @@ lines and circles into real beams and rings.
 
 ## Done
 Compiles for Powers and Kingdoms; not played.
-- 2026-11-11 19:02 PR #1310 is merged into master; moved to Agents/Done.
+- 2026-11-11 14:13 PR #1310 is merged into master; moved to Agents/Done.
