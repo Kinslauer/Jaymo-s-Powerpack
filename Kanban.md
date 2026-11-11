@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:17). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 
 
 ## Being built
 
+- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · claimed
 
 
 ## In review
