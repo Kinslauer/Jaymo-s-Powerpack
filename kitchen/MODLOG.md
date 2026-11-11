@@ -1813,3 +1813,7 @@ Andy's TFC Hardrock picks (ideas after Cold Sweat, GPL-3.0, written afresh; art 
   south, up to 25 (`Warmth.NORTH_COLD`).
 - JEI info pages for the hearth, icebox, thermometer, the loom (linings) and the waterskins.
 - Compile-checked; not played.
+
+## 0.5.109 (2026-11-11): Old waterskins survive the tier update
+
+A waterskin from before the tier update turns into a Leather Waterskin instead of disappearing, and keeps its water (up to the leather skin's 3 sips).

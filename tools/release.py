@@ -11,7 +11,8 @@ end of the same MODLOG, and each squash merge made every later PR "conflict" on 
 
 A PR now adds a note instead (see changes/README.md): `changes/<powers|kingdoms|kitchen>/<slug>.md`, first line
 `# <title>`, then the MODLOG text. For each note, oldest first, this script:
-  1. raises that mod's patch version in its gradle.properties (0.21.64 -> 0.21.65);
+  1. raises that mod's patch version in its gradle.properties (0.21.64 -> 0.21.65), or, when the note has a
+     `bump: minor` line, the minor version (0.21.109 -> 0.22.0; `bump: major` gives 1.0.0). Only when Andy asks;
   2. appends `## <version> (<date>): <title> (#<PR>)` and the note's text to the end of the mod's MODLOG;
   3. deletes the note.
 Then it updates the version table in docs/vault/Home.md and regenerates docs/codemap/ (also kept out of PRs).
@@ -46,14 +47,22 @@ def pending():
     return sorted(notes, key=lambda n: (n[0], n[2].name))
 
 
+BUMP = re.compile(r"^bump:\s*(patch|minor|major)\s*$", re.I)
+
+
 def read_note(f):
-    """(title, body). The title is the first `# ` line; without one it's the file name."""
+    """(title, body, level). The title is the first `# ` line; without one it's the file name. A `bump: minor` (or
+    `major`) line anywhere asks for a bigger version step and is left out of the MODLOG text; the default is patch."""
     lines = f.read_text(encoding="utf-8").strip().splitlines()
     title = f.stem.replace("-", " ").replace("_", " ")
     if lines and lines[0].startswith("# "):
         title = lines[0][2:].strip()
         lines = lines[1:]
-    return title, "\n".join(lines).strip()
+    level = "patch"
+    for line in [l for l in lines if BUMP.match(l.strip())]:
+        level = BUMP.match(line.strip()).group(1).lower()
+        lines.remove(line)
+    return title, "\n".join(lines).strip(), level
 
 
 def pr_number(f):
@@ -63,10 +72,13 @@ def pr_number(f):
     return m.group(1) if m else None
 
 
-def bump(v):
+def bump(v, level="patch"):
+    """0.21.109 -> 0.21.110 (patch), 0.22.0 (minor) or 1.0.0 (major)."""
     parts = v.split(".")
-    parts[-1] = str(int(parts[-1]) + 1)
-    return ".".join(parts)
+    at = {"major": 0, "minor": 1}.get(level, len(parts) - 1)
+    at = min(at, len(parts) - 1)
+    parts[at] = str(int(parts[at]) + 1)
+    return ".".join(parts[:at + 1] + ["0"] * (len(parts) - at - 1))
 
 
 def main():
@@ -88,9 +100,9 @@ def main():
         if prop_file not in props:
             props[prop_file] = (ROOT / prop_file).read_text(encoding="utf-8")
             logs[log_file] = (ROOT / log_file).read_text(encoding="utf-8")
-        new = bump(VERSION.search(props[prop_file]).group(2))
+        title, body, level = read_note(f)
+        new = bump(VERSION.search(props[prop_file]).group(2), level)
         props[prop_file] = VERSION.sub(lambda m: m.group(1) + new, props[prop_file], count=1)
-        title, body = read_note(f)
         pr = pr_number(f)
         entry = f"## {new} ({today}): {title}" + (f" (#{pr})" if pr else "") + "\n\n" + body + "\n"
         logs[log_file] = logs[log_file].rstrip("\n") + "\n\n" + entry

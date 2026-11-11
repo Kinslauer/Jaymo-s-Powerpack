@@ -120,7 +120,12 @@ public final class WaterskinItem extends Item {
 	}
 
 	public static Water water(ItemStack stack) {
-		return stack.getOrDefault(Climate.WATERSKIN_WATER, Water.EMPTY);
+		Water water = stack.getOrDefault(Climate.WATERSKIN_WATER, Water.EMPTY);
+		// a waterskin from before the tiers held 5 sips: never show more than this tier holds
+		if (stack.getItem() instanceof WaterskinItem skin && water.sips() > skin.maxSips()) {
+			return new Water(skin.maxSips(), water.clean(), water.temp(), water.until());
+		}
+		return water;
 	}
 
 	@Override

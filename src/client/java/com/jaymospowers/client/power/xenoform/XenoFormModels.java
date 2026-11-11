@@ -7074,6 +7074,8 @@ public final class XenoFormModels {
 		 */
 		static final float LEG_SWING = 0.85F, FOOT_LIFT = 2.5F, LEG_LENGTH = 12.0F, LAND_DROP = 1.2F;
 		static final float ARM_SWING = 0.9F, ARM_FLARE = 0.12F, ROLL = 0.11F, SHOULDER_TURN = 0.22F, LEAN = 0.12F;
+		/** Hauling (sprinting, {@code Towerback#HAUL_STRIDE}): its arms swing and shoulders turn this share of a walk's, and it leans in this much more. */
+		static final float HAUL_ARMS = 0.3F, HAUL_LEAN = 0.15F;
 		/** (0.19.28) The swat's arm (radians): drawn across the chest and coiled, then flung out wide to its right; how it turns its shoulders and trembles. */
 		static final float SWAT_RAISE = -1.45F, SWAT_ACROSS = -1.15F, SWAT_OUT = 1.35F, SWAT_COIL = -0.5F, SWAT_UNCOIL = 0.45F, SWAT_TREMBLE = 0.05F;
 		/** The grab's arm (radians, x): reared back, reaching down, held at the chest, slammed down. */
@@ -7114,7 +7116,7 @@ public final class XenoFormModels {
 				state.walkAnimationSpeed = 0.0F;
 				super.setupAnim(state);
 				state.walkAnimationSpeed = speed;
-				walk(stride, Math.min(1.0F, speed * 1.3F));
+				walk(stride, Math.min(1.0F, speed * 1.3F), Boolean.TRUE.equals(state.getData(XenoformClient.TOWER_HAUL)));
 			} else {
 				super.setupAnim(state);
 			}
@@ -7154,9 +7156,9 @@ public final class XenoFormModels {
 
 		/**
 		 * (0.19.28) One step of its walk: {@code stride} in radians (a foot down at each half turn past a quarter),
-		 * {@code amount} how far into walking it is (0 standing).
+		 * {@code amount} how far into walking it is (0 standing), {@code hauling} if it sprints.
 		 */
-		private void walk(float stride, float amount) {
+		private void walk(float stride, float amount, boolean hauling) {
 			if (amount <= 0.001F) {
 				return;
 			}
@@ -7174,12 +7176,14 @@ public final class XenoFormModels {
 			// its weight rolls over the planted foot; its head keeps level; it leans into the walk
 			this.body.zRot += forward * ROLL * amount;
 			this.head.zRot -= forward * ROLL * 0.6F * amount;
-			this.body.xRot += LEAN * amount;
-			this.head.xRot -= LEAN * 0.5F * amount;
-			// its shoulders turn with the arm swinging forward, and the arms swing big against the legs, flared out
-			turn(-swing * SHOULDER_TURN * amount);
-			this.rightArm.xRot += -swing * ARM_SWING * amount;
-			this.leftArm.xRot += swing * ARM_SWING * amount;
+			float lean = LEAN + (hauling ? HAUL_LEAN : 0.0F), arms = hauling ? HAUL_ARMS : 1.0F;
+			this.body.xRot += lean * amount;
+			this.head.xRot -= lean * 0.5F * amount;
+			// its shoulders turn with the arm swinging forward, and the arms swing big against the legs, flared out (hauling,
+			// hardly at all: it doesn't flail)
+			turn(-swing * SHOULDER_TURN * arms * amount);
+			this.rightArm.xRot += -swing * ARM_SWING * arms * amount;
+			this.leftArm.xRot += swing * ARM_SWING * arms * amount;
 			this.rightArm.zRot += ARM_FLARE * amount;
 			this.leftArm.zRot -= ARM_FLARE * amount;
 		}
