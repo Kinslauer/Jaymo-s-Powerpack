@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: undead-seek-real-shelter
 branch: claude/undead-seek-real-shelter
 with:
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-11 01:49 No sign of work for 30 min: marked stalled (whoever ran it stopped).
