@@ -8,6 +8,7 @@
     python tools/discord_read_aloud.py --list lore             # which documents match, without joining
     python tools/discord_read_aloud.py "Lore" --dry-run        # print what would be read, no Discord
     python tools/discord_read_aloud.py --stop                  # stop the reading that's running and leave
+    python tools/discord_read_aloud.py "Lore" --debug          # also log the voice connection (no sound? run this)
     python tools/discord_read_aloud.py --check                 # is everything installed for THIS Python? (no Discord)
 
 Setup on the PC (once):  pip install "discord.py[voice]>=2.7" edge-tts   and have ffmpeg on PATH (or set FFMPEG).
@@ -302,8 +303,24 @@ def pick_channel(client, wanted):
     raise SystemExit("Nobody to follow is in a voice channel: pass --channel=<name or id> or set READ_ALOUD_CHANNEL.")
 
 
-async def read_in_channel(token, title, pieces, start, wanted):
+def voice_status(vc):
+    """The voice link's encryption state, for --debug: Discord's E2EE (DAVE) drops audio it can't decrypt silently."""
+    c = getattr(vc, "_connection", None)
+    if c is None:
+        return "no connection state"
+    sess = getattr(c, "dave_session", None)
+    return (f"dave_version={getattr(c, 'dave_protocol_version', '?')} session={'yes' if sess else 'no'} "
+            f"ready={getattr(sess, 'ready', '-') if sess else '-'} can_encrypt={getattr(c, 'can_encrypt', '?')} "
+            f"mode={getattr(vc, 'mode', '?')} playing={vc.is_playing()} connected={vc.is_connected()}")
+
+
+async def read_in_channel(token, title, pieces, start, wanted, debug=False):
     import discord
+    if debug:
+        import logging
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(asctime)s %(name)s %(message)s")
+        for name in ("discord.voice_state", "discord.voice_client", "discord.gateway", "discord.player"):
+            logging.getLogger(name).setLevel(logging.DEBUG)
 
     intents = discord.Intents.none()
     intents.guilds = True
@@ -344,10 +361,15 @@ async def read_in_channel(token, title, pieces, start, wanted):
                 if stop.is_set() or not others_here(vc):
                     break
                 print(f"{clock()} paragraph {i + 1} of {len(pieces)}", flush=True)
+                if debug:
+                    print(f"  file {os.path.basename(path)} {os.path.getsize(path)} bytes; {voice_status(vc)}", flush=True)
                 finished = asyncio.Event()
                 loop = asyncio.get_running_loop()
                 vc.play(discord.FFmpegPCMAudio(path, executable=exe),
                         after=lambda err: loop.call_soon_threadsafe(finished.set))
+                if debug:
+                    asyncio.get_running_loop().call_later(
+                        3, lambda: print(f"  3 s in: {voice_status(vc)}", flush=True))
                 while not finished.is_set():
                     if stop.is_set() or not others_here(vc):
                         vc.stop()
@@ -486,6 +508,7 @@ def main(argv=None):
     ap.add_argument("--list", action="store_true", help="list the documents that match and stop")
     ap.add_argument("--dry-run", action="store_true", help="print the paragraphs that would be read; no Discord")
     ap.add_argument("--stop", action="store_true", help="stop the reading that is running")
+    ap.add_argument("--debug", action="store_true", help="log the voice connection and its encryption state")
     ap.add_argument("--check", action="store_true", help="check this Python has everything; no Discord")
     a = ap.parse_args(argv)
 
@@ -534,7 +557,7 @@ def main(argv=None):
     wanted = a.channel or os.environ.get("READ_ALOUD_CHANNEL")
     write_pid()
     try:
-        return asyncio.run(read_in_channel(token, title, pieces, start, wanted))
+        return asyncio.run(read_in_channel(token, title, pieces, start, wanted, a.debug))
     except KeyboardInterrupt:
         return 0
     finally:
