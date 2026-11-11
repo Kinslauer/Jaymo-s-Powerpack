@@ -17,7 +17,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
-- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 
 
@@ -27,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
+- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · #1332 · in-review
 - [ ] [[Agents/claude-cloud-arsenal-anywhere|claude-cloud-arsenal-anywhere]] · 💻 Odysseus · #1326 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 
