@@ -105,7 +105,12 @@ public final class Melting {
 		new Alloy(Molten.AMETHYST_BRONZE, 9, List.of(new Input(Molten.COPPER, 9), new Input(Molten.AMETHYST, 10))),
 		new Alloy(Molten.PIG_IRON, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.BLOOD, 5), new Input(Molten.HONEY, 5))),
 		new Alloy(Molten.SLIMESTEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.SLIME, 25))),
-		new Alloy(Molten.STEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.PIG_IRON, 9))));
+		new Alloy(Molten.STEEL, 9, List.of(new Input(Molten.IRON, 9), new Input(Molten.PIG_IRON, 9))),
+		// the knife metals, all from cobalt: three of cobalt hardened with one of steel, cobalt and gold in slime,
+		// two of copper to one of cobalt with amethyst
+		new Alloy(Molten.MANYULLYN, 36, List.of(new Input(Molten.COBALT, 27), new Input(Molten.STEEL, 9))),
+		new Alloy(Molten.QUEEN_SLIME, 18, List.of(new Input(Molten.COBALT, 9), new Input(Molten.GOLD, 9), new Input(Molten.SLIME, 25))),
+		new Alloy(Molten.HEPATIZON, 18, List.of(new Input(Molten.COPPER, 18), new Input(Molten.COBALT, 9), new Input(Molten.AMETHYST, 10))));
 
 	private static final Map<Item, Result> ITEMS = new IdentityHashMap<>();
 	/**
@@ -166,6 +171,11 @@ public final class Melting {
 	public static void silver(Item ingot, Item nugget, Item block, Item raw, Item rawBlock, Item... ores) {
 		metal(Molten.SILVER, ingot, nugget, block, raw, rawBlock);
 		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
+	}
+
+	/** Cobalt ore melts doubled, as the other ores do (its ingot melts as one of {@link Tinkering#ALLOY_INGOTS}). */
+	public static void cobalt(Item ore) {
+		add(Molten.COBALT, Molten.INGOT * ORE_INGOTS, ore);
 	}
 
 	/** (0.21.29) Crushed and washed ore ({@code tinkering/ore/OreWashing}) melt as raw ore does (doubled). */
