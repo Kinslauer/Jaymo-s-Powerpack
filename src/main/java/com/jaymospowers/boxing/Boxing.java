@@ -24,6 +24,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -78,11 +80,15 @@ public final class Boxing {
 	public static final float GASSED_CUT = 0.45F, GASSED_CAP = 2.0F;
 	/** This long (ticks) without a punch and the string starts again. */
 	static final int STRING_RESET = 30;
+	/** With this many half-feathers or fewer left in the row (four icons), a boxer is tiring: a warning, nothing more. */
+	public static final int TIRING_FEATHERS = 8;
+	/** Gassed: Mining Fatigue is kept up in spells this long (ticks), renewed this often. */
+	static final int FATIGUE_TICKS = 40, FATIGUE_EVERY = 20;
 	/** The game's own hit immunity lasts this long (ticks) after a hit. */
 	static final int IMMUNITY_GATE = 10;
 
 	/** The punches of the strings. The lead hand is the left, but the Bastion stands southpaw: its lead is the right. */
-	public enum Punch { JAB, CROSS, LEAD_HOOK, REAR_HOOK }
+	public enum Punch { JAB, CROSS, LEAD_HOOK, REAR_HOOK, UPPERCUT, PULL_COUNTER, STRAIGHT }
 
 	/** The three styles. Their order is saved: add new ones at the end. */
 	public enum Style {
@@ -146,6 +152,8 @@ public final class Boxing {
 		long landed = Long.MIN_VALUE / 2;
 		/** What the attack-speed modifier was last set for (0: taken off). */
 		int applied;
+		/** A click that came too early: the one it was aimed at (entity id), thrown as soon as the rhythm allows; -1 for none. */
+		int queued = -1;
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
@@ -165,12 +173,13 @@ public final class Boxing {
 				// (the client's own swing and attack indicator run as usual; the server decides the punch)
 				return InteractionResult.PASS;
 			}
-			punch(boxer, target);
+			punch(boxer, target, false);
 			return InteractionResult.SUCCESS;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Boxing::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> STATES.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
+		BoxingEvades.init();
 		BoxingDebug.register();
 	}
 
@@ -245,6 +254,11 @@ public final class Boxing {
 		return style != null && level(player, style) > 0 && !player.isSpectator() && BoxingGear.isGear(player.getMainHandItem());
 	}
 
+	/** Whether {@code player} is boxing and running low: {@link #TIRING_FEATHERS} or fewer left, but not yet {@link #gassed}. */
+	public static boolean tiring(Player player) {
+		return boxing(player) && !player.isCreative() && !gassed(player) && Feathers.view(player).feathers() <= TIRING_FEATHERS;
+	}
+
 	/** Whether {@code player} is out of stamina ({@link Feathers}' exhausted state). */
 	public static boolean gassed(Player player) {
 		return !player.isCreative() && Feathers.view(player).exhausted();
@@ -274,7 +288,23 @@ public final class Boxing {
 
 	// ---- the punch ---------------------------------------------------------------------------------------------------
 
-	private static void punch(ServerPlayer boxer, LivingEntity target) {
+	/** Spends {@code cost} half-feathers of {@code boxer}'s stamina, fractions carried over; false if there is none to spend. */
+	static boolean spend(ServerPlayer boxer, float cost) {
+		if (gassed(boxer)) {
+			return false;
+		}
+		State state = STATES.computeIfAbsent(boxer.getUUID(), id -> new State());
+		state.owed += cost;
+		int whole = (int)state.owed;
+		if (whole > 0) {
+			state.owed -= whole;
+			return Feathers.spend(boxer, whole);
+		}
+		return true;
+	}
+
+	/** {@code queued}: a click that came early, thrown now that the rhythm allows. */
+	private static void punch(ServerPlayer boxer, LivingEntity target, boolean queued) {
 		ServerLevel level = boxer.level();
 		Style style = style(boxer);
 		if (style == null) {
@@ -283,9 +313,11 @@ public final class Boxing {
 		State state = STATES.computeIfAbsent(boxer.getUUID(), id -> new State());
 		long now = level.getGameTime();
 		if (now < state.readyAt - EARLY_SLACK) {
-			// too soon: nothing is thrown, and nothing is spent
+			// too soon: one punch waits its turn ({@link #tick}); nothing is spent yet
+			state.queued = target.getId();
 			return;
 		}
+		state.queued = -1;
 		boolean gassed = gassed(boxer);
 		int interval = interval(boxer);
 		// an early punch borrows from the next one, so the rhythm holds on average
@@ -293,25 +325,28 @@ public final class Boxing {
 		if (now - state.lastPunch > STRING_RESET) {
 			state.step = 0;
 		}
-		Punch punch = style.punch(state.step++);
+		// a strong attack an evade earned comes before the string (and never when gassed)
+		BoxingEvades.Strong strong = gassed ? null : BoxingEvades.takeStrong(boxer, now);
+		Punch punch = strong != null ? strong.punch() : style.punch(state.step++);
 		state.last = punch;
 		state.lastPunch = now;
-		if (!gassed) {
-			state.owed += costAt(level(boxer, style));
-			int whole = (int)state.owed;
-			if (whole > 0) {
-				state.owed -= whole;
-				Feathers.spend(boxer, whole);
-			}
+		boolean heavy = strong != null && strong.heavy();
+		if (heavy) {
+			// (a strong attack costs the same at every level)
+			spend(boxer, BoxingEvades.STRONG_COST);
+		} else if (!gassed) {
+			spend(boxer, costAt(level(boxer, style)));
 		}
-		float pitch = punch == Punch.JAB ? 1.3F : punch == Punch.CROSS ? 0.9F : 1.05F;
-		if (!target.isAlive() || target.getBoundingBox().distanceToSqr(boxer.getEyePosition()) > RANGE * RANGE) {
-			// out of reach: the punch is thrown at the air
+		float pitch = punch == Punch.JAB ? 1.3F : punch == Punch.CROSS ? 0.9F : heavy ? 0.7F : 1.05F;
+		double reach = RANGE + (strong == null ? 0.0 : strong.reach());
+		if (!target.isAlive() || target.getBoundingBox().distanceToSqr(boxer.getEyePosition()) > reach * reach
+			|| BoxingEvades.outOfReach(boxer, target, now)) {
+			// out of reach (or slipped clear by the combo breaker): the punch is thrown at the air
 			level.playSound(null, boxer.getX(), boxer.getEyeY(), boxer.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.4F, pitch + 0.3F);
 			return;
 		}
 		// (a cestus hits harder; levels never do)
-		float damage = PUNCH_DAMAGE + BoxingGear.punchBonus(boxer.getMainHandItem());
+		float damage = (strong != null ? strong.damage() : PUNCH_DAMAGE) + BoxingGear.punchBonus(boxer.getMainHandItem());
 		if (gassed) {
 			damage = Math.min(GASSED_CAP, damage * (1.0F - GASSED_CUT));
 		}
@@ -325,11 +360,15 @@ public final class Boxing {
 		}
 		state.victim = target.getId();
 		state.landed = now;
-		// most of the shove is taken back, so a flurry stays in reach
+		// most of the shove is taken back, so a flurry stays in reach (the pull counter keeps all of it and more)
 		Vec3 after = target.getDeltaMovement();
-		target.setDeltaMovement(before.add(after.subtract(before).scale(PUNCH_KNOCKBACK)));
+		target.setDeltaMovement(before.add(after.subtract(before).scale(strong != null ? strong.knockback() : PUNCH_KNOCKBACK)));
 		target.syncVelocity = true;
-		level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, pitch);
+		level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, heavy ? 1.0F : 0.8F, pitch);
+		if (strong != null) {
+			BoxingEvades.strongLanded(boxer, target, strong, now);
+		}
+		BoxingEvades.landed(boxer, target, now);
 		ItemStack gear = boxer.getMainHandItem();
 		if (BoxingGear.isGear(gear)) {
 			gear.hurtAndBreak(1, boxer, InteractionHand.MAIN_HAND);
@@ -343,6 +382,22 @@ public final class Boxing {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			boolean boxing = boxing(player);
 			State state = STATES.get(player.getUUID());
+			if (state != null && state.queued >= 0) {
+				if (!boxing) {
+					state.queued = -1;
+				} else if (player.level().getGameTime() >= state.readyAt) {
+					// the click that came early, in its turn
+					int id = state.queued;
+					state.queued = -1;
+					if (player.level().getEntity(id) instanceof LivingEntity target) {
+						punch(player, target, true);
+					}
+				}
+			}
+			if (boxing && player.tickCount % FATIGUE_EVERY == 0 && gassed(player)) {
+				// gassed: the arms are lead
+				player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, FATIGUE_TICKS, 0));
+			}
 			if (!boxing && (state == null || state.applied == 0)) {
 				continue;
 			}

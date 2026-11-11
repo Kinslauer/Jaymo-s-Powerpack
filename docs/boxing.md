@@ -43,16 +43,52 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   (its material's), steel 600.
 - All the art is drawn by `tools/boxing_assets.py` and is placeholder.
 
+## Built so far: evades, strong attacks, blur, the combo breaker
+
+`BoxingEvades` (server), `client/boxing/BoxingClient`, and a hook in `client/stamina/DodgeClient`.
+
+- **The Dodge key (Left Alt) while boxing** is the style's evade, not the roll. The client moves the boxer and sends
+  which way was held. Arrow Slit: slip left or right (`SLIP_SPEED` 0.38), else a bob straight in (`BOB_SPEED` 0.3).
+  Long Guard: a pull straight back (`PULL_SPEED` 0.6). Bastion: a shoulder roll in place, or a slip to a side.
+  `COOLDOWN` 14 ticks. Cost: 2 half-feathers at level 1 down to 1 at level 10 (two evades an icon). A gassed boxer
+  can't evade.
+- **Missing a blow:** a melee blow or a shot that would land within `EVADE_TICKS` 8 of the press misses. That is shorter than the
+  cooldown, so evades can't be chained into lasting immunity.
+- **Perfect evade:** within the guard's perfect-parry window of the press (`Guard.PERFECT_TICKS` 5, +2 when locked onto
+  the attacker). It earns the next punch inside `STRONG_TICKS` 30:
+  - bob: the **uppercut**, `UPPERCUT_DAMAGE` 4;
+  - pull: the **pull counter**, `PULL_COUNTER_DAMAGE` 3, reaching `PULL_COUNTER_REACH` 1 block further than a punch and
+    shoving 1.8 times the usual knockback;
+  - shoulder roll: the **roll straight**, `STRAIGHT_DAMAGE` 5;
+  - a side slip: the hook on that side as the next punch (a plain punch, chosen).
+- **A plain shoulder roll** (in the window but not perfect) lets `GLANCE` half the blow through and earns a
+  `STRAIGHT_WEAK_DAMAGE` 2.5 straight.
+- A strong attack costs `STRONG_COST` one icon at every level, and a cestus adds to it.
+- **Blur and daze:** a strong attack out of a perfect evade blurs a player for 1 s, 1.5 s or 2.5 s (`UPPERCUT_BLUR`,
+  `PULL_COUNTER_BLUR`, `STRAIGHT_BLUR`), not again within `BLUR_COOLDOWN` 5 s of the last one starting. Mobs are
+  dazed for as long (`DarktideStatus.stun`); the undead never; a boss `BOSS_DAZE` 1.5 s at most.
+- **The blur on screen** is a pale haze over the world, drawn under the HUD (crosshair, incoming-blow cues and bars
+  stay sharp), fading over its last half second. It is a haze, not a true lens blur. The "Boxing: blur or vignette" key
+  (unbound by default) swaps it for a dark frame; the choice is kept in `config/jaymospowers-boxing.properties`.
+- **Combo breaker:** `BREAKER_HITS` 6 punches landed in a row on a player or a boss (a pause of `BREAKER_RESET` 40
+  ticks, or them evading one, ends the row) and they are shoved about 1.5 blocks back; that boxer's punches can't
+  reach them for `BREAKER_TICKS` 20, and their blur clears.
+- **Early click:** a click that comes too early is kept (one) and thrown when the rhythm allows.
+- **Gassed** adds Mining Fatigue. `Boxing.tiring` (8 half-feathers or fewer) is there for the looks patch to read.
+
 ## Not built yet
 
-The evades on Left Alt and the perfect evade, the strong attacks, the blocks, blur and daze, the combo breaker, the
-early click that queues a punch, tiring and gassed looks, the idles and poses, the teachers,
-quests and levelling, the HUD, and the loading-screen hints.
+**The blocks.** Right click does nothing with fist gear yet. The brief prices a blocked hit (1 icon; 1.5 for the Close
+Guard / Arrow Slit) but the block itself has to go through `combat/Guard`, and wants its own patch. Until then
+bracers do nothing special.
+
+Also: the breath puff and heaving shoulders, the idles and poses, the gear worn on the hands, the teachers, quests
+and levelling, the HUD, and the loading-screen hints.
 
 ## Things to know
 
-- A punch is instant, like any vanilla hit, so its target gets no incoming-blow glint. The evades patch has to decide
-  whether punches get a short wind-up.
+- A punch is instant, like any vanilla hit, so its target gets no incoming-blow glint: against another boxer an
+  evade is a read, not a reaction. Mobs' and weapons' blows do show the cue. Andy to say if punches get a wind-up.
 - Fist gear is not in Kingdoms' `form_fists` tag, so a fist form never takes right click from the block to come.
 - Hand Wraps have no Better Combat weapon attributes: they hit the vanilla way, which is what the server hooks.
 - Sharpness and other damage enchantments do nothing to a styled punch.
@@ -76,3 +112,14 @@ quests and levelling, the HUD, and the loading-screen hints.
 14. Forge an Iron Cestus: shape Cestus Studs at the Part Builder, cast them, pour iron, then studs + a Tool Binding at
     the Tool Station. The same with steel, and with Bracer Plates.
 11. A second player: PvP punches obey the server's PvP setting.
+15. Arrow Slit, a zombie swinging: Left Alt with A or D held slips aside and the blow misses; with W, a bob in.
+16. Time the bob so the blow would land within a quarter second of the press: crit sparks, and the next punch is a 4
+    damage uppercut that leaves the zombie's arms down for a second (a skeleton is not dazed).
+17. Long Guard: Left Alt pulls back. Timed right, the next punch reaches from 3 blocks, does 3 and throws the target.
+18. Bastion: Left Alt with no direction rolls in place. Timed right: no damage, and a 5 damage straight. A little
+    late: half damage taken, and a 2.5 straight.
+19. Two players: land a perfect uppercut on the other: their screen hazes for a second, HUD still sharp. Again within
+    5 s: no haze. Press the "Boxing: blur or vignette" key (bind it first): the haze becomes a dark frame.
+20. Two players: land six punches in a row: the sixth shoves them back and the next second of punches miss.
+21. Click twice quickly at level 1: the second punch comes by itself when the first's rhythm is up.
+22. No fist gear, or no style: Left Alt is the roll, as before.
