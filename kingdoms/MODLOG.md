@@ -11055,3 +11055,10 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
   12/22/32/42%, and a skeleton that traded its bow for a blade may carry one too. Never beside a trident or a bow.
 - **Shields are raised more** (`MobShields`): 65% of chances instead of 55%, with a shorter rest between raises (20 to 50 ticks, was 25 to 60).
 - Compiled; not played.
+
+## 0.7.719 (2026-11-11): the wild's shields start battered
+
+- Shields now break only when their durability runs out (Jaymo's Powers), so the plain shields barbarians, orc grunts and
+  goblins carry (`ShieldBearers`) start 50 to 90% worn: some break in the fight you have with them, sooner under an axe.
+  Realm guards' and the undead's shields are whole, as before.
+- Compiled; not played.
