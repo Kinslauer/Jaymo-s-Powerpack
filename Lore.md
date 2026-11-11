@@ -26,6 +26,11 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
+the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
+whatever leather, mail and iron they had, filthy and bloodied by then.
+
 **The field of the long defence** (Andy, 2026-11-11). It was fought in a wooded forest, in sight of a Keep the defenders
 held. It was large and legendary: the fighting ran through the whole wood. Lightning struck when the sorcerer summoned
 his legion, and the dead came up a few at a time, here and there, not all at once. Varro disarmed the orc that came at
@@ -33,6 +38,14 @@ him and brought it to its knees to in-balm it. At the end the fifth ran at the s
 bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
 The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
+
+(new) **The keep above the ford in the world.** It still stands, one in the world, in a forest above a river, wherever that
+forest lies; it has stood there since the long defence, and folk stopped speaking of it generations ago: a ruined
+keep of mossy, cracked stone, its corner tower half fallen and its gate toward the water, a worn road down to a shallow
+crossing. Horses won't drink there. In the keep lies **A Loose Page** in the gate-warden's hand: the names of the dead
+ran past the gatehouse wall, and before the one at the back went into the ground he turned and looked at the ford, "the
+way a man looks at a door he means to come back through". The warden asks whoever keeps the crossing after him to keep a
+light in the keep at night. (This is where the Second Defence will come.)
 
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
@@ -55,6 +68,14 @@ the sky became an ordinary, grinding one on the ground.
 around them, and they are taking back the world they once knew. This is the present age. It is why a player starts as
 a farmhand and can end in the tier of songs: the world is not lost, it is being retaken, one village, one ruin and one
 raider at a time.
+
+(new) **The Retaking** (Andy, 2026-11-11). The taking back is the pack's main story, and every player lives it, whatever
+their power, class or blood. It runs in five acts on the ladder of kings: The Hearth (the Goblin King), The Old Stones
+(an Ogre King, the monoliths, the Giants, the Aether, and the wood and ford of *The Long Defence*), Lights in the Sky
+(the Skeleton Lord, the raider bands, fallen stars, the pods, the Maw and the far worlds), The Dark Below (the Piglin
+King, the spirits, the Banes, the demons' country, the Judge's weighing, the Grue's shades) and Legend (the Wither, and
+the Grue's legion raised again at the ford: the Second Defence). Each power, class and faith has its own road into the
+same acts. The story says what was done, never what it means: that still comes from people, books and wordless films.
 
 ## Ki and mana are the same thing
 
@@ -540,6 +561,11 @@ and there are zombified Hornkin too.
 **The Piglin King** holds the fourth rung of Knowledge. **Ignivorus**, the Nether's fire dragon, flies anywhere
 in the Nether.
 
+(new) **Cobalt** (crafting routes thread, 2026-11-11; Andy asked that every item have a route). A blue ore in the
+Nether's netherrack, which the piglins leave alone because it is not gold. It is the root of the four knife metals:
+smiths melt it with steel for manyullyn, with gold and slime for queen's slime, with copper and amethyst for hepatizon.
+Nobody made it; it is simply in the rock.
+
 ## The spirits
 
 There are five mage-spirits, and **only one wakes for you**, for life (Andy, 2026-11-11). It shares your mana. Each has
@@ -724,6 +750,12 @@ names, families and tempers.
 
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
+
+(new) **How the town golems look.** Each is shaped by the realm's own masons for its work. The **lamp warden** is a
+lean figure of pale stone banded in gold whose head is a lantern; it stands with the iron golems and its flame wakes
+at dusk. The **mender** is a mossy boulder that walks, green crystals grown from its back, and it holds out its hands
+to the hurt. The **throne golem** is a small keep of dark stone set with diamond that sits down by the seat and folds
+itself into the ruler's throne, its turrets and battlements the throne's back.
 
 **Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
