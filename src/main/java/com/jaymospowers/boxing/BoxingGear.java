@@ -25,11 +25,15 @@ import net.minecraft.world.item.ToolMaterial;
  * {@code jaymospowers:wrap_cloth} tag (a Clean Rag, Kingdoms' Torn Cloth, the Kitchen's Hemp Cloth). The plainest fist
  * gear: nothing but the style.</li>
  * <li>The <b>cestus</b>, for damage: a styled punch does {@link #punchBonus} more with one on (leather, iron, steel).</li>
- * <li>The <b>bracers</b>, for blocking: no harder a punch than wraps; what they do for a block comes with the blocks.</li>
+ * <li>The <b>bracers</b>, for blocking: no harder a punch than wraps, but they stop the most of a blow.</li>
  * </ul>
  * The leather cestus and bracers are sewn round Hand Wraps in the crafting grid. The iron and steel ones are forged
  * like every metal weapon ({@code tinkering/WeaponParts}: the cestus's studs or the bracers' plates, and a binding, at
  * the Tool Station). No gold or diamond. Without a style, all of it is a plain weak weapon.
+ *
+ * <p><b>Blocking.</b> Fist gear is a weapon, so right click raises the pack's weapon guard with it ({@code combat/Guard}:
+ * the block, and the parry in its first ticks). What it stops is the gear's own ({@link #blockShare}): each step up,
+ * wraps to leather to iron to steel, stops more and costs a boxer less ({@link #blockCostShare}); bracers most of all.
  *
  * <p>Fist gear is whatever is in the {@code jaymospowers:boxing_gear} item tag. It is deliberately not in Kingdoms'
  * {@code form_fists} tag: with fist gear in hand, right click has to stay free for the boxer's block. The art comes
@@ -51,6 +55,16 @@ public final class BoxingGear {
 	static final int STEEL_DURABILITY = 600;
 	static final float STEEL_BONUS = 2.5F;
 
+	/**
+	 * The share of a blow from the front each piece stops when raised (right click; the pack's weapon guard,
+	 * {@code combat/Guard}, which stops 0.6): Hand Wraps, then the cestus and the bracers in leather, iron, steel.
+	 */
+	static final float WRAPS_BLOCK = 0.5F;
+	static final float[] CESTUS_BLOCK = {0.55F, 0.6F, 0.65F}, BRACERS_BLOCK = {0.65F, 0.75F, 0.85F};
+	/** What a boxer's block costs with each piece, as a share of the full cost: the same order. */
+	static final float WRAPS_BLOCK_COST = 1.0F;
+	static final float[] CESTUS_BLOCK_COST = {0.95F, 0.9F, 0.85F}, BRACERS_BLOCK_COST = {0.9F, 0.8F, 0.7F};
+
 	/** Everything a boxer can box with. */
 	public static final TagKey<Item> GEAR = TagKey.create(Registries.ITEM, JaymosPowers.id("boxing_gear"));
 
@@ -60,6 +74,8 @@ public final class BoxingGear {
 	public static Item HAND_WRAPS, LEATHER_CESTUS, IRON_CESTUS, STEEL_CESTUS, LEATHER_BRACERS, IRON_BRACERS, STEEL_BRACERS;
 	/** What each cestus adds to a styled punch. */
 	private static final Map<Item, Float> PUNCH = new LinkedHashMap<>();
+	/** Each piece's block: the share of a blow it stops, and the share of the block's cost it leaves. */
+	private static final Map<Item, float[]> BLOCK = new LinkedHashMap<>();
 
 	private BoxingGear() {
 	}
@@ -78,6 +94,12 @@ public final class BoxingGear {
 		PUNCH.put(LEATHER_CESTUS, LEATHER_CESTUS_PUNCH);
 		PUNCH.put(IRON_CESTUS, IRON_CESTUS_PUNCH);
 		PUNCH.put(STEEL_CESTUS, STEEL_CESTUS_PUNCH);
+		BLOCK.put(HAND_WRAPS, new float[] {WRAPS_BLOCK, WRAPS_BLOCK_COST});
+		Item[] cestus = {LEATHER_CESTUS, IRON_CESTUS, STEEL_CESTUS}, bracers = {LEATHER_BRACERS, IRON_BRACERS, STEEL_BRACERS};
+		for (int tier = 0; tier < 3; tier++) {
+			BLOCK.put(cestus[tier], new float[] {CESTUS_BLOCK[tier], CESTUS_BLOCK_COST[tier]});
+			BLOCK.put(bracers[tier], new float[] {BRACERS_BLOCK[tier], BRACERS_BLOCK_COST[tier]});
+		}
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(HAND_WRAPS);
 			output.accept(LEATHER_CESTUS);
@@ -111,6 +133,18 @@ public final class BoxingGear {
 	/** Whether {@code stack} is fist gear. */
 	public static boolean isGear(ItemStack stack) {
 		return !stack.isEmpty() && stack.is(GEAR);
+	}
+
+	/** The share of a blow {@code item} stops when raised: its own if it is fist gear, else {@code otherwise}. */
+	public static float blockShare(Item item, float otherwise) {
+		float[] block = BLOCK.get(item);
+		return block == null ? otherwise : block[0];
+	}
+
+	/** The share of a boxer's block cost left with {@code stack} raised (1 for anything that isn't fist gear). */
+	public static float blockCostShare(ItemStack stack) {
+		float[] block = BLOCK.get(stack.getItem());
+		return block == null ? 1.0F : block[1];
 	}
 
 	/** What {@code stack} adds to a styled punch (a cestus; 0 for anything else). */
