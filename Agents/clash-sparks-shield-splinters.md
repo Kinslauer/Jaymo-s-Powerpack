@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-76m9kc
 with: Claude (cloud thread "Add sparks to blade clashes and parries")
-pr: 1289 (1288 merged)
+pr: 1288, 1289 (both merged)
 mods: powers, kingdoms
 versions: 
 started: 2026-11-11
