@@ -219,6 +219,7 @@ public final class XenoformPowerClient implements PowerClient {
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		XenoformHud.render(graphics, delta, player);
+		com.jaymospowers.client.power.chrono.ChronoSpeedHud.render(graphics, player);
 	}
 
 	/** Z: the wrist comes up while it's held (the wheel turns the dial), the hand lands as the band slams on letting go. */
