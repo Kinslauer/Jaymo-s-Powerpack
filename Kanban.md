@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 05:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 05:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,13 +19,13 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
 
 
 ## Done
