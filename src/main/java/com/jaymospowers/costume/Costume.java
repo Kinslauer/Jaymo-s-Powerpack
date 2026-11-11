@@ -123,6 +123,28 @@ public final class Costume {
 		return player.getAttached(WORN);
 	}
 
+	/**
+	 * A symbiote's host wears no cloth: the symbiote has taken the costume's shape as its suit (Andy: "any symbiote user
+	 * with a costume has the symbiote take that shape for its suit instead, so it can be called on and off at will like
+	 * the default suit does"). The design stays in {@link #WORN}; it shows only while the suit is called ({@link #shown}).
+	 * Either side.
+	 */
+	public static boolean symbioteShape(Player player) {
+		return worn(player) != null && com.jaymospowers.power.web.WebSymbiote.isBonded(player);
+	}
+
+	/**
+	 * The costume showing on this player now, or null (either side): the one they wear, unless a symbiote wears its
+	 * shape ({@link #symbioteShape}) and its suit is withdrawn, or swollen into the big body.
+	 */
+	public static @Nullable CostumeDesign shown(Player player) {
+		CostumeDesign worn = worn(player);
+		if (worn == null || !com.jaymospowers.power.web.WebSymbiote.isBonded(player)) {
+			return worn;
+		}
+		return com.jaymospowers.power.web.WebSymbiote.suitShown(player) && !com.jaymospowers.power.web.WebSymbiote.bulked(player) ? worn : null;
+	}
+
 	/** Whether this player's face is hidden by their costume (for a later secret identity). */
 	public static boolean masked(Player player) {
 		// (0.11.82) a Rig Helm hides the face too
@@ -136,7 +158,8 @@ public final class Costume {
 
 	/** (0.12.3) Whether the costume itself hides the face: a face-hiding mask that is on (either side). */
 	public static boolean faceHidden(Player player) {
-		CostumeDesign worn = worn(player);
+		// (a symbiote's shape hides nobody while its suit is withdrawn)
+		CostumeDesign worn = shown(player);
 		return worn != null && worn.mask().hidesFace && !unmasked(player);
 	}
 
@@ -145,7 +168,7 @@ public final class Costume {
 	 * and on, with the face not hidden (either side).
 	 */
 	public static boolean hooded(Player player) {
-		CostumeDesign worn = worn(player);
+		CostumeDesign worn = shown(player);
 		return worn != null && worn.mask().isHood() && !unmasked(player) && !faceHidden(player);
 	}
 
@@ -238,6 +261,12 @@ public final class Costume {
 		}
 		SecretIdentity.update(player);
 		rustle(player);
+		if (symbioteShape(player)) {
+			// the symbiote has it now: worn when its suit is called
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.7F);
+			player.sendOverlayMessage(Component.translatable(com.jaymospowers.power.web.WebSymbiote.suitShown(player)
+				? "message.jaymospowers.costume.symbiote_shape" : "message.jaymospowers.costume.symbiote_shape_call"));
+		}
 	}
 
 	/** Takes the worn costume off (server) and gives it back; false if none was worn. */

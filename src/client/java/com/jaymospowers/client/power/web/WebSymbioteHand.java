@@ -41,6 +41,10 @@ public final class WebSymbioteHand {
 		if (!armor && !WebSymbiote.suitShown(player)) {
 			return;
 		}
+		if (!armor && com.jaymospowers.costume.Costume.symbioteShape(player)) {
+			// the suit is the costume's shape: its sleeve is drawn instead (CostumeClient.renderHand)
+			return;
+		}
 		if (suitWide == null) {
 			suitWide = model(0.12F, false);
 			suitSlim = model(0.12F, true);
