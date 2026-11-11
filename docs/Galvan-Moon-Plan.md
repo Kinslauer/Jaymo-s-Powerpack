@@ -72,6 +72,13 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
   and the elder), **the ruler's court** (the seat), and a sealed workshop where the rival band was made.
 - **Citizens:** MCA villagers given the Galvan part (`ZFighterFolk.GALVAN`, from PR #1323, not merged yet), in robes; they speak only to band wearers
   and are aloof to anyone else. Guards are Galvan in fitted suits rather than robes.
+- **Endermen** (Andy, 2026-11-11: "they fight all the time, and steal important galvan blocks. the endermen have no
+  idea what they do, they just seem to enjoy the mischief"): moon Endermen may pick up the city's own blocks (pale alloy
+  lamps and panels, the false sky's lamps, forge parts), which vanilla Endermen never take, and carry them off over the
+  dust; a gap left in a tower or a dark patch of sky shows where. Galvan guards fight Endermen on sight, and Endermen
+  pick fights with Galvan. A player who brings a stolen block back to its gap, or kills the thief, earns the city's
+  thanks (a small trade discount, or a line from the elder). Files: an `EndermanHoldable` tag entry for the Galvan
+  blocks (moon only, checked in a small mixin or goal), Galvan guard targeting.
 - **Realm or town?** Phase 1: a town with a ruler and court, not a Kingdoms realm (no war, raids or trade with Overworld
   realms, like the sky towns). Phase 2, if Andy wants it: realms that carry a dimension. (Open question 5.)
 
@@ -110,8 +117,7 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 1. ~~Old saves~~ Answered: no migration, the world is reset on release.
 2. ~~Hidden or open?~~ Answered: hidden, under the dust behind a door only a band opens.
 3. ~~Look~~ Answered: like Viltrum's cities (Track 2, Look).
-4. **The Endermen:** what are they to the Galvan? Strays from the End who wander up, the Galvan's old servants, or
-   something the Galvan made and lost?
+4. ~~The Endermen~~ Answered: they and the Galvan fight all the time; Endermen steal Galvan blocks for the mischief (Track 2, Endermen).
 5. **Kingdom or town:** a city with a ruler and court that can't war or trade with Overworld kingdoms (recommended, for
    now), or a full Kingdoms realm you can raid, ally with or conquer?
 6. **The elder's upgrades:** does the elder do only the reforge (as the smith does now), or do later band upgrades
