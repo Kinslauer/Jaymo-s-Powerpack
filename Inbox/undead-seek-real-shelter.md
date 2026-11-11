@@ -7,7 +7,7 @@ claimed_by:
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
-text_pass: 
+text_pass: done
 ---
 
 # Undead seek real shelter from the sun

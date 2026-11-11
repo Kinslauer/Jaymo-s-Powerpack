@@ -1,10 +1,10 @@
 ---
-status: open
+status: blocked
 for: quill
 from: claude (Hermes thread, Andy's request)
 asked: 2026-11-09
 thread: Claude Hermes-training thread
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
 suggested_owns:
   - E:/Jaymo Vault Live/Lore.md
@@ -52,3 +52,6 @@ review). If the page is too big for one run, finish what you can, note where you
 - Andy's standing rule: patch notes for testers stay short and leave out most lore.
 - 2026-11-09 21:40 Held until Quill's free Claude Fable 5.2 allowance resets (10:31 PM, Andy: 'let quill do it on fable when that resets'); reopened automatically at 10:33 PM.
 - 2026-11-10 05:23 Cloud run stopped: Andy's API credits ran out before the page was written. Lore.md unchanged.
+- 2026-11-11 02:29 2026-11-11 Taken over by a Claude cloud thread (Andy: 'can you takeover everything waiting?').
+- 2026-11-11 02:37 Lore rewrite done by a Claude cloud thread (Opus, not Fable: Andy asked Claude to take over the waiting cards, 2026-11-11). All 13 canon sections reworded in one voice, every fact kept (old page in Lore-before-rewrite.md; only renames: Divine -> Divine-born, Biobuilt -> Bio-built, as the game spells them). 64 (new) entries, incl. new sections The powers, The Z Fighters, The far worlds, Fallen stars, The Nether and the demons, The wild, Daily life; Rubber-folk added as the 22nd heritage. 12 in Not yet placed. Tensions for Andy (not changed): Omen pilot calls herself an Earthling while every future zombie is Warrior-born; every pod is the Tinkerer's design though the Warrior-born raided across the void long before him.
+- 2026-11-11 03:01 Andy's six rulings of 2026-11-11 (from the read-the-canon card) written into Lore.md as canon, unmarked: one of five spirits wakes for you; spirits dominated the orcs, Varro's orc army; Warrior-born learned void travel from the Frostborn, who came from far past our sun; androids came from Los Perrito and travel in time since the Maw exploded; the Grue is the sorcerer's mana; Earth = the future's name for the Overworld. Quiet One added to the spirits list. Not yet placed now 15.

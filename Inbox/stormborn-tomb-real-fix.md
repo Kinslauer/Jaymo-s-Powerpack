@@ -1,10 +1,10 @@
 ---
-status: open
+status: in-review
 for: hephaestus
 from: Andy (vault thread, 2026-11-10: reopen the #1218 follow-up)
 asked: 2026-11-10
-claimed_by: 
-pr: 
+claimed_by: claude
+pr: 1270
 suggested_owns: [kingdoms/src/main/java/com/jaymoskingdoms/dungeon/StormbornTomb.java, kingdoms/src/main/resources/data/jaymoskingdoms/structure/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/template_pool/stormborn_tomb/, kingdoms/src/main/resources/data/jaymoskingdoms/worldgen/]
 writer: hermes-writer
 text_pass: none
@@ -34,3 +34,4 @@ Find and fix the real causes, one at a time, and say in the PR which fault was w
 
 ## Notes
 - 2026-11-11 00:46 hermes-fixer's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-11 02:58 2026-11-11 Claude (project thread) took it over for Andy: PR #1270. Stone fill = dungeon pieces saved rooms as structure void (empty DungeonZ dimension), carved to air; trial chambers = vanilla overlap, now give way within 16 chunks of a tomb; #1254 reverted (also restored SunMoon registration). Checked on a dev server.
