@@ -26,7 +26,7 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
-(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and (new) Grimsby, a Sylvan, carries the wind on his blade: it runs along the steel in lit currents.
 Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
 the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
 whatever leather, mail and iron they had, filthy and bloodied by then.
@@ -241,6 +241,25 @@ breath, not fire: they feel a blow before it lands and are simply not there, and
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
+
+(new) **The sky villages** (four-mods thread, 2026-11-11; Andy: "should all instead spawn in the aether proper, and be
+filled with divine born, any other heritage has a reason for not only having traveled but being accepted"). The
+Divine-born live in villages on the Aether's islands: a round green with a well, homes of the island's own wood
+under cloth roofs, a windmill, a kitchen that feeds guests because its owners are never hungry, and a mast with a
+balloon skiff tied to it. Each land builds in its own wood (skyroot in the highfields, wisproot in the magnetic
+lands, greatroot in the cold). A sky lord keeps a holystone castle here and there. No kingdom claims any of it, and
+nobody's blood is held against them up there. Some villages have stood empty since the scattering, their roofs
+fallen in, swets and cockatrices in the houses.
+
+(new) **The halfway folk** (same thread; Andy: "This will be what the dawnborn culture becomes"). A few in every
+sky village are Dawnborn. Their people walked up after the sun generations ago and were let stay because they came
+on their own feet. They praise the sun where their neighbours keep the Truth, mend the windmills, and call
+themselves halfway: high enough for the light, not high enough for the ring. They are the "wizards on the floating
+rocks" of the ground folk's riddles. Anyone else found living there is one of the devout who made the climb, or one
+of the just who asked the Judge to stay.
+
+(new) **Things that fall.** Now and then something drops out of a clear sky onto the land below: a tuft of
+cloudwool, a feather, a hat, a letter never meant for whoever finds it. Nobody below can say where from.
 
 ## The shape of the world
 
