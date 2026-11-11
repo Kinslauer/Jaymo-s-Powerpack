@@ -215,6 +215,21 @@ his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
+(new) **Those who stay** (four-mods thread, 2026-11-11; Andy: "some live there perpetually after reaching the
+otherworld with righteous karma, and choosing to stay there at the judge. This keeps your halo and you are free to
+roam"). One of the dead whose page weighed just may ask the Judge to stay. He writes it down and that is the end of
+it: no road home, no tournament, no second asking. They keep the ring, are Divine-born from then on, and walk the
+Aether as its own people do. This is the second way the blood wakes, and the commoner one among the devout of the
+Truth.
+
+(new) **How the Divine-born carry themselves** (same thread; Andy: "like z fighters but without the raging raw ki,
+it is controlled and elegant, they gain a web like sense that allows them to dodge incoming attacks and counter, as
+long as they have feathers"). Their strength is the same stuff a fighter burns as ki, but held still. It shows as
+breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. It costs
+them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
+ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
+but they fall slowly when they choose to.
+
 ## The shape of the world
 
 The world is graded in tiers, and the tiers are its history as much as its difficulty:
