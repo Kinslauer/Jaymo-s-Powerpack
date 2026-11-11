@@ -18,11 +18,11 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🍇 Bacchus · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🍇 Bacchus · #1262 · in-review
 - [ ] [[Agents/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · 💻 Odysseus · #1256 · in-review
 
 
