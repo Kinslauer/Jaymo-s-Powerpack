@@ -759,6 +759,11 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+**Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
+realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
+blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
+and breaks under enough blows, and a fighter who loses one fetches another from camp; steel on steel throws sparks.
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
