@@ -29,7 +29,6 @@ kanban-plugin: board
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
-- [ ] [[Agents/four-mods-sound-vfx|four-mods-sound-vfx]] · 💻 Odysseus · #1303, 1305 · in-review
 
 
 ## Needs Andy
