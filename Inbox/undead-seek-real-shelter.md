@@ -49,3 +49,4 @@ Not tested in game.
 3. The reflection getNavigation().getClass().getDeclaredField("avoidSun") only works when the class is exactly GroundPathNavigation. Use 'nav instanceof GroundPathNavigation g' with g.setAvoidSun(...) instead of reflection (check the 26.3 method name in the sources).
 Not tested in game.
 - 2026-11-11 05:14 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-11 00:34 Text pass: change note changes/powers/claude-undead-seek-real-shelter.md is the only player-visible text for this feature. It describes the deadlier sunlight (ray-cast from multiple body points, tree shade no longer counts) and shelter search (caves, solid roofs, wider radius). Text is clear and player-facing; no rewrite needed.
