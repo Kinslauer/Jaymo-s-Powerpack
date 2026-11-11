@@ -1,12 +1,14 @@
 ---
-status: blocked
+status: in-review
 for: quill
 from: youth (Andy in #quill-class, 2026-11-09)
 asked: 2026-11-09
 thread: 1569356185964904578
 claimed_by: claude-cloud-lore-canon
-pr: 
+pr: 1271
 suggested_owns: []
+writer: hermes-writer
+text_pass: done
 ---
 
 # Lore: read the canon and write against it
@@ -75,3 +77,4 @@ blight, the Grue's and the Quiet One's lines, the heavens rumours, the Wet Page 
 - 2026-11-10 16:27 Still blocked on Nov 10 although Quill's Fable allowance reset at 10:31 PM Nov 9 (the automatic reopen didn't happen). Reopened by the cloud vault check, per Andy's 'let quill do it on fable when that resets'.
 - 2026-11-11 Claude (cloud) took this over from Quill at Andy's request ('can you takeover everything waiting?'). Canon check written above; waiting on Andy to say which side wins for items 1-6.
 - 2026-11-10 9:59 PM Andy answered all six (logged in Decisions.md): one spirit of five wakes; Varro led an army of orcs the spirits dominated; Warrior-born learned space travel from the Frostborn, who come from far past our sun with unseen technology (Frostborn to be rewritten); the androids came from Los Perrito and, after the Maw exploded, travel back and forth through time, some hoping to prevent it; the Grue is the sorcerer, the Grue is what his mana became; 'Earth' is what the future calls the Overworld. Lore.md update handed to the lore-canon-rewrite thread. Game text that now needs changing: Varro's teach/inbalm lines (fine as is, maybe stress 'dominated'), the Frostborn heritage, its dialogue and story lines, and the draugr's Frostborn jailer.
+- 2026-11-10 22:22 Text pass: reviewed all player-visible text in PR #1271. Changes in kingdoms/lang/parts/heritage.json (Frostborn desc), spirit-varro.json (Varro teach lines), dialogue.json (Frostborn villager), lore-films.json (demon master), astronomy-journal.json (new journal UI), inhabitants.json (Bogre), spirit-duel.json, stench.json, story-road.json (Maw road), talk-hermit_alchemy.json, training-weights.json, unique-starts.json, gui.json (stats legend). All text aligns with Lore.md canon (Frostborn from far past the sun, Varro dominated orcs, Maw as pull not black hole, demons remember the old war). No rewrites needed. changes/kingdoms/project-thread-4hxvy5.md already present.

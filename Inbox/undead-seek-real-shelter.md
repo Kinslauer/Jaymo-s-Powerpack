@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: claimed
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -42,4 +42,4 @@ OK: vanilla isSunBurnTick is mirrored faithfully (checked against 26.3 bytecode:
 Not tested in game.
 - 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
 - 2026-11-11 01:54 Review (head 025ce16), second pass: still changes needed; the 01:19 list (whole-body rays, search cost, change note) is not fixed yet. One more: 4. Skeletons may not be able to leave tree shade: vanilla RestrictSunGoal turns on avoidSun, and GroundPathNavigation trims a path at the first open-sky node whenever the mob's own spot can't see sky. Under leaves canSeeSky is false, so SeekShelterGoal's moveTo (SeekShelterGoal.java:67) gets cut at the tree's edge and the skeleton keeps burning in place. Check trimPath in the 26.3 sources; if so, turn avoidSun off while this goal runs (or replace RestrictSunGoal for these mobs). Not tested in game.
-- 2026-11-10 21:46 Text pass: rewrote change note in changes/powers/claude-undead-seek-real-shelter.md to be concise and player-focused
+- 2026-11-11 03:13 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
