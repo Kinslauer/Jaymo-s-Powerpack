@@ -160,5 +160,16 @@
 	"gui.jaymospowers.arsenal_places.dim.other": "Another world",
 	"message.jaymospowers.arsenal.pocket_enter": "Your pocket. The ender chest is your Rift Hoard; walk into the portal by the door (or press Z) to step out",
 	"message.jaymospowers.arsenal.pocket_visit": "Someone else's pocket. Walk into the portal by the door to step out",
-	"message.jaymospowers.arsenal.pocket_not_yours": "This hoard isn't yours to open"
+	"message.jaymospowers.arsenal.pocket_not_yours": "This hoard isn't yours to open",
+	"message.jaymospowers.arsenal.pack_taken": "Something reached into your pack and took your %s. It'll come back.",
+	"message.jaymospowers.arsenal.pack_pulled": "The rift went into %2$s's pack: %1$s",
+	"message.jaymospowers.arsenal.pack_returned": "Your %s came back out of the rift",
+	"message.jaymospowers.arsenal.hazard.ember": "Your hand closed on embers",
+	"message.jaymospowers.arsenal.hazard.puffer": "Your hand closed on a pufferfish",
+	"message.jaymospowers.arsenal.hazard.wither": "Your hand closed on a wither rose",
+	"message.jaymospowers.arsenal.hazard.cactus": "Your hand closed on a cactus",
+	"message.jaymospowers.arsenal.hazard.frost": "Your hand closed on powder snow",
+	"message.jaymospowers.arsenal.hazard.charge": "Your hand closed on a lit charge",
+	"message.jaymospowers.arsenal.grab_holding": "Reaching for %s's pack... (keep holding)",
+	"message.jaymospowers.arsenal.pack_empty": "%s has nothing the rift can take"
 }
