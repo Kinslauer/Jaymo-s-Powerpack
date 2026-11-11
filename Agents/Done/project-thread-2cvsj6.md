@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: merged
 task: imps-nether
 branch: claude/project-thread-2cvsj6
 with: 
