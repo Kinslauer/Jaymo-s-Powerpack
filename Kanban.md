@@ -16,6 +16,7 @@ kanban-plugin: board
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
+- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
 
 
 ## Being built
