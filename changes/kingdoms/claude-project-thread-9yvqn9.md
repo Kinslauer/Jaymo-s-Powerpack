@@ -4,9 +4,9 @@
 - Grimsby is a Sylvan elf: long pointed ears, a slighter build, no beard
 - The soldiers each wear their own mix of leather, chainmail and iron, caked in mud and old blood, not shiny
 - Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
-- Varro throws his fire after the in-balming, then runs in to stand back to back with Grimsby, who is blade on blade with an orc; one long side shot of the two
+- Varro throws his fire after the in-balming and runs in after it in the same shot; a shot of Thessaly and Ambrose from the front comes between, then the cut to him crossing to Grimsby, who is blade on blade with an orc, and one long side shot of the two back to back
 - Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
-- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) are in among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
-- A new run of shots near the start takes each hero from the front, at a different distance each: the camera goes out after their bolt to what it bursts (an imp, or for Grimsby an orc), and out of the burst the next hero's light forms and carries the camera back to that one's face. Thessaly, then Ambrose, Grimsby, Varro
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) each have a foe on them from the first frame and fight among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
 - The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
 - The film is 11 seconds longer; its tape is recorded again with all of this

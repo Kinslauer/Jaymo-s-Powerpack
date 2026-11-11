@@ -123,7 +123,7 @@ public final class LoreFilmClient {
 	 */
 	static final int MELEE = 90, LINE = MELEE + Relay.TICKS, SUMMON = LINE + 110, STRIKE = SUMMON + 22, RISING = SUMMON + 44, VARRO = SUMMON + 146,
 		VARRO_CLOSE = VARRO + 36, VARRO_CAST = VARRO + 78, CAST_TICKS = 36,
-		DUO1 = VARRO_CAST + CAST_TICKS, DUO2 = DUO1 + 104, DON = DUO2 + 100, QUIET = DON + 40, REVERSE = QUIET + 52, END = REVERSE + 120,
+		VARRO_RUNS = 16, INTER = VARRO_CAST + 52, DUO1 = INTER + 56, DUO2 = DUO1 + 104, DON = DUO2 + 100, QUIET = DON + 40, REVERSE = QUIET + 52, END = REVERSE + 120,
 		LENGTH = LoreFilms.FILM_TICKS;
 	/** Varro's move, beat by beat: the orc runs in, raises its axe, chops; the disarm, the kick, its knees, his grip, the mark, its bow, it rises. */
 	static final int ORC_CHARGE = VARRO - 34, CHOP_UP = VARRO + 12, CHOP = VARRO + 16, DISARM = VARRO + 20, KICK = VARRO + 26, KNEES = VARRO + 29,
@@ -140,11 +140,13 @@ public final class LoreFilmClient {
 	 * air an imp}), how far in front of them the camera sits, and the move they throw with.
 	 */
 	static final class Relay {
-		static final int HOLD = 10, FLY = 8, BACK = 18, LEG = HOLD + FLY + BACK, LAST = 30, CAST = 4, TICKS = 3 * LEG + LAST;
-		static final int[] WHO = {1, 3, 2, 0};
-		static final double[][] PREY = {{21.5, -5.0, 4.6}, {22.5, 5.5, 5.2}, {23.0, -9.5, 0.0}, {22.5, 12.0, 4.4}};
-		static final double[] NEAR = {2.6, 4.4, 3.3, 5.6};
-		static final String[] MOVES = {"cast_both", "cast_left", "cast_blade", "point"};
+		static final int HOLD = 10, FLY = 8, BACK = 18, LEG = HOLD + FLY + BACK, LAST = 30, CAST = 4, TICKS = LEG + LAST;
+		// (Thessaly and Ambrose only. Andy: "Grimsby and varro dont need a shot of the magic bolts, because their team up
+		// shot is the back to back stand off")
+		static final int[] WHO = {1, 3};
+		static final double[][] PREY = {{21.5, -5.0, 4.6}, {22.5, 5.5, 5.2}};
+		static final double[] NEAR = {2.6, 4.4};
+		static final String[] MOVES = {"cast_both", "cast_left"};
 		static final double SHORT = 3.2, ASIDE = 0.55, EYE = 1.45, FACE = 1.35, BOB = 0.3;
 
 		private Relay() {
@@ -168,7 +170,8 @@ public final class LoreFilmClient {
 	static final float GATE_SIZE = 2.4F;
 	static final int RIFT_RIM = 0xF2D8FF;
 	static final double[] QUIET_FIGHTS = {10.0, -7.5};
-	static final int VARRO_READY = 44, QUIET_READY = 56, EARLY_FOES = 1, BOLT_AT_IMP = 3;
+	static final int VARRO_READY = 44, QUIET_READY = 56, EARLY_FOES = 2, BOLT_AT_IMP = 3, INTER_BOLT = 10;
+	static final double VARRO_AFTER = 0.36;
 	static final float EARLY_KILLS = 0.06F;
 	static final double QUIET_WALK = 0.22, IMP_BOLT_REACH = 20.0;
 	static final int PALE = 0xF4F4FF;
@@ -245,13 +248,14 @@ public final class LoreFilmClient {
 	static final double[][] LEVEL = {{DUO1_AT[0] + 1.2, DUO1_AT[1] + 3.0}, {DUO2_AT[0] + 0.2, DUO2_AT[1] + 2.6}};
 	static final double LEVEL_FLAT = 7.0, LEVEL_EASE = 5.0, DUO_KEPT = 6.5;
 	/** How often Grimsby, Thessaly and Ambrose each throw a bolt into the fight (ticks), and when in that their own comes. */
-	static final int[][] BOLTS = {{26, 0}, {34, 11}, {30, 19}};
+	static final int[][] BOLTS = {{14, 3}, {34, 11}, {16, 9}};
 	/** Ground the fighting is kept off while a close shot is taken across it: {from tick, to tick, f, s, how far round}. */
 	/** How far in front of a hero their face shot is taken from, how far behind their shoulder shot, and how far off Varro his close one. */
 	static final double HERO_FRONT = 4.4, HERO_BEHIND = 4.0, VARRO_NEAR = 3.0;
 	/** The ground between a hero and their camera is cleared of fighters this many ticks before the cut to them. */
 	static final int HERO_CLEAR_EARLY = 8;
 	static final double[][] CAMERA_CLEAR = {{LINE - 30, SUMMON, 19.3, 9.5, 4.2}, {VARRO - 30, VARRO_CAST, VARRO_AT[0] + 1.3, VARRO_AT[1] + 2.8, 3.0},
+		{INTER - 20, DUO1, 19.0, 0.5, 2.8}, {INTER - 20, DUO1, 16.2, 0.2, 2.0},
 		{DUO1 - 30, DUO2, DUO1_AT[0] + 2.4, DUO1_AT[1] + 5.0, 3.2}, {DUO1 - 30, DUO2, DUO1_AT[0] + 1.5, DUO1_AT[1] + 2.8, 2.0},
 		{DUO2 - 30, DON, DUO2_AT[0] + 0.4, DUO2_AT[1] + 5.2, 2.4}, {DUO2 - 30, DON, DUO2_AT[0] + 0.2, DUO2_AT[1] + 2.9, 2.0}, {DON - 20, QUIET, STRANGER_AT[0] - 1.5, STRANGER_AT[1] - 0.8, 3.2}};
 	/** How far Varro and his orc go looking for the dead once they charge. */
@@ -1083,6 +1087,23 @@ public final class LoreFilmClient {
 			f.legion.add(foe);
 			f.fighters.add(foe);
 		}
+		// Varro, Grimsby and the fifth each have one of the host on them already (Andy: "they are also all still idling at
+		// the start, remember they should be among the soldiers in battle")
+		Actor[] early = {f.varro, f.grimsby, f.stranger};
+		for (int i = 0; i < early.length; i++) {
+			Actor hero = early[i];
+			Actor foe = hero == null ? null : orc(f, "orc_" + i % 3, i, Role.HOST, Flesh.ORC, i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE, hero.f + STAND_OFF, hero.s, 0.0, facingBack);
+			if (foe == null) {
+				continue;
+			}
+			foe.team = 1;
+			foe.foe = hero;
+			hero.foe = foe;
+			foe.engagedAt = hero.engagedAt = 0;
+			foe.nextSwing = 4 + i * 3;
+			f.legion.add(foe);
+			f.fighters.add(foe);
+		}
 		// the dead, under the ground until their group's time: a few here, a few there, no two groups alike
 		int at = RISING + 4;
 		for (int i = 0; i < DEAD; ) {
@@ -1859,7 +1880,7 @@ public final class LoreFilmClient {
 			return true;
 		}
 		// the heroes' relay: each one's bolt, and the camera's way after it and back to the next of them
-		double[][] homes = {HEROES_AT[1], HEROES_AT[2], HEROES_AT[0], VARRO_AT};
+		double[][] homes = {HEROES_AT[1], HEROES_AT[2]};
 		for (int i = 0; i < Relay.PREY.length; i++) {
 			double[] prey = Relay.PREY[i], next = homes[Math.min(i + 1, homes.length - 1)];
 			if (segment(tf, ts, homes[i][0], homes[i][1], prey[0], prey[1]) < 2.6 || segment(tf, ts, prey[0], prey[1], next[0], next[1]) < 2.6) {
@@ -2055,7 +2076,9 @@ public final class LoreFilmClient {
 			Actor mage = caster(f, i + 1);
 			// (until their own shot: Grimsby's sword has an orc on it by then, and the other two throw faster in theirs)
 			int until = mage == f.grimsby ? DUO1 - DUO_GATHER : DUO2 - DUO_BOLT;
-			if (mage != null && t > 20 && t < until && t % BOLTS[i][0] == BOLTS[i][1] && t >= mage.busyUntil) {
+			// (and faster while the camera is on the two of them, between Varro's shots)
+			boolean two = mage != f.grimsby && t >= INTER && t < DUO1;
+			if (mage != null && t > 2 && t < until && (two ? t % INTER_BOLT == (i == 0 ? 0 : INTER_BOLT / 2) : t % BOLTS[i][0] == BOLTS[i][1]) && t >= mage.busyUntil) {
 				Actor d = target(f, mage, 16.0);
 				if (mage != f.grimsby && f.rnd.nextInt(BOLT_AT_IMP) == 0) {
 					// up at one of the imps (it takes more than one to bring one down)
@@ -2071,8 +2094,29 @@ public final class LoreFilmClient {
 			}
 		}
 		// Varro's fire, once his orc is up and his
-		if (t >= VARRO_CAST && t < DUO1 && f.varro != null) {
+		if (t >= VARRO_CAST && t < VARRO_CAST + VARRO_RUNS && f.varro != null) {
 			spell(f, 0, f.varro, t - VARRO_CAST);
+		}
+		if (t == VARRO_CAST + VARRO_RUNS && f.varro != null) {
+			// and he goes after it, in the same shot (Andy: "After varro casts his flame he should run directly after it in
+			// that same shot"): his axe to his right hand, and in among what the fire left standing
+			Actor varro = f.varro;
+			Vec3 lands = target(f, 0, varro);
+			float[] to = f.staged(lands);
+			rest(f, varro);
+			hold(f, varro, EquipmentSlot.MAINHAND, id(varro.e.getOffhandItem().getItem()));
+			hold(f, varro, EquipmentSlot.OFFHAND, "");
+			gait(f, varro, Moves.GUARD, Moves.SPRINT);
+			varro.scripted = false;
+			varro.busyUntil = 0;
+			varro.facing = null;
+			varro.foe = null;
+			varro.speed = VARRO_AFTER;
+			varro.homeF = varro.toF = to[0];
+			varro.homeS = varro.toS = to[1];
+			varro.leash = HERO_LEASH;
+			varro.kills = DUO_KILLS;
+			varro.nextSwing = t + 10;
 		}
 		gates(f, t);
 		relay(f, t);
@@ -2629,11 +2673,7 @@ public final class LoreFilmClient {
 				f.finishes.add(begin(f, grimsby, orc, IMPALE, t));
 			}
 			if (t == DUO1) {
-				// Varro, his fire thrown, goes in (Andy: "then rush in afterward alongside grimsby"): his axe to his right hand
-				rest(f, varro);
-				hold(f, varro, EquipmentSlot.MAINHAND, id(varro.e.getOffhandItem().getItem()));
-				hold(f, varro, EquipmentSlot.OFFHAND, "");
-				gait(f, varro, Moves.GUARD, Moves.SPRINT);
+				// Varro, from where his fire took him, across to Grimsby (Andy: "then later it should cut to him running to Grimsby")
 				varro.facing = null;
 				varro.foe = null;
 				varro.speed = VARRO_RUSH;
@@ -2799,6 +2839,10 @@ public final class LoreFilmClient {
 				return;
 			}
 			best.foe = hero;
+			if (hero.arc == 0 && hero.foe == null) {
+				// (a hero on its own goes to meet it)
+				hero.foe = best;
+			}
 			best.engagedAt = -1;
 			best.speed = Math.max(best.speed, DUO_FOE_RUN);
 		}
@@ -3880,7 +3924,7 @@ public final class LoreFilmClient {
 			}
 		}
 		// nor between a hero and the camera while their spell is on them (from a little before the cut to them)
-		if (t >= VARRO_CAST - HERO_CLEAR_EARLY && t < DUO1 && a.role != Role.STRANGER && a.role != Role.MARKED) {
+		if (t >= VARRO_CAST - HERO_CLEAR_EARLY && t < INTER && a.role != Role.STRANGER && a.role != Role.MARKED) {
 			Actor hero = f.varro;
 			if (hero != null && hero != a) {
 				double side = hero.s > 0.0 ? -1.0 : 1.0;
@@ -4014,8 +4058,13 @@ public final class LoreFilmClient {
 			// them, until it is up and his
 			pos = f.at(VARRO_AT[0] + 1.5, VARRO_AT[1] + VARRO_NEAR, 1.3);
 			look = f.at(VARRO_AT[0] + 1.3, VARRO_AT[1], 1.0);
-		} else if (t < DUO1) {
-			// Varro's fire
+		} else if (t >= INTER && t < DUO1) {
+			// Thessaly and Ambrose from the front, both in the frame, their bolts going out past the camera either side
+			float k = smooth((t - INTER) / (float)(DUO1 - INTER));
+			pos = f.at(20.5 - 1.5 * k, 0.6, 1.9);
+			look = f.at(13.0, 0.0, 1.2);
+		} else if (t < INTER) {
+			// Varro's fire, and Varro after it
 			int which = 0;
 			float into = t - VARRO_CAST;
 			Actor mage = f.varro;
