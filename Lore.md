@@ -527,6 +527,20 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
+(new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
+its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
+its bloom glows; **lonlix** is the common tuft of the warm lands; **parignum** lies in mats with small lit flowers;
+grey **Eden moss** covers the stone garden. **Eden vines** hang in strings under caps and ledges, and the **symbiotic
+moulds** grow on the undersides of the mushrooms and brain trees that feed them, one kind glowing. **Limphium** is the
+one the Verdant farm: its leaves are poor eating fresh and good eating dried, and a traveller in the far country is
+offered them before anything else.
+
+(new) **Diskwings** (four-mods thread, 2026-11-11, Eden Ring part 4). The far country's sky has one beast of its
+own: the diskwing, a flat slow glider with two crescent wings and a finned tail, lit along its back in its country's
+colour (purple over the mushroom forests, red over storm and sand, green over stone and grass, blue over the pulse
+forest). They harm nothing and nothing there hunts them. The Verdant read weather by them and count it bad manners to
+shoot one.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -583,11 +597,18 @@ hunter drops his orders as he runs: find the band ("it hums when it is near its 
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
-(new) **The city under the dust** (Andy, 2026-11-11: "hidden"). The Galvan live hidden
+(new) **Undersky, the city under the dust** (Andy, 2026-11-11: "hidden"; names Claude's, Andy said "surprise me"). The Ocellan live hidden
 beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
 moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
-believes the pod crews' rumour. The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed
-workshop where the rival band was made.
+believes the pod crews' rumour. Inside, tall white towers curve up to a false sky the Ocellan made themselves, blue with pale clouds,
+with gardens on their tops and rails sweeping round them (Andy: like the cities of Viltrum). The moon's Endermen and the Ocellan fight all the time: the Endermen steal
+the city's blocks, lamps and panels and bits of the false sky, with no idea what any of it does, for the mischief of it
+(Andy, 2026-11-11). The elder, **Ammet Thrum** (the Old Maker), keeps the Star Forge there; the ruler, **Sovereign Vorrel**, keeps
+his court there, and a sealed
+workshop where the rival band was made. A band wearer who hands the band to the ruler sees what he wanted it for: he
+puts it on and turns on them in his own court (Andy, 2026-11-11).
+Before Vorrel the Ocellan "had it figured out" (Andy, 2026-11-11): from Undersky they traded and made war between
+the worlds. Whoever kills the ruler while he wears the band may take his seat and open the city to the worlds again.
 
 ## The future: Los Perrito
 
