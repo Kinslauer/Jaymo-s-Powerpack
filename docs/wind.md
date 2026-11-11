@@ -640,6 +640,40 @@ client half is `client/BeamClashClient`.
   inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
 - Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
 
+## Airflow sense (always on; client `WindAirSense`)
+
+Jung's idea: a Wind user feels the air that moving things stir. It is information, not strength.
+
+- **What you see:** round the crosshair, a faint pale streak on the side each moving thing is on (ahead is up, behind is
+  down, like the incoming-blow cues). It is brighter the faster the thing moves and the nearer it is, thicker for
+  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall), and fades over about a second once it stops (`FADE`
+  0.05 a tick). At most `MAX_MARKS` 12 streaks, the strongest.
+- **What it feels:** any living thing but you (and your mount or rider) within reach that moved `MOVE_MIN` 0.08 b/t or
+  more this tick, through walls, in the dark, invisible or not. Full strength at `MOVE_FULL` 0.3 b/t.
+- **What it can't feel:** anything still or moving softly. A sneak is about 0.065 b/t, under `MOVE_MIN`, so standing
+  still or sneaking hides you from it. It gives a side only: no outline, no distance, no height.
+- **Reach:** `RANGE_BASE` 8 + `RANGE_PER_ABILITY` 4 per unlocked ability (12 blocks at one, 24 at four), from
+  `MIN_MASTERY` 1. By the sky over you (`WindWeather.sky`): `SHELTERED_RANGE` x0.5 with no sky overhead,
+  `OTHERWORLD_RANGE` x0.75 where there is no weather, `STORM_RANGE` x1.25 in a thunderstorm.
+- **Weather:** in a storm the streaks wander up to `STORM_WOBBLE` 20 degrees off true, so it reaches further and tells
+  you less. In the rain or the cold (`WindCold`) soft movement is lost: the least it feels is `DULLED_MIN` x1.5.
+- **Under water** (eyes in water) it feels nothing.
+- **Client side only**, from what the client already knows of the things round it (so never beyond the server's entity
+  tracking range): no packets, no server code, no cost. Run from `WindPowerClient.tick` and `renderHud`.
+- Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
+
+### Testing (airflow sense)
+1. `/power set @s wind`. Stand in the open with zombies or animals walking near: a streak shows round the crosshair on
+   each one's side and follows it as you turn. When one stops, its streak fades in about a second.
+2. Put a wall between you and a walking zombie: the streak still shows.
+3. A second player walks near you: a streak. They sneak or stand still: nothing.
+4. Go under a roof or into a cave: things have to be about half as close to show.
+5. `/weather thunder` in a rainy biome, outside: it reaches further and the streaks wander from side to side.
+6. `/weather rain`, or a snowy biome: slow mobs (a shuffling zombie) stop showing; a running one still does.
+7. Put your head under water: no streaks.
+8. `/power level @s 0`: no streaks. `/power level @s 1`: 12 blocks. `/power level @s 4`: 24 blocks.
+9. Another power, or no power: no streaks.
+
 ## 0.15.58: the way into the Aether (`power/wind/aether/WindAether.java`)
 
 Wind is the power that gets you to the Aether, the way Chrono's Fast Forward gets you to the future. Lore: the Aether
