@@ -356,8 +356,14 @@ there is no road, and nobody below has the ships. Sky kingdoms deal with each ot
 
 (new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
 village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
-the head of the road a three-storey keep with flared roofs, which is the lord's seat. A blossom town is a kingdom like
-any other great town, and keeps its own style of name.
+the head of the road the lord's castle. A blossom town is a kingdom like any other great town, and keeps its own style
+of name.
+
+(new) **The blossom castle.** The blossom lords build their seat the same way wherever they rule: a moat and a stone
+bridge, a footing of rough stone that leans in as it climbs, and on it a white keep of four storeys under grey tiled
+roofs whose corners turn up, with a pair of pale horns on the top ridge and a gatehouse against one side. The lord
+sits in a niche at the far end of the great room, between two raised matted floors where his people kneel. The grey
+tile is the castle's alone; the town below roofs in dark tile.
 
 ## The shape of the world
 

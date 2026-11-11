@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: elemental-ki-limits
 branch: claude/project-thread-dnj6tx
 with: Claude (cloud project thread)
@@ -27,3 +27,6 @@ owns:
 ## Done
 - PR #1333. Elemental users: power level x0.4 (ki sense reads them weaker); never see others' mana glow, wings, spirits, mage hands or clash bars. Valor unchanged.
 - Built; not played. Lore.md has a (new) paragraph for Andy.
+
+## Notes
+- 2026-11-11 22:31 PR #1333 is merged into master; moved to Agents/Done.
