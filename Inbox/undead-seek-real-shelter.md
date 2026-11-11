@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: changes
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
@@ -48,3 +48,4 @@ Not tested in game.
 2. canUse turns avoidSun off before it knows the goal will run (before the exposure/cooldown checks), and nothing turns it back on when canUse returns false. Change it in start() and restore it in stop().
 3. The reflection getNavigation().getClass().getDeclaredField("avoidSun") only works when the class is exactly GroundPathNavigation. Use 'nav instanceof GroundPathNavigation g' with g.setAvoidSun(...) instead of reflection (check the 26.3 method name in the sources).
 Not tested in game.
+- 2026-11-11 05:14 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
