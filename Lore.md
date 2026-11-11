@@ -534,6 +534,12 @@ moulds** grow on the undersides of the mushrooms and brain trees that feed them,
 one the Verdant farm: its leaves are poor eating fresh and good eating dried, and a traveller in the far country is
 offered them before anything else.
 
+(new) **Diskwings** (four-mods thread, 2026-11-11, Eden Ring part 4). The far country's sky has one beast of its
+own: the diskwing, a flat slow glider with two crescent wings and a finned tail, lit along its back in its country's
+colour (purple over the mushroom forests, red over storm and sand, green over stone and grass, blue over the pulse
+forest). They harm nothing and nothing there hunts them. The Verdant read weather by them and count it bad manners to
+shoot one.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
