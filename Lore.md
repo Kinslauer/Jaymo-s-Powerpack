@@ -488,6 +488,15 @@ wind-worn pillars and banded boulders with moss on their heads, and little else.
 day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
 the ring lies and do not think the sight remarkable.
 
+(new) **Storm, sand and wind** (four-mods thread, 2026-11-11, Eden Ring part 2). Three more countries of the Verdant
+World. The **brainstorm** is cold grey upland where the ground is rich in metal and so are the trees: a brain tree
+carries copper, iron or gold through its flesh, builds up charge and lets it go into anything living that comes near.
+The Verdant who gather there wear metal, which takes the charge to ground; they say the trees are thinking, and that
+it is rude to interrupt. The **lakeside desert** is hot dry country where every pond stands in a ring of sand, because
+of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
+**wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
+swings slowly round, and carries off anything thrown or let fall.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -533,7 +542,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 
 (new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
 eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
-name, and Ocellan is Claude's pick, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
 half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
 in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
 monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
