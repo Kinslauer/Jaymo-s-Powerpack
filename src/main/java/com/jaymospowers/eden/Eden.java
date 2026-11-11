@@ -22,9 +22,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -78,6 +82,13 @@ public final class Eden {
 	public static Block MOSSY_STONE;
 	public static Block BRAIN_LOG, BRAIN_PLANKS, BRAIN_COPPER, BRAIN_IRON, BRAIN_GOLD, COPPER_GRASS, IRON_GRASS, GOLD_GRASS;
 	public static Block AQUATUS, AQUATUS_ROOTS, AQUATUS_SAPLING;
+	/** Light of a violum's bloom, of parignum's flowers and of the glowing mould. */
+	public static final int VIOLUM_LIGHT = 6, PARIGNUM_LIGHT = 4, MOLD_LIGHT = 10;
+	/** Food and saturation of a limphium leaf, fresh and dried. */
+	public static final int LEAF_FOOD = 1, DRIED_LEAF_FOOD = 3;
+	public static final float LEAF_SATURATION = 0.1F, DRIED_LEAF_SATURATION = 0.5F;
+	public static Block VIOLUM, LONLIX, PARIGNUM, LIMPHIUM, EDEN_VINE, EDEN_MOSS, SYMBIOTIC_MOLD, SYMBIOTIC_MOLD_EMISSIVE;
+	public static Item LIMPHIUM_LEAF, DRIED_LIMPHIUM_LEAF;
 	public static Block GRAVILITE_SHARDS, GRAVILITE_BLOCK, GRAVILITE_LAMP, GRAVILITE_LANTERN, GRAVITY_COMPRESSOR;
 	/** The mycotic lanterns, by colour. */
 	public static final Map<DyeColor, Block> LANTERNS = new LinkedHashMap<>();
@@ -98,6 +109,14 @@ public final class Eden {
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
 		TAB.add(Registry.register(BuiltInRegistries.ITEM, itemKey, itemFactory.apply(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())));
 		return block;
+	}
+
+	private static Item food(String id, int nutrition, float saturation) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
+		Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).food(
+			new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build(), Consumables.defaultFood().build())));
+		TAB.add(item);
+		return item;
 	}
 
 	private static BlockBehaviour.Properties wood(MapColor color) {
@@ -194,6 +213,21 @@ public final class Eden {
 		shaped("balloon_mushroom", BALLOON_PLANKS, MapColor.COLOR_PINK);
 		shaped("pulse_tree", PULSE_PLANKS, MapColor.COLOR_CYAN);
 		shaped("brain_tree", BRAIN_PLANKS, MapColor.COLOR_GRAY);
+
+		// ---- the small growth ----
+		VIOLUM = block("violum", TallFlowerBlock::new, plant(MapColor.COLOR_PURPLE).sound(SoundType.GRASS).lightLevel(state -> VIOLUM_LIGHT)
+			.offsetType(BlockBehaviour.OffsetType.XZ), DoubleHighBlockItem::new);
+		LONLIX = block("lonlix", p -> new FloraPlantBlock(Block.box(2, 0, 2, 14, 13, 14), false, p),
+			plant(MapColor.PLANT).sound(SoundType.GRASS).replaceable().offsetType(BlockBehaviour.OffsetType.XZ));
+		PARIGNUM = block("parignum", CarpetBlock::new, plant(MapColor.PLANT).sound(SoundType.MOSS_CARPET).lightLevel(state -> PARIGNUM_LIGHT));
+		LIMPHIUM = block("limphium", TallFlowerBlock::new, plant(MapColor.PLANT).sound(SoundType.GRASS), DoubleHighBlockItem::new);
+		EDEN_VINE = block("eden_vine", p -> new HangingPlantBlock(true, p), plant(MapColor.PLANT).sound(SoundType.VINE));
+		EDEN_MOSS = block("eden_moss", CarpetBlock::new, plant(MapColor.COLOR_LIGHT_GRAY).sound(SoundType.MOSS_CARPET));
+		SYMBIOTIC_MOLD = block("symbiotic_mold", p -> new HangingPlantBlock(false, p), plant(MapColor.COLOR_GREEN));
+		SYMBIOTIC_MOLD_EMISSIVE = block("symbiotic_mold_emissive", p -> new HangingPlantBlock(false, p),
+			plant(MapColor.COLOR_YELLOW).lightLevel(state -> MOLD_LIGHT));
+		LIMPHIUM_LEAF = food("limphium_leaf", LEAF_FOOD, LEAF_SATURATION);
+		DRIED_LIMPHIUM_LEAF = food("dried_limphium_leaf", DRIED_LEAF_FOOD, DRIED_LEAF_SATURATION);
 
 		// ---- gravilite ----
 		GRAVILITE_SHARDS = block("gravilite_shards", p -> new FloraPlantBlock(Block.box(3, 0, 3, 13, 13, 13), true, p),

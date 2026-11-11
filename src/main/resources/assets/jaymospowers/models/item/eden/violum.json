@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:block/eden/violum_top_color",
+    "layer1": "jaymospowers:block/eden/violum_top_overlay"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:block/eden/eden_vine_bottom_color",
+    "layer1": "jaymospowers:block/eden/eden_vine_bottom_overlay"
+  }
+}

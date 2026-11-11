@@ -310,6 +310,135 @@ def gravilite():
     tag(f"{MC}/tags/block/mineable/pickaxe.json", [f"{NS}:{b}" for b in ("gravilite_block", "gravilite_lantern", "gravity_compressor")])
 
 
+GRASS = {"type": "minecraft:grass", "downfall": 1.0, "temperature": 0.5}
+PLAIN = {"type": "minecraft:constant", "value": -1}
+
+
+def crossed(texture, overlay=None, glow=None):
+    """A cross of the plant's own colours, with its leaves over it in the country's grass colour and its glow, if any."""
+    textures = {"particle": TEX + texture, "texture": TEX + texture}
+    layers = [("#texture", {})]
+    if overlay:
+        textures["overlay"] = TEX + overlay
+        layers.append(("#overlay", {"tintindex": 0}))
+    if glow:
+        textures["glow"] = TEX + glow
+        layers.append(("#glow", None))
+    elements = []
+    for ref, extra in layers:
+        for frm, to, sides in (([0.8, 0, 8], [15.2, 16, 8], ("north", "south")), ([8, 0, 0.8], [8, 16, 15.2], ("west", "east"))):
+            el = {"from": frm, "to": to, "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": 45, "rescale": True}, "shade": False,
+                  "faces": {d: dict({"uv": [0, 0, 16, 16], "texture": ref}, **(extra or {})) for d in sides}}
+            if extra is None:
+                el["light_emission"] = 15
+            elements.append(el)
+    return {"ambientocclusion": False, "textures": textures, "elements": elements}
+
+
+def layered(*layers):
+    return {"parent": "minecraft:item/generated", "textures": {f"layer{i}": TEX + t for i, t in enumerate(layers)}}
+
+
+def tinted_item(block_id, tints):
+    write(f"{ASSETS}/items/{block_id}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/eden/{block_id}", "tints": tints}})
+
+
+def loot(block_id, pools):
+    write(f"{DATA}/loot_table/blocks/{block_id}.json", {"type": "minecraft:block", "pools": pools, "random_sequence": f"{NS}:blocks/{block_id}"})
+
+
+def lower_half(block_id):
+    return {"type": "minecraft:match_block", "blocks": f"{NS}:{block_id}", "state": {"half": "lower"}}
+
+
+def small_plants():
+    """Violum, lonlix, parignum, limphium, the Eden vine, Eden moss and the symbiotic moulds."""
+    m = lambda name: {"model": f"{NS}:block/eden/{name}"}  # noqa: E731
+    # violum: two blocks of glowing bloom
+    write(f"{ASSETS}/models/block/eden/violum_top.json", crossed("violum_top_color", "violum_top_overlay", "violum_top_color_e"))
+    block("violum", crossed("violum_bottom_color", "violum_bottom_overlay", "violum_bottom_color_e"),
+          states={"variants": {"half=lower": m("violum"), "half=upper": m("violum_top")}},
+          item_model=layered("violum_top_color", "violum_top_overlay"), drop=False)
+    tinted_item("violum", [PLAIN, GRASS])
+    loot("violum", [{"rolls": 1, "condition": {"type": "minecraft:survives_explosion"}, "entries": [
+        {"type": "minecraft:item", "condition": lower_half("violum"), "name": f"{NS}:violum"}]}])
+    # lonlix: a leafy tuft, taken with shears
+    block("lonlix", crossed("lonlix_color", "lonlix_overlay"), item_model=layered("lonlix_color", "lonlix_overlay"), drop=False)
+    tinted_item("lonlix", [PLAIN, GRASS])
+    loot("lonlix", [{"rolls": 1, "entries": [{"type": "minecraft:item", "condition": "minecraft:tool/can_shear", "name": f"{NS}:lonlix"}]}])
+    # parignum: a mat of leaves with glowing flowers, four ways
+    for n in range(1, 5):
+        quad = lambda y, ref, **extra: dict({"from": [0, y, 0], "to": [16, y, 16], "shade": False, "faces": {  # noqa: E731
+            d: dict({"uv": [0, 0, 16, 16], "texture": ref}, **({"tintindex": 0} if ref == "#leaves" else {})) for d in ("up", "down")}}, **extra)
+        write(f"{ASSETS}/models/block/eden/parignum_{n}.json", {"ambientocclusion": False, "textures": {
+            "particle": TEX + "parignum", "leaves": TEX + "parignum", "flowers": TEX + f"parignum_flowers_{n}", "glow": TEX + f"parignum_flowers_{n}_e"},
+            "elements": [quad(0.5, "#leaves"), quad(0.6, "#flowers"), quad(0.7, "#glow", light_emission=15)]})
+    block("parignum", None, states={"variants": {"": [m(f"parignum_{n}") for n in range(1, 5)]}},
+          item_model=layered("parignum", "parignum_flowers_1"))
+    tinted_item("parignum", [GRASS, PLAIN])
+    # limphium: a stem under a head of leaves (Eden Ring's shapes), which gives leaves to eat or dry
+    def limphium(name, textures, elements):
+        return {"ambientocclusion": False, "textures": dict({"particle": TEX + textures["stem"]}, **{k: TEX + v for k, v in textures.items()}), "elements": elements}
+
+    plane = lambda x, angle, ref, extra=None: dict({"from": [x, 0, 0], "to": [x, 16, 22.5], "rotation": {"origin": [x, 0, 0], "axis": "y", "angle": angle},  # noqa: E731
+                                                     "shade": False, "faces": {d: {"uv": [0, 0, 16, 16], "texture": ref} for d in ("west", "east")}},
+                                                    **(extra or {}))
+    stems = lambda ref, extra=None: [plane(0, 45, ref, extra), plane(16, -45, ref, extra)]  # noqa: E731
+
+    def leaf(lo, hi, y, ref):
+        side = {"uv": [lo, 16 - (hi - lo) // 6 - 2, hi, 16], "texture": ref, "tintindex": 0}
+        side["uv"][1] = 14
+        faces = {d: dict(side) for d in SIDES}
+        faces["up"] = {"uv": [lo, lo, hi, hi], "texture": ref, "tintindex": 0}
+        faces["down"] = {"uv": [lo, lo, hi, hi], "texture": ref, "tintindex": 0}
+        return {"from": [lo, y, lo], "to": [hi, y + 2, hi], "faces": faces}
+
+    write(f"{ASSETS}/models/block/eden/limphium_stem.json", limphium("limphium_stem", {"stem": "limphium_stem"}, stems("#stem")))
+    heads = {1: [leaf(2, 14, 2, "#leaf_1"), leaf(3, 13, 6, "#leaf_2")], 2: [leaf(3, 13, 6, "#leaf_2")], 3: [leaf(2, 14, 6, "#leaf_1")]}
+    for n, leaves in heads.items():
+        write(f"{ASSETS}/models/block/eden/limphium_top_{n}.json", limphium(f"limphium_top_{n}", {
+            "stem": "limphium_stem_top", "glow": "limphium_stem_top_e", "leaf_1": "limphium_leaf_1", "leaf_2": "limphium_leaf_2"},
+            stems("#stem") + stems("#glow", {"light_emission": 15}) + leaves))
+    block("limphium", None, states={"variants": {"half=lower": m("limphium_stem"), "half=upper": [m(f"limphium_top_{n}") for n in heads]}},
+          item_model=layered("limphium_sapling_color", "limphium_sapling_overlay"), drop=False)
+    tinted_item("limphium", [PLAIN, GRASS])
+    loot("limphium", [
+        {"rolls": 1, "condition": {"type": "minecraft:survives_explosion"}, "entries": [
+            {"type": "minecraft:item", "condition": lower_half("limphium"), "name": f"{NS}:limphium"}]},
+        {"rolls": 1, "condition": lower_half("limphium"), "entries": [{"type": "minecraft:item", "name": f"{NS}:limphium_leaf", "modifier": [
+            {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}}]}]}])
+    for item, name in (("limphium_leaf", "Limphium Leaf"), ("dried_limphium_leaf", "Dried Limphium Leaf")):
+        write(f"{ASSETS}/models/item/eden/{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/eden/{item}"}})
+        write(f"{ASSETS}/items/{item}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/eden/{item}"}})
+        LANG[f"item.{NS}.{item}"] = name
+    for kind, ticks in (("smelting", 200), ("smoking", 100), ("campfire_cooking", 600)):
+        write(f"{DATA}/recipe/eden/dried_limphium_leaf_{kind}.json", {"type": f"minecraft:{kind}", "category": "food", "ingredient": f"{NS}:limphium_leaf",
+                                                                      "result": {"id": f"{NS}:dried_limphium_leaf"}, "experience": 0.1, "cookingtime": ticks})
+    # the Eden vine: hangs in strings, the lowest block its tip
+    write(f"{ASSETS}/models/block/eden/eden_vine_bottom.json", crossed("eden_vine_bottom_color", "eden_vine_bottom_overlay"))
+    block("eden_vine", crossed("eden_vine_color", "eden_vine_overlay"),
+          states={"variants": {"bottom=false": m("eden_vine"), "bottom=true": m("eden_vine_bottom")}},
+          item_model=layered("eden_vine_bottom_color", "eden_vine_bottom_overlay"))
+    tinted_item("eden_vine", [PLAIN, GRASS])
+    # Eden moss: a thin mat
+    block("eden_moss", {"ambientocclusion": False, "textures": {"particle": TEX + "eden_moss_top", "top": TEX + "eden_moss_top"}, "elements": [
+        {"from": [0, 0, 0], "to": [16, 1, 16], "faces": dict(
+            {d: {"uv": [0, 15, 16, 16], "texture": "#top", "tintindex": 0} for d in SIDES},
+            up={"uv": [0, 0, 16, 16], "texture": "#top", "tintindex": 0}, down={"uv": [0, 0, 16, 16], "texture": "#top", "tintindex": 0, "cullface": "down"})}]})
+    write(f"{ASSETS}/items/eden_moss.json", {"model": {"type": "minecraft:model", "model": f"{NS}:block/eden/eden_moss", "tints": [GRASS]}})
+    # the symbiotic moulds: tufts under a roof, one kind glowing
+    both = lambda name: {"variants": {"bottom=false": m(name), "bottom=true": m(name)}}  # noqa: E731
+    block("symbiotic_mold", crossed("symbiotic_mold"), "Symbiotic Mould", states=both("symbiotic_mold"), item_model=flat("symbiotic_mold"))
+    lit = crossed("symbiotic_mold_emissive")
+    for el in lit["elements"]:
+        el["light_emission"] = 15
+    block("symbiotic_mold_emissive", lit, "Glowing Symbiotic Mould", states=both("symbiotic_mold_emissive"),
+          item_model=flat("symbiotic_mold_emissive"))
+    tag(f"{MC}/tags/block/climbable.json", [f"{NS}:eden_vine"])
+    tag(f"{MC}/tags/block/replaceable.json", [f"{NS}:lonlix"])
+    tag(f"{MC}/tags/block/replaceable_by_trees.json", [f"{NS}:{b}" for b in ("lonlix", "parignum", "eden_moss")])
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -372,6 +501,14 @@ FEATURES = {
     "eden_gravilite": ("gravilite", ["rare:5", "surface"]),
     # (after the trees: a plant on the turf would lift the surface a tree looks for)
     "eden_mycotic_plants": ("mycotic_plants", ["count:3", "surface"]),
+    # the small growth: what hangs, then what stands, then the mats
+    "eden_vines": ("eden_vines", ["count:3", "surface"]),
+    "eden_mold": ("symbiotic_mold", ["count:2", "surface"]),
+    "eden_limphium": ("limphium", ["rare:2", "surface"]),
+    "eden_violum": ("violum", ["rare:2", "surface"]),
+    "eden_lonlix": ("lonlix", ["count:2", "surface"]),
+    "eden_parignum": ("parignum", ["rare:2", "surface"]),
+    "eden_moss": ("eden_moss", ["count:2", "surface"]),
 }
 # the saplings' trees
 TREES = {"balloon_mushroom": "balloon_mushroom", "pulse_tree": "pulse_tree", "aquatus": "aquatus"}
@@ -392,25 +529,26 @@ def placement(spec):
 # name: (display, sky, fog, grass, foliage, water, step 2 features, step 9 features of ours, vanilla step 9 kept)
 BIOMES = {
     "mycotic_forest": ("Mycotic Forest", "#c9a0e0", "#e2c4ee", "#c66bb0", "#b85aa6", "#7ab0d8",
-                       ["eden_mycelium_ground"], ["eden_mycotic_plants", "eden_balloon_mushrooms", "eden_old_balloon_mushroom_rare"],
+                       ["eden_mycelium_ground"], ["eden_mycotic_plants", "eden_balloon_mushrooms", "eden_old_balloon_mushroom_rare", "eden_vines", "eden_mold", "eden_limphium", "eden_parignum"],
                        ["minecraft:glow_lichen", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal"]),
     "old_mycotic_forest": ("Old Mycotic Forest", "#b890d8", "#d4b4e6", "#b85aa6", "#a04a96", "#6aa0d0",
-                           ["eden_mycelium_ground"], ["eden_mycotic_plants", "eden_balloon_mushrooms_sparse", "eden_old_balloon_mushrooms"],
+                           ["eden_mycelium_ground"], ["eden_mycotic_plants", "eden_balloon_mushrooms_sparse", "eden_old_balloon_mushrooms", "eden_vines", "eden_mold", "eden_limphium",
+                            "eden_parignum"],
                            ["minecraft:glow_lichen", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal"]),
     "pulse_forest": ("Pulse Forest", "#7fd8e0", "#a8ecf0", "#3fc6b0", "#35b0a8", "#2fb8d8",
-                     [], ["eden_pulse_trees"],
+                     [], ["eden_pulse_trees", "eden_violum", "eden_lonlix"],
                      ["minecraft:glow_lichen", "minecraft:patch_tall_grass_2", "minecraft:patch_grass_plain", "minecraft:patch_firefly_bush_near_water"]),
     "stone_garden": ("Stone Garden", "#9fdcb0", "#c4ecc8", "#6fb85a", "#5fa84e", "#3fc0a8",
-                     ["eden_stone_ground", "eden_stone_pillar", "eden_stone_boulder"], [],
+                     ["eden_stone_ground", "eden_stone_pillar", "eden_stone_boulder"], ["eden_vines", "eden_limphium", "eden_violum", "eden_moss"],
                      ["minecraft:glow_lichen", "minecraft:patch_grass_plain"]),
     "brainstorm": ("Brainstorm", "#5f6f80", "#7f8c98", "#7a9a6a", "#6a8a5e", "#4a7a90",
-                   [], ["eden_brain_trees", "eden_metal_grass"],
+                   [], ["eden_brain_trees", "eden_metal_grass", "eden_mold", "eden_parignum"],
                    ["minecraft:glow_lichen", "minecraft:patch_grass_plain"]),
     "lakeside_desert": ("Lakeside Desert", "#a8dcc0", "#d8ecc8", "#b8c86a", "#a8b85e", "#3fc8b8",
-                        ["eden_sand_ground", "eden_pond"], [],
+                        ["eden_sand_ground", "eden_pond"], ["eden_lonlix"],
                         ["minecraft:glow_lichen", "minecraft:patch_sugar_cane"]),
     "wind_valley": ("Wind Valley", "#9fe8c0", "#c8f4d8", "#7fd86a", "#6fc85e", "#3fd0a0",
-                    [], [],
+                    [], ["eden_violum", "eden_lonlix"],
                     ["minecraft:glow_lichen", "minecraft:patch_tall_grass_2", "minecraft:flower_plains", "minecraft:patch_grass_plain"]),
 }
 
@@ -477,6 +615,7 @@ def main():
     blocks()
     shaped_wood()
     gravilite()
+    small_plants()
     recipes_and_tags()
     worldgen()
     write(f"{ASSETS}/lang/parts/eden.json", LANG)

@@ -57,6 +57,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
+		com.jaymospowers.client.eden.EdenPlantsClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
