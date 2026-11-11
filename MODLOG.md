@@ -2488,3 +2488,111 @@ will still have to fight in the tournament as a non z fighter)".
   - **The Arsenal's Road**: claim a relic; mark a place; pull something from the future (the first time, a Los Perrito parade **Notice** comes through the rift with it); pin a weapon.
 - New `PowerRoads` holds these roads and their saved, synced progress (`power_roads`).
 - Built; not played.
+
+## 0.22.22 (2026-11-11): sky villages, ruined villages and the sky lord's castle in the Aether (#1312)
+
+Andy, on the Sky Villages mod's ideas (ARR, nothing of it used): "should all instead spawn in the aether proper, and be
+filled with divine born", "Yes but now aether material", castle "in that scale, out of the relevant material".
+- **Sky village** (`aether/structure/SkyVillages.village`, 47 by 47): a round green with paths and a flagged plaza, a well
+  of light, four homes (two villagers each, bedrolls, a chest), a kitchen (Kitchen's stove, cabinet, pot and crates when
+  Kitchen is installed; smoker, barrel, cauldron and hay if not), a workshop (crafting station, part and pattern chests,
+  layer blocks), a windmill with cloth sails, two farm plots, and a mooring mast with a balloon skiff tied to it (a chest
+  in its hold). Three palettes by the land: skyroot (highfields), wisproot (magnetic), greatroot and icestone (arctic).
+- **Ruined village** (variants 3 to 5): the same village abandoned. Walls and roofs fallen in more the higher up, moss on
+  the stone, vases where the furniture was, no skiff, three swets and two cockatrices living in it.
+- **Sky castle** (`SkyVillages.castle`, 49 by 49): a two-thick curtain wall with a walk and merlons, four corner towers
+  with ladders and cloth caps, an arched gate, a keep with the lord's hall and seat, rooms above, a walled roof and a
+  spire. Eight villagers, one tagged as the lord.
+- New plans `village` and `castle` on `jaymospowers:aether_structure`; one structure set `sky_villages` (spacing 30,
+  separation 14, kept 6 chunks from outposts). Loot: `chests/sky_village/home`, `skiff`, `keep`. Data written by
+  `tools/gen_aether_structures.py`.
+- Villagers are plain villagers tagged `jaymospowers_sky_villager` (`jaymospowers_sky_lord`); MCA turns them into its own,
+  and Kingdoms gives them their blood.
+- The skiff hangs a step clear of the landing and, with Jaymo's Kingdoms installed, has a ship's wheel by the gap in
+  her rail: use it to cast her off as a balloon ship. Kingdoms also crews her, names the castle's lord and wardens, and
+  dresses the sky folk.
+- Compiled; never generated in a world, so the layout has not been seen in game.
+
+## 0.22.23 (2026-11-11): Divine-born: the feather sense, Alight, hover, and staying at the Judge (#1308)
+
+Andy: "Divine born should be like z fighters but without the raging raw ki, it is controlled and elegant, they gain a
+web like sense that allows them to dodge incoming attacks and counter, as long as they have feathers. They can directly
+replenish feathers by using their heritage key."
+- **The sense** (`divine/DivineSense`): every Divine-born, Z Fighter or not. A melee blow or a projectile that would
+  land misses instead, for 2 feathers, and they drift a step aside. Nothing is pressed. Not more than once in 10 ticks,
+  and not at all once the feathers are spent. Explosions, falls, fire and the like still hurt. A web slinger keeps the
+  web sense instead.
+- **The answer**: for 2 seconds after a slipped blow, their next melee hit on whoever threw it does 1.5x and gives
+  2 feathers back (`DivineCounterMixin`).
+- **Scaling** (Andy: "they deal more damage with the counters as they increase in level and they can train it for higher
+  increases"): the answer gains 1% per experience level (up to +50%) and 15% per rank of practice. Practice comes from
+  use: 1 for a blow slipped, 3 for an answer landed; five ranks at 40, 120, 280, 560 and 1000, each with a line over
+  the hotbar. At best the answer is 2.75x.
+- **Alight** (the heritage key `;`, sent by Kingdoms): they rise a little, hang still, feathers of light wind down round
+  them and the row refills, one half-feather every 4 ticks (every 2 under open sky or in the Aether). Sneak, the key
+  again, being hit or a full row ends it; 20 s before the next. The sense is shut while it lasts.
+- **Hover**: Jump pressed again in the air and held slows the fall to a drift, for a half-feather every 8 ticks, with
+  no fall damage (`client/divine/DivineSenseClient`).
+- **Staying**: one of the dead whose page weighed just gets a new choice at the Judge, "Ask to stay". Saying yes ends
+  the stay among the dead (no hold at the hall, no road home, no tournament) and keeps the page's weight. Their
+  heritage does not change (Andy: "they just get the buffs and the halo"): they keep the ring over the head, get all of
+  the above, and Kingdoms gives them the Divine-born's buffs. They are free to walk the Aether.
+- All numbers are constants at the top of `DivineSense`. Compiled; not played.
+
+## 0.22.24 (2026-11-11): Epic igloos and jungle temples; the Sentry Ruins are the Slider's again (#1320)
+
+- **New in the pack**: Epic Structures: Igloo 1.0.5 (5 large and 7 small igloos, cellars under the large ones) and
+  Epic Structures: Jungle Temples 1.0.3 (temples, large temples and temple ruins). Both are all rights reserved with
+  modpack use invited, so they are linked unchanged, like Epic Villages, Dungeons and Witch Huts. They only add to
+  chunks nobody has visited yet.
+- **Sentry Ruins**: new ruins always hold the Slider. The minotaur has moved to the Epic dungeons under the Overworld
+  (Kingdoms' `Labyrinths`). A ruin already built with a minotaur keeps it, and its doors and crates still work.
+- Compiled; not played.
+
+## 0.22.25 (2026-11-11): sky towns - whole towns on Aether islands (#1321)
+
+Andy asked for Epic-village-scale towns in the Aether's style. Epic Villages itself is all rights reserved, so these are
+our own.
+- **Sky towns** (`SkyTowns`, structures `sky_town_highfields`, `sky_town_magnetic`, `sky_town_arctic`): laid out lot by
+  lot around a paved plaza with a bell, a well and stalls. Each has a galleried great hall with a spire, a library, a
+  smithy, a tavern, a workshop, a windmill, tall and low houses, terraced farms and a mooring mast with a skiff, built
+  from the island's own stone and wood. A town needs at least 14 level lots, so it only stands on big islands.
+- Rare: one try per 48 chunks, and never within 8 chunks of a sky village.
+- The pieces name themselves (`great_hall`, `library`, `weaponsmith`, `farm`...), so Jaymo's Kingdoms reads a sky town
+  like any Epic village and founds a kingdom there.
+- `/place structure jaymospowers:sky_town_highfields` puts one where you stand.
+
+## 0.22.26 (2026-11-11): Gremlin is a tiny bug-eyed imp (#1323)
+
+- **Gremlin's look** (Andy: "very small with bug eyes"): the Xeno-Band's Gremlin is no longer a hunched knuckle-walker with
+  a huge skull and floppy ears. It is a tiny upright imp about half a block tall: a slim grey body on thin legs with
+  broad pale feet, thin arms, and a wide flat head with two big yellow-green eyes that bulge out past the sides of it.
+  The eyes shine in the dark and blink.
+- **How it moves**: it patters on quick little steps and throws its arms back at a run, its head wobbles and tilts when
+  it stands still, a bite darts the head and drops the jaw with a swipe of the right arm, a leap throws the arms up, and
+  sneaking it squats on splayed legs. The insignia is on its chest now (it was on its back).
+- Its moves, size (a third of a player, fits one-block gaps) and health are unchanged. Swarm, its Ultimate, keeps its
+  hunched plated build.
+- `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
+  `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+- The Gremlin is the shape of the Ocellan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
+- Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.
+
+## 0.22.27 (2026-11-11): the Verdant World's far country - mycotic forests, the pulse forest, the stone garden and a ringed giant in the sky (#1324)
+
+Andy's Eden Ring picks, part 1. Eden Ring (paulevs) is MIT, so its art is used, with its licence in
+`tools/eden_ring_license.txt`. No portal and no new world: these are regions of the Verdant World.
+- **The Verdant World has regions now** (`dimension/verdant_world.json`): plains as before, with four new biomes laid
+  out by climate. Only chunks made after this update get them.
+- **Mycotic Forest and Old Mycotic Forest**: pink mycelium turf, mycotic grass, balloon mushrooms (thin stem, domed cap),
+  and in the old forest huge branched ones on full logs with glowing lanterns hanging under their caps. A small balloon
+  mushroom grows into a tree with bone meal. Lanterns come in 16 colours: craft one with any dye to recolour it.
+- **Pulse Forest**: pulse trees, thin glowing stems carrying a big, a medium and a small cap, some on a glowing log trunk.
+  All of them brighten and dim together. They stand like bamboo: cut the foot and the rest comes down.
+- **Stone Garden**: turf worn through to moss-capped stone and gravel, wind-worn banded pillars and layered boulders.
+- **Wood**: balloon mushroom and pulse tree logs and planks (planks also from stems). Stairs, doors and the rest of the
+  sets come in a later part.
+- **The sky** (`VerdantSkyClient`): a blue giant with a ring hangs in the same place over the Verdant World, faint by
+  day and bright at night.
+- Code: `eden/Eden` (blocks), `eden/EdenFeature` (ground, trees, rocks; tuning constants at the top),
+  `eden/PulseTreeBlock`, `tools/gen_eden.py` (all models and data).

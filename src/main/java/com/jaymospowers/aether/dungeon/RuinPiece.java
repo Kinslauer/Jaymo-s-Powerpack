@@ -4,8 +4,6 @@ import com.jaymospowers.JaymosPowers;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -276,16 +274,11 @@ public final class RuinPiece extends StructurePiece {
 		// the boss's crates in the vault, facing the room
 		s.crate(11, f, BOSS_L + 3, 2, loot("boss"), false);
 		s.crate(12, f, BOSS_L + 3, 2, loot("boss"), false);
-		// the Slider, asleep in the middle of the room; or, in some ruins with Kingdoms in the pack, the minotaur (RuinBoss)
+		// the Slider, asleep in the middle of the room
 		BoundingBox room = BoundingBox.fromCorners(new BlockPos(s.x(1, 1), f, s.z(1, 1)), new BlockPos(s.x(BOSS_W - 2, BOSS_L - 2), f + BOSS_H - 3,
 			s.z(BOSS_W - 2, BOSS_L - 2)));
 		double cx = (room.minX() + room.maxX() + 1) / 2.0, cz = (room.minZ() + room.maxZ() + 1) / 2.0;
-		EntityType<Mob> minotaur = RuinBoss.minotaur();
-		if (minotaur != null && s.random(6).nextFloat() < RuinBoss.MINOTAUR_CHANCE) {
-			RuinBoss.place(s, minotaur, cx, room.minY(), cz, s.facing.toYRot(), room);
-		} else {
-			s.spawn(DungeonMobs.SLIDER, cx, room.minY() + 2.0, cz, s.facing.toYRot(), slider -> slider.setRoom(room));
-		}
+		s.spawn(DungeonMobs.SLIDER, cx, room.minY() + 2.0, cz, s.facing.toYRot(), slider -> slider.setRoom(room));
 	}
 
 	// ---- tunnels ----

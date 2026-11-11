@@ -354,6 +354,24 @@ final class McaBridge {
 		return true;
 	}
 
+	/** {@link SkyCourt}: {@code villager} takes up a guard's trade (MCA arms them and has them fight), dressed for it. */
+	static void toGuard(LivingEntity villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			if (!v.isGuard()) {
+				v.setProfession(ProfessionsMCA.GUARD);
+			}
+			v.setPersistenceRequired();
+			Uniforms.fit(v);
+		}
+	}
+
+	/** {@code villager} is put in the clothes they should be in now ({@link Uniforms#fit}), their blood just settled. */
+	static void dress(LivingEntity villager) {
+		if (villager instanceof VillagerEntityMCA v) {
+			Uniforms.fit(v);
+		}
+	}
+
 	/** Keeps {@code player}'s MCA Size and Width within their heritage's body, re-saving their look and showing it to everyone. */
 	static void keepBody(ServerPlayer player) {
 		PlayerSaveData save = PlayerSaveData.get(player);

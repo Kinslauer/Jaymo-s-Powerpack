@@ -777,11 +777,54 @@ public final class ZFighterAfterlife {
 
 	// ---------------------------------------------------------------- talking (0.17.146)
 
+	/**
+	 * The Judge's choices, with one more for one of the dead whose page weighed just (Andy: "some live there perpetually
+	 * after reaching the otherworld with righteous karma, and choosing to stay there at the judge"): to stay.
+	 */
+	private static List<ZFighterNpcs.Option> judgeOptions(ServerPlayer player, LivingEntity npc, Runnable back, List<ZFighterNpcs.Option> usual) {
+		if (!among(player) || !com.jaymospowers.core.wounds.Karma.just(player)) {
+			return usual;
+		}
+		List<ZFighterNpcs.Option> all = new ArrayList<>(usual);
+		all.add(ZFighterNpcs.Option.of("talk.jaymospowers.judge.stay", true, () -> ZFighterNpcs.ask(player, npc,
+			Component.translatable("talk.jaymospowers.judge.stay_ask"), List.of(
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.stay_yes", true, () -> stay(player, npc)),
+				ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
+		return all;
+	}
+
+	/**
+	 * A just one stays for good: no longer one of the dead (nothing holds them at the hall, nothing sends them home, the
+	 * tournament is over for them), the weighing settled with the page as it is. They keep their own heritage (Andy: "they just
+	 * get the buffs and the halo, no change in heritage otherwise") and carry the Divine-born's ring, their buffs (Kingdoms)
+	 * and {@link com.jaymospowers.divine.DivineSense} on top of it. They walk the Aether freely.
+	 */
+	private static void stay(ServerPlayer player, LivingEntity npc) {
+		if (!among(player) || !com.jaymospowers.core.wounds.Karma.just(player)) {
+			return;
+		}
+		endGauntlet(player);
+		RETURNS.remove(player.getUUID());
+		player.removeAttached(STAY);
+		player.removeAttached(HOME);
+		player.removeAttached(TAUGHT);
+		player.removeAttached(CHAMPION);
+		player.removeAttached(PAID);
+		com.jaymospowers.core.wounds.Karma.stayed(player);
+		com.jaymospowers.divine.DivineSense.stay(player);
+		ZFighterKingdoms.stayed(player);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), net.minecraft.sounds.SoundEvents.BEACON_POWER_SELECT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.4F);
+		com.jaymospowers.core.fx.MagicFx.blast(level, player.getX(), player.getY() + 1.0, player.getZ(), 1.2F, com.jaymospowers.divine.DivineSense.LIGHT);
+		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), 3.0F, com.jaymospowers.divine.DivineSense.LIGHT);
+		ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.stay_done"), List.of());
+	}
+
 	/** A character of the Other World's talk (MCA's "Talk about work"): the Judge, the road's master, the fortune teller. */
 	static void talk(ServerPlayer player, LivingEntity npc, String tag) {
 		Runnable back = () -> talk(player, npc, tag);
 		switch (tag) {
-			case JUDGE_TAG -> ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.greet"), List.of(
+			case JUDGE_TAG -> ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.judge.greet"), judgeOptions(player, npc, back, List.of(
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ask", true, () -> ZFighterNpcs.reply(player, npc, () -> judge(player, npc), back)),
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
@@ -798,7 +841,7 @@ public final class ZFighterAfterlife {
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable("talk.jaymospowers.judge.reborn_ask"), List.of(
 						ZFighterNpcs.Option.of("talk.jaymospowers.judge.reborn_yes", true, () -> reborn(player)),
-						ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))))));
+						ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))))));
 			case MASTER_TAG -> {
 				boolean taught = Boolean.TRUE.equals(player.getAttached(TAUGHT)) && !player.isCreative();
 				ZFighterNpcs.ask(player, npc, Component.translatable(taught ? "talk.jaymospowers.road_master.greet_taught" : "talk.jaymospowers.road_master.greet"),

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "epic:medium_plains_dungeon", "required": false},
+    {"id": "epic:medium_ice_dungeon", "required": false},
+    {"id": "epic:medium_sand_dungeon", "required": false}
+  ]
+}

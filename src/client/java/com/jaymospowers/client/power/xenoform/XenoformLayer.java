@@ -83,6 +83,11 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, 0);
 		}
+		if (model instanceof XenoFormModels.Gremlin) {
+			// Gremlin's bug eyes shine in the dark: their lit pixels again, fullbright
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Gremlin.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
+				-1, null, 0);
+		}
 		XenoformSlap.Pose slap = state.getData(XenoformSlap.KEY);
 		if (slap != null && slap.chest()) {
 			// (0.18.90) tapping the insignia on its chest: it lights under the hand (the body posed now, as it will be drawn)

@@ -11253,3 +11253,101 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 ## 0.7.738 (2026-11-11): Story tab no longer crashes the game at launch (#1314)
 
 - The Story tab's act and road icons were item stacks made while the client was starting, before items could be built ("Components not bound yet"), which crashed the game on launch. They are now made the first time the tab is drawn.
+
+## 0.7.739 (2026-11-11): sky folk - who lives in the Aether, the sky lord's court, and balloon ships (#1312)
+
+Andy: the sky villages are "filled with divine born, any other heritage has a reason for not only having traveled but being
+accepted"; the halfway folk are "what the dawnborn culture becomes".
+- **Blood** (`SkyFolk.born`, from `VillagerHeritage.roll`): everyone born in the Aether is Divine-born, but for 15% who
+  are Dawnborn, the halfway folk.
+- **Nobody is minded up there** (`Prejudice.minds`): a villager standing in the Aether holds no one's blood against them.
+- **Their talk**: five lines each for the Divine-born and the Dawnborn of the sky, used while they are in the Aether
+  (`lang/parts/sky_folk.json`). Hints only.
+- **Things that fall off** (`SkyFolk.fall`): about once in six days spent under an open sky in the Overworld, something
+  drops near you: a dropped letter (five of them), somebody's hat, cloudwool, a moa feather or cloudtwine.
+- **Their clothes** (`SkyFolk.outfits`, art from `tools/gen_sky_folk.py`, 16 new outfits): the Divine-born of the
+  Aether wear white robes with gold at the collar, cord and hem; the halfway folk sun-coloured tunics with a white sash
+  and a sun on the chest; the sky lord a blue mantle over the robe; his wardens a white tabard over deep blue. A villager
+  is dressed as soon as their blood is settled. Travellers from below keep their own clothes.
+- **The sky lord's court** (`SkyCourt`): each sky castle near a player in the Aether gets a lord (the one seated on the
+  throne when it was built if he can still be told, else whoever stands nearest the keep) and three wardens, who take
+  up MCA's guard trade. They have their own lines. A dead lord is replaced from the castle's people at the next look.
+  The court is not a kingdom: factions live only in the Overworld and their wars, caravans and envoys walk, so the
+  castle holds no land and takes no part in them.
+- **Balloon ships** (`Ship`, `Hull.airworthy`): a ship with at least 24 blocks of wool hung over her, enough to lift her
+  weight (half a block of water's weight per block of wool), flies. Her wheel casts her off with no water under her;
+  at the wheel Space takes her up and Sprint down (0.12 blocks a tick), W/S set her cloth and A/D steer as at sea. She
+  holds her height with nobody at the wheel, moors in mid-air when you sneak off a still wheel, settles onto water if
+  brought down on it, and is never becalmed head to wind. Enough of her cloth shot away and she falls. The readout
+  shows her height.
+- **Sky ferries** (`SkyFerries`): in daylight, about every five minutes, two villagers of a sky village near a player go
+  aboard the skiff at its mast, take her up 22 blocks, cross 110 to 200 blocks of sky, come about, return and haul her
+  in onto her mooring, where she is blocks again. You can ride along on her deck or take her wheel. Something in her
+  way sends her 6 blocks higher; a trip that runs past four minutes turns for home.
+- Compiled; not played. Not seen: whether MCA villagers sit quietly as a ferry's crew, and how the skiff looks under way.
+
+## 0.7.740 (2026-11-11): Divine-born: heritage key is Alight, and staying at the Judge makes you one (#1308)
+
+- The heritage key `;` for a Divine-born is now Alight (Jaymo's Powers refills the feathers). Sneak + `;` is Halo Pulse,
+  as the key alone was before. Without Powers the key is still Halo Pulse.
+- One of the just who stays at the Judge keeps their heritage. `DivineBorn.is` counts them (mending, no hunger or sleep,
+  harder blows on the wicked, the healing bonus), `Heritage.stayed` unlocks Divine-born and the afterlife road's deed,
+  and their own heritage key becomes Alight whenever there are feathers to bring back.
+- The Divine-born gift text lists the sense, the hover and Alight; the hint mentions the Judge.
+- Compiled; not played.
+
+## 0.7.741 (2026-11-11): The Retaking: the Hermit's Road and the Common Road (#1319)
+
+- **The Hermit's Road** (Smoke, Gravity and Cryo users): meet a hermit wizard on a floating island, who writes you **A Letter** the first time (you looked straight through the spirit at their shoulder; your ki went to your element; "you will grow something of your own instead"); then grow your Valor to Kindled, Tempered and Steeled.
+- **The Common Road** (anyone with no power): take a job in a town; take up a class; swear to a patron; become a Master at your job; grow your Valor to Steeled.
+- With these, every power, class and faith has a road in the Story tab.
+- Built; not played.
+
+## 0.7.742 (2026-11-11): the minotaur's labyrinths - it keeps the Epic dungeons (#1320)
+
+- **Labyrinths**: every large Epic Structures dungeon (plains, snow and desert) holds one minotaur in its biggest hall,
+  and about one in three medium ones does too. Small dungeons have none. It is stood there the first time a player
+  comes within 40 blocks of the hall, once per dungeon, never in peaceful, and it keeps to within 14 blocks of the spot.
+  Dungeons in worlds that already exist get theirs the same way, the first time someone goes back in.
+- Nothing in the Epic Structures files is changed: `beasts/Labyrinths` reads the dungeon's rooms from the world and picks
+  a roofed, clear floor near the middle of the biggest one. Which dungeons count is two structure tags,
+  `jaymoskingdoms:minotaur_labyrinths` (always) and `minotaur_labyrinths_some` (`SOME_CHANCE`, 35%).
+- Compiled; not played. The room check was run against the mod's room files (each large dungeon's first hall has dozens
+  of spots that fit), but no dungeon has been walked in game.
+
+## 0.7.743 (2026-11-11): sky kingdoms and blossom towns (#1321)
+
+Andy: "if there is room for an epic village kingdom ... spawn one and maybe we could design some in the aether and
+blossom biome styles".
+- **Sky kingdoms**: Jaymo's Powers' sky towns count as Epic villages (`Seats.epic`), so in a stacked world (the
+  default) a kingdom is founded at a sky town's bell the usual way: great hall as the seat, library or smithy as the
+  storehouse, farms taken on. Its people are sky folk.
+- **No road down** (`Stacked.band`, `Raids.horizontal`): a place in the Aether band and one below it count as endlessly
+  far apart, so wars, raids, rivalries, caravans and spacing never reach between a sky kingdom and a ground realm.
+  Declaring such a war answers that no army can march there. Sky kingdoms deal with each other normally.
+- **Land by band** (`Factions.at`, `KingdomEvents.claim`): a realm's land is only its own height band of a chunk, so the
+  ground under a sky kingdom is not its land, and a ground realm does not own the islands above it.
+- **Blossom towns** (`BlossomVillages.foundTown`, `Blossom.tenshu`): on a wide, level cherry grove with no realm within
+  900 blocks, a town rises instead of a village: torii, lantern road, ten houses, four job halls, stalls, a shrine and
+  a three-storey keep with flared roofs. It is a kingdom from the start, with the keep as its seat and a Blossom name.
+  `/kingdom found blossomtown` raises one where you stand.
+- Sky village skiffs are no longer crewed by guards or people at work.
+
+## 0.7.744 (2026-11-11): Art credits file cleaned up
+
+The dragon art credits file had leftover merge markers from an old merge; they are gone and the Stegonaut credit is kept. Nothing changes in game.
+
+## 0.7.745 (2026-11-11): The band's smith is an Ocellan (#1323)
+
+- **The Ocellan** (Andy: "the race of aliens that build and upgrade the watch ... very small with bug eyes ... robes ...
+  and monocles, and are a high class society"): the smith who keeps the star forge is no longer drawn as a man. He is a
+  Ocellan, about half a block tall, with the body of Powers' Gremlin: grey, a wide flat head and two big yellow-green
+  eyes that shine in the dark and blink. He wears a long trimmed robe with a short mantle and wide cuffs, a monocle on a
+  chain over his right eye, and keeps his hands folded in front of him. There are three robes (plum, teal, umber).
+- He is still the same villager: his menu, his talk and the reforge are unchanged. He is small now, so aim lower to
+  click him. Smiths already in a world change the next time they are loaded.
+- `OcellanBody` (new: hides the man's body, draws the Ocellan), `ZFighterFolk.OCELLAN` (which parts are Ocellan; add a part
+  there to make another villager one) and `OCELLAN_SCALE`, `VillagerLooks`, `ModelPoses`, `McaLookModels.hideChest`,
+  `tools/gen_ocellan.py` (skins in `textures/entity/ocellan/`).
+- Compiled (`compileClientJava`) and rendered from the skins outside the game; not played. Not checked in game: that
+  every MCA layer on the smith (hair, clothes, held things) is hidden, and how his name tag sits.

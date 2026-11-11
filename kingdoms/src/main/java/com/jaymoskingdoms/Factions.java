@@ -112,7 +112,8 @@ public final class Factions {
 		}
 		ChunkPos chunk = ChunkPos.containing(pos);
 		for (Faction f : all(server)) {
-			if (f.claims(chunk)) {
+			// (in a stacked world a realm's land is its own band's: the ground under a sky kingdom is not its land)
+			if (f.claims(chunk) && Stacked.band(server, f.seat().getY()) == Stacked.band(server, pos.getY())) {
 				return f;
 			}
 		}

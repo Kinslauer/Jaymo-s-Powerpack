@@ -121,6 +121,11 @@ def packMods = [
 	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
+	// Epic Structures: Igloo and Jungle Temples (all rights reserved; "feel free to add to any modpack"; linked, never
+	// edited): 5 large and 7 small igloos with cellars under the large ones, and big jungle temples and temple ruins, all
+	// from vanilla blocks, mobs and loot (structure ids epic:*). Data only, no dependencies. 1.0.5 and 1.0.3.
+	[dep: "maven.modrinth:epic-structures-igloo:nXW1eymX", cf: [1511498, 8528158]],
+	[dep: "maven.modrinth:epic-structures-jungle-temples:ImFhV10j", cf: [1600197, 8984105]],
 	// Towns and Towers (CC BY-NC-ND 4.0, by Kubek, Biban_Auriu and Cristelknight999; shipped unchanged, never edited,
 	// with credit and a link: modrinth.com/mod/towns-and-towers):
 	// new villages per biome (tagged as villages, so Jaymo's Kingdoms founds capitals in them too), biome pillager outposts

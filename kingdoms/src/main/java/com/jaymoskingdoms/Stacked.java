@@ -111,6 +111,25 @@ public final class Stacked {
 		}
 	}
 
+	/** The stack's bands as last read: the server they were read for, the Overworld band's lowest height, the Aether band's. */
+	private static MinecraftServer bandsOf;
+	private static int overworldFrom, aetherFrom;
+
+	/**
+	 * Which band of the world the factions live in holds height {@code y}: 1 the Aether's, 0 the Overworld's, -1 the
+	 * Nether's. Always 0 in a world that isn't stacked. What stands in different bands has no road between it.
+	 */
+	public static int band(MinecraftServer server, int y) {
+		if (server != bandsOf) {
+			bandsOf = server;
+			ResourceKey<Level> aether = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
+				net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
+			aetherFrom = joined(server, aether) ? minY(server, aether) : Integer.MAX_VALUE;
+			overworldFrom = joined(server, Level.NETHER) ? minY(server, Level.OVERWORLD) : Integer.MIN_VALUE;
+		}
+		return y >= aetherFrom ? 1 : y < overworldFrom ? -1 : 0;
+	}
+
 	/** Whether this realm is a band of the stacked Overworld (so you reach it by walking, digging or flying, not a jump). */
 	public static boolean joined(MinecraftServer server, ResourceKey<Level> realm) {
 		return realm != Level.OVERWORLD && band(server, realm) != null;

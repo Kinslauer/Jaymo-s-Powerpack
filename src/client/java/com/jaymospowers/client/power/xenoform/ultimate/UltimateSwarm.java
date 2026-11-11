@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 
 /**
- * (0.20.21, Ultimates patch 1) Gremlin's Ultimate, Swarm: Gremlin's own build and gait (the hunched imp on its knuckles, the big
+ * (0.20.21, Ultimates patch 1) Gremlin's Ultimate, Swarm: the hunched imp Gremlin grows into (on its knuckles, the big
  * bobbing skull, the floppy ears, every limb solved onto the ground with two-bone IK), drawn at 0.45 of a player instead of 0.3.
  * The skull gets a plated brow with a crest of five small horns, the fists get knuckle plates, the shoulders pauldrons, the
  * forearms and shins guards, the flanks plates and the back six spines. The thin tail grows barbs and curls up over the back in
