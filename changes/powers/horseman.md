@@ -1,0 +1,5 @@
+# Horseman riding fixes in the pack
+- **Horseman** (MIT, mortuusars) ships unchanged in the pack. While riding, right-click a fence to hitch your horse (it needs a lead in the new slot in the horse's inventory). Horses step up a little higher, stop jittering on stairs, keep more speed going downhill and in the air, and get caught on leaves less. You mine at full speed in the saddle. Horses fit in boats. A saddled horse stays within 16 blocks of where you got off. Shears take the chest off a donkey, mule or llama. A button switches between your inventory and the horse's. The horse fades out when you look straight down.
+- Free rein stays as it was: Horseman only lets you look around while the horse is standing still.
+- Horseman's Copper Horn can't be crafted (`tinkering/Uncraftable`). It calls a horse from anywhere and can teleport it, and the whistle already does this job.
+- Built in the cloud; not played. The lead slot inside our restyled horse inventory screen still needs a look in game.
