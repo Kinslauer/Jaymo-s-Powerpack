@@ -71,8 +71,8 @@ public class RigForgeEntity extends BlockEntity {
 		return s < 0 ? 0 : s + 1;
 	}
 
-	public void nextSelection() {
-		this.selection = (selection() + 1) % SELECTIONS;
+	public void setSelection(int selection) {
+		this.selection = Math.floorMod(selection, SELECTIONS);
 		changed();
 	}
 

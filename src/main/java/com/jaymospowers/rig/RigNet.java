@@ -38,6 +38,35 @@ public final class RigNet {
 	public static final int WARN_LOW_CHARGE = 1, WARN_LOW_HEALTH = 2, WARN_PROJECTILE = 4, WARN_EXPLOSION = 8, WARN_LAVA = 16,
 		WARN_VOID = 32, WARN_BEHIND = 64;
 
+	/** Server → client: open the Rig Forge's screen for the Forge at {@code pos}. */
+	public record ForgeOpen(net.minecraft.core.BlockPos pos) implements CustomPacketPayload {
+		public static final Type<ForgeOpen> TYPE = new Type<>(JaymosPowers.id("rig_forge_open"));
+		public static final StreamCodec<ByteBuf, ForgeOpen> CODEC = net.minecraft.core.BlockPos.STREAM_CODEC.map(ForgeOpen::new, ForgeOpen::pos);
+
+		@Override
+		public Type<ForgeOpen> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * Client → server, from the Forge's screen: what it is set to build ({@code selection}, {@code frame} by ordinal), the
+	 * paints (a dye's id, {@link #PAINT_WASH} to wash it off, {@link #PAINT_LEAVE} to leave it), and whether to build now.
+	 */
+	public record ForgeSet(net.minecraft.core.BlockPos pos, int selection, int frame, int plates, int trim, boolean build) implements CustomPacketPayload {
+		public static final Type<ForgeSet> TYPE = new Type<>(JaymosPowers.id("rig_forge_set"));
+		public static final StreamCodec<ByteBuf, ForgeSet> CODEC = StreamCodec.composite(
+			net.minecraft.core.BlockPos.STREAM_CODEC, ForgeSet::pos, ByteBufCodecs.VAR_INT, ForgeSet::selection, ByteBufCodecs.VAR_INT, ForgeSet::frame,
+			ByteBufCodecs.INT, ForgeSet::plates, ByteBufCodecs.INT, ForgeSet::trim, ByteBufCodecs.BOOL, ForgeSet::build, ForgeSet::new);
+
+		@Override
+		public Type<ForgeSet> type() {
+			return TYPE;
+		}
+	}
+
+	public static final int PAINT_WASH = -1, PAINT_LEAVE = -2;
+
 	/** {@link Scan} kinds. */
 	public static final int FOUND_HOSTILE = 0, FOUND_PLAYER = 1, FOUND_CHEST = 2, FOUND_ORE = 3;
 
@@ -142,6 +171,9 @@ public final class RigNet {
 		PayloadTypeRegistry.serverboundPlay().register(Use.TYPE, Use.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Lock.TYPE, Lock.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Volley.TYPE, Volley.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ForgeSet.TYPE, ForgeSet.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ForgeOpen.TYPE, ForgeOpen.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ForgeSet.TYPE, (payload, context) -> RigForgeBlock.set(context.player(), payload));
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Scan.TYPE, Scan.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);

@@ -253,6 +253,23 @@ public final class RigSuit {
 	 * From the avatar renderer's extractRenderState, after hidden armour, costumes and forms have taken what they hide off
 	 * the state: the Rig's pieces still on it come off it (the vanilla armour layer would draw them) and onto the suit.
 	 */
+	/** The Forge screen's preview: while {@code run} extracts the local player's render state, they wear the whole suit in this frame and paint (-1: bare). */
+	static void withPreview(RigFrame frame, int plates, int trim, Runnable run) {
+		previewFrame = frame;
+		previewPlates = plates;
+		previewTrim = trim;
+		try {
+			run.run();
+		} finally {
+			previewFrame = null;
+		}
+	}
+
+	private static @org.jspecify.annotations.Nullable RigFrame previewFrame;
+	private static int previewPlates, previewTrim;
+	/** A piece this old (ticks) is fully on. */
+	private static final float PREVIEW_AGE = 10000.0F;
+
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		state.setData(AGES, null);
 		state.setData(FRAME, null);
@@ -316,6 +333,17 @@ public final class RigSuit {
 				}
 				ages[i] = age;
 			}
+		}
+		if (previewFrame != null && player == net.minecraft.client.Minecraft.getInstance().player) {
+			ages = new float[] {PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE};
+			frame = previewFrame;
+			trim = previewTrim;
+			colors = previewPlates < 0 ? null : new int[] {previewPlates, previewPlates, previewPlates, previewPlates};
+			state.headEquipment = ItemStack.EMPTY;
+			state.headItem.clear();
+			state.chestEquipment = ItemStack.EMPTY;
+			state.legsEquipment = ItemStack.EMPTY;
+			state.feetEquipment = ItemStack.EMPTY;
 		}
 		state.setData(AGES, ages);
 		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());

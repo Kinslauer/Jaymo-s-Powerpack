@@ -35,10 +35,10 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Salvage in hand, right-click: it is fed in (up to {@link RigForgeEntity#MAX_FED} points) and the hologram's
  * plates for the picked piece light as it goes. Builds spend what was fed first, then salvage carried.</li>
- * <li>Right-click the <b>top</b> with a free hand: build the picked piece in the picked frame ({@link RigFrame}). Sneak +
- * right-click: the next piece. Right-click a <b>side</b>: the next frame.</li>
- * <li>A dye in hand: the plates' paint; with Sneak, the trim's. What is worn is repainted too, and what is built next
- * takes it. A water bucket washes both off.</li>
+ * <li>Right-click with a free hand: the Forge's screen (client {@code RigForgeScreen}, in the Costume Table's style): a
+ * preview of you in the suit, the piece and frame ({@link RigFrame}), the two paints, the cost and Build ({@link #set}).</li>
+ * <li>A dye in hand still works: the plates' paint; with Sneak, the trim's. What is worn is repainted too, and what is
+ * built next takes it. A water bucket washes both off.</li>
  * <li>A worn-down Rig piece in hand refits it ({@link #REFIT_POINTS}). Creative builds for free.</li>
  * </ul>
  */
@@ -54,7 +54,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 	static final int FX_COLOR = 0x5FE6FF;
 
 	/** A piece's price: salvage points, then two plain materials. */
-	record Cost(int points, Item first, int firstCount, Item second, int secondCount) {
+	public record Cost(int points, Item first, int firstCount, Item second, int secondCount) {
 	}
 
 	/** The standard frame's price for each piece ({@link Rig.Piece} order). */
@@ -75,7 +75,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 	}
 
 	/** A Rig limb's price in a frame (limb: {@link RigForgeEntity#ARM} or {@link RigForgeEntity#LEG}). */
-	static Cost limbCost(int limb, RigFrame frame) {
+	public static Cost limbCost(int limb, RigFrame frame) {
 		boolean arm = limb == RigForgeEntity.ARM;
 		Item second = arm ? Items.REDSTONE : Items.BLAZE_POWDER;
 		int secondCount = arm ? 2 : 1;
@@ -138,19 +138,91 @@ public class RigForgeBlock extends Block implements EntityBlock {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_forge.refit", held.getHoverName()));
 			return;
 		}
-		if (player.isShiftKeyDown()) {
-			forge.nextSelection();
-			describe(player, forge);
-			player.level().playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.4F, 1.4F);
+		if (!held.isEmpty()) {
 			return;
 		}
-		if (face != Direction.UP) {
-			forge.setFrame(forge.frame().next());
-			describe(player, forge);
-			player.level().playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.4F, 1.1F);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new RigNet.ForgeOpen(pos));
+	}
+
+	/** How far from the Forge its screen still works (blocks, squared). */
+	static final double SCREEN_REACH_SQR = 64.0;
+
+	/** From the Forge's screen: the pick, the paints (each costs one dye of that colour unless it is what the Forge has), and the build. */
+	static void set(ServerPlayer player, RigNet.ForgeSet set) {
+		BlockPos pos = set.pos();
+		if (player.distanceToSqr(Vec3.atCenterOf(pos)) > SCREEN_REACH_SQR || !player.level().isLoaded(pos)) {
 			return;
 		}
-		build(player, forge, pos);
+		BlockState state = player.level().getBlockState(pos);
+		if (!(state.getBlock() instanceof RigForgeBlock)) {
+			return;
+		}
+		RigForgeEntity forge = RigForgeEntity.of(player.level(), pos, state);
+		if (set.selection() != forge.selection() && set.selection() >= 0 && set.selection() < RigForgeEntity.SELECTIONS) {
+			forge.setSelection(set.selection());
+		}
+		RigFrame[] frames = RigFrame.values();
+		if (set.frame() >= 0 && set.frame() < frames.length && frames[set.frame()] != forge.frame()) {
+			forge.setFrame(frames[set.frame()]);
+		}
+		for (int pass = 0; pass < 2; pass++) {
+			boolean trim = pass == 1;
+			int wanted = trim ? set.trim() : set.plates(), has = trim ? forge.trim() : forge.plates();
+			if (wanted == RigNet.PAINT_LEAVE || wanted < RigNet.PAINT_LEAVE || wanted >= DyeColor.values().length) {
+				continue;
+			}
+			DyeColor dye = wanted == RigNet.PAINT_WASH ? null : DyeColor.byId(wanted);
+			int rgb = dye == null ? RigForgeEntity.NO_PAINT : dye.getTextureDiffuseColor() & 0xFFFFFF;
+			if (rgb == has) {
+				continue;
+			}
+			if (dye != null && !player.isCreative() && !takeDye(player, dye)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_forge.no_dye",
+					Component.translatable("color.minecraft." + dye.getName())));
+				continue;
+			}
+			forge.setPaint(trim ? forge.plates() : rgb, trim ? rgb : forge.trim());
+			repaintWorn(player, trim, rgb);
+			player.level().playSound(null, pos, dye == null ? SoundEvents.BUCKET_EMPTY : SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+		}
+		if (set.build()) {
+			build(player, forge, pos);
+		}
+	}
+
+	/** One dye of {@code colour} out of the pack; false if there is none. */
+	private static boolean takeDye(Player player, DyeColor colour) {
+		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+			if (stack.getItem() instanceof DyeItem && stack.get(DataComponents.DYE) == colour) {
+				stack.shrink(1);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Puts one paint ({@link RigForgeEntity#NO_PAINT}: none) on every Rig piece worn; how many took it. */
+	private static int repaintWorn(Player player, boolean trim, int rgb) {
+		int pieces = 0;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			ItemStack worn = player.getItemBySlot(piece.slot);
+			if (piece.item() == null || !worn.is(piece.item())) {
+				continue;
+			}
+			if (trim) {
+				if (rgb == RigForgeEntity.NO_PAINT) {
+					worn.remove(Rig.TRIM);
+				} else {
+					worn.set(Rig.TRIM, rgb);
+				}
+			} else if (rgb == RigForgeEntity.NO_PAINT) {
+				worn.remove(DataComponents.DYED_COLOR);
+			} else {
+				worn.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
+			}
+			pieces++;
+		}
+		return pieces;
 	}
 
 	private static void build(ServerPlayer player, RigForgeEntity forge, BlockPos pos) {
@@ -262,11 +334,11 @@ public class RigForgeBlock extends Block implements EntityBlock {
 	}
 
 	/** Salvage points carried (main inventory). */
-	static int points(Player player) {
+	public static int points(Player player) {
 		return count(player, Rig.SALVAGE) * SALVAGE_POINTS + count(player, Rig.SCRAP) * SCRAP_POINTS;
 	}
 
-	private static int count(Player player, Item item) {
+	public static int count(Player player, Item item) {
 		int n = 0;
 		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
 			if (stack.is(item)) {

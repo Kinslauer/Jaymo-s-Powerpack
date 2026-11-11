@@ -87,6 +87,7 @@ public final class RigClient {
 	public static void init() {
 		rigKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.rig", InputConstants.KEY_J, JaymosPowersClient.CATEGORY));
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Status.TYPE, (payload, context) -> status = payload);
+		ClientPlayNetworking.registerGlobalReceiver(RigNet.ForgeOpen.TYPE, (payload, context) -> context.client().gui.setScreen(new RigForgeScreen(payload.pos())));
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Scan.TYPE, (payload, context) -> RigScanClient.accept(payload));
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTicks = TAKEOVER_SCREEN;
