@@ -18,5 +18,5 @@ owns:
 ## Done
 - PR #1335: FutureTrooper squads in whole Rigs (palm blast, slow fall), three-way targeting with androids, mechs and the dead; wary to players (squad turns on whoever hurts one), peace with Omens; Rig Salvage drop.
 - Lore.md: (new) paragraph "The troopers" for Andy to approve.
-- Asked Andy: friendly to the player? Built with "wary unless hit".
+- Andy chose: hostile to everyone (players too).
 - Built; not played.
