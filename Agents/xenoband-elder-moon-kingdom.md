@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: xenoband-elder-moon-kingdom
 branch: claude/project-thread-tsmsed
 with: claude-cloud
-pr: 
+pr: 1325
 mods: none (plan only)
 versions: 
 started: 2026-11-11
@@ -22,3 +22,4 @@ owns:
 - 
 
 ## Done
+- Plan in PR #1325, waiting on Andy's answers to its open questions.
