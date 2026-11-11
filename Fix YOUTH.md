@@ -114,6 +114,8 @@ Tidiness
 
 - 0.22.0: Andy chose "have the tool support a bigger bump when I ask". PR #1264 adds `bump: minor` to change notes
   (changes/README.md) and carries the 0.22.0 note. Nothing to do here.
+  - I didn't see this change in time and opened PR #1267 for the same thing (Andy picked `bump: minor` again in
+    chat). Closed it as a duplicate of #1264 and deleted the branch.
 
 ## When you're done
 
