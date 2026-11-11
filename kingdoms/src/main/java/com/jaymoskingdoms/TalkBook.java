@@ -235,6 +235,18 @@ final class TalkBook {
 	private static final Gate SEEKS = c -> Heavens.seeks(c.v());
 	private static final Gate CLEAR_NIGHT = c -> Vampires.night(c.clock()) && !c.level().isRaining() && c.level().canSeeSky(c.v().blockPosition().above());
 	private static final Gate POCKETS = c -> Heavens.carriesAether(c.player());
+	// the Retaking (Retaking): what folk say shifts with the act the player has reached; hints only, never said outright
+	private static Gate act(int least, int most) {
+		return c -> grown(c) && Knowledge.level(c.player()) >= least && Knowledge.level(c.player()) <= most;
+	}
+
+	private static final Gate READ_DEFENCE = c -> LoreCodex.holds(c.player(), Retaking.LONG_DEFENCE_BOOK)
+		|| com.jaymoskingdoms.films.LoreFilms.seen(c.player(), com.jaymoskingdoms.films.LoreFilms.LONG_DEFENCE);
+	private static final Gate FORD_STANDS = c -> Ford.site(c.level().getServer()) != null;
+	private static final Args FORD_WAY = c -> {
+		Ford.Site site = Ford.site(c.level().getServer());
+		return new Object[] {site == null ? "" : Sightings.direction(c.v().blockPosition(), site.keep())};
+	};
 	private static final Gate CROOK_NEAR = c -> Bearings.trust(c.v(), c.player()) >= Bearings.SECRET_TRUST && Talks.crookNear(c.v()) != null;
 
 	private static Gate mem(Recollections.Kind... kinds) {
@@ -535,6 +547,21 @@ final class TalkBook {
 			r("a", -1, 0, 0), r("b", 3, 1, 2, Outcome.of(Out.RIDDLE)), r("c", 1, 0, 1, Outcome.of(Out.RIDDLE))));
 		t.add(life("heavens_tower", SEEKS, c -> new Object[] {8, name(Items.SCAFFOLDING)},
 			r("a", 2, 0, 4, bring(Items.SCAFFOLDING, 8, 3)), r("b", 0, 0, 1, Outcome.of(Out.RIDDLE)), r("c", 0, -1, -3)));
+		// ---- the Retaking (Retaking): one or two per act, for anyone grown
+		t.add(lifeOnce("retaking_watch", act(0, 0), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, -1, -1), r("c", 1, 1, 2)));
+		t.add(lifeOnce("retaking_book", act(0, 1).and(READ_DEFENCE), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 0, -1), r("c", 1, 0, 1)));
+		t.add(lifeOnce("retaking_ford", act(1, 1).and(FORD_STANDS), FORD_WAY,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 2, 0, 1)));
+		t.add(lifeOnce("retaking_hardier", act(1, 1), NO_ARGS,
+			r("a", 0, 0, 1), r("b", 0, -1, 0), r("c", 1, 0, 1)));
+		t.add(lifeOnce("retaking_lights", act(2, 2), NO_ARGS,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 1, 1, 2)));
+		t.add(lifeOnce("retaking_counting", act(3, 3), NO_ARGS,
+			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 1, 0, 2)));
+		t.add(lifeOnce("retaking_songs", act(4, 5), NO_ARGS,
+			r("a", 1, 1, 2), r("b", 0, 1, 1), r("c", 1, 2, 1)));
 		// ---- trust
 		t.add(talk("money_loan", LENDER, c -> new Object[] {com.jaymoskingdoms.money.Money.text(c.player(), com.jaymoskingdoms.money.Money.worth(Talks.LOAN_EMERALDS))}, Talks.WEIGHT_LENDER, false, false,
 			r("a", 1, 0, 1, Outcome.of(Out.LOAN)), r("b", 0, 1, 0), r("c", 0, 0, -2)));
