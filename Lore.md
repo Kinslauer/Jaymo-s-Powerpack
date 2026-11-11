@@ -378,6 +378,14 @@ Bordo and the rest), and their Commanders (Vael, Orrin, Teska, Brandt) answer a 
 **Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
 of their own, take what they like and leave. Beaten, one of their pods is left ticking over where it landed.
 
+(new) **The Raider's Tally** (Retaking Act III, 2026-11-11). A beaten band leaves its tally in the pod: a few
+lines per world in the raiders' own blunt hand. The grey one (the Pale Moon: nothing on it, taken anyway), the red one
+(Rustfall: good iron), the ice one (Glacia: the clans fought well, "we sang for them after"), the green one (the Verdant
+World: nothing worth carrying). Then *this one*, the Overworld: "Rich. Soft. They keep looking up. Good." The last page
+reads "Home: —" and "We do not write that one down any more." It never names the Maw; the dash is the hint that their
+home is gone (*The Maw*). Act III's other milestones are a fallen star broken open, a pod flown, the Maw set foot in,
+and a far world freed or conquered, all before the Skeleton Lord.
+
 ## Fallen stars
 
 **Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
