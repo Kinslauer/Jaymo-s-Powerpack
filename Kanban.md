@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 06:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 06:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
@@ -26,6 +25,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · sent
 
 
 ## Done
