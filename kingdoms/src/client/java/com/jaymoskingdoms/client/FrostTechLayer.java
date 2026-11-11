@@ -27,8 +27,9 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
- * What a Frostborn villager wears of their people's work ({@link FrostTech}), for everyone to see: a scouter over one
- * eye, a made arm, a made leg. The scouter is Jaymo's Powers' own, drawn from its armour sheet on a helmet-sized box (so
+ * What a villager wears of the Frostborn's work ({@link FrostTech}), for everyone to see: a scouter over one eye, a made
+ * arm, a made leg; and the wooden or iron limb a smith fitted one with after they lost their own (Jaymo's Powers' own
+ * wooden and iron limb sheets, the same box). The scouter is Jaymo's Powers' own, drawn from its armour sheet on a helmet-sized box (so
  * a resource pack that repaints the scouter repaints these too; without Powers there is no scouter to draw). A made
  * limb is plating of our own ({@code tools/gen_frost_tech.py}, in the scouter's greys and green light) drawn over the
  * arm or leg, just proud of the sleeve, with its lamps unlit by the dark. Both follow the body the way the Beastfolk's
@@ -41,10 +42,12 @@ public final class FrostTechLayer {
 	/** The scouter's box off the head: a helmet's. */
 	static final float SCOUTER_INFLATE = 1.0F;
 
-	/** On a living body's render state: {@link FrostTech#of}, or null for none. */
+	/** On a living body's render state: {@link FrostTech#of}, with {@link FrostTech#kinds} above it (shifted 8), or null for none. */
 	static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:frost_tech");
 	private static final Identifier SCOUTER = Identifier.fromNamespaceAndPath("jaymospowers", "textures/entity/equipment/humanoid/scouter.png");
 	private static final Identifier LIMB = JaymosKingdoms.id("textures/entity/frost_tech/limb.png");
+	private static final Identifier WOOD = Identifier.fromNamespaceAndPath("jaymospowers", "textures/entity/wounds/wooden_limb.png");
+	private static final Identifier IRON = Identifier.fromNamespaceAndPath("jaymospowers", "textures/entity/wounds/iron_limb.png");
 	private static final Identifier LIMB_GLOW = JaymosKingdoms.id("textures/entity/frost_tech/limb_glow.png");
 	private static final boolean POWERS = FabricLoader.getInstance().isModLoaded("jaymospowers");
 
@@ -66,10 +69,10 @@ public final class FrostTechLayer {
 		return new Layer((RenderLayerParent) renderer);
 	}
 
-	/** From the living renderer's extractRenderState: what this body wears (nothing for anyone but a grown Frostborn villager). */
+	/** From the living renderer's extractRenderState: what this body wears (nothing for anyone but a grown villager or a patrolman). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		int worn = FrostTech.of(entity);
-		state.setData(KEY, worn == 0 ? null : worn);
+		state.setData(KEY, worn == 0 ? null : worn | FrostTech.kinds(entity) << 8);
 	}
 
 	private static ModelPart box(float x, float y, float z, float w, float h, float d, float inflate, int sheetW, int sheetH) {
@@ -106,7 +109,7 @@ public final class FrostTechLayer {
 			if (data == null || state.isInvisible || state.getData(BioForms.KEY) != null) {
 				return;
 			}
-			int worn = data;
+			int worn = data & 0xFF, kinds = data >> 8;
 			HumanoidModel<S> model = this.getParentModel();
 			HumanoidModel<?> posed = model;
 			if (McaCompat.LOADED) {
@@ -125,20 +128,24 @@ public final class FrostTechLayer {
 			if ((worn & FrostTech.LIMBS) == 0 || PowersCover.body(state)) {
 				return;
 			}
-			limb(poseStack, collector, lightCoords, posed.rightArm, rightArm(), worn & FrostTech.RIGHT_ARM);
-			limb(poseStack, collector, lightCoords, posed.leftArm, leftArm(), worn & FrostTech.LEFT_ARM);
-			limb(poseStack, collector, lightCoords, posed.rightLeg, leg(), worn & FrostTech.RIGHT_LEG);
-			limb(poseStack, collector, lightCoords, posed.leftLeg, leg(), worn & FrostTech.LEFT_LEG);
+			limb(poseStack, collector, lightCoords, posed.rightArm, rightArm(), kinds & 3);
+			limb(poseStack, collector, lightCoords, posed.leftArm, leftArm(), kinds >> 2 & 3);
+			limb(poseStack, collector, lightCoords, posed.rightLeg, leg(), kinds >> 4 & 3);
+			limb(poseStack, collector, lightCoords, posed.leftLeg, leg(), kinds >> 6 & 3);
 		}
 
-		private static void limb(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart bone, ModelPart plating, int worn) {
-			if (worn == 0 || !bone.visible) {
+		/** One limb's stand-in, of its make. (Not asked whether the bone shows: a lost limb's is hidden, and this stands in for it.) */
+		private static void limb(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart bone, ModelPart plating, int make) {
+			if (make == FrostTech.NONE) {
 				return;
 			}
+			Identifier sheet = make == FrostTech.WOOD ? WOOD : make == FrostTech.IRON ? IRON : LIMB;
 			poseStack.pushPose();
 			bone.translateAndRotate(poseStack);
-			collector.order(1).submitModelPart(plating, poseStack, RenderTypes.entityCutout(LIMB), light, OverlayTexture.NO_OVERLAY, null, -1);
-			collector.order(2).submitModelPart(plating, poseStack, RenderTypes.eyes(LIMB_GLOW), light, OverlayTexture.NO_OVERLAY, null, -1);
+			collector.order(1).submitModelPart(plating, poseStack, RenderTypes.entityCutout(sheet), light, OverlayTexture.NO_OVERLAY, null, -1);
+			if (make == FrostTech.MADE) {
+				collector.order(2).submitModelPart(plating, poseStack, RenderTypes.eyes(LIMB_GLOW), light, OverlayTexture.NO_OVERLAY, null, -1);
+			}
 			poseStack.popPose();
 		}
 	}
