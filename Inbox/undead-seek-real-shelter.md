@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
