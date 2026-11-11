@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: frostborn-tech-villagers
 branch: claude/project-thread-2kqme0
 with: claude-cloud
