@@ -53,7 +53,7 @@ they did in *The Long Defence*, a few at a time and here and there, under lightn
 the ground, grey, tusked, still carrying the iron they were buried with) and zombified piglins, never zombies or
 skeletons. Behind them, at the back, stands a **Shade of the Grue** in the sorcerer's red. When it falls, the rest go back
 into the ground, and the ford holds. Nothing on screen says who they were or why they came. If nobody stands at the ford,
-they sink back and come again another night.
+they sink back and come again another night. (new) When it is held, a short wordless film plays at the ford: dawn, the light still burning in the keep, the last of the old legion going back into the ground on the far bank.
 
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
@@ -269,6 +269,21 @@ of the just who asked the Judge to stay.
 
 (new) **Things that fall.** Now and then something drops out of a clear sky onto the land below: a tuft of
 cloudwool, a feather, a hat, a letter never meant for whoever finds it. Nobody below can say where from.
+
+(new) **The high house** (four-mods thread, 2026-11-11; Andy: "Yep do them next"). The sky castle has a lord and three
+wardens, drawn from its own people. The lord wears a blue mantle over the white robe and says he holds the hall for
+someone who has not come back; he does not say who. The court is no kingdom: it claims no land, sends no envoys and
+goes to no war, because the realms below settle things on foot and there is no road up. If the lord dies another of the
+house takes the mantle; if the house is emptied the seat stands empty.
+
+(new) **How the sky folk dress.** The Divine-born of the Aether wear white robes to the ankle with gold at the collar,
+cord and hem. The halfway folk wear tunics in the colours of sunrise with a white sash and a small sun on the chest.
+Wardens wear a white tabard with a gold sun over deep blue.
+
+(new) **The skiffs.** Each sky village keeps one balloon skiff at its mooring mast: a small hull hung under a bag of
+cloudwool. In daylight two of the village take her out across the open sky and bring her home, and haul her in on the
+line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
+below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
 ## The shape of the world
 
