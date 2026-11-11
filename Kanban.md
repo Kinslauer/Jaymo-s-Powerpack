@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,6 +18,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
+- [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · running
 
 
 ## In review
