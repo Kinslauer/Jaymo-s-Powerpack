@@ -11101,3 +11101,11 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - **Shadowflame is black soulfire** (Andy: "soulfire, but black, retaining the blue soul wisps, and the black particles, but make sure the smoke is added"): a new particle `jaymoskingdoms:shadowflame` (the soul fire flame drawn black), with black motes, smoke off the top and blue souls let go. Used wherever the sorcerer's shadowflame was.
 - **The Quiet One waits in rags** (Andy: "stand in the back until his time comes, then he dons the suit with the anti symbiote. Before then he is just in tattered cloths"): he stands at the back in torn clothes, bare-headed and barefoot, through the whole battle. When the spells are spent the white comes up over him from the ground, legs and trunk first, then all of him, the cloak winds out of it and sets, and the rapier is in his hand (two seconds, its own shot; tape event DRESS, skins `stranger_rags` and `stranger_half`). The suit is still the film's own white hooded cloak, not the Costume Table's costume (that needs PR #1287).
 - Staged and recorded in a dev client, then the shipped tape was played back in a fresh client and matched the recording shot for shot. Jaymo's Powers, Wizards and Archers are not in that dev client, so only Varro's armour was seen drawn; not watched in the full pack, and the dev client has no sound.
+
+## 0.7.722 (2026-11-11): karma - reputation and outlaws feed the weighing (#1291)
+
+- Every change of reputation with a kingdom, fiefdom or village also moves the weight of your life (Powers' `Karma`): 1 for
+  every 20 reputation, at most -5 or +3 for one deed, in a mask or not. A barbarian camp's opinion weighs nothing.
+- Outlaws (looters, assassins, camp raiders, anyone in a bandit's mask) are no innocents: killing one doesn't weigh
+  against you as killing a villager does (`PowersCompat.tellGuilty`).
+- Compiles (Gradle); not played.
