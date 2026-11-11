@@ -139,3 +139,13 @@ The silence was two readings at once (YOUTH's background full-Lore read, process
 over the bot's one voice connection (4006 drops, DAVE never ready). PR #1280 (merged): a new reading now stops the one
 still running before it joins. Pull master into E:/Origins Mod. Still open: the gateway watchdog logging "restarted
 the gateway" every minute since 11:29 PM while the gateway was up (may start extra YOUTH logins).
+
+## 2026-11-11 5:25 AM: why nobody hears it (cloud thread)
+Andy still hears nothing. The cause: davey 0.2.0 (what discord.py[voice] installs now) needs prepare_transition /
+execute_transition calls that discord.py 2.7.1 never makes, so Discord's voice encryption never gets ready
+(ready=False in the debug log) and every packet is dropped. Fix, for Claude Code on the PC:
+1. With the Python YOUTH uses (3.12): `py -3 -m pip install "davey==0.1.7"`. That's the whole fix; PR #1283 only
+   makes --check catch it.
+2. `py -3 tools/discord_read_aloud.py --status` and --stop anything running, then with Andy in General:
+   `py -3 tools/discord_read_aloud.py Lore --section="The ages of the world" --only --debug 2> read_debug.log`
+   Andy listens. Write here whether he heard it and whether `ready` turned True.

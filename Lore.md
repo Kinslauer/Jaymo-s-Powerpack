@@ -29,6 +29,14 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
+**The field of the long defence** (Andy, 2026-11-11). It was fought in a wooded forest, in sight of a Keep the defenders
+held. It was large and legendary: the fighting ran through the whole wood. Lightning struck when the sorcerer summoned
+his legion, and the dead came up a few at a time, here and there, not all at once. Varro disarmed the orc that came at
+him and brought it to its knees to in-balm it. At the end the fifth ran at the sorcerer through the trees, past his
+bolts of mana, blade in hand, and lunged; the sorcerer faded away.
+
+(new) The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
+
 (new) **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with

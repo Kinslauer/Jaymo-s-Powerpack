@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -50,3 +50,4 @@ Not tested in game.
 Not tested in game.
 - 2026-11-11 05:14 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-11 00:34 Text pass: change note changes/powers/claude-undead-seek-real-shelter.md is the only player-visible text for this feature. It describes the deadlier sunlight (ray-cast from multiple body points, tree shade no longer counts) and shelter search (caves, solid roofs, wider radius). Text is clear and player-facing; no rewrite needed.
+- 2026-11-11 06:20 Review of #1262 (head 947704b), cloud reviewer: pass. Checks green. The 04:13 list is fixed: avoidSun is now changed in start() and the saved value is put back in stop(), so zombies keep pathing out at night. Reading it by reflection is fine, since GroundPathNavigation has setAvoidSun but no getter in 26.3; drowned (amphibious navigation) just skip the toggle. Minor, not blocking: a skeleton whose RestrictSunGoal flips avoidSun while this goal runs gets the older value back. Not tested in game.
