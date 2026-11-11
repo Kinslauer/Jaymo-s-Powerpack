@@ -26,7 +26,7 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
-(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and (new) Grimsby, a Sylvan, carries the wind on his blade: it runs along the steel in lit currents.
 Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
 the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
 whatever leather, mail and iron they had, filthy and bloodied by then.
