@@ -103,6 +103,8 @@ public final class ZFighterLineage {
 	 */
 	static final double APE_STRIDE = 5.0, APE_STEP_RANGE = 32.0;
 	static final float APE_STEP_SHAKE = 1.0F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
+	/** Andy: "the giant sprint is a lumbering haul": sprinting, each of its steps covers this many times the ground. */
+	static final double APE_HAUL_STRIDE = 1.8;
 	/**
 	 * Every footfall is a stomp: enemies this far from the foot (blocks, at full size) are hurt this much and thrown up.
 	 * (0.17.54) As the Aether Giants' (Andy: "a stomp with every step, emitting a shockwave signified by a radiating particle
@@ -644,10 +646,10 @@ public final class ZFighterLineage {
 		} else {
 			live.apePeak = Math.max(live.apePeak, player.getY());
 		}
-		// every stride of his shakes the ground (sprinting, he skims over it instead)
-		if (player.moveDist - live.apeStepAt >= APE_STRIDE * Math.max(0.5F, live.apeSize)) {
+		// every stride of his shakes the ground, walking or hauling
+		if (player.moveDist - live.apeStepAt >= apeStride(player, live)) {
 			live.apeStepAt = player.moveDist;
-			if (player.onGround() && !player.isSprinting() && live.apeSize >= 0.5F) {
+			if (player.onGround() && live.apeSize >= 0.5F) {
 				footfall(player, live, level);
 			}
 		}
@@ -662,6 +664,11 @@ public final class ZFighterLineage {
 	}
 
 	/** One of the Great Ape's steps: the foot (left, then right) comes down like a stomp, shaking the ground and flinging what's near. */
+	/** How far one of the ape's steps goes (blocks): longer as it grows, and longer still hauling (sprinting). */
+	static double apeStride(LivingEntity ape, ZFighterPower.Live live) {
+		return APE_STRIDE * Math.max(0.5F, live.apeSize) * (ape.isSprinting() ? APE_HAUL_STRIDE : 1.0);
+	}
+
 	static void footfall(LivingEntity player, ZFighterPower.Live live, ServerLevel level) {
 		live.apeLeftFoot = !live.apeLeftFoot;
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
@@ -682,7 +689,7 @@ public final class ZFighterLineage {
 		// (0.19.39) the trees round his feet go down
 		com.jaymospowers.core.GiantTrample.step(player);
 		ZFighterNet.ApeStep step = new ZFighterNet.ApeStep(player.getId(), live.apeLeftFoot, foot.x, under.getY() + 1.0, foot.z, (float)reach,
-			(float)(APE_STRIDE * Math.max(0.5F, live.apeSize)));
+			(float)apeStride(player, live));
 		for (ServerPlayer viewer : PlayerLookup.tracking(player)) {
 			ServerPlayNetworking.send(viewer, step);
 		}

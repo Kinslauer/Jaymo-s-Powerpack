@@ -129,6 +129,14 @@ public class AetherGiant extends Monster {
 	 * it), and where each foot comes down (blocks out to the side and ahead of its middle).
 	 */
 	public static final float STEP_LENGTH = 6.0F;
+	/**
+	 * Andy: "the giant sprint is a lumbering haul, and will be activated by the npc giants when you get too far, they cover
+	 * alot of ground but dont flail their limbs". With its target farther off than this (blocks, past its body) it hauls:
+	 * this much faster, each step this many times as long (so its legs keep their slow swing), smashing through what's in
+	 * its way as it goes ({@link #trample}).
+	 */
+	static final double HAUL_FROM = 32.0, HAUL_SPEED = 0.8;
+	public static final float HAUL_STEP = 1.8F;
 	static final double FOOT_SIDE = 3.6, FOOT_AHEAD = 3.0;
 	/**
 	 * Each footfall's shockwave: it runs out along the ground this fast (blocks a tick) to this far, and hurts everyone it
@@ -188,6 +196,7 @@ public class AetherGiant extends Monster {
 	private static final EntityDataAccessor<Long> GRAB_START = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<Integer> GRAB_HELD = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.INT);
 	private static final Identifier RAGE_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_rage");
+	private static final Identifier HAUL_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_haul");
 
 	private final Element element;
 	/** The monolith it rose beside (null if it was summoned). */
@@ -333,7 +342,7 @@ public class AetherGiant extends Monster {
 		if (this.isAlive() && this.onGround()) {
 			// its stride runs on with the ground it covers (a teleport doesn't count as many steps)
 			double moved = Math.sqrt(Mth.square(this.getX() - this.xo) + Mth.square(this.getZ() - this.zo));
-			this.stride += (float)Math.min(moved / STEP_LENGTH, 0.5);
+			this.stride += (float)Math.min(moved / (STEP_LENGTH * (this.isSprinting() ? HAUL_STEP : 1.0F)), 0.5);
 		}
 		if (this.level() instanceof ServerLevel level) {
 			if (this.swingTicks > 0 && --this.swingTicks == 0) {
@@ -368,6 +377,9 @@ public class AetherGiant extends Monster {
 		if (this.tickCount % 20 == 0) {
 			this.aura(level);
 		}
+		LivingEntity chase = this.getTarget();
+		this.haul(chase != null && chase.isAlive() && this.windup <= 0 && !this.grabbing()
+			&& this.distanceToSqr(chase) > Mth.square(this.getBbWidth() / 2.0 + HAUL_FROM));
 		if (this.windup > 0) {
 			if (--this.windup == 0) {
 				this.stamp(level);
@@ -396,7 +408,7 @@ public class AetherGiant extends Monster {
 			&& this.distanceToSqr(target) > Mth.square(this.getBbWidth() / 2.0 + STAMP_TRIGGER / 2.0)) {
 			this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.1);
 		}
-		if (this.tickCount % TRAMPLE_EVERY == 0 && this.horizontalCollision && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+		if (this.tickCount % TRAMPLE_EVERY == 0 && (this.horizontalCollision || this.isSprinting()) && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
 			this.trample(level);
 		}
 		if (this.powerCooldown > 0) {
@@ -894,6 +906,23 @@ public class AetherGiant extends Monster {
 		this.entityData.set(GRAB_START, Long.MIN_VALUE);
 		this.entityData.set(GRAB_HELD, -1);
 		this.heldTree = -1;
+	}
+
+	/** Its haul on or off: sprinting (seen on the client, its longer stride), and faster. */
+	private void haul(boolean on) {
+		if (this.isSprinting() == on) {
+			return;
+		}
+		this.setSprinting(on);
+		AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
+		}
+		if (on) {
+			speed.addOrUpdateTransientModifier(new AttributeModifier(HAUL_ID, HAUL_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		} else {
+			speed.removeModifier(HAUL_ID);
+		}
 	}
 
 	private void rage() {

@@ -30,6 +30,10 @@ import org.jspecify.annotations.Nullable;
  * Running into a tree is harder still: instead of toppling, the tree is knocked flying, whole from its roots, on ahead of
  * the giant and tumbling as it goes (Kingdoms' {@code Trees.uproot}, as a tornado's). One too big for the giant to send
  * flying ({@link GiantTrees#mostLogs}) topples as a walk would; without Kingdoms the broken trunk's logs fly on ahead.
+ * <p>
+ * Andy: "they should break blocks they sprint through too, the giant sprint is a lumbering haul". A giant hauls when it
+ * sprints: a player giant at the sprint key, a mob giant when its quarry gets too far off (it sets itself sprinting).
+ * Hauling, it smashes whatever stands in its way above the ground it walks on ({@link #smash}), as the Aether Giants do.
  */
 public final class GiantTrample {
 	/** How far past its body a step reaches for trees (blocks, plus this per scale), and how high up its legs it looks for a trunk. */
@@ -37,13 +41,16 @@ public final class GiantTrample {
 	public static final int HEIGHT = 6;
 	/** Walking into a tree: checked this often (ticks). */
 	public static final int PUSH_EVERY = 5;
-	/** Running into a tree: checked this often (ticks). */
-	public static final int RAM_EVERY = 2;
+	/** Running into trees: checked this often (ticks), and at most this many trees go each time. */
+	public static final int RAM_EVERY = 2, RAM_MOST = 3;
 	/**
-	 * A giant counts as running at this speed over the ground (blocks a tick), or a player giant when sprinting: mobs
-	 * hardly ever sprint, and a player's speed isn't known on the server.
+	 * Hauling, it smashes what's in its way this far ahead of its body (blocks), from this high over its feet up (the
+	 * ground it walks on and the lip it steps over stay), at most this many blocks a check, and this share of them drops.
+	 * Nothing this hard or harder breaks (obsidian), nor anything unbreakable.
 	 */
-	public static final double RAM_SPEED = 0.2;
+	public static final double SMASH_REACH = 1.5, SMASH_ABOVE = 1.0;
+	public static final int SMASH_MOST = 48;
+	public static final float SMASH_DROPS = 0.25F, SMASH_HARDEST = 50.0F;
 	/** How far ahead of its body a run reaches for trees (blocks, plus this per scale). */
 	public static final double RAM_REACH = 1.0, RAM_REACH_PER_SCALE = 0.15;
 	/**
@@ -64,9 +71,11 @@ public final class GiantTrample {
 	private GiantTrample() {
 	}
 
-	/** Each tick of a giant: running into a tree throws it; walking into one pushes it over. */
+	/** Each tick of a giant: hauling, it throws the trees it runs into and smashes the rest; walking into a tree pushes it over. */
 	public static void tick(LivingEntity giant, long now) {
-		if (now % RAM_EVERY == 0 && ram(giant)) {
+		if (now % RAM_EVERY == 0 && giant.isSprinting()) {
+			ram(giant);
+			smash(giant);
 			return;
 		}
 		if (now % PUSH_EVERY == 0 && giant.horizontalCollision) {
@@ -75,27 +84,24 @@ public final class GiantTrample {
 	}
 
 	/**
-	 * Running into a tree: the first standing trunk just ahead of its body, from its feet up {@link #HEIGHT} blocks, is
-	 * thrown on ahead. True if one went.
+	 * Hauling into trees: the standing trunks just ahead of its body, from its feet up {@link #HEIGHT} blocks (up to
+	 * {@link #RAM_MOST}), are knocked flying on ahead. True if any went.
 	 */
 	public static boolean ram(LivingEntity giant) {
 		if (!(giant.level() instanceof ServerLevel level)) {
 			return false;
 		}
-		Vec3 motion = giant.getDeltaMovement().multiply(1.0, 0.0, 1.0);
-		double speed = motion.length();
-		boolean running = giant instanceof ServerPlayer ? giant.isSprinting() : speed >= RAM_SPEED;
-		if (!running || !mayFell(giant, level)) {
+		if (!giant.isSprinting() || !mayFell(giant, level)) {
 			return false;
 		}
-		// a sprinting player's motion isn't known here: its facing stands in for it
-		Vec3 ahead = speed > 1.0E-3 && !(giant instanceof ServerPlayer)
-			? motion.normalize() : Vec3.directionFromRotation(0.0F, giant.getYRot());
+		Vec3 ahead = ahead(giant);
+		double speed = giant.getDeltaMovement().horizontalDistance();
 		double reach = RAM_REACH + RAM_REACH_PER_SCALE * giant.getScale();
 		AABB body = giant.getBoundingBox();
 		AABB box = body.move(ahead.scale(reach)).minmax(body.move(ahead.scale(body.getXsize() * 0.5)));
 		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
 		int x1 = Mth.floor(box.maxX), z1 = Mth.floor(box.maxZ);
+		int hit = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y0 + HEIGHT, z1)) {
 			BlockState state = level.getBlockState(pos);
 			if (!state.is(BlockTags.LOGS) || !standing(state) || giant instanceof ServerPlayer player && !level.mayInteract(player, pos)) {
@@ -109,16 +115,56 @@ public final class GiantTrample {
 			}
 			if (knockFlying(level, log, giant, v)) {
 				level.playSound(null, log, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 2.0F, 0.5F);
-				return true;
+			} else {
+				boolean kingdoms = kingdoms() != null;
+				fell(level, log, giant);
+				if (!kingdoms) {
+					fling(level, log, ahead);
+				}
 			}
-			boolean kingdoms = kingdoms() != null;
-			fell(level, log, giant);
-			if (!kingdoms) {
-				fling(level, log, ahead);
+			if (++hit >= RAM_MOST) {
+				break;
 			}
-			return true;
 		}
-		return false;
+		return hit > 0;
+	}
+
+	/** Which way it's going: a mob along its motion; a player along its facing (its motion isn't known here). */
+	private static Vec3 ahead(LivingEntity giant) {
+		Vec3 motion = giant.getDeltaMovement().multiply(1.0, 0.0, 1.0);
+		return motion.lengthSqr() > 1.0E-6 && !(giant instanceof ServerPlayer) ? motion.normalize()
+			: Vec3.directionFromRotation(0.0F, giant.getYRot());
+	}
+
+	/**
+	 * Hauling: everything breakable just ahead of its body, from a block over its feet to the top of it, is smashed (the
+	 * trees it ran into have already gone flying, {@link #ram}; any wood left, a log wall, breaks). A player giant only where
+	 * they may build; a mob giant only with mob griefing on.
+	 */
+	public static void smash(LivingEntity giant) {
+		if (!(giant.level() instanceof ServerLevel level) || !giant.isSprinting() || !mayFell(giant, level)) {
+			return;
+		}
+		Vec3 ahead = ahead(giant);
+		AABB body = giant.getBoundingBox();
+		AABB box = body.move(ahead.scale(SMASH_REACH)).minmax(body.move(ahead.scale(0.5)));
+		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY + SMASH_ABOVE), z0 = Mth.floor(box.minZ);
+		int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
+		int broken = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || state.getCollisionShape(level, pos).isEmpty()) {
+				continue;
+			}
+			float hardness = state.getDestroySpeed(level, pos);
+			if (hardness < 0.0F || hardness >= SMASH_HARDEST || giant instanceof ServerPlayer player && !level.mayInteract(player, pos)) {
+				continue;
+			}
+			level.destroyBlock(pos, giant.getRandom().nextFloat() < SMASH_DROPS, giant);
+			if (++broken >= SMASH_MOST) {
+				return;
+			}
+		}
 	}
 
 	/** Kingdoms' {@code Trees.uproot}: the tree on {@code log} flies off whole at {@code v}. False if it can't (too big, not a living tree, no Kingdoms). */
