@@ -7,7 +7,8 @@
     python tools/discord_read_aloud.py "Lore" --channel=General  # a voice channel by name or id
     python tools/discord_read_aloud.py --list lore             # which documents match, without joining
     python tools/discord_read_aloud.py "Lore" --dry-run        # print what would be read, no Discord
-    python tools/discord_read_aloud.py --stop                  # stop the reading that's running and leave
+    python tools/discord_read_aloud.py --stop                  # stop every reading that's running and leave
+    python tools/discord_read_aloud.py --status                # is anything being read? (finds every running reading)
     python tools/discord_read_aloud.py "Lore" --debug          # also log the voice connection (no sound? run this)
     python tools/discord_read_aloud.py --check                 # is everything installed for THIS Python? (no Discord)
 
@@ -49,7 +50,8 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-PIDFILE = os.path.join(os.path.expanduser("~"), ".discord_read_aloud.pid")
+PIDFILE = os.path.join(os.path.expanduser("~"), ".discord_read_aloud.pid")  # the newest reading
+PIDDIR = os.path.join(os.path.expanduser("~"), ".discord_read_aloud")  # one file per running reading
 DOC_EXTS = (".md", ".txt")
 CHUNK_CHARS = 900  # longest piece sent to the speech engine at once; paragraphs longer than this are split at sentences
 DEFAULT_VOICE = "en-US-GuyNeural"
@@ -493,31 +495,112 @@ def pid_alive(pid):
         return True
 
 
-def stop_older_reading():
-    """One bot can hold only one voice connection per server: a second reading kicks the first out and back in
-    (close code 4006) over and over, and nobody hears either. So a new reading ends the old one first."""
+def _reader_cmdline(cmd):
+    """Is this command line a reading (not --stop, --status, --check, --list or --dry-run)?"""
+    if not cmd or "discord_read_aloud" not in cmd:
+        return False
+    return not re.search(r"\s--(stop|status|check|list|dry-run)\b", cmd)
+
+
+def scan_readers():
+    """PIDs of running readings found by their command line, so a reading whose pid file was overwritten or removed
+    is still found. On Windows a reading started from an elevated shell hides its command line from a normal one;
+    the per-reading pid files (PIDDIR) cover that case."""
+    found = set()
+    if os.name == "nt":
+        import json
+        import subprocess
+        ps = ("Get-CimInstance Win32_Process -Filter \"Name like 'python%'\" | "
+              "Select-Object ProcessId,CommandLine | ConvertTo-Json -Compress")
+        try:
+            out = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps],
+                                 capture_output=True, text=True, timeout=30).stdout.strip()
+            rows = json.loads(out) if out else []
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return found
+        for r in rows if isinstance(rows, list) else [rows]:
+            if _reader_cmdline(r.get("CommandLine") or ""):
+                found.add(int(r["ProcessId"]))
+    else:
+        for d in os.listdir("/proc") if os.path.isdir("/proc") else []:
+            if not d.isdigit():
+                continue
+            try:
+                with open(f"/proc/{d}/cmdline", "rb") as f:
+                    cmd = f.read().replace(b"\0", b" ").decode(errors="replace")
+            except OSError:
+                continue
+            if "python" in cmd.lower() and _reader_cmdline(" " + cmd):
+                found.add(int(d))
+    found.discard(os.getpid())
+    return found
+
+
+def running_readers():
+    """{pid: what it is reading} for every reading still running: the pid files (the old single one and one per
+    reading) plus a command-line scan. Pid files of readings that have ended are removed on the way."""
+    readers = {}
+    files = [PIDFILE]
+    if os.path.isdir(PIDDIR):
+        files += [os.path.join(PIDDIR, n) for n in os.listdir(PIDDIR)]
+    for path in files:
+        try:
+            with open(path, encoding="utf-8") as f:
+                first, _, rest = f.read().strip().partition("\n")
+            pid = int(first)
+        except (OSError, ValueError):
+            continue
+        if pid_alive(pid):
+            readers[pid] = rest.strip()
+        elif path != PIDFILE:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+    for pid in scan_readers():
+        readers.setdefault(pid, "")
+    readers.pop(os.getpid(), None)
+    return readers
+
+
+def end_reading(pid):
+    """Ends one reading and waits up to 10 s for it to go. False when it can't be ended (e.g. it runs elevated)."""
     try:
-        with open(PIDFILE) as f:
-            pid = int(f.read().strip())
-    except (OSError, ValueError):
-        return
-    if not pid_alive(pid):
-        return
-    print(f"{clock()} another reading is still running (process {pid}); stopping it first", flush=True)
-    try:
+        # On Linux the reader catches this and leaves the channel cleanly. On Windows it ends the process at once and
+        # Discord drops the bot from the channel a few seconds later.
         os.kill(pid, signal.SIGTERM)
     except OSError:
-        return
-    for _ in range(20):  # up to 10 s for it to go
+        return not pid_alive(pid)
+    for _ in range(20):
         if not pid_alive(pid):
-            break
+            return True
         time.sleep(0.5)
+    return not pid_alive(pid)
+
+
+def stop_older_reading():
+    """One bot can hold only one voice connection per server: a second reading kicks the first out and back in
+    (close code 4006) over and over, and nobody hears either. So a new reading ends the old ones first."""
+    readers = running_readers()
+    if not readers:
+        return
+    for pid in readers:
+        print(f"{clock()} another reading is still running (process {pid}); stopping it first", flush=True)
+        if not end_reading(pid):
+            print(f"{clock()} could not stop process {pid} (it may run as administrator): end it in Task Manager, "
+                  f"or this reading will fight it for the voice channel", file=sys.stderr, flush=True)
     time.sleep(3)  # let Discord notice the old voice connection is gone before ours joins
 
 
-def write_pid():
-    with open(PIDFILE, "w") as f:
+def write_pid(title=""):
+    with open(PIDFILE, "w", encoding="utf-8") as f:
         f.write(str(os.getpid()))
+    try:
+        os.makedirs(PIDDIR, exist_ok=True)
+        with open(os.path.join(PIDDIR, str(os.getpid())), "w", encoding="utf-8") as f:
+            f.write(f"{os.getpid()}\n{title}, started {clock()}")
+    except OSError:
+        pass
 
 
 def clear_pid():
@@ -527,27 +610,46 @@ def clear_pid():
                 os.remove(PIDFILE)
     except OSError:
         pass
+    try:
+        os.remove(os.path.join(PIDDIR, str(os.getpid())))
+    except OSError:
+        pass
+
+
+def describe(pid, what):
+    return f"process {pid}" + (f" ({what})" if what else "")
+
+
+def show_status():
+    """Is a reading running? Found by pid files and by command line, not only by the one pid file."""
+    readers = running_readers()
+    if not readers:
+        print("Nothing is being read.")
+        return 0
+    for pid, what in readers.items():
+        print(f"Reading: {describe(pid, what)}.")
+    if len(readers) > 1:
+        print("More than one reading is running: they fight over the voice channel. Run --stop.")
+    return 0
 
 
 def stop_running():
-    try:
-        with open(PIDFILE) as f:
-            pid = int(f.read().strip())
-    except (OSError, ValueError):
+    readers = running_readers()
+    stuck = []
+    for pid, what in readers.items():
+        if end_reading(pid):
+            print(f"Stopped the reading: {describe(pid, what)}.")
+        else:
+            stuck.append(pid)
+            print(f"Could not stop {describe(pid, what)}: it may run as administrator. End it in Task Manager "
+                  f"(Details, PID {pid}).")
+    if not readers:
         print("Nothing is being read.")
-        return 0
-    try:
-        # On Linux the reader catches this and leaves the channel cleanly. On Windows it ends the process at once and
-        # Discord drops the bot from the channel a few seconds later.
-        os.kill(pid, signal.SIGTERM)
-        print(f"Stopped the reading (process {pid}).")
-    except OSError:
-        print("Nothing is being read (the last reading already ended).")
     try:
         os.remove(PIDFILE)
     except OSError:
         pass
-    return 0
+    return 1 if stuck else 0
 
 
 # ---------------------------------------------------------------- main
@@ -562,13 +664,16 @@ def main(argv=None):
     ap.add_argument("--from", dest="start", type=int, default=1, help="paragraph to start at (default 1)")
     ap.add_argument("--list", action="store_true", help="list the documents that match and stop")
     ap.add_argument("--dry-run", action="store_true", help="print the paragraphs that would be read; no Discord")
-    ap.add_argument("--stop", action="store_true", help="stop the reading that is running")
+    ap.add_argument("--stop", action="store_true", help="stop every reading that is running")
+    ap.add_argument("--status", action="store_true", help="say whether a reading is running")
     ap.add_argument("--debug", action="store_true", help="log the voice connection and its encryption state")
     ap.add_argument("--check", action="store_true", help="check this Python has everything; no Discord")
     a = ap.parse_args(argv)
 
     if a.stop:
         return stop_running()
+    if a.status:
+        return show_status()
     if a.check:
         return check()
     if not a.document:
@@ -611,7 +716,7 @@ def main(argv=None):
         return 2
     wanted = a.channel or os.environ.get("READ_ALOUD_CHANNEL")
     stop_older_reading()
-    write_pid()
+    write_pid(title)
     try:
         return asyncio.run(read_in_channel(token, title, pieces, start, wanted, a.debug))
     except KeyboardInterrupt:
