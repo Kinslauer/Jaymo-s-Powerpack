@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 17:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 17:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🪶 Quill · #1262 · writing
 
 
 ## In review
@@ -23,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-frostborn-troopers|claude-cloud-frostborn-troopers]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
