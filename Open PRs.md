@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 15:16
+updated: 2026-11-11 16:42
 ---
 # Open PRs
 
-13 open, as of 2026-11-11 15:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-11 16:42. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -38,17 +38,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1295](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1295) Boxing: evades, strong attacks, blur and the combo breaker (Jung, part 3, stacked on #1294)
 - **Branch:** `jung/boxing-evades` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1308](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1308) Divine-born: feather sense, Alight, hover, and staying at the Judge
-- **Branch:** `claude/project-thread-5dj9k7-divine-born` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1312](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1312) Aether villages: sky villages, the sky lord's court, sky folk outfits, balloon ships and ferries
-- **Branch:** `claude/project-thread-5dj9k7-aether-villages` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
+- **Checks:** no checks
 - **Agent:** no agent note
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
@@ -58,15 +48,25 @@ Andy merges only on "merge", one at a time.
 
 ## [#1316](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1316) Boxing: fist gear worn on the hands (Jung, part 4, stacked on #1295)
 - **Branch:** `jung/boxing-worn-gear` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
+- **Checks:** no checks
 - **Agent:** no agent note
 
 ## [#1317](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1317) Boxing: the block (Jung, part 5, stacked on #1316)
 - **Branch:** `jung/boxing-blocks` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
+- **Checks:** no checks
 - **Agent:** no agent note
 
-## [#1318](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1318) Kingdoms CREDITS.txt: remove committed merge conflict markers
-- **Branch:** `claude/project-thread-qp0izy` · **Updated:** 2026-11-11 (today)
+## [#1322](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1322) Wisp: animated ghost tail and a Phase you hold
+- **Branch:** `claude/project-thread-ixuj2m` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
-- **Agent:** no agent note
+- **Agent:** [[Hero mechanics (Yo Fadda)]]
+
+## [#1325](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1325) Plan: the band's makers on the Pale Moon
+- **Branch:** `claude/project-thread-tsmsed` · **Updated:** 2026-11-11 (today)
+- **Checks:** ⏳ 1 of 4 running
+- **Agent:** [[xenoband-elder-moon-kingdom]]
+
+## [#1326](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1326) Pocket Arsenal pulls from anywhere: someone's pack, hazards
+- **Branch:** `claude/project-thread-4dzn49` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** [[claude-cloud-arsenal-anywhere]]

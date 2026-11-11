@@ -193,6 +193,21 @@ traits, never as a system.
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
 
+**The skull under the fire.** (new) When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
+
+**The burning chain.** (new) A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
+
+**Judgement.** (new) An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
+the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
+
+**The burning steeds.** (new) The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
+crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
+kin to the fire; anyone else is burned and thrown.
+
 ## The Z Fighters
 
 **The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
