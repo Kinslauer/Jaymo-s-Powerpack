@@ -12,12 +12,12 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · 🪶 Quill · #1326 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
-- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
