@@ -14,12 +14,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 🪶 Quill · #1271 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · #1271 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
