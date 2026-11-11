@@ -2199,3 +2199,7 @@ Built, not played.
 - **Wild villager apes haul too**: one chasing its quarry from more than 16 blocks off breaks into the haul (`VillagerApe.HAUL_FROM`/`HAUL_FACTOR`).
 - **Fix**: the tree check now looks just ahead of the giant from its feet up. Before, it looked only around eye height, so a tall giant missed trunks at its feet.
 - Not tested in game.
+
+## 0.22.0 (2026-11-11): Powerpack 0.22.0
+
+- The pack moves up to 0.22.0, at Andy's call. Nothing else changes in this entry.
