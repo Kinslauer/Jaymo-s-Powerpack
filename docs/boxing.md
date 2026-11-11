@@ -77,6 +77,17 @@ Jung's names; Andy has the last word. Changing them back is the three lines in `
 - **Early click:** a click that comes too early is kept (one) and thrown when the rhythm allows.
 - **Gassed** adds Mining Fatigue. `Boxing.tiring` (8 half-feathers or fewer) is there for the looks patch to read.
 
+## Built so far: gear worn on the hands
+
+- Fist gear is **worn, not held**, the way the Fang Gauntlets are (`client/armory/FangGauntletsClient`, through its
+  mixins): the held item is hidden and the gear is drawn on the arm, for everyone and in your own first person. With
+  the off hand empty it shows on both hands.
+- **Hand Wraps**: a wrap round the hand. **Cestus**: the wrap, with a studded band over the knuckles. **Bracers**: a
+  guard up the forearm. Sizes are the `WRAP_*`, `KNUCKLE_*` and `BRACER_*` knobs there; the textures are
+  `textures/entity/boxing/<item>.png` (from `tools/boxing_assets.py`, placeholder).
+- Holding fist gear also puts the arms in the Fang Gauntlets' fists-up guard when nothing is swinging. The styles'
+  own idles and poses will replace it.
+
 ## Not built yet
 
 **The blocks.** Right click does nothing with fist gear yet. The brief prices a blocked hit (1 icon; 1.5 for the Close
@@ -108,6 +119,9 @@ and levelling, the HUD, and the loading-screen hints.
 8. `long_guard` and `bastion`: same numbers; listen for the cross in the Long Guard's third punch.
 9. Empty hand, any style: plain vanilla punches (and Z Fighter's bare hands as before).
 10. `/powerdebug boxing status` prints all of it.
+15. Hold Hand Wraps, each cestus and each pair of bracers, third person (F5) and first person: the item is not in
+    the hand; it is on the hands (both, with the off hand empty; only the main hand with something in the off hand).
+16. A second player sees the same. The Fang Gauntlets still look as they did.
 12. Cestus: with a style, a leather, iron and steel cestus punch for 2, 2.5 and 3. Bracers punch for 1.5.
 13. Craft a Leather Cestus (Hand Wraps + 2 leather) and Leather Bracers (Hand Wraps + 4 leather).
 14. Forge an Iron Cestus: shape Cestus Studs at the Part Builder, cast them, pour iron, then studs + a Tool Binding at
