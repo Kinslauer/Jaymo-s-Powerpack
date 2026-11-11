@@ -262,3 +262,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 (four-mods thread): the Eden Ring field guide is 'A Far Country Herbal' (PR #1331), a written book in a traveller's voice (hints only, per the lore-delivery rule), crafted from a book + dried limphium leaf + gravilite shards. Claude's call, unconfirmed: crafted rather than found or given.
 - 2026-11-11: Andy on the Rig Forge: "they deserve a costume style UI" (RigForgeScreen, PR #1322).
 - 2026-11-11 5:10 PM ET (Andy): merge PR #1325 (Ocellan moon plan). Merged.
+- 2026-11-11: Andy: vigilantes fight villains (rivalries a player can join), and villagers talk about the costumed ones they've seen (PR #1332).
