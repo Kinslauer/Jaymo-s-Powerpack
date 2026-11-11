@@ -12,6 +12,17 @@ or the task's own Running state) that the new task no longer matches. Also, "Fix
 "restarts" every minute without the check ever coming back true. If the new task allows parallel runs, or the
 watchdog starts the gateway some other way, each minute could start another YOUTH login.
 
+## 12:43 AM: YOUTH stuck in voice
+At 12:42-12:43 AM Tiv said "stop" and "stop reading" in parthenon > Dashboard. YOUTH said nothing was reading, but
+YOUTH was still in Hotspot > General voice (50+ min). Each message got one reply, so no sign yet of two gateways both
+answering. Do this before step 1:
+- List every process holding YOUTH: `Get-CimInstance Win32_Process | ? { $_.CommandLine -match 'discord_read_aloud|gateway' } |
+  select ProcessId,CreationDate,CommandLine`. Stop every `discord_read_aloud` process (also run
+  `py -3 tools/discord_read_aloud.py --stop`). --stop reads one pid file, so a second reading started over it isn't stopped by --stop.
+- If YOUTH is still in voice after that, it's a gateway's own voice connection: note which gateway PID, and in step 2
+  keep only one gateway. Check the Hermes config for a Discord voice feature and say what it is set to.
+- Fix YOUTH's "is it reading?" answer: it should check for a running discord_read_aloud process, not only the pid file.
+
 ## Steps
 
 Times on a 12-hour clock. Never print or log a token or key. Restart the gateway only with
