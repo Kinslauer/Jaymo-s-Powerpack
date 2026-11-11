@@ -429,6 +429,10 @@ public final class ChronoPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		if (!down) {
+			if (key.ordinal() == OVERCLOCK) {
+				// V let go: a held phase ends
+				ChronoPhase.release(player);
+			}
 			return;
 		}
 		ChronoState state = state(player);
@@ -441,9 +445,9 @@ public final class ChronoPower implements Power {
 			return;
 		}
 		if (ability == OVERCLOCK && state.overclockLeft > 0) {
-			// V again mid-Overclock: phase through the wall ahead
-			if (now >= state.phaseReadyAt && ChronoSpeed.phase(player)) {
-				state.phaseReadyAt = now + ChronoSpeed.PHASE_GAP;
+			// V again mid-Overclock: hold it at a wall to phase through
+			if (ChronoPhase.start(player)) {
+				return;
 			} else if (state.overclockHeld) {
 				// max-rank toggle: no wall to phase through, so V switches Overclock off and the cooldown starts now
 				overclockOff(player, state);
@@ -545,6 +549,7 @@ public final class ChronoPower implements Power {
 		java.util.Arrays.fill(state.readyAt, 0);
 		state.ultimateReadyAt = 0;
 		state.phaseReadyAt = 0;
+		ChronoPhase.resetCooldown(player);
 		net.minecraft.world.item.ItemCooldowns items = player.getCooldowns();
 		java.util.Set<Identifier> groups = new java.util.HashSet<>();
 		for (net.minecraft.world.item.ItemStack stack : player.getInventory()) {
