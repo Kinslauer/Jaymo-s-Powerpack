@@ -247,3 +247,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:54 PM ET (Andy, Galvan moon plan): the Galvan city is not a Kingdoms realm: "no war or trading with other kingdoms".
 - 2026-11-11 4:54 PM ET (Andy, Galvan moon plan): "all upgrades require a trip" to the elder on the Pale Moon. Read as: learning, fitting and swapping modules and buying band skills only at the elder forge; scanning new aliens stays in the field.
 - 2026-11-11 4:55 PM ET (Andy, Galvan moon plan): a player can hand the band to the ruler; "the ruler becomes a boss, and turns on you. starting a hard fight on your own. easier with still empowered friends."
+- 2026-11-11 4:56 PM ET (Andy, Galvan moon plan): "if he is given the band and killed, the new wearer can take the seat, becoming the king, and opening intergalactic trade and warfare. The Oscellans had it figured out before." Oscellans not yet in Lore.md; asked who they are.
