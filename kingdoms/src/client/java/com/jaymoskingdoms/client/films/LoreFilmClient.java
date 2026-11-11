@@ -3,7 +3,6 @@ package com.jaymoskingdoms.client.films;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.films.LoreFilms;
-import com.jaymoskingdoms.inhabitants.Inhabitants;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -31,7 +30,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -53,13 +51,16 @@ import org.jspecify.annotations.Nullable;
  * <ol>
  * <li>A line of hearthlanders at night, and behind them the five mages: Grimsby, Thessaly, Ambrose and Varro, each the
  * living man or woman their spirit was ({@code tools/gen_film_skins.py}), and a fifth in plain grey, a step back.</li>
- * <li>Andy: "shadows rising from the ground like flame, flickering and revealing the growing legion with every flicker".
- * Black flame flares across the field; each flare lights it, and each time more of the dead stand in it (zombies, husks,
- * skeletons, wither skeletons, Draugr), risen out of the ground, until the last flare shows the sorcerer behind them: the
- * Grue as it was, hooded, its eyes lit violet.</li>
- * <li>A horn. The dead come on and meet the line; some of the hearthlanders fall.</li>
+ * <li>Far off across the field stands the sorcerer's living host, orcs and Warrior-born, and the sorcerer among them:
+ * the Grue as it was, hooded, its eyes lit violet.</li>
+ * <li>The sorcerer raises a hand and calls up the rest. Andy: "shadows rising from the ground like flame, flickering and
+ * revealing the growing legion with every flicker". Black flame flares across the field; each flare lights it, and each
+ * time more of the dead stand in it, risen out of the ground in front of the host: dead orcs and zombified piglins.</li>
+ * <li>A horn. The dead come on, the host behind them, and meet the line; some of the hearthlanders fall. Grimsby, sword
+ * in hand, throws bolts into them with the other.</li>
  * <li>The mages, each in turn, each in their own colour: Varro's fire, Thessaly's ward (a wall of light the dead are thrown
- * back from), Grimsby's blade (a cut that runs the length of the field), Ambrose's light (day, for a breath).</li>
+ * back from), Grimsby's spell-cut (glyphs round him, then one cut of light that runs the length of the field), Ambrose's
+ * light (day, for a breath).</li>
  * <li>The fifth walks out alone through what's left. The dead fall as he passes. He faces the sorcerer, raises his hand,
  * and the sorcerer sinks into the ground in shadow. Nobody says who he was; he looks like none of the spirits.</li>
  * <li>The field, wide, and the line still standing. Fade.</li>
@@ -77,6 +78,11 @@ public final class LoreFilmClient {
 	static final double LINE_F = 14.0, MAGES_F = 10.0, STRANGER_F = 7.0, LEGION_NEAR = 28.0, LEGION_FAR = 40.0, LEGION_HALF = 13.0,
 		SORCERER_F = 45.0, CLASH_F = 16.5;
 	static final int SOLDIERS = 9, LEGION = 36;
+	/** The living host (orcs and Warrior-born): how many, and where they stand, behind where the dead will rise. */
+	static final int HOST = 16;
+	static final double HOST_NEAR = 40.5, HOST_FAR = 43.5;
+	/** How often Grimsby throws a bolt in the clash (ticks). */
+	static final int BOLT_EVERY = 22;
 	/** How far under the ground a hidden actor waits, and how fast actors walk (blocks a tick). */
 	static final double HIDDEN = 3.2, WALK = 0.14, STRANGER_WALK = 0.27;
 	/** The dark over the screen: the memory's dim, between flickers, and at a flicker's height. */
@@ -88,7 +94,7 @@ public final class LoreFilmClient {
 		VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS};
 
 	enum Role {
-		SOLDIER, MAGE, STRANGER, SORCERER, DEAD
+		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST
 	}
 
 	/** One actor: its entity, where it stands on the stage and where it's headed, how far under the ground, which flicker shows it. */
@@ -118,6 +124,7 @@ public final class LoreFilmClient {
 		final float yaw;
 		final RandomSource rnd = RandomSource.create();
 		final List<Actor> actors = new ArrayList<>();
+		/** The dead and the living host: everything on the far side that the mages strike at. */
 		final List<Actor> legion = new ArrayList<>();
 		final List<Actor> soldiers = new ArrayList<>();
 		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer;
@@ -243,10 +250,22 @@ public final class LoreFilmClient {
 			a.group = i % FLICKERS;
 			f.legion.add(a);
 		}
+		// the living host, standing from the start, a gap in the middle for the one they serve
+		for (int i = 0; i < HOST; i++) {
+			boolean orc = i % 5 < 3;
+			LivingEntity e = person(f, orc ? "orc_" + i % 3 : "raider_" + i % 3, false);
+			if (e == null) {
+				continue;
+			}
+			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(orc ? (i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE) : Items.IRON_SWORD));
+			double side = (i < HOST / 2 ? -1.0 : 1.0) * (2.5 + (i % (HOST / 2)) * (LEGION_HALF - 2.5) / (HOST / 2 - 1));
+			Actor a = cast(f, e, Role.HOST, HOST_NEAR + f.rnd.nextDouble() * (HOST_FAR - HOST_NEAR), side + spread(f, 0.4), facingBack);
+			a.group = -1;
+			f.legion.add(a);
+		}
 		LivingEntity grue = person(f, "sorcerer", false);
 		if (grue != null) {
 			f.sorcerer = cast(f, grue, Role.SORCERER, SORCERER_F, 0.0, facingBack);
-			f.sorcerer.sink = HIDDEN;
 		}
 		sound(SoundEvents.AMBIENT_CAVE.value(), 0.7F, 0.5F);
 	}
@@ -284,17 +303,18 @@ public final class LoreFilmClient {
 		return e;
 	}
 
-	/** One of the dead: mostly zombies and skeletons, some husks, wither skeletons and Draugr. */
+	/** One of the dead the sorcerer raises: dead orcs and zombified piglins, half and half. */
 	private static @Nullable LivingEntity dead(Film f, int i) {
-		int roll = f.rnd.nextInt(20);
-		EntityType<? extends LivingEntity> type = roll < 7 ? EntityTypes.ZOMBIE : roll < 12 ? EntityTypes.SKELETON : roll < 15 ? EntityTypes.HUSK
-			: roll < 17 ? EntityTypes.WITHER_SKELETON : Inhabitants.DRAUGR;
-		if (type == null) {
-			type = EntityTypes.ZOMBIE;
+		if (i % 2 == 0) {
+			LivingEntity e = person(f, "dead_orc_" + (i / 2) % 2, false);
+			if (e != null && i % 6 == 0) {
+				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_AXE));
+			}
+			return e;
 		}
-		LivingEntity e = type.create(f.level, EntitySpawnReason.LOAD);
-		if (e != null && i % 4 == 0) {
-			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(type == EntityTypes.WITHER_SKELETON ? Items.STONE_SWORD : Items.IRON_SWORD));
+		LivingEntity e = EntityTypes.ZOMBIFIED_PIGLIN.create(f.level, EntitySpawnReason.LOAD);
+		if (e != null) {
+			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(i % 3 == 0 ? Items.IRON_SWORD : Items.GOLDEN_SWORD));
 		}
 		return e;
 	}
@@ -386,7 +406,12 @@ public final class LoreFilmClient {
 				}
 			}
 		}
-		// the sorcerer, behind them all
+		// the sorcerer raises a hand, and the dark starts to come up
+		if (t == REVEAL - 6 && f.sorcerer != null) {
+			f.sorcerer.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			sound(SoundEvents.EVOKER_PREPARE_SUMMON, 0.6F, 0.9F);
+		}
+		// the last of them up, and the sorcerer behind them all
 		if (t == SORCERER && f.sorcerer != null) {
 			sound(SoundEvents.WITHER_SPAWN, 0.6F, 0.45F);
 			f.flash = 0.0F;
@@ -400,7 +425,8 @@ public final class LoreFilmClient {
 		if (t == CLASH) {
 			sound(SoundEvents.RAID_HORN.value(), 1.0F, 0.6F);
 			for (Actor a : f.legion) {
-				a.toF = CLASH_F + 1.0 + (a.homeF - LEGION_NEAR) * 0.3;
+				// the dead in front, the host pressing in behind them
+				a.toF = a.role == Role.HOST ? CLASH_F + 5.5 + (a.homeF - HOST_NEAR) * 0.4 : CLASH_F + 1.0 + (a.homeF - LEGION_NEAR) * 0.3;
 				a.toS = a.homeS * 0.75;
 			}
 			for (Actor a : f.soldiers) {
@@ -420,6 +446,13 @@ public final class LoreFilmClient {
 				if (d != null) {
 					d.fallAt = t;
 				}
+			}
+		}
+		// Grimsby, sword in one hand, throws bolts with the other
+		if (t > CLASH + 30 && t < SPELLS && (t - CLASH) % BOLT_EVERY == 0 && f.grimsby != null) {
+			Actor d = front(f);
+			if (d != null) {
+				bolt(f, f.grimsby, d);
 			}
 		}
 		if ((t == CLASH + 60 || t == CLASH + 95 || t == CLASH + 125) && f.soldiers.size() > 7) {
@@ -490,7 +523,32 @@ public final class LoreFilmClient {
 		};
 	}
 
+	/** Grimsby's bolt: off his free hand, a streak of light into {@code at}, which falls. */
+	private static void bolt(Film f, Actor mage, Actor at) {
+		mage.e.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+		sound(SoundEvents.EVOKER_CAST_SPELL, 1.3F, 0.6F);
+		Vec3 from = mage.e.position().add(0.0, 1.4, 0.0).add(f.right.scale(-0.4)), to = at.e.position().add(0.0, 1.1, 0.0);
+		for (int i = 0; i <= 24; i++) {
+			Vec3 p = from.lerp(to, i / 24.0);
+			particle(f, i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.0, 0.0);
+		}
+		at.fallAt = f.tick + 2;
+	}
+
 	private static void spell(Film f, int which, Actor mage, int into) {
+		if (which == 2 && into < 12) {
+			// Grimsby: glyphs gather and turn about him as he calls it up, his free hand raised
+			if (into == 2) {
+				mage.e.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+				sound(SoundEvents.EVOKER_PREPARE_ATTACK, 1.0F, 0.8F);
+			}
+			for (int i = 0; i < 6; i++) {
+				double turn = (into * 0.5 + i * Math.PI / 3.0);
+				Vec3 p = mage.e.position().add(Math.cos(turn) * 1.3, 0.3 + into * 0.12, Math.sin(turn) * 1.3);
+				particle(f, ParticleTypes.ENCHANT, p, 0.0, 0.0, 0.0);
+				particle(f, ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.02, 0.0);
+			}
+		}
 		if (into == 10) {
 			mage.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
@@ -530,10 +588,11 @@ public final class LoreFilmClient {
 				}
 			}
 			case 2 -> {
-				// Grimsby: one cut that runs the length of the field
+				// Grimsby: the spell let go down his blade, one cut of light that runs the length of the field
 				int run = into - 12;
 				if (run == 0) {
 					sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 1.0F);
+					sound(SoundEvents.EVOKER_CAST_SPELL, 0.8F, 0.9F);
 				}
 				if (run < 14) {
 					double along = CLASH_F + run * (LEGION_FAR + 2.0 - CLASH_F) / 14.0;
@@ -541,6 +600,7 @@ public final class LoreFilmClient {
 					particle(f, ParticleTypes.SWEEP_ATTACK, p, 0.0, 0.0, 0.0);
 					for (int i = 0; i < 4; i++) {
 						particle(f, ParticleTypes.CRIT, p.add(spread(f, 1.0), spread(f, 0.5), spread(f, 1.0)), 0.0, 0.05, 0.0);
+						particle(f, ParticleTypes.ENCHANTED_HIT, p.add(spread(f, 1.2), spread(f, 0.8), spread(f, 1.2)), 0.0, 0.03, 0.0);
 					}
 					for (Actor a : f.legion) {
 						if (!a.down && a.fallAt < 0 && Math.abs(a.f - along) < 1.6 && Math.abs(a.s - mage.s) < 2.6) {
@@ -598,8 +658,6 @@ public final class LoreFilmClient {
 		// rising out of the ground at its flicker (the dead), or as the film began (everyone else)
 		if (a.role == Role.DEAD && a.sink > 0.0 && a.sink < HIDDEN) {
 			a.sink = Math.max(0.0, a.sink - 0.2);
-		} else if (a.role == Role.SORCERER && f.tick >= SORCERER && f.tick < BANISH) {
-			a.sink = Math.max(0.0, a.sink - 0.12);
 		}
 		Vec3 at = f.at(a.f, a.s, -a.sink);
 		e.setPos(at.x, at.y, at.z);
@@ -675,16 +733,16 @@ public final class LoreFilmClient {
 			// along the line's backs, the dark field beyond
 			float k = smooth(t / REVEAL);
 			pos = f.at(LINE_F - 2.4, Mth.lerp(k, -7.0, -2.5), 1.5);
-			look = f.at(LINE_F + 12.0, 2.0, 1.2);
+			look = f.at(HOST_NEAR, 2.0, 1.4);
 		} else if (t < SORCERER) {
 			// over the mages' heads, out at the field as it flickers
 			float k = smooth((t - REVEAL) / (SORCERER - REVEAL));
 			pos = f.at(MAGES_F - 3.0 + 2.5 * k, 1.0, 2.6);
 			look = f.at(LEGION_NEAR + 5.0, 0.0, 0.8);
 		} else if (t < CLASH) {
-			// low among the dead, up at the one behind them
+			// low among the dead, through the gap in the host, up at the one behind them
 			float k = smooth((t - SORCERER) / (CLASH - SORCERER));
-			pos = f.at(SORCERER_F - 7.5 + 1.5 * k, 2.5, 0.9);
+			pos = f.at(SORCERER_F - 7.5 + 1.5 * k, 1.2, 0.9);
 			look = f.sorcerer != null ? f.sorcerer.e.getPosition(partialTicks).add(0.0, 1.6, 0.0) : f.at(SORCERER_F, 0.0, 1.6);
 		} else if (t < OVER_SHOULDER) {
 			// off the flank as they meet

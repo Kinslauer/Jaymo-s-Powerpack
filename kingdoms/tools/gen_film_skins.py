@@ -8,6 +8,11 @@ the Grue:
 - Varro: a warlord, cropped grey hair, a short beard and a scar, a red tunic and a war belt (he wears iron plate over it).
 - The sorcerer: a hood and robe of near-black purple, a grey face, eyes that glow violet, clawed grey hands.
 - The fifth mage: a plain grey hooded cloak, a face in shadow, nothing else, so that he looks like none of the others.
+The sorcerer's living host, and the dead he raises:
+- Orcs (orc_0-2): grey-green and tusked, a black top-knot, scars, hide and scrap iron over a bare chest.
+- Warrior-born raiders (raider_0-2): dark spiky hair, a dark fighting suit under a pale chest plate with shoulder guards,
+  and a brown furred tail wrapped round the waist, its tip hanging at the back.
+- Dead orcs (dead_orc_0-1): the orcs gone ashen and rotten, rags, ribs showing, one tusk broken, pale dead eyes.
 Run from the kingdoms project root: python -I tools/gen_film_skins.py"""
 from PIL import Image
 import os
@@ -363,6 +368,141 @@ def stranger():
     save(img, "stranger")
 
 
+def tusks(img, broken=False):
+    fx, fy, fw, fh = HEAD["front"]
+    ivory = (226, 218, 190)
+    px(img, fx + 2, fy + 6, ivory)
+    px(img, fx + 2, fy + 5, ivory)
+    px(img, fx + 5, fy + 6, ivory)
+    if not broken:
+        px(img, fx + 5, fy + 5, ivory)
+
+
+ORC_SKINS = [(98, 124, 78), (86, 112, 84), (110, 126, 70)]
+
+
+def orc_body(img, rnd, skin, dead=False):
+    """Bare grey-green arms and chest, hide trousers, a scrap-iron pauldron (or rags, for the dead)."""
+    box(img, BODY, skin, 7, rnd)
+    for arm in arms(False):
+        box(img, arm, skin, 7, rnd)
+    hide = (88, 64, 44) if not dead else (66, 58, 50)
+    for leg in LEGS:
+        box(img, leg, hide, 7, rnd)
+    rows(img, BODY, 8, 4, hide, 6, rnd)
+    belt(img, rnd, (56, 40, 28), (120, 120, 116))
+    if not dead:
+        strap(img, rnd, (60, 42, 28))
+        # a scrap-iron plate over the left shoulder
+        paint(img, arms(False)[1]["top"], (118, 118, 114), 10, rnd)
+        for side in SIDES:
+            x0, y0, w, h = sleeves(False)[1][side]
+            paint(img, (x0, y0, w, 3), (112, 112, 108), 10, rnd)
+        boots(img, rnd, (52, 38, 26))
+    else:
+        # rot: dark patches, and the ribs showing through
+        for _ in range(26):
+            b = rnd.choice([BODY, arms(False)[0], arms(False)[1]])
+            x0, y0, w, h = b[rnd.choice(SIDES)]
+            px(img, x0 + rnd.randrange(w), y0 + rnd.randrange(h), shade(skin, -40))
+        bx, by, bw, bh = BODY["front"]
+        for y in (by + 3, by + 5, by + 7):
+            for x in range(bx + 1, bx + 7):
+                if x not in (bx + 3, bx + 4):
+                    px(img, x, y, (196, 188, 164))
+        for leg in LEGS:
+            for side in SIDES:
+                x0, y0, w, h = leg[side]
+                for x in range(x0, x0 + w):
+                    for y in range(y0 + h - rnd.randint(0, 4), y0 + h):
+                        px(img, x, y, shade(skin, -20))
+
+
+def orc(i):
+    rnd = random.Random(9200 + i)
+    img = blank()
+    skin = ORC_SKINS[i % len(ORC_SKINS)]
+    face(img, rnd, skin, (24, 22, 20), (200, 60, 40) if i != 1 else (220, 180, 40), brows=shade(skin, -50))
+    tusks(img)
+    fx, fy, fw, fh = HEAD["front"]
+    # a scar across the face, a different place each
+    for k in range(3):
+        px(img, fx + 1 + k + i, fy + 1 + k, shade(skin, 40))
+    # the top-knot: a black tuft on the hat layer's crown
+    paint(img, (HAT["top"][0] + 3, HAT["top"][1] + 2, 2, 4), (20, 18, 16), 4, rnd)
+    orc_body(img, rnd, skin)
+    hands(img, rnd, skin)
+    save(img, "orc_%d" % i)
+
+
+def dead_orc(i):
+    rnd = random.Random(9300 + i)
+    img = blank()
+    skin = shade(ORC_SKINS[i % len(ORC_SKINS)], -18)
+    skin = tuple((v + (sum(skin) // 3)) // 2 for v in skin)
+    face(img, rnd, skin, (40, 38, 34), (190, 210, 200), glow=True)
+    tusks(img, broken=True)
+    fx, fy, fw, fh = HEAD["front"]
+    for (x, y) in ((1, 2), (2, 2), (5, 2), (6, 2)):
+        px(img, fx + x, fy + y, shade(skin, -45))
+    orc_body(img, rnd, skin, dead=True)
+    hands(img, rnd, skin, claws=(70, 66, 56))
+    save(img, "dead_orc_%d" % i)
+
+
+RAIDER_SKINS = [(196, 150, 112), (150, 104, 72), (222, 184, 150)]
+
+
+def raider(i):
+    rnd = random.Random(9400 + i)
+    img = blank()
+    skin = RAIDER_SKINS[i % len(RAIDER_SKINS)]
+    hair = (18, 16, 18)
+    face(img, rnd, skin, hair, (30, 24, 20), brows=hair)
+    # spiked hair standing up off the crown, on the hat layer
+    for side in SIDES:
+        x0, y0, w, h = HAT[side]
+        for x in range(x0, x0 + w):
+            if (x + i) % 2 == 0:
+                px(img, x, y0, shade(hair, rnd.randint(0, 10)))
+    paint(img, HAT["top"], hair, 6, rnd)
+    suit = [(28, 34, 70), (44, 30, 52), (30, 48, 44)][i % 3]
+    box(img, BODY, suit, 5, rnd)
+    for arm in arms(False):
+        box(img, arm, suit, 5, rnd)
+    for leg in LEGS:
+        box(img, leg, suit, 5, rnd)
+    # the chest plate and shoulder guards, pale, on the jacket and sleeve layers
+    plate = (214, 206, 182)
+    for side in ("front", "back"):
+        x0, y0, w, h = JACKET[side]
+        paint(img, (x0, y0, w, 7), plate, 6, rnd)
+        paint(img, (x0, y0 + 7, w, 1), (150, 120, 60), 4, rnd)
+    for side in ("right", "left"):
+        x0, y0, w, h = JACKET[side]
+        paint(img, (x0, y0, w, 7), plate, 6, rnd)
+    for sleeve in sleeves(False):
+        paint(img, sleeve["top"], plate, 6, rnd)
+        for side in SIDES:
+            x0, y0, w, h = sleeve[side]
+            paint(img, (x0, y0, w, 3), plate, 6, rnd)
+    # the tail, wrapped round the waist like a belt of fur, its tip hanging down the back
+    fur = (104, 70, 40)
+    rows(img, BODY, 8, 2, fur, 10, rnd)
+    bx, by, bw, bh = BODY["back"]
+    paint(img, (bx + 5 - i, by + 10, 2, 2), fur, 10, rnd)
+    for leg in TROUSERS[:1]:
+        x0, y0, w, h = leg["back"]
+        paint(img, (x0 + 1, y0, 2, 3 + i), fur, 10, rnd)
+    boots(img, rnd, plate)
+    for arm in arms(False):
+        for side in SIDES:
+            x0, y0, w, h = arm[side]
+            paint(img, (x0, y0 + h - 3, w, 1), plate, 4, rnd)
+    hands(img, rnd, skin)
+    save(img, "raider_%d" % i)
+
+
 def save(img, name):
     os.makedirs(ROOT, exist_ok=True)
     img.save(ROOT + name + ".png")
@@ -375,3 +515,8 @@ if __name__ == "__main__":
     varro()
     sorcerer()
     stranger()
+    for i in range(3):
+        orc(i)
+        raider(i)
+    for i in range(2):
+        dead_orc(i)
