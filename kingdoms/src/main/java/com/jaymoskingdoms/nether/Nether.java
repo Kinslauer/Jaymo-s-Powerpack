@@ -84,6 +84,8 @@ public final class Nether {
 		CinderForge.register();
 		// (0.7.351) the possessed who walk the fortress halls, in Kintsugi
 		FortressHaunts.register();
+		// the imps: the demons' flying kin
+		Imps.register();
 	}
 
 	private static EntityType<Hornkin> hornkin(String name, Hornkin.Kind kind, float width, float height) {

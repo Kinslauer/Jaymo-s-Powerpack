@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -703,8 +704,8 @@ public final class BeamClash {
 			loser.hurtServer(level, winner.damageSources().playerAttack(winner), KI_OVERWHELM_DAMAGE);
 			loser.igniteForTicks(KI_BURN_TICKS);
 			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 3, 0.6, 0.6, 0.6, 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 40, 0.6, 0.8, 0.6, 0.5);
-			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.5, 0.7, 0.5, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 40, 0.6, 0.8, 0.6, 0.5);
+			level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 25, 0.5, 0.7, 0.5, 0.2);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4F, 1.2F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.0F, 1.5F);
 			screen(loser, 0xFFF2C0);
@@ -747,7 +748,7 @@ public final class BeamClash {
 		int n = Math.max(1, (int)(dir.length() / 0.6));
 		for (int i = 0; i <= n; i++) {
 			Vec3 p = from.add(dir.scale(i / (double)n));
-			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : hold.kind == KIND_KI ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.LARGE_SMOKE,
+			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : hold.kind == KIND_KI ? MagicFx.CRACKLE : ParticleTypes.LARGE_SMOKE,
 				p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.02);
 		}
 		level.playSound(null, to.x, to.y, to.z, hold.kind == KIND_WIND ? SoundEvents.BREEZE_SHOOT : hold.kind == KIND_KI ? SoundEvents.BEACON_DEACTIVATE
@@ -764,7 +765,7 @@ public final class BeamClash {
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, k.x, k.y, k.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CLOUD, k.x, k.y, k.z, 80, 1.2, 1.2, 1.2, 0.35);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, k.x, k.y, k.z, 60, 1.0, 1.0, 1.0, 0.25);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, k.x, k.y, k.z, 40, 0.6, 0.6, 0.6, 0.6);
+		level.sendParticles(MagicFx.CRACKLE, k.x, k.y, k.z, 40, 0.6, 0.6, 0.6, 0.6);
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
 		if (smoky(clash.a.kind) || smoky(clash.b.kind)) {

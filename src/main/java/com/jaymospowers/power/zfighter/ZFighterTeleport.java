@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -16,7 +17,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -242,7 +243,7 @@ public final class ZFighterTeleport {
 	private static void jump(ServerPlayer player, ZFighterPower.Live live, Vec3 dest, float yaw, float pitch) {
 		ServerLevel level = player.level();
 		Vec3 start = player.position();
-		DustParticleOptions image = ZFighterPower.dust(live);
+		ParticleOptions image = ZFighterPower.dust(live);
 		for (double h = 0.1; h < player.getBbHeight(); h += 0.3) {
 			level.sendParticles(image, true, false, start.x, start.y + h, start.z, 4, 0.2, 0.05, 0.2, 0.0);
 		}

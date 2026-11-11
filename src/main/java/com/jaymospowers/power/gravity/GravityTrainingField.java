@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
@@ -13,8 +14,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -110,8 +110,7 @@ public final class GravityTrainingField {
 		Vec3 centre = hit.getType() == BlockHitResult.Type.MISS ? player.position() : hit.getLocation();
 		FIELDS.add(new Field(level.dimension(), centre, player.getUUID(), now + TICKS));
 		READY.put(player.getUUID(), now + COOLDOWN);
-		level.sendParticles(new DustParticleOptions(COLOR, 2.0F), true, false, centre.x, centre.y + 0.5, centre.z, 60, RADIUS * 0.4, 0.4,
-			RADIUS * 0.4, 0.0);
+		MagicFx.burst(level, centre.x, centre.y + 0.5, centre.z, COLOR, 2.0F, 60, RADIUS * 0.4, 0.4, RADIUS * 0.4);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 0.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field").withStyle(ChatFormatting.LIGHT_PURPLE));
@@ -224,7 +223,7 @@ public final class GravityTrainingField {
 		}
 		if (now % 3 == 0) {
 			// the dome's skin: purple motes on its surface, and a dark ring on the ground
-			DustParticleOptions dust = new DustParticleOptions(COLOR, 1.3F);
+			ParticleOptions dust = MagicFx.wisp(COLOR, 1.3F);
 			var random = level.getRandom();
 			for (int i = 0; i < 16; i++) {
 				Vec3 dir = new Vec3(random.nextGaussian(), Math.abs(random.nextGaussian()), random.nextGaussian()).normalize();
@@ -234,7 +233,7 @@ public final class GravityTrainingField {
 			double a = now * 0.15;
 			for (int i = 0; i < 8; i++) {
 				double t = a + i * Math.PI / 4.0;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x + Math.cos(t) * RADIUS, c.y + 0.1, c.z + Math.sin(t) * RADIUS, 1, 0.0, 0.0, 0.0,
+				level.sendParticles(MagicFx.VOID, c.x + Math.cos(t) * RADIUS, c.y + 0.1, c.z + Math.sin(t) * RADIUS, 1, 0.0, 0.0, 0.0,
 					0.0);
 			}
 		}

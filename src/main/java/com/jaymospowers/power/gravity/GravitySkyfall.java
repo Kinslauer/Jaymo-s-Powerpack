@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.JaymosPowers;
 import java.util.ArrayList;
@@ -194,7 +195,7 @@ final class GravitySkyfall {
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.0F, 0.5F);
 		for (int i = 0; i < 48; i++) {
 			double a = i / 48.0 * Math.PI * 2.0;
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x + Math.cos(a) * RADIUS * 0.8, center.y + 0.3, center.z + Math.sin(a) * RADIUS * 0.8,
+			level.sendParticles(MagicFx.VOID, center.x + Math.cos(a) * RADIUS * 0.8, center.y + 0.3, center.z + Math.sin(a) * RADIUS * 0.8,
 				4, 0.2, 0.0, 0.2, 0.3);
 		}
 		GravityPower.shake(level, center, RADIUS * 1.5, 0.8F);
@@ -359,7 +360,7 @@ final class GravitySkyfall {
 		push(e, new Vec3((random.nextDouble() - 0.5) * JOSTLE, RISE_SPEED * (1.0 - t / (double)RISE_TICKS * 0.5), (random.nextDouble() - 0.5) * JOSTLE));
 		e.resetFallDistance();
 		if (t % 4 == 0) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, e.getX(), e.getY(), e.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
+			level.sendParticles(MagicFx.VOID, e.getX(), e.getY(), e.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
 		}
 	}
 
@@ -407,7 +408,7 @@ final class GravitySkyfall {
 		player.resetFallDistance();
 		RIDES.put(player.getUUID(), new Ride(player.level().dimension(), player.level().getGameTime()));
 		GravityPower.modifier(player, Attributes.GRAVITY, HOVER_ID, -1.0, true);
-		player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 0.5, player.getZ(), 10, 0.4, 0.4, 0.4, 0.02);
+		player.level().sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 0.5, player.getZ(), 10, 0.4, 0.4, 0.4, 0.02);
 	}
 
 	private static void tickRides(MinecraftServer server) {
@@ -443,7 +444,7 @@ final class GravitySkyfall {
 				GravityPower.modifier(player, Attributes.GRAVITY, DESCENT_ID, DESCENT_GRAVITY, !weightless);
 				GravityPower.modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, DESCENT_FALL_ID, -1.0, true);
 			} else if (player.tickCount % 10 == 0) {
-				player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() - 0.2, player.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
+				player.level().sendParticles(MagicFx.LIGHT, player.getX(), player.getY() - 0.2, player.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +60,7 @@ final class ZFighterVerdantForms {
 		double height = player.getBbHeight();
 		if (branch == ZFighterBranchForms.GLOOM_GIANT) {
 			if (now % 3 == 0) {
-				level.sendParticles(new DustParticleOptions(SMOKE_COLOR, 3.0F), true, false, player.getX(), player.getY() + height * 0.5, player.getZ(), 3, width,
+				level.sendParticles(MagicFx.miasma(SMOKE_COLOR, 3.0F), true, false, player.getX(), player.getY() + height * 0.5, player.getZ(), 3, width,
 					height * 0.4, width, 0.0);
 			}
 			if (now % 8 == 0) {

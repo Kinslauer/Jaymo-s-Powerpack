@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -222,7 +222,7 @@ public final class Spellcraft {
 		spells.add(spell);
 		player.setAttached(Classes.CLASS, new Classes.Chosen(c.cls(), c.option(), List.copyOf(spells), c.selected()));
 		ServerLevel level = (ServerLevel) player.level();
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 40, 0.4, 0.5, 0.4, 0.8);
+		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 40, 0.4, 0.5, 0.4, 0.8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.4F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spell.learned", spellName(spell)).withStyle(ChatFormatting.LIGHT_PURPLE));
 		return true;
@@ -274,7 +274,7 @@ public final class Spellcraft {
 			Mana.take(player, cost);
 		}
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
+		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (!mage && "wind".equals(PowersCompat.power(player))) {
 			// (0.7.477) a Wind Controller's magic only ever goes out through the wind: a gust carries the spell off the staff
 			net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
@@ -285,7 +285,7 @@ public final class Spellcraft {
 		}
 		if (mage && player.getRandom().nextInt(MAGE_ECHO_ONE_IN) == 0) {
 			// the spell echoes: no cooldown this time
-			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
+			level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
 			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, 40);
 			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
@@ -515,7 +515,7 @@ public final class Spellcraft {
 				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(LIGHTNING_RANGE),
 					e -> e != target && e != player && e.isAlive() && !(e instanceof ServerPlayer))) {
 					other.hurtServer(level, level.damageSources().indirectMagic(player, player), LIGHTNING_DAMAGE);
-					level.sendParticles(ParticleTypes.ELECTRIC_SPARK, other.getX(), other.getY(0.6), other.getZ(), 10, 0.2, 0.3, 0.2, 0.2);
+					level.sendParticles(Fx.CRACKLE, other.getX(), other.getY(0.6), other.getZ(), 10, 0.2, 0.3, 0.2, 0.2);
 					if (++chained >= LIGHTNING_CHAIN) {
 						break;
 					}
@@ -552,14 +552,14 @@ public final class Spellcraft {
 		return switch (element) {
 			case "fire" -> ParticleTypes.FLAME;
 			case "water" -> ParticleTypes.SPLASH;
-			case "earth" -> new DustParticleOptions(0x8B6A3C, 1.2F);
+			case "earth" -> Fx.miasma(0x8B6A3C, 1.2F);
 			case "air" -> ParticleTypes.CLOUD;
-			case "lightning" -> ParticleTypes.ELECTRIC_SPARK;
+			case "lightning" -> Fx.CRACKLE;
 			case "ice" -> ParticleTypes.SNOWFLAKE;
 			case "restoration" -> Restoration.GOLD_MOTE;
 			case "death" -> Necromancy.VIOLET_MOTE;
 			case "blood" -> Hemomancy.bloodMote();
-			default -> ParticleTypes.ENCHANT;
+			default -> Fx.GLYPH;
 		};
 	}
 

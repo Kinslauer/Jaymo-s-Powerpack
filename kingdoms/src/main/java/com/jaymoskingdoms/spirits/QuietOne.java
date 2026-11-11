@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -24,7 +25,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -403,7 +404,7 @@ public final class QuietOne extends Spirit {
 		level.addFreshEntity(stand);
 		MIRRORS.put(player.getUUID(), new Mirror(stand, level.getGameTime() + MIRROR_TICKS, new ArrayList<>()));
 		aimMobs(player, MIRRORS.get(player.getUUID()));
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(Fx.VOID, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
 		Mana.sendSeen(level, Mana.MOTE, from.x, from.y + 1.0, from.z, 18, 0.3, 0.6, 0.3, 0.04);
 		player.teleportTo(to.x, to.y, to.z);
 		level.sendParticles(ParticleTypes.WHITE_ASH, to.x, to.y + 1.0, to.z, 12, 0.3, 0.6, 0.3, 0.02);
@@ -649,7 +650,7 @@ public final class QuietOne extends Spirit {
 	}
 
 	private static void mote(ServerLevel level, ServerPlayer player, int colour, double x, double y, double z, int count, double spreadXZ, double spreadY) {
-		ParticleOptions dust = new DustParticleOptions(colour, 1.0F);
+		ParticleOptions dust = Fx.wisp(colour, 1.0F);
 		level.sendParticles(player, dust, false, false, x, y, z, count, spreadXZ, spreadY, spreadXZ, 0.0);
 	}
 

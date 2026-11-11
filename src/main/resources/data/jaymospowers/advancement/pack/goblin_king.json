@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/story",
+  "display": {
+    "icon": {
+      "id": "minecraft:gold_nugget"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.goblin_king.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.goblin_king.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

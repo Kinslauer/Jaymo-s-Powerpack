@@ -222,7 +222,7 @@ public final class Starfall {
 		double z = fall.fromZ + (fall.land.getZ() + 0.5 - fall.fromZ) * eased;
 		double y = fall.land.getY() + 1.0 + FALL_HEIGHT * (1.0 - eased);
 		level.sendParticles(ParticleTypes.FLAME, true, true, x, y, z, 14, 0.5, 0.5, 0.5, 0.02);
-		level.sendParticles(ParticleTypes.END_ROD, true, true, x, y, z, 6, 0.7, 0.7, 0.7, 0.03);
+		level.sendParticles(Fx.LIGHT, true, true, x, y, z, 6, 0.7, 0.7, 0.7, 0.03);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, true, true, x, y + 0.5, z, 8, 0.6, 0.6, 0.6, 0.01);
 		if (fall.age % 10 == 1) {
 			level.playSound(null, x, y, z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 6.0F, 0.5F);
@@ -275,7 +275,7 @@ public final class Starfall {
 			level.setBlock(floor.get(i), ore.defaultBlockState(), Block.UPDATE_ALL);
 		}
 		level.explode(null, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.NONE);
-		level.sendParticles(ParticleTypes.END_ROD, true, true, at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 60, 2.5, 1.5, 2.5, 0.15);
+		level.sendParticles(Fx.LIGHT, true, true, at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 60, 2.5, 1.5, 2.5, 0.15);
 		level.playSound(null, at, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 40.0F, 0.6F);
 		tell(level, fall);
 	}

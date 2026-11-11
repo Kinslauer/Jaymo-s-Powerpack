@@ -190,7 +190,14 @@ def last_activity(live, task, *paths):
 
 
 def stale(live, task, path, props):
-    limit = CLOUD_STALE_MINUTES if props.get("claimed_by") == "claude-cloud" else STALE_MINUTES
+    who = (props.get("claimed_by") or "").strip().lower()
+    if not who and props.get("status") == "writing":  # a text pass: the writer holds it
+        who = (props.get("writer") or "").strip().lower()
+    if who.startswith("hermes") and not os.path.isdir(WORKTREES):
+        # A Hermes bot builds in E:/wt on Andy's PC. A cloud VM can't see that worktree, so it would hand back a claim
+        # the bot is still building (and the bot then gives up). Only the PC judges Hermes claims.
+        return False
+    limit = CLOUD_STALE_MINUTES if who == "claude-cloud" else STALE_MINUTES
     return time.time() - last_activity(live, task, path) > limit * 60
 
 

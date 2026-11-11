@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/skeleton_lord",
+  "display": {
+    "icon": {
+      "id": "minecraft:amethyst_shard"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.spirit.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.spirit.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

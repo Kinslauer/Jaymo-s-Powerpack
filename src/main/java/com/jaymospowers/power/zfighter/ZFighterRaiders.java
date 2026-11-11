@@ -330,8 +330,24 @@ public final class ZFighterRaiders {
 		BlockPos prize = kept.blockPosition();
 		for (ServerPlayer player : level.getPlayers(p -> p.blockPosition().distSqr(prize) < 96 * 96)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.raiders.beaten").withStyle(ChatFormatting.GOLD));
+			com.jaymospowers.core.PackAdvancements.deed(player, "raiders");
 		}
+		// the band's tally, left in the pod they came down in
+		net.minecraft.world.entity.item.ItemEntity tally = new net.minecraft.world.entity.item.ItemEntity(level, kept.getX(), kept.getY() + 1.0, kept.getZ(),
+			tally());
+		level.addFreshEntity(tally);
 	}
+
+	/**
+	 * A raider band's tally: the worlds it has taken, in the raiders' own few words, and the one they no longer write down
+	 * (written in the lang file). Filed in Kingdoms' lore codex like any lore book.
+	 */
+	static net.minecraft.world.item.ItemStack tally() {
+		return com.jaymospowers.core.LoreBook.written("raiders_tally", "Raider's Tally", TALLY_PAGES);
+	}
+
+	/** The tally's pages. */
+	static final int TALLY_PAGES = 3;
 
 	/**
 	 * (0.18.51) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast

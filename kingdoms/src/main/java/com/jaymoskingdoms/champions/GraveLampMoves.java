@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +50,8 @@ final class GraveLampMoves implements Moves {
 	private void swirl(ServerLevel level, PatronChampion c, int left, int total) {
 		double a = left * 0.8;
 		double r = 0.4 + 1.2 * (1.0 - left / (double)total);
-		level.sendParticles(ParticleTypes.END_ROD, c.getX() + Math.cos(a) * r, c.getY() + 2.6, c.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, c.getX() - Math.cos(a) * r, c.getY() + 2.9, c.getZ() - Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(Fx.LIGHT, c.getX() + Math.cos(a) * r, c.getY() + 2.6, c.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(Fx.LIGHT, c.getX() - Math.cos(a) * r, c.getY() + 2.9, c.getZ() - Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 	}
 
 	private void flareTell(ServerLevel level, PatronChampion c, @Nullable LivingEntity target, int left) {
@@ -68,7 +69,7 @@ final class GraveLampMoves implements Moves {
 				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FLARE_SLOW, 0));
 			}
 		}
-		level.sendParticles(ParticleTypes.END_ROD, c.getX(), c.getY() + 2.6, c.getZ(), 40, 0.3, 0.3, 0.3, 0.3);
+		level.sendParticles(Fx.LIGHT, c.getX(), c.getY() + 2.6, c.getZ(), 40, 0.3, 0.3, 0.3, 0.3);
 		MoveKit.sound(level, c.position(), SoundEvents.BELL_RESONATE, 2.0F, 1.2F);
 	}
 

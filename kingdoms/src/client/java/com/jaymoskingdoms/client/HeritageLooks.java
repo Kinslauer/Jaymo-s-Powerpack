@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.BioBuilt;
 import com.jaymoskingdoms.EarthlingSurge;
 import com.jaymoskingdoms.Faiths;
@@ -34,7 +35,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
@@ -228,10 +229,10 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	private static ModelPart brow;
 
 	/** (0.7.262) A Divine-born's drifting light. */
-	private static final DustParticleOptions LIGHT_MOTE = new DustParticleOptions(0xFFE9A0, 0.6F);
+	private static final ParticleOptions LIGHT_MOTE = Fx.wisp(0xFFE9A0, 0.6F);
 
 	/** Stoneborn glints (amethyst). */
-	private static final DustParticleOptions AMETHYST = new DustParticleOptions(0xB17BEB, 0.6F);
+	private static final ParticleOptions AMETHYST = Fx.wisp(0xB17BEB, 0.6F);
 
 	private HeritageLooks(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -681,12 +682,12 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 				case FROSTBORN -> level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, -0.02, 0.0);
 				case STORMBORN -> {
 					if (level.isThundering()) {
-						level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0.0, 0.05, 0.0);
+						level.addParticle(Fx.CRACKLE, x, y, z, 0.0, 0.05, 0.0);
 					}
 				}
 				case ENDBORN -> {
 					if (level.isDarkOutside() && !player.isInWaterOrRain()) {
-						level.addParticle(ParticleTypes.PORTAL, x, y, z, (random.nextDouble() - 0.5) * 0.5, -random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.5);
+						level.addParticle(Fx.VOID, x, y, z, (random.nextDouble() - 0.5) * 0.5, -random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.5);
 					}
 				}
 				case DEEPBORN -> {

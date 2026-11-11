@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -124,6 +125,7 @@ public final class WindPower implements Power {
 		WindDagger.register();
 		WindKick.init();
 		WindThunderDive.register();
+		WindSpiralDive.register();
 		WindCyclone.init();
 		WindMoves.init();
 		WindJet.init();
@@ -229,12 +231,14 @@ public final class WindPower implements Power {
 		// the cyclone and the jet stop (flight ends by WindFlight.canFly, next tick)
 		WindCyclone.stop(player);
 		WindJet.stop(player);
+		WindSpiralDive.stop(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
 		WindCyclone.stop(player);
 		WindJet.stop(player);
+		WindSpiralDive.stop(player);
 		player.removeTag(KINGDOMS_TAG);
 		forgetLance(player);
 		WindMoves.clear(player);
@@ -325,8 +329,18 @@ public final class WindPower implements Power {
 		return s != null && s.flight.flying();
 	}
 
+	/** Drops {@code player} out of wind flight now and tells their client, for a move that takes over the fall (the Spiral Dive). */
+	void dropFlight(ServerPlayer player) {
+		State s = this.states.get(player.getUUID());
+		if (s != null && s.flight.flying()) {
+			this.setFlight(player, s, WindFlight.NONE, false);
+			this.sendStatus(player, s, 0.0F, true);
+		}
+	}
+
 	/** Debug: every cooldown back to zero. */
 	void clearCooldowns(ServerPlayer player) {
+		WindSpiralDive.clearCooldown(player);
 		State s = this.state(player);
 		java.util.Arrays.fill(s.cooldowns, 0);
 		s.lanceCooldown = 0;
@@ -767,7 +781,7 @@ public final class WindPower implements Power {
 			ParticleOptions accent = switch (s.channel) {
 				case TAILWIND -> ParticleTypes.SMALL_GUST;
 				case GALE_BARRIER -> ParticleTypes.WHITE_SMOKE;
-				case ZEPHYR -> Fate.isCorrupted(player) ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.HAPPY_VILLAGER;
+				case ZEPHYR -> Fate.isCorrupted(player) ? MagicFx.CRACKLE : ParticleTypes.HAPPY_VILLAGER;
 			};
 			level.sendParticles(accent, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.5, 0.6, 0.5, 0.0);
 			// a chime that climbs as the wind gathers

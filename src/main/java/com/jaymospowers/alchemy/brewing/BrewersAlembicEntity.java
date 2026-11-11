@@ -1,12 +1,12 @@
 package com.jaymospowers.alchemy.brewing;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Knowledge;
 import com.jaymospowers.alchemy.cauldron.CauldronBrewing;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -125,7 +125,7 @@ public class BrewersAlembicEntity extends BlockEntity {
 		if (alembic.progress % PUFF_TICKS == 0) {
 			int colour = alembic.bottles.getFirst().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor();
 			double x = pos.getX() + 0.85, y = pos.getY() + 0.8, z = pos.getZ() + 0.5;
-			server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, colour | 0xFF000000), x, y, z, 2, 0.05, 0.05, 0.05, 0.0);
+			server.sendParticles(MagicFx.wisp(colour | 0xFF000000, 1.0F), x, y, z, 2, 0.05, 0.05, 0.05, 0.0);
 			server.sendParticles(ParticleTypes.CLOUD, x, y, z, 1, 0.05, 0.05, 0.05, 0.01);
 		}
 		if (alembic.progress >= DISTIL_TICKS) {

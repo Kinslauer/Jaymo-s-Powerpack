@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
@@ -175,7 +176,7 @@ public final class ZFighterSonicSway {
 		publish(player, mode, right, true);
 		ServerLevel level = player.level();
 		Vec3 at = player.position();
-		DustParticleOptions blur = ZFighterPower.dust(ZFighterPower.live(player));
+		ParticleOptions blur = ZFighterPower.dust(ZFighterPower.live(player));
 		level.sendParticles(blur, true, false, at.x, at.y + 1.0, at.z, 4, 0.2, 0.5, 0.2, 0.0);
 		level.sendParticles(ParticleTypes.POOF, true, false, at.x, at.y + 0.8, at.z, 2, 0.15, 0.3, 0.15, 0.02);
 	}

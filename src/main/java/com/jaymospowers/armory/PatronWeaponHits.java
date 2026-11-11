@@ -1,5 +1,6 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.wounds.Resting;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,6 +43,10 @@ import net.minecraft.world.phys.Vec3;
  * window, Sun's Judgement's wind-up, Kindled Blow's gap), their server tick, and the guarded extra-damage helper.
  */
 final class PatronWeaponHits {
+	/** The sun's column on a struck foe: how high (blocks), how thick, how long it shows (ticks). */
+	static final double SUN_COLUMN = 12.0;
+	static final float SUN_COLUMN_RADIUS = 0.35F;
+	static final int SUN_COLUMN_TICKS = 12;
 	private static final Identifier SUNDER_ID = Identifier.fromNamespaceAndPath("jaymospowers", "sunder");
 
 	/** Sunder: stacks and when they end (game time). */
@@ -270,7 +275,7 @@ final class PatronWeaponHits {
 				}
 				Vec3 at = s.target().position();
 				for (double y = 0.0; y < 6.0; y += 0.6) {
-					level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + y, at.z, 1, 0.1, 0.0, 0.1, 0.0);
+					level.sendParticles(MagicFx.LIGHT, at.x, at.y + y, at.z, 1, 0.1, 0.0, 0.1, 0.0);
 				}
 				if (level.getGameTime() >= s.due()) {
 					STRIKES.remove(s);
@@ -303,9 +308,8 @@ final class PatronWeaponHits {
 		target.hurtServer(level, level.damageSources().indirectMagic(by, by), damage);
 		target.igniteForTicks(PatronWeapons.SUN_FIRE);
 		target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, PatronWeapons.SUN_BLIND, 0));
-		for (double y = 0.0; y < 12.0; y += 0.4) {
-			level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + y, target.getZ(), 2, 0.15, 0.0, 0.15, 0.02);
-		}
+		// the sun's column of light down on them
+		MagicFx.beam(level, target.position().add(0.0, SUN_COLUMN, 0.0), target.position(), SUN_COLUMN_RADIUS, MagicFx.LIGHT_COLOR, SUN_COLUMN_TICKS);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 1.8F);
 	}
 

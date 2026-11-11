@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -304,7 +305,7 @@ final class ThessalyHands {
 		for (int i = 0; i < 6; i++) {
 			double a = i * Math.PI / 3.0 + level.getGameTime() * 0.05;
 			double x = cx + Math.cos(a) * 0.45, z = cz + Math.sin(a) * 0.45;
-			level.sendParticles(ParticleTypes.END_ROD, x, cy, z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(Fx.LIGHT, x, cy, z, 1, 0.0, 0.0, 0.0, 0.0);
 			Mana.sendSeen(level, Mana.MOTE, x, cy, z, 1, 0.02, 0.0, 0.02, 0.0);
 		}
 	}
@@ -319,7 +320,7 @@ final class ThessalyHands {
 		} else if (foe.isAlive()) {
 			foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, TRAP_PIN, HandGrip.PIN_SLOW, false, false));
 		}
-		level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 18, 0.3, 0.4, 0.3, 0.08);
+		level.sendParticles(Fx.LIGHT, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 18, 0.3, 0.4, 0.3, 0.08);
 		Mana.sendSeen(level, Mana.MOTE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 12, 0.3, 0.4, 0.3, 0.05);
 		level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		Spirits.show(owner, Poses.TRAP);

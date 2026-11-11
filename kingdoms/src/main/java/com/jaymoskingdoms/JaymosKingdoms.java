@@ -108,9 +108,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.astronomy.StarDiscovery.register();
 		// the Astronomer's Journal: the armillary's readings, the Scholar pillar's points, the study pages
 		com.jaymoskingdoms.astronomy.AstronomersJournal.register();
+		// the Moon's orbit and phases, observing them, and the Sun's glare
+		com.jaymoskingdoms.astronomy.SunMoon.register();
 		Cafe.register();
 		// (0.7.579) our part of the "Jaymo's Powerpack" advancement tab
 		PackAdvancements.register();
+		Retaking.register();
+		// the field of The Long Defence: the keep above the ford (Act II of the Retaking)
+		Ford.register();
+		SecondDefence.register();
+		StoryRoads.register();
 		// (0.7.580) mice that raid pantries, chased by cats
 		Mice.register();
 		Commissions.register();
@@ -350,7 +357,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tails.register();
 		GreenskinLife.register();
 		FrostPrison.register();
-		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
+		FrostTech.register();
+		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
 		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
 			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE);

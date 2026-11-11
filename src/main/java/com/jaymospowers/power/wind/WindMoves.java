@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -433,7 +434,7 @@ public final class WindMoves {
 			Vec3 up = side.cross(this.dir).normalize();
 			double length = from.distanceTo(to);
 			int steps = Math.max(2, (int)Math.ceil(length * 3.0));
-			ParticleOptions accent = this.kind == LANCE ? (this.stormbound ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.CLOUD) : this.element.particle(level);
+			ParticleOptions accent = this.kind == LANCE ? (this.stormbound ? MagicFx.CRACKLE : ParticleTypes.CLOUD) : this.element.particle(level);
 			double spiral = this.kind == LANCE ? LANCE_SPIRAL : r * 0.75;
 			int strands = this.kind == LANCE ? 2 : 3;
 			for (int i = 0; i < steps; i++) {

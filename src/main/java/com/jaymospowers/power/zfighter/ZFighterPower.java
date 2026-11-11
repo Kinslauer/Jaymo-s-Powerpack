@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -23,8 +24,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -198,6 +198,8 @@ public final class ZFighterPower implements Power {
 	 * the ring, bits of ground thrown out to this far, and the shake (felt this far).
 	 */
 	static final int FULL_BURST_BLASTS = 5, FULL_BURST_RING = 36, FULL_BURST_DEBRIS = 40;
+	/** How far the full burst's shockwave runs over the ground (blocks). */
+	static final float FULL_BURST_WAVE = 6.0F;
 	static final double FULL_BURST_RADIUS = 3.5;
 	static final float FULL_BURST_SHAKE = 0.5F;
 	static final double FULL_BURST_SHAKE_RANGE = 16.0;
@@ -778,7 +780,7 @@ public final class ZFighterPower implements Power {
 					player.setHealth(player.getHealth() - burn);
 				}
 				if (now % 3 == 0) {
-					level.sendParticles(new DustParticleOptions(LIMIT_COLOR, 1.4F), true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+					level.sendParticles(MagicFx.wisp(LIMIT_COLOR, 1.4F), true, false, player.getX(), player.getY() + 1.0, player.getZ(),
 						live.limit * 2, 0.45, 0.7, 0.45, 0.05);
 				}
 			}
@@ -996,7 +998,7 @@ public final class ZFighterPower implements Power {
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();
 		double x = player.getX(), y = player.getY(), z = player.getZ();
-		DustParticleOptions dust = dust(live);
+		ParticleOptions dust = dust(live);
 		for (int i = 0; i < 24; i++) {
 			double a = i * Math.PI * 2.0 / 24.0;
 			level.sendParticles(ParticleTypes.CLOUD, true, false, x + Math.cos(a) * 0.6, y + 0.1, z + Math.sin(a) * 0.6, 0, Math.cos(a), 0.02,
@@ -1117,11 +1119,9 @@ public final class ZFighterPower implements Power {
 			double strength = 1.6 * (1.0 - distance / (SUPER_BURST_RADIUS + 1.0));
 			ZFighterKi.push(near, away, strength, 0.4);
 		}
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE08A), true, true, center.x, center.y + 1.0, center.z, 1, 0.0,
-			0.0, 0.0, 0.0);
+		MagicFx.blast(level, center.x, center.y + 1.0, center.z, MagicFx.FLASH_RADIUS, 0xFFE08A);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, center.x, center.y + 0.5, center.z, 6, 1.2, 0.4, 1.2, 0.0);
-		level.sendParticles(new DustParticleOptions(ZFighterLineage.color(live.lineage, form), 2.0F), true, false, center.x, center.y + 1.0, center.z, 40 + 20 * tier, 1.2,
-			1.2, 1.2, 0.2);
+		MagicFx.burst(level, center.x, center.y + 1.0, center.z, ZFighterLineage.color(live.lineage, form), 2.0F, 40 + 20 * tier, 1.2, 1.2, 1.2);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * tier);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		com.jaymospowers.core.Shakes.heavy(player, center, SUPER_SHAKE_RANGE, SUPER_SHAKE + SUPER_SHAKE_PER_FORM * tier);
@@ -1267,8 +1267,7 @@ public final class ZFighterPower implements Power {
 		} else {
 			live.limit = next;
 			ServerLevel level = player.level();
-			level.sendParticles(new DustParticleOptions(LIMIT_COLOR, 2.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 30,
-				0.6, 0.9, 0.6, 0.15);
+			MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), LIMIT_COLOR, 2.0F, 30, 0.6, 0.9, 0.6);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.8F, 0.6F + 0.2F * next);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_limit", next).withStyle(ChatFormatting.RED));
 			refresh(player, live);
@@ -1306,7 +1305,7 @@ public final class ZFighterPower implements Power {
 	static void aura(ServerPlayer player, Live live, int count) {
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = dust(live);
+		ParticleOptions dust = dust(live);
 		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = 0.55 + 0.12 * live.tier() + random.nextDouble() * (0.25 + 0.1 * live.tier());
@@ -1323,7 +1322,7 @@ public final class ZFighterPower implements Power {
 	static void settledAura(ServerPlayer player, Live live, int count) {
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = new DustParticleOptions(auraColor(live), SETTLED_AURA_SIZE + 0.1F * live.tier());
+		ParticleOptions dust = MagicFx.wisp(auraColor(live), SETTLED_AURA_SIZE + 0.1F * live.tier());
 		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = 0.75 + 0.08 * live.tier() + random.nextDouble() * 0.2;
@@ -1396,7 +1395,7 @@ public final class ZFighterPower implements Power {
 		}
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = new DustParticleOptions(auraColor(live), FAINT_AURA_SIZE + 0.12F * step);
+		ParticleOptions dust = MagicFx.wisp(auraColor(live), FAINT_AURA_SIZE + 0.12F * step);
 		for (int i = 0; i < 1 + step / 2; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = 0.4 + random.nextDouble() * 0.15;
@@ -1418,10 +1417,10 @@ public final class ZFighterPower implements Power {
 		RandomSource random = level.getRandom();
 		Vec3 c = player.position();
 		int color = auraColor(live);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), true, true, c.x, c.y + 1.0, c.z, 1, 0.0, 0.0,
-			0.0, 0.0);
+		MagicFx.blast(level, c.x, c.y + 1.0, c.z, MagicFx.FLASH_RADIUS, color);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, c.x, c.y + 0.4, c.z, FULL_BURST_BLASTS, 1.0, 0.3, 1.0, 0.0);
-		DustParticleOptions ring = new DustParticleOptions(color, 1.6F + 0.2F * live.tier());
+		ParticleOptions ring = MagicFx.wisp(color, 1.6F + 0.2F * live.tier());
+		MagicFx.ring(level, c.add(0.0, 0.1, 0.0), FULL_BURST_WAVE, color);
 		BlockState ground = groundUnder(player);
 		BlockParticleOption bits = ground == null ? null : new BlockParticleOption(ParticleTypes.BLOCK, ground);
 		for (int i = 0; i < FULL_BURST_RING; i++) {
@@ -1475,7 +1474,7 @@ public final class ZFighterPower implements Power {
 			crackle(player, random, live.tier() + 1);
 		}
 		if (now % Math.max(2, 8 - live.tier() * 2) == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+			level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
 				IDLE_SPARKS_PER_FORM * live.tier() + 1, 0.5, 0.7, 0.5, 0.15);
 		}
 		if (live.form == ApeRage.SUPER_4) {
@@ -1503,7 +1502,7 @@ public final class ZFighterPower implements Power {
 		if (now % SETTLED_SPARK_EVERY == 0) {
 			for (int i = 0; i < live.tier(); i++) {
 				double a = random.nextDouble() * Math.PI * 2.0, r = 0.8 + 0.1 * live.tier();
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * 2.0,
+				level.sendParticles(MagicFx.CRACKLE, true, false, player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * 2.0,
 					player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.1);
 			}
 		}
@@ -1565,7 +1564,7 @@ public final class ZFighterPower implements Power {
 	/** A small fork of lightning over him: a jagged line of white motes, a spark where it ends. */
 	private static void crackle(ServerPlayer player, RandomSource random, int tier) {
 		ServerLevel level = player.level();
-		DustParticleOptions bolt = new DustParticleOptions(CRACKLE_COLOR, 0.5F + 0.1F * tier);
+		ParticleOptions bolt = MagicFx.wisp(CRACKLE_COLOR, 0.5F + 0.1F * tier);
 		double a = random.nextDouble() * Math.PI * 2.0;
 		double r = 0.5 + random.nextDouble() * (0.3 + 0.15 * tier);
 		Vec3 at = new Vec3(player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * player.getBbHeight(), player.getZ() + Math.sin(a) * r);
@@ -1580,7 +1579,7 @@ public final class ZFighterPower implements Power {
 			}
 			at = next;
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.1);
+		level.sendParticles(MagicFx.CRACKLE, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.1);
 		if (random.nextInt(4) == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.12F + 0.04F * tier, 1.8F);
 		}
@@ -1621,12 +1620,12 @@ public final class ZFighterPower implements Power {
 		}
 	}
 
-	static DustParticleOptions dust(Live live) {
+	static ParticleOptions dust(Live live) {
 		if (live.raging()) {
-			return new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 1.5F);
+			return MagicFx.wisp(ZFighterBattle.RAGE_COLOR, 1.5F);
 		}
 		// (0.15.59) in base form, his own ki colour
-		return new DustParticleOptions(auraColor(live), live.superOn() ? 1.4F + 0.2F * live.tier() : 1.2F);
+		return MagicFx.wisp(auraColor(live), live.superOn() ? 1.4F + 0.2F * live.tier() : 1.2F);
 	}
 
 	// ---------------------------------------------------------------- attributes

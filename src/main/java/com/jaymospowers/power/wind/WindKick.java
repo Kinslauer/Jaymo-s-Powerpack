@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -21,7 +22,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * wind out sideways-flat ahead of you. It flies {@link #RANGE} blocks for {@link #DAMAGE}; ascended (the Tempest),
  * {@link #RANGE_ASCENDED} blocks for {@link #DAMAGE_ASCENDED}. It cuts through everything in its path (each once) and
  * stops at walls. It flies where you look as the leg snaps: in the air, up or down at anything; on the ground, level
- * or up (looking down at your feet doesn't drive it into the floor).
+ * or up (looking down at your feet doesn't drive it into the floor). A tap in the air looking steeply down, well clear
+ * of the ground, is the {@link WindSpiralDive} instead.
  */
 public final class WindKick {
 	static final double RANGE = 5.0, RANGE_ASCENDED = 20.0;
@@ -66,7 +68,7 @@ public final class WindKick {
 	static final int SWING_POINTS = 10;
 	/** How far the crescent tips, its kicking-side tip low and the other high (blocks at each tip). */
 	static final double CRESCENT_TILT = 0.35;
-	private static final DustParticleOptions WHITE = new DustParticleOptions(0xFFFFFF, 1.4F);
+	private static final ParticleOptions WHITE = MagicFx.wisp(0xFFFFFF, 1.4F);
 	/**
 	 * The cold's extra wind-up for the kick (ticks, 1 s; the other Wind abilities take {@link WindCold#EXTRA_WINDUP_TICKS}).
 	 * While it lasts, white wind swirls round the kicker ({@code COLD_SWIRL_*}: points on the ring, its radius in blocks,
@@ -159,8 +161,14 @@ public final class WindKick {
 	}
 
 	private static void kick(ServerPlayer player) {
-		if (!Powers.has(player, WindPower.INSTANCE) || Mastery.unlocked(player) < Mastery.ALL || !player.isAlive() || player.isSpectator()
-			|| WindCyclone.isActive(player)) {
+		if (!Powers.has(player, WindPower.INSTANCE) || !player.isAlive() || player.isSpectator() || WindCyclone.isActive(player)) {
+			return;
+		}
+		// in the air, looking steeply down: the tap is the Spiral Dive (which comes before the kick is mastered)
+		if (WindSpiralDive.wants(player) && WindSpiralDive.start(player)) {
+			return;
+		}
+		if (Mastery.unlocked(player) < Mastery.ALL) {
 			return;
 		}
 		if (!com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.LEGS)) {

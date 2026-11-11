@@ -34,12 +34,12 @@ public final class MobShields {
 	/** A foe within this (blocks) is close enough to raise the shield against; one drawing a bow, within this. */
 	static final double GUARD_RANGE = 7.0, ARROW_RANGE = 28.0;
 	/** Each time it could raise its shield, the chance it does (else it presses on for {@link #RETRY_TICKS}). */
-	static final float GUARD_CHANCE = 0.55F;
+	static final float GUARD_CHANCE = 0.65F;
 	/** (0.7.267) The same for a raised blade, no shield. */
 	static final float BLADE_GUARD_CHANCE = 0.3F;
 	/** How long it holds the shield up (ticks, between these); and after lowering it, how long it fights before raising it again. */
 	static final int GUARD_MIN_TICKS = 20, GUARD_MAX_TICKS = 50;
-	static final int REST_MIN_TICKS = 25, REST_MAX_TICKS = 60;
+	static final int REST_MIN_TICKS = 20, REST_MAX_TICKS = 50;
 	static final int RETRY_TICKS = 15;
 	/** A drawn bow on it: the shield stays up at least this long (ticks). */
 	static final int ARROW_GUARD_TICKS = 30;

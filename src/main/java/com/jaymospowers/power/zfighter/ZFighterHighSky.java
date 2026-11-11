@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
@@ -216,7 +217,7 @@ public final class ZFighterHighSky {
 			}
 			raider.setTarget(foe);
 			ids.add(raider.getUUID());
-			level.sendParticles(ParticleTypes.END_ROD, x, y + 1.0, z, 12, 0.3, 0.5, 0.3, 0.08);
+			level.sendParticles(MagicFx.LIGHT, x, y + 1.0, z, 12, 0.3, 0.5, 0.3, 0.08);
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
 		return ids;

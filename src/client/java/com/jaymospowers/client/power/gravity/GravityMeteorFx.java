@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.gravity.GravityMeteorBurst;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,7 +13,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ParticleStatus;
@@ -51,7 +52,7 @@ public final class GravityMeteorFx {
 	static final float[] DUST = {0.62F, 0.56F, 0.49F}, SMOKE = {0.22F, 0.21F, 0.21F};
 	/** In low-end mode, this share of the debris, smoke and hanging dust (on top of the particle setting). */
 	static final float LOW_END_SHARE = 0.5F;
-	private static final DustParticleOptions HAZE = new DustParticleOptions(0x8C8273, 4.0F);
+	private static final ParticleOptions HAZE = MagicFx.miasma(0x8C8273, 4.0F);
 
 	private static final class Cloud {
 		final Vec3 at;

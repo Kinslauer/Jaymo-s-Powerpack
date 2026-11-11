@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:egg",
+    {
+      "id": "#minecraft:eggs",
+      "required": false
+    },
+    {
+      "id": "naturalist:duck_egg",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:eagle_egg",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:prismallard_egg",
+      "required": false
+    }
+  ]
+}

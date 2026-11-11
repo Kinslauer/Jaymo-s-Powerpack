@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Powers;
@@ -387,7 +388,7 @@ public final class EmberKindle {
 			double t = random.nextDouble() * reach;
 			double width = MOUTH + SPREAD * t;
 			Vec3 p = from.add(look.scale(t));
-			level.sendParticles(white && random.nextInt(3) == 0 ? ParticleTypes.END_ROD : ParticleTypes.FLAME, p.x, p.y, p.z, 1,
+			level.sendParticles(white && random.nextInt(3) == 0 ? MagicFx.LIGHT : ParticleTypes.FLAME, p.x, p.y, p.z, 1,
 				width * 0.5, width * 0.5, width * 0.5, 0.01);
 		}
 		if (random.nextInt(3) == 0) {

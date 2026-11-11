@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -149,7 +148,7 @@ public final class Rites {
 		String line = (rite.to() == Patron.TRUTH ? "speech.jaymoskingdoms.rite.home." : "speech.jaymoskingdoms.rite.done.") + sp.getRandom().nextInt(2);
 		Speech.sayTo(level, priest, sp, Component.translatable(line), Speech.GOLD);
 		level.playSound(null, priest.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.NEUTRAL, 0.8F, 1.2F);
-		level.sendParticles(ParticleTypes.END_ROD, sp.getX(), sp.getY() + 1.0, sp.getZ(), 16, 0.5, 0.8, 0.5, 0.05);
+		level.sendParticles(Fx.LIGHT, sp.getX(), sp.getY() + 1.0, sp.getZ(), 16, 0.5, 0.8, 0.5, 0.05);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rite.done", Patrons.coloured(rite.from())));
 		if (rite.to() == Patron.TRUTH && Patrons.of(sp) == Patron.TRUTH) {
 			Patrons.deed(sp, Patron.TRUTH, Patrons.DEED_SMALL, "rite");

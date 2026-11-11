@@ -1,11 +1,11 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.gravity.GravityWalk;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -99,7 +99,7 @@ final class GravityWalkClient {
 		player.resetFallDistance();
 		if (move.lengthSqr() > 0.0 && player.tickCount % 5 == 0) {
 			Vec3 at = player.position().add(0.0, face == Direction.UP ? player.getBbHeight() : player.getBbHeight() * 0.5, 0.0).add(into.scale(0.35));
-			player.level().addParticle(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, n.x * 0.02, n.y * 0.02, n.z * 0.02);
+			player.level().addParticle(MagicFx.VOID, at.x, at.y, at.z, n.x * 0.02, n.y * 0.02, n.z * 0.02);
 		}
 	}
 

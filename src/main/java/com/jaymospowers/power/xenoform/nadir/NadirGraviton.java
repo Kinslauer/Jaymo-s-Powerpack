@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public final class NadirGraviton {
 			target.syncVelocity = true;
 			target.removeEffect(MobEffects.LEVITATION);
 			target.removeEffect(MobEffects.SLOW_FALLING);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 30, 0.4, 0.1, 0.4, 0.3);
+			level.sendParticles(MagicFx.VOID, target.getX(), target.getY(), target.getZ(), 30, 0.4, 0.1, 0.4, 0.3);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		} else {
 			target.setDeltaMovement(0.0, -3.0, 0.0);
@@ -96,7 +97,7 @@ public final class NadirGraviton {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PIN_TICKS, 6, false, false, true));
 			st.pinned.put(target.getId(), level.getGameTime() + PIN_TICKS);
 			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + 0.1, target.getZ(), 40, 0.8, 0.05, 0.8, 0.05);
+			level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + 0.1, target.getZ(), 40, 0.8, 0.05, 0.8, 0.05);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.0F, 0.7F);
 		}
 		trail(level, player, target);
@@ -109,7 +110,7 @@ public final class NadirGraviton {
 		int steps = (int)Math.min(24, a.distanceTo(b) * 1.5);
 		for (int i = 1; i <= steps; i++) {
 			Vec3 p = a.lerp(b, i / (double)steps);
-			level.sendParticles(ParticleTypes.PORTAL, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.VOID, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -176,9 +177,9 @@ public final class NadirGraviton {
 		if (now % 2 == 0) {
 			for (int i = 0; i < 16; i++) {
 				double a = i / 16.0 * Math.PI * 2.0 + now * 0.05;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x + Math.cos(a) * ZONE_RADIUS, c.y + 0.2, c.z + Math.sin(a) * ZONE_RADIUS, 1, 0.0, 0.3, 0.0, 0.02);
+				level.sendParticles(MagicFx.VOID, c.x + Math.cos(a) * ZONE_RADIUS, c.y + 0.2, c.z + Math.sin(a) * ZONE_RADIUS, 1, 0.0, 0.3, 0.0, 0.02);
 			}
-			level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 1.0, c.z, 3, ZONE_RADIUS * 0.5, 1.0, ZONE_RADIUS * 0.5, 0.01);
+			level.sendParticles(MagicFx.LIGHT, c.x, c.y + 1.0, c.z, 3, ZONE_RADIUS * 0.5, 1.0, ZONE_RADIUS * 0.5, 0.01);
 		}
 		for (LivingEntity e : NadirAim.around(player, c, ZONE_RADIUS)) {
 			if (!st.floaters.containsKey(e.getId())) {
@@ -231,9 +232,9 @@ public final class NadirGraviton {
 		for (int i = 0; i < 6; i++) {
 			double a = (now * 0.35 + i * Math.PI / 3.0) % (Math.PI * 2.0);
 			double r = 1.0 + 2.5 * open;
-			level.sendParticles(ParticleTypes.PORTAL, c.x + Math.cos(a) * r, c.y + Math.sin(a * 2.0) * 0.3, c.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.VOID, c.x + Math.cos(a) * r, c.y + Math.sin(a * 2.0) * 0.3, c.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y, c.z, 6, HORIZON_PULL * 0.3 * open, 2.0, HORIZON_PULL * 0.3 * open, 0.0);
+		level.sendParticles(MagicFx.VOID, c.x, c.y, c.z, 6, HORIZON_PULL * 0.3 * open, 2.0, HORIZON_PULL * 0.3 * open, 0.0);
 		if (now % 20 == 0) {
 			level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.5F, 0.3F);
 		}
@@ -270,7 +271,7 @@ public final class NadirGraviton {
 				}
 				if (d <= 1.4 && !(target instanceof Player) && target.getMaxHealth() <= ERASE_HEALTH) {
 					// erased: what it carried comes out at the collapse, with the rest
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + 0.5, target.getZ(), 30, 0.3, 0.3, 0.3, 0.3);
+					level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + 0.5, target.getZ(), 30, 0.3, 0.3, 0.3, 0.3);
 					target.hurtServer(level, player.damageSources().playerAttack(player), 1000.0F);
 				}
 			}
@@ -297,7 +298,7 @@ public final class NadirGraviton {
 			return;
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y, c.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x, c.y, c.z, 200, 3.0, 3.0, 3.0, 1.0);
+		level.sendParticles(MagicFx.VOID, c.x, c.y, c.z, 200, 3.0, 3.0, 3.0, 1.0);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.6F);
 		for (Entity e : caught) {

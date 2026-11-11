@@ -25,6 +25,8 @@ public final class Reputation {
 	static final Identifier VOID_CROWN = Identifier.fromNamespaceAndPath("jaymospowers", "void_crown");
 	/** At or under this, a kingdom's guards attack you on sight; at or over {@link #WELCOME} it will take your pledge. */
 	public static final int HOSTILE = -100, WELCOME = 0;
+	/** How much reputation makes one point of karma (Powers' Karma, -100 to 100), and the most one deed loses or gains. */
+	static final float KARMA_PER = 20.0F, KARMA_MOST_LOST = 5.0F, KARMA_MOST_GAINED = 3.0F;
 
 	/** Per player: kingdom id → reputation. Saved, kept through death. */
 	static final AttachmentType<Map<String, Integer>> REPUTATION = AttachmentRegistry.create(JaymosKingdoms.id("reputation"),
@@ -71,6 +73,11 @@ public final class Reputation {
 		// (0.7.509) and the clash of faiths, then the Crowned Sun's and The Truth's blessings
 		by = Faiths.reputation(kingdom, player, by);
 		by = Blessings.reputation(kingdom, player, by);
+		// what is done to a lawful settlement, or for it, weighs on the life itself (Powers' Karma), mask or no mask; a
+		// camp's opinion of you weighs nothing
+		if (kingdom.type() != FactionType.BARBARIAN) {
+			PowersCompat.karma(player, Mth.clamp(by / KARMA_PER, -KARMA_MOST_LOST, KARMA_MOST_GAINED));
+		}
 		String persona = Identities.persona(player, kingdom.id());
 		if (persona != null) {
 			// (0.7.62) done in a mask they don't see through: it's the costume's name that's made (or ruined)

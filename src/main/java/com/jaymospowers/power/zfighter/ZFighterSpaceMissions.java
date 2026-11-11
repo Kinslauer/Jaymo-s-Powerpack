@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
@@ -629,6 +630,7 @@ public final class ZFighterSpaceMissions {
 		boolean free = mode == FREE;
 		player.setAttached(DATA, new Data(data.state(), free ? data.freed() | 1 << planet : data.freed(), free ? data.conquered() : data.conquered() | 1 << planet));
 		clearFoes(player);
+		com.jaymospowers.core.PackAdvancements.deed(player, "far_world");
 		int tp = free ? info.freeTp() : info.conquerTp();
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);
@@ -650,7 +652,7 @@ public final class ZFighterSpaceMissions {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.space_done", title, tp).withStyle(ChatFormatting.GOLD));
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
-		level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.06);
+		level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.06);
 		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("message.jaymospowers.space_told", player.getDisplayName(), title)
 			.withStyle(ChatFormatting.GRAY), false);
 	}

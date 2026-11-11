@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -56,8 +57,8 @@ final class TimeBloom {
 	private static final int EXTRA_BLOCK_ENTITY_TICKS = 3;
 	private static final int MAX_BLOCK_ENTITY_TICKS_PER_TICK = 60;
 	private static final int RESCAN_INTERVAL = 20;
-	private static final DustParticleOptions BLOOM_DUST = new DustParticleOptions(0xC8E05A, 1.0F);
-	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 0.9F);
+	private static final ParticleOptions BLOOM_DUST = MagicFx.wisp(0xC8E05A, 1.0F);
+	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 0.9F);
 
 	/** Block entity types that misbehaved (threw) when ticked from here; never ticked by a bloom again. */
 	private static final Set<BlockEntityType<?>> BROKEN = new HashSet<>();
@@ -82,7 +83,7 @@ final class TimeBloom {
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.BONE_MEAL_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, RADIUS * 0.5, 0.6, RADIUS * 0.5, 0.0);
-		ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
+		ChronoFx.particles(level, fx, MagicFx.EMBER, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
 		scan();
 	}
 
@@ -166,7 +167,7 @@ final class TimeBloom {
 				// it grew (or otherwise changed): a little green-gold puff
 				ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
 				if (random.nextInt(3) == 0) {
-					ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
+					ChronoFx.particles(level, fx, MagicFx.EMBER, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
 				}
 			}
 		}
@@ -183,7 +184,7 @@ final class TimeBloom {
 				}
 			}
 			if ((age + i) % 10 == 0) {
-				ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
+				ChronoFx.particles(level, fx, MagicFx.EMBER, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
 				ChronoFx.particles(level, fx, GOLD_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.45, 0.45, 0.45, 0.0);
 			}
 		}
@@ -237,7 +238,7 @@ final class TimeBloom {
 			double a0 = age * 0.05;
 			for (int h = 0; h < 12; h++) {
 				double a = a0 + h / 12.0 * Math.PI * 2.0;
-				ChronoFx.particles(level, fx, h % 3 == 0 ? ParticleTypes.WAX_ON : ParticleTypes.COMPOSTER,
+				ChronoFx.particles(level, fx, h % 3 == 0 ? MagicFx.EMBER : ParticleTypes.COMPOSTER,
 					center.getX() + 0.5 + Math.sin(a) * RADIUS, center.getY() + 0.15, center.getZ() + 0.5 - Math.cos(a) * RADIUS,
 					1, 0.0, 0.0, 0.0, 0.0);
 			}

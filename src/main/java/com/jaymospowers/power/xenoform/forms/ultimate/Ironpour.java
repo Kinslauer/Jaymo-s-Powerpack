@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -112,7 +113,7 @@ public final class Ironpour extends XenoUltimate {
 	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
 		live.rolls = 0;
 		ServerLevel level = player.level();
-		burst(level, ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.6, 0.0), 40, 0.5, 0.2);
+		burst(level, MagicFx.CRACKLE, player.position().add(0.0, 0.6, 0.0), 40, 0.5, 0.2);
 		burst(level, ParticleTypes.LAVA, player.position().add(0.0, 0.3, 0.0), 12, 0.5, 0.0);
 		sound(player, SoundEvents.ANVIL_LAND, 1.2F, 0.5F);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.2F, 0.6F);
@@ -302,7 +303,7 @@ public final class Ironpour extends XenoUltimate {
 			target.setDeltaMovement(target.getDeltaMovement().add(pull.x, 0.3, pull.z));
 			target.syncVelocity = true;
 			beam(level, eye.subtract(0.0, 0.3, 0.0), target.getBoundingBox().getCenter(), ParticleTypes.CRIT, 16);
-			beam(level, eye.subtract(0.0, 0.3, 0.0), target.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 8);
+			beam(level, eye.subtract(0.0, 0.3, 0.0), target.getBoundingBox().getCenter(), MagicFx.CRACKLE, 8);
 		}
 		sound(player, SoundEvents.CHAIN_PLACE, 1.2F, 1.4F);
 		sound(player, SoundEvents.ANVIL_USE, 0.6F, 1.6F);
@@ -408,7 +409,7 @@ public final class Ironpour extends XenoUltimate {
 			player.setDeltaMovement(motion.x * 0.3, SLAM_RISE_SPEED, motion.z * 0.3);
 			player.syncVelocity = true;
 			level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.3, 0.1, 0.3, 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.5, player.getZ(), 5, 0.3, 0.8, 0.3, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 0.5, player.getZ(), 5, 0.3, 0.8, 0.3, 0.05);
 			if (work.slamTicks >= SLAM_RISE_TICKS || player.verticalCollision) {
 				work.slam = 2;
 				work.slamTicks = 0;
@@ -422,7 +423,7 @@ public final class Ironpour extends XenoUltimate {
 		}
 		player.setDeltaMovement(motion.x * 0.3, Math.min(motion.y, -SLAM_DROP_SPEED), motion.z * 0.3);
 		player.syncVelocity = true;
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.5, player.getZ(), 3, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 0.5, player.getZ(), 3, 0.3, 0.6, 0.3, 0.05);
 		if (work.slamTicks > 1 && (player.onGround() || player.isInWater() || player.isInLava()) || work.slamTicks > SLAM_FALL_TICKS) {
 			work.slam = 0;
 			work.slamTicks = 0;
@@ -443,7 +444,7 @@ public final class Ironpour extends XenoUltimate {
 		}
 		for (double r = 1.5; r <= SLAM_RADIUS + 1.0E-6; r += 1.75) {
 			ring(level, ParticleTypes.LAVA, feet, r, 14 + (int)(r * 4.0));
-			ring(level, ParticleTypes.ELECTRIC_SPARK, feet, r, 14 + (int)(r * 4.0));
+			ring(level, MagicFx.CRACKLE, feet, r, 14 + (int)(r * 4.0));
 		}
 		BlockPos under = player.blockPosition().below();
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(under)), feet.x, feet.y, feet.z, 40, SLAM_RADIUS * 0.3, 0.1, SLAM_RADIUS * 0.3, 0.2);

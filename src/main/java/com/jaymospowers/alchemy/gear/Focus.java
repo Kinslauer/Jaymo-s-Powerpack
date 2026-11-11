@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.gear;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Phials;
@@ -104,7 +105,7 @@ public enum Focus {
 		target.setDeltaMovement(velocity);
 		target.needsSync = true;
 		target.resetFallDistance();
-		level.sendParticles(this == PULL ? ParticleTypes.PORTAL : ParticleTypes.CLOUD, target.getX(), target.getY() + target.getBbHeight() / 2.0,
+		level.sendParticles(this == PULL ? MagicFx.VOID : ParticleTypes.CLOUD, target.getX(), target.getY() + target.getBbHeight() / 2.0,
 			target.getZ(), 12, 0.3, 0.3, 0.3, 0.05);
 		level.playSound(null, target.blockPosition(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.PLAYERS, 0.8F, this == PULL ? 1.4F : 0.7F);
 		return true;

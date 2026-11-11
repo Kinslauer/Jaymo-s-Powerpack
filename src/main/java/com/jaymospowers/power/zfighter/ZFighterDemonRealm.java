@@ -527,8 +527,13 @@ public final class ZFighterDemonRealm {
 			chest.setItem(11, new ItemStack(Items.GOLD_INGOT, 4 + random.nextInt(6) + layer * 4));
 			chest.setItem(13, new ItemStack(Items.NETHERITE_SCRAP, 1 + layer));
 			chest.setItem(15, new ItemStack(Items.WITHER_SKELETON_SKULL, 1));
+			// the village's muster-roll for the sorcerer's battle (the Retaking's Act IV lore find)
+			chest.setItem(4, com.jaymospowers.core.LoreBook.written("demon_muster", "Muster-Roll", MUSTER_PAGES));
 		}
 	}
+
+	/** The muster-roll's pages. */
+	static final int MUSTER_PAGES = 4;
 
 	// ---------------------------------------------------------------- the dark master
 

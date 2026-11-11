@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/skeleton_lord",
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_helmet"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.piglin_king.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.piglin_king.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

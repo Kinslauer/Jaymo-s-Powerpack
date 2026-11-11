@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.divine;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import java.util.HashMap;
 import java.util.List;
@@ -184,7 +185,7 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 			cap = RETURN_SPEED;
 			if (pos.distanceTo(want) <= CATCH_DISTANCE) {
 				level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 1.5F);
-				level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 6, 0.15, 0.15, 0.15, 0.02);
+				level.sendParticles(MagicFx.LIGHT, pos.x, pos.y, pos.z, 6, 0.15, 0.15, 0.15, 0.02);
 				this.giveBack(owner);
 				this.discard();
 				return;
@@ -216,7 +217,7 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 		this.setDeltaMovement(move);
 		this.setPos(pos.add(move));
 		if (this.life % 2 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY(), this.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(MagicFx.LIGHT, this.getX(), this.getY(), this.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
 		}
 	}
 
@@ -256,7 +257,7 @@ public class FlyingSword extends Projectile implements ItemSupplier {
 		}
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 6, 0.2, 0.25, 0.2, 0.2);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 4, 0.2, 0.25, 0.2, 0.05);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 4, 0.2, 0.25, 0.2, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.5F);
 	}
 

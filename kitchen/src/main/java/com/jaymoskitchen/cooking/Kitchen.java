@@ -6,6 +6,7 @@ import com.jaymoskitchen.kitchen.KitchenBlocks;
 import com.jaymoskitchen.kitchen.KitchenPool;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Comparator;
 import com.jaymoskitchen.kitchen.HobQueue;
 import com.jaymoskitchen.kitchen.OvenHob;
 import net.blay09.mods.cookingforblockheads.block.OvenBlock;
@@ -370,26 +371,38 @@ public final class Kitchen {
 		return KitchenPool.at(player, pos);
 	}
 
+	/**
+	 * The ingredients in the order to look for them: the pickiest first (fewest items that will do), so an ingredient
+	 * any fruit will do for never takes the one peach the Peach ingredient needs.
+	 */
+	private static List<Map.Entry<Step, Integer>> pickiestFirst(Map<Step, Integer> ingredients) {
+		List<Map.Entry<Step, Integer>> order = new ArrayList<>(ingredients.entrySet());
+		order.sort(Comparator.comparingInt(need -> need.getKey().items().size()));
+		return order;
+	}
+
+	/** Whether the pool holds every ingredient at once: a piece that would do for two of them counts for one. */
 	public static boolean hasIngredients(KitchenPool pool, Map<Step, Integer> ingredients) {
-		for (Map.Entry<Step, Integer> need : ingredients.entrySet()) {
+		Map<Item, Integer> spoken = new HashMap<>();
+		for (Map.Entry<Step, Integer> need : pickiestFirst(ingredients)) {
 			Step step = need.getKey();
-			if (countStep(pool, step, need.getValue()) < need.getValue()) {
+			int left = need.getValue();
+			for (Item item : step.items()) {
+				int taken = spoken.getOrDefault(item, 0);
+				int free = Math.min(left, pool.count(item, step::matches, taken + left) - taken);
+				if (free > 0) {
+					spoken.merge(item, free, Integer::sum);
+					left -= free;
+				}
+				if (left <= 0) {
+					break;
+				}
+			}
+			if (left > 0) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	/** How many of an ingredient the pool holds, counting no further than {@code max} (any of its items counts). */
-	private static int countStep(KitchenPool pool, Step step, int max) {
-		int have = 0;
-		for (Item item : step.items()) {
-			have += pool.count(item, step::matches, max - have);
-			if (have >= max) {
-				break;
-			}
-		}
-		return have;
 	}
 
 	private static int count(Container container, Step step) {
@@ -422,7 +435,7 @@ public final class Kitchen {
 	/** Removes the ingredients (pockets first, then the kitchen) and hands back their leftovers. */
 	static void takeIngredients(ServerPlayer player, BlockPos pos, Map<Step, Integer> ingredients) {
 		KitchenPool pool = sources(player, pos);
-		for (Map.Entry<Step, Integer> need : ingredients.entrySet()) {
+		for (Map.Entry<Step, Integer> need : pickiestFirst(ingredients)) {
 			Step step = need.getKey();
 			int left = need.getValue();
 			for (Item item : step.items()) {

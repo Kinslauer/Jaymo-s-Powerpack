@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.inhabitants;
 import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.model.DefaultedEntityGeoModel;
+import com.geckolib.model.GeoModel;
 import com.geckolib.renderer.GeoEntityRenderer;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.RenderPassInfo;
@@ -21,7 +22,12 @@ public class InhabitantRenderer<T extends LivingEntity & GeoAnimatable> extends 
 	private final String headBone;
 
 	public InhabitantRenderer(EntityRendererProvider.Context context, String name, float scale, float shadow, String headBone) {
-		super(context, new DefaultedEntityGeoModel<T>(JaymosKingdoms.id(name)));
+		this(context, new DefaultedEntityGeoModel<T>(JaymosKingdoms.id(name)), scale, shadow, headBone);
+	}
+
+	/** One whose model is its own (a texture picked by its state, say). */
+	protected InhabitantRenderer(EntityRendererProvider.Context context, GeoModel<T> model, float scale, float shadow, String headBone) {
+		super(context, model);
 		this.withScale(scale);
 		this.shadowRadius = shadow;
 		this.headBone = headBone;

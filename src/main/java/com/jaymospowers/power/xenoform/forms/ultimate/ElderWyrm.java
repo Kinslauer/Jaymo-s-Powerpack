@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -19,7 +20,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.PowerParticleOption;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -162,8 +162,8 @@ public final class ElderWyrm extends XenoUltimate {
 		live.wings = false;
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
-		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 80, 1.0, 1.0, 1.0, 0.5);
-		ring(level, PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.position(), 3.0, 24);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 80, 1.0, 1.0, 1.0, 0.5);
+		ring(level, MagicFx.MURK, player.position(), 3.0, 24);
 		sound(player, SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.9F);
 		Shakes.heavy(player, player.position(), ELDER_SHAKE_RANGE, ELDER_SHAKE);
 	}
@@ -248,7 +248,7 @@ public final class ElderWyrm extends XenoUltimate {
 			}
 			if (player.tickCount % 16 == 0) {
 				sound(player, SoundEvents.ENDER_DRAGON_FLAP, 1.0F, 0.8F);
-				level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.5, player.getZ(), 10, 0.9, 0.5, 0.9, 0.1);
+				level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.5, player.getZ(), 10, 0.9, 0.5, 0.9, 0.1);
 			}
 		}
 		if (work != null) {
@@ -256,7 +256,7 @@ public final class ElderWyrm extends XenoUltimate {
 			workTick(player, work);
 		}
 		if (player.tickCount % 3 == 0) {
-			level.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.getX(), player.getY() + 2.0, player.getZ(), 1, 1.0, 1.0, 1.0, 0.0);
+			level.sendParticles(MagicFx.MURK, player.getX(), player.getY() + 2.0, player.getZ(), 1, 1.0, 1.0, 1.0, 0.0);
 		}
 		Wyrm.ambient(player);
 	}
@@ -346,7 +346,7 @@ public final class ElderWyrm extends XenoUltimate {
 		boolean ours = cloud.getOwner() != null && !level.getEntitiesOfClass(DragonFireball.class, cloud.getBoundingBox().inflate(CLOUD_SEARCH_XZ, CLOUD_SEARCH_Y, CLOUD_SEARCH_XZ),
 			ball -> ball.entityTags().contains(FIREBALL_TAG) && ball.getOwner() == cloud.getOwner()).isEmpty();
 		// only the dragon-breath cloud of the ball itself: a potion cloud or another creature's breath is left alone (0.21.37)
-		ours = ours && cloud.getParticle().getType() == ParticleTypes.DRAGON_BREATH && cloud.tickCount == 0;
+		ours = ours && cloud.getParticle().getType() == MagicFx.MURK && cloud.tickCount == 0;
 		if (!ours) {
 			return;
 		}
@@ -398,7 +398,7 @@ public final class ElderWyrm extends XenoUltimate {
 					hit.add(e);
 				}
 			}
-			level.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), spot.x, spot.y + 0.3, spot.z, 14, cast.radius * 0.5, 0.2, cast.radius * 0.5, 0.01);
+			level.sendParticles(MagicFx.MURK, spot.x, spot.y + 0.3, spot.z, 14, cast.radius * 0.5, 0.2, cast.radius * 0.5, 0.01);
 		}
 		for (LivingEntity e : hit) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), cast.damage);
@@ -410,7 +410,7 @@ public final class ElderWyrm extends XenoUltimate {
 		ServerLevel level = cast.level;
 		AreaEffectCloud cloud = new AreaEffectCloud(level, at.x, at.y, at.z);
 		cloud.setOwner(player);
-		cloud.setCustomParticle(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F));
+		cloud.setCustomParticle(MagicFx.MURK);
 		cloud.setRadius(cast.radius);
 		cloud.setRadiusPerTick(0.0F);
 		cloud.setDuration(cast.life);
@@ -455,7 +455,7 @@ public final class ElderWyrm extends XenoUltimate {
 		work.casts.add(cast);
 		for (double d = 1.0; d < BREATH_AHEAD[BREATH_AHEAD.length - 1]; d += 0.5) {
 			Vec3 p = eye.add(look.scale(d));
-			level.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), p.x, p.y - 0.2, p.z, 3, 0.2, 0.2, 0.2, 0.02);
+			level.sendParticles(MagicFx.MURK, p.x, p.y - 0.2, p.z, 3, 0.2, 0.2, 0.2, 0.02);
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		sound(player, SoundEvents.ENDER_DRAGON_SHOOT, 1.4F, 0.9F);
@@ -490,7 +490,7 @@ public final class ElderWyrm extends XenoUltimate {
 			shove(living, player.position(), DIVE_OUT, DIVE_UP);
 		}
 		ring(level, ParticleTypes.CLOUD, player.position(), DIVE_RADIUS * 0.5, 16);
-		ring(level, PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.position(), DIVE_RADIUS, 24);
+		ring(level, MagicFx.MURK, player.position(), DIVE_RADIUS, 24);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 0.7F);
 		sound(player, SoundEvents.ENDER_DRAGON_FLAP, 1.5F, 0.6F);
 		Shakes.heavy(player, player.position(), TEMPEST_SHAKE_RANGE, DIVE_SHAKE);
@@ -558,8 +558,8 @@ public final class ElderWyrm extends XenoUltimate {
 			for (LivingEntity living : foes(player, LAND_RADIUS)) {
 				living.hurtServer(level, player.damageSources().playerAttack(player), LAND_DAMAGE);
 			}
-			level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 50, 0.4, 0.9, 0.4, 0.4);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, feet.x, feet.y + 1.0, feet.z, 50, 0.4, 0.9, 0.4, 0.4);
+			level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 50, 0.4, 0.9, 0.4, 0.4);
+			level.sendParticles(MagicFx.VOID, feet.x, feet.y + 1.0, feet.z, 50, 0.4, 0.9, 0.4, 0.4);
 			sound(player, SoundEvents.ENDERMAN_TELEPORT, 1.2F, 0.6F);
 			return true;
 		}
@@ -599,7 +599,7 @@ public final class ElderWyrm extends XenoUltimate {
 			return false;
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		ParticleOptions fire = PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F);
+		ParticleOptions fire = MagicFx.MURK;
 		burst(level, fire, eye.add(look.scale(1.2)), 30, 0.6, 0.05);
 		sound(player, SoundEvents.ENDER_DRAGON_GROWL, 1.5F, 1.1F);
 		sound(player, SoundEvents.ENDER_DRAGON_SHOOT, 1.5F, 0.8F);

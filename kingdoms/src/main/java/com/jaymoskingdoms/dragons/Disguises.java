@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.TalkNet;
@@ -267,7 +268,8 @@ public final class Disguises {
 			return;
 		}
 		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator()).toList();
-		if (players.isEmpty() || !Monoliths.firstFallen(level)) {
+		// (and no dragon comes to the Overworld, disguised or not, before someone has killed one: DragonRecords#worldSlain)
+		if (players.isEmpty() || !Monoliths.firstFallen(level) || !DragonRecords.worldSlain()) {
 			return;
 		}
 		RandomSource random = level.getRandom();
@@ -561,7 +563,7 @@ public final class Disguises {
 		level.sendParticles(ParticleTypes.POOF, x, y, z, 30, 0.8, 0.8, 0.8, 0.1);
 		level.playSound(null, x, y, z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 4.0F, kind == Kind.EURUS ? 1.0F : 0.5F);
 		if (kind == Kind.EURUS) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 30, 1.0, 1.0, 1.0, 0.3);
+			level.sendParticles(Fx.CRACKLE, x, y, z, 30, 1.0, 1.0, 1.0, 0.3);
 			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 			if (bolt != null) {
 				// (the light and thunder only: no fires wherever it turns up)

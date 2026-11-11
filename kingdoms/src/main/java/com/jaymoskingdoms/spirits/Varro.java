@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
@@ -290,7 +291,7 @@ public final class Varro extends Spirit {
 			MARKS.put(target.getUUID(), new Mark(player.getUUID(), level.getGameTime() + MARK_TICKS));
 			target.addEffect(new MobEffectInstance(MobEffects.GLOWING, MARK_TICKS, 0, false, false), player);
 			Vec3 at = target.getBoundingBox().getCenter();
-			SpiritFoes.line(level, ParticleTypes.END_ROD, muzzle(player), at, 10);
+			SpiritFoes.line(level, Fx.LIGHT, muzzle(player), at, 10);
 			level.sendParticles(SpiritJavelin.AMBER, at.x, at.y + target.getBbHeight() * 0.6, at.z, 14, 0.3, 0.3, 0.3, 0.02);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 0.6F);
 			said(player);
@@ -420,7 +421,7 @@ public final class Varro extends Spirit {
 				Vec3 p = centre.add(across.scale(i));
 				for (double h = 0.0; h <= 2.0; h += 0.5) {
 					level.sendParticles(SpiritJavelin.AMBER, p.x, p.y + h, p.z, 2, 0.08, 0.05, 0.08, 0.0);
-					level.sendParticles(ParticleTypes.END_ROD, p.x, p.y + h, p.z, 1, 0.03, 0.05, 0.03, 0.0);
+					level.sendParticles(Fx.LIGHT, p.x, p.y + h, p.z, 1, 0.03, 0.05, 0.03, 0.0);
 				}
 				Mana.sendSeen(level, Mana.MOTE, p.x, p.y + 1.0, p.z, 4, 0.1, 0.7, 0.1, 0.0);
 				AABB column = new AABB(p.x - 0.7, p.y - 1.5, p.z - 0.7, p.x + 0.7, p.y + 2.5, p.z + 0.7);

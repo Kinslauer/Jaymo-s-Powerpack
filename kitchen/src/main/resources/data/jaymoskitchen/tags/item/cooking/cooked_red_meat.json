@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cooked_beef",
+    {
+      "id": "naturalist:cooked_venison",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:cooked_venison",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_mammoth_meat",
+      "required": false
+    },
+    {
+      "id": "bearminimum:cooked_bear_meat",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cooked_burrukai_rib_cut",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cooked_whale_meat",
+      "required": false
+    }
+  ]
+}

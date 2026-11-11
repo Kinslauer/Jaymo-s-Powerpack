@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.client.ManaClient;
 import com.jaymoskingdoms.spirits.Poses;
 import com.jaymoskingdoms.spirits.SpiritState;
@@ -20,7 +21,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
@@ -218,7 +219,7 @@ public final class SpiritManifest {
 		if (stage.placed) {
 			for (int n = 0; n < LEVEL_RING; n++) {
 				double a = n * Mth.TWO_PI / LEVEL_RING;
-				level.addParticle(ParticleTypes.END_ROD, stage.x, stage.y + 0.1, stage.z, Math.cos(a) * LEVEL_RING_SPEED, 0.04, Math.sin(a) * LEVEL_RING_SPEED);
+				level.addParticle(Fx.LIGHT, stage.x, stage.y + 0.1, stage.z, Math.cos(a) * LEVEL_RING_SPEED, 0.04, Math.sin(a) * LEVEL_RING_SPEED);
 			}
 			level.playLocalSound(stage.x, stage.y + 1.0, stage.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 0.7F, false);
 		}
@@ -439,7 +440,7 @@ public final class SpiritManifest {
 				continue;
 			}
 			int color = SpiritArms.ghost(SpiritArms.mix(Spirits.of(spirit.kind()).color()));
-			DustParticleOptions mote = new DustParticleOptions(GrueClient.tint(entity, color) & 0xFFFFFF, 0.5F);
+			ParticleOptions mote = Fx.wisp(GrueClient.tint(entity, color) & 0xFFFFFF, 0.5F);
 			var random = entity.getRandom();
 			for (int n = 0; n < RAIN_PER_TICK; n++) {
 				level.addParticle(mote, stage.x + (random.nextDouble() - 0.5) * 2.0 * RAIN_WIDTH, stage.y + random.nextDouble() * RAIN_HEIGHT,
@@ -597,7 +598,7 @@ public final class SpiritManifest {
 			if (since >= DODGE_TICKS) {
 				level.playLocalSound(boss.getX(), boss.getY() + 1.4, boss.getZ(), kind == Spirits.VARRO ? SoundEvents.WARDEN_ATTACK_IMPACT : SoundEvents.PLAYER_ATTACK_STRONG,
 					SoundSource.PLAYERS, 0.5F, kind == Spirits.VARRO ? 0.8F : 1.3F, false);
-				DustParticleOptions mote = new DustParticleOptions(SpiritArms.mix(Spirits.of(kind).color()) & 0xFFFFFF, 1.1F);
+				ParticleOptions mote = Fx.wisp(SpiritArms.mix(Spirits.of(kind).color()) & 0xFFFFFF, 1.1F);
 				for (int n = 0; n < 6; n++) {
 					level.addParticle(mote, boss.getX(), boss.getY() + 1.4, boss.getZ(), (player.getRandom().nextDouble() - 0.5) * 0.3, 0.05,
 						(player.getRandom().nextDouble() - 0.5) * 0.3);
@@ -733,7 +734,7 @@ public final class SpiritManifest {
 			level.playLocalSound(clashX, clashY + 1.2, clashZ, grueHits ? SoundEvents.WARDEN_ATTACK_IMPACT : SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS,
 				0.6F, grueHits ? 0.6F : 1.2F, false);
 			level.playLocalSound(clashX, clashY + 1.2, clashZ, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.4F, grueHits ? 0.5F : 1.5F, false);
-			DustParticleOptions red = new DustParticleOptions(GRUE_EDGE & 0xFFFFFF, 1.2F);
+			ParticleOptions red = Fx.wisp(GRUE_EDGE & 0xFFFFFF, 1.2F);
 			var random = minecraft.player.getRandom();
 			for (int n = 0; n < 12; n++) {
 				level.addParticle(red, clashX, clashY + 1.3, clashZ, (random.nextDouble() - 0.5) * 0.4, (random.nextDouble() - 0.3) * 0.3,

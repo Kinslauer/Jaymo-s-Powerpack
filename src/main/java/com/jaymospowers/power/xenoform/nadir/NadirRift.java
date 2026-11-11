@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -87,7 +88,7 @@ public final class NadirRift {
 	}
 
 	private static void tear(ServerLevel level, Vec3 at, double height) {
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + height * 0.5, at.z, 40, 0.3, height * 0.4, 0.3, 0.15);
+		level.sendParticles(MagicFx.VOID, at.x, at.y + height * 0.5, at.z, 40, 0.3, height * 0.4, 0.3, 0.15);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + height * 0.5, at.z, 8, 0.2, height * 0.3, 0.2, 0.02);
 	}
 
@@ -155,7 +156,7 @@ public final class NadirRift {
 		}
 		// through the floor maw
 		target.hurtServer(level, player.damageSources().playerAttack(player), DROP_DAMAGE);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, st.dropX, st.dropFloor + 0.2, st.dropZ, 20, 0.3, 0.1, 0.3, 0.1);
+		level.sendParticles(MagicFx.VOID, st.dropX, st.dropFloor + 0.2, st.dropZ, 20, 0.3, 0.1, 0.3, 0.1);
 		level.playSound(null, st.dropX, st.dropFloor, st.dropZ, SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 0.6F, 0.7F + st.dropPasses * 0.1F);
 		if (--st.dropPasses <= 0 || !target.isAlive()) {
 			st.dropTarget = -1;
@@ -165,14 +166,14 @@ public final class NadirRift {
 		target.teleportTo(st.dropX, st.dropSky, st.dropZ);
 		target.setDeltaMovement(0.0, -0.8, 0.0);
 		target.syncVelocity = true;
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, st.dropX, st.dropSky + target.getBbHeight(), st.dropZ, 20, 0.3, 0.1, 0.3, 0.1);
+		level.sendParticles(MagicFx.VOID, st.dropX, st.dropSky + target.getBbHeight(), st.dropZ, 20, 0.3, 0.1, 0.3, 0.1);
 	}
 
 	/** A flat ring of the void: the mouth of a maw. */
 	private static void maw(ServerLevel level, double x, double y, double z) {
 		for (int i = 0; i < 12; i++) {
 			double a = i / 12.0 * Math.PI * 2.0;
-			level.sendParticles(ParticleTypes.PORTAL, x + Math.cos(a) * 0.9, y, z + Math.sin(a) * 0.9, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.VOID, x + Math.cos(a) * 0.9, y, z + Math.sin(a) * 0.9, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, x, y, z, 2, 0.3, 0.0, 0.3, 0.0);
 	}

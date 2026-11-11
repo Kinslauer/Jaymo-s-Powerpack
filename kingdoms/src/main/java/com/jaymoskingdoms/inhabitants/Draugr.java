@@ -51,8 +51,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The draugr: a dead Nordic warrior in a horned helm, mail and fur, guarding the Stormborn Tomb's halls (placed by the
- * tomb's spawners). Our own model, texture, animations and code (kingdoms/art/draugr.bbmodel); after the old idea of the
+ * The draugr: a long-dead Warrior-born, a Z Fighter of the old raids gone to sinew, in a horned helm, mail and fur, its
+ * tail wrapped round its waist, guarding the Stormborn Tomb's halls (placed by the tomb's spawners). Our own model, texture, animations and code (kingdoms/art/draugr.bbmodel); after the old idea of the
  * barrow-dead only, nothing from any other mod.
  *
  * <p>Each one rises with one of two arms (a real item in its hands, so vanilla does the rest): a sword and shield, and
@@ -92,6 +92,8 @@ public class Draugr extends Monster implements GeoEntity {
 	private int guardBroken;
 	/** It has been given its arms (a structure may place it without finalizeSpawn, so it arms itself on its first tick). */
 	private boolean armed;
+	/** (Client, a lore film's actor only) drawn as the living Warrior-born it was, in the same gear in better condition. */
+	private boolean living;
 	/** (Client) the tick it last took a blow on its shield. */
 	private int blockedAt = -1000;
 
@@ -110,6 +112,54 @@ public class Draugr extends Monster implements GeoEntity {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(AXE, false);
+	}
+
+	/**
+	 * Makes this (a client-only lore film actor, never a real draugr) the living Warrior-born it was: drawn alive, its
+	 * tail whole, armed with the axe or the sword and shield.
+	 */
+	public void stageLiving(boolean axe) {
+		this.living = true;
+		this.entityData.set(AXE, axe);
+	}
+
+	/** (A lore film's actor) what a finisher took off it: {@link #MAIM_HEAD}, {@link #MAIM_ARM} (its weapon arm). */
+	public static final int MAIM_HEAD = 1, MAIM_ARM = 2;
+	private int maimed;
+
+	/** (A lore film's actor) loses its head or its weapon arm to a finisher: no longer drawn. */
+	public void stageMaim(int bits) {
+		this.maimed |= bits;
+	}
+
+	public int maimed() {
+		return this.maimed;
+	}
+
+	/** (A lore film's actor) the loops it stands and moves in ({@link com.jaymoskingdoms.films.Moves}); null for a real draugr. */
+	private @Nullable String stageStill, stageMoving;
+	private net.minecraft.world.phys.Vec3 stageLast = net.minecraft.world.phys.Vec3.ZERO;
+	private double stageSpeed;
+
+	/** (A lore film's actor) stands and moves in these loops of the humanoid move library from now on. */
+	public void stageGait(String still, String moving) {
+		this.stageStill = still;
+		this.stageMoving = moving;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.stageStill != null) {
+			net.minecraft.world.phys.Vec3 now = this.position();
+			this.stageSpeed = Math.sqrt((now.x - this.stageLast.x) * (now.x - this.stageLast.x) + (now.z - this.stageLast.z) * (now.z - this.stageLast.z));
+			this.stageLast = now;
+		}
+	}
+
+	/** Whether this is a lore film's living Warrior-born ({@link #stageLiving}). */
+	public boolean living() {
+		return this.living;
 	}
 
 	/** It fights with the two-handed axe (else sword and shield). */
@@ -219,13 +269,21 @@ public class Draugr extends Monster implements GeoEntity {
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
 		controllers.add(new AnimationController<Draugr>("move", 4, test -> {
+			Draugr draugr = test.animatable();
+			if (draugr.stageStill != null && draugr.stageMoving != null) {
+				// a lore film's Warrior-born: the move library's loops, in time with how fast the film moves it
+				boolean going = draugr.stageSpeed > 0.02;
+				test.setControllerSpeed(going ? com.jaymoskingdoms.films.Moves.rate(draugr.stageMoving, draugr.stageSpeed, 1.2) : 1.0F);
+				return test.setAndContinue(com.jaymoskingdoms.films.Moves.loop(going ? draugr.stageMoving : draugr.stageStill));
+			}
 			if (test.animatable().tickCount - test.animatable().blockedAt < BLOCK_SHOWN_TICKS) {
 				return test.setAndContinue(BLOCK);
 			}
 			return test.setAndContinue(test.isMoving() ? WALK : IDLE);
 		}));
-		controllers.add(new AnimationController<Draugr>("action", test -> PlayState.STOP).triggerableAnim("attack_sword", ATTACK_SWORD)
-			.triggerableAnim("attack_axe", ATTACK_AXE).triggerableAnim("guard_broken", GUARD_BROKEN));
+		// its own blows, and every move of the humanoid library (the lore films' Warrior-born use them)
+		controllers.add(com.jaymoskingdoms.films.Moves.actions(new AnimationController<Draugr>("action", 2, test -> PlayState.STOP))
+			.triggerableAnim("attack_sword", ATTACK_SWORD).triggerableAnim("attack_axe", ATTACK_AXE).triggerableAnim("guard_broken", GUARD_BROKEN));
 	}
 
 	@Override

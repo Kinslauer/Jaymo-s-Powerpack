@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.power.gravity.GravityPower;
@@ -15,7 +16,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -48,7 +49,7 @@ public final class ArsenalDamocles {
 	/** How far out it can be aimed (where the crosshair lands: a block, a creature, or open air this far out). */
 	static final double RANGE = 64.0;
 	/** While B is held: the ring marking where it will land (shown only to you). */
-	private static final DustParticleOptions MARKER = new DustParticleOptions(0x5A1A8C, 1.6F);
+	private static final ParticleOptions MARKER = MagicFx.wisp(0x5A1A8C, 1.6F);
 	/** The rift opens this high over the ground it's aimed at (lower under the world's ceiling). */
 	public static final double PORTAL_HEIGHT = 30.0;
 	public static final double PORTAL_RADIUS = 4.5;
@@ -343,7 +344,7 @@ public final class ArsenalDamocles {
 		if (t < DROP) {
 			// the rift above, gathering: motes falling from it, and a rumble as it's about to give
 			if (t % 2 == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 0.3, portal.z, 6, PORTAL_RADIUS * 0.5, 0.1, PORTAL_RADIUS * 0.5, 0.02);
+				level.sendParticles(MagicFx.VOID, portal.x, portal.y - 0.3, portal.z, 6, PORTAL_RADIUS * 0.5, 0.1, PORTAL_RADIUS * 0.5, 0.02);
 				level.sendParticles(ParticleTypes.SQUID_INK, portal.x, portal.y - 0.4, portal.z, 3, PORTAL_RADIUS * 0.45, 0.1, PORTAL_RADIUS * 0.45, 0.02);
 			}
 			if (t == DROP - 30 || t == DROP - 12) {
@@ -354,18 +355,18 @@ public final class ArsenalDamocles {
 		if (t == DROP) {
 			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 3.0F, 0.6F);
 			level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.6F, 0.5F);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 1.0, portal.z, 120, 1.5, 1.0, 1.5, 0.3);
+			level.sendParticles(MagicFx.VOID, portal.x, portal.y - 1.0, portal.z, 120, 1.5, 1.0, 1.5, 0.3);
 		}
 		if (live.landed) {
 			if (t == (long) Math.ceil(fall.reopensAt())) {
 				// the rift opens again to take it back
 				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.0F, 0.8F);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 0.3, portal.z, 60, PORTAL_RADIUS * 0.5, 0.2, PORTAL_RADIUS * 0.5, 0.05);
+				level.sendParticles(MagicFx.VOID, portal.x, portal.y - 0.3, portal.z, 60, PORTAL_RADIUS * 0.5, 0.2, PORTAL_RADIUS * 0.5, 0.05);
 			}
 			if (t == (long) Math.ceil(fall.risesAt())) {
 				// it tears out of the ground and is hauled up
 				double surface = fall.tipEnd() + EMBED_DEPTH;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), surface + 1.0, fall.z(), 120, 1.0, 0.5, 1.0, 0.15);
+				level.sendParticles(MagicFx.VOID, fall.x(), surface + 1.0, fall.z(), 120, 1.0, 0.5, 1.0, 0.15);
 				level.playSound(null, fall.x(), surface, fall.z(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.5F, 0.5F);
 				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.6F, 0.7F);
 				com.jaymospowers.core.Shakes.around(level, new net.minecraft.world.phys.Vec3(fall.x(), surface, fall.z()), 24.0, 1.0F);
@@ -373,11 +374,11 @@ public final class ArsenalDamocles {
 			if (t > fall.risesAt() && t < fall.sunkAt() && t % 2 == 0) {
 				double tip = tipY(fall, t);
 				double shown = shownLength(fall, t);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), tip + shown * 0.5, fall.z(), 8, 0.4, shown * 0.25, 0.4, 0.02);
+				level.sendParticles(MagicFx.VOID, fall.x(), tip + shown * 0.5, fall.z(), 8, 0.4, shown * 0.25, 0.4, 0.02);
 			}
 			if (t == (long) Math.ceil(fall.sunkAt())) {
 				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 2.0F, 0.4F);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 0.5, portal.z, 120, 1.5, 0.5, 1.5, 0.2);
+				level.sendParticles(MagicFx.VOID, portal.x, portal.y - 0.5, portal.z, 120, 1.5, 0.5, 1.5, 0.2);
 			}
 			return;
 		}
@@ -389,7 +390,7 @@ public final class ArsenalDamocles {
 		live.tip = tip;
 		live.guard = guard;
 		if (t % 2 == 0) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), (tip + hilt) * 0.5, fall.z(), 10, 0.5, LENGTH * 0.25, 0.5, 0.02);
+			level.sendParticles(MagicFx.VOID, fall.x(), (tip + hilt) * 0.5, fall.z(), 10, 0.5, LENGTH * 0.25, 0.5, 0.02);
 		}
 		if (tip <= fall.tipEnd() + 1.0E-3) {
 			live.landed = true;
@@ -476,7 +477,7 @@ public final class ArsenalDamocles {
 		}
 		Debris.ring(level, center.below(), Mth.ceil(IMPACT_RADIUS), 1.6F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 200, 2.5, 0.5, 2.5, 0.25);
+		level.sendParticles(MagicFx.VOID, at.x, at.y + 1.0, at.z, 200, 2.5, 0.5, 2.5, 0.25);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 0.5, at.z, 60, 3.0, 0.3, 3.0, 0.08);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 4.0F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 3.0F, 0.4F);

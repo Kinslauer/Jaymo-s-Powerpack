@@ -1,13 +1,13 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -118,13 +118,13 @@ final class ZFighterKiRain {
 		RAINS.add(new Rain(level, player.getUUID(), lockedId, centre, damage, color, level.getGameTime() + DELAY_TICKS));
 		// the spray: motes shot upward from the hand, fanning a little
 		Vec3 hand = player.getEyePosition().add(player.getViewVector(1.0F).scale(0.8)).add(0.0, -0.3, 0.0);
-		DustParticleOptions dust = new DustParticleOptions(color, 1.4F);
+		ParticleOptions dust = MagicFx.wisp(color, 1.4F);
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < 30; i++) {
 			level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 0, (random.nextDouble() - 0.5) * 0.3, 1.0, (random.nextDouble() - 0.5) * 0.3,
 				0.6 + random.nextDouble() * 0.5);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, true, false, hand.x, hand.y, hand.z, 8, 0.1, 0.1, 0.1, 0.4);
+		level.sendParticles(MagicFx.LIGHT, true, false, hand.x, hand.y, hand.z, 8, 0.1, 0.1, 0.1, 0.4);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.8F, 1.3F);
@@ -168,7 +168,7 @@ final class ZFighterKiRain {
 				rain.drops.add(new Drop(start, 0x58000000 | (nextId++ & 0xFFFFFF)));
 			}
 		}
-		DustParticleOptions dust = new DustParticleOptions(rain.color, 1.2F);
+		ParticleOptions dust = MagicFx.wisp(rain.color, 1.2F);
 		var source = ZFighterKi.source(owner);
 		for (Iterator<Drop> it = rain.drops.iterator(); it.hasNext(); ) {
 			Drop drop = it.next();
@@ -191,7 +191,7 @@ final class ZFighterKiRain {
 			}
 			if (landed) {
 				level.sendParticles(dust, true, false, end.x, end.y, end.z, 5, 0.25, 0.25, 0.25, 0.1);
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.3);
+				level.sendParticles(MagicFx.CRACKLE, true, false, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.3);
 				if (random.nextInt(3) == 0) {
 					level.playSound(null, end.x, end.y, end.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.3F, 1.9F);
 				}

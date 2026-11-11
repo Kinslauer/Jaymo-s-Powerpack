@@ -96,6 +96,7 @@ public final class Barbarians {
 			folk.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(SIGHT + 8.0);
 			Item[] weapons = {Items.STONE_AXE, Items.IRON_AXE, Items.STONE_SWORD, Items.IRON_SWORD, Items.STONE_AXE};
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapons[folk.getRandom().nextInt(weapons.length)]));
+			ShieldBearers.arm(folk, ShieldBearers.BARBARIAN, null);
 			folk.setItemSlot(EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, HIDE));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, HIDE));
 			if (folk.getRandom().nextInt(CAP_ONE_IN) == 0) {

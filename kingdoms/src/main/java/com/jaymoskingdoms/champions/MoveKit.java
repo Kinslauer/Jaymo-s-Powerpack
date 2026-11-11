@@ -1,9 +1,10 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -26,7 +27,7 @@ public final class MoveKit {
 
 	/** A ring of dust on the ground, sent each tell tick. */
 	public static void ring(ServerLevel level, Vec3 center, double radius, int colour) {
-		DustParticleOptions dust = new DustParticleOptions(colour & 0xFFFFFF, 1.2F);
+		ParticleOptions dust = Fx.wisp(colour & 0xFFFFFF, 1.2F);
 		int n = Math.max(12, (int) (radius * 10));
 		for (int i = 0; i < n; i++) {
 			double a = i * Math.PI * 2.0 / n;
@@ -36,7 +37,7 @@ public final class MoveKit {
 
 	/** A column of dust standing up from {@code pos}. */
 	public static void column(ServerLevel level, Vec3 pos, double height, int colour) {
-		DustParticleOptions dust = new DustParticleOptions(colour & 0xFFFFFF, 1.2F);
+		ParticleOptions dust = Fx.wisp(colour & 0xFFFFFF, 1.2F);
 		for (double y = 0.0; y <= height; y += 0.5) {
 			level.sendParticles(dust, pos.x, pos.y + y, pos.z, 1, 0.15, 0.0, 0.15, 0.0);
 		}

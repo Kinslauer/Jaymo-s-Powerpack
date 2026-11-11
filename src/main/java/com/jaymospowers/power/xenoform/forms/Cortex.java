@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -110,7 +111,7 @@ public final class Cortex extends XenoForm {
 				}
 				target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, LIFT_TICKS, 4, false, false), player);
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, LIFT_TICKS, 3, false, false), player);
-				beam(level, player.getEyePosition(), target.getEyePosition(), ParticleTypes.ELECTRIC_SPARK, 14);
+				beam(level, player.getEyePosition(), target.getEyePosition(), MagicFx.CRACKLE, 14);
 				sound(player, SoundEvents.GUARDIAN_AMBIENT, 1.0F, 1.6F);
 				cooldown(player, live, V, LIFT_COOLDOWN);
 			}
@@ -139,7 +140,7 @@ public final class Cortex extends XenoForm {
 		LivingEntity next = first;
 		float damage = ARC_DAMAGE;
 		while (next != null) {
-			beam(level, from, next.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 12);
+			beam(level, from, next.getBoundingBox().getCenter(), MagicFx.CRACKLE, 12);
 			next.hurtServer(level, player.damageSources().playerAttack(player), damage);
 			struck.add(next);
 			if (struck.size() > ARC_JUMPS) {
@@ -206,7 +207,7 @@ public final class Cortex extends XenoForm {
 
 	@Override
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 1.6, 0.0), 40, 0.8, 0.2);
+		burst(player.level(), MagicFx.CRACKLE, player.position().add(0.0, 1.6, 0.0), 40, 0.8, 0.2);
 		sound(player, SoundEvents.TRIDENT_THUNDER.value(), 0.8F, 1.4F);
 		return true;
 	}

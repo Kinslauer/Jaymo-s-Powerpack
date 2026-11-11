@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.mojang.serialization.Codec;
@@ -9,8 +10,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -168,9 +167,8 @@ public final class ZFighterFalseSuper {
 		ZFighterPower.refresh(player, live);
 		ServerLevel level = player.level();
 		Vec3 c = player.position();
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE9A0), true, true, c.x, c.y + 1.0, c.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(new DustParticleOptions(ZFighterForms.color(ZFighterForms.FALSE_SUPER), 2.0F), true, false, c.x, c.y + 1.0, c.z, 50, 0.9, 1.0, 0.9, 0.2);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, c.x, c.y + 1.0, c.z, 30, 0.6, 0.9, 0.6, 0.3);
+		MagicFx.burst(level, c.x, c.y + 1.0, c.z, ZFighterForms.color(ZFighterForms.FALSE_SUPER), 2.0F, 50, 0.9, 1.0, 0.9);
+		level.sendParticles(MagicFx.CRACKLE, true, false, c.x, c.y + 1.0, c.z, 30, 0.6, 0.9, 0.6, 0.3);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.7F);
 		com.jaymospowers.core.Shakes.heavy(player, c, 16.0, 1.2F);
@@ -203,14 +201,14 @@ public final class ZFighterFalseSuper {
 			flare.nextFlicker = flare.flickerUntil + (last ? FLICKER_MIN / 3 : FLICKER_MIN) + player.getRandom().nextInt(last ? FLICKER_SPREAD / 3 : FLICKER_SPREAD);
 			ZFighterPower.refresh(player, live);
 			ServerLevel level = player.level();
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.5, 0.8, 0.5, 0.25);
+			level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.5, 0.8, 0.5, 0.25);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.35F, 1.9F);
 			com.jaymospowers.core.Shakes.send(player, 0.35F, null);
 		} else if (now == flare.flickerUntil) {
 			ZFighterPower.refresh(player, live);
 		}
 		if (now % 4 == 0) {
-			player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.8, 0.4, 0.1);
+			player.level().sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.8, 0.4, 0.1);
 		}
 	}
 

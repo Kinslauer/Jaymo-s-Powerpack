@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.flux;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.Alchemy;
 import com.jaymospowers.alchemy.Corruption;
@@ -16,7 +17,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -158,7 +158,7 @@ public final class FluxEffects {
 		Flux.add(level, pos, flux);
 		double x = pos.getX() + 0.5, y = pos.getY() + 0.6, z = pos.getZ() + 0.5;
 		int count = Math.min(60, 6 + flux / 4);
-		level.sendParticles(new DustParticleOptions(Essence.FLUX.colour, 1.2F), x, y, z, count, 0.5, 0.4, 0.5, 0.05);
+		level.sendParticles(MagicFx.miasma(Essence.FLUX.colour, 1.2F), x, y, z, count, 0.5, 0.4, 0.5, 0.05);
 		level.sendParticles(ParticleTypes.SMOKE, x, y, z, Math.min(20, count / 2), 0.4, 0.3, 0.4, 0.02);
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.8F, 0.6F);
 		int soak = Math.min(30, Math.max(1, flux / 10));

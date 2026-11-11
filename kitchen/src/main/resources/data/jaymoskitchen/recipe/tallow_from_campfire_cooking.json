@@ -3,7 +3,7 @@
   "category": "misc",
   "cookingtime": 600,
   "experience": 0.1,
-  "ingredient": "jaymoskitchen:animal_fat",
+  "ingredient": "#jaymoskitchen:animal_fats",
   "result": {
     "id": "jaymoskitchen:tallow"
   }

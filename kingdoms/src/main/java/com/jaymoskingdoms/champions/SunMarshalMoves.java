@@ -1,8 +1,8 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.List;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -26,6 +26,9 @@ import org.jspecify.annotations.Nullable;
 final class SunMarshalMoves implements Moves {
 	static final int BEAM_WINDUP = 25, BEAM_COOLDOWN = 140, BEAM_FOLLOW = 15, BEAM_FIRE = 100;
 	static final double BEAM_RANGE = 20.0, BEAM_RADIUS = 1.5;
+	/** The column of light: how high it stands (blocks) and how long it shows (ticks). */
+	static final double BEAM_HEIGHT = 14.0;
+	static final int BEAM_SHOWN = 14;
 	static final float BEAM_SHARE = 1.0F;
 	static final int GUARD_COOLDOWN = 300, GUARD_TICKS = 80;
 	static final double GUARD_FRONT = 0.2;
@@ -61,9 +64,8 @@ final class SunMarshalMoves implements Moves {
 				e.igniteForTicks(BEAM_FIRE);
 			}
 		}
-		for (double y = 0.0; y < 14.0; y += 0.5) {
-			level.sendParticles(ParticleTypes.END_ROD, this.held.x, this.held.y + y, this.held.z, 2, 0.2, 0.0, 0.2, 0.02);
-		}
+		// the column of light itself, as wide as what it burns
+		Fx.beam(level, this.held.add(0.0, BEAM_HEIGHT, 0.0), this.held, (float)BEAM_RADIUS * 0.5F, c.patron().colour, BEAM_SHOWN);
 		MoveKit.sound(level, this.held, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5F, 1.6F);
 	}
 
@@ -73,7 +75,7 @@ final class SunMarshalMoves implements Moves {
 			this.guard--;
 			if (this.guard % 5 == 0) {
 				Vec3 f = c.getLookAngle().multiply(1.0, 0.0, 1.0).normalize();
-				level.sendParticles(ParticleTypes.WAX_ON, c.getX() + f.x * 0.8, c.getY() + 1.3, c.getZ() + f.z * 0.8, 3, 0.3, 0.6, 0.3, 0.0);
+				level.sendParticles(Fx.EMBER, c.getX() + f.x * 0.8, c.getY() + 1.3, c.getZ() + f.z * 0.8, 3, 0.3, 0.6, 0.3, 0.0);
 			}
 		}
 	}
@@ -113,7 +115,7 @@ final class SunMarshalMoves implements Moves {
 		double h = 12.0 * (1.0 - left / (double)NOON_WINDUP);
 		for (int i = 0; i < 6; i++) {
 			double a = i * Math.PI / 3.0 + left * 0.3;
-			level.sendParticles(ParticleTypes.END_ROD, c.getX() + Math.cos(a) * 1.2, c.getY() + h, c.getZ() + Math.sin(a) * 1.2, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(Fx.LIGHT, c.getX() + Math.cos(a) * 1.2, c.getY() + h, c.getZ() + Math.sin(a) * 1.2, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		MoveKit.ring(level, c.position(), NOON_RANGE, c.patron().colour);
 	}
@@ -126,7 +128,7 @@ final class SunMarshalMoves implements Moves {
 				e.igniteForTicks(NOON_FIRE);
 			}
 		}
-		level.sendParticles(ParticleTypes.END_ROD, c.getX(), c.getY() + 1.5, c.getZ(), 60, 1.0, 1.0, 1.0, 0.3);
+		level.sendParticles(Fx.LIGHT, c.getX(), c.getY() + 1.5, c.getZ(), 60, 1.0, 1.0, 1.0, 0.3);
 		MoveKit.sound(level, c.position(), SoundEvents.BEACON_ACTIVATE, 2.0F, 1.6F);
 	}
 

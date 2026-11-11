@@ -1,10 +1,11 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -245,7 +246,7 @@ public class ZFighterRogue extends Monster {
 		if (tyrant) {
 			bar(level);
 			if (this.tickCount % 4 == 0) {
-				level.sendParticles(new DustParticleOptions(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
+				level.sendParticles(MagicFx.wisp(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
 					0.4, 0.8, 0.4, 0.0);
 			}
 			if (form() < 2 && this.getHealth() < this.getMaxHealth() * 0.5F) {
@@ -373,7 +374,7 @@ public class ZFighterRogue extends Monster {
 		this.setLastHurtMob(target);
 		Vec3 look = at.subtract(this.getEyePosition());
 		look = look.lengthSqr() < 1.0E-4 ? this.getLookAngle() : look.normalize();
-		DustParticleOptions dust = new DustParticleOptions(tyrant ? form() >= 2 ? 0xFFF080 : TYRANT_COLOR : CHAMPION_COLOR, 1.2F);
+		ParticleOptions dust = MagicFx.wisp(tyrant ? form() >= 2 ? 0xFFF080 : TYRANT_COLOR : CHAMPION_COLOR, 1.2F);
 		if (finisher) {
 			Vec3 motion = target.getDeltaMovement();
 			target.setDeltaMovement(motion.x * REEL, Math.max(0.0, motion.y), motion.z * REEL);

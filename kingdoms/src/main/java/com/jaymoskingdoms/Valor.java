@@ -25,7 +25,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -1068,7 +1068,7 @@ public final class Valor {
 	 * drawn in, Undying a soul rising now and then, Duelist sparks off the hand (a Hunter's eyes glint instead).
 	 */
 	static void coatParticles(ServerLevel level, LivingEntity e, boolean armed, Data data, boolean kings) {
-		DustParticleOptions dust = new DustParticleOptions(kings ? data.soulColor() : data.lookKind().color, 0.8F);
+		ParticleOptions dust = Fx.wisp(kings ? data.soulColor() : data.lookKind().color, 0.8F);
 		float yaw = e.yBodyRot * Mth.DEG_TO_RAD;
 		double fx = -Mth.sin(yaw), fz = Mth.cos(yaw), sx = Mth.cos(yaw), sz = Mth.sin(yaw);
 		double y = e.getY() + e.getBbHeight() * 0.5;
@@ -1107,7 +1107,7 @@ public final class Valor {
 			}
 			case BULWARK -> {
 				if (e.tickCount % 20 < 4) {
-					DustParticleOptions ring = new DustParticleOptions(kings ? data.soulColor() : data.lookKind().color, 0.6F);
+					ParticleOptions ring = Fx.wisp(kings ? data.soulColor() : data.lookKind().color, 0.6F);
 					for (int i = 0; i < 6; i++) {
 						double a = r.nextDouble() * Math.PI * 2;
 						level.sendParticles(ring, e.getX() + Math.cos(a) * BULWARK_REACH, e.getY() + 0.1, e.getZ() + Math.sin(a) * BULWARK_REACH, 1, 0.0,
@@ -1117,7 +1117,7 @@ public final class Valor {
 			}
 			case HOLLOW -> {
 				// (the enchanting glyphs fly from where they're sent to their point: here, the hands)
-				level.sendParticles(ParticleTypes.ENCHANT, hx, hy, hz, 0, (r.nextDouble() - 0.5) * 2.0, r.nextDouble(), (r.nextDouble() - 0.5) * 2.0, 1.0);
+				level.sendParticles(Fx.GLYPH, hx, hy, hz, 0, (r.nextDouble() - 0.5) * 2.0, r.nextDouble(), (r.nextDouble() - 0.5) * 2.0, 1.0);
 			}
 			case UNDYING -> {
 				if (r.nextInt(5) == 0) {
@@ -1188,7 +1188,7 @@ public final class Valor {
 
 	/** A burst of the coating round {@code e} (waking, a rank, the coatings going up). */
 	static void coatBurst(ServerLevel level, LivingEntity e, int color, int count) {
-		level.sendParticles(new DustParticleOptions(color, 1.4F), e.getX(), e.getY(0.5), e.getZ(), count, 0.5, 0.7, 0.5, 0.05);
+		level.sendParticles(Fx.wisp(color, 1.4F), e.getX(), e.getY(0.5), e.getZ(), count, 0.5, 0.7, 0.5, 0.05);
 	}
 
 	// ---- blows -----------------------------------------------------------------------------------------------------

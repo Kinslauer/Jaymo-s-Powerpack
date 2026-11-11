@@ -109,6 +109,9 @@ public final class Tinkering {
 	public static Item BOG_IRON_INGOT;
 	public static final Item[] BOG_IRON_ARMOUR = new Item[4];
 	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
+	/** Cobalt ore, in the Nether's netherrack. */
+	public static Block COBALT_ORE;
+	public static final ResourceKey<PlacedFeature> COBALT_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_cobalt"));
 	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
 	/** (0.18.52) Told of every tool taken from a Tool Station that has iron (or better) in it: the player and the tool. Jaymo's Kingdoms adds one (by reflection) for its first-forged-tool deed. */
 	public static final List<java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, ItemStack>> TOOL_BUILT_LISTENERS = new ArrayList<>();
@@ -215,6 +218,7 @@ public final class Tinkering {
 			for (Block block : List.of(SILVER_ORE, DEEPSLATE_SILVER_ORE, RAW_SILVER_BLOCK, SILVER_BLOCK)) {
 				output.accept(block);
 			}
+			output.accept(COBALT_ORE);
 			output.accept(RAW_SILVER);
 			output.accept(SILVER_NUGGET);
 			ALLOY_INGOTS.values().forEach(output::accept);
@@ -395,8 +399,11 @@ public final class Tinkering {
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES, SILVER_ORE_FEATURE);
 	}
 
-	/** Cobalt, manyullyn, queen's slime and hepatizon: the knife metals. Their ingots are their material,
-	 * so the Part Builder and the Tool Station recognise them; there is no ore or melting for them yet. */
+	/**
+	 * Cobalt, manyullyn, queen's slime and hepatizon: the knife metals. Their ingots are their material, so the Part
+	 * Builder and the Tool Station recognise them. Cobalt is an ore in the Nether's netherrack (iron pickaxe; smelted, or
+	 * melted doubled); the other three are smeltery alloys of it ({@link Melting#ALLOYS}), cast into ingots.
+	 */
 	private static void registerKnifeMetals() {
 		Item cobaltIngot = item("cobalt_ingot", Item::new, Function.identity());
 		Item manyullynIngot = item("manyullyn_ingot", Item::new, Function.identity());
@@ -406,6 +413,14 @@ public final class Tinkering {
 		TinkerMaterial.own(TinkerMaterial.MANYULLYN, 1, manyullynIngot);
 		TinkerMaterial.own(TinkerMaterial.QUEEN_SLIME, 1, queenSlimeIngot);
 		TinkerMaterial.own(TinkerMaterial.HEPATIZON, 1, hepatizonIngot);
+		ALLOY_INGOTS.put(Molten.COBALT, cobaltIngot);
+		ALLOY_INGOTS.put(Molten.MANYULLYN, manyullynIngot);
+		ALLOY_INGOTS.put(Molten.QUEEN_SLIME, queenSlimeIngot);
+		ALLOY_INGOTS.put(Molten.HEPATIZON, hepatizonIngot);
+		COBALT_ORE = block("cobalt_ore", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.NETHER)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(3.0F, 3.0F).sound(SoundType.NETHER_GOLD_ORE).requiresCorrectToolForDrops());
+		Melting.cobalt(COBALT_ORE.asItem());
+		BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Decoration.UNDERGROUND_ORES, COBALT_ORE_FEATURE);
 	}
 
 	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {

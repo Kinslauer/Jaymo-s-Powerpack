@@ -1,7 +1,5 @@
 {
 	"values": [
-		"minecraft:desert",
-		"#minecraft:is_badlands",
 		"#minecraft:is_jungle"
 	]
 }

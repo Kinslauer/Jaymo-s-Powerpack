@@ -1,9 +1,9 @@
 package com.jaymospowers.alchemy.codex;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,7 +77,7 @@ public class LensItem extends Item {
 			return;
 		}
 		if ((USE_TICKS - remainingUseTicks) % SPARKLE_EVERY == 0) {
-			serverLevel.sendParticles(ParticleTypes.ENCHANT, thing.at().x, thing.at().y, thing.at().z, 3, 0.3, 0.3, 0.3, 0.3);
+			serverLevel.sendParticles(MagicFx.GLYPH, thing.at().x, thing.at().y, thing.at().z, 3, 0.3, 0.3, 0.3, 0.3);
 		}
 	}
 

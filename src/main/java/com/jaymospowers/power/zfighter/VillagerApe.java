@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -243,7 +243,7 @@ final class VillagerApe {
 		}
 		berserk(mob, live, level, now);
 		if (now % 3 == 0) {
-			level.sendParticles(new DustParticleOptions(0xC03020, 2.5F), true, false, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 2,
+			level.sendParticles(MagicFx.wisp(0xC03020, 2.5F), true, false, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 2,
 				mob.getBbWidth() * 0.4, mob.getBbHeight() * 0.3, mob.getBbWidth() * 0.4, 0.0);
 		}
 		if (now % 200 == 0) {
@@ -285,7 +285,7 @@ final class VillagerApe {
 		body(mob, live);
 		if (ape) {
 			double width = mob.getBbWidth();
-			level.sendParticles(new DustParticleOptions(0x6B3A1E, 3.0F), true, false, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 6,
+			level.sendParticles(MagicFx.wisp(0x6B3A1E, 3.0F), true, false, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 6,
 				width * 0.4, mob.getBbHeight() * 0.35, width * 0.4, 0.0);
 			if (level.getGameTime() % 10 == 0) {
 				level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 3.0F,

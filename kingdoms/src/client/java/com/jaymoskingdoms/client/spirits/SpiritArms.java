@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.client.ManaClient;
 import com.jaymoskingdoms.client.ManaClient.Glow;
@@ -33,7 +34,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.model.player.PlayerModel;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -458,7 +459,7 @@ public final class SpiritArms {
 				// waiting unseen: now and then a wisp at the shoulder, so the keeper knows it's there
 				float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
 				double side = entity.getRandom().nextBoolean() ? 0.4 : -0.4;
-				level.addParticle(new DustParticleOptions(GrueClient.tint(entity, ghost(mix(Spirits.of(kind).color()))) & 0xFFFFFF, 0.7F),
+				level.addParticle(Fx.wisp(GrueClient.tint(entity, ghost(mix(Spirits.of(kind).color()))) & 0xFFFFFF, 0.7F),
 					entity.getX() - Mth.cos(yaw) * side, entity.getY() + 1.4, entity.getZ() - Mth.sin(yaw) * side, 0.0, 0.02, 0.0);
 			}
 		} else if (flickerLeft > 0 && entity == Minecraft.getInstance().player) {
@@ -473,7 +474,7 @@ public final class SpiritArms {
 			return;
 		}
 		Spirit sp = Spirits.of(kind);
-		DustParticleOptions mote = new DustParticleOptions(GrueClient.tint(entity, ghost(mix(sp.color()))) & 0xFFFFFF, 1.3F);
+		ParticleOptions mote = Fx.wisp(GrueClient.tint(entity, ghost(mix(sp.color()))) & 0xFFFFFF, 1.3F);
 		float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
 		double behindX = Mth.sin(yaw), behindZ = -Mth.cos(yaw);
 		for (int i = 0; i < arms; i++) {
@@ -518,7 +519,7 @@ public final class SpiritArms {
 		// where the hand landed: as far as it reached out, or just ahead
 		double out = spirit.reach() > 0 ? spirit.reach() : BURST_AHEAD + BURST_AHEAD * size;
 		Vec3 at = entity.getEyePosition().add(entity.getLookAngle().scale(out));
-		DustParticleOptions dust = new DustParticleOptions(GrueClient.tint(entity, mix(Spirits.of(spirit.kind()).color())) & 0xFFFFFF, 1.6F);
+		ParticleOptions dust = Fx.wisp(GrueClient.tint(entity, mix(Spirits.of(spirit.kind()).color())) & 0xFFFFFF, 1.6F);
 		var random = entity.getRandom();
 		if (spirit.pose() == Poses.HAMMER || spirit.pose() == Poses.SLAM) {
 			// a slam lands on the ground in front: a ring of aura thrown out along it
@@ -539,7 +540,7 @@ public final class SpiritArms {
 			double vx = (random.nextDouble() - 0.5) * BURST_SPEED, vy = (random.nextDouble() - 0.5) * BURST_SPEED, vz = (random.nextDouble() - 0.5) * BURST_SPEED;
 			level.addParticle(dust, at.x, at.y, at.z, vx, vy, vz);
 			if (n % 2 == 0) {
-				level.addParticle(ParticleTypes.END_ROD, at.x, at.y, at.z, vx * 0.6, vy * 0.6, vz * 0.6);
+				level.addParticle(Fx.LIGHT, at.x, at.y, at.z, vx * 0.6, vy * 0.6, vz * 0.6);
 			}
 			if (n % 3 == 0) {
 				level.addParticle(ParticleTypes.CRIT, at.x, at.y, at.z, vx * 1.5, vy * 1.5, vz * 1.5);

@@ -50,6 +50,8 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.BaneBrand.extract(entity, state);
 		// (0.7.490) the Beastfolk's and the fae's ears, tails and wings: real model parts
 		com.jaymoskingdoms.client.BeastParts.extract(entity, state);
+		// what a Frostborn villager wears of their people's work: a scouter, a made limb
+		com.jaymoskingdoms.client.FrostTechLayer.extract(entity, state);
 		// (0.7.486) the sea-blooded Tideborn's fins, tentacles, shells and spines
 		com.jaymoskingdoms.client.SeaParts.extract(entity, state);
 		com.jaymoskingdoms.client.TinkererOutfit.extract(entity, state);

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
@@ -477,7 +478,7 @@ public final class ChronoEchoes {
 		double x = echo.getX();
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
-		ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.REVERSE_PORTAL, x, y, z, 80, 0.5, 0.9, 0.5, 0.3);
+		ChronoFx.particles(level, echo.ownerPlayer(), MagicFx.VOID, x, y, z, 80, 0.5, 0.9, 0.5, 0.3);
 		ChronoFx.particles(level, echo.ownerPlayer(), ChronoEcho.SHARD, x, y, z, 60, 0.6, 1.0, 0.6, 0.0);
 		ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.SCULK_SOUL, x, y, z, 10, 0.4, 0.6, 0.4, 0.05);
 		// a ring of light rushing inwards: the moment folding shut
@@ -485,7 +486,7 @@ public final class ChronoEchoes {
 			double a = i / 32.0 * Math.PI * 2.0;
 			double dx = Math.cos(a);
 			double dz = Math.sin(a);
-			ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.END_ROD, x + dx * 3.0, y, z + dz * 3.0, 0, -dx, 0.0, -dz, 0.25);
+			ChronoFx.particles(level, echo.ownerPlayer(), MagicFx.LIGHT, x + dx * 3.0, y, z + dz * 3.0, 0, -dx, 0.0, -dz, 0.25);
 		}
 		level.playSound(null, x, y, z, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 1.5F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.2F, 0.5F);
@@ -519,7 +520,7 @@ public final class ChronoEchoes {
 		double z = echo.getZ();
 		ChronoFx.particles(level, player, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 120, 1.2, 1.6, 1.2, 0.2);
 		ChronoFx.particles(level, player, ParticleTypes.SONIC_BOOM, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-		ChronoFx.particles(level, player, ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
+		ChronoFx.particles(level, player, MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
 		level.playSound(null, x, y, z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 2.0F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.END_PORTAL_SPAWN, SoundSource.HOSTILE, 1.5F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, new net.minecraft.world.phys.Vec3(x, y, z), 24.0, 1.8F);
@@ -539,8 +540,8 @@ public final class ChronoEchoes {
 		double z = echo.getZ();
 		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD, x, y, z, 40, 0.4, 0.8, 0.4, 0.0);
 		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD_GREY, x, y, z, 20, 0.5, 0.9, 0.5, 0.0);
-		ChronoFx.particles(level, owner(echo), ParticleTypes.ELECTRIC_SPARK, x, y, z, 16, 0.4, 0.7, 0.4, 0.15);
-		ChronoFx.particles(level, owner(echo), ParticleTypes.END_ROD, x, y, z, 8, 0.3, 0.6, 0.3, 0.12);
+		ChronoFx.particles(level, owner(echo), MagicFx.CRACKLE, x, y, z, 16, 0.4, 0.7, 0.4, 0.15);
+		ChronoFx.particles(level, owner(echo), MagicFx.LIGHT, x, y, z, 8, 0.3, 0.6, 0.3, 0.12);
 		level.playSound(null, x, y, z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.0F, 1.4F);
 		level.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
 		level.playSound(null, x, y, z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 0.8F, 0.6F);
@@ -551,12 +552,12 @@ public final class ChronoEchoes {
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
 		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD_GREY, x, y, z, 24, 0.35, 0.8, 0.35, 0.0);
-		ChronoFx.particles(level, owner(echo), ParticleTypes.REVERSE_PORTAL, x, y, z, 12, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, owner(echo), MagicFx.VOID, x, y, z, 12, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 0.5F, 1.6F);
 	}
 
 	static void arriveFx(ServerLevel level, Vec3 at) {
-		ChronoFx.particles(level, ChronoFx.PLAIN, ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.1);
+		ChronoFx.particles(level, ChronoFx.PLAIN, MagicFx.VOID, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.1);
 		ChronoFx.particles(level, ChronoFx.PLAIN, ChronoEcho.SHARD, at.x, at.y + 1.0, at.z, 16, 0.3, 0.8, 0.3, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 0.6F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.COMPARATOR_CLICK, SoundSource.HOSTILE, 0.5F, 0.7F);

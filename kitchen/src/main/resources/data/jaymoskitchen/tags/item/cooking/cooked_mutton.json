@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cooked_mutton",
+    {
+      "id": "jaymospowers:kirrid_cutlet",
+      "required": false
+    }
+  ]
+}

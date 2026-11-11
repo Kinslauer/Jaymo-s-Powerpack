@@ -15,8 +15,14 @@ import net.minecraft.util.Mth;
  */
 final class StormParticle extends SingleQuadParticle {
 	static final int CLOUD = 0, FUNNEL = 1, DEBRIS = 2;
+	/** A bank of ground fog that belongs to no storm: it drifts the way it was sent and turns slowly. */
+	static final int FOG = 3;
 	/** How many ticks it takes to fade in and out. */
 	private static final int FADE = 25;
+
+	/** Ground fog is not drawn within FOG_CLEAR blocks of the camera, and thins in over the next FOG_THIN. */
+	private static final double FOG_CLEAR = 5.0, FOG_THIN = 9.0;
+	private float near = 1.0F;
 
 	private final int kind;
 	/** The storm or tornado it belongs to. */
@@ -71,7 +77,15 @@ final class StormParticle extends SingleQuadParticle {
 			return;
 		}
 		boolean alive = true;
-		if (this.kind == CLOUD) {
+		if (this.kind == FOG) {
+			this.x += this.xd;
+			this.z += this.zd;
+			this.roll += 0.002F;
+			// (thin close to: a bank of it seen from inside is only a grey wall)
+			net.minecraft.world.phys.Vec3 eye = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera().position();
+			double away = Math.sqrt((this.x - eye.x) * (this.x - eye.x) + (this.z - eye.z) * (this.z - eye.z));
+			this.near = Mth.clamp((float)((away - FOG_CLEAR) / FOG_THIN), 0.0F, 1.0F);
+		} else if (this.kind == CLOUD) {
 			Storm s = storm(this.owner);
 			if (s == null) {
 				alive = false;
@@ -111,7 +125,7 @@ final class StormParticle extends SingleQuadParticle {
 		if (!alive) {
 			this.age = Math.max(this.age, this.lifetime - FADE);
 		}
-		this.alpha = this.baseAlpha * Mth.clamp(fade, 0.0F, 1.0F);
+		this.alpha = this.baseAlpha * Mth.clamp(fade, 0.0F, 1.0F) * this.near;
 	}
 
 	@Override

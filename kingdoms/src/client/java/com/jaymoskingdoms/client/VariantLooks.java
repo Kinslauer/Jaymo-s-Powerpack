@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.HeritageVariants.Variant;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -7,7 +8,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
@@ -39,18 +40,18 @@ public final class VariantLooks {
 
 	private static final Map<Variant, Style> STYLES = new EnumMap<>(Variant.class);
 
-	private static final DustParticleOptions OBSIDIAN_GLINT = new DustParticleOptions(0x9A5CFF, 0.6F), THORN_PETAL = new DustParticleOptions(0xC8283C, 0.7F),
-		GLOWCAP_SPORE = new DustParticleOptions(0xE8F05A, 0.5F), AURORA_MOTE = new DustParticleOptions(0x7CF0B4, 0.6F),
-		MOON_MOTE = new DustParticleOptions(0xE6EAFF, 0.5F), LODE_SPARK = new DustParticleOptions(0xA06CE0, 0.5F),
-		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
-		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
+	private static final ParticleOptions OBSIDIAN_GLINT = Fx.wisp(0x9A5CFF, 0.6F), THORN_PETAL = Fx.wisp(0xC8283C, 0.7F),
+		GLOWCAP_SPORE = Fx.wisp(0xE8F05A, 0.5F), AURORA_MOTE = Fx.wisp(0x7CF0B4, 0.6F),
+		MOON_MOTE = Fx.wisp(0xE6EAFF, 0.5F), LODE_SPARK = Fx.wisp(0xA06CE0, 0.5F),
+		GILT_MOTE = Fx.wisp(0xFFD45A, 0.5F), GEODE_GLINT = Fx.wisp(0xB17BEB, 0.6F),
+		REEF_MOTE = Fx.wisp(0xFF8A6A, 0.5F), INK_MOTE = Fx.wisp(0x2A2E44, 0.5F),
 		// (0.7.490) the fae's pollen and leaf-light, a fox's fire, the elves' blood and the dead's chill
-		LEAF_MOTE = new DustParticleOptions(0x7CB84A, 0.6F), POLLEN_MOTE = new DustParticleOptions(0xB8FFD8, 0.5F),
-		WATER_MOTE = new DustParticleOptions(0x8CE0F0, 0.5F), FAE_MOTE = new DustParticleOptions(0xFFA8E8, 0.5F),
-		FOX_FIRE = new DustParticleOptions(0xFF9A3C, 0.6F),
-		CHILL_MOTE = new DustParticleOptions(0x9AF0FF, 0.5F),
+		LEAF_MOTE = Fx.wisp(0x7CB84A, 0.6F), POLLEN_MOTE = Fx.wisp(0xB8FFD8, 0.5F),
+		WATER_MOTE = Fx.wisp(0x8CE0F0, 0.5F), FAE_MOTE = Fx.wisp(0xFFA8E8, 0.5F),
+		FOX_FIRE = Fx.wisp(0xFF9A3C, 0.6F),
+		CHILL_MOTE = Fx.wisp(0x9AF0FF, 0.5F),
 		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks (the weedfrond's leaf is LEAF_MOTE above)
-		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
+		JELLY_MOTE = Fx.wisp(0xE0B8FF, 0.5F), FRILL_MOTE = Fx.wisp(0xFF8A30, 0.5F);
 
 	static {
 		// variant, eye colour (0: its heritage's), eyes, particle, every, when
@@ -59,12 +60,12 @@ public final class VariantLooks {
 		style(Variant.OBSIDIAN, 0xFFC49CFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_OBSIDIAN_TEAR, 40, When.ALWAYS);
 		style(Variant.MAGMAVEIN, 0xFFFFA040, HeritageLooks.Eyes.ALWAYS, ParticleTypes.DRIPPING_LAVA, 30, When.DRY);
 		style(Variant.REEFCROWNED, 0xFFFFB49C, null, REEF_MOTE, 24, When.WET);
-		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 28, When.WET);
+		style(Variant.ABYSSAL, 0xFFE6FFFF, HeritageLooks.Eyes.ALWAYS, Fx.GLOW, 28, When.WET);
 		// (0.7.486) the thirteen sea-blooded Tideborn looks (their model parts are SeaParts')
 		style(Variant.GREYFIN, 0xFFE8EEF2, null, null, 0, When.WET);
 		style(Variant.MANTAWING, 0xFFB8E0FF, null, null, 0, When.WET);
 		style(Variant.EIGHTARM, 0xFFFFC060, null, INK_MOTE, 40, When.WET);
-		style(Variant.LANTERNJAW, 0xFFF0FFE0, null, ParticleTypes.GLOW, 30, When.ALWAYS);
+		style(Variant.LANTERNJAW, 0xFFF0FFE0, null, Fx.GLOW, 30, When.ALWAYS);
 		style(Variant.DRIFTBELL, 0xFFF0C8FF, null, JELLY_MOTE, 18, When.ALWAYS);
 		style(Variant.MORAY, 0xFFFFE060, null, null, 0, When.WET);
 		style(Variant.SHELLCLAW, 0xFFFFD040, null, null, 0, When.WET);
@@ -92,17 +93,17 @@ public final class VariantLooks {
 		style(Variant.GALEBORN, 0xFFF0F8FF, HeritageLooks.Eyes.STORM, ParticleTypes.CLOUD, 40, When.ALWAYS);
 		style(Variant.TWILIGHT, 0xFFFFE6C8, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
 		style(Variant.GILDED, 0xFFFFE08A, HeritageLooks.Eyes.DAY, GILT_MOTE, 24, When.ALWAYS);
-		style(Variant.CHORUSGROWN, 0xFFF0B4FF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.REVERSE_PORTAL, 16, When.DRY);
-		style(Variant.VOIDPALE, 0xFF2A1440, HeritageLooks.Eyes.ALWAYS, ParticleTypes.PORTAL, 14, When.DRY);
+		style(Variant.CHORUSGROWN, 0xFFF0B4FF, HeritageLooks.Eyes.ALWAYS, Fx.VOID, 16, When.DRY);
+		style(Variant.VOIDPALE, 0xFF2A1440, HeritageLooks.Eyes.ALWAYS, Fx.VOID, 14, When.DRY);
 		style(Variant.GOLDSCALE, 0xFFFFD060, HeritageLooks.Eyes.NIGHT, GILT_MOTE, 40, When.ALWAYS);
 		style(Variant.RIMEWYRM, 0xFFB8E8FF, HeritageLooks.Eyes.NIGHT, ParticleTypes.SNOWFLAKE, 18, When.ALWAYS);
 		style(Variant.HOLLOW, 0xFFF0FFFC, HeritageLooks.Eyes.ALWAYS, ParticleTypes.SCULK_SOUL, 50, When.DARK_PLACE);
 		style(Variant.GEODE, 0xFFD6AAFF, HeritageLooks.Eyes.ALWAYS, GEODE_GLINT, 20, When.ALWAYS);
 		// (0.7.262) the Divine-born's, the Bio-built's and the Rubber-folk's
-		style(Variant.STARLIT, 0xFFCFE0FF, HeritageLooks.Eyes.ALWAYS, ParticleTypes.END_ROD, 40, When.NIGHT);
+		style(Variant.STARLIT, 0xFFCFE0FF, HeritageLooks.Eyes.ALWAYS, Fx.LIGHT, 40, When.NIGHT);
 		style(Variant.SERAPHIC, 0xFFFFF4D0, HeritageLooks.Eyes.ALWAYS, ParticleTypes.WHITE_ASH, 36, When.ALWAYS);
 		style(Variant.BRASSBOUND, 0xFFFFB050, HeritageLooks.Eyes.ALWAYS, null, 0, When.ALWAYS);
-		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, ParticleTypes.GLOW, 60, When.DARK_PLACE);
+		style(Variant.OPALINE, 0xFFE8FFF8, HeritageLooks.Eyes.ALWAYS, Fx.GLOW, 60, When.DARK_PLACE);
 		style(Variant.CANDYSTRIPE, 0, null, null, 0, When.ALWAYS);
 		style(Variant.BERRYGLOSS, 0, null, null, 0, When.ALWAYS);
 		// (0.7.490) the Sylvan's fae and elves
@@ -182,7 +183,7 @@ public final class VariantLooks {
 			y = entity.getY() + random.nextDouble() * entity.getBbHeight();
 			z = entity.getZ() + (random.nextDouble() - 0.5) * 1.2;
 		}
-		double up = particle == ParticleTypes.CLOUD ? 0.01 : particle == ParticleTypes.PORTAL ? -0.2 : 0.02;
+		double up = particle == ParticleTypes.CLOUD ? 0.01 : particle == Fx.VOID ? -0.2 : 0.02;
 		level.addParticle(particle, x, y, z, 0.0, up, 0.0);
 	}
 }
