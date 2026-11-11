@@ -5,14 +5,29 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
@@ -61,6 +76,18 @@ public final class StormbornTomb extends Structure {
 	static final int MID_X = -12, MID_Z = -107, BARROW_Y = 28, BARROW_X = 69, BARROW_Z = -36;
 	/** The lowest any piece reaches, in the layout's frame. */
 	static final int LOWEST = -60;
+	/**
+	 * Big underground structures that don't generate where a tomb will, because they'd cut through its halls (Tiv found
+	 * trial chamber rooms inside one): vanilla's trial chambers (one every 34 chunks or so) and ancient cities.
+	 */
+	public static final TagKey<Structure> GIVES_WAY = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("gives_way_to_stormborn_tomb"));
+	/**
+	 * How near (in chunks, along either axis) a tomb's start keeps their starts: the tomb reaches about 9 chunks from its
+	 * own start chunk, a trial chamber up to about 7 from its.
+	 */
+	static final int GIVE_WAY_CHUNKS = 16;
+	static final ResourceKey<StructureSet> SET = ResourceKey.create(Registries.STRUCTURE_SET, JaymosKingdoms.id("stormborn_tomb"));
+	static final ResourceKey<Structure> KEY = ResourceKey.create(Registries.STRUCTURE, JaymosKingdoms.id("stormborn_tomb"));
 
 	public StormbornTomb(StructureSettings settings) {
 		super(settings);
@@ -72,35 +99,83 @@ public final class StormbornTomb extends Structure {
 
 	@Override
 	protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
-	    Rotation turn = Rotation.getRandom(context.random());
-	    BlockPos mid = turn(new BlockPos(MID_X, 0, MID_Z), turn);
-	    int ax = context.chunkPos().getMinBlockX() + 8 - mid.getX();
-	    int az = context.chunkPos().getMinBlockZ() + 8 - mid.getZ();
-	    BlockPos barrow = turn(new BlockPos(BARROW_X, 0, BARROW_Z), turn);
-	    int bx = ax + barrow.getX(), bz = az + barrow.getZ();
-	    int ground = context.chunkGenerator().getFirstFreeHeight(bx, bz, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(),
-	        context.randomState());
-	    int ay = ground - SINK - BARROW_Y;
-	    if (ay + LOWEST < context.heightAccessor().getMinY() + FLOOR_MARGIN) {
-	        return Optional.empty();
-	    }
-	    BlockPos anchor = new BlockPos(ax, ay, az);
-	    return Optional.of(new GenerationStub(new BlockPos(bx, ground, bz), builder -> {
-	        for (Part part : LAYOUT) {
-	            Rotation rotation = turns(part.turns()).getRotated(turn);
-	            BlockPos basePos = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
-	            // Use heightmap to ensure piece sits on terrain rather than floating or leaving solid stone gaps
-	                        // Compute the ground height at the piece's position using the same method as the barrow base
-	                        BlockPos piecePos = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
-	                        int pieceGround = context.chunkGenerator().getFirstFreeHeight(piecePos.getX(), piecePos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - part.y();
-            BlockPos position = anchor.offset(turn(new BlockPos(part.x(), pieceGround, part.z()), turn));
-	            SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb_" + part.name()).toString())
-	                .apply(StructureTemplatePool.Projection.RIGID);
-	            BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), position, rotation);
-	            builder.addPiece(new PoolElementStructurePiece(context.structureTemplateManager(), element, position, element.getGroundLevelDelta(),
-	                rotation, box, LiquidSettings.IGNORE_WATERLOGGING));
-	        }
-	    }));
+		Optional<Siting> siting = site(context.chunkPos(), context.random(), context.chunkGenerator(), context.heightAccessor(), context.randomState());
+		if (siting.isEmpty()) {
+			return Optional.empty();
+		}
+		Rotation turn = siting.get().turn();
+		BlockPos anchor = siting.get().anchor();
+		return Optional.of(new GenerationStub(siting.get().barrow(), builder -> {
+			for (Part part : LAYOUT) {
+				Rotation rotation = turns(part.turns()).getRotated(turn);
+				BlockPos position = anchor.offset(turn(new BlockPos(part.x(), part.y(), part.z()), turn));
+				SinglePoolElement element = StructurePoolElement.single(JaymosKingdoms.id("stormborn_tomb/" + part.name()).toString())
+					.apply(StructureTemplatePool.Projection.RIGID);
+				BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), position, rotation);
+				builder.addPiece(new PoolElementStructurePiece(context.structureTemplateManager(), element, position, element.getGroundLevelDelta(),
+					rotation, box, LiquidSettings.IGNORE_WATERLOGGING));
+			}
+		}));
+	}
+
+	/** Where a tomb started in a chunk goes: its turn, the layout's origin, and the barrow's middle on the ground. */
+	record Siting(Rotation turn, BlockPos anchor, BlockPos barrow) {
+	}
+
+	/**
+	 * Where a tomb started in {@code chunk} goes, with the layout's middle on that chunk and the barrow sunk {@link #SINK}
+	 * into the ground; empty where its deepest halls would reach the bottom of the world. {@code random} is the start
+	 * chunk's own (only its first draw, the turn, is used).
+	 */
+	static Optional<Siting> site(ChunkPos chunk, RandomSource random, ChunkGenerator generator, LevelHeightAccessor height, RandomState randomState) {
+		Rotation turn = Rotation.getRandom(random);
+		BlockPos mid = turn(new BlockPos(MID_X, 0, MID_Z), turn);
+		int ax = chunk.getMinBlockX() + 8 - mid.getX();
+		int az = chunk.getMinBlockZ() + 8 - mid.getZ();
+		BlockPos barrow = turn(new BlockPos(BARROW_X, 0, BARROW_Z), turn);
+		int bx = ax + barrow.getX(), bz = az + barrow.getZ();
+		int ground = generator.getFirstFreeHeight(bx, bz, Heightmap.Types.WORLD_SURFACE_WG, height, randomState);
+		int ay = ground - SINK - BARROW_Y;
+		if (ay + LOWEST < height.getMinY() + FLOOR_MARGIN) {
+			return Optional.empty();
+		}
+		return Optional.of(new Siting(turn, new BlockPos(ax, ay, az), new BlockPos(bx, ground, bz)));
+	}
+
+	/**
+	 * Whether a tomb will generate with its start within {@link #GIVE_WAY_CHUNKS} of {@code context}'s chunk (both
+	 * ways), worked out the way the game decides it: the tomb set's spread, the start chunk's own random, the depth
+	 * check and the biome under the barrow. Asked by a structure in {@link #GIVES_WAY} before it generates
+	 * ({@code StructureGivesWayMixin}).
+	 */
+	public static boolean near(GenerationContext context) {
+		Optional<Holder.Reference<StructureSet>> set = context.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET).get(SET);
+		Optional<Holder.Reference<Structure>> tomb = context.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(KEY);
+		if (set.isEmpty() || tomb.isEmpty() || !(set.get().value().placement() instanceof RandomSpreadStructurePlacement spread)) {
+			return false;
+		}
+		ChunkPos here = context.chunkPos();
+		int spacing = spread.spacing();
+		for (int gx = Math.floorDiv(here.x() - GIVE_WAY_CHUNKS, spacing); gx <= Math.floorDiv(here.x() + GIVE_WAY_CHUNKS, spacing); gx++) {
+			for (int gz = Math.floorDiv(here.z() - GIVE_WAY_CHUNKS, spacing); gz <= Math.floorDiv(here.z() + GIVE_WAY_CHUNKS, spacing); gz++) {
+				ChunkPos start = spread.getPotentialStructureChunk(context.seed(), gx * spacing, gz * spacing);
+				if (Math.abs(start.x() - here.x()) > GIVE_WAY_CHUNKS || Math.abs(start.z() - here.z()) > GIVE_WAY_CHUNKS) {
+					continue;
+				}
+				WorldgenRandom random = new WorldgenRandom(new LegacyRandomSource(0L));
+				random.setLargeFeatureSeed(context.seed(), start.x(), start.z());
+				Optional<Siting> siting = site(start, random, context.chunkGenerator(), context.heightAccessor(), context.randomState());
+				if (siting.isPresent()) {
+					BlockPos at = siting.get().barrow();
+					Holder<Biome> biome = context.biomeResolver().getNoiseBiome(QuartPos.fromBlock(at.getX()), QuartPos.fromBlock(at.getY()),
+						QuartPos.fromBlock(at.getZ()));
+					if (tomb.get().value().biomes().contains(biome)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/** {@code pos} turned about the layout's origin the way a template turns about its own. */
