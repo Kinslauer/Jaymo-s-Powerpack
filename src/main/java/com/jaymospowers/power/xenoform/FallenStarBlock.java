@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Callings;
 import com.jaymospowers.core.Powers;
@@ -80,8 +81,8 @@ public final class FallenStarBlock extends Block {
 		com.jaymospowers.core.PackAdvancements.deed(player, "star");
 		RandomSource random = level.getRandom();
 		Vec3 centre = Vec3.atCenterOf(pos);
-		level.sendParticles(ParticleTypes.END_ROD, centre.x, centre.y, centre.z, 30, 0.3, 0.3, 0.3, 0.1);
-		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFF5CF07A), centre.x, centre.y, centre.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(MagicFx.LIGHT, centre.x, centre.y, centre.z, 30, 0.3, 0.3, 0.3, 0.1);
+		MagicFx.blast(level, centre.x, centre.y, centre.z, MagicFx.FLASH_RADIUS, 0x5CF07A);
 		level.playSound(null, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1.2F, 0.6F);
 		// (0.18.92) there is only one band in the world: a star holds it only while nobody wears it and none lies loose
 		if (random.nextFloat() < BAND_CHANCE && XenoBands.available(level.getServer())) {
@@ -112,7 +113,7 @@ public final class FallenStarBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (random.nextInt(3) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, pos.getX() + random.nextDouble(), pos.getY() + 1.0 + random.nextDouble() * 0.3,
+			level.addParticle(MagicFx.LIGHT, pos.getX() + random.nextDouble(), pos.getY() + 1.0 + random.nextDouble() * 0.3,
 				pos.getZ() + random.nextDouble(), 0.0, 0.02, 0.0);
 		}
 		if (random.nextInt(6) == 0) {

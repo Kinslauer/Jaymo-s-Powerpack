@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.EnderscapeLoot;
 import com.jaymospowers.core.Powers;
@@ -17,7 +18,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -258,7 +258,7 @@ public final class ArsenalRelics {
 				inventory.setItem(slot, stack.getCount() > 1 ? stack.copyWithCount(stack.getCount() - 1) : ItemStack.EMPTY);
 				ServerLevel level = player.level();
 				Summoned.dissolveEffects(level, player.position().add(0.0, 1.0, 0.0));
-				level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
+				level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.5, 0.3, 0.05);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.7F);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.relic_kept", stack.getHoverName())
 					.withStyle(ChatFormatting.LIGHT_PURPLE));

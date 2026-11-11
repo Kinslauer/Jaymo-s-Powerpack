@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.pod;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.CarryBlock;
@@ -262,7 +263,7 @@ public final class SalvageRack {
 		done++;
 		smith.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		hammer.hurtAndBreak(1, smith, InteractionHand.MAIN_HAND);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y, top.z, 8, 0.25, 0.1, 0.25, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, top.x, top.y, top.z, 8, 0.25, 0.1, 0.25, 0.3);
 		if (done >= BLOWS) {
 			level.setBlock(pos, state.setValue(MENDED, true).setValue(DONE, 0), Block.UPDATE_ALL);
 			level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.9F, 1.3F);

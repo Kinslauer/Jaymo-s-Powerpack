@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoDouble;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -242,7 +243,7 @@ public final class Duplex extends XenoForm {
 			return;
 		}
 		player.hurtServer(level, player.damageSources().magic(), DEATH_STING);
-		level.sendParticles(ParticleTypes.WAX_OFF, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.3, 0.5, 0.3, 0.05);
+		level.sendParticles(MagicFx.PALE, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.3, 0.5, 0.3, 0.05);
 		int left = (int)level.getEntities(XenoDouble.TYPE, e -> e.isAlive() && e.isDoubleOf(player)).size();
 		announce(player, 1 + left);
 	}
@@ -330,8 +331,8 @@ public final class Duplex extends XenoForm {
 			return null;
 		}
 		live.doubles.add(twin.getId());
-		level.sendParticles(ParticleTypes.WAX_ON, at.x, at.y + 1.0, at.z, 14, 0.3, 0.5, 0.3, 0.05);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0, at.z, 10, 0.3, 0.5, 0.3, 0.08);
+		level.sendParticles(MagicFx.EMBER, at.x, at.y + 1.0, at.z, 14, 0.3, 0.5, 0.3, 0.05);
+		level.sendParticles(MagicFx.CRACKLE, at.x, at.y + 1.0, at.z, 10, 0.3, 0.5, 0.3, 0.08);
 		return twin;
 	}
 
@@ -354,7 +355,7 @@ public final class Duplex extends XenoForm {
 			}
 		}
 		if (target != null) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 10, 0.2, 0.1, 0.2, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 10, 0.2, 0.1, 0.2, 0.05);
 			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 1.6F);
 		} else {
 			sound(player, SoundEvents.COPPER_GOLEM_STEP, 1.0F, 0.9F);
@@ -425,7 +426,7 @@ public final class Duplex extends XenoForm {
 
 	/** A spark where you sent them. */
 	private static void mark(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 10, 0.25, 0.1, 0.25, 0.05);
+		level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 10, 0.25, 0.1, 0.25, 0.05);
 	}
 
 	// ---- V: Switch ----
@@ -453,8 +454,8 @@ public final class Duplex extends XenoForm {
 		pick.teleportTo(mine.x, mine.y, mine.z);
 		pick.getNavigation().stop();
 		player.resetFallDistance();
-		burst(level, ParticleTypes.WAX_OFF, mine.add(0.0, 1.0, 0.0), 10, 0.3, 0.05);
-		burst(level, ParticleTypes.WAX_OFF, theirs.add(0.0, 1.0, 0.0), 10, 0.3, 0.05);
+		burst(level, MagicFx.PALE, mine.add(0.0, 1.0, 0.0), 10, 0.3, 0.05);
+		burst(level, MagicFx.PALE, theirs.add(0.0, 1.0, 0.0), 10, 0.3, 0.05);
 		sound(player, SoundEvents.COPPER_BULB_TURN_ON, 1.0F, 1.4F);
 		return true;
 	}
@@ -522,7 +523,7 @@ public final class Duplex extends XenoForm {
 			int steps = Math.max(2, (int)(from.distanceTo(to) * 2.0));
 			for (int i = 0; i <= steps; i++) {
 				Vec3 p = from.lerp(to, i / (double)steps);
-				level.sendParticles(ParticleTypes.WAX_ON, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(MagicFx.EMBER, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
 			}
 			twin.pop(level);
 			it.remove();

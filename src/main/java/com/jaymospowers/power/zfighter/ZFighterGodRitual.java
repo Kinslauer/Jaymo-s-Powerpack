@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -15,8 +16,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -362,9 +361,9 @@ public final class ZFighterGodRitual {
 	private static void hint(ServerLevel level, ServerPlayer viewer, Vec3 middle) {
 		for (int i = 0; i < PAD_COUNT; i++) {
 			Vec3 p = pad(middle, i);
-			level.sendParticles(viewer, ParticleTypes.END_ROD, true, false, p.x, p.y + 0.2, p.z, 1, 0.1, 0.1, 0.1, 0.0);
+			level.sendParticles(viewer, MagicFx.LIGHT, true, false, p.x, p.y + 0.2, p.z, 1, 0.1, 0.1, 0.1, 0.0);
 		}
-		level.sendParticles(viewer, new DustParticleOptions(GOLD, 1.0F), true, false, middle.x, middle.y + 0.2, middle.z, 2, 0.4, 0.1, 0.4, 0.0);
+		level.sendParticles(viewer, MagicFx.wisp(GOLD, 1.0F), true, false, middle.x, middle.y + 0.2, middle.z, 2, 0.4, 0.1, 0.4, 0.0);
 	}
 
 	private static void begin(ServerLevel level, Vec3 middle, ServerPlayer candidate, Member[] ring, long now) {
@@ -455,24 +454,25 @@ public final class ZFighterGodRitual {
 		candidate.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 40, 0, false, false));
 	}
 
+	/** The pads' beams: sent again every this many ticks, and how thick (blocks) when the rite starts and when it is full. */
+	static final int BEAM_EVERY = 4;
+	static final float BEAM_THIN = 0.05F, BEAM_THICK = 0.14F;
+
 	/** The light: beams from each pad into the middle, a column rising, a hum that climbs, a tremor. */
 	private static void effects(ServerLevel level, Vec3 middle, ServerPlayer candidate, long t) {
 		float fill = Mth.clamp(t / (float)RITUAL_TICKS, 0.0F, 1.0F);
 		Vec3 heart = candidate.getBoundingBox().getCenter();
-		DustParticleOptions beam = new DustParticleOptions(fill > 0.5F ? RED : GOLD, 1.0F + fill);
 		for (Member m : rite.members) {
 			Vec3 from = pad(middle, m.pad()).add(0.0, 1.0, 0.0);
-			if (t % 2 == 0) {
-				for (int i = 0; i < 3; i++) {
-					Vec3 at = from.lerp(heart, level.getRandom().nextDouble());
-					level.sendParticles(beam, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
-				}
+			if (t % BEAM_EVERY == 0) {
+				// one beam from each pad into the candidate, thickening as the rite fills
+				MagicFx.beam(level, from, heart, BEAM_THIN + (BEAM_THICK - BEAM_THIN) * fill, fill > 0.5F ? RED : GOLD, BEAM_EVERY + 2);
 			}
 			if (spirit(m, rite.candidate) && t % 4 == 0) {
-				level.sendParticles(ParticleTypes.END_ROD, true, false, from.x, from.y + 0.6, from.z, 3, 0.1, 0.7, 0.1, 0.01);
+				level.sendParticles(MagicFx.LIGHT, true, false, from.x, from.y + 0.6, from.z, 3, 0.1, 0.7, 0.1, 0.01);
 			}
 		}
-		level.sendParticles(new DustParticleOptions(RED, 1.6F), true, false, candidate.getX(), candidate.getY() + 1.0, candidate.getZ(), 2 + Math.round(6 * fill), 0.4,
+		level.sendParticles(MagicFx.wisp(RED, 1.6F), true, false, candidate.getX(), candidate.getY() + 1.0, candidate.getZ(), 2 + Math.round(6 * fill), 0.4,
 			0.9, 0.4, 0.05);
 		if (t % 20 == 0) {
 			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 2.0F, 0.6F + 1.0F * fill);
@@ -499,9 +499,8 @@ public final class ZFighterGodRitual {
 					.withStyle(ChatFormatting.GOLD));
 			}
 		}
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFD0C0), true, true, middle.x, middle.y + 2.0, middle.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(new DustParticleOptions(RED, 2.4F), true, false, middle.x, middle.y + 2.0, middle.z, 120, 1.5, 2.5, 1.5, 0.3);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, middle.x, middle.y + 2.0, middle.z, 60, 1.0, 2.0, 1.0, 0.2);
+		MagicFx.burst(level, middle.x, middle.y + 2.0, middle.z, RED, 2.4F, 120, 1.5, 2.5, 1.5);
+		level.sendParticles(MagicFx.LIGHT, true, false, middle.x, middle.y + 2.0, middle.z, 60, 1.0, 2.0, 1.0, 0.2);
 		level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.9F);
 		level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		com.jaymospowers.core.Shakes.heavy(candidate, middle, 48.0, 2.0F);

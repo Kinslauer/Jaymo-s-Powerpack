@@ -1,8 +1,7 @@
 package com.jaymospowers.baubles;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.EnumSet;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -124,7 +123,7 @@ public class PinkFairy extends PathfinderMob implements ItemSupplier {
 			}
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.PLAYERS, 1.0F, 1.4F);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.2F, 1.6F);
-			level.sendParticles(new DustParticleOptions(GLOW, 0.8F), this.getX(), this.getY() + 0.2, this.getZ(), 14, 0.25, 0.25, 0.25, 0.0);
+			level.sendParticles(MagicFx.wisp(GLOW, 0.8F), this.getX(), this.getY() + 0.2, this.getZ(), 14, 0.25, 0.25, 0.25, 0.0);
 			this.discard();
 		}
 		return InteractionResult.SUCCESS;
@@ -137,8 +136,8 @@ public class PinkFairy extends PathfinderMob implements ItemSupplier {
 			boolean fade = this.freed ? this.tickCount > FREED_LIFE
 				: level.isBrightOutside() && this.tickCount > DAY_LIFE && this.random.nextInt(FADE_ODDS) == 0;
 			if (fade) {
-				level.sendParticles(new DustParticleOptions(GLOW, 0.7F), this.getX(), this.getY() + 0.2, this.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
-				level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 0.2, this.getZ(), 3, 0.1, 0.1, 0.1, 0.02);
+				level.sendParticles(MagicFx.wisp(GLOW, 0.7F), this.getX(), this.getY() + 0.2, this.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
+				level.sendParticles(MagicFx.LIGHT, this.getX(), this.getY() + 0.2, this.getZ(), 3, 0.1, 0.1, 0.1, 0.02);
 				this.discard();
 			} else if (this.freed) {
 				// up and away, in a spiral
@@ -147,11 +146,11 @@ public class PinkFairy extends PathfinderMob implements ItemSupplier {
 			}
 		} else {
 			if (this.random.nextInt(2) == 0) {
-				this.level().addParticle(new DustParticleOptions(GLOW, 0.5F), this.getRandomX(0.5), this.getY() + this.random.nextDouble() * 0.3,
+				this.level().addParticle(MagicFx.wisp(GLOW, 0.5F), this.getRandomX(0.5), this.getY() + this.random.nextDouble() * 0.3,
 					this.getRandomZ(0.5), 0.0, -0.02, 0.0);
 			}
 			if (this.random.nextInt(12) == 0) {
-				this.level().addParticle(ParticleTypes.END_ROD, this.getRandomX(0.4), this.getY() + 0.15, this.getRandomZ(0.4), 0.0, -0.01, 0.0);
+				this.level().addParticle(MagicFx.LIGHT, this.getRandomX(0.4), this.getY() + 0.15, this.getRandomZ(0.4), 0.0, -0.01, 0.0);
 			}
 		}
 	}

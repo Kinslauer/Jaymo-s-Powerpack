@@ -1,7 +1,7 @@
 package com.jaymoskingdoms.nightfall;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Vampires;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.effect.MobEffect;
@@ -56,7 +56,7 @@ final class Immunity extends MobEffect {
 		mob.removeEffect(Nightfall.ATROPHY);
 		if (mob.level() instanceof ServerLevel level && unholy(mob)) {
 			mob.igniteForSeconds(BURN_SECONDS);
-			level.sendParticles(ParticleTypes.WAX_OFF, mob.getX(), mob.getY(0.6), mob.getZ(), 12, 0.3, 0.4, 0.3, 0.05);
+			level.sendParticles(Fx.PALE, mob.getX(), mob.getY(0.6), mob.getZ(), 12, 0.3, 0.4, 0.3, 0.05);
 		}
 	}
 

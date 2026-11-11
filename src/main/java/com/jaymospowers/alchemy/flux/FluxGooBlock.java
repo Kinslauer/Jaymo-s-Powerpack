@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.flux;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Corruption;
 import com.jaymospowers.alchemy.Flux;
 import net.minecraft.core.BlockPos;
@@ -76,7 +77,7 @@ public class FluxGooBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (random.nextInt(10) == 0) {
-			level.addParticle(ParticleTypes.WITCH, pos.getX() + random.nextDouble(), pos.getY() + 0.15, pos.getZ() + random.nextDouble(), 0.0, 0.02, 0.0);
+			level.addParticle(MagicFx.HEX, pos.getX() + random.nextDouble(), pos.getY() + 0.15, pos.getZ() + random.nextDouble(), 0.0, 0.02, 0.0);
 		}
 	}
 }

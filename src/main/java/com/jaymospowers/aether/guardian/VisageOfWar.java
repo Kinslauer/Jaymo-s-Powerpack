@@ -1,8 +1,8 @@
 package com.jaymospowers.aether.guardian;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -387,7 +387,7 @@ public class VisageOfWar extends Monster {
 		this.quiet = 0;
 		this.bar.setVisible(true);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 2.0F, 0.8F);
-		level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 1.5, this.getZ(), 40, 1.0, 1.5, 1.0, 0.05);
+		level.sendParticles(MagicFx.LIGHT, this.getX(), this.getY() + 1.5, this.getZ(), 40, 1.0, 1.5, 1.0, 0.05);
 		for (ServerPlayer player : this.playersInside(level)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.visage_of_war.wakes"));
 		}
@@ -447,11 +447,11 @@ public class VisageOfWar extends Monster {
 		this.setDeltaMovement(0.0, -0.04, 0.0);
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		if (this.deathTime % 4 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 1.5, this.getZ(), 12, 0.8, 1.2, 0.8, 0.08);
+			level.sendParticles(MagicFx.LIGHT, this.getX(), this.getY() + 1.5, this.getZ(), 12, 0.8, 1.2, 0.8, 0.08);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.HOSTILE, 1.5F, 0.5F + this.random.nextFloat() * 0.5F);
 		}
 		if (this.deathTime >= DEATH_TICKS && !this.isRemoved()) {
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE08A), this.getX(), this.getY() + 1.5, this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(level, this.getX(), this.getY() + 1.5, this.getZ(), MagicFx.FLASH_RADIUS, 0xFFE08A);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0F, 0.5F);
 			ExperienceOrb.award(level, this.position(), XP);
 			for (String drop : DROPS) {

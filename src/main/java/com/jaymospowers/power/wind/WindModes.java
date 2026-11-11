@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -262,7 +263,7 @@ public final class WindModes {
 		}
 		if ((mode & STORM) != 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.3);
+			level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.3);
 		}
 		if ((mode & TEMPEST) != 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.7F);
@@ -383,7 +384,7 @@ public final class WindModes {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F,
 				0.6F + random.nextFloat() * 0.3F);
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.9, 0.5, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.9, 0.5, 0.3);
 		screenFx(player, THUNDERHEAD_DARK_RANGE, WindNet.ScreenFx.LIGHTNING, 0, 0);
 	}
 
@@ -431,7 +432,7 @@ public final class WindModes {
 					false, false, false), player);
 			}
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.8, 1.2, 0.8, 0.5);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.8, 1.2, 0.8, 0.5);
 	}
 
 	/** Real lightning charges a creeper; so does a wind's (without lightning's own damage and fire). */
@@ -456,7 +457,7 @@ public final class WindModes {
 		}
 		DamageSource source = player.damageSources().source(DamageTypes.LIGHTNING_BOLT);
 		player.hurtServer(level, source, damage);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.3, 0.6, 0.3, 0.4);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.3, 0.6, 0.3, 0.4);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.5F, 1.8F);
 	}
 
@@ -499,7 +500,7 @@ public final class WindModes {
 		long now = level.getGameTime();
 		Charge previous = STATIC.get(target.getUUID());
 		int stacks = (previous == null || now - previous.at() > STATIC_DECAY_TICKS ? 0 : previous.stacks()) + 1;
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(),
+		level.sendParticles(MagicFx.CRACKLE, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(),
 			4 + stacks * 3, 0.3, 0.4, 0.3, 0.2);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.6F, 0.8F + stacks * 0.2F);
 		if (stacks < STATIC_MAX) {
@@ -573,7 +574,7 @@ public final class WindModes {
 					living.syncVelocity = true;
 				}
 				if (level.getGameTime() % 4 == 0) {
-					level.sendParticles(ParticleTypes.ELECTRIC_SPARK, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(),
+					level.sendParticles(MagicFx.CRACKLE, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(),
 						3, 0.3, 0.5, 0.3, 0.15);
 				}
 			}
@@ -626,7 +627,7 @@ public final class WindModes {
 		if (!player.isCreative()) {
 			player.hurtServer(level, player.damageSources().source(DamageTypes.LIGHTNING_BOLT), Mth.lerp(f, CALL_SELF_DAMAGE_MIN, CALL_SELF_DAMAGE_MAX));
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.6, 0.3, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.6, 0.3, 0.3);
 		return true;
 	}
 

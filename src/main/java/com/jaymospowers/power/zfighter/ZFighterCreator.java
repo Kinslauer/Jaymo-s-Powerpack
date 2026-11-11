@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -330,7 +330,7 @@ public final class ZFighterCreator {
 			near.hurtServer(level, ZFighterKi.source(player), (BURST_DAMAGE + BURST_DAMAGE_PER * p) * kiPower);
 			ZFighterKi.push(near, to, 0.8 + 0.2 * p, 0.35);
 		}
-		level.sendParticles(new DustParticleOptions(made.color(), 2.0F), true, false, at.x, at.y, at.z, 40 + 10 * p, radius * 0.4, 0.4, radius * 0.4, 0.0);
+		MagicFx.burst(level, at.x, at.y, at.z, made.color(), 2.0F, 40 + 10 * p, radius * 0.4, 0.4, radius * 0.4);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.5F);
 		Shakes.send(player, 0.3F + 0.1F * p, at);
@@ -378,10 +378,10 @@ public final class ZFighterCreator {
 		var random = level.getRandom();
 		if (random.nextInt(2) == 0) {
 			double ox = (random.nextDouble() - 0.5) * 1.6, oy = (random.nextDouble() - 0.5) * 1.6, oz = (random.nextDouble() - 0.5) * 1.6;
-			level.sendParticles(new DustParticleOptions(made.color(), 0.8F + charge), true, false, hands.x + ox, hands.y + oy, hands.z + oz, 0, -ox, -oy, -oz, 0.12);
+			level.sendParticles(MagicFx.wisp(made.color(), 0.8F + charge), true, false, hands.x + ox, hands.y + oy, hands.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (Soundscape.due(player, "ki.wave", 8, 13)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.pitched(0.8F + charge), ZFighterKi.KI_SURGE);

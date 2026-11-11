@@ -20,7 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -424,7 +424,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 		this.lastBlow = now;
 		this.tally += amount;
 		this.hurtServer(level, source, amount);
-		this.beam(level, ruler, new DustParticleOptions(0x7FEFE0, 1.2F));
+		this.beam(level, ruler, 0x7FEFE0);
 		level.playSound(null, ruler.blockPosition(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		LivingEntity by = source.getEntity() instanceof LivingEntity l && l != ruler && l != this ? l : null;
 		if (this.tally > RISE_AT && this.isAlive()) {
@@ -502,7 +502,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 
 	private void lamp(ServerLevel level) {
 		if (this.lit() && this.tickCount % 8 == 0) {
-			level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
+			level.sendParticles(Fx.LIGHT, this.getX(), this.getY() + this.getBbHeight() * 0.62, this.getZ(), 1, 0.3, 0.2, 0.3, 0.0);
 		}
 		Mob foe = this.nearestFoe(level, BEAM_RANGE);
 		if (foe == null || this.cooldown > 0) {
@@ -512,7 +512,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 		this.getLookControl().setLookAt(foe);
 		this.triggerAnim("action", "beam");
 		boolean undead = foe.is(EntityTypeTags.UNDEAD);
-		this.beam(level, foe, new DustParticleOptions(0xFFE36A, 1.2F));
+		this.beam(level, foe, 0xFFE36A);
 		foe.hurtServer(level, this.damageSources().indirectMagic(this, this), undead ? BEAM_HARM * 2.0F : BEAM_HARM);
 		if (undead) {
 			foe.igniteForSeconds(3.0F);
@@ -535,7 +535,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 			this.getLookControl().setLookAt(e);
 			this.triggerAnim("action", "mend");
 			e.addEffect(new MobEffectInstance(MobEffects.REGENERATION, MEND_TICKS, 1), this);
-			this.beam(level, e, new DustParticleOptions(0x7FF09A, 1.0F));
+			this.beam(level, e, 0x7FF09A);
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.4, 0.3, 0.0);
 			return;
 		}
@@ -548,15 +548,9 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 	}
 
 	/** A line of motes from its core to {@code to}. */
-	private void beam(ServerLevel level, Entity to, ParticleOptions mote) {
+	private void beam(ServerLevel level, Entity to, int colour) {
 		Vec3 from = this.position().add(0, this.getBbHeight() * this.kind().beamFrom, 0);
-		Vec3 end = to.position().add(0, to.getBbHeight() * 0.5, 0);
-		Vec3 step = end.subtract(from);
-		int n = Math.max(4, (int)(step.length() * 3));
-		for (int i = 0; i <= n; i++) {
-			Vec3 p = from.add(step.scale(i / (double)n));
-			level.sendParticles(mote, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
-		}
+		Fx.beam(level, from, to.position().add(0, to.getBbHeight() * 0.5, 0), Sorcery.BEAM_RADIUS * 1.3F, colour, Sorcery.BEAM_TICKS);
 	}
 
 	/** Whom it looks after: its maker and their party and pets, the town's folk, other golems, and players in good standing with its realm. */
@@ -823,7 +817,7 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 			}
 			level.addFreshEntity(golem);
 			level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-			level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
+			level.sendParticles(Fx.GLYPH, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 30, 0.4, 0.8, 0.4, 0.5);
 			context.getItemInHand().consume(1, player);
 			return InteractionResult.SUCCESS;
 		}

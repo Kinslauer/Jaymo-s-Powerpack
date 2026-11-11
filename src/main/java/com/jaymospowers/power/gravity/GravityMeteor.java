@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.BlockCluster;
@@ -11,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -112,10 +113,10 @@ final class GravityMeteor {
 	static final double EMBED_SHARE = 0.6;
 	/** Players this near see the burst's debris and its dust cloud. */
 	static final double BURST_SEEN = 256.0;
-	private static final DustParticleOptions WHITE_HOT = new DustParticleOptions(0xFFE6A8, 4.0F);
+	private static final ParticleOptions WHITE_HOT = MagicFx.wisp(0xFFE6A8, 4.0F);
 	/** Half the small rock's width (blocks), as drawn. */
 	private static final double ROCK_HALF = 1.2;
-	private static final DustParticleOptions SHADOW = new DustParticleOptions(0x120A1A, 2.0F);
+	private static final ParticleOptions SHADOW = MagicFx.wisp(0x120A1A, 2.0F);
 
 	/**
 	 * What the rock is made of: a conglomerate straight from the Aether's magnetic region, superheated to magma here and

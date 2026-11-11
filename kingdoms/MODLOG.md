@@ -11144,3 +11144,68 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - The Story tab's Act III lists five goals before the Skeleton Lord: beat a raider band from the sky, break open a fallen star, fly a pod past the clouds, set foot in the Maw, free or conquer a far world.
 - `Retaking.look` reads the deed tags Jaymo's Powers leaves (raiders, star, pod, far_world), awards the milestone if Act III has begun and takes the tag off either way; the Maw is checked by dimension.
 - Built; not played.
+
+## 0.7.727 (2026-11-11): The Retaking, Act IV: The Dark Below (#1302)
+
+- The Story tab's Act IV lists five goals before the Piglin King: a spirit woken, your Bane ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
+- A woken spirit and a subjugated Grue count whenever Act IV is open (they can't be done twice); the Bane counts when it's ended or sworn with its marks; the Abyss is checked by biome; the Judge by Powers' deed tag.
+- Built; not played.
+
+## 0.7.728 (2026-11-11): The Retaking, Act V: Legend, and the Second Defence (#1304)
+
+- **The Second Defence**: once in a world, at night, with a light burning in the old keep and a player whose Act V has begun at the ford, the dead of the old legion come back. They rise a few at a time across the water under strokes of lightning, risen orcs and zombified piglins, in four growing waves (more with more defenders), then a Shade of the Grue at the back with the last of them. When it falls the rest sink back into the ground, and everyone who stood at the ford gets the milestone. If nobody stands near the ford for 30 seconds, the legion sinks back and comes again another night. Ops: `/kingdom ford defend`.
+- **Risen Orc**: a new undead mob, an orc grunt's body gone grave-grey (tusks and all), tougher than a zombie and unburnt by the sun. Only the Second Defence raises them.
+- The Story tab's Act V lists three goals before the Wither: keep a light in the old keep at night, bring down the End's dragon (vanilla's advancement counts), hold the ford.
+- Built; not played.
+
+## 0.7.729 (2026-11-11): Magic FX: spells, golems and spirits use the typed effects (#1306)
+
+- New `Fx`: Kingdoms' door to Powers' typed magic effects (beam, blast, ring, orb, sigil, mote, miasma), looked up at
+  run time; without Powers it falls back to the old dust.
+- Spell beams are the one shared beam: Sorcerer drain, hex and bolt, Restoration's healing, Necromancy, Hemomancy's
+  dark bolt, the scroll bolt, town golems' rays and the Grue's grasp. Blood drawn out by Hemomancy stays a line of
+  blood.
+- Restoration's rings are shockwave rings; a Sanctuary is a sigil on the ground for as long as it stands.
+- Patron blessings, turning, in-balming, soul flares, champions' arrivals and the Grue's bursts are blasts; a
+  Giant's Ambrosium flare and a king's soul flare no longer use a recoloured firework flash.
+- Every other recoloured dust (spirits, mana wings, heritage and variant looks, Valor, vampires, champions) is a mote,
+  or miasma when dark.
+- Not touched: `LoreFilmClient` (the film thread's), attack tells, the redstone golem, lycan fur, Rubber-folk.
+- Compiles; not played.
+
+## 0.7.730 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Spells, patrons, champions and rituals that used end rod, electric spark, enchant, portal, witch, glow or wax
+  particles as magic now use Powers' typed looks through `Fx` (`Fx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`): about 130 places. Without Powers they fall back to the old vanilla particles.
+- The Sun Marshal's landing beam is a real beam.
+- Parries, clashes, horses, villagers' everyday marks, real portals and enchanting storage keep their vanilla particles.
+- Built; not played.
+
+## 0.7.731 (2026-11-11): life story lines rewritten for the lore canon (#1309)
+
+- **Life story** (the character creator's questions): 82 lines now follow the canon page. The Frostborn are born in "the snowfields your people settled" (from far past the sun), not "the frozen north"; a warband's old ones never say where the band came from; the vat-born are the Mad Tinkerer's unfinished work; Sylvan elders remember the old trees as saplings.
+- **Raised by**: families keep the faith their trade keeps (the Anvil-Father, the Deep Mother, the Green Huntsman, the Hearthkeeper, the Ash Whisperer); the Dawnborn's priests are the Crowned Sun's, the Nightborn's barrow-keepers the Lantern Warden's, and the Emberborn's Hornkin fosterers were paid off in gold.
+- **As you grew up**: each class is learned from the people the canon says teach it (the Ash Whisperer's cutpurses, a war camp, an old elemental school, the Green Huntsman's folk, the wild, a ship's guns, a realm's stables and tilt-yard). The class descriptions end with who teaches the trade.
+- **Then one day**: the spider's bite leaves you quieter, the weapon is one you reached for that wasn't there, the dark water holds you up, the won fight comes off you like heat. No power is named.
+- **Roads**: the afterlife road is the Judge's weighing, the demon master's people "do not go up any more", the Pale Moon has a rumour about who lives there, the monolith is one of the old stones, and the stone lab is somebody's unfinished work. Five villager greetings for those roads follow.
+- **Heritages**: Sylvan are long-lived, the Warrior-born are why folk watch the sky, the Nightborn name the Dawnborn's distrust, and the Divine-born hint adds those the Judge finds just who ask to stay.
+- The narrator's clips for the 25 changed tales are removed, so those tales are read in silence until `python tools/voices/make_voices.py narrator` remakes them. Question titles and the lines under them are unchanged, so their clips still match.
+- Lang only; not played.
+
+## 0.7.732 (2026-11-11): The Long Defence: heroes in full frame, armoured soldiers, Grimsby the Sylvan elf (#1290)
+
+- Each hero's shots in the film are pulled back so the whole figure is in frame, and fighters are kept out from between the hero and the camera
+- The Warrior-born soldiers wear real armour and helmets (iron, chainmail, steel plate helms), drawn the way the draugr's gear is
+- Grimsby is a Sylvan elf: long pointed ears, a slighter build, no beard
+- The soldiers each wear their own mix of leather, chainmail and iron, caked in mud and old blood, not shiny
+- Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
+- Varro throws his fire after the in-balming and runs in after it in the same shot; a shot of Thessaly and Ambrose from the front comes between, then the cut to him crossing to Grimsby, who is blade on blade with an orc, and one long side shot of the two back to back
+- Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) each have a foe on them from the first frame and fight among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
+- The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
+- The film is 11 seconds longer; its tape is recorded again with all of this
+- When the Quiet One flips off a tree or rolls under a bolt, his cloak comes back onto him whole and goes over with him, then comes apart and throws for the next tree
+- Varro's steel stays bright in the dark and glints, and Grimsby's blade is wind-imbued: lit currents run along it and curl off it, so the two can be picked out of the crowd in the wide shots
+- Beheadings are a level cut: the blade drawn back low to the side and swept through at neck height with the whole body turning, the head going the way of the cut; the cut that follows a severed arm comes down across from the shoulder (new moves in the library: wind_side, behead, wind_high, hew; the draugr's animation file is regenerated with the whole library)

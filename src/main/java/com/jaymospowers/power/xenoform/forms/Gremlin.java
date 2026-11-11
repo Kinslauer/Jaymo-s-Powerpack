@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -199,7 +200,7 @@ public final class Gremlin extends XenoForm {
 		}
 		if (done) {
 			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
 			level.playSound(null, pos, SoundEvents.SILVERFISH_AMBIENT, SoundSource.PLAYERS, 1.0F, 1.6F);
 		}
 		return done;

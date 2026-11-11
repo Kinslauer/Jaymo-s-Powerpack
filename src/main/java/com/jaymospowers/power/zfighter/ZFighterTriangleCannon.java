@@ -1,9 +1,10 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.Soundscape;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,7 +63,7 @@ final class ZFighterTriangleCannon {
 			ZFighterKi.orb(level, id - 1000 * (i + 1), points[i], 0.1 + 0.1 * charge, color);
 		}
 		ZFighterKi.orb(level, id, centre, 0.15 + 0.5 * charge, color);
-		DustParticleOptions dust = new DustParticleOptions(color, 0.8F + charge);
+		ParticleOptions dust = MagicFx.wisp(color, 0.8F + charge);
 		for (int i = 0; i < points.length; i++) {
 			// the edges of the triangle, one mote along each
 			Vec3 a = points[i];
@@ -71,7 +72,7 @@ final class ZFighterTriangleCannon {
 			level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, centre.x, centre.y, centre.z, 2, 0.2, 0.2, 0.2, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, centre.x, centre.y, centre.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (Soundscape.due(player, "ki.triangle", 8, 13)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(0.9F).pitched(0.7F + charge * 0.6F), ZFighterKi.KI_SURGE);

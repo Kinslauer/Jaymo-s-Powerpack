@@ -28,7 +28,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -395,7 +394,7 @@ public final class PatronChampions {
 		Patron p = c.patron();
 		c.clearMoves();
 		clearAdds(level, c);
-		level.sendParticles(new DustParticleOptions(p.colour & 0xFFFFFF, 2.0F), c.getX(), c.getY() + 1.2, c.getZ(), 80, 0.6, 1.2, 0.6, 0.05);
+		Fx.burst(level, c.getX(), c.getY() + 1.2, c.getZ(), p.colour & 0xFFFFFF, 2.0F, 80, 0.6, 1.2, 0.6);
 		c.speak("fall");
 		if (c.hunting()) {
 			HUNTERS.values().removeIf(h -> h == c);

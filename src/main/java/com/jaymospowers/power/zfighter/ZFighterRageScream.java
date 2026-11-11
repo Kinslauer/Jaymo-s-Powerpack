@@ -1,8 +1,9 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -68,7 +69,7 @@ final class ZFighterRageScream {
 				ZFighterPoise.wear(near, POISE_WEAR);
 			}
 		}
-		DustParticleOptions rage = new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 2.0F);
+		ParticleOptions rage = MagicFx.wisp(ZFighterBattle.RAGE_COLOR, 2.0F);
 		for (int ring = 1; ring <= RINGS; ring++) {
 			double r = RADIUS * ring / RINGS;
 			int points = 16 + ring * 12;

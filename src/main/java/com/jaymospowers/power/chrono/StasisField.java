@@ -1,11 +1,11 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -37,8 +37,8 @@ final class StasisField {
 	static final int DURATION = ChronoPower.REWIND_TICKS, DURATION_MASTERED = 120;
 	/** Released knockback is capped to this speed (blocks/tick), so stacked hits can't fling a mob across the map. */
 	private static final double MAX_RELEASE_SPEED = 1.4;
-	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 1.1F);
-	private static final DustParticleOptions AMBER_DUST = new DustParticleOptions(0xFFB347, 0.8F);
+	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 1.1F);
+	private static final ParticleOptions AMBER_DUST = MagicFx.wisp(0xFFB347, 0.8F);
 
 	/** Everything frozen by any field, with how many fields hold it. Server thread only. */
 	private static final Map<Entity, Frozen> FROZEN = new IdentityHashMap<>();
@@ -106,7 +106,7 @@ final class StasisField {
 	void start() {
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.8F);
-		ChronoFx.particles(level, fx, ParticleTypes.END_ROD, center.x, center.y + 1.0, center.z, 40, 0.6, 0.6, 0.6, 0.25);
+		ChronoFx.particles(level, fx, MagicFx.LIGHT, center.x, center.y + 1.0, center.z, 40, 0.6, 0.6, 0.6, 0.25);
 		capture();
 		shell(48);
 	}
@@ -131,7 +131,7 @@ final class StasisField {
 			}
 			frozen.hold(entity);
 			if (age % 10 == i % 10) {
-				ChronoFx.particles(level, fx, ParticleTypes.ELECTRIC_SPARK, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
+				ChronoFx.particles(level, fx, MagicFx.CRACKLE, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
 					2, entity.getBbWidth() * 0.4, entity.getBbHeight() * 0.3, entity.getBbWidth() * 0.4, 0.0);
 			}
 		}
@@ -168,7 +168,7 @@ final class StasisField {
 			if (frozen == null) {
 				frozen = Frozen.of(entity);
 				FROZEN.put(entity, frozen);
-				ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
+				ChronoFx.particles(level, fx, MagicFx.EMBER, entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
 					4, entity.getBbWidth() * 0.4, entity.getBbHeight() * 0.4, entity.getBbWidth() * 0.4, 0.0);
 			}
 			frozen.holders++;
@@ -220,7 +220,7 @@ final class StasisField {
 		if (age % 10 == 0) {
 			for (int h = 0; h < 12; h++) {
 				double a = h / 12.0 * Math.PI * 2.0 - twist * 0.25;
-				ChronoFx.particles(level, fx, h % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.WAX_ON,
+				ChronoFx.particles(level, fx, h % 3 == 0 ? MagicFx.LIGHT : MagicFx.EMBER,
 					center.x + Math.sin(a) * RADIUS, center.y + 1.0, center.z - Math.cos(a) * RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}

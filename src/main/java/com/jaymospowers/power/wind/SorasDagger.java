@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -424,7 +425,7 @@ public final class SorasDagger extends Item {
 		player.setItemInHand(InteractionHand.MAIN_HAND, forged);
 		Vec3 at = player.position();
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, at.x, at.y + 1.0, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.0, at.z, 60, 0.6, 1.0, 0.6, 0.12);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y + 1.0, at.z, 60, 0.6, 1.0, 0.6, 0.12);
 		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.2, at.z, 40, 1.2, 0.2, 1.2, 0.1);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.8F, 1.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.5F, 0.6F);

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -421,7 +422,7 @@ public class AtroxiiaDragon extends WindDragon implements GeoEntity {
 		for (int i = 1; i <= 8; i++) {
 			Vec3 p = this.position().add(this.moveAim.scale(reach * i / 8.0)).add(0.0, 1.2, 0.0);
 			level.sendParticles(ParticleTypes.SNOWFLAKE, p.x, p.y, p.z, 4, 0.15, 0.15, 0.15, 0.02);
-			level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(Fx.LIGHT, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}
 		level.playSound(null, this.blockPosition(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.HOSTILE, 0.8F, 1.4F);
 		level.playSound(null, this.blockPosition(), SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 2.0F, 0.5F);

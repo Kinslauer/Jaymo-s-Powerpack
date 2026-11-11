@@ -310,7 +310,9 @@ def grimsby():
     cloak = (92, 72, 52)
     skin = (190, 150, 118)
     face(img, rnd, skin, (44, 34, 28), (70, 90, 70), brows=(40, 30, 24))
-    stubble(img, rnd, (44, 34, 28))
+    # a Sylvan elf (Andy: "Grimsby is a sylvan elf, thats why he lived so long"): beardless, and his ears (the film
+    # actor's "elf" bone) are painted from this patch of his skin
+    paint(img, FLESH_PATCH, shade(skin, -6), 4, rnd)
     # gaunt: hollows under the cheekbones
     fx, fy, fw, fh = HEAD["front"]
     px(img, fx + 1, fy + 5, shade(skin, -28))

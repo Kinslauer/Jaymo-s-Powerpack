@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.combat.Guard;
@@ -7,8 +8,6 @@ import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -294,13 +293,13 @@ public final class DarktideGuard {
 		target.hurtServer(level, level.damageSources().playerAttack(player), damage);
 		DarktideStatus.legHit(player, target);
 		Vec3 mid = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), mid.x, mid.y, mid.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, mid.x, mid.y, mid.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 		// the streak: a diagonal line of ink from the shoulder down across
 		Vec3 right = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
 		for (int i = 0; i <= 10; i++) {
 			double t = i / 10.0 - 0.5;
 			Vec3 p = mid.add(right.scale(t * 1.6)).add(0.0, -t * 1.2, 0.0);
-			level.sendParticles(new DustParticleOptions(0x0A1430, 1.6F), p.x, p.y, p.z, 2, 0.03, 0.03, 0.03, 0.0);
+			level.sendParticles(MagicFx.wisp(0x0A1430, 1.6F), p.x, p.y, p.z, 2, 0.03, 0.03, 0.03, 0.0);
 			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);

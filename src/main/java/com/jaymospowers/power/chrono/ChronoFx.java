@@ -1,8 +1,9 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -42,7 +43,7 @@ public final class ChronoFx {
 	/** How loud an ascended punch's glass crack is. */
 	static final float CRACK_VOLUME = 0.35F;
 
-	private static final DustParticleOptions BLACK = new DustParticleOptions(0x0A0A0E, 1.0F);
+	private static final ParticleOptions BLACK = MagicFx.wisp(0x0A0A0E, 1.0F);
 	private static BlockParticleOption darkGlass;
 	private static BlockParticleOption clearGlass;
 

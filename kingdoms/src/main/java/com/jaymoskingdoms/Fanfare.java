@@ -1,7 +1,7 @@
 package com.jaymoskingdoms;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -75,14 +75,14 @@ public final class Fanfare {
 	/** A rising ring of sparks in the track's colour, end-rod motes, and for the grandest a totem's swirl. */
 	public static void burst(ServerPlayer player, int color, int size) {
 		ServerLevel level = player.level();
-		DustParticleOptions dust = new DustParticleOptions(color & 0xFFFFFF, 1.4F);
+		ParticleOptions dust = Fx.wisp(color & 0xFFFFFF, 1.4F);
 		int sparks = SPARKS[size];
 		for (int i = 0; i < sparks; i++) {
 			double a = Math.PI * 2.0 * i / sparks;
 			double up = 0.2 + (i % 4) * 0.45;
 			level.sendParticles(dust, player.getX() + Math.cos(a) * RING, player.getY() + up, player.getZ() + Math.sin(a) * RING, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), sparks / 2, 0.5, 0.8, 0.5, 0.05);
+		level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), sparks / 2, 0.5, 0.8, 0.5, 0.05);
 		if (size >= GRAND) {
 			level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.5);
 		}

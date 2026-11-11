@@ -20,7 +20,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -414,7 +413,7 @@ public final class Patrons {
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.sworn", coloured(shrine)));
 				if (sp.level() instanceof ServerLevel level) {
 					level.playSound(null, sp.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.0F);
-					level.sendParticles(new DustParticleOptions(shrine.colour & 0xFFFFFF, 1.2F), sp.getX(), sp.getY() + 1.0, sp.getZ(), 30, 0.5, 0.8, 0.5, 0.0);
+					Fx.burst(level, sp.getX(), sp.getY() + 1.0, sp.getZ(), shrine.colour & 0xFFFFFF, 1.2F, 30, 0.5, 0.8, 0.5);
 					level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, sp.getX(), sp.getY() + 1.0, sp.getZ(), 20, 0.5, 0.8, 0.5, 0.3);
 				}
 			} else {

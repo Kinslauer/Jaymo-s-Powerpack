@@ -1,5 +1,6 @@
 package com.jaymospowers.core.mobs;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.mixin.MobPersistenceAccess;
 import com.mojang.serialization.Codec;
@@ -8,7 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -197,14 +198,14 @@ public final class BlightMobs {
 		double x = mob.getX();
 		double y = mob.getY() + mob.getBbHeight() * 0.5;
 		double z = mob.getZ();
-		// Greenish plague particles using DustParticleOptions (packed RGB: 0x339933)
+		// Greenish plague particles using ParticleOptions (packed RGB: 0x339933)
 		int green = 0x339933;
 		int count = tier * 2;
 		for (int i = 0; i < count; i++) {
 			double px = x + (random.nextDouble() - 0.5) * mob.getBbWidth();
 			double py = y + random.nextDouble() * mob.getBbHeight();
 			double pz = z + (random.nextDouble() - 0.5) * mob.getBbWidth();
-			level.sendParticles(new DustParticleOptions(green, 1.0f), px, py, pz, 1, 0.1, 0.1, 0.1, 0.0);
+			level.sendParticles(MagicFx.miasma(green, 1.0f), px, py, pz, 1, 0.1, 0.1, 0.1, 0.0);
 		}
 		// Occasional dark smoke for higher tiers
 		if (tier >= 2 && random.nextFloat() < 0.3F) {

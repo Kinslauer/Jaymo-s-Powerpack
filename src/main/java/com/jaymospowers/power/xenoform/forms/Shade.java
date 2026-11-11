@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -131,7 +132,7 @@ public final class Shade extends XenoForm {
 			case ABILITY_4 -> {
 				if (ready(player, live, B)) {
 					live.hideUntil = level.getGameTime() + WARY_TICKS;
-					burst(level, ParticleTypes.PORTAL, player.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.3);
+					burst(level, MagicFx.VOID, player.position().add(0.0, 1.0, 0.0), 30, 0.5, 0.3);
 					sound(player, SoundEvents.ENDERMAN_AMBIENT, 1.0F, 1.2F);
 					cooldown(player, live, B, WARY_COOLDOWN);
 				}
@@ -154,7 +155,7 @@ public final class Shade extends XenoForm {
 		}
 		level.removeBlock(at, false);
 		live.lifted = state;
-		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), ParticleTypes.PORTAL, 8);
+		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), MagicFx.VOID, 8);
 		sound(player, SoundEvents.ENDERMAN_TELEPORT, 0.6F, 1.6F);
 		return true;
 	}
@@ -228,8 +229,8 @@ public final class Shade extends XenoForm {
 		Vec3 from = player.position();
 		player.teleportTo(level, to.x, to.y, to.z, java.util.Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
-		burst(level, ParticleTypes.PORTAL, from.add(0.0, 1.0, 0.0), 30, 0.4, 0.4);
-		burst(level, ParticleTypes.REVERSE_PORTAL, to.add(0.0, 1.0, 0.0), 20, 0.4, 0.05);
+		burst(level, MagicFx.VOID, from.add(0.0, 1.0, 0.0), 30, 0.4, 0.4);
+		burst(level, MagicFx.VOID, to.add(0.0, 1.0, 0.0), 20, 0.4, 0.05);
 		level.playSound(null, from.x, from.y, from.z, SoundEvents.ENDERMAN_TELEPORT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
 		sound(player, SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 	}
@@ -238,7 +239,7 @@ public final class Shade extends XenoForm {
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		if (player.tickCount % 4 == 0) {
-			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.4, 0.8, 0.4, 0.02);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.4, 0.8, 0.4, 0.02);
 		}
 		if (player.isInWaterOrRain() && !player.isCreative()) {
 			if (player.tickCount % 5 == 0) {
@@ -252,7 +253,7 @@ public final class Shade extends XenoForm {
 		if (live.lifted != null && player.tickCount % 2 == 0) {
 			Vec3 over = player.getEyePosition().add(0.0, 1.0, 0.0);
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, live.lifted), over.x, over.y, over.z, 2, 0.3, 0.3, 0.3, 0.0);
-			level.sendParticles(ParticleTypes.PORTAL, over.x, over.y, over.z, 1, 0.4, 0.4, 0.4, 0.0);
+			level.sendParticles(MagicFx.VOID, over.x, over.y, over.z, 1, 0.4, 0.4, 0.4, 0.0);
 		}
 		if (live.stalked >= 0) {
 			stare(player, live, level);
@@ -275,13 +276,13 @@ public final class Shade extends XenoForm {
 			mob.getNavigation().stop();
 		}
 		if (player.tickCount % 3 == 0) {
-			level.sendParticles(ParticleTypes.PORTAL, held.getX(), held.getEyeY(), held.getZ(), 3, 0.2, 0.2, 0.2, 0.3);
+			level.sendParticles(MagicFx.VOID, held.getX(), held.getEyeY(), held.getZ(), 3, 0.2, 0.2, 0.2, 0.3);
 		}
 	}
 
 	@Override
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
-		burst(player.level(), ParticleTypes.REVERSE_PORTAL, player.position().add(0.0, 1.2, 0.0), 60, 1.0, 0.05);
+		burst(player.level(), MagicFx.VOID, player.position().add(0.0, 1.2, 0.0), 60, 1.0, 0.05);
 		sound(player, SoundEvents.ENDERMAN_SCREAM, 1.6F, 0.6F);
 		return true;
 	}

@@ -64,7 +64,7 @@ final class OrcSkins {
 	 * tusks jutting up from the jaw (texture at 0,32 and 4,32), a heavy brow (at 8,32) and two small ears swept back
 	 * (at 0,36 and 8,36).
 	 */
-	static HumanoidModel<JaymosKingdomsClient.FolkState> features() {
+	static <S extends net.minecraft.client.renderer.entity.state.HumanoidRenderState> HumanoidModel<S> features() {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
 		PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO);

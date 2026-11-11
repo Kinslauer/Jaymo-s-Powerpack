@@ -2386,3 +2386,77 @@ will still have to fight in the tournament as a non z fighter)".
 - **Raider's Tally**: a beaten raider band leaves a short book at its pod, the worlds the band has taken in its own few words. It files in the lore codex.
 - Powers leaves a `jaymospowers.retaking.<deed>` tag on the player (`PackAdvancements.deed`); Jaymo's Kingdoms turns it into the milestone. Hooks in ZFighterRaiders, FallenStarBlock, StarWreckBlock, ZFighterPodTrip, ZFighterSpaceMissions.
 - Built; not played.
+
+## 0.22.12 (2026-11-11): The Retaking, Act IV: The Dark Below (#1302)
+
+- **Five new milestones** in the Jaymo's Powerpack advancement tab, hanging off the Skeleton Lord before the Piglin King: A Voice Behind You (a spirit wakes for you), Back in the Ground (end your Bane with its own marks), The Deepest Dark (walk into the Abyss), A Page in His Book (ask the Judge how your page reads), Leashed (beat the Grue in its own dark). They count only once Act IV has begun.
+- **Muster-Roll**: every demon village chest holds the village's muster-roll for the sorcerer's battle: who went up, what they were promised, who came home, and that they have not been called again. Yet. It files in the lore codex.
+- New `core/LoreBook` makes these written lore books (the Raider's Tally uses it too). Asking the Judge leaves the `weighed` deed tag.
+- Built; not played.
+
+## 0.22.13 (2026-11-11): sound - ImmersiveFX in, varied sounds, the web sense turns your head (#1303)
+
+- **ImmersiveFX: Resurrected** 1.9.0 (AGPL-3.0, Fabric 26.3, client-only) joins the pack unchanged: footsteps for each
+  kind of ground, armour, wading and swimming sounds, biome ambience heard from where it is, crafting and workstation
+  sounds, a stomach growl, auroras, fog, jets, and a sound browser (Ctrl+I). **AmbientSounds 6 and CreativeCore leave**
+  (Andy's pick), so there is one ambience system; the build moves them out of the CurseForge profile. Its blood,
+  fireflies and waterfalls are left on beside ours (Andy: "the more blood the better").
+- **Varied sounds** (`client/sound/Varied`, `VariedSoundEngineMixin`): every one-shot sound in the world plays one of
+  seven pitch steps around what was asked (2% apart), never the step it had last time, so the same clink or hit doesn't
+  repeat note for note. Loops, music, voices, menu sounds, note blocks, bells, horns, records and Chronokinesis' clock
+  ticks are untouched.
+- **Web sense glance** (`client/power/web/WebSenseGlance`): when an ascended web slinger's Spider-Sense picks up a new
+  danger out of sight (a creature that has just turned on you, a creeper starting to swell, a skeleton drawing), the
+  look snaps round to it: the first-person view swings and others see the head turn. It adds to the mouse, stops once
+  the danger is in view, lasts at most 12 ticks and waits 50 ticks between glances.
+- Compiled (`compileClientJava`); not played. ImmersiveFX has not been run beside Sound Physics Remastered, Subtle
+  Effects or Iris yet, and its doubled effects (fireflies, waterfalls, footprints) may want turning down in its config.
+
+## 0.22.14 (2026-11-11): The Retaking, Act V: Legend (#1304)
+
+- Three new milestones in the Jaymo's Powerpack advancement tab, hanging off the Piglin King before the Wither: A Light in the Keep, The End's Dragon, The Second Defence (Jaymo's Kingdoms awards them).
+- Built; not played.
+
+## 0.22.15 (2026-11-11): TEST: ImmersiveVFX in place of Iris and Complementary (#1305)
+
+- A trial Andy asked for ("We can test this to see if it runs better, if not it gets scrapped"). **ImmersiveVFX 2.0.5**
+  (all rights reserved, alpha, Fabric 26.3, client-only, shipped unchanged) joins the pack: pixel shadows, shore foam
+  and caustics, clouds and sky, fire, ground fog, sand winds, auroras, heavier rain.
+- Its page says it does not work with Iris, so **Iris and the Complementary Unbound default leave** while it is in
+  (the build moves Iris out of the CurseForge profile), and **Sodium goes from 0.9.2 to 0.9.3-beta.4**, which it needs.
+- No code changes. `ShaderPreset`, `LowEndMode` and Kingdoms' dark-night Iris mixins all check for Iris and do nothing
+  without it; the Aether veil's Sodium mixin compiles against the beta.
+- What to look at in game: frame rate against the old shaders, dark nights (they were dimmed through Iris), the Aether
+  staying hidden from the ground, `/lowend`, and whether Bobby and the other Sodium mods still load on the beta.
+- To scrap it, revert this PR: the comments in `build.gradle` say which lines.
+- Compiled; not run. Nothing here has been started with ImmersiveVFX or the Sodium beta.
+
+## 0.22.16 (2026-11-11): Magic FX: every effect has a type (#1306)
+
+- Andy: "Every effect should have a type, (beam, blast, miasma, etc) and go to the same asset for each one, like the
+  beacon for beams". New `core/fx/MagicFx` with `client/fx/MagicFxClient`: **beam** (the beacon beam: core and glow),
+  **blast** (a swelling shell round a white-hot heart), **ring** (a shockwave over the ground), **orb**, **sigil** (a
+  turning circle of marks on the ground), and two particles, **mote** (a glint of light) and **miasma** (a soft dark
+  puff). Only colour, size and time vary. Dark colours draw as murk in every type.
+- Every recoloured redstone dust in the powers, alchemy, baubles and Aether guardians is now a mote, or miasma if its
+  colour is dark (Darktide's ink, gravity's shadow, flux, blight, gas). 22 one-off dust clouds (transformations,
+  surges, wave impacts, self-destruct) and 27 recoloured firework flashes are blasts. The god ritual's pad beams are
+  real beams; the full-ki burst and milestones throw a ring.
+- Left alone because they aren't magic: the symbiote's goo, Hive, redstone charging the Rig, attack tells, leaves, gun
+  muzzle flashes, tournament fireworks.
+- Rules for new effects and what is still to move: `docs/MagicFx.md`. Textures: `tools/gen_magic_fx.py`.
+- Compiles (Gradle, `compileJava compileClientJava`); not played. Lines and circles drawn as rows of dust inside loops
+  are rows of motes for now, and END_ROD / ELECTRIC_SPARK style particles are a later pass.
+
+## 0.22.17 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Two new effect types: **spark** (a jagged fork that jumps every tick, for lightning and charge) and **rune** (marks
+  from the sigil's alphabet, for enchanting and written magic).
+- Vanilla particles that stood in for magic (end rod, electric spark, enchant glyphs, portal specks, witch, glow, wax,
+  dragon breath, tinted potion swirls) now use the typed looks: about 540 places across the powers. Machines, rigs,
+  sentries and real portals keep the vanilla ones.
+- Dotted lines and circles from the shared helpers are now real beams and rings: the Xeno form's beams and rings,
+  Rivet's lines, the Z Fighter gift line, the Arsenal streak, and the Sun patron's column.
+- `docs/MagicFx.md` lists the new types, the stock looks (`MagicFx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`, `MURK`) and `MagicFx.line` / `circle`.
+- Built; not played.

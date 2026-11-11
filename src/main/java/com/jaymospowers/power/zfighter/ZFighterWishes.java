@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
@@ -18,8 +19,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -340,8 +340,8 @@ public final class ZFighterWishes {
 	/** The dragon: a long body coiling up into the sky, gold along its back, a head with red eyes looking down. */
 	private static void draw(Summon summon, long now) {
 		ServerLevel level = summon.level();
-		DustParticleOptions body = new DustParticleOptions(DRAGON_COLOR, 3.0F);
-		DustParticleOptions scales = new DustParticleOptions(SCALE_COLOR, 2.0F);
+		ParticleOptions body = MagicFx.wisp(DRAGON_COLOR, 3.0F);
+		ParticleOptions scales = MagicFx.wisp(SCALE_COLOR, 2.0F);
 		int points = 70;
 		Vec3 head = summon.at();
 		for (int i = 0; i <= points; i++) {
@@ -356,7 +356,7 @@ public final class ZFighterWishes {
 			head = p;
 		}
 		level.sendParticles(body, true, false, head.x, head.y, head.z, 8, 0.8, 0.5, 0.8, 0.0);
-		DustParticleOptions eye = new DustParticleOptions(EYE_COLOR, 1.5F);
+		ParticleOptions eye = MagicFx.wisp(EYE_COLOR, 1.5F);
 		level.sendParticles(eye, true, false, head.x - 0.5, head.y + 0.3, head.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(eye, true, false, head.x + 0.5, head.y + 0.3, head.z, 1, 0.0, 0.0, 0.0, 0.0);
 		if (now % 60 == 0) {
@@ -368,7 +368,7 @@ public final class ZFighterWishes {
 	private static void depart(MinecraftServer server, Summon summon) {
 		ServerLevel level = summon.level();
 		Vec3 at = summon.at();
-		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y + 10.0, at.z, 120, 6.0, 10.0, 6.0, 0.3);
+		level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y + 10.0, at.z, 120, 6.0, 10.0, 6.0, 0.3);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 4.0F, 0.6F);
 		ZFighterSites.Data data = ZFighterSites.data(server);
 		ZFighterSites.save(server, new ZFighterSites.Data(ZFighterSites.scatter(level.getRandom()), 0, server.overworld().getGameTime() + REST,

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Vampires;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -76,9 +76,9 @@ public final class HunterSense {
 				continue; // standing still: no shadow to lag
 			}
 			var random = minecraft.level.getRandom();
-			minecraft.level.addParticle(new DustParticleOptions(DARK, SIZE), then.x + (random.nextDouble() - 0.5) * 0.4, then.y + 0.2 + random.nextDouble() * 0.4,
+			minecraft.level.addParticle(Fx.wisp(DARK, SIZE), then.x + (random.nextDouble() - 0.5) * 0.4, then.y + 0.2 + random.nextDouble() * 0.4,
 				then.z + (random.nextDouble() - 0.5) * 0.4, 0.0, 0.0, 0.0);
-			minecraft.level.addParticle(new DustParticleOptions(DARK, SIZE), then.x + (random.nextDouble() - 0.5) * 0.4, then.y + 0.9 + random.nextDouble() * 0.6,
+			minecraft.level.addParticle(Fx.wisp(DARK, SIZE), then.x + (random.nextDouble() - 0.5) * 0.4, then.y + 0.9 + random.nextDouble() * 0.6,
 				then.z + (random.nextDouble() - 0.5) * 0.4, 0.0, 0.0, 0.0);
 			if (random.nextInt(4) == 0) {
 				minecraft.level.addParticle(ParticleTypes.SMOKE, then.x, then.y + 1.0, then.z, 0.0, 0.01, 0.0);

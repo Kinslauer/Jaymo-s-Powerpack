@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.flux;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Corruption;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.Phials;
@@ -111,7 +112,7 @@ public class FluxWisp extends Monster implements ItemSupplier {
 				this.discard();
 			}
 		} else if (this.random.nextInt(2) == 0) {
-			this.level().addParticle(ParticleTypes.WITCH, this.getRandomX(0.4), this.getY() + 0.1 + this.random.nextDouble() * 0.3, this.getRandomZ(0.4),
+			this.level().addParticle(MagicFx.HEX, this.getRandomX(0.4), this.getY() + 0.1 + this.random.nextDouble() * 0.3, this.getRandomZ(0.4),
 				0.0, -0.01, 0.0);
 		}
 	}

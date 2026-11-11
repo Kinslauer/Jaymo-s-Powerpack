@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -115,7 +116,7 @@ public final class ApeSmash {
 		} else if (now - start == ApeGrab.HOLD_TO_GRAB) {
 			// the grab is ready: a deeper growl, and his hand opens
 			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 1.2F, 0.45F);
-			player.level().sendParticles(new net.minecraft.core.particles.DustParticleOptions(0xC03020, 3.0F), true, false, player.getX(),
+			player.level().sendParticles(MagicFx.wisp(0xC03020, 3.0F), true, false, player.getX(),
 				player.getY() + player.getBbHeight() * 0.6, player.getZ(), 20, player.getBbWidth() * 0.5, player.getBbHeight() * 0.2, player.getBbWidth() * 0.5, 0.05);
 		}
 	}

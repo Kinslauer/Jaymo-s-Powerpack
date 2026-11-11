@@ -1,9 +1,9 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -97,7 +97,7 @@ public final class StarWreckBlock extends Block {
 		if (out >= MAX_PROBES) {
 			return;
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, centre.x, centre.y + 0.6, centre.z, 12, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.CRACKLE, centre.x, centre.y + 0.6, centre.z, 12, 0.3, 0.3, 0.3, 0.1);
 		XenoFinds.sendProbe(level, centre.add(0.0, 1.5, 0.0), near);
 	}
 

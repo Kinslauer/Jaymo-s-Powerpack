@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -116,7 +117,7 @@ public final class WindThunderDive {
 		player.causeFoodExhaustion(EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.2F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.6F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.3, 0.6, 0.3, 0.4);
+		level.sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.3, 0.6, 0.3, 0.4);
 		return true;
 	}
 
@@ -150,7 +151,7 @@ public final class WindThunderDive {
 			player.setDeltaMovement(steer.x, -DIVE_SPEED, steer.z);
 			player.syncVelocity = true;
 			if (age % 2 == 0) {
-				player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.3, 0.8, 0.3, 0.1);
+				player.level().sendParticles(MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.3, 0.8, 0.3, 0.1);
 				player.level().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 2.0, player.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
 			}
 		}
@@ -196,7 +197,7 @@ public final class WindThunderDive {
 			double angle = i * Math.PI * 2.0 / points;
 			double cos = Math.cos(angle), sin = Math.sin(angle);
 			level.sendParticles(ParticleTypes.CLOUD, at.x + cos * 1.0, at.y + 0.2, at.z + sin * 1.0, 0, cos * radius * 0.25, 0.03, sin * radius * 0.25, 1.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x + cos * 1.5, at.y + 0.3, at.z + sin * 1.5, 0, cos * radius * 0.2, 0.05, sin * radius * 0.2, 1.0);
+			level.sendParticles(MagicFx.CRACKLE, at.x + cos * 1.5, at.y + 0.3, at.z + sin * 1.5, 0, cos * radius * 0.2, 0.05, sin * radius * 0.2, 1.0);
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 0.2, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 5.0F, 0.8F);

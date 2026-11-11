@@ -1,9 +1,9 @@
 package com.jaymospowers.aether.gear;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.aether.AetherItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -124,7 +124,7 @@ public class AltarBlockEntity extends BlockEntity implements WorldlyContainer {
 		watched = items.get(INPUT).copy();
 		if (level instanceof ServerLevel server) {
 			BlockPos pos = getBlockPos();
-			server.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 24, 0.4, 0.3, 0.4, 0.5);
+			server.sendParticles(MagicFx.GLYPH, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 24, 0.4, 0.3, 0.4, 0.5);
 			server.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
 		}
 		setChanged();

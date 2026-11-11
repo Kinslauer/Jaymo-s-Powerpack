@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.power.arsenal.SwordStone.Variant;
@@ -17,7 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -255,7 +255,7 @@ public final class StoneSwords {
 				Vec3 to = foe.getBoundingBox().getCenter();
 				for (double d = 0.0; d <= 1.0; d += 0.12) {
 					Vec3 at = from.lerp(to, d);
-					level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
+					level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
 				}
 				foe.setInvulnerableTime(0);
 				foe.hurtServer(level, attack(level, attacker), Math.max(1.0F, damage));
@@ -388,7 +388,7 @@ public final class StoneSwords {
 				if (t < PLANT_WINDUP_TICKS) {
 					if (t == 0) {
 						Vec3 tip = this.player.getEyePosition().add(0.0, 0.4, 0.0);
-						this.level.sendParticles(ParticleTypes.ENCHANT, tip.x, tip.y, tip.z, 12, 0.2, 0.3, 0.2, 0.4);
+						this.level.sendParticles(MagicFx.GLYPH, tip.x, tip.y, tip.z, 12, 0.2, 0.3, 0.2, 0.4);
 					}
 					return false;
 				}
@@ -580,7 +580,7 @@ public final class StoneSwords {
 		for (double d = 1.0; d <= reach; d += 0.5) {
 			Vec3 at = eye.add(dir.scale(d));
 			int rgb = Mth.hsvToRgb((float)((d / RAINBOW_RANGE + t * 0.05) % 1.0), 0.75F, 1.0F);
-			level.sendParticles(new DustParticleOptions(rgb, 1.2F), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
+			level.sendParticles(MagicFx.wisp(rgb, 1.2F), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 	}
 

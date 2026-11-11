@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.crucible;
 
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
@@ -36,7 +37,7 @@ public class EverflameBlock extends Block {
 				z + (random.nextDouble() - 0.5) * 0.15, 0.0, 0.01, 0.0);
 		}
 		if (random.nextInt(12) == 0) {
-			level.addParticle(ParticleTypes.END_ROD, x + (random.nextDouble() - 0.5) * 0.3, y + 0.1, z + (random.nextDouble() - 0.5) * 0.3,
+			level.addParticle(MagicFx.LIGHT, x + (random.nextDouble() - 0.5) * 0.3, y + 0.1, z + (random.nextDouble() - 0.5) * 0.3,
 				0.0, 0.01, 0.0);
 		}
 	}

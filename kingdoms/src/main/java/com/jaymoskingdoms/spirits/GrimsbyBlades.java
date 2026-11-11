@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +39,7 @@ final class GrimsbyBlades {
 	/** A far strike: the foes within the form's reach times this of the one aimed at are struck with it. */
 	static final double SPLASH = 0.6;
 	/** The slash mote colour: Grimsby's steel-blue-white. */
-	static final DustParticleOptions EDGE = new DustParticleOptions(0x9AB8FF, 1.0F);
+	static final ParticleOptions EDGE = Fx.wisp(0x9AB8FF, 1.0F);
 
 	/** One blade form: its tuning. */
 	record Form(String id, int pose, float cost, int cooldown, float damage, double reach, double halfArc, int most, boolean breaks, boolean lifts) {

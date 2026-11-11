@@ -1,12 +1,12 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
@@ -54,8 +54,8 @@ public record Summoned(UUID owner, long expires, int batch) {
 
 	/** The weapon slipping back into its dimension, seen and heard by everyone near {@code pos}. */
 	public static void dissolveEffects(ServerLevel level, Vec3 pos) {
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 18, 0.2, 0.25, 0.2, 0.02);
-		level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 14, 0.15, 0.2, 0.15, 0.4);
+		level.sendParticles(MagicFx.VOID, pos.x, pos.y, pos.z, 18, 0.2, 0.25, 0.2, 0.02);
+		level.sendParticles(MagicFx.VOID, pos.x, pos.y, pos.z, 14, 0.15, 0.2, 0.15, 0.4);
 		level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 0.5F, 1.6F);
 	}
 }

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -171,8 +171,8 @@ public final class ZFighterEgo {
 		player.setAttached(MODE, true);
 		ZFighterPower.refresh(player, live);
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(COLOR, 2.2F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.9, 1.0, 0.9, 0.15);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.08);
+		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), COLOR, 2.2F, 80, 0.9, 1.0, 0.9);
+		level.sendParticles(MagicFx.VOID, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.08);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 0.5F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ego_on").withStyle(ChatFormatting.DARK_PURPLE));
@@ -245,10 +245,10 @@ public final class ZFighterEgo {
 		}
 		if (now % 2 == 0) {
 			double reach = 0.5 + 0.02 * ego.stacks;
-			level.sendParticles(new DustParticleOptions(now % 4 == 0 ? COLOR : SHADOW_COLOR, 1.6F + 0.02F * ego.stacks), true, false, player.getX(),
+			level.sendParticles(MagicFx.wisp(now % 4 == 0 ? COLOR : SHADOW_COLOR, 1.6F + 0.02F * ego.stacks), true, false, player.getX(),
 				player.getY() + 0.9, player.getZ(), 3, reach, 0.7, reach, 0.0);
 			if (now % 6 == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.7, 0.4, 0.02);
+				level.sendParticles(MagicFx.VOID, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.7, 0.4, 0.02);
 			}
 		}
 	}

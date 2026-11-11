@@ -1,10 +1,9 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.Soundscape;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -66,10 +65,10 @@ final class ZFighterNovaSphere {
 			double ox = (level.getRandom().nextDouble() - 0.5) * 2.0 * size;
 			double oy = (level.getRandom().nextDouble() - 0.5) * 2.0 * size;
 			double oz = (level.getRandom().nextDouble() - 0.5) * 2.0 * size;
-			level.sendParticles(new DustParticleOptions(color, 1.6F), true, false, at.x + ox * 1.5, at.y + oy * 1.5, at.z + oz * 1.5, 0, -ox, -oy, -oz, 0.1);
+			level.sendParticles(MagicFx.wisp(color, 1.6F), true, false, at.x + ox * 1.5, at.y + oy * 1.5, at.z + oz * 1.5, 0, -ox, -oy, -oz, 0.1);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 4, size * 0.5, size * 0.5, size * 0.5, 0.3);
+			level.sendParticles(MagicFx.CRACKLE, true, false, at.x, at.y, at.z, 4, size * 0.5, size * 0.5, size * 0.5, 0.3);
 		}
 		if (Soundscape.due(player, "ki.nova", 8, 12)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.3F).pitched(0.5F + charge * 0.5F), ZFighterKi.KI_SURGE);

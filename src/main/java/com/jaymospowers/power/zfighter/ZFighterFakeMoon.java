@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -218,7 +218,7 @@ public final class ZFighterFakeMoon {
 		Vec3 at = moon.at();
 		ZFighterKi.orb(moon.level, moon.id, at, size, blend(moon.color, MOON_COLOR, t));
 		if (moon.age % 2 == 0) {
-			moon.level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y - 1.0, at.z, 2, 0.15, 0.6, 0.15, 0.01);
+			moon.level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y - 1.0, at.z, 2, 0.15, 0.6, 0.15, 0.01);
 		}
 	}
 

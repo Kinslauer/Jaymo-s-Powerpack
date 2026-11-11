@@ -1,8 +1,8 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -55,7 +55,7 @@ public final class DragonStorm {
 		for (int i = 0; i < MOUTH_SPARKS; i++) {
 			Vec3 d = DragonBreath.spread(aim, random, 0.3);
 			// (count 0: the particle flies along (dx, dy, dz) times speed)
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mouth.x, mouth.y, mouth.z, 0, d.x, d.y, d.z, 0.5 + random.nextDouble() * 0.5);
+			level.sendParticles(Fx.CRACKLE, mouth.x, mouth.y, mouth.z, 0, d.x, d.y, d.z, 0.5 + random.nextDouble() * 0.5);
 		}
 		if (tick % HIT_EVERY != 0) {
 			return;
@@ -146,7 +146,7 @@ public final class DragonStorm {
 			double x = from.x + (to.x - from.x) * t + (random.nextDouble() - 0.5) * 2.0 * jag;
 			double y = from.y + (to.y - from.y) * t + (random.nextDouble() - 0.5) * 2.0 * jag;
 			double z = from.z + (to.z - from.z) * t + (random.nextDouble() - 0.5) * 2.0 * jag;
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 1, 0.03, 0.03, 0.03, 0.0);
+			level.sendParticles(Fx.CRACKLE, x, y, z, 1, 0.03, 0.03, 0.03, 0.0);
 		}
 	}
 }

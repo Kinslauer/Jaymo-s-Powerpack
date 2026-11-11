@@ -22,7 +22,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -206,7 +205,7 @@ public final class Stakes {
 		if (!(vampire.level() instanceof ServerLevel level)) {
 			return;
 		}
-		level.sendParticles(new DustParticleOptions(0x5A0A0A, 1.0F), vampire.getX(), vampire.getY(0.65), vampire.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
+		level.sendParticles(Fx.wisp(0x5A0A0A, 1.0F), vampire.getX(), vampire.getY(0.65), vampire.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
 		level.playSound(null, vampire.getX(), vampire.getY(), vampire.getZ(), SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.8F, 0.6F);
 		if (stake.isEmpty()) {
 			return;
@@ -245,7 +244,7 @@ public final class Stakes {
 		showTugs(player, tugs);
 		if (tugs % 3 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 0.5F, 0.6F);
-			level.sendParticles(new DustParticleOptions(0x5A0A0A, 0.8F), player.getX(), player.getY(0.6), player.getZ(), 3, 0.15, 0.1, 0.15, 0.0);
+			level.sendParticles(Fx.wisp(0x5A0A0A, 0.8F), player.getX(), player.getY(0.6), player.getZ(), 3, 0.15, 0.1, 0.15, 0.0);
 		}
 	}
 
@@ -289,7 +288,7 @@ public final class Stakes {
 			}
 			WORK.put(e.getUUID(), work);
 			if (e.level() instanceof ServerLevel level && e.getRandom().nextInt(4) == 0) {
-				level.sendParticles(new DustParticleOptions(0x5A0A0A, 0.8F), e.getX(), e.getY(0.6), e.getZ(), 1, 0.1, 0.05, 0.1, 0.0);
+				level.sendParticles(Fx.wisp(0x5A0A0A, 0.8F), e.getX(), e.getY(0.6), e.getZ(), 1, 0.1, 0.05, 0.1, 0.0);
 			}
 		}
 	}

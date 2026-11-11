@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Flames;
@@ -18,7 +19,6 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -265,7 +265,7 @@ public final class Sunheart extends XenoUltimate {
 			ball.setPos(from.x, from.y, from.z);
 			level.addFreshEntity(ball);
 		}
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFC040), centre.x, centre.y, centre.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, centre.x, centre.y, centre.z, MagicFx.FLASH_RADIUS, 0xFFC040);
 		level.sendParticles(ParticleTypes.FLAME, centre.x, centre.y, centre.z, 80, 1.2, 1.0, 1.2, 0.25);
 		ring(level, ParticleTypes.FLAME, player.position(), CORONA_RADIUS * 0.5, 32);
 		ring(level, ParticleTypes.FLAME, player.position(), CORONA_RADIUS, 48);

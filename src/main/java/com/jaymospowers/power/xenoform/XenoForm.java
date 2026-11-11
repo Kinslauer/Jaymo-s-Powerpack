@@ -303,18 +303,12 @@ public abstract class XenoForm {
 
 	/** (0.18.96) A line of {@code points} particles from {@code from} to {@code to}. */
 	protected static void beam(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions particle, int points) {
-		Vec3 step = to.subtract(from).scale(1.0 / points);
-		for (int i = 1; i <= points; i++) {
-			Vec3 p = from.add(step.scale(i));
-			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+		// a beam when the particle is one of the magic lights, else the row of particles
+		com.jaymospowers.core.fx.MagicFx.line(level, from, to, particle, points);
 	}
 
-	/** A ring of particles on the ground round {@code at}. */
+	/** A ring on the ground round {@code at}: a shockwave when the particle is one of the magic ones, else a circle of them. */
 	protected static void ring(ServerLevel level, ParticleOptions particle, Vec3 at, double radius, int points) {
-		for (int i = 0; i < points; i++) {
-			double a = i / (double)points * Math.PI * 2.0;
-			level.sendParticles(particle, at.x + Math.cos(a) * radius, at.y + 0.2, at.z + Math.sin(a) * radius, 1, 0.1, 0.05, 0.1, 0.0);
-		}
+		com.jaymospowers.core.fx.MagicFx.circle(level, particle, at, radius, points);
 	}
 }

@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -222,8 +221,8 @@ public final class InBalming {
 			m.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0.0F);
 		}
 		int colour = Spirits.of(kind).color() & 0xFFFFFF;
-		level.sendParticles(new DustParticleOptions(colour, 1.4F), e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.0);
-		level.sendParticles(ParticleTypes.ENCHANT, e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.6);
+		Fx.burst(level, e.getX(), e.getY(0.6), e.getZ(), colour, 1.4F, 30, 0.4, 0.6, 0.4);
+		level.sendParticles(Fx.GLYPH, e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.6);
 		level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.7F + kind * 0.1F);
 		if (kind != Spirits.QUIET) {
 			Speech.say(level, e, Dialects.trShared(e, "talk.jaymoskingdoms.inbalm." + key(kind) + "." + random.nextInt(LINES), player.getDisplayName()),
@@ -363,7 +362,7 @@ public final class InBalming {
 		for (ServerPlayer p : level.players()) {
 			if (p.distanceTo(mob) < MARK_SEEN && "zfighter".equals(PowersCompat.power(p))) {
 				Vec3 brow = mob.getEyePosition().add(mob.getLookAngle().scale(0.25)).add(0.0, 0.15, 0.0);
-				level.sendParticles(p, new DustParticleOptions(0xFFB347, 0.7F), true, false, brow.x, brow.y, brow.z, 2, 0.02, 0.02, 0.02, 0.0);
+				level.sendParticles(p, Fx.wisp(0xFFB347, 0.7F), true, false, brow.x, brow.y, brow.z, 2, 0.02, 0.02, 0.02, 0.0);
 			}
 		}
 	}

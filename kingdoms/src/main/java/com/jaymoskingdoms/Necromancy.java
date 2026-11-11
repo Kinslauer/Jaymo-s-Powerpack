@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -79,7 +79,7 @@ public final class Necromancy {
 	static final double DOOR_TOLL = -4.0;
 
 	static final int VIOLET = 0x5B2A86, ASH = 0x3A3A3A;
-	static final DustParticleOptions VIOLET_MOTE = new DustParticleOptions(VIOLET, 1.0F), ASH_MOTE = new DustParticleOptions(ASH, 1.2F);
+	static final ParticleOptions VIOLET_MOTE = Fx.wisp(VIOLET, 1.0F), ASH_MOTE = Fx.wisp(ASH, 1.2F);
 	static final net.minecraft.resources.Identifier DOOR_TOLL_ID = JaymosKingdoms.id("deaths_door");
 
 	/** Blighted bodies: until when (game time). */
@@ -204,7 +204,7 @@ public final class Necromancy {
 		}
 		player.getCooldowns().addCooldown(key, Spellcraft.BOLT_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), VIOLET_MOTE);
+		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), VIOLET);
 		if (!execute(level, target, player)) {
 			target.hurtServer(level, level.damageSources().indirectMagic(player, player), Float.MAX_VALUE);
 		}
@@ -281,7 +281,7 @@ public final class Necromancy {
 			return;
 		}
 		Commandments.act(player, "necromancy");
-		Sorcery.beam(level, player, corpse.position().add(0.0, 0.3, 0.0), VIOLET_MOTE);
+		Sorcery.beam(level, player, corpse.position().add(0.0, 0.3, 0.0), VIOLET);
 		corpse.discard();
 		RAISE_READY.put(player.getUUID(), now + RAISE_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -316,7 +316,7 @@ public final class Necromancy {
 		if (target == null) {
 			return false;
 		}
-		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), VIOLET_MOTE);
+		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), VIOLET);
 		blight(target, (int) (BLIGHT_TICKS * power));
 		target.addEffect(new MobEffectInstance(MobEffects.WITHER, (int) (BLIGHT_TICKS * power), BLIGHT_WITHER), player);
 		level.sendParticles(ParticleTypes.SOUL, target.getX(), target.getY(0.6), target.getZ(), 10, 0.3, 0.4, 0.3, 0.03);

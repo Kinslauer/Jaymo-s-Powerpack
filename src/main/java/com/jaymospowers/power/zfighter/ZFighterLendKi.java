@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -132,7 +133,7 @@ public final class ZFighterLendKi {
 		if (now % MOTE_EVERY == 0) {
 			Vec3 from = lender.getBoundingBox().getCenter();
 			Vec3 to = friend.getBoundingBox().getCenter();
-			DustParticleOptions dust = ZFighterPower.dust(giving);
+			ParticleOptions dust = ZFighterPower.dust(giving);
 			double t = level.getRandom().nextDouble();
 			Vec3 at = from.lerp(to, t);
 			level.sendParticles(dust, true, false, at.x, at.y, at.z, 2, 0.08, 0.08, 0.08, 0.0);

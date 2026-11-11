@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -8,7 +9,6 @@ import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -90,7 +90,7 @@ public final class ArsenalItems {
 				// it turns
 				serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 1.0F, 0.5F);
 				serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.7F, 1.2F);
-				serverLevel.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.4, 0.8, 0.4, 0.15);
+				serverLevel.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.4, 0.8, 0.4, 0.15);
 				stack.consume(1, player);
 				Fate.ascend(serverPlayer);
 				return InteractionResult.SUCCESS;

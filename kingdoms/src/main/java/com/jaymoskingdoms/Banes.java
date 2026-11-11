@@ -1218,6 +1218,7 @@ public final class Banes {
 				p.setAttached(Captains.SWORN, List.copyOf(sworn));
 			}
 			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.ended", c.name()).withStyle(ChatFormatting.GOLD));
+			PackAdvancements.award(p, "bane", "done");
 			Post.news(server, Component.translatable("news.jaymoskingdoms.bane.ended", Component.literal(c.name()), p.getDisplayName()));
 		}
 	}
@@ -1232,6 +1233,7 @@ public final class Banes {
 		p.removeAttached(BANE);
 		SwornCaptains.swearBane(level, p, body, c);
 		p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bane.sworn", c.name()).withStyle(ChatFormatting.GOLD));
+		PackAdvancements.award(p, "bane", "done");
 		Post.news(server, Component.translatable("news.jaymoskingdoms.bane.sworn", Component.literal(c.name()), p.getDisplayName()));
 	}
 

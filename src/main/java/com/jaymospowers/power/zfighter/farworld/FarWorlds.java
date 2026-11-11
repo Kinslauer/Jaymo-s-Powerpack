@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.farworld;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.ground.LooseStonesBlock;
 import com.jaymospowers.tinkering.TinkerMaterial;
@@ -23,7 +24,6 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -252,7 +252,7 @@ public final class FarWorlds {
 			// (Prospector career) the first reveal of each ore kind on a world; the listeners count each kind once
 			com.jaymospowers.power.zfighter.Prospecting.found(player, world.key, BuiltInRegistries.BLOCK.getKey(real.getBlock()).toString());
 		}
-		level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3, 0.35, 0.35, 0.35, 0.01);
+		level.sendParticles(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3, 0.35, 0.35, 0.35, 0.01);
 		return true;
 	}
 

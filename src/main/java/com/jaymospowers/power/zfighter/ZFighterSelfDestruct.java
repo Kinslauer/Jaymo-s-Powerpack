@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.Soundscape;
@@ -7,7 +8,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -160,10 +160,10 @@ final class ZFighterSelfDestruct {
 		}
 		int color = charge >= 0.75F ? GLOW : ZFighterArts.color(live);
 		double spread = 0.4 + charge * 0.6;
-		level.sendParticles(new DustParticleOptions(color, 1.2F + charge * 1.4F), true, false, at.x, at.y, at.z, 3 + (int)(charge * 8),
+		level.sendParticles(MagicFx.wisp(color, 1.2F + charge * 1.4F), true, false, at.x, at.y, at.z, 3 + (int)(charge * 8),
 			spread, player.getBbHeight() * 0.4, spread, 0.0);
 		if (level.getGameTime() % 4 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 2 + (int)(charge * 6), spread, spread, spread, 0.3);
+			level.sendParticles(MagicFx.CRACKLE, true, false, at.x, at.y, at.z, 2 + (int)(charge * 6), spread, spread, spread, 0.3);
 		}
 		if (level.getGameTime() % 10 == 0) {
 			Shakes.send(player, 0.2F + charge * 0.5F, at);
@@ -202,9 +202,9 @@ final class ZFighterSelfDestruct {
 		// the ground torn up, by how strong it was (it always takes the ground: there's no holding back a self-destruct)
 		float terrain = Math.min(TERRAIN_CAP, Mth.lerp(charge, TERRAIN_MIN, TERRAIN_MAX) * boost * ZFighterPower.kiPower(player, live));
 		level.explode(player, ZFighterKi.source(player), ZFighterKi.GROUND_ONLY, at.x, at.y, at.z, terrain, false, Level.ExplosionInteraction.BLOCK);
-		level.sendParticles(new DustParticleOptions(GLOW, 4.0F), true, false, at.x, at.y, at.z, 120, radius * 0.4, radius * 0.4, radius * 0.4, 0.0);
+		MagicFx.burst(level, at.x, at.y, at.z, GLOW, 4.0F, 120, radius * 0.4, radius * 0.4, radius * 0.4);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, at.x, at.y, at.z, 3, radius * 0.2, radius * 0.2, radius * 0.2, 0.0);
-		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFF4E0), true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xFFF4E0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 4.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 0.6F);
 		Shakes.send(player, 1.5F + charge, at);
@@ -223,7 +223,7 @@ final class ZFighterSelfDestruct {
 			int steps = Math.max(2, (int)(step.length() * 3.0));
 			for (int i = 0; i <= steps; i++) {
 				Vec3 p = from.add(step.scale((double)i / steps));
-				level.sendParticles(new DustParticleOptions(color, 0.9F), true, false, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+				level.sendParticles(MagicFx.wisp(color, 0.9F), true, false, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 			}
 		}
 	}

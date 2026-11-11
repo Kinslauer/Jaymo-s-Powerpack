@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
@@ -17,7 +18,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
@@ -148,19 +148,19 @@ public final class GravityPowerClient implements PowerClient {
 				continue;
 			}
 			if (player.getAttached(GravityPower.WEIGHTLESS_ON) != null && player.tickCount % 3 == 0) {
-				level.addParticle(ParticleTypes.END_ROD, player.getX() + (random.nextDouble() - 0.5) * 0.8, player.getY() + random.nextDouble() * 0.3,
+				level.addParticle(MagicFx.LIGHT, player.getX() + (random.nextDouble() - 0.5) * 0.8, player.getY() + random.nextDouble() * 0.3,
 					player.getZ() + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.02, 0.0);
 			}
 			if (Fate.isCorrupted(player) && player.tickCount % 2 == 0) {
 				double a = random.nextDouble() * Math.PI * 2.0;
 				double r = 1.5 + random.nextDouble() * 1.5;
-				level.addParticle(ParticleTypes.PORTAL, player.getX() + Math.cos(a) * r, player.getY() + 0.2 + random.nextDouble() * 1.8,
+				level.addParticle(MagicFx.VOID, player.getX() + Math.cos(a) * r, player.getY() + 0.2 + random.nextDouble() * 1.8,
 					player.getZ() + Math.sin(a) * r, -Math.cos(a) * 0.6, 0.0, -Math.sin(a) * 0.6);
 			}
 			if (Fate.isAscended(player) && player.tickCount % 4 == 0) {
 				// a thin ring circling at the waist: the horizon
 				double a = player.tickCount * 0.25;
-				level.addParticle(ParticleTypes.REVERSE_PORTAL, player.getX() + Math.cos(a) * 0.9, player.getY() + 1.0, player.getZ() + Math.sin(a) * 0.9,
+				level.addParticle(MagicFx.VOID, player.getX() + Math.cos(a) * 0.9, player.getY() + 1.0, player.getZ() + Math.sin(a) * 0.9,
 					0.0, 0.0, 0.0);
 			}
 		}

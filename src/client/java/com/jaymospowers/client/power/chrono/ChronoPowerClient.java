@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.chrono.ChronoFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
@@ -16,7 +17,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -60,8 +61,8 @@ public final class ChronoPowerClient implements PowerClient {
 	private static final double TIMELESS_HOUR_SPEED = 0.035;
 	/** A particle every this many ticks per hand. */
 	private static final int TIMELESS_INTERVAL = 2;
-	private static final DustParticleOptions MINUTE_HAND = new DustParticleOptions(0xFFE8A0, 0.55F);
-	private static final DustParticleOptions HOUR_HAND = new DustParticleOptions(0xA8E8FF, 0.6F);
+	private static final ParticleOptions MINUTE_HAND = MagicFx.wisp(0xFFE8A0, 0.55F);
+	private static final ParticleOptions HOUR_HAND = MagicFx.wisp(0xA8E8FF, 0.6F);
 
 	private static final int GOLD = 0xFFF2C14E;
 	private static final int HAND = 0xFFFFE08A;

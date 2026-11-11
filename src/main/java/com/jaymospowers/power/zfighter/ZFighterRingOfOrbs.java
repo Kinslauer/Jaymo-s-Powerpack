@@ -1,11 +1,12 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -124,7 +125,7 @@ final class ZFighterRingOfOrbs {
 		double grow = Math.min(1.0, ring.age / 5.0);
 		double size = ORB_SIZE * (0.3 + 0.7 * grow);
 		double spin = ring.age * TURN;
-		DustParticleOptions dust = new DustParticleOptions(ring.color, 1.0F);
+		ParticleOptions dust = MagicFx.wisp(ring.color, 1.0F);
 		for (int i = 0; i < ring.count; i++) {
 			double a = spin + i * Math.PI * 2.0 / ring.count;
 			Vec3 at = ring.centre.add(Math.cos(a) * radius, 0.0, Math.sin(a) * radius);
@@ -134,7 +135,7 @@ final class ZFighterRingOfOrbs {
 			}
 		}
 		if (ring.age == 1) {
-			level.sendParticles(ParticleTypes.ENCHANT, true, false, ring.centre.x, ring.centre.y, ring.centre.z, 20, RING_RADIUS * 0.5, 0.5, RING_RADIUS * 0.5, 0.3);
+			level.sendParticles(MagicFx.GLYPH, true, false, ring.centre.x, ring.centre.y, ring.centre.z, 20, RING_RADIUS * 0.5, 0.5, RING_RADIUS * 0.5, 0.3);
 		}
 		if (closed < 1.0) {
 			return true;
@@ -154,7 +155,7 @@ final class ZFighterRingOfOrbs {
 			double sideways = Math.hypot(now.x - centre.x, now.z - centre.z);
 			hit = sideways <= MIDDLE && Math.abs(now.y - centre.y) <= MIDDLE_HEIGHT;
 		}
-		DustParticleOptions dust = new DustParticleOptions(ring.color, 1.6F);
+		ParticleOptions dust = MagicFx.wisp(ring.color, 1.6F);
 		if (hit) {
 			var source = ZFighterKi.source(owner);
 			for (int i = 0; i < ring.count; i++) {

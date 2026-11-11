@@ -7,9 +7,7 @@ import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,6 +45,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class ValorKings {
+	/** How far a soul flare's blast of light swells (blocks). */
+	static final float SOUL_FLARE = 1.8F;
 	/** Great foes for King's Valor Coating; how many a King's Valor holder counts as. */
 	public static final int COAT_FOES = 3, KINGS_COUNT = 3;
 	/** King's Valor: its reach (base, per great foe, most), how long the weaker are out, how long the rest are shaken (ticks). */
@@ -115,7 +115,7 @@ public final class ValorKings {
 
 	/** The soul colour shown: a ring and a column of it, thunder far off, a heartbeat. */
 	static void reveal(ServerLevel level, LivingEntity holder, int color, boolean coat) {
-		DustParticleOptions dust = new DustParticleOptions(color, 2.0F);
+		ParticleOptions dust = Fx.wisp(color, 2.0F);
 		for (int i = 0; i < 48; i++) {
 			double a = Math.PI * 2 * i / 48;
 			level.sendParticles(dust, holder.getX() + Math.cos(a) * 3.0, holder.getY(0.2), holder.getZ() + Math.sin(a) * 3.0, 2, 0.1, 0.1, 0.1, 0.0);
@@ -131,8 +131,8 @@ public final class ValorKings {
 
 	/** A flash of the soul colour round {@code e} and its glow rising off them. */
 	static void soulFlare(ServerLevel level, LivingEntity e, int color) {
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | color), e.getX(), e.getY(0.5), e.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color), e.getX(), e.getY(0.5), e.getZ(), 60, 0.4, 1.0, 0.4,
+		Fx.blast(level, new Vec3(e.getX(), e.getY(0.5), e.getZ()), SOUL_FLARE, color);
+		level.sendParticles(Fx.wisp(0xFF000000 | color, 1.0F), e.getX(), e.getY(0.5), e.getZ(), 60, 0.4, 1.0, 0.4,
 			0.6);
 	}
 
@@ -165,7 +165,7 @@ public final class ValorKings {
 	/** King's Valor from {@code source}: the weaker among {@code hits} round them pass out, the rest are shaken. */
 	static void unleash(ServerLevel level, LivingEntity source, Valor.Data data, Predicate<LivingEntity> hits) {
 		double reach = Math.min(REACH_MAX, REACH + REACH_PER_FOE * data.greatFoes());
-		DustParticleOptions dust = new DustParticleOptions(data.soulColor(), 1.6F);
+		ParticleOptions dust = Fx.wisp(data.soulColor(), 1.6F);
 		for (double r = 1.5; r <= reach; r += 1.5) {
 			int n = (int) (r * 6);
 			for (int i = 0; i < n; i++) {
@@ -235,7 +235,7 @@ public final class ValorKings {
 		KILLED.put(target, level.getGameTime());
 		Valor.Data data = Valor.of(striker);
 		if (data != null) {
-			level.sendParticles(new DustParticleOptions(data.soulColor(), 1.5F), target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.4, 0.3, 0.0);
+			level.sendParticles(Fx.wisp(data.soulColor(), 1.5F), target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.4, 0.3, 0.0);
 		}
 		return Math.max(amount, target.getHealth() + target.getAbsorptionAmount() + 20.0F);
 	}
@@ -257,12 +257,12 @@ public final class ValorKings {
 		Valor.Data da = Valor.of(a), db = Valor.of(b);
 		Vec3 mid = a.position().add(b.position()).scale(0.5).add(0.0, 1.2, 0.0);
 		if (da != null) {
-			level.sendParticles(new DustParticleOptions(da.soulColor(), 1.8F), mid.x, mid.y, mid.z, 30, 0.4, 0.4, 0.4, 0.0);
+			Fx.burst(level, mid.x, mid.y, mid.z, da.soulColor(), 1.8F, 30, 0.4, 0.4, 0.4);
 		}
 		if (db != null) {
-			level.sendParticles(new DustParticleOptions(db.soulColor(), 1.8F), mid.x, mid.y, mid.z, 30, 0.4, 0.4, 0.4, 0.0);
+			Fx.burst(level, mid.x, mid.y, mid.z, db.soulColor(), 1.8F, 30, 0.4, 0.4, 0.4);
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mid.x, mid.y, mid.z, 40, 0.5, 0.5, 0.5, 0.4);
+		level.sendParticles(Fx.CRACKLE, mid.x, mid.y, mid.z, 40, 0.5, 0.5, 0.5, 0.4);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 2.0F, 1.1F);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 0.5F);
 		RandomSource r = level.getRandom();

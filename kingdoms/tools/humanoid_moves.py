@@ -190,6 +190,32 @@ def moves(leg=12.0, cape=True):
 				"ll": 32, "ls": -50, "rl": -22, "rs": -26, "pos": (0, -2.0, 0)}),
 		(0.5, {"ra": (44, 0, -12), "rf": 12, "la": (44, 0, 12), "lf": 12, "b": (-28, 0, 0), "w": (-12, 0, 0), "h": (20, 0, 0),
 			   "ll": 30, "ls": -46, "rl": -22, "rs": -24, "pos": (0, -1.8, 0)})]))
+	# a beheading cut, drawn: turned right round to the weapon side, the blade low and level out behind, eyes on the neck
+	WIND = {"ra": (16, 0, 40), "rf": 18, "la": (44, 0, -8), "lf": 72, "b": (-6, 56, 0), "w": (0, 20, 0), "h": (4, -52, 0),
+			"ll": 24, "ls": -28, "rl": -18, "rs": -12, "pos": (0, -0.9, 0)}
+	out.append(m("wind_side", "hold", [(0, UP), (0.2, WIND), (0.35, dict(WIND, b=(-6, 60, 0), ra=(14, 0, 44)))]))
+	# and through, level, the whole body turning with it: the blade stays at the height of a kneeling neck all the way round
+	out.append(m("behead", "hold", [
+		(0, dict(WIND, b=(-6, 60, 0), ra=(14, 0, 44))),
+		(0.08, {"ra": (22, 0, 16), "rf": 8, "la": (10, 0, -30), "lf": 50, "b": (-12, -6, 0), "w": (0, -4, 0), "h": (6, 4, 0),
+				"ll": 28, "ls": -36, "rl": -22, "rs": -12, "pos": (0, -1.3, -0.5)}),
+		(0.16, {"ra": (26, 0, -8), "rf": 6, "la": (-24, 0, -42), "lf": 30, "b": (-14, -66, 0), "w": (0, -24, 0), "h": (6, 54, 0),
+				"ll": 30, "ls": -42, "rl": -26, "rs": -10, "pos": (0, -1.6, -0.9)}),
+		(0.5, {"ra": (24, 0, -6), "rf": 10, "la": (-20, 0, -40), "lf": 34, "b": (-12, -58, 0), "w": (0, -20, 0), "h": (6, 48, 0),
+			   "ll": 28, "ls": -40, "rl": -26, "rs": -10, "pos": (0, -1.5, -0.9)})]))
+	# a cut from the shoulder, drawn: the blade back over the weapon shoulder, the body turned under it
+	HIGH = {"ra": (148, 0, 42), "rf": 64, "la": (36, 0, -18), "lf": 66, "b": (6, 42, 0), "w": (2, 14, 0), "h": (4, -38, 0),
+			"ll": 22, "ls": -24, "rl": -18, "rs": -10, "pos": (0, -0.5, 0)}
+	out.append(m("wind_high", "hold", [(0, UP), (0.2, HIGH), (0.35, dict(HIGH, b=(8, 46, 0)))]))
+	# and down across, shoulder to the far hip, turning through it
+	out.append(m("hew", "hold", [
+		(0, dict(HIGH, b=(8, 46, 0))),
+		(0.08, {"ra": (96, 0, 10), "rf": 16, "la": (14, 0, -30), "lf": 50, "b": (-12, -4, 0), "w": (-4, -2, 0), "h": (8, 2, 0),
+				"ll": 28, "ls": -36, "rl": -22, "rs": -14, "pos": (0, -1.2, -0.5)}),
+		(0.16, {"ra": (34, 0, -44), "rf": 8, "la": (-18, 0, -40), "lf": 34, "b": (-24, -50, 0), "w": (-8, -18, 0), "h": (12, 40, 0),
+				"ll": 32, "ls": -46, "rl": -26, "rs": -14, "pos": (0, -1.9, -0.9)}),
+		(0.5, {"ra": (36, 0, -40), "rf": 12, "la": (-16, 0, -38), "lf": 36, "b": (-22, -46, 0), "w": (-8, -16, 0), "h": (12, 36, 0),
+			   "ll": 30, "ls": -44, "rl": -26, "rs": -14, "pos": (0, -1.8, -0.9)})]))
 	# run through: the arm drawn back, a long step, the point driven home and held there
 	out.append(m("thrust", "hold", [
 		(0, UP), (0.12, {"ra": (20, 0, 14), "rf": 104, "la": (60, 0, -20), "lf": 30, "b": (-4, 30, 0), "w": (0, 10, 0), "h": (2, -26, 0)}),

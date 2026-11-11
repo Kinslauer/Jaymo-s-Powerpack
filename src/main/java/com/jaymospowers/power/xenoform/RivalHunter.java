@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterNpcs;
 import com.mojang.serialization.Codec;
@@ -17,7 +18,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -307,7 +307,7 @@ public final class RivalHunter {
 	}
 
 	private static void flash(ServerLevel level, Vec3 at) {
-		level.sendParticles(new DustParticleOptions(0xFF3030, 1.6F), at.x, at.y, at.z, 30, 0.4, 0.7, 0.4, 0.0);
+		MagicFx.burst(level, at.x, at.y, at.z, 0xFF3030, 1.6F, 30, 0.4, 0.7, 0.4);
 	}
 
 	// ---------------------------------------------------------------- taking it

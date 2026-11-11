@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -9,7 +10,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -75,7 +75,7 @@ public final class ZFighterCorruption {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && source.getEntity() instanceof ServerPlayer player && entity != player && mode(player)) {
 				player.heal(damageTaken * LIFE_STEAL);
-				player.level().sendParticles(new DustParticleOptions(MARK_COLOR, 1.0F), entity.getX(), entity.getY() + entity.getBbHeight() * 0.6,
+				player.level().sendParticles(MagicFx.wisp(MARK_COLOR, 1.0F), entity.getX(), entity.getY() + entity.getBbHeight() * 0.6,
 					entity.getZ(), 6, 0.25, 0.3, 0.25, 0.0);
 			}
 		});
@@ -126,8 +126,7 @@ public final class ZFighterCorruption {
 		player.setAttached(MODE, true);
 		ZFighterPower.refresh(player, live);
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(MARK_COLOR, 2.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.8, 1.0,
-			0.8, 0.1);
+		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), MARK_COLOR, 2.0F, 60, 0.8, 1.0, 0.8);
 		level.sendParticles(ParticleTypes.SQUID_INK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.8, 0.5, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 0.8F, 1.3F);
@@ -178,7 +177,7 @@ public final class ZFighterCorruption {
 			player.setHealth(player.getHealth() - DRAIN);
 		}
 		if (now % 3 == 0) {
-			level.sendParticles(new DustParticleOptions(now % 6 == 0 ? MARK_COLOR : 0x200008, 1.5F), true, false, player.getX(),
+			level.sendParticles(MagicFx.wisp(now % 6 == 0 ? MARK_COLOR : 0x200008, 1.5F), true, false, player.getX(),
 				player.getY() + 0.9, player.getZ(), 3, 0.35, 0.7, 0.35, 0.0);
 		}
 	}
@@ -237,12 +236,12 @@ public final class ZFighterCorruption {
 			return;
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y + 1.0, from.z, 20, 0.3, 0.6, 0.3, 0.05);
-		level.sendParticles(new DustParticleOptions(MARK_COLOR, 1.5F), from.x, from.y + 1.0, from.z, 15, 0.3, 0.6, 0.3, 0.0);
+		level.sendParticles(MagicFx.wisp(MARK_COLOR, 1.5F), from.x, from.y + 1.0, from.z, 15, 0.3, 0.6, 0.3, 0.0);
 		player.teleportTo(level, safe.x, safe.y, safe.z, Set.of(), yaw, player.getXRot(), false);
 		player.setDeltaMovement(Vec3.ZERO);
 		player.needsSync = true;
 		player.resetFallDistance();
-		level.sendParticles(new DustParticleOptions(MARK_COLOR, 1.5F), safe.x, safe.y + 1.0, safe.z, 20, 0.3, 0.6, 0.3, 0.0);
+		level.sendParticles(MagicFx.wisp(MARK_COLOR, 1.5F), safe.x, safe.y + 1.0, safe.z, 20, 0.3, 0.6, 0.3, 0.0);
 		level.playSound(null, safe.x, safe.y, safe.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,9 +13,8 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -70,8 +70,8 @@ public final class ArsenalGates {
 	public static final AttachmentType<List<Gate>> GATES = AttachmentRegistry.create(JaymosPowers.id("arsenal_gates"),
 		builder -> builder.persistent(Gate.CODEC.listOf()).copyOnDeath());
 
-	private static final DustParticleOptions VOID = new DustParticleOptions(0x5A1E8C, 1.2F);
-	private static final DustParticleOptions OUTLINE = new DustParticleOptions(0xC07CFF, 0.8F);
+	private static final ParticleOptions VOID = MagicFx.wisp(0x5A1E8C, 1.2F);
+	private static final ParticleOptions OUTLINE = MagicFx.wisp(0xC07CFF, 0.8F);
 
 	/** A gate being cast out ahead: where it is now, the way it's going, how far it has gone. */
 	private static final class Projection {
@@ -167,7 +167,7 @@ public final class ArsenalGates {
 		gates.remove(gate);
 		player.setAttached(GATES, gates);
 		Vec3 p = gate.pos();
-		level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 0.5, p.z, 30, 0.2, 0.5, 0.2, 0.6);
+		level.sendParticles(MagicFx.VOID, p.x, p.y + 0.5, p.z, 30, 0.2, 0.5, 0.2, 0.6);
 		level.playSound(null, p.x, p.y, p.z, SoundEvents.ENDER_CHEST_CLOSE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal_gate_closed", gates.size(), MAX_GATES)
 			.withStyle(ChatFormatting.DARK_PURPLE));
@@ -187,7 +187,7 @@ public final class ArsenalGates {
 		}
 		gates.add(new Gate(level.dimension(), at));
 		player.setAttached(GATES, gates);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 0.5, at.z, 30, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(MagicFx.VOID, at.x, at.y + 0.5, at.z, 30, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 0.8F, 0.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal_gate_placed", gates.size(), MAX_GATES)
 			.withStyle(ChatFormatting.DARK_PURPLE));
@@ -224,7 +224,7 @@ public final class ArsenalGates {
 			return;
 		}
 		Vec3 from = player.position();
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 40, 0.4, 0.8, 0.4, 0.08);
+		level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 40, 0.4, 0.8, 0.4, 0.08);
 		level.playSound(null, from.x, from.y, from.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9F, 0.6F);
 		if (player.isPassenger()) {
 			player.stopRiding();
@@ -232,7 +232,7 @@ public final class ArsenalGates {
 		player.teleportTo(level, spot.x, spot.y, spot.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
 		ArsenalPlaces.arrived(player);
-		level.sendParticles(ParticleTypes.PORTAL, spot.x, spot.y + 1.0, spot.z, 60, 0.4, 0.9, 0.4, 0.4);
+		level.sendParticles(MagicFx.VOID, spot.x, spot.y + 1.0, spot.z, 60, 0.4, 0.9, 0.4, 0.4);
 		level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.9F, 0.5F);
 		READY_AT.put(player.getUUID(), level.getGameTime() + COOLDOWN);
 	}
@@ -259,7 +259,7 @@ public final class ArsenalGates {
 			Gate held = gateAt(player);
 			if (held != null) {
 				Vec3 p = held.pos();
-				show(player, level, ParticleTypes.REVERSE_PORTAL, p.x, p.y + 0.9, p.z, 4, 0.3, 0.6, 0.3, 0.02);
+				show(player, level, MagicFx.VOID, p.x, p.y + 0.9, p.z, 4, 0.3, 0.6, 0.3, 0.02);
 				if (level.getGameTime() - pressed >= CLOSE_HOLD) {
 					PRESSED.remove(player.getUUID());
 					closeGate(player, held);
@@ -288,7 +288,7 @@ public final class ArsenalGates {
 			for (Gate gate : gates(player)) {
 				if (gate.dimension() == level.dimension() && gate.pos().distanceToSqr(player.position()) < 96.0 * 96.0) {
 					Vec3 p = gate.pos();
-					show(player, level, ParticleTypes.PORTAL, p.x, p.y + 0.9, p.z, 3, 0.25, 0.6, 0.25, 0.3);
+					show(player, level, MagicFx.VOID, p.x, p.y + 0.9, p.z, 3, 0.25, 0.6, 0.25, 0.3);
 					show(player, level, VOID, p.x, p.y + 0.9, p.z, 2, 0.2, 0.5, 0.2, 0.0);
 				}
 			}
@@ -310,7 +310,7 @@ public final class ArsenalGates {
 				}
 			}
 		}
-		show(player, level, ParticleTypes.REVERSE_PORTAL, at.x, at.y + h * 0.5, at.z, 2, 0.2, 0.4, 0.2, 0.01);
+		show(player, level, MagicFx.VOID, at.x, at.y + h * 0.5, at.z, 2, 0.2, 0.4, 0.2, 0.01);
 	}
 
 	private static void show(ServerPlayer player, ServerLevel level, ParticleOptions particle, double x, double y, double z, int count,

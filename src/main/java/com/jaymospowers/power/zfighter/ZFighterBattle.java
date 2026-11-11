@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
@@ -8,7 +9,6 @@ import java.util.List;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -407,7 +407,7 @@ final class ZFighterBattle {
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			ZFighterKi.push(near, near.position().subtract(centre), 1.2, 0.3);
 		}
-		level.sendParticles(new DustParticleOptions(RAGE_COLOR, 2.0F), true, false, centre.x, centre.y + 1.0, centre.z, 50, 1.0, 1.0, 1.0, 0.2);
+		MagicFx.burst(level, centre.x, centre.y + 1.0, centre.z, RAGE_COLOR, 2.0F, 50, 1.0, 1.0, 1.0);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, centre.x, centre.y + 0.5, centre.z, 3, 0.8, 0.3, 0.8, 0.0);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2F, 1.3F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rage").withStyle(ChatFormatting.RED));
