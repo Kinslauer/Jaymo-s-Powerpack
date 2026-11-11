@@ -738,6 +738,12 @@ names, families and tempers.
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
 
+(new) **How the town golems look.** Each is shaped by the realm's own masons for its work. The **lamp warden** is a
+lean figure of pale stone banded in gold whose head is a lantern; it stands with the iron golems and its flame wakes
+at dusk. The **mender** is a mossy boulder that walks, green crystals grown from its back, and it holds out its hands
+to the hurt. The **throne golem** is a small keep of dark stone set with diamond that sits down by the seat and folds
+itself into the ruler's throne, its turrets and battlements the throne's back.
+
 **Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
