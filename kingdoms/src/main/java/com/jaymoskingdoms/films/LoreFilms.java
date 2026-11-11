@@ -79,6 +79,7 @@ public final class LoreFilms {
 
 	public static void register() {
 		JaymosKingdoms.LOGGER.debug("lore film attachment: {}", SEEN);
+		FilmActor.register();
 		PayloadTypeRegistry.clientboundPlay().register(Play.TYPE, Play.CODEC);
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register(LoreFilms::harm);
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

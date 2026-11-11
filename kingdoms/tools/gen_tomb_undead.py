@@ -23,6 +23,8 @@ import random
 import sys
 import uuid
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -271,8 +273,9 @@ def draugr():
 	b = Builder(128, 128, 11)
 	b.bone("root", None, (0, 0, 0))
 	# long legs gone to sinew, fur-wrapped boots, leather breeches
-	mirror(b, "leg", "root", (2.2, 15, 0), [((0.4, 0, -1.8), (4.0, 15, 1.8), "skin"), ((0.2, 0, -2.3), (4.2, 5, 2.1), "fur", 0.25),
-											  ((0.3, 9, -2.0), (4.1, 15, 2.0), "leather")])
+	# (each limb in two, hinged at the knee and the elbow, so it can take humanoid_moves.py's animations)
+	mirror(b, "leg", "root", (2.2, 15, 0), [((0.4, 7.5, -1.8), (4.0, 15, 1.8), "skin"), ((0.3, 9, -2.0), (4.1, 15, 2.0), "leather")])
+	mirror(b, "shin", ("leg",), (2.2, 7.5, 0), [((0.4, 0, -1.8), (4.0, 7.5, 1.8), "skin"), ((0.2, 0, -2.3), (4.2, 5, 2.1), "fur", 0.25)])
 	b.bone("waist", "root", (0, 15, 0))
 	b.cube("waist", (-4, 14, -2.5), (4, 17, 2.5), "leather", 0.1)
 	b.cube("waist", (-1, 14.5, -3.1), (1, 16.5, -2.6), "gold")
@@ -296,17 +299,17 @@ def draugr():
 	mirror(b, "horn", "head", (4.5, 35, 0), [((4.5, 34, -1), (7, 36, 1), "horn"), ((6, 36, -0.75), (7.5, 40, 0.75), "horn")],
 		   (0, 0, -15))
 	# long arms, iron pauldrons, a fighter's wristbands
-	mirror(b, "arm", "body", (6.5, 26, 0), [((5, 13.5, -1.8), (8.6, 27, 1.8), "skin"), ((4.6, 24, -2.6), (9.4, 29.5, 2.6), "iron", 0.1),
-											  ((5, 13.5, -2.1), (8.6, 17.5, 2.1), "leather", 0.15)])
-	b.bone("sword", "right_arm", (6.8, 14.5, 0))
+	mirror(b, "arm", "body", (6.5, 26, 0), [((5, 20, -1.8), (8.6, 27, 1.8), "skin"), ((4.6, 24, -2.6), (9.4, 29.5, 2.6), "iron", 0.1)])
+	mirror(b, "forearm", ("arm",), (6.8, 20, 0), [((5, 13.5, -1.8), (8.6, 20, 1.8), "skin"), ((5, 13.5, -2.1), (8.6, 17.5, 2.1), "leather", 0.15)])
+	b.bone("sword", "right_forearm", (6.8, 14.5, 0))
 	b.cube("sword", (6.3, 13, -1.5), (7.3, 14.25, 1.5), "leather")
 	b.cube("sword", (4.8, 13, -2.5), (8.8, 14.5, -1.5), "gold")
 	b.cube("sword", (6.05, 13.25, -16), (7.55, 14.25, -2.5), "steel")
-	b.bone("axe", "right_arm", (6.8, 14.5, 0))
+	b.bone("axe", "right_forearm", (6.8, 14.5, 0))
 	b.cube("axe", (6.3, 13, -16), (7.3, 14, 4), "wood")
 	b.cube("axe", (6.05, 14, -16), (7.55, 17.5, -12), "steel")
 	b.cube("axe", (6.05, 9.5, -16), (7.55, 14, -13.5), "steel")
-	b.bone("shield", "left_arm", (-6.8, 19, 0))
+	b.bone("shield", "left_forearm", (-6.8, 19, 0))
 	b.cube("shield", (-10.1, 11.5, -6), (-9.1, 24.5, 6), "wood")
 	b.cube("shield", (-10.2, 11.5, -6), (-9.0, 12.5, 6), "iron")
 	b.cube("shield", (-10.2, 23.5, -6), (-9.0, 24.5, 6), "iron")
@@ -363,6 +366,10 @@ def draugr():
 			"head": {"rotation": [(0, Z), (0.2, (15, 0, 0)), (1.0, Z)]},
 		}),
 	]
+	# and every move of the humanoid library it has no move of its own for (the lore films' Warrior-born use them)
+	import humanoid_moves
+	own = {a["name"] for a in anims}
+	anims += [a for a in humanoid_moves.moves(leg=15.0, cape=False) if a["name"] not in own]
 	add_animations(model, anims, bone_uuids_of(model))
 	return model
 

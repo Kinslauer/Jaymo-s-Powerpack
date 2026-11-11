@@ -25,7 +25,6 @@ public final class ModelPoses {
 			BioForms.apply(model, state);
 		}
 		HandshakePose.apply(model, state);
-		com.jaymoskingdoms.client.films.FilmPose.apply(model, state);
 		MobAnimations.apply(model, state);
 		HiddenBladeClient.pose(model, state);
 		GoblinBody.apply(model, state);

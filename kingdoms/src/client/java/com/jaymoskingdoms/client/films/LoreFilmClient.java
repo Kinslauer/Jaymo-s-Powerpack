@@ -1,16 +1,23 @@
 package com.jaymoskingdoms.client.films;
 
+import com.geckolib.animatable.GeoEntity;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
+import com.jaymoskingdoms.films.FilmActor;
 import com.jaymoskingdoms.films.LoreFilms;
+import com.jaymoskingdoms.films.Moves;
 import com.jaymoskingdoms.inhabitants.Draugr;
 import com.jaymoskingdoms.inhabitants.Inhabitants;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.math.Transformation;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -28,15 +35,14 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.Mth;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -49,11 +55,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -62,6 +66,18 @@ import org.jspecify.annotations.Nullable;
  * A lore film ({@link LoreFilms}) played on this game alone: a story staged in front of you with actors and a set only
  * your game sees, shot through letterbox bars with the HUD cleared and no words on screen (sounds only). Sneak held for a
  * second skips it.
+ * <p>
+ * <b>Recorded, then replayed</b> (Andy: "captured from within the engine, then replayed. Not drawn up every time"). A
+ * film is staged once, in the game, with the tape running ({@code /kingdomfilm record <film>}): who stood where each
+ * tick, every move started, every sound, particle, bolt and flying head goes onto a {@link FilmTape}. That tape ships
+ * with the mod and is what everyone sees, the same performance every time, set down on whatever ground they stand on.
+ * Only when there is no tape is the film staged afresh. Everything the staging does that can be seen or heard goes
+ * through the few calls under "what a film can do", which do it and put it on the tape; the player does the same
+ * calls back off it.
+ * <p>
+ * <b>The actors</b> are {@link FilmActor}s (and, for the Warrior-born, draugr drawn alive): GeckoLib bodies with elbows
+ * and knees, moved by the humanoid move library ({@link Moves}). They walk, run, guard, swing, block, kneel and die by
+ * its animations; nothing is posed by hand here.
  * <p>
  * <b>The Long Defence</b> (40 seconds), staged on the ground ahead of where you stand, as a memory: dim. Andy: "The
  * setting should be a fairly wooded forest, with a Keep off in the distance", and "the battle should be spanning the
@@ -83,9 +99,13 @@ import org.jspecify.annotations.Nullable;
  * its head, gets up, takes its axe back and turns on the dead for him.</li>
  * <li>The mages, each in turn, each in their own colour: Varro's fire, Thessaly's ward, Grimsby's spell-cut (he carries a
  * sword and casts with the other hand, bolts all battle long), Ambrose's light.</li>
- * <li>The fifth, in plain grey, blade in hand, runs at the sorcerer, "darting back and forth through trees and past bolts
- * of mana from the sorcerer as he approaches quickly ... and he lunges, but the sorcerer fades away". The dead drop where
- * they stand, the host runs. Nobody says who he was; he looks like none of the spirits.</li>
+ * <li>The fifth, the Quiet One, in a white hooded cloak that is alive (Andy: "the cloak takes form of his webbing and
+ * tendrils, he uses them for mobility and combat alike ... moving as if it also has a mind of its own"), a rapier in
+ * his hand. He runs at the sorcerer "darting back and forth through trees and past bolts of mana from the sorcerer",
+ * the cloak throwing a tether at each tree ahead and hauling him round it, "flipping dodging off the trees". The
+ * sorcerer's two guards come for him and the cloak deals with them itself ("using his cloak to attach to an orc
+ * nearby almost autonomously"): a tether takes each and throws it aside without his breaking stride. "And he lunges,
+ * but the sorcerer fades away". The dead drop where they stand, the host runs. Nobody says who he was.</li>
  * <li>The road, wide, the Keep still standing. Fade.</li>
  * </ol>
  * <b>The camera</b> (Andy: "consider the 180 degree rule and the rule of thirds") never crosses the battle line: every
@@ -111,8 +131,6 @@ public final class LoreFilmClient {
 	static final int PAIRS = 26, DEAD = 52;
 	/** Orcs are drawn bigger than a man (as BodySizes draws the real ones). */
 	static final double ORC_SCALE = 1.12;
-	/** The film's orcs' greens (as tools/gen_film_skins.py paints them), and the dead ones', for GreenskinLooks to tint by. */
-	static final int[] ORC_GREENS = {0xFF7C8A62, 0xFF687854, 0xFF566646}, DEAD_GREENS = {0xFF5E6452, 0xFF545C48, 0xFF4E5444};
 
 	// ---- the set ----
 	/** The forest: how far it reaches behind, ahead and aside, how many trees, how far apart, and how near one a fighter can stand. */
@@ -136,8 +154,12 @@ public final class LoreFilmClient {
 	static final float DEFENDER_LOSES = 0.4F;
 	/** A finisher: the head off (on its knees first), the weapon arm off and then cut down, or run through. */
 	static final int BEHEAD = 0, SEVER = 1, IMPALE = 2;
-	/** How far a kneeling actor is lowered (blocks, times its scale), and how fast actors rise and sink. */
-	static final double KNEEL = 0.62, SINK_RATE = 0.12;
+	/** How much lower a kneeling actor's head and shoulders are (blocks, times its scale), and how fast actors rise and sink. */
+	static final double KNEEL = 0.375, SINK_RATE = 0.12;
+	/** The cuts a fighter makes; how often the one cut at gets something up to it, and how long that keeps it from its own next blow. */
+	static final String[] SWINGS = {"swing_across", "swing_down", "swing_back"};
+	static final float BLOCKED = 0.3F;
+	static final int BLOCK_TICKS = 12;
 	/** Flying heads, limbs and Varro's orc's axe: gravity (blocks a tick, a tick), and how much of its speed one bounce keeps. */
 	static final double GRAVITY = 0.045, BOUNCE = 0.35;
 	/**
@@ -158,7 +180,12 @@ public final class LoreFilmClient {
 	static final double[][] STRIKES = {{58.0, -7.0, 0}, {62.0, -14.0, 4}, {55.0, -2.5, 9}};
 
 	// ---- Varro's orc ----
-	static final double MARKED_RUN = 0.36, MARKED_HUNT = 0.2;
+	/** How fast it runs at him and hunts after, and how far in front of where he stands it pulls up to chop. */
+	static final double MARKED_RUN = 0.36, MARKED_HUNT = 0.2, MARKED_STOPS = 2.0;
+	/** How long getting up off its knees takes it (the "rise" move, ticks). */
+	static final int RISE_TICKS = 16;
+	/** Each mage's working (Varro, Thessaly, Grimsby, Ambrose), a held move of the library. */
+	static final String[] CASTS = {"cast_both", "cast_ward", "cast_blade", "cast_high"};
 	/** How often Grimsby throws a bolt (ticks). */
 	static final int BOLT_EVERY = 26;
 
@@ -167,11 +194,34 @@ public final class LoreFilmClient {
 	static final double[][] QUIET_PATH = {{17.0, -1.0}, {22.0, -3.0}, {26.0, 2.5}, {30.0, -2.5}, {34.0, 3.0}, {38.0, -2.0}, {42.0, 2.0}, {46.0, -1.0},
 		{49.2, 0.0}};
 	static final double QUIET_RUN = 0.5, QUIET_LUNGE = 0.85, LUNGE_END = 53.6;
+	/** What he carries: the pack's rapier (Jaymo's Powers), or a sword where a game hasn't got it. */
+	static final String QUIET_BLADE = "jaymospowers:iron_rapier|minecraft:iron_sword";
+	/** The turns of his run he flips off the tree at, and the ones he rolls through. */
+	static final int[] QUIET_FLIPS = {2, 5}, QUIET_ROLLS = {3, 7};
+	/** His cloak's tethers: the first of them swing him from tree to tree (thrown this far up the trunk); the rest hunt for themselves. */
+	static final int SWING_TETHERS = 2;
+	static final double TETHER_HIGH = 3.4;
+	/**
+	 * The sorcerer's guards: where each waits ({f, s}) and how far into the fifth's run it goes for him (ticks). The cloak
+	 * has one once it's this near, holds it this long, then throws it this far aside at this speed, and it's down.
+	 */
+	static final double[][] GUARDS = {{43.0, 7.0}, {48.5, -5.5}};
+	static final int[] GUARD_AT = {12, 44};
+	static final double SNATCH_REACH = 4.4, THROWN = 5.0, THROWN_SPEED = 0.8;
+	static final int SNATCH_HOLD = 5, THROWN_TICKS = 6;
+	/** How far under the ground the sorcerer is put once he's gone. */
+	static final double GONE_UNDER = 40.0;
 	/** The sorcerer's bolts at him: how often (ticks), how fast (blocks a tick), and how near he gets before the sorcerer stops throwing. */
 	static final int MANA_EVERY = 9;
 	static final double MANA_SPEED = 2.2, MANA_UNTIL = 45.5;
 	/** The chase camera runs this far behind him and to his side, its way kept clear of trees. */
 	static final double CHASE_BACK = 3.0, CHASE_SIDE = 2.6;
+
+	// ---- the tape ----
+	/** An actor goes on the tape again once it has moved this far (blocks) or turned this much (degrees). */
+	static final double TAPE_MOVED = 0.004, TAPE_TURNED = 0.25;
+	/** Set (to true) on a game that stages the films: every film played there is staged afresh and taped, as {@code /kingdomfilm record} does. */
+	static final String RECORD_PROPERTY = "jaymoskingdoms.filmRecord";
 
 	// ---- the screen ----
 	/** The dark over the screen: the memory's dim, and as the sorcerer calls. */
@@ -185,7 +235,7 @@ public final class LoreFilmClient {
 		VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS};
 
 	enum Role {
-		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST, MARKED
+		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST, MARKED, GUARD
 	}
 
 	/** What a fighter is made of: what flies off it, and how its blood is drawn. */
@@ -209,9 +259,11 @@ public final class LoreFilmClient {
 		}
 	}
 
-	/** One actor: its entity, where it stands on the stage and where it's headed, how far under the ground, whom it fights, how it's posed. */
+	/** One actor: its entity, where it stands on the stage and where it's headed, how far under the ground, whom it fights. */
 	static final class Actor {
 		final LivingEntity e;
+		/** Its number in the cast (what a tape knows it by). */
+		final int index;
 		final Role role;
 		Flesh flesh = Flesh.MAN;
 		double f, s, toF, toS;
@@ -225,14 +277,18 @@ public final class LoreFilmClient {
 		double bleedUp;
 		int fallAt = -1;
 		boolean down, fled;
+		/** Still coming up out of the ground (the dead); set down where it is this tick, not moved there. */
+		boolean clawing, snap = true;
 		float yaw, restYaw = Float.NaN;
-		final float[] pose = new float[FilmPose.NUMBERS], poseO = new float[FilmPose.NUMBERS];
-		float @Nullable [] poseTo;
-		float weight, weightO, poseRate = 0.4F;
 		int gone;
+		/** How it falls when it does (a move), or null for whichever way it goes. */
+		@Nullable String death;
+		/** What the tape last has of it: {f, s, up, the way it faces}. */
+		final float[] taped = {Float.NaN, Float.NaN, Float.NaN, Float.NaN};
 
-		Actor(LivingEntity e, Role role, double f, double s, float yaw) {
+		Actor(LivingEntity e, int index, Role role, double f, double s, float yaw) {
 			this.e = e;
+			this.index = index;
 			this.role = role;
 			this.f = this.toF = f;
 			this.s = this.toS = s;
@@ -255,18 +311,24 @@ public final class LoreFilmClient {
 	/** Something sent flying (a head, an arm, an axe): a display moved by hand each tick until it comes to rest. */
 	static final class Gib {
 		final Display e;
+		final int id;
+		/** Lies where it first lands (the axe), not bounced. */
+		final boolean flat;
 		double x, y, z, vx, vy, vz;
 		float turn, spin;
 		boolean bounced, rest;
 
-		Gib(Display e, Vec3 at, Vec3 speed, float spin) {
+		Gib(Display e, int id, boolean flat, Vec3 at, Vec3 speed, float turn, float spin) {
 			this.e = e;
+			this.id = id;
+			this.flat = flat;
 			this.x = at.x;
 			this.y = at.y;
 			this.z = at.z;
 			this.vx = speed.x;
 			this.vy = speed.y;
 			this.vz = speed.z;
+			this.turn = turn;
 			this.spin = spin;
 		}
 	}
@@ -288,10 +350,15 @@ public final class LoreFilmClient {
 
 	/** A film playing: the stage (where you stood, which way you faced), how far in, its actors and its set. */
 	static final class Film {
+		final String name;
 		final ClientLevel level;
 		final Vec3 origin, fwd, right;
 		final float yaw;
 		final RandomSource rnd = RandomSource.create();
+		/** The tape being made of this staging, or the one being played back (then nothing below is staged, only replayed). */
+		@Nullable FilmTape rec, play;
+		/** A played tape's particles, by their numbers on it. */
+		ParticleOptions[] palette = new ParticleOptions[0];
 		final List<Actor> actors = new ArrayList<>();
 		/** Everyone in the battle: the defenders' line, the host, the dead (once up), Varro's orc (once marked). */
 		final List<Actor> fighters = new ArrayList<>();
@@ -299,8 +366,6 @@ public final class LoreFilmClient {
 		final List<Actor> legion = new ArrayList<>();
 		final List<Actor> soldiers = new ArrayList<>();
 		final Map<Entity, Actor> byEntity = new IdentityHashMap<>();
-		/** Each orc actor → the green its orc look is tinted by ({@link #orcLook}). */
-		final Map<LivingEntity, Integer> orcs = new IdentityHashMap<>();
 		/** The set and everything else that isn't an actor: trees, the Keep, lightning, what's sent flying. */
 		final List<Entity> props = new ArrayList<>();
 		/** The trees' trunks ({f, s}), and the ones the fifth turns at. */
@@ -310,23 +375,43 @@ public final class LoreFilmClient {
 		final List<Gib> gibs = new ArrayList<>();
 		final List<Mana> mana = new ArrayList<>();
 		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer, marked;
+		/** The sorcerer's guards, and when the fifth's cloak took hold of each (-1 until it has). */
+		final @Nullable Actor[] guards = new Actor[GUARDS.length];
+		final int[] snatchAt = new int[GUARDS.length];
 		@Nullable Gib axe;
 		@Nullable CameraType viewBefore;
-		int tick, skip, quietAt = 1, lungeAt = -1;
+		int tick, skip, quietAt = 1, lungeAt = -1, gibIds;
 		float flash, flashO;
 
-		Film(ClientLevel level, Vec3 origin, float yaw) {
+		Film(String name, ClientLevel level, Vec3 origin, float yaw) {
+			this.name = name;
 			this.level = level;
 			this.origin = origin;
 			this.yaw = yaw;
 			this.fwd = Vec3.directionFromRotation(0.0F, yaw);
 			this.right = new Vec3(-this.fwd.z, 0.0, this.fwd.x);
+			java.util.Arrays.fill(this.snatchAt, -1);
 		}
 
 		/** The stage point {@code f} ahead and {@code s} aside, {@code up} over the ground there. */
 		Vec3 at(double f, double s, double up) {
 			double x = this.origin.x + this.fwd.x * f + this.right.x * s, z = this.origin.z + this.fwd.z * f + this.right.z * s;
 			return new Vec3(x, ground(x, z) + up, z);
+		}
+
+		/** {@code p} in the stage's measure: {f, s, up over the ground there}. */
+		float[] staged(Vec3 p) {
+			double x = p.x - this.origin.x, z = p.z - this.origin.z;
+			return new float[] {(float)(x * this.fwd.x + z * this.fwd.z), (float)(x * this.right.x + z * this.right.z), (float)(p.y - ground(p.x, p.z))};
+		}
+
+		/** A speed in the stage's measure ({ahead, aside, up}), and back into the world's. */
+		float[] stagedWay(Vec3 v) {
+			return new float[] {(float)(v.x * this.fwd.x + v.z * this.fwd.z), (float)(v.x * this.right.x + v.z * this.right.z), (float)v.y};
+		}
+
+		Vec3 way(double ahead, double aside, double up) {
+			return new Vec3(this.fwd.x * ahead + this.right.x * aside, up, this.fwd.z * ahead + this.right.z * aside);
 		}
 
 		/** The ground's height at {@code x, z}, looked for near the height you stood at (so a cave or a house has a floor). */
@@ -360,7 +445,8 @@ public final class LoreFilmClient {
 	}
 
 	public static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(LoreFilms.Play.TYPE, (payload, context) -> context.client().execute(() -> start(context.client(), payload.film())));
+		ClientPlayNetworking.registerGlobalReceiver(LoreFilms.Play.TYPE,
+			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY))));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				tick(minecraft);
@@ -378,6 +464,21 @@ public final class LoreFilmClient {
 			film = null;
 			bars = barsO = 0.0F;
 		});
+		// for whoever stages the films (creative only): play one here, or stage it afresh with the tape running
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal("kingdomfilm")
+			.then(ClientCommands.literal("play").then(ClientCommands.argument("film", StringArgumentType.word())
+				.executes(c -> command(c.getSource().getClient(), StringArgumentType.getString(c, "film"), false))))
+			.then(ClientCommands.literal("record").then(ClientCommands.argument("film", StringArgumentType.word())
+				.executes(c -> command(c.getSource().getClient(), StringArgumentType.getString(c, "film"), true))))));
+	}
+
+	private static int command(Minecraft minecraft, String name, boolean record) {
+		if (minecraft.player == null || !minecraft.player.isCreative() || !LoreFilms.ALL.contains(name)) {
+			return 0;
+		}
+		// (once the chat screen has closed)
+		minecraft.execute(() -> start(minecraft, name, record));
+		return 1;
 	}
 
 	/** Whether a film is playing (movement keys don't answer). */
@@ -387,33 +488,85 @@ public final class LoreFilmClient {
 
 	// ---- staging ------------------------------------------------------------------------------------------------------------
 
-	private static void start(Minecraft minecraft, String name) {
+	/**
+	 * Plays {@code name} where you stand: off its tape (this game's own recording, else the one shipped), or staged
+	 * afresh when there's none or {@code record} asks for a new tape to be made of it.
+	 */
+	private static void start(Minecraft minecraft, String name, boolean record) {
 		if (!LoreFilms.LONG_DEFENCE.equals(name) || minecraft.level == null || minecraft.player == null) {
 			return;
 		}
 		stop(minecraft);
-		Film f = new Film(minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
+		Film f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
 		f.viewBefore = minecraft.options.getCameraType();
 		film = f;
-		float facing = f.yaw, facingBack = f.yaw + 180.0F;
+		FilmTape tape = record ? null : FilmTape.find(name);
+		if (tape != null && load(f, tape)) {
+			return;
+		}
+		if (tape != null) {
+			// (a tape that asked for something this game hasn't got: clear away what it had set up)
+			stop(minecraft);
+			f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
+			f.viewBefore = minecraft.options.getCameraType();
+			film = f;
+		}
+		if (record) {
+			f.rec = new FilmTape();
+		}
+		stage(f);
+	}
+
+	/** Sets up a tape's set and cast; false if it can't be. */
+	private static boolean load(Film f, FilmTape tape) {
+		f.play = tape;
+		for (FilmTape.Box box : tape.set) {
+			float[] at = box.at();
+			box(f, block(box.block()), at[0], at[1], at[2], at[3], at[4], at[5], at[6], at[7], box.lit());
+		}
+		for (FilmTape.Cast c : tape.cast) {
+			if (spawn(f, c) == null) {
+				return false;
+			}
+		}
+		f.palette = new ParticleOptions[tape.particles.size()];
+		for (int i = 0; i < f.palette.length; i++) {
+			f.palette[i] = particle(tape.particles.get(i));
+		}
+		f.varro = named(f, tape, "varro");
+		f.thessaly = named(f, tape, "thessaly");
+		f.grimsby = named(f, tape, "grimsby");
+		f.ambrose = named(f, tape, "ambrose");
+		f.stranger = named(f, tape, "stranger");
+		f.sorcerer = named(f, tape, "sorcerer");
+		f.marked = named(f, tape, "marked");
+		return true;
+	}
+
+	private static @Nullable Actor named(Film f, FilmTape tape, String name) {
+		Integer index = tape.named.get(name);
+		return index == null || index < 0 || index >= f.actors.size() ? null : f.actors.get(index);
+	}
+
+	/** The Long Defence, staged afresh: the set, the cast, and the fight already joined. */
+	private static void stage(Film f) {
+		float facing = 0.0F, facingBack = 180.0F;
 		forest(f);
 		keep(f);
 		// the four mages behind the fight, and the fifth off to one side
-		f.grimsby = mage(f, "grimsby", false, -7.0, Items.IRON_SWORD);
-		f.thessaly = mage(f, "thessaly", true, -2.5, null);
-		f.ambrose = mage(f, "ambrose", false, 2.5, Items.BLAZE_ROD);
-		f.varro = mage(f, "varro", false, VARRO_AT[1], Items.NETHERITE_AXE);
+		f.grimsby = mage(f, "grimsby", FilmActor.WIDE, -7.0, Items.IRON_SWORD, null);
+		f.thessaly = mage(f, "thessaly", FilmActor.SLIM, -2.5, null, null);
+		f.ambrose = mage(f, "ambrose", FilmActor.WIDE, 2.5, Items.BLAZE_ROD, null);
+		// (Varro's axe in his left hand: his right is the one he marks with)
+		f.varro = mage(f, "varro", FilmActor.WIDE, VARRO_AT[1], null, Items.NETHERITE_AXE);
 		if (f.varro != null) {
-			f.varro.e.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-			f.varro.e.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-			f.varro.e.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
 			f.varro.speed = 0.3;
 		}
-		LivingEntity quiet = person(f, "stranger", false);
-		if (quiet != null) {
-			quiet.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-			f.stranger = cast(f, quiet, Role.STRANGER, STRANGER_AT[0], STRANGER_AT[1], facing);
-			f.stranger.restYaw = facing;
+		// the Quiet One: the white cloak, and a rapier where the pack has one
+		f.stranger = cast(f, new FilmTape.Cast(0, "stranger", FilmActor.WIDE, 0, true, Role.STRANGER.ordinal(), Flesh.MAN.ordinal(), false, QUIET_BLADE, "",
+			new float[] {(float)STRANGER_AT[0], (float)STRANGER_AT[1], 0.0F, facing, 1.0F}));
+		if (f.stranger != null) {
+			f.stranger.restYaw = f.yaw + facing;
 			f.stranger.speed = QUIET_RUN;
 		}
 		// the fight, already joined: a hearthlander and one of the host to each pair, all over the field
@@ -439,17 +592,12 @@ public final class LoreFilmClient {
 			double turn = staged ? 0.0 : (f.rnd.nextDouble() - 0.5) * 1.6, df = Math.cos(turn) * 0.8, ds = Math.sin(turn) * 0.8;
 			Actor soldier = soldier(f, i, at[0] - df, at[1] - ds, facing);
 			boolean warrior = staged ? at[5] > 0.0 : i % 5 >= 3;
-			LivingEntity e = warrior ? warriorBorn(f, i) : orc(f, "orc_" + i % 3);
-			if (e == null || soldier == null) {
+			Actor foe = warrior ? warriorBorn(f, i, at[0] + df, at[1] + ds, facingBack)
+				: orc(f, "orc_" + i % 3, i, Role.HOST, Flesh.ORC, i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE, at[0] + df, at[1] + ds, 0.0, facingBack);
+			if (foe == null || soldier == null) {
 				continue;
 			}
-			if (!warrior) {
-				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE));
-			}
-			Actor foe = cast(f, e, Role.HOST, at[0] + df, at[1] + ds, facingBack);
 			foe.team = 1;
-			foe.flesh = warrior ? Flesh.WARRIOR : Flesh.ORC;
-			foe.scale = warrior ? 1.0 : ORC_SCALE;
 			foe.foe = soldier;
 			soldier.foe = foe;
 			foe.engagedAt = soldier.engagedAt = 0;
@@ -468,16 +616,12 @@ public final class LoreFilmClient {
 			int many = 1 + f.rnd.nextInt(GROUP_MOST);
 			f.rises.add(new Rise(at, gf, gs, f.rnd.nextInt(GROUP_LIGHTNING) == 0));
 			for (int j = 0; j < many && i < DEAD; j++, i++) {
-				LivingEntity e = dead(f, i);
-				if (e == null) {
+				Actor a = dead(f, i, gf + spread(f, GROUP_SPREAD), gs + spread(f, GROUP_SPREAD), facingBack);
+				if (a == null) {
 					continue;
 				}
-				Actor a = cast(f, e, Role.DEAD, gf + spread(f, GROUP_SPREAD), gs + spread(f, GROUP_SPREAD), facingBack);
 				a.team = 1;
-				a.flesh = i % 2 == 0 ? Flesh.DEAD_ORC : Flesh.PIGLIN;
-				a.scale = i % 2 == 0 ? ORC_SCALE : 1.0;
 				a.speed = DEAD_WALK;
-				a.sink = a.sinkTo = HIDDEN;
 				a.sinkRate = RISE_RATE + f.rnd.nextDouble() * RISE_SPREAD;
 				a.riseAt = at + f.rnd.nextInt(14);
 				f.legion.add(a);
@@ -486,143 +630,187 @@ public final class LoreFilmClient {
 			at += 3 + f.rnd.nextInt(GROUP_GAP);
 		}
 		// the orc Varro will mark, waiting its moment
-		LivingEntity brute = orc(f, "orc_0");
-		if (brute != null) {
-			brute.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
-			f.marked = cast(f, brute, Role.MARKED, MARKED_AT[0], MARKED_AT[1], facingBack);
+		f.marked = orc(f, "orc_0", 0, Role.MARKED, Flesh.ORC, Items.IRON_AXE, MARKED_AT[0], MARKED_AT[1], 0.0, facingBack);
+		if (f.marked != null) {
 			f.marked.team = 1;
-			f.marked.flesh = Flesh.ORC;
-			f.marked.scale = ORC_SCALE;
 			f.marked.scripted = true;
 			f.marked.speed = MARKED_RUN;
 		}
-		LivingEntity grue = person(f, "sorcerer", false);
-		if (grue != null) {
-			f.sorcerer = cast(f, grue, Role.SORCERER, SORCERER_F, 0.0, facingBack);
-			f.sorcerer.restYaw = facingBack;
+		f.sorcerer = cast(f, new FilmTape.Cast(0, "sorcerer", FilmActor.WIDE, 0, false, Role.SORCERER.ordinal(), Flesh.MAN.ordinal(), false, "", "",
+			new float[] {(float)SORCERER_F, 0.0F, 0.0F, facingBack, 1.0F}));
+		if (f.sorcerer != null) {
+			f.sorcerer.restYaw = f.yaw + facingBack;
 		}
-		sound(SoundEvents.AMBIENT_CAVE.value(), 0.7F, 0.5F);
-		sound(SoundEvents.RAID_HORN.value(), 1.0F, 0.5F);
-	}
-
-	/** One of the line: a hearthlander in iron, a sword or an axe, some with shields. */
-	private static @Nullable Actor soldier(Film f, int i, double fwd, double side, float yaw) {
-		LivingEntity e = person(f, null, false);
-		if (e == null) {
-			return null;
-		}
-		e.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-		e.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-		e.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-		e.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-		e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(i % 3 == 1 ? Items.IRON_AXE : Items.IRON_SWORD));
-		if (i % 2 == 0) {
-			e.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
-		}
-		Actor a = cast(f, e, Role.SOLDIER, fwd, side, yaw);
-		f.soldiers.add(a);
-		f.fighters.add(a);
-		return a;
-	}
-
-	private static @Nullable Actor mage(Film f, String skin, boolean slim, double s, @Nullable Item held) {
-		LivingEntity e = person(f, skin, slim);
-		if (e == null) {
-			return null;
-		}
-		if (held != null) {
-			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(held));
-		}
-		Actor a = cast(f, e, Role.MAGE, MAGES_F, s, f.yaw);
-		a.restYaw = f.yaw;
-		return a;
-	}
-
-	/** A person (a mannequin of our own: no name over it), in {@code textures/entity/film/<skin>.png} or the plain default. */
-	private static @Nullable LivingEntity person(Film f, @Nullable String skin, boolean slim) {
-		LivingEntity e = EntityTypes.MANNEQUIN.create(f.level, EntitySpawnReason.LOAD);
-		if (e == null) {
-			return null;
-		}
-		CompoundTag tag = new CompoundTag();
-		tag.putBoolean("hide_description", true);
-		if (skin != null) {
-			CompoundTag profile = new CompoundTag();
-			profile.putString("texture", JaymosKingdoms.id("entity/film/" + skin).toString());
-			profile.putString("model", slim ? "slim" : "wide");
-			tag.put("profile", profile);
-		}
-		try {
-			e.load(TagValueInput.create(ProblemReporter.DISCARDING, f.level.registryAccess(), tag));
-		} catch (RuntimeException ex) {
-			JaymosKingdoms.LOGGER.debug("lore film actor {} kept its default look", skin, ex);
-		}
-		return e;
-	}
-
-	/** An orc (or a dead one): a mannequin in its skin, drawn bigger, and given the real orcs' look ({@link #orcLook}). */
-	private static @Nullable LivingEntity orc(Film f, String skin) {
-		LivingEntity e = person(f, skin, false);
-		if (e != null) {
-			var scale = e.getAttribute(Attributes.SCALE);
-			if (scale != null) {
-				scale.setBaseValue(ORC_SCALE);
+		// his guard: two orcs who stand by him until the fifth comes
+		for (int i = 0; i < GUARDS.length; i++) {
+			Actor guard = orc(f, "orc_" + (i + 1) % 3, i + 1, Role.GUARD, Flesh.ORC, Items.IRON_AXE, GUARDS[i][0], GUARDS[i][1], 0.0, facingBack);
+			if (guard != null) {
+				guard.team = 1;
+				guard.scripted = true;
+				guard.speed = MARKED_RUN;
+				guard.restYaw = f.yaw + facingBack;
 			}
-			int n = skin.charAt(skin.length() - 1) - '0';
-			f.orcs.put(e, skin.startsWith("dead") ? DEAD_GREENS[n % DEAD_GREENS.length] : ORC_GREENS[n % ORC_GREENS.length]);
+			f.guards[i] = guard;
 		}
-		return e;
+		if (f.rec != null) {
+			name(f, "varro", f.varro);
+			name(f, "thessaly", f.thessaly);
+			name(f, "grimsby", f.grimsby);
+			name(f, "ambrose", f.ambrose);
+			name(f, "stranger", f.stranger);
+			name(f, "sorcerer", f.sorcerer);
+			name(f, "marked", f.marked);
+		}
+		sound(f, SoundEvents.AMBIENT_CAVE.value(), 0.7F, 0.5F);
+		sound(f, SoundEvents.RAID_HORN.value(), 1.0F, 0.5F);
 	}
 
-	/**
-	 * The green a lore film's orc is tinted by, for {@code GreenskinLooks} to draw the real orcs' tusks, brow, ears, marks
-	 * and scars on it; 0 for anything else.
-	 */
-	public static int orcLook(Entity e) {
-		Film f = film;
-		if (f == null || e.getId() >= 0) {
-			return 0;
+	private static void name(Film f, String name, @Nullable Actor a) {
+		if (a != null && f.rec != null) {
+			f.rec.named.put(name, a.index);
 		}
-		Integer green = f.orcs.get(e);
-		return green == null ? 0 : green;
+	}
+
+	/** One of the line: a hearthlander in plate, a sword or an axe, some with shields. */
+	private static @Nullable Actor soldier(Film f, int i, double fwd, double side, float turn) {
+		Actor a = cast(f, new FilmTape.Cast(0, "soldier_" + i % 3, FilmActor.WIDE, 0, false, Role.SOLDIER.ordinal(), Flesh.MAN.ordinal(), false,
+			id(i % 3 == 1 ? Items.IRON_AXE : Items.IRON_SWORD), id(i % 2 == 0 ? Items.SHIELD : null), new float[] {(float)fwd, (float)side, 0.0F, turn, 1.0F}));
+		if (a != null) {
+			f.soldiers.add(a);
+			f.fighters.add(a);
+		}
+		return a;
+	}
+
+	private static @Nullable Actor mage(Film f, String skin, int body, double s, @Nullable Item main, @Nullable Item off) {
+		Actor a = cast(f, new FilmTape.Cast(0, skin, body, 0, false, Role.MAGE.ordinal(), Flesh.MAN.ordinal(), false, id(main), id(off),
+			new float[] {(float)MAGES_F, (float)s, 0.0F, 0.0F, 1.0F}));
+		if (a != null) {
+			a.restYaw = f.yaw;
+		}
+		return a;
+	}
+
+	/** An orc (or a dead one): in its skin, bigger than a man, with one of the two orc heads (tusks, brow, ears). */
+	private static @Nullable Actor orc(Film f, String skin, int n, Role role, Flesh flesh, @Nullable Item main, double fwd, double side, double up,
+		float turn) {
+		return cast(f, new FilmTape.Cast(0, skin, FilmActor.WIDE, 1 + n % 2, false, role.ordinal(), flesh.ordinal(), false, id(main), "",
+			new float[] {(float)fwd, (float)side, (float)up, turn, (float)ORC_SCALE}));
 	}
 
 	/** A Warrior-born of the host: a draugr's helm, mail and fur, worn by the living man in better days (Andy). */
-	private static @Nullable LivingEntity warriorBorn(Film f, int i) {
-		Draugr e = Inhabitants.DRAUGR.create(f.level, EntitySpawnReason.LOAD);
-		if (e != null) {
-			e.stageLiving(i % 3 == 0);
-		}
-		return e;
+	private static @Nullable Actor warriorBorn(Film f, int i, double fwd, double side, float turn) {
+		return cast(f, new FilmTape.Cast(1, "", 0, 0, false, Role.HOST.ordinal(), Flesh.WARRIOR.ordinal(), i % 3 == 0, "", "",
+			new float[] {(float)fwd, (float)side, 0.0F, turn, 1.0F}));
 	}
 
-	/** One of the dead the sorcerer raises: dead orcs and zombified piglins, half and half. */
-	private static @Nullable LivingEntity dead(Film f, int i) {
+	/** One of the dead the sorcerer raises, waiting under the ground: dead orcs and zombified piglins, half and half. */
+	private static @Nullable Actor dead(Film f, int i, double fwd, double side, float turn) {
 		if (i % 2 == 0) {
-			LivingEntity e = orc(f, "dead_orc_" + (i / 2) % 3);
-			if (e != null && i % 6 == 0) {
-				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_AXE));
-			}
-			return e;
+			return orc(f, "dead_orc_" + (i / 2) % 3, i / 2, Role.DEAD, Flesh.DEAD_ORC, i % 6 == 0 ? Items.STONE_AXE : null, fwd, side, -HIDDEN, turn);
 		}
-		LivingEntity e = EntityTypes.ZOMBIFIED_PIGLIN.create(f.level, EntitySpawnReason.LOAD);
-		if (e != null) {
-			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(i % 3 == 0 ? Items.IRON_SWORD : Items.GOLDEN_SWORD));
-		}
-		return e;
+		return cast(f, new FilmTape.Cast(0, "", FilmActor.PIGLIN, 0, false, Role.DEAD.ordinal(), Flesh.PIGLIN.ordinal(), false,
+			id(i % 3 == 0 ? Items.IRON_SWORD : Items.GOLDEN_SWORD), "", new float[] {(float)fwd, (float)side, (float)-HIDDEN, turn, 1.0F}));
 	}
 
-	private static Actor cast(Film f, LivingEntity e, Role role, double fwd, double side, float yaw) {
-		Actor a = new Actor(e, role, fwd, side, yaw);
-		Vec3 at = f.at(fwd, side, 0.0);
+	/** Casts {@code c} in the staging (and onto the tape being made of it). */
+	private static @Nullable Actor cast(Film f, FilmTape.Cast c) {
+		Actor a = spawn(f, c);
+		if (a != null && f.rec != null) {
+			f.rec.cast.add(c);
+		}
+		return a;
+	}
+
+	/** One of the cast, made and set on the stage as {@code c} has it (a staging and a tape alike). */
+	private static @Nullable Actor spawn(Film f, FilmTape.Cast c) {
+		Role role = Role.values()[Mth.clamp(c.role(), 0, Role.values().length - 1)];
+		LivingEntity e;
+		if (c.kind() == 1) {
+			Draugr draugr = Inhabitants.DRAUGR.create(f.level, EntitySpawnReason.LOAD);
+			if (draugr == null) {
+				return null;
+			}
+			draugr.stageLiving(c.axe());
+			draugr.stageGait(Moves.GUARD, Moves.RUN);
+			e = draugr;
+		} else {
+			FilmActor actor = FilmActor.TYPE.create(f.level, EntitySpawnReason.LOAD);
+			if (actor == null) {
+				return null;
+			}
+			actor.skin = c.skin();
+			actor.body = c.body();
+			actor.orc = c.orc();
+			actor.cloak = c.cloak();
+			actor.still = switch (role) {
+				case SOLDIER, HOST, MARKED, GUARD -> Moves.GUARD;
+				case DEAD -> Moves.CLAW_UP;
+				default -> Moves.IDLE;
+			};
+			actor.moving = switch (role) {
+				case DEAD -> Moves.SHAMBLE;
+				case STRANGER, MARKED, GUARD -> Moves.SPRINT;
+				default -> Moves.RUN;
+			};
+			actor.setItemSlot(EquipmentSlot.MAINHAND, stack(c.main()));
+			actor.setItemSlot(EquipmentSlot.OFFHAND, stack(c.off()));
+			e = actor;
+		}
+		float[] at = c.at();
+		var scale = e.getAttribute(Attributes.SCALE);
+		if (scale != null && at[4] != 1.0F) {
+			scale.setBaseValue(at[4]);
+		}
+		Actor a = new Actor(e, f.actors.size(), role, at[0], at[1], f.yaw + at[3]);
+		a.flesh = Flesh.values()[Mth.clamp(c.flesh(), 0, Flesh.values().length - 1)];
+		a.scale = at[4];
+		a.sink = a.sinkTo = -at[2];
+		a.clawing = role == Role.DEAD;
 		e.setId(nextId--);
-		e.snapTo(at.x, at.y, at.z, yaw, 0.0F);
-		e.setYHeadRot(yaw);
-		e.setYBodyRot(yaw);
+		place(f, a);
 		f.level.addEntity(e);
 		f.actors.add(a);
 		f.byEntity.put(e, a);
 		return a;
+	}
+
+	/** Sets {@code a}'s entity where the actor is and facing as it faces (moved there over the tick, or set down there at once). */
+	private static void place(Film f, Actor a) {
+		Vec3 at = f.at(a.f, a.s, -a.sink);
+		LivingEntity e = a.e;
+		if (a.snap) {
+			e.snapTo(at.x, at.y, at.z, a.yaw, 0.0F);
+			e.yBodyRotO = e.yHeadRotO = a.yaw;
+			a.snap = false;
+		} else {
+			e.setPos(at.x, at.y, at.z);
+		}
+		e.setYRot(a.yaw);
+		e.setYHeadRot(a.yaw);
+		e.setYBodyRot(a.yaw);
+		e.setRemainingFireTicks(0);
+	}
+
+	private static String id(@Nullable Item item) {
+		return item == null ? "" : BuiltInRegistries.ITEM.getKey(item).toString();
+	}
+
+	/** {@code item} in hand: an item's id, or several with {@code |} between (the first this game has), or nothing. */
+	private static ItemStack stack(String item) {
+		for (String one : item.split("\\|")) {
+			Identifier id = one.isEmpty() ? null : Identifier.tryParse(one);
+			Item found = id == null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+			if (found != null) {
+				return new ItemStack(found);
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
+	private static Block block(String block) {
+		Identifier id = Identifier.tryParse(block);
+		return id == null ? Blocks.STONE : BuiltInRegistries.BLOCK.getOptional(id).orElse(Blocks.STONE);
 	}
 
 	private static void stop(Minecraft minecraft) {
@@ -644,27 +832,354 @@ public final class LoreFilmClient {
 		}
 	}
 
+	// ---- what a film can do (each done here, and put on the tape when one is being made) ------------------------------------------
+
+	private static final float[] NONE = {};
+
+	private static void tape(Film f, byte type, int a, int b, float[] v, String s) {
+		if (f.rec != null) {
+			f.rec.frame(f.tick).events.add(new FilmTape.Event(type, a, b, v, s));
+		}
+	}
+
+	/** {@code a} starts {@code move} (one of the library's one-off or held moves). */
+	private static void act(Film f, Actor a, String move) {
+		tape(f, FilmTape.ACT, a.index, 0, NONE, move);
+		if (a.e instanceof GeoEntity geo) {
+			geo.triggerAnim("action", move);
+		}
+	}
+
+	/** {@code a} lets go of whatever move it holds, back to how it stands or goes. */
+	private static void rest(Film f, Actor a) {
+		tape(f, FilmTape.REST, a.index, 0, NONE, "");
+		if (a.e instanceof GeoEntity geo) {
+			geo.stopTriggeredAnim("action", null);
+		}
+	}
+
+	/** The loops {@code a} stands and moves in from now on. */
+	private static void gait(Film f, Actor a, String still, String moving) {
+		tape(f, FilmTape.GAIT, a.index, 0, NONE, still + " " + moving);
+		if (a.e instanceof FilmActor actor) {
+			actor.still = still;
+			actor.moving = moving;
+		} else if (a.e instanceof Draugr draugr) {
+			draugr.stageGait(still, moving);
+		}
+	}
+
+	/** {@code item} (an id; none for an empty hand) in {@code a}'s hand. */
+	private static void hold(Film f, Actor a, EquipmentSlot slot, String item) {
+		tape(f, FilmTape.ITEM, a.index, slot.ordinal(), NONE, item);
+		a.e.setItemSlot(slot, stack(item));
+	}
+
+	/** A head or an arm gone: not drawn from here on. */
+	private static void maim(Film f, Actor a, int what) {
+		tape(f, FilmTape.MAIM, a.index, what, NONE, "");
+		a.gone |= what;
+		if (a.e instanceof FilmActor actor) {
+			actor.gone |= what;
+		} else if (a.e instanceof Draugr draugr) {
+			draugr.stageMaim(what == FilmActor.NO_HEAD ? Draugr.MAIM_HEAD : Draugr.MAIM_ARM);
+		}
+	}
+
+	/** {@code a} flinches red. */
+	private static void hurt(Film f, Actor a) {
+		tape(f, FilmTape.HURT, a.index, 0, NONE, "");
+		a.e.hurtTime = a.e.hurtDuration = 10;
+	}
+
+	private static void hide(Film f, Actor a) {
+		tape(f, FilmTape.HIDE, a.index, 0, NONE, "");
+		a.e.setInvisible(true);
+	}
+
+	/** Tether {@code which} of {@code a}'s cloak thrown at {@code to} (null: let go). */
+	private static void tether(Film f, Actor a, int which, @Nullable Vec3 to) {
+		tape(f, FilmTape.TETHER, a.index, which, to == null ? NONE : f.staged(to), "");
+		if (a.e instanceof FilmActor actor) {
+			actor.tether(which, to);
+		}
+	}
+
+	private static void sound(Film f, SoundEvent sound, float pitch, float volume) {
+		if (f.rec != null) {
+			Identifier id = BuiltInRegistries.SOUND_EVENT.getKey(sound);
+			if (id != null) {
+				tape(f, FilmTape.SOUND, 0, 0, new float[] {pitch, volume}, id.toString());
+			}
+		}
+		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch, volume));
+	}
+
+	private static void particle(Film f, ParticleOptions type, Vec3 p, double vx, double vy, double vz) {
+		if (f.rec != null) {
+			float[] at = f.staged(p), way = f.stagedWay(new Vec3(vx, vy, vz));
+			tape(f, FilmTape.PARTICLE, f.rec.particle(name(type)), 0, new float[] {at[0], at[1], at[2], way[0], way[1], way[2]}, "");
+		}
+		f.level.addParticle(type, true, true, p.x, p.y, p.z, vx, vy, vz);
+	}
+
+	/** A particle as a tape names it: its id, or a block's, or dust's colour and size. */
+	private static String name(ParticleOptions type) {
+		if (type instanceof BlockParticleOption block) {
+			return "block " + BuiltInRegistries.BLOCK.getKey(block.getState().getBlock());
+		}
+		if (type instanceof DustParticleOptions dust) {
+			Vector3f colour = dust.getColor();
+			return "dust " + (ARGB.colorFromFloat(1.0F, colour.x, colour.y, colour.z) & 0xFFFFFF) + " " + dust.getScale();
+		}
+		return String.valueOf(BuiltInRegistries.PARTICLE_TYPE.getKey(type.getType()));
+	}
+
+	/** And back (smoke for one this game doesn't know). */
+	private static ParticleOptions particle(String name) {
+		String[] parts = name.split(" ");
+		try {
+			if (parts.length == 2 && parts[0].equals("block")) {
+				return new BlockParticleOption(ParticleTypes.BLOCK, block(parts[1]).defaultBlockState());
+			}
+			if (parts.length == 3 && parts[0].equals("dust")) {
+				return new DustParticleOptions(Integer.parseInt(parts[1]), Float.parseFloat(parts[2]));
+			}
+			Identifier id = Identifier.tryParse(name);
+			if (id != null && BuiltInRegistries.PARTICLE_TYPE.getOptional(id).orElse(null) instanceof ParticleOptions simple) {
+				return simple;
+			}
+		} catch (NumberFormatException e) {
+			// (falls through)
+		}
+		return ParticleTypes.SMOKE;
+	}
+
+	/** The screen lit, this much. */
+	private static void flash(Film f, float much) {
+		tape(f, FilmTape.FLASH, 0, 0, new float[] {much}, "");
+		f.flash = Math.max(f.flash, much);
+	}
+
+	/** A bolt of lightning at {@code (fwd, side)}: seen and heard on this game alone, and the screen lit by it. */
+	private static void lightning(Film f, double fwd, double side) {
+		tape(f, FilmTape.BOLT, 0, 0, new float[] {(float)fwd, (float)side}, "");
+		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(f.level, EntitySpawnReason.LOAD);
+		if (bolt == null) {
+			return;
+		}
+		bolt.setVisualOnly(true);
+		Vec3 at = f.at(fwd, side, 0.0);
+		bolt.setId(nextId--);
+		bolt.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+		f.level.addEntity(bolt);
+		f.props.add(bolt);
+		f.flash = Math.max(f.flash, 0.55F);
+	}
+
+	/**
+	 * Sends something flying from {@code at} at {@code speed}, turning over as it goes: an item ({@code what} its id, drawn
+	 * {@code w} times its size) or a box of a block ({@code w} by {@code h} by {@code d}). {@code flat}: it lies where it lands.
+	 */
+	private static Gib fling(Film f, boolean item, String what, float w, float h, float d, Vec3 at, Vec3 speed, float spin, boolean flat) {
+		float[] from = f.staged(at), way = f.stagedWay(speed);
+		return fling(f, f.gibIds++, item, what, w, h, d, from, way, spin, f.rnd.nextFloat() * 360.0F, flat);
+	}
+
+	private static Gib fling(Film f, int id, boolean item, String what, float w, float h, float d, float[] from, float[] way, float spin, float turn,
+		boolean flat) {
+		tape(f, FilmTape.GIB, id, (item ? 1 : 0) | (flat ? 2 : 0), new float[] {from[0], from[1], from[2], way[0], way[1], way[2], spin, turn, w, h, d}, what);
+		Display e;
+		if (item) {
+			Display.ItemDisplay display = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, f.level);
+			display.setItemStack(stack(what));
+			display.setItemTransform(ItemDisplayContext.NONE);
+			display.setTransformation(new Transformation(new Vector3f(), null, new Vector3f(w), null));
+			e = display;
+		} else {
+			Display.BlockDisplay display = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
+			display.setBlockState(block(what).defaultBlockState());
+			display.setTransformation(new Transformation(new Vector3f(-w / 2.0F, -h / 2.0F, -d / 2.0F), null, new Vector3f(w, h, d), null));
+			e = display;
+		}
+		Vec3 at = f.at(from[0], from[1], from[2]);
+		e.setId(nextId--);
+		e.snapTo(at.x, at.y, at.z, turn, 0.0F);
+		f.level.addEntity(e);
+		f.props.add(e);
+		Gib gib = new Gib(e, id, flat, at, f.way(way[0], way[1], way[2]), turn, spin);
+		f.gibs.add(gib);
+		return gib;
+	}
+
+	/** Something sent flying is picked up again: gone. */
+	private static void ungib(Film f, int id) {
+		tape(f, FilmTape.UNGIB, id, 0, NONE, "");
+		for (Iterator<Gib> it = f.gibs.iterator(); it.hasNext(); ) {
+			Gib gib = it.next();
+			if (gib.id == id) {
+				f.level.removeEntity(gib.e.getId(), Entity.RemovalReason.DISCARDED);
+				it.remove();
+			}
+		}
+	}
+
+	// ---- the tape ------------------------------------------------------------------------------------------------------------
+
+	/** Puts where {@code a} is on the tape, if it has moved or turned since the tape last had it. */
+	private static void record(Film f, Actor a, boolean snapped) {
+		FilmTape tape = f.rec;
+		if (tape == null) {
+			return;
+		}
+		float up = (float)-a.sink, turn = Mth.wrapDegrees(a.yaw - f.yaw);
+		float[] had = a.taped;
+		if (!snapped && Math.abs(a.f - had[0]) <= TAPE_MOVED && Math.abs(a.s - had[1]) <= TAPE_MOVED && Math.abs(up - had[2]) <= TAPE_MOVED
+			&& Math.abs(Mth.wrapDegrees(turn - had[3])) <= TAPE_TURNED) {
+			return;
+		}
+		if (snapped) {
+			tape(f, FilmTape.PLACE, a.index, 0, NONE, "");
+		}
+		had[0] = (float)a.f;
+		had[1] = (float)a.s;
+		had[2] = up;
+		had[3] = turn;
+		tape.frame(f.tick).moves.add(new float[] {a.index, had[0], had[1], up, turn});
+	}
+
+	/** One tick off the tape: what happened in it, then where everyone is. */
+	private static void replay(Film f, FilmTape tape, int t) {
+		if (t < tape.frames.size()) {
+			FilmTape.Frame frame = tape.frames.get(t);
+			for (FilmTape.Event e : frame.events) {
+				happen(f, e);
+			}
+			for (float[] m : frame.moves) {
+				int index = (int)m[0];
+				if (index >= 0 && index < f.actors.size()) {
+					Actor a = f.actors.get(index);
+					a.f = m[1];
+					a.s = m[2];
+					a.sink = -m[3];
+					a.yaw = f.yaw + m[4];
+				}
+			}
+		}
+		for (Actor a : f.actors) {
+			place(f, a);
+		}
+	}
+
+	private static void happen(Film f, FilmTape.Event e) {
+		Actor a = e.a() >= 0 && e.a() < f.actors.size() ? f.actors.get(e.a()) : null;
+		float[] v = e.v();
+		switch (e.type()) {
+			case FilmTape.ACT -> {
+				if (a != null) {
+					act(f, a, e.s());
+				}
+			}
+			case FilmTape.REST -> {
+				if (a != null) {
+					rest(f, a);
+				}
+			}
+			case FilmTape.GAIT -> {
+				String[] loops = e.s().split(" ");
+				if (a != null && loops.length == 2) {
+					gait(f, a, loops[0], loops[1]);
+				}
+			}
+			case FilmTape.ITEM -> {
+				if (a != null && e.b() >= 0 && e.b() < EquipmentSlot.values().length) {
+					hold(f, a, EquipmentSlot.values()[e.b()], e.s());
+				}
+			}
+			case FilmTape.MAIM -> {
+				if (a != null) {
+					maim(f, a, e.b());
+				}
+			}
+			case FilmTape.HURT -> {
+				if (a != null) {
+					hurt(f, a);
+				}
+			}
+			case FilmTape.HIDE -> {
+				if (a != null) {
+					hide(f, a);
+				}
+			}
+			case FilmTape.PLACE -> {
+				if (a != null) {
+					a.snap = true;
+				}
+			}
+			case FilmTape.TETHER -> {
+				if (a != null && e.b() >= 0 && e.b() < FilmActor.TETHERS) {
+					tether(f, a, e.b(), v.length >= 3 ? f.at(v[0], v[1], v[2]) : null);
+				}
+			}
+			case FilmTape.SOUND -> {
+				Identifier id = Identifier.tryParse(e.s());
+				SoundEvent sound = id == null ? null : BuiltInRegistries.SOUND_EVENT.getOptional(id).orElse(null);
+				if (sound != null && v.length >= 2) {
+					sound(f, sound, v[0], v[1]);
+				}
+			}
+			case FilmTape.PARTICLE -> {
+				if (e.a() >= 0 && e.a() < f.palette.length && v.length >= 6) {
+					Vec3 way = f.way(v[3], v[4], v[5]);
+					particle(f, f.palette[e.a()], f.at(v[0], v[1], v[2]), way.x, way.y, way.z);
+				}
+			}
+			case FilmTape.BOLT -> {
+				if (v.length >= 2) {
+					lightning(f, v[0], v[1]);
+				}
+			}
+			case FilmTape.FLASH -> {
+				if (v.length >= 1) {
+					flash(f, v[0]);
+				}
+			}
+			case FilmTape.GIB -> {
+				if (v.length >= 11) {
+					fling(f, e.a(), (e.b() & 1) != 0, e.s(), v[8], v[9], v[10], new float[] {v[0], v[1], v[2]}, new float[] {v[3], v[4], v[5]}, v[6], v[7],
+						(e.b() & 2) != 0);
+				}
+			}
+			case FilmTape.UNGIB -> ungib(f, e.a());
+			default -> {
+			}
+		}
+	}
+
 	// ---- the set ------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * A box of {@code block}, {@code w} wide, {@code h} high and {@code d} deep, its foot centred on the stage point at
-	 * height {@code y}: a block display, seen from far off.
+	 * A box of {@code block}, {@code w} wide, {@code h} high and {@code d} deep, its foot centred on the stage point
+	 * {@code (fwd, side)}, {@code up} over the ground at {@code (anchorF, anchorS)} (so a building's parts all stand on
+	 * the one level): a block display, seen from far off.
 	 */
-	private static Display.@Nullable BlockDisplay box(Film f, Block block, double fwd, double side, double y, float w, float h, float d,
-		@Nullable Brightness light) {
+	private static void box(Film f, Block block, double anchorF, double anchorS, double fwd, double side, double up, float w, float h, float d, boolean lit) {
+		if (f.rec != null) {
+			f.rec.set.add(new FilmTape.Box(BuiltInRegistries.BLOCK.getKey(block).toString(),
+				new float[] {(float)anchorF, (float)anchorS, (float)fwd, (float)side, (float)up, w, h, d}, lit));
+		}
 		Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
 		e.setBlockState(block.defaultBlockState());
 		e.setTransformation(new Transformation(new Vector3f(-w / 2.0F, 0.0F, -d / 2.0F), null, new Vector3f(w, h, d), null));
 		e.setViewRange(SET_VIEW_RANGE);
-		if (light != null) {
-			e.setBrightnessOverride(light);
+		if (lit) {
+			e.setBrightnessOverride(new Brightness(15, 15));
 		}
 		Vec3 at = f.at(fwd, side, 0.0);
 		e.setId(nextId--);
-		e.snapTo(at.x, y, at.z, f.yaw, 0.0F);
+		e.snapTo(at.x, f.at(anchorF, anchorS, 0.0).y + up, at.z, f.yaw, 0.0F);
 		f.level.addEntity(e);
 		f.props.add(e);
-		return e;
 	}
 
 	/** The forest: the trees the fifth turns at, then the rest, off the road and out of the way of what's staged. */
@@ -730,18 +1245,17 @@ public final class LoreFilmClient {
 	/** A tree at {@code (tf, ts)}: a spruce (a tall trunk, three tiers of needles) or an oak (two of leaves). */
 	private static void tree(Film f, double tf, double ts, boolean spruce) {
 		f.trees.add(new double[] {tf, ts});
-		double y = f.at(tf, ts, 0.0).y;
 		float tall = 7.0F + f.rnd.nextFloat() * 4.0F, girth = 0.8F + f.rnd.nextFloat() * 0.25F;
 		if (spruce) {
-			box(f, Blocks.SPRUCE_LOG, tf, ts, y, girth, tall, girth, null);
-			box(f, Blocks.SPRUCE_LEAVES, tf, ts, y + tall - 3.2, 4.4F, 2.0F, 4.4F, null);
-			box(f, Blocks.SPRUCE_LEAVES, tf, ts, y + tall - 1.2, 3.0F, 2.0F, 3.0F, null);
-			box(f, Blocks.SPRUCE_LEAVES, tf, ts, y + tall + 0.8, 1.6F, 2.0F, 1.6F, null);
+			box(f, Blocks.SPRUCE_LOG, tf, ts, tf, ts, 0.0, girth, tall, girth, false);
+			box(f, Blocks.SPRUCE_LEAVES, tf, ts, tf, ts, tall - 3.2, 4.4F, 2.0F, 4.4F, false);
+			box(f, Blocks.SPRUCE_LEAVES, tf, ts, tf, ts, tall - 1.2, 3.0F, 2.0F, 3.0F, false);
+			box(f, Blocks.SPRUCE_LEAVES, tf, ts, tf, ts, tall + 0.8, 1.6F, 2.0F, 1.6F, false);
 		} else {
 			tall -= 1.5F;
-			box(f, Blocks.OAK_LOG, tf, ts, y, girth, tall, girth, null);
-			box(f, Blocks.OAK_LEAVES, tf, ts, y + tall - 1.4, 5.2F, 2.6F, 5.2F, null);
-			box(f, Blocks.OAK_LEAVES, tf, ts, y + tall + 1.2, 3.2F, 1.8F, 3.2F, null);
+			box(f, Blocks.OAK_LOG, tf, ts, tf, ts, 0.0, girth, tall, girth, false);
+			box(f, Blocks.OAK_LEAVES, tf, ts, tf, ts, tall - 1.4, 5.2F, 2.6F, 5.2F, false);
+			box(f, Blocks.OAK_LEAVES, tf, ts, tf, ts, tall + 1.2, 3.2F, 1.8F, 3.2F, false);
 		}
 	}
 
@@ -756,37 +1270,35 @@ public final class LoreFilmClient {
 
 	/** The Keep at the far end of the road: a curtain wall, a gatehouse, two corner towers and the great tower behind, its windows lit. */
 	private static void keep(Film f) {
-		double y = f.at(KEEP_F, 0.0, 0.0).y + KEEP_RISE;
-		Brightness lit = new Brightness(15, 15);
 		for (int i = -2; i <= 2; i++) {
-			box(f, Blocks.STONE_BRICKS, KEEP_F, i * 8.0, y, 8.0F, 8.0F, 3.0F, null);
+			box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F, i * 8.0, KEEP_RISE, 8.0F, 8.0F, 3.0F, false);
 			if (i != 0) {
 				// merlons along the wall walk
-				box(f, Blocks.STONE_BRICKS, KEEP_F, i * 8.0 - 2.0, y + 8.0, 2.0F, 1.6F, 3.0F, null);
-				box(f, Blocks.STONE_BRICKS, KEEP_F, i * 8.0 + 2.0, y + 8.0, 2.0F, 1.6F, 3.0F, null);
+				box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F, i * 8.0 - 2.0, KEEP_RISE + 8.0, 2.0F, 1.6F, 3.0F, false);
+				box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F, i * 8.0 + 2.0, KEEP_RISE + 8.0, 2.0F, 1.6F, 3.0F, false);
 			}
 		}
 		// the gatehouse, its gate, a torch either side
-		box(f, Blocks.STONE_BRICKS, KEEP_F + 1.5, 0.0, y, 9.0F, 12.0F, 5.0F, null);
-		box(f, Blocks.COBBLESTONE, KEEP_F + 1.5, 0.0, y + 12.0, 10.0F, 1.5F, 6.0F, null);
-		box(f, Blocks.DARK_OAK_PLANKS, KEEP_F + 4.05, 0.0, y, 4.0F, 5.5F, 0.3F, null);
-		box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F + 4.2, -3.2, y + 4.0, 0.5F, 0.7F, 0.5F, lit);
-		box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F + 4.2, 3.2, y + 4.0, 0.5F, 0.7F, 0.5F, lit);
+		box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F + 1.5, 0.0, KEEP_RISE, 9.0F, 12.0F, 5.0F, false);
+		box(f, Blocks.COBBLESTONE, KEEP_F, 0.0, KEEP_F + 1.5, 0.0, KEEP_RISE + 12.0, 10.0F, 1.5F, 6.0F, false);
+		box(f, Blocks.DARK_OAK_PLANKS, KEEP_F, 0.0, KEEP_F + 4.05, 0.0, KEEP_RISE, 4.0F, 5.5F, 0.3F, false);
+		box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F, 0.0, KEEP_F + 4.2, -3.2, KEEP_RISE + 4.0, 0.5F, 0.7F, 0.5F, true);
+		box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F, 0.0, KEEP_F + 4.2, 3.2, KEEP_RISE + 4.0, 0.5F, 0.7F, 0.5F, true);
 		for (int side = -1; side <= 1; side += 2) {
-			box(f, Blocks.STONE_BRICKS, KEEP_F, side * 21.0, y, 7.0F, 15.0F, 7.0F, null);
-			box(f, Blocks.COBBLESTONE, KEEP_F, side * 21.0, y + 15.0, 8.2F, 1.4F, 8.2F, null);
-			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F + 3.55, side * 21.0, y + 10.5, 0.8F, 1.6F, 0.2F, lit);
+			box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F, side * 21.0, KEEP_RISE, 7.0F, 15.0F, 7.0F, false);
+			box(f, Blocks.COBBLESTONE, KEEP_F, 0.0, KEEP_F, side * 21.0, KEEP_RISE + 15.0, 8.2F, 1.4F, 8.2F, false);
+			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F, 0.0, KEEP_F + 3.55, side * 21.0, KEEP_RISE + 10.5, 0.8F, 1.6F, 0.2F, true);
 		}
 		// the great tower, behind the wall and over it
 		for (int i = -1; i <= 1; i += 2) {
-			box(f, Blocks.STONE_BRICKS, KEEP_F - 12.0, i * 4.0, y, 8.0F, 13.0F, 14.0F, null);
-			box(f, Blocks.STONE_BRICKS, KEEP_F - 12.0, i * 4.0, y + 13.0, 8.0F, 13.0F, 14.0F, null);
-			box(f, Blocks.STONE_BRICKS, KEEP_F - 12.0, i * 6.5, y + 28.0, 3.0F, 2.6F, 15.0F, null);
-			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F - 4.95, i * 3.5, y + 16.0, 0.9F, 2.0F, 0.2F, lit);
-			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F - 4.95, i * 4.5, y + 22.0, 0.9F, 2.0F, 0.2F, lit);
+			box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F - 12.0, i * 4.0, KEEP_RISE, 8.0F, 13.0F, 14.0F, false);
+			box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F - 12.0, i * 4.0, KEEP_RISE + 13.0, 8.0F, 13.0F, 14.0F, false);
+			box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F - 12.0, i * 6.5, KEEP_RISE + 28.0, 3.0F, 2.6F, 15.0F, false);
+			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F, 0.0, KEEP_F - 4.95, i * 3.5, KEEP_RISE + 16.0, 0.9F, 2.0F, 0.2F, true);
+			box(f, Blocks.OCHRE_FROGLIGHT, KEEP_F, 0.0, KEEP_F - 4.95, i * 4.5, KEEP_RISE + 22.0, 0.9F, 2.0F, 0.2F, true);
 		}
-		box(f, Blocks.COBBLESTONE, KEEP_F - 12.0, 0.0, y + 26.0, 17.0F, 2.0F, 15.0F, null);
-		box(f, Blocks.STONE_BRICKS, KEEP_F - 12.0, 0.0, y + 28.0, 3.0F, 2.6F, 15.0F, null);
+		box(f, Blocks.COBBLESTONE, KEEP_F, 0.0, KEEP_F - 12.0, 0.0, KEEP_RISE + 26.0, 17.0F, 2.0F, 15.0F, false);
+		box(f, Blocks.STONE_BRICKS, KEEP_F, 0.0, KEEP_F - 12.0, 0.0, KEEP_RISE + 28.0, 3.0F, 2.6F, 15.0F, false);
 	}
 
 	private static double distance(double f1, double s1, double f2, double s2) {
@@ -820,25 +1332,40 @@ public final class LoreFilmClient {
 		if (minecraft.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
 			minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 		}
-		f.skip = minecraft.options.keyShift.isDown() ? f.skip + 1 : 0;
+		// (a tape being made is never cut short)
+		f.skip = minecraft.options.keyShift.isDown() && f.rec == null ? f.skip + 1 : 0;
 		if (f.skip == SKIP_HOLD && f.tick < LENGTH - FADE) {
 			f.tick = LENGTH - FADE;
 		}
 		f.flashO = f.flash;
 		f.flash *= 0.82F;
 		int t = f.tick;
-		beats(f, t);
-		battle(f, t);
-		for (Iterator<Finish> it = f.finishes.iterator(); it.hasNext(); ) {
-			if (finish(f, it.next(), t)) {
-				it.remove();
+		if (f.play != null) {
+			replay(f, f.play, t);
+		} else {
+			beats(f, t);
+			battle(f, t);
+			for (Iterator<Finish> it = f.finishes.iterator(); it.hasNext(); ) {
+				if (finish(f, it.next(), t)) {
+					it.remove();
+				}
 			}
-		}
-		for (Actor a : f.actors) {
-			move(f, a, t);
+			for (Actor a : f.actors) {
+				boolean snapped = a.snap;
+				move(f, a, t);
+				record(f, a, snapped);
+			}
 		}
 		things(f);
 		if (++f.tick >= LENGTH) {
+			if (f.rec != null) {
+				try {
+					f.rec.save(f.name);
+					JaymosKingdoms.LOGGER.info("lore film {}: taped to {}", f.name, FilmTape.local(f.name));
+				} catch (IOException e) {
+					JaymosKingdoms.LOGGER.warn("lore film {}: its tape couldn't be saved", f.name, e);
+				}
+			}
 			stop(minecraft);
 		}
 	}
@@ -882,8 +1409,8 @@ public final class LoreFilmClient {
 			return;
 		}
 		if (t == SUMMON + 4) {
-			pose(grue, FilmPose.SUMMON, 0.18F);
-			sound(SoundEvents.EVOKER_PREPARE_SUMMON, 0.6F, 0.9F);
+			act(f, grue, "summon");
+			sound(f, SoundEvents.EVOKER_PREPARE_SUMMON, 0.6F, 0.9F);
 		}
 		if (t >= SUMMON && t < RISING + 20) {
 			for (int i = 0; i < 6; i++) {
@@ -896,10 +1423,10 @@ public final class LoreFilmClient {
 			}
 		}
 		if (t == STRIKE) {
-			sound(SoundEvents.WITHER_SPAWN, 0.6F, 0.45F);
+			sound(f, SoundEvents.WITHER_SPAWN, 0.6F, 0.45F);
 		}
 		if (t == RISING + 40) {
-			pose(grue, null, 0.1F);
+			rest(f, grue);
 		}
 		for (Rise rise : f.rises) {
 			if (t >= rise.tick - 10 && t < rise.tick + 24) {
@@ -908,7 +1435,7 @@ public final class LoreFilmClient {
 				}
 			}
 			if (t == rise.tick) {
-				sound(SoundEvents.SOUL_ESCAPE.value(), 0.6F + f.rnd.nextFloat() * 0.3F, 0.8F);
+				sound(f, SoundEvents.SOUL_ESCAPE.value(), 0.6F + f.rnd.nextFloat() * 0.3F, 0.8F);
 				if (rise.lightning) {
 					lightning(f, rise.f + spread(f, 3.0), rise.s + spread(f, 3.0));
 				}
@@ -919,21 +1446,6 @@ public final class LoreFilmClient {
 				a.sinkTo = 0.0;
 			}
 		}
-	}
-
-	/** A bolt of lightning at {@code (fwd, side)}: seen and heard on this game alone, and the screen lit by it. */
-	private static void lightning(Film f, double fwd, double side) {
-		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(f.level, EntitySpawnReason.LOAD);
-		if (bolt == null) {
-			return;
-		}
-		bolt.setVisualOnly(true);
-		Vec3 at = f.at(fwd, side, 0.0);
-		bolt.setId(nextId--);
-		bolt.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
-		f.level.addEntity(bolt);
-		f.props.add(bolt);
-		f.flash = Math.max(f.flash, 0.55F);
 	}
 
 	/** The mage casting {@code which} (0 Varro, 1 Thessaly, 2 Grimsby, 3 Ambrose). */
@@ -966,14 +1478,15 @@ public final class LoreFilmClient {
 	/**
 	 * Varro's own move, and the mark. The orc runs at him and chops; he slips inside it, catches the wrist, wrenches the
 	 * axe away (it flies), kicks the knee from under it, takes its head in his hand as it kneels and sets his ki mark on
-	 * its brow. It bows, rises, takes up its axe and turns on the dead.
+	 * its brow. It bows, rises, takes up its axe and turns on the dead. His side of it is one move of the library
+	 * ("disarm"), the orc's another ("disarmed"); the beats here are when each part of them lands.
 	 */
 	private static void marking(Film f, int t) {
 		Actor orc = f.marked, varro = f.varro;
 		if (orc == null || varro == null) {
 			return;
 		}
-		double kneelF = VARRO_AT[0] + 1.7;
+		double kneelF = VARRO_AT[0] + MARKED_STOPS;
 		if (t == ORC_CHARGE) {
 			orc.toF = kneelF;
 			orc.toS = VARRO_AT[1];
@@ -981,87 +1494,83 @@ public final class LoreFilmClient {
 		}
 		if (t == CHOP_UP) {
 			orc.facing = varro;
-			pose(orc, FilmPose.OVERHEAD, 0.5F);
+			act(f, orc, "overhead");
 		}
 		if (t == CHOP) {
-			pose(orc, FilmPose.CHOP, 0.8F);
-			sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 0.8F);
+			act(f, orc, "chop");
+			sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 0.8F);
 			// inside the blow
-			varro.toF = VARRO_AT[0] + 0.5;
-			varro.toS = VARRO_AT[1] - 0.7;
-			pose(varro, FilmPose.CATCH, 0.7F);
+			varro.toF = VARRO_AT[0] + 0.45;
+			varro.toS = VARRO_AT[1] - 0.75;
+			act(f, varro, "disarm");
 		}
 		if (t == DISARM) {
-			pose(varro, FilmPose.WRENCH, 0.7F);
-			pose(orc, FilmPose.STAGGER, 0.6F);
-			ItemStack axe = orc.e.getMainHandItem().copy();
-			orc.e.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-			Display.ItemDisplay flying = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, f.level);
-			flying.setItemStack(axe);
-			flying.setItemTransform(ItemDisplayContext.NONE);
+			act(f, orc, "disarmed");
+			String axe = id(orc.e.getMainHandItem().getItem());
+			hold(f, orc, EquipmentSlot.MAINHAND, "");
 			Vec3 hand = orc.e.position().add(0.0, 1.3, 0.0).subtract(f.fwd.scale(0.6));
-			f.axe = fling(f, flying, hand, f.fwd.scale(0.085).add(f.right.scale(0.075)).add(0.0, 0.42, 0.0), 38.0F);
-			sound(SoundEvents.SHIELD_BLOCK.value(), 1.3F, 0.9F);
-			sound(SoundEvents.ANVIL_LAND, 1.6F, 0.25F);
+			f.axe = fling(f, true, axe, 1.0F, 1.0F, 1.0F, hand, f.fwd.scale(0.085).add(f.right.scale(0.075)).add(0.0, 0.42, 0.0), 38.0F, true);
+			sound(f, SoundEvents.SHIELD_BLOCK.value(), 1.3F, 0.9F);
+			sound(f, SoundEvents.ANVIL_LAND, 1.6F, 0.25F);
 		}
 		if (t == KICK) {
-			pose(varro, FilmPose.KICK, 0.7F);
-			sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.7F, 0.9F);
+			sound(f, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.7F, 0.9F);
 		}
 		if (t == KNEES) {
-			orc.e.hurtTime = orc.e.hurtDuration = 10;
-			orc.sinkTo = KNEEL * orc.scale;
-			pose(orc, FilmPose.KNEEL, 0.5F);
-			sound(SoundEvents.ANVIL_LAND, 0.5F, 0.35F);
+			hurt(f, orc);
+			sound(f, SoundEvents.ANVIL_LAND, 0.5F, 0.35F);
 			for (int i = 0; i < 8; i++) {
 				particle(f, ParticleTypes.CLOUD, orc.e.position().add(spread(f, 0.5), 0.1, spread(f, 0.5)), spread(f, 0.03), 0.01, spread(f, 0.03));
 			}
 		}
 		if (t == GRIP) {
 			// in front of it, his hand on its head, its face forced up to him
-			varro.toF = kneelF - 0.95;
+			varro.toF = kneelF - 1.1;
 			varro.toS = VARRO_AT[1];
-			pose(varro, FilmPose.REACH, 0.4F);
-			pose(orc, FilmPose.KNEEL_UP, 0.4F);
+			act(f, orc, "kneel_up");
 		}
-		Vec3 brow = orc.e.position().add(0.0, 1.55 * ORC_SCALE, 0.0).subtract(f.fwd.scale(0.3));
+		Vec3 brow = orc.e.position().add(0.0, (1.55 - KNEEL) * ORC_SCALE, 0.0).subtract(f.fwd.scale(0.3));
 		if (t == MARK_SET) {
 			// the ki mark burns on its brow
-			sound(SoundEvents.FIRECHARGE_USE, 0.7F, 0.8F);
-			sound(SoundEvents.BEACON_POWER_SELECT, 0.6F, 0.8F);
-			f.flash = Math.max(f.flash, 0.14F);
+			sound(f, SoundEvents.FIRECHARGE_USE, 0.7F, 0.8F);
+			sound(f, SoundEvents.BEACON_POWER_SELECT, 0.6F, 0.8F);
+			flash(f, 0.14F);
 			for (int i = 0; i < 24; i++) {
 				double turn = i * Math.PI / 12.0;
 				particle(f, i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.END_ROD, brow.add(f.right.scale(Math.cos(turn) * 0.35)).add(0.0, Math.sin(turn) * 0.35, 0.0),
 					0.0, 0.01, 0.0);
 			}
 		}
-		if (t > MARK_SET && t < QUIET && t % 4 == 0 && !orc.down) {
+		if (t > MARK_SET && t < MARK_RISE && t % 4 == 0) {
 			particle(f, ParticleTypes.SMALL_FLAME, brow, 0.0, 0.005, 0.0);
 		}
+		if (t > MARK_RISE + 14 && t < QUIET && t % 4 == 0 && !orc.down) {
+			particle(f, ParticleTypes.SMALL_FLAME, orc.e.position().add(0.0, 1.6 * ORC_SCALE, 0.0), 0.0, 0.005, 0.0);
+		}
 		if (t == BOW) {
-			pose(orc, FilmPose.KNEEL, 0.25F);
-			pose(varro, null, 0.25F);
+			act(f, orc, "kneel_bow");
+			rest(f, varro);
 		}
 		if (t == MARK_RISE) {
 			// up, its axe taken back, and turned on the dead
-			orc.sinkTo = 0.0;
-			pose(orc, null, 0.3F);
-			pose(varro, FilmPose.POINT, 0.4F);
+			act(f, orc, "rise");
+			act(f, varro, "point");
+			gait(f, orc, Moves.GUARD, Moves.RUN);
+			sound(f, SoundEvents.RAVAGER_ROAR, 0.9F, 0.7F);
+		}
+		if (t == MARK_RISE + RISE_TICKS) {
 			orc.facing = null;
 			orc.speed = MARKED_HUNT;
 			if (f.axe != null) {
-				Vec3 to = new Vec3(f.axe.x, 0.0, f.axe.z).subtract(f.origin.x, 0.0, f.origin.z);
-				orc.toF = to.dot(f.fwd);
-				orc.toS = to.dot(f.right);
+				float[] to = f.staged(new Vec3(f.axe.x, f.axe.y, f.axe.z));
+				orc.toF = to[0];
+				orc.toS = to[1];
 			}
-			sound(SoundEvents.RAVAGER_ROAR, 0.9F, 0.7F);
 		}
-		if (t > MARK_RISE && orc.scripted && (t >= MARK_RISE + 26 || distance(orc.f, orc.s, orc.toF, orc.toS) < 0.6)) {
+		if (t > MARK_RISE + RISE_TICKS && orc.scripted && (t >= MARK_RISE + RISE_TICKS + 26 || distance(orc.f, orc.s, orc.toF, orc.toS) < 0.6)) {
 			if (f.axe != null) {
-				orc.e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
-				f.level.removeEntity(f.axe.e.getId(), Entity.RemovalReason.DISCARDED);
-				f.gibs.remove(f.axe);
+				hold(f, orc, EquipmentSlot.MAINHAND, id(Items.IRON_AXE));
+				ungib(f, f.axe.id);
 				f.axe = null;
 			}
 			orc.scripted = false;
@@ -1069,7 +1578,7 @@ public final class LoreFilmClient {
 			f.fighters.add(orc);
 		}
 		if (t == VARRO_FIELD + 8) {
-			pose(varro, null, 0.2F);
+			rest(f, varro);
 			varro.facing = null;
 			varro.toF = VARRO_AT[0];
 			varro.toS = VARRO_AT[1];
@@ -1078,8 +1587,8 @@ public final class LoreFilmClient {
 
 	/** Grimsby's bolt: off his free hand, a streak of light into {@code at}, which falls. */
 	private static void bolt(Film f, Actor mage, Actor at) {
-		mage.e.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
-		sound(SoundEvents.EVOKER_CAST_SPELL, 1.3F, 0.5F);
+		act(f, mage, "cast_left");
+		sound(f, SoundEvents.EVOKER_CAST_SPELL, 1.3F, 0.5F);
 		Vec3 from = mage.e.position().add(0.0, 1.4, 0.0).add(f.right.scale(-0.4)), to = at.e.position().add(0.0, 1.1, 0.0);
 		int steps = Math.max(8, (int)(from.distanceTo(to) * 2.0));
 		for (int i = 0; i <= steps; i++) {
@@ -1090,11 +1599,17 @@ public final class LoreFilmClient {
 	}
 
 	private static void spell(Film f, int which, Actor mage, int into) {
+		// the working itself: called up, let go about as the camera cuts to where it lands, then held a moment
+		if (into == 0) {
+			act(f, mage, CASTS[which % CASTS.length]);
+		}
+		if (into == CAST_TICKS - 6) {
+			rest(f, mage);
+		}
 		if (which == 2 && into < 12) {
 			// Grimsby: glyphs gather and turn about him as he calls it up, his free hand raised
 			if (into == 2) {
-				mage.e.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
-				sound(SoundEvents.EVOKER_PREPARE_ATTACK, 1.0F, 0.8F);
+				sound(f, SoundEvents.EVOKER_PREPARE_ATTACK, 1.0F, 0.8F);
 			}
 			for (int i = 0; i < 6; i++) {
 				double turn = (into * 0.5 + i * Math.PI / 3.0);
@@ -1102,9 +1617,6 @@ public final class LoreFilmClient {
 				particle(f, ParticleTypes.ENCHANT, p, 0.0, 0.0, 0.0);
 				particle(f, ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.02, 0.0);
 			}
-		}
-		if (into == 10) {
-			mage.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
 		if (into < 12) {
 			return;
@@ -1114,8 +1626,8 @@ public final class LoreFilmClient {
 			case 0 -> {
 				// Varro: fire, thrown into the thick of them
 				if (into == 12) {
-					sound(SoundEvents.BLAZE_SHOOT, 0.8F, 0.9F);
-					sound(SoundEvents.GENERIC_EXPLODE.value(), 1.1F, 0.6F);
+					sound(f, SoundEvents.BLAZE_SHOOT, 0.8F, 0.9F);
+					sound(f, SoundEvents.GENERIC_EXPLODE.value(), 1.1F, 0.6F);
 					for (int i = 0; i < 70; i++) {
 						particle(f, i % 6 == 0 ? ParticleTypes.LAVA : ParticleTypes.FLAME, aim.add(spread(f, 2.5), f.rnd.nextDouble(), spread(f, 2.5)), spread(f, 0.25),
 							f.rnd.nextDouble() * 0.25, spread(f, 0.25));
@@ -1126,14 +1638,15 @@ public final class LoreFilmClient {
 			case 1 -> {
 				// Thessaly: a wall of light across the front, and the sorcerer's thrown back from it
 				if (into == 12) {
-					sound(SoundEvents.AMETHYST_BLOCK_CHIME, 0.7F, 1.0F);
-					sound(SoundEvents.BEACON_ACTIVATE, 1.4F, 0.7F);
+					sound(f, SoundEvents.AMETHYST_BLOCK_CHIME, 0.7F, 1.0F);
+					sound(f, SoundEvents.BEACON_ACTIVATE, 1.4F, 0.7F);
 					for (Actor a : f.legion) {
 						if (a.up() && f.tick >= a.busyUntil && a.f < 19.0) {
 							a.toF = a.f + 4.0;
 							a.toS = a.s;
 							a.stunUntil = f.tick + 30;
-							a.e.hurtTime = a.e.hurtDuration = 10;
+							hurt(f, a);
+							act(f, a, "stagger");
 						}
 					}
 				}
@@ -1148,8 +1661,8 @@ public final class LoreFilmClient {
 				// Grimsby: the spell let go down his blade, one cut of light that runs the length of the field
 				int run = into - 12;
 				if (run == 0) {
-					sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 1.0F);
-					sound(SoundEvents.EVOKER_CAST_SPELL, 0.8F, 0.9F);
+					sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 1.0F);
+					sound(f, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 0.9F);
 				}
 				if (run < 14) {
 					double along = MAGES_F + 3.0 + run * (SORCERER_F - 6.0 - MAGES_F - 3.0) / 14.0;
@@ -1169,9 +1682,9 @@ public final class LoreFilmClient {
 			default -> {
 				// Ambrose: day, for a breath
 				if (into == 12) {
-					sound(SoundEvents.TRIDENT_THUNDER.value(), 1.2F, 0.5F);
-					sound(SoundEvents.BEACON_ACTIVATE, 2.0F, 1.0F);
-					f.flash = 0.75F;
+					sound(f, SoundEvents.TRIDENT_THUNDER.value(), 1.2F, 0.5F);
+					sound(f, SoundEvents.BEACON_ACTIVATE, 2.0F, 1.0F);
+					flash(f, 0.75F);
 					fell(f, aim, 7.0, 6);
 				}
 				if (into < 24) {
@@ -1193,8 +1706,10 @@ public final class LoreFilmClient {
 	}
 
 	/**
-	 * The fifth: he runs at the sorcerer through the trees, turning at each, the sorcerer's bolts going by him and into
-	 * the trunks; he lunges, and the sorcerer isn't there. The dead drop, the host runs.
+	 * The fifth, the Quiet One. He runs at the sorcerer through the trees, his cloak throwing a tether at each tree
+	 * ahead and hauling him round it, a flip off this trunk and a roll under that bolt, the sorcerer's bolts going by him
+	 * and into the trunks. The sorcerer's guards come for him; the cloak takes each of them itself and throws it aside.
+	 * He lunges, and the sorcerer isn't there. The dead drop, the host runs.
 	 */
 	private static void fifth(Film f, int t) {
 		Actor quiet = f.stranger, grue = f.sorcerer;
@@ -1205,35 +1720,53 @@ public final class LoreFilmClient {
 			// (from the edge of the fight: the cut hides the step)
 			quiet.f = QUIET_PATH[0][0];
 			quiet.s = QUIET_PATH[0][1];
+			quiet.snap = true;
 			quiet.toF = QUIET_PATH[1][0];
 			quiet.toS = QUIET_PATH[1][1];
 			quiet.restYaw = Float.NaN;
-			pose(quiet, FilmPose.RUN, 0.5F);
 			grue.facing = quiet;
+			swingTo(f, quiet, 1);
 		}
 		if (t < QUIET) {
 			return;
 		}
 		if (f.lungeAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
 			if (f.quietAt + 1 < QUIET_PATH.length) {
+				// round this tree: off its trunk, or under what's coming
+				for (int flip : QUIET_FLIPS) {
+					if (flip == f.quietAt) {
+						act(f, quiet, "tree_flip");
+						sound(f, SoundEvents.WOOD_HIT, 0.8F, 0.6F);
+					}
+				}
+				for (int roll : QUIET_ROLLS) {
+					if (roll == f.quietAt) {
+						act(f, quiet, "dodge_roll");
+					}
+				}
 				f.quietAt++;
 				quiet.toF = QUIET_PATH[f.quietAt][0];
 				quiet.toS = QUIET_PATH[f.quietAt][1];
+				swingTo(f, quiet, f.quietAt);
 			} else {
 				// the lunge
 				f.lungeAt = t;
 				quiet.speed = QUIET_LUNGE;
 				quiet.toF = LUNGE_END;
 				quiet.toS = 0.0;
-				pose(quiet, FilmPose.LUNGE, 0.8F);
-				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.0F);
+				for (int i = 0; i < FilmActor.TETHERS; i++) {
+					tether(f, quiet, i, null);
+				}
+				act(f, quiet, "lunge");
+				sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.0F);
 			}
 		}
+		guards(f, quiet, t);
 		// the sorcerer's bolts
 		if (f.lungeAt < 0 && quiet.f < MANA_UNTIL && t > QUIET + 6 && (t - QUIET) % MANA_EVERY == 0) {
 			boolean left = (t - QUIET) / MANA_EVERY % 2 == 0;
-			pose(grue, left ? FilmPose.CAST_LEFT : FilmPose.CAST_RIGHT, 0.7F);
-			sound(SoundEvents.EVOKER_CAST_SPELL, 0.5F, 0.7F);
+			act(f, grue, left ? "cast_left" : "cast_right");
+			sound(f, SoundEvents.EVOKER_CAST_SPELL, 0.5F, 0.7F);
 			Vec3 from = grue.e.position().add(0.0, 1.5, 0.0).subtract(f.fwd.scale(0.6));
 			Vec3 to = null;
 			boolean tree = false;
@@ -1256,7 +1789,6 @@ public final class LoreFilmClient {
 		}
 		if (f.lungeAt < 0 && quiet.f > SORCERER_F - 7.0) {
 			// he knows: the shadow comes up round him
-			pose(grue, null, 0.3F);
 			for (int i = 0; i < 9; i++) {
 				shadowFlame(f, SORCERER_F + spread(f, 0.9), spread(f, 0.9), 0.2);
 			}
@@ -1276,10 +1808,11 @@ public final class LoreFilmClient {
 			}
 		}
 		if (since == 3) {
-			grue.e.setInvisible(true);
+			hide(f, grue);
 			grue.fled = true;
-			sound(SoundEvents.SOUL_ESCAPE.value(), 0.5F, 1.0F);
-			sound(SoundEvents.WARDEN_SONIC_BOOM, 0.6F, 0.3F);
+			grue.sink = grue.sinkTo = GONE_UNDER;
+			sound(f, SoundEvents.SOUL_ESCAPE.value(), 0.5F, 1.0F);
+			sound(f, SoundEvents.WARDEN_SONIC_BOOM, 0.6F, 0.3F);
 			// the dead with nothing holding them up, and the host with no one to hold it
 			for (Actor a : f.legion) {
 				if (!a.up() && a.sink < 0.5) {
@@ -1288,24 +1821,99 @@ public final class LoreFilmClient {
 				if (a.role == Role.DEAD) {
 					a.sinkTo = a.sink;
 					if (a.sink < 0.5) {
+						a.death = "death_drop";
 						a.fallAt = t + 2 + f.rnd.nextInt(16);
 					}
 				} else if (t >= a.busyUntil) {
-					a.fled = true;
-					a.foe = null;
-					a.speed = FLEE;
-					a.toF = a.f + 34.0;
-					a.toS = a.s * 1.3;
+					rout(f, a);
+				}
+			}
+			for (Actor guard : f.guards) {
+				if (guard != null && guard.up()) {
+					rout(f, guard);
 				}
 			}
 		}
 		if (since == 8) {
-			pose(quiet, null, 0.2F);
+			act(f, quiet, "look_about");
 			quiet.speed = 0.08;
 		}
-		if (since == 22) {
-			// he looks about for him
-			quiet.restYaw = f.yaw + 150.0F;
+	}
+
+	/** One of the host runs for it. */
+	private static void rout(Film f, Actor a) {
+		a.fled = true;
+		a.foe = null;
+		a.facing = null;
+		a.restYaw = Float.NaN;
+		a.speed = FLEE;
+		a.toF = a.f + 34.0;
+		a.toS = a.s * 1.3;
+		gait(f, a, Moves.GUARD, Moves.FLEE);
+	}
+
+	/** The fifth's cloak throws a tether at the tree he turns at next (turn {@code k} of his run), and lets go of the last. */
+	private static void swingTo(Film f, Actor quiet, int k) {
+		tether(f, quiet, (k + 1) % SWING_TETHERS, null);
+		if (k - 1 < f.dartTrees.size()) {
+			double[] trunk = f.dartTrees.get(k - 1);
+			tether(f, quiet, k % SWING_TETHERS, f.at(trunk[0], trunk[1], TETHER_HIGH));
+			sound(f, SoundEvents.FISHING_BOBBER_THROW, 0.7F, 0.5F);
+		}
+	}
+
+	/**
+	 * The sorcerer's guards and the cloak. Each guard goes for the fifth in its turn; once it's near, a tether of the
+	 * cloak has it by the chest (it reels), holds it a moment, and throws it across his path and down. He never looks.
+	 */
+	private static void guards(Film f, Actor quiet, int t) {
+		for (int i = 0; i < f.guards.length; i++) {
+			Actor guard = f.guards[i];
+			if (guard == null || guard.down || guard.fled) {
+				continue;
+			}
+			int which = SWING_TETHERS + i % (FilmActor.TETHERS - SWING_TETHERS), since = f.snatchAt[i] < 0 ? -1 : t - f.snatchAt[i];
+			Vec3 chest = guard.e.position().add(0.0, 1.15 * guard.scale, 0.0);
+			if (since < 0) {
+				if (f.lungeAt >= 0 || t < QUIET + GUARD_AT[i]) {
+					continue;
+				}
+				// at him
+				guard.restYaw = Float.NaN;
+				guard.facing = quiet;
+				guard.toF = quiet.f + 1.5;
+				guard.toS = quiet.s;
+				if (distance(guard.f, guard.s, quiet.f, quiet.s) < SNATCH_REACH) {
+					f.snatchAt[i] = t;
+					guard.toF = guard.f;
+					guard.toS = guard.s;
+					tether(f, quiet, which, chest);
+					act(f, guard, "stagger");
+					hurt(f, guard);
+					sound(f, SoundEvents.FISHING_BOBBER_THROW, 0.6F, 0.8F);
+					sound(f, SoundEvents.WOOL_HIT, 0.6F, 1.0F);
+				}
+				continue;
+			}
+			if (since <= SNATCH_HOLD + THROWN_TICKS) {
+				// (the tether stays on it as he runs on and it goes)
+				tether(f, quiet, which, chest);
+			}
+			if (since == SNATCH_HOLD) {
+				// thrown: across his path, away from where it came from
+				guard.facing = null;
+				guard.speed = THROWN_SPEED;
+				guard.toF = guard.f - 1.5;
+				guard.toS = guard.s - Math.signum(GUARDS[i][1]) * THROWN;
+				guard.death = "death_back";
+				guard.fallAt = t + THROWN_TICKS;
+				act(f, guard, "stagger");
+				sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.5F, 0.9F);
+			}
+			if (since == SNATCH_HOLD + THROWN_TICKS) {
+				tether(f, quiet, which, null);
+				sound(f, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.6F, 0.8F);
+			}
 		}
 	}
 
@@ -1350,10 +1958,10 @@ public final class LoreFilmClient {
 				a.foe.foe = a;
 			}
 			if (t >= a.nextSwing) {
-				swing(a);
+				swing(f, a);
 				a.nextSwing = t + SWING_GAP + f.rnd.nextInt(SWING_SPREAD);
 				if (f.rnd.nextInt(4) == 0) {
-					sound(f.rnd.nextBoolean() ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.PLAYER_ATTACK_STRONG, 0.8F + f.rnd.nextFloat() * 0.4F, 0.22F);
+					sound(f, f.rnd.nextBoolean() ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.PLAYER_ATTACK_STRONG, 0.8F + f.rnd.nextFloat() * 0.4F, 0.22F);
 				}
 			}
 		}
@@ -1407,11 +2015,13 @@ public final class LoreFilmClient {
 		return best;
 	}
 
-	private static void swing(Actor a) {
-		if (a.e instanceof Draugr draugr) {
-			draugr.stageSwing();
-		} else {
-			a.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+	/** A blow: one of the library's cuts; now and then whoever it's at gets a shield or an arm up to it. */
+	private static void swing(Film f, Actor a) {
+		act(f, a, SWINGS[f.rnd.nextInt(SWINGS.length)]);
+		Actor foe = a.foe;
+		if (foe != null && foe.foe == a && foe.up() && f.tick >= foe.busyUntil && f.rnd.nextFloat() < BLOCKED) {
+			act(f, foe, "block");
+			foe.nextSwing = Math.max(foe.nextSwing, f.tick + BLOCK_TICKS);
 		}
 	}
 
@@ -1433,112 +2043,108 @@ public final class LoreFilmClient {
 		double df = l.f - w.f, ds = l.s - w.s, d = Math.max(0.01, Math.sqrt(df * df + ds * ds));
 		// the way the blow goes (the world's), and across it
 		Vec3 along = f.fwd.scale(df / d).add(f.right.scale(ds / d)), across = new Vec3(-along.z, 0.0, along.x);
-		Vec3 chest = l.e.position().add(0.0, 1.1 * l.scale, 0.0), neck = l.e.position().add(0.0, 1.45 * l.scale, 0.0);
+		Vec3 chest = l.e.position().add(0.0, 1.1 * l.scale, 0.0);
 		switch (fin.kind) {
 			case BEHEAD -> {
+				// (on its knees, bent toward whoever put it there)
+				Vec3 neck = l.e.position().add(0.0, (1.45 - KNEEL) * l.scale, 0.0).subtract(along.scale(0.2 * l.scale));
 				if (into == 0) {
 					// beaten to its knees
-					swing(w);
-					l.e.hurtTime = l.e.hurtDuration = 10;
-					l.sinkTo = KNEEL * l.scale * (l.e instanceof Draugr ? 0.6 : 1.0);
-					pose(l, FilmPose.KNEEL, 0.5F);
+					act(f, w, "swing_across");
+					hurt(f, l);
+					act(f, l, "kneel");
 					blood(f, chest, along, 6, l.flesh.dark);
-					sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.8F, 0.5F);
+					sound(f, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.8F, 0.5F);
 				}
 				if (into == 7) {
-					pose(w, FilmPose.OVERHEAD, 0.5F);
+					act(f, w, "overhead");
 				}
 				if (into == 13) {
-					pose(w, FilmPose.CHOP, 0.85F);
-					swing(w);
-					sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 0.7F);
+					act(f, w, "chop");
+					sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 0.7F);
 				}
 				if (into == 15) {
-					maim(l, FilmPose.NO_HEAD);
-					Display head = l.flesh.head != null ? item(f, new ItemStack(l.flesh.head), (float)l.scale) : cube(f, l.flesh.helm, 0.5F, 0.5F, 0.5F);
-					fling(f, head, neck.add(0.0, 0.2, 0.0), across.scale(f.rnd.nextBoolean() ? 0.2 : -0.2).add(along.scale(0.08)).add(0.0, 0.42 + f.rnd.nextDouble() * 0.1, 0.0),
-						30.0F);
+					maim(f, l, FilmActor.NO_HEAD);
+					Vec3 speed = across.scale(f.rnd.nextBoolean() ? 0.2 : -0.2).add(along.scale(0.08)).add(0.0, 0.42 + f.rnd.nextDouble() * 0.1, 0.0);
+					if (l.flesh.head != null) {
+						fling(f, true, id(l.flesh.head), (float)l.scale, 1.0F, 1.0F, neck.add(0.0, 0.2, 0.0), speed, 30.0F, false);
+					} else {
+						fling(f, false, BuiltInRegistries.BLOCK.getKey(l.flesh.helm).toString(), 0.5F, 0.5F, 0.5F, neck.add(0.0, 0.2, 0.0), speed, 30.0F, false);
+					}
 					blood(f, neck, new Vec3(0.0, 1.0, 0.0), 16, l.flesh.dark);
 					l.bleedUntil = t + 14;
-					l.bleedUp = 1.45 * l.scale;
-					sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.8F);
+					l.bleedUp = (1.45 - KNEEL) * l.scale;
+					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.8F);
 				}
 				if (into == 19) {
+					l.death = "death_headless";
 					l.fallAt = t;
 				}
 			}
 			case SEVER -> {
 				if (into == 0) {
 					// the weapon arm, off at the shoulder
-					swing(w);
-					pose(w, FilmPose.CHOP, 0.8F);
-					l.e.hurtTime = l.e.hurtDuration = 10;
-					maim(l, FilmPose.NO_RIGHT_ARM);
-					l.e.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-					pose(l, FilmPose.STAGGER, 0.6F);
+					act(f, w, "swing_down");
+					hurt(f, l);
+					maim(f, l, FilmActor.NO_RIGHT_ARM);
+					hold(f, l, EquipmentSlot.MAINHAND, "");
+					act(f, l, "maimed");
 					Vec3 shoulder = l.e.position().add(0.0, 1.35 * l.scale, 0.0);
-					fling(f, cube(f, l.flesh.limb, 0.26F, 0.72F, 0.26F), shoulder,
-						across.scale(f.rnd.nextBoolean() ? 0.17 : -0.17).add(along.scale(0.05)).add(0.0, 0.36 + f.rnd.nextDouble() * 0.1, 0.0), 34.0F);
+					fling(f, false, BuiltInRegistries.BLOCK.getKey(l.flesh.limb).toString(), 0.26F, 0.72F, 0.26F, shoulder,
+						across.scale(f.rnd.nextBoolean() ? 0.17 : -0.17).add(along.scale(0.05)).add(0.0, 0.36 + f.rnd.nextDouble() * 0.1, 0.0), 34.0F, false);
 					blood(f, shoulder, across, 14, l.flesh.dark);
 					l.bleedUntil = t + 12;
-					l.bleedUp = 1.35 * l.scale;
-					sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 0.7F);
-					sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.7F);
+					l.bleedUp = 1.3 * l.scale;
+					sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 0.7F);
+					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.7F);
 				}
 				if (into == 8) {
-					pose(w, FilmPose.OVERHEAD, 0.5F);
+					act(f, w, "overhead");
 				}
 				if (into == 13) {
 					// and cut down
-					pose(w, FilmPose.CHOP, 0.85F);
-					swing(w);
+					act(f, w, "chop");
 					blood(f, chest, along, 10, l.flesh.dark);
-					sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.7F, 0.6F);
+					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.7F, 0.6F);
 				}
 				if (into == 15) {
+					l.death = "death_back";
 					l.fallAt = t;
 				}
 			}
 			default -> {
 				if (into == 0) {
 					// run through
-					pose(w, FilmPose.THRUST, 0.75F);
-					swing(w);
-					w.toF = w.f + df / d * 0.5;
-					w.toS = w.s + ds / d * 0.5;
+					act(f, w, "thrust");
+					w.toF = w.f + df / d * 0.4;
+					w.toS = w.s + ds / d * 0.4;
 				}
-				if (into == 3) {
-					l.e.hurtTime = l.e.hurtDuration = 10;
-					pose(l, FilmPose.STAGGER, 0.6F);
+				if (into == 4) {
+					hurt(f, l);
+					act(f, l, "impaled");
 					blood(f, chest.add(along.scale(0.35)), along, 16, l.flesh.dark);
-					sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.8F);
+					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.8F);
 				}
-				if (into == 12) {
+				if (into == 13) {
 					// the blade drawn back out
-					w.toF = w.f - df / d * 0.5;
-					w.toS = w.s - ds / d * 0.5;
+					rest(f, w);
+					w.toF = w.f - df / d * 0.4;
+					w.toS = w.s - ds / d * 0.4;
 					blood(f, chest, along.scale(-1.0), 8, l.flesh.dark);
 				}
-				if (into == 14) {
+				if (into == 15) {
+					l.death = "death_front";
 					l.fallAt = t;
 				}
 			}
 		}
 		if (into >= FINISH_TICKS - 2) {
-			pose(w, null, 0.3F);
+			rest(f, w);
 			w.facing = null;
 			l.facing = null;
 			return true;
 		}
 		return false;
-	}
-
-	/** A head or an arm gone: not drawn from here on. */
-	private static void maim(Actor a, int what) {
-		a.gone |= what;
-		if (a.e instanceof Draugr draugr) {
-			draugr.stageMaim(what == FilmPose.NO_HEAD ? Draugr.MAIM_HEAD : Draugr.MAIM_ARM);
-		}
 	}
 
 	/** Blood out of {@code at}, thrown the way of {@code way}: red (or the dead's, dark and thick). */
@@ -1551,32 +2157,6 @@ public final class LoreFilmClient {
 				particle(f, new DustParticleOptions(dark ? 0x3A0A12 : 0x9A0C0C, 1.1F), p.add(way.scale(0.3 * f.rnd.nextDouble())), 0.0, 0.0, 0.0);
 			}
 		}
-	}
-
-	private static Display cube(Film f, Block block, float w, float h, float d) {
-		Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
-		e.setBlockState(block.defaultBlockState());
-		e.setTransformation(new Transformation(new Vector3f(-w / 2.0F, -h / 2.0F, -d / 2.0F), null, new Vector3f(w, h, d), null));
-		return e;
-	}
-
-	private static Display item(Film f, ItemStack stack, float scale) {
-		Display.ItemDisplay e = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, f.level);
-		e.setItemStack(stack);
-		e.setItemTransform(ItemDisplayContext.NONE);
-		e.setTransformation(new Transformation(new Vector3f(), null, new Vector3f(scale), null));
-		return e;
-	}
-
-	/** Sends {@code e} flying from {@code at} at {@code speed}, turning over as it goes. */
-	private static Gib fling(Film f, Display e, Vec3 at, Vec3 speed, float spin) {
-		e.setId(nextId--);
-		e.snapTo(at.x, at.y, at.z, f.rnd.nextFloat() * 360.0F, 0.0F);
-		f.level.addEntity(e);
-		f.props.add(e);
-		Gib gib = new Gib(e, at, speed, spin);
-		f.gibs.add(gib);
-		return gib;
 	}
 
 	/** What's in the air: heads, limbs and the axe fall and come to rest; the sorcerer's bolts fly and burst; the wounded bleed. */
@@ -1593,7 +2173,7 @@ public final class LoreFilmClient {
 			double floor = f.ground(g.x, g.z) + 0.2;
 			if (g.y <= floor) {
 				g.y = floor;
-				if (g.bounced || g == f.axe) {
+				if (g.bounced || g.flat) {
 					g.rest = true;
 				} else {
 					g.bounced = true;
@@ -1605,7 +2185,7 @@ public final class LoreFilmClient {
 			}
 			g.e.setPos(g.x, g.y, g.z);
 			g.e.setYRot(g.turn);
-			g.e.setXRot(g.rest ? (g == f.axe ? 125.0F : 90.0F) : g.turn * 0.7F);
+			g.e.setXRot(g.rest ? (g.flat ? 125.0F : 90.0F) : g.turn * 0.7F);
 		}
 		for (Iterator<Mana> it = f.mana.iterator(); it.hasNext(); ) {
 			Mana m = it.next();
@@ -1617,7 +2197,7 @@ public final class LoreFilmClient {
 			m.at = m.at.add(m.step);
 			if (--m.left <= 0) {
 				it.remove();
-				sound(m.tree ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.FIRECHARGE_USE, m.tree ? 1.4F : 0.6F, 0.45F);
+				sound(f, m.tree ? SoundEvents.ZOMBIE_ATTACK_IRON_DOOR : SoundEvents.FIRECHARGE_USE, m.tree ? 1.4F : 0.6F, 0.45F);
 				for (int i = 0; i < 16; i++) {
 					particle(f, ParticleTypes.WITCH, m.at.add(spread(f, 0.4), spread(f, 0.4), spread(f, 0.4)), spread(f, 0.15), f.rnd.nextDouble() * 0.2, spread(f, 0.15));
 					if (m.tree) {
@@ -1635,43 +2215,15 @@ public final class LoreFilmClient {
 		}
 	}
 
-	/** {@code a} takes up {@code to} (null lets it go), this quickly. */
-	private static void pose(Actor a, float @Nullable [] to, float rate) {
-		if (to != null && a.poseTo == null && a.weight < 0.05F) {
-			System.arraycopy(to, 0, a.pose, 0, FilmPose.NUMBERS);
-			System.arraycopy(to, 0, a.poseO, 0, FilmPose.NUMBERS);
-		}
-		a.poseTo = to;
-		a.poseRate = rate;
-	}
-
-	/** A film actor's pose this frame for {@link FilmPose}, or null when it has none. */
-	public static float @Nullable [] pose(Entity e, float partialTicks) {
-		Film f = film;
-		Actor a = f == null ? null : f.byEntity.get(e);
-		if (a == null || (a.weight < 0.005F && a.weightO < 0.005F && a.gone == 0)) {
-			return null;
-		}
-		float[] out = new float[FilmPose.LENGTH];
-		for (int i = 0; i < FilmPose.NUMBERS; i++) {
-			out[i] = Float.isNaN(a.pose[i]) || Float.isNaN(a.poseO[i]) ? a.pose[i] : Mth.lerp(partialTicks, a.poseO[i], a.pose[i]);
-		}
-		out[FilmPose.WEIGHT] = Mth.lerp(partialTicks, a.weightO, a.weight);
-		out[FilmPose.GONE] = a.gone;
-		return out;
-	}
-
-	/** Moves one actor toward where it's headed, rises or sinks it, turns it, eases its pose, and drops it when its time comes. */
+	/** Moves one actor toward where it's headed, rises or sinks it, turns it, and drops it when its time comes. */
 	private static void move(Film f, Actor a, int t) {
-		LivingEntity e = a.e;
 		if (a.fallAt >= 0 && t >= a.fallAt && !a.down) {
 			a.down = true;
 			a.sinkTo = Math.min(a.sinkTo, 0.0);
-			a.poseTo = null;
-			e.hurtTime = e.hurtDuration = 10;
-			e.setHealth(0.0F);
+			hurt(f, a);
+			act(f, a, a.death != null ? a.death : f.rnd.nextBoolean() ? "death_back" : "death_front");
 			if (a.role == Role.DEAD) {
-				particle(f, ParticleTypes.LARGE_SMOKE, e.position().add(0.0, 0.8, 0.0), 0.0, 0.05, 0.0);
+				particle(f, ParticleTypes.LARGE_SMOKE, a.e.position().add(0.0, 0.8, 0.0), 0.0, 0.05, 0.0);
 			}
 		}
 		double df = a.toF - a.f, ds = a.toS - a.s, d = Math.sqrt(df * df + ds * ds);
@@ -1694,8 +2246,11 @@ public final class LoreFilmClient {
 		if (a.sink != a.sinkTo) {
 			a.sink = a.sink < a.sinkTo ? Math.min(a.sinkTo, a.sink + a.sinkRate) : Math.max(a.sinkTo, a.sink - a.sinkRate);
 		}
-		Vec3 at = f.at(a.f, a.s, -a.sink);
-		e.setPos(at.x, at.y, at.z);
+		if (a.clawing && a.sink <= 0.0) {
+			// out of the ground, and on its feet
+			a.clawing = false;
+			gait(f, a, Moves.GUARD, Moves.SHAMBLE);
+		}
 		// facing: whoever its scene has it face, its foe, the way it's going, or as it stood
 		Actor toward = a.facing != null ? a.facing : a.foe != null && distance(a.f, a.s, a.foe.f, a.foe.s) < 7.0 ? a.foe : null;
 		float want = a.yaw;
@@ -1709,25 +2264,9 @@ public final class LoreFilmClient {
 			want = a.restYaw;
 		}
 		a.yaw = Mth.rotLerp(0.35F, a.yaw, want);
-		e.setYRot(a.yaw);
-		e.setYHeadRot(a.yaw);
-		e.setYBodyRot(a.yaw);
-		e.setRemainingFireTicks(0);
-		e.calculateEntityAnimation(false);
-		// its pose, eased
-		System.arraycopy(a.pose, 0, a.poseO, 0, FilmPose.NUMBERS);
-		a.weightO = a.weight;
-		if (a.poseTo != null) {
-			a.weight += (1.0F - a.weight) * a.poseRate;
-			for (int i = 0; i < FilmPose.NUMBERS; i++) {
-				float to = a.poseTo[i];
-				a.pose[i] = Float.isNaN(to) || Float.isNaN(a.pose[i]) ? to : a.pose[i] + (to - a.pose[i]) * a.poseRate;
-			}
-		} else {
-			a.weight += (0.0F - a.weight) * a.poseRate;
-		}
+		place(f, a);
 		if (a.role == Role.SORCERER && !a.fled && f.tick % 3 == 0) {
-			particle(f, ParticleTypes.WITCH, e.position().add(spread(f, 0.6), 1.2 + f.rnd.nextDouble(), spread(f, 0.6)), 0.0, 0.02, 0.0);
+			particle(f, ParticleTypes.WITCH, a.e.position().add(spread(f, 0.6), 1.2 + f.rnd.nextDouble(), spread(f, 0.6)), 0.0, 0.02, 0.0);
 		}
 	}
 
@@ -1740,16 +2279,8 @@ public final class LoreFilmClient {
 		}
 	}
 
-	private static void particle(Film f, ParticleOptions type, Vec3 p, double vx, double vy, double vz) {
-		f.level.addParticle(type, true, true, p.x, p.y, p.z, vx, vy, vz);
-	}
-
 	private static double spread(Film f, double by) {
 		return (f.rnd.nextDouble() * 2.0 - 1.0) * by;
-	}
-
-	private static void sound(SoundEvent sound, float pitch, float volume) {
-		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch, volume));
 	}
 
 	// ---- the camera ---------------------------------------------------------------------------------------------------------
@@ -1799,7 +2330,7 @@ public final class LoreFilmClient {
 			// a cut in on the same line: Varro on the left third, the orc on its knees on the right, his hand on its brow between
 			// them; then after it as it goes for the dead
 			pos = f.at(VARRO_AT[0] + 1.5, VARRO_AT[1] + 2.0, 1.55);
-			Vec3 orc = f.marked != null ? f.marked.e.getPosition(partialTicks) : f.at(VARRO_AT[0] + 1.7, VARRO_AT[1], 0.0);
+			Vec3 orc = f.marked != null ? f.marked.e.getPosition(partialTicks) : f.at(VARRO_AT[0] + MARKED_STOPS, VARRO_AT[1], 0.0);
 			look = t < VARRO_FIELD ? f.at(VARRO_AT[0] + 1.3, VARRO_AT[1], 1.2) : orc.add(0.0, 1.0, 0.0);
 		} else if (t < QUIET) {
 			int which = (int)((t - SPELLS) / CAST_TICKS);

@@ -90,13 +90,6 @@ public final class GreenskinLooks {
 	/** From the living renderer's extractRenderState ({@link VillagerLooks#extract}): a goblin's or an orc's look, or none. True if it's one. */
 	static boolean extract(LivingEntity entity, LivingEntityRenderState state) {
 		long bits = entity.getUUID().getLeastSignificantBits();
-		int film = com.jaymoskingdoms.client.films.LoreFilmClient.orcLook(entity);
-		if (film != 0) {
-			// a lore film's orc (a mannequin in an orc's skin): the real orcs' tusks, brow, ears, marks and scars
-			state.setData(KEY, new Look(Heritage.Kind.ORC, (int)Math.floorMod(bits >>> 3, (long)SHAPES), (int)Math.floorMod(bits >>> 7, (long)MARKS),
-				(int)Math.floorMod(bits >>> 11, (long)MARKS), film));
-			return true;
-		}
 		if (entity instanceof Player) {
 			// (0.7.474) a half-orc player: an orc's tusks, brow, ears and marks, on the skin they picked
 			int skin = halfOrcSkin(entity);

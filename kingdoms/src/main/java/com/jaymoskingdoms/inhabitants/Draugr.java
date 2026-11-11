@@ -136,9 +136,25 @@ public class Draugr extends Monster implements GeoEntity {
 		return this.maimed;
 	}
 
-	/** (A lore film's actor) swings what it holds, on this game alone. */
-	public void stageSwing() {
-		this.triggerAnim("action", this.axe() ? "attack_axe" : "attack_sword");
+	/** (A lore film's actor) the loops it stands and moves in ({@link com.jaymoskingdoms.films.Moves}); null for a real draugr. */
+	private @Nullable String stageStill, stageMoving;
+	private net.minecraft.world.phys.Vec3 stageLast = net.minecraft.world.phys.Vec3.ZERO;
+	private double stageSpeed;
+
+	/** (A lore film's actor) stands and moves in these loops of the humanoid move library from now on. */
+	public void stageGait(String still, String moving) {
+		this.stageStill = still;
+		this.stageMoving = moving;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.stageStill != null) {
+			net.minecraft.world.phys.Vec3 now = this.position();
+			this.stageSpeed = Math.sqrt((now.x - this.stageLast.x) * (now.x - this.stageLast.x) + (now.z - this.stageLast.z) * (now.z - this.stageLast.z));
+			this.stageLast = now;
+		}
 	}
 
 	/** Whether this is a lore film's living Warrior-born ({@link #stageLiving}). */
@@ -253,13 +269,21 @@ public class Draugr extends Monster implements GeoEntity {
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
 		controllers.add(new AnimationController<Draugr>("move", 4, test -> {
+			Draugr draugr = test.animatable();
+			if (draugr.stageStill != null && draugr.stageMoving != null) {
+				// a lore film's Warrior-born: the move library's loops, in time with how fast the film moves it
+				boolean going = draugr.stageSpeed > 0.02;
+				test.setControllerSpeed(going ? com.jaymoskingdoms.films.Moves.rate(draugr.stageMoving, draugr.stageSpeed, 1.2) : 1.0F);
+				return test.setAndContinue(com.jaymoskingdoms.films.Moves.loop(going ? draugr.stageMoving : draugr.stageStill));
+			}
 			if (test.animatable().tickCount - test.animatable().blockedAt < BLOCK_SHOWN_TICKS) {
 				return test.setAndContinue(BLOCK);
 			}
 			return test.setAndContinue(test.isMoving() ? WALK : IDLE);
 		}));
-		controllers.add(new AnimationController<Draugr>("action", test -> PlayState.STOP).triggerableAnim("attack_sword", ATTACK_SWORD)
-			.triggerableAnim("attack_axe", ATTACK_AXE).triggerableAnim("guard_broken", GUARD_BROKEN));
+		// its own blows, and every move of the humanoid library (the lore films' Warrior-born use them)
+		controllers.add(com.jaymoskingdoms.films.Moves.actions(new AnimationController<Draugr>("action", 2, test -> PlayState.STOP))
+			.triggerableAnim("attack_sword", ATTACK_SWORD).triggerableAnim("attack_axe", ATTACK_AXE).triggerableAnim("guard_broken", GUARD_BROKEN));
 	}
 
 	@Override
