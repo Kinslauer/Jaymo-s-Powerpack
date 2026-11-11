@@ -11378,3 +11378,8 @@ Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise
 - Horseman (now in the pack) treats every horse-like mount as a horse. Dragons can't be hitched to a fence or put in a boat, and war elephants and mammoths can't be put in a boat (`data/horseman/tags/entity_type`, entries optional, so nothing changes without Horseman).
 - Dragons keep vanilla's speed in the air (`WindDragon.getFlyingSpeed`). Horseman's air-speed boost would have made ridden dragons several times faster in flight.
 - Built in the cloud; not played.
+
+## 0.7.749 (2026-11-11): elemental powers can't see mana or spirits (#1333)
+
+- **Smoke, Gravity and Cryo users are blind to mana** (Andy: "cannot view mana abilities or spirits because of the way their ki manifests"): even attuned or reading magic, they see no one else's mana glow, mana wings, spirit arms, spirit figure or mage hands, and get no clash bars. Their own mana still shows to them. Valor works for them as for any other power user (`Mana.blindToMana`, `seesMana`, used by `ManaClient`, `ManaWings`, `SpiritArms`, `SpiritHandRenderer`, `ClashCinematic`).
+- Built; not played.
