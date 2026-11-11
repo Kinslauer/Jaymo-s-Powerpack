@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-robe1m
 with: claude-cloud
-pr: 
+pr: 1287
 mods: powers
 versions: 
 started: 2026-11-11
@@ -27,3 +27,4 @@ owns:
 - The film thread (PR #1284) owns The Long Defence; told what this builds.
 
 ## Done
+- A bonded host's costume shows only while the Suit is called; it folds over the goo as it forms; mask key and Mask chip lift the costume's head piece. Compiled (Gradle, JDK 25), not played.
