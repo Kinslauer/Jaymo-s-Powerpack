@@ -112,9 +112,14 @@ public final class WebTraps {
 
 	/** A temporary web (cobweb, or the symbiote's black one) in this spot, if it's open air. */
 	private static void place(ServerLevel level, BlockPos pos, boolean dark) {
+		cling(level, pos, dark, COBWEB_TICKS);
+	}
+
+	/** The same, kept for {@code ticks} (the webbing round something hung or stuck up). */
+	static void cling(ServerLevel level, BlockPos pos, boolean dark, int ticks) {
 		if (level.isLoaded(pos) && level.getBlockState(pos).isAir()) {
 			level.setBlockAndUpdate(pos, dark ? WebPower.SYMBIOTE_WEB.defaultBlockState() : Blocks.COBWEB.defaultBlockState());
-			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + COBWEB_TICKS));
+			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + ticks));
 		}
 	}
 

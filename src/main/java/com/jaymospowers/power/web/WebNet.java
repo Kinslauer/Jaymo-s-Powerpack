@@ -154,6 +154,17 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: the slinger is hanging head down from a line above ({@code on}) or not (see {@link WebHanging}). */
+	public record Upside(boolean on) implements CustomPacketPayload {
+		public static final Type<Upside> TYPE = new Type<>(JaymosPowers.id("web_upside"));
+		public static final StreamCodec<ByteBuf, Upside> CODEC = ByteBufCodecs.BOOL.map(Upside::new, Upside::on);
+
+		@Override
+		public Type<Upside> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: picked a symbiote ability from the radial menu (see {@link WebSymbiote}'s ability indices). */
 	public record SymbioteUse(int ability) implements CustomPacketPayload {
 		public static final Type<SymbioteUse> TYPE = new Type<>(JaymosPowers.id("web_symbiote_use"));
@@ -413,6 +424,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Peel.TYPE, Peel.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(WingsBrake.TYPE, WingsBrake.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Upside.TYPE, Upside.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Fists.TYPE, Fists.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);

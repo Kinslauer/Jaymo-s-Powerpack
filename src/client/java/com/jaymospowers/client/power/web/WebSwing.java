@@ -250,6 +250,8 @@ public final class WebSwing {
 	private Vec3 lastPos = Vec3.ZERO;
 	/** Flips and twirls off the webs, on them, and on landing. */
 	private final WebTrickClient tricks = new WebTrickClient();
+	/** Hanging head down from a line above ({@link WebUpsideClient}). */
+	private final WebUpsideClient upside = new WebUpsideClient();
 
 	void reset() {
 		for (Strand strand : strands) {
@@ -268,6 +270,7 @@ public final class WebSwing {
 		wingsNeedRelease = false;
 		swingLockout = 0;
 		tricks.reset();
+		upside.reset();
 	}
 
 	private static LocalPlayer player() {
@@ -513,8 +516,10 @@ public final class WebSwing {
 			detachAll(player, false);
 			flying = false;
 			pull = null;
+			upside.reset();
 			return;
 		}
+		upside.tick(player, strands);
 		if (swingLockout > 0) {
 			swingLockout--;
 		}

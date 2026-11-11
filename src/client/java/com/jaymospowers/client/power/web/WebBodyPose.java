@@ -25,10 +25,25 @@ public final class WebBodyPose {
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_body_pose");
 
+	/** Ticks it takes to turn over, and per hanging entity when it began. */
+	static final float UPSIDE_TURN = 8.0F;
+	private static final java.util.Map<Integer, Float> UPSIDE_SINCE = new java.util.HashMap<>();
+
 	private WebBodyPose() {
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+		if (entity.getAttached(WebPower.UPSIDE) != null) {
+			// hanging head down: eased over for as long as it lasts
+			float now = entity.level().getGameTime() + partialTicks;
+			float began = UPSIDE_SINCE.computeIfAbsent(entity.getId(), id -> now);
+			if (UPSIDE_SINCE.size() > 64) {
+				UPSIDE_SINCE.keySet().removeIf(id -> id != entity.getId() && entity.level().getEntity(id) == null);
+			}
+			state.setData(KEY, new Pose(WebPose.UPSIDE, 0, Mth.clamp((now - began) / UPSIDE_TURN, 0.0F, 1.0F), now));
+			return;
+		}
+		UPSIDE_SINCE.remove(entity.getId());
 		WebPose pose = entity.getAttached(WebPower.POSE);
 		if (pose == null) {
 			state.setData(KEY, null);
@@ -172,6 +187,15 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, 30.0F * flare - 15.0F * crouch);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.UPSIDE -> {
+				// turned over about the middle, head down, with a slow sway
+				float turn2 = ease(pose.p());
+				float sway = Mth.sin(pose.time() * 0.09F) * 4.0F * turn2;
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 180.0F * turn2);
+				poseStack.rotateDegrees(Axis.ZP, sway);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.GLIDE_KICK -> {
 				// laid back with the feet thrown out ahead, held, then folding away
 				float kick = hold(pose.p(), 0.2F, 0.6F);
@@ -296,6 +320,17 @@ public final class WebBodyPose {
 				set(h.leftArm, 0.5F, 0.0F, -0.9F, crouch * (1.0F - flare));
 				set(h.rightLeg, -1.1F, 0.0F, 0.2F, crouch);
 				set(h.leftLeg, 0.6F, 0.0F, -0.2F, crouch);
+			}
+			case WebPose.UPSIDE -> {
+				// the arms hang loose toward the ground (up the body, turned over), the legs together
+				float e2 = ease(pose.p());
+				if (living.getData(WebArms.KEY) == null) {
+					float drift = Mth.sin(pose.time() * 0.11F) * 0.12F;
+					set(h.rightArm, 3.0F + drift, 0.0F, 0.25F, e2);
+					set(h.leftArm, 3.0F - drift, 0.0F, -0.25F, e2);
+				}
+				set(h.rightLeg, 0.0F, 0.0F, 0.05F, e2);
+				set(h.leftLeg, 0.0F, 0.0F, -0.05F, e2);
 			}
 			case WebPose.GLIDE_KICK -> {
 				float kick = hold(pose.p(), 0.2F, 0.6F);
