@@ -1,15 +1,10 @@
 ---
-updated: 2026-11-10 20:45
+updated: 2026-11-11 05:25
 ---
 # Open PRs
 
-7 open, as of 2026-11-10 20:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+8 open, as of 2026-11-11 05:25. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
-
-## [#1261](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1261) Giants haul: a lumbering sprint that smashes through and knocks trees flying; Aether Giant shake fixed
-- **Branch:** `claude/project-thread-gcqmlj` · **Updated:** 2026-11-11 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
 - **Branch:** `claude/undead-seek-real-shelter` · **Updated:** 2026-11-11 (today)
@@ -21,22 +16,32 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** [[water-belly-flop-damage]]
 
-## [#1264](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1264) Release tool: bigger version bumps on request, and Powers 0.22.0
-- **Branch:** `claude/project-thread-5fdpb9` · **Updated:** 2026-11-11 (today)
+## [#1268](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1268) The Long Defence: the sorcerer's host, Grimsby's spells, and a text pass
+- **Branch:** `claude/project-thread-0nu9tv` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** [[long-defence-text-pass]]
+
+## [#1272](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1272) CLAUDE.md: every new addition must fit the lore canon
+- **Branch:** `claude/project-thread-c2juvk` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1265](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1265) Checklists in the repo (docs/checklists)
-- **Branch:** `claude/checklists-in-repo` · **Updated:** 2026-11-11 (today)
+## [#1276](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1276) Wind: Spiral Dive (tap X in the air, looking steeply down)
+- **Branch:** `jung/wind-spiral-dive` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1266](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1266) Old waterskins survive the tier update
-- **Branch:** `claude/waterskin-old-id` · **Updated:** 2026-11-11 (today)
+## [#1277](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1277) Wind: airflow sense (streaks round the crosshair for what moves nearby)
+- **Branch:** `jung/wind-air-sense` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1267](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1267) Release: bump: minor in change notes; Powers to 0.22.0
-- **Branch:** `claude/release-bump-minor` · **Updated:** 2026-11-11 (today)
-- **Checks:** ⏳ 3 of 4 running
+## [#1282](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1282) Plan: Boxing (three bare-fist styles), for Andy to rule on
+- **Branch:** `jung/boxing-plan` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1283](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1283) read aloud: detect davey 0.2 + discord.py 2.7.1 (the silent-voice cause)
+- **Branch:** `claude/project-thread-iwe61z` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note

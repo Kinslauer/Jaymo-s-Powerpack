@@ -1,5 +1,5 @@
 --- 
-status: in-review
+status: sent
 for: quill
 from: cloud vault review of #1251 (2026-11-10)
 asked: 2026-11-10
@@ -26,3 +26,4 @@ Keep the lang keys. The film itself has no words on screen.
 - 2026-11-11 02:45 PR #1268 (cloud): demon master no longer says demons "were there"; book p5 the sorcerer goes down into the ground with the dark; p6 "the four... the fifth too, though he never had much to say". For Andy, not changed: the film's legion is the risen dead while Lore.md says the long defence was against the Warrior-born and orcs; the book drops from overworld draugr camps though Lore.md says draugr never leave the Stormborn Tomb; the film casts Grimsby (the wizard) as a swordsman.
 - 2026-11-11 03:20 Andy settled the legion: the living orc + Warrior-born host is allied with the sorcerer, who summons undead orcs and zombified piglins; Grimsby casts as well as cuts. Built into #1268 (film, skins, book page 2). Draugr are out of the film; the book's draugr drop is still open.
 - 2026-11-10 21:57 Text pass: aligned Long Defence book pages (indefinite articles for unnamed defenders, Grue 'was gone' not 'gone down into ground', removed grandmother framing) and demon master dialogue ('We remember it. We were there') with Lore.md canon
+- 2026-11-11 05:15 Review of #1268 (head 4a4d2c2), cloud reviewer: pass. Checks green. Film: the living host (orcs + Warrior-born as living draugr), the sorcerer's raised dead orcs and zombified piglins, Varro in-balming an orc, Grimsby's bolts and glyphs; the new draugr model has every bone the renderer uses (ribs, left_horn, tail_0-4) and all six animations; orcLook only matches film actors (negative ids). Still open for Andy: the book drops from draugr. Not watched in game.
