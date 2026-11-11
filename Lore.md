@@ -6,10 +6,7 @@ line of dialogue disagrees with this page, the page wins until Andy changes it h
 Most of what follows was already in the game or in a plan doc; the rest Andy has added since 2026-11-09. Andy adds to
 it, and nothing is removed without his say.
 
-**Reading the marks.** A paragraph that starts with **(new)** was added in the 2026-11-11 rewrite to place something
-the game already has but the page never spoke for. Each one is built from what the element does in the game (its lang
-text and code) and leans on nothing beyond the canon. Andy approves, changes or strikes them. Everything without the
-mark is the canon as it stood, reworded but unchanged in meaning (the old page is kept as `Lore-before-rewrite.md`).
+**Approved.** Andy approved every entry added in the 2026-11-11 rewrite (2026-11-11), so the whole page is canon. New placements are still marked `(new)` when they are added.
 
 ## The ages of the world
 
@@ -35,9 +32,9 @@ his legion, and the dead came up a few at a time, here and there, not all at onc
 him and brought it to its knees to in-balm it. At the end the fifth ran at the sorcerer through the trees, past his
 bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
-(new) The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
+The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
 
-(new) **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
+**What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with
 the defenders: an old man with a beard who made it day for the space of a breath, a woman whose wall they could not
@@ -46,7 +43,7 @@ over, the one at the back had gone down into the ground, and the dark with him. 
 his mana became (see *The dark*). The book never names any of them, and the film that plays when it is first opened (or when a court wizard or a demon master tells the story)
 shows no words either. Copies turn up on draugr and in camps.
 
-(new) **The demons remember it.** The demon masters below say the surface has forgotten the old war and they have not:
+**The demons remember it.** The demon masters below say the surface has forgotten the old war and they have not:
 "We remember it. We were there." They do not say which side they stood on.
 
 **The vacuum.** Raiding across the void could only be kept up for so long. The Warrior-born thinned, and their place
@@ -71,20 +68,20 @@ fighter and not of a mage: it is the same energy a spell is made of, held in the
 Everything else draws on the same well. Mana spirits share it with you, blessings spend it, shrines bank it. A
 Warrior-born's ki and a priest's mana are not two forces in opposition; they are two hands on the same rope.
 
-(new) **Attunement.** Mana can be seen by those attuned to it (amethyst attunes you), and only they see its glow. The
+**Attunement.** Mana can be seen by those attuned to it (amethyst attunes you), and only they see its glow. The
 Sorcerer's Restoration element, the court wizards' staves and the spells read off scrolls are all the same well,
 shaped by hand.
 
 ## The powers
 
-(new) **How a power comes.** Every Overworlder may carry a power, asleep. It wakes on its own after a few days of
+**How a power comes.** Every Overworlder may carry a power, asleep. It wakes on its own after a few days of
 living hard; some life stories wake it a day sooner. Nobody chooses one. Each power is the one well, ki and mana, come
 up through a single person in a single shape, which is why no two holders use it quite alike. A power that is mastered
 can **ascend** into a truer form of itself; one that is bent the wrong way can become **corrupted**; some holders end
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-(new) **The twelve powers known in the world**, as folk would describe them:
+**The twelve powers known in the world**, as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
@@ -122,7 +119,7 @@ vigilantes work on the legend of the old heroes, but each has their own methods,
 widely disliked. Costumed power users turn up in the world, some wreaking havoc, some trying to help their people. A
 masked hero goes by the costume's name while masked.
 
-(new) **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
+**The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
 wizards (who teach the making of a staff), the **Archer** from the Green Huntsman's hunters, the **Survivalist** from
 the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' gunners and the guards of the realms,
@@ -132,46 +129,46 @@ the **Sorcerer** from court wizards and the old elemental schools (Death and Blo
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
 
-(new) How that reads in the world: a temper is what a childhood leaves (the soft-hearted, the greedy, the hard), and
+How that reads in the world: a temper is what a childhood leaves (the soft-hearted, the greedy, the hard), and
 valor is what a life earns by living it (a survivor's, a veteran's). Villagers name them in each other as ordinary
 traits, never as a system.
 
-(new) **The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
+**The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
 
 ## The Z Fighters
 
-(new) **The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
+**The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
 rematch; every defeat makes them stronger; a beating can send them into a Rage; hardship breaks them through to
 Super. Their lineage follows their blood: the Earthling's adrenaline, the Frostborn's cold reserve, the Warrior-born's
 comebacks, tail and great ape (the Warrior-born's forms run through the tamed ape to Primal Super). Each lineage has
 its own charged wave. Forms past Super are spoken of as legends: the False Super, the God Form, Legend.
 
-(new) **The Lookout and the Keeper.** High on the Lookout lives the **Keeper**, who has watched the world "since before
+**The Lookout and the Keeper.** High on the Lookout lives the **Keeper**, who has watched the world "since before
 the towns". The wind up there carries everything. Behind the Lookout's door is the **Time Chamber**, endless white,
 where hours pass like days. Below lie the Lookout's pool (which shows where the orbs lie) and its library of lessons.
 Far off stands the **white Tower**, which the Keeper says was built to see the monoliths from far away; the Tower
 Hermit keeps it.
 
-(new) **The sagas.** The masters and the Keeper tell the old stories only to those who fight with ki, and they agree
+**The sagas.** The masters and the Keeper tell the old stories only to those who fight with ki, and they agree
 with the canon: "The Aether did not die. It came apart, and every piece waits for someone strong enough to carry it."
 *A Spark in the Ashes* (the first piece of the sky fell at a shrine; the Ash Rival came for its stone), *What the Sky
 Left Behind* (the four highlands each left one sleeper; when a Giant falls, "far above, the Keeper lets out a breath
 held for a thousand years"), and *The Hollow Crown* (a fighter took a splinter of the Aether for a crown, sky-glass that
 sings to amethyst, and was emptied by it into the Hollow King).
 
-(new) **The orbs and the dragon.** Seven orbs lie in the world; gathered, they wake a dragon who grants a wish. A wish
+**The orbs and the dragon.** Seven orbs lie in the world; gathered, they wake a dragon who grants a wish. A wish
 can call the dead back from the Other World, unmake and retell a fighter's story, or give a fighter's blood its gift
 anew.
 
-(new) **The masters.** Masters of the art teach in towns and in the wild: the Keeper, the hermits, the Master of the
+**The masters.** Masters of the art teach in towns and in the wild: the Keeper, the hermits, the Master of the
 Road among the dead, and the three demon masters below. Rogue fighters roam the land: a tyrant in dark armour, a
 champion in a blue gi. Tournaments
 are held in the open: bracket bouts, last-one-standing rings of light, and the tournament of the dead. When an army
 comes for a town, fighters hold the line at its wall of light and share the prize.
 
-(new) **The Mad Tinkerer's operation.** The Tinkerer sets up workshops near towns and "rebuilds fighters": a fighter
+**The Mad Tinkerer's operation.** The Tinkerer sets up workshops near towns and "rebuilds fighters": a fighter
 who beats his test unit wakes on his table an **android**, with endless ki that burns with no aura, no need for food,
 and wounds mended with iron or copper ingots rather than bandages. A wish can make them flesh again. (His Bio-built are
 under *The peoples*.)
@@ -186,7 +183,7 @@ to be in several places at once.
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
 his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 
-(new) **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
+**Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
 ## The shape of the world
@@ -204,13 +201,13 @@ Knowledge is gathered up a ladder of five kings and terrors: the Goblin King, an
 Piglin King, then the Wither (Knowledge 1 to 5). Slaying the first Giant of the remnants raises the world's floor to
 Borderlands.
 
-(new) **What each rung opens.** The ladder is the reason a craft is lost until a terror falls: until the Goblin King
+**What each rung opens.** The ladder is the reason a craft is lost until a terror falls: until the Goblin King
 falls, only the stone anvil rings; until an Ogre King falls, no smith works a smithing table or forges heavy arms;
 the enchanting table stays cold until the Skeleton Lord "laughs his last"; then the Piglin King, then the Wither. Each
 king leaves a trophy head that the Tool Station can make into a weapon (the goblin king's gutting hook, the ogre king's
 maul).
 
-(new) **The monsters of legend.** Great foes that come out of the old songs and do not count toward a player's tier:
+**The monsters of legend.** Great foes that come out of the old songs and do not count toward a player's tier:
 ogres of the hills, caves, armour and fire, the Ogre King in his hold, the **Bogre** of the mangrove swamps, wraiths
 and flame wraiths that you can see through, silver skeletons that rise and sprint at you, mud golems of the swamps,
 chest mimics, the bull-headed **minotaur** with his hammer, the snake-haired **gorgon** archer of the jungles and
@@ -235,24 +232,24 @@ What folk believe about the sky (village talk, not proven):
 - The giants by the old stones did not come out of the mountains; they came **down**. Some of the stones still hum.
 - Some days the rain tastes sweet, "like it fell from somewhere nobody's ever muddied".
 
-(new) **More of the same talk.** The riddles villagers trade point the same way: meadows with no ground under them, a
+**More of the same talk.** The riddles villagers trade point the same way: meadows with no ground under them, a
 waterfall with no top ("follow the water the wrong way"), whales that swim through clouds, geese that go up in winter,
 stones tired of the ground, gold that grows on trees "higher", wizards on the floating rocks who "aren't hermits,
 they're halfway". A humming stone in your pack is best kept from the priests. Some villagers quietly build towers.
 
-(new) **What lives up there.** Phygs, flying cows, sheepuffs, aerbunnies, moas, kirrids, burrukai, taegores, skyroot
+**What lives up there.** Phygs, flying cows, sheepuffs, aerbunnies, moas, kirrids, burrukai, taegores, skyroot
 lizards, prismallards, glitterwings and shroudwings. **Aerwhales** swim the open sky, as big as the great whales of
 the sea. The hostile Aether has its zephyrs and tempests, cockatrices, blue and golden swets, aechor plants and
 carrion sprouts, skephids, the taluton and the bladeshroom hunter.
 
-(new) **The Aether's own ruins.** The **Sentry Ruins** are guarded by the Slider (only a pickaxe hurts it), sentry
+**The Aether's own ruins.** The **Sentry Ruins** are guarded by the Slider (only a pickaxe hurts it), sentry
 golems, detonation sentries and mimics, behind locked undershale and boss doorways. The **Visage of War** wakes in its
 hall and lifts its lance. The **Sky Warden**, a great holystone sentry, stands guard on a floating arena high over the
 islands. The **guardian trees** grow from their own wood, some of it infected, some lucent. **Outpost campfires** are
 old camps a traveller can remember; you wake beside one if you die with no bed. Holystone, Veradexian and Brexallen
 vases hold what the Aether's people left.
 
-(new) **The wind dragons.** The four winds are dragons: **Notus** the south wind (fire, the badlands and basalt
+**The wind dragons.** The four winds are dragons: **Notus** the south wind (fire, the badlands and basalt
 spires), **Boreas** the north (frost, the frozen peaks), **Zephyrus** the west (acid, half sunk in the swamps) and
 **Eurus** the east (lightning, the fastest, disguised as a villager anywhere). **Aeolus** keeps the winds: a dragon
 three times their size who walks among folk disguised as a villager, and who leaves four eggs when he falls. Each wind
@@ -260,7 +257,7 @@ takes most kindly to the blood that shares its weather (Notus to the Emberborn, 
 Verdant and Tideborn, Eurus to the Stormborn). Over the Aether flies **Aetherion**, the star dragon, with a breath of
 starlight and a cataclysm of falling stars.
 
-(new) **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
+**The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
 cold lands (Frostborn), and the crocodile dragon **Varasuchus**, which roosts on beaches and swamps (Tideborn).
 
@@ -276,21 +273,21 @@ Overworld in the old age, before they were stopped. A powerful Frostborn Z Fight
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
 
-(new) **The Other World.** A Z Fighter who dies wakes in the Other World: a pale hall on an island of holystone high in
+**The Other World.** A Z Fighter who dies wakes in the Other World: a pale hall on an island of holystone high in
 the sky, with a halo over their head. It is the Aether's, as the afterlife is, and there is no portal there either. The
 **Judge** reads their fights out of his book and sends them down the road: "Death is a door, not a wall." The **Master
 of the Road** teaches one lesson each stay. A **Fortune Teller** waits at the road's end and sends the dead back, for
 a price or for free to the champion of the **tournament of the dead**, fought against spirit fighters when the bell
 tolls. Nobody stays forever: "The Other World doesn't let go of its dead so easily", but in time it lets go.
 
-(new) **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
+**The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
-(new) **Those who raise the dead.** Necromancers raise the dead out past the hills; court necromancers serve some
+**Those who raise the dead.** Necromancers raise the dead out past the hills; court necromancers serve some
 realms openly. Those with the forbidden Death element raise a thrall of their own. (The dead who come back on their own
 for one person are the Banes, under *The dark*.)
 
-(new) **The bodies that stay.** The dead lie where they fall, and the living treat them as people would: blasts tear
+**The bodies that stay.** The dead lie where they fall, and the living treat them as people would: blasts tear
 them apart, spiders are crushed to legs, looters rob them, and kin carry their fallen home. A fallen ruler is stripped
 by their guards so no thief has the armour, then given the Truth's rite and buried: "You kept this realm; now it keeps
 you."
@@ -311,12 +308,12 @@ The salvager's trade stays as it is: deck plates out to the nine wrecks for neth
 enchanted golden apples and Hermit Beans; dust on your hands that no water takes; Maw dust that still shines and makes
 a lens that sees what lies ahead of a pod. The pull is slow, and the tide at the hole kills.
 
-(new) **The Maw's own metal.** Its stone holds void shards, which a salvager knaps at a field anvil from three of its
+**The Maw's own metal.** Its stone holds void shards, which a salvager knaps at a field anvil from three of its
 loose rocks and an iron ingot, and melts in the smeltery.
 
 ## The far worlds
 
-(new) **The star map.** Pods fly between the Overworld and six other worlds, fuelled with coal or blaze powder. Each
+**The star map.** Pods fly between the Overworld and six other worlds, fuelled with coal or blaze powder. Each
 world has a first metal that only shows itself when its stone is tapped with a pick, knapped at a field anvil and
 forged.
 
@@ -335,28 +332,28 @@ forged.
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
-(new) **The pods.** Nobody makes pods any more. The Mad Tinkerer designed them, "every rivet", working from the
+**The pods.** Nobody makes pods any more. The Mad Tinkerer designed them, "every rivet", working from the
 Frostborn's own void-ships as he did with his androids, and the drawings went with his big clock-machine when it
 vanished; now he says he cannot remember how. (A man who runs through time and never tells may be lying.) The ones flying are the ones that are left,
 and the Warrior-born raiders have most of them. A wrecked pod's log tells of salvagers who heard the Maw's dust "hum
 like the great stones back home do in a storm".
 
-(new) **The Galactic Patrol.** Officers who keep the worlds honest, chase raider bands from world to world and carry
+**The Galactic Patrol.** Officers who keep the worlds honest, chase raider bands from world to world and carry
 warrants. They come down for fighters whose power level gets talked about "out there", and swear the strong ones in
 with a pod, full tanks and a license: Rookie, then up the ranks by arrests. Patrolmen are named people (Jaco, Irilla,
 Bordo and the rest), and their Commanders (Vael, Orrin, Teska, Brandt) answer a skip writ.
 
-(new) **Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
+**Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
 of their own, take what they like and leave. Beaten, one of their pods is left ticking over where it landed.
 
 ## Fallen stars
 
-(new) **Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
+**Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
 those craters. About one in ten comes down as a **star wreck**, which sends out probes while a band wearer is near and
 holds a wreck core at its heart. Star tablets turn up in fallen stars, in fishing treasure and in the remnants' chests;
 star-readers trade band plans for star metal.
 
-(new) **The Xeno-Band.** A band of alien metal from a fallen star, holding the bodies of aliens its wearer becomes for
+**The Xeno-Band.** A band of alien metal from a fallen star, holding the bodies of aliens its wearer becomes for
 a while: forty-odd of them, from Bulwark and Gremlin to Wyrm, Lurk and the rule-writing Nadir. It learns new ones by
 scanning creatures and reading tablets. Bands corrupt and glitch. There is also a **rival band** that never falls from
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
@@ -384,7 +381,7 @@ The hints, all of them visible and none of them spoken (Andy, 2026-11-09):
 - Nothing explains any of this. It arrives through villager talk, rumour and gossip, and through what the player sees
   for themselves. No book says "this is the Warrior-born homeworld"; a tail in the dark says it.
 
-(new) **The last pilots.** A few of the city's people are left, strapped into the **Omens**, the red and the blue: war
+**The last pilots.** A few of the city's people are left, strapped into the **Omens**, the red and the blue: war
 machines you wear like a coat, "meant to be a parade". The pilots (Marisol, Teo, Ines, Dario, Lupe, Paloma, Nico, Rosa)
 tell it in their own words, a piece at a time and only to someone warm and breathing: the city went dark district by
 district; the androids that swept the streets "stopped answering and started marching", all in step, and nobody knows
@@ -405,7 +402,7 @@ the city, corrupted by the Tinkerer's bug.
 **Earth.** In the future they started calling the Overworld **Earth** (a dead rig's log: "It's just more Earth,
 burning"). Now, folk say the Overworld. Only future voices use the word.
 
-(new) **Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
+**Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
 
 ## The eight faiths
 
@@ -452,7 +449,7 @@ Old quarrels that are canon and can be used:
 Faith is kept strictly or loosely. Breaking a commandment costs favour; blasphemy makes a villager cry out and cast you
 out; and the Truth's clerics cry "Abomination! It walks among us!" at the cursed.
 
-(new) **The champions.** Each faith keeps a champion in its holy place, and each champion carries a weapon head that
+**The champions.** Each faith keeps a champion in its holy place, and each champion carries a weapon head that
 falls to whoever beats them three times: the **Hearth-Warden** (Hearthkeeper, in a hearth-hall), the **Forge-Thane**
 (Anvil-Father), the **Tide-Bride** (Deep Mother), the **Antlered Hunter** (Green Huntsman), the **Grave-Lamp** (Lantern
 Warden, in a crypt or the Nether's soul valleys), the **Sun-Marshal** (Crowned Sun), the **Cinder-Shade** (Ash
@@ -469,10 +466,10 @@ free, it promises another door. It has fought "them" before: *"They fought me on
 **The Quiet One** is a spirit of almost no words: "Stay." "No." "Don't." He stands against the Grue, remembers him, and
 when the Grue is beaten says *"…Thank you."* Sickness silences him down to dots.
 
-(new) **The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
+**The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
 the Shade of the Grue is one of them.
 
-(new) **The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
+**The whispers.** Those who work flux in the alchemist's crucible may start to hear voices, and the voices are
 not nothing: there is a dark ink in them. Learning to draw it is forbidden and leaves a mark. Thessaly warns against
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
 becomes corruption on the land.
@@ -485,10 +482,10 @@ finishes; "the gold burns going down".
 **Vampires and werewolves** live hidden among ordinary folk. They can be unmasked before a priest, and they hate the
 Lantern Warden's light.
 
-(new) **More of the cursed.** A vampire stranded in the Nether drinks from piglins and Hornkin, never the zombified. A
+**More of the cursed.** A vampire stranded in the Nether drinks from piglins and Hornkin, never the zombified. A
 werewolf who has tamed the curse can run as a lean wolf on all fours instead of the great beast.
 
-(new) **The Nightfall plague.** Things that drink blood come out of the dark and leave the plague behind them: the
+**The Nightfall plague.** Things that drink blood come out of the dark and leave the plague behind them: the
 **Night Bleeder** in its cloak, which brought down becomes a **Blightwing**, a big bald bat in the rags of that cloak,
 and the vampire bats that follow it. A pale miasma closes in where it spreads. The old cure is garlic over every door,
 and leeches draw the bad blood out.
@@ -496,16 +493,16 @@ and leeches draw the bad blood out.
 **The Mad Tinkerer** made the Bio-built from the blood of every heritage but the Dawnborn and the Divine-born, and
 never finished the work. He is said to still wander.
 
-(new) **The Tinkerer's other work.** He built the pods and a great clock-machine that vanished, taking his drawings
+**The Tinkerer's other work.** He built the pods and a great clock-machine that vanished, taking his drawings
 with it. Clockwork golems stir around his small stone labs in the wild and come looking for anyone who escapes one;
 the alchemists' Golemancy (a clock for a heart, copper for a body, redstone for blood, a drop of ichor to wake it)
 builds them, and clockwork hornets, on purpose. He rebuilds fighters into androids (see *The Z Fighters*).
 
-(new) **The forbidden arts.** Two Sorcerer elements are forbidden everywhere: **Death** (blows that blight, the downed
+**The forbidden arts.** Two Sorcerer elements are forbidden everywhere: **Death** (blows that blight, the downed
 reaped, a body raised as a thrall) and **Blood** (paid in blood rather than mana). Practising them is a crime and
 brings corruption. The **blood witch** is their face in the world.
 
-(new) **Banes.** Something you bury may not stay down. A foe you killed, or one that killed you, can come back with a
+**Banes.** Something you bury may not stay down. A foe you killed, or one that killed you, can come back with a
 name and a mark on its brow that flares and does not go out when it dies, and it comes for you alone ("You put me in
 the ground. The ground gave me back. It always will."; "Not by your hand. Tell them I'll be waiting."). A Bane learns
 what you hit it with (fire, shot, blade, spells, beasts) and climbs in rank while it hunts you. There are three kinds:
@@ -514,7 +511,7 @@ demon-sworn with its hell-sworn. Each leaves a weapon head when it is ended with
 
 ## The Nether and the demons
 
-(new) **The demons' country.** The demons live in the Nether's depths, in three layers: **the Gloam** (their
+**The demons' country.** The demons live in the Nether's depths, in three layers: **the Gloam** (their
 outskirts), **the Ash** (their heartland) and **the Abyss** (their deepest dark). Each layer has its master (the Master
 of the Gloam, of the Ash, of the Abyss), who teaches only "those who walk the shadowed path", once a day, in blood.
 Demon soldiers and captains serve them. There is no portal to any of it beyond the Nether's own.
@@ -525,11 +522,11 @@ too), who fly, lunge and strike from every angle, and charge a great fireball ov
 blow can set off early, killing the imp. Their fireballs set trees and everything around them ablaze. (Imps and
 zombified imps are in the game, PR #1286.)
 
-(new) **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
+**The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
 and there are zombified Hornkin too.
 
-(new) **The Piglin King** holds the fourth rung of Knowledge. **Ignivorus**, the Nether's fire dragon, flies anywhere
+**The Piglin King** holds the fourth rung of Knowledge. **Ignivorus**, the Nether's fire dragon, flies anywhere
 in the Nether.
 
 ## The spirits
@@ -565,11 +562,11 @@ Warrior-born, the orcs and the Grue came at it. That is what they were made for,
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
 
-(new) **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
+**Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
 
-(new) **The spirit hand.** A fighter can reach with a floating hand of ki glow (Far Hand, Catch).
+**The spirit hand.** A fighter can reach with a floating hand of ki glow (Far Hand, Catch).
 
 ## The peoples
 
@@ -611,7 +608,7 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   quick to mend, and the wicked know them. "They say it wakes in those who die a second time, among the dead."
 - **Hollow**: struck down by the dead and got up again; something of the grave came back with them. "Those the dead
   cut down do not always stay down."
-- (new) **Rubber-folk**: soft, bright and bendy, born at the travelling fairs where the strangest folk gather. They
+- **Rubber-folk**: soft, bright and bendy, born at the travelling fairs where the strangest folk gather. They
   take a knock and bounce, grow back what is lost, swallow small foes whole and take on what they had, and never turn
   down a cake. Fire and arrows are their bane. They were raised by the fair, or left behind by it.
 
@@ -628,12 +625,12 @@ The peoples not born to the realms, born only to their own:
 
 Also in the world: ogres, giants, piglins with a king, and the drowned.
 
-(new) **Who the outsiders keep.** Goblins live in their own villages under a goblin king, keep goblin slaves and
+**Who the outsiders keep.** Goblins live in their own villages under a goblin king, keep goblin slaves and
 slingers, send loot goblins running with what they stole, and roll **war barrels** (walking barrels of planks and iron
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
 
-(new) **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
+**Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
 
 ## Why the peoples don't like each other
@@ -681,7 +678,7 @@ them repulsive.
 **The plain folk and every marked blood.** Heartlanders and Earthlings have nothing in their blood, which is exactly
 why they are the ones who keep the tally of what every other blood has done to them.
 
-(new) **How it shows in the street.** In a city of one blood, folk of another are jeered and shouldered aside ("This
+**How it shows in the street.** In a city of one blood, folk of another are jeered and shouldered aside ("This
 is a Stoneborn street"), and kin are welcomed like family. Purist cities are the worst for it. Unwashed folk are smelled
 before they are seen, and the greenskins like the smell. The havens are villages of the non-human peoples, of one
 blood or many; they turn the Bio-built away at first, and a haven's good name comes slowly and goes fast.
@@ -699,25 +696,25 @@ A realm is founded on one creed, and the creed decides how it treats its neighbo
 
 Kingdoms come only from Epic villages. Grim keeps and citadels are fiefs or allied small villages, never kingdoms.
 
-(new) **Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
+**Who rules.** A realm has its king or queen (crowned, with regalia), its lords, barons, counts and vassals, its
 elders and foremen, its court wizard and sometimes a court necromancer, and its guards, archers and King's Guard. A
 weak, poor ruler can be stared down into yielding the crown. Rulers and guards are ordinary people of the realm with
 names, families and tempers.
 
-(new) **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
+**Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
 
-(new) **Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
+**Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
 pullers and carriage drivers carry folk between towns; messenger pigeons and couriers carry word. Realms sign treaties,
 take tribute, and hold festivals.
 
-(new) **What goes on in the shadows.** A den is found by a hatch in the grass and a whisper ("Tell 'em nobody sent
+**What goes on in the shadows.** A den is found by a hatch in the grass and a whisper ("Tell 'em nobody sent
 you"): dice, bookies, fight pits, and goods the watch would rather not see. Assassins take contracts; a black candle in
 a tavern window is the guild's mark that someone has been paid for. Looters and bandits do not give their names.
 Barbarian camps take raiders and captives, and spare those the realms have outlawed.
 
-(new) **Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
+**Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
 
@@ -727,37 +724,37 @@ A page found on drowned men, unsigned, called "A Wet Page": the tide brought the
 from the deep should not be warm. Put an ear to it and there is a bell very far off, and then something very large
 turning over to listen back. The writer stopped going to the shore.
 
-(new) **Who sails.** Pirates, navies, merchants and whalers crew their ships, each with a sea captain, gunners, powder
+**Who sails.** Pirates, navies, merchants and whalers crew their ships, each with a sea captain, gunners, powder
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
 ## The wild
 
-(new) **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
+**Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
 boar, tarantulas and the grizzly. Barrow beetles live in the cold barrows and caves. **Pink fairies** flit over the
 flowers of a quiet forest on the darkest nights; folk say a fairy keeps death off the one who carries her, once, and
 would kill for one. Frostbites, frozen dead, walk the powder snow. Rats get into stores. Pets are named, and folk say a
 name shapes a beast ("Call a beast Midas and it'll shine like coin").
 
-(new) **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
+**Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
 
 ## Daily life
 
-(new) **Kitchen and table.** Food is cooked at hob, grill and oven, in pot, skillet and saucepan, and a cook can get a
+**Kitchen and table.** Food is cooked at hob, grill and oven, in pot, skillet and saucepan, and a cook can get a
 dish just right or slip. Every food the world grows has a dish, down to the Aether's (orange-glazed taegore, kirrid
 roast, prismallard omelette, sky fruit salad, white apple tart). Ale, cider, mead, berry wine and strong spirits come
 from cask and still.
 
-(new) **Fields and mills.** Fields are ploughed and manured, hemp is grown for fibre and cloth, grain goes to hand
+**Fields and mills.** Fields are ploughed and manured, hemp is grown for fibre and cloth, grain goes to hand
 quern, horse mill, windmill or waterwheel, and hides are tanned. Wagons, coaches, supply carts, animal carts and
 ploughs are drawn by horses and oxen.
 
-(new) **Butchery.** A kill is a body, and a body is dressed at the butcher's block (as the Green Huntsman would have
+**Butchery.** A kill is a body, and a body is dressed at the butcher's block (as the Green Huntsman would have
 it) or dragged home by rope.
 
-(new) **Making things.** Iron tools are forged, not crafted in a grid: parts are cast and put together at the Tool
+**Making things.** Iron tools are forged, not crafted in a grid: parts are cast and put together at the Tool
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
@@ -784,7 +781,7 @@ what is learned, from hermits who guide the way.
   `hollow-blight`, `heavens`, `bestiary`, `underworld`, `story*`.
 - `docs/remnants.md` (monoliths and Giants), `docs/aether.md` (the Aether), `docs/Patrons-Plan.md` (the villagers'
   faiths, strict faith), `docs/Spirits-Plan.md` (the spirits).
-- (new) Also: Powers' `lang/parts/zfighter_*` (sagas, the Lookout, the Other World, the demons, the far worlds, the
+- Also: Powers' `lang/parts/zfighter_*` (sagas, the Lookout, the Other World, the demons, the far worlds, the
   Patrol), `xenoform`, `ember` (Flame Avatar), `aether_*`; Kingdoms' `lore-films`, `fairy`, `skeleton-curse`, `bane`,
   `royal-remains`, `disaster`; `docs/Dragons-Plan.md` and `docs/SaintsDragons-Plan.md` (the dragons).
 

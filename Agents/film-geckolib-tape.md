@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task: The Long Defence on GeckoLib actors, recorded to a tape and replayed
 branch: claude/project-thread-9yvqn9
 with: claude-cloud
@@ -29,3 +29,4 @@ owns:
 
 ## Done
 - Film plays from the shipped tape; watched in a dev client, live and replayed. Not seen in the full pack; no sound in the dev client.
+- 2026-11-11 13:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).

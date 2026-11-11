@@ -28,4 +28,4 @@ owns:
 - The Long Defence film thread adds the imps to the film after the merge (it has LoreFilmClient.igniteNear in PR #1268).
 
 ## Done
-- 2026-11-11 13:28 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-11 13:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).
