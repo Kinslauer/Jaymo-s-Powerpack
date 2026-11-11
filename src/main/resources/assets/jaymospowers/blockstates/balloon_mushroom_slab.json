@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/eden/balloon_mushroom_slab"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/eden/balloon_mushroom_slab_top"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/eden/balloon_mushroom_planks"
+    }
+  }
+}

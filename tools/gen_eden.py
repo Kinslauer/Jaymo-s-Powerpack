@@ -216,6 +216,100 @@ def blocks():
           states={"variants": {"stage=0": {"model": f"{NS}:block/eden/aquatus_sapling"}, "stage=1": {"model": f"{NS}:block/eden/aquatus_sapling"}}})
 
 
+WOODS = ["balloon_mushroom", "pulse_tree", "brain_tree"]
+SIDES = ("north", "south", "west", "east")
+
+
+def shaped_wood():
+    """Stairs, slab, fence, gate, door, trapdoor, button and pressure plate of each wood: the shapes are the Aether woods'
+    (gen_aether_flora), pointed at this folder."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import gen_aether_flora as F
+    F.SUB = "eden"
+    for w in WOODS:
+        F.WOODS[w] = {"new": False}
+        F.wood_assets(w)
+        for shape in F.SHAPES:
+            b = f"{w}_{shape}"
+            LANG[f"block.{NS}.{b}"] = title(b)
+            table = F.G.self_table(b)
+            if shape == "slab":
+                table = F.table(b, [{"rolls": 1, "entries": [F.item_entry(f"{NS}:{b}", modifier=[
+                    {"type": "minecraft:set_count", "condition": F.match(b, type="double"), "count": 2}, F.EXPLODE])]}])
+            elif shape == "door":
+                table = F.table(b, [{"rolls": 1, "condition": F.SURVIVES, "entries": [
+                    F.item_entry(f"{NS}:{b}", condition=F.match(b, half="lower"))]}])
+            write(f"{DATA}/loot_table/blocks/{b}.json", table)
+        planks = f"{NS}:{w}_planks"
+        stick = "minecraft:stick"
+
+        def shaped(shape, key, pattern, count, group, cat="building"):
+            result = {"id": f"{NS}:{w}_{shape}", "count": count} if count > 1 else {"id": f"{NS}:{w}_{shape}"}
+            write(f"{DATA}/recipe/eden/{w}_{shape}.json", {"type": "minecraft:crafting_shaped", "category": cat, "group": group, "key": key,
+                                                           "pattern": pattern, "result": result})
+
+        shaped("stairs", {"#": planks}, ["#  ", "## ", "###"], 4, "wooden_stairs")
+        shaped("slab", {"#": planks}, ["###"], 6, "wooden_slab")
+        shaped("fence", {"#": stick, "W": planks}, ["W#W", "W#W"], 3, "wooden_fence")
+        shaped("fence_gate", {"#": stick, "W": planks}, ["#W#", "#W#"], 1, "wooden_fence_gate", "redstone")
+        shaped("door", {"#": planks}, ["##", "##", "##"], 3, "wooden_door", "redstone")
+        shaped("trapdoor", {"#": planks}, ["###", "###"], 2, "wooden_trapdoor", "redstone")
+        shaped("pressure_plate", {"#": planks}, ["##"], 1, "wooden_pressure_plate", "redstone")
+        write(f"{DATA}/recipe/eden/{w}_button.json", {"type": "minecraft:crafting_shapeless", "category": "redstone", "group": "wooden_button",
+                                                      "ingredients": [planks], "result": {"id": f"{NS}:{w}_button"}})
+    kinds = {"wooden_stairs": "stairs", "wooden_slabs": "slab", "wooden_fences": "fence", "fence_gates": "fence_gate", "wooden_doors": "door",
+             "wooden_trapdoors": "trapdoor", "wooden_buttons": "button", "wooden_pressure_plates": "pressure_plate"}
+    for kind in ("block", "item"):
+        for name, shape in kinds.items():
+            tag(f"{MC}/tags/{kind}/{name}.json", [f"{NS}:{w}_{shape}" for w in WOODS])
+        tag(f"{MC}/tags/{kind}/logs_that_burn.json", [f"{NS}:{w}_log" for w in WOODS])
+    tag(f"{MC}/tags/block/mineable/axe.json", [f"{NS}:{w}_{shape}" for w in WOODS for shape in F.SHAPES])
+
+
+def gravilite():
+    """The crystal that bends weight: wild shards, the block, the lamp, the lantern and the Gravity Compressor."""
+    block("gravilite_shards", cross("gravilite_shards"), item_model=flat("gravilite_shards"))
+    block("gravilite_block", column("gravilite_block_side", "gravilite_block_top"))
+    all_faces = {d: {"uv": [0, 0, 16, 16], "texture": "#all", "cullface": d} for d in SIDES + ("up", "down")}
+    block("gravilite_lamp", glowing({"parent": "minecraft:block/block", "textures": {
+        "particle": TEX + "gravilite_lamp", "all": TEX + "gravilite_lamp"}, "elements": [box([0, 0, 0], [16, 16, 16], all_faces)]}, ["all"]))
+
+    def lantern(y):
+        face = {"uv": [8, 8, 16, 16], "texture": "#texture"}
+        faces = {d: dict(face) for d in SIDES + ("up",)}
+        faces["down"] = {"uv": [8, 0, 16, 8], "texture": "#texture"}
+        return glowing({"parent": "minecraft:block/block", "textures": {"particle": TEX + "gravilite_lantern", "texture": TEX + "gravilite_lantern"},
+                        "elements": [box([4, y, 4], [12, y + 8, 12], faces)]}, ["texture"])
+
+    write(f"{ASSETS}/models/block/eden/gravilite_lantern_hanging.json", lantern(8))
+    block("gravilite_lantern", lantern(0), states={"variants": {
+        f"hanging={h},waterlogged={w}": {"model": f"{NS}:block/eden/gravilite_lantern" + ("_hanging" if h == "true" else "")}
+        for h in ("false", "true") for w in ("false", "true")}})
+
+    def compressor(side):
+        faces = {d: {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": d} for d in SIDES}
+        faces.update({d: {"uv": [0, 0, 16, 16], "texture": "#end", "cullface": d} for d in ("up", "down")})
+        return glowing({"parent": "minecraft:block/block", "textures": {
+            "particle": TEX + "gravity_compressor_bottom", "side": TEX + side, "end": TEX + "gravity_compressor_bottom"},
+            "elements": [box([0, 0, 0], [16, 16, 16], faces)]}, ["side"])
+
+    write(f"{ASSETS}/models/block/eden/gravity_compressor_on.json", compressor("gravity_compressor_side_on"))
+    block("gravity_compressor", compressor("gravity_compressor_side_off"), states={"variants": {
+        f"power={p}": {"model": f"{NS}:block/eden/gravity_compressor" + ("_on" if p else "")} for p in range(16)}})
+
+    def shaped(name, key, pattern, count=1, cat="building"):
+        result = {"id": f"{NS}:{name}", "count": count} if count > 1 else {"id": f"{NS}:{name}"}
+        write(f"{DATA}/recipe/eden/{name}.json", {"type": "minecraft:crafting_shaped", "category": cat, "key": key, "pattern": pattern, "result": result})
+
+    shards = f"{NS}:gravilite_shards"
+    shaped("gravilite_block", {"#": shards}, ["##", "##"])
+    shaped("gravilite_lamp", {"#": shards, "G": "minecraft:glass"}, [" G ", "G#G", " G "])
+    shaped("gravilite_lantern", {"#": shards, "N": "minecraft:iron_nugget"}, ["NNN", "N#N", "NNN"])
+    shaped("gravity_compressor", {"#": f"{NS}:gravilite_block", "I": "minecraft:iron_ingot", "R": "minecraft:redstone", "S": "#minecraft:stone_crafting_materials"},
+           ["I#I", "IRI", "SSS"], cat="redstone")
+    tag(f"{MC}/tags/block/mineable/pickaxe.json", [f"{NS}:{b}" for b in ("gravilite_block", "gravilite_lantern", "gravity_compressor")])
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -275,6 +369,7 @@ FEATURES = {
     "eden_pulse_trees": ("pulse_tree", ["count:8", "surface"]),
     "eden_brain_trees": ("brain_tree", ["count:3", "surface"]),
     "eden_metal_grass": ("metal_grass", ["count:4", "surface"]),
+    "eden_gravilite": ("gravilite", ["rare:5", "surface"]),
     # (after the trees: a plant on the turf would lift the surface a tree looks for)
     "eden_mycotic_plants": ("mycotic_plants", ["count:3", "surface"]),
 }
@@ -343,7 +438,13 @@ def worldgen():
     for name, kind in TREES.items():
         write(f"{DATA}/worldgen/feature/{name}.json", {"type": f"{NS}:eden", "kind": kind})
 
-    plains = json.load(open(f"{DATA}/worldgen/biome/verdant_plains.json"))
+    # gravilite grows in every country, the plains too (their file is otherwise hand-kept)
+    plains_path = f"{DATA}/worldgen/biome/verdant_plains.json"
+    plains = json.load(open(plains_path))
+    if f"{NS}:eden_gravilite" not in plains["features"][9]:
+        plains["features"][9].insert(0, f"{NS}:eden_gravilite")
+        write(plains_path, plains)
+    plains["features"][9].remove(f"{NS}:eden_gravilite")
     for name, (display, sky, fog, grass, foliage, water, ground, ours, kept) in BIOMES.items():
         biome = copy.deepcopy(plains)
         biome["attributes"]["minecraft:visual/sky_color"] = sky
@@ -353,7 +454,7 @@ def worldgen():
         # our features go first in their step, always in FEATURES' order; vanilla's keep the order the plains have them in
         order = list(FEATURES)
         steps[2] = [f"{NS}:{f}" for f in sorted(ground, key=order.index)] + steps[2]
-        steps[9] = [f"{NS}:{f}" for f in sorted(ours, key=order.index)] + [f for f in steps[9] if f in kept]
+        steps[9] = [f"{NS}:{f}" for f in sorted(ours + ["eden_gravilite"], key=order.index)] + [f for f in steps[9] if f in kept]
         write(f"{DATA}/worldgen/biome/{name}.json", biome)
         LANG[f"biome.{NS}.{name}"] = display
     LANG[f"biome.{NS}.verdant_plains"] = "Verdant Plains"
@@ -374,6 +475,8 @@ def worldgen():
 
 def main():
     blocks()
+    shaped_wood()
+    gravilite()
     recipes_and_tags()
     worldgen()
     write(f"{ASSETS}/lang/parts/eden.json", LANG)

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/button",
+  "textures": {
+    "texture": "jaymospowers:block/eden/balloon_mushroom_planks"
+  }
+}

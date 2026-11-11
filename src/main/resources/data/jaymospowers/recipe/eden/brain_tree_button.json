@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "group": "wooden_button",
+  "ingredients": [
+    "jaymospowers:brain_tree_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:brain_tree_button"
+  }
+}
