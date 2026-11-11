@@ -9,7 +9,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -220,7 +219,7 @@ public final class Turning {
 		sp.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, 1.0F));
 		ServerLevel level = sp.level();
 		level.playSound(null, sp.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 0.7F);
-		level.sendParticles(new DustParticleOptions(from.colour & 0xFFFFFF, 1.4F), sp.getX(), sp.getY() + 1.0, sp.getZ(), 30, 0.5, 0.8, 0.5, 0.0);
+		Fx.burst(level, sp.getX(), sp.getY() + 1.0, sp.getZ(), from.colour & 0xFFFFFF, 1.4F, 30, 0.5, 0.8, 0.5);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, sp.getX(), sp.getY() + 1.0, sp.getZ(), 12, 0.5, 0.8, 0.5, 0.02);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.turned", Patrons.coloured(to), Patrons.coloured(from))
 			.withStyle(style -> style.withColor(from.colour & 0xFFFFFF)));
@@ -525,7 +524,7 @@ public final class Turning {
 			if (sp.getRandom().nextFloat() >= TRIAL_SIGN_CHANCE * s) {
 				continue;
 			}
-			level.sendParticles(sp, new DustParticleOptions(p.colour & 0xFFFFFF, 1.0F), true, false, sp.getX(), sp.getY() + 1.0, sp.getZ(), 14, 0.7, 0.9, 0.7, 0.0);
+			level.sendParticles(sp, Fx.wisp(p.colour & 0xFFFFFF, 1.0F), true, false, sp.getX(), sp.getY() + 1.0, sp.getZ(), 14, 0.7, 0.9, 0.7, 0.0);
 			float volume = 0.5F, pitch = 1.0F;
 			SoundEvent sound;
 			switch (p) {

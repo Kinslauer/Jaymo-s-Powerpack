@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Powers;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -415,7 +416,7 @@ public final class ZFighterKi {
 		long held = now - live.barrageFrom;
 		Vec3 look = LockOn.aim(player);
 		int color = formColor(live);
-		DustParticleOptions dust = new DustParticleOptions(color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color, 1.0F);
+		ParticleOptions dust = MagicFx.wisp(color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color, 1.0F);
 		if (held < BARRAGE_WINDUP) {
 			if (held < 5) {
 				// too soon to tell a tap from a hold
@@ -523,7 +524,7 @@ public final class ZFighterKi {
 		Vec3 lead = bolt.kind == SPIRIT ? bolt.velocity.normalize().scale(bolt.size * SPIRIT_LEAD) : Vec3.ZERO;
 		BlockHitResult block = level.clip(new ClipContext(from.add(lead), to.add(lead), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
 		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation().subtract(lead);
-		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
+		ParticleOptions dust = MagicFx.wisp(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
 			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
 		double reach = 1.0 + bolt.size;
 		EntityHitResult hit = bolt.kind == SPIRIT ? null : ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
@@ -655,7 +656,7 @@ public final class ZFighterKi {
 			level.playSound(null, from.x, from.y, from.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.8F);
 		}
 		Vec3 end = from.add(dir.scale(reach));
-		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color, 1.8F);
+		ParticleOptions dust = MagicFx.wisp(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color, 1.8F);
 		// every creature its edge passes through, once each
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(DISC_HALF_WIDTH + 1.0),
 			e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner && !bolt.struck.contains(e.getId()))) {
@@ -694,7 +695,7 @@ public final class ZFighterKi {
 			&& PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, null);
 	}
 
-	private static void draw(ServerLevel level, Bolt bolt, Vec3 from, DustParticleOptions dust) {
+	private static void draw(ServerLevel level, Bolt bolt, Vec3 from, ParticleOptions dust) {
 		Vec3 to = from.add(bolt.velocity);
 		int orbColor = bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color;
 		switch (bolt.kind) {
@@ -729,7 +730,7 @@ public final class ZFighterKi {
 					Vec3 at = to.add(dir.scale(bolt.size * (0.6 + random.nextDouble() * 0.4)));
 					level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 				}
-				level.sendParticles(new DustParticleOptions(0xFFFFFF, 3.0F), true, false, to.x, to.y, to.z, 2, bolt.size * 0.2, bolt.size * 0.2,
+				level.sendParticles(MagicFx.wisp(0xFFFFFF, 3.0F), true, false, to.x, to.y, to.z, 2, bolt.size * 0.2, bolt.size * 0.2,
 					bolt.size * 0.2, 0.0);
 				if (Soundscape.due(level, bolt.orbId, "ki.bolt", 4, 8)) {
 					Soundscape.play(level, to, SoundSource.PLAYERS, KI_HUM.louder(1.0F + (float)bolt.size * 0.3F).pitched(0.6F), KI_SURGE);
@@ -810,7 +811,7 @@ public final class ZFighterKi {
 					bolt.burst * SPIRIT_OUTER_POWER, false, bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 			}
 		}
-		DustParticleOptions dust = new DustParticleOptions(bolt.color, 3.0F);
+		ParticleOptions dust = MagicFx.wisp(bolt.color, 3.0F);
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, (int)(30 + bolt.radius * 10), bolt.radius * 0.4, bolt.radius * 0.4,
 			bolt.radius * 0.4, 0.3);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, at.x, at.y, at.z, spirit ? 3 : 1, bolt.radius * 0.2, 0.2,
@@ -825,8 +826,8 @@ public final class ZFighterKi {
 	/** The Spirit Bomb bursts like a star: a sea of blue motes flung out, and cracks of energy racing away from it. */
 	private static void nova(ServerLevel level, Vec3 at, double size) {
 		RandomSource random = level.getRandom();
-		DustParticleOptions blue = new DustParticleOptions(NOVA_BLUE, 4.0F);
-		DustParticleOptions pale = new DustParticleOptions(NOVA_PALE, 3.0F);
+		ParticleOptions blue = MagicFx.wisp(NOVA_BLUE, 4.0F);
+		ParticleOptions pale = MagicFx.wisp(NOVA_PALE, 3.0F);
 		for (int i = 0; i < NOVA_MOTES; i++) {
 			Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 			double speed = NOVA_SPEED * size * (0.4 + random.nextDouble() * 0.6);
@@ -836,7 +837,7 @@ public final class ZFighterKi {
 				level.sendParticles(ParticleTypes.END_ROD, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, Math.min(1.2, speed * 0.06));
 			}
 		}
-		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | NOVA_PALE), true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, NOVA_PALE);
 		Vec3[] headings = new Vec3[NOVA_CRACKS];
 		Vec3[] tips = new Vec3[NOVA_CRACKS];
 		for (int i = 0; i < NOVA_CRACKS; i++) {
@@ -853,7 +854,7 @@ public final class ZFighterKi {
 		RandomSource random = level.getRandom();
 		int age = ++nova.age()[0];
 		float width = 2.2F * (1.0F - age / (float)(NOVA_TICKS + 2));
-		DustParticleOptions crack = new DustParticleOptions(age % 2 == 0 ? NOVA_PALE : NOVA_BLUE, Math.max(0.6F, width));
+		ParticleOptions crack = MagicFx.wisp(age % 2 == 0 ? NOVA_PALE : NOVA_BLUE, Math.max(0.6F, width));
 		double step = nova.size() * NOVA_STEP;
 		for (int i = 0; i < nova.tips().length; i++) {
 			Vec3 from = nova.tips()[i];
@@ -890,7 +891,7 @@ public final class ZFighterKi {
 		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y, at.z, flashes, bolt.size * 0.5, bolt.size * 0.5, bolt.size * 0.5,
 			0.1 + glow * 0.4);
 		if (glow > 0.6F) {
-			level.sendParticles(new DustParticleOptions(0xFFFFFF, 4.0F), true, false, at.x, at.y + bolt.size * 0.5, at.z, 1, bolt.size * 0.3, 0.2, bolt.size * 0.3,
+			level.sendParticles(MagicFx.wisp(0xFFFFFF, 4.0F), true, false, at.x, at.y + bolt.size * 0.5, at.z, 1, bolt.size * 0.3, 0.2, bolt.size * 0.3,
 				0.0);
 		}
 		for (int i = 0; i < 12; i++) {
@@ -916,7 +917,7 @@ public final class ZFighterKi {
 		return true;
 	}
 
-	private static void pop(ServerLevel level, Vec3 at, DustParticleOptions dust) {
+	private static void pop(ServerLevel level, Vec3 at, ParticleOptions dust) {
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, 5, 0.25, 0.25, 0.25, 0.1);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.3);
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 2, 0.15, 0.15, 0.15, 0.02);
@@ -1077,7 +1078,7 @@ public final class ZFighterKi {
 			// one finger, pointed: the ki gathers at its tip
 			hands = ZFighterHands.mainPalm(player, look).add(look.scale(0.15));
 		}
-		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : baseColor(live, sig.color()),
+		ParticleOptions dust = MagicFx.wisp(live.superOn() ? formColor(live) : baseColor(live, sig.color()),
 			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
 		// the ki gathers as an orb between the hands, growing with the charge; now and then a mote drawn in
 		boolean needle = sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB;
@@ -1306,7 +1307,7 @@ public final class ZFighterKi {
 			return false;
 		}
 		// the afterimage: a column of fading motes where he stood
-		DustParticleOptions image = ZFighterPower.dust(live);
+		ParticleOptions image = ZFighterPower.dust(live);
 		for (double h = 0.1; h < player.getBbHeight(); h += 0.3) {
 			level.sendParticles(image, true, false, start.x, start.y + h, start.z, 3, 0.15, 0.05, 0.15, 0.0);
 		}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
@@ -18,7 +19,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -340,8 +341,8 @@ public final class ZFighterWishes {
 	/** The dragon: a long body coiling up into the sky, gold along its back, a head with red eyes looking down. */
 	private static void draw(Summon summon, long now) {
 		ServerLevel level = summon.level();
-		DustParticleOptions body = new DustParticleOptions(DRAGON_COLOR, 3.0F);
-		DustParticleOptions scales = new DustParticleOptions(SCALE_COLOR, 2.0F);
+		ParticleOptions body = MagicFx.wisp(DRAGON_COLOR, 3.0F);
+		ParticleOptions scales = MagicFx.wisp(SCALE_COLOR, 2.0F);
 		int points = 70;
 		Vec3 head = summon.at();
 		for (int i = 0; i <= points; i++) {
@@ -356,7 +357,7 @@ public final class ZFighterWishes {
 			head = p;
 		}
 		level.sendParticles(body, true, false, head.x, head.y, head.z, 8, 0.8, 0.5, 0.8, 0.0);
-		DustParticleOptions eye = new DustParticleOptions(EYE_COLOR, 1.5F);
+		ParticleOptions eye = MagicFx.wisp(EYE_COLOR, 1.5F);
 		level.sendParticles(eye, true, false, head.x - 0.5, head.y + 0.3, head.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(eye, true, false, head.x + 0.5, head.y + 0.3, head.z, 1, 0.0, 0.0, 0.0, 0.0);
 		if (now % 60 == 0) {

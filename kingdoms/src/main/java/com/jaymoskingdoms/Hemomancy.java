@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -93,7 +93,7 @@ public final class Hemomancy {
 	static final int WITCH_DRINK_EVERY = 40, WITCH_HEMORRHAGE_COOLDOWN = 20 * 12, WITCH_GRIP_COOLDOWN = 20 * 10;
 
 	static final int CRIMSON = 0x8A0F14, DARK = 0x4A0508;
-	static final DustParticleOptions DARK_MOTE = new DustParticleOptions(DARK, 1.2F);
+	static final ParticleOptions DARK_MOTE = Fx.wisp(DARK, 1.2F);
 
 	/** (0.7.646) Andy: "no redstone textures": the blood drawn out is Powers' blood fleck, not red dust. */
 	static ParticleOptions bloodMote() {
@@ -264,7 +264,7 @@ public final class Hemomancy {
 		if (pay && player instanceof ServerPlayer sp && !pay(sp, cost("blood_grip"))) {
 			return false;
 		}
-		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), DARK_MOTE);
+		Sorcery.beam(level, player, target.getBoundingBox().getCenter(), DARK);
 		Vec3 to = player.position().subtract(target.position());
 		Vec3 pull = to.lengthSqr() < 1.0E-4 ? Vec3.ZERO : to.normalize().scale(GRIP_PULL * power);
 		target.setDeltaMovement(target.getDeltaMovement().add(pull.x, 0.35, pull.z));
@@ -335,7 +335,7 @@ public final class Hemomancy {
 		}
 		if (timers[Sorcery.T_HEX] <= 0 && witch.distanceTo(target) > Sorcery.CLOSE) {
 			timers[Sorcery.T_HEX] = WITCH_GRIP_COOLDOWN;
-			Sorcery.beam(level, witch, target.getBoundingBox().getCenter(), DARK_MOTE);
+			Sorcery.beam(level, witch, target.getBoundingBox().getCenter(), DARK);
 			Vec3 pull = witch.position().subtract(target.position()).normalize().scale(GRIP_PULL);
 			target.setDeltaMovement(target.getDeltaMovement().add(pull.x, 0.35, pull.z));
 			target.syncVelocity = true;

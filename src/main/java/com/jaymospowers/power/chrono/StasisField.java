@@ -1,10 +1,11 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -37,8 +38,8 @@ final class StasisField {
 	static final int DURATION = ChronoPower.REWIND_TICKS, DURATION_MASTERED = 120;
 	/** Released knockback is capped to this speed (blocks/tick), so stacked hits can't fling a mob across the map. */
 	private static final double MAX_RELEASE_SPEED = 1.4;
-	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 1.1F);
-	private static final DustParticleOptions AMBER_DUST = new DustParticleOptions(0xFFB347, 0.8F);
+	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 1.1F);
+	private static final ParticleOptions AMBER_DUST = MagicFx.wisp(0xFFB347, 0.8F);
 
 	/** Everything frozen by any field, with how many fields hold it. Server thread only. */
 	private static final Map<Entity, Frozen> FROZEN = new IdentityHashMap<>();

@@ -1,12 +1,13 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -81,7 +82,7 @@ final class ZFighterRisingDome {
 		ZFighterPoise.wear(foe, POISE_WEAR);
 		int color = ZFighterArts.color(live);
 		Vec3 at = foe.position();
-		DustParticleOptions dust = new DustParticleOptions(color, 1.6F);
+		ParticleOptions dust = MagicFx.wisp(color, 1.6F);
 		level.sendParticles(dust, true, false, at.x, at.y + 0.2, at.z, 30, 0.4, 0.2, 0.4, 0.3);
 		level.sendParticles(ParticleTypes.CRIT, true, false, at.x, at.y + 1.0, at.z, 16, 0.3, 0.6, 0.3, 0.5);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.8F);
@@ -130,7 +131,7 @@ final class ZFighterRisingDome {
 		}
 		level.explode(owner, source, ZFighterKi.GROUND_ONLY, base.x, base.y + 0.3, base.z, PILLAR_BLAST, false, Level.ExplosionInteraction.NONE);
 		ZFighterKi.showBeam(level, base, top, (float)PILLAR_RADIUS, pillar.color);
-		DustParticleOptions dust = new DustParticleOptions(pillar.color, 2.0F);
+		ParticleOptions dust = MagicFx.wisp(pillar.color, 2.0F);
 		// a dome of motes at the foot, then sparks up the column
 		for (int i = 0; i < 48; i++) {
 			Vec3 dir = new Vec3(level.getRandom().nextGaussian(), Math.abs(level.getRandom().nextGaussian()), level.getRandom().nextGaussian()).normalize();

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -166,7 +167,7 @@ public final class ZFighterInstinct {
 		player.setAttached(ACTIVE, true);
 		live.silver = true;
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(COLOR, 1.8F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.15);
+		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), COLOR, 1.8F, 40, 0.5, 0.9, 0.5);
 		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
@@ -208,7 +209,7 @@ public final class ZFighterInstinct {
 			}
 		}
 		if (now % 3 == 0) {
-			player.level().sendParticles(new DustParticleOptions(COLOR, 1.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.35, 0.8,
+			player.level().sendParticles(MagicFx.wisp(COLOR, 1.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.35, 0.8,
 				0.35, 0.02);
 		}
 	}
@@ -223,7 +224,7 @@ public final class ZFighterInstinct {
 		player.setDeltaMovement(player.getDeltaMovement().add(side));
 		player.syncVelocity = true;
 		Vec3 at = player.position();
-		DustParticleOptions blur = new DustParticleOptions(COLOR, 1.3F);
+		ParticleOptions blur = MagicFx.wisp(COLOR, 1.3F);
 		for (double h = 0.1; h < player.getBbHeight(); h += 0.35) {
 			level.sendParticles(blur, true, false, at.x, at.y + h, at.z, 2, 0.15, 0.05, 0.15, 0.0);
 		}
@@ -254,7 +255,7 @@ public final class ZFighterInstinct {
 		ZFighterKi.push(foe, foe.position().subtract(player.position()), COUNTER_PUSH, 0.25);
 		Vec3 c = foe.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.CRIT, true, false, c.x, c.y, c.z, 10, 0.3, 0.3, 0.3, 0.3);
-		level.sendParticles(new DustParticleOptions(COLOR, 1.4F), true, false, c.x, c.y, c.z, 8, 0.25, 0.25, 0.25, 0.1);
+		level.sendParticles(MagicFx.wisp(COLOR, 1.4F), true, false, c.x, c.y, c.z, 8, 0.25, 0.25, 0.25, 0.1);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.5F);
 	}
 }

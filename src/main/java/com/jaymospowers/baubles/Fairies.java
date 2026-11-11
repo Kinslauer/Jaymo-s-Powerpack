@@ -1,5 +1,6 @@
 package com.jaymospowers.baubles;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.wounds.Downed;
 import java.util.List;
@@ -20,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -189,7 +189,7 @@ public final class Fairies {
 			level.addFreshEntity(fairy);
 		}
 		level.playSound(null, x, y, z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.5F);
-		level.sendParticles(new DustParticleOptions(PinkFairy.GLOW, 1.0F), x, y, z, 24, 0.4, 0.4, 0.4, 0.0);
+		MagicFx.burst(level, x, y, z, PinkFairy.GLOW, 1.0F, 24, 0.4, 0.4, 0.4);
 	}
 
 	// ---- worn by anyone ----------------------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ public final class Fairies {
 			for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(VILLAGERS_NEAR), Villager::isAlive)) {
 				if (v.hasAttached(WEARS)) {
 					if (!v.isInvisible() && level.getRandom().nextInt(2) == 0) {
-						level.sendParticles(new DustParticleOptions(PinkFairy.GLOW, 0.5F), v.getX(), v.getY() + v.getBbHeight() * 0.6, v.getZ(),
+						level.sendParticles(MagicFx.wisp(PinkFairy.GLOW, 0.5F), v.getX(), v.getY() + v.getBbHeight() * 0.6, v.getZ(),
 							1, 0.3, 0.3, 0.3, 0.0);
 					}
 					continue;
@@ -221,7 +221,7 @@ public final class Fairies {
 						inventory.removeItem(i, 1);
 						set(v, true);
 						level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.0F, 1.5F);
-						level.sendParticles(new DustParticleOptions(PinkFairy.GLOW, 0.9F), v.getX(), v.getY() + v.getBbHeight() * 0.6, v.getZ(),
+						level.sendParticles(MagicFx.wisp(PinkFairy.GLOW, 0.9F), v.getX(), v.getY() + v.getBbHeight() * 0.6, v.getZ(),
 							12, 0.3, 0.3, 0.3, 0.0);
 						break;
 					}

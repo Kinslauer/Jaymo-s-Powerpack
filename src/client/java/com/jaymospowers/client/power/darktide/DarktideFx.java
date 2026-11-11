@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.darktide.DarktideMove;
 import com.jaymospowers.power.darktide.DarktideNet;
 import com.jaymospowers.power.darktide.DarktideState;
@@ -11,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -126,7 +126,7 @@ public final class DarktideFx {
 			int rim = Math.max(4, (int) (r * 3.0));
 			for (int i = 0; i < rim; i++) {
 				double a = random.nextDouble() * Math.PI * 2.0;
-				level.addParticle(new DustParticleOptions(FIELD_COLOR, 0.9F), c.x + Math.cos(a) * r, c.y + 0.08, c.z + Math.sin(a) * r, 0.0, 0.01, 0.0);
+				level.addParticle(MagicFx.wisp(FIELD_COLOR, 0.9F), c.x + Math.cos(a) * r, c.y + 0.08, c.z + Math.sin(a) * r, 0.0, 0.01, 0.0);
 			}
 			for (int i = 0; i < 5; i++) {
 				double a = random.nextDouble() * Math.PI * 2.0;

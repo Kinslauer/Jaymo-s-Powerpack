@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
@@ -32,7 +33,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -86,6 +86,10 @@ import org.jspecify.annotations.Nullable;
  * The client drives the body ({@code GrueClient}, the same steering as a seizure) and tints the arms.
  */
 public final class Grue {
+	/** The grasp's line of dark from the hand to the foe: how thick (blocks), how long (ticks). */
+	static final float GRASP_BEAM = 0.1F;
+	static final int GRASP_BEAM_TICKS = 9;
+
 	/** Corruption the Grue can't use: below it, its hold ebbs. */
 	static final int SAFE = 10;
 	/** The hold is looked at this often (ticks). */
@@ -662,10 +666,7 @@ public final class Grue {
 			foe.setDeltaMovement(in.x, 0.35, in.z);
 			foe.needsSync = true;
 			Vec3 from = player.getEyePosition(), to = foe.getBoundingBox().getCenter();
-			for (int i = 0; i <= 12; i++) {
-				Vec3 p = from.lerp(to, i / 12.0);
-				level.sendParticles(new DustParticleOptions(COLOR, 1.4F), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
-			}
+			Fx.beam(level, from, to, GRASP_BEAM, COLOR, GRASP_BEAM_TICKS);
 			level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SCULK_CLICKING, SoundSource.PLAYERS, 1.2F, 0.5F);
 		}
 	}
@@ -844,7 +845,7 @@ public final class Grue {
 	}
 
 	private static void redBurst(ServerLevel level, Vec3 at, int count, double spread) {
-		level.sendParticles(new DustParticleOptions(COLOR, 1.8F), at.x, at.y, at.z, count, spread, spread, spread, 0.02);
+		level.sendParticles(Fx.wisp(COLOR, 1.8F), at.x, at.y, at.z, count, spread, spread, spread, 0.02);
 		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, count / 3, spread, spread, spread, 0.02);
 	}
 

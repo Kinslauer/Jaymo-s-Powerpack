@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -7,7 +8,7 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -67,8 +68,8 @@ final class ChronoEchoFight {
 	static final double BAR_RANGE = 32.0;
 
 	private static final Identifier HEALTH_MODIFIER = com.jaymospowers.JaymosPowers.id("echo_nether_health");
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
-	private static final DustParticleOptions SHARD = new DustParticleOptions(0xA8E8FF, 0.8F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xFFE08A, 1.0F);
+	private static final ParticleOptions SHARD = MagicFx.wisp(0xA8E8FF, 0.8F);
 
 	private final ChronoEcho echo;
 	/** Where it was and how hurt, each tick, for Rewind. */

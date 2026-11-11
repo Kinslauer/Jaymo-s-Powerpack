@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,7 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -355,7 +356,7 @@ public final class ZFighterGravityMachine {
 		/** The room's edges, in purple motes (the corners and the middle of each edge). */
 		private void outline(ServerLevel level) {
 			AABB r = room();
-			DustParticleOptions dust = new DustParticleOptions(COLOR, 1.2F);
+			ParticleOptions dust = MagicFx.wisp(COLOR, 1.2F);
 			double[] xs = {r.minX, (r.minX + r.maxX) / 2.0, r.maxX};
 			double[] ys = {r.minY, (r.minY + r.maxY) / 2.0, r.maxY};
 			double[] zs = {r.minZ, (r.minZ + r.maxZ) / 2.0, r.maxZ};

@@ -18,7 +18,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -90,6 +90,8 @@ public final class Restoration {
 	/** Sanctuary: radius (blocks), how long (ticks), heal per {@code SANCTUARY_HEAL_EVERY} for a friend inside, the push on the undead. */
 	static final double SANCTUARY_RADIUS = 4.0, SANCTUARY_PUSH = 0.7;
 	static final int SANCTUARY_TICKS = 20 * 15, SANCTUARY_HEAL_EVERY = 40;
+	/** A sanctuary's sigil is laid again every this many ticks, each lasting this much longer (the fade the two share). */
+	static final int SANCTUARY_SIGIL_EVERY = 40, SANCTUARY_SIGIL_OVERLAP = 6;
 	static final float SANCTUARY_HEAL = 1.0F, SANCTUARY_SEAR = 1.0F;
 	/** Restoration: the hunger it costs whoever casts or reads it; the chance of its scroll in the rarest chests. */
 	static final int RESTORATION_HUNGER = 6;
@@ -113,7 +115,7 @@ public final class Restoration {
 	static final double MERCY_SEEN = 16.0;
 
 	static final int GOLD = 0xFFD86B, GREEN = 0x9BE37A;
-	static final DustParticleOptions GOLD_MOTE = new DustParticleOptions(GOLD, 1.0F), GREEN_MOTE = new DustParticleOptions(GREEN, 0.8F);
+	static final ParticleOptions GOLD_MOTE = Fx.wisp(GOLD, 1.0F), GREEN_MOTE = Fx.wisp(GREEN, 0.8F);
 
 	/** When a player last bought a Scroll of Restoration from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> RESTORATION_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("restoration_bought"),
@@ -266,7 +268,7 @@ public final class Restoration {
 		MEND_READY.put(player.getUUID(), now + MEND_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		if (target != player) {
-			beam(level, player, target, GOLD_MOTE);
+			beam(level, player, target, GOLD);
 		}
 		if (undead(target)) {
 			target.hurtServer(level, level.damageSources().indirectMagic(player, player), MEND_SEAR);
@@ -295,8 +297,8 @@ public final class Restoration {
 		RENEWAL_READY.put(player.getUUID(), now + RENEWAL_COOLDOWN);
 		starve(player, RENEWAL_HUNGER);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		ring(level, player.position().add(0.0, 0.2, 0.0), RENEWAL_RANGE, GOLD_MOTE, 48);
-		ring(level, player.position().add(0.0, 0.6, 0.0), RENEWAL_RANGE * 0.6, GREEN_MOTE, 28);
+		ring(level, player.position().add(0.0, 0.2, 0.0), RENEWAL_RANGE, GOLD);
+		ring(level, player.position().add(0.0, 0.6, 0.0), RENEWAL_RANGE * 0.6, GREEN);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 1.2F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.7F, 1.6F);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RENEWAL_RANGE), LivingEntity::isAlive)) {
@@ -331,7 +333,7 @@ public final class Restoration {
 		REKINDLE_READY.put(player.getUUID(), now + REKINDLE_COOLDOWN);
 		starve(player, REKINDLE_HUNGER);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-		beam(level, player, body, GOLD_MOTE);
+		beam(level, player, body, GOLD);
 		RISING.add(new Rising(body, player, now + REKINDLE_DELAY));
 		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.7F);
 		Theft.sorcery(player, level, player.blockPosition());
@@ -368,7 +370,7 @@ public final class Restoration {
 		LivingEntity sighted = Arcana.sighted(player);
 		LivingEntity target = sighted != null && player.distanceTo(sighted) <= MENDING_REACH && (friend(player, sighted) || undead(sighted)) ? sighted : player;
 		if (target != player) {
-			beam(level, player, target, GOLD_MOTE);
+			beam(level, player, target, GOLD);
 		}
 		if (undead(target)) {
 			target.hurtServer(level, level.damageSources().indirectMagic(player, player), MENDING_HEAL * power);
@@ -394,7 +396,7 @@ public final class Restoration {
 	static boolean sanctuary(ServerLevel level, Player player, float power) {
 		CIRCLES.add(new Circle(level, player.position(), level.getGameTime() + (long)(SANCTUARY_TICKS * power), SANCTUARY_HEAL * Math.max(1.0F, power * 0.75F),
 			player.getUUID()));
-		ring(level, player.position().add(0.0, 0.1, 0.0), SANCTUARY_RADIUS, GOLD_MOTE, 40);
+		ring(level, player.position().add(0.0, 0.1, 0.0), SANCTUARY_RADIUS, GOLD);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
 		return true;
 	}
@@ -408,14 +410,14 @@ public final class Restoration {
 		LivingEntity target = sighted != null && (friend(player, sighted) || Downed.isDowned(sighted) && !undead(sighted)) ? sighted : player;
 		boolean wasDown = Downed.isDowned(target);
 		if (target != player) {
-			beam(level, player, target, GOLD_MOTE);
+			beam(level, player, target, GOLD);
 		}
 		PowersCompat.restore(target);
 		if (wasDown && Downed.isDowned(target)) {
 			// (no Powers to bring them round: asked of whoever holds the downed state)
 			target.addTag(Downed.REVIVE_TAG);
 		}
-		ring(level, target.position().add(0.0, 0.1, 0.0), 1.5, GOLD_MOTE, 24);
+		ring(level, target.position().add(0.0, 0.1, 0.0), 1.5, GOLD);
 		level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.6), target.getZ(), 24, 0.4, 0.7, 0.4, 0.05);
 		level.sendParticles(GOLD_MOTE, target.getX(), target.getY(0.6), target.getZ(), 30, 0.4, 0.7, 0.4, 0.03);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.4F);
@@ -497,8 +499,9 @@ public final class Restoration {
 
 	private static void circle(Circle c, long now) {
 		ServerLevel level = c.level();
-		if (now % 10L == 0L) {
-			ring(level, c.centre().add(0.0, 0.1, 0.0), SANCTUARY_RADIUS, GOLD_MOTE, 32);
+		if (now % SANCTUARY_SIGIL_EVERY == 0L) {
+			// the circle itself: a sigil laid on the ground, sent again as the last one fades so it never breaks
+			Fx.sigil(level, c.centre(), (float)SANCTUARY_RADIUS, GOLD, SANCTUARY_SIGIL_EVERY + SANCTUARY_SIGIL_OVERLAP);
 		}
 		if (now % 5L != 0L) {
 			return;
@@ -555,7 +558,7 @@ public final class Restoration {
 					next[1] = now + CLERIC_REKINDLE_PAUSE;
 					next[0] = now + CLERIC_PAUSE;
 					Mana.ripple(cleric, Mana.HEAL);
-					beam(level, cleric, v, GOLD_MOTE);
+					beam(level, cleric, v, GOLD);
 					RISING.add(new Rising(v, null, now + REKINDLE_DELAY));
 					level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.8F, 1.7F);
 					return;
@@ -578,12 +581,12 @@ public final class Restoration {
 		// (0.7.244) a cleric is attuned: the heal ripples their aura
 		Mana.ripple(cleric, Mana.HEAL);
 		if (worst != cleric) {
-			beam(level, cleric, worst, GOLD_MOTE);
+			beam(level, cleric, worst, GOLD);
 		}
 		PowersCompat.mend(worst, CLERIC_HEAL);
 		PowersCompat.closeCut(worst);
 		PowersCompat.easeFever(worst);
-		ring(level, worst.position().add(0.0, 0.1, 0.0), 1.0, GOLD_MOTE, 14);
+		ring(level, worst.position().add(0.0, 0.1, 0.0), 1.0, GOLD);
 		level.playSound(null, worst.getX(), worst.getY(), worst.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.4F, 1.2F);
 	}
 
@@ -607,7 +610,7 @@ public final class Restoration {
 			}
 			timers[Sorcery.T_MEND] = Sorcery.MEND_COOLDOWN;
 			Mana.ripple(wizard, Mana.HEAL);
-			beam(level, wizard, e, GOLD_MOTE);
+			beam(level, wizard, e, GOLD);
 			RISING.add(new Rising(e, null, level.getGameTime() + REKINDLE_DELAY));
 			level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.8F, 1.7F);
 			return true;
@@ -710,8 +713,8 @@ public final class Restoration {
 				} else {
 					PowersCompat.restore(player);
 				}
-				beam(level, healer, player, GOLD_MOTE);
-				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD_MOTE, 18);
+				beam(level, healer, player, GOLD);
+				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 1.3F);
 				Speech.tell(level, healer, player, Component.translatable(kind.equals("heal") ? "talk.jaymoskingdoms.healer.healed"
 					: "talk.jaymoskingdoms.healer.healed_free"), Speech.GOLD);
@@ -720,8 +723,8 @@ public final class Restoration {
 				// (0.7.462) cuts closed, festering cleaned, bones set and knitted, every part healed to full (never a severed limb)
 				Money.charge(player, Money.worth(Healing.treatmentPrice(player)));
 				Healing.treat(player);
-				beam(level, healer, player, GOLD_MOTE);
-				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD_MOTE, 18);
+				beam(level, healer, player, GOLD);
+				ring(level, player.position().add(0.0, 0.1, 0.0), 1.2, GOLD);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 1.3F);
 				Speech.tell(level, healer, player, Component.translatable("talk.jaymoskingdoms.healer.treated"), Speech.GOLD);
 			}
@@ -796,19 +799,12 @@ public final class Restoration {
 
 	// ---- the look ---------------------------------------------------------------------------------------------------
 
-	static void beam(ServerLevel level, Entity from, Entity to, ParticleOptions particle) {
-		Vec3 a = from.getEyePosition().add(0.0, -0.3, 0.0), b = to.getBoundingBox().getCenter();
-		int n = Math.max(2, (int)(a.distanceTo(b) * 3.0));
-		for (int i = 0; i <= n; i++) {
-			Vec3 p = a.lerp(b, i / (double)n);
-			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+	static void beam(ServerLevel level, Entity from, Entity to, int colour) {
+		Fx.beam(level, from.getEyePosition().add(0.0, -0.3, 0.0), to.getBoundingBox().getCenter(), Sorcery.BEAM_RADIUS, colour, Sorcery.BEAM_TICKS);
 	}
 
-	static void ring(ServerLevel level, Vec3 centre, double radius, ParticleOptions particle, int points) {
-		for (int i = 0; i < points; i++) {
-			double a = i * Math.PI * 2.0 / points;
-			level.sendParticles(particle, centre.x + Math.cos(a) * radius, centre.y, centre.z + Math.sin(a) * radius, 1, 0.0, 0.05, 0.0, 0.0);
-		}
+	/** A ring of mana running out over the ground from {@code centre} to {@code radius}. */
+	static void ring(ServerLevel level, Vec3 centre, double radius, int colour) {
+		Fx.ring(level, centre, (float)radius, colour);
 	}
 }

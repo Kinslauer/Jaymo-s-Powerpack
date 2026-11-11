@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -308,11 +307,7 @@ public final class Arcana {
 		}
 		Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
 		Vec3 step = target.getBoundingBox().getCenter().subtract(start);
-		int n = Math.max(2, (int)(step.length() * 3.0));
-		for (int i = 0; i <= n; i++) {
-			Vec3 p = start.add(step.scale(i / (double)n));
-			level.sendParticles(new DustParticleOptions(Sorcery.BOLT_COLOUR, 1.2F), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+		Fx.beam(level, start, start.add(step), Sorcery.BEAM_RADIUS, Sorcery.BOLT_COLOUR, Sorcery.BEAM_TICKS);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player),
 			(target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? SCROLL_BOLT * 2.0F : SCROLL_BOLT) * power);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 12, 0.2, 0.3, 0.2, 0.2);

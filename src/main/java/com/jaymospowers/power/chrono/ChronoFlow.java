@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -17,7 +18,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -157,9 +158,9 @@ public final class ChronoFlow {
 	/** The mode's hunger, per tick. */
 	static final float EXHAUSTION = 0.006F;
 
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
-	private static final DustParticleOptions CLOCK_FACE = new DustParticleOptions(0xFFE8A0, 0.45F);
-	private static final DustParticleOptions CLOCK_HAND = new DustParticleOptions(0xFFFFFF, 0.5F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xFFE08A, 1.0F);
+	private static final ParticleOptions CLOCK_FACE = MagicFx.wisp(0xFFE8A0, 0.45F);
+	private static final ParticleOptions CLOCK_HAND = MagicFx.wisp(0xFFFFFF, 0.5F);
 	private static final ColorParticleOption FLASH = ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF);
 	private static final ColorParticleOption GOLD_FLASH = ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFD27A);
 

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter.divine;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -48,7 +49,7 @@ public final class EightSignCircle {
 	public static final float KI_COST = 35.0F;
 	public static final int COOLDOWN = 400;
 	private static final int SIGNS = 8, RING_POINTS = 48;
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xF2D26B, 1.0F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xF2D26B, 1.0F);
 
 	private record Ring(ResourceKey<Level> dimension, Vec3 centre, UUID caster, long until) {
 	}

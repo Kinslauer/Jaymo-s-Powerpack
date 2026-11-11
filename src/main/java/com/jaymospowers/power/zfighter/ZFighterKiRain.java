@@ -1,12 +1,13 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -118,7 +119,7 @@ final class ZFighterKiRain {
 		RAINS.add(new Rain(level, player.getUUID(), lockedId, centre, damage, color, level.getGameTime() + DELAY_TICKS));
 		// the spray: motes shot upward from the hand, fanning a little
 		Vec3 hand = player.getEyePosition().add(player.getViewVector(1.0F).scale(0.8)).add(0.0, -0.3, 0.0);
-		DustParticleOptions dust = new DustParticleOptions(color, 1.4F);
+		ParticleOptions dust = MagicFx.wisp(color, 1.4F);
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < 30; i++) {
 			level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 0, (random.nextDouble() - 0.5) * 0.3, 1.0, (random.nextDouble() - 0.5) * 0.3,
@@ -168,7 +169,7 @@ final class ZFighterKiRain {
 				rain.drops.add(new Drop(start, 0x58000000 | (nextId++ & 0xFFFFFF)));
 			}
 		}
-		DustParticleOptions dust = new DustParticleOptions(rain.color, 1.2F);
+		ParticleOptions dust = MagicFx.wisp(rain.color, 1.2F);
 		var source = ZFighterKi.source(owner);
 		for (Iterator<Drop> it = rain.drops.iterator(); it.hasNext(); ) {
 			Drop drop = it.next();

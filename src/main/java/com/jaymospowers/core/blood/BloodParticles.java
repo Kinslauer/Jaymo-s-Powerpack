@@ -1,5 +1,6 @@
 package com.jaymospowers.core.blood;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -151,7 +152,7 @@ public final class BloodParticles {
 		BloodSmears.init();
 	}
 
-	/** (0.15.109) A {@link Fleck} of this colour (RGB) and size, where a {@code DustParticleOptions} would go. */
+	/** (0.15.109) A {@link Fleck} of this colour (RGB) and size, where a {@code ParticleOptions} would go. */
 	public static Fleck fleck(int color, float size) {
 		return new Fleck(color, size);
 	}

@@ -1,10 +1,11 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,7 +47,7 @@ public final class ZFighterAirBurst {
 		}
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		Vec3 back = player.getLookAngle().scale(-1.0);
-		DustParticleOptions dust = ZFighterPower.dust(live);
+		ParticleOptions dust = ZFighterPower.dust(live);
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, 24, 0.25, 0.4, 0.25, 0.1);
 		level.sendParticles(ParticleTypes.CLOUD, true, false, at.x, at.y, at.z, 0, back.x, back.y, back.z, 0.5);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);

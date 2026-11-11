@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -18,7 +19,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -335,8 +335,8 @@ public final class ZFighterFusion {
 			}
 			if (now % 10 == 0) {
 				ServerLevel level = leader.level();
-				level.sendParticles(new DustParticleOptions(0xFFD040, 1.6F), leader.getX(), leader.getY() + 1.0, leader.getZ(), 6, 0.4, 0.8, 0.4, 0.0);
-				level.sendParticles(new DustParticleOptions(0x40E0D0, 1.6F), leader.getX(), leader.getY() + 1.0, leader.getZ(), 6, 0.4, 0.8, 0.4, 0.0);
+				level.sendParticles(MagicFx.wisp(0xFFD040, 1.6F), leader.getX(), leader.getY() + 1.0, leader.getZ(), 6, 0.4, 0.8, 0.4, 0.0);
+				level.sendParticles(MagicFx.wisp(0x40E0D0, 1.6F), leader.getX(), leader.getY() + 1.0, leader.getZ(), 6, 0.4, 0.8, 0.4, 0.0);
 			}
 			if (!fused.warned && fused.until() - now <= 200) {
 				fused.warned = true;
@@ -457,7 +457,7 @@ public final class ZFighterFusion {
 		ZFighterPower.refresh(leader, live);
 		leader.setHealth(leader.getMaxHealth());
 		ServerLevel level = leader.level();
-		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), leader.getX(), leader.getY() + 1.0, leader.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, leader.getX(), leader.getY() + 1.0, leader.getZ(), MagicFx.FLASH_RADIUS, 0xFFFFFF);
 		level.sendParticles(ParticleTypes.END_ROD, true, false, leader.getX(), leader.getY() + 1.0, leader.getZ(), 80, 1.5, 1.5, 1.5, 0.2);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
@@ -580,7 +580,7 @@ public final class ZFighterFusion {
 			ZFighterPower.refresh(leader, live);
 			live.ki = Math.min(live.ki, ZFighterPower.maxKi(leader));
 			leader.setHealth(Math.min(leader.getHealth(), leader.getMaxHealth()));
-			leader.level().sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), leader.getX(), leader.getY() + 1.0, leader.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(leader.level(), leader.getX(), leader.getY() + 1.0, leader.getZ(), MagicFx.FLASH_RADIUS, 0xFFFFFF);
 			leader.level().playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.5F, 1.0F);
 			leader.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_unfused").withStyle(ChatFormatting.GOLD));
 		}

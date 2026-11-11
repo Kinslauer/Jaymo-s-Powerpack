@@ -1,10 +1,11 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import java.util.List;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -45,8 +46,8 @@ final class GravityGift implements GiftKit {
 	/** Everyday: this many motes float round them. */
 	static final int MOTES = 5;
 
-	private static final DustParticleOptions SHADOW = new DustParticleOptions(0x120A1A, 2.0F);
-	private static final DustParticleOptions WHITE_HOT = new DustParticleOptions(0xFFE6A8, 4.0F);
+	private static final ParticleOptions SHADOW = MagicFx.wisp(0x120A1A, 2.0F);
+	private static final ParticleOptions WHITE_HOT = MagicFx.wisp(0xFFE6A8, 4.0F);
 
 	static void init() {
 		Gifted.register(new GravityGift());

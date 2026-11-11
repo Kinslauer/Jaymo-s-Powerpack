@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.Set;
@@ -10,7 +11,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -70,7 +71,7 @@ public final class ChronoSpeed {
 	static final int WAKE_STEPS = 4, WAKE_SPRAY = 3, WAKE_SOUND_EVERY = 6;
 	static final float WAKE_VOLUME = 0.25F;
 	/** Velox's streak behind you (server particles): a light blue dust. */
-	public static final DustParticleOptions SKY_DUST = new DustParticleOptions(0x8FD8FF, 1.2F);
+	public static final ParticleOptions SKY_DUST = MagicFx.wisp(0x8FD8FF, 1.2F);
 
 	static final Identifier SPRINT_MODIFIER = JaymosPowers.id("chrono_flash_sprint");
 	static final Identifier STEP_MODIFIER = JaymosPowers.id("chrono_flash_step");

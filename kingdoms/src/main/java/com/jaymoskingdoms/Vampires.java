@@ -20,7 +20,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -339,7 +339,7 @@ public final class Vampires {
 			return amount;
 		}
 		if (self.level() instanceof ServerLevel level) {
-			level.sendParticles(new DustParticleOptions(0x5A0A0A, 1.2F), self.getX(), self.getY(0.65), self.getZ(), 14, 0.2, 0.2, 0.2, 0.0);
+			level.sendParticles(Fx.wisp(0x5A0A0A, 1.2F), self.getX(), self.getY(0.65), self.getZ(), 14, 0.2, 0.2, 0.2, 0.0);
 			level.sendParticles(ParticleTypes.SMOKE, self.getX(), self.getY(0.65), self.getZ(), 6, 0.15, 0.15, 0.15, 0.01);
 			level.playSound(null, self.getX(), self.getY(), self.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
@@ -793,7 +793,7 @@ public final class Vampires {
 		Vec3 look = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 side = new Vec3(-look.z, 0.0, look.x).scale(0.11);
 		Vec3 at = mob.getEyePosition().add(look.scale(0.3));
-		DustParticleOptions eye = new DustParticleOptions(EYES, 0.45F);
+		ParticleOptions eye = Fx.wisp(EYES, 0.45F);
 		level.sendParticles(eye, at.x + side.x, at.y, at.z + side.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(eye, at.x - side.x, at.y, at.z - side.z, 1, 0.0, 0.0, 0.0, 0.0);
 	}
@@ -961,7 +961,7 @@ public final class Vampires {
 		elder.setDeltaMovement(Vec3.ZERO);
 		elder.fallDistance = 0.0;
 		if (f.ticks % 4 == 0 && bat.level() instanceof ServerLevel level) {
-			level.sendParticles(new DustParticleOptions(EYES, 0.4F), next.x, next.y + 0.2, next.z, 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(Fx.wisp(EYES, 0.4F), next.x, next.y + 0.2, next.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}
 	}
 

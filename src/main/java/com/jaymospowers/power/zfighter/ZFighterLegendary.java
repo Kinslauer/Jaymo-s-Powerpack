@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -188,8 +188,7 @@ public final class ZFighterLegendary {
 		}
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + SURGE_KI);
 		int color = ZFighterForms.color(live.form);
-		level.sendParticles(new DustParticleOptions(color, 2.2F), true, false, c.x, c.y + player.getBbHeight() * 0.5, c.z, 50, radius * 0.3, player.getBbHeight() * 0.4,
-			radius * 0.3, 0.3);
+		MagicFx.burst(level, c.x, c.y + player.getBbHeight() * 0.5, c.z, color, 2.2F, 50, radius * 0.3, player.getBbHeight() * 0.4, radius * 0.3);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, c.x, c.y + 0.5, c.z, 3, radius * 0.25, 0.3, radius * 0.25, 0.0);
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, c.x, c.y + 0.2, c.z, 8, radius * 0.3, 0.1, radius * 0.3, 0.04);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.6F, 0.6F);

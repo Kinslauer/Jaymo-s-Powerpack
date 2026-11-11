@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Breaks;
@@ -103,7 +104,7 @@ public final class FrostBeam {
 		}
 	}
 
-	private static final net.minecraft.core.particles.DustParticleOptions GAZE_DUST = new net.minecraft.core.particles.DustParticleOptions(GAZE_COLOR, 1.0F);
+	private static final net.minecraft.core.particles.ParticleOptions GAZE_DUST = MagicFx.wisp(GAZE_COLOR, 1.0F);
 
 	private FrostBeam() {
 	}

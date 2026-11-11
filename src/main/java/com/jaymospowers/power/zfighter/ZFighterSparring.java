@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -249,7 +250,7 @@ final class ZFighterSparring {
 				level.playSound(null, behind.x, behind.y, behind.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6F, 1.8F);
 			}
 		}
-		DustParticleOptions dust = new DustParticleOptions(ZFighterPower.COLOR, 1.6F);
+		ParticleOptions dust = MagicFx.wisp(ZFighterPower.COLOR, 1.6F);
 		for (Iterator<Vec3[]> it = bout.blasts.iterator(); it.hasNext(); ) {
 			Vec3[] blast = it.next();
 			blast[0] = blast[0].add(blast[1]);

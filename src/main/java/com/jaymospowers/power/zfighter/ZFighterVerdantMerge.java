@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -261,7 +261,7 @@ public final class ZFighterVerdantMerge {
 		}
 		Vec3 a = player.position().add(0.0, 1.0, 0.0), b = partner.position().add(0.0, 1.0, 0.0);
 		Vec3 mid = a.add(b).scale(0.5);
-		level.sendParticles(new DustParticleOptions(COLOR, 1.2F), true, false, mid.x, mid.y, mid.z, 5, 0.4, 0.5, 0.4, 0.02);
+		level.sendParticles(MagicFx.wisp(COLOR, 1.2F), true, false, mid.x, mid.y, mid.z, 5, 0.4, 0.5, 0.4, 0.02);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, true, false, mid.x, mid.y, mid.z, 2, 0.5, 0.5, 0.5, 0.0);
 	}
 
@@ -298,7 +298,7 @@ public final class ZFighterVerdantMerge {
 	private static void burst(Entity a, Entity b) {
 		ServerLevel level = (ServerLevel)a.level();
 		Vec3 mid = a.position().add(b.position()).scale(0.5).add(0.0, 1.0, 0.0);
-		level.sendParticles(new DustParticleOptions(COLOR, 2.0F), true, false, mid.x, mid.y, mid.z, 50, 0.7, 0.9, 0.7, 0.2);
+		MagicFx.burst(level, mid.x, mid.y, mid.z, COLOR, 2.0F, 50, 0.7, 0.9, 0.7);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, true, false, mid.x, mid.y, mid.z, 20, 0.7, 0.9, 0.7, 0.0);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.0F);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.3F);

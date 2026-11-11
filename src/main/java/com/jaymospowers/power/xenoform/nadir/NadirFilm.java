@@ -1,10 +1,10 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.UltimateFilm;
 import java.util.UUID;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -122,11 +122,11 @@ public final class NadirFilm {
 				Vec3 p = base.add(side.scale(across)).add(0.0, up * PANEL_HEIGHT, 0.0);
 				// the sky above, the ground below
 				int colour = up > 0.4 ? world.high : world.low;
-				level.sendParticles(new DustParticleOptions(colour & 0xFFFFFF, 2.4F), p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.0);
+				level.sendParticles(MagicFx.wisp(colour & 0xFFFFFF, 2.4F), p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.0);
 			}
 		}
 		Vec3 mid = base.add(0.0, PANEL_HEIGHT * 0.5, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, world.high), mid.x, mid.y, mid.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, mid.x, mid.y, mid.z, MagicFx.FLASH_RADIUS, world.high);
 		ParticleOptions detail = switch (world) {
 			case OVERWORLD -> ParticleTypes.HAPPY_VILLAGER;
 			case NETHER -> ParticleTypes.FLAME;
@@ -151,7 +151,7 @@ public final class NadirFilm {
 				near.hurtServer(level, player.damageSources().playerAttack(player), SPLASH_DAMAGE);
 			}
 		}
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 80, 0.5, 0.8, 0.5, 0.4);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.6F, 0.6F);

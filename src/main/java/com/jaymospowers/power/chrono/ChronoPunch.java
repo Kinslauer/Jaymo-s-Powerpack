@@ -1,10 +1,11 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -40,7 +41,7 @@ final class ChronoPunch {
 	static final int FILM_TICKS = 22;
 	/** Screen shake per landed punch: the first, then this much more each. */
 	static final float SHAKE = 0.1F, SHAKE_STEP = 0.06F;
-	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
+	private static final ParticleOptions GOLD = MagicFx.wisp(0xFFE08A, 1.0F);
 	private static final SwingAnimation JAB = new SwingAnimation(SwingAnimationType.WHACK, EVERY);
 
 	private static final Map<UUID, Integer> FLURRIES = new HashMap<>();
