@@ -147,10 +147,20 @@ public final class LoreFilmClient {
 		{"", "jaymoskingdoms:steel_plate_chestplate", "jaymoskingdoms:steel_plate_leggings", "jaymoskingdoms:steel_plate_boots"},
 		{"wizards:wizard_robe_head", "wizards:wizard_robe_chest", "wizards:wizard_robe_legs", "wizards:wizard_robe_feet"},
 		{"archers:ranger_armor_head", "archers:ranger_armor_chest", "archers:ranger_armor_legs", "archers:ranger_armor_feet"}};
+	/** What the hearthlanders of the line wear, one set after another down it: head, chest, legs, feet. */
+	static final String[][] SOLDIER_GEAR = {
+		{"minecraft:iron_helmet", "minecraft:iron_chestplate", "minecraft:iron_leggings", "minecraft:iron_boots"},
+		{"minecraft:chainmail_helmet", "minecraft:chainmail_chestplate", "minecraft:chainmail_leggings", "minecraft:iron_boots"},
+		{"jaymoskingdoms:steel_plate_helmet|minecraft:iron_helmet", "minecraft:iron_chestplate", "minecraft:chainmail_leggings", "minecraft:iron_boots"},
+		{"minecraft:iron_helmet", "minecraft:chainmail_chestplate", "minecraft:iron_leggings", "minecraft:iron_boots"}};
 	/** How often Grimsby, Thessaly and Ambrose each throw a bolt into the fight (ticks), and when in that their own comes. */
 	static final int[][] BOLTS = {{26, 0}, {34, 11}, {30, 19}};
 	/** Ground the fighting is kept off while a close shot is taken across it: {from tick, to tick, f, s, how far round}. */
-	static final double[][] CAMERA_CLEAR = {{MELEE - 30, SUMMON, 19.3, 9.5, 4.2}, {VARRO - 30, SPELLS, VARRO_AT[0] + 1.3, VARRO_AT[1] + 2.4, 2.6}, {DON - 20, QUIET, STRANGER_AT[0] - 1.5, STRANGER_AT[1] - 0.8, 3.2}};
+	/** How far in front of a hero their face shot is taken from, how far behind their shoulder shot, and how far off Varro his close one. */
+	static final double HERO_FRONT = 4.4, HERO_BEHIND = 4.0, VARRO_NEAR = 3.0;
+	/** The ground between a hero and their camera is cleared of fighters this many ticks before the cut to them. */
+	static final int HERO_CLEAR_EARLY = 8;
+	static final double[][] CAMERA_CLEAR = {{MELEE - 30, SUMMON, 19.3, 9.5, 4.2}, {VARRO - 30, SPELLS, VARRO_AT[0] + 1.3, VARRO_AT[1] + 2.8, 3.0}, {DON - 20, QUIET, STRANGER_AT[0] - 1.5, STRANGER_AT[1] - 0.8, 3.2}};
 	/** How far Varro and his orc go looking for the dead once they charge. */
 	static final double HUNT = 80.0;
 	/** How many fight on each side at the start (one pair each), and how many dead are raised. */
@@ -1019,6 +1029,11 @@ public final class LoreFilmClient {
 		Actor a = cast(f, new FilmTape.Cast(0, "soldier_" + i % 3, FilmActor.WIDE, 0, false, Role.SOLDIER.ordinal(), Flesh.MAN.ordinal(), false,
 			id(i % 3 == 1 ? Items.IRON_AXE : Items.IRON_SWORD), id(i % 2 == 0 ? Items.SHIELD : null), new float[] {(float)fwd, (float)side, 0.0F, turn, 1.0F}));
 		if (a != null) {
+			// real armour and a helmet on every one of them (Andy: "like the draugr the human soldiers should have real armor and helmets on")
+			String[] gear = SOLDIER_GEAR[i % SOLDIER_GEAR.length];
+			for (int j = 0; j < GEAR_SLOTS.length; j++) {
+				hold(f, a, GEAR_SLOTS[j], gear[j]);
+			}
 			f.soldiers.add(a);
 			f.fighters.add(a);
 		}
@@ -3168,6 +3183,21 @@ public final class LoreFilmClient {
 				}
 			}
 		}
+		// nor between a hero and the camera while their spell is on them (from a little before the cut to them)
+		if (t >= SPELLS - HERO_CLEAR_EARLY && t < DON && a.role != Role.STRANGER) {
+			Actor hero = caster(f, Math.min(3, (t + HERO_CLEAR_EARLY - SPELLS) / CAST_TICKS));
+			if (hero != null && hero != a) {
+				double side = hero.s > 0.0 ? -1.0 : 1.0;
+				double[][] kept = {{hero.f + HERO_FRONT * 0.5, hero.s + 0.85 * side, HERO_FRONT * 0.5 + 0.6}, {hero.f - HERO_BEHIND * 0.5, hero.s + 0.75 * side, HERO_BEHIND * 0.5 + 0.4}};
+				for (double[] clear : kept) {
+					double cf = a.f - clear[0], cs = a.s - clear[1], near = Math.sqrt(cf * cf + cs * cs);
+					if (near < clear[2] && near > 1.0E-4 && distance(a.f, a.s, hero.f, hero.s) > 0.1) {
+						a.f = clear[0] + cf / near * clear[2];
+						a.s = clear[1] + cs / near * clear[2];
+					}
+				}
+			}
+		}
 		if (a.sink != a.sinkTo) {
 			a.sink = a.sink < a.sinkTo ? Math.min(a.sinkTo, a.sink + a.sinkRate) : Math.max(a.sinkTo, a.sink - a.sinkRate);
 		}
@@ -3260,14 +3290,14 @@ public final class LoreFilmClient {
 			look = f.at(30.0, -1.0, 0.5);
 		} else if (t < VARRO_CLOSE) {
 			// side on: Varro on the left third, the orc on the right
-			pos = f.at(VARRO_AT[0] + 1.2, VARRO_AT[1] + 3.3, 1.45);
-			look = f.at(VARRO_AT[0] + 1.0, VARRO_AT[1], 1.2);
+			pos = f.at(VARRO_AT[0] + 1.2, VARRO_AT[1] + 4.0, 1.3);
+			look = f.at(VARRO_AT[0] + 1.0, VARRO_AT[1], 1.0);
 		} else if (t < QUIET && t < SPELLS) {
 			// a cut in on the same line: Varro on the left third, the orc on its knees on the right, his hand on its brow between
 			// them; then after it as it goes for the dead
-			pos = f.at(VARRO_AT[0] + 1.5, VARRO_AT[1] + 2.0, 1.55);
+			pos = f.at(VARRO_AT[0] + 1.5, VARRO_AT[1] + VARRO_NEAR, 1.3);
 			Vec3 orc = f.marked != null ? f.marked.e.getPosition(partialTicks) : f.at(VARRO_AT[0] + MARKED_STOPS, VARRO_AT[1], 0.0);
-			look = t < VARRO_FIELD ? f.at(VARRO_AT[0] + 1.3, VARRO_AT[1], 1.2) : orc.add(0.0, 1.0, 0.0);
+			look = t < VARRO_FIELD ? f.at(VARRO_AT[0] + 1.3, VARRO_AT[1], 1.0) : orc.add(0.0, 1.0, 0.0);
 		} else if (t < DON) {
 			int which = (int)((t - SPELLS) / CAST_TICKS);
 			float into = (t - SPELLS) - which * CAST_TICKS;
@@ -3278,13 +3308,16 @@ public final class LoreFilmClient {
 			double side = mage != null && f.staged(m)[1] > 0.0 ? -1.0 : 1.0;
 			if (into < 12) {
 				// their face as they call it up, on a third, the field they look out at behind the camera's shoulder
-				pos = m.add(f.fwd.scale(2.6)).add(f.right.scale(1.1 * side)).add(0.0, 1.6, 0.0);
-				look = m.add(0.0, 1.55, 0.0);
-				third = 0.6F * (float)side;
+				// (far enough back that all of them is in the frame, head to foot: Andy, "the heroes are in full frame during their bits")
+				pos = m.add(f.fwd.scale(HERO_FRONT)).add(f.right.scale(1.7 * side)).add(0.0, 1.25, 0.0);
+				look = m.add(0.0, 1.0, 0.0);
+				third = 0.45F * (float)side;
 			} else {
 				// and over their shoulder as it lands
-				pos = m.subtract(f.fwd.scale(1.8)).add(f.right.scale(0.8 * side)).add(0.0, 2.0, 0.0);
-				look = mage != null ? target(f, which, mage) : f.at(26.0, 0.0, 0.0);
+				pos = m.subtract(f.fwd.scale(HERO_BEHIND)).add(f.right.scale(1.5 * side)).add(0.0, 2.3, 0.0);
+				Vec3 lands = mage != null ? target(f, which, mage) : f.at(26.0, 0.0, 0.0);
+				// (looking past them at where it lands, not so far past that they leave the frame)
+				look = m.add(0.0, 1.0, 0.0).lerp(lands, 0.6);
 			}
 		} else if (t < QUIET) {
 			// the fifth, at the back where he has stood all this while (the line is his own now): on the right third, the
