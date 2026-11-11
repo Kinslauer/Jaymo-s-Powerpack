@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 00:45
+updated: 2026-11-11 00:50
 ---
 # Open PRs
 
-6 open, as of 2026-11-11 00:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+7 open, as of 2026-11-11 00:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -34,4 +34,9 @@ Andy merges only on "merge", one at a time.
 ## [#1277](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1277) Wind: airflow sense (streaks round the crosshair for what moves nearby)
 - **Branch:** `jung/wind-air-sense` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1281](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1281) discord_read_aloud: --stop and --status find every running reading
+- **Branch:** `claude/read-aloud-find-every-reading` · **Updated:** 2026-11-11 (today)
+- **Checks:** ⏳ 4 of 4 running
 - **Agent:** no agent note
