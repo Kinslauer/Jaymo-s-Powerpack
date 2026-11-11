@@ -324,6 +324,7 @@ public final class RivalHunter {
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		player.getInventory().placeItemBackInInventory(XenoBands.item(XenoBandItem.RIVAL_ALIENS, true, null), net.minecraft.util.Prediction.SERVER_ONLY);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.xenoform.rival_taken").withStyle(ChatFormatting.DARK_RED));
+		com.jaymospowers.core.PowerRoads.hunterBeaten(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.8F);
 	}

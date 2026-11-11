@@ -389,6 +389,9 @@ public final class ArsenalPower implements Power {
 			List<ItemStack> future = pair == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
 			stacks = pair != null ? pair : future != null ? future
 				: new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
+			if (pair == null && future != null) {
+				com.jaymospowers.core.PowerRoads.arsenalFuture(player);
+			}
 		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
