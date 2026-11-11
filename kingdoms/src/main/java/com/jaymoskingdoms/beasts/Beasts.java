@@ -64,6 +64,8 @@ public final class Beasts {
 	public static void register() {
 		MINOTAUR = type("minotaur", EntityType.Builder.of(Minotaur::new, MobCategory.MONSTER).sized(1.4F, 3.3F).clientTrackingRange(10),
 			Minotaur.createAttributes());
+		// it keeps the great dungeons under the Overworld
+		Labyrinths.register();
 		PIGLIN_KING = type("piglin_king", EntityType.Builder.of(PiglinKing::new, MobCategory.MONSTER).sized(1.4F, 3.5F).fireImmune().clientTrackingRange(10),
 			PiglinKing.createAttributes());
 		REDSTONE_GOLEM = type("redstone_golem", EntityType.Builder.of(RedstoneGolem::new, MobCategory.MONSTER).sized(2.0F, 3.6F).clientTrackingRange(10),

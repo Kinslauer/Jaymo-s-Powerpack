@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:pulse_tree",
+    "jaymospowers:pulse_tree",
+    "jaymospowers:pulse_tree",
+    "jaymospowers:pulse_tree"
+  ],
+  "result": {
+    "id": "jaymospowers:pulse_tree_planks",
+    "count": 1
+  },
+  "group": "planks"
+}

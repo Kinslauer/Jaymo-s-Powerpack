@@ -137,8 +137,8 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
 		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
 		// the mud golem is no monster of legend any more but one of the swamps' common threats (Andy), and the witches'
-		// allies at their huts (monsters/WitchHuts). The minotaur no longer roams the mountains: it is one of the bosses of
-		// the Aether's Sentry Ruins (Powers' RuinBoss).
+		// allies at their huts (monsters/WitchHuts). The minotaur no longer roams the mountains: it keeps the great
+		// dungeons under the Overworld (beasts/Labyrinths).
 		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", MUD_GOLEM_WEIGHT, 1, 2),
 		// (0.7.137) the wind dragons (dragons/Dragons), rare: Notus over the badlands, Boreas over the frozen peaks, Zephyrus
 		// in the swamps

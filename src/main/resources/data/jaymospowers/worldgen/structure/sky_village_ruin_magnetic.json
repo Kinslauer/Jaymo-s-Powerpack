@@ -1,0 +1,9 @@
+{
+  "type": "jaymospowers:aether_structure",
+  "biomes": "#jaymospowers:has_structure/sky_village_ruin_magnetic",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "plan": "village",
+  "variant": 4
+}

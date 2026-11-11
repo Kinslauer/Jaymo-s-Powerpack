@@ -1,0 +1,9 @@
+{
+  "type": "jaymospowers:aether_structure",
+  "biomes": "#jaymospowers:has_structure/sky_town_magnetic",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "plan": "town",
+  "variant": 1
+}

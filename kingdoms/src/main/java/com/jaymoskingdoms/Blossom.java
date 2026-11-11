@@ -198,6 +198,108 @@ final class Blossom {
 		return s.done();
 	}
 
+	/** The first {@code rings} rings of a hipped roof over x0..x1, z0..z1 from {@code y}: the skirt of roof round a storey that stands back from the one below. */
+	private static void skirt(Buildings.Sketch s, int x0, int x1, int z0, int z1, int y, int rings, BlockState stairs) {
+		for (int k = 0; k < rings; k++) {
+			int ax0 = x0 + k, ax1 = x1 - k, az0 = z0 + k, az1 = z1 - k;
+			for (int x = ax0; x <= ax1; x++) {
+				s.set(x, y + k, az0, Buildings.Sketch.stair(stairs, Direction.SOUTH));
+				s.set(x, y + k, az1, Buildings.Sketch.stair(stairs, Direction.NORTH));
+			}
+			for (int z = az0 + 1; z < az1; z++) {
+				s.set(ax0, y + k, z, Buildings.Sketch.stair(stairs, Direction.EAST));
+				s.set(ax1, y + k, z, Buildings.Sketch.stair(stairs, Direction.WEST));
+			}
+		}
+	}
+
+	/** One storey of the keep: walls round x0..x1, z0..z1 from y0 to y1 (stone for the first {@code stone} rows, plaster above, timber posts, paper windows), a top plate over them. */
+	private static void storey(Buildings.Sketch s, Buildings.Kit k, int x0, int x1, int z0, int z1, int y0, int y1, int stone) {
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (x != x0 && x != x1 && z != z0 && z != z1) {
+					continue;
+				}
+				boolean alongX = z == z0 || z == z1;
+				int along = alongX ? x - x0 : z - z0, span = alongX ? x1 - x0 : z1 - z0;
+				boolean post = (x == x0 || x == x1) && alongX || along % 4 == 0 && along != 0 && along != span;
+				for (int y = y0; y <= y1; y++) {
+					boolean window = !post && y == y0 + stone + 1 && along % 4 == 2;
+					s.set(x, y, z, post ? TIMBER : y < y0 + stone ? k.p.wall() : window ? PAPER : k.infill);
+				}
+				s.set(x, y1 + 1, z, post ? TIMBER : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
+			}
+		}
+	}
+
+	/**
+	 * A castle keep in the Blossom way (a tenshu; 17 x 17): three storeys, each standing back from the one below with a
+	 * skirt of dark tile round it, stone to the knee and white plaster above between dark posts, paper windows, a hipped
+	 * roof on top with a lantern at each end of the ridge. The great room below is left open from the door to the back
+	 * wall for whoever rules there; ladders climb to the two rooms above. The seat of a Blossom town's kingdom.
+	 */
+	static Blueprint tenshu(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_tenshu", 17, 17, 28);
+		BlockState boards = k.p.planks(), tile = Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(), ridge = Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState();
+		BlockState ladder = Buildings.Sketch.facing(Blocks.LADDER, Direction.NORTH);
+		// the footing and the great room's floor
+		for (int x = 1; x <= 15; x++) {
+			for (int z = 1; z <= 15; z++) {
+				boolean inside = x >= 3 && x <= 13 && z >= 3 && z <= 13;
+				s.set(x, 0, z, inside ? TATAMI : k.p.wall());
+			}
+		}
+		// the great room: x 2..14, z 2..14, five high
+		storey(s, k, 2, 14, 2, 14, 1, 5, 2);
+		s.door(8, 1, 2, Direction.NORTH, k.door);
+		skirt(s, 0, 16, 0, 16, 5, 4, tile);
+		// its ceiling is the second storey's floor
+		for (int x = 3; x <= 13; x++) {
+			for (int z = 3; z <= 13; z++) {
+				if (!(x == 5 && z == 11)) {
+					s.set(x, 6, z, boards);
+				}
+			}
+		}
+		// the second storey: x 4..12, z 4..12
+		storey(s, k, 4, 12, 4, 12, 7, 10, 0);
+		skirt(s, 2, 14, 2, 14, 10, 4, tile);
+		for (int x = 5; x <= 11; x++) {
+			for (int z = 5; z <= 11; z++) {
+				if (!(x == 7 && z == 9)) {
+					s.set(x, 11, z, boards);
+				}
+			}
+		}
+		// the third: x 6..10, z 6..10, and the roof
+		storey(s, k, 6, 10, 6, 10, 12, 14, 0);
+		s.hip(4, 12, 4, 12, 14, tile, ridge);
+		s.set(8, 19, 8, Blocks.LANTERN.defaultBlockState());
+		// the ladders: each against a post of its own below the wall it comes up beside
+		for (int y = 1; y <= 5; y++) {
+			s.set(5, y, 12, TIMBER);
+		}
+		for (int y = 1; y <= 6; y++) {
+			s.set(5, y, 11, ladder);
+		}
+		for (int y = 7; y <= 10; y++) {
+			s.set(7, y, 10, TIMBER);
+		}
+		for (int y = 7; y <= 11; y++) {
+			s.set(7, y, 9, ladder);
+		}
+		// lanterns under the great room's ceiling, the lord's things above
+		for (int[] at : new int[][] {{5, 5}, {11, 5}, {5, 9}, {11, 11}}) {
+			s.set(at[0], 5, at[1], Buildings.Sketch.hanging(Blocks.LANTERN));
+		}
+		s.bed(10, 7, 9, Direction.SOUTH, FUTON);
+		s.set(6, 7, 6, Blocks.BARREL.defaultBlockState());
+		s.set(10, 7, 6, BONSAI);
+		s.set(8, 10, 8, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(8, 12, 9, BONSAI);
+		return s.done();
+	}
+
 	private static BlockState named(String name, Block fallback) {
 		Block b = Townscape.named(name);
 		return (b == null ? fallback : b).defaultBlockState();

@@ -1,0 +1,27 @@
+{
+  "structures": [
+    {
+      "structure": "jaymospowers:sky_town_highfields",
+      "weight": 1
+    },
+    {
+      "structure": "jaymospowers:sky_town_magnetic",
+      "weight": 1
+    },
+    {
+      "structure": "jaymospowers:sky_town_arctic",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 48,
+    "separation": 24,
+    "salt": 1380213111,
+    "spread_type": "linear",
+    "exclusion_zone": {
+      "other_set": "jaymospowers:sky_villages",
+      "chunk_count": 8
+    }
+  }
+}

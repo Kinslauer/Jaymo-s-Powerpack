@@ -25,6 +25,8 @@
   "ship.jaymoskingdoms.keys.sails_oars": "W/S sails  ·  Space oars  ·  A/D rudder  ·  sneak: anchor",
   "ship.jaymoskingdoms.keys.oars": "W/S oars  ·  A/D rudder  ·  sneak: anchor",
   "ship.jaymoskingdoms.keys.paddle": "W/S paddle  ·  A/D rudder  ·  sneak: anchor",
+  "ship.jaymoskingdoms.keys.balloon": "W/S cloth  ·  A/D rudder  ·  Space up  ·  Sprint down  ·  sneak: moor",
+  "ship.jaymoskingdoms.hud.height": "Height %s",
   "ship.jaymoskingdoms.keys.broadside": "click: broadside",
   "ship.jaymoskingdoms.no_guns_that_way": "No loaded guns on that side",
   "ship.jaymoskingdoms.cannon.powder_first": "Load gunpowder first",

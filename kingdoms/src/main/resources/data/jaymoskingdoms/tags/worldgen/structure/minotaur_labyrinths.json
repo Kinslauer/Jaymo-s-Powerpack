@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "epic:large_dungeon", "required": false},
+    {"id": "epic:large_ice_dungeon", "required": false},
+    {"id": "epic:large_sand_dungeon", "required": false}
+  ]
+}

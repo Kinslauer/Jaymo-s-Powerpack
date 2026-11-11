@@ -89,7 +89,8 @@ final class Seats {
 	/** A village structure (by tag, or a {@code minecraft:village_*} id). */
 	static boolean village(Holder<Structure> holder) {
 		return holder.is(StructureTags.VILLAGE)
-			|| holder.unwrapKey().map(k -> k.identifier().getNamespace().equals("minecraft") && k.identifier().getPath().startsWith("village_")).orElse(false);
+			|| holder.unwrapKey().map(k -> k.identifier().getNamespace().equals("minecraft") && k.identifier().getPath().startsWith("village_")
+				|| k.identifier().toString().startsWith(SKY_TOWN)).orElse(false);
 	}
 
 	/**
@@ -104,8 +105,11 @@ final class Seats {
 
 	/** {@link #epic(Holder)} by structure id. */
 	static boolean epic(String id) {
-		return id.startsWith("minecraft:village_");
+		return id.startsWith("minecraft:village_") || id.startsWith(SKY_TOWN);
 	}
+
+	/** Jaymo's Powers' sky towns: our own towns at that scale in the Aether, read like any village (their pieces name themselves). */
+	static final String SKY_TOWN = "jaymospowers:sky_town";
 
 	/**
 	 * The structure {@code which} accepts with a piece at {@code pos} (within {@link #BELL_SLACK}), read only from loaded
@@ -148,6 +152,11 @@ final class Seats {
 	/** A piece's name: its template's path (lower case), or what the piece calls itself. */
 	static String name(StructurePiece piece) {
 		String s = piece instanceof PoolElementStructurePiece pool ? pool.getElement().toString() : piece.getClass().getSimpleName();
+		// (a piece built in code that says what it is, as a sky town's do)
+		String said = piece instanceof PoolElementStructurePiece ? "" : piece.toString();
+		if (said.startsWith("jaymos")) {
+			s = said;
+		}
 		return s.toLowerCase(Locale.ROOT);
 	}
 
