@@ -3,7 +3,7 @@ status: stalled
 task: fix-youth
 branch: claude/waterskin-old-id
 with:
-pr:
+pr: 1266
 mods: [kitchen]
 versions:
 started: 2026-11-10
@@ -26,7 +26,9 @@ owns:
 - Writer list, model, cap, checklists PR, worktree cleanup, vault cards, memory pending
 
 ## Notes
--
+- Gateway: `schtasks /run` doesn't restart a running gateway (IgnoreNew). SOUL.md reaches live sessions through
+  `hermes sessions refresh-prompts`; config.yaml model changes apply on the next message.
+- 0.22.0 was already done in the cloud as PR #1264. My duplicate #1267 is closed.
 
 ## Done
 - 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).

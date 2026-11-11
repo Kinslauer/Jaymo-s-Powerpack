@@ -88,3 +88,4 @@ When the script is done, send it to Andy in chat; he will tell you whether it is
 
 ## Notes
 - 2026-11-10 17:12 Rewritten as Picklists/Jujutsu five mods pick-list.md (Andy 2026-11-10: make a new checklist). Closed.
+- 2026-11-10 8:40 PM Merged in the misspelled duplicate `jujujutsu-mod-checklist` (Tiv, Tasks thread: "have quill work on the checklist"; same ask) and deleted it.

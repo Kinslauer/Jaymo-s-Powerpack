@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 task: ape-giant-trees-flying-screenshake-dust
 branch: claude/ape-giant-trees-flying-screenshake-dust
 with:
-pr: 1256
+pr: 1260
 mods: [powers, kingdoms]
 versions:
 started: 2026-11-10
@@ -45,3 +45,5 @@ owns:
 - Scaling screenshake intensity at different Great Ape sizes
 - Scaling dust particles on Aether Giant footfalls
 - Multiplayer screenshake synchronization
+
+**PR:** #1256 was closed; the work merged as #1260 (Nov 10).

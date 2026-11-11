@@ -4,44 +4,49 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 01:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:31). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · for 🪶 Quill · open
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
+- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
+- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
+- [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
+- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
+- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 
 
 ## Being built
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
-- [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · running
+- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
+- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · claimed
 
 
 ## In review
 
-- [ ] [[Agents/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · 💻 Odysseus · #1256 · in-review
+- [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
+- [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · stalled
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
-- [x] [[Inbox/Done/jujujutsu-mod-checklist|jujujutsu-mod-checklist]]
-- [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
-- [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
-- [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
+- [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 
 
 %% kanban:settings
