@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Rebuild Yo Fadda hero mechanics for our powers
 branch: claude/project-thread-ixuj2m
 with: cloud thread

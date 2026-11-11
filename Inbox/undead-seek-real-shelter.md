@@ -1,9 +1,9 @@
 ---
-status: writing
+status: claimed
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: 
+claimed_by: hermes-fixer
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
@@ -41,9 +41,4 @@ Andy: "because we made the sun more deadly to the undead, they should now seek s
 OK: vanilla isSunBurnTick is mirrored faithfully (checked against 26.3 bytecode: MONSTERS_BURN, the light/random gate, rain, powder snow), SunMoon.sun(Level, Vec3) exists, FutureSunMixin and WebHostZombieMixin (isSunSensitive) keep working, leaves/glass are not isSolidRender.
 Not tested in game.
 - 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
-- 2026-11-11 01:54 Review (head 025ce16), second pass: still changes needed; the 01:19 list (whole-body rays, search cost, change note) is not fixed yet. One more: 4. Skeletons may not be able to leave tree shade: vanilla RestrictSunGoal turns on avoidSun, and GroundPathNavigation trims a path at the first open-sky node whenever the mob's own spot can't see sky. Under leaves canSeeSky is false, so SeekShelterGoal's moveTo (SeekShelterGoal.java:67) gets cut at the tree's edge and the skeleton keeps burning in place. Check trimPath in the 26.3 sources; if so, turn avoidSun off while this goal runs (or replace RestrictSunGoal for these mobs). Not tested in game.
-- 2026-11-11 03:13 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
-- 2026-11-11 11:31 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
-- 2026-11-11 12:39 Andy 2026-11-11 12:39Z: 'It should keep searching till it finds shelter.' Change SeekShelterGoal: when nothing is found within REACH, don't stay put; walk away (e.g. downhill or toward the darkest/most covered direction, or a widening search) and keep searching every back-off until it finds shelter. Held from merge for this.
-- 2026-11-11 16:32 Review (head 947704b), quick look: the 01:19/01:54 fixes are in, but Andy's 12:39Z ask (keep searching until it finds shelter) is not done yet. Also SeekShelterGoal.java:105/125 flips avoidSun by reflection on nav.getClass().getDeclaredField, which throws for any GroundPathNavigation subclass; use the public GroundPathNavigation.setAvoidSun (check it in 26.3) instead. Full review once the keep-searching change is pushed.
-- 2026-11-11 18:01 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-11 21:32 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.

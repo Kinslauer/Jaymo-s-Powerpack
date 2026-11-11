@@ -493,6 +493,25 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+(new) **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
+world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
+the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
+branched, and hang glowing spore lanterns that the Verdant dye and carry home for light. In the warm wet country is the
+**pulse forest**: thin blue stems with flat caps that brighten and dim together, the whole wood on one slow beat.
+Verdant elders say the wood is breathing; nobody has shown otherwise. In the dry cold uplands is the **stone garden**:
+wind-worn pillars and banded boulders with moss on their heads, and little else. And over all of it, in the same place
+day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
+the ring lies and do not think the sight remarkable.
+
+(new) **Storm, sand and wind** (four-mods thread, 2026-11-11, Eden Ring part 2). Three more countries of the Verdant
+World. The **brainstorm** is cold grey upland where the ground is rich in metal and so are the trees: a brain tree
+carries copper, iron or gold through its flesh, builds up charge and lets it go into anything living that comes near.
+The Verdant who gather there wear metal, which takes the charge to ground; they say the trees are thinking, and that
+it is rude to interrupt. The **lakeside desert** is hot dry country where every pond stands in a ring of sand, because
+of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
+**wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
+swings slowly round, and carries off anything thrown or let fall.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -536,10 +555,24 @@ upgrades are done there, at the elder's forge. The elder's people have an extrem
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
+(new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
+eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
+in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
+monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
+**Gremlin** is the Ocellan's own shape, bare of the robe: the makers put themselves in the band.
+
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
+
+(new, proposed in docs/Galvan-Moon-Plan.md, waiting on Andy) **The city under the dust.** The Galvan live hidden
+beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
+moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
+believes the pod crews' rumour. The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed
+workshop where the rival band was made.
 
 ## The future: Los Perrito
 
