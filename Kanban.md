@@ -12,12 +12,12 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🍇 Bacchus · claimed
 
 
 ## In review
