@@ -10,7 +10,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
-- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
 
 
 ## Being built
@@ -27,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
+- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · #1333 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-costumed-folk|claude-cloud-costumed-folk]] · 💻 Odysseus · #1332 · in-review
 
