@@ -533,7 +533,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 
 (new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
 eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
-name, and Ocellan is Claude's pick, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
 half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
 in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
 monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
@@ -543,6 +543,12 @@ monocle on a chain, and fold their hands in front of them. The smith who keeps t
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
+
+(new, proposed in docs/Galvan-Moon-Plan.md, waiting on Andy) **The city under the dust.** The Galvan live hidden
+beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
+moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
+believes the pod crews' rumour. The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed
+workshop where the rival band was made.
 
 ## The future: Los Perrito
 

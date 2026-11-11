@@ -234,3 +234,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:20 PM ET (Andy, Galvan thread): the Galvan are "the race of aliens that build and upgrade the watch"; they use the Gremlin model; "the npc galvan wear robes like the picture, and monocles, and are a high class society." Built: the star forge smith drawn as a robed, monocled Galvan (Kingdoms GalvanBody), PR #1323.
 - 2026-11-11 4:31 PM ET (Andy, same thread): "yes change the name across the board plese": the band's makers get a name of our own, not the Ben 10 one. Renamed to Ocellan (Claude's pick, offered on a card with Lunari / Tinkin / his own).
 - 2026-11-11 (Andy, lore thread): "Arsenal can pull from literally anywhere ... until he masters the power he can't command it at will." Built in PR #1326: pack picks and hazards until ascended.
+- 2026-11-11 4:35 PM ET (Andy, same thread): picked "Ocellan" on the name card for the band's makers.
