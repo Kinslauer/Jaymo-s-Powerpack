@@ -20,11 +20,11 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 🪶 Quill · #1285 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
