@@ -20,7 +20,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · #1271 · in-review
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 💻 Odysseus · #1270 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
