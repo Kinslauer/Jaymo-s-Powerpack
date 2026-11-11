@@ -152,3 +152,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   5. "the grue is the sorcerer, its what his mana manifested as."
   6. "They started calling it Earth in the future, we say overworld now."
 - 2026-11-10 10:12 PM: Andy (decision card): the demon master says "We kept it. Down here, nothing is let go.", not "We were there"; demons only remember the old war for now. PR #1268.
+- 2026-11-10 10:12 PM: Andy: "the warriorborn should be wearing the same gear the current draugr are in, just in better condition." The film host's Warrior-born are draugr drawn alive (draugr_living.png, whole tail). PR #1268.
