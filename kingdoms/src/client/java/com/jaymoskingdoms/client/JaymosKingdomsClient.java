@@ -198,6 +198,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.astronomy.SkyClient.register();
 		// the Astronomer's Journal, and the armillary's reading answers
 		com.jaymoskingdoms.client.astronomy.AstronomersJournalClient.register();
+		// a click on the Sun (dazzling before Optics)
+		com.jaymoskingdoms.client.astronomy.SunMoonClient.register();
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(DarkNights::tick);
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
