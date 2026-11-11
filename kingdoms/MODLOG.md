@@ -11285,3 +11285,13 @@ accepted"; the halfway folk are "what the dawnborn culture becomes".
   in onto her mooring, where she is blocks again. You can ride along on her deck or take her wheel. Something in her
   way sends her 6 blocks higher; a trip that runs past four minutes turns for home.
 - Compiled; not played. Not seen: whether MCA villagers sit quietly as a ferry's crew, and how the skiff looks under way.
+
+## 0.7.740 (2026-11-11): Divine-born: heritage key is Alight, and staying at the Judge makes you one (#1308)
+
+- The heritage key `;` for a Divine-born is now Alight (Jaymo's Powers refills the feathers). Sneak + `;` is Halo Pulse,
+  as the key alone was before. Without Powers the key is still Halo Pulse.
+- One of the just who stays at the Judge keeps their heritage. `DivineBorn.is` counts them (mending, no hunger or sleep,
+  harder blows on the wicked, the healing bonus), `Heritage.stayed` unlocks Divine-born and the afterlife road's deed,
+  and their own heritage key becomes Alight whenever there are feathers to bring back.
+- The Divine-born gift text lists the sense, the hover and Alight; the hint mentions the Judge.
+- Compiled; not played.
