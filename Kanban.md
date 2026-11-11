@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,8 +24,8 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
+- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
 - [ ] [[Agents/claude-cloud-arsenal-anywhere|claude-cloud-arsenal-anywhere]] · 💻 Odysseus · #1326 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review

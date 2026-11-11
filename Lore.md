@@ -526,6 +526,14 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
+(new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
+its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
+its bloom glows; **lonlix** is the common tuft of the warm lands; **parignum** lies in mats with small lit flowers;
+grey **Eden moss** covers the stone garden. **Eden vines** hang in strings under caps and ledges, and the **symbiotic
+moulds** grow on the undersides of the mushrooms and brain trees that feed them, one kind glowing. **Limphium** is the
+one the Verdant farm: its leaves are poor eating fresh and good eating dried, and a traveller in the far country is
+offered them before anything else.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
