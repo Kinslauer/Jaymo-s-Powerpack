@@ -3,7 +3,7 @@ status: stalled
 task: undead-seek-real-shelter
 branch: claude/undead-seek-real-shelter
 with:
-pr:
+pr: 1262
 mods: powers
 versions: Powers 0.21.109, Kingdoms 0.7.712
 started: 2026-11-10
