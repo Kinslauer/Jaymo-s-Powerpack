@@ -18,15 +18,15 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 
 
 ## In review
 
-- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · #1325 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
+- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · #1325 · in-review
 - [ ] [[Agents/claude-cloud-arsenal-anywhere|claude-cloud-arsenal-anywhere]] · 💻 Odysseus · #1326 · in-review
 
 
