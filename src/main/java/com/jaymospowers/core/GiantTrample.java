@@ -1,6 +1,5 @@
 package com.jaymospowers.core;
 
-import com.jaymospowers.core.GiantTrees;
 import java.lang.reflect.Method;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,7 +11,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * Aether Giants'), and the falling wood crushes whatever it lands on; without it the trunk just breaks. A player giant
  * only fells where they may build; a mob giant only with mob griefing on.
  * <p>
- * When a giant sprints into a tree, the tree is torn up and thrown outward, sending logs flying.
+ * Running into a tree is harder still: the tree is torn out whole and thrown on ahead of the giant ({@link GiantTrees#ram});
+ * one too big to lift is pushed over as a walk would, and without Kingdoms the broken trunk's logs fly on ahead.
  */
 public final class GiantTrample {
 	/** How far past its body a step reaches for trees (blocks, plus this per scale), and how high up its legs it looks for a trunk. */
@@ -37,99 +36,89 @@ public final class GiantTrample {
 	public static final int HEIGHT = 6;
 	/** Walking into a tree: checked this often (ticks). */
 	public static final int PUSH_EVERY = 5;
-	/** Sprinting into a tree: checked every tick while sprinting. */
-	public static final int SPRINT_EVERY = 1;
-	/** How far ahead a sprint reaches for trees (blocks, plus this per scale). */
-	public static final double SPRINT_REACH = 2.0, SPRINT_REACH_PER_SCALE = 0.2;
-	/** How high up a sprint checks for trunks (blocks). */
-	public static final int SPRINT_HEIGHT = 8;
+	/** Running into a tree: checked this often (ticks). */
+	public static final int RAM_EVERY = 2;
+	/**
+	 * A giant counts as running at this speed over the ground (blocks a tick), or a player giant when sprinting: mobs
+	 * hardly ever sprint, and a player's speed isn't known on the server.
+	 */
+	public static final double RAM_SPEED = 0.2;
+	/** How far ahead of its body a run reaches for trees (blocks, plus this per scale). */
+	public static final double RAM_REACH = 1.0, RAM_REACH_PER_SCALE = 0.15;
+	/** A tree run into flies on at this share of the giant's speed, at least {@link #RAM_THROW_MIN}, with this lift (blocks a tick). */
+	public static final double RAM_THROW_SHARE = 1.5, RAM_THROW_MIN = 0.4, RAM_THROW_LIFT = 0.3;
+	/** Without Kingdoms: the logs of a trunk run into fly ahead at about this speed (blocks a tick). */
+	public static final double RAM_LOG_SPEED = 0.4;
 	/** Without Kingdoms: the most logs one broken trunk drops. */
 	public static final int FALLBACK_LOGS = 24;
-	/** Sprint hit throw speed multiplier (blocks per tick per log). */
-	public static final double SPRINT_THROW_SPEED = 0.15;
-	/** Sprint hit upward lift. */
-	public static final double SPRINT_THROW_LIFT = 0.3;
 
 	private static @Nullable Method trample;
-	private static @Nullable Method hurl;
 	private static boolean looked;
 
 	private GiantTrample() {
 	}
 
-	/** Each tick of a giant: walking into a tree pushes it over; sprinting into a tree tears it up and throws it. */
-		public static void tick(LivingEntity giant, long now) {
-			if (now % PUSH_EVERY == 0 && giant.horizontalCollision) {
-				step(giant);
-			}
-			if (giant.isSprinting() && now % SPRINT_EVERY == 0) {
-				sprintHit(giant);
-			}
+	/** Each tick of a giant: running into a tree throws it; walking into one pushes it over. */
+	public static void tick(LivingEntity giant, long now) {
+		if (now % RAM_EVERY == 0 && ram(giant)) {
+			return;
 		}
+		if (now % PUSH_EVERY == 0 && giant.horizontalCollision) {
+			step(giant);
+		}
+	}
 
-		/** Sprinting into a tree: the tree is torn up and thrown outward, sending logs flying. */
-		public static void sprintHit(LivingEntity giant) {
-			if (!(giant.level() instanceof ServerLevel level) || !mayFell(giant, level)) {
-				return;
-			}
-			Vec3 look = giant.getLookAngle();
-			Vec3 start = giant.getEyePosition();
-			double reach = SPRINT_REACH + SPRINT_REACH_PER_SCALE * giant.getScale();
-			Vec3 end = start.add(look.scale(reach));
-			// Check for logs in a box ahead
-			AABB box = new AABB(start, end).inflate(giant.getBbWidth() * 0.5, 0.0, giant.getBbWidth() * 0.5);
-			int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
-			int x1 = Mth.floor(box.maxX), y1 = Mth.floor(box.maxY), z1 = Mth.floor(box.maxZ);
-			y1 = Math.min(y1, y0 + SPRINT_HEIGHT);
-			for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y1, z1)) {
-				BlockState state = level.getBlockState(pos);
-				if (!state.is(BlockTags.LOGS) || !standing(state)) {
-					continue;
-				}
-				// Found a tree: tear it up and throw logs
-				sprintFell(level, pos.immutable(), giant, look);
-				break; // one tree per sprint hit
-			}
+	/**
+	 * Running into a tree: the first standing trunk just ahead of its body, from its feet up {@link #HEIGHT} blocks, is
+	 * thrown on ahead. True if one went.
+	 */
+	public static boolean ram(LivingEntity giant) {
+		if (!(giant.level() instanceof ServerLevel level)) {
+			return false;
 		}
+		Vec3 motion = giant.getDeltaMovement().multiply(1.0, 0.0, 1.0);
+		double speed = motion.length();
+		boolean running = giant instanceof ServerPlayer ? giant.isSprinting() : speed >= RAM_SPEED;
+		if (!running || !mayFell(giant, level)) {
+			return false;
+		}
+		// a sprinting player's motion isn't known here: its facing stands in for it
+		Vec3 ahead = speed > 1.0E-3 && !(giant instanceof ServerPlayer)
+			? motion.normalize() : Vec3.directionFromRotation(0.0F, giant.getYRot());
+		double reach = RAM_REACH + RAM_REACH_PER_SCALE * giant.getScale();
+		AABB body = giant.getBoundingBox();
+		AABB box = body.move(ahead.scale(reach)).minmax(body.move(ahead.scale(body.getXsize() * 0.5)));
+		int x0 = Mth.floor(box.minX), y0 = Mth.floor(box.minY), z0 = Mth.floor(box.minZ);
+		int x1 = Mth.floor(box.maxX), z1 = Mth.floor(box.maxZ);
+		for (BlockPos pos : BlockPos.betweenClosed(x0, y0, z0, x1, y0 + HEIGHT, z1)) {
+			BlockState state = level.getBlockState(pos);
+			if (!state.is(BlockTags.LOGS) || !standing(state) || giant instanceof ServerPlayer player && !level.mayInteract(player, pos)) {
+				continue;
+			}
+			BlockPos log = pos.immutable();
+			Vec3 throwAt = ahead.scale(Math.max(RAM_THROW_MIN, speed * RAM_THROW_SHARE)).add(0.0, RAM_THROW_LIFT, 0.0);
+			if (GiantTrees.ram(level, giant, Vec3.atCenterOf(log), 0.5, throwAt)) {
+				level.playSound(null, log, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 2.0F, 0.5F);
+				return true;
+			}
+			boolean kingdoms = kingdoms() != null;
+			fell(level, log, giant);
+			if (!kingdoms) {
+				fling(level, log, ahead);
+			}
+			return true;
+		}
+		return false;
+	}
 
-		/** Tears up a tree and throws its logs outward in the look direction. */
-		private static void sprintFell(ServerLevel level, BlockPos log, LivingEntity giant, Vec3 look) {
-			Method method = kingdomsHurl();
-			if (method != null) {
-				try {
-					// Kingdoms' FallingTree.hurl(tree, velocity, tumble, thrower)
-					// We need to create a FallingTree entity first - use take to get it
-					Method take = Class.forName("com.jaymoskingdoms.FallingTree").getMethod("take", ServerLevel.class, Vec3.class, double.class, Entity.class, int.class);
-					Entity tree = (Entity) take.invoke(null, level, Vec3.atCenterOf(log), 0.0, giant, GiantTrees.mostLogs(giant));
-					if (tree != null) {
-						double speed = SPRINT_THROW_SPEED * Math.max(1, GiantTrees.mostLogs(giant) / 20.0);
-						Vec3 v = look.scale(speed).add(0.0, SPRINT_THROW_LIFT, 0.0);
-						method.invoke(null, tree, v, GiantTrees.TUMBLE, giant);
-						level.playSound(null, log.getX(), log.getY(), log.getZ(), SoundEvents.RAVAGER_ROAR, giant instanceof ServerPlayer ? SoundSource.PLAYERS : SoundSource.HOSTILE, 2.0F, 0.6F);
-						return;
-					}
-				} catch (ReflectiveOperationException | RuntimeException e) {
-					hurl = null;
-				}
-			}
-			// No Kingdoms: break logs and scatter them
-			BlockPos.MutableBlockPos at = log.mutable();
-			Vec3 center = Vec3.atCenterOf(log);
-			for (int i = 0; i < FALLBACK_LOGS && level.getBlockState(at).is(BlockTags.LOGS); i++, at.move(Direction.UP)) {
-				BlockState state = level.getBlockState(at);
-				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 20, 0.5, 0.5, 0.5, 0.2);
-				level.destroyBlock(at, true, giant);
-				// Throw the dropped items outward
-							if (!level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(0.5)).isEmpty()) {
-								for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(0.5))) {
-									Vec3 away = look.normalize().scale(0.3 + giant.getRandom().nextDouble() * 0.2).add(0.0, 0.2 + giant.getRandom().nextDouble() * 0.2, 0.0);
-									item.setDeltaMovement(away);
-									item.setDefaultPickUpDelay();
-								}
-							}
-			}
-			level.playSound(null, log, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 2.0F, 0.5F);
+	/** Without Kingdoms: the logs a broken trunk dropped fly on ahead of the giant that ran into it. */
+	private static void fling(ServerLevel level, BlockPos log, Vec3 ahead) {
+		AABB trunk = new AABB(log).expandTowards(0.0, FALLBACK_LOGS, 0.0).inflate(1.0);
+		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, trunk, e -> e.getItem().is(net.minecraft.tags.ItemTags.LOGS))) {
+			double push = RAM_LOG_SPEED * (0.75 + level.getRandom().nextDouble() * 0.5);
+			item.setDeltaMovement(ahead.scale(push).add(0.0, 0.2 + level.getRandom().nextDouble() * 0.2, 0.0));
 		}
+	}
 
 	/** One of its steps: the trees round its feet go down. */
 	public static void step(LivingEntity giant) {
@@ -184,24 +173,16 @@ public final class GiantTrample {
 	}
 
 	/** Kingdoms' {@code Trees.trample(level, log, giant)}, if Kingdoms is loaded. */
-		private static @Nullable Method kingdoms() {
-			if (!looked) {
-				looked = true;
-				try {
-					trample = Class.forName("com.jaymoskingdoms.Trees").getMethod("trample", ServerLevel.class, BlockPos.class,
-							net.minecraft.world.entity.Entity.class);
-					hurl = Class.forName("com.jaymoskingdoms.FallingTree").getMethod("hurl", Entity.class, Vec3.class, float.class, Entity.class);
-				} catch (ReflectiveOperationException | LinkageError e) {
-					trample = null;
-					hurl = null;
-				}
+	private static @Nullable Method kingdoms() {
+		if (!looked) {
+			looked = true;
+			try {
+				trample = Class.forName("com.jaymoskingdoms.Trees").getMethod("trample", ServerLevel.class, BlockPos.class,
+					net.minecraft.world.entity.Entity.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				trample = null;
 			}
-			return trample;
 		}
-
-		/** Kingdoms' {@code FallingTree.hurl(tree, velocity, tumble, thrower)}, if Kingdoms is loaded. */
-		private static @Nullable Method kingdomsHurl() {
-			kingdoms(); // ensures looked and hurl are set
-			return hurl;
-		}
+		return trample;
 	}
+}

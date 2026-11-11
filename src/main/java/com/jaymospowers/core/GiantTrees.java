@@ -76,6 +76,26 @@ public final class GiantTrees {
 		}
 	}
 
+	/**
+	 * Runs into a tree: the tree nearest {@code at} (within {@code reach}, no bigger than it can lift) is torn out and thrown
+	 * straight off at {@code velocity}, with no hold first. True if one went; false without Kingdoms or with no such tree.
+	 */
+	public static boolean ram(ServerLevel level, LivingEntity giant, Vec3 at, double reach, Vec3 velocity) {
+		if (!kingdoms() || !mayFell(giant, level)) {
+			return false;
+		}
+		try {
+			Entity tree = (Entity)mTake.invoke(null, level, at, reach, giant, mostLogs(giant));
+			if (tree == null) {
+				return false;
+			}
+			mHurl.invoke(null, tree, velocity, TUMBLE, giant);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** Whether it holds a tree now. */
 	public static boolean holding(LivingEntity giant) {
 		return HELD.containsKey(giant.getUUID());
