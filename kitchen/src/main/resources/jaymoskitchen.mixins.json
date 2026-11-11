@@ -23,6 +23,7 @@
 		"KitchenMenuMixin",
 		"LimpPlayerMixin",
 		"LivingEntityMixin",
+		"MappedRegistryMixin",
 		"MobAccessor",
 		"OvenBlockCollisionMixin",
 		"OvenBlockEntityMixin",
