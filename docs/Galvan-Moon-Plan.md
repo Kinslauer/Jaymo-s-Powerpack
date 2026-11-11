@@ -97,7 +97,14 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
   against the ruler in the open; his lines hint.
 - **The ruler:** holds the court. He greets a band wearer warmly and asks for the band "for safe keeping". Refuse and
   he is polite and cold; from then on hunters come more often (`RivalHunter.COME_GAP` shortened for that player).
-  Hand it over and the band is lost (open question 7: should that be allowed at all?).
+  **Hand it over** (Andy, 2026-11-11: "the ruler becomes a boss, and turns on you. starting a hard fight on your own.
+  easier with still empowered friends."): he puts the band on and turns on you there in the court, and you have no band.
+  The ruler fight is a boss (boss bar) who changes between the band's aliens as the band hunter does (`RivalAlien`,
+  but with the player's own band and the aliens it had unlocked), tuned to be hard alone and fair for a group that still
+  has its powers. His guards seal the court's doors while he lives. Beat him and the band falls from his wrist and is
+  yours again (it still counts as the world's one Xeno-Band, `XenoBands`); die and he keeps it, and the court stays shut
+  to you until you come back and win. The elder will not forge for a wearer who gave the band away until it is taken
+  back.
 - **The hunter:** his orders already say he was sent. New: a beaten hunter's orders carry the court's seal, which the
   city's gate guards know; the sealed workshop in the city is where the rival band was made. The rival band stays as
   now (the world's other band).
@@ -125,8 +132,7 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 4. ~~The Endermen~~ Answered: they and the Galvan fight all the time; Endermen steal Galvan blocks for the mischief (Track 2, Endermen).
 5. ~~Kingdom or town~~ Answered: a city with a ruler and court; no war or trading with other kingdoms.
 6. ~~The elder's upgrades~~ Answered: all upgrades require a trip to him (Track 3, the elder).
-7. **The ruler's ask:** can a player actually hand the band to the ruler, and what happens then (the band is gone; the
-   ruler becomes a boss who wears it)?
+7. ~~The ruler's ask~~ Answered: yes; he puts it on, becomes a boss and turns on you (Track 3, the ruler).
 8. **Ending:** should there be a way to bring the ruler down (with the elder's help, or the Patrol's), or does he stay
    on his seat?
 9. **Names:** the elder's and the ruler's names, and the city's. ("Galvan" is your working name; no line in the game
