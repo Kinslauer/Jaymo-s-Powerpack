@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: four-mods-sound-vfx
 branch: claude/project-thread-5dj9k7 (sound), claude/project-thread-5dj9k7-vfx-test (VFX test)
 with:
