@@ -41,6 +41,7 @@ public class GiantRenderer extends MobRenderer<AetherGiant, GiantState, GiantMod
 		state.flinch = giant.hurtTime > 0 && giant.hurtDuration > 0 ? (giant.hurtTime - partialTicks) / giant.hurtDuration : 0.0F;
 		state.seed = giant.getId();
 		state.stride = giant.stride(partialTicks);
+		state.hauling = giant.isSprinting();
 		int grab = giant.grabTick();
 		state.grab = grab >= 0 && grab < AetherGiant.GRAB_TOTAL ? grab + partialTicks : -1.0F;
 	}

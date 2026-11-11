@@ -129,6 +129,14 @@ public class AetherGiant extends Monster {
 	 * it), and where each foot comes down (blocks out to the side and ahead of its middle).
 	 */
 	public static final float STEP_LENGTH = 6.0F;
+	/**
+	 * Andy: "the giant sprint is a lumbering haul, and will be activated by the npc giants when you get too far, they cover
+	 * alot of ground but dont flail their limbs". With its target farther off than this (blocks, past its body) it hauls:
+	 * this much faster, each step this many times as long (so its legs keep their slow swing), smashing through what's in
+	 * its way as it goes ({@link #trample}).
+	 */
+	static final double HAUL_FROM = 32.0, HAUL_SPEED = 0.8;
+	public static final float HAUL_STEP = 1.8F;
 	static final double FOOT_SIDE = 3.6, FOOT_AHEAD = 3.0;
 	/**
 	 * Each footfall's shockwave: it runs out along the ground this fast (blocks a tick) to this far, and hurts everyone it
@@ -169,6 +177,13 @@ public class AetherGiant extends Monster {
 	/** (0.7.549) The shake of each footfall and of its grab's slam: how far it's felt (blocks), how hard (degrees). */
 	static final double STEP_SHAKE_RANGE = 28.0, SLAM_SHAKE_RANGE = 36.0;
 	static final float STEP_SHAKE = 1.1F, SLAM_SHAKE = 3.0F;
+	/** How hard its stamp shakes the ground (degrees); felt as far as the stamp reaches. */
+	static final float STAMP_SHAKE = 2.0F;
+	/**
+	 * A giant bigger or smaller than its kind ({@link #HEIGHT}) shakes harder or softer and kicks up more or less dust, in
+	 * proportion, kept between these shares of a normal one's.
+	 */
+	static final float SIZE_SCALE_MIN = 0.5F, SIZE_SCALE_MAX = 2.0F;
 	/** Where its hand holds its catch: ahead and to its right of its middle (shares of its width), this high (share of its height). */
 	static final double HAND_AHEAD = 0.55, HAND_SIDE = 0.45, HAND_UP = 0.55;
 	/** The hand's lift into the hold and its drop into the slam run over this many ticks of each. */
@@ -181,6 +196,7 @@ public class AetherGiant extends Monster {
 	private static final EntityDataAccessor<Long> GRAB_START = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.LONG);
 	private static final EntityDataAccessor<Integer> GRAB_HELD = SynchedEntityData.defineId(AetherGiant.class, EntityDataSerializers.INT);
 	private static final Identifier RAGE_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_rage");
+	private static final Identifier HAUL_ID = Identifier.fromNamespaceAndPath("jaymoskingdoms", "giant_haul");
 
 	private final Element element;
 	/** The monolith it rose beside (null if it was summoned). */
@@ -244,16 +260,16 @@ public class AetherGiant extends Monster {
 	}
 
 	void bind(BlockPos monolith) {
-			this.monolith = monolith.immutable();
-		}
+		this.monolith = monolith.immutable();
+	}
 
-		/** Scale factor relative to a player (1.8 blocks tall). Used for scaling shake, particles, etc. */
-		public float getScaleFactor() {
-			return this.getBbHeight() / 1.8F;
-		}
+	/** Its size against a normal one of its kind: 1 for a normal giant, more for a bigger one ({@link #SIZE_SCALE_MAX}). */
+	float sizeScale() {
+		return Mth.clamp(this.getBbHeight() / HEIGHT, SIZE_SCALE_MIN, SIZE_SCALE_MAX);
+	}
 
-		@Override
-		protected void registerGoals() {
+	@Override
+	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, true));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.7));
@@ -326,7 +342,7 @@ public class AetherGiant extends Monster {
 		if (this.isAlive() && this.onGround()) {
 			// its stride runs on with the ground it covers (a teleport doesn't count as many steps)
 			double moved = Math.sqrt(Mth.square(this.getX() - this.xo) + Mth.square(this.getZ() - this.zo));
-			this.stride += (float)Math.min(moved / STEP_LENGTH, 0.5);
+			this.stride += (float)Math.min(moved / (STEP_LENGTH * (this.isSprinting() ? HAUL_STEP : 1.0F)), 0.5);
 		}
 		if (this.level() instanceof ServerLevel level) {
 			if (this.swingTicks > 0 && --this.swingTicks == 0) {
@@ -361,6 +377,9 @@ public class AetherGiant extends Monster {
 		if (this.tickCount % 20 == 0) {
 			this.aura(level);
 		}
+		LivingEntity chase = this.getTarget();
+		this.haul(chase != null && chase.isAlive() && this.windup <= 0 && !this.grabbing()
+			&& this.distanceToSqr(chase) > Mth.square(this.getBbWidth() / 2.0 + HAUL_FROM));
 		if (this.windup > 0) {
 			if (--this.windup == 0) {
 				this.stamp(level);
@@ -389,7 +408,7 @@ public class AetherGiant extends Monster {
 			&& this.distanceToSqr(target) > Mth.square(this.getBbWidth() / 2.0 + STAMP_TRIGGER / 2.0)) {
 			this.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.1);
 		}
-		if (this.tickCount % TRAMPLE_EVERY == 0 && this.horizontalCollision && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+		if (this.tickCount % TRAMPLE_EVERY == 0 && (this.horizontalCollision || this.isSprinting()) && level.getGameRules().get(GameRules.MOB_GRIEFING)) {
 			this.trample(level);
 		}
 		if (this.powerCooldown > 0) {
@@ -613,26 +632,27 @@ public class AetherGiant extends Monster {
 	}
 
 	/** Its catch slammed into the ground at {@code at}: the blow, the ground thrown up, and its catch flung clear. */
-		private void slam(ServerLevel level, LivingEntity prey, Vec3 at) {
-			prey.resetFallDistance();
-			prey.hurtServer(level, this.damageSources().mobAttack(this), SLAM_DAMAGE);
-			this.touch(prey, 2);
-			Vec3 away = Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_THROW);
-			prey.setDeltaMovement(away.x, 0.5, away.z);
-			prey.needsSync = true;
-			prey.syncVelocity = true;
-			this.entityData.set(GRAB_HELD, -1);
-			BlockState ground = level.getBlockState(BlockPos.containing(at.x, at.y - 0.5, at.z));
-			float scale = this.getScaleFactor();
-			if (!ground.isAir()) {
-				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.2, at.z, Math.round(80 * scale), SLAM_DUST * scale, 0.3, SLAM_DUST * scale, 0.3);
-			}
-			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 2, 1.0, 0.2, 1.0, 0.0);
-			this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.5F, 0.5F);
-			// (0.7.549) its catch hits the ground like a shell
-			com.jaymoskingdoms.PowersCompat.shakeAround(level, at, SLAM_SHAKE_RANGE * scale, SLAM_SHAKE * scale);
-			this.crack(level, BlockPos.containing(at.x, at.y - 0.5, at.z));
+	private void slam(ServerLevel level, LivingEntity prey, Vec3 at) {
+		prey.resetFallDistance();
+		prey.hurtServer(level, this.damageSources().mobAttack(this), SLAM_DAMAGE);
+		this.touch(prey, 2);
+		Vec3 away = Vec3.directionFromRotation(0.0F, this.yBodyRot).scale(SLAM_THROW);
+		prey.setDeltaMovement(away.x, 0.5, away.z);
+		prey.needsSync = true;
+		prey.syncVelocity = true;
+		this.entityData.set(GRAB_HELD, -1);
+		BlockState ground = level.getBlockState(BlockPos.containing(at.x, at.y - 0.5, at.z));
+		float size = this.sizeScale();
+		if (!ground.isAir()) {
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.2, at.z, Math.round(80 * size),
+				SLAM_DUST * size, 0.3, SLAM_DUST * size, 0.3);
 		}
+		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 2, 1.0, 0.2, 1.0, 0.0);
+		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 2.5F, 0.5F);
+		// (0.7.549) its catch hits the ground like a shell
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, SLAM_SHAKE_RANGE * size, SLAM_SHAKE * size);
+		this.crack(level, BlockPos.containing(at.x, at.y - 0.5, at.z));
+	}
 
 	/** Whom it holds, if it's still there to hold. */
 	private @Nullable LivingEntity held(ServerLevel level) {
@@ -706,35 +726,33 @@ public class AetherGiant extends Monster {
 		return Double.NaN;
 	}
 
-	/** Its foot comes down: a thud and a burst of the ground's dust, the ground cracked round the foot, and a shockwave
-		 * runs out from it ({@link #runWaves}). The client's legs are kept in step with it ({@link #handleEntityEvent}).
-		 */
-		private void footfall(ServerLevel level, boolean right) {
-			level.broadcastEntityEvent(this, right ? STEP_RIGHT : STEP_LEFT);
-			Vec3 at = this.foot(level, right);
-			if (at == null) {
-				return;
-			}
-			BlockPos under = BlockPos.containing(at.x, at.y - 0.5, at.z);
-			BlockState ground = level.getBlockState(under);
-			float scale = this.getScaleFactor();
-			int dustCount = Math.round(40 * scale);
-			double dustSpread = 1.4 * scale;
-			int poofCount = Math.round(8 * scale);
-			double poofSpread = 1.2 * scale;
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.1, at.z, dustCount, dustSpread, 0.1, dustSpread, 0.25);
-			level.sendParticles(ParticleTypes.POOF, at.x, at.y + 0.2, at.z, poofCount, poofSpread, 0.1, poofSpread, 0.04);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.RAVAGER_STEP, this.getSoundSource(), 3.0F, 0.35F + this.random.nextFloat() * 0.1F);
-			level.playSound(null, at.x, at.y, at.z, ground.getSoundType().getBreakSound(), this.getSoundSource(), 2.0F, 0.5F);
-			this.crack(level, under);
-			// (0.7.549) every footfall shakes the ground under everyone near
-			com.jaymoskingdoms.PowersCompat.shakeAround(level, at, STEP_SHAKE_RANGE * scale, STEP_SHAKE * scale);
-			if (level.getGameRules().get(GameRules.MOB_GRIEFING)) {
-				// (0.7.470) Andy: "all giants should get this damaging effect": the trees round its feet go down with every step
-				this.trampleTrees(level, STEP_TREE_REACH);
-			}
-			this.waves.add(new Wave(at.x, at.y, at.z));
+	/**
+	 * Its foot comes down: a thud and a burst of the ground's dust, the ground cracked round the foot, and a shockwave
+	 * runs out from it ({@link #runWaves}). The client's legs are kept in step with it ({@link #handleEntityEvent}).
+	 */
+	private void footfall(ServerLevel level, boolean right) {
+		level.broadcastEntityEvent(this, right ? STEP_RIGHT : STEP_LEFT);
+		Vec3 at = this.foot(level, right);
+		if (at == null) {
+			return;
 		}
+		BlockPos under = BlockPos.containing(at.x, at.y - 0.5, at.z);
+		BlockState ground = level.getBlockState(under);
+		float size = this.sizeScale();
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), at.x, at.y + 0.1, at.z, Math.round(40 * size),
+			1.4 * size, 0.1, 1.4 * size, 0.25);
+		level.sendParticles(ParticleTypes.POOF, at.x, at.y + 0.2, at.z, Math.round(8 * size), 1.2 * size, 0.1, 1.2 * size, 0.04);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.RAVAGER_STEP, this.getSoundSource(), 3.0F, 0.35F + this.random.nextFloat() * 0.1F);
+		level.playSound(null, at.x, at.y, at.z, ground.getSoundType().getBreakSound(), this.getSoundSource(), 2.0F, 0.5F);
+		this.crack(level, under);
+		// (0.7.549) every footfall shakes the ground under everyone near
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, STEP_SHAKE_RANGE * size, STEP_SHAKE * size);
+		if (level.getGameRules().get(GameRules.MOB_GRIEFING)) {
+			// (0.7.470) Andy: "all giants should get this damaging effect": the trees round its feet go down with every step
+			this.trampleTrees(level, STEP_TREE_REACH);
+		}
+		this.waves.add(new Wave(at.x, at.y, at.z));
+	}
 
 	/** The ground cracked round {@code under}: the blocks under the foot, and lines of cracks running out from it. */
 	private void crack(ServerLevel level, BlockPos under) {
@@ -890,6 +908,23 @@ public class AetherGiant extends Monster {
 		this.heldTree = -1;
 	}
 
+	/** Its haul on or off: sprinting (seen on the client, its longer stride), and faster. */
+	private void haul(boolean on) {
+		if (this.isSprinting() == on) {
+			return;
+		}
+		this.setSprinting(on);
+		AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
+		}
+		if (on) {
+			speed.addOrUpdateTransientModifier(new AttributeModifier(HAUL_ID, HAUL_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		} else {
+			speed.removeModifier(HAUL_ID);
+		}
+	}
+
 	private void rage() {
 		this.raging = true;
 		AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -901,23 +936,22 @@ public class AetherGiant extends Monster {
 
 	// ---- its powers ------------------------------------------------------------------------------------------------
 
-		/** Its foot brought down: everyone near is hurt and thrown, and its element's touch goes with it. */
-		private void stamp(ServerLevel level) {
-			Vec3 at = this.position().add(this.getLookAngle().multiply(STAMP_AHEAD, 0.0, STAMP_AHEAD));
-			float scale = this.getScaleFactor();
-			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, Math.round(3 * scale), 1.0, 0.1, 1.0, 0.0);
-			level.sendParticles(this.element.mote, at.x, at.y + 0.3, at.z, Math.round(50 * scale), STAMP_RANGE / 3, 0.2, STAMP_RANGE / 3, 0.05);
-			this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.5F, 0.5F);
-			for (LivingEntity hit : this.near(level, at, STAMP_RANGE)) {
-				hit.hurtServer(level, this.damageSources().mobAttack(this), STAMP_DAMAGE);
-				Vec3 away = hit.position().subtract(at).multiply(1.0, 0.0, 1.0).normalize().scale(STAMP_THROW);
-				hit.push(away.x, this.element == Element.HIGHFIELD ? 0.9 : 0.6, away.z);
-				hit.needsSync = true;
-				this.touch(hit, 1);
-			}
-			// Stamp also shakes the ground
-			com.jaymoskingdoms.PowersCompat.shakeAround(level, at, STAMP_RANGE * scale, 2.0F * scale);
+	/** Its foot brought down: everyone near is hurt and thrown, and its element's touch goes with it. */
+	private void stamp(ServerLevel level) {
+		Vec3 at = this.position().add(this.getLookAngle().multiply(STAMP_AHEAD, 0.0, STAMP_AHEAD));
+		float size = this.sizeScale();
+		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, Math.round(3 * size), 1.0, 0.1, 1.0, 0.0);
+		level.sendParticles(this.element.mote, at.x, at.y + 0.3, at.z, Math.round(50 * size), STAMP_RANGE / 3, 0.2, STAMP_RANGE / 3, 0.05);
+		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.5F, 0.5F);
+		for (LivingEntity hit : this.near(level, at, STAMP_RANGE)) {
+			hit.hurtServer(level, this.damageSources().mobAttack(this), STAMP_DAMAGE);
+			Vec3 away = hit.position().subtract(at).multiply(1.0, 0.0, 1.0).normalize().scale(STAMP_THROW);
+			hit.push(away.x, this.element == Element.HIGHFIELD ? 0.9 : 0.6, away.z);
+			hit.needsSync = true;
+			this.touch(hit, 1);
 		}
+		com.jaymoskingdoms.PowersCompat.shakeAround(level, at, STAMP_RANGE * size, STAMP_SHAKE * size);
+	}
 
 	/** Its element's own power, on everyone in reach. */
 	private void power(ServerLevel level) {

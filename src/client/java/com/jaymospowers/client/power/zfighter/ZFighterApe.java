@@ -48,6 +48,13 @@ public final class ZFighterApe {
 	public static final RenderStateDataKey<Float> STRIDE = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_stride");
 	/** (0.17.68) How far into his grab he is (ticks, {@link ApeGrab#TOTAL} long), or null when he isn't grabbing. */
 	public static final RenderStateDataKey<Float> GRAB = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_grab");
+	/** Whether the ape is hauling (sprinting): its long, heavy strides ({@link ZFighterApeHaul}). */
+	public static final RenderStateDataKey<Boolean> HAULING = RenderStateDataKey.create(() -> "jaymospowers:zfighter_ape_hauling");
+	/**
+	 * Hauling, Andy: "they cover alot of ground but dont flail their limbs": its arms swing this share of a walk's, its legs
+	 * this share, and it leans into the haul this far (radians), head held up.
+	 */
+	static final float HAUL_ARMS = 0.3F, HAUL_LEGS = 0.75F, HAUL_LEAN = 0.22F;
 	/** Vanilla's walk cycle: its legs swing with {@code cos(walkAnimationPos * this)}. */
 	private static final float VANILLA_WALK = 0.6662F;
 
@@ -66,6 +73,7 @@ public final class ZFighterApe {
 		state.setData(CRIPPLED, ZFighterLineage.crippled((Player)entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
 		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
+		state.setData(HAULING, entity.isSprinting() ? Boolean.TRUE : null);
 		float grab = ApeGrab.phase(entity, partialTicks);
 		state.setData(GRAB, grab >= 0.0F ? grab : null);
 		state.setData(GOLDEN, ZFighterGoldenApe.golden((Player)entity) ? Boolean.TRUE : null);
@@ -111,6 +119,7 @@ public final class ZFighterApe {
 		state.setData(CRIPPLED, ZFighterLineage.crippled(entity));
 		state.setData(STYLE, WarriorLooks.ape(entity));
 		state.setData(STRIDE, ZFighterApeSteps.stride(entity, partialTicks));
+		state.setData(HAULING, entity.isSprinting() ? Boolean.TRUE : null);
 		float grab = ApeGrab.phase(entity, partialTicks);
 		state.setData(GRAB, grab >= 0.0F ? grab : null);
 		state.isInvisible = true;
@@ -220,6 +229,18 @@ public final class ZFighterApe {
 			state.walkAnimationPos = walked;
 			float time = state.ageInTicks;
 			float walk = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
+			if (Boolean.TRUE.equals(state.getData(HAULING))) {
+				// hauling: long heavy strides, the arms hardly swinging, leant into it
+				this.rightArm.xRot *= HAUL_ARMS;
+				this.leftArm.xRot *= HAUL_ARMS;
+				this.rightLeg.xRot *= HAUL_LEGS;
+				this.leftLeg.xRot *= HAUL_LEGS;
+				float lean = HAUL_LEAN * walk;
+				this.body.xRot += lean;
+				this.head.xRot -= lean;
+				this.rightArm.xRot -= lean;
+				this.leftArm.xRot -= lean;
+			}
 			// the arms hang a little out from the bulk of him and sway heavily
 			this.rightArm.zRot += 0.12F + 0.03F * Mth.sin(time * 0.07F);
 			this.leftArm.zRot -= 0.12F + 0.03F * Mth.sin(time * 0.07F);
