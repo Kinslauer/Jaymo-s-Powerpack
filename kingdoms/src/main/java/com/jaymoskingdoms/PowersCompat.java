@@ -2902,6 +2902,16 @@ public final class PowersCompat {
 		}
 	}
 
+	/** The limbs {@code entity} has lost (Powers' {@code Dismember.missing}: its head, arm and leg bits); 0 without Powers. */
+	public static int missingLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForHealing();
+		try {
+			return missingLimbs == null ? 0 : (int)missingLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();

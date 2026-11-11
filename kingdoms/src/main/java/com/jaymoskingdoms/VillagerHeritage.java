@@ -451,6 +451,8 @@ public final class VillagerHeritage {
 			if (villager.isRemoved() || !villager.isAlive()) {
 				continue;
 			}
+			// one who has lost a limb goes looking for another (FrostTech)
+			FrostTech.tick(villager, server.getTickCount() / 20);
 			Heritage.Kind kind = of(villager);
 			if (kind == null) {
 				continue;
@@ -545,6 +547,10 @@ public final class VillagerHeritage {
 
 	/** Which lines: {@code wrapped}, {@code wrapped_turned}, {@code cut}, {@code cut_rampage}, or the heritage's key. */
 	private static String talkKind(Entity villager, Heritage.Kind kind, RandomSource random) {
+		if (kind == Heritage.Kind.FROSTBORN) {
+			// the scouter or the limb they wear, or the Overworld-raised one's own lines
+			return FrostTech.talk(villager, random);
+		}
 		if (kind != Heritage.Kind.WARRIORBORN) {
 			return kind.key();
 		}
@@ -575,16 +581,23 @@ public final class VillagerHeritage {
 	 */
 	static @Nullable Component neighbours(ServerLevel level, Entity villager, ServerPlayer player) {
 		java.util.Map<Heritage.Kind, Integer> rare = new java.util.EnumMap<>(Heritage.Kind.class);
+		boolean frostTech = false;
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, villager.getBoundingBox().inflate(NEIGHBOURS_RANGE),
 			e -> e != villager && e.isAlive() && eligible(e))) {
 			Heritage.Kind kind = of(other);
 			if (kind != null && !common(kind)) {
 				rare.merge(kind, 1, Integer::sum);
 			}
+			frostTech |= FrostTech.wearsWork(other);
 		}
 		var random = level.getRandom();
 		if (random.nextFloat() >= (rare.isEmpty() ? NEIGHBOURS_PLAIN_CHANCE : NEIGHBOURS_RARE_CHANCE)) {
 			return null;
+		}
+		// someone near them wears Frostborn work: as often as not that is what the talk is of (never a Frostborn's own boast)
+		String envy = frostTech && of(villager) != Heritage.Kind.FROSTBORN ? FrostTech.envy(random) : null;
+		if (envy != null) {
+			return Component.translatable(envy, Identities.shownName(player));
 		}
 		String base = "talk.jaymoskingdoms.neighbours.";
 		if (rare.isEmpty()) {
@@ -606,6 +619,11 @@ public final class VillagerHeritage {
 
 	/** (Coming over to gossip) now and then they talk of their own blood instead; null if not this time. */
 	static @Nullable Component gossip(ServerLevel level, Entity villager, ServerPlayer player) {
+		// one with a wooden limb would sooner grumble about that
+		String grumble = FrostTech.grumble(villager, level.getRandom());
+		if (grumble != null) {
+			return Component.translatable(grumble, Identities.shownName(player));
+		}
 		Heritage.Kind kind = of(villager);
 		if (kind == null || kind == Heritage.Kind.HEARTLANDER || level.getRandom().nextFloat() >= GOSSIP_CHANCE) {
 			return null;

@@ -491,6 +491,8 @@ public final class LifeStory {
 				Answer.raised("elders", Items.GLOW_BERRIES, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.VERDANT),
 				Answer.raised("hornkin", Items.GOLD_INGOT, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.EMBERBORN),
 				Answer.raised("wolves", Items.BONE, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.FROSTBORN),
+				// kin who still keep the Frostborn's crafts: the one Frostborn start that isn't Overworld-raised (FrostTech)
+				Answer.raised("starwrights", Items.SPYGLASS, Stats.Stat.WITS, false).onlyBorn(Heritage.Kind.FROSTBORN),
 				Answer.raised("barrows", Items.SOUL_LANTERN, Stats.Stat.FINESSE, false).onlyBorn(Heritage.Kind.NIGHTBORN),
 				Answer.raised("chieftain", Items.GOAT_HORN, Stats.Stat.MIGHT, false).onlyBorn(Heritage.Kind.WARRIORBORN),
 				Answer.raised("master", Items.STICK, Stats.Stat.ENDURANCE, false).onlyBorn(Heritage.Kind.EARTHLING),
@@ -2188,6 +2190,14 @@ public final class LifeStory {
 		}
 		if (raised.key.equals("merchants")) {
 			give(player, purse(player, MERCHANT_SILVER));
+		}
+		if (raised.key.equals("starwrights")) {
+			// their people's work goes with them: a scouter on the brow, and a made arm against the day they need one
+			equip(player, FrostTech.scouter());
+			ItemStack arm = FrostTech.spareArm();
+			if (!arm.isEmpty()) {
+				give(player, arm);
+			}
 		}
 	}
 

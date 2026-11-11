@@ -465,6 +465,18 @@ final class TalkBook {
 			r("a", 1, 0, 3, bring(Items.COAL, 6, 2)), r("b", 0, 0, -1), r("c", 1, 0, 1)));
 		t.add(life("blood_frost_heat", blood(Heritage.Kind.FROSTBORN), NO_ARGS,
 			r("a", 0, 0, 3, give(Items.SNOWBALL, 4), Need.item(Items.SNOWBALL, 4)), r("b", 0, 0, 1), r("c", 0, 0, -3)));
+		// the Frostborn's work (FrostTech): one who wears it is proud of it, and everyone else would like some
+		t.add(life("blood_frost_tech", c -> grown(c) && c.blood() == Heritage.Kind.FROSTBORN && FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 2, 3), r("b", 0, 1, 1), r("c", -1, -2, -3)));
+		// anyone else who came by some of it, and one who lost a limb and got a wooden one
+		t.add(life("frost_tech_owner", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 1, 1), r("c", -1, -1, -2)));
+		t.add(life("wooden_limb", c -> grown(c) && FrostTech.wooden(c.v()), NO_ARGS,
+			r("a", 1, 0, 3), r("b", 0, 1, -1), r("c", 0, 0, 1)));
+		t.add(lifeOnce("frost_tech_want", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && c.mine() != Heritage.Kind.FROSTBORN && !FrostTech.wearsWork(c.v()), NO_ARGS,
+			r("a", 1, 0, 2), r("b", 0, 1, 0), r("c", 0, -1, -1)));
+		t.add(lifeOnce("frost_tech_yours", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && c.mine() == Heritage.Kind.FROSTBORN, NO_ARGS,
+			r("a", 1, 1, 3), r("b", 0, 1, 0), r("c", 0, 0, -2)));
 		// ---- faith
 		t.add(life("faith_same", SAME_FAITH, c -> new Object[] {c.faith().named()},
 			r("a", 2, 0, 3), r("b", 0, -1, -1), r("c", 1, 0, 2)));

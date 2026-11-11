@@ -235,6 +235,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VillagerLooks.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
+		FrostTechLayer.register();
 		// (0.7.486) the sea-blooded Tideborn's parts (players and villagers)
 		SeaParts.register();
 		// (0.7.292) goblins and orcs as MCA villagers
