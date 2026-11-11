@@ -156,6 +156,12 @@ kit.
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
 itself they cannot see mana abilities or spirits. They can still develop valor.
 
+(new) **A hermit's letter** (Retaking, the Hermit's Road, 2026-11-11). A hermit wizard who meets a Smoke, Gravity or Cryo
+user for the first time writes them a short letter: "You looked straight through her. She stood at my shoulder the
+whole time"; their ki "went to the cold, or the smoke, or the weight of things, whichever found you first. It does not
+go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
+when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
