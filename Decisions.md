@@ -245,3 +245,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:49 PM ET (Andy, Galvan moon plan): the Galvan city looks "kind of like the viltrumite cities" (Invincible): tall curved white towers, dark seams, lit windows, roof gardens, ring rails. Our own build; under the dust in a hollow with a built false sky.
 - 2026-11-11 4:53 PM ET (Andy, Galvan moon plan): the moon Endermen and the Galvan "fight all the time"; Endermen "steal important galvan blocks", with no idea what they do, for the mischief.
 - 2026-11-11 4:54 PM ET (Andy, Galvan moon plan): the Galvan city is not a Kingdoms realm: "no war or trading with other kingdoms".
+- 2026-11-11 4:54 PM ET (Andy, Galvan moon plan): "all upgrades require a trip" to the elder on the Pale Moon. Read as: learning, fitting and swapping modules and buying band skills only at the elder forge; scanning new aliens stays in the field.
