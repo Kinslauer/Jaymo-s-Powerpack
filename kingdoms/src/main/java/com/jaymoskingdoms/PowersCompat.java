@@ -2848,6 +2848,51 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code Karma.add}, or null without Powers (or an older one). */
+	private static java.lang.reflect.@Nullable Method karmaAdd;
+	private static boolean karmaLooked;
+
+	/**
+	 * {@code by} more (or less) on the weight of {@code player}'s life (Powers' {@code Karma}: what they are weighed by when
+	 * the life ends). Nothing happens without Powers (or an older one).
+	 */
+	static void karma(net.minecraft.server.level.ServerPlayer player, float by) {
+		if (!karmaLooked) {
+			karmaLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					karmaAdd = Class.forName("com.jaymospowers.core.wounds.Karma").getMethod("add", net.minecraft.server.level.ServerPlayer.class, float.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma (older Powers?)", e);
+				}
+			}
+		}
+		if (karmaAdd != null) {
+			try {
+				karmaAdd.invoke(null, player, by);
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// (a deed that goes unweighed)
+			}
+		}
+	}
+
+	/**
+	 * Tells Powers' {@code Karma.GUILTY} who is no innocent whatever they look like ({@link Outlaws#is}): killing one doesn't
+	 * weigh against a player as killing a villager does. Nothing happens without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellGuilty(java.util.function.Predicate<net.minecraft.world.entity.Entity> guilty) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Karma").getField("GUILTY").get(null);
+			((java.util.List<java.util.function.Predicate<net.minecraft.world.entity.Entity>>)list).add(guilty);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma (older Powers?)", e);
+		}
+	}
+
 	/**
 	 * (0.7.524) Tells Powers' death by cause ({@code Mortality.BOSS_TESTS}) what Kingdoms counts as a boss: whatever shows a
 	 * boss bar ({@link BossBars#boss}), so a death to one is a boss's. Nothing happens without Powers (or an older one).

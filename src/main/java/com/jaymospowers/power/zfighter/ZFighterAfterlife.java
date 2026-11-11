@@ -151,6 +151,8 @@ public final class ZFighterAfterlife {
 	static final double SPIRIT_HEALTH_PER_ROUND = 30.0;
 	static final double SPIRIT_DAMAGE = 3.0;
 	static final double SPIRIT_DAMAGE_PER_ROUND = 1.5;
+	/** The share of a spirit fighter's health one who never trained faces (a just soul with a lent blade). */
+	static final double UNTRAINED_SPIRIT = 0.6;
 	/** The gauntlet is called off if the fighter wanders this far from the ring (blocks). */
 	static final double RING_LEASH = 48.0;
 	/** The fortune teller's price in silver coins (0.19.69: was emeralds, 1 silver = 1 old emerald). */
@@ -240,8 +242,10 @@ public final class ZFighterAfterlife {
 				// ((0.20.26) and anyone whose life ended for good, Mortality: they leave only to be born again)
 				// ((0.20.94) no more: Andy wants a life that ended to go black and straight on to the new one, not by the hall,
 				// where the Judge's rebirth put him back in the world still dead, in a wall, to die and come back again)
+				// (and a life that ended and weighed just, Z Fighter or not; never one weighed wicked: Karma)
 				if (ZFighterRealism.afterlife() && !player.isSpectator() && !com.jaymospowers.core.wounds.Mortality.isFinal(player)
-					&& (among(player) || !inOtherWorld(player) && Powers.has(player, ZFighterPower.INSTANCE))) {
+					&& !com.jaymospowers.core.wounds.Karma.wicked(player) && !com.jaymospowers.core.wounds.Karma.below(player)
+					&& (among(player) || com.jaymospowers.core.wounds.Karma.just(player) || !inOtherWorld(player) && Powers.has(player, ZFighterPower.INSTANCE))) {
 					PENDING.put(player.getUUID(), player.level().getGameTime());
 				}
 				endGauntlet(player);
@@ -307,6 +311,11 @@ public final class ZFighterAfterlife {
 	}
 
 	// ---------------------------------------------------------------- the dying
+
+	/** Whether the Other World takes the dead on this server: {@code afterlife} is on and the Aether is there. */
+	public static boolean open(MinecraftServer server) {
+		return ZFighterRealism.afterlife() && server.getLevel(WindAether.AETHER) != null;
+	}
 
 	/** Training at the Other World pays this many times over (1 anywhere else). */
 	public static float trainingBonus(ServerPlayer player) {
@@ -388,7 +397,11 @@ public final class ZFighterAfterlife {
 			if (since == null || RETURNS.containsKey(player.getUUID())) {
 				continue;
 			}
-			if (now - since >= STAY_TICKS) {
+			if (now - since >= STAY_TICKS && com.jaymospowers.core.wounds.Karma.just(player) && !Boolean.TRUE.equals(player.getAttached(CHAMPION))) {
+				// a just one who hasn't won by the time the Other World lets go: the life is over after all
+				com.jaymospowers.core.wounds.Karma.letGo(player);
+				returnHome(player, After.AS_WAS);
+			} else if (now - since >= STAY_TICKS) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_let_go").withStyle(ChatFormatting.AQUA));
 				returnHome(player, After.ASK);
 			} else if (player.isAlive() && !ARRIVALS.containsKey(player.getUUID()) && (!inOtherWorld(player) || player.getY() < FLOOR - FALL_LIMIT)) {
@@ -444,6 +457,7 @@ public final class ZFighterAfterlife {
 			world.setAttached(BUILT, true);
 		}
 		// (0.17.108) dying again among the dead keeps the stay he had (its clock, his way home, what he won)
+		boolean weighed = com.jaymospowers.core.wounds.Karma.just(player), first = !among(player);
 		if (!among(player)) {
 			player.setAttached(HOME, new Home(player.level().dimension(), player.blockPosition()));
 			player.setAttached(STAY, player.level().getGameTime());
@@ -460,6 +474,17 @@ public final class ZFighterAfterlife {
 		world.playSound(null, ax, FLOOR, az, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.7F);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_wake").withStyle(ChatFormatting.AQUA));
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_halo").withStyle(ChatFormatting.AQUA));
+		if (weighed && first) {
+			// a life that ended and weighed just: told what it takes, and one who never trained is lent a blade for the ring
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.just_wake").withStyle(ChatFormatting.GOLD));
+			if (!Powers.has(player, ZFighterPower.INSTANCE)) {
+				ItemStack blade = new ItemStack(net.minecraft.world.item.Items.IRON_SWORD);
+				blade.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.jaymospowers.karma.lent_blade"));
+				if (player.getInventory().add(blade)) {
+					player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.lent").withStyle(ChatFormatting.GRAY));
+				}
+			}
+		}
 	}
 
 	/**
@@ -543,6 +568,7 @@ public final class ZFighterAfterlife {
 		to.getChunk(at);
 		// (0.20.94) Andy: "reincarnating just spawned me in a wall": never into anything solid
 		at = com.jaymospowers.core.wounds.Mortality.safe(to, at);
+		com.jaymospowers.core.wounds.Karma.returned(player);
 		player.removeAttached(STAY);
 		player.removeAttached(TAUGHT);
 		player.removeAttached(CHAMPION);
@@ -723,6 +749,12 @@ public final class ZFighterAfterlife {
 				: "message.jaymospowers.zfighter_afterlife_teller_paid", teller.getDisplayName()).withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}
+		if (com.jaymospowers.core.wounds.Karma.just(player)) {
+			// weighed just: no coin moves it, only the ring
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.teller_no_coin", teller.getDisplayName())
+				.withStyle(ChatFormatting.LIGHT_PURPLE));
+			return;
+		}
 		if (!player.isShiftKeyDown()) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_offer", teller.getDisplayName(),
 				KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP).withStyle(ChatFormatting.LIGHT_PURPLE));
@@ -753,6 +785,10 @@ public final class ZFighterAfterlife {
 				ZFighterNpcs.Option.of("talk.jaymospowers.judge.ring", true, () -> ZFighterNpcs.ask(player, npc,
 					Component.translatable(Boolean.TRUE.equals(player.getAttached(CHAMPION)) ? "talk.jaymospowers.judge.ring_won" : "talk.jaymospowers.judge.ring_how", ROUNDS),
 					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))),
+				// how their page reads (Karma): in his words, never a number
+				ZFighterNpcs.Option.of("talk.jaymospowers.judge.weigh", true, () -> ZFighterNpcs.ask(player, npc,
+					Component.translatable("talk.jaymospowers.judge.weigh_" + com.jaymospowers.core.wounds.Karma.band(player)),
+					List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))),
 				// (0.19.33) Andy: "make the judge offer it in his interactions menu": one of the dead may ask to be born again
 				// (0.20.78) Andy: "you should always be able to reset your character at the Judge, the option shouldnt be greyed":
 				// never greyed, for the dead and for a living visitor alike (born again on the spot)
@@ -781,6 +817,10 @@ public final class ZFighterAfterlife {
 						})) : List.of());
 					return;
 				}
+				if (com.jaymospowers.core.wounds.Karma.just(player)) {
+					ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.weighed"), List.of());
+					return;
+				}
 				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.worth(PRICE_SILVER));
 				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
 				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP), List.of(
@@ -792,7 +832,7 @@ public final class ZFighterAfterlife {
 
 	/** (0.17.146) Paid from the talk screen: {@link #PRICE_SILVER} silver from anywhere you carry it, or {@link #PRICE_TP} TP. */
 	private static void pay(ServerPlayer player, LivingEntity teller, boolean emeralds) {
-		if (!among(player)) {
+		if (!among(player) || com.jaymospowers.core.wounds.Karma.just(player)) {
 			return;
 		}
 		if (emeralds) {
@@ -831,7 +871,8 @@ public final class ZFighterAfterlife {
 	private static void ring(ServerPlayer player, BlockPos bell) {
 		ServerLevel level = player.level();
 		level.playSound(null, bell, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0F, 0.8F);
-		if (!Powers.has(player, ZFighterPower.INSTANCE)) {
+		// (Andy: the just "will still have to fight in the tournament as a non z fighter")
+		if (!Powers.has(player, ZFighterPower.INSTANCE) && !com.jaymospowers.core.wounds.Karma.just(player)) {
 			return;
 		}
 		if (GAUNTLETS.containsKey(player.getUUID())) {
@@ -857,7 +898,8 @@ public final class ZFighterAfterlife {
 		double angle = level.getRandom().nextDouble() * Mth.TWO_PI;
 		BlockPos c = ringCentre();
 		spirit.snapTo(c.getX() + 0.5 + Math.cos(angle) * 8.0, FLOOR, c.getZ() + 0.5 + Math.sin(angle) * 8.0, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		spirit.getAttribute(Attributes.MAX_HEALTH).setBaseValue(SPIRIT_HEALTH + SPIRIT_HEALTH_PER_ROUND * (gauntlet.round - 1));
+		spirit.getAttribute(Attributes.MAX_HEALTH).setBaseValue((SPIRIT_HEALTH + SPIRIT_HEALTH_PER_ROUND * (gauntlet.round - 1))
+			* (Powers.has(player, ZFighterPower.INSTANCE) ? 1.0 : UNTRAINED_SPIRIT));
 		spirit.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(SPIRIT_DAMAGE + SPIRIT_DAMAGE_PER_ROUND * (gauntlet.round - 1));
 		spirit.setHealth(spirit.getMaxHealth());
 		spirit.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -895,9 +937,13 @@ public final class ZFighterAfterlife {
 				}
 				continue;
 			}
-			ZFighterTraining.grant(player, ROUND_TP * gauntlet.round);
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_ring_won_round", gauntlet.round, ROUND_TP * gauntlet.round)
-				.withStyle(ChatFormatting.AQUA));
+			if (Powers.has(player, ZFighterPower.INSTANCE)) {
+				ZFighterTraining.grant(player, ROUND_TP * gauntlet.round);
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_ring_won_round", gauntlet.round, ROUND_TP * gauntlet.round)
+					.withStyle(ChatFormatting.AQUA));
+			} else {
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.ring_won_round", gauntlet.round).withStyle(ChatFormatting.AQUA));
+			}
 			if (gauntlet.round >= ROUNDS) {
 				player.setAttached(CHAMPION, true);
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_ring_champion").withStyle(ChatFormatting.GOLD));

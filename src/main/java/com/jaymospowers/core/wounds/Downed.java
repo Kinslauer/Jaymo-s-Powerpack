@@ -1487,6 +1487,7 @@ public final class Downed {
 				}
 				getUp(level, body);
 				MedicineSkill.broughtRound(player, body);
+				Karma.broughtRound(player, body);
 				MedicineSkill.treated(player);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
