@@ -14,6 +14,10 @@ what wasn't tested). Example, `changes/powers/fishing-tackle.md`:
     - **Rods**: the Cane Pole takes small fish only, but they bite 1.5x as fast...
     - Built; not played.
 
+For a new minor version (0.21.109 -> 0.22.0), put `bump: minor` on the line right after the title. The release
+script raises the minor version for that note instead of the patch, and leaves the line out of the MODLOG. Later
+notes go on from there (0.22.1, ...). Only do this when Andy asks for a new version.
+
 A PR that touches two mods adds two notes. After the merge, the Release workflow (`.github/workflows/release.yml`,
 running `tools/release.py`) bumps each mod's patch version once per note, appends
 `## <version> (<date>): <title> (#<PR>)` plus the text to the end of that mod's MODLOG, deletes the note, updates the

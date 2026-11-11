@@ -11,7 +11,8 @@ end of the same MODLOG, and each squash merge made every later PR "conflict" on 
 
 A PR now adds a note instead (see changes/README.md): `changes/<powers|kingdoms|kitchen>/<slug>.md`, first line
 `# <title>`, then the MODLOG text. For each note, oldest first, this script:
-  1. raises that mod's patch version in its gradle.properties (0.21.64 -> 0.21.65);
+  1. raises that mod's patch version in its gradle.properties (0.21.64 -> 0.21.65), or its minor version when the
+     line after the title is `bump: minor` (0.21.109 -> 0.22.0; that line isn't copied to the MODLOG);
   2. appends `## <version> (<date>): <title> (#<PR>)` and the note's text to the end of the mod's MODLOG;
   3. deletes the note.
 Then it updates the version table in docs/vault/Home.md and regenerates docs/codemap/ (also kept out of PRs).
@@ -46,14 +47,23 @@ def pending():
     return sorted(notes, key=lambda n: (n[0], n[2].name))
 
 
+BUMP = re.compile(r"^bump:\s*(patch|minor)\s*$", re.I)
+
+
 def read_note(f):
-    """(title, body). The title is the first `# ` line; without one it's the file name."""
+    """(title, body, part). The title is the first `# ` line; without one it's the file name. part is "minor" when
+    the first line after the title is `bump: minor`, else "patch"."""
     lines = f.read_text(encoding="utf-8").strip().splitlines()
     title = f.stem.replace("-", " ").replace("_", " ")
     if lines and lines[0].startswith("# "):
         title = lines[0][2:].strip()
         lines = lines[1:]
-    return title, "\n".join(lines).strip()
+    part = "patch"
+    m = BUMP.match(lines[0].strip()) if lines else None
+    if m:
+        part = m.group(1).lower()
+        lines = lines[1:]
+    return title, "\n".join(lines).strip(), part
 
 
 def pr_number(f):
@@ -63,9 +73,14 @@ def pr_number(f):
     return m.group(1) if m else None
 
 
-def bump(v):
+def bump(v, part="patch"):
+    """0.21.109 -> 0.21.110 (patch) or 0.22.0 (minor)."""
     parts = v.split(".")
-    parts[-1] = str(int(parts[-1]) + 1)
+    if part == "minor" and len(parts) >= 3:
+        parts[-2] = str(int(parts[-2]) + 1)
+        parts[-1] = "0"
+    else:
+        parts[-1] = str(int(parts[-1]) + 1)
     return ".".join(parts)
 
 
@@ -88,9 +103,9 @@ def main():
         if prop_file not in props:
             props[prop_file] = (ROOT / prop_file).read_text(encoding="utf-8")
             logs[log_file] = (ROOT / log_file).read_text(encoding="utf-8")
-        new = bump(VERSION.search(props[prop_file]).group(2))
+        title, body, part = read_note(f)
+        new = bump(VERSION.search(props[prop_file]).group(2), part)
         props[prop_file] = VERSION.sub(lambda m: m.group(1) + new, props[prop_file], count=1)
-        title, body = read_note(f)
         pr = pr_number(f)
         entry = f"## {new} ({today}): {title}" + (f" (#{pr})" if pr else "") + "\n\n" + body + "\n"
         logs[log_file] = logs[log_file].rstrip("\n") + "\n\n" + entry
