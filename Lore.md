@@ -53,7 +53,7 @@ they did in *The Long Defence*, a few at a time and here and there, under lightn
 the ground, grey, tusked, still carrying the iron they were buried with) and zombified piglins, never zombies or
 skeletons. Behind them, at the back, stands a **Shade of the Grue** in the sorcerer's red. When it falls, the rest go back
 into the ground, and the ford holds. Nothing on screen says who they were or why they came. If nobody stands at the ford,
-they sink back and come again another night.
+they sink back and come again another night. (new) When it is held, a short wordless film plays at the ford: dawn, the light still burning in the keep, the last of the old legion going back into the ground on the far bank.
 
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
