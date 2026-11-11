@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,6 +23,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 - [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · running
+- [ ] [[Agents/symbiote-costume-shape|symbiote-costume-shape]] · 💻 Odysseus · running
 
 
 ## In review
