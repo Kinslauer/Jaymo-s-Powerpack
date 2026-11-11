@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
  */
 public final class AetherStructure extends Structure {
 	public enum Plan implements StringRepresentable {
-		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINESHAFT, IRRADIATED, GUARDIAN, VILLAGE, CASTLE;
+		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINESHAFT, IRRADIATED, GUARDIAN, VILLAGE, CASTLE, TOWN;
 
 		public static final Codec<Plan> CODEC = StringRepresentable.fromEnum(Plan::values);
 
@@ -126,6 +126,7 @@ public final class AetherStructure extends Structure {
 			case GUARDIAN -> surface(ground, AetherPiece.Kind.GUARDIAN, cx, cz, GUARDIAN_SIZE, GUARDIAN_SIZE, GUARDIAN_H, WIDE_TOLERANCE, facing, seed, 0, 0);
 			case VILLAGE -> surface(ground, AetherPiece.Kind.SKY_VILLAGE, cx, cz, VILLAGE_SIZE, VILLAGE_SIZE, VILLAGE_H, VILLAGE_TOLERANCE, facing, seed, Math.max(variant, 0), 0);
 			case CASTLE -> surface(ground, AetherPiece.Kind.SKY_CASTLE, cx, cz, CASTLE_SIZE, CASTLE_SIZE, CASTLE_H, CASTLE_TOLERANCE, facing, seed, 0, 0);
+			case TOWN -> SkyTowns.plan(ground, random, cx, cz, facing, Math.max(variant, 0) % 3);
 			case LIBRARY -> library(ground, cx, cz, facing, seed, Math.max(variant, 0));
 			case AQUEDUCT -> aqueduct(ground, cx, cz, facing, seed);
 			case BREXALLEN -> brexallen(ground, random, cx, cz, facing, seed);

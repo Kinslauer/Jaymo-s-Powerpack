@@ -682,6 +682,9 @@ STRUCTURES = {
     "sky_village_ruin_magnetic": ("village", 4, ["magnetic_scar", "turquoise_forest", "violet_highwoods", "glistening_swamp"], "surface_structures"),
     "sky_village_ruin_arctic": ("village", 5, ARCTIC, "surface_structures"),
     "sky_castle": ("castle", None, SURFACE_MID, "surface_structures"),
+    "sky_town_highfields": ("town", 0, ["flourishing_field", "verdant_woods"], "surface_structures"),
+    "sky_town_magnetic": ("town", 1, ["magnetic_scar", "turquoise_forest", "violet_highwoods"], "surface_structures"),
+    "sky_town_arctic": ("town", 2, ARCTIC, "surface_structures"),
 }
 
 # set id: (spacing, separation, salt, [(structure, weight)], frequency, exclusion (other set, chunks) or None, spread)
@@ -699,6 +702,7 @@ SETS = {
     "sky_villages": (30, 14, 1380213110, [("sky_village_highfields", 6), ("sky_village_magnetic", 6), ("sky_village_arctic", 6),
                                           ("sky_village_ruin_highfields", 2), ("sky_village_ruin_magnetic", 2), ("sky_village_ruin_arctic", 2),
                                           ("sky_castle", 2)], 1.0, ("outposts", 6), "linear"),
+    "sky_towns": (48, 24, 1380213111, [("sky_town_highfields", 1), ("sky_town_magnetic", 1), ("sky_town_arctic", 1)], 1.0, ("sky_villages", 8), "linear"),
 }
 
 
