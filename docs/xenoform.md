@@ -320,6 +320,17 @@ Scanning stays the main way in. Beside it:
   after the one above, so stops and turns run down it as a wave. The ki shells bend with it. Phased
   (`WispPhaseClient`), the skin thins to almost nothing over dimmer ki and flickers in the last second; your own screen
   takes a pale wash, shows no block face when your eyes are inside one, and draws the world without cave culling.
+- **Wisp's other moves:** Sneak+G Overshadow (`Revenant.possess` at 5 blocks, 8 s, 20 s cooldown): it wears a creature and
+  walks it by the player's own keys (`Revenant.wearTick` reads `getLastClientInput`: WASD against the look, sprint, jump);
+  G again lets go. Sneak+B Ghost Ray: held up to 30 ticks, let go for a `MagicFx.beam` (20 to 32 blocks, 4 to 12 damage,
+  1 to 3.5 s wait by charge). Dread Wail also throws a cone of rings 9 blocks ahead that shoves creatures, breaks up to 32
+  glass blocks and panes, and leaves Wisp slowed and weakened for 2.5 s.
+- **Ghost breath (`WispBreath`, client):** a cold puff from a Wisp's mouth every 50 ticks while anything undead or another
+  Wisp is within 14 blocks.
+- **Float on the move:** `XenoformFlightPose` tips the float forward with speed (24 degrees at 0.3 a tick), rolls it into
+  turns and brings the arms out ahead; the tail's comma breathes and flicks while it hangs (`WispTail`).
+- **Change rings (`XenoChangeRings`, client, every alien):** when a player's synced form changes (in, out, or alien to
+  alien) two rings of motes in their band's glow run from the waist to head and feet over 12 ticks. The band flash stays.
 - **Wisp is ki (0.18.90):** it floats 0.3 blocks up and bobs instead of walking (no step swing, no footsteps,
   `XenoformWispStepMixin`); its skin is drawn see-through and fullbright over two shells of pale ki (the ki glow
   texture, scrolling) that are its own body puffed out (`XenoFormModels.Wisp.shells`, `WispKi`), first-person arm too.

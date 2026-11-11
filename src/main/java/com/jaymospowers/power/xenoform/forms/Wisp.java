@@ -31,8 +31,14 @@ import net.minecraft.world.phys.Vec3;
  * floor holds until it sneaks; bedrock and the like always hold). Nothing hurts it and it hurts nothing. Let go inside a
  * block, or run dry there, and it is put out at the nearest place it fits ({@link #EJECT_REACH}), or failing that where it
  * last stood clear; running dry costs {@link #EJECT_DAMAGE}.</li>
- * <li>G, Shroud: fade from sight until you strike something.</li>
- * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness.</li>
+ * <li>G, Shroud: fade from sight until you strike something. Sneak + G, Overshadow: slip into the creature you look at
+ * (within {@link #POSSESS_REACH}) and walk it as your own for {@link #POSSESS_TICKS} ticks: your keys steer it, Jump
+ * jumps it, your swing is its strike; Sneak steps out. Revenant's Possession, shorter ({@code Revenant#wearTick}).</li>
+ * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness. It
+ * goes out ahead as a cone of rings ({@link #WAIL_CONE} long) that shoves back what it passes over and shatters glass,
+ * and leaves you drained for a moment.</li>
+ * <li>Sneak + B, Ghost Ray: let go for a pale bolt along your aim; hold up to {@link #RAY_CHARGE} ticks first and it is
+ * wider, longer and hits harder. Not while phased.</li>
  * <li>B (hold), Float: (0.20.23) float upright where you steer, Jump rising and sneaking sinking; let go and you drop.</li>
  * <li>C (ascended), Revenant: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
  * </ul>
@@ -48,6 +54,18 @@ public final class Wisp extends XenoForm {
 	public static final int SHROUD_COOLDOWN = 40;
 	public static final int WAIL_COOLDOWN = 300, WAIL_TICKS = 60, WAIL_DARKNESS_TICKS = 100;
 	public static final double WAIL_RADIUS = 10.0, WAIL_FLEE = 10.0, WAIL_FLEE_SPEED = 1.5;
+	/** The wail's cone: how far it reaches ahead, how wide it opens (the least dot with your aim), its shove out and up, how many panes it can break, and how long it leaves you slowed and weak. */
+	public static final double WAIL_CONE = 9.0, WAIL_CONE_DOT = 0.7, WAIL_SHOVE = 1.3, WAIL_LIFT = 0.35;
+	public static final int WAIL_GLASS = 32, WAIL_DRAIN_TICKS = 50;
+	public static final int WAIL_COLOR = 0xB8E8F8;
+	/** Ghost Ray: ticks to a full charge; reach, half-width and damage as a bolt and fully charged; the wait after as a bolt and fully charged. */
+	public static final int RAY_CHARGE = 30;
+	public static final double RAY_REACH = 20.0, RAY_REACH_FULL = 32.0;
+	public static final float RAY_WIDTH = 0.12F, RAY_WIDTH_FULL = 0.45F, RAY_DAMAGE = 4.0F, RAY_DAMAGE_FULL = 12.0F;
+	public static final int RAY_WAIT = 20, RAY_WAIT_FULL = 70, RAY_COLOR = 0x9FF5E0;
+	/** Overshadow: how far you can reach into a creature, how long you wear it, and G's cooldown after. */
+	public static final double POSSESS_REACH = 5.0;
+	public static final int POSSESS_TICKS = 160, POSSESS_COOLDOWN = 400;
 	/** (0.20.23, Andy: "it should float upright instead of an angled glide") Float: how fast it drifts where you steer
 	 * (blocks a tick; sprinting faster), how fast Jump lifts and sneaking sinks it, how fast it eases to that (share a tick). */
 	public static final double FLOAT_SPEED = 0.22, FLOAT_SPRINT = 0.3, FLOAT_RISE = 0.12, FLOAT_SINK = 0.12, FLOAT_EASE = 0.25;
@@ -68,6 +86,8 @@ public final class Wisp extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		unshroud(player, live, false);
 		endPhase(player, live, false);
+		com.jaymospowers.power.xenoform.forms.ultimate.Revenant.release(player, live, false);
+		live.rayDown = -1L;
 		live.glide = false;
 		live.wail = 0;
 	}
@@ -75,6 +95,17 @@ public final class Wisp extends XenoForm {
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		if (key == PowerKey.ABILITY_4) {
+			if (down && player.isShiftKeyDown() && !live.glide && !live.phase && live.possessed < 0) {
+				// Sneak + B gathers the Ghost Ray instead of floating
+				if (player.level().getGameTime() >= live.rayNext) {
+					live.rayDown = player.level().getGameTime();
+				}
+				return;
+			}
+			if (!down && live.rayDown >= 0L) {
+				fireRay(player, live);
+				return;
+			}
 			live.glide = down;
 			return;
 		}
@@ -91,7 +122,13 @@ public final class Wisp extends XenoForm {
 		}
 		switch (key) {
 			case ABILITY_2 -> {
-				if (live.shroud) {
+				if (live.possessed >= 0) {
+					com.jaymospowers.power.xenoform.forms.ultimate.Revenant.release(player, live, true);
+				} else if (player.isShiftKeyDown() && !live.phase) {
+					if (ready(player, live, G) && com.jaymospowers.power.xenoform.forms.ultimate.Revenant.possess(player, live, POSSESS_REACH)) {
+						cooldown(player, live, G, POSSESS_COOLDOWN);
+					}
+				} else if (live.shroud) {
 					unshroud(player, live, true);
 				} else if (ready(player, live, G)) {
 					shroud(player, live);
@@ -133,6 +170,19 @@ public final class Wisp extends XenoForm {
 			}
 			if (player.tickCount % 24 == 0) {
 				sound(player, SoundEvents.PHANTOM_FLAP, 0.4F, 1.4F);
+			}
+		}
+		if (live.possessed >= 0) {
+			com.jaymospowers.power.xenoform.forms.ultimate.Revenant.wearTick(player, live, POSSESS_TICKS);
+		}
+		if (live.rayDown >= 0L) {
+			if (live.phase || live.possessed >= 0) {
+				live.rayDown = -1L;
+			} else if (player.tickCount % 2 == 0) {
+				// it gathers in the hand
+				float charge = rayCharge(level, live);
+				Vec3 hand = player.getEyePosition().add(player.getLookAngle().scale(0.7)).add(0.0, -0.35, 0.0);
+				MagicFx.orb(level, hand, 0.08F + 0.22F * charge, RAY_COLOR, 3);
 			}
 		}
 		if (live.shroud) {
@@ -180,7 +230,7 @@ public final class Wisp extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.glide || live.phase;
+		return live.glide || live.phase || live.possessed >= 0;
 	}
 
 	@Override
@@ -321,12 +371,84 @@ public final class Wisp extends XenoForm {
 				living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 60, 0));
 			}
 		}
+		wailCone(player);
 		ring(level, ParticleTypes.SCULK_SOUL, player.position().add(0.0, 1.0, 0.0), WAIL_RADIUS * 0.4, 16);
 		ring(level, ParticleTypes.SOUL, player.position(), WAIL_RADIUS, 32);
 		sound(player, SoundEvents.PHANTOM_SWOOP, 2.0F, 0.5F);
 		sound(player, SoundEvents.WARDEN_ROAR, 0.6F, 1.8F);
 		sound(player, SoundEvents.PHANTOM_AMBIENT, 2.0F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), WAIL_RADIUS, 1.0F);
+	}
+
+	/** The wail going out ahead: rings down the cone, everything in it shoved back, glass in it broken, and the wailer left drained. */
+	private static void wailCone(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		for (int i = 1; i <= 4; i++) {
+			double d = WAIL_CONE * i / 4.0;
+			MagicFx.ring(level, eye.add(look.scale(d)), look, (float)(0.5 + d * 0.45), WAIL_COLOR, 6 + i * 3);
+		}
+		for (LivingEntity living : around(player, WAIL_CONE)) {
+			Vec3 to = living.getBoundingBox().getCenter().subtract(eye);
+			if (to.lengthSqr() > 1.0E-4 && to.normalize().dot(look) >= WAIL_CONE_DOT) {
+				shove(living, player.position(), WAIL_SHOVE, WAIL_LIFT);
+			}
+		}
+		int broken = 0;
+		int reach = (int)Math.ceil(WAIL_CONE);
+		for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(player.blockPosition().offset(-reach, -reach, -reach),
+			player.blockPosition().offset(reach, reach, reach))) {
+			if (broken >= WAIL_GLASS) {
+				break;
+			}
+			Vec3 to = Vec3.atCenterOf(pos).subtract(eye);
+			double far = to.length();
+			if (far > WAIL_CONE || far < 0.5 || to.scale(1.0 / far).dot(look) < WAIL_CONE_DOT) {
+				continue;
+			}
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+			if ((state.is(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags.GLASS_BLOCKS)
+				|| state.is(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags.GLASS_PANES)) && player.mayInteract(level, pos)) {
+				level.destroyBlock(pos, false, player);
+				broken++;
+			}
+		}
+		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WAIL_DRAIN_TICKS, 1, false, false));
+		player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WAIL_DRAIN_TICKS, 0, false, false));
+	}
+
+	/** How charged the Ghost Ray is, 0 a bolt to 1 full. */
+	private static float rayCharge(ServerLevel level, XenoformPower.Live live) {
+		return net.minecraft.util.Mth.clamp((level.getGameTime() - live.rayDown) / (float)RAY_CHARGE, 0.0F, 1.0F);
+	}
+
+	/** Lets the Ghost Ray go along the aim: it stops at the first block and burns every creature it passes through. */
+	private static void fireRay(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		float charge = rayCharge(level, live);
+		live.rayDown = -1L;
+		live.rayNext = level.getGameTime() + Math.round(net.minecraft.util.Mth.lerp(charge, RAY_WAIT, RAY_WAIT_FULL));
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		Vec3 end = eye.add(look.scale(net.minecraft.util.Mth.lerp(charge, RAY_REACH, RAY_REACH_FULL)));
+		net.minecraft.world.phys.BlockHitResult wall = level.clip(new net.minecraft.world.level.ClipContext(eye, end,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (wall.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			end = wall.getLocation();
+		}
+		float width = net.minecraft.util.Mth.lerp(charge, RAY_WIDTH, RAY_WIDTH_FULL);
+		float damage = net.minecraft.util.Mth.lerp(charge, RAY_DAMAGE, RAY_DAMAGE_FULL);
+		Vec3 from = eye.add(look.scale(0.7)).add(0.0, -0.3, 0.0);
+		Vec3 stop = end;
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(width + 1.0),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !spared(player, e) && e.getBoundingBox().inflate(width).clip(eye, stop).isPresent())) {
+			living.hurtServer(level, player.damageSources().indirectMagic(player, player), damage);
+		}
+		MagicFx.beam(level, from, end, width, RAY_COLOR, 6 + Math.round(charge * 6.0F));
+		MagicFx.blast(level, end, 0.5F + charge, RAY_COLOR, 8);
+		sound(player, SoundEvents.PHANTOM_BITE, 1.0F, 1.7F - 0.6F * charge);
+		sound(player, SoundEvents.BEACON_DEACTIVATE, 0.5F, 2.0F - 0.5F * charge);
 	}
 
 	/** Every mob within reach drops what it was doing and runs. */

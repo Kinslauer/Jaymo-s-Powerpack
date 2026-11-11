@@ -75,6 +75,9 @@ public final class XenoformPowerClient implements PowerClient {
 		// Wisp: the ghost tail trailing after everyone who is one, and the held Phase's look
 		ClientTickEvents.END_CLIENT_TICK.register(WispTail::tick);
 		WispPhaseClient.init();
+		ClientTickEvents.END_CLIENT_TICK.register(WispBreath::tick);
+		// the change itself: two rings of the band's light over anyone whose form changes
+		ClientTickEvents.END_CLIENT_TICK.register(XenoChangeRings::tick);
 		// (0.20.9) the change-in morph: notices an Ultimate turning on
 		ClientTickEvents.END_CLIENT_TICK.register(XenoMorph::tick);
 		PyreComet.init();

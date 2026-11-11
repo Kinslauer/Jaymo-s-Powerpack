@@ -226,6 +226,8 @@ public final class XenoformPower implements Power {
 		public boolean phase;
 		public int phaseTicks;
 		public net.minecraft.world.phys.@Nullable Vec3 phaseFree;
+		/** Wisp: when Sneak + B went down for the Ghost Ray (game time, -1: not gathering), and when it can fire again. */
+		public long rayDown = -1L, rayNext;
 		/** Gremlin: climbing; ticks since a spring (0: none). */
 		public boolean climb;
 		public int spring;
@@ -436,6 +438,7 @@ public final class XenoformPower implements Power {
 			shroud = glide = phase = false;
 			wail = phaseTicks = 0;
 			phaseFree = null;
+			rayDown = -1L;
 			climb = false;
 			spring = 0;
 			sense = false;

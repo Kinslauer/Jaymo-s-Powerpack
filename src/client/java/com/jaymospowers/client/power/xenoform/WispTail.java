@@ -41,6 +41,13 @@ public final class WispTail {
 	static final float ROOT_FOLLOW = 0.35F, LINK_FOLLOW = 0.45F;
 	/** The waver: side to side at the tip while hanging and while streaming (radians), its rate, and how far it is out of step link to link. */
 	static final float WAVE_HANG = 0.2F, WAVE_STREAM = 0.07F, WAVE_RATE = 0.16F, WAVE_STEP = 0.8F;
+	/**
+	 * It is never still (Andy: "it should be constant but animated better"). Hanging, the comma slowly tightens and lets out
+	 * ({@code BREATHE}, radians a link, at {@code BREATHE_RATE}), and every {@code FLICK_EVERY} ticks or so the top link is
+	 * kicked to one side ({@code FLICK}, radians), which runs down the chain as a whip and snaps the tip.
+	 */
+	static final float BREATHE = 0.07F, BREATHE_RATE = 0.045F, FLICK = 0.55F;
+	static final int FLICK_EVERY = 70;
 
 	/** For a frame: each link's bend back from the one above, then each link's lean to the side, then how much it is streaming (0-1). */
 	public static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:wisp_tail");
@@ -53,6 +60,7 @@ public final class WispTail {
 		final float[] pitch = new float[N], pitchO = new float[N], roll = new float[N], rollO = new float[N];
 		final float[] pitchOff = new float[N], rollOff = new float[N];
 		float stream, streamO;
+		int flickIn = 20;
 		boolean fresh = true;
 	}
 
@@ -97,12 +105,22 @@ public final class WispTail {
 		chain.streamO = chain.stream;
 		chain.stream += (stream - chain.stream) * 0.3F;
 		float lastPitchOff = 0.0F, lastRollOff = 0.0F;
+		// hanging: the comma breathes, and now and then the top is flicked aside for the links below to chase
+		float idle = 1.0F - chain.stream;
+		float breathe = Mth.sin((player.tickCount + player.getId() * 13) * BREATHE_RATE) * BREATHE * idle;
+		if (--chain.flickIn <= 0) {
+			chain.flickIn = FLICK_EVERY / 2 + player.getRandom().nextInt(FLICK_EVERY);
+			if (!chain.fresh) {
+				chain.roll[0] += (player.getRandom().nextBoolean() ? FLICK : -FLICK) * (0.4F + 0.6F * idle);
+				chain.pitch[0] += FLICK * 0.4F * idle;
+			}
+		}
 		for (int i = 0; i < N; i++) {
 			chain.pitchO[i] = chain.pitch[i];
 			chain.rollO[i] = chain.roll[i];
 			// where this link should point: curled at rest; streaming, the top bends over and the rest lie along it
 			float reach = Math.min(1.0F, (i + 1) / 2.0F);
-			float pitchWant = Mth.lerp(chain.stream, CURL * (i + 1), pitchTo * reach);
+			float pitchWant = Mth.lerp(chain.stream, (CURL + breathe) * (i + 1), pitchTo * reach);
 			float rollWant = rollTo * Math.min(1.0F, (i + 1) / 3.0F);
 			if (chain.fresh) {
 				chain.pitch[i] = chain.pitchO[i] = pitchWant;

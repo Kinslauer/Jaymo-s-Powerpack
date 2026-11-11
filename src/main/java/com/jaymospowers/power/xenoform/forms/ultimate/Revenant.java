@@ -65,6 +65,8 @@ public final class Revenant extends XenoUltimate {
 	public static final double DRIFT_SPEED = 0.2, DRIFT_RISE = 0.12, DRIFT_SINK = 0.1;
 	/** Revenant: how far you can reach into a creature, how long you wear it, how fast it goes for you, C's cooldown. */
 	public static final double POSSESS_REACH = 8.0, POSSESS_SPEED = 0.32;
+	/** A worn host walks at {@link #POSSESS_SPEED} where your keys steer it; held to a sprint it goes this much faster, backing off this much slower. */
+	public static final double POSSESS_SPRINT = 1.5, POSSESS_BACK = 0.6;
 	public static final int POSSESS_TICKS = 300, POSSESS_COOLDOWN = 300;
 	/** Worn: how far past its own width the host strikes, ticks between its strikes, and what a host with no attack of its own deals. */
 	public static final double HOST_REACH = 3.0;
@@ -167,7 +169,7 @@ public final class Revenant extends XenoUltimate {
 	public void onBigMove(ServerPlayer player, XenoformPower.Live live) {
 		if (live.possessed >= 0) {
 			release(player, live, true);
-		} else if (ready(player, live, C) && possess(player, live)) {
+		} else if (ready(player, live, C) && possess(player, live, POSSESS_REACH)) {
 			cooldown(player, live, C, POSSESS_COOLDOWN);
 		}
 	}
@@ -191,7 +193,7 @@ public final class Revenant extends XenoUltimate {
 			}
 		}
 		if (live.possessed >= 0) {
-			wearTick(player, live);
+			wearTick(player, live, POSSESS_TICKS);
 		}
 		// always a little unreal
 		if (player.tickCount % 5 == 0) {
@@ -394,8 +396,9 @@ public final class Revenant extends XenoUltimate {
 
 	// ---- C: Revenant ----
 
-	private static boolean possess(ServerPlayer player, XenoformPower.Live live) {
-		LivingEntity target = aimed(player, POSSESS_REACH, e -> e instanceof Mob && !(e instanceof Player) && !e.entityTags().contains(XenoformState.MINION_TAG));
+	/** Slips into the creature {@code player} looks at within {@code reach} (Wisp's Overshadow comes here too). */
+	public static boolean possess(ServerPlayer player, XenoformPower.Live live, double reach) {
+		LivingEntity target = aimed(player, reach, e -> e instanceof Mob && !(e instanceof Player) && !e.entityTags().contains(XenoformState.MINION_TAG));
 		if (!(target instanceof Mob host) || host.isVehicle()) {
 			return false;
 		}
@@ -440,7 +443,7 @@ public final class Revenant extends XenoUltimate {
 	}
 
 	/** Out of the creature: it comes to, dazed and marked; you stand beside it. */
-	private static void release(ServerPlayer player, XenoformPower.Live live, boolean fx) {
+	public static void release(ServerPlayer player, XenoformPower.Live live, boolean fx) {
 		if (live.possessed < 0) {
 			return;
 		}
@@ -468,22 +471,35 @@ public final class Revenant extends XenoUltimate {
 		}
 	}
 
-	/** Wearing a host: it goes where you look, jumps for you, strikes what you aim at, and nothing hunts you. */
-	private static void wearTick(ServerPlayer player, XenoformPower.Live live) {
+	/**
+	 * Wearing a host for up to {@code ticks}: it is yours to walk. Your movement keys steer it (forward, back and
+	 * sideways of where you look; nothing held and it stands), Sprint hurries it, Jump jumps it, it faces where you
+	 * face and strikes what you aim at when you swing. Nothing hunts you meanwhile. Sneak steps out of it.
+	 */
+	public static void wearTick(ServerPlayer player, XenoformPower.Live live, int ticks) {
 		ServerLevel level = player.level();
 		Work work = WORK.computeIfAbsent(player.getUUID(), id -> new Work());
 		if (!(findHost(player, level, live.possessed, work) instanceof Mob host) || !host.isAlive() || player.getVehicle() != host
-			|| level.getGameTime() - work.since > POSSESS_TICKS) {
+			|| level.getGameTime() - work.since > ticks) {
 			release(player, live, true);
 			return;
 		}
 		live.possessed = host.getId(); // (0.20.21) follows the host through a portal
-		// it goes where you look
-		Vec3 look = player.getLookAngle().horizontal();
-		look = look.lengthSqr() < 1.0E-4 ? Vec3.ZERO : look.normalize().scale(POSSESS_SPEED * (player.getXRot() > 60.0F ? 0.0 : 1.0));
+		// it goes where your keys steer it
+		net.minecraft.world.entity.player.Input input = player.getLastClientInput();
+		double forward = (input.forward() ? 1.0 : 0.0) - (input.backward() ? 1.0 : 0.0);
+		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
+		Vec3 look = Vec3.ZERO;
+		if (forward != 0.0 || strafe != 0.0) {
+			float yaw = player.getYRot() * net.minecraft.util.Mth.DEG_TO_RAD;
+			double sin = net.minecraft.util.Mth.sin(yaw), cos = net.minecraft.util.Mth.cos(yaw);
+			// facing is (-sin, cos); to its left is (cos, sin)
+			look = new Vec3(-sin * forward + cos * strafe, 0.0, cos * forward + sin * strafe).normalize()
+				.scale(POSSESS_SPEED * (input.sprint() && forward > 0.0 ? POSSESS_SPRINT : forward < 0.0 ? POSSESS_BACK : 1.0));
+		}
 		Vec3 motion = host.getDeltaMovement();
 		double up = motion.y;
-		if (host.horizontalCollision && host.onGround()) {
+		if (host.onGround() && (input.jump() || host.horizontalCollision && look != Vec3.ZERO)) {
 			up = 0.42;
 		}
 		if (host.isInWater()) {
