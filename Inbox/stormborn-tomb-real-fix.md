@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hephaestus
 from: Andy (vault thread, 2026-11-10: reopen the #1218 follow-up)
 asked: 2026-11-10
