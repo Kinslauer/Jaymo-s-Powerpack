@@ -19,7 +19,7 @@ public final class Moves {
 	public static final String[] ONCE = {"swing_across", "swing_down", "swing_back", "block", "stagger", "rise", "cast_right", "cast_left",
 		"tree_flip", "dodge_roll"};
 	/** Moves that end held. */
-	public static final String[] HOLD = {"overhead", "chop", "thrust", "kneel", "kneel_up", "kneel_bow", "maimed", "impaled", "death_back",
+	public static final String[] HOLD = {"overhead", "chop", "wind_side", "behead", "wind_high", "hew", "thrust", "kneel", "kneel_up", "kneel_bow", "maimed", "impaled", "death_back",
 		"death_front", "death_drop", "death_headless", "summon", "cast_both", "cast_ward", "cast_high", "cast_blade", "point", "disarm",
 		"disarmed", "lunge", "look_about", "sling", "glide"};
 	/** How fast each moving loop carries a body of ordinary size at its own pace (blocks a second). */
