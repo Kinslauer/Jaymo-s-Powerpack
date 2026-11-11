@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: quill
 from: tiv (Discord, Checklists thread, 2026-11-08)
 asked: 2026-11-08
@@ -20,3 +20,4 @@ suggested_owns:
 
 Here is the full message, Heres a bunch of mods i'd like a checklist written up for. [https://www.curseforge.com/minecraft/mc-mods/simple-difficulty-reforged](https://www.curseforge.com/minecraft/mc-mods/simple-difficulty-reforged "https://www.curseforge.com/minecraft/mc-mods/simple-difficulty-reforged") [https://www.curseforge.com/minecraft/mc-mods/dynamictrees](https://www.curseforge.com/minecraft/mc-mods/dynamictrees "https://www.curseforge.com/minecraft/mc-mods/dynamictrees") [https://www.curseforge.com/minecraft/modpacks/worldbound/gallery](https://www.curseforge.com/minecraft/modpacks/worldbound/gallery "https://www.curseforge.com/minecraft/modpacks/worldbound/gallery") [https://www.curseforge.com/minecraft/mc-mods/tinker-delight](https://www.curseforge.com/minecraft/mc-mods/tinker-delight "https://www.curseforge.com/minecraft/mc-mods/tinker-delight")
 We already handled it though.
+- 2026-11-10 17:10 Closed by Andy (2026-11-10): already handled.
