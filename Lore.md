@@ -665,6 +665,13 @@ Some still fight in the hope of someday taking back what was.
 **The three-sided war** (Andy, 2026-11-11). Frostborn troopers in rigs fight in the future too, so the streets are a
 three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
 
+(new) **The troopers** (future-three-sided-war, 2026-11-11). The Frostborn come in squads, each trooper in a whole Rig,
+firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
+Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
+the dead fight each other as well. A traveller they leave alone unless one of them is hurt, and then the whole squad
+turns on whoever did it; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
+and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
+
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
 the city, corrupted by the Tinkerer's bug.
