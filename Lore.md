@@ -26,6 +26,11 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
+the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
+whatever leather, mail and iron they had, filthy and bloodied by then.
+
 **The field of the long defence** (Andy, 2026-11-11). It was fought in a wooded forest, in sight of a Keep the defenders
 held. It was large and legendary: the fighting ran through the whole wood. Lightning struck when the sorcerer summoned
 his legion, and the dead came up a few at a time, here and there, not all at once. Varro disarmed the orc that came at
