@@ -562,7 +562,7 @@ Warrior-born, the orcs and the Grue came at it. That is what they were made for,
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
 
-  **A symbiote wears what its host wears** (new, 2026-11-11, Andy: "any symbiote user with a costume has the symbiote
+  **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
   beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
   the body and drawing it back in like the plain suit. The Quiet One's white hooded cloak was never cloth: it is the
