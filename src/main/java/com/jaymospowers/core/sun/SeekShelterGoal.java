@@ -10,6 +10,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import java.lang.reflect.Field;
 
 /**
  * A sun-burning undead's shelter search: when the Sun's rays reach it, it looks for real shelter - a cave, anywhere
@@ -23,6 +24,7 @@ public class SeekShelterGoal extends Goal {
     private final Level level;
     private int cooldown;
     private BlockPos shelter;
+    private boolean avoidSunDisabled;
 
     public SeekShelterGoal(PathfinderMob mob) {
         this.mob = mob;
@@ -43,6 +45,18 @@ public class SeekShelterGoal extends Goal {
         }
         if (this.mob.isInWaterOrRain()) {
             return false;
+        }
+        // Disable avoidSun while this goal is active, allowing mobs to path through
+        // leaf shade to reach real shelter (fixes skeletons getting stuck under trees)
+        if (!this.avoidSunDisabled) {
+            try {
+                Field avoidSunField = this.mob.getNavigation().getClass().getDeclaredField("avoidSun");
+                avoidSunField.setAccessible(true);
+                avoidSunField.set(this.mob.getNavigation(), false);
+                this.avoidSunDisabled = true;
+            } catch (Exception e) {
+                // If reflection fails, just continue without toggling
+            }
         }
         // Check multiple body points (feet, chest, head) and hitbox corners - burn if any is exposed
         Vec3 eye = this.mob.getEyePosition();
@@ -92,6 +106,15 @@ public class SeekShelterGoal extends Goal {
     @Override
     public void stop() {
         this.shelter = null;
+        try {
+            Field avoidSunField = this.mob.getNavigation().getClass().getDeclaredField("avoidSun");
+            avoidSunField.setAccessible(true);
+            avoidSunField.set(this.mob.getNavigation(), true);
+            this.avoidSunDisabled = false;
+        } catch (Exception e) {
+            // If reflection fails, just reset the flag
+            this.avoidSunDisabled = false;
+        }
     }
 
     @Override
