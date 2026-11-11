@@ -244,3 +244,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 5:52 PM ET (Andy, project chat): "https://www.planetminecraft.com/project/ninja-castle/ this should be the seat for the blossom kingdom".
 - 2026-11-11 4:49 PM ET (Andy, Galvan moon plan): the Galvan city looks "kind of like the viltrumite cities" (Invincible): tall curved white towers, dark seams, lit windows, roof gardens, ring rails. Our own build; under the dust in a hollow with a built false sky.
 - 2026-11-11 4:53 PM ET (Andy, Galvan moon plan): the moon Endermen and the Galvan "fight all the time"; Endermen "steal important galvan blocks", with no idea what they do, for the mischief.
+- 2026-11-11 (four-mods thread): Diskwing added to the Eden Ring part 4 branch (PR #1330). Claude's calls, unconfirmed: it is a harmless ambient glider that wanders (Eden Ring's circles an anchor point), drops nothing, colour by biome, spawns in every Verdant biome.
