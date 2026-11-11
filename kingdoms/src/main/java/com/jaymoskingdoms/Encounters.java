@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * (0.5.55) Wilderness encounters with Naturalist's predators, and (0.7.526) no longer: Andy, "remove the encounters, its
  * better when the predators can naturally spawn". Nothing comes hunting a player out of nowhere any more. Naturalist's
  * bears, lions, tigers, alligators, komodo dragons, rhinos, scorpions and elephants spawn as Naturalist has them, and every
- * Kingdoms beast in {@link #TABLE} (feral wolves, coyotes, tarantulas, moose, the monsters of legend, the wind dragons)
+ * Kingdoms beast in {@link #TABLE} (feral wolves, coyotes, tarantulas, moose, the monsters of legend, the mud golem, the wind dragons)
  * spawns on its own in its biome tag ({@code jaymoskingdoms:has_<beast>}) by the table's weight: on the surface (the cave
  * ogre anywhere dark), the night ones only in the dark, the monsters of legend only {@link #LEGEND_CHANCE} of the times they
  * could and never on or near a settlement's land ({@link #SETTLEMENT_CLEARANCE}), as are the wind dragons.
@@ -74,8 +74,10 @@ public final class Encounters {
 	static final List<String> CUBE_DUPLICATES = List.of("komododragon", "moose", "piranha", "snail", "tiger");
 	/** Of the times a monster of legend could spawn on its own, how many it does (they stay rare). */
 	static final float LEGEND_CHANCE = 0.1F;
-	/** Of the times a monster that walks by day (ogre, tarantula, minotaur, mud golem) could spawn in daylight, how many it does. */
+	/** Of the times a monster that walks by day (the ogre, the mud golem) could spawn in daylight, how many it does (by night, all of them). */
 	static final float DAY_MONSTER_CHANCE = 0.03F;
+	/** The mud golem's weight among the swamps' monsters (a zombie's is 95). */
+	static final int MUD_GOLEM_WEIGHT = 15;
 	/** No monster of legend or wind dragon spawns this close to a settlement's seat (blocks), nor on any settlement's land. */
 	static final double SETTLEMENT_CLEARANCE = 256.0;
 	/** How far off they come from (blocks). */
@@ -123,7 +125,8 @@ public final class Encounters {
 		// Kingdoms' own, after Better Animals Plus (wild/Wild)
 		new Encounter("jaymoskingdoms:feral_wolf", "jaymoskingdoms:has_feral_wolf", 10, 3, 5),
 		new Encounter("jaymoskingdoms:coyote", "jaymoskingdoms:has_coyote", 10, 2, 3, true),
-		new Encounter("jaymoskingdoms:tarantula", "jaymoskingdoms:has_tarantula", 8, 1, 2),
+		// (Andy: "tarantula should only spawn in the jungle at night"; under the canopy too, see wildSpawn)
+		new Encounter("jaymoskingdoms:tarantula", "jaymoskingdoms:has_tarantula", 8, 1, 2, true),
 		new Encounter("jaymoskingdoms:moose", "jaymoskingdoms:has_moose", 6, 1, 1),
 		// (0.5.56) the monsters of legend (monsters/Monsters)
 		new Encounter("jaymoskingdoms:werewolf", "jaymoskingdoms:has_werewolf", 5, 1, 1, true),
@@ -133,9 +136,10 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:wraith", "jaymoskingdoms:has_wraith", 5, 1, 2, true),
 		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
 		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
-		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", 6, 1, 2),
-		// (0.7.329) the minotaur, in the mountains (beasts/Minotaur)
-		new Encounter("jaymoskingdoms:minotaur", "jaymoskingdoms:has_minotaur", 3, 1, 1),
+		// the mud golem is no monster of legend any more but one of the swamps' common threats (Andy), and the witches'
+		// allies at their huts (monsters/WitchHuts). The minotaur no longer roams the mountains: it is one of the bosses of
+		// the Aether's Sentry Ruins (Powers' RuinBoss).
+		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", MUD_GOLEM_WEIGHT, 1, 2),
 		// (0.7.137) the wind dragons (dragons/Dragons), rare: Notus over the badlands, Boreas over the frozen peaks, Zephyrus
 		// in the swamps
 		new Encounter("jaymoskingdoms:notus_dragon", "jaymoskingdoms:has_notus_dragon", 2, 1, 1),
@@ -210,7 +214,7 @@ public final class Encounters {
 				continue;
 			}
 			boolean legend = Monsters.legend(type), dragon = id.getPath().endsWith("_dragon"), cave = "cave_ogre".equals(id.getPath());
-			placement(type, e.night(), cave, legend, dragon);
+			placement(type, e.night(), cave, legend, dragon, "tarantula".equals(id.getPath()));
 			BiomeModifications.addSpawn(BiomeSelectors.tag(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes()))), type.getCategory(), type,
 				e.weight(), e.min(), e.max());
 		}
@@ -218,17 +222,17 @@ public final class Encounters {
 
 	/** Where and when a beast of {@link #TABLE} may spawn on its own (kept if its kind has its own rules already). */
 	@SuppressWarnings("unchecked")
-	private static void placement(EntityType<?> type, boolean night, boolean cave, boolean legend, boolean dragon) {
+	private static void placement(EntityType<?> type, boolean night, boolean cave, boolean legend, boolean dragon, boolean underTrees) {
 		try {
 			SpawnPlacements.register((EntityType<Mob>) type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-				(t, level, reason, pos, random) -> wildSpawn(t, level, reason, pos, random, night, cave, legend, dragon));
+				(t, level, reason, pos, random) -> wildSpawn(t, level, reason, pos, random, night, cave, legend, dragon, underTrees));
 		} catch (IllegalStateException already) {
 			// the fire ogre and the flame wraith keep the Nether's monster rules (monsters/Monsters)
 		}
 	}
 
 	private static boolean wildSpawn(EntityType<? extends Mob> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos,
-		RandomSource random, boolean night, boolean cave, boolean legend, boolean dragon) {
+		RandomSource random, boolean night, boolean cave, boolean legend, boolean dragon, boolean underTrees) {
 		if (!Mob.checkMobSpawnRules(type, level, reason, pos, random)) {
 			return false;
 		}
@@ -236,13 +240,24 @@ public final class Encounters {
 		if (monster && level.getDifficulty() == Difficulty.PEACEFUL) {
 			return false;
 		}
-		if (!cave && !level.canSeeSky(pos)) {
+		// (the dragons stay out of the Overworld until someone has killed one: DragonRecords#worldSlain)
+		if (dragon && !com.jaymoskingdoms.dragons.DragonRecords.worldSlain()) {
+			return false;
+		}
+		boolean dark = level.getLevel().isDarkOutside();
+		if (underTrees) {
+			// (the tarantula: under the jungle's canopy or in the open, but only once night has fallen)
+			if (!dark) {
+				return false;
+			}
+		} else if (!cave && !level.canSeeSky(pos)) {
 			return false;
 		}
 		if ((night || cave) && !Monster.isDarkEnoughToSpawn(level, pos, random)) {
 			return false;
 		}
-		if (legend && random.nextFloat() >= LEGEND_CHANCE || monster && !night && !cave && random.nextFloat() >= DAY_MONSTER_CHANCE) {
+		// (the cut for the monsters that walk by day applies in daylight only: by night they come as often as any)
+		if (legend && random.nextFloat() >= LEGEND_CHANCE || monster && !night && !cave && !dark && random.nextFloat() >= DAY_MONSTER_CHANCE) {
 			return false;
 		}
 		if (legend || dragon) {

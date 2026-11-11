@@ -267,7 +267,8 @@ public final class Disguises {
 			return;
 		}
 		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator()).toList();
-		if (players.isEmpty() || !Monoliths.firstFallen(level)) {
+		// (and no dragon comes to the Overworld, disguised or not, before someone has killed one: DragonRecords#worldSlain)
+		if (players.isEmpty() || !Monoliths.firstFallen(level) || !DragonRecords.worldSlain()) {
 			return;
 		}
 		RandomSource random = level.getRandom();

@@ -11,6 +11,15 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -34,7 +43,51 @@ public final class DragonRecords {
 	public static final AttachmentType<Boolean> TAMER = AttachmentRegistry.create(JaymosKingdoms.id("dragon_tamer"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
+	/**
+	 * Whether anyone in this world has killed a dragon (any dragon: ours, the Ender Dragon, another mod's), saved on the
+	 * Overworld. Andy: dragons "can only appear in the overworld after you've killed one. Any dragon counts. Besides that
+	 * they either fly around in the aether or the nether". Until then no dragon spawns or comes calling in the Overworld
+	 * (Encounters, Dragons, Disguises); they are met in the Aether, and Ignivorus and Notus in the Nether.
+	 */
+	static final AttachmentType<Boolean> WORLD_SLAIN = AttachmentRegistry.create(JaymosKingdoms.id("world_dragon_slain"),
+		builder -> builder.persistent(Codec.BOOL));
+	/** {@link #WORLD_SLAIN}, kept to hand: natural spawning asks it off the server thread too. */
+	private static volatile boolean worldSlain;
+
 	private DragonRecords() {
+	}
+
+	static void register() {
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> worldSlain = Boolean.TRUE.equals(server.overworld().getAttached(WORLD_SLAIN)));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> worldSlain = false);
+		ServerLivingEntityEvents.AFTER_DEATH.register(DragonRecords::died);
+	}
+
+	/** Someone has killed a dragon in this world: they may come to the Overworld now. */
+	public static boolean worldSlain() {
+		return worldSlain;
+	}
+
+	/** A dragon died: if a player killed it (and it was nobody's), dragons may come to the Overworld from now on. */
+	private static void died(LivingEntity entity, DamageSource source) {
+		if (worldSlain || !(entity.level() instanceof ServerLevel level) || !dragon(entity)
+			|| entity instanceof OwnableEntity owned && owned.getOwnerReference() != null || entity instanceof WindDragon tame && tame.isTamed()
+			|| !(source.getEntity() instanceof Player) && !(entity.getKillCredit() instanceof Player)) {
+			return;
+		}
+		markSlain(level.getServer());
+	}
+
+	/** A dragon of any kind: the Ender Dragon, one of ours, or any mob whose id names it one. */
+	static boolean dragon(LivingEntity entity) {
+		return entity instanceof EnderDragon || entity instanceof WindDragon
+			|| BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("dragon");
+	}
+
+	static void markSlain(MinecraftServer server) {
+		worldSlain = true;
+		server.overworld().setAttached(WORLD_SLAIN, true);
+		JaymosKingdoms.LOGGER.info("A dragon was slain: dragons may come to the Overworld now");
 	}
 
 	/** {@code player} had a hand in killing a {@code species}. */
