@@ -224,6 +224,58 @@
             }
           ]
         }
+      },
+      {
+        "when": "cobalt",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/cobalt_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "manyullyn",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/manyullyn_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "queen_slime",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/queen_slime_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
+      },
+      {
+        "when": "hepatizon",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/hepatizon_ingot",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -26040
+            }
+          ]
+        }
       }
     ],
     "fallback": {
