@@ -280,6 +280,17 @@ of the Road** teaches one lesson each stay. A **Fortune Teller** waits at the ro
 a price or for free to the champion of the **tournament of the dead**, fought against spirit fighters when the bell
 tolls. Nobody stays forever: "The Other World doesn't let go of its dead so easily", but in time it lets go.
 
+(new) **The weighing** (Andy, 2026-11-11: "your actions are weighed against you after death"). The Judge's book holds
+more than fights. Everyone whose life ends for good is weighed in it: what they did for others against what they did to
+them. Most weigh near even and are simply born again. **The just** wake in the Other World beside the fighters, halo and
+all, though they never trained a day; the Fortune Teller takes no coin from them, and the only way back to the life they
+had is to win the tournament of the dead with a blade the hall lends them. If the Other World lets go of them first,
+they are born again like anyone. **The wicked** are not let in. They wake below, in the Nether, unarmed and half dead,
+with the demons' country beneath them and every horned thing aware of them: "those who walk the shadowed path" were
+always the demons' to keep. Somewhere down there a way up stands lit, and a cold draught runs from it. Walk out through
+it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
+their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
