@@ -8,6 +8,7 @@
     python tools/discord_read_aloud.py --list lore             # which documents match, without joining
     python tools/discord_read_aloud.py "Lore" --dry-run        # print what would be read, no Discord
     python tools/discord_read_aloud.py --stop                  # stop the reading that's running and leave
+    python tools/discord_read_aloud.py --check                 # is everything installed for THIS Python? (no Discord)
 
 Setup on the PC (once):  pip install "discord.py[voice]>=2.7" edge-tts   and have ffmpeg on PATH (or set FFMPEG).
 
@@ -326,7 +327,7 @@ async def read_in_channel(token, title, pieces, start, wanted):
             return
         print(f"{clock()} joining {channel.guild.name} > {channel.name} to read {title} "
               f"(paragraphs {start + 1}-{len(pieces)})", flush=True)
-        vc = await channel.connect(self_deaf=True)
+        vc = await channel.connect()  # not self-deafened: a deafened icon made people think it couldn't speak
         if isinstance(channel, discord.StageChannel):
             try:
                 await channel.guild.me.edit(suppress=False)  # speak on a stage
@@ -396,6 +397,45 @@ def others_here(vc):
     return ch is not None and any(uid != vc.user.id for uid in ch.voice_states)
 
 
+NEEDED = [("discord", "discord.py[voice]>=2.7"), ("nacl", "discord.py[voice]>=2.7"), ("davey", "discord.py[voice]>=2.7"),
+          ("edge_tts", "edge-tts")]
+
+
+def missing_packages():
+    import importlib.util
+    return sorted({pip for mod, pip in NEEDED if importlib.util.find_spec(mod) is None})
+
+
+def check():
+    """What this Python is missing, and the exact command that installs it into this same Python."""
+    ok = True
+    print(f"Python: {sys.executable} ({sys.version.split()[0]})")
+    miss = missing_packages()
+    if miss:
+        ok = False
+        print("Missing packages. Install into THIS Python with:")
+        print(f'  "{sys.executable}" -m pip install ' + " ".join(f'"{m}"' for m in miss))
+    else:
+        print("Packages: discord.py, PyNaCl, davey, edge-tts all found.")
+    exe = os.environ.get("FFMPEG") or shutil.which("ffmpeg")
+    if exe and (os.path.isfile(exe) or shutil.which(exe)):
+        print(f"ffmpeg: {exe}")
+    else:
+        ok = False
+        print("ffmpeg: not found. Install it (winget install ffmpeg) and set FFMPEG to ffmpeg.exe's full path "
+              "for the process that runs this (a new PATH entry doesn't reach an already-running gateway).")
+    if os.environ.get("KANBAN_BOT_TOKEN") or os.environ.get("DISCORD_BOT_TOKEN"):
+        print("Token: set (not shown).")
+    else:
+        ok = False
+        print("Token: KANBAN_BOT_TOKEN / DISCORD_BOT_TOKEN not set in this process.")
+    follow = follow_ids()
+    print(f"Follows: {len(follow)} user id(s)" if follow else "Follows: nobody (READ_ALOUD_FOLLOW / KANBAN_MOVERS "
+          "unset): pass --channel or set READ_ALOUD_CHANNEL.")
+    print("Ready." if ok else "Not ready: fix the lines above, then run --check again.")
+    return 0 if ok else 1
+
+
 # ---------------------------------------------------------------- stop / pid
 
 def write_pid():
@@ -446,10 +486,13 @@ def main(argv=None):
     ap.add_argument("--list", action="store_true", help="list the documents that match and stop")
     ap.add_argument("--dry-run", action="store_true", help="print the paragraphs that would be read; no Discord")
     ap.add_argument("--stop", action="store_true", help="stop the reading that is running")
+    ap.add_argument("--check", action="store_true", help="check this Python has everything; no Discord")
     a = ap.parse_args(argv)
 
     if a.stop:
         return stop_running()
+    if a.check:
+        return check()
     if not a.document:
         ap.error("name a document (or use --stop)")
     hits = find_docs(a.document)
@@ -482,6 +525,8 @@ def main(argv=None):
             print(f"[{i + 1}] {pieces[i]}")
         return 0
 
+    if missing_packages():
+        return check()
     token = os.environ.get("KANBAN_BOT_TOKEN") or os.environ.get("DISCORD_BOT_TOKEN")
     if not token:
         print("Set KANBAN_BOT_TOKEN (or DISCORD_BOT_TOKEN) to the bot's token.", file=sys.stderr)
