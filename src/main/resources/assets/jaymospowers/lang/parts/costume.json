@@ -26,6 +26,8 @@
   "message.jaymospowers.costume.worn": "You put on %s",
   "message.jaymospowers.costume.taken_off": "You take your costume off",
   "message.jaymospowers.costume.none": "You aren't wearing a costume",
+  "message.jaymospowers.costume.symbiote_shape": "The symbiote takes the costume's shape",
+  "message.jaymospowers.costume.symbiote_shape_call": "The symbiote takes the costume's shape. Call its suit to wear it",
   "message.jaymospowers.costume.missing": "You don't have the materials to sew that",
   "message.jaymospowers.costume.sewn": "Sewn: %s",
   "screen.jaymospowers.costume.title": "Costume Table",

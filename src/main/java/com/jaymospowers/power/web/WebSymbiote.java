@@ -782,7 +782,15 @@ public final class WebSymbiote {
 
 	/** The suit's mask is off and the suit shows (either side): the face is yours to see. */
 	public static boolean unmasked(Player player) {
-		return Boolean.TRUE.equals(player.getAttached(UNMASKED)) && suitShown(player) && !bulked(player);
+		if (!suitShown(player) || bulked(player)) {
+			return false;
+		}
+		com.jaymospowers.costume.CostumeDesign shape = com.jaymospowers.costume.Costume.worn(player);
+		if (shape != null && shape.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE) {
+			// its suit is the host's costume (Costume.symbioteShape): the mask is the costume's head piece
+			return com.jaymospowers.costume.Costume.unmasked(player);
+		}
+		return Boolean.TRUE.equals(player.getAttached(UNMASKED));
 	}
 
 	/** (server) When each player last flipped the suit's mask (game time). */
@@ -801,6 +809,13 @@ public final class WebSymbiote {
 		LAST_MASK.put(player.getUUID(), now);
 		if (!suitShown(player) || bulked(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote.mask_no_suit"));
+			return;
+		}
+		com.jaymospowers.costume.CostumeDesign shape = com.jaymospowers.costume.Costume.shown(player);
+		if (shape != null && shape.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE) {
+			// its suit is the host's costume: the mask to take off is the costume's head piece
+			LAST_MASK.remove(player.getUUID());
+			com.jaymospowers.costume.Costume.toggleMask(player);
 			return;
 		}
 		boolean off = !Boolean.TRUE.equals(player.getAttached(UNMASKED));
@@ -1378,6 +1393,13 @@ public final class WebSymbiote {
 		}
 		if (!state.equals(was)) {
 			player.setAttached(STATE, state);
+			int shape = WebSymbioteState.SUIT | WebSymbioteState.BULK;
+			if ((was == null || was.bonded() != state.bonded() || (was.flags() & shape) != (state.flags() & shape))
+				&& com.jaymospowers.costume.Costume.worn(player) != null) {
+				// its suit is the host's costume (Costume.symbioteShape): called or withdrawn, the mask's secret
+				// identity comes and goes with it
+				com.jaymospowers.costume.SecretIdentity.update(player);
+			}
 		}
 	}
 

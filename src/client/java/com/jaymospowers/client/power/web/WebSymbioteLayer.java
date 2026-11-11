@@ -79,7 +79,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 				// bare skin: the goo goes on first, the suit over it
 				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
-			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+			if (!com.jaymospowers.client.costume.CostumeClient.forming(state)) {
+				// (a host's costume is the suit's shape: it is laid over the goo instead, CostumeClient)
+				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+			}
 			// (no tongue on the plain suit: only the big body has one, Andy)
 			if (high == 2) {
 				coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);

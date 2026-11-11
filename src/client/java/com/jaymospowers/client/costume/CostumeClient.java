@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * goes on their render state ({@link #extract}, which also takes their armour off it: it still protects, it just isn't
  * drawn), and {@link Layer} draws it over the body. In first person your own sleeves are drawn over your hands.
  * <p>
- * The costume gives way to a Xeno-Band form and to the symbiote's suit (both cover the whole body themselves).
+ * The costume gives way to a Xeno-Band form. On a symbiote's host it is the symbiote's suit ({@code Costume.symbioteShape},
+ * {@link #SHAPE}): drawn while the suit is called, gone while it is withdrawn, under the big body when that swells.
  * <p>
  * (0.12.3) The mask key ({@link #maskKey}, apostrophe by default: every letter is taken by Powers, Kingdoms or
  * vanilla) takes the costume's head piece off and puts it back ({@code Costume.toggleMask}); with it off
@@ -58,6 +59,12 @@ public final class CostumeClient {
 	public static final double HOOD_NAME_RANGE = 8.0;
 	/** The costume to draw on this player, or null. */
 	public static final RenderStateDataKey<CostumeDesign> KEY = RenderStateDataKey.create(() -> "jaymospowers:costume");
+
+	/**
+	 * On a player's render state while the costume drawn on them is their symbiote's suit ({@code Costume.symbioteShape}):
+	 * it stands in for the plain suit, and is laid over the goo part by part as the suit is called or withdrawn.
+	 */
+	public static final RenderStateDataKey<Boolean> SHAPE = RenderStateDataKey.create(() -> "jaymospowers:costume_symbiote_shape");
 
 	/** While the designer draws its preview: the design shown on the local player in place of what they wear. */
 	private static @Nullable CostumeDesign preview;
@@ -128,6 +135,24 @@ public final class CostumeClient {
 				design = design.withMask(CostumeDesign.Mask.NONE);
 			}
 		}
+		boolean shape = false;
+		if (design != null && WebSymbiote.isBonded((Player)entity)) {
+			// a symbiote's host: the costume is its suit's shape, there only while the suit is
+			WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
+			if (growth == null && state.getData(WebSymbioteClient.SUIT) == null) {
+				// withdrawn (or swollen into the big body): they look like themselves (the designer still shows its preview)
+				if (design != preview) {
+					design = null;
+				}
+			} else {
+				shape = true;
+				if (growth == null && !WebSuitGrowth.bigBody(state) && state.getData(WebSuitGrowth.PULL) == null) {
+					// worn and whole: the costume is all there is of the suit, on a body drawn like any costumed one
+					state.setData(WebSymbioteClient.SUIT, null);
+				}
+			}
+		}
+		state.setData(SHAPE, shape ? Boolean.TRUE : null);
 		state.setData(KEY, design);
 		// (0.11.78) filled in again as it is drawn (CostumeBody), never left over from another frame
 		state.setData(CostumeBody.BODY, null);
@@ -169,10 +194,34 @@ public final class CostumeClient {
 
 	/** Whether something else covers the whole body just now (a Xeno-Band form, the symbiote's suit). */
 	public static boolean covered(AvatarRenderState state) {
-		if (state.getData(XenoformClient.FORM) != null || state.getData(WebSymbioteClient.SUIT) != null || state.getData(WebSuitGrowth.KEY) != null) {
+		if (state.getData(XenoformClient.FORM) != null) {
+			return true;
+		}
+		if (forming(state)) {
+			// the symbiote's suit in the costume's shape, being called or withdrawn: laid over the goo as it goes
+			return false;
+		}
+		if (state.getData(WebSymbioteClient.SUIT) != null || state.getData(WebSuitGrowth.KEY) != null) {
 			return true;
 		}
 		return WebSuitGrowth.bigBody(state);
+	}
+
+	/**
+	 * The costume on this player is their symbiote's suit ({@link #SHAPE}) and it is being called or withdrawn just now
+	 * (not torn off, nor swelling into the big body): the costume takes the plain suit's place over the goo.
+	 */
+	public static boolean forming(AvatarRenderState state) {
+		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
+		return growth != null && state.getData(SHAPE) != null && !growth.tear() && Math.max(growth.from(), growth.to()) == 1;
+	}
+
+	/**
+	 * While {@link #forming}: how far each of a worn model's parts is laid, 0-1 (body, right arm, left arm, head, right
+	 * leg, left leg, as the plain suit's are), else null.
+	 */
+	static float @Nullable [] laid(AvatarRenderState state) {
+		return forming(state) ? WebSuitGrowth.suitLaid(state.getData(WebSuitGrowth.KEY)) : null;
 	}
 
 	/** Draws the worn costume over a player, piece by piece, each piece once per colour. */
@@ -290,8 +339,9 @@ public final class CostumeClient {
 	/** First person, after the game draws your arm: the costume's sleeve over it (from the avatar renderer's renderHand). */
 	public static void renderHand(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart arm, PlayerModel source) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		CostumeDesign design = player != null ? Costume.worn(player) : null;
-		if (design == null || WebSymbiote.suitShown(player) || WebSymbiote.bulked(player)) {
+		// (a symbiote's host: the sleeve is there while its suit is, Costume.shown)
+		CostumeDesign design = player != null ? Costume.shown(player) : null;
+		if (design == null) {
 			return;
 		}
 		if (handModels == null) {
