@@ -3,7 +3,7 @@ status: in-review
 task: 
 branch: claude/project-thread-udod01
 with: Claude (cloud thread)
-pr: 
+pr: 1320
 mods: powers, kingdoms
 versions: 
 started: 2026-11-11
