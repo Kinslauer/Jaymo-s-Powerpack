@@ -56,9 +56,11 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   hide and cloth sets (Beast pelt, Caveman, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
   brightness rank in the set's 7-step ramp. Worn layers use the ramp's mid tone to glint, as vanilla's diamond and
   gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt and Caveman.
-  Caveman keeps its own scraps cut (its old worn alpha is the mask). Ichorcloth's hood/robe icons and Bog iron's
-  icons were already in this style and stay. Left as they are: Scouter, Sealed Helm, Void Crown, Rig, Training
-  Weights, Weighted Gi, Air Skin and Traceur Boots (gear, not armour sets).
+  Caveman keeps its own scraps cut (its old worn alpha is the mask) and its own icon shapes (Andy: "more like the
+  original rather than leather armor"), drawn as grids and shaded by `vstyle.parts`. Ichorcloth's hood/robe icons
+  and Bog iron's icons were already in this style and stay. One-off gear with placeholder art is redrawn in the
+  same script: Traceur Boots and Gloves, Training Weights (both), Weighted Gi, and the Sealed Helm's worn layer.
+  Scouter, Rig, Air Skin and Void Crown were already clean and stay.
 
 Armour: `python -I tools/vanilla_style/armour.py <vanilla 26.3 assets/minecraft/textures folder>` (it needs the
 `item` and `entity/equipment` folders), then `python -I tools/excalibur_style/grade.py` for the graded copies.
