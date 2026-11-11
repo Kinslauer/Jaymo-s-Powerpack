@@ -291,6 +291,20 @@ cloudwool. In daylight two of the village take her out across the open sky and b
 line. Enough cloth over a light hull will lift anything, so a balloon can be built by anyone who has seen one; nobody
 below has. A skiff is never in irons, because at some height there is always a wind going her way.
 
+(new) **The sky towns** (four-mods thread, 2026-11-11; Andy: "if there is room for an epic village kingdom ... spawn
+one and maybe we could design some in the aether and blossom biome styles"). Rarer than the sky villages, a few islands
+carry a whole town: a bell on a paved plaza, a galleried great hall beside it, a library, a smithy, a tavern, a mill,
+tall houses and terraced plots, all in the island's own stone and wood, with a mooring mast at the far edge. A town
+that size takes a king as any great town below does, so there are kingdoms in the sky. They are Divine-born realms
+with the halfway folk among them. A sky kingdom holds its own islands and nothing under them, and the ground below a
+sky town is still whoever's it was. It and the realms below cannot go to war, raid or send caravans to one another:
+there is no road, and nobody below has the ships. Sky kingdoms deal with each other as kingdoms do.
+
+(new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
+village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
+the head of the road a three-storey keep with flared roofs, which is the lord's seat. A blossom town is a kingdom like
+any other great town, and keeps its own style of name.
+
 ## The shape of the world
 
 The world is graded in tiers, and the tiers are its history as much as its difficulty:
