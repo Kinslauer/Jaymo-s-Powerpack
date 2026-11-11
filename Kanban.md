@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-10 20:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,12 +17,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🍇 Bacchus · #1262 · changes · fixing review notes
 
 
 ## In review
 
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🍇 Bacchus · #1263 · in-review
 - [ ] [[Agents/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]] · 💻 Odysseus · #1256 · in-review
 
 
