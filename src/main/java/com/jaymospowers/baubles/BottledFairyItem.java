@@ -1,9 +1,9 @@
 package com.jaymospowers.baubles;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,7 +53,7 @@ public class BottledFairyItem extends BaubleItem {
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
 		if (owner.tickCount % GLOW_EVERY == 0 && !owner.isInvisible()) {
-			level.sendParticles(new DustParticleOptions(PinkFairy.GLOW, 0.5F), owner.getX(), owner.getY() + owner.getBbHeight() * 0.55, owner.getZ(),
+			level.sendParticles(MagicFx.wisp(PinkFairy.GLOW, 0.5F), owner.getX(), owner.getY() + owner.getBbHeight() * 0.55, owner.getZ(),
 				1, 0.35, 0.35, 0.35, 0.0);
 		}
 	}

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -51,7 +52,7 @@ public final class SpiritJavelin extends Projectile {
 	/** How much of the burst's damage lands at its very edge. */
 	static final float BURST_EDGE = 0.5F;
 	/** The javelin's trail colour (amber). */
-	static final DustParticleOptions AMBER = new DustParticleOptions(0xFFB347, 0.9F);
+	static final ParticleOptions AMBER = Fx.wisp(0xFFB347, 0.9F);
 
 	public static EntityType<SpiritJavelin> TYPE;
 

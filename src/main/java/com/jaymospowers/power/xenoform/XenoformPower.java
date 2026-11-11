@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -1209,7 +1210,7 @@ public final class XenoformPower implements Power {
 		ultimateBody(player, form, true);
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
@@ -1345,7 +1346,7 @@ public final class XenoformPower implements Power {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		com.jaymospowers.core.Shakes.heavy(player, at, 10.0, 0.5F);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | COLOR), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, COLOR);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.12);
 		BandFlash.flash(player, at);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
@@ -1415,7 +1416,7 @@ public final class XenoformPower implements Power {
 		if (fx) {
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | COLOR), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, COLOR);
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.4, 0.6, 0.4, 0.08);
 			BandFlash.flash(player, at);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
@@ -1470,7 +1471,7 @@ public final class XenoformPower implements Power {
 		live.hudDirty = true;
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
@@ -1534,7 +1535,7 @@ public final class XenoformPower implements Power {
 		if (fx) {
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.5, 0.8, 0.5, 0.08);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 			player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color))));

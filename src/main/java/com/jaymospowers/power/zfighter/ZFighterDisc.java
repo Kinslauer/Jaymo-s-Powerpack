@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Powers;
@@ -12,7 +13,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -170,7 +170,7 @@ public final class ZFighterDisc {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = 0.5 + 0.6 * (1.0F - charge);
 			double ox = Math.cos(a) * r, oz = Math.sin(a) * r;
-			level.sendParticles(new DustParticleOptions(color, 0.8F), true, false, at.x + ox, at.y, at.z + oz, 0, -ox, 0.0, -oz, 0.12);
+			level.sendParticles(MagicFx.wisp(color, 0.8F), true, false, at.x + ox, at.y, at.z + oz, 0, -ox, 0.0, -oz, 0.12);
 		}
 		if (held % HUM_EVERY == 0) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS,

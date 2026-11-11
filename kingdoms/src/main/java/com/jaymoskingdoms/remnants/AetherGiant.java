@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.FallingTree;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,7 +12,6 @@ import com.jaymoskingdoms.Trees;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -107,6 +107,8 @@ public class AetherGiant extends Monster {
 	static final double FLARE_WITHER_RANGE = 12.0;
 	/** The flare's flash (Ambrosium gold-green). */
 	static final int FLARE_COLOR = 0xFFC8F060;
+	/** How far the flare's blast of light swells (blocks). */
+	static final float FLARE_RADIUS = 3.0F;
 	/** Where its stamp lands, this far ahead of its middle (blocks). */
 	static final double STAMP_AHEAD = 6.0;
 	/** Too big to path through woods: with no path to its target it strides straight at it, and every this many ticks whatever it walks into is knocked down. */
@@ -993,7 +995,7 @@ public class AetherGiant extends Monster {
 			case IRRADIATED -> {
 				// an Ambrosium flare: poison for all near, wither for the closest
 				level.sendParticles(this.element.mote, at.x, at.y + 2.0, at.z, 80, POWER_RANGE / 3, 1.0, POWER_RANGE / 3, 0.05);
-				level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, FLARE_COLOR), at.x, at.y + 3.0, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				Fx.blast(level, at.add(0.0, 3.0, 0.0), FLARE_RADIUS, FLARE_COLOR);
 				this.playSound(SoundEvents.BEACON_ACTIVATE, 2.0F, 1.6F);
 				for (LivingEntity hit : this.near(level, at, POWER_RANGE)) {
 					this.touch(hit, 2);

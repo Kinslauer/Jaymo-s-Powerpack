@@ -1,11 +1,11 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -94,7 +94,7 @@ final class DarktideGift implements GiftKit {
 	private static boolean grip(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
 		Vec3 c = foe.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y, c.z, 20, 0.3, 0.5, 0.3, 0.05);
-		level.sendParticles(new DustParticleOptions(INK_COLOR, 1.4F), c.x, c.y, c.z, 16, 0.3, 0.5, 0.3, 0.0);
+		level.sendParticles(MagicFx.wisp(INK_COLOR, 1.4F), c.x, c.y, c.z, 16, 0.3, 0.5, 0.3, 0.0);
 		level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 10, 0.3, 0.4, 0.3, 0.05);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.CONDUIT_AMBIENT_SHORT, SoundSource.NEUTRAL, 0.8F, 0.7F);
@@ -158,7 +158,7 @@ final class DarktideGift implements GiftKit {
 			}
 		}
 		level.sendParticles(ParticleTypes.FALLING_WATER, mob.getX(), mob.getY(0.6), mob.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
-		level.sendParticles(new DustParticleOptions(INK_COLOR, 1.0F), mob.getX(), mob.getY(0.6), mob.getZ(), 3, 0.4, 0.3, 0.4, 0.0);
+		level.sendParticles(MagicFx.wisp(INK_COLOR, 1.0F), mob.getX(), mob.getY(0.6), mob.getZ(), 3, 0.4, 0.3, 0.4, 0.0);
 		if (washed) {
 			level.playSound(null, at, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.8F, 1.2F);
 			level.playSound(null, at, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.0F);
@@ -178,7 +178,7 @@ final class DarktideGift implements GiftKit {
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y + 1.0, c.z, 80, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4, 0.1);
 		level.sendParticles(ParticleTypes.FALLING_WATER, c.x, c.y + 4.0, c.z, 120, TIDE_RADIUS * 0.4, 0.5, TIDE_RADIUS * 0.4, 0.0);
-		level.sendParticles(new DustParticleOptions(INK_COLOR, 2.0F), c.x, c.y + 1.0, c.z, 40, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4, 0.0);
+		MagicFx.burst(level, c.x, c.y + 1.0, c.z, INK_COLOR, 2.0F, 40, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.NEUTRAL, 2.0F, 0.5F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.CONDUIT_ACTIVATE, SoundSource.NEUTRAL, 2.0F, 0.6F);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, foe.getBoundingBox().inflate(TIDE_RADIUS),

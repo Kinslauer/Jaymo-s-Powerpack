@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.crucible;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
 import com.jaymospowers.alchemy.Flux;
@@ -227,8 +228,7 @@ public class CrucibleEntity extends BlockEntity {
 			out.addTag(Crucibles.SPENT_TAG);
 			out.setPickUpDelay(20);
 			level.addFreshEntity(out);
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), pos.getX() + 0.5, pos.getY() + 1.0,
-				pos.getZ() + 0.5, 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 			level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 14, 0.2, 0.2, 0.2, 0.08);
 			level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.8F);
 			level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8F, 1.1F);

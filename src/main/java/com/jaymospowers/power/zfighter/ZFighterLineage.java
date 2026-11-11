@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -12,7 +13,6 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -558,7 +558,7 @@ public final class ZFighterLineage {
 		attributes(player, live);
 		if (ape) {
 			double width = player.getBbWidth();
-			level.sendParticles(new DustParticleOptions(0x6B3A1E, 3.0F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
+			level.sendParticles(MagicFx.wisp(0x6B3A1E, 3.0F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
 				player.getZ(), 6, width * 0.4, player.getBbHeight() * 0.35, width * 0.4, 0.0);
 			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, player.getX(), player.getY() + 0.2, player.getZ(), 3, width * 0.6, 0.1,
 				width * 0.6, 0.02);
@@ -630,7 +630,7 @@ public final class ZFighterLineage {
 			berserk(player, live, level, now);
 		}
 		if (now % 3 == 0) {
-			level.sendParticles(new DustParticleOptions(0xC03020, 2.5F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
+			level.sendParticles(MagicFx.wisp(0xC03020, 2.5F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
 				player.getZ(), 2, player.getBbWidth() * 0.4, player.getBbHeight() * 0.3, player.getBbWidth() * 0.4, 0.0);
 		}
 		if (now % 200 == 0) {
@@ -1060,7 +1060,7 @@ public final class ZFighterLineage {
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 12, 0.4, 0.5,
 			0.4, 0.05);
-		level.sendParticles(new DustParticleOptions(color(VERDANT, 0), 1.4F), true, false, target.getX(), target.getY() + 1.0, target.getZ(), 16,
+		level.sendParticles(MagicFx.wisp(color(VERDANT, 0), 1.4F), true, false, target.getX(), target.getY() + 1.0, target.getZ(), 16,
 			0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.4F);
 		return true;

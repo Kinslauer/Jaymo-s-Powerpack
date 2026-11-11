@@ -1,12 +1,12 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Soundscape;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -142,7 +142,7 @@ final class ZFighterTechniques {
 				mob.getNavigation().stop();
 			}
 		}
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), true, true, eye.x, eye.y, eye.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, eye.x, eye.y, eye.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 		level.sendParticles(ParticleTypes.END_ROD, true, false, eye.x, eye.y, eye.z, 40, 0.3, 0.3, 0.3, 0.5);
 		level.playSound(null, eye.x, eye.y, eye.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 2.0F);
 		level.playSound(null, eye.x, eye.y, eye.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.6F);
@@ -171,13 +171,13 @@ final class ZFighterTechniques {
 		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(BARRIER_RADIUS),
 			p -> p.getOwner() != player)) {
 			Vec3 at = projectile.position();
-			level.sendParticles(new DustParticleOptions(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.5F), true, false, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.05);
+			level.sendParticles(MagicFx.wisp(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.5F), true, false, at.x, at.y, at.z, 8, 0.15, 0.15, 0.15, 0.05);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 0.7F, 1.5F);
 			projectile.discard();
 		}
 		if (live.barrierTicks % 2 == 0) {
 			RandomSource random = level.getRandom();
-			DustParticleOptions dust = new DustParticleOptions(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.0F);
+			ParticleOptions dust = MagicFx.wisp(ZFighterKi.baseColor(live, BARRIER_COLOR), 1.0F);
 			for (int i = 0; i < 14; i++) {
 				Vec3 dir = new Vec3(random.nextGaussian(), Math.abs(random.nextGaussian()), random.nextGaussian()).normalize();
 				Vec3 at = centre.add(dir.scale(BARRIER_RADIUS * 0.8));
@@ -244,7 +244,7 @@ final class ZFighterTechniques {
 		Vec3 sphere = spherePos(player, live);
 		if ((now - live.spiritFrom) % 20 == 0 && live.spiritEnergy < SPIRIT_MAX) {
 			int lenders = 0;
-			DustParticleOptions mote = new DustParticleOptions(SPIRIT_COLOR, 1.2F);
+			ParticleOptions mote = MagicFx.wisp(SPIRIT_COLOR, 1.2F);
 			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SPIRIT_RANGE),
 				e -> e != player && e.isAlive() && !e.isSpectator())) {
 				if (lenders >= SPIRIT_MAX_LENDERS) {
@@ -367,14 +367,14 @@ final class ZFighterTechniques {
 
 	private static void drawSphere(ServerLevel level, Vec3 centre, double size, long now) {
 		RandomSource random = level.getRandom();
-		DustParticleOptions shell = new DustParticleOptions(SPIRIT_COLOR, 3.0F);
+		ParticleOptions shell = MagicFx.wisp(SPIRIT_COLOR, 3.0F);
 		int count = (int)Math.min(70, 10 + size * size * 4);
 		for (int i = 0; i < count; i++) {
 			Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 			Vec3 at = centre.add(dir.scale(size * (0.7 + random.nextDouble() * 0.3)));
 			level.sendParticles(shell, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(new DustParticleOptions(0xFFFFFF, 3.5F), true, false, centre.x, centre.y, centre.z, 3, size * 0.25, size * 0.25,
+		level.sendParticles(MagicFx.wisp(0xFFFFFF, 3.5F), true, false, centre.x, centre.y, centre.z, 3, size * 0.25, size * 0.25,
 			size * 0.25, 0.0);
 		if (now % 20 == 0) {
 			Soundscape.play(level, centre, SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(2.0F).pitched(0.5F + (float)size * 0.05F), ZFighterKi.KI_SURGE);

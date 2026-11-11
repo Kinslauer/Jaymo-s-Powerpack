@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.power.gravity.GravityPower;
@@ -15,7 +16,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -48,7 +49,7 @@ public final class ArsenalDamocles {
 	/** How far out it can be aimed (where the crosshair lands: a block, a creature, or open air this far out). */
 	static final double RANGE = 64.0;
 	/** While B is held: the ring marking where it will land (shown only to you). */
-	private static final DustParticleOptions MARKER = new DustParticleOptions(0x5A1A8C, 1.6F);
+	private static final ParticleOptions MARKER = MagicFx.wisp(0x5A1A8C, 1.6F);
 	/** The rift opens this high over the ground it's aimed at (lower under the world's ceiling). */
 	public static final double PORTAL_HEIGHT = 30.0;
 	public static final double PORTAL_RADIUS = 4.5;

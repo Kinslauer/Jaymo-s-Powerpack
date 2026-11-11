@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.Downed;
@@ -17,7 +18,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -465,7 +466,7 @@ public final class ZFighterInvasions {
 	/** The line, drawn in motes for each player near it (only he sees his stretch of it). */
 	private static void wall(Invasion inv) {
 		Vec3 c = Vec3.atBottomCenterOf(inv.seat);
-		DustParticleOptions dust = new DustParticleOptions(inv.theme.dust, 2.0F);
+		ParticleOptions dust = MagicFx.wisp(inv.theme.dust, 2.0F);
 		for (ServerPlayer player : inv.level.players()) {
 			double dx = player.getX() - c.x, dz = player.getZ() - c.z;
 			double distance = Math.sqrt(dx * dx + dz * dz);

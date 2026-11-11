@@ -1,8 +1,8 @@
 package com.jaymospowers.aether.guardian;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -451,7 +451,7 @@ public class VisageOfWar extends Monster {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.HOSTILE, 1.5F, 0.5F + this.random.nextFloat() * 0.5F);
 		}
 		if (this.deathTime >= DEATH_TICKS && !this.isRemoved()) {
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE08A), this.getX(), this.getY() + 1.5, this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			MagicFx.blast(level, this.getX(), this.getY() + 1.5, this.getZ(), MagicFx.FLASH_RADIUS, 0xFFE08A);
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0F, 0.5F);
 			ExperienceOrb.award(level, this.position(), XP);
 			for (String drop : DROPS) {

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,7 +11,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.MinecraftServer;
@@ -158,7 +159,7 @@ final class ZFighterAfterimage {
 				COPIES.remove(player.getUUID());
 			}
 		}
-		DustParticleOptions image = new DustParticleOptions(ZFighterArts.color(live), 1.2F);
+		ParticleOptions image = MagicFx.wisp(ZFighterArts.color(live), 1.2F);
 		for (double h = 0.1; h < player.getBbHeight(); h += 0.3) {
 			level.sendParticles(image, true, false, start.x, start.y + h, start.z, 3, 0.2, 0.05, 0.2, 0.0);
 		}
@@ -217,7 +218,7 @@ final class ZFighterAfterimage {
 			}
 			if (now % LURE_EVERY == 0) {
 				lure(owner, copy.level, mannequin);
-				copy.level.sendParticles(new DustParticleOptions(ZFighterPower.live(owner).kiColor >= 0 ? ZFighterPower.live(owner).kiColor : ZFighterPower.COLOR, 0.8F),
+				copy.level.sendParticles(MagicFx.wisp(ZFighterPower.live(owner).kiColor >= 0 ? ZFighterPower.live(owner).kiColor : ZFighterPower.COLOR, 0.8F),
 					true, false, mannequin.getX(), mannequin.getY() + 1.0, mannequin.getZ(), 1, 0.3, 0.6, 0.3, 0.0);
 			}
 		}

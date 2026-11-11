@@ -1,7 +1,7 @@
 package com.jaymoskingdoms;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -75,7 +75,7 @@ public final class Fanfare {
 	/** A rising ring of sparks in the track's colour, end-rod motes, and for the grandest a totem's swirl. */
 	public static void burst(ServerPlayer player, int color, int size) {
 		ServerLevel level = player.level();
-		DustParticleOptions dust = new DustParticleOptions(color & 0xFFFFFF, 1.4F);
+		ParticleOptions dust = Fx.wisp(color & 0xFFFFFF, 1.4F);
 		int sparks = SPARKS[size];
 		for (int i = 0; i < sparks; i++) {
 			double a = Math.PI * 2.0 * i / sparks;

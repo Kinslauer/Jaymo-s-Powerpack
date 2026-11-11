@@ -1,12 +1,13 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -46,9 +47,9 @@ final class GravityShockwave {
 	/** How far each lump leans out (degrees). */
 	static final float TILT_MIN = 20.0F, TILT_MAX = 60.0F;
 
-	private static final DustParticleOptions BUBBLE = new DustParticleOptions(0xA070FF, 1.6F);
-	private static final DustParticleOptions STREAK = new DustParticleOptions(0xC9A6FF, 1.1F);
-	private static final DustParticleOptions SHARD = new DustParticleOptions(0x1A0F2E, 1.3F);
+	private static final ParticleOptions BUBBLE = MagicFx.wisp(0xA070FF, 1.6F);
+	private static final ParticleOptions STREAK = MagicFx.wisp(0xC9A6FF, 1.1F);
+	private static final ParticleOptions SHARD = MagicFx.wisp(0x1A0F2E, 1.3F);
 	/** The lumps' shapes (block offsets): a pair side by side, a pair stacked, an L, a standing plate. */
 	private static final int[][][] SHAPES = {
 		{{0, 0, 0}, {1, 0, 0}},
@@ -177,7 +178,7 @@ final class GravityShockwave {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double d = Math.sqrt(random.nextDouble()) * Math.max(1.0, r);
 			double x = at.x + Math.cos(a) * d, z = at.z + Math.sin(a) * d;
-			DustParticleOptions kind = i == 2 ? SHARD : STREAK;
+			ParticleOptions kind = i == 2 ? SHARD : STREAK;
 			double tall = 1.2 + random.nextDouble() * 1.6;
 			for (int k = 0; k < 6; k++) {
 				level.sendParticles(kind, x, at.y + tall * k / 6.0, z, 1, 0.02, 0.0, 0.02, 0.0);

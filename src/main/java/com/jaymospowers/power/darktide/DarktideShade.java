@@ -1,10 +1,11 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -46,7 +47,7 @@ final class DarktideShade {
 	/** Shadow ash left where a shade burned away. */
 	static final int ASH_DROPPED = 3;
 	/** The black dust a shade sheds as it moves: colour and size, and how many specks every {@link #DUST_EVERY} ticks. */
-	static final DustParticleOptions DUST = new DustParticleOptions(0x0B0B0F, 1.3F);
+	static final ParticleOptions DUST = MagicFx.wisp(0x0B0B0F, 1.3F);
 	static final int DUST_EVERY = 2, DUST_COUNT = 3;
 	/** The sun burning a shade away: {@code jaymospowers:darktide_dawn}, through everything. */
 	static final ResourceKey<DamageType> DAWN = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("darktide_dawn"));

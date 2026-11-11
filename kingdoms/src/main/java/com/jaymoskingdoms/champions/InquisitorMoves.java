@@ -1,9 +1,10 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,7 +56,7 @@ final class InquisitorMoves implements Moves {
 			return;
 		}
 		Vec3 from = c.getEyePosition(), to = t.getEyePosition();
-		DustParticleOptions dust = new DustParticleOptions(0x909090, 1.0F);
+		ParticleOptions dust = Fx.wisp(0x909090, 1.0F);
 		int n = (int)from.distanceTo(to) * 2;
 		for (int i = 0; i <= n; i++) {
 			Vec3 p = from.add(to.subtract(from).scale(i / (double)Math.max(1, n)));

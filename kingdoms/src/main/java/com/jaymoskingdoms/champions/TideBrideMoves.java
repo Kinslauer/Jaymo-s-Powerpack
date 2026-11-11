@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.PatronChampion;
 import java.util.List;
 import net.minecraft.core.particles.ParticleTypes;
@@ -129,7 +130,7 @@ final class TideBrideMoves implements Moves {
 		}
 		for (double d = 0.0; d <= WAVE_LENGTH; d += 1.0) {
 			Vec3 p = this.waveFrom.add(this.waveTo.subtract(this.waveFrom).scale(d / WAVE_LENGTH));
-			MoveKit.dust(level, new net.minecraft.core.particles.DustParticleOptions(c.patron().colour & 0xFFFFFF, 1.0F), p.add(0.0, 0.2, 0.0), 2,
+			MoveKit.dust(level, Fx.wisp(c.patron().colour & 0xFFFFFF, 1.0F), p.add(0.0, 0.2, 0.0), 2,
 				WAVE_WIDTH / 2.0, 0.0);
 		}
 	}

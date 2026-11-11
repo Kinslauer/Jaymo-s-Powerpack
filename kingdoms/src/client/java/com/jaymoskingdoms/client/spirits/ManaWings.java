@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.ManaAlchemy;
 import com.jaymoskingdoms.client.ManaClient;
@@ -37,7 +38,6 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -289,7 +289,7 @@ public final class ManaWings {
 		double x = player.getX() - Mth.cos(yaw) * side - Mth.sin(yaw) * back;
 		double z = player.getZ() - Mth.sin(yaw) * side + Mth.cos(yaw) * back;
 		double y = player.getY() + 0.6 + player.getRandom().nextDouble() * 0.8;
-		level.addParticle(new DustParticleOptions(color() & 0xFFFFFF, 0.9F), x, y, z, 0.0, -0.02, 0.0);
+		level.addParticle(Fx.wisp(color() & 0xFFFFFF, 0.9F), x, y, z, 0.0, -0.02, 0.0);
 	}
 
 	/** Whether this client may see {@code entity}'s mana (and so its wings): it is attuned, and the viewer is or reads magic. */

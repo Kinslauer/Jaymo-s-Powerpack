@@ -13,7 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -144,7 +144,7 @@ public final class Mana {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/** The overload's blue motes. */
-	public static final DustParticleOptions MOTE = new DustParticleOptions(0x4C8DFF, 1.0F);
+	public static final ParticleOptions MOTE = Fx.wisp(0x4C8DFF, 1.0F);
 
 	private Mana() {
 	}
