@@ -478,6 +478,16 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+(new) **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
+world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
+the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
+branched, and hang glowing spore lanterns that the Verdant dye and carry home for light. In the warm wet country is the
+**pulse forest**: thin blue stems with flat caps that brighten and dim together, the whole wood on one slow beat.
+Verdant elders say the wood is breathing; nobody has shown otherwise. In the dry cold uplands is the **stone garden**:
+wind-worn pillars and banded boulders with moss on their heads, and little else. And over all of it, in the same place
+day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
+the ring lies and do not think the sight remarkable.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
