@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: elemental-ki-limits
 branch: claude/project-thread-dnj6tx
 with: Claude (cloud project thread)
-pr:
+pr: 1333
 mods: powers, kingdoms
 versions:
 started: 2026-11-11
@@ -23,3 +23,7 @@ owns:
 ## Plan
 - Powers: scouter power level x0.4 for elemental holders (ki sense reads them weaker).
 - Kingdoms: Mana.blindToMana/seesMana gate every "who sees mana" check on the client.
+
+## Done
+- PR #1333. Elemental users: power level x0.4 (ki sense reads them weaker); never see others' mana glow, wings, spirits, mage hands or clash bars. Valor unchanged.
+- Built; not played. Lore.md has a (new) paragraph for Andy.
