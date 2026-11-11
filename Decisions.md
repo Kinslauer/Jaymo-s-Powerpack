@@ -229,3 +229,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 3:57 PM ET (Andy, four-mods thread): "merge". PRs #1312 (Aether villages), #1308 (Divine-born) and #1321 (sky towns, Blossom towns) merged.
 - 2026-11-11 9:00 PM UTC (Andy, Galvan thread): "The galvan should look very small with bug eyes, similar to the gremlin" (screenshot of tiny big-eyed gremlins). Built as the Xeno-Band Gremlin redrawn: a tiny upright imp with bulging glowing eyes instead of the hunched knuckle-walker.
 - 2026-11-11 4:21 PM: Andy 'merge': PR #1318 (CREDITS.txt conflict markers) merged.
+- 2026-11-11 4:20 PM ET (Andy, Galvan thread): the Galvan are "the race of aliens that build and upgrade the watch"; they use the Gremlin model; "the npc galvan wear robes like the picture, and monocles, and are a high class society." Built: the star forge smith drawn as a robed, monocled Galvan (Kingdoms GalvanBody), PR #1323.
