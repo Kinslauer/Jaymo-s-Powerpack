@@ -9,7 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
 ## Being built
@@ -21,6 +20,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
+- [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · 💻 Odysseus · #1270 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
