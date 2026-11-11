@@ -17,3 +17,5 @@
 - **Not built locally, not booted with `runServer`, not played.** The session could not reach the build's download
   hosts; the PR checks are its compile. It adds an item, so it needs a server boot before merging. The Hand Wraps
   texture is a placeholder.
+- Review fix: the punch takes the left click only after every other rule (a downed or armless player, a finisher,
+  Kingdoms' tag, the fight pit, captives), in a later event phase. Before, a boxer's punch skipped them all.
