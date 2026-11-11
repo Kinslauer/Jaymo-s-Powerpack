@@ -16,8 +16,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
+- [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 
 
