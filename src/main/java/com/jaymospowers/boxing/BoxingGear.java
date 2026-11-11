@@ -94,6 +94,20 @@ public final class BoxingGear {
 		return Registry.register(BuiltInRegistries.ITEM, key, new Item(props.setId(key)));
 	}
 
+	/** The gear worn on the hands when held (the client draws it there), by item id; its place here is its {@link #wornIndex}. */
+	public static final String[] WORN = {"hand_wraps", "leather_cestus", "iron_cestus", "steel_cestus", "leather_bracers", "iron_bracers",
+		"steel_bracers"};
+
+	/** {@code stack}'s place in {@link #WORN}, or -1 if it isn't boxing's gear. */
+	public static int wornIndex(ItemStack stack) {
+		if (stack.isEmpty() || HAND_WRAPS == null) {
+			return -1;
+		}
+		Item item = stack.getItem();
+		return item == HAND_WRAPS ? 0 : item == LEATHER_CESTUS ? 1 : item == IRON_CESTUS ? 2 : item == STEEL_CESTUS ? 3
+			: item == LEATHER_BRACERS ? 4 : item == IRON_BRACERS ? 5 : item == STEEL_BRACERS ? 6 : -1;
+	}
+
 	/** Whether {@code stack} is fist gear. */
 	public static boolean isGear(ItemStack stack) {
 		return !stack.isEmpty() && stack.is(GEAR);

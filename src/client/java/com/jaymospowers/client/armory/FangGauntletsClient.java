@@ -2,6 +2,7 @@ package com.jaymospowers.client.armory;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.Armory;
+import com.jaymospowers.boxing.BoxingGear;
 import com.jaymospowers.client.PoseTakeover;
 import com.jaymospowers.client.power.wind.CombatAnimCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -47,6 +48,10 @@ import org.jspecify.annotations.Nullable;
  * in {@code ModelPoses}, and as each model is finally drawn), and a pose of ours, so Entity Model Features pauses for it
  * ({@code PoseTakeover}). While an attack swings, vanilla's or Better Combat's (their combo animations are untouched),
  * the guard lets go and they drive the arms; there is no custom swing.
+ * <p>
+ * Boxing's fist gear ({@link BoxingGear}: Hand Wraps, the cestus, the bracers) is worn the same way, through the same
+ * mixins: wound round the hand, a studded band over the knuckles for a cestus, a guard up the forearm for bracers
+ * ({@link #buildBoxing}), each with its own texture, and the same fists-up guard.
  */
 public final class FangGauntletsClient {
 	// ===== the knobs ================================================================================================
@@ -64,6 +69,13 @@ public final class FangGauntletsClient {
 	static final float FIRST_IN = 0.16F, FIRST_UP = 0.1F, FIRST_FORWARD = 0.05F, FIRST_RAISE = 12.0F, FIRST_TURN = 10.0F, FIRST_TIP = 4.0F;
 	/** First person: the shoulder the arm turns about (right arm; x right, y up, z toward you), and how far below the view the empty off hand starts. */
 	static final float FIRST_SHOULDER_X = 0.75F, FIRST_SHOULDER_Y = -0.85F, FIRST_ENTRY_DROP = 0.6F;
+	/** Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it. */
+	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.3F;
+	/** A cestus's band over the knuckles: from this far down, and this far proud. */
+	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.55F;
+	/** Bracers: the guard up the forearm, from this far down, this long, and this far proud. */
+	static final float BRACER_TOP = 3.0F, BRACER_GROW = 0.45F;
+	static final int BRACER_LENGTH = 6;
 	// ================================================================================================================
 
 	/** Bits on a render state: the right arm wears a gauntlet, the left does, and (4) they're in the guard (no attack swinging). */
@@ -72,6 +84,12 @@ public final class FangGauntletsClient {
 	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:fang_gauntlets");
 
 	private static ModelPart rightGauntlet, leftGauntlet;
+	/** Boxing's shapes (the same on either arm): the wrap, the wrap under a cestus's knuckle band, and the bracer. */
+	private static ModelPart wrap, cestus, bracer;
+	/** Boxing's textures, by {@link BoxingGear#wornIndex}. */
+	private static final Identifier[] BOXING_TEXTURES = new Identifier[BoxingGear.WORN.length];
+	/** On a render state, above the arm bits: which of boxing's gear it is, plus one (0: the Fang Gauntlets). */
+	private static final int KIND_SHIFT = 8;
 
 	private FangGauntletsClient() {
 	}
@@ -84,8 +102,14 @@ public final class FangGauntletsClient {
 		});
 	}
 
+	/** Whether {@code stack} is worn on the hands when held: the Fang Gauntlets, or boxing's fist gear. */
 	public static boolean isGauntlets(ItemStack stack) {
-		return Armory.FANG_GAUNTLETS != null && stack.is(Armory.FANG_GAUNTLETS);
+		return Armory.FANG_GAUNTLETS != null && stack.is(Armory.FANG_GAUNTLETS) || BoxingGear.wornIndex(stack) >= 0;
+	}
+
+	/** 0 for the Fang Gauntlets, else boxing's gear: its {@link BoxingGear#wornIndex} plus one. */
+	private static int kind(ItemStack stack) {
+		return BoxingGear.wornIndex(stack) + 1;
 	}
 
 	/** From the avatar renderer's extractRenderState: which arms wear a gauntlet, and whether they're in the guard. */
@@ -103,7 +127,7 @@ public final class FangGauntletsClient {
 		if (!swinging && CombatAnimCompat.attack(entity) == null && !entity.isUsingItem()) {
 			bits |= GUARD;
 		}
-		state.setData(KEY, bits);
+		state.setData(KEY, bits | kind(entity.getMainHandItem()) << KIND_SHIFT);
 	}
 
 	/** Whether the guard is on this state (for PoseTakeover: Entity Model Features pauses so it holds). */
@@ -206,13 +230,44 @@ public final class FangGauntletsClient {
 		leftGauntlet = baked.getChild("left_gauntlet");
 	}
 
-	/** One gauntlet, on the arm the pose stack is at (its pivot). */
-	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim) {
+	/** Boxing's shapes, about the arm's middle: boxes round the arm, so one of each serves both arms. */
+	private static void buildBoxing() {
+		if (wrap != null) {
+			return;
+		}
+		MeshDefinition mesh = new MeshDefinition();
+		PartDefinition root = mesh.getRoot();
+		float wrapHeight = 10.0F - WRAP_TOP;
+		root.addOrReplaceChild("wrap", CubeListBuilder.create()
+			.texOffs(0, 0).addBox(-2.0F, WRAP_TOP, -2.0F, 4.0F, wrapHeight, 4.0F, new CubeDeformation(WRAP_GROW)), PartPose.ZERO);
+		root.addOrReplaceChild("cestus", CubeListBuilder.create()
+			.texOffs(0, 0).addBox(-2.0F, WRAP_TOP, -2.0F, 4.0F, wrapHeight, 4.0F, new CubeDeformation(WRAP_GROW))
+			.texOffs(0, 8).addBox(-2.0F, KNUCKLE_TOP, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(KNUCKLE_GROW)), PartPose.ZERO);
+		root.addOrReplaceChild("bracer", CubeListBuilder.create()
+			.texOffs(0, 16).addBox(-2.0F, BRACER_TOP, -2.0F, 4.0F, BRACER_LENGTH, 4.0F, new CubeDeformation(BRACER_GROW)), PartPose.ZERO);
+		ModelPart baked = LayerDefinition.create(mesh, 32, 32).bakeRoot();
+		wrap = baked.getChild("wrap");
+		cestus = baked.getChild("cestus");
+		bracer = baked.getChild("bracer");
+		for (int i = 0; i < BOXING_TEXTURES.length; i++) {
+			BOXING_TEXTURES[i] = JaymosPowers.id("textures/entity/boxing/" + BoxingGear.WORN[i] + ".png");
+		}
+	}
+
+	/** One gauntlet (or, {@code kind} above 0, one of boxing's), on the arm the pose stack is at (its pivot). */
+	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind) {
 		build();
+		buildBoxing();
 		poseStack.pushPose();
 		float middle = slim ? SLIM_ARM_MIDDLE : WIDE_ARM_MIDDLE;
 		poseStack.translate((right ? -middle : middle) / 16.0F, 0.0F, 0.0F);
-		collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+		if (kind <= 0 || kind > BOXING_TEXTURES.length) {
+			collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
+		} else {
+			String shape = BoxingGear.WORN[kind - 1];
+			ModelPart part = shape.endsWith("bracers") ? bracer : shape.endsWith("cestus") ? cestus : wrap;
+			collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(BOXING_TEXTURES[kind - 1]), light, OverlayTexture.NO_OVERLAY, null);
+		}
 		poseStack.popPose();
 	}
 
@@ -229,7 +284,7 @@ public final class FangGauntletsClient {
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
-		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM);
+		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()));
 		poseStack.popPose();
 	}
 
@@ -256,7 +311,7 @@ public final class FangGauntletsClient {
 				poseStack.pushPose();
 				body.root().translateAndRotate(poseStack);
 				arm.translateAndRotate(poseStack);
-				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim);
+				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT);
 				poseStack.popPose();
 			}
 		}
