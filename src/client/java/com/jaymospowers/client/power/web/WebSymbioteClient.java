@@ -527,6 +527,7 @@ public final class WebSymbioteClient {
 			THREATS.clear();
 			THREATS.addAll(payload.ids());
 			threatsAt = context.player() == null ? 0L : context.player().level().getGameTime();
+			WebSenseGlance.noticed(payload.ids());
 		});
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
@@ -2280,6 +2281,11 @@ public final class WebSymbioteClient {
 
 	/** Whether Spider-Sense is on for us this tick. */
 	private static boolean sensing;
+
+	/** Whether Spider-Sense is on for us (WebSenseGlance turns the head toward what it picks up). */
+	static boolean sensing() {
+		return sensing;
+	}
 
 	/** The outline colour for {@code entity} on our screen, or 0: red if it's about to hurt an ascended web slinger. */
 	public static int senseColor(Entity entity) {
