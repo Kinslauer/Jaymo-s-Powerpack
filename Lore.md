@@ -825,6 +825,17 @@ Barbarian camps take raiders and captives, and spare those the realms have outla
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
 
+(new) **How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
+this page, and it only ever hints. Families keep the faith of their trade: miners and smiths the Anvil-Father, fisherfolk
+the Deep Mother, hunters the Green Huntsman, healers the Hearthkeeper, outlaws the Ash Whisperer. Among the Nightborn,
+some families are **lantern-keepers of the barrows**, who keep the Lantern Warden's lights on the moor's old graves.
+The Dawnborn's priests are the Crowned Sun's. The Emberborn expedition at the Nether's edge **paid the Hornkin off in
+gold**, and a child fostered to a Hornkin war-band was part of such a bargain. The **Sylvan are long-lived**, so their
+elders remember old trees as saplings. A warband's old ones never say where the band came from, "only that it was a long
+way up". Pod crews trade a rumour that **somebody lives on the Pale Moon**, and nobody believes it. A stone lab's
+escapee is "somebody's unfinished work". The spider's bite leaves a person quieter. None of it names the old war, the
+Quiet One, the Tinkerer's labs or the elder.
+
 ## The sea
 
 A page found on drowned men, unsigned, called "A Wet Page": the tide brought the same stone up three times, and a stone
