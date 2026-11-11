@@ -144,3 +144,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-10 7:32-8:48 PM: Andy on giants (PR #1261, merged): running into a tree should knock it flying (the topple sends it), not grab it; the grab-and-throw stays as its own attack. Giants break blocks they sprint through; the giant sprint is a lumbering haul (on its feet, long strides, covers a lot of ground, no limb flailing), and NPC giants break into it when you get too far.
 - 2026-11-11: Andy: "can you takeover everything waiting?" A Claude cloud thread took over lore-canon-rewrite (meant for Quill on Fable): Lore.md rewritten in one voice with 64 (new) entries and a Not yet placed list, old page kept as Lore-before-rewrite.md; card set blocked for Andy to read.
 - 2026-11-10 9:50 PM: Andy on The Long Defence film: "the orc and warrior born legion are allied with the sorceror, who then summons the legion of undead orcs and risen dead (zombie pigmen)"; "Grimsby would have carried a sword but he should also cast spells." Built in PR #1268 (with the film's text pass); added to Lore.md's long defence.
+- 2026-11-10 9:59 PM: Andy's rulings on the lore-read-the-canon contradictions (Read the lore canon thread). Lore.md edits are left to the Rewrite the lore canon thread so only one session edits it.
+  1. "only one wakes for you": one spirit per player, out of five (the page didn't yet know about the Quiet One).
+  2. "the spirits fought and dominated them, so Varro should depict his own army of dominated orcs."
+  3. The Warrior-born "adopted that method of space travel from the frostborn, who should be rewritten to have come from far past our sun, with various technological advances we have never seen on overworld."
+  4. "The androids came from los perrito, and after the maw exploded, they traveled back and forth through time. some hope to prevent it someday, somehow."
+  5. "the grue is the sorcerer, its what his mana manifested as."
+  6. "They started calling it Earth in the future, we say overworld now."
