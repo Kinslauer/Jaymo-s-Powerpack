@@ -101,6 +101,16 @@ Warrior-born's ki and a priest's mana are not two forces in opposition; they are
 Sorcerer's Restoration element, the court wizards' staves and the spells read off scrolls are all the same well,
 shaped by hand.
 
+**(new) What power looks like** (magic FX thread, 2026-11-11, for Andy to approve). Because it is one well, power takes
+the same few shapes whoever draws it, and only its colour and size tell you whose it is: a **beam** (a line of power, a
+bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's ray and a rite's light), a **blast** (a
+shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
+place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
+power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
+which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
+goo, gunpowder, festival fireworks).
+
 ## The powers
 
 **How a power comes.** Every Overworlder may carry a power, asleep. It wakes on its own after a few days of
