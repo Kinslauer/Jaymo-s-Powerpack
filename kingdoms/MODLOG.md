@@ -11332,3 +11332,7 @@ blossom biome styles".
   a three-storey keep with flared roofs. It is a kingdom from the start, with the keep as its seat and a Blossom name.
   `/kingdom found blossomtown` raises one where you stand.
 - Sky village skiffs are no longer crewed by guards or people at work.
+
+## 0.7.744 (2026-11-11): Art credits file cleaned up
+
+The dragon art credits file had leftover merge markers from an old merge; they are gone and the Stegonaut credit is kept. Nothing changes in game.
