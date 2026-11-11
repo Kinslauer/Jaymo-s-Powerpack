@@ -139,7 +139,13 @@ kit.
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
   their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
-  when they heal (Andy, 2026-11-11). What they are given is not their eyes back: living things burn
+  when they heal (Andy, 2026-11-11).
+  (new) **The Unseeing** (Claude's name for them, for Andy to approve): the devout who carve the eyes keep together as
+  the Unseeing, and they take followers. Out in the wild at night a traveller may come on one of their services: the
+  members, blindfolded, in a ring of candles round a follower; the chant ("What the eye takes in, it lies about"), the
+  eldest's cut, the binding, and the follower given their new sight. A watcher is left a blindfold for when they are
+  ready (Andy, 2026-11-11: "you should be able to stumble on a service of the members performing this on one of their
+  followers"). What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
@@ -168,6 +174,13 @@ whole time"; their ki "went to the cold, or the smoke, or the weight of things, 
 go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
 when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
+(new) **What an elemental user sees** (Claude's placement, for Andy to approve). A Smoke, Gravity or Cryo user's ki
+went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
+body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
+sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
+mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
+any other power user.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -175,6 +188,26 @@ outright, mostly to make daily life easier: putting out a fire, keeping a food s
 vigilantes work on the legend of the old heroes, but each has their own methods, some better than others, so they are
 widely disliked. Costumed power users turn up in the world, some wreaking havoc, some trying to help their people. A
 masked hero goes by the costume's name while masked.
+
+(new) **The costumed gifted, and the everyday ones** (Claude's placement, for Andy to approve). The costumed power users
+in the world are gifted villagers, the one in eighty whose power woke. Only those who hide their gift put on a costume:
+the ones who don't care who sees have no need of a mask, and use the power plainly about the house. A costume is sewn by
+the village tailor, the same who sews them for players, and worn only after dark; by day its wearer is a baker or a
+farmhand like anyone else, and the street doesn't know whose face is under it.
+- **Vigilantes** are the brave, the kindhearted, the dutiful and the devout: at night, masked, they go out after the
+  monsters that come at their own people, by the legend of the old heroes, each in their own way.
+- **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
+  or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
+- **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
+  villain; neither is thanked.
+- **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
+  dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
+  house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
 
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
