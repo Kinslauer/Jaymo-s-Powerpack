@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,6 +12,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🪶 Quill · #1263 · writing
 
 
 ## In review
@@ -19,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
