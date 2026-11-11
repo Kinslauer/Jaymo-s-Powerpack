@@ -16,7 +16,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🪶 Quill · #1262 · writing
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 
 
 ## In review
@@ -28,6 +27,7 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 💻 Odysseus · blocked
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 
 
 ## Done
