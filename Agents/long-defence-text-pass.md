@@ -20,3 +20,15 @@ PR #1268: three lines rewritten (demon master, book pages 5 and 6). Text only.
 
 ## 2026-11-11 restage (Andy)
 Film restaged in PR #1268: forest + Keep set (block displays), battle engine running the whole film (pairs, finishers with heads/limbs/blood), lightning at the summons, dead rising in random groups, Varro's disarm-and-kneel in-balming, the fifth's run through trees past mana bolts and the sorcerer fading; cameras keep the 180 degree rule and thirds. New file `client/films/FilmPose.java`; also touched `ModelPoses`, `MobSwingLivingEntityRendererMixin`, `Draugr` (stageMaim, stageSwing), `InhabitantsClient`, `LoreFilms.FILM_TICKS` (800). Compiles; not watched in game. A browser preview of the staging is in the thread.
+
+## 2026-11-11 the Quiet One's cloak (Andy)
+White hooded look (`gen_film_skins.py` stranger), a living cloak of block-display cloth strips, tethers that wrap dart trees and nearby legion and throw them, swings and flips off trees (`FilmPose.FLIP`), two tethers at the sorcerer on the lunge. All in `LoreFilmClient` (`cloak`, `tether`, `stretch`, `cloth`, `fifth`). Compiles; not watched in game. Preview artifact updated. The model/GeckoLib side of the cloak belongs to the GeckoLib thread.
+
+## 2026-11-11 the forest burns (Andy)
+Trees catch from lightning and mana bolts, spread, blaze by the end; surviving soldiers run to beat them out after the sorcerer is gone (`fire`, `douse`, `igniteNear`, `spreadFrom`; FILM_TICKS 860). Owed: the new imps and their fireballs, once an imp mob exists (none in the repo on 2026-11-11).
+
+## 2026-11-11 slingshot and glide (Andy)
+Last jump: cloak grabs two SLING_TREES, draws him back, slow spiral glide (FilmPose.ROLL), cloak streams then opens, sorcerer turns to smoke just before contact (`glide`). FILM_TICKS 886. Note: the "Record the film with GeckoLib actors" thread (branch claude/project-thread-9yvqn9) is rebuilding this film on GeckoLib actors and a tape; it ports what is added here. Further film changes should go on its branch once it says so.
+
+## 2026-11-11 closed
+PR #1268 closed unmerged on Andy's choice; PR #1284 (GeckoLib thread) contains its commits up to 938baad3 and rebuilds the rest. This agent owns no files now.

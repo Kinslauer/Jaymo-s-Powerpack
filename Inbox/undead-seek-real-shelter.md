@@ -1,5 +1,5 @@
 ---
-status: sent
+status: changes
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -7,7 +7,7 @@ claimed_by:
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Undead seek real shelter from the sun
@@ -43,11 +43,6 @@ Not tested in game.
 - 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
 - 2026-11-11 01:54 Review (head 025ce16), second pass: still changes needed; the 01:19 list (whole-body rays, search cost, change note) is not fixed yet. One more: 4. Skeletons may not be able to leave tree shade: vanilla RestrictSunGoal turns on avoidSun, and GroundPathNavigation trims a path at the first open-sky node whenever the mob's own spot can't see sky. Under leaves canSeeSky is false, so SeekShelterGoal's moveTo (SeekShelterGoal.java:67) gets cut at the tree's edge and the skeleton keeps burning in place. Check trimPath in the 26.3 sources; if so, turn avoidSun off while this goal runs (or replace RestrictSunGoal for these mobs). Not tested in game.
 - 2026-11-11 03:13 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
-- 2026-11-11 04:15 Review of #1262 (head a862f4c), cloud reviewer: checks green? (see PR), changes needed. Whole-body rays (SunBurnMixin) and the 200-tick search back-off are fixed, and the change note matches.
-1. SeekShelterGoal.stop() sets avoidSun to true on every mob. GroundPathNavigation.trimPath cuts a path at the first open-sky node whenever avoidSun is on, at any time of day (26.3 bytecode: no daylight check there). Zombies have no RestrictSunGoal to turn it back off, so after their first shelter search they can't path out from under a roof at night, e.g. to chase a player. Save the value before changing it and put that value back.
-2. canUse turns avoidSun off before it knows the goal will run (before the exposure/cooldown checks), and nothing turns it back on when canUse returns false. Change it in start() and restore it in stop().
-3. The reflection getNavigation().getClass().getDeclaredField("avoidSun") only works when the class is exactly GroundPathNavigation. Use 'nav instanceof GroundPathNavigation g' with g.setAvoidSun(...) instead of reflection (check the 26.3 method name in the sources).
-Not tested in game.
-- 2026-11-11 05:14 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
-- 2026-11-11 00:34 Text pass: change note changes/powers/claude-undead-seek-real-shelter.md is the only player-visible text for this feature. It describes the deadlier sunlight (ray-cast from multiple body points, tree shade no longer counts) and shelter search (caves, solid roofs, wider radius). Text is clear and player-facing; no rewrite needed.
-- 2026-11-11 06:20 Review of #1262 (head 947704b), cloud reviewer: pass. Checks green. The 04:13 list is fixed: avoidSun is now changed in start() and the saved value is put back in stop(), so zombies keep pathing out at night. Reading it by reflection is fine, since GroundPathNavigation has setAvoidSun but no getter in 26.3; drowned (amphibious navigation) just skip the toggle. Minor, not blocking: a skeleton whose RestrictSunGoal flips avoidSun while this goal runs gets the older value back. Not tested in game.
+- 2026-11-11 11:31 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-11 12:39 Andy 2026-11-11 12:39Z: 'It should keep searching till it finds shelter.' Change SeekShelterGoal: when nothing is found within REACH, don't stay put; walk away (e.g. downhill or toward the darkest/most covered direction, or a widening search) and keep searching every back-off until it finds shelter. Held from merge for this.
+- 2026-11-11 16:32 Review (head 947704b), quick look: the 01:19/01:54 fixes are in, but Andy's 12:39Z ask (keep searching until it finds shelter) is not done yet. Also SeekShelterGoal.java:105/125 flips avoidSun by reflection on nav.getClass().getDeclaredField, which throws for any GroundPathNavigation subclass; use the public GroundPathNavigation.setAvoidSun (check it in 26.3) instead. Full review once the keep-searching change is pushed.
