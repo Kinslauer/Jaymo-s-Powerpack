@@ -34,7 +34,8 @@ bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
 The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
 
-(new) **The keep above the ford in the world.** It still stands, one in the world, in a wood above a river: a ruined
+(new) **The keep above the ford in the world.** It still stands, one in the world, in a forest above a river, wherever that
+forest lies; it has stood there since the long defence, and folk stopped speaking of it generations ago: a ruined
 keep of mossy, cracked stone, its corner tower half fallen and its gate toward the water, a worn road down to a shallow
 crossing. Horses won't drink there. In the keep lies **A Loose Page** in the gate-warden's hand: the names of the dead
 ran past the gatehouse wall, and before the one at the back went into the ground he turned and looked at the ford, "the
