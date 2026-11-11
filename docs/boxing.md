@@ -31,10 +31,24 @@ Jung's names; Andy has the last word. Changing them back is the three lines in `
 - **Gassed** (Feathers' exhausted state): a punch every `GASSED_INTERVAL` 32 ticks (proposed number), `GASSED_CUT` 45%
   weaker, never more than `GASSED_CAP` 2. The breath puff, the heaving shoulders and the tiring warning are not built.
 
+## Built so far: cestus and bracers
+
+- **Cestus** (damage): a styled punch does more with one on: leather +0.5 (`LEATHER_CESTUS_PUNCH`), iron +1
+  (`IRON_CESTUS_PUNCH`), steel +1.5 (`STEEL_CESTUS_PUNCH`). So 2, 2.5 and 3 a punch against 1.5 in wraps. The gassed
+  cap of 2 still holds.
+- **Bracers** (blocking): leather, iron, steel. They punch like wraps. What they do for a block comes with the blocks.
+- **Making them:** the leather ones are sewn round Hand Wraps in the crafting grid (wraps + 2 leather for the cestus,
+  wraps + 4 leather for the bracers). The iron and steel ones are forged like other metal weapons
+  (`tinkering/WeaponParts`): Cestus Studs (2 ingots) or Bracer Plates (3 ingots), in iron or steel, with a Tool Binding
+  at the Tool Station. No gold or diamond.
+- Without a style they are weak weapons: cestus 2 / 3 / 3.5, bracers 1.5 / 2 / 2.5. Durability: leather 400, iron 250
+  (its material's), steel 600.
+- All the art is drawn by `tools/boxing_assets.py` and is placeholder.
+
 ## Not built yet
 
 The evades on Left Alt and the perfect evade, the strong attacks, the blocks, blur and daze, the combo breaker, the
-early click that queues a punch, tiring and gassed looks, the idles and poses, the cestus and bracers, the teachers,
+early click that queues a punch, tiring and gassed looks, the idles and poses, the teachers,
 quests and levelling, the HUD, and the loading-screen hints.
 
 ## Things to know
@@ -59,4 +73,8 @@ quests and levelling, the HUD, and the loading-screen hints.
 8. `long_guard` and `bastion`: same numbers; listen for the cross in the Long Guard's third punch.
 9. Empty hand, any style: plain vanilla punches (and Z Fighter's bare hands as before).
 10. `/powerdebug boxing status` prints all of it.
+12. Cestus: with a style, a leather, iron and steel cestus punch for 2, 2.5 and 3. Bracers punch for 1.5.
+13. Craft a Leather Cestus (Hand Wraps + 2 leather) and Leather Bracers (Hand Wraps + 4 leather).
+14. Forge an Iron Cestus: shape Cestus Studs at the Part Builder, cast them, pour iron, then studs + a Tool Binding at
+    the Tool Station. The same with steel, and with Bracer Plates.
 11. A second player: PvP punches obey the server's PvP setting.

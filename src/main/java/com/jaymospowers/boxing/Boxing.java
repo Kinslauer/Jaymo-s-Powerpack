@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * (counters). A player learns one, and another only once every style they know is mastered ({@link #MAX_LEVEL});
  * {@link #learn} enforces it. Each style has its own level, 1 to {@link #MAX_LEVEL}.</li>
  * <li><b>The punch</b>: a left click on a living thing. The server throws it in place of the game's own attack, so
- * it does {@link #PUNCH_DAMAGE} whatever the level: levels never add damage. Which punch it is comes from the style's
+ * it does {@link #PUNCH_DAMAGE} whatever the level (a cestus adds its own): levels never add damage. Which punch it is comes from the style's
  * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again.</li>
  * <li><b>Speed</b>: one punch every {@link #interval} ticks, {@link #SLOWEST} at level 1 down to {@link #FASTEST}
  * at level {@link #MAX_LEVEL}. The attack-speed attribute is set to match, so the game's own attack indicator shows
@@ -305,7 +305,8 @@ public final class Boxing {
 			level.playSound(null, boxer.getX(), boxer.getEyeY(), boxer.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.4F, pitch + 0.3F);
 			return;
 		}
-		float damage = PUNCH_DAMAGE;
+		// (a cestus hits harder; levels never do)
+		float damage = PUNCH_DAMAGE + BoxingGear.punchBonus(boxer.getMainHandItem());
 		if (gassed) {
 			damage = Math.min(GASSED_CAP, damage * (1.0F - GASSED_CUT));
 		}
