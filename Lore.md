@@ -373,8 +373,17 @@ killed a dragon, any dragon, the Ender Dragon too. After the first one dies the 
 
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
-witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
-the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
+no longer held in the Aether's Sentry Ruins either: those are the Slider's alone again (see the labyrinths, next).
+
+(new) **The labyrinths, the snow houses and the jungle temples** (Epic Structures thread, 2026-11-11; Andy: the Epic
+dungeons "should spawn the minotaur instead of the slider dungeon"). Under the plains, the deserts and the snow lie
+great dungeons older than any kingdom standing, halls and stairs cut by nobody the songs name. Each of the great ones
+is a labyrinth with a **minotaur** in its biggest hall, and about one in three of the middling ones has one too; the
+small ones hold only the usual dead. It does not leave its hall. In the cold lands stand snow houses, small ones and
+large ones with a cellar dug under them, the winter camps of hunters who are mostly not at home. In the jungles stand
+stepped stone temples and their ruins, raised by the same forgotten hands as the labyrinths and long since emptied of
+priests. (Claude's placement, for Andy to approve: who built them is left unnamed on purpose.)
 
 ## The dead
 
