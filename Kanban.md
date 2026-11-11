@@ -29,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · ☁️ Cloud · #1332 · in-review
 - [ ] [[Agents/claude-cloud-arsenal-anywhere|claude-cloud-arsenal-anywhere]] · 💻 Odysseus · #1326 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
+- [ ] [[Agents/claude-cloud-costumed-folk|claude-cloud-costumed-folk]] · 💻 Odysseus · #1332 · in-review
 
 
 ## Needs Andy
