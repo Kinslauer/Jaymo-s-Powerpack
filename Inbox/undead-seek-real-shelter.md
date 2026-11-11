@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
 claimed_by: hermes-b
-pr: 
+pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
 text_pass: none
