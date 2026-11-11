@@ -12,8 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · claimed
-- [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · running
 
 
 ## In review
@@ -25,9 +23,11 @@ kanban-plugin: board
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
+- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-costumed-folk|claude-cloud-costumed-folk]] · 💻 Odysseus · #1332 · in-review
 - [ ] [[Agents/claude-cloud-frostborn-troopers|claude-cloud-frostborn-troopers]] · 💻 Odysseus · #1335 · in-review
+- [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 
 
 ## Needs Andy
