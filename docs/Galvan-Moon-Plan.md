@@ -54,7 +54,7 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 **Files:** new `kingdoms/.../galvan/GalvanCity` (layout, pieces), structure templates under
 `data/jaymoskingdoms/structure/galvan/`, `lang/parts/galvan.json`, `ZFighterFolk` (Galvan citizens).
 
-- One city per save, under the dust of a large crater some distance from where pods land, built like `SkyTowns`:
+- **Undersky**: one city per save, under the dust of a large crater some distance from where pods land, built like `SkyTowns`:
   lots on a grid round a central plaza, every piece named so Kingdoms can read it.
 - **Look** (Andy, 2026-11-11: "kind of like the viltrumite cities", a still of Viltrum from *Invincible*; our own
   buildings from the idea, nothing traced): tall, slender white towers that lean and curve as they rise, cut into
@@ -66,7 +66,8 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
     and warm yellow froglights for windows; moss, azalea and grass for the gardens. No wood or cobble.
   - **Under the dust:** towers need room, so the city stands in a vast hollow under the crater, and its roof is a
     false sky the Galvan built themselves: light blue glass and lamps high overhead, with pale "clouds". From outside
-    it is only a crater. (Open question 10: how big.)
+    it is only a crater. Size (Andy agreed): about 150 blocks across, towers 60-80 blocks tall, the
+    false sky just above the tallest.
 - **Pieces:** the dome gate (shut until a band wearer comes near), the plaza with a tall ring instead of a bell, homes,
   a hall of records (tablets, the alien bodies the band holds shown as statues), **the elder's forge** (the Star Forge
   and the elder), **the ruler's court** (the seat), and a sealed workshop where the rival band was made.
@@ -88,14 +89,14 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 **Files:** `BandForge` (elder talk), `BandUpgrades` (the forge check on `Action`), the band screen, `RivalHunter`, new `kingdoms/.../galvan/GalvanCourt`, lang parts `xenoform` and
 `galvan`.
 
-- **The elder:** an old Galvan who made the band, at the forge. Talking: he knew the band would be found ("it was made
+- **The elder, Ammet Thrum** ("the Old Maker"): an old Galvan who made the band, at the forge. Talking: he knew the band would be found ("it was made
   to be given"), he reforges it as the smith does now, and every upgrade after it is his too (Andy, 2026-11-11: "all upgrades require a
   trip"). Read as: learning a module from its plan, fitting or swapping modules and buying band skills all happen at
   the elder's forge (`BandUpgrades.Action` is refused unless the player is near the forge, with a line saying the band
   must go back to its maker); away from it the band screen shows them but greys the buttons. Learning new aliens by
   scanning and tablets stays out in the world, since that is the band's own doing, not an upgrade. He never speaks
   against the ruler in the open; his lines hint.
-- **The ruler:** holds the court. He greets a band wearer warmly and asks for the band "for safe keeping". Refuse and
+- **The ruler, Sovereign Vorrel:** holds the court. He greets a band wearer warmly and asks for the band "for safe keeping". Refuse and
   he is polite and cold; from then on hunters come more often (`RivalHunter.COME_GAP` shortened for that player).
   **Hand it over** (Andy, 2026-11-11: "the ruler becomes a boss, and turns on you. starting a hard fight on your own.
   easier with still empowered friends."): he puts the band on and turns on you there in the court, and you have no band.
@@ -149,11 +150,9 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 6. ~~The elder's upgrades~~ Answered: all upgrades require a trip to him (Track 3, the elder).
 7. ~~The ruler's ask~~ Answered: yes; he puts it on, becomes a boss and turns on you (Track 3, the ruler).
 8. ~~Ending~~ Answered: whoever kills the ruler while he wears the band can take his seat (Track 5).
-9. **Names:** the elder's and the ruler's names, and the city's. ("Galvan" is your working name; no line in the game
-   says it yet.)
-10. **Size:** how big a city? Recommended: about 150 blocks across, towers up to 60-80 blocks, in a hollow whose
-    false sky sits just above the tallest tower (the moon's build height allows it). Bigger is grander but slower to
-    generate.
+9. ~~Names~~ Andy: "surprise me". Claude's picks (change any): the elder is **Ammet Thrum**, called the Old Maker;
+   the ruler is **Sovereign Vorrel**; the city is **Undersky**. The people stay the Galvan.
+10. ~~Size~~ Answered: about 150 blocks across, towers 60-80 blocks, the false sky just above the tallest.
 11. **Intergalactic trade and warfare:** what should a player king be able to do? Trade with which worlds and
     kingdoms, and war against whom (far world captains, Overworld realms, the raiders, the Patrol)?
 12. **The Oscellans:** who were they? Another people of the Pale Moon or a far world, the Galvan's old rulers, or the
