@@ -19,8 +19,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
 
 
 ## In review
