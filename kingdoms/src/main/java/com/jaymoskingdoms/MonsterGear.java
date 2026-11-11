@@ -36,8 +36,8 @@ public final class MonsterGear {
 	/** Per world tier: the chance an empty-handed zombie takes up a weapon, and a skeleton trades its bow for a blade. */
 	static final float[] WEAPON_CHANCE = {0.0F, 0.15F, 0.25F, 0.35F, 0.45F};
 	static final float[] SKELETON_BLADE_CHANCE = {0.0F, 0.03F, 0.06F, 0.10F, 0.15F};
-	/** Per world tier: the chance an armed zombie carries a shield. */
-	static final float[] SHIELD_CHANCE = {0.0F, 0.05F, 0.12F, 0.20F, 0.30F};
+	/** Per world tier: the chance an armed zombie, or a skeleton with a blade, carries a shield. */
+	static final float[] SHIELD_CHANCE = {0.0F, 0.12F, 0.22F, 0.32F, 0.42F};
 	/** Per world tier, the weights of the five grades (worn, common, fine, rare, legendary). */
 	static final int[][] GRADE_WEIGHTS = {
 		{100, 0, 0, 0, 0},
@@ -99,7 +99,7 @@ public final class MonsterGear {
 			int grade = grade(random, tier);
 			mob.setItemSlot(EquipmentSlot.MAINHAND, finish(level, random, weapon(random, grade), grade));
 		}
-		if (zombie && !mob.getMainHandItem().isEmpty() && mob.getOffhandItem().isEmpty() && random.nextFloat() < SHIELD_CHANCE[tier]) {
+		if (ShieldBearers.canBear(mob) && random.nextFloat() < SHIELD_CHANCE[tier]) {
 			int grade = grade(random, tier);
 			mob.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(item(SHIELDS[grade]).orElse(Items.SHIELD)));
 		}

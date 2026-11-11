@@ -67,6 +67,67 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ClashFx.sparks(ServerLevel, Vec3, Vec3, int, float)} and {@code ClashFx.met(...)}. */
+	private static java.lang.invoke.@Nullable MethodHandle clashSparks, clashMet;
+	private static boolean lookedForClash;
+
+	private static void lookForClash() {
+		if (lookedForClash) {
+			return;
+		}
+		lookedForClash = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> fx = Class.forName("com.jaymospowers.combat.ClashFx");
+			clashSparks = java.lang.invoke.MethodHandles.publicLookup().findStatic(fx, "sparks", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, net.minecraft.world.phys.Vec3.class, int.class, float.class));
+			clashMet = java.lang.invoke.MethodHandles.publicLookup().findStatic(fx, "met", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, LivingEntity.class, net.minecraft.world.item.ItemStack.class, LivingEntity.class,
+				net.minecraft.world.phys.Vec3.class, int.class, float.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' clash sparks", e);
+		}
+	}
+
+	/**
+	 * Andy: "when swords clash or when parries occur there should be particle sparks". Jaymo's Powers' shower of hot
+	 * sparks at {@code at}, thrown across {@code line} (the way the blow ran): {@code count} of them, {@code scale} big.
+	 * False without Powers, and the caller draws its old vanilla sparks.
+	 */
+	public static boolean clashSparks(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, net.minecraft.world.phys.Vec3 line,
+		int count, float scale) {
+		lookForClash();
+		if (clashSparks == null) {
+			return false;
+		}
+		try {
+			clashSparks.invoke(level, at, line, count, scale);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * {@code attacker}'s blow met {@code defender}'s {@code guard} (a blade or a shield): Jaymo's Powers' sparks if steel
+	 * met steel, shards of wood ({@code chips}) off a wooden shield. False without Powers.
+	 */
+	public static boolean guardMet(net.minecraft.server.level.ServerLevel level, LivingEntity defender, net.minecraft.world.item.ItemStack guard,
+		LivingEntity attacker, int sparks, float scale, int chips) {
+		lookForClash();
+		if (clashMet == null) {
+			return false;
+		}
+		try {
+			clashMet.invoke(level, defender, guard, attacker, (net.minecraft.world.phys.Vec3)null, sparks, scale, chips);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (PvP indicator) Powers' {@code IncomingBlows.aimed(LivingEntity, LivingEntity, int, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle incoming;
 	private static boolean lookedForIncoming;
