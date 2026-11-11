@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 14:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,14 +14,15 @@ kanban-plugin: board
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
 - [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
-- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
+- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 
 
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · running
 
 
 ## In review
@@ -34,7 +35,6 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · stalled
 
 
