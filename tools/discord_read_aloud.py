@@ -460,6 +460,61 @@ def check():
 
 # ---------------------------------------------------------------- stop / pid
 
+def pid_alive(pid):
+    """Is `pid` a running Python process? (A PID can be reused, so a non-Python process counts as gone.)"""
+    if pid <= 0 or pid == os.getpid():
+        return False
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return False
+        try:
+            code = wintypes.DWORD()
+            if not k32.GetExitCodeProcess(h, ctypes.byref(code)) or code.value != 259:  # 259 = STILL_ACTIVE
+                return False
+            buf = ctypes.create_unicode_buffer(1024)
+            size = wintypes.DWORD(1024)
+            if k32.QueryFullProcessImageNameW(h, 0, buf, ctypes.byref(size)):
+                return "python" in os.path.basename(buf.value).lower()
+            return True
+        finally:
+            k32.CloseHandle(h)
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    try:
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            return b"python" in f.read().lower()
+    except OSError:
+        return True
+
+
+def stop_older_reading():
+    """One bot can hold only one voice connection per server: a second reading kicks the first out and back in
+    (close code 4006) over and over, and nobody hears either. So a new reading ends the old one first."""
+    try:
+        with open(PIDFILE) as f:
+            pid = int(f.read().strip())
+    except (OSError, ValueError):
+        return
+    if not pid_alive(pid):
+        return
+    print(f"{clock()} another reading is still running (process {pid}); stopping it first", flush=True)
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        return
+    for _ in range(20):  # up to 10 s for it to go
+        if not pid_alive(pid):
+            break
+        time.sleep(0.5)
+    time.sleep(3)  # let Discord notice the old voice connection is gone before ours joins
+
+
 def write_pid():
     with open(PIDFILE, "w") as f:
         f.write(str(os.getpid()))
@@ -555,6 +610,7 @@ def main(argv=None):
         print("Set KANBAN_BOT_TOKEN (or DISCORD_BOT_TOKEN) to the bot's token.", file=sys.stderr)
         return 2
     wanted = a.channel or os.environ.get("READ_ALOUD_CHANNEL")
+    stop_older_reading()
     write_pid()
     try:
         return asyncio.run(read_in_channel(token, title, pieces, start, wanted, a.debug))
