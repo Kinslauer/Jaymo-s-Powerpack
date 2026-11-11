@@ -53,7 +53,7 @@ public final class LoreFilms {
 	 * player takes no harm while one plays, since their keys don't answer. The protection ends early once they strike a blow
 	 * or walk off from where it began (a skipped film), so it can't be used as a shield.
 	 */
-	public static final int FILM_TICKS = 926;
+	public static final int FILM_TICKS = 1006;
 	static final double LEFT_SPOT = 1.5;
 	/** (Server) players in a film just now: until when (game time), and where they stood. */
 	private static final Map<java.util.UUID, Long> WATCHING = new java.util.HashMap<>();
