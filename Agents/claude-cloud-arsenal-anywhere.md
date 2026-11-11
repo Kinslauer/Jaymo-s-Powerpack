@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: arsenal-pulls-anything
 branch: claude/project-thread-4dzn49
 with: Claude (cloud project thread)
