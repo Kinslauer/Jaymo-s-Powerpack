@@ -56,9 +56,17 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 
 - One city per save, under the dust of a large crater some distance from where pods land, built like `SkyTowns`:
   lots on a grid round a central plaza, every piece named so Kingdoms can read it.
-- **Look (futuristic):** pale alloy walls (new block family: pale alloy block, panel, pillar, lamp), white concrete,
-  quartz, tinted and plain glass domes, end rods and sea lanterns for light, copper bulbs, a dark smooth floor. Clean
-  curves and rings, no wood or cobble. Andy is gathering inspiration (open question 3); pieces wait for it.
+- **Look** (Andy, 2026-11-11: "kind of like the viltrumite cities", a still of Viltrum from *Invincible*; our own
+  buildings from the idea, nothing traced): tall, slender white towers that lean and curve as they rise, cut into
+  long panels by dark seams with rows of small lit windows (cyan and warm yellow); gardens on the tower tops and
+  ledges; raised ring roads and rails that sweep round the towers on pillars; low shell-domed halls; green park strips
+  between white plazas.
+  - **Palette:** pale alloy (new block family: block, smooth panel, pillar, lamp) and white concrete, calcite and
+    quartz for the walls; black and grey concrete with tinted glass for the seams; cyan stained glass over sea lanterns
+    and warm yellow froglights for windows; moss, azalea and grass for the gardens. No wood or cobble.
+  - **Under the dust:** towers need room, so the city stands in a vast hollow under the crater, and its roof is a
+    false sky the Galvan built themselves: light blue glass and lamps high overhead, with pale "clouds". From outside
+    it is only a crater. (Open question 10: how big.)
 - **Pieces:** the dome gate (shut until a band wearer comes near), the plaza with a tall ring instead of a bell, homes,
   a hall of records (tablets, the alien bodies the band holds shown as statues), **the elder's forge** (the Star Forge
   and the elder), **the ruler's court** (the seat), and a sealed workshop where the rival band was made.
@@ -101,7 +109,7 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 
 1. ~~Old saves~~ Answered: no migration, the world is reset on release.
 2. ~~Hidden or open?~~ Answered: hidden, under the dust behind a door only a band opens.
-3. **Look:** what is your inspiration for the futuristic buildings? Send pictures and we draw our own from them.
+3. ~~Look~~ Answered: like Viltrum's cities (Track 2, Look).
 4. **The Endermen:** what are they to the Galvan? Strays from the End who wander up, the Galvan's old servants, or
    something the Galvan made and lost?
 5. **Kingdom or town:** a city with a ruler and court that can't war or trade with Overworld kingdoms (recommended, for
@@ -114,3 +122,6 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
    on his seat?
 9. **Names:** the elder's and the ruler's names, and the city's. ("Galvan" is your working name; no line in the game
    says it yet.)
+10. **Size:** how big a city? Recommended: about 150 blocks across, towers up to 60-80 blocks, in a hollow whose
+    false sky sits just above the tallest tower (the moon's build height allows it). Bigger is grander but slower to
+    generate.
