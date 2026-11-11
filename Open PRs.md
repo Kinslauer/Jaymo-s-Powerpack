@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 14:22
+updated: 2026-11-11 15:16
 ---
 # Open PRs
 
-11 open, as of 2026-11-11 14:22. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-11 15:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -13,7 +13,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1263](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1263) Belly flops into water hurt
 - **Branch:** `claude/water-belly-flop-damage` · **Updated:** 2026-11-11 (today)
-- **Checks:** ⏳ 3 of 4 running
+- **Checks:** ✅ 4 passed
 - **Agent:** [[water-belly-flop-damage]]
 
 ## [#1277](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1277) Wind: airflow sense (streaks round the crosshair for what moves nearby)
@@ -48,7 +48,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1312](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1312) Aether villages: sky villages, the sky lord's court, sky folk outfits, balloon ships and ferries
 - **Branch:** `claude/project-thread-5dj9k7-aether-villages` · **Updated:** 2026-11-11 (today)
-- **Checks:** ⏳ 2 of 4 running
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
@@ -56,7 +56,17 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** [[armor-pngs-vanilla-style]]
 
-## [#1314](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1314) The Retaking: the Web Slinger's, Xenoform's and Arsenal's roads
-- **Branch:** `claude/project-thread-lrvits` · **Updated:** 2026-11-11 (today)
+## [#1316](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1316) Boxing: fist gear worn on the hands (Jung, part 4, stacked on #1295)
+- **Branch:** `jung/boxing-worn-gear` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1317](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1317) Boxing: the block (Jung, part 5, stacked on #1316)
+- **Branch:** `jung/boxing-blocks` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1318](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1318) Kingdoms CREDITS.txt: remove committed merge conflict markers
+- **Branch:** `claude/project-thread-qp0izy` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
