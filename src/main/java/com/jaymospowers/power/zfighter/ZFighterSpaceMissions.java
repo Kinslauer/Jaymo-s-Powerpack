@@ -629,6 +629,7 @@ public final class ZFighterSpaceMissions {
 		boolean free = mode == FREE;
 		player.setAttached(DATA, new Data(data.state(), free ? data.freed() | 1 << planet : data.freed(), free ? data.conquered() : data.conquered() | 1 << planet));
 		clearFoes(player);
+		com.jaymospowers.core.PackAdvancements.deed(player, "far_world");
 		int tp = free ? info.freeTp() : info.conquerTp();
 		if (Powers.has(player, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(player, tp);

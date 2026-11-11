@@ -77,6 +77,7 @@ public final class FallenStarBlock extends Block {
 	@Override
 	public void playerDestroy(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack destroyedWith) {
 		super.playerDestroy(level, player, pos, state, blockEntity, destroyedWith);
+		com.jaymospowers.core.PackAdvancements.deed(player, "star");
 		RandomSource random = level.getRandom();
 		Vec3 centre = Vec3.atCenterOf(pos);
 		level.sendParticles(ParticleTypes.END_ROD, centre.x, centre.y, centre.z, 30, 0.3, 0.3, 0.3, 0.1);
