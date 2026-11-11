@@ -3,7 +3,7 @@ status: running
 task: Rebuild Yo Fadda hero mechanics for our powers
 branch: claude/project-thread-ixuj2m
 with: cloud thread
-pr: 
+pr: 1322
 mods: powers
 versions: 
 started: 2026-11-11
@@ -11,6 +11,7 @@ owns:
   - src/main/java/com/jaymospowers/power/xenoform/forms/Wisp.java
   - src/client/java/com/jaymospowers/client/power/xenoform/WispTail.java
   - src/client/java/com/jaymospowers/client/power/xenoform/WispPhaseClient.java
+  - src/main/java/com/jaymospowers/power/xenoform/mixin/WispPhaseMixin.java
 ---
 # Hero mechanics (Yo Fadda)
 
@@ -21,6 +22,7 @@ owns:
 - Build first what Andy named: Wisp's ghost tail and a held Phase.
 
 ## Notes
-- "Rig improvements" = the Rig (power/rig), our AI armour.
+- "Rig improvements" = the Rig (com/jaymospowers/rig), our AI armour.
+- PR #1322: Wisp ghost tail + held Phase, compiled, not played.
 
 ## Done
