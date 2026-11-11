@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: 
 branch: claude/project-thread-g31te8
 with: cloud thread "Redesign the village golems"
@@ -26,3 +26,4 @@ owns:
 - 
 
 ## Done
+- 2026-11-11 17:27 No sign of work for 30 min: marked stalled (whoever ran it stopped).
