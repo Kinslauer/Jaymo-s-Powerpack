@@ -106,3 +106,16 @@ For Claude Code on the PC (the follow-up PR #1278, which adds --check, is merged
 The 11:55 PM section above was wrong about the cause: the reading had already worked with Python 3.12 (py -3); only
 YOUTH's own check used a different Python. Andy chose to point YOUTH at Python 3.12 explicitly; don't install anything
 into Hermes' Python 3.14.
+
+### Done (Claude Code, 2026-11-11, 12:15 AM)
+- E:/Origins Mod is on master at f9bcac27f, which has #1278 (--check, no self-deafen).
+- What YOUTH's own history shows: at 11:53 PM he ran the reader with Python 3.12 and it read all 9 paragraphs of "The
+  ages of the world" in Hotspot > General, finishing at 11:57 PM. His 11:55 PM check used `python3`, which is Hermes'
+  Python 3.14 and doesn't have the packages. That check also found ffmpeg, so "no ffmpeg" was wrong too.
+- `--check` with Python 3.12 (FFMPEG set): packages found, ffmpeg found, token set, follows 1 id, "Ready."
+  With Hermes' 3.14 it reports the packages missing. Nothing was installed there.
+- YOUTH's SOUL "Reading aloud" section and skill discord-read-aloud now use the full path
+  C:/Users/toopo/AppData/Local/Programs/Python/Python312/python.exe for every use of the script (reading, --check,
+  --stop, --list, --dry-run). They never use python3/python/py, and say not to test with `python3 -c "import discord"`.
+  The skill also lists `--check` and says to report its result, not install things.
+- Still to do: Andy asks YOUTH to read again. The bot should now join undeafened.
