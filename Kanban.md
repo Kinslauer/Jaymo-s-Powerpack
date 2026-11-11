@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,7 +15,6 @@ kanban-plugin: board
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
-- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
 
 
 ## Being built
@@ -23,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
+- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · claimed
 - [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · running
 
 
