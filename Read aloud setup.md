@@ -85,5 +85,6 @@ For YOUTH, Claude Code or anyone who finds a tool from master missing (like tool
    no uncommitted changes besides the old "Build Modpack.bat" / kitchen-jar deletions. Then
    `git checkout master` and `git pull --ff-only origin master`.
 - Watch out: powerpack_guard blocks every mutating git command in E:/Origins Mod for the Hermes bots and YOUTH,
-  `pull` included. So the "pull master once" rule in YOUTH's skill and SOUL can't work as written. Andy's call
-  whether to change the rule or the guard.
+  `pull` included. So the "pull master once" rule in YOUTH's skill and SOUL couldn't work as written.
+- Changed (Andy, 2026-11-11): YOUTH no longer pulls. If the script is missing he checks the branch, tells Andy, and
+  stops (SOUL "Reading aloud" section and skill discord-read-aloud, "If it fails"). The guard is unchanged.
