@@ -343,17 +343,7 @@ public final class ZFighterRaiders {
 	 * (written in the lang file). Filed in Kingdoms' lore codex like any lore book.
 	 */
 	static net.minecraft.world.item.ItemStack tally() {
-		net.minecraft.world.item.ItemStack book = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WRITTEN_BOOK);
-		java.util.List<net.minecraft.server.network.Filterable<Component>> pages = new java.util.ArrayList<>();
-		for (int i = 1; i <= TALLY_PAGES; i++) {
-			pages.add(net.minecraft.server.network.Filterable.passThrough(Component.translatable("book.jaymospowers.raiders_tally.page" + i)));
-		}
-		book.set(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT, new net.minecraft.world.item.component.WrittenBookContent(
-			net.minecraft.server.network.Filterable.passThrough("Raider's Tally"), "", 1, pages, true));
-		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-		tag.putString("jaymoskingdoms_lore", JaymosPowers.id("raiders_tally").toString());
-		book.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
-		return book;
+		return com.jaymospowers.core.LoreBook.written("raiders_tally", "Raider's Tally", TALLY_PAGES);
 	}
 
 	/** The tally's pages. */
