@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-fml2w0
 with: Claude (cloud thread)
-pr: 
+pr: 1291
 mods: powers, kingdoms
 versions: 
 started: 2026-11-11
