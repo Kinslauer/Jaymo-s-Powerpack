@@ -108,6 +108,8 @@ public final class Revenant extends XenoUltimate {
 	@Override
 	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		// (Wisp's held Phase doesn't carry over: Revenant has Wraithwalk)
+		com.jaymospowers.power.xenoform.forms.Wisp.endPhase(player, live, false);
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.SCULK_SOUL, at.x, at.y, at.z, 30, 0.4, 0.7, 0.4, 0.05);
 		ring(level, ParticleTypes.SOUL, player.position().add(0.0, 0.3, 0.0), 2.0, 24);

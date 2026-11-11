@@ -8100,7 +8100,8 @@ public final class XenoFormModels {
 	}
 
 	/**
-	 * Wisp: a hooded thing with no legs, trailing off into tatters that sway. (0.18.90) Andy: "wisp should float instead
+	 * Wisp: a hooded thing with no legs; below the waist it is one tapering ghost tail, a chain of links that trails after
+	 * the body ({@link WispTail}). (0.18.90) Andy: "wisp should float instead
 	 * of walk and be made of ki with the current texture overlaid". It never walks: its arms hang and drift instead of
 	 * swinging with its steps, trail back as it moves, and {@link XenoformLayer} draws it floating, bobbing, its skin
 	 * see-through and fullbright over glowing shells of ki ({@link #shells}, the same body puffed out).
@@ -8110,7 +8111,7 @@ public final class XenoFormModels {
 		static final float[] KI_SHELLS = {0.45F, 1.1F};
 		/** How far back its arms trail at a run (radians), and their slow drift. */
 		static final float ARM_TRAIL = 0.5F, ARM_DRIFT = 0.08F;
-		private final ModelPart tatters;
+		private final ModelPart[] tail = new ModelPart[WispTail.SEGMENTS.length];
 		/** Its ki, the body again a little bigger each time ({@link #KI_SHELLS}); none on a shell itself. */
 		Wisp[] shells = new Wisp[0];
 
@@ -8124,7 +8125,11 @@ public final class XenoFormModels {
 
 		private Wisp(float grow) {
 			super(bake(mesh(grow)), "wisp");
-			this.tatters = this.body.getChild("tatters");
+			ModelPart link = this.body;
+			for (int i = 0; i < this.tail.length; i++) {
+				link = link.getChild("tail" + i);
+				this.tail[i] = link;
+			}
 		}
 
 		private static MeshDefinition mesh(float grow) {
@@ -8132,8 +8137,13 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(puff, 0.0F);
 			PartDefinition root = mesh.getRoot();
 			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F, puff), PartPose.ZERO);
-			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 86).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F, puff),
-				PartPose.offset(0.0F, 12.0F, 0.0F));
+			// the tail: each link hangs off the end of the one above, all cut from the old tatters' cloth (0,86)
+			PartDefinition link = root.getChild("body");
+			for (int i = 0; i < WispTail.SEGMENTS.length; i++) {
+				float w = WispTail.SEGMENTS[i][0], h = WispTail.SEGMENTS[i][1], d = WispTail.SEGMENTS[i][2];
+				link = link.addOrReplaceChild("tail" + i, CubeListBuilder.create().texOffs(0, 86).addBox(-w / 2.0F, 0.0F, -d / 2.0F, w, h, d, puff),
+					PartPose.offset(0.0F, i == 0 ? 11.0F : WispTail.SEGMENTS[i - 1][1] - WispTail.OVERLAP, 0.0F));
+			}
 			return mesh;
 		}
 
@@ -8146,24 +8156,14 @@ public final class XenoFormModels {
 			state.walkAnimationSpeed = walk;
 			this.rightLeg.visible = false;
 			this.leftLeg.visible = false;
-			XenoMotion.Read m = XenoMotion.read(state);
 			// arms hang loose, drifting, and trail back as it glides along
 			float move = Math.min(1.0F, walk);
 			this.rightArm.xRot += move * ARM_TRAIL + Mth.sin(state.ageInTicks * 0.07F) * ARM_DRIFT;
 			this.leftArm.xRot += move * ARM_TRAIL + Mth.sin(state.ageInTicks * 0.07F + 1.7F) * ARM_DRIFT;
 			this.rightArm.zRot += 0.08F + Mth.cos(state.ageInTicks * 0.05F) * 0.04F;
 			this.leftArm.zRot -= 0.08F + Mth.cos(state.ageInTicks * 0.05F + 1.1F) * 0.04F;
-			// the tatters drag behind it, billow up as it drops and swing out of a turn
-			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + walk * 0.5F + Math.abs(m.fall()) * 0.6F * m.air()
-				+ m.land() * 0.3F;
-			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F - m.trail() * 0.35F;
-			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
-			if (flight != null && flight.drift() > 0.001F) {
-				// (0.20.23) floating upright, the tatters hang below and ripple, trailing a little as it drifts
-				float g = XenoformFlightPose.smooth(flight.drift());
-				this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 0.12F + walk * 0.35F + Mth.sin(state.ageInTicks * 0.2F) * 0.12F);
-				this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(state.ageInTicks * 0.15F) * 0.12F);
-			}
+			// the tail trails after the body, link by link
+			WispTail.pose(this.tail, state.getData(WispTail.KEY), state.ageInTicks);
 		}
 	}
 

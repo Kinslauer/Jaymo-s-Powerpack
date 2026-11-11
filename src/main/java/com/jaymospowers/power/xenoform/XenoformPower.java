@@ -222,6 +222,10 @@ public final class XenoformPower implements Power {
 		/** Wisp: shrouded; gliding; ticks left of the wail. */
 		public boolean shroud, glide;
 		public int wail;
+		/** Wisp: Phase is held, for how many ticks so far, and the last place it stood clear of every block. */
+		public boolean phase;
+		public int phaseTicks;
+		public net.minecraft.world.phys.@Nullable Vec3 phaseFree;
 		/** Gremlin: climbing; ticks since a spring (0: none). */
 		public boolean climb;
 		public int spring;
@@ -429,8 +433,9 @@ public final class XenoformPower implements Power {
 			savedSpeed = null;
 			reflecting = false;
 			wall.clear();
-			shroud = glide = false;
-			wail = 0;
+			shroud = glide = phase = false;
+			wail = phaseTicks = 0;
+			phaseFree = null;
 			climb = false;
 			spring = 0;
 			sense = false;
@@ -558,6 +563,10 @@ public final class XenoformPower implements Power {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			// (0.18.103) Dud can't hurt anything (0.20.9: its Ultimate can)
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && has(attacker) && live(attacker).body() == XenoForms.DUD) {
+				return false;
+			}
+			// a phasing Wisp's hands pass through whatever it strikes
+			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && XenoformState.phasing(attacker)) {
 				return false;
 			}
 			if (com.jaymospowers.power.xenoform.forms.ultimate.Swarm.bitesPlayer(source, entity)) {
@@ -727,6 +736,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.SHELL);
 		player.removeAttached(XenoformState.EYES);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.PHASE);
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.CLIMB);
 		player.removeAttached(XenoformState.ACT);
@@ -1392,6 +1402,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
 		player.removeAttached(XenoformState.FLIGHT);
+		player.removeAttached(XenoformState.PHASE);
 		player.removeAttached(XenoformState.CEILING);
 		player.removeAttached(XenoformState.CLIMB);
 		player.removeAttached(XenoformState.ACT);
