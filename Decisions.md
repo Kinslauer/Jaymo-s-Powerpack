@@ -151,3 +151,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   4. "The androids came from los perrito, and after the maw exploded, they traveled back and forth through time. some hope to prevent it someday, somehow."
   5. "the grue is the sorcerer, its what his mana manifested as."
   6. "They started calling it Earth in the future, we say overworld now."
+- 2026-11-10 10:12 PM: Andy (decision card): the demon master says "We kept it. Down here, nothing is let go.", not "We were there"; demons only remember the old war for now. PR #1268.
