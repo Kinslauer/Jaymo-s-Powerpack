@@ -34,7 +34,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · #1288, 1289 (both merged) · stalled
 
 
 ## Done
