@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymospowers:mycotic_lanterns",
+    "minecraft:lime_dye"
+  ],
+  "result": {
+    "id": "jaymospowers:mycotic_lantern_lime",
+    "count": 1
+  },
+  "group": "mycotic_lantern"
+}

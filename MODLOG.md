@@ -2561,3 +2561,130 @@ our own.
 - The pieces name themselves (`great_hall`, `library`, `weaponsmith`, `farm`...), so Jaymo's Kingdoms reads a sky town
   like any Epic village and founds a kingdom there.
 - `/place structure jaymospowers:sky_town_highfields` puts one where you stand.
+
+## 0.22.26 (2026-11-11): Gremlin is a tiny bug-eyed imp (#1323)
+
+- **Gremlin's look** (Andy: "very small with bug eyes"): the Xeno-Band's Gremlin is no longer a hunched knuckle-walker with
+  a huge skull and floppy ears. It is a tiny upright imp about half a block tall: a slim grey body on thin legs with
+  broad pale feet, thin arms, and a wide flat head with two big yellow-green eyes that bulge out past the sides of it.
+  The eyes shine in the dark and blink.
+- **How it moves**: it patters on quick little steps and throws its arms back at a run, its head wobbles and tilts when
+  it stands still, a bite darts the head and drops the jaw with a swipe of the right arm, a leap throws the arms up, and
+  sneaking it squats on splayed legs. The insignia is on its chest now (it was on its back).
+- Its moves, size (a third of a player, fits one-block gaps) and health are unchanged. Swarm, its Ultimate, keeps its
+  hunched plated build.
+- `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
+  `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+- The Gremlin is the shape of the Ocellan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
+- Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.
+
+## 0.22.27 (2026-11-11): the Verdant World's far country - mycotic forests, the pulse forest, the stone garden and a ringed giant in the sky (#1324)
+
+Andy's Eden Ring picks, part 1. Eden Ring (paulevs) is MIT, so its art is used, with its licence in
+`tools/eden_ring_license.txt`. No portal and no new world: these are regions of the Verdant World.
+- **The Verdant World has regions now** (`dimension/verdant_world.json`): plains as before, with four new biomes laid
+  out by climate. Only chunks made after this update get them.
+- **Mycotic Forest and Old Mycotic Forest**: pink mycelium turf, mycotic grass, balloon mushrooms (thin stem, domed cap),
+  and in the old forest huge branched ones on full logs with glowing lanterns hanging under their caps. A small balloon
+  mushroom grows into a tree with bone meal. Lanterns come in 16 colours: craft one with any dye to recolour it.
+- **Pulse Forest**: pulse trees, thin glowing stems carrying a big, a medium and a small cap, some on a glowing log trunk.
+  All of them brighten and dim together. They stand like bamboo: cut the foot and the rest comes down.
+- **Stone Garden**: turf worn through to moss-capped stone and gravel, wind-worn banded pillars and layered boulders.
+- **Wood**: balloon mushroom and pulse tree logs and planks (planks also from stems). Stairs, doors and the rest of the
+  sets come in a later part.
+- **The sky** (`VerdantSkyClient`): a blue giant with a ring hangs in the same place over the Verdant World, faint by
+  day and bright at night.
+- Code: `eden/Eden` (blocks), `eden/EdenFeature` (ground, trees, rocks; tuning constants at the top),
+  `eden/PulseTreeBlock`, `tools/gen_eden.py` (all models and data).
+
+## 0.22.28 (2026-11-11): Boxing: Hand Wraps and the punch
+
+- **Boxing, first part (Jung's plan, `docs/Boxing-Plan.md`).** Fist gear and the punch are in; nothing teaches a
+  style yet, so for now only gamemasters can box (`/powerdebug boxing style|level|status`).
+- **Hand Wraps:** two rags or cloths (Clean Rag, Torn Cloth, Hemp Cloth) in the crafting grid. A weak weapon by
+  themselves; with a style they are what lets you box.
+- **The punch:** with fist gear and a style, a left click inside 2 blocks is a punch for 1.5 at every level, with little
+  knockback. Arrow Slit throws a one-two then hooks, Long Guard jab-jab-cross, Bastion the right jab.
+- **Levels 1 to 10** make punches quicker (one every 0.8 s down to 0.35 s; the attack indicator shows it) and cheaper
+  on feathers (one icon a punch down to four punches an icon), never stronger. From level 8 a boxer's punches land
+  faster than the usual hit immunity allows.
+- **Gassed:** out of feathers, a boxer punches once every 1.6 s for 45% less (2 at most) until the row is 30% back.
+- **Names:** Arrow Slit, Long Guard and Bastion (Jung's names, kept by Andy).
+- Classes: `boxing/Boxing` (styles, levels, the punch), `boxing/BoxingGear` (Hand Wraps, the `boxing_gear` tag),
+  `boxing/BoxingDebug`. `docs/boxing.md` has the numbers and test steps.
+- Not in it: evades, strong attacks, blocks, blur, the combo breaker, looks, cestus and bracers, teachers, HUD, hints.
+- **Not built locally, not booted with `runServer`, not played.** The session could not reach the build's download
+  hosts; the PR checks are its compile. It adds an item, so it needs a server boot before merging. The Hand Wraps
+  texture is a placeholder.
+- Review fix: the punch takes the left click only after every other rule (a downed or armless player, a finisher,
+  Kingdoms' tag, the fight pit, captives), in a later event phase. Before, a boxer's punch skipped them all.
+
+## 0.22.29 (2026-11-11): Boxing: the cestus and the bracers
+
+- **Cestus** (leather, iron, steel): fist gear that makes a styled punch hit harder, 2, 2.5 and 3 against 1.5 in Hand
+  Wraps. **Bracers** (leather, iron, steel): fist gear for blocking; they punch like wraps, and their block comes with
+  the blocks patch. Like Hand Wraps, all of it lets a boxer use their style.
+- **Making them:** leather ones in the crafting grid round Hand Wraps (2 leather for the cestus, 4 for the bracers).
+  Iron and steel ones are forged like other metal weapons: Cestus Studs or Bracer Plates and a Tool Binding at the
+  Tool Station. No gold or diamond.
+- Classes: `boxing/BoxingGear` (the items and `punchBonus`), `boxing/Boxing` (the bonus in the punch),
+  `tinkering/WeaponParts` (four new kinds). Art from `tools/boxing_assets.py` (placeholder, drawn for this).
+- **Not built locally, not booted with `runServer`, not played.** It adds ten items (six gear, four heads), so it
+  needs a server boot before merging. Untested in particular: the whole forging route for the new heads.
+
+## 0.22.30 (2026-11-11): Boxing: evades, strong attacks, blur and the combo breaker
+
+- **Evades:** while boxing, the Dodge key (Left Alt) is the style's evade in place of the roll. Arrow Slit slips left
+  or right or bobs straight in, Long Guard pulls back, Bastion rolls the shoulder in place (or slips aside). A blow
+  that would land within 0.4 s of the press misses, and the next evade is ready 0.7 s after it. Two evades cost a feather icon at level 10, one each at
+  level 1.
+- **Perfect evade and strong attacks:** an evade pressed inside the guard's perfect-parry window (5 ticks, 7 when
+  locked on) earns the next punch: the uppercut out of a bob (4), the pull counter out of a pull (3, a block more
+  reach and a hard shove), the roll straight out of a shoulder roll (5). A shoulder roll that isn't perfect lets half
+  the blow through and earns a 2.5 straight. A strong attack costs one icon at every level.
+- **Blur and daze:** those strong attacks blur a player's sight for 1, 1.5 or 2.5 s (a pale haze under the HUD; a key
+  swaps it for a dark frame for players who get motion sick), not again for 5 s. Mobs are dazed for as long, the
+  undead never, a boss 1.5 s at most.
+- **Combo breaker:** six punches landed in a row on a player or a boss and they are shoved back; that boxer can't
+  reach them for a second, and their blur clears.
+- A click that comes too early is kept and thrown in its turn. A gassed boxer gets Mining Fatigue and can't evade.
+- Classes: `boxing/BoxingEvades` (new), `boxing/Boxing` (the punch takes strong attacks, the breaker, the queue),
+  `client/boxing/BoxingClient` (new: the evades' movement, the blur), `client/stamina/DodgeClient` (the Dodge key
+  hands over to boxing). `docs/boxing.md` has the numbers and test steps.
+- Not in it: **the blocks** (right click with fist gear), which need their own patch through `combat/Guard`; the
+  breath puff, poses and idles; teachers; the HUD.
+- **Not built locally, not booted, not played.** The haze is a wash of colour, not a true blur.
+
+## 0.22.31 (2026-11-11): Boxing: fist gear worn on the hands
+
+- **Hand Wraps, the cestus and the bracers are worn, not held**, like the Fang Gauntlets: holding them hides the item
+  and draws the gear on the hands, for everyone and in your own first person. Wraps wind round the hand, a cestus adds
+  a studded band over the knuckles, bracers run up the forearm. With the off hand empty, both hands wear it.
+- Holding fist gear also raises the arms into the Fang Gauntlets' fists-up guard when nothing is swinging (the
+  styles' own idles come later).
+- Classes: client `armory/FangGauntletsClient` (boxing's shapes and textures beside the gauntlets', through the same
+  mixins), `boxing/BoxingGear.wornIndex`. Textures `textures/entity/boxing/` from `tools/boxing_assets.py`
+  (placeholder).
+- **Not built locally and not seen in game.** The shapes' sizes and the textures' layout were set without a render.
+
+## 0.22.32 (2026-11-11): Boxing: the block
+
+- **Fist gear blocks on right click**, through the pack's weapon guard (the block, and the parry in its first ticks).
+  What it stops is the gear's own, more with each step up: Hand Wraps 50%; cestus 55 / 60 / 65% (leather, iron,
+  steel); bracers 65 / 75 / 85%. A sword's guard stops 60%.
+- **A boxer's block costs by the blow**, whatever its weight: one feather icon, an icon and a half in the Arrow Slit.
+  Better gear takes less: cestus 95 / 90 / 85% of that, bracers 90 / 80 / 70%. Without a style, fist gear blocks at the
+  usual cost.
+- **The combo breaker** no longer counts a punch that ran into a raised guard from the front.
+- Classes: `combat/Guard` (two small hooks: the gear's share in the guard's component, the boxer's cost when a blow is
+  blocked), `boxing/BoxingGear` (`blockShare`, `blockCostShare`), `boxing/Boxing` (`blockCost`).
+- **Not built locally and not played.** Untested in particular: that fist gear raises the weapon guard at all (it
+  should, being a plain weapon), and that every other weapon's guard is unchanged.
+
+## 0.22.33 (2026-11-11): Pocket Arsenal pulls from anywhere
+
+- **Someone's pack**: until the power is ascended, about 1 Reach in 25 with another player within 24 blocks goes into their inventory instead and comes back with one of their weapons, tools or armour pieces (never what they're holding, nothing stackable or placeable). They see "Something reached into your pack and took your ...". The thief gets it as an ordinary summon; the owner gets the real one back when that summon's time is up (75 s after the pull, or on their next login if they left), whatever happened to the summon (sent back early, broken, dropped).
+- **Hazards**: about 1 Reach in 30 (not yet ascended) the hand closes on something that hurts: embers (fire), a pufferfish (poison and nausea), a wither rose (wither), a cactus, powder snow (freezing) or a lit charge that goes off in the hand (breaks no blocks). Nothing is kept.
+- Once ascended (the Armory's pin) neither happens by accident: the rift answers to you. Instead, look at a player within 16 blocks and hold R for a second (motes gather on them) to reach into their pack for a random one of their things, returned the same way. Let go sooner and it's an ordinary Reach; look away and it's called off. Future handguns stay as they were (1 Reach in 600).
+- `ArsenalAnywhere` (new), `ArsenalPower` (reach roll, pull, lender tick), lang `arsenal.json`.
+- Built; not played. Not tested: the return after a server restart, the charge's damage on armoured players.

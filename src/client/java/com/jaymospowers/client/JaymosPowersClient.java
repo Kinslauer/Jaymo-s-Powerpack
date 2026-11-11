@@ -54,6 +54,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		// the Verdant World's sky: the blue giant and its ring
+		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
@@ -200,6 +202,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		CarryClient.init();
 		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
+		// boxing: the evades' movement and the blur
+		com.jaymospowers.client.boxing.BoxingClient.init();
 		com.jaymospowers.client.divine.DivineSenseClient.init();
 		com.jaymospowers.client.combat.TakedownClient.init();
 		SneakZoom.init();

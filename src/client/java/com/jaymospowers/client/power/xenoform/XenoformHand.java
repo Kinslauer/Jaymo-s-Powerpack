@@ -42,9 +42,6 @@ public final class XenoformHand {
 		limb.zRot = right ? 0.1F : -0.1F;
 		if (model instanceof XenoFormModels.Pyre pyre) {
 			pyre.handPose();
-		} else if (model instanceof XenoFormModels.Gremlin gremlin) {
-			// (0.19.66) its knuckle-walking forearm and fist straightened for the first-person arm
-			gremlin.handPose();
 		} else if (model instanceof com.jaymospowers.client.power.xenoform.ultimate.UltimateTitan titan) {
 			// (0.20.9) Titan's forearm and fist straightened for the first-person arm
 			titan.handPose();

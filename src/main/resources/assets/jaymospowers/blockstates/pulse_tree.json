@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "shape=stem": {
+      "model": "jaymospowers:block/eden/pulse_tree_stem"
+    },
+    "shape=head_small": {
+      "model": "jaymospowers:block/eden/pulse_tree_head_small"
+    },
+    "shape=head_medium": {
+      "model": "jaymospowers:block/eden/pulse_tree_head_medium"
+    },
+    "shape=head_big": {
+      "model": "jaymospowers:block/eden/pulse_tree_head_big"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jaymospowers:block/eden/pulse_tree_log"
+    },
+    "axis=z": {
+      "model": "jaymospowers:block/eden/pulse_tree_log",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jaymospowers:block/eden/pulse_tree_log",
+      "x": 90,
+      "y": 90
+    }
+  }
+}
