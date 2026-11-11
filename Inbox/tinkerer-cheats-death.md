@@ -13,3 +13,6 @@ writer: hermes-writer
 **Andy (2026-11-11):** "The tinkerer is the only other chrono user... he conquered his echo, and conquered death... he should cheat death the same way if ever he is killed, and his echos will reappear and act in his place, which is why he seems to be multiple places at once."
 
 **Build:** killing the Mad Tinkerer doesn't end him: a chrono echo of him reappears and carries on in his place, and he can show up in more than one place. Reuse the Chrono echo entity where it fits. He never admits the android bug. Lore: Lore.md "Who the Tinkerer is".
+
+## Notes
+- 2026-11-11 18:30 Text pass: changes/powers/claude-project-thread-ekfmqj.md - dropped the (Andy: ...) meta parenthetical and reworded the kill bullet as plain player-facing patch notes; new lang part zfighter_tinkerer_echoes.json already in the Tinkerer's voice, plain and brief, keys match the chat code (message.jaymospowers.tinkerer_echo.back/aside, talk.jaymospowers.tinkerer.turned.*) - no changes needed there; all other player strings go through existing lang keys.
