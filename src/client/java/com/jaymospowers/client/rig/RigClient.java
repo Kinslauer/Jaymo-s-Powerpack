@@ -3,7 +3,11 @@ package com.jaymospowers.client.rig;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
+import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Prosthetics;
+import java.util.ArrayList;
+import java.util.List;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigActives;
 import com.jaymospowers.rig.RigCall;
@@ -46,6 +50,12 @@ public final class RigClient {
 	static final int JUMP_TAP_TICKS = 7;
 	/** Lock-on picks the creature nearest the crosshair within this cone (dot of the directions). */
 	static final double LOCK_CONE = 0.97;
+	/** Multi-lock: V held this long (ticks) starts marking; a mark takes the creature nearest the crosshair within this cone. */
+	static final int MARK_AFTER = 6;
+	static final double MARK_CONE = 0.95;
+	/** The lift-off from the ground: its speed (b/t) and how long it lasts (ticks), dying away. */
+	static final double LAUNCH_SPEED = 0.8;
+	static final int LAUNCH_TICKS = 8;
 	/** The takeover: how long the screen shows it, and how many ticks the view turns to the threat (share per tick). */
 	static final int TAKEOVER_SCREEN = 30, TAKEOVER_TURN = 8, TAKEOVER_HANDS_OFF = 14;
 	static final float TAKEOVER_TURN_SHARE = 0.4F;
@@ -62,6 +72,10 @@ public final class RigClient {
 	private static int rigHeld;
 	private static int scanHeld;
 	private static boolean callWasDown, jumpWasDown;
+	private static boolean limbShotWas, limbKickWas, volleyActive, launching;
+	private static int volleyHeld;
+	/** The creatures marked for the missile volley while V is held (entity ids, in the order marked). */
+	private static final List<Integer> MARKS = new ArrayList<>();
 	private static int sinceJump = Integer.MAX_VALUE;
 	/** Ticks left of the takeover's screen (0: none), and the threat the view turns to. */
 	static int takeoverTicks;
@@ -81,6 +95,8 @@ public final class RigClient {
 		ClientTickEvents.END_CLIENT_TICK.register(RigClient::tick);
 		// (0.11.104) the worn suit, drawn and assembled
 		RigSuit.init();
+		// the Forge's hologram
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.rig.RigForgeEntity.TYPE, RigForgeRenderer::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("rig_hud"), RigHud::render);
 	}
 
@@ -91,6 +107,11 @@ public final class RigClient {
 	/** Whether the local player is on their thrusters (hover or full flight): the barrel roll works then. */
 	public static boolean flying(LocalPlayer player) {
 		return status.hovering() && Rig.fullSet(player) && !player.onGround();
+	}
+
+	/** The creatures marked for the missile volley now (entity ids). */
+	static List<Integer> marks() {
+		return MARKS;
 	}
 
 	/** The locked target, if it's loaded here. */
@@ -119,7 +140,7 @@ public final class RigClient {
 
 	/** (0.11.110) The radial menu's pick: an active becomes J's and is used now; a switch just flips. */
 	static void pick(int action) {
-		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT) {
+		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY) {
 			selected = action;
 		}
 		send(action);
@@ -134,6 +155,8 @@ public final class RigClient {
 		if (player == null) {
 			status = RigNet.Status.NONE;
 			java.util.Arrays.fill(powerKeysDown, false);
+			MARKS.clear();
+			volleyActive = false;
 			takeoverTicks = 0;
 			RigScanClient.clear();
 			return;
@@ -144,14 +167,52 @@ public final class RigClient {
 		boolean powerless = Powers.of(player) == null;
 		int level = Rig.level(player);
 		// no power: the four power keys are the Rig's
+		boolean volleyKey = free && powerless && level >= Rig.LOCK_LEVEL && Rig.wears(player, Rig.Piece.HELM);
 		for (PowerKey key : PowerKey.values()) {
 			boolean down = free && powerless && JaymosPowersClient.keyMapping(key).isDown();
+			boolean volley = key == PowerKey.ABILITY_3 && volleyKey;
 			if (down && !powerKeysDown[key.ordinal()]) {
-				// (0.11.107) Sneak + G: the Unibeam
-				send(key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && level >= Rig.UNIBEAM_LEVEL ? RigNet.UNIBEAM : key.ordinal());
+				if (volley) {
+					// V: a tap fires the pair; held, the view marks up to six creatures and letting go sends a missile to each
+					volleyActive = true;
+					volleyHeld = 0;
+					MARKS.clear();
+				} else {
+					// (0.11.107) Sneak + G: the Unibeam
+					send(key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && level >= Rig.UNIBEAM_LEVEL ? RigNet.UNIBEAM : key.ordinal());
+				}
+			}
+			if (volley || volleyActive && key == PowerKey.ABILITY_3) {
+				if (down) {
+					if (++volleyHeld >= MARK_AFTER) {
+						mark(player);
+					}
+				} else if (volleyActive) {
+					volleyActive = false;
+					if (MARKS.isEmpty()) {
+						send(RigNet.LAUNCHER);
+					} else {
+						ClientPlayNetworking.send(new RigNet.Volley(new ArrayList<>(MARKS)));
+					}
+					MARKS.clear();
+				}
 			}
 			powerKeysDown[key.ordinal()] = down;
 		}
+		// a Rig arm or leg fitted, no suit on: G fires the arm's repulsor, V hops or kicks with the leg
+		boolean noSuit = screenFree && powerless && !wearing;
+		boolean shotDown = noSuit && Prosthetics.hasRig(player, Dismember.RIGHT_ARM | Dismember.LEFT_ARM)
+			&& JaymosPowersClient.keyMapping(PowerKey.ABILITY_2).isDown();
+		if (shotDown && !limbShotWas) {
+			send(RigNet.LIMB_SHOT);
+		}
+		limbShotWas = shotDown;
+		boolean kickDown = noSuit && Prosthetics.hasRig(player, Dismember.RIGHT_LEG | Dismember.LEFT_LEG)
+			&& JaymosPowersClient.keyMapping(PowerKey.ABILITY_3).isDown();
+		if (kickDown && !limbKickWas) {
+			send(RigNet.LIMB_KICK);
+		}
+		limbKickWas = kickDown;
 		// B held: a scan (the report has already gone on the press)
 		if (powerKeysDown[PowerKey.ABILITY_4.ordinal()]) {
 			if (++scanHeld == SCAN_HOLD && level >= Rig.SCAN_LEVEL) {
@@ -163,7 +224,8 @@ public final class RigClient {
 		// C (no power: the ultimate key answers nothing else): park or call the suit
 		boolean call = screenFree && powerless && (wearing || RigCall.parked(player)) && JaymosPowersClient.ultimateKey().isDown();
 		if (call && !callWasDown) {
-			send(RigNet.CALL);
+			// Sneak + C with the suit on: leave it standing sentry here
+			send(player.isShiftKeyDown() && wearing ? RigNet.SENTRY : RigNet.CALL);
 		}
 		callWasDown = call;
 		rigKeyTick(player, screenFree, wearing, level);
@@ -240,6 +302,35 @@ public final class RigClient {
 		jumpWasDown = jump;
 	}
 
+	/** Marks the creature nearest the crosshair that is not marked yet, up to the most one volley takes. */
+	private static void mark(LocalPlayer player) {
+		if (MARKS.size() >= RigNet.MAX_MARKS) {
+			return;
+		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		LivingEntity best = null;
+		double bestDot = MARK_CONE;
+		for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RigActives.LOCK_RANGE),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !e.isInvisible() && !MARKS.contains(e.getId()))) {
+			Vec3 to = entity.getBoundingBox().getCenter().subtract(eye);
+			double distance = to.length();
+			if (distance > RigActives.LOCK_RANGE || distance < 1.0E-3) {
+				continue;
+			}
+			double dot = to.scale(1.0 / distance).dot(look);
+			if (dot > bestDot && player.hasLineOfSight(entity)) {
+				bestDot = dot;
+				best = entity;
+			}
+		}
+		if (best != null) {
+			MARKS.add(best.getId());
+			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(),
+				net.minecraft.sounds.SoundSource.PLAYERS, 0.3F, 1.2F + MARKS.size() * 0.1F, false);
+		}
+	}
+
 	/** The living thing nearest the crosshair, in sight, within lock range. */
 	private static @Nullable LivingEntity pick(LocalPlayer player) {
 		Vec3 eye = player.getEyePosition();
@@ -298,27 +389,31 @@ public final class RigClient {
 
 	private static void hover(Minecraft minecraft, LocalPlayer player) {
 		hoverTicks++;
+		if (hoverTicks == 1) {
+			launching = player.onGround();
+		}
+		float air = Rig.frame(player).airSpeed;
 		Vec3 motion = player.getDeltaMovement();
 		double vy;
-		if (minecraft.options.keyJump.isDown()) {
+		if (launching && hoverTicks <= LAUNCH_TICKS) {
+			// off the ground in a burst, dying away into the hover
+			vy = LAUNCH_SPEED * (1.0 - (hoverTicks - 1) / (double)LAUNCH_TICKS);
+		} else if (minecraft.options.keyJump.isDown()) {
 			vy = HOVER_RISE;
 		} else if (minecraft.options.keyShift.isDown()) {
 			vy = -HOVER_SINK;
-		} else if (hoverTicks < 4 && player.onGround()) {
-			// lift off
-			vy = HOVER_RISE * 1.5;
 		} else {
 			vy = Math.sin(hoverTicks * 0.15) * HOVER_BOB;
 		}
 		double vx = motion.x, vz = motion.z;
 		if (minecraft.options.keyUp.isDown()) {
 			double yaw = Math.toRadians(player.getYRot());
-			vx += -Math.sin(yaw) * HOVER_PUSH;
-			vz += Math.cos(yaw) * HOVER_PUSH;
+			vx += -Math.sin(yaw) * HOVER_PUSH * air;
+			vz += Math.cos(yaw) * HOVER_PUSH * air;
 			double speed = Math.sqrt(vx * vx + vz * vz);
-			if (speed > HOVER_MAX) {
-				vx *= HOVER_MAX / speed;
-				vz *= HOVER_MAX / speed;
+			if (speed > HOVER_MAX * air) {
+				vx *= HOVER_MAX * air / speed;
+				vz *= HOVER_MAX * air / speed;
 			}
 		}
 		player.setDeltaMovement(vx, vy, vz);
@@ -328,12 +423,13 @@ public final class RigClient {
 	/** Full flight: where you look, with some weight to it; let go and it slows to a hold. */
 	private static void flight(Minecraft minecraft, LocalPlayer player) {
 		hoverTicks++;
+		float air = Rig.frame(player).airSpeed;
 		Vec3 look = player.getLookAngle();
 		Vec3 want = Vec3.ZERO;
 		if (minecraft.options.keyUp.isDown()) {
-			want = look.scale(FLIGHT_SPEED * (minecraft.options.keySprint.isDown() ? FLIGHT_SPRINT : 1.0));
+			want = look.scale(FLIGHT_SPEED * air * (minecraft.options.keySprint.isDown() ? FLIGHT_SPRINT : 1.0));
 		} else if (minecraft.options.keyDown.isDown()) {
-			want = look.scale(-FLIGHT_SPEED * 0.35);
+			want = look.scale(-FLIGHT_SPEED * air * 0.35);
 		}
 		double yaw = Math.toRadians(player.getYRot());
 		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
