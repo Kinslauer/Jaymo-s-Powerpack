@@ -15,7 +15,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · claimed
-- [ ] [[Agents/claude-cloud-elemental-ki-limits|claude-cloud-elemental-ki-limits]] · 💻 Odysseus · running
 
 
 ## In review
@@ -29,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · #1333 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-costumed-folk|claude-cloud-costumed-folk]] · 💻 Odysseus · #1332 · in-review
+- [ ] [[Agents/claude-cloud-elemental-ki-limits|claude-cloud-elemental-ki-limits]] · 💻 Odysseus · #1333 · in-review
 
 
 ## Needs Andy
