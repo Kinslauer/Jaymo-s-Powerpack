@@ -547,6 +547,13 @@ not nothing: there is a dark ink in them. Learning to draw it is forbidden and l
 it: "That is forbidden for a reason, dear, and the reason has a name I will not say aloud!" Flux left to gather
 becomes corruption on the land.
 
+(new) **A court wizard's margins** (Retaking, the Arcanist's Road, 2026-11-11). A few pages of a court wizard's notes, now
+and then found on a witch: the four elements and their angry cousins, Mending "the fifth, and nobody argues with it"; that
+every court forbids Death and Blood and none remembers why (the old master "looked at the door before he answered, and
+then he did not answer"); that the crucible does not talk when the flux runs high, "it listens, which is worse"; and "if
+you hear your own name in it, put the lid on and go outside. Do not answer. Somebody answered, once, a long time ago."
+It hints at the sorcerer who became the Grue without naming him.
+
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
 *"There's no hunger where we go. Only the one."* It is cured with weakness first, then a golden apple before it
