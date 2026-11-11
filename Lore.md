@@ -135,6 +135,11 @@ kit.
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+  (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
+  plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
+  rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
+  their eyes out do it once and never speak of it. What they are given is not their eyes back: living things burn
+  through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
@@ -187,6 +192,21 @@ traits, never as a system.
 **The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
+
+**The skull under the fire.** (new) When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
+
+**The burning chain.** (new) A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
+
+**Judgement.** (new) An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
+the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
+
+**The burning steeds.** (new) The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
+crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
+kin to the fire; anyone else is burned and thrown.
 
 ## The Z Fighters
 
@@ -562,7 +582,7 @@ hunter drops his orders as he runs: find the band ("it hums when it is near its 
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
-(new, proposed in docs/Galvan-Moon-Plan.md, waiting on Andy) **The city under the dust.** The Galvan live hidden
+(new) **The city under the dust** (Andy, 2026-11-11: "hidden"). The Galvan live hidden
 beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
 moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
 believes the pod crews' rumour. The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed

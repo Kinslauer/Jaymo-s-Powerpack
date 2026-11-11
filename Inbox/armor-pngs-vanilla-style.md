@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by:
 pr: 1313
 suggested_owns: [src/main/resources/assets/jaymospowers/textures/item/armory/, src/main/resources/assets/jaymospowers/models/item/armory/]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Remake armor PNGs in vanilla style
