@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 16:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 16:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,6 +22,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Agents/village-golem-redesign|village-golem-redesign]] · 💻 Odysseus · running
 
 
 ## In review
@@ -29,7 +30,6 @@ kanban-plugin: board
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
-- [ ] [[Agents/meat-groups-crafting-routes|meat-groups-crafting-routes]] · 💻 Odysseus · #1292 · in-review
 
 
 ## Needs Andy

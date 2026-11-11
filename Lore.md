@@ -555,6 +555,11 @@ and there are zombified Hornkin too.
 **The Piglin King** holds the fourth rung of Knowledge. **Ignivorus**, the Nether's fire dragon, flies anywhere
 in the Nether.
 
+(new) **Cobalt** (crafting routes thread, 2026-11-11; Andy asked that every item have a route). A blue ore in the
+Nether's netherrack, which the piglins leave alone because it is not gold. It is the root of the four knife metals:
+smiths melt it with steel for manyullyn, with gold and slime for queen's slime, with copper and amethyst for hepatizon.
+Nobody made it; it is simply in the rock.
+
 ## The spirits
 
 There are five mage-spirits, and **only one wakes for you**, for life (Andy, 2026-11-11). It shares your mana. Each has

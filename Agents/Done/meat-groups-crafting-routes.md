@@ -3,8 +3,8 @@ status: done
 task: 
 branch: claude/project-thread-qj39dp
 with: 
-pr: 1292
-mods: kitchen
+pr: 1292, 1297 (both merged)
+mods: kitchen, powers
 versions: 
 started: 2026-11-11
 owns:
