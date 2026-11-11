@@ -55,6 +55,9 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.Guard.init();
 		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
 		com.jaymospowers.combat.ShieldBang.init();
+		// sparks off meeting steel, shards off wooden shields, and the shields that break
+		com.jaymospowers.combat.ClashFx.init();
+		com.jaymospowers.combat.ShieldShatter.init();
 		com.jaymospowers.combat.AttackTells.init();
 		com.jaymospowers.combat.IncomingBlows.init();
 		com.jaymospowers.combat.Crowds.init();

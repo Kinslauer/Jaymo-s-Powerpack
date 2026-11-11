@@ -40,6 +40,8 @@ public final class MobParry {
 	/** The player parried: slowed this long (ticks), and pushed back this hard. */
 	static final int STAGGER_TICKS = 14;
 	static final double PUSH = 0.35;
+	/** A parry's sparks off its blade or metal shield, or the chips off its wooden one (Jaymo's Powers' {@code ClashFx}). */
+	static final int SPARKS = 16, CHIPS = 3;
 	/** Only blows from this far round its front (degrees each side). */
 	static final double FRONT_DEGREES = 70.0;
 
@@ -99,8 +101,11 @@ public final class MobParry {
 
 	private static void parried(ServerLevel level, Mob mob, Player player) {
 		Vec3 at = mob.getEyePosition().add(player.getEyePosition().subtract(mob.getEyePosition()).normalize().scale(0.6)).add(0.0, -0.3, 0.0);
-		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.15, 0.15, 0.15, 0.45);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 10, 0.1, 0.1, 0.1, 0.25);
+		net.minecraft.world.InteractionHand hand = MobShields.guardHand(mob);
+		if (hand == null || !PowersCompat.guardMet(level, mob, mob.getItemInHand(hand), player, SPARKS, 1.0F, CHIPS)) {
+			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.15, 0.15, 0.15, 0.45);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 10, 0.1, 0.1, 0.1, 0.25);
+		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.3F, 1.8F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.0F, 1.3F);
 		mob.getLookControl().setLookAt(player, 30.0F, 30.0F);

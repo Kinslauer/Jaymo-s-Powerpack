@@ -257,6 +257,11 @@ public final class DarktideGuard {
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 12, 0.2, 0.2, 0.2, 0.3);
 		level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y - 0.3, at.z, 10, 0.25, 0.25, 0.25, 0.05);
 		boolean katana = DarktideWeapons.kit(player) == DarktideWeapons.Kit.KATANA;
+		if (player.getMainHandItem().has(net.minecraft.core.component.DataComponents.WEAPON)) {
+			// a blade turned the blow: sparks off it
+			com.jaymospowers.combat.ClashFx.met(level, player, player.getMainHandItem(), attacker, null, com.jaymospowers.combat.ClashFx.PARRY_SPARKS,
+				com.jaymospowers.combat.ClashFx.PARRY_SCALE, 0);
+		}
 		if (katana) {
 			DarktidePower.countParry(player);
 		}
