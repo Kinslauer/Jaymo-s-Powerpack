@@ -56,6 +56,14 @@ around them, and they are taking back the world they once knew. This is the pres
 a farmhand and can end in the tier of songs: the world is not lost, it is being retaken, one village, one ruin and one
 raider at a time.
 
+(new) **The Retaking** (Andy, 2026-11-11). The taking back is the pack's main story, and every player lives it, whatever
+their power, class or blood. It runs in five acts on the ladder of kings: The Hearth (the Goblin King), The Old Stones
+(an Ogre King, the monoliths, the Giants, the Aether, and the wood and ford of *The Long Defence*), Lights in the Sky
+(the Skeleton Lord, the raider bands, fallen stars, the pods, the Maw and the far worlds), The Dark Below (the Piglin
+King, the spirits, the Banes, the demons' country, the Judge's weighing, the Grue's shades) and Legend (the Wither, and
+the Grue's legion raised again at the ford: the Second Defence). Each power, class and faith has its own road into the
+same acts. The story says what was done, never what it means: that still comes from people, books and wordless films.
+
 ## Ki and mana are the same thing
 
 There is one energy in the world, and two words for it. **Ki** is what a Z Fighter calls it and **mana** is what
