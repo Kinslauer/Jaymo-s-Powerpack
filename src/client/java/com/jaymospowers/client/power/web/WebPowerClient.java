@@ -196,6 +196,7 @@ public final class WebPowerClient implements PowerClient {
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		WebShootersClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
+		WebSenseGlance.init();
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
 		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {

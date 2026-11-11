@@ -82,10 +82,13 @@ def packMods = [
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:gA7nKz5g", cf: [535489, 9280065]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
-	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
-	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
-	[dep: "maven.modrinth:ambientsounds:LFUkYKC1", cf: [254284, 9254861]],
-	[dep: "maven.modrinth:creativecore:mzuUQoPB", cf: [257814, 9265584]],
+	// ImmersiveFX: Resurrected 1.9.0 (AGPL-3.0, by Shinyflvres; a fork of OreCruncher's Dynamic Surroundings; shipped
+	// unchanged, never copied from): footsteps for each kind of ground, armour, swimming and wading sounds, biome ambience
+	// heard from where it is, crafting and workstation sounds, a stomach growl, auroras, fog, steam and bubble jets, and a
+	// sound browser (Ctrl+I) to turn any one sound down. Client-only. It took AmbientSounds 6's place (Andy, 2026-11-11),
+	// so there is one ambience system and not two. Its blood, fireflies and waterfalls stay on beside our own (Andy:
+	// "the more blood the better"). CurseForge only. Kept out of the dev game.
+	[dep: "curse.maven:immersivefx-resurrected-1741564:9521657", cf: [1741564, 9521657], dev: false],
 	// Subtle Effects (all rights reserved, by MincraftEinstein; "use this mod in modpacks with credit and a link",
 	// modrinth.com/mod/subtle-effects): sparks on fires, snoring, dust clouds, burning entities, heartbeat at low health
 	// and more, all toggled in its config. Server-side too (some effects need it), so every client needs it to join.
@@ -601,9 +604,10 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
-// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading)
+// dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading);
+// AmbientSounds and CreativeCore (ImmersiveFX: Resurrected took their place);
 // Iris (out while the ImmersiveVFX test runs: ImmersiveVFX does not work beside it)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "iris"]
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "ambientsounds", "creativecore", "iris"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
