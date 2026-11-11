@@ -12,7 +12,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · 🪶 Quill · #1328 · writing
 
 
 ## In review
@@ -23,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
+- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
 - [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 - [ ] [[Agents/claude-cloud-frostborn-troopers|claude-cloud-frostborn-troopers]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Agents/claude-cloud-tinkerer-cheats-death|claude-cloud-tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
