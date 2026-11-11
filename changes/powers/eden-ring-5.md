@@ -1,4 +1,4 @@
-# the Aether's share of Eden Ring - Sunroot Grove, volvox colonies, hollow islands
+# the Aether's share of Eden Ring, and the field guide
 Andy's Eden Ring picks, part 5 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Only Aether chunks made after
 this update get them.
 - **Sunroot Grove**: a new Aether biome on the wetter half of the Gilded Ridge: sunroot trees (Eden Ring's auritis
@@ -9,4 +9,6 @@ this update get them.
   Aether sky (y 165-250), about one chunk in 36.
 - **Hollow islands**: drifting shells of holystone, turfed on top, with one to three ways into a chamber where
   gravilite shards stand and Eden vines hang; about one chunk in 80.
+- **A Far Country Herbal**: the field guide, a ten-page written book of a traveller's notes on the Verdant World's
+  far country. Crafted from a book, a Dried Limphium Leaf and Gravilite Shards.
 - Numbers are constants at the top of `EdenFeature` and in `tools/aether_world_features.py`.
