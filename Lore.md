@@ -135,6 +135,11 @@ kit.
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+  (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
+  plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
+  rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
+  their eyes out do it once and never speak of it. What they are given is not their eyes back: living things burn
+  through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
@@ -511,6 +516,15 @@ it is rude to interrupt. The **lakeside desert** is hot dry country where every 
 of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
 **wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
 swings slowly round, and carries off anything thrown or let fall.
+
+(new) **Gravilite** (four-mods thread, 2026-11-11, Eden Ring part 3). All over the Verdant World, in every country,
+small blue crystals stand out of the ground and glow. The Verdant call it gravilite and say it fell from the ring of
+the giant overhead, the same stuff that holds the ring up. On its own it only shines, so they light their halls with
+it, in lamps and lanterns. Bound in iron over a core of redstone it does what the ring does: the **Gravity
+Compressor** turns weight upside down in the air above it, higher the harder it is driven. The Verdant use them as
+lifts and to keep stores off the ground. It is a craft of theirs, not a power, and it has nothing to do with the
+Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
+balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
