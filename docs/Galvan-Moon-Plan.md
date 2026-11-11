@@ -120,9 +120,18 @@ intergalactic trade and warfare. The Oscellans had it figured out before."
   his seat in the court: they become the Galvan's king (or queen), and the city takes them as its ruler.
 - Only then does the city open to the worlds: **intergalactic trade and warfare**. While the Galvan ruler holds the
   seat the city stays shut (no war or trade with kingdoms, Track 2); a player king opens it.
-- What that opens is not designed yet (open question 11). A first idea: the king's pods fly Galvan goods to the far
-  worlds and the Overworld kingdoms and bring trade back; the king can send Galvan guards against a far world's
-  captains (it counts toward freeing or conquering it, `ZFighterSpaceMissions`) or against a realm.
+- What the king can do (Andy, 2026-11-11: "they can muster armies that attack overworld kingdoms with space pod
+  invasions, or they can take the fight to the warrior born, drawing them to the moon, and having large sclae warfare
+  on the moon itself"):
+  - **Muster an army:** Galvan guards in fitted suits, raised at the court for star metal and pale alloy, kept in
+    barracks in Undersky.
+  - **Pod invasions:** the king names an Overworld kingdom; the army comes down in pods near its seat and fights as a
+    Kingdoms raid does (it uses Kingdoms' war and raid rules, as a realm with no land of its own on the Overworld).
+    Beaten, the pods stay where they landed.
+  - **War with the Warrior-born:** the king can call out the raider bands; they come to the Pale Moon in their pods and
+    a large battle is fought on the dust outside Undersky, Galvan army against raiders, waves and a raider chief at the
+    end. Winning stops raider pod landings in the Overworld for a while.
+  - Trade between worlds stays open as an idea for later.
 - The **Oscellans** "had it figured out before": a people who once held this kind of power between the worlds. They
   are not in Lore.md yet (open question 12).
 
@@ -153,7 +162,6 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 9. ~~Names~~ Andy: "surprise me". Claude's picks (change any): the elder is **Ammet Thrum**, called the Old Maker;
    the ruler is **Sovereign Vorrel**; the city is **Undersky**. The people stay the Galvan.
 10. ~~Size~~ Answered: about 150 blocks across, towers 60-80 blocks, the false sky just above the tallest.
-11. **Intergalactic trade and warfare:** what should a player king be able to do? Trade with which worlds and
-    kingdoms, and war against whom (far world captains, Overworld realms, the raiders, the Patrol)?
+11. ~~Intergalactic trade and warfare~~ Answered: pod invasions of Overworld kingdoms, or war with the Warrior-born on the moon (Track 5).
 12. **The Oscellans:** who were they? Another people of the Pale Moon or a far world, the Galvan's old rulers, or the
     band's first wearers? Where are they now?
