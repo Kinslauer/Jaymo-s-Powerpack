@@ -23,4 +23,4 @@ owns:
 
 ## Done
 The life story's tales, class and heritage lines follow Lore.md. Not played.
-- 2026-11-11 19:21 PR #1309 is merged into master; moved to Agents/Done.
+- 2026-11-11 19:29 PR #1309 is merged into master; moved to Agents/Done.

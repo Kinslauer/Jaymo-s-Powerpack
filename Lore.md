@@ -53,7 +53,7 @@ they did in *The Long Defence*, a few at a time and here and there, under lightn
 the ground, grey, tusked, still carrying the iron they were buried with) and zombified piglins, never zombies or
 skeletons. Behind them, at the back, stands a **Shade of the Grue** in the sorcerer's red. When it falls, the rest go back
 into the ground, and the ford holds. Nothing on screen says who they were or why they came. If nobody stands at the ford,
-they sink back and come again another night.
+they sink back and come again another night. (new) When it is held, a short wordless film plays at the ford: dawn, the light still burning in the keep, the last of the old legion going back into the ground on the far bank.
 
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
@@ -155,6 +155,12 @@ kit.
 **The elemental powers** (Andy, 2026-11-11). Smoke, Gravity and Cryokinesis come from ki attuning to an element the
 holder was exposed to. Elemental power users have the weakest ki auras of anyone, and because of the way their ki shows
 itself they cannot see mana abilities or spirits. They can still develop valor.
+
+(new) **A hermit's letter** (Retaking, the Hermit's Road, 2026-11-11). A hermit wizard who meets a Smoke, Gravity or Cryo
+user for the first time writes them a short letter: "You looked straight through her. She stood at my shoulder the
+whole time"; their ki "went to the cold, or the smoke, or the weight of things, whichever found you first. It does not
+go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
+when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
@@ -381,8 +387,17 @@ killed a dragon, any dragon, the Ender Dragon too. After the first one dies the 
 
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
-witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
-the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
+no longer held in the Aether's Sentry Ruins either: those are the Slider's alone again (see the labyrinths, next).
+
+(new) **The labyrinths, the snow houses and the jungle temples** (Epic Structures thread, 2026-11-11; Andy: the Epic
+dungeons "should spawn the minotaur instead of the slider dungeon"). Under the plains, the deserts and the snow lie
+great dungeons older than any kingdom standing, halls and stairs cut by nobody the songs name. Each of the great ones
+is a labyrinth with a **minotaur** in its biggest hall, and about one in three of the middling ones has one too; the
+small ones hold only the usual dead. It does not leave its hall. In the cold lands stand snow houses, small ones and
+large ones with a cellar dug under them, the winter camps of hunters who are mostly not at home. In the jungles stand
+stepped stone temples and their ruins, raised by the same forgotten hands as the labyrinths and long since emptied of
+priests. (Claude's placement, for Andy to approve: who built them is left unnamed on purpose.)
 
 ## The dead
 
@@ -509,7 +524,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
-it home, do not come home". Andy to confirm: this hints that the elder meant the band to be given away.
+it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
 ## The future: Los Perrito
 
