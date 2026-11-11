@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: imps-nether
 branch: claude/project-thread-2cvsj6
 with: 
-pr: 
+pr: 1286
 mods: kingdoms
 versions: 
 started: 2026-11-11
@@ -28,3 +28,4 @@ owns:
 - The Long Defence film thread adds the imps to the film after the merge (it has LoreFilmClient.igniteNear in PR #1268).
 
 ## Done
+PR #1286 (change note changes/kingdoms/project-thread-2cvsj6.md). A player sees imps and zombified imps flying in the Nether, lunging from new sides, charging a 3 s fireball a blow in the last 0.6 s sets off, and fireballs lighting trees. Built; on a dev server imps fought a golem, threw fireballs, lit fires and went off when struck in the opening. Not seen in a client (animations in motion, spawn rates).

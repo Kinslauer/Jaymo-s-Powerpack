@@ -522,8 +522,8 @@ Demon soldiers and captains serve them. There is no portal to any of it beyond t
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
 too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
-blow can set off early, killing the imp. Their fireballs set trees and everything around them ablaze. (Imps are not in
-the game yet.)
+blow can set off early, killing the imp. Their fireballs set trees and everything around them ablaze. (Imps and
+zombified imps are in PR #1286.)
 
 (new) **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
