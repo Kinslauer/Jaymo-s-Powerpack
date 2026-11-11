@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,9 +26,9 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · in-review
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 - [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · #1286 · in-review
