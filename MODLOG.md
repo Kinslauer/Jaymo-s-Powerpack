@@ -2479,3 +2479,12 @@ will still have to fight in the tournament as a non z fighter)".
 - The Z Fighter sagas are back, folded into the Retaking: the character menu's Story tab shows **The Fighter's Road** under the five acts, listing each saga (done, the step you're on with its count, ready to begin, or not yet). Its Open button brings up the saga screen (now called Sagas) to pick a difficulty, start or give up a saga, and see side jobs.
 - New client `StoryRoads` is what Jaymo's Kingdoms' Story tab reads (by reflection) for a player's own road; other powers' and callings' roads will join it.
 - Built; not played.
+
+## 0.22.21 (2026-11-11): The Retaking: the Web Slinger's, Xenoform's and Arsenal's roads (#1314)
+
+- Three more roads in the Story tab, each for whoever has the power (steps already done tick themselves):
+  - **The Web Slinger's Road**: bond with a symbiote at a meteor crater; grow close enough (bond 60) that it stops fighting you; purify it white. At bond 60 it writes **What It Remembers** on a blank page for you.
+  - **The Xenoform's Road**: hear a star-reader out; set foot on the Pale Moon; have your band reforged; tear the rival band off the band hunter, who drops his **Orders** as he runs.
+  - **The Arsenal's Road**: claim a relic; mark a place; pull something from the future (the first time, a Los Perrito parade **Notice** comes through the rift with it); pin a weapon.
+- New `PowerRoads` holds these roads and their saved, synced progress (`power_roads`).
+- Built; not played.
