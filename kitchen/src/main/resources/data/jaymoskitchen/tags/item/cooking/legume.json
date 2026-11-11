@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "pantryforblockheads:peanut",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:soybean",
+      "required": false
+    }
+  ]
+}

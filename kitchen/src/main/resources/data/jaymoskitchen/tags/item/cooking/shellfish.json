@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "naturalist:clam_meat",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_snail_meat",
+      "required": false
+    }
+  ]
+}

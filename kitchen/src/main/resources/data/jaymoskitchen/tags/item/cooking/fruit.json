@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:apple",
+    {
+      "id": "pantryforblockheads:peach",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:kiwi",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:orange",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:white_apple",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:sweet_berries",
+    {
+      "id": "pantryforblockheads:blueberries",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:strawberry",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:cherries",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:blue_berry",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wyndberry",
+      "required": false
+    }
+  ]
+}

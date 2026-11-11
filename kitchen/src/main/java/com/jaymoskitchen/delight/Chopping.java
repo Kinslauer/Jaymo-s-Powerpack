@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +36,8 @@ public final class Chopping {
 	static final Identifier POWERS_TUNA = Identifier.fromNamespaceAndPath("jaymospowers", "tuna");
 	static final Identifier POWERS_TUNA_STEAK = Identifier.fromNamespaceAndPath("jaymospowers", "tuna_steak");
 	static final Identifier POWERS_FISH_WEIGHT = Identifier.fromNamespaceAndPath("jaymospowers", "fish_weight");
+	/** The cooking groups (item tags, see cooking/Step) whose meats cut like beef, pork, chicken and mutton. */
+	static final TagKey<Item> RED_MEAT = group("red_meat"), PORK = group("pork"), POULTRY = group("poultry"), MUTTON = group("mutton");
 	static final int CABBAGE_LEAVES = 2;
 	static final int PANICLE_RICE = 2;
 	/** Slices from a cake, a pumpkin pie (a pie dish gives PieBlock.SLICES), a pumpkin, a melon and a kelp roll. */
@@ -44,6 +48,10 @@ public final class Chopping {
 	static final int KELP_ROLL_SLICES = 3;
 
 	private Chopping() {
+	}
+
+	private static TagKey<Item> group(String name) {
+		return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("jaymoskitchen", "cooking/" + name));
 	}
 
 	/** The pieces this cuts into (fresh stacks), or empty if a knife can't do anything with it. */
@@ -69,6 +77,19 @@ public final class Chopping {
 		}
 		if (item == Items.SALMON) {
 			return List.of(new ItemStack(Delight.SALMON_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
+		}
+		// any other meat of the same kind cuts the same way (the cooking groups, see cooking/Step): venison minces like beef
+		if (stack.is(RED_MEAT)) {
+			return List.of(new ItemStack(Delight.MINCED_BEEF, MEAT_CUTS));
+		}
+		if (stack.is(PORK)) {
+			return List.of(new ItemStack(Delight.RAW_BACON, MEAT_CUTS));
+		}
+		if (stack.is(POULTRY)) {
+			return List.of(new ItemStack(Delight.CHICKEN_CUTS, MEAT_CUTS), new ItemStack(Items.BONE_MEAL));
+		}
+		if (stack.is(MUTTON)) {
+			return List.of(new ItemStack(Delight.MUTTON_CHOPS, MEAT_CUTS));
 		}
 		if (BuiltInRegistries.ITEM.getKey(item).equals(POWERS_TUNA)) {
 			Item steak = BuiltInRegistries.ITEM.getOptional(POWERS_TUNA_STEAK).orElse(null);

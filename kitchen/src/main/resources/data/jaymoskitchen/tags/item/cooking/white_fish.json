@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cod",
+    {
+      "id": "naturalist:bass",
+      "required": false
+    },
+    {
+      "id": "naturalist:catfish",
+      "required": false
+    },
+    {
+      "id": "naturalist:piranha",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:shark_meat",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_shark_meat",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:deep_fish",
+      "required": false
+    }
+  ]
+}

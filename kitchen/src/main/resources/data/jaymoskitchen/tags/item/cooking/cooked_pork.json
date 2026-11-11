@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cooked_porkchop",
+    {
+      "id": "jaymospowers:cooked_taegore_meat",
+      "required": false
+    }
+  ]
+}

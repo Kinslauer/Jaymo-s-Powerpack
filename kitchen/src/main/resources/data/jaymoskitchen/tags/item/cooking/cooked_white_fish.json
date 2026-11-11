@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cooked_cod",
+    {
+      "id": "naturalist:cooked_bass",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_catfish",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_piranha",
+      "required": false
+    },
+    {
+      "id": "naturalist:cooked_fish_fillet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cooked_shark_meat",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:cooked_shark_meat",
+      "required": false
+    }
+  ]
+}

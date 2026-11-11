@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cooked_salmon",
+    {
+      "id": "jaymospowers:cooked_tuna_steak",
+      "required": false
+    }
+  ]
+}

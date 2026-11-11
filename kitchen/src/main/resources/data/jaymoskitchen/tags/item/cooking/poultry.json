@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:chicken",
+    {
+      "id": "naturalist:duck",
+      "required": false
+    },
+    {
+      "id": "naturalist:drumstick",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_bird_leg",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:prismallard_leg",
+      "required": false
+    }
+  ]
+}

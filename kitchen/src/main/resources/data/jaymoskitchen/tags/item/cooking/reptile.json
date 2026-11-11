@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "naturalist:lizard_tail",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_reptile_meat",
+      "required": false
+    }
+  ]
+}

@@ -3,8 +3,8 @@
   "category": "misc",
   "ingredients": [
     "jaymoskitchen:cooking_pot",
-    "jaymoskitchen:animal_fat",
-    "jaymoskitchen:animal_fat"
+    "#jaymoskitchen:animal_fats",
+    "#jaymoskitchen:animal_fats"
   ],
   "result": {
     "id": "jaymoskitchen:tallow",

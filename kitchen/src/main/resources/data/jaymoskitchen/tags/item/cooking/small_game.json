@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:rabbit",
+    {
+      "id": "naturalist:bushmeat",
+      "required": false
+    },
+    {
+      "id": "naturalist:morsel",
+      "required": false
+    }
+  ]
+}
