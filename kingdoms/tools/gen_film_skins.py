@@ -482,6 +482,60 @@ def stranger():
         for y in range(y0 + h - rnd.randint(0, 2), y0 + h):
             img.putpixel((x, y), (0, 0, 0, 0))
     save(img, "stranger")
+    return img
+
+
+def stranger_rags():
+    """The fifth before his time comes (Andy: "Before then he is just in tattered cloths"): the same man with no hood and
+    no cloak, in what is left of a drab tunic and trousers, torn through to the skin, barefoot, a rope for a belt."""
+    rnd = random.Random(9107)
+    img = blank()
+    skin, hair = (176, 140, 112), (60, 56, 52)
+    drab, dark = (112, 98, 80), (78, 70, 62)
+    face(img, rnd, skin, hair, (60, 60, 60), brows=hair)
+    stubble(img, rnd, hair)
+    box(img, BODY, drab, 8, rnd)
+    for arm in arms(False):
+        box(img, arm, skin, 5, rnd)
+        # what is left of a sleeve: to the elbow on one side, a strip of it lower
+        rows(img, arm, 0, 4, drab, 8, rnd)
+        for side in SIDES:
+            x0, y0, w, h = arm[side]
+            px(img, x0 + rnd.randrange(w), y0 + 4, drab)
+            paint(img, (x0, y0 + 8, w, 1), shade(dark, 10), 6, rnd)
+    for leg in LEGS:
+        box(img, leg, dark, 8, rnd)
+        # the hems gone, the shins and feet bare
+        rows(img, leg, 9, 3, skin, 5, rnd)
+        paint(img, leg["bottom"], shade(skin, -20), 4, rnd)
+        for side in SIDES:
+            x0, y0, w, h = leg[side]
+            for x in range(x0, x0 + w):
+                if rnd.random() < 0.5:
+                    px(img, x, y0 + 8, skin)
+    # torn through at the chest and side, and a rope round the waist
+    for side, holes in (("front", 5), ("back", 4), ("right", 2), ("left", 2)):
+        x0, y0, w, h = BODY[side]
+        for _ in range(holes):
+            x, y = x0 + rnd.randrange(w), y0 + 1 + rnd.randrange(h - 2)
+            px(img, x, y, shade(skin, -10))
+            if rnd.random() < 0.5 and x + 1 < x0 + w:
+                px(img, x + 1, y + (1 if y + 1 < y0 + h else 0), shade(skin, -16))
+        for x in range(x0, x0 + w):
+            if rnd.random() < 0.45:
+                px(img, x, y0 + h - 1, shade(skin, -14))
+        paint(img, (x0, y0 + 8, w, 1), (150, 132, 96), 6, rnd)
+    save(img, "stranger_rags")
+    return img
+
+
+def stranger_half(rags, suited):
+    """The white suit come halfway over him: his legs and trunk already in it, his arms and head still as they were."""
+    img = rags.copy()
+    for part in LEGS + TROUSERS + [BODY, JACKET]:
+        for x0, y0, w, h in part.values():
+            img.paste(suited.crop((x0, y0, x0 + w, y0 + h)), (x0, y0))
+    save(img, "stranger_half")
 
 
 CLOTHES = "src/main/resources/assets/jaymoskingdoms/skins/clothing/greenskin/"
@@ -563,7 +617,7 @@ if __name__ == "__main__":
     thessaly()
     varro()
     sorcerer()
-    stranger()
+    stranger_half(stranger_rags(), stranger())
     for i in range(3):
         soldier(i)
     for i in range(3):

@@ -16,7 +16,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Draws a lore film's actor ({@link FilmActor}): the body it's cast with (wide, slim or a piglin's), in its own skin,
+ * Draws a lore film's actor ({@link FilmActor}): the body it's cast with (wide, slim or a piglin's), in its own skin
+ * with the armour it wears drawn onto it ({@link FilmGear}),
  * what it holds in its hands; an orc's tusks, brow and ears on an orc; no head or weapon arm once a finisher has taken
  * it; and on the fifth, the cloak and its tethers, each turned at what it has hold of and stretched there.
  */
@@ -28,6 +29,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 	static final Identifier PIGLIN = Identifier.withDefaultNamespace("textures/entity/piglin/zombified_piglin.png");
 
 	static final DataTicket<String> SKIN = DataTicket.create("jaymoskingdoms_film_skin", String.class);
+	static final DataTicket<String> GEAR = DataTicket.create("jaymoskingdoms_film_gear", String.class);
 	static final DataTicket<Integer> BODY = DataTicket.create("jaymoskingdoms_film_body", Integer.class);
 	static final DataTicket<Integer> ORC = DataTicket.create("jaymoskingdoms_film_orc", Integer.class);
 	static final DataTicket<Integer> GONE = DataTicket.create("jaymoskingdoms_film_gone", Integer.class);
@@ -39,6 +41,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 	public FilmActorRenderer(EntityRendererProvider.Context context) {
 		super(context, new Model());
 		this.shadowRadius = SHADOW;
+		FilmGear.assets = context.getEquipmentAssets();
 		this.withRenderLayer(new ItemInHandGeoLayer<>(context, this, "right_hand", "left_hand"));
 	}
 
@@ -63,7 +66,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 			if (state.getOrDefaultGeckolibData(BODY, 0) == FilmActor.PIGLIN) {
 				return PIGLIN;
 			}
-			return JaymosKingdoms.id("textures/entity/film/" + state.getOrDefaultGeckolibData(SKIN, "soldier_0") + ".png");
+			return FilmGear.texture(state.getOrDefaultGeckolibData(SKIN, "soldier_0"), state.getOrDefaultGeckolibData(GEAR, ""));
 		}
 	}
 
@@ -71,6 +74,7 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 	public void addRenderData(FilmActor actor, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(actor, related, state, partialTick);
 		state.addGeckolibData(SKIN, actor.skin);
+		state.addGeckolibData(GEAR, FilmGear.key(actor));
 		state.addGeckolibData(BODY, actor.body);
 		state.addGeckolibData(ORC, actor.orc);
 		state.addGeckolibData(GONE, actor.gone);

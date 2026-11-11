@@ -12,9 +12,9 @@ import java.util.Map;
  * are started on its "action" controller by name, a held pose staying until the next move or {@code stopTriggeredAnim}.
  */
 public final class Moves {
-	/** Loops: standing, a fighting stance, a walk, a run, a low sprint, the dead's drag, a rout, climbing out of the ground. */
+	/** Loops: standing, a fighting stance, a walk, a run, a low sprint, the dead's drag, a rout, climbing out of the ground, hung in the air from cords. */
 	public static final String IDLE = "idle", GUARD = "guard", WALK = "walk", RUN = "run", SPRINT = "sprint", SHAMBLE = "shamble", FLEE = "flee",
-		CLAW_UP = "claw_up";
+		CLAW_UP = "claw_up", HANG = "hang";
 	/** One-off moves, over when they're done. */
 	public static final String[] ONCE = {"swing_across", "swing_down", "swing_back", "block", "stagger", "rise", "cast_right", "cast_left",
 		"tree_flip", "dodge_roll"};

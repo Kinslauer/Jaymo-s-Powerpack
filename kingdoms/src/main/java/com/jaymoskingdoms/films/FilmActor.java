@@ -33,7 +33,7 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 	/** What a finisher took off it. */
 	public static final int NO_HEAD = 1, NO_RIGHT_ARM = 2;
 	/** The cloak's tethers: how many, how fast one runs out to what it's thrown at and comes back (a share of the way, a tick). */
-	public static final int TETHERS = 4;
+	public static final int TETHERS = 5;
 	static final float TETHER_OUT = 0.5F, TETHER_IN = 0.35F;
 	/** Slower than this (blocks a tick) it stands. */
 	static final double STILL = 0.02;

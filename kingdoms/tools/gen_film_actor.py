@@ -8,8 +8,8 @@ Three bodies, one set of animations (the bones are named alike):
   small swept ears) and orc_1 (an underbite with long tusks, a heavier brow, one ear torn short), after
   client/GreenskinLooks' shapes; they're painted from two patches the orc skins carry in the layout's unused corner
   (flesh at 56,16 and ivory at 56,24) and hidden on everyone else.
-Every body also has the fifth's cloak (cape_0-3), the same cloak in three ribbons (ribbon_0-2_0-3) and its four tethers
-(tether_0-3), hidden on everyone but him.
+Every body also has the fifth's cloak (cape_0-3), the same cloak in three ribbons (ribbon_0-2_0-3) and its five cords
+(tether_0-4), hidden on everyone but him.
 - film_actor_slim: 3-wide arms (Thessaly).
 - film_actor_piglin: a piglin's head (10 wide, snout, tusks, ears), wearing the game's own zombified piglin texture.
 
@@ -25,6 +25,7 @@ geckolib/animations/entity/film_actor.animation.json.
 import base64
 import io
 import json
+import math
 import os
 import sys
 
@@ -185,12 +186,25 @@ def body(arm=4, piglin=False):
 	# forward from its root (hung on a bone of their own that no move turns, so a flip or a kneel doesn't swing them off
 	# what they hold); the renderer turns it at what it has hold of and stretches it there (FilmActorRenderer)
 	r.bone("cords", None, (0, 0, 0))
-	for i, (x, y) in enumerate(((3.6, 24.6), (-3.6, 24.6), (4.4, 21.0), (-4.4, 21.0))):
+	# (Andy: "Two or three strand of the cloak should extend at a time, so the line is thicker and corded, theres should
+	# also be a maximum of five ... cords woven out of the robe".) Each cord is CORD_STRANDS strands wound round one
+	# another, CORD_TURN degrees further round at each of its CORD_LINKS links, CORD_WIDE out from its middle
+	for i, (x, y) in enumerate(CORDS):
 		r.bone("tether_%d" % i, "cords", (x, y, 2.0))
 		cord = {fn: (CLOTH[0], CLOTH[1], CLOTH[0] + 8, CLOTH[1] + 1) for fn in ("east", "west", "up", "down")}
 		cord["north"] = cord["south"] = (CLOTH[0], CLOTH[1], CLOTH[0] + 1, CLOTH[1] + 1)
-		r.cube("tether_%d" % i, (x - 0.5, y - 0.5, 2.0 - 16.0), (x + 0.5, y + 0.5, 2.0), cord)
+		link = 16.0 / CORD_LINKS
+		for k in range(CORD_LINKS):
+			for strand in range(CORD_STRANDS):
+				a = math.radians(k * CORD_TURN + strand * 360.0 / CORD_STRANDS)
+				cx, cy = x + CORD_WIDE * math.cos(a), y + CORD_WIDE * math.sin(a)
+				r.cube("tether_%d" % i, (cx - CORD_STRAND / 2, cy - CORD_STRAND / 2, 2.0 - (k + 1) * link), (cx + CORD_STRAND / 2, cy + CORD_STRAND / 2, 2.0 - k * link), cord)
 	return r
+
+
+# the cloak's cords: where each comes out of it (x, y), and how each is wound
+CORDS = ((3.6, 24.6), (-3.6, 24.6), (4.4, 21.0), (-4.4, 21.0), (0.0, 25.0))
+CORD_STRANDS, CORD_LINKS, CORD_TURN, CORD_WIDE, CORD_STRAND = 3, 8, 45.0, 0.62, 0.8
 
 
 def main():

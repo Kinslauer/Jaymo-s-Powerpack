@@ -121,15 +121,38 @@ public final class LoreFilmClient {
 	 * rising, Varro and his orc, the spells, the fifth's run (chased, then from behind the sorcerer, then side on), the end.
 	 */
 	static final int MELEE = 90, SUMMON = 200, STRIKE = 222, RISING = 244, VARRO = 346, VARRO_CLOSE = 382, VARRO_FIELD = 420, SPELLS = 440,
-		CAST_TICKS = 36, QUIET = 584, REVERSE = 636, END = 756, LENGTH = LoreFilms.FILM_TICKS;
+		CAST_TICKS = 36, DON = 584, QUIET = 624, REVERSE = 676, END = 796, LENGTH = LoreFilms.FILM_TICKS;
 	/** Varro's move, beat by beat: the orc runs in, raises its axe, chops; the disarm, the kick, its knees, his grip, the mark, its bow, it rises. */
 	static final int ORC_CHARGE = 312, CHOP_UP = 358, CHOP = 362, DISARM = 366, KICK = 372, KNEES = 375, GRIP = 379, MARK_SET = 388, BOW = 402,
 		MARK_RISE = 412;
 	/** Fading in and out (ticks), and how long sneak is held to skip. */
 	static final int FADE = 20, SKIP_HOLD = 20;
 	/** The staging, in blocks ahead of where you stood ({@code f}) and to the side ({@code s}). */
-	static final double MAGES_F = 8.0, SORCERER_F = 52.0, FIELD_NEAR = 11.0, FIELD_FAR = 31.0, FIELD_HALF = 25.0;
-	static final double[] STRANGER_AT = {3.5, -4.5}, VARRO_AT = {8.0, 7.0}, MARKED_AT = {25.0, 8.5};
+	static final double MAGES_F = 13.5, SORCERER_F = 52.0, FIELD_NEAR = 8.5, FIELD_FAR = 31.0, FIELD_HALF = 25.0;
+	static final double[] STRANGER_AT = {3.5, -4.5}, VARRO_AT = {14.0, 9.0}, MARKED_AT = {27.0, 10.0};
+	/**
+	 * The heroes stand in the fight, not behind it (Andy: "among the fighters instead of in the back in a line"): where
+	 * Grimsby, Thessaly and Ambrose start ({f, s}; Varro at VARRO_AT), how far Grimsby's sword takes him from there, and how
+	 * near a pair of fighters may begin to any of them.
+	 */
+	static final double[][] HEROES_AT = {{15.0, -8.0}, {12.5, -3.0}, {13.5, 3.0}};
+	static final double HERO_LEASH = 6.0, HERO_ROOM = 2.6;
+	/**
+	 * What the heroes wear. Andy: "ichorcloth robes on thessaly, steel armor on varro, no helmet, ambrose in the wizard
+	 * robes, grimsby with the ranger hood and armor". Thessaly, Varro, Ambrose, Grimsby; head, chest, legs, feet.
+	 */
+	static final EquipmentSlot[] GEAR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	static final String[][] HERO_GEAR = {
+		{"", "jaymospowers:ichorcloth_robe", "jaymospowers:ichorcloth_leggings", "jaymospowers:ichorcloth_boots"},
+		{"", "jaymoskingdoms:steel_plate_chestplate", "jaymoskingdoms:steel_plate_leggings", "jaymoskingdoms:steel_plate_boots"},
+		{"wizards:wizard_robe_head", "wizards:wizard_robe_chest", "wizards:wizard_robe_legs", "wizards:wizard_robe_feet"},
+		{"archers:ranger_armor_head", "archers:ranger_armor_chest", "archers:ranger_armor_legs", "archers:ranger_armor_feet"}};
+	/** How often Grimsby, Thessaly and Ambrose each throw a bolt into the fight (ticks), and when in that their own comes. */
+	static final int[][] BOLTS = {{26, 0}, {34, 11}, {30, 19}};
+	/** Ground the fighting is kept off while a close shot is taken across it: {from tick, to tick, f, s, how far round}. */
+	static final double[][] CAMERA_CLEAR = {{MELEE - 30, SUMMON, 19.3, 9.5, 4.2}, {VARRO - 30, SPELLS, VARRO_AT[0] + 1.3, VARRO_AT[1] + 2.4, 2.6}, {DON - 20, QUIET, STRANGER_AT[0] - 1.5, STRANGER_AT[1] - 0.8, 3.2}};
+	/** How far Varro and his orc go looking for the dead once they charge. */
+	static final double HUNT = 80.0;
 	/** How many fight on each side at the start (one pair each), and how many dead are raised. */
 	static final int PAIRS = 26, DEAD = 52;
 	/** Orcs are drawn bigger than a man (as BodySizes draws the real ones). */
@@ -177,6 +200,20 @@ public final class LoreFilmClient {
 	static final String[] SWINGS = {"swing_across", "swing_down", "swing_back"};
 	static final float BLOCKED = 0.3F;
 	static final int BLOCK_TICKS = 12;
+	/**
+	 * Steel on steel. Andy: "blades clashing and some of the fighters should have shields so the fight looks realistic,
+	 * sparks flying from parries and splintering wood from shattering shields". A blow at a shield is caught on it more
+	 * often (SHIELDED); CLASHED of the rest are met by the other's own cut, blade on blade. LANDS ticks into the swing the
+	 * two meet: sparks off a parry or a clash (PARRY_SPARKS, CLASH_SPARKS, thrown at SPARK_SPEED), chips off a shield, and a
+	 * shield that has taken as many blows as it can bear (SHIELD_LASTS, and up to SHIELD_SPREAD more) breaks: splinters
+	 * (SPLINTERS), SHIELD_BOARDS boards of it sent flying, and its bearer knocked back for SHATTER_STUN ticks. One orc of
+	 * the host in ORC_SHIELDS carries one too.
+	 */
+	static final float SHIELDED = 0.62F, CLASHED = 0.22F;
+	static final int LANDS = 4, PARRY_SPARKS = 9, CLASH_SPARKS = 16, CHIPS = 5, SPLINTERS = 26, SHIELD_BOARDS = 3, SHIELD_LASTS = 2, SHIELD_SPREAD = 4,
+		SHATTER_STUN = 12, ORC_SHIELDS = 3;
+	static final double SPARK_SPEED = 1.1, MEET_HIGH = 1.25;
+	static final int PARRY = 0, CLASH = 1, SHIELD = 2;
 	/** Flying heads, limbs and Varro's orc's axe: gravity (blocks a tick, a tick), and how much of its speed one bounce keeps. */
 	static final double GRAVITY = 0.045, BOUNCE = 0.35;
 	/**
@@ -204,7 +241,6 @@ public final class LoreFilmClient {
 	/** Each mage's working (Varro, Thessaly, Grimsby, Ambrose), a held move of the library. */
 	static final String[] CASTS = {"cast_both", "cast_ward", "cast_blade", "cast_high"};
 	/** How often Grimsby throws a bolt (ticks). */
-	static final int BOLT_EVERY = 26;
 
 	// ---- the fifth ----
 	/** His run: where he starts, each turn of it ({f, s}), how fast he runs and lunges (blocks a tick), and where the lunge carries him. */
@@ -242,12 +278,31 @@ public final class LoreFilmClient {
 	static final double SLING_BACK = 1.4, GLIDE_END = SORCERER_F - 1.3, GLIDE_HIGH = 0.6, GLIDE_ARC = 0.5, GLIDE_LAND = 0.3, GLIDE_DROP = 0.14;
 	static final double QUIET_RUN = 0.5, LUNGE_END = 53.6;
 	/** What he carries: the pack's rapier (Jaymo's Powers), or a sword where a game hasn't got it. */
+	/**
+	 * Until then. Andy: "The quiet one should stand in the back until his time comes, then he dons the suit with the anti
+	 * symbiote. Before then he is just in tattered cloths". From DON the white comes up out of the ground over him (motes
+	 * of it climbing him every tick for DON_CLIMB ticks): his legs and trunk are in it at DON_HALF, all of him at
+	 * DON_WHOLE, when the cloak winds out of it in its ribbons and the blade is in his hand; at DON_SET the cloak has set
+	 * whole. Then his run.
+	 */
+	static final String QUIET_RAGS = "stranger_rags", QUIET_HALF = "stranger_half", QUIET_SUIT = "stranger";
+	static final int DON_CLIMB = 24, DON_HALF = 10, DON_WHOLE = 20, DON_SET = 30;
+	static final int WHITE = 0xF2F0E6;
 	static final String QUIET_BLADE = "jaymospowers:iron_rapier|minecraft:iron_sword";
 	/** The turns of his run he flips off the tree at, and the ones he rolls through. */
 	static final int[] QUIET_FLIPS = {2, 5}, QUIET_ROLLS = {3};
 	/** His cloak's tethers: the first of them swing him from tree to tree (thrown this far up the trunk); the rest hunt for themselves. */
 	static final int SWING_TETHERS = 2;
-	static final double TETHER_HIGH = 3.4;
+	static final double TETHER_HIGH = 5.2;
+	/**
+	 * Andy: the cords attach "like the tendrils do, suspending him in mid-air while attached and he flips and dodges between
+	 * tethers". Through his run he hangs from them (the loop "hang"): SWING_CORDS take the trees he turns at in turn, two
+	 * of them fast at a time (the tree ahead and the one he has just left), and carry him AIR_LOW off the ground, AIR_ARC
+	 * higher in the middle of each swing; he is that high AIR_RISE ticks after the first takes hold.
+	 */
+	static final int[] SWING_CORDS = {0, 1, 4};
+	static final double AIR_LOW = 1.1, AIR_ARC = 0.9;
+	static final int AIR_RISE = 8;
 	/**
 	 * The sorcerer's guards: where each waits ({f, s}) and how far into the fifth's run it goes for him (ticks). The cloak
 	 * has one once it's this near, holds it this long, then throws it this far aside at this speed, and it's down.
@@ -272,7 +327,7 @@ public final class LoreFilmClient {
 
 	// ---- the screen ----
 	/** The dark over the screen: the memory's dim, and as the sorcerer calls. */
-	static final float DIM = 0.3F, SUMMONING = 0.6F;
+	static final float DIM = 0.08F, SUMMONING = 0.45F;
 	static final float BAR_SHARE = 0.11F;
 	/** The rule of thirds: how far the camera is turned off its subject (degrees) to set it on a third line. */
 	static final float THIRD = 18.0F;
@@ -319,6 +374,12 @@ public final class LoreFilmClient {
 		int team;
 		/** Left to its own script (the battle doesn't move it). */
 		boolean scripted;
+		/** Goes looking for the dead wherever they are (Varro and his orc, once they charge). */
+		boolean hunter;
+		/** Where it keeps to, and how far from there it will follow a fight (0: anywhere). */
+		double homeF, homeS, leash;
+		/** The blows its shield has taken, and how many it can. */
+		int shieldHits, shieldLasts = SHIELD_LASTS;
 		/** An imp: where on its ring it is, when it began to gather its fireball (-1 not), and the tree that's for. */
 		double ring;
 		int chargeAt = -1;
@@ -355,6 +416,10 @@ public final class LoreFilmClient {
 
 	/** A finisher under way: who wins, who loses, how, and since when. */
 	record Finish(Actor winner, Actor loser, int kind, int start) {
+	}
+
+	/** Two fighters' weapons about to meet: when, whose blow and who meets it, and how (PARRY, CLASH, SHIELD). */
+	record Meet(int tick, Actor striker, Actor other, int kind) {
 	}
 
 	/** A group of the dead: when it comes up, where, and whether lightning comes with it. */
@@ -439,6 +504,7 @@ public final class LoreFilmClient {
 		/** The trees' trunks ({f, s}), and the ones the fifth turns at. */
 		final List<double[]> trees = new ArrayList<>(), dartTrees = new ArrayList<>();
 		final List<Finish> finishes = new ArrayList<>();
+		final List<Meet> meets = new ArrayList<>();
 		final List<Rise> rises = new ArrayList<>();
 		final List<Gib> gibs = new ArrayList<>();
 		final List<Mana> mana = new ArrayList<>();
@@ -460,6 +526,10 @@ public final class LoreFilmClient {
 		int slingAt = -1, glideAt = -1;
 		double slingF, slingS;
 		float flash, flashO;
+		/** The land the film laid over the world's: what each block it changed was (put back when it ends), and how high each column now stands. */
+		final Map<BlockPos, BlockState> land = new java.util.LinkedHashMap<>();
+		double @Nullable [] landY;
+		int landX, landZ, landWide;
 
 		Film(String name, ClientLevel level, Vec3 origin, float yaw) {
 			this.name = name;
@@ -492,8 +562,18 @@ public final class LoreFilmClient {
 			return new Vec3(this.fwd.x * ahead + this.right.x * aside, up, this.fwd.z * ahead + this.right.z * aside);
 		}
 
-		/** The ground's height at {@code x, z}, looked for near the height you stood at (so a cave or a house has a floor). */
+		/** The ground's height at {@code x, z}: the film's own land where it has laid some, else the world's. */
 		double ground(double x, double z) {
+			int ix = Mth.floor(x) - this.landX, iz = Mth.floor(z) - this.landZ;
+			if (this.landY != null && ix >= 0 && iz >= 0 && ix < this.landWide && iz < this.landY.length / this.landWide
+				&& !Double.isNaN(this.landY[iz * this.landWide + ix])) {
+				return this.landY[iz * this.landWide + ix];
+			}
+			return this.real(x, z);
+		}
+
+		/** The world's own ground at {@code x, z}, looked for near the height you stood at (so a cave or a house has a floor). */
+		double real(double x, double z) {
 			int top = Mth.floor(this.origin.y) + 6;
 			BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(Mth.floor(x), top, Mth.floor(z));
 			boolean airAbove = false;
@@ -523,6 +603,7 @@ public final class LoreFilmClient {
 	}
 
 	public static void register() {
+		ShadowFlameParticle.register();
 		ClientPlayNetworking.registerGlobalReceiver(LoreFilms.Play.TYPE,
 			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY))));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -564,6 +645,145 @@ public final class LoreFilmClient {
 		return film != null;
 	}
 
+	/** The hour a film is set at (ticks into the day: night, the moon well up), and a day's length. */
+	static final long NIGHT = 15500L, DAY = 24000L;
+	/** How bright the film's night is under its moon (the lightmap's sky factor: 1 is day, about a quarter a plain night). */
+	public static final float MOONLIGHT = 0.85F;
+
+	/** The hour this game's clocks read while a film plays, on the day {@code time} is in (FilmNightMixin). */
+	public static long nightTime(long time) {
+		return time - Math.floorMod(time, DAY) + NIGHT;
+	}
+
+	/**
+	 * The fog. Andy: "a low rolling fog from the sorcerers side, volumetric like the smoke ability and ambient like there is
+	 * on some areas of the map". It comes over the field from behind the sorcerer: its front is at FOG_FROM when the film
+	 * opens and FOG_TO by its end, and behind the front, FOG_HALF either side of the road, FOG_PUFFS puffs a tick roll
+	 * along the ground toward the Keep (FOG_DRIFT a tick), none higher than FOG_HIGH. It is this game's own (not on the
+	 * tape: the same fog rolls over a staging and a replay).
+	 */
+	static final double FOG_FROM = 46.0, FOG_TO = 4.0, FOG_HALF = 30.0, FOG_HIGH = 0.4, FOG_DRIFT = 0.03, FOG_DEEP = 34.0;
+	/** Banks begun a tick, how long one lasts (ticks), how big it is across (blocks, and as much again at random), its grey and how solid. */
+	static final int FOG_PUFFS = 5, FOG_LIFE = 160;
+	static final float FOG_SIZE = 1.0F, FOG_GREY = 0.62F, FOG_ALPHA = 0.3F;
+
+	private static void fog(Film f) {
+		double front = Mth.lerp(Math.min(1.0, f.tick / (double)(LENGTH - FADE)), FOG_FROM, FOG_TO);
+		var rnd = f.level.getRandom();
+		for (int i = 0; i < FOG_PUFFS; i++) {
+			// (thickest at the front, thinning back toward where it comes from)
+			double back = rnd.nextDouble();
+			Vec3 p = f.at(front + back * back * FOG_DEEP, (rnd.nextDouble() * 2.0 - 1.0) * FOG_HALF, 0.25 + rnd.nextDouble() * FOG_HIGH);
+			Vec3 drift = f.fwd.scale(-FOG_DRIFT * (0.5 + rnd.nextDouble()));
+			com.jaymoskingdoms.client.disasters.StormsClient.fog(f.level, p.x, p.y, p.z, drift.x, drift.z, FOG_SIZE * (1.0F + rnd.nextFloat()),
+				FOG_LIFE + rnd.nextInt(FOG_LIFE / 2), FOG_GREY + rnd.nextFloat() * 0.1F, FOG_ALPHA);
+		}
+	}
+
+	// ---- the land ---------------------------------------------------------------------------------------------------------
+
+	/**
+	 * The land. Andy: "there should also be more hills in the landscape, to make it look like a real area of the world".
+	 * Over the stage (LAND_BACK to LAND_FRONT ahead of you, LAND_HALF either side) the film lays hills of earth and grass on
+	 * top of the ground that's there, on this screen only, and takes them away again when it ends: the field rolls (ROLL
+	 * blocks at most), the sorcerer stands on a knoll, the Keep on its own rise, and wooded ridges close the field in at the
+	 * sides and behind him. Nothing is raised within LAND_FLAT of where you stand. A worn track runs down from the gate to
+	 * the fight, and grass and ferns grow over all of it. Everyone and everything on the stage stands on it.
+	 */
+	static final double LAND_BACK = -86.0, LAND_FRONT = 94.0, LAND_HALF = 62.0, LAND_EDGE = 7.0, LAND_FLAT = 2.5, LAND_EASE = 7.0;
+	static final double ROLL = 2.6, KNOLL = 3.0, KNOLL_WIDE = 8.0, KEEP_HILL = 4.0, KEEP_HILL_WIDE = 15.0, RIDGE = 7.5, RIDGE_AT = 47.0, RIDGE_WIDE = 7.0,
+		FAR_RIDGE = 9.0, FAR_RIDGE_AT = 79.0, TRACK_HALF = 1.7, TRACK_FROM = KEEP_F + 4.0, TRACK_TO = 30.0;
+	/** One column in this many grows grass; one in this many a fern. */
+	static final int GRASS_IN = 5, FERN_IN = 28;
+	private static final int LAND_FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
+
+	/** How far the land is raised over the world's ground at the stage's {@code (fw, s)}, in blocks. */
+	static double hill(double fw, double s) {
+		double roll = 0.5 + 0.22 * Math.sin(fw * 0.11 + 1.3) * Math.cos(s * 0.09 - 0.4) + 0.16 * Math.sin(fw * 0.23 - s * 0.17 + 2.0)
+			+ 0.12 * Math.cos(s * 0.31 + fw * 0.07);
+		double h = ROLL * Mth.clamp(roll, 0.0, 1.0);
+		h += KNOLL * Math.exp(-((fw - SORCERER_F - 2.0) * (fw - SORCERER_F - 2.0) + s * s) / (2.0 * KNOLL_WIDE * KNOLL_WIDE));
+		h += KEEP_HILL * Math.exp(-((fw - KEEP_F) * (fw - KEEP_F) + s * s * 0.3) / (2.0 * KEEP_HILL_WIDE * KEEP_HILL_WIDE));
+		double side = Math.abs(s) - RIDGE_AT;
+		h += RIDGE * (0.65 + 0.35 * Math.sin(fw * 0.08 + Math.signum(s))) * Math.exp(-side * side / (2.0 * RIDGE_WIDE * RIDGE_WIDE));
+		h += FAR_RIDGE * (0.7 + 0.3 * Math.cos(s * 0.07)) * Math.exp(-(fw - FAR_RIDGE_AT) * (fw - FAR_RIDGE_AT) / (2.0 * RIDGE_WIDE * RIDGE_WIDE));
+		double edge = Math.min(Math.min(fw - LAND_BACK, LAND_FRONT - fw), LAND_HALF - Math.abs(s)) / LAND_EDGE;
+		double near = (Math.sqrt(fw * fw + s * s) - LAND_FLAT) / LAND_EASE;
+		return h * smooth((float)edge) * smooth((float)near);
+	}
+
+	/** Lays the land (see {@link #hill}); {@link #unlay} takes it away. */
+	private static void lay(Film f) {
+		double[][] corners = {{LAND_BACK, -LAND_HALF}, {LAND_BACK, LAND_HALF}, {LAND_FRONT, -LAND_HALF}, {LAND_FRONT, LAND_HALF}};
+		int x0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, z0 = Integer.MAX_VALUE, z1 = Integer.MIN_VALUE;
+		for (double[] corner : corners) {
+			int x = Mth.floor(f.origin.x + f.fwd.x * corner[0] + f.right.x * corner[1]), z = Mth.floor(f.origin.z + f.fwd.z * corner[0] + f.right.z * corner[1]);
+			x0 = Math.min(x0, x);
+			x1 = Math.max(x1, x);
+			z0 = Math.min(z0, z);
+			z1 = Math.max(z1, z);
+		}
+		int wide = x1 - x0 + 1, deep = z1 - z0 + 1;
+		double[] heights = new double[wide * deep];
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		BlockState earth = Blocks.DIRT.defaultBlockState(), turf = Blocks.GRASS_BLOCK.defaultBlockState();
+		for (int z = z0; z <= z1; z++) {
+			for (int x = x0; x <= x1; x++) {
+				int i = (z - z0) * wide + (x - x0);
+				heights[i] = Double.NaN;
+				double dx = x + 0.5 - f.origin.x, dz = z + 0.5 - f.origin.z, fw = dx * f.fwd.x + dz * f.fwd.z, s = dx * f.right.x + dz * f.right.z;
+				if (fw < LAND_BACK || fw > LAND_FRONT || Math.abs(s) > LAND_HALF || !f.level.hasChunkAt(pos.set(x, 0, z))) {
+					continue;
+				}
+				int ground = Mth.floor(f.real(x + 0.5, z + 0.5)), up = (int)Math.round(hill(fw, s));
+				// (one column's own number, the same every time the film is laid here)
+				int roll = Math.floorMod((int)Math.round(fw * 7.0) * 73_856_093 ^ (int)Math.round(s * 7.0) * 19_349_663, 1_000);
+				boolean track = fw > TRACK_FROM && fw < TRACK_TO && Math.abs(s + Math.sin(fw * 0.21) * 0.8) < TRACK_HALF - (roll % 3) * 0.3;
+				BlockState under = f.level.getBlockState(pos.set(x, ground - 1, z));
+				boolean soil = up > 0 || under.is(Blocks.GRASS_BLOCK) || under.is(Blocks.DIRT);
+				for (int y = ground; y < ground + up; y++) {
+					put(f, pos.set(x, y, z), y == ground + up - 1 ? turf : earth);
+				}
+				if (up > 0 && under.is(Blocks.GRASS_BLOCK)) {
+					put(f, pos.set(x, ground - 1, z), earth);
+				}
+				int top = ground + up;
+				heights[i] = top;
+				if (!soil) {
+					continue;
+				}
+				if (track) {
+					put(f, pos.set(x, top - 1, z), (roll % 4 == 0 ? Blocks.COARSE_DIRT : roll % 7 == 0 ? Blocks.GRAVEL : Blocks.DIRT_PATH).defaultBlockState());
+				} else if (f.level.getBlockState(pos.set(x, top, z)).isAir() && fw * fw + s * s > 9.0) {
+					if (roll % FERN_IN == 0) {
+						put(f, pos, Blocks.FERN.defaultBlockState());
+					} else if (roll % GRASS_IN == 0) {
+						put(f, pos, Blocks.SHORT_GRASS.defaultBlockState());
+					}
+				}
+			}
+		}
+		f.landY = heights;
+		f.landX = x0;
+		f.landZ = z0;
+		f.landWide = wide;
+	}
+
+	private static void put(Film f, BlockPos pos, BlockState state) {
+		f.land.putIfAbsent(pos.immutable(), f.level.getBlockState(pos));
+		f.level.setBlock(pos, state, LAND_FLAGS);
+	}
+
+	/** Puts the world's own ground back. */
+	private static void unlay(Film f) {
+		List<Map.Entry<BlockPos, BlockState>> was = new ArrayList<>(f.land.entrySet());
+		for (int i = was.size() - 1; i >= 0; i--) {
+			f.level.setBlock(was.get(i).getKey(), was.get(i).getValue(), LAND_FLAGS);
+		}
+		f.land.clear();
+		f.landY = null;
+	}
+
 	// ---- staging ------------------------------------------------------------------------------------------------------------
 
 	/**
@@ -578,6 +798,7 @@ public final class LoreFilmClient {
 		Film f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
 		f.viewBefore = minecraft.options.getCameraType();
 		film = f;
+		lay(f);
 		FilmTape tape = record ? null : FilmTape.find(name);
 		if (tape != null && load(f, tape)) {
 			return;
@@ -588,6 +809,7 @@ public final class LoreFilmClient {
 			f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
 			f.viewBefore = minecraft.options.getCameraType();
 			film = f;
+			lay(f);
 		}
 		if (record) {
 			f.rec = new FilmTape();
@@ -635,17 +857,33 @@ public final class LoreFilmClient {
 		float facing = 0.0F, facingBack = 180.0F;
 		forest(f);
 		keep(f);
-		// the four mages behind the fight, and the fifth off to one side
-		f.grimsby = mage(f, "grimsby", FilmActor.WIDE, -7.0, Items.IRON_SWORD, null);
-		f.thessaly = mage(f, "thessaly", FilmActor.SLIM, -2.5, null, null);
-		f.ambrose = mage(f, "ambrose", FilmActor.WIDE, 2.5, Items.BLAZE_ROD, null);
+		// the four heroes in among the fighting, and the fifth off to one side
+		f.grimsby = mage(f, "grimsby", FilmActor.WIDE, HEROES_AT[0], Items.IRON_SWORD, null);
+		f.thessaly = mage(f, "thessaly", FilmActor.SLIM, HEROES_AT[1], null, null);
+		f.ambrose = mage(f, "ambrose", FilmActor.WIDE, HEROES_AT[2], Items.BLAZE_ROD, null);
 		// (Varro's axe in his left hand: his right is the one he marks with)
-		f.varro = mage(f, "varro", FilmActor.WIDE, VARRO_AT[1], null, Items.NETHERITE_AXE);
+		f.varro = mage(f, "varro", FilmActor.WIDE, VARRO_AT, null, Items.NETHERITE_AXE);
 		if (f.varro != null) {
 			f.varro.speed = 0.3;
 		}
-		// the Quiet One: the white cloak, and a rapier where the pack has one
-		f.stranger = cast(f, new FilmTape.Cast(0, "stranger", FilmActor.WIDE, 0, true, Role.STRANGER.ordinal(), Flesh.MAN.ordinal(), false, QUIET_BLADE, "",
+		// what each of them wears is the game's own (the first of each that this game has; FilmGear draws it on them)
+		Actor[] heroes = {f.thessaly, f.varro, f.ambrose, f.grimsby};
+		for (int i = 0; i < heroes.length; i++) {
+			for (int j = 0; j < GEAR_SLOTS.length && heroes[i] != null; j++) {
+				if (!HERO_GEAR[i][j].isEmpty()) {
+					hold(f, heroes[i], GEAR_SLOTS[j], HERO_GEAR[i][j]);
+				}
+			}
+		}
+		if (f.grimsby != null) {
+			// Grimsby's sword is in the fight from the first, never far from where he stands
+			f.grimsby.leash = HERO_LEASH;
+			f.grimsby.nextSwing = 6;
+			gait(f, f.grimsby, Moves.GUARD, Moves.RUN);
+			f.fighters.add(f.grimsby);
+		}
+		// the Quiet One, at the back in his rags until his time comes
+		f.stranger = cast(f, new FilmTape.Cast(0, QUIET_RAGS, FilmActor.WIDE, 0, false, Role.STRANGER.ordinal(), Flesh.MAN.ordinal(), false, "", "",
 			new float[] {(float)STRANGER_AT[0], (float)STRANGER_AT[1], 0.0F, facing, 1.0F}));
 		if (f.stranger != null) {
 			f.stranger.restYaw = f.yaw + facing;
@@ -660,6 +898,9 @@ public final class LoreFilmClient {
 			double[] at = {FIELD_NEAR + f.rnd.nextDouble() * (FIELD_FAR - FIELD_NEAR), (f.rnd.nextDouble() * 2.0 - 1.0) * FIELD_HALF};
 			boolean free = !nearTree(f, at[0], at[1], 1.6) && distance(at[0], at[1], VARRO_AT[0], VARRO_AT[1]) > 5.0
 				&& segment(at[0], at[1], MARKED_AT[0], MARKED_AT[1], VARRO_AT[0], VARRO_AT[1]) > 2.4;
+			for (double[] hero : HEROES_AT) {
+				free &= distance(at[0], at[1], hero[0], hero[1]) > HERO_ROOM;
+			}
 			for (double[] other : spots) {
 				free &= distance(at[0], at[1], other[0], other[1]) > 3.0;
 			}
@@ -682,6 +923,11 @@ public final class LoreFilmClient {
 			foe.team = 1;
 			foe.foe = soldier;
 			soldier.foe = foe;
+			if (!warrior && i % ORC_SHIELDS == 0) {
+				hold(f, foe, EquipmentSlot.OFFHAND, id(Items.SHIELD));
+			}
+			foe.shieldLasts = SHIELD_LASTS + f.rnd.nextInt(SHIELD_SPREAD + 1);
+			soldier.shieldLasts = SHIELD_LASTS + f.rnd.nextInt(SHIELD_SPREAD + 1);
 			foe.engagedAt = soldier.engagedAt = 0;
 			foe.nextSwing = f.rnd.nextInt(SWING_GAP + SWING_SPREAD);
 			soldier.nextSwing = f.rnd.nextInt(SWING_GAP + SWING_SPREAD);
@@ -779,11 +1025,13 @@ public final class LoreFilmClient {
 		return a;
 	}
 
-	private static @Nullable Actor mage(Film f, String skin, int body, double s, @Nullable Item main, @Nullable Item off) {
+	private static @Nullable Actor mage(Film f, String skin, int body, double[] at, @Nullable Item main, @Nullable Item off) {
 		Actor a = cast(f, new FilmTape.Cast(0, skin, body, 0, false, Role.MAGE.ordinal(), Flesh.MAN.ordinal(), false, id(main), id(off),
-			new float[] {(float)MAGES_F, (float)s, 0.0F, 0.0F, 1.0F}));
+			new float[] {(float)at[0], (float)at[1], 0.0F, 0.0F, 1.0F}));
 		if (a != null) {
 			a.restYaw = f.yaw;
+			a.homeF = at[0];
+			a.homeS = at[1];
 		}
 		return a;
 	}
@@ -929,6 +1177,7 @@ public final class LoreFilmClient {
 			for (Entity prop : f.props) {
 				f.level.removeEntity(prop.getId(), Entity.RemovalReason.DISCARDED);
 			}
+			unlay(f);
 		}
 		if (f.viewBefore != null) {
 			minecraft.options.setCameraType(f.viewBefore);
@@ -1073,6 +1322,15 @@ public final class LoreFilmClient {
 	}
 
 	/** An imp's fireball over its head: how far into its charge it shows (0 none). */
+	/** {@code a} is in another skin, with or without the cloak. */
+	private static void dress(Film f, Actor a, String skin, boolean cloak) {
+		tape(f, FilmTape.DRESS, a.index, cloak ? 1 : 0, NONE, skin);
+		if (a.e instanceof FilmActor actor) {
+			actor.skin = skin;
+			actor.cloak = cloak;
+		}
+	}
+
 	private static void charge(Film f, Actor a, int charge) {
 		tape(f, FilmTape.CHARGE, a.index, charge, NONE, "");
 		if (a.e instanceof Imp imp) {
@@ -1330,6 +1588,11 @@ public final class LoreFilmClient {
 					cloak(f, a, e.b() != 0);
 				}
 			}
+			case FilmTape.DRESS -> {
+				if (a != null) {
+					dress(f, a, e.s(), e.b() != 0);
+				}
+			}
 			default -> {
 			}
 		}
@@ -1387,7 +1650,7 @@ public final class LoreFilmClient {
 			return true;
 		}
 		// the mages and the fifth; Varro's ground and his orc's run at him; the sorcerer and the lunge shot across him
-		if (tf > -1.5 && tf < MAGES_F + 2.5 && Math.abs(ts) < 10.0) {
+		if (tf > -1.5 && tf < MAGES_F + 4.0 && Math.abs(ts) < 10.5) {
 			return true;
 		}
 		if (distance(tf, ts, VARRO_AT[0], VARRO_AT[1]) < 4.4 || segment(tf, ts, MARKED_AT[0], MARKED_AT[1], VARRO_AT[0], VARRO_AT[1]) < 1.9
@@ -1415,7 +1678,7 @@ public final class LoreFilmClient {
 			}
 		}
 		// the line Grimsby's cut runs down
-		if (segment(tf, ts, 8.0, -7.0, 30.0, -7.0) < 1.5) {
+		if (segment(tf, ts, HEROES_AT[0][0], HEROES_AT[0][1], 32.0, HEROES_AT[0][1]) < 2.2) {
 			return true;
 		}
 		// the staged finishers, and the two shots that watch them
@@ -1526,6 +1789,7 @@ public final class LoreFilmClient {
 		}
 		f.flashO = f.flash;
 		f.flash *= 0.82F;
+		fog(f);
 		int t = f.tick;
 		if (f.play != null) {
 			replay(f, f.play, t);
@@ -1575,14 +1839,18 @@ public final class LoreFilmClient {
 		summons(f, t);
 		marking(f, t);
 		// Grimsby, sword in one hand, throws bolts with the other, all battle long
-		if (t > 20 && t < SPELLS && t % BOLT_EVERY == 0 && f.grimsby != null) {
-			Actor d = target(f, f.grimsby, 16.0);
-			if (d != null) {
-				bolt(f, f.grimsby, d);
+		// (and Thessaly and Ambrose, each in their own colour, from where they stand in it)
+		for (int i = 0; i < BOLTS.length; i++) {
+			Actor mage = caster(f, i + 1);
+			if (mage != null && t > 20 && t < SPELLS && t % BOLTS[i][0] == BOLTS[i][1] && t >= mage.busyUntil) {
+				Actor d = target(f, mage, 16.0);
+				if (d != null) {
+					bolt(f, mage, d, i);
+				}
 			}
 		}
 		// the spells, each mage in turn
-		if (t >= SPELLS && t < QUIET) {
+		if (t >= SPELLS && t < DON) {
 			int which = (t - SPELLS) / CAST_TICKS, into = (t - SPELLS) % CAST_TICKS;
 			Actor mage = caster(f, which);
 			if (mage != null) {
@@ -1651,11 +1919,13 @@ public final class LoreFilmClient {
 
 	/** Where {@code which}'s spell lands. */
 	private static Vec3 target(Film f, int which, Actor mage) {
+		// (from where they stand now, which a tape's actor only has as where its body is)
+		float[] m = f.staged(mage.e.position());
 		return switch (which) {
-			case 0 -> f.at(21.0, mage.s - 1.0, 0.5);
-			case 1 -> f.at(15.0, 0.0, 1.0);
-			case 2 -> f.at(26.0, mage.s, 1.0);
-			default -> f.at(26.0, 0.0, 0.0);
+			case 0 -> f.at(m[0] + 8.0, m[1] - 1.0, 0.5);
+			case 1 -> f.at(m[0] + 3.0, 0.0, 1.0);
+			case 2 -> f.at(m[0] + 11.0, m[1], 1.0);
+			default -> f.at(m[0] + 12.0, 0.0, 0.0);
 		};
 	}
 
@@ -1749,6 +2019,15 @@ public final class LoreFilmClient {
 			sound(f, SoundEvents.RAVAGER_ROAR, 0.9F, 0.7F);
 		}
 		if (t == MARK_RISE + RISE_TICKS) {
+			// Varro goes with it (Andy: "varro charges with his orc after the counter"): his axe to his right hand, and at the dead
+			rest(f, varro);
+			hold(f, varro, EquipmentSlot.MAINHAND, id(varro.e.getOffhandItem().getItem()));
+			hold(f, varro, EquipmentSlot.OFFHAND, "");
+			gait(f, varro, Moves.GUARD, Moves.SPRINT);
+			varro.facing = null;
+			varro.hunter = true;
+			varro.nextSwing = t + 8;
+			f.fighters.add(varro);
 			orc.facing = null;
 			orc.speed = MARKED_HUNT;
 			if (f.axe != null) {
@@ -1767,23 +2046,20 @@ public final class LoreFilmClient {
 			orc.team = 0;
 			f.fighters.add(orc);
 		}
-		if (t == VARRO_FIELD + 8) {
-			rest(f, varro);
-			varro.facing = null;
-			varro.toF = VARRO_AT[0];
-			varro.toS = VARRO_AT[1];
-		}
 	}
 
 	/** Grimsby's bolt: off his free hand, a streak of light into {@code at}, which falls. */
-	private static void bolt(Film f, Actor mage, Actor at) {
+	private static void bolt(Film f, Actor mage, Actor at, int whose) {
 		act(f, mage, "cast_left");
-		sound(f, SoundEvents.EVOKER_CAST_SPELL, 1.3F, 0.5F);
+		sound(f, SoundEvents.EVOKER_CAST_SPELL, 1.3F - whose * 0.15F, 0.5F);
 		Vec3 from = mage.e.position().add(0.0, 1.4, 0.0).add(f.right.scale(-0.4)), to = at.e.position().add(0.0, 1.1, 0.0);
 		int steps = Math.max(8, (int)(from.distanceTo(to) * 2.0));
 		for (int i = 0; i <= steps; i++) {
 			Vec3 p = from.lerp(to, i / (double)steps);
-			particle(f, i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.0, 0.0);
+			// Grimsby's white, Thessaly's violet, Ambrose's gold
+			particle(f, whose == 1 ? (i % 3 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(0xB98CFF, 0.9F))
+				: whose == 2 ? (i % 3 == 0 ? ParticleTypes.SMALL_FLAME : new DustParticleOptions(0xFFD35A, 0.9F))
+				: i % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.ENCHANTED_HIT, p, 0.0, 0.0, 0.0);
 		}
 		at.fallAt = f.tick + 2;
 	}
@@ -1792,6 +2068,12 @@ public final class LoreFilmClient {
 		// the working itself: called up, let go about as the camera cuts to where it lands, then held a moment
 		if (into == 0) {
 			act(f, mage, CASTS[which % CASTS.length]);
+			// (whoever was fighting stops to work it)
+			mage.busyUntil = f.tick + CAST_TICKS - 4;
+			mage.toF = mage.f;
+			mage.toS = mage.s;
+			mage.facing = null;
+			mage.foe = null;
 		}
 		if (into == CAST_TICKS - 6) {
 			rest(f, mage);
@@ -1831,7 +2113,7 @@ public final class LoreFilmClient {
 					sound(f, SoundEvents.AMETHYST_BLOCK_CHIME, 0.7F, 1.0F);
 					sound(f, SoundEvents.BEACON_ACTIVATE, 1.4F, 0.7F);
 					for (Actor a : f.legion) {
-						if (a.up() && f.tick >= a.busyUntil && a.f < 19.0) {
+						if (a.up() && f.tick >= a.busyUntil && a.f < mage.f + 7.0) {
 							a.toF = a.f + 4.0;
 							a.toS = a.s;
 							a.stunUntil = f.tick + 30;
@@ -1842,7 +2124,7 @@ public final class LoreFilmClient {
 				}
 				if (into < 30) {
 					for (int i = 0; i < 22; i++) {
-						Vec3 p = f.at(15.0, (f.rnd.nextDouble() * 2.0 - 1.0) * FIELD_HALF, f.rnd.nextDouble() * 3.0);
+						Vec3 p = f.at(mage.f + 3.0, (f.rnd.nextDouble() * 2.0 - 1.0) * FIELD_HALF, f.rnd.nextDouble() * 3.0);
 						particle(f, i % 3 == 0 ? ParticleTypes.ENCHANT : ParticleTypes.END_ROD, p, 0.0, 0.04, 0.0);
 					}
 				}
@@ -1855,7 +2137,7 @@ public final class LoreFilmClient {
 					sound(f, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 0.9F);
 				}
 				if (run < 14) {
-					double along = MAGES_F + 3.0 + run * (SORCERER_F - 6.0 - MAGES_F - 3.0) / 14.0;
+					double along = mage.f + 3.0 + run * (SORCERER_F - 6.0 - mage.f - 3.0) / 14.0;
 					Vec3 p = f.at(along, mage.s, 1.2);
 					particle(f, ParticleTypes.SWEEP_ATTACK, p, 0.0, 0.0, 0.0);
 					for (int i = 0; i < 4; i++) {
@@ -1906,6 +2188,40 @@ public final class LoreFilmClient {
 		if (quiet == null || grue == null) {
 			return;
 		}
+		int don = t - DON;
+		if (don >= 0 && don < DON_SET + 6) {
+			// the white comes up over him, feet first
+			Vec3 feet = quiet.e.position();
+			if (don < DON_CLIMB) {
+				double high = 2.0 * Math.min(1.0, (don + 2) / (double)DON_WHOLE);
+				for (int i = 0; i < 10; i++) {
+					double turn = don * 0.7 + i * Math.PI / 5.0, up = f.rnd.nextDouble() * high;
+					particle(f, i % 5 == 0 ? ParticleTypes.END_ROD : new DustParticleOptions(WHITE, 0.8F),
+						feet.add(Math.cos(turn) * 0.45, up, Math.sin(turn) * 0.45), 0.0, 0.03, 0.0);
+				}
+				particle(f, ParticleTypes.SNOWFLAKE, feet.add(spread(f, 0.6), 0.05, spread(f, 0.6)), 0.0, 0.05, 0.0);
+			}
+			if (don == 0) {
+				act(f, quiet, "cast_high");
+				sound(f, SoundEvents.HONEY_BLOCK_SLIDE, 0.7F, 0.8F);
+				sound(f, SoundEvents.BEACON_AMBIENT, 1.6F, 0.6F);
+			}
+			if (don == DON_HALF) {
+				dress(f, quiet, QUIET_HALF, false);
+				sound(f, SoundEvents.WOOL_PLACE, 0.8F, 0.7F);
+			}
+			if (don == DON_WHOLE) {
+				dress(f, quiet, QUIET_SUIT, true);
+				cloak(f, quiet, true);
+				hold(f, quiet, EquipmentSlot.MAINHAND, QUIET_BLADE);
+				rest(f, quiet);
+				sound(f, SoundEvents.WOOL_PLACE, 1.1F, 0.8F);
+				sound(f, SoundEvents.AMETHYST_BLOCK_CHIME, 0.6F, 0.7F);
+			}
+			if (don == DON_SET) {
+				cloak(f, quiet, false);
+			}
+		}
 		if (t == QUIET) {
 			// (from the edge of the fight: the cut hides the step)
 			quiet.f = QUIET_PATH[0][0];
@@ -1916,12 +2232,20 @@ public final class LoreFilmClient {
 			quiet.restYaw = Float.NaN;
 			grue.facing = quiet;
 			swingTo(f, quiet, 1);
-			// his cloak goes to work: it winds over him and comes apart
+			// his cloak goes to work: it winds over him and comes apart, and its cords take him off the ground
 			cloak(f, quiet, true);
+			gait(f, quiet, Moves.HANG, Moves.HANG);
 			sound(f, SoundEvents.WOOL_BREAK, 0.7F, 0.6F);
 		}
 		if (t < QUIET) {
 			return;
+		}
+		if (f.slingAt < 0) {
+			// hung from the cords, swung from one tree's to the next's
+			double[] from = QUIET_PATH[f.quietAt - 1], to = QUIET_PATH[f.quietAt];
+			double leg = Math.max(0.1, distance(from[0], from[1], to[0], to[1]));
+			double along = Mth.clamp(1.0 - distance(quiet.f, quiet.s, to[0], to[1]) / leg, 0.0, 1.0);
+			quiet.sink = quiet.sinkTo = -(AIR_LOW + AIR_ARC * Math.sin(along * Math.PI)) * Math.min(1.0, (t - QUIET) / (double)AIR_RISE);
 		}
 		if (f.slingAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
 			if (f.quietAt + 1 < QUIET_PATH.length) {
@@ -1999,8 +2323,11 @@ public final class LoreFilmClient {
 			for (int i = 0; i < Math.max(1, 12 - since / 2); i++) {
 				Vec3 p = f.at(SORCERER_F + spread(f, 0.7), spread(f, 0.7), f.rnd.nextDouble() * 2.0);
 				particle(f, f.rnd.nextInt(3) == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK, p, spread(f, 0.04), 0.03, spread(f, 0.04));
+				if (i % 2 == 0) {
+					particle(f, LoreFilms.SHADOWFLAME, p, spread(f, 0.01), 0.04, spread(f, 0.01));
+				}
 				if (i % 4 == 0) {
-					particle(f, ParticleTypes.WITCH, p, 0.0, 0.05, 0.0);
+					particle(f, ParticleTypes.SOUL, p, 0.0, 0.05, 0.0);
 				}
 			}
 		}
@@ -2071,7 +2398,8 @@ public final class LoreFilmClient {
 		double g = into / (double)GLIDE_TICKS;
 		quiet.f = quiet.toF = Mth.lerp(g, f.slingF - SLING_BACK, GLIDE_END);
 		quiet.s = quiet.toS = 0.0;
-		quiet.sink = quiet.sinkTo = -(GLIDE_HIGH * smooth((float)(g / 0.15)) + GLIDE_ARC * Math.sin(g * Math.PI));
+		// (from where the cords had him hung)
+		quiet.sink = quiet.sinkTo = -(AIR_LOW * (1.0 - g) + GLIDE_HIGH * smooth((float)(g / 0.15)) + GLIDE_ARC * Math.sin(g * Math.PI));
 		if (into == 4) {
 			// let go of the trees: the cloak streams behind
 			tether(f, quiet, 0, null);
@@ -2091,6 +2419,7 @@ public final class LoreFilmClient {
 		if (into == GLIDE_TICKS) {
 			tether(f, quiet, 2, null);
 			tether(f, quiet, 3, null);
+			gait(f, quiet, Moves.IDLE, Moves.WALK);
 			quiet.speed = GLIDE_LAND;
 			quiet.toF = LUNGE_END;
 		}
@@ -2110,10 +2439,11 @@ public final class LoreFilmClient {
 
 	/** The fifth's cloak throws a tether at the tree he turns at next (turn {@code k} of his run), and lets go of the last. */
 	private static void swingTo(Film f, Actor quiet, int k) {
-		tether(f, quiet, (k + 1) % SWING_TETHERS, null);
+		// (the cord that had the tree before last comes in; the one on the tree he is leaving holds until the next)
+		tether(f, quiet, SWING_CORDS[(k + 1) % SWING_CORDS.length], null);
 		if (k - 1 < f.dartTrees.size()) {
 			double[] trunk = f.dartTrees.get(k - 1);
-			tether(f, quiet, k % SWING_TETHERS, f.at(trunk[0], trunk[1], TETHER_HIGH));
+			tether(f, quiet, SWING_CORDS[k % SWING_CORDS.length], f.at(trunk[0], trunk[1], TETHER_HIGH));
 			sound(f, SoundEvents.FISHING_BOBBER_THROW, 0.7F, 0.5F);
 		}
 	}
@@ -2432,6 +2762,15 @@ public final class LoreFilmClient {
 	 */
 	private static void battle(Film f, int t) {
 		boolean over = f.lungeAt >= 0 && t >= f.lungeAt + 3;
+		for (Iterator<Meet> it = f.meets.iterator(); it.hasNext(); ) {
+			Meet meet = it.next();
+			if (t >= meet.tick) {
+				it.remove();
+				if (meet.striker.up() && meet.other.up()) {
+					meet(f, meet);
+				}
+			}
+		}
 		for (Actor a : f.fighters) {
 			if (a.down || a.fallAt >= 0 || a.sink > 0.0 || a.scripted || a.fled || t < a.busyUntil || t < a.stunUntil) {
 				continue;
@@ -2444,8 +2783,9 @@ public final class LoreFilmClient {
 				a.foe = foeFor(f, a);
 			}
 			if (a.foe == null) {
-				a.toF = a.f;
-				a.toS = a.s;
+				// (a hero with nobody near goes back to their ground)
+				a.toF = a.leash > 0.0 ? a.homeF : a.f;
+				a.toS = a.leash > 0.0 ? a.homeS : a.s;
 				continue;
 			}
 			double df = a.f - a.foe.f, ds = a.s - a.foe.s, d = Math.max(0.01, Math.sqrt(df * df + ds * ds));
@@ -2495,9 +2835,11 @@ public final class LoreFilmClient {
 	/** Whom {@code a} goes for: the nearest of the other side still up (a defender only one close by; no more than two on one man). */
 	private static @Nullable Actor foeFor(Film f, Actor a) {
 		Actor best = null;
-		double nearest = a.team == 0 && a.role != Role.MARKED ? DEFENDER_SEEK : 80.0;
+		boolean hunts = a.role == Role.MARKED || a.hunter;
+		double nearest = a.team == 0 && !hunts ? DEFENDER_SEEK : HUNT;
 		for (Actor o : f.fighters) {
-			if (o.team == a.team || !o.up() || o.sink > 0.0 || o.scripted || (a.role == Role.MARKED && o.role != Role.DEAD)) {
+			if (o.team == a.team || !o.up() || o.sink > 0.0 || o.scripted || (hunts && o.role != Role.DEAD)
+				|| (a.leash > 0.0 && distance(a.homeF, a.homeS, o.f, o.s) > a.leash)) {
 				continue;
 			}
 			double d = distance(a.f, a.s, o.f, o.s);
@@ -2521,14 +2863,77 @@ public final class LoreFilmClient {
 		return best;
 	}
 
-	/** A blow: one of the library's cuts; now and then whoever it's at gets a shield or an arm up to it. */
+	/** A blow: one of the library's cuts; whoever it's at may catch it on a shield, turn it with an arm or a blade, or meet it with a cut of their own. */
 	private static void swing(Film f, Actor a) {
 		act(f, a, SWINGS[f.rnd.nextInt(SWINGS.length)]);
 		Actor foe = a.foe;
-		if (foe != null && foe.foe == a && foe.up() && f.tick >= foe.busyUntil && f.rnd.nextFloat() < BLOCKED) {
+		if (foe == null || foe.foe != a || !foe.up() || f.tick < foe.busyUntil || f.tick < foe.stunUntil) {
+			return;
+		}
+		boolean shield = foe.e.getOffhandItem().is(Items.SHIELD);
+		float roll = f.rnd.nextFloat(), blocked = shield ? SHIELDED : BLOCKED;
+		if (roll < blocked) {
 			act(f, foe, "block");
 			foe.nextSwing = Math.max(foe.nextSwing, f.tick + BLOCK_TICKS);
+			f.meets.add(new Meet(f.tick + LANDS, a, foe, shield ? SHIELD : PARRY));
+		} else if (roll < blocked + CLASHED && !a.e.getMainHandItem().isEmpty() && !foe.e.getMainHandItem().isEmpty()) {
+			act(f, foe, SWINGS[f.rnd.nextInt(SWINGS.length)]);
+			foe.nextSwing = f.tick + SWING_GAP + f.rnd.nextInt(SWING_SPREAD);
+			f.meets.add(new Meet(f.tick + LANDS, a, foe, CLASH));
 		}
+	}
+
+	/** The blow lands on what was put up to it: sparks off steel, chips off a shield, and a shield that has had enough comes apart. */
+	private static void meet(Film f, Meet meet) {
+		Actor a = meet.striker, b = meet.other;
+		Vec3 from = a.e.position(), to = b.e.position(), line = to.subtract(from);
+		line = line.lengthSqr() < 1.0E-6 ? f.fwd : line.normalize();
+		Vec3 at = from.lerp(to, meet.kind == SHIELD ? 0.7 : 0.5).add(0.0, MEET_HIGH * b.scale, 0.0);
+		if (meet.kind != SHIELD) {
+			boolean clash = meet.kind == CLASH;
+			sparks(f, at, clash ? CLASH_SPARKS : PARRY_SPARKS);
+			sound(f, SoundEvents.ANVIL_LAND, 1.7F + f.rnd.nextFloat() * 0.3F, clash ? 0.2F : 0.13F);
+			if (clash) {
+				sound(f, SoundEvents.TRIDENT_HIT, 1.2F + f.rnd.nextFloat() * 0.3F, 0.35F);
+			}
+			return;
+		}
+		BlockParticleOption wood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState());
+		if (++b.shieldHits < b.shieldLasts) {
+			sound(f, SoundEvents.SHIELD_BLOCK.value(), 0.85F + f.rnd.nextFloat() * 0.3F, 0.4F);
+			for (int i = 0; i < CHIPS; i++) {
+				particle(f, wood, at, -line.x * 0.2 + spread(f, 0.1), 0.1, -line.z * 0.2 + spread(f, 0.1));
+			}
+			return;
+		}
+		// it breaks: splinters, a few boards of it thrown wide, and the arm behind it knocked back
+		hold(f, b, EquipmentSlot.OFFHAND, "");
+		sound(f, SoundEvents.SHIELD_BREAK.value(), 0.9F + f.rnd.nextFloat() * 0.2F, 0.7F);
+		sound(f, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, 1.3F, 0.25F);
+		BlockParticleOption dark = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SPRUCE_PLANKS.defaultBlockState());
+		for (int i = 0; i < SPLINTERS; i++) {
+			particle(f, i % 4 == 0 ? dark : wood, at.add(spread(f, 0.3), spread(f, 0.35), spread(f, 0.3)), line.x * 0.25 + spread(f, 0.3), 0.15 + f.rnd.nextDouble() * 0.2,
+				line.z * 0.25 + spread(f, 0.3));
+		}
+		for (int i = 0; i < SHIELD_BOARDS; i++) {
+			fling(f, false, id(Items.OAK_PLANKS), 0.5F, 0.07F, 0.22F, at, new Vec3(line.x * 0.12 + spread(f, 0.16), 0.2 + f.rnd.nextDouble() * 0.18, line.z * 0.12 + spread(f, 0.16)),
+				28.0F + f.rnd.nextFloat() * 20.0F, false);
+		}
+		sparks(f, at, PARRY_SPARKS / 2);
+		act(f, b, "stagger");
+		b.stunUntil = f.tick + SHATTER_STUN;
+		b.nextSwing = Math.max(b.nextSwing, f.tick + SHATTER_STUN + 4);
+	}
+
+	/** Sparks struck off steel at {@code at}: {@code many} of them thrown every way, hot ones among the white. */
+	private static void sparks(Film f, Vec3 at, int many) {
+		for (int i = 0; i < many; i++) {
+			particle(f, ParticleTypes.ELECTRIC_SPARK, at, spread(f, SPARK_SPEED), f.rnd.nextDouble() * SPARK_SPEED, spread(f, SPARK_SPEED));
+			if (i % 3 == 0) {
+				particle(f, new DustParticleOptions(i % 2 == 0 ? 0xFFB347 : 0xFFE9A8, 0.45F), at.add(spread(f, 0.25), spread(f, 0.25), spread(f, 0.25)), 0.0, 0.0, 0.0);
+			}
+		}
+		particle(f, ParticleTypes.CRIT, at, spread(f, 0.3), 0.2, spread(f, 0.3));
 	}
 
 	private static Finish begin(Film f, Actor winner, Actor loser, int kind, int t) {
@@ -2753,6 +3158,16 @@ public final class LoreFilmClient {
 				}
 			}
 		}
+		// and not across the camera where it sits close in
+		if (a.role != Role.MAGE && a.role != Role.MARKED && a.role != Role.STRANGER) {
+			for (double[] clear : CAMERA_CLEAR) {
+				double cf = a.f - clear[2], cs = a.s - clear[3], near = Math.sqrt(cf * cf + cs * cs);
+				if (t >= clear[0] && t < clear[1] && near < clear[4] && near > 1.0E-4) {
+					a.f = clear[2] + cf / near * clear[4];
+					a.s = clear[3] + cs / near * clear[4];
+				}
+			}
+		}
 		if (a.sink != a.sinkTo) {
 			a.sink = a.sink < a.sinkTo ? Math.min(a.sinkTo, a.sink + a.sinkRate) : Math.max(a.sinkTo, a.sink - a.sinkRate);
 		}
@@ -2780,12 +3195,23 @@ public final class LoreFilmClient {
 		}
 	}
 
-	/** Black flame: ink and smoke licking up out of the ground at {@code (fwd, side)}. */
+	/**
+	 * Shadowflame at {@code (fwd, side)}. Andy: "The shadowflame should be soulfire, but black, retaining the blue soul
+	 * wisps, and the black particles, but make sure the smoke is added". A black soul flame licking up out of the ground,
+	 * black motes with it, smoke off the top of it, and now and then a blue soul let go.
+	 */
 	private static void shadowFlame(Film f, double fwd, double side, double rise) {
 		Vec3 p = f.at(fwd, side, 0.1);
-		particle(f, f.rnd.nextInt(3) == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK, p, spread(f, 0.03), rise + f.rnd.nextDouble() * 0.08, spread(f, 0.03));
-		if (f.rnd.nextInt(9) == 0) {
-			particle(f, ParticleTypes.SOUL_FIRE_FLAME, p, 0.0, rise * 0.4, 0.0);
+		particle(f, LoreFilms.SHADOWFLAME, p.add(0.0, f.rnd.nextDouble() * 0.5, 0.0), spread(f, 0.01), rise * 0.35 + f.rnd.nextDouble() * 0.03, spread(f, 0.01));
+		if (f.rnd.nextInt(2) == 0) {
+			particle(f, ParticleTypes.SQUID_INK, p, spread(f, 0.03), rise + f.rnd.nextDouble() * 0.08, spread(f, 0.03));
+		}
+		if (f.rnd.nextInt(3) == 0) {
+			particle(f, f.rnd.nextInt(3) == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE, p.add(0.0, 0.7 + f.rnd.nextDouble() * 0.6, 0.0), spread(f, 0.02),
+				0.05 + f.rnd.nextDouble() * 0.04, spread(f, 0.02));
+		}
+		if (f.rnd.nextInt(7) == 0) {
+			particle(f, ParticleTypes.SOUL, p.add(0.0, 0.4, 0.0), spread(f, 0.02), 0.04 + rise * 0.2, spread(f, 0.02));
 		}
 	}
 
@@ -2824,7 +3250,7 @@ public final class LoreFilmClient {
 		} else if (t < RISING) {
 			// low before the sorcerer, on the right third, the sky he calls down filling the rest
 			float k = smooth((t - SUMMON) / (RISING - SUMMON));
-			pos = f.at(SORCERER_F - 5.5 + 0.8 * k, 2.4, 0.8);
+			pos = f.at(SORCERER_F - 5.5 + 0.8 * k, 2.4, 1.3);
 			look = f.at(SORCERER_F, 0.0, 1.9);
 			third = -0.85F;
 		} else if (t < VARRO) {
@@ -2842,21 +3268,32 @@ public final class LoreFilmClient {
 			pos = f.at(VARRO_AT[0] + 1.5, VARRO_AT[1] + 2.0, 1.55);
 			Vec3 orc = f.marked != null ? f.marked.e.getPosition(partialTicks) : f.at(VARRO_AT[0] + MARKED_STOPS, VARRO_AT[1], 0.0);
 			look = t < VARRO_FIELD ? f.at(VARRO_AT[0] + 1.3, VARRO_AT[1], 1.2) : orc.add(0.0, 1.0, 0.0);
-		} else if (t < QUIET) {
+		} else if (t < DON) {
 			int which = (int)((t - SPELLS) / CAST_TICKS);
 			float into = (t - SPELLS) - which * CAST_TICKS;
 			Actor mage = caster(f, which);
 			Vec3 m = mage != null ? mage.e.getPosition(partialTicks) : f.at(MAGES_F, 0.0, 0.0);
+			// (the line is each hero's own: Andy, "the 180 can swap when swapping povs to different heroes". The camera takes
+			// the side of them that is toward the middle of the field)
+			double side = mage != null && f.staged(m)[1] > 0.0 ? -1.0 : 1.0;
 			if (into < 12) {
-				// their face as they call it up, on the left third, the field they look out at behind the camera's shoulder
-				pos = m.add(f.fwd.scale(2.6)).add(f.right.scale(1.1)).add(0.0, 1.6, 0.0);
+				// their face as they call it up, on a third, the field they look out at behind the camera's shoulder
+				pos = m.add(f.fwd.scale(2.6)).add(f.right.scale(1.1 * side)).add(0.0, 1.6, 0.0);
 				look = m.add(0.0, 1.55, 0.0);
-				third = 0.6F;
+				third = 0.6F * (float)side;
 			} else {
 				// and over their shoulder as it lands
-				pos = m.subtract(f.fwd.scale(1.8)).add(f.right.scale(0.8)).add(0.0, 2.0, 0.0);
+				pos = m.subtract(f.fwd.scale(1.8)).add(f.right.scale(0.8 * side)).add(0.0, 2.0, 0.0);
 				look = mage != null ? target(f, which, mage) : f.at(26.0, 0.0, 0.0);
 			}
+		} else if (t < QUIET) {
+			// the fifth, at the back where he has stood all this while (the line is his own now): on the right third, the
+			// burning field beyond him, as the white comes up over him
+			Vec3 q = f.stranger != null ? f.stranger.e.getPosition(partialTicks) : f.at(STRANGER_AT[0], STRANGER_AT[1], 0.0);
+			float k = smooth((t - DON) / (QUIET - DON));
+			pos = q.subtract(f.fwd.scale(3.4 - 0.8 * k)).subtract(f.right.scale(1.5)).add(0.0, 1.5, 0.0);
+			look = q.add(0.0, 1.25, 0.0);
+			third = -0.7F;
 		} else if (t < REVERSE) {
 			// with him as he runs, behind and on his right, the forest weaving past and the bolts coming in: he stays left of the
 			// middle, the way ahead of him open

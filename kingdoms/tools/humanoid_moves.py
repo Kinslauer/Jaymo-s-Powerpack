@@ -26,7 +26,7 @@ SHORT = {"ra": "right_arm", "rf": "right_forearm", "la": "left_arm", "lf": "left
 SHORT.update({"k%d%d" % (j, i): "ribbon_%d_%d" % (j, i) for j in range(3) for i in range(4)})
 # the cloak in ribbons: each follows what the whole cloak does in a move, the outer two swung a little more and splayed
 # apart, more toward their ends (degrees a link), and further by a pose's "fan"
-RIBBON_SWING, RIBBON_SPLAY = 0.18, (3.0, 5.0, 7.0, 9.0)
+RIBBON_SWING, RIBBON_SPLAY = 0.05, (0.6, 1.2, 1.8, 2.4)
 
 
 def anim(name, length, loop, tracks):
@@ -399,6 +399,13 @@ def moves(leg=12.0, cape=True):
 			   "ra": (-40, 0, 16), "rf": 30, "la": (40, 0, -8), "lf": 80, "c0": -50, "c1": -20, "c2": -10, "c3": 0}),
 		(0.6, {"rr": -360, "pos": Z, "rl": 0, "rs": 0, "ll": 0, "ls": 0, "b": (-30, 0, 0), "w": (-6, 0, 0), "h": (26, 0, 0),
 			   "ra": (-58, 0, 16), "rf": 22, "la": (52, 0, -8), "lf": 96, "c0": -62, "c1": -18, "c2": -8, "c3": -4})]))
+	# hung from his cloak's cords in mid-air, carried along by them: the body forward, the legs trailing and working a
+	# little, one arm up along a cord and the blade arm back, the cloak behind
+	hang_a = {"b": (-22, 6, 0), "w": (-8, 0, 0), "h": (24, -4, 0), "ra": (-40, 0, 14), "rf": 20, "la": (150, 0, -16), "lf": 24,
+			  "rl": -18, "rs": -34, "ll": 16, "ls": -58, "pos": (0, 0.6, 0), "c0": -34, "c1": -12, "c2": -8, "c3": -4}
+	hang_b = {"b": (-26, -6, 0), "w": (-8, 0, 0), "h": (26, 4, 0), "ra": (-46, 0, 16), "rf": 26, "la": (158, 0, -12), "lf": 16,
+			  "rl": 12, "rs": -56, "ll": -16, "ls": -30, "pos": (0, -0.6, 0), "c0": -40, "c1": -8, "c2": -10, "c3": -2}
+	out.append(m("hang", "loop", [(0, hang_a), (0.5, hang_b), (1.0, hang_a)]))
 	# drawn back on his slingshot: low, the arms wide, the cloak pulled out ahead of him toward the trees that have it
 	out.append(m("sling", "hold", [
 		(0, {"b": (-30, 0, 0), "h": (26, 0, 0)}),
@@ -450,4 +457,4 @@ def moves(leg=12.0, cape=True):
 	return out
 
 
-LOOPS = ("idle", "guard", "walk", "run", "sprint", "shamble", "flee", "claw_up")
+LOOPS = ("idle", "guard", "walk", "run", "sprint", "shamble", "flee", "claw_up", "hang")
