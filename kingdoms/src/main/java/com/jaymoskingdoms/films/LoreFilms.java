@@ -138,7 +138,7 @@ public final class LoreFilms {
 		return n;
 	}
 
-	static boolean seen(ServerPlayer player, String film) {
+	public static boolean seen(ServerPlayer player, String film) {
 		return player.getAttachedOrElse(SEEN, List.of()).contains(film);
 	}
 

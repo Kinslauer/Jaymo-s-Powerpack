@@ -1,5 +1,5 @@
 {
-  "advancements.jaymospowers.pack.root.title": "Jaymo's Powerpack",
+  "advancements.jaymospowers.pack.root.title": "The Retaking",
   "advancements.jaymospowers.pack.root.description": "Every life starts somewhere.",
   "advancements.jaymospowers.pack.story.title": "A Life Begun",
   "advancements.jaymospowers.pack.story.description": "Tell the story of who you were.",
@@ -32,5 +32,19 @@
   "advancements.jaymospowers.pack.forged.title": "Forged",
   "advancements.jaymospowers.pack.forged.description": "Hold a tool you put together from parts.",
   "advancements.jaymospowers.pack.executioner.title": "Executioner",
-  "advancements.jaymospowers.pack.executioner.description": "Finish a foe who lies helpless before you."
+  "advancements.jaymospowers.pack.executioner.description": "Finish a foe who lies helpless before you.",
+  "advancements.jaymospowers.pack.errands.title": "Odd Jobs",
+  "advancements.jaymospowers.pack.errands.description": "Do three errands for the folk of a town.",
+  "advancements.jaymospowers.pack.long_defence.title": "The Long Defence",
+  "advancements.jaymospowers.pack.long_defence.description": "Find a copy of the gate-warden's book.",
+  "advancements.jaymospowers.pack.goblin_king.title": "The Hearth",
+  "advancements.jaymospowers.pack.goblin_king.description": "Bring down the Goblin King.",
+  "advancements.jaymospowers.pack.ogre_king.title": "The Old Stones",
+  "advancements.jaymospowers.pack.ogre_king.description": "Bring down an Ogre King.",
+  "advancements.jaymospowers.pack.skeleton_lord.title": "Lights in the Sky",
+  "advancements.jaymospowers.pack.skeleton_lord.description": "Bring down the Skeleton Lord.",
+  "advancements.jaymospowers.pack.piglin_king.title": "The Dark Below",
+  "advancements.jaymospowers.pack.piglin_king.description": "Bring down the Piglin King.",
+  "advancements.jaymospowers.pack.wither.title": "Legend",
+  "advancements.jaymospowers.pack.wither.description": "Bring down the Wither."
 }

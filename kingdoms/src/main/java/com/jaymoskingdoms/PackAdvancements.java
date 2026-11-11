@@ -100,6 +100,7 @@ public final class PackAdvancements {
 		if (player.getRootVehicle() instanceof Ship) {
 			award(player, "cast_off", "done");
 		}
+		Retaking.look(player);
 	}
 
 	/** (0.7.605) Gives {@code player} the {@code criterion} of Kingdoms' own advancement {@code jaymoskingdoms:<name>} (nothing if done or missing). */
@@ -114,10 +115,13 @@ public final class PackAdvancements {
 		return server.getAdvancements().get(Identifier.fromNamespaceAndPath(NAMESPACE, "pack/" + name));
 	}
 
-	/** Gives {@code player} the {@code criterion} of {@code pack/<name>} (nothing if it's done, or doesn't exist). */
+	/**
+	 * Gives {@code player} the {@code criterion} of {@code pack/<name>} (nothing if it's done, or doesn't exist, or it is a
+	 * milestone of an act of the story the player hasn't reached yet: {@link Retaking#open}).
+	 */
 	public static void award(ServerPlayer player, String name, String criterion) {
 		AdvancementHolder holder = get(player.level().getServer(), name);
-		if (holder == null) {
+		if (holder == null || !Retaking.open(player, name)) {
 			return;
 		}
 		AdvancementProgress progress = player.getAdvancements().getOrStartProgress(holder);

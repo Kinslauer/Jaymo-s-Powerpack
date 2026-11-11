@@ -1,5 +1,5 @@
 {
-  "parent": "jaymospowers:pack/giant",
+  "parent": "jaymospowers:pack/goblin_king",
   "display": {
     "icon": {
       "id": "minecraft:white_wool"
@@ -17,10 +17,7 @@
   },
   "criteria": {
     "aether": {
-      "trigger": "minecraft:changed_dimension",
-      "conditions": {
-        "to": "jaymospowers:aether"
-      }
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
