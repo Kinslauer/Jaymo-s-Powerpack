@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: armor-pngs-vanilla-style
 branch: claude/armor-pngs-vanilla-style
 with: hermes-modeller
-pr:
+pr: 1313
 mods: powers
 versions: Powers 0.22.11
 started: 2026-11-11
@@ -31,3 +31,10 @@ Remake the mod's armor textures in pure vanilla Minecraft style — solid 1-pixe
 - Task claimed via vault.py --claim hermes-modeller (tiv, Tasks thread, 2026-11-08); claim printed at 2026-11-11 13:40 EST.
 - Worn equipment textures (textures/entity/equipment/humanoid/bog_iron.png etc., 64x32) left untouched — out of the task's item-texture scope.
 - No bbmodel: flat item textures, verified with vision_analyze instead of bbrender.
+
+## Done
+- Remade 8 armor item-icon PNGs in vanilla 16x16 style: bog_iron ×4 (textures/item/armor/) and caveman ×4 (textures/item/armory/), solid 1px outlines, flat fills, transparent backgrounds, no antialiasing (verified pixel-level).
+- Added changes/powers/armor-pngs-vanilla-style.md.
+- sh ./gradlew build: BUILD SUCCESSFUL. tools/pr_checks.py: passed (9 changed files against origin/master 6de81b6d6).
+- Pushed claude/armor-pngs-vanilla-style, opened PR #1313.
+- Task set to in-review via vault.py. Not played in game.
