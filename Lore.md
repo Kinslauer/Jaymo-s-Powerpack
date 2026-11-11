@@ -128,6 +128,10 @@ kit.
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
   the future, a thing out of someone else's pack, even something hazardous that hurts the holder. Until the power is
   mastered, the holder can't command what comes.
+  (new) **The parade notice** (Retaking, the Arsenal's Road, 2026-11-11). The first time the rift pulls something from
+  the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
+  not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
+  off. the bridge is the line now. if you find this don't come".
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
@@ -473,6 +477,11 @@ upgrades are done there, at the elder's forge. The elder's people have an extrem
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
+(new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
+hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
+explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
+it home, do not come home". Andy to confirm: this hints that the elder meant the band to be given away.
+
 ## The future: Los Perrito
 
 The future a Chrono can leap to is Los Perrito City in ruins: always night, the streets wrecked, feral hordes in them,
@@ -698,6 +707,11 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   purifying its nature and turning it to good and to healing, while it kept all its lethality: that is the white suit,
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
+
+  (new) **What It Remembers** (Retaking, the Web Slinger's Road, 2026-11-11). Once a symbiote is close enough to stop
+  fighting its host, it leaks onto a blank page and writes: cold, dark, falling and burning; a hole in the ground and
+  hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
+  was left of him went out into the world, fine as dust. Some of it found you." It never names him.
 
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
