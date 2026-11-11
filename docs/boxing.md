@@ -3,10 +3,8 @@
 Jung's fist styles, approved by Andy as a build on 2026-11-11. The whole design is `docs/Boxing-Plan.md`; this page
 says what is built so far, where the numbers are, and how to test it.
 
-**Names.** Andy's brief named the styles Close Guard, Long Guard and Shoulder Guard. Jung has since asked for
-**Arrow Slit** (was peekaboo / Close Guard) and **Bastion** (was Philly shell / Shoulder Guard). The code and lang use
-Jung's names; Andy has the last word. Changing them back is the three lines in `lang/parts/boxing.json` (the ids
-`arrow_slit` and `bastion` are only used by the debug command; saves store a number).
+**Names.** The styles are **Arrow Slit** (Jung's plan's peekaboo), **Long Guard** and **Bastion** (the Philly
+shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard and Shoulder Guard.
 
 ## Built so far: gear and punches
 
