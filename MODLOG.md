@@ -2561,3 +2561,38 @@ our own.
 - The pieces name themselves (`great_hall`, `library`, `weaponsmith`, `farm`...), so Jaymo's Kingdoms reads a sky town
   like any Epic village and founds a kingdom there.
 - `/place structure jaymospowers:sky_town_highfields` puts one where you stand.
+
+## 0.22.26 (2026-11-11): Gremlin is a tiny bug-eyed imp (#1323)
+
+- **Gremlin's look** (Andy: "very small with bug eyes"): the Xeno-Band's Gremlin is no longer a hunched knuckle-walker with
+  a huge skull and floppy ears. It is a tiny upright imp about half a block tall: a slim grey body on thin legs with
+  broad pale feet, thin arms, and a wide flat head with two big yellow-green eyes that bulge out past the sides of it.
+  The eyes shine in the dark and blink.
+- **How it moves**: it patters on quick little steps and throws its arms back at a run, its head wobbles and tilts when
+  it stands still, a bite darts the head and drops the jaw with a swipe of the right arm, a leap throws the arms up, and
+  sneaking it squats on splayed legs. The insignia is on its chest now (it was on its back).
+- Its moves, size (a third of a player, fits one-block gaps) and health are unchanged. Swarm, its Ultimate, keeps its
+  hunched plated build.
+- `XenoFormModels.Gremlin` (new mesh and pose, `GLOW`), `XenoformLayer` (the eyes' fullbright pass), `XenoformHand`,
+  `tools/gen_xenoform.py` (`gremlin()` and `gremlin_paint()`, seeded by itself; `xenoform_gremlin_glow.png` is new).
+- The Gremlin is the shape of the Ocellan, the band's makers (Kingdoms draws the star forge's smith as one, robed).
+- Compiled (`compileClientJava`) and rendered from the skin outside the game; not played.
+
+## 0.22.27 (2026-11-11): the Verdant World's far country - mycotic forests, the pulse forest, the stone garden and a ringed giant in the sky (#1324)
+
+Andy's Eden Ring picks, part 1. Eden Ring (paulevs) is MIT, so its art is used, with its licence in
+`tools/eden_ring_license.txt`. No portal and no new world: these are regions of the Verdant World.
+- **The Verdant World has regions now** (`dimension/verdant_world.json`): plains as before, with four new biomes laid
+  out by climate. Only chunks made after this update get them.
+- **Mycotic Forest and Old Mycotic Forest**: pink mycelium turf, mycotic grass, balloon mushrooms (thin stem, domed cap),
+  and in the old forest huge branched ones on full logs with glowing lanterns hanging under their caps. A small balloon
+  mushroom grows into a tree with bone meal. Lanterns come in 16 colours: craft one with any dye to recolour it.
+- **Pulse Forest**: pulse trees, thin glowing stems carrying a big, a medium and a small cap, some on a glowing log trunk.
+  All of them brighten and dim together. They stand like bamboo: cut the foot and the rest comes down.
+- **Stone Garden**: turf worn through to moss-capped stone and gravel, wind-worn banded pillars and layered boulders.
+- **Wood**: balloon mushroom and pulse tree logs and planks (planks also from stems). Stairs, doors and the rest of the
+  sets come in a later part.
+- **The sky** (`VerdantSkyClient`): a blue giant with a ring hangs in the same place over the Verdant World, faint by
+  day and bright at night.
+- Code: `eden/Eden` (blocks), `eden/EdenFeature` (ground, trees, rocks; tuning constants at the top),
+  `eden/PulseTreeBlock`, `tools/gen_eden.py` (all models and data).
