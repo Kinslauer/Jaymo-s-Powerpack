@@ -7,50 +7,48 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Andy (2026-11-11): "splintering wood from shattering shields". A wooden shield ({@link ClashFx#wooden}) that has taken
- * too much breaks apart in a burst of shards.
+ * Andy (2026-11-11): "splintering wood from shattering shields", then: "The shields break when their durability is gone,
+ * and axe hits deal more damage to its durability than swords". A shield breaks when its durability runs out and at no
+ * other time, a player's and a mob's alike (vanilla wears a raised shield by what it blocks, whoever holds it).
  * <ul>
- * <li>A player's wears out as it always did (its durability); when it breaks, it breaks like this ({@link #broke}).</li>
- * <li>A mob's would outlast any fight that way, so it has a strength of its own: after {@link #MOB_SHIELD_HEALTH} points
- * blocked (an axe's blows count {@link #AXE_FACTOR} times) it shatters, and the mob reels {@link #STAGGER} ticks with
- * nothing left to hide behind. The count is forgotten {@link #FORGET_TICKS} after the last blow.</li>
+ * <li>An axe (any weapon that knocks a shield aside) wears a shield {@link #AXE_FACTOR} times as fast as anything else
+ * ({@link #axe}), wooden or metal.</li>
+ * <li>A wooden shield ({@link ClashFx#wooden}) that breaks bursts into shards ({@link #broke}); a mob that lost one this
+ * way reels {@link #STAGGER} ticks.</li>
  * <li>The mob isn't left without one for good: it takes up another {@link #SPARE_TICKS} later, or when it's unloaded
  * (so a realm's guard keeps the shield with his realm's arms).</li>
  * </ul>
- * Metal shields never shatter: they throw sparks ({@link ClashFx#blocked}). {@link #shatter} breaks a held wooden shield
- * outright, for anything else that should (the films' staged fights).
+ * {@link #shatter} breaks a held wooden shield outright, for anything else that should (the films' staged fights).
  */
 public final class ShieldShatter {
-	/** Damage a mob's wooden shield blocks before it breaks, and how much more an axe's blows count. */
-	public static final float MOB_SHIELD_HEALTH = 28.0F, AXE_FACTOR = 2.0F;
+	/** An axe's blow wears a raised shield this many times what a sword's of the same weight does. */
+	public static final float AXE_FACTOR = 3.0F;
 	/** A mob whose shield broke reels this long (ticks). */
 	public static final int STAGGER = 12;
-	/** A mob's shield is whole again this long (ticks) after its last blow; a mob takes up a spare this long after losing one. */
-	public static final int FORGET_TICKS = 20 * 30, SPARE_TICKS = 20 * 240;
-
-	/** What a mob's shield has taken, and when it last took any (game time). */
-	private record Worn(float taken, long at) {
-	}
+	/** A mob takes up a spare shield this long (ticks) after losing one. */
+	public static final int SPARE_TICKS = 20 * 240;
 
 	/** A mob's broken shield: which hand it was in, what it was, and when the spare comes out (game time). */
 	private record Spare(InteractionHand hand, ItemStack shield, long at) {
 	}
 
-	private static final Map<Mob, Worn> WORN = new WeakHashMap<>();
 	private static final Map<Mob, Spare> SPARES = new WeakHashMap<>();
 
 	private ShieldShatter() {
@@ -60,7 +58,6 @@ public final class ShieldShatter {
 		ServerTickEvents.END_SERVER_TICK.register(ShieldShatter::tick);
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob) {
-				WORN.remove(mob);
 				giveBack(mob);
 			}
 		});
@@ -68,32 +65,35 @@ public final class ShieldShatter {
 			for (Mob mob : new ArrayList<>(SPARES.keySet())) {
 				giveBack(mob);
 			}
-			WORN.clear();
 		});
 	}
 
-	/** A mob's raised wooden shield took {@code taken} of a blow: it may break. */
-	static void took(ServerLevel level, LivingEntity defender, ItemStack guard, DamageSource source, float taken) {
-		if (!(defender instanceof Mob mob) || !mob.isAlive()) {
+	/**
+	 * {@code defender}'s raised shield (not a weapon's guard) took {@code taken} of an axe's blow: the wear vanilla already
+	 * gave it for the blow, {@link #AXE_FACTOR} - 1 times more. It may break of it ({@link #broke}).
+	 */
+	static void axe(LivingEntity defender, DamageSource source, float taken) {
+		if (!(source.getDirectEntity() instanceof LivingEntity attacker) || attacker == defender || attacker.getSecondsToDisableBlocking() <= 0.0F) {
 			return;
 		}
-		long now = level.getGameTime();
-		Worn worn = WORN.get(mob);
-		float before = worn == null || now - worn.at() > FORGET_TICKS ? 0.0F : worn.taken();
-		boolean axe = source.getDirectEntity() instanceof LivingEntity attacker && attacker.getSecondsToDisableBlocking() > 0.0F;
-		float total = before + taken * (axe ? AXE_FACTOR : 1.0F);
-		if (total < MOB_SHIELD_HEALTH) {
-			WORN.put(mob, new Worn(total, now));
+		ItemStack shield = defender.getItemBlockingWith();
+		if (shield == null || shield.isEmpty() || shield.has(DataComponents.WEAPON)) {
 			return;
 		}
-		WORN.remove(mob);
-		shatter(mob, source.getSourcePosition());
+		BlocksAttacks blocks = shield.get(DataComponents.BLOCKS_ATTACKS);
+		if (blocks == null) {
+			return;
+		}
+		int extra = Math.round(blocks.itemDamage().apply(taken) * (AXE_FACTOR - 1.0F));
+		if (extra > 0) {
+			shield.hurtAndBreak(extra, defender, defender.getUsedItemHand());
+		}
 	}
 
 	/**
-	 * {@code holder}'s wooden shield (either hand) breaks apart now: gone from the hand, shards thrown away from
-	 * {@code from} (null: every way), the crack of it, and a mob reels. False if they hold none. A mob takes up a spare
-	 * later; a player's is simply gone.
+	 * {@code holder}'s wooden shield (either hand) breaks apart now, whatever durability it had left: gone from the hand,
+	 * shards thrown away from {@code from} (null: every way), the crack of it, and a mob reels. False if they hold none.
+	 * A mob takes up a spare later; a player's is simply gone.
 	 */
 	public static boolean shatter(LivingEntity holder, @Nullable Vec3 from) {
 		if (!(holder.level() instanceof ServerLevel level)) {
@@ -108,10 +108,7 @@ public final class ShieldShatter {
 				holder.stopUsingItem();
 			}
 			holder.setItemInHand(hand, ItemStack.EMPTY);
-			if (holder instanceof Mob mob) {
-				SPARES.put(mob, new Spare(hand, held.copy(), level.getGameTime() + SPARE_TICKS));
-				DarktideStatus.stun(mob, STAGGER);
-			}
+			lost(level, holder, hand, held);
 			burst(level, holder, from);
 			level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.SHIELD_BREAK.value(),
 				holder instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 0.9F, 0.9F + holder.getRandom().nextFloat() * 0.2F);
@@ -120,10 +117,29 @@ public final class ShieldShatter {
 		return false;
 	}
 
-	/** Something {@code holder} wore or held broke ({@code LivingEntity.onEquippedItemBroken}): a wooden shield bursts. */
-	public static void broke(LivingEntity holder, ItemStack broken) {
-		if (holder.level() instanceof ServerLevel level && ClashFx.wooden(broken)) {
+	/**
+	 * Something {@code holder} wore or held ran out of durability ({@code LivingEntity.onEquippedItemBroken}): a wooden
+	 * shield bursts into shards, and a mob that lost its shield (wooden or not) reels and is owed a spare.
+	 */
+	public static void broke(LivingEntity holder, ItemStack broken, EquipmentSlot slot) {
+		if (!(holder.level() instanceof ServerLevel level) || !broken.has(DataComponents.BLOCKS_ATTACKS) || broken.has(DataComponents.WEAPON)) {
+			return;
+		}
+		if (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
+			lost(level, holder, slot == EquipmentSlot.MAINHAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, broken);
+		}
+		if (ClashFx.wooden(broken)) {
 			burst(level, holder, null);
+		}
+	}
+
+	/** A mob lost the shield it held in {@code hand}: it reels, and a whole one like it comes out later. */
+	private static void lost(ServerLevel level, LivingEntity holder, InteractionHand hand, ItemStack shield) {
+		if (holder instanceof Mob mob) {
+			ItemStack spare = shield.copyWithCount(1);
+			spare.setDamageValue(0);
+			SPARES.put(mob, new Spare(hand, spare, level.getGameTime() + SPARE_TICKS));
+			DarktideStatus.stun(mob, STAGGER);
 		}
 	}
 
