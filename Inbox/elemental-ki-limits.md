@@ -3,7 +3,7 @@ status: in-review
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
-claimed_by: 
+claimed_by: claude-cloud-elemental-ki-limits
 pr: 1333
 ---
 
