@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:rice",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:rice",
+      "required": false
+    }
+  ]
+}

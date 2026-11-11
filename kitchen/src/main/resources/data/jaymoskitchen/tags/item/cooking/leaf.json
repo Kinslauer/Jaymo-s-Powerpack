@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:cabbage_leaf",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:lettuce",
+      "required": false
+    }
+  ]
+}

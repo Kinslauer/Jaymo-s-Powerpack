@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bread",
+    {
+      "id": "jaymoskitchen:flatbread",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:flatbread",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:bagel",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:croissant",
+      "required": false
+    }
+  ]
+}

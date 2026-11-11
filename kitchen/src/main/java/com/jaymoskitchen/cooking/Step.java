@@ -22,9 +22,9 @@ import org.jspecify.annotations.Nullable;
  * One button in the cooking minigame (or one ingredient): either "add this ingredient" or a cooking action.
  *
  * <p>An ingredient may name a group, the item tag {@code jaymoskitchen:cooking/<group>}: anything in it does as well as
- * the ingredient's own item (venison for beef, duck for chicken, bass for cod), so a new meat needs a line in a tag and
- * no dish of its own. The ingredient's own item is always used up first. No dish asks for two ingredients whose groups
- * share an item (venison is in both "venison" and "red_meat"); keep it so, or one piece would count for both.
+ * the ingredient's own item (venison for beef, duck for chicken, bass for cod), so a new food needs a line in a tag and
+ * no dish of its own. The ingredient's own item is always used up first. Groups may share items (a peach is a
+ * "fruit" and is the Peach ingredient): Kitchen#hasIngredients never counts one piece twice.
  */
 public enum Step {
 	BOWL(() -> Items.BOWL, null),
@@ -32,11 +32,11 @@ public enum Step {
 	POTATO(() -> Items.POTATO, null),
 	CARROT(() -> Items.CARROT, null),
 	FLOUR(() -> com.jaymoskitchen.mill.Mill.FLOUR, null),
-	BROWN_MUSHROOM(() -> Items.BROWN_MUSHROOM, null),
+	BROWN_MUSHROOM(() -> Items.BROWN_MUSHROOM, null, "mushroom"),
 	RED_MUSHROOM(() -> Items.RED_MUSHROOM, null),
-	EGG(() -> Items.EGG, null),
+	EGG(() -> Items.EGG, null, "egg"),
 	SUGAR(() -> Items.SUGAR, null),
-	SWEET_BERRIES(() -> Items.SWEET_BERRIES, null),
+	SWEET_BERRIES(() -> Items.SWEET_BERRIES, null, "berries"),
 	SALMON(() -> Items.SALMON, null, "oily_fish"),
 	DRIED_KELP(() -> Items.DRIED_KELP, null),
 	CHICKEN(() -> Items.CHICKEN, null, "poultry"),
@@ -46,7 +46,7 @@ public enum Step {
 	PORKCHOP(() -> Items.PORKCHOP, null, "pork"),
 	COD(() -> Items.COD, null, "white_fish"),
 	PUMPKIN(() -> Items.PUMPKIN, null),
-	APPLE(() -> Items.APPLE, null),
+	APPLE(() -> Items.APPLE, null, "fruit"),
 	RABBIT(() -> Items.RABBIT, null, "small_game"),
 	BLAZE_POWDER(() -> Items.BLAZE_POWDER, null),
 	MAGMA_CREAM(() -> Items.MAGMA_CREAM, null),
@@ -66,10 +66,10 @@ public enum Step {
 	TOMATO(() -> own("tomato"), null, () -> pantry("tomato")),
 	ONION(() -> own("onion"), null, () -> pantry("onion")),
 	EGGPLANT(() -> pantry("eggplant"), null),
-	CHILI_PEPPER(() -> pantry("chili_pepper"), null),
+	CHILI_PEPPER(() -> pantry("chili_pepper"), null, "pepper"),
 	STRAWBERRY(() -> pantry("strawberry"), null),
 	TURNIP(() -> pantry("turnip"), null),
-	PEANUT(() -> pantry("peanut"), null),
+	PEANUT(() -> pantry("peanut"), null, "legume"),
 	// Naturalist's game and fish
 	VENISON(() -> naturalist("venison"), null, "venison"),
 	DUCK(() -> naturalist("duck"), null),
@@ -104,11 +104,11 @@ public enum Step {
 	COOKED_SALMON(() -> Items.COOKED_SALMON, null, "cooked_oily_fish"),
 	COOKED_PORKCHOP(() -> Items.COOKED_PORKCHOP, null, "cooked_pork"),
 	COOKED_MUTTON(() -> Items.COOKED_MUTTON, null, "cooked_mutton"),
-	BREAD(() -> Items.BREAD, null),
+	BREAD(() -> Items.BREAD, null, "bread"),
 	// (0.5.28) Farmer's Delight's crops and cuts (delight/Delight)
-	CABBAGE(() -> com.jaymoskitchen.delight.Delight.CABBAGE, null),
-	CABBAGE_LEAF(() -> com.jaymoskitchen.delight.Delight.CABBAGE_LEAF, null),
-	RICE(() -> com.jaymoskitchen.delight.Delight.RICE, null),
+	CABBAGE(() -> com.jaymoskitchen.delight.Delight.CABBAGE, null, "cabbage"),
+	CABBAGE_LEAF(() -> com.jaymoskitchen.delight.Delight.CABBAGE_LEAF, null, "leaf"),
+	RICE(() -> com.jaymoskitchen.delight.Delight.RICE, null, "rice"),
 	MINCED_BEEF(() -> com.jaymoskitchen.delight.Delight.MINCED_BEEF, null),
 	RAW_BACON(() -> com.jaymoskitchen.delight.Delight.RAW_BACON, null),
 	// (0.5.33) the rest of Farmer's Delight's larder (delight/DelightDishes) and the vanilla food it needs

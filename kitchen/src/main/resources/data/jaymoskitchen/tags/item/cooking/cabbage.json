@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskitchen:cabbage",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:cabbage",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:broccoli",
+      "required": false
+    },
+    {
+      "id": "pantryforblockheads:cauliflower",
+      "required": false
+    }
+  ]
+}

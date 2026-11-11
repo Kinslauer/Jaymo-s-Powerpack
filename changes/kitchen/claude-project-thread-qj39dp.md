@@ -19,3 +19,12 @@
   ingredients out when first asked, since tags load after recipes are read).
 - The raw groups are in `raw_meats` (eaten raw they can make you sick, like beef) and `spit_foods` (they roast on the spit).
 - Built (Gradle compileClientJava clean); not played.
+- **Produce, eggs and bread the same way**: any egg (duck, eagle, Prismallard, vanilla's blue and brown) is an Egg; Berries
+  (was sweet berries) take blueberries, strawberries, cherries, blue berries and wyndberries; Fruit (was apple) takes
+  peach, kiwi, orange and white apple; either mushroom is a Mushroom; Pantry's cabbage, broccoli and cauliflower do for
+  cabbage, its lettuce for a cabbage leaf, its rice for rice, soybeans for peanuts, bell pepper for chili; flatbread,
+  bagels and croissants are Bread.
+- `Kitchen.hasIngredients` and `takeIngredients` look for the pickiest ingredient first and never count one piece for
+  two ingredients (a peach is a Fruit and the Peach of a Fruit Salad).
+- Naturalist's Fat renders to tallow and goes into supple leather and blood sausage like our Animal Fat (tag
+  `jaymoskitchen:animal_fats`).
