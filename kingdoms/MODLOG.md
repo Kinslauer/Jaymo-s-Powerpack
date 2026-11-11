@@ -11372,3 +11372,9 @@ added to the survivalist tree. available for everyone".
 Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise no steeds.
 - The Flame Avatars' camps in the Nether now keep burning steeds (Powers' horses of fire): two at each new camp, and
   another now and then while a player is near, up to three round the hearth (`AvatarCamps`, `PowersCompat.burningSteed`).
+
+## 0.7.748 (2026-11-11): Dragons and war elephants left out of Horseman's horse tricks
+
+- Horseman (now in the pack) treats every horse-like mount as a horse. Dragons can't be hitched to a fence or put in a boat, and war elephants and mammoths can't be put in a boat (`data/horseman/tags/entity_type`, entries optional, so nothing changes without Horseman).
+- Dragons keep vanilla's speed in the air (`WindDragon.getFlyingSpeed`). Horseman's air-speed boost would have made ridden dragons several times faster in flight.
+- Built in the cloud; not played.
