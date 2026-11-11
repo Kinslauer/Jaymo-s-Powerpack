@@ -26,4 +26,4 @@ owns:
 
 ## Done
 Any red meat, pork, poultry, mutton, small game, white or oily fish goes into the dishes that asked for beef, porkchop, chicken, mutton, rabbit, cod or salmon; the cutting board cuts by the same groups. Compiled, not played.
-- 2026-11-11 16:49 PR #1292 is merged into master; moved to Agents/Done.
+- 2026-11-11 17:14 PR #1292 is merged into master; moved to Agents/Done.
