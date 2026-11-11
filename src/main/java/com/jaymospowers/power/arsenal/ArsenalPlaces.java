@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterSites;
 import com.mojang.serialization.Codec;
@@ -15,7 +16,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -130,7 +130,7 @@ public final class ArsenalPlaces {
 		player.setAttached(MARKS, List.copyOf(marks));
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.place_marked", place.label()).withStyle(ChatFormatting.LIGHT_PURPLE));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.6F, 1.5F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.7, 0.3, 0.05);
+		level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.7, 0.3, 0.05);
 	}
 
 	/** Where the player has just arrived: it goes to the top of Recent (replacing a neighbour within the merge radius). */

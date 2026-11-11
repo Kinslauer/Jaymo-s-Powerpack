@@ -19,7 +19,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -458,7 +457,7 @@ public final class ZFighterFusion {
 		leader.setHealth(leader.getMaxHealth());
 		ServerLevel level = leader.level();
 		MagicFx.blast(level, leader.getX(), leader.getY() + 1.0, leader.getZ(), MagicFx.FLASH_RADIUS, 0xFFFFFF);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, leader.getX(), leader.getY() + 1.0, leader.getZ(), 80, 1.5, 1.5, 1.5, 0.2);
+		level.sendParticles(MagicFx.LIGHT, true, false, leader.getX(), leader.getY() + 1.0, leader.getZ(), 80, 1.5, 1.5, 1.5, 0.2);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
 		com.jaymospowers.core.Shakes.around(level, leader.position(), 20.0, 1.5F);
@@ -558,7 +557,7 @@ public final class ZFighterFusion {
 			ZFighterPower.hoverNow(partner, flightPose);
 		}
 		ServerLevel level = partner.level();
-		level.sendParticles(ParticleTypes.END_ROD, true, false, partner.getX(), partner.getY() + 1.0, partner.getZ(), 40, 0.8, 1.0, 0.8, 0.1);
+		level.sendParticles(MagicFx.LIGHT, true, false, partner.getX(), partner.getY() + 1.0, partner.getZ(), 40, 0.8, 1.0, 0.8, 0.1);
 		level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.5F, 0.8F);
 		Component message = Component.translatable("message.jaymospowers.zfighter_fusion_swap", partner.getDisplayName()).withStyle(ChatFormatting.GOLD);
 		partner.sendOverlayMessage(message);

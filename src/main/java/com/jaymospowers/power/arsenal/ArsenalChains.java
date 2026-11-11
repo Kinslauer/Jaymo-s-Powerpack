@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -160,7 +160,7 @@ public final class ArsenalChains {
 		Chained chained = target.getAttached(CHAINED);
 		for (int i = 0; i < 3; i++) {
 			Vec3 r = chained.rift(i, target.getBbHeight());
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, r.x, r.y, r.z, 12, 0.15, 0.15, 0.15, 0.04);
+			level.sendParticles(MagicFx.VOID, r.x, r.y, r.z, 12, 0.15, 0.15, 0.15, 0.04);
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6F, 0.7F);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.4F, 0.6F);
@@ -276,7 +276,7 @@ public final class ArsenalChains {
 		if (chained != null && chained.yank() == 0L) {
 			for (int i = 0; i < 3; i++) {
 				Vec3 r = chained.rift(i, target.getBbHeight());
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, r.x, r.y, r.z, 8, 0.1, 0.1, 0.1, 0.06);
+				level.sendParticles(MagicFx.VOID, r.x, r.y, r.z, 8, 0.1, 0.1, 0.1, 0.06);
 			}
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.8F, 1.1F);

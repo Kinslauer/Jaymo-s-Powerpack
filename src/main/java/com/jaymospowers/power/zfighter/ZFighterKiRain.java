@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -125,7 +124,7 @@ final class ZFighterKiRain {
 			level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 0, (random.nextDouble() - 0.5) * 0.3, 1.0, (random.nextDouble() - 0.5) * 0.3,
 				0.6 + random.nextDouble() * 0.5);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, true, false, hand.x, hand.y, hand.z, 8, 0.1, 0.1, 0.1, 0.4);
+		level.sendParticles(MagicFx.LIGHT, true, false, hand.x, hand.y, hand.z, 8, 0.1, 0.1, 0.1, 0.4);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.8F, 1.3F);
@@ -192,7 +191,7 @@ final class ZFighterKiRain {
 			}
 			if (landed) {
 				level.sendParticles(dust, true, false, end.x, end.y, end.z, 5, 0.25, 0.25, 0.25, 0.1);
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.3);
+				level.sendParticles(MagicFx.CRACKLE, true, false, end.x, end.y, end.z, 3, 0.2, 0.2, 0.2, 0.3);
 				if (random.nextInt(3) == 0) {
 					level.playSound(null, end.x, end.y, end.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.3F, 1.9F);
 				}

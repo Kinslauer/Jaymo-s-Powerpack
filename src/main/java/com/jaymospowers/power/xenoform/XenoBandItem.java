@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Callings;
 import com.jaymospowers.core.Powers;
@@ -7,7 +8,6 @@ import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -122,7 +122,7 @@ public final class XenoBandItem extends Item {
 			.withStyle(rival ? ChatFormatting.DARK_RED : ChatFormatting.GREEN));
 		serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		serverLevel.playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
-		serverLevel.sendParticles(ParticleTypes.END_ROD, server.getX(), server.getY() + 1.0, server.getZ(), 20, 0.3, 0.4, 0.3, 0.06);
+		serverLevel.sendParticles(MagicFx.LIGHT, server.getX(), server.getY() + 1.0, server.getZ(), 20, 0.3, 0.4, 0.3, 0.06);
 		return InteractionResult.CONSUME;
 	}
 }

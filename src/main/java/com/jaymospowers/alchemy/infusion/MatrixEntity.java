@@ -278,7 +278,7 @@ public class MatrixEntity extends BlockEntity {
 		Flux.add(level, worldPosition, recipe.flux() + (int) (instability * FLUX_PER_INSTABILITY));
 		phase = Phase.IDLE;
 		Vec3 core = Vec3.atCenterOf(worldPosition);
-		level.sendParticles(ParticleTypes.END_ROD, core.x, core.y, core.z, 30, 0.3, 0.3, 0.3, 0.12);
+		level.sendParticles(MagicFx.LIGHT, core.x, core.y, core.z, 30, 0.3, 0.3, 0.3, 0.12);
 		level.playSound(null, worldPosition, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 0.8F, 0.7F);
 		level.playSound(null, worldPosition, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 0.6F, 1.6F);
 		tell(level, "done");
@@ -378,7 +378,7 @@ public class MatrixEntity extends BlockEntity {
 		for (int i = 0; i <= steps; i++) {
 			Vec3 p = core.add(line.scale(i / (double) steps)).add((random.nextDouble() - 0.5) * 0.25, (random.nextDouble() - 0.5) * 0.25,
 				(random.nextDouble() - 0.5) * 0.25);
-			level.sendParticles(i % 2 == 0 ? ParticleTypes.ELECTRIC_SPARK : dust(ANGRY_COLOUR, 0.7F), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(i % 2 == 0 ? MagicFx.CRACKLE : dust(ANGRY_COLOUR, 0.7F), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		level.playSound(null, worldPosition, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.35F, 1.9F);
 		target.hurtServer(level, level.damageSources().magic(), ZAP_DAMAGE);
@@ -420,7 +420,7 @@ public class MatrixEntity extends BlockEntity {
 				core.z + Math.sin(a) * radius, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (t > 0.5 && level.getRandom().nextFloat() < t * 0.4) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, core.x, core.y, core.z, 1, 0.4, 0.4, 0.4, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, core.x, core.y, core.z, 1, 0.4, 0.4, 0.4, 0.05);
 		}
 	}
 

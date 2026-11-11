@@ -2,7 +2,6 @@ package com.jaymospowers.baubles;
 
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.EnumSet;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -138,7 +137,7 @@ public class PinkFairy extends PathfinderMob implements ItemSupplier {
 				: level.isBrightOutside() && this.tickCount > DAY_LIFE && this.random.nextInt(FADE_ODDS) == 0;
 			if (fade) {
 				level.sendParticles(MagicFx.wisp(GLOW, 0.7F), this.getX(), this.getY() + 0.2, this.getZ(), 10, 0.2, 0.2, 0.2, 0.0);
-				level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 0.2, this.getZ(), 3, 0.1, 0.1, 0.1, 0.02);
+				level.sendParticles(MagicFx.LIGHT, this.getX(), this.getY() + 0.2, this.getZ(), 3, 0.1, 0.1, 0.1, 0.02);
 				this.discard();
 			} else if (this.freed) {
 				// up and away, in a spiral
@@ -151,7 +150,7 @@ public class PinkFairy extends PathfinderMob implements ItemSupplier {
 					this.getRandomZ(0.5), 0.0, -0.02, 0.0);
 			}
 			if (this.random.nextInt(12) == 0) {
-				this.level().addParticle(ParticleTypes.END_ROD, this.getRandomX(0.4), this.getY() + 0.15, this.getRandomZ(0.4), 0.0, -0.01, 0.0);
+				this.level().addParticle(MagicFx.LIGHT, this.getRandomX(0.4), this.getY() + 0.15, this.getRandomZ(0.4), 0.0, -0.01, 0.0);
 			}
 		}
 	}

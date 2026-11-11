@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,14 +92,14 @@ public final class StormArts {
 			if (hit.isPresent()) {
 				foe.hurtServer(level, level.damageSources().indirectMagic(player, player), STEP_DAMAGE);
 				flash(level, foe.position());
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, foe.getX(), foe.getY(0.6), foe.getZ(), 12, 0.3, 0.4, 0.3, 0.2);
+				level.sendParticles(Fx.CRACKLE, foe.getX(), foe.getY(0.6), foe.getZ(), 12, 0.3, 0.4, 0.3, 0.2);
 			}
 		}
 		// the trail it leaves, then the step itself (how far you have fallen goes with you)
 		int n = Math.max(2, (int)(line.length() * 3.0));
 		for (int i = 0; i <= n; i++) {
 			Vec3 p = start.add(line.scale(i / (double)n)).add(0.0, player.getBbHeight() * 0.5, 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 1, 0.05, 0.1, 0.05, 0.02);
+			level.sendParticles(Fx.CRACKLE, p.x, p.y, p.z, 1, 0.05, 0.1, 0.05, 0.02);
 		}
 		double fallen = player.fallDistance;
 		player.teleportTo(level, end.x, end.y, end.z, Set.of(), player.getYRot(), player.getXRot(), false);
@@ -165,9 +164,9 @@ public final class StormArts {
 					foe.syncVelocity = true;
 				}
 			}
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0, at.z, 14, 0.3, 0.8, 0.3, 0.25);
+			level.sendParticles(Fx.CRACKLE, at.x, at.y + 1.0, at.z, 14, 0.3, 0.8, 0.3, 0.25);
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, centre.x, centre.y + 1.0, centre.z, 30, 0.5, 0.8, 0.5, 0.3);
+		level.sendParticles(Fx.CRACKLE, centre.x, centre.y + 1.0, centre.z, 30, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.2F);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Spellcraft.afterCast(player, level, "lightning");

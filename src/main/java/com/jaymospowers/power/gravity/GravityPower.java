@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -839,7 +840,7 @@ public final class GravityPower implements Power {
 		}
 		ServerLevel level = player.level();
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 0.6F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 20, 0.4, 0.1, 0.4, 0.05);
+		level.sendParticles(MagicFx.VOID, target.getX(), target.getY(), target.getZ(), 20, 0.4, 0.1, 0.4, 0.05);
 	}
 
 	private static void tickLift(ServerPlayer player, State state) {
@@ -890,7 +891,7 @@ public final class GravityPower implements Power {
 			// the stun's worn off: the hold loosens, and far enough off they've broken free
 			if (to.length() > HELD_ESCAPE) {
 				player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.9F, 0.7F);
-				player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 20, 0.3, 0.4, 0.3, 0.1);
+				player.level().sendParticles(MagicFx.VOID, center.x, center.y, center.z, 20, 0.3, 0.4, 0.3, 0.1);
 				dropLift(player, state, true);
 				return;
 			}
@@ -912,7 +913,7 @@ public final class GravityPower implements Power {
 		}
 		player.causeFoodExhaustion(LIFT_EXHAUSTION);
 		if (state.liftTicks % 4 == 0) {
-			player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 3, 0.3, 0.05, 0.3, 0.02);
+			player.level().sendParticles(MagicFx.VOID, target.getX(), target.getY(), target.getZ(), 3, 0.3, 0.05, 0.3, 0.02);
 		}
 	}
 
@@ -1046,7 +1047,7 @@ public final class GravityPower implements Power {
 		if (!state.choking) {
 			state.choking = true;
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.6F);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getEyeY(), target.getZ(), 15, 0.2, 0.2, 0.2, 0.05);
+			level.sendParticles(MagicFx.VOID, target.getX(), target.getEyeY(), target.getZ(), 15, 0.2, 0.2, 0.2, 0.05);
 			return;
 		}
 		// the slam
@@ -1225,7 +1226,7 @@ public final class GravityPower implements Power {
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 1.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.5F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, entity.getX(), entity.getY() + 0.3, entity.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
+		level.sendParticles(MagicFx.VOID, entity.getX(), entity.getY() + 0.3, entity.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
 	}
 
 	/** Hurled things in flight: they batter whatever they pass through, and smash into what stops them. */
@@ -1288,7 +1289,7 @@ public final class GravityPower implements Power {
 			item.needsSync = true;
 			item.syncVelocity = true;
 			if (state.liftTicks % 2 == 0) {
-				player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, item.getX(), item.getY() + 0.1, item.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
+				player.level().sendParticles(MagicFx.VOID, item.getX(), item.getY() + 0.1, item.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 			}
 			return;
 		}
@@ -1400,7 +1401,7 @@ public final class GravityPower implements Power {
 			boolean landed = age > slam.rise() + 1 && (target.onGround() || target.verticalCollision || target.isInWater());
 			if (!landed && age < SLAM_MAX_TICKS + slam.rise()) {
 				if (age % 2 == 0) {
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight(), target.getZ(), 3, 0.2, 0.1, 0.2, 0.02);
+					level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + target.getBbHeight(), target.getZ(), 3, 0.2, 0.1, 0.2, 0.02);
 				}
 				continue;
 			}
@@ -1592,7 +1593,7 @@ public final class GravityPower implements Power {
 		state.weightlessTicks = 0;
 		setWeightless(player, true);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.7F, 1.6F);
-		player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 0.1, player.getZ(), 12, 0.4, 0.05, 0.4, 0.02);
+		player.level().sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 0.1, player.getZ(), 12, 0.4, 0.05, 0.4, 0.02);
 	}
 
 	private static void endWeightless(ServerPlayer player, State state, int cooldown) {
@@ -1693,7 +1694,7 @@ public final class GravityPower implements Power {
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(launch));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 1.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.2F, 0.6F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 0.1, player.getZ(), 40, 0.6, 0.1, 0.6, 0.3);
+		level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 0.1, player.getZ(), 40, 0.6, 0.1, 0.6, 0.3);
 		com.jaymospowers.core.Debris.puff(level, player.blockPosition().below(), level.getBlockState(player.blockPosition().below()), 2.0F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.8F);
 		return true;
@@ -1948,11 +1949,11 @@ public final class GravityPower implements Power {
 			loose.syncVelocity = true;
 			pulled = true;
 			if (player.tickCount % 4 == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, loose.getX(), loose.getY() + 0.15, loose.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(MagicFx.VOID, loose.getX(), loose.getY() + 0.15, loose.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
 			}
 		}
 		if (player.tickCount % 10 == 0) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, me.x, me.y, me.z, 6, 0.4, 0.5, 0.4, 0.02);
+			level.sendParticles(MagicFx.VOID, me.x, me.y, me.z, 6, 0.4, 0.5, 0.4, 0.02);
 		}
 		if (pulled && player.tickCount % 40 == 0) {
 			com.jaymospowers.core.Mastery.used(player);
@@ -2022,7 +2023,7 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		Vec3 hand = player.getEyePosition().add(player.getViewVector(1.0F).scale(1.2)).subtract(0.0, 0.3, 0.0);
 		double spread = 0.15 + charge * 0.3;
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, hand.x, hand.y, hand.z, 3 + Math.round(charge * 9), spread, spread, spread, 0.02);
+		level.sendParticles(MagicFx.VOID, hand.x, hand.y, hand.z, 3 + Math.round(charge * 9), spread, spread, spread, 0.02);
 		if (GravityOrbit.collapsingHorizon(player)) {
 			GravityOrbit.drawTo(player, aimPoint(player, GravityWave.range(charge) + GravityWave.COLLAPSE_RANGE_BONUS));
 		}
@@ -2055,7 +2056,7 @@ public final class GravityPower implements Power {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HEAVY_AURA_REFRESH * 2 + 4, 0, false, false, true), player);
 			WEIGHED.put(living.getUUID(), new Weighed(level.dimension(), living.getUUID(), until));
 			if (level.getRandom().nextInt(4) == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, living.getX(), living.getY() + 0.1, living.getZ(), 3, 0.3, 0.05, 0.3, 0.0);
+				level.sendParticles(MagicFx.VOID, living.getX(), living.getY() + 0.1, living.getZ(), 3, 0.3, 0.05, 0.3, 0.0);
 			}
 		}
 	}
@@ -2190,7 +2191,7 @@ public final class GravityPower implements Power {
 			}
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 6, 0.3, 0.3, 0.3, 0.02);
-		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 16, radius * 0.3, radius * 0.3, radius * 0.3, -1.0);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 16, radius * 0.3, radius * 0.3, radius * 0.3, -1.0);
 		if (left % 20 == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
 		}
@@ -2219,9 +2220,9 @@ public final class GravityPower implements Power {
 			// its edge, a ring of pressure pressing down round you
 			for (int i = 0; i < 10; i++) {
 				double ang = left * 0.08 + i / 10.0 * Math.PI * 2.0;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x + Math.cos(ang) * radius, at.y + 0.2, at.z + Math.sin(ang) * radius, 1, 0.0, 0.0, 0.0, -0.05);
+				level.sendParticles(MagicFx.VOID, at.x + Math.cos(ang) * radius, at.y + 0.2, at.z + Math.sin(ang) * radius, 1, 0.0, 0.0, 0.0, -0.05);
 			}
-			level.sendParticles(ParticleTypes.PORTAL, at.x, at.y + 1.0, at.z, 6, radius * 0.5, 0.6, radius * 0.5, -0.3);
+			level.sendParticles(MagicFx.VOID, at.x, at.y + 1.0, at.z, 6, radius * 0.5, 0.6, radius * 0.5, -0.3);
 		}
 	}
 
@@ -2240,7 +2241,7 @@ public final class GravityPower implements Power {
 			living.syncVelocity = true;
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 80, 1.5, 1.5, 1.5, 0.6);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 80, 1.5, 1.5, 1.5, 0.6);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.around(level, at, 28.0, 1.8F);
 	}

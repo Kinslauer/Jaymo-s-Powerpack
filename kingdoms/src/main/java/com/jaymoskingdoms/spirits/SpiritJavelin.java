@@ -179,7 +179,7 @@ public final class SpiritJavelin extends Projectile {
 		int steps = this.orb ? 1 : 3;
 		for (int i = 0; i < steps; i++) {
 			Vec3 p = from.lerp(to, i / (double)steps);
-			level.sendParticles(this.orb ? AMBER : ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+			level.sendParticles(this.orb ? AMBER : Fx.LIGHT, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 			Mana.sendSeen(level, Mana.MOTE, p.x, p.y, p.z, this.orb ? 2 : 1, 0.05, 0.05, 0.05, 0.0);
 		}
 	}
@@ -213,7 +213,7 @@ public final class SpiritJavelin extends Projectile {
 
 	/** The javelin spends itself: a puff of light where it ends. */
 	private void fizzle(ServerLevel level) {
-		level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY(), this.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
+		level.sendParticles(Fx.LIGHT, this.getX(), this.getY(), this.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
 		Mana.sendSeen(level, Mana.MOTE, this.getX(), this.getY(), this.getZ(), 6, 0.15, 0.15, 0.15, 0.03);
 		this.discard();
 	}

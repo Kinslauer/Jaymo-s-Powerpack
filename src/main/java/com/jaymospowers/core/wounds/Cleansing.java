@@ -1,10 +1,10 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -35,7 +35,7 @@ public final class Cleansing extends MobEffect {
 	public static Holder<Potion> POTION, LONG_POTION;
 
 	private Cleansing() {
-		super(MobEffectCategory.BENEFICIAL, 0xE8B84A, ParticleTypes.WAX_ON);
+		super(MobEffectCategory.BENEFICIAL, 0xE8B84A, MagicFx.EMBER);
 	}
 
 	static void register() {
@@ -66,7 +66,7 @@ public final class Cleansing extends MobEffect {
 		}
 		if (festering != 0) {
 			entity.removeEffect(MobEffects.WEAKNESS);
-			level.sendParticles(ParticleTypes.WAX_ON, entity.getX(), entity.getY(0.6), entity.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+			level.sendParticles(MagicFx.EMBER, entity.getX(), entity.getY(0.6), entity.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
 			if (entity instanceof Player player) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.cleansed").withStyle(ChatFormatting.GOLD));
 			}

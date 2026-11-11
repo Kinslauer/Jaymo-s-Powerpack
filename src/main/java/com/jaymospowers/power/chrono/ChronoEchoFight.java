@@ -144,7 +144,7 @@ final class ChronoEchoFight {
 			this.overclockLeft = OVERCLOCK_TICKS;
 			this.overclockReady = now + OVERCLOCK_COOLDOWN;
 			level.playSound(null, this.echo.getX(), this.echo.getY(), this.echo.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 0.8F, 2.0F);
-			ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, this.echo.getX(), this.echo.getY() + 1.0, this.echo.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
+			ChronoFx.particles(level, fx, MagicFx.EMBER, this.echo.getX(), this.echo.getY() + 1.0, this.echo.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		}
 		if (this.overclockLeft > 0) {
 			this.overclockLeft--;
@@ -251,7 +251,7 @@ final class ChronoEchoFight {
 		Vec3 from = this.echo.position();
 		Vec3 to = this.positions.peekFirst();
 		float then = this.healths.peekFirst();
-		ChronoFx.particles(level, fx, ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 30, 0.4, 0.8, 0.4, 0.2);
+		ChronoFx.particles(level, fx, MagicFx.VOID, from.x, from.y + 1.0, from.z, 30, 0.4, 0.8, 0.4, 0.2);
 		this.echo.teleportTo(to.x, to.y, to.z);
 		this.echo.setHealth(Math.max(this.echo.getHealth(), then));
 		this.echo.clearFire();
@@ -269,7 +269,7 @@ final class ChronoEchoFight {
 		Vec3 c = target.position();
 		for (int i = 0; i < 16; i++) {
 			double a = i / 16.0 * Math.PI * 2.0;
-			ChronoFx.particles(level, fx, i % 4 == 0 ? ParticleTypes.END_ROD : SHARD, c.x + Math.cos(a) * 1.2, c.y + 1.0, c.z + Math.sin(a) * 1.2,
+			ChronoFx.particles(level, fx, i % 4 == 0 ? MagicFx.LIGHT : SHARD, c.x + Math.cos(a) * 1.2, c.y + 1.0, c.z + Math.sin(a) * 1.2,
 				1, 0.0, 0.3, 0.0, 0.0);
 		}
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 1.0F, 0.6F);
@@ -285,7 +285,7 @@ final class ChronoEchoFight {
 				&& e.distanceToSqr(this.echo) <= OVERCLOCK_DRAG_RADIUS * OVERCLOCK_DRAG_RADIUS)) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, OVERCLOCK_DRAG, false, false, true), this.echo);
 		}
-		ChronoFx.particles(level, fx, ParticleTypes.ELECTRIC_SPARK, this.echo.getX(), this.echo.getY() + 0.2, this.echo.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
+		ChronoFx.particles(level, fx, MagicFx.CRACKLE, this.echo.getX(), this.echo.getY() + 0.2, this.echo.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
 	}
 
 	/** One punch of the flurry a tick; the last throws its target. */

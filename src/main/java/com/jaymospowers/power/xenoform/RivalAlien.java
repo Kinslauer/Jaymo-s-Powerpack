@@ -1,10 +1,10 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.UUID;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -138,7 +138,7 @@ public class RivalAlien extends PathfinderMob {
 			this.age++;
 			if (this.hunter == null || this.spent()) {
 				// its time's up: the band lets go, and the hunter takes it from here
-				level.sendParticles(ParticleTypes.GLOW, this.getX(), this.getY(0.5), this.getZ(), 16, 0.3, 0.6, 0.3, 0.02);
+				level.sendParticles(MagicFx.GLOW, this.getX(), this.getY(0.5), this.getZ(), 16, 0.3, 0.6, 0.3, 0.02);
 				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 0.8F, 0.7F);
 				this.discard();
 			}

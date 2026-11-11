@@ -20,7 +20,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -369,7 +368,7 @@ public final class ZFighterWishes {
 	private static void depart(MinecraftServer server, Summon summon) {
 		ServerLevel level = summon.level();
 		Vec3 at = summon.at();
-		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y + 10.0, at.z, 120, 6.0, 10.0, 6.0, 0.3);
+		level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y + 10.0, at.z, 120, 6.0, 10.0, 6.0, 0.3);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 4.0F, 0.6F);
 		ZFighterSites.Data data = ZFighterSites.data(server);
 		ZFighterSites.save(server, new ZFighterSites.Data(ZFighterSites.scatter(level.getRandom()), 0, server.overworld().getGameTime() + REST,

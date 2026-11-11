@@ -242,7 +242,7 @@ public final class ZFighterExecutions {
 		float size = 0.6F + fill * 1.2F;
 		level.sendParticles(MagicFx.wisp(color, size), at.x, at.y, at.z, 2 + (int) (fill * 4), 0.08, 0.08, 0.08, 0.0);
 		if (t % 2 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 1 + (int) (fill * 3), 0.15, 0.15, 0.15, 0.05);
+			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 1 + (int) (fill * 3), 0.15, 0.15, 0.15, 0.05);
 		}
 		if (kind == Kind.Z_NOVA) {
 			// the aura swells round him
@@ -292,7 +292,7 @@ public final class ZFighterExecutions {
 				level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.5F);
 				level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.2F, 0.6F);
 				MagicFx.blast(level, x, y, z, MagicFx.FLASH_RADIUS, color);
-				level.sendParticles(ParticleTypes.END_ROD, x, y, z, 40, 0.3, 0.5, 0.3, 0.15);
+				level.sendParticles(MagicFx.LIGHT, x, y, z, 40, 0.3, 0.5, 0.3, 0.15);
 				level.sendParticles(ParticleTypes.WHITE_ASH, x, y, z, 60, 0.4, 0.4, 0.4, 0.05);
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 12, 0.3, 0.3, 0.3, 0.02);
 				// (burned away: no corpse; Kitchen reads the tag as it would swap the dying body for one)

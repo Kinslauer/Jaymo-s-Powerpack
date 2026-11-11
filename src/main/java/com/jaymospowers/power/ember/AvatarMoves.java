@@ -1,5 +1,6 @@
 package com.jaymospowers.power.ember;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.core.Shakes;
@@ -297,7 +298,7 @@ public final class AvatarMoves {
 		// a great ball of flame, a molten heart and a smoking tail
 		level.sendParticles(ParticleTypes.FLAME, to.x, to.y, to.z, 14, 0.4, 0.4, 0.4, 0.02);
 		level.sendParticles(ParticleTypes.LAVA, to.x, to.y, to.z, 1, 0.2, 0.2, 0.2, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, to.x, to.y, to.z, 1, 0.1, 0.1, 0.1, 0.0);
+		level.sendParticles(MagicFx.LIGHT, to.x, to.y, to.z, 1, 0.1, 0.1, 0.1, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y, from.z, 2, 0.2, 0.2, 0.2, 0.01);
 		if (ball.age % 6 == 0) {
 			level.playSound(null, to.x, to.y, to.z, SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 1.0F, 0.6F);

@@ -13,7 +13,6 @@ import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -142,7 +141,7 @@ public class CrucibleEntity extends BlockEntity {
 	}
 
 	private void steam(ServerLevel level, int argb, int count) {
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, argb), worldPosition.getX() + 0.5,
+		level.sendParticles(MagicFx.wisp(argb, 1.0F), worldPosition.getX() + 0.5,
 			worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, count, 0.25, 0.1, 0.25, 0.02);
 		level.sendParticles(ParticleTypes.CLOUD, worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5,
 			Math.max(2, count / 3), 0.2, 0.05, 0.2, 0.02);
@@ -229,7 +228,7 @@ public class CrucibleEntity extends BlockEntity {
 			out.setPickUpDelay(20);
 			level.addFreshEntity(out);
 			MagicFx.blast(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, MagicFx.FLASH_RADIUS, 0xFFFFFF);
-			level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 14, 0.2, 0.2, 0.2, 0.08);
+			level.sendParticles(MagicFx.LIGHT, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 14, 0.2, 0.2, 0.2, 0.08);
 			level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0F, 0.8F);
 			level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.8F, 1.1F);
 			changed();
@@ -258,7 +257,7 @@ public class CrucibleEntity extends BlockEntity {
 		add(level, new EssenceList(kept));
 		int colour = 0xFF000000 | Crucibles.mix(essences);
 		double top = pos.getY() + surface(fill());
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, colour), pos.getX() + 0.5, top + 0.1, pos.getZ() + 0.5, 8,
+		level.sendParticles(MagicFx.wisp(colour, 1.0F), pos.getX() + 0.5, top + 0.1, pos.getZ() + 0.5, 8,
 			0.2, 0.05, 0.2, 0.02);
 		level.sendParticles(ParticleTypes.BUBBLE_POP, pos.getX() + 0.5, top, pos.getZ() + 0.5, 5, 0.2, 0.02, 0.2, 0.0);
 		level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.3F);
@@ -296,9 +295,9 @@ public class CrucibleEntity extends BlockEntity {
 		}
 		essences = essences.minus(EssenceList.of(main, 1));
 		BlockPos at = jar.getBlockPos();
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | main.colour), pos.getX() + 0.5,
+		level.sendParticles(MagicFx.wisp(0xFF000000 | main.colour, 1.0F), pos.getX() + 0.5,
 			pos.getY() + 1.6, pos.getZ() + 0.5, 2, 0.1, 0.1, 0.1, 0.0);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | main.colour), at.getX() + 0.5,
+		level.sendParticles(MagicFx.wisp(0xFF000000 | main.colour, 1.0F), at.getX() + 0.5,
 			at.getY() + 1.0, at.getZ() + 0.5, 2, 0.1, 0.05, 0.1, 0.0);
 		level.playSound(null, at, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 0.3F, 1.4F);
 		changed();

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.combat.HitStreak;
 import com.jaymospowers.combat.Shields;
 import com.jaymospowers.core.finisher.Finishers;
@@ -68,7 +69,7 @@ public final class ChronoTakedowns {
 				&& source.getDirectEntity() != player && victim != player && victim.isAlive() && victim.level() instanceof ServerLevel level) {
 				// (something thrown or shot: marked for the blink)
 				MARKS.put(victim, new Mark(player.getUUID(), level.getGameTime() + MARK_TICKS));
-				level.sendParticles(ParticleTypes.END_ROD, victim.getX(), victim.getEyeY() + 0.4, victim.getZ(), 6, 0.15, 0.15, 0.15, 0.01);
+				level.sendParticles(MagicFx.LIGHT, victim.getX(), victim.getEyeY() + 0.4, victim.getZ(), 6, 0.15, 0.15, 0.15, 0.01);
 				level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 			}
 		});
@@ -136,7 +137,7 @@ public final class ChronoTakedowns {
 		}
 		Vec3 at = target.getBoundingBox().getCenter();
 		ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 30, 0.4, 0.5, 0.4, 0.4);
-		ChronoFx.particles(level, player, ParticleTypes.ENCHANT, at.x, at.y, at.z, 60, 0.8, 0.8, 0.8, 0.6);
+		ChronoFx.particles(level, player, MagicFx.GLYPH, at.x, at.y, at.z, 60, 0.8, 0.8, 0.8, 0.6);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.9F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.send(player, 1.0F, at);
@@ -165,11 +166,11 @@ public final class ChronoTakedowns {
 		Vec3 from = player.position();
 		Vec3 back = Vec3.directionFromRotation(0.0F, target.getYRot()).reverse().scale(BLINK_BEHIND + target.getBbWidth() * 0.5);
 		Vec3 to = target.position().add(back);
-		ChronoFx.particles(level, player, ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 30, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, player, MagicFx.VOID, from.x, from.y + 1.0, from.z, 30, 0.3, 0.6, 0.3, 0.05);
 		player.teleportTo(to.x, target.getY(), to.z);
 		player.lookAt(EntityAnchorArgument.Anchor.EYES, target, EntityAnchorArgument.Anchor.EYES);
 		player.resetFallDistance();
-		ChronoFx.particles(level, player, ParticleTypes.REVERSE_PORTAL, to.x, target.getY() + 1.0, to.z, 30, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, player, MagicFx.VOID, to.x, target.getY() + 1.0, to.z, 30, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, to.x, target.getY(), to.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 1.5F);
 		target.setInvulnerableTime(0);
 		float bonus = Math.min(ChronoFlow.COMBO_MAX_BONUS, ChronoFlow.combo(player) * ChronoFlow.COMBO_BONUS);
@@ -206,8 +207,8 @@ public final class ChronoTakedowns {
 		ChronoFlow.reel(target, ChronoFlow.FLINCH, player.getRandom().nextBoolean() ? 1 : -1);
 		ChronoFlow.addCombo(player);
 		Vec3 at = target.getBoundingBox().getCenter();
-		ChronoFx.particles(level, player, ParticleTypes.ENCHANT, at.x, at.y, at.z, 40, 0.6, 0.6, 0.6, 0.8);
-		ChronoFx.particles(level, player, ParticleTypes.WAX_OFF, at.x, at.y, at.z, 10, 0.5, 0.5, 0.5, 0.0);
+		ChronoFx.particles(level, player, MagicFx.GLYPH, at.x, at.y, at.z, 40, 0.6, 0.6, 0.6, 0.8);
+		ChronoFx.particles(level, player, MagicFx.PALE, at.x, at.y, at.z, 10, 0.5, 0.5, 0.5, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		return true;

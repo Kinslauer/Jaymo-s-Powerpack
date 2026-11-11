@@ -3,7 +3,6 @@ package com.jaymospowers.alchemy.flux;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Flux;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -86,7 +85,7 @@ public class PurifyingSalts extends ThrowableItemProjectile {
 		}
 		double x = centre.getX() + 0.5, y = centre.getY() + 0.5, z = centre.getZ() + 0.5;
 		MagicFx.blast(level, x, y, z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
-		level.sendParticles(ParticleTypes.END_ROD, x, y, z, 40, RADIUS * 0.4, RADIUS * 0.3, RADIUS * 0.4, 0.05);
+		level.sendParticles(MagicFx.LIGHT, x, y, z, 40, RADIUS * 0.4, RADIUS * 0.3, RADIUS * 0.4, 0.05);
 		level.playSound(null, centre, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 0.8F);
 		level.playSound(null, centre, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5F, 1.6F);
 	}

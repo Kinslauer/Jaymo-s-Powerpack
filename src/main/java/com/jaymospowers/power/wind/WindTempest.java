@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
@@ -116,7 +117,7 @@ public final class WindTempest {
 			ItemStack heart = new ItemStack(GALE_HEART);
 			breeze.spawnAtLocation(level, heart);
 			level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, breeze.getX(), breeze.getY() + 0.5, breeze.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.END_ROD, breeze.getX(), breeze.getY() + 0.5, breeze.getZ(), 20, 0.3, 0.4, 0.3, 0.05);
+			level.sendParticles(MagicFx.LIGHT, breeze.getX(), breeze.getY() + 0.5, breeze.getZ(), 20, 0.3, 0.4, 0.3, 0.05);
 			level.playSound(null, breeze.getX(), breeze.getY(), breeze.getZ(), SoundEvents.BREEZE_DEATH, SoundSource.HOSTILE, 1.5F, 0.5F);
 			level.playSound(null, breeze.getX(), breeze.getY(), breeze.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 0.5F);
 		}

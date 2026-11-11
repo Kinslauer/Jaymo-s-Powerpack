@@ -222,7 +222,7 @@ public final class InBalming {
 		}
 		int colour = Spirits.of(kind).color() & 0xFFFFFF;
 		Fx.burst(level, e.getX(), e.getY(0.6), e.getZ(), colour, 1.4F, 30, 0.4, 0.6, 0.4);
-		level.sendParticles(ParticleTypes.ENCHANT, e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.6);
+		level.sendParticles(Fx.GLYPH, e.getX(), e.getY(0.6), e.getZ(), 30, 0.4, 0.6, 0.4, 0.6);
 		level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.7F + kind * 0.1F);
 		if (kind != Spirits.QUIET) {
 			Speech.say(level, e, Dialects.trShared(e, "talk.jaymoskingdoms.inbalm." + key(kind) + "." + random.nextInt(LINES), player.getDisplayName()),

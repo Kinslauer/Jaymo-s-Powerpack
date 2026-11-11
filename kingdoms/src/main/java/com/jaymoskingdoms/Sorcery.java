@@ -720,7 +720,7 @@ public final class Sorcery {
 		beam(level, folk, target.getBoundingBox().getCenter(), HEX_COLOUR);
 		target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, HEX_TICKS, 0), folk);
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HEX_TICKS, 1), folk);
-		level.sendParticles(ParticleTypes.WITCH, target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.5, 0.3, 0.05);
+		level.sendParticles(Fx.HEX, target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.5, 0.3, 0.05);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, SoundSource.HOSTILE, 1.0F, 0.8F);
 	}
 
@@ -769,7 +769,7 @@ public final class Sorcery {
 		beam(level, folk, target.getBoundingBox().getCenter(), BOLT_COLOUR);
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 10, 0.2, 0.3, 0.2, 0.2);
+		level.sendParticles(Fx.CRACKLE, target.getX(), target.getY(0.6), target.getZ(), 10, 0.2, 0.3, 0.2, 0.2);
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.NEUTRAL, 0.9F, 1.3F);
 	}
 
@@ -779,7 +779,7 @@ public final class Sorcery {
 		timers[T_WARD] = WARD_COOLDOWN;
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, WARD_TICKS, WARD_LEVEL), folk);
-			level.sendParticles(ParticleTypes.END_ROD, ally.getX(), ally.getY() + 1.0, ally.getZ(), 10, 0.4, 0.6, 0.4, 0.02);
+			level.sendParticles(Fx.LIGHT, ally.getX(), ally.getY() + 1.0, ally.getZ(), 10, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1.0F, 1.4F);
 	}
@@ -793,7 +793,7 @@ public final class Sorcery {
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), folk);
 		}
 		level.sendParticles(ParticleTypes.CLOUD, folk.getX(), folk.getY() + 0.5, folk.getZ(), 30, 1.5, 0.3, 1.5, 0.1);
-		level.sendParticles(ParticleTypes.ENCHANT, folk.getX(), folk.getY() + 1.0, folk.getZ(), 40, 1.5, 0.8, 1.5, 0.5);
+		level.sendParticles(Fx.GLYPH, folk.getX(), folk.getY() + 1.0, folk.getZ(), 40, 1.5, 0.8, 1.5, 0.5);
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.NEUTRAL, 1.2F, 0.7F);
 	}
 

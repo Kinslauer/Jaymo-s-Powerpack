@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.wounds.Downed;
@@ -319,7 +320,7 @@ public final class ZFighterAndroid {
 				npc = trader;
 			}
 			npc.addTag(UNTIL_TAG + (level.getGameTime() + LIFETIME));
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, npc.getX(), npc.getY() + 1.2, npc.getZ(), 20, 0.4, 0.8, 0.4, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, npc.getX(), npc.getY() + 1.2, npc.getZ(), 20, 0.4, 0.8, 0.4, 0.2);
 			level.playSound(null, npc.getX(), npc.getY(), npc.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1.0F, 1.8F);
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_scientist_here", npc.getBlockX(), npc.getBlockZ())
 				.withStyle(ChatFormatting.AQUA));
@@ -501,7 +502,7 @@ public final class ZFighterAndroid {
 		TEST_OWNERS.put(unit.getUUID(), player.getUUID());
 		TEST_UNITS.put(player.getUUID(), unit.getUUID());
 		TEST_STARTS.put(player.getUUID(), level.getGameTime());
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, unit.getX(), unit.getY() + 1.5, unit.getZ(), 30, 0.5, 1.0, 0.5, 0.3);
+		level.sendParticles(MagicFx.CRACKLE, unit.getX(), unit.getY() + 1.5, unit.getZ(), 30, 0.5, 1.0, 0.5, 0.3);
 		level.playSound(null, unit.getX(), unit.getY(), unit.getZ(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.HOSTILE, 1.5F, 0.6F);
 		level.playSound(null, unit.getX(), unit.getY(), unit.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.2F, 1.4F);
 	}
@@ -582,7 +583,7 @@ public final class ZFighterAndroid {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, 10, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 5, 128, false, false));
 			if (operation.ticks % 2 == 0) {
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.4, 0.8, 0.4, 0.25);
+				level.sendParticles(MagicFx.CRACKLE, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.4, 0.8, 0.4, 0.25);
 			}
 			if (operation.ticks % 20 == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.6F, 1.6F);
@@ -620,7 +621,7 @@ public final class ZFighterAndroid {
 			bolt.setVisualOnly(true);
 			level.addFreshEntity(bolt);
 		}
-		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.2);
+		level.sendParticles(MagicFx.LIGHT, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.2);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.5F, 1.2F);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_android_done").withStyle(ChatFormatting.AQUA));
 	}

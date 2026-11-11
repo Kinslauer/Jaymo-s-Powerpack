@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.chrono.ChronoFx;
@@ -139,7 +140,7 @@ public final class Standstill extends XenoUltimate {
 		player.getAttribute(Attributes.SAFE_FALL_DISTANCE)
 			.addOrUpdateTransientModifier(new AttributeModifier(SAFE_FALL_ID, 4.0, AttributeModifier.Operation.ADD_VALUE));
 		ServerLevel level = player.level();
-		ring(level, ParticleTypes.END_ROD, player.position(), 3.0, 24);
+		ring(level, MagicFx.LIGHT, player.position(), 3.0, 24);
 		burst(level, ChronoSpeed.SKY_DUST, player.position().add(0.0, 1.0, 0.0), 24, 0.5, 0.05);
 		sound(player, SoundEvents.BELL_RESONATE, 1.2F, 0.6F);
 	}
@@ -295,7 +296,7 @@ public final class Standstill extends XenoUltimate {
 		overdriveSpeed(player);
 		ChronoSpeed.tick(player, player.level(), true, ChronoSpeed.SKY);
 		burst(player.level(), ChronoSpeed.SKY_DUST, player.position().add(0.0, 1.0, 0.0), 24, 0.4, 0.05);
-		burst(player.level(), ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 1.0, 0.0), 14, 0.4, 0.2);
+		burst(player.level(), MagicFx.CRACKLE, player.position().add(0.0, 1.0, 0.0), 14, 0.4, 0.2);
 		sound(player, SoundEvents.BEACON_POWER_SELECT, 0.8F, 2.0F);
 		sound(player, SoundEvents.HORSE_GALLOP, 1.0F, 1.3F);
 	}
@@ -450,7 +451,7 @@ public final class Standstill extends XenoUltimate {
 		for (int arm = 0; arm < 4; arm++) {
 			double a = (VORTEX_TICKS - live.cyclone) * 0.7 + arm * Math.PI * 0.5;
 			double r = 1.0 + t * (VORTEX_RADIUS - 1.5);
-			level.sendParticles(arm % 2 == 0 ? ParticleTypes.CLOUD : ParticleTypes.END_ROD, centre.x + Math.cos(a) * r, centre.y + 0.3 + t * VORTEX_MAX_RISE,
+			level.sendParticles(arm % 2 == 0 ? ParticleTypes.CLOUD : MagicFx.LIGHT, centre.x + Math.cos(a) * r, centre.y + 0.3 + t * VORTEX_MAX_RISE,
 				centre.z + Math.sin(a) * r, 1, 0.1, 0.1, 0.1, 0.0);
 		}
 		if (live.cyclone % 8 == 0) {
@@ -550,7 +551,7 @@ public final class Standstill extends XenoUltimate {
 		MobEffectInstance had = player.getEffect(MobEffects.SPEED);
 		live.savedSpeed = had == null ? null : new MobEffectInstance(had);
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, STANDSTILL_TICKS, STANDSTILL_SPEED, false, false));
-		ring(level, ParticleTypes.END_ROD, player.position(), 4.0, 24);
+		ring(level, MagicFx.LIGHT, player.position(), 4.0, 24);
 		sound(player, SoundEvents.BELL_RESONATE, 1.4F, 0.5F);
 		sound(player, SoundEvents.BEACON_POWER_SELECT, 1.0F, 0.6F);
 	}
@@ -562,7 +563,7 @@ public final class Standstill extends XenoUltimate {
 		if (moved.lengthSqr() > TRAIL_MIN_SQ) {
 			for (int i = 0; i < 3; i++) {
 				Vec3 at = was.add(moved.scale(i / 3.0));
-				ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+				ChronoFx.particles(level, player, MagicFx.CRACKLE, at.x, at.y + 0.3 + level.getRandom().nextDouble() * 1.2, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 			}
 			ChronoFx.particles(level, player, ChronoSpeed.SKY_DUST, was.x, was.y + 0.9, was.z, 2, 0.2, 0.4, 0.2, 0.0);
 		}
@@ -613,7 +614,7 @@ public final class Standstill extends XenoUltimate {
 		});
 		// the air itself holds still
 		for (int i = 0; i < 6; i++) {
-			level.sendParticles(ParticleTypes.END_ROD, player.getX() + (level.getRandom().nextDouble() - 0.5) * STANDSTILL_RADIUS,
+			level.sendParticles(MagicFx.LIGHT, player.getX() + (level.getRandom().nextDouble() - 0.5) * STANDSTILL_RADIUS,
 				player.getY() + level.getRandom().nextDouble() * 4.0, player.getZ() + (level.getRandom().nextDouble() - 0.5) * STANDSTILL_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (--live.standstill <= 0) {
@@ -644,7 +645,7 @@ public final class Standstill extends XenoUltimate {
 					had.getAmplifier(), had.isAmbient(), had.isVisible(), had.showIcon()));
 			}
 			if (fx) {
-				ring(player.level(), ParticleTypes.END_ROD, player.position(), 4.0, 24);
+				ring(player.level(), MagicFx.LIGHT, player.position(), 4.0, 24);
 				sound(player, SoundEvents.BELL_RESONATE, 1.4F, 0.4F);
 				sound(player, SoundEvents.BEACON_DEACTIVATE, 1.0F, 0.8F);
 			}

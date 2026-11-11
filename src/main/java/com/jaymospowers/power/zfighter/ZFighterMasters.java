@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -140,7 +141,7 @@ final class ZFighterMasters {
 			for (LivingEntity master : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(24.0),
 				e -> e.entityTags().contains(TAG) || e.entityTags().contains(DARK_TAG))) {
 				boolean dark = master.entityTags().contains(DARK_TAG);
-				player.level().sendParticles(player, dark ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.END_ROD, false, false, master.getX(),
+				player.level().sendParticles(player, dark ? ParticleTypes.SOUL_FIRE_FLAME : MagicFx.LIGHT, false, false, master.getX(),
 					master.getY() + master.getBbHeight() + 0.3, master.getZ(), 2, 0.25, 0.1, 0.25, 0.01);
 			}
 		}
@@ -202,7 +203,7 @@ final class ZFighterMasters {
 			level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 0.6F, 1.4F);
 		} else {
-			level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
+			level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.0F);
 		}
 	}

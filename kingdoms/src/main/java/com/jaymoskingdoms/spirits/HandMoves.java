@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Factions;
 import com.jaymoskingdoms.Folk;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -20,7 +21,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -479,7 +479,7 @@ public final class HandMoves {
 				}
 			}
 		}
-		level.sendParticles(ParticleTypes.END_ROD, shot.getX(), shot.getY(), shot.getZ(), 6, 0.1, 0.1, 0.1, 0.05);
+		level.sendParticles(Fx.LIGHT, shot.getX(), shot.getY(), shot.getZ(), 6, 0.1, 0.1, 0.1, 0.05);
 		level.playSound(null, shot.getX(), shot.getY(), shot.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.6F);
 		SpiritState state = Spirits.state(player);
 		if (state != null) {

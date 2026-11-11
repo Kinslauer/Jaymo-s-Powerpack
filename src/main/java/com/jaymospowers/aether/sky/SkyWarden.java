@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.sky;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -217,7 +218,7 @@ public class SkyWarden extends Monster {
 		if (this.boltTicks >= 0) {
 			this.boltTicks++;
 			for (Vec3 m : this.marks) {
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, m.x, m.y + 0.2, m.z, 6, BOLT_RADIUS * 0.5, 0.05, BOLT_RADIUS * 0.5, 0.0);
+				level.sendParticles(MagicFx.CRACKLE, m.x, m.y + 0.2, m.z, 6, BOLT_RADIUS * 0.5, 0.05, BOLT_RADIUS * 0.5, 0.0);
 			}
 			if (this.boltTicks >= BOLT_WAIT) {
 				this.strike(level);
@@ -262,7 +263,7 @@ public class SkyWarden extends Monster {
 		this.setDeltaMovement(0.0, 0.4, 0.0);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3.0F, 0.5F);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ELYTRA_FLYING, SoundSource.HOSTILE, 2.0F, 1.4F);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 4.0, this.getZ(), 120, ARENA_RADIUS * 0.5, 4.0, ARENA_RADIUS * 0.5, 0.05);
+		level.sendParticles(MagicFx.VOID, this.getX(), this.getY() + 4.0, this.getZ(), 120, ARENA_RADIUS * 0.5, 4.0, ARENA_RADIUS * 0.5, 0.05);
 	}
 
 	/** Keeps the flipped pull on everyone in the arena, and takes it off anyone who is not (or once it is over). */

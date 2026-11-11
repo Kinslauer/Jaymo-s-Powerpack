@@ -5,7 +5,6 @@ import com.jaymoskingdoms.PatronChampion;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -92,7 +91,7 @@ final class InquisitorMoves implements Moves {
 			e.removeEffect(MobEffects.INVISIBILITY);
 			e.addEffect(new MobEffectInstance(MobEffects.GLOWING, STRIP_GLOW, 0));
 		}
-		level.sendParticles(ParticleTypes.END_ROD, c.getX(), c.getY() + 1.2, c.getZ(), 40, 1.5, 1.0, 1.5, 0.1);
+		level.sendParticles(Fx.LIGHT, c.getX(), c.getY() + 1.2, c.getZ(), 40, 1.5, 1.0, 1.5, 0.1);
 		MoveKit.sound(level, c.position(), SoundEvents.BELL_BLOCK, 2.0F, 1.0F);
 	}
 
@@ -138,10 +137,10 @@ final class InquisitorMoves implements Moves {
 		float each = m.getMaxHealth() * JUDGE_SHARE / shared.size();
 		for (Player p : shared) {
 			p.hurtServer(level, c.damageSources().magic(), each);
-			level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1.0, p.getZ(), 30, 0.4, 1.0, 0.4, 0.2);
+			level.sendParticles(Fx.LIGHT, p.getX(), p.getY() + 1.0, p.getZ(), 30, 0.4, 1.0, 0.4, 0.2);
 		}
 		for (double y = 0.0; y < 14.0; y += 0.5) {
-			level.sendParticles(ParticleTypes.END_ROD, m.getX(), m.getY() + y, m.getZ(), 2, 0.2, 0.0, 0.2, 0.02);
+			level.sendParticles(Fx.LIGHT, m.getX(), m.getY() + y, m.getZ(), 2, 0.2, 0.0, 0.2, 0.02);
 		}
 		MoveKit.sound(level, m.position(), SoundEvents.LIGHTNING_BOLT_THUNDER, 1.0F, 1.8F);
 	}

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import java.util.HashMap;
@@ -103,7 +104,7 @@ final class SpiritCharms {
 		var undead = level.getEntitiesOfClass(LivingEntity.class, box,
 			e -> e.isAlive() && e.is(EntityTypeTags.UNDEAD) && e.distanceTo(player) <= GUARDIAN_RADIUS && !SpiritFoes.ally(player, e));
 		Mana.sendSeen(level, Mana.MOTE, player.getX(), player.getY() + 1.2, player.getZ(), 60, 2.5, 1.2, 2.5, 0.05);
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 50, 0.4, 0.6, 0.4, 0.35);
+		level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 50, 0.4, 0.6, 0.4, 0.35);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		for (LivingEntity e : undead) {
@@ -115,7 +116,7 @@ final class SpiritCharms {
 				e.push(away.x, 0.35, away.z);
 				e.syncVelocity = true;
 			}
-			level.sendParticles(ParticleTypes.END_ROD, e.getX(), e.getY(0.6), e.getZ(), 6, 0.2, 0.3, 0.2, 0.05);
+			level.sendParticles(Fx.LIGHT, e.getX(), e.getY(0.6), e.getZ(), 6, 0.2, 0.3, 0.2, 0.05);
 		}
 		return true;
 	}

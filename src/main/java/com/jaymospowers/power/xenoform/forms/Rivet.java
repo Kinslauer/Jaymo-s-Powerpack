@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -282,7 +283,7 @@ public final class Rivet extends XenoForm {
 		setShell(player, live, shell);
 		Vec3 c = Vec3.atCenterOf(at);
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(at)), player.getX(), player.getY() + 0.4, player.getZ(), 30, 0.3, 0.3, 0.3, 0.1);
-		line(level, player.position().add(0.0, 0.4, 0.0), c, ParticleTypes.ELECTRIC_SPARK, 8);
+		line(level, player.position().add(0.0, 0.4, 0.0), c, MagicFx.CRACKLE, 8);
 		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 0.8F, 1.4F);
 		sound(player, SoundEvents.ARMOR_EQUIP_IRON.value(), 1.0F, 0.8F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.shell." + shell).withStyle(ChatFormatting.GREEN));
@@ -308,7 +309,7 @@ public final class Rivet extends XenoForm {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_machine").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			return false;
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, ride.getX(), ride.getY() + ride.getBbHeight() * 0.5, ride.getZ(), 30, 0.5, 0.6, 0.5, 0.2);
+		level.sendParticles(MagicFx.CRACKLE, ride.getX(), ride.getY() + ride.getBbHeight() * 0.5, ride.getZ(), 30, 0.5, 0.6, 0.5, 0.2);
 		sound(player, SoundEvents.COPPER_GOLEM_SPAWN, 1.0F, 0.9F);
 		return true;
 	}
@@ -541,7 +542,7 @@ public final class Rivet extends XenoForm {
 				LivingEntity target = ready(player, live, V) ? aimed(player, BEAM_REACH, e -> true) : null;
 				if (target != null) {
 					target.hurtServer(level, player.damageSources().playerAttack(player), BEAM_DAMAGE);
-					line(level, player.getEyePosition(), target.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 16);
+					line(level, player.getEyePosition(), target.getBoundingBox().getCenter(), MagicFx.CRACKLE, 16);
 					sound(player, SoundEvents.BEACON_POWER_SELECT, 0.8F, 2.0F);
 					cooldown(player, live, V, BEAM_COOLDOWN);
 				}
@@ -646,7 +647,7 @@ public final class Rivet extends XenoForm {
 					if (s.isDamageableItem() && s.isDamaged()) {
 						s.setDamageValue(0);
 						mended++;
-						level.sendParticles(ParticleTypes.WAX_OFF, item.getX(), item.getY() + 0.3, item.getZ(), 6, 0.2, 0.2, 0.2, 0.0);
+						level.sendParticles(MagicFx.PALE, item.getX(), item.getY() + 0.3, item.getZ(), 6, 0.2, 0.2, 0.2, 0.0);
 					}
 				}
 				if (mended == 0) {
@@ -843,7 +844,7 @@ public final class Rivet extends XenoForm {
 			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 5, 2, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, 2, false, false));
 			if (player.tickCount % 10 == 0) {
-				level.sendParticles(ParticleTypes.WAX_ON, player.getX(), player.getY() + 0.5, player.getZ(), 2, 0.3, 0.3, 0.3, 0.0);
+				level.sendParticles(MagicFx.EMBER, player.getX(), player.getY() + 0.5, player.getZ(), 2, 0.3, 0.3, 0.3, 0.0);
 			}
 		}
 		// Rebound (piston): a hard landing springs you up again
@@ -918,7 +919,7 @@ public final class Rivet extends XenoForm {
 			}
 		}
 		if (player.tickCount % 4 == 0) {
-			level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | XenoformPower.COLOR),
+			level.sendParticles(MagicFx.wisp(0xFF000000 | XenoformPower.COLOR, 1.0F),
 				machine.getX(), machine.getY() + machine.getBbHeight() * 0.5, machine.getZ(), 3, machine.getBbWidth() * 0.4, machine.getBbHeight() * 0.4,
 				machine.getBbWidth() * 0.4, 0.0);
 		}
@@ -980,11 +981,7 @@ public final class Rivet extends XenoForm {
 	}
 
 	private static void line(ServerLevel level, Vec3 from, Vec3 to, net.minecraft.core.particles.ParticleOptions particle, int points) {
-		Vec3 step = to.subtract(from).scale(1.0 / points);
-		for (int i = 1; i <= points; i++) {
-			Vec3 p = from.add(step.scale(i));
-			level.sendParticles(particle, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+		com.jaymospowers.core.fx.MagicFx.line(level, from, to, particle, points);
 	}
 
 	private static final class Mth {

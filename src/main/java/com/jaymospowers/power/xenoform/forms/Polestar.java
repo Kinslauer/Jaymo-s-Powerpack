@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -167,7 +168,7 @@ public final class Polestar extends XenoForm {
 			Vec3 pull = to.normalize().scale(-strength);
 			e.setDeltaMovement(e.getDeltaMovement().add(pull.x, 0.25, pull.z));
 			e.syncVelocity = true;
-			beam(level, eye.subtract(0.0, 0.3, 0.0), e.getBoundingBox().getCenter(), ParticleTypes.ELECTRIC_SPARK, 10);
+			beam(level, eye.subtract(0.0, 0.3, 0.0), e.getBoundingBox().getCenter(), MagicFx.CRACKLE, 10);
 			pulled++;
 		}
 		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(PULL_REACH), i -> irony(i.getItem()))) {
@@ -175,7 +176,7 @@ public final class Polestar extends XenoForm {
 			item.setDeltaMovement(to.normalize().scale(PULL_ITEM).add(0.0, 0.2, 0.0));
 			pulled++;
 		}
-		burst(level, ParticleTypes.ELECTRIC_SPARK, eye, 12, 0.3, 0.1);
+		burst(level, MagicFx.CRACKLE, eye, 12, 0.3, 0.1);
 		sound(player, SoundEvents.LODESTONE_COMPASS_LOCK, 1.0F, pulled > 0 ? 1.2F : 0.7F);
 	}
 
@@ -192,8 +193,8 @@ public final class Polestar extends XenoForm {
 		for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(REPEL_RADIUS), a -> a.getOwner() != player)) {
 			turn(arrow, player);
 		}
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), REPEL_RADIUS * 0.5, 24);
-		ring(level, ParticleTypes.ELECTRIC_SPARK, player.position(), REPEL_RADIUS * 0.9, 32);
+		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.5, 24);
+		ring(level, MagicFx.CRACKLE, player.position(), REPEL_RADIUS * 0.9, 32);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 8.0, 0.3F);
 	}
@@ -207,7 +208,7 @@ public final class Polestar extends XenoForm {
 		arrow.setOwner(player);
 		arrow.setDeltaMovement(back);
 		arrow.syncVelocity = true;
-		player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, arrow.getX(), arrow.getY(), arrow.getZ(), 4, 0.1, 0.1, 0.1, 0.05);
+		player.level().sendParticles(MagicFx.CRACKLE, arrow.getX(), arrow.getY(), arrow.getZ(), 4, 0.1, 0.1, 0.1, 0.05);
 	}
 
 	private static boolean lift(ServerPlayer player, XenoformPower.Live live) {
@@ -220,7 +221,7 @@ public final class Polestar extends XenoForm {
 		}
 		level.removeBlock(at, false);
 		live.lifted = state;
-		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), ParticleTypes.ELECTRIC_SPARK, 8);
+		beam(level, Vec3.atCenterOf(at), player.getEyePosition().add(0.0, 0.8, 0.0), MagicFx.CRACKLE, 8);
 		sound(player, SoundEvents.CHAIN_BREAK, 1.0F, 0.6F);
 		return true;
 	}
@@ -254,7 +255,7 @@ public final class Polestar extends XenoForm {
 		if (live.lifted != null && player.tickCount % 2 == 0) {
 			Vec3 over = player.getEyePosition().add(0.0, 1.0, 0.0);
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, live.lifted), over.x, over.y, over.z, 2, 0.3, 0.3, 0.3, 0.0);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, over.x, over.y, over.z, 1, 0.4, 0.4, 0.4, 0.0);
+			level.sendParticles(MagicFx.CRACKLE, over.x, over.y, over.z, 1, 0.4, 0.4, 0.4, 0.0);
 		}
 		if (live.field) {
 			for (AbstractArrow arrow : level.getEntitiesOfClass(AbstractArrow.class, player.getBoundingBox().inflate(FIELD_RADIUS),
@@ -264,7 +265,7 @@ public final class Polestar extends XenoForm {
 				sound(player, SoundEvents.CHAIN_BREAK, 0.6F, 1.6F);
 			}
 			if (player.tickCount % 6 == 0) {
-				ring(level, ParticleTypes.ELECTRIC_SPARK, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.4, 10);
+				ring(level, MagicFx.CRACKLE, player.position().add(0.0, 0.8, 0.0), FIELD_RADIUS * 0.4, 10);
 			}
 		}
 	}

@@ -255,7 +255,7 @@ public final class StoneSwords {
 				Vec3 to = foe.getBoundingBox().getCenter();
 				for (double d = 0.0; d <= 1.0; d += 0.12) {
 					Vec3 at = from.lerp(to, d);
-					level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
+					level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
 				}
 				foe.setInvulnerableTime(0);
 				foe.hurtServer(level, attack(level, attacker), Math.max(1.0F, damage));
@@ -388,7 +388,7 @@ public final class StoneSwords {
 				if (t < PLANT_WINDUP_TICKS) {
 					if (t == 0) {
 						Vec3 tip = this.player.getEyePosition().add(0.0, 0.4, 0.0);
-						this.level.sendParticles(ParticleTypes.ENCHANT, tip.x, tip.y, tip.z, 12, 0.2, 0.3, 0.2, 0.4);
+						this.level.sendParticles(MagicFx.GLYPH, tip.x, tip.y, tip.z, 12, 0.2, 0.3, 0.2, 0.4);
 					}
 					return false;
 				}

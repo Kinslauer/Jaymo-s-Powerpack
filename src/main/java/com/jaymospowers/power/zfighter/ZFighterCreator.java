@@ -381,7 +381,7 @@ public final class ZFighterCreator {
 			level.sendParticles(MagicFx.wisp(made.color(), 0.8F + charge), true, false, hands.x + ox, hands.y + oy, hands.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
 		if (charge >= 1.0F && level.getGameTime() % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
+			level.sendParticles(MagicFx.CRACKLE, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
 		if (Soundscape.due(player, "ki.wave", 8, 13)) {
 			Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.pitched(0.8F + charge), ZFighterKi.KI_SURGE);

@@ -13,7 +13,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -125,7 +124,7 @@ public final class ZFighterWarriorComeback {
 		ZFighterPower.refresh(player, ZFighterPower.live(player));
 		ServerLevel level = player.level();
 		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), COLOR, 1.8F, 40, 0.6, 0.9, 0.6);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.4, 0.8, 0.4, 0.1);
+		level.sendParticles(MagicFx.LIGHT, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.4, 0.8, 0.4, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.5F);
 		Shakes.send(player, 0.6F);
 		player.sendOverlayMessage(Component.translatable(revived ? "message.jaymospowers.zfighter_comeback_up" : "message.jaymospowers.zfighter_comeback")

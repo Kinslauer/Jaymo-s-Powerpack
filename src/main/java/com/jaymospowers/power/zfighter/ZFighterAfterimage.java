@@ -228,7 +228,7 @@ final class ZFighterAfterimage {
 	private static void pop(ServerLevel level, net.minecraft.world.entity.Entity entity) {
 		Vec3 at = entity.position();
 		level.sendParticles(ParticleTypes.POOF, true, false, at.x, at.y + 1.0, at.z, 14, 0.3, 0.6, 0.3, 0.03);
-		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y + 1.0, at.z, 8, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y + 1.0, at.z, 8, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ALLAY_DEATH, SoundSource.PLAYERS, 0.8F, 1.6F);
 		entity.discard();
 	}

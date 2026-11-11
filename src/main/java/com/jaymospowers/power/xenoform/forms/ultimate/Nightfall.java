@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -422,10 +423,10 @@ public final class Nightfall extends XenoUltimate {
 			AABB b = e.getBoundingBox();
 			double mid = (b.minY + b.maxY) * 0.5;
 			for (double y : new double[] {b.minY, mid, b.maxY}) {
-				level.sendParticles(player, ParticleTypes.WITCH, true, false, b.minX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.WITCH, true, false, b.maxX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.WITCH, true, false, b.minX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
-				level.sendParticles(player, ParticleTypes.WITCH, true, false, b.maxX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.HEX, true, false, b.minX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.HEX, true, false, b.maxX, y, b.minZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.HEX, true, false, b.minX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(player, MagicFx.HEX, true, false, b.maxX, y, b.maxZ, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 	}

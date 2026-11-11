@@ -335,7 +335,7 @@ public final class ZFighterRush {
 			level.sendParticles(MagicFx.wisp(color, size), true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		Vec3 snout = head.add(dir.scale(0.6));
-		level.sendParticles(ParticleTypes.END_ROD, true, false, snout.x, snout.y, snout.z, 2, 0.1, 0.1, 0.1, 0.02);
+		level.sendParticles(MagicFx.LIGHT, true, false, snout.x, snout.y, snout.z, 2, 0.1, 0.1, 0.1, 0.02);
 		level.sendParticles(ParticleTypes.FLAME, true, false, snout.x, snout.y + 0.15, snout.z, 1, 0.05, 0.05, 0.05, 0.01);
 	}
 

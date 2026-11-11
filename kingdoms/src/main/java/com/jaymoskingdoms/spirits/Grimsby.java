@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
@@ -161,7 +162,7 @@ public final class Grimsby extends Spirit {
 	private static void clang(ServerLevel level, LivingEntity holder, @Nullable LivingEntity attacker) {
 		Vec3 at = attacker == null ? holder.getEyePosition() : holder.position().add(attacker.position()).scale(0.5).add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.3);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.2);
+		level.sendParticles(Fx.CRACKLE, at.x, at.y, at.z, 8, 0.2, 0.2, 0.2, 0.2);
 		Mana.sendSeen(level, GrimsbyBlades.EDGE, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.02);
 		level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, holder.getX(), holder.getY(), holder.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.25F, 1.8F);

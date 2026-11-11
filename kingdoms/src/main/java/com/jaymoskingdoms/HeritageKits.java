@@ -896,7 +896,7 @@ public final class HeritageKits {
 			case RUNE_OF_WARDING -> {
 				fx(p, MobEffects.ABSORPTION, WARD_SECONDS, 2);
 				fx(p, MobEffects.RESISTANCE, WARD_SECONDS, 0);
-				burst(p, ParticleTypes.ENCHANT, 40);
+				burst(p, Fx.GLYPH, 40);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 1.2F);
 			}
 			case MOUNTAIN_LEAP -> {
@@ -969,7 +969,7 @@ public final class HeritageKits {
 				fx(p, MobEffects.HASTE, 15, 1);
 				fx(p, MobEffects.REGENERATION, 10, 0);
 				fx(p, MobEffects.LUCK, 30, 0);
-				burst(p, ParticleTypes.ENCHANT, 50);
+				burst(p, Fx.GLYPH, 50);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 1.0F);
 			}
 			case STROKE_OF_FORTUNE -> {
@@ -999,7 +999,7 @@ public final class HeritageKits {
 				for (LivingEntity e : around(p, HALO_SMITE_RANGE, e -> e.is(EntityTypeTags.UNDEAD))) {
 					e.hurtServer(level, level.damageSources().playerAttack(p), HALO_SMITE);
 				}
-				ring(p, ParticleTypes.END_ROD, 28);
+				ring(p, Fx.LIGHT, 28);
 				sound(p, SoundEvents.BEACON_ACTIVATE, 0.8F, 1.4F);
 			}
 			case FERAL_SPRINT -> {
@@ -1142,7 +1142,7 @@ public final class HeritageKits {
 				if (target instanceof Mob mob) {
 					mob.setTarget(null);
 				}
-				burst(p, ParticleTypes.WITCH, 20);
+				burst(p, Fx.HEX, 20);
 				sound(p, SoundEvents.ENDERMAN_TELEPORT, 0.6F, 1.5F);
 			}
 			case PHASE_SHIFT -> {
@@ -1151,7 +1151,7 @@ public final class HeritageKits {
 				launch(p, look.x * 1.2, 0.2, look.z * 1.2);
 				fx(p, MobEffects.INVISIBILITY, 3, 0);
 				fx(p, MobEffects.SLOW_FALLING, 6, 0);
-				burst(p, ParticleTypes.END_ROD, 20);
+				burst(p, Fx.LIGHT, 20);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.6F, 1.8F);
 			}
 			case SIRENS_CHARM -> {
@@ -1182,19 +1182,19 @@ public final class HeritageKits {
 				fx(p, MobEffects.STRENGTH, BARGAIN_SECONDS, 1);
 				fx(p, MobEffects.SPEED, BARGAIN_SECONDS, 1);
 				fx(p, MobEffects.LUCK, BARGAIN_SECONDS * 4, 1);
-				burst(p, ParticleTypes.WITCH, 30);
+				burst(p, Fx.HEX, 30);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.8F, 0.8F);
 			}
 			case ARCANE_REFLEX -> {
 				REFLEX.put(p.getUUID(), now + REFLEX_TICKS);
-				burst(p, ParticleTypes.ENCHANT, 30);
+				burst(p, Fx.GLYPH, 30);
 				sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.6F, 1.7F);
 			}
 			case MOONLIT_VEIL -> {
 				fx(p, MobEffects.INVISIBILITY, night(p) ? VEIL_NIGHT_SECONDS : VEIL_SECONDS, 0);
 				fx(p, MobEffects.SPEED, night(p) ? VEIL_NIGHT_SECONDS : VEIL_SECONDS, 0);
 				calm(p, 16.0);
-				burst(p, ParticleTypes.END_ROD, 20);
+				burst(p, Fx.LIGHT, 20);
 				sound(p, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.7F, 0.7F);
 			}
 			case BLOOD_FRENZY -> {
@@ -1315,7 +1315,7 @@ public final class HeritageKits {
 		p.teleportTo(level, at.x, at.y, at.z, Set.<Relative>of(), p.getYRot(), p.getXRot(), false);
 		p.resetFallDistance();
 		sound(p, SoundEvents.ENDERMAN_TELEPORT, 0.8F, 1.2F);
-		burst(p, ParticleTypes.PORTAL, 30);
+		burst(p, Fx.VOID, 30);
 		return true;
 	}
 

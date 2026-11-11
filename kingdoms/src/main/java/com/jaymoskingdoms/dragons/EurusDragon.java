@@ -1,8 +1,8 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.PowersCompat;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -203,11 +203,11 @@ public class EurusDragon extends WindDragon {
 		Vec3 point = this.position().add(this.leaveWay.scale(30.0)).add(0.0, LEAVE_CLIMB, 0.0);
 		flyToward(level, point, cruiseSpeed() * LEAVE_SPEED, false);
 		if (this.tickCount % 3 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY(0.5), this.getZ(), 4, 0.6, 0.4, 0.6, 0.05);
+			level.sendParticles(Fx.CRACKLE, this.getX(), this.getY(0.5), this.getZ(), 4, 0.6, 0.4, 0.6, 0.05);
 		}
 		if (this.leavingFor > LEAVE_TICKS || this.getY() > this.leaveFrom + LEAVE_HEIGHT) {
 			level.playSound(null, this.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 4.0F, 1.0F);
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY(0.5), this.getZ(), 40, 1.0, 0.6, 1.0, 0.3);
+			level.sendParticles(Fx.CRACKLE, this.getX(), this.getY(0.5), this.getZ(), 40, 1.0, 0.6, 1.0, 0.3);
 			this.discard();
 		}
 	}
