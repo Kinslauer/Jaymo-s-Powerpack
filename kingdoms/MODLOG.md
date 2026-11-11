@@ -11138,3 +11138,9 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - Ops: `/kingdom ford where` shows where the keep stands or will stand; `/kingdom ford raise` builds one at a forest river near you, for testing.
 - Classes: `Ford` (new), `Retaking` (ford milestone), `TalkBook` (retaking_* talks).
 - Compiled (main + client); not played.
+
+## 0.7.726 (2026-11-11): The Retaking, Act III: Lights in the Sky (#1301)
+
+- The Story tab's Act III lists five goals before the Skeleton Lord: beat a raider band from the sky, break open a fallen star, fly a pod past the clouds, set foot in the Maw, free or conquer a far world.
+- `Retaking.look` reads the deed tags Jaymo's Powers leaves (raiders, star, pod, far_world), awards the milestone if Act III has begun and takes the tag off either way; the Maw is checked by dimension.
+- Built; not played.
