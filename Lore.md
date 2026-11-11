@@ -174,7 +174,7 @@ whole time"; their ki "went to the cold, or the smoke, or the weight of things, 
 go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
 when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
-(new) **What an elemental user sees** (Claude's placement, for Andy to approve). A Smoke, Gravity or Cryo user's ki
+**What an elemental user sees** (Andy approved, 2026-11-11). A Smoke, Gravity or Cryo user's ki
 went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
 body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
 sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
@@ -693,8 +693,8 @@ three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
 (new) **The troopers** (future-three-sided-war, 2026-11-11). The Frostborn come in squads, each trooper in a whole Rig,
 firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
 Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
-the dead fight each other as well. A traveller they leave alone unless one of them is hurt, and then the whole squad
-turns on whoever did it; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
+the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
+hurting one turns the whole squad; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
 and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
