@@ -24,7 +24,7 @@ owns:
 ## Notes
 - PR #1284 is built on #1268 at 938baad3 and replaces it. FilmPose is deleted; anything new in the film that shows or sounds must go through a stage op in LoreFilmClient so it reaches the tape, and the tape must be re-recorded (`/kingdomfilm record long_defence`, or `-Djaymoskingdoms.filmRecord=true`), then copied to `assets/jaymoskingdoms/films/`.
 - Ported from #1268's later commits: forest fire (flames are tape events IGNITE/FLAME/QUENCH), 860 ticks.
-- Slingshot glide ported (moves `sling`, `glide`; END 756, FILM_TICKS 886). Not ported: #1268's ribbon cloak winding over him to form and fall away (Andy's rule of 2026-11-11 11:49 UTC); here the cloak is solid cape bones and tethers reach out only at work.
+- Slingshot glide ported (moves `sling`, `glide`; END 756, FILM_TICKS 886). The cloak rule is built on the model: solid cape at rest, ribbon bones while at work, winding to part and to form (`FilmActor.cloak`, tape event CLOAK).
 - The imps (thread "Build the Nether imps") join the film later; their fireballs call `LoreFilmClient.igniteNear`.
 
 ## Done
