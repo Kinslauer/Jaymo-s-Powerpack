@@ -104,6 +104,7 @@ public final class StarWreckBlock extends Block {
 	@Override
 	public void playerDestroy(ServerLevel server, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
 		super.playerDestroy(server, player, pos, state, blockEntity, tool);
+		com.jaymospowers.core.PackAdvancements.deed(player, "star");
 		RandomSource random = server.getRandom();
 		popResource(server, pos, new ItemStack(XenoFinds.WRECK_CORE));
 		popResource(server, pos, new ItemStack(XenoFinds.CIRCUIT, CIRCUITS_MIN + random.nextInt(CIRCUITS_MAX - CIRCUITS_MIN + 1)));

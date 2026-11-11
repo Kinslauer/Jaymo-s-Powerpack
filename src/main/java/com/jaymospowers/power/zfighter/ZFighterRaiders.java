@@ -330,8 +330,34 @@ public final class ZFighterRaiders {
 		BlockPos prize = kept.blockPosition();
 		for (ServerPlayer player : level.getPlayers(p -> p.blockPosition().distSqr(prize) < 96 * 96)) {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.raiders.beaten").withStyle(ChatFormatting.GOLD));
+			com.jaymospowers.core.PackAdvancements.deed(player, "raiders");
 		}
+		// the band's tally, left in the pod they came down in
+		net.minecraft.world.entity.item.ItemEntity tally = new net.minecraft.world.entity.item.ItemEntity(level, kept.getX(), kept.getY() + 1.0, kept.getZ(),
+			tally());
+		level.addFreshEntity(tally);
 	}
+
+	/**
+	 * A raider band's tally: the worlds it has taken, in the raiders' own few words, and the one they no longer write down
+	 * (written in the lang file). Filed in Kingdoms' lore codex like any lore book.
+	 */
+	static net.minecraft.world.item.ItemStack tally() {
+		net.minecraft.world.item.ItemStack book = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WRITTEN_BOOK);
+		java.util.List<net.minecraft.server.network.Filterable<Component>> pages = new java.util.ArrayList<>();
+		for (int i = 1; i <= TALLY_PAGES; i++) {
+			pages.add(net.minecraft.server.network.Filterable.passThrough(Component.translatable("book.jaymospowers.raiders_tally.page" + i)));
+		}
+		book.set(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT, new net.minecraft.world.item.component.WrittenBookContent(
+			net.minecraft.server.network.Filterable.passThrough("Raider's Tally"), "", 1, pages, true));
+		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+		tag.putString("jaymoskingdoms_lore", JaymosPowers.id("raiders_tally").toString());
+		book.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		return book;
+	}
+
+	/** The tally's pages. */
+	static final int TALLY_PAGES = 3;
 
 	/**
 	 * (0.18.51) Raiders fly stripped pods: {@link #STRIP_MIN} to {@link #STRIP_MAX} of the hull plates, the canopy and the mast

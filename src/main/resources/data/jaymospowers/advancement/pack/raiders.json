@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/ogre_king",
+  "display": {
+    "icon": {
+      "id": "minecraft:crossbow"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.raiders.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.raiders.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

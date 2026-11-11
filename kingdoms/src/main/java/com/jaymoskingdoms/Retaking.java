@@ -75,9 +75,21 @@ public final class Retaking {
 		new Milestone("monolith", Act.OLD_STONES), new Milestone("giant", Act.OLD_STONES), new Milestone("aether", Act.OLD_STONES),
 		new Milestone("ford", Act.OLD_STONES),
 		new Milestone("giant_two", Act.OLD_STONES), new Milestone("giant_all", Act.OLD_STONES), new Milestone("ogre_king", Act.OLD_STONES),
-		new Milestone("skeleton_lord", Act.LIGHTS),
+		new Milestone("raiders", Act.LIGHTS), new Milestone("star", Act.LIGHTS), new Milestone("pod", Act.LIGHTS),
+		new Milestone("maw", Act.LIGHTS), new Milestone("far_world", Act.LIGHTS), new Milestone("skeleton_lord", Act.LIGHTS),
 		new Milestone("piglin_king", Act.DARK_BELOW),
 		new Milestone("wither", Act.LEGEND));
+
+	/**
+	 * Milestones only Jaymo's Powers sees done (a raider band beaten, a fallen star broken, a pod flown, a far world freed or
+	 * conquered). Powers leaves a tag, {@link #DEED} + name, which {@link #look} turns into the milestone if its act has begun
+	 * and takes off either way.
+	 */
+	static final List<String> DEEDS = List.of("raiders", "star", "pod", "far_world");
+	/** Powers' deed tag prefix ({@code PackAdvancements.DEED} there). */
+	static final String DEED = "jaymospowers.retaking.";
+	/** The Maw; setting foot in it is an Act III milestone. */
+	static final ResourceKey<Level> MAW = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "maw"));
 
 	/** Per Knowledge level 1 to 5, its king's milestone. */
 	static final String[] KINGS = {"", "goblin_king", "ogre_king", "skeleton_lord", "piglin_king", "wither"};
@@ -137,6 +149,14 @@ public final class Retaking {
 		}
 		if (player.level().dimension() == AETHER) {
 			PackAdvancements.award(player, "aether", "aether");
+		}
+		if (player.level().dimension() == MAW) {
+			PackAdvancements.award(player, "maw", "done");
+		}
+		for (String deed : DEEDS) {
+			if (player.removeTag(DEED + deed)) {
+				PackAdvancements.award(player, deed, "done");
+			}
 		}
 	}
 

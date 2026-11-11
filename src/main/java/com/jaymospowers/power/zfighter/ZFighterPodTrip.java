@@ -253,6 +253,7 @@ public final class ZFighterPodTrip {
 
 	/** Seats {@code player} in {@code pod} (the pod entity the star map was opened at) and starts the countdown. */
 	static void start(ServerPlayer player, int dest, PodEntity pod, int fuelLeft, int fuelBefore) {
+		com.jaymospowers.core.PackAdvancements.deed(player, "pod");
 		ServerLevel level = player.level();
 		BlockPos at = pod.blockPosition();
 		Trip trip = new Trip(dest, fuelLeft, fuelBefore, level.dimension(), at);
