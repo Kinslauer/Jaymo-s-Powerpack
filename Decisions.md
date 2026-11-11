@@ -252,3 +252,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:56 PM ET (Andy, Galvan moon plan): names "surprise me". Claude picked: elder Ammet Thrum (the Old Maker), ruler Sovereign Vorrel, city Undersky.
 - 2026-11-11 4:57 PM ET (Andy, Galvan moon plan): city size "your choice seems good": about 150 blocks across, towers 60-80 blocks, false sky just above the tallest.
 - 2026-11-11 5:00 PM ET (Andy, Galvan moon plan): a player king "can muster armies that attack overworld kingdoms with space pod invasions, or they can take the fight to the warrior born, drawing them to the moon, and having large sclae warfare on the moon itself."
+- 2026-11-11 5:00 PM ET (Andy, Galvan moon plan): "the Oscellans" is the name chosen in place of "Galvan" (Lore.md spells it Ocellan). Plan renamed docs/Ocellan-Moon-Plan.md; all prose now says Ocellan; code ids GalvanBody / ZFighterFolk.GALVAN from #1323 unchanged.
