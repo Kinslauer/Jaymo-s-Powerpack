@@ -220,3 +220,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 19:40 UTC (film thread, PR #1315): Andy chose "At the real ford and keep" for the Second Defence closing film (over laying the Long Defence set there, or skipping it). Built that way.
 
 - 2026-11-11 (Andy, Retaking roads): the elder on the Pale Moon meant the band to be given away; the ruler sent the band hunter against that. The Web/Xeno/Arsenal road books are all correct.
+- 2026-11-11 3:12 PM: Andy 'fix it': clean Hephaestus's stuck belly-flop worktree (vault step 5) and master's CREDITS.txt markers (PR #1318).
