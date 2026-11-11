@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: armor-pngs-vanilla-style
 branch: claude/armor-pngs-vanilla-style
 with: prometheus
@@ -26,3 +26,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots × 5 tiers:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-11 13:04 No sign of work for 30 min: marked stalled (whoever ran it stopped).
