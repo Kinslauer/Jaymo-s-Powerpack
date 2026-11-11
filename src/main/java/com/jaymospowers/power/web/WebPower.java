@@ -384,6 +384,7 @@ public final class WebPower implements Power {
 		WebLead.register();
 		// (0.21.23, Rivals patch 9) takedowns, wall pins, strung up from a perch
 		WebTakedowns.register();
+		WebGlideKick.register();
 	}
 
 	@Override

@@ -172,6 +172,13 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, 30.0F * flare - 15.0F * crouch);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.GLIDE_KICK -> {
+				// laid back with the feet thrown out ahead, held, then folding away
+				float kick = hold(pose.p(), 0.2F, 0.6F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -35.0F * kick);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.ROAR -> {
 				// hunched over and shuddering while it builds, then reared back as it roars, then upright again
 				float p2 = pose.p();
@@ -289,6 +296,15 @@ public final class WebBodyPose {
 				set(h.leftArm, 0.5F, 0.0F, -0.9F, crouch * (1.0F - flare));
 				set(h.rightLeg, -1.1F, 0.0F, 0.2F, crouch);
 				set(h.leftLeg, 0.6F, 0.0F, -0.2F, crouch);
+			}
+			case WebPose.GLIDE_KICK -> {
+				float kick = hold(pose.p(), 0.2F, 0.6F);
+				// both feet together out in front, arms swept back for balance
+				set(h.rightLeg, -1.55F, 0.0F, 0.05F, kick);
+				set(h.leftLeg, -1.55F, 0.0F, -0.05F, kick);
+				set(h.rightArm, 0.9F, 0.0F, 0.5F, kick);
+				set(h.leftArm, 0.9F, 0.0F, -0.5F, kick);
+				h.head.xRot = Mth.lerp(kick, h.head.xRot, -0.2F);
 			}
 			case WebPose.ROAR -> {
 				float p = pose.p();
