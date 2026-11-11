@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: open
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-b
-pr: 1263
+claimed_by: 
+pr: 
 suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer
 text_pass: none
@@ -38,3 +38,4 @@ Today only the falls are posed: FreefallPose (flailing, and the head-first dive 
 - Cannonball: knees hugged to the chest, tucked into a ball.
 - Belly flop: flat and spread at the moment of hitting, a short wince after.
 Each starts when Sneak marks the entry in the air (or the flop when you hit) and eases out under water.
+- 2026-11-11 01:29 hermes-b's claim had no sign of work for 30 min: handed back as open.
