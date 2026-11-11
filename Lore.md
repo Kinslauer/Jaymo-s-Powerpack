@@ -562,6 +562,13 @@ Warrior-born, the orcs and the Grue came at it. That is what they were made for,
   the **anti**. After he died, the anti roamed the world and took on his personality, which is why it is quiet. The web
   is a side effect of his passing, binding to those who gain an affinity for it during their life.
 
+  **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
+  take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
+  beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
+  the body and drawing it back in like the plain suit. The Quiet One's white hooded cloak was never cloth: it is the
+  anti wearing the shape of the knight's cloak he wore in life. Any strain does this for any host. The big suit still
+  swallows the shape while it is up.
+
 **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
@@ -758,6 +765,11 @@ it) or dragged home by rope.
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
+
+**Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
+realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
+blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
+and breaks under enough blows, and a fighter who loses one fetches another from camp; steel on steel throws sparks.
 
 ## Rules for writing against this
 
