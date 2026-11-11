@@ -26,6 +26,11 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
+the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
+whatever leather, mail and iron they had, filthy and bloodied by then.
+
 **The field of the long defence** (Andy, 2026-11-11). It was fought in a wooded forest, in sight of a Keep the defenders
 held. It was large and legendary: the fighting ran through the whole wood. Lightning struck when the sorcerer summoned
 his legion, and the dead came up a few at a time, here and there, not all at once. Varro disarmed the orc that came at
@@ -745,6 +750,12 @@ names, families and tempers.
 
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
+
+(new) **How the town golems look.** Each is shaped by the realm's own masons for its work. The **lamp warden** is a
+lean figure of pale stone banded in gold whose head is a lantern; it stands with the iron golems and its flame wakes
+at dusk. The **mender** is a mossy boulder that walks, green crystals grown from its back, and it holds out its hands
+to the hurt. The **throne golem** is a small keep of dark stone set with diamond that sits down by the seat and folds
+itself into the ruler's throne, its turrets and battlements the throne's back.
 
 **Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
