@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 20:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 20:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,8 +25,8 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/epic-structures-minotaur|epic-structures-minotaur]] · 💻 Odysseus · #1320 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
