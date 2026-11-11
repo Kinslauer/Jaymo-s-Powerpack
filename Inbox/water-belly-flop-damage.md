@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer

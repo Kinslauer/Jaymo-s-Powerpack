@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: undead-seek-real-shelter
 branch: claude/undead-seek-real-shelter
 with:
-pr:
+pr: 1262
 mods: powers
 versions: Powers 0.21.109, Kingdoms 0.7.712
 started: 2026-11-10
@@ -27,4 +27,4 @@ owns:
 - Task suggests asking before dig-down/stay-put last resort.
 
 ## Done
-What a player will see, and what wasn't tested.
+Undead that burn in daylight now only burn when a ray from their head to the Sun’s real position is unobstructed — a roof, cave wall or solid cliff shades them; leaves, glass and torches let the rays through, so tree shade no longer counts. Burning zombies, skeletons and strays now search a 24-block radius for real shelter (cave, underground, solid roof) and path toward it; they stay put when nothing is reachable (no digging — that needs Andy’s say-so). Not tested in game: compile-checked (sh ./gradlew clean compileJava passes) and tools/pr_checks.py passes. PR #1262 pushed, awaiting review/merge.
