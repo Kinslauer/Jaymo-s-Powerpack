@@ -1,7 +1,7 @@
 # Boxing: evades, strong attacks, blur and the combo breaker
 - **Evades:** while boxing, the Dodge key (Left Alt) is the style's evade in place of the roll. Arrow Slit slips left
   or right or bobs straight in, Long Guard pulls back, Bastion rolls the shoulder in place (or slips aside). A blow
-  that would land within half a second of the press misses. Two evades cost a feather icon at level 10, one each at
+  that would land within 0.4 s of the press misses, and the next evade is ready 0.7 s after it. Two evades cost a feather icon at level 10, one each at
   level 1.
 - **Perfect evade and strong attacks:** an evade pressed inside the guard's perfect-parry window (5 ticks, 7 when
   locked on) earns the next punch: the uppercut out of a bob (4), the pull counter out of a pull (3, a block more

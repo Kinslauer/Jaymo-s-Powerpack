@@ -60,10 +60,14 @@ import org.jspecify.annotations.Nullable;
 public final class BoxingEvades {
 	// ---- tuning ----
 	/** Ticks between evades, and how much earlier the server lets one through (clocks differ a little). */
-	public static final int COOLDOWN = 8;
+	public static final int COOLDOWN = 14;
 	static final int COOLDOWN_SLACK = 3;
-	/** A blow that would land this many ticks or fewer after the press misses. */
-	public static final int EVADE_TICKS = 10;
+	/**
+	 * A blow that would land this many ticks or fewer after the press misses. Shorter than {@link #COOLDOWN}, so evades
+	 * can't be chained into lasting immunity (the roll: 5 of every 10 ticks); a little longer than the perfect window
+	 * locked on (7), so an evade can still be early or late and not perfect.
+	 */
+	public static final int EVADE_TICKS = 8;
 	/** An evade's stamina (half-feathers; two to an icon) at level 1 and at the top level (two evades an icon). */
 	public static final float COST_FIRST = 2.0F, COST_LAST = 1.0F;
 	/** The evades' speed along the ground (blocks/tick), and the pull's small hop. The client moves the boxer. */

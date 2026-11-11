@@ -52,9 +52,10 @@ Jung's names; Andy has the last word. Changing them back is the three lines in `
 - **The Dodge key (Left Alt) while boxing** is the style's evade, not the roll. The client moves the boxer and sends
   which way was held. Arrow Slit: slip left or right (`SLIP_SPEED` 0.38), else a bob straight in (`BOB_SPEED` 0.3).
   Long Guard: a pull straight back (`PULL_SPEED` 0.6). Bastion: a shoulder roll in place, or a slip to a side.
-  `COOLDOWN` 8 ticks. Cost: 2 half-feathers at level 1 down to 1 at level 10 (two evades an icon). A gassed boxer
+  `COOLDOWN` 14 ticks. Cost: 2 half-feathers at level 1 down to 1 at level 10 (two evades an icon). A gassed boxer
   can't evade.
-- **Missing a blow:** a melee blow or a shot that would land within `EVADE_TICKS` 10 of the press misses.
+- **Missing a blow:** a melee blow or a shot that would land within `EVADE_TICKS` 8 of the press misses. That is shorter than the
+  cooldown, so evades can't be chained into lasting immunity.
 - **Perfect evade:** within the guard's perfect-parry window of the press (`Guard.PERFECT_TICKS` 5, +2 when locked onto
   the attacker). It earns the next punch inside `STRONG_TICKS` 30:
   - bob: the **uppercut**, `UPPERCUT_DAMAGE` 4;
