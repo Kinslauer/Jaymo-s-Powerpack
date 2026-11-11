@@ -50,7 +50,7 @@ public final class SkyCourt {
 	/** The castle's people are looked for this far past its walls (blocks). */
 	static final double COURT_REACH = 4.0;
 
-	private static final String BUILDER = "jaymospowers", CASTLE = "sky_castle", VILLAGE = "sky_village_", RUIN = "ruin";
+	private static final String BUILDER = "jaymospowers", CASTLE = "sky_castle", VILLAGE = "sky_village_", TOWN = "sky_town_", RUIN = "ruin";
 
 	private SkyCourt() {
 	}
@@ -84,7 +84,7 @@ public final class SkyCourt {
 							continue;
 						}
 						boolean castle = id.getPath().equals(CASTLE);
-						if (!castle && !(id.getPath().startsWith(VILLAGE) && !id.getPath().contains(RUIN))) {
+						if (!castle && !(id.getPath().startsWith(VILLAGE) && !id.getPath().contains(RUIN)) && !id.getPath().startsWith(TOWN)) {
 							continue;
 						}
 						for (long ref : e.getValue()) {

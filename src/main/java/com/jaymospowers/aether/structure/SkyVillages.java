@@ -39,13 +39,13 @@ final class SkyVillages {
 	}
 
 	/** A palette: the wood, the stone under it, two roof cloths, the green and the path. */
-	private record Palette(String wood, String stone, String roofA, String roofB, String ground, String path) {
+	record Palette(String wood, String stone, String roofA, String roofB, String ground, String path) {
 		String planks() {
 			return this.wood + "_planks";
 		}
 	}
 
-	private static Palette palette(int variant) {
+	static Palette palette(int variant) {
 		return switch (variant) {
 			case 1 -> new Palette("wisproot", "holystone_bricks", "purple_cloudwool", "cyan_cloudwool", "aether_grass_block", "coarse_aether_dirt");
 			case 2 -> new Palette("greatroot", "icestone_bricks", "cloudwool", "light_blue_cloudwool", "arctic_snow_block", "holystone_flagstones");
@@ -54,7 +54,7 @@ final class SkyVillages {
 	}
 
 	/** What a ruin leaves of {@code state} at a spot: nothing (more often the higher up), moss on stone, or the block. */
-	private static BlockState worn(Site s, boolean ruined, int u, int y, int v, BlockState state) {
+	static BlockState worn(Site s, boolean ruined, int u, int y, int v, BlockState state) {
 		if (!ruined || state == null || state.isAir()) {
 			return state;
 		}
@@ -117,7 +117,7 @@ final class SkyVillages {
 	}
 
 	/** The well of light: a ring of stone round water, four posts, a small roof, an ambrosium torch under it. */
-	private static void well(Site s, Palette p, int u0, int v0, boolean ruined) {
+	static void well(Site s, Palette p, int u0, int v0, boolean ruined) {
 		int f = s.floor, y0 = s.box.minY();
 		s.fill(u0, y0, v0, u0 + 2, y0, v0 + 2, Kit.b(p.stone));
 		s.set(u0 + 1, y0, v0 + 1, Kit.water());
@@ -143,7 +143,7 @@ final class SkyVillages {
 	 * A 7 by 7 building at (u0, v0), its door in the middle of local side {@code door}. {@code kind}: 0 a home (two of the
 	 * village's people live in it), 1 the kitchen, 2 the workshop (those two with the door on side 0).
 	 */
-	private static void house(Site s, Palette p, int u0, int v0, int door, String roof, int kind, boolean ruined) {
+	static void house(Site s, Palette p, int u0, int v0, int door, String roof, int kind, boolean ruined) {
 		int f = s.floor, y0 = s.box.minY(), u1 = u0 + HOUSE - 1, v1 = v0 + HOUSE - 1, mu = u0 + 3, mv = v0 + 3;
 		BlockState log = Kit.log(p.wood + "_log", Direction.Axis.Y), planks = Kit.b(p.planks()), stone = Kit.b(p.stone);
 		s.fill(u0, y0, v0, u1, y0, v1, planks);
@@ -222,7 +222,7 @@ final class SkyVillages {
 		}
 	}
 
-	private static void villager(Site s, int u, int y, int v, boolean lord) {
+	static void villager(Site s, int u, int y, int v, boolean lord) {
 		s.spawn(EntityTypes.VILLAGER, s.x(u, v) + 0.5, y, s.z(u, v) + 0.5, s.facing.toYRot(), mob -> {
 			mob.addTag(VILLAGER_TAG);
 			if (lord) {
@@ -232,7 +232,7 @@ final class SkyVillages {
 	}
 
 	/** A windmill: a 5 by 5 tower of planks on a stone foot, a cloth cap, and four cloth sails on its -u face. */
-	private static void windmill(Site s, Palette p, int u0, int v0, boolean ruined) {
+	static void windmill(Site s, Palette p, int u0, int v0, boolean ruined) {
 		int f = s.floor, y0 = s.box.minY(), u1 = u0 + 4, v1 = v0 + 4, h = 10;
 		BlockState log = Kit.log(p.wood + "_log", Direction.Axis.Y), planks = Kit.b(p.planks());
 		s.fill(u0, y0, v0, u1, y0, v1, Kit.b(p.stone));
@@ -269,7 +269,7 @@ final class SkyVillages {
 	}
 
 	/** A 5 by 5 farm plot, fenced, water in the middle; a ruin's has gone to seed. */
-	private static void farm(Site s, Palette p, int u0, int v0, int salt, boolean ruined) {
+	static void farm(Site s, Palette p, int u0, int v0, int salt, boolean ruined) {
 		int f = s.floor, y0 = s.box.minY();
 		String crop = new String[] {"orange_tree", "berry_bush", "valkyrie_sprout"}[Math.floorMod((int)(s.seed >>> (5 + salt)), 3)];
 		s.fill(u0, y0, v0, u0 + 4, y0, v0 + 4, ruined ? Kit.b("coarse_aether_dirt") : Kit.b("aether_farmland"));
@@ -290,7 +290,7 @@ final class SkyVillages {
 	 * The mooring: a mast with a ladder and a landing at its top (u0 + 2 to u0 + 4, v0 + 1 to v0 + 3), and tied up beside it a
 	 * skiff hung under a long cloth balloon. A ruin keeps half the mast.
 	 */
-	private static void mooring(Site s, Palette p, int u0, int v0, boolean ruined) {
+	static void mooring(Site s, Palette p, int u0, int v0, boolean ruined) {
 		int f = s.floor, deck = f + 7, mu = u0 + 3, mv = v0 + 2;
 		BlockState log = Kit.log(p.wood + "_log", Direction.Axis.Y), planks = Kit.b(p.planks()), fence = Kit.b(p.wood + "_fence");
 		s.fill(mu, f, mv, mu, ruined ? f + 3 : deck, mv, log);

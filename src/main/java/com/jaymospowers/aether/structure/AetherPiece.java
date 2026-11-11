@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 /** One built-in-code piece of an Aether II structure; {@link #kind} says which builder draws it, a chunk at a time. */
 public final class AetherPiece extends StructurePiece {
 	public enum Kind {
-		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINE_HUB, MINE_TUNNEL, MINE_ROOM, IRRADIATED, GUARDIAN, SKY_VILLAGE, SKY_CASTLE
+		OUTPOST, CAMP, TOWER, DEN, RUINS, HENGE, LIBRARY, AQUEDUCT, BREXALLEN, MINE_HUB, MINE_TUNNEL, MINE_ROOM, IRRADIATED, GUARDIAN, SKY_VILLAGE, SKY_CASTLE, TOWN_LOT, TOWN_BUILDING
 	}
 
 	public static StructurePieceType TYPE;
@@ -42,6 +42,16 @@ public final class AetherPiece extends StructurePiece {
 		this.facing = Direction.from2DDataValue(tag.getIntOr("facing", 0));
 		this.seed = tag.getLongOr("seed", 0L);
 		this.variant = tag.getIntOr("variant", 0);
+	}
+
+	/** A sky town's pieces say what they are, as a village's templates do (Jaymo's Kingdoms reads a town by these). */
+	@Override
+	public String toString() {
+		return switch (this.kind) {
+			case TOWN_LOT -> SkyTowns.groundName(this.variant);
+			case TOWN_BUILDING -> SkyTowns.name(this.variant);
+			default -> super.toString();
+		};
 	}
 
 	@Override
@@ -74,6 +84,8 @@ public final class AetherPiece extends StructurePiece {
 				case GUARDIAN -> GuardianTree.build(s);
 				case SKY_VILLAGE -> SkyVillages.village(s);
 				case SKY_CASTLE -> SkyVillages.castle(s);
+				case TOWN_LOT -> SkyTowns.lot(s);
+				case TOWN_BUILDING -> SkyTowns.building(s);
 			}
 		} catch (RuntimeException e) {
 			JaymosPowers.LOGGER.error("Aether structure {} failed at {}", this.kind, this.boundingBox, e);

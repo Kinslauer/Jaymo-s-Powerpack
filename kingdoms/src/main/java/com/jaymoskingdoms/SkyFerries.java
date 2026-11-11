@@ -116,7 +116,8 @@ public final class SkyFerries implements Ship.Skyfaring {
 		}
 		// her crew: the grown villagers nearest her who hold no office
 		List<Villager> crew = SkyCourt.people(level, box);
-		crew.removeIf(v -> v.isSleeping() || v.isPassenger() || v.entityTags().contains(SkyCourt.LORD_TAG) || v.entityTags().contains(SkyCourt.WARDEN_TAG));
+		crew.removeIf(v -> v.isSleeping() || v.isPassenger() || v.entityTags().contains(SkyCourt.LORD_TAG) || v.entityTags().contains(SkyCourt.WARDEN_TAG)
+			|| McaCompat.isGuard(v) || v instanceof Worker w && w.role() >= 0);
 		if (crew.isEmpty()) {
 			return;
 		}
