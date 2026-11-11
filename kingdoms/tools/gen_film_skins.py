@@ -9,9 +9,10 @@ the Grue:
 - The sorcerer: a hood and robe of near-black purple, a grey face, eyes that glow violet, clawed grey hands.
 - The fifth mage: a plain grey hooded cloak, a face in shadow, nothing else, so that he looks like none of the others.
 The sorcerer's living host, and the dead he raises:
-- Orcs (orc_0-2): grey-green and tusked, a black top-knot, scars, hide and scrap iron over a bare chest.
+- Orcs (orc_0-2): an in-game orc's green under an orc war camp grunt's clothes; the tusks, brow, ears, marks and scars
+  are drawn on them by GreenskinLooks, as on the real orcs (LoreFilmClient#orcLook).
 (The Warrior-born of the host are draugr drawn alive: tools/gen_draugr_living.py.)
-- Dead orcs (dead_orc_0-1): the orcs gone ashen and rotten, rags, ribs showing, one tusk broken, pale dead eyes.
+- Dead orcs (dead_orc_0-1): the same, gone ashen and rotten, the clothes in rags, ribs showing, pale dead eyes.
 Run from the kingdoms project root: python -I tools/gen_film_skins.py"""
 from PIL import Image
 import os
@@ -367,85 +368,69 @@ def stranger():
     save(img, "stranger")
 
 
-def tusks(img, broken=False):
-    fx, fy, fw, fh = HEAD["front"]
-    ivory = (226, 218, 190)
-    px(img, fx + 2, fy + 6, ivory)
-    px(img, fx + 2, fy + 5, ivory)
-    px(img, fx + 5, fy + 6, ivory)
-    if not broken:
-        px(img, fx + 5, fy + 5, ivory)
+CLOTHES = "src/main/resources/assets/jaymoskingdoms/skins/clothing/greenskin/"
+# the in-game orcs' greens (Greenskins.ORC_PALE to ORC_DEEP), a few shades along it; the dead ones greyed and darkened
+ORC_SKINS = [(124, 138, 98), (104, 120, 84), (86, 102, 70)]
 
 
-ORC_SKINS = [(98, 124, 78), (86, 112, 84), (110, 126, 70)]
-
-
-def orc_body(img, rnd, skin, dead=False):
-    """Bare grey-green arms and chest, hide trousers, a scrap-iron pauldron (or rags, for the dead)."""
-    box(img, BODY, skin, 7, rnd)
+def orc_base(img, rnd, skin, eyes, glow=False):
+    """The plain body an in-game orc has under its look: MCA's skin in an orc's green, its eyes. The tusks, brow, ears,
+    marks and scars are drawn on it by GreenskinLooks, as on a real orc."""
+    face(img, rnd, skin, (24, 22, 20), eyes, glow=glow)
+    box(img, BODY, skin, 4, rnd)
     for arm in arms(False):
-        box(img, arm, skin, 7, rnd)
-    hide = (88, 64, 44) if not dead else (66, 58, 50)
+        box(img, arm, skin, 4, rnd)
     for leg in LEGS:
-        box(img, leg, hide, 7, rnd)
-    rows(img, BODY, 8, 4, hide, 6, rnd)
-    belt(img, rnd, (56, 40, 28), (120, 120, 116))
-    if not dead:
-        strap(img, rnd, (60, 42, 28))
-        # a scrap-iron plate over the left shoulder
-        paint(img, arms(False)[1]["top"], (118, 118, 114), 10, rnd)
-        for side in SIDES:
-            x0, y0, w, h = sleeves(False)[1][side]
-            paint(img, (x0, y0, w, 3), (112, 112, 108), 10, rnd)
-        boots(img, rnd, (52, 38, 26))
-    else:
-        # rot: dark patches, and the ribs showing through
-        for _ in range(26):
-            b = rnd.choice([BODY, arms(False)[0], arms(False)[1]])
-            x0, y0, w, h = b[rnd.choice(SIDES)]
-            px(img, x0 + rnd.randrange(w), y0 + rnd.randrange(h), shade(skin, -40))
-        bx, by, bw, bh = BODY["front"]
-        for y in (by + 3, by + 5, by + 7):
-            for x in range(bx + 1, bx + 7):
-                if x not in (bx + 3, bx + 4):
-                    px(img, x, y, (196, 188, 164))
-        for leg in LEGS:
-            for side in SIDES:
-                x0, y0, w, h = leg[side]
-                for x in range(x0, x0 + w):
-                    for y in range(y0 + h - rnd.randint(0, 4), y0 + h):
-                        px(img, x, y, shade(skin, -20))
+        box(img, leg, skin, 4, rnd)
+
+
+def clothes(img, name, dead=False, rnd=None):
+    """An in-game orc's clothes (MCA's clothing layout is the skin's), torn and greyed on the dead."""
+    over = Image.open(CLOTHES + name + ".png").convert("RGBA")
+    if dead:
+        o = over.load()
+        for y in range(64):
+            for x in range(64):
+                r, g, b, a = o[x, y]
+                if not a:
+                    continue
+                if rnd.random() < 0.18:
+                    o[x, y] = (0, 0, 0, 0)
+                    continue
+                m = (r + g + b) // 3
+                o[x, y] = ((r + m) // 2 - 10, (g + m) // 2 - 10, (b + m) // 2 - 8, a)
+    img.alpha_composite(over)
 
 
 def orc(i):
+    """An orc of the host, dressed as a grunt of an orc war camp (orc_grunt_<i>.png)."""
     rnd = random.Random(9200 + i)
     img = blank()
-    skin = ORC_SKINS[i % len(ORC_SKINS)]
-    face(img, rnd, skin, (24, 22, 20), (200, 60, 40) if i != 1 else (220, 180, 40), brows=shade(skin, -50))
-    tusks(img)
-    fx, fy, fw, fh = HEAD["front"]
-    # a scar across the face, a different place each
-    for k in range(3):
-        px(img, fx + 1 + k + i, fy + 1 + k, shade(skin, 40))
-    # the top-knot: a black tuft on the hat layer's crown
-    paint(img, (HAT["top"][0] + 3, HAT["top"][1] + 2, 2, 4), (20, 18, 16), 4, rnd)
-    orc_body(img, rnd, skin)
-    hands(img, rnd, skin)
+    orc_base(img, rnd, ORC_SKINS[i % len(ORC_SKINS)], (200, 60, 40) if i != 1 else (220, 180, 40))
+    clothes(img, "orc_grunt_%d" % i)
     save(img, "orc_%d" % i)
 
 
 def dead_orc(i):
+    """A dead orc the sorcerer raises: ashen and rotten, the ribs showing, a grunt's clothes in rags, pale dead eyes."""
     rnd = random.Random(9300 + i)
     img = blank()
-    skin = shade(ORC_SKINS[i % len(ORC_SKINS)], -18)
-    skin = tuple((v + (sum(skin) // 3)) // 2 for v in skin)
-    face(img, rnd, skin, (40, 38, 34), (190, 210, 200), glow=True)
-    tusks(img, broken=True)
+    skin = ORC_SKINS[(i + 1) % len(ORC_SKINS)]
+    skin = tuple((v + (sum(skin) // 3)) // 2 - 16 for v in skin)
+    orc_base(img, rnd, skin, (190, 210, 200), glow=True)
     fx, fy, fw, fh = HEAD["front"]
     for (x, y) in ((1, 2), (2, 2), (5, 2), (6, 2)):
         px(img, fx + x, fy + y, shade(skin, -45))
-    orc_body(img, rnd, skin, dead=True)
-    hands(img, rnd, skin, claws=(70, 66, 56))
+    for _ in range(30):
+        b = rnd.choice([BODY, arms(False)[0], arms(False)[1], LEGS[0], LEGS[1]])
+        x0, y0, w, h = b[rnd.choice(SIDES)]
+        px(img, x0 + rnd.randrange(w), y0 + rnd.randrange(h), shade(skin, -40))
+    bx, by, bw, bh = BODY["front"]
+    for y in (by + 3, by + 5, by + 7):
+        for x in range(bx + 1, bx + 7):
+            if x not in (bx + 3, bx + 4):
+                px(img, x, y, (196, 188, 164))
+    clothes(img, "orc_grunt_%d" % (i + 2), dead=True, rnd=rnd)
     save(img, "dead_orc_%d" % i)
 
 

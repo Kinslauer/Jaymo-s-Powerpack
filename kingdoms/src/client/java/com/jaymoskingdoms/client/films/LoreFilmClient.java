@@ -83,6 +83,10 @@ public final class LoreFilmClient {
 	static final int SOLDIERS = 9, LEGION = 36;
 	/** The living host (orcs and Warrior-born): how many, and where they stand, behind where the dead will rise. */
 	static final int HOST = 16;
+	/** Orcs are drawn bigger than a man (as BodySizes draws the real ones). */
+	static final double ORC_SCALE = 1.12;
+	/** The film's orcs' greens (as tools/gen_film_skins.py paints them), and the dead ones', for GreenskinLooks to tint by. */
+	static final int[] ORC_GREENS = {0xFF7C8A62, 0xFF687854, 0xFF566646}, DEAD_GREENS = {0xFF5E6452, 0xFF545C48};
 	static final double HOST_NEAR = 40.5, HOST_FAR = 43.5;
 	/** How often Grimsby throws a bolt in the clash (ticks). */
 	static final int BOLT_EVERY = 22;
@@ -130,6 +134,8 @@ public final class LoreFilmClient {
 		/** The dead and the living host: everything on the far side that the mages strike at. */
 		final List<Actor> legion = new ArrayList<>();
 		final List<Actor> soldiers = new ArrayList<>();
+		/** Each orc actor → the green its orc look is tinted by ({@link #orcLook}). */
+		final java.util.Map<LivingEntity, Integer> orcs = new java.util.IdentityHashMap<>();
 		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer;
 		@Nullable CameraType viewBefore;
 		int tick, skip;
@@ -256,7 +262,7 @@ public final class LoreFilmClient {
 		// the living host, standing from the start, a gap in the middle for the one they serve
 		for (int i = 0; i < HOST; i++) {
 			boolean orc = i % 5 < 3;
-			LivingEntity e = orc ? person(f, "orc_" + i % 3, false) : warriorBorn(f, i);
+			LivingEntity e = orc ? orc(f, "orc_" + i % 3) : warriorBorn(f, i);
 			if (e == null) {
 				continue;
 			}
@@ -308,6 +314,33 @@ public final class LoreFilmClient {
 		return e;
 	}
 
+	/** An orc (or a dead one): a mannequin in its skin, drawn bigger, and given the real orcs' look ({@link #orcLook}). */
+	private static @Nullable LivingEntity orc(Film f, String skin) {
+		LivingEntity e = person(f, skin, false);
+		if (e != null) {
+			var scale = e.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+			if (scale != null) {
+				scale.setBaseValue(ORC_SCALE);
+			}
+			int n = skin.charAt(skin.length() - 1) - '0';
+			f.orcs.put(e, skin.startsWith("dead") ? DEAD_GREENS[n % DEAD_GREENS.length] : ORC_GREENS[n % ORC_GREENS.length]);
+		}
+		return e;
+	}
+
+	/**
+	 * The green a lore film's orc is tinted by, for {@code GreenskinLooks} to draw the real orcs' tusks, brow, ears, marks
+	 * and scars on it; 0 for anything else.
+	 */
+	public static int orcLook(net.minecraft.world.entity.Entity e) {
+		Film f = film;
+		if (f == null || e.getId() >= 0) {
+			return 0;
+		}
+		Integer green = f.orcs.get(e);
+		return green == null ? 0 : green;
+	}
+
 	/** A Warrior-born of the host: a draugr's helm, mail and fur, worn by the living man in better days (Andy). */
 	private static @Nullable LivingEntity warriorBorn(Film f, int i) {
 		Draugr e = Inhabitants.DRAUGR.create(f.level, EntitySpawnReason.LOAD);
@@ -320,7 +353,7 @@ public final class LoreFilmClient {
 	/** One of the dead the sorcerer raises: dead orcs and zombified piglins, half and half. */
 	private static @Nullable LivingEntity dead(Film f, int i) {
 		if (i % 2 == 0) {
-			LivingEntity e = person(f, "dead_orc_" + (i / 2) % 2, false);
+			LivingEntity e = orc(f, "dead_orc_" + (i / 2) % 2);
 			if (e != null && i % 6 == 0) {
 				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_AXE));
 			}
