@@ -18,7 +18,7 @@ YOUTH was still in Hotspot > General voice (50+ min). Each message got one reply
 answering. Do this before step 1:
 - List every process holding YOUTH: `Get-CimInstance Win32_Process | ? { $_.CommandLine -match 'discord_read_aloud|gateway' } |
   select ProcessId,CreationDate,CommandLine`. Stop every `discord_read_aloud` process (also run
-  `py -3 tools/discord_read_aloud.py --stop`). A reader started before PR #1280 has no pid file, so --stop misses it.
+  `py -3 tools/discord_read_aloud.py --stop`). --stop reads one pid file, so a second reading started over it isn't stopped by --stop.
 - If YOUTH is still in voice after that, it's a gateway's own voice connection: note which gateway PID, and in step 2
   keep only one gateway. Check the Hermes config for a Discord voice feature and say what it is set to.
 - Fix YOUTH's "is it reading?" answer: it should check for a running discord_read_aloud process, not only the pid file.
