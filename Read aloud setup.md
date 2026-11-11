@@ -101,3 +101,8 @@ For Claude Code on the PC (the follow-up PR #1278, which adds --check, is merged
 3. ffmpeg: `winget install ffmpeg` if missing, then set a user env var FFMPEG to ffmpeg.exe's full path and restart
    the gateway with `schtasks /run /tn Hermes_Gateway` (a running gateway doesn't see new PATH entries).
 4. Have YOUTH run --check again until it says Ready, then the reading. Append the result here and run vault_sync.
+
+### Correction (12:05 AM, cloud thread)
+The 11:55 PM section above was wrong about the cause: the reading had already worked with Python 3.12 (py -3); only
+YOUTH's own check used a different Python. Andy chose to point YOUTH at Python 3.12 explicitly; don't install anything
+into Hermes' Python 3.14.
