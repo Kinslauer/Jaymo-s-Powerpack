@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client.spirits;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Mana;
-import com.jaymoskingdoms.ManaAlchemy;
 import com.jaymoskingdoms.client.ManaClient;
 import com.jaymoskingdoms.spirits.SpiritHand;
 import com.jaymoskingdoms.spirits.Spirits;
@@ -75,7 +74,7 @@ public final class SpiritHandRenderer extends EntityRenderer<SpiritHand, SpiritH
 	public void extractRenderState(SpiritHand hand, State state, float partialTicks) {
 		super.extractRenderState(hand, state, partialTicks);
 		LocalPlayer viewer = Minecraft.getInstance().player;
-		state.visible = viewer != null && (Mana.attuned(viewer) || ManaAlchemy.readsMagic(viewer));
+		state.visible = viewer != null && Mana.seesMana(viewer);
 		state.kind = Math.clamp(hand.kind(), 0, Spirits.QUIET);
 		state.yRot = hand.getYRot(partialTicks);
 		state.xRot = hand.getXRot(partialTicks);

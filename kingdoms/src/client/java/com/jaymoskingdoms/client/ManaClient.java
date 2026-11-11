@@ -118,7 +118,7 @@ public final class ManaClient extends RenderLayer<AvatarRenderState, PlayerModel
 
 	private static @Nullable Glow glow(LivingEntity entity) {
 		LocalPlayer viewer = Minecraft.getInstance().player;
-		if (viewer == null || !Mana.attuned(entity) || entity.isInvisible() || !Mana.attuned(viewer) && !ManaAlchemy.readsMagic(viewer)) {
+		if (viewer == null || !Mana.attuned(entity) || entity.isInvisible() || entity != viewer && !Mana.seesMana(viewer)) {
 			return null;
 		}
 		boolean player = entity instanceof Player;
