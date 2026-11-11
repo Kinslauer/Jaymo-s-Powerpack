@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:40). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
 - [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
@@ -21,6 +20,7 @@ kanban-plugin: board
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🪶 Quill · #1313 · writing
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
+- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · claimed
 
 
 ## In review
