@@ -1,8 +1,9 @@
-# The Long Defence: the sorcerer's host, Grimsby's spells, text pass
+# The Long Defence: the sorcerer's host, Grimsby's spells, a new draugr, text pass
 - **The film:** a living host of orcs and Warrior-born now stands across the field with the sorcerer from the first shot. He raises a hand and summons the rest: the black-flame flickers raise dead orcs and zombified piglins in front of the host (no more zombies, skeletons or draugr). At the horn the dead come on with the host pressing in behind, and the mages' spells and the fifth strike both.
 - **Grimsby** still carries his sword but now casts too. Through the clash he throws bolts of light from his free hand. On his turn, glyphs turn around him before his cut of light runs the length of the field.
 - **The Warrior-born of the host** wear the draugr's own gear (horned helm, mail, fur), in better condition: they are draugr drawn alive, with living skin, cleaner mail and a whole tail (`draugr_living.png`, from `tools/gen_draugr_living.py`).
 - **The film's orcs** look like the real ones: an orc's green under an orc war camp grunt's clothes, drawn bigger than a man, with the real orcs' tusks, brow, ears, marks and scars (GreenskinLooks). The dead orcs are the same, ashen and rotten, in rags.
+- **The draugr's new model** (`kingdoms/art/draugr.bbmodel`, from `tools/gen_tomb_undead.py`): a long-dead Warrior-born Z Fighter gone to sinew (broad shoulders, narrow waist, long arms in wristbands, wild hair out from under the helm, gaunt face, ribs through torn mail), in the same horned helm, mail, fur and iron, with the tail wrapped round the waist and its frosted tip at the back. Its tail is now whole on most, or cut at the root, halfway round, or at the tip (the old bends are gone with the wrap).
 - **Demon master:** no longer says the demons "were there" for the old war. He says they kept the story the surface forgot.
 - **The Long Defence (book):** page 2 says they came first as men and orcs, then the dead rose. Page 6 no longer counts "the five" and then "the fifth too", and hints that the fifth never had much to say.
 - Compiles (`compileClientJava`); the film has not been watched in game.

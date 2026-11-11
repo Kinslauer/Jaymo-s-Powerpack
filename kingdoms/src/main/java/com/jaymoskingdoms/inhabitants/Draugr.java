@@ -51,8 +51,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The draugr: a dead Nordic warrior in a horned helm, mail and fur, guarding the Stormborn Tomb's halls (placed by the
- * tomb's spawners). Our own model, texture, animations and code (kingdoms/art/draugr.bbmodel); after the old idea of the
+ * The draugr: a long-dead Warrior-born, a Z Fighter of the old raids gone to sinew, in a horned helm, mail and fur, its
+ * tail wrapped round its waist, guarding the Stormborn Tomb's halls (placed by the tomb's spawners). Our own model, texture, animations and code (kingdoms/art/draugr.bbmodel); after the old idea of the
  * barrow-dead only, nothing from any other mod.
  *
  * <p>Each one rises with one of two arms (a real item in its hands, so vanilla does the rest): a sword and shield, and

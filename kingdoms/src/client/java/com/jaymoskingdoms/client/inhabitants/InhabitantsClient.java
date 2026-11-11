@@ -38,14 +38,11 @@ public final class InhabitantsClient {
 	static final float LAUGH_JAW = 0.35F, LAUGH_JAW_SPEED = 0.9F;
 
 	/**
-	 * A draugr's tail (Warrior-born, every one of them), mangled in one of these ways, picked by its id: as it was, bent hard
-	 * to one side, snapped and hanging from the break, cut through, gone at the root, hanging dead, broken twice, the tip
-	 * gone. The bends (degrees, as GeckoLib turns a bone: +x hangs it lower) are added to whatever the walk or idle has it doing.
+	 * A draugr's tail (Warrior-born, every one of them), wrapped round its waist and cut short in one of these ways, picked
+	 * by its id: whole, gone at the root, cut halfway round, or the tip gone. Most are whole.
 	 */
-	enum DraugrTail { WHOLE, BENT, SNAPPED, HALF_CUT, ROOT_STUMP, LIMP, ZIGZAG, TIP_GONE }
+	enum DraugrTail { WHOLE, WHOLE_TOO, ROOT_STUMP, HALF_CUT, TIP_GONE }
 	static final String[] DRAUGR_TAIL = {"tail_0", "tail_1", "tail_2", "tail_3", "tail_4"};
-	/** BENT's sideways bend; SNAPPED's drop at the break (the rest kept straight down); LIMP's droop; ZIGZAG's up and down. */
-	static final float TAIL_BEND = 60.0F, TAIL_SNAP = 55.0F, TAIL_STRAIGHT = 10.0F, TAIL_LIMP = 30.0F, TAIL_ZIG = -45.0F, TAIL_ZAG = 70.0F;
 
 	static final DataTicket<Boolean> DRAUGR_AXE = DataTicket.create("jaymoskingdoms_draugr_axe", Boolean.class);
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
@@ -67,7 +64,7 @@ public final class InhabitantsClient {
 	}
 
 	/**
-	 * Its sword and shield, or its axe; its tail, mangled its own way. A lore film's living Warrior-born
+	 * Its sword and shield, or its axe; its tail, cut short its own way. A lore film's living Warrior-born
 	 * ({@link Draugr#stageLiving}) wears {@code draugr_living.png} (the same gear in better condition) and a whole tail.
 	 */
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
@@ -98,40 +95,18 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("sword", bone -> bone.skipRender(axe));
 			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
 			if (info.getOrDefaultGeckolibData(DRAUGR_LIVING, false)) {
+				// alive: no ribs through the mail, the tail whole
+				snapshots.ifPresent("ribs", bone -> bone.skipRender(true));
 				return;
 			}
 			int roll = info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0);
-			DraugrTail tail = DraugrTail.values()[Math.floorMod(roll, DraugrTail.values().length)];
-			int side = (roll >>> 8 & 1) == 0 ? 1 : -1;
-			switch (tail) {
-				case BENT -> turn(snapshots, 2, 0.0F, side * TAIL_BEND);
-				case SNAPPED -> {
-					turn(snapshots, 2, TAIL_SNAP, 0.0F);
-					turn(snapshots, 3, TAIL_STRAIGHT, 0.0F);
-					turn(snapshots, 4, TAIL_STRAIGHT, 0.0F);
-				}
-				case HALF_CUT -> cut(snapshots, 3);
+			switch (DraugrTail.values()[Math.floorMod(roll, DraugrTail.values().length)]) {
 				case ROOT_STUMP -> cut(snapshots, 1);
-				case LIMP -> {
-					turn(snapshots, 0, TAIL_LIMP, 0.0F);
-					for (int i = 1; i < DRAUGR_TAIL.length; i++) {
-						turn(snapshots, i, TAIL_STRAIGHT, 0.0F);
-					}
-				}
-				case ZIGZAG -> {
-					turn(snapshots, 1, TAIL_ZIG, 0.0F);
-					turn(snapshots, 2, TAIL_ZAG, 0.0F);
-				}
+				case HALF_CUT -> cut(snapshots, 3);
 				case TIP_GONE -> cut(snapshots, 4);
 				default -> {
 				}
 			}
-		}
-
-		/** Bends a tail segment (and so all past it) by these degrees more. */
-		private static void turn(BoneSnapshots snapshots, int segment, float down, float aside) {
-			snapshots.ifPresent(DRAUGR_TAIL[segment], bone -> bone.setRotX(bone.getRotX() + down * Mth.DEG_TO_RAD)
-				.setRotY(bone.getRotY() + aside * Mth.DEG_TO_RAD));
 		}
 
 		/** The tail ends before this segment. */
