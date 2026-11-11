@@ -13,8 +13,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 - [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 🪶 Quill · #1271 · writing
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
 
 
 ## In review
