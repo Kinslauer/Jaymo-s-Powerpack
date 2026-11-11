@@ -68,6 +68,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Dynamite.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
 		// (0.7.310) a Bio-built's buds, small copies of their maker
 		BioBudRenderer.register();
+		RisenOrcRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs

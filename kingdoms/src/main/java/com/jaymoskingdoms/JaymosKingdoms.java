@@ -116,6 +116,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Retaking.register();
 		// the field of The Long Defence: the keep above the ford (Act II of the Retaking)
 		Ford.register();
+		SecondDefence.register();
 		// (0.7.580) mice that raid pantries, chased by cats
 		Mice.register();
 		Commissions.register();

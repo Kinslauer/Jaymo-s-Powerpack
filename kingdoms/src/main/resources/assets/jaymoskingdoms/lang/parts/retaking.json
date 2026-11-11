@@ -40,6 +40,9 @@
 	"retaking.jaymoskingdoms.goal.weighed": "Ask the Judge how your page reads.",
 	"retaking.jaymoskingdoms.goal.grue": "Beat the Grue in its own dark.",
 	"retaking.jaymoskingdoms.goal.piglin_king": "Bring down the Piglin King.",
+	"retaking.jaymoskingdoms.goal.light": "Keep a light burning in the old keep at night.",
+	"retaking.jaymoskingdoms.goal.dragon": "Bring down the dragon of the End.",
+	"retaking.jaymoskingdoms.goal.second_defence": "Hold the ford.",
 	"retaking.jaymoskingdoms.goal.wither": "Bring down the Wither.",
 	"retaking.jaymoskingdoms.goal.ford": "Find the ford below an old keep in a wood, where a road crosses water.",
 	"talk.jaymoskingdoms.word.retaking_watch.open": "My father sat up every night with one eye on the stars and one on the door. Never missed a night in forty years.",
@@ -93,5 +96,7 @@
 	"talk.jaymoskingdoms.word.retaking_songs.c.said": "No. That's why it's worth listening to.",
 	"talk.jaymoskingdoms.word.retaking_ford.near": "half a day's walk",
 	"talk.jaymoskingdoms.word.retaking_ford.far": "a good few days' walk",
-	"talk.jaymoskingdoms.word.retaking_ford.very_far": "further than anyone here has walked"
+	"talk.jaymoskingdoms.word.retaking_ford.very_far": "further than anyone here has walked",
+	"entity.jaymoskingdoms.risen_orc": "Risen Orc",
+	"message.jaymoskingdoms.second_defence.held": "The ford holds."
 }
