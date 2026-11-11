@@ -14,9 +14,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🪶 Quill · #1262 · writing
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
+- [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · claimed
 
 
 ## In review
