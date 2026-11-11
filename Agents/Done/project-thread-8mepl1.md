@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Magic FX typed system (Andy, project thread, 2026-11-11)
 branch: claude/project-thread-8mepl1
 with: claude-cloud
@@ -35,3 +35,4 @@ have a type, (beam, blast, miasma, etc) and go to the same asset for each one, l
 PR #1306 is up (2026-11-11). A player will see: spell, golem and ritual beams as beacon-style beams; transformations,
 surges and flashes as swelling blasts; rings as shockwaves; a Sanctuary as a turning sigil; every recoloured dust as a
 glint (mote) or a soft dark puff (miasma). Compiles for Powers and Kingdoms; not played.
+Merged 2026-11-11 (Andy: "They look great merge").
