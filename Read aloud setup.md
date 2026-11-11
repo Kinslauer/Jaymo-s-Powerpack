@@ -65,3 +65,25 @@ For Claude Code on the PC:
   section.
 - Still to do: Andy asks YOUTH again in voice. Whatever switched the main checkout to a PR branch may do it again.
   If it does, YOUTH's pull goes to that branch and won't bring the script.
+
+### What switched E:/Origins Mod off master (found 2026-11-11, 12:10 AM)
+- At 11:04 PM Andy opened PR #1274's cloud session (`claude/project-thread-1ly3a2`) from the Claude desktop app. To
+  open it on the PC, the app ran `git fetch origin claude/project-thread-1ly3a2` (11:04:36 PM) and then
+  `git checkout claude/project-thread-1ly3a2` (11:04:37 PM) in the main checkout. Andy confirmed it.
+- It wasn't a bot. No Hermes session ran a checkout then, and powerpack_guard blocks them from doing it in
+  E:/Origins Mod. (The "11:00 PM" above was the commit's date, not the time of the switch.)
+- To avoid it: open cloud sessions in a worktree (E:\Origins Mod\.claude\worktrees\...), not in the main checkout.
+  When done with one that did switch it: `git -C "E:/Origins Mod" checkout master`, then pull.
+
+### A script is missing from E:/Origins Mod: check the branch first
+For YOUTH, Claude Code or anyone who finds a tool from master missing (like tools/discord_read_aloud.py):
+1. `git -C "E:/Origins Mod" branch --show-current`. If it isn't `master`, someone opened a session on a PR branch.
+   Pulling won't help: it updates that branch, not master.
+2. YOUTH: tell Andy which branch E:/Origins Mod is on and that the script is missing, and stop there. Don't switch
+   branches, don't write the script, don't use text_to_speech.
+3. Claude Code on the PC: check the branch has nothing unpushed (`git log origin/<branch>..HEAD` is empty) and
+   no uncommitted changes besides the old "Build Modpack.bat" / kitchen-jar deletions. Then
+   `git checkout master` and `git pull --ff-only origin master`.
+- Watch out: powerpack_guard blocks every mutating git command in E:/Origins Mod for the Hermes bots and YOUTH,
+  `pull` included. So the "pull master once" rule in YOUTH's skill and SOUL can't work as written. Andy's call
+  whether to change the rule or the guard.
