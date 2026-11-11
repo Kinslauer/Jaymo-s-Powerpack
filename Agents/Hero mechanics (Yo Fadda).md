@@ -26,4 +26,4 @@ owns:
 - PR #1322: Wisp ghost tail + held Phase, compiled, not played.
 
 ## Done
-- 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-11 16:35 No sign of work for 30 min: marked stalled (whoever ran it stopped).
