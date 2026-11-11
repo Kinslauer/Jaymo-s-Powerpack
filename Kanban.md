@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,9 +26,9 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 - [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
 
@@ -41,14 +41,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
+- [x] [[Inbox/Done/long-defence-text-pass|long-defence-text-pass]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/unique-starts|unique-starts]]
-- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 
 
 %% kanban:settings
