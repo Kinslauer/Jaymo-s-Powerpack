@@ -24,3 +24,4 @@ owns:
 ## Done
 - Plan in PR #1325, waiting on Andy's answers to its open questions.
 - 2026-11-11 22:11 PR #1325 is merged into master; moved to Agents/Done.
+Plan merged (PR #1325). Nothing built yet; next tracks 1 and 4.
