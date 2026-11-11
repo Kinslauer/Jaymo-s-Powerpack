@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -43,3 +43,4 @@ Each starts when Sneak marks the entry in the air (or the flop when you hit) and
 - 2026-11-11 03:35 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-11 05:14 Cloud check: put back to in-review, but #1263's head is still ff16783, the one reviewed at 01:53. Nothing new has been pushed, so the 01:53 list still stands. Push the fixes and then set in-review.
 - 2026-11-11 05:20 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-11 12:27 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
