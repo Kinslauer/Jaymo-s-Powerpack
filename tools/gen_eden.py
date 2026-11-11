@@ -439,6 +439,25 @@ def small_plants():
     tag(f"{MC}/tags/block/replaceable_by_trees.json", [f"{NS}:{b}" for b in ("lonlix", "parignum", "eden_moss")])
 
 
+def diskwing():
+    """The diskwing's name, spawn egg and calls (its skins and sounds are Eden Ring's, copied in by hand)."""
+    LANG[f"entity.{NS}.diskwing"] = "Diskwing"
+    LANG[f"item.{NS}.diskwing_spawn_egg"] = "Diskwing Spawn Egg"
+    LANG[f"subtitles.{NS}.eden.diskwing.ambient"] = "Diskwing calls"
+    LANG[f"subtitles.{NS}.eden.diskwing.hurt"] = "Diskwing hurts"
+    write(f"{ASSETS}/models/item/eden/diskwing_spawn_egg.json", {"parent": "minecraft:item/generated", "textures": {
+        "layer0": f"{NS}:item/eden/diskwing_spawn_egg"}})
+    write(f"{ASSETS}/items/diskwing_spawn_egg.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/eden/diskwing_spawn_egg"}})
+    # sounds.json is shared and tab-indented: add our two events and leave the rest as it is
+    path = f"{ASSETS}/sounds.json"
+    sounds = json.load(open(path))
+    sounds["eden.diskwing.ambient"] = {"subtitle": f"subtitles.{NS}.eden.diskwing.ambient",
+                                       "sounds": [{"name": f"{NS}:eden/diskwing_{n}"} for n in range(1, 7)]}
+    sounds["eden.diskwing.hurt"] = {"subtitle": f"subtitles.{NS}.eden.diskwing.hurt", "sounds": [{"name": f"{NS}:eden/diskwing_hurt"}]}
+    with open(path, "w", newline="\n") as f:
+        f.write(json.dumps(sounds, indent="\t") + "\n")
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -616,6 +635,7 @@ def main():
     shaped_wood()
     gravilite()
     small_plants()
+    diskwing()
     recipes_and_tags()
     worldgen()
     write(f"{ASSETS}/lang/parts/eden.json", LANG)

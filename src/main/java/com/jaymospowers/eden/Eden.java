@@ -21,6 +21,16 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.component.Consumables;
@@ -89,6 +99,10 @@ public final class Eden {
 	public static final float LEAF_SATURATION = 0.1F, DRIED_LEAF_SATURATION = 0.5F;
 	public static Block VIOLUM, LONLIX, PARIGNUM, LIMPHIUM, EDEN_VINE, EDEN_MOSS, SYMBIOTIC_MOLD, SYMBIOTIC_MOLD_EMISSIVE;
 	public static Item LIMPHIUM_LEAF, DRIED_LIMPHIUM_LEAF;
+	/** The diskwing's spawning: weight among the ambient mobs, and how many come together. */
+	public static final int DISKWING_WEIGHT = 6, DISKWING_MIN = 1, DISKWING_MAX = 2;
+	public static EntityType<Diskwing> DISKWING;
+	public static Item DISKWING_SPAWN_EGG;
 	public static Block GRAVILITE_SHARDS, GRAVILITE_BLOCK, GRAVILITE_LAMP, GRAVILITE_LANTERN, GRAVITY_COMPRESSOR;
 	/** The mycotic lanterns, by colour. */
 	public static final Map<DyeColor, Block> LANTERNS = new LinkedHashMap<>();
@@ -228,6 +242,24 @@ public final class Eden {
 			plant(MapColor.COLOR_YELLOW).lightLevel(state -> MOLD_LIGHT));
 		LIMPHIUM_LEAF = food("limphium_leaf", LEAF_FOOD, LEAF_SATURATION);
 		DRIED_LIMPHIUM_LEAF = food("dried_limphium_leaf", DRIED_LEAF_FOOD, DRIED_LEAF_SATURATION);
+
+		// ---- the diskwing ----
+		ResourceKey<EntityType<?>> diskwing = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("diskwing"));
+		DISKWING = Registry.register(BuiltInRegistries.ENTITY_TYPE, diskwing, EntityType.Builder.of(Diskwing::new, MobCategory.AMBIENT)
+			.sized(1.4F, 0.4F).eyeHeight(0.2F).clientTrackingRange(10).noLootTable().build(diskwing));
+		FabricDefaultAttributeRegistry.register(DISKWING, Diskwing.createAttributes());
+		ResourceKey<Item> egg = ResourceKey.create(Registries.ITEM, JaymosPowers.id("diskwing_spawn_egg"));
+		DISKWING_SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM, egg, new SpawnEggItem(new Item.Properties().setId(egg).spawnEgg(DISKWING)));
+		// in open air under the sky, not over water
+		SpawnPlacements.register(DISKWING, SpawnPlacementTypes.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			(type, level, reason, pos, random) -> level.getBlockState(pos).isAir() && level.canSeeSky(pos) && level.getFluidState(pos.below()).isEmpty());
+		List<ResourceKey<Biome>> skies = new ArrayList<>();
+		for (String biome : new String[] {"verdant_plains", "mycotic_forest", "old_mycotic_forest", "pulse_forest", "stone_garden", "brainstorm",
+			"lakeside_desert", "wind_valley"}) {
+			skies.add(ResourceKey.create(Registries.BIOME, JaymosPowers.id(biome)));
+		}
+		BiomeModifications.addSpawn(BiomeSelectors.includeByKey(skies), MobCategory.AMBIENT, DISKWING, DISKWING_WEIGHT, DISKWING_MIN, DISKWING_MAX);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(output -> output.accept(DISKWING_SPAWN_EGG));
 
 		// ---- gravilite ----
 		GRAVILITE_SHARDS = block("gravilite_shards", p -> new FloraPlantBlock(Block.box(3, 0, 3, 13, 13, 13), true, p),

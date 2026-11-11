@@ -1,4 +1,4 @@
-# the Verdant World's small growth - Violum, Lonlix, Parignum, Limphium, vines, moss, mould
+# the Verdant World's small growth and the Diskwing
 Andy's Eden Ring picks, part 4 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Only chunks made after this
 update grow them. Leaves take the grass colour of the biome.
 - **Violum**: two blocks tall, glowing bloom (pulse forest, wind valley, stone garden).
@@ -9,4 +9,6 @@ update grow them. Leaves take the grass colour of the biome.
 - **Symbiotic Mould** and **Glowing Symbiotic Mould**: tufts on the undersides of mushroom caps and brain trees.
 - **Limphium**: a stem under a head of leaves; breaking it gives 1-2 Limphium Leaves (a poor snack) that dry in a
   furnace, smoker or campfire into Dried Limphium Leaf (3 food). Bone meal doubles the plant.
+- **Diskwing**: a flat glowing glider that drifts over every Verdant biome, in four colours by biome (Eden Ring's
+  model, skins and calls). Harmless, 10 health, drops nothing; it has a spawn egg (`Diskwing`, `DiskwingClient`).
 - Numbers are constants at the top of `Eden` and `EdenFeature`.
