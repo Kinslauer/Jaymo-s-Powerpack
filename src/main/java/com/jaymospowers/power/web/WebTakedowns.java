@@ -49,6 +49,13 @@ public final class WebTakedowns {
 	static final float SLAM_DAMAGE = 3.0F;
 	/** String up: how far above him you must stand, how far out (flat) he may be. */
 	static final double PERCH_DROP = 2.5, PERCH_REACH = 4.0;
+	/**
+	 * Silent takedown: from behind (within {@code SILENT_REACH}, in the rear {@code SILENT_BEHIND} of his facing: the dot
+	 * of his facing with the way to you below it), a foe not after you is muffled and cocooned, down for
+	 * {@code SILENT_OUT_TICKS}, with no sound and no hit.
+	 */
+	static final double SILENT_REACH = 2.6, SILENT_BEHIND = -0.25;
+	static final int SILENT_OUT_TICKS = 600, SILENT_WEB_TICKS = 600;
 	/** A thrown foe that strikes a wall within this long (ticks) is pinned; pinned (stunned) this long. */
 	static final int THROWN_TICKS = 20, PIN_TICKS = 100;
 	/** A plain blow finishes one already down once the streak's this long. */
@@ -92,6 +99,9 @@ public final class WebTakedowns {
 			stringUp(player, target, flat);
 			return true;
 		}
+		if (silent(player, target)) {
+			return true;
+		}
 		if (target.distanceTo(player) - target.getBbWidth() * 0.5 > REACH) {
 			return false;
 		}
@@ -110,6 +120,36 @@ public final class WebTakedowns {
 			}
 		}
 		HitStreak.kept(player);
+		return true;
+	}
+
+	/** Sneaking up unseen behind a foe that is not after you: muffled and cocooned, no sound, no hit streak needed. */
+	private static boolean silent(ServerPlayer player, LivingEntity target) {
+		if (target instanceof Player || !target.isAlive() || Finishers.helpless(target) || WebHanging.webbedUp(target)
+			|| target instanceof Mob mob && mob.getTarget() == player
+			|| target.distanceTo(player) - target.getBbWidth() * 0.5 > SILENT_REACH) {
+			return false;
+		}
+		Vec3 facing = target.getViewVector(1.0F).multiply(1.0, 0.0, 1.0);
+		Vec3 toYou = player.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+		if (facing.lengthSqr() < 1.0E-4 || toYou.lengthSqr() < 1.0E-4 || Math.abs(player.getY() - target.getY()) > 2.0
+			|| facing.normalize().dot(toYou.normalize()) > SILENT_BEHIND) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		boolean dark = WebSymbiote.suitShown(player);
+		if (target instanceof Mob mob) {
+			mob.getNavigation().stop();
+			mob.setTarget(null);
+		}
+		WebTraps.ensnare(level, target, WebBall.SLOWNESS_AMPLIFIER, SILENT_WEB_TICKS, dark, true);
+		if (!Downed.knockOut(level, target, SILENT_OUT_TICKS, true, "message.jaymospowers.takedown.downed")) {
+			DarktideStatus.stun(target, SILENT_OUT_TICKS / 4);
+		}
+		WebHanging.web(level, target, dark, SILENT_WEB_TICKS);
+		Vec3 at = target.getBoundingBox().getCenter();
+		level.sendParticles(dark ? WebSymbiote.dust(1.0F) : ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 18, 0.3, 0.5, 0.3, 0.03);
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		return true;
 	}
 

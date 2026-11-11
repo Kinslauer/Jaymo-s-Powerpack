@@ -285,12 +285,12 @@ public final class WebHanging {
 		if (haul.flat()) {
 			target.setNoGravity(true);
 			STUCK.add(new Stuck(haul.dimension(), target.getUUID(), target.position(), level.getGameTime() + STUCK_TICKS));
-			web(level, target, dark);
+			web(level, target, dark, WEB_TICKS);
 		} else if (target instanceof LivingEntity living) {
 			WebHitches.hitch(level, by, living, anchor, haul.ceiling(), Direction.DOWN);
 			WebTraps.ensnare(level, living, WebBall.SLOWNESS_AMPLIFIER, WebBall.SLOWNESS_MAX_TICKS, dark);
 			DarktideStatus.stun(living, WebTakedowns.PIN_TICKS);
-			web(level, target, dark);
+			web(level, target, dark, WEB_TICKS);
 		}
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(dark ? WebSymbiote.dust(1.4F) : ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 26, 0.4, 0.6, 0.4, 0.05);
@@ -299,11 +299,11 @@ public final class WebHanging {
 	}
 
 	/** Cobwebs in every open cell the catch fills, and round it. */
-	private static void web(ServerLevel level, Entity target, boolean dark) {
+	static void web(ServerLevel level, Entity target, boolean dark, int ticks) {
 		AABB box = target.getBoundingBox();
 		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX - 0.3, box.minY, box.minZ - 0.3),
 			BlockPos.containing(box.maxX + 0.3, box.maxY, box.maxZ + 0.3))) {
-			WebTraps.cling(level, pos.immutable(), dark, WEB_TICKS);
+			WebTraps.cling(level, pos.immutable(), dark, ticks);
 		}
 	}
 }
