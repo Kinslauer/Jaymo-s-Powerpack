@@ -13,6 +13,14 @@
     "jaymoskitchen:mutton_chops",
     "jaymoskitchen:cod_slice",
     "jaymoskitchen:salmon_slice",
-    "jaymoskitchen:raw_blood_sausage"
+    "jaymoskitchen:raw_blood_sausage",
+    "#jaymoskitchen:cooking/red_meat",
+    "#jaymoskitchen:cooking/pork",
+    "#jaymoskitchen:cooking/poultry",
+    "#jaymoskitchen:cooking/mutton",
+    "#jaymoskitchen:cooking/small_game",
+    "#jaymoskitchen:cooking/white_fish",
+    "#jaymoskitchen:cooking/oily_fish",
+    "#jaymoskitchen:cooking/reptile"
   ]
 }

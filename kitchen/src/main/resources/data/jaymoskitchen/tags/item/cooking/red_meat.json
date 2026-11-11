@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:beef",
+    {
+      "id": "naturalist:venison",
+      "required": false
+    },
+    {
+      "id": "cubeanimals:raw_venison",
+      "required": false
+    },
+    {
+      "id": "naturalist:mammoth_meat",
+      "required": false
+    },
+    {
+      "id": "bearminimum:bear_meat",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:burrukai_rib_cut",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:whale_meat",
+      "required": false
+    }
+  ]
+}
