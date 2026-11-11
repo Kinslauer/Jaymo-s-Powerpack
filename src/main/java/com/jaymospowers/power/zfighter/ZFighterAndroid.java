@@ -115,7 +115,7 @@ public final class ZFighterAndroid {
 
 	/** An operation under way. */
 	private static final class Operation {
-		final UUID scientist;
+		UUID scientist;
 		int ticks;
 		float pain;
 
@@ -134,6 +134,7 @@ public final class ZFighterAndroid {
 	}
 
 	static void init() {
+		TinkererEchoes.init();
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterAndroid::tickServer);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (!entity.entityTags().contains(TAG) || ZFighterNpcs.viaMca(entity)) {
@@ -300,24 +301,9 @@ public final class ZFighterAndroid {
 			if (!level.getFluidState(at.below()).isEmpty() || !level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
 				continue;
 			}
-			// (0.17.146) with Kingdoms and MCA, an MCA villager held at his bench; else the old frozen trader
-			Entity npc = ZFighterNpcs.villager(level, Vec3.atBottomCenterOf(at), random.nextFloat() * 360.0F, TAG, "entity.jaymospowers.scientist", false);
+			Entity npc = tinkerer(level, Vec3.atBottomCenterOf(at), random.nextFloat() * 360.0F);
 			if (npc == null) {
-				WanderingTrader trader = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
-				if (trader == null) {
-					return false;
-				}
-				trader.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-				trader.setNoAi(true);
-				trader.setPermanentlyInvulnerable(true);
-				trader.setPersistenceRequired();
-				trader.setDespawnDelay(0);
-				trader.addTag(TAG);
-				trader.setCustomName(Component.translatable("entity.jaymospowers.scientist"));
-				trader.setCustomNameVisible(true);
-				trader.getOffers().clear();
-				level.addFreshEntity(trader);
-				npc = trader;
+				return false;
 			}
 			npc.addTag(UNTIL_TAG + (level.getGameTime() + LIFETIME));
 			level.sendParticles(MagicFx.CRACKLE, npc.getX(), npc.getY() + 1.2, npc.getZ(), 20, 0.4, 0.8, 0.4, 0.2);
@@ -327,6 +313,33 @@ public final class ZFighterAndroid {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * The Mad Tinkerer at {@code at}, facing {@code yaw}: with Kingdoms and MCA an MCA villager held at his bench, else
+	 * the old frozen trader. He can be hurt and killed (the other characters can't): his echoes carry on for him
+	 * ({@link TinkererEchoes}). Null if he couldn't be made.
+	 */
+	static @org.jspecify.annotations.Nullable Entity tinkerer(ServerLevel level, Vec3 at, float yaw) {
+		Entity npc = ZFighterNpcs.villager(level, at, yaw, TAG, "entity.jaymospowers.scientist", false);
+		if (npc == null) {
+			WanderingTrader trader = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
+			if (trader == null) {
+				return null;
+			}
+			trader.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+			trader.setNoAi(true);
+			trader.setPersistenceRequired();
+			trader.setDespawnDelay(0);
+			trader.addTag(TAG);
+			trader.setCustomName(Component.translatable("entity.jaymospowers.scientist"));
+			trader.setCustomNameVisible(true);
+			trader.getOffers().clear();
+			level.addFreshEntity(trader);
+			npc = trader;
+		}
+		TinkererEchoes.mortal(npc);
+		return npc;
 	}
 
 	// ---------------------------------------------------------------- talking
@@ -403,6 +416,10 @@ public final class ZFighterAndroid {
 		// (0.18.5, Andy) the pod was his: he lost the know-how along with his time machine
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.pod", true, () -> ZFighterNpcs.ask(player, scientist,
 			Component.translatable("talk.jaymospowers.tinkerer.pod." + (1 + player.getRandom().nextInt(3))),
+			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
+		// (Andy, 2026-11-11: the bug that turned Los Perrito's androids was his, and he will never tell you)
+		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.turned", true, () -> ZFighterNpcs.ask(player, scientist,
+			Component.translatable("talk.jaymospowers.tinkerer.turned." + (1 + player.getRandom().nextInt(3))),
 			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		ZFighterNpcs.ask(player, scientist, Component.translatable("talk.jaymospowers.tinkerer.greet." + Math.min(stage, DONE)), options);
 	}
@@ -571,6 +588,11 @@ public final class ZFighterAndroid {
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
 			Operation operation = entry.getValue();
 			Entity scientist = player == null ? null : player.level().getEntity(operation.scientist);
+			if (player != null && player.isAlive() && TinkererEchoes.owed(operation.scientist)) {
+				// (he was killed over you: hold still, his echo is a breath away and finishes the job)
+				player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, 10, false, false));
+				continue;
+			}
 			if (player == null || !player.isAlive() || scientist == null || !scientist.isAlive() || scientist.distanceToSqr(player) > OPERATION_NEAR * OPERATION_NEAR) {
 				it.remove();
 				if (player != null) {
@@ -596,6 +618,15 @@ public final class ZFighterAndroid {
 			if (operation.ticks >= OPERATION_TICKS) {
 				it.remove();
 				rebuilt(player);
+			}
+		}
+	}
+
+	/** {@code dead}'s echo {@code echo} takes over whatever operation he was in the middle of. */
+	static void handOver(UUID dead, UUID echo) {
+		for (Operation operation : OPERATIONS.values()) {
+			if (operation.scientist.equals(dead)) {
+				operation.scientist = echo;
 			}
 		}
 	}
