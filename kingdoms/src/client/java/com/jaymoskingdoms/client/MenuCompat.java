@@ -35,7 +35,7 @@ import net.minecraft.world.item.Items;
 
 /**
  * (0.7.649) Jaymo's Powers' character menu (H; Andy, after Kageborne's one-screen menu), when Powers is loaded: Kingdoms'
- * tabs on it (Skills, the K screen; Journal & Quests, the M journal; Faction; Party), its rows on the Character page
+ * tabs on it (Skills, the K screen; Story, the Retaking; Journal & Quests, the M journal; Faction; Party), its rows on the Character page
  * (heritage, class, career, renown, skills, world tier, patron, realm) and its pins on the Map page (the settlements you
  * know, your party). Powers' {@code com.jaymospowers.client.menu.MenuTabs} is reached by reflection with plain Java and
  * Minecraft types only, so Kingdoms never compiles against Powers; without Powers, K and M work as they always did.
@@ -46,7 +46,7 @@ public final class MenuCompat {
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
-	static final int ORDER_SKILLS = 20, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
+	static final int ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -56,6 +56,7 @@ public final class MenuCompat {
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(MenuNet.Info.TYPE, (payload, context) -> FactionScreen.info = payload);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> FactionScreen.info = null);
+		RetakingScreen.register();
 		if (!FabricLoader.getInstance().isModLoaded(POWERS)) {
 			return;
 		}
@@ -65,6 +66,8 @@ public final class MenuCompat {
 				Function.class, BooleanSupplier.class);
 			tab(register, "skills", ORDER_SKILLS, () -> new ItemStack(Items.EXPERIENCE_BOTTLE), "menu.jaymoskingdoms.tab.skills",
 				() -> Minecraft.getInstance().gui.setScreen(new SkillScreen()), s -> s instanceof SkillScreen, s -> ((SkillScreen)s).corner());
+			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
+				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "journal", ORDER_JOURNAL, () -> new ItemStack(Journal.JOURNAL), "menu.jaymoskingdoms.tab.journal", MenuCompat::openJournal,
 				s -> s instanceof JournalScreen, s -> ((JournalScreen)s).corner());
 			tab(register, "faction", ORDER_FACTION, () -> new ItemStack(Items.BELL), "menu.jaymoskingdoms.tab.faction",
