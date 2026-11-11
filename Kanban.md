@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:08). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,19 +28,18 @@ kanban-plugin: board
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
-- [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
 ## Needs Andy
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1284 · sent
 - [ ] [[Agents/clash-sparks-shield-splinters|clash-sparks-shield-splinters]] · 💻 Odysseus · #1288, 1289 (both merged) · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/long-defence-text-pass|long-defence-text-pass]]
 - [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
 - [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
 - [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
@@ -48,7 +47,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 
 
 %% kanban:settings
