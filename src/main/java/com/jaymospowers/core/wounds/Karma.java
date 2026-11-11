@@ -337,6 +337,12 @@ public final class Karma {
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.let_go").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}
 
+	/** A just one chose to stay in the high places for good (the Judge): the weighing is settled and the page keeps its weight. */
+	public static void stayed(ServerPlayer player) {
+		player.removeAttached(FATE);
+		player.removeAttached(EXIT);
+	}
+
 	/** One of the dead is leaving the Other World: a just one going back as they were pays for it with part of the weight. */
 	public static void returned(ServerPlayer player) {
 		if (!just(player)) {

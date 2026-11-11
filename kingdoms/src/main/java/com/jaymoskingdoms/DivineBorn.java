@@ -49,7 +49,8 @@ public final class DivineBorn {
 	}
 
 	static boolean is(Player player) {
-		return Heritage.is(player, Heritage.Kind.DIVINE);
+		// by blood, or one of the just who stayed at the Judge (Jaymo's Powers): the buffs are theirs too
+		return Heritage.is(player, Heritage.Kind.DIVINE) || PowersCompat.stayedDivine(player);
 	}
 
 	private static void tick(MinecraftServer server) {
