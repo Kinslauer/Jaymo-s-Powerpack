@@ -188,6 +188,14 @@ public final class LoreFilmClient {
 	static final double CLOAK_LINK = 0.4, CLOAK_STIR = 0.3;
 	static final float CLOAK_WIDTH = 0.3F, CLOAK_THICK = 0.05F;
 	/**
+	 * At rest the cloak is whole: one still, solid fall of cloth down his back. It comes apart into its ribbons over this many
+	 * ticks when he runs, the ribbons winding round him on the way (as a suit crawls over its wearer), and winds back over
+	 * him and sets solid again this long after his lunge.
+	 */
+	static final int CLOAK_FORM = 12, CLOAK_SETTLE = 14;
+	static final double CLOAK_COIL = 0.36;
+	static final float CLOAK_SOLID_THICK = 0.08F;
+	/**
 	 * Its tethers: cords of the same cloth that throw themselves out, wrap what they reach (a trunk to swing him round, one
 	 * of the sorcerer's to pull it off its feet) and come back. How many links, how thick, how many ticks to reach and to
 	 * come back, and the ring it closes round what it holds.
@@ -375,6 +383,8 @@ public final class LoreFilmClient {
 		final Vec3[][] cloakAt = new Vec3[CLOAK_STRIPS][CLOAK_LINKS];
 		final List<Tether> tethers = new ArrayList<>();
 		int anchored, hopAt = -100, nextGrab, grabs;
+		/** How far the cloak is come apart into ribbons (0 whole, 1 loose). */
+		double loose;
 		boolean hopFlips;
 		@Nullable CameraType viewBefore;
 		int tick, skip, quietAt = 1, lungeAt = -1;
@@ -1489,6 +1499,10 @@ public final class LoreFilmClient {
 		double over = quiet.flip;
 		Vec3 spine = up.scale(Math.cos(over)).add(ahead.scale(Math.sin(over)));
 		Vec3 chest = feet.add(0.0, 0.75, 0.0);
+		boolean apart = t >= QUIET && (f.lungeAt < 0 || t < f.lungeAt + CLOAK_SETTLE);
+		f.loose = apart ? Math.min(1.0, f.loose + 1.0 / CLOAK_FORM) : Math.max(0.0, f.loose - 1.0 / CLOAK_FORM);
+		// (wound round him while it is neither whole nor loose)
+		double loose = f.loose, coil = Math.sin(loose * Math.PI) * 0.85;
 		for (int j = 0; j < CLOAK_STRIPS; j++) {
 			double across = (j - (CLOAK_STRIPS - 1) / 2.0) * 0.26;
 			Vec3 from = chest.add(spine.scale(0.67)).subtract(ahead.scale(0.2 * Math.cos(over))).add(side.scale(across));
@@ -1497,13 +1511,19 @@ public final class LoreFilmClient {
 				Vec3 way = up.scale(-1.0 + pace * 0.55 + CLOAK_STIR * 0.5 * lift * (1.0 - pace))
 					.subtract(ahead.scale(0.3 + pace * 2.0 + CLOAK_STIR * stir * (1.0 - pace) * (i + 1) / CLOAK_LINKS))
 					.add(side.scale(across * 0.5 + (0.12 + 0.3 * pace) * stir * (i + 1) / CLOAK_LINKS)).normalize();
+				// whole, it hangs straight and still
+				way = up.scale(-1.0).subtract(ahead.scale(0.12)).lerp(way, loose).normalize();
 				Vec3 want = from.add(way.scale(CLOAK_LINK)), had = f.cloakAt[j][i];
 				// each link follows the one above it, a little late
-				Vec3 to = had == null ? want : had.lerp(want, 0.55);
+				Vec3 to = had == null ? want : had.lerp(want, 1.0 - 0.45 * loose);
 				Vec3 reach = to.subtract(from);
 				to = from.add(reach.lengthSqr() < 1.0E-6 ? way.scale(CLOAK_LINK) : reach.normalize().scale(CLOAK_LINK));
+				if (coil > 0.001) {
+					double turn = j * 2.1 + i * 1.3 + t * 0.7;
+					to = to.lerp(chest.add(0.0, 0.55 - i * 0.28, 0.0).add(ahead.scale(Math.cos(turn) * CLOAK_COIL)).add(side.scale(Math.sin(turn) * CLOAK_COIL)), coil);
+				}
 				f.cloakAt[j][i] = to;
-				stretch(f.cloak[j][i], from, to, CLOAK_WIDTH - i * 0.03F, CLOAK_THICK);
+				stretch(f.cloak[j][i], from, to, CLOAK_WIDTH - i * 0.03F * (float)loose, Mth.lerp((float)loose, CLOAK_SOLID_THICK, CLOAK_THICK));
 				from = to;
 			}
 		}
