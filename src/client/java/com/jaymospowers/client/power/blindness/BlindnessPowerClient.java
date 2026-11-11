@@ -75,6 +75,7 @@ public final class BlindnessPowerClient implements PowerClient {
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
         BlindnessEcholocationClient.init();
         BlindnessSockets.register();
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.blindness.Unseeing.TYPE, UnseeingRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(BlindnessEcho.TYPE, (payload, context) ->
                 context.client().execute(() -> BlindnessEcholocationClient.onEcho(payload)));
     }
