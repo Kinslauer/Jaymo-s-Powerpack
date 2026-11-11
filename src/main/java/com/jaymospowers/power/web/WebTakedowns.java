@@ -147,6 +147,7 @@ public final class WebTakedowns {
 			DarktideStatus.stun(target, SILENT_OUT_TICKS / 4);
 		}
 		WebHanging.web(level, target, dark, SILENT_WEB_TICKS);
+		WebFear.strungUp(level, target);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(dark ? WebSymbiote.dust(1.0F) : ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 18, 0.3, 0.5, 0.3, 0.03);
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -187,6 +188,7 @@ public final class WebTakedowns {
 		WebHitches.hitch(level, player, target, anchor, block, Direction.UP);
 		WebTraps.ensnare(level, target, WebBall.SLOWNESS_AMPLIFIER, WebBall.SLOWNESS_MAX_TICKS, WebSymbiote.suitShown(player));
 		DarktideStatus.stun(target, PIN_TICKS);
+		WebFear.strungUp(level, target);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.7F);
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		HitStreak.kept(player);

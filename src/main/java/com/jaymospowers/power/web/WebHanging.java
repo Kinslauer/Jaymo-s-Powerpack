@@ -292,6 +292,7 @@ public final class WebHanging {
 			DarktideStatus.stun(living, WebTakedowns.PIN_TICKS);
 			web(level, target, dark, WEB_TICKS);
 		}
+		WebFear.strungUp(level, target);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(dark ? WebSymbiote.dust(1.4F) : ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 26, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.2F, 0.6F);
