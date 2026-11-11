@@ -3,7 +3,7 @@ status: stalled
 task: 
 branch: claude/project-thread-g31te8
 with: cloud thread "Redesign the village golems"
-pr: 
+pr: 1300
 mods: kingdoms
 versions: 
 started: 2026-11-11

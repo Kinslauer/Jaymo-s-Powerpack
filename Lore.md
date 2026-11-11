@@ -39,7 +39,8 @@ bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
 The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
 
-(new) **The keep above the ford in the world.** It still stands, one in the world, in a wood above a river: a ruined
+(new) **The keep above the ford in the world.** It still stands, one in the world, in a forest above a river, wherever that
+forest lies; it has stood there since the long defence, and folk stopped speaking of it generations ago: a ruined
 keep of mossy, cracked stone, its corner tower half fallen and its gate toward the water, a worn road down to a shallow
 crossing. Horses won't drink there. In the keep lies **A Loose Page** in the gate-warden's hand: the names of the dead
 ran past the gatehouse wall, and before the one at the back went into the ground he turned and looked at the ford, "the
@@ -377,6 +378,14 @@ Bordo and the rest), and their Commanders (Vael, Orrin, Teska, Brandt) answer a 
 **Warrior-born raider bands.** The old raiding never fully stopped: bands of Warrior-born still come down in pods
 of their own, take what they like and leave. Beaten, one of their pods is left ticking over where it landed.
 
+(new) **The Raider's Tally** (Retaking Act III, 2026-11-11). A beaten band leaves its tally in the pod: a few
+lines per world in the raiders' own blunt hand. The grey one (the Pale Moon: nothing on it, taken anyway), the red one
+(Rustfall: good iron), the ice one (Glacia: the clans fought well, "we sang for them after"), the green one (the Verdant
+World: nothing worth carrying). Then *this one*, the Overworld: "Rich. Soft. They keep looking up. Good." The last page
+reads "Home: —" and "We do not write that one down any more." It never names the Maw; the dash is the hint that their
+home is gone (*The Maw*). Act III's other milestones are a fallen star broken open, a pod flown, the Maw set foot in,
+and a far world freed or conquered, all before the Skeleton Lord.
+
 ## Fallen stars
 
 **Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
@@ -546,6 +555,13 @@ demon-sworn with its hell-sworn. Each leaves a weapon head when it is ended with
 outskirts), **the Ash** (their heartland) and **the Abyss** (their deepest dark). Each layer has its master (the Master
 of the Gloam, of the Ash, of the Abyss), who teaches only "those who walk the shadowed path", once a day, in blood.
 Demon soldiers and captains serve them. There is no portal to any of it beyond the Nether's own.
+
+(new) **The muster-rolls** (Retaking Act IV, 2026-11-11). Every demon village keeps the roll it sent up to the
+sorcerer's battle: "for the one at the back" (never named), the Gloam's four hundred, the Ash's nine hundred, "the Abyss:
+what the Abyss would give". Promised: the light, the fields, the warm houses and what was in them. Came home: "the imps,
+mostly. They fly." The last page: the Master says they do not go up again until they are called. "We have not been
+called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
+ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
 
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
@@ -749,6 +765,12 @@ names, families and tempers.
 
 **Town golems.** Magically attuned kingdoms keep rune golems of their own stone; the **throne golem** answers only
 to its king or queen.
+
+(new) **How the town golems look.** Each is shaped by the realm's own masons for its work. The **lamp warden** is a
+lean figure of pale stone banded in gold whose head is a lantern; it stands with the iron golems and its flame wakes
+at dusk. The **mender** is a mossy boulder that walks, green crystals grown from its back, and it holds out its hands
+to the hurt. The **throne golem** is a small keep of dark stone set with diamond that sits down by the seat and folds
+itself into the ruler's throne, its turrets and battlements the throne's back.
 
 **Work and coin.** Towns post work on bounty boards and errands in their news; villagers hire out ten careers
 with ranks and wages at dusk; caravans of masters, captains and merchants walk the roads; carters, coachmen, rickshaw
