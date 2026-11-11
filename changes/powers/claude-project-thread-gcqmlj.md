@@ -1,7 +1,0 @@
-# Giants haul: a lumbering sprint that smashes through, trees knocked flying
-- **The haul**: a giant's sprint is now a lumbering haul. It stays on its feet, takes long heavy strides that cover a lot of ground, and hardly swings its arms. The ground shakes with every step. The Great Ape no longer lifts off and skims over the ground (`ZFighterApeHaul`, `ZFighterLineage.APE_HAUL_STRIDE`). Towerback hauls too, faster than its walk (`Towerback.HAUL_STRIDE`/`HAUL_SPEED`).
-- **Smashes through**: a hauling giant breaks whatever stands in its way above the ground it walks on. A quarter of the broken blocks drop. Obsidian and anything harder holds (`GiantTrample.smash`, `SMASH_*`). A player giant only does this where they may build, and a mob giant only with mob griefing on.
-- **Trees go flying**: a tree a hauling giant runs into is knocked off its roots whole and flies on ahead, tumbling, faster the bigger the giant (up to 3 at once). With Jaymo's Kingdoms this uses a tornado's uprooting (`Trees.uproot`). A tree too big to send flying topples as usual. Without Kingdoms the trunk breaks and its logs fly ahead (`GiantTrample.ram`, `RAM_*`).
-- **Wild villager apes haul too**: one chasing its quarry from more than 16 blocks off breaks into the haul (`VillagerApe.HAUL_FROM`/`HAUL_FACTOR`).
-- **Fix**: the tree check now looks just ahead of the giant from its feet up. Before, it looked only around eye height, so a tall giant missed trunks at its feet.
-- Not tested in game.
