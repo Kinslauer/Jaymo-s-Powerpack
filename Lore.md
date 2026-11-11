@@ -47,6 +47,14 @@ ran past the gatehouse wall, and before the one at the back went into the ground
 way a man looks at a door he means to come back through". The warden asks whoever keeps the crossing after him to keep a
 light in the keep at night. (This is where the Second Defence will come.)
 
+(new) **The Second Defence** (Retaking Act V, 2026-11-11). It comes once in a world. Whoever keeps the warden's light in the
+keep at night, when their own legend has begun, is answered: the dead of the old legion come up across the ford the way
+they did in *The Long Defence*, a few at a time and here and there, under lightning. They are **risen orcs** (orcs long in
+the ground, grey, tusked, still carrying the iron they were buried with) and zombified piglins, never zombies or
+skeletons. Behind them, at the back, stands a **Shade of the Grue** in the sorcerer's red. When it falls, the rest go back
+into the ground, and the ford holds. Nothing on screen says who they were or why they came. If nobody stands at the ford,
+they sink back and come again another night.
+
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with

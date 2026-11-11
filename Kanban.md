@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 17:52). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
 
 
 ## In review
