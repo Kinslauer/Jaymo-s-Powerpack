@@ -149,3 +149,14 @@ execute_transition calls that discord.py 2.7.1 never makes, so Discord's voice e
 2. `py -3 tools/discord_read_aloud.py --status` and --stop anything running, then with Andy in General:
    `py -3 tools/discord_read_aloud.py Lore --section="The ages of the world" --only --debug 2> read_debug.log`
    Andy listens. Write here whether he heard it and whether `ready` turned True.
+
+**Done (Claude Code on the PC, 5:21-5:25 AM): fixed. Andy heard it clearly in General.**
+- **Cause confirmed:** discord.py 2.7.1 was installed with davey 0.2.0. davey 0.2.0's `DaveSession` has
+  `prepare_transition` / `execute_transition`, and discord.py's gateway.py never calls them on the session.
+- **Fix:** `py -3 -m pip install "davey==0.1.7"` (Python 3.12.10). It uninstalled 0.2.0, and `pip check` shows no
+  conflicts.
+- **Before the read:** `--status` (from #1281, now on master) said "Nothing is being read", so there was nothing to stop.
+- **The read:** "The ages of the world" (11 paragraphs) played in Hotspot > General from 5:21 to 5:25 AM, exit 0.
+  `ready=True can_encrypt=True` from paragraph 1 on, and there were 0 voice drops (4006) in `read_debug.log`.
+- **Still needed:** the pin isn't in any requirements file. A new `pip install "discord.py[voice]"` brings davey 0.2.0
+  back. PR #1283 (`--check` catches it) is the guard.
