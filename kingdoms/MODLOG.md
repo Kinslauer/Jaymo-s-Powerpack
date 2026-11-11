@@ -11118,3 +11118,14 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - New Act I milestones: three town errands handed in (errands handed in count for party members within 64 blocks), and finding The Long Defence (filed in the codex or read). Reaching the Aether is now awarded by Kingdoms so it can wait for Act II.
 - Classes: `Retaking` (acts, milestones, gating, journal payloads), `RetakingScreen`; hooks in `PackAdvancements`, `Quests.turnIn`, `MenuCompat`.
 - Compiled (main + client); not played.
+
+## 0.7.724 (2026-11-11): town golems redesigned - three bodies of their own, the throne golem folds into a real throne (#1300)
+
+- Andy: "The village golems all need redesigns, the throne golem NEEDS to turn into a throne among the other previous descriptors." The one shared rune-golem body is gone; each kind has its own GeckoLib model, skin and keyframed animations.
+- **Lamp warden**: a lean sandstone lamplighter banded in gold whose head is a lantern cage with a crystal flame turning in it. The flame and the light in its chest burn only at night. It bows the lantern as it fires its beam, and the beam now leaves from the lantern.
+- **Mender**: a squat, mossy boulder with long arms, a small head and emerald crystals on its back. It holds both hands out to whoever it mends while the crystals swell.
+- **Throne golem**: a walking keep of dark masonry set with diamond (turret shoulders, bracer forearms, crenellated head), a little smaller than before (1.25x, was 1.35x). On its ruler's word it folds over 1.5 s into a throne: it sits (thighs the seat, shins the step in front), the keep slides back and lets a plinth down to the ground (the back), the forearms swing level (the armrests) and a crenellated crest rises behind its head (the high back). Rising plays it backwards, and it doesn't walk or strike until it is up. As a throne its head slowly looks from side to side. The sitter sits on the seat (higher than the old kneeling pose).
+- Everything else about them is as it was: who they serve, the ruler's damage going to the throne golem, rising to fight past 20 damage, items and recipes. New item icons.
+- Each golem has walk, idle, hurt and death animations (they fall by their own animation instead of tipping over).
+- `TownGolem` (now a GeoEntity), `client/TownGolemRenderer`, `kingdoms/tools/gen_town_golems.py`, `kingdoms/art/town_golem_*.bbmodel`, `docs/TownGolems-Spec.md`.
+- Built; not played. The models and poses were only seen in the tool's renders, so the seat height and how the fold reads in game are unchecked.
