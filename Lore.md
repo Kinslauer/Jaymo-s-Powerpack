@@ -832,7 +832,7 @@ Barbarian camps take raiders and captives, and spare those the realms have outla
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
 
-(new) **How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
+**How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
 this page, and it only ever hints. Families keep the faith of their trade: miners and smiths the Anvil-Father, fisherfolk
 the Deep Mother, hunters the Green Huntsman, healers the Hearthkeeper, outlaws the Ash Whisperer. Among the Nightborn,
 some families are **lantern-keepers of the barrows**, who keep the Lantern Warden's lights on the moor's old graves.
