@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 05:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 05:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,11 +13,11 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
