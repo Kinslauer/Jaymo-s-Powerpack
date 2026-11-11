@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: water-belly-flop-damage
 branch: claude/water-belly-flop-damage
 with:
-pr:
+pr: 1263
 mods: powers
 versions: Powers 0.21.109, Kingdoms 0.7.712
 started: 2026-11-10
@@ -26,4 +26,4 @@ owns:
 - Mobs same rule only if cheap; players first. Wind/flyers and fall-damage-cancelling powers keep protection.
 
 ## Done
-What a player will see, and what wasn't tested.
+Belly flops (and cannonballs) into water now deal real fall damage scaled by fall height and impact speed (flop about 6 HP from 12 blocks, capped at 8; cannonball middle case capped at 4); a clean dive looking straight down takes nothing; short drops stay harmless. Entry poses show on everyone in view and ease out under water. Not tested in game: compile-checked (sh ./gradlew clean compileJava passes) and tools/pr_checks.py passes. PR #1263 pushed, awaiting review/merge. Open question flagged in the PR: the loading-screen hint needs Kingdoms' StoryHoldScreen (HINTS is 88 there, 89-92 reserved) plus a lang key - not added since this PR touches Powers only.
