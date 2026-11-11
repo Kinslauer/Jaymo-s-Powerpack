@@ -420,6 +420,7 @@ public final class PatronChampions {
 		for (ServerPlayer sp : fighters) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.patron_champion.slain", Patrons.coloured(p)));
 			Patron sworn = Patrons.of(sp);
+			StoryRoads.champion(sp, sworn == p, sworn != null && sworn != p && sworn.rivals(p));
 			if (sworn == p) {
 				Patrons.deed(sp, p, Patrons.DEED_GREAT, "champion");
 			} else if (sworn != null && sworn.rivals(p)) {

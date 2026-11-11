@@ -232,6 +232,7 @@ public final class FutureOmenPilots {
 			mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		}
 		WATCHES.put(npc.getUUID(), new Watch(DONE, level.getGameTime() + AGAIN_AFTER / 2));
+		com.jaymospowers.power.chrono.ChronoRoad.omen(player);
 		boolean surprised = seen(npc, SURPRISED);
 		mark(npc, SURPRISED);
 		if (!ZFighterNpcs.villagers() || npc.getType() == EntityTypes.VILLAGER) {

@@ -151,6 +151,7 @@ public final class ChronoPower implements Power {
 		// Time Stop (sneak + C, Timeless): the whole server's tick freeze
 		ChronoTimeStop.init();
 		com.jaymospowers.power.chrono.future.Future.init();
+		ChronoRoad.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {

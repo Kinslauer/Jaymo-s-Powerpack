@@ -146,6 +146,7 @@ public final class Retaking {
 
 	/** Looked at with the other pack advancements, every few seconds. */
 	static void look(ServerPlayer player) {
+		StoryRoads.look(player);
 		int level = Knowledge.level(player);
 		for (int k = 1; k <= level; k++) {
 			PackAdvancements.award(player, KINGS[k], "done");
@@ -208,30 +209,42 @@ public final class Retaking {
 				done.add(m.name());
 			}
 		}
-		ServerPlayNetworking.send(player, new State(Knowledge.level(player), player.getAttachedOrElse(ERRANDS_DONE, 0), done));
+		ServerPlayNetworking.send(player, new State(Knowledge.level(player), player.getAttachedOrElse(ERRANDS_DONE, 0), done, StoryRoads.yours(player),
+			StoryRoads.done(player)));
 	}
 
-	/** Server → player: their Knowledge level, errands handed in, and the milestones done. */
-	public record State(int level, int errands, List<String> done) implements CustomPacketPayload {
+	/** Server → player: their Knowledge level, errands handed in, the milestones done, their own roads ({@link StoryRoads}) and the road steps done. */
+	public record State(int level, int errands, List<String> done, List<String> roads, List<String> roadDone) implements CustomPacketPayload {
 		public static final Type<State> TYPE = new Type<>(JaymosKingdoms.id("retaking_state"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, State> CODEC = CustomPacketPayload.codec(State::write, State::read);
 
 		private void write(RegistryFriendlyByteBuf buf) {
 			buf.writeVarInt(level);
 			buf.writeVarInt(errands);
-			buf.writeVarInt(done.size());
-			for (String s : done) {
+			strings(buf, done);
+			strings(buf, roads);
+			strings(buf, roadDone);
+		}
+
+		private static void strings(RegistryFriendlyByteBuf buf, List<String> list) {
+			buf.writeVarInt(list.size());
+			for (String s : list) {
 				buf.writeUtf(s);
 			}
 		}
 
-		private static State read(RegistryFriendlyByteBuf buf) {
-			int level = buf.readVarInt(), errands = buf.readVarInt(), n = buf.readVarInt();
-			List<String> done = new ArrayList<>();
+		private static List<String> strings(RegistryFriendlyByteBuf buf) {
+			int n = buf.readVarInt();
+			List<String> list = new ArrayList<>();
 			for (int i = 0; i < n; i++) {
-				done.add(buf.readUtf());
+				list.add(buf.readUtf());
 			}
-			return new State(level, errands, done);
+			return list;
+		}
+
+		private static State read(RegistryFriendlyByteBuf buf) {
+			int level = buf.readVarInt(), errands = buf.readVarInt();
+			return new State(level, errands, strings(buf), strings(buf), strings(buf));
 		}
 
 		@Override

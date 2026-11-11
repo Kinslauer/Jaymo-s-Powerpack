@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * Tower or the Time Chamber, defeat foes, hand over goods, and defeat a boss (a fighter of ours, {@link ZFighterRogue},
  * or a Giant, named only by its entity id so nothing here needs Jaymo's Kingdoms; without it that step is skipped).
  * <p>
- * A fighter started a saga from the Story screen (ZFighterStoryScreen, no longer opened: the story is now the character menu's Story tab, Kingdoms' Retaking; the sagas come back as the fighter's road in it) and picked a difficulty
+ * A fighter starts a saga from the saga screen (ZFighterStoryScreen), opened from the Fighter's Road in the character menu's Story tab (Kingdoms' Retaking, through the client's StoryRoads), and picks a difficulty
  * then ({@link #BOSS_HEALTH}, {@link #BOSS_DAMAGE}, {@link #REWARD}). To speak with a master or the Keeper: sneak and
  * right-click with anything in hand. A boss kill, a Giant's fall and each foe count for the killer's party members
  * within {@link #PARTY_RANGE} blocks ({@link ZFighterKingdoms#partyMembers}). Progress is saved on the player

@@ -180,5 +180,6 @@ public final class LoreFilms {
 	/** An elder mage or a demon tells {@code player} the story: the old war, as a film. */
 	public static void told(ServerPlayer player, LivingEntity teller) {
 		play(player, LONG_DEFENCE);
+		com.jaymoskingdoms.StoryRoads.told(player);
 	}
 }
