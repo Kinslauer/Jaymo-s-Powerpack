@@ -569,6 +569,12 @@ too), who fly, lunge and strike from every angle, and charge a great fireball ov
 blow can set off early, killing the imp. Their fireballs set trees and everything around them ablaze. (Imps and
 zombified imps are in the game, PR #1286.)
 
+(new) **Imps open their own doors** (Andy, 2026-11-11: "The imps can also open portals like the arsenal uses to travel
+through, that should be how they make their entrance to the overworld in the long defence scene"). Imps tear small
+rifts in the air, like an Arsenal user's, and fly through them. That is how they came up to the sorcerer's battle in
+*The Long Defence*. These are tears, not gates: nothing stands open after they pass, so there is still no portal to the
+demons' country beyond the Nether's own.
+
 **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
 and there are zombified Hornkin too.
