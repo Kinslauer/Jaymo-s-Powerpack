@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 05:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 11:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -37,8 +37,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
 - [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
 - [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
-- [x] [[Inbox/Done/ore-hearts-art|ore-hearts-art]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 
 
 %% kanban:settings
