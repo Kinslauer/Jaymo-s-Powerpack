@@ -26,7 +26,7 @@ Grue as it was). At the long defence the living host of orcs and Warrior-born st
 legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
 well.
 
-(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and
+(new) **How they fought it** (Andy, 2026-11-11). At the long defence the four fought in pairs, back to back: Varro and (new) Grimsby, a Sylvan, carries the wind on his blade: it runs along the steel in lit currents.
 Grimsby with axe and sword, Thessaly and Ambrose with their workings. Thessaly was a sorcerer and Ambrose a mage, and
 the two could make one working between them: her ward the vessel, his light poured into it. The line's soldiers wore
 whatever leather, mail and iron they had, filthy and bloodied by then.
@@ -107,7 +107,9 @@ bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's 
 shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
 place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
 power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
-which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+which rolls as murk because light cannot be black). *(new, second pass, 2026-11-11)* Two more: **sparks** (power that
+has not settled: lightning, charge, a crackle that forks and jumps) and **runes** (power written down: the marks of the
+sigil's circle, seen loose where something is enchanted, warded or read). Blood drawn out by the forbidden Blood element stays blood, not
 light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
 goo, gunpowder, festival fireworks).
 
@@ -222,23 +224,47 @@ to be in several places at once.
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
 his.** Nobody knew it was him, nobody knows now, and he will never tell you.
 
+(new) **The drawings** (Retaking, the Chrono's Road, 2026-11-11). The first of the last pilots a Chrono talks to hands
+over some folded sheets found in the city: a great wheel "every rivet", the same wheel small enough for a sweeper's
+chest plate ("they will want to keep time"), the city's streets with a mark where every sweeper stands, and the maker's
+name scraped off every sheet, neatly. Nothing says whose they are.
+
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
 (new) **Those who stay** (four-mods thread, 2026-11-11; Andy: "some live there perpetually after reaching the
 otherworld with righteous karma, and choosing to stay there at the judge. This keeps your halo and you are free to
 roam"). One of the dead whose page weighed just may ask the Judge to stay. He writes it down and that is the end of
-it: no road home, no tournament, no second asking. They keep the ring, are Divine-born from then on, and walk the
-Aether as its own people do. This is the second way the blood wakes, and the commoner one among the devout of the
-Truth.
+it: no road home, no tournament, no second asking. They keep the ring and their own blood (Andy, later that day: "they just get the buffs and the halo, no change in
+heritage otherwise"), carry the Divine-born's gifts on top of it, and walk the Aether as its own people do.
 
 (new) **How the Divine-born carry themselves** (same thread; Andy: "like z fighters but without the raging raw ki,
 it is controlled and elegant, they gain a web like sense that allows them to dodge incoming attacks and counter, as
 long as they have feathers"). Their strength is the same stuff a fighter burns as ki, but held still. It shows as
-breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. It costs
+breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. The answer
+is a thing practised: it lands harder the more seasoned they are and the more they have used it. It costs
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
+
+(new) **The sky villages** (four-mods thread, 2026-11-11; Andy: "should all instead spawn in the aether proper, and be
+filled with divine born, any other heritage has a reason for not only having traveled but being accepted"). The
+Divine-born live in villages on the Aether's islands: a round green with a well, homes of the island's own wood
+under cloth roofs, a windmill, a kitchen that feeds guests because its owners are never hungry, and a mast with a
+balloon skiff tied to it. Each land builds in its own wood (skyroot in the highfields, wisproot in the magnetic
+lands, greatroot in the cold). A sky lord keeps a holystone castle here and there. No kingdom claims any of it, and
+nobody's blood is held against them up there. Some villages have stood empty since the scattering, their roofs
+fallen in, swets and cockatrices in the houses.
+
+(new) **The halfway folk** (same thread; Andy: "This will be what the dawnborn culture becomes"). A few in every
+sky village are Dawnborn. Their people walked up after the sun generations ago and were let stay because they came
+on their own feet. They praise the sun where their neighbours keep the Truth, mend the windmills, and call
+themselves halfway: high enough for the light, not high enough for the ring. They are the "wizards on the floating
+rocks" of the ground folk's riddles. Anyone else found living there is one of the devout who made the climb, or one
+of the just who asked the Judge to stay.
+
+(new) **Things that fall.** Now and then something drops out of a clear sky onto the land below: a tuft of
+cloudwool, a feather, a hat, a letter never meant for whoever finds it. Nobody below can say where from.
 
 ## The shape of the world
 
@@ -838,11 +864,21 @@ you"): dice, bookies, fight pits, and goods the watch would rather not see. Assa
 a tavern window is the guild's mark that someone has been paid for. Looters and bandits do not give their names.
 Barbarian camps take raiders and captives, and spare those the realms have outlawed.
 
+(new) **Paid For** (Retaking, the Thief's Road, 2026-11-11). Now and then a locked chest holds a contract left under a
+black candle: a book is in the chest, do not read it, put it in the ground where no road goes, "nobody sent you"; and
+"whoever pays for this has paid for it before. The book keeps turning up again. Bury it deeper this time." The book
+beside it is a copy of *The Long Defence*. Nobody says who pays.
+
+(new) **The Old Campaign** (Retaking, the trades' road, 2026-11-11). An old campaigner's account in four short parts,
+handed to fighters as they rise in their trade: the goblins at the river farms ("they were the small ones"), the orc
+king at the high pass and the stone at its top that "something had walked away from", a slow light beyond the ridge and
+the one man back with a notched stick, and the buried who did not stay buried: "Burn them. And keep a light at the ford."
+
 **Life stories.** Every life begins somewhere: a farm, a burned home, a shipwreck, a mountain pass, the wild, a
 city, a lab, a moon wreck, Rustfall's mines, the Maw, a demon's country, the Other World. No two people wake in the same
 place. A new face is a stranger until they give their name.
 
-(new) **How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
+**How a life story is told** (creator lines thread, 2026-11-11). The life story a newcomer tells is written from
 this page, and it only ever hints. Families keep the faith of their trade: miners and smiths the Anvil-Father, fisherfolk
 the Deep Mother, hunters the Green Huntsman, healers the Hearthkeeper, outlaws the Ash Whisperer. Among the Nightborn,
 some families are **lantern-keepers of the barrows**, who keep the Lantern Warden's lights on the moor's old graves.

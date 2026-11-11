@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 12:42
+updated: 2026-11-11 13:37
 ---
 # Open PRs
 
-10 open, as of 2026-11-11 12:42. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+12 open, as of 2026-11-11 13:37. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -51,7 +51,17 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1302](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1302) The Retaking, Act IV: The Dark Below
+## [#1307](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1307) The Retaking: roads in the Story tab (Fighter, Arcanist, Faithful)
 - **Branch:** `claude/project-thread-lrvits` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1308](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1308) Divine-born: feather sense, Alight, hover, and staying at the Judge
+- **Branch:** `claude/project-thread-5dj9k7-divine-born` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1309](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1309) Life story lines rewritten for the lore canon
+- **Branch:** `claude/project-thread-6ogcsw` · **Updated:** 2026-11-11 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
