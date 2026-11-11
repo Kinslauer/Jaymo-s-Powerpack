@@ -18,3 +18,4 @@ Also (Long Defence thread): their fireballs catch the trees and surroundings in 
 ## Notes
 - 2026-11-11 12:33 Being built in the project thread 'Build the Nether imps' (Andy's request, 2026-11-11). Andy also wants every part animated: arms, legs, wings, fireball, swoop attack, basic swing.
 - 2026-11-11 14:07 claude-cloud-imps-thread's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-11 22:15 Already built and merged: imps and zombified imps in PR #1286; imps and their fireballs are in The Long Defence film via PR #1284 (merged; it replaced #1268). Not built yet: the rift entrance in Lore.md's new paragraph 'Imps open their own doors'. Closed as done.
