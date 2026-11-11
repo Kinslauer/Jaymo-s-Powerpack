@@ -7,6 +7,7 @@ import com.jaymospowers.client.BodyCover;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.ember.AvatarMoves;
+import com.jaymospowers.power.ember.BurningSteed;
 import com.jaymospowers.power.ember.FlameAvatar;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Locale;
@@ -71,6 +72,8 @@ public final class FlameAvatarClient {
 	static final float VEIN_LOW = 0.35F;
 	/** An ember off the body in this many ticks (full flame; guttering, it's rarer), and smoke with one in this many. */
 	static final int EMBER_EVERY = 3, SMOKE_ONE_IN = 4;
+	/** A steed this fast (blocks a tick) throws sparks off every hoof. */
+	static final double STEED_GALLOP = 0.15;
 	private static final int CHIP = 20, CHIP_GAP = 2;
 	static final int COLOR = 0xFF8A1E, LOW_COLOR = 0xB03A10;
 
@@ -182,6 +185,10 @@ public final class FlameAvatarClient {
 
 	/** From every living renderer's extractRenderState: an avatar's flame, and the body wreathed in fire. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		if (BurningSteed.is(entity)) {
+			// the steed's mane and flanks burn
+			state.displayFireAnimation = !entity.isInWater();
+		}
 		if (!(entity instanceof Player player) || !FlameAvatar.is(player)) {
 			state.setData(KEY, null);
 			return;
@@ -226,11 +233,37 @@ public final class FlameAvatarClient {
 		}
 	}
 
+	/** A burning steed's mane and hooves: flames at the neck, sparks and smoke at the feet, more at a gallop. */
+	private static void steedEmbers(ClientLevel level, net.minecraft.world.entity.Entity steed) {
+		RandomSource random = level.getRandom();
+		double speed = steed.getDeltaMovement().horizontalDistance();
+		double yaw = Math.toRadians(steed.getYRot());
+		double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+		if (random.nextInt(2) == 0) {
+			// the mane, along the neck
+			double along = 0.7 + random.nextDouble() * 0.3;
+			level.addParticle(ParticleTypes.FLAME, steed.getX() + fx * along, steed.getY() + steed.getBbHeight() * (0.85 + random.nextDouble() * 0.2),
+				steed.getZ() + fz * along, 0.0, 0.03, 0.0);
+		}
+		if (speed > STEED_GALLOP || random.nextInt(4) == 0) {
+			// the hooves
+			double side = (random.nextDouble() - 0.5) * 0.6;
+			double along = (random.nextDouble() - 0.5) * 1.6;
+			double x = steed.getX() + fx * along - fz * side, z = steed.getZ() + fz * along + fx * side;
+			level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.SMOKE : ParticleTypes.SMALL_FLAME, x, steed.getY() + 0.1, z, 0.0, 0.03, 0.0);
+		}
+	}
+
 	/** Every client tick: embers and smoke rising off each avatar (fewer embers, more smoke as the flame gutters). */
 	private static void embers(Minecraft minecraft) {
 		ClientLevel level = minecraft.level;
 		if (level == null || minecraft.isPaused()) {
 			return;
+		}
+		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+			if (BurningSteed.is(entity) && entity.isAlive()) {
+				steedEmbers(level, entity);
+			}
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			if (!FlameAvatar.is(player) || player.isInvisible() || player.isSpectator()

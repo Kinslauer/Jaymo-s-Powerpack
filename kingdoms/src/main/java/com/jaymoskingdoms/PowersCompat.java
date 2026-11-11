@@ -2932,6 +2932,39 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code BurningSteed.spawn}, or null without Powers (or an older one). */
+	private static java.lang.reflect.@Nullable Method steedSpawn;
+	private static boolean steedLooked;
+
+	/** The scoreboard tag on every burning steed (Powers' {@code BurningSteed.TAG}). */
+	public static final String STEED_TAG = "jaymospowers_burning_steed";
+
+	/**
+	 * A burning steed at {@code at} (Powers' horse with a mane and hooves of fire, ridden only by a Flame Avatar or a Smoke
+	 * user): null without Powers (or an older one), or if it could not be made.
+	 */
+	public static net.minecraft.world.entity.@Nullable Mob burningSteed(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		if (!steedLooked) {
+			steedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					steedSpawn = Class.forName("com.jaymospowers.power.ember.BurningSteed").getMethod("spawn", net.minecraft.server.level.ServerLevel.class,
+						net.minecraft.world.phys.Vec3.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' BurningSteed (older Powers?)", e);
+				}
+			}
+		}
+		if (steedSpawn == null) {
+			return null;
+		}
+		try {
+			return steedSpawn.invoke(null, level, at) instanceof net.minecraft.world.entity.Mob mob ? mob : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Tells Powers' {@code Karma.GUILTY} who is no innocent whatever they look like ({@link Outlaws#is}): killing one doesn't
 	 * weigh against a player as killing a villager does. Nothing happens without Powers (or an older one).
