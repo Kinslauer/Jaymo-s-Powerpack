@@ -39,6 +39,13 @@ bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
 The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
 
+(new) **The keep above the ford in the world.** It still stands, one in the world, in a wood above a river: a ruined
+keep of mossy, cracked stone, its corner tower half fallen and its gate toward the water, a worn road down to a shallow
+crossing. Horses won't drink there. In the keep lies **A Loose Page** in the gate-warden's hand: the names of the dead
+ran past the gatehouse wall, and before the one at the back went into the ground he turned and looked at the ford, "the
+way a man looks at a door he means to come back through". The warden asks whoever keeps the crossing after him to keep a
+light in the keep at night. (This is where the Second Defence will come.)
+
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with
@@ -60,6 +67,14 @@ the sky became an ordinary, grinding one on the ground.
 around them, and they are taking back the world they once knew. This is the present age. It is why a player starts as
 a farmhand and can end in the tier of songs: the world is not lost, it is being retaken, one village, one ruin and one
 raider at a time.
+
+(new) **The Retaking** (Andy, 2026-11-11). The taking back is the pack's main story, and every player lives it, whatever
+their power, class or blood. It runs in five acts on the ladder of kings: The Hearth (the Goblin King), The Old Stones
+(an Ogre King, the monoliths, the Giants, the Aether, and the wood and ford of *The Long Defence*), Lights in the Sky
+(the Skeleton Lord, the raider bands, fallen stars, the pods, the Maw and the far worlds), The Dark Below (the Piglin
+King, the spirits, the Banes, the demons' country, the Judge's weighing, the Grue's shades) and Legend (the Wither, and
+the Grue's legion raised again at the ford: the Second Defence). Each power, class and faith has its own road into the
+same acts. The story says what was done, never what it means: that still comes from people, books and wordless films.
 
 ## Ki and mana are the same thing
 
@@ -284,6 +299,17 @@ the sky, with a halo over their head. It is the Aether's, as the afterlife is, a
 of the Road** teaches one lesson each stay. A **Fortune Teller** waits at the road's end and sends the dead back, for
 a price or for free to the champion of the **tournament of the dead**, fought against spirit fighters when the bell
 tolls. Nobody stays forever: "The Other World doesn't let go of its dead so easily", but in time it lets go.
+
+(new) **The weighing** (Andy, 2026-11-11: "your actions are weighed against you after death"). The Judge's book holds
+more than fights. Everyone whose life ends for good is weighed in it: what they did for others against what they did to
+them. Most weigh near even and are simply born again. **The just** wake in the Other World beside the fighters, halo and
+all, though they never trained a day; the Fortune Teller takes no coin from them, and the only way back to the life they
+had is to win the tournament of the dead with a blade the hall lends them. If the Other World lets go of them first,
+they are born again like anyone. **The wicked** are not let in. They wake below, in the Nether, half dead and starving,
+with the demons' country beneath them and every horned thing aware of them: "those who walk the shadowed path" were
+always the demons' to keep. Somewhere down there a way up stands lit, and a cold draught runs from it. Walk out through
+it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
+their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
@@ -533,6 +559,11 @@ and there are zombified Hornkin too.
 
 **The Piglin King** holds the fourth rung of Knowledge. **Ignivorus**, the Nether's fire dragon, flies anywhere
 in the Nether.
+
+(new) **Cobalt** (crafting routes thread, 2026-11-11; Andy asked that every item have a route). A blue ore in the
+Nether's netherrack, which the piglins leave alone because it is not gold. It is the root of the four knife metals:
+smiths melt it with steel for manyullyn, with gold and slime for queen's slime, with copper and amethyst for hepatizon.
+Nobody made it; it is simply in the rock.
 
 ## The spirits
 
