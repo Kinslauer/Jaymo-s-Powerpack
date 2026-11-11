@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -7,7 +7,7 @@ claimed_by: hermes-fixer
 pr: 1263
 suggested_owns: [src/main/java/com/jaymospowers/water/Dives.java]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Belly flops into water hurt
