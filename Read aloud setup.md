@@ -52,3 +52,16 @@ For Claude Code on the PC:
 2. Check `Test-Path "E:/Origins Mod/tools/discord_read_aloud.py"` is True, then run the dry run from step 3 above.
 3. Tell YOUTH (and put it in his read-aloud skill): if the script is missing, run `git -C "E:/Origins Mod" pull origin
    master` once and try again. Never write the script himself and never fall back to text_to_speech.
+
+### Done (Claude Code, 2026-11-10, 11:50 PM)
+- Why it was missing: at 11:00 PM something switched E:/Origins Mod from master to `claude/project-thread-1ly3a2`
+  (PR #1274, already merged; its one commit was pushed). That branch is older than #1273, so the script wasn't
+  there.
+- That branch had no unpushed or unmerged work, so the checkout went back to master and pulled. It is now at
+  43938b86c, and `Test-Path` is True. The two old local deletions ("Build Modpack.bat", the kitchen jar) and the
+  untracked deck files are untouched.
+- Dry run OK: 9 paragraphs for "The ages of the world".
+- The missing-script rule is in YOUTH's skill (discord-read-aloud, "If it fails") and in his SOUL "Reading aloud"
+  section.
+- Still to do: Andy asks YOUTH again in voice. Whatever switched the main checkout to a PR branch may do it again.
+  If it does, YOUTH's pull goes to that branch and won't bring the script.
