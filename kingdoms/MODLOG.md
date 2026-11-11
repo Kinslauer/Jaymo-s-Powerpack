@@ -11295,3 +11295,22 @@ accepted"; the halfway folk are "what the dawnborn culture becomes".
   and their own heritage key becomes Alight whenever there are feathers to bring back.
 - The Divine-born gift text lists the sense, the hover and Alight; the hint mentions the Judge.
 - Compiled; not played.
+
+## 0.7.741 (2026-11-11): The Retaking: the Hermit's Road and the Common Road (#1319)
+
+- **The Hermit's Road** (Smoke, Gravity and Cryo users): meet a hermit wizard on a floating island, who writes you **A Letter** the first time (you looked straight through the spirit at their shoulder; your ki went to your element; "you will grow something of your own instead"); then grow your Valor to Kindled, Tempered and Steeled.
+- **The Common Road** (anyone with no power): take a job in a town; take up a class; swear to a patron; become a Master at your job; grow your Valor to Steeled.
+- With these, every power, class and faith has a road in the Story tab.
+- Built; not played.
+
+## 0.7.742 (2026-11-11): the minotaur's labyrinths - it keeps the Epic dungeons (#1320)
+
+- **Labyrinths**: every large Epic Structures dungeon (plains, snow and desert) holds one minotaur in its biggest hall,
+  and about one in three medium ones does too. Small dungeons have none. It is stood there the first time a player
+  comes within 40 blocks of the hall, once per dungeon, never in peaceful, and it keeps to within 14 blocks of the spot.
+  Dungeons in worlds that already exist get theirs the same way, the first time someone goes back in.
+- Nothing in the Epic Structures files is changed: `beasts/Labyrinths` reads the dungeon's rooms from the world and picks
+  a roofed, clear floor near the middle of the biggest one. Which dungeons count is two structure tags,
+  `jaymoskingdoms:minotaur_labyrinths` (always) and `minotaur_labyrinths_some` (`SOME_CHANCE`, 35%).
+- Compiled; not played. The room check was run against the mod's room files (each large dungeon's first hall has dozens
+  of spots that fit), but no dungeon has been walked in game.

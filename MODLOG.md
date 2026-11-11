@@ -2538,3 +2538,13 @@ replenish feathers by using their heritage key."
   heritage does not change (Andy: "they just get the buffs and the halo"): they keep the ring over the head, get all of
   the above, and Kingdoms gives them the Divine-born's buffs. They are free to walk the Aether.
 - All numbers are constants at the top of `DivineSense`. Compiled; not played.
+
+## 0.22.24 (2026-11-11): Epic igloos and jungle temples; the Sentry Ruins are the Slider's again (#1320)
+
+- **New in the pack**: Epic Structures: Igloo 1.0.5 (5 large and 7 small igloos, cellars under the large ones) and
+  Epic Structures: Jungle Temples 1.0.3 (temples, large temples and temple ruins). Both are all rights reserved with
+  modpack use invited, so they are linked unchanged, like Epic Villages, Dungeons and Witch Huts. They only add to
+  chunks nobody has visited yet.
+- **Sentry Ruins**: new ruins always hold the Slider. The minotaur has moved to the Epic dungeons under the Overworld
+  (Kingdoms' `Labyrinths`). A ruin already built with a minotaur keeps it, and its doors and crates still work.
+- Compiled; not played.
