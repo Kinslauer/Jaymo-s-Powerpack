@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 02:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 02:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,8 +14,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 🪶 Quill · #1268 · writing
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 🪶 Quill · #1268 · writing
 
 
 ## In review
