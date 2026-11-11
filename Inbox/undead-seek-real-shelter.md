@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: changes
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
@@ -41,3 +41,4 @@ Andy: "because we made the sun more deadly to the undead, they should now seek s
 OK: vanilla isSunBurnTick is mirrored faithfully (checked against 26.3 bytecode: MONSTERS_BURN, the light/random gate, rain, powder snow), SunMoon.sun(Level, Vec3) exists, FutureSunMixin and WebHostZombieMixin (isSunSensitive) keep working, leaves/glass are not isSolidRender.
 Not tested in game.
 - 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
+- 2026-11-11 21:32 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.

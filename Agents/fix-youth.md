@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: fix-youth
 branch: claude/waterskin-old-id
 with:
@@ -29,3 +29,4 @@ owns:
 -
 
 ## Done
+- 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
