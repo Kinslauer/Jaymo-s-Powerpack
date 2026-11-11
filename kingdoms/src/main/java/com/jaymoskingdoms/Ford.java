@@ -436,6 +436,14 @@ public final class Ford {
 				c.getSource().sendSuccess(() -> Component.literal("Keep raised at " + site.keep().toShortString() + ", ford at " + site.ford().toShortString()),
 					true);
 				return 1;
+			}))
+			.then(Commands.literal("defend").executes(c -> {
+				if (!SecondDefence.force(c.getSource().getServer())) {
+					c.getSource().sendFailure(Component.literal("No keep yet, or the Second Defence is already under way."));
+					return 0;
+				}
+				c.getSource().sendSuccess(() -> Component.literal("The Second Defence begins at the ford."), true);
+				return 1;
 			}));
 	}
 }

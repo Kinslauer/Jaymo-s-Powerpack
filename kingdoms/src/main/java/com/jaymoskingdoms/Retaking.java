@@ -83,6 +83,7 @@ public final class Retaking {
 		new Milestone("maw", Act.LIGHTS), new Milestone("far_world", Act.LIGHTS), new Milestone("skeleton_lord", Act.LIGHTS),
 		new Milestone("spirit", Act.DARK_BELOW), new Milestone("bane", Act.DARK_BELOW), new Milestone("abyss", Act.DARK_BELOW),
 		new Milestone("weighed", Act.DARK_BELOW), new Milestone("grue", Act.DARK_BELOW), new Milestone("piglin_king", Act.DARK_BELOW),
+		new Milestone("light", Act.LEGEND), new Milestone("dragon", Act.LEGEND), new Milestone("second_defence", Act.LEGEND),
 		new Milestone("wither", Act.LEGEND));
 
 	/**
@@ -171,6 +172,11 @@ public final class Retaking {
 		}
 		if (GrueTrial.mastered(spirit)) {
 			PackAdvancements.award(player, "grue", "done");
+		}
+		// the End's dragon: vanilla's own advancement, shared with everyone near as vanilla shares it
+		AdvancementHolder dragon = player.level().getServer().getAdvancements().get(Identifier.withDefaultNamespace("end/kill_dragon"));
+		if (dragon != null && player.getAdvancements().getOrStartProgress(dragon).isDone()) {
+			PackAdvancements.award(player, "dragon", "done");
 		}
 		for (String deed : DEEDS) {
 			if (player.removeTag(DEED + deed)) {
