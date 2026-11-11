@@ -27,7 +27,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
-- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · in-review
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
@@ -36,6 +35,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
+- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · sent
 
 
 ## Done
