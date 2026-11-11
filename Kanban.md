@@ -4,11 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:31). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
+- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 
 
 ## Being built
