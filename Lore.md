@@ -533,7 +533,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 
 (new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
 eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
-name, and Ocellan is Claude's pick, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
 half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
 in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
 monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
