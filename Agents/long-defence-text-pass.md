@@ -23,3 +23,6 @@ Film restaged in PR #1268: forest + Keep set (block displays), battle engine run
 
 ## 2026-11-11 the Quiet One's cloak (Andy)
 White hooded look (`gen_film_skins.py` stranger), a living cloak of block-display cloth strips, tethers that wrap dart trees and nearby legion and throw them, swings and flips off trees (`FilmPose.FLIP`), two tethers at the sorcerer on the lunge. All in `LoreFilmClient` (`cloak`, `tether`, `stretch`, `cloth`, `fifth`). Compiles; not watched in game. Preview artifact updated. The model/GeckoLib side of the cloak belongs to the GeckoLib thread.
+
+## 2026-11-11 the forest burns (Andy)
+Trees catch from lightning and mana bolts, spread, blaze by the end; surviving soldiers run to beat them out after the sorcerer is gone (`fire`, `douse`, `igniteNear`, `spreadFrom`; FILM_TICKS 860). Owed: the new imps and their fireballs, once an imp mob exists (none in the repo on 2026-11-11).
