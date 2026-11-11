@@ -1,29 +1,33 @@
 ---
-status: stalled
+status: running
 task: armor-pngs-vanilla-style
 branch: claude/armor-pngs-vanilla-style
-with: prometheus
+with: hermes-modeller
 pr:
 mods: powers
 versions: Powers 0.22.11
 started: 2026-11-11
 owns:
-  - src/main/resources/assets/jaymospowers/textures/item/armory/
+  - src/main/resources/assets/jaymospowers/textures/item/armor/bog_iron_helmet.png
+  - src/main/resources/assets/jaymospowers/textures/item/armor/bog_iron_chestplate.png
+  - src/main/resources/assets/jaymospowers/textures/item/armor/bog_iron_leggings.png
+  - src/main/resources/assets/jaymospowers/textures/item/armor/bog_iron_boots.png
+  - src/main/resources/assets/jaymospowers/textures/item/armory/caveman_helmet.png
+  - src/main/resources/assets/jaymospowers/textures/item/armory/caveman_chestplate.png
+  - src/main/resources/assets/jaymospowers/textures/item/armory/caveman_leggings.png
+  - src/main/resources/assets/jaymospowers/textures/item/armory/caveman_boots.png
 ---
 # armor-pngs-vanilla-style
 
-Remake the mod's armor textures (helmet, chestplate, leggings, boots × 5 tiers: leather, iron, gold, diamond, netherite) under assets/jaymospowers/textures/item/armory/ in pure vanilla Minecraft style — solid outlines, pixel-level detail, flat colors, no gradients.
+Remake the mod's armor textures in pure vanilla Minecraft style — solid 1-pixel outlines, flat solid colors per section, crisp pixel art, no gradients. The task text names tiered leather/iron/gold/diamond/netherite armors under textures/item/armory/, but the mod registers only two player armor sets: bog_iron (4 pieces, textures/item/armor/) and caveman (4 pieces, textures/item/armory/), all 16x16 item icons. Remaking those 8 existing PNGs only; no new items, no model JSON changes.
 
 ## Plan
-- List existing armory PNGs and their sizes.
-- Reference vanilla armor PNGs as style guide (solid 1px outlines, no anti-aliasing gradients).
-- Remake all 15 PNGs keeping the same canvas size per piece.
-- Do not touch model JSON / item models — PNGs only.
-- sh ./gradlew build + tools/pr_checks.py, commit, push, PR, vault.py --set status=in-review.
+- Draw 8 clean 16x16 armor item-icon PNGs (bog_iron iron-gray, caveman hide-brown) with solid outlines and flat fills
+- Verify each with vision_analyze
+- sh ./gradlew build + tools/pr_checks.py
+- changes/powers/armor-pngs-vanilla-style.md, commit, push, open PR, set vault task status=in-review
 
 ## Notes
-- Task claimed via vault.py --claim hermes-modeller (tiv, Tasks thread, 2026-11-08).
-
-## Done
-What a player will see, and what wasn't tested.
-- 2026-11-11 18:34 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- Task claimed via vault.py --claim hermes-modeller (tiv, Tasks thread, 2026-11-08); claim printed at 2026-11-11 13:40 EST.
+- Worn equipment textures (textures/entity/equipment/humanoid/bog_iron.png etc., 64x32) left untouched — out of the task's item-texture scope.
+- No bbmodel: flat item textures, verified with vision_analyze instead of bbrender.
