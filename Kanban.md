@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:12). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,12 +12,12 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 🪶 Quill · #1335 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
-- [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · 💻 Odysseus · #1335 · in-review
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · 💻 Odysseus · #1336 · in-review
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · in-review
