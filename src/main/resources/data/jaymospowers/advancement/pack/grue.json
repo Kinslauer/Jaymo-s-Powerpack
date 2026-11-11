@@ -1,0 +1,28 @@
+{
+  "parent": "jaymospowers:pack/skeleton_lord",
+  "display": {
+    "icon": {
+      "id": "minecraft:crying_obsidian"
+    },
+    "title": {
+      "translate": "advancements.jaymospowers.pack.grue.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.pack.grue.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

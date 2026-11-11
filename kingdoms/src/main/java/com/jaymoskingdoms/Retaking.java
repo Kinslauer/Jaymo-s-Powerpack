@@ -17,6 +17,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import com.jaymoskingdoms.spirits.GrueTrial;
+import com.jaymoskingdoms.spirits.SpiritState;
+import com.jaymoskingdoms.spirits.Spirits;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -77,19 +81,23 @@ public final class Retaking {
 		new Milestone("giant_two", Act.OLD_STONES), new Milestone("giant_all", Act.OLD_STONES), new Milestone("ogre_king", Act.OLD_STONES),
 		new Milestone("raiders", Act.LIGHTS), new Milestone("star", Act.LIGHTS), new Milestone("pod", Act.LIGHTS),
 		new Milestone("maw", Act.LIGHTS), new Milestone("far_world", Act.LIGHTS), new Milestone("skeleton_lord", Act.LIGHTS),
-		new Milestone("piglin_king", Act.DARK_BELOW),
+		new Milestone("spirit", Act.DARK_BELOW), new Milestone("bane", Act.DARK_BELOW), new Milestone("abyss", Act.DARK_BELOW),
+		new Milestone("weighed", Act.DARK_BELOW), new Milestone("grue", Act.DARK_BELOW), new Milestone("piglin_king", Act.DARK_BELOW),
 		new Milestone("wither", Act.LEGEND));
 
 	/**
 	 * Milestones only Jaymo's Powers sees done (a raider band beaten, a fallen star broken, a pod flown, a far world freed or
-	 * conquered). Powers leaves a tag, {@link #DEED} + name, which {@link #look} turns into the milestone if its act has begun
+	 * conquered, the Judge asked how your page reads). Powers leaves a tag, {@link #DEED} + name, which {@link #look} turns into the milestone if its act has begun
 	 * and takes off either way.
 	 */
-	static final List<String> DEEDS = List.of("raiders", "star", "pod", "far_world");
+	static final List<String> DEEDS = List.of("raiders", "star", "pod", "far_world", "weighed");
 	/** Powers' deed tag prefix ({@code PackAdvancements.DEED} there). */
 	static final String DEED = "jaymospowers.retaking.";
 	/** The Maw; setting foot in it is an Act III milestone. */
 	static final ResourceKey<Level> MAW = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "maw"));
+
+	/** The Abyss, the demons' deepest layer (Powers' demon country biome); standing in it is an Act IV milestone. */
+	static final ResourceKey<Biome> ABYSS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", "demon_abyss"));
 
 	/** Per Knowledge level 1 to 5, its king's milestone. */
 	static final String[] KINGS = {"", "goblin_king", "ogre_king", "skeleton_lord", "piglin_king", "wither"};
@@ -152,6 +160,17 @@ public final class Retaking {
 		}
 		if (player.level().dimension() == MAW) {
 			PackAdvancements.award(player, "maw", "done");
+		}
+		if (player.level().getBiome(player.blockPosition()).is(ABYSS)) {
+			PackAdvancements.award(player, "abyss", "done");
+		}
+		// a spirit woken, or the Grue subjugated, stays so: counted whenever Act IV is open
+		SpiritState spirit = Spirits.state(player);
+		if (spirit != null) {
+			PackAdvancements.award(player, "spirit", "done");
+		}
+		if (GrueTrial.mastered(spirit)) {
+			PackAdvancements.award(player, "grue", "done");
 		}
 		for (String deed : DEEDS) {
 			if (player.removeTag(DEED + deed)) {
