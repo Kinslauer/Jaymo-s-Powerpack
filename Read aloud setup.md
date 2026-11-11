@@ -21,3 +21,24 @@ and it's on master in E:/Origins Mod, do these steps:
    To carry on later: same command plus `--from=N`. Not sure which doc: `--list <part of name>`.
 5. The bot needs Connect and Speak in the voice channel. Then have Andy join voice and ask YOUTH to read Lore from
    "The ages of the world". Write what happened at the end of this note and run tools/vault_sync.py.
+
+## What happened (Claude Code, 2026-11-10, 11:35 PM)
+
+- Master pulled in E:/Origins Mod (d469200be, has PR #1273 and tools/discord_read_aloud.py).
+- Step 1 done: for `py -3` (Python 3.12) discord.py 2.7.1 with the voice extra (PyNaCl 1.5.0, davey 0.2.0) and
+  edge-tts 7.3.1. ffmpeg 9.0.2 from `winget install Gyan.FFmpeg`. A short edge-tts sample generated fine.
+- Step 2 done: user env vars READ_ALOUD_FOLLOW = 127224948107378688 (Andy, same id as KANBAN_MOVERS) and FFMPEG =
+  the WinGet ffmpeg.exe. KANBAN_BOT_TOKEN was already set and was not read or printed. READ_ALOUD_CHANNEL and
+  READ_ALOUD_VOICE are left unset (the tool follows Andy and uses en-US-GuyNeural).
+- Step 3 done: the dry run found Lore.md and listed 9 paragraphs for "The ages of the world", with no dates,
+  footnotes or (new) marks left.
+- Step 4 done: a "Reading aloud in voice" section in E:/hermes/SOUL.md, and a new skill
+  E:/hermes/skills/media/discord-read-aloud/SKILL.md (`hermes skills list` shows it enabled).
+- Gateway restarted at 11:31 PM, after Andy paused Hephaestus. Now PID 16940, Discord connected as YOUTH.
+  - `hermes gateway restart` first finished an earlier, unfinished Hermes update. It is still v0.23.0, and that
+    update also synced the built-in skills and re-registered the Hermes_Gateway task.
+  - The restart's direct spawn didn't get the new env vars, so the gateway was stopped once more and started with
+    `schtasks /run /tn Hermes_Gateway` to pick them up.
+  - Two restarts cut off a claude-writer kanban worker (t_3e3fded7, waiting on a retry) and two idle sessions.
+- Step 5 still to do: Andy joins voice and asks YOUTH to read Lore from "The ages of the world". Check that the bot
+  has Connect and Speak in that channel. If it says "ffmpeg isn't on PATH", the gateway didn't get FFMPEG.
