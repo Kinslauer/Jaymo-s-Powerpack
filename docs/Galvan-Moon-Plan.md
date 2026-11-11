@@ -30,7 +30,7 @@ This is a plan only. Nothing is built until Andy answers the open questions at t
 ## How it fits the lore
 
 The canon says the Pale Moon has "nothing on it" (the raiders' tally) and pod crews' rumour that "somebody lives on
-the Pale Moon" is not believed. So the Galvan city must be **hidden**: proposed, it lies **under the dust**, in a great
+the Pale Moon" is not believed. So the Galvan city is **hidden** (Andy, 2026-11-11: "hidden"): it lies **under the dust**, in a great
 domed hollow beneath one crater, its doors shut to anyone without a band. The band "hums when it is near its maker's
 work": that hum is what leads a wearer down. The Galvan build in **pale alloy**, the moon's own metal, which explains
 why the moon's ore is there at all. The Endermen are the one thing the Galvan do not explain (open question 4).
@@ -99,10 +99,8 @@ and ruler from the Galvan model). Then **Track 2** (the big one), then **Track 3
 
 ## Open questions for Andy
 
-1. **Old saves:** a save whose Star Forge already stands on Rustfall, Glacia, Cinder or Verdant: keep it there, or
-   move it (the old hut stays as a ruin)? Recommended: keep a built one, move one that isn't built yet.
-2. **Hidden or open?** The lore says the moon has "nothing on it". Is the city under the dust behind a door only a
-   band opens (recommended), or out on the surface where anyone with a pod sees it?
+1. ~~Old saves~~ Answered: no migration, the world is reset on release.
+2. ~~Hidden or open?~~ Answered: hidden, under the dust behind a door only a band opens.
 3. **Look:** what is your inspiration for the futuristic buildings? Send pictures and we draw our own from them.
 4. **The Endermen:** what are they to the Galvan? Strays from the End who wander up, the Galvan's old servants, or
    something the Galvan made and lost?
