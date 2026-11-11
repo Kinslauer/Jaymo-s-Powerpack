@@ -71,6 +71,12 @@
     "jaymospowers:jewellers_bench",
     "jaymospowers:lapidary_wheel",
     "jaymospowers:support_beam",
-    "jaymospowers:sluice"
+    "jaymospowers:sluice",
+    "jaymospowers:balloon_mushroom_stem",
+    "jaymospowers:balloon_mushroom_log",
+    "jaymospowers:balloon_mushroom_planks",
+    "jaymospowers:pulse_tree",
+    "jaymospowers:pulse_tree_log",
+    "jaymospowers:pulse_tree_planks"
   ]
 }
