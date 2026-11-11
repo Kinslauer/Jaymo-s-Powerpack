@@ -1,11 +1,12 @@
 ---
-status: writing
+status: in-review
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
 claimed_by: claude-cloud-tinkerer
 pr: 1336
 writer: hermes-writer
+text_pass: done
 ---
 
 # The Tinkerer cheats death with his echoes
