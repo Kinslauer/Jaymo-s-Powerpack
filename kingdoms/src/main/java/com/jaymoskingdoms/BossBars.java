@@ -39,6 +39,7 @@ public final class BossBars {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HITTERS.clear());
 		// (0.7.524) a death to one of these is a boss's, to Powers' death by cause
 		PowersCompat.tellBosses(BossBars::boss);
+		PowersCompat.tellGuilty(Outlaws::is);
 	}
 
 	private static void hit(LivingEntity entity, DamageSource source) {
