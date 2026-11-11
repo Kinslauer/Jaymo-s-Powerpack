@@ -50,6 +50,18 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   Cleaver, Soul Saber, Laevateinn and Sunfang keep their shapes; the Frost Lance is vanilla's spear in ice; the
   Void Flintlock, Grand Shield and Void Crown are drawn fresh in their own palettes.
 - WeaponMod: iron katana (`paint_batch.py`).
+- **Jaymo's Powers armour (2026-11-11, Tiv's ask: "solid outlines, pixel based detail, clean images")**
+  (`armour.py`). Nine sets, item icons and worn layers (`entity/equipment/humanoid` and `humanoid_leggings`).
+  Metal sets (Zanite, Gravitite, Arkenium, Neptune, Burrukai plate, Bog iron) start from vanilla's iron armour,
+  hide and cloth sets (Beast pelt, Caveman, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
+  brightness rank in the set's 7-step ramp. Worn layers use the ramp's mid tone to glint, as vanilla's diamond and
+  gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt and Caveman.
+  Caveman keeps its own scraps cut (its old worn alpha is the mask). Ichorcloth's hood/robe icons and Bog iron's
+  icons were already in this style and stay. Left as they are: Scouter, Sealed Helm, Void Crown, Rig, Training
+  Weights, Weighted Gi, Air Skin and Traceur Boots (gear, not armour sets).
+
+Armour: `python -I tools/vanilla_style/armour.py <vanilla 26.3 assets/minecraft/textures folder>` (it needs the
+`item` and `entity/equipment` folders), then `python -I tools/excalibur_style/grade.py` for the graded copies.
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
 `python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
