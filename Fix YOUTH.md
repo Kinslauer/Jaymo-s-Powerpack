@@ -75,11 +75,10 @@ Tidiness
   the same ask; if so, keep one and add the other's notes to it.
 - [ ] Tell Andy what's in `/memory pending` (3 memory batches, 1 deletion batch): he approves or drops them.
 
-## 4. Andy decides
+## 4. Done in the cloud
 
-- **0.22.0**: versions are bumped by `tools/release.py`, one patch per change note, so nothing ever reaches 0.22.0
-  by itself. Andy picks: a one-time commit on master setting Powers to 0.22.0 (his say-so), or teach release.py a
-  `bump: minor` line in a change note.
+- 0.22.0: Andy chose "have the tool support a bigger bump when I ask". PR #1264 adds `bump: minor` to change notes
+  (changes/README.md) and carries the 0.22.0 note. Nothing to do here.
 
 ## When you're done
 

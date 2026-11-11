@@ -140,3 +140,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-10 (Andy, via Jujutsu Five picks): The Long Defence lore film built as specified (grue = sorcerer, four spirits alive, unnamed fifth = the Quiet One, never said; flickering shadow-flame legion, no portal). PR #1251.
 - 2026-11-10 7:50 PM: Andy, after the YOUTH audit: "do them both, fix youth's bad behaviors on the whole" — map the old waterskin id, and YOUTH merges only on an explicit merge order (never on a question), never pushes to master, answers every ask, checks PR state before reporting it. Steps in the vault's Fix YOUTH.md for Claude Code on the PC.
+- 2026-11-10 8:28 PM: Andy: "have the tool support a bigger bump when i ask" — change notes take `bump: minor` / `bump: major` (tools/release.py, PR #1264), only on his ask; #1264 also carries Powers 0.22.0.
