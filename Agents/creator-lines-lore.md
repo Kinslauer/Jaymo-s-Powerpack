@@ -3,7 +3,7 @@ status: in-review
 task: 
 branch: claude/project-thread-6ogcsw
 with: claude-cloud
-pr: 
+pr: 1309
 mods: kingdoms
 versions: 
 started: 2026-11-11
