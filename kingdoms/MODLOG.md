@@ -11243,3 +11243,9 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - The Story tab has a row under the five acts for the player's own road when their power has one (the Z Fighter's sagas for now, from Jaymo's Powers): its goals listed the same plain way as an act's, and an Open button to the road's own screen.
 - `RoadCompat` reaches Powers' `StoryRoads` by reflection; without Powers there is no road row.
 - Built; not played.
+
+## 0.7.737 (2026-11-11): The Second Defence ends with a short film at the ford (#1315)
+
+- When the Second Defence is held, everyone who stood at the ford sees a short wordless film (16 seconds) set at the ford itself: dawn, the last of the old legion on the far bank bowing and going back into the ground one by one, a slow look across the water, then the keep with its light still burning
+- It is played from a recorded tape like The Long Defence, with nothing laid over the world; the weather is clear on your screen while it plays
+- `/kingdom film second_defence` plays it for testing (where you stand, if you are not at the ford)
