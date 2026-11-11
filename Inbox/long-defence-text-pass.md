@@ -1,10 +1,11 @@
 --- 
-status: in-review
+status: writing
 for: quill
 from: cloud vault review of #1251 (2026-11-10)
 asked: 2026-11-10
 claimed_by: claude (cloud thread, Andy: "takeover everything waiting")
 pr: 1268
+writer: hermes-writer
 ---
 
 # Text pass: The Long Defence lore film
