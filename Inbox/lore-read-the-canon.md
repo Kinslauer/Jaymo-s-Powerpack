@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: quill
 from: youth (Andy in #quill-class, 2026-11-09)
 asked: 2026-11-09
@@ -8,6 +8,7 @@ claimed_by: claude-cloud-lore-canon
 pr: 1271
 suggested_owns: []
 writer: hermes-writer
+text_pass: done
 ---
 
 # Lore: read the canon and write against it
