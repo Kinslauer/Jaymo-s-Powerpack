@@ -96,6 +96,11 @@ public final class WebTraps {
 
 	/** The same; {@code dark}: the symbiote's, with a black web. */
 	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks, boolean dark) {
+		ensnare(level, target, amplifier, ticks, dark, false);
+	}
+
+	/** The same; {@code quiet}: no sound at all (a silent takedown). */
+	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks, boolean dark, boolean quiet) {
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, amplifier));
 		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
 		if (jump != null) {
@@ -107,14 +112,21 @@ public final class WebTraps {
 		place(level, feet, dark);
 		level.sendParticles(dark ? WebSymbiote.dust(1.2F) : ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			14, target.getBbWidth() * 0.5, target.getBbHeight() * 0.4, target.getBbWidth() * 0.5, 0.02);
-		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
+		if (!quiet) {
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
+		}
 	}
 
 	/** A temporary web (cobweb, or the symbiote's black one) in this spot, if it's open air. */
 	private static void place(ServerLevel level, BlockPos pos, boolean dark) {
+		cling(level, pos, dark, COBWEB_TICKS);
+	}
+
+	/** The same, kept for {@code ticks} (the webbing round something hung or stuck up). */
+	static void cling(ServerLevel level, BlockPos pos, boolean dark, int ticks) {
 		if (level.isLoaded(pos) && level.getBlockState(pos).isAir()) {
 			level.setBlockAndUpdate(pos, dark ? WebPower.SYMBIOTE_WEB.defaultBlockState() : Blocks.COBWEB.defaultBlockState());
-			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + COBWEB_TICKS));
+			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + ticks));
 		}
 	}
 
