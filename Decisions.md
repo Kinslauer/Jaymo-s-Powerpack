@@ -151,3 +151,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   4. "The androids came from los perrito, and after the maw exploded, they traveled back and forth through time. some hope to prevent it someday, somehow."
   5. "the grue is the sorcerer, its what his mana manifested as."
   6. "They started calling it Earth in the future, we say overworld now."
+- 2026-11-10 10:35 PM: Andy: "Everything we add from now on should consult the lore and iterate accordingly." Every new feature checks Lore.md first and fits its scope; placements go into Lore.md as (new) paragraphs for Andy to approve.
