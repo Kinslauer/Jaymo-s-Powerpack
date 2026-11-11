@@ -3,5 +3,5 @@
 - **Grimsby** still carries his sword but now casts too. Through the clash he throws bolts of light from his free hand. On his turn, glyphs turn around him before his cut of light runs the length of the field.
 - **The Warrior-born of the host** wear the draugr's own gear (horned helm, mail, fur), in better condition: they are draugr drawn alive, with living skin, cleaner mail and a whole tail (`draugr_living.png`, from `tools/gen_draugr_living.py`). Orc skins (3) and dead orc skins (2) are new in `tools/gen_film_skins.py`.
 - **Demon master:** no longer says the demons "were there" for the old war. He says they kept the story the surface forgot.
-- **The Long Defence (book):** page 2 says they came first as men and orcs, then the dead rose. On page 5 the sorcerer goes down into the ground with the dark. Page 6 no longer counts "the five" and then "the fifth too", and hints that the fifth never had much to say.
+- **The Long Defence (book):** page 2 says they came first as men and orcs, then the dead rose. Page 6 no longer counts "the five" and then "the fifth too", and hints that the fifth never had much to say.
 - Compiles (`compileClientJava`); the film has not been watched in game.
