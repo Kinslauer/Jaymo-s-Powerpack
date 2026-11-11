@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.films;
 
+import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.model.DefaultedEntityGeoModel;
 import com.geckolib.renderer.GeoEntityRenderer;
@@ -12,6 +13,7 @@ import com.jaymoskingdoms.films.FilmActor;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,6 +37,8 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 	static final DataTicket<Integer> GONE = DataTicket.create("jaymoskingdoms_film_gone", Integer.class);
 	static final DataTicket<Boolean> CLOAK = DataTicket.create("jaymoskingdoms_film_cloak", Boolean.class);
 	static final DataTicket<Boolean> RIBBONS = DataTicket.create("jaymoskingdoms_film_ribbons", Boolean.class);
+	/** The actor whose wind-imbued blade is to be found as it's drawn (none: left out). */
+	static final DataTicket<FilmActor> WIND = DataTicket.create("jaymoskingdoms_film_wind", FilmActor.class);
 	/** Each tether's {turn, tilt (radians, the model's way), length (blocks; 0 is in)}. */
 	static final DataTicket<float[]> TETHERS = DataTicket.create("jaymoskingdoms_film_tethers", float[].class);
 
@@ -80,6 +84,11 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 		state.addGeckolibData(GONE, actor.gone);
 		state.addGeckolibData(CLOAK, actor.cloak);
 		state.addGeckolibData(RIBBONS, actor.ribbons);
+		state.addGeckolibData(WIND, actor.wind ? actor : null);
+		if (actor.shine > 0) {
+			int light = state.getPackedLight();
+			state.addGeckolibData(DataTickets.PACKED_LIGHT, LightCoordsUtil.pack(Math.max(LightCoordsUtil.block(light), actor.shine), LightCoordsUtil.sky(light)));
+		}
 		float[] tethers = new float[FilmActor.TETHERS * 3];
 		if (actor.cloak) {
 			double scale = actor.getScale();
@@ -114,6 +123,21 @@ public final class FilmActorRenderer extends GeoEntityRenderer<FilmActor, Living
 		}
 		if ((gone & FilmActor.NO_RIGHT_ARM) != 0) {
 			snapshots.ifPresent("right_arm", bone -> bone.skipRender(true).skipChildrenRender(true));
+		}
+		FilmActor actor = info.getOrDefaultGeckolibData(WIND, null);
+		if (actor != null) {
+			// where its fist and its blade's point have got to, for the wind that runs along it (FilmActor.windBlade)
+			info.addBonePositionListener("right_hand", (world, model, local) -> {
+				if (world != null) {
+					actor.fistAt = world;
+				}
+			});
+			info.addBonePositionListener("blade_tip", (world, model, local) -> {
+				if (world != null) {
+					actor.pointAt = world;
+					actor.bladeSeen = actor.tickCount;
+				}
+			});
 		}
 		boolean cloak = info.getOrDefaultGeckolibData(CLOAK, false);
 		boolean whole = cloak && !info.getOrDefaultGeckolibData(RIBBONS, false), ribbons = cloak && !whole;

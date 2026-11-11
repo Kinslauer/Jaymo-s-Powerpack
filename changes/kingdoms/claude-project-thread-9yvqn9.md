@@ -10,3 +10,6 @@
 - A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
 - The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
 - The film is 11 seconds longer; its tape is recorded again with all of this
+- When the Quiet One flips off a tree or rolls under a bolt, his cloak comes back onto him whole and goes over with him, then comes apart and throws for the next tree
+- Varro's steel stays bright in the dark and glints, and Grimsby's blade is wind-imbued: lit currents run along it and curl off it, so the two can be picked out of the crowd in the wide shots
+- Beheadings are a level cut: the blade drawn back low to the side and swept through at neck height with the whole body turning, the head going the way of the cut; the cut that follows a severed arm comes down across from the shoulder (new moves in the library: wind_side, behead, wind_high, hew; the draugr's animation file is regenerated with the whole library)

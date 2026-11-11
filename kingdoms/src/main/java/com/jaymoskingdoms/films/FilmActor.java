@@ -9,6 +9,7 @@ import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.JaymosKingdoms;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -59,6 +60,16 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 	private final @Nullable Vec3[] tetherTo = new Vec3[TETHERS];
 	private final Vec3[] tetherAt = new Vec3[TETHERS];
 	private final float[] reach = new float[TETHERS], reachO = new float[TETHERS];
+	/** Lit as if by this much block light at the least (0 to 15): polished steel that still catches the fires at night. */
+	public int shine;
+	/** Its blade is wind-imbued: lit currents run along it and trail off it. */
+	public boolean wind;
+	/** Where the renderer last drew its fist and its blade's point (the world's), and the tick it did. */
+	public Vec3 fistAt = Vec3.ZERO, pointAt = Vec3.ZERO;
+	public int bladeSeen = -100;
+	/** The wind on a blade: lit motes along it a tick, how often a current curls off it and a gust turns round it (ticks), how fast they drift. */
+	static final int WIND_MOTES = 3, WIND_CURRENT = 2, WIND_GUST = 10;
+	static final double WIND_DRIFT = 0.06;
 
 	public FilmActor(EntityType<? extends FilmActor> type, Level level) {
 		super(type, level);
@@ -92,6 +103,17 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 		}
 	}
 
+	/** The cloak is whole and on its back at once, every cord in: for a move the whole body turns over in, so it goes with it. */
+	public void gather() {
+		this.ribbons = false;
+		this.setting = 0;
+		this.stopTriggeredAnim("cloak", null);
+		for (int i = 0; i < TETHERS; i++) {
+			this.tetherTo[i] = null;
+			this.reach[i] = this.reachO[i] = 0.0F;
+		}
+	}
+
 	/** Throws tether {@code which} at {@code to} (null lets go: it comes back in). */
 	public void tether(int which, @Nullable Vec3 to) {
 		this.tetherTo[which] = to;
@@ -122,9 +144,32 @@ public class FilmActor extends PathfinderMob implements GeoEntity {
 			this.ribbons = false;
 			this.stopTriggeredAnim("cloak", null);
 		}
+		if (this.wind && this.level().isClientSide() && this.tickCount - this.bladeSeen < 3 && !this.getMainHandItem().isEmpty()) {
+			this.windBlade();
+		}
 		for (int i = 0; i < TETHERS; i++) {
 			this.reachO[i] = this.reach[i];
 			this.reach[i] += this.tetherTo[i] != null ? (1.0F - this.reach[i]) * TETHER_OUT : -this.reach[i] * TETHER_IN;
+		}
+	}
+
+	/** The wind on its blade, this tick: lit motes down its length, a current curling off it, and now and then a gust turning round it. */
+	private void windBlade() {
+		Vec3 along = this.pointAt.subtract(this.fistAt);
+		for (int i = 0; i < WIND_MOTES; i++) {
+			Vec3 p = this.fistAt.add(along.scale(0.25 + this.random.nextDouble() * 0.85));
+			this.level().addParticle(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 0.0, 0.0, 0.0);
+		}
+		if (this.tickCount % WIND_CURRENT == 0) {
+			// round the blade: off one side of it, turning with the tick
+			double turn = this.tickCount * 0.9;
+			Vec3 side = along.cross(new Vec3(Math.cos(turn), Math.sin(turn) * 0.6, Math.sin(turn))).normalize();
+			Vec3 p = this.fistAt.add(along.scale(0.35 + this.random.nextDouble() * 0.7)).add(side.scale(0.12));
+			this.level().addParticle(ParticleTypes.SCRAPE, p.x, p.y, p.z, side.x * WIND_DRIFT * 10.0, side.y * WIND_DRIFT * 10.0 + 0.2, side.z * WIND_DRIFT * 10.0);
+		}
+		if (this.tickCount % WIND_GUST == 0) {
+			Vec3 p = this.fistAt.add(along.scale(0.7));
+			this.level().addParticle(ParticleTypes.SMALL_GUST, p.x, p.y, p.z, 0.0, 0.0, 0.0);
 		}
 	}
 

@@ -305,6 +305,8 @@ public final class LoreFilmClient {
 	static final double KNEEL = 0.375, SINK_RATE = 0.12;
 	/** The cuts a fighter makes; how often the one cut at gets something up to it, and how long that keeps it from its own next blow. */
 	static final String[] SWINGS = {"swing_across", "swing_down", "swing_back"};
+	/** How fast a head leaves along the line of the cut that took it (blocks a tick). */
+	static final double HEAD_OFF = 0.26;
 	static final float BLOCKED = 0.3F;
 	static final int BLOCK_TICKS = 12;
 	/**
@@ -398,6 +400,19 @@ public final class LoreFilmClient {
 	static final String QUIET_BLADE = "jaymospowers:iron_rapier|minecraft:iron_sword";
 	/** The turns of his run he flips off the tree at, and the ones he rolls through. */
 	static final int[] QUIET_FLIPS = {2, 5}, QUIET_ROLLS = {3};
+	/**
+	 * Andy: "Whenever quiet flips the cape should return to him, so it all animates as one". Through a flip or a roll
+	 * (FLIP_TICKS) the cloak is whole on his back and every cord in (the tape's CLOAK_GATHERED); then it comes apart again
+	 * and throws for the next tree.
+	 */
+	static final int FLIP_TICKS = 13, CLOAK_GATHERED = 2;
+	/**
+	 * Andy, of the wide shot: "you should still be able to make out varro's shiny armor and grimsby should have an imbued
+	 * wind blade glowing visibly with currents so that you can tell them apart from the crowd". Varro's steel is lit as
+	 * if by VARRO_SHINE block light whatever the night (Grimsby and his blade by GRIMSBY_SHINE), a glint comes off Varro's
+	 * plate every GLINT_EVERY ticks or so, and the wind runs on Grimsby's blade all film long (the tape's AURA: the light, and AURA_WIND).
+	 */
+	static final int VARRO_SHINE = 13, GRIMSBY_SHINE = 9, AURA_WIND = 16, GLINT_EVERY = 5;
 	/** His cloak's tethers: the first of them swing him from tree to tree (thrown this far up the trunk); the rest hunt for themselves. */
 	static final int SWING_TETHERS = 2;
 	static final double TETHER_HIGH = 5.2;
@@ -431,6 +446,20 @@ public final class LoreFilmClient {
 	static final double TAPE_MOVED = 0.004, TAPE_TURNED = 0.25;
 	/** Set (to true) on a game that stages the films: every film played there is staged afresh and taped, as {@code /kingdomfilm record} does. */
 	static final String RECORD_PROPERTY = "jaymoskingdoms.filmRecord";
+	/** For looking a staging over while it's built: -Djaymoskingdoms.filmCam=f,s,up,f,s,up holds the camera there, looking at the second point. */
+	static final double @Nullable [] DEV_CAMERA = devCamera();
+
+	private static double @Nullable [] devCamera() {
+		String[] parts = System.getProperty("jaymoskingdoms.filmCam", "").split(",");
+		if (parts.length != 6) {
+			return null;
+		}
+		double[] out = new double[6];
+		for (int i = 0; i < 6; i++) {
+			out[i] = Double.parseDouble(parts[i]);
+		}
+		return out;
+	}
 
 	// ---- the screen ----
 	/** The dark over the screen: the memory's dim, and as the sorcerer calls. */
@@ -640,7 +669,7 @@ public final class LoreFilmClient {
 		@Nullable CameraType viewBefore;
 		int tick, skip, quietAt = 1, lungeAt = -1, gibIds;
 		/** When the fifth's slingshot took hold, when it let him fly, and where he stood when it took hold. */
-		int slingAt = -1, glideAt = -1;
+		int slingAt = -1, glideAt = -1, flipUntil = -1;
 		double slingF, slingS;
 		float flash, flashO;
 		/** The land the film laid over the world's: what each block it changed was (put back when it ends), and how high each column now stands. */
@@ -1005,6 +1034,12 @@ public final class LoreFilmClient {
 			f.varro.nextSwing = 9;
 			gait(f, f.varro, Moves.GUARD, Moves.RUN);
 			f.fighters.add(f.varro);
+		}
+		if (f.varro != null) {
+			aura(f, f.varro, VARRO_SHINE, false);
+		}
+		if (f.grimsby != null) {
+			aura(f, f.grimsby, GRIMSBY_SHINE, true);
 		}
 		// what each of them wears is the game's own (the first of each that this game has; FilmGear draws it on them)
 		Actor[] heroes = {f.thessaly, f.varro, f.ambrose, f.grimsby};
@@ -1535,6 +1570,23 @@ public final class LoreFilmClient {
 		}
 	}
 
+	/** {@code a}'s cloak is whole on its back at once and every cord of it in, to go with a move that turns the whole body over. */
+	private static void gather(Film f, Actor a) {
+		tape(f, FilmTape.CLOAK, a.index, CLOAK_GATHERED, NONE, "");
+		if (a.e instanceof FilmActor actor) {
+			actor.gather();
+		}
+	}
+
+	/** {@code a} is lit as if by {@code shine} block light at the least (bright steel), and its blade has the wind on it or not. */
+	private static void aura(Film f, Actor a, int shine, boolean wind) {
+		tape(f, FilmTape.AURA, a.index, shine | (wind ? AURA_WIND : 0), NONE, "");
+		if (a.e instanceof FilmActor actor) {
+			actor.shine = shine;
+			actor.wind = wind;
+		}
+	}
+
 	/** An imp's fireball over its head: how far into its charge it shows (0 none). */
 	/** {@code a} is in another skin, with or without the cloak. */
 	private static void dress(Film f, Actor a, String skin, boolean cloak) {
@@ -1804,7 +1856,16 @@ public final class LoreFilmClient {
 			}
 			case FilmTape.CLOAK -> {
 				if (a != null) {
-					cloak(f, a, e.b() != 0);
+					if (e.b() == CLOAK_GATHERED) {
+						gather(f, a);
+					} else {
+						cloak(f, a, e.b() != 0);
+					}
+				}
+			}
+			case FilmTape.AURA -> {
+				if (a != null) {
+					aura(f, a, e.b() & (AURA_WIND - 1), (e.b() & AURA_WIND) != 0);
 				}
 			}
 			case FilmTape.DRESS -> {
@@ -2122,6 +2183,10 @@ public final class LoreFilmClient {
 		relay(f, t);
 		early(f, t);
 		pairs(f, t);
+		if (f.varro != null && f.varro.up() && t % GLINT_EVERY == 0 && f.rnd.nextInt(3) != 0) {
+			// a glint off Varro's plate
+			particle(f, ParticleTypes.ELECTRIC_SPARK, f.varro.e.position().add(spread(f, 0.3), 0.9 + f.rnd.nextDouble() * 0.9, spread(f, 0.3)), 0.0, 0.0, 0.0);
+		}
 		fifth(f, t);
 	}
 
@@ -2977,21 +3042,31 @@ public final class LoreFilmClient {
 		if (f.slingAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
 			if (f.quietAt + 1 < QUIET_PATH.length) {
 				// round this tree: off its trunk, or under what's coming
+				boolean over = false;
 				for (int flip : QUIET_FLIPS) {
 					if (flip == f.quietAt) {
 						act(f, quiet, "tree_flip");
 						sound(f, SoundEvents.WOOD_HIT, 0.8F, 0.6F);
+						over = true;
 					}
 				}
 				for (int roll : QUIET_ROLLS) {
 					if (roll == f.quietAt) {
 						act(f, quiet, "dodge_roll");
+						over = true;
 					}
 				}
 				f.quietAt++;
 				quiet.toF = QUIET_PATH[f.quietAt][0];
 				quiet.toS = QUIET_PATH[f.quietAt][1];
-				swingTo(f, quiet, f.quietAt);
+				if (over) {
+					// the cloak comes in to him and goes over with him, all one
+					gather(f, quiet);
+					sound(f, SoundEvents.WOOL_PLACE, 1.0F, 0.5F);
+					f.flipUntil = t + FLIP_TICKS;
+				} else {
+					swingTo(f, quiet, f.quietAt);
+				}
 			} else {
 				// the slingshot: the cloak takes a tree either side of his way and draws him back on them
 				f.slingAt = t;
@@ -3006,8 +3081,14 @@ public final class LoreFilmClient {
 				sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 1.2F, 0.6F);
 			}
 		}
+		if (t == f.flipUntil && f.slingAt < 0) {
+			// down and running: it comes apart again and throws for the next tree
+			cloak(f, quiet, true);
+			swingTo(f, quiet, f.quietAt);
+			sound(f, SoundEvents.WOOL_BREAK, 0.8F, 0.5F);
+		}
 		glide(f, quiet, t);
-		if (f.slingAt < 0) {
+		if (f.slingAt < 0 && t >= f.flipUntil) {
 			guards(f, quiet, t);
 		}
 		// the sorcerer's bolts
@@ -3723,15 +3804,17 @@ public final class LoreFilmClient {
 					sound(f, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.8F, 0.5F);
 				}
 				if (into == 7) {
-					act(f, w, "overhead");
+					// (Andy: "the beheading chop a lot of the soldiers do is vertical rather than horizontal": drawn back level, and through level)
+					act(f, w, "wind_side");
 				}
 				if (into == 13) {
-					act(f, w, "chop");
+					act(f, w, "behead");
 					sound(f, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 0.7F);
 				}
 				if (into == 15) {
 					maim(f, l, FilmActor.NO_HEAD);
-					Vec3 speed = across.scale(f.rnd.nextBoolean() ? 0.2 : -0.2).add(along.scale(0.08)).add(0.0, 0.42 + f.rnd.nextDouble() * 0.1, 0.0);
+					// (the head goes the way the blade went: off to the striker's left)
+					Vec3 speed = across.scale(-HEAD_OFF).add(along.scale(0.08)).add(0.0, 0.3 + f.rnd.nextDouble() * 0.1, 0.0);
 					if (l.flesh.head != null) {
 						fling(f, true, id(l.flesh.head), (float)l.scale, 1.0F, 1.0F, neck.add(0.0, 0.2, 0.0), speed, 30.0F, false);
 					} else {
@@ -3765,11 +3848,11 @@ public final class LoreFilmClient {
 					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.6F, 0.7F);
 				}
 				if (into == 8) {
-					act(f, w, "overhead");
+					act(f, w, "wind_high");
 				}
 				if (into == 13) {
-					// and cut down
-					act(f, w, "chop");
+					// and cut down across, shoulder to hip
+					act(f, w, "hew");
 					blood(f, chest, along, 10, l.flesh.dark);
 					sound(f, SoundEvents.PLAYER_ATTACK_STRONG, 0.7F, 0.6F);
 				}
@@ -4133,6 +4216,11 @@ public final class LoreFilmClient {
 			look = keepTop(f);
 			third = -1.0F;
 			tilt = -2.0F;
+		}
+		if (DEV_CAMERA != null) {
+			pos = f.at(DEV_CAMERA[0], DEV_CAMERA[1], DEV_CAMERA[2]);
+			look = f.at(DEV_CAMERA[3], DEV_CAMERA[4], DEV_CAMERA[5]);
+			third = tilt = 0.0F;
 		}
 		Vec3 dir = look.subtract(pos);
 		dir = dir.lengthSqr() < 1.0E-6 ? f.fwd : dir.normalize();
