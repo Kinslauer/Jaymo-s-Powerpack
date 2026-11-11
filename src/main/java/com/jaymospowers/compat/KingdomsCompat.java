@@ -188,4 +188,35 @@ public final class KingdomsCompat {
 			// (an older Kingdoms, or one that threw: the shadowboxing goes on)
 		}
 	}
+
+	private static Method temperOf, temperKey;
+	private static boolean temperLooked;
+
+	/**
+	 * {@code entity}'s temperament key in Kingdoms ("timid", "brave", "hotheaded"...), or null without Kingdoms, for a
+	 * creature that has none, or if the call fails. Kingdoms draws one for a humanoid of its own that has none yet.
+	 */
+	public static @Nullable String temperament(Entity entity) {
+		if (!LOADED) {
+			return null;
+		}
+		if (!temperLooked) {
+			temperLooked = true;
+			try {
+				temperOf = Class.forName("com.jaymoskingdoms.Temperaments").getMethod("of", Entity.class);
+				temperKey = Class.forName("com.jaymoskingdoms.Temperaments$Temperament").getMethod("key");
+			} catch (ReflectiveOperationException | LinkageError e) {
+				temperOf = temperKey = null;
+			}
+		}
+		if (temperOf == null || temperKey == null) {
+			return null;
+		}
+		try {
+			Object t = temperOf.invoke(null, entity);
+			return t == null ? null : (String)temperKey.invoke(t);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
 }

@@ -37,10 +37,11 @@ import org.jspecify.annotations.Nullable;
  * it takes whatever pose the body is drawn in. The missing limb itself stays hidden by {@link com.jaymospowers.client.Dismembered}.
  */
 public final class ProstheticLayer {
-	/** On a living body's render state: the fitted limbs ({@link Dismember} bits) and, above them (shifted 8), which are iron. */
+	/** On a living body's render state: the fitted limbs ({@link Dismember} bits) and, above them (shifted 8), which are iron, and (shifted 16) which are Rig limbs. */
 	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:prosthetics");
 	private static final Identifier WOOD = JaymosPowers.id("textures/entity/wounds/wooden_limb.png");
 	private static final Identifier IRON = JaymosPowers.id("textures/entity/wounds/iron_limb.png");
+	private static final Identifier RIG = JaymosPowers.id("textures/entity/wounds/rig_limb.png");
 	private static final String PIECE = "prosthetic";
 	/** The worn models, so {@link com.jaymospowers.client.Dismembered} doesn't hide the limb they draw. */
 	private static final Set<Model<?>> OWNED = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -69,7 +70,7 @@ public final class ProstheticLayer {
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int fitted = Prosthetics.fitted(entity);
-		state.setData(KEY, fitted == 0 ? null : fitted | Prosthetics.ironMask(entity) << 8);
+		state.setData(KEY, fitted == 0 ? null : fitted | Prosthetics.ironMask(entity) << 8 | Prosthetics.rigMask(entity) << 16);
 	}
 
 	private static LayerDefinition limbs(boolean slimArms) {
@@ -90,18 +91,18 @@ public final class ProstheticLayer {
 
 	/** One renderer's worn models, for wide arms and slim: wood and iron. */
 	private static final class Worn {
-		private final PlayerModel[] wide = new PlayerModel[2], slim = new PlayerModel[2];
+		private final PlayerModel[] wide = new PlayerModel[3], slim = new PlayerModel[3];
 		private final java.util.function.Supplier<PlayerModel> wearer;
 
 		Worn(java.util.function.Supplier<PlayerModel> wearer) {
 			this.wearer = wearer;
 		}
 
-		PlayerModel get(boolean iron, boolean slimArms) {
+		/** The worn model for a material: 0 wood, 1 iron, 2 Rig. */
+		PlayerModel get(int kind, boolean slimArms) {
 			PlayerModel[] models = slimArms ? this.slim : this.wide;
-			int kind = iron ? 1 : 0;
 			if (models[kind] == null) {
-				models[kind] = CostumeModels.worn(limbs(slimArms), slimArms, this.wearer, (model, state) -> show(model, state, iron));
+				models[kind] = CostumeModels.worn(limbs(slimArms), slimArms, this.wearer, (model, state) -> show(model, state, kind));
 				OWNED.add(models[kind]);
 			}
 			return models[kind];
@@ -109,10 +110,10 @@ public final class ProstheticLayer {
 	}
 
 	/** As a worn model animates, for the player it's drawn on: only the limbs of its own material that are fitted. */
-	private static void show(PlayerModel model, AvatarRenderState state, boolean iron) {
+	private static void show(PlayerModel model, AvatarRenderState state, int kind) {
 		int data = fitted(state);
-		int ironBits = data >> 8 & data;
-		int mask = iron ? ironBits : data & ~ironBits;
+		int fitted = data & 0xFF, ironBits = data >> 8 & fitted, rigBits = data >> 16 & fitted;
+		int mask = kind == 2 ? rigBits : kind == 1 ? ironBits & ~rigBits : fitted & ~ironBits & ~rigBits;
 		piece(model.rightArm, mask & Dismember.RIGHT_ARM);
 		piece(model.leftArm, mask & Dismember.LEFT_ARM);
 		piece(model.rightLeg, mask & Dismember.RIGHT_LEG);
@@ -152,12 +153,15 @@ public final class ProstheticLayer {
 			}
 			CostumeModels.wear(state, parent);
 			boolean slimArms = CostumeModels.slim(parent, state);
-			int iron = data >> 8 & data;
-			if ((data & ~iron & 0xFF) != 0) {
-				renderColoredCutoutModel(this.worn.get(false, slimArms), WOOD, poseStack, collector, lightCoords, state, -1, 1);
+			int fitted = data & 0xFF, iron = data >> 8 & fitted, rig = data >> 16 & fitted;
+			if ((fitted & ~iron & ~rig) != 0) {
+				renderColoredCutoutModel(this.worn.get(0, slimArms), WOOD, poseStack, collector, lightCoords, state, -1, 1);
 			}
-			if (iron != 0) {
-				renderColoredCutoutModel(this.worn.get(true, slimArms), IRON, poseStack, collector, lightCoords, state, -1, 1);
+			if ((iron & ~rig) != 0) {
+				renderColoredCutoutModel(this.worn.get(1, slimArms), IRON, poseStack, collector, lightCoords, state, -1, 1);
+			}
+			if (rig != 0) {
+				renderColoredCutoutModel(this.worn.get(2, slimArms), RIG, poseStack, collector, lightCoords, state, -1, 1);
 			}
 		}
 	}

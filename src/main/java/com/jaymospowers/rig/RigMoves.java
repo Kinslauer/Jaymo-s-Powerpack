@@ -19,6 +19,9 @@ import org.jspecify.annotations.Nullable;
 public final class RigMoves {
 	/** {@link Move} kinds. */
 	public static final int PALM = 1, LAUNCHER = 2, UNIBEAM = 3;
+	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}). */
+	public static final int KNEE = 4, KICK = 5;
+	public static final int KNEE_TICKS = 26, KICK_TICKS = 10;
 	/** {@link #THRUST} values. */
 	public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
 	/** How long a palm blast's and a launch's poses play (ticks); the Unibeam's is its charge and beam and the let-down. */
@@ -42,6 +45,8 @@ public final class RigMoves {
 		return switch (kind) {
 			case PALM -> PALM_TICKS;
 			case LAUNCHER -> LAUNCHER_TICKS;
+			case KNEE -> KNEE_TICKS;
+			case KICK -> KICK_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
 			default -> 0;
 		};
