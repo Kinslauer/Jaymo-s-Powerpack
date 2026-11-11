@@ -34,6 +34,13 @@ bolts of mana, blade in hand, and lunged; the sorcerer faded away.
 
 The ford the gate-warden's book speaks of is where the forest road crosses water below that Keep.
 
+(new) **The keep above the ford in the world.** It still stands, one in the world, in a wood above a river: a ruined
+keep of mossy, cracked stone, its corner tower half fallen and its gate toward the water, a worn road down to a shallow
+crossing. Horses won't drink there. In the keep lies **A Loose Page** in the gate-warden's hand: the names of the dead
+ran past the gatehouse wall, and before the one at the back went into the ground he turned and looked at the ford, "the
+way a man looks at a door he means to come back through". The warden asks whoever keeps the crossing after him to keep a
+light in the keep at night. (This is where the Second Defence will come.)
+
 **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with
