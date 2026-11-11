@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
-claimed_by: hermes-modeller
+claimed_by: 
 pr:
 suggested_owns: [src/main/resources/assets/jaymospowers/textures/item/armory/, src/main/resources/assets/jaymospowers/models/item/armory/]
 ---
@@ -25,3 +25,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots) in a pure 
 - Do not change the model JSON files or the item model definitions — only the PNG texture files.
 - Say back the task name and that Prometheus is starting it, and add it to the todo list as `in_progress`.
 - Reference image: vanilla leather helmet at `https://textures.minecraft.net/texture/leather_helmet.png` as the visual style guide (solid brown with white border).
+- 2026-11-11 19:13 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
