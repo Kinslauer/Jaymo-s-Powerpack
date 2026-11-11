@@ -12,6 +12,7 @@ kanban-plugin: board
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
+- [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 
 
 ## Being built
