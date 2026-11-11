@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
 claimed_by: claude-cloud
 pr: 1325
+writer: hermes-writer
 ---
 
 # The band's elder and the moon kingdom (plan first)
