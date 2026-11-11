@@ -794,8 +794,9 @@ public final class ZFighterAfterlife {
 
 	/**
 	 * A just one stays for good: no longer one of the dead (nothing holds them at the hall, nothing sends them home, the
-	 * tournament is over for them), the weighing settled with the page as it is, and Divine-born from here on (Kingdoms'
-	 * heritage, which brings the ring, no hunger and {@link com.jaymospowers.divine.DivineSense}). They walk the Aether freely.
+	 * tournament is over for them), the weighing settled with the page as it is. They keep their own heritage (Andy: "they just
+	 * get the buffs and the halo, no change in heritage otherwise") and carry the Divine-born's ring, their buffs (Kingdoms)
+	 * and {@link com.jaymospowers.divine.DivineSense} on top of it. They walk the Aether freely.
 	 */
 	private static void stay(ServerPlayer player, LivingEntity npc) {
 		if (!among(player) || !com.jaymospowers.core.wounds.Karma.just(player)) {
@@ -809,6 +810,7 @@ public final class ZFighterAfterlife {
 		player.removeAttached(CHAMPION);
 		player.removeAttached(PAID);
 		com.jaymospowers.core.wounds.Karma.stayed(player);
+		com.jaymospowers.divine.DivineSense.stay(player);
 		ZFighterKingdoms.stayed(player);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), net.minecraft.sounds.SoundEvents.BEACON_POWER_SELECT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.4F);

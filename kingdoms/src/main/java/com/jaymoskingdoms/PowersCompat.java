@@ -392,6 +392,34 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code DivineSense.stayed(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle stayedDivine;
+	private static boolean lookedForStayed;
+
+	/** Whether {@code player} is one of the just who stayed at the Judge (both sides: Powers syncs it); false without Powers. */
+	public static boolean stayedDivine(Player player) {
+		if (!lookedForStayed) {
+			lookedForStayed = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					stayedDivine = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.divine.DivineSense"),
+						"stayed", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stay at the Judge (older Powers?)", e);
+				}
+			}
+		}
+		if (stayedDivine == null) {
+			return false;
+		}
+		try {
+			return (boolean) stayedDivine.invokeExact(player);
+		} catch (Throwable e) {
+			stayedDivine = null;
+			return false;
+		}
+	}
+
 	/** Powers' {@code DivineSense.alight(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle alight;
 	private static boolean lookedForAlight;

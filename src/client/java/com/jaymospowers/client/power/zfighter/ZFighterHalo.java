@@ -56,8 +56,8 @@ public final class ZFighterHalo {
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
-		boolean dead = entity instanceof Player player && player.isAlive() && !player.isSpectator() && ZFighterAfterlife.among(player)
-			&& !ZFighterLineage.divine(player);
+		boolean dead = entity instanceof Player player && player.isAlive() && !player.isSpectator() && (ZFighterAfterlife.among(player)
+			|| com.jaymospowers.divine.DivineSense.stayed(player)) && !ZFighterLineage.divine(player);
 		state.setData(KEY, dead ? Boolean.TRUE : null);
 	}
 

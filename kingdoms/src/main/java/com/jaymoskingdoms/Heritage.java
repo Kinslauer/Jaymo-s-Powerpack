@@ -856,6 +856,10 @@ public final class Heritage {
 	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
+		// one who stayed at the Judge: Alight when there are feathers to bring back, else their own heritage's key
+		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
+			return;
+		}
 		if (kind == Kind.WARRIORBORN) {
 			if (player.isShiftKeyDown()) {
 				// (0.7.490) sneaking, the key is the war cry instead
@@ -878,16 +882,14 @@ public final class Heritage {
 	}
 
 	/**
-	 * Jaymo's Powers calls this by name: one of the just chose to stay in the high places at the Judge. They are Divine-born
-	 * from here on (their own blood changes, unlike a heritage merely earned), with the afterlife's road open as for one who
-	 * died there.
+	 * Jaymo's Powers calls this by name: one of the just chose to stay in the high places at the Judge. Their own blood
+	 * stays what it is (Andy: "they just get the buffs and the halo, no change in heritage otherwise"): Powers marks them,
+	 * {@link DivineBorn} counts them as its own, and here the Divine-born heritage and the afterlife's road open to them
+	 * as for one who died there.
 	 */
 	public static void stayed(ServerPlayer player) {
 		unlock(player, Kind.DIVINE);
 		Deeds.done(player, RoadLocks.DIVINE_DEED);
-		if (of(player) != Kind.DIVINE) {
-			set(player, Kind.DIVINE);
-		}
 	}
 
 	/** Sylvan: the share off how far sneaking is seen. */

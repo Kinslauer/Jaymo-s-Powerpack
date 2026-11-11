@@ -39,6 +39,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,7 +52,7 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The sense.</b> A blow or a shot that would land is felt first: it misses, {@link #SENSE_COST} feathers go, and
  * the body drifts a step aside. Nothing is pressed. It stops when the feathers do.</li>
  * <li><b>The answer.</b> For {@link #COUNTER_TICKS} after a blow slipped that way, the next melee hit on whoever threw it
- * lands {@link #COUNTER_BONUS} times as hard and gives {@link #COUNTER_REFUND} feathers back.</li>
+ * lands {@link #COUNTER_BONUS} times as hard (more with level and practice: {@link #counterBonus}) and gives {@link #COUNTER_REFUND} feathers back.</li>
  * <li><b>Alight</b> (the heritage key, through Kingdoms: {@link #alight}). Lifted a little off the ground and held still,
  * a sigil turns under them, motes of light wind down round them and the row fills, one every {@link #ALIGHT_EVERY} ticks (faster under an open
  * sky or in the Aether). Being hit, sneaking or the key again ends it; the sense is shut while it lasts.</li>
@@ -70,6 +71,15 @@ public final class DivineSense {
 	public static final int COUNTER_TICKS = 40;
 	public static final float COUNTER_BONUS = 1.5F;
 	public static final int COUNTER_REFUND = 4;
+	/**
+	 * The answer grows (Andy: "they deal more damage with the counters as they increase in level and they can train it for
+	 * higher increases"): this much more per experience level, up to {@link #LEVEL_CAP} in all, and this much more per rank
+	 * of practice. Practice is earned by using it: {@link #SLIP_PRACTICE} for a blow slipped, {@link #COUNTER_PRACTICE} for an
+	 * answer landed, ranks at {@link #RANK_AT}.
+	 */
+	public static final float PER_LEVEL = 0.01F, LEVEL_CAP = 0.5F, PER_RANK = 0.15F;
+	public static final int SLIP_PRACTICE = 1, COUNTER_PRACTICE = 3;
+	public static final int[] RANK_AT = {0, 40, 120, 280, 560, 1000};
 	/** Alight: ticks per half-feather (on the ground under a roof, and under the sky or in the Aether), the longest it lasts, and the wait after. */
 	public static final int ALIGHT_EVERY = 4, ALIGHT_EVERY_SKY = 2, ALIGHT_MAX = 20 * 12, ALIGHT_COOLDOWN = 20 * 20;
 	/** Alight ends if they are carried this far from where it began. */
@@ -84,6 +94,12 @@ public final class DivineSense {
 	/** On a Divine-born player, synced to them alone: their client needs to know (heritage tags aren't sent). */
 	public static final AttachmentType<Boolean> DIVINE = AttachmentRegistry.create(JaymosPowers.id("divine_born"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+	/** On one of the just who stayed at the Judge: they keep their own heritage and carry all of this and the ring. Saved, kept through death, synced to everyone (the ring). */
+	public static final AttachmentType<Boolean> STAYED = AttachmentRegistry.create(JaymosPowers.id("divine_stayed"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.BOOL).copyOnDeath().syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Practice at the sense and the answer. Saved, kept through death. */
+	public static final AttachmentType<Integer> PRACTICE = AttachmentRegistry.create(JaymosPowers.id("divine_practice"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
 	/** While Alight lasts, synced to them alone (their client holds them in the air). */
 	public static final AttachmentType<Boolean> ALIGHT = AttachmentRegistry.create(JaymosPowers.id("divine_alight"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
@@ -144,8 +160,45 @@ public final class DivineSense {
 		HOVERING.remove(id);
 	}
 
+	/** Divine-born by blood, or one of the just who stayed at the Judge. */
 	public static boolean is(Entity entity) {
-		return ZFighterLineage.divine(entity);
+		return ZFighterLineage.divine(entity) || entity instanceof Player player && stayed(player);
+	}
+
+	/** Whether {@code player} stayed at the Judge (Kingdoms asks by name: its Divine-born buffs are theirs too). */
+	public static boolean stayed(Player player) {
+		return player.hasAttached(STAYED);
+	}
+
+	/** The Judge wrote it down: {@code player} stays. */
+	public static void stay(ServerPlayer player) {
+		player.setAttached(STAYED, true);
+	}
+
+	/** The rank of {@code player}'s practice, 0 to 5. */
+	public static int rank(Player player) {
+		int points = player.getAttachedOrElse(PRACTICE, 0), rank = 0;
+		while (rank + 1 < RANK_AT.length && points >= RANK_AT[rank + 1]) {
+			rank++;
+		}
+		return rank;
+	}
+
+	/** What the answer multiplies a blow by for {@code player}: the base, their level and their practice. */
+	public static float counterBonus(Player player) {
+		return COUNTER_BONUS + Math.min(LEVEL_CAP, player.experienceLevel * PER_LEVEL) + rank(player) * PER_RANK;
+	}
+
+	private static void practise(ServerPlayer player, int points) {
+		int before = rank(player);
+		player.setAttached(PRACTICE, Math.min(RANK_AT[RANK_AT.length - 1], player.getAttachedOrElse(PRACTICE, 0) + points));
+		int after = rank(player);
+		if (after > before) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.divine.rank." + after).withStyle(ChatFormatting.GOLD));
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 0.9F);
+			MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), 2.5F, LIGHT);
+		}
 	}
 
 	// ---- the sense ---------------------------------------------------------------------------------------------------
@@ -172,6 +225,7 @@ public final class DivineSense {
 			return true;
 		}
 		SENSED.put(player.getUUID(), now);
+		practise(player, SLIP_PRACTICE);
 		Entity foe = source.getEntity() != null ? source.getEntity() : direct;
 		if (foe instanceof LivingEntity && foe != player) {
 			COUNTERS.put(player.getUUID(), new Counter(foe.getUUID(), now + COUNTER_TICKS));
@@ -208,7 +262,8 @@ public final class DivineSense {
 		Feathers.refund(player, COUNTER_REFUND);
 		level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.9F, 1.6F);
 		MagicFx.blast(level, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 0.7F, LIGHT);
-		return damage * COUNTER_BONUS;
+		practise(player, COUNTER_PRACTICE);
+		return damage * counterBonus(player);
 	}
 
 	// ---- Alight ------------------------------------------------------------------------------------------------------
@@ -228,9 +283,14 @@ public final class DivineSense {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long ready = ALIGHT_READY.get(player.getUUID());
-		if (ready != null && now < ready) {
+		if (ready != null && now < ready && ZFighterLineage.divine(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.divine.alight_wait", (ready - now + 19) / 20).withStyle(ChatFormatting.GRAY));
 			return true;
+		}
+		// one who stayed keeps their own heritage's key: it is only Alight when there is something to refill
+		boolean own = !ZFighterLineage.divine(player);
+		if (own && (ready != null && now < ready || full(player))) {
+			return false;
 		}
 		if (full(player) || player.isPassenger() || player.isInWater()) {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.4F, 0.8F);

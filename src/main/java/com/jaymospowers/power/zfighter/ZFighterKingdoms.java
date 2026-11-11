@@ -50,7 +50,7 @@ public final class ZFighterKingdoms {
 	private static Method CAN_REBORN, REBORN;
 	/** (0.20.83) Kingdoms' LifeStory.reincarnateAnew(ServerPlayer): born again with MCA's creator too (the third death). */
 	private static Method REBORN_ANEW;
-	/** Kingdoms' Heritage.stayed(ServerPlayer): one of the just stayed in the high places and is Divine-born now. */
+	/** Kingdoms' Heritage.stayed(ServerPlayer): one of the just stayed in the high places (the Divine-born road opens to them). */
 	private static Method STAYED;
 	/** (0.20.94) Kingdoms' LifeStory.making(ServerPlayer): still making their character. */
 	private static Method MAKING;
@@ -244,7 +244,7 @@ public final class ZFighterKingdoms {
 		}
 	}
 
-	/** One of the just stayed at the Judge: Kingdoms makes them Divine-born. Nothing without Kingdoms. */
+	/** One of the just stayed at the Judge: Kingdoms opens the Divine-born road to them. Nothing without Kingdoms. */
 	static void stayed(ServerPlayer player) {
 		if (STAYED == null) {
 			return;
@@ -252,7 +252,7 @@ public final class ZFighterKingdoms {
 		try {
 			STAYED.invoke(null, player);
 		} catch (ReflectiveOperationException | RuntimeException e) {
-			JaymosPowers.LOGGER.warn("Kingdoms couldn't make {} Divine-born", player.getScoreboardName(), e);
+			JaymosPowers.LOGGER.warn("Kingdoms couldn't note that {} stayed", player.getScoreboardName(), e);
 		}
 	}
 
