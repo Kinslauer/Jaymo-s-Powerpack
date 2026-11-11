@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,7 +22,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
-- [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · running
 
 
 ## In review
@@ -31,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
+- [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · #1286 · in-review
 
 
 ## Needs Andy
