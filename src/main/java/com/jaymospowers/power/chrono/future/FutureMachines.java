@@ -22,13 +22,15 @@ import org.jspecify.annotations.Nullable;
  * The future's machines, roaming the ruins beside the dead: patrols of androids ({@link FutureAndroid}) and, now and
  * then, a war mech ({@link FutureMech}). They fight the dead as readily as the living. Checked with the hordes
  * ({@link FutureFerals}): each player gets a patrol about every {@link #PATROL_CHANCE} checks while few are near, and a
- * mech about every {@link #MECH_CHANCE} while none is.
+ * mech about every {@link #MECH_CHANCE} while none is. Frostborn troopers in Rigs ({@link FutureTrooper}) come in squads
+ * about every {@link #SQUAD_CHANCE} checks, fighting both the machines and the dead.
  */
 public final class FutureMachines {
 	public static EntityType<FutureAndroid> ANDROID;
 	public static EntityType<FutureMech> MECH;
 	/** (0.17.135) The smaller android mech: now and then at the head of a patrol, and the Mad Tinkerer's test unit. */
 	public static EntityType<FutureMech> ANDROID_MECH;
+	public static EntityType<FutureTrooper> TROOPER;
 
 	/** One check in this many (with the hordes, every 2 s) sends a patrol of this many androids, while fewer than the cap are near. */
 	static final int PATROL_CHANCE = 45, PATROL_MIN = 1, PATROL_MAX = 3, ANDROID_CAP = 4;
@@ -36,6 +38,8 @@ public final class FutureMachines {
 	static final int PATROL_MECH_CHANCE = 6;
 	/** One check in this many sends a mech, while none is within {@link #MECH_SPACE}. */
 	static final int MECH_CHANCE = 240;
+	/** One check in this many sends a squad of this many Frostborn troopers, while fewer than the cap are near. */
+	static final int SQUAD_CHANCE = 60, SQUAD_MIN = 2, SQUAD_MAX = 4, TROOPER_CAP = 4;
 	static final double NEAR = 64.0, MECH_SPACE = 128.0;
 	/** How far out they turn up. */
 	static final int SPAWN_MIN = 30, SPAWN_MAX = 50;
@@ -50,7 +54,10 @@ public final class FutureMachines {
 			.sized(2.1F, 4.0F).eyeHeight(3.5F).clientTrackingRange(12).noLootTable());
 		ANDROID_MECH = register("android_mech", EntityType.Builder.<FutureMech>of(FutureMech::new, MobCategory.MONSTER)
 			.sized(1.6F, 3.1F).eyeHeight(2.7F).clientTrackingRange(10).noLootTable());
+		TROOPER = register("frostborn_trooper", EntityType.Builder.<FutureTrooper>of(FutureTrooper::new, MobCategory.CREATURE)
+			.sized(0.6F, 1.95F).eyeHeight(1.74F).clientTrackingRange(10).noLootTable());
 		FabricDefaultAttributeRegistry.register(ANDROID, FutureAndroid.createAttributes());
+		FabricDefaultAttributeRegistry.register(TROOPER, FutureTrooper.createAttributes());
 		FabricDefaultAttributeRegistry.register(MECH, FutureMech.createAttributes());
 		FabricDefaultAttributeRegistry.register(ANDROID_MECH, FutureMech.createAndroidAttributes());
 	}
@@ -80,6 +87,20 @@ public final class FutureMachines {
 					FutureMech lead = ANDROID_MECH.create(level, EntitySpawnReason.EVENT);
 					if (lead != null && place(level, lead, at)) {
 						level.addFreshEntity(lead);
+					}
+				}
+			}
+		}
+		if (random.nextInt(SQUAD_CHANCE) == 0
+			&& level.getEntitiesOfClass(FutureTrooper.class, player.getBoundingBox().inflate(NEAR), FutureTrooper::isAlive).size() < TROOPER_CAP) {
+			BlockPos at = spot(level, player, random);
+			if (at != null) {
+				int count = SQUAD_MIN + random.nextInt(SQUAD_MAX - SQUAD_MIN + 1);
+				for (int i = 0; i < count; i++) {
+					FutureTrooper trooper = TROOPER.create(level, EntitySpawnReason.EVENT);
+					if (trooper != null && place(level, trooper, at.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2))) {
+						trooper.outfit();
+						level.addFreshEntity(trooper);
 					}
 				}
 			}

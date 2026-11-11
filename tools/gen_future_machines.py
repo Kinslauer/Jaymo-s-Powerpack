@@ -1,4 +1,5 @@
-"""Our own skins for the future's machines (Chrono's Los Perrito future): three androids. (The mechs have their own
+"""Our own skins for the future's machines (Chrono's Los Perrito future): three androids, and the Frostborn
+trooper's body under its Rig (the Rig itself is the worn armour's texture). (The mechs have their own
 model and skins now: tools/gen_android_mech.py.)
 
 Androids are 64x64 on the humanoid layout (head, hat, body, right arm, right leg; the left limbs mirror). Each has an
@@ -133,8 +134,48 @@ def android(index):
     return name, img, eyes
 
 
+def trooper():
+    """A Frostborn trooper: pale, frost-blue skin, white hair, ice-blue eyes, a dark flight suit under the Rig."""
+    r = random.Random(0xF205)
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    skin, hair, eye, suit, seam = (178, 206, 226), (236, 242, 248), (120, 220, 255), (34, 40, 58), (70, 150, 200)
+
+    def surface(base, face):
+        c = shade(base, 0.94 + r.random() * 0.08)
+        return shade(c, 0.88) if face in ("left", "right") else shade(c, 0.94) if face == "back" else c
+
+    def head(face, x, y, fw, fh):
+        if face == "top" or (face != "bottom" and y <= 1) or (face == "back" and y <= 5):
+            return surface(hair, face)
+        if face == "front" and y == 4 and x in (1, 2, 5, 6):
+            return eye if x in (2, 5) else (240, 246, 250)
+        if face == "front" and y == 6 and 3 <= x <= 4:
+            return shade(skin, 0.8)
+        return surface(skin, face)
+
+    def body(face, x, y, fw, fh):
+        if face == "front" and x in (3, 4):
+            return seam                                  # the suit's zip
+        if y == 9:
+            return shade(suit, 0.7)                      # belt
+        return surface(suit, face)
+
+    def arm(face, x, y, fw, fh):
+        return surface(skin, face) if y >= 10 or face == "bottom" else surface(suit, face)
+
+    def leg(face, x, y, fw, fh):
+        return surface((24, 28, 40), face) if y >= 10 or face == "bottom" else surface(suit, face)
+
+    box(img, 0, 0, 8, 8, 8, head)
+    box(img, 16, 16, 8, 12, 4, body)
+    box(img, 40, 16, 4, 12, 4, arm)
+    box(img, 0, 16, 4, 12, 4, leg)
+    return img
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    trooper().save(os.path.join(OUT, "frostborn_trooper.png"))
     for i in range(len(ANDROIDS)):
         name, img, eyes = android(i)
         img.save(os.path.join(OUT, "android_%s.png" % name))
