@@ -4,6 +4,8 @@ import com.geckolib.constant.dataticket.DataTicket;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
+import com.geckolib.model.DefaultedEntityGeoModel;
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.SkeletonLord;
 import com.jaymoskingdoms.inhabitants.BarrowBeetle;
 import com.jaymoskingdoms.inhabitants.Bogre;
@@ -14,6 +16,7 @@ import com.jaymoskingdoms.monsters.SilverSkeleton;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -45,6 +48,7 @@ public final class InhabitantsClient {
 	static final float TAIL_BEND = 60.0F, TAIL_SNAP = 55.0F, TAIL_STRAIGHT = 10.0F, TAIL_LIMP = 30.0F, TAIL_ZIG = -45.0F, TAIL_ZAG = 70.0F;
 
 	static final DataTicket<Boolean> DRAUGR_AXE = DataTicket.create("jaymoskingdoms_draugr_axe", Boolean.class);
+	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
 	static final DataTicket<Boolean> LORD_DORMANT = DataTicket.create("jaymoskingdoms_lord_dormant", Boolean.class);
 	static final DataTicket<Float> LORD_SINCE_WOKE = DataTicket.create("jaymoskingdoms_lord_since_woke", Float.class);
@@ -62,10 +66,20 @@ public final class InhabitantsClient {
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
 	}
 
-	/** Its sword and shield, or its axe; its tail, mangled its own way. */
+	/**
+	 * Its sword and shield, or its axe; its tail, mangled its own way. A lore film's living Warrior-born
+	 * ({@link Draugr#stageLiving}) wears {@code draugr_living.png} (the same gear in better condition) and a whole tail.
+	 */
 	static final class DraugrRenderer extends InhabitantRenderer<Draugr> {
+		static final Identifier LIVING = JaymosKingdoms.id("textures/entity/draugr_living.png");
+
 		DraugrRenderer(EntityRendererProvider.Context context) {
-			super(context, "draugr", 1.0F, DRAUGR_SHADOW, "head");
+			super(context, new DefaultedEntityGeoModel<Draugr>(JaymosKingdoms.id("draugr")) {
+				@Override
+				public Identifier getTextureResource(GeoRenderState state) {
+					return state.getOrDefaultGeckolibData(DRAUGR_LIVING, false) ? LIVING : super.getTextureResource(state);
+				}
+			}, 1.0F, DRAUGR_SHADOW, "head");
 		}
 
 		@Override
@@ -73,6 +87,7 @@ public final class InhabitantsClient {
 			super.addRenderData(draugr, related, state, partialTick);
 			state.addGeckolibData(DRAUGR_AXE, draugr.axe());
 			state.addGeckolibData(DRAUGR_TAIL_ROLL, draugr.getUUID().hashCode());
+			state.addGeckolibData(DRAUGR_LIVING, draugr.living());
 		}
 
 		@Override
@@ -82,6 +97,9 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("axe", bone -> bone.skipRender(!axe));
 			snapshots.ifPresent("sword", bone -> bone.skipRender(axe));
 			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
+			if (info.getOrDefaultGeckolibData(DRAUGR_LIVING, false)) {
+				return;
+			}
 			int roll = info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0);
 			DraugrTail tail = DraugrTail.values()[Math.floorMod(roll, DraugrTail.values().length)];
 			int side = (roll >>> 8 & 1) == 0 ? 1 : -1;

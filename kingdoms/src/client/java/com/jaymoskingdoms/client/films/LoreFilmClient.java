@@ -3,6 +3,8 @@ package com.jaymoskingdoms.client.films;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.films.LoreFilms;
+import com.jaymoskingdoms.inhabitants.Draugr;
+import com.jaymoskingdoms.inhabitants.Inhabitants;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -51,7 +53,8 @@ import org.jspecify.annotations.Nullable;
  * <ol>
  * <li>A line of hearthlanders at night, and behind them the five mages: Grimsby, Thessaly, Ambrose and Varro, each the
  * living man or woman their spirit was ({@code tools/gen_film_skins.py}), and a fifth in plain grey, a step back.</li>
- * <li>Far off across the field stands the sorcerer's living host, orcs and Warrior-born, and the sorcerer among them:
+ * <li>Far off across the field stands the sorcerer's living host, orcs and Warrior-born (in the draugr's gear, as they
+ * were alive), and the sorcerer among them:
  * the Grue as it was, hooded, its eyes lit violet.</li>
  * <li>The sorcerer raises a hand and calls up the rest. Andy: "shadows rising from the ground like flame, flickering and
  * revealing the growing legion with every flicker". Black flame flares across the field; each flare lights it, and each
@@ -253,11 +256,13 @@ public final class LoreFilmClient {
 		// the living host, standing from the start, a gap in the middle for the one they serve
 		for (int i = 0; i < HOST; i++) {
 			boolean orc = i % 5 < 3;
-			LivingEntity e = person(f, orc ? "orc_" + i % 3 : "raider_" + i % 3, false);
+			LivingEntity e = orc ? person(f, "orc_" + i % 3, false) : warriorBorn(f, i);
 			if (e == null) {
 				continue;
 			}
-			e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(orc ? (i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE) : Items.IRON_SWORD));
+			if (orc) {
+				e.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(i % 2 == 0 ? Items.IRON_AXE : Items.STONE_AXE));
+			}
 			double side = (i < HOST / 2 ? -1.0 : 1.0) * (2.5 + (i % (HOST / 2)) * (LEGION_HALF - 2.5) / (HOST / 2 - 1));
 			Actor a = cast(f, e, Role.HOST, HOST_NEAR + f.rnd.nextDouble() * (HOST_FAR - HOST_NEAR), side + spread(f, 0.4), facingBack);
 			a.group = -1;
@@ -299,6 +304,15 @@ public final class LoreFilmClient {
 			e.load(TagValueInput.create(ProblemReporter.DISCARDING, f.level.registryAccess(), tag));
 		} catch (RuntimeException ex) {
 			JaymosKingdoms.LOGGER.debug("lore film actor {} kept its default look", skin, ex);
+		}
+		return e;
+	}
+
+	/** A Warrior-born of the host: a draugr's helm, mail and fur, worn by the living man in better days (Andy). */
+	private static @Nullable LivingEntity warriorBorn(Film f, int i) {
+		Draugr e = Inhabitants.DRAUGR.create(f.level, EntitySpawnReason.LOAD);
+		if (e != null) {
+			e.stageLiving(i % 3 == 0);
 		}
 		return e;
 	}

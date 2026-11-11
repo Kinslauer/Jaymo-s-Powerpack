@@ -92,6 +92,8 @@ public class Draugr extends Monster implements GeoEntity {
 	private int guardBroken;
 	/** It has been given its arms (a structure may place it without finalizeSpawn, so it arms itself on its first tick). */
 	private boolean armed;
+	/** (Client, a lore film's actor only) drawn as the living Warrior-born it was, in the same gear in better condition. */
+	private boolean living;
 	/** (Client) the tick it last took a blow on its shield. */
 	private int blockedAt = -1000;
 
@@ -110,6 +112,20 @@ public class Draugr extends Monster implements GeoEntity {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(AXE, false);
+	}
+
+	/**
+	 * Makes this (a client-only lore film actor, never a real draugr) the living Warrior-born it was: drawn alive, its
+	 * tail whole, armed with the axe or the sword and shield.
+	 */
+	public void stageLiving(boolean axe) {
+		this.living = true;
+		this.entityData.set(AXE, axe);
+	}
+
+	/** Whether this is a lore film's living Warrior-born ({@link #stageLiving}). */
+	public boolean living() {
+		return this.living;
 	}
 
 	/** It fights with the two-handed axe (else sword and shield). */
