@@ -62,7 +62,16 @@ def packMods = [
 	[dep: "maven.modrinth:jei:wQJNj1C5", cf: [238222, 9255015]],
 	[dep: "maven.modrinth:mezzconfig:GKiA7PV4", cf: [1689768, 9048674]],
 	[dep: "maven.modrinth:xaeros-minimap:eUEhnw8G", cf: [263420, 9265879]],
-	[dep: "maven.modrinth:sodium:bAZQdGpg", cf: [394468, 8888037]],
+	// Sodium 0.9.3-beta.4 while the ImmersiveVFX test runs (ImmersiveVFX 1.9.0 and later need 0.9.3 beta 4 or newer);
+	// the release before it was 0.9.2 (Modrinth bAZQdGpg, CurseForge file 8888037).
+	[dep: "maven.modrinth:sodium:2MZWfUts", cf: [394468, 9504673]],
+	// ImmersiveVFX 2.0.5 (all rights reserved, by Shinyflvres; alpha; shipped unchanged, downloaded by id): pixel shadows,
+	// shore foam and water caustics, new clouds and sky, fire, ground fog, sand winds, auroras and heavier rain, drawn on
+	// Sodium with no shader pack. A TEST (Andy, 2026-11-11: "We can test this to see if it runs better, if not it gets
+	// scrapped"): its page says it does not work with Iris, so Iris and the Complementary Unbound default are out of the
+	// pack while it is in. To scrap it: put Iris and packShaderPacks back, Sodium back to 0.9.2, and take "iris" out of
+	// removedIdsFromProfile. Client-only. CurseForge only. Kept out of the dev game.
+	[dep: "curse.maven:immersivevfx-1766116:9559200", cf: [1766116, 9559200], dev: false],
 	[dep: "maven.modrinth:ok-zoomer:3UXOK2JF", cf: [354047, 8899781]],
 	// Moog's Voyager Structures (MIT): new structures in world generation, and its library (LGPL-3.0)
 	[dep: "maven.modrinth:moogs-voyager-structures:PiFoSPXI", cf: [656977, 8970306]],
@@ -203,9 +212,8 @@ def packMods = [
 	// made bigger and tougher. Shipped unchanged. Kingdoms' grizzly mini-boss (wild/Grizzly) is drawn after its brown
 	// bear (2026-11-05, Andy). Client and server.
 	[dep: "maven.modrinth:bear-minimum:L6rn1t3T", cf: [1240239, 9379925]],
-	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
-	// Client-only: the server ignores it.
-	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
+	// Iris Shaders (LGPL-3.0) is out while the ImmersiveVFX test runs (see Sodium above). It was:
+	// [dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
 	// Bobby (LGPL-3.0, by Johni0702): keeps the chunks you've seen on disk and draws them past the server's view distance
 	// (the Deck sends 12), so explored land stays in sight further out. Nothing for land nobody has visited yet; works
 	// with Sodium and Iris. Client-only: the server ignores it.
@@ -579,7 +587,8 @@ def packShaderPacks = [
 	// Complementary Unbound (by EminGT, Complementary Development; Complementary License Agreement): modpacks may include
 	// it unchanged, added through CurseForge's own system, and must credit it on the pack's description page since it's
 	// on by default. Never copied into the pack or changed, settings included. r5.9.3 is made for 26.2 and 26.3 (Iris).
-	[cf: [385587, 8884656], file: "ComplementaryUnbound_r5.9.3.zip"],
+	// out while the ImmersiveVFX test runs (no Iris to draw it):
+	// [cf: [385587, 8884656], file: "ComplementaryUnbound_r5.9.3.zip"],
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
@@ -593,7 +602,8 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
 // dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov"]
+// Iris (out while the ImmersiveVFX test runs: ImmersiveVFX does not work beside it)
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "iris"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {
@@ -657,7 +667,7 @@ dependencies {
 	compileOnly "maven.modrinth:spell-engine:kgVsejrW"
 	// (0.20.52) compiled against to keep the Aether out of its chunk culling from under the clouds; touched only via
 	// client/aether/SodiumVeil and client/mixin/sodium (an optional mixin config)
-	compileOnly "maven.modrinth:sodium:bAZQdGpg"
+	compileOnly "maven.modrinth:sodium:2MZWfUts"
 	// compiled against so its F5 skips the front view (client/mixin/shouldersurfing/ShoulderSurfingFrontMixin, an
 	// optional mixin config); the front view has its own key (client/FrontCamera)
 	compileOnly "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx"
