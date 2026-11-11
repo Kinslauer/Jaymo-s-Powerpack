@@ -52,8 +52,9 @@ final class WebBodyLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	private static LayerDefinition capeMesh() {
 		MeshDefinition mesh = new MeshDefinition();
-		mesh.getRoot().addOrReplaceChild("cape", CubeListBuilder.create().texOffs(0, 0).addBox(-CAPE_W / 2.0F, 0.0F, 0.0F, (int)CAPE_W, (int)CAPE_H, 1),
-			PartPose.offset(0.0F, 0.0F, CAPE_BACK));
+		// (hinged strips, so it hangs as cloth: ClothCape)
+		com.jaymospowers.client.costume.ClothCape.chain(mesh.getRoot(), "cape", PartPose.offset(0.0F, 0.0F, CAPE_BACK),
+			-CAPE_W / 2.0F, CAPE_W, (int)CAPE_H, 0.0F, 1.0F, 0, 0);
 		return LayerDefinition.create(mesh, 64, 32);
 	}
 
@@ -147,6 +148,8 @@ final class WebBodyLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			this.cape.yScale = Math.max(0.05F, unfurl);
 			this.cape.xScale = 0.5F + 0.5F * unfurl;
 			this.cape.visible = unfurl > 0.02F;
+			// the rest of it is cloth: lags the body, swings on turns, billows in a fall, spreads on a glide
+			com.jaymospowers.client.costume.ClothCape.pose(this.cape, state, 1);
 		}
 	}
 }
