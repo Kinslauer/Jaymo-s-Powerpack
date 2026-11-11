@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 20:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 20:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,6 +21,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 🪶 Quill · #1285 · writing
+- [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · running
 
 
 ## In review
