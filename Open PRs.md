@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-11 00:50
+updated: 2026-11-11 05:25
 ---
 # Open PRs
 
-7 open, as of 2026-11-11 00:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+8 open, as of 2026-11-11 05:25. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1262](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1262) Undead seek real shelter from the sun
@@ -36,7 +36,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1281](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1281) discord_read_aloud: --stop and --status find every running reading
-- **Branch:** `claude/read-aloud-find-every-reading` · **Updated:** 2026-11-11 (today)
-- **Checks:** ⏳ 4 of 4 running
+## [#1282](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1282) Plan: Boxing (three bare-fist styles), for Andy to rule on
+- **Branch:** `jung/boxing-plan` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1283](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1283) read aloud: detect davey 0.2 + discord.py 2.7.1 (the silent-voice cause)
+- **Branch:** `claude/project-thread-iwe61z` · **Updated:** 2026-11-11 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
