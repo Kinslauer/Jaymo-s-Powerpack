@@ -42,8 +42,7 @@ why the moon's ore is there at all. The Endermen are the one thing the Galvan do
 **Files:** `BandForge`, `lang/parts/xenoform.json` (the hum and smith lines).
 
 - `CHOICES` becomes the Moon alone (kept as a constant so it can be reopened).
-- Old saves: a save whose forge is already **built** on another world keeps it (people may have walked there); a save
-  that has only **picked** a world and not built yet is moved to the Moon. (Open question 1.)
+- Old saves: none to handle. Andy (2026-11-11): "doesnt matter, we will reset the world on release."
 - Without Kingdoms (no city), the forge is raised as now, but on the Moon: the stone hut becomes a pale alloy shelter
   half sunk in a crater wall.
 - With Kingdoms, Track 2's city holds the forge and Powers stops raising its hut there (Kingdoms sets the forge's `AT`
