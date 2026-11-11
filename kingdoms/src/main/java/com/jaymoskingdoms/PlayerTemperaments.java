@@ -47,6 +47,7 @@ public final class PlayerTemperaments {
 		Map.entry("elders", Temperaments.Temperament.KINDHEARTED),
 		Map.entry("hornkin", Temperaments.Temperament.PROUD),
 		Map.entry("wolves", Temperaments.Temperament.SUSPICIOUS),
+		Map.entry("starwrights", Temperaments.Temperament.PROUD),
 		Map.entry("barrows", Temperaments.Temperament.GLOOMY),
 		Map.entry("chieftain", Temperaments.Temperament.PROUD),
 		Map.entry("master", Temperaments.Temperament.DUTIFUL),
