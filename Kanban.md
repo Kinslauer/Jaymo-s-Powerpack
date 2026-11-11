@@ -13,8 +13,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 🪶 Quill · #1271 · writing
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · 🔨 Hephaestus · #1262 · claimed
+- [ ] [[Inbox/lore-read-the-canon|lore-read-the-canon]] · 🪶 Quill · #1271 · writing
 
 
 ## In review
