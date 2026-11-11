@@ -61,6 +61,7 @@ public final class BlindnessPower implements Power {
         BlindnessBlackout.init();
         BlindnessAbyssalEcho.init();
         BlindnessDevotion.init();
+        BlindnessService.init();
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             BlindnessEcholocation.clear();

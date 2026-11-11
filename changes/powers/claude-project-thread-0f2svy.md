@@ -14,6 +14,13 @@
 - **Sky Sight**: the devout's Void Sight (C, ascended) lifts the view 16 blocks over them, looking almost straight down,
   eased in and out; a ceiling stops it short. The dark thins further and the glow reaches 32 blocks. Blackout and Abyssal
   Echo are unchanged.
+- **A service of the Unseeing** (Andy: "you should be able to stumble on a service of the members performing this on
+  one of their followers"): now and then at night, out in the wild in the Overworld (not near a village), 22-32 blocks
+  from a survival player, three blindfolded members stand round a follower between four lit candles. They chant three
+  lines, the eldest carves the follower's eyes out (shears, a cry, blood), binds them with a blindfold and the follower
+  thanks them. A player within 20 blocks at the end is tossed a blindfold "for when you are ready". Then they walk off as
+  ordinary villagers; the candles stay. Killing any of them breaks it up. At most once every 3 days a player (0.4% a
+  10 s check at night, about one night in five). `BlindnessService`.
 - `BlindnessDevotion`, `BlindnessDevoutSight` and three client mixins (`jaymospowers.blindness.client.mixins.json`);
   `Scars.Kind.CARVED_EYES`.
-- Built; not played. The worn blindfold's texture is a plain dark band (first try).
+- Built; not played. Villagers don't draw head gear, so the members' and the follower's blindfolds don't show on them. The worn blindfold's texture is a plain dark band (first try).

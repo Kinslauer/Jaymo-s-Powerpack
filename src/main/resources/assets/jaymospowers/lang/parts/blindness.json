@@ -29,5 +29,19 @@
 	"message.jaymospowers.blindness.carve_warn": "Again, to carve out your eyes. There is no undoing it.",
 	"message.jaymospowers.scar.carved_eyes": "Your eyes are gone. Something else looks out in their place.",
 	"message.jaymospowers.blindness.sockets_bleed": "The sockets won't stop bleeding. Bandage your eyes or bleed out.",
-	"message.jaymospowers.blindness.sockets_healed": "The sockets have closed over. Your eyes are not coming back."
+	"message.jaymospowers.blindness.sockets_healed": "The sockets have closed over. Your eyes are not coming back.",
+	"message.jaymospowers.blindness.service.says": "%s: %s",
+	"message.jaymospowers.blindness.service.hush": "%s turns their bound face toward you and says nothing. Not now.",
+	"message.jaymospowers.blindness.service.elder_name": "Eldest of the Unseeing",
+	"message.jaymospowers.blindness.service.member_name": "One of the Unseeing",
+	"message.jaymospowers.blindness.service.follower_name": "Follower",
+	"message.jaymospowers.blindness.service.unseeing_name": "Newly Unseeing",
+	"message.jaymospowers.blindness.service.chant.1": "What the eye takes in, it lies about.",
+	"message.jaymospowers.blindness.service.chant.2": "Give up the liar, and be shown the truth of things.",
+	"message.jaymospowers.blindness.service.chant.3": "Are you ready to stop looking, and begin to see?",
+	"message.jaymospowers.blindness.service.cut": "Then be still.",
+	"message.jaymospowers.blindness.service.bind": "Bind it tight, or the dark will drink you before it fills you.",
+	"message.jaymospowers.blindness.service.thanks": "I... I can feel you. All of you. Thank you.",
+	"message.jaymospowers.blindness.service.gift": "You watched. Then this is yours, for when you are ready.",
+	"message.jaymospowers.blindness.service.scattered": "No! Not now, not like this!"
 }
