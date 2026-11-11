@@ -2466,3 +2466,16 @@ will still have to fight in the tournament as a non z fighter)".
 - Andy: the minotaur "should spawn in the aether as one of the dungeon bosses".
 - With Jaymo's Kingdoms in the pack, about a third of newly generated Sentry Ruins (35%) have Kingdoms' minotaur in the boss room in place of the Slider. It keeps to its room. While it lives, a player in the room shuts the doors, and they open again once the room is empty. Its boss bar shows to the players in the room. Its death opens the doors, breaks the way to the boss's crates and unlocks the walls, the same as the Slider's. Without Kingdoms every ruin keeps its Slider. Ruins already generated keep the boss they have. `aether/dungeon/RuinBoss`, `RuinPiece` (boss room).
 - Built (`compileJava`). Not played: no ruin with a minotaur has been seen in game.
+
+## 0.22.19 (2026-11-11): The Retaking: the Chrono's Road (#1307)
+
+- **The Chrono's Road** in the Story tab, for every Chrono: end your own echo for good; go forward into the future; find one of the last Omen pilots and let them talk; spend long enough outside time and sleep through to morning (the Stopped Clock). Steps already done (an echo ended, a clock held) tick themselves.
+- The first pilot you talk to presses some folded **Drawings** into your hand: four sheets of a great clock and the sweepers' parts, the maker's name scraped off every one.
+- `StoryRoads` now gives Jaymo's Kingdoms several roads (the Fighter's and the Chrono's); only the Fighter's has its own screen behind Open.
+- Built; not played.
+
+## 0.22.20 (2026-11-11): The Retaking: the Fighter's Road (#1307)
+
+- The Z Fighter sagas are back, folded into the Retaking: the character menu's Story tab shows **The Fighter's Road** under the five acts, listing each saga (done, the step you're on with its count, ready to begin, or not yet). Its Open button brings up the saga screen (now called Sagas) to pick a difficulty, start or give up a saga, and see side jobs.
+- New client `StoryRoads` is what Jaymo's Kingdoms' Story tab reads (by reflection) for a player's own road; other powers' and callings' roads will join it.
+- Built; not played.
