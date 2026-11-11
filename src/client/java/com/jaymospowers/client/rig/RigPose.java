@@ -52,6 +52,12 @@ public final class RigPose {
 	/** Unibeam: the arms drawn back and wide, the head back, and the shake while the beam pours. */
 	static final float UNI_ARM_BACK = 0.75F, UNI_ARM_OUT = 0.95F, UNI_HEAD_BACK = 0.2F, UNI_SHAKE = 0.05F;
 
+	/** The one-knee landing: ticks to drop, when it rises, how far the body drops (model pixels), the lean, the head, the legs, the planted fist and the flung arm. */
+	static final float KNEE_DOWN = 3.0F, KNEE_UP_AT = 17.0F, KNEE_DROP = 6.0F, KNEE_LEAN = 0.55F, KNEE_HEAD = 0.25F;
+	static final float KNEE_FRONT = -1.2F, KNEE_BACK = 1.1F, KNEE_FIST = -0.5F, KNEE_FLUNG = 0.7F, KNEE_FLUNG_OUT = 0.4F;
+	/** A Rig leg's kick: ticks to raise, when it lowers, and the leg's swing. */
+	static final float KICK_RAISE = 2.0F, KICK_LOWER_AT = 6.0F, KICK_LEG = -1.35F;
+
 	/** Per entity: {hover amount, game time it was last stepped}. */
 	private static final Map<Integer, float[]> HOVER = new HashMap<>();
 	private static final int MAX_TRACKS = 256;
@@ -87,7 +93,8 @@ public final class RigPose {
 	/** From the avatar renderer's extractRenderState (RigSuitAvatarRendererMixin). */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!(entity instanceof Player player) || minecraft.level == null || player.isSleeping() || player.isPassenger() || !Rig.wearsAny(player)) {
+		if (!(entity instanceof Player player) || minecraft.level == null || player.isSleeping() || player.isPassenger()
+			|| !Rig.wearsAny(player) && RigMoves.get(player) == null) {
 			state.setData(KEY, null);
 			if (entity != null) {
 				HOVER.remove(entity.getId());
@@ -177,6 +184,26 @@ public final class RigPose {
 				set(h.rightArm, UNI_ARM_BACK + shake, 0.0F, UNI_ARM_OUT - shake, amount);
 				set(h.leftArm, UNI_ARM_BACK - shake, 0.0F, -UNI_ARM_OUT + shake, amount);
 				h.head.xRot = Mth.lerp(amount, h.head.xRot, h.head.xRot - UNI_HEAD_BACK);
+			}
+			case RigMoves.KNEE -> {
+				// the one-knee landing: down fast, held with a fist on the ground, then up
+				float amount = smooth(t / KNEE_DOWN) * (1.0F - smooth((t - KNEE_UP_AT) / (RigMoves.KNEE_TICKS - KNEE_UP_AT)));
+				for (ModelPart part : new ModelPart[] {h.head, h.body, h.rightArm, h.leftArm, h.rightLeg, h.leftLeg}) {
+					part.y += KNEE_DROP * amount;
+				}
+				h.body.xRot = Mth.lerp(amount, h.body.xRot, KNEE_LEAN);
+				h.head.xRot = Mth.lerp(amount, h.head.xRot, KNEE_HEAD);
+				set(h.rightLeg, KNEE_FRONT, 0.0F, 0.08F, amount);
+				set(h.leftLeg, KNEE_BACK, 0.0F, -0.1F, amount);
+				set(h.rightArm, KNEE_FIST, 0.0F, 0.1F, amount);
+				set(h.leftArm, KNEE_FLUNG, 0.0F, -KNEE_FLUNG_OUT, amount);
+			}
+			case RigMoves.KICK -> {
+				float amount = smooth(t / KICK_RAISE) * (1.0F - smooth((t - KICK_LOWER_AT) / (RigMoves.KICK_TICKS - KICK_LOWER_AT)));
+				set(h.rightLeg, KICK_LEG, 0.0F, 0.0F, amount);
+				set(h.leftLeg, 0.25F, 0.0F, 0.0F, amount);
+				set(h.rightArm, 0.5F, 0.0F, 0.5F, amount);
+				set(h.leftArm, 0.5F, 0.0F, -0.5F, amount);
 			}
 			default -> {
 			}

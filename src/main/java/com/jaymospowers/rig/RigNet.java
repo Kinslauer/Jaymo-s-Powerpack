@@ -23,6 +23,12 @@ public final class RigNet {
 	public static final int UNIBEAM = 7;
 	/** (0.11.110) The Helm's switches, from the Rig menu: the faceplate up / down, night vision on / off. */
 	public static final int FACEPLATE = 8, NIGHT = 9;
+	/** The sentry post: stand the worn suit where you are, or call it if it stands. */
+	public static final int SENTRY = 10;
+	/** The Rig prosthetics: the arm's repulsor shot and the leg's thruster kick (no suit needed, just the fitted limb). */
+	public static final int LIMB_SHOT = 11, LIMB_KICK = 12;
+	/** The most targets one missile volley marks. */
+	public static final int MAX_MARKS = 6;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
 	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL};
 	/** The first three of {@link #CYCLE} need no level. */
@@ -57,13 +63,25 @@ public final class RigNet {
 		}
 	}
 
+	/** Client → server: the targets marked by sweeping the view (entity ids, up to {@link #MAX_MARKS}): each gets a missile. */
+	public record Volley(List<Integer> targets) implements CustomPacketPayload {
+		public static final Type<Volley> TYPE = new Type<>(JaymosPowers.id("rig_volley"));
+		public static final StreamCodec<ByteBuf, Volley> CODEC = ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(MAX_MARKS)).map(Volley::new, Volley::targets);
+
+		@Override
+		public Type<Volley> type() {
+			return TYPE;
+		}
+	}
+
 	/**
 	 * Server → client: hovering (and in full flight), the Mind's current warnings, the actives' cooldowns (ticks), the
-	 * locked target's entity id (-1: none), and the takeover save's cooldown (seconds; 0 ready) and (0.11.107) the Unibeam's (ticks).
+	 * locked target's entity id (-1: none), the takeover save's cooldown (seconds; 0 ready), the Unibeam's (ticks), and how
+	 * long the Core's overcharge has left (ticks; 0 none).
 	 */
 	public record Status(boolean hovering, boolean flying, int warnings, int palmCooldown, int launcherCooldown, int scanCooldown, int lock,
-		int takeoverSeconds, int unibeamCooldown) implements CustomPacketPayload {
-		public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0);
+		int takeoverSeconds, int unibeamCooldown, int overcharge) implements CustomPacketPayload {
+		public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0, 0);
 		public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
 		public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
 			buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0));
@@ -74,11 +92,12 @@ public final class RigNet {
 			ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
 			ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
 			ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
+			ByteBufCodecs.VAR_INT.encode(buf, s.overcharge);
 		}, buf -> {
 			int flags = buf.readByte();
 			return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf) - 1,
-				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
+				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
 		});
 
 		@Override
@@ -122,10 +141,12 @@ public final class RigNet {
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Use.TYPE, Use.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Lock.TYPE, Lock.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Volley.TYPE, Volley.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Scan.TYPE, Scan.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Use.TYPE, (payload, context) -> RigActives.use(context.player(), payload.action()));
 		ServerPlayNetworking.registerGlobalReceiver(Lock.TYPE, (payload, context) -> RigActives.lock(context.player(), payload.entity()));
+		ServerPlayNetworking.registerGlobalReceiver(Volley.TYPE, (payload, context) -> RigActives.volley(context.player(), payload.targets()));
 	}
 }

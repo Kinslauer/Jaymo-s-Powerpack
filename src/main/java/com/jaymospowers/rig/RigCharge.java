@@ -3,7 +3,10 @@ package com.jaymospowers.rig;
 import java.util.Set;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import com.jaymospowers.core.fx.MagicFx;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -37,6 +40,9 @@ public final class RigCharge {
 	static final int FORGE_CHARGE = 30, FORGE_EVERY = 20, FORGE_REACH = 2;
 	/** Chrono's augment: every refill is this much bigger. */
 	static final float CHRONO_RATE = 1.5F;
+	/** Fire and magic damage to the plates: charge per point of damage (whole suit; fewer pieces, a share), the most one hit gives, and the sparks' colour. */
+	static final float FIRE_RATE = 4.0F, MAGIC_RATE = 6.0F;
+	static final int ABSORB_MAX = 60, ABSORB_COLOR = 0xFFC060;
 	/**
 	 * The blocks that count as a Kingdoms forge, by registry id (lit ones only, when they have a lit state). Kingdoms'
 	 * smithies are built round a blast furnace; {@code jaymoskingdoms:forge} is listed for when it gets a forge of its own.
@@ -65,15 +71,50 @@ public final class RigCharge {
 			return InteractionResult.SUCCESS;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (entity instanceof ServerPlayer player && source.is(DamageTypes.LIGHTNING_BOLT) && !Rig.core(player).isEmpty()) {
-				boolean wasFull = Rig.charge(player) >= Rig.MAX_CHARGE;
-				Rig.addCharge(player, Rig.MAX_CHARGE);
-				if (!wasFull) {
-					RigMind.struck(player);
-				}
+			if (!(entity instanceof ServerPlayer player) || Rig.core(player).isEmpty()) {
+				return true;
+			}
+			if (source.is(DamageTypes.LIGHTNING_BOLT)) {
+				strike(player);
+			} else if (source.is(DamageTypeTags.IS_FIRE)) {
+				absorb(player, amount, FIRE_RATE);
+			} else if (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC) || source.is(DamageTypes.DRAGON_BREATH)) {
+				absorb(player, amount, MAGIC_RATE);
+			} else if (source.is(DamageTypes.FALL) && RigLanding.catches(player, amount)) {
+				return false;
 			}
 			return true;
 		});
+	}
+
+	/** Lightning fills the Core and overfills it: a short burst of stronger, free shots ({@link RigActives#overcharge}). */
+	private static void strike(ServerPlayer player) {
+		boolean wasFull = Rig.charge(player) >= Rig.MAX_CHARGE;
+		Rig.addCharge(player, Rig.MAX_CHARGE);
+		RigActives.overcharge(player);
+		ServerLevel level = player.level();
+		Vec3 chest = player.position().add(0.0, 1.1, 0.0);
+		MagicFx.blast(level, chest, 1.6F, RigActives.OVER_COLOR);
+		MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), 3.0F, RigActives.OVER_COLOR);
+		level.sendParticles(MagicFx.spark(RigActives.OVER_COLOR, 1.0F), chest.x, chest.y, chest.z, 14, 0.4, 0.6, 0.4, 0.2);
+		if (!wasFull) {
+			RigMind.struck(player);
+		}
+	}
+
+	/** Some of what fire and magic do to the plates goes into the Core: the damage times the rate, a share for the pieces worn. */
+	private static void absorb(ServerPlayer player, float amount, float rate) {
+		int worn = 0;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			worn += Rig.wears(player, piece) ? 1 : 0;
+		}
+		int gain = Math.min(ABSORB_MAX, Math.round(amount * rate * worn / Rig.Piece.values().length));
+		if (gain <= 0 || Rig.charge(player) >= Rig.MAX_CHARGE) {
+			return;
+		}
+		add(player, gain);
+		Vec3 chest = player.position().add(0.0, 1.1, 0.0);
+		player.level().sendParticles(MagicFx.spark(ABSORB_COLOR, 0.7F), chest.x, chest.y, chest.z, 4, 0.3, 0.4, 0.3, 0.05);
 	}
 
 	/** Adds a refill (Chrono's augment makes it bigger). */
