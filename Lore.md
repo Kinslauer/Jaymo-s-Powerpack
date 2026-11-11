@@ -315,6 +315,16 @@ starlight and a cataclysm of falling stars.
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
 cold lands (Frostborn), and the crocodile dragon **Varasuchus**, which roosts on beaches and swamps (Tideborn).
 
+(new) **Where the dragons keep, and when they come down** (Andy, 2026-11-11). The dragons live in the sky: the wind
+dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus over the basalt deltas) keeps to the
+Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
+killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
+
+(new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
+its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
+witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains: it is held in
+the boss room of some of the Aether's Sentry Ruins, in place of the Slider.
+
 ## The dead
 
 **The dead of the Overworld are old villagers.** Zombies and husks wear villager-like skins because that is what they
