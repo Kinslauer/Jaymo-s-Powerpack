@@ -1,12 +1,12 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -102,7 +102,7 @@ public final class ZFighterGod {
 		if (player.isInvisible() || player.isSpectator()) {
 			return;
 		}
-		level.sendParticles(new DustParticleOptions(ZFighterForms.color(ZFighterForms.GOD), 0.9F), true, false, player.getX(), player.getY() + 0.8,
+		level.sendParticles(MagicFx.wisp(ZFighterForms.color(ZFighterForms.GOD), 0.9F), true, false, player.getX(), player.getY() + 0.8,
 			player.getZ(), GLOW_MOTES, 0.45, 0.8, 0.45, 0.0);
 		level.sendParticles(ParticleTypes.END_ROD, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.4, 0.7, 0.4, 0.01);
 	}

@@ -1,11 +1,11 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Mastery;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -104,7 +104,7 @@ final class DarktideGedan {
 		// the stance keeps its start (the field's growth): only the kamae changes
 		player.setAttached(DarktideState.MOVE, new DarktideState.Move(DarktideMove.STANCE, gedan.start, MAX_HOLD + 40, gedan.stance + 4 * gedan.parries));
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFBFE6FF), at.x, at.y - 0.3, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		MagicFx.blast(level, at.x, at.y - 0.3, at.z, MagicFx.FLASH_RADIUS, 0xBFE6FF);
 		level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y - 0.3, at.z, 14, 0.3, 0.3, 0.3, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.9F);
 		DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), attacker.getId()));

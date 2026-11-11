@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -13,7 +14,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
@@ -286,8 +286,8 @@ public final class ZFighterBranchForms {
 		player.setAttached(BRANCH, form);
 		ZFighterPower.transform(player, live, live.form);
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(COLORS[form - FIRST], 2.2F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
-			player.getZ(), 70, 1.0, player.getBbHeight() * 0.5, 1.0, 0.25);
+		MagicFx.burst(level, player.getX(), player.getY() + player.getBbHeight() * 0.5, player.getZ(), COLORS[form - FIRST], 2.2F, 70,
+			1.0, player.getBbHeight() * 0.5, 1.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.6F);
 	}
 

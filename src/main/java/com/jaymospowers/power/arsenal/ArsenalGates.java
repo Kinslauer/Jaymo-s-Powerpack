@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,7 +13,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -70,8 +71,8 @@ public final class ArsenalGates {
 	public static final AttachmentType<List<Gate>> GATES = AttachmentRegistry.create(JaymosPowers.id("arsenal_gates"),
 		builder -> builder.persistent(Gate.CODEC.listOf()).copyOnDeath());
 
-	private static final DustParticleOptions VOID = new DustParticleOptions(0x5A1E8C, 1.2F);
-	private static final DustParticleOptions OUTLINE = new DustParticleOptions(0xC07CFF, 0.8F);
+	private static final ParticleOptions VOID = MagicFx.wisp(0x5A1E8C, 1.2F);
+	private static final ParticleOptions OUTLINE = MagicFx.wisp(0xC07CFF, 0.8F);
 
 	/** A gate being cast out ahead: where it is now, the way it's going, how far it has gone. */
 	private static final class Projection {

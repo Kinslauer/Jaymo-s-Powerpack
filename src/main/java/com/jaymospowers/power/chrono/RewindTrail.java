@@ -1,7 +1,8 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.List;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -14,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
  */
 final class RewindTrail {
 	static final int PLAYBACK_TICKS = 6;
-	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 1.3F);
+	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 1.3F);
 
 	private final ServerLevel level;
 	private final List<Vec3> path;

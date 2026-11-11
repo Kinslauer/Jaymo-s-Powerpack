@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Fate;
@@ -19,7 +20,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -101,7 +102,7 @@ public final class WindCyclone {
 	static final int ROAR_INTERVAL = 16;
 	/** How often the funnel blows out the fire it sweeps (ticks). */
 	static final int DOUSE_EVERY = 5;
-	private static final DustParticleOptions STORM_DUST = new DustParticleOptions(0xB070FF, 1.2F);
+	private static final ParticleOptions STORM_DUST = MagicFx.wisp(0xB070FF, 1.2F);
 	private static final Identifier ROOT = JaymosPowers.id("wind_cyclone_root");
 
 	/**

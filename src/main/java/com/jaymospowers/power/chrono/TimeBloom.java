@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Soundscape;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -56,8 +57,8 @@ final class TimeBloom {
 	private static final int EXTRA_BLOCK_ENTITY_TICKS = 3;
 	private static final int MAX_BLOCK_ENTITY_TICKS_PER_TICK = 60;
 	private static final int RESCAN_INTERVAL = 20;
-	private static final DustParticleOptions BLOOM_DUST = new DustParticleOptions(0xC8E05A, 1.0F);
-	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 0.9F);
+	private static final ParticleOptions BLOOM_DUST = MagicFx.wisp(0xC8E05A, 1.0F);
+	private static final ParticleOptions GOLD_DUST = MagicFx.wisp(0xF2C14E, 0.9F);
 
 	/** Block entity types that misbehaved (threw) when ticked from here; never ticked by a bloom again. */
 	private static final Set<BlockEntityType<?>> BROKEN = new HashSet<>();

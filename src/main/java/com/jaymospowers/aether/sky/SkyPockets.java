@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.sky;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.baubles.Baubles;
 import com.jaymospowers.compat.Stacked;
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -48,7 +49,7 @@ public final class SkyPockets {
 	static final double LIGHT_GRAVITY = -0.55, HEAVY_GRAVITY = 0.6, LIGHT_JUMP = 0.45, HEAVY_JUMP = -0.2, LIGHT_FALL = 8.0, HEAVY_FALL = -1.0;
 	static final Identifier GRAVITY_ID = JaymosPowers.id("sky_pocket_gravity"), JUMP_ID = JaymosPowers.id("sky_pocket_jump"),
 		FALL_ID = JaymosPowers.id("sky_pocket_fall");
-	static final DustParticleOptions GAS = new DustParticleOptions(0x8FBF4A, 2.0F);
+	static final ParticleOptions GAS = MagicFx.miasma(0x8FBF4A, 2.0F);
 
 	public enum Pocket {
 		NONE, LIGHT, HEAVY

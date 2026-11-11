@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -544,6 +544,16 @@ public final class Sorcery {
 	}
 
 	/** A line of {@code particle} from the caster's hand to {@code to}. */
+	/** A working's beam from the caster's hands to {@code to}: how thick (blocks) and how long it lasts (ticks). */
+	static final float BEAM_RADIUS = 0.07F;
+	static final int BEAM_TICKS = 9;
+
+	/** A beam of mana in {@code colour} from {@code from}'s hands to {@code to} (the one beam every working shares). */
+	static void beam(ServerLevel level, LivingEntity from, Vec3 to, int colour) {
+		Fx.beam(level, from.getEyePosition().add(0.0, -0.3, 0.0), to, BEAM_RADIUS, colour, BEAM_TICKS);
+	}
+
+	/** A line of {@code particle} from {@code from}'s hands to {@code to}: for what is drawn out and isn't mana (blood). */
 	static void beam(ServerLevel level, LivingEntity from, Vec3 to, ParticleOptions particle) {
 		Vec3 start = from.getEyePosition().add(0.0, -0.3, 0.0);
 		Vec3 step = to.subtract(start);
@@ -563,7 +573,7 @@ public final class Sorcery {
 	/** Life drain: a violet thread from his hand to the foe; what it takes, he keeps. */
 	static void drain(ServerLevel level, LivingEntity caster, LivingEntity target, float damage, float heal) {
 		Mana.ripple(caster, Mana.HARM);
-		beam(level, caster, target.getBoundingBox().getCenter(), new DustParticleOptions(DRAIN_COLOUR, 1.2F));
+		beam(level, caster, target.getBoundingBox().getCenter(), DRAIN_COLOUR);
 		if (target.hurtServer(level, magic(level, caster), damage)) {
 			caster.heal(heal);
 			level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY(0.6), target.getZ(), 4, 0.2, 0.2, 0.2, 0.1);
@@ -582,7 +592,7 @@ public final class Sorcery {
 		for (int i = 1; i <= SPIKES_LENGTH; i++) {
 			Vec3 p = folk.position().add(dir.scale(i));
 			level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 0.3, p.z, 6, 0.2, 0.4, 0.2, 0.15);
-			level.sendParticles(new DustParticleOptions(0xE8E2CF, 1.6F), p.x, p.y + 0.5, p.z, 8, 0.15, 0.5, 0.15, 0.0);
+			level.sendParticles(Fx.wisp(0xE8E2CF, 1.6F), p.x, p.y + 0.5, p.z, 8, 0.15, 0.5, 0.15, 0.0);
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(p.x - 0.7, p.y - 0.5, p.z - 0.7, p.x + 0.7, p.y + 2.0, p.z + 0.7),
 				e -> !hit.contains(e) && caster.foe(e))) {
 				hit.add(e);
@@ -614,7 +624,7 @@ public final class Sorcery {
 				}
 				EntityType<? extends Mob> type = risenAs(KitchenCompat.sourceType(corpse), caster.climate());
 				if (type != null && Thralls.raise(level, type, corpse.position(), caster.factionId(), folk.getUUID(), false, RAISE_LIFE, target) != null) {
-					beam(level, folk, corpse.position().add(0.0, 0.3, 0.0), new DustParticleOptions(DRAIN_COLOUR, 1.0F));
+					beam(level, folk, corpse.position().add(0.0, 0.3, 0.0), DRAIN_COLOUR);
 					corpse.discard();
 					raised++;
 				}
@@ -707,7 +717,7 @@ public final class Sorcery {
 		PathfinderMob folk = caster.mob();
 		Mana.ripple(folk, Mana.HARM);
 		caster.timers()[T_HEX] = HEX_COOLDOWN;
-		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(HEX_COLOUR, 1.0F));
+		beam(level, folk, target.getBoundingBox().getCenter(), HEX_COLOUR);
 		target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, HEX_TICKS, 0), folk);
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HEX_TICKS, 1), folk);
 		level.sendParticles(ParticleTypes.WITCH, target.getX(), target.getY(0.6), target.getZ(), 20, 0.3, 0.5, 0.3, 0.05);
@@ -742,11 +752,11 @@ public final class Sorcery {
 		Mana.ripple(caster, Mana.HEAL);
 		worst.heal(MEND_HEAL);
 		if (worst != caster) {
-			beam(level, caster, worst.getBoundingBox().getCenter(), ParticleTypes.HAPPY_VILLAGER);
+			beam(level, caster, worst.getBoundingBox().getCenter(), Restoration.GREEN);
 		}
 		level.sendParticles(ParticleTypes.HEART, worst.getX(), worst.getY() + 2.0, worst.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 		// (0.7.212) Restoration's gold ring where it lands, so a field healer is plain to see in a fight
-		Restoration.ring(level, worst.position().add(0.0, 0.1, 0.0), 1.2, Restoration.GOLD_MOTE, 18);
+		Restoration.ring(level, worst.position().add(0.0, 0.1, 0.0), 1.2, Restoration.GOLD);
 		level.playSound(null, worst.getX(), worst.getY(), worst.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.5F, 1.2F);
 	}
 
@@ -756,7 +766,7 @@ public final class Sorcery {
 	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
 		// (0.7.244) every cast ripples the caster's aura with its intent
 		Mana.ripple(folk, Mana.HARM);
-		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(BOLT_COLOUR, 1.2F));
+		beam(level, folk, target.getBoundingBox().getCenter(), BOLT_COLOUR);
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 10, 0.2, 0.3, 0.2, 0.2);
@@ -798,7 +808,7 @@ public final class Sorcery {
 		timers[T_BANISH] = BANISH_COOLDOWN;
 		thralls.sort(Comparator.comparingDouble(folk::distanceToSqr));
 		for (Mob thrall : thralls.subList(0, Math.min(BANISH_COUNT, thralls.size()))) {
-			beam(level, folk, thrall.getBoundingBox().getCenter(), ParticleTypes.END_ROD);
+			beam(level, folk, thrall.getBoundingBox().getCenter(), DRAIN_COLOUR);
 			Thralls.crumble(level, thrall);
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.NEUTRAL, 0.8F, 1.5F);

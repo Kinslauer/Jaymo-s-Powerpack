@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindPower;
@@ -7,7 +8,7 @@ import com.jaymospowers.power.wind.WindStorm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -31,7 +32,7 @@ final class WindAura {
 	/** Stormbound: dark motes per tick at full static, and the chance of a spark per tick. */
 	private static final float STATIC_MOTES = 1.5F;
 	private static final float STATIC_SPARK_CHANCE = 0.35F;
-	private static final DustParticleOptions STATIC_DUST = new DustParticleOptions(0x2B1D3A, 1.3F);
+	private static final ParticleOptions STATIC_DUST = MagicFx.wisp(0x2B1D3A, 1.3F);
 	/** Stormbound crackle: about every this many ticks, at this volume (fading with the calm). */
 	private static final int CRACKLE_TICKS = 50;
 	private static final float CRACKLE_VOLUME = 0.25F;

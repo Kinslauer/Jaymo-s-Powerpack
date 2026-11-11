@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -552,7 +552,7 @@ public final class Spellcraft {
 		return switch (element) {
 			case "fire" -> ParticleTypes.FLAME;
 			case "water" -> ParticleTypes.SPLASH;
-			case "earth" -> new DustParticleOptions(0x8B6A3C, 1.2F);
+			case "earth" -> Fx.miasma(0x8B6A3C, 1.2F);
 			case "air" -> ParticleTypes.CLOUD;
 			case "lightning" -> ParticleTypes.ELECTRIC_SPARK;
 			case "ice" -> ParticleTypes.SNOWFLAKE;

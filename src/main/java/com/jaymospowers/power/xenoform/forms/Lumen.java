@@ -1,10 +1,10 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -100,7 +100,7 @@ public final class Lumen extends XenoForm {
 						}
 					}
 					Vec3 at = player.getEyePosition();
-					level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+					MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 					burst(level, ParticleTypes.END_ROD, at, 30, 0.6, 0.15);
 					sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 2.0F, 1.6F);
 					cooldown(player, live, G, FLARE_COOLDOWN);

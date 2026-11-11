@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.HeritageVariants.Variant;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -7,7 +8,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
@@ -39,18 +40,18 @@ public final class VariantLooks {
 
 	private static final Map<Variant, Style> STYLES = new EnumMap<>(Variant.class);
 
-	private static final DustParticleOptions OBSIDIAN_GLINT = new DustParticleOptions(0x9A5CFF, 0.6F), THORN_PETAL = new DustParticleOptions(0xC8283C, 0.7F),
-		GLOWCAP_SPORE = new DustParticleOptions(0xE8F05A, 0.5F), AURORA_MOTE = new DustParticleOptions(0x7CF0B4, 0.6F),
-		MOON_MOTE = new DustParticleOptions(0xE6EAFF, 0.5F), LODE_SPARK = new DustParticleOptions(0xA06CE0, 0.5F),
-		GILT_MOTE = new DustParticleOptions(0xFFD45A, 0.5F), GEODE_GLINT = new DustParticleOptions(0xB17BEB, 0.6F),
-		REEF_MOTE = new DustParticleOptions(0xFF8A6A, 0.5F), INK_MOTE = new DustParticleOptions(0x2A2E44, 0.5F),
+	private static final ParticleOptions OBSIDIAN_GLINT = Fx.wisp(0x9A5CFF, 0.6F), THORN_PETAL = Fx.wisp(0xC8283C, 0.7F),
+		GLOWCAP_SPORE = Fx.wisp(0xE8F05A, 0.5F), AURORA_MOTE = Fx.wisp(0x7CF0B4, 0.6F),
+		MOON_MOTE = Fx.wisp(0xE6EAFF, 0.5F), LODE_SPARK = Fx.wisp(0xA06CE0, 0.5F),
+		GILT_MOTE = Fx.wisp(0xFFD45A, 0.5F), GEODE_GLINT = Fx.wisp(0xB17BEB, 0.6F),
+		REEF_MOTE = Fx.wisp(0xFF8A6A, 0.5F), INK_MOTE = Fx.wisp(0x2A2E44, 0.5F),
 		// (0.7.490) the fae's pollen and leaf-light, a fox's fire, the elves' blood and the dead's chill
-		LEAF_MOTE = new DustParticleOptions(0x7CB84A, 0.6F), POLLEN_MOTE = new DustParticleOptions(0xB8FFD8, 0.5F),
-		WATER_MOTE = new DustParticleOptions(0x8CE0F0, 0.5F), FAE_MOTE = new DustParticleOptions(0xFFA8E8, 0.5F),
-		FOX_FIRE = new DustParticleOptions(0xFF9A3C, 0.6F),
-		CHILL_MOTE = new DustParticleOptions(0x9AF0FF, 0.5F),
+		LEAF_MOTE = Fx.wisp(0x7CB84A, 0.6F), POLLEN_MOTE = Fx.wisp(0xB8FFD8, 0.5F),
+		WATER_MOTE = Fx.wisp(0x8CE0F0, 0.5F), FAE_MOTE = Fx.wisp(0xFFA8E8, 0.5F),
+		FOX_FIRE = Fx.wisp(0xFF9A3C, 0.6F),
+		CHILL_MOTE = Fx.wisp(0x9AF0FF, 0.5F),
 		// (0.7.486) a jellyfish's shimmer and a sea slug's bright flecks (the weedfrond's leaf is LEAF_MOTE above)
-		JELLY_MOTE = new DustParticleOptions(0xE0B8FF, 0.5F), FRILL_MOTE = new DustParticleOptions(0xFF8A30, 0.5F);
+		JELLY_MOTE = Fx.wisp(0xE0B8FF, 0.5F), FRILL_MOTE = Fx.wisp(0xFF8A30, 0.5F);
 
 	static {
 		// variant, eye colour (0: its heritage's), eyes, particle, every, when

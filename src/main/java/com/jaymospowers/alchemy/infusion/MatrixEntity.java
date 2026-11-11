@@ -1,5 +1,6 @@
 package com.jaymospowers.alchemy.infusion;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.alchemy.Corruption;
 import com.jaymospowers.alchemy.Essence;
 import com.jaymospowers.alchemy.EssenceList;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -400,8 +401,8 @@ public class MatrixEntity extends BlockEntity {
 
 	// ------------------------------------------------------------------ show and tell
 
-	private static DustParticleOptions dust(int colour, float size) {
-		return new DustParticleOptions(colour, size);
+	private static ParticleOptions dust(int colour, float size) {
+		return MagicFx.wisp(colour, size);
 	}
 
 	/** Motes round the stone, calm blue to angry purple as the instability rises. */

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -105,8 +106,8 @@ public class ChronoEcho extends Monster {
 	static final int ROUTE_PAUSE_MAX = 140;
 	/** Its look: a pale cyan, half there. ARGB, used by the client renderer. */
 	public static final int TINT = 0x9AB8F4FF;
-	static final DustParticleOptions SHARD = new DustParticleOptions(0xA8E8FF, 0.7F);
-	static final DustParticleOptions SHARD_GREY = new DustParticleOptions(0xC8D0D8, 0.6F);
+	static final ParticleOptions SHARD = MagicFx.wisp(0xA8E8FF, 0.7F);
+	static final ParticleOptions SHARD_GREY = MagicFx.wisp(0xC8D0D8, 0.6F);
 
 	private static final EntityDataAccessor<ResolvableProfile> DATA_PROFILE = SynchedEntityData.defineId(ChronoEcho.class,
 		EntityDataSerializers.RESOLVABLE_PROFILE);

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -87,7 +87,7 @@ public final class ZFighterEarthlingRace {
 			}
 			live.ki += SURGE_KI;
 			if (now % 4 == 0) {
-				player.level().sendParticles(new DustParticleOptions(SURGE_COLOR, 1.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+				player.level().sendParticles(MagicFx.wisp(SURGE_COLOR, 1.0F), true, false, player.getX(), player.getY() + 1.0, player.getZ(),
 					3, 0.35, 0.7, 0.35, 0.02);
 			}
 			return;
@@ -128,7 +128,7 @@ public final class ZFighterEarthlingRace {
 		ZFighterPower.set(player, Attributes.MOVEMENT_SPEED, SPEED_ID, SURGE_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ZFighterPower.set(player, Attributes.ATTACK_DAMAGE, FISTS_ID, SURGE_FISTS, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ServerLevel level = player.level();
-		level.sendParticles(new DustParticleOptions(SURGE_COLOR, 1.6F), true, false, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.8, 0.5, 0.1);
+		MagicFx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), SURGE_COLOR, 1.6F, 30, 0.5, 0.8, 0.5);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.7F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.5F, 1.4F);
 		player.sendOverlayMessage(Component.translatable(outnumbered ? "message.jaymospowers.zfighter_adrenaline_crowd" : "message.jaymospowers.zfighter_adrenaline")

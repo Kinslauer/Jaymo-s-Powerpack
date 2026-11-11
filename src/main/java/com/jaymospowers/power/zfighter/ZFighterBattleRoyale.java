@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.core.wounds.Downed;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -384,7 +385,7 @@ final class ZFighterBattleRoyale {
 		Vec3 c = Vec3.atBottomCenterOf(r.center);
 		double radius = radius(r, now);
 		boolean closing = radius < ZFighterTournaments.RADIUS - 0.01;
-		DustParticleOptions dust = new DustParticleOptions(closing ? CLOSING_COLOR : RING_COLOR, 1.6F);
+		ParticleOptions dust = MagicFx.wisp(closing ? CLOSING_COLOR : RING_COLOR, 1.6F);
 		int points = (int)Math.max(24, radius * 7);
 		for (int i = 0; i < points; i++) {
 			double a = i * Math.PI * 2.0 / points;
