@@ -7,6 +7,8 @@ import com.jaymoskingdoms.films.FilmActor;
 import com.jaymoskingdoms.films.LoreFilms;
 import com.jaymoskingdoms.films.Moves;
 import com.jaymoskingdoms.inhabitants.Draugr;
+import com.jaymoskingdoms.nether.Imp;
+import com.jaymoskingdoms.nether.Imps;
 import com.jaymoskingdoms.inhabitants.Inhabitants;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.math.Transformation;
@@ -218,6 +220,21 @@ public final class LoreFilmClient {
 	 * does, and the sorcerer is gone GLIDE_MISS ticks before. The camera stays behind the sorcerer for the first GLIDE_CUT
 	 * ticks of it. He comes down at GLIDE_DROP a tick and walks on (GLIDE_LAND) through the smoke.
 	 */
+	/**
+	 * The imps. Andy: "add the new imps too when they are ready, their fireballs also catch the trees and surroundings in a
+	 * blaze". They are the game's own imps (nether.Imp), on the sorcerer's side: each flies a ring over the field
+	 * (IMP_RINGS: {middle f, middle s, how wide, where on it it starts}; IMP_TURN round it a tick, IMP_HIGH up and IMP_STEP
+	 * more for each next one). From IMP_FIRST, every IMP_EVERY ticks (each IMP_STAGGER after the last), one hangs in the air,
+	 * gathers a fireball over its head for IMP_CHARGE ticks and IMP_RELEASE after that throws it (BALL_SPEED) into the crown
+	 * of a tree not yet alight between IMP_NEAR and IMP_FAR of it, which lights every tree within BALL_LIGHTS. IMP_SWOOP
+	 * ticks into each round it dives to IMP_LOW over the fighting for IMP_SWOOP_TICKS. When the sorcerer is gone they fly
+	 * off (IMP_FLEE a tick, up to IMP_AWAY).
+	 */
+	static final double[][] IMP_RINGS = {{24.0, -8.0, 6.0, 0.0}, {31.0, 9.0, 7.0, 2.0}, {20.0, 6.0, 5.0, 4.0}, {35.0, -5.0, 6.0, 1.0}};
+	static final String[] IMP_SKINS = {"imp", "imp", "zombified_imp", "imp"};
+	static final int IMP_FIRST = 60, IMP_EVERY = 170, IMP_STAGGER = 40, IMP_CHARGE = 60, IMP_RELEASE = 5, IMP_SWOOP = 100, IMP_SWOOP_TICKS = 16;
+	static final double IMP_TURN = 0.05, IMP_HIGH = 4.0, IMP_STEP = 0.5, IMP_SPEED = 0.45, IMP_NEAR = 4.0, IMP_FAR = 15.0, IMP_LOW = 1.9,
+		IMP_CLIMB = 0.2, BALL_SPEED = 0.7, BALL_LIGHTS = 2.5, BALL_HEIGHT = 1.85, IMP_FLEE = 0.6, IMP_AWAY = 14.0;
 	/** His cloak sets whole again this long after the sorcerer is gone (ticks). */
 	static final int CLOAK_SETS = 14;
 	static final double[][] SLING_TREES = {{45.0, 3.6}, {45.0, -3.6}};
@@ -265,7 +282,7 @@ public final class LoreFilmClient {
 		VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS};
 
 	enum Role {
-		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST, MARKED, GUARD
+		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST, MARKED, GUARD, IMP
 	}
 
 	/** What a fighter is made of: what flies off it, and how its blood is drawn. */
@@ -302,6 +319,10 @@ public final class LoreFilmClient {
 		int team;
 		/** Left to its own script (the battle doesn't move it). */
 		boolean scripted;
+		/** An imp: where on its ring it is, when it began to gather its fireball (-1 not), and the tree that's for. */
+		double ring;
+		int chargeAt = -1;
+		double @Nullable [] aim;
 		/** The burning tree it has gone to beat out. */
 		@Nullable Fire dousing;
 		@Nullable Actor foe, facing;
@@ -421,6 +442,9 @@ public final class LoreFilmClient {
 		final List<Rise> rises = new ArrayList<>();
 		final List<Gib> gibs = new ArrayList<>();
 		final List<Mana> mana = new ArrayList<>();
+		/** The imps, and their fireballs in the air ({@link Mana#tree}: always). */
+		final List<Actor> imps = new ArrayList<>();
+		final List<Mana> balls = new ArrayList<>();
 		/** The trees on fire, in the order they caught, and every flame by its number. */
 		final List<Fire> fires = new ArrayList<>();
 		final Map<double[], Fire> fireOf = new IdentityHashMap<>();
@@ -710,6 +734,21 @@ public final class LoreFilmClient {
 			}
 			f.guards[i] = guard;
 		}
+		// his imps, on the wing over the field
+		for (int i = 0; i < IMP_RINGS.length; i++) {
+			double[] ring = IMP_RINGS[i];
+			Actor imp = cast(f, new FilmTape.Cast(2, IMP_SKINS[i], 0, 0, false, Role.IMP.ordinal(), Flesh.ORC.ordinal(), false, "", "",
+				new float[] {(float)(ring[0] + ring[2] * Math.cos(ring[3])), (float)(ring[1] + ring[2] * Math.sin(ring[3])), (float)(IMP_HIGH + i * IMP_STEP),
+					facingBack, 1.0F}));
+			if (imp != null) {
+				imp.team = 1;
+				imp.scripted = true;
+				imp.ring = ring[3];
+				imp.speed = IMP_SPEED;
+				imp.sinkRate = IMP_CLIMB;
+				f.imps.add(imp);
+			}
+		}
 		if (f.rec != null) {
 			name(f, "varro", f.varro);
 			name(f, "thessaly", f.thessaly);
@@ -784,7 +823,13 @@ public final class LoreFilmClient {
 	private static @Nullable Actor spawn(Film f, FilmTape.Cast c) {
 		Role role = Role.values()[Mth.clamp(c.role(), 0, Role.values().length - 1)];
 		LivingEntity e;
-		if (c.kind() == 1) {
+		if (c.kind() == 2) {
+			Imp imp = (c.skin().startsWith("zombified") ? Imps.ZOMBIFIED_IMP : Imps.IMP).create(f.level, EntitySpawnReason.LOAD);
+			if (imp == null) {
+				return null;
+			}
+			e = imp;
+		} else if (c.kind() == 1) {
 			Draugr draugr = Inhabitants.DRAUGR.create(f.level, EntitySpawnReason.LOAD);
 			if (draugr == null) {
 				return null;
@@ -1024,6 +1069,14 @@ public final class LoreFilmClient {
 		tape(f, FilmTape.CLOAK, a.index, loose ? 1 : 0, NONE, "");
 		if (a.e instanceof FilmActor actor) {
 			actor.cloak(loose);
+		}
+	}
+
+	/** An imp's fireball over its head: how far into its charge it shows (0 none). */
+	private static void charge(Film f, Actor a, int charge) {
+		tape(f, FilmTape.CHARGE, a.index, charge, NONE, "");
+		if (a.e instanceof Imp imp) {
+			imp.stageCharge(charge);
 		}
 	}
 
@@ -1267,6 +1320,11 @@ public final class LoreFilmClient {
 				}
 			}
 			case FilmTape.QUENCH -> quench(f, e.a());
+			case FilmTape.CHARGE -> {
+				if (a != null) {
+					charge(f, a, e.b());
+				}
+			}
 			case FilmTape.CLOAK -> {
 				if (a != null) {
 					cloak(f, a, e.b() != 0);
@@ -1474,6 +1532,7 @@ public final class LoreFilmClient {
 		} else {
 			beats(f, t);
 			battle(f, t);
+			imps(f, t);
 			douse(f, t);
 			fire(f, t);
 			for (Iterator<Finish> it = f.finishes.iterator(); it.hasNext(); ) {
@@ -2110,6 +2169,102 @@ public final class LoreFilmClient {
 			if (since == SNATCH_HOLD + THROWN_TICKS) {
 				tether(f, quiet, which, null);
 				sound(f, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.6F, 0.8F);
+			}
+		}
+	}
+
+	// ---- the imps -----------------------------------------------------------------------------------------------------------
+
+	/** The sorcerer's imps, each tick: round their rings, a dive now and then, and in turn a fireball into a tree. */
+	private static void imps(Film f, int t) {
+		for (int i = 0; i < f.imps.size(); i++) {
+			Actor a = f.imps.get(i);
+			if (f.lungeAt >= 0) {
+				if (!a.fled) {
+					// no one to fly for
+					a.fled = true;
+					a.chargeAt = -1;
+					charge(f, a, 0);
+					rest(f, a);
+					a.restYaw = Float.NaN;
+					a.speed = IMP_FLEE;
+					a.toF = a.f + 40.0;
+					a.toS = a.s * 1.5;
+					a.sinkTo = -IMP_AWAY;
+				}
+				continue;
+			}
+			int round = t - IMP_FIRST - i * IMP_STAGGER, into = round < 0 ? -1 : round % IMP_EVERY;
+			if (into == 0) {
+				a.aim = null;
+				double nearest = IMP_FAR;
+				for (double[] tree : f.trees) {
+					double d = distance(tree[0], tree[1], a.f, a.s);
+					if (d > IMP_NEAR && d < nearest && !f.fireOf.containsKey(tree)) {
+						nearest = d;
+						a.aim = tree;
+					}
+				}
+				if (a.aim != null) {
+					a.chargeAt = t;
+					a.restYaw = f.yawOf(a.aim[0] - a.f, a.aim[1] - a.s);
+					act(f, a, "charge");
+					sound(f, SoundEvents.FIRECHARGE_USE, 0.6F, 0.5F);
+				}
+			}
+			if (a.chargeAt >= 0 && a.aim != null) {
+				// hung in the air, the ball swelling over its head
+				int charged = t - a.chargeAt;
+				a.toF = a.f;
+				a.toS = a.s;
+				if (charged <= IMP_CHARGE) {
+					charge(f, a, Math.max(1, charged));
+				}
+				if (charged == IMP_CHARGE) {
+					act(f, a, "throw");
+				}
+				if (charged >= IMP_CHARGE + IMP_RELEASE) {
+					charge(f, a, 0);
+					Vec3 from = a.e.position().add(0.0, BALL_HEIGHT, 0.0), to = f.at(a.aim[0], a.aim[1], 0.0).add(0.0, a.aim[2] + 0.6, 0.0);
+					int ticks = Math.max(2, (int)Math.ceil(from.distanceTo(to) / BALL_SPEED));
+					f.balls.add(new Mana(from, to.subtract(from).scale(1.0 / ticks), ticks, true));
+					sound(f, SoundEvents.BLAZE_SHOOT, 0.8F, 0.6F);
+					a.chargeAt = -1;
+					a.restYaw = Float.NaN;
+				}
+				continue;
+			}
+			double[] ring = IMP_RINGS[i % IMP_RINGS.length];
+			a.ring += IMP_TURN;
+			a.toF = ring[0] + ring[2] * Math.cos(a.ring);
+			a.toS = ring[1] + ring[2] * Math.sin(a.ring);
+			boolean dive = into >= IMP_SWOOP && into < IMP_SWOOP + IMP_SWOOP_TICKS;
+			a.sinkTo = -(dive ? IMP_LOW : IMP_HIGH + i * IMP_STEP);
+			if (into == IMP_SWOOP) {
+				act(f, a, "swoop");
+				sound(f, SoundEvents.PHANTOM_SWOOP, 1.3F, 0.4F);
+			}
+			if (t % 11 == i) {
+				sound(f, SoundEvents.PHANTOM_FLAP, 1.6F, 0.12F);
+			}
+		}
+		for (Iterator<Mana> it = f.balls.iterator(); it.hasNext(); ) {
+			Mana ball = it.next();
+			for (int i = 0; i < 5; i++) {
+				particle(f, ParticleTypes.FLAME, ball.at.add(spread(f, 0.3), spread(f, 0.3), spread(f, 0.3)), spread(f, 0.02), spread(f, 0.02), spread(f, 0.02));
+			}
+			particle(f, f.rnd.nextInt(3) == 0 ? ParticleTypes.LAVA : ParticleTypes.SMOKE, ball.at, 0.0, 0.0, 0.0);
+			ball.at = ball.at.add(ball.step);
+			if (--ball.left <= 0) {
+				it.remove();
+				float[] hit = f.staged(ball.at);
+				igniteNear(f, hit[0], hit[1], BALL_LIGHTS);
+				sound(f, SoundEvents.FIRECHARGE_USE, 0.5F, 0.9F);
+				flash(f, 0.12F);
+				for (int i = 0; i < 22; i++) {
+					particle(f, i % 4 == 0 ? ParticleTypes.LAVA : i % 4 == 1 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.FLAME, ball.at.add(spread(f, 0.8), spread(f, 0.8), spread(f, 0.8)),
+						spread(f, 0.18), f.rnd.nextDouble() * 0.15, spread(f, 0.18));
+				}
 			}
 		}
 	}

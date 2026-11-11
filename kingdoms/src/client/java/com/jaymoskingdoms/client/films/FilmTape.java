@@ -35,7 +35,7 @@ final class FilmTape {
 	static final int MAGIC = 0x4A4B4654, VERSION = 1;
 	/** What can happen in a tick ({@link Event#type}). */
 	static final byte ACT = 0, REST = 1, ITEM = 2, MAIM = 3, HURT = 4, HIDE = 5, SOUND = 6, PARTICLE = 7, BOLT = 8, FLASH = 9, GIB = 10, UNGIB = 11,
-		TETHER = 12, GAIT = 13, PLACE = 14, IGNITE = 15, FLAME = 16, QUENCH = 17, CLOAK = 18;
+		TETHER = 12, GAIT = 13, PLACE = 14, IGNITE = 15, FLAME = 16, QUENCH = 17, CLOAK = 18, CHARGE = 19;
 
 	/**
 	 * How finely a tape keeps things (steps to a block, or to a degree): where actors stand, which way they face, where a
@@ -45,7 +45,7 @@ final class FilmTape {
 
 	/**
 	 * One of the cast: {@code kind} 0 a film actor (its skin, body, an orc's features, the cloak), 1 a draugr drawn alive (with
-	 * an axe or a sword); its part and what it's made of; what's in its hands; and {f, s, up, the way it faces, its size}.
+	 * an axe or a sword), 2 an imp (its skin "imp" or "zombified_imp"); its part and what it's made of; what's in its hands; and {f, s, up, the way it faces, its size}.
 	 */
 	record Cast(int kind, String skin, int body, int orc, boolean cloak, int role, int flesh, boolean axe, String main, String off, float[] at) {
 	}
