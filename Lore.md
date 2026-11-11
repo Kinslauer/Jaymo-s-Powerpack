@@ -540,6 +540,15 @@ colour (purple over the mushroom forests, red over storm and sand, green over st
 forest). They harm nothing and nothing there hunts them. The Verdant read weather by them and count it bad manners to
 shoot one.
 
+(new) **What the Aether kept of it** (four-mods thread, 2026-11-11, Eden Ring part 5; Andy: Golden Forest, hollow
+islands and Sky Colony go in the Aether). Three things of the far country's kind are found in the Aether and not on
+the Verdant World, and the sky folk hold that they were always the Aether's and the Verdant World only has their
+cousins. On the wetter side of the Gilded Ridge stands the **Sunroot Grove**: tall straight trees under broad golden
+crowns, over yellow moss. Sunroot is the sky towns' best joinery wood. High above the islands drift **volvox
+colonies**, hollow balls of living jelly round a dense glowing heart; nobody has seen one start or die. And among them
+drift **hollow islands**, shells of holystone turfed on top, with a chamber inside lit by gravilite, which is the
+only place in the Aether it grows. Divine-born children are told the hollow islands are eggs.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
