@@ -185,6 +185,11 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
   monsters that come at their own people, by the legend of the old heroes, each in their own way.
 - **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
   or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
 - **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
   villain; neither is thanked.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
