@@ -3,7 +3,7 @@ status: stalled
 task: imps-nether
 branch: claude/project-thread-2cvsj6
 with: 
-pr: 
+pr: 1286
 mods: kingdoms
 versions: 
 started: 2026-11-11

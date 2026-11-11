@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,9 +20,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
-- [ ] [[Agents/project-thread-2cvsj6|project-thread-2cvsj6]] · 💻 Odysseus · running
 
 
 ## In review
@@ -35,8 +33,9 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
+- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · sent
 
 
 ## Done
