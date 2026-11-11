@@ -11192,3 +11192,20 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - **Heritages**: Sylvan are long-lived, the Warrior-born are why folk watch the sky, the Nightborn name the Dawnborn's distrust, and the Divine-born hint adds those the Judge finds just who ask to stay.
 - The narrator's clips for the 25 changed tales are removed, so those tales are read in silence until `python tools/voices/make_voices.py narrator` remakes them. Question titles and the lines under them are unchanged, so their clips still match.
 - Lang only; not played.
+
+## 0.7.732 (2026-11-11): The Long Defence: heroes in full frame, armoured soldiers, Grimsby the Sylvan elf (#1290)
+
+- Each hero's shots in the film are pulled back so the whole figure is in frame, and fighters are kept out from between the hero and the camera
+- The Warrior-born soldiers wear real armour and helmets (iron, chainmail, steel plate helms), drawn the way the draugr's gear is
+- Grimsby is a Sylvan elf: long pointed ears, a slighter build, no beard
+- The soldiers each wear their own mix of leather, chainmail and iron, caked in mud and old blood, not shiny
+- Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
+- Varro throws his fire after the in-balming and runs in after it in the same shot; a shot of Thessaly and Ambrose from the front comes between, then the cut to him crossing to Grimsby, who is blade on blade with an orc, and one long side shot of the two back to back
+- Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) each have a foe on them from the first frame and fight among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
+- The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
+- The film is 11 seconds longer; its tape is recorded again with all of this
+- When the Quiet One flips off a tree or rolls under a bolt, his cloak comes back onto him whole and goes over with him, then comes apart and throws for the next tree
+- Varro's steel stays bright in the dark and glints, and Grimsby's blade is wind-imbued: lit currents run along it and curl off it, so the two can be picked out of the crowd in the wide shots
+- Beheadings are a level cut: the blade drawn back low to the side and swept through at neck height with the whole body turning, the head going the way of the cut; the cut that follows a severed arm comes down across from the shoulder (new moves in the library: wind_side, behead, wind_high, hew; the draugr's animation file is regenerated with the whole library)
