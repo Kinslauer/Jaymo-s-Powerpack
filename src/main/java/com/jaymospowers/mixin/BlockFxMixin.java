@@ -41,6 +41,6 @@ abstract class BlockFxMixin {
 
 	@Inject(method = "onEquippedItemBroken", at = @At("HEAD"))
 	private void jaymospowers$shieldBroke(ItemStack broken, EquipmentSlot slot, CallbackInfo ci) {
-		ShieldShatter.broke((LivingEntity) (Object) this, broken);
+		ShieldShatter.broke((LivingEntity) (Object) this, broken, slot);
 	}
 }

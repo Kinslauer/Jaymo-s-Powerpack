@@ -46,8 +46,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Every parry calls it ({@link Guard#parried}, Darktide's blade, Kingdoms' fighters' parries and blade clashes through
  * its {@code PowersCompat}), and so does every blow a raised guard takes ({@link #blocked}, from {@code BlockFxMixin}):
- * small sparks off a blade or a metal shield, chips off a wooden one. A wooden shield that takes too much breaks apart
- * ({@link ShieldShatter}).
+ * small sparks off a blade or a metal shield, chips off a wooden one. A wooden shield whose durability runs out breaks
+ * apart ({@link ShieldShatter}).
  */
 public final class ClashFx {
 	/** Sparks in a shower: a plain block's, a parry's, a perfect parry's or a clash of two swings. */
@@ -155,8 +155,8 @@ public final class ClashFx {
 
 	/**
 	 * Every blow a raised guard took a share of ({@code LivingEntity.applyItemBlocking}, {@code BlockFxMixin}): a few
-	 * sparks or chips off it, and a wooden shield wears toward breaking ({@link ShieldShatter#took}). {@code guard} is
-	 * what was held up when the blow came.
+	 * sparks or chips off it, and an axe wears a shield the faster ({@link ShieldShatter#axe}). {@code guard} is what
+	 * was held up when the blow came.
 	 */
 	public static void blocked(LivingEntity defender, ServerLevel level, DamageSource source, ItemStack guard, float taken) {
 		if (taken <= 0.0F || guard.isEmpty() || source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypeTags.IS_FIRE)) {
@@ -172,8 +172,9 @@ public final class ClashFx {
 		if (wooden(guard)) {
 			level.playSound(null, defender.getX(), defender.getY(), defender.getZ(), SoundEvents.WOOD_HIT, SoundSource.NEUTRAL, 0.7F,
 				0.8F + defender.getRandom().nextFloat() * 0.3F);
-			ShieldShatter.took(level, defender, guard, source, taken);
 		}
+		// an axe wears a shield faster; one on its last points breaks of it
+		ShieldShatter.axe(defender, source, taken);
 	}
 
 	/**
