@@ -14,13 +14,15 @@ mark is the canon as it stood, reworded but unchanged in meaning (the old page i
 ## The ages of the world
 
 **The Warrior-born age.** The Warrior-born were a fighting blood that lived by pillage and murder, and they were still
-living that way when their own world was destroyed. They did not grieve it. They took to the dark between worlds and
-raided other people's worlds instead, the Overworld among them. That is why every settled people remembers lights in
+living that way when their own world was destroyed. They did not grieve it. They took to the dark between worlds, by a
+way of travel they had learned from the Frostborn, and raided other people's worlds instead, the Overworld among them. That is why every settled people remembers lights in
 the sky, and keeps a watch for them.
 
 **The long defence.** Before they were spirits, the mana spirits (Ambrose, Grimsby, Thessaly, Varro and the Quiet One)
 were each a talent in their own right. Between them they held the Overworld against the Warrior-born and the orcs
-alike.
+alike, and against the Grue. They did not only beat the orcs: they fought them and **dominated** them (Andy,
+2026-11-11). Varro marched an army of orcs he had broken to his will, each one marked with his ki, coming when he
+called: "I had orcs under me once. Leagues of them."
 
 **The host and the sorcerer** (Andy, 2026-11-10). The Warrior-born and the orcs were allied with the sorcerer (the
 Grue as it was). At the long defence the living host of orcs and Warrior-born stood with him, and he summoned a second
@@ -32,8 +34,8 @@ gate-warden who held a ford for three nights. The dark came up out of the ground
 each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with
 the defenders: an old man with a beard who made it day for the space of a breath, a woman whose wall they could not
 cross, a swordsman, and a big man in plate who burned them. The fifth the warden could never describe; when it was
-over, the one at the back had gone down into the ground, and the dark with him. The figure at the back is the Grue. The book never names any
-of them, and the film that plays when it is first opened (or when a court wizard or a demon master tells the story)
+over, the one at the back had gone down into the ground, and the dark with him. The figure at the back is the Grue: a sorcerer, and the thing
+his mana became (see *The dark*). The book never names any of them, and the film that plays when it is first opened (or when a court wizard or a demon master tells the story)
 shows no words either. Copies turn up on draugr and in camps.
 
 (new) **The demons remember it.** The demon masters below say the surface has forgotten the old war and they have not:
@@ -334,6 +336,12 @@ district; the androids that swept the streets "stopped answering and started mar
 why; then the dead got up, a few more every night; the last stand was the east bridge. **Worky** drones map the
 streets and are "the only ones left who still ask if you're okay".
 
+**The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
+travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow.
+
+**Earth.** In the future they started calling the Overworld **Earth** (a dead rig's log: "It's just more Earth,
+burning"). Now, folk say the Overworld. Only future voices use the word.
+
 (new) **Lost Cities in the future.** The future is built from the same Lost Cities as the ground under the Maw.
 
 ## The eight faiths
@@ -390,12 +398,13 @@ falls on those who break faith badly.
 
 ## The dark
 
-**The Grue** is the thing at the bottom of the dark. It whispers, it takes a body and walks in the sun wearing it ("I
+**The Grue** is the thing at the bottom of the dark. It was a sorcerer once, and the Grue is what his mana manifested as
+(Andy, 2026-11-11): the evil sorcerer at the back of the legion in *The Long Defence*. It whispers, it takes a body and walks in the sun wearing it ("I
 am getting very good at being you"), and it taunts the people who love you. Beaten, it is leashed for a while; set
 free, it promises another door. It has fought "them" before: *"They fought me once. Look where they are now."*
 
-**The Quiet One** is a spirit of almost no words: "Stay." "No." "Don't." It stands against the Grue, remembers him, and
-when he is beaten says *"…Thank you."* Sickness silences it down to dots.
+**The Quiet One** is a spirit of almost no words: "Stay." "No." "Don't." He stands against the Grue, remembers him, and
+when the Grue is beaten says *"…Thank you."* Sickness silences him down to dots.
 
 (new) **The Grue's shades.** When the Grue reaches for you, your spirit fights it out and the Grue sends its shades;
 the Shade of the Grue is one of them.
@@ -456,9 +465,10 @@ in the Nether.
 
 ## The spirits
 
-Four mage-spirits wake with you and share your mana. Each has a voice of their own and keeps it. Each was a talent in
-their own right before they became a spirit (a keeper, a wizard, a scholar, a soldier), and together they held the
-Overworld when the Warrior-born and the orcs came at it. That is what they were made for, and they have not stopped.
+There are five mage-spirits, and **only one wakes for you**, for life (Andy, 2026-11-11). It shares your mana. Each has
+a voice of their own and keeps it. Each was a talent in their own right before they became a spirit (a keeper, a
+wizard, a scholar, a soldier, and one nobody can describe), and together they held the Overworld when the
+Warrior-born, the orcs and the Grue came at it. That is what they were made for, and they have not stopped.
 
 - **Ambrose, the Warden**: gentle, calls you "little one". He calms rather than kills; a beaten ogre walks with you
   after he lays a hand on it.
@@ -466,10 +476,16 @@ Overworld when the Warrior-born and the orcs came at it. That is what they were 
   see is you. Wonderful."
 - **Thessaly the Learned**: a scholar who reads through the eyes of the beaten. Chapters, footnotes, and the untidy
   margins of your aura.
-- **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order.
+- **Varro**: a soldier. "Recruit." Targets, cover, fall back, that is an order. He commanded an army of orcs he had
+  dominated, marked with his ki, and he can still show you how to put one on his back and make it yours.
+- **The Quiet One**: the fifth, of almost no words, who looks like none of the others and changes size each time he is
+  called. He is the fifth figure in *The Long Defence*, though it is never said. He remembers the Grue ("I remember
+  him." "He's here."), warns you off it ("No." "Don't." "Stop."), and thanks you when it is beaten. He speaks fully
+  only once, at the deepest bond. Sickness silences him down to dots.
 
-(new) **Mana spirits in the world.** A spirit can fight beside you as arms of aura. Rarely, near death, a new spirit
-answers, and its waking leaves you sick for days.
+(new) **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
+(about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
+Attuned folk (court wizards, hermits) have spirits you can see and fight.
 
 (new) **The spirit hand.** A fighter can reach with a floating hand of ki glow (Far Hand, Catch).
 
@@ -485,7 +501,9 @@ Twenty-two heritages. The plain folk and the elemental bloods:
 - **Sylvan**: light-footed woodland kin. They drop from branches without a sound, and were never ones for brute force.
 - **Verdant**: green-skinned, with antennae, fed by the sun. Fire is their oldest enemy.
 - **Emberborn**: born of the badlands and the burning places. Flame cannot touch them; the frost saps them.
-- **Frostborn**: highlanders of the snowfields and peaks. The heat wears them thin.
+- **Frostborn**: they came to the Overworld from far past our sun, and brought with them technology the Overworld has
+  never seen (Andy, 2026-11-11). They settled the snowfields and peaks, and the heat wears them thin. Crossing the
+  void between worlds was theirs first: the Warrior-born learned it from them.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -696,13 +714,20 @@ Elements found in the mods that can't be placed without inventing something big.
   faith, people or event behind them would be new.
 - **The Xeno-Band's makers.** Who made the bands, where the forty-odd aliens came from, and who the band hunter is cast
   out from.
-- **Pods before the Tinkerer.** The Warrior-born raided across the void long ago, but every pod flying now is the
-  Tinkerer's design. How they crossed before his pods (or whether their wrecks at the Maw are something else) needs
-  deciding.
-- **The Omen pilots' blood.** One pilot calls herself "a plain Earthling, like me", while every zombie in the future is
-  Warrior-born. Whose city Los Perrito was, and how the two fit, needs Andy.
-- **The demon masters' side.** "We were there" in the old war: whether the demons were the Grue's legion or stood
-  against it.
+- **The Tinkerer's pods and the Frostborn's way.** The Warrior-born crossed the void the Frostborn way (Andy,
+  2026-11-11), and every pod flying now is the Tinkerer's design. Whether he built his pods from Frostborn craft, and
+  what the Frostborn's own ships were, is still open.
+- **The Frostborn's home.** "Far past our sun" is canon; its name, what became of it, and which of their technology
+  the game shows (the Z Fighter who sealed the draugr in the Stormborn Tomb was Frostborn) are open.
+- **The Tinkerer's androids and Los Perrito's.** The Tinkerer rebuilds fighters into androids; the androids came from
+  Los Perrito and travel in time. Whether he learned the work from them is open.
+- **The Omen pilots' blood.** "Earth" is the future's word for the Overworld, so Los Perrito is an Overworld city of the
+  future and a pilot calls herself "a plain Earthling". Every zombie there is still Warrior-born; how the dead of a
+  Warrior-born war came to fill an Earthling city is left unsaid.
+- **What turned the androids.** The pilots say the city's androids "stopped answering and started marching" and nobody
+  knows why. Whether that was the same androids who now travel in time is open.
+- **The demon masters' side.** "We were there" in the old war: whether the demons were the Grue's legion (the legion
+  that rose from the dark at the ford) or stood against it.
 - **Costumes and masks.** Masked heroes take a costume's name while masked; who wears costumes in the world and why is
   unsaid.
 - **The classes** (Thief, Warlord, Mage, Archer, Survivalist, Brute, Marksman, Sorcerer, Rider). They read as trades
