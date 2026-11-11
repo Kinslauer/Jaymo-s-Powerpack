@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -16,6 +16,7 @@ kanban-plugin: board
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
+- [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 
 
 ## Being built
@@ -35,7 +36,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 - [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
-- [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · sent
 
 
 ## Done
