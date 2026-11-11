@@ -230,14 +230,14 @@ touch, with a halo of blue or white light at the neck for the Starlit and the Se
 (new) **Those who stay** (four-mods thread, 2026-11-11; Andy: "some live there perpetually after reaching the
 otherworld with righteous karma, and choosing to stay there at the judge. This keeps your halo and you are free to
 roam"). One of the dead whose page weighed just may ask the Judge to stay. He writes it down and that is the end of
-it: no road home, no tournament, no second asking. They keep the ring, are Divine-born from then on, and walk the
-Aether as its own people do. This is the second way the blood wakes, and the commoner one among the devout of the
-Truth.
+it: no road home, no tournament, no second asking. They keep the ring and their own blood (Andy, later that day: "they just get the buffs and the halo, no change in
+heritage otherwise"), carry the Divine-born's gifts on top of it, and walk the Aether as its own people do.
 
 (new) **How the Divine-born carry themselves** (same thread; Andy: "like z fighters but without the raging raw ki,
 it is controlled and elegant, they gain a web like sense that allows them to dodge incoming attacks and counter, as
 long as they have feathers"). Their strength is the same stuff a fighter burns as ki, but held still. It shows as
-breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. It costs
+breath, not fire: they feel a blow before it lands and are simply not there, and answer once, exactly. The answer
+is a thing practised: it lands harder the more seasoned they are and the more they have used it. It costs
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
