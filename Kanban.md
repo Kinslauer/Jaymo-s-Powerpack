@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 11:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 11:47). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,8 +13,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
+- [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 
 
 ## In review
