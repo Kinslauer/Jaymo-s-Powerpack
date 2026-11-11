@@ -250,3 +250,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 4:56 PM ET (Andy, Galvan moon plan): "if he is given the band and killed, the new wearer can take the seat, becoming the king, and opening intergalactic trade and warfare. The Oscellans had it figured out before." Oscellans not yet in Lore.md; asked who they are.
 - 2026-11-11 4:56 PM ET (Andy, Galvan moon plan): names "surprise me". Claude picked: elder Ammet Thrum (the Old Maker), ruler Sovereign Vorrel, city Undersky.
 - 2026-11-11 4:57 PM ET (Andy, Galvan moon plan): city size "your choice seems good": about 150 blocks across, towers 60-80 blocks, false sky just above the tallest.
+- 2026-11-11 5:00 PM ET (Andy, Galvan moon plan): a player king "can muster armies that attack overworld kingdoms with space pod invasions, or they can take the fight to the warrior born, drawing them to the moon, and having large sclae warfare on the moon itself."
