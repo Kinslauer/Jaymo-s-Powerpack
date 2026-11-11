@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:48). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · for ☁️ Cloud · open
 - [ ] [[Inbox/costumed-and-everyday-power-users|costumed-and-everyday-power-users]] · for ☁️ Cloud · open
 - [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · for ☁️ Cloud · open
-- [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · for ☁️ Cloud · open
 - [ ] [[Inbox/future-three-sided-war|future-three-sided-war]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
@@ -29,6 +28,8 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
+- [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
+- [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
