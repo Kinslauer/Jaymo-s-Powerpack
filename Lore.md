@@ -521,13 +521,13 @@ upgrades are done there, at the elder's forge. The elder's people have an extrem
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
-(new) **The Galvan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
-eyes ... the npc galvan wear robes ... and monocles, and are a high class society"). The elder's people are the
-**Galvan**: grey folk about half a block tall, with wide flat heads and two great yellow-green eyes that stand out past
-the sides of them and shine in the dark. Theirs is a high-class society: they go in long trimmed robes with a short
-mantle and wide cuffs, wear a monocle on a chain, and fold their hands in front of them. The smith who keeps the band's
-forge is one. The band's **Gremlin** is the Galvan's own shape, bare of the robe: the makers put themselves in the band.
-(The name is Andy's working name; no line in the game says it yet.)
+(new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
+eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
+name, and Ocellan is Claude's pick, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
+in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
+monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
+**Gremlin** is the Ocellan's own shape, bare of the robe: the makers put themselves in the band.
 
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
