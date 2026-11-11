@@ -61,6 +61,9 @@ import org.jspecify.annotations.Nullable;
  * time more of the dead stand in it, risen out of the ground in front of the host: dead orcs and zombified piglins.</li>
  * <li>A horn. The dead come on, the host behind them, and meet the line; some of the hearthlanders fall. Grimsby, sword
  * in hand, throws bolts into them with the other.</li>
+ * <li>Andy: "at least one of the heroes should be shown" in-balming an orc ({@code InBalming}). One orc of the host breaks
+ * through the line at Varro; Varro beats it to its knees, sets his ki mark on its brow, and it gets up and turns on the
+ * dead, fighting at the front for him until the rout.</li>
  * <li>The mages, each in turn, each in their own colour: Varro's fire, Thessaly's ward (a wall of light the dead are thrown
  * back from), Grimsby's spell-cut (glyphs round him, then one cut of light that runs the length of the field), Ambrose's
  * light (day, for a breath).</li>
@@ -88,6 +91,12 @@ public final class LoreFilmClient {
 	/** The film's orcs' greens (as tools/gen_film_skins.py paints them), and the dead ones', for GreenskinLooks to tint by. */
 	static final int[] ORC_GREENS = {0xFF7C8A62, 0xFF687854, 0xFF566646}, DEAD_GREENS = {0xFF5E6452, 0xFF545C48, 0xFF4E5444};
 	static final double HOST_NEAR = 40.5, HOST_FAR = 43.5;
+	/**
+	 * Varro's marked orc: where it starts in the host (aside), how fast it charges (blocks a tick), and the beats: Varro
+	 * beats it down, sets the mark, it rises; how often it strikes at the dead after (ticks), and how near they must be.
+	 */
+	static final double MARKED_S = 6.0, MARKED_RUN = 0.42, MARKED_KNEEL = 0.45, MARKED_REACH = 3.0;
+	static final int MARK_HIT = 350, MARK_SET = 364, MARK_RISE = 388, MARKED_STRIKE = 9;
 	/** How often Grimsby throws a bolt in the clash (ticks). */
 	static final int BOLT_EVERY = 22;
 	/** How far under the ground a hidden actor waits, and how fast actors walk (blocks a tick). */
@@ -101,7 +110,7 @@ public final class LoreFilmClient {
 		VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS};
 
 	enum Role {
-		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST
+		SOLDIER, MAGE, STRANGER, SORCERER, DEAD, HOST, MARKED
 	}
 
 	/** One actor: its entity, where it stands on the stage and where it's headed, how far under the ground, which flicker shows it. */
@@ -136,7 +145,7 @@ public final class LoreFilmClient {
 		final List<Actor> soldiers = new ArrayList<>();
 		/** Each orc actor → the green its orc look is tinted by ({@link #orcLook}). */
 		final java.util.Map<LivingEntity, Integer> orcs = new java.util.IdentityHashMap<>();
-		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer;
+		@Nullable Actor grimsby, thessaly, ambrose, varro, stranger, sorcerer, marked;
 		@Nullable CameraType viewBefore;
 		int tick, skip;
 		float flash, flashO;
@@ -273,6 +282,12 @@ public final class LoreFilmClient {
 			Actor a = cast(f, e, Role.HOST, HOST_NEAR + f.rnd.nextDouble() * (HOST_FAR - HOST_NEAR), side + spread(f, 0.4), facingBack);
 			a.group = -1;
 			f.legion.add(a);
+		}
+		// the orc Varro will mark, in the host on his side
+		LivingEntity brute = orc(f, "orc_0");
+		if (brute != null) {
+			brute.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+			f.marked = cast(f, brute, Role.MARKED, HOST_FAR, MARKED_S + 1.5, facingBack);
 		}
 		LivingEntity grue = person(f, "sorcerer", false);
 		if (grue != null) {
@@ -495,6 +510,7 @@ public final class LoreFilmClient {
 				}
 			}
 		}
+		marking(f, t);
 		// Grimsby, sword in one hand, throws bolts with the other
 		if (t > CLASH + 30 && t < SPELLS && (t - CLASH) % BOLT_EVERY == 0 && f.grimsby != null) {
 			Actor d = front(f);
@@ -568,6 +584,61 @@ public final class LoreFilmClient {
 			case 2 -> f.at(CLASH_F + 8.0, mage.s, 1.0);
 			default -> f.at(CLASH_F + 8.0, 0.0, 0.0);
 		};
+	}
+
+	/** Varro's marked orc: it charges him, is beaten down, marked on the brow, and rises to fight the dead for him. */
+	private static void marking(Film f, int t) {
+		Actor orc = f.marked, varro = f.varro;
+		if (orc == null || varro == null) {
+			return;
+		}
+		if (t == CLASH) {
+			// through the line, straight at Varro
+			orc.toF = MAGES_F + 1.6;
+			orc.toS = varro.homeS;
+		}
+		if (t == MARK_HIT) {
+			varro.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			orc.e.hurtTime = orc.e.hurtDuration = 10;
+			orc.e.setPose(net.minecraft.world.entity.Pose.CROUCHING);
+			orc.sink = MARKED_KNEEL;
+			sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.7F, 0.9F);
+			sound(SoundEvents.ANVIL_LAND, 0.5F, 0.35F);
+		}
+		Vec3 brow = orc.e.position().add(0.0, 1.55 * ORC_SCALE - orc.sink, 0.0).subtract(f.fwd.scale(0.3));
+		if (t == MARK_SET) {
+			// his hand to its brow, and the ki mark burns there
+			varro.e.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
+			sound(SoundEvents.FIRECHARGE_USE, 0.7F, 0.8F);
+			sound(SoundEvents.BEACON_POWER_SELECT, 0.6F, 0.8F);
+			for (int i = 0; i < 24; i++) {
+				double turn = i * Math.PI / 12.0;
+				particle(f, i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.END_ROD,
+					brow.add(Math.cos(turn) * 0.35, Math.sin(turn) * 0.35, 0.0), 0.0, 0.01, 0.0);
+			}
+		}
+		if (t > MARK_SET && t < ROUT && t % 4 == 0) {
+			particle(f, ParticleTypes.SMALL_FLAME, brow, 0.0, 0.005, 0.0);
+		}
+		if (t == MARK_RISE) {
+			// up, and turned on the dead
+			orc.e.setPose(net.minecraft.world.entity.Pose.STANDING);
+			orc.sink = 0.0;
+			orc.yaw = f.yaw;
+			orc.toF = CLASH_F - 0.4;
+			orc.toS = varro.homeS * 0.8;
+			sound(SoundEvents.RAVAGER_ROAR, 0.9F, 0.7F);
+		}
+		if (t > MARK_RISE + 20 && t < ROUT && t % MARKED_STRIKE == 0) {
+			orc.e.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			for (Actor d : f.legion) {
+				if (!d.down && d.fallAt < 0 && d.sink <= 0.0 && Math.abs(d.f - orc.f) < MARKED_REACH && Math.abs(d.s - orc.s) < MARKED_REACH) {
+					d.fallAt = t + 2;
+					sound(SoundEvents.PLAYER_ATTACK_STRONG, 0.7F, 0.5F);
+					break;
+				}
+			}
+		}
 	}
 
 	/** Grimsby's bolt: off his free hand, a streak of light into {@code at}, which falls. */
@@ -695,7 +766,7 @@ public final class LoreFilmClient {
 		}
 		if (!a.down) {
 			double df = a.toF - a.f, ds = a.toS - a.s, d = Math.sqrt(df * df + ds * ds);
-			double speed = a.role == Role.STRANGER ? STRANGER_WALK : WALK;
+			double speed = a.role == Role.STRANGER ? STRANGER_WALK : a.role == Role.MARKED && f.tick < MARK_HIT ? MARKED_RUN : WALK;
 			if (d > 0.05) {
 				double step = Math.min(d, speed);
 				a.f += df / d * step;
@@ -797,10 +868,10 @@ public final class LoreFilmClient {
 			pos = f.at(CLASH_F + 1.0, -LEGION_HALF - 5.0 + 3.0 * k, 2.2);
 			look = f.at(CLASH_F + 1.0, 0.0, 1.0);
 		} else if (t < SPELLS) {
-			// over Varro's shoulder
+			// over Varro's shoulder, down at the orc he marks, then out at the field as it turns on the dead
 			Vec3 m = f.varro != null ? f.varro.e.getPosition(partialTicks) : f.at(MAGES_F, 6.0, 0.0);
 			pos = m.subtract(f.fwd.scale(1.6)).add(f.right.scale(0.7)).add(0.0, 2.0, 0.0);
-			look = f.at(CLASH_F + 2.0, 3.0, 1.0);
+			look = f.marked != null && t < MARK_RISE + 8 ? f.marked.e.getPosition(partialTicks).add(0.0, 1.2, 0.0) : f.at(CLASH_F + 2.0, 3.0, 1.0);
 		} else if (t < ROUT) {
 			int which = (int)((t - SPELLS) / CAST_TICKS);
 			float into = (t - SPELLS) - which * CAST_TICKS;
