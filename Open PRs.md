@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-10 20:43
+updated: 2026-11-10 20:45
 ---
 # Open PRs
 
-6 open, as of 2026-11-10 20:43. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+7 open, as of 2026-11-10 20:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1261](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1261) Giants haul: a lumbering sprint that smashes through and knocks trees flying; Aether Giant shake fixed
@@ -34,4 +34,9 @@ Andy merges only on "merge", one at a time.
 ## [#1266](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1266) Old waterskins survive the tier update
 - **Branch:** `claude/waterskin-old-id` · **Updated:** 2026-11-11 (today)
 - **Checks:** ✅ 4 passed
+- **Agent:** no agent note
+
+## [#1267](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1267) Release: bump: minor in change notes; Powers to 0.22.0
+- **Branch:** `claude/release-bump-minor` · **Updated:** 2026-11-11 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
