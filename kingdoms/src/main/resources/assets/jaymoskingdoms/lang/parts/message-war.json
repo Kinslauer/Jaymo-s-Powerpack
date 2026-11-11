@@ -61,6 +61,7 @@
   "message.jaymoskingdoms.war.status.offer": "  %s has offered peace.",
   "message.jaymoskingdoms.war.status.terms": "  Peace now: %s",
   "message.jaymoskingdoms.war.status.banner": "  Banner of %s at %s in %s's land: %s%% held",
+  "message.jaymoskingdoms.war.no_road": "There is no road between those realms. No army could march it.",
   "message.jaymoskingdoms.war.pledged": "That realm is pledged to another's war and fights only that one.",
   "message.jaymoskingdoms.war.status.great": "  A GREAT WAR. The attacker fights for %s (%s).",
   "message.jaymoskingdoms.war.status.goal": "  The attacker fights for %s (%s)."

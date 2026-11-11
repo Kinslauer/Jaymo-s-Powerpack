@@ -33,6 +33,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The Old Campaign</b> (Warlords, Brutes, Riders, Marksmen, Archers and Survivalists): rise in your trade's skill
  * (Survival for Archers and Survivalists, Strength for the rest), each {@link #CAMPAIGN_EVERY} levels a step, and each step
  * hands you the next part of an old campaigner's account ({@code the_old_campaign_1..4}).</li>
+ * <li><b>The Hermit's Road</b> (Smoke, Gravity and Cryo users, whose ki went to an element and who cannot see spirits): meet a
+ * hermit wizard, who writes you a letter ({@code a_hermits_letter}); then grow the thing you have instead, your Valor
+ * (Kindled, Tempered, Steeled).</li>
+ * <li><b>The Common Road</b> (anyone with no power): hold a job; take up a class; swear to a patron; become a Master at
+ * your job; reach Steeled Valor.</li>
  * </ul>
  */
 public final class StoryRoads {
@@ -55,6 +60,8 @@ public final class StoryRoads {
 	/** The trade skill levels between the Old Campaign's steps. */
 	static final int CAMPAIGN_EVERY = 5;
 	static final List<String> CAMPAIGN_STEPS = List.of("first", "second", "third", "fourth");
+	/** The powers the Hermit's Road is for (their ids' paths). */
+	static final Set<String> ELEMENTAL = Set.of("smoke", "gravity", "cryo");
 	static final Set<Classes.PlayerClass> CAMPAIGNERS = EnumSet.of(Classes.PlayerClass.WARLORD, Classes.PlayerClass.BRUTE,
 		Classes.PlayerClass.RIDER, Classes.PlayerClass.MARKSMAN, Classes.PlayerClass.ARCHER, Classes.PlayerClass.SURVIVALIST);
 
@@ -70,7 +77,13 @@ public final class StoryRoads {
 			new Step("buried", Retaking.Act.DARK_BELOW))),
 		new Road("campaign", p -> CAMPAIGNERS.contains(Classes.classOf(p)), List.of(
 			new Step("first", Retaking.Act.HEARTH), new Step("second", Retaking.Act.OLD_STONES), new Step("third", Retaking.Act.LIGHTS),
-			new Step("fourth", Retaking.Act.DARK_BELOW))));
+			new Step("fourth", Retaking.Act.DARK_BELOW))),
+		new Road("hermit", p -> ELEMENTAL.contains(PowersCompat.power(p)), List.of(
+			new Step("met", Retaking.Act.HEARTH), new Step("kindled", Retaking.Act.OLD_STONES), new Step("tempered", Retaking.Act.LIGHTS),
+			new Step("steeled", Retaking.Act.DARK_BELOW))),
+		new Road("common", p -> PowersCompat.power(p) == null, List.of(
+			new Step("job", Retaking.Act.HEARTH), new Step("class", Retaking.Act.OLD_STONES), new Step("sworn", Retaking.Act.LIGHTS),
+			new Step("master", Retaking.Act.DARK_BELOW), new Step("steeled", Retaking.Act.LEGEND))));
 
 	/** The road steps done, as {@code road.step}. Saved, kept through death. */
 	static final AttachmentType<List<String>> DONE = AttachmentRegistry.create(JaymosKingdoms.id("retaking_roads"),
@@ -167,6 +180,30 @@ public final class StoryRoads {
 				}
 			}
 		}
+		int valor = Valor.rank(player);
+		if (valor >= Valor.KINDLED) {
+			mark(player, "hermit", "kindled");
+		}
+		if (valor >= Valor.TEMPERED) {
+			mark(player, "hermit", "tempered");
+		}
+		if (valor >= Valor.STEELED) {
+			mark(player, "hermit", "steeled");
+			mark(player, "common", "steeled");
+		}
+		Careers.Career career = Careers.of(player);
+		if (!career.posts().isEmpty()) {
+			mark(player, "common", "job");
+		}
+		if (career.master()) {
+			mark(player, "common", "master");
+		}
+		if (Classes.classOf(player) != null) {
+			mark(player, "common", "class");
+		}
+		if (Patrons.of(player) != null) {
+			mark(player, "common", "sworn");
+		}
 		Patron sworn = Patrons.of(player);
 		if (sworn != null) {
 			mark(player, "faith", "sworn");
@@ -189,6 +226,13 @@ public final class StoryRoads {
 	private static void give(ServerPlayer player, ItemStack stack) {
 		if (!stack.isEmpty() && !player.getInventory().add(stack)) {
 			player.drop(stack, false, Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** (From a hermit wizard's greeting.) The first time, on the Hermit's Road, the hermit writes you a letter. */
+	static void hermit(ServerPlayer player) {
+		if (mark(player, "hermit", "met")) {
+			give(player, LoreBooks.book("a_hermits_letter"));
 		}
 	}
 

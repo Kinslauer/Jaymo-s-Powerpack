@@ -37,6 +37,12 @@ final class Kit {
 		return BLOCKS.computeIfAbsent("m:" + id, key -> BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(id)));
 	}
 
+	/** Another mod's block by its full id, or {@code fallback} when that mod isn't there. */
+	static BlockState other(String id, BlockState fallback) {
+		Block block = BLOCKS.computeIfAbsent("o:" + id, key -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id)));
+		return block == Blocks.AIR ? fallback : block.defaultBlockState();
+	}
+
 	static BlockState b(String id) {
 		return ours(id).defaultBlockState();
 	}

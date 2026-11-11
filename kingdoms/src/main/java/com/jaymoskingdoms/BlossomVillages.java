@@ -25,6 +25,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
@@ -83,6 +84,27 @@ final class BlossomVillages {
 	/** The gravel roads: from the torii to the shrine, and across to each pair of houses (x0, z0, x1, z1). */
 	private static final int[][] ROADS = {{-1, -20, 1, 4}, {-6, -9, 6, -7}, {-6, 3, 6, 5}};
 
+	// ---- the Blossom town: the same land's capital, at the scale of the great towns ----
+	/** A Blossom town's ground: its radius, the most it may rise and fall, and how high it is cleared. */
+	static final int TOWN_RADIUS = 42, TOWN_SPREAD = 10, TOWN_CLEAR = 26;
+	/** A site with no kingdom's seat this near (blocks) raises a town and its kingdom; nearer one, a village as ever. */
+	static final int TOWN_REALM_SPACING = 900;
+	/** Its buildings, in the bell's frame as a village's are: two rows of minka each side of the road, the halls at the outer corners. */
+	private static final List<Spot> TOWN_HOUSES = List.of(new Spot("house", -4, -28, 1, 0), new Spot("house", 4, -28, 3, 0),
+		new Spot("house", -4, -15, 1, 0), new Spot("house", 4, -15, 3, 0), new Spot("house", -4, 11, 1, 0), new Spot("house", 4, 11, 3, 0),
+		new Spot("house", -18, -15, 1, 0), new Spot("house", 18, -15, 3, 0), new Spot("house", -18, -2, 1, 0), new Spot("house", 18, -2, 3, 0));
+	private static final List<Spot> TOWN_HALLS = List.of(new Spot("butcher", -18, -28, 1, 7), new Spot("hunting_lodge", 18, -28, 3, 9),
+		new Spot("fishery", -18, 11, 1, 9), new Spot("training_hall", 18, 11, 3, 9));
+	private static final List<Spot> TOWN_STALLS = List.of(new Spot("stall", -5, -4, 1, 5), new Spot("stall", 5, -4, 3, 5),
+		new Spot("stall", -5, 3, 1, 5), new Spot("stall", 5, 3, 3, 5));
+	private static final Spot TOWN_KEEP = new Spot("blossom_tenshu", 0, 22, 0, 17);
+	private static final Spot TOWN_SHRINE = new Spot("blossom_shrine", -14, 24, 0, 7);
+	private static final Spot TOWN_TORII = new Spot("blossom_torii", 0, -36, 0, 7);
+	private static final int[][] TOWN_LANTERNS = {{-3, -33}, {3, -33}, {-3, -21}, {3, -21}, {-3, -8}, {3, -8}, {-3, 7}, {3, 7}, {-3, 19}, {3, 19}};
+	/** The main road from the torii to the keep, the lanes between the rows, and an alley behind each inner row. */
+	private static final int[][] TOWN_ROADS = {{-1, -38, 1, 22}, {-17, -22, 17, -21}, {-17, -9, 17, -8}, {-17, 4, 17, 5}, {-17, -34, -16, 17},
+		{16, -34, 17, 17}, {-4, -5, 4, 5}};
+
 	/** Settlement id → the land its seat stands in (it never changes). */
 	private static final Map<Integer, Climate> CLIMATES = new HashMap<>();
 
@@ -129,6 +151,11 @@ final class BlossomVillages {
 			}
 			// the torii faces the way the player came from
 			Direction gate = Direction.getApproximateNearest(player.getX() - at.getX(), 0, player.getZ() - at.getZ());
+			// with no kingdom in reach and room enough, the land's capital; else a village
+			int wide = townSite(level, at) ? IllagerBuildings.floor(level, at, TOWN_SPREAD, TOWN_RADIUS) : Integer.MIN_VALUE;
+			if (wide != Integer.MIN_VALUE && foundTown(level, at, wide, gate) != null) {
+				return;
+			}
 			found(level, at, floor, gate);
 			return;
 		}
@@ -155,6 +182,113 @@ final class BlossomVillages {
 			return false;
 		}
 		return level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), at, BELL_CLEARANCE, PoiManager.Occupancy.ANY).isEmpty();
+	}
+
+	/** {@code at} (already {@link #open}) could hold a town: its whole ground loaded, and no kingdom's seat within {@link #TOWN_REALM_SPACING}. */
+	private static boolean townSite(ServerLevel level, BlockPos at) {
+		if (!level.hasChunksAt(at.getX() - TOWN_RADIUS, at.getZ() - TOWN_RADIUS, at.getX() + TOWN_RADIUS, at.getZ() + TOWN_RADIUS)) {
+			return false;
+		}
+		for (Faction f : Factions.all(level.getServer())) {
+			if (!f.fallen() && f.type().isRealm() && Raids.horizontal(f.seat(), at) < (double)TOWN_REALM_SPACING * TOWN_REALM_SPACING) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * A Blossom town round {@code center} on {@code floor}, and its kingdom: a road from the torii through the bell plaza
+	 * to a castle keep in the Blossom way ({@link Blossom#tenshu}), ten minka in two rows each side, four job halls, four
+	 * stalls round the bell, a shrine beside the keep. The keep is the seat (a throne at the back of its great room, a
+	 * panic room under it, archers' posts), the kingdom has a Blossom name and is manned like any other, and its builders
+	 * grow the town from there. Null (and nothing built) never: the site was checked before.
+	 */
+	static @Nullable Faction foundTown(ServerLevel level, BlockPos center, int floor, Direction gate) {
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		BlockPos bell = new BlockPos(center.getX(), floor, center.getZ());
+		CampBuildings.level(level, bell, TOWN_RADIUS, TOWN_CLEAR);
+		CampBuildings.Placer frame = new CampBuildings.Placer(bell, gate, 0);
+		for (int[] road : TOWN_ROADS) {
+			for (int x = road[0]; x <= road[2]; x++) {
+				for (int z = road[1]; z <= road[3]; z++) {
+					level.setBlock(frame.at(x, -1, z), Blocks.GRAVEL.defaultBlockState(), Block.UPDATE_ALL);
+				}
+			}
+		}
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				level.setBlock(frame.at(x, -1, z), Blocks.STONE_BRICKS.defaultBlockState(), Block.UPDATE_ALL);
+			}
+		}
+		level.setBlock(bell, Blocks.BELL.defaultBlockState(), Block.UPDATE_ALL);
+		Faction kingdom = Factions.update(server, KingdomEvents.create(level, bell).id(), f -> f.withName(name(server, random)));
+		if (kingdom == null) {
+			return null;
+		}
+		int id = kingdom.id();
+		CLIMATES.put(id, Climate.CHERRY);
+		List<Works.Built> built = new ArrayList<>();
+		// the keep first: it is the seat
+		List<Works.Built> keepBuilt = new ArrayList<>();
+		place(level, Blossom.tenshu(kit(level, kingdom, random)), TOWN_KEEP, bell, gate, keepBuilt);
+		Works.Built tenshu = keepBuilt.getFirst();
+		BoundingBox keepBox = BoundingBox.fromCorners(tenshu.min(), tenshu.max());
+		place(level, Blossom.shrine(), TOWN_SHRINE, bell, gate, null);
+		place(level, Blossom.torii(), TOWN_TORII, bell, gate, null);
+		for (int[] lantern : TOWN_LANTERNS) {
+			place(level, Blossom.stoneLantern(), new Spot("blossom_lantern", lantern[0], lantern[1], 0, 1), bell, gate, null);
+		}
+		List<BlockPos> homes = new ArrayList<>(), halls = new ArrayList<>();
+		for (Spot s : TOWN_HOUSES) {
+			Blueprint house = Blossom.minka(kit(level, kingdom, random));
+			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
+		}
+		for (Spot s : TOWN_HALLS) {
+			Buildings.Kit k = kit(level, kingdom, random);
+			Blueprint hall = switch (s.id()) {
+				case "butcher" -> JobHalls.butcher(k);
+				case "fishery" -> JobHalls.fishery(k);
+				case "training_hall" -> JobHalls.trainingHall(k);
+				default -> JobHalls.huntingLodge(k);
+			};
+			halls.add(place(level, hall, new Spot(s.id(), s.x(), s.z(), s.turns(), hall.width()), bell, gate, built));
+		}
+		for (Spot s : TOWN_STALLS) {
+			place(level, Buildings.stall(kit(level, kingdom, random)), s, bell, gate, built);
+		}
+		Works.update(server, id, w -> {
+			List<Works.Built> all = new ArrayList<>(w.built());
+			all.addAll(built);
+			return w.withBuilt(all);
+		});
+		// the seat in the keep's great room; without one (it couldn't be read) the kingdom's own castle beside the town
+		Seats.Room room = Seats.room(level, new Seats.Building(keepBox, "blossom_tenshu"), bell);
+		Castle.Keep keep;
+		if (room != null) {
+			keep = Seats.keep(level, kingdom, room, bell, true, true);
+			Holds.guard(server, id, keepBox);
+		} else {
+			keep = Castle.build(level, kingdom, bell, Castle.Kind.KEEP);
+		}
+		Factions.putKeep(server, id, keep);
+		KingdomEvents.man(level, Factions.get(server, id), keep);
+		Storehouse.build(level, Factions.get(server, id));
+		KingdomEvents.settle(level, Factions.get(server, id), null, bell);
+		for (BlockPos home : homes) {
+			for (int i = 0; i < PER_HOUSE; i++) {
+				EntityTypes.VILLAGER.spawn(level, Construction.standable(level, home, 3), EntitySpawnReason.STRUCTURE);
+			}
+		}
+		for (BlockPos hall : halls) {
+			for (int i = 0; i < PER_HALL; i++) {
+				EntityTypes.VILLAGER.spawn(level, Construction.standable(level, hall, 3), EntitySpawnReason.STRUCTURE);
+			}
+		}
+		WalledTowns.front(server, id, gate);
+		JaymosKingdoms.LOGGER.info("A Blossom town, {}, rose at {}; its keep's throne at {}", kingdom.name(), bell, keep.throne());
+		return Factions.get(server, id);
 	}
 
 	/** A new Blossom village round {@code center} on {@code floor}, its torii toward {@code gate}: built, named, peopled. */
@@ -317,6 +451,24 @@ final class BlossomVillages {
 		BlockPos at = player.blockPosition();
 		Faction village = found(level, at, at.getY(), player.getDirection());
 		c.getSource().sendSuccess(() -> Component.literal("Founded the Blossom village of " + village.name()), true);
+		return 1;
+	}
+
+	/** {@code /kingdom found blossomtown}: a Blossom town and its kingdom round you, its torii behind you and its keep ahead. */
+	static int foundTownHere(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		ServerLevel level = Factions.level(c.getSource().getServer());
+		if (player.level() != level) {
+			c.getSource().sendFailure(Component.literal("Blossom towns are only in the Overworld"));
+			return 0;
+		}
+		BlockPos at = player.blockPosition();
+		Faction town = foundTown(level, at, at.getY(), player.getDirection().getOpposite());
+		if (town == null) {
+			c.getSource().sendFailure(Component.literal("No Blossom town could be founded here"));
+			return 0;
+		}
+		c.getSource().sendSuccess(() -> Component.literal("Founded the Blossom kingdom of " + town.name()), true);
 		return 1;
 	}
 }

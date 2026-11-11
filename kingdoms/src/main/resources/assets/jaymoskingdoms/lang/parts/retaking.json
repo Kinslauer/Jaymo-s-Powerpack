@@ -122,5 +122,16 @@
 	"retaking.jaymoskingdoms.road.campaign.first": "Rise in your trade: reach level 5 in its skill.",
 	"retaking.jaymoskingdoms.road.campaign.second": "Rise in your trade: reach level 10 in its skill.",
 	"retaking.jaymoskingdoms.road.campaign.third": "Rise in your trade: reach level 15 in its skill.",
-	"retaking.jaymoskingdoms.road.campaign.fourth": "Rise in your trade: reach level 20 in its skill."
+	"retaking.jaymoskingdoms.road.campaign.fourth": "Rise in your trade: reach level 20 in its skill.",
+	"retaking.jaymoskingdoms.road.hermit": "The Hermit's Road",
+	"retaking.jaymoskingdoms.road.hermit.met": "Climb to a hermit wizard's island, and let them greet you.",
+	"retaking.jaymoskingdoms.road.hermit.kindled": "Grow your Valor to Kindled.",
+	"retaking.jaymoskingdoms.road.hermit.tempered": "Grow your Valor to Tempered.",
+	"retaking.jaymoskingdoms.road.hermit.steeled": "Grow your Valor to Steeled.",
+	"retaking.jaymoskingdoms.road.common": "The Common Road",
+	"retaking.jaymoskingdoms.road.common.job": "Take a job in a town.",
+	"retaking.jaymoskingdoms.road.common.class": "Take up a class.",
+	"retaking.jaymoskingdoms.road.common.sworn": "Swear yourself to a patron.",
+	"retaking.jaymoskingdoms.road.common.master": "Become a Master at your job.",
+	"retaking.jaymoskingdoms.road.common.steeled": "Grow your Valor to Steeled."
 }

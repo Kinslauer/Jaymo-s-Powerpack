@@ -229,8 +229,10 @@ public final class KingdomEvents {
 		ChunkPos middle = ChunkPos.containing(center);
 		// (0.7.490) every claim held, gathered once, so each chunk is one lookup rather than a search of every faction's land
 		java.util.Set<Long> taken = new java.util.HashSet<>();
+		int band = Stacked.band(server, center.getY());
 		for (Faction other : Factions.all(server)) {
-			if (!other.fallen()) {
+			// (a sky kingdom and the realm under it each hold their own band of the same chunks)
+			if (!other.fallen() && Stacked.band(server, other.seat().getY()) == band) {
 				taken.addAll(other.claims());
 			}
 		}
@@ -349,7 +351,7 @@ public final class KingdomEvents {
 	}
 
 	/** A new kingdom's faction at {@code capital}: named, coloured, its land claimed, its banner raised. */
-	private static Faction create(ServerLevel level, BlockPos capital) {
+	static Faction create(ServerLevel level, BlockPos capital) {
 		MinecraftServer server = level.getServer();
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
@@ -361,7 +363,7 @@ public final class KingdomEvents {
 	}
 
 	/** Its king crowned, its guards and an archer on every post of {@code keep}. Returns it as stored. */
-	private static Faction man(ServerLevel level, Faction kingdom, Castle.Keep keep) {
+	static Faction man(ServerLevel level, Faction kingdom, Castle.Keep keep) {
 		MinecraftServer server = level.getServer();
 		kingdom = crown(level, kingdom);
 		for (int i = 0; i < GUARDS; i++) {
