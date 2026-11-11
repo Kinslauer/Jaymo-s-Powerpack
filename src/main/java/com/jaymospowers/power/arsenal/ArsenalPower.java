@@ -216,6 +216,10 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		if (!down) {
+			// let go of R before a held grab finished: an ordinary Reach after all
+			if (key == PowerKey.ABILITY_1 && ArsenalAnywhere.release(player)) {
+				reach(player, null);
+			}
 			return;
 		}
 		if (com.jaymospowers.core.Mastery.starterOnly(player)) {
@@ -232,8 +236,11 @@ public final class ArsenalPower implements Power {
 					if (!ArsenalArmory.tryPin(player)) {
 						ArsenalPlaces.mark(player);
 					}
+				} else if (!PENDING.containsKey(player.getUUID()) && player.level().getGameTime() >= cooldowns(player).reach()
+					&& ArsenalAnywhere.startGrab(player)) {
+					// mastered, looking at a player: hold R to reach into their pack (ArsenalAnywhere)
 				} else {
-					reach(player);
+					reach(player, null);
 				}
 			}
 			case ABILITY_2 -> {
@@ -303,6 +310,7 @@ public final class ArsenalPower implements Power {
 	public void onLost(ServerPlayer player) {
 		ArsenalGates.close(player);
 		ArsenalArmory.onLost(player);
+		ArsenalAnywhere.release(player);
 		HundredBlades.onLost(player);
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
@@ -329,6 +337,10 @@ public final class ArsenalPower implements Power {
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);
 		ArsenalCannons.tick(player);
+		ServerPlayer grabbed = ArsenalAnywhere.tickGrab(player);
+		if (grabbed != null) {
+			reach(player, grabbed);
+		}
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
 			return;
@@ -368,13 +380,14 @@ public final class ArsenalPower implements Power {
 
 	// ---------------------------------------------------------------- R: Reach Through
 
-	private static void reach(ServerPlayer player) {
+	/** Reach Through; {@code from}: a mastered Arsenal's held grab, into that player's pack. */
+	private static void reach(ServerPlayer player, @Nullable ServerPlayer from) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		if (PENDING.containsKey(player.getUUID())) {
 			return;
 		}
-		if (ArsenalArmory.tryPin(player)) {
+		if (from == null && ArsenalArmory.tryPin(player)) {
 			return;
 		}
 		Cooldowns cd = cooldowns(player);
@@ -382,14 +395,22 @@ public final class ArsenalPower implements Power {
 			denied(player, "message.jaymospowers.arsenal.reach_recharging", cd.reach() - now);
 			return;
 		}
+		ArsenalAnywhere.Wild chosen = from == null ? null : ArsenalAnywhere.take(player, from, level, player.getRandom(), SUMMON_TICKS);
+		if (from != null && chosen == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pack_empty", from.getDisplayName())
+				.withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		player.setAttached(COOLDOWNS, cd.withReach(now + REACH_COOLDOWN));
 		// decided now, so the weapon everyone sees coming out of the portal is the one you get
 		// the first of the three you can hold: your pinned weapon, or else a relic from the Pocket Stash
 		boolean first = heldBatches(player) == 0;
-		ItemStack relic = first && ArsenalArmory.pinned(player) == null ? ArsenalRelics.takeFromStash(player) : ItemStack.EMPTY;
+		ItemStack relic = chosen == null && first && ArsenalArmory.pinned(player) == null ? ArsenalRelics.takeFromStash(player) : ItemStack.EMPTY;
 		List<ItemStack> stacks;
-		ArsenalAnywhere.Wild wild = null;
-		if (!relic.isEmpty()) {
+		ArsenalAnywhere.Wild wild = chosen;
+		if (chosen != null) {
+			stacks = ArsenalAnywhere.stacksFor(chosen);
+		} else if (!relic.isEmpty()) {
 			// the relic itself, with whatever it fires (arrows for a bow, say)
 			stacks = new ArrayList<>(ArsenalPool.stacksFor(level, player.getRandom(), relic.getItem()));
 			stacks.set(0, relic);

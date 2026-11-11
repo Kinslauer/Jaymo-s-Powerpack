@@ -169,5 +169,7 @@
 	"message.jaymospowers.arsenal.hazard.wither": "Your hand closed on a wither rose",
 	"message.jaymospowers.arsenal.hazard.cactus": "Your hand closed on a cactus",
 	"message.jaymospowers.arsenal.hazard.frost": "Your hand closed on powder snow",
-	"message.jaymospowers.arsenal.hazard.charge": "Your hand closed on a lit charge"
+	"message.jaymospowers.arsenal.hazard.charge": "Your hand closed on a lit charge",
+	"message.jaymospowers.arsenal.grab_holding": "Reaching for %s's pack... (keep holding)",
+	"message.jaymospowers.arsenal.pack_empty": "%s has nothing the rift can take"
 }
