@@ -26,4 +26,5 @@ owns:
 - PR #1322: Wisp ghost tail + held Phase, compiled, not played.
 
 ## Done
-- 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+2026-11-11: on PR #1322 now: Wisp, Read the Ground (Kingdoms), Speed, Web, Smoke/Flame Avatar tracks. Rig track still building. Lore.md has 4 (new) paragraphs after The Flame Avatar for Andy to approve.

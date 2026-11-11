@@ -188,6 +188,21 @@ traits, never as a system.
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
 
+**The skull under the fire.** (new) When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
+
+**The burning chain.** (new) A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
+
+**Judgement.** (new) An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
+the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
+
+**The burning steeds.** (new) The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
+crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
+kin to the fire; anyone else is burned and thrown.
+
 ## The Z Fighters
 
 **The fighters.** A Z Fighter is a martial artist who fights with fists and ki. A foe who beats one owes a
@@ -488,6 +503,15 @@ wind-worn pillars and banded boulders with moss on their heads, and little else.
 day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
 the ring lies and do not think the sight remarkable.
 
+(new) **Storm, sand and wind** (four-mods thread, 2026-11-11, Eden Ring part 2). Three more countries of the Verdant
+World. The **brainstorm** is cold grey upland where the ground is rich in metal and so are the trees: a brain tree
+carries copper, iron or gold through its flesh, builds up charge and lets it go into anything living that comes near.
+The Verdant who gather there wear metal, which takes the charge to ground; they say the trees are thinking, and that
+it is rude to interrupt. The **lakeside desert** is hot dry country where every pond stands in a ring of sand, because
+of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
+**wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
+swings slowly round, and carries off anything thrown or let fall.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -533,7 +557,7 @@ the moon to get the band back, for the kingdom's ruler, who wants the band's pow
 
 (new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
 eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
-name, and Ocellan is Claude's pick, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
 half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
 in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
 monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
