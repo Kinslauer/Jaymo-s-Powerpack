@@ -1,10 +1,10 @@
 ---
-status: open
+status: in-review
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
 claimed_by: 
-pr: 
+pr: 1333
 ---
 
 # Elemental power users: weak auras, blind to mana
