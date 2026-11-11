@@ -174,6 +174,20 @@ public final class StormsClient {
 		}
 	}
 
+	/**
+	 * One soft bank of ground fog (a storm cloud's puff, low and pale), drifting ({@code xd}, {@code zd}) a tick for
+	 * {@code life} ticks; for whoever wants fog that isn't a storm's (a lore film's).
+	 */
+	public static void fog(ClientLevel level, double x, double y, double z, double xd, double zd, float size, int life, float grey, float alpha) {
+		if (cloudSprites == null) {
+			return;
+		}
+		StormParticle p = new StormParticle(level, x, y, z, cloudSprites.get(level.getRandom()), StormParticle.FOG, 0, size, life, grey, grey,
+			grey * 1.04F, alpha);
+		p.setParticleSpeed(xd, 0.0, zd);
+		Minecraft.getInstance().particleEngine.add(p);
+	}
+
 	/** Each tornado in view: wisps whirling up its funnel, and dust and debris round its foot. */
 	private static void funnels(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random) {
 		for (Tornado t : Storms.CLIENT_TORNADOES) {

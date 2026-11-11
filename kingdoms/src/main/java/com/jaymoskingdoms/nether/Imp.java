@@ -129,6 +129,11 @@ public class Imp extends Monster implements GeoEntity {
 		return this.entityData.get(CHARGING);
 	}
 
+	/** (Client) a lore film's imp: how far into its charge it is shown ({@link #charging}; 0 no ball). */
+	public void stageCharge(int charge) {
+		this.entityData.set(CHARGING, charge);
+	}
+
 	/** On the ground with its wings folded. */
 	public boolean resting() {
 		return this.entityData.get(RESTING);
