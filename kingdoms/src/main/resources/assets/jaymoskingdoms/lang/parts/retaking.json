@@ -100,5 +100,17 @@
 	"entity.jaymoskingdoms.risen_orc": "Risen Orc",
 	"message.jaymoskingdoms.second_defence.held": "The ford holds.",
 	"menu.jaymoskingdoms.story.road_open": "Open",
-	"menu.jaymoskingdoms.story.road_sub": "Your own road"
+	"menu.jaymoskingdoms.story.road_sub": "Your own road",
+	"retaking.jaymoskingdoms.road.later": "Later in the story.",
+	"retaking.jaymoskingdoms.road.arcana": "The Arcanist's Road",
+	"retaking.jaymoskingdoms.road.arcana.staff": "Carry a caster's staff.",
+	"retaking.jaymoskingdoms.road.arcana.told": "Ask a court wizard about the old war.",
+	"retaking.jaymoskingdoms.road.arcana.margins": "Find a court wizard's margin notes.",
+	"retaking.jaymoskingdoms.road.arcana.learned": "Learn a second spell for good.",
+	"retaking.jaymoskingdoms.road.faith": "The Faithful Road",
+	"retaking.jaymoskingdoms.road.faith.sworn": "Swear yourself to a patron.",
+	"retaking.jaymoskingdoms.road.faith.favour": "Rise to your patron's second tier of favour.",
+	"retaking.jaymoskingdoms.road.faith.champion": "Bring down your patron's champion.",
+	"retaking.jaymoskingdoms.road.faith.rival": "Stand against a rival faith's champion.",
+	"retaking.jaymoskingdoms.road.faith.champion_three": "Bring down your patron's champion three times."
 }

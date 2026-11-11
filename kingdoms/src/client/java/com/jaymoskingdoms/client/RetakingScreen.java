@@ -22,8 +22,9 @@ import org.jspecify.annotations.Nullable;
  * down the left (done, yours, or not reached, which show no name); on the right the picked act's milestones as plain
  * goals, ticked when done. It says what to do, never what it means. Asks the server when it opens.
  * <p>
- * Below the acts, the player's own road if their power has one ({@link RoadCompat}: the Z Fighter's sagas), its goals the
- * same plain way, with a button to its own screen.
+ * Below the acts, the player's own roads ({@link com.jaymoskingdoms.StoryRoads}: the Arcanist's, the Faithful; and from
+ * Jaymo's Powers through {@link RoadCompat}, the Z Fighter's sagas, with a button to its own screen), their goals the same
+ * plain way, a step of an act not yet reached shown only as "later".
  */
 final class RetakingScreen extends Screen {
 	static final int MAX_W = 360, MAX_H = 210, LIST_W = 118, LIST_ROW = 19, HEADER = 34, GOAL_ROW = 4, ROAD_GAP = 6, ROAD_BUTTON_W = 96;
@@ -35,8 +36,10 @@ final class RetakingScreen extends Screen {
 	static Retaking.@Nullable State state;
 
 	private Retaking.@Nullable Act picked;
-	/** The road row picked instead of an act. */
-	private boolean roadPicked;
+	/** The road row picked instead of an act (its key), or null. */
+	private @Nullable String roadPicked;
+	/** The key Jaymo's Powers' road goes by here. */
+	static final String POWERS_ROAD = "powers";
 	private @Nullable Button roadButton;
 
 	RetakingScreen() {
@@ -62,13 +65,58 @@ final class RetakingScreen extends Screen {
 		}
 	}
 
-	/** The road's row, under the acts. */
-	private int roadY() {
-		return rowY(Retaking.Act.values().length) + ROAD_GAP;
+	/** The player's roads, by key: Powers' first if they have one, then Kingdoms'. */
+	private List<String> roads() {
+		List<String> keys = new ArrayList<>();
+		if (this.roadButton != null && RoadCompat.title() != null) {
+			keys.add(POWERS_ROAD);
+		}
+		if (state != null) {
+			keys.addAll(state.roads());
+		}
+		return keys;
 	}
 
-	private boolean overRoad(int mouseX, int mouseY) {
-		return this.roadButton != null && Ui.over(mouseX, mouseY, left() + 4, roadY(), LIST_W - 8, LIST_ROW - 2);
+	/** Road row {@code index}'s top, under the acts. */
+	private int roadY(int index) {
+		return rowY(Retaking.Act.values().length) + ROAD_GAP + index * LIST_ROW;
+	}
+
+	private @Nullable String roadAt(int mouseX, int mouseY) {
+		List<String> keys = roads();
+		for (int i = 0; i < keys.size(); i++) {
+			if (Ui.over(mouseX, mouseY, left() + 4, roadY(i), LIST_W - 8, LIST_ROW - 2)) {
+				return keys.get(i);
+			}
+		}
+		return null;
+	}
+
+	private Component roadTitle(String key) {
+		if (POWERS_ROAD.equals(key)) {
+			Component t = RoadCompat.title();
+			return t == null ? Component.empty() : t;
+		}
+		return Component.translatable("retaking.jaymoskingdoms.road." + key);
+	}
+
+	/** A road's goals: done or not, and the line (a step of an act not reached yet only says "later"). */
+	private List<java.util.Map.Entry<Boolean, Component>> roadGoals(String key) {
+		if (POWERS_ROAD.equals(key)) {
+			return RoadCompat.goals();
+		}
+		List<java.util.Map.Entry<Boolean, Component>> goals = new ArrayList<>();
+		com.jaymoskingdoms.StoryRoads.Road road = com.jaymoskingdoms.StoryRoads.road(key);
+		if (road == null || state == null) {
+			return goals;
+		}
+		for (com.jaymoskingdoms.StoryRoads.Step step : road.steps()) {
+			boolean done = state.roadDone().contains(key + "." + step.name());
+			Component line = reached(step.act()) ? Component.translatable("retaking.jaymoskingdoms.road." + key + "." + step.name())
+				: Component.translatable("retaking.jaymoskingdoms.road.later");
+			goals.add(new java.util.AbstractMap.SimpleEntry<>(done, line));
+		}
+		return goals;
 	}
 
 	@Override
@@ -126,14 +174,15 @@ final class RetakingScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		Retaking.Act row = rowAt((int)event.x(), (int)event.y());
-		if (overRoad((int)event.x(), (int)event.y())) {
-			this.roadPicked = true;
+		String roadRow = roadAt((int)event.x(), (int)event.y());
+		if (roadRow != null) {
+			this.roadPicked = roadRow;
 			this.picked = null;
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;
 		}
 		if (row != null) {
-			this.roadPicked = false;
+			this.roadPicked = null;
 			this.picked = row;
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;
@@ -174,21 +223,24 @@ final class RetakingScreen extends Screen {
 			Ui.line(graphics, this.font, actName(act), x + 27, ry + 5, LIST_W - 34, color);
 		}
 
-		// the road, under the acts
-		boolean roadHover = overRoad(mouseX, mouseY);
-		boolean roadShown = this.roadButton != null && (roadHover || this.roadPicked && hover == null);
-		if (this.roadButton != null) {
-			int ry = roadY();
-			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2, this.roadPicked ? Ui.ROW_PICKED : roadHover ? Ui.ROW_HOVER : Ui.ROW_ALT);
+		// the roads, under the acts
+		String roadHover = roadAt(mouseX, mouseY);
+		List<String> roads = roads();
+		String roadShown = roadHover != null ? roadHover : hover == null && this.roadPicked != null && roads.contains(this.roadPicked) ? this.roadPicked : null;
+		for (int i = 0; i < roads.size(); i++) {
+			String key = roads.get(i);
+			int ry = roadY(i);
+			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2, key.equals(this.roadPicked) ? Ui.ROW_PICKED : key.equals(roadHover) ? Ui.ROW_HOVER : Ui.ROW_ALT);
 			graphics.item(ROAD_ICON, x + 8, ry + 1);
-			Component road = RoadCompat.title();
-			Ui.line(graphics, this.font, road == null ? Component.empty() : road, x + 27, ry + 5, LIST_W - 34, roadShown ? Ui.GOLD : Ui.TEXT);
-			this.roadButton.visible = roadShown;
-			if (roadShown) {
-				road(graphics, road, x + LIST_W, y, w - LIST_W, h);
-				super.extractRenderState(graphics, mouseX, mouseY, a);
-				return;
-			}
+			Ui.line(graphics, this.font, roadTitle(key), x + 27, ry + 5, LIST_W - 34, key.equals(roadShown) ? Ui.GOLD : Ui.TEXT);
+		}
+		if (this.roadButton != null) {
+			this.roadButton.visible = POWERS_ROAD.equals(roadShown);
+		}
+		if (roadShown != null) {
+			road(graphics, roadShown, x + LIST_W, y, w - LIST_W, h);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
 		}
 
 		// the picked act's goals
@@ -235,12 +287,12 @@ final class RetakingScreen extends Screen {
 	}
 
 	/** The road's goals, the acts' way: a tick when done, a ring when not. */
-	private void road(GuiGraphicsExtractor graphics, @Nullable Component title, int px, int y, int pw, int h) {
-		Ui.line(graphics, this.font, title == null ? Component.empty() : title, px + 10, y + 8, pw - 20, Ui.GOLD);
+	private void road(GuiGraphicsExtractor graphics, String key, int px, int y, int pw, int h) {
+		Ui.line(graphics, this.font, roadTitle(key), px + 10, y + 8, pw - 20, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("menu.jaymoskingdoms.story.road_sub"), px + 10, y + 19, pw - 20, Ui.DIM);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
 		int ry = y + HEADER, bottom = y + h - 26, textW = pw - 34, n = 0;
-		for (java.util.Map.Entry<Boolean, Component> goal : RoadCompat.goals()) {
+		for (java.util.Map.Entry<Boolean, Component> goal : roadGoals(key)) {
 			boolean done = goal.getKey();
 			List<FormattedCharSequence> split = this.font.split(goal.getValue(), textW);
 			int rh = split.size() * Ui.LINE + GOAL_ROW;
