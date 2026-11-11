@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-b48kai
 with: Claude (cloud thread "Make the Galvan tiny and bug-eyed")
-pr: 
+pr: 1323
 mods: powers
 versions: 
 started: 2026-11-11
