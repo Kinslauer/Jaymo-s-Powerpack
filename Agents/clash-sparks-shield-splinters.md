@@ -3,7 +3,7 @@ status: in-review
 task: 
 branch: claude/project-thread-76m9kc
 with: Claude (cloud thread "Add sparks to blade clashes and parries")
-pr: 1288
+pr: 1289 (1288 merged)
 mods: powers, kingdoms
 versions: 
 started: 2026-11-11
@@ -33,3 +33,4 @@ wood from shattering shields", "some of the fighters should have shields so the 
 Sparks (our own particle) on every parry, clash and blocked blow; wooden shields chip and break apart (a mob's after 28
 points blocked, a spare back 4 minutes later); barbarians, orc grunts, goblins and tiered undead carry shields more and
 raise them more. Both mods compile (Gradle, JDK 25); nothing was played. Lore.md has a (new) Shields paragraph.
+Follow-up PR #1289: shields break by durability only, axes wear them 3x, wild shields start battered.
