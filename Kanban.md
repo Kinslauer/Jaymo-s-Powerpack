@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 15:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 20:49). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,13 +21,15 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 🪶 Quill · #1285 · writing
+- [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · running
 
 
 ## In review
 
-- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
+- [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · in-review
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
+- [ ] [[Agents/epic-structures-minotaur|epic-structures-minotaur]] · 💻 Odysseus · #1320 · in-review
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · in-review
 
 
@@ -39,14 +41,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
-- [x] [[Inbox/Done/long-defence-text-pass|long-defence-text-pass]]
-- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
-- [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
-- [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
-- [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
-- [x] [[Inbox/Done/mod-checklists|mod-checklists]]
-- [x] [[Inbox/Done/parasites-and-cures|parasites-and-cures]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
+- [x] [[Inbox/Done/unique-starts|unique-starts]]
+- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 
 
 %% kanban:settings
