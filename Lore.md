@@ -140,12 +140,19 @@ kit.
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
   their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
   when they heal (Andy, 2026-11-11).
-  (new) **The Unseeing** (Claude's name for them, for Andy to approve): the devout who carve the eyes keep together as
-  the Unseeing, and they take followers. Out in the wild at night a traveller may come on one of their services: the
-  members, blindfolded, in a ring of candles round a follower; the chant ("What the eye takes in, it lies about"), the
-  eldest's cut, the binding, and the follower given their new sight. A watcher is left a blindfold for when they are
-  ready (Andy, 2026-11-11: "you should be able to stumble on a service of the members performing this on one of their
-  followers"). What they are given is not their eyes back: living things burn
+  **The Unseeing** (Andy, 2026-11-11: "add the unseeing as a feral cult, that believes in nonsense as an 8th belief")
+  are a feral cult with a belief of their own, beside the faiths: that the eye lies, that the sun is a great eye lying
+  to everyone, that the seven are painted faces and the Truth a book with no letters, and that when all are blind no
+  one can be watched. They keep two rites: the blindfold, tied on and never taken off, and the gouging, the eyes
+  carved out and the sockets bound in linen. The gouged lose their minds in time; the zealous among them hunt by ear
+  anyone who still has their eyes, and leave alone those who have taken the dark on themselves. Villagers who have
+  done it are shunned by their own, so the Unseeing live apart, in enclaves in caves and other dark places in the
+  wild, where they are safe to keep their belief. A traveller may come on one of their services at night out in the
+  wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
+  blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
+  ("you should be able to stumble on a service of the members performing this on one of their followers").
+  (Claude, for Andy: the eight faiths already count the Truth as the eighth, so this reads the Unseeing's as a belief
+  outside them. It isn't a faith a player can swear to in Kingdoms.) What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
