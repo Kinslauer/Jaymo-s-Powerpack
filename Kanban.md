@@ -16,11 +16,11 @@ kanban-plugin: board
 - [ ] [[Inbox/imps-nether|imps-nether]] · for ☁️ Cloud · open
 - [ ] [[Inbox/tinkerer-cheats-death|tinkerer-cheats-death]] · for ☁️ Cloud · open
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · for ☁️ Cloud · open
-- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
+- [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · 🔥 Prometheus · claimed
 
 
 ## In review
