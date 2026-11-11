@@ -1,14 +1,14 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
 thread: 1569170499680870560
 claimed_by: hermes-a
-pr: 1256
+pr: 1260
 suggested_owns: [src/main/java/com/jaymospowers/entity/ape/, src/main/java/com/jaymoskingdoms/beast/]
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Ape/giant trees-flying, screenshake and dust on steps/landings
@@ -39,3 +39,4 @@ Tiv, in the Tasks thread: "The apes and giants should send trees flying when the
 Not tested in game.
 - 2026-11-10 17:21 Text pass: Added change notes for ape/giant sprint-hit trees flying, scaling screenshake, and scaled dust particles. No player-facing strings in code changes (only particle/sound/shake scaling logic). Created changes/powers/ape-giant-trees-flying-screenshake-dust.md and changes/kingdoms/ape-giant-trees-flying-screenshake-dust.md. Build passes for both mods. PR checks pass.
 - 2026-11-11 00:11 Review of #1260 (merged 5:04 PM Nov 10, e50d3ad), cloud reviewer, changes needed as a follow-up PR from master: 1. AetherGiant.getScaleFactor() is height/1.8 = 17 for every Aether Giant (HEIGHT 30.6), and footfall/slam/stamp multiply shake strength AND range by it: each step now shakes ~19 degrees for every player within ~476 blocks, a slam ~51 degrees within ~612 (Shakes has no strength cap), and a footfall sends ~680 block particles. The old numbers were already tuned for this giant: scale against its own base size (getScale(), or bbHeight/HEIGHT) so a normal Aether Giant stays as it was and only bigger ones grow, and cap the range. 2. Points 3-5 of the #1256 review are still open: sprintHit searches from the eye along the look (misses trunks at a tall giant's feet; search from position() up SPRINT_HEIGHT along horizontal getDeltaMovement), it only runs on isSprinting() which VillagerApe/mob giants never set (use horizontal speed), and indentation in GiantTrample and AetherGiant is off by one or two tabs. Verified by a second reviewer. Not tested in game.
+- 2026-11-11 00:11 PR #1260 is merged into master; moved to Inbox/Done.
