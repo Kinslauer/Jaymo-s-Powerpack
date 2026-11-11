@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 22:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,7 +33,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Agents/Hero mechanics (Yo Fadda)|Hero mechanics (Yo Fadda)]] · 💻 Odysseus · #1322 · stalled
 - [ ] [[Agents/fix-youth|fix-youth]] · 💻 Odysseus · #1266 · stalled
 
 
