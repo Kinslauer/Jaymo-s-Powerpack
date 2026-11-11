@@ -17,7 +17,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · 🔨 Hephaestus · #1263 · claimed
 - [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · 🪶 Quill · #1325 · writing
-- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/elemental-ki-limits|elemental-ki-limits]] · 💻 Odysseus · claimed
 
 
 ## In review
