@@ -44,8 +44,10 @@ public final class DivePose {
         }
         int entry = (int) (packed >>> 56) - 1;
         long start = packed & 0x00FF_FFFF_FFFF_FFFFL;
-        float time = player.tickCount + partialTicks;
-        float age = time - start;
+        // The server stamps the entry with the level's game time, so compare against that (not the player's age).
+        long now = player.level().getGameTime();
+        float time = now + partialTicks;
+        float age = (now - start) + partialTicks;
         if (age < 0.0F || age >= DURATION) {
             state.setData(KEY, null);
             return;
