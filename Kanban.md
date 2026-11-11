@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 12:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 13:18). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,6 +26,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · in-review
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · in-review
 - [ ] [[Inbox/frostborn-tech-villagers|frostborn-tech-villagers]] · 💻 Odysseus · #1285 · in-review
 - [ ] [[Inbox/imps-nether|imps-nether]] · 💻 Odysseus · #1286 · in-review
 - [ ] [[Agents/film-geckolib-tape|film-geckolib-tape]] · 💻 Odysseus · #1284 · in-review
@@ -35,21 +36,20 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · 💻 Odysseus · #1268 · sent
 - [ ] [[Inbox/lore-canon-rewrite|lore-canon-rewrite]] · ☁️ Cloud · blocked
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
+- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
+- [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
+- [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
+- [x] [[Inbox/Done/freecam-creative-only|freecam-creative-only]]
+- [x] [[Inbox/Done/mod-checklists|mod-checklists]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
-- [x] [[Inbox/Done/unique-starts|unique-starts]]
-- [x] [[Inbox/Done/training-weights-might|training-weights-might]]
 
 
 %% kanban:settings
