@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-qj39dp
 with: 
-pr: 1292
-mods: kitchen
+pr: 1297 (1292 merged)
+mods: kitchen, powers
 versions: 
 started: 2026-11-11
 owns:
@@ -26,3 +26,9 @@ owns:
 
 ## Done
 Any red meat, pork, poultry, mutton, small game, white or oily fish goes into the dishes that asked for beef, porkchop, chicken, mutton, rabbit, cod or salmon; the cutting board cuts by the same groups. Compiled, not played.
+
+## 2026-11-11, second pass
+- PR #1292 merged (Andy: "Merge and continue").
+- Went through the flagged items: Kitchen 16, Kingdoms 86 and the Powers families. All have routes in code (forge parts, casts, quests, trades, drops, "never made" loot armour) except the four knife metals.
+- PR #1297: Cobalt Ore in the Nether + smeltery alloys for Manyullyn, Queen's Slime, Hepatizon. Andy has an open choice on whether a Nether ore is the route he wants. Owns tools/gen_knife_metals.py and the knife-metal lines in tinkering/Tinkering.java, smeltery/Molten.java, smeltery/Melting.java.
+- 2026-11-11 16:38 PR #1292 is merged into master; moved to Agents/Done.
