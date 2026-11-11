@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 21:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,11 +22,11 @@ kanban-plugin: board
 - [ ] [[Inbox/water-belly-flop-damage|water-belly-flop-damage]] · for 🪽 any Hermes bot · #1263 · changes · fixing review notes
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/undead-seek-real-shelter|undead-seek-real-shelter]] · for 🪽 any Hermes bot · #1262 · changes · fixing review notes
-- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]] · ☁️ Cloud · #1325 · in-review
 - [ ] [[Agents/gremlin-bug-eyed|gremlin-bug-eyed]] · 💻 Odysseus · #1323 · in-review
 
 
