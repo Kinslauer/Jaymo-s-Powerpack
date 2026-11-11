@@ -596,14 +596,16 @@ hunter drops his orders as he runs: find the band ("it hums when it is near its 
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
 
-(new) **The city under the dust** (Andy, 2026-11-11: "hidden"). The Galvan live hidden
+(new) **Undersky, the city under the dust** (Andy, 2026-11-11: "hidden"; names Claude's, Andy said "surprise me"). The Galvan live hidden
 beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
 moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
 believes the pod crews' rumour. Inside, tall white towers curve up to a false sky the Galvan made themselves, blue with pale clouds,
 with gardens on their tops and rails sweeping round them (Andy: like the cities of Viltrum). The moon's Endermen and the Galvan fight all the time: the Endermen steal
 the city's blocks, lamps and panels and bits of the false sky, with no idea what any of it does, for the mischief of it
-(Andy, 2026-11-11). The elder keeps the Star Forge there; the ruler keeps his court there, and a sealed
-workshop where the rival band was made.
+(Andy, 2026-11-11). The elder, **Ammet Thrum** (the Old Maker), keeps the Star Forge there; the ruler, **Sovereign Vorrel**, keeps
+his court there, and a sealed
+workshop where the rival band was made. A band wearer who hands the band to the ruler sees what he wanted it for: he
+puts it on and turns on them in his own court (Andy, 2026-11-11).
 
 ## The future: Los Perrito
 
