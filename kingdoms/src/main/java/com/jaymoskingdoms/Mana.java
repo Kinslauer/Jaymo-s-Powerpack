@@ -197,6 +197,23 @@ public final class Mana {
 		return entity.getAttachedOrElse(ATTUNED, false);
 	}
 
+	/** The elemental powers (Jaymo's Powers' Smoke, Gravity and Cryokinesis): their holders can't see mana at all. */
+	static final java.util.Set<String> ELEMENTAL = java.util.Set.of("smoke", "gravity", "cryo");
+
+	/**
+	 * Andy (2026-11-11): "elemental power users have the weakest ki auras and cannot view mana abilities or spirits because
+	 * of the way their ki manifests". Their ki went to the element that found them and doesn't look for anything else, so
+	 * whether they are attuned or read magic, no one's mana glow, wings, spirit or mage hands shows on their screen.
+	 */
+	public static boolean blindToMana(Player viewer) {
+		return ELEMENTAL.contains(PowersCompat.power(viewer));
+	}
+
+	/** Whether {@code viewer} sees others' mana and spirits: attuned or reading magic, and not an elemental power user. */
+	public static boolean seesMana(Player viewer) {
+		return (attuned(viewer) || ManaAlchemy.readsMagic(viewer)) && !blindToMana(viewer);
+	}
+
 	/** A natural: an attuned Mage or Sorcerer. */
 	public static boolean natural(Player player) {
 		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER));
