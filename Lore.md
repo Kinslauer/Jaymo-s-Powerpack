@@ -107,7 +107,9 @@ bright core in a wider glow, the same for a ki wave, a wizard's bolt, a golem's 
 shell of light swelling out of a point), a **ring** (a shockwave running over the ground), an **orb** (power held in one
 place), a **sigil** (a working laid on the ground as a turning circle of marks, such as a sanctuary), **motes** (loose
 power glinting in the air) and **miasma** (dark or heavy power: the Grue's dark, Darktide's ink, blight, flux, gas,
-which rolls as murk because light cannot be black). Blood drawn out by the forbidden Blood element stays blood, not
+which rolls as murk because light cannot be black). *(new, second pass, 2026-11-11)* Two more: **sparks** (power that
+has not settled: lightning, charge, a crackle that forks and jumps) and **runes** (power written down: the marks of the
+sigil's circle, seen loose where something is enchanted, warded or read). Blood drawn out by the forbidden Blood element stays blood, not
 light: it is paid in blood rather than mana. Things that are not the well keep their own look (steel sparks, redstone,
 goo, gunpowder, festival fireworks).
 
