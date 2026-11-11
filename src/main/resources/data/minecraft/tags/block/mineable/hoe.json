@@ -40,6 +40,10 @@
     "jaymospowers:mycotic_lantern_green",
     "jaymospowers:mycotic_lantern_red",
     "jaymospowers:mycotic_lantern_black",
-    "jaymospowers:balloon_mushroom_block"
+    "jaymospowers:balloon_mushroom_block",
+    "jaymospowers:brain_tree_block_copper",
+    "jaymospowers:brain_tree_block_iron",
+    "jaymospowers:brain_tree_block_gold",
+    "jaymospowers:aquatus_block"
   ]
 }

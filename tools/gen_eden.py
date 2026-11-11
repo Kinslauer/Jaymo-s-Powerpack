@@ -190,6 +190,32 @@ def blocks():
         "top": TEX + "mossy_stone_top", "side": TEX + "mossy_stone_side", "bottom": "minecraft:block/stone"}}, "Moss-Capped Stone")
 
 
+    # ---- the brainstorm ----
+    block("brain_tree_log", column("brain_tree_log_side", "brain_tree_log_top"), states=pillar_states("brain_tree_log"))
+    block("brain_tree_planks", cube("brain_tree_planks"))
+    for metal in ("copper", "iron", "gold"):
+        name = f"brain_tree_block_{metal}"
+        write(f"{ASSETS}/models/block/eden/{name}_active.json", {"parent": "minecraft:block/block", "textures": {
+            "particle": TEX + name + "_active", "all": TEX + name + "_active"}, "elements": [{
+                "from": [0, 0, 0], "to": [16, 16, 16], "shade": False, "light_emission": 15,
+                "faces": {d: {"uv": [0, 0, 16, 16], "texture": "#all", "cullface": d} for d in ("north", "south", "west", "east", "up", "down")}}]})
+        block(name, cube(name), f"{title(metal)} Brain Tree Flesh", states={"variants": {
+            "active=false": {"model": f"{NS}:block/eden/{name}"}, "active=true": {"model": f"{NS}:block/eden/{name}_active"}}})
+        block(f"{metal}_grass", cross(f"{metal}_grass"), item_model=flat(f"{metal}_grass"), drop=False)
+        write(f"{DATA}/loot_table/blocks/{metal}_grass.json", {"type": "minecraft:block", "pools": [{"rolls": 1, "entries": [{
+            "type": "minecraft:alternatives", "children": [
+                {"type": "minecraft:item", "condition": "minecraft:tool/can_shear", "name": f"{NS}:{metal}_grass"},
+                {"type": "minecraft:item", "condition": {"type": "minecraft:random_chance", "chance": 0.1},
+                 "name": f"minecraft:{metal}_nugget"}]}]}],
+            "random_sequence": f"{NS}:blocks/{metal}_grass"})
+
+    # ---- the lakeside desert ----
+    block("aquatus_block", column("aquatus_block_side", "aquatus_block_top"), "Aquatus Head")
+    block("aquatus_roots", {"parent": "minecraft:block/cross", "textures": {"cross": TEX + "aquatus_roots"}}, item_model=flat("aquatus_roots"))
+    block("aquatus_sapling", cross("aquatus_sapling"), item_model=flat("aquatus_sapling"),
+          states={"variants": {"stage=0": {"model": f"{NS}:block/eden/aquatus_sapling"}, "stage=1": {"model": f"{NS}:block/eden/aquatus_sapling"}}})
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -205,6 +231,17 @@ def recipes_and_tags():
     tag(f"{DATA}/tags/item/mycotic_lanterns.json", [f"{NS}:mycotic_lantern_{c}" for c in COLOURS])
     for colour in COLOURS:
         shapeless(f"mycotic_lantern_{colour}", [f"#{NS}:mycotic_lanterns", f"minecraft:{colour}_dye"], f"mycotic_lantern_{colour}", 1, "mycotic_lantern")
+
+    shapeless("brain_tree_planks", [f"{NS}:brain_tree_log"], "brain_tree_planks", 4, "planks")
+    armour = [f"minecraft:{m}_{p}" for m in ("iron", "golden", "chainmail", "copper", "netherite") for p in ("helmet", "chestplate", "leggings", "boots")]
+    tag(f"{DATA}/tags/item/grounding_armor.json", armour)
+    brains = [f"{NS}:brain_tree_block_{m}" for m in ("copper", "iron", "gold")]
+    tag(f"{MC}/tags/block/mineable/axe.json", [f"{NS}:brain_tree_log", f"{NS}:brain_tree_planks", f"{NS}:aquatus_roots"])
+    tag(f"{MC}/tags/block/mineable/hoe.json", brains + [f"{NS}:aquatus_block"])
+    for kind in ("block", "item"):
+        tag(f"{MC}/tags/{kind}/planks.json", [f"{NS}:brain_tree_planks"])
+        tag(f"{MC}/tags/{kind}/logs.json", [f"{NS}:brain_tree_log"])
+        tag(f"{MC}/tags/{kind}/saplings.json", [f"{NS}:aquatus_sapling"])
 
     lanterns = [f"{NS}:mycotic_lantern_{c}" for c in COLOURS]
     wood = [f"{NS}:{b}" for b in ("balloon_mushroom_stem", "balloon_mushroom_log", "balloon_mushroom_planks", "pulse_tree", "pulse_tree_log",
@@ -227,6 +264,8 @@ FEATURES = {
     # id: (kind, placement)
     "eden_mycelium_ground": ("mycelium_ground", []),
     "eden_stone_ground": ("stone_ground", []),
+    "eden_sand_ground": ("sand_ground", []),
+    "eden_pond": ("pond", ["rare:2", "surface"]),
     "eden_stone_pillar": ("stone_pillar", ["rare:3", "surface"]),
     "eden_stone_boulder": ("stone_boulder", ["count:2", "surface"]),
     "eden_balloon_mushrooms": ("balloon_mushroom", ["count:5", "surface"]),
@@ -234,11 +273,13 @@ FEATURES = {
     "eden_old_balloon_mushroom_rare": ("old_balloon_mushroom", ["rare:6", "surface"]),
     "eden_old_balloon_mushrooms": ("old_balloon_mushroom", ["count:3", "surface"]),
     "eden_pulse_trees": ("pulse_tree", ["count:8", "surface"]),
+    "eden_brain_trees": ("brain_tree", ["count:3", "surface"]),
+    "eden_metal_grass": ("metal_grass", ["count:4", "surface"]),
     # (after the trees: a plant on the turf would lift the surface a tree looks for)
     "eden_mycotic_plants": ("mycotic_plants", ["count:3", "surface"]),
 }
 # the saplings' trees
-TREES = {"balloon_mushroom": "balloon_mushroom", "pulse_tree": "pulse_tree"}
+TREES = {"balloon_mushroom": "balloon_mushroom", "pulse_tree": "pulse_tree", "aquatus": "aquatus"}
 
 
 def placement(spec):
@@ -267,13 +308,28 @@ BIOMES = {
     "stone_garden": ("Stone Garden", "#9fdcb0", "#c4ecc8", "#6fb85a", "#5fa84e", "#3fc0a8",
                      ["eden_stone_ground", "eden_stone_pillar", "eden_stone_boulder"], [],
                      ["minecraft:glow_lichen", "minecraft:patch_grass_plain"]),
+    "brainstorm": ("Brainstorm", "#5f6f80", "#7f8c98", "#7a9a6a", "#6a8a5e", "#4a7a90",
+                   [], ["eden_brain_trees", "eden_metal_grass"],
+                   ["minecraft:glow_lichen", "minecraft:patch_grass_plain"]),
+    "lakeside_desert": ("Lakeside Desert", "#a8dcc0", "#d8ecc8", "#b8c86a", "#a8b85e", "#3fc8b8",
+                        ["eden_sand_ground", "eden_pond"], [],
+                        ["minecraft:glow_lichen", "minecraft:patch_sugar_cane"]),
+    "wind_valley": ("Wind Valley", "#9fe8c0", "#c8f4d8", "#7fd86a", "#6fc85e", "#3fd0a0",
+                    [], [],
+                    ["minecraft:glow_lichen", "minecraft:patch_tall_grass_2", "minecraft:flower_plains", "minecraft:patch_grass_plain"]),
 }
 
 FULL = [-2.0, 2.0]
 # biome: [(temperature, humidity)]; the boxes tile the whole temperature/humidity plane, so every place is one of them
 LAYOUT = {
-    "stone_garden": [((-2.0, -0.2), (-2.0, -0.3))],
-    "verdant_plains": [((-0.2, 2.0), (-2.0, -0.3)), ((-2.0, 2.0), (-0.3, 0.12))],
+    # dry: the stone garden in the cold, the lakeside desert in the heat, the wind valley between
+    "stone_garden": [((-2.0, -0.3), (-2.0, -0.3))],
+    "wind_valley": [((-0.3, 0.25), (-2.0, -0.3))],
+    "lakeside_desert": [((0.25, 2.0), (-2.0, -0.3))],
+    # middling: the plains, and the brainstorm in the cold
+    "brainstorm": [((-2.0, -0.4), (-0.3, 0.12))],
+    "verdant_plains": [((-0.4, 2.0), (-0.3, 0.12))],
+    # wet: the mycotic forests, and the pulse forest in the heat
     "mycotic_forest": [((-2.0, 0.15), (0.12, 0.42))],
     "old_mycotic_forest": [((-2.0, 0.15), (0.42, 2.0))],
     "pulse_forest": [((0.15, 2.0), (0.12, 2.0))],
@@ -303,6 +359,8 @@ def worldgen():
     LANG[f"biome.{NS}.verdant_plains"] = "Verdant Plains"
     write(f"{DATA}/tags/worldgen/biome/eden_mycelium_ground.json", {"values": [f"{NS}:mycotic_forest", f"{NS}:old_mycotic_forest"]})
     write(f"{DATA}/tags/worldgen/biome/eden_stone_ground.json", {"values": [f"{NS}:stone_garden"]})
+    write(f"{DATA}/tags/worldgen/biome/eden_sand_ground.json", {"values": [f"{NS}:lakeside_desert"]})
+    write(f"{DATA}/tags/worldgen/biome/eden_windy.json", {"values": [f"{NS}:wind_valley"]})
 
     entries = []
     for name, boxes in LAYOUT.items():

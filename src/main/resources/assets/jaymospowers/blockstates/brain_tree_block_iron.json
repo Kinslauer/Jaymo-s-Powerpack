@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "jaymospowers:block/eden/brain_tree_block_iron"
+    },
+    "active=true": {
+      "model": "jaymospowers:block/eden/brain_tree_block_iron_active"
+    }
+  }
+}
