@@ -1,0 +1,15 @@
+{
+  "title": "Margins",
+  "author": "a court wizard",
+  "pages": [
+    "Fire, water, earth and air. Ice and lightning are the same four, only angry. Mending is the fifth, and nobody argues with it.",
+    "Death and Blood. Every court forbids them and none of them remembers why. I asked the old master once. He looked at the door before he answered, and then he did not answer.",
+    "The crucible hums when the flux runs high. The apprentices say it talks. It does not talk. It listens, which is worse.",
+    "If you hear your own name in it, put the lid on and go outside. Do not answer. Somebody answered, once, a long time ago."
+  ],
+  "drop": {
+    "entities": ["minecraft:witch"],
+    "dimensions": ["minecraft:overworld"],
+    "chance": 0.06
+  }
+}

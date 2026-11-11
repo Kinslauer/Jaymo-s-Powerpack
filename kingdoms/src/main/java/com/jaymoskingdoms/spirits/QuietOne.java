@@ -404,7 +404,7 @@ public final class QuietOne extends Spirit {
 		level.addFreshEntity(stand);
 		MIRRORS.put(player.getUUID(), new Mirror(stand, level.getGameTime() + MIRROR_TICKS, new ArrayList<>()));
 		aimMobs(player, MIRRORS.get(player.getUUID()));
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(Fx.VOID, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
 		Mana.sendSeen(level, Mana.MOTE, from.x, from.y + 1.0, from.z, 18, 0.3, 0.6, 0.3, 0.04);
 		player.teleportTo(to.x, to.y, to.z);
 		level.sendParticles(ParticleTypes.WHITE_ASH, to.x, to.y + 1.0, to.z, 12, 0.3, 0.6, 0.3, 0.02);

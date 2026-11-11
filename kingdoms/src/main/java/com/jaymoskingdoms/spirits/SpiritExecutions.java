@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Arcana;
 import com.jaymoskingdoms.Mana;
 import com.jaymoskingdoms.PowersCompat;
@@ -311,7 +312,7 @@ public final class SpiritExecutions {
 			}
 			case Spirits.AMBROSE -> {
 				if (t < 24 && t % 4 == 0) {
-					level.sendParticles(scene.silent ? ParticleTypes.WHITE_ASH : ParticleTypes.END_ROD, at.x, at.y, at.z, 4, 0.4, 0.6, 0.4, 0.02);
+					level.sendParticles(scene.silent ? ParticleTypes.WHITE_ASH : Fx.LIGHT, at.x, at.y, at.z, 4, 0.4, 0.6, 0.4, 0.02);
 				}
 				switch (t) {
 					case 0 -> sound(level, scene, at, SoundEvents.AMETHYST_BLOCK_CHIME, 1.0F, 0.6F);
@@ -320,7 +321,7 @@ public final class SpiritExecutions {
 					case 30 -> {
 						level.sendParticles(scene.silent ? ParticleTypes.WHITE_ASH : ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 30, 0.3, 0.4, 0.3, 0.4);
 						sound(level, scene, at, SoundEvents.BELL_RESONATE, 1.0F, 1.2F);
-						end(level, player, scene, SoundEvents.AMETHYST_CLUSTER_BREAK, ParticleTypes.END_ROD, 0.3F);
+						end(level, player, scene, SoundEvents.AMETHYST_CLUSTER_BREAK, Fx.LIGHT, 0.3F);
 					}
 					default -> {
 					}

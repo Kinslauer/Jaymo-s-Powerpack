@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.spirits;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -125,7 +126,7 @@ public final class HandExtras {
 		ARMOUR.put(player.getUUID(), player.level().getGameTime() + ARMOUR_TICKS);
 		Spirits.toggle(player, SpiritState.ARMOUR, true);
 		ServerLevel level = (ServerLevel)player.level();
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.9, 0.5, 0.6);
+		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.9, 0.5, 0.6);
 		Mana.sendSeen(level, Mana.MOTE, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.8, 0.5, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 0.8F);

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.power.web.WebCraterFeature;
 import com.jaymospowers.power.web.WebPower;
@@ -164,7 +165,7 @@ public final class FallingStars {
 				if (player.distanceToSqr(at) > SEEN_FROM * SEEN_FROM) {
 					continue;
 				}
-				level.sendParticles(player, ParticleTypes.END_ROD, true, true, at.x, at.y + 0.8, at.z, 14, 1.0, 1.0, 1.0, 0.03);
+				level.sendParticles(player, MagicFx.LIGHT, true, true, at.x, at.y + 0.8, at.z, 14, 1.0, 1.0, 1.0, 0.03);
 				level.sendParticles(player, ParticleTypes.FLAME, true, true, at.x, at.y + 0.8, at.z, 8, 1.0, 1.0, 1.0, 0.05);
 				level.sendParticles(player, ParticleTypes.LARGE_SMOKE, true, true, at.x, at.y + 0.8, at.z, 6, 0.8, 0.8, 0.8, 0.02);
 				level.sendParticles(player, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, true, at.x, at.y + 0.8, at.z, 3, 0.6, 0.6, 0.6, 0.01);
@@ -203,7 +204,7 @@ public final class FallingStars {
 					continue;
 				}
 				level.sendParticles(player, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, true, at.x, at.y + 0.5, at.z, 2, 0.6, 0.3, 0.6, 0.01);
-				level.sendParticles(player, ParticleTypes.END_ROD, true, true, at.x, at.y + 1.0, at.z, 2, 0.5, 1.5, 0.5, 0.06);
+				level.sendParticles(player, MagicFx.LIGHT, true, true, at.x, at.y + 1.0, at.z, 2, 0.5, 1.5, 0.5, 0.06);
 			}
 		}
 	}
@@ -215,7 +216,7 @@ public final class FallingStars {
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 8.0F, 0.6F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 10.0F, 0.9F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, to.x, to.y + 1.0, to.z, 2, 1.0, 0.5, 1.0, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, to.x, to.y + 1.0, to.z, 60, 1.5, 1.0, 1.5, 0.25);
+		level.sendParticles(MagicFx.LIGHT, to.x, to.y + 1.0, to.z, 60, 1.5, 1.0, 1.5, 0.25);
 		level.sendParticles(ParticleTypes.LAVA, to.x, to.y + 1.0, to.z, 20, 1.0, 0.5, 1.0, 0.0);
 		BlockPos ground = BlockPos.containing(to).below();
 		BlockPos seat = ground.below(WebCraterFeature.DEPTH - 1);

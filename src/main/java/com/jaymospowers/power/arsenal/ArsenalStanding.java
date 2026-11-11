@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.chrono.ChronoEcho;
@@ -26,7 +27,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -279,7 +279,7 @@ public final class ArsenalStanding {
 				continue;
 			}
 			Vec3 p = end.pos();
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y + 1.1, p.z, 30, 0.3, 0.8, 0.3, 0.06);
+			level.sendParticles(MagicFx.VOID, p.x, p.y + 1.1, p.z, 30, 0.3, 0.8, 0.3, 0.06);
 			level.playSound(null, p.x, p.y, p.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
 		}
 	}
@@ -428,7 +428,7 @@ public final class ArsenalStanding {
 		}
 		Vec3 p = end.pos();
 		if (tick % MOTE_EVERY == 0) {
-			level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 1.1, p.z, 3, 0.3, 0.7, 0.3, 0.2);
+			level.sendParticles(MagicFx.VOID, p.x, p.y + 1.1, p.z, 3, 0.3, 0.7, 0.3, 0.2);
 		}
 		if (tick % HUM_EVERY == 0) {
 			level.playSound(null, p.x, p.y + 1.1, p.z, SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.3F, 1.5F);

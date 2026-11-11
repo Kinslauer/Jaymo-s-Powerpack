@@ -11172,3 +11172,84 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
   or miasma when dark.
 - Not touched: `LoreFilmClient` (the film thread's), attack tells, the redstone golem, lycan fur, Rubber-folk.
 - Compiles; not played.
+
+## 0.7.730 (2026-11-11): Magic FX second pass: sparks, runes and real beams (#1310)
+
+- Spells, patrons, champions and rituals that used end rod, electric spark, enchant, portal, witch, glow or wax
+  particles as magic now use Powers' typed looks through `Fx` (`Fx.LIGHT`, `CRACKLE`, `GLYPH`, `VOID`, `HEX`, `GLOW`,
+  `EMBER`, `PALE`): about 130 places. Without Powers they fall back to the old vanilla particles.
+- The Sun Marshal's landing beam is a real beam.
+- Parries, clashes, horses, villagers' everyday marks, real portals and enchanting storage keep their vanilla particles.
+- Built; not played.
+
+## 0.7.731 (2026-11-11): life story lines rewritten for the lore canon (#1309)
+
+- **Life story** (the character creator's questions): 82 lines now follow the canon page. The Frostborn are born in "the snowfields your people settled" (from far past the sun), not "the frozen north"; a warband's old ones never say where the band came from; the vat-born are the Mad Tinkerer's unfinished work; Sylvan elders remember the old trees as saplings.
+- **Raised by**: families keep the faith their trade keeps (the Anvil-Father, the Deep Mother, the Green Huntsman, the Hearthkeeper, the Ash Whisperer); the Dawnborn's priests are the Crowned Sun's, the Nightborn's barrow-keepers the Lantern Warden's, and the Emberborn's Hornkin fosterers were paid off in gold.
+- **As you grew up**: each class is learned from the people the canon says teach it (the Ash Whisperer's cutpurses, a war camp, an old elemental school, the Green Huntsman's folk, the wild, a ship's guns, a realm's stables and tilt-yard). The class descriptions end with who teaches the trade.
+- **Then one day**: the spider's bite leaves you quieter, the weapon is one you reached for that wasn't there, the dark water holds you up, the won fight comes off you like heat. No power is named.
+- **Roads**: the afterlife road is the Judge's weighing, the demon master's people "do not go up any more", the Pale Moon has a rumour about who lives there, the monolith is one of the old stones, and the stone lab is somebody's unfinished work. Five villager greetings for those roads follow.
+- **Heritages**: Sylvan are long-lived, the Warrior-born are why folk watch the sky, the Nightborn name the Dawnborn's distrust, and the Divine-born hint adds those the Judge finds just who ask to stay.
+- The narrator's clips for the 25 changed tales are removed, so those tales are read in silence until `python tools/voices/make_voices.py narrator` remakes them. Question titles and the lines under them are unchanged, so their clips still match.
+- Lang only; not played.
+
+## 0.7.732 (2026-11-11): The Long Defence: heroes in full frame, armoured soldiers, Grimsby the Sylvan elf (#1290)
+
+- Each hero's shots in the film are pulled back so the whole figure is in frame, and fighters are kept out from between the hero and the camera
+- The Warrior-born soldiers wear real armour and helmets (iron, chainmail, steel plate helms), drawn the way the draugr's gear is
+- Grimsby is a Sylvan elf: long pointed ears, a slighter build, no beard
+- The soldiers each wear their own mix of leather, chainmail and iron, caked in mud and old blood, not shiny
+- Fighters no longer stand inside one another: anyone too close is eased apart, and the opening pairs start farther apart
+- Varro throws his fire after the in-balming and runs in after it in the same shot; a shot of Thessaly and Ambrose from the front comes between, then the cut to him crossing to Grimsby, who is blade on blade with an orc, and one long side shot of the two back to back
+- Thessaly and Ambrose fight back to back the same way, then make one working together: her ward drawn in, his light poured into it, and it goes out over the field as a ring
+- The heroes fight from the first shot: Varro, Grimsby and the Quiet One (in his rags) each have a foe on them from the first frame and fight among the soldiers until their own beats, and Thessaly's and Ambrose's bolts go up at the imps as well as into the host
+- A new run of shots near the start takes Thessaly from the front: the camera goes out after her bolt to the imp it bursts, and out of the burst Ambrose's light forms and carries the camera back to his face, and then after his bolt in turn
+- The imps come into the film through rifts of nether light that open over the field and draw shut behind them, like the Arsenal's
+- The film is 11 seconds longer; its tape is recorded again with all of this
+- When the Quiet One flips off a tree or rolls under a bolt, his cloak comes back onto him whole and goes over with him, then comes apart and throws for the next tree
+- Varro's steel stays bright in the dark and glints, and Grimsby's blade is wind-imbued: lit currents run along it and curl off it, so the two can be picked out of the crowd in the wide shots
+- Beheadings are a level cut: the blade drawn back low to the side and swept through at neck height with the whole body turning, the head going the way of the cut; the cut that follows a severed arm comes down across from the shoulder (new moves in the library: wind_side, behead, wind_high, hew; the draugr's animation file is regenerated with the whole library)
+
+## 0.7.733 (2026-11-11): mob homes: ogres and Bogres in orc camps, witches' mud golems, jungle tarantulas, dragons wait for a kill (#1311)
+
+- Andy: "Ogres should be found in orc encampments as heavy duty units, same with Bogres. Mud golem should spawn in witch huts as their allies, in the swamp as regular threats and the minotaur should spawn in the aether as one of the dungeon bosses. Tarantula should only spawn in the jungle at night, the 3% is a bug and can be reverted to day only.. They can only appear in the overworld after youve killed one. Any dragon counts. Besides that they either fly around in the aether or the nether w ignovorius".
+- **Orc camps' heavy hands.** Every orc camp now has a band of ogres (a two-headed brute, an armoured ogre and an ogre) and a Bogre living by its fire from the day it's founded. An older camp gets its band and Bogre once, the first time it's looked over with no band. A camp's Bogre keeps to the camp instead of walking off from the orcs, goes back to the fire when it strays, and spares whoever the camp's ogres spare. Ogres and Bogres never set on each other or on greenskins. Wild ogres and the mangrove Bogres still spawn as before. `OgreHolds.joinCamp/bogre/everBanded/spares`, `OrcCamps.found/tick`, `Bogre`.
+- **Mud golems.** No longer a monster of legend: one of the swamps' common threats, weight 15 among the swamp and mangrove monsters (a zombie is 95). They're no longer in rumours or beast quests. **Witch huts**: when a player is near a witch in a swamp hut, a mud golem now and then rises out of the mud by the hut, at most 2 per hut. They keep near the hut, a witch's potions don't hurt them, and they go for anyone who strikes a witch near them. `monsters/WitchHuts`. Hint 127.
+- **The 3% cut is daytime-only again.** Monsters that walk by day (the ogre, the mud golem) were cut to 3% of their spawns at every hour. They now get that cut only in daylight. `Encounters.wildSpawn`.
+- **Tarantulas** spawn only in jungles, and only at night, under the canopy too (`has_tarantula`).
+- **The minotaur** no longer spawns in the mountains, in rumours or in beast quests. It's one of the bosses of the Aether's Sentry Ruins (Powers). The `has_minotaur` tag is gone.
+- **Dragons stay out of the Overworld until a dragon is killed.** Until someone in the world kills a dragon (any dragon: ours, the Ender Dragon, another mod's; not a tamed one), no dragon spawns there. That covers the Notus, Boreas and Zephyrus encounters, Stegonaut, Atroxiia and Varasuchus, and Eurus and Aeolus in their disguises. Eggs, spawners and the op command still work. Until then the dragons are met in the Aether, where Notus, Boreas and Zephyrus now fly about beside Aetherion (a dragon about once an hour per player, Aetherion most often), and in the Nether (Ignivorus anywhere, Notus over the basalt deltas). The kill is saved with the world. `DragonRecords.worldSlain/markSlain`, `Dragons.aether/overworldOpen`, `Disguises.spawns`.
+- Lore.md: two (new) paragraphs, "Where the dragons keep" and "Who keeps company with whom".
+- Built (Kingdoms `build`, Powers `compileJava`). Not played: the camp bands, the hut golems and the Aether dragons haven't been seen in game.
+
+## 0.7.734 (2026-11-11): The Retaking: the Thief's Road and the Old Campaign (#1307)
+
+- **The Thief's Road** (Thieves): pick a pocket clean; pick a lock; find a den; then, once the Dark Below has begun, a locked chest you pick may hold a contract left under a black candle (**Paid For**) and the book someone paid to have buried, a copy of *The Long Defence* (a third of picked chests, until you have read it).
+- **The Old Campaign** (Warlords, Brutes, Riders, Marksmen, Archers, Survivalists): every 5 levels in your trade's skill (Survival for Archers and Survivalists, Strength for the rest), up to 20, is a step, and each hands you the next part of an old campaigner's account, four short books from the river farms to the ford.
+- The Story tab lists every road Jaymo's Powers gives (the Fighter's and the Chrono's), and shows Open only for a road with its own screen.
+- Built; not played.
+
+## 0.7.735 (2026-11-11): The Retaking: the Arcanist's and the Faithful roads (#1307)
+
+- Two more roads in the Story tab, under the acts, for whoever they fit (each step counts only once its act has begun):
+  - **The Arcanist's Road** (Mages and Sorcerers): carry a caster's staff; ask a court wizard about the old war; find a court wizard's margin notes; learn a second spell for good.
+  - **The Faithful Road** (anyone sworn to a patron): swear; rise to the second tier of favour; bring down your patron's champion; stand against a rival faith's champion; bring your own champion down three times.
+- **Margins**: a court wizard's margin notes, a new lore book (now and then on a witch, 6%): the elements, why Death and Blood are forbidden, and what the crucible does when the flux runs high.
+- `StoryRoads` (roads, steps, saved progress) and the Story tab now list several roads; a step of an act not yet reached shows only "Later in the story."
+- Built; not played.
+
+## 0.7.736 (2026-11-11): The Retaking: your own road in the Story tab (#1307)
+
+- The Story tab has a row under the five acts for the player's own road when their power has one (the Z Fighter's sagas for now, from Jaymo's Powers): its goals listed the same plain way as an act's, and an Open button to the road's own screen.
+- `RoadCompat` reaches Powers' `StoryRoads` by reflection; without Powers there is no road row.
+- Built; not played.
+
+## 0.7.737 (2026-11-11): The Second Defence ends with a short film at the ford (#1315)
+
+- When the Second Defence is held, everyone who stood at the ford sees a short wordless film (16 seconds) set at the ford itself: dawn, the last of the old legion on the far bank bowing and going back into the ground one by one, a slow look across the water, then the keep with its light still burning
+- It is played from a recorded tape like The Long Defence, with nothing laid over the world; the weather is clear on your screen while it plays
+- `/kingdom film second_defence` plays it for testing (where you stand, if you are not at the ford)
+
+## 0.7.738 (2026-11-11): Story tab no longer crashes the game at launch (#1314)
+
+- The Story tab's act and road icons were item stacks made while the client was starting, before items could be built ("Components not bound yet"), which crashed the game on launch. They are now made the first time the tab is drawn.

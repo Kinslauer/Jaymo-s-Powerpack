@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.core.Powers;
@@ -57,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * Tower or the Time Chamber, defeat foes, hand over goods, and defeat a boss (a fighter of ours, {@link ZFighterRogue},
  * or a Giant, named only by its entity id so nothing here needs Jaymo's Kingdoms; without it that step is skipped).
  * <p>
- * A fighter started a saga from the Story screen (ZFighterStoryScreen, no longer opened: the story is now the character menu's Story tab, Kingdoms' Retaking; the sagas come back as the fighter's road in it) and picked a difficulty
+ * A fighter starts a saga from the saga screen (ZFighterStoryScreen), opened from the Fighter's Road in the character menu's Story tab (Kingdoms' Retaking, through the client's StoryRoads), and picks a difficulty
  * then ({@link #BOSS_HEALTH}, {@link #BOSS_DAMAGE}, {@link #REWARD}). To speak with a master or the Keeper: sneak and
  * right-click with anything in hand. A boss kill, a Giant's fall and each foe count for the killer's party members
  * within {@link #PARTY_RANGE} blocks ({@link ZFighterKingdoms#partyMembers}). Progress is saved on the player
@@ -463,7 +464,7 @@ public final class ZFighterSagas {
 			give(player, stack);
 		}
 		ServerLevel level = player.level();
-		level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.06);
+		level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.06);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
 		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("message.jaymospowers.zfighter_saga_told", player.getDisplayName(),
 			title(data.saga())).withStyle(ChatFormatting.GRAY), false);

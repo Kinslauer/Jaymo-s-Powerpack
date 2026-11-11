@@ -667,7 +667,7 @@ final class ZFighterTournaments {
 			t.level.sendParticles(dust, true, false, c.x + Math.cos(a) * RADIUS, c.y + 0.15, c.z + Math.sin(a) * RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (t.signingUp()) {
-			t.level.sendParticles(ParticleTypes.END_ROD, true, false, c.x, c.y + 0.5, c.z, 6, 0.2, 2.0, 0.2, 0.02);
+			t.level.sendParticles(MagicFx.LIGHT, true, false, c.x, c.y + 0.5, c.z, 6, 0.2, 2.0, 0.2, 0.02);
 		}
 	}
 

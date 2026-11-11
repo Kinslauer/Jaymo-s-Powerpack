@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.forms;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Casters;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.CourtWizards;
@@ -26,7 +27,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -439,7 +439,7 @@ public final class WizardTrials {
 		if (player.tickCount % 10 == 0) {
 			for (int i = 0; i < 20; i++) {
 				double a = i * Math.PI * 2.0 / 20;
-				level.sendParticles(player, inside ? ParticleTypes.END_ROD : ParticleTypes.ELECTRIC_SPARK, true, false,
+				level.sendParticles(player, inside ? Fx.LIGHT : Fx.CRACKLE, true, false,
 					run.ring.x + Math.cos(a) * RING_RADIUS, run.ring.y + 0.15, run.ring.z + Math.sin(a) * RING_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
@@ -465,7 +465,7 @@ public final class WizardTrials {
 		}
 		if (marked != null && player.tickCount % 10 == 0) {
 			// (a mark over its head that only you see, besides its glow)
-			level.sendParticles(player, ParticleTypes.END_ROD, true, false, marked.getX(), marked.getY() + marked.getBbHeight() + 0.6, marked.getZ(), 2,
+			level.sendParticles(player, Fx.LIGHT, true, false, marked.getX(), marked.getY() + marked.getBbHeight() + 0.6, marked.getZ(), 2,
 				0.1, 0.1, 0.1, 0.0);
 		}
 	}

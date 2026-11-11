@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -202,7 +201,7 @@ final class GravityWave {
 			}
 		}
 		Vec3 mid = wave.from.add(wave.dir.scale(at));
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, mid.x, mid.y, mid.z, 6, halfWidth * 0.4, halfHeight * 0.4, halfWidth * 0.4, 0.1);
+		level.sendParticles(MagicFx.VOID, mid.x, mid.y, mid.z, 6, halfWidth * 0.4, halfHeight * 0.4, halfWidth * 0.4, 0.1);
 	}
 
 	/** Everything the wave has just reached (out to {@code far}) is hurt, thrown along it and slowed, once. */
@@ -229,7 +228,7 @@ final class GravityWave {
 				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(hitPlayer, new com.jaymospowers.power.web.WebNet.Nudge(v));
 			}
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, SLOW_LEVEL), owner);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 12,
+			level.sendParticles(MagicFx.VOID, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 12,
 				0.3, 0.3, 0.3, 0.1);
 		}
 	}

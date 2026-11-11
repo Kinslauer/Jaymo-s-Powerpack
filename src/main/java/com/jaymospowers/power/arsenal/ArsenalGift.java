@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
@@ -68,17 +69,12 @@ final class ArsenalGift implements GiftKit {
 
 	/** A glinting streak of a blade's flight from {@code from} to {@code to}. */
 	private static void streak(ServerLevel level, Vec3 from, Vec3 to) {
-		Vec3 step = to.subtract(from);
-		int steps = Math.max(1, (int)(step.length() * 2.0));
-		for (int i = 1; i <= steps; i++) {
-			Vec3 p = from.add(step.scale((double)i / steps));
-			level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+		MagicFx.beam(level, from, to, MagicFx.LINE_RADIUS * 0.6F, MagicFx.LIGHT_COLOR, MagicFx.LINE_TICKS);
 	}
 
 	private static void rift(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 10, 0.3, 0.1, 0.3, 0.1);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 6, 0.3, 0.1, 0.3, 0.03);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 10, 0.3, 0.1, 0.3, 0.1);
+		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 6, 0.3, 0.1, 0.3, 0.03);
 	}
 
 	private static boolean throwBlade(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
@@ -140,7 +136,7 @@ final class ArsenalGift implements GiftKit {
 		for (int i = -3; i <= 3; i++) {
 			for (int j = -2; j <= 2; j++) {
 				Vec3 p = shield.add(across.scale(i * 0.2)).add(0.0, j * 0.25, 0.0);
-				level.sendParticles(ParticleTypes.ENCHANT, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.GLYPH, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 		level.sendParticles(ParticleTypes.CRIT, shield.x, shield.y, shield.z, 10, 0.4, 0.4, 0.4, 0.2);
@@ -161,14 +157,14 @@ final class ArsenalGift implements GiftKit {
 		rift(level, hand);
 		for (int i = 0; i < 12; i++) {
 			double a = i * Math.PI / 6.0;
-			level.sendParticles(ParticleTypes.END_ROD, hand.x + Math.cos(a) * 0.35, hand.y + Math.sin(a) * 0.35, hand.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.LIGHT, hand.x + Math.cos(a) * 0.35, hand.y + Math.sin(a) * 0.35, hand.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.NEUTRAL, 0.5F, 1.6F);
 		// and the tool in hand mended a little
 		ItemStack held = mob.getMainHandItem();
 		if (!held.isEmpty() && held.isDamaged()) {
 			held.setDamageValue(Math.max(0, held.getDamageValue() - MEND_AMOUNT));
-			level.sendParticles(ParticleTypes.ENCHANT, hand.x, hand.y, hand.z, 6, 0.3, 0.3, 0.3, 0.1);
+			level.sendParticles(MagicFx.GLYPH, hand.x, hand.y, hand.z, 6, 0.3, 0.3, 0.3, 0.1);
 		}
 	}
 

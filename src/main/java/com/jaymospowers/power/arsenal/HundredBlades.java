@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.arsenal.entity.RiftBlade;
@@ -207,9 +208,9 @@ public final class HundredBlades {
 		if (t % 3 == 0) {
 			for (int i = 0; i < PORTALS; i++) {
 				Vec3 p = sky.portal(i);
-				level.sendParticles(Fate.isCorrupted(player) ? ParticleTypes.SQUID_INK : ParticleTypes.PORTAL,
+				level.sendParticles(Fate.isCorrupted(player) ? ParticleTypes.SQUID_INK : MagicFx.VOID,
 					p.x, p.y - 0.2, p.z, 2, PORTAL_RADIUS * 0.5, 0.05, PORTAL_RADIUS * 0.5, 0.05);
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y - 0.1, p.z, 2, PORTAL_RADIUS * 0.5, 0.05, PORTAL_RADIUS * 0.5, 0.02);
+				level.sendParticles(MagicFx.VOID, p.x, p.y - 0.1, p.z, 2, PORTAL_RADIUS * 0.5, 0.05, PORTAL_RADIUS * 0.5, 0.02);
 			}
 		}
 	}

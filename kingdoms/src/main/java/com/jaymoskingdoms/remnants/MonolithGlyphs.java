@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Factions;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -194,7 +194,7 @@ public final class MonolithGlyphs {
 		book.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(pages));
 		level.playSound(null, sp.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 		level.playSound(null, at, SoundEvents.VILLAGER_WORK_CARTOGRAPHER, SoundSource.PLAYERS, 0.7F, 0.9F);
-		level.sendParticles(ParticleTypes.ENCHANT, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 20, 0.5, 0.5, 0.5, 0.6);
+		level.sendParticles(Fx.GLYPH, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 20, 0.5, 0.5, 0.5, 0.6);
 	}
 
 	/** A row of {@code m}'s glyphs as copied at {@code at}, and the copier's guesses under it, as many as {@code rows} allow. */

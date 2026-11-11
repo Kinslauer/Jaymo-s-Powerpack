@@ -374,6 +374,8 @@ public final class SecondDefence {
 			if (player != null) {
 				PackAdvancements.award(player, "second_defence", "done");
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.second_defence.held").withStyle(ChatFormatting.GOLD));
+				// and the morning after, without a word
+				com.jaymoskingdoms.films.LoreFilms.play(player, com.jaymoskingdoms.films.LoreFilms.SECOND_DEFENCE);
 			}
 		}
 	}

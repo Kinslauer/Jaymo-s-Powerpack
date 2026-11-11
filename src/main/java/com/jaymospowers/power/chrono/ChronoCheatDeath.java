@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
@@ -564,7 +565,7 @@ public final class ChronoCheatDeath {
 			}
 		}
 		from.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
-		ChronoFx.particles(from, player, ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(from, player, MagicFx.CRACKLE, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.3, 0.6, 0.3, 0.05);
 
 		if (Downed.isDowned(player)) {
 			Downed.undo(from, player);
@@ -604,7 +605,7 @@ public final class ChronoCheatDeath {
 		ChronoMemory.of(player).stoppedTime += (int) Math.min(Integer.MAX_VALUE / 2, Math.max(0, held.since - point.time()));
 
 		to.playSound(null, point.pos().x, point.pos().y, point.pos().z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0F, 0.9F);
-		ChronoFx.particles(to, player, ParticleTypes.END_ROD, point.pos().x, point.pos().y + 1.0, point.pos().z, 30, 0.4, 0.8, 0.4, 0.02);
+		ChronoFx.particles(to, player, MagicFx.LIGHT, point.pos().x, point.pos().y + 1.0, point.pos().z, 30, 0.4, 0.8, 0.4, 0.02);
 		int seconds = (int) Math.max(0, (held.since - point.time()) / 20);
 		ServerPlayNetworking.send(player, new Rewound(seconds));
 		JaymosPowers.LOGGER.info("{} rewound {} s to cheat death", player.getScoreboardName(), seconds);

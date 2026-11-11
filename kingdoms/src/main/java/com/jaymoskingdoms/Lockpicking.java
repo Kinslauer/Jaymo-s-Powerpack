@@ -272,10 +272,15 @@ public final class Lockpicking {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
 				BlockState state = level.getBlockState(pos);
 				// (0.7.497) picking a loot chest in town, seen, is burglary
 				Theft.burgled(player, level, pos, state);
+				BlockEntity picked = level.getBlockEntity(pos);
+				if (picked != null) {
+					StoryRoads.pickedChest(player, picked);
+				}
 				// and in they go
 				state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
 			}
@@ -331,6 +336,7 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
+				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
 				pending.picked().run();
 			}

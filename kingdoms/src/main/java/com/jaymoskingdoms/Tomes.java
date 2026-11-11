@@ -417,7 +417,7 @@ public final class Tomes {
 	/** Sheds {@code count} glyphs (the enchanting table's runes) around {@code at}, and the element's own particle among them. */
 	private static void shed(ServerLevel level, Vec3 at, String element, float count) {
 		int n = Math.max(1, Math.round(count));
-		level.sendParticles(ParticleTypes.ENCHANT, at.x, at.y, at.z, n, 0.25, 0.25, 0.25, 0.5);
+		level.sendParticles(Fx.GLYPH, at.x, at.y, at.z, n, 0.25, 0.25, 0.25, 0.5);
 		level.sendParticles(Spellcraft.particle(element), at.x, at.y, at.z, Math.max(1, Math.round(n * OWN_SHARE)), 0.12, 0.12, 0.12, 0.02);
 	}
 

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.dragons;
 
+import com.jaymoskingdoms.Fx;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -421,7 +422,7 @@ public class StegonautDragon extends WindDragon implements GeoEntity {
 		this.roarIn = ROAR_EVERY;
 		act(ROAR);
 		level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.4F);
-		level.sendParticles(ParticleTypes.WAX_ON, this.getX(), this.getY() + 1.6, this.getZ(), 30, 1.2, 0.6, 1.8, 0.05);
+		level.sendParticles(Fx.EMBER, this.getX(), this.getY() + 1.6, this.getZ(), 30, 1.2, 0.6, 1.8, 0.05);
 		List<LivingEntity> hardened = new ArrayList<>();
 		hardened.add(this);
 		for (Entity passenger : this.getPassengers()) {

@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -776,7 +775,7 @@ public final class XenoformPower implements Power {
 			if (beepsAt(live.ticksLeft) || before - live.ticksLeft > 1 && beepsAt(live.ticksLeft + 1)) {
 				float pitch = live.ticksLeft <= BEEP_FAST_TICKS ? 1.8F : 1.4F;
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6F, pitch);
-				player.level().sendParticles(player, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFFFF4040), true, false,
+				player.level().sendParticles(player, MagicFx.wisp(0xFFFF4040, 1.0F), true, false,
 					player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.3, 0.3, 0.0);
 			}
 			if (live.ticksLeft <= 0) {
@@ -920,7 +919,7 @@ public final class XenoformPower implements Power {
 		Vec3 step = at.subtract(eye).scale(1.0 / 6.0);
 		for (int i = 1; i <= 6; i++) {
 			Vec3 p = eye.add(step.scale(i));
-			level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | COLOR), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(MagicFx.wisp(0xFF000000 | COLOR, 1.0F), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}
 		if (live.scanTicks % 10 == 0) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.5F, 1.5F + live.scanTicks / 60.0F);
@@ -1211,7 +1210,7 @@ public final class XenoformPower implements Power {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
@@ -1347,7 +1346,7 @@ public final class XenoformPower implements Power {
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		com.jaymospowers.core.Shakes.heavy(player, at, 10.0, 0.5F);
 		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, COLOR);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.12);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.12);
 		BandFlash.flash(player, at);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.4F, 1.8F);
@@ -1417,7 +1416,7 @@ public final class XenoformPower implements Power {
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
 			MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, COLOR);
-			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.4, 0.6, 0.4, 0.08);
+			level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 25, 0.4, 0.6, 0.4, 0.08);
 			BandFlash.flash(player, at);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
 			if (knockout) {
@@ -1472,7 +1471,7 @@ public final class XenoformPower implements Power {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
 		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
@@ -1536,7 +1535,7 @@ public final class XenoformPower implements Power {
 			ServerLevel level = player.level();
 			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 			MagicFx.blast(level, at.x, at.y, at.z, MagicFx.FLASH_RADIUS, form.color);
-			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.5, 0.8, 0.5, 0.08);
+			level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 25, 0.5, 0.8, 0.5, 0.08);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 			player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color))));
 		}
@@ -1552,7 +1551,7 @@ public final class XenoformPower implements Power {
 		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ULT_BREAK_STUN, 2, false, false));
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 30, 0.5, 0.8, 0.5, 0.2);
+		level.sendParticles(MagicFx.LIGHT, at.x, at.y, at.z, 30, 0.5, 0.8, 0.5, 0.2);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 0.7F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.ultimate_broke").withStyle(ChatFormatting.RED));
 	}

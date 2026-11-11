@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -208,8 +209,8 @@ public final class Wisp extends XenoForm {
 					Vec3 from = player.position();
 					player.teleportTo(level, feet.x, feet.y, feet.z, Set.of(), player.getYRot(), player.getXRot(), false);
 					player.resetFallDistance();
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 20, 0.3, 0.5, 0.3, 0.05);
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, feet.x, feet.y + 1.0, feet.z, 20, 0.3, 0.5, 0.3, 0.05);
+					level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 20, 0.3, 0.5, 0.3, 0.05);
+					level.sendParticles(MagicFx.VOID, feet.x, feet.y + 1.0, feet.z, 20, 0.3, 0.5, 0.3, 0.05);
 					sound(player, SoundEvents.PHANTOM_SWOOP, 1.0F, 1.3F);
 					return true;
 				}

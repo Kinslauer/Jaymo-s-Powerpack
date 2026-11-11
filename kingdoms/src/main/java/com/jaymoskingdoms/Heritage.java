@@ -22,7 +22,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -1005,7 +1004,7 @@ public final class Heritage {
 	private static boolean charged(ServerPlayer player) {
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, STORM_CHARGED_TICKS, 1));
 		player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, STORM_CHARGED_TICKS, 0));
-		player.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY(0.5), player.getZ(), 12, 0.3, 0.6, 0.3, 0.1);
+		player.level().sendParticles(Fx.CRACKLE, player.getX(), player.getY(0.5), player.getZ(), 12, 0.3, 0.6, 0.3, 0.1);
 		return true;
 	}
 
@@ -1052,7 +1051,7 @@ public final class Heritage {
 			double tx = nearest.getX(), ty = nearest.getY(0.6), tz = nearest.getZ();
 			for (int i = 0; i <= 8; i++) {
 				double t = i / 8.0;
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(Fx.CRACKLE, fx + (tx - fx) * t, fy + (ty - fy) * t, fz + (tz - fz) * t, 2, 0.05, 0.05, 0.05, 0.0);
 			}
 			level.playSound(null, tx, ty, tz, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
 			nearest.hurtServer(level, level.damageSources().lightningBolt(), STORM_SPARK_DAMAGE);

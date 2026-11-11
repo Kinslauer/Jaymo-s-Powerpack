@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -251,8 +252,8 @@ public final class Revenant extends XenoUltimate {
 					passThrough(player, from, feet);
 					player.teleportTo(level, feet.x, feet.y, feet.z, Set.of(), player.getYRot(), player.getXRot(), false);
 					player.resetFallDistance();
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
-					level.sendParticles(ParticleTypes.REVERSE_PORTAL, feet.x, feet.y + 1.0, feet.z, 24, 0.3, 0.6, 0.3, 0.05);
+					level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
+					level.sendParticles(MagicFx.VOID, feet.x, feet.y + 1.0, feet.z, 24, 0.3, 0.6, 0.3, 0.05);
 					level.sendParticles(ParticleTypes.SCULK_SOUL, feet.x, feet.y + 1.0, feet.z, 10, 0.3, 0.6, 0.3, 0.03);
 					sound(player, SoundEvents.PHANTOM_SWOOP, 1.0F, 1.1F);
 					return true;

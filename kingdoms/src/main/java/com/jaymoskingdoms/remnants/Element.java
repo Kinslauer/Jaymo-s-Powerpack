@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.remnants;
 
+import com.jaymoskingdoms.Fx;
 import java.util.Locale;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,7 +26,7 @@ import org.jspecify.annotations.Nullable;
 public enum Element {
 	HIGHFIELD(BossEvent.BossBarColor.GREEN, ParticleTypes.CLOUD, "holystone", "holystone_bricks", "aether_grass_block", "zanite_block",
 		Blocks.CALCITE, Blocks.SMOOTH_QUARTZ, Blocks.MOSS_BLOCK, Blocks.PEARLESCENT_FROGLIGHT),
-	MAGNETIC(BossEvent.BossBarColor.PURPLE, ParticleTypes.ELECTRIC_SPARK, "ferrosite", "undershale_bricks", "ferrosite_sand", "gravitite_block",
+	MAGNETIC(BossEvent.BossBarColor.PURPLE, Fx.CRACKLE, "ferrosite", "undershale_bricks", "ferrosite_sand", "gravitite_block",
 		Blocks.DEEPSLATE_TILES, Blocks.RAW_IRON_BLOCK, Blocks.TUFF, Blocks.LODESTONE),
 	ARCTIC(BossEvent.BossBarColor.BLUE, ParticleTypes.SNOWFLAKE, "icestone", "icestone_bricks", "arctic_snow_block", "arkenium_block",
 		Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.SNOW_BLOCK, Blocks.SEA_LANTERN),

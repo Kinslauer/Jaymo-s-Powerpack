@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -38,7 +39,7 @@ public final class ArsenalStash {
 		player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, container),
 			Component.translatable("container.jaymospowers.arsenal_stash")));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.6F, 1.3F);
-		player.level().sendParticles(net.minecraft.core.particles.ParticleTypes.REVERSE_PORTAL,
+		player.level().sendParticles(MagicFx.VOID,
 			player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.4, 0.5, 0.4, 0.02);
 	}
 

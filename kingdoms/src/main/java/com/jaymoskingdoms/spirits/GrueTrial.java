@@ -593,7 +593,7 @@ public final class GrueTrial {
 		Grue.speakTo(player, "beaten");
 		SpiritVoice.sayNow(player, spirit.kind(), "grue.won");
 		ServerLevel level = (ServerLevel)player.level();
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.6, 0.9, 0.6, 0.08);
+		level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.6, 0.9, 0.6, 0.08);
 		burst(level, player.position().add(0.0, 1.0, 0.0), 60, 1.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.grue.subjugated").withStyle(s -> s.withColor(Grue.COLOR).withBold(true)));

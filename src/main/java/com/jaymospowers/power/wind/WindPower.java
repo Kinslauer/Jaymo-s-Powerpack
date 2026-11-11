@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -780,7 +781,7 @@ public final class WindPower implements Power {
 			ParticleOptions accent = switch (s.channel) {
 				case TAILWIND -> ParticleTypes.SMALL_GUST;
 				case GALE_BARRIER -> ParticleTypes.WHITE_SMOKE;
-				case ZEPHYR -> Fate.isCorrupted(player) ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.HAPPY_VILLAGER;
+				case ZEPHYR -> Fate.isCorrupted(player) ? MagicFx.CRACKLE : ParticleTypes.HAPPY_VILLAGER;
 			};
 			level.sendParticles(accent, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.5, 0.6, 0.5, 0.0);
 			// a chime that climbs as the wind gathers

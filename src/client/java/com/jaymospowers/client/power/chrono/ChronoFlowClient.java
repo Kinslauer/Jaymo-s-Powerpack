@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.chrono.ChronoFx;
 import com.jaymospowers.power.chrono.ChronoFlow;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -301,7 +302,7 @@ public final class ChronoFlowClient {
 		player.setDeltaMovement(dashVelocity.x, player.getDeltaMovement().y, dashVelocity.z);
 		player.resetFallDistance();
 		if (player.tickCount % 2 == 0) {
-			ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
+			ChronoFx.particle(player.level(), player, MagicFx.GLYPH, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -345,7 +346,7 @@ public final class ChronoFlowClient {
 				}
 				player.setDeltaMovement(step.x, player.getDeltaMovement().y, step.z);
 				if (t % 2 == 0) {
-					ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
+					ChronoFx.particle(player.level(), player, MagicFx.GLYPH, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
 				}
 			}
 		} else if (counter.variant() == ChronoFlow.SLIP && t <= SLIP_TICKS) {
@@ -373,7 +374,7 @@ public final class ChronoFlowClient {
 				double y = t == VAULT_DELAY ? VAULT_HOP + target.getBbHeight() * 0.1 : player.getDeltaMovement().y;
 				player.setDeltaMovement(step.x, y, step.z);
 				player.resetFallDistance();
-				ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
+				ChronoFx.particle(player.level(), player, MagicFx.GLYPH, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
 			}
 		} else if (counter.variant() == ChronoFlow.THROW && t < THROW_TICKS) {
 			double gap = to.horizontalDistance() - THROW_CLOSE;

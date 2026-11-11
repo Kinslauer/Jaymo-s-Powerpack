@@ -3,7 +3,6 @@ package com.jaymospowers.power.chrono;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.List;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -41,10 +40,10 @@ final class RewindTrail {
 			Vec3 p = path.get(i);
 			ChronoFx.particles(level, fx, GOLD_DUST, p.x, p.y + 1.0, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 			if (i % 2 == 0) {
-				ChronoFx.particles(level, fx, ParticleTypes.END_ROD, p.x, p.y + 0.9, p.z, 1, 0.05, 0.25, 0.05, 0.0);
+				ChronoFx.particles(level, fx, MagicFx.LIGHT, p.x, p.y + 0.9, p.z, 1, 0.05, 0.25, 0.05, 0.0);
 			}
 			if (i % 5 == 0) {
-				ChronoFx.particles(level, fx, ParticleTypes.ELECTRIC_SPARK, p.x, p.y + 1.2, p.z, 1, 0.15, 0.3, 0.15, 0.0);
+				ChronoFx.particles(level, fx, MagicFx.CRACKLE, p.x, p.y + 1.2, p.z, 1, 0.15, 0.3, 0.15, 0.0);
 			}
 		}
 		Vec3 at = path.get(Math.min(n - 1, Math.max(0, to - 1)));
@@ -55,7 +54,7 @@ final class RewindTrail {
 		if (tick >= PLAYBACK_TICKS) {
 			Vec3 end = path.get(n - 1);
 			level.playSound(null, end.x, end.y, end.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.7F, 2.0F);
-			ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, end.x, end.y + 1.0, end.z, 12, 0.4, 0.7, 0.4, 0.4);
+			ChronoFx.particles(level, fx, MagicFx.EMBER, end.x, end.y + 1.0, end.z, 12, 0.4, 0.7, 0.4, 0.4);
 			return false;
 		}
 		return true;

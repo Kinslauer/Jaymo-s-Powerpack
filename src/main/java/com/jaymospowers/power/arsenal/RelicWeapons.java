@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.EnderscapeLoot;
 import com.jaymospowers.core.Flames;
@@ -299,10 +300,10 @@ public final class RelicWeapons {
 			if (!level.noCollision(player, player.getBoundingBox().move(behind.subtract(player.position())))) {
 				behind = target.position().add(0.0, target.getBbHeight() + 0.1, 0.0);
 			}
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.3, 0.6, 0.3, 0.1);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.3, 0.6, 0.3, 0.1);
 			float yaw = (float)(net.minecraft.util.Mth.atan2(facing.z, facing.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
 			player.teleportTo(level, behind.x, behind.y, behind.z, Set.of(), yaw, player.getXRot(), false);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, behind.x, behind.y + 1.0, behind.z, 30, 0.3, 0.6, 0.3, 0.1);
+			level.sendParticles(MagicFx.VOID, behind.x, behind.y + 1.0, behind.z, 30, 0.3, 0.6, 0.3, 0.1);
 			level.playSound(null, behind.x, behind.y, behind.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.6F);
 			return BLINK_COOLDOWN;
 		}

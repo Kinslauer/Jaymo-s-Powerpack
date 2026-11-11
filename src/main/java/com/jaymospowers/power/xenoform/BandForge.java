@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterNpcs;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
@@ -213,7 +214,7 @@ public final class BandForge {
 		level.setAttached(AT, forge);
 		Vec3 post = Vec3.atBottomCenterOf(centre.offset(1, 0, -1));
 		ZFighterNpcs.villager(level, post, 180.0F, SMITH_TAG, "npc.jaymospowers.star_smith", random.nextBoolean());
-		level.sendParticles(ParticleTypes.END_ROD, forge.getX() + 0.5, forge.getY() + 1.0, forge.getZ() + 0.5, 30, 0.6, 0.6, 0.6, 0.05);
+		level.sendParticles(MagicFx.LIGHT, forge.getX() + 0.5, forge.getY() + 1.0, forge.getZ() + 0.5, 30, 0.6, 0.6, 0.6, 0.05);
 		return forge;
 	}
 
@@ -274,7 +275,7 @@ public final class BandForge {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.0F, 1.3F);
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.6, at.z, 12, 0.3, 0.2, 0.3, 0.0);
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.6, 0.4, 0.1);
+		level.sendParticles(MagicFx.LIGHT, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.6, 0.4, 0.1);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.band.reforged", BandUpgrades.SLOTS).withStyle(ChatFormatting.GREEN));
 		// (0.19.85) the reforged band holds a charge now (it was a random timer), full to start, with no recharge left
 		XenoformPower.Live live = XenoformPower.live(player);

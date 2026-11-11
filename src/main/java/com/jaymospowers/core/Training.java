@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import java.util.HashMap;
@@ -346,7 +347,7 @@ public final class Training {
 			case "tide" -> ParticleTypes.BUBBLE_POP;
 			case "cobwebs" -> ParticleTypes.WHITE_ASH;
 			case "campfire" -> ParticleTypes.CAMPFIRE_COSY_SMOKE;
-			case "hourglass" -> ParticleTypes.END_ROD;
+			case "hourglass" -> MagicFx.LIGHT;
 			case "tuning" -> ParticleTypes.NOTE;
 			case "weighted" -> ParticleTypes.CLOUD;
 			default -> ParticleTypes.CRIT;

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -119,7 +120,7 @@ public final class GravityWalk {
 		if (fresh) {
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.4F, 1.9F);
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 0.9, player.getZ(), 14, 0.3, 0.5, 0.3, 0.05);
+			level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 0.9, player.getZ(), 14, 0.3, 0.5, 0.3, 0.05);
 		}
 	}
 

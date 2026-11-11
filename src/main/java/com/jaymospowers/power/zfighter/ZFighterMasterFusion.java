@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -248,7 +248,7 @@ public final class ZFighterMasterFusion {
 			Vec3 side = leader.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().cross(new Vec3(0.0, 1.0, 0.0));
 			master.teleportTo(leader.level(), leader.getX() + side.x * 1.5, leader.getY(), leader.getZ() + side.z * 1.5, Set.of(), leader.getYRot() + 180.0F,
 				0.0F, false);
-			leader.level().sendParticles(ParticleTypes.END_ROD, true, false, master.getX(), master.getY() + 1.0, master.getZ(), 30, 0.4, 0.8, 0.4, 0.1);
+			leader.level().sendParticles(MagicFx.LIGHT, true, false, master.getX(), master.getY() + 1.0, master.getZ(), 30, 0.4, 0.8, 0.4, 0.1);
 			leader.level().playSound(null, master.getX(), master.getY(), master.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.9F);
 		}
 	}

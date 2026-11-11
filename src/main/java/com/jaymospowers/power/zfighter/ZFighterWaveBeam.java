@@ -18,7 +18,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -312,7 +311,7 @@ public final class ZFighterWaveBeam {
 				}
 			}
 		}
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, head.x, head.y, head.z, 2, spec.radius() * 0.4, spec.radius() * 0.4,
+		level.sendParticles(MagicFx.CRACKLE, true, false, head.x, head.y, head.z, 2, spec.radius() * 0.4, spec.radius() * 0.4,
 			spec.radius() * 0.4, 0.15);
 	}
 
@@ -327,7 +326,7 @@ public final class ZFighterWaveBeam {
 		} else {
 			// the lance and the needle don't burst: they shatter into motes
 			MagicFx.burst(level, at.x, at.y, at.z, spec.color(), 1.5F, 24, 0.4, 0.4, 0.4);
-			level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.15);
+			level.sendParticles(MagicFx.LIGHT, true, false, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.15);
 			level.playSound(null, at.x, at.y, at.z, spec.style() == ZFighterKi.NEEDLE ? SoundEvents.AMETHYST_BLOCK_BREAK : SoundEvents.BEACON_DEACTIVATE,
 				SoundSource.PLAYERS, 1.2F, spec.style() == ZFighterKi.NEEDLE ? 1.6F : 1.2F);
 		}

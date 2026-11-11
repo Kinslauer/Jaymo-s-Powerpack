@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
@@ -16,7 +17,6 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -547,7 +547,7 @@ public final class ZFighterLookout {
 				.withStyle(ChatFormatting.AQUA));
 			double length = Math.max(1.0E-3, orb[3]);
 			for (double t = 1.5; t <= TRAIL; t += TRAIL_STEP) {
-				player.level().sendParticles(player, ParticleTypes.END_ROD, false, false, player.getX() + orb[1] / length * t, player.getY() + 1.0 + 0.25 * n,
+				player.level().sendParticles(player, MagicFx.LIGHT, false, false, player.getX() + orb[1] / length * t, player.getY() + 1.0 + 0.25 * n,
 					player.getZ() + orb[2] / length * t, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
@@ -600,7 +600,7 @@ public final class ZFighterLookout {
 		Component lesson = ZFighterMasters.lesson(player, false);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_library", lesson).withStyle(ChatFormatting.AQUA));
 		ServerLevel level = player.level();
-		level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.5, player.getZ(), 30, 0.5, 0.5, 0.5, 0.5);
+		level.sendParticles(MagicFx.GLYPH, player.getX(), player.getY() + 1.5, player.getZ(), 30, 0.5, 0.5, 0.5, 0.5);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.9F);
 	}
 }

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal.entity;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.power.arsenal.ArsenalDamocles;
 import com.jaymospowers.power.arsenal.ArsenalVoid;
@@ -155,7 +156,7 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.04);
 		if (this.isVoid()) {
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 20, 0.4, 0.4, 0.4, 0.1);
+			level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 20, 0.4, 0.4, 0.4, 0.1);
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
 		com.jaymospowers.core.Shakes.around(level, at, BURST_RADIUS * 3.0, this.isVoid() ? 1.1F : 0.8F);
