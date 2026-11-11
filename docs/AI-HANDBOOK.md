@@ -21,6 +21,9 @@ Written 2026-11-06, at Powers/pack 0.21.40, Kingdoms 0.7.642, Kitchen 0.5.84.
 6. `docs/ai-bundle/`: the exported project memory (one file per topic), the reference notes and the modpack readout.
    See `docs/ai-bundle/README.md`.
 
+Friends invited to work on their own power (Jung on Wind first) start from `CONTRIBUTING.md` at the repo root: which
+parts of this handbook apply to them, where their power lives, and the branch and PR rules.
+
 Skills and workflows the Claude sessions used live in `.claude/`:
 
 - `.claude/skills/pbdr/SKILL.md`: pull, build, deploy, restart the Steam Deck server (section 5).
