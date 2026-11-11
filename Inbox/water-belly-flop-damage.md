@@ -30,3 +30,11 @@ Andy: "https://www.curseforge.com/minecraft/data-packs/realistic-damage-water-fa
 - Vanilla water resets `fallDistance` on entry. Check in the 26.3 sources where (`Entity.updateInWaterStateAndDoFluidPushing` / `checkFallDamage`) and read the speed before it's cleared.
 - Mobs can follow the same rule if it's cheap; players first.
 - Add a loading-screen hint (StoryHoldScreen HINTS) and a change note in `changes/powers/`.
+
+## Animations (Andy asked 2026-11-10 whether dives are animated)
+
+Today only the falls are posed: FreefallPose (flailing, and the head-first dive for Wind users and Leap of Faith looking down) and RunMovesPose (the sky dive spread flat). The water entries in Dives have no pose: holding Sneak just shows the vanilla crouch. Add poses everyone can see, in the same style as FreefallPose (client, worked out from synced state):
+- Clean dive: arms forward over the head, body straight, head first.
+- Cannonball: knees hugged to the chest, tucked into a ball.
+- Belly flop: flat and spread at the moment of hitting, a short wince after.
+Each starts when Sneak marks the entry in the air (or the flop when you hit) and eases out under water.
