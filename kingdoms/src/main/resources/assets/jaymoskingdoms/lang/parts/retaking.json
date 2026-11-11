@@ -98,5 +98,7 @@
 	"talk.jaymoskingdoms.word.retaking_ford.far": "a good few days' walk",
 	"talk.jaymoskingdoms.word.retaking_ford.very_far": "further than anyone here has walked",
 	"entity.jaymoskingdoms.risen_orc": "Risen Orc",
-	"message.jaymoskingdoms.second_defence.held": "The ford holds."
+	"message.jaymoskingdoms.second_defence.held": "The ford holds.",
+	"menu.jaymoskingdoms.story.road_open": "Open",
+	"menu.jaymoskingdoms.story.road_sub": "Your own road"
 }

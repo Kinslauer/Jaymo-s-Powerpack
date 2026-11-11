@@ -5,5 +5,10 @@
   "book.jaymospowers.demon_muster.page1": "MUSTER\nfor the one at the back\n\nThe Gloam: four hundred.\nThe Ash: nine hundred.\nThe Abyss: what the Abyss would give.",
   "book.jaymospowers.demon_muster.page2": "PROMISED\n\nThe light.\nTheir fields.\nTheir warm houses, and what was in them.",
   "book.jaymospowers.demon_muster.page3": "CAME HOME\n\nThe imps, mostly.\nThey fly.",
-  "book.jaymospowers.demon_muster.page4": "The Master says we do not go up again until we are called.\n\nWe have not been called.\n\nYet."
+  "book.jaymospowers.demon_muster.page4": "The Master says we do not go up again until we are called.\n\nWe have not been called.\n\nYet.",
+  "road.jaymospowers.zfighter": "The Fighter's Road",
+  "road.jaymospowers.step": "%1$s, step %2$s of %3$s: %4$s",
+  "road.jaymospowers.step_count": "%1$s, step %2$s of %3$s: %4$s (%5$s/%6$s)",
+  "road.jaymospowers.ready": "%1$s: ready to begin.",
+  "road.jaymospowers.later": "Not yet."
 }
