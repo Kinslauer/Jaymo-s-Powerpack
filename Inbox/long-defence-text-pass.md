@@ -23,3 +23,4 @@ Keep the lang keys. The film itself has no words on screen.
 ## Notes
 - 2026-11-10 17:25 someone's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-11 02:45 PR #1268 (cloud): demon master no longer says demons "were there"; book p5 the sorcerer goes down into the ground with the dark; p6 "the four... the fifth too, though he never had much to say". For Andy, not changed: the film's legion is the risen dead while Lore.md says the long defence was against the Warrior-born and orcs; the book drops from overworld draugr camps though Lore.md says draugr never leave the Stormborn Tomb; the film casts Grimsby (the wizard) as a swordsman.
+- 2026-11-11 03:20 Andy settled the legion: the living orc + Warrior-born host is allied with the sorcerer, who summons undead orcs and zombified piglins; Grimsby casts as well as cuts. Built into #1268 (film, skins, book page 2). Draugr are out of the film; the book's draugr drop is still open.

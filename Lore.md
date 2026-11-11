@@ -22,12 +22,17 @@ the sky, and keeps a watch for them.
 were each a talent in their own right. Between them they held the Overworld against the Warrior-born and the orcs
 alike.
 
+**The host and the sorcerer** (Andy, 2026-11-10). The Warrior-born and the orcs were allied with the sorcerer (the
+Grue as it was). At the long defence the living host of orcs and Warrior-born stood with him, and he summoned a second
+legion behind his word: undead orcs and the risen dead (zombified piglins). Grimsby carried a sword but cast spells as
+well.
+
 (new) **What the gate-warden saw.** One night of the long defence survives in a book, *The Long Defence*, written by a
 gate-warden who held a ford for three nights. The dark came up out of the ground the way fire does, only black, and
-each time it flared more of the enemy stood in it. One figure stood at the back and never came closer. Five stood with
+each time it flared more of the enemy stood in it, none of them living, though the host had come first as men and orcs. One figure stood at the back and never came closer. Five stood with
 the defenders: an old man with a beard who made it day for the space of a breath, a woman whose wall they could not
 cross, a swordsman, and a big man in plate who burned them. The fifth the warden could never describe; when it was
-over, the one at the back was gone, and so was the dark. The figure at the back is the Grue. The book never names any
+over, the one at the back had gone down into the ground, and the dark with him. The figure at the back is the Grue. The book never names any
 of them, and the film that plays when it is first opened (or when a court wizard or a demon master tells the story)
 shows no words either. Copies turn up on draugr and in camps.
 
