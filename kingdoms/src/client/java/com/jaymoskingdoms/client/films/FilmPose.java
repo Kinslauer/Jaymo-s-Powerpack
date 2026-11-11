@@ -23,9 +23,10 @@ public final class FilmPose {
 	static final int HEAD_X = 0, HEAD_Y = 1, LEAN = 2, RIGHT_ARM = 3, LEFT_ARM = 6, RIGHT_LEG = 9, LEFT_LEG = 10, NUMBERS = 11;
 	/**
 	 * After the numbers: how much of the pose is on (0 to 1), what's gone ({@link #NO_HEAD}, {@link #NO_RIGHT_ARM}), and how
-	 * far over the whole body is turned in a flip (radians, head first, about its middle).
+	 * far over the whole body is turned in a flip (radians, head first, about its middle), and how far rolled about the way
+	 * it flies once it is laid out by the flip.
 	 */
-	static final int WEIGHT = NUMBERS, GONE = NUMBERS + 1, FLIP = NUMBERS + 2, LENGTH = NUMBERS + 3;
+	static final int WEIGHT = NUMBERS, GONE = NUMBERS + 1, FLIP = NUMBERS + 2, ROLL = NUMBERS + 3, LENGTH = NUMBERS + 4;
 	static final int NO_HEAD = 1, NO_RIGHT_ARM = 2;
 	static final float NO = Float.NaN;
 
@@ -48,6 +49,9 @@ public final class FilmPose {
 	static final float[] POINT = {0.0F, 0.0F, 0.0F, -1.55F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, NO, NO};
 	/** The fifth: running low, the blade trailing; and the lunge. */
 	static final float[] RUN = {0.05F, 0.0F, 0.32F, 0.6F, 0.0F, 0.15F, NO, NO, NO, NO, NO};
+	/** Drawn back on his slingshot, low, arms wide; and in the air off it, arms swept back, legs together. */
+	static final float[] SLING = {0.1F, 0.0F, 0.45F, -0.6F, 0.0F, 0.5F, -0.6F, 0.0F, -0.5F, -0.6F, 0.5F};
+	static final float[] DIVE = {-0.3F, 0.0F, 0.0F, 0.5F, 0.0F, 0.15F, 0.5F, 0.0F, -0.15F, 0.08F, 0.08F};
 	static final float[] LUNGE = {-0.1F, 0.0F, 0.5F, -1.5F, 0.0F, 0.0F, 0.9F, 0.0F, -0.3F, -0.95F, 0.75F};
 
 	static final RenderStateDataKey<float[]> KEY = RenderStateDataKey.create(() -> "jaymoskingdoms:film_pose");
@@ -71,7 +75,10 @@ public final class FilmPose {
 		if (p == null) {
 			return;
 		}
-		float flip = p[FLIP];
+		float flip = p[FLIP], roll = p[ROLL];
+		if (roll != 0.0F) {
+			model.root().zRot += roll;
+		}
 		if (flip != 0.0F) {
 			// the whole body turned over about its middle (the model's own origin is at the neck, its feet 24 below)
 			var root = model.root();

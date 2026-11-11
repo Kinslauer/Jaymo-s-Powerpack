@@ -104,7 +104,7 @@ public final class LoreFilmClient {
 	 * rising, Varro and his orc, the spells, the fifth's run (chased, then from behind the sorcerer, then side on), the end.
 	 */
 	static final int MELEE = 90, SUMMON = 200, STRIKE = 222, RISING = 244, VARRO = 346, VARRO_CLOSE = 382, VARRO_FIELD = 420, SPELLS = 440,
-		CAST_TICKS = 36, QUIET = 584, REVERSE = 636, LUNGE_SHOT = 666, END = 730, LENGTH = LoreFilms.FILM_TICKS;
+		CAST_TICKS = 36, QUIET = 584, REVERSE = 636, END = 756, LENGTH = LoreFilms.FILM_TICKS;
 	/** Varro's move, beat by beat: the orc runs in, raises its axe, chops; the disarm, the kick, its knees, his grip, the mark, its bow, it rises. */
 	static final int ORC_CHARGE = 312, CHOP_UP = 358, CHOP = 362, DISARM = 366, KICK = 372, KNEES = 375, GRIP = 379, MARK_SET = 388, BOW = 402,
 		MARK_RISE = 412;
@@ -183,8 +183,20 @@ public final class LoreFilmClient {
 
 	// ---- the fifth ----
 	/** His run: where he starts, each turn of it ({f, s}), how fast he runs and lunges (blocks a tick), and where the lunge carries him. */
-	static final double[][] QUIET_PATH = {{17.0, -1.0}, {22.0, -3.0}, {26.0, 2.5}, {30.0, -2.5}, {34.0, 3.0}, {38.0, -2.0}, {42.0, 2.0}, {46.0, -1.0},
-		{49.2, 0.0}};
+	static final double[][] QUIET_PATH = {{17.0, -1.0}, {22.0, -3.0}, {26.0, 2.5}, {30.0, -2.5}, {34.0, 3.0}, {38.0, -2.0}, {41.0, 0.0}};
+	/**
+	 * His last jump. Andy: "one of his last jumps should grab two trees ahead of him like a web slingshot, then he spirals
+	 * through the air with the tendrils trailing him like a streamer, and they unfold before he makes his strike, he stays
+	 * midair through the whole glide in slow motion, and almost makes contact before the sorcerer turns into the shadowflame".
+	 * At the end of his run the cloak takes the two SLING_TREES (one each side of his way), he is drawn SLING_BACK back on
+	 * them over SLING_TICKS, and is let fly: GLIDE_TICKS in the air, laid out head first and turning GLIDE_TURNS times over,
+	 * to GLIDE_END short of the sorcerer. The cloak streams behind him in a spiral and from GLIDE_UNFOLD of the way opens out
+	 * wide as he comes level for the strike. The camera stays behind the sorcerer for the first GLIDE_CUT ticks of it.
+	 */
+	static final double[][] SLING_TREES = {{45.0, 3.6}, {45.0, -3.6}};
+	static final int SLING_TICKS = 12, GLIDE_TICKS = 54, GLIDE_CUT = 20;
+	static final double SLING_BACK = 1.4, GLIDE_END = SORCERER_F - 1.3, GLIDE_HIGH = 0.6, GLIDE_ARC = 0.5, GLIDE_UNFOLD = 0.72, GLIDE_TURNS = 2.0,
+		GLIDE_LAND = 0.3;
 	static final double QUIET_RUN = 0.5, QUIET_LUNGE = 0.85, LUNGE_END = 53.6;
 	/** The sorcerer's bolts at him: how often (ticks), how fast (blocks a tick), and how near he gets before the sorcerer stops throwing. */
 	static final int MANA_EVERY = 9;
@@ -274,6 +286,8 @@ public final class LoreFilmClient {
 		/** How far off the ground it is (a hop, a throw), and how far turned over in a flip (radians). */
 		double lift;
 		float flip, flipO;
+		/** How far rolled over about the way it flies (radians). */
+		float roll, rollO;
 		/** 0 the defenders, 1 the sorcerer's. */
 		int team;
 		/** The burning tree it has gone to beat out. */
@@ -420,6 +434,9 @@ public final class LoreFilmClient {
 		boolean hopFlips;
 		@Nullable CameraType viewBefore;
 		int tick, skip, quietAt = 1, lungeAt = -1;
+		/** When the fifth's slingshot began, when it let him fly, and where he stood when it took hold. */
+		int slingAt = -1, glideAt = -1;
+		double slingF, slingS;
 		float flash, flashO;
 
 		Film(ClientLevel level, Vec3 origin, float yaw) {
@@ -787,6 +804,9 @@ public final class LoreFilmClient {
 			f.dartTrees.add(trunk);
 			tree(f, trunk[0], trunk[1], true);
 		}
+		for (double[] sling : SLING_TREES) {
+			tree(f, sling[0], sling[1], true);
+		}
 		for (int tries = 0; f.trees.size() < TREES && tries < 1500; tries++) {
 			double tf = FOREST_BACK + f.rnd.nextDouble() * (FOREST_FRONT - FOREST_BACK), ts = (f.rnd.nextDouble() * 2.0 - 1.0) * FOREST_HALF;
 			if (clearing(tf, ts) || nearTree(f, tf, ts, TREE_GAP)) {
@@ -816,6 +836,10 @@ public final class LoreFilmClient {
 			if (distance(tf, ts, strike[0], strike[1]) < 1.6) {
 				return true;
 			}
+		}
+		// the fifth's glide
+		if (segment(tf, ts, QUIET_PATH[QUIET_PATH.length - 1][0] - SLING_BACK - 1.0, 0.0, SORCERER_F, 0.0) < 2.2) {
+			return true;
 		}
 		// the fifth's run, and the camera's beside it
 		for (int i = 0; i + 1 < QUIET_PATH.length; i++) {
@@ -1333,7 +1357,7 @@ public final class LoreFilmClient {
 		// his turn off each tree: a tether thrown round its trunk as he comes up to it, then a swing round on it, or a kick
 		// off the bark and a flip
 		int turnTree = f.quietAt - 1;
-		if (f.lungeAt < 0 && turnTree < f.dartTrees.size() && f.anchored <= turnTree && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < ANCHOR_NEAR) {
+		if (f.slingAt < 0 && turnTree < f.dartTrees.size() && f.anchored <= turnTree && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < ANCHOR_NEAR) {
 			f.anchored = turnTree + 1;
 			double[] tree = f.dartTrees.get(turnTree);
 			tether(f, turnTree % 2 == 0 ? -1 : 1, t, t + TETHER_REACH + ANCHOR_HOLD, f.at(tree[0], tree[1], ANCHOR_HIGH), null, 0.62);
@@ -1350,7 +1374,7 @@ public final class LoreFilmClient {
 			}
 		}
 		// the cloak takes hold of whoever of the sorcerer's is near, hardly asking him
-		if (f.lungeAt < 0 && t >= f.nextGrab && f.grabs < GRABS) {
+		if (f.slingAt < 0 && t >= f.nextGrab && f.grabs < GRABS) {
 			Actor near = null;
 			double nearest = GRAB_REACH;
 			for (Actor a : f.legion) {
@@ -1371,7 +1395,7 @@ public final class LoreFilmClient {
 				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.4F, 0.4F);
 			}
 		}
-		if (f.lungeAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
+		if (f.slingAt < 0 && distance(quiet.f, quiet.s, quiet.toF, quiet.toS) < 0.3) {
 			if (f.quietAt < QUIET_PATH.length - 1) {
 				// off the trunk
 				f.hopAt = t;
@@ -1385,21 +1409,21 @@ public final class LoreFilmClient {
 				quiet.toF = QUIET_PATH[f.quietAt][0];
 				quiet.toS = QUIET_PATH[f.quietAt][1];
 			} else {
-				// the lunge
-				f.lungeAt = t;
-				quiet.speed = QUIET_LUNGE;
-				quiet.toF = LUNGE_END;
-				quiet.toS = 0.0;
-				pose(quiet, FilmPose.LUNGE, 0.8F);
-				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.0F);
-				// the cloak gets there before the blade, and closes on smoke
-				Vec3 where = f.at(SORCERER_F, 0.0, 1.1);
-				tether(f, -1, t, t + TETHER_REACH + 7, where, null, 0.4);
-				tether(f, 1, t + 1, t + TETHER_REACH + 8, where, null, 0.55);
+				// the slingshot: the cloak takes a tree either side of his way and draws him back on them
+				f.slingAt = t;
+				f.slingF = quiet.f;
+				f.slingS = quiet.s;
+				quiet.restYaw = f.yaw;
+				pose(quiet, FilmPose.SLING, 0.4F);
+				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.2F, 0.6F);
+				for (int i = 0; i < SLING_TREES.length; i++) {
+					tether(f, i == 0 ? 1 : -1, t, t + SLING_TICKS + 6, f.at(SLING_TREES[i][0], SLING_TREES[i][1], ANCHOR_HIGH), null, 0.62);
+				}
 			}
 		}
+		glide(f, quiet, t);
 		// the sorcerer's bolts
-		if (f.lungeAt < 0 && quiet.f < MANA_UNTIL && t > QUIET + 6 && (t - QUIET) % MANA_EVERY == 0) {
+		if (f.glideAt < 0 && quiet.f < MANA_UNTIL && t > QUIET + 6 && (t - QUIET) % MANA_EVERY == 0) {
 			boolean left = (t - QUIET) / MANA_EVERY % 2 == 0;
 			pose(grue, left ? FilmPose.CAST_LEFT : FilmPose.CAST_RIGHT, 0.7F);
 			sound(SoundEvents.EVOKER_CAST_SPELL, 0.5F, 0.7F);
@@ -1480,6 +1504,60 @@ public final class LoreFilmClient {
 
 	// ---- his cloak ---------------------------------------------------------------------------------------------------------
 
+	/** The fifth drawn back on his slingshot, let fly, and in the air to the sorcerer; then set down past where he stood. */
+	private static void glide(Film f, Actor quiet, int t) {
+		if (f.slingAt < 0) {
+			return;
+		}
+		if (f.glideAt < 0) {
+			float back = smooth((t - f.slingAt) / (float)SLING_TICKS);
+			quiet.f = quiet.toF = f.slingF - SLING_BACK * back;
+			quiet.s = quiet.toS = f.slingS * (1.0 - back);
+			if (t >= f.slingAt + SLING_TICKS) {
+				f.glideAt = t;
+				pose(quiet, FilmPose.DIVE, 0.5F);
+				sound(SoundEvents.PLAYER_ATTACK_KNOCKBACK, 0.7F, 0.7F);
+				sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.5F, 0.9F);
+			}
+			return;
+		}
+		int into = t - f.glideAt;
+		quiet.rollO = quiet.roll;
+		if (into > GLIDE_TICKS) {
+			// down, and on through the smoke
+			quiet.lift = Math.max(0.0, quiet.lift - 0.14);
+			quiet.flip = Math.max(0.0F, quiet.flip - 0.08F);
+			quiet.roll = quiet.rollO = 0.0F;
+			return;
+		}
+		double g = into / (double)GLIDE_TICKS;
+		float in = smooth((float)(g / 0.15)), open = smooth((float)((g - GLIDE_UNFOLD) / (0.95 - GLIDE_UNFOLD)));
+		quiet.f = quiet.toF = Mth.lerp(g, f.slingF - SLING_BACK, GLIDE_END);
+		quiet.s = quiet.toS = 0.0;
+		quiet.lift = GLIDE_HIGH * in + GLIDE_ARC * Math.sin(g * Math.PI);
+		// laid out head first, turning over; and level again for the strike
+		quiet.flip = Mth.HALF_PI * in * (1.0F - 0.8F * open);
+		quiet.roll = (float)(Math.PI * 2.0 * GLIDE_TURNS) * smooth((float)Math.min(1.0, g / GLIDE_UNFOLD));
+		if (into == (int)(GLIDE_TICKS * GLIDE_UNFOLD)) {
+			pose(quiet, FilmPose.LUNGE, 0.25F);
+			sound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.0F);
+		}
+		if (into == GLIDE_TICKS - 8) {
+			// the cloak gets there before the blade, and closes on smoke
+			Vec3 where = f.at(SORCERER_F, 0.0, 1.1);
+			tether(f, -1, t, t + TETHER_REACH + 7, where, null, 0.4);
+			tether(f, 1, t + 1, t + TETHER_REACH + 8, where, null, 0.55);
+		}
+		if (into == GLIDE_TICKS - 3) {
+			// a hand's breadth off, and nobody there
+			f.lungeAt = t;
+		}
+		if (into == GLIDE_TICKS) {
+			quiet.speed = GLIDE_LAND;
+			quiet.toF = LUNGE_END;
+		}
+	}
+
 	/** One link of the cloak or of a tether: a strip of white cloth, stretched where it's wanted each tick. */
 	private static Display.BlockDisplay cloth(Film f) {
 		Display.BlockDisplay e = new Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, f.level);
@@ -1538,9 +1616,15 @@ public final class LoreFilmClient {
 		f.loose = apart ? Math.min(1.0, f.loose + 1.0 / CLOAK_FORM) : Math.max(0.0, f.loose - 1.0 / CLOAK_FORM);
 		// (wound round him while it is neither whole nor loose)
 		double loose = f.loose, coil = Math.sin(loose * Math.PI) * 0.85;
+		// in his glide it streams out behind him in a spiral, and opens wide before the strike
+		double g = f.glideAt < 0 ? 0.0 : (t - f.glideAt) / (double)GLIDE_TICKS;
+		double stream = f.glideAt < 0 ? 0.0 : g <= 1.0 ? smooth((float)(g / 0.15)) : Math.max(0.0, 1.0 - (g - 1.0) * GLIDE_TICKS / 8.0);
+		double open = smooth((float)((g - GLIDE_UNFOLD) / (0.95 - GLIDE_UNFOLD)));
+		Vec3 across1 = side.scale(Math.cos(quiet.roll)).add(up.scale(Math.sin(quiet.roll)));
+		double linkLong = CLOAK_LINK * (1.0 + 1.3 * stream * (1.0 - 0.4 * open));
 		for (int j = 0; j < CLOAK_STRIPS; j++) {
 			double across = (j - (CLOAK_STRIPS - 1) / 2.0) * 0.26;
-			Vec3 from = chest.add(spine.scale(0.67)).subtract(ahead.scale(0.2 * Math.cos(over))).add(side.scale(across));
+			Vec3 from = chest.add(spine.scale(0.67)).subtract(ahead.scale(0.2 * Math.cos(over))).add(across1.scale(across));
 			for (int i = 0; i < CLOAK_LINKS; i++) {
 				double stir = Math.sin(t * 0.45 + i * 1.1 + j * 2.1), lift = Math.sin(t * 0.31 + i * 0.8 + j * 1.3);
 				Vec3 way = up.scale(-1.0 + pace * 0.55 + CLOAK_STIR * 0.5 * lift * (1.0 - pace))
@@ -1548,11 +1632,17 @@ public final class LoreFilmClient {
 					.add(side.scale(across * 0.5 + (0.12 + 0.3 * pace) * stir * (i + 1) / CLOAK_LINKS)).normalize();
 				// whole, it hangs straight and still
 				way = up.scale(-1.0).subtract(ahead.scale(0.12)).lerp(way, loose).normalize();
-				Vec3 want = from.add(way.scale(CLOAK_LINK)), had = f.cloakAt[j][i];
+				if (stream > 0.0) {
+					double turn = quiet.roll + i * 0.8 + j * 2.09;
+					Vec3 swirl = up.scale(Math.cos(turn) * 0.55).add(side.scale(Math.sin(turn) * 0.55));
+					Vec3 fan = side.scale(across * 5.0).add(up.scale(0.35));
+					way = way.lerp(ahead.scale(-1.0).add(swirl.scale(1.0 - open)).add(fan.scale(open)).normalize(), stream).normalize();
+				}
+				Vec3 want = from.add(way.scale(linkLong)), had = f.cloakAt[j][i];
 				// each link follows the one above it, a little late
 				Vec3 to = had == null ? want : had.lerp(want, 1.0 - 0.45 * loose);
 				Vec3 reach = to.subtract(from);
-				to = from.add(reach.lengthSqr() < 1.0E-6 ? way.scale(CLOAK_LINK) : reach.normalize().scale(CLOAK_LINK));
+				to = from.add(reach.lengthSqr() < 1.0E-6 ? way.scale(linkLong) : reach.normalize().scale(linkLong));
 				if (coil > 0.001) {
 					double turn = j * 2.1 + i * 1.3 + t * 0.7;
 					to = to.lerp(chest.add(0.0, 0.55 - i * 0.28, 0.0).add(ahead.scale(Math.cos(turn) * CLOAK_COIL)).add(side.scale(Math.sin(turn) * CLOAK_COIL)), coil);
@@ -2134,7 +2224,7 @@ public final class LoreFilmClient {
 	public static float @Nullable [] pose(Entity e, float partialTicks) {
 		Film f = film;
 		Actor a = f == null ? null : f.byEntity.get(e);
-		if (a == null || (a.weight < 0.005F && a.weightO < 0.005F && a.gone == 0 && a.flip == 0.0F && a.flipO == 0.0F)) {
+		if (a == null || (a.weight < 0.005F && a.weightO < 0.005F && a.gone == 0 && a.flip == 0.0F && a.flipO == 0.0F && a.roll == 0.0F && a.rollO == 0.0F)) {
 			return null;
 		}
 		float[] out = new float[FilmPose.LENGTH];
@@ -2144,6 +2234,7 @@ public final class LoreFilmClient {
 		out[FilmPose.WEIGHT] = Mth.lerp(partialTicks, a.weightO, a.weight);
 		out[FilmPose.GONE] = a.gone;
 		out[FilmPose.FLIP] = Mth.lerp(partialTicks, a.flipO, a.flip);
+		out[FilmPose.ROLL] = Mth.lerp(partialTicks, a.rollO, a.roll);
 		return out;
 	}
 
@@ -2308,7 +2399,7 @@ public final class LoreFilmClient {
 			Vec3 q = f.stranger != null ? f.stranger.e.getPosition(partialTicks) : f.at(QUIET_PATH[0][0], QUIET_PATH[0][1], 0.0);
 			pos = q.subtract(f.fwd.scale(CHASE_BACK)).add(f.right.scale(CHASE_SIDE)).add(0.0, 1.7, 0.0);
 			look = q.add(f.fwd.scale(2.5)).add(0.0, 1.1, 0.0);
-		} else if (t < LUNGE_SHOT) {
+		} else if (f.glideAt < 0 || t < f.glideAt + GLIDE_CUT) {
 			// from behind the sorcerer (his shoulder at the right edge), the fifth coming on, on the left third
 			Vec3 q = f.stranger != null ? f.stranger.e.getPosition(partialTicks) : f.at(40.0, 0.0, 0.0);
 			pos = f.at(SORCERER_F + 2.3, 1.3, 2.0);
@@ -2316,9 +2407,9 @@ public final class LoreFilmClient {
 			third = 0.5F;
 		} else if (t < END) {
 			// side on: he comes in from the left, the sorcerer on the right third, and then nobody there
-			float k = smooth((t - LUNGE_SHOT) / (END - LUNGE_SHOT));
-			pos = f.at(51.2, 5.6 - 1.0 * k, 1.4);
-			look = f.at(50.3, 0.0, 1.3);
+			float k = smooth((t - f.glideAt - GLIDE_CUT) / (END - f.glideAt - GLIDE_CUT));
+			pos = f.at(51.2 - 1.6 * (1.0F - k), 6.4 - 1.4 * k, 1.5);
+			look = f.at(50.3 - 2.2 * (1.0F - k), 0.0, 1.4);
 		} else {
 			// the road again, wide, drawing up and away, the Keep still on its third
 			float k = smooth((t - END) / (LENGTH - END));
