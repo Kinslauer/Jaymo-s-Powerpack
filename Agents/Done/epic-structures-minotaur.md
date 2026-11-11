@@ -29,4 +29,4 @@ minotaur instead of the slider dungeon.
 
 ## Done
 Compiled (Kingdoms and Powers); not played.
-- 2026-11-11 16:17 PR #1320 is merged into master; moved to Agents/Done.
+- 2026-11-11 21:26 PR #1320 is merged into master; moved to Agents/Done.
