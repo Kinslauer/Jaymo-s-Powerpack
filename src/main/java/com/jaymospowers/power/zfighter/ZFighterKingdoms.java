@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.JaymosPowers;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,8 @@ public final class ZFighterKingdoms {
 	private static Method CAN_REBORN, REBORN;
 	/** (0.20.83) Kingdoms' LifeStory.reincarnateAnew(ServerPlayer): born again with MCA's creator too (the third death). */
 	private static Method REBORN_ANEW;
+	/** Kingdoms' Heritage.stayed(ServerPlayer): one of the just stayed in the high places and is Divine-born now. */
+	private static Method STAYED;
 	/** (0.20.94) Kingdoms' LifeStory.making(ServerPlayer): still making their character. */
 	private static Method MAKING;
 	/** (0.18.54) Kingdoms' WorldTiers.open(Player, Tier) and the Tier constants: whether a tier is open to a player (their deeds). */
@@ -145,6 +148,11 @@ public final class ZFighterKingdoms {
 				REBORN = null;
 			}
 			try {
+				STAYED = Class.forName("com.jaymoskingdoms.Heritage").getMethod("stayed", ServerPlayer.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				STAYED = null;
+			}
+			try {
 				Class<?> tier = Class.forName("com.jaymoskingdoms.WorldTiers$Tier");
 				TIER_OPEN = Class.forName("com.jaymoskingdoms.WorldTiers").getMethod("open", net.minecraft.world.entity.player.Player.class, tier);
 				TIERS = tier.getEnumConstants();
@@ -233,6 +241,18 @@ public final class ZFighterKingdoms {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			CAN_REBORN = null;
 			return false;
+		}
+	}
+
+	/** One of the just stayed at the Judge: Kingdoms makes them Divine-born. Nothing without Kingdoms. */
+	static void stayed(ServerPlayer player) {
+		if (STAYED == null) {
+			return;
+		}
+		try {
+			STAYED.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosPowers.LOGGER.warn("Kingdoms couldn't make {} Divine-born", player.getScoreboardName(), e);
 		}
 	}
 

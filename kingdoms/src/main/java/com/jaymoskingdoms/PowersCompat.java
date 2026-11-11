@@ -392,6 +392,34 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code DivineSense.alight(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle alight;
+	private static boolean lookedForAlight;
+
+	/** A Divine-born's heritage key: Jaymo's Powers' Alight (the feathers come back). False without Powers, or if it won't have them. */
+	public static boolean alight(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForAlight) {
+			lookedForAlight = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					alight = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.divine.DivineSense"),
+						"alight", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Alight (older Powers?)", e);
+				}
+			}
+		}
+		if (alight == null) {
+			return false;
+		}
+		try {
+			return (boolean) alight.invokeExact(player);
+		} catch (Throwable e) {
+			alight = null;
+			return false;
+		}
+	}
+
 	/** (0.7.320) Powers' {@code ZFighterAfterlife.among(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle among;
 	private static boolean lookedForAmong;

@@ -869,9 +869,24 @@ public final class Heritage {
 		} else if (kind == Kind.RUBBERFOLK) {
 			// (0.7.288) starts (or stops) swallowing a weak foe
 			RubberFolk.press(player);
+		} else if (kind == Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.alight(player)) {
+			// Alight (Jaymo's Powers): the feathers come back; sneaking, the key is still the kit's ability
 		} else {
 			// (0.7.490) every other heritage and look: its kit's ability (or, for a left-mouse hold, a word on how to use it)
 			HeritageKits.press(player);
+		}
+	}
+
+	/**
+	 * Jaymo's Powers calls this by name: one of the just chose to stay in the high places at the Judge. They are Divine-born
+	 * from here on (their own blood changes, unlike a heritage merely earned), with the afterlife's road open as for one who
+	 * died there.
+	 */
+	public static void stayed(ServerPlayer player) {
+		unlock(player, Kind.DIVINE);
+		Deeds.done(player, RoadLocks.DIVINE_DEED);
+		if (of(player) != Kind.DIVINE) {
+			set(player, Kind.DIVINE);
 		}
 	}
 
