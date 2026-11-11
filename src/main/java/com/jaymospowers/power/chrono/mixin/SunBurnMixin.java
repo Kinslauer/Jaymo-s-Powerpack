@@ -3,6 +3,7 @@ package com.jaymospowers.power.chrono.mixin;
 import com.jaymospowers.core.sun.SunExposure;
 import com.jaymospowers.power.chrono.future.Future;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,7 +29,37 @@ public abstract class SunBurnMixin {
         if (!level.isClientSide() && level.environmentAttributes().getValue(EnvironmentAttributes.MONSTERS_BURN, mob.position())) {
             float br = mob.getLightLevelDependentMagicValue();
             if (br > 0.5F && mob.getRandom().nextFloat() * 30.0F < (br - 0.4F) * 2.0F && !mob.isInWaterOrRain() && !mob.isInPowderSnow && !mob.wasInPowderSnow) {
-                cir.setReturnValue(SunExposure.exposedToSun(level, mob.getEyePosition()));
+                // Burn if any body point (feet, chest, head) is exposed to the sun
+                Vec3 eye = mob.getEyePosition();
+                // Feet: bottom of the entity's bounding box
+                Vec3 feet = new Vec3(mob.getX(), mob.getY(), mob.getZ());
+                // Head: top of the entity's bounding box
+                Vec3 head = new Vec3(mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ());
+                Vec3 chest = new Vec3(mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ());
+                boolean eyeExposed = SunExposure.exposedToSun(level, eye);
+                boolean feetExposed = SunExposure.exposedToSun(level, feet);
+                boolean headExposed = SunExposure.exposedToSun(level, head);
+                boolean chestExposed = SunExposure.exposedToSun(level, chest);
+                // Also check hitbox corners at feet and head level
+                // Feet corners
+                Vec3 feetCorner1 = new Vec3(mob.getBoundingBox().minX, mob.getY(), mob.getBoundingBox().minZ);
+                Vec3 feetCorner2 = new Vec3(mob.getBoundingBox().maxX, mob.getY(), mob.getBoundingBox().minZ);
+                Vec3 feetCorner3 = new Vec3(mob.getBoundingBox().minX, mob.getY(), mob.getBoundingBox().maxZ);
+                Vec3 feetCorner4 = new Vec3(mob.getBoundingBox().maxX, mob.getY(), mob.getBoundingBox().maxZ);
+                // Head corners
+                Vec3 headCorner1 = new Vec3(mob.getBoundingBox().minX, mob.getY() + mob.getBbHeight(), mob.getBoundingBox().minZ);
+                Vec3 headCorner2 = new Vec3(mob.getBoundingBox().maxX, mob.getY() + mob.getBbHeight(), mob.getBoundingBox().minZ);
+                Vec3 headCorner3 = new Vec3(mob.getBoundingBox().minX, mob.getY() + mob.getBbHeight(), mob.getBoundingBox().maxZ);
+                Vec3 headCorner4 = new Vec3(mob.getBoundingBox().maxX, mob.getY() + mob.getBbHeight(), mob.getBoundingBox().maxZ);
+                boolean feetCornerExposed = SunExposure.exposedToSun(level, feetCorner1)
+                    || SunExposure.exposedToSun(level, feetCorner2)
+                    || SunExposure.exposedToSun(level, feetCorner3)
+                    || SunExposure.exposedToSun(level, feetCorner4);
+                boolean headCornerExposed = SunExposure.exposedToSun(level, headCorner1)
+                    || SunExposure.exposedToSun(level, headCorner2)
+                    || SunExposure.exposedToSun(level, headCorner3)
+                    || SunExposure.exposedToSun(level, headCorner4);
+                cir.setReturnValue(eyeExposed || feetExposed || headExposed || chestExposed || feetCornerExposed || headCornerExposed);
                 return;
             }
         }

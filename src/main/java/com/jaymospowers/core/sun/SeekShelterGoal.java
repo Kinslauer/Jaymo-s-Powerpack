@@ -44,33 +44,59 @@ public class SeekShelterGoal extends Goal {
         if (this.mob.isInWaterOrRain()) {
             return false;
         }
-        if (!SunExposure.exposedToSun(this.level, this.mob.getEyePosition())) {
+        // Check multiple body points (feet, chest, head) and hitbox corners - burn if any is exposed
+        Vec3 eye = this.mob.getEyePosition();
+        Vec3 feet = new Vec3(this.mob.getX(), this.mob.getY(), this.mob.getZ());
+        Vec3 head = new Vec3(this.mob.getX(), this.mob.getY() + this.mob.getBbHeight(), this.mob.getZ());
+        Vec3 chest = new Vec3(this.mob.getX(), this.mob.getY() + this.mob.getBbHeight() / 2.0, this.mob.getZ());
+        boolean eyeExposed = SunExposure.exposedToSun(this.level, eye);
+        boolean feetExposed = SunExposure.exposedToSun(this.level, feet);
+        boolean headExposed = SunExposure.exposedToSun(this.level, head);
+        boolean chestExposed = SunExposure.exposedToSun(this.level, chest);
+        if (!eyeExposed && !feetExposed && !headExposed && !chestExposed) {
+            return false; // already under real shelter
+        }
+        // Also check hitbox corners at feet and head level
+        // Feet corners (bottom of bounding box)
+        Vec3 feetCorner1 = new Vec3(this.mob.getBoundingBox().minX, this.mob.getY(), this.mob.getBoundingBox().minZ);
+        Vec3 feetCorner2 = new Vec3(this.mob.getBoundingBox().maxX, this.mob.getY(), this.mob.getBoundingBox().minZ);
+        Vec3 feetCorner3 = new Vec3(this.mob.getBoundingBox().minX, this.mob.getY(), this.mob.getBoundingBox().maxZ);
+        Vec3 feetCorner4 = new Vec3(this.mob.getBoundingBox().maxX, this.mob.getY(), this.mob.getBoundingBox().maxZ);
+        // Head corners (top of bounding box)
+        Vec3 headCorner1 = new Vec3(this.mob.getBoundingBox().minX, this.mob.getY() + this.mob.getBbHeight(), this.mob.getBoundingBox().minZ);
+        Vec3 headCorner2 = new Vec3(this.mob.getBoundingBox().maxX, this.mob.getY() + this.mob.getBbHeight(), this.mob.getBoundingBox().minZ);
+        Vec3 headCorner3 = new Vec3(this.mob.getBoundingBox().minX, this.mob.getY() + this.mob.getBbHeight(), this.mob.getBoundingBox().maxZ);
+        Vec3 headCorner4 = new Vec3(this.mob.getBoundingBox().maxX, this.mob.getY() + this.mob.getBbHeight(), this.mob.getBoundingBox().maxZ);
+        boolean feetCornerExposed = SunExposure.exposedToSun(this.level, feetCorner1)
+            || SunExposure.exposedToSun(this.level, feetCorner2)
+            || SunExposure.exposedToSun(this.level, feetCorner3)
+            || SunExposure.exposedToSun(this.level, feetCorner4);
+        boolean headCornerExposed = SunExposure.exposedToSun(this.level, headCorner1)
+            || SunExposure.exposedToSun(this.level, headCorner2)
+            || SunExposure.exposedToSun(this.level, headCorner3)
+            || SunExposure.exposedToSun(this.level, headCorner4);
+        if (eyeExposed || feetExposed || headExposed || chestExposed || feetCornerExposed || headCornerExposed) {
+            // at least one body point is exposed to sun
+        } else {
             return false; // already under real shelter
         }
         if (this.cooldown > 0) {
             this.cooldown--;
             return false;
         }
-        this.cooldown = 40; // once in a while, not every tick
+        this.cooldown = 200; // search once every 200 ticks (about 10 seconds), not every time burning
         this.shelter = this.findShelter();
         return this.shelter != null;
     }
 
     @Override
-    public boolean canContinueToUse() {
-        return !this.mob.getNavigation().isDone();
-    }
-
-    @Override
-    public void start() {
-        if (this.shelter != null) {
-            this.mob.getNavigation().moveTo(this.shelter.getX() + 0.5, this.shelter.getY() + 1.0, this.shelter.getZ() + 0.5, 1.0D);
-        }
-    }
-
-    @Override
     public void stop() {
         this.shelter = null;
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return !this.mob.getNavigation().isDone();
     }
 
     /** The nearest real shelter within {@value #REACH} blocks, or null. */
@@ -102,6 +128,12 @@ public class SeekShelterGoal extends Goal {
                         Vec3 at = Vec3.atBottomCenterOf(cand).add(0.0, 1.62, 0.0);
                         if (SunExposure.exposedToSun(this.level, at)) {
                             continue; // leaves, glass and torches let the rays through: not real shelter
+                        }
+                        // Also check feet and head positions at the candidate
+                        Vec3 feetAt = Vec3.atBottomCenterOf(cand).add(0.0, 0.0, 0.0);
+                        Vec3 headAt = Vec3.atBottomCenterOf(cand).add(0.0, mob.getBbHeight(), 0.0);
+                        if (SunExposure.exposedToSun(this.level, feetAt) || SunExposure.exposedToSun(this.level, headAt)) {
+                            continue; // rays reach feet or head: not real shelter
                         }
                         double score = -pos.distSqr(cand) + (pos.getY() - cand.getY()) * 2.0; // closer, then lower (caves)
                         if (best == null || score > bestScore) {
