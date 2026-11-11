@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Rebuild Yo Fadda hero mechanics for our powers
 branch: claude/project-thread-ixuj2m
 with: cloud thread
@@ -28,3 +28,4 @@ owns:
 ## Done
 
 2026-11-11: on PR #1322 now: Wisp, Read the Ground (Kingdoms), Speed, Web, Smoke/Flame Avatar tracks. Rig track still building. Lore.md has 4 (new) paragraphs after The Flame Avatar for Andy to approve.
+- 2026-11-11 17:22 PR #1322 is merged into master; moved to Agents/Done.
