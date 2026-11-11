@@ -123,6 +123,24 @@ public class Draugr extends Monster implements GeoEntity {
 		this.entityData.set(AXE, axe);
 	}
 
+	/** (A lore film's actor) what a finisher took off it: {@link #MAIM_HEAD}, {@link #MAIM_ARM} (its weapon arm). */
+	public static final int MAIM_HEAD = 1, MAIM_ARM = 2;
+	private int maimed;
+
+	/** (A lore film's actor) loses its head or its weapon arm to a finisher: no longer drawn. */
+	public void stageMaim(int bits) {
+		this.maimed |= bits;
+	}
+
+	public int maimed() {
+		return this.maimed;
+	}
+
+	/** (A lore film's actor) swings what it holds, on this game alone. */
+	public void stageSwing() {
+		this.triggerAnim("action", this.axe() ? "attack_axe" : "attack_sword");
+	}
+
 	/** Whether this is a lore film's living Warrior-born ({@link #stageLiving}). */
 	public boolean living() {
 		return this.living;

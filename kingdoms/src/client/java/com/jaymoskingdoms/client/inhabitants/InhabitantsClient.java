@@ -46,6 +46,7 @@ public final class InhabitantsClient {
 
 	static final DataTicket<Boolean> DRAUGR_AXE = DataTicket.create("jaymoskingdoms_draugr_axe", Boolean.class);
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
+	static final DataTicket<Integer> DRAUGR_MAIMED = DataTicket.create("jaymoskingdoms_draugr_maimed", Integer.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
 	static final DataTicket<Boolean> LORD_DORMANT = DataTicket.create("jaymoskingdoms_lord_dormant", Boolean.class);
 	static final DataTicket<Float> LORD_SINCE_WOKE = DataTicket.create("jaymoskingdoms_lord_since_woke", Float.class);
@@ -96,6 +97,7 @@ public final class InhabitantsClient {
 			state.addGeckolibData(DRAUGR_AXE, draugr.axe());
 			state.addGeckolibData(DRAUGR_TAIL_ROLL, draugr.getUUID().hashCode());
 			state.addGeckolibData(DRAUGR_LIVING, draugr.living());
+			state.addGeckolibData(DRAUGR_MAIMED, draugr.maimed());
 		}
 
 		@Override
@@ -107,6 +109,14 @@ public final class InhabitantsClient {
 			snapshots.ifPresent("shield", bone -> bone.skipRender(axe));
 			// the bronze chieftain's left horn broken off
 			snapshots.ifPresent("left_horn", bone -> bone.skipRender(look(info.getOrDefaultGeckolibData(DRAUGR_TAIL_ROLL, 0)) == 1));
+			// a lore film's finisher took its head or its weapon arm
+			int maimed = info.getOrDefaultGeckolibData(DRAUGR_MAIMED, 0);
+			if ((maimed & Draugr.MAIM_HEAD) != 0) {
+				snapshots.ifPresent("head", bone -> bone.skipRender(true).skipChildrenRender(true));
+			}
+			if ((maimed & Draugr.MAIM_ARM) != 0) {
+				snapshots.ifPresent("right_arm", bone -> bone.skipRender(true).skipChildrenRender(true));
+			}
 			if (info.getOrDefaultGeckolibData(DRAUGR_LIVING, false)) {
 				// alive: no ribs through the mail, the tail whole
 				snapshots.ifPresent("ribs", bone -> bone.skipRender(true));
