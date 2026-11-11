@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -7,7 +7,7 @@ claimed_by: hermes-fixer
 pr: 1262
 suggested_owns: [src/main/java/com/jaymospowers/undead/]
 writer: hermes-writer
-text_pass: 
+text_pass: done
 ---
 
 # Undead seek real shelter from the sun
