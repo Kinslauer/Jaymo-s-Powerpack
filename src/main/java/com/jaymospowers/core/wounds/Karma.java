@@ -92,6 +92,8 @@ public final class Karma {
 	static final float KILL_OUTLAW = 0.3F, KILL_MONSTER = 0.15F, KILL_UNDEAD = 0.25F, KILL_BOSS = 4.0F;
 	/** Getting the fallen up: a player, a villager, anything else that isn't a monster. */
 	static final float RAISE_PLAYER = 5.0F, RAISE_VILLAGER = 3.0F, RAISE_OTHER = 0.5F;
+	/** The weight at which a player's guilt is whole ({@link #guilt}), and how guilty an outlaw stands. */
+	public static final float GUILT_FULL = -60.0F, GUILT_OUTLAW = 0.5F;
 	/** The share of the weight a just one keeps when they go back as they were. */
 	static final float RETURN_KEEPS = 0.5F;
 	/** How far (blocks) from the way up one sent below wakes. */
@@ -220,6 +222,27 @@ public final class Karma {
 		} else if (before > WICKED && after <= WICKED) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.karma.heavier").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 		}
+	}
+
+	/**
+	 * How guilty {@code who} stands, 0 (blameless) to 1: a player by the weight of their life (nothing at or above even, all
+	 * of it at {@link #GUILT_FULL} or under; the harm done to villagers and players, and to a realm's good name, is in it),
+	 * one of the folk outside the law ({@link #GUILTY}: Kingdoms' outlaws) by {@link #GUILT_OUTLAW}, anything else none.
+	 */
+	public static float guilt(LivingEntity who) {
+		if (who instanceof Player player) {
+			return Mth.clamp(-of(player) / -GUILT_FULL, 0.0F, 1.0F);
+		}
+		for (Predicate<Entity> test : GUILTY) {
+			try {
+				if (test.test(who)) {
+					return GUILT_OUTLAW;
+				}
+			} catch (RuntimeException e) {
+				// (a broken test counts for nothing)
+			}
+		}
+		return 0.0F;
 	}
 
 	/** How the Judge reads a page, 1 (wicked) to 5 (just): for his talk, never a number. */
