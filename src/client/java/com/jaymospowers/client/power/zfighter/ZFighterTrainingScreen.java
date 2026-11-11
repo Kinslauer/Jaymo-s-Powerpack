@@ -116,9 +116,7 @@ public class ZFighterTrainingScreen extends Screen {
 		// (0.17.60) the HUD editor, and the first-time tip
 		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.hud_button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterHudEditor(this))).bounds(left() + 8, top() + 7, 44, 14).build());
-		// (0.17.61) the Story screen: sagas and side jobs
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.story_button"),
-			b -> this.minecraft.gui.setScreen(new ZFighterStoryScreen(this))).bounds(left() + 56, top() + 7, 44, 14).build());
+		// the old Story button is gone: the story is the character menu's Story tab (Kingdoms' Retaking) for everyone
 		// (0.18.94) the technique creator
 		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_creator.button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterCreatorScreen(this))).bounds(left() + panelW() - 52, top() + 7, 44, 14).build());
