@@ -11221,3 +11221,25 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - **Dragons stay out of the Overworld until a dragon is killed.** Until someone in the world kills a dragon (any dragon: ours, the Ender Dragon, another mod's; not a tamed one), no dragon spawns there. That covers the Notus, Boreas and Zephyrus encounters, Stegonaut, Atroxiia and Varasuchus, and Eurus and Aeolus in their disguises. Eggs, spawners and the op command still work. Until then the dragons are met in the Aether, where Notus, Boreas and Zephyrus now fly about beside Aetherion (a dragon about once an hour per player, Aetherion most often), and in the Nether (Ignivorus anywhere, Notus over the basalt deltas). The kill is saved with the world. `DragonRecords.worldSlain/markSlain`, `Dragons.aether/overworldOpen`, `Disguises.spawns`.
 - Lore.md: two (new) paragraphs, "Where the dragons keep" and "Who keeps company with whom".
 - Built (Kingdoms `build`, Powers `compileJava`). Not played: the camp bands, the hut golems and the Aether dragons haven't been seen in game.
+
+## 0.7.734 (2026-11-11): The Retaking: the Thief's Road and the Old Campaign (#1307)
+
+- **The Thief's Road** (Thieves): pick a pocket clean; pick a lock; find a den; then, once the Dark Below has begun, a locked chest you pick may hold a contract left under a black candle (**Paid For**) and the book someone paid to have buried, a copy of *The Long Defence* (a third of picked chests, until you have read it).
+- **The Old Campaign** (Warlords, Brutes, Riders, Marksmen, Archers, Survivalists): every 5 levels in your trade's skill (Survival for Archers and Survivalists, Strength for the rest), up to 20, is a step, and each hands you the next part of an old campaigner's account, four short books from the river farms to the ford.
+- The Story tab lists every road Jaymo's Powers gives (the Fighter's and the Chrono's), and shows Open only for a road with its own screen.
+- Built; not played.
+
+## 0.7.735 (2026-11-11): The Retaking: the Arcanist's and the Faithful roads (#1307)
+
+- Two more roads in the Story tab, under the acts, for whoever they fit (each step counts only once its act has begun):
+  - **The Arcanist's Road** (Mages and Sorcerers): carry a caster's staff; ask a court wizard about the old war; find a court wizard's margin notes; learn a second spell for good.
+  - **The Faithful Road** (anyone sworn to a patron): swear; rise to the second tier of favour; bring down your patron's champion; stand against a rival faith's champion; bring your own champion down three times.
+- **Margins**: a court wizard's margin notes, a new lore book (now and then on a witch, 6%): the elements, why Death and Blood are forbidden, and what the crucible does when the flux runs high.
+- `StoryRoads` (roads, steps, saved progress) and the Story tab now list several roads; a step of an act not yet reached shows only "Later in the story."
+- Built; not played.
+
+## 0.7.736 (2026-11-11): The Retaking: your own road in the Story tab (#1307)
+
+- The Story tab has a row under the five acts for the player's own road when their power has one (the Z Fighter's sagas for now, from Jaymo's Powers): its goals listed the same plain way as an act's, and an Open button to the road's own screen.
+- `RoadCompat` reaches Powers' `StoryRoads` by reflection; without Powers there is no road row.
+- Built; not played.
