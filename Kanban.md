@@ -9,7 +9,7 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · open
-- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · for 🪶 Quill · open
+- [ ] [[Inbox/long-defence-text-pass|long-defence-text-pass]] · claude (cloud) · claimed
 - [ ] [[Inbox/stormborn-tomb-real-fix|stormborn-tomb-real-fix]] · for 🔨 Hephaestus · open
 
 
