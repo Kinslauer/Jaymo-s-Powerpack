@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:balloon_mushroom_log"
+  ],
+  "result": {
+    "id": "jaymospowers:balloon_mushroom_planks",
+    "count": 4
+  },
+  "group": "planks"
+}
