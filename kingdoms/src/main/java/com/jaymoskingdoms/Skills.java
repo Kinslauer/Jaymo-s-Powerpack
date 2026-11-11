@@ -345,7 +345,9 @@ public final class Skills {
 		ENCHANTED_STORAGE(Pillar.SURVIVAL, 3, 2, 15, 18, 0, ARCANE_EVOCATION),
 		// the Scholar's first skill, learned in the Astronomer's Journal: each rank makes its readings finer
 		// (astronomy.Measurements#resolution); last, so no ordinal moves
-		ASTROMETRY(Pillar.SCHOLAR, 20, 1, 0, 0, 1);
+		ASTROMETRY(Pillar.SCHOLAR, 20, 1, 0, 0, 1),
+		// anyone who crouches and holds still sees the prints of whatever walked there ({@link TrailReading}); last, so no ordinal moves
+		READ_THE_GROUND(Pillar.SURVIVAL, 2, 1, 0, 2, 1, FORAGER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -614,6 +616,7 @@ public final class Skills {
 		ShieldThrow.register();
 		// (0.7.514) the bridge perks
 		Bridges.register();
+		TrailReading.register();
 		Renown.register();
 		KitchenCompat.skills();
 	}
