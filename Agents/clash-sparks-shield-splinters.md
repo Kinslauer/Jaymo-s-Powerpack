@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: 
 branch: claude/project-thread-76m9kc
 with: Claude (cloud thread "Add sparks to blade clashes and parries")
@@ -30,3 +30,4 @@ wood from shattering shields", "some of the fighters should have shields so the 
 - The film thread (PR #1284, "Move every model onto GeckoLib animations") reuses the effects.
 
 ## Done
+- 2026-11-11 15:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
