@@ -43,6 +43,8 @@ public record WebPose(int kind, long start, int side) {
 	public static final int GLIDE_KICK = 16;
 	/** Hanging head down from a line above ({@link WebHanging}); lasts as long as the attachment {@link WebPower#UPSIDE} does, not a set time. */
 	public static final int UPSIDE = 17;
+	/** A balanced crouch on a narrow top ({@link WebPerch}); lasts as long as the attachment {@link WebPower#PERCH} does. */
+	public static final int PERCH = 18;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;

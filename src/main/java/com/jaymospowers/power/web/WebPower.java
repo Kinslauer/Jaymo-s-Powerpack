@@ -150,6 +150,9 @@ public final class WebPower implements Power {
 	/** Hanging head down from a swing line above (everyone draws it; see {@link WebHanging}). */
 	public static final AttachmentType<Boolean> UPSIDE = AttachmentRegistry.create(JaymosPowers.id("web_upside"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Settled into a balanced crouch on a narrow top (everyone draws it; see {@link WebPerch}). */
+	public static final AttachmentType<Boolean> PERCH = AttachmentRegistry.create(JaymosPowers.id("web_perch"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
 	public static final int WINGS_TICKS = 80;
 	public static final int WINGS_COOLDOWN = 60;
@@ -365,6 +368,7 @@ public final class WebPower implements Power {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
 		WebHanging.register();
+		WebPerch.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {

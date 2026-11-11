@@ -252,6 +252,8 @@ public final class WebSwing {
 	private final WebTrickClient tricks = new WebTrickClient();
 	/** Hanging head down from a line above ({@link WebUpsideClient}). */
 	private final WebUpsideClient upside = new WebUpsideClient();
+	/** Settled into a balanced crouch on a narrow top ({@link WebPerchClient}). */
+	private final WebPerchClient perch = new WebPerchClient();
 
 	void reset() {
 		for (Strand strand : strands) {
@@ -271,6 +273,7 @@ public final class WebSwing {
 		swingLockout = 0;
 		tricks.reset();
 		upside.reset();
+		perch.reset();
 	}
 
 	private static LocalPlayer player() {
@@ -517,9 +520,11 @@ public final class WebSwing {
 			flying = false;
 			pull = null;
 			upside.reset();
+			perch.reset();
 			return;
 		}
 		upside.tick(player, strands);
+		perch.tick(player, attached() || pull != null || wingsTicks > 0);
 		if (swingLockout > 0) {
 			swingLockout--;
 		}

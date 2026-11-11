@@ -29,6 +29,10 @@ public final class WebBodyPose {
 	static final float UPSIDE_TURN = 8.0F;
 	private static final java.util.Map<Integer, Float> UPSIDE_SINCE = new java.util.HashMap<>();
 
+	/** Ticks it takes to settle into a perch, and per perched entity when it began. */
+	static final float PERCH_SETTLE = 6.0F;
+	private static final java.util.Map<Integer, Float> PERCH_SINCE = new java.util.HashMap<>();
+
 	private WebBodyPose() {
 	}
 
@@ -44,6 +48,16 @@ public final class WebBodyPose {
 			return;
 		}
 		UPSIDE_SINCE.remove(entity.getId());
+		if (entity.getAttached(WebPower.PERCH) != null) {
+			float now = entity.level().getGameTime() + partialTicks;
+			float began = PERCH_SINCE.computeIfAbsent(entity.getId(), id -> now);
+			if (PERCH_SINCE.size() > 64) {
+				PERCH_SINCE.keySet().removeIf(id -> id != entity.getId() && entity.level().getEntity(id) == null);
+			}
+			state.setData(KEY, new Pose(WebPose.PERCH, 0, Mth.clamp((now - began) / PERCH_SETTLE, 0.0F, 1.0F), now));
+			return;
+		}
+		PERCH_SINCE.remove(entity.getId());
 		WebPose pose = entity.getAttached(WebPower.POSE);
 		if (pose == null) {
 			state.setData(KEY, null);
@@ -196,6 +210,14 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.ZP, sway);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.PERCH -> {
+				// sunk into a crouch, leaning a little forward over the feet
+				float e2 = ease(pose.p());
+				poseStack.translate(0.0F, -0.28F * e2, 0.0F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 10.0F * e2);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.GLIDE_KICK -> {
 				// laid back with the feet thrown out ahead, held, then folding away
 				float kick = hold(pose.p(), 0.2F, 0.6F);
@@ -331,6 +353,15 @@ public final class WebBodyPose {
 				}
 				set(h.rightLeg, 0.0F, 0.0F, 0.05F, e2);
 				set(h.leftLeg, 0.0F, 0.0F, -0.05F, e2);
+			}
+			case WebPose.PERCH -> {
+				// feet together, knees out, arms held wide for balance, a slight sway
+				float e2 = ease(pose.p());
+				float sway = Mth.sin(pose.time() * 0.07F) * 0.05F;
+				set(h.rightLeg, -0.9F, 0.0F, 0.2F, e2);
+				set(h.leftLeg, -0.9F, 0.0F, -0.2F, e2);
+				set(h.rightArm, 0.1F, 0.0F, 1.25F + sway, e2);
+				set(h.leftArm, 0.1F, 0.0F, -1.25F - sway, e2);
 			}
 			case WebPose.GLIDE_KICK -> {
 				float kick = hold(pose.p(), 0.2F, 0.6F);
