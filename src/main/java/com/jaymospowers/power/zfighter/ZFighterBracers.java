@@ -93,7 +93,7 @@ public final class ZFighterBracers {
 		Bar bar = BARS.computeIfAbsent(player.getUUID(), id -> new Bar());
 		bar.soaked = Math.min(SOAK_CAP, bar.soaked + amount);
 		int filled = Mth.clamp(Math.round(bar.soaked / SOAK_CAP * 10.0F), 0, 10);
-		player.sendOverlayMessage(Component.literal("[" + "|".repeat(filled) + ".".repeat(10 - filled) + "]").withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.literal("[" + "=".repeat(filled) + "-".repeat(10 - filled) + "]").withStyle(ChatFormatting.GOLD));
 	}
 
 	/** The guard came down: what it soaked pays out as a boost. */
