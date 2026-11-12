@@ -22,6 +22,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +50,9 @@ public final class BoxingClient {
 	static final int VIGNETTE_BANDS = 10;
 	/** The blur fades out over its last ticks. */
 	static final float FADE_TICKS = 10.0F;
+
+	/** The style and level line: its colour, and its gap from the screen's corner (pixels). */
+	static final int STYLE_COLOR = 0xFFE8E2D0, STYLE_MARGIN = 4;
 
 	private static final String FILE = "jaymospowers-boxing.properties";
 	private static final String VIGNETTE = "vignette";
@@ -78,6 +82,7 @@ public final class BoxingClient {
 			}
 		});
 		HudElementRegistry.addFirst(JaymosPowers.id("boxing_blur"), BoxingClient::draw);
+		HudElementRegistry.addLast(JaymosPowers.id("boxing_style"), BoxingClient::drawStyle);
 	}
 
 	/**
@@ -110,6 +115,23 @@ public final class BoxingClient {
 		player.setSprinting(false);
 		ClientPlayNetworking.send(new BoxingEvades.Evade(direction));
 		return true;
+	}
+
+	/** While boxing: the style and its level, small, in the bottom right corner. */
+	private static void drawStyle(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (player == null || !Boxing.boxing(player)) {
+			return;
+		}
+		Boxing.Style style = Boxing.style(player);
+		if (style == null) {
+			return;
+		}
+		Component text = Component.translatable("boxing.jaymospowers.hud", Component.translatable("boxing.jaymospowers.style." + style.id),
+			Boxing.level(player, style));
+		graphics.text(minecraft.font, text, graphics.guiWidth() - minecraft.font.width(text) - STYLE_MARGIN,
+			graphics.guiHeight() - minecraft.font.lineHeight - STYLE_MARGIN, STYLE_COLOR, true);
 	}
 
 	/** The blur: a haze over the world, or the vignette. */
