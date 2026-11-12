@@ -411,9 +411,12 @@ public final class Breaks {
 		return !stack.isEmpty() && (stack.is(Items.SHIELD) || stack.has(DataComponents.BLOCKS_ATTACKS) || stack.getItem() instanceof ProjectileWeaponItem);
 	}
 
-	/** A person whose two legs are both broken (not severed): crawling is all that's left, (0.20.110) unless on {@link Adrenaline}. */
+	/**
+	 * A person whose two legs are both broken (not severed): crawling is all that's left, (0.20.110) unless on
+	 * {@link Adrenaline}. Or a player with a leg gone and nothing to stand on in its place ({@link Crutches#legless}).
+	 */
 	public static boolean crawlOnly(Entity entity) {
-		return bothLegsBroken(entity) && !Adrenaline.active(entity);
+		return bothLegsBroken(entity) && !Adrenaline.active(entity) || Crutches.legless(entity);
 	}
 
 	/** (0.20.110) Two broken legs (not severed, not both splinted), adrenaline or not: what {@link #crawlOnly} holds to the ground. */
