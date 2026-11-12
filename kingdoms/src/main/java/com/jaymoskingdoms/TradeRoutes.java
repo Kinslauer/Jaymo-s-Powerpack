@@ -373,7 +373,7 @@ final class TradeRoutes {
 				l = Caravans.ledger(server);
 				continue;
 			}
-			if (now < due || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())) {
+			if (now < due || l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && !c.smuggle())) {
 				continue;
 			}
 			start(level, f, false);
@@ -780,7 +780,7 @@ final class TradeRoutes {
 			l = Caravans.ledger(server);
 			int id = l.nextId();
 			Caravans.Caravan c = new Caravans.Caravan(id, camp.id(), camp.id(), false, site.at(), List.of(cart), 0, false, now,
-				now + Caravans.STOP_TICKS / 2, HAND, false, site.id());
+				now + Caravans.STOP_TICKS / 2, HAND, false, site.id(), false);
 			Map<String, Caravans.Caravan> all = new HashMap<>(l.caravans());
 			all.put(Integer.toString(id), c);
 			Map<String, Long> next = new HashMap<>(l.next());
@@ -902,6 +902,10 @@ final class TradeRoutes {
 		Faction f = Factions.get(server, wagon.faction());
 		if (c == null || f == null || wagon.slot() >= c.carts().size()) {
 			return false;
+		}
+		if (c.smuggle()) {
+			// (a smuggler sells only what's under the sacks, and only to someone the den knows)
+			return Smuggling.deal(level, wagon, player, c, f);
 		}
 		if (f.type() == FactionType.BARBARIAN && Hordes.greenskin(server, f.id())) {
 			// (they count in bent copper, and do not sell to a stranger)
