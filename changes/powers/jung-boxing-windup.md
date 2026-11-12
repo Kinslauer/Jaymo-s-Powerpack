@@ -11,3 +11,4 @@
   lifts the arm out wide as the body coils back; an uppercut drops the fist and dips. The pose starts on the click
   and is at full reach as the blow lands. First person draws the punching arm back the same way.
 - Not built locally; not played. The timing is worth a feel test: it changes how boxing fights.
+- A boxer knocked down or killed during the windup throws nothing.

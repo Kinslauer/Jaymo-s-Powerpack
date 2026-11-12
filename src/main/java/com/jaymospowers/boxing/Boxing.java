@@ -497,7 +497,8 @@ public final class Boxing {
 				// the windup is over: the blow lands (a boxer who put the gear away meanwhile throws nothing)
 				int id = state.winding;
 				state.winding = -1;
-				if (boxing && player.level().getEntity(id) instanceof LivingEntity target) {
+				// (nor does one knocked down or killed while it wound up)
+				if (boxing && player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player) && player.level().getEntity(id) instanceof LivingEntity target) {
 					land(player, target, state);
 				}
 			}
