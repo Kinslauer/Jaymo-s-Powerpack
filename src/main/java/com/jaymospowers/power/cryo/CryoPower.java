@@ -80,6 +80,7 @@ public final class CryoPower implements Power {
 		CryoIce.init();
 		CryoShards.init();
 		CryoFlashFreeze.init();
+		CryoPicks.init();
 		// (0.17.3) what a gifted villager does with Cryokinesis
 		CryoGift.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
@@ -99,6 +100,7 @@ public final class CryoPower implements Power {
 		CryoBreath.stop(player, false);
 		CryoBlizzard.end(player, false);
 		CryoMoves.forget(player);
+		CryoPicks.end(player);
 	}
 
 	@Override
@@ -203,19 +205,29 @@ public final class CryoPower implements Power {
 				}
 			}
 			case ABILITY_2 -> {
-				if (down) {
+				// sneak + G: the cold gaze instead of the breath
+				if (down && player.isShiftKeyDown()) {
+					CryoPicks.eyes(player, true);
+				} else if (down) {
 					CryoBreath.start(player);
 				} else {
+					CryoPicks.eyes(player, false);
 					CryoBreath.stop(player, true);
 				}
 			}
 			case ABILITY_3 -> {
-				if (down && ready(player, CryoState.SHARDS)) {
+				// sneak + V: a volley of bleeding icicles instead of the shards
+				if (down && player.isShiftKeyDown()) {
+					CryoPicks.volley(player);
+				} else if (down && ready(player, CryoState.SHARDS)) {
 					CryoShards.fire(player);
 				}
 			}
 			case ABILITY_4 -> {
-				if (down && ready(player, CryoState.FREEZE)) {
+				// sneak + B: a ball of ice that roots, instead of Flash Freeze
+				if (down && player.isShiftKeyDown()) {
+					CryoPicks.ball(player);
+				} else if (down && ready(player, CryoState.FREEZE)) {
 					CryoFlashFreeze.cast(player);
 				}
 			}
