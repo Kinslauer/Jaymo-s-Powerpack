@@ -50,5 +50,17 @@
   "message.jaymoskingdoms.smog.driven_out": "%s has driven you out for the corruption on you. Stay away for %s minutes.",
   "message.jaymoskingdoms.giant.slipped": "You slide out of %s's fist!",
   "menu.jaymoskingdoms.tab.class": "Class",
-  "zfighter.jaymoskingdoms.part.escort_ward": "In your charge"
+  "zfighter.jaymoskingdoms.part.escort_ward": "In your charge",
+  "dialogue.main.jaymoskingdoms_errands": "Town business",
+  "talk.jaymoskingdoms.errands.ask": "What can I do for you?",
+  "talk.jaymoskingdoms.errands.festival": "Call a festival",
+  "talk.jaymoskingdoms.errands.war": "March with our war party",
+  "talk.jaymoskingdoms.errands.plot_mark": "Mark a plot here",
+  "talk.jaymoskingdoms.errands.plot_build": "Choose what goes up on my plot",
+  "talk.jaymoskingdoms.errands.plot_clear": "Give up my plot",
+  "talk.jaymoskingdoms.errands.courier": "Have what I'm holding carried to someone",
+  "talk.jaymoskingdoms.errands.leave": "Never mind",
+  "talk.jaymoskingdoms.errands.build_ask": "What should go up there?",
+  "talk.jaymoskingdoms.errands.courier_ask": "Who should %s go to?",
+  "talk.jaymoskingdoms.errands.courier_none": "There's nobody about to carry %s to."
 }

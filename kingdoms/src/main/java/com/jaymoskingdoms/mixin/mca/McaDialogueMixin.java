@@ -354,6 +354,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.TalkErrands.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) festivals, war parties, plots and couriers, on a talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.TalkErrands.open(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Mourning.ANSWER.equals(answer)) {
 			// (Andy, 2026-11-12) a companion they buried, brought up
 			villager.sendChatMessage(com.jaymoskingdoms.Mourning.tale(player, villager), player);
