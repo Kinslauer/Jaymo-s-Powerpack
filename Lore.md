@@ -1377,4 +1377,5 @@ breath of the deep fires: it crusts yellow where lava runs near, round the hot s
 the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that dry ground sweats: the deserts, the
 badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
 powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
-measures where the bone heap made one.
+measures where the bone heap made one. Farmsteads that keep stock grow it too, the slow way: a nitre bed of earth,
+straw and dung under the barn roof, turned through the seasons and scraped when it whitens.
