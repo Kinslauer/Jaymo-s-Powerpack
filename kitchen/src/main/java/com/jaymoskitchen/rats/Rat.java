@@ -312,7 +312,7 @@ public class Rat extends PathfinderMob {
 			}
 			setAction(NIBBLING);
 			if (atTicks % 10 == 0) {
-				playSound(SoundEvents.GENERIC_EAT.value(), 0.4F, 1.6F + random.nextFloat() * 0.3F);
+				com.jaymoskitchen.sound.KitchenSounds.chew(Rat.this, 0.4F, 1.75F);
 				ItemStack shown = target.peek(level);
 				if (!shown.isEmpty()) {
 					Vec3 mouth = position().add(getLookAngle().scale(0.3)).add(0, 0.3, 0);

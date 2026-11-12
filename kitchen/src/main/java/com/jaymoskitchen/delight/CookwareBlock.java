@@ -99,7 +99,7 @@ public class CookwareBlock extends HorizontalDirectionalBlock {
 				level.addParticle(ParticleTypes.CLOUD, x, y + 0.1, z, 0, 0.03, 0);
 			}
 			if (random.nextInt(10) == 0) {
-				level.playLocalSound(pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.5F, 1.0F, false);
+				com.jaymoskitchen.sound.KitchenSounds.cookwareLocal(level, pos, true);
 			}
 		} else {
 			double y = pos.getY() + 0.3;
@@ -107,7 +107,7 @@ public class CookwareBlock extends HorizontalDirectionalBlock {
 				level.addParticle(ParticleTypes.SMOKE, x + (random.nextDouble() - 0.5) * 0.5, y, z + (random.nextDouble() - 0.5) * 0.5, 0, 0.02, 0);
 			}
 			if (random.nextInt(10) == 0) {
-				level.playLocalSound(pos, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.6F, 1.2F, false);
+				com.jaymoskitchen.sound.KitchenSounds.cookwareLocal(level, pos, false);
 			}
 		}
 	}

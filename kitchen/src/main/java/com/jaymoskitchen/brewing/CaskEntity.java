@@ -229,8 +229,8 @@ public class CaskEntity extends BlockEntity {
 			cask.progress++;
 			if (server.getGameTime() % 80L == 0L) {
 				server.sendParticles(ParticleTypes.BUBBLE_POP, pos.getX() + 0.5, pos.getY() + 0.9, pos.getZ() + 0.5, 2, 0.2, 0.03, 0.2, 0.01);
-				server.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.3F, 0.8F);
 			}
+			com.jaymoskitchen.sound.KitchenSounds.cask(server, pos);
 			if (cask.progress >= FERMENT_TICKS) {
 				cask.finish();
 			} else if (cask.progress % 200 == 0) {

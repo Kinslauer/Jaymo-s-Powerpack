@@ -585,8 +585,7 @@ public final class Ship extends Entity {
 		if (row != 0 && pilot != null) {
 			pilot.causeFoodExhaustion(ROW_TIRE);
 			if (this.tickCount % STROKE == 0) {
-				level.playSound(null, this.getX(), this.getY() + h.draft, this.getZ(), SoundEvents.BOAT_PADDLE_WATER, SoundSource.NEUTRAL, 1.0F,
-					0.8F + this.random.nextFloat() * 0.2F);
+				com.jaymoskingdoms.WorldSounds.oars(level, new Vec3(this.getX(), this.getY() + h.draft, this.getZ()), this.speed);
 			}
 		}
 		// (0.7.18) a Wind user's gale or a Smoke user's jet in her sails
@@ -669,8 +668,8 @@ public final class Ship extends Entity {
 			Vec3 bow = this.toWorld(0.0, h.draft, h.maxZ + 0.5);
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SPLASH, bow.x, bow.y, bow.z, 6, 0.6, 0.1, 0.6, 0.1);
 		}
-		if (this.tickCount % 90 == 0 && this.speed > 0.05) {
-			level.playSound(null, this.getX(), this.getY() + h.draft, this.getZ(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.6F, 0.5F);
+		if (this.speed > 0.05) {
+			com.jaymoskingdoms.WorldSounds.hull(level, this, new Vec3(this.getX(), this.getY() + h.draft, this.getZ()), this.speed, this.sail > 0.0);
 		}
 		if (pilot != null && this.tickCount % 10 == 0) {
 			pilot.sendOverlayMessage(this.readout(level, h, row, sails || flying ? top : oars ? rowTop : PADDLE));
@@ -1732,9 +1731,7 @@ public final class Ship extends Entity {
 			Vec3 at = this.toWorld((this.random.nextFloat() - 0.5) * (h.maxX - h.minX), h.draft, (this.random.nextFloat() - 0.5) * (h.maxZ - h.minZ));
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, at.x, at.y, at.z, 6, 0.4, 0.2, 0.4, 0.05);
 		}
-		if (this.sinking % 40 == 0) {
-			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 1.0F, 0.4F);
-		}
+		com.jaymoskingdoms.WorldSounds.sinking(level, this);
 	}
 
 	/** She's laid on the bottom where she sank, block for block where there's room, her holds full of what they held. */

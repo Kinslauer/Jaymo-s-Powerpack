@@ -370,9 +370,7 @@ public class AeolusDragon extends WindDragon {
 		setFlying(true);
 		this.getNavigation().stop();
 		this.setDeltaMovement(this.getDeltaMovement().lerp(new Vec3(0.0, 0.9, 0.0), 0.1));
-		if (this.leaving % 20 == 0) {
-			level.playSound(null, this.blockPosition(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.HOSTILE, 6.0F, 0.6F);
-		}
+		com.jaymoskingdoms.WorldSounds.wingbeat(level, this, "leaving", 16, 24, SoundSource.HOSTILE, SoundEvents.ENDER_DRAGON_FLAP, 6.0F, 0.6F);
 		level.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), 6, 3.0, 1.0, 3.0, 0.05);
 		if (--this.leaving <= 0) {
 			level.sendParticles(ParticleTypes.POOF, this.getX(), this.getY() + 2.0, this.getZ(), 80, 3.0, 2.0, 3.0, 0.1);

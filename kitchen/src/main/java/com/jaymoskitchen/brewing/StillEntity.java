@@ -139,8 +139,8 @@ public class StillEntity extends BlockEntity {
 			}
 			if (now % 40L == 0L) {
 				server.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 1, 0.1, 0.05, 0.1, 0.01);
-				server.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.3F, 1.6F);
 			}
+			com.jaymoskitchen.sound.KitchenSounds.still(server, pos);
 			if (still.progress >= DISTIL_TICKS) {
 				still.pot.clear();
 				still.progress = 0;
