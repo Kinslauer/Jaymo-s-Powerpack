@@ -87,3 +87,11 @@ itself posts one last shutdown notice in Tenbuki > lair, because the running gat
 - `dashboard.public_url` was commented out at 5:05 AM (after Claude wrongly reported the crash as permanent), then
   put back at Andy's word.
 - Hephaestus is on the stop list (Andy, Nov 12: "Yes, stop it").
+
+## Dropped Discord messages (checked Nov 12, verified by independent agents)
+
+- **missed.py** was a one-off scan in an old Claude scratchpad, never scheduled. A oneshot YOUTH session on Nov 9 (4:35-4:48 PM) caught up what it found. The "~120" was connection drops, not messages. About 20-29 messages were really lost on Nov 8-9 (missed.py over-counted: it missed `msg="..."` log lines, stripped @mentions and attachments).
+- **Why:** Hermes force-reconnects Discord when the event loop stalls (70 forced reconnects and 6 watchdog exits on Nov 8-9). A forced reconnect starts a new Discord session, so anything sent in the gap is lost. The stalls look local (disk/GIL), not Discord's fault.
+- **Since Nov 11 8 PM:** nothing lost. All 4 of Andy's messages to YOUTH were answered (DMs can't be checked by bot API).
+- **Fix:** `discord.missed_message_backfill` turned on in config.yaml, scoped to the parthenon forum and its threads only, 2-hour window, at most 5 replies per reconnect. Live after the next gateway restart.
+- **Left from Nov 9, never answered:** (1) the server roles/channels cleanup question ("who is him?") in Patch Notes; (2) "yes fix that" in DMs (fix step 6 of the modpack-cross-reference skill, which said to bump versions every release). (2) is now done: the line says PRs add change notes and never touch `version=` (backup `backups/modpack-cross-reference.SKILL.md.2026-11-12.bak`).
