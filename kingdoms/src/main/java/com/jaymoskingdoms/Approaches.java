@@ -1162,6 +1162,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (com.jaymoskingdoms.thirst.Thirst.answer(player, answer)) {
+			// the thirst: the shape menu and the blood witch's rite
+			return;
+		}
 		if (Talks.answer(player, answer)) {
 			// (0.7.523) a talk that matters: their answer to your reply
 			return;

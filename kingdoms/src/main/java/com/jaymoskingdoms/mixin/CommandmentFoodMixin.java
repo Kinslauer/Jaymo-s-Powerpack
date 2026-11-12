@@ -19,6 +19,7 @@ abstract class CommandmentFoodMixin {
 		if (!level.isClientSide()) {
 			Commandments.ate(eater, stack);
 			com.jaymoskingdoms.hunger.HungerCurse.ateStart(eater, stack);
+			com.jaymoskingdoms.thirst.Thirst.ateStart(eater);
 		}
 	}
 
@@ -27,6 +28,7 @@ abstract class CommandmentFoodMixin {
 	private void jaymoskingdoms$poorFeeding(Level level, LivingEntity eater, ItemStack stack, Consumable consumable, CallbackInfo ci) {
 		if (!level.isClientSide()) {
 			com.jaymoskingdoms.hunger.HungerCurse.ateDone(eater);
+			com.jaymoskingdoms.thirst.Thirst.ateDone(eater);
 		}
 	}
 }

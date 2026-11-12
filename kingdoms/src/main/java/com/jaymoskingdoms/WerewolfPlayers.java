@@ -267,7 +267,7 @@ public final class WerewolfPlayers {
 		boolean full = Lycans.fullMoon(level, clock);
 		Lycans.Curse had = player.getAttached(Lycans.CURSE);
 		if (level != level.getServer().overworld() || !Vampires.night(clock) || !level.canSeeSky(player.blockPosition().above())
-			|| had != null && (!had.half() || !full) || Vampires.isVampire(player)) {
+			|| had != null && (!had.half() || !full) || Vampires.isVampire(player) || com.jaymoskingdoms.thirst.Thirst.thirsty(player)) {
 			return false;
 		}
 		int fires = 0;

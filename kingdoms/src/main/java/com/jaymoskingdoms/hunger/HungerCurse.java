@@ -201,7 +201,7 @@ public final class HungerCurse {
 
 	/** The curse comes on {@code player} (the Gaunt's bite, its heart, rotten flesh in the snow). */
 	public static void curse(ServerPlayer player) {
-		if (cursed(player) || player.isCreative() || player.isSpectator()) {
+		if (cursed(player) || player.isCreative() || player.isSpectator() || com.jaymoskingdoms.thirst.Thirst.thirsty(player)) {
 			return;
 		}
 		player.setAttached(CURSED, true);

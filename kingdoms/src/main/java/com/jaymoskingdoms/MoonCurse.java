@@ -110,7 +110,7 @@ public final class MoonCurse {
 
 	/** The life story's entry: {@code player} carries the moon's curse from now on. */
 	public static void curse(ServerPlayer player) {
-		if (cursed(player)) {
+		if (cursed(player) || com.jaymoskingdoms.thirst.Thirst.thirsty(player)) {
 			return;
 		}
 		player.setAttached(CURSED, true);

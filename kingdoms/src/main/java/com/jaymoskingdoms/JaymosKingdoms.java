@@ -272,6 +272,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.85: a disarmed guard draws a sidearm or goes for a weapon on the ground
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
+		// the thirst (before the pickpocket: a hungry drinker's hand goes to the throat, not the pocket)
+		com.jaymoskingdoms.thirst.Thirst.register();
 		Pickpocket.register();
 		RogueGambits.register();
 		ChestNoise.register();
