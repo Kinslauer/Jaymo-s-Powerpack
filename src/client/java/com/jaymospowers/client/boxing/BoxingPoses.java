@@ -62,7 +62,7 @@ public final class BoxingPoses {
 	/** The Long Guard's lead shoulder turned a little forward and its upright, slightly backward lean (radians). */
 	static final float LONG_BLADE = 0.25F, LONG_LEAN = -0.06F;
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
-	static final float BASTION_LEAD_PITCH = -0.7F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 1.45F, BASTION_REAR_PITCH = -0.9F, BASTION_REAR_IN = 0.6F, BASTION_REAR_FOLD = -2.1F;
+	static final float BASTION_LEAD_PITCH = -0.5F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 1.05F, BASTION_REAR_PITCH = -0.9F, BASTION_REAR_IN = 0.6F, BASTION_REAR_FOLD = -2.1F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
 	static final float BASTION_BLADE = 0.45F, BASTION_SHOULDER = 1.0F, BASTION_LEAN = -0.08F, BASTION_HEAD_TILT = 0.12F, BASTION_CHIN = 0.1F;
 	/** Its slow rock of the weight, back and forth (radians, radians a tick), and how much further side on its block stands. */
@@ -70,7 +70,7 @@ public final class BoxingPoses {
 	/** The shrug: every this many ticks, this long, this high (pixels). */
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
-	static final float BASTION_BLOCK_LEAD_PITCH = -0.95F, BASTION_BLOCK_UP = 1.6F, BASTION_BLOCK_ACROSS = 1.5F, BASTION_BLOCK_REAR_PITCH = -1.0F, BASTION_BLOCK_REAR_IN = 0.7F, BASTION_BLOCK_REAR_FOLD = -2.2F;
+	static final float BASTION_BLOCK_LEAD_PITCH = -0.8F, BASTION_BLOCK_UP = 1.6F, BASTION_BLOCK_ACROSS = 1.25F, BASTION_BLOCK_REAR_PITCH = -1.0F, BASTION_BLOCK_REAR_IN = 0.7F, BASTION_BLOCK_REAR_FOLD = -2.2F;
 	/** A straight punch at full reach (the elbow straightens as it goes out). */
 	static final float STRAIGHT_PITCH = -1.57F;
 	/** A hook: the upper arm level, swept from out to in, the forearm folded across at the elbow. */
