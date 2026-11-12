@@ -1,140 +1,156 @@
 {
-  "variants": {
-    "sticks=1,waterlogged=false": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1"
+  "multipart": [
+    {
+      "when": {
+        "sticks": "1"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 90
+      "apply": [
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_1"
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_1",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_1",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_1",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "sticks": "2"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 180
+      "apply": [
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_2"
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_2",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_2",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_2",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "sticks": "3"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 270
+      "apply": [
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_3"
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_3",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_3",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_3",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "sticks": "4"
+      },
+      "apply": [
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_4"
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_4",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_4",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/ground/loose_sticks_4",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "stones": "1|2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_1"
       }
-    ],
-    "sticks=1,waterlogged=true": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1"
+    },
+    {
+      "when": {
+        "stones": "2|3|4|5|6|7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_1",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_2"
       }
-    ],
-    "sticks=2,waterlogged=false": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2"
+    },
+    {
+      "when": {
+        "stones": "3|4|5|6|7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_3"
       }
-    ],
-    "sticks=2,waterlogged=true": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2"
+    },
+    {
+      "when": {
+        "stones": "4|5|6|7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_2",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_4"
       }
-    ],
-    "sticks=3,waterlogged=false": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3"
+    },
+    {
+      "when": {
+        "stones": "5|6|7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_5"
       }
-    ],
-    "sticks=3,waterlogged=true": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3"
+    },
+    {
+      "when": {
+        "stones": "6|7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_3",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_6"
       }
-    ],
-    "sticks=4,waterlogged=false": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4"
+    },
+    {
+      "when": {
+        "stones": "7|8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_7"
       }
-    ],
-    "sticks=4,waterlogged=true": [
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4"
+    },
+    {
+      "when": {
+        "stones": "8"
       },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 90
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 180
-      },
-      {
-        "model": "jaymospowers:block/ground/loose_sticks_4",
-        "y": 270
+      "apply": {
+        "model": "jaymospowers:block/ground/pit_stone_8"
       }
-    ]
-  }
+    }
+  ]
 }

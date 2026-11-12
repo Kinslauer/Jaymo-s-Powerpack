@@ -3442,3 +3442,30 @@ Compiled only; nothing was played in a client. Least sure: the sweep's back-fall
 Classes: `baubles/TickingCharm`, `core/OneHolder`, hooks in `compat/KingdomsCompat`, `Afflictions`, `Powers`, `PowerCommand`.
 
 Compiled only; not played.
+
+## 0.22.75 (2026-11-12): ground sticks look like sticks; firepits and bonfires
+
+- **Loose sticks on the ground** were the rock pile's chunky boxes wearing a mostly see-through texture, and the block draws solid, so they showed as dark slabs. Each stick is now a thin rod (about 1 pixel thick, 6-11 long) lying at its own angle, with lengthwise bark, pale end grain and a side twig on two of them; a 2-4 pile crosses them over each other. Piles no longer shift off the block centre. The outline box hugs the sticks. The creative-tab Loose Sticks item has a model now.
+- **Laying sticks**: right click the top of bare ground (soil, sand, gravel, stone) with a stick to start a pile, or sneak + right click to lay one on anything; right click a pile with a stick to add one (other items pick one up).
+- **Firepit** (TFC style, one block): right click a stick pile with rocks to set a ring of stones round it, one rock a click; 4 sticks in a full ring of 8 rocks becomes a Firepit: stones in a circle, ash, a stick teepee, the fire inside. A campfire underneath (campfires tag, vanilla campfire block entity): flint and steel, a flint-and-rock strike or a fire charge lights it, it cooks four foods, smokes, burns, a shovel or water puts it out, Kitchen's spit goes on top, sitting by fires counts it. It burns fuel: a stick 22.5 s, a plank 45 s, a log about 1 min 52 s (TFC's times), up to 15 sticks' worth; right click to feed it. Out of fuel it dies to ash and won't take a light until fed; rain puts it out. Empty-hand right click takes a ring stone back off a pile.
+- **Grate**: right click a firepit with iron bars, or sneak + right click with 4 sticks, to lay a grate over it; Kitchen's cooking pot and frying pan go over a lit firepit only on a grate (firepit added to `jaymoskitchen:heat_sources`). Sneak + empty hand takes the grate off (a pan on it pops off). A stick grate chars through in time (10% per stick of fuel burnt).
+- **Bonfire**: nine unlit firepits in a 3x3 merge into one Bonfire: a big ring of boulders round the 3x3, ash, a log teepee and a two-block fire. It starts with the pits' fuel, burns it 9x as fast, gives full light, and burns harder; uses on any part go to the centre; breaking any part breaks it all (each part gives back its 8 rocks).
+- Breaking a firepit gives back its 8 rocks (as plain stone rocks), up to 4 unburnt sticks and its grate. `ground/FirepitBlock`, `BonfireBlock`, `BonfireEdgeBlock`; assets from `tools/gen_loose_sticks.py`. Built; not played.
+
+## 0.22.76 (2026-11-12): collisions - wall slams, wall bumps, head bumps, sore knuckles, horse crashes
+
+- Andy's BONK! picks (ideas only; BONK! is All Rights Reserved). New `core/collide/Collisions` (+ `CollideMoveMixin` on `Entity.move`, `client/collide/CollisionsClient`).
+- **Wall slams**: anyone knocked back or blown into a wall at speed is hurt by how hard they hit it (from 0.55 blocks/tick: 1 damage, about 5.5 at 1 block/tick, up to 20), with a thud, the wall's dust and a second of Slowness II. A slam of 6 damage or more knocks a player limp (Kitchen ragdoll). Mobs are judged on the server, players on their own client.
+- **Running into walls**: a flat-out sprint straight into a wall at body height (not a step, not a glancing brush) bumps you, at most half a heart, with a jolt. Freerun moves, ledge grabs, wall slides, crouching, swimming, ladders and riding never count.
+- **Head bumps**: jumping into a ceiling knocks your head (a quarter heart on a plain jump, more the faster you go up). Andy: "hitting hard enough can ragdoll you": 0.7 blocks/tick or faster (a boosted jump, a launch) knocks you limp.
+- **Sore knuckles**: an empty fist that punches or starts to dig a block that needs a tool (stone, ore, metal) bruises that arm by half a point, once per punch; so does punching anyone with 8+ armour, a Stoneborn, or a `jaymospowers:tough_hide` mob (golems, ravagers, armadillos, turtles, shulkers, wardens, guardians, hoglins, sniffers, skeletons, withers, the dragon). Fist gear spares you, and so does being Stoneborn. Logs still splinter (Splinters).
+- **Riders thrown**: a galloping horse (0.4 blocks/tick into a wall) throws its rider forward limp; both are hurt. `jaymospowers:crash_proof`, no-gravity mounts and anything called a dragon never crash.
+- Built; not played.
+
+## 0.22.77 (2026-11-12): wound marks - hits leave a mark of what made them, fresh cuts drip
+
+- Andy's Cruor picks (ideas only; Cruor is All Rights Reserved). New `core/wounds/WoundMarks` (synced attachment, fed from `Wounds` after each routed hit) and `client/wounds/WoundMarksLayer`.
+- **Wound marks by weapon**: a hit of half a heart or more leaves a mark on the part it was routed to, on the side it came from: a blade a cut (dark line, raw edges), claws and teeth three raking cuts, arrows, bolts, cactus and berry bushes a puncture with a short run of blood under it, fists, blunt weapons, falls and wall slams a bruise that yellows as it heals, a blast specks and soot over up to three parts. Up to 10 marks a body. On humanoid skins (players, MCA folk, zombies) each lies on its own part and side; on other creatures somewhere on the skin. Bloodless bodies (skeletons, Stoneborn) get none.
+- Marks fade in four steps over their life (bruises 6 minutes, the rest 8 to 10) and go as soon as the part has mended whole. Painted into the skin as a cutout picture of just the mark pixels, so the blood coat still shows round them. Not kept over a restart (as blood coats aren't).
+- **Fresh wounds drip**: a fresh cut, claw or puncture that isn't already bleeding properly (Bleeding) drips a few drops onto the ground for 30 seconds, about every 1.5 s at first and every 7 s by the end, leaving lasting stains (BloodTrail).
+- Not yet on corpses. Built; not played.

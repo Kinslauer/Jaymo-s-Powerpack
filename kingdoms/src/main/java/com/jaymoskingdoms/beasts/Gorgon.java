@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.beasts;
 
+import com.jaymoskingdoms.MobAmmo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -86,7 +87,9 @@ public class Gorgon extends ActingMonster implements RangedAttackMob {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(2, new RangedBowAttackGoal<>(this, 1.0, SHOT_INTERVAL, SHOT_RANGE));
+		// (MobAmmo) shoots while its quiver lasts, then closes in
+		this.goalSelector.addGoal(2, MobAmmo.bowGoal(this, 1.0, SHOT_INTERVAL, SHOT_RANGE));
+		this.goalSelector.addGoal(3, MobAmmo.meleeWhenDry(this));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -106,7 +109,7 @@ public class Gorgon extends ActingMonster implements RangedAttackMob {
 			}
 			return;
 		}
-		if (--this.rainCooldown <= 0 && target != null && target.isAlive() && this.hasLineOfSight(target) && this.distanceTo(target) < SHOT_RANGE) {
+		if (--this.rainCooldown <= 0 && target != null && MobAmmo.has(this, MobAmmo.Kind.ARROWS) && target.isAlive() && this.hasLineOfSight(target) && this.distanceTo(target) < SHOT_RANGE) {
 			this.rainCooldown = RAIN_COOLDOWN;
 			this.stopUsingItem();
 			this.act("rain_shot", RAIN_TICKS);
@@ -116,13 +119,14 @@ public class Gorgon extends ActingMonster implements RangedAttackMob {
 
 	/** A volley loosed into the sky comes down round its foe. */
 	private void rain(ServerLevel level, LivingEntity target) {
-		for (int i = 0; i < RAIN_ARROWS; i++) {
+		// (MobAmmo) the volley comes out of her quiver: as many as she has left, up to RAIN_ARROWS
+		for (int i = 0; i < RAIN_ARROWS && MobAmmo.spend(this, MobAmmo.Kind.ARROWS); i++) {
 			double angle = this.random.nextDouble() * Math.PI * 2.0;
 			double r = Math.sqrt(this.random.nextDouble()) * RAIN_RADIUS;
 			Arrow arrow = new Arrow(level, target.getX() + Math.cos(angle) * r, target.getY() + 12.0 + this.random.nextDouble() * 4.0,
 				target.getZ() + Math.sin(angle) * r, new ItemStack(Items.ARROW), null);
 			arrow.setOwner(this);
-			arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+			arrow.pickup = AbstractArrow.Pickup.ALLOWED;
 			arrow.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STONE_TICKS, STONE_AMP));
 			arrow.setDeltaMovement(0.0, -1.2, 0.0);
 			level.addFreshEntity(arrow);
@@ -133,12 +137,13 @@ public class Gorgon extends ActingMonster implements RangedAttackMob {
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power) {
-		if (this.acting()) {
+		if (this.acting() || !MobAmmo.spend(this, MobAmmo.Kind.ARROWS)) {
 			return;
 		}
 		ItemStack bow = this.getItemInHand(InteractionHand.MAIN_HAND);
 		ItemStack arrowStack = new ItemStack(Items.ARROW);
 		AbstractArrow arrow = ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
+		MobAmmo.canBePickedUp(arrow);
 		if (arrow instanceof Arrow plain) {
 			plain.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STONE_TICKS, STONE_AMP));
 		}

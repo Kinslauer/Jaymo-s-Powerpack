@@ -1,0 +1,742 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "0"
+                }
+              },
+              "count": 0
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "1"
+                }
+              },
+              "count": 1
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "2"
+                }
+              },
+              "count": 2
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "3"
+                }
+              },
+              "count": 3
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "4"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "5"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "6"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "7"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "8"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "9"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "10"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "11"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "12"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "13"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "14"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "15"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "16"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "17"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "18"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "19"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "20"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "21"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "22"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "23"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "24"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "25"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "26"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "27"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "28"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "29"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "30"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "31"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "32"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "33"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "34"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "35"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "36"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "37"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "38"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "39"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "40"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "41"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "42"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "43"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "44"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "45"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "46"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "47"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "48"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "49"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "50"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "51"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "52"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "53"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "54"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "55"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "56"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "57"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "58"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "59"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "60"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "61"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "62"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:bonfire",
+                "state": {
+                  "fuel": "63"
+                }
+              },
+              "count": 4
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:stone_rock",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 8
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/bonfire"
+}
