@@ -680,6 +680,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Heavens.register();
 		SkyFolk.register();
 		SkyCourt.register();
+		SkyUsurpers.register();
 		SkyFerries.register();
 		SkyTrades.register();
 		Starfall.register();

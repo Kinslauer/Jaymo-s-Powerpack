@@ -34,7 +34,8 @@ import net.minecraft.world.phys.AABB;
  * has them fight what comes over the wall, and anyone who strikes the castle's people.</li>
  * </ul>
  * The court is nobody's kingdom: it holds no land, pays and takes no tribute and goes to no war. The realms below settle
- * their affairs on foot, and there is no road up.
+ * their affairs on foot, and there is no road up. But the seat can be taken by force: a power-hungry traveller now and then
+ * comes for it ({@link SkyUsurpers}).
  */
 public final class SkyCourt {
 	/** On the castle's lord, and on each of his wardens. */
@@ -130,6 +131,9 @@ public final class SkyCourt {
 		int wardens = 0;
 		List<Villager> free = new ArrayList<>();
 		for (Villager v : people) {
+			if (SkyUsurpers.party(v)) {
+				continue;
+			}
 			if (v.entityTags().contains(LORD_TAG)) {
 				lord = v;
 			} else if (v.entityTags().contains(WARDEN_TAG)) {
@@ -137,6 +141,11 @@ public final class SkyCourt {
 			} else {
 				free.add(v);
 			}
+		}
+		if (SkyUsurpers.underway(box)) {
+			// a usurper is at the gate: the seat isn't filled again until that is settled
+			SkyUsurpers.watch(level, box, lord, people);
+			return;
 		}
 		if (lord == null && !free.isEmpty()) {
 			// the one sat on the throne when it was built, else whoever keeps nearest the keep
@@ -156,5 +165,7 @@ public final class SkyCourt {
 			McaBridge.toGuard(warden);
 			wardens++;
 		}
+		// now and then a power-hungry traveller comes for the seat (SkyUsurpers)
+		SkyUsurpers.watch(level, box, lord, people);
 	}
 }
