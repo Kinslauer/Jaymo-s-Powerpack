@@ -1162,8 +1162,8 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
-		if (com.jaymoskingdoms.thirst.Thirst.answer(player, answer)) {
-			// the thirst: the shape menu and the blood witch's rite
+		if (com.jaymoskingdoms.nightforms.NightForms.answer(player, answer)) {
+			// a vampire's shape menu
 			return;
 		}
 		if (Talks.answer(player, answer)) {

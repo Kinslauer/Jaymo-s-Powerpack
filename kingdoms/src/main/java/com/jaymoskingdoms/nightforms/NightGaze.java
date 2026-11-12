@@ -1,4 +1,4 @@
-package com.jaymoskingdoms.thirst;
+package com.jaymoskingdoms.nightforms;
 
 import com.jaymoskingdoms.Folk;
 import com.jaymoskingdoms.Will;
@@ -25,12 +25,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The stare. Once a thirsty player has fixed their eyes (the shape menu, {@link ThirstForms}; it lasts {@link #ARM_TICKS}), holding
+ * The stare. Once a vampire player has fixed their eyes (the shape menu, {@link NightForms}; it lasts {@link #ARM_TICKS}), holding
  * the gaze on a weak-willed person ({@link Will#weaker}: a villager, a folk, an illager, a skeleton or a zombie weaker than them)
  * for {@link #NEEDED} ticks makes it walk to them, and it stands by them while the gaze holds. Each second of it costs a point of
  * the gauge. It ends when the gaze breaks, the gauge runs dry, or after {@link #HOLD_MAX} ticks.
  */
-public final class ThirstGaze {
+public final class NightGaze {
 	// ---- tuning ----
 	/** How long the fixed eyes last (ticks), how far they reach (blocks), how long the gaze must hold (ticks), and the longest one person is held (ticks). */
 	static final int ARM_TICKS = 600, NEEDED = 24, HOLD_MAX = 300;
@@ -55,11 +55,11 @@ public final class ThirstGaze {
 	private static final Map<UUID, Long> ARMED = new HashMap<>();
 	private static final Map<UUID, Fix> FIXES = new HashMap<>();
 
-	private ThirstGaze() {
+	private NightGaze() {
 	}
 
 	static void register() {
-		ServerTickEvents.END_SERVER_TICK.register(ThirstGaze::tick);
+		ServerTickEvents.END_SERVER_TICK.register(NightGaze::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ARMED.clear();
 			FIXES.clear();
@@ -69,7 +69,7 @@ public final class ThirstGaze {
 	/** {@code player} fixes their eyes. */
 	static void arm(ServerPlayer player) {
 		ARMED.put(player.getUUID(), player.level().getGameTime() + ARM_TICKS);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.drinker.stare").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightform.stare").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 	}
 
 	/** Whether {@code player} has their eyes fixed. */
@@ -100,8 +100,8 @@ public final class ThirstGaze {
 		}
 		for (Map.Entry<UUID, Long> e : new ArrayList<>(ARMED.entrySet())) {
 			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
-			if (p == null || !(p.level() instanceof ServerLevel level) || !p.isAlive() || level.getGameTime() > e.getValue() || Thirst.gauge(p) <= 0
-				|| !Thirst.thirsty(p) || !Thirst.form(p).isEmpty()) {
+			if (p == null || !(p.level() instanceof ServerLevel level) || !p.isAlive() || level.getGameTime() > e.getValue() || NightForms.blood(p) <= 0
+				|| !NightForms.vampire(p) || !NightForms.form(p).isEmpty()) {
 				disarm(e.getKey(), server);
 				continue;
 			}
@@ -145,8 +145,8 @@ public final class ThirstGaze {
 		}
 		mob.getLookControl().setLookAt(p, 30.0F, 30.0F);
 		if (fix.held % 20 == 0 || fix.held == NEEDED) {
-			Thirst.spend(p, COST);
-			level.sendParticles(com.jaymoskingdoms.Fx.mote(Thirst.BLOOD, 0.5F), mob.getX(), mob.getEyeY(), mob.getZ(), 3, 0.15, 0.1, 0.15, 0.0);
+			NightForms.spend(p, COST);
+			level.sendParticles(com.jaymoskingdoms.Fx.mote(NightForms.BLOOD, 0.5F), mob.getX(), mob.getEyeY(), mob.getZ(), 3, 0.15, 0.1, 0.15, 0.0);
 		}
 	}
 

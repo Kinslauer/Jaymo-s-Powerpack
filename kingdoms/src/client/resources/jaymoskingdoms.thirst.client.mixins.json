@@ -1,7 +1,0 @@
-{
-	"required": true,
-	"package": "com.jaymoskingdoms.client.mixin.thirst",
-	"compatibilityLevel": "JAVA_25",
-	"client": ["ThirstGlowMixin", "ThirstGlowColorMixin", "ThirstHidesPlayerMixin", "ThirstHidesHandMixin"],
-	"injectors": { "defaultRequire": 1 }
-}

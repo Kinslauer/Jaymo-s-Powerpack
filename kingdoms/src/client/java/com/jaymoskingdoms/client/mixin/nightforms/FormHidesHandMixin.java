@@ -1,6 +1,6 @@
-package com.jaymoskingdoms.client.mixin.thirst;
+package com.jaymoskingdoms.client.mixin.nightforms;
 
-import com.jaymoskingdoms.client.thirst.ThirstClient;
+import com.jaymoskingdoms.client.nightforms.NightFormsClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -14,11 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** No human arm in first person while you are a bat, a mist or a wolf. */
 @Mixin(AvatarRenderer.class)
-abstract class ThirstHidesHandMixin {
+abstract class FormHidesHandMixin {
 	@Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
-	private void jaymoskingdoms$thirstHidesHand(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, Identifier skinTexture, ModelPart arm,
+	private void jaymoskingdoms$formHidesHand(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, Identifier skinTexture, ModelPart arm,
 		boolean hasSleeve, CallbackInfo ci) {
-		if (ThirstClient.shaped(Minecraft.getInstance().player)) {
+		if (NightFormsClient.shaped(Minecraft.getInstance().player)) {
 			ci.cancel();
 		}
 	}

@@ -329,14 +329,6 @@ public final class Theft {
 
 	// ---- what counts --------------------------------------------------------------------------------------------
 
-	/** The thirsty player's bite on a villager or one of a realm's folk ({@code Thirst}): bloodletting, a heavy crime if its people see. */
-	public static void bloodletting(ServerPlayer player, ServerLevel level, BlockPos pos) {
-		Faction f = lawAt(level, pos);
-		if (f != null) {
-			commit(player, level, f, Crime.BLOODLETTING, pos, null, false);
-		}
-	}
-
 	/** Whose law holds at {@code pos} (null where none does, or in a camp). */
 	public static @Nullable Faction lawAt(ServerLevel level, BlockPos pos) {
 		Faction f = Factions.around(level.getServer(), level, pos, Villages.VILLAGE_RADIUS);

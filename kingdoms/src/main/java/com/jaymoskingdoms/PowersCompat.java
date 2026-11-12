@@ -1506,7 +1506,7 @@ public final class PowersCompat {
 	 * the moon's curse lets go, and so does the alchemist's mark (Powers 0.18.83). True if either was lifted.
 	 */
 	public static boolean cureCurses(net.minecraft.world.entity.LivingEntity entity) {
-		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && (MoonCurse.cure(player) | com.jaymoskingdoms.remnants.Blight.cure(player) | com.jaymoskingdoms.hunger.HungerCurse.cure(player) | com.jaymoskingdoms.thirst.Thirst.cure(player));
+		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && (MoonCurse.cure(player) | com.jaymoskingdoms.remnants.Blight.cure(player) | com.jaymoskingdoms.hunger.HungerCurse.cure(player));
 		if (!lookedForWashOut) {
 			lookedForWashOut = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
@@ -1533,7 +1533,6 @@ public final class PowersCompat {
 			MoonCurse.cure(player);
 			com.jaymoskingdoms.remnants.Blight.cure(player);
 			com.jaymoskingdoms.hunger.HungerCurse.cure(player);
-			com.jaymoskingdoms.thirst.Thirst.cure(player);
 		}
 		mending();
 		if (restore != null) {

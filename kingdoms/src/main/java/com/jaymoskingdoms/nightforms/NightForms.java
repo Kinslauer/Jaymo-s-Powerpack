@@ -1,6 +1,14 @@
-package com.jaymoskingdoms.thirst;
+package com.jaymoskingdoms.nightforms;
 
 import com.jaymoskingdoms.BossBars;
+import com.jaymoskingdoms.BloodGrab;
+import com.jaymoskingdoms.NightGifts;
+import com.jaymoskingdoms.VampirePlayers;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.network.codec.ByteBufCodecs;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Parties;
@@ -44,7 +52,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ambient.Bat;
-import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
@@ -52,41 +59,40 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The shapes of the thirsty, picked from a menu opened by crouching and using empty-handed on the open air (the client sends
- * {@link Menu}); the same input in a shape returns them to themselves. Each costs the gauge ({@link Thirst}) and then makes them wait.
+ * The vampire player's shapes of the night, further night gifts ({@link NightGifts}) for a full vampire (not a dhampir). Sneak and
+ * {@code O} (the Blood Dash key) opens a menu on the talk screen; sneak and {@code O} in a shape turns them back. Each shape costs
+ * blood, paid in the food level a bite fills ({@link VampirePlayers}), and then makes them wait. They need a few points to spare.
  * <ul>
  * <li><b>Bat</b> ({@link #BAT_TICKS}): a small body that flies. A vanilla bat is drawn in their place (a puppet that follows them,
- * unhurtable; a blow on it is a blow on them), their own body is not drawn, and the living nearby show to them as red outlines
- * through walls (client, {@code ThirstClient}). It drinks the gauge slowly.</li>
+ * unhurtable; a blow on it is a blow on them) and their own body is not drawn. Seeing the living through walls is blood vision's
+ * already. It drinks a point of blood now and then.</li>
  * <li><b>Colony</b>: a swarm of bats lifts one foe in sight up ({@link #LIFT_TICKS}) and drops it. Players only where
  * player-versus-player is allowed, never a party member.</li>
  * <li><b>Mist</b> ({@link #MIST_TICKS}): nothing can hurt them and they can hurt nothing; they drift slowly.</li>
- * <li><b>Wolf</b> ({@link #WOLF_TICKS}): a red-eyed vanilla wolf drawn in their place that swells ({@link #SWELL}) into a beast: strong,
- * quick and hard to hurt, then spent.</li>
- * <li><b>The stare</b> fixes the eyes ({@link ThirstGaze}).</li>
+ * <li><b>The stare</b> fixes the eyes ({@link NightGaze}).</li>
  * <li><b>The riposte</b>: crouch just before a blow lands ({@link #RIPOSTE_WINDOW} ticks) and it finds only bats: they are a few
  * blocks off. (A player with the Slip perk uses Slip instead.)</li>
  * </ul>
+ * The werewolf's beast stays the werewolf's; there is no wolf shape here.
  */
-public final class ThirstForms {
-	public static final String BAT = "bat", MIST = "mist", WOLF = "wolf";
+public final class NightForms {
+	public static final String BAT = "bat", MIST = "mist";
 	/** The tag on every puppet and swarm bat this makes (a stray one left in the world is removed as it loads). */
-	public static final String PUPPET_TAG = "jaymoskingdoms_thirst_puppet";
+	public static final String PUPPET_TAG = "jaymoskingdoms_night_puppet";
 
 	// ---- tuning ----
-	/** The gauge points each costs (at night three quarters). */
-	static final int BAT_COST = 10, MIST_COST = 12, WOLF_COST = 16, COLONY_COST = 18, STARE_COST = 6, RIPOSTE_COST = 10;
+	/** The blood (food points) each costs (at night three quarters). */
+	static final int BAT_COST = 3, MIST_COST = 4, COLONY_COST = 6, STARE_COST = 2, RIPOSTE_COST = 3;
+	/** The food level they must keep after paying (a shape never starves them). */
+	static final int KEEP = 3;
 	/** How long each lasts (ticks). */
-	static final int BAT_TICKS = 1200, MIST_TICKS = 100, WOLF_TICKS = 400;
+	static final int BAT_TICKS = 1200, MIST_TICKS = 100;
 	/** How long they must wait after each (ticks). */
-	static final long BAT_COOLDOWN = 300L, MIST_COOLDOWN = 600L, WOLF_COOLDOWN = 900L, COLONY_COOLDOWN = 700L, STARE_COOLDOWN = 200L, RIPOSTE_COOLDOWN = 400L;
+	static final long BAT_COOLDOWN = 300L, MIST_COOLDOWN = 600L, COLONY_COOLDOWN = 700L, STARE_COOLDOWN = 200L, RIPOSTE_COOLDOWN = 400L;
 	/** The bat's size (added to the scale: the body is this much smaller), how often its flight drinks a point (ticks), and its flight and the mist's (fly speed). */
 	static final double BAT_SCALE = -0.7;
 	static final int BAT_DRAIN_EVERY = 60;
 	static final float BAT_FLY = 0.04F, MIST_FLY = 0.02F;
-	/** The wolf's swell (added to the scale), how long the swelling takes (ticks), and its gifts (amplifiers) and the weariness after it (ticks). */
-	static final double SWELL = 0.6;
-	static final int SWELL_TICKS = 12, WOLF_STRENGTH = 1, WOLF_SPEED = 1, WOLF_RESIST = 0, GIFT_TICKS = 40, SPENT_TICKS = 100;
 	/** The colony: bats, ticks the foe is lifted, ticks the swarm stays, the lift's speed, how far it finds a foe (blocks) and how true the aim must be (cosine). */
 	static final int COLONY_BATS = 9, LIFT_TICKS = 26, COLONY_END = 44;
 	static final double LIFT_SPEED = 0.38, COLONY_RANGE = 14.0, COLONY_AIM = 0.8;
@@ -99,18 +105,16 @@ public final class ThirstForms {
 	/** How long a menu waits for an answer (ticks). */
 	static final long MENU_TICKS = 1200L;
 
-	private static final Identifier SIZE_ID = JaymosKingdoms.id("thirst_form_size");
+	/** The colour of the blood. */
+	public static final int BLOOD = 0x8A0303;
 
-	/** Client to server: the open-air crouch-use (the shape menu, or back to themselves). */
-	public record Menu() implements CustomPacketPayload {
-		public static final Type<Menu> TYPE = new Type<>(JaymosKingdoms.id("thirst_menu"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Menu> CODEC = StreamCodec.unit(new Menu());
+	private static final Identifier SIZE_ID = JaymosKingdoms.id("night_form_size");
 
-		@Override
-		public Type<Menu> type() {
-			return TYPE;
-		}
-	}
+	/** The shape they wear now ("bat", "mist"; none when absent): told to everyone, not saved. */
+	public static final AttachmentType<String> FORM = AttachmentRegistry.create(JaymosKingdoms.id("night_form"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+	/** On someone given flight for a shape and not yet had it taken back (so a log-out in the air can't keep it). Saved. */
+	static final AttachmentType<Boolean> FLIGHT = AttachmentRegistry.create(JaymosKingdoms.id("night_form_flight"), builder -> builder.persistent(Codec.BOOL));
 
 	/** A shape worn now: which, when, its puppet, and whether it gave them flight. */
 	private static final class Active {
@@ -157,12 +161,52 @@ public final class ThirstForms {
 	private static final Set<UUID> SNEAKING = new HashSet<>();
 	private static final Map<UUID, Long> PRESSED = new HashMap<>();
 
-	private ThirstForms() {
+	private NightForms() {
 	}
 
-	static void register() {
-		ServerTickEvents.END_SERVER_TICK.register(ThirstForms::tick);
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register(ThirstForms::allowDamage);
+	/** Whether {@code p} is a full vampire (a dhampir has no shapes); on either side. */
+	public static boolean vampire(Player p) {
+		NightGifts.Gift g = NightGifts.gift(p);
+		return g != null && g.kind() == NightGifts.VAMPIRE;
+	}
+
+	/** The shape {@code p} wears, or an empty string. */
+	public static String form(Player p) {
+		return p.getAttachedOrElse(FORM, "");
+	}
+
+	/** The blood they have: their food level (a bite fills it, and ordinary food gives a vampire nothing). */
+	static int blood(Player p) {
+		return p.getFoodData().getFoodLevel();
+	}
+
+	/** Pays {@code by} of blood. */
+	static void spend(ServerPlayer p, int by) {
+		p.getFoodData().setFoodLevel(Math.max(0, blood(p) - by));
+	}
+
+	/** A bar of ten cells, {@code =} where it is full and {@code -} where it is not. */
+	static MutableComponent bar(int value, int of, ChatFormatting colour) {
+		final int cells = 10;
+		int full = Math.max(0, Math.min(cells, Math.round(value * cells / (float)of)));
+		return Component.literal("=".repeat(full)).withStyle(colour).append(Component.literal("-".repeat(cells - full)).withStyle(ChatFormatting.DARK_GRAY));
+	}
+
+	/** A light red mist at {@code at}. */
+	static void bloodMist(ServerLevel level, Vec3 at, float size, int count) {
+		level.sendParticles(Fx.mote(BLOOD, size), at.x, at.y, at.z, count, 0.2, 0.2, 0.2, 0.01);
+	}
+
+	public static void register() {
+		ServerTickEvents.END_SERVER_TICK.register(NightForms::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player) {
+				end(player, false);
+			}
+		});
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> settleOnJoin(handler.player));
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> end(handler.player, false));
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(NightForms::allowDamage);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity.entityTags().contains(PUPPET_TAG) && !PUPPETS.containsKey(entity.getUUID()) && level.getServer() != null) {
 				level.getServer().execute(entity::discard);
@@ -177,7 +221,7 @@ public final class ThirstForms {
 			SNEAKING.clear();
 			PRESSED.clear();
 		});
-		ThirstGaze.register();
+		NightGaze.register();
 	}
 
 	// ---- queries ----
@@ -203,7 +247,7 @@ public final class ThirstForms {
 	}
 
 	private static boolean canAfford(ServerPlayer p, ServerLevel level, int base) {
-		return Thirst.gauge(p) >= cost(level, base);
+		return blood(p) >= cost(level, base) + KEEP;
 	}
 
 	/** The shape's own bar: how much of it is left. */
@@ -213,55 +257,55 @@ public final class ThirstForms {
 			return null;
 		}
 		long left = Math.max(0L, a.end - p.level().getGameTime());
-		return Thirst.bar((int)left, (int)(a.end - a.start), ChatFormatting.DARK_RED);
+		return bar((int)left, (int)(a.end - a.start), ChatFormatting.DARK_RED);
 	}
 
 	// ---- the menu ----
 
 	/** The open-air crouch-use: back to themselves when in a shape, else the menu. */
-	static void menu(ServerPlayer p) {
-		if (!Thirst.thirsty(p) || !p.isAlive() || p.isSpectator() || !(p.level() instanceof ServerLevel level) || ThirstBite.biting(p) || !p.getMainHandItem().isEmpty()) {
-			return;
+	public static boolean menu(ServerPlayer p) {
+		if (!vampire(p) || !p.isAlive() || p.isSpectator() || !(p.level() instanceof ServerLevel level) || p.hasAttached(BloodGrab.GRABBING)) {
+			return false;
 		}
 		if (ACTIVE.containsKey(p.getUUID())) {
 			end(p, false);
-			return;
+			return true;
 		}
 		if (!ServerPlayNetworking.canSend(p, TalkNet.Ask.TYPE)) {
-			return;
+			return false;
 		}
-		List<String> kinds = List.of(BAT, "colony", MIST, WOLF, "stare", "close");
+		List<String> kinds = List.of(BAT, "colony", MIST, "stare", "close");
 		List<Component> options = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
 		for (String kind : kinds) {
-			options.add(Component.translatable("talk.jaymoskingdoms.drinker.menu." + kind));
+			options.add(Component.translatable("talk.jaymoskingdoms.nightform.menu." + kind));
 			enabled.add(open(p, level, kind));
 		}
 		MENUS.put(p.getUUID(), new Open(kinds, level.getGameTime() + MENU_TICKS));
-		ServerPlayNetworking.send(p, new TalkNet.Ask(p.getId(), Component.translatable("talk.jaymoskingdoms.drinker.menu.speaker"),
-			Component.translatable("talk.jaymoskingdoms.drinker.menu.ask"), options, enabled));
+		ServerPlayNetworking.send(p, new TalkNet.Ask(p.getId(), Component.translatable("talk.jaymoskingdoms.nightform.menu.speaker"),
+			Component.translatable("talk.jaymoskingdoms.nightform.menu.ask"), options, enabled));
+		return true;
 	}
 
 	private static boolean open(ServerPlayer p, ServerLevel level, String kind) {
 		return switch (kind) {
 			case BAT -> canAfford(p, level, BAT_COST) && ready(p, BAT);
 			case MIST -> canAfford(p, level, MIST_COST) && ready(p, MIST);
-			case WOLF -> canAfford(p, level, WOLF_COST) && ready(p, WOLF);
 			case "colony" -> canAfford(p, level, COLONY_COST) && ready(p, "colony") && foe(p, level) != null;
-			case "stare" -> canAfford(p, level, STARE_COST) && ready(p, "stare") && !ThirstGaze.armed(p);
+			case "stare" -> canAfford(p, level, STARE_COST) && ready(p, "stare") && !NightGaze.armed(p);
 			default -> true;
 		};
 	}
 
 	/** An answer on the shape menu; false when it was not one. */
-	static boolean answer(ServerPlayer p, TalkNet.Answer answer) {
+	public static boolean answer(ServerPlayer p, TalkNet.Answer answer) {
 		Open open = MENUS.get(p.getUUID());
 		if (open == null || answer.entityId() != p.getId()) {
 			return false;
 		}
 		MENUS.remove(p.getUUID());
 		if (answer.option() < 0 || answer.option() >= open.kinds().size() || p.level().getGameTime() > open.until() || !(p.level() instanceof ServerLevel level)
-			|| !Thirst.thirsty(p) || !p.isAlive() || ACTIVE.containsKey(p.getUUID())) {
+			|| !vampire(p) || !p.isAlive() || ACTIVE.containsKey(p.getUUID())) {
 			return true;
 		}
 		String kind = open.kinds().get(answer.option());
@@ -272,19 +316,18 @@ public final class ThirstForms {
 		switch (kind) {
 			case BAT -> enter(p, level, BAT, BAT_COST, BAT_COOLDOWN, BAT_TICKS);
 			case MIST -> enter(p, level, MIST, MIST_COST, MIST_COOLDOWN, MIST_TICKS);
-			case WOLF -> enter(p, level, WOLF, WOLF_COST, WOLF_COOLDOWN, WOLF_TICKS);
 			case "colony" -> {
 				LivingEntity foe = foe(p, level);
 				if (foe != null) {
-					Thirst.spend(p, cost(level, COLONY_COST));
+					spend(p, cost(level, COLONY_COST));
 					READY.put(key(p, "colony"), now + COLONY_COOLDOWN);
 					colony(p, level, foe);
 				}
 			}
 			case "stare" -> {
-				Thirst.spend(p, cost(level, STARE_COST));
+				spend(p, cost(level, STARE_COST));
 				READY.put(key(p, "stare"), now + STARE_COOLDOWN);
-				ThirstGaze.arm(p);
+				NightGaze.arm(p);
 			}
 			default -> {
 			}
@@ -296,12 +339,12 @@ public final class ThirstForms {
 
 	private static void enter(ServerPlayer p, ServerLevel level, String form, int baseCost, long cooldown, int ticks) {
 		long now = level.getGameTime();
-		Thirst.spend(p, cost(level, baseCost));
+		spend(p, cost(level, baseCost));
 		READY.put(key(p, form), now + cooldown);
-		ThirstGaze.disarm(p.getUUID(), level.getServer());
+		NightGaze.disarm(p.getUUID(), level.getServer());
 		Active a = new Active(form, now, now + ticks);
 		ACTIVE.put(p.getUUID(), a);
-		p.setAttached(Thirst.FORM, form);
+		p.setAttached(FORM, form);
 		Vec3 at = p.position().add(0.0, p.getBbHeight() * 0.5, 0.0);
 		switch (form) {
 			case BAT -> {
@@ -319,16 +362,6 @@ public final class ThirstForms {
 				level.playSound(null, p.blockPosition(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.9F, 0.4F);
 				level.sendParticles(Fx.miasma(0x7A4A5A, 1.4F), at.x, at.y, at.z, 24, 0.4, 0.6, 0.4, 0.02);
 			}
-			case WOLF -> {
-				a.puppet = spawnPuppet(level, p, EntityTypes.WOLF);
-				if (a.puppet instanceof Wolf wolf) {
-					wolf.setTimeToRemainAngry(ticks + 200L);
-					setPuppetScale(wolf, 1.0);
-				}
-				level.playSound(null, p.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.3F, 0.5F);
-				Fx.ring(level, p.position(), 4.0F, Thirst.BLOOD);
-				Fx.blast(level, at, 2.5F, Thirst.BLOOD);
-			}
 			default -> {
 			}
 		}
@@ -337,14 +370,14 @@ public final class ThirstForms {
 	/** The shape ends: they are themselves again (spent after the wolf if it ran its course). */
 	static void end(ServerPlayer p, boolean spent) {
 		Active a = ACTIVE.remove(p.getUUID());
-		ThirstGaze.disarm(p.getUUID(), p.level().getServer());
+		NightGaze.disarm(p.getUUID(), p.level().getServer());
 		PRESSED.remove(p.getUUID());
 		SNEAKING.remove(p.getUUID());
 		if (a == null) {
-			p.removeAttached(Thirst.FORM);
+			p.removeAttached(FORM);
 			return;
 		}
-		p.removeAttached(Thirst.FORM);
+		p.removeAttached(FORM);
 		if (a.puppet != null) {
 			PUPPETS.remove(a.puppet.getUUID());
 			a.puppet.discard();
@@ -360,18 +393,13 @@ public final class ThirstForms {
 			Vec3 at = p.position().add(0.0, p.getBbHeight() * 0.5, 0.0);
 			level.sendParticles(Fx.miasma(a.form.equals(MIST) ? 0x7A4A5A : 0x2A0A12, 1.1F), at.x, at.y, at.z, 14, 0.4, 0.5, 0.4, 0.02);
 		}
-		if (spent && a.form.equals(WOLF)) {
-			p.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SPENT_TICKS, 1, true, false, false));
-			p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SPENT_TICKS, 0, true, false, false));
-			p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.drinker.spent").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-		}
 	}
 
 	/** A player coming in: nothing they were given for a shape in the last session stays. */
 	static void settleOnJoin(ServerPlayer p) {
-		p.removeAttached(Thirst.FORM);
+		p.removeAttached(FORM);
 		setSize(p, 0.0);
-		if (p.hasAttached(Thirst.FLIGHT)) {
+		if (p.hasAttached(FLIGHT)) {
 			revokeFlight(p);
 		}
 	}
@@ -384,13 +412,13 @@ public final class ThirstForms {
 		abilities.mayfly = true;
 		abilities.flying = true;
 		abilities.setFlyingSpeed(speed);
-		p.setAttached(Thirst.FLIGHT, true);
+		p.setAttached(FLIGHT, true);
 		p.onUpdateAbilities();
 		return true;
 	}
 
 	private static void revokeFlight(ServerPlayer p) {
-		p.removeAttached(Thirst.FLIGHT);
+		p.removeAttached(FLIGHT);
 		Abilities abilities = p.getAbilities();
 		if (!p.isCreative() && !p.isSpectator()) {
 			abilities.mayfly = false;
@@ -451,7 +479,7 @@ public final class ThirstForms {
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-			boolean sneaking = p.isShiftKeyDown() && Thirst.thirsty(p);
+			boolean sneaking = p.isShiftKeyDown() && vampire(p);
 			if (sneaking ? SNEAKING.add(p.getUUID()) : SNEAKING.remove(p.getUUID())) {
 				if (sneaking) {
 					PRESSED.put(p.getUUID(), now);
@@ -469,19 +497,25 @@ public final class ThirstForms {
 				}
 				continue;
 			}
-			if (!p.isAlive() || p.isSpectator() || !Thirst.thirsty(p) || a.puppet != null && a.puppet.level() != p.level()) {
+			if (!p.isAlive() || p.isSpectator() || !vampire(p) || a.puppet != null && a.puppet.level() != p.level()) {
 				end(p, false);
 				continue;
 			}
 			long age = p.level().getGameTime() - a.start;
 			if (p.level().getGameTime() >= a.end) {
-				end(p, true);
+				end(p, false);
 				continue;
 			}
 			if (a.puppet != null) {
 				follow(p, a.puppet);
 			}
 			tickForm(p, a, age);
+			if (age % 5 == 0) {
+				MutableComponent text = bar(p);
+				if (text != null) {
+					p.sendOverlayMessage(text);
+				}
+			}
 		}
 		if (!SWARMS.isEmpty() && server.overworld() != null) {
 			tickSwarms(server);
@@ -495,8 +529,8 @@ public final class ThirstForms {
 		switch (a.form) {
 			case BAT -> {
 				if (age > 0 && age % BAT_DRAIN_EVERY == 0) {
-					Thirst.spend(p, 1);
-					if (Thirst.gauge(p) <= 0) {
+					spend(p, 1);
+					if (blood(p) <= 0) {
 						end(p, false);
 					}
 				}
@@ -504,20 +538,6 @@ public final class ThirstForms {
 			case MIST -> {
 				if (age % 2 == 0) {
 					level.sendParticles(Fx.miasma(0x7A4A5A, 1.3F), p.getX(), p.getY() + p.getBbHeight() * 0.5, p.getZ(), 5, 0.35, 0.5, 0.35, 0.01);
-				}
-			}
-			case WOLF -> {
-				if (age <= SWELL_TICKS) {
-					double part = Math.min(1.0, age / (double)SWELL_TICKS);
-					setSize(p, SWELL * part);
-					if (a.puppet != null) {
-						setPuppetScale(a.puppet, 1.0 + SWELL * part);
-					}
-				}
-				if (age % 20 == 0) {
-					p.addEffect(new MobEffectInstance(MobEffects.STRENGTH, GIFT_TICKS, WOLF_STRENGTH, true, false, false));
-					p.addEffect(new MobEffectInstance(MobEffects.SPEED, GIFT_TICKS, WOLF_SPEED, true, false, false));
-					p.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, GIFT_TICKS, WOLF_RESIST, true, false, false));
 				}
 			}
 			default -> {
@@ -553,7 +573,7 @@ public final class ThirstForms {
 
 	/** A blow on someone who crouched a moment ago finds only bats. True if it was dodged. */
 	private static boolean riposte(ServerPlayer p, ServerLevel level, DamageSource source, float amount) {
-		if (amount <= 0.0F || !Thirst.thirsty(p) || ACTIVE.containsKey(p.getUUID()) || !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker
+		if (amount <= 0.0F || !vampire(p) || ACTIVE.containsKey(p.getUUID()) || !(source.getDirectEntity() instanceof LivingEntity striker) || source.getEntity() != striker
 			|| striker == p || p.isBlocking() || p.isSpectator() || p.isCreative() || Skills.rank(p, "slip_behind") > 0) {
 			return false;
 		}
@@ -577,7 +597,7 @@ public final class ThirstForms {
 		if (dest == null) {
 			return false;
 		}
-		Thirst.spend(p, cost(level, RIPOSTE_COST));
+		spend(p, cost(level, RIPOSTE_COST));
 		READY.put(key(p, "riposte"), now + RIPOSTE_COOLDOWN);
 		PRESSED.remove(p.getUUID());
 		burst(level, p, start.add(0.0, 1.0, 0.0));
@@ -585,7 +605,7 @@ public final class ThirstForms {
 		p.teleportTo(level, dest.x, dest.y, dest.z, Set.of(), Mth.wrapDegrees(yaw), 0.0F, false);
 		level.sendParticles(Fx.miasma(0x2A0A12, 1.1F), dest.x, dest.y + 1.0, dest.z, 10, 0.3, 0.5, 0.3, 0.02);
 		level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1.0F, 1.1F);
-		p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.drinker.riposte").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+		p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.nightform.riposte").withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
 		return true;
 	}
 
@@ -621,7 +641,7 @@ public final class ThirstForms {
 			}
 		}
 		SWARMS.add(swarm);
-		Thirst.bloodMist(level, at, 0.7F, 10);
+		bloodMist(level, at, 0.7F, 10);
 		level.sendParticles(Fx.miasma(0x2A0A12, 1.2F), at.x, at.y, at.z, 20, 0.5, 0.6, 0.5, 0.03);
 	}
 
