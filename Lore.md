@@ -254,6 +254,21 @@ thrown sword is a sword given away, and mean it: it lies where it lands. Only th
 Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
 teaching.
 
+(new) **The Twinblade** (Andy, 2026-11-11: "an ancient warrior born design, not often wielded by many, and the schematic
+is found in the stormborn dungeon"). Two swords of one make joined at the hilt on a long grip, a weapon of the old
+Warrior-born that few ever carried. Nobody forges it as such: the joining is a knack, and the only drawing of it left
+lies in the Stormborn Tomb among the draugr, who were Warrior-born once. Whoever studies the sheet can join two blades
+and part them again.
+
+(new) **The Mill Charge** (SWGC swordplay picks, 2026-11-12). The Skyward Reach teaches its staff and glaive students
+to go through a press of foes with the shaft turning before them, the way a mill's sails take the wind.
+
+(new) **The schools' styles** (SWGC swordplay picks, 2026-11-12). Each school fights its own way, and its students
+carry it into every fight with the school's weapon in hand. The Quiet Tide's **Still Water** waits and turns blows; the
+Skyward Reach's **Long Measure** keeps its distance and thrusts; the Stone Root's **Deep Root** is slow and never out of
+breath; the Low Lantern's **Low Flame** is quick hands and little guard; the Ashen Fang's **Red Ember** comes on fastest
+and burns out first. A school's guards and its duellists fight the same way, which is how the knowing tell them apart.
+
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
 
@@ -480,6 +495,15 @@ three times their size who walks among folk disguised as a villager, and who lea
 takes most kindly to the blood that shares its weather (Notus to the Emberborn, Boreas to the Frostborn, Zephyrus to the
 Verdant and Tideborn, Eurus to the Stormborn). Over the Aether flies **Aetherion**, the star dragon, with a breath of
 starlight and a cataclysm of falling stars.
+
+(new) **First sight of the great ones** (Andy, 2026-11-11: "can bosses get intro cutscenes? ... even passive boss mobs
+can get them. just to further illustrate the majesty of the encounter"). The first time anyone lays eyes on each kind of
+great creature, the moment is shown as a short wordless film: a low look up at it, its roar, then the two of them in one
+frame. It happens once for each kind: every dragon (Ignivorus over the Nether first among them), the Giants, the
+patrons' champions, the Ogre King, chiefs and warlords, the Piglin King, the grizzly, the minotaur and gorgon, the
+Slider and the Visage of War, the Ender Dragon, Wither, Warden and Elder Guardian, and the gentle great ones, the great
+whales and the Aerwhales. Kings and lords get none; they are met in their halls by talking. Nothing is named or
+explained on screen.
 
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
