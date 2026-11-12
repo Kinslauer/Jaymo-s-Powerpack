@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_wall_sign",
+  "textures": {
+    "all": "jaymospowers:block/eden/pulse_tree_sign",
+    "particle": "jaymospowers:block/eden/pulse_tree_planks"
+  }
+}

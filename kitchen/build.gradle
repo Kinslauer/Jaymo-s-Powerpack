@@ -42,10 +42,27 @@ dependencies {
 	compileOnly fileTree("../libs") { include "mca-fabric-*.jar" }
 }
 
+def langParts = file("src/main/resources/assets/jaymoskitchen/lang/parts")
 processResources {
 	def version = project.version
 	inputs.property "version", version
 	filesMatching("fabric.mod.json") { expand "version": version }
+	// new features' lang keys go in small part files, lang/parts/*.json; they're merged into en_us.json here
+	exclude "assets/jaymoskitchen/lang/parts/**"
+	inputs.dir langParts
+	doLast {
+		def out = new File(destinationDir, "assets/jaymoskitchen/lang/en_us.json")
+		def merged = new TreeMap(new groovy.json.JsonSlurper().parse(out, "UTF-8"))
+		(langParts.listFiles() ?: new File[0]).findAll { it.name.endsWith(".json") }.sort { it.name }.each { part ->
+			new groovy.json.JsonSlurper().parse(part, "UTF-8").each { k, v ->
+				if (merged.containsKey(k) && merged[k] != v) {
+					throw new GradleException("lang key ${k} is defined twice (again in ${part.name})")
+				}
+				merged[k] = v
+			}
+		}
+		out.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(merged)), "UTF-8")
+	}
 }
 
 tasks.withType(JavaCompile).configureEach { it.options.release = 25 }

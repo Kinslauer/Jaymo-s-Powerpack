@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_hanging_sign_rot_1",
+  "textures": {
+    "all": "jaymospowers:block/eden/brain_tree_hanging_sign",
+    "particle": "jaymospowers:block/eden/brain_tree_planks"
+  }
+}

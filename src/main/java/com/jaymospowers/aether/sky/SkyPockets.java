@@ -188,7 +188,8 @@ public final class SkyPockets {
 		}
 	}
 
-	private static void gas(ServerPlayer sp, ServerLevel level) {
+	/** The haze round {@code sp}, and the poison in it unless they wear a sky mask (also read by the gas vents of the hollow islands). */
+	public static void gas(ServerPlayer sp, ServerLevel level) {
 		level.sendParticles(GAS, sp.getX(), sp.getY() + 1.0, sp.getZ(), 10, 3.0, 1.5, 3.0, 0.0);
 		if (sp.isCreative() || Baubles.wearing(sp, Baubles.SKY_MASK)) {
 			return;

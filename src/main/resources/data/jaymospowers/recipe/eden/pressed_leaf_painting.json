@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:dried_limphium_leaf",
+    "minecraft:painting"
+  ],
+  "result": {
+    "id": "minecraft:painting",
+    "components": {
+      "minecraft:painting/variant": "jaymospowers:pressed_leaf"
+    }
+  }
+}

@@ -32,6 +32,8 @@ public final class Professions {
 	public static VillagerProfession COOK;
 	/** (0.7.490) A town's money-changer ({@link Currencies}): taken on by the town, never a player's pick. Trades coin for coin. */
 	public static VillagerProfession CHANGER;
+	/** A sky village's trader, in sky goods ({@link SkyTrades}): taken on by the village, never a player's pick. */
+	public static VillagerProfession CLOUDWRIGHT;
 
 	private Professions() {
 	}
@@ -56,6 +58,7 @@ public final class Professions {
 		COOK = register("cook", SoundEvents.VILLAGER_WORK_BUTCHER);
 		// (0.7.490)
 		CHANGER = register("changer", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
+		CLOUDWRIGHT = register("cloudwright", SoundEvents.VILLAGER_WORK_SHEPHERD);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {

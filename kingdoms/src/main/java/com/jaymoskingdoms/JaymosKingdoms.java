@@ -678,6 +678,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		SkyFolk.register();
 		SkyCourt.register();
 		SkyFerries.register();
+		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();

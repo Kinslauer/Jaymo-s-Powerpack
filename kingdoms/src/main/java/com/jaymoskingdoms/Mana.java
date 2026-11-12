@@ -503,7 +503,8 @@ public final class Mana {
 		float max = max(player), mana = current(player);
 		// (0.7.244) meditating brings it back faster, sickness slower or not at all; vis feeds it, flux drains it
 		float back = regen(player) * MEDITATE_REGEN[meditating(player)] * ManaSickness.regenTimes(player) * com.jaymoskingdoms.spirits.SpiritSickness.regenTimes(player);
-		float alchemy = ManaAlchemy.perSecond(player);
+		// (the Verdant World's pulse trees feed a caster who stands among them: PulseSprings)
+		float alchemy = ManaAlchemy.perSecond(player) + PulseSprings.draw(player);
 		if (mana > max) {
 			set(player, Math.max(max, mana - SPILL + Math.min(0.0F, alchemy)));
 			if (player.level() instanceof ServerLevel level && player.getRandom().nextInt(3) == 0) {

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/eden/sunroot_ladder"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/eden/sunroot_ladder",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/eden/sunroot_ladder",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/eden/sunroot_ladder",
+      "y": 270
+    }
+  }
+}

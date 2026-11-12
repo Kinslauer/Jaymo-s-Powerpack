@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "P": "jaymospowers:balloon_mushroom_planks",
+    "S": "jaymospowers:balloon_mushroom_slab"
+  },
+  "pattern": [
+    "PSP",
+    "P P",
+    "PSP"
+  ],
+  "result": {
+    "id": "jaymospowers:balloon_mushroom_barrel"
+  },
+  "group": "barrel"
+}

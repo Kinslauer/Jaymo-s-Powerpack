@@ -105,6 +105,10 @@ public final class SkyCourt {
 								hold(level, box);
 							} else {
 								SkyFerries.moored(level, box, ref);
+								if (id.getPath().startsWith(VILLAGE)) {
+									// a sky village is a haven of the Divine-born (SkyHavens)
+									SkyHavens.found(level, box);
+								}
 							}
 						}
 					}

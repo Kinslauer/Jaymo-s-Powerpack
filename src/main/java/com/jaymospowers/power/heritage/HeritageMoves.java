@@ -253,7 +253,8 @@ public final class HeritageMoves {
 		ServerLevel level = player.level();
 		boolean done = blood(player) == STORM ? thunderclap(player, level) : sunflare(player, level);
 		if (done) {
-			int cooldown = blood(player) == STORM ? level.isThundering() ? CLAP_STORM_COOLDOWN : CLAP_COOLDOWN : FLARE_COOLDOWN;
+			int cooldown = blood(player) == STORM ? level.isThundering() || com.jaymospowers.eden.EdenBrainstorm.in(player) ? CLAP_STORM_COOLDOWN : CLAP_COOLDOWN
+				: FLARE_COOLDOWN;
 			READY.put(player.getUUID(), level.getGameTime() + cooldown);
 		}
 	}

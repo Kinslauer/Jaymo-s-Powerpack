@@ -32,7 +32,7 @@ public record EdenFeature(Kind kind) implements Feature {
 		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER,
 		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS, GRAVILITE,
 		VIOLUM, LONLIX, PARIGNUM, EDEN_MOSS, LIMPHIUM, EDEN_VINES, SYMBIOTIC_MOLD,
-		SUNROOT_TREE, VOLVOX_COLONY, HOLLOW_ISLAND;
+		SUNROOT_TREE, VOLVOX_COLONY, HOLLOW_ISLAND, ISLAND_CAVES;
 
 		static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)), k -> k.name().toLowerCase(Locale.ROOT));
 	}
@@ -74,9 +74,19 @@ public record EdenFeature(Kind kind) implements Feature {
 	/** A volvox colony: radius (least, spread), the share of its skin that is dense, and its dense heart's share of the radius. */
 	public static final int VOLVOX_RADIUS = 3, VOLVOX_RADIUS_SPREAD = 4;
 	public static final float VOLVOX_DENSE_SHARE = 0.15F, VOLVOX_HEART = 0.35F;
+	/** A volvox with a room in it: from this radius up, the share of the radius that is pool, and the share the pool takes of the width (the rest is shore). */
+	public static final int VOLVOX_ROOM_FROM = 5;
+	public static final float VOLVOX_WATER = 0.3F, VOLVOX_SHORE = 0.45F;
 	/** A hollow island: radius (least, spread), its height as a share of that, the hollow's share of the shell, and the doors broken into it (most). */
 	public static final int HOLLOW_RADIUS = 7, HOLLOW_RADIUS_SPREAD = 5, HOLLOW_DOORS = 3;
 	public static final float HOLLOW_HEIGHT = 0.6F, HOLLOW_INSIDE = 0.72F;
+	/** One hollow island, and one island cave, in this many is a gas cave (see {@link EdenCaves}). */
+	public static final int GAS_ONE_IN = 4;
+	/** Island caves: the length of a tunnel (steps, least and spread), how far it may wander from where it starts, and its girth. */
+	public static final int CAVE_STEPS = 22, CAVE_STEPS_SPREAD = 22, CAVE_WANDER = 12;
+	public static final double CAVE_GIRTH = 1.6, CAVE_GIRTH_SWELL = 0.9;
+	/** Tunnels a try cuts (least and spread), and how far (blocks) down it looks for the island's solid body. */
+	public static final int CAVE_TUNNELS = 1, CAVE_TUNNELS_SPREAD = 2, CAVE_SEEK = 14;
 	/** The colours lanterns grow in wild (builders dye the rest). */
 	private static final DyeColor[] WILD_LANTERNS = {DyeColor.WHITE, DyeColor.YELLOW, DyeColor.LIGHT_BLUE, DyeColor.LIME, DyeColor.PINK, DyeColor.ORANGE,
 		DyeColor.MAGENTA, DyeColor.CYAN};
@@ -113,6 +123,7 @@ public record EdenFeature(Kind kind) implements Feature {
 			case SUNROOT_TREE -> sunroot(level, random, origin);
 			case VOLVOX_COLONY -> volvox(level, random, origin);
 			case HOLLOW_ISLAND -> hollowIsland(level, random, origin);
+			case ISLAND_CAVES -> islandCaves(level, random, origin);
 		};
 	}
 
@@ -668,26 +679,64 @@ public record EdenFeature(Kind kind) implements Feature {
 		return true;
 	}
 
-	/** A volvox colony: a hollow drifting ball of jelly, patched with denser growth, round a dense heart. */
+	/**
+	 * A volvox colony: a drifting ball of jelly, patched with denser growth, round a dense heart. Inside it holds a pool in
+	 * its lower part, with a mossy shore planted with small growth round it, so a flyer can come in through a gap and rest.
+	 */
 	private static boolean volvox(WorldGenLevel level, RandomSource random, BlockPos origin) {
 		int radius = VOLVOX_RADIUS + random.nextInt(VOLVOX_RADIUS_SPREAD + 1);
 		if (!openSky(level, origin, radius + 1)) {
 			return false;
 		}
 		float heart = Math.max(1.0F, radius * VOLVOX_HEART);
+		// small balls are all heart; from the middle size up there is a room, a pool and a shore
+		boolean room = radius >= VOLVOX_ROOM_FROM;
+		int water = -(int)Math.floor(radius * VOLVOX_WATER);
+		// a gap in the skin, high on one side, to fly in by
+		double gapAngle = random.nextDouble() * Math.PI * 2.0;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int dx = -radius; dx <= radius; dx++) {
 			for (int dy = -radius; dy <= radius; dy++) {
 				for (int dz = -radius; dz <= radius; dz++) {
 					double far = Math.sqrt(dx * dx + dy * dy + dz * dz);
 					boolean skin = far <= radius + 0.3 && far > radius - 0.9;
-					if (!skin && far > heart) {
-						continue;
-					}
 					pos.setWithOffset(origin, dx, dy, dz);
-					if (level.getBlockState(pos).isAir()) {
-						Block block = !skin || random.nextFloat() < VOLVOX_DENSE_SHARE ? Eden.DENSE_VOLVOX : Eden.VOLVOX;
-						level.setBlock(pos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+					if (room && skin) {
+						double angle = Math.atan2(dz, dx);
+						double off = Math.abs(Math.atan2(Math.sin(angle - gapAngle), Math.cos(angle - gapAngle)));
+						if (dy >= 1 && dy <= 3 && off * Math.sqrt(dx * dx + dz * dz) < 1.6) {
+							continue;
+						}
+					}
+					if (skin) {
+						if (level.getBlockState(pos).isAir()) {
+							Block block = random.nextFloat() < VOLVOX_DENSE_SHARE ? Eden.DENSE_VOLVOX : Eden.VOLVOX;
+							level.setBlock(pos, block.defaultBlockState(), Block.UPDATE_CLIENTS);
+						}
+					} else if (far <= heart && !room) {
+						if (level.getBlockState(pos).isAir()) {
+							level.setBlock(pos, Eden.DENSE_VOLVOX.defaultBlockState(), Block.UPDATE_CLIENTS);
+						}
+					} else if (room && far <= radius - 0.9 && level.getBlockState(pos).isAir()) {
+						double flat = Math.sqrt(dx * dx + dz * dz);
+						if (dy < water - 1 || dy == water - 1 && flat > radius * VOLVOX_SHORE) {
+							level.setBlock(pos, Eden.VOLVOX.defaultBlockState(), Block.UPDATE_CLIENTS);
+						} else if (dy == water && flat > radius * VOLVOX_SHORE) {
+							// the shore: moss, planted
+							level.setBlock(pos, Blocks.MOSS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+						} else if (dy <= water) {
+							level.setBlock(pos, Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
+						} else if (dy == radius - 2 && flat < 1.0) {
+							// a dense lantern hanging in the roof
+							level.setBlock(pos, Eden.DENSE_VOLVOX.defaultBlockState(), Block.UPDATE_CLIENTS);
+						} else if (dy == water + 1 && flat > radius * VOLVOX_SHORE && random.nextInt(3) == 0) {
+							Block plant = switch (random.nextInt(3)) {
+								case 0 -> Eden.LONLIX;
+								case 1 -> Eden.EDEN_MOSS;
+								default -> Eden.PARIGNUM;
+							};
+							level.setBlock(pos, plant.defaultBlockState(), Block.UPDATE_CLIENTS);
+						}
 					}
 				}
 			}
@@ -715,6 +764,7 @@ public record EdenFeature(Kind kind) implements Feature {
 			doorAngles[i] = random.nextDouble() * Math.PI * 2.0;
 		}
 		int floor = -(int)Math.floor(tall * HOLLOW_INSIDE) + 1;
+		boolean gassy = random.nextInt(GAS_ONE_IN) == 0;
 		for (int dx = -radius; dx <= radius; dx++) {
 			for (int dz = -radius; dz <= radius; dz++) {
 				for (int dy = -high; dy <= high; dy++) {
@@ -757,11 +807,80 @@ public record EdenFeature(Kind kind) implements Feature {
 					if (top && level.getBlockState(pos.below()).isAir() && random.nextInt(5) == 0) {
 						level.setBlock(pos.below(), Eden.EDEN_VINE.defaultBlockState(), Block.UPDATE_CLIENTS);
 					} else if (!top && level.getBlockState(pos.above()).isAir() && random.nextInt(7) == 0) {
-						level.setBlock(pos.above(), Eden.GRAVILITE_SHARDS.defaultBlockState(), Block.UPDATE_CLIENTS);
+						level.setBlock(pos.above(), (gassy ? EdenCaves.GAS_VENT : Eden.GRAVILITE_SHARDS).defaultBlockState(), Block.UPDATE_CLIENTS);
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	/** Whether a block is the island's own body, which a cave may be cut from. */
+	private static boolean body(BlockState state) {
+		return state.is(AetherBlocks.HOLYSTONE) || state.is(AetherBlocks.AETHER_DIRT) || state.is(AetherBlocks.QUICKSOIL);
+	}
+
+	/**
+	 * Caves worn into an island itself: from a point in its body, winding tunnels swell and narrow, never wandering far, cut
+	 * only through the island's own stone and soil (so they open on air where they meet it); now and then one is a gas
+	 * cave, its floor dotted with vents, and in the others a shard of gravilite shows here and there.
+	 */
+	private static boolean islandCaves(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		BlockPos start = null;
+		for (int dy = 0; dy < CAVE_SEEK && start == null; dy++) {
+			pos.set(origin.getX(), origin.getY() - dy, origin.getZ());
+			if (body(level.getBlockState(pos)) && body(level.getBlockState(pos.below())) && body(level.getBlockState(pos.below(4)))) {
+				start = pos.below(3 + random.nextInt(3)).immutable();
+			}
+		}
+		if (start == null) {
+			return false;
+		}
+		boolean gassy = random.nextInt(GAS_ONE_IN) == 0;
+		int tunnels = CAVE_TUNNELS + random.nextInt(CAVE_TUNNELS_SPREAD + 1);
+		boolean cut = false;
+		for (int t = 0; t < tunnels; t++) {
+			double x = start.getX() + 0.5, y = start.getY() + 0.5, z = start.getZ() + 0.5;
+			double yaw = random.nextDouble() * Math.PI * 2.0, pitch = (random.nextDouble() - 0.5) * 0.4;
+			int steps = CAVE_STEPS + random.nextInt(CAVE_STEPS_SPREAD + 1);
+			for (int i = 0; i < steps; i++) {
+				double girth = CAVE_GIRTH + Math.sin(i * 0.45) * CAVE_GIRTH_SWELL;
+				int r = (int)Math.ceil(girth);
+				for (int dx = -r; dx <= r; dx++) {
+					for (int dy = -r; dy <= r; dy++) {
+						for (int dz = -r; dz <= r; dz++) {
+							if (dx * dx + dy * dy * 1.4 + dz * dz > girth * girth) {
+								continue;
+							}
+							pos.set((int)Math.floor(x) + dx, (int)Math.floor(y) + dy, (int)Math.floor(z) + dz);
+							if (body(level.getBlockState(pos))) {
+								level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+								cut = true;
+							}
+						}
+					}
+				}
+				yaw += (random.nextDouble() - 0.5) * 0.7;
+				pitch = Math.max(-0.5, Math.min(0.5, pitch + (random.nextDouble() - 0.5) * 0.3));
+				x += Math.cos(yaw) * Math.cos(pitch) * 1.5;
+				y += Math.sin(pitch) * 1.5;
+				z += Math.sin(yaw) * Math.cos(pitch) * 1.5;
+				if (Math.abs(x - start.getX()) > CAVE_WANDER || Math.abs(z - start.getZ()) > CAVE_WANDER) {
+					yaw += Math.PI;
+				}
+				if (i % 3 == 0) {
+					pos.set((int)Math.floor(x), (int)Math.floor(y) - Math.max(1, (int)Math.floor(girth)), (int)Math.floor(z));
+					if (level.getBlockState(pos.above()).isAir() && body(level.getBlockState(pos))) {
+						if (gassy) {
+							level.setBlock(pos, EdenCaves.GAS_VENT.defaultBlockState(), Block.UPDATE_CLIENTS);
+						} else if (random.nextInt(3) == 0) {
+							level.setBlock(pos.above(), Eden.GRAVILITE_SHARDS.defaultBlockState(), Block.UPDATE_CLIENTS);
+						}
+					}
+				}
+			}
+		}
+		return cut;
 	}
 }
