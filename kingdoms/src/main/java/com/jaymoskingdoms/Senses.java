@@ -266,6 +266,10 @@ public final class Senses {
 		if (!MOVING.getOrDefault(player.getUUID(), true)) {
 			f *= STILL;
 		}
+		if (Pace.slow(player)) {
+			f *= Pace.SIGHT;
+		}
+		f *= FieldWeather.sight(level, looker);
 		if (player.distanceTo(looker) > BEHIND_CLOSE && !inCone(looker, player)) {
 			f *= BEHIND;
 		}

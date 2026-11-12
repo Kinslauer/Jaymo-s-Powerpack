@@ -827,6 +827,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		ThiefSneak.register();
 		RecklessBlows.register();
 		Shoves.register();
+		// fifth edition picks, the field: sight in the dark, a helping hand, kinds of damage, cover, water, breath, watch, pace, weather
+		Darkvision.register();
+		LendAHand.register();
+		DamageKinds.register();
+		UnderWater.register();
+		CatchBreath.register();
+		NightWatch.register();
+		Pace.register();
+		FieldWeather.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

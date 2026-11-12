@@ -125,7 +125,8 @@ public final class KitchenCompat {
 		}
 		try {
 			java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player> brawn = player ->
-				Stats.value(player, Stats.Stat.MIGHT) / MIGHT_PER_BRAWN + (Skills.rank(player, Skills.Perk.PACKHORSE) > 0 ? 1 : 0);
+				Stats.value(player, Stats.Stat.MIGHT) / MIGHT_PER_BRAWN + (Skills.rank(player, Skills.Perk.PACKHORSE) > 0 ? 1 : 0)
+					+ LendAHand.brawn(player);
 			Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("addBrawn", java.util.function.ToIntFunction.class).invoke(null, brawn);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for strength to ease hauling (needs 0.5.36): {}", e.toString());

@@ -1,0 +1,7 @@
+{
+  "values": [
+    { "id": "jaymoskingdoms:spirit_javelin", "required": false },
+    { "id": "jaymoskingdoms:harpoon", "required": false },
+    { "id": "weaponmod:bullet", "required": false }
+  ]
+}

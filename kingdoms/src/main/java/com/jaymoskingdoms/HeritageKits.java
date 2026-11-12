@@ -537,10 +537,8 @@ public final class HeritageKits {
 		if (!(entity instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) {
 			return;
 		}
-		if (kit.has(Perk.NIGHT_EYES) && dark(player) || kit.has(Perk.DEEP_EYES) && !level.canSeeSky(player.blockPosition().above())
-			|| kit.has(Perk.MOONSIGHT) && night(player)) {
-			player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, EYES_TICKS, 0, true, false, false));
-		}
+		// (the eyes' gifts, night eyes, deep eyes and moonsight, are darkvision now: grey shapes out to 16 blocks, seen on the player's
+		// own screen alone, see Darkvision; no Night Vision is given)
 		if (kit.has(Perk.AQUATIC) && player.isInWater()) {
 			player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, Heritage.TICK_EVERY * 3, 0, true, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, Heritage.TICK_EVERY * 3, 0, true, false, false));

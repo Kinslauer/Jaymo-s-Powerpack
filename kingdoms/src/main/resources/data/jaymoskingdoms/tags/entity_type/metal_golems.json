@@ -1,0 +1,8 @@
+{
+  "values": [
+    "minecraft:iron_golem",
+    { "id": "jaymoskingdoms:clockwork_golem", "required": false },
+    { "id": "jaymoskingdoms:redstone_golem", "required": false },
+    { "id": "jaymoskingdoms:town_golem", "required": false }
+  ]
+}

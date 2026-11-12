@@ -84,6 +84,8 @@ public final class Notice {
 		float c = LEAST + WITS * Saves.share(player, Stats.Stat.WITS);
 		if (player.isShiftKeyDown()) {
 			c += SNEAKING;
+		} else if (Pace.slow(player)) {
+			c += Pace.NOTICING;
 		}
 		if (player.isSprinting() || player.getVehicle() != null && player.getVehicle().getDeltaMovement().horizontalDistance() > HARD_RIDE) {
 			c *= RUSHING;

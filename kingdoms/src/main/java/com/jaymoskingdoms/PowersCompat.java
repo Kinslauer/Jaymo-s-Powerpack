@@ -3527,4 +3527,37 @@ public final class PowersCompat {
 		}
 		return false;
 	}
+
+	// ---- (fifth edition) lifting together: whether Powers' Carry has {@code entity} holding someone up -----------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle carrying, dragged;
+	private static boolean lookedForCarry;
+
+	private static void lookForCarry() {
+		if (lookedForCarry) {
+			return;
+		}
+		lookedForCarry = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+				Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+				java.lang.invoke.MethodType type = java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class);
+				carrying = lookup.findStatic(carry, "isCarrying", type);
+				dragged = lookup.findStatic(carry, "isDragged", type);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' carrying (older Powers?)", e);
+			}
+		}
+	}
+
+	/** Whether {@code who} has someone or something in their arms (Powers' Carry, a body or a block), or is dragging a downed body. */
+	public static boolean carrying(net.minecraft.world.entity.Entity who) {
+		lookForCarry();
+		try {
+			return carrying != null && ((boolean)carrying.invoke(who) || (boolean)dragged.invoke(who));
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

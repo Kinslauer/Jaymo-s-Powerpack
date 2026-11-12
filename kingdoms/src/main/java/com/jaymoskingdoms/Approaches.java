@@ -1470,7 +1470,7 @@ public final class Approaches {
 					}
 					reply(level, a, k + "paid." + temper, Speech.GOLD);
 				} else if (option == 1) {
-					if (random.nextFloat() < HAGGLE_CHANCE[tv] + Charm.sway(a.mob, player)) {
+					if (random.nextFloat() < Math.min(0.95F, HAGGLE_CHANCE[tv] + Charm.sway(a.mob, player) + LendAHand.haggle(level, player))) {
 						int half = Currencies.fine(level.getServer(), player, f, Math.max(1, a.price / 2));
 						toTreasury(level, f, half);
 						reply(level, a, k + "haggled." + temper, Speech.WHITE, Currencies.asked(level.getServer(), f, half));

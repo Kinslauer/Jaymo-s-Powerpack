@@ -222,8 +222,8 @@ public final class Lockpicking {
 		PICKING.put(sp.getUUID(), lockPos);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
-		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp) * LendAHand.lockWidth(sp);
+		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp);
 		ServerPlayNetworking.send(sp, new Open(lockPos, lock.kind(), lock.level(), lock.seed(), width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
 		return InteractionResult.SUCCESS;
@@ -311,8 +311,8 @@ public final class Lockpicking {
 		PICKING.put(sp.getUUID(), at);
 		int prowess = Skills.rank(sp, Skills.Perk.LOCKPICKING);
 		int practice = Math.min(Skills.MAX_LEVEL, Skills.of(sp).level(Skills.Pillar.STEALTH));
-		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp);
-		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess);
+		float width = (1.0F + PRACTICE_PER_LEVEL * practice) * (1.0F + PROWESS_WIDTH * prowess) * Blessings.lockWidth(sp) * LendAHand.lockWidth(sp);
+		float strain = Math.max(0.2F, 1.0F - PROWESS_STRAIN * prowess) * LendAHand.lockStrain(sp);
 		ServerPlayNetworking.send(sp, new Open(at, kind.ordinal(), level, seed, width, strain, prowess >= PROWESS_FEEL,
 			prowess >= PROWESS_FORGIVE ? 1 : 0, picks));
 		return true;

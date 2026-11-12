@@ -5,7 +5,8 @@
 	"client": [
 		"LockedInputMixin",
 		"LockedActionsMixin",
-		"SoundEngineMixin"
+		"SoundEngineMixin",
+		"DarkvisionMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }
