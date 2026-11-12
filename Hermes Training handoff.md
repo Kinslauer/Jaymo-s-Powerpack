@@ -74,3 +74,48 @@ which the cloud thread couldn't.
 
 Write the result into the vault (a note, or a line under the task), run `python tools/vault_sync.py`, and tell Andy
 in one short Discord post or here. The cloud thread reads the vault, so anything written there reaches it.
+
+## New (Nov 12): teach YOUTH to open Discord threads
+
+**What happened.** Nov 12, 6:22 PM, in parthenon > Dashboard, Tiv told YOUTH "Okay open a new experiment thread and
+log this there for later." YOUTH made a vault Inbox task (`omniroute-ai-gateway-experiment`), synced, and said
+"Done". No Discord thread was made. Tiv's wording was fine; YOUTH got it wrong for two reasons:
+1. **No tool.** Hermes has no agent tool that opens a Discord thread. Its Discord docs list only gateway behaviour
+   (`auto_thread` on @mention in text channels, the user's `/thread` command, forum posts the gateway makes on its
+   own). So YOUTH couldn't do it, and instead of saying so it did something else and called it done.
+2. **Its rules point at the vault.** The Nov 10 Hard rule "Every ask becomes an Inbox task ... the same turn" makes
+   the vault YOUTH's answer to any "log this".
+
+**The tool.** PR (branch `claude/project-thread-xamylw`) adds `tools/discord_thread.py`. It uses YOUTH's token from
+`KANBAN_BOT_TOKEN` (already set on the PC) and never prints it. Asked from inside a forum post (like Dashboard), it
+makes a new post in the same forum (parthenon); asked in a text channel, a new public thread. Prints the link last.
+
+Steps for the PC Claude (tick each):
+- [ ] After Andy merges the PR, `git pull` in `E:/Origins Mod`. Test once without posting:
+      `py -3 tools/discord_thread.py --in 1570579626151903354 --title "OmniRoute experiment" --message "test" --dry-run`
+      (that id is the Dashboard thread). It should say "Would make a new post ... in forum #parthenon".
+- [ ] Check YOUTH's bot role can **Create Posts** in parthenon (and Create Public Threads, Send Messages in Threads
+      elsewhere). A 403 from the script means it can't. Tell Andy which permission to tick; don't change roles yourself.
+- [ ] Make the real post for Tiv's ask (Tiv already asked for it, and parthenon is the private bot forum, not a public
+      Tenbuki channel): title "OmniRoute experiment", message = the "What's wanted" and "Initial assessment" parts of
+      `Inbox/omniroute-ai-gateway-experiment.md` plus the repo link. Reply in Dashboard with the new link. Add
+      `thread: <new id>` to that Inbox card and keep the card (it tracks the evaluation).
+- [ ] Add a YOUTH skill `E:/hermes/skills/discord-thread/SKILL.md` (Hermes skill format, look at an existing one):
+      when to use it (someone in Discord says thread / topic / post / "open a new X thread"), the command above,
+      `--in` = the channel or thread id the ask came from, a short clear title, `--message-file` for long text,
+      `--tag` if parthenon requires a tag, and "reply with the link it prints".
+- [ ] Add this to the Hard rules in `E:/hermes/SOUL.md` (backup first), then `hermes sessions refresh-prompts`:
+
+```
+Discord threads (Andy, 2026-11-12)
+- In Discord, "thread", "topic" or "post" means a Discord thread. When someone asks you to open, start or make one,
+  make it with the discord-thread skill (tools/discord_thread.py) and reply with its link. A vault Inbox task is
+  not a thread.
+- Put things in the vault only when someone asks for the vault (Inbox, task, card, Kanban, "for a bot"), or as well
+  as the thread when the ask is work a bot should pick up. "Log this there" means log it in the thread.
+- If you can't do what was asked (no tool, a permission error), say so and say what you did instead. Never answer
+  "Done" for something other than what was asked.
+```
+- [ ] Test it: in Dashboard, ask YOUTH "open a new test thread called Thread test and put hello in it". It should
+      reply with a link to a new parthenon post. Delete the test post afterwards.
+- [ ] Write one line per box here, run `python tools/vault_sync.py`, tell Andy in one short post.
