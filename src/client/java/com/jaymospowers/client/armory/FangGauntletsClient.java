@@ -261,12 +261,20 @@ public final class FangGauntletsClient {
 	}
 
 	/** One gauntlet (or, {@code kind} above 0, one of boxing's), on the arm the pose stack is at (its pivot). */
-	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind) {
+	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind, float fold,
+		boolean across) {
 		build();
 		buildBoxing();
 		poseStack.pushPose();
 		float middle = slim ? SLIM_ARM_MIDDLE : WIDE_ARM_MIDDLE;
 		poseStack.translate((right ? -middle : middle) / 16.0F, 0.0F, 0.0F);
+		if (fold != 0.0F) {
+			// a boxer's elbow is bent (boxing/BoxingPoses): the gear turns with the forearm, about the elbow
+			float elbow = com.jaymospowers.client.boxing.BoxingPoses.ELBOW / 16.0F;
+			poseStack.translate(0.0F, elbow, 0.0F);
+			poseStack.rotateDegrees(across ? Axis.ZP : Axis.XP, fold * Mth.RAD_TO_DEG);
+			poseStack.translate(0.0F, -elbow, 0.0F);
+		}
 		if (kind <= 0 || kind > BOXING_TEXTURES.length) {
 			collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
 		} else {
@@ -290,7 +298,7 @@ public final class FangGauntletsClient {
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
-		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()));
+		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()), 0.0F, false);
 		poseStack.popPose();
 	}
 
@@ -317,7 +325,10 @@ public final class FangGauntletsClient {
 				poseStack.pushPose();
 				body.root().translateAndRotate(poseStack);
 				arm.translateAndRotate(poseStack);
-				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT);
+				com.jaymospowers.client.boxing.BoxingPoses.Bends bends = state.getData(com.jaymospowers.client.boxing.BoxingPoses.BENDS);
+				float fold = bends == null ? 0.0F : right ? bends.right() : bends.left();
+				boolean across = bends != null && (right ? bends.rightAcross() : bends.leftAcross());
+				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT, fold, across);
 				poseStack.popPose();
 			}
 		}
