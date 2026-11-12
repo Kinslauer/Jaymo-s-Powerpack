@@ -112,5 +112,6 @@ public final class WildRenderer<T extends Mob & WildLook> extends MobRenderer<T,
 			null, null);
 		// (0.7.610) the grizzly mini-boss, by its own model and poses
 		EntityRenderers.register(Wild.GRIZZLY, GrizzlyRenderer::new);
+		EntityRenderers.register(Wild.MUSKOX, MuskoxRenderer::new);
 	}
 }
