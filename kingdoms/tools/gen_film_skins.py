@@ -7,7 +7,7 @@ the Grue:
   a teal gown with bell sleeves, a grey shawl.
 - Varro: a warlord, cropped grey hair, a short beard and a scar, a red tunic and a war belt (he wears iron plate over it).
 - The sorcerer: a hood and robe of near-black purple, a grey face, eyes that glow violet, clawed grey hands.
-- The fifth: a bone-white hooded cloak over grey wrappings, a face in shadow, so that he looks like none of the others.
+- The fifth: the Costume Table's white suit and hood (read from its textures), a face in shadow, a white cape.
 - Soldiers (soldier_0-2): hearthlanders in padded coats under iron harness and open helms (painted on, so it bends with them).
 The sorcerer's living host, and the dead he raises:
 - Orcs (orc_0-2): an in-game orc's green under an orc war camp grunt's clothes, the real orcs' marks and scars painted
@@ -436,45 +436,54 @@ def sorcerer():
     save(img, "sorcerer")
 
 
+COSTUME = "../src/main/resources/assets/jaymospowers/textures/entity/costume/"
+# DyeColor.WHITE's texture colour: the Costume Table tints its grey mask textures with it
+COSTUME_WHITE = (0xF9, 0xFF, 0xFE)
+
+
+def costume_layer(kind, name, tint):
+    """One of the Costume Table's greyscale mask textures (jaymospowers: textures/entity/costume/<kind>/<name>.png) tinted
+    by a dye colour, as the Costume Table's renderer tints it."""
+    mask = Image.open(COSTUME + kind + "/" + name + ".png").convert("RGBA")
+    out = Image.new("RGBA", mask.size, (0, 0, 0, 0))
+    src, dst = mask.load(), out.load()
+    for y in range(mask.size[1]):
+        for x in range(mask.size[0]):
+            r, g, b, a = src[x, y]
+            if a:
+                dst[x, y] = (r * tint[0] // 255, g * tint[1] // 255, b * tint[2] // 255, a)
+    return out
+
+
 def stranger():
-    """The fifth (Andy, 2026-11-11): the white cloak's first wearer. A hood and cloak of bone white over grey wrappings,
-    the face lost in the hood, nothing on him that any of the four spirits wears. The cloak itself (the film actor's
-    cape and tethers) is painted from the cloth patch."""
+    """The fifth (Andy, 2026-11-11): "Quiet in the actual white costume". His suit is read from the Costume Table: the
+    plain bodysuit cut with the hood, both dyed white, as that table makes them (its mask textures, tinted the way its
+    renderer tints them), over a bare skin with the face lost in the hood. The cloak itself (the film actor's cape and
+    tethers) is painted from the cloth patch."""
     rnd = random.Random(9106)
     img = blank()
     cloth = (226, 224, 214)
-    wrap = (128, 130, 134)
-    face(img, rnd, (176, 140, 112), (60, 56, 52), (60, 60, 60), shadow=True)
-    box(img, BODY, wrap, 6, rnd)
-    for arm in arms(False):
-        box(img, arm, wrap, 6, rnd)
-        # bindings up the forearm
-        for side in SIDES:
-            x0, y0, w, h = arm[side]
-            for y in (y0 + 6, y0 + 8):
-                paint(img, (x0, y, w, 1), shade(cloth, -30), 4, rnd)
-    for leg in LEGS:
-        box(img, leg, shade(wrap, -20), 6, rnd)
-    boots(img, rnd, (86, 86, 88))
-    hands(img, rnd, shade(wrap, -30))
-    # the cloak's mantle over the shoulders and chest, open down the front
-    box(img, JACKET, cloth, 6, rnd)
-    jx, jy, jw, jh = JACKET["front"]
-    for y in range(jy + 3, jy + 12):
-        for x in (jx + 3, jx + 4):
-            img.putpixel((x, y), (0, 0, 0, 0))
-    for y in range(jy + 6, jy + 12):
-        for x in (jx + 2, jx + 5):
-            img.putpixel((x, y), (0, 0, 0, 0))
-    for sleeve in sleeves(False):
-        rows(img, sleeve, 0, 5, cloth, 6, rnd)
-        paint(img, sleeve["top"], cloth, 6, rnd)
-    hood(img, rnd, cloth, open_face=False)
-    hx, hy, hw, hh = HAT["front"]
-    for y in range(hy + 2, hy + 8):
-        px(img, hx, y, shade(cloth, -26))
-        px(img, hx + 7, y, shade(cloth, -26))
-    belt(img, rnd, (70, 72, 78), SILVER)
+    skin = (176, 140, 112)
+    face(img, rnd, skin, (60, 56, 52), (60, 60, 60), shadow=True)
+    for part in [BODY] + arms(False) + LEGS:
+        box(img, part, skin, 4, rnd)
+    # the suit: the table's bodysuit, primary then secondary, over the body, arms and legs (wide arms; the base layer's boxes)
+    for which in ("primary", "secondary"):
+        img.alpha_composite(costume_layer("suit", "bodysuit_" + which, COSTUME_WHITE))
+    # the hood over the head (the table's hood, in the same head box), then the face dark in it again
+    hood_img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    for which in ("primary", "secondary"):
+        hood_img.alpha_composite(costume_layer("mask", "hood_" + which, COSTUME_WHITE))
+    head = hood_img.crop((0, 0, 32, 16))
+    # (the hood's crown is drawn over the whole top of the head, whatever the table's texture leaves clear)
+    paint(img, HEAD["top"], cloth, 4, rnd)
+    img.alpha_composite(head, (0, 0))
+    fx, fy, fw, fh = HEAD["front"]
+    for y in range(fy + 2, fy + 6):
+        for x in range(fx + 1, fx + 7):
+            px(img, x, y, shade(skin, -78))
+    px(img, fx + 2, fy + 4, shade(skin, -30))
+    px(img, fx + 5, fy + 4, shade(skin, -30))
     # the cloth: brighter at the shoulders, greyer and ragged toward the hem
     x0, y0, w, h = CLOTH_PATCH
     for y in range(y0, y0 + h):
