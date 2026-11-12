@@ -58,7 +58,7 @@ public final class BandLeaders {
 		if (m instanceof Worker w && CampChiefs.isRole(w.role())) {
 			return true;
 		}
-		return Captains.is(m) || Illagers.warlord(m) || m instanceof Raider r && r.isCaptain() || RivalParties.leads(m);
+		return Captains.is(m) || Illagers.warlord(m) || m instanceof Raider r && r.isCaptain() || RivalParties.leads(m) || Veterans.leading(m);
 	}
 
 	/** The leader of {@code m}'s band near it, or null. */

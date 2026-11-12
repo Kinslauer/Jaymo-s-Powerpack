@@ -488,6 +488,8 @@ public final class Quests {
 			Speech.GOLD);
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.accepted", title(q)).withStyle(ChatFormatting.YELLOW));
 		level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+		// a band that saw it may be waiting where you're headed (docs/Pawn-Plan.md row B3)
+		Wayfinding.questTaken(level, player, q);
 		sync(player, true);
 	}
 

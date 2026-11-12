@@ -54,8 +54,10 @@ import org.jspecify.annotations.Nullable;
  * One knack each; a new book replaces the old.</li>
  * <li><b>Tongue-speaker</b>: with them by ({@link #NEAR}) you understand every tongue ({@link Languages#understands}).</li>
  * <li><b>Field medic</b>: minds the fallen whatever their leanings, and gets them up twice as fast ({@link FieldMedics}).</li>
- * <li><b>Forager</b>: on the road outdoors finds what the land gives ({@link #forage}) now and then and hands it over.</li>
- * <li><b>Haggler</b>: by you at a trade, every price drops {@link #HAGGLE} (at least one).</li>
+ * <li><b>Forager</b>: on the road outdoors finds what the land gives ({@link #forage}) now and then and hands it over, and
+ * points out ore and herbs it can see ({@link #spot}: it looks and points, and says what it is).</li>
+ * <li><b>Haggler</b>: by you at a trade, every price drops {@link #HAGGLE} (at least one); and buys your junk (use it on
+ * them: rotten flesh, bones, string and the like, {@link #JUNK_PER_COIN} to a coin) to sell on.</li>
  * <li><b>Packhorse</b>: carries what you throw at their feet ({@link #PACK} stacks) and gives it all back when you sit down
  * together ({@link TableTalk}), or drops it where they fall.</li>
  * <li><b>The quiet one</b>: when you sneak, they sneak, and foes farther than {@link #QUIET_SEEN} lose them.</li>
@@ -63,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  * <b>Foe specialists</b>: a band member may be one ({@link #FOE_TRACKER}, {@link #FOE_MEDIC}, {@link #FOE_TONGUE}, rolled
  * once when he first fights): a <b>tracker</b> keeps after a player he lost ({@link #TRACK_FOR}, {@link #TRACK_RANGE}), a
  * <b>medic</b> minds his fallen as a companion medic does, and a <b>tongue-speaker</b> understands your companions' calls
- * and warns the mate they're coming for ({@link #overheard}).
+ * and warns the mate they're coming for ({@link #overheard}); a camp's tongue-speaker also bargains with you ({@link Parleys}).
  */
 public final class Specialties {
 	public enum Specialty {
@@ -107,6 +109,12 @@ public final class Specialties {
 	static final int BRACED = 60;
 	/** Looked over this often (ticks). */
 	static final int EVERY = 20;
+	/** A forager points out ore or herbs it can see this near (blocks), at most this often (ticks). */
+	static final int SPOT_RANGE = 10, SPOT_EVERY = 400;
+	/** Any companion this near a quest's place (blocks) points out its levers and buttons. */
+	static final double QUEST_NEAR = 48.0;
+	/** A haggler gives an emerald's worth for this much junk (what a cleric gives for rotten flesh). */
+	static final int JUNK_PER_COIN = 32;
 
 	/** On a fighter: its specialty key, or "" (rolled, none). Saved. */
 	public static final AttachmentType<String> SPECIALTY = AttachmentRegistry.create(JaymosKingdoms.id("comrade_specialty"),
@@ -127,6 +135,8 @@ public final class Specialties {
 	private static final Map<UUID, Trail> TRAILS = new HashMap<>();
 	private static final Map<UUID, Long> FORAGED = new HashMap<>();
 	private static final Map<UUID, int[]> UNDERSTOOD = new HashMap<>();
+	private static final Map<UUID, Long> SPOTTED = new HashMap<>(), LEVERED = new HashMap<>();
+	private static final Map<UUID, java.util.Set<BlockPos>> SHOWN = new HashMap<>();
 
 	private Specialties() {
 	}
@@ -137,6 +147,9 @@ public final class Specialties {
 			TRAILS.clear();
 			FORAGED.clear();
 			UNDERSTOOD.clear();
+			SPOTTED.clear();
+			LEVERED.clear();
+			SHOWN.clear();
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || world.isClientSide() || !(player instanceof ServerPlayer sp) || player.isSpectator()) {
@@ -146,6 +159,10 @@ public final class Specialties {
 			Specialty taught = of(held);
 			if (taught != null && entity instanceof Mob m && sp.getUUID().equals(Bonds.lordOf(m)) && !Downed.isDowned(m)) {
 				teach(sp, m, held, taught);
+				return InteractionResult.SUCCESS;
+			}
+			if (junk(held) && entity instanceof Mob m && is(m, Specialty.HAGGLER) && sp.getUUID().equals(Bonds.lordOf(m)) && !Downed.isDowned(m)) {
+				buyJunk(sp, m, held);
 				return InteractionResult.SUCCESS;
 			}
 			if (entity instanceof Villager v && taught == null) {
@@ -323,9 +340,11 @@ public final class Specialties {
 				continue;
 			}
 			for (Mob m : Bonds.companions(player, 32.0)) {
+				levers(player, m, time);
 				Specialty s = of(m);
 				if (s == Specialty.FORAGER) {
 					forage(player, m, time);
+					spot(player, m, time);
 				} else if (s == Specialty.PACKHORSE) {
 					pack(player, m);
 				} else if (s == Specialty.QUIET) {
@@ -351,8 +370,8 @@ public final class Specialties {
 		}
 	}
 
-	/** A band member's specialty, rolled once when he first fights. */
-	private static void roll(Mob m) {
+	/** A band member's specialty, rolled once when he first fights or a player comes near him ({@link Parleys}). */
+	static void roll(Mob m) {
 		if (m.hasAttached(SPECIALTY) || !FoeLore.keeps(Comrades.side(m))) {
 			return;
 		}
@@ -413,6 +432,118 @@ public final class Specialties {
 		}
 		m.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Callouts.say(m, "spec.forage", player, false, stack.getHoverName());
+	}
+
+	/** A forager points out the nearest ore or herb it can see and hasn't shown you yet. */
+	private static void spot(ServerPlayer player, Mob m, long time) {
+		if (time - SPOTTED.getOrDefault(m.getUUID(), -SPOT_EVERY * 2L) < SPOT_EVERY || Comrades.target(m) != null) {
+			return;
+		}
+		SPOTTED.put(m.getUUID(), time);
+		BlockPos best = pointOut(player, m, s -> ore(s) || herb(s));
+		if (best != null) {
+			Callouts.say(m, ore(player.level().getBlockState(best)) ? "spec.ore" : "spec.herb", player, false,
+				player.level().getBlockState(best).getBlock().getName());
+		}
+	}
+
+	/**
+	 * (docs/Pawn-Plan.md row B3) Near a quest's place, any companion points out the levers, buttons and tripwires it can see:
+	 * the hidden workings of the spot.
+	 */
+	private static void levers(ServerPlayer player, Mob m, long time) {
+		if (time - LEVERED.getOrDefault(m.getUUID(), -SPOT_EVERY * 2L) < SPOT_EVERY / 4 || Comrades.target(m) != null) {
+			return;
+		}
+		boolean atQuest = false;
+		for (Quest q : Quests.log(player)) {
+			if (q.objective().pos().isPresent() && q.objective().pos().get().distSqr(player.blockPosition()) < QUEST_NEAR * QUEST_NEAR) {
+				atQuest = true;
+				break;
+			}
+		}
+		if (!atQuest) {
+			return;
+		}
+		LEVERED.put(m.getUUID(), time);
+		BlockPos best = pointOut(player, m, s -> s.getBlock() instanceof net.minecraft.world.level.block.LeverBlock
+			|| s.is(net.minecraft.tags.BlockTags.BUTTONS) || s.is(net.minecraft.world.level.block.Blocks.TRIPWIRE_HOOK)
+			|| s.is(net.minecraft.tags.BlockTags.PRESSURE_PLATES));
+		if (best != null) {
+			Callouts.say(m, "quest.lever", player, false, player.level().getBlockState(best).getBlock().getName());
+		}
+	}
+
+	private static boolean ore(net.minecraft.world.level.block.state.BlockState s) {
+		return Careers.ore(s) || s.getBlock().builtInRegistryHolder().key().identifier().getPath().endsWith("_ore");
+	}
+
+	/** {@code m} looks and points at the nearest block it can see that {@code what} picks and it hasn't shown before; null if none. */
+	private static @Nullable BlockPos pointOut(ServerPlayer player, Mob m, java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState> what) {
+		ServerLevel level = player.level();
+		java.util.Set<BlockPos> shown = SHOWN.computeIfAbsent(m.getUUID(), k -> new java.util.HashSet<>());
+		net.minecraft.world.phys.Vec3 eye = m.getEyePosition();
+		BlockPos c = m.blockPosition();
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		for (BlockPos p : BlockPos.betweenClosed(c.offset(-SPOT_RANGE, -SPOT_RANGE / 2, -SPOT_RANGE), c.offset(SPOT_RANGE, SPOT_RANGE / 2, SPOT_RANGE))) {
+			if (!what.test(level.getBlockState(p)) || shown.contains(p)) {
+				continue;
+			}
+			double d = p.distToCenterSqr(eye);
+			if (d >= bestD) {
+				continue;
+			}
+			// seen: nothing solid between its eyes and it
+			net.minecraft.world.phys.BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(eye, net.minecraft.world.phys.Vec3.atCenterOf(p),
+				net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, m));
+			if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS && !hit.getBlockPos().equals(p)) {
+				continue;
+			}
+			best = p.immutable();
+			bestD = d;
+		}
+		if (best == null) {
+			return null;
+		}
+		if (shown.size() > 128) {
+			shown.clear();
+		}
+		shown.add(best);
+		net.minecraft.world.phys.Vec3 at = net.minecraft.world.phys.Vec3.atCenterOf(best);
+		Gestures.look(m, at);
+		m.getLookControl().setLookAt(at.x, at.y, at.z);
+		m.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, at.x, at.y + 0.3, at.z, 3, 0.3, 0.3, 0.3, 0.0);
+		return best;
+	}
+
+	/** Herbs a forager knows: flowers, mushrooms, berry bushes, and any block named for herbs. */
+	private static boolean herb(net.minecraft.world.level.block.state.BlockState s) {
+		return s.is(net.minecraft.tags.BlockTags.SMALL_FLOWERS) || s.is(net.minecraft.world.level.block.Blocks.BROWN_MUSHROOM)
+			|| s.is(net.minecraft.world.level.block.Blocks.RED_MUSHROOM) || s.is(net.minecraft.world.level.block.Blocks.SWEET_BERRY_BUSH)
+			|| s.getBlock().builtInRegistryHolder().key().identifier().getPath().contains("herb");
+	}
+
+	/** What a haggler takes off your hands. */
+	static boolean junk(ItemStack s) {
+		return s.is(Items.ROTTEN_FLESH) || s.is(Items.BONE) || s.is(Items.STRING) || s.is(Items.SPIDER_EYE) || s.is(Items.POISONOUS_POTATO)
+			|| s.is(Items.WHEAT_SEEDS) || s.is(Items.DIRT) || s.is(Items.GRAVEL) || s.is(Items.COBBLESTONE) || s.is(Items.STICK);
+	}
+
+	/** A haggler buys the junk in your hand, {@link #JUNK_PER_COIN} to a coin, to sell on. */
+	private static void buyJunk(ServerPlayer player, Mob m, ItemStack held) {
+		int coins = held.getCount() / JUNK_PER_COIN;
+		if (coins <= 0) {
+			Callouts.say(m, "spec.junk.few", player, true, JUNK_PER_COIN);
+			return;
+		}
+		int took = coins * JUNK_PER_COIN;
+		held.shrink(took);
+		long milli = com.jaymoskingdoms.money.Money.worth(coins);
+		com.jaymoskingdoms.money.Money.pay(player, milli);
+		m.level().playSound(null, m.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
+		Callouts.say(m, "spec.junk", player, true, took, com.jaymoskingdoms.money.Money.text(player, milli));
 	}
 
 	/** What the land at {@code at} gives a forager, or null (bare rock, sand, ice). */

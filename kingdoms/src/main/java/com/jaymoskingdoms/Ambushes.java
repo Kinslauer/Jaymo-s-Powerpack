@@ -56,6 +56,12 @@ public final class Ambushes {
 	private static final Map<Mob, Lying> HIDING = new IdentityHashMap<>();
 	private static final Map<UUID, Long> READIED = new HashMap<>();
 	private static final Map<UUID, Long> HID = new HashMap<>();
+	/** A spotter's hush (crouched, until), a hider's high ground, nets thrown (where, until). */
+	private static final Map<Mob, Long> HUSH = new IdentityHashMap<>();
+	private static final Map<Mob, net.minecraft.core.BlockPos> RISE = new IdentityHashMap<>();
+	private static final Map<net.minecraft.core.BlockPos, Long> NETS = new HashMap<>();
+	/** How long a hush and a brace last (ticks); high ground looked for this near (blocks), at least this much higher; a net lasts (ticks); a rush (ticks). */
+	static final int HUSH_TICKS = 40, BRACE_TICKS = 200, RISE_NEAR = 8, RISE_MIN = 2, NET_TICKS = 100, RUSH_TICKS = 60;
 
 	private Ambushes() {
 	}
@@ -67,6 +73,9 @@ public final class Ambushes {
 			HIDING.clear();
 			READIED.clear();
 			HID.clear();
+			HUSH.clear();
+			RISE.clear();
+			NETS.clear();
 		});
 	}
 
@@ -85,6 +94,29 @@ public final class Ambushes {
 		if (server.getTickCount() % EVERY != 0) {
 			return;
 		}
+		HUSH.entrySet().removeIf(e -> {
+			if (e.getValue() < now || !e.getKey().isAlive()) {
+				e.getKey().setShiftKeyDown(false);
+				return true;
+			}
+			return false;
+		});
+		NETS.entrySet().removeIf(e -> {
+			if (e.getValue() >= now) {
+				return false;
+			}
+			ServerLevel level = server.overworld();
+			for (ServerLevel l : server.getAllLevels()) {
+				if (l.getBlockState(e.getKey()).is(net.minecraft.world.level.block.Blocks.COBWEB) && l.isLoaded(e.getKey())) {
+					level = l;
+					break;
+				}
+			}
+			if (level.getBlockState(e.getKey()).is(net.minecraft.world.level.block.Blocks.COBWEB)) {
+				level.removeBlock(e.getKey(), false);
+			}
+			return true;
+		});
 		READIED.values().removeIf(t -> t < now);
 		HID.values().removeIf(t -> t < now);
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -116,8 +148,15 @@ public final class Ambushes {
 				}
 				READIED.put(player.getUUID(), now + READY_GAP);
 				Callouts.say(v, "ready", foe, false, foe.getDisplayName());
+				// a hush: down low, a look to you
+				v.setShiftKeyDown(true);
+				v.getLookControl().setLookAt(player, 30.0F, 30.0F);
+				HUSH.put(v, now + HUSH_TICKS);
 				for (Villager w : yours) {
 					QuickOrders.close(w, player, READY_TICKS);
+					draw(w);
+					// braced for it
+					w.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.RESISTANCE, BRACE_TICKS, 0));
 				}
 				return;
 			}
@@ -146,7 +185,14 @@ public final class Ambushes {
 			for (Mob o : band) {
 				HIDING.put(o, l);
 				HID.put(o.getUUID(), now + HIDE_GAP);
-				hold(o);
+				// the bowmen take the high ground first
+				net.minecraft.core.BlockPos rise = Comrades.ranged(o) ? rise(level, o) : null;
+				if (rise != null) {
+					RISE.put(o, rise);
+					o.getNavigation().moveTo(rise.getX() + 0.5, rise.getY(), rise.getZ() + 0.5, 1.0);
+				} else {
+					hold(o);
+				}
 			}
 			return;
 		}
@@ -166,6 +212,7 @@ public final class Ambushes {
 			boolean gone = !m.isAlive() || m.isRemoved() || Downed.isDowned(m);
 			if (gone) {
 				HIDING.remove(m);
+				RISE.remove(m);
 				m.setShiftKeyDown(false);
 			}
 			return gone;
@@ -189,9 +236,14 @@ public final class Ambushes {
 			Mob shouter = null;
 			for (Mob m : l.band) {
 				HIDING.remove(m);
+				RISE.remove(m);
 				m.setShiftKeyDown(false);
 				if (spring && !giveUp) {
 					Comrades.aim(m, prey);
+					if (!Comrades.ranged(m)) {
+						// the hidden rush
+						m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SPEED, RUSH_TICKS, 1));
+					}
 					if (shouter == null || m.distanceToSqr(prey) < shouter.distanceToSqr(prey)) {
 						shouter = m;
 					}
@@ -199,12 +251,67 @@ public final class Ambushes {
 			}
 			if (shouter != null) {
 				Callouts.say(shouter, "ambush", prey, true, prey.getDisplayName());
+				net(shouter, prey, now);
 			}
 			return;
 		}
 		for (Mob m : l.band) {
+			net.minecraft.core.BlockPos rise = RISE.get(m);
+			if (rise != null && m.blockPosition().distSqr(rise) > 2.0 && !m.getNavigation().isDone()) {
+				// still climbing to it
+				continue;
+			}
+			RISE.remove(m);
 			hold(m);
 			m.getLookControl().setLookAt(prey, 10.0F, 10.0F);
+		}
+	}
+
+	/** Higher open ground near {@code m} it can stand on, or null. */
+	private static net.minecraft.core.@org.jspecify.annotations.Nullable BlockPos rise(ServerLevel level, Mob m) {
+		net.minecraft.core.BlockPos best = null;
+		int bestY = m.getBlockY() + RISE_MIN - 1;
+		for (int i = 0; i < 16; i++) {
+			double a = Math.PI * 2.0 * i / 16.0;
+			net.minecraft.core.BlockPos col = net.minecraft.core.BlockPos.containing(m.getX() + Math.cos(a) * RISE_NEAR, m.getY(), m.getZ() + Math.sin(a) * RISE_NEAR);
+			if (!level.isLoaded(col)) {
+				continue;
+			}
+			net.minecraft.core.BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, col);
+			if (top.getY() > bestY && top.getY() - m.getBlockY() <= RISE_NEAR) {
+				bestY = top.getY();
+				best = top;
+			}
+		}
+		return best;
+	}
+
+	/** The one who springs it throws a net over {@code prey}: a web at their feet for a few seconds. */
+	private static void net(Mob thrower, ServerPlayer prey, long now) {
+		ServerLevel level = prey.level();
+		net.minecraft.core.BlockPos at = prey.blockPosition();
+		if (!level.getBlockState(at).canBeReplaced() || thrower.distanceToSqr(prey) > 12.0 * 12.0) {
+			return;
+		}
+		level.setBlockAndUpdate(at, net.minecraft.world.level.block.Blocks.COBWEB.defaultBlockState());
+		NETS.put(at, now + NET_TICKS);
+		thrower.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		Callouts.say(thrower, "ambush.net", prey, true);
+	}
+
+	/** {@code v} takes a weapon from its pack into its hand if its hand is empty. */
+	private static void draw(Villager v) {
+		if (!v.getMainHandItem().isEmpty()) {
+			return;
+		}
+		net.minecraft.world.SimpleContainer pack = v.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			net.minecraft.world.item.ItemStack s = pack.getItem(i);
+			if (!s.isEmpty() && (s.is(net.minecraft.tags.ItemTags.SWORDS) || s.is(net.minecraft.tags.ItemTags.AXES) || s.getItem() instanceof net.minecraft.world.item.BowItem
+				|| s.getItem() instanceof net.minecraft.world.item.CrossbowItem)) {
+				v.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, pack.removeItemNoUpdate(i));
+				return;
+			}
 		}
 	}
 

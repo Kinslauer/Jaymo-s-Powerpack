@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
  */
 final class TableTalkScreen extends Screen {
 	private static final int W = 270, ROW = 22;
-	private static final String[] LEANINGS = {"biggest", "shooters", "weak", "guard", "medic", "first", "spoils", "backup"};
+	private static final String[] LEANINGS = {"biggest", "shooters", "weak", "guard", "medic", "first", "spoils", "backup", "scout"};
 
 	private final TableTalk.OpenTable ask;
 	private final List<String> seconds = new ArrayList<>();
@@ -25,7 +25,10 @@ final class TableTalkScreen extends Screen {
 	private int style;
 	private int man;
 	private int lend;
-	private boolean errand;
+	/** 0 as it is, 1 gather it, 2 a want with a purse, 3 no errands. */
+	private int errand;
+	private int purse = 1;
+	private static final int[] PURSES = {1, 3, 5, 10};
 
 	TableTalkScreen(TableTalk.OpenTable ask) {
 		super(Component.translatable("gui.jaymoskingdoms.table.title", ask.name()));
@@ -57,7 +60,7 @@ final class TableTalkScreen extends Screen {
 
 	/** The rows below the first three: his men's leaning, how they're lent, an errand. */
 	private int rows() {
-		return 3 + (this.ask.captain() ? 1 : 0) + (lends() ? 1 : 0) + (errands() ? 1 : 0);
+		return 3 + (this.ask.captain() ? 1 : 0) + (lends() ? 1 : 0) + (errands() ? 2 : 0);
 	}
 
 	static void register() {
@@ -108,8 +111,18 @@ final class TableTalkScreen extends Screen {
 	}
 
 	private Component errandLabel() {
-		return this.errand ? Component.translatable("gui.jaymoskingdoms.table.errand.yes", this.ask.errand())
-			: Component.translatable("gui.jaymoskingdoms.table.errand.no");
+		return switch (this.errand) {
+			case 1 -> Component.translatable("gui.jaymoskingdoms.table.errand.yes", this.ask.errand());
+			// (a name tag with a name on it: find that person)
+			case 2 -> this.ask.errandCount() == 0 ? Component.translatable("gui.jaymoskingdoms.table.errand.find", this.ask.errand())
+				: Component.translatable("gui.jaymoskingdoms.table.errand.want", this.ask.errandCount(), this.ask.errand());
+			case 3 -> Component.translatable("gui.jaymoskingdoms.table.errand.none");
+			default -> Component.translatable("gui.jaymoskingdoms.table.errand.no");
+		};
+	}
+
+	private Component purseLabel() {
+		return Component.translatable("gui.jaymoskingdoms.table.purse", PURSES[this.purse]);
 	}
 
 	private Component menLabel() {
@@ -147,14 +160,21 @@ final class TableTalkScreen extends Screen {
 		}
 		if (errands()) {
 			addRenderableWidget(Button.builder(errandLabel(), b -> {
-				this.errand = !this.errand;
+				this.errand = (this.errand + 1) % 4;
+				if (this.errand == 1 && !this.ask.gather()) {
+					this.errand = 2;
+				}
 				b.setMessage(errandLabel());
+			}).bounds(x, y + ROW * row++, 110, 16).build());
+			addRenderableWidget(Button.builder(purseLabel(), b -> {
+				this.purse = (this.purse + 1) % PURSES.length;
+				b.setMessage(purseLabel());
 			}).bounds(x, y + ROW * row, 110, 16).build());
 		}
 		int by = top() + height() - 24;
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.table.done"), b -> {
 			ClientPlayNetworking.send(new TableTalk.SetTable(this.ask.entityId(), this.second == 0 ? "" : this.seconds.get(this.second), this.chatter,
-				this.style, this.men.get(this.man), lends() ? this.lend : -1, this.errand));
+				this.style, this.men.get(this.man), lends() ? this.lend : -1, this.errand, this.purse));
 			onClose();
 		}).bounds(left() + 10, by, 90, 16).build());
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.table.leave"), b -> onClose()).bounds(left() + W - 100, by, 90, 16).build());
@@ -182,7 +202,8 @@ final class TableTalkScreen extends Screen {
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.ask.lend"), x + 10, ry + ROW * row++, W - 140, Ui.TEXT);
 		}
 		if (errands()) {
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.ask.errand"), x + 10, ry + ROW * row, W - 140, Ui.TEXT);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.ask.errand"), x + 10, ry + ROW * row++, W - 140, Ui.TEXT);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.ask.purse"), x + 10, ry + ROW * row, W - 140, Ui.TEXT);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}

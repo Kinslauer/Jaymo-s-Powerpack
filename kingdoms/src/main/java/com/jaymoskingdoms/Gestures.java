@@ -174,11 +174,14 @@ public final class Gestures {
 		}
 	}
 
+	/** A scout ranges this far ahead of you (blocks). */
+	static final double SCOUT_AHEAD = 8.0;
+
 	private static void look(Mob m, LivingEntity at) {
 		LOOKS.put(m, new Look(at, at.getEyePosition(), m.level().getGameTime() + LOOK_TICKS));
 	}
 
-	private static void look(Mob m, Vec3 to) {
+	static void look(Mob m, Vec3 to) {
 		LOOKS.put(m, new Look(null, to, m.level().getGameTime() + LOOK_TICKS));
 	}
 
@@ -237,6 +240,18 @@ public final class Gestures {
 				}
 			}
 			case BACKUP -> look(m, player);
+			case SCOUT -> {
+				// to the skyline, and ranging a little ahead of you when you're on the move
+				Vec3 ahead = player.getLookAngle().multiply(1.0, 0.0, 1.0);
+				if (ahead.lengthSqr() > 1.0E-4) {
+					ahead = ahead.normalize();
+					look(m, new Vec3(eye.x + ahead.x * 40.0, eye.y + 6.0, eye.z + ahead.z * 40.0));
+					if (player.getDeltaMovement().horizontalDistanceSqr() > 0.004 && QuickOrders.stance(m) == null) {
+						Vec3 to = player.position().add(ahead.scale(SCOUT_AHEAD));
+						m.getNavigation().moveTo(to.x, to.y, to.z, 0.7);
+					}
+				}
+			}
 		}
 	}
 }

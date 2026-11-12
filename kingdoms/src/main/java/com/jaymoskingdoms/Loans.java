@@ -111,13 +111,39 @@ public final class Loans {
 		static final News NONE = new News(0L, List.of(), List.of(), List.of(), 0);
 	}
 
-	/** On a companion a camp took: the camp, its price (milli), when. Saved. */
-	public record Taken(int camp, long ransom, long since) {
+	/** On a companion back from a loan: the tale it tells at your next rest together ({@link #tell}). Saved. */
+	static final AttachmentType<News> TALE = AttachmentRegistry.create(JaymosKingdoms.id("comrade_loan_tale"),
+		builder -> builder.persistent(News.CODEC));
+
+	/** On a companion a camp took: the camp, its price (milli), when, and the job it'll take instead (item id and count). Saved. */
+	public record Taken(int camp, long ransom, long since, String job, int jobCount) {
 		static final Codec<Taken> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("camp").forGetter(Taken::camp),
 			Codec.LONG.fieldOf("ransom").forGetter(Taken::ransom),
-			Codec.LONG.optionalFieldOf("since", 0L).forGetter(Taken::since)).apply(i, Taken::new));
+			Codec.LONG.optionalFieldOf("since", 0L).forGetter(Taken::since),
+			Codec.STRING.optionalFieldOf("job", "minecraft:iron_ingot").forGetter(Taken::job),
+			Codec.INT.optionalFieldOf("job_count", 12).forGetter(Taken::jobCount)).apply(i, Taken::new));
 	}
+
+	/** On a companion: a want its owner left (bring {@code count} of {@code item}), how many it has, and the purse (milli) for whoever brings them. Saved. */
+	public record Want(String item, int count, int got, long purse) {
+		static final Codec<Want> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.STRING.fieldOf("item").forGetter(Want::item),
+			Codec.INT.fieldOf("count").forGetter(Want::count),
+			Codec.INT.optionalFieldOf("got", 0).forGetter(Want::got),
+			Codec.LONG.fieldOf("purse").forGetter(Want::purse)).apply(i, Want::new));
+	}
+
+	/** What a camp asks instead of coin: a job's worth of goods (item id, count). */
+	static final String[][] JOBS = {{"minecraft:iron_ingot", "12"}, {"minecraft:bread", "24"}, {"minecraft:arrow", "32"}, {"minecraft:leather", "16"},
+		{"minecraft:gold_ingot", "8"}};
+	/** A captive is sent with the demand after this long taken (ticks), to an owner within this (blocks); it waits this long (ticks). */
+	static final long DEMAND_AFTER = 6000L, DEMAND_WAIT = 2400L;
+	static final double DEMAND_RANGE = 160.0, BRING_NEAR = 4.0;
+	/** Purses an owner can leave with a want (emeralds' worth). */
+	static final int[] PURSES = {1, 3, 5, 10};
+	/** A well-spoken-of companion (this many good words) waits at a tavern while its owner's away. */
+	static final int TAVERN_RATING = 3;
 
 	public static final AttachmentType<Owner> OWNER = AttachmentRegistry.create(JaymosKingdoms.id("comrade_owner"),
 		builder -> builder.persistent(Owner.CODEC));
@@ -134,6 +160,8 @@ public final class Loans {
 	/** Good words had from borrowers. Saved. */
 	public static final AttachmentType<Integer> RATING = AttachmentRegistry.create(JaymosKingdoms.id("comrade_rating"),
 		builder -> builder.persistent(Codec.INT));
+	public static final AttachmentType<Want> WANT = AttachmentRegistry.create(JaymosKingdoms.id("comrade_want"),
+		builder -> builder.persistent(Want.CODEC));
 	/** The item an errand gathers (its id). Saved. */
 	public static final AttachmentType<String> ERRAND = AttachmentRegistry.create(JaymosKingdoms.id("comrade_errand"),
 		builder -> builder.persistent(Codec.STRING));
@@ -145,14 +173,14 @@ public final class Loans {
 
 	/** The hire screen (mode 0) or the parting screen (mode 1). */
 	public record OpenLoan(int entityId, int mode, Component name, Component owner, String main, String second, int steps, int rating,
-		int fight, int work, Component gift) implements CustomPacketPayload {
+		int fight, int work, Component gift, Component want) implements CustomPacketPayload {
 		public static final Type<OpenLoan> TYPE = new Type<>(JaymosKingdoms.id("loan_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, OpenLoan> CODEC = new StreamCodec<>() {
 			@Override
 			public OpenLoan decode(RegistryFriendlyByteBuf buf) {
 				return new OpenLoan(buf.readVarInt(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf),
 					ComponentSerialization.STREAM_CODEC.decode(buf), buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(),
-					buf.readVarInt(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf));
+					buf.readVarInt(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf), ComponentSerialization.STREAM_CODEC.decode(buf));
 			}
 
 			@Override
@@ -168,6 +196,7 @@ public final class Loans {
 				buf.writeVarInt(p.fight);
 				buf.writeVarInt(p.work);
 				ComponentSerialization.STREAM_CODEC.encode(buf, p.gift);
+				ComponentSerialization.STREAM_CODEC.encode(buf, p.want);
 			}
 		};
 
@@ -201,6 +230,9 @@ public final class Loans {
 	private static final Map<Villager, Long> PARTING = new java.util.IdentityHashMap<>();
 	private static final Map<UUID, Long> WORKED = new HashMap<>();
 	private static final Map<UUID, Long> RANSOMED = new HashMap<>();
+	/** Captives sent to their owner with the demand: until when; and those that have been sent (once a capture). */
+	private static final Map<Villager, Long> DEMANDS = new java.util.IdentityHashMap<>();
+	private static final Set<UUID> DEMANDED = new HashSet<>();
 
 	private Loans() {
 	}
@@ -229,6 +261,8 @@ public final class Loans {
 			PARTING.clear();
 			WORKED.clear();
 			RANSOMED.clear();
+			DEMANDS.clear();
+			DEMANDED.clear();
 		});
 		UseEntityCallback.EVENT.register(Loans::use);
 	}
@@ -249,11 +283,8 @@ public final class Loans {
 		return party == null ? null : RivalParties.side(e, party);
 	}
 
-	/** (Comrades.busy) taken and set to work, or hired to work: they don't fight. */
+	/** (Comrades.busy) hired to work: they don't fight. */
 	static boolean working(Mob m) {
-		if (m.hasAttached(TAKEN)) {
-			return true;
-		}
 		Loan loan = m.getAttached(LOAN);
 		return loan != null && loan.work();
 	}
@@ -304,19 +335,37 @@ public final class Loans {
 
 	// ---- the table's answers -----------------------------------------------------------------------------------------
 
-	/** (TableTalk) how the owner wants {@code m} lent (0 when away, 1 never, 2 left at a tavern now), and an errand from {@code hand}. */
-	static void fromTable(ServerPlayer player, Mob m, int lend, boolean errand) {
+	/**
+	 * (TableTalk) how the owner wants {@code m} lent (0 when away, 1 never, 2 left at a tavern now), and an errand from
+	 * what's in hand: 0 as it is, 1 gather it while I'm away, 2 a want (bring this many of it) with purse {@code purse}
+	 * ({@link #PURSES}), 3 no errands.
+	 */
+	static void fromTable(ServerPlayer player, Mob m, int lend, int errand, int purse) {
 		if (!(m instanceof Villager v)) {
 			return;
 		}
 		stamp(v, player);
 		lend = Math.max(0, Math.min(2, lend));
-		if (errand) {
-			Item item = player.getMainHandItem().getItem();
-			if (gatherable(item)) {
-				v.setAttached(ERRAND, BuiltInRegistries.ITEM.getKey(item).toString());
-				Callouts.say(v, "loan.errand", player, true, player.getMainHandItem().getHoverName());
+		ItemStack hand = player.getMainHandItem();
+		if (errand == 1 && gatherable(hand.getItem())) {
+			v.setAttached(ERRAND, BuiltInRegistries.ITEM.getKey(hand.getItem()).toString());
+			Callouts.say(v, "loan.errand", player, true, hand.getHoverName());
+		} else if (errand == 2 && !hand.isEmpty() && !Coinage.isMoney(hand)) {
+			long cost = Money.worth(PURSES[Math.max(0, Math.min(PURSES.length - 1, purse))]);
+			refundWant(player, v);
+			if (!Money.charge(player, cost)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.loan.short", Money.text(player, cost)).withStyle(ChatFormatting.GRAY));
+			} else if (person(hand) != null) {
+				// someone to find: brought to them by whoever has them on hire
+				v.setAttached(WANT, new Want(PERSON + person(hand), 1, 0, cost));
+				Callouts.say(v, "want.person", player, true, person(hand), Money.text(player, cost));
+			} else {
+				v.setAttached(WANT, new Want(BuiltInRegistries.ITEM.getKey(hand.getItem()).toString(), hand.getCount(), 0, cost));
+				Callouts.say(v, "want.set", player, true, hand.getCount(), hand.getHoverName(), Money.text(player, cost));
 			}
+		} else if (errand == 3) {
+			v.removeAttached(ERRAND);
+			refundWant(player, v);
 		}
 		int was = v.getAttachedOrElse(LEND, 0);
 		v.setAttached(LEND, lend);
@@ -329,6 +378,36 @@ public final class Loans {
 			Callouts.say(v, tavern != null ? "loan.tavern" : "loan.wait", player, true);
 		} else if (lend != 2) {
 			v.removeAttached(TAVERN);
+		}
+	}
+
+	/** A want for a person, not a thing: this, then their name. */
+	static final String PERSON = "person:";
+
+	/** The name on a name tag (someone to find), or null. */
+	static @Nullable String person(ItemStack hand) {
+		Component name = hand.is(net.minecraft.world.item.Items.NAME_TAG) ? hand.get(net.minecraft.core.component.DataComponents.CUSTOM_NAME) : null;
+		return name == null || name.getString().isBlank() ? null : name.getString().strip();
+	}
+
+	/** The one {@code want} asks for, brought within {@link #BRING_NEAR} of {@code v} and following {@code by}, or null. */
+	private static @Nullable Villager found(Villager v, Want want, ServerPlayer by) {
+		String name = want.item().substring(PERSON.length());
+		for (Villager o : v.level().getEntitiesOfClass(Villager.class, v.getBoundingBox().inflate(BRING_NEAR), o -> o != v && o.isAlive()
+			&& o.getDisplayName().getString().equalsIgnoreCase(name))) {
+			if (by.getUUID().equals(McaCompat.following(o)) || o.distanceTo(by) < BRING_NEAR) {
+				return o;
+			}
+		}
+		return null;
+	}
+
+	/** An unfinished want is called off: the purse comes back. */
+	private static void refundWant(ServerPlayer player, Villager v) {
+		Want w = v.getAttached(WANT);
+		if (w != null) {
+			v.removeAttached(WANT);
+			Money.pay(player, w.purse());
 		}
 	}
 
@@ -413,6 +492,14 @@ public final class Loans {
 				if (!v.hasAttached(AWAY)) {
 					v.setAttached(AWAY, now);
 				}
+				// one others speak well of goes where it'll be hired: the tavern (row A6)
+				if (v.getAttachedOrElse(RATING, 0) >= TAVERN_RATING && v.getAttachedOrElse(LEND, 0) == 0 && !v.hasAttached(TAVERN)) {
+					BlockPos tavern = tavernNear(level, v.blockPosition());
+					if (tavern != null) {
+						v.setAttached(TAVERN, tavern.asLong());
+						McaBridge.stopFollowing(v);
+					}
+				}
 			} else if (home.level() == level && home.distanceTo(v) < MEET) {
 				meet(home, v, now);
 			}
@@ -421,7 +508,7 @@ public final class Loans {
 				continue;
 			}
 			Long tavern = v.getAttached(TAVERN);
-			if (tavern != null && v.getAttachedOrElse(LEND, 0) == 2 && McaCompat.following(v) == null) {
+			if (tavern != null && (v.getAttachedOrElse(LEND, 0) == 2 || home == null) && McaCompat.following(v) == null) {
 				BlockPos at = BlockPos.of(tavern);
 				if (v.blockPosition().distSqr(at) > 16.0 && v.getNavigation().isDone()) {
 					v.getNavigation().moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.5);
@@ -513,6 +600,7 @@ public final class Loans {
 		}
 		if (v.getAttachedOrElse(LEND, 0) != 2) {
 			v.removeAttached(AWAY);
+			v.removeAttached(TAVERN);
 		}
 		if (n == null && goods.isEmpty()) {
 			return;
@@ -528,15 +616,12 @@ public final class Loans {
 				give(owner, g.copy());
 				gifts++;
 			}
-			int last = n.words().isEmpty() ? NO_WORD : n.words().getLast();
 			String who = n.from().isEmpty() ? "" : n.from().getLast();
-			if (last != NO_WORD) {
-				Callouts.say(v, "loan.home", owner, true, who, Component.translatable("gui.jaymoskingdoms.loan.word." + last));
-			} else if (n.learned() > 0) {
-				Callouts.say(v, "loan.learned", owner, true, who);
-			} else {
-				Callouts.say(v, "loan.back", owner, true, who);
+			// the coin and gifts now; the tale (the word they were sent off with, what they learned) at your next rest together
+			if (!n.words().isEmpty() || n.learned() > 0) {
+				v.setAttached(TALE, new News(0L, n.words(), n.from(), List.of(), n.learned()));
 			}
+			Callouts.say(v, "loan.back", owner, true, who);
 			owner.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.loan.home", v.getDisplayName(), Money.text(owner, n.coin()),
 				gifts, n.from().size()).withStyle(ChatFormatting.GOLD));
 		}
@@ -550,6 +635,22 @@ public final class Loans {
 		}
 		if (v.getAttachedOrElse(LEND, 0) == 0 && McaCompat.following(v) == null && Followers.takesOrders(v, owner)) {
 			Followers.take(v, owner, Followers.FOLLOW);
+		}
+	}
+
+	/** (TableTalk) sat down with its owner: a companion back from a loan tells how it went. */
+	static void tell(Mob m, ServerPlayer owner) {
+		News n = m.getAttached(TALE);
+		if (n == null || !owner.getUUID().equals(Bonds.lordOf(m))) {
+			return;
+		}
+		m.removeAttached(TALE);
+		int last = n.words().isEmpty() ? NO_WORD : n.words().getLast();
+		String who = n.from().isEmpty() ? "" : n.from().getLast();
+		if (last != NO_WORD) {
+			Callouts.say(m, "loan.home", owner, true, who, Component.translatable("gui.jaymoskingdoms.loan.word." + last));
+		} else if (n.learned() > 0) {
+			Callouts.say(m, "loan.learned", owner, true, who);
 		}
 	}
 
@@ -578,7 +679,8 @@ public final class Loans {
 			if (tag == null) {
 				continue;
 			}
-			v.setAttached(TAKEN, new Taken(tag.camp(), Money.worth(price(v) * RANSOM_TIMES), now));
+			String[] job = JOBS[level.getRandom().nextInt(JOBS.length)];
+			v.setAttached(TAKEN, new Taken(tag.camp(), Money.worth(price(v) * RANSOM_TIMES), now, job[0], Integer.parseInt(job[1])));
 			McaBridge.stopFollowing(v);
 			v.removeAttached(Followers.ORDER);
 			Callouts.say(captor, "taken.ours", v, true, v.getDisplayName());
@@ -590,43 +692,82 @@ public final class Loans {
 		Taken t = v.getAttached(TAKEN);
 		Owner o = v.getAttached(OWNER);
 		ServerPlayer owner = o == null ? null : level.getServer().getPlayerList().getPlayer(uuid(o.id()));
+		boolean here = owner != null && owner.level() == level && !owner.isSpectator();
 		if (Downed.isDowned(v)) {
+			// beaten down: its owner reaches it and brings it home
+			if (here && owner.distanceTo(v) < BRING_NEAR) {
+				free(v, owner, null);
+			}
 			return;
 		}
-		boolean ownerNear = owner != null && owner.level() == level && owner.distanceTo(v) < OWNER_COMES && !owner.isSpectator();
-		List<Mob> captors = level.getEntitiesOfClass(Mob.class, v.getBoundingBox().inflate(OWNER_FAR), m -> m.isAlive() && !Downed.isDowned(m)
-			&& Illagers.isCampIllager(m) && Illagers.tag(m).camp() == t.camp());
-		if (ownerNear) {
-			if (captors.isEmpty() && owner.distanceTo(v) < MEET) {
-				free(v, owner, null);
-				return;
+		String side = "f:" + t.camp();
+		List<Mob> captors = level.getEntitiesOfClass(Mob.class, v.getBoundingBox().inflate(OWNER_FAR), m -> m != v && m.isAlive() && !Downed.isDowned(m)
+			&& !m.hasAttached(TAKEN) && Comrades.side(m).equals(side));
+		if (here && owner.distanceTo(v) < OWNER_COMES && Bonds.of(v, owner.getUUID()) >= Bonds.CLOSE) {
+			free(v, owner, captors.isEmpty() ? null : captors.getFirst());
+			return;
+		}
+		// it fights for the camp that took it, its owner too
+		if (Comrades.target(v) == null) {
+			for (Mob m : captors) {
+				LivingEntity foe = Comrades.target(m);
+				if (foe != null && !Comrades.side(foe).equals(side)) {
+					Comrades.aim(v, foe);
+					break;
+				}
 			}
-			if (Bonds.of(v, owner.getUUID()) >= Bonds.CLOSE) {
-				free(v, owner, captors.isEmpty() ? null : captors.getFirst());
-				return;
-			}
+		}
+		if (Comrades.target(v) != null) {
+			return;
+		}
+		if (here && owner.distanceTo(v) < OWNER_COMES) {
 			Long said = RANSOMED.get(v.getUUID());
 			if (!captors.isEmpty() && (said == null || now - said > RANSOM_EVERY)) {
 				RANSOMED.put(v.getUUID(), now);
-				Mob speaker = captors.getFirst();
-				Callouts.say(speaker, "taken.ransom", owner, true, v.getDisplayName(), Money.text(owner, t.ransom()));
-				Callouts.say(v, "taken.help", owner, false, owner.getDisplayName());
+				Callouts.say(captors.getFirst(), "taken.ransom", owner, true, v.getDisplayName(), Money.text(owner, t.ransom()), t.jobCount(),
+					new ItemStack(jobItem(t)).getHoverName());
 			}
+		}
+		// the captors send it to its owner with their demand (row A5, the foe side)
+		Long until = DEMANDS.get(v);
+		if (until != null) {
+			if (!here || now > until) {
+				DEMANDS.remove(v);
+			} else {
+				if (owner.distanceTo(v) > 3.0) {
+					if (v.getNavigation().isDone()) {
+						v.getNavigation().moveTo(owner, 0.6);
+					}
+				} else if (DEMANDED.add(v.getUUID())) {
+					v.getLookControl().setLookAt(owner, 30.0F, 30.0F);
+					Callouts.say(v, "taken.demand", owner, true, owner.getDisplayName(), Money.text(owner, t.ransom()), t.jobCount(),
+						new ItemStack(jobItem(t)).getHoverName());
+				}
+				return;
+			}
+		} else if (!DEMANDED.contains(v.getUUID()) && now - t.since() > DEMAND_AFTER && here && owner.distanceTo(v) < DEMAND_RANGE) {
+			DEMANDS.put(v, now + DEMAND_WAIT);
+			v.getNavigation().moveTo(owner, 0.6);
 			return;
 		}
 		Camps.CampData camp = Camps.data(level.getServer(), t.camp());
 		if (camp != null && v.blockPosition().distSqr(camp.center()) > CAMP_HOME * CAMP_HOME && v.getNavigation().isDone()) {
 			v.getNavigation().moveTo(camp.center().getX() + 0.5, camp.center().getY(), camp.center().getZ() + 0.5, 0.5);
-		} else if (camp != null && level.getRandom().nextInt(30) == 0) {
-			// set to work about the camp
-			v.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		}
+	}
+
+	private static Item jobItem(Taken t) {
+		Item item = BuiltInRegistries.ITEM.getValue(Identifier.tryParse(t.job()));
+		return item == null ? net.minecraft.world.item.Items.IRON_INGOT : item;
 	}
 
 	/** {@code v} is its owner's again (and, with {@code at}, turns on its captors). */
 	private static void free(Villager v, ServerPlayer owner, @Nullable Mob at) {
 		v.removeAttached(TAKEN);
 		RANSOMED.remove(v.getUUID());
+		DEMANDS.remove(v);
+		DEMANDED.remove(v.getUUID());
+		Comrades.stand(v);
 		if (Followers.takesOrders(v, owner)) {
 			Followers.take(v, owner, Followers.FOLLOW);
 		}
@@ -636,17 +777,56 @@ public final class Loans {
 		}
 	}
 
+	/** A borrower hands in what the owner's want asks for: the purse when it's all there (row A5). */
+	private static void handIn(ServerPlayer sp, Villager v, Want want, ItemStack held) {
+		int n = Math.min(held.getCount(), want.count() - want.got());
+		if (n <= 0) {
+			return;
+		}
+		ItemStack given = held.split(n);
+		News news = v.getAttachedOrElse(NEWS, News.NONE);
+		List<ItemStack> gifts = new ArrayList<>(news.gifts());
+		gifts.add(given);
+		v.setAttached(NEWS, new News(news.coin(), news.words(), news.from(), gifts, news.learned()));
+		int got = want.got() + n;
+		if (got >= want.count()) {
+			v.removeAttached(WANT);
+			Money.pay(sp, want.purse());
+			Callouts.say(v, "want.done", sp, true, sp.getDisplayName(), Money.text(sp, want.purse()));
+		} else {
+			v.setAttached(WANT, new Want(want.item(), want.count(), got, want.purse()));
+			Callouts.say(v, "want.part", sp, true, want.count() - got, given.getHoverName());
+		}
+	}
+
 	// ---- hiring and parting ------------------------------------------------------------------------------------------
 
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, net.minecraft.world.phys.@Nullable EntityHitResult hit) {
 		if (!(level instanceof ServerLevel) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND || sp.isSpectator()
-			|| !(entity instanceof Villager v) || !Coinage.isMoney(sp.getMainHandItem()) || !v.isAlive()) {
+			|| !(entity instanceof Villager v) || !v.isAlive()) {
 			return InteractionResult.PASS;
 		}
+		ItemStack held = sp.getMainHandItem();
+		boolean money = Coinage.isMoney(held);
+		String heldId = held.isEmpty() ? "" : BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
 		Owner owner = v.getAttached(OWNER);
 		Taken taken = v.getAttached(TAKEN);
 		if (taken != null) {
 			if (owner == null || !owner.id().equals(sp.getUUID().toString())) {
+				return InteractionResult.PASS;
+			}
+			if (heldId.equals(taken.job())) {
+				// the job instead of the coin
+				if (held.getCount() < taken.jobCount()) {
+					sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.loan.job_short", taken.jobCount(), held.getHoverName())
+						.withStyle(ChatFormatting.GRAY));
+					return InteractionResult.SUCCESS;
+				}
+				held.shrink(taken.jobCount());
+				free(v, sp, null);
+				return InteractionResult.SUCCESS;
+			}
+			if (!money) {
 				return InteractionResult.PASS;
 			}
 			if (!Money.canPay(sp, taken.ransom())) {
@@ -657,6 +837,29 @@ public final class Loans {
 			Money.charge(sp, taken.ransom());
 			free(v, sp, null);
 			return InteractionResult.SUCCESS;
+		}
+		Want want = v.getAttached(WANT);
+		if (want != null && borrowedBy(v, sp) && heldId.equals(want.item())) {
+			handIn(sp, v, want, held);
+			return InteractionResult.SUCCESS;
+		}
+		// the one they asked for, brought to them
+		if (want != null && want.item().startsWith(PERSON) && borrowedBy(v, sp)) {
+			Villager who = found(v, want, sp);
+			if (who != null) {
+				v.removeAttached(WANT);
+				if (sp.getUUID().equals(McaCompat.following(who))) {
+					McaBridge.stopFollowing(who);
+				}
+				who.getLookControl().setLookAt(v, 30.0F, 30.0F);
+				v.getLookControl().setLookAt(who, 30.0F, 30.0F);
+				Money.pay(sp, want.purse());
+				Callouts.say(v, "want.found", sp, true, who.getDisplayName(), Money.text(sp, want.purse()));
+				return InteractionResult.SUCCESS;
+			}
+		}
+		if (!money) {
+			return InteractionResult.PASS;
 		}
 		if (borrowedBy(v, sp)) {
 			if (!PARTING.containsKey(v)) {
@@ -676,6 +879,19 @@ public final class Loans {
 		return InteractionResult.SUCCESS;
 	}
 
+	/** The owner's want, as the hire screen shows it, or empty. */
+	private static Component wantText(ServerPlayer player, Villager v) {
+		Want w = v.getAttached(WANT);
+		if (w != null && w.item().startsWith(PERSON)) {
+			return Component.translatable("gui.jaymoskingdoms.loan.want.person", w.item().substring(PERSON.length()), Money.text(player, w.purse()));
+		}
+		Item item = w == null ? null : BuiltInRegistries.ITEM.getValue(Identifier.tryParse(w.item()));
+		if (w == null || item == null) {
+			return Component.empty();
+		}
+		return Component.translatable("gui.jaymoskingdoms.loan.want", w.count() - w.got(), new ItemStack(item).getHoverName(), Money.text(player, w.purse()));
+	}
+
 	private static void send(ServerPlayer player, Villager v, int mode) {
 		if (!ServerPlayNetworking.canSend(player, OpenLoan.TYPE)) {
 			return;
@@ -686,7 +902,7 @@ public final class Loans {
 		ItemStack off = player.getOffhandItem();
 		ServerPlayNetworking.send(player, new OpenLoan(v.getId(), mode, v.getDisplayName(), Component.literal(owner == null ? "?" : owner.name()),
 			l.main().key(), l.second().key(), steps, v.getAttachedOrElse(RATING, 0), price(v), workPrice(v),
-			off.isEmpty() ? Component.empty() : off.getHoverName()));
+			off.isEmpty() ? Component.empty() : off.getHoverName(), wantText(player, v)));
 	}
 
 	private static void act(ServerPlayer player, LoanAct a) {

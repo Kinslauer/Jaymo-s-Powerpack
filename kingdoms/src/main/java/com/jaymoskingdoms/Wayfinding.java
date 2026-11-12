@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -62,6 +64,19 @@ public final class Wayfinding {
 
 	public static final AttachmentType<Known> KNOWN = AttachmentRegistry.create(JaymosKingdoms.id("comrade_known_places"),
 		builder -> builder.persistent(Known.CODEC));
+	/** On the overworld: where each camp's raiders got into each town ("camp:town" -> packed). Saved. */
+	static final AttachmentType<Map<String, Long>> WAY_IN = AttachmentRegistry.create(JaymosKingdoms.id("raid_way_in"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.LONG)));
+	/** On a player: quests a band saw them take (quest id -> camp id; negative once the band is waiting). Saved. */
+	static final AttachmentType<Map<String, Integer>> WATCHED = AttachmentRegistry.create(JaymosKingdoms.id("quest_watched"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.INT)));
+	/** A raider this near the seat has got in (blocks). */
+	static final double WAY_IN_NEAR = 24.0;
+	/** A band member this near (blocks) sees you take a quest; the band waits this many, and sets out when you're this near the place. */
+	static final double SEES_QUEST = 32.0, WAIT_FROM = 128.0, WAIT_NOT_NEARER = 48.0;
+	static final int WAITERS = 3;
+	/** A road this near you (blocks) when a companion leads off it: they know a shorter way across. */
+	static final double ON_ROAD = 4.0, SHORT_WAY = 64.0;
 
 	private record Guide(UUID player, BlockPos to, long until) {
 	}
@@ -148,19 +163,130 @@ public final class Wayfinding {
 			best = i;
 			bestD = d;
 		}
-		if (best < 0) {
+		// a quest's next step it knows the way to (row B3)
+		BlockPos questAt = null;
+		Component giver = null;
+		List<String> known = v.getAttachedOrElse(Remarks.QUESTS, List.of());
+		for (Quest q : Quests.log(player)) {
+			if (q.objective().pos().isEmpty() || !known.contains(q.template())) {
+				continue;
+			}
+			BlockPos p = q.objective().pos().get();
+			Vec3 to = new Vec3(p.getX() + 0.5 - player.getX(), 0.0, p.getZ() + 0.5 - player.getZ());
+			double d = to.length();
+			if (d >= LEAD_MIN && d < bestD && to.normalize().dot(flat) >= LOOK_COS) {
+				bestD = d;
+				questAt = p;
+				giver = Component.literal(q.giver().name());
+			}
+		}
+		if (best < 0 && questAt == null) {
 			return false;
 		}
-		BlockPos to = BlockPos.of(k.at().get(best));
-		String what = k.what().get(best);
+		BlockPos to = questAt != null ? questAt : BlockPos.of(k.at().get(best));
+		String what = questAt != null ? "quest" : k.what().get(best);
 		McaBridge.moveState(v, 0, player);
 		GUIDES.put(v, new Guide(player.getUUID(), to, now + LEAD_TICKS));
-		if (what.startsWith("town:")) {
+		if (onRoad(level, player.blockPosition()) && bestD > SHORT_WAY) {
+			// on a road that winds a long way round: they know a shorter way across country
+			Callouts.say(v, "way.short", player, true);
+		} else if (what.equals("quest")) {
+			Callouts.say(v, "way.quest", player, true, giver);
+		} else if (what.startsWith("town:")) {
 			Callouts.say(v, "way.town", player, true, what.substring(5));
 		} else {
 			Callouts.say(v, "way.chest", player, true);
 		}
 		return true;
+	}
+
+	/** {@code at} is on (or beside) a road between settlements. */
+	private static boolean onRoad(ServerLevel level, BlockPos at) {
+		for (Roads.Road r : Roads.network(level.getServer()).roads()) {
+			for (long packed : r.points()) {
+				if (BlockPos.of(packed).distSqr(at) < ON_ROAD * ON_ROAD) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// ---- the foe side: the way into a town, and waiting where you're headed -----------------------------------------------
+
+	/** (Raids) where {@code camp}'s raiders got into {@code town} before, or null. */
+	static @Nullable BlockPos wayIn(MinecraftServer server, int camp, int town) {
+		Long p = Factions.level(server).getAttachedOrElse(WAY_IN, Map.of()).get(camp + ":" + town);
+		return p == null ? null : BlockPos.of(p);
+	}
+
+	/** (Raids) {@code camp}'s raiders got into {@code town} at {@code at}. */
+	static void noteWayIn(MinecraftServer server, int camp, int town, BlockPos at) {
+		ServerLevel level = Factions.level(server);
+		Map<String, Long> ways = new HashMap<>(level.getAttachedOrElse(WAY_IN, Map.of()));
+		ways.put(camp + ":" + town, at.asLong());
+		level.setAttached(WAY_IN, ways);
+	}
+
+	/** (Quests) {@code player} took {@code q}: a camp's band member who saw it remembers where they're headed. */
+	static void questTaken(ServerLevel level, ServerPlayer player, Quest q) {
+		if (q.objective().pos().isEmpty()) {
+			return;
+		}
+		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SEES_QUEST), m -> m.isAlive() && !Downed.isDowned(m)
+			&& Comrades.side(m).startsWith("f:") && m.hasLineOfSight(player))) {
+			int camp;
+			try {
+				camp = Integer.parseInt(Comrades.side(m).substring(2));
+			} catch (NumberFormatException e) {
+				continue;
+			}
+			if (Camps.data(level.getServer(), camp) == null) {
+				continue;
+			}
+			Map<String, Integer> w = new HashMap<>(player.getAttachedOrElse(WATCHED, Map.of()));
+			w.put(q.id(), camp);
+			player.setAttached(WATCHED, w);
+			return;
+		}
+	}
+
+	/** A band that saw you take a quest is waiting there when you come (set out before you're in sight of the place). */
+	private static void waiting(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			Map<String, Integer> w = player.getAttached(WATCHED);
+			if (w == null || w.isEmpty()) {
+				continue;
+			}
+			Map<String, Integer> next = new HashMap<>(w);
+			boolean changed = next.keySet().retainAll(Quests.log(player).stream().map(Quest::id).toList());
+			for (Quest q : Quests.log(player)) {
+				Integer camp = next.get(q.id());
+				if (camp == null || camp < 0 || q.objective().pos().isEmpty()) {
+					continue;
+				}
+				BlockPos at = q.objective().pos().get();
+				double d = Math.sqrt(player.blockPosition().distSqr(at));
+				Faction f = Factions.get(server, camp);
+				if (d > WAIT_FROM || d < WAIT_NOT_NEARER || f == null || f.fallen() || !player.level().isLoaded(at)) {
+					continue;
+				}
+				ServerLevel level = player.level();
+				for (int i = 0; i < WAITERS; i++) {
+					BlockPos spot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.offset(level.getRandom().nextInt(9) - 4, 0,
+						level.getRandom().nextInt(9) - 4));
+					Mob m = Raids.member(level, f, i, spot, at, 10, false);
+					if (m != null && i == 0) {
+						Callouts.say(m, "foe.waiting", player, true, player.getDisplayName());
+					}
+				}
+				next.put(q.id(), -camp - 1);
+				changed = true;
+			}
+			if (changed) {
+				player.setAttached(WATCHED, next);
+			}
+		}
 	}
 
 	private static boolean unlooted(BlockEntity be) {
@@ -175,6 +301,9 @@ public final class Wayfinding {
 		long now = server.overworld().getGameTime();
 		guide(server, now);
 		cutAcross(server, now);
+		if (t % LEARN_EVERY == 0) {
+			waiting(server);
+		}
 		if (t % LEARN_EVERY != 0) {
 			return;
 		}

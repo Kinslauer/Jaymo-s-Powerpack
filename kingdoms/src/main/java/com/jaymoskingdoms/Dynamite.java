@@ -118,6 +118,22 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 		return balkon;
 	}
 
+	/**
+	 * Whether a stick landing at {@code mark} would catch only those in the fight: no townsfolk, child or other bystander
+	 * (anyone not on {@code foe}'s side whom it would hurt) within its burst. Every thrower checks before it throws.
+	 */
+	static boolean clear(ServerLevel level, LivingEntity thrower, LivingEntity foe, Vec3 mark) {
+		String foes = Comrades.side(foe);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(mark, mark).inflate(BURST_RADIUS + 1.0),
+			e -> e.isAlive() && e != foe && e != thrower)) {
+			if (Javelins.harms(thrower, e) && !Comrades.side(e).equals(foes) && (e instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
+				|| e.isBaby() || e instanceof Player)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** A lit stick thrown by {@code thrower} from his hand, along {@code velocity}. */
 	static Dynamite light(ServerLevel level, LivingEntity thrower, Vec3 velocity) {
 		Dynamite stick = new Dynamite(TYPE, level);

@@ -103,7 +103,13 @@ public final class Callouts {
 		for (String k : new String[] {"loan.errand", "loan.tavern", "loan.wait", "loan.work", "loan.part", "loan.home", "loan.learned", "loan.back",
 			"loan.errand.done", "loan.bye", "loan.thanks", "loan.hired", "loan.hired.work", "taken.ours", "taken.ransom", "taken.help", "taken.free",
 			"sell.camp", "band.boast", "band.praise", "band.scold", "way.town", "way.chest", "way.here", "way.cut", "party.done", "party.warn",
-			"party.won", "party.race", "party.greet", "party.short", "party.hired"}) {
+			"party.won", "party.race", "party.greet", "party.short", "party.hired",
+			// the gaps filled in (docs/Pawn-Plan.md, "Gaps filled")
+			"know.creeper", "know.bows", "know.fire", "taken.demand", "want.set", "want.done", "want.part", "sell.raid", "raid.way", "foe.waiting",
+			"way.short", "way.quest", "ambush.net", "pack.eat", "pack.bandage", "pack.bind", "pack.feed", "pack.arrows", "pack.drink", "pack.fallback",
+			"gear.better", "gear.worse", "spec.ore", "spec.herb", "spec.junk", "spec.junk.few", "parley.offer", "parley.paid", "parley.refused",
+			"parley.short", "party.aid", "party.back", "party.rematch", "party.wary", "party.friend", "party.gift", "party.gift.friend",
+			"party.bounty.took", "party.bounty", "party.caught", "party.claimed", "want.person", "want.found", "quest.lever"}) {
 			LINES.put(k, 3);
 		}
 	}

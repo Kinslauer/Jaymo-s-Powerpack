@@ -72,7 +72,9 @@ public final class Comrades {
 		/** After the spoils: the best-armed foe. */
 		SPOILS,
 		/** Backs the others up: the foe most of its side is on. */
-		BACKUP;
+		BACKUP,
+		/** Scouts ahead: out of a fight it ranges in front; in one it goes for the foes out ahead of the rest. */
+		SCOUT;
 
 		public String key() {
 			return this.name().toLowerCase(Locale.ROOT);
@@ -453,13 +455,19 @@ public final class Comrades {
 			stand(m);
 			current = null;
 		}
+		if (current != null && FoeLore.avoids(m, current)) {
+			// they know what a creeper does up close (row B1)
+			stand(m);
+			FoeLore.backOff(m, current);
+			current = null;
+		}
 		Leanings leanings = fighting(m, mine);
 		LivingEntity protectee = leader != null ? leader : BandLeaders.leaderOf(level, m, mine);
 		Map<LivingEntity, Integer> claims = SIDE_TARGETS.getOrDefault(level, Map.of()).getOrDefault(mine, Map.of());
 		LivingEntity best = null;
 		double bestScore = -Double.MAX_VALUE, currentScore = -Double.MAX_VALUE;
 		for (LivingEntity e : candidates(level, m, mine)) {
-			if (close && e.distanceToSqr(leader) > CLOSE * CLOSE) {
+			if (close && e.distanceToSqr(leader) > CLOSE * CLOSE || FoeLore.avoids(m, e)) {
 				continue;
 			}
 			int claimed = claims.getOrDefault(e, 0) - (e == current ? 1 : 0);
@@ -504,6 +512,7 @@ public final class Comrades {
 			case FIRST -> claimed == 0 ? 30.0 : -10.0 * claimed;
 			case SPOILS -> e.getArmorValue() * 2.0 + (e.getMainHandItem().isEmpty() ? 0.0 : 10.0) + (e.getMainHandItem().isEnchanted() ? 10.0 : 0.0);
 			case BACKUP -> 12.0 * claimed;
+			case SCOUT -> protectee == null ? 10.0 : Math.min(30.0, 1.5 * Math.sqrt(e.distanceToSqr(protectee)));
 		};
 	}
 

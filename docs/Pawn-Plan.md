@@ -112,9 +112,54 @@ degrees of your look, 24 to 800 blocks; chests already opened are forgotten; ban
 of you get a short burst of speed). `BandTallies` (damage on players and companions; praise at 6+, +2 health, 3 times
 at most). `RivalParties` (3 or 4 MCA guards, a knight or veteran leading, from a road near a player's settlement,
 chance 15% every 2 minutes, two at most; camp within 320 or else a settlement within 400; rest 2 minutes in towns;
-gone after 3 days with nobody near; the leader's price is the sum of the members'). Not built: short cuts for
-companions (only the bands' own-ground run), and the best of a band being sent after you on its next raid (they're
-just tougher).
+gone after 3 days with nobody near; the leader's price is the sum of the members').
+
+## Gaps filled (same PR)
+
+Andy asked for everything left out. Every ticked row was checked against the code again, and each part that had been
+left out, or swapped for something easier, is now built as the row says, friend and foe:
+
+- **A1 foe**: a taken companion fights for the camp (its side is the camp's); knock it down and stand over it within 4
+  blocks to bring it home. **A5**: the camp sends the captive to you after 5 minutes with its demand, the ransom or a
+  job (12 iron, or the like: hand it over); a want left at the table (any thing in hand, or a name tag naming someone
+  to find) with a purse of 1, 3, 5 or 10, which whoever hires them can finish for the purse.
+- **A3**: veterans come knowing two kinds of foe (stars from kills they never made with you), knights three, one of
+  them to the full; a sellsword you turned down
+  leads its camp's raid on a settlement you're near, once a week. **A6**: companions rated 3 or more wait at a tavern
+  while you're offline; a band's praised fighters (two at most) go with its raids, and the one told off minds the pens
+  by the camp's fire for a day; a lent companion's tale waits for your next rest at the table (the coin and gifts come
+  when you meet).
+- **B1 friend**: with stars, companions without a bow keep off creepers, take archers first (8 more on the score), set
+  undead alight at 2 stars, and say the weakness. **B2 foe**: a raid notes how it got into a town (24 blocks from the
+  seat) and comes the same way next time. **B2 friend**: on a road with the goal past 64 blocks, a guide says they
+  know a shorter way across country and leads you straight there. **B3**: Go leads to the next quest step they know; near a quest's place any
+  companion points out the levers, buttons, tripwires and pressure plates it can see; a band near you when you take a
+  quest on it sends three to wait at the spot.
+- **C1**: a scout leaning (ranges 8 blocks ahead of you, looks to the skyline).
+- **F4**: companions bandage (cheapest first) and eat from their own pack, bind you under half health, feed you when
+  you're hungry, and gather and hand back spent arrows; a band member under 35% health falls back 8 blocks and drinks
+  its daily draught (40%). **F5**: before a fight your companions draw a weapon from their pack and brace (Resistance
+  10 s), the spotter crouches and points; ambush archers climb to higher ground, the shouter throws a net at your feet
+  (5 s of cobweb), and the hidden rush in fast (Speed II, 3 s).
+- **G2**: a forager points out ore and herbs it can see within 10 blocks (looks, points, says what); a haggler buys
+  junk (rotten flesh, bones, string and the like) at 32 to an emerald's worth, the cleric's rate; a camp's
+  tongue-speaker who sees you before blood is drawn holds the band back and names a toll (2 plus 1 per band member, at
+  most 12): pay inside 30 s and the band lets you pass for a day, walk off or strike one and it's a fight.
+- **H4**: a rival party resting in a town takes the best open bounty of 5 or more off its court's board, finds the one
+  it's on (a crook, or you), downs them, carries them over a shoulder to the court's seat and hands them in (as when a
+  player brings someone in). Food given, blows struck in their fights and a hire that ended well build goodwill; at 10
+  they're friends (greeted as one, half price, they come to your aid, and they won't take a bounty on you). A party
+  beaten by you is remembered: half the time a party sets out it's one that met someone before, harder (a knight
+  leads, +4 health a loss, three at most), knowing your ways, and either out for a rematch (a bold leader) or keeping
+  its distance.
+- **What not to copy**: gear handed to your companion (armour, a sword, an axe) is worn if better and handed back if
+  not; a pirate bombardier holds its throw while a friend is in the blast.
+
+What is still short of the row, and why: the bounty hunters skip greenskin warlords (they sit in their own city among
+the horde, and the warlord bounty is a war's, not a crook's) and minibosses (a miniboss arms itself only when a
+player takes its bounty, and a party taking it would leave it unarmed); without Jaymo's Powers there is no shoulder
+carry, so a party settles the bounty where its target falls. The blast check covers the pirates' bombs because no
+companion has an area attack yet. None of this has been played.
 
 ## Patch 6: the dark mirror
 

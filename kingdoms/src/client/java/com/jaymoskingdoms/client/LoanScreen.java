@@ -116,6 +116,9 @@ final class LoanScreen extends Screen {
 				: this.ask.rating() >= 2 ? "gui.jaymoskingdoms.loan.rating.some" : "gui.jaymoskingdoms.loan.rating.none", this.ask.rating()),
 				x + 10, y + 60, W - 20, Ui.TEXT);
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.note"), x + 10, y + 74, W - 20, Ui.DIM);
+			if (!this.ask.want().getString().isEmpty()) {
+				Ui.line(graphics, this.font, this.ask.want(), x + 10, y + 86, W - 20, Ui.GOLD);
+			}
 		} else {
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.part_note", this.ask.owner()), x + 10, y + 24, W - 20, Ui.DIM);
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.ask.word"), x + 10, y + 50, W - 150, Ui.TEXT);

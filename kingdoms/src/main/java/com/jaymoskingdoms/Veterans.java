@@ -54,6 +54,11 @@ public final class Veterans {
 	/** On a veteran who sold their sword: the camp. Saved. */
 	public static final AttachmentType<Integer> SOLD = AttachmentRegistry.create(JaymosKingdoms.id("sold_sword"),
 		builder -> builder.persistent(Codec.INT));
+	/** When a sold sword last went raiding (or was sold). Saved. */
+	static final AttachmentType<Long> SOLD_AT = AttachmentRegistry.create(JaymosKingdoms.id("sold_sword_at"),
+		builder -> builder.persistent(Codec.LONG));
+	/** A sold sword leads a raid on someone who turned it down at most this often (ticks: a week), when they're this near a settlement. */
+	static final long RAID_EVERY = 168000L;
 	/** Players a veteran pitched to who didn't take them on. Saved. */
 	static final AttachmentType<List<String>> SPURNED = AttachmentRegistry.create(JaymosKingdoms.id("drifter_spurned"),
 		builder -> builder.persistent(Codec.STRING.listOf()));
@@ -118,6 +123,24 @@ public final class Veterans {
 		if (grade == KNIGHT) {
 			v.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
 		}
+		// a few kinds they've fought often enough to know (row B1): two at two stars, a knight three and one at three
+		List<String> kinds = new ArrayList<>(List.of(KNOWN_KINDS));
+		java.util.Collections.shuffle(kinds, new java.util.Random(v.getRandom().nextLong()));
+		Map<String, Integer> stars = new HashMap<>(v.getAttachedOrElse(FoeLore.STARS, Map.of()));
+		int n = grade == KNIGHT ? 3 : 2;
+		for (int i = 0; i < n; i++) {
+			stars.merge(kinds.get(i), grade == KNIGHT && i == 0 ? FoeLore.KILLS_PER_STAR[2] : FoeLore.KILLS_PER_STAR[1], Math::max);
+		}
+		v.setAttached(FoeLore.STARS, stars);
+	}
+
+	/** Kinds an old hand may know. */
+	static final String[] KNOWN_KINDS = {"minecraft:zombie", "minecraft:skeleton", "minecraft:spider", "minecraft:creeper", "minecraft:pillager",
+		"minecraft:vindicator", "minecraft:husk", "minecraft:drowned", "minecraft:witch"};
+
+	/** (BandLeaders) a sold sword leading its camp's raid on someone who turned it down. */
+	static boolean leading(LivingEntity m) {
+		return m.hasAttached(SOLD) && BandTallies.raiding(m);
 	}
 
 	/** The price to take {@code v} on (emeralds' worth). */
@@ -159,8 +182,37 @@ public final class Veterans {
 		}
 		McaBridge.toGuard(v);
 		v.setPersistenceRequired();
+		v.setAttached(SOLD_AT, level.getGameTime());
 		SOLD_LOADED.add(v);
 		return true;
+	}
+
+	/** A sold sword whose week is up leads its camp on a settlement where someone who turned it down is (row A3, the foe side). */
+	private static void raidOn(ServerLevel level, Villager v, int campId, Camps.CampData data, long now) {
+		if (now - v.getAttachedOrElse(SOLD_AT, now) < RAID_EVERY || Raids.raiding(campId)) {
+			return;
+		}
+		List<String> spurned = v.getAttachedOrElse(SPURNED, List.of());
+		Faction camp = Factions.get(level.getServer(), campId);
+		if (camp == null || spurned.isEmpty()) {
+			return;
+		}
+		for (ServerPlayer p : level.players()) {
+			if (!spurned.contains(p.getUUID().toString())) {
+				continue;
+			}
+			for (Faction f : Factions.all(level.getServer())) {
+				if (f.fallen() || f.type() == FactionType.BARBARIAN || f.seat().distSqr(p.blockPosition()) > Raids.PLAYER_RANGE * Raids.PLAYER_RANGE
+					|| f.seat().distSqr(data.center()) > Raids.REACH * Raids.REACH) {
+					continue;
+				}
+				v.setAttached(SOLD_AT, now);
+				if (Raids.start(level, camp, f)) {
+					Callouts.say(v, "sell.raid", p, true, p.getDisplayName());
+				}
+				return;
+			}
+		}
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -187,6 +239,10 @@ public final class Veterans {
 				continue;
 			}
 			String side = "f:" + camp;
+			if (BandTallies.raiding(v)) {
+				continue;
+			}
+			raidOn(level, v, camp, data, now);
 			if (Comrades.target(v) == null) {
 				for (Mob m : level.getEntitiesOfClass(Mob.class, v.getBoundingBox().inflate(BAND_NEAR), m -> m != v && Comrades.side(m).equals(side))) {
 					LivingEntity foe = Comrades.target(m);

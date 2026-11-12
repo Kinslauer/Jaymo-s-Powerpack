@@ -917,6 +917,38 @@ public final class Bounties {
 		level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 	}
 
+	// ---- rival parties (docs/Pawn-Plan.md row H4) --------------------------------------------------------------------------
+
+	/** (RivalParties) A rival party has taken bounty {@code key} ({@code hunter}: "party:" and its id): no one else may for a while. */
+	static void takenByParty(MinecraftServer server, String key, String hunter, long now) {
+		Bounty b = all(server).get(key);
+		if (b != null && !b.dead()) {
+			put(server, b.hunted(Optional.of(hunter), now));
+		}
+	}
+
+	/**
+	 * (RivalParties) A party set {@code body} down, downed, by the seat of court {@code court}: the bounty's off the board,
+	 * a player is sentenced as when a hunter brings them in, a crook goes to the cells. False if there was none on them.
+	 */
+	static boolean broughtIn(ServerLevel level, LivingEntity body, int court) {
+		MinecraftServer server = level.getServer();
+		Bounty b = on(server, body, court);
+		Faction f = Factions.get(server, court);
+		if (b == null || f == null) {
+			return false;
+		}
+		remove(server, b.key());
+		unpinAll(level, b.key());
+		if (body instanceof ServerPlayer target) {
+			sentence(level, target, f, b);
+		} else {
+			forgetBoss(body);
+			body.discard();
+		}
+		return true;
+	}
+
 	/** A player brought in alive: fined what they carry (up to the price), forgiven their wanted time there, got back on their feet. */
 	private static void sentence(ServerLevel level, ServerPlayer target, Faction court, Bounty b) {
 		// (0.7.490) fined in the court's own coin first, then emeralds

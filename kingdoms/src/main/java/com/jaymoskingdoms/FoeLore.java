@@ -56,8 +56,11 @@ public final class FoeLore {
 	static final int MAX_STARS = 3;
 	/** More damage per star against a kind they know. */
 	static final float DAMAGE_PER_STAR = 0.08F;
-	/** Score a leaning gives a foe of a kind they know (per star). */
-	static final double SCORE_PER_STAR = 4.0;
+	/** Score a leaning gives a foe of a kind they know (per star), and more a star for a bowman. */
+	static final double SCORE_PER_STAR = 4.0, BOWS_FIRST = 8.0;
+	/** Stars on an undead kind at which a companion's blows set it alight (it fears fire); for how long (seconds). */
+	static final int FIRE_STARS = 2;
+	static final float FIRE_SECONDS = 3.0F;
 	/** Companions within this of a kill (blocks) who were on it share it. */
 	static final double SHARE = 16.0;
 	/** Two meetings at least this far apart (ticks); counters from this many meetings. */
@@ -139,15 +142,35 @@ public final class FoeLore {
 		return stars;
 	}
 
-	/** Extra score a leaning gives {@code e} for {@code m} knowing its kind. */
+	/** Extra score a leaning gives {@code e} for {@code m} knowing its kind: bowmen first, once they know them. */
 	static double knownScore(Mob m, LivingEntity e) {
-		return SCORE_PER_STAR * stars(m, e);
+		int stars = stars(m, e);
+		return SCORE_PER_STAR * stars + (stars > 0 && Comrades.ranged(e) ? BOWS_FIRST * stars : 0.0);
+	}
+
+	/** (Comrades.think) one who knows creepers doesn't go at one with a blade. */
+	static boolean avoids(Mob m, LivingEntity e) {
+		return e instanceof net.minecraft.world.entity.monster.Creeper && !Comrades.ranged(m) && stars(m, e) > 0;
+	}
+
+	/** {@code m} backs away from {@code e} (a creeper it knows). */
+	static void backOff(Mob m, LivingEntity e) {
+		net.minecraft.world.phys.Vec3 away = m.position().subtract(e.position());
+		if (away.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		net.minecraft.world.phys.Vec3 to = m.position().add(away.normalize().scale(6.0));
+		m.getNavigation().moveTo(to.x, to.y, to.z, 1.2);
 	}
 
 	/** (From the hurt mixin) a companion hits a kind it knows harder. */
 	public static float dealt(LivingEntity self, DamageSource source, float amount) {
 		if (source.getEntity() instanceof Mob by && by != self && by.hasAttached(STARS)) {
 			int stars = stars(by, self);
+			if (stars >= FIRE_STARS && self.is(net.minecraft.tags.EntityTypeTags.UNDEAD) && !self.fireImmune()) {
+				// they know it fears fire, and use it
+				self.igniteForSeconds(FIRE_SECONDS);
+			}
 			if (stars > 0) {
 				return amount * (1.0F + DAMAGE_PER_STAR * stars);
 			}
@@ -208,7 +231,10 @@ public final class FoeLore {
 		if (teacher != null) {
 			return Callouts.say(m, "know.taught", foe, true, Component.literal(teacher), foe.getType().getDescription());
 		}
-		return Callouts.say(m, "know", foe, false, foe.getType().getDescription());
+		// the weakness, said aloud
+		String weak = foe instanceof net.minecraft.world.entity.monster.Creeper ? "know.creeper" : Comrades.ranged(foe) ? "know.bows"
+			: stars >= FIRE_STARS && foe.is(net.minecraft.tags.EntityTypeTags.UNDEAD) ? "know.fire" : "know";
+		return Callouts.say(m, weak, foe, false, foe.getType().getDescription());
 	}
 
 	// ---- what bands know of players --------------------------------------------------------------------------------------

@@ -77,13 +77,14 @@ public final class TableTalk {
 
 	/** The screen: who, their leanings, how they talk and take a win, the bond, and (a captain) his men's leaning. */
 	public record OpenTable(int entityId, Component name, String main, String second, int chatter, int style, int bond, boolean captain, String men,
-		int lend, Component errand) implements CustomPacketPayload {
+		int lend, Component errand, int errandCount, boolean gather) implements CustomPacketPayload {
 		public static final Type<OpenTable> TYPE = new Type<>(JaymosKingdoms.id("table_talk_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, OpenTable> CODEC = new StreamCodec<>() {
 			@Override
 			public OpenTable decode(RegistryFriendlyByteBuf buf) {
 				return new OpenTable(buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf), buf.readUtf(), buf.readUtf(), buf.readVarInt(),
-					buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf));
+					buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf),
+					buf.readVarInt(), buf.readBoolean());
 			}
 
 			@Override
@@ -99,6 +100,8 @@ public final class TableTalk {
 				buf.writeUtf(p.men);
 				buf.writeVarInt(p.lend);
 				ComponentSerialization.STREAM_CODEC.encode(buf, p.errand);
+				buf.writeVarInt(p.errandCount);
+				buf.writeBoolean(p.gather);
 			}
 		};
 
@@ -110,9 +113,9 @@ public final class TableTalk {
 
 	/**
 	 * The answers: the second leaning ("" keeps it), chatter, style, his men's leaning ("" as they are), how they're lent
-	 * ({@link Loans#LEND}; -1 not asked), whether to take on the errand of what's in hand.
+	 * ({@link Loans#LEND}; -1 not asked), the errand for what's in hand ({@link Loans#fromTable}) and its purse.
 	 */
-	public record SetTable(int entityId, String second, int chatter, int style, String men, int lend, boolean errand) implements CustomPacketPayload {
+	public record SetTable(int entityId, String second, int chatter, int style, String men, int lend, int errand, int purse) implements CustomPacketPayload {
 		public static final Type<SetTable> TYPE = new Type<>(JaymosKingdoms.id("table_talk_set"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SetTable> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, SetTable::entityId,
@@ -121,7 +124,8 @@ public final class TableTalk {
 			ByteBufCodecs.VAR_INT, SetTable::style,
 			ByteBufCodecs.STRING_UTF8, SetTable::men,
 			ByteBufCodecs.VAR_INT, SetTable::lend,
-			ByteBufCodecs.BOOL, SetTable::errand,
+			ByteBufCodecs.VAR_INT, SetTable::errand,
+			ByteBufCodecs.VAR_INT, SetTable::purse,
 			SetTable::new);
 
 		@Override
@@ -297,6 +301,7 @@ public final class TableTalk {
 			Callouts.say(m, "table.sit", player, true, player.getDisplayName());
 		}
 		Bonds.add(m, player.getUUID(), warmth);
+		Loans.tell(m, player);
 		if (Specialties.is(m, Specialties.Specialty.PACKHORSE) && Specialties.unpack(m, player)) {
 			Callouts.say(m, "spec.unpack", player, true);
 		}
@@ -308,10 +313,10 @@ public final class TableTalk {
 		// a companion of one's own (not a sworn captain, not one on loan) is asked how it's lent, and given an errand (row A1, A5)
 		boolean lends = McaCompat.LOADED && m instanceof net.minecraft.world.entity.npc.villager.Villager && !captain && !m.hasAttached(Loans.LOAN);
 		ItemStack hand = player.getMainHandItem();
-		Component errand = lends && !hand.isEmpty() && Loans.gatherable(hand.getItem()) ? hand.getHoverName() : Component.empty();
+		Component errand = lends && !hand.isEmpty() && !com.jaymoskingdoms.money.Coinage.isMoney(hand) ? hand.getHoverName() : Component.empty();
 		ServerPlayNetworking.send(player, new OpenTable(m.getId(), m.getDisplayName(), l.main().key(), l.second().key(), chatter(m),
 			m.getAttachedOrElse(STYLE, styleOf(m)), Bonds.of(m, player.getUUID()), captain, m.getAttachedOrElse(MEN, ""),
-			lends ? m.getAttachedOrElse(Loans.LEND, 0) : -1, errand));
+			lends ? m.getAttachedOrElse(Loans.LEND, 0) : -1, errand, Loans.person(hand) != null ? 0 : hand.getCount(), lends && Loans.gatherable(hand.getItem())));
 	}
 
 	/** How {@code m} takes a win before anyone asked: by their voice. */
@@ -359,7 +364,7 @@ public final class TableTalk {
 			}
 		}
 		if (a.lend() >= 0 && McaCompat.LOADED && !m.hasAttached(Loans.LOAN) && !SwornCaptains.free(m)) {
-			Loans.fromTable(player, m, a.lend(), a.errand());
+			Loans.fromTable(player, m, a.lend(), a.errand(), a.purse());
 		}
 		Callouts.say(m, "table.done", player, true, player.getDisplayName());
 	}
