@@ -35,6 +35,12 @@ public final class DodgeClient {
 	/** (0.15.74) Client game time our own last roll started and which way, drawn at once ({@link DodgeRollPose}). */
 	static long rollStart = Long.MIN_VALUE;
 	static float rollX, rollZ;
+	/** Whether our own last roll was the flip in the air ({@link Dodge#canFlip}). */
+	static boolean rollFlip;
+	/** Leaving the ground faster than this upward (blocks/tick) is a jump, not a step off an edge. */
+	static final double JUMP_RISE = 0.1;
+	/** We were on the ground last tick; we're in the air off a jump; this jump's flip is spent. */
+	private static boolean wasOnGround = true, jumped, flipped;
 
 	private DodgeClient() {
 	}
@@ -73,6 +79,14 @@ public final class DodgeClient {
 			landingRoll = 0;
 			return;
 		}
+		boolean ground = player.onGround();
+		if (ground) {
+			jumped = false;
+			flipped = false;
+		} else if (wasOnGround && player.getDeltaMovement().y > JUMP_RISE) {
+			jumped = true;
+		}
+		wasOnGround = ground;
 		boolean wanted = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
@@ -82,6 +96,12 @@ public final class DodgeClient {
 		if (wanted && vault(player)) {
 			// (0.21.22) in the air over a raised shield: the vault, not a roll
 			wanted = false;
+		}
+		if (wanted && jumped && !flipped && tryFlip(player)) {
+			// in the air off a jump, armed and schooled: the flip, once a jump
+			wanted = false;
+			flipped = true;
+			landingRoll = 0;
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
@@ -124,6 +144,40 @@ public final class DodgeClient {
 		return true;
 	}
 
+	/**
+	 * Andy: "its tied to weapon forms but activated by dodging in midair, after a jump". Dodge pressed in the air off a
+	 * jump, a weapon in hand and Weapon Forms learnt ({@link Dodge#canFlip}): a somersault the way the movement keys point
+	 * (forward with none held), with a little push (and a lift for those {@link Dodge#flipLift} names), for {@link Dodge#FLIP_COST} feathers. It evades like a dodge.
+	 */
+	private static boolean tryFlip(LocalPlayer player) {
+		if (cooldown > 0 || player.isSpectator() || !Dodge.canFlip(player) || FreerunClient.active() || com.jaymospowers.boxing.Boxing.boxing(player)
+			|| !Feathers.canSpend(player, Dodge.FLIP_COST)) {
+			return false;
+		}
+		Input input = player.input.keyPresses;
+		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
+		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
+		if (forward == 0.0F && strafe == 0.0F) {
+			forward = 1.0F;
+		}
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
+		Vec3 dir = new Vec3(strafe * cos - forward * sin, 0.0, forward * cos + strafe * sin).normalize();
+		Vec3 motion = player.getDeltaMovement();
+		player.setDeltaMovement(dir.x * Dodge.FLIP_SPEED + motion.x * Dodge.FLIP_KEEP, Dodge.flipLift(player) > 0.0 ? Math.max(motion.y, 0.0) * 0.5 + Dodge.flipLift(player) : motion.y,
+			dir.z * Dodge.FLIP_SPEED + motion.z * Dodge.FLIP_KEEP);
+		cooldown = Dodge.COOLDOWN;
+		sinceDodge = 0;
+		rollStart = player.level().getGameTime();
+		rollX = (float)dir.x;
+		rollZ = (float)dir.z;
+		rollFlip = true;
+		if (ClientPlayNetworking.canSend(Dodge.Flip.TYPE)) {
+			ClientPlayNetworking.send(new Dodge.Flip((float)dir.x, (float)dir.z));
+		}
+		return true;
+	}
+
 	/** {@code landing}: a landing roll, which goes forward when no movement key is held. */
 	private static void tryDodge(LocalPlayer player, boolean landing) {
 		if (cooldown > 0 || player.isSpectator() || !Dodge.canDodge(player) || FreerunClient.active()) {
@@ -163,6 +217,7 @@ public final class DodgeClient {
 		rollStart = player.level().getGameTime();
 		rollX = (float)dir.x;
 		rollZ = (float)dir.z;
+		rollFlip = false;
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z));
 		}

@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * mobs it holds fast (hold the line). Andy: "manipulating items from way farther away than you could naturally". All of it is
  * kept by server tick count, per keeper; everything lets go the moment the keeper's spirit is no longer out.
  */
-final class HandGrip {
+public final class HandGrip {
 	/** How long a seized thing is held at most (ticks), and how far in front of the eyes (blocks). */
 	static final int HOLD_TICKS = 60;
 	static final double HOLD_DISTANCE = 2.0;
@@ -74,6 +74,41 @@ final class HandGrip {
 	 * {@link #landed} gives it its gravity back when it loads again.
 	 */
 	static final String HELD_TAG = "jaymoskingdoms_held";
+
+	/**
+	 * The scroll wheel reels what the arms hold in or out (Andy's pick from Star Wars: Galaxy in a Cube, ideas only):
+	 * {@code REEL_STEP} blocks a notch, between {@code REEL_MIN} and {@code REEL_MAX} from the eyes, following at
+	 * {@code REEL_SPEED} blocks a tick divided by its bulk (the cube root of its box, never under 1).
+	 */
+	static final double REEL_STEP = 1.0, REEL_MIN = 1.5, REEL_MAX = 10.0, REEL_SPEED = 0.4;
+	/** On a keeper whose spirit holds something: synced to them, so their wheel reels it and leaves the hotbar be. */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> GRIPPING =
+		net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(com.jaymoskingdoms.JaymosKingdoms.id("spirit_gripping"),
+			builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
+	/** Per keeper: how far out the held thing is now, and where the wheel has asked for it. */
+	private static final java.util.Map<UUID, double[]> REACH = new java.util.HashMap<>();
+
+	/** Client → server: the wheel while the spirit holds something, {@code steps} notches out (or in, below zero). */
+	public record Reel(int steps) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<Reel> TYPE = new Type<>(com.jaymoskingdoms.JaymosKingdoms.id("spirit_reel"));
+		public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, Reel> CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Reel::steps, Reel::new);
+
+		@Override
+		public Type<Reel> type() {
+			return TYPE;
+		}
+	}
+
+	static void register() {
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(Reel.TYPE, Reel.CODEC);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(Reel.TYPE, (payload, context) -> {
+			double[] reach = REACH.get(context.player().getUUID());
+			if (reach != null && holding(context.player())) {
+				reach[1] = net.minecraft.util.Mth.clamp(reach[1] + net.minecraft.util.Mth.clamp(payload.steps(), -3, 3) * REEL_STEP, REEL_MIN, REEL_MAX);
+			}
+		});
+	}
 
 	private HandGrip() {
 	}
@@ -147,6 +182,8 @@ final class HandGrip {
 	static void seize(ServerPlayer player, Entity thing) {
 		thing.stopRiding();
 		HELD.put(player.getUUID(), new Held(thing, tick(player), thing.isNoGravity()));
+		REACH.put(player.getUUID(), new double[] {HOLD_DISTANCE, HOLD_DISTANCE});
+		player.setAttached(GRIPPING, true);
 		floatUp(thing);
 		thing.setDeltaMovement(Vec3.ZERO);
 		if (thing instanceof Mob mob) {
@@ -223,6 +260,13 @@ final class HandGrip {
 	}
 
 	static void tick(MinecraftServer server) {
+		// whoever's spirit holds nothing any more gets their wheel back
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.hasAttached(GRIPPING) && !HELD.containsKey(player.getUUID())) {
+				player.removeAttached(GRIPPING);
+				REACH.remove(player.getUUID());
+			}
+		}
 		if (HELD.isEmpty() && THROWN.isEmpty() && PULLS.isEmpty() && PINS.isEmpty()) {
 			return;
 		}
@@ -252,7 +296,10 @@ final class HandGrip {
 				continue;
 			}
 			Entity thing = held.thing;
-			Vec3 at = owner.getEyePosition().add(owner.getLookAngle().scale(HOLD_DISTANCE)).subtract(0.0, thing.getBbHeight() * 0.5, 0.0);
+			double[] reach = REACH.computeIfAbsent(entry.getKey(), id -> new double[] {HOLD_DISTANCE, HOLD_DISTANCE});
+			double pace = REEL_SPEED / Math.max(1.0, Math.cbrt(thing.getBbWidth() * thing.getBbWidth() * thing.getBbHeight()));
+			reach[0] += net.minecraft.util.Mth.clamp(reach[1] - reach[0], -pace, pace);
+			Vec3 at = owner.getEyePosition().add(owner.getLookAngle().scale(reach[0])).subtract(0.0, thing.getBbHeight() * 0.5, 0.0);
 			if (thing instanceof ServerPlayer sp) {
 				sp.teleportTo(at.x, at.y, at.z);
 			} else {

@@ -3206,6 +3206,7 @@ public final class PowersCompat {
 			return -1.0F;
 		}
 	}
+
 	// ---- boxing (Powers' boxing/BoxingTraining) ----------------------------------------------------------------------------
 
 	private static java.lang.invoke.@Nullable MethodHandle boxingLesson, boxingCount, boxingKill, boxingTrained;
@@ -3291,5 +3292,157 @@ public final class PowersCompat {
 		} catch (Throwable e) {
 			// (nothing to give)
 		}
+	}
+
+	// ---- the blade school's special cuts (forms/SpecialCuts): feathers, the body's pose, a hurled blade ---------------------
+
+	/** Powers' tag on an attacker whose blow a guard can only block, never parry ({@code Guard.UNPARRYABLE_TAG}). */
+	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
+	/** Powers' special cuts, as {@code Armed.cut} draws them: the Wheel Cut, the Figure Eight, a hurled blade. */
+	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2, CUT_BOTH = 3, CUT_MILL = 4;
+
+	private static boolean lookedForCuts;
+	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade, styleSet, styleClear, bladeSwing;
+
+	private static void lookForCuts() {
+		if (lookedForCuts) {
+			return;
+		}
+		lookedForCuts = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			feathers = lookup.findStatic(Class.forName("com.jaymospowers.stamina.Feathers"), "spend",
+				java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no feathers (older Powers?)", e);
+		}
+		try {
+			Class<?> armed = Class.forName("com.jaymospowers.combat.Armed");
+			cutPose = lookup.findStatic(armed, "cut", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, int.class, int.class, int.class));
+			endCutPose = lookup.findStatic(armed, "endCut", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class));
+			hurlBlade = lookup.findStatic(Class.forName("com.jaymospowers.combat.BladeThrow"), "hurl",
+				java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.item.ItemStack.class,
+					float.class, float.class, boolean.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no special cuts (older Powers?)", e);
+		}
+		try {
+			Class<?> style = Class.forName("com.jaymospowers.combat.BladeStyle");
+			styleSet = lookup.findStatic(style, "set", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class,
+				float.class, float.class, float.class, float.class));
+			styleClear = lookup.findStatic(style, "clear", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no fighting styles (older Powers?)", e);
+		}
+		try {
+			bladeSwing = lookup.findStatic(Class.forName("com.jaymospowers.combat.BladeSounds"), "swing", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, int.class, float.class, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no blade sounds (older Powers?)", e);
+		}
+	}
+
+	/** Whether Powers' feathers (stamina) are there to be spent at all. */
+	public static boolean hasFeathers() {
+		lookForCuts();
+		return feathers != null;
+	}
+
+	/** Spends {@code cost} of {@code player}'s feathers (Powers' stamina): false if they haven't that many. True, at no cost, without Powers. */
+	public static boolean spendFeathers(net.minecraft.server.level.ServerPlayer player, int cost) {
+		lookForCuts();
+		if (feathers == null || player.isCreative()) {
+			return true;
+		}
+		try {
+			return (boolean)feathers.invoke(player, cost);
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
+	/** {@code body} is drawn making the special cut {@code kind} for {@code ticks}, as if begun {@code skip} ticks ago; nothing without Powers. */
+	public static void cutPose(LivingEntity body, int kind, int ticks, int skip) {
+		lookForCuts();
+		try {
+			if (cutPose != null) {
+				cutPose.invoke(body, kind, ticks, skip);
+			}
+		} catch (Throwable ignored) {
+			// only the look of it
+		}
+	}
+
+	/** {@code body}'s special cut is no longer drawn. */
+	public static void endCutPose(LivingEntity body) {
+		lookForCuts();
+		try {
+			if (endCutPose != null) {
+				endCutPose.invoke(body);
+			}
+		} catch (Throwable ignored) {
+			// only the look of it
+		}
+	}
+
+	/**
+	 * {@code player} hurls {@code blade} (one item, already out of the hand) as Powers' thrown weapon, for {@code damage},
+	 * at {@code speed} blocks a tick; it flies back to the hand if {@code comesBack}. False without Powers (nothing was thrown).
+	 */
+	public static boolean hurlBlade(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack blade, float damage, float speed,
+		boolean comesBack) {
+		lookForCuts();
+		try {
+			return hurlBlade != null && (boolean)hurlBlade.invoke(player, blade, damage, speed, comesBack);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * {@code player} fights in a style with these trades (Powers' {@code BladeStyle.set}): feathers a landed swing costs,
+	 * a blocked blow's cost and attack speed and feather regrowth, each times the usual. Nothing without Powers.
+	 */
+	public static void bladeStyle(net.minecraft.server.level.ServerPlayer player, float swing, float block, float speed, float regen) {
+		lookForCuts();
+		try {
+			if (styleSet != null) {
+				styleSet.invoke(player, swing, block, speed, regen);
+			}
+		} catch (Throwable ignored) {
+			// the style is only its trades
+		}
+	}
+
+	/** {@code player} fights plain again. */
+	public static void clearBladeStyle(net.minecraft.server.level.ServerPlayer player) {
+		lookForCuts();
+		try {
+			if (styleClear != null) {
+				styleClear.invoke(player);
+			}
+		} catch (Throwable ignored) {
+			// the style is only its trades
+		}
+	}
+
+	/**
+	 * A blade's swing at {@code at} in Powers' own sounds ({@code weight}: 0 light, 1 medium, 2 heavy). False without
+	 * Powers, and the caller plays vanilla's sweep.
+	 */
+	public static boolean bladeSwing(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, int weight, float volume, float pitch) {
+		lookForCuts();
+		try {
+			if (bladeSwing != null) {
+				bladeSwing.invoke(level, at, weight, volume, pitch);
+				return true;
+			}
+		} catch (Throwable ignored) {
+			// only a sound
+		}
+		return false;
 	}
 }

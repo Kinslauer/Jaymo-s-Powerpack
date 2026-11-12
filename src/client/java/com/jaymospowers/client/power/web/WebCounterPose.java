@@ -184,6 +184,12 @@ public final class WebCounterPose {
 					Mth.sin(t * 2.7F) * 3.0F * squeeze);
 				poseStack.translate(0.0F, -0.12F * hold - 0.15F * slam, 0.0F);
 			}
+			case WebCounter.CATCH_SLAM -> {
+				// reaching out to catch it, rearing back as it's heaved up overhead, then driven down into the ground
+				float heave = ramp(t, 3.0F, 6.0F) * (1.0F - ramp(t, 8.0F, 10.0F)), slam = bump(t, 10.0F, 1.5F, 6.0F);
+				lean(poseStack, hips, 16.0F * heave - 40.0F * slam, side * 5.0F * slam);
+				poseStack.translate(0.0F, -0.25F * slam, 0.0F);
+			}
 			case WebCounter.JAW_SNAP -> {
 				// the head lunges and the body follows it
 				float lunge = bump(t, 8.0F, 5.0F, 8.0F);
@@ -413,6 +419,20 @@ public final class WebCounterPose {
 				set(h.rightLeg, -0.25F, 0.0F, 0.25F, Math.max(hold, slam));
 				set(h.leftLeg, -0.25F, 0.0F, -0.25F, Math.max(hold, slam));
 				h.head.xRot = Mth.lerp(hold, h.head.xRot, 0.35F);
+			}
+			case WebCounter.CATCH_SLAM -> {
+				// the lead hand shoots out and takes it, both arms heave it overhead, then drive it down with the knees bent
+				float cast = bump(t, 3.0F, 2.0F, 2.0F);
+				float heave = ramp(t, 3.0F, 6.0F) * (1.0F - ramp(t, 8.0F, 10.0F)), slam = bump(t, 10.0F, 1.5F, 6.0F);
+				castArm(arm, other, out, 0.0F, cast);
+				set(h.rightArm, -2.9F, 0.0F, 0.25F, heave);
+				set(h.leftArm, -2.9F, 0.0F, -0.25F, heave);
+				set(h.rightArm, -0.6F, 0.0F, 0.2F, slam);
+				set(h.leftArm, -0.6F, 0.0F, -0.2F, slam);
+				set(leg, -0.6F, 0.0F, out * 0.12F, slam);
+				set(plant, 0.4F, 0.0F, -out * 0.12F, slam);
+				h.head.xRot = Mth.lerp(heave, h.head.xRot, -0.45F);
+				h.head.xRot = Mth.lerp(slam, h.head.xRot, 0.35F);
 			}
 			case WebCounter.JAW_SNAP -> {
 				// arms flung back as the head shoots forward, then the claws come round

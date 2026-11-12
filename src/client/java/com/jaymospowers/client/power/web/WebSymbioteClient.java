@@ -578,6 +578,7 @@ public final class WebSymbioteClient {
 		state.setData(FERAL, entity instanceof Player player && WebSymbiote.isBonded(player)
 			? 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX : null);
 		WebMorphLayer.extract(entity, state);
+		WebBrutePose.extract(entity, state);
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}

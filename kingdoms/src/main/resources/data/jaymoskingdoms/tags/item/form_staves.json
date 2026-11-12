@@ -1,0 +1,73 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:wooden_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:telescoping_staff",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.copper",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.netherite",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:twinblade",
+      "required": false
+    }
+  ]
+}

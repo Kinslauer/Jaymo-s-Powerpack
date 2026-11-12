@@ -1,0 +1,10 @@
+{
+	"key.jaymospowers.web_goo_puddle": "Symbiote: Puddle",
+	"key.jaymospowers.web_goo_spit": "Symbiote: Spit Goo",
+	"key.jaymospowers.web_goo_wall": "Symbiote: Goo Wall",
+	"block.jaymospowers.web_goo_wall": "Goo Wall",
+	"message.jaymospowers.web_goo.no_suit": "The suit has to be up first.",
+	"message.jaymospowers.web_goo.no_maw": "It needs a mouth: the big suit, or Living Armor with its mask on.",
+	"message.jaymospowers.web_symbiote.goo_puddle": "Down. They'll step right over us.",
+	"message.jaymospowers.web_symbiote.goo_wall": "Behind me."
+}

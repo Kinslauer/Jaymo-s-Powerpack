@@ -163,13 +163,14 @@ public final class Spirits {
 
 	public static void register() {
 		// (their attachments, registered as the classes load)
-		JaymosKingdoms.LOGGER.debug("spirit attachments: {} {} {} {}", SPIRIT, SICK, RELEASED, FLASH);
+		JaymosKingdoms.LOGGER.debug("spirit attachments: {} {} {} {} {}", SPIRIT, SICK, RELEASED, FLASH, HandGrip.GRIPPING);
 		PayloadTypeRegistry.serverboundPlay().register(Key.TYPE, Key.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, context) -> key(context.player(), payload));
 		Moves.register();
 		SpiritVoice.register();
 		SpiritSickness.register();
 		HandMoves.register();
+		HandGrip.register();
 		HandExtras.register();
 		Grimsby.register();
 		Varro.register();

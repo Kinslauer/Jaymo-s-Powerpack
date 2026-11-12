@@ -62,7 +62,7 @@ public final class PoseTakeover {
 		return com.jaymospowers.client.wounds.DownedPose.down(s) || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
 			|| s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
-			|| com.jaymospowers.client.pets.PetPoses.posed(s);
+			|| com.jaymospowers.client.pets.PetPoses.posed(s) || com.jaymospowers.client.combat.AttentionPose.on(s);
 	}
 
 	public static void beginDraw(LivingEntityRenderState state) {
@@ -157,7 +157,8 @@ public final class PoseTakeover {
 
 	public static boolean posed(AvatarRenderState s) {
 		return posedOtherwise(s) || s.getData(com.jaymospowers.client.wounds.WoundNursePose.KEY) != null
-			|| com.jaymospowers.client.armory.FangGauntletsClient.guarding(s);
+			|| com.jaymospowers.client.armory.FangGauntletsClient.guarding(s)
+			|| s.getData(com.jaymospowers.client.combat.ParryPose.KEY) != null || com.jaymospowers.client.combat.ArmedPose.on(s);
 	}
 
 	/** (0.16.21) One of our poses other than nursing a wound (which lets go under any of them) is on. */
@@ -180,6 +181,7 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.web.WebExecutionPose.KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(WebSymbioteClient.SLAM) != null || s.getData(WebSymbioteClient.CHARGE) != null
+			|| s.getData(com.jaymospowers.client.power.web.WebBrutePose.KEY) != null
 			|| s.getData(WebSymbioteClient.ROAR) != null || s.getData(WebSymbioteClient.EATING) != null
 			// the symbiote's suit and Living Armor are models of their own over the body, posed the vanilla way (and Living
 			// Armor hunches like a beast, WebFeral): Fresh Animations would move the body out from under them

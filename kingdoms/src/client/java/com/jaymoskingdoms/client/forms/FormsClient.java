@@ -218,6 +218,15 @@ public final class FormsClient {
 			String text = named ? (i + 1) + " " + (form == null ? "-" : form.name().getString()) : String.valueOf(i + 1);
 			graphics.text(font, Ui.cut(font, text, w - 4), x + 2, y + 2, color);
 		}
+		// the school's style you are fighting in, over the belt
+		com.jaymoskingdoms.forms.Styles.Style style = com.jaymoskingdoms.forms.Styles.Style.byKey(player.getAttached(com.jaymoskingdoms.forms.Styles.ACTIVE));
+		if (style != null) {
+			Component name = style.displayName();
+			int[] over = HudZones.place(HudZones.FOCUS, "jaymoskingdoms:style", 21, font.width(name), 9);
+			if (over != null) {
+				graphics.text(font, name, over[0], over[1], Ui.DIM);
+			}
+		}
 	}
 
 	/** The chain counter right of the crosshair: links and a grade, fading as the chain's window runs out. */

@@ -100,6 +100,10 @@ public final class ZFighterGuard {
 		long now = level.getGameTime();
 		if (now - live.guardStart <= PARRY_TICKS && now >= live.parryReadyAt) {
 			parry(player, live, melee ? (LivingEntity)direct : null);
+			if (direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
+				// with the ki weapon out, the arrow is struck back at whoever loosed it
+				ZFighterKiWeapon.deflect(player, arrow);
+			}
 			ZFighterGrowth.guarded(player, true);
 			return 0.0F;
 		}
