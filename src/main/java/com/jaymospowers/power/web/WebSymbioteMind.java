@@ -548,7 +548,7 @@ public final class WebSymbioteMind {
 		}
 	}
 
-	private static void addTrust(ServerPlayer player, int delta) {
+	static void addTrust(ServerPlayer player, int delta) {
 		Mind mind = mind(player);
 		write(player, mind.withTrust(mind.trust + delta));
 	}
