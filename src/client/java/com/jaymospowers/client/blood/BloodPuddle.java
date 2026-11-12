@@ -35,6 +35,10 @@ import java.util.TreeSet;
  * ({@link BloodWallMark#edges}). A bloody footprint ({@link BloodParticles.Puddle#print}) is one sole, turned the way its
  * walker went and laid flat where it fell. Magma blood ({@link BloodParticles#MAGMA}) glows bright and cools to a dark crust
  * ({@link #shade}, {@link #glow}), smoking while it's hot.
+ *
+ * <p>(Cruor's ideas) What it lies on changes it ({@link BloodSurfaces}): cloth soaks it small and dark, earth drinks it
+ * dull and soon, glass and ice smear it thin; a fresh pool on a thin floor drips through from the underside. A passing
+ * pool lasts as long as the player's blood setting says ({@link BloodSettings}).
  */
 public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** Its starting opacity; how long it takes to splat in (ticks); how far down it can lie (blocks). */
@@ -106,6 +110,9 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	private final boolean rightFoot;
 	private final int color;
 	private final boolean magma;
+	/** What it lies on, and the thin floor it soaks through (null: none). */
+	private final BloodSurfaces.Surface surface;
+	private final @org.jspecify.annotations.Nullable BlockPos soakThrough;
 
 	BloodPuddle(ClientLevel level, double x, double y, double z, SpriteSet sprites, int color, float scale, int age, int life) {
 		this(level, x, y, z, sprites, color, scale, age, life, BloodParticles.Puddle.ROUND);
@@ -172,6 +179,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.g = green(color);
 		this.b = blue(color);
 		this.zFight = this.random.nextFloat();
+		if (!wet && !this.print) {
+			this.surface = BloodSurfaces.under(level, x, y, z);
+			this.baseSize *= this.surface.size;
+			this.targetSize = this.baseSize;
+			if (!this.stain) {
+				this.lifetime = Math.max(FADE + 20, Math.round(this.lifetime * this.surface.life * BloodSettings.amount().life));
+			}
+			this.soakThrough = BloodSurfaces.soaksThrough(level, x, y, z);
+		} else {
+			this.surface = BloodSurfaces.Surface.PLAIN;
+			this.soakThrough = null;
+		}
 		if (!wet && !this.print && round) {
 			// (0.20.41) a pool spread over a ledge pours down its side
 			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
@@ -239,6 +258,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
 			this.lifetime = this.age + RAIN_WASH;
 			this.quickFade = RAIN_WASH;
+		}
+		// a fresh pool on a thin floor drips through from its underside
+		if (this.soakThrough != null && this.age < BloodSurfaces.SOAK_TICKS && !this.magma
+			&& this.random.nextFloat() < BloodSurfaces.SOAK_DRIP * Math.min(1.5F, this.baseSize / SIZE)) {
+			double dx = Mth.clamp(this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.5, this.soakThrough.getX() + 0.05,
+				this.soakThrough.getX() + 0.95);
+			double dz = Mth.clamp(this.z + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.5, this.soakThrough.getZ() + 0.05,
+				this.soakThrough.getZ() + 0.95);
+			BlockState floor = this.level.getBlockState(this.soakThrough);
+			double bottom = floor.getShape(this.level, this.soakThrough).isEmpty() ? 0.0 : floor.getShape(this.level, this.soakThrough).min(
+				net.minecraft.core.Direction.Axis.Y);
+			BloodClient.drip(this.level, dx, this.soakThrough.getY() + bottom - 0.03, dz, this.color, 0.6F);
 		}
 		if (this.magma && this.age < BloodParticles.MAGMA_COOLS / 2 && this.random.nextFloat() < 0.03F) {
 			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x + (this.random.nextFloat() - 0.5F) * this.baseSize * 0.6,
@@ -351,6 +382,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		// a big pool lies thicker: more opaque and darker
 		float thick = this.round && !this.wet ? Mth.clamp((this.baseSize / SIZE - THICK_FROM) / (THICK_FULL - THICK_FROM), 0.0F, 1.0F) : 0.0F;
 		float alpha = this.wet ? WET_ALPHA : this.drag ? DRAG_ALPHA : Mth.lerp(thick, ALPHA, THICK_ALPHA);
+		alpha = Math.min(0.95F, alpha * this.surface.alpha);
 		if (age > fadeFrom) {
 			size *= Mth.smoothstep(1.0F - Math.max(age - fadeFrom - 60.0F, 0.0F) / fade);
 			// (worked out each frame, so a pool that grows again after it began to fade is whole again)
@@ -380,6 +412,11 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		this.shown = shade(this.color, age, this.stain);
 		if (thick > 0.0F && !this.magma) {
 			float dark = Mth.lerp(thick, 1.0F, THICK_DARK);
+			this.shown = ARGB.color(0, Math.round(red(this.shown) * dark * 255.0F), Math.round(green(this.shown) * dark * 255.0F),
+				Math.round(blue(this.shown) * dark * 255.0F)) & 0xFFFFFF;
+		}
+		if (this.surface.dark < 1.0F && !this.magma && !this.wet) {
+			float dark = this.surface.dark;
 			this.shown = ARGB.color(0, Math.round(red(this.shown) * dark * 255.0F), Math.round(green(this.shown) * dark * 255.0F),
 				Math.round(blue(this.shown) * dark * 255.0F)) & 0xFFFFFF;
 		}
