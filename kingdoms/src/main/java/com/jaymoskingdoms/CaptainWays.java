@@ -579,7 +579,7 @@ public final class CaptainWays {
 	}
 
 	/** A rock or an axe thrown at {@code target}, weighing {@code weight}; {@code glinted}: nobody parries it. */
-	private static void hurl(ServerLevel level, Mob mob, LivingEntity target, ItemStack what, float weight, boolean glinted) {
+	private static Snowball hurl(ServerLevel level, Mob mob, LivingEntity target, ItemStack what, float weight, boolean glinted) {
 		Snowball thrown = new Snowball(level, mob, what);
 		THROWN.put(thrown, weight);
 		if (glinted) {
@@ -592,6 +592,7 @@ public final class CaptainWays {
 		mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Projectile.spawnProjectileUsingShoot(thrown, level, what, dx, dy + flat * 0.2, dz, 1.4F, 2.0F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.HOSTILE, 1.0F, 0.7F);
+		return thrown;
 	}
 
 	// ---- signature moves -----------------------------------------------------------------------------------------------------
@@ -632,7 +633,9 @@ public final class CaptainWays {
 		boolean inRange = switch (move) {
 			case SHIELD_CHARGE -> d >= CHARGE_MIN && d <= CHARGE_MAX && mob.hasLineOfSight(target);
 			case GROUND_SLAM -> d <= SLAM_RANGE;
-			case AXE_THROW -> d >= THROW_MIN && d <= THROW_MAX && mob.hasLineOfSight(target);
+			// (MobAmmo) only with an axe in hand: the one he throws, and then he hasn't got it
+			case AXE_THROW -> d >= THROW_MIN && d <= THROW_MAX && mob.hasLineOfSight(target)
+				&& mob.getMainHandItem().is(net.minecraft.tags.ItemTags.AXES);
 			case CRUSHING_GRAB -> d <= GRAB_RANGE;
 			default -> false;
 		};
@@ -680,7 +683,15 @@ public final class CaptainWays {
 						e.needsSync = true;
 					}
 				}
-				case AXE_THROW -> hurl(level, mob, target, new ItemStack(Items.IRON_AXE), AXE_DAMAGE, true);
+				case AXE_THROW -> {
+					// his own axe: out of his hand, and left lying where it lands till he (or anyone) picks it up
+					ItemStack axe = mob.getMainHandItem().copyWithCount(1);
+					if (!axe.is(net.minecraft.tags.ItemTags.AXES)) {
+						break;
+					}
+					MobAmmo.lost(mob, axe.getItem());
+					MobAmmo.leaves(hurl(level, mob, target, axe, AXE_DAMAGE, true), axe);
+				}
 				case CRUSHING_GRAB -> {
 					if (mob.distanceTo(target) <= GRAB_RANGE + 0.8) {
 						mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);

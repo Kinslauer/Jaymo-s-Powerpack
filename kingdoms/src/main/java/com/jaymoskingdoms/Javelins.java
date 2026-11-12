@@ -35,7 +35,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.5.12) Guards (and barbarians) throw javelins at a foe they can't close with: one up on a wall or a tower, one they
  * have no path to, or a bowman keeping his distance. So an archer on the wall is no longer safe from the men below.
- * A javelin can't be picked up; it doesn't hurt the thrower's own side, nor (thrown by defenders) the villagers and golems
+ * (MobAmmo) Each guard carries only a few, and a javelin or trident lies where it lands to be picked up again (by him or
+ * anyone). It doesn't hurt the thrower's own side, nor (thrown by defenders) the villagers and golems
  * about them.
  * <p>(0.5.28) What's thrown depends on the thrower's purse ({@link #javelin}): the guards of the wealthiest kingdoms
  * ({@link #elite}) throw tridents; poor kingdoms' guards, barbarians and their chiefs throw rocks; everyone else throws
@@ -138,10 +139,16 @@ final class Javelins {
 			return;
 		}
 		NEXT.put(folk, now + COOLDOWN + level.getRandom().nextInt(JITTER));
+		// (MobAmmo) he carries a few; each thrown one lies where it lands till it's picked up again
+		if (!MobAmmo.has(folk, MobAmmo.Kind.JAVELINS)) {
+			return;
+		}
 		Projectile thrown = javelin(level, folk, faction);
 		if (thrown == null) {
 			return;
 		}
+		MobAmmo.spend(folk, MobAmmo.Kind.JAVELINS);
+		MobAmmo.canBePickedUp(thrown);
 		THROWN.add(thrown);
 		ItemStack javelin = thrown instanceof AbstractArrow arrow ? arrow.getPickupItemStackOrigin() : ItemStack.EMPTY;
 		double dx = foe.getX() - folk.getX(), dz = foe.getZ() - folk.getZ();
