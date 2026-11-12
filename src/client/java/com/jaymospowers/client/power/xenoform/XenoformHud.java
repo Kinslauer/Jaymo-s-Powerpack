@@ -129,6 +129,7 @@ final class XenoformHud {
 			if (form == XenoForms.BULWARK) {
 				furyBar(graphics, player, at[0], at[1] - 22, chipsWidth(chips), time);
 			}
+			XenoMindsHud.draw(graphics, font, player, form, at[0], at[1] - 24, chipsWidth(chips), time);
 			return;
 		}
 		int[] at = chipsOrigin(width, height, 2);

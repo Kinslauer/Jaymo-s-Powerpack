@@ -526,6 +526,7 @@ public final class XenoformPower implements Power {
 		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
 		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
 		XenoStalker.init();
+		XenoMinds.init();
 		// (0.18.125, patch 8) the band hunter and the rival band's aliens
 		RivalHunter.init();
 		XenoBandItem.init();
@@ -569,7 +570,7 @@ public final class XenoformPower implements Power {
 				return false;
 			}
 			// a phasing Wisp's hands pass through whatever it strikes
-			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && XenoformState.phasing(attacker)) {
+			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && XenoformState.phasing(attacker) && !com.jaymospowers.power.xenoform.minds.WispHand.striking()) {
 				return false;
 			}
 			if (com.jaymospowers.power.xenoform.forms.ultimate.Swarm.bitesPlayer(source, entity)) {

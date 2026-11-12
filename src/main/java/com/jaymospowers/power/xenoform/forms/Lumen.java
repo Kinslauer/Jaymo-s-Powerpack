@@ -4,6 +4,7 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.minds.LumenShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -36,6 +37,9 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Flare: a flash that blinds every creature round you.</li>
  * <li>V, Light: a light hangs where you look for {@link #LIGHT_TICKS} ticks, as a glare leaves.</li>
  * <li>B, Fetch: as an allay, items on the ground of the kind you hold fly to you (anything, with an empty hand).</li>
+ * <li>Shapes of light ({@link LumenShapes}): Z tapped turns the dial of shapes (sneaking, back), and sneak + V makes the one in
+ * hand (V alone is still Light): a held beam on a heat gauge, a dome, a grabbing hand, a volley of missiles, a great thrown
+ * block, a wall, a bridge or a cage. They spend a charge that tops itself up (faster in bright light, and Mend adds to it).</li>
  * </ul>
  */
 public final class Lumen extends XenoForm {
@@ -65,6 +69,7 @@ public final class Lumen extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		douse(player.level(), live, Long.MAX_VALUE);
 		live.fetch = 0;
+		LumenShapes.forget(player);
 	}
 
 	@Override
@@ -75,12 +80,16 @@ public final class Lumen extends XenoForm {
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		if (!down) {
+			if (key == PowerKey.ABILITY_3) {
+				LumenShapes.letGo(player);
+			}
 			return;
 		}
 		ServerLevel level = player.level();
 		switch (key) {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
+					LumenShapes.topUp(player, LumenShapes.MEND_TOPUP);
 					for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(MEND_RADIUS),
 						e -> e.isAlive() && (e == player || e instanceof Player || spared(player, e)) && e.distanceTo(player) <= MEND_RADIUS)) {
 						e.heal(MEND_HEAL);
@@ -107,7 +116,9 @@ public final class Lumen extends XenoForm {
 				}
 			}
 			case ABILITY_3 -> {
-				if (ready(player, live, V) && light(player, live, level)) {
+				if (player.isShiftKeyDown()) {
+					LumenShapes.cast(player);
+				} else if (ready(player, live, V) && light(player, live, level)) {
 					cooldown(player, live, V, LIGHT_COOLDOWN);
 				}
 			}
@@ -168,9 +179,17 @@ public final class Lumen extends XenoForm {
 		}
 	}
 
+	/** Z tapped: the next shape of light (sneaking, the one before). */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		LumenShapes.cycle(player, player.isShiftKeyDown());
+		return true;
+	}
+
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		LumenShapes.tick(player);
 		// it drifts down rather than falls
 		Vec3 m = player.getDeltaMovement();
 		if (!player.onGround() && !player.isShiftKeyDown() && !player.isInWater() && m.y < DRIFT_FALL) {
