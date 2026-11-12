@@ -97,3 +97,27 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **C6 reckless** (`RecklessBlows`): 35% glance at x0.4, else x1.75; open 2 s.
 - **C7 shove and trip** (`Shoves`): key default Insert (no free key fit; remap in Controls). Players only; Might
   contest, bosses immune.
+
+### Patch 3
+- **A6 lend a hand** (`LendAHand`): lock picking (window x1.35, strain x0.7), carrying (+10% speed, +2 Kitchen
+  hauling brawn), "watch out" (a friend facing a foe hunting you from out of view shouts; next blow has the upper
+  hand), haggling (+0.25). The pack's wagon is horse-drawn, so "a cart" is covered by Carry and corpse hauling.
+- **C3 cover** (`Cover`, `ProjectileCoverMixin`, `RangedTactics` TAKE_COVER): crouched behind fences, walls or
+  carts, up to 85% of shots hit the cover and stick. Raised shields are vanilla blocking, unchanged. Spell bolts count
+  via the `cover_stops` entity tag.
+- **C8 damage kinds** (`DamageKinds`): 13 kinds, a family table (skeletal, undead, ghostly, slime, metal golem,
+  fiery, snowy). Ghostly = vexes and wraiths: only enchanted, silver, holy weapons, Divine-born or Dawnborn in sun.
+- **C10 under water** (`UnderWater`): blades x0.6 and slower; spears/tridents/daggers exempt; arrows at 0.3 speed;
+  bolts last 8 ticks. Water-folk exempt.
+- **E1 catching your breath** (`CatchBreath`): a minute seated at a lit fire, a bench or a still horse, unhurt for
+  10 s and unhunted; reserve 8 + 12 x Endurance share + class bonus; refilled by a full night's sleep.
+- **E2 keeping watch** (`NightWatch`): watcher = awake player, companion or tame wolf by the fire; visitors are
+  wolves, a bandit or a pack thief (Vindicators as stand-ins), at most once an hour per camp.
+- **F1 travel pace** (`Pace`): hold key "Walk slowly" (default Caps Lock; Left Alt is roll): -35% speed, quieter,
+  harder to see, notices more. Riding hard is loud.
+- **F2 darkvision** (`Darkvision`): Nightborn, Deepborn, Stoneborn, Hollow, goblin, orc, moon elf, and per Andy the
+  lizard (Serpen) and feline beast folk, plus arachnid. A client depth-based grey lift within 16 blocks (may need
+  tuning in play). Replaces the three eye perks' night-vision effect.
+- **F4 weather** (`FieldWeather`): gale arrow drift and placed torches blowing out (to the burnt torch villagers
+  relight); rain douses fire arrows and cuts mob sight (x0.85, storm x0.7); deep snow -30% (sprint or horse -42%).
+  Held torches and lanterns don't blow out.

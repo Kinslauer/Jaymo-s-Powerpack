@@ -14,4 +14,13 @@
 - **Sneak attack** (`ThiefSneak`): a Thief's light blade or bow bursts on a foe busy with a friend or unaware, once a second.
 - **Reckless blows** (`RecklessBlows`): sneak while swinging a two-hander or loosing a bow: likelier to glance, much harder if not, and foes have the upper hand on you for a moment.
 - **Shove and trip** (`Shoves`, key default Insert under Jaymo's Fight Moves): an empty hand or shield shoves a foe back a block; a hooked weapon trips them prone.
+- **Lend a hand** (`LendAHand`): a friend at your side picks locks faster with you, speeds a carry, calls "watch out" at a foe you can't see (your next blow has the upper hand) and backs a haggle.
+- **Cover** (`Cover`, mixin `fifth/ProjectileCoverMixin`, `RangedTactics`): crouched behind a fence, low wall or cart, arrows, bolts and bullets hit the cover more and stick in it; archers and musketeers duck behind cover and lean out to shoot.
+- **Damage kinds** (`DamageKinds`, tags `ghostly`, `fiery`, `metal_golems`): every hit has a kind, and families take more or less: skeletons shrug arrows and break under maces, zombies ignore poison, ghosts (vexes, wraiths) take only enchanted, silver or holy blows, slimes split when cut, iron golems shrug off plain iron, fire creatures heal in fire.
+- **Under water** (`UnderWater`, tag `works_under_water`): swords and axes swing slow and weak; spears, tridents and daggers work; arrows barely fly; crossbow bolts work close.
+- **Catching your breath** (`CatchBreath`): sit a minute at a fire, on a bench or a still horse to heal from a daily reserve sized by Endurance and class; a night's sleep refills it. Food hearts still never heal back.
+- **Keeping watch** (`NightWatch`): sleeping out, one by the fire keeps watch and shouts everyone awake; unwatched camps draw wolves, bandits and a pack thief.
+- **Travel pace** (`Pace`, key "Walk slowly", default Caps Lock): walking slowly is quiet, hard to see and notices more; riding hard is as loud as sprinting.
+- **Darkvision by blood** (`Darkvision`, client post effect): grey shapes out to 16 blocks for Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves and the lizard, feline and arachnid beast folk; it replaces the eye perks' night vision. The five human bloods need light.
+- **Weather in the fight** (`FieldWeather`): gales push arrows and blow out placed torches, rain puts out fire arrows and shortens mobs' sight, deep snow slows a charge and a horse.
 - Built; not played.

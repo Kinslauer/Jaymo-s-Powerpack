@@ -19,7 +19,7 @@ import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 /**
- * Travel pace, the walking-slowly end of it. A held key (default Left Alt) drops you to a careful crawl on foot: you
+ * Travel pace, the walking-slowly end of it. A held key (default Caps Lock) drops you to a careful crawl on foot: you
  * move a third slower, make less than half the noise, are harder for watchers to pick out, and notice more of what is
  * around you. The other end is already in the game: sprinting, or riding a horse hard, is loud, shows you from further
  * off ({@link Awareness}, {@link Senses}) and leaves you blind to traps and ambushes ({@link Notice}).
