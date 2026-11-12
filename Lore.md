@@ -151,8 +151,9 @@ kit.
   wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
   blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
   ("you should be able to stumble on a service of the members performing this on one of their followers").
-  (Claude, for Andy: the eight faiths already count the Truth as the eighth, so this reads the Unseeing's as a belief
-  outside them. It isn't a faith a player can swear to in Kingdoms.) What they are given is not their eyes back: living things burn
+  **It is the faith the barbarians follow** (Andy, 2026-11-11: "these can be the faith barbarians follow"): the camps
+  hold none of the eight; the Unseeing in their caves are its most zealous, the ones who went all the way. It isn't a
+  faith a player can swear to. What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).

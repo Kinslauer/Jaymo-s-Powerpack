@@ -273,3 +273,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11: Andy approved the four Flame Avatar/Smoke lore paragraphs (skull under the fire, burning chain, Judgement, burning steeds); (new) markers removed.
 - 2026-11-11 (Andy, Blindness devout path, PR #1328): the Unseeing are a feral cult with a nonsense belief of their own; they do both the blindfold rite and the gouging; the blindfold and bandage must show; the gouged go mad and the zealous attack; shunned by other villagers, they live in enclaves in caves and the wild.
 - 2026-11-11 8:30 PM ET (Andy, four-mods thread): "Merge". Merged #1337 (Blossom castle) and the Eden Ring stack #1327, #1329, #1330, #1331. Weather and looks still waits on his ImmersiveVFX verdict.
+- 2026-11-12 (Andy, PR #1328): the Unseeing's belief is the faith barbarians follow (not a ninth patron).
