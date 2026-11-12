@@ -225,7 +225,12 @@ public final class Guard {
 				Optional.of(lookup.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
 				Optional.of(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.TRIDENT_HIT)),
 				Optional.of(SoundEvents.SHIELD_BREAK)))));
+		// (a sneaking join or parting of a Twinblade comes before a raised guard)
+		com.jaymospowers.armory.Twinblade.init();
 		UseItemCallback.EVENT.register(Guard::use);
+		Swat.init();
+		BladeStyle.init();
+		TwoBlades.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && met(player, source, amount)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -428,13 +433,18 @@ public final class Guard {
 		if (timing.parried()) {
 			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
+			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
+			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
+				&& Armed.kind(player.getUseItem()) != null) {
+				Swat.back(player, arrow);
+			}
 			return true;
 		}
 		ItemStack guard = player.getUseItem();
 		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
 		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
 			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
-			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE))))) {
+			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE * BladeStyle.block(player)))))) {
 			guardBreak(player, guard);
 		}
 		return false;

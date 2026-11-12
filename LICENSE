@@ -1,0 +1,54 @@
+Jaymo's Powers, Jaymo's Kingdoms and Jaymo's Kitchen
+Copyright (c) 2025-2026 Kinslauer and the contributors named in this repository's history.
+All Rights Reserved, except where stated below.
+
+1. What this covers
+
+Everything in this repository and in the jars and modpack zips built from it that was made for the pack: the code of
+Jaymo's Powers (src/) and Jaymo's Kitchen (kitchen/), the art, models, animations, sounds, structures, text and data
+of all three mods, the tools in tools/ and the documents in docs/, except the parts listed in section 4.
+
+The code of Jaymo's Kingdoms is under the GNU General Public License v3 instead (section 3), because parts of it are
+ported from a GPL v3 mod. Its art, models, sounds, structures, text and data that were made for the pack are covered
+by this notice and are not part of that grant.
+
+2. What you may do
+
+If Kinslauer has given you the pack (the jars, or a Jaymos-Powers-Modpack zip) or invited you to this repository, you
+may download it, install it, play it in single player, and run it on a server for players who were given it the same
+way. Invited contributors may also change the code on a branch and send it back as a pull request.
+
+Without written permission from Kinslauer you may not:
+- share, re-upload, mirror or sell the jars, the modpack zip, or any part of this repository, in public or in private,
+  to anyone who was not given the pack by Kinslauer;
+- post the pack or any of its mods on CurseForge, Modrinth, GitHub or any other site;
+- put the mods, or any of their art, models or sounds, in another modpack or mod.
+
+3. Jaymo's Kingdoms code (GPL v3)
+
+The Java code of Jaymo's Kingdoms (kingdoms/src/**/*.java) is a work based on Mo' Creatures (DrZhark, GNU GPL v3) and
+is licensed under the GNU General Public License v3 only. Its full text is in
+kingdoms/src/main/resources/licenses/mocreatures/LICENSE. That grant covers the code only, not the pack's own assets
+named in section 1. Anyone given the Kingdoms jar can ask Kinslauer for its source code.
+
+4. Parts that belong to others
+
+These keep their own licences, which ship beside them. Nothing in this notice limits what those licences allow.
+- Jaymo's Kingdoms (kingdoms/src/main/resources/licenses/): the Jaki Versatile Structures ship files (GPL v3); the
+  Mo' Creatures models, animations and textures (GPL v3); the Loot Goblins textures, model, loot and ported code
+  (LGPL v3); the HYG star data (CC BY-SA 4.0) and constellation lines (CC BY 4.0); the code ported from Saint's
+  Dragons, Stormborn Tomb and the ideas from Runic Races and RPG Lore (MIT); polyjo's Dead Traveler (CC BY 4.0).
+- Jaymo's Powers (src/main/resources/licenses/): the ported code and sprites of Iron's Simple Blood and Enchanting
+  System Overhaul (MIT).
+- Jaymo's Kitchen (kitchen/src/main/resources/LICENSE_*): the Rats model, animations, textures and sounds and the
+  rat trap model (LGPL v3); the Horse Power parts (LGPL v3); the Farmer's Delight and Nifty Carts parts (MIT).
+- The flintlock gun models (art/guns/, CC BY 4.0, makers in art/guns/CREDITS.md).
+- Every other mod, resource pack and shader the modpack downloads or ships (including the MCA jar and ports/trmt),
+  under its own licence. The modpack zip lists most of them for CurseForge to download, and does not relicense them.
+
+5. Contributions
+
+By sending a pull request or pushing to this repository you agree that your contribution is covered by this notice
+(section 3 for Kingdoms code), and that Kinslauer may use, change and ship it as part of the pack.
+
+The pack is provided as is, without any warranty.

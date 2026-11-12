@@ -629,6 +629,8 @@ public final class GuardDrills {
 			}
 		}
 		Forms.practice(player, pick, PRACTICE);
+		// (a boxer's style gains from the drill too: Jaymo's Powers' boxing)
+		com.jaymoskingdoms.PowersCompat.boxingTrained(player, com.jaymoskingdoms.BoxingTeachers.DRILL_POINTS);
 		Post.aside(player.getUUID(), Component.translatable("tidings.jaymoskingdoms.drill.practiced", guard.getDisplayName(), formName(pick)));
 	}
 

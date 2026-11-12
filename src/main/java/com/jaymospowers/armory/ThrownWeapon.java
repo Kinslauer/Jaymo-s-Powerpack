@@ -37,7 +37,15 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	/** Harpoon: how hard it drags its catch back toward the thrower. */
 	static final double HARPOON_PULL = 0.9;
 
+	/** A hurled blade that comes back: the ticks it flies out before turning, how hard it is pulled home (blocks/tick each tick), and how near the hand it is caught (blocks). */
+	static final int RETURN_AFTER = 14;
+	static final double RETURN_PULL = 0.3, RETURN_CATCH = 1.6;
+
 	private boolean dealtDamage;
+	/** A blade hurled by {@code BladeThrow}: what it deals (negative: this weapon's own thrown damage), whether it flies back to the hand, and how long it has flown. */
+	private float hurled = -1.0F;
+	private boolean comesBack;
+	private int flown;
 
 	public ThrownWeapon(EntityType<? extends ThrownWeapon> type, Level level) {
 		super(type, level);
@@ -59,10 +67,50 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		return this.entityData.get(DATA_ITEM);
 	}
 
-	/** It tumbles end over end (until it lands). */
+	/** It tumbles end over end (until it lands). A sword always does (a hurled blade, {@code BladeThrow}). */
 	public boolean spins() {
 		ItemStack item = this.getItem();
-		return (item.getItem() instanceof ThrowingWeaponItem weapon ? weapon.spins() : Ranged.spins(item)) && !this.isInGround();
+		return (item.getItem() instanceof ThrowingWeaponItem weapon ? weapon.spins() : Ranged.spins(item) || item.is(net.minecraft.tags.ItemTags.SWORDS))
+			&& !this.isInGround();
+	}
+
+	/** This is a hurled blade ({@code BladeThrow}): it deals {@code damage}, and {@code comesBack} to its thrower's hand. */
+	public void hurled(float damage, boolean comesBack) {
+		this.hurled = damage;
+		this.comesBack = comesBack;
+	}
+
+	/** A blade that comes back: once it has struck, stuck or flown its length it turns and flies home through anything. True when it was caught (and is gone). */
+	private boolean flyHome() {
+		this.flown++;
+		if (!this.dealtDamage && !this.isInGround() && !this.isNoPhysics() && this.flown <= RETURN_AFTER) {
+			return false;
+		}
+		if (!(this.getOwner() instanceof Player owner) || !owner.isAlive() || owner.isSpectator() || owner.level() != this.level()) {
+			// nobody to fly to: it falls and lies like any other
+			this.comesBack = false;
+			this.setNoPhysics(false);
+			return false;
+		}
+		this.dealtDamage = true;
+		this.setNoPhysics(true);
+		Vec3 to = owner.getEyePosition().add(0.0, -0.3, 0.0).subtract(this.position());
+		if (to.length() < RETURN_CATCH) {
+			ItemStack blade = this.getPickupItemStackOrigin().copy();
+			if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
+				if (owner.getMainHandItem().isEmpty()) {
+					owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, blade);
+				} else if (!owner.getInventory().add(blade)) {
+					this.spawnAtLocation((net.minecraft.server.level.ServerLevel)this.level(), blade);
+				}
+			}
+			this.playSound(SoundEvents.TRIDENT_RETURN, 0.8F, 1.3F);
+			this.discard();
+			return true;
+		}
+		this.setDeltaMovement(this.getDeltaMovement().scale(0.8).add(to.normalize().scale(RETURN_PULL)));
+		this.needsSync = true;
+		return false;
 	}
 
 	private boolean harpoon() {
@@ -73,6 +121,9 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	public void tick() {
 		if (this.inGroundTime > 4) {
 			this.dealtDamage = true;
+		}
+		if (this.comesBack && !this.level().isClientSide() && this.flyHome()) {
+			return;
 		}
 		super.tick();
 	}
@@ -93,7 +144,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		Entity entity = hitResult.getEntity();
 		Entity owner = this.getOwner();
 		// (0.15.x) Tinkering's javelin, throwing axes and shuriken are thrown as this too, with their materials' damage
-		float damage = this.getItem().getItem() instanceof ThrowingWeaponItem weapon ? weapon.thrownDamage() : Ranged.thrownDamage(this.getItem());
+		float damage = this.hurled >= 0.0F ? this.hurled
+			: this.getItem().getItem() instanceof ThrowingWeaponItem weapon ? weapon.thrownDamage() : Ranged.thrownDamage(this.getItem());
 		DamageSource source = this.damageSources().thrown(this, owner == null ? this : owner);
 		if (this.level() instanceof ServerLevel serverLevel) {
 			damage = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, source, damage);
@@ -165,6 +217,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.dealtDamage = input.getBooleanOr("DealtDamage", false);
+		this.hurled = input.getFloatOr("Hurled", -1.0F);
+		this.comesBack = input.getBooleanOr("ComesBack", false);
 		this.entityData.set(DATA_ITEM, this.getPickupItemStackOrigin().copyWithCount(1));
 	}
 
@@ -172,5 +226,7 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putBoolean("DealtDamage", this.dealtDamage);
+		output.putFloat("Hurled", this.hurled);
+		output.putBoolean("ComesBack", this.comesBack);
 	}
 }

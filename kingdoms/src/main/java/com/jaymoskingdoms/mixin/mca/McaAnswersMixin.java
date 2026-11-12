@@ -131,6 +131,10 @@ abstract class McaAnswersMixin {
 			// (0.7.381) only a veteran guard sets drills
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.GuardDrills.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.BoxingTeachers.canOffer(player, villager)) {
+			// only one who teaches boxing speaks of the fist (the Fist school's master, elders and veteran guards of the peoples who box)
+			cir.getReturnValue().remove(com.jaymoskingdoms.BoxingTeachers.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.forms.Schools.canTalk(player, villager)) {
 			// (0.7.384) only a school master talks of the school
 			cir.getReturnValue().remove(com.jaymoskingdoms.forms.Schools.ANSWER);

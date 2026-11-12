@@ -71,7 +71,7 @@ public final class Schools {
 	/** The Worker role of a school master (none of a settlement's: {@code ZFighterFolk.ROLE} is 95). */
 	public static final int ROLE = 96;
 	/** Standing needed for the nth art a school teaches (0 = on joining), and for the masterstroke. */
-	static final int[] ART_STANDING = {0, 20, 45};
+	static final int[] ART_STANDING = {0, 20, 45, 70, 95, 120};
 	static final int MASTERY_STANDING = 150;
 	/** The most standing a school gives. */
 	static final int STANDING_CAP = 600;
@@ -92,8 +92,8 @@ public final class Schools {
 
 	/** The five schools, one for each weapon family. */
 	public enum School {
-		BLADE(Forms.Family.BLADE, "weapon/katana_blade", "rain_of_cuts", "sheath_draw", "crescent_sweep"),
-		SPEAR(Forms.Family.SPEAR, "weapon/spear_tip", "pinning_throw", "spear_lunge", "couched_lance"),
+		BLADE(Forms.Family.BLADE, "weapon/katana_blade", "rain_of_cuts", "sheath_draw", "crescent_sweep", "wheel_cut", "figure_eight", "hurled_blade"),
+		SPEAR(Forms.Family.SPEAR, "weapon/spear_tip", "pinning_throw", "spear_lunge", "couched_lance", "mill_charge"),
 		FIST(Forms.Family.FIST, null, null, "ground_stomp", "falling_fist"),
 		KNIFE(Forms.Family.KNIFE, "weapon/kunai_blade", null, "marked_quarry", "cast_off_cloak", "tangle_cord"),
 		CLAW(Forms.Family.CLAW, "weapon/fang_blades", null, "rending_claw", "feral_pounce");

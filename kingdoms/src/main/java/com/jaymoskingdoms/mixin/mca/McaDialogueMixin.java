@@ -375,6 +375,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.BoxingTeachers.ANSWER.equals(answer)) {
+			// a boxing teacher: a task, a style learned, or how you stand (Jaymo's Powers' fist styles)
+			com.jaymoskingdoms.BoxingTeachers.teach(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.forms.Schools.ANSWER.equals(answer)) {
 			// (0.7.384) a school master: join, a lesson, or how you stand (Weapon Forms)
 			com.jaymoskingdoms.forms.Schools.talk(player, villager);

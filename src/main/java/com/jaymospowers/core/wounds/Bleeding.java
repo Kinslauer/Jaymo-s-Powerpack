@@ -89,9 +89,13 @@ public final class Bleeding {
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
 	public static final ResourceKey<DamageType> BLEEDING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("bleeding"));
 
-	/** (0.14.4) The bleeding parts (a bit per {@link BodyPart#ordinal()}; one that's severed is a stump). Saved, synced to its owner, not kept through death. */
+	/**
+	 * (0.14.4) The bleeding parts (a bit per {@link BodyPart#ordinal()}; one that's severed is a stump). Saved, not kept
+	 * through death. Synced to everyone: an open cut shows on the body until it is dressed or closes (the client's
+	 * {@code DressingsLayer}).
+	 */
 	public static final AttachmentType<Integer> BLEEDING = AttachmentRegistry.create(JaymosPowers.id("wounds_bleeding"),
-		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** (0.14.4) The festering parts. Saved, synced to the owner (the fever's shimmer). */
 	public static final AttachmentType<Integer> FESTERING = AttachmentRegistry.create(JaymosPowers.id("wounds_festering"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));

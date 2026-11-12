@@ -222,6 +222,19 @@ final class McaBridge {
 		}
 	}
 
+	/** {@link Followers}: whether {@code v} is an MCA villager involved with {@code player} ({@link Strangers}). */
+	static boolean involved(Villager v, net.minecraft.server.level.ServerPlayer player) {
+		return v instanceof VillagerEntityMCA m && Strangers.involved(m, player);
+	}
+
+	/** {@link Followers}: MCA's move state by number (0 go about your day, 1 stay, 2 follow {@code player}). */
+	static void moveState(Villager v, int state, net.minecraft.world.entity.player.Player player) {
+		if (v instanceof VillagerEntityMCA m) {
+			m.getVillagerBrain().setMoveState(state == 2 ? net.conczin.mca.entity.ai.MoveState.FOLLOW
+				: state == 1 ? net.conczin.mca.entity.ai.MoveState.STAY : net.conczin.mca.entity.ai.MoveState.MOVE, state == 2 ? player : null);
+		}
+	}
+
 	/** (0.7.220) {@link McaCompat#follow}. */
 	static boolean follow(Villager v, net.minecraft.world.entity.player.Player player) {
 		if (!(v instanceof VillagerEntityMCA m)) {

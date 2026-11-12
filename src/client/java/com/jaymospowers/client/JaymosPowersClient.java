@@ -199,6 +199,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.compat.FreecamCompat.init();
 		FrontCamera.init();
 		AimCrosshair.init();
+		GreatHelmView.init();
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();

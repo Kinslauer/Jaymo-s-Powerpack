@@ -543,6 +543,10 @@ public final class Approaches {
 		MET.put(best.getUUID() + "/" + id, now);
 		if (bestTopic == HALT) {
 			MET.put("halt/" + bestFaction.id() + "/" + id, now);
+			// a guard's challenge: the polearm comes down level for as long as they walk up and speak
+			if (best instanceof net.minecraft.world.entity.Mob challenger) {
+				Levelled.level(challenger, WALK_TICKS);
+			}
 		}
 		if (bestTopic == UNMASK) {
 			Identities.challenged(player, bestFaction, now, false);

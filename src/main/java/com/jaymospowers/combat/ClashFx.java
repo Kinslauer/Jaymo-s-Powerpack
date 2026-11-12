@@ -133,6 +133,8 @@ public final class ClashFx {
 	 */
 	public static void met(ServerLevel level, LivingEntity defender, ItemStack guard, @Nullable LivingEntity attacker, @Nullable Vec3 from, int sparks,
 		float scale, int chips) {
+		// the body's side of it: the guard goes to the line the blow came on (see Armed, and the client's ParryPose)
+		Armed.met(defender, guard, attacker, from, sparks >= PARRY_SPARKS);
 		Vec3 eye = defender.getEyePosition();
 		Vec3 toward = from != null ? from.subtract(eye) : attacker != null ? attacker.getEyePosition().subtract(eye) : defender.getLookAngle();
 		toward = toward.lengthSqr() > 1.0E-4 ? toward.normalize() : defender.getLookAngle();
@@ -147,6 +149,10 @@ public final class ClashFx {
 			}
 		} else if (steel || attacker == null) {
 			sparks(level, at, toward, sparks, scale);
+			// steel on steel rings (our own clashes, under whatever the guard itself plays)
+			if (guard.has(DataComponents.WEAPON)) {
+				BladeSounds.clash(level, at, sparks >= PARRY_SPARKS ? 0.8F : 0.55F, 1.0F);
+			}
 		} else if (!guard.isEmpty()) {
 			// a fist or a claw on steel: a few
 			sparks(level, at, toward, Math.max(2, sparks / 3), scale * 0.8F);

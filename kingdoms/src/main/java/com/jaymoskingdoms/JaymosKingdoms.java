@@ -556,12 +556,17 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.384: the fighting schools (joined, standing, mastery; their masks), their masters in the realms' halls, and the wizards' trials
 		LOGGER.debug("school attachments: {} {}", com.jaymoskingdoms.forms.Schools.SCHOOLS, com.jaymoskingdoms.forms.WizardTrials.TRIALS);
 		com.jaymoskingdoms.forms.Schools.register();
+		// who teaches Jaymo's Powers' boxing styles, and the kills their tasks ask for
+		com.jaymoskingdoms.BoxingTeachers.register();
 		com.jaymoskingdoms.forms.WizardTrials.register();
 		SchoolHalls.register();
 		// 0.7.385: schooled guards, honour duels, rival schools, festival bouts (Weapon Forms, patch 5; and the duel days' attachment)
 		LOGGER.debug("duel days attachment: {}", com.jaymoskingdoms.forms.Duels.DAYS);
 		com.jaymoskingdoms.forms.SchooledGuards.register();
 		com.jaymoskingdoms.forms.Duels.register();
+		com.jaymoskingdoms.forms.Styles.register();
+		Levelled.register();
+		Followers.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)

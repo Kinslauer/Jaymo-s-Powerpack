@@ -1406,6 +1406,98 @@
 			}
 		]
 	},
+	"ki_blade.ignite": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.ignite",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/ignite_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/ignite_2"
+			}
+		]
+	},
+	"ki_blade.retract": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.retract",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/retract_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/retract_2"
+			}
+		]
+	},
+	"ki_blade.hum": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.hum",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/hum_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/hum_2"
+			}
+		]
+	},
+	"ki_blade.swing": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/swing_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_2"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_3"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_4"
+			}
+		]
+	},
+	"ki_blade.deflect": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.deflect",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/deflect_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/deflect_2"
+			},
+			{
+				"name": "jaymospowers:ki_blade/deflect_3"
+			}
+		]
+	},
+	"helm.breath": {
+		"subtitle": "subtitles.jaymospowers.helm.breath",
+		"sounds": [
+			{
+				"name": "jaymospowers:helm/breath_1"
+			},
+			{
+				"name": "jaymospowers:helm/breath_2"
+			},
+			{
+				"name": "jaymospowers:helm/breath_3"
+			}
+		]
+	},
+	"armed.draw": {
+		"subtitle": "subtitles.jaymospowers.armed.draw",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/draw_1"
+			},
+			{
+				"name": "jaymospowers:blade/draw_2"
+			},
+			{
+				"name": "jaymospowers:blade/draw_3"
+			}
+		]
+	},
 	"guard.parry": {
 		"sounds": [
 			{
@@ -1498,6 +1590,89 @@
 		"sounds": [
 			{
 				"name": "jaymospowers:eden/diskwing_hurt"
+			}
+		]
+	},
+	"armed.swing.light": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_light_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_5"
+			}
+		]
+	},
+	"armed.swing.medium": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_medium_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_5"
+			}
+		]
+	},
+	"armed.swing.heavy": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_heavy_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_5"
+			}
+		]
+	},
+	"armed.clash": {
+		"subtitle": "subtitles.jaymospowers.armed.clash",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/clash_1"
+			},
+			{
+				"name": "jaymospowers:blade/clash_2"
+			},
+			{
+				"name": "jaymospowers:blade/clash_3"
+			},
+			{
+				"name": "jaymospowers:blade/clash_4"
+			},
+			{
+				"name": "jaymospowers:blade/clash_5"
+			},
+			{
+				"name": "jaymospowers:blade/clash_6"
 			}
 		]
 	}

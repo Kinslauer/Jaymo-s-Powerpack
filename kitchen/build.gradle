@@ -54,3 +54,8 @@ java {
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
 }
+
+// The pack's licence notice (LICENSE at the repo root) ships in the jar as LICENSE_jaymos.
+jar {
+	from(file("../LICENSE")) { rename { "LICENSE_jaymos" } }
+}
