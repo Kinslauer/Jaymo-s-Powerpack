@@ -227,10 +227,13 @@ public final class CrawlPose {
 		if (entity instanceof Player skitter && "skitter".equals(skitter.getAttached(com.jaymospowers.power.xenoform.XenoformState.FORM))
 			&& com.jaymospowers.client.power.xenoform.SkitterCeiling.spiderOrRising(skitter)) {
 			state.setData(ProneTransition.KEY, null);
+			state.setData(ProneHaulPose.KEY, null);
 			state.setData(KEY, null);
 			state.setData(RISEN_KEY, null);
 			return;
 		}
+		// hauling up a block while prone (ProneHaul), drawn over the crawl
+		ProneHaulPose.extract(entity, state, partialTicks);
 		// (0.19.9) going down into the crawl or getting up from it
 		if (entity instanceof Player p) {
 			ProneTransition.extract(p, state, partialTicks);
@@ -366,6 +369,10 @@ public final class CrawlPose {
 		if (crawl == null || !state.isVisuallySwimming) {
 			return;
 		}
+		if (ProneHaulPose.rotate(state, poseStack)) {
+			// hauling up a block: the body where the struggle has it
+			return;
+		}
 		if (crawl.rise() >= 0.0F) {
 			// (0.18.5) turned up off the ground about the feet; stood, vanilla's tilt and shift are undone outright
 			float up = riseDegrees(crawl.rise()) / 90.0F;
@@ -466,6 +473,11 @@ public final class CrawlPose {
 			return;
 		}
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
+		if (ProneHaulPose.pose(state, f)) {
+			// hauling up a block: the reach, the pull up the face, the knee over the edge
+			track.apply(h, f, 2.0F);
+			return;
+		}
 		if (crawl.roll() != null) {
 			// log roll: arms straight out past the head, legs together
 			f.set(PoseBlend.RIGHT_ARM, -Mth.PI, 0.0F, 0.12F);

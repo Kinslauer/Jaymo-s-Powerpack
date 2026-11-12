@@ -94,6 +94,12 @@ public final class CrawlTaps {
 		while (crawlKey.consumeClick()) {
 			keyPressed = free;
 		}
+		if (ProneHaulClient.active()) {
+			// hauling up a block (ProneHaul): no getting up, turning over or rolling till it's done
+			jumpWasDown = jump;
+			jumpReleased = !jump;
+			return;
+		}
 		if (crawling) {
 			boolean jumpPressed = jump && jumpReleased;
 			jumpReleased |= !jump;

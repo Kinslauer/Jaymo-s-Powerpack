@@ -99,7 +99,7 @@ final class BloodDrop extends SingleQuadParticle {
 			Vec3 to = from.add(pxd * 2.0 + Math.signum(pxd) * 0.1, pyd, pzd * 2.0 + Math.signum(pzd) * 0.1);
 			var hit = this.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
 			if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && hit.getDirection().getAxis() != net.minecraft.core.Direction.Axis.Y) {
-				BloodWallMark.splat(this.level, hit.getLocation(), hit.getDirection(), this.color, this.getQuadSize(0.0F));
+				BloodWallMark.splat(this.level, hit.getBlockPos(), hit.getLocation(), hit.getDirection(), this.color, this.getQuadSize(0.0F));
 				this.remove();
 				return;
 			}

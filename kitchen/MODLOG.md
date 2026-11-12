@@ -1882,3 +1882,18 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
   as `LICENSE_jaymos`). The Rats and Horse Power parts (LGPL v3) and the Farmer's Delight and Nifty Carts parts (MIT)
   keep their own licences (`LICENSE_*`).
 - Nothing changes in game. Built; not played.
+
+## 0.5.116 (2026-11-12): corpses of the downed start lying
+
+- A body that dies already on the ground no longer starts as a standing ragdoll that topples: another mod marks it with the tag `jaymoskitchen.lying.<u|d>.<degrees>` (face up or down, the way its head points) and `Corpses.deathBody` starts the corpse lying just so. Jaymo's Powers sets it on anyone who dies downed (Andy: executed zombies "popped up after, instead of being beaten into the ground").
+- Built; not played.
+
+## 0.5.117 (2026-11-12): tundra autumn - the tundra's grass turns with the year (#1358)
+
+- **Tundra seasons** (Andy picked Klei_Wright's tundra, `docs/Tundra-Plan.md`): the grass of Powers' tundra and lichen
+  woodland follows our calendar: straw in early spring, green-gold through the short summer, orange then red through
+  autumn, dull straw in winter. Only the colour changes; they are too cold to be temperate, so nothing else about the
+  seasons applies there.
+- `Seasons.tundra` knows the two biomes by their base temperatures (-0.4 and -0.45, which nothing else uses), so the
+  colour lookup needs no registry; `SeasonTints.TUNDRA_TINT` holds the twelve colours.
+- Compiled; not played.

@@ -278,6 +278,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();
+		// a broken Lootr chest spills its shares as a random roll instead of losing them
+		SpiltLoot.register();
 		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 		Locks.register();
@@ -472,6 +474,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
 		Lanterns.register();
+		Lamplight.register();
 		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing

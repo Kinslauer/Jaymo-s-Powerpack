@@ -38,6 +38,8 @@ import net.minecraft.world.level.Level;
  * Other mods read it by reflection: {@link #seasonName(Level)} and {@link #dayOfYear(Level)}.
  */
 public final class Seasons {
+	/** Base temperatures between these belong to the tundra and the lichen woodland (see {@link #tundra}). */
+	public static final float TUNDRA_TEMP_MIN = -0.47F, TUNDRA_TEMP_MAX = -0.38F;
 	/** Days in each part of a season (early, mid, late): 7 makes a season 21 days and the year 84. */
 	public static final int DAYS_PER_PART = 7;
 	public static final int PARTS = 3;
@@ -96,6 +98,15 @@ public final class Seasons {
 
 	public static int today() {
 		return today;
+	}
+
+	/**
+	 * The tundra and the lichen woodland (Powers' {@code jaymospowers:tundra} at -0.4 and {@code lichen_woodland} at
+	 * -0.45): known here by their base temperatures, which no other biome uses, so the colour lookup needs no registry.
+	 * They turn with the year ({@code SeasonTints}) though they are far too cold to be temperate.
+	 */
+	public static boolean tundra(float baseTemperature) {
+		return baseTemperature > TUNDRA_TEMP_MIN && baseTemperature < TUNDRA_TEMP_MAX;
 	}
 
 	/** Whether a biome this warm at its base has seasons. */

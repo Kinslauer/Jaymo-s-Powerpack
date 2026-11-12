@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * The local player on a ledge (or, 0.14.3, hanging from a bar): the hold moves them instead of their own travel (no
- * gravity, no steering), and a Jump press there climbs (or swings off) instead of opening an elytra.
+ * gravity, no steering), and a Jump press there climbs (or swings off) instead of opening an elytra. So does the prone haul
+ * up a block (ProneHaulClient).
  */
 @Mixin(Player.class)
 abstract class LedgePlayerMixin {
@@ -20,6 +21,10 @@ abstract class LedgePlayerMixin {
 	private void jaymospowers$ledgeTravel(Vec3 input, CallbackInfo ci) {
 		if (LedgeClient.active() && (Object)this == Minecraft.getInstance().player) {
 			LedgeClient.travel(Minecraft.getInstance().player);
+			ci.cancel();
+		} else if (com.jaymospowers.client.ProneHaulClient.active() && (Object)this == Minecraft.getInstance().player) {
+			// hauling up a block while prone (ProneHaul): the haul moves the body
+			com.jaymospowers.client.ProneHaulClient.travel(Minecraft.getInstance().player);
 			ci.cancel();
 		} else if (com.jaymospowers.client.freerun.FreerunClient.hanging() && (Object)this == Minecraft.getInstance().player) {
 			// (0.14.3) hanging from a bar (Bar Swing): held under it the same way
