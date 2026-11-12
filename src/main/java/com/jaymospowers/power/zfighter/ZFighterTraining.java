@@ -108,15 +108,18 @@ public final class ZFighterTraining {
 	public static final int SONIC_SWAY = 22;
 	/** (0.18.94) Self-destruct, charged on V; only android, Bio-built and Rubber-folk bodies ({@link ZFighterSelfDestruct}). */
 	public static final int SELF_DESTRUCT = 23;
-	public static final int TECHNIQUES = 24;
+	/** Eye Beams (sneak+V hold), Aerial Charge (G, in flight), Thunderclap (G) and Great Breath (sneak+V hold). */
+	public static final int EYE_BEAMS = 24, AERIAL_CHARGE = 25, THUNDERCLAP = 26, GREAT_BREATH = 27;
+	public static final int TECHNIQUES = 28;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
 		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
-		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway", "self_destruct"};
+		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway", "self_destruct",
+		"eye_beams", "aerial_charge", "thunderclap", "great_breath"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
 	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
-		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400, 3000};
+		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400, 3000, 2600, 2200, 1800, 2400};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 

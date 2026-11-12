@@ -444,6 +444,11 @@ public final class Pickpocket {
 
 	/** What {@code mark} has on them: a share of something they carry, or else a pocket's worth (or nothing). */
 	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random, Currency coin) {
+		// (Lift Weapon: what they hold in their hand comes first)
+		ItemStack weapon = RogueGambits.lifted(player, mark);
+		if (!weapon.isEmpty()) {
+			return weapon;
+		}
 		if (mark instanceof Villager v) {
 			SimpleContainer bag = v.getInventory();
 			List<Integer> full = new ArrayList<>();

@@ -204,7 +204,7 @@ public final class Monoliths {
 		return entity instanceof AetherGiant;
 	}
 
-	static List<Monolith> all(ServerLevel level) {
+	public static List<Monolith> all(ServerLevel level) {
 		return level.getAttachedOrElse(MONOLITHS, List.of());
 	}
 
@@ -267,7 +267,7 @@ public final class Monoliths {
 		return best;
 	}
 
-	static double horizontal(BlockPos a, BlockPos b) {
+	public static double horizontal(BlockPos a, BlockPos b) {
 		double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
 		return dx * dx + dz * dz;
 	}

@@ -27,6 +27,7 @@ public final class PowerCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("power")
 			.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+			.then(OneHolder.command())
 			.then(Commands.literal("set")
 				.then(Commands.argument("targets", EntityArgument.players())
 					.then(Commands.argument("power", StringArgumentType.word())
@@ -37,7 +38,7 @@ public final class PowerCommand {
 								throw UNKNOWN.create();
 							}
 							Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
-							players.forEach(p -> Powers.set(p, power));
+							players.forEach(p -> OneHolder.bypassed(() -> Powers.set(p, power)));
 							c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.set", power.name(), players.size()), true);
 							return players.size();
 						}))))

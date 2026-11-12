@@ -115,6 +115,7 @@ public final class WindPower implements Power {
 		Powers.register(INSTANCE);
 		WindNet.register();
 		WindModes.register();
+		WindBolts.init();
 		WindTempest.init();
 		SorasDagger.register();
 		SorasLineage.register();
@@ -312,6 +313,9 @@ public final class WindPower implements Power {
 	/** The Power Mode key (Z): the Stormbound / Tempest mode (or both), once the power has either form. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && player.isShiftKeyDown() && WindBolts.turnSky(player)) {
+			return;
+		}
 		if (down) {
 			WindModes.toggle(player);
 		}
@@ -516,6 +520,7 @@ public final class WindPower implements Power {
 		ServerLevel level = player.level();
 		blowShieldAway(player, level);
 		WindJet.tick(player);
+		WindBolts.tick(player);
 		boolean statusDirty = !s.synced;
 		s.synced = true;
 		for (int i = 0; i < s.cooldowns.length; i++) {
@@ -634,6 +639,9 @@ public final class WindPower implements Power {
 		WindAbility ability = WindAbility.byKey(key);
 		if (ability == null) {
 			// R toggles the flight on the client, which reports it via wind_flight
+			return;
+		}
+		if (down && (player.isShiftKeyDown() || player.isSprinting()) && WindBolts.key(player, ability)) {
 			return;
 		}
 		State s = this.state(player);

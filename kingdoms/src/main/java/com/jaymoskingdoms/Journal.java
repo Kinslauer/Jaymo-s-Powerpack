@@ -224,6 +224,8 @@ public final class Journal {
 		entries.addAll(Captains.journal(player));
 		// (0.7.523) your promises to villagers
 		entries.addAll(Promises.journal(player));
+		// the people you know, the great foes you have seen and the structures you have walked into
+		entries.addAll(JournalLog.journal(player));
 		// (0.7.31) the weather foretold, first
 		Component weather = DisasterRelief.journal(level, player);
 		if (weather != null) {

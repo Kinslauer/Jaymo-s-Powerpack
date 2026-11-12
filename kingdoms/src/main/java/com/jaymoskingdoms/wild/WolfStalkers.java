@@ -173,7 +173,7 @@ public final class WolfStalkers {
 		if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
 			return false;
 		}
-		if (wolf instanceof FeralWolf) {
+		if (wolf instanceof FeralWolf || com.jaymoskingdoms.remnants.Blight.blighted(wolf)) {
 			return true;
 		}
 		// the game's wolves: never while you hold out a bone; at night, or when you're hurt

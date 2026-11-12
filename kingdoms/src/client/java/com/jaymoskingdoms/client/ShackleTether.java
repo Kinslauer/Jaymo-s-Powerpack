@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public final class ShackleTether {
 	static final Identifier CHAIN = JaymosKingdoms.id("textures/entity/shackle/chain.png");
 	static final Identifier IRON = JaymosKingdoms.id("textures/entity/shackle/iron.png");
-	static final Identifier ROPE = JaymosKingdoms.id("textures/entity/shackle/rope.png");
+	public static final Identifier ROPE = JaymosKingdoms.id("textures/entity/shackle/rope.png");
 	/** A chain link's length, its width; the rope's radius; the collar's radius and thickness (blocks). */
 	static final double LINK = 0.16, LINK_WIDTH = 0.11, ROPE_RADIUS = 0.035, COLLAR = 0.24, COLLAR_THICK = 0.05;
 	/** How far below the eyes the neck is, and how much the line sags per block of length. */
@@ -79,7 +79,7 @@ public final class ShackleTether {
 	}
 
 	/** Where the line hangs {@code s} of the way from {@code from} to {@code to}. */
-	private static Vec3 along(Vec3 from, Vec3 to, double s) {
+	public static Vec3 along(Vec3 from, Vec3 to, double s) {
 		double length = to.subtract(from).length();
 		return from.add(to.subtract(from).scale(s)).add(0.0, -Math.sin(s * Math.PI) * length * SAG, 0.0);
 	}
@@ -122,7 +122,7 @@ public final class ShackleTether {
 	}
 
 	/** A twisted rope, a tube sagging between the two. */
-	private static void rope(VertexConsumer buffer, PoseStack.Pose pose, Vec3 from, Vec3 to, int light) {
+	public static void rope(VertexConsumer buffer, PoseStack.Pose pose, Vec3 from, Vec3 to, int light) {
 		Vec3[] centre = new Vec3[PIECES + 1];
 		for (int i = 0; i <= PIECES; i++) {
 			centre[i] = along(from, to, i / (double)PIECES);

@@ -1,0 +1,22 @@
+{
+  "entity.jaymoskingdoms.gaunt": "Gaunt",
+  "item.jaymoskingdoms.gaunts_heart": "Gaunt's Heart",
+  "message.jaymoskingdoms.encounter.gaunt": "The snow has gone quiet. Something tall is standing between the trees, and it is looking at you.",
+  "message.jaymoskingdoms.hunger.cursed": "Something cold settles in your belly and does not leave.",
+  "message.jaymoskingdoms.hunger.cured": "The hollow in you fills. You can breathe again.",
+  "message.jaymoskingdoms.hunger.grown": "You are huge, and you are not hungry. Not yet.",
+  "message.jaymoskingdoms.hunger.spent": "The strength drains out of you. You are small again, and empty.",
+  "message.jaymoskingdoms.hunger.stage.1": "Your stomach turns over. Bread does not help.",
+  "message.jaymoskingdoms.hunger.stage.2": "Your hands shake. You keep thinking of the last thing you killed.",
+  "message.jaymoskingdoms.hunger.stage.3": "The edges of the world go dark. You would eat anything, if it were still warm.",
+  "quest.jaymoskingdoms.foes.gaunt": "Gaunts",
+  "quest.jaymoskingdoms.beast.hunt.gaunt.title": "The Thin Thing in the Snow",
+  "quest.jaymoskingdoms.beast.hunt.gaunt.text": "Something tall and thin was seen near %s, %s, standing outside the firelight. Folk who saw it up close do not eat well now. Kill it at night.",
+  "quest.jaymoskingdoms.beast.survive.gaunt.title": "A Cold Night",
+  "quest.jaymoskingdoms.beast.survive.gaunt.text": "Last a night near %s, %s, where the thin thing was seen, and live to see the sun. Keep your fire small.",
+  "talk.jaymoskingdoms.gossip.beast.gaunt.0": "Don't light a fire in the snow, %1$s blocks %2$s. Something comes to the light. Tall. It doesn't blink.",
+  "talk.jaymoskingdoms.gossip.beast.gaunt.1": "The trappers %1$s blocks %2$s say they saw antlers over the tree line. Over it. No stag stands that tall.",
+  "talk.jaymoskingdoms.gossip.beast.gaunt.2": "A man came back from %1$s blocks %2$s with a bite on his arm and no appetite. Went off his food. Then he started looking at the dogs.",
+  "talk.jaymoskingdoms.word.rumour.none.2": "People say it is bad luck to cook in the snow after dark. I just keep to the hearth.",
+  "talk.jaymoskingdoms.word.rumour.none.3": "My grandmother never let us eat spoiled meat outdoors in winter. She never said why."
+}

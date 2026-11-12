@@ -38,6 +38,7 @@
 		"jaymoskingdoms.omni.mixins.json",
 		"jaymoskingdoms.locks.mixins.json",
 		"jaymoskingdoms.spellengine.mixins.json",
+		"jaymoskingdoms.wild.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
@@ -52,7 +53,8 @@
 		{ "config": "jaymoskingdoms.shouldersurfing.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.iris.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

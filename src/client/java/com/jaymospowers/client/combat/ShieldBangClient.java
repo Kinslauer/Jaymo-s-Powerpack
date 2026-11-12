@@ -83,6 +83,6 @@ public final class ShieldBangClient {
 	/** Whether the attack key is the bang's right now (a shield up, a weapon out), not a swing's. */
 	public static boolean holdsAttack(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		return player != null && ShieldBang.ready(player);
+		return player != null && !player.isShiftKeyDown() && ShieldBang.ready(player);
 	}
 }

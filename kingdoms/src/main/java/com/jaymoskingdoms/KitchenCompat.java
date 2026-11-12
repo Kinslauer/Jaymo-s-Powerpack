@@ -207,6 +207,7 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Green Huntsman's meat hook blessings (needs 0.5.57): {}", e.toString());
 		}
+		HunterBow.kitchenHooks();
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
@@ -319,6 +320,28 @@ public final class KitchenCompat {
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
+	}
+
+	/** Kitchen's corpses exist in this game (the hunger curse feeds on them, and on fresh kills without them). */
+	public static boolean corpsesExist() {
+		return CORPSE != null;
+	}
+
+	/** The free corpse (never a player's) nearest {@code at} within {@code range} blocks, or null; always null without Kitchen. */
+	public static @Nullable Entity freeCorpseNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range) {
+		if (CORPSE == null) {
+			return null;
+		}
+		Entity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Entity e : level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), KitchenCompat::isFreeCorpse)) {
+			double d = e.position().distanceToSqr(at);
+			if (d < bestD && !isPlayerCorpse(e)) {
+				best = e;
+				bestD = d;
+			}
+		}
+		return best;
 	}
 
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */

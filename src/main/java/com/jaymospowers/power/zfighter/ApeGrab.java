@@ -4,6 +4,7 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.GiantTrees;
 import com.jaymospowers.core.UltimateFilm;
+import com.jaymospowers.power.xenoform.forms.TowerSlab;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -140,7 +141,9 @@ public final class ApeGrab {
 		}
 		// (0.20.106) no one in reach: a tree will do, to be thrown (GiantTrees)
 		boolean tree = target == null && GiantTrees.treeNear(level, ape, hand(ape, 0.0), treeReach(ape, live));
-		if (!tree && (target == null || !canGrab(ape, target))) {
+		// no tree either: the ground itself, a slab of it torn up (a player's ape)
+		boolean slab = target == null && !tree && ape instanceof ServerPlayer sp && TowerSlab.groundNear(level, sp, hand(ape, 0.0), CLIMB);
+		if (!tree && !slab && (target == null || !canGrab(ape, target))) {
 			return false;
 		}
 		ape.setAttached(GRAB, new Grab(now, -1));
@@ -199,6 +202,11 @@ public final class ApeGrab {
 			// (0.20.106) a tree in his hand, lifted, then thrown where he looks
 			return true;
 		}
+		if (prey == null && ape instanceof ServerPlayer slabber && TowerSlab.holding(slabber)
+			&& TowerSlab.tick(level, slabber, t - WINDUP - SNATCH, HOLD, hand(ape, 0.0))) {
+			// a slab of the ground in his hand, lifted, then thrown where he looks
+			return true;
+		}
 		if (prey == null) {
 			// his hand closed on nothing (or his catch is gone): he straightens up
 			if (t < WINDUP + SNATCH + HOLD + SLAM) {
@@ -249,7 +257,8 @@ public final class ApeGrab {
 	/** His hand closes: on his target if it's still within reach of the hand, else on nothing. */
 	private static void snatch(LivingEntity ape, ZFighterPower.Live live, ServerLevel level, Grab grab, @Nullable LivingEntity target) {
 		if (target == null || !canGrab(ape, target) || !inHandsReach(ape, live, target)) {
-			if (GiantTrees.take(level, ape, hand(ape, 0.0), treeReach(ape, live))) {
+			if (GiantTrees.take(level, ape, hand(ape, 0.0), treeReach(ape, live))
+				|| ape instanceof ServerPlayer sp && TowerSlab.take(level, sp, hand(ape, 0.0), CLIMB)) {
 				return;
 			}
 			Vec3 miss = hand(ape, ape.getBbWidth() * 0.3);
@@ -366,6 +375,9 @@ public final class ApeGrab {
 	/** The grab is over, or the ape is: whatever he held is let go. */
 	static void end(LivingEntity ape, ZFighterPower.Live live) {
 		GiantTrees.drop(ape);
+		if (ape instanceof ServerPlayer slabber) {
+			TowerSlab.drop(slabber);
+		}
 		if (ape.hasAttached(GRAB)) {
 			ape.removeAttached(GRAB);
 		}

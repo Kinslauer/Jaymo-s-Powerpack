@@ -71,6 +71,8 @@ public final class Monsters {
 	public static EntityType<Ogre> OGRE, CAVE_OGRE, FIRE_OGRE;
 	/** (0.7.623) the armoured ogre, of orc camps and ogre holds only ({@link Ogre#ARMOURED}). */
 	public static EntityType<Ogre> ARMOURED_OGRE;
+	/** A captive made into a great foe by a Blood Sorcerer's rite ({@link MadeBrute}). */
+	public static EntityType<MadeBrute> MADE_BRUTE;
 	public static EntityType<Wraith> WRAITH, FLAME_WRAITH;
 	public static EntityType<SilverSkeleton> SILVER_SKELETON;
 	public static EntityType<MudGolem> MUD_GOLEM;
@@ -86,7 +88,8 @@ public final class Monsters {
 	/** The monsters of legend, the ones folk gossip about and send you after. */
 	public static List<EntityType<?>> legends() {
 		// (0.7.329) and the minotaur (beasts/Minotaur); not the mud golem, one of the swamps' common threats now
-		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, com.jaymoskingdoms.beasts.Beasts.MINOTAUR);
+		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, com.jaymoskingdoms.beasts.Beasts.MINOTAUR,
+			com.jaymoskingdoms.hunger.Hunger.GAUNT, MADE_BRUTE);
 	}
 
 	public static boolean legend(EntityType<?> type) {
@@ -110,6 +113,8 @@ public final class Monsters {
 		SILVER_SKELETON = type("silver_skeleton", EntityType.Builder.of(SilverSkeleton::new, MobCategory.MONSTER).sized(0.8F, 2.0F).clientTrackingRange(8));
 		MUD_GOLEM = type("mud_golem", EntityType.Builder.of(MudGolem::new, MobCategory.MONSTER).sized(1.3F, 2.1F).clientTrackingRange(10));
 		MIMIC = type("mimic", EntityType.Builder.of(Mimic::new, MobCategory.MONSTER).sized(0.9F, 0.9F).clientTrackingRange(8));
+		MADE_BRUTE = type("made_brute", EntityType.Builder.of(MadeBrute::new, MobCategory.MONSTER).sized(1.6F, 3.4F).clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(MADE_BRUTE, MadeBrute.createAttributes());
 		FabricDefaultAttributeRegistry.register(WEREWOLF, Werewolf.createAttributes());
 		FabricDefaultAttributeRegistry.register(OGRE, Ogre.createAttributes(Ogre.GREEN));
 		FabricDefaultAttributeRegistry.register(CAVE_OGRE, Ogre.createAttributes(Ogre.CAVE));
@@ -126,6 +131,8 @@ public final class Monsters {
 		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 		// the witches' mud golems at their huts
 		WitchHuts.register();
+		// the Gaunt of the snowy woods, its heart and the curse of the hungry
+		com.jaymoskingdoms.hunger.Hunger.register();
 
 		// the Nether's own: fire ogres and flame wraiths among its monsters
 		SpawnPlacements.register(FIRE_OGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

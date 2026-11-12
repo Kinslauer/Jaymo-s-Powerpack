@@ -146,6 +146,8 @@ public final class Baubles {
 		Fairies.init();
 		// (Artifacts) the Artifacts mod's 45 baubles, ported (MIT), and where they are found
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
+		// the ticking charm: clicks faster the nearer the blight
+		TickingCharm.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
 		BaublesQuickEquip.init();

@@ -16,7 +16,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -29,6 +32,11 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * It lies as long as the pool that fed it (a lasting stain's runs as long as the stain), darkens as it dries, and fades.
  * Magma blood glows and cools here as it does on the ground.
+ *
+ * <p>Each mark keeps the block it lies on ({@link #host}). Andy: "the blood decals that splashed on the door did not
+ * travel with the door as it opened, so they floated in midair". When that block changes ({@link #follow}), a mark on a
+ * door swings with the door, about its hinge, to wherever the door now stands; one whose wall is gone (the block broken,
+ * a fence gate or trapdoor opened, a trapdoor closed) is gone with it.
  */
 public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** Its opacity; how long a run takes to run its length (ticks); how far it can run (blocks). */
@@ -46,7 +54,8 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	/** How far off the face it's drawn (against flicker). */
 	static final float LIFT = 0.015F;
 
-	private final Direction face;
+	/** The face it lies on; changes when the door it's on swings ({@link #follow}). */
+	private Direction face;
 	private final float splat;
 	private final float run;
 	private final float runWidth;
@@ -56,18 +65,23 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	private final @Nullable TextureAtlasSprite splatSprite;
 	private final @Nullable TextureAtlasSprite runSprite;
 	/** Where it starts on the face (its top: the splat's middle, or the edge a run pours over). */
-	private final double ax, ay, az;
+	private double ax, ay, az;
+	/** The block it lies on, and how that block stood when last looked at ({@link #follow}). */
+	private final BlockPos host;
+	private BlockState hostState;
 	private int drips;
 	/** (0.20.54) When the rain started washing it off (it fades from then), or -1. */
 	private int washFrom = -1;
 
-	private BloodWallMark(ClientLevel level, double x, double y, double z, Direction face, float splat, float run, float runWidth, int color,
-		int age, int life, boolean stain) {
+	private BloodWallMark(ClientLevel level, BlockPos host, double x, double y, double z, Direction face, float splat, float run,
+		float runWidth, int color, int age, int life, boolean stain) {
 		// its light comes from just off the face
 		super(level, x + face.getStepX() * 0.1, y, z + face.getStepZ() * 0.1);
 		this.ax = x;
 		this.ay = y;
 		this.az = z;
+		this.host = host.immutable();
+		this.hostState = level.getBlockState(this.host);
 		this.face = face;
 		this.splat = splat;
 		this.run = run;
@@ -94,6 +108,10 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			this.remove();
 			return;
 		}
+		if (!this.follow()) {
+			this.remove();
+			return;
+		}
 		// (0.20.54) rain running down the wall washes it away (stain's runs too, as the server washes the stain)
 		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.RAIN_WASH
 			&& BloodPuddle.rainedOn(this.level, this.x, this.y, this.z)) {
@@ -111,6 +129,115 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			Vec3 at = this.point(0.0, -this.run * 0.5, 0.05);
 			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, at.x, at.y, at.z, 0.0, 0.02, 0.0);
 		}
+	}
+
+	/**
+	 * Keeps it on the block it lies on: when that block has changed, a door that swung takes it with it; otherwise it
+	 * stays only if the wall it's on is still there. False when it has nothing left to lie on.
+	 */
+	private boolean follow() {
+		if (!this.level.hasChunkAt(this.host)) {
+			// not loaded here (at the edge of view): nothing to go by, so leave it as it was
+			return true;
+		}
+		BlockState now = this.level.getBlockState(this.host);
+		if (now == this.hostState) {
+			return true;
+		}
+		BlockState was = this.hostState;
+		this.hostState = now;
+		if (now.getBlock() == was.getBlock() && !this.swing(was, now)) {
+			return false;
+		}
+		return this.onWall(now);
+	}
+
+	/**
+	 * A panel (a door, an open trapdoor) that swung from lying against one side of its block to another: turns the mark
+	 * the quarter turn the panel took, about its hinge (the corner the two sides share). Vanilla's door is a board
+	 * {@code t} thick against side {@code d1} closed and against side {@code d2} open, so the swing is the quarter turn
+	 * about the vertical line {@code t/2} in from both sides that takes {@code d2} to {@code d1} (what faced out now faces
+	 * into the block, as a real door's does). False if it swung some way a wall mark can't follow (a trapdoor's flip).
+	 */
+	private boolean swing(BlockState was, BlockState now) {
+		AABB before = bounds(was), after = bounds(now);
+		Direction d1 = before == null ? null : againstSide(before), d2 = after == null ? null : againstSide(after);
+		if (d1 == null || d2 == null) {
+			// not a panel before or after: nothing swung; whether it still has a wall is up to the caller
+			return true;
+		}
+		if (d1 == d2) {
+			return true;
+		}
+		if (d1.getAxis() == Direction.Axis.Y || d2.getAxis() == Direction.Axis.Y || d1.getAxis() == d2.getAxis()) {
+			return false;
+		}
+		double t = Math.min(before.getXsize(), before.getZsize());
+		if (Math.abs(t - Math.min(after.getXsize(), after.getZsize())) > 1.0E-3) {
+			return false;
+		}
+		// the hinge line, in the block
+		double inset = 0.5 - t * 0.5;
+		double px = this.host.getX() + 0.5 + (d1.getStepX() + d2.getStepX()) * inset;
+		double pz = this.host.getZ() + 0.5 + (d1.getStepZ() + d2.getStepZ()) * inset;
+		// the quarter turn about the vertical axis k = d2 x d1 (k.y = d2.z*d1.x - d2.x*d1.z) is v -> k x v: (x, z) -> (k.y*z, -k.y*x)
+		int ky = d2.getStepZ() * d1.getStepX() - d2.getStepX() * d1.getStepZ();
+		double rx = this.ax - px, rz = this.az - pz;
+		this.ax = px + ky * rz;
+		this.az = pz - ky * rx;
+		// the same turn on the face it lies on: (x, z) -> (z, -x) is a quarter turn counter-clockwise seen from above
+		Direction turned = ky > 0 ? this.face.getCounterClockWise() : this.face.getClockWise();
+		this.face = turned;
+		// its light comes from just off the face, as when it was made
+		this.setPos(this.ax + turned.getStepX() * 0.1, this.ay, this.az + turned.getStepZ() * 0.1);
+		this.xo = this.x;
+		this.zo = this.z;
+		return true;
+	}
+
+	/** Whether the block it lies on still has a surface where it starts (just behind it, on the face it lies on). */
+	private boolean onWall(BlockState state) {
+		VoxelShape shape = state.getCollisionShape(this.level, this.host);
+		if (shape.isEmpty()) {
+			return false;
+		}
+		double x = this.ax - this.face.getStepX() * 0.02 - this.host.getX(), y = this.ay - this.host.getY();
+		double z = this.az - this.face.getStepZ() * 0.02 - this.host.getZ();
+		for (AABB box : shape.toAabbs()) {
+			if (box.inflate(0.01).contains(x, y, z)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private @Nullable AABB bounds(BlockState state) {
+		VoxelShape shape = state.getShape(this.level, this.host, CollisionContext.empty());
+		return shape.isEmpty() ? null : shape.bounds();
+	}
+
+	/** The side of its block a thin board ({@code box}, block-local) lies flat against, or null if it isn't one. */
+	private static @Nullable Direction againstSide(AABB box) {
+		for (Direction.Axis axis : Direction.Axis.values()) {
+			double min = box.min(axis), max = box.max(axis);
+			if (max - min >= 0.5) {
+				continue;
+			}
+			// thin this way and whole the other two
+			for (Direction.Axis other : Direction.Axis.values()) {
+				if (other != axis && (box.min(other) > 1.0E-3 || box.max(other) < 1.0 - 1.0E-3)) {
+					return null;
+				}
+			}
+			if (min < 1.0E-3) {
+				return Direction.fromAxisAndDirection(axis, Direction.AxisDirection.NEGATIVE);
+			}
+			if (max > 1.0 - 1.0E-3) {
+				return Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE);
+			}
+			return null;
+		}
+		return null;
 	}
 
 	/** A point on the face: {@code across} along it, {@code down} from the top (negative is down), {@code out} off it. */
@@ -192,17 +319,16 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	 * A drop of {@code color}, {@code size} across, flew into the {@code face} of a wall at {@code at}: a splat there,
 	 * and from a big one (by chance) a run down the wall below it.
 	 */
-	static void splat(ClientLevel level, Vec3 at, Direction face, int color, float size) {
+	static void splat(ClientLevel level, BlockPos wall, Vec3 at, Direction face, int color, float size) {
 		if (face.getAxis() == Direction.Axis.Y || BloodClient.puddleSprites() == null) {
 			return;
 		}
 		float splat = Mth.clamp(size * SPLAT_GROWTH, 0.15F, 0.9F);
 		float run = 0.0F;
 		if (splat >= RUNS_FROM && level.getRandom().nextFloat() < 0.6F) {
-			BlockPos wall = BlockPos.containing(at.x - face.getStepX() * 0.05, at.y, at.z - face.getStepZ() * 0.05);
 			run = Math.min(reach(level, wall, face, at.y), splat * (1.0F + level.getRandom().nextFloat() * 1.5F));
 		}
-		add(new BloodWallMark(level, at.x, at.y, at.z, face, splat, run, splat * 0.35F, color, 0, LIFE + level.getRandom().nextInt(600), false));
+		add(new BloodWallMark(level, wall, at.x, at.y, at.z, face, splat, run, splat * 0.35F, color, 0, LIFE + level.getRandom().nextInt(600), false));
 	}
 
 	/**
@@ -247,7 +373,7 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 				under.getZ() + 0.85);
 			float run = (float) Math.min(reach(level, under, face, y), 0.3 + over * 1.6 + level.getRandom().nextDouble() * 0.5);
 			float width = (float) Mth.clamp(over * 0.6, 0.12, 0.4);
-			add(new BloodWallMark(level, fx, y, fz, face, 0.0F, run, width, color, age, Math.max(1, life), stain));
+			add(new BloodWallMark(level, under, fx, y, fz, face, 0.0F, run, width, color, age, Math.max(1, life), stain));
 			made++;
 		}
 	}

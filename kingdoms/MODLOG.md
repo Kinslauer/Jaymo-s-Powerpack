@@ -11540,3 +11540,107 @@ Mill Charge and the guards' challenge:
   that can't see mana looked a missing power up in a set that throws on a missing value. A player with no power now
   simply isn't an elemental power user.
 - The same lookup in the story roads (the hermit's road) had the same fault and is fixed the same way.
+
+## 0.7.763 (2026-11-12): lamplight follows people - lanterns last longer and passers keep them lit
+
+- **Longer burn**: a lantern set by world generation or a settlement now starts with ten days of fuel (was three), and a coal or charcoal adds five days (was three).
+- **Relit as they pass**: villagers (MCA's too) and a settlement's guards, carters and workers top up a lit lantern they walk within about four blocks of once it is under five days, and light any burnt lantern or torch they pass, without stopping. A caravan lights its road as it goes.
+- **Lanterns on posts**: villagers sent to relight a burnt lantern now reach one on a road post above their heads (before, the reach was measured straight to the lantern, so posts were out of reach and road lanterns were never relit).
+- **Places people use stay lit**: where no player is within 40 blocks, a lantern on a settlement's land or on a King's Road that caravans travel (one end serves the other, or a caravan is on it now) is kept burning, and a burnt lantern or torch there is lit again within about ten minutes. Roads between towns with no dealings, or whose towns have fallen, burn through their fuel and go dark.
+- New loading-screen hint (131).
+- Classes: Lamplight (new), Lanterns, Torches, StoryHoldScreen.
+- Built; not played.
+
+## 0.7.764 (2026-11-12): Broken loot chests spill their loot
+
+- **Broken Lootr chests no longer swallow their loot.** Lootr keeps each player's share of a loot chest or barrel apart
+  from the block, and dropped none of it when the chest was broken (sneak-break), so whatever was inside just vanished.
+  Now every share in it spills onto the floor as a random roll: each stack comes out 60% of the time, keeping 40-100% of
+  its count; the rest is lost in the smash. A chest you never opened spills a roll of your own share, so forcing a locked
+  chest still gets you something, just less than picking the lock. Creative breaks spill nothing. Plain chests drop all
+  they hold, as before. Tuning in `SpiltLoot` (`SURVIVES`, `KEPT_MIN`).
+- Built; not played.
+
+## 0.7.765 (2026-11-12): the tundra's muskox, herds that keep together, and predators that stop when fed (#1358)
+
+- **Muskox** (`wild/Muskox`): a giant shaggy goat cousin for the far cold, in herds of 3 to 6 on snowy plains (and the
+  tundra and lichen woodland when Powers adds them; biome tag `jaymoskingdoms:has_muskox`). Brown or black, 24 health,
+  slow. It leaves people alone, but a grown one that's struck butts back with a hard knockback for a few seconds; a
+  calf just runs. Drops mutton and leather. Breed it by hand with glow lichen. Spawn egg.
+- **It grazes glow lichen**: when hungry (about every two minutes) it walks to the game's glow lichen within 10 blocks
+  and eats it off the rock, head down. Only vanilla `minecraft:glow_lichen`: sprouted or snipped lichen is left alone.
+- **It sheds string after each feed**, more the better it lives: room about it, 2 to 8 other muskox within 16 blocks,
+  open sky by day, and its home country (`jaymoskingdoms:muskox_home`). None of those: 0 or 1 string. All four: 6 to 8.
+  More than 12 others packed within 8 blocks: nothing. So a herd on open tundra with lichen to eat is a string farm
+  you keep by looking after it.
+- **Herds keep together** (`wild/HerdPull`): a muskox that has strayed strolls back toward its herd, and a herd drifts
+  toward lichen within 24 blocks. Wild cows, sheep, pigs, chickens and goats keep together the same way (entity tag
+  `jaymoskingdoms:herds_together`). Never a leashed, named, tamed or ridden animal, and never through a fence: an
+  animal that can't walk the whole way isn't pulled, so pens don't pile into a corner.
+- **A herd recovers its losses**: when a muskox dies, the others within 32 blocks remember it for three days. One that
+  remembers, with no calf near and fewer than 10 in the herd, is ready to breed for two minutes after its next feed.
+  With Respawning Animals, muskox never despawn and are not refilled by it (tag
+  `respawninganimals:persistent_animals`): a herd you wipe out is gone, a herd you leave some of comes back.
+- **Muskox run from their hunters** (entity tag `jaymoskingdoms:predators`: polar bears, wolves, feral wolves, coyotes,
+  grizzlies, and Naturalist's and Cube Animals' big cats and bears), each its own way.
+- **Fed predators stop hunting** (`wild/FedPredators`): after a polar bear, wolf, fox, feral wolf or coyote (entity tag
+  `jaymoskingdoms:sated_predators`, with other mods' hunters) kills an animal, it doesn't hunt another animal for two
+  days. Players, villagers and anything that hurts it are still fair game, and wolves stalk players as before. It's
+  saved on the animal.
+- **The young go first**: a hungry predator that picks an animal takes one of the young in reach instead of an adult.
+- **Polar bears hunt muskox.**
+- The muskox's model and both coats are our own (`docs/Muskox-Model-Spec.md`, `tools/gen_muskox.py`); pose previews in
+  `art-overhaul/muskox/`.
+- Classes: `wild/Muskox`, `wild/HerdPull`, `wild/FedPredators`, `mixin/wild/PredatorTargetMixin`,
+  `client/wild/MuskoxModel`, `client/wild/MuskoxRenderer`.
+- Built (compiles); not played. Not seen in the game: the model and its poses, the grazing walk, the pen test, a
+  polar bear's hunt, and whether Naturalist's, Cube Animals' and Bear Minimum's hunters pick prey the way the game's
+  do (if they don't, being fed changes nothing for them).
+
+## 0.7.766 (2026-11-12): The journal remembers people, great foes and places (#1355)
+
+- The journal's quests page gains three entries: **People I have met** (everyone whose name you have learned), **Great foes I have seen** and **Places I have walked into** (structures you have stood inside, the last one marked).
+- People you already knew before this update appear once you come within 16 blocks of them again.
+
+Classes: `JournalLog` (hooks in `Journal`, `Introductions`, `BossIntros`, `JaymosKingdoms`), lang part `journal-log.json`.
+
+Compiled only; not played. The structure check was not tried in every dimension.
+
+## 0.7.767 (2026-11-12): Hunters' packs, the Gaunt and its curse, blighted wolves, night shapes, crews, a lasso, new spells, trophy stands and great foe music (#1364)
+
+**Trades**
+- **Hunter**: a pack wolf that is always with you and is replaced two minutes after it falls (two for a Master). Use a bone on a beast to mark it: it glows and takes a quarter more from you and the pack. A bone used in the air sends the pack; sneak + bone calls it back. From Journeyman the pack follows the quarry out of sight, mends itself, fetches loose drops, and a goat horn marks and slows every beast near.
+- **Hunter's bow** (Journeyman): hold a full draw on a beast for a beat for a bullseye that hits harder and pierces. Marked and bullseye kills give extra cuts when the carcass is butchered (or better drops without Jaymo's Kitchen). The bow draws twice as fast from the saddle.
+- **Farmhand**: breaking a grown crop re-sows it (not in winter). From Journeyman an empty hand tends a crop on. Tamed animals hit harder near their farmer.
+- **Smith**: built golems hit harder near a smith. From Journeyman, sneak + use a lit campfire with a pickaxe or hammer to raise a field forge: a minute of slow mending and quicker hands for your side, once every five minutes.
+- **Lords**: sneak + goat horn calls your realm's guards, archers and golems to you for half a minute.
+- A Master of any trade gets better prices from villagers in the town they work in.
+
+**The wild**
+- **Blighted wolves**: wolves that den near the Irradiated Giant's monolith change. They are tougher, hunt at any hour, and their bite carries the sickness.
+- **The sickness**: lingering round that monolith makes you ill in three stages. The Potion of Cleansing, a healer, Mending or Restoration clears it; honey or wild garlic eases it.
+- **The Gaunt**: a great foe of the snowy woods. It comes at night, is drawn to lit campfires, stalks before it rushes and is gone by day. Its bite can carry a curse. It drops its heart.
+- **The curse of the hungry** (from the Gaunt's bite, eating its heart, or rotten flesh eaten in snow at night): at night you run on all fours, pounce from a crouch and pin what you land on, and crouch by the corpse of your own kill to feed a gauge. Full, you grow huge for thirty seconds. Ordinary food feeds you poorly, villagers run from you at night and daylight weakens you. Cleansing cures it and death ends it. `/kingdom hungercurse curse|cure|feed` for operators.
+
+**Night folk**
+- Vampires gain shapes on sneak + O: **bat** (small and flying), **colony** (bats lift a foe and drop it), **mist** (nothing hurts you and you hurt nothing), a **stare** that walks the weak-willed to you, and a **riposte** (crouch just before a blow and it finds only bats). Each costs blood. Sneak + O no longer dashes; plain O still does.
+
+**Outlaws**
+- **Crews**: barbarian camps now have ranks: plain raiders, one or two strong ones, a heavy, and a chief with one of four styles (the Knife, the Hammer, the Archer, the Poisoner), each with its own move. The nearest court posts a bounty under the byname.
+- **Stealth perks**: Watched (damage builds while you keep an unaware target in your sights), The Stare (closes a target's sight in), Slip (tap sneak just before a blow to end up behind the attacker), Body Count (hidden kills heal).
+- **Thief perks and knife forms**: Disarm Rush, Lift Weapon (pickpocket a held weapon) and Dry Remark (the faint-hearted drop what they hold).
+- **Lasso**: throw it to hold a creature on a rope; use again up close to wrap it and lead it. Strong things break out sooner and great foes shrug it off. Players can only be held, and only where PvP is on.
+
+**Sorcery**
+- Three spells by scroll, staff, tome, the J key or the skill bar: **Bulwark** (earth: a dome that turns shots and shoves foes out), **Tide Pearl** (water: drags a foe to a ring at your feet) and **Harrying Gale** (air: hops a foe about, hurting it each time).
+- **A forbidden rite**, learned from a rare Stitched Page: a Blood Sorcerer can unmake a bound captive into a brute that obeys for a moment and then turns on everyone. It is the heaviest crime there is and the captive's town remembers.
+
+**Great foes**
+- **Trophy stands** (wood, stone): every great foe drops a trophy. Set it, a head or anything else on a stand; the plate names the foe only if you know it.
+- **Themes**: the four Giants, the Gaunt, ogres, wraiths, werewolves, wild dragons and warlords each have their own music, built from short layers so it never loops, rising as the foe weakens. It follows the Music slider.
+
+Classes: `HunterPack`, `HunterBow`, `SettlerKit`, `FieldForge`, `Rally`, `Crews`, `remnants/Blight`, `hunger/` (`Gaunt`, `Hunger`, `HungerCurse`), `nightforms/`, `RogueGambits`, `forms/Lasso`, `forms/RogueForms`, `SorceryPicks`, `BruteRite`, `monsters/MadeBrute`, `trophies/`, `music/FoeThemes`. Art and sound from `tools/gen_hunger_picks.py`, `gen_rogue_picks.py`, `gen_sorcery_picks.py`, `gen_trophy_picks.py`, `gen_foe_themes.py`.
+
+Left out: the cooked-meat bullseye and the ghostly crossbow (a Master's second wolf stands in), the thrown pitchfork (Strength's spear already pins), a wolf shape for vampires (the wolf-cursed own the beast), and the beam and ring-of-lightning spells, which already existed.
+
+Compiled only; nothing was played. Least sure: the bat shape and its flight, the all-fours pose, how MCA villagers take the crew gear and the rally, the hero's-price effect through MCA's trade button, the new perks' places on the skill web, and how the synthesised themes sound.

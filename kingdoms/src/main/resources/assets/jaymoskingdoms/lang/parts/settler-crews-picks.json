@@ -1,0 +1,10 @@
+{
+  "message.jaymoskingdoms.tend.rest": "This crop has been tended lately.",
+  "message.jaymoskingdoms.tend.hungry": "You are too hungry to tend crops.",
+  "message.jaymoskingdoms.forge.raised": "The forge roars. Those near it mend and work quicker.",
+  "message.jaymoskingdoms.forge.spent": "The field forge burns low.",
+  "message.jaymoskingdoms.forge.cooling": "Your hammer arm is tired. Again in %s seconds.",
+  "message.jaymoskingdoms.rally.called": "Your horn sounds. %s answer the call.",
+  "message.jaymoskingdoms.rally.none": "Your horn sounds, and nobody is near enough to hear it.",
+  "bounty.jaymoskingdoms.crime.crew": "leading a band of raiders"
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "jaymospowers:block/tundra/lichen_face",
+  "textures": {
+    "lichen": "jaymospowers:block/tundra/sprouted_glow_lichen"
+  }
+}

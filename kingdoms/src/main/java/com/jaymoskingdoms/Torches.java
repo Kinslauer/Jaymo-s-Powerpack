@@ -51,7 +51,8 @@ import net.minecraft.world.level.material.PushReaction;
  * on each random tick, mixin.TorchBlockMixin), then goes out and is left a {@link #BURNT_TORCH}; rain on a torch open
  * to the sky puts it out much sooner. A burnt torch gives no light and drops a stick. Flint and steel, a fire charge or
  * a lit torch in hand lights it again, and villagers (MCA's too) walk over to burnt torches near them and relight them,
- * so a village stays lit as long as its folk are up and about (Andy, 2026-10-14).
+ * so a village stays lit as long as its folk are up and about (Andy, 2026-10-14). Folk also light the burnt torches they
+ * walk past, and somewhere people live or travel a burnt torch nobody is near to see is lit again ({@link Lamplight}).
  */
 public final class Torches {
 	/** How long a torch burns on average (ticks): two days. */
@@ -83,6 +84,16 @@ public final class Torches {
 		}
 
 		@Override
+		protected boolean isRandomlyTicking(BlockState state) {
+			return true;
+		}
+
+		@Override
+		protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+			Lamplight.burntTick(state, level, pos, random);
+		}
+
+		@Override
 		public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 			if (random.nextInt(6) == 0) {
 				level.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 0.0, 0.01, 0.0);
@@ -94,6 +105,16 @@ public final class Torches {
 	static final class BurntWallTorch extends WallTorchBlock {
 		BurntWallTorch(BlockBehaviour.Properties properties) {
 			super(ParticleTypes.SMOKE, properties);
+		}
+
+		@Override
+		protected boolean isRandomlyTicking(BlockState state) {
+			return true;
+		}
+
+		@Override
+		protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+			Lamplight.burntTick(state, level, pos, random);
 		}
 
 		@Override
@@ -227,7 +248,7 @@ public final class Torches {
 	/** The nearest free, awake grown villager goes to the burnt torch at {@code pos}, and relights it once there. */
 	private static void tend(ServerLevel level, BlockPos pos, Set<Villager> busy) {
 		BlockState state = level.getBlockState(pos);
-		if (!state.is(BURNT_TORCH) && !state.is(BURNT_WALL_TORCH) && !state.is(Lanterns.BURNT_LANTERN)) {
+		if (!burnt(state)) {
 			forget(level, pos);
 			return;
 		}
@@ -246,21 +267,32 @@ public final class Torches {
 			return;
 		}
 		busy.add(lighter);
-		if (best <= LIGHTER_REACH * LIGHTER_REACH) {
+		// (measured flat, with room to reach up: a road lantern sits on a post above the lighter's head)
+		if (Lamplight.reaches(lighter, pos, LIGHTER_REACH)) {
 			lighter.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			lighter.getLookControl().setLookAt(at);
-			// (0.7.206) a town with whale oil in store puts up an oil lamp in its place
-			if (state.is(Lanterns.BURNT_LANTERN)) {
-				Lanterns.relight(level, pos, state); // (0.7.541) filled with a coal's worth from the town's stores
-			} else if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
-				forget(level, pos);
-			} else {
-				relight(level, pos, state);
-			}
-			level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			kindle(level, pos, state);
 		} else {
 			lighter.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 0.5F, 1));
 		}
+	}
+
+	/** The burnt torch or lantern {@code state} at {@code pos} is lit again, by a villager or someone passing. */
+	static void kindle(ServerLevel level, BlockPos pos, BlockState state) {
+		// (0.7.206) a town with whale oil in store puts up an oil lamp in its place
+		if (state.is(Lanterns.BURNT_LANTERN)) {
+			Lanterns.relight(level, pos, state);
+		} else if (state.is(BURNT_TORCH) && com.jaymoskingdoms.whaling.Lamplighters.upgrade(level, pos)) {
+			forget(level, pos);
+		} else {
+			relight(level, pos, state);
+		}
+		level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
+	}
+
+	/** Whether {@code state} is a burnt torch or lantern someone could light again. */
+	static boolean burnt(BlockState state) {
+		return state.is(BURNT_TORCH) || state.is(BURNT_WALL_TORCH) || state.is(Lanterns.BURNT_LANTERN);
 	}
 
 	private static Block block(String name, Function<BlockBehaviour.Properties, Block> make, BlockBehaviour.Properties properties) {
