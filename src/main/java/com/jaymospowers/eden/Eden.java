@@ -44,6 +44,11 @@ public final class Eden {
 	public static final float MYCELIUM_HARDNESS = 0.6F, CAP_HARDNESS = 0.3F, STEM_HARDNESS = 0.8F, LOG_HARDNESS = 2.0F, PLANKS_BLAST = 3.0F,
 		LANTERN_HARDNESS = 0.5F, STONE_HARDNESS = 1.5F, STONE_BLAST = 6.0F;
 
+	/** Hardness of a brain tree's flesh and of an aquatus head. */
+	public static final float BRAIN_HARDNESS = 1.2F, AQUATUS_HARDNESS = 0.6F;
+
+	/** The biome whose ground is sand (the lakeside desert). */
+	public static final TagKey<Biome> SAND_GROUND = TagKey.create(Registries.BIOME, JaymosPowers.id("eden_sand_ground"));
 	/** The biomes whose turf is mycelium, and the one whose ground is worn stone. */
 	public static final TagKey<Biome> MYCELIUM_GROUND = TagKey.create(Registries.BIOME, JaymosPowers.id("eden_mycelium_ground"));
 	public static final TagKey<Biome> STONE_GROUND = TagKey.create(Registries.BIOME, JaymosPowers.id("eden_stone_ground"));
@@ -51,6 +56,8 @@ public final class Eden {
 	public static Block MYCELIUM, MYCOTIC_GRASS, BALLOON_SMALL, BALLOON_STEM, BALLOON_LOG, BALLOON_CAP, BALLOON_PLANKS;
 	public static Block PULSE_TREE, PULSE_LOG, PULSE_PLANKS, PULSE_SAPLING;
 	public static Block MOSSY_STONE;
+	public static Block BRAIN_LOG, BRAIN_PLANKS, BRAIN_COPPER, BRAIN_IRON, BRAIN_GOLD, COPPER_GRASS, IRON_GRASS, GOLD_GRASS;
+	public static Block AQUATUS, AQUATUS_ROOTS, AQUATUS_SAPLING;
 	/** The mycotic lanterns, by colour. */
 	public static final Map<DyeColor, Block> LANTERNS = new LinkedHashMap<>();
 
@@ -78,6 +85,16 @@ public final class Eden {
 	private static Block sapling(String id, String tree, MapColor color) {
 		ResourceKey<Feature> feature = ResourceKey.create(Registries.FEATURE, JaymosPowers.id(tree));
 		return block(id, p -> new AetherSaplingBlock(feature, p), plant(color).randomTicks());
+	}
+
+	private static Block brain(String metal, MapColor color) {
+		return block("brain_tree_block_" + metal, BrainBlock::new, BlockBehaviour.Properties.of().mapColor(color).strength(BRAIN_HARDNESS)
+			.sound(SoundType.NETHER_WART).randomTicks().lightLevel(state -> state.getValue(BrainBlock.ACTIVE) ? BrainBlock.LIT_LIGHT : 0));
+	}
+
+	private static Block metalGrass(String id) {
+		return block(id, p -> new FloraPlantBlock(Block.box(2, 0, 2, 14, 10, 14), false, p),
+			plant(MapColor.PLANT).replaceable().offsetType(BlockBehaviour.OffsetType.XZ));
 	}
 
 	public static void init() {
@@ -111,6 +128,24 @@ public final class Eden {
 		// ---- the stone garden ----
 		MOSSY_STONE = block("eden_mossy_stone", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
 			.instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(STONE_HARDNESS, STONE_BLAST));
+
+		// ---- the brainstorm ----
+		BRAIN_LOG = block("brain_tree_log", RotatedPillarBlock::new, wood(MapColor.COLOR_GRAY));
+		BRAIN_PLANKS = block("brain_tree_planks", Block::new, wood(MapColor.COLOR_GRAY).strength(LOG_HARDNESS, PLANKS_BLAST));
+		BRAIN_COPPER = brain("copper", MapColor.COLOR_ORANGE);
+		BRAIN_IRON = brain("iron", MapColor.TERRACOTTA_WHITE);
+		BRAIN_GOLD = brain("gold", MapColor.GOLD);
+		COPPER_GRASS = metalGrass("copper_grass");
+		IRON_GRASS = metalGrass("iron_grass");
+		GOLD_GRASS = metalGrass("gold_grass");
+
+		// ---- the lakeside desert ----
+		AQUATUS = block("aquatus_block", AquatusBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(AQUATUS_HARDNESS)
+			.sound(SoundType.WET_GRASS).randomTicks());
+		AQUATUS_ROOTS = block("aquatus_roots", p -> new ThinStemBlock(5, p), wood(MapColor.COLOR_BROWN).strength(STEM_HARDNESS).noOcclusion());
+		AQUATUS_SAPLING = sapling("aquatus_sapling", "aquatus", MapColor.COLOR_CYAN);
+
+		EdenWind.init();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> TAB.forEach(output::accept));
 	}

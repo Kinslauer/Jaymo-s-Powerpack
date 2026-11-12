@@ -26,7 +26,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
  */
 public record EdenFeature(Kind kind) implements Feature {
 	public enum Kind {
-		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER;
+		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER,
+		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS;
 
 		static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)), k -> k.name().toLowerCase(Locale.ROOT));
 	}
@@ -50,6 +51,12 @@ public record EdenFeature(Kind kind) implements Feature {
 	public static final int PULSE_TRUNK = 4, PULSE_STEMS = 1, PULSE_STEMS_SPREAD = 3;
 	/** A stone pillar: height (least, spread) and radius (most); a boulder's radius (least, spread). */
 	public static final int PILLAR_HEIGHT = 5, PILLAR_HEIGHT_SPREAD = 10, PILLAR_RADIUS = 2, BOULDER_RADIUS = 2, BOULDER_RADIUS_SPREAD = 2;
+	/** The lakeside desert: share of its sand that is gravel; a pond's radius (least, spread), depth, and the aquatus on its shore (most). */
+	public static final int DESERT_GRAVEL = 14, POND_RADIUS = 3, POND_RADIUS_SPREAD = 3, POND_DEPTH = 3, POND_AQUATUS = 4;
+	/** The ground round a pond may stand this far off its level, or no pond is dug. */
+	public static final int POND_TOLERANCE = 2;
+	/** A brain tree: trunk height (least, spread) and crown radius (least, spread); a patch of metal grass: tries and spread. */
+	public static final int BRAIN_TRUNK = 5, BRAIN_TRUNK_SPREAD = 4, BRAIN_CROWN = 2, BRAIN_CROWN_SPREAD = 1, METAL_GRASS_TRIES = 14, METAL_GRASS_SPREAD = 5;
 	/** The colours lanterns grow in wild (builders dye the rest). */
 	private static final DyeColor[] WILD_LANTERNS = {DyeColor.WHITE, DyeColor.YELLOW, DyeColor.LIGHT_BLUE, DyeColor.LIME, DyeColor.PINK, DyeColor.ORANGE,
 		DyeColor.MAGENTA, DyeColor.CYAN};
@@ -70,6 +77,11 @@ public record EdenFeature(Kind kind) implements Feature {
 			case PULSE_TREE -> pulse(level, random, origin);
 			case STONE_PILLAR -> pillar(level, random, origin);
 			case STONE_BOULDER -> boulder(level, random, origin);
+			case SAND_GROUND -> sand(level, random, origin);
+			case POND -> pond(level, random, origin);
+			case AQUATUS -> aquatus(level, random, origin);
+			case BRAIN_TREE -> brainTree(level, random, origin);
+			case METAL_GRASS -> metalGrass(level, random, origin);
 		};
 	}
 
@@ -340,5 +352,153 @@ public record EdenFeature(Kind kind) implements Feature {
 			}
 		}
 		return true;
+	}
+
+	// ---------------------------------------------------------------- the lakeside desert
+
+	private static boolean sand(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int x0 = origin.getX() & ~15, z0 = origin.getZ() & ~15;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		boolean laid = false;
+		for (int dx = 0; dx < 16; dx++) {
+			for (int dz = 0; dz < 16; dz++) {
+				int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x0 + dx, z0 + dz) - 1;
+				pos.set(x0 + dx, y, z0 + dz);
+				if (!level.getBlockState(pos).is(Blocks.GRASS_BLOCK) || !level.getBiome(pos).is(Eden.SAND_GROUND)) {
+					continue;
+				}
+				level.setBlock(pos, (random.nextInt(100) < DESERT_GRAVEL ? Blocks.GRAVEL : Blocks.SAND).defaultBlockState(), Block.UPDATE_CLIENTS);
+				// sandstone under it, so the sand has something to lie on over a cave
+				for (int down = 0; down < 2; down++) {
+					if (level.getBlockState(pos.move(Direction.DOWN)).is(BlockTags.DIRT)) {
+						level.setBlock(pos, Blocks.SANDSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+				laid = true;
+			}
+		}
+		return laid;
+	}
+
+	private static boolean shore(BlockState state) {
+		return state.is(Blocks.SAND) || state.is(Blocks.GRAVEL) || state.is(BlockTags.DIRT);
+	}
+
+	private static boolean pond(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int radius = POND_RADIUS + random.nextInt(POND_RADIUS_SPREAD + 1);
+		int surface = origin.getY() - 1;
+		// only on ground level enough to hold water
+		for (int dx = -radius - 1; dx <= radius + 1; dx += radius + 1) {
+			for (int dz = -radius - 1; dz <= radius + 1; dz += radius + 1) {
+				int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, origin.getX() + dx, origin.getZ() + dz) - 1;
+				if (Math.abs(y - surface) > POND_TOLERANCE || y < surface) {
+					return false;
+				}
+			}
+		}
+		if (!shore(level.getBlockState(origin.below()))) {
+			return false;
+		}
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int dx = -radius - 1; dx <= radius + 1; dx++) {
+			for (int dz = -radius - 1; dz <= radius + 1; dz++) {
+				float out = (dx * dx + dz * dz) / (float) (radius * radius);
+				if (out > 1.45F) {
+					continue;
+				}
+				if (out > 1.0F) {
+					// the rim: make sure the water has a bank at its own level
+					pos.set(origin.getX() + dx, surface, origin.getZ() + dz);
+					if (!level.getBlockState(pos).isSolidRender()) {
+						level.setBlock(pos, Blocks.SAND.defaultBlockState(), Block.UPDATE_CLIENTS);
+						level.setBlock(pos.move(Direction.DOWN), Blocks.SANDSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+					continue;
+				}
+				int depth = Math.max(1, Math.round(POND_DEPTH * (1.0F - out)));
+				// clear what stands over the water, then the bowl: clay under, water in it
+				for (int up = 1; up <= 3; up++) {
+					pos.set(origin.getX() + dx, surface + up, origin.getZ() + dz);
+					if (!level.getBlockState(pos).isAir()) {
+						level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+				for (int down = 0; down < depth; down++) {
+					level.setBlock(pos.set(origin.getX() + dx, surface - down, origin.getZ() + dz), Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
+				}
+				level.setBlock(pos.set(origin.getX() + dx, surface - depth, origin.getZ() + dz),
+					(random.nextInt(3) == 0 ? Blocks.CLAY : Blocks.SAND).defaultBlockState(), Block.UPDATE_CLIENTS);
+				level.setBlock(pos.move(Direction.DOWN), Blocks.SANDSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+		// the drinkers on the shore
+		int plants = 1 + random.nextInt(POND_AQUATUS);
+		for (int i = 0; i < plants; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int x = origin.getX() + (int) Math.round(Math.cos(angle) * (radius + 2)), z = origin.getZ() + (int) Math.round(Math.sin(angle) * (radius + 2));
+			aquatus(level, random, new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), z));
+		}
+		return true;
+	}
+
+	/** An aquatus: a twist of roots one or two blocks tall with the head on top. */
+	private static boolean aquatus(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int roots = 1 + random.nextInt(2);
+		if (!shore(level.getBlockState(origin.below())) || !room(level, origin, roots + 1)) {
+			return false;
+		}
+		for (int dy = 0; dy < roots; dy++) {
+			level.setBlock(origin.above(dy), Eden.AQUATUS_ROOTS.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+		level.setBlock(origin.above(roots), Eden.AQUATUS.defaultBlockState(), Block.UPDATE_CLIENTS);
+		return true;
+	}
+
+	// ---------------------------------------------------------------- the brainstorm
+
+	private static boolean brainTree(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		int height = BRAIN_TRUNK + random.nextInt(BRAIN_TRUNK_SPREAD + 1);
+		int radius = BRAIN_CROWN + random.nextInt(BRAIN_CROWN_SPREAD + 1);
+		if (!soil(level, origin) || !room(level, origin, height + radius * 2)) {
+			return false;
+		}
+		BlockState log = Eden.BRAIN_LOG.defaultBlockState();
+		for (int dy = 0; dy < height; dy++) {
+			level.setBlock(origin.above(dy), log, Block.UPDATE_CLIENTS);
+		}
+		// one metal to a tree
+		Block[] metals = {Eden.BRAIN_COPPER, Eden.BRAIN_COPPER, Eden.BRAIN_IRON, Eden.BRAIN_IRON, Eden.BRAIN_GOLD};
+		BlockState flesh = metals[random.nextInt(metals.length)].defaultBlockState();
+		BlockPos middle = origin.above(height + radius - 1);
+		float high = radius * 0.85F;
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dy = -radius; dy <= radius; dy++) {
+				for (int dz = -radius; dz <= radius; dz++) {
+					float d = (dx * dx + dz * dz) / (float) (radius * radius) + (dy * dy) / (high * high);
+					// a groove down the middle, as a brain has
+					if (d <= 1.05F && !(dx == 0 && dy >= radius - 1)) {
+						put(level, middle.offset(dx, dy, dz), flesh);
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private static boolean metalGrass(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		Block[] kinds = {Eden.COPPER_GRASS, Eden.IRON_GRASS, Eden.GOLD_GRASS};
+		Block kind = kinds[random.nextInt(kinds.length)];
+		boolean placed = false;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int i = 0; i < METAL_GRASS_TRIES; i++) {
+			int x = origin.getX() + random.nextInt(METAL_GRASS_SPREAD * 2 + 1) - METAL_GRASS_SPREAD;
+			int z = origin.getZ() + random.nextInt(METAL_GRASS_SPREAD * 2 + 1) - METAL_GRASS_SPREAD;
+			pos.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), z);
+			if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(Blocks.GRASS_BLOCK)) {
+				level.setBlock(pos, kind.defaultBlockState(), Block.UPDATE_CLIENTS);
+				placed = true;
+			}
+		}
+		return placed;
 	}
 }
