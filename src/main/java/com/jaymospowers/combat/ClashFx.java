@@ -133,6 +133,8 @@ public final class ClashFx {
 	 */
 	public static void met(ServerLevel level, LivingEntity defender, ItemStack guard, @Nullable LivingEntity attacker, @Nullable Vec3 from, int sparks,
 		float scale, int chips) {
+		// the body's side of it: the guard goes to the line the blow came on (see Armed, and the client's ParryPose)
+		Armed.met(defender, guard, attacker, from, sparks >= PARRY_SPARKS);
 		Vec3 eye = defender.getEyePosition();
 		Vec3 toward = from != null ? from.subtract(eye) : attacker != null ? attacker.getEyePosition().subtract(eye) : defender.getLookAngle();
 		toward = toward.lengthSqr() > 1.0E-4 ? toward.normalize() : defender.getLookAngle();

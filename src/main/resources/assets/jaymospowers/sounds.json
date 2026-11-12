@@ -1406,6 +1406,22 @@
 			}
 		]
 	},
+	"armed.draw": {
+		"sounds": [
+			{
+				"name": "minecraft:item/armor/equip_iron1",
+				"volume": 0.8
+			},
+			{
+				"name": "minecraft:item/armor/equip_iron3",
+				"volume": 0.8
+			},
+			{
+				"name": "minecraft:item/armor/equip_iron5",
+				"volume": 0.8
+			}
+		]
+	},
 	"guard.parry": {
 		"sounds": [
 			{

@@ -24,7 +24,42 @@ public final class KingdomsCompat {
 	private static Method trainMight;
 	private static boolean trainMightLooked;
 
+	private static Method formsKnown, formsPerk;
+	private static boolean formsLooked;
+
 	private KingdomsCompat() {
+	}
+
+	/**
+	 * Whether {@code player} has Weapon Forms: a form learnt from any teacher (Kingdoms' {@code forms.Forms}), or the
+	 * Strength perk that opens every weapon's full combo ({@code WeaponForms}). Both are synced to their owner, so this
+	 * answers alike on the client (for yourself) and the server. True without Kingdoms: there is nothing to learn it from.
+	 */
+	public static boolean knowsForms(Player player) {
+		if (!LOADED || player == null) {
+			return true;
+		}
+		if (!formsLooked) {
+			formsLooked = true;
+			try {
+				formsKnown = Class.forName("com.jaymoskingdoms.forms.Forms").getMethod("known", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				formsKnown = null;
+			}
+			try {
+				formsPerk = Class.forName("com.jaymoskingdoms.WeaponForms").getMethod("knows", Player.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				formsPerk = null;
+			}
+		}
+		try {
+			if (formsKnown != null && formsKnown.invoke(null, player) instanceof java.util.Collection<?> known && !known.isEmpty()) {
+				return true;
+			}
+			return formsPerk != null && Boolean.TRUE.equals(formsPerk.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
 	}
 
 	/** Whether Kingdoms calls {@code entity} a boss (one with a boss bar: a king, a lord, a warlord, an Aether Giant, a wild dragon). */
