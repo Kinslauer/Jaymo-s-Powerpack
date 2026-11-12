@@ -184,16 +184,26 @@ public final class FangGauntletsClient {
 	/**
 	 * First person, before the game draws your bare arm for {@code hand}: with a gauntlet on it, moves the arm into the
 	 * guard and returns true. Not while a swing runs ({@code attack} above 0, or a Better Combat animation): then the
-	 * arm is left to the swing, drawn bare where the game puts it.
+	 * arm is left to the swing, drawn bare where the game puts it. A boxer's arms stay in the guard through a punch,
+	 * and the one that throws it goes out from there ({@code BoxingPoses.firstPerson}).
 	 */
 	public static boolean firstPersonGuard(PoseStack poseStack, AvatarRenderState avatar, InteractionHand hand, float attack, float inverseArmHeight) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || avatar.id != player.getId() || attack > 0.0F || CombatAnimCompat.attack(player) != null) {
+		if (player == null || avatar.id != player.getId()) {
 			return false;
 		}
 		boolean main = hand == InteractionHand.MAIN_HAND;
 		boolean right = (main ? avatar.mainArm : avatar.mainArm.getOpposite()) == HumanoidArm.RIGHT;
 		float side = right ? 1.0F : -1.0F;
+		// a boxer's punch is their own: the arm that throws it goes out from the guard (a jab from the lead hand, a
+		// cross from the rear), and the game's swing is left out
+		float[] punch = com.jaymospowers.client.boxing.BoxingPoses.firstPerson(avatar, right);
+		if (punch == null && (attack > 0.0F || CombatAnimCompat.attack(player) != null)) {
+			return false;
+		}
+		if (punch != null) {
+			poseStack.translate(-side * punch[1], punch[2], -punch[0]);
+		}
 		// the empty off hand isn't drawn by the game: it rises in with the swap of the main hand's height
 		float drop = main ? 0.0F : Mth.clamp(inverseArmHeight, 0.0F, 1.0F) * FIRST_ENTRY_DROP;
 		poseStack.translate(-side * FIRST_IN, FIRST_UP - drop, -FIRST_FORWARD);

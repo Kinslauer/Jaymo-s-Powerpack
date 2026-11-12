@@ -81,14 +81,31 @@ public final class BoxingPoses {
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
 	static final float BASTION_BLOCK_LEAD_PITCH = -0.55F, BASTION_BLOCK_UP = 1.6F, BASTION_BLOCK_ACROSS = 1.45F, BASTION_BLOCK_REAR_PITCH = -1.2F, BASTION_BLOCK_REAR_IN = 0.7F, BASTION_BLOCK_REAR_FOLD = -2.2F;
-	/** A straight punch at full reach (the elbow straightens as it goes out). */
-	static final float STRAIGHT_PITCH = -1.57F;
-	/** A hook: the upper arm level, swept from out to in, the forearm folded across at the elbow. */
-	static final float HOOK_PITCH = -1.45F, HOOK_FROM = -0.7F, HOOK_TO = 0.5F, HOOK_ACROSS = 1.3F;
-	/** An uppercut: the upper arm from by the hip up to ahead, the forearm up, the fist rising under the chin. */
-	static final float UPPERCUT_FROM = 0.15F, UPPERCUT_TO = -1.2F, UPPERCUT_IN = 0.3F, UPPERCUT_FOLD = -1.7F;
-	/** The body's turn into a rear-hand punch (radians). */
-	static final float PUNCH_TURN = 0.3F;
+	/**
+	 * A punch lasts this long (ticks), whatever the game's own arm swing does; a straight one is at full reach this
+	 * far through (it snaps out and comes home slower).
+	 */
+	static final float PUNCH_TICKS = 6.0F, SNAP = 0.4F;
+	/** A jab: the lead arm straight out at chin height, its shoulder up to the chin (pixels) and turned in behind it (radians). The rear glove stays home. */
+	static final float JAB_PITCH = -1.62F, JAB_SHOULDER = 0.8F, JAB_TURN = 0.3F;
+	/**
+	 * A cross (and the straights that are thrown like it): the rear arm straight out, the rear shoulder and hip turned
+	 * right through, the body leaning into it, the rear knee turned in on the ball of the foot, and the lead glove
+	 * brought home to the cheek (its upper arm's pitch and turn in, and its fold).
+	 */
+	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.1F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.3F, HOME_IN = 0.45F, HOME_FOLD = -1.85F;
+	/**
+	 * A hook: the upper arm level, the forearm folded across at the elbow, swept from out to in while the body turns
+	 * with it. Light in a string (the Arrow Slit's flurry); the full hook is the one a slip to the side sets up.
+	 */
+	static final float HOOK_PITCH = -1.45F, HOOK_ACROSS = 1.3F, HOOK_FROM = -0.7F, HOOK_TO = 0.6F, HOOK_TURN = 0.6F;
+	static final float LIGHT_HOOK_FROM = -0.3F, LIGHT_HOOK_TO = 0.4F, LIGHT_HOOK_TURN = 0.3F;
+	/** A hook is the full one for this long after a slip (ticks). */
+	static final float HEAVY_HOOK_TICKS = 30.0F;
+	/** An uppercut: the upper arm from by the hip up to ahead, the forearm up, the fist rising under the chin; the body's turn into it. */
+	static final float UPPERCUT_FROM = 0.15F, UPPERCUT_TO = -1.2F, UPPERCUT_IN = 0.3F, UPPERCUT_FOLD = -1.7F, PUNCH_TURN = 0.3F;
+	/** First person: how far a punching arm goes forward, in toward the middle and up (blocks), for a straight punch, a hook and an uppercut. */
+	static final float[] FIRST_STRAIGHT = {0.5F, 0.12F, 0.04F}, FIRST_HOOK = {0.22F, 0.32F, 0.05F}, FIRST_UPPERCUT = {0.2F, 0.1F, 0.3F};
 	/** An evade's pose lasts this long (ticks): a slip's lean to the side, a bob's duck, a pull's lean back, a shoulder roll's turn and lift. */
 	static final float MOVE_TICKS = 8.0F, SLIP_LEAN = 0.3F, BOB_DUCK = 0.5F, PULL_LEAN = -0.3F, ROLL_TURN = 0.6F, ROLL_UP = 1.0F;
 	/** A shoulder roll's sway back and its tip of the head away from the blow (radians). */
@@ -101,9 +118,20 @@ public final class BoxingPoses {
 	static final float GASSED_PITCH = -0.3F, GASSED_IN = 0.15F, GASSED_FOLD = -0.5F, HEAVE = 0.6F, HEAVE_RATE = 0.3F, SLUMP = 0.18F;
 	// ================================================================================================================
 
-	/** A boxer, as their render state carries them. {@code moveAge}: ticks since the evade began. */
-	public record Look(Boxing.Style style, int spent, Boxing.@Nullable Punch punch, BoxingEvades.@Nullable Move move, float moveAge, boolean blocking) {
+	/**
+	 * A boxer, as their render state carries them. {@code punch}: the punch being thrown right now, or null;
+	 * {@code punchAt}: how far through it is (0 to 1); {@code heavy}: a hook thrown out of a slip, the full one.
+	 * {@code moveAge}: ticks since the evade began.
+	 */
+	public record Look(Boxing.Style style, int spent, Boxing.@Nullable Punch punch, float punchAt, boolean heavy, BoxingEvades.@Nullable Move move,
+		float moveAge, boolean blocking) {
 	}
+
+	/** The last punch each player was told to have thrown ({@link Boxing#LOOK}, less its tiredness bits), and when its pose began (game ticks). */
+	private record Thrown(int look, float at) {
+	}
+
+	private static final java.util.Map<Integer, Thrown> THROWN = new java.util.HashMap<>();
 
 	public static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymospowers:boxing_look");
 
@@ -156,15 +184,41 @@ public final class BoxingPoses {
 		}
 		BoxingEvades.Move move = null;
 		float age = 0.0F;
+		boolean slipped = false;
 		Long moved = player.getAttached(BoxingEvades.MOVED);
 		if (moved != null) {
 			int index = (int)(moved & 7);
 			age = player.level().getGameTime() - (moved >> 3) + partialTicks;
-			if (index >= 1 && index <= BoxingEvades.Move.values().length && age >= 0.0F && age < MOVE_TICKS) {
-				move = BoxingEvades.Move.values()[index - 1];
+			if (index >= 1 && index <= BoxingEvades.Move.values().length && age >= 0.0F) {
+				BoxingEvades.Move made = BoxingEvades.Move.values()[index - 1];
+				slipped = age < HEAVY_HOOK_TICKS && (made == BoxingEvades.Move.SLIP_LEFT || made == BoxingEvades.Move.SLIP_RIGHT);
+				if (age < MOVE_TICKS) {
+					move = made;
+				}
 			}
 		}
-		state.setData(KEY, new Look(style, Boxing.spent(player), Boxing.shownPunch(player), move, age, player.isBlocking()));
+		// The punch's pose runs on its own clock, from when the server says a punch was thrown (so a queued punch, thrown
+		// a moment after the click, shows too). If the arm is already swinging from the click, the pose carries on from
+		// where that swing is. A click that hit nothing has no punch told: it shows as a jab, on the swing's own clock.
+		Integer told = player.getAttached(Boxing.LOOK);
+		int seen = told == null ? 0 : told >> 2;
+		float now = player.level().getGameTime() + partialTicks;
+		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
+		if (THROWN.size() > 512) {
+			THROWN.clear();
+		}
+		Thrown thrown = THROWN.get(player.getId());
+		if (thrown == null || thrown.look() != seen) {
+			thrown = new Thrown(seen, thrown == null ? now - PUNCH_TICKS : now - (swinging ? state.swingAnimation * PUNCH_TICKS : 0.0F));
+			THROWN.put(player.getId(), thrown);
+		}
+		Boxing.Punch punch = Boxing.shownPunch(player);
+		float punchAt = (now - thrown.at()) / PUNCH_TICKS;
+		if (punch == null || punchAt < 0.0F || punchAt >= 1.0F) {
+			punch = swinging ? Boxing.Punch.JAB : null;
+			punchAt = swinging ? Mth.clamp(state.swingAnimation, 0.0F, 1.0F) : 0.0F;
+		}
+		state.setData(KEY, new Look(style, Boxing.spent(player), punch, punchAt, slipped, move, age, player.isBlocking()));
 	}
 
 	/**
@@ -184,7 +238,15 @@ public final class BoxingPoses {
 		boolean leadRight = look.style() == Boxing.Style.BASTION;
 		ModelPart lead = leadRight ? model.rightArm : model.leftArm, rear = leadRight ? model.leftArm : model.rightArm;
 		float time = state.ageInTicks;
-		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
+		boolean swinging = look.punch() != null;
+		if (state.currentSwing != null && state.swingAnimation > 0.0F) {
+			// the game's own arm swing has turned the body and carried the shoulders round: a boxer's punch is posed whole here
+			model.body.yRot = 0.0F;
+			model.rightArm.x = -SHOULDER_OUT;
+			model.leftArm.x = SHOULDER_OUT;
+			model.rightArm.z = 0.0F;
+			model.leftArm.z = 0.0F;
+		}
 		// how far the lead shoulder is turned forward (radians), added up from the stance, the punch and the evade
 		float turn = 0.0F;
 		Elbow leadElbow = new Elbow(), rearElbow = new Elbow();
@@ -238,8 +300,7 @@ public final class BoxingPoses {
 			turn += stance(model, look.style(), lead, rear, leadElbow, rearElbow, leadRight, time);
 		}
 		if (swinging && !look.blocking()) {
-			turn += punch(look.punch() == null ? Boxing.Punch.JAB : look.punch(), lead, rear, leadElbow, rearElbow, leadRight,
-				Mth.clamp(state.swingAnimation, 0.0F, 1.0F));
+			turn += punch(model, look, lead, rear, leadElbow, rearElbow, leadRight);
 		}
 		if (look.move() != null) {
 			// out and back over the evade's few ticks
@@ -342,37 +403,85 @@ public final class BoxingPoses {
 	}
 
 	/**
-	 * {@code swing}: 0 as the punch starts, 1 as it ends. The arm that throws it goes out and comes home, its elbow
-	 * straightening for a straight punch and folding for a hook or an uppercut; the other keeps its place. Returns how
-	 * far the punch turns the lead shoulder forward (negative: the rear one comes through).
+	 * The punch {@code look} is throwing. The arm that throws it goes out and comes home; the body, the other glove
+	 * and the rear leg do their part. Returns how far the punch turns the lead shoulder forward (negative: the rear
+	 * one comes through).
+	 * <ul>
+	 * <li>A <b>jab</b>: the lead arm snaps straight out at chin height, its shoulder up and turned in behind it; the
+	 * rear glove doesn't leave the cheek.</li>
+	 * <li>A <b>cross</b> (and a straight or pull counter): the rear arm straight out as the rear shoulder and hip
+	 * turn right through, the rear knee turning in, the body leaning into it; the lead glove comes home to the cheek.</li>
+	 * <li>A <b>hook</b>: the upper arm level, the forearm folded across, swept in as the body turns with it; lighter
+	 * in a string than out of a slip.</li>
+	 * <li>An <b>uppercut</b>: the fist rising under the chin with the forearm up.</li>
+	 * </ul>
 	 */
-	private static float punch(Boxing.Punch punch, ModelPart lead, ModelPart rear, Elbow leadElbow, Elbow rearElbow, boolean leadRight, float swing) {
-		float out = Mth.sin(swing * Mth.PI);
-		switch (punch) {
+	private static float punch(HumanoidModel<?> model, Look look, ModelPart lead, ModelPart rear, Elbow leadElbow, Elbow rearElbow, boolean leadRight) {
+		float at = look.punchAt();
+		// out fast, home slower
+		float out = at < SNAP ? Mth.sin(at / SNAP * Mth.HALF_PI) : Mth.cos((at - SNAP) / (1.0F - SNAP) * Mth.HALF_PI);
+		float swept = Mth.sin(at * Mth.PI);
+		switch (look.punch()) {
 			case JAB -> {
-				reach(lead, leadRight, STRAIGHT_PITCH, 0.0F, out);
+				reach(lead, leadRight, JAB_PITCH, 0.0F, out);
 				leadElbow.fold *= 1.0F - out;
+				lead.y -= JAB_SHOULDER * out;
+				return JAB_TURN * out;
 			}
 			case CROSS, STRAIGHT, PULL_COUNTER -> {
 				reach(rear, !leadRight, STRAIGHT_PITCH, 0.0F, out);
 				rearElbow.fold *= 1.0F - out;
-				// the rear shoulder comes through
-				return -PUNCH_TURN * out;
+				if (!leadElbow.across) {
+					// the lead glove comes home to the cheek (the Bastion's stays low, where it lives)
+					reach(lead, leadRight, HOME_PITCH, HOME_IN, out);
+					leadElbow.fold = Mth.lerp(out, leadElbow.fold, HOME_FOLD);
+				}
+				bend(model, CROSS_LEAN * out);
+				// the rear knee turns in as the hip comes through
+				(leadRight ? model.leftLeg : model.rightLeg).yRot += (leadRight ? CROSS_KNEE : -CROSS_KNEE) * out;
+				return -CROSS_TURN * out;
 			}
-			case LEAD_HOOK -> {
-				set(lead, leadRight, HOOK_PITCH, Mth.lerp(swing, HOOK_FROM, HOOK_TO));
-				leadElbow.across(HOOK_ACROSS);
-			}
-			case REAR_HOOK -> {
-				set(rear, !leadRight, HOOK_PITCH, Mth.lerp(swing, HOOK_FROM, HOOK_TO));
-				rearElbow.across(HOOK_ACROSS);
+			case LEAD_HOOK, REAR_HOOK -> {
+				boolean leading = look.punch() == Boxing.Punch.LEAD_HOOK;
+				float from = look.heavy() ? HOOK_FROM : LIGHT_HOOK_FROM, to = look.heavy() ? HOOK_TO : LIGHT_HOOK_TO;
+				set(leading ? lead : rear, leading == leadRight, HOOK_PITCH, Mth.lerp(at, from, to));
+				(leading ? leadElbow : rearElbow).across(HOOK_ACROSS);
+				float turned = (look.heavy() ? HOOK_TURN : LIGHT_HOOK_TURN) * swept;
+				return leading ? turned : -turned;
 			}
 			case UPPERCUT -> {
-				set(rear, !leadRight, Mth.lerp(swing, UPPERCUT_FROM, UPPERCUT_TO), UPPERCUT_IN);
+				set(rear, !leadRight, Mth.lerp(at, UPPERCUT_FROM, UPPERCUT_TO), UPPERCUT_IN);
 				rearElbow.forward(UPPERCUT_FOLD);
+				return -PUNCH_TURN * swept;
 			}
 		}
 		return 0.0F;
+	}
+
+	/**
+	 * First person: where a boxer's own {@code right} or left arm is in its punch, as how far it has gone forward, in
+	 * toward the middle of the view and up (blocks); all zero for an arm that isn't punching. Null if this isn't a boxer.
+	 */
+	public static float @Nullable [] firstPerson(AvatarRenderState state, boolean right) {
+		Look look = state.getData(KEY);
+		if (look == null) {
+			return null;
+		}
+		Boxing.Punch punch = look.punch();
+		boolean leadRight = look.style() == Boxing.Style.BASTION;
+		boolean leading = punch == Boxing.Punch.JAB || punch == Boxing.Punch.LEAD_HOOK;
+		if (punch == null || look.blocking() || leading != (right == leadRight)) {
+			return new float[3];
+		}
+		float at = look.punchAt();
+		float out = at < SNAP ? Mth.sin(at / SNAP * Mth.HALF_PI) : Mth.cos((at - SNAP) / (1.0F - SNAP) * Mth.HALF_PI);
+		float[] reach = switch (punch) {
+			case LEAD_HOOK, REAR_HOOK -> FIRST_HOOK;
+			case UPPERCUT -> FIRST_UPPERCUT;
+			default -> FIRST_STRAIGHT;
+		};
+		float light = (punch == Boxing.Punch.LEAD_HOOK || punch == Boxing.Punch.REAR_HOOK) && !look.heavy() ? 0.7F : 1.0F;
+		return new float[] {reach[0] * out * light, reach[1] * out * light, reach[2] * out * light};
 	}
 
 	/** Puts {@code arm} at {@code pitch}, turned {@code in} across the body. */

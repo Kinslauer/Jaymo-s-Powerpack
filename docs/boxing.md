@@ -140,8 +140,16 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   The stance gives the style away, on purpose.
 - **Blocks:** Arrow Slit pulls the gloves in tighter and crouches lower; Long Guard puts both arms out ahead with
   the hands together, to smother; Bastion turns further side on and lifts the lead shoulder higher.
-- **Punches:** the throwing arm goes out by the punch; the other stays home. A jab, cross or straight straightens the
-  elbow as it goes out; a hook keeps the forearm folded across and sweeps in; an uppercut rises with the forearm up.
+- **Punches** are posed whole, in place of the game's arm swing (shapes after a jab and cross lesson Jung sent). The
+  pose runs on its own clock (`PUNCH_TICKS`) from when the server tells of a punch (`Boxing.LOOK`), so a queued punch
+  shows when it is thrown; a click that hits nothing shows a jab.
+  - Jab: the lead arm snaps straight out at chin height, its shoulder up and turned in behind it; the rear glove stays.
+  - Cross, straight, pull counter: the rear arm straight out, the rear shoulder and hip turned through, the rear knee
+    turned in, a lean into it; the lead glove comes home to the cheek (the Bastion's stays low).
+  - Hook: upper arm level, forearm folded across, swept in with the body. Light in the Arrow Slit's flurry; the full
+    one within `HEAVY_HOOK_TICKS` of a slip to the side.
+  - Uppercut: the fist rises under the chin with the forearm up.
+  - First person: the arms stay in the guard and the punching arm goes out from it (`BoxingPoses.firstPerson`).
 - **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull; a shoulder roll turns the lead shoulder in,
   sways the weight back and tips the head away. The legs stay under the hips in a crouch, duck or lean.
 - **Tiring and gassed:** a faint puff of breath every 2.5 s when tiring (four icons or fewer), a clear one every second

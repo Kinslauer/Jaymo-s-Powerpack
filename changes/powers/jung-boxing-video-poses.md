@@ -28,3 +28,13 @@
   bracers cover the hand like a glove, from the wrist to its end, so they turn with a bent forearm.
 - The Arrow Slit's back is slightly rounded (the spine bends halfway down, the same way the limbs do), and its head
   stays up rather than tucked.
+- **Punches are a boxer's own, not the game's arm swing**, after a jab and cross lesson Jung sent ("The Punches: Jab
+  Cross (1 & 2)"). A jab snaps the lead arm straight out at chin height with its shoulder up and turned in behind
+  it, the rear glove staying on the cheek. A cross sends the rear arm straight out as the rear shoulder and hip turn
+  through and the rear knee turns in, the lead glove coming home to the cheek. Both go out fast and come home slower.
+- The Arrow Slit's flurry hooks are light ones (a short sweep, a small turn); the full hook is the one a slip to the
+  side sets up.
+- The punch's pose now starts when the server says a punch was thrown, so a punch queued by an early click shows
+  when it lands (it showed nothing before). A click that hits nothing shows a jab.
+- First person: a boxer's arms stay in the guard and the punching arm goes out from it (the lead hand for a jab or
+  lead hook, the rear for the rest); before, the game's own swing took over.
