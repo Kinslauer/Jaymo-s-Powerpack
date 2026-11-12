@@ -69,13 +69,18 @@ public final class FangGauntletsClient {
 	static final float FIRST_IN = 0.16F, FIRST_UP = 0.1F, FIRST_FORWARD = 0.05F, FIRST_RAISE = 12.0F, FIRST_TURN = 10.0F, FIRST_TIP = 4.0F;
 	/** First person: the shoulder the arm turns about (right arm; x right, y up, z toward you), and how far below the view the empty off hand starts. */
 	static final float FIRST_SHOULDER_X = 0.75F, FIRST_SHOULDER_Y = -0.85F, FIRST_ENTRY_DROP = 0.6F;
-	/** Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it. */
-	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.3F;
+	/**
+	 * Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it: clear of a
+	 * skin's sleeve layer (a quarter pixel proud itself), which it sank into, so it showed in patches.
+	 */
+	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.55F;
+	/** Boxing's gear is shaped for a 4 pixel arm: on a slim one (3 pixels) it is this much narrower across, to sit as close. */
+	static final float SLIM_GEAR = 0.8F;
 	/** A cestus's band over the knuckles: from this far down, and this far proud. */
-	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.55F;
-	/** Bracers: the guard up the forearm, from this far down, this long, and this far proud. */
-	static final float BRACER_TOP = 3.0F, BRACER_GROW = 0.45F;
-	static final int BRACER_LENGTH = 6;
+	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.8F;
+	/** Bracers: worn as a glove, from the wrist (this far down the arm) over the rest of the hand to its end, and this far proud. */
+	static final float BRACER_TOP = 7.0F, BRACER_GROW = 0.6F;
+	static final int BRACER_LENGTH = 3;
 	// ================================================================================================================
 
 	/** Bits on a render state: the right arm wears a gauntlet, the left does, and (4) they're in the guard (no attack swinging). */
@@ -179,16 +184,26 @@ public final class FangGauntletsClient {
 	/**
 	 * First person, before the game draws your bare arm for {@code hand}: with a gauntlet on it, moves the arm into the
 	 * guard and returns true. Not while a swing runs ({@code attack} above 0, or a Better Combat animation): then the
-	 * arm is left to the swing, drawn bare where the game puts it.
+	 * arm is left to the swing, drawn bare where the game puts it. A boxer's arms stay in the guard through a punch,
+	 * and the one that throws it goes out from there ({@code BoxingPoses.firstPerson}).
 	 */
 	public static boolean firstPersonGuard(PoseStack poseStack, AvatarRenderState avatar, InteractionHand hand, float attack, float inverseArmHeight) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || avatar.id != player.getId() || attack > 0.0F || CombatAnimCompat.attack(player) != null) {
+		if (player == null || avatar.id != player.getId()) {
 			return false;
 		}
 		boolean main = hand == InteractionHand.MAIN_HAND;
 		boolean right = (main ? avatar.mainArm : avatar.mainArm.getOpposite()) == HumanoidArm.RIGHT;
 		float side = right ? 1.0F : -1.0F;
+		// a boxer's punch is their own: the arm that throws it goes out from the guard (a jab from the lead hand, a
+		// cross from the rear), and the game's swing is left out
+		float[] punch = com.jaymospowers.client.boxing.BoxingPoses.firstPerson(avatar, right);
+		if (punch == null && (attack > 0.0F || CombatAnimCompat.attack(player) != null)) {
+			return false;
+		}
+		if (punch != null) {
+			poseStack.translate(-side * punch[1], punch[2], -punch[0]);
+		}
 		// the empty off hand isn't drawn by the game: it rises in with the swap of the main hand's height
 		float drop = main ? 0.0F : Mth.clamp(inverseArmHeight, 0.0F, 1.0F) * FIRST_ENTRY_DROP;
 		poseStack.translate(-side * FIRST_IN, FIRST_UP - drop, -FIRST_FORWARD);
@@ -261,15 +276,26 @@ public final class FangGauntletsClient {
 	}
 
 	/** One gauntlet (or, {@code kind} above 0, one of boxing's), on the arm the pose stack is at (its pivot). */
-	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind) {
+	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind, float fold,
+		boolean across) {
 		build();
 		buildBoxing();
 		poseStack.pushPose();
 		float middle = slim ? SLIM_ARM_MIDDLE : WIDE_ARM_MIDDLE;
 		poseStack.translate((right ? -middle : middle) / 16.0F, 0.0F, 0.0F);
+		if (fold != 0.0F) {
+			// a boxer's elbow is bent (boxing/BoxingPoses): the gear turns with the forearm, about the elbow
+			float elbow = com.jaymospowers.client.boxing.BoxingPoses.ELBOW / 16.0F;
+			poseStack.translate(0.0F, elbow, 0.0F);
+			poseStack.rotateDegrees(across ? Axis.ZP : Axis.XP, fold * Mth.RAD_TO_DEG);
+			poseStack.translate(0.0F, -elbow, 0.0F);
+		}
 		if (kind <= 0 || kind > BOXING_TEXTURES.length) {
 			collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
 		} else {
+			if (slim) {
+				poseStack.scale(SLIM_GEAR, 1.0F, 1.0F);
+			}
 			String shape = BoxingGear.WORN[kind - 1];
 			ModelPart part = shape.endsWith("bracers") ? bracer : shape.endsWith("cestus") ? cestus : wrap;
 			collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(BOXING_TEXTURES[kind - 1]), light, OverlayTexture.NO_OVERLAY, null);
@@ -290,7 +316,7 @@ public final class FangGauntletsClient {
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
-		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()));
+		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()), 0.0F, false);
 		poseStack.popPose();
 	}
 
@@ -317,7 +343,10 @@ public final class FangGauntletsClient {
 				poseStack.pushPose();
 				body.root().translateAndRotate(poseStack);
 				arm.translateAndRotate(poseStack);
-				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT);
+				com.jaymospowers.client.boxing.BoxingPoses.Bends bends = state.getData(com.jaymospowers.client.boxing.BoxingPoses.BENDS);
+				float fold = bends == null ? 0.0F : right ? bends.right() : bends.left();
+				boolean across = bends != null && (right ? bends.rightAcross() : bends.leftAcross());
+				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT, fold, across);
 				poseStack.popPose();
 			}
 		}

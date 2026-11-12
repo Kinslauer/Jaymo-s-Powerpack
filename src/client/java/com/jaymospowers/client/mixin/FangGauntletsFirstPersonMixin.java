@@ -36,9 +36,10 @@ abstract class FangGauntletsFirstPersonMixin {
 			return;
 		}
 		poseStack.pushPose();
-		FangGauntletsClient.firstPersonGuard(poseStack, avatar, hand, attack, inverseArmHeight);
+		// in the guard (or a boxer's own punch out of it), the game's swing is left out
+		boolean guarded = FangGauntletsClient.firstPersonGuard(poseStack, avatar, hand, attack, inverseArmHeight);
 		HumanoidArm arm = hand == InteractionHand.MAIN_HAND ? avatar.mainArm : avatar.mainArm.getOpposite();
-		this.renderPlayerArm(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, attack, arm, playerState);
+		this.renderPlayerArm(poseStack, submitNodeCollector, lightCoords, inverseArmHeight, guarded ? 0.0F : attack, arm, playerState);
 		poseStack.popPose();
 		ci.cancel();
 	}
