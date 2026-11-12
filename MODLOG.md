@@ -3280,3 +3280,10 @@ Nothing here has been played in a client yet; expect tuning.
 - **Rain of Arrows** (Archers) spends one of your arrows (pack or worn quiver) for each arrow that falls, as many as you carry up to its usual count, and won't cast with none. **Barrage** won't cast unless you carry its three arrows (Spell Engine made up any it ran short of).
 - **Throw Net** (Rogue) throws one of your new **Throwing Nets** (5 string, crafted in an X) and won't cast without one. Andy: "make a net item crafted from string".
 - Creative casts take nothing, as before. Built; not played.
+
+## 0.22.68 (2026-11-12): blood on doors swings with the door
+
+- Andy: "the blood decals that splashed on the door in the second clip did not travel with the door as it opened, so they floated in midair".
+- **Doors**: a blood splat or run on a door now swings with it when it opens or closes, turning about the hinge to wherever the door now stands (the side that faced out ends up facing into the doorway, as on a real door). Each wall mark remembers the block it lies on (`BloodWallMark.follow`, `swing`).
+- **Nothing left to lie on**: a wall mark whose wall is gone goes with it instead of hanging in the air: the block broken or replaced, a fence gate opened, a trapdoor flipped. Puddles on the ground already settled onto whatever was under them.
+- Built; not played.
