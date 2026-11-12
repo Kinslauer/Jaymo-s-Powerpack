@@ -27,6 +27,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>Melee blows and projectiles from the front {@link #FRONT_DEGREES}° lose {@link #BLOCK_SHARE} of their damage, paid
  * in ki ({@link #KI_PER_DAMAGE} a point blocked); with no ki left the blow goes through whole. Never falls, fire,
  * explosions or anything from behind.</li>
+ * <li>(Bracers, {@link ZFighterBracers}) The guard soaks what it takes into a bar that pays out as a damage boost when it drops;
+ * left click while guarding clashes the bracers (knockback); an arrow that hits the guard is sent back.</li>
  * <li>A blow in the first {@link #PARRY_TICKS} of raising the guard is parried: nothing taken, +{@link #PARRY_KI} ki, the
  * attacker is knocked back reeling (slowed and weakened), and his next punch within {@link #COUNTER_TICKS} is a
  * counter ({@link #COUNTER_BONUS} harder). Then {@link #PARRY_COOLDOWN} before another parry.</li>
@@ -73,6 +75,8 @@ public final class ZFighterGuard {
 		} else {
 			player.removeAttached(GUARD);
 			Guard.hidePower(player);
+			// what the guard soaked pays out as a boost
+			ZFighterBracers.released(player);
 		}
 		ZFighterPower.refresh(player, live);
 	}
@@ -82,6 +86,7 @@ public final class ZFighterGuard {
 		live.guarding = false;
 		player.removeAttached(GUARD);
 		Guard.hidePower(player);
+		ZFighterBracers.dropped(player);
 	}
 
 	/** What's left of {@code damage} after his guard (the victim side of the damage hook). */
@@ -101,10 +106,20 @@ public final class ZFighterGuard {
 		if (now - live.guardStart <= PARRY_TICKS && now >= live.parryReadyAt) {
 			parry(player, live, melee ? (LivingEntity)direct : null);
 			if (direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
-				// with the ki weapon out, the arrow is struck back at whoever loosed it
-				ZFighterKiWeapon.deflect(player, arrow);
+				// the arrow is struck back at whoever loosed it (with the ki weapon out, by the weapon)
+				if (ZFighterKiWeapon.out(player) >= 0) {
+					ZFighterKiWeapon.deflect(player, arrow);
+				} else {
+					ZFighterBracers.sendBack(player, arrow);
+				}
 			}
+			ZFighterBracers.soak(player, damage);
 			ZFighterGrowth.guarded(player, true);
+			return 0.0F;
+		}
+		if (direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow && ZFighterBracers.turnBack(player, live, arrow, damage)) {
+			// a raised guard turns an arrow back (a few ki)
+			ZFighterGrowth.guarded(player, false);
 			return 0.0F;
 		}
 		float blocked = damage * BLOCK_SHARE;
@@ -120,6 +135,7 @@ public final class ZFighterGuard {
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6));
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y - 0.4, at.z, 6, 0.2, 0.2, 0.2, 0.05);
 		ZFighterGrowth.guarded(player, false);
+		ZFighterBracers.soak(player, blocked);
 		return damage - blocked;
 	}
 

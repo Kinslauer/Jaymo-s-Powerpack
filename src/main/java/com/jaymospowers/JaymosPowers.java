@@ -90,6 +90,7 @@ public class JaymosPowers implements ModInitializer {
 		// (0.20.89) blunt and large arrow heads
 		com.jaymospowers.tinkering.ranged.ArrowHeads.init();
 		com.jaymospowers.core.BeamClash.init();
+		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
@@ -112,6 +113,10 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.blindness.Blind.init();
 		// (0.14.0) Cryokinesis, the ice power
 		com.jaymospowers.power.cryo.CryoPower.init();
+		// fire users: the fight gauge, soak and return, the fire kit's gaps
+		com.jaymospowers.power.ember.RunningHot.init();
+		com.jaymospowers.power.ember.EmberSoak.init();
+		com.jaymospowers.power.ember.FireKit.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
@@ -222,9 +227,11 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
 			"power.xenoform.forms.BulwarkFury",
 			"power.xenoform.forms.FuseStore",
+			"power.ember.RunningHot", "power.ember.EmberSoak",
 			"power.xenoform.XenoMinds",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
+			"power.zfighter.ZFighterAerialCharge",
 			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.zfighter.ZFighterAura", "power.zfighter.ZFighterSlots", "power.zfighter.ZFighterKiWeapon","power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
