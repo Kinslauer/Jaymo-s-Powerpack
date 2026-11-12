@@ -8,10 +8,15 @@
   "technique.jaymospowers.zfighter.skyward_chase": "Skyward Chase",
   "technique.jaymospowers.zfighter.skyward_chase.desc": "G. Kick the foe high into the air, flash up after it and hammer it back down into the ground. Costs 40 ki, 16 second cooldown.",
   "technique.jaymospowers.zfighter.ki_weapon": "Ki Weapon",
-  "technique.jaymospowers.zfighter.ki_weapon.desc": "G toggles a weapon of ki in your right hand: a blade, a scythe or a clawed lance. While it is out ki drains every second, and your bare-handed blows hit harder (more with Ki Power) and reach further (blade 1, scythe 1.5, lance 2 blocks). They still count as fists. Click the button on this row to change its shape.",
+  "technique.jaymospowers.zfighter.ki_weapon.desc": "G toggles a weapon of ki in your right hand: a blade, a scythe or a clawed lance. While it is out ki drains every second, and your bare-handed blows hit harder (more with Ki Power) and reach further (blade 1, scythe 1.5, lance 2 blocks). They still count as fists. You stand as if armed, and a parry made with it out strikes an arrow back at whoever loosed it. Click the button on this row to change its shape.",
   "technique.jaymospowers.zfighter.ki_weapon.blade": "Blade",
   "technique.jaymospowers.zfighter.ki_weapon.scythe": "Scythe",
   "technique.jaymospowers.zfighter.ki_weapon.lance": "Lance",
   "message.jaymospowers.zfighter_rush_nofoe": "No foe in sight.",
-  "message.jaymospowers.zfighter_ki_weapon_out": "Ki %s drawn."
+  "message.jaymospowers.zfighter_ki_weapon_out": "Ki %s drawn.",
+  "subtitles.jaymospowers.ki_blade.ignite": "Ki blade flares out",
+  "subtitles.jaymospowers.ki_blade.retract": "Ki blade drawn in",
+  "subtitles.jaymospowers.ki_blade.hum": "Ki blade hums",
+  "subtitles.jaymospowers.ki_blade.swing": "Ki blade cuts",
+  "subtitles.jaymospowers.ki_blade.deflect": "Ki blade strikes a shot aside"
 }

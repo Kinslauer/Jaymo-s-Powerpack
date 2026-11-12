@@ -5,6 +5,7 @@
 	"client": [
 		"GravityLivingEntityRendererMixin",
 		"GravityModelFeatureRendererMixin",
+		"GravityReelScrollMixin",
 		"GravityStunInputMixin"
 	],
 	"injectors": {

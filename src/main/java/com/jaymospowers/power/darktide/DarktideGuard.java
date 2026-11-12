@@ -45,6 +45,8 @@ import org.jspecify.annotations.Nullable;
  * shield block); the bounce in {@code DarktideDeflectMixin} (Entity.deflection).
  */
 public final class DarktideGuard {
+	/** The sparks off a blade as the guard swats a shot aside. */
+	static final int SWAT_SPARKS = 5;
 	public static final double FRONT_DEGREES = 150.0;
 	static final float BLOCK_SHARE = 0.75F;
 	static final float STARTER_BLOCK_SHARE = 0.5F;
@@ -187,6 +189,11 @@ public final class DarktideGuard {
 		if (!inFront(player, source.getSourcePosition())) {
 			return -1.0F;
 		}
+		// Andy: "darktide can block unparryable projectiles. it animates him swinging away at it whenever they impact the
+		// guard": every shot the guard meets, a ball or a tagged one too, is seen swatted aside
+		if (projectile) {
+			swat(player, source.getSourcePosition());
+		}
 		// a blade turns arrows back at their shooter (those that came through the damage path, like WeaponMod's bullets)
 		if (projectile && direct instanceof Projectile shot && blade(player) && reflectable(player, shot)) {
 			if (parryWindow(player, live)) {
@@ -317,6 +324,14 @@ public final class DarktideGuard {
 
 	// ---- reflect (DarktideDeflectMixin) -------------------------------------------------------------------------------
 
+	/** The guard swings at a shot as it arrives from {@code from}: the arm's swing for everyone to see, and sparks where they met (a blade's). */
+	private static void swat(ServerPlayer player, @Nullable Vec3 from) {
+		com.jaymospowers.combat.Swat.swing(player);
+		if (blade(player) && from != null) {
+			com.jaymospowers.combat.ClashFx.met(player.level(), player, player.getMainHandItem(), null, from, SWAT_SPARKS, 0.8F, 0);
+		}
+	}
+
 	private static boolean blade(ServerPlayer player) {
 		DarktideWeapons.Kit kit = DarktideWeapons.kit(player);
 		return kit == DarktideWeapons.Kit.KATANA || kit == DarktideWeapons.Kit.KNIFE;
@@ -350,6 +365,7 @@ public final class DarktideGuard {
 		} else if (!payOrBreak(player, live, REFLECT_FLOW, REFLECT_FLOW)) {
 			return null;
 		}
+		swat(player, projectile.position());
 		Vec3 velocity = reflectVelocity(player, projectile);
 		PENDING.add(new Pending(projectile, player, velocity));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 1.6F);

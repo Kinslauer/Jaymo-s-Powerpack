@@ -81,6 +81,10 @@ public final class ModelPoses {
 		com.jaymospowers.client.power.smoke.SmokeMovePose.applyModel(model, state);
 		com.jaymospowers.client.power.cryo.CryoPose.applyModel(model, state);
 		com.jaymospowers.client.rig.RigPose.applyModel(model, state);
+		// only when none of the above has the body: a weapon's guard on its line, else the armed stance
+		com.jaymospowers.client.combat.ParryPose.applyModel(model, state);
+		com.jaymospowers.client.combat.ArmedPose.applyModel(model, state);
+		com.jaymospowers.client.combat.AttentionPose.applyModel(model, state);
 		// last, and only when none of the above has the arms: the Fang Gauntlets' guard
 		com.jaymospowers.client.armory.FangGauntletsClient.applyModel(model, state);
 	}
