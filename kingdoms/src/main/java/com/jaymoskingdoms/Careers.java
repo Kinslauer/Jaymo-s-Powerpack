@@ -1178,7 +1178,7 @@ public final class Careers {
 		return amount;
 	}
 
-	private static boolean beast(LivingEntity e) {
+	static boolean beast(LivingEntity e) {
 		return (e instanceof Animal || e instanceof Enemy) && !(e instanceof Player) && !(e instanceof Villager) && !(e instanceof Folk)
 			&& !(e instanceof net.minecraft.world.entity.monster.illager.AbstractIllager);
 	}
@@ -1199,7 +1199,7 @@ public final class Careers {
 	}
 
 	/** The meat {@code e} gives, or null. */
-	private static @Nullable Item cut(LivingEntity e) {
+	static @Nullable Item cut(LivingEntity e) {
 		String id = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath();
 		return switch (id) {
 			case "cow", "mooshroom" -> Items.BEEF;
