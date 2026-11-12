@@ -911,6 +911,8 @@ public final class Downed {
 		Entity by = felled == null ? null : felled.getEntity();
 		// ((0.20.26) and what downed it is the cause its death is rolled on, Mortality)
 		Mortality.felled(entity, felled);
+		// (dying where it lies: its body starts lying too, not on its feet)
+		DownedLie.markBody(entity);
 		forget(entity);
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(Wounds.WOUNDS_DAMAGE), by);
 		FINISHING.add(entity);
@@ -922,6 +924,9 @@ public final class Downed {
 		} finally {
 			FINISHING.remove(entity);
 			Wounds.FINISHING.remove(entity);
+			if (entity.isAlive()) {
+				DownedLie.clearBody(entity);
+			}
 		}
 	}
 
