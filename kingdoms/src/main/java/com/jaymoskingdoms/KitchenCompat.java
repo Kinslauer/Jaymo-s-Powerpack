@@ -181,6 +181,37 @@ public final class KitchenCompat {
 		}
 	}
 
+	/** Kitchen's freshness clock: {@code Freshness.today(Level)} and {@code left(ItemStack, long)}, looked up the first time. */
+	private static @Nullable Method FRESH_TODAY, FRESH_LEFT;
+	private static boolean freshLooked;
+
+	/**
+	 * How fresh Kitchen's freshness clock says {@code stack} still is, 1 (just made) to 0 (about to turn), or -1 if it
+	 * isn't dated (not perishable, never carried, or no Kitchen).
+	 */
+	static float freshness(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack stack) {
+		if (!freshLooked) {
+			freshLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					Class<?> fresh = Class.forName("com.jaymoskitchen.fresh.Freshness");
+					FRESH_TODAY = fresh.getMethod("today", net.minecraft.world.level.Level.class);
+					FRESH_LEFT = fresh.getMethod("left", net.minecraft.world.item.ItemStack.class, long.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.debug("Kitchen freshness not found: {}", e.toString());
+				}
+			}
+		}
+		if (FRESH_TODAY == null || FRESH_LEFT == null) {
+			return -1.0F;
+		}
+		try {
+			return (Float)FRESH_LEFT.invoke(null, stack, (Long)FRESH_TODAY.invoke(null, level));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1.0F;
+		}
+	}
+
 	private KitchenCompat() {
 	}
 

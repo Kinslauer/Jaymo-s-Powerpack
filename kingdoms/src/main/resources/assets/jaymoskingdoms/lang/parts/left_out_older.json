@@ -117,5 +117,6 @@
   "message.jaymoskingdoms.rust_storm.warn.hermit": "\"The stars over Rustfall have gone the colour of old blood. A rust storm is gathering there. Whatever lives in it will be mad with it, so don't be out on that world when it breaks.\"",
   "message.jaymoskingdoms.rust_storm.warn.hermit.here": "\"Smell that? Iron on the wind. A rust storm is coming, and the beasts here go mad in it. Find cover, or be ready.\"",
   "message.jaymoskingdoms.rust_storm.warn.patrolman": "\"Patrol advisory: a rust storm front is building over Rustfall. Hostiles out there get a lot meaner while it blows. Delay any landing if you can.\"",
-  "message.jaymoskingdoms.rust_storm.warn.patrolman.here": "\"Heads up, the front's almost on us. Rust storm inbound. Everything with teeth gets meaner while it blows, so stay sharp.\""
+  "message.jaymoskingdoms.rust_storm.warn.patrolman.here": "\"Heads up, the front's almost on us. Rust storm inbound. Everything with teeth gets meaner while it blows, so stay sharp.\"",
+  "cafe.jaymoskingdoms.stale": "This has been sitting about a while, hasn't it? I'll pay, but I won't be telling anyone about it."
 }

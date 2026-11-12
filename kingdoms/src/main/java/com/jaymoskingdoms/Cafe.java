@@ -545,7 +545,8 @@ final class Cafe {
 	static void serve(ServerLevel level, CafeBoard.Entity board, Customer c, Villager v, ItemStack dish, ServerPlayer payee) {
 		long now = level.getGameTime();
 		double left = c.patience <= 0 ? 0.0 : Math.max(0.0, 1.0 - (double)(now - c.sat) / c.patience);
-		long price = Math.max(CafeBoard.LEAST_PRICE, Math.round(CafeBoard.fair(dish) * board.markup.price * CafeBoard.quality(dish)));
+		double fresh = CafeBoard.freshness(level, dish);
+		long price = Math.max(CafeBoard.LEAST_PRICE, Math.round(CafeBoard.fair(dish) * board.markup.price * CafeBoard.quality(dish) * fresh));
 		double tipShare = TIP_SHARE * left * (1.0 + (double)c.comfort / (COMFORT_MOST * 2)) * board.markup.tips;
 		if (Careers.heldRank(payee, Careers.Job.INNKEEPER) >= Careers.MASTER) {
 			tipShare *= MASTER_TIPS;
@@ -559,7 +560,12 @@ final class Cafe {
 		payee.sendOverlayMessage(Component.translatable(tip > 0 ? "cafe.jaymoskingdoms.paid_tip" : "cafe.jaymoskingdoms.paid",
 			Money.text(f, price), Money.text(f, tip)).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.6F, 1.2F);
-		int rep = REP_SERVED + (CafeBoard.perfect(dish) ? REP_PERFECT : 0) + (left >= 0.5 ? REP_QUICK : 0);
+		int rep = REP_SERVED + (CafeBoard.perfect(dish) ? REP_PERFECT : 0) + (left >= 0.5 ? REP_QUICK : 0)
+			// (food nearly off loses the cafe what serving it would have won, and they say so)
+			- (fresh <= CafeBoard.OFF_PRICE ? REP_SERVED : 0);
+		if (fresh <= CafeBoard.OFF_PRICE) {
+			Speech.say(level, v, Component.translatable("cafe.jaymoskingdoms.stale"), Speech.YELLOW, 12.0);
+		}
 		reputation(level, board, rep);
 		Careers.work(level, payee, "serve", 1, board.getBlockPos());
 		c.state = State.EATING;
