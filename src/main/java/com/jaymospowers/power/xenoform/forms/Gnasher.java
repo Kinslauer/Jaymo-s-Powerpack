@@ -60,6 +60,14 @@ public final class Gnasher extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.latched = -1;
 		live.latchTicks = live.rush = live.frenzy = live.rolls = 0;
+		com.jaymospowers.power.xenoform.TailSweep.forget(player);
+	}
+
+	/** Z (tap): the tail sweep. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		com.jaymospowers.power.xenoform.TailSweep.sweep(player, color);
+		return true;
 	}
 
 	@Override
