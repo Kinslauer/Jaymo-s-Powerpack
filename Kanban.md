@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 15:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 17:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · stalled
 
 
 ## Done

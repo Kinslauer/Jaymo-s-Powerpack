@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-12 07:07
+updated: 2026-11-12 12:19
 ---
 # Open PRs
 
-3 open, as of 2026-11-12 07:07. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-12 12:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
@@ -11,12 +11,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 4 passed
 - **Agent:** [[armor-pngs-vanilla-style]]
 
-## [#1359](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1359) Boxing: stances copied from fight footage, to test (Jung)
-- **Branch:** `jung/boxing-video-poses` · **Updated:** 2026-11-12 (today)
-- **Checks:** ✅ 4 passed
-- **Agent:** no agent note
-
-## [#1374](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1374) Zombies run for the nearest shade, then straight back on the attack
-- **Branch:** `claude/project-thread-fnhp6u` · **Updated:** 2026-11-12 (today)
+## [#1376](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1376) Kingdoms: fighting together (pawn picks patches 1-5)
+- **Branch:** `claude/project-thread-ulaoul` · **Updated:** 2026-11-12 (today)
 - **Checks:** ✅ 4 passed
 - **Agent:** no agent note
