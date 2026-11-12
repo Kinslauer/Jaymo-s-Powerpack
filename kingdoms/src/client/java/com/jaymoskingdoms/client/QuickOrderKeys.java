@@ -10,7 +10,7 @@ import net.minecraft.client.KeyMapping;
 
 /**
  * The four quick orders' keys ({@link QuickOrders}), rebindable, in the Followers group beside the orders screen's: Go on
- * the Up arrow, Help on the Left, Wait on the Right, Come on Right Shift (the Down arrow is the crawl's). A press sends
+ * the Up arrow, Come on the Down arrow, Help on the Left, Wait on the Right. A press sends
  * the order; there's no screen.
  */
 public final class QuickOrderKeys {
@@ -21,7 +21,7 @@ public final class QuickOrderKeys {
 
 	static void register() {
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("quick_orders"));
-		int[] defaults = {InputConstants.KEY_UP, InputConstants.KEY_RSHIFT, InputConstants.KEY_RIGHT, InputConstants.KEY_LEFT};
+		int[] defaults = {InputConstants.KEY_UP, InputConstants.KEY_DOWN, InputConstants.KEY_RIGHT, InputConstants.KEY_LEFT};
 		for (int kind = QuickOrders.GO; kind <= QuickOrders.HELP; kind++) {
 			KEYS[kind] = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.quick_" + new String[] {"go", "come", "wait", "help"}[kind],
 				defaults[kind], category));

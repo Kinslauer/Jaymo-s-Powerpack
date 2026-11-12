@@ -31,7 +31,7 @@ Rows C1, D1, D5, E1, and the tending half of F1 and F4.
   one tending them". Every speaker waits between lines, one side says a kind of line once per stretch near any spot,
   quiet temperaments speak less, and nobody repeats a line they said recently.
 - **Four quick orders (E1).** Keys (rebindable), no menu: Go = Up arrow, Help = Left arrow, Wait = Right arrow, Come =
-  Right Shift (Down is already crawl). Go: spread out and take foes by leaning, or out of a fight scout a little ahead.
+  the Down arrow (Andy moved crawl off it). Go: spread out and take foes by leaning, or out of a fight scout a little ahead.
   Come: to me, and fight only what's near me. Wait: stop, hold here, stop attacking (stays until another order). Help:
   get the fallen up, you first; if nobody's down, see to your wounds. One companion answers in a bubble. The orders
   screen (comma) keeps the long orders.
@@ -75,12 +75,11 @@ A5 errands left with a companion, with Andy's note: some are hired to work, not 
 ## Patch 6: the dark mirror
 
 H1 turned for a while (sorcerers, a thrall-bite or the Grue seize a companion; knock them down to clear it), H2 the
-sickness that rides between companions (proposed in Lore.md as the Murmur, for Andy to approve), H3 the masterless
+sickness that rides between companions (the Murmur, Andy approved the name), H3 the masterless
 (a reincarnated player's old companion lives on, lost).
 
-## Open questions for Andy
+## Andy's answers
 
-1. Keys: Up/Left/Right arrows and Right Shift. Fine, or other keys?
-2. H2: when a sick companion turns at an inn, does the town go down (our rule: humanoids are downed unless beheaded)
-   and get up later, or do some die for good?
-3. A1: may other players hire your companion only while you're offline, or also when you leave them at a tavern?
+1. Keys: the four arrows (Andy, 2026-11-12: Come takes Down, crawl goes unbound).
+2. H2 (Andy, 2026-11-12): townsfolk the Murmur turns on can die, and the sick can heal themselves at a cleric or priest.
+3. A1 (Andy, 2026-11-12): both: lent while you're offline, and when you leave them at a tavern.
