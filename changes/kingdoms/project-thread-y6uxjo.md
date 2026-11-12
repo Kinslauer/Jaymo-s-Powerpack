@@ -1,0 +1,5 @@
+# everyone runs from a hissing creeper
+- **Creeper flight** (Andy: "everyone should run from creepers ready to explode"): once a creeper's fuse is lit (it hisses and swells, or flint and steel was put to it), every mob within 8 blocks (14 for a charged creeper) drops what it is doing and runs clear of the blast: villagers, folk, guards, animals, pets, monsters and raiders alike. They stop when the creeper blows, dies or calms down. A sleeper wakes; a pet told to sit gets up, runs and sits again after.
+- Stays put: other creepers (packs still come on together), the downed, bound captives, anyone riding or carried, a mount a player is steering, no-AI mobs, and mobs with 100+ max health (iron golems, ravagers, bosses), which can take a blast, so golems still smash creepers.
+- `CreeperFlight`: a priority -1 MOVE-only goal added to every PathfinderMob on load (floating still works); walking brains (villagers, piglins, goats) get a walk target instead, as `Herds` does. Hissing creepers are looked for every 2 ticks. Hint 132 (lang part creeper-flight.json).
+- Built; not played.
