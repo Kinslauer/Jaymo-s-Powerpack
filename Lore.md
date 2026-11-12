@@ -1394,3 +1394,14 @@ the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that d
 badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
 powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
 measures where the bone heap made one.
+
+(new) **The old rules of the fight** (Claude's placement for the fifth edition picks, patch 1, 2026-11-12, for Andy to
+approve). Every drillmaster in the realms teaches the same few things, and the camps learn them the hard way. Turn
+your back on a blade and it takes you as you go: back off behind your shield, or don't go at all. A halberd keeps a
+doorway, which is why the guards of every gate carry one. Strike from above, or at a foe who is down or blind, and
+the blow tells; fight up to your waist in a river, on ice or poisoned, and it glances. A body has seven strengths
+(the K screen's attributes), and each keeps out something: the quick are not where the blast lands, the hardy shake
+off poison, the steady hold through fear and keep a spell through a blow, the sharp see through a charm, the
+learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
+until it drops where it stands. The dead the Grue raises are stubborn, and the first blow that drops one seldom
+keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
