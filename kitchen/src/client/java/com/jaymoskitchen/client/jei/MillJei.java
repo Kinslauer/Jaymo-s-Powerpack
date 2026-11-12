@@ -114,6 +114,22 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymoskitchen.fresh.Cheese.CHEESE_WHEEL, note("cheese_wheel"));
 		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.SNAP_TRAP, note("traps_small_game"));
 		registration.addIngredientInfo(com.jaymoskitchen.rats.Rats.CAGE_TRAP, note("traps_small_game"));
+		// (Hardrock picks, the parts #1253 left out) furs and the tailor, damp, preserving, soot, tired fields, familiar animals
+		for (Item fur : List.of(com.jaymoskitchen.climate.Furs.WOLF_FUR, com.jaymoskitchen.climate.Furs.BEAR_FUR, com.jaymoskitchen.climate.Furs.WILD_FUR)) {
+			registration.addIngredientInfo(fur, note("fur_lining"));
+		}
+		registration.addIngredientInfo(Items.LOOM, note("tailor"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("damp"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.BRINE, note("brine"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.VINEGAR, note("vinegar"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.BRINE_CROCK, note("crock"));
+		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.VINEGAR_CROCK, note("crock"));
+		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.DRYING_RACK, note("drying_food"));
+		registration.addIngredientInfo(Items.BRUSH, note("familiar_brush"));
+		registration.addIngredientInfo(Items.FURNACE, note("soot"));
+		registration.addIngredientInfo(Items.BLAST_FURNACE, note("soot"));
+		registration.addIngredientInfo(Items.BONE_MEAL, note("tired_fields"));
+		registration.addIngredientInfo(com.jaymoskitchen.delight.DelightFarm.ORGANIC_COMPOST, note("tired_fields"));
 	}
 
 	private static Component title(String id) {

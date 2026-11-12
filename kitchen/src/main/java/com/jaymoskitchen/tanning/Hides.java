@@ -154,6 +154,12 @@ public final class Hides {
 		if (stack.is(com.jaymoskitchen.herb.PmehFarming.FRESH_PMEH)) {
 			return com.jaymoskitchen.herb.PmehFarming.dried(stack);
 		}
+		// (Hardrock picks) raw meat, fish and fruit dry into jerky and dried fruit, which keep
+		if (com.jaymoskitchen.fresh.Curing.takes("dried", stack)) {
+			ItemStack food = stack.copy();
+			com.jaymoskitchen.fresh.Curing.cure(food, "dried");
+			return food;
+		}
 		return null;
 	}
 

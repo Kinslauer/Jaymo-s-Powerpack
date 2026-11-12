@@ -134,6 +134,13 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.PAN, Component.translatable("jei.jaymospowers.pan"));
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SLUICE, Component.translatable("jei.jaymospowers.sluice"));
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SUPPORT_BEAM, Component.translatable("jei.jaymospowers.support_beam"));
+		// Hardrock parts left out of the first patch: rough travel, rumours, rivers
+		registration.addIngredientInfo(com.jaymospowers.rough.SleepingBag.SLEEPING_BAG_ITEM, Component.translatable("jei.jaymospowers.sleeping_bag"));
+		registration.addIngredientInfo(com.jaymospowers.rough.Hammock.HAMMOCK_ITEM, Component.translatable("jei.jaymospowers.hammock"));
+		registration.addIngredientInfo(com.jaymospowers.rough.ParagliderItem.PARAGLIDER, Component.translatable("jei.jaymospowers.paraglider"));
+		registration.addIngredientInfo(com.jaymospowers.rough.HotAirBalloon.ITEM, Component.translatable("jei.jaymospowers.hot_air_balloon"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.ICE, Component.translatable("jei.jaymospowers.river_ice"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.EMERALD, Component.translatable("jei.jaymospowers.vein_rumour"));
 		// (Havens patch 5) the kings' weapon heads: where each is taken
 		for (String part : WeaponParts.KINGS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);

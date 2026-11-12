@@ -63,7 +63,8 @@ public final class Currents {
 			}
 		}
 		if (fluid.isSource()) {
-			return Vec3.ZERO;
+			// the game's rivers are still water: a river runs all the same, the way it lies (RiverRun)
+			return RiverRun.downstream(level, pos);
 		}
 		Vec3 flow = fluid.getFlow(level, pos);
 		return new Vec3(flow.x, 0.0, flow.z);

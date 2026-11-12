@@ -42,6 +42,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.freerun.moves.RunMoves.init();
 		com.jaymospowers.water.Dives.init();
 		com.jaymospowers.water.Currents.init();
+		com.jaymospowers.water.RiverIce.init();
+		com.jaymospowers.water.Floods.init();
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
@@ -136,6 +138,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.Panning.init();
 		com.jaymospowers.rough.SleepingBag.init();
 		com.jaymospowers.rough.ParagliderItem.init();
+		com.jaymospowers.rough.Hammock.init();
+		com.jaymospowers.rough.HotAirBalloon.init();
 		// Andy's TFC Hardrock picks: tamed dogs learn skills
 		com.jaymospowers.dogs.Dogs.init();
 		// how bad you smell (Kingdoms' mob senses read it)

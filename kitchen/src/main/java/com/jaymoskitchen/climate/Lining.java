@@ -19,11 +19,15 @@ import org.jspecify.annotations.Nullable;
  * piece counts in {@link BodyHeat} as that much of a warm or cool piece.
  */
 public enum Lining {
-	WOOL("wool", 1.0F, 0.0F),
-	/** The muskox's underwool (Kingdoms' qiviut): the warmest lining there is, and no help in the heat. */
-	QIVIUT("qiviut", 1.5F, 0.0F),
-	RABBIT_HIDE("rabbit_hide", 0.0F, 1.0F),
-	LEATHER("leather", 0.5F, 0.5F);
+	WOOL("wool", 1.0F, 0.0F, false),
+	/** The muskox's underwool (Kingdoms' qiviut): the warmest woven lining there is, and no help in the heat. */
+	QIVIUT("qiviut", 1.5F, 0.0F, false),
+	RABBIT_HIDE("rabbit_hide", 0.0F, 1.0F, false),
+	LEATHER("leather", 0.5F, 0.5F, false),
+	/** Furs are heavier than wool and warmer. A loom can't take a pelt: only a tailor sews one ({@link Tailoring}). */
+	WOLF_FUR("wolf_fur", 1.5F, 0.0F, true),
+	WILD_FUR("wild_fur", 1.25F, 0.0F, true),
+	BEAR_FUR("bear_fur", 2.0F, 0.0F, true);
 
 	public static final Codec<Lining> CODEC = Codec.STRING.xmap(Lining::byId, lining -> lining.id);
 	/** Qiviut, whichever mod's it is (Kingdoms lists its own; the tag is empty without it). */
@@ -33,11 +37,24 @@ public enum Lining {
 	public final String id;
 	/** How much of a warm piece ({@link BodyHeat#WARM_PIECE}) and of a cool piece it counts as. */
 	public final float warm, cool;
+	/** Sewn only by a tailor villager, for a fee. */
+	public final boolean tailored;
 
-	Lining(String id, float warm, float cool) {
+	Lining(String id, float warm, float cool, boolean tailored) {
 		this.id = id;
 		this.warm = warm;
 		this.cool = cool;
+		this.tailored = tailored;
+	}
+
+	/** Flame pips the tooltip shows: half a warm piece each. */
+	public int warmPips() {
+		return Math.round(warm * 2.0F);
+	}
+
+	/** Snowflake pips the tooltip shows: half a cool piece each. */
+	public int coolPips() {
+		return Math.round(cool * 2.0F);
 	}
 
 	public static Lining byId(String id) {
@@ -62,6 +79,15 @@ public enum Lining {
 		}
 		if (stack.is(Items.LEATHER)) {
 			return LEATHER;
+		}
+		if (stack.is(Furs.WOLF_FUR)) {
+			return WOLF_FUR;
+		}
+		if (stack.is(Furs.BEAR_FUR)) {
+			return BEAR_FUR;
+		}
+		if (stack.is(Furs.WILD_FUR)) {
+			return WILD_FUR;
 		}
 		return null;
 	}

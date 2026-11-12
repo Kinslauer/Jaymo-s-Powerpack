@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SWS",
+    "R R"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "W": "#minecraft:wool",
+    "R": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymospowers:hammock",
+    "count": 1
+  }
+}

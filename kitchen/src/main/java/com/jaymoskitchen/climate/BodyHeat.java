@@ -381,6 +381,10 @@ public final class BodyHeat {
 			}
 		}
 		float air = land;
+		// (Hardrock picks) damp near the sea
+		if (realm == Level.OVERWORLD) {
+			air += Warmth.damp(level, at, sky, land);
+		}
 
 		// wet
 		Biome.Precipitation falling = level.precipitationAt(head);

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "B B",
+    "BSB",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:brick",
+    "S": "jaymoskitchen:vinegar"
+  },
+  "result": {
+    "id": "jaymoskitchen:vinegar_crock"
+  }
+}

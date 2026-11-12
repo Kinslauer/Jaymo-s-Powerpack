@@ -412,8 +412,48 @@ public final class Payloads {
 		}
 	}
 
+	/**
+	 * Server → client: open the screen of the hearth or icebox at {@code pos}: its fuel (of {@code most}), whether it is the
+	 * cold one and lit, how much air it fills, and whether the player carries something it burns.
+	 */
+	public record OpenHearth(BlockPos pos, int fuel, int most, boolean cold, boolean lit, int cells, boolean canFeed) implements CustomPacketPayload {
+		public static final Type<OpenHearth> TYPE = new Type<>(JaymosKitchen.id("open_hearth"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenHearth> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeBlockPos(p.pos);
+				buf.writeVarInt(p.fuel);
+				buf.writeVarInt(p.most);
+				buf.writeBoolean(p.cold);
+				buf.writeBoolean(p.lit);
+				buf.writeVarInt(p.cells);
+				buf.writeBoolean(p.canFeed);
+			},
+			buf -> new OpenHearth(buf.readBlockPos(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readVarInt(),
+				buf.readBoolean()));
+
+		@Override
+		public Type<OpenHearth> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: put one thing from the pockets that the hearth or icebox at {@code pos} burns into it. */
+	public record FeedHearth(BlockPos pos) implements CustomPacketPayload {
+		public static final Type<FeedHearth> TYPE = new Type<>(JaymosKitchen.id("feed_hearth"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, FeedHearth> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBlockPos(p.pos),
+			buf -> new FeedHearth(buf.readBlockPos()));
+
+		@Override
+		public Type<FeedHearth> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Sip.TYPE, Sip.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenHearth.TYPE, OpenHearth.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(FeedHearth.TYPE, FeedHearth.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SeasonSync.TYPE, SeasonSync.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SpitRip.TYPE, SpitRip.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);

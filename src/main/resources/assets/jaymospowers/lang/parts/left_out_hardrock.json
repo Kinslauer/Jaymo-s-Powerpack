@@ -1,0 +1,21 @@
+{
+  "item.jaymospowers.hot_air_balloon": "Hot Air Balloon",
+  "block.jaymospowers.hammock": "Hammock",
+  "item.jaymospowers.vein_rumour": "Rumour of %s",
+  "item.jaymospowers.vein_map": "Vein Map",
+  "subtitles.jaymospowers.balloon.burner": "Balloon burner roars",
+  "jei.jaymospowers.sleeping_bag": "Sleeps one out in the open. It never sets your spawn.",
+  "jei.jaymospowers.hammock": "Needs an anchor (a log, fence, wall or any solid face) one block past each end. Sleeping in it passes the night but never sets your spawn.",
+  "jei.jaymospowers.paraglider": "Held open in a fall it slows you and carries you forward on the air.",
+  "jei.jaymospowers.hot_air_balloon": "Feed the burner coal, logs, planks or sticks. Jump to burn and rise, the back key to vent and sink. It cannot be steered: the wind blows a different way at every height, so climb or sink until you find a layer that goes your way. Hit it to take it back.",
+  "jei.jaymospowers.river_ice": "In the cold, rivers freeze from their banks, and floes break off and drift downstream with whatever stands on them. They thaw when it warms. Breaking out the bank of a small lake can also let a flood run downhill.",
+  "jei.jaymospowers.vein_rumour": "Village masons sell rumours of ore veins: a paper that names the metal, the way and the rough distance, or for more a map with the place marked.",
+  "item.jaymospowers.vein_rumour.line.north": "A vein lies about %s blocks to the north",
+  "item.jaymospowers.vein_rumour.line.northeast": "A vein lies about %s blocks to the northeast",
+  "item.jaymospowers.vein_rumour.line.east": "A vein lies about %s blocks to the east",
+  "item.jaymospowers.vein_rumour.line.southeast": "A vein lies about %s blocks to the southeast",
+  "item.jaymospowers.vein_rumour.line.south": "A vein lies about %s blocks to the south",
+  "item.jaymospowers.vein_rumour.line.southwest": "A vein lies about %s blocks to the southwest",
+  "item.jaymospowers.vein_rumour.line.west": "A vein lies about %s blocks to the west",
+  "item.jaymospowers.vein_rumour.line.northwest": "A vein lies about %s blocks to the northwest"
+}

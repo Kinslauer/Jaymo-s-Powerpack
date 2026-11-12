@@ -71,6 +71,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.mode", InputConstants.KEY_Z, CATEGORY));
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.BlockCluster.TYPE, BlockClusterRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.rough.HotAirBalloon.TYPE,
+			com.jaymospowers.client.rough.HotAirBalloonRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
 		// (0.20.51) Subtle Effects' skeleton bone sprites off, and again now and then (the server's config syncs on join)

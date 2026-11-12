@@ -103,7 +103,7 @@ public final class Freshness {
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide()) {
-				food.set(PRESERVED, Unit.INSTANCE);
+				Curing.cure(food, "salt");
 				if (!player.getAbilities().instabuild) {
 					salt.shrink(Mth.positiveCeilDiv(food.getCount(), PER_SALT));
 				}
@@ -144,7 +144,7 @@ public final class Freshness {
 		} else {
 			days = OTHER;
 		}
-		return stack.has(PRESERVED) ? days * PRESERVED_KEEPS : days;
+		return stack.has(PRESERVED) ? days * Curing.multiplier(stack) : days;
 	}
 
 	/** How fresh it still is, 1 (just made) to 0 (about to turn), or -1 if it isn't stamped. */
@@ -156,10 +156,13 @@ public final class Freshness {
 		return Mth.clamp(1.0F - (float)(today - made) / days(stack), 0.0F, 1.0F);
 	}
 
-	/** Marks {@code stack} preserved (the smoker's minigame does, salt does). */
+	/** Marks {@code stack} preserved (the smoker's minigame does, and every way in {@link Curing}). */
 	public static void preserve(ItemStack stack) {
 		if (perishable(stack)) {
 			stack.set(PRESERVED, Unit.INSTANCE);
+			if (!stack.has(Curing.CURED)) {
+				stack.set(Curing.CURED, "smoke");
+			}
 		}
 	}
 
