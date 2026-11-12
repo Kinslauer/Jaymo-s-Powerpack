@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -49,3 +49,4 @@ Not tested in game.
 - 2026-11-11 18:01 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-11 16:17 Text pass: rewrote changes/powers/claude-undead-seek-real-shelter.md - both bullets now player-facing; 'shelter search' no longer says undead stay put when nothing is in reach (they keep walking and searching until they find shelter, matching the pushed SeekShelterGoal change). No lang keys or code changed; PR adds no other player-visible text.
 - 2026-11-11 21:30 Review (head 84fc2fb): checks green, changes needed. 1. Undead never walk anywhere now: SeekShelterGoal.start() (line 102) only toggles avoidSun; the navigation.moveTo(shelter) call was dropped, so isDone() is true at once, canContinueToUse ends the goal and nothing moves. Put the moveTo back in start(). 2. 'Keep searching' isn't real: when findShelter finds nothing, line 96 sets the target 1 block west, then the 200-tick cooldown. Andy wants them to keep going until they find shelter: pick a real direction (downhill, toward the darkest/most covered side, or a point REACH blocks out) and search again on arrival, with a shorter wait. 3. originalAvoidSun (line 28) is never saved, so stop() always sets avoidSun false and skeletons lose vanilla's shade-keeping (RestrictSunGoal) afterwards. Save nav's value in start() before turning it off. 4. Lines 108/121 cast to GroundPathNavigation before the instanceof check, so a mob with another navigation throws ClassCastException; use 'if (mob.getNavigation() instanceof GroundPathNavigation nav)'. 5. Cost: canUse casts 12 rays (up to 80 steps each) every call before the cooldown check (line 55 vs 90), for every undead in daylight. Check the cooldown first, or cast the rays only when the mob is burning (isOnFire / last isSunBurnTick). 6. Husks get the goal too (they don't burn): check isSunSensitive. 7. Class javadoc still says it stays put. Not tested in game.
+- 2026-11-12 01:54 PR #1262 is merged into master; moved to Inbox/Done.
