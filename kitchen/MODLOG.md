@@ -1904,3 +1904,8 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
 - On players it sits just over the skin's outer (hat) layer so painted-on hair doesn't hide it.
 - `client/archery/HeadWounds` (new), `StuckArrowsLayer` (marks head parts by name), `mixin/StuckInBodyLayerMixin` (the game's own player arrow layer), texture `textures/entity/arrow_wound.png`.
 - Built and checked in a dev game (Kitchen alone): villagers, a wandering trader and a player with arrows in their heads.
+
+## 0.5.119 (2026-11-12): corpse impacts - a hook for bodies that hit hard
+
+- New `corpse/CorpseImpacts`: a free-lying body (`CorpseRagdoll`) that loses 0.4+ blocks a tick of speed in one step, past what gravity explains, is told to Jaymo's Powers (`setOnImpact`), which smears its blood where it struck. Not while held or pinned on a table; 8 ticks between impacts.
+- Built; not played.

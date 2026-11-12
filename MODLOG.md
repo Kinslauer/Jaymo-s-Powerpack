@@ -3469,3 +3469,12 @@ Compiled only; not played.
 - Marks fade in four steps over their life (bruises 6 minutes, the rest 8 to 10) and go as soon as the part has mended whole. Painted into the skin as a cutout picture of just the mark pixels, so the blood coat still shows round them. Not kept over a restart (as blood coats aren't).
 - **Fresh wounds drip**: a fresh cut, claw or puncture that isn't already bleeding properly (Bleeding) drips a few drops onto the ground for 30 seconds, about every 1.5 s at first and every 7 s by the end, leaving lasting stains (BloodTrail).
 - Not yet on corpses. Built; not played.
+
+## 0.22.78 (2026-11-12): stumps and smears - lost limbs leave stumps, cut-off parts leak, bodies smear where they land
+
+- Andy's Cruor picks (ideas only).
+- **Stumps**: a humanoid's lost arm or leg is drawn as a short stump at the shoulder or hip (`Dismembered.STUBS`, 28% of the limb) instead of vanishing. Its end is raw and red while it bleeds (Bleeding's stump bleed, until cauterised), and capped once closed: scar pink, puckered to a seam (`WoundMarksLayer`). A limb with a prosthetic shows the prosthetic as before.
+- Andy: "the unarmed start starts with the lost limb capped": its long-healed limb never bleeds, so its stump is capped from the start.
+- **Cut-off parts leak**: a severed head or limb lying on the ground keeps leaking from the cut for 30 seconds, slower and slower (every second at first, every 4.5 s at the end), into a small lasting pool, then stops (`SeveredPart`).
+- **Ragdoll impact smears**: a corpse that hits the ground or a wall hard (thrown, blown, dropped; it lost 0.4+ blocks a tick in one step) leaves a blood blot where it struck and throws a few drops, bigger the harder it hit (`BladeBlood.impact`, through Jaymo's Kitchen's new `CorpseImpacts` hook). Bloodless bodies don't.
+- Built; not played.
