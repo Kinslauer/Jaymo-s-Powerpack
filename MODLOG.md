@@ -2989,3 +2989,75 @@ this update get them.
 - New `tools/check_data_refs.py`, run by the PR checks: a recipe category the recipe book doesn't have, or a recipe,
   loot table or advancement naming an item of ours that doesn't exist, now fails the PR instead of stopping the server.
   Not built here.
+
+## 0.22.53 (2026-11-12): Blindness is a condition, Resonance gains its gifts (#1339)
+
+Andy: "blindness should stay as is, just no longer considered a power, meaning you can go blind from battle, or malicious
+intent. resonance gains the new abilities. so the two stay, but resonance is buffed, and you can awaken resonance while
+blind with the fork."
+- **Blindness is no longer a power.** Anyone can lose an eye, or both: a heavy blow to a bare head (8%, a shot 20%; a
+  helmet protects), someone using shears on you while you're downed (sneak, twice), or your own hand. One eye gone darkens
+  that side of the view; both, all of it. Sockets bleed until the head is bandaged and show on the face.
+- **Sound paints the dark.** The blind now really do see by sound: every step, blow, door and falling thing within 32
+  blocks opens a ring on the dark where it came from. (The old power promised this and only drew a ring when you pressed R.)
+- **Awaken Resonance in the dark**: blind and without a power, strike a Tuning Fork. Keeping the blindfold's 5 minute
+  vigil and striking it with the blindfold still on works too. Whoever held Blindness holds Resonance when they next join.
+- **Resonance, buffed**: Pulse outlines whatever it hits for you for 5 s. Hold B for **Quiet**: you make no sound at all
+  (a tap is still Hush). A holder who can't see hears the living through the dark, and an ascended one rises into **Sky
+  Sight** with sneak + V. Shriek blacks out everything within 8 blocks.
+- **Sound you can see**: Pulse, Echolocation, Shriek and Sonic Boom draw typed rings and a beam in Resonance's violet.
+- **The Unseeing fight by sound**: zealots scream a Pulse at you from up to 7 blocks, and no power answers within 10
+  blocks of one of their services while its eldest lives.
+- Gone: the Blindness power's keys (One-Eye Blind, Blindside Swap, Deafen, Void Sight, Blackout, Abyssal Echo), which did
+  little or nothing; what they promised is in the condition and in Resonance.
+- Classes: `Blind` (new), `ResonanceQuiet`, `ResonanceSight` (new), `BlindnessEcholocation`, `BlindnessPowerClient` and
+  `BlindnessEcholocationClient` (rewritten), `Scars` (two eye scars), `Wounds` (head hits). `docs/blindness.md` (new),
+  `docs/resonance.md`.
+- Compiled (main and client); not played.
+
+## 0.22.54 (2026-11-12): Darktide overhaul, part 2: looks (#1339)
+
+Andy's picks from the Darktide picklist, the looks half. Three new Magic FX types, for any power to use, and Darktide
+redrawn with them.
+- **New effect types** (`docs/MagicFx.md`): **wave** (a wall of water that rises, rolls, curls and breaks), **stroke** (one
+  ink brush mark, heavy at the start and dry at the end, for any cut) and **pool** (a flat sheet with ripples).
+- **Black Tide is a real wave**: dark water 2.5 blocks high (4 at spring tide) with a pale crest, rolling with the hit
+  itself, breaking at the end and leaving the ground marked. Ascended, pools lie along its path.
+- **Every cut is an ink stroke**: Dark Strike, Crescent (the whole circle at spring tide), Ink Cross, the riposte, Fang
+  Barrage, Pounce, the flurry, Riptide Dash and Stillwater's cuts. The vanilla sweep and the dotted arcs are gone.
+- **Undertow**: a dark pool where you sink and where you'll rise, a shadow over the ground between them, spray as you burst out.
+- **Stillwater** is a mirror of still black water with slow ripples instead of a dotted circle.
+- **The tide shows on you**: at high tide water lies at your feet and your eyes shed a pale light; at spring tide the
+  water is wider, ink rises off your shoulders and your blade paints a stroke behind each swing.
+- **Maelstrom**: waves roll in from every side as the dome rises and out as it comes down; the ground under it is water.
+- **No vanilla stand-ins left**: squid ink is miasma, rain splash is pale spray off a ring, a parry is a pale ring (with
+  steel sparks when a blade turned it), the shade and the risen shed miasma. Gifted villagers' Darktide kit uses the
+  same stroke, pool and wave.
+- Classes: `DarktideLooks` (new: colours, `cut`, `stab`, `spray`, `ink`, `pool`), `MagicFx` and `MagicFxClient` (the three
+  types; the `Shape` packet carries a stroke's bend), `DarktideFx` (mirror, tide on the body), every Darktide move class.
+  Textures from `tools/gen_magic_fx.py`: `textures/fx/wave.png`, `stroke.png`, `pool.png`, `ripple.png`.
+- Compiled (main and client); not played. The eyes' light is drawn as pale glints at the eyes, not a change to the skin.
+
+## 0.22.55 (2026-11-12): Darktide overhaul, part 1: power (#1339)
+
+Andy: "Darktide needs an overhaul to bring it up to power and graphical fidelity with the other powers." His picks from the
+picklist; this is the power half, the looks follow.
+- **Flow is the only cost.** Dark Strike, Crescent, Ink Cross, Undertow, Pounce and Fang Barrage are ready again in a second or
+  two; only Black Tide (15 s), Stillwater, the flurry and the C moves keep a real cooldown. Pounce costs 15 Flow.
+- **Flow no longer drains in daylight**, trickles in at 1 a second anywhere, and is kept when you log out.
+- **Damage**: Black Tide 6 to 12, rolls 16 blocks and pushes harder. Crescent +4 to +8, 3 to 5 foes. Undertow bursts for 8 and
+  throws foes back, for everyone and not only the ascended. Riposte 6 to 10. Stillwater 10 + 2 a second held (was 6 + 1), its
+  field full in 3 s. Drown 2 to 4 a second, and foes hang helpless in it.
+- **The tide**: from 50 Flow it's high tide and moves reach a quarter further. At a full bar it's spring tide: the next Black
+  Tide is twice as wide, the next Crescent cuts all the way round, the next Undertow drags those beside you under with you.
+- **Maelstrom** (ascended, hold C): a 12-block dome of dark water for 10 s. You swim through it with Flow held full; everyone
+  else in it is slowed, can't get out and drowns, then it crashes down for 16. Hold C again to bring it down early. 2 minutes.
+  Tapping C (raise a shadow) now acts when you let the key go.
+- **Blade of Dark Water**: guarding, G or X with both hands empty draws a katana of dark water (an iron sword's blow), so the
+  whole kit works without WeaponMod or a blade of your own. It can't be dropped and runs back to water 15 s after its last use.
+  Every parry now counts toward ascending, not only a katana's.
+- **At home in water**: in water or rain you're a fifth faster on foot and swim like a dolphin, Undertow is free, and you can
+  surface anywhere rain is falling.
+- Classes: `DarktideMaelstrom`, `DarktideBlade` (new), `DarktideFlow`, `DarktideMoves`, `DarktideTide`, `DarktidePower`,
+  `DarktideState` (Flow in the save, the `TIDE` attachment, the Maelstrom's cooldown slot). `docs/darktide.md` updated.
+- Compiled (main and client); not played.
