@@ -254,6 +254,9 @@ thrown sword is a sword given away, and mean it: it lies where it lands. Only th
 Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
 teaching.
 
+(new) **The Mill Charge** (SWGC swordplay picks, 2026-11-12). The Skyward Reach teaches its staff and glaive students
+to go through a press of foes with the shaft turning before them, the way a mill's sails take the wind.
+
 (new) **The schools' styles** (SWGC swordplay picks, 2026-11-12). Each school fights its own way, and its students
 carry it into every fight with the school's weapon in hand. The Quiet Tide's **Still Water** waits and turns blows; the
 Skyward Reach's **Long Measure** keeps its distance and thrusts; the Stone Root's **Deep Root** is slow and never out of
