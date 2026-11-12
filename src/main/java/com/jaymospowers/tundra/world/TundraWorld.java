@@ -1,0 +1,96 @@
+package com.jaymospowers.tundra.world;
+
+import com.jaymospowers.JaymosPowers;
+import com.mojang.datafixers.util.Pair;
+import java.util.function.Consumer;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+
+/**
+ * The tundra's place in the Overworld (Andy, 2026-11-12, after Klei_Wright's tundra concept; {@code docs/Tundra-Plan.md}).
+ * Two biomes, not a dimension:
+ * <ul>
+ * <li>{@link #TUNDRA}: bare old rock. Deepslate from bedrock to the surface, crossed by greenstone belts (strips of
+ * smooth basalt carrying banded iron), thin grass and yellow moss, boulders, lichen, no trees and no snowfall.</li>
+ * <li>{@link #LICHEN_WOODLAND}: the belt between the tundra and everything else, where spruce grows dwarfed.</li>
+ * </ul>
+ * They take over the driest part of what was Snowy Plains ({@link #placing}), so new chunks only. The ground itself is
+ * the material rule {@code jaymospowers:tundra}, run from our copy of {@code minecraft:overworld}; the rest is
+ * {@link TundraFeatures}. The blocks belong to {@code com.jaymospowers.tundra} and are looked up by id here.
+ */
+public final class TundraWorld {
+	// ---- tuning ----
+	/** Snowy Plains drier than this (humidity, in 1/10000) becomes tundra or woodland; vanilla's driest cell ends here. */
+	static final long DRY_BELOW = -3500L;
+	/** Past the dry cell, this much more humidity is still lichen woodland before Snowy Plains begins. */
+	static final long WOODLAND_BAND = 1000L;
+	/** In the dry cell, colder than this (temperature, 1/10000) is tundra; the warmer rim is lichen woodland. */
+	static final long TUNDRA_COLDER_THAN = -6000L;
+	/** The frozen temperature row ends here: Snowy Plains only lives below it. */
+	static final long FROZEN_BELOW = -4500L;
+
+	public static final ResourceKey<Biome> TUNDRA = ResourceKey.create(Registries.BIOME, JaymosPowers.id("tundra"));
+	public static final ResourceKey<Biome> LICHEN_WOODLAND = ResourceKey.create(Registries.BIOME, JaymosPowers.id("lichen_woodland"));
+	/** Where a spruce sapling grows into a dwarfed spruce. */
+	public static final TagKey<Biome> DWARFS_SPRUCE = TagKey.create(Registries.BIOME, JaymosPowers.id("dwarfs_spruce"));
+
+	private TundraWorld() {
+	}
+
+	public static void init() {
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_boulder"), TundraFeatures.Boulder.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_banded_vein"), TundraFeatures.BandedVein.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_lichen_patch"), TundraFeatures.LichenPatch.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_shrubs"), TundraFeatures.Shrubs.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_moss_patch"), TundraFeatures.MossPatch.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("tundra_white_ice"), TundraFeatures.WhiteIce.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("dwarfed_spruce"), TundraFeatures.DwarfSpruce.CODEC);
+	}
+
+	/** A tundra block by its path, or {@code fallback} while that block isn't registered. */
+	static Block block(String path, Block fallback) {
+		Block found = BuiltInRegistries.BLOCK.getValue(JaymosPowers.id(path));
+		return found == null || found == Blocks.AIR ? fallback : found;
+	}
+
+	/**
+	 * Wraps the Overworld biome list as it is built: each Snowy Plains cell in the dry end of the frozen row is handed
+	 * out again as tundra (the cold, dry core), lichen woodland (its warmer rim, and a band on its humid side) and what
+	 * is left of Snowy Plains. So the tundra is wrapped in woodland wherever it would have met Snowy Plains or Plains.
+	 */
+	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> placing(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out) {
+		return pair -> {
+			Climate.ParameterPoint at = pair.getFirst();
+			Climate.Parameter hum = at.humidity(), temp = at.temperature();
+			if (pair.getSecond() != Biomes.SNOWY_PLAINS || temp.max() > FROZEN_BELOW) {
+				out.accept(pair);
+				return;
+			}
+			if (hum.max() <= DRY_BELOW) {
+				if (temp.min() < TUNDRA_COLDER_THAN && temp.max() > TUNDRA_COLDER_THAN) {
+					out.accept(Pair.of(with(at, new Climate.Parameter(temp.min(), TUNDRA_COLDER_THAN), hum), TUNDRA));
+					out.accept(Pair.of(with(at, new Climate.Parameter(TUNDRA_COLDER_THAN, temp.max()), hum), LICHEN_WOODLAND));
+				} else {
+					out.accept(Pair.of(at, temp.max() <= TUNDRA_COLDER_THAN ? TUNDRA : LICHEN_WOODLAND));
+				}
+			} else if (hum.min() == DRY_BELOW && hum.max() > DRY_BELOW + WOODLAND_BAND) {
+				out.accept(Pair.of(with(at, temp, new Climate.Parameter(DRY_BELOW, DRY_BELOW + WOODLAND_BAND)), LICHEN_WOODLAND));
+				out.accept(Pair.of(with(at, temp, new Climate.Parameter(DRY_BELOW + WOODLAND_BAND, hum.max())), Biomes.SNOWY_PLAINS));
+			} else {
+				out.accept(pair);
+			}
+		};
+	}
+
+	private static Climate.ParameterPoint with(Climate.ParameterPoint at, Climate.Parameter temperature, Climate.Parameter humidity) {
+		return new Climate.ParameterPoint(temperature, humidity, at.continentalness(), at.erosion(), at.depth(), at.weirdness(), at.offset());
+	}
+}

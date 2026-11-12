@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "stripped_spruce_log_from_dwarfed",
+  "ingredients": [
+    "jaymospowers:stripped_dwarfed_spruce_post",
+    "jaymospowers:stripped_dwarfed_spruce_post",
+    "jaymospowers:stripped_dwarfed_spruce_post",
+    "jaymospowers:stripped_dwarfed_spruce_post"
+  ],
+  "result": {
+    "id": "minecraft:stripped_spruce_log"
+  }
+}

@@ -114,6 +114,12 @@
     "jaymospowers:sunroot_door",
     "jaymospowers:sunroot_trapdoor",
     "jaymospowers:sunroot_button",
-    "jaymospowers:sunroot_pressure_plate"
+    "jaymospowers:sunroot_pressure_plate",
+    "jaymospowers:dwarfed_spruce_log",
+    "jaymospowers:dwarfed_spruce_post",
+    "jaymospowers:stripped_dwarfed_spruce_log",
+    "jaymospowers:stripped_dwarfed_spruce_post",
+    "jaymospowers:sprouted_glow_lichen",
+    "jaymospowers:snipped_glow_lichen"
   ]
 }
