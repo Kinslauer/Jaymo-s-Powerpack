@@ -1304,10 +1304,24 @@ The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the sy
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,
 costumes, the classes, valor and temperaments. The Excalibur look and the other art toggles stay out of the lore.
 
-(new) **The tundra** (Tundra thread, 2026-11-12; Andy picked all of Klei_Wright's tundra concept). In the far cold of
-the Overworld, past the snowy taiga, the soil ends. The old ice scraped it away long ago and left the world's oldest
-rock bare: dark deepslate to the surface, crossed by strips of older basalt that the smiths call greenstone, banded
-with iron. Nobody made it and no kingdom claims it. Lichen is slowly turning the rock back into soil, moss follows the
-lichen, and low red and yellow shrubs follow the moss; at the edge stands the lichen woodland, where spruce grows no
-taller than a man. Muskox graze the lichen in herds and white bears hunt the herds. Frostborn villages in the cold
-lands keep muskox for their wool. None of this is told on a screen: it is only there to be seen.
+(new) **What the wild and the outlaw keep** (Claude's placement for the Kingdoms and world picks, 2026-11-12, for Andy to
+approve). Round the Irradiated Giant's monolith the remnant leaks. Wolves that den there too long **change**: greener,
+tougher, hunting at any hour, and their bite carries the same slow **sickness** a traveller gets by lingering on that
+ground. It is cured as the other afflictions are. Tinkers make a small **ticking charm** that clicks faster the nearer
+the source; nobody who sells one can say why it works. In the snowy woods of the north the hearthlanders tell of **the
+Gaunt**, a starved, antlered thing that comes to fires lit in the snow at night and leaves at dawn. It is a monster of
+legend, not a remnant. Its bite, its heart, or carrion eaten in the snow at night can pass on **the curse of the
+hungry**: the cursed run on all fours after dark, feed on what they have killed, and for a short while grow huge. Death
+ends it. It cannot share a body with the night folk or the wolf-cursed. The **night folk** (vampires) learn older
+shapes with age: the bat, the colony, the mist, a stare that draws the weak-willed, and a way of not being where a
+blow lands. They do not take a wolf's shape; that belongs to the wolf-cursed. Among the forbidden blood arts there is
+one rite written on **stitched pages** that blood witches keep: it unmakes a bound captive into a **brute** that obeys
+for a moment and then knows no one. Realms punish it above every other forbidden art, and the captive's kin remember.
+Trades have their own lore: **hunters** keep a pack and mark a quarry with a bone, **farmhands** re-sow as they reap,
+**smiths** can raise a field forge on any campfire, and a **lord** can sound a horn for their guards. Barbarian bands
+have a pecking order: plain raiders, one or two strong ones, a heavy, and a chief known by a byname (the Knife, the
+Hammer, the Archer, the Poisoner) that the courts post a bounty under. Sorcerers of earth, water and air each have
+one more working: a **bulwark** dome, a **tide pearl** that drags a foe to the caster's feet, and a **harrying gale**.
+Kingdoms' assassins and thieves have a few more tricks (watching unseen, slipping a blow, lifting a weapon, a dry
+remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
+before it is seen.
