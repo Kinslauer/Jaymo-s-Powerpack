@@ -366,6 +366,33 @@ public final class PowersCompat {
 	}
 
 	/** Powers' {@code Smell.smell(Player)}. */
+	/** Powers' {@code Stance.low(Player)}: the stance wheel's low crouch. */
+	private static java.lang.invoke.@Nullable MethodHandle lowOf;
+	private static boolean lookedForLow;
+
+	/** Whether {@code player} holds Jaymo's Powers' low crouch (the stance wheel); false without Powers. */
+	public static boolean lowStance(Player player) {
+		if (!lookedForLow) {
+			lookedForLow = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					lowOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Stance"),
+						"low", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stance (older Powers?)", e);
+				}
+			}
+		}
+		if (lowOf == null) {
+			return false;
+		}
+		try {
+			return (boolean)lowOf.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle smellOf;
 	private static boolean lookedForSmell;
 
