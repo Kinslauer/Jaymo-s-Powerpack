@@ -51,6 +51,9 @@ public final class FormSkills {
 	static final String NIGHT_PREFIX = "night_";
 	static final Identifier NIGHT_HANDLER = JaymosKingdoms.id("night_move");
 	static final List<String> NIGHT_MOVES = List.of("dash", "pound", "gaze", "feed");
+	/** A Sorcerer's earth, water or air spell on the bar: {@code jaymoskingdoms:sorc_<spell>} ({@link com.jaymoskingdoms.SorceryPicks}), delivered by this. */
+	static final String SORC_PREFIX = "sorc_";
+	static final Identifier SORC_HANDLER = JaymosKingdoms.id("sorcerer_spell");
 	/** The spell tag of every form spell: what a form weapon's own container takes. */
 	public static final String TAG = JaymosKingdoms.MOD_ID + ":weapon_forms";
 
@@ -93,9 +96,18 @@ public final class FormSkills {
 		return NIGHT_MOVES.indexOf(spell.getPath().substring(NIGHT_PREFIX.length()));
 	}
 
-	/** (0.7.625) A form's or a takedown's spell, (0.7.632) or a vampire's move. */
+	/** The Sorcerer's spell a spell id stands for, or null. */
+	public static @Nullable String sorcOf(@Nullable Identifier spell) {
+		if (spell == null || !spell.getNamespace().equals(JaymosKingdoms.MOD_ID) || !spell.getPath().startsWith(SORC_PREFIX)) {
+			return null;
+		}
+		String name = spell.getPath().substring(SORC_PREFIX.length());
+		return com.jaymoskingdoms.SorceryPicks.ours(name) ? name : null;
+	}
+
+	/** A form's or a takedown's spell, a vampire's move, or a Sorcerer's spell. */
 	public static boolean ours(@Nullable Identifier spell) {
-		return formOf(spell) != null || moveOf(spell) != null || nightOf(spell) >= 0;
+		return formOf(spell) != null || moveOf(spell) != null || nightOf(spell) >= 0 || sorcOf(spell) != null;
 	}
 
 	/** The form spells on {@code player}'s bar now, (0.7.625) its Powers takedowns first. */
@@ -107,6 +119,10 @@ public final class FormSkills {
 			for (String move : NIGHT_MOVES) {
 				out.add(JaymosKingdoms.MOD_ID + ":" + NIGHT_PREFIX + move);
 			}
+		}
+		String sorc = com.jaymoskingdoms.SorceryPicks.barSpell(player);
+		if (sorc != null) {
+			out.add(JaymosKingdoms.MOD_ID + ":" + SORC_PREFIX + sorc);
 		}
 		for (String move : PowersCompat.barMoves(player)) {
 			out.add(JaymosKingdoms.MOD_ID + ":" + MOVE_PREFIX + move);
@@ -138,6 +154,11 @@ public final class FormSkills {
 			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(NIGHT_HANDLER, (level, spell, caster, targets, context, position) -> {
 				int which = nightOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
 				return which >= 0 && caster instanceof ServerPlayer player && NightGifts.move(player, which);
+			});
+			net.spell_engine.api.spell.event.SpellHandlers.registerCustomDelivery(SORC_HANDLER, (level, spell, caster, targets, context, position) -> {
+				String name = sorcOf(spell.unwrapKey().map(key -> key.identifier()).orElse(null));
+				return name != null && caster instanceof ServerPlayer player && player.level() instanceof net.minecraft.server.level.ServerLevel server
+					&& name.equals(com.jaymoskingdoms.SorceryPicks.barSpell(player)) && com.jaymoskingdoms.SorceryPicks.castKey(player, server, name);
 			});
 		}
 	}

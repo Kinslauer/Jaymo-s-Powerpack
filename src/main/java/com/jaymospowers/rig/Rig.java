@@ -227,6 +227,7 @@ public final class Rig {
 		RigCall.init();
 		RigSentry.init();
 		RigLimbs.init();
+		RigPicks.init();
 		ServerTickEvents.END_SERVER_TICK.register(Rig::tick);
 	}
 

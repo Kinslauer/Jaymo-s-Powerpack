@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "#c:strings",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "SS ",
+    "SLS",
+    " SS"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:lasso",
+    "count": 1
+  }
+}

@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.mixin.wild",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"PredatorTargetMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

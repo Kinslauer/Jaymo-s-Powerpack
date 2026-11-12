@@ -66,6 +66,7 @@ public final class Alchemy {
 		// (0.19.24) the bone-knitting elixir and the draught of vigour
 		com.jaymospowers.alchemy.healing.HealingBrews.init();
 		LabEscape.init();
+		com.jaymospowers.alchemy.picks.AlchemyPicks.init();
 	}
 
 	/** Registers an item and adds it to the Alchemy tab. */

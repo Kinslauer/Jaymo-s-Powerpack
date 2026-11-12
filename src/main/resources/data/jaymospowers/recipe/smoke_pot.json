@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:clay_ball",
+    "minecraft:charcoal",
+    "minecraft:spider_eye"
+  ],
+  "result": {
+    "id": "jaymospowers:smoke_pot",
+    "count": 2
+  }
+}

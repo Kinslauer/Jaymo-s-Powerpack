@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:bone",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "jaymospowers:head_whistle",
+    "count": 2
+  }
+}

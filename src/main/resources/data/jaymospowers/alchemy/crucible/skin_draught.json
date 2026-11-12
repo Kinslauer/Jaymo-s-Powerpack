@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "earth": 8,
+    "metal": 6,
+    "crystal": 5,
+    "life": 3
+  },
+  "result": {
+    "item": "jaymospowers:skin_draught",
+    "count": 1
+  },
+  "research": "skins"
+}

@@ -36,13 +36,14 @@ abstract class LivingEntityHurtMixin {
 	private float jaymoskingdoms$classDamage(float amount, ServerLevel level, DamageSource source) {
 		LivingEntity self = (LivingEntity) (Object) this;
 		// (0.7.220) and a Master Hunter's on beasts
-		float dealt = Careers.dealt(self, source, Flaws.dealt(self, source, com.jaymoskingdoms.Blessings.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, com.jaymoskingdoms.BruteRage.dealt(self, source, ClassPerks.dealt(self, source, com.jaymoskingdoms.Vampires.weakness(self, source, com.jaymoskingdoms.Vampires.staked(self, source, amount)))))))))));
+		float dealt = com.jaymoskingdoms.HunterPack.dealt(self, source, Careers.dealt(self, source, Flaws.dealt(self, source, com.jaymoskingdoms.Blessings.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, com.jaymoskingdoms.BruteRage.dealt(self, source, ClassPerks.dealt(self, source, com.jaymoskingdoms.Vampires.weakness(self, source, com.jaymoskingdoms.Vampires.staked(self, source, amount))))))))))));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
 		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
 		// (0.7.431) last, a tribe's captain takes it as his traits have it (Captains)
 		// (0.7.433) a tribe's king, while his captains stand (SwornCaptains)
 		// (0.7.492) last, a kneeling boss takes a riposte (BossPosture)
-		return com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))));
+		// (and Watched, the gaze built from hiding, spends itself on the blow: RogueGambits)
+		return com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))))));
 	}
 }

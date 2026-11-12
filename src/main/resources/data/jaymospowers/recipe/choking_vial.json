@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:poisonous_potato",
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "id": "jaymospowers:choking_vial",
+    "count": 1
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "message.jaymoskingdoms.hunter.marked": "Quarry marked: %s.",
+  "message.jaymoskingdoms.hunter.sent": "The pack goes after %s.",
+  "message.jaymoskingdoms.hunter.noquarry": "You have no quarry marked. Use a bone on a beast first.",
+  "message.jaymoskingdoms.hunter.recalled": "The pack comes back to your side.",
+  "message.jaymoskingdoms.hunter.newwolf": "The lodge has sent you a hound.",
+  "message.jaymoskingdoms.hunter.fell": "One of your hounds has fallen. The lodge will send another.",
+  "message.jaymoskingdoms.hunter.howl": "Your howl rings out. %s beasts are marked and slowed.",
+  "message.jaymoskingdoms.hunter.howl.none": "Your howl rings out, and nothing answers."
+}

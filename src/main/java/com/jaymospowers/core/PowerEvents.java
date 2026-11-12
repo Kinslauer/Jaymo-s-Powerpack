@@ -46,6 +46,7 @@ public final class PowerEvents {
 			Affinity.forget(handler.player);
 		});
 		Callings.register();
+		OneHolder.register();
 		ServerTickEvents.END_SERVER_TICK.register(Powers::tick);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> PowerCommand.register(dispatcher));
 	}

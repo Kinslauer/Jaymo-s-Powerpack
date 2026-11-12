@@ -1162,6 +1162,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (com.jaymoskingdoms.nightforms.NightForms.answer(player, answer)) {
+			// a vampire's shape menu
+			return;
+		}
 		if (Talks.answer(player, answer)) {
 			// (0.7.523) a talk that matters: their answer to your reply
 			return;

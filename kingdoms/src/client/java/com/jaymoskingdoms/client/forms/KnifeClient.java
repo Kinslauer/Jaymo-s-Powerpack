@@ -28,6 +28,8 @@ public final class KnifeClient {
 
 	public static void register() {
 		EntityRenderers.register(Bolas.TYPE, context -> new ThrownItemRenderer<>(context, 0.8F, false));
+		EntityRenderers.register(com.jaymoskingdoms.forms.Lasso.TYPE, context -> new ThrownItemRenderer<>(context, 0.8F, false));
+		LassoRope.register();
 		ClientPlayNetworking.registerGlobalReceiver(KnifeForms.Mark.TYPE, (payload, context) -> {
 			Minecraft minecraft = context.client();
 			if (minecraft.level == null) {

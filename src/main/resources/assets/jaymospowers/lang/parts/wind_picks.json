@@ -1,0 +1,10 @@
+{
+  "message.jaymospowers.wind_picks.cooling": "The storm is still gathering.",
+  "message.jaymospowers.wind_picks.hungry": "Too hungry to hold a bolt.",
+  "message.jaymospowers.wind_picks.no_room": "No room to step along a bolt.",
+  "message.jaymospowers.wind_picks.sky_overworld": "Only the Overworld's sky will turn.",
+  "message.jaymospowers.wind_picks.sky_locked": "The sky will not turn here.",
+  "message.jaymospowers.wind_picks.sky_clear": "The storm lets go of the sky.",
+  "message.jaymospowers.wind_picks.sky_rain": "You draw the rain in.",
+  "message.jaymospowers.wind_picks.sky_thunder": "You call the thunder."
+}

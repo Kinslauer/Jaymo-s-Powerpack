@@ -96,7 +96,7 @@ public final class AvatarMoves {
 	public static final int FIST = 0, PILLAR = 1, SWITCH = 2;
 
 	/** {@code PowerKey} ordinals of R, G and B. */
-	public static final int KEY_R = 0, KEY_G = 1, KEY_B = 3;
+	public static final int KEY_R = 0, KEY_G = 1, KEY_V = 2, KEY_B = 3;
 
 	/**
 	 * Each avatar's cooldowns (when each move is ready, game time), synced to the avatar for the HUD:
@@ -124,7 +124,7 @@ public final class AvatarMoves {
 
 	/** One avatar's held keys: when G and B went down (game time), or -1. */
 	private static final class Held {
-		long g = -1, b = -1;
+		long g = -1, b = -1, v = -1;
 	}
 
 	private static final List<Ball> BALLS = new ArrayList<>();
@@ -148,6 +148,17 @@ public final class AvatarMoves {
 	static void key(ServerPlayer player, int key, boolean down) {
 		Held held = HELD.computeIfAbsent(player.getUUID(), k -> new Held());
 		long now = player.level().getGameTime();
+		if (key == KEY_V) {
+			// V: a tap raises a fire wall, a hold keeps a ring of flame (FireKit)
+			if (down) {
+				held.v = now;
+			} else if (held.v >= 0) {
+				boolean hold = now - held.v >= HOLD_TICKS;
+				held.v = -1;
+				FireKit.avatarKey(player, false, hold);
+			}
+			return;
+		}
 		if (key == KEY_R) {
 			if (down) {
 				fist(player);
@@ -196,6 +207,9 @@ public final class AvatarMoves {
 			long now = player.level().getGameTime();
 			if (now % MARK_EVERY != 0) {
 				continue;
+			}
+			if (held.v >= 0 && now - held.v >= HOLD_TICKS && FlameAvatar.is(player) && !FireKit.ringing(player)) {
+				FireKit.ring(player, true);
 			}
 			if (held.g >= 0 && now - held.g >= HOLD_TICKS && ready(player, PILLAR)) {
 				Vec3 spot = cursor(player);

@@ -26,6 +26,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -50,15 +51,24 @@ import net.minecraft.world.phys.Vec3;
  * (0.7.541) Lanterns burn down like {@link Torches} do, but on fuel you put in them (Andy, 2026-11-04). A lantern burns until
  * its fuel runs out, then goes out and is left a {@link #BURNT_LANTERN} (no light). Use coal or charcoal on a lantern, lit or
  * burnt out, to add {@link #COAL_TICKS} of burning; ambergris burns slow and adds {@link #AMBERGRIS_TICKS}. A lantern holds at
- * most {@link #MOST_TICKS}. A lantern never fuelled (fresh from the crafting grid, or set by world generation or a settlement)
- * starts with one coal's worth. Nothing ever says how long is left (Andy): a lantern picked up keeps its fuel in
+ * most {@link #MOST_TICKS}. A lantern fresh from the crafting grid starts with one coal's worth; one set by world generation
+ * or a settlement starts with {@link #KEPT_FILL}. Nothing ever says how long is left (Andy): a lantern picked up keeps its fuel in
  * {@link #FUEL_LEFT}, and its item shows a durability-style bar for what is left of its last fill (mixin.LanternItemBarMixin),
  * hidden while full. Lanterns sit behind glass, so rain doesn't put them out. Villagers relight burnt lanterns near them the way
  * they relight burnt torches. Soul lanterns never go out (Andy), and copper lanterns are left alone, as copper torches are.
+ *
+ * <p>(Andy, 2026-11-12: a whole field went dark too early) A lantern set by world generation or a settlement starts on
+ * {@link #KEPT_FILL}, and folk keep it going as they pass ({@link Lamplight}): lanterns where people live and travel stay
+ * lit, while those on roads nobody uses burn down and go dark.
  */
 public final class Lanterns {
-	/** One coal (or charcoal) burns this long (ticks): three days. */
-	static final long COAL_TICKS = 72000L;
+	/** One coal (or charcoal) burns this long (ticks): five days (three before 2026-11-12). */
+	static final long COAL_TICKS = 120000L;
+	/**
+	 * A lantern set by world generation or a settlement starts on this much, and folk passing top it back up to it
+	 * ({@link Lamplight}): ten days.
+	 */
+	static final long KEPT_FILL = 240000L;
 	/** One ambergris burns this long (ticks): fifteen days. */
 	static final long AMBERGRIS_TICKS = 360000L;
 	/** A lantern holds no more than this much fuel (ticks): thirty days. */
@@ -76,10 +86,20 @@ public final class Lanterns {
 	private Lanterns() {
 	}
 
-	/** A burnt-out lantern, standing or hung: dark and cold. */
+	/** A burnt-out lantern, standing or hung: dark and cold, till someone lights it ({@link Lamplight#burntTick}). */
 	static final class BurntLantern extends LanternBlock {
 		BurntLantern(BlockBehaviour.Properties properties) {
 			super(properties);
+		}
+
+		@Override
+		protected boolean isRandomlyTicking(BlockState state) {
+			return true;
+		}
+
+		@Override
+		protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+			Lamplight.burntTick(state, level, pos, random);
 		}
 	}
 
@@ -140,12 +160,32 @@ public final class Lanterns {
 		return state.is(Blocks.LANTERN);
 	}
 
-	/** A lantern's random tick (mixin.LanternBlockMixin): out once its fuel is spent; never fuelled, it starts on a coal's worth. */
+	/**
+	 * A lantern's random tick (mixin.LanternBlockMixin): out once its fuel is spent; never fuelled, it starts on
+	 * {@link #KEPT_FILL}. One that ran dry while nobody was near to see it (its chunk unloaded, or out of every player's
+	 * reach) stays lit if people live or travel there ({@link Lamplight#kept}): someone filled it in the meantime.
+	 */
 	public static void randomTick(BlockState state, ServerLevel level, BlockPos pos) {
 		long now = level.getGameTime();
-		if (now >= fuel(level, pos, now)[0]) {
+		long end = fuel(level, pos, now)[0];
+		if (now < end) {
+			return;
+		}
+		if (now - end > Lamplight.UNSEEN && Lamplight.kept(level, pos)) {
+			// (filled some while back, so a stretch of road doesn't all go dark on the same night)
+			set(level, pos, now + KEPT_FILL / 2 + (long) (level.getRandom().nextDouble() * (KEPT_FILL / 2)), KEPT_FILL);
+		} else {
 			goOut(level, pos, state);
 		}
+	}
+
+	/** Folk passing the lit lantern at {@code pos} fill it to {@link #KEPT_FILL} if it is under half that; true if they did. */
+	static boolean topUp(ServerLevel level, BlockPos pos, long now) {
+		if (!burns(level.getBlockState(pos)) || fuel(level, pos, now)[0] - now >= KEPT_FILL / 2) {
+			return false;
+		}
+		set(level, pos, now + KEPT_FILL, KEPT_FILL);
+		return true;
 	}
 
 	/** A lantern was set down from {@code stack} (mixin.LanternBlockMixin): it burns on the fuel the item carried, or a fresh coal's worth. */
@@ -182,12 +222,12 @@ public final class Lanterns {
 		set(level, pos, -1, 0);
 	}
 
-	/** [fuel end time, last fill] of the lantern at {@code pos}; one never fuelled is given a coal's worth from {@code now}. */
+	/** [fuel end time, last fill] of the lantern at {@code pos}; one never fuelled is given {@link #KEPT_FILL} from {@code now}. */
 	private static long[] fuel(ServerLevel level, BlockPos pos, long now) {
 		List<Long> entry = level.getChunkAt(pos).getAttachedOrElse(FUEL, Map.of()).get(String.valueOf(pos.asLong()));
 		if (entry == null || entry.size() != 2) {
-			set(level, pos, now + COAL_TICKS, COAL_TICKS);
-			return new long[] {now + COAL_TICKS, COAL_TICKS};
+			set(level, pos, now + KEPT_FILL, KEPT_FILL);
+			return new long[] {now + KEPT_FILL, KEPT_FILL};
 		}
 		return new long[] {entry.get(0), entry.get(1)};
 	}
@@ -242,7 +282,7 @@ public final class Lanterns {
 		Torches.remember(level, pos);
 	}
 
-	/** The burnt lantern {@code state} at {@code pos} burns again. Fuel set by the caller, or a coal's worth on its next tick. */
+	/** The burnt lantern {@code state} at {@code pos} burns again. Fuel set by the caller, or {@link #KEPT_FILL} on its next tick. */
 	static void relight(ServerLevel level, BlockPos pos, BlockState state) {
 		level.setBlockAndUpdate(pos, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, state.getValue(LanternBlock.HANGING))
 			.setValue(LanternBlock.WATERLOGGED, state.getValue(LanternBlock.WATERLOGGED)));

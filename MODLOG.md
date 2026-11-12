@@ -3271,3 +3271,174 @@ Nothing here has been played in a client yet; expect tuning.
 - While you're lying against a rise you could go up, right click is the haul's (no item used or block worked), unless the crosshair is on a mob or something a click is for (a door, a chest...). Downed players can haul too.
 - Code: `core/ProneHaul` (rules, path, server), `client/ProneHaulClient` (input and movement), `client/ProneHaulPose` (drawn over `CrawlPose`), `ProneHaulUseMixin`; the old automatic haul step in `Crawl` is gone. `Breaks.workingArms` added.
 - Built; not played.
+
+## 0.22.67 (2026-11-12): Daggers harvest alike; no free knives or arrows from RPG Series skills
+
+- **Rogues & Warriors' daggers** (Flint Dagger and the rest) now cut what the Tool Station dagger cuts: everything a hoe mines (hay, moss, sponge, sculk, wart blocks...) at their material's speed, plus a sword's cuts. Before they only had the sword's (armory/DaggerHarvest).
+- **Fan of Knives** no longer makes up its blades. It throws up to three of your own knives: the one in your hand first, then the same kind from your pack, then any other knife or dagger (never Sora's Dagger or Ashfang). It never throws more than you carry; with only the held one, one knife flies. Each knife shows as itself and lands to be picked up, like Impale's spear (compat/SpellThrows).
+- **Shattering Throw** (Warrior) throws the weapon itself, which leaves your hand and lands to be picked up, as Impale does.
+- **Rain of Arrows** (Archers) spends one of your arrows (pack or worn quiver) for each arrow that falls, as many as you carry up to its usual count, and won't cast with none. **Barrage** won't cast unless you carry its three arrows (Spell Engine made up any it ran short of).
+- **Throw Net** (Rogue) throws one of your new **Throwing Nets** (5 string, crafted in an X) and won't cast without one. Andy: "make a net item crafted from string".
+- Creative casts take nothing, as before. Built; not played.
+
+## 0.22.68 (2026-11-12): blood on doors swings with the door
+
+- Andy: "the blood decals that splashed on the door in the second clip did not travel with the door as it opened, so they floated in midair".
+- **Doors**: a blood splat or run on a door now swings with it when it opens or closes, turning about the hinge to wherever the door now stands (the side that faced out ends up facing into the doorway, as on a real door). Each wall mark remembers the block it lies on (`BloodWallMark.follow`, `swing`).
+- **Nothing left to lie on**: a wall mark whose wall is gone goes with it instead of hanging in the air: the block broken or replaced, a fence gate opened, a trapdoor flipped. Puddles on the ground already settled onto whatever was under them.
+- Built; not played.
+
+## 0.22.69 (2026-11-12): hits and pickups heard again - downed hits land, ImmersiveFX leaves the pack
+
+- **Hitting a downed body sounds and looks like a hit** (`Downed.blowLands`): a player's blow on anyone downed (every
+  humanoid, villagers, tamed animals) takes no health, so vanilla only played its soft no-damage swish and the only
+  answer was a quiet, low player grunt. Now each blow that counts a wound gives the thud of a full swing (arrows keep
+  their own hit sound), the red hurt flash and flinch every client sees, and the body's own hurt cry at its own voice
+  (a vindicator grunts as a vindicator). The killing blow (three hearts or more, or the tenth wound) gets the thud and
+  flash, and the death cry follows as before. Andy: "attacking the vindicator didnt have any impact or reaction sounds".
+- **ImmersiveFX: Resurrected leaves the pack** (Andy: "having both is making everyone lag so you can remove the
+  immersive"). It and Sound Physics Remastered both put their own echo and muffling filters on every sound: ImmersiveFX
+  stands down beside a sound physics mod, but it looks for the old id `soundphysics`, not Remastered's
+  `sound_physics_remastered`, so both ran. That was the likeliest reason pickups went silent and all sound dropped out
+  while sprinting, and the two together cost frames. The build moves it out of the CurseForge profile
+  (`removedIdsFromProfile`). AmbientSounds 6, which it replaced, is not brought back; Sound Physics keeps the echoes.
+- Built; not played.
+
+## 0.22.70 (2026-11-12): Z Fighter techniques, brute clashes and new moves for fire, frost, storm, weight, water and sound (#1351)
+
+**Z Fighter**
+- Four new techniques to buy with TP on the Techniques page: **Eye Beams** (sneak + V held, on a heat gauge; let go at once for a blinding shot, R while held for a spin, cold and freezing for the Frost lineage, and into the face of someone you hold), **Aerial Charge** (G while flying: carry the first foe into a wall or the ground; aimed steeply down it is a power dive), **Thunderclap** (G: a shockwave, or boxed ears up close, which deafens a player for a few seconds) and **Great Breath** (sneak + V held: a gust that pushes everything back; cold for the Frost lineage).
+- **Hold Fast**: every Z Fighter hits harder the closer they are to going down.
+- **Bracers**: guarding soaks damage into a bar that pays out as a damage boost when the guard drops, left click while guarding clashes them for a knockback, and arrows that hit the guard are sent back.
+- **Great ape**: a held punch with nothing to grab tears up a slab of ground to throw; G cracks the earth in a line and B in rings.
+- **Clash of blows**: two great blows that meet lock for a moment and one side gives. Great ape, Bulwark's charge, the big suit's ram and a combo finisher can all clash.
+- **Sun and moon**: Verdant fists are stronger in sunlight and a little weaker at night; Warrior-born are stronger under the night sky, more so at full moon. Sneak, stand still and look straight up to drink it in.
+- **Kicks**: a tornado kick joins the strings, spinning kicks pull the target in, and sprinting into a string opens with a flying kick.
+- **Throws**: a thrown body bowls into others; a thrown friend lands soft.
+- **Charged throws**: hold a rock or dagger throw longer to charge it with ki so it bursts where it lands; sneak on release sets rocks circling you.
+
+**Fire and frost**
+- **Emberborn and Pyre** run hot: a heat bar that climbs in a fight, white-hot hands that wear armour down, a vent (double-tap sneak), and a burn and burst at the top. Sneaking still with empty hands braces: blows are soaked and blasted back, and a shot that hits you is caught and returned stronger. Fire you start jumps between foes, and what it kills bursts.
+- **Pyre** (sneak + R rays, sneak + V flame ring, sneak + B fire wall, Z tap sky column) and the **Flame Avatar** (V tap wall, V hold ring) get the new fire moves.
+- **Cryokinesis and Rime**: a cold gaze that freezes after six seconds, an icicle volley that bleeds and an ice ball that roots (sneak variants of their keys).
+
+**Storm, weight, water and sound** (sneak or sprint variants of the usual keys)
+- **Wind**, in a storm mode: Bolt Rush, Bolt Clap, Bolt Slam; in Thunderhead also a lightning dome, a blink along a bolt and a ring of tornadoes; sneak + Z turns the sky (clear, rain, thunder); hits change with the weather.
+- **Gravity**: Binding Bands (sneak + B) pin up to five; Trading Places (sneak + Z) swaps with a target, blinks and leaves a copy, or drags what you hit to your feet; Last Footing snaps you back to safe ground once when badly hurt; in Collapse, sneak + C is ten seconds where nothing stops you.
+- **Darktide**: a water dome, a whirlpool, a held water beam, a bleeding trident jab, lightning on a thrown trident, a shoal that fights for you in water and drowned that side with a trident bearer.
+- **Resonance**: a held shriek, a cry that lifts you in mid-air, a sound-barrier punch and a panic cry when hit.
+
+Nothing here has been played in a client yet; expect tuning.
+
+## 0.22.71 (2026-11-12): the tundra - bare old rock and the lichen woodland (#1358)
+
+- **Two new Overworld biomes** (Andy picked all of Klei_Wright's tundra concept; `docs/Tundra-Plan.md`). Not a
+  dimension: they take the driest part of what was Snowy Plains, in new chunks only.
+  - **Tundra**: no stone or soil. Deepslate runs from bedrock to the surface under thin grass, yellow moss and gravel.
+    **Greenstone belts** (strips and patches of smooth basalt) cross it from the surface down, with pockets of
+    **banded iron ore** in them, some round a heart of raw iron blocks; iron ore is also far commoner underground here
+    than anywhere else. Boulders, lichen on the bare rock, low red, orange and yellow shrubs. No trees. It never
+    snows or rains, but snow motes drift under a pale sky, and its water freezes to white ice. Polar bears, foxes, rabbits.
+  - **Lichen woodland**: the belt between the tundra and everything else, with a grass colour halfway between, yellow
+    moss patches, and **dwarfed spruce** no taller than a man.
+- **Spruce saplings grow dwarfed** in both biomes (there is no dwarf sapling).
+- How: `tundra/world/TundraWorld` splits Snowy Plains' dry cells as the Overworld biome list is built
+  (`TundraPlacementMixin`); the ground is the material rule `jaymospowers:tundra`, run from our copy of
+  `minecraft:overworld` (one added line: another pack replacing that file would switch the tundra's rock off);
+  `TundraFeatures` has the boulders, veins, lichen, shrubs, moss, white ice and dwarfed spruce.
+- Compiled; not played. Numbers that are guesses until seen in a world: belt width and spacing, vein count, how much of
+  the surface is grass, and how much of Snowy Plains the two biomes take.
+- **Klei_Wright's own art** for the tundra's blocks, ground and hanging lichen and the phosphor icon ships as its own
+  resource pack inside the mod, `resourcepacks/klei_tundra` (CC BY-NC-SA 4.0, his files unchanged, credited in its
+  `CREDITS.txt`), on by default over our own art; switch it off in Resource Packs to see ours. His muskox art is not
+  used: it fits his model, not ours. Not seen in game: whether each of his textures sits right on our models.
+
+## 0.22.72 (2026-11-12): the tundra's blocks, plants and living lichen (#1358)
+
+From Klei_Wright's "Tundra game drop" concept (`docs/Tundra-Plan.md`, track A). Package `com.jaymospowers.tundra`;
+every texture is painted from nothing by `tools/gen_tundra.py`, the models are our own.
+- **Banded Iron Ore**: iron in smooth basalt, in pale bands. Stone pick or better; 2 to 4 raw iron (plain ore gives 1),
+  Fortune as on any ore, silk touch keeps the block. Smelts and blasts into an iron ingot.
+- **Dwarfed Spruce Log** (a 10-wide pillar) and **Dwarfed Spruce Post** (6 wide): placed along any axis like a log,
+  stand in water, an axe strips them. 2 logs or 4 posts craft into 1 spruce log (the stripped ones into a stripped
+  spruce log). They burn, and count as logs (`minecraft:logs_that_burn`).
+- **Stunted Red Shrub, Orange Shrub, Yellow Shrub**: small bushes on dirt, grass, moss, yellow moss and gravel. Shears
+  or silk touch to keep one.
+- **Yellow Moss** and **Yellow Moss Carpet** (2 moss -> 3 carpets); hoe-mined like moss, and plants root in it.
+- **White Ice**: opaque white ice that never melts, as slippery as ice. A pickaxe gets it back.
+- **Sprouted Glow Lichen**: bone meal on vanilla glow lichen sprouts it (same faces). By day, with sky light 9 or more,
+  it breaks the rock it clings to down a step (stone, deepslate, basalt, smooth basalt, granite, diorite, andesite,
+  tuff, calcite, cobblestone, cobbled deepslate, sandstone -> gravel; gravel -> sand 60% / coarse dirt 40%; coarse
+  dirt -> dirt), or seeds a plain glow lichen onto another such block within 8. With no rock left in reach it stops;
+  with 12 lichen within 8 it stops seeding. Never ores, never a block that holds something. `LichenLife`; the rock
+  lists are the block tags `jaymospowers:lichen/to_gravel`, `to_soil`, `to_dirt`.
+- **Shears** on a sprouted lichen snip it (it only glows from then on); on vanilla glow lichen they make **Snipped
+  Glow Lichen**, a lichen that never spreads. Builds are safe.
+- **Succession**: yellow moss creeps onto dirt and coarse dirt beside it while glow lichen is within 4 blocks; under
+  open sky it sometimes raises a shrub (stunted red where rock is still under the moss, else orange or yellow), no
+  more than 3 within 5 blocks. `YellowMossBlock`.
+- **Phosphor**: the glow ink sac is renamed Phosphor (English) and redrawn; any glow lichen smelts into one.
+- **Glow lichen's look**: vanilla glow lichen (and ours) grows tufts and crusts on a floor and hanging strands under
+  a ceiling.
+- Changed on purpose: bone meal in the hand no longer spreads vanilla glow lichen, it sprouts it (a dispenser still
+  spreads it).
+- Not built: yellow moss layers through the saw (the layer list is generated from wooden and stone blocks, not a
+  one-line registration); a claims check for the lichen (Powers has none to ask).
+- Built and compiled; not played. JEI showing the Phosphor recipe is unchecked.
+
+## 0.22.73 (2026-11-12): Chrono, Blindness and Rig additions, arrowheads, a belt of throwables, shield moves, three draughts, two pacts and trained hands (#1355)
+
+**Chrono**
+- **Calculation**: parries, perfect parries and blows that pass through you in Time Flow feed a bar. Full, every blow you land finds a weak point (more damage, may open the most hurt limb). Sneak + G spends it: for a few seconds blows and shots aimed at you miss and you slip aside (falls, fire, magic and blasts still land).
+- **Afterimage decoys** (sneak + V while overclocked): copies of you stand about, more in a higher gear. Hostile creatures go for them, are slowed when they pop one, and now and then you change places with a copy.
+
+**Blindness**
+- **Radar sense**: someone who can't see is no longer blinded by flashes, smoke or darkness thrown at them. Hostile creatures near you are felt and shown, and one behind you or out of sight is called out with a red mark on that side of the screen and a low knock.
+- **Pursuit**: a melee blow marks the creature and opens a cut; while the mark lasts you sprint faster toward it. It shows in gold on the radar.
+
+**The Rig** (all from the Rig menu, Sneak + J, and the new Wrist Table screen)
+- **Drones**: one for each level of the Mind, up to five. Formations (close in, surround, strafe, scout), a shell that takes blows for you, one sent as a missile, and duties when there is nothing to fight (fetch items, mend you, patrol a route of up to four marks).
+- **Wrist Table**: a map of the land the suit has seen with drones, enemies and patrol marks, a list of creatures studied (read with the Scrying Lens, or five of a kind felled), and every drone order with what it does.
+- **Decoy**: a lure that every enemy turns on while you go unseen, or three images that copy your moves.
+- **Storing field**: keeps up to three parried blows (a perfect parry at double strength) and lets them all go at once.
+- **Bank shot**: look at a wall with an enemy near it and a faint line shows the bounce; arrows, thrown things and the palm blast turn off that wall toward the enemy.
+
+**Arrowheads** (they ride in the quivers the pack already has)
+- Fourteen heads fitted to plain arrows at the Fletching Station: bola, net, caltrop, harpoon, grapple, smoke, flare, whistle, barbed, broadhead, fire, flash, drill and boomerang. Iron heads are forged from blanks; every route shows in JEI.
+- **Quiver: Next Arrowhead** (mouse button 5 unless changed) brings the next kind to the top of a worn quiver (needs Jaymo's Kitchen for its quiver).
+- **Trained archers** (by arrows loosed): drawing in the air slows your fall, sneak + full draw looses a second arrow behind the first, and a full draw loosed in the air becomes a volley on the spot you aimed at.
+- Arsenal's rift arrows can carry a fitted head.
+
+**Belt of throwables** (leather, iron, steel; worn in the belt slot)
+- Eight throwables: smoke pot, flash powder, sneezing powder, bleeding dart, acid vial, choking vial, caltrops and bear trap. Click them onto the belt to load it. **Belt: Throw** is mouse button 4 unless changed; sneak + throw picks the next kind.
+
+**Shield moves** (shield up)
+- Attack throws the shield (it ricochets and comes back; a round shield throws best), sneak + attack slams it into the ground, sprinting charges behind it, and standing still or sneaking braces: nothing from the front moves you and arrows are turned back.
+
+**Alchemy**
+- **Skin Draught**: drink, then touch stone, iron, glass, ice, wood, slime, honey, sponge, obsidian, sand, wool or a bell to take its skin for a while, each with a gain and a cost.
+- **Dampening Draught** (also as splash, lingering and tipped arrows): shuts a power away for a few minutes. It always wears off. Great foes shrug most of it off.
+- **Draught of Release** (late research): drunk twice, slowly, it gives a power up for good and leaves it in a sealed phial a powerless person can drink. A Xeno-Band comes off instead. It will not take on a Z Fighter, a bonded symbiote or anyone bound by a pact.
+- **Two pacts**, for a holder whose power is already corrupted, one for a person, never undone: one is offered by a demon master; the other comes to those who carry a Maw void shard long enough.
+
+**Everyone**
+- **Matching colours**: wearing the same costume design as a companion within 12 blocks steadies you both (a little toughness and slow mending).
+- **Boxing**: with fist gear, trained boxers get a loose-joint chance on any punch (style level 2), a pressure point on sneak + punch that deadens an arm or leg for 10 seconds (level 4; on a player's arm it can shut two ability keys for a moment), a knee kick on sprint + punch (level 5) and a sweep on sneak + strafe + punch that puts a person on their back (level 7).
+- **Planted stance**: sneak with any guard up for a second to plant. Blows are cut by 60%, nothing stuns or moves you, and you barely walk. A parried melee blow hands part of its weight back to the attacker. Jump while guarding (not sneaking) to step up and back out of reach.
+
+**Changed on the way**
+- Sneaking now counts as standing still for the shield brace.
+
+Classes: `power/chrono/ChronoCalculation, ChronoDecoys`; `power/blindness/BlindnessRadar, BlindnessPursuit`; `rig/RigPicks, RigDrones, RigTable, RigStudy, RigDecoy, RigField, RigBank`, `client/rig/RigTableScreen`; `gear/` (arrowheads, `QuiverCycle`, `ArcheryMoves`, belts, throwables, `shield/ShieldMoves`, `GearJei`); `alchemy/picks/SkinDraughts, Dampening, GivingUp, Pacts`; `costume/Rally`, `boxing/PressurePoints`, `combat/Stances`. Art from `tools/gen_gear_picks.py` and `tools/gen_alchemy_picks.py`.
+
+Compiled only; nothing was played in a client. Least sure: the sweep's back-fall pose, the shield throw and charge feel, drone flight, the bank-shot bounce, the skin overlay on modded bodies, and mouse side buttons on mice that lack them (rebind in Controls).
+
+## 0.22.74 (2026-11-12): A ticking charm and one holder per power (#1364)
+
+- **Ticking Charm** (charm slot; clock, copper, string and amethyst): it clicks faster the nearer you are to the Irradiated Giant's monolith or a blighted wolf. Sound only. Needs Jaymo's Kingdoms to have anything to hear.
+- Honey and wild garlic ease the blight sickness, and the Gaunt and its heart have alchemy essences.
+- **One holder per power**, off by default: `/power oneholder on|off|status` and `/power oneholder free <power>` for operators. While on, a power someone already holds cannot awaken in, be granted to or be drunk from a phial by anyone else, until its holder dies for good, gives it up or an operator frees it. Z Fighter lineages and Xenoform are exempt.
+
+Classes: `baubles/TickingCharm`, `core/OneHolder`, hooks in `compat/KingdomsCompat`, `Afflictions`, `Powers`, `PowerCommand`.
+
+Compiled only; not played.

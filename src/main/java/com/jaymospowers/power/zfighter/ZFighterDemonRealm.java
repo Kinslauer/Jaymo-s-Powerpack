@@ -541,8 +541,10 @@ public final class ZFighterDemonRealm {
 	static void talk(ServerPlayer player, net.minecraft.world.entity.LivingEntity master) {
 		Long last = player.getAttached(LESSON);
 		boolean today = last != null && last >= player.level().getGameTime() / DAY && !player.isCreative();
-		java.util.List<ZFighterNpcs.Option> options = java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.demon_master.lesson",
-			!today && Powers.has(player, ZFighterPower.INSTANCE), () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, true), () -> talk(player, master))));
+		java.util.List<ZFighterNpcs.Option> options = new java.util.ArrayList<>(java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.demon_master.lesson",
+			!today && Powers.has(player, ZFighterPower.INSTANCE), () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, true), () -> talk(player, master)))));
+		// the Cinder Pact, offered to a corrupted holder only
+		options.addAll(com.jaymospowers.alchemy.picks.Pacts.offer(player, master, () -> talk(player, master)));
 		ZFighterNpcs.ask(player, master, Component.translatable(today ? "talk.jaymospowers.demon_master.greet_today" : "talk.jaymospowers.demon_master.greet"), options);
 	}
 

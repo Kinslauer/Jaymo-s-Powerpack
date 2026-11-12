@@ -87,6 +87,11 @@ public final class BossIntros {
 	static final AttachmentType<List<String>> SEEN = AttachmentRegistry.create(JaymosKingdoms.id("boss_intros_seen"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
+	/** The kinds of great foe {@code player} has seen make their entrance, as {@link #key} names them (for the journal). */
+	public static List<String> seen(net.minecraft.world.entity.player.Player player) {
+		return player.getAttachedOrElse(SEEN, List.of());
+	}
+
 	/** Tells a player's game to play {@code entity}'s entrance; {@code calm} for one that isn't after them (no shake). */
 	public record Play(int entity, int ticks, int roarAt, boolean calm) implements CustomPacketPayload {
 		public static final Type<Play> TYPE = new Type<>(JaymosKingdoms.id("boss_intro"));
@@ -164,7 +169,12 @@ public final class BossIntros {
 	 * several great foes is told apart: each patron's champion, a chief from a warlord.
 	 */
 	public static @Nullable String key(Entity entity) {
-		if (!(entity instanceof LivingEntity living) || !living.isAlive() || entity instanceof ServerPlayer) {
+		return entity instanceof LivingEntity living && living.isAlive() ? kind(entity) : null;
+	}
+
+	/** {@link #key}, for a creature alive or fallen (the trophy it leaves, {@code Trophies}). */
+	public static @Nullable String kind(Entity entity) {
+		if (!(entity instanceof LivingEntity) || entity instanceof ServerPlayer) {
 			return null;
 		}
 		String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();

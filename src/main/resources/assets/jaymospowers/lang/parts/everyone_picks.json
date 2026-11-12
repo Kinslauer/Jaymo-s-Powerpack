@@ -1,0 +1,6 @@
+{
+  "message.jaymospowers.plant": "Planted",
+  "message.jaymospowers.limbs.numb": "That limb has gone dead for now",
+  "message.jaymospowers.pressure.limb": "Your %s has gone dead",
+  "message.jaymospowers.pressure.keys": "Your power will not answer"
+}
