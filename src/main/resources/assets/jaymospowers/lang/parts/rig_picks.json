@@ -13,7 +13,7 @@
   "gui.jaymospowers.rig_table.tab.map": "Map",
   "gui.jaymospowers.rig_table.tab.studied": "Studied",
   "gui.jaymospowers.rig_table.tab.orders": "Orders",
-  "gui.jaymospowers.rig_table.legend": "White: you. Brass: drones. Red: enemies. Numbers: patrol marks. Only land the suit has seen is drawn.",
+  "gui.jaymospowers.rig_table.legend": "White: you. Cyan: drones. Red: enemies. Numbers: patrol marks. Only land the suit has seen is drawn.",
   "gui.jaymospowers.rig_table.studied.none": "Nothing studied yet. Read a creature with the Scrying Lens, or fell five of a kind, and the table remembers it here.",
   "gui.jaymospowers.rig_table.studied.count": "%1$s kinds studied",
   "gui.jaymospowers.rig_table.studied.row": "%1$s slain",

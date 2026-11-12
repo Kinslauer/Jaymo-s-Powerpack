@@ -88,5 +88,5 @@
   "message.jaymospowers.shield.braced": "Braced ==========",
   "jei.jaymospowers.arrowhead_fitting": "Fitting an Arrowhead",
   "jei.jaymospowers.arrowhead_fitting.how": "At the Fletching Station: arrows in the first slot, the head in the second.",
-  "jei.jaymospowers.thrower_belt": "Worn in the belt slot. Click throwables onto it to load it. Cycle the picked kind with one key and throw it with another (set both in Controls)."
+  "jei.jaymospowers.thrower_belt": "Worn in the belt slot. Click throwables onto it to load it. Throw the picked kind with the belt key (a mouse side button unless changed in Controls); sneak and press it to pick the next kind."
 }
