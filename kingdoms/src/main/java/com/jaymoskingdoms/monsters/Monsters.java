@@ -86,7 +86,8 @@ public final class Monsters {
 	/** The monsters of legend, the ones folk gossip about and send you after. */
 	public static List<EntityType<?>> legends() {
 		// (0.7.329) and the minotaur (beasts/Minotaur); not the mud golem, one of the swamps' common threats now
-		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, com.jaymoskingdoms.beasts.Beasts.MINOTAUR);
+		return List.of(WEREWOLF, OGRE, CAVE_OGRE, FIRE_OGRE, WRAITH, FLAME_WRAITH, SILVER_SKELETON, com.jaymoskingdoms.beasts.Beasts.MINOTAUR,
+			com.jaymoskingdoms.hunger.Hunger.GAUNT);
 	}
 
 	public static boolean legend(EntityType<?> type) {
@@ -126,6 +127,8 @@ public final class Monsters {
 		BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.MONSTER, MIME, MIME_WEIGHT, 1, 1);
 		// the witches' mud golems at their huts
 		WitchHuts.register();
+		// the Gaunt of the snowy woods, its heart and the curse of the hungry
+		com.jaymoskingdoms.hunger.Hunger.register();
 
 		// the Nether's own: fire ogres and flame wraiths among its monsters
 		SpawnPlacements.register(FIRE_OGRE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
