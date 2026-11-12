@@ -247,6 +247,13 @@ the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' g
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
 
+(new) **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
+those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
+**Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
+thrown sword is a sword given away, and mean it: it lies where it lands. Only those whose gift can fetch it (the
+Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
+teaching.
+
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
 
@@ -1153,6 +1160,12 @@ name shapes a beast ("Call a beast Midas and it'll shine like coin").
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
+
+(new) **Everyday weather.** The heart of a storm is a downpour: rain so thick a traveller is soaked through at once,
+chilled, and slowed until they find a roof. Mist lies on low ground and water from before dawn until mid-morning,
+thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
+lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
+breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
 
 ## Daily life
 
