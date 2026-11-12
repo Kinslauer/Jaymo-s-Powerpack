@@ -59,6 +59,8 @@ public class FutureAndroid extends Monster {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
 		// the Omens (manned mechs) are at war with the machines
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureOmen.class, true));
+		// and with the Frostborn troopers, whose designs they were built from
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureTrooper.class, true));
 	}
 
 	/** Sent out by {@link FutureMachines}: most get a gun. */

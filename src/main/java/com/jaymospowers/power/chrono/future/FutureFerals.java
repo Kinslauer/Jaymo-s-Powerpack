@@ -28,7 +28,7 @@ import net.minecraft.world.phys.AABB;
  * zombies, and a zombie's body left lying gets back up. The horde is husks and plain zombies in our own skins; a
  * few are Kitchen's corpse zombies in random skins ({@link FutureKitchen}), and every one of those carries a modern gun
  * and uses it, badly ({@link FutureGuns}). All of them are Warrior-born, with mangled tails (the client's
- * {@code FutureDeadLooks}).
+ * {@code FutureDeadLooks}). With nobody living in sight they go for the androids and the Frostborn troopers.
  */
 public final class FutureFerals {
 	public static final String TAG = "jaymospowers.feral";
@@ -161,7 +161,26 @@ public final class FutureFerals {
 				feral.setTarget(player);
 			} else if (d < hear) {
 				feral.getNavigation().moveTo(player, 1.1);
+			} else {
+				prey(feral);
 			}
+		}
+	}
+
+	/** Nobody living in sight: the dead go for the nearest android or Frostborn trooper they can see (the third side of the war). */
+	private static void prey(Zombie feral) {
+		Mob nearest = null;
+		double best = SIGHT * SIGHT;
+		for (Mob mob : feral.level().getEntitiesOfClass(Mob.class, feral.getBoundingBox().inflate(SIGHT),
+			m -> m.isAlive() && (m instanceof FutureAndroid || m instanceof FutureTrooper))) {
+			double d = feral.distanceToSqr(mob);
+			if (d < best && feral.hasLineOfSight(mob)) {
+				best = d;
+				nearest = mob;
+			}
+		}
+		if (nearest != null) {
+			feral.setTarget(nearest);
 		}
 	}
 

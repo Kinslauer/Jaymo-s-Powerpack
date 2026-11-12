@@ -139,6 +139,7 @@ public class FutureMech extends Monster implements GeoEntity {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
 		// the Omens (manned mechs) are at war with the machines
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureOmen.class, true));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, FutureTrooper.class, true));
 	}
 
 	/** Movement loops underneath whichever one-off move the server starts. */
