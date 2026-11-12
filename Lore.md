@@ -1242,6 +1242,12 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+(new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
+belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
+scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
+a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
+answer, and no stick helps the one who has lost both.
+
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
