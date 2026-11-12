@@ -137,6 +137,11 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
+	/**
+	 * A weighted string net. Rogues &amp; Warriors' Throw Net spends one per cast (compat/SpellThrows); Andy: "make a net
+	 * item crafted from string".
+	 */
+	public static Item THROWING_NET;
 	/** (0.18.75) The Fang Gauntlets: worn on the hands when held (client/armory/FangGauntletsClient). */
 	public static Item FANG_GAUNTLETS;
 	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
@@ -153,6 +158,7 @@ public final class Armory {
 	public static void init() {
 		ArmoryEntities.init();
 		KnifeGuard.init();
+		DaggerHarvest.init();
 		for (Weapon weapon : WEAPONS) {
 			for (Tier tier : Tier.values()) {
 				Item item = tiered(weapon, tier);
@@ -165,6 +171,7 @@ public final class Armory {
 		throwing("primitive_spear", p -> p.sword(ToolMaterial.STONE, 2.5F, -2.8F).repairable(net.minecraft.world.item.Items.FLINT), 6.0F, false);
 		item("primitive_knife", Item::new, p -> p.sword(ToolMaterial.STONE, 1.0F, -1.8F).repairable(net.minecraft.world.item.Items.FLINT));
 		item("bone_knife", Item::new, p -> p.sword(ToolMaterial.STONE, 1.0F, -1.6F).repairable(net.minecraft.world.item.Items.BONE));
+		THROWING_NET = item("throwing_net", Item::new, p -> p.stacksTo(16));
 		item("hand_axe", Item::new, p -> p.axe(ToolMaterial.STONE, 5.0F, -3.0F).repairable(net.minecraft.world.item.Items.FLINT));
 		item("wooden_cudgel", Item::new, p -> p.sword(ToolMaterial.WOOD, 3.0F, -2.8F));
 		item("stone_cudgel", Item::new, p -> p.sword(ToolMaterial.STONE, 3.0F, -2.8F));
