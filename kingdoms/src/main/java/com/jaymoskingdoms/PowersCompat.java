@@ -2407,6 +2407,32 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle slipperyOf;
+	private static boolean slipperyLooked;
+
+	/** {@code entity} is a player in Slipfin's form, too slick to grab (Powers' {@code Slipfin.slippery}); false without Powers. */
+	public static boolean slippery(net.minecraft.world.entity.@Nullable Entity entity) {
+		if (!slipperyLooked) {
+			slipperyLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					slipperyOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.xenoform.forms.Slipfin"),
+						"slippery", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Slipfin.slippery (older Powers?)", e);
+				}
+			}
+		}
+		if (slipperyOf == null || entity == null) {
+			return false;
+		}
+		try {
+			return (boolean)slipperyOf.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle carried;
 	private static boolean carriedLooked;
 

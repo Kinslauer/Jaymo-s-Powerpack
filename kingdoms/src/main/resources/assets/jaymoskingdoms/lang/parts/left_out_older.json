@@ -47,5 +47,6 @@
   "speech.jaymoskingdoms.smog.out.2": "Whatever wickedness brought that smoke on you, it isn't staying in our town.",
   "speech.jaymoskingdoms.smog.out.3": "Get out before you choke the lot of us!",
   "message.jaymoskingdoms.smog.last_warning": "%s has had enough of the smoke on you. One more time and they'll throw you out.",
-  "message.jaymoskingdoms.smog.driven_out": "%s has driven you out for the corruption on you. Stay away for %s minutes."
+  "message.jaymoskingdoms.smog.driven_out": "%s has driven you out for the corruption on you. Stay away for %s minutes.",
+  "message.jaymoskingdoms.giant.slipped": "You slide out of %s's fist!"
 }
