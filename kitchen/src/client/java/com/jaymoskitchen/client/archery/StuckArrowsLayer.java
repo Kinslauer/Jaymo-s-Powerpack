@@ -25,7 +25,8 @@ import net.minecraft.util.RandomSource;
 /**
  * (0.5.23) The arrows stuck in a creature or its corpse (see StuckArrows), drawn as the game draws a player's: each one in
  * a random box of the body, chosen from the body's id so they stay put, pointing in from where it went in. Vanilla's
- * layer only works on the player model, so this one walks any model's parts (with their parents' poses).
+ * layer only works on the player model, so this one walks any model's parts (with their parents' poses). One in the head
+ * leaves a wound where it went in (HeadWounds).
  */
 public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
 	/** On a living body's render state: {how many arrows to draw in it, the seed that places them (the entity's id)}. */
@@ -34,7 +35,11 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 	private final ArrowModel arrow;
 	private final ArrowRenderState arrowState = new ArrowRenderState();
 	/** Each model's parts that have boxes, as the path down to them from its root (built once a model). */
-	private final Map<ModelPart, List<ModelPart[]>> paths = new IdentityHashMap<>();
+	private final Map<ModelPart, List<Limb>> paths = new IdentityHashMap<>();
+
+	/** A part with boxes: the path down to it from the model's root, and whether it's (in) the head. */
+	private record Limb(ModelPart[] path, boolean head) {
+	}
 
 	public StuckArrowsLayer(RenderLayerParent<S, M> renderer, EntityRendererProvider.Context context) {
 		super(renderer);
@@ -49,13 +54,14 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 		}
 		int count = stuck[0];
 		ModelPart root = this.getParentModel().root();
-		List<ModelPart[]> parts = this.paths.computeIfAbsent(root, StuckArrowsLayer::walk);
+		List<Limb> parts = this.paths.computeIfAbsent(root, StuckArrowsLayer::walk);
 		if (parts.isEmpty()) {
 			return;
 		}
 		RandomSource random = RandomSource.createThreadLocalInstance(stuck[1]);
 		for (int i = 0; i < count; i++) {
-			ModelPart[] path = parts.get(random.nextInt(parts.size()));
+			Limb limb = parts.get(random.nextInt(parts.size()));
+			ModelPart[] path = limb.path();
 			ModelPart part = path[path.length - 1];
 			ModelPart.Cube cube = part.getRandomCube(random);
 			float midX = random.nextFloat(), midY = random.nextFloat(), midZ = random.nextFloat();
@@ -69,6 +75,10 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 			}
 			poseStack.translate(Mth.lerp(midX, cube.minX, cube.maxX) / 16.0F, Mth.lerp(midY, cube.minY, cube.maxY) / 16.0F,
 				Mth.lerp(midZ, cube.minZ, cube.maxZ) / 16.0F);
+			if (limb.head()) {
+				// an arrow in the head leaves a wound where it went in (HeadWounds)
+				HeadWounds.submit(poseStack, collector, lightCoords, cube, midX, midY, midZ, HeadWounds.LIFT);
+			}
 			float dx = -(midX * 2.0F - 1.0F), dy = -(midY * 2.0F - 1.0F), dz = -(midZ * 2.0F - 1.0F);
 			float dxz = Mth.sqrt(dx * dx + dz * dz);
 			poseStack.rotateDegrees(Axis.YP, (float) (Math.atan2(dx, dz) * 180.0 / Math.PI) - 90.0F);
@@ -89,20 +99,22 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 	}
 
 	/** Every part under {@code root} with boxes of its own, as its path from the root (root included). */
-	private static List<ModelPart[]> walk(ModelPart root) {
+	private static List<Limb> walk(ModelPart root) {
 		// the parts' paths ("/body/head"), as the model's own walk over its boxes names them
 		java.util.Set<String> named = new java.util.LinkedHashSet<>();
 		root.visit(new PoseStack(), (pose, path, index, cube) -> named.add(path));
-		List<ModelPart[]> found = new ArrayList<>();
+		List<Limb> found = new ArrayList<>();
 		for (String path : named) {
 			List<ModelPart> chain = new ArrayList<>();
 			chain.add(root);
 			ModelPart at = root;
 			boolean ok = true;
+			boolean head = false;
 			for (String name : path.split("/")) {
 				if (name.isEmpty()) {
 					continue;
 				}
+				head |= HeadWounds.isHead(name);
 				if (!at.hasChild(name)) {
 					ok = false;
 					break;
@@ -111,7 +123,7 @@ public class StuckArrowsLayer<S extends LivingEntityRenderState, M extends Entit
 				chain.add(at);
 			}
 			if (ok && !at.isEmpty()) {
-				found.add(chain.toArray(new ModelPart[0]));
+				found.add(new Limb(chain.toArray(new ModelPart[0]), head));
 			}
 		}
 		return found;

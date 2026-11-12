@@ -147,6 +147,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();
+		com.jaymospowers.core.collide.Collisions.init();
 		// (0.17.14) players throw rocks, as Kingdoms' poor guards and barbarians do
 		com.jaymospowers.ground.ThrownRocks.init();
 		// (0.18.55) far worlds restart the stone age: veiled ore, first metals, the field anvil, the patrol's skip writ
