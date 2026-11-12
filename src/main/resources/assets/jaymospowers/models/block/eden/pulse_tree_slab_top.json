@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "jaymospowers:block/eden/pulse_tree_planks",
+    "side": "jaymospowers:block/eden/pulse_tree_planks",
+    "top": "jaymospowers:block/eden/pulse_tree_planks"
+  }
+}

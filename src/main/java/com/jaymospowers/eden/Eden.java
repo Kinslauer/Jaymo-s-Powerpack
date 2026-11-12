@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
@@ -20,7 +21,20 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -44,6 +58,12 @@ public final class Eden {
 	public static final float MYCELIUM_HARDNESS = 0.6F, CAP_HARDNESS = 0.3F, STEM_HARDNESS = 0.8F, LOG_HARDNESS = 2.0F, PLANKS_BLAST = 3.0F,
 		LANTERN_HARDNESS = 0.5F, STONE_HARDNESS = 1.5F, STONE_BLAST = 6.0F;
 
+	/** Hardness of doors and trapdoors; ticks a wooden button stays pressed. */
+	public static final float DOOR_HARDNESS = 3.0F;
+	public static final int BUTTON_TICKS = 30;
+	/** Light of gravilite: the wild shards, the block, the lamp and lantern; hardness of the crystal and of the compressor. */
+	public static final int SHARDS_LIGHT = 9, GRAVILITE_LIGHT = 12, GRAVILITE_LAMP_LIGHT = 15;
+	public static final float GRAVILITE_HARDNESS = 1.5F, COMPRESSOR_HARDNESS = 3.5F;
 	/** Hardness of a brain tree's flesh and of an aquatus head. */
 	public static final float BRAIN_HARDNESS = 1.2F, AQUATUS_HARDNESS = 0.6F;
 
@@ -58,6 +78,7 @@ public final class Eden {
 	public static Block MOSSY_STONE;
 	public static Block BRAIN_LOG, BRAIN_PLANKS, BRAIN_COPPER, BRAIN_IRON, BRAIN_GOLD, COPPER_GRASS, IRON_GRASS, GOLD_GRASS;
 	public static Block AQUATUS, AQUATUS_ROOTS, AQUATUS_SAPLING;
+	public static Block GRAVILITE_SHARDS, GRAVILITE_BLOCK, GRAVILITE_LAMP, GRAVILITE_LANTERN, GRAVITY_COMPRESSOR;
 	/** The mycotic lanterns, by colour. */
 	public static final Map<DyeColor, Block> LANTERNS = new LinkedHashMap<>();
 
@@ -67,10 +88,15 @@ public final class Eden {
 	}
 
 	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
+		return block(id, factory, properties, BlockItem::new);
+	}
+
+	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties,
+		BiFunction<Block, Item.Properties, Item> itemFactory) {
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosPowers.id(id));
 		Block block = Registry.register(BuiltInRegistries.BLOCK, key, factory.apply(properties.setId(key)));
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
-		TAB.add(Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())));
+		TAB.add(Registry.register(BuiltInRegistries.ITEM, itemKey, itemFactory.apply(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())));
 		return block;
 	}
 
@@ -85,6 +111,23 @@ public final class Eden {
 	private static Block sapling(String id, String tree, MapColor color) {
 		ResourceKey<Feature> feature = ResourceKey.create(Registries.FEATURE, JaymosPowers.id(tree));
 		return block(id, p -> new AetherSaplingBlock(feature, p), plant(color).randomTicks());
+	}
+
+	/** Stairs, slab, fence, gate, door, trapdoor, button and pressure plate of a wood, from its planks. */
+	private static void shaped(String name, Block planks, MapColor color) {
+		BlockBehaviour.Properties board = wood(color).strength(LOG_HARDNESS, PLANKS_BLAST);
+		block(name + "_stairs", p -> new StairBlock(planks.defaultBlockState(), p), wood(color).strength(LOG_HARDNESS, PLANKS_BLAST));
+		block(name + "_slab", SlabBlock::new, wood(color).strength(LOG_HARDNESS, PLANKS_BLAST));
+		block(name + "_fence", FenceBlock::new, wood(color).strength(LOG_HARDNESS, PLANKS_BLAST));
+		block(name + "_fence_gate", p -> new FenceGateBlock(WoodType.CRIMSON, p), board.forceSolidOn());
+		block(name + "_door", p -> new DoorBlock(BlockSetType.CRIMSON, p), wood(color).strength(DOOR_HARDNESS).noOcclusion()
+			.pushReaction(PushReaction.POPPED), DoubleHighBlockItem::new);
+		block(name + "_trapdoor", p -> new TrapDoorBlock(BlockSetType.CRIMSON, p), wood(color).strength(DOOR_HARDNESS).noOcclusion()
+			.isValidSpawn(Blocks::never));
+		block(name + "_button", p -> new ButtonBlock(BlockSetType.CRIMSON, BUTTON_TICKS, p), BlockBehaviour.Properties.of().noCollision()
+			.strength(0.5F).sound(SoundType.NETHER_WOOD).pushReaction(PushReaction.POPPED));
+		block(name + "_pressure_plate", p -> new PressurePlateBlock(BlockSetType.CRIMSON, p), BlockBehaviour.Properties.of().mapColor(color)
+			.forceSolidOn().noCollision().strength(0.5F).sound(SoundType.NETHER_WOOD).pushReaction(PushReaction.POPPED));
 	}
 
 	private static Block brain(String metal, MapColor color) {
@@ -146,6 +189,26 @@ public final class Eden {
 		AQUATUS_SAPLING = sapling("aquatus_sapling", "aquatus", MapColor.COLOR_CYAN);
 
 		EdenWind.init();
+
+		// ---- the shaped wood ----
+		shaped("balloon_mushroom", BALLOON_PLANKS, MapColor.COLOR_PINK);
+		shaped("pulse_tree", PULSE_PLANKS, MapColor.COLOR_CYAN);
+		shaped("brain_tree", BRAIN_PLANKS, MapColor.COLOR_GRAY);
+
+		// ---- gravilite ----
+		GRAVILITE_SHARDS = block("gravilite_shards", p -> new FloraPlantBlock(Block.box(3, 0, 3, 13, 13, 13), true, p),
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).noCollision().strength(0.3F).sound(SoundType.AMETHYST_CLUSTER)
+				.lightLevel(state -> SHARDS_LIGHT).pushReaction(PushReaction.POPPED));
+		GRAVILITE_BLOCK = block("gravilite_block", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+			.strength(GRAVILITE_HARDNESS).sound(SoundType.AMETHYST).requiresCorrectToolForDrops().lightLevel(state -> GRAVILITE_LIGHT));
+		GRAVILITE_LAMP = block("gravilite_lamp", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+			.strength(0.3F).sound(SoundType.GLASS).lightLevel(state -> GRAVILITE_LAMP_LIGHT));
+		GRAVILITE_LANTERN = block("gravilite_lantern", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+			.forceSolidOn().strength(GRAVILITE_HARDNESS).sound(SoundType.LANTERN).lightLevel(state -> GRAVILITE_LAMP_LIGHT).noOcclusion()
+			.pushReaction(PushReaction.POPPED));
+		GRAVITY_COMPRESSOR = block("gravity_compressor", GravityCompressorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+			.strength(COMPRESSOR_HARDNESS).sound(SoundType.COPPER).requiresCorrectToolForDrops()
+			.lightLevel(state -> state.getValue(GravityCompressorBlock.POWER) > 0 ? 7 : 0));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> TAB.forEach(output::accept));
 	}

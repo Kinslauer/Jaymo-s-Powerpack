@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 public record EdenFeature(Kind kind) implements Feature {
 	public enum Kind {
 		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER,
-		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS;
+		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS, GRAVILITE;
 
 		static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)), k -> k.name().toLowerCase(Locale.ROOT));
 	}
@@ -57,6 +57,8 @@ public record EdenFeature(Kind kind) implements Feature {
 	public static final int POND_TOLERANCE = 2;
 	/** A brain tree: trunk height (least, spread) and crown radius (least, spread); a patch of metal grass: tries and spread. */
 	public static final int BRAIN_TRUNK = 5, BRAIN_TRUNK_SPREAD = 4, BRAIN_CROWN = 2, BRAIN_CROWN_SPREAD = 1, METAL_GRASS_TRIES = 14, METAL_GRASS_SPREAD = 5;
+	/** A stand of gravilite shards: tries and spread. */
+	public static final int GRAVILITE_TRIES = 8, GRAVILITE_SPREAD = 2;
 	/** The colours lanterns grow in wild (builders dye the rest). */
 	private static final DyeColor[] WILD_LANTERNS = {DyeColor.WHITE, DyeColor.YELLOW, DyeColor.LIGHT_BLUE, DyeColor.LIME, DyeColor.PINK, DyeColor.ORANGE,
 		DyeColor.MAGENTA, DyeColor.CYAN};
@@ -82,6 +84,7 @@ public record EdenFeature(Kind kind) implements Feature {
 			case AQUATUS -> aquatus(level, random, origin);
 			case BRAIN_TREE -> brainTree(level, random, origin);
 			case METAL_GRASS -> metalGrass(level, random, origin);
+			case GRAVILITE -> gravilite(level, random, origin);
 		};
 	}
 
@@ -496,6 +499,25 @@ public record EdenFeature(Kind kind) implements Feature {
 			pos.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), z);
 			if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(Blocks.GRASS_BLOCK)) {
 				level.setBlock(pos, kind.defaultBlockState(), Block.UPDATE_CLIENTS);
+				placed = true;
+			}
+		}
+		return placed;
+	}
+
+	// ---------------------------------------------------------------- gravilite
+
+	private static boolean gravilite(WorldGenLevel level, RandomSource random, BlockPos origin) {
+		boolean placed = false;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int i = 0; i < GRAVILITE_TRIES; i++) {
+			int x = origin.getX() + random.nextInt(GRAVILITE_SPREAD * 2 + 1) - GRAVILITE_SPREAD;
+			int z = origin.getZ() + random.nextInt(GRAVILITE_SPREAD * 2 + 1) - GRAVILITE_SPREAD;
+			pos.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), z);
+			BlockState below = level.getBlockState(pos.below());
+			if (level.getBlockState(pos).isAir() && below.isFaceSturdy(level, pos.below(), Direction.UP) && !below.is(BlockTags.LEAVES)
+				&& !below.is(Eden.BALLOON_CAP)) {
+				level.setBlock(pos, Eden.GRAVILITE_SHARDS.defaultBlockState(), Block.UPDATE_CLIENTS);
 				placed = true;
 			}
 		}

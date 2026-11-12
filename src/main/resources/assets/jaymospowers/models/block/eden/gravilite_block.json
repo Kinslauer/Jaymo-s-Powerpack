@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "jaymospowers:block/eden/gravilite_block_side",
+    "end": "jaymospowers:block/eden/gravilite_block_top"
+  }
+}
