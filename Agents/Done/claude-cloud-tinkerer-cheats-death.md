@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: tinkerer-cheats-death
 branch: claude/project-thread-ekfmqj
 with: Claude (cloud project thread)
@@ -26,3 +26,6 @@ owns:
 ## Done
 - PR #1336. Tinkerer killable; echo steps in 3 s later where he fell and carries on (operation included); other Tinkerers mutter asides; new deflecting talk about the turned androids.
 - Built; not played. Lore.md has a (new) paragraph for Andy.
+
+## Notes
+- 2026-11-12 01:45 PR #1336 is merged into master; moved to Agents/Done.
