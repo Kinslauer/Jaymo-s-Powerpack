@@ -49,5 +49,6 @@
   "message.jaymoskingdoms.smog.last_warning": "%s has had enough of the smoke on you. One more time and they'll throw you out.",
   "message.jaymoskingdoms.smog.driven_out": "%s has driven you out for the corruption on you. Stay away for %s minutes.",
   "message.jaymoskingdoms.giant.slipped": "You slide out of %s's fist!",
-  "menu.jaymoskingdoms.tab.class": "Class"
+  "menu.jaymoskingdoms.tab.class": "Class",
+  "zfighter.jaymoskingdoms.part.escort_ward": "In your charge"
 }

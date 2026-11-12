@@ -3,4 +3,7 @@
 - Villagers no longer try to tend a downed body someone is carrying (`PowersCompat.isCarried`).
 - Last Stand never saves a player who gave up where they lay.
 - **Folk react to a Smog user, and drive them out** (Andy: "they should react, and repeat interactions should drive you out of the town. most people will come to realize the effects from corruption and the bad karma you must harbor to have gotten there"). A villager who sees you while the smog holds you remarks on it, at most once a minute a town, and thinks a heart less of you. The first two wonder at the ash and the cough; after that they know it for corruption and say what it says of you, and the fourth time you're warned. The fifth time the town drives you out for 10 minutes: a realm with a ruler has its guards see you out; a town without one shouts you off, and if you're still there after 30 s its nearest guard comes at you. A town forgets one remark every in-game day (`SmogFolk`).
+- **Slipfin slides out of an Aether Giant's grab** (Andy: "fix it"): its hand closes and the slick alien squirts out between the fingers, even if they turn Slipfin while held.
+- **Creative players switch class from a Class tab on the H menu** (docs/Classes-Plan.md promised it): the class screen opens with a class already chosen, and Choose swaps it.
+- Powers' escort wards are walked by Powers, as its patrolmen are.
 - Built; not played.

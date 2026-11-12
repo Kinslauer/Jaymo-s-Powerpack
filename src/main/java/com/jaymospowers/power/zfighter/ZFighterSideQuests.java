@@ -35,8 +35,8 @@ import net.minecraft.world.entity.player.Player;
  * own town errands instead. Jobs are saved on the player ({@link #DATA}) and told to his client.
  */
 public final class ZFighterSideQuests {
-	public static final int FOES = 0, DELIVER = 1, SPAR = 2;
-	public static final int KINDS = 3;
+	public static final int FOES = 0, DELIVER = 1, SPAR = 2, ESCORT = 3;
+	public static final int KINDS = 4;
 
 	// ---- tuning ----
 	/** Jobs held at once, and jobs finished in a day (game days) before the next one waits. */
@@ -59,6 +59,8 @@ public final class ZFighterSideQuests {
 	static final int REPUTATION = 25;
 	/** The kingdom must be within this many blocks of him to think better of him. */
 	static final double REPUTATION_RANGE = 600.0;
+	/** TP for an escort done ({@link ZFighterEscorts}). */
+	static final int ESCORT_TP = 220;
 	/** A job's item prize (a Hermit Bean) comes up one time in this many. */
 	static final int BEAN_ONE_IN = 6;
 
@@ -113,6 +115,7 @@ public final class ZFighterSideQuests {
 		return switch (job.kind()) {
 			case DELIVER -> Component.translatable("saga.jaymospowers.job.deliver", job.need(), item(job.param()));
 			case SPAR -> Component.translatable("saga.jaymospowers.job.spar", job.need());
+			case ESCORT -> Component.translatable("saga.jaymospowers.job.escort." + Math.floorMod(job.param(), ZFighterEscorts.VARIANTS));
 			default -> Component.translatable("saga.jaymospowers.job.foes", job.need());
 		};
 	}
@@ -162,6 +165,10 @@ public final class ZFighterSideQuests {
 			return false;
 		}
 		Job job = roll(player, giver, data);
+		if (job.kind() == ESCORT && !ZFighterEscorts.begin(player, giver, job.param())) {
+			// nowhere to take anyone from here: a fight job instead
+			job = new Job(FOES, 0, FOES_MIN + player.level().getRandom().nextInt(FOES_MAX - FOES_MIN + 1), 0, job.giver());
+		}
 		List<Job> next = new ArrayList<>(data.jobs());
 		next.add(job);
 		player.setAttached(DATA, new Data(List.copyOf(next), data.day(), data.today()));
@@ -180,6 +187,11 @@ public final class ZFighterSideQuests {
 			if (kind == DELIVER) {
 				int goods = random.nextInt(GOODS.length);
 				job = new Job(DELIVER, goods, Math.max(1, GOODS_COUNT[goods] - random.nextInt(Math.max(1, GOODS_COUNT[goods] / 4))), 0, name);
+			} else if (kind == ESCORT) {
+				if (!ZFighterEscorts.available(player)) {
+					continue;
+				}
+				job = new Job(ESCORT, random.nextInt(ZFighterEscorts.VARIANTS), 1, 0, name);
 			} else if (kind == SPAR) {
 				job = new Job(SPAR, 0, SPAR_MIN + random.nextInt(SPAR_MAX - SPAR_MIN + 1), 0, name);
 			} else {
@@ -217,6 +229,9 @@ public final class ZFighterSideQuests {
 		}
 		List<Job> next = new ArrayList<>(data.jobs());
 		Job gone = next.remove(index);
+		if (gone.kind() == ESCORT) {
+			ZFighterEscorts.abandon(player);
+		}
 		player.setAttached(DATA, new Data(List.copyOf(next), data.day(), data.today()));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_job_dropped", describe(gone)).withStyle(ChatFormatting.GRAY));
 	}
@@ -254,6 +269,23 @@ public final class ZFighterSideQuests {
 		}
 	}
 
+	/** The escort under way ended ({@link ZFighterEscorts}): done, its job pays; failed, it goes. */
+	static void escortEnded(ServerPlayer player, boolean done) {
+		for (Job job : new ArrayList<>(of(player).jobs())) {
+			if (job.kind() == ESCORT) {
+				if (done) {
+					advance(player, job);
+				} else {
+					Data data = of(player);
+					List<Job> next = new ArrayList<>(data.jobs());
+					next.remove(job);
+					player.setAttached(DATA, new Data(List.copyOf(next), data.day(), data.today()));
+				}
+				return;
+			}
+		}
+	}
+
 	private static void replace(ServerPlayer player, Job old, Job now) {
 		Data data = of(player);
 		List<Job> next = new ArrayList<>(data.jobs());
@@ -273,6 +305,7 @@ public final class ZFighterSideQuests {
 		int tp = switch (job.kind()) {
 			case DELIVER -> 50 + GOODS_TP[job.param()] * job.need();
 			case SPAR -> SPAR_TP * job.need();
+			case ESCORT -> ESCORT_TP;
 			default -> FOES_BASE_TP + FOES_TP * job.need();
 		};
 		ZFighterTraining.grant(player, tp);
