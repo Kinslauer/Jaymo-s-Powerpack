@@ -1218,6 +1218,15 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
+(new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
+banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
+are her drinking, and she takes boats and swimmers with the draught. Waterspouts are the land's tornadoes come down on
+her, or small ones she puts up herself on still warm days. At night a glowing tide lights where anything moves through
+the water, and in a thunderstorm blue St. Elmo's fire crackles on the mastheads: sailors take both as her watching, and
+neither does harm. Flotsam from ships she took drifts by, and old shipwrecks can be raised, pumped dry and sailed again:
+she gives back a little of what she keeps. Rivet, the Xenoform's machine form, can flow into a ship's cannon as he does a
+golem and fire it himself, though even he needs powder and shot.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
