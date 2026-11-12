@@ -1,6 +1,6 @@
 # the armed body and special cuts - stance, draw, flip, parry lines, swatted shots
 Andy's picks from Star Wars: Galaxy in a Cube (All Rights Reserved, 1.20.1 only: ideas only, every pose, name and line
-of code is ours). Patches 1 and 2 of 6 of the SWGC swordplay picks.
+of code is ours). Patches 1 to 3 of 6 of the SWGC swordplay picks.
 - **Armed stance** (`client/combat/ArmedPose`, `combat/Armed`): with a weapon in hand the whole body changes. Standing,
   the weapon shoulder turns forward, the blade is held out ahead, the other hand goes back, the feet set apart and the
   weight shifts slowly. Walking, the blade is carried low at the side; running, it trails behind and you lean into it.
@@ -30,6 +30,9 @@ of code is ours). Patches 1 and 2 of 6 of the SWGC swordplay picks.
   Cut (the blade circling overhead, then across), the Figure Eight and the throw. `combat/BladeThrow` hurls any sword as
   a tumbling `ThrownWeapon` that sticks where it lands, or flies back to the hand when the caller says its thrower can
   call it.
+- **Fighting styles, the trades** (`combat/BladeStyle`, for Kingdoms' schools): a player set in a style pays feathers
+  for the swings that land, pays more or less for a blow a weapon guard blocks (`Guard`), swings faster or slower (an
+  attack speed modifier) and gets feathers back faster or slower (`Feathers`). Nobody has a style until Kingdoms sets one.
 - The stance and the guard are poses of ours, so Entity Model Features (Fresh Animations, Touch'n Motion) pauses on a
   body while they're on, as it does for the Fang Gauntlets' guard.
 - Compiled; not played. Every angle is a first pass set without seeing it in game: the knobs are at the top of

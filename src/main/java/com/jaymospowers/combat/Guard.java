@@ -227,6 +227,7 @@ public final class Guard {
 				Optional.of(SoundEvents.SHIELD_BREAK)))));
 		UseItemCallback.EVENT.register(Guard::use);
 		Swat.init();
+		BladeStyle.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && met(player, source, amount)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -440,7 +441,7 @@ public final class Guard {
 		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
 		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
 			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
-			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE))))) {
+			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE * BladeStyle.block(player)))))) {
 			guardBreak(player, guard);
 		}
 		return false;

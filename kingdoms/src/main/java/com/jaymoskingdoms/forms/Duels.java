@@ -463,7 +463,8 @@ public final class Duels {
 		if (now < duel.nextBlow) {
 			return;
 		}
-		duel.nextBlow = now + STRIKE_EVERY;
+		// (the school's style sets the rhythm: a wild one is quick and tires, Styles)
+		duel.nextBlow = now + Math.round(STRIKE_EVERY * Styles.tempo(duel.school, duel.blows));
 		duel.blows++;
 		if (level.getRandom().nextFloat() < FORM_CHANCE && SchooledGuards.showForm(level, foe, player, true)) {
 			return;
@@ -497,6 +498,11 @@ public final class Duels {
 		}
 		if (by instanceof ServerPlayer attacker) {
 			Duel duel = DUELS.get(attacker.getUUID());
+			// a blow the student turns aside in their school's style doesn't land at all
+			if (duel != null && duel.foe.equals(entity.getUUID()) && attacker.level() instanceof ServerLevel turnedIn
+				&& source.getDirectEntity() == attacker && Styles.turns(turnedIn, duel.school, entity, attacker, duel.blows)) {
+				return false;
+			}
 			if (duel != null && duel.foe.equals(entity.getUUID()) && attacker.level() instanceof ServerLevel level
 				&& entity.getHealth() - amount <= entity.getMaxHealth() * FLOOR) {
 				finish(level, attacker, duel, Outcome.WON);

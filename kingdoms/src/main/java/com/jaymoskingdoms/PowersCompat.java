@@ -3215,7 +3215,7 @@ public final class PowersCompat {
 	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2;
 
 	private static boolean lookedForCuts;
-	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade;
+	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade, styleSet, styleClear;
 
 	private static void lookForCuts() {
 		if (lookedForCuts) {
@@ -3241,6 +3241,14 @@ public final class PowersCompat {
 					float.class, float.class, boolean.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no special cuts (older Powers?)", e);
+		}
+		try {
+			Class<?> style = Class.forName("com.jaymospowers.combat.BladeStyle");
+			styleSet = lookup.findStatic(style, "set", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class,
+				float.class, float.class, float.class, float.class));
+			styleClear = lookup.findStatic(style, "clear", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no fighting styles (older Powers?)", e);
 		}
 	}
 
@@ -3298,6 +3306,33 @@ public final class PowersCompat {
 			return hurlBlade != null && (boolean)hurlBlade.invoke(player, blade, damage, speed, comesBack);
 		} catch (Throwable e) {
 			return false;
+		}
+	}
+
+	/**
+	 * {@code player} fights in a style with these trades (Powers' {@code BladeStyle.set}): feathers a landed swing costs,
+	 * a blocked blow's cost and attack speed and feather regrowth, each times the usual. Nothing without Powers.
+	 */
+	public static void bladeStyle(net.minecraft.server.level.ServerPlayer player, float swing, float block, float speed, float regen) {
+		lookForCuts();
+		try {
+			if (styleSet != null) {
+				styleSet.invoke(player, swing, block, speed, regen);
+			}
+		} catch (Throwable ignored) {
+			// the style is only its trades
+		}
+	}
+
+	/** {@code player} fights plain again. */
+	public static void clearBladeStyle(net.minecraft.server.level.ServerPlayer player) {
+		lookForCuts();
+		try {
+			if (styleClear != null) {
+				styleClear.invoke(player);
+			}
+		} catch (Throwable ignored) {
+			// the style is only its trades
 		}
 	}
 }

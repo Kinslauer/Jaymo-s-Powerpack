@@ -1,4 +1,4 @@
-# the Quiet Tide's later arts - Wheel Cut, Figure Eight, Hurled Blade
+# special cuts and the schools' styles - Wheel Cut, Figure Eight, Hurled Blade, five styles
 Andy's picks from Star Wars: Galaxy in a Cube (All Rights Reserved: ideas only, the code, names and poses are ours).
 Three new blade forms (`forms/SpecialCuts`), taught by the blade school after Sheath Draw and Crescent Sweep (standing
 70, 95, 120) and castable from the skill bar like the others.
@@ -12,3 +12,18 @@ Three new blade forms (`forms/SpecialCuts`), taught by the blade school after Sh
   fetch. It flies back to the hand only for Gravity, a Z Fighter, or anyone with a mana spirit. Needs Powers.
 - The picklist said "hold attack" for the Wheel Cut; Better Combat owns that button, so it is a form on the belt.
 - Compiled; not played. No Skill Web perks for the three yet (the school teaches them).
+
+The schools' fighting styles (`forms/Styles`; the picklist row said seven, SWGC's count, but ours go one a school, so five):
+- While a school you've joined has its weapon in your hand you fight in its style. A style trades four things: the
+  feathers a landed swing costs, what a blocked blow costs, attack speed, and how fast feathers come back.
+  - Still Water (the Quiet Tide, blades): swing 0.75, block x0.6, speed x0.95. The warding style.
+  - Long Measure (the Skyward Reach, spears): swing 0.4, block x1.4, regrowth x1.1. The fencer's style.
+  - Deep Root (the Stone Root, fists): swing 0.5, block x0.8, speed x0.9, regrowth x1.3.
+  - Low Flame (the Low Lantern, knives): swing 0.5, block x1.5, speed x1.15.
+  - Red Ember (the Ashen Fang, claws): swing 1, block x1.8, speed x1.25, regrowth x0.85. The wild style.
+- The style shows over the belt in battle stance. Sneak and use a Training Post with a weapon in hand to put the styles
+  aside and fight plain, or take them up again.
+- A school's guards and duellists fight in its style: the wait between their blows follows it (Red Ember students strike
+  fastest, then tire after 8 blows; Low Flame after 14), and in a duel a student turns some of your blows aside (Still
+  Water nearly half, Red Ember almost none; a tired one turns nothing).
+- Needs Powers for the trades (`combat/BladeStyle`). Compiled; not played. Every number is a first pass.
