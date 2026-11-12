@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Klei_Wright's tundra, all 34 picks (docs/Tundra-Plan.md)
 branch: claude/project-thread-1y9883
 with: 
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 A player in new chunks finds the tundra and lichen woodland, living glow lichen, muskox herds and predators that get full. Change notes: changes/powers/tundra.md, tundra-world.md, changes/kingdoms/tundra.md, changes/kitchen/tundra.md. Compiles; nothing played; worldgen JSON not load-tested.
+- 2026-11-12 07:01 PR #1358 is merged into master; moved to Agents/Done.
