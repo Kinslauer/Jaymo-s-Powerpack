@@ -1,0 +1,69 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+// build output outside OneDrive on the home PC, like Kitchen, Kingdoms and ports/trmt
+if (file("E:/").exists()) {
+	layout.buildDirectory = file("E:/dynamicwaters-port-build")
+}
+
+repositories {
+	exclusiveContent {
+		forRepository { maven { url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
+	exclusiveContent {
+		forRepository { maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } }
+		filter { includeGroup "fuzs.forgeconfigapiport" }
+	}
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/dynamicwaters.accesswidener")
+	runs {
+		client {
+			vmArgs '-Xmx4G', '-Dfile.encoding=UTF-8'
+		}
+		server {
+			vmArgs '-Dfile.encoding=UTF-8'
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${project.forgeconfigapiport_version}"
+	compileOnly "maven.modrinth:modmenu:${project.modmenu_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = "UTF-8"
+	it.options.compilerArgs += ["-Xmaxerrs", "3000"]
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	inputs.property "projectName", project.name
+	from("LICENSE") { rename { "${it}_${project.name}" } }
+	from("LICENSES") { into "LICENSES_${project.name}" }
+	from("THIRD_PARTY_NOTICES.md") { rename { "THIRD_PARTY_NOTICES_${project.name}.md" } }
+	from("PORT.md") { rename { "PORT_${project.name}.md" } }
+}

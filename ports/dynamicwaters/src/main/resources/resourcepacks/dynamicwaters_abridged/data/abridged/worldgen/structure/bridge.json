@@ -1,0 +1,8 @@
+{
+  "type": "abridged:bridge",
+  "biomes": "#abridged:has_bridges",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "max_chunk_radius": 4
+}

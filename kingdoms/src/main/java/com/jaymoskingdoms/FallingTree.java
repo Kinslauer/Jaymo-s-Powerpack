@@ -444,9 +444,7 @@ public final class FallingTree extends Entity {
 		if (!landed) {
 			this.entityData.set(LEAN, next);
 			// the rush of air and creaking as it goes over
-			if (this.tickCount % 6 == 0) {
-				level.playSound(null, this.blockPosition(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.8F, 0.5F + lean / 180.0F);
-			}
+			WorldSounds.treeFalling(level, this, lean);
 			return;
 		}
 		this.landTurning = this.speed * Mth.DEG_TO_RAD;
@@ -558,9 +556,7 @@ public final class FallingTree extends Entity {
 			// (0.7.588) thrown, it strikes whatever it flies through
 			this.hit(level, pieces, next, Integer.MIN_VALUE, (float)v.length(), this.tumble * Mth.DEG_TO_RAD);
 		}
-		if (this.flown % 8 == 0) {
-			level.playSound(null, this.blockPosition(), SoundEvents.AZALEA_LEAVES_STEP, SoundSource.BLOCKS, 1.2F, 0.6F);
-		}
+		WorldSounds.treeFlying(level, this);
 	}
 
 	/** Whether this tree has been torn up by a tornado and is still flying, and for how long (ticks). */
