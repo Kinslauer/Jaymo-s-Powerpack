@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 04:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 04:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,7 +17,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/swgc-swordplay|swgc-swordplay]] · 💻 Odysseus · #1341 · in-review
 
 
 ## Needs Andy
