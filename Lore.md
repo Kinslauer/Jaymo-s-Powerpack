@@ -496,6 +496,15 @@ takes most kindly to the blood that shares its weather (Notus to the Emberborn, 
 Verdant and Tideborn, Eurus to the Stormborn). Over the Aether flies **Aetherion**, the star dragon, with a breath of
 starlight and a cataclysm of falling stars.
 
+(new) **First sight of the great ones** (Andy, 2026-11-11: "can bosses get intro cutscenes? ... even passive boss mobs
+can get them. just to further illustrate the majesty of the encounter"). The first time anyone lays eyes on each kind of
+great creature, the moment is shown as a short wordless film: a low look up at it, its roar, then the two of them in one
+frame. It happens once for each kind: every dragon (Ignivorus over the Nether first among them), the Giants, the
+patrons' champions, the Ogre King, chiefs and warlords, the Piglin King, the grizzly, the minotaur and gorgon, the
+Slider and the Visage of War, the Ender Dragon, Wither, Warden and Elder Guardian, and the gentle great ones, the great
+whales and the Aerwhales. Kings and lords get none; they are met in their halls by talking. Nothing is named or
+explained on screen.
+
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
 cold lands (Frostborn), and the crocodile dragon **Varasuchus**, which roosts on beaches and swamps (Tideborn).
