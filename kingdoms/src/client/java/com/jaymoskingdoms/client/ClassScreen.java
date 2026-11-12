@@ -39,8 +39,29 @@ final class ClassScreen extends Screen {
 	private final java.util.Map<PlayerClass, List<ItemStack>> kits = new java.util.EnumMap<>(PlayerClass.class);
 
 	ClassScreen(boolean forced) {
+		this(forced, false);
+	}
+
+	/**
+	 * {@code switching}: a creative player's class tab on the H menu (docs/Classes-Plan.md: "Creative players can switch
+	 * on the H powers screen too"): open with a class already chosen, and Choose swaps it, the screen staying up.
+	 */
+	ClassScreen(boolean forced, boolean switching) {
 		super(Component.translatable("gui.jaymoskingdoms.class.title"));
 		this.forced = forced;
+		this.switching = switching;
+	}
+
+	private final boolean switching;
+
+	/** The panel's top-left corner, for the H menu's tabs. */
+	int[] corner() {
+		return new int[] {left(), top()};
+	}
+
+	/** Whether the screen is done: a class chosen (not while a creative player is switching). */
+	private boolean done(Minecraft minecraft) {
+		return !this.switching && minecraft.player != null && Classes.classOf(minecraft.player) != null;
 	}
 
 	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
@@ -109,7 +130,7 @@ final class ClassScreen extends Screen {
 	@Override
 	protected void init() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && Classes.classOf(minecraft.player) != null) {
+		if (done(minecraft)) {
 			onClose();
 			return;
 		}
@@ -123,7 +144,9 @@ final class ClassScreen extends Screen {
 			if (this.picked != null) {
 				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
-				onClose();
+				if (!this.switching) {
+					onClose();
+				}
 			}
 		}).bounds(right - 110, y, 110, 16).build());
 	}
@@ -207,7 +230,7 @@ final class ClassScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && Classes.classOf(minecraft.player) != null) {
+		if (done(minecraft)) {
 			onClose();
 			return;
 		}
