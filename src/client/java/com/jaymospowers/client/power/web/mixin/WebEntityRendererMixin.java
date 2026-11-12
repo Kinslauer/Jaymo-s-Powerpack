@@ -23,6 +23,10 @@ abstract class WebEntityRendererMixin {
 		} else {
 			// (0.17.150) the red strain feels heartbeats and movement
 			color = com.jaymospowers.client.power.web.WebRedSense.outline(entity);
+			if (color == 0) {
+				// the black strain smells blood
+				color = com.jaymospowers.client.power.web.WebScent.outline(entity);
+			}
 			if (color != 0) {
 				state.outlineColor = color;
 			}
