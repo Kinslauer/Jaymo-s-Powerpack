@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.mixin.icecaves",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"BlueIceWaterMixin",
+		"IceCavePlacementMixin",
+		"OreStandInMixin",
+		"ScatteredOreStandInMixin",
+		"StraySpawnMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
