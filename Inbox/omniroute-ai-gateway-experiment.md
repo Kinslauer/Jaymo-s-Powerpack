@@ -38,3 +38,4 @@ Downside: another dependency to run and configure; current setup is more streaml
 ## Notes
 
 Not urgent. If Andy wants to experiment, run OmniRoute locally and point run.py at its OpenAI-compatible endpoint instead of calling Anthropic directly.
+- 2026-11-12 18:30 hermes-b: logged the experiment thread; see Agents/omniroute-ai-gateway-experiment.md. OmniRoute not directly useful for the current setup (no build tool/dispatcher/PR-manager fit, no Hermes fleet integration, direct-API setup already works); keep for later evaluation — auto-fallback, token compression, free-tier backup. Not urgent. Not built or integrated, as asked.
