@@ -164,6 +164,7 @@ public final class Forms {
 
 	static {
 		BladeForms.addTo(FORMS);
+		SpecialCuts.addTo(FORMS);
 		SpearForms.addTo(FORMS);
 		FistForms.addTo(FORMS);
 		KnifeForms.addTo(FORMS);
@@ -342,6 +343,7 @@ public final class Forms {
 		ServerTickEvents.END_SERVER_TICK.register(Forms::tick);
 		SpearForms.register();
 		BladeForms.register();
+		SpecialCuts.register();
 		FistForms.register();
 		KnifeForms.register();
 		ClawForms.register();
@@ -710,6 +712,10 @@ public final class Forms {
 		if (SpearForms.tug(player)) {
 			return;
 		}
+		// a Figure Eight spinning: any press lets it drop
+		if (SpecialCuts.stop(player)) {
+			return;
+		}
 		Book book = book(player);
 		if (!book.stance()) {
 			return;
@@ -724,7 +730,7 @@ public final class Forms {
 	 * leaves the bar's cooldown untouched (and says why on the action bar).
 	 */
 	public static boolean cast(ServerPlayer player, String formId) {
-		if (SpearForms.tug(player)) {
+		if (SpearForms.tug(player) || SpecialCuts.stop(player)) {
 			return false;
 		}
 		return tryForm(player, formId, true);
@@ -783,6 +789,11 @@ public final class Forms {
 		if (player.isFallFlying()) {
 			return false;
 		}
+		// a special cut that costs feathers: there must be the wind for it
+		if (!SpecialCuts.ready(player, form)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.winded", form.name()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
 		// the cooldown is set now (no second press during the wind-up); the food is spent when the form goes off
 		READY.get(player.getUUID()).put(id, now + form.cooldown());
 		// Form Cancel: right after a chain blow landed, the wind-up is skipped
@@ -795,8 +806,14 @@ public final class Forms {
 			return true;
 		}
 		WINDUPS.add(new Windup(player.getUUID(), form, now + form.windUp(), bar));
+		SpecialCuts.windingUp(level, player, form);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.6F, 1.8F);
 		return true;
+	}
+
+	/** Breaks off {@code form}'s wind-up on {@code player} (its cooldown stays spent). True if it was winding up. */
+	static boolean interrupt(ServerPlayer player, Form form) {
+		return WINDUPS.removeIf(w -> w.who().equals(player.getUUID()) && w.form() == form);
 	}
 
 	private static void perform(ServerPlayer player, Form form) {
@@ -807,7 +824,11 @@ public final class Forms {
 		player.causeFoodExhaustion(form.hunger());
 		int rank = Math.max(1, rank(player, form.id()));
 		if (form.family() == Family.BLADE) {
-			BladeForms.perform(player, form, rank);
+			if (SpecialCuts.owns(form)) {
+				SpecialCuts.perform(player, form, rank);
+			} else {
+				BladeForms.perform(player, form, rank);
+			}
 		} else if (form.family() == Family.SPEAR) {
 			SpearForms.perform(player, form, rank);
 		}
@@ -839,6 +860,9 @@ public final class Forms {
 			// (0.7.550) a stance form ends with the stance; a skill-bar form with its weapon out of the hand
 			if (player == null || !player.isAlive() || !(w.bar() ? w.form().family().holds(player.getMainHandItem()) : book(player).stance())) {
 				it.remove();
+				if (player != null) {
+					SpecialCuts.cutShort(player, w.form());
+				}
 				// a wind-up cut short by the stance ending gives its cooldown back
 				Map<String, Long> ready = player == null ? null : READY.get(w.who());
 				if (ready != null) {

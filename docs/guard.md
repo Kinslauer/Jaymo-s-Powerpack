@@ -132,3 +132,7 @@ attracting mobs (or repelling sensitive ones...)".
   time, the line (high, low, hanging, from the height the blow came from) and whether it was a parry.
   `client/combat/ParryPose` holds a raised weapon guard across the body, moves it to that line for `HOLD_TICKS`, and
   rocks the body back for `RECOIL_TICKS`. It runs on any humanoid model, so mobs show it too.
+
+- A perfect parry made with a blade bats an arrow back at its shooter at half speed (`combat/Swat`); balls and
+  unparryable shots are only ever blocked. Darktide's guard is seen swinging at every shot it meets.
+- A Wheel Cut (Kingdoms' `forms/SpecialCuts`) tags its striker unparryable for the blow, as a heavy tell does.

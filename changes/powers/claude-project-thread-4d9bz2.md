@@ -1,6 +1,6 @@
-# the armed body - stance, draw, low guard, mid-air flip, parry lines
+# the armed body and special cuts - stance, draw, flip, parry lines, swatted shots
 Andy's picks from Star Wars: Galaxy in a Cube (All Rights Reserved, 1.20.1 only: ideas only, every pose, name and line
-of code is ours). Patch 1 of 6 of the SWGC swordplay picks.
+of code is ours). Patches 1 and 2 of 6 of the SWGC swordplay picks.
 - **Armed stance** (`client/combat/ArmedPose`, `combat/Armed`): with a weapon in hand the whole body changes. Standing,
   the weapon shoulder turns forward, the blade is held out ahead, the other hand goes back, the feet set apart and the
   weight shifts slowly. Walking, the blade is carried low at the side; running, it trails behind and you lean into it.
@@ -21,6 +21,15 @@ of code is ours). Patch 1 of 6 of the SWGC swordplay picks.
   far side (blows at your own height take high and hanging turn about). A plain block rocks you back; a parry barely
   does. Everyone sees it (`Armed.MET`, synced), and fighters who parry you snap to the line too. Shields and the
   powers' own guards keep their poses.
+- **Batting shots back** (`combat/Swat`): a perfect parry made with a blade (not a shield) knocks an arrow back at
+  whoever loosed it, at half the speed it came with. Never a gun's ball or anything tagged unparryable.
+- **Darktide swats every shot** (Andy: "darktide can block unparryable projectiles. it animates him swinging away at it
+  whenever they impact the guard"): each shot Darktide's guard meets, balls and tagged ones too, is seen swung at, with
+  sparks off a katana or a knife. What the guard stops and sends back is as it was.
+- **Special cuts, the body's side** (for Kingdoms' new blade forms): `Armed.CUT` (synced) has `ArmedPose` draw the Wheel
+  Cut (the blade circling overhead, then across), the Figure Eight and the throw. `combat/BladeThrow` hurls any sword as
+  a tumbling `ThrownWeapon` that sticks where it lands, or flies back to the hand when the caller says its thrower can
+  call it.
 - The stance and the guard are poses of ours, so Entity Model Features (Fresh Animations, Touch'n Motion) pauses on a
   body while they're on, as it does for the Fang Gauntlets' guard.
 - Compiled; not played. Every angle is a first pass set without seeing it in game: the knobs are at the top of

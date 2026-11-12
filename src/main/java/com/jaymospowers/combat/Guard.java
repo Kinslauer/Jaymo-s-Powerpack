@@ -226,6 +226,7 @@ public final class Guard {
 				Optional.of(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.TRIDENT_HIT)),
 				Optional.of(SoundEvents.SHIELD_BREAK)))));
 		UseItemCallback.EVENT.register(Guard::use);
+		Swat.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && met(player, source, amount)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -428,6 +429,11 @@ public final class Guard {
 		if (timing.parried()) {
 			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
+			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
+			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
+				&& Armed.kind(player.getUseItem()) != null) {
+				Swat.back(player, arrow);
+			}
 			return true;
 		}
 		ItemStack guard = player.getUseItem();

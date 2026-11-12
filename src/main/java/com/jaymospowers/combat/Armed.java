@@ -64,6 +64,37 @@ public final class Armed {
 	public static final AttachmentType<Met> MET = AttachmentRegistry.create(JaymosPowers.id("guard_met"),
 		builder -> builder.syncWith(Met.CODEC, AttachmentSyncPredicate.all()));
 
+	/** The special cuts a body can be drawn making ({@code ArmedPose}): the Wheel Cut, the Figure Eight, a hurled blade. */
+	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2;
+
+	/** A special cut under way: when it began (game time), which, and how long its pose lasts (ticks). */
+	public record Cut(long start, int kind, int ticks) {
+		public static final StreamCodec<ByteBuf, Cut> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, Cut::start,
+			ByteBufCodecs.VAR_INT, Cut::kind,
+			ByteBufCodecs.VAR_INT, Cut::ticks,
+			Cut::new);
+	}
+
+	/** On a body making a special cut; synced to everyone. Not saved. */
+	public static final AttachmentType<Cut> CUT = AttachmentRegistry.create(JaymosPowers.id("special_cut"),
+		builder -> builder.syncWith(Cut.CODEC, AttachmentSyncPredicate.all()));
+
+	/**
+	 * {@code body} is drawn making the special cut {@code kind} for {@code ticks}, as if it had begun {@code skip} ticks
+	 * ago (a cut whose wind-up was skipped goes straight to its blow). Kingdoms' blade forms call this by name.
+	 */
+	public static void cut(LivingEntity body, int kind, int ticks, int skip) {
+		body.setAttached(CUT, new Cut(body.level().getGameTime() - skip, kind, ticks));
+	}
+
+	/** {@code body}'s special cut is over (stopped short, or interrupted). */
+	public static void endCut(LivingEntity body) {
+		if (body.getAttached(CUT) != null) {
+			body.removeAttached(CUT);
+		}
+	}
+
 	private static final boolean BETTER_COMBAT = FabricLoader.getInstance().isModLoaded("bettercombat");
 
 	private Armed() {

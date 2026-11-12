@@ -70,10 +70,28 @@ public final class ArmedPose {
 	/** The draw's reach, weapon arm only: across to the far hip (a one-handed blade), up over the shoulder (the big ones); then the top of the sweep out. */
 	static final float[] DRAW_HIP = {-0.5F, 1.1F, 0.0F}, DRAW_SHOULDER = {-2.9F, 0.0F, -0.2F};
 	static final float[] SWEEP_HIP = {-1.6F, -0.2F, 0.4F}, SWEEP_SHOULDER = {-1.9F, 0.1F, 0.0F};
+	/**
+	 * The special cuts ({@link Armed#CUT}; Kingdoms' blade forms). The Wheel Cut: the blade circles overhead through the
+	 * wind-up ({@link #WHEEL_CIRCLE_TICKS} a turn, {@link #WHEEL_RADIUS} wide) with the body wound back, then comes
+	 * across in one blow over the last {@link #WHEEL_SWEEP_TICKS}. The Figure Eight: the blade traces an eight before the
+	 * body, once every {@link #EIGHT_TICKS}. The hurled blade: the arm goes back, then snaps forward over the last
+	 * {@link #HURL_SNAP_TICKS}.
+	 */
+	static final float WHEEL_CIRCLE_TICKS = 12.5F, WHEEL_RADIUS = 0.35F, WHEEL_WIND = 0.55F;
+	static final int WHEEL_SWEEP_TICKS = 8;
+	static final float[] WHEEL_HIGH = {-2.75F, 0.0F, 0.1F}, WHEEL_FROM = {-1.9F, -0.9F, 0.5F}, WHEEL_TO = {-1.0F, 1.0F, 0.0F};
+	static final float EIGHT_TICKS = 14.0F, EIGHT_RISE = 0.8F, EIGHT_ACROSS = 0.9F, EIGHT_TURN = 0.25F;
+	static final float[] EIGHT_MID = {-1.25F, 0.1F, 0.15F};
+	static final int HURL_SNAP_TICKS = 6;
+	static final float[] HURL_BACK = {0.7F, -0.3F, 0.5F}, HURL_OUT = {-1.7F, 0.25F, 0.0F};
+	static final float HURL_TURN = 0.5F;
 	// ================================================================================================================
 
-	/** What's on a render state: how the weapon is carried, which arm has it, and how far through the draw (0-1; -1: drawn). */
-	public record Held(Armed.Kind kind, boolean right, float draw) {
+	/**
+	 * What's on a render state: how the weapon is carried, which arm has it, and how far through the draw (0-1; -1:
+	 * drawn); and the special cut being made ({@code cut}: -1 none), how long it has run and how long it lasts (ticks).
+	 */
+	public record Held(Armed.Kind kind, boolean right, float draw, int cut, float cutAt, int cutTicks) {
 	}
 
 	public static final RenderStateDataKey<Held> KEY = RenderStateDataKey.create(() -> "jaymospowers:armed");
@@ -109,6 +127,17 @@ public final class ArmedPose {
 			}
 			SEEN.put(entity.getId(), new Seen(main.getItem(), drawn));
 		}
+		Armed.Cut special = kind == null || !entity.isAlive() ? null : entity.getAttached(Armed.CUT);
+		if (special != null && (now - special.start() >= special.ticks() || now < special.start())) {
+			special = null;
+		}
+		if (special != null) {
+			// a special cut is the whole arm's business: it is drawn over a swing of the hand, and no draw plays under it
+			SEEN.put(entity.getId(), new Seen(main.getItem(), Long.MIN_VALUE));
+			state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, -1.0F, special.kind(), now - special.start() + partialTicks,
+				special.ticks()));
+			return;
+		}
 		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
 		if (kind == null || swinging || entity.isUsingItem() || entity.isSleeping() || !entity.isAlive() || CombatAnimCompat.attack(entity) != null) {
 			if (swinging || entity.isUsingItem()) {
@@ -119,7 +148,7 @@ public final class ArmedPose {
 			return;
 		}
 		float draw = drawn == Long.MIN_VALUE ? -1.0F : (now - drawn + partialTicks) / DRAW_TICKS;
-		state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, draw < 0.0F || draw >= 1.0F ? -1.0F : draw));
+		state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, draw < 0.0F || draw >= 1.0F ? -1.0F : draw, -1, 0.0F, 0));
 	}
 
 	/** Whether the stance is on this state (for {@link PoseTakeover}: Entity Model Features pauses so it holds). */
@@ -221,6 +250,48 @@ public final class ArmedPose {
 			yaw *= smooth(t);
 			bothHands = bothHands && t > 0.65F;
 		}
+		if (held.cut() >= 0) {
+			// a special cut: the weapon arm alone, the body turning with it
+			float t = held.cutAt();
+			bothHands = false;
+			other[0] = 0.2F;
+			other[2] = 0.3F;
+			switch (held.cut()) {
+				case Armed.CUT_WHEEL -> {
+					float windUp = held.cutTicks() - WHEEL_SWEEP_TICKS;
+					if (t < windUp) {
+						float a = t * Mth.TWO_PI / WHEEL_CIRCLE_TICKS;
+						float rise = smooth(t / 5.0F);
+						main[0] = Mth.lerp(rise, main[0], WHEEL_HIGH[0] + Mth.cos(a) * WHEEL_RADIUS);
+						main[1] = Mth.lerp(rise, main[1], WHEEL_HIGH[1] + Mth.sin(a) * WHEEL_RADIUS);
+						main[2] = Mth.lerp(rise, main[2], WHEEL_HIGH[2]);
+						yaw = -WHEEL_WIND * smooth(t / windUp);
+					} else {
+						float k = smooth((t - windUp) / (WHEEL_SWEEP_TICKS * 0.6F));
+						for (int i = 0; i < 3; i++) {
+							main[i] = Mth.lerp(k, WHEEL_FROM[i], WHEEL_TO[i]);
+						}
+						yaw = Mth.lerp(k, -WHEEL_WIND, WHEEL_WIND);
+					}
+				}
+				case Armed.CUT_EIGHT -> {
+					float a = t * Mth.TWO_PI / EIGHT_TICKS;
+					main[0] = EIGHT_MID[0] + Mth.sin(2.0F * a) * EIGHT_RISE;
+					main[1] = EIGHT_MID[1] + Mth.sin(a) * EIGHT_ACROSS;
+					main[2] = EIGHT_MID[2];
+					yaw = Mth.sin(a) * EIGHT_TURN;
+				}
+				default -> {
+					float back = held.cutTicks() - HURL_SNAP_TICKS;
+					float k = t < back ? 0.0F : smooth((t - back) / (HURL_SNAP_TICKS * 0.5F));
+					float reach = smooth(t / Math.max(1.0F, back));
+					for (int i = 0; i < 3; i++) {
+						main[i] = Mth.lerp(k, Mth.lerp(reach, main[i], HURL_BACK[i]), HURL_OUT[i]);
+					}
+					yaw = Mth.lerp(k, -HURL_TURN * reach, HURL_TURN);
+				}
+			}
+		}
 		float side = right ? 1.0F : -1.0F;
 		int mainArm = right ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, otherArm = right ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM;
 		f.set(mainArm, main[0], -side * main[1], side * main[2]);
@@ -236,7 +307,7 @@ public final class ArmedPose {
 		f.set(PoseBlend.HIP_ROLL, breath * BREATH_ROLL);
 		f.set(PoseBlend.HIP_PITCH, RUN_LEAN * run * (1.0F - crouch));
 		f.add(PoseBlend.HEAD, -RUN_LEAN * run * (1.0F - crouch));
-		float set = still * (1.0F - crouch);
+		float set = held.cut() >= 0 ? 1.0F - crouch : still * (1.0F - crouch);
 		f.set(PoseBlend.DROP, STANCE_DROP * set);
 		f.add(right ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG, -STANCE_STRIDE * set);
 		f.add(right ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG, STANCE_STRIDE * set);
