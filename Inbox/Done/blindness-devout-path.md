@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -17,3 +17,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-11 17:26 Text pass: reviewed all player-visible text in PR #1328. blindness.json: added blindfold item name, Sky Sight on/off, carve_warn, socket bleed/healed messages, Unseeing service chants (names + 3 chant lines + cut/bind/thanks/gift/scattered); extended blindness.desc and key.ultimate. chrono.json/rig.json/xenoform.json: ability description simplifications matching removed features. arsenal.json/ember.json/web.json: deletions of removed-feature messages only. All text plain, brief, in appropriate voice; no rewrites needed. No code changed.
+- 2026-11-11 21:05 PR #1328 is merged into master; moved to Inbox/Done.

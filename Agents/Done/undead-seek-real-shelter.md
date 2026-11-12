@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: undead-seek-real-shelter
 branch: claude/undead-seek-real-shelter
 with:
@@ -29,3 +29,4 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - 2026-11-11 01:49 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-11 21:05 PR #1262 is merged into master; moved to Agents/Done.

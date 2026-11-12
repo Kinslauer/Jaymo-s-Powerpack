@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: blindness-devout-path
 branch: claude/project-thread-0f2svy
 with: Claude (cloud project thread)
@@ -22,3 +22,6 @@ owns:
 ## Done
 - PR #1328. Blindfold (blinds non-holders; 5 min vigil calls Blindness), sneak+shears twice carves the eyes (scar, head cut, awakens at once). Devout holders: thinner dark, living things glow within 16 blocks. Devout Void Sight = Sky Sight (view 16 blocks overhead looking down).
 - Built; not played. Lore.md has a (new) paragraph for Andy.
+
+## Notes
+- 2026-11-11 21:05 PR #1328 is merged into master; moved to Agents/Done.

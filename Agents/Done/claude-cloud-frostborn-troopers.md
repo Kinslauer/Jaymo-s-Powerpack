@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: future-three-sided-war
 branch: claude/project-thread-yseohu
 with: Claude (cloud project thread)
@@ -20,3 +20,6 @@ owns:
 - Lore.md: (new) paragraph "The troopers" for Andy to approve.
 - Andy chose: hostile to everyone (players too).
 - Built; not played.
+
+## Notes
+- 2026-11-11 21:05 PR #1335 is merged into master; moved to Agents/Done.
