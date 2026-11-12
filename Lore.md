@@ -1335,5 +1335,8 @@ temper gives it (the bold shout, the warm reassure, the steady report, the quiet
 **leader** (a camp chief, a warchief, a captain, a warlord, a raid's captain) gives the same four orders a traveller
 gives their own: press on, come to me, hold, get the fallen up. Those who mind the fallen kneel beside a downed friend
 in the thick of it and get them up, on either side, so a fight against a band is won by putting down its healers first,
-and a leader who goes down leaves his band to fight each by its own habit. Patch 6 proposes a name for the sickness
+and a leader who goes down leaves his band to fight each by its own habit. They drag their fallen clear of the press by the shoulder before kneeling to
+them, hold a foe from behind for a friend to strike, pin a lone traveller between two of them, and give each other a
+leg up a wall. A band that sees you first goes to ground and waits; and the greedy grab what falls, goblins most of all,
+who run off with it. Patch 6 proposes a name for the sickness
 that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
