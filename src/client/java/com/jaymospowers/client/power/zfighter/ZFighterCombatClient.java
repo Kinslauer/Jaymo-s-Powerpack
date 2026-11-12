@@ -55,6 +55,10 @@ public final class ZFighterCombatClient {
 			case ZFighterTraining.AFTERIMAGE -> Items.PHANTOM_MEMBRANE;
 			case ZFighterTraining.SONIC_SWAY -> Items.BREEZE_ROD;
 			case ZFighterTraining.SELF_DESTRUCT -> Items.CREEPER_HEAD;
+			case ZFighterTraining.EYE_BEAMS -> Items.SPIDER_EYE;
+			case ZFighterTraining.AERIAL_CHARGE -> Items.FIREWORK_ROCKET;
+			case ZFighterTraining.THUNDERCLAP -> Items.BELL;
+			case ZFighterTraining.GREAT_BREATH -> Items.WIND_CHARGE;
 			default -> com.jaymospowers.power.zfighter.ZFighterCreator.custom(technique) ? Items.GLOWSTONE_DUST : Items.FIRE_CHARGE;
 		};
 	}
