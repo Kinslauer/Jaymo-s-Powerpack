@@ -33,7 +33,8 @@ public final class RigPassives {
 	static final double JUMP_BOOST = 0.12;
 
 	private static final Identifier PUNCH_ID = JaymosPowers.id("rig_punch"), PUNCH_KNOCK_ID = JaymosPowers.id("rig_punch_knockback"),
-		JUMP_ID = JaymosPowers.id("rig_jump");
+		JUMP_ID = JaymosPowers.id("rig_jump"), FRAME_ARMOR_ID = JaymosPowers.id("rig_frame_armor"),
+		FRAME_TOUGH_ID = JaymosPowers.id("rig_frame_toughness"), FRAME_SPEED_ID = JaymosPowers.id("rig_frame_speed");
 
 	private RigPassives() {
 	}
@@ -65,6 +66,31 @@ public final class RigPassives {
 		set(player, Attributes.ATTACK_KNOCKBACK, PUNCH_KNOCK_ID,
 			arms ? PUNCH_KNOCKBACK + (augment == Rig.Augment.ZFIGHTER ? ZFIGHTER_PUNCH_KNOCKBACK : 0.0) : 0.0);
 		set(player, Attributes.JUMP_STRENGTH, JUMP_ID, wearing && Rig.wears(player, Rig.Piece.THRUSTERS) ? JUMP_BOOST : 0.0);
+		frame(player, wearing);
+	}
+
+	/** The frame's plates and weight: armour, toughness and walking speed, a share for each piece worn. */
+	private static void frame(ServerPlayer player, boolean wearing) {
+		RigFrame frame = wearing ? Rig.frame(player) : RigFrame.STANDARD;
+		int worn = 0;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			worn += wearing && Rig.wears(player, piece) ? 1 : 0;
+		}
+		double share = worn / (double)Rig.Piece.values().length;
+		set(player, Attributes.ARMOR, FRAME_ARMOR_ID, frame.armor * share);
+		set(player, Attributes.ARMOR_TOUGHNESS, FRAME_TOUGH_ID, frame.toughness * share);
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			double amount = frame.speed * share;
+			AttributeModifier current = speed.getModifier(FRAME_SPEED_ID);
+			if (amount == 0.0) {
+				if (current != null) {
+					speed.removeModifier(FRAME_SPEED_ID);
+				}
+			} else if (current == null || current.amount() != amount) {
+				speed.addOrUpdateTransientModifier(new AttributeModifier(FRAME_SPEED_ID, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+		}
 	}
 
 	/** Keeps a flat bonus on (amount non-zero) or off. */

@@ -29,6 +29,8 @@ public final class ChronoSpeedClient {
 			ClientPlayNetworking.send(new ChronoSpeed.WallRun(-1));
 		}
 		wall = null;
+		ChronoMomentumClient.reset();
+		ChronoSpeedKeys.reset();
 		ChronoSpeed.clientOverclockedAt = Long.MIN_VALUE;
 	}
 
@@ -53,6 +55,9 @@ public final class ChronoSpeedClient {
 			player.setDeltaMovement(was.getStepX() * ChronoSpeed.WALL_TOP_IN, ChronoSpeed.WALL_TOP_UP, was.getStepZ() * ChronoSpeed.WALL_TOP_IN);
 		}
 		wall = now;
+		ChronoMomentumClient.tick(player, overclocked && now == null);
+		ChronoRapidClient.tick(player, overclocked);
+		ChronoSpeedKeys.tick(player, overclocked);
 		if (now != was && ClientPlayNetworking.canSend(ChronoSpeed.WallRun.TYPE)) {
 			ClientPlayNetworking.send(new ChronoSpeed.WallRun(now == null ? -1 : now.get3DDataValue()));
 		}

@@ -560,7 +560,7 @@ public final class SpiritArms {
 	/** Whether this client may see the aura of {@code entity} (the arms are made of it): attuned, or reading magic. */
 	static boolean visibleToAttuned(LivingEntity entity) {
 		LocalPlayer viewer = Minecraft.getInstance().player;
-		return viewer != null && Mana.attuned(entity) && (Mana.attuned(viewer) || com.jaymoskingdoms.ManaAlchemy.readsMagic(viewer));
+		return viewer != null && Mana.attuned(entity) && (entity == viewer || Mana.seesMana(viewer));
 	}
 
 	/** The spirit's colour mixed with mana's blue. */

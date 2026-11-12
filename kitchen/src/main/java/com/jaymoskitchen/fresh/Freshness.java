@@ -3,6 +3,9 @@ package com.jaymoskitchen.fresh;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.stomach.RawFood;
 import com.mojang.serialization.Codec;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -224,13 +227,26 @@ public final class Freshness {
 		container.setChanged();
 	}
 
-	/** Cool and dark enough to keep food: dark and out of the sky, and deep down or beside ice or an icebox. */
+	/** Other mods' cold places (by reflection, {@link #addCold}): Jaymo's Powers' gifted Cryo villagers keep their larders cold. */
+	private static final List<BiPredicate<ServerLevel, BlockPos>> COLD = new CopyOnWriteArrayList<>();
+
+	/** For other mods (by reflection): more places cold enough to keep food (still only where it's dark and out of the sky). */
+	public static void addCold(BiPredicate<ServerLevel, BlockPos> cold) {
+		COLD.add(cold);
+	}
+
+	/** Cool and dark enough to keep food: dark and out of the sky, and deep down, beside ice or an icebox, or in another mod's cold. */
 	public static boolean cellar(ServerLevel level, BlockPos pos) {
 		if (level.canSeeSky(pos.above()) || level.getBrightness(LightLayer.BLOCK, pos.above()) >= CELLAR_DARK) {
 			return false;
 		}
 		if (pos.getY() < CELLAR_DEEP) {
 			return true;
+		}
+		for (BiPredicate<ServerLevel, BlockPos> cold : COLD) {
+			if (cold.test(level, pos)) {
+				return true;
+			}
 		}
 		for (BlockPos p : BlockPos.betweenClosed(pos.offset(-ICE_REACH, -1, -ICE_REACH), pos.offset(ICE_REACH, 1, ICE_REACH))) {
 			BlockState state = level.getBlockState(p);

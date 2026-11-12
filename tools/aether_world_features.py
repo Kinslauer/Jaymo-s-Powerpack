@@ -333,6 +333,8 @@ TREE_BIOMES = {
     'mistsea': ('short_skyroot_ferns_tree', [('skyroot_ferns_tree', 0.3)], {'rarity': 12}),
     'rustworks': ('skybirch_tree', [('wisptop_tree', 0.2)], {'rarity': 6}),
     'gilded_ridge': ('golden_oak_tree', [('skyroot_tree', 0.4), ('large_skyroot_tree', 0.1)], {'count': [(3, 1)]}),
+    # the golden grove (four-mods plan, Eden Ring): sunroots, with a golden oak among them now and then
+    'sunroot_grove': ('sunroot_tree', [('golden_oak_tree', 0.08), ('skyroot_tree', 0.1)], {'count': [(9, 1), (11, 1)]}),
 }
 
 
@@ -590,6 +592,10 @@ def build_misc():
     # stored for the crude scatterglass etc: nothing else
 
 
+# one chunk in this many starts a volvox colony, or a hollow island; and the heights they drift between
+VOLVOX_RARITY, HOLLOW_RARITY, DRIFT_HEIGHTS = 36, 80, (165, 250)
+
+
 def build_sky():
     """(0.20.96) The Aether sky (seven-mods plan, patch 10): updraft vents, upfalls, the sky warden's arena, the watched
     vault, and the dressing of the four sky biomes. All one Java feature type, jaymospowers:sky, told its kind."""
@@ -607,6 +613,12 @@ def build_sky():
     for nm, block, chance in (('boulder_gilded_gold', 'minecraft:raw_gold_block', 9), ('boulder_gilded_glint', 'glint_ore', 6)):
         feature(nm, {'type': 'minecraft:block_blob', 'can_place_on': tag(NS + ':aether_boulder_can_place_on'), 'state': state(block)})
         placed(nm, nm, [rarity(chance), IN_SQ] + surface('high', up=False) + [BIOME])
+    # (four-mods plan, Eden Ring) the sunroot, and what drifts in the high sky: volvox colonies and hollow islands.
+    # com.jaymospowers.eden.EdenFeature builds them.
+    for kind in ('sunroot_tree', 'volvox_colony', 'hollow_island'):
+        feature(kind, {'type': NS + ':eden', 'kind': kind})
+    placed('volvox_colonies', 'volvox_colony', [rarity(VOLVOX_RARITY), IN_SQ, hr_uniform(*DRIFT_HEIGHTS)])
+    placed('hollow_islands', 'hollow_island', [rarity(HOLLOW_RARITY), IN_SQ, hr_uniform(*DRIFT_HEIGHTS)])
 
 
 # biome name -> placed features by decoration step, built from the lists below
@@ -637,7 +649,7 @@ VEGETAL = [
     'arilum_short', 'arilum', 'arilum_blooming', 'hanging_roots',
 ]
 # (0.20.96) after the clouds, so the vents' columns and the arena are not built over
-SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky_arena']
+SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky_arena', 'hollow_islands', 'volvox_colonies']
 
 
 # ---------------------------------------------------------------- the biomes' lists
@@ -645,7 +657,7 @@ SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky
 # in every biome (including the cave layer): anything whose placement is decided by height rather than by the surface,
 # because the biome at that height is whichever the depth router picks there
 COMMON = ['cloudbed', 'quicksoil_shelf', 'pointed_holystone_cave', 'spring_water', 'crystal_island', 'upfalls', 'sky_arena', 'watched_vault',
-          'updraft_vents', 'updraft_vents_high'] + ORES + [
+          'updraft_vents', 'updraft_vents_high', 'hollow_islands', 'volvox_colonies'] + ORES + [
     n for (k, b, c, h) in CLOUD_PLACEMENTS for n in ['aercloud_%s_%s' % (k, b)]]
 SURFACE_COMMON = ['pointed_holystone', 'holystone_rocks']
 
@@ -683,6 +695,8 @@ PLAN = {
                   'magnetic_shrooms'],
     'gilded_ridge': ['boulder_gilded_gold', 'boulder_gilded_glint', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_small', 'flowers_highfields',
                      'holystone_twigs', 'moa_nests'],
+    'sunroot_grove': ['lake_water', 'moss_patch_ambrelinn', 'boulder_holystone', 'TREES', 'TREES_HIGH', 'grass_medium', 'fern_patch', 'flowers_highfields',
+                      'holystone_twigs', 'moa_nests'],
 }
 BIOMES = list(PLAN)
 

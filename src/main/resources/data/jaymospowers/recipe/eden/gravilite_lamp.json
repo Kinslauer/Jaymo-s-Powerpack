@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:gravilite_shards",
+    "G": "minecraft:glass"
+  },
+  "pattern": [
+    " G ",
+    "G#G",
+    " G "
+  ],
+  "result": {
+    "id": "jaymospowers:gravilite_lamp"
+  }
+}

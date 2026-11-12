@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "jaymospowers:sunroot_log"
+  ],
+  "result": {
+    "id": "jaymospowers:sunroot_planks",
+    "count": 4
+  }
+}

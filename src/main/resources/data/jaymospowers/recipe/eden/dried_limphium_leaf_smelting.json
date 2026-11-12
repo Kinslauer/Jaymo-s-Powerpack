@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "ingredient": "jaymospowers:limphium_leaf",
+  "result": {
+    "id": "jaymospowers:dried_limphium_leaf"
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

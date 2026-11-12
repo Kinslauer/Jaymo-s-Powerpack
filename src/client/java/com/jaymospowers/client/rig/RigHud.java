@@ -65,6 +65,13 @@ final class RigHud {
 			return;
 		}
 		world(graphics, minecraft, player);
+		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		if (RigHelmView.active(minecraft, player)) {
+			RigHelmView.render(graphics, minecraft, player, partial);
+		}
+		if (!RigClient.marks().isEmpty()) {
+			RigHelmView.marks(graphics, minecraft, player, RigClient.marks(), partial);
+		}
 		Font font = minecraft.font;
 		RigNet.Status status = RigClient.status;
 		boolean blink = (player.tickCount / 5) % 2 == 0;
@@ -102,7 +109,8 @@ final class RigHud {
 			boolean low = (warnings & RigNet.WARN_LOW_CHARGE) != 0;
 			int barX = x + 26, barW = 36;
 			graphics.fill(barX, row + 2, barX + barW, row + 6, 0x60000000);
-			graphics.fill(barX, row + 2, barX + Math.round(barW * share), row + 6, low && blink ? LOW : ACCENT);
+			graphics.fill(barX, row + 2, barX + Math.round(barW * share), row + 6,
+				low && blink ? LOW : status.overcharge() > 0 ? RigHelmView.OVER : ACCENT);
 			graphics.text(font, Math.round(share * 100) + "%", barX + barW + 3, row, low ? LOW : 0xFFFFFFFF, false);
 			if (mind != null) {
 				String tag = Component.translatable("rig.jaymospowers.hud.mind." + mind).getString() + " "
@@ -280,7 +288,7 @@ final class RigHud {
 	 * Where a point in the world falls on the screen: {x, y, pixels per block there}, or null if it's behind the camera or
 	 * off the screen.
 	 */
-	private static double @Nullable [] project(GuiGraphicsExtractor graphics, Minecraft minecraft, Vec3 world) {
+	static double @Nullable [] project(GuiGraphicsExtractor graphics, Minecraft minecraft, Vec3 world) {
 		Camera camera = minecraft.gameRenderer.mainCamera();
 		Vec3 rel = world.subtract(camera.position());
 		Vector3fc forward = camera.forwardVector(), up = camera.upVector(), left = camera.leftVector();
@@ -324,7 +332,7 @@ final class RigHud {
 	}
 
 	/** What the Helm sees under the crosshair. */
-	private static @Nullable LivingEntity target(Minecraft minecraft, LocalPlayer player) {
+	static @Nullable LivingEntity target(Minecraft minecraft, LocalPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(TARGET_RANGE));
 		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

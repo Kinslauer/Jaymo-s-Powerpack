@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": "jaymospowers:gravilite_block",
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "S": "#minecraft:stone_crafting_materials"
+  },
+  "pattern": [
+    "I#I",
+    "IRI",
+    "SSS"
+  ],
+  "result": {
+    "id": "jaymospowers:gravity_compressor"
+  }
+}

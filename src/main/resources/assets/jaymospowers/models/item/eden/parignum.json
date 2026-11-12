@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:block/eden/parignum",
+    "layer1": "jaymospowers:block/eden/parignum_flowers_1"
+  }
+}

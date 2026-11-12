@@ -97,6 +97,7 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_RED, OmenRenderer::red);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.OMEN_BLUE, OmenRenderer::blue);
 		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureOmens.WORKY, WorkyRenderer::new);
+		EntityRendererRegistry.register(com.jaymospowers.power.chrono.future.FutureMachines.TROOPER, FutureTrooperRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
 		ChronoTimeStopClient.init();
@@ -213,6 +214,7 @@ public final class ChronoPowerClient implements PowerClient {
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		ChronoFlowClient.renderHud(graphics, player);
+		ChronoSpeedHud.render(graphics, player);
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
 		float partial = delta.getGameTimeDeltaPartialTick(false);

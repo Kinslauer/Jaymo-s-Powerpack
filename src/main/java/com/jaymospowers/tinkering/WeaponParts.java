@@ -199,6 +199,11 @@ public final class WeaponParts {
 		add(new Kind(SORAS_DAGGER_BLADE, "jaymospowers:soras_dagger", Scheme.SINGLE, 2 * INGOT, Assembly.ROD_BINDING, 1));
 		// (0.18.47) Weapon Forms: the Fang Gauntlets (claws for the Claw family), iron only, forged like the rest: fangs and a binding
 		add(new Kind("fang_blades", "jaymospowers:fang_gauntlets", Scheme.SINGLE, 3 * INGOT, Assembly.BINDING, 1));
+		// boxing's metal fist gear (boxing/BoxingGear), forged like the rest: the cestus's studs or the bracers' plates, and a binding
+		add(new Kind("cestus_studs", "jaymospowers:iron_cestus", Scheme.SINGLE, 2 * INGOT, Assembly.BINDING, 1));
+		add(new Kind("steel_cestus_studs", "jaymospowers:steel_cestus", Scheme.SINGLE_STEEL, 2 * INGOT, Assembly.BINDING, 1));
+		add(new Kind("bracer_plates", "jaymospowers:iron_bracers", Scheme.SINGLE, 3 * INGOT, Assembly.BINDING, 1));
+		add(new Kind("steel_bracer_plates", "jaymospowers:steel_bracers", Scheme.SINGLE_STEEL, 3 * INGOT, Assembly.BINDING, 1));
 		// vanilla spears
 		add(new Kind("spear_tip", "minecraft:spear", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
 		// Balkon's WeaponMod (the musket bayonet is still a musket and a knife put together)

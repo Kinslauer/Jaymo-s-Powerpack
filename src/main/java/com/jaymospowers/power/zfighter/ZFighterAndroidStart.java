@@ -21,9 +21,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WrittenBookContent;
@@ -141,24 +138,9 @@ public final class ZFighterAndroidStart {
 
 	/** The Mad Tinkerer, held at his bench: an MCA villager with Kingdoms and MCA, else the old frozen trader. */
 	private static void tinkerer(ServerLevel level, BlockPos o, RandomSource random) {
-		Vec3 at = Vec3.atBottomCenterOf(o.offset(6, 0, 3));
-		Entity npc = ZFighterNpcs.villager(level, at, 90.0F, ZFighterAndroid.TAG, "entity.jaymospowers.scientist", false);
+		Entity npc = ZFighterAndroid.tinkerer(level, Vec3.atBottomCenterOf(o.offset(6, 0, 3)), 90.0F);
 		if (npc == null) {
-			WanderingTrader trader = EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT);
-			if (trader == null) {
-				return;
-			}
-			trader.snapTo(at.x, at.y, at.z, 90.0F, 0.0F);
-			trader.setNoAi(true);
-			trader.setPermanentlyInvulnerable(true);
-			trader.setPersistenceRequired();
-			trader.setDespawnDelay(0);
-			trader.addTag(ZFighterAndroid.TAG);
-			trader.setCustomName(Component.translatable("entity.jaymospowers.scientist"));
-			trader.setCustomNameVisible(true);
-			trader.getOffers().clear();
-			level.addFreshEntity(trader);
-			npc = trader;
+			return;
 		}
 		npc.addTag(ZFighterAndroid.UNTIL_TAG + (level.getGameTime() + TINKERER_STAYS));
 	}

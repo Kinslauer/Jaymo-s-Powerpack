@@ -56,6 +56,7 @@
 		{ "config": "jaymospowers.smoke.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.blindness.client.mixins.json", "environment": "client" },
 		"jaymospowers.fishing.mixins.json",
+		"jaymospowers.rig.mixins.json",
 		{ "config": "jaymospowers.rig.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.cryo.client.mixins.json", "environment": "client" },
 		"jaymospowers.ember.mixins.json",

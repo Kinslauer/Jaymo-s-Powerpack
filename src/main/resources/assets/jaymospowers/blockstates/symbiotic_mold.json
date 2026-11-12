@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "bottom=false": {
+      "model": "jaymospowers:block/eden/symbiotic_mold"
+    },
+    "bottom=true": {
+      "model": "jaymospowers:block/eden/symbiotic_mold"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:symbiotic_mold_emissive"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/symbiotic_mold_emissive"
+}

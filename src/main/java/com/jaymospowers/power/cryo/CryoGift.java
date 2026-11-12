@@ -15,6 +15,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +50,7 @@ final class CryoGift implements GiftKit {
 
 	static void init() {
 		Gifted.register(new CryoGift());
+		CryoChill.init();
 	}
 
 	@Override
@@ -169,6 +171,19 @@ final class CryoGift implements GiftKit {
 	@Override
 	public void everyday(ServerLevel level, PathfinderMob mob, Gifted.Gift gift) {
 		BlockPos at = mob.blockPosition();
+		// any fire close by smothered in frost, and the air round them left cold (the larder and the house keep cool, CryoChill)
+		boolean smothered = false;
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-LARDER_RADIUS, -2, -LARDER_RADIUS), at.offset(LARDER_RADIUS, 3, LARDER_RADIUS))) {
+			if (level.getBlockState(p).getBlock() instanceof BaseFireBlock) {
+				level.removeBlock(p, false);
+				level.sendParticles(ParticleTypes.SNOWFLAKE, p.getX() + 0.5, p.getY() + 0.3, p.getZ() + 0.5, 10, 0.25, 0.2, 0.25, 0.02);
+				smothered = true;
+			}
+		}
+		if (smothered) {
+			level.playSound(null, at, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.3F);
+		}
+		CryoChill.chill(level, at);
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-LARDER_RADIUS, -2, -LARDER_RADIUS), at.offset(LARDER_RADIUS, 1, LARDER_RADIUS))) {
 			if (level.getFluidState(p).is(Fluids.WATER) && level.getFluidState(p).isSource() && level.getBlockState(p.above()).isAir()
 				&& CryoIce.place(level, p.immutable(), Blocks.ICE.defaultBlockState(), LARDER_TICKS, CryoIce.Mode.WATER)) {

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "stage=0": {
+      "model": "jaymospowers:block/eden/pulse_tree_sapling"
+    },
+    "stage=1": {
+      "model": "jaymospowers:block/eden/pulse_tree_sapling"
+    }
+  }
+}

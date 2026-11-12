@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "jaymospowers:dried_limphium_leaf",
+    "jaymospowers:gravilite_shards"
+  ],
+  "result": {
+    "id": "minecraft:written_book",
+    "components": {
+      "minecraft:written_book_content": {
+        "title": "A Far Country Herbal",
+        "author": "",
+        "generation": 1,
+        "resolved": true,
+        "pages": [
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page1"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page2"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page3"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page4"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page5"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page6"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page7"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page8"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page9"
+          },
+          {
+            "translate": "book.jaymospowers.far_country_herbal.page10"
+          }
+        ]
+      },
+      "minecraft:custom_data": {
+        "jaymoskingdoms_lore": "jaymospowers:far_country_herbal"
+      }
+    }
+  }
+}
