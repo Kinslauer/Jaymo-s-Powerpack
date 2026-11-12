@@ -687,6 +687,7 @@ public final class ChronoFlow {
 				SoundEvents.NOTE_BLOCK_BASEDRUM, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 0.7F,
 				level.getRandom().nextLong()));
 		}
+		ChronoCalculation.feed(player, ChronoCalculation.FEED_PASS);
 		ChronoFx.particles(level, player, MagicFx.PALE, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.35, 0.6, 0.35, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6F, 1.7F);
 		return true;
@@ -1063,6 +1064,7 @@ public final class ChronoFlow {
 
 	/** Turned aside: each attacker is struck and staggered, the first with the counter's blow. One attacker gets a longer counter. */
 	private static void counter(ServerPlayer player, List<LivingEntity> attackers) {
+		ChronoCalculation.feed(player, ChronoCalculation.FEED_COUNTER);
 		if (attackers.size() == 1) {
 			counterOne(player, attackers.get(0));
 			return;
