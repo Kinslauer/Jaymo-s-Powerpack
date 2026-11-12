@@ -3,10 +3,8 @@ status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
-claimed_by: claude-cloud-tinkerer
-pr: 1336
-writer: hermes-writer
-text_pass: done
+claimed_by: 
+pr: 
 ---
 
 # The Tinkerer cheats death with his echoes

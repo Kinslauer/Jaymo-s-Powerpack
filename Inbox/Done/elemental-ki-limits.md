@@ -14,4 +14,4 @@ pr: 1333
 **Build:** Smoke, Gravity and Cryo holders get the weakest aura and can't see mana glow, spirits or mana abilities; valor still works. Lore: Lore.md "The elemental powers".
 
 ## Notes
-- 2026-11-11 22:31 PR #1333 is merged into master; moved to Inbox/Done.
+- 2026-11-12 01:48 PR #1333 is merged into master; moved to Inbox/Done.

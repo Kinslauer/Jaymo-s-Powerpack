@@ -122,7 +122,7 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-**The twelve powers known in the world**, as folk would describe them:
+**The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
@@ -132,9 +132,18 @@ kit.
   the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
   not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
   off. the bridge is the line now. if you find this don't come".
-- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
-  choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
-  within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+- **Blindness** is not a power (Andy, 2026-11-11: "blindness should stay as is, just no longer considered a power,
+  meaning you can go blind from battle, or malicious intent ... you can awaken resonance while blind with the fork").
+  It is a thing that happens to people: an eye lost to a blow, both taken by an enemy's blade or by one's own hand. For
+  the blind, sound paints the world a moment at a time. **The especially devout choose it**: they don a blindfold or
+  carve out their own eyes. The new kind of sight within the dark, and the bird's-eye view at its height, belong to
+  those among them whom Resonance has answered.
+  (new) **The fork in the dark** (Claude's placement, for Andy to approve). A struck tuning fork is how the blind find
+  out whether sound will answer them: one clear note held in the dark, and for some the note comes back as a world.
+  That is why the Unseeing keep forks and why a service ends with one struck over the newly bound. Most hear only the
+  note. The few who hear more are what the cult calls the Shown, and what everyone else calls a Resonance holder who
+  happens to be blind. A fighter who lost an eye in battle is owed nothing by the dark; it is the whole dark, both eyes,
+  that the fork answers.
   (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
@@ -151,16 +160,31 @@ kit.
   wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
   blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
   ("you should be able to stumble on a service of the members performing this on one of their followers").
-  (Claude, for Andy: the eight faiths already count the Truth as the eighth, so this reads the Unseeing's as a belief
-  outside them. It isn't a faith a player can swear to in Kingdoms.) What they are given is not their eyes back: living things burn
+  **It is the faith the barbarians follow** (Andy, 2026-11-11: "these can be the faith barbarians follow"): the camps
+  hold none of the eight; the Unseeing in their caves are its most zealous, the ones who went all the way. It isn't a
+  faith a player can swear to. What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
 - **Darktide**: water and darkness, a guard and a blade, and a Flow that rises in the deep and the dark. Its holders
   harvest shadows; ascended, it is the Abyssal Tide.
+  (new) **The tide in them** (Darktide overhaul, 2026-11-11, for Andy to approve). The Flow keeps a tide of its own: at
+  high tide the holder's reach lengthens, and at spring tide, a full measure, the next thing they call is the great one.
+  A holder with empty hands is never unarmed: the water in them takes the shape of a blade when they raise a guard, and
+  runs back to water when it is not needed. In water or rain they are at home, quicker, and can go under anywhere the
+  rain is falling. The Abyssal Tide's height is the **Maelstrom**: the deep brought up as a standing dome of dark water,
+  which its caller swims through while everyone else in it drowns. Tideborn say the Deep Mother lends it and wants it back.
+  (new) **Ink and water** (Darktide looks, 2026-11-12, for Andy to approve). What a holder does is seen as ink on water:
+  a cut hangs in the air for a breath as a single brush stroke, the tide they call is a true wave with a pale crest, and
+  where they go under the ground lies open as a dark pool. Tideborn calligraphers say the Deep Mother writes with her
+  holders, and read a fight's strokes afterward the way others read tea leaves. A holder near full Flow can be told at
+  a glance: water gathers at their feet and their eyes go pale.
 - **Gravity**: weight taken out of things or piled on; at its height, a meteor called down.
 - **Resonance**: sound and the Deep Dark's sculk. The holder hears through walls and breaks things by their pitch.
+  (new) **What Resonance took from the blind** (2026-11-12, for Andy to approve). A holder can go wholly quiet, steps
+  and breath and all, and what their shout strikes they go on hearing through walls. In the dark, blind or blindfolded,
+  they hear the living as shapes; at their height the hearing lifts off the ground and looks down like a bird.
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
@@ -707,7 +731,7 @@ three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
 firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
 Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
 the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
-hurting one turns the whole squad; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
+hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
 and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
