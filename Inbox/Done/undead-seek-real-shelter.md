@@ -1,5 +1,5 @@
 ---
-status: writing
+status: done
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -47,3 +47,4 @@ Not tested in game.
 - 2026-11-11 12:39 Andy 2026-11-11 12:39Z: 'It should keep searching till it finds shelter.' Change SeekShelterGoal: when nothing is found within REACH, don't stay put; walk away (e.g. downhill or toward the darkest/most covered direction, or a widening search) and keep searching every back-off until it finds shelter. Held from merge for this.
 - 2026-11-11 16:32 Review (head 947704b), quick look: the 01:19/01:54 fixes are in, but Andy's 12:39Z ask (keep searching until it finds shelter) is not done yet. Also SeekShelterGoal.java:105/125 flips avoidSun by reflection on nav.getClass().getDeclaredField, which throws for any GroundPathNavigation subclass; use the public GroundPathNavigation.setAvoidSun (check it in 26.3) instead. Full review once the keep-searching change is pushed.
 - 2026-11-11 18:01 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-12 19:07 PR #1262 is merged into master; moved to Inbox/Done.

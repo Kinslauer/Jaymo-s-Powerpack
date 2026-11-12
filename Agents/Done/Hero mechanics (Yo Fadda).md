@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: Rebuild Yo Fadda hero mechanics for our powers
 branch: claude/project-thread-ixuj2m
 with: cloud thread
@@ -26,3 +26,4 @@ owns:
 - PR #1322: Wisp ghost tail + held Phase, compiled, not played.
 
 ## Done
+- 2026-11-12 19:07 PR #1322 is merged into master; moved to Agents/Done.
