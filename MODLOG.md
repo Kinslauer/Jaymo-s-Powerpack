@@ -2820,3 +2820,21 @@ Ideas from Yo Fadda's Danny Phantom mod (All Rights Reserved: nothing taken, our
 - While suited they're drawn as a player body in that costume (`client/costume/GiftedCostumeClient`, `GiftedCostumeEntityRenderDispatcherMixin`), the costume's name over their head instead of theirs. The mask hides MCA's look and the villager's size and blood under it.
 - **Everyday Cryo** (Andy: "putting fires out or keeping a food store or home cold"): a gifted Cryo villager's everyday use now smothers fire near them in frost and leaves the air round their home cold for 2 minutes (`power/cryo/CryoChill`). With Jaymo's Kitchen: a chest or barrel in that cold keeps food as a cold cellar does (needs this patch's Kitchen), and a player indoors there in a hot land is cooled by 20.
 - Built; not played. Not seen in game: how the costume sits on a villager drawn as a player body, and whether any other mod's player layer minds a villager drawn that way.
+
+## 0.22.42 (2026-11-12): the Verdant World's storm, sand and wind - Brainstorm, Lakeside Desert, Wind Valley (#1327)
+
+Andy's Eden Ring picks, part 2 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Three more regions of the Verdant
+World; only chunks made after this update get them.
+- **Brainstorm**: cold grey upland of brain trees, each shot through with copper, iron or gold, with metal grasses
+  underfoot (shears take them; now and then one drops a nugget). The trees build up charge: now and then a block of the
+  crown lights and shocks every living thing within 4 blocks for 3 damage (`BrainBlock`). Anyone wearing a piece of
+  iron, golden, chainmail, copper or netherite armour is passed by (item tag `jaymospowers:grounding_armor`). Some
+  discharges show a bolt that does nothing.
+- **Lakeside Desert**: hot dry country of sand and gravel with ponds, and aquatus on their shores. An aquatus head
+  slowly turns the soil within 5 blocks of it to sand (`AquatusBlock`), so keep one away from a field. Its sapling grows
+  with bone meal.
+- **Wind Valley**: open grassland with a steady wind (`EdenWind`). Under the open sky it pushes you sideways, harder
+  off the ground, and carries thrown and shot things and dropped items. It blows from one quarter for the whole valley
+  and swings round once in five days. Sneaking braces against it.
+- **Wood**: brain tree logs and planks.
+- All numbers are constants at the top of `BrainBlock`, `AquatusBlock`, `EdenWind` and `EdenFeature`.

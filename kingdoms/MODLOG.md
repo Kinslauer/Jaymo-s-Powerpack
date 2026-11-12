@@ -11394,3 +11394,12 @@ Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise
 - **Nobody likes them**: folk near a suited one grumble at a vigilante ("Go home. We managed before you lot.") or cry out at a villain ("Someone fetch the guard!"), in speech bubbles. Lines in `lang/parts/costumed-folk.json`.
 - Lore.md has the placement as a (new) paragraph for Andy to approve.
 - Built; not played.
+
+## 0.7.751 (2026-11-12): Blossom castle - the Blossom kingdom's seat rebuilt as a four-storey castle (#1337)
+
+- **The seat of a Blossom town is a castle now**, in the style of the Ninja Castle build Andy picked (our own design; that build has no stated licence, so none of it is shipped). `Blossom.tenshu` replaces the three-storey keep.
+- **Outside**: a moat along the front with a stone bridge and lanterns, steps up a footing of rough stone that is a block wider at the ground, a terrace under the eaves, then four storeys of white plaster and dark posts, each standing back under a skirt of grey stone tile with turned-up corners. A gable on the front of the two lowest roofs, a top roof with its ridge across the front and a pale horn at each end, and a gatehouse wing against the right side whose ridge runs into the keep. 25 wide, 25 deep, 30 high (the old keep was 17 x 17 x 20).
+- **Inside**: the great room is a boarded hall between two raised tatami floors, with a niche at the far end that the throne goes in (it is the only spot the seat finder can pick, so the throne is no longer in a corner). Ladders up to a guards' floor with futons, the lord's rooms, and a lookout under the roof. A door off the right-hand floor opens into the gatehouse.
+- **Town layout** (`BlossomVillages`): the castle starts 5 blocks nearer the bell, the shrine moved 5 blocks left, the last pair of road lanterns moved up, and the ground is cleared 32 high instead of 26. The footing is the land's own stone so the panic room is still dug under the throne.
+- Existing Blossom towns keep their old keep; only towns founded after this get the castle (`/kingdom found blossomtown` to see one).
+- Built (compiles); not seen in game.
