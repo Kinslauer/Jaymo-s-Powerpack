@@ -133,11 +133,16 @@ public final class ChestNoise {
 	}
 
 	/** Something solid stands between the chest and the sleeper's head. */
-	private static boolean walled(ServerLevel level, Vec3 noise, LivingEntity sleeper) {
+	static boolean walled(ServerLevel level, Vec3 noise, LivingEntity sleeper) {
 		Vec3 head = sleeper.getEyePosition();
 		// (start just off the chest toward them, so the chest itself doesn't count)
 		Vec3 from = noise.add(head.subtract(noise).normalize().scale(0.75));
 		return level.clip(new ClipContext(from, head, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, sleeper)).getType() == HitResult.Type.BLOCK;
+	}
+
+	/** (Footsteps) {@code player}'s noise at {@code pos} wakes {@code sleeper}, as a chest's creak would. */
+	static void wakeBy(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos) {
+		wake(level, sleeper, player, pos, level.getGameTime());
 	}
 
 	private static void wake(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos, long now) {
