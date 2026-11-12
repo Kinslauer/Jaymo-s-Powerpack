@@ -158,6 +158,7 @@ public final class Wounds {
 		Fainting.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
+		WoundMarks.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
@@ -724,6 +725,8 @@ public final class Wounds {
 		// (0.14.4) a blade, a shot or claws that cut deep enough opens a bleeding cut
 		if (!blocked && victim.isAlive()) {
 			Bleeding.onHit(victim, plan, source, landed, was, points);
+			// a mark of what made it, where it landed
+			WoundMarks.onHit(victim, plan, source, landed, loss);
 		}
 		if (victim.isAlive() && lethal(victim, points, plan)) {
 			finish(level, victim, plan, by, null);

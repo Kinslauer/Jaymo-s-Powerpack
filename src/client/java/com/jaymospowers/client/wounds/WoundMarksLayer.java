@@ -1,0 +1,369 @@
+package com.jaymospowers.client.wounds;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.wet.ArmourGrimeTextures;
+import com.jaymospowers.core.BladeBlood;
+import com.jaymospowers.core.wounds.BodyPart;
+import com.jaymospowers.core.wounds.WoundMarks;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The marks wounds leave ({@link WoundMarks}), drawn into the skin: a cut (a dark line with raw edges), claws (three of
+ * them side by side), a puncture (a dark hole with a run of blood under it), a bruise (a purple patch that yellows as it
+ * heals), a blast (specks and soot). On a humanoid skin (players, villagers, zombies and the rest of the humanoid layout)
+ * each lies on its own part and side; on anything else it lies somewhere on the skin, the same place every time. They fade
+ * as they age, in a few steps, so each body's painted picture changes seldom.
+ * <p>
+ * Only the mark's pixels are painted (the rest of the picture is clear), so the blood coat ({@code BloodCoatLayer}) and the
+ * skin show through everywhere else; each mark pixel is the skin's own pixel with the mark mixed in.
+ */
+public final class WoundMarksLayer {
+	static final RenderStateDataKey<Marked> KEY = RenderStateDataKey.create(() -> "jaymospowers:wound_marks");
+	/** How many fade steps a mark goes through. */
+	static final int STAGES = 4;
+	/** At most this many painted pictures are kept; past it they're all thrown away and painted again as needed. */
+	static final int MOST_KEPT = 300;
+	/** The colours of a fresh bruise and an old one, and a blast's soot. */
+	static final int BRUISE_FRESH = 0x4A2C5E, BRUISE_OLD = 0x8C8A3C, SOOT = 0x2A2522;
+
+	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood) {
+		String key() {
+			StringBuilder b = new StringBuilder();
+			for (int i = 0; i < this.marks.size(); i++) {
+				b.append(Long.toHexString(this.marks.get(i).shape())).append(':').append(this.stages[i]).append(',');
+			}
+			return b.append(Integer.toHexString(this.blood)).toString();
+		}
+	}
+
+	private static final Map<String, Identifier> MADE = new HashMap<>();
+	private static final Set<Identifier> UNREADABLE = new HashSet<>();
+	private static int made;
+
+	private WoundMarksLayer() {
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static void register() {
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> helper.register((RenderLayer) new Layer(renderer)));
+		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> MADE.clear());
+	}
+
+	/** From every living renderer's extractRenderState. */
+	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		List<WoundMarks.Mark> marks = WoundMarks.marks(entity);
+		if (marks.isEmpty()) {
+			state.setData(KEY, null);
+			return;
+		}
+		long now = entity.level().getGameTime();
+		int[] stages = new int[marks.size()];
+		for (int i = 0; i < stages.length; i++) {
+			// stage STAGES is fresh, 1 nearly gone
+			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
+		}
+		int blood = BladeBlood.color(entity);
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood));
+	}
+
+	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
+		private final LivingEntityRenderer<?, S, M> renderer;
+
+		Layer(LivingEntityRenderer<?, S, M> renderer) {
+			super(renderer);
+			this.renderer = renderer;
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
+			Marked marked = state.getData(KEY);
+			if (marked == null || state.isInvisible) {
+				return;
+			}
+			Identifier skin;
+			try {
+				skin = this.renderer.getTextureLocation(state);
+			} catch (RuntimeException e) {
+				return;
+			}
+			Identifier painted = skin == null ? null : paint(skin, marked, this.getParentModel() instanceof HumanoidModel);
+			if (painted != null) {
+				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
+			}
+		}
+	}
+
+	private static @Nullable Identifier paint(Identifier skin, Marked marked, boolean humanoid) {
+		if (UNREADABLE.contains(skin)) {
+			return null;
+		}
+		String key = skin + "|" + humanoid + "|" + marked.key();
+		Identifier done = MADE.get(key);
+		if (done != null) {
+			return done;
+		}
+		NativeImage base = ArmourGrimeTextures.copy(skin);
+		if (base == null) {
+			UNREADABLE.add(skin);
+			return null;
+		}
+		if (MADE.size() >= MOST_KEPT) {
+			Minecraft minecraft = Minecraft.getInstance();
+			for (Identifier id : MADE.values()) {
+				minecraft.getTextureManager().release(id);
+			}
+			MADE.clear();
+		}
+		int w = base.getWidth(), h = base.getHeight();
+		NativeImage out = new NativeImage(w, h, true);
+		try (base) {
+			boolean layout = humanoid && (w == h || w == h * 2) && w >= 64;
+			Painter painter = new Painter(base, out, layout);
+			for (int i = 0; i < marked.marks().size(); i++) {
+				painter.mark(marked.marks().get(i), marked.stages()[i] / (float) STAGES, marked.blood());
+			}
+		}
+		Identifier id = JaymosPowers.id("wound_marks/" + made++);
+		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, out));
+		MADE.put(key, id);
+		return id;
+	}
+
+	/** Paints marks from a skin ({@code base}) onto a clear picture ({@code out}) the same size. */
+	static final class Painter {
+		private final NativeImage base, out;
+		private final int w, h;
+		/** One skin pixel per this many picture pixels across (a 64-wide skin is 1). */
+		private final int unit;
+		private final boolean layout;
+		/** Whether the skin is the old 64 by 32 layout (no separate left limbs). */
+		private final boolean old;
+
+		Painter(NativeImage base, NativeImage out, boolean layout) {
+			this.base = base;
+			this.out = out;
+			this.w = base.getWidth();
+			this.h = base.getHeight();
+			this.unit = Math.max(1, this.w / 64);
+			this.layout = layout;
+			this.old = this.w == this.h * 2;
+		}
+
+		void mark(WoundMarks.Mark mark, float strength, int blood) {
+			int[] rect = this.layout ? rect(mark.part(), mark.side()) : null;
+			double cx, cy, size;
+			if (rect != null) {
+				cx = (rect[0] + rect[2] * mark.across()) * this.unit;
+				cy = (rect[1] + rect[3] * mark.down()) * this.unit;
+				size = Math.min(rect[2], rect[3]) * this.unit;
+			} else {
+				int[] at = somewhere(mark.seed());
+				if (at == null) {
+					return;
+				}
+				cx = at[0];
+				cy = at[1];
+				size = 6.0 * this.unit;
+			}
+			java.util.Random random = new java.util.Random(mark.seed());
+			int core = scale(blood, 0.45F), raw = scale(blood, 0.85F);
+			switch (mark.kind()) {
+				case CUT -> this.cut(cx, cy, mark.angle(), Math.max(3.0, size * 0.75), core, raw, strength, rect);
+				case CLAW -> {
+					double nx = -Math.sin(mark.angle()) * 1.6 * this.unit, ny = Math.cos(mark.angle()) * 1.6 * this.unit;
+					for (int k = -1; k <= 1; k++) {
+						this.cut(cx + nx * k, cy + ny * k, mark.angle(), Math.max(2.5, size * 0.55), core, raw, strength * 0.9F, rect);
+					}
+				}
+				case STAB -> {
+					this.blot(cx, cy, 0.6 * this.unit, scale(blood, 0.25F), strength, rect);
+					this.ring(cx, cy, 1.4 * this.unit, raw, strength * 0.6F, rect);
+					for (int k = 1; k <= 2 + random.nextInt(2); k++) {
+						this.dot(cx, cy + k * this.unit, raw, strength * (0.7F - k * 0.15F), rect);
+					}
+				}
+				case BRUISE -> {
+					int colour = lerp(1.0F - strength, BRUISE_FRESH, BRUISE_OLD);
+					this.patch(cx, cy, Math.max(1.5 * this.unit, size * 0.35), colour, 0.5F * (0.4F + 0.6F * strength), random, rect);
+				}
+				case BLAST -> {
+					this.patch(cx, cy, Math.max(2.0 * this.unit, size * 0.45), SOOT, 0.3F * strength, random, rect);
+					int specks = 4 + random.nextInt(3);
+					double r = Math.max(2.0 * this.unit, size * 0.4);
+					for (int k = 0; k < specks; k++) {
+						double a = random.nextDouble() * Math.PI * 2.0, d = random.nextDouble() * r;
+						this.dot(cx + Math.cos(a) * d, cy + Math.sin(a) * d, core, strength, rect);
+					}
+				}
+			}
+		}
+
+		/**
+		 * The rectangle (64ths: x, y, width, height) of {@code side} of {@code part} on a humanoid skin, or null for a part
+		 * the layout doesn't have. A box's sides lie along its strip in the order right, front, left, back.
+		 */
+		@Nullable int[] rect(BodyPart part, int side) {
+			int x, y, wide, deep, tall;
+			switch (part) {
+				case HEAD -> {
+					x = 0; y = 0; wide = 8; deep = 8; tall = 8;
+				}
+				case BODY -> {
+					x = 16; y = 16; wide = 8; deep = 4; tall = 12;
+				}
+				case RIGHT_ARM -> {
+					x = 40; y = 16; wide = 4; deep = 4; tall = 12;
+				}
+				case LEFT_ARM -> {
+					x = this.old ? 40 : 32; y = this.old ? 16 : 48; wide = 4; deep = 4; tall = 12;
+				}
+				case RIGHT_LEG, RIGHT_FOOT -> {
+					x = 0; y = 16; wide = 4; deep = 4; tall = 12;
+				}
+				case LEFT_LEG, LEFT_FOOT -> {
+					x = this.old ? 0 : 16; y = this.old ? 16 : 48; wide = 4; deep = 4; tall = 12;
+				}
+				default -> {
+					return null;
+				}
+			}
+			int top = y + deep;
+			int[] r = switch (side) {
+				case WoundMarks.RIGHT -> new int[] {x, top, deep, tall};
+				case WoundMarks.LEFT -> new int[] {x + deep + wide, top, deep, tall};
+				case WoundMarks.BACK -> new int[] {x + deep + wide + deep, top, wide, tall};
+				default -> new int[] {x + deep, top, wide, tall};
+			};
+			if (part == BodyPart.LEFT_FOOT || part == BodyPart.RIGHT_FOOT) {
+				// the foot is the bottom of the leg
+				r[1] += tall * 2 / 3;
+				r[3] = tall - tall * 2 / 3;
+			}
+			return r;
+		}
+
+		/** A skin pixel picked by {@code seed} that the skin has (not a clear one), or null if none turned up. */
+		int @Nullable [] somewhere(int seed) {
+			java.util.Random random = new java.util.Random(seed * 31L + 7L);
+			for (int tries = 0; tries < 60; tries++) {
+				int x = random.nextInt(this.w), y = random.nextInt(this.h);
+				if ((this.base.getPixel(x, y) >>> 24) > 0) {
+					return new int[] {x, y};
+				}
+			}
+			return null;
+		}
+
+		private void cut(double cx, double cy, float angle, double length, int core, int raw, float strength, int @Nullable [] rect) {
+			double dx = Math.cos(angle), dy = Math.sin(angle);
+			double nx = -dy, ny = dx;
+			int steps = (int) Math.ceil(length * 2.0);
+			for (int i = 0; i <= steps; i++) {
+				double t = i / (double) steps - 0.5;
+				double px = cx + dx * length * t, py = cy + dy * length * t;
+				// thinner at the ends
+				float taper = 1.0F - (float) Math.abs(t) * 1.2F;
+				if (taper <= 0.0F) {
+					continue;
+				}
+				this.dot(px, py, core, strength * (0.6F + 0.4F * taper), rect);
+				this.dot(px + nx * this.unit, py + ny * this.unit, raw, strength * 0.45F * taper, rect);
+				this.dot(px - nx * this.unit, py - ny * this.unit, raw, strength * 0.45F * taper, rect);
+			}
+		}
+
+		private void blot(double cx, double cy, double r, int colour, float strength, int @Nullable [] rect) {
+			int reach = (int) Math.ceil(r);
+			for (int y = -reach; y <= reach; y++) {
+				for (int x = -reach; x <= reach; x++) {
+					if (x * x + y * y <= r * r + 0.5) {
+						this.dot(cx + x, cy + y, colour, strength, rect);
+					}
+				}
+			}
+		}
+
+		private void ring(double cx, double cy, double r, int colour, float strength, int @Nullable [] rect) {
+			int reach = (int) Math.ceil(r);
+			for (int y = -reach; y <= reach; y++) {
+				for (int x = -reach; x <= reach; x++) {
+					double d = Math.sqrt(x * x + y * y);
+					if (d > r - 1.0 && d <= r) {
+						this.dot(cx + x, cy + y, colour, strength, rect);
+					}
+				}
+			}
+		}
+
+		/** A soft, ragged patch: strongest in the middle, uneven at its edge. */
+		private void patch(double cx, double cy, double r, int colour, float strength, java.util.Random random, int @Nullable [] rect) {
+			int reach = (int) Math.ceil(r);
+			for (int y = -reach; y <= reach; y++) {
+				for (int x = -reach; x <= reach; x++) {
+					double d = Math.sqrt(x * x + y * y) / r;
+					double edge = 0.75 + random.nextDouble() * 0.35;
+					if (d <= edge) {
+						this.dot(cx + x, cy + y, colour, strength * (float) (1.0 - 0.6 * d), rect);
+					}
+				}
+			}
+		}
+
+		/** One picture pixel at ({@code x}, {@code y}): the skin's own pixel with {@code colour} mixed in. */
+		private void dot(double x, double y, int colour, float strength, int @Nullable [] rect) {
+			int px = (int) Math.floor(x), py = (int) Math.floor(y);
+			if (px < 0 || py < 0 || px >= this.w || py >= this.h || strength < 0.12F) {
+				return;
+			}
+			if (rect != null && (px < rect[0] * this.unit || py < rect[1] * this.unit || px >= (rect[0] + rect[2]) * this.unit
+				|| py >= (rect[1] + rect[3]) * this.unit)) {
+				return;
+			}
+			int argb = this.base.getPixel(px, py);
+			if ((argb >>> 24) == 0) {
+				return;
+			}
+			int was = this.out.getPixel(px, py);
+			// a pixel already marked mixes on from that
+			int from = (was >>> 24) != 0 ? was : argb;
+			float k = Math.min(1.0F, strength);
+			int r = mix(from >> 16 & 0xFF, colour >> 16 & 0xFF, k), g = mix(from >> 8 & 0xFF, colour >> 8 & 0xFF, k), b = mix(from & 0xFF, colour & 0xFF, k);
+			this.out.setPixel(px, py, 0xFF000000 | r << 16 | g << 8 | b);
+		}
+	}
+
+	private static int mix(int from, int to, float t) {
+		return Mth.clamp(Math.round(from + (to - from) * t), 0, 255);
+	}
+
+	private static int lerp(float t, int from, int to) {
+		return mix(from >> 16 & 0xFF, to >> 16 & 0xFF, t) << 16 | mix(from >> 8 & 0xFF, to >> 8 & 0xFF, t) << 8 | mix(from & 0xFF, to & 0xFF, t);
+	}
+
+	private static int scale(int rgb, float k) {
+		return Mth.clamp(Math.round((rgb >> 16 & 0xFF) * k), 0, 255) << 16 | Mth.clamp(Math.round((rgb >> 8 & 0xFF) * k), 0, 255) << 8
+			| Mth.clamp(Math.round((rgb & 0xFF) * k), 0, 255);
+	}
+}

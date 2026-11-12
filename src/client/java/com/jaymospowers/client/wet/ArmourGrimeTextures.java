@@ -368,6 +368,11 @@ public final class ArmourGrimeTextures {
 		bodyBlood = Mask.read(JaymosPowers.id("textures/blood/body_blood.png"));
 	}
 
+	/** A fresh copy of {@code texture}'s pixels (a resource, or a downloaded skin), or null if it can't be read; the caller closes it. */
+	public static @Nullable NativeImage copy(Identifier texture) {
+		return read(texture);
+	}
+
 	private static @Nullable NativeImage read(Identifier texture) {
 		Resource resource = Minecraft.getInstance().getResourceManager().getResource(texture).orElse(null);
 		if (resource == null) {
