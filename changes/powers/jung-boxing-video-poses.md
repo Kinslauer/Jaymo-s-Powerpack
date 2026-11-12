@@ -15,6 +15,10 @@
   the belly, the rear glove by the cheek, the weight back, the head tipped to the rear shoulder
   with the chin tucked. Its block turns further side on with the shoulder higher. Its shoulder roll now also sways
   back and tips the head away.
+- **A base under each style**, after reference pictures Jung sent (Bivol's long guard, Mayweather's Philly shell, a
+  peekaboo crouch): feet apart, the lead foot ahead and the rear one behind, knees bent, feet flat. The Arrow Slit
+  is low and wide with its gloves up at the cheeks; the Long Guard long and balanced, bladed from the feet up, chin
+  tucked; the Bastion upright on soft knees, its lead forearm low across the belly.
 - When the body turns the shoulders go round with it, and when it leans the legs stay under the hips (neither did
   before). A cross now brings the rear shoulder forward; it turned the wrong way.
 - `client/boxing/BoxingPoses`: every angle is still a knob at the top. Not built locally; not played, the angles are

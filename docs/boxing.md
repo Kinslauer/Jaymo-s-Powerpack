@@ -135,6 +135,8 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   - Bastion (Philly shell): side on with the right shoulder forward and held up by the chin, the lead forearm folded
     across the belly, the rear glove folded up by the cheek, the weight back, the head tipped toward the rear
     shoulder with the chin tucked; it still shrugs its lead shoulder now and then.
+  - Each stands on a base (`BoxingPoses.base`): feet apart, lead foot ahead, knees bent, feet flat; the bladed
+    styles' toes turn with the body. Shapes after reference pictures Jung sent (Bivol, Mayweather, a peekaboo crouch).
   The stance gives the style away, on purpose.
 - **Blocks:** Arrow Slit pulls the gloves in tighter and crouches lower; Long Guard puts both arms out ahead with
   the hands together, to smother; Bastion turns further side on and lifts the lead shoulder higher.
