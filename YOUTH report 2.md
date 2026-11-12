@@ -76,11 +76,14 @@ itself posts one last shutdown notice in Tenbuki > lair, because the running gat
   gateway to exit with a marker file, which works where `Stop-Process` gets "Access is denied". It posted one last
   shutdown notice in Tenbuki > lair, as expected.
 - **12:07 AM:** the watchdog's first start (12:02 AM) crashed. "Refusing to bind dashboard… no auth providers are
-  registered" (a Hermes bug: under the task, the basic-auth plugin registers per profile, but the dashboard check
-  reads only the global list).
+  registered". Corrected cause (Nov 12, from agent.log): the start hit a disk stall (event loop stalled 662 s), the
+  basic-auth plugin overran Hermes's 10-second plugin load limit, and its provider was dropped ("called
+  register_dashboard_auth_provider() after its load timed out; ignored", 12:03:15 AM). Not a scope bug. Fixed by
+  `plugins.load_timeout_seconds: 120` in config.yaml (backup `backups/config.yaml.2026-11-12-plugin-timeout.bak`).
 - **12:16 AM:** the watchdog's retry (12:13 AM, PID 10552) came up fine and connected as YOUTH, so the crash is
   intermittent.
 - **New settings are live:** heartbeats off, home channel in parthenon > Bot alerts, YOUTH's fallbacks without
   Ollama. No new post in lair since.
-- `dashboard.public_url` is commented out (Andy, 5:05 AM, after Claude reported the crash as permanent).
-  It only matters at the next restart.
+- `dashboard.public_url` was commented out at 5:05 AM (after Claude wrongly reported the crash as permanent), then
+  put back at Andy's word.
+- Hephaestus is on the stop list (Andy, Nov 12: "Yes, stop it").

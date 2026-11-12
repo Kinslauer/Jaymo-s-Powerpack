@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-12 06:57
+updated: 2026-11-12 07:07
 ---
 # Open PRs
 
-3 open, as of 2026-11-12 06:57. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-12 07:07. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
