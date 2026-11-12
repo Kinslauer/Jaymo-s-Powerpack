@@ -333,6 +333,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LoreBooks.register();
 		com.jaymoskingdoms.films.LoreFilms.register();
 		com.jaymoskingdoms.films.BossIntros.register();
+		// great foes' themes (stems mixed on the player's own side) and the trophy stand
+		com.jaymoskingdoms.music.FoeThemes.register();
+		com.jaymoskingdoms.trophies.Trophies.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();

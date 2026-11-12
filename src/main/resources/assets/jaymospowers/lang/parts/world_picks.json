@@ -1,0 +1,11 @@
+{
+	"message.jaymospowers.oneholder.passed": "It reaches for you, and passes by.",
+	"commands.jaymospowers.oneholder.on": "One holder per power is on: a power held by one player cannot come to another",
+	"commands.jaymospowers.oneholder.off": "One holder per power is off",
+	"commands.jaymospowers.oneholder.free": "Freed %s from %s holder(s)",
+	"commands.jaymospowers.oneholder.status.on": "One holder per power: on",
+	"commands.jaymospowers.oneholder.status.off": "One holder per power: off (holders are still noted)",
+	"commands.jaymospowers.oneholder.status.none": "Nobody holds a power that is known yet",
+	"commands.jaymospowers.oneholder.status.line": "%s: %s",
+	"commands.jaymospowers.oneholder.status.line.online": "%s: %s (online)"
+}
