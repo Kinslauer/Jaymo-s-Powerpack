@@ -37,7 +37,9 @@ public final class Winds {
 	/** How hard the wind blows at (x, z) for a ship's sails (about 0.45 to 1.5). */
 	public static float strength(Level level, double x, double z) {
 		float rain = Math.max(level.getRainLevel(1.0F), Storms.cover(level, x, z));
-		return LEAST + (MOST - LEAST) * Mth.clamp(Storms.windStrength(), 0.0F, 1.0F) + RAIN * rain + THUNDER * Storms.thunder(level, x, z);
+		// the sea's own weather: dead calm in the doldrums, harder in a squall
+		return (LEAST + (MOST - LEAST) * Mth.clamp(Storms.windStrength(), 0.0F, 1.0F) + RAIN * rain + THUNDER * Storms.thunder(level, x, z))
+			* SeaEvents.wind(level, x, z);
 	}
 
 	/** The angle (degrees, 0 to 180) between a ship heading {@code yaw} and the way the wind blows. */
@@ -80,9 +82,9 @@ public final class Winds {
 		return Storms.direction(0.0, 0.0, -Math.cos(a), -Math.sin(a));
 	}
 
-	/** How hard it blows, as a word: light, fresh, strong, a gale. */
+	/** How hard it blows, as a word: calm, light, fresh, strong, a gale. */
 	public static Component word(float strength) {
-		String w = strength < 0.62F ? "light" : strength < 0.85F ? "fresh" : strength < 1.15F ? "strong" : "gale";
+		String w = strength < 0.15F ? "calm" : strength < 0.62F ? "light" : strength < 0.85F ? "fresh" : strength < 1.15F ? "strong" : "gale";
 		return Component.translatable("ship.jaymoskingdoms.wind." + w);
 	}
 }

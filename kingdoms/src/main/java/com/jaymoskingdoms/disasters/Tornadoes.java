@@ -111,16 +111,44 @@ public final class Tornadoes {
 		}
 		double y = ground(level, x, z, level.getSeaLevel());
 		Tornado t = new Tornado(Storms.nextId(), size, storm == null ? -1 : storm.id, x, y, z, vx, vz, 0, life, random.nextFloat() * 100.0F);
+		t.water = onWater(level, x, y, z);
 		SERVER.add(t);
 		if (size != Tornado.DUST_DEVIL) {
+			// over the sea it's a waterspout: the same funnel, its foot on the water
+			String news = t.water ? "disaster.jaymoskingdoms.touchdown.waterspout." + Tornado.NAMES[size] : "disaster.jaymoskingdoms.touchdown." + Tornado.NAMES[size];
 			for (ServerPlayer p : level.players()) {
 				if (p.position().distanceToSqr(x, p.getY(), z) < NEWS_RANGE * NEWS_RANGE) {
-					p.sendSystemMessage(Component.translatable("disaster.jaymoskingdoms.touchdown." + Tornado.NAMES[size],
-						Storms.direction(p.getX(), p.getZ(), x, z)));
+					p.sendSystemMessage(Component.translatable(news, Storms.direction(p.getX(), p.getZ(), x, z)));
 				}
 			}
 		}
 		return t;
+	}
+
+	/**
+	 * A fair-weather waterspout: one of the sea's own, out of a towering cloud on a still warm day, under no storm. It has a
+	 * dust devil's strength, drifts with the wind, and dies as soon as its foot comes ashore. Null if (x, z) isn't open water.
+	 */
+	public static @Nullable Tornado waterspout(ServerLevel level, double x, double z, RandomSource random) {
+		double y = ground(level, x, z, level.getSeaLevel());
+		if (!onWater(level, x, y, z)) {
+			return null;
+		}
+		Tornado t = spawn(level, Tornado.DUST_DEVIL, null, x, z, random);
+		t.spout = true;
+		return t;
+	}
+
+	/** The tornadoes and waterspouts on the ground just now (the sea's ships ask, {@code SeaEvents}). */
+	public static List<Tornado> active() {
+		return java.util.Collections.unmodifiableList(SERVER);
+	}
+
+	/** Whether a funnel standing at (x, y, z) (y its foot) has open water under it. */
+	static boolean onWater(ServerLevel level, double x, double y, double z) {
+		BlockPos foot = BlockPos.containing(x, y - 1.0, z);
+		return level.isLoaded(foot) && level.getFluidState(foot).is(net.minecraft.tags.FluidTags.WATER)
+			&& level.getFluidState(foot.below()).is(net.minecraft.tags.FluidTags.WATER);
 	}
 
 	static void tick(ServerLevel level) {
@@ -138,8 +166,15 @@ public final class Tornadoes {
 				continue;
 			}
 			t.y = ground(level, t.x, t.z, t.y);
+			t.water = onWater(level, t.x, t.y, t.z);
+			if (t.spout && !t.water && t.age < t.life - FORM_TICKS) {
+				// a fair-weather spout come ashore falls apart
+				cut(t);
+			}
 			winds(level, t, now);
-			if (level.getGameRules().get(Disasters.DISASTER_DAMAGE)) {
+			if (t.water) {
+				spray(level, t, random);
+			} else if (level.getGameRules().get(Disasters.DISASTER_DAMAGE)) {
 				tear(level, t, random);
 			}
 			if (now % 40 == t.id % 40) {
@@ -208,7 +243,8 @@ public final class Tornadoes {
 		double pull = t.pull(), height = t.height(), f = t.formed();
 		AABB box = new AABB(t.x - pull, t.y - 4.0, t.z - pull, t.x + pull, t.y + height, t.z + pull);
 		for (Entity e : level.getEntities((Entity)null, box, e -> e.isAlive() && !e.isSpectator()
-			&& !(e instanceof Player p && (p.isCreative() || p.getAbilities().flying)) && !e.isPassenger() && !letGo(e))) {
+			&& !(e instanceof Player p && (p.isCreative() || p.getAbilities().flying)) && !e.isPassenger() && !letGo(e)
+			&& !(e instanceof com.jaymoskingdoms.sailing.Ship))) {
 			double dx = e.getX() - t.x, dz = e.getZ() - t.z, d = Math.sqrt(dx * dx + dz * dz);
 			if (d > pull || d < 1.0E-3) {
 				continue;
@@ -257,6 +293,20 @@ public final class Tornadoes {
 			return flown < 0 || flown > THROWN_RIDE;
 		}
 		return false;
+	}
+
+	/** A waterspout's foot: the sea thrown up in a ring of spray (it has nothing to tear up out there). */
+	private static void spray(ServerLevel level, Tornado t, RandomSource random) {
+		if (level.getGameTime() % 4 != t.id % 4) {
+			return;
+		}
+		float r = t.core() * 1.2F;
+		int n = 6 + t.size * 10;
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.SPLASH, t.x, t.y + 0.2, t.z, n, r * 0.6, 0.3, r * 0.6, 0.4);
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.FALLING_WATER, t.x, t.y + 3.0 + t.size * 3.0, t.z, n / 2, r * 0.7, 2.0, r * 0.7, 0.0);
+		if (random.nextInt(4) == 0) {
+			level.playSound(null, t.x, t.y, t.z, SoundEvents.GENERIC_SPLASH, SoundSource.WEATHER, 2.0F + t.size * 2.0F, 0.5F + random.nextFloat() * 0.2F);
+		}
 	}
 
 	/** It tears up a few blocks in its path. */
