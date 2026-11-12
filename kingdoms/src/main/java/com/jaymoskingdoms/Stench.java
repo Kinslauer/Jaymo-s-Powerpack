@@ -21,6 +21,11 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * through {@link PowersCompat#smell}). In {@link Senses#factor} a mob notices a smelly player from further off: a keen
  * nose ({@link #KEEN}: beasts, monsters, goblins and orcs, vampires and werewolves) up to twice as far, a person's
  * ({@link #DULL}) a little. And villagers who catch a whiff say so ({@link #tick}).
+ * <p>
+ * Andy, on blood that lingers: "EVERYONE will comment on it". Blood a player wears (Powers' {@code Bloodied.noticed}:
+ * their own coat, or bloodied armour or weapons) is remarked on before any smell, by nearly anyone who sees it, and
+ * sooner and more often ({@link #BLOOD_CHANCE}, {@link #BLOOD_COOLDOWN}): fresh blood alarms people, dried blood is
+ * frowned at, rotten blood disgusts them. Goblins and orcs have their own lines.
  */
 public final class Stench {
 	/** How much further a keen nose and a person's notice you at the worst smell. */
@@ -31,6 +36,11 @@ public final class Stench {
 	static final double REMARK_RANGE = 5.0;
 	static final int REMARK_TICKS = 100, REMARK_COOLDOWN = 2400, REMARK_LINES = 6, GREEN_LINES = 3;
 	static final float REMARK_CHANCE = 0.25F;
+	/** Blood on a player: the chance someone near says so each check, the wait before another, and lines per stage. */
+	static final float BLOOD_CHANCE = 0.7F;
+	static final int BLOOD_COOLDOWN = 900;
+	static final String[] BLOOD_STAGES = {"fresh", "dried", "rotten"};
+	static final int BLOOD_LINES = 6, GREEN_BLOOD_LINES = 3;
 
 	private static final Map<UUID, Long> LAST_REMARK = new HashMap<>();
 
@@ -66,8 +76,18 @@ public final class Stench {
 		}
 		long now = server.overworld().getGameTime();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (player.isSpectator() || now - LAST_REMARK.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2) < REMARK_COOLDOWN
-				|| PowersCompat.smell(player) < REMARK || player.getRandom().nextFloat() >= REMARK_CHANCE) {
+			long since = now - LAST_REMARK.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2);
+			if (player.isSpectator() || player.isInvisible()) {
+				continue;
+			}
+			int blood = PowersCompat.bloodSeen(player);
+			if (blood >= 0 && since >= BLOOD_COOLDOWN) {
+				if (player.getRandom().nextFloat() < BLOOD_CHANCE && remarkBlood(player, Math.min(blood, BLOOD_STAGES.length - 1))) {
+					LAST_REMARK.put(player.getUUID(), now);
+				}
+				continue;
+			}
+			if (since < REMARK_COOLDOWN || PowersCompat.smell(player) < REMARK || player.getRandom().nextFloat() >= REMARK_CHANCE) {
 				continue;
 			}
 			ServerLevel level = player.level();
@@ -84,5 +104,22 @@ public final class Stench {
 			Speech.sayTo(level, speaker, player, Component.translatable(key), Speech.WHITE);
 			LAST_REMARK.put(player.getUUID(), now);
 		}
+	}
+
+	/** Someone who can see {@code player} remarks on the blood on them ({@code stage}: 0 fresh, 1 dried, 2 rotten). */
+	private static boolean remarkBlood(ServerPlayer player, int stage) {
+		ServerLevel level = player.level();
+		List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(REMARK_RANGE),
+			m -> (m instanceof Villager || m instanceof Npc) && m.isAlive() && !m.isBaby() && !m.isSleeping() && m.hasLineOfSight(player));
+		if (near.isEmpty()) {
+			return false;
+		}
+		Mob speaker = near.get(player.getRandom().nextInt(near.size()));
+		Heritage.Kind kind = VillagerHeritage.of(speaker);
+		boolean green = kind == Heritage.Kind.GOBLIN || kind == Heritage.Kind.ORC;
+		String key = "speech.jaymoskingdoms.blood." + BLOOD_STAGES[stage] + (green ? ".green." + player.getRandom().nextInt(GREEN_BLOOD_LINES)
+			: "." + player.getRandom().nextInt(BLOOD_LINES));
+		Speech.sayTo(level, speaker, player, Component.translatable(key), Speech.WHITE);
+		return true;
 	}
 }

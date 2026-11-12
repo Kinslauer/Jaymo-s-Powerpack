@@ -82,6 +82,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		}
 		// (0.20.41) blood splashed on bodies
 		com.jaymospowers.client.blood.BloodCoatLayer.register();
+		com.jaymospowers.client.blood.Flies.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
