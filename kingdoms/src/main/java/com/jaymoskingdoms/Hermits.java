@@ -33,13 +33,18 @@ import org.jspecify.annotations.Nullable;
  * (0.7.215) They also love Jaymo's Powers' alchemy and can't stop talking about it ({@link HermitAlchemy}).
  * (0.7.384) They watch the sky, and sell the star charts a pod pilot needs, one at a time ({@link StarFolk}).
  * <p>
- * Which structures make hermits is the structure tag {@code jaymoskingdoms:sky_hermitage}. MCA's villagers only (the
+ * Which structures make hermits is the structure tag {@code jaymoskingdoms:sky_hermitage}, and at sea
+ * {@code jaymoskingdoms:sea_hermitage} (a tower on an island; their stories are the sea's). MCA's villagers only (the
  * pack always has MCA; a plain villager is left as it is).
  */
 public final class Hermits {
 	/** A hermit's faction: none (a court wizard's is their kingdom's). */
 	public static final int FACTION = -2;
 	public static final TagKey<Structure> SKY = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("sky_hermitage"));
+	/** The sea hermit's towers, out on islands only a boat reaches ({@code seas.IslandStructure}): the same wizard, at sea. */
+	public static final TagKey<Structure> SEA = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("sea_hermitage"));
+	/** On a hermit who lives out at sea: their stories are the sea's ({@code sea_<story>}). */
+	static final String SEA_HERMIT = "jaymoskingdoms.sea_hermit";
 	/** How often a villager with no work is checked for standing on a floating island (ticks). */
 	static final int CHECK_TICKS = 1200;
 	/** How far a hermit wanders from where they were found. */
@@ -88,18 +93,31 @@ public final class Hermits {
 
 	/** {@code pos} (or the block under it) is in a piece of a floating island. */
 	static boolean onSkyIsland(ServerLevel level, BlockPos pos) {
-		return level.structureManager().getStructureWithPieceAt(pos, SKY).isValid()
-			|| level.structureManager().getStructureWithPieceAt(pos.below(), SKY).isValid();
+		return in(level, pos, SKY) || atSea(level, pos);
+	}
+
+	/** {@code pos} (or the block under it) is in a sea hermit's tower on an island. */
+	static boolean atSea(ServerLevel level, BlockPos pos) {
+		return in(level, pos, SEA);
+	}
+
+	private static boolean in(ServerLevel level, BlockPos pos, TagKey<Structure> tag) {
+		return level.structureManager().getStructureWithPieceAt(pos, tag).isValid()
+			|| level.structureManager().getStructureWithPieceAt(pos.below(), tag).isValid();
 	}
 
 	/** The story {@code mob} tells (the same every time, from who they are). */
 	public static String story(Entity mob) {
-		return STORY[Math.floorMod(mob.getUUID().hashCode(), STORY.length)];
+		String story = STORY[Math.floorMod(mob.getUUID().hashCode(), STORY.length)];
+		return mob.entityTags().contains(SEA_HERMIT) ? "sea_" + story : story;
 	}
 
 	/** {@code mob} just became a hermit: their home where they stand, a shimmer. */
 	static void settled(ServerLevel level, PathfinderMob mob) {
 		mob.setPersistenceRequired();
+		if (atSea(level, mob.blockPosition())) {
+			mob.addTag(SEA_HERMIT);
+		}
 		level.sendParticles(Fx.GLYPH, mob.getX(), mob.getY() + 1.2, mob.getZ(), 30, 0.4, 0.8, 0.4, 0.6);
 		JaymosKingdoms.LOGGER.debug("{} is a hermit on a floating island ({})", mob.getName().getString(), story(mob));
 	}

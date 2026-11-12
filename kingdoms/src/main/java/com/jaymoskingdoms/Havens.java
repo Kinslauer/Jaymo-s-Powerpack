@@ -110,7 +110,15 @@ public final class Havens {
 
 	/** ... and {@code always}: a haven whatever the share (a ChoiceTheorem village's, {@link #ctov}). */
 	private static String draw(ServerLevel level, Faction f, boolean always) {
-		if (f.fallen() || f.type() == FactionType.BARBARIAN || Tempers.of(f) == Tempers.Temper.PURIST) {
+		if (f.fallen() || f.type() == FactionType.BARBARIAN) {
+			return NONE;
+		}
+		// (Andy's ocean pick-list: "Tideborn islands") a settlement out on an island, one only a boat reaches, is
+		// always a Tideborn haven
+		if (com.jaymoskingdoms.seas.Offshore.island(level, f.seat().getX(), f.seat().getZ())) {
+			return Heritage.Kind.TIDEBORN.key();
+		}
+		if (Tempers.of(f) == Tempers.Temper.PURIST) {
 			return NONE;
 		}
 		long mix = (f.seat().asLong() * 0x9E3779B97F4A7C15L) ^ ((long)f.id() << 21);
