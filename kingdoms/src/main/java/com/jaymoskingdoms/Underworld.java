@@ -81,8 +81,9 @@ import org.jspecify.annotations.Nullable;
  * bouts in the den's <b>fight pit</b> ({@link FightPit}), dug off the den as a backroom (or a makeshift ring where
  * that's all there's room for).
  *
- * <p>Stage 2 (not yet): the guards raiding a den that runs too hot, smuggling runs between hotbeds, the trade spreading
- * from city to city.
+ * <p>The second stage: the watch raids a den that runs too hot ({@link DenRaids}); a hotbed's smugglers carry its good to
+ * the other dens and to cities that have none, where the trade takes root, and a fence hands out sealed bundles for a player
+ * to run ({@link Smuggling}).
  */
 public final class Underworld {
 	/** One realm in this many keeps a den: the richest. */
@@ -182,16 +183,21 @@ public final class Underworld {
 	}
 
 	/** The lang key of what a den makes. */
-	private static String good(Den d) {
+	static String good(Den d) {
 		return d.makes() == PMEH ? "item.jaymoskitchen.pmeh" : "item.jaymoskingdoms.shash_brick";
 	}
 
 	/**
-	 * A realm's underworld: whether it has a den at all ({@code has}: among the richest), what it makes, where its hatch is
-	 * ({@code built} once dug), how hot it runs, whether it's a known hotbed, the last day counted, and its cells (once
-	 * built, for {@link Busts}).
+	 * A realm's underworld: whether it has a den at all ({@code has}: among the richest, or the trade spread to it), what it
+	 * makes, where its hatch is ({@code built} once dug), how hot it runs, whether it's a known hotbed, the last day counted,
+	 * and its cells (once built, for {@link Busts}). Then the second stage's: until when the watch has it shut after a raid
+	 * ({@code shut}, {@link Raids}), how many of the other city's goods its smugglers have brought in for the fence
+	 * ({@code supply}, {@link Smuggling}), how many smugglers' visits a city without a den has had ({@code seeds}: enough and
+	 * the trade takes root), when its next smuggler sets out ({@code nextRun}), and when a raid on it is due ({@code raidAt},
+	 * 0 for none).
 	 */
-	record Den(int realm, boolean has, int makes, BlockPos hatch, boolean built, int heat, boolean known, long day, Optional<BlockPos> cell) {
+	record Den(int realm, boolean has, int makes, BlockPos hatch, boolean built, int heat, boolean known, long day, Optional<BlockPos> cell,
+		long shut, int supply, int seeds, long nextRun, long raidAt) {
 		static final Codec<Den> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("realm").forGetter(Den::realm),
 			Codec.BOOL.fieldOf("has").forGetter(Den::has),
@@ -201,27 +207,78 @@ public final class Underworld {
 			Codec.INT.fieldOf("heat").forGetter(Den::heat),
 			Codec.BOOL.fieldOf("known").forGetter(Den::known),
 			Codec.LONG.fieldOf("day").forGetter(Den::day),
-			BlockPos.CODEC.optionalFieldOf("cell").forGetter(Den::cell)
+			BlockPos.CODEC.optionalFieldOf("cell").forGetter(Den::cell),
+			Codec.LONG.optionalFieldOf("shut", 0L).forGetter(Den::shut),
+			Codec.INT.optionalFieldOf("supply", 0).forGetter(Den::supply),
+			Codec.INT.optionalFieldOf("seeds", 0).forGetter(Den::seeds),
+			Codec.LONG.optionalFieldOf("next_run", 0L).forGetter(Den::nextRun),
+			Codec.LONG.optionalFieldOf("raid_at", 0L).forGetter(Den::raidAt)
 		).apply(i, Den::new));
 
+		static Den fresh(int realm, boolean has, int makes, BlockPos seat, long day) {
+			return new Den(realm, has, makes, seat, false, START_HEAT, false, day, Optional.empty(), 0L, 0, 0, 0L, 0L);
+		}
+
 		Den withHeat(int heat) {
-			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, Math.clamp(heat, 0, MAX_HEAT), this.known, this.day, this.cell);
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, Math.clamp(heat, 0, MAX_HEAT), this.known, this.day, this.cell,
+				this.shut, this.supply, this.seeds, this.nextRun, this.raidAt);
 		}
 
 		Den withHatch(BlockPos hatch) {
-			return new Den(this.realm, this.has, this.makes, hatch, true, this.heat, this.known, this.day, this.cell);
+			return new Den(this.realm, this.has, this.makes, hatch, true, this.heat, this.known, this.day, this.cell,
+				this.shut, this.supply, this.seeds, this.nextRun, this.raidAt);
 		}
 
 		Den withDay(long day, int heat, boolean known) {
-			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, Math.clamp(heat, 0, MAX_HEAT), known, day, this.cell);
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, Math.clamp(heat, 0, MAX_HEAT), known, day, this.cell,
+				this.shut, this.supply, this.seeds, this.nextRun, this.raidAt);
 		}
 
 		Den withCell(BlockPos cell) {
-			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, Optional.of(cell));
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, Optional.of(cell),
+				this.shut, this.supply, this.seeds, this.nextRun, this.raidAt);
 		}
 
 		Den opened(int makes) {
-			return new Den(this.realm, true, makes, this.hatch, false, this.heat, this.known, this.day, this.cell);
+			return new Den(this.realm, true, makes, this.hatch, false, this.heat, this.known, this.day, this.cell,
+				this.shut, this.supply, this.seeds, this.nextRun, this.raidAt);
+		}
+
+		/** Raided: shut till {@code until}, cooled to {@code heat}, no longer a known hotbed, nothing smuggled in waiting. */
+		Den raided(long until, int heat) {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, Math.clamp(heat, 0, MAX_HEAT), false, this.day, this.cell,
+				until, 0, this.seeds, this.nextRun, 0L);
+		}
+
+		Den withSupply(int supply) {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, this.cell,
+				this.shut, Math.clamp(supply, 0, Smuggling.SUPPLY_MOST), this.seeds, this.nextRun, this.raidAt);
+		}
+
+		Den withSeeds(int seeds) {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, this.cell,
+				this.shut, this.supply, seeds, this.nextRun, this.raidAt);
+		}
+
+		Den withNextRun(long nextRun) {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, this.cell,
+				this.shut, this.supply, this.seeds, nextRun, this.raidAt);
+		}
+
+		Den withRaidAt(long raidAt) {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, this.cell,
+				this.shut, this.supply, this.seeds, this.nextRun, raidAt);
+		}
+
+		/** Open again after a raid's shutting. */
+		Den reopened() {
+			return new Den(this.realm, this.has, this.makes, this.hatch, this.built, this.heat, this.known, this.day, this.cell,
+				0L, this.supply, this.seeds, this.nextRun, 0L);
+		}
+
+		/** Shut by the watch just now (after a raid). */
+		boolean shutAt(long now) {
+			return now < this.shut;
 		}
 	}
 
@@ -275,7 +332,7 @@ public final class Underworld {
 				dice(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
-			if (sp.isShiftKeyDown() && contraband(sp.getMainHandItem()) && !v.entityTags().contains(FENCE_TAG) && !v.entityTags().contains(DICER_TAG)) {
+			if (sp.isShiftKeyDown() && contraband(sp.getMainHandItem()) && !Smuggling.isBundle(sp.getMainHandItem()) && !v.entityTags().contains(FENCE_TAG) && !v.entityTags().contains(DICER_TAG)) {
 				pitch(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
@@ -285,6 +342,8 @@ public final class Underworld {
 			return InteractionResult.PASS;
 		});
 		Busts.register();
+		Smuggling.register();
+		DenRaids.register();
 		ServerTickEvents.END_SERVER_TICK.register(Underworld::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WHISPERED.clear();
@@ -321,7 +380,7 @@ public final class Underworld {
 				})))));
 	}
 
-	private static Item item(String name, java.util.function.Function<Item.Properties, Item> make, Item.Properties properties) {
+	static Item item(String name, java.util.function.Function<Item.Properties, Item> make, Item.Properties properties) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
 		return Registry.register(BuiltInRegistries.ITEM, key, make.apply(properties.setId(key)));
 	}
@@ -333,14 +392,14 @@ public final class Underworld {
 			return false;
 		}
 		Item pmeh = pmeh(), joint = joint(), fresh = BuiltInRegistries.ITEM.getOptional(KITCHEN_FRESH_PMEH).orElse(null);
-		return stack.is(SHASH_BRICK) || pmeh != null && stack.is(pmeh) || joint != null && stack.is(joint) || fresh != null && stack.is(fresh);
+		return stack.is(SHASH_BRICK) || Smuggling.isBundle(stack) || pmeh != null && stack.is(pmeh) || joint != null && stack.is(joint) || fresh != null && stack.is(fresh);
 	}
 
 	static @Nullable Den den(MinecraftServer server, int realm) {
 		return Factions.level(server).getAttachedOrElse(DENS, Map.of()).get(Integer.toString(realm));
 	}
 
-	private static void put(MinecraftServer server, Den den) {
+	static void put(MinecraftServer server, Den den) {
 		ServerLevel level = Factions.level(server);
 		Map<String, Den> all = new HashMap<>(level.getAttachedOrElse(DENS, Map.of()));
 		all.put(Integer.toString(den.realm()), den);
@@ -384,7 +443,7 @@ public final class Underworld {
 		MinecraftServer server = level.getServer();
 		Den d = den(server, f.id());
 		if (d == null) {
-			d = new Den(f.id(), true, makes(level.getRandom()), f.seat(), false, START_HEAT, false, level.getGameTime() / 24000L, Optional.empty());
+			d = Den.fresh(f.id(), true, makes(level.getRandom()), f.seat(), level.getGameTime() / 24000L);
 		} else if (!d.has()) {
 			d = d.opened(makes(level.getRandom()));
 		}
@@ -424,7 +483,7 @@ public final class Underworld {
 			Den d = den(server, f.id());
 			if (d == null || !d.has() && rich.contains(f.id())) {
 				// one of the richest third: the criminals come where the money is
-				d = d == null ? new Den(f.id(), rich.contains(f.id()), makes(random), f.seat(), false, START_HEAT, false, day, Optional.empty())
+				d = d == null ? Den.fresh(f.id(), rich.contains(f.id()), makes(random), f.seat(), day)
 					: d.opened(makes(random));
 				put(server, d);
 			}
@@ -433,7 +492,10 @@ public final class Underworld {
 			}
 			if (day > d.day()) {
 				put(server, d.withDay(day, d.heat(), d.known()));
-				warm(server, f, HEAT_PER_DAY * (int)Math.min(day - d.day(), 5L));
+				if (!d.shutAt(now)) {
+					// (a den the watch has shut doesn't warm)
+					warm(server, f, HEAT_PER_DAY * (int)Math.min(day - d.day(), 5L));
+				}
 				d = den(server, f.id());
 			}
 			String key = Integer.toString(f.id());
@@ -451,7 +513,12 @@ public final class Underworld {
 				}
 				continue;
 			}
-			if (level.isPositionEntityTicking(d.hatch())) {
+			// the watch's raids, and the den's smugglers
+			DenRaids.check(level, f, d, now);
+			d = den(server, f.id());
+			Smuggling.maybeSend(level, f, d, now);
+			d = den(server, f.id());
+			if (level.isPositionEntityTicking(d.hatch()) && !d.shutAt(now) && !DenRaids.live(f.id())) {
 				staff(level, f, d, now);
 			}
 		}
@@ -548,21 +615,23 @@ public final class Underworld {
 		return true;
 	}
 
-	/** {@code guard} heard talk of the den: the watch cracks down on the city for {@link #CRACKDOWN_TICKS}. */
-	static void crackDown(ServerLevel level, Faction f, LivingEntity guard, @Nullable ServerPlayer player) {
+	/** {@code guard} heard talk of the den: the watch cracks down on the city for {@link #CRACKDOWN_TICKS} (null: no one says so aloud). */
+	static void crackDown(ServerLevel level, Faction f, @Nullable LivingEntity guard, @Nullable ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		boolean already = crackdown(server, f.id());
 		Map<String, Long> all = new HashMap<>(level.getAttachedOrElse(CRACKDOWNS, Map.of()));
 		all.put(Integer.toString(f.id()), level.getGameTime() + CRACKDOWN_TICKS);
 		level.setAttached(CRACKDOWNS, Map.copyOf(all));
-		Speech.say(level, guard, Component.translatable("underworld.jaymoskingdoms.crackdown.guard." + level.getRandom().nextInt(LINES)), Speech.RED, DEN_SPEECH);
+		if (guard != null) {
+			Speech.say(level, guard, Component.translatable("underworld.jaymoskingdoms.crackdown.guard." + level.getRandom().nextInt(LINES)), Speech.RED, DEN_SPEECH);
+		}
 		if (player != null && !already) {
 			player.sendSystemMessage(Component.translatable("underworld.jaymoskingdoms.crackdown", f.name()).withStyle(ChatFormatting.RED));
 		}
 	}
 
 	/** Which of the den's hands {@code v} is (his tag), or null. */
-	private static @Nullable String hand(Villager v) {
+	static @Nullable String hand(Villager v) {
 		for (String tag : new String[] {FENCE_TAG, DICER_TAG, Bookies.TAG, FightPit.ATTENDANT_TAG, FightPit.FIGHTER_TAG}) {
 			if (v.entityTags().contains(tag)) {
 				return tag;
@@ -585,7 +654,8 @@ public final class Underworld {
 				continue;
 			}
 			Den d = builtDen(server, f);
-			if (d == null || !level.isPositionEntityTicking(d.hatch())) {
+			if (d == null || !level.isPositionEntityTicking(d.hatch()) || d.shutAt(now) || DenRaids.live(f.id())) {
+				// (a den under a raid, or shut after one, isn't kept: DenRaids sees to it)
 				continue;
 			}
 			BlockPos hatch = d.hatch();
@@ -705,7 +775,7 @@ public final class Underworld {
 	private static void whispers(ServerLevel level, ServerPlayer player, Faction f, Den d, long now) {
 		Long last = WHISPERED.get(player.getUUID());
 		if (last != null && now - last < WHISPER_GAP || level.getRandom().nextFloat() >= WHISPER_CHANCE || Theft.wanted(player, f.id())
-			|| crackdown(level.getServer(), f.id())
+			|| crackdown(level.getServer(), f.id()) || d.shutAt(now)
 			|| !guards(level, f, player.getBoundingBox().inflate(GUARD_EARSHOT)).isEmpty()) {
 			return;
 		}
@@ -794,15 +864,22 @@ public final class Underworld {
 			MerchantOffers offers = v.getOffers();
 			offers.clear();
 			boolean home = d.makes() == PMEH;
+			// what the smugglers brought in of the other city's good: more of it, cheaper, for the day
+			int extra = Math.min(d.supply(), Smuggling.SUPPLY_MOST);
 			Item pmeh = pmeh();
 			if (pmeh != null) {
-				offers.add(sellPrime(pmeh, home ? PMEH_SELL_HOME : PMEH_SELL_AWAY, home ? HOME_STOCK : AWAY_STOCK));
+				offers.add(sellPrime(pmeh, home ? PMEH_SELL_HOME : smuggled(PMEH_SELL_AWAY, extra), home ? HOME_STOCK : AWAY_STOCK + extra));
 			}
-			offers.add(sell(SHASH_BRICK, home ? SHASH_SELL_AWAY : SHASH_SELL_HOME, home ? AWAY_STOCK : HOME_STOCK));
+			offers.add(sell(SHASH_BRICK, home ? smuggled(SHASH_SELL_AWAY, extra) : SHASH_SELL_HOME, home ? AWAY_STOCK + extra : HOME_STOCK));
 			if (pmeh != null) {
 				buyGraded(offers, pmeh, home ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK);
 			}
 			offers.add(buy(SHASH_BRICK, home ? SHASH_BUY_AWAY : SHASH_BUY_HOME, BUY_STOCK));
+			// and the sealed bundles a player can run to the other dens
+			Smuggling.bundles(level, f, offers);
+			if (extra > 0) {
+				put(level.getServer(), d.withSupply(d.supply() - extra));
+			}
 			return;
 		}
 		if (!d.known() || !Crooks.isCrook(v) || last != null) {
@@ -816,6 +893,11 @@ public final class Underworld {
 			buyGraded(offers, pmeh, STREET_PMEH, STREET_STOCK);
 		}
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
+	}
+
+	/** A price, cheaper while there's smuggled stock. */
+	private static int smuggled(int emeralds, int extra) {
+		return extra > 0 ? Math.max(1, Math.round(emeralds * Smuggling.SUPPLY_PRICE)) : emeralds;
 	}
 
 	private static MerchantOffer sell(Item item, int emeralds, int uses) {
@@ -874,12 +956,17 @@ public final class Underworld {
 				PITCHED.remove(v.getUUID());
 				return;
 			}
+			int sold = stack.is(SHASH_BRICK) ? SHASH : PMEH;
 			stack.consume(1, player);
 			Money.pay(player, f, Money.worth(price));
 			Speech.tell(level, v, player, Component.translatable("underworld.jaymoskingdoms.pitch.yes." + level.getRandom().nextInt(LINES)), Speech.GOLD);
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.6F, 1.0F);
 			if (realm) {
 				warm(level.getServer(), f, HEAT_PER_SALE);
+				if (d == null || !d.has()) {
+					// a city with no den getting a taste for it: the trade spreads ({@link Smuggling#seed})
+					Smuggling.seed(level.getServer(), f, Smuggling.SEEDS_PER_SALE, sold);
+				}
 				List<LivingEntity> seen = new ArrayList<>(Theft.crimeWitnesses(level, f, player));
 				seen.removeIf(e -> e == v || Crooks.isCrook(e));
 				if (!seen.isEmpty()) {
@@ -954,6 +1041,10 @@ public final class Underworld {
 		}
 		warm(level.getServer(), f, HEAT_PER_SALE);
 		Den d = builtDen(level.getServer(), f);
+		if (v.entityTags().contains(FENCE_TAG) && Smuggling.isBundle(offer.getCostA())) {
+			// a sealed bundle run here: stock for the fence
+			Smuggling.delivered(level.getServer(), f);
+		}
 		if (v.entityTags().contains(FENCE_TAG) && d != null && Speakeasy.room(d.hatch()).inflate(1.0).contains(v.position())) {
 			return;
 		}
