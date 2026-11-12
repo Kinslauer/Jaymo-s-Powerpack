@@ -54,12 +54,16 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Hurled Blade</b>: the blade is thrown tumbling. It strikes once and sticks where it lands, as a dagger does. It
  * flies back to the hand only for one whose power can call it ({@link #callsBack}): Gravity, a Z Fighter's ki, a mana
  * spirit's Far Hand. Thrown through Powers ({@link PowersCompat#hurlBlade}); without Powers there is no throw.</li>
+ * <li><b>Mill Charge</b> (the spear school's, for a quarterstaff, a glaive or a halberd: {@link Forms#STAVES}): a short
+ * dash with the shaft turning before you. Everyone it passes is struck once for {@value #MILL_DAMAGE} times your attack
+ * and thrown aside, and while it lasts blows and shots from ahead are turned.</li>
  * </ul>
  */
 final class SpecialCuts {
 	static final Form WHEEL_CUT = new Form("wheel_cut", Family.BLADE, Kind.ART, 160, 25, 2.5F, 6);
 	static final Form FIGURE_EIGHT = new Form("figure_eight", Family.BLADE, Kind.ART, 120, 0, 0.5F, 5);
 	static final Form HURLED_BLADE = new Form("hurled_blade", Family.BLADE, Kind.ART, 100, 8, 1.0F, 5);
+	static final Form MILL_CHARGE = new Form("mill_charge", Family.SPEAR, Kind.ART, 100, 0, 1.5F, 6);
 
 	/** Wheel Cut: feathers it costs, how far it reaches (blocks), how wide (cosine of the half-angle: 0.5 is 120 degrees in all), what it deals (times your attack). */
 	static final int WHEEL_FEATHERS = 6;
@@ -84,6 +88,10 @@ final class SpecialCuts {
 	/** Hurled Blade: what it deals (times your attack), the speed it leaves at (blocks/tick) and each rank adds, and how long the throw is drawn after it leaves (ticks; Powers' {@code ArmedPose.HURL_SNAP_TICKS}). */
 	static final float HURL_DAMAGE = 1.1F, HURL_SPEED = 1.7F, HURL_RANK_SPEED = 0.15F;
 	static final int HURL_SNAP_TICKS = 6;
+	/** Mill Charge: how long the dash lasts (ticks), its speed (blocks/tick) and each rank adds, how near a foe must be to be struck (blocks), what it deals (times your attack), its shove, and how much of the front it guards (cosine of the half-angle). */
+	static final int MILL_TICKS = 7;
+	static final double MILL_SPEED = 0.6, MILL_RANK_SPEED = 0.04, MILL_REACH = 1.9, MILL_SHOVE = 0.5, MILL_GUARD = 0.3;
+	static final float MILL_DAMAGE = 1.5F, MILL_SHAKE = 0.35F;
 	/** The powers that can call a hurled blade back to the hand. */
 	static final Set<String> CALLING_POWERS = Set.of("gravity", "zfighter");
 
@@ -101,6 +109,22 @@ final class SpecialCuts {
 
 	private static final Map<UUID, Spin> SPINS = new HashMap<>();
 
+	/** A Mill Charge under way: until when, the way it goes, the form's rank, and who it has struck. */
+	private static final class Mill {
+		final long until;
+		final Vec3 dir;
+		final int rank;
+		final List<LivingEntity> landed = new ArrayList<>();
+
+		Mill(long until, Vec3 dir, int rank) {
+			this.until = until;
+			this.dir = dir;
+			this.rank = rank;
+		}
+	}
+
+	private static final Map<UUID, Mill> MILLS = new HashMap<>();
+
 	private SpecialCuts() {
 	}
 
@@ -108,17 +132,29 @@ final class SpecialCuts {
 		forms.put(WHEEL_CUT.id(), WHEEL_CUT);
 		forms.put(FIGURE_EIGHT.id(), FIGURE_EIGHT);
 		forms.put(HURLED_BLADE.id(), HURLED_BLADE);
+		forms.put(MILL_CHARGE.id(), MILL_CHARGE);
 	}
 
 	static boolean owns(Form form) {
-		return form == WHEEL_CUT || form == FIGURE_EIGHT || form == HURLED_BLADE;
+		return form == WHEEL_CUT || form == FIGURE_EIGHT || form == HURLED_BLADE || form == MILL_CHARGE;
+	}
+
+	/** Whether {@code main} is a weapon {@code form} can be done with, beyond its family's say: a Mill Charge wants a staff or a glaive, not a spear. */
+	static boolean fits(Form form, ItemStack main) {
+		return form != MILL_CHARGE || main.is(Forms.STAVES);
 	}
 
 	/** Called from {@link Forms#register}. */
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(SpecialCuts::tick);
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SPINS.remove(handler.player.getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SPINS.clear());
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			SPINS.remove(handler.player.getUUID());
+			MILLS.remove(handler.player.getUUID());
+		});
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			SPINS.clear();
+			MILLS.clear();
+		});
 		// a spinning blade turns aside what comes at its front
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && turnedAside(player, source, amount)));
 		// a Wheel Cut still winding up is broken off by a blow that lands
@@ -177,6 +213,8 @@ final class SpecialCuts {
 			figureEight(level, player, rank);
 		} else if (form == HURLED_BLADE) {
 			hurledBlade(level, player, form, rank);
+		} else if (form == MILL_CHARGE) {
+			millCharge(level, player, rank);
 		}
 	}
 
@@ -299,6 +337,7 @@ final class SpecialCuts {
 	}
 
 	private static void tick(MinecraftServer server) {
+		tickMills(server);
 		if (SPINS.isEmpty()) {
 			return;
 		}
@@ -354,7 +393,8 @@ final class SpecialCuts {
 
 	/** Damage on its way to someone spinning a Figure Eight: true when the blade turned it aside (none of it lands). */
 	private static boolean turnedAside(ServerPlayer player, DamageSource source, float amount) {
-		if (amount <= 0.0F || !SPINS.containsKey(player.getUUID()) || source.is(DamageTypeTags.BYPASSES_SHIELD) || source.is(DamageTypeTags.IS_EXPLOSION)) {
+		Mill mill = MILLS.get(player.getUUID());
+		if (amount <= 0.0F || mill == null && !SPINS.containsKey(player.getUUID()) || source.is(DamageTypeTags.BYPASSES_SHIELD) || source.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		}
 		Entity direct = source.getDirectEntity();
@@ -370,10 +410,11 @@ final class SpecialCuts {
 			return false;
 		}
 		Vec3 to = from.subtract(player.position()).multiply(1.0, 0.0, 1.0);
-		if (to.lengthSqr() > 1.0E-4 && to.normalize().dot(flatLook(player)) < TURN_ARC) {
+		if (to.lengthSqr() > 1.0E-4 && to.normalize().dot(mill != null ? mill.dir : flatLook(player)) < (mill != null ? MILL_GUARD : TURN_ARC)) {
 			return false;
 		}
-		if (!PowersCompat.spendFeathers(player, TURN_FEATHERS)) {
+		// (the turning shaft of a Mill Charge guards for nothing; a Figure Eight pays by the blow)
+		if (mill == null && !PowersCompat.spendFeathers(player, TURN_FEATHERS)) {
 			return false;
 		}
 		ServerLevel level = player.level();
@@ -383,6 +424,59 @@ final class SpecialCuts {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.6F, 1.5F);
 		return true;
+	}
+
+	// ---- Mill Charge ---------------------------------------------------------------------------------------------------
+
+	private static void millCharge(ServerLevel level, ServerPlayer player, int rank) {
+		Vec3 dir = flatLook(player);
+		MILLS.put(player.getUUID(), new Mill(level.getGameTime() + MILL_TICKS, dir, rank));
+		PowersCompat.cutPose(player, PowersCompat.CUT_MILL, MILL_TICKS + 3, 0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	private static void tickMills(MinecraftServer server) {
+		if (MILLS.isEmpty()) {
+			return;
+		}
+		for (Iterator<Map.Entry<UUID, Mill>> it = MILLS.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Mill> entry = it.next();
+			Mill mill = entry.getValue();
+			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+			if (player == null || !(player.level() instanceof ServerLevel level)) {
+				it.remove();
+				continue;
+			}
+			if (!player.isAlive() || player.isPassenger() || !player.getMainHandItem().is(Forms.STAVES) || level.getGameTime() > mill.until) {
+				it.remove();
+				PowersCompat.endCutPose(player);
+				Forms.landed(player, MILL_CHARGE, mill.landed);
+				continue;
+			}
+			// carried along the way it began, the shaft turning: whoever it passes is struck once and thrown aside
+			double speed = MILL_SPEED + MILL_RANK_SPEED * (mill.rank - 1);
+			player.setDeltaMovement(mill.dir.x * speed, player.getDeltaMovement().y, mill.dir.z * speed);
+			player.syncVelocity = true;
+			arcTrail(level, player, turned(mill.dir, (float)((level.getGameTime() % 4) * 90)), Math.PI / 3.0, 1.4, 1.1);
+			if (level.getGameTime() % 3 == 0) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.2F);
+			}
+			for (LivingEntity foe : Forms.targets(level, player, player.getBoundingBox().inflate(MILL_REACH, 0.5, MILL_REACH))) {
+				if (mill.landed.contains(foe)) {
+					continue;
+				}
+				mill.landed.add(foe);
+				CombatArts.strike(level, player, foe, Forms.damage(player, MILL_DAMAGE, mill.rank));
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, foe.getX(), foe.getY(0.6), foe.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				if (foe.isAlive()) {
+					Vec3 out = foe.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+					Vec3 push = out.lengthSqr() < 1.0E-4 ? mill.dir : out.normalize();
+					foe.setDeltaMovement(foe.getDeltaMovement().add(push.x * MILL_SHOVE, 0.2, push.z * MILL_SHOVE));
+					foe.needsSync = true;
+				}
+				PowersCompat.shake(player, MILL_SHAKE);
+			}
+		}
 	}
 
 	// ---- Hurled Blade --------------------------------------------------------------------------------------------------

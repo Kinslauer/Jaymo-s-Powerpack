@@ -122,7 +122,7 @@ public final class Forms {
 		public boolean holds(ItemStack main) {
 			return switch (this) {
 				case BLADE -> main.is(BLADES);
-				case SPEAR -> main.is(SPEARS);
+				case SPEAR -> main.is(SPEARS) || main.is(STAVES);
 				case FIST -> main.isEmpty() || main.is(FISTS);
 				case KNIFE -> main.is(ClassPerks.LIGHT_BLADES);
 				case CLAW -> main.is(CLAWS);
@@ -154,6 +154,9 @@ public final class Forms {
 	public static final TagKey<Item> BLADES = tag("form_blades"), SPEARS = tag("form_spears"), CLAWS = tag("form_claws"),
 		/** (0.7.383) Cestus-like fist weapons: an empty hand is a fist as well. */
 		FISTS = tag("form_fists");
+
+	/** The long two-ended weapons of the spear family: quarterstaffs, glaives, halberds (what a Mill Charge turns). */
+	public static final TagKey<Item> STAVES = tag("form_staves");
 
 	private static TagKey<Item> tag(String name) {
 		return TagKey.create(Registries.ITEM, JaymosKingdoms.id(name));
@@ -761,7 +764,7 @@ public final class Forms {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.bare").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
-		if (!form.family().holds(player.getMainHandItem())) {
+		if (!form.family().holds(player.getMainHandItem()) || !SpecialCuts.fits(form, player.getMainHandItem())) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.weapon", form.name()).withStyle(ChatFormatting.GRAY));
 			return false;
 		}

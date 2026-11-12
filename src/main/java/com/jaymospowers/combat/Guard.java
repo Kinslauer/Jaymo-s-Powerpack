@@ -228,6 +228,7 @@ public final class Guard {
 		UseItemCallback.EVENT.register(Guard::use);
 		Swat.init();
 		BladeStyle.init();
+		TwoBlades.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && met(player, source, amount)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {

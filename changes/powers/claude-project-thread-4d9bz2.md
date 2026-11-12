@@ -1,6 +1,6 @@
 # the armed body and special cuts - stance, draw, flip, parry lines, swatted shots
 Andy's picks from Star Wars: Galaxy in a Cube (All Rights Reserved, 1.20.1 only: ideas only, every pose, name and line
-of code is ours). Patches 1 to 3 of 6 of the SWGC swordplay picks.
+of code is ours). Patches 1 to 4 of 6 (the Twinblade still to come) of the SWGC swordplay picks.
 - **Armed stance** (`client/combat/ArmedPose`, `combat/Armed`): with a weapon in hand the whole body changes. Standing,
   the weapon shoulder turns forward, the blade is held out ahead, the other hand goes back, the feet set apart and the
   weight shifts slowly. Walking, the blade is carried low at the side; running, it trails behind and you lean into it.
@@ -33,6 +33,13 @@ of code is ours). Patches 1 to 3 of 6 of the SWGC swordplay picks.
 - **Fighting styles, the trades** (`combat/BladeStyle`, for Kingdoms' schools): a player set in a style pays feathers
   for the swings that land, pays more or less for a blow a weapon guard blocks (`Guard`), swings faster or slower (an
   attack speed modifier) and gets feathers back faster or slower (`Feathers`). Nobody has a style until Kingdoms sets one.
+- **Two blades** (`combat/TwoBlades`, `Armed.dual`): with a one-handed blade in each hand the stance is wider and
+  squarer, the off hand carrying its blade like the other; a raised guard crosses the two; and every third swing that
+  lands, both blades cut together, the second for 0.6 of your attack on the same foe. Better Combat's off-hand swings
+  are untouched.
+- **Guards at attention** (`client/combat/AttentionPose`): a humanoid mob with a polearm that is standing with nobody
+  to fight holds it upright at its side; one with someone to fight (or, with Kingdoms, a guard challenging you) levels
+  it in both hands. Their swings are as they were.
 - The stance and the guard are poses of ours, so Entity Model Features (Fresh Animations, Touch'n Motion) pauses on a
   body while they're on, as it does for the Fang Gauntlets' guard.
 - Compiled; not played. Every angle is a first pass set without seeing it in game: the knobs are at the top of

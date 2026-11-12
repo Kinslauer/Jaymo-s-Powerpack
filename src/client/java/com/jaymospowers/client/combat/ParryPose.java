@@ -55,8 +55,11 @@ public final class ParryPose {
 	 * What's on a render state: whose it is (entity id), which arm guards, the line met ({@link Armed#HIGH}...; -1: only
 	 * held up), how long ago (ticks; -1: nothing lately) and whether that was a parry.
 	 */
-	public record Parry(int id, boolean right, int line, float since, boolean parried) {
+	public record Parry(int id, boolean right, int line, float since, boolean parried, boolean dual) {
 	}
+
+	/** Two blades guard crossed: how much lower the second arm is held than the first, and how much further across the body. */
+	static final float CROSS_LOWER = 0.2F, CROSS_OVER = 0.25F;
 
 	public static final RenderStateDataKey<Parry> KEY = RenderStateDataKey.create(() -> "jaymospowers:parry_pose");
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("parry");
@@ -84,7 +87,7 @@ public final class ParryPose {
 		if (up && entity.getUsedItemHand() == InteractionHand.OFF_HAND) {
 			right = !right;
 		}
-		return new Parry(entity.getId(), right, lately ? met.line() : -1, lately ? since : -1.0F, lately && met.parried());
+		return new Parry(entity.getId(), right, lately ? met.line() : -1, lately ? since : -1.0F, lately && met.parried(), Armed.dual(entity));
 	}
 
 	/** Right after a model is animated (for the layers, and as each model is drawn). */
@@ -134,7 +137,12 @@ public final class ParryPose {
 		int mainArm = parry.right() ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM, otherArm = parry.right() ? PoseBlend.LEFT_ARM : PoseBlend.RIGHT_ARM;
 		PoseBlend.Frame f = new PoseBlend.Frame(h);
 		f.set(mainArm, arms[0] + RECOIL_ARM * k, -side * arms[1], side * arms[2]);
-		f.set(otherArm, arms[3], side * arms[4], -side * arms[5]);
+		if (parry.dual()) {
+			// a blade in each hand: the other comes up behind the first, the two crossed before the body
+			f.set(otherArm, arms[0] + RECOIL_ARM * k + CROSS_LOWER, side * (arms[1] + CROSS_OVER), -side * arms[2]);
+		} else {
+			f.set(otherArm, arms[3], side * arms[4], -side * arms[5]);
+		}
 		float pitch = hips[0] - RECOIL_HIPS * k, yaw = -side * hips[1];
 		f.set(PoseBlend.HIP_PITCH, pitch);
 		f.set(PoseBlend.HIP_YAW, yaw);

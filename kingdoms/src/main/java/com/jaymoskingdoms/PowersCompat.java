@@ -3212,7 +3212,7 @@ public final class PowersCompat {
 	/** Powers' tag on an attacker whose blow a guard can only block, never parry ({@code Guard.UNPARRYABLE_TAG}). */
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
 	/** Powers' special cuts, as {@code Armed.cut} draws them: the Wheel Cut, the Figure Eight, a hurled blade. */
-	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2;
+	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2, CUT_BOTH = 3, CUT_MILL = 4;
 
 	private static boolean lookedForCuts;
 	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade, styleSet, styleClear;

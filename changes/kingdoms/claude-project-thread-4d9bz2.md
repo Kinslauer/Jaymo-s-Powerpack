@@ -27,3 +27,13 @@ The schools' fighting styles (`forms/Styles`; the picklist row said seven, SWGC'
   fastest, then tire after 8 blows; Low Flame after 14), and in a duel a student turns some of your blows aside (Still
   Water nearly half, Red Ember almost none; a tired one turns nothing).
 - Needs Powers for the trades (`combat/BladeStyle`). Compiled; not played. Every number is a first pass.
+
+Mill Charge and the guards' challenge:
+- **Mill Charge** (`forms/SpecialCuts`), a spear-school form for quarterstaffs, glaives and halberds (new item tag
+  `form_staves`): a short dash with the shaft turning before you. Everyone you pass is struck once for 1.5 times your
+  attack and thrown aside, and blows and shots from ahead are turned while it lasts. 5 second cooldown. Taught by the
+  Skyward Reach after Couched Lance.
+- Staffs, glaives and halberds now count as the spear family's weapons, so the battle stance and the spear forms take
+  them too.
+- A guard who walks up to challenge you ("Halt!") levels their polearm at you until they have spoken (`Levelled`; Powers
+  draws it).

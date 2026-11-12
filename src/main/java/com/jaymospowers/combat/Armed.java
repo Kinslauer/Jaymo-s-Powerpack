@@ -64,8 +64,8 @@ public final class Armed {
 	public static final AttachmentType<Met> MET = AttachmentRegistry.create(JaymosPowers.id("guard_met"),
 		builder -> builder.syncWith(Met.CODEC, AttachmentSyncPredicate.all()));
 
-	/** The special cuts a body can be drawn making ({@code ArmedPose}): the Wheel Cut, the Figure Eight, a hurled blade. */
-	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2;
+	/** The special cuts a body can be drawn making ({@code ArmedPose}): the Wheel Cut, the Figure Eight, a hurled blade, both blades together, the Mill Charge. */
+	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2, CUT_BOTH = 3, CUT_MILL = 4;
 
 	/** A special cut under way: when it began (game time), which, and how long its pose lasts (ticks). */
 	public record Cut(long start, int kind, int ticks) {
@@ -98,6 +98,11 @@ public final class Armed {
 	private static final boolean BETTER_COMBAT = FabricLoader.getInstance().isModLoaded("bettercombat");
 
 	private Armed() {
+	}
+
+	/** Whether {@code body} has a one-handed blade in each hand (the same answer on both sides). */
+	public static boolean dual(LivingEntity body) {
+		return kind(body.getMainHandItem()) == Kind.ONE_HAND && kind(body.getOffhandItem()) == Kind.ONE_HAND;
 	}
 
 	/** How {@code stack} is carried as a weapon, or null if it isn't one. The same answer on both sides. */

@@ -62,7 +62,7 @@ public final class PoseTakeover {
 		return com.jaymospowers.client.wounds.DownedPose.down(s) || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
 			|| s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
-			|| com.jaymospowers.client.pets.PetPoses.posed(s);
+			|| com.jaymospowers.client.pets.PetPoses.posed(s) || com.jaymospowers.client.combat.AttentionPose.on(s);
 	}
 
 	public static void beginDraw(LivingEntityRenderState state) {

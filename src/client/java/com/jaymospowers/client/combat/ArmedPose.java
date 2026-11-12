@@ -85,13 +85,23 @@ public final class ArmedPose {
 	static final int HURL_SNAP_TICKS = 6;
 	static final float[] HURL_BACK = {0.7F, -0.3F, 0.5F}, HURL_OUT = {-1.7F, 0.25F, 0.0F};
 	static final float HURL_TURN = 0.5F;
+	/**
+	 * A blade in each hand: the other arm carries its blade as the weapon arm does, a little lower and wider
+	 * ({@link #DUAL_LOWER}, {@link #DUAL_WIDER}), the feet wider apart ({@link #DUAL_SPREAD}) and the shoulders squarer
+	 * ({@link #DUAL_YAW} of the stance's turn). Both blades together: the arms open wide, then cut across each other.
+	 * The Mill Charge: both hands on the shaft before the body, turning it over and over ({@link #MILL_TICKS} a turn).
+	 */
+	static final float DUAL_LOWER = 0.15F, DUAL_WIDER = 0.1F, DUAL_SPREAD = 0.07F, DUAL_YAW = 0.35F;
+	static final float[] BOTH_OPEN = {-1.3F, -0.7F, 0.5F}, BOTH_CROSS = {-1.1F, 0.9F, 0.0F};
+	static final float MILL_TICKS = 6.0F, MILL_SWING = 0.9F;
+	static final float[] MILL_MID = {-1.3F, 0.45F, 0.0F};
 	// ================================================================================================================
 
 	/**
 	 * What's on a render state: how the weapon is carried, which arm has it, and how far through the draw (0-1; -1:
 	 * drawn); and the special cut being made ({@code cut}: -1 none), how long it has run and how long it lasts (ticks).
 	 */
-	public record Held(Armed.Kind kind, boolean right, float draw, int cut, float cutAt, int cutTicks) {
+	public record Held(Armed.Kind kind, boolean right, float draw, int cut, float cutAt, int cutTicks, boolean dual) {
 	}
 
 	public static final RenderStateDataKey<Held> KEY = RenderStateDataKey.create(() -> "jaymospowers:armed");
@@ -135,7 +145,7 @@ public final class ArmedPose {
 			// a special cut is the whole arm's business: it is drawn over a swing of the hand, and no draw plays under it
 			SEEN.put(entity.getId(), new Seen(main.getItem(), Long.MIN_VALUE));
 			state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, -1.0F, special.kind(), now - special.start() + partialTicks,
-				special.ticks()));
+				special.ticks(), Armed.dual(entity)));
 			return;
 		}
 		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
@@ -148,7 +158,7 @@ public final class ArmedPose {
 			return;
 		}
 		float draw = drawn == Long.MIN_VALUE ? -1.0F : (now - drawn + partialTicks) / DRAW_TICKS;
-		state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, draw < 0.0F || draw >= 1.0F ? -1.0F : draw, -1, 0.0F, 0));
+		state.setData(KEY, new Held(kind, entity.getMainArm() == HumanoidArm.RIGHT, draw < 0.0F || draw >= 1.0F ? -1.0F : draw, -1, 0.0F, 0, Armed.dual(entity)));
 	}
 
 	/** Whether the stance is on this state (for {@link PoseTakeover}: Entity Model Features pauses so it holds). */
@@ -250,6 +260,15 @@ public final class ArmedPose {
 			yaw *= smooth(t);
 			bothHands = bothHands && t > 0.65F;
 		}
+		boolean dual = held.dual() && held.kind() == Armed.Kind.ONE_HAND;
+		if (dual) {
+			// a blade in each hand: the other arm carries its own as the weapon arm does, and the shoulders square up
+			bothHands = true;
+			other[0] = main[0] + DUAL_LOWER;
+			other[1] = main[1];
+			other[2] = main[2] + DUAL_WIDER;
+			yaw *= DUAL_YAW;
+		}
 		if (held.cut() >= 0) {
 			// a special cut: the weapon arm alone, the body turning with it
 			float t = held.cutAt();
@@ -281,6 +300,30 @@ public final class ArmedPose {
 					main[2] = EIGHT_MID[2];
 					yaw = Mth.sin(a) * EIGHT_TURN;
 				}
+				case Armed.CUT_BOTH -> {
+					// both blades: open wide, then across each other
+					float k = smooth(t / (held.cutTicks() * 0.6F));
+					for (int i = 0; i < 3; i++) {
+						main[i] = Mth.lerp(k, BOTH_OPEN[i], BOTH_CROSS[i]);
+					}
+					bothHands = true;
+					other[0] = main[0];
+					other[1] = main[1];
+					other[2] = main[2];
+					yaw = 0.0F;
+				}
+				case Armed.CUT_MILL -> {
+					// both hands on the shaft, one over the other, turning it
+					float a = t * Mth.TWO_PI / MILL_TICKS;
+					main[0] = MILL_MID[0] + Mth.sin(a) * MILL_SWING;
+					main[1] = MILL_MID[1];
+					main[2] = MILL_MID[2];
+					bothHands = true;
+					other[0] = MILL_MID[0] - Mth.sin(a) * MILL_SWING;
+					other[1] = MILL_MID[1];
+					other[2] = MILL_MID[2];
+					yaw = 0.0F;
+				}
 				default -> {
 					float back = held.cutTicks() - HURL_SNAP_TICKS;
 					float k = t < back ? 0.0F : smooth((t - back) / (HURL_SNAP_TICKS * 0.5F));
@@ -311,8 +354,9 @@ public final class ArmedPose {
 		f.set(PoseBlend.DROP, STANCE_DROP * set);
 		f.add(right ? PoseBlend.RIGHT_LEG : PoseBlend.LEFT_LEG, -STANCE_STRIDE * set);
 		f.add(right ? PoseBlend.LEFT_LEG : PoseBlend.RIGHT_LEG, STANCE_STRIDE * set);
-		f.add(PoseBlend.RIGHT_LEG + 2, STANCE_SPREAD * set);
-		f.add(PoseBlend.LEFT_LEG + 2, -STANCE_SPREAD * set);
+		float spread = STANCE_SPREAD + (dual ? DUAL_SPREAD : 0.0F);
+		f.add(PoseBlend.RIGHT_LEG + 2, spread * set);
+		f.add(PoseBlend.LEFT_LEG + 2, -spread * set);
 		track.apply(h, f);
 	}
 
