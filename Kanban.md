@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 23:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 04:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,8 +33,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/future-three-sided-war|future-three-sided-war]]
 - [x] [[Inbox/Done/blindness-devout-path|blindness-devout-path]]
 - [x] [[Inbox/Done/arsenal-pulls-anything|arsenal-pulls-anything]]
-- [x] [[Inbox/Done/elemental-ki-limits|elemental-ki-limits]]
-- [x] [[Inbox/Done/costumed-and-everyday-power-users|costumed-and-everyday-power-users]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
 
 
 %% kanban:settings
