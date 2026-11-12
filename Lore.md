@@ -1325,3 +1325,15 @@ one more working: a **bulwark** dome, a **tide pearl** that drags a foe to the c
 Kingdoms' assassins and thieves have a few more tricks (watching unseen, slipping a blow, lifting a weapon, a dry
 remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
 before it is seen.
+
+(new) **Fighting together** (Claude's placement for the pawn picks, patch 1, 2026-11-12, for Andy to approve). Nobody
+in the realms fights alone if they can help it, and nobody fights the same way. Everyone who takes up arms has a
+**leaning**, a first habit and a second: going for the biggest foe, for the archers, for the wounded, guarding a
+friend, minding the fallen, striking first, going for the loot, or hanging back. A companion sworn to you has one as
+surely as a goblin raider does, and it shows: it calls out what it is doing, in its own tongue and in the voice its
+temper gives it (the bold shout, the warm reassure, the steady report, the quiet often say nothing). A band's
+**leader** (a camp chief, a warchief, a captain, a warlord, a raid's captain) gives the same four orders a traveller
+gives their own: press on, come to me, hold, get the fallen up. Those who mind the fallen kneel beside a downed friend
+in the thick of it and get them up, on either side, so a fight against a band is won by putting down its healers first,
+and a leader who goes down leaves his band to fight each by its own habit. Patch 6 proposes a name for the sickness
+that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
