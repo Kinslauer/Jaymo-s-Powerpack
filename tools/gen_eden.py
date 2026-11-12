@@ -216,7 +216,7 @@ def blocks():
           states={"variants": {"stage=0": {"model": f"{NS}:block/eden/aquatus_sapling"}, "stage=1": {"model": f"{NS}:block/eden/aquatus_sapling"}}})
 
 
-WOODS = ["balloon_mushroom", "pulse_tree", "brain_tree"]
+WOODS = ["balloon_mushroom", "pulse_tree", "brain_tree", "sunroot"]
 SIDES = ("north", "south", "west", "east")
 
 
@@ -458,6 +458,59 @@ def diskwing():
         f.write(json.dumps(sounds, indent="\t") + "\n")
 
 
+def aether_share():
+    """What went to the Aether: the sunroot of the golden grove (Eden Ring's auritis under our own name) and the volvox of the high sky.
+    The grove itself, and where the colonies and hollow islands drift, are in tools/gen_aether_world.py."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import gen_aether as G
+    block("sunroot_log", column("sunroot_log_side", "sunroot_log_top"), states=pillar_states("sunroot_log"))
+    block("sunroot_planks", cube("sunroot_planks"))
+    block("sunroot_leaves", {"parent": "minecraft:block/leaves", "textures": {"all": TEX + "sunroot_leaves"}}, drop=False)
+    write(f"{DATA}/loot_table/blocks/sunroot_leaves.json", G.leaves_table("sunroot_leaves", sapling="sunroot_sapling"))
+    block("sunroot_sapling", cross("sunroot_sapling"), item_model=flat("sunroot_sapling"),
+          states={"variants": {"stage=0": {"model": f"{NS}:block/eden/sunroot_sapling"}, "stage=1": {"model": f"{NS}:block/eden/sunroot_sapling"}}})
+    block("volvox_block", cube("volvox_block"), "Volvox")
+    block("volvox_block_dense", cube("volvox_block_dense"), "Dense Volvox")
+    write(f"{DATA}/recipe/eden/sunroot_planks.json", {"type": "minecraft:crafting_shapeless", "category": "building", "group": "planks",
+                                                      "ingredients": [f"{NS}:sunroot_log"], "result": {"id": f"{NS}:sunroot_planks", "count": 4}})
+    tag(f"{MC}/tags/block/mineable/axe.json", [f"{NS}:sunroot_log", f"{NS}:sunroot_planks"])
+    tag(f"{MC}/tags/block/mineable/hoe.json", [f"{NS}:sunroot_leaves", f"{NS}:volvox_block", f"{NS}:volvox_block_dense"])
+    for kind in ("block", "item"):
+        tag(f"{MC}/tags/{kind}/planks.json", [f"{NS}:sunroot_planks"])
+        tag(f"{MC}/tags/{kind}/logs.json", [f"{NS}:sunroot_log"])
+        tag(f"{MC}/tags/{kind}/leaves.json", [f"{NS}:sunroot_leaves"])
+        tag(f"{MC}/tags/{kind}/saplings.json", [f"{NS}:sunroot_sapling"])
+
+
+HERBAL = [
+    "Notes kept on the far side of the green world, for whoever walks it after me. I name things as the Verdant do. Where they would not tell me a thing I have left the page short.",
+    "The great mushrooms hold their caps up on gas. Cut the stem and the cap comes down slowly. The lanterns under the old ones are fruit. The Verdant dye them and say the colour changes what they dream.",
+    "The pulse trees beat. Lay a hand on the stem and count: it is slower than a heart and it does not change when you are afraid. All the trees of one wood keep the same time.",
+    "Do not walk under the brain trees bare. Wear iron, or gold, or mail. The Verdant say the trees are thinking, and that the charge is only what a thought costs.",
+    "Aquatus drinks the ground to sand. Every pond in the dry country has one on its shore, and I cannot say which came first. Never plant it by a field.",
+    "Violum glows and is good for nothing else. Lonlix is shorn like wool. Parignum and the grey moss lie flat. The moulds hang under whatever feeds them, and one kind gives light.",
+    "Limphium is the plant to know. Fresh, the leaf will keep you walking. Dried over a fire it is a meal. I was offered it at every door before I was asked my name.",
+    "The blue crystal is gravilite. They say it fell from the ring overhead. On its own it shines. Bound in iron over redstone it turns weight upside down above it. I have ridden one. I did not enjoy it.",
+    "Diskwings harm nothing. Their backs are lit the colour of the country under them, and the Verdant read the weather by how low they fly. Do not shoot one where you can be seen.",
+    "I am told the sky folk have a golden wood of this same kind, and living lanterns that drift, and islands that are hollow. I am told many things. I have not been up to look.",
+]
+
+
+def herbal():
+    """The field guide: a written book made at a crafting table from a book, a dried limphium leaf and a gravilite shard.
+    Its pages are lang keys, and it carries Kingdoms' lore id so the lore codex files it."""
+    name = "far_country_herbal"
+    for i, text in enumerate(HERBAL, 1):
+        LANG[f"book.{NS}.{name}.page{i}"] = text
+    write(f"{DATA}/recipe/eden/{name}.json", {
+        "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": ["minecraft:book", f"{NS}:dried_limphium_leaf", f"{NS}:gravilite_shards"],
+        "result": {"id": "minecraft:written_book", "components": {
+            "minecraft:written_book_content": {"title": "A Far Country Herbal", "author": "", "generation": 1, "resolved": True,
+                                               "pages": [{"translate": f"book.{NS}.{name}.page{i}"} for i in range(1, len(HERBAL) + 1)]},
+            "minecraft:custom_data": {"jaymoskingdoms_lore": f"{NS}:{name}"}}}})
+
+
 def recipes_and_tags():
     def shapeless(name, ingredients, result, count=1, group=None):
         r = {"type": "minecraft:crafting_shapeless", "category": "building", "ingredients": ingredients,
@@ -632,10 +685,12 @@ def worldgen():
 
 def main():
     blocks()
+    aether_share()
     shaped_wood()
     gravilite()
     small_plants()
     diskwing()
+    herbal()
     recipes_and_tags()
     worldgen()
     write(f"{ASSETS}/lang/parts/eden.json", LANG)

@@ -36,7 +36,11 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
+import net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer;
 import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.DoorBlock;
@@ -103,6 +107,10 @@ public final class Eden {
 	public static final int DISKWING_WEIGHT = 6, DISKWING_MIN = 1, DISKWING_MAX = 2;
 	public static EntityType<Diskwing> DISKWING;
 	public static Item DISKWING_SPAWN_EGG;
+	/** Hardness of volvox, and the light the dense kind gives. */
+	public static final float VOLVOX_HARDNESS = 0.4F;
+	public static final int DENSE_VOLVOX_LIGHT = 7;
+	public static Block SUNROOT_LOG, SUNROOT_PLANKS, SUNROOT_LEAVES, SUNROOT_SAPLING, VOLVOX, DENSE_VOLVOX;
 	public static Block GRAVILITE_SHARDS, GRAVILITE_BLOCK, GRAVILITE_LAMP, GRAVILITE_LANTERN, GRAVITY_COMPRESSOR;
 	/** The mycotic lanterns, by colour. */
 	public static final Map<DyeColor, Block> LANTERNS = new LinkedHashMap<>();
@@ -223,10 +231,23 @@ public final class Eden {
 
 		EdenWind.init();
 
+		// ---- the Aether's share: the sunroot of the golden grove, and the volvox of the high sky ----
+		SUNROOT_LOG = block("sunroot_log", RotatedPillarBlock::new, wood(MapColor.COLOR_BROWN).sound(SoundType.WOOD));
+		SUNROOT_PLANKS = block("sunroot_planks", Block::new, wood(MapColor.GOLD).sound(SoundType.WOOD).strength(LOG_HARDNESS, PLANKS_BLAST));
+		SUNROOT_LEAVES = block("sunroot_leaves", p -> new UntintedParticleLeavesBlock(0.0F, ParticleTypes.SMOKE,
+			AmbientLeavesBlockSoundPlayer.noAmbientSound(), p), BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(0.2F).randomTicks()
+			.sound(SoundType.GRASS).noOcclusion().isValidSpawn(Blocks::never).isSuffocating(Blocks::never).isRedstoneConductor(Blocks::never));
+		SUNROOT_SAPLING = sapling("sunroot_sapling", "sunroot_tree", MapColor.GOLD);
+		VOLVOX = block("volvox_block", HalfTransparentBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN)
+			.strength(VOLVOX_HARDNESS).sound(SoundType.SLIME_BLOCK).noOcclusion().isSuffocating(Blocks::never));
+		DENSE_VOLVOX = block("volvox_block_dense", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+			.strength(VOLVOX_HARDNESS).sound(SoundType.SLIME_BLOCK).lightLevel(state -> DENSE_VOLVOX_LIGHT));
+
 		// ---- the shaped wood ----
 		shaped("balloon_mushroom", BALLOON_PLANKS, MapColor.COLOR_PINK);
 		shaped("pulse_tree", PULSE_PLANKS, MapColor.COLOR_CYAN);
 		shaped("brain_tree", BRAIN_PLANKS, MapColor.COLOR_GRAY);
+		shaped("sunroot", SUNROOT_PLANKS, MapColor.GOLD);
 
 		// ---- the small growth ----
 		VIOLUM = block("violum", TallFlowerBlock::new, plant(MapColor.COLOR_PURPLE).sound(SoundType.GRASS).lightLevel(state -> VIOLUM_LIGHT)
