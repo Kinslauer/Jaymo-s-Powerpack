@@ -267,3 +267,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11: Andy: vigilantes fight villains (rivalries a player can join), and villagers talk about the costumed ones they've seen (PR #1332).
 
 - 2026-11-11 (future-three-sided-war, PR #1335): Frostborn troopers in the future are hostile to everyone, players included (Andy, decision card).
+- 2026-11-11 (future-three-sided-war, PR #1335): the Frostborn troopers fight the Omens too (Andy).
