@@ -10,11 +10,14 @@ import com.jaymoskingdoms.SkeletonLord;
 import com.jaymoskingdoms.inhabitants.BarrowBeetle;
 import com.jaymoskingdoms.inhabitants.Bogre;
 import com.jaymoskingdoms.inhabitants.Draugr;
+import com.jaymoskingdoms.inhabitants.Impaler;
+import com.jaymoskingdoms.inhabitants.WarpedClam;
 import com.jaymoskingdoms.inhabitants.Inhabitants;
 import com.jaymoskingdoms.monsters.Monsters;
 import com.jaymoskingdoms.monsters.SilverSkeleton;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -29,6 +32,8 @@ public final class InhabitantsClient {
 	static final float BEETLE_SHADOW = 0.3F, DRAUGR_SHADOW = 0.5F, SILVER_SHADOW = 0.6F;
 	/** The Bogre is drawn a quarter over its model's size (as Inhabitants draws it), with a wide shadow. */
 	static final float BOGRE_SCALE = 1.25F, BOGRE_SHADOW = 1.25F;
+	/** The Impaler and the Warped Clam are drawn at their models' size (as Inhabitants draws them). */
+	static final float IMPALER_SHADOW = 0.9F, CLAM_SHADOW = 0.7F;
 	/** The Skeleton Lord's model stands 5 blocks to its crown (8 to the staff's tip): drawn to his 2.9-block height. */
 	static final float LORD_SCALE = 0.55F, LORD_SHADOW = 0.9F;
 	/** The Skeleton Lord's crystal bones, shown only while he sleeps as a statue. */
@@ -48,6 +53,8 @@ public final class InhabitantsClient {
 	static final DataTicket<Boolean> DRAUGR_LIVING = DataTicket.create("jaymoskingdoms_draugr_living", Boolean.class);
 	static final DataTicket<Integer> DRAUGR_MAIMED = DataTicket.create("jaymoskingdoms_draugr_maimed", Integer.class);
 	static final DataTicket<Integer> DRAUGR_TAIL_ROLL = DataTicket.create("jaymoskingdoms_draugr_tail", Integer.class);
+	static final DataTicket<Boolean> IMPALER_SPIKES = DataTicket.create("jaymoskingdoms_impaler_spikes", Boolean.class);
+	static final DataTicket<Boolean> CLAM_PEARL = DataTicket.create("jaymoskingdoms_clam_pearl", Boolean.class);
 	static final DataTicket<Boolean> LORD_DORMANT = DataTicket.create("jaymoskingdoms_lord_dormant", Boolean.class);
 	static final DataTicket<Float> LORD_SINCE_WOKE = DataTicket.create("jaymoskingdoms_lord_since_woke", Float.class);
 
@@ -59,6 +66,9 @@ public final class InhabitantsClient {
 			context -> new InhabitantRenderer<BarrowBeetle>(context, "barrow_beetle", 1.0F, BEETLE_SHADOW, "head"));
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
 		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
+		EntityRenderers.register(Inhabitants.IMPALER, ImpalerRenderer::new);
+		EntityRenderers.register(Inhabitants.WARPED_CLAM, ClamRenderer::new);
+		EntityRenderers.register(Inhabitants.IMPALER_SPIKE, ThrownItemRenderer::new);
 		EntityRenderers.register(Monsters.SILVER_SKELETON,
 			context -> new InhabitantRenderer<SilverSkeleton>(context, "silver_skeleton", 1.0F, SILVER_SHADOW, "head"));
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
@@ -152,6 +162,47 @@ public final class InhabitantsClient {
 		@Override
 		protected float getDeathMaxRotation(GeoRenderState state) {
 			return 0.0F;
+		}
+	}
+
+	/** Its arm bare of spikes once it has thrown them all (they grow back). */
+	static final class ImpalerRenderer extends InhabitantRenderer<Impaler> {
+		ImpalerRenderer(EntityRendererProvider.Context context) {
+			super(context, "impaler", 1.0F, IMPALER_SHADOW, "head");
+		}
+
+		@Override
+		public void addRenderData(Impaler impaler, Void related, LivingEntityRenderState state, float partialTick) {
+			super.addRenderData(impaler, related, state, partialTick);
+			state.addGeckolibData(IMPALER_SPIKES, impaler.spikes() > 0);
+		}
+
+		@Override
+		public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
+			super.adjustModelBonesForRender(info, snapshots);
+			boolean spikes = info.getOrDefaultGeckolibData(IMPALER_SPIKES, true);
+			snapshots.ifPresent("spikes8", bone -> bone.skipRender(!spikes));
+		}
+	}
+
+	/** Its pearl, and the glow inside, only once it has grown one. It has no head to turn. */
+	static final class ClamRenderer extends InhabitantRenderer<WarpedClam> {
+		ClamRenderer(EntityRendererProvider.Context context) {
+			super(context, "warped_clam", 1.0F, CLAM_SHADOW, null);
+		}
+
+		@Override
+		public void addRenderData(WarpedClam clam, Void related, LivingEntityRenderState state, float partialTick) {
+			super.addRenderData(clam, related, state, partialTick);
+			state.addGeckolibData(CLAM_PEARL, clam.pearl());
+		}
+
+		@Override
+		public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
+			super.adjustModelBonesForRender(info, snapshots);
+			boolean pearl = info.getOrDefaultGeckolibData(CLAM_PEARL, false);
+			snapshots.ifPresent("pearl", bone -> bone.skipRender(!pearl));
+			snapshots.ifPresent("glowLayer", bone -> bone.skipRender(!pearl));
 		}
 	}
 

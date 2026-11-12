@@ -43,4 +43,5 @@
   - WeaponMod's fire rod: wooden handle and a torch.
   - All of them show in JEI.
 - F5 already toggles only first and third person; the front camera moves to F7 (from F6) and Simple Voice Chat's menu to F6, moved once per install; our shoulder view is unchanged.
+- Chrono's echo is a mimic now: it wears its owner's face while it walks their routes and does their work, but when it fights the face splits and it shows its true form (Prometheus's Mimic model and animations), and it keeps that form until it has had nothing to fight for a few seconds. Its blows, flinches and death play on the true form.
 - Built; not played.

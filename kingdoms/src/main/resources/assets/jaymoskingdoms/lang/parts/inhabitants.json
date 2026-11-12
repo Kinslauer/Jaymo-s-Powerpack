@@ -4,5 +4,10 @@
   "entity.jaymoskingdoms.draugr": "Draugr",
   "item.jaymoskingdoms.barrow_beetle_spawn_egg": "Barrow Beetle Spawn Egg",
   "item.jaymoskingdoms.bogre_spawn_egg": "Bogre Spawn Egg",
-  "item.jaymoskingdoms.draugr_spawn_egg": "Draugr Spawn Egg"
+  "item.jaymoskingdoms.draugr_spawn_egg": "Draugr Spawn Egg",
+  "entity.jaymoskingdoms.impaler": "Impaler",
+  "item.jaymoskingdoms.impaler_spawn_egg": "Impaler Spawn Egg",
+  "entity.jaymoskingdoms.warped_clam": "Warped Clam",
+  "item.jaymoskingdoms.warped_clam_spawn_egg": "Warped Clam Spawn Egg",
+  "entity.jaymoskingdoms.impaler_spike": "Impaler Spike"
 }

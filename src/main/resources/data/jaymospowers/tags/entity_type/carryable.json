@@ -9,6 +9,7 @@
 		"minecraft:rabbit",
 		"minecraft:parrot",
 		"minecraft:frog",
-		"minecraft:armadillo"
+		"minecraft:armadillo",
+		{"id": "jaymoskingdoms:warped_clam", "required": false}
 	]
 }
