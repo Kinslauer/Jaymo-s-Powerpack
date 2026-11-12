@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Downed enemies react to executions and stay down when killed
 branch: claude/project-thread-dgrimh
 with: 
@@ -25,3 +25,4 @@ owns:
 
 ## Done
 Compile-checked, not played.
+- 2026-11-12 06:10 PR #1356 is merged into master; moved to Agents/Done.
