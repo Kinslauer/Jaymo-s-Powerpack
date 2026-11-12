@@ -43,11 +43,12 @@ public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	/** A stick pile the world laid down, not a player (see {@link LooseSticksFeature}). */
 	public static final BooleanProperty NATURAL = BooleanProperty.create("natural");
+	/** Boxes around the sticks of each pile size (tools/gen_loose_sticks.py prints them). */
 	private static final VoxelShape[] STICK_SHAPES = {
-		Block.box(5.5, 0.0, 6.0, 10.0, 3.0, 10.5),
-		Block.box(5.5, 0.0, 6.0, 13.0, 3.0, 13.0),
-		Block.box(3.0, 0.0, 6.0, 13.0, 3.0, 13.0),
-		Block.box(3.0, 0.0, 3.0, 13.0, 3.0, 13.0),
+		Block.box(5.0, 0.0, 3.0, 11.0, 1.5, 14.0),
+		Block.box(4.5, 0.0, 3.0, 12.5, 1.5, 14.0),
+		Block.box(2.5, 0.0, 3.0, 12.5, 1.5, 14.0),
+		Block.box(2.5, 0.0, 3.0, 13.0, 1.5, 14.0),
 	};
 
 	private LooseSticksBlock(BlockBehaviour.Properties properties) {
