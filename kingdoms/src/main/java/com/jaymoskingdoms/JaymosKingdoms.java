@@ -71,6 +71,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
 		Senses.register();
 		Stench.register();
+		SmogFolk.register();
 		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
 		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)

@@ -81,6 +81,8 @@ public final class Stomach {
 	 * ... with no assistance": the rest takes treatment (Powers' bandages, salves and the like) or other help.
 	 */
 	public static final float SELF_HEAL_CAP = 0.6F;
+	/** Jaymo's Powers' tag on a Smog user standing in clean open air: meals heal nothing then. */
+	static final String CLEAN_AIR_TAG = "jaymospowers.clean_air";
 	/** (0.5.7) Jaymo's Powers' scoreboard tag on the downed: they don't heal at all until someone brings them round. */
 	static final String DOWNED_TAG = "jaymospowers_downed";
 	/**
@@ -451,8 +453,9 @@ public final class Stomach {
 			REGEN_PROGRESS.remove(id);
 			return;
 		}
-		if (player.entityTags().contains(DOWNED_TAG)) {
-			// (0.5.7) lying downed: no healing on your own, and nothing saved up for when you're up
+		if (player.entityTags().contains(DOWNED_TAG) || player.entityTags().contains(CLEAN_AIR_TAG)) {
+			// (0.5.7) lying downed: no healing on your own, and nothing saved up for when you're up; nor a Smog user in
+			// clean open air (Jaymo's Powers' smoke corruption)
 			REGEN_PROGRESS.remove(id);
 			return;
 		}

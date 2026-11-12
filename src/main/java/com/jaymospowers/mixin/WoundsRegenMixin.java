@@ -21,7 +21,8 @@ abstract class WoundsRegenMixin {
 	 */
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isHurt()Z"))
 	private boolean jaymospowers$onlyWhatCanHeal(ServerPlayer player, Operation<Boolean> original) {
-		return original.call(player) && Wounds.canHealMore(player);
+		// (and a Smog user in clean open air heals nothing there)
+		return original.call(player) && Wounds.canHealMore(player) && !player.entityTags().contains(com.jaymospowers.power.smoke.SmokeSmog.CLEAN_AIR_TAG);
 	}
 
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V"))

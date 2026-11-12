@@ -33,5 +33,19 @@
   "sign.jaymoskingdoms.mourning.cause.player": "Fell in a fight",
   "sign.jaymoskingdoms.mourning.cause.other": "Fell on the road",
   "sign.jaymoskingdoms.mourning.cause.void": "Lost to the dark",
-  "sign.jaymoskingdoms.mourning.cause.beheaded": "Beheaded"
+  "sign.jaymoskingdoms.mourning.cause.beheaded": "Beheaded",
+  "speech.jaymoskingdoms.smog.curious.0": "Is something burning? It's coming off you.",
+  "speech.jaymoskingdoms.smog.curious.1": "That cough of yours doesn't sound like any cold I know.",
+  "speech.jaymoskingdoms.smog.curious.2": "You've ash all over you. Been sleeping in a chimney?",
+  "speech.jaymoskingdoms.smog.curious.3": "Your breath smells like a forge gone bad.",
+  "speech.jaymoskingdoms.smog.knowing.0": "That's no hearth smoke. That's the rot that eats people from the inside.",
+  "speech.jaymoskingdoms.smog.knowing.1": "Nobody ends up breathing that filth by chance. What did you do to deserve it?",
+  "speech.jaymoskingdoms.smog.knowing.2": "My grandmother said the black smoke only takes those who've earned it. Keep away from my children.",
+  "speech.jaymoskingdoms.smog.knowing.3": "People are talking about you. The smoke, the coughing. Whatever's in you, we don't want it here.",
+  "speech.jaymoskingdoms.smog.out.0": "Out! Take your poison somewhere else!",
+  "speech.jaymoskingdoms.smog.out.1": "We've seen enough. You're not welcome here. Go!",
+  "speech.jaymoskingdoms.smog.out.2": "Whatever wickedness brought that smoke on you, it isn't staying in our town.",
+  "speech.jaymoskingdoms.smog.out.3": "Get out before you choke the lot of us!",
+  "message.jaymoskingdoms.smog.last_warning": "%s has had enough of the smoke on you. One more time and they'll throw you out.",
+  "message.jaymoskingdoms.smog.driven_out": "%s has driven you out for the corruption on you. Stay away for %s minutes."
 }

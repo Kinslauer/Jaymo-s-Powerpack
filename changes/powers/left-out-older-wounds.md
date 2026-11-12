@@ -5,4 +5,5 @@
 - **No armour repairs mid-fight at the grindstone or in the crafting grid** (two worn pieces put together), as at the anvil: the mended piece can't be taken from the result slot till the fight is over (`ArmourWearSlotMixin`).
 - **Letting go of attack stops the symbiote's execution** before its killing blow, sparing them (the client sends the release; `WebExecutions.letGo`).
 - **Wounds leftovers**: Kingdoms' Last Stand never turns away a death you gave up to (the `jaymospowers.finishing` tag while it's let through); food's healing no longer burns hunger when nothing may heal (a broken part held at its cap: `Wounds.canHealMore`); a broken leg stops the sprint on your own client too, not only the server (`Breaks.NO_SPRINT`, `BrokenLegSprintMixin`).
+- **Smog's clean-air cost is built**: while the smog holds you and you stand in clean open air (high up, no smoke about), you don't heal naturally there, from full hunger or (with Kitchen) from meals. Powers tags the player `jaymospowers.smog` while the smog holds them and `jaymospowers.clean_air` while they stand in clean air, for Kingdoms and Kitchen to read.
 - Built; not played.
