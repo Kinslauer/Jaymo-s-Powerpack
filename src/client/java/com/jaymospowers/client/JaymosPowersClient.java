@@ -54,6 +54,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (and the tundra's place in the Overworld, for the same reason)
 		com.jaymospowers.tundra.world.TundraWorld.place();
+		com.jaymospowers.frost.IceCaves.place();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
 		// the Verdant World's sky: the blue giant and its ring

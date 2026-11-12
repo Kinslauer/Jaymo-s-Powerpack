@@ -10,5 +10,6 @@ public final class JaymosPowersServer implements DedicatedServerModInitializer {
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
 		// (and the tundra's place in the Overworld, for the same reason)
 		com.jaymospowers.tundra.world.TundraWorld.place();
+		com.jaymospowers.frost.IceCaves.place();
 	}
 }

@@ -7,3 +7,5 @@
 - The Overworld's list now stays vanilla's until every mod has started (`TundraWorld.place`, called from the server
   and client entrypoints), the same way the demon realm's Nether biomes already do. Worlds load their registries
   later, from the data files, so the tundra still generates in new chunks.
+- The new ice caves biome had the same fault ("No value registered for key jaymospowers:ice_caves" would have been next)
+  and waits for `IceCaves.place` the same way.
