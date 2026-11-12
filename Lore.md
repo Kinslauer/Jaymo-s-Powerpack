@@ -1413,3 +1413,11 @@ always bought, and the midnight poison is a witch's own. The clerics keep the an
 realms' weaponsmiths knot and weight the nets their guards throw at a fleeing crook; the orc camps' keepers carry
 cruder ones for runaway goblins. The gas bottle is a glassblower's trick sold under the counter. Dragons, wraiths, the
 Warden and a witch's curse put a fear in anyone that their legs won't walk into.
+
+(new) **Eyes for the dark, and the road's habits** (Claude's placement for the fifth edition picks, patch 3,
+2026-11-12, for Andy to approve). Some bloods see in the dark, in grey and without colour, as far as a stone's long
+throw: the Nightborn, whom daylight dulls; the Deepborn, who hear the world through the stone; the Stoneborn, raised
+under the mountains; the Hollow, who carry the grave's cold; goblins and orcs; the moon elves; and of the beast folk
+the lizard, feline and spider kin. The five human bloods need a lantern. Folk of the road learn to crouch behind a
+wall, to take a watch by the fire, to walk softly in the dark and to catch their breath where they can; the camps
+learn it the hard way. Wolves, bandits and the pack thieves who rob sleepers come to any camp nobody watches.
