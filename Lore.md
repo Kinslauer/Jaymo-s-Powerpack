@@ -247,6 +247,13 @@ the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' g
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
 
+(new) **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
+those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
+**Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
+thrown sword is a sword given away, and mean it: it lies where it lands. Only those whose gift can fetch it (the
+Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
+teaching.
+
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
 

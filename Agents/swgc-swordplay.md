@@ -32,3 +32,7 @@ names and sounds.
 ## Done
 Patch 1 (PR #1341): armed stance, draw, armed crouch, mid-air flip, parry lines. Compiled, not played; pose angles are a
 first pass. Patches 2-6 not started.
+
+- 2026-11-12: patch 2 pushed to the same branch/PR (#1341): `combat/Swat`, `combat/BladeThrow`, `Armed.CUT`, cut poses
+  in `ArmedPose`, Darktide swat; Kingdoms `forms/SpecialCuts` (wheel_cut, figure_eight, hurled_blade), bridge methods in
+  `PowersCompat`, blade school arts + `ART_STANDING`. Flip lift gated by `Dodge.flipLift`. Compiled, not played.
