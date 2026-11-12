@@ -163,6 +163,14 @@ public final class BodyHeat {
 		heatProof = proof;
 	}
 
+	/**
+	 * For other mods (by reflection): {@code player} is soaked through, and stays wet for {@code ticks} from now if that
+	 * is longer than they would have (Kingdoms' downpours: plain rain leaves you wet for {@link #WET_TICKS}).
+	 */
+	public static void soak(ServerPlayer player, int ticks) {
+		WET_UNTIL.merge(player.getUUID(), player.level().getGameTime() + ticks, Math::max);
+	}
+
 	/** For other mods (by reflection): more weather on players, in body heat. */
 	public static void addWeather(ToDoubleFunction<ServerPlayer> weather) {
 		WEATHER.add(weather);

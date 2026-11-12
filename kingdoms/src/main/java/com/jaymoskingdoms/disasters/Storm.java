@@ -49,6 +49,25 @@ public final class Storm {
 		return f * strength();
 	}
 
+	/**
+	 * How hard a downpour falls at (x, z), 0..1: the heart of a gathered thunderstorm or supercell (and of one rain cell
+	 * in {@link Storms#DOWNPOUR_RAIN_CELLS}), the inner {@link Storms#DOWNPOUR_CORE} of its radius, easing in from its rim.
+	 */
+	public float downpour(double px, double pz) {
+		if (kind == RAIN && id % Storms.DOWNPOUR_RAIN_CELLS != 0) {
+			return 0.0F;
+		}
+		float built = (strength() - Storms.DOWNPOUR_GATHERED) / (1.0F - Storms.DOWNPOUR_GATHERED);
+		if (built <= 0.0F) {
+			return 0.0F;
+		}
+		double d = Math.sqrt((px - x) * (px - x) + (pz - z) * (pz - z)), core = radius * Storms.DOWNPOUR_CORE;
+		if (d >= core) {
+			return 0.0F;
+		}
+		return (float)Math.min(1.0, (1.0 - d / core) * 3.0) * Math.min(1.0F, built);
+	}
+
 	/** One tick of drift. */
 	public void move() {
 		x += vx;

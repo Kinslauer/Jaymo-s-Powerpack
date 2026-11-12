@@ -50,7 +50,8 @@ public final class StormsClient {
 	/** How fast the rain and thunder ease toward what's overhead (per tick). */
 	static final float EASE = 0.008F;
 
-	private static SpriteSet cloudSprites, funnelSprites;
+	static SpriteSet cloudSprites;
+	private static SpriteSet funnelSprites;
 	private static float cloudCarry;
 
 	private StormsClient() {

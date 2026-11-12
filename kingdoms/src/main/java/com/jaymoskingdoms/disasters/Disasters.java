@@ -89,6 +89,7 @@ public final class Disasters {
 		Calamities.register();
 		ServerTickEvents.END_SERVER_TICK.register(Storms::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Calamities::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Downpours::tick);
 		// (0.7.31) floods drain before the world is saved
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> Calamities.clear(server.overworld()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> Storms.clear());
