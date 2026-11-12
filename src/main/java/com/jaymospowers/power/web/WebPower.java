@@ -324,6 +324,7 @@ public final class WebPower implements Power {
 		WebTricks.register();
 		WebWhip.register();
 		WebSlam.register();
+		WebBrute.register();
 		WebWallRun.register();
 		WebParkour.register();
 		WebStrain.register();
@@ -342,6 +343,7 @@ public final class WebPower implements Power {
 			WebTendrils.forget(handler.player);
 			WebWhip.forget(handler.player);
 			WebSlam.forget(handler.player);
+			WebBrute.forget(handler.player);
 			WebSymbioteCollect.forget(handler.player);
 		});
 		WebSymbiote.register();
@@ -370,6 +372,7 @@ public final class WebPower implements Power {
 		WebHanging.register();
 		WebPerch.register();
 		WebFear.register();
+		WebFury.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
@@ -593,6 +596,7 @@ public final class WebPower implements Power {
 		WebImpacts.tick(player);
 		WebWhip.tick(player);
 		WebSlam.tick(player);
+		WebBrute.tick(player);
 		WebMorph.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
 		WebPose pose = player.getAttached(POSE);

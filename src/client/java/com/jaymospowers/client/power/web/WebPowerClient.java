@@ -59,8 +59,12 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
-			if (com.jaymospowers.power.web.WebHeldGrab.holding(player)) {
-				// (0.16.7) something held up in the left hand: the click mauls it (one of six attacks), and nothing else
+			if (WebBrutePose.onAttack(player, clicks)) {
+				// a chunk or tree held overhead: the click throws it
+				return true;
+			}
+			if (com.jaymospowers.power.web.WebHeldGrab.holding(player) || com.jaymospowers.power.web.WebLatch.latched(player)) {
+				// something held up in the left hand: the click mauls it (or throws a friend carried over the shoulders); latched on a mount's back: it bites
 				if (clicks > 0) {
 					ClientPlayNetworking.send(new WebNet.HeldAttack());
 				}
@@ -276,6 +280,29 @@ public final class WebPowerClient implements PowerClient {
 			return;
 		}
 		int hand;
+		// sprinting G at something big: leap onto its back (latch, or ride and maul in the big suit); G while latched lets go
+		net.minecraft.world.entity.LivingEntity latchTarget = key == PowerKey.ABILITY_2 && down && player.isSprinting()
+			&& !com.jaymospowers.power.web.WebHeldGrab.holding(player) ? com.jaymospowers.power.web.WebLatch.aimed(player) : null;
+		// a sneaking friend close by, with Living Armor or the big suit on: G carries them over the shoulders
+		net.minecraft.world.entity.Entity friend = key == PowerKey.ABILITY_2 && down && latchTarget == null
+			&& !com.jaymospowers.power.web.WebHeldGrab.holding(player) && com.jaymospowers.power.web.WebSymbiote.livingArmor(player) ? grabTarget(player) : null;
+		if (friend != null && !com.jaymospowers.power.web.WebHeldGrab.canCarry(player, friend)) {
+			friend = null;
+		}
+		if (key == PowerKey.ABILITY_2 && !down && heldGrabKey) {
+			heldGrabKey = false;
+			return;
+		}
+		if (key == PowerKey.ABILITY_2 && down && com.jaymospowers.power.web.WebLatch.latched(player)) {
+			heldGrabKey = true;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize(-1));
+			return;
+		}
+		if (latchTarget != null || friend != null) {
+			heldGrabKey = true;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize((latchTarget != null ? latchTarget : friend).getId()));
+			return;
+		}
 		// only Living Armor's tendrils grab (or theirs while they hold you off a wall); the plain suit just swings (on black ropes)
 		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player);
 		if (key == PowerKey.ABILITY_1) {
@@ -284,6 +311,10 @@ public final class WebPowerClient implements PowerClient {
 			// G is the off-hand web (it needs an empty off hand)
 			hand = WebNet.OFF;
 		} else {
+			return;
+		}
+		// the big suit's rip and throw: G drops what is held, and its release is not a swing's
+		if (hand == WebNet.OFF && WebBrutePose.earlyKey(player, down)) {
 			return;
 		}
 		// (0.16.7) G with the tendrils out: the left hand takes something living close by, no bigger than a cow, or lets go
@@ -313,6 +344,10 @@ public final class WebPowerClient implements PowerClient {
 			if (target != null) {
 				grabbing[hand] = true;
 				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, target.getId()));
+				return;
+			}
+			if (hand == WebNet.OFF && WebBrutePose.startKey(player)) {
+				// the big suit's rip and throw, ground tear or tree lift
 				return;
 			}
 			if (player.isShiftKeyDown() && aimedBlock(player)) {
@@ -477,6 +512,7 @@ public final class WebPowerClient implements PowerClient {
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
+		WebFuryClient.renderHud(graphics, player);
 		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);

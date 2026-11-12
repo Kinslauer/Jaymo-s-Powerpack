@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  * like any chunk, each for its own while ({@link #DEBRIS_LINGER_MIN} to {@link #DEBRIS_LINGER_MAX} ticks, so some go
  * much sooner than others), then crumble away into rubble and are gone.
  */
-final class GravityShockwave {
+public final class GravityShockwave {
 	/** How far the bubble swells (blocks) and how fast. */
 	static final double RADIUS = 8.0;
 	static final int GROW_TICKS = 12;
@@ -195,6 +195,18 @@ final class GravityShockwave {
 		}
 	}
 
+	/**
+	 * One lump of the ground shoved up at ({@code x}, {@code z}) near height {@code y}, leaning toward {@code outAngle}
+	 * (radians, the direction it falls away in), for other moves that break the ground. True if there was ground there.
+	 */
+	public static boolean lump(ServerLevel level, double x, double y, double z, double outAngle) {
+		if (ground(level, x, y, z) == null) {
+			return false;
+		}
+		raise(level, new Vec3(x, y, z), new Spot(outAngle, 0.0, 0));
+		return true;
+	}
+
 	/** A lump of the ground at {@code spot}, leaning out from the middle, starting its rise. */
 	private static void raise(ServerLevel level, Vec3 center, Spot spot) {
 		double x = center.x + Math.cos(spot.angle()) * spot.radius(), z = center.z + Math.sin(spot.angle()) * spot.radius();
@@ -240,7 +252,7 @@ final class GravityShockwave {
 	}
 
 	/** The top of the ground at ({@code x}, {@code z}) near height {@code y}: a full block with room over it, or null. */
-	static @Nullable BlockPos ground(ServerLevel level, double x, double y, double z) {
+	public static @Nullable BlockPos ground(ServerLevel level, double x, double y, double z) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		int bx = Mth.floor(x), bz = Mth.floor(z), by = Mth.floor(y);
 		for (int dy = GROUND_UP; dy >= -GROUND_DOWN; dy--) {
