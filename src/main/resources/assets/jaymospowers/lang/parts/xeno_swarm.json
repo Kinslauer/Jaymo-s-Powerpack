@@ -1,0 +1,16 @@
+{
+	"message.jaymospowers.xenoform.fuse.shell": "Fuse seals itself in a shell!",
+	"message.jaymospowers.xenoform.fuse.not_full": "The stored hurt is not full yet.",
+	"message.jaymospowers.xenoform.fuse.nothing": "Nothing lit or burning to smother.",
+	"message.jaymospowers.xenoform.rivet.pulse": "Pulse: %s machines shut down, %s seized.",
+	"message.jaymospowers.xenoform.rivet.nothing_to_hack": "No iron door, lever, button or lamp near enough to hack.",
+	"message.jaymospowers.xenoform.hive.form.0": "Swarm: close in",
+	"message.jaymospowers.xenoform.hive.form.1": "Swarm: surround from afar",
+	"message.jaymospowers.xenoform.hive.form.2": "Swarm: strafe",
+	"message.jaymospowers.xenoform.hive.form.3": "Swarm: scout ahead",
+	"message.jaymospowers.xenoform.hive.shell_on": "The swarm closes round you as a shell.",
+	"message.jaymospowers.xenoform.hive.shell_off": "The swarm flies out again.",
+	"message.jaymospowers.xenoform.sea.no_water": "The sea only answers from under the water.",
+	"message.jaymospowers.xenoform.sea.no_shoal": "No sea creatures near enough to answer.",
+	"message.jaymospowers.xenoform.sea.no_target": "Nothing in reach for the tentacle to seize."
+}

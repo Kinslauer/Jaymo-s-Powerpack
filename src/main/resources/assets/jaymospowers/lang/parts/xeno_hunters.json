@@ -1,0 +1,8 @@
+{
+	"message.jaymospowers.xenoform.prowl.claws_out": "Claws out",
+	"message.jaymospowers.xenoform.prowl.claws_in": "Claws in",
+	"message.jaymospowers.xenoform.howl.scent_picked": "Following the scent of %s",
+	"message.jaymospowers.xenoform.howl.scent_dropped": "The scent is dropped",
+	"message.jaymospowers.xenoform.howl.no_scent": "Nothing to follow: look at a creature",
+	"message.jaymospowers.xenoform.talon.no_prey": "Nothing to dive on"
+}

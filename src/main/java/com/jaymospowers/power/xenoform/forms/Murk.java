@@ -54,6 +54,13 @@ public final class Murk extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.grips.clear();
 		live.gripTicks = live.lure = 0;
+		com.jaymospowers.power.xenoform.SeaCalls.clear(player);
+	}
+
+	/** Z (tap): a tentacle out of the sea seizes the creature you look at, lifts it and throws it where you look. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		return com.jaymospowers.power.xenoform.SeaCalls.tentacle(player, aimed(player, com.jaymospowers.power.xenoform.SeaCalls.TENTACLE_REACH, e -> true));
 	}
 
 	@Override
@@ -115,7 +122,10 @@ public final class Murk extends XenoForm {
 				}
 			}
 			case ABILITY_4 -> {
-				if (ready(player, live, B)) {
+				if (player.isShiftKeyDown()) {
+					// sneak + B: under water, call the shoal to fight for you
+					com.jaymospowers.power.xenoform.SeaCalls.shoal(player);
+				} else if (ready(player, live, B)) {
 					live.lure = LURE_TICKS;
 					sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.4F, 0.6F);
 					cooldown(player, live, B, LURE_COOLDOWN);
@@ -129,6 +139,7 @@ public final class Murk extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		com.jaymospowers.power.xenoform.SeaCalls.tick(player);
 		if (player.isInWater()) {
 			player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 10, 1, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 10, 0, false, false));

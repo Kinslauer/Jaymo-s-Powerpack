@@ -31,7 +31,10 @@ import net.minecraft.world.phys.Vec3;
  * bite.</li>
  * <li>V, Horn Charge: head down and run ({@link #HORN_TICKS} ticks), goring the first creature in the way. Run off a
  * ledge mid-charge and it turns into a slam: the landing hits everything round, harder the farther you fell.</li>
- * <li>B (hold), Roll Up: curl into the shell. Arrows and other shots glance off, nothing moves you, but you crawl.</li>
+ * <li>B (hold), Roll Up: curl into the shell. Arrows and other shots glance off, nothing moves you, but you crawl.
+ * Shots that come at the ball are batted away, fireballs back at who sent them. While rolled ({@link GorgerRoll}): V sets
+ * the ball bowling through a line of creatures, bouncing off walls with each rebound hitting harder; G is the rising
+ * strike, an uppercut spring that comes down as the slam.</li>
  * <li>C (ascended), Worldmaw: (0.21.37) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Worldmaw}.</li>
  * </ul>
  */
@@ -67,11 +70,12 @@ public final class Gorger extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.gorge = live.horn = 0;
 		live.hornSlam = live.rolled = false;
+		GorgerRoll.clear(player);
 	}
 
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
-		if (live.rolled && source.is(DamageTypeTags.IS_PROJECTILE)) {
+		if (live.rolled && (source.is(DamageTypeTags.IS_PROJECTILE) || source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile)) {
 			sound(player, SoundEvents.ARMADILLO_SCUTE_DROP, 1.0F, 1.4F);
 			return false;
 		}
@@ -88,6 +92,15 @@ public final class Gorger extends XenoForm {
 				if (down) {
 					cooldown(player, live, B, 1);
 				}
+			}
+			return;
+		}
+		if (down && live.rolled) {
+			// rolled up: V bowls the ball, G springs up (the rising strike)
+			if (key == PowerKey.ABILITY_3 && ready(player, live, V) && !GorgerRoll.bowling(player) && GorgerRoll.bowl(player)) {
+				cooldown(player, live, V, GorgerRoll.ROLL_COOLDOWN);
+			} else if (key == PowerKey.ABILITY_2 && ready(player, live, G) && GorgerRoll.rise(player)) {
+				cooldown(player, live, G, GorgerRoll.RISE_COOLDOWN);
 			}
 			return;
 		}
@@ -177,9 +190,14 @@ public final class Gorger extends XenoForm {
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		if (live.rolled) {
-			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, 3, false, false));
+			boolean bowling = GorgerRoll.tick(player, live);
 			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 5, 1, false, false));
-			player.setDeltaMovement(player.getDeltaMovement().multiply(0.0, 1.0, 0.0));
+			if (!bowling && !live.hornSlam) {
+				player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 5, 3, false, false));
+				player.setDeltaMovement(player.getDeltaMovement().multiply(0.0, 1.0, 0.0));
+			}
+		} else {
+			GorgerRoll.clear(player);
 		}
 		if (live.horn > 0) {
 			horn(player, live, level);

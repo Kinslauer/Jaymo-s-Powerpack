@@ -60,6 +60,15 @@ public final class Gnasher extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.latched = -1;
 		live.latchTicks = live.rush = live.frenzy = live.rolls = 0;
+		com.jaymospowers.power.xenoform.TailSweep.forget(player);
+		com.jaymospowers.power.xenoform.SeaCalls.clear(player);
+	}
+
+	/** Z (tap): the tail sweep. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		com.jaymospowers.power.xenoform.TailSweep.sweep(player, color);
+		return true;
 	}
 
 	@Override
@@ -101,7 +110,10 @@ public final class Gnasher extends XenoForm {
 				}
 			}
 			case ABILITY_3 -> {
-				if (ready(player, live, V)) {
+				if (player.isShiftKeyDown()) {
+					// sneak + V: a whirlpool where you look drags things in
+					com.jaymospowers.power.xenoform.SeaCalls.whirlpool(player, aimed(player, com.jaymospowers.power.xenoform.SeaCalls.WHIRL_REACH, e -> true));
+				} else if (ready(player, live, V)) {
 					live.frenzy = FRENZY_TICKS;
 					sound(player, SoundEvents.DOLPHIN_PLAY, 1.2F, 0.5F);
 					cooldown(player, live, V, FRENZY_COOLDOWN);
@@ -128,6 +140,8 @@ public final class Gnasher extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		com.jaymospowers.power.xenoform.SeaCalls.tick(player);
+		com.jaymospowers.power.xenoform.SeaCalls.answerDrowned(player);
 		if (player.isInWater()) {
 			player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 10, 1, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 10, 0, false, false));

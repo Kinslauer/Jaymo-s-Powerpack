@@ -1,0 +1,7 @@
+{
+	"values": [
+		"minecraft:iron_golem",
+		"minecraft:copper_golem",
+		{ "id": "jaymoskingdoms:clockwork_golem", "required": false }
+	]
+}

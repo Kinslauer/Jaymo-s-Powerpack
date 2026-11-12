@@ -168,6 +168,7 @@ public final class Rivet extends XenoForm {
 
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
+		RivetPulse.clear(player);
 		live.rolls = 0;
 		setShell(player, live, null);
 		if (player.getVehicle() != null && driven(player) != null) {
@@ -821,6 +822,13 @@ public final class Rivet extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		shellTick(player, live, 1.0F);
+		RivetPulse.tick(player);
+	}
+
+	/** Z (tap): the pulse that shuts machines down and seizes the living; sneaking, the hack. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		return RivetPulse.tap(player);
 	}
 
 	/** (0.21.37) The every-tick work (Brace, Rebound, Drop, Climb, the spray, Chord, driving a machine), the Drop's slam {@code power} times as strong. */

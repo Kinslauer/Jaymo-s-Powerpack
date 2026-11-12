@@ -5,6 +5,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
+import com.jaymospowers.power.xenoform.minds.WispHand;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -40,6 +41,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>Sneak + B, Ghost Ray: let go for a pale bolt along your aim; hold up to {@link #RAY_CHARGE} ticks first and it is
  * wider, longer and hits harder. Not while phased.</li>
  * <li>B (hold), Float: (0.20.23) float upright where you steer, Jump rising and sneaking sinking; let go and you drop.</li>
+ * <li>V while Phase is held, Ghost Hand ({@link WispHand}): phase one hand, and your next blow passes into the chest (ignores armour,
+ * hits harder, a cold shudder).</li>
+ * <li>Z (a tap), Thin Out: for a few seconds you take half the damage, and when struck you sink through the floor and rise behind
+ * the attacker.</li>
  * <li>C (ascended), Revenant: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Revenant}.</li>
  * </ul>
  */
@@ -90,6 +95,14 @@ public final class Wisp extends XenoForm {
 		live.rayDown = -1L;
 		live.glide = false;
 		live.wail = 0;
+		WispHand.forget(player);
+	}
+
+	/** Z tapped: thin out. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		WispHand.toggleThin(player);
+		return true;
 	}
 
 	@Override
@@ -136,7 +149,9 @@ public final class Wisp extends XenoForm {
 				}
 			}
 			case ABILITY_3 -> {
-				if (ready(player, live, V)) {
+				if (live.phase) {
+					WispHand.arm(player);
+				} else if (ready(player, live, V)) {
 					wail(player, live);
 					cooldown(player, live, V, WAIL_COOLDOWN);
 				}
@@ -149,6 +164,7 @@ public final class Wisp extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		WispHand.tick(player);
 		// (on the ground it walks as usual until Jump lifts it off)
 		if (live.phase) {
 			live.phaseTicks++;

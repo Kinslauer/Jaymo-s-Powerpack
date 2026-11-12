@@ -6,6 +6,7 @@ import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoForms;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
+import com.jaymospowers.power.xenoform.forms.BulwarkFury;
 import java.util.Locale;
 import java.util.Map;
 import net.minecraft.client.DeltaTracker;
@@ -125,6 +126,13 @@ final class XenoformHud {
 				under(graphics, hud, form, at[0], at[1] - 2, chipsWidth(chips));
 			}
 			timer(graphics, font, hud, ult != null ? ult : form, at[0], at[1] - 14, time, chipsWidth(chips));
+			if (form == XenoForms.BULWARK) {
+				furyBar(graphics, player, at[0], at[1] - 22, chipsWidth(chips), time);
+			}
+			if (form == XenoForms.FUSE) {
+				storeBar(graphics, player, at[0], at[1] - 22, chipsWidth(chips), time);
+			}
+			XenoMindsHud.draw(graphics, font, player, form, at[0], at[1] - 24, chipsWidth(chips), time);
 			return;
 		}
 		int[] at = chipsOrigin(width, height, 2);
@@ -258,6 +266,26 @@ final class XenoformHud {
 		int dim = (form.color >> 16 & 0xFF) * 3 / 4 << 16 | (form.color >> 8 & 0xFF) * 3 / 4 << 8 | (form.color & 0xFF) * 3 / 4;
 		graphics.fill(x, y, x + width, y + 2, 0x90000000);
 		graphics.fill(x, y, x + Mth.ceil(width * share), y + 2, 0xFF000000 | dim);
+	}
+
+	/** Bulwark's fury: a thin bar over the timer, pulsing when it is full. */
+	private static void furyBar(GuiGraphicsExtractor graphics, LocalPlayer player, int x, int y, int width, float time) {
+		int fury = BulwarkFury.fury(player);
+		boolean full = fury >= BulwarkFury.MAX;
+		int color = full ? pulse(BulwarkFury.COLOR, 0xFFD070, time * 0.5F) : BulwarkFury.COLOR;
+		graphics.fill(x - 1, y - 1, x + width + 1, y + 4, 0xB0000000);
+		graphics.fill(x, y, x + width, y + 3, 0x90303030);
+		graphics.fill(x, y, x + Mth.ceil(width * Mth.clamp(fury / (float)BulwarkFury.MAX, 0.0F, 1.0F)), y + 3, 0xFF000000 | color);
+	}
+
+	/** Fuse's stored hurt: a thin bar over the timer, pulsing when it is full (sneak + B lets it go). */
+	private static void storeBar(GuiGraphicsExtractor graphics, LocalPlayer player, int x, int y, int width, float time) {
+		int stored = com.jaymospowers.power.xenoform.forms.FuseStore.stored(player);
+		boolean full = stored >= com.jaymospowers.power.xenoform.forms.FuseStore.MAX;
+		int color = full ? pulse(com.jaymospowers.power.xenoform.forms.FuseStore.COLOR, 0xFFF0A0, time * 0.5F) : com.jaymospowers.power.xenoform.forms.FuseStore.COLOR;
+		graphics.fill(x - 1, y - 1, x + width + 1, y + 4, 0xB0000000);
+		graphics.fill(x, y, x + width, y + 3, 0x90303030);
+		graphics.fill(x, y, x + Mth.ceil(width * Mth.clamp(stored / (float)com.jaymospowers.power.xenoform.forms.FuseStore.MAX, 0.0F, 1.0F)), y + 3, 0xFF000000 | color);
 	}
 
 	/** The form's clock: a bar in its colour, red and pulsing through the beeps, and the seconds. */

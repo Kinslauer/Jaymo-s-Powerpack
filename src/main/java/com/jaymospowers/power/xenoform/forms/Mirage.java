@@ -5,6 +5,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoDouble;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.minds.MirageFace;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +31,8 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Blind: the creature you aim at is blinded and loses you.</li>
  * <li>V, Unseen: for {@link #UNSEEN_TICKS} ticks you can't be seen, and whatever was after you loses you.</li>
  * <li>B, Swap: you trade places with your copy farthest off (nearest, sneaking).</li>
+ * <li>Sneak + V, Wear a Face ({@link MirageFace}): take the look of the creature or player you aim at (again, or at nothing, to
+ * put yours back). Mobs of that kind leave you be until you strike; a blow, or a hard hit on you, drops it.</li>
  * </ul>
  */
 public final class Mirage extends XenoForm {
@@ -54,6 +57,20 @@ public final class Mirage extends XenoForm {
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		vanish(player.level(), live);
+		MirageFace.forget(player);
+	}
+
+	/** The face drops the moment you strike. */
+	@Override
+	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+		MirageFace.drop(player, true);
+	}
+
+	/** A hard blow on you drops the face. */
+	@Override
+	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		MirageFace.struck(player, amount);
+		return true;
 	}
 
 	/** Every copy gone. */
@@ -109,7 +126,9 @@ public final class Mirage extends XenoForm {
 				cooldown(player, live, G, BLIND_COOLDOWN);
 			}
 			case ABILITY_3 -> {
-				if (ready(player, live, V)) {
+				if (player.isShiftKeyDown()) {
+					MirageFace.toggle(player);
+				} else if (ready(player, live, V)) {
 					player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, UNSEEN_TICKS, 0, false, false));
 					for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(UNSEEN_RANGE), m -> m.getTarget() == player)) {
 						mob.setTarget(null);
@@ -191,6 +210,7 @@ public final class Mirage extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		MirageFace.tick(player);
 		if (player.tickCount % 8 == 0) {
 			player.level().sendParticles(MagicFx.HEX, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.3, 0.5, 0.3, 0.0);
 		}

@@ -926,6 +926,11 @@ public final class ZFighterPower implements Power {
 		if (down && !player.isShiftKeyDown()) {
 			ZFighterFusion.tappedZ(player);
 		}
+		if (down && player.isShiftKeyDown() && !live(player).flying && !player.onGround() && ZFighterLineage.tailOut(player) && !ZFighterLineage.ape(player)) {
+			// in the air, tail out: the tail sweep (on the ground the same press wraps the tail)
+			com.jaymospowers.power.xenoform.TailSweep.sweep(player, kiColor(player));
+			return;
+		}
 		if (down && player.isShiftKeyDown() && !live(player).flying) {
 			ZFighterLineage.toggleTail(player);
 			// (0.17.56) a Verdant's merging

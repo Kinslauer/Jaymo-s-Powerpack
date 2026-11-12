@@ -4,6 +4,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
+import com.jaymospowers.power.xenoform.minds.OozeStretch;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -44,6 +45,9 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Spit: what you swallowed is spat out where you look; with nothing inside, a glob of slime that slows.</li>
  * <li>V, Squeeze: you thin right down, small enough for a one-block gap; V again (with room) to fill out.</li>
  * <li>B, Split: two blobs drop off you at once.</li>
+ * <li>Elastic limbs ({@link OozeStretch}): sneak + G lashes a long arm round in a wide arc; sneak + R wraps the nearest creature,
+ * squeezes it and drags it where you turn (again to let go); sneak + B swells both hands for a heavy slam. A shot that hits the
+ * jelly bounces back.</li>
  * </ul>
  */
 public final class Ooze extends XenoForm {
@@ -83,6 +87,7 @@ public final class Ooze extends XenoForm {
 
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
+		OozeStretch.forget(player);
 		spit(player, live, Vec3.ZERO);
 		squeeze(player, false);
 		live.squeeze = false;
@@ -106,6 +111,10 @@ public final class Ooze extends XenoForm {
 		ServerLevel level = player.level();
 		switch (key) {
 			case ABILITY_1 -> {
+				if (player.isShiftKeyDown()) {
+					OozeStretch.wrap(player, this.color);
+					return;
+				}
 				if (live.latched >= 0 || !ready(player, live, R)) {
 					return;
 				}
@@ -120,6 +129,10 @@ public final class Ooze extends XenoForm {
 				cooldown(player, live, R, ENGULF_COOLDOWN);
 			}
 			case ABILITY_2 -> {
+				if (player.isShiftKeyDown() && live.latched < 0) {
+					OozeStretch.lash(player, this.color);
+					return;
+				}
 				if (!ready(player, live, G)) {
 					return;
 				}
@@ -155,6 +168,10 @@ public final class Ooze extends XenoForm {
 				cooldown(player, live, V, SQUEEZE_COOLDOWN);
 			}
 			case ABILITY_4 -> {
+				if (player.isShiftKeyDown()) {
+					OozeStretch.mallet(player, this.color);
+					return;
+				}
 				if (ready(player, live, B) && live.minions.size() < SPLIT_MAX) {
 					this.blob(player, live, level);
 					this.blob(player, live, level);
@@ -250,6 +267,7 @@ public final class Ooze extends XenoForm {
 		} else if (wanted < live.splits) {
 			live.splits = wanted;
 		}
+		OozeStretch.tick(player, this.color);
 		if (live.latched >= 0) {
 			this.engulfed(player, live, level);
 		}

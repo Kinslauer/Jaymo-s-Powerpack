@@ -71,6 +71,15 @@ public final class Slipfin extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.dry = 0;
 		live.horn = 0;
+		com.jaymospowers.power.xenoform.TailSweep.forget(player);
+		com.jaymospowers.power.xenoform.SeaCalls.clear(player);
+	}
+
+	/** Z (tap): the tail sweep. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		com.jaymospowers.power.xenoform.TailSweep.sweep(player, color);
+		return true;
 	}
 
 	@Override
@@ -86,13 +95,19 @@ public final class Slipfin extends XenoForm {
 		ServerLevel level = player.level();
 		switch (key) {
 			case ABILITY_1 -> {
-				if (ready(player, live, R)) {
+				if (player.isShiftKeyDown()) {
+					// sneak + R: a dome of water that stops projectiles
+					com.jaymospowers.power.xenoform.SeaCalls.dome(player);
+				} else if (ready(player, live, R)) {
 					jet(player, level);
 					cooldown(player, live, R, JET_COOLDOWN);
 				}
 			}
 			case ABILITY_2 -> {
-				if (ready(player, live, G)) {
+				if (player.isShiftKeyDown()) {
+					// sneak + G: under water, call the shoal to fight for you
+					com.jaymospowers.power.xenoform.SeaCalls.shoal(player);
+				} else if (ready(player, live, G)) {
 					free(player);
 					player.addEffect(new MobEffectInstance(MobEffects.SPEED, SLIP_SPEED_TICKS, 1, false, true));
 					burst(level, ParticleTypes.SPLASH, player.position().add(0.0, 0.6, 0.0), 30, 0.4, 0.1);
@@ -170,6 +185,7 @@ public final class Slipfin extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		com.jaymospowers.power.xenoform.SeaCalls.tick(player);
 		// slick: whatever grabs it can't keep hold
 		if (player.tickCount % 5 == 0 && (com.jaymospowers.core.Carry.isCarried(player) || player.getAttached(com.jaymospowers.core.wounds.Tripped.TRIP) != null)) {
 			free(player);
