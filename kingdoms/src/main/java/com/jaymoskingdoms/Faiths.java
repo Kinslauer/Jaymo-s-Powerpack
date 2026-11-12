@@ -136,8 +136,12 @@ public final class Faiths {
 		if (!holds(e)) {
 			return null;
 		}
-		Patron stored = Patron.byKey(e.getAttached(FAITH));
 		boolean server = !e.level().isClientSide();
+		if (server && unseeing(e)) {
+			// Andy (2026-11-11): the Unseeing's belief is "the faith barbarians follow": none of the eight
+			return null;
+		}
+		Patron stored = Patron.byKey(e.getAttached(FAITH));
 		if (server && Accusations.priest(e) && stored != Patron.TRUTH) {
 			e.setAttached(FAITH, Patron.TRUTH.key);
 			return Patron.TRUTH;
@@ -147,6 +151,20 @@ public final class Faiths {
 			e.setAttached(FAITH, stored.key);
 		}
 		return stored;
+	}
+
+	/**
+	 * A barbarian camp's own (its raiders, chief, casters and workers; not the illager, goblin, orc or pirate camps): they
+	 * keep the Unseeing's belief (Andy, 2026-11-11: "these can be the faith barbarians follow"), so they hold no patron.
+	 * The Unseeing themselves, the cult's shunned and blinded, are Powers' ({@code power/blindness/Unseeing}).
+	 */
+	static boolean unseeing(Entity e) {
+		MinecraftServer server = e.level().getServer();
+		if (server == null || !(e instanceof Worker w) || !(e instanceof Folk folk ? Barbarians.isBarbarian(folk) : Barbarians.isCampVillager(e))) {
+			return false;
+		}
+		Faction f = Factions.get(server, w.factionId());
+		return f != null && f.type() == FactionType.BARBARIAN && Camps.BARBARIAN.equals(Camps.kind(server, f.id()));
 	}
 
 	private static Patron draw(LivingEntity who) {
