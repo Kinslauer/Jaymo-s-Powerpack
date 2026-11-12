@@ -3253,3 +3253,21 @@ Nothing here has been played in a client yet; expect tuning.
   `tools/gen_crutches.py`. Transformed Xenoforms and creative players are not held down.
 - Compiled; not played. The third-person hold (the stick hanging from the fist to the ground) is set by eye from the
   numbers and may need its angle tuned.
+
+## 0.22.65 (2026-11-12): downed enemies take executions lying down
+
+- Andy: "downed enemies should react to the executions, i just watched jung wild slam a few zombies and they popped up after, instead of being beaten into the ground".
+- **No more popping up**: a downed mob only looks laid out; to the game it still stands, so Jaymo's Kitchen started its corpse upright and let it topple. Anyone who dies downed (a finisher, a symbiote execution, a mob's execution, a takedown, bleeding out, the third hit) now hands the corpse how it lay (`DownedLie.markBody`, called from `Downed.finish`): crawlers face down, the rest on their backs or side, head the same way. Same for one tripped by a bolas and finished there.
+- **Reactions while it plays** (`ExecutionReact`, drawn through `DownedPose`): the body braces before and between blows (arms over the face, or over the back of the head face down), each crushing blow (Wild Slam, Skull Crusher, rock, flail, staff, ki, the symbiote's stomps and pounds) drives it into the ground and it bounces off, limbs flung up; a blade or spear pins it rigid and quivering; a cut or shot jerks it once; the neck snap, garrotte and the symbiote's chokes, bites and tearing are fought, hands at the grip and heels kicking. Animals, bugs and birds get the drop and bounce and kick with their own legs. No sit-ups while being finished.
+- Needs Jaymo's Kitchen's matching change for the corpse to start lying (older Kitchen: reactions only).
+- Built; not played.
+
+## 0.22.66 (2026-11-12): prone haul up a block is a held struggle
+
+- Andy: "the one block climb while prone should be activated by holding right click and animating a struggle up the block, longer and differently animated if you only have one hand. if you let go or are interuppted during the struggle then you ragdoll. there is a third faster animation if you are perfectly healthy."
+- **Hold Use to haul up**: lying on your belly against a rise about a block high (0.55 to 1.1) with room to lie on top, hold right click. Your hands reach up onto the top, you drag yourself up the face with your legs scrabbling, a knee comes over the edge and you slide in on your belly on top. Crawling into a block no longer steps you up it by itself (the step is vanilla's again).
+- **Three ways up** (`ProneHaul.style`): perfectly healthy (full health, nothing broken or lost, not downed) is quick and clean, 0.8 s with a strong knee onto the edge; the usual is a hard 1.6 s pull with the arms shaking; with only one working arm (the other broken or gone) it's a 2.8 s one-armed heave, rolled onto the good side with the dead arm hanging, that slips back part way and has to heave again. No working arm, no haul. Downed, each takes half as long again.
+- **Let go or get hit and you fall**: release right click part way, or take damage, and the grip goes: you ragdoll back off the face (Kitchen's limp body when it's there).
+- While you're lying against a rise you could go up, right click is the haul's (no item used or block worked), unless the crosshair is on a mob or something a click is for (a door, a chest...). Downed players can haul too.
+- Code: `core/ProneHaul` (rules, path, server), `client/ProneHaulClient` (input and movement), `client/ProneHaulPose` (drawn over `CrawlPose`), `ProneHaulUseMixin`; the old automatic haul step in `Crawl` is gone. `Breaks.workingArms` added.
+- Built; not played.

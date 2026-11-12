@@ -212,6 +212,30 @@ public final class Corpses {
 	 */
 	public static final String PINNED_TAG = "jaymoskitchen.pinned.";
 
+	/**
+	 * Prefix of the tag another mod puts on a body that dies already lying on the ground (Jaymo's Powers: someone downed
+	 * and finished where they lay), followed by {@code u} or {@code d} (face up or down), a dot, and the way its head
+	 * points in whole degrees: its corpse starts lying just so ({@link #deathBody}) instead of standing and toppling.
+	 */
+	public static final String LYING_TAG = "jaymoskitchen.lying.";
+
+	/** The body {@code mob}'s {@link #LYING_TAG} asks for (the tag used up), or null if it carries none or it can't be read. */
+	private static @org.jspecify.annotations.Nullable RagdollBody lyingFrom(LivingEntity mob, RagdollRig rig) {
+		for (String tag : java.util.List.copyOf(mob.entityTags())) {
+			if (tag.startsWith(LYING_TAG)) {
+				mob.removeTag(tag);
+				String rest = tag.substring(LYING_TAG.length());
+				try {
+					float yaw = Float.parseFloat(rest.substring(2));
+					return RagdollBody.lying(rig, mob.getX(), mob.getY(), mob.getZ(), yaw, rest.charAt(0) == 'u', mob.getRandom().nextLong());
+				} catch (RuntimeException ignored) {
+					return null;
+				}
+			}
+		}
+		return null;
+	}
+
 	/** (0.5.23) Pins {@code corpse} as {@code body}'s {@link #PINNED_TAG} says, if it carries one (which is then used up). */
 	static void pinFrom(LivingEntity body, CorpseEntity corpse) {
 		for (String tag : java.util.List.copyOf(body.entityTags())) {
@@ -332,7 +356,8 @@ public final class Corpses {
 
 	/**
 	 * (0.5.1) The ragdoll a dying mob (or player) starts as: standing as it stood, moving as it was moving, then toppled
-	 * with a push at the head along its death knockback (any way if it had none). One lying or swimming starts lying.
+	 * with a push at the head along its death knockback (any way if it had none). One lying or swimming starts lying, and so
+	 * does one marked as lying where it died ({@link #LYING_TAG}).
 	 */
 	public static RagdollBody deathBody(LivingEntity mob) {
 		net.minecraft.world.entity.EntityDimensions size = mob.getDimensions(Pose.STANDING);
@@ -341,8 +366,11 @@ public final class Corpses {
 		Pose pose = mob.getPose();
 		boolean down = pose == Pose.SWIMMING || pose == Pose.SLEEPING || pose == Pose.FALL_FLYING;
 		Vec3 v = mob.getDeltaMovement();
-		RagdollBody body;
-		if (down) {
+		// Andy: downed enemies "popped up after, instead of being beaten into the ground": one that died lying stays lying
+		RagdollBody body = lyingFrom(mob, rig);
+		if (body != null) {
+			down = true;
+		} else if (down) {
 			body = RagdollBody.lying(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, random.nextBoolean(), random.nextLong());
 		} else {
 			body = RagdollBody.standing(rig, mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot);
