@@ -55,6 +55,16 @@ public final class Dismembered {
 	/** The walk's stride, as vanilla's humanoid model swings its legs. */
 	private static final float GAIT_STRIDE = 0.6662F;
 	public static final RenderStateDataKey<Integer> ONLY = RenderStateDataKey.create(() -> "jaymospowers:only_part");
+	/**
+	 * On a living body's render state: the lost arms and legs drawn as stumps (no prosthetic on them). Andy's Cruor pick:
+	 * a humanoid's lost limb leaves a short stump at the shoulder or hip, its end drawn raw while it bleeds and capped
+	 * once it has closed ({@code WoundMarksLayer}); the unarmed start's long-healed stump is capped from the start.
+	 */
+	public static final RenderStateDataKey<Integer> STUBS = RenderStateDataKey.create(() -> "jaymospowers:stumps");
+	/** How long a stump is, as a share of the limb. */
+	public static final float STUB = 0.28F;
+	private static final List<ModelPart> STUBBED = new ArrayList<>();
+	private static final List<Float> STUBBED_SCALE = new ArrayList<>();
 
 	private static final Map<ModelPart, Function<String, ModelPart>> LOOKUPS = new WeakHashMap<>();
 	private static final List<ModelPart> HIDDEN = new ArrayList<>();
@@ -89,6 +99,8 @@ public final class Dismembered {
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int mask = Dismember.missing(entity);
 		state.setData(MISSING, mask == 0 ? null : mask);
+		int stubs = mask & ~Dismember.HEAD & ~com.jaymospowers.core.Prosthetics.fitted(entity);
+		state.setData(STUBS, stubs == 0 ? null : stubs);
 		// (0.14.2) Wounds' broken arms and legs (synced to everyone)
 		int broken = Wounds.brokenLimbs(entity);
 		state.setData(BROKEN, broken == 0 ? null : broken);
@@ -154,10 +166,16 @@ public final class Dismembered {
 		if (missing == null || com.jaymospowers.client.wounds.ProstheticLayer.owns(model)) {
 			return;
 		}
+		Integer stubs = model instanceof HumanoidModel<?> ? renderState.getData(STUBS) : null;
 		for (int part : Dismember.PARTS) {
 			if ((missing & part) != 0) {
+				boolean stub = stubs != null && (stubs & part) != 0;
 				for (String name : names(part)) {
-					hidePart(find(root, name));
+					if (stub) {
+						stubPart(find(root, name));
+					} else {
+						hidePart(find(root, name));
+					}
 				}
 			}
 		}
@@ -234,8 +252,24 @@ public final class Dismembered {
 		}
 	}
 
+	/** Shortens {@code part} to a stump (about its pivot: the shoulder or the hip) until the model's drawn ({@link #restore}). */
+	static void stubPart(@Nullable ModelPart part) {
+		if (part != null && part.visible) {
+			STUBBED.add(part);
+			STUBBED_SCALE.add(part.yScale);
+			part.yScale *= STUB;
+		}
+	}
+
 	/** Once the model's drawn: everything hidden for it shown again. */
 	public static void restore() {
+		if (!STUBBED.isEmpty()) {
+			for (int i = 0; i < STUBBED.size(); i++) {
+				STUBBED.get(i).yScale = STUBBED_SCALE.get(i);
+			}
+			STUBBED.clear();
+			STUBBED_SCALE.clear();
+		}
 		if (!HIDDEN.isEmpty()) {
 			for (ModelPart part : HIDDEN) {
 				part.visible = true;
