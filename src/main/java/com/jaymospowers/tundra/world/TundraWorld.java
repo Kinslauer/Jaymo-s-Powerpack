@@ -55,6 +55,20 @@ public final class TundraWorld {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("dwarfed_spruce"), TundraFeatures.DwarfSpruce.CODEC);
 	}
 
+	private static boolean placed;
+
+	/**
+	 * From here on the Overworld's biome list holds the two tundra biomes ({@link #placing}). Called from the server and
+	 * client entrypoints, which run after every mod's main entrypoint, never from {@link #init}: once the list asks for
+	 * them, every registry bootstrap must have them, and TaCZ builds {@code VanillaRegistries.createWorldLookup()} in
+	 * its main entrypoint, where only vanilla's biomes exist ("No value registered for key jaymospowers:tundra", the
+	 * game crashed on start). A world's own registries are loaded later, from the data files, so the biomes still
+	 * generate. The same as the demon realm's Nether biomes ({@code ZFighterDemonRealm.addBiomes}).
+	 */
+	public static void place() {
+		placed = true;
+	}
+
 	/** A tundra block by its path, or {@code fallback} while that block isn't registered. */
 	static Block block(String path, Block fallback) {
 		Block found = BuiltInRegistries.BLOCK.getValue(JaymosPowers.id(path));
@@ -65,8 +79,12 @@ public final class TundraWorld {
 	 * Wraps the Overworld biome list as it is built: each Snowy Plains cell in the dry end of the frozen row is handed
 	 * out again as tundra (the cold, dry core), lichen woodland (its warmer rim, and a band on its humid side) and what
 	 * is left of Snowy Plains. So the tundra is wrapped in woodland wherever it would have met Snowy Plains or Plains.
+	 * Until {@link #place} the list is left as vanilla's.
 	 */
 	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> placing(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out) {
+		if (!placed) {
+			return out;
+		}
 		return pair -> {
 			Climate.ParameterPoint at = pair.getFirst();
 			Climate.Parameter hum = at.humidity(), temp = at.temperature();

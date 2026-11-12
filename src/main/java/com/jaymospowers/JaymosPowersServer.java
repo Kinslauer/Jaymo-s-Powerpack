@@ -8,5 +8,8 @@ public final class JaymosPowersServer implements DedicatedServerModInitializer {
 	public void onInitializeServer() {
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
+		// (and the tundra's place in the Overworld, for the same reason)
+		com.jaymospowers.tundra.world.TundraWorld.place();
+		com.jaymospowers.frost.IceCaves.place();
 	}
 }
