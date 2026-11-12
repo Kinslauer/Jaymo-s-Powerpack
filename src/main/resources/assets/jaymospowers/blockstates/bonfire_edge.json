@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "lit=false,part=north": {
+      "model": "jaymospowers:block/ground/bonfire_north"
+    },
+    "lit=true,part=north": {
+      "model": "jaymospowers:block/ground/bonfire_north"
+    },
+    "lit=false,part=south": {
+      "model": "jaymospowers:block/ground/bonfire_south"
+    },
+    "lit=true,part=south": {
+      "model": "jaymospowers:block/ground/bonfire_south"
+    },
+    "lit=false,part=west": {
+      "model": "jaymospowers:block/ground/bonfire_west"
+    },
+    "lit=true,part=west": {
+      "model": "jaymospowers:block/ground/bonfire_west"
+    },
+    "lit=false,part=east": {
+      "model": "jaymospowers:block/ground/bonfire_east"
+    },
+    "lit=true,part=east": {
+      "model": "jaymospowers:block/ground/bonfire_east"
+    },
+    "lit=false,part=north_west": {
+      "model": "jaymospowers:block/ground/bonfire_north_west"
+    },
+    "lit=true,part=north_west": {
+      "model": "jaymospowers:block/ground/bonfire_north_west"
+    },
+    "lit=false,part=north_east": {
+      "model": "jaymospowers:block/ground/bonfire_north_east"
+    },
+    "lit=true,part=north_east": {
+      "model": "jaymospowers:block/ground/bonfire_north_east"
+    },
+    "lit=false,part=south_west": {
+      "model": "jaymospowers:block/ground/bonfire_south_west"
+    },
+    "lit=true,part=south_west": {
+      "model": "jaymospowers:block/ground/bonfire_south_west"
+    },
+    "lit=false,part=south_east": {
+      "model": "jaymospowers:block/ground/bonfire_south_east"
+    },
+    "lit=true,part=south_east": {
+      "model": "jaymospowers:block/ground/bonfire_south_east"
+    }
+  }
+}
