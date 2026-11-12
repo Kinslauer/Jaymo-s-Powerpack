@@ -1,12 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jaymoskingdoms:item/truth_draught",
-    "tints": [
-      {
-        "type": "minecraft:constant",
-        "value": 10149096
-      }
-    ]
+    "model": "jaymoskingdoms:item/truth_draught"
   }
 }

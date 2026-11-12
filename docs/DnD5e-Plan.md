@@ -91,7 +91,7 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **B7 poisons** (`Poisons`, `PoisonItems`, `GasBottle`): five vials, coat/dose/smear/gas; sleep 20 s, stiffening
   holds 8 s, truth 3 min (`Poisons.truthful`, tag `jaymoskingdoms_truthful`, for G2), midnight kills at the next
   midnight. Cleric sells the antidote (no herbalist profession exists). New trades reach villagers who level after
-  this. Stand-in art: tinted potions.
+  this. Our own small vial icons (one bottle shape and colour each).
 - **C4 surprise** (`Surprise`): 14-tick freeze both ways; `Surprise.addImmunity` for Alert (K10).
 - **C5 sneak attack** (`ThiefSneak`): x1.5 + 2, once a second.
 - **C6 reckless** (`RecklessBlows`): 35% glance at x0.4, else x1.75; open 2 s.

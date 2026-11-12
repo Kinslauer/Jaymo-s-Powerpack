@@ -1,12 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jaymoskingdoms:item/sleep_draught",
-    "tints": [
-      {
-        "type": "minecraft:constant",
-        "value": 9075400
-      }
-    ]
+    "model": "jaymoskingdoms:item/sleep_draught"
   }
 }
