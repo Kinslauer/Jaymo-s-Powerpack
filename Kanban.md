@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 01:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 01:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,8 +18,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · in-review
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · ☁️ Cloud · #1326 · in-review
-- [ ] [[Inbox/blindness-devout-path|blindness-devout-path]] · ☁️ Cloud · #1328 · in-review
-- [ ] [[Agents/claude-cloud-blindness-devout-path|claude-cloud-blindness-devout-path]] · 💻 Odysseus · #1328 · in-review
 
 
 ## Needs Andy
@@ -30,6 +28,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/blindness-devout-path|blindness-devout-path]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 - [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
@@ -37,7 +36,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/future-three-sided-war|future-three-sided-war]]
 - [x] [[Inbox/Done/elemental-ki-limits|elemental-ki-limits]]
 - [x] [[Inbox/Done/costumed-and-everyday-power-users|costumed-and-everyday-power-users]]
-- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
 
 
 %% kanban:settings
