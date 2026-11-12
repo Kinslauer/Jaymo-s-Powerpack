@@ -7,6 +7,7 @@
 		"ChronoCameraMixin",
 		"ChronoLivingEntityRendererMixin",
 		"ChronoModelFeatureRendererMixin",
+		"ChronoScrollMixin",
 		"ChronoStunInputMixin",
 		"FutureHuskRendererMixin",
 		"FutureZombieRendererMixin"

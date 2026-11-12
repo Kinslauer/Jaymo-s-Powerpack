@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_right_open",
+  "textures": {
+    "bottom": "jaymospowers:block/eden/brain_tree_door_bottom",
+    "top": "jaymospowers:block/eden/brain_tree_door_top"
+  }
+}

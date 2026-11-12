@@ -5,7 +5,7 @@
 	"power.jaymospowers.chrono.key.ability_1.name": "Rewind",
 	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too) and reset all your other cooldowns",
 	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",
-	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water and lava; V again at a wall to phase through it. Hold Shift to walk at normal speed. All four abilities unlocked: a toggle, on until V again (away from a wall)",
+	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water and lava; hold V at a wall to phase through it. Scroll while sprinting to shift five gears. Hold Shift to walk at normal speed. All four abilities unlocked: a toggle, on until V again (away from a wall)",
 	"power.jaymospowers.chrono.key.ability_3.name": "Overclock",
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds and those of every creature near you). Sneak+B, once you've killed your echo for good: Fast Forward, a leap to the ruined future (and back) with everyone near you",
 	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",
@@ -158,5 +158,12 @@
 	"talk.jaymospowers.omen.piece.5.1": "The little drones are Worky. They map the streets, find a way through if there is one, and tell you when there isn't. Be nice to them. They're the only ones left who still ask if you're okay.",
 	"talk.jaymospowers.omen.piece.5.2": "Worky doesn't sleep and doesn't leave. It'll hover over your shoulder and show you the clear way. Most days it's the best company I've got.",
 	"message.jaymospowers.chrono_time_stop_cooldown": "Time won't stop again for %s s.",
-	"message.jaymospowers.chrono_time_stop_taken": "Time already stands still."
+	"message.jaymospowers.chrono_time_stop_taken": "Time already stands still.",
+	"key.jaymospowers.speed_slow": "Speedster: slow time (hold)",
+	"key.jaymospowers.speed_mark": "Speedster: mark (Sneak) / run to the mark",
+	"message.jaymospowers.speed_marked": "Marked. Press the mark key to run back here.",
+	"message.jaymospowers.speed_no_mark": "No mark. Sneak and press the mark key to lay one.",
+	"message.jaymospowers.speed_no_path": "No way there that you can run, or it is too far.",
+	"hud.jaymospowers.speed_gear": "Gear %s",
+	"hud.jaymospowers.speed_run": "Running to the mark"
 }

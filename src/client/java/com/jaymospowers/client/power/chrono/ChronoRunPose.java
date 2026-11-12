@@ -65,6 +65,11 @@ public final class ChronoRunPose {
 		}
 		// the body's front is -Z here, so a negative turn about X tips the head forward
 		poseStack.rotateDegrees(Axis.XP, -LEAN_DEGREES * amount);
+		// a drift turn leans the body into it (the local player's own turn)
+		float side = ChronoMomentumClient.lean(state instanceof AvatarRenderState avatar ? avatar.id : -1);
+		if (side != 0.0F) {
+			poseStack.rotateDegrees(Axis.ZP, side * amount);
+		}
 	}
 
 	/** After the model animates (once per {@code setupAnim}): the fast pumping run, set from the age so every copy agrees. */

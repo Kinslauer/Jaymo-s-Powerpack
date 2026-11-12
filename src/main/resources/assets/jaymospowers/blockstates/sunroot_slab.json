@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymospowers:block/eden/sunroot_slab"
+    },
+    "type=top": {
+      "model": "jaymospowers:block/eden/sunroot_slab_top"
+    },
+    "type=double": {
+      "model": "jaymospowers:block/eden/sunroot_planks"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.client.power.zfighter.ZFighterStoryScreen;
+import com.jaymospowers.core.PowerRoads;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.chrono.ChronoPower;
 import com.jaymospowers.power.chrono.ChronoRoad;
@@ -18,8 +19,8 @@ import net.minecraft.world.entity.player.Player;
 /**
  * The player's own roads through the Retaking (Jaymo's Kingdoms' story), for its Story tab, which reaches here by
  * reflection (Kingdoms never compiles against Powers). The Z Fighter's road (the three sagas folded in: Ashes, then Sky
- * and Crown), with the saga screen to pick one up or give it up ({@link #open}); and the Chrono's road
- * ({@link ChronoRoad}). The tab lists their goals as plain lines.
+ * and Crown), with the saga screen to pick one up or give it up ({@link #open}); the Chrono's road
+ * ({@link ChronoRoad}); and the Web Slinger's, the Xenoform's and the Arsenal's ({@link PowerRoads}). The tab lists their goals as plain lines.
  * <p>
  * The contract Kingdoms calls: {@link #keys()}, {@link #title(String)}, {@link #goals(String)}, {@link #hasScreen(String)},
  * {@link #open(String, Screen)}.
@@ -40,6 +41,11 @@ public final class StoryRoads {
 			}
 			if (Powers.has(player, ChronoPower.INSTANCE)) {
 				keys.add(CHRONO);
+			}
+			for (String road : List.of("web", "xeno", "arsenal")) {
+				if (PowerRoads.yours(player, road)) {
+					keys.add(road);
+				}
 			}
 		}
 		return keys;
@@ -65,6 +71,13 @@ public final class StoryRoads {
 		if (CHRONO.equals(key)) {
 			for (String step : ChronoRoad.STEPS) {
 				goals.add(new AbstractMap.SimpleEntry<>(ChronoRoad.done(player, step), Component.translatable("road.jaymospowers.chrono." + step)));
+			}
+			return goals;
+		}
+		List<String> steps = PowerRoads.STEPS.get(key);
+		if (steps != null) {
+			for (String step : steps) {
+				goals.add(new AbstractMap.SimpleEntry<>(PowerRoads.done(player, key, step), Component.translatable("road.jaymospowers." + key + "." + step)));
 			}
 			return goals;
 		}

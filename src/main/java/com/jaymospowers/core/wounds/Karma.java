@@ -92,6 +92,8 @@ public final class Karma {
 	static final float KILL_OUTLAW = 0.3F, KILL_MONSTER = 0.15F, KILL_UNDEAD = 0.25F, KILL_BOSS = 4.0F;
 	/** Getting the fallen up: a player, a villager, anything else that isn't a monster. */
 	static final float RAISE_PLAYER = 5.0F, RAISE_VILLAGER = 3.0F, RAISE_OTHER = 0.5F;
+	/** The weight at which a player's guilt is whole ({@link #guilt}), and how guilty an outlaw, and an illager or raider, stands. */
+	public static final float GUILT_FULL = -60.0F, GUILT_OUTLAW = 0.5F, GUILT_RAIDER = 0.75F;
 	/** The share of the weight a just one keeps when they go back as they were. */
 	static final float RETURN_KEEPS = 0.5F;
 	/** How far (blocks) from the way up one sent below wakes. */
@@ -222,6 +224,33 @@ public final class Karma {
 		}
 	}
 
+	/**
+	 * How guilty {@code who} stands, 0 (blameless) to 1: a player by the weight of their life (nothing at or above even, all
+	 * of it at {@link #GUILT_FULL} or under; the harm done to villagers and players, and to a realm's good name, is in it),
+	 * an illager or a raider by {@link #GUILT_RAIDER},
+	 * one of the folk outside the law ({@link #GUILTY}: Kingdoms' outlaws) by {@link #GUILT_OUTLAW}, anything else none.
+	 */
+	public static float guilt(LivingEntity who) {
+		if (who instanceof Player player) {
+			return Mth.clamp(-of(player) / -GUILT_FULL, 0.0F, 1.0F);
+		}
+		// (Andy: "they certainly should be guilty": every illager, and whoever rides with a raid; not the beast they bring)
+		if (who instanceof net.minecraft.world.entity.monster.illager.AbstractIllager
+			|| who instanceof net.minecraft.world.entity.raid.Raider && !(who instanceof net.minecraft.world.entity.monster.Ravager)) {
+			return GUILT_RAIDER;
+		}
+		for (Predicate<Entity> test : GUILTY) {
+			try {
+				if (test.test(who)) {
+					return GUILT_OUTLAW;
+				}
+			} catch (RuntimeException e) {
+				// (a broken test counts for nothing)
+			}
+		}
+		return 0.0F;
+	}
+
 	/** How the Judge reads a page, 1 (wicked) to 5 (just): for his talk, never a number. */
 	public static int band(Player player) {
 		float weight = of(player);
@@ -335,6 +364,12 @@ public final class Karma {
 	public static void letGo(ServerPlayer player) {
 		over(player);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.karma.let_go").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+	}
+
+	/** A just one chose to stay in the high places for good (the Judge): the weighing is settled and the page keeps its weight. */
+	public static void stayed(ServerPlayer player) {
+		player.removeAttached(FATE);
+		player.removeAttached(EXIT);
 	}
 
 	/** One of the dead is leaving the Other World: a just one going back as they were pays for it with part of the weight. */

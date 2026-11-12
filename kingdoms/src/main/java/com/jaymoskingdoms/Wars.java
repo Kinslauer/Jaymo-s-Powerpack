@@ -311,6 +311,10 @@ public final class Wars {
 		if (a.id() == d.id()) {
 			return "message.jaymoskingdoms.war.same_side";
 		}
+		if (Raids.horizontal(a.seat(), d.seat()) >= Raids.NO_ROAD) {
+			// a sky kingdom and a realm below: no army can march from one to the other
+			return "message.jaymoskingdoms.war.no_road";
+		}
 		if (between(server, a.id(), d.id()) != null) {
 			return "message.jaymoskingdoms.war.already";
 		}

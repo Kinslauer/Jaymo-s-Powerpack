@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/eden/parignum_1"
+      },
+      {
+        "model": "jaymospowers:block/eden/parignum_2"
+      },
+      {
+        "model": "jaymospowers:block/eden/parignum_3"
+      },
+      {
+        "model": "jaymospowers:block/eden/parignum_4"
+      }
+    ]
+  }
+}

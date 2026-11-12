@@ -1,0 +1,113 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "jaymospowers:block/eden/parignum",
+    "leaves": "jaymospowers:block/eden/parignum",
+    "flowers": "jaymospowers:block/eden/parignum_flowers_3",
+    "glow": "jaymospowers:block/eden/parignum_flowers_3_e"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.5,
+        0
+      ],
+      "to": [
+        16,
+        0.5,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#leaves",
+          "tintindex": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#leaves",
+          "tintindex": 0
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0.6,
+        0
+      ],
+      "to": [
+        16,
+        0.6,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#flowers"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#flowers"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0.7,
+        0
+      ],
+      "to": [
+        16,
+        0.7,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#glow"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#glow"
+        }
+      },
+      "light_emission": 15
+    }
+  ]
+}

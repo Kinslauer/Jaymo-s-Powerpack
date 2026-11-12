@@ -601,6 +601,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Temples.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
+		CostumedFolk.register();
 		GiftTales.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
@@ -643,6 +644,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		StarFolk.register();
 		// 0.7.547: some villagers know of the heavens overhead, and some try to get there
 		Heavens.register();
+		SkyFolk.register();
+		SkyCourt.register();
+		SkyFerries.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();

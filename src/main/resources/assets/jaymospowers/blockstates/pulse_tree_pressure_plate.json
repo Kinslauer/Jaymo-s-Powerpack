@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "jaymospowers:block/eden/pulse_tree_pressure_plate"
+    },
+    "powered=true": {
+      "model": "jaymospowers:block/eden/pulse_tree_pressure_plate_down"
+    }
+  }
+}

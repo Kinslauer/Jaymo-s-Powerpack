@@ -170,7 +170,7 @@ public final class ArsenalRelics {
 		return stack;
 	}
 
-	static List<ItemStack> stored(ServerPlayer player) {
+	public static List<ItemStack> stored(ServerPlayer player) {
 		List<ItemStack> stored = player.getAttached(STORED);
 		return stored == null ? List.of() : stored;
 	}

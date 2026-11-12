@@ -141,7 +141,11 @@ public final class SmokePower implements Power {
 
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (down) {
+		// sneak + Z, for an Emberborn who has become a Flame Avatar: Judgement (held)
+		if (com.jaymospowers.power.ember.AvatarJudgement.holding(player)
+			|| down && player.isShiftKeyDown() && com.jaymospowers.power.ember.AvatarJudgement.available(player)) {
+			com.jaymospowers.power.ember.AvatarJudgement.key(player, down);
+		} else if (down) {
 			SmokeSight.toggle(player);
 		}
 	}

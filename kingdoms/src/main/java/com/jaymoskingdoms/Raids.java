@@ -676,7 +676,21 @@ final class Raids {
 
 	// ---- helpers -----------------------------------------------------------------------------------------------------
 
+	/** What {@link #horizontal} answers for two places in different bands of a stacked world: further than anything reaches. */
+	static final double NO_ROAD = 1.0e18;
+
+	/**
+	 * How far apart two places are over the ground (squared). In a stacked world a place in the Aether and one below it
+	 * have no road between them ({@link Stacked#band}), so they are {@link #NO_ROAD} apart: nothing that goes by this
+	 * (wars, raids, rivalries, spacing) reaches from one to the other.
+	 */
 	static double horizontal(BlockPos a, BlockPos b) {
+		if (a.getY() != b.getY()) {
+			MinecraftServer server = Rulers.server();
+			if (server != null && Stacked.band(server, a.getY()) != Stacked.band(server, b.getY())) {
+				return NO_ROAD;
+			}
+		}
 		double dx = a.getX() - b.getX(), dz = a.getZ() - b.getZ();
 		return dx * dx + dz * dz;
 	}

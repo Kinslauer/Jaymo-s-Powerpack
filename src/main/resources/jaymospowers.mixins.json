@@ -45,6 +45,7 @@
 		"FistGuardInventoryMixin",
 		"GuardOverTalkMixin",
 		"GuardRiposteMixin",
+		"DivineCounterMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

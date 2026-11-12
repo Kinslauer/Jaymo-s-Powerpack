@@ -11243,3 +11243,163 @@ Andy (2026-11-11): "some of the fighters should have shields so the fight looks 
 - The Story tab has a row under the five acts for the player's own road when their power has one (the Z Fighter's sagas for now, from Jaymo's Powers): its goals listed the same plain way as an act's, and an Open button to the road's own screen.
 - `RoadCompat` reaches Powers' `StoryRoads` by reflection; without Powers there is no road row.
 - Built; not played.
+
+## 0.7.737 (2026-11-11): The Second Defence ends with a short film at the ford (#1315)
+
+- When the Second Defence is held, everyone who stood at the ford sees a short wordless film (16 seconds) set at the ford itself: dawn, the last of the old legion on the far bank bowing and going back into the ground one by one, a slow look across the water, then the keep with its light still burning
+- It is played from a recorded tape like The Long Defence, with nothing laid over the world; the weather is clear on your screen while it plays
+- `/kingdom film second_defence` plays it for testing (where you stand, if you are not at the ford)
+
+## 0.7.738 (2026-11-11): Story tab no longer crashes the game at launch (#1314)
+
+- The Story tab's act and road icons were item stacks made while the client was starting, before items could be built ("Components not bound yet"), which crashed the game on launch. They are now made the first time the tab is drawn.
+
+## 0.7.739 (2026-11-11): sky folk - who lives in the Aether, the sky lord's court, and balloon ships (#1312)
+
+Andy: the sky villages are "filled with divine born, any other heritage has a reason for not only having traveled but being
+accepted"; the halfway folk are "what the dawnborn culture becomes".
+- **Blood** (`SkyFolk.born`, from `VillagerHeritage.roll`): everyone born in the Aether is Divine-born, but for 15% who
+  are Dawnborn, the halfway folk.
+- **Nobody is minded up there** (`Prejudice.minds`): a villager standing in the Aether holds no one's blood against them.
+- **Their talk**: five lines each for the Divine-born and the Dawnborn of the sky, used while they are in the Aether
+  (`lang/parts/sky_folk.json`). Hints only.
+- **Things that fall off** (`SkyFolk.fall`): about once in six days spent under an open sky in the Overworld, something
+  drops near you: a dropped letter (five of them), somebody's hat, cloudwool, a moa feather or cloudtwine.
+- **Their clothes** (`SkyFolk.outfits`, art from `tools/gen_sky_folk.py`, 16 new outfits): the Divine-born of the
+  Aether wear white robes with gold at the collar, cord and hem; the halfway folk sun-coloured tunics with a white sash
+  and a sun on the chest; the sky lord a blue mantle over the robe; his wardens a white tabard over deep blue. A villager
+  is dressed as soon as their blood is settled. Travellers from below keep their own clothes.
+- **The sky lord's court** (`SkyCourt`): each sky castle near a player in the Aether gets a lord (the one seated on the
+  throne when it was built if he can still be told, else whoever stands nearest the keep) and three wardens, who take
+  up MCA's guard trade. They have their own lines. A dead lord is replaced from the castle's people at the next look.
+  The court is not a kingdom: factions live only in the Overworld and their wars, caravans and envoys walk, so the
+  castle holds no land and takes no part in them.
+- **Balloon ships** (`Ship`, `Hull.airworthy`): a ship with at least 24 blocks of wool hung over her, enough to lift her
+  weight (half a block of water's weight per block of wool), flies. Her wheel casts her off with no water under her;
+  at the wheel Space takes her up and Sprint down (0.12 blocks a tick), W/S set her cloth and A/D steer as at sea. She
+  holds her height with nobody at the wheel, moors in mid-air when you sneak off a still wheel, settles onto water if
+  brought down on it, and is never becalmed head to wind. Enough of her cloth shot away and she falls. The readout
+  shows her height.
+- **Sky ferries** (`SkyFerries`): in daylight, about every five minutes, two villagers of a sky village near a player go
+  aboard the skiff at its mast, take her up 22 blocks, cross 110 to 200 blocks of sky, come about, return and haul her
+  in onto her mooring, where she is blocks again. You can ride along on her deck or take her wheel. Something in her
+  way sends her 6 blocks higher; a trip that runs past four minutes turns for home.
+- Compiled; not played. Not seen: whether MCA villagers sit quietly as a ferry's crew, and how the skiff looks under way.
+
+## 0.7.740 (2026-11-11): Divine-born: heritage key is Alight, and staying at the Judge makes you one (#1308)
+
+- The heritage key `;` for a Divine-born is now Alight (Jaymo's Powers refills the feathers). Sneak + `;` is Halo Pulse,
+  as the key alone was before. Without Powers the key is still Halo Pulse.
+- One of the just who stays at the Judge keeps their heritage. `DivineBorn.is` counts them (mending, no hunger or sleep,
+  harder blows on the wicked, the healing bonus), `Heritage.stayed` unlocks Divine-born and the afterlife road's deed,
+  and their own heritage key becomes Alight whenever there are feathers to bring back.
+- The Divine-born gift text lists the sense, the hover and Alight; the hint mentions the Judge.
+- Compiled; not played.
+
+## 0.7.741 (2026-11-11): The Retaking: the Hermit's Road and the Common Road (#1319)
+
+- **The Hermit's Road** (Smoke, Gravity and Cryo users): meet a hermit wizard on a floating island, who writes you **A Letter** the first time (you looked straight through the spirit at their shoulder; your ki went to your element; "you will grow something of your own instead"); then grow your Valor to Kindled, Tempered and Steeled.
+- **The Common Road** (anyone with no power): take a job in a town; take up a class; swear to a patron; become a Master at your job; grow your Valor to Steeled.
+- With these, every power, class and faith has a road in the Story tab.
+- Built; not played.
+
+## 0.7.742 (2026-11-11): the minotaur's labyrinths - it keeps the Epic dungeons (#1320)
+
+- **Labyrinths**: every large Epic Structures dungeon (plains, snow and desert) holds one minotaur in its biggest hall,
+  and about one in three medium ones does too. Small dungeons have none. It is stood there the first time a player
+  comes within 40 blocks of the hall, once per dungeon, never in peaceful, and it keeps to within 14 blocks of the spot.
+  Dungeons in worlds that already exist get theirs the same way, the first time someone goes back in.
+- Nothing in the Epic Structures files is changed: `beasts/Labyrinths` reads the dungeon's rooms from the world and picks
+  a roofed, clear floor near the middle of the biggest one. Which dungeons count is two structure tags,
+  `jaymoskingdoms:minotaur_labyrinths` (always) and `minotaur_labyrinths_some` (`SOME_CHANCE`, 35%).
+- Compiled; not played. The room check was run against the mod's room files (each large dungeon's first hall has dozens
+  of spots that fit), but no dungeon has been walked in game.
+
+## 0.7.743 (2026-11-11): sky kingdoms and blossom towns (#1321)
+
+Andy: "if there is room for an epic village kingdom ... spawn one and maybe we could design some in the aether and
+blossom biome styles".
+- **Sky kingdoms**: Jaymo's Powers' sky towns count as Epic villages (`Seats.epic`), so in a stacked world (the
+  default) a kingdom is founded at a sky town's bell the usual way: great hall as the seat, library or smithy as the
+  storehouse, farms taken on. Its people are sky folk.
+- **No road down** (`Stacked.band`, `Raids.horizontal`): a place in the Aether band and one below it count as endlessly
+  far apart, so wars, raids, rivalries, caravans and spacing never reach between a sky kingdom and a ground realm.
+  Declaring such a war answers that no army can march there. Sky kingdoms deal with each other normally.
+- **Land by band** (`Factions.at`, `KingdomEvents.claim`): a realm's land is only its own height band of a chunk, so the
+  ground under a sky kingdom is not its land, and a ground realm does not own the islands above it.
+- **Blossom towns** (`BlossomVillages.foundTown`, `Blossom.tenshu`): on a wide, level cherry grove with no realm within
+  900 blocks, a town rises instead of a village: torii, lantern road, ten houses, four job halls, stalls, a shrine and
+  a three-storey keep with flared roofs. It is a kingdom from the start, with the keep as its seat and a Blossom name.
+  `/kingdom found blossomtown` raises one where you stand.
+- Sky village skiffs are no longer crewed by guards or people at work.
+
+## 0.7.744 (2026-11-11): Art credits file cleaned up
+
+The dragon art credits file had leftover merge markers from an old merge; they are gone and the Stegonaut credit is kept. Nothing changes in game.
+
+## 0.7.745 (2026-11-11): The band's smith is an Ocellan (#1323)
+
+- **The Ocellan** (Andy: "the race of aliens that build and upgrade the watch ... very small with bug eyes ... robes ...
+  and monocles, and are a high class society"): the smith who keeps the star forge is no longer drawn as a man. He is a
+  Ocellan, about half a block tall, with the body of Powers' Gremlin: grey, a wide flat head and two big yellow-green
+  eyes that shine in the dark and blink. He wears a long trimmed robe with a short mantle and wide cuffs, a monocle on a
+  chain over his right eye, and keeps his hands folded in front of him. There are three robes (plum, teal, umber).
+- He is still the same villager: his menu, his talk and the reforge are unchanged. He is small now, so aim lower to
+  click him. Smiths already in a world change the next time they are loaded.
+- `OcellanBody` (new: hides the man's body, draws the Ocellan), `ZFighterFolk.OCELLAN` (which parts are Ocellan; add a part
+  there to make another villager one) and `OCELLAN_SCALE`, `VillagerLooks`, `ModelPoses`, `McaLookModels.hideChest`,
+  `tools/gen_ocellan.py` (skins in `textures/entity/ocellan/`).
+- Compiled (`compileClientJava`) and rendered from the skins outside the game; not played. Not checked in game: that
+  every MCA layer on the smith (hair, clothes, held things) is hidden, and how his name tag sits.
+
+## 0.7.746 (2026-11-11): Read the Ground: a Survival perk that shows footprints (#1322)
+
+An idea from Yo Fadda's Batman mod (All Rights Reserved: nothing taken, our own code). Andy: "this should instead be
+added to the survivalist tree. available for everyone".
+- **Prints** (`TrailReading`): every creature walking on the ground near a player leaves a print each 1.6 blocks, with the
+  way it was heading. Prints last 8 minutes (kept in memory; a restart clears them). Nothing in water or in the air leaves
+  any, and a player sneaking with Soft Step leaves none.
+- **Read the Ground** (Survival, first page, under Forager; 2 ranks, 1 point each, no level needed): crouch and hold still
+  for a second and the prints round you show to you alone as faint motes drifting the way their maker went: pale for
+  people, rust for monsters, moss for beasts, bigger for bigger feet, fainter with age. Rank 1 reads 18 blocks and 3
+  minutes back; rank 2 reads 32 blocks and the full 8 minutes. Your own prints are not shown.
+- Blood and drag marks are already on the ground for everyone and need no perk.
+- Built and compiled; not played. To check in game: that the motes read as a trail you can follow, and where the perk
+  sits on Survival's first page.
+
+## 0.7.747 (2026-11-11): Burning steeds at the Flame Avatars' camps (#1322)
+
+Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise no steeds.
+- The Flame Avatars' camps in the Nether now keep burning steeds (Powers' horses of fire): two at each new camp, and
+  another now and then while a player is near, up to three round the hearth (`AvatarCamps`, `PowersCompat.burningSteed`).
+
+## 0.7.748 (2026-11-11): Dragons and war elephants left out of Horseman's horse tricks
+
+- Horseman (now in the pack) treats every horse-like mount as a horse. Dragons can't be hitched to a fence or put in a boat, and war elephants and mammoths can't be put in a boat (`data/horseman/tags/entity_type`, entries optional, so nothing changes without Horseman).
+- Dragons keep vanilla's speed in the air (`WindDragon.getFlyingSpeed`). Horseman's air-speed boost would have made ridden dragons several times faster in flight.
+- Built in the cloud; not played.
+
+## 0.7.749 (2026-11-11): elemental powers can't see mana or spirits (#1333)
+
+- **Smoke, Gravity and Cryo users are blind to mana** (Andy: "cannot view mana abilities or spirits because of the way their ki manifests"): even attuned or reading magic, they see no one else's mana glow, mana wings, spirit arms, spirit figure or mage hands, and get no clash bars. Their own mana still shows to them. Valor works for them as for any other power user (`Mana.blindToMana`, `seesMana`, used by `ManaClient`, `ManaWings`, `SpiritArms`, `SpiritHandRenderer`, `ClashCinematic`).
+- Built; not played.
+
+## 0.7.750 (2026-11-11): costumed gifted: vigilantes and villains (#1332)
+
+- **Who** (`CostumedFolk`): a grown gifted villager who hides their gift and isn't a ruler is weighed once: the brave, kindhearted, dutiful and devout become vigilantes and the spiteful, greedy and hotheaded villains (35% each), anyone else either side at 8%. The open gifted never take one (they use their power plainly, as before). Needs Powers with this patch.
+- **When**: the costume goes on after dark and comes off at dawn, only while no player within 16 blocks can see who is under it.
+- **Vigilantes**, suited, go after the nearest monster within 16 blocks ("Get behind me!"). **Villains**, suited, now and then (0.3% a second) pick on a player within 20 blocks (never family), or else a grown villager who isn't one of their own, for 12 seconds ("You'll do.").
+- **Rivals** (Andy: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even get involved"): a suited vigilante goes after a suited villain within 16 blocks before any monster ("Leave them be, the Squall. It's me you want."). From then on they're rivals: the vigilante goes after them from 32 blocks, and a villain with a rival about goes looking for them (2% a second). A player who hits one of them mid-fight hears from the other: the vigilante thanks them grudgingly ("Didn't need the help. ...Thanks."), the villain crows ("Ha! Even they're sick of you.").
+- **Folk talk about them** ("the villagers will talk about the ones they have seen"): villagers who see a suited one, or two rivals fighting, remember the names (their last 4), and by day now and then tell a player near ("The Gale and Black Ice were at it again last night.").
+- **Nobody likes them**: folk near a suited one grumble at a vigilante ("Go home. We managed before you lot.") or cry out at a villain ("Someone fetch the guard!"), in speech bubbles. Lines in `lang/parts/costumed-folk.json`.
+- Lore.md has the placement as a (new) paragraph for Andy to approve.
+- Built; not played.
+
+## 0.7.751 (2026-11-12): Blossom castle - the Blossom kingdom's seat rebuilt as a four-storey castle (#1337)
+
+- **The seat of a Blossom town is a castle now**, in the style of the Ninja Castle build Andy picked (our own design; that build has no stated licence, so none of it is shipped). `Blossom.tenshu` replaces the three-storey keep.
+- **Outside**: a moat along the front with a stone bridge and lanterns, steps up a footing of rough stone that is a block wider at the ground, a terrace under the eaves, then four storeys of white plaster and dark posts, each standing back under a skirt of grey stone tile with turned-up corners. A gable on the front of the two lowest roofs, a top roof with its ridge across the front and a pale horn at each end, and a gatehouse wing against the right side whose ridge runs into the keep. 25 wide, 25 deep, 30 high (the old keep was 17 x 17 x 20).
+- **Inside**: the great room is a boarded hall between two raised tatami floors, with a niche at the far end that the throne goes in (it is the only spot the seat finder can pick, so the throne is no longer in a corner). Ladders up to a guards' floor with futons, the lord's rooms, and a lookout under the roof. A door off the right-hand floor opens into the gatehouse.
+- **Town layout** (`BlossomVillages`): the castle starts 5 blocks nearer the bell, the shrine moved 5 blocks left, the last pair of road lanterns moved up, and the ground is cleared 32 high instead of 26. The footing is the land's own stone so the panic room is still dug under the throne.
+- Existing Blossom towns keep their old keep; only towns founded after this get the castle (`/kingdom found blossomtown` to see one).
+- Built (compiles); not seen in game.

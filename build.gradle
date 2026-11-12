@@ -121,6 +121,11 @@ def packMods = [
 	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
+	// Epic Structures: Igloo and Jungle Temples (all rights reserved; "feel free to add to any modpack"; linked, never
+	// edited): 5 large and 7 small igloos with cellars under the large ones, and big jungle temples and temple ruins, all
+	// from vanilla blocks, mobs and loot (structure ids epic:*). Data only, no dependencies. 1.0.5 and 1.0.3.
+	[dep: "maven.modrinth:epic-structures-igloo:nXW1eymX", cf: [1511498, 8528158]],
+	[dep: "maven.modrinth:epic-structures-jungle-temples:ImFhV10j", cf: [1600197, 8984105]],
 	// Towns and Towers (CC BY-NC-ND 4.0, by Kubek, Biban_Auriu and Cristelknight999; shipped unchanged, never edited,
 	// with credit and a link: modrinth.com/mod/towns-and-towers):
 	// new villages per biome (tagged as villages, so Jaymo's Kingdoms founds capitals in them too), biome pillager outposts
@@ -229,6 +234,16 @@ def packMods = [
 	[dep: "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx", cf: [243190, 9013849]],
 	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
 	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
+	// Horseman 1.7.5 (MIT, by mortuusars; shipped unchanged): riding fixes for every horse-like mount. Right-click a
+	// fence from the saddle to hitch (a lead slot in the horse's inventory), a little more step height, no stair
+	// jitter, less speed lost stepping down and in the air, fewer snags on leaves, full mining speed in the saddle,
+	// horses in boats, saddled horses keep within 16 blocks of where you left them, shears take a pack animal's chest
+	// off, an inventory swap button, and the horse fades when you look straight down. Its look-around works only
+	// while the horse stands still, so Kingdoms' free rein (steer toward the camera) stays. Its Copper Horn has no
+	// recipe (tinkering/Uncraftable; Kingdoms' whistle calls horses); Kingdoms keeps the dragons off fence posts and
+	// out of boats, and the war elephant out of boats (data/horseman/tags), and WindDragon keeps vanilla's speed in
+	// the air. Needs Fabric API and Forge Config API Port (above). Client and server.
+	[dep: "maven.modrinth:horseman:SkbN0JlH", cf: [1082085, 9064580]],
 	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
 	// from resource packs, here for Fresh Animations: Player Extension (packResourcePacks). Client-only. Our own poses
 	// pause its animations while they play (client/EmfCompat).

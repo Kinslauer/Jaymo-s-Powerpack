@@ -204,3 +204,8 @@ of them (30 ticks, refreshed every 10). Overwhelming with smoke engulfs the lose
 (Soot: 4 s), their air knocked out (the bubbles empty and refill), 6 damage, thrown back. In a clash, X down/up are
 the clash's taps (sneaking or not, so Smoke Step can't fire mid-clash); the client also sends a tap that's quicker
 than a tick.
+
+## Burning chain, Judgement (Flame Avatar track)
+- **Burning chain**: a Smoke user's flail and whip (`armory/Lash`, `Lash.burning`) ignite what they hit, the whip's wrap re-lights what it holds, and the flail's whirl drags what it clips in and swings it round (`DRAG_IN`, `DRAG_ROUND`) instead of shoving it away. The head throws embers and flame.
+- **Judgement** (`power/ember/AvatarJudgement`): sneak + Z held, for a Smoke user who is Emberborn and a Flame Avatar (Z alone is still Smoke Sight). Roots the aimed creature and pulses damage through armour by `Karma.guilt` (a player by their karma, weight -60 is full guilt; an outlaw from Kingdoms' `Karma.GUILTY` list 0.5; everything else 0, which refuses the move).
+- Smoke users may also ride the Flame Avatars' burning steeds (`power/ember/BurningSteed`).

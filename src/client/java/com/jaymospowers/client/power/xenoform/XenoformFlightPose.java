@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class XenoformFlightPose {
 	/** One player's flight this frame: the glide's amount, the wings' (flying, folded back), Pyre's jet, and the time. */
-	public record Flight(float glide, float wings, float fold, float jet, float time, float drift) {
+	public record Flight(float glide, float wings, float fold, float jet, float time, float drift, float lean, float bank) {
 	}
 
 	public static final RenderStateDataKey<Flight> KEY = RenderStateDataKey.create(() -> "jaymospowers:xenoform_flight");
@@ -51,6 +51,12 @@ public final class XenoformFlightPose {
 	static final float GLIDE_LEAN = 38.0F, GLIDE_ROLL = 9.0F, GLIDE_BOB = 0.07F;
 	/** (0.20.23) The float's slow side-to-side sway (degrees). */
 	static final float FLOAT_SWAY = 3.0F;
+	/** The float on the move: tipped forward this far at {@code FLOAT_FAST} blocks a tick (degrees), and rolled into a turn this far at most. */
+	static final float FLOAT_LEAN = 24.0F, FLOAT_BANK = 14.0F, FLOAT_FAST = 0.3F;
+	/** A turn of this many degrees a tick banks it right over. */
+	static final float FLOAT_BANK_TURN = 12.0F;
+	/** At full lean the arms come this far forward (radians). */
+	static final float FLOAT_REACH = -1.25F;
 	/** Pyre's foot flames: particles per foot a tick, and their push out behind; only while cruising less than this much. */
 	static final int FOOT_FLAMES = 1;
 	static final float JETS_UNTIL = 0.5F;
@@ -61,7 +67,7 @@ public final class XenoformFlightPose {
 	/** Pyre's jet arms: swept back this far (radians) and out from the body this far. */
 	static final float JET_ARM_BACK = 0.35F, JET_ARM_OUT = 0.3F;
 
-	/** entity id → {glide, glide before, wings, wings before, fold, fold before, jet, jet before, float, float before}. */
+	/** entity id → {glide, glide before, wings, wings before, fold, fold before, jet, jet before, float, float before, lean, lean before, bank, bank before}. */
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
 
 	private XenoformFlightPose() {
@@ -107,7 +113,7 @@ public final class XenoformFlightPose {
 				if (kind == XenoformState.FLY_NONE) {
 					continue;
 				}
-				a = new float[10];
+				a = new float[14];
 				AMOUNTS.put(player.getId(), a);
 			}
 			a[1] = a[0];
@@ -115,7 +121,19 @@ public final class XenoformFlightPose {
 			a[5] = a[4];
 			a[7] = a[6];
 			a[9] = a[8];
+			a[11] = a[10];
+			a[13] = a[12];
 			a[8] = ease(a[8], kind == XenoformState.FLY_FLOAT);
+			// the float leans the way it goes and rolls into its turns, late and soft
+			float leanTo = 0.0F, bankTo = 0.0F;
+			if (kind == XenoformState.FLY_FLOAT) {
+				float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+				float forward = (float)(-Mth.sin(yaw) * (player.getX() - player.xo) + Mth.cos(yaw) * (player.getZ() - player.zo));
+				leanTo = Mth.clamp(forward / FLOAT_FAST, -0.4F, 1.0F);
+				bankTo = Mth.clamp(Mth.wrapDegrees(player.yBodyRot - player.yBodyRotO) / FLOAT_BANK_TURN, -1.0F, 1.0F) * Math.abs(leanTo);
+			}
+			a[10] += (leanTo - a[10]) * 0.2F;
+			a[12] += (bankTo - a[12]) * 0.25F;
 			a[6] = ease(a[6], XenoformState.jet(kind));
 			a[0] = ease(a[0], kind == XenoformState.FLY_GLIDE);
 			a[2] = ease(a[2], kind == XenoformState.FLY_WINGS);
@@ -129,7 +147,7 @@ public final class XenoformFlightPose {
 		AMOUNTS.entrySet().removeIf(entry -> {
 			float[] a = entry.getValue();
 			return a[0] <= 0.0F && a[1] <= 0.0F && a[2] <= 0.0F && a[3] <= 0.0F && a[4] <= 0.001F && a[6] <= 0.0F && a[7] <= 0.0F
-				&& a[8] <= 0.0F && a[9] <= 0.0F
+				&& a[8] <= 0.0F && a[9] <= 0.0F && Math.abs(a[10]) <= 0.01F && Math.abs(a[12]) <= 0.01F
 				|| level.getEntity(entry.getKey()) == null;
 		});
 	}
@@ -190,7 +208,8 @@ public final class XenoformFlightPose {
 			return;
 		}
 		state.setData(KEY, new Flight(Mth.lerp(partialTicks, a[1], a[0]), Mth.lerp(partialTicks, a[3], a[2]), Mth.lerp(partialTicks, a[5], a[4]),
-			Mth.lerp(partialTicks, a[7], a[6]), entity.tickCount + partialTicks, Mth.lerp(partialTicks, a[9], a[8])));
+			Mth.lerp(partialTicks, a[7], a[6]), entity.tickCount + partialTicks, Mth.lerp(partialTicks, a[9], a[8]),
+			Mth.lerp(partialTicks, a[11], a[10]), Mth.lerp(partialTicks, a[13], a[12])));
 	}
 
 	/** After the body's turned to face its way: the glide tips it forward, rolling and bobbing slowly. */
@@ -204,7 +223,8 @@ public final class XenoformFlightPose {
 			float f = smooth(flight.drift()), t = flight.time();
 			float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 			poseStack.translate(0.0F, middle, 0.0F);
-			poseStack.rotateDegrees(Axis.ZP, Mth.sin(t * 0.07F) * FLOAT_SWAY * f);
+			poseStack.rotateDegrees(Axis.XP, FLOAT_LEAN * flight.lean() * f);
+			poseStack.rotateDegrees(Axis.ZP, (Mth.sin(t * 0.07F) * FLOAT_SWAY + FLOAT_BANK * flight.bank()) * f);
 			poseStack.translate(0.0F, -middle, 0.0F);
 		}
 		if (flight.glide() <= 0.001F) {
@@ -237,10 +257,13 @@ public final class XenoformFlightPose {
 		if (flight.drift() > 0.001F) {
 			// (0.20.23) the float: arms hanging loose at the sides, a little forward and out, drifting out of step
 			float f = smooth(flight.drift()), t = flight.time();
-			pose(h.rightArm, -0.2F + Mth.sin(t * 0.09F) * 0.12F, 0.0F, 0.18F + Mth.sin(t * 0.07F) * 0.06F, f);
-			pose(h.leftArm, -0.2F + Mth.sin(t * 0.09F + 1.9F) * 0.12F, 0.0F, -0.18F - Mth.sin(t * 0.07F + 1.3F) * 0.06F, f);
-			// the head level, turning to look as it likes
-			pose(h.head, h.head.xRot * 0.5F + Mth.sin(t * 0.05F) * 0.04F, h.head.yRot, Mth.sin(t * 0.06F) * 0.05F, f);
+			// at speed they come up and reach out ahead, the way a ghost goes through the air
+			float reach = smooth(Math.max(0.0F, flight.lean()));
+			float armX = Mth.lerp(reach, -0.2F, FLOAT_REACH);
+			pose(h.rightArm, armX + Mth.sin(t * 0.09F) * 0.12F, 0.0F, 0.18F * (1.0F - reach) + Mth.sin(t * 0.07F) * 0.06F, f);
+			pose(h.leftArm, armX + Mth.sin(t * 0.09F + 1.9F) * 0.12F, 0.0F, -0.18F * (1.0F - reach) - Mth.sin(t * 0.07F + 1.3F) * 0.06F, f);
+			// the head level, turning to look as it likes (lifted against the lean, to see ahead)
+			pose(h.head, h.head.xRot * 0.5F + Mth.sin(t * 0.05F) * 0.04F - FLOAT_LEAN * Mth.DEG_TO_RAD * flight.lean() * 0.8F, h.head.yRot, Mth.sin(t * 0.06F) * 0.05F, f);
 			// the legs (when there are any) hang straight down, swaying a little
 			pose(h.rightLeg, 0.08F + Mth.sin(t * 0.08F) * 0.06F, 0.0F, 0.03F, f);
 			pose(h.leftLeg, 0.08F + Mth.sin(t * 0.08F + 2.2F) * 0.06F, 0.0F, -0.03F, f);

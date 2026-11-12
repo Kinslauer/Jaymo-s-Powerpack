@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "jaymospowers:block/eden/gravilite_lantern"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "jaymospowers:block/eden/gravilite_lantern"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "jaymospowers:block/eden/gravilite_lantern_hanging"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "jaymospowers:block/eden/gravilite_lantern_hanging"
+    }
+  }
+}

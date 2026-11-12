@@ -145,5 +145,6 @@ public final class Hermits {
 		}
 		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hermit.gift", mob.getDisplayName()).withColor(COLOR));
+		StoryRoads.hermit(player);
 	}
 }

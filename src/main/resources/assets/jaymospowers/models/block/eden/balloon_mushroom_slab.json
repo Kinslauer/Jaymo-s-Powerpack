@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "jaymospowers:block/eden/balloon_mushroom_planks",
+    "side": "jaymospowers:block/eden/balloon_mushroom_planks",
+    "top": "jaymospowers:block/eden/balloon_mushroom_planks"
+  }
+}

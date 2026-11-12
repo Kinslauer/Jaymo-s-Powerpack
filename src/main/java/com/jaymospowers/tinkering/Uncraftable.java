@@ -32,6 +32,11 @@ public final class Uncraftable {
 	 * data pack puts vanilla's recipe back over Kitchen's switch-off).
 	 */
 	static final Set<String> TANNED = Set.of("minecraft:leather");
+	/**
+	 * Horseman's Copper Horn calls a bound horse from anywhere and can teleport it there. Kingdoms' whistle already calls
+	 * a horse that trusts you, from close by, on its own legs ({@code Bonding}), so the horn has no recipe.
+	 */
+	static final Set<String> HORSEMAN = Set.of("horseman:copper_horn");
 
 	/**
 	 * (RPG Series) Rogues &amp; Warriors' and Archers' stone, iron and golden weapons are forged from heads
@@ -112,6 +117,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !HORSEMAN.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

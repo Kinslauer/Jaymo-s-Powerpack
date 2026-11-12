@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jaymospowers:hand_wraps",
+    "minecraft:leather",
+    "minecraft:leather"
+  ],
+  "result": {
+    "id": "jaymospowers:leather_cestus",
+    "count": 1
+  }
+}

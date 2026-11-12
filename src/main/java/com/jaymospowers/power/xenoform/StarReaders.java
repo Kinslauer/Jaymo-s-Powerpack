@@ -160,6 +160,7 @@ public final class StarReaders {
 			mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		}
 		menu(player, reader, line("greet", GREET_LINES, reader));
+		com.jaymospowers.core.PowerRoads.starReader(player);
 	}
 
 	private static void menu(ServerPlayer player, LivingEntity reader, Component words) {

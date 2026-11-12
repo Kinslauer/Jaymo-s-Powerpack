@@ -1469,5 +1469,36 @@
 				"name": "jaymospowers:blast/whistle"
 			}
 		]
+	},
+	"eden.diskwing.ambient": {
+		"subtitle": "subtitles.jaymospowers.eden.diskwing.ambient",
+		"sounds": [
+			{
+				"name": "jaymospowers:eden/diskwing_1"
+			},
+			{
+				"name": "jaymospowers:eden/diskwing_2"
+			},
+			{
+				"name": "jaymospowers:eden/diskwing_3"
+			},
+			{
+				"name": "jaymospowers:eden/diskwing_4"
+			},
+			{
+				"name": "jaymospowers:eden/diskwing_5"
+			},
+			{
+				"name": "jaymospowers:eden/diskwing_6"
+			}
+		]
+	},
+	"eden.diskwing.hurt": {
+		"subtitle": "subtitles.jaymospowers.eden.diskwing.hurt",
+		"sounds": [
+			{
+				"name": "jaymospowers:eden/diskwing_hurt"
+			}
+		]
 	}
 }

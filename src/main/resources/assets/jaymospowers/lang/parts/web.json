@@ -877,5 +877,6 @@
 	"message.jaymospowers.web_symbiote.say.white.execute_tendril.3": "Don't make us wind it tighter.",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.1": "Pull! PULL!",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.2": "Squeeze until it pops!",
-	"message.jaymospowers.web_symbiote.say.red.execute_tendril.3": "More arms. More. MORE."
+	"message.jaymospowers.web_symbiote.say.red.execute_tendril.3": "More arms. More. MORE.",
+	"message.jaymospowers.web_up.nothing": "Nothing up there to hang them from"
 }
