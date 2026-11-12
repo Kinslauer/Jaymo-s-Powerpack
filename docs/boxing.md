@@ -19,10 +19,12 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   out is a punch at the air and still costs), `PUNCH_KNOCKBACK` 25% of the usual shove.
 - **Strings**: Arrow Slit throws a one-two then alternating hooks; Long Guard jab, jab, cross; Bastion the right jab
   only. A pause of `STRING_RESET` 30 ticks starts the string again. So far the punches differ only in sound.
-- **Windup** (Jung's call): every punch lands `WINDUP` 15 ticks (0.75 s) after it is thrown, on the one it was aimed
-  at if they are still in reach then (else it hits air). Its stamina is spent as it starts; the next punch can't start
-  until it has landed. So no boxer punches faster than once every 0.75 s: levels 2 and up all punch at that pace, and
-  from there a level only makes a punch cheaper. The pose draws the arm back through the windup, then throws.
+- **Windup** (Jung's idea; Andy made it shorten with level): every punch lands a moment after it is thrown,
+  `WINDUP_SLOWEST` 15 ticks (0.75 s) at level 1, one tick or so less a level, down to `WINDUP_FASTEST` 7 (0.35 s) at
+  level 10 (`windupAt`), on the one it was aimed at if they are still in reach then (else it hits air). Its stamina is
+  spent as it starts; the next punch can't start until it has landed. The windup keeps pace with the speed below, so
+  the speed table still holds. Everyone is told each punch's windup (`LOOK`), for the poses. The pose draws the arm
+  back through the windup, then throws.
 - **Speed**: one punch every 16 ticks at level 1, one tick quicker a level, 7 at level 10 (`SLOWEST`, `FASTEST`). The
   attack-speed attribute is set to match, so the attack indicator shows the rhythm. A click up to `EARLY_SLACK`
   2 ticks early still counts and borrows from the next.
@@ -183,8 +185,8 @@ Nothing from the plan. See the open points below.
 3. `/powerdebug boxing style arrow_slit`. Punch a zombie from 3 blocks: nothing lands. From inside 2: 1.5 damage, and
    it is barely pushed back. The attack indicator fills in 0.8 s. Each punch winds up first: the arm draws back and the
    blow lands 0.75 s after the click. Step back out of reach during the windup: the punch hits air, its stamina still spent.
-4. `/powerdebug boxing level 10`: the indicator fills in 0.75 s (the windup sets the pace from level 2 on), and a held
-   flurry lands one punch every 0.75 s.
+4. `/powerdebug boxing level 10`: the indicator fills in 0.35 s, each blow lands 0.35 s after its click, and a held
+   flurry lands about three a second. A second player watching sees the shorter windup from the first punch on.
 5. Level 7, then 8: at 8 the punches land faster than a sword could re-hit the same zombie.
 6. Watch the feathers: at level 1 each punch takes one icon; at level 10 four punches take one.
 7. Punch until exhausted: punches slow to one every 1.6 s and do under 1 damage, until the row is back to 30%.

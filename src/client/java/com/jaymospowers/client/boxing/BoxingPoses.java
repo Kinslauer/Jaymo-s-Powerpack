@@ -87,7 +87,7 @@ public final class BoxingPoses {
 	 */
 	static final float PUNCH_TICKS = 6.0F, SNAP = 0.4F;
 	/**
-	 * Before it goes, a punch winds up for {@link Boxing#WINDUP} ticks: a straight punch's arm draws back this share
+	 * Before it goes, a punch winds up for {@link Boxing#windup} ticks: a straight punch's arm draws back this share
 	 * of its reach (and the body coils the other way by as much of its turn); a hook's arm rises out wide while the
 	 * body coils back this share of its turn; an uppercut dips this far (radians) as the fist drops.
 	 */
@@ -223,7 +223,7 @@ public final class BoxingPoses {
 		float now = player.level().getGameTime() + partialTicks;
 		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
 		// (the pose's windup ends a little before the server's, so the punch is at full reach as the blow lands)
-		float windup = Boxing.WINDUP - SNAP * PUNCH_TICKS, whole = windup + PUNCH_TICKS;
+		float windup = Boxing.windup(player) - SNAP * PUNCH_TICKS, whole = windup + PUNCH_TICKS;
 		if (THROWN.size() > 512) {
 			THROWN.clear();
 		}
