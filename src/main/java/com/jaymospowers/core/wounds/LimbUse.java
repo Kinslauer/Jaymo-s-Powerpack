@@ -118,6 +118,10 @@ public final class LimbUse {
 			// (0.18.82) a wooden or iron limb stands in for it, weaker (0 when there's none)
 			return com.jaymospowers.core.Prosthetics.strength(entity, Breaks.limb(part));
 		}
+		if (com.jaymospowers.boxing.PressurePoints.numb(entity, part)) {
+			// a pressure point struck: dead for a while, not broken
+			return 0.0F;
+		}
 		if (!Breaks.isBroken(entity, part) || Adrenaline.active(entity)) {
 			// (0.20.110) on adrenaline a broken limb works as a sound one
 			return SOUND;
@@ -246,6 +250,11 @@ public final class LimbUse {
 	public static void refuse(Player player, int need) {
 		BodyPart part = gone(player, need);
 		if (part == null) {
+			return;
+		}
+		if (!Breaks.missing(player, part)) {
+			// not gone, only numb
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.limbs.numb").withStyle(ChatFormatting.RED));
 			return;
 		}
 		boolean bothArms = (need & ANY_ARM) != 0 && Breaks.missing(player, BodyPart.LEFT_ARM) && Breaks.missing(player, BodyPart.RIGHT_ARM);

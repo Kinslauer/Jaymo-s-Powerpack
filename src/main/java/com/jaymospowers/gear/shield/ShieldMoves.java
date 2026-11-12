@@ -320,7 +320,7 @@ public final class ShieldMoves {
 		if (up && now < state.chargeEnd) {
 			ram(player, state, level);
 		}
-		boolean still = up && player.onGround() && !player.isSprinting() && moved.lengthSqr() < STILL && now >= state.chargeEnd;
+		boolean still = up && player.onGround() && !player.isSprinting() && (moved.lengthSqr() < STILL || player.isShiftKeyDown()) && now >= state.chargeEnd;
 		state.still = still ? state.still + 1 : 0;
 		boolean braced = state.still >= BRACE_TICKS;
 		if (braced != state.braced) {

@@ -2087,7 +2087,7 @@ public final class GravityPower implements Power {
 
 	/** Everyone (but the user) within {@code radius} of {@code center} is heavy for a moment (refresh it to keep them so). */
 	/** Forced to its knees until {@code until} (or longer, if it's already kneeling for longer). */
-	static void kneel(LivingEntity living, long until) {
+	public static void kneel(LivingEntity living, long until) {
 		Kneeling was = KNEELING.get(living.getUUID());
 		if (was != null && was.until() >= until) {
 			return;

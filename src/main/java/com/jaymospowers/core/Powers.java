@@ -250,6 +250,9 @@ public final class Powers {
 		if (down && power != null && silenced(player)) {
 			return;
 		}
+		if (down && power != null && com.jaymospowers.boxing.PressurePoints.keyShut(player, key)) {
+			return;
+		}
 		// (0.15.136) a press the body can't make (a severed limb the ability is done with) never starts, and its release
 		// is swallowed too
 		int need = LimbUse.need(power, player, LimbUse.slot(key));
