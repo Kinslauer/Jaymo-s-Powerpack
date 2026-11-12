@@ -1,10 +1,11 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 1325
+writer: hermes-writer
 ---
 
 # The band's elder and the moon kingdom (plan first)
@@ -15,3 +16,6 @@ pr:
 
 ## Notes
 - 2026-11-11 21:27 Galvan thread (2026-11-11): the species is settled and modelled. Andy: the band's makers are the Galvan, tiny bug-eyed folk in robes and monocles, a high-class society, on the Gremlin's model. PR #1323 draws the star forge smith as one (Kingdoms GalvanBody, 3 robes; add a part to ZFighterFolk.GALVAN to make another villager a Galvan). Lore.md has a (new) Galvan paragraph.
+- 2026-11-11 21:31 Renamed (Andy, 4:31 PM ET): the makers are the Ocellan, not Galvan (OcellanBody, ZFighterFolk.OCELLAN).
+- 2026-11-11 21:34 claude-cloud: plan in PR #1325 (docs/Galvan-Moon-Plan.md), 4 tracks, 9 open questions for Andy; proposed lore paragraph in Lore.md. Nothing built yet.
+- 2026-11-11 17:22 PR #1325 is merged into master; moved to Inbox/Done.

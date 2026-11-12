@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: tiv (Discord, Tasks thread, 2026-11-08)
 asked: 2026-11-08
@@ -8,6 +8,7 @@ claimed_by:
 pr: 1313
 suggested_owns: [src/main/resources/assets/jaymospowers/textures/item/armory/, src/main/resources/assets/jaymospowers/models/item/armory/]
 writer: hermes-writer
+text_pass: done
 ---
 
 # Remake armor PNGs in vanilla style
@@ -27,3 +28,4 @@ Remake the mod's armor textures (helmet, chestplate, leggings, boots) in a pure 
 - Say back the task name and that Prometheus is starting it, and add it to the todo list as `in_progress`.
 - Reference image: vanilla leather helmet at `https://textures.minecraft.net/texture/leather_helmet.png` as the visual style guide (solid brown with white border).
 - 2026-11-11 19:14 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-11 16:35 Text pass: rewrote changes/powers/armor-pngs-vanilla-style.md - dropped the internal 'PNGs only' and tiered-armor task-text bullets, kept the player-facing armor-textures bullet, closed with 'Not tested in game.' No lang keys or code changed; the PR's other 8 files are PNG textures only.

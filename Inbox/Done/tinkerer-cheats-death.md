@@ -12,3 +12,6 @@ pr:
 **Andy (2026-11-11):** "The tinkerer is the only other chrono user... he conquered his echo, and conquered death... he should cheat death the same way if ever he is killed, and his echos will reappear and act in his place, which is why he seems to be multiple places at once."
 
 **Build:** killing the Mad Tinkerer doesn't end him: a chrono echo of him reappears and carries on in his place, and he can show up in more than one place. Reuse the Chrono echo entity where it fits. He never admits the android bug. Lore: Lore.md "Who the Tinkerer is".
+
+## Notes
+- 2026-11-12 01:48 claude-cloud-tinkerer's claim had no sign of work for 30 min: handed back as open.

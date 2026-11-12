@@ -135,6 +135,26 @@ kit.
 - **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
   choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
   within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+  (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
+  plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
+  rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
+  their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
+  when they heal (Andy, 2026-11-11).
+  **The Unseeing** (Andy, 2026-11-11: "add the unseeing as a feral cult, that believes in nonsense as an 8th belief")
+  are a feral cult with a belief of their own, beside the faiths: that the eye lies, that the sun is a great eye lying
+  to everyone, that the seven are painted faces and the Truth a book with no letters, and that when all are blind no
+  one can be watched. They keep two rites: the blindfold, tied on and never taken off, and the gouging, the eyes
+  carved out and the sockets bound in linen. The gouged lose their minds in time; the zealous among them hunt by ear
+  anyone who still has their eyes, and leave alone those who have taken the dark on themselves. Villagers who have
+  done it are shunned by their own, so the Unseeing live apart, in enclaves in caves and other dark places in the
+  wild, where they are safe to keep their belief. A traveller may come on one of their services at night out in the
+  wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
+  blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
+  ("you should be able to stumble on a service of the members performing this on one of their followers").
+  **It is the faith the barbarians follow** (Andy, 2026-11-11: "these can be the faith barbarians follow"): the camps
+  hold none of the eight; the Unseeing in their caves are its most zealous, the ones who went all the way. It isn't a
+  faith a player can swear to. What they are given is not their eyes back: living things burn
+  through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
@@ -162,6 +182,13 @@ whole time"; their ki "went to the cold, or the smoke, or the weight of things, 
 go looking for anything else"; and "you will grow something of your own instead, harder than any of it. Watch for it
 when you are frightened, and do not run." That something is Valor. The letter never says "spirit" or "Valor".
 
+**What an elemental user sees** (Andy approved, 2026-11-11). A Smoke, Gravity or Cryo user's ki
+went to the element and shows faintly: a scouter or a Z Fighter's ki sense reads them at well under half of what their
+body alone would give, the weakest aura there is. Mana never shows to them, even if they attune at an amethyst seam or
+sink deep enough into corruption to read magic: no glow on a wizard, no mana wings, no spirit at anyone's shoulder, no
+mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
+any other power user.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
@@ -169,6 +196,26 @@ outright, mostly to make daily life easier: putting out a fire, keeping a food s
 vigilantes work on the legend of the old heroes, but each has their own methods, some better than others, so they are
 widely disliked. Costumed power users turn up in the world, some wreaking havoc, some trying to help their people. A
 masked hero goes by the costume's name while masked.
+
+(new) **The costumed gifted, and the everyday ones** (Claude's placement, for Andy to approve). The costumed power users
+in the world are gifted villagers, the one in eighty whose power woke. Only those who hide their gift put on a costume:
+the ones who don't care who sees have no need of a mask, and use the power plainly about the house. A costume is sewn by
+the village tailor, the same who sews them for players, and worn only after dark; by day its wearer is a baker or a
+farmhand like anyone else, and the street doesn't know whose face is under it.
+- **Vigilantes** are the brave, the kindhearted, the dutiful and the devout: at night, masked, they go out after the
+  monsters that come at their own people, by the legend of the old heroes, each in their own way.
+- **Villains** are the spiteful, the greedy and the hotheaded: at night, masked, they come out to rough up a passer-by
+  or a stranger, and are gone before the guard comes.
+- **Rivals** (Andy, 2026-11-11: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even
+  get involved"). A vigilante goes for a villain before any monster, and once two have fought they know each other: the
+  one hunts the other, the other comes looking for a fight, and a stranger who joins in is thanked grudgingly or mocked.
+- **The folk talk of them** (Andy: "the villagers will talk about the ones they have seen"): by the costume's name, by
+  day, of who was out last night and who fought whom.
+- **Nobody likes either.** Folk grumble at a vigilante passing ("Go home. We managed before you lot.") and run from a
+  villain; neither is thanked.
+- **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
+  dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
+  house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
 
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
@@ -187,6 +234,21 @@ traits, never as a system.
 **The Flame Avatar.** An Emberborn who holds fire long enough is held by it in turn. The signs come slowly ("The
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
+
+**The skull under the fire.** When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
+
+**The burning chain.** A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
+
+**Judgement.** An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
+the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
+
+**The burning steeds.** The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
+crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
+kin to the fire; anyone else is burned and thrown.
 
 ## The Z Fighters
 
@@ -229,6 +291,13 @@ player does, by messing about with time, but he **conquered his echo, and conque
 through time ever since, wreaking havoc on events and warping the timeline, and he seems to get away with all of it.
 If he is ever killed he cheats death the same way: his **echoes** reappear and act in his place, which is why he seems
 to be in several places at once.
+
+(new) **How his echoes cheat death** (tinkerer thread, 2026-11-11). He can be hurt and killed, unlike the other
+masters you meet. The body falls like anyone's. A breath later one of his echoes steps out of the air where he fell, in
+the same violet burst and pale shards a Chrono's own echo arrives in, and carries on at his bench as if nothing
+happened ("Hm? Oh, him. One of me."), mid-operation included. Wherever else he is standing just then, he flinches and
+mutters that somebody, somewhere, has just killed him. Ask him about Los Perrito's androids and he blames shoddy
+copies, the city's orders, or "a bug, every machine has one", and changes the subject.
 
 **His androids and mechs** (Andy, 2026-11-11). He developed the androids himself, from Frostborn designs, and has had
 years to rework them; that is why there are so many mech builds. **The bug that turned Los Perrito's androids was
@@ -302,8 +371,14 @@ there is no road, and nobody below has the ships. Sky kingdoms deal with each ot
 
 (new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
 village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
-the head of the road a three-storey keep with flared roofs, which is the lord's seat. A blossom town is a kingdom like
-any other great town, and keeps its own style of name.
+the head of the road the lord's castle. A blossom town is a kingdom like any other great town, and keeps its own style
+of name.
+
+(new) **The blossom castle.** The blossom lords build their seat the same way wherever they rule: a moat and a stone
+bridge, a footing of rough stone that leans in as it climbs, and on it a white keep of four storeys under grey tiled
+roofs whose corners turn up, with a pair of pale horns on the top ridge and a gatehouse against one side. The lord
+sits in a niche at the far end of the great room, between two raised matted floors where his people kneel. The grey
+tile is the castle's alone; the town below roofs in dark tile.
 
 ## The shape of the world
 
@@ -478,6 +553,57 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+(new) **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
+world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
+the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
+branched, and hang glowing spore lanterns that the Verdant dye and carry home for light. In the warm wet country is the
+**pulse forest**: thin blue stems with flat caps that brighten and dim together, the whole wood on one slow beat.
+Verdant elders say the wood is breathing; nobody has shown otherwise. In the dry cold uplands is the **stone garden**:
+wind-worn pillars and banded boulders with moss on their heads, and little else. And over all of it, in the same place
+day and night, hangs a **blue giant with a ring**: the Verdant World is its moon. The Verdant tell time of year by how
+the ring lies and do not think the sight remarkable.
+
+(new) **Storm, sand and wind** (four-mods thread, 2026-11-11, Eden Ring part 2). Three more countries of the Verdant
+World. The **brainstorm** is cold grey upland where the ground is rich in metal and so are the trees: a brain tree
+carries copper, iron or gold through its flesh, builds up charge and lets it go into anything living that comes near.
+The Verdant who gather there wear metal, which takes the charge to ground; they say the trees are thinking, and that
+it is rude to interrupt. The **lakeside desert** is hot dry country where every pond stands in a ring of sand, because
+of the aquatus on its shore, a plant that drinks the soil dry around it. Plant one by a field and lose the field. The
+**wind valley** is open grass between the two, where the wind never drops: it comes from one quarter for days and
+swings slowly round, and carries off anything thrown or let fall.
+
+(new) **Gravilite** (four-mods thread, 2026-11-11, Eden Ring part 3). All over the Verdant World, in every country,
+small blue crystals stand out of the ground and glow. The Verdant call it gravilite and say it fell from the ring of
+the giant overhead, the same stuff that holds the ring up. On its own it only shines, so they light their halls with
+it, in lamps and lanterns. Bound in iron over a core of redstone it does what the ring does: the **Gravity
+Compressor** turns weight upside down in the air above it, higher the harder it is driven. The Verdant use them as
+lifts and to keep stores off the ground. It is a craft of theirs, not a power, and it has nothing to do with the
+Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
+balloon mushroom, pulse tree and brain tree each give a full joiner's set.
+
+(new) **The small growth** (four-mods thread, 2026-11-11, Eden Ring part 4). Under the big trees the far country has
+its own undergrowth, and all of it takes the colour of the country it grows in. **Violum** stands two blocks tall and
+its bloom glows; **lonlix** is the common tuft of the warm lands; **parignum** lies in mats with small lit flowers;
+grey **Eden moss** covers the stone garden. **Eden vines** hang in strings under caps and ledges, and the **symbiotic
+moulds** grow on the undersides of the mushrooms and brain trees that feed them, one kind glowing. **Limphium** is the
+one the Verdant farm: its leaves are poor eating fresh and good eating dried, and a traveller in the far country is
+offered them before anything else.
+
+(new) **Diskwings** (four-mods thread, 2026-11-11, Eden Ring part 4). The far country's sky has one beast of its
+own: the diskwing, a flat slow glider with two crescent wings and a finned tail, lit along its back in its country's
+colour (purple over the mushroom forests, red over storm and sand, green over stone and grass, blue over the pulse
+forest). They harm nothing and nothing there hunts them. The Verdant read weather by them and count it bad manners to
+shoot one.
+
+(new) **What the Aether kept of it** (four-mods thread, 2026-11-11, Eden Ring part 5; Andy: Golden Forest, hollow
+islands and Sky Colony go in the Aether). Three things of the far country's kind are found in the Aether and not on
+the Verdant World, and the sky folk hold that they were always the Aether's and the Verdant World only has their
+cousins. On the wetter side of the Gilded Ridge stands the **Sunroot Grove**: tall straight trees under broad golden
+crowns, over yellow moss. Sunroot is the sky towns' best joinery wood. High above the islands drift **volvox
+colonies**, hollow balls of living jelly round a dense glowing heart; nobody has seen one start or die. And among them
+drift **hollow islands**, shells of holystone turfed on top, with a chamber inside lit by gravilite, which is the
+only place in the Aether it grows. Divine-born children are told the hollow islands are eggs.
+
 Each occupied world can be **freed** (its captains and their boss beaten) or **conquered** (its champions beaten and a
 Conquest Flag planted).
 
@@ -521,18 +647,31 @@ upgrades are done there, at the elder's forge. The elder's people have an extrem
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
 the moon to get the band back, for the kingdom's ruler, who wants the band's power for himself.
 
-(new) **The Galvan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
-eyes ... the npc galvan wear robes ... and monocles, and are a high class society"). The elder's people are the
-**Galvan**: grey folk about half a block tall, with wide flat heads and two great yellow-green eyes that stand out past
-the sides of them and shine in the dark. Theirs is a high-class society: they go in long trimmed robes with a short
-mantle and wide cuffs, wear a monocle on a chain, and fold their hands in front of them. The smith who keeps the band's
-forge is one. The band's **Gremlin** is the Galvan's own shape, bare of the robe: the makers put themselves in the band.
-(The name is Andy's working name; no line in the game says it yet.)
+(new) **The Ocellan** (Andy, 2026-11-11: "the race of aliens that build and upgrade the watch ... very small with bug
+eyes ... robes ... and monocles, and are a high class society"; he asked for a name of our own in place of his working
+name, and he picked Ocellan, from ocellus, a small eye). The elder's people are the **Ocellan**: grey folk about
+half a block tall, with wide flat heads and two great yellow-green eyes that stand out past the sides of them and shine
+in the dark. Theirs is a high-class society: they go in long trimmed robes with a short mantle and wide cuffs, wear a
+monocle on a chain, and fold their hands in front of them. The smith who keeps the band's forge is one. The band's
+**Gremlin** is the Ocellan's own shape, bare of the robe: the makers put themselves in the band.
 
 (new) **The hunter's orders** (Retaking, the Xenoform's Road, 2026-11-11). Beaten and robbed of the rival band, the
 hunter drops his orders as he runs: find the band ("it hums when it is near its maker's work"), do not bargain or
 explain, "the old one says it was made to be given. The old one is not the one who sent you", and "if you cannot bring
 it home, do not come home". Andy confirmed (2026-11-11): the elder meant the band to be given away.
+
+(new) **Undersky, the city under the dust** (Andy, 2026-11-11: "hidden"; names Claude's, Andy said "surprise me"). The Ocellan live hidden
+beneath one great crater of the Pale Moon, in a domed hollow built of pale alloy (which is why that metal is in the
+moon's ore at all), behind a gate that opens only to a band. That is why raiders found "nothing on it" and why nobody
+believes the pod crews' rumour. Inside, tall white towers curve up to a false sky the Ocellan made themselves, blue with pale clouds,
+with gardens on their tops and rails sweeping round them (Andy: like the cities of Viltrum). The moon's Endermen and the Ocellan fight all the time: the Endermen steal
+the city's blocks, lamps and panels and bits of the false sky, with no idea what any of it does, for the mischief of it
+(Andy, 2026-11-11). The elder, **Ammet Thrum** (the Old Maker), keeps the Star Forge there; the ruler, **Sovereign Vorrel**, keeps
+his court there, and a sealed
+workshop where the rival band was made. A band wearer who hands the band to the ruler sees what he wanted it for: he
+puts it on and turns on them in his own court (Andy, 2026-11-11).
+Before Vorrel the Ocellan "had it figured out" (Andy, 2026-11-11): from Undersky they traded and made war between
+the worlds. Whoever kills the ruler while he wears the band may take his seat and open the city to the worlds again.
 
 ## The future: Los Perrito
 
@@ -564,6 +703,13 @@ Some still fight in the hope of someday taking back what was.
 
 **The three-sided war** (Andy, 2026-11-11). Frostborn troopers in rigs fight in the future too, so the streets are a
 three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
+
+(new) **The troopers** (future-three-sided-war, 2026-11-11). The Frostborn come in squads, each trooper in a whole Rig,
+firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
+Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
+the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
+hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
+and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
 travelled back and forth through time, and they still do; some of them hope to prevent it someday, somehow. They are the same androids that turned in
