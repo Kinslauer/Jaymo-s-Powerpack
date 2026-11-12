@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebHeldGrab;
+import com.jaymospowers.power.web.WebLatch;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.HumanoidModel;
@@ -49,6 +50,14 @@ public final class WebHeldGrabPose {
 	static final float CRUSH_ARM = -1.35F, CRUSH_ACROSS = -0.55F, CRUSH_TREMBLE = 0.05F, CRUSH_TREMBLE_SPEED = 2.5F;
 	/** The skewer: the body twists this far (radians) and the right shoulder lifts out by this, the arm back by this. */
 	static final float SKEWER_TWIST = -0.25F, SKEWER_SHOULDER = 0.5F, SKEWER_ARM = 0.3F;
+	/** The ankle swing: both hands on the ankles, leaning back against the weight (radians) and the shoulders winding round this far. */
+	static final float SWING_ARMS = -1.15F, SWING_LEAN = -0.3F, SWING_TWIST = 0.9F;
+	/** The ground and pound: the arms raised between blows (radians) and driven down to {@code SLAM_ARMS} on each; the body bends this far into each. */
+	static final float POUND_RAISE = -2.3F, POUND_BEND = 0.5F;
+	/** A friend over the shoulders: both arms up round their legs (radians), and the body a little forward. */
+	static final float CARRY_ARM = -0.9F, CARRY_OUT = 0.35F, CARRY_BEND = 0.06F;
+	/** Latched or riding: the arms reach round the mount (radians), the legs clamp round it, the body lean, and the bite's lunge (pixels) and tip. */
+	static final float CLING_ARM = -1.75F, CLING_IN = 0.45F, CLING_LEG = -0.9F, CLING_LEG_OUT = 0.5F, CLING_BEND = 0.3F, CLING_LUNGE = 2.0F, CLING_TIP = 0.5F;
 	// ================================================================================================================
 
 	/**
@@ -56,8 +65,11 @@ public final class WebHeldGrabPose {
 	 * {@code phase}: how far through it (0-1); {@code target}: the held thing's middle in the model's root space (pixels,
 	 * +Y down), for things drawn at it (the skewer), or null.
 	 */
-	public record Grab(float in, int attack, float phase, float time, @Nullable Vec3 target) {
+	public record Grab(float in, int attack, float phase, float time, @Nullable Vec3 target, int mode) {
 	}
+
+	/** {@link Grab#mode}: in the hand, over the shoulders, latched onto a mount's back, riding a big one. */
+	public static final int HAND = 0, SHOULDERS = 1, LATCHED = 2, RIDING = 3;
 
 	public static final RenderStateDataKey<Grab> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_held_grab");
 
@@ -74,7 +86,12 @@ public final class WebHeldGrabPose {
 		}
 		WebHeldGrab.Held held = player.getAttached(WebHeldGrab.HELD);
 		LivingEntity target = held == null ? null : WebHeldGrab.heldEntity(player);
-		boolean on = held != null && target != null;
+		WebLatch.Latch latch = held == null ? player.getAttached(WebLatch.LATCH) : null;
+		LivingEntity mount = latch == null ? null : WebLatch.mount(player);
+		if (mount != null) {
+			target = mount;
+		}
+		boolean on = held != null && target != null || mount != null;
 		float in = WebEase.smooth(IN.to(entity.getId(), on ? 1.0F : 0.0F, BLEND_TICKS));
 		if (in <= 0.001F) {
 			state.setData(KEY, null);
@@ -83,8 +100,14 @@ public final class WebHeldGrabPose {
 		float time = entity.level().getGameTime() + partialTicks;
 		int attack = -1;
 		float phase = 0.0F;
-		if (on && held.attack() >= 0) {
-			phase = (entity.level().getGameTime() - held.attackStart() + partialTicks) / (float)WebHeldGrab.ANIM_TICKS;
+		if (mount != null) {
+			float bite = WebLatch.biteTicks(player, partialTicks);
+			if (bite >= 0.0F) {
+				attack = WebHeldGrab.BITE;
+				phase = bite / WebLatch.BITE_ANIM_TICKS;
+			}
+		} else if (on && held.attack() >= 0 && !held.carried()) {
+			phase = (entity.level().getGameTime() - held.attackStart() + partialTicks) / (float)WebHeldGrab.animTicks(held.attack());
 			if (phase >= 0.0F && phase < 1.0F) {
 				attack = Mth.clamp(held.attack(), 0, WebHeldGrab.ATTACKS - 1);
 			}
@@ -98,18 +121,20 @@ public final class WebHeldGrabPose {
 			Vector3f q = Axis.YP.rotationDegrees(-(180.0F - yaw)).transform(new Vector3f((float)d.x / scale, (float)d.y / scale, (float)d.z / scale));
 			at = new Vec3(-q.x, 1.501F - q.y, q.z).scale(16.0);
 		}
-		state.setData(KEY, new Grab(in, attack, phase, time, at));
+		int mode = mount != null ? (latch.ride() ? RIDING : LATCHED) : held != null && held.carried() ? SHOULDERS : HAND;
+		state.setData(KEY, new Grab(in, attack, phase, time, at, mode));
 	}
 
 	/** The bite is closing on it: the teeth bare (WebHulk.teeth). */
 	static boolean biting(AvatarRenderState state) {
 		Grab grab = state.getData(KEY);
-		return grab != null && grab.attack() == WebHeldGrab.BITE && grab.phase() > 0.15F && grab.phase() < 0.85F;
+		return grab != null && grab.attack() == WebHeldGrab.BITE && grab.phase() > 0.15F && grab.phase() < 0.85F
+			&& (grab.mode() == HAND || grab.mode() >= LATCHED);
 	}
 
 	/** Where an attack lands, as a share of its animation. */
 	private static float hitShare(int attack) {
-		return WebHeldGrab.HIT_TICK[Mth.clamp(attack, 0, WebHeldGrab.ATTACKS - 1)] / (float)WebHeldGrab.ANIM_TICKS;
+		return WebHeldGrab.HIT_TICK[Mth.clamp(attack, 0, WebHeldGrab.ATTACKS - 1)] / (float)WebHeldGrab.animTicks(attack);
 	}
 
 	/** How far out an attack's reach is (0-1): rising to the blow, held a moment, then drawn back. Spikes, blades and the skewer grow by it. */
@@ -160,6 +185,14 @@ public final class WebHeldGrabPose {
 	private static void pose(HumanoidModel<?> h, AvatarRenderState avatar, Grab grab) {
 		boolean slim = avatar.skin != null && avatar.skin.model() == PlayerModelType.SLIM;
 		float armY = slim ? 2.5F : 2.0F;
+		if (grab.mode() == SHOULDERS) {
+			poseCarry(h, avatar, armY);
+			return;
+		}
+		if (grab.mode() >= LATCHED) {
+			poseCling(h, avatar, grab, armY);
+			return;
+		}
 		int attack = grab.attack();
 		float w = attack < 0 ? 0.0F : grown(grab);
 		float s = attack < 0 ? 0.0F : strike(grab);
@@ -227,6 +260,34 @@ public final class WebHeldGrabPose {
 				h.leftArm.zRot -= tremble;
 				h.head.xRot += 0.2F * w;
 			}
+			case WebHeldGrab.SWING -> {
+				// both hands on the ankles, leaning back against the weight, the shoulders winding round through the circle
+				float u = Mth.clamp((grab.phase() * WebHeldGrab.SWING_ANIM_TICKS - WebHeldGrab.SWING_WINDUP)
+					/ (WebHeldGrab.HIT_TICK[WebHeldGrab.SWING] - WebHeldGrab.SWING_WINDUP), 0.0F, 1.0F);
+				h.body.xRot = bend + SWING_LEAN * w;
+				h.body.yRot = turn + SWING_TWIST * Mth.sin(u * Mth.TWO_PI) * w;
+				h.leftArm.xRot = Mth.lerp(w, h.leftArm.xRot, SWING_ARMS);
+				h.rightArm.xRot = Mth.lerp(w, h.rightArm.xRot, SWING_ARMS);
+				h.rightArm.yRot += CRUSH_ACROSS * 0.6F * w;
+				h.leftArm.yRot -= 0.1F * w;
+				h.head.yRot += h.body.yRot * 0.5F;
+				h.head.xRot -= 0.1F * w;
+			}
+			case WebHeldGrab.POUND -> {
+				// both arms hauled up and hammered down into the ground, three times, the body folding into each
+				float t = grab.phase() * WebHeldGrab.POUND_ANIM_TICKS;
+				float blow = 0.0F;
+				for (int hit : WebHeldGrab.POUND_HITS) {
+					blow = Math.max(blow, smooth(1.0F - Math.abs(t - hit) / 3.0F));
+				}
+				float up = w * (1.0F - blow);
+				h.leftArm.xRot = Mth.lerp(w, h.leftArm.xRot, Mth.lerp(blow, POUND_RAISE, SLAM_ARMS) - bend);
+				h.rightArm.xRot = Mth.lerp(w, h.rightArm.xRot, Mth.lerp(blow, POUND_RAISE, SLAM_ARMS * 2.0F) - bend);
+				h.rightArm.yRot += CRUSH_ACROSS * 0.5F * w;
+				h.body.xRot = bend + POUND_BEND * blow * w - 0.2F * up;
+				h.head.xRot += 0.4F * blow * w;
+				sink = SLAM_SINK * blow * w;
+			}
 			case WebHeldGrab.SKEWER -> {
 				// the shoulder lifts and the body twists as the tendril goes in
 				h.rightArm.zRot += SKEWER_SHOULDER * w;
@@ -237,6 +298,58 @@ public final class WebHeldGrabPose {
 			}
 		}
 		h.root().y = sink;
+	}
+
+	/** A friend over the shoulders: both arms up and round their legs, the body upright and a touch forward. */
+	private static void poseCarry(HumanoidModel<?> h, AvatarRenderState avatar, float armY) {
+		WebFeral.place(h.body, 0.0F, 0.0F, CARRY_BEND);
+		WebFeral.place(h.head, 0.0F, 0.0F, CARRY_BEND);
+		WebFeral.place(h.rightArm, -5.0F, armY, CARRY_BEND);
+		WebFeral.place(h.leftArm, 5.0F, armY, CARRY_BEND);
+		h.body.xRot = CARRY_BEND;
+		h.body.yRot = 0.0F;
+		h.body.zRot = 0.0F;
+		h.head.xRot = avatar.xRot * Mth.DEG_TO_RAD + CARRY_BEND;
+		h.head.yRot = avatar.yRot * Mth.DEG_TO_RAD;
+		h.head.zRot = 0.0F;
+		h.leftArm.xRot = CARRY_ARM;
+		h.leftArm.yRot = -0.1F;
+		h.leftArm.zRot = -CARRY_OUT;
+		h.rightArm.xRot = CARRY_ARM;
+		h.rightArm.yRot = 0.1F;
+		h.rightArm.zRot = CARRY_OUT;
+		h.root().y = 0.0F;
+	}
+
+	/** Latched on a mount's back or riding it: arms round it, legs clamped, the body hunched in, the head lunging with each bite, the right hand raking. */
+	private static void poseCling(HumanoidModel<?> h, AvatarRenderState avatar, Grab grab, float armY) {
+		float bite = grab.attack() == WebHeldGrab.BITE ? grown(grab) : 0.0F;
+		float rake = grab.attack() == WebHeldGrab.BITE ? Mth.sin(Mth.clamp(grab.phase(), 0.0F, 1.0F) * Mth.PI) : 0.0F;
+		float bend = CLING_BEND;
+		WebFeral.place(h.body, 0.0F, 0.0F, bend);
+		WebFeral.place(h.head, 0.0F, 0.0F, bend);
+		WebFeral.place(h.rightArm, -5.0F, armY, bend);
+		WebFeral.place(h.leftArm, 5.0F, armY, bend);
+		h.body.xRot = bend;
+		h.body.yRot = 0.0F;
+		h.body.zRot = 0.0F;
+		h.head.xRot = avatar.xRot * Mth.DEG_TO_RAD * 0.5F + bend + CLING_TIP * bite;
+		h.head.yRot = avatar.yRot * Mth.DEG_TO_RAD * 0.5F;
+		h.head.zRot = 0.0F;
+		h.head.z -= CLING_LUNGE * bite;
+		h.leftArm.xRot = CLING_ARM;
+		h.leftArm.yRot = CLING_IN;
+		h.leftArm.zRot = 0.1F;
+		h.rightArm.xRot = CLING_ARM + 1.0F * rake;
+		h.rightArm.yRot = -CLING_IN;
+		h.rightArm.zRot = -0.1F;
+		h.rightLeg.xRot = CLING_LEG;
+		h.rightLeg.yRot = 0.0F;
+		h.rightLeg.zRot = CLING_LEG_OUT;
+		h.leftLeg.xRot = CLING_LEG;
+		h.leftLeg.yRot = 0.0F;
+		h.leftLeg.zRot = -CLING_LEG_OUT;
+		h.root().y = 0.0F;
 	}
 
 	/** Swings an arm's pivot round with the body's turn (about the model's up axis). */

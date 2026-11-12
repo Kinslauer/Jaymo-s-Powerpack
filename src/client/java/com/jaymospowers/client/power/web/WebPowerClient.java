@@ -59,8 +59,8 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
-			if (com.jaymospowers.power.web.WebHeldGrab.holding(player)) {
-				// (0.16.7) something held up in the left hand: the click mauls it (one of six attacks), and nothing else
+			if (com.jaymospowers.power.web.WebHeldGrab.holding(player) || com.jaymospowers.power.web.WebLatch.latched(player)) {
+				// something held up in the left hand: the click mauls it (or throws a friend carried over the shoulders); latched on a mount's back: it bites
 				if (clicks > 0) {
 					ClientPlayNetworking.send(new WebNet.HeldAttack());
 				}
@@ -276,6 +276,29 @@ public final class WebPowerClient implements PowerClient {
 			return;
 		}
 		int hand;
+		// sprinting G at something big: leap onto its back (latch, or ride and maul in the big suit); G while latched lets go
+		net.minecraft.world.entity.LivingEntity latchTarget = key == PowerKey.ABILITY_2 && down && player.isSprinting()
+			&& !com.jaymospowers.power.web.WebHeldGrab.holding(player) ? com.jaymospowers.power.web.WebLatch.aimed(player) : null;
+		// a sneaking friend close by, with Living Armor or the big suit on: G carries them over the shoulders
+		net.minecraft.world.entity.Entity friend = key == PowerKey.ABILITY_2 && down && latchTarget == null
+			&& !com.jaymospowers.power.web.WebHeldGrab.holding(player) && com.jaymospowers.power.web.WebSymbiote.livingArmor(player) ? grabTarget(player) : null;
+		if (friend != null && !com.jaymospowers.power.web.WebHeldGrab.canCarry(player, friend)) {
+			friend = null;
+		}
+		if (key == PowerKey.ABILITY_2 && !down && heldGrabKey) {
+			heldGrabKey = false;
+			return;
+		}
+		if (key == PowerKey.ABILITY_2 && down && com.jaymospowers.power.web.WebLatch.latched(player)) {
+			heldGrabKey = true;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize(-1));
+			return;
+		}
+		if (latchTarget != null || friend != null) {
+			heldGrabKey = true;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new WebNet.HeldSeize((latchTarget != null ? latchTarget : friend).getId()));
+			return;
+		}
 		// only Living Armor's tendrils grab (or theirs while they hold you off a wall); the plain suit just swings (on black ropes)
 		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player);
 		if (key == PowerKey.ABILITY_1) {
