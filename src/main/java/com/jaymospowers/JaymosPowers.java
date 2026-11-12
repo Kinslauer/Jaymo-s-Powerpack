@@ -144,6 +144,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.GroundSticks.init();
 		// (0.20.89) seamed stone and rocky dirt round ore veins
 		com.jaymospowers.ground.OreTells.init();
+		// sulphur and saltpetre: ores, loose crust, and the true black powder
+		com.jaymospowers.ground.PowderMinerals.init();
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();

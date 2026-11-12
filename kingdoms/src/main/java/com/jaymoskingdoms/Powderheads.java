@@ -38,11 +38,13 @@ import net.minecraft.world.phys.Vec3;
  * weaponsmith's or armourer's book, and a foe specialist in the bands. Nothing comes from nowhere: everything it makes
  * and throws is made from what it carries ({@link SimpleContainer the villager's own pack}).
  * <ul>
- * <li><b>Stocking it</b>: use charcoal, bone meal, gunpowder, string, paper, an iron ingot, gravel or a dynamite stick
- * on your powderhead and it packs the lot ({@link #STOCK}). It also picks up loose gunpowder near it (a creeper's).</li>
- * <li><b>Black powder</b>: out of a fight it grinds one charcoal and two bone meal (the saltpetre of the bone heap)
- * into a gunpowder ({@link #GRIND_EVERY}), keeping a few in hand; players craft it the same way (recipe
- * {@code black_powder}).</li>
+ * <li><b>Stocking it</b>: use charcoal, bone meal, gunpowder, string, paper, an iron ingot, gravel, a dynamite stick,
+ * or Powers' saltpetre, sulphur or brimstone on your powderhead and it packs the lot ({@link #STOCK}). It also picks up
+ * loose gunpowder near it (a creeper's).</li>
+ * <li><b>Black powder</b>: out of a fight ({@link #GRIND_EVERY}), keeping a few in hand, it grinds the true mix when it
+ * has it, three saltpetre, a sulphur (or brimstone) and a charcoal into four gunpowder ({@link #TRUE_SALTPETRE}); else
+ * one charcoal and two bone meal (the saltpetre of the bone heap) into one. Players craft both the same way (recipes
+ * {@code black_powder} and Powers' {@code gunpowder_from_saltpetre}).</li>
  * <li><b>For the marksman</b>: if you carry a gun (a WeaponMod musket, flintlock or blunderbuss) and run low on its
  * ammunition ({@link #LOW_AMMO}), it rolls you cartridges from its pack by the gunsmith's own measure (an iron ingot
  * or gravel, a gunpowder and a paper for eight: bullets, or shot for a blunderbuss); without the makings it hands you
@@ -66,6 +68,9 @@ public final class Powderheads {
 	static final int HAND_POWDER = 4, KEEP_POWDER = 2;
 	/** Shot a measure of powder gives a companion's or mate's musket. */
 	static final int SHOT_PER_POWDER = 4;
+	/** The true mix: saltpetre in it (with a sulphur and a charcoal), and the gunpowder it makes (Powers' recipe). */
+	static final int TRUE_SALTPETRE = 3, TRUE_YIELD = 4;
+	private static final String SALTPETRE = "saltpetre", SULPHUR = "sulphur", BRIMSTONE = "brimstone";
 	/** Sticks it keeps made up. */
 	static final int STICKS_KEPT = 6;
 	/** Its throw: from this near to this far (blocks), at most this often (ticks). */
@@ -125,7 +130,17 @@ public final class Powderheads {
 	/** What a powderhead packs when you hand it over. */
 	static boolean stock(ItemStack s) {
 		return s.is(Items.CHARCOAL) || s.is(Items.BONE_MEAL) || s.is(Items.GUNPOWDER) || s.is(Items.STRING) || s.is(Items.PAPER)
-			|| s.is(Items.IRON_INGOT) || s.is(Items.GRAVEL) || s.is(Dynamite.stick());
+			|| s.is(Items.IRON_INGOT) || s.is(Items.GRAVEL) || s.is(Dynamite.stick()) || is(s, SALTPETRE) || is(s, SULPHUR) || is(s, BRIMSTONE);
+	}
+
+	private static boolean is(ItemStack s, String powersItem) {
+		Item item = powers(powersItem);
+		return item != null && s.is(item);
+	}
+
+	/** One of Powers' items (its sulphur, saltpetre, brimstone), or null without Powers. */
+	private static Item powers(String path) {
+		return BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", path)).orElse(null);
 	}
 
 	/** (Specialties.roll) a band member's chance of being a powderhead, and what it carries. */
@@ -190,10 +205,19 @@ public final class Powderheads {
 			return;
 		}
 		int powder = count(pack, Items.GUNPOWDER);
-		if (powder < KEEP_POWDER + HAND_POWDER && count(pack, Items.CHARCOAL) >= 1 && count(pack, Items.BONE_MEAL) >= 2) {
+		// the true mix (three saltpetre, a sulphur or brimstone, a charcoal: four measures) before the bone-heap one
+		Item saltpetre = powers(SALTPETRE), sulphur = powers(SULPHUR), brimstone = powers(BRIMSTONE);
+		Item burning = sulphur != null && count(pack, sulphur) >= 1 ? sulphur : brimstone != null && count(pack, brimstone) >= 1 ? brimstone : null;
+		boolean trueMix = saltpetre != null && burning != null && count(pack, saltpetre) >= TRUE_SALTPETRE && count(pack, Items.CHARCOAL) >= 1;
+		if (powder < KEEP_POWDER + HAND_POWDER && (trueMix || count(pack, Items.CHARCOAL) >= 1 && count(pack, Items.BONE_MEAL) >= 2)) {
 			take(pack, Items.CHARCOAL, 1);
-			take(pack, Items.BONE_MEAL, 2);
-			pack.addItem(new ItemStack(Items.GUNPOWDER));
+			if (trueMix) {
+				take(pack, saltpetre, TRUE_SALTPETRE);
+				take(pack, burning, 1);
+			} else {
+				take(pack, Items.BONE_MEAL, 2);
+			}
+			pack.addItem(new ItemStack(Items.GUNPOWDER, trueMix ? TRUE_YIELD : 1));
 			v.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			level.playSound(null, v.blockPosition(), SoundEvents.GRINDSTONE_USE, SoundSource.NEUTRAL, 0.5F, 1.4F);
 			level.sendParticles(ParticleTypes.SMOKE, v.getX(), v.getY() + 1.0, v.getZ(), 4, 0.2, 0.1, 0.2, 0.01);

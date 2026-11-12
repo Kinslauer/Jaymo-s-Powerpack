@@ -15,6 +15,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -158,7 +159,9 @@ public final class OreTells {
 				int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
 				p.set(x, top, z);
 				BlockState ground = level.getBlockState(p);
-				if (!(ground.is(Blocks.DIRT) || ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.COARSE_DIRT) || ground.is(Blocks.PODZOL))) {
+				// dry sand and terracotta show only saltpetre, which blooms out of desert ground
+				boolean sandy = ground.is(BlockTags.SAND) || ground.is(BlockTags.TERRACOTTA);
+				if (!(sandy || ground.is(Blocks.DIRT) || ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.COARSE_DIRT) || ground.is(Blocks.PODZOL))) {
 					continue;
 				}
 				BlockPos above = p.above();
@@ -167,6 +170,18 @@ public final class OreTells {
 				}
 				for (int dy = SHALLOW_MIN; dy <= SHALLOW_MOST; dy++) {
 					BlockState ore = level.getBlockState(p.below(dy));
+					// sulphur and saltpetre over a shallow vein bloom at the surface: the pebble is the mineral itself
+					Block bloom = PowderMinerals.bloomOf(ore);
+					if (bloom != null) {
+						if ((!sandy || bloom == PowderMinerals.SALTPETRE_PEBBLE) && random.nextFloat() < PEBBLE_CHANCE) {
+							level.setBlock(above, bloom.defaultBlockState(), Block.UPDATE_CLIENTS);
+							placed = true;
+						}
+						break;
+					}
+					if (sandy) {
+						continue;
+					}
 					Block stained = ore.is(ConventionalBlockTags.COPPER_ORES) ? COPPER_PEBBLE : ore.is(ConventionalBlockTags.IRON_ORES) ? IRON_PEBBLE
 						: ore.is(ConventionalBlockTags.GOLD_ORES) ? GOLD_PEBBLE : ore.is(ConventionalBlockTags.COAL_ORES) ? COAL_PEBBLE : null;
 					if (stained != null) {

@@ -1,0 +1,8 @@
+{
+  "feature": "jaymospowers:saltpetre_crust",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
