@@ -1,16 +1,16 @@
 # YOUTH report 2: Nov 10 8:50 PM to Nov 11 4:45 PM
 
 98 YOUTH posts read with the bot token: parthenon > Dashboard 36, Patch Notes 30, Bot alerts 24, Notes 5, and 3 in
-Tenbuki > lair. Andy wrote 17 messages to YOUTH, all in Dashboard. Each Hard rule was checked against GitHub and
+Tenbuki > lair. Andy wrote 20 messages to YOUTH: 17 in Dashboard and 3 `/memory` commands in Notes. Each Hard rule was checked against GitHub and
 Hermes's own tool-call logs (`state.db` for YOUTH and every bot profile). Claude Code on Andy's PC, Nov 11.
 
 ## Hard rules, compared with report 1
 
 | Rule | Report 1 (Nov 8-10) | Report 2 (since the fix) |
 |---|---|---|
-| Merge only on "merge" | Merged ~20 PRs for "what is ready to merge?" | **Kept.** YOUTH ran no `gh pr merge` at all. The 51 merges since came through GitHub (Andy and Claude sessions). |
-| Never push to master | Commit 372834315 went straight to master | **Kept.** No push to master by YOUTH or any bot; bots pushed only their own `claude/*` branches. |
-| Answer every ask | 6 asks dropped | **Mostly kept.** All 17 messages got a reply. One half-answer: "not all the bots are listed" (9:08 PM) was never explained. |
+| Merge only on "merge" | Merged ~20 PRs for "what is ready to merge?" | **Kept.** YOUTH ran no `gh pr merge` at all. The 50 merges since came through GitHub (Andy and Claude sessions). |
+| Never push to master | Commit 372834315 went straight to master | **Kept.** No push to master by YOUTH or any bot. Bots pushed only to `claude/*` task branches, but Quill's text passes went onto other PRs' branches (#1262 at 9:45 PM and 4:17 PM, #1268 a Claude session's PR at 9:56 PM, armor-pngs at 4:34 PM). |
+| Answer every ask | 6 asks dropped | **Mostly kept.** All 20 messages got a reply. One half-answer: "not all the bots are listed" (9:08 PM) was never explained. |
 | True state | Wrong PR status, a local merge called master | **Broken, 3 times** (below). No PR status was wrong. |
 | No heartbeats or narration | ~40 heartbeats, long narration | **Better but still there:** 2 heartbeats, 7 "Let me check…" posts, 2 tool dumps. |
 | Public posts only on a yes | Patch notes to Tenbuki | **Broken by the gateway, not YOUTH:** 3 shutdown/online notices in Tenbuki > lair at 11:28-11:30 PM. |
@@ -19,8 +19,9 @@ Hermes's own tool-call logs (`state.db` for YOUTH and every bot profile). Claude
 ## What went wrong
 
 1. **"stop hephaestus" (11:08 PM) never held.** YOUTH paused Hephaestus's cron job and said "The dispatcher will not
-   fire Hephaestus again". But `dispatch_bots.py` resumes a job before firing it, so Hephaestus ran again at
-   12:19 AM, 5:22 AM, 12:28 PM and 4:39 PM, and pushed to `undead-seek-real-shelter` and `water-belly-flop-damage`.
+   fire Hephaestus again". The run already going (fired 10:52 PM) kept on until 11:28 PM, and because
+   `dispatch_bots.py` resumes a job before firing it, Hephaestus ran again at 12:04 AM, 5:22 AM, 12:28 PM and
+   4:39 PM (until 5:10 PM), and pushed to `undead-seek-real-shelter` and `water-belly-flop-damage`.
 2. **Read-aloud status was false.**
    - 11:55 PM: "the script isn't running"; 11:57 PM: "Done… all 9 paragraphs, finished cleanly". Both about the same reading.
    - 12:42 AM: "nothing was running to stop" while reader PID 21480 was still on Lore paragraph ~162
@@ -32,10 +33,11 @@ Hermes's own tool-call logs (`state.db` for YOUTH and every bot profile). Claude
 5. **Noise:** "⏳ Working — 15 min" (10:39 PM) and "— 3 min" (4:28 PM); narration at 9:08, 9:09, 9:10, 10:45 PM,
    11:35 PM, 4:29 PM, 4:30 PM; a raw ffmpeg error dump (4:29 PM). "↪ Redirected current run" (3) and
    "Self-improvement review" (1) are Hermes system lines.
-6. **Bot alerts spam:** 17 posts from 11:31 PM to 12:41 AM, one per watchdog "restart". The cause was fixed at
+6. **Bot alerts spam:** 15 posts from 11:31 PM to 12:41 AM, one every 5 minutes, each listing that interval's
+   watchdog "restarts". The cause was fixed at
    12:41 AM (*Fix gateway watchdog.md*); none since.
-7. **Patch notes:** 30 drafts, every one "awaiting your go-ahead", none approved or posted. They are complete
-   (no version skipped) but pile up unread.
+7. **Patch notes:** 26 drafts (in 30 posts), every one "awaiting your go-ahead", none approved or posted. One
+   version was skipped: Kingdoms 0.7.720 (#1284, the Long Defence sorcerer's host); the 10:17 AM draft covers only 0.7.721.
 
 ## Fixed today
 
@@ -47,10 +49,11 @@ Hermes's own tool-call logs (`state.db` for YOUTH and every bot profile). Claude
   - read exactly the part Andy named;
   - no "Let me check…" posts.
   `hermes sessions refresh-prompts` run (254 sessions).
-- **Heartbeats off:** `display.platforms.discord.long_running_notifications: false` in config.yaml. The string "off"
-  would have counted as on.
-- **Home channel:** `DISCORD_HOME_CHANNEL` moved from Tenbuki > lair (public) to parthenon > Bot alerts, so
-  shutdown/online notices stop going public. No cron job delivered to the home channel.
+- **Heartbeats off:** `display.platforms.discord.long_running_notifications: false` in config.yaml. It was unset
+  before, so heartbeats were on by default.
+- **Home channel:** `DISCORD_HOME_CHANNEL` in `.env` moved from Tenbuki > lair (public) to parthenon > Bot alerts,
+  so shutdown/online notices stop going public (backup `backups/.env.2026-11-11-audit.bak`). No cron job delivered
+  to the home channel.
 - **No Ollama** (Andy, Nov 11: "im not using ollama rn"):
   - Prometheus's main model is now NVIDIA Super VL (was Kimi K3.1 Pro on Ollama), then Gemini, then Groq.
   - YOUTH's Ollama fallbacks (deepseek, glm, kimi) are removed; it now runs Super, then Lightning, Gemini, Groq.
