@@ -112,6 +112,10 @@ public final class XenoformClient {
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		Player player = entity instanceof Player p ? p : null;
 		String form = player != null ? player.getAttached(XenoformState.FORM) : null;
+		if (form != null && MirageFaceClient.face(player) != null) {
+			// a Mirage wearing a face is drawn as that face, not as the alien
+			form = null;
+		}
 		state.setData(FORM, form);
 		state.setData(XenoformSlap.KEY, XenoformSlap.extract(entity, form, partialTicks));
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
