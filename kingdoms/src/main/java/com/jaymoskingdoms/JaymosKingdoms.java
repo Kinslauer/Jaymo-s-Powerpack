@@ -235,6 +235,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
 		Introductions.register();
+		DeadNames.register();
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();

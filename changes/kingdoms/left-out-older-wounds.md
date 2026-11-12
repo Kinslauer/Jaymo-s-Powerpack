@@ -14,5 +14,7 @@
 - **Cast Out wakes you with an empty map** (Andy: "fix it"). While your own kind are still turning you away (the first three days), Xaero's Minimap shows nothing, no waypoint is drawn in the world or on the map, and Xaero's World Map won't open ("You don't know these lands yet"). Nothing changes without Xaero (`CastOutMap`).
 - **The chained road's figure is drawn in chains**: irons on both wrists and ankles and a chain from wrist to wrist across the front (`StoryChains`).
 - **A ruler's boss bar keeps their name from strangers** (Andy: "fix it"). Until you've been introduced it reads "The King of Ardent" (their title and realm); once you have, their name as before.
+- **Death messages name only those you know** (Andy: "yes it should say stranger, the only way you can find out after death is a new spell death sorcerers can cast called Speak with dead"). A player's death message now reads to each player as they knew the people in it: anyone you weren't introduced to is "a stranger", the dead and their killer alike (`DeadNames`).
+- **Speak with Dead**, a new Death Sorcerer spell (scroll, tome page and staff, tier 2, 12 mana, Will): look at a body and the dead answer, giving who they were, how they died and who killed them (as they knew them), and you know their name from then on. Only a Death Sorcerer can cast it. Its scroll turns up where the Scroll of Whispers does.
 - Powers' escort wards are walked by Powers, as its patrolmen are.
 - Built; not played.

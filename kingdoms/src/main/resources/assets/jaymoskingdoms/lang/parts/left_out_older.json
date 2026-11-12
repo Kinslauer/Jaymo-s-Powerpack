@@ -97,5 +97,15 @@
   "gui.jaymoskingdoms.bout.later": "Not yet",
   "gui.jaymoskingdoms.bout.close": "Close",
   "message.jaymoskingdoms.hard.cast.no_map": "You don't know these lands yet. There's nothing on your map.",
-  "entity.jaymoskingdoms.ruler_unnamed": "The %1$s of %2$s"
+  "entity.jaymoskingdoms.ruler_unnamed": "The %1$s of %2$s",
+  "chat.jaymoskingdoms.death.stranger_first": "A stranger",
+  "chat.jaymoskingdoms.death.stranger": "a stranger",
+  "item.jaymoskingdoms.scroll_of_speak_with_dead": "Scroll of Speak with Dead",
+  "class.jaymoskingdoms.option.speak_with_dead": "Speak with Dead",
+  "class.jaymoskingdoms.option.speak_with_dead.desc": "A Death Sorcerer asks the body they look at, and the dead answer: who they were, how they died, and who killed them. You know their name after.",
+  "message.jaymoskingdoms.death.speak_not_yours": "Only a Death Sorcerer can make the dead speak.",
+  "message.jaymoskingdoms.death.speak_silent": "The dead won't answer. Whoever this was, they're too far gone to call back.",
+  "message.jaymoskingdoms.death.speak_name": "The dead speak: \"I was %s.\"",
+  "message.jaymoskingdoms.death.speak_how": "\"%s.\"",
+  "message.jaymoskingdoms.death.speak_killer": "\"It was %s who did it.\""
 }

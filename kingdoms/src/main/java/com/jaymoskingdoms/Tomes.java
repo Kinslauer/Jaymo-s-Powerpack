@@ -110,7 +110,7 @@ public final class Tomes {
 	static final float ATTUNED_WAIT = Spellcraft.ATTUNED_COOLDOWN;
 	/** Each spell's tier (1 quick .. 5 very long); anything not listed is tier 2. */
 	static final Map<String, Integer> TIER = Map.ofEntries(
-		Map.entry("fire", 1), Map.entry("arcane", 1), Map.entry("whispers", 1), Map.entry("blood_grip", 1),
+		Map.entry("fire", 1), Map.entry("arcane", 1), Map.entry("whispers", 1), Map.entry("blood_grip", 1), Map.entry("speak_with_dead", 2),
 		Map.entry("warding", 2), Map.entry("draining", 2), Map.entry("mending", 2),
 		Map.entry("tide_pearl", 2), Map.entry("harrying_gale", 3), Map.entry("bulwark", 3),
 		Map.entry("raising", 3), Map.entry("sanctuary", 3), Map.entry("blight", 3), Map.entry("hemorrhage", 3),
@@ -123,7 +123,7 @@ public final class Tomes {
 	static final Map<String, String> SPELL_ELEMENT = Map.ofEntries(
 		Map.entry("bulwark", "earth"), Map.entry("tide_pearl", "water"), Map.entry("harrying_gale", "air"),
 		Map.entry("fire", "fire"), Map.entry("arcane", "lightning"), Map.entry("warding", "earth"),
-		Map.entry("draining", "death"), Map.entry("raising", "death"), Map.entry("blight", "death"), Map.entry("whispers", "death"),
+		Map.entry("draining", "death"), Map.entry("raising", "death"), Map.entry("blight", "death"), Map.entry("whispers", "death"), Map.entry("speak_with_dead", "death"),
 		Map.entry("deaths_door", "death"), Map.entry("mending", "restoration"), Map.entry("sanctuary", "restoration"),
 		Map.entry("restoration", "restoration"), Map.entry("hemorrhage", "blood"), Map.entry("blood_grip", "blood"), Map.entry("frenzy", "blood"));
 
