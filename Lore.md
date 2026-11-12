@@ -122,7 +122,7 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-**The twelve powers known in the world**, as folk would describe them:
+**The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
@@ -132,9 +132,18 @@ kit.
   the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
   not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
   off. the bridge is the line now. if you find this don't come".
-- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
-  choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
-  within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+- **Blindness** is not a power (Andy, 2026-11-11: "blindness should stay as is, just no longer considered a power,
+  meaning you can go blind from battle, or malicious intent ... you can awaken resonance while blind with the fork").
+  It is a thing that happens to people: an eye lost to a blow, both taken by an enemy's blade or by one's own hand. For
+  the blind, sound paints the world a moment at a time. **The especially devout choose it**: they don a blindfold or
+  carve out their own eyes. The new kind of sight within the dark, and the bird's-eye view at its height, belong to
+  those among them whom Resonance has answered.
+  (new) **The fork in the dark** (Claude's placement, for Andy to approve). A struck tuning fork is how the blind find
+  out whether sound will answer them: one clear note held in the dark, and for some the note comes back as a world.
+  That is why the Unseeing keep forks and why a service ends with one struck over the newly bound. Most hear only the
+  note. The few who hear more are what the cult calls the Shown, and what everyone else calls a Resonance holder who
+  happens to be blind. A fighter who lost an eye in battle is owed nothing by the dark; it is the whole dark, both eyes,
+  that the fork answers.
   (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
@@ -160,8 +169,22 @@ kit.
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
 - **Darktide**: water and darkness, a guard and a blade, and a Flow that rises in the deep and the dark. Its holders
   harvest shadows; ascended, it is the Abyssal Tide.
+  (new) **The tide in them** (Darktide overhaul, 2026-11-11, for Andy to approve). The Flow keeps a tide of its own: at
+  high tide the holder's reach lengthens, and at spring tide, a full measure, the next thing they call is the great one.
+  A holder with empty hands is never unarmed: the water in them takes the shape of a blade when they raise a guard, and
+  runs back to water when it is not needed. In water or rain they are at home, quicker, and can go under anywhere the
+  rain is falling. The Abyssal Tide's height is the **Maelstrom**: the deep brought up as a standing dome of dark water,
+  which its caller swims through while everyone else in it drowns. Tideborn say the Deep Mother lends it and wants it back.
+  (new) **Ink and water** (Darktide looks, 2026-11-12, for Andy to approve). What a holder does is seen as ink on water:
+  a cut hangs in the air for a breath as a single brush stroke, the tide they call is a true wave with a pale crest, and
+  where they go under the ground lies open as a dark pool. Tideborn calligraphers say the Deep Mother writes with her
+  holders, and read a fight's strokes afterward the way others read tea leaves. A holder near full Flow can be told at
+  a glance: water gathers at their feet and their eyes go pale.
 - **Gravity**: weight taken out of things or piled on; at its height, a meteor called down.
 - **Resonance**: sound and the Deep Dark's sculk. The holder hears through walls and breaks things by their pitch.
+  (new) **What Resonance took from the blind** (2026-11-12, for Andy to approve). A holder can go wholly quiet, steps
+  and breath and all, and what their shout strikes they go on hearing through walls. In the dark, blind or blindfolded,
+  they hear the living as shapes; at their height the hearing lifts off the ground and looks down like a bird.
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.

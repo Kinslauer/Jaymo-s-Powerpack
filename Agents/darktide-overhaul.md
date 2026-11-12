@@ -3,12 +3,18 @@ status: stalled
 task: Darktide overhaul and Resonance into Blindness (proposal, waiting on Andy's picks)
 branch: claude/project-thread-qtqlao
 with: 
-pr: 
+pr: 1339
 mods: powers
 versions: 
 started: 2026-11-12
 owns:
-  - 
+  - src/main/java/com/jaymospowers/power/darktide/
+  - src/client/java/com/jaymospowers/client/power/darktide/
+  - src/main/java/com/jaymospowers/power/resonance/
+  - src/main/java/com/jaymospowers/power/blindness/
+  - src/client/java/com/jaymospowers/client/power/blindness/
+  - src/main/java/com/jaymospowers/core/fx/MagicFx.java
+  - src/client/java/com/jaymospowers/client/fx/MagicFxClient.java
 ---
 # Darktide overhaul
 
