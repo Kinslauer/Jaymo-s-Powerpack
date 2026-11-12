@@ -208,15 +208,8 @@ public final class HobQueue {
 				level.sendParticles(ParticleTypes.SMOKE, fx, pos.getY() + 0.85, fz, 1, 0.15, 0.02, 0.15, 0.005);
 			}
 		}
-		if (now % 60 == 0) {
-			if (pot) {
-				level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.5F, 0.9F);
-			} else if (pan) {
-				level.playSound(null, pos, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.6F, 1.2F);
-			} else {
-				level.playSound(null, pos, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 0.5F, 1.0F);
-			}
-		}
+		// a layered boil, sizzle or bake, unevenly spaced
+		com.jaymoskitchen.sound.KitchenSounds.hob(level, pos, pot, pan);
 	}
 
 	private static void deliver(ServerLevel level, BlockPos pos, Pending p) {

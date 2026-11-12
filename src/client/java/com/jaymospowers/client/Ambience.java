@@ -9,20 +9,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ParticleStatus;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -39,9 +34,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>fireflies drift over flowers and grass in warm biomes from dusk until dawn, more on some nights than others;</li>
  * <li>dust hangs in the air deep in dark caves, thicker the deeper you go;</li>
  * <li>anything that drops into water throws up a splash as wide as it is and as tall as its fall was fast;</li>
- * <li>anyone walking in armour clinks with each stride (its own equip sound, quietly).</li>
+ * <li>the bodies near you are handed to {@link com.jaymospowers.client.sound.Footfalls} each tick for their jumps,
+ * landings, wading, swimming, dives and beds (armour by material rides on each step there, in place of the old clink).</li>
  * </ul>
- * Off when Particles is set to Minimal (the armour clink stays).
+ * Off when Particles is set to Minimal (the bodies' sounds stay).
  */
 public final class Ambience {
 	/** Waterfalls: looked for this far around you (blocks out, blocks up and down), one slice of columns a tick. */
@@ -65,9 +61,8 @@ public final class Ambience {
 	static final double SPLASH_MIN_SPEED = 0.25, SPLASH_DROPS_PER_WIDTH = 14.0, SPLASH_LIFT = 0.55;
 	static final int SPLASH_MAX_DROPS = 60;
 	static final double SPLASH_RADIUS = 32.0;
-	/** Armour: a clink every this many blocks walked, heard this far, at this volume and pitch. */
-	static final double CLINK_STRIDE = 1.7, CLINK_RADIUS = 16.0;
-	static final float CLINK_VOLUME = 0.12F, CLINK_PITCH = 1.45F;
+	/** Bodies this near are handed to Footfalls. */
+	static final double BODY_RADIUS = 16.0;
 
 	/** The waterfalls found, by the column they land in: the spot spray comes from, and the fall's height. */
 	private static final Map<Long, Fall> FALLS = new HashMap<>();
@@ -81,7 +76,6 @@ public final class Ambience {
 	private static final class Track {
 		Vec3 last;
 		boolean wet;
-		double walked;
 
 		Track(Vec3 at, boolean wet) {
 			this.last = at;
@@ -106,6 +100,7 @@ public final class Ambience {
 			lastLevel = level;
 			FALLS.clear();
 			TRACKS.clear();
+			com.jaymospowers.client.sound.Footfalls.clear();
 		}
 		RandomSource random = level.getRandom();
 		boolean particles = mc.options.particles().get() != ParticleStatus.MINIMAL;
@@ -243,10 +238,11 @@ public final class Ambience {
 		}
 	}
 
-	// ---- splashes and armour ----
+	// ---- splashes, and the bodies' own sounds ----
 
 	private static void entities(ClientLevel level, LocalPlayer player, RandomSource random, boolean particles) {
-		AABB around = player.getBoundingBox().inflate(Math.max(SPLASH_RADIUS, CLINK_RADIUS));
+		com.jaymospowers.client.sound.Footfalls.tick(level);
+		AABB around = player.getBoundingBox().inflate(Math.max(SPLASH_RADIUS, BODY_RADIUS));
 		for (Entity entity : level.getEntities((Entity)null, around, e -> e instanceof LivingEntity && !e.isSpectator())) {
 			Vec3 now = entity.position();
 			boolean wet = entity.isInWater();
@@ -259,13 +255,7 @@ public final class Ambience {
 			if (particles && wet && !track.wet && -moved.y >= SPLASH_MIN_SPEED) {
 				splash(level, entity, -moved.y, random);
 			}
-			if (entity.onGround() && !entity.isShiftKeyDown() && entity.distanceToSqr(player) < CLINK_RADIUS * CLINK_RADIUS) {
-				track.walked += Math.sqrt(moved.x * moved.x + moved.z * moved.z);
-				if (track.walked >= CLINK_STRIDE) {
-					track.walked = 0.0;
-					clink(level, (LivingEntity)entity, random);
-				}
-			}
+			com.jaymospowers.client.sound.Footfalls.moved(level, player, (LivingEntity)entity, moved, random);
 			track.last = now;
 			track.wet = wet;
 		}
@@ -300,17 +290,5 @@ public final class Ambience {
 			level.addParticle(ParticleTypes.BUBBLE, entity.getX() + random.nextGaussian() * width * 0.4, surface - 0.3 - random.nextDouble(),
 				entity.getZ() + random.nextGaussian() * width * 0.4, 0.0, 0.04, 0.0);
 		}
-	}
-
-	/** The chestpiece's own equip sound, soft and quick, as if the plates knock together. */
-	private static void clink(ClientLevel level, LivingEntity entity, RandomSource random) {
-		ItemStack chest = entity.getItemBySlot(EquipmentSlot.CHEST);
-		Equippable equippable = chest.isEmpty() ? null : chest.get(DataComponents.EQUIPPABLE);
-		if (equippable == null || equippable.slot() != EquipmentSlot.CHEST) {
-			return;
-		}
-		SoundEvent sound = equippable.equipSound().value();
-		level.playLocalSound(entity.getX(), entity.getY() + 1.0, entity.getZ(), sound, entity.getSoundSource(),
-			CLINK_VOLUME, CLINK_PITCH + (random.nextFloat() - 0.5F) * 0.2F, false);
 	}
 }

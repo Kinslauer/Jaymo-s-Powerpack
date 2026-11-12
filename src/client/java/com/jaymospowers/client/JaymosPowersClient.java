@@ -214,6 +214,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		AimCrosshair.init();
 		GreatHelmView.init();
 		Ambience.init();
+		// our own take on ImmersiveFX's sounds: footsteps, armour, water, jets, stations, drops, beds, the sound browser
+		com.jaymospowers.client.sound.ImmersiveSounds.init();
 		LeafRustle.init();
 		CarryClient.init();
 		PerchClient.init();

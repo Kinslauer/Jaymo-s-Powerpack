@@ -64,6 +64,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.corpse.Scavengers.register();
 		PlayerCorpses.register();
 		Saddlebags.register();
+		// echoes for the layered sounds
+		com.jaymoskitchen.sound.Soundscape.register();
 		Mill.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
