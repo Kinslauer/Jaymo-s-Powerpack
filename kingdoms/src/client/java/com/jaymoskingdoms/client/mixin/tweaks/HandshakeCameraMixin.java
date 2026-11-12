@@ -39,6 +39,10 @@ abstract class HandshakeCameraMixin {
 			// (a lore film: LoreFilmClient)
 			view = com.jaymoskingdoms.client.films.LoreFilmClient.view(this.minecraft, partialTicks);
 		}
+		if (view == null) {
+			// (a great foe's entrance: BossIntroClient)
+			view = com.jaymoskingdoms.client.films.BossIntroClient.view(this.minecraft, partialTicks);
+		}
 		if (view != null) {
 			this.setRotation((float)view[3], (float)view[4]);
 			this.setPosition(view[0], view[1], view[2]);

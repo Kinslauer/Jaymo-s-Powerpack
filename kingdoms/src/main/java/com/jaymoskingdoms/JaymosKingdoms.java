@@ -331,6 +331,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LoreCodex.register();
 		LoreBooks.register();
 		com.jaymoskingdoms.films.LoreFilms.register();
+		com.jaymoskingdoms.films.BossIntros.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();

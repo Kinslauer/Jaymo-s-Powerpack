@@ -64,6 +64,13 @@ public final class BossBars {
 			|| entity instanceof com.jaymoskingdoms.wild.Grizzly;
 	}
 
+	/** {@code player} has met {@code boss} face to face (its entrance played, {@code BossIntros}): its bar shows to them as if they had struck it. */
+	public static void met(LivingEntity boss, ServerPlayer player) {
+		if (boss(boss)) {
+			HITTERS.computeIfAbsent(boss.getUUID(), id -> new HashSet<>()).add(player.getUUID());
+		}
+	}
+
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
 	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
 		Set<UUID> hitters = HITTERS.get(boss.getUUID());

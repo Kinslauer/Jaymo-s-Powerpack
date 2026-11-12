@@ -15,7 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class ClashInputMixin extends ClientInput {
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void jaymoskingdoms$clashing(CallbackInfo ci) {
-		if (ClashCinematic.locked() || com.jaymoskingdoms.client.films.LoreFilmClient.locked()) {
+		if (ClashCinematic.locked() || com.jaymoskingdoms.client.films.LoreFilmClient.locked()
+			|| com.jaymoskingdoms.client.films.BossIntroClient.locked()) {
 			this.keyPresses = Input.EMPTY;
 			this.moveVector = Vec2.ZERO;
 		}
