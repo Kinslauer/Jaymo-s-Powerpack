@@ -21,7 +21,7 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - J6 blood bats: "the vampire bats should work like this instead."
 - J8 copies: villagers found under the ground near Grim Kingdoms sites and villages are the ones whose lives were
   stolen; they say they were kidnapped and try to lead you back to their village.
-- K6 Ranger: "we can wrap our ranger and survivalist into this" (decision card: which classes Ranger replaces).
+- K6 Ranger: "we can wrap our ranger and survivalist into this". Andy decided 2026-11-12: Ranger replaces Archer and Survivalist.
 
 ## Patches (one branch, one PR, a commit per patch)
 1. **Core feel** (the eight first-patch rows plus C2): A1 upper hand and bad footing, A2 saves from Stats, A5 noticing
