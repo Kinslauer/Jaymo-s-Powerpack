@@ -187,6 +187,8 @@ public final class CostumeModels {
 					.rotateX((6.0F + state.capeLean / 2.0F + state.capeFlap) * (float)(Math.PI / 180.0))
 					.rotateZ(state.capeLean2 / 2.0F * (float)(Math.PI / 180.0))
 					.rotateY((180.0F - state.capeLean2 / 2.0F) * (float)(Math.PI / 180.0)));
+				// the rest of it hangs as cloth, turned round: lags, swings on turns, billows in a fall, spreads on a glide
+				ClothCape.pose(this.cape, state, -1);
 			}
 			float[] laid = CostumeClient.laid(state);
 			if (laid != null) {
@@ -502,9 +504,9 @@ public final class CostumeModels {
 			case TIDE -> TIDE_CAPE;
 			default -> LONG_CAPE;
 		};
-		mesh.getRoot().getChild("body").addOrReplaceChild("cape",
-			CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, 0.0F, -1.0F, 10.0F, length, 1.0F),
-			PartPose.offsetAndRotation(0.0F, 0.0F, 2.0F + CAPE_GAP, 0.0F, (float)Math.PI, 0.0F));
+		// (hinged strips, so it hangs as cloth: ClothCape)
+		ClothCape.chain(mesh.getRoot().getChild("body"), "cape",
+			PartPose.offsetAndRotation(0.0F, 0.0F, 2.0F + CAPE_GAP, 0.0F, (float)Math.PI, 0.0F), -5.0F, 10.0F, length, -1.0F, 1.0F, 0, 0);
 		return LayerDefinition.create(mesh, 64, 32);
 	}
 

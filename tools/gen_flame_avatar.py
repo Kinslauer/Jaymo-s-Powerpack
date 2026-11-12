@@ -179,6 +179,43 @@ def veins():
     save(img, "avatar_veins.png")
 
 
+BONE = [(214, 204, 184), (200, 190, 170), (226, 218, 198), (186, 176, 158)]
+SOCKET = (14, 10, 8)
+
+
+def skull():
+    """The bare skull the face burns away to: bone on every face of the head (front, sides, back, crown, jaw), copied
+    onto the hat layer; eye sockets, a nose hollow and a row of teeth on the front. Fades in over the char with the flame."""
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    head = faces(*CUBES["head"])
+    for face, (x0, y0, x1, y1) in head.items():
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                img.putpixel((x, y), rng.choice(BONE) + (255,))
+    fx0, fy0, fx1, fy1 = head["front"]
+    # two sockets (the veins' ember eyes sit in them), a nose hollow, a toothed jaw
+    for ex in (1, 5):
+        for dx in range(2):
+            for dy in range(3, 5 + 1):
+                img.putpixel((fx0 + ex + dx, fy0 + dy), SOCKET + (255,))
+    for dx in (3, 4):
+        img.putpixel((fx0 + dx, fy0 + 5), SOCKET + (255,))
+        img.putpixel((fx0 + dx, fy0 + 6), SOCKET + (255,))
+    for dx in range(8):
+        if dx % 2 == 0:
+            img.putpixel((fx0 + dx, fy0 + 7), SOCKET + (255,))
+    # cheekbones shadow the sides of the front
+    for dy in range(3, 8):
+        img.putpixel((fx0, fy0 + dy), BONE[3] + (255,))
+        img.putpixel((fx0 + 7, fy0 + dy), BONE[3] + (255,))
+    # copy onto the hat layer
+    u, v, w, h, d = CUBES["head"]
+    ou, ov = OUTER["head"]
+    img.paste(img.crop((u, v, u + d * 2 + w * 2, v + d + h)), (ou, ov))
+    img.save(os.path.join(OUT, "avatar_skull.png"))  # Powers only: the camp villagers keep their faces
+
+
 char()
 veins()
+skull()
 print("Flame Avatar looks written to", os.path.normpath(OUT))

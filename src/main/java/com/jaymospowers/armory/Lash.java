@@ -213,6 +213,19 @@ public final class Lash {
 	/** The head flies back to the hand in this many ticks. */
 	public static final int RETURN_TICKS = 5;
 
+	// ---- the burning chain (a Smoke user's) -------------------------------------------------------------------------
+	/**
+	 * A Smoke user's flail or whip burns: whatever the head hits is set alight for this many seconds, and one it holds
+	 * (wrapped, or hauled) is kept alight, re-lit this often (ticks). The whirl then drags what it clips in toward you
+	 * and swings it round the circle instead of knocking it off: this hard in ({@code DRAG_IN}), this hard along the ball's way
+	 * ({@code DRAG_ROUND}), and a little up.
+	 */
+	static final float BURN_SECONDS = 4.0F;
+	static final int BURN_EVERY = 20;
+	static final double DRAG_IN = 0.55, DRAG_ROUND = 0.5, DRAG_LIFT = 0.15;
+	/** How often (ticks) the glowing head throws embers, and how many. */
+	static final int EMBER_EVERY = 2, EMBER_COUNT = 2;
+
 	/**
 	 * What a player's flail or whip is doing (synced to everyone near). {@code since}: the game tick it began;
 	 * {@code target}: what it's wrapped round (-1: nothing); {@code from}: where the head was when it began; {@code aim}:
@@ -702,6 +715,9 @@ public final class Lash {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		long t = now - state.since();
+		if (burning(player) && now % EMBER_EVERY == 0) {
+			glow(level, head(player, state, now, 1.0F));
+		}
 		switch (state.phase()) {
 			case WHIRL -> {
 				if (run.held && !player.isUsingItem()) {
@@ -739,6 +755,9 @@ public final class Lash {
 					return true;
 				}
 				hold(player, target);
+				if (burning(player) && t % BURN_EVERY == 0) {
+					target.igniteForSeconds(BURN_SECONDS);
+				}
 			}
 			case HEAVE -> {
 				Entity target = level.getEntity(state.target());
@@ -876,7 +895,17 @@ public final class Lash {
 			if (strike(player, other, damage, wrapped)) {
 				Vec3 push = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(GLANCE_PUSH * (0.5 + spin));
-				shove(other, new Vec3(push.x, 0.2, push.z));
+				if (burning(player)) {
+					// the burning chain wraps what it clips: dragged in toward you and swung round the circle
+					Vec3 inward = player.position().subtract(other.position()).multiply(1.0, 0.0, 1.0);
+					Vec3 round = ball.subtract(last).multiply(1.0, 0.0, 1.0);
+					inward = inward.lengthSqr() < 1.0E-4 ? Vec3.ZERO : inward.normalize().scale(DRAG_IN);
+					round = round.lengthSqr() < 1.0E-4 ? Vec3.ZERO : round.normalize().scale(DRAG_ROUND * (0.5 + spin));
+					push = inward.add(round);
+					shove(other, new Vec3(push.x, DRAG_LIFT, push.z));
+				} else {
+					shove(other, new Vec3(push.x, 0.2, push.z));
+				}
 				level.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.8F, 1.0F);
 			}
 			if (guarded && !wrapped || heft(other) >= momentum(FLAIL, spin)) {
@@ -1069,6 +1098,9 @@ public final class Lash {
 		if (target instanceof LivingEntity living) {
 			living.setInvulnerableTime(0);
 			living.hurtServer(level, level.damageSources().playerAttack(player), WHIP_SLAM_DAMAGE);
+			if (burning(player)) {
+				living.igniteForSeconds(BURN_SECONDS);
+			}
 		}
 		if (target instanceof ServerPlayer struck) {
 			Shakes.send(struck, TARGET_SHAKE, struck.position());
@@ -1316,12 +1348,31 @@ public final class Lash {
 	private static boolean strike(ServerPlayer player, LivingEntity other, float damage, boolean wrapped) {
 		ServerLevel level = player.level();
 		if (!wrapped) {
-			return other.hurtServer(level, level.damageSources().playerAttack(player), damage);
+			boolean hurt = other.hurtServer(level, level.damageSources().playerAttack(player), damage);
+			if (hurt && burning(player)) {
+				other.igniteForSeconds(BURN_SECONDS);
+			}
+			return hurt;
 		}
 		boolean flail = isFlail(player.getMainHandItem());
 		level.playSound(null, other.getX(), other.getEyeY(), other.getZ(), flail ? SoundEvents.CHAIN_HIT : SoundEvents.LEAD_TIED,
 			SoundSource.PLAYERS, 0.9F, flail ? 0.75F : 1.3F);
-		return other.hurtServer(level, level.damageSources().source(WRAP_DAMAGE, player), damage * WRAP_SHARE);
+		boolean hurt = other.hurtServer(level, level.damageSources().source(WRAP_DAMAGE, player), damage * WRAP_SHARE);
+		if (hurt && burning(player)) {
+			other.igniteForSeconds(BURN_SECONDS);
+		}
+		return hurt;
+	}
+
+	/** Whether {@code player}'s flail or whip burns: they are a Smoke user. */
+	public static boolean burning(Player player) {
+		return com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.smoke.SmokePower.INSTANCE);
+	}
+
+	/** The burning head's glow: embers and a lick of flame where it is. */
+	private static void glow(ServerLevel level, Vec3 at) {
+		level.sendParticles(com.jaymospowers.core.fx.MagicFx.mote(com.jaymospowers.core.fx.MagicFx.EMBER_COLOR, 0.5F), at.x, at.y, at.z, EMBER_COUNT, 0.15, 0.15, 0.15, 0.02);
+		level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 1, 0.1, 0.1, 0.1, 0.01);
 	}
 
 	/** (0.19.73) How heavy something is to a swung head: its bulk, doubled per point of knockback resistance. */

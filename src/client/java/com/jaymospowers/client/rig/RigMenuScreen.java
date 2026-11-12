@@ -23,7 +23,7 @@ import net.minecraft.world.item.Items;
 /**
  * (0.11.110) The Rig's radial menu (Andy: "make j menu radial"): hold Sneak + J, point the mouse toward an entry, let go
  * (or click). An active (Hover, Palm Blast, Launcher, Unibeam, Scan, Suit) becomes what a tap of J uses, and is used
- * now; the Helm's switches (Faceplate, Night Vision) just flip. Eight tiles clockwise from the top, each with its icon,
+ * now; the Helm's switches (Faceplate, Night Vision) just flip. Nine tiles clockwise from the top, each with its icon,
  * cooldown, and the Mind level it waits for; a lit strip on what's on. Like the symbiote's menu, it doesn't pause.
  */
 final class RigMenuScreen extends Screen {
@@ -37,13 +37,13 @@ final class RigMenuScreen extends Screen {
 	private static final int INFO_H = 30;
 
 	/** The entries, clockwise from the top. */
-	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.FACEPLATE,
-		RigNet.NIGHT};
-	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "faceplate", "night"};
-	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, 1, 1};
+	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
+		RigNet.FACEPLATE, RigNet.NIGHT};
+	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0};
-	private static final int SLICE = 360 / 8;
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0};
+	private static final int SLICE = 360 / ACTIONS.length;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -60,7 +60,8 @@ final class RigMenuScreen extends Screen {
 			case 3 -> Items.BEACON;
 			case 4 -> Items.SPYGLASS;
 			case 5 -> Items.ARMOR_STAND;
-			case 6 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
+			case 6 -> Items.SHIELD;
+			case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -130,7 +131,7 @@ final class RigMenuScreen extends Screen {
 		if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
 			return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
 		}
-		if (action == RigNet.CALL && !core) {
+		if ((action == RigNet.CALL || action == RigNet.SENTRY) && !core) {
 			return Component.translatable("gui.jaymospowers.rig_menu.no_core");
 		}
 		if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM) && !Rig.fullSet(player)) {

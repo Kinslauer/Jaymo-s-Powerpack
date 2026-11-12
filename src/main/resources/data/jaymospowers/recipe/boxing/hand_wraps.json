@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "#jaymospowers:wrap_cloth",
+    "#jaymospowers:wrap_cloth"
+  ],
+  "result": {
+    "id": "jaymospowers:hand_wraps",
+    "count": 1
+  }
+}

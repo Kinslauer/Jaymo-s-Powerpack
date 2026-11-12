@@ -5,6 +5,28 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## The Web track: ledges, glide kick, hanging, perch, silent takedown, fear, cloth capes (`web-track`)
+Andy picked these mechanics after seeing another mod's bat-themed moves: ideas only, all written fresh here.
+- **Ledge launch:** `WebLedge.launch` looks at the Zip's face: a side face with a free two-block gap above a solid top
+  within `REACH_UP` of the aim point, or a top face with a drop beside it. `WebSwing` then rides the zip all the way in
+  (no early release) and throws you `CLEARANCE` blocks over the lip, so the wings can open at once.
+- **Glide kick:** the server watches a gliding slinger's real speed each tick (`WebGlideKick`); a creature ahead in the
+  path takes `BASE_DAMAGE + PER_SPEED x speed` (x`DIVE_MULTIPLIER` when falling faster than `DIVE_FALL`), is knocked
+  down, and the slinger is nudged back up (`WebNet.Nudge`) with `WebPose.GLIDE_KICK`.
+- **Hang and web-up:** `WebUpsideClient` turns you over after `HOLD_TICKS` still on a line anchored `ABOVE` or more over
+  you; `WebPower.UPSIDE` syncs it and `WebBodyPose` draws it. B while hanging runs `WebHanging.webUp` before Yank: a
+  haul tracker lifts the catch under the ceiling, then a downed one is pinned flat (`STUCK_TICKS`) and a standing one
+  is hitched (`WebHitches.hitch` with `Direction.DOWN`) and ensnared; both in long-lived cobwebs (`WebTraps.cling`).
+- **Perch:** `WebPerchClient` settles you on landing on a narrow top (`NARROW`), a webline plank or a drop's edge, and
+  holds you fast until you move; `WebPerch` syncs `WebPower.PERCH`; Spider-Sense range x`WebPerch.SENSE_SCALE`.
+- **Silent takedown:** `WebTakedowns.silent`, tried before the streak takedown. No sound, no damage, `SILENT_OUT_TICKS` down.
+- **Fear:** `WebFear.strungUp` is called by the string-up, the silent takedown and the ceiling web-up. Temperament via
+  `KingdomsCompat.temperament`; without it, a roll from the mob's and the comrade's ids.
+- **Cloth capes:** `ClothCape` (client) builds a cape as a chain of strips (`chain`) and steps a spring per strip per
+  wearer (`sample`); tuning at its top. Applies to the Mantle, costume capes and the hooded cloak's hem.
+- To check first in game: the Mantle's and costume cape's turn swing direction (`TURN_SWING`, the `side` argument),
+  the upside-down body's height against its line, and whether the pinned flat catch looks right on a ceiling.
+
 ## Rapid Web Shot from the shooters, longer fists, levels that build (`web-shot`)
 Andy: "make the web shot tap fire as fast as you can tap the button, so it can be more rapid and web an enemy up after
 5 hits, but you can only use it when you have web shooters equipped and spare web in the canisters. organic web

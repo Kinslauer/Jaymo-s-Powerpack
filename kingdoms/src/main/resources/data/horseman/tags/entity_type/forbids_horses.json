@@ -1,0 +1,49 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:war_elephant",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:notus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:boreas_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:zephyrus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:eurus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:aeolus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:stegonaut_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:atroxiia_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:varasuchus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:ignivorus_dragon",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:aetherion_dragon",
+      "required": false
+    }
+  ]
+}
