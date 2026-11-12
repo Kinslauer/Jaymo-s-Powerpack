@@ -15,6 +15,15 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(FoodData.class)
 abstract class WoundsRegenMixin {
+	/**
+	 * Hurt, but with nothing left that may heal (a broken part held at its cap, a severed one): not hurt, as far as food's
+	 * healing goes, so the healing it would refuse doesn't burn their hunger for nothing.
+	 */
+	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isHurt()Z"))
+	private boolean jaymospowers$onlyWhatCanHeal(ServerPlayer player, Operation<Boolean> original) {
+		return original.call(player) && Wounds.canHealMore(player);
+	}
+
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V"))
 	private void jaymospowers$slowUntilPatched(ServerPlayer player, float amount, Operation<Void> original) {
 		original.call(player, Wounds.patchedUp(player) ? amount : amount * Wounds.UNPATCHED_REGEN);

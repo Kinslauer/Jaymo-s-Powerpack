@@ -98,6 +98,10 @@ abstract class McaAnswersMixin {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Mourning.canAsk(villager)) {
+			// (Andy, 2026-11-12) only one who buried a companion speaks of their old adventures
+			cir.getReturnValue().remove(com.jaymoskingdoms.Mourning.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
 			// (0.7.332) only a priest, with someone here to accuse
 			cir.getReturnValue().remove(com.jaymoskingdoms.Accusations.ANSWER);

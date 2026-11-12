@@ -364,6 +364,23 @@ public final class KitchenCompat {
 		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));
 	}
 
+	/** A player's corpse's owner (their UUID as text), or null (not a corpse, or Kitchen too old). */
+	static @Nullable String corpseOwner(Entity corpse) {
+		if (CORPSE == null || !CORPSE.isInstance(corpse)) {
+			return null;
+		}
+		try {
+			return CORPSE.getMethod("ownerId").invoke(corpse) instanceof String s ? s : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/** {@link Mourning}: a companion takes up a player's body to bury it, and what it carried with it (to lay in the grave). */
+	static java.util.List<net.minecraft.world.item.ItemStack> robCorpse(Entity corpse, Entity by) {
+		return robBy(corpse, by);
+	}
+
 	/** (0.7.132) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */
 	@SuppressWarnings("unchecked")
 	static java.util.List<net.minecraft.world.item.ItemStack> robBy(Entity corpse, Entity robber) {

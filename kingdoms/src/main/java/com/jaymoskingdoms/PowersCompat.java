@@ -2407,6 +2407,29 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle carried;
+	private static boolean carriedLooked;
+
+	/** Someone is carrying {@code entity} in their arms or dragging it (Powers' {@code Carry.isCarried}); false without Powers. */
+	public static boolean isCarried(net.minecraft.world.entity.Entity entity) {
+		if (!carriedLooked) {
+			carriedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					carried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"),
+						"isCarried", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Carry.isCarried (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return carried != null && (boolean)carried.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
 	public static int powerLevel(LivingEntity entity) {
 		lookForWill();

@@ -509,7 +509,14 @@ public final class Finishers {
 		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> attackHeld(ctx.player(), payload.target()));
+		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> {
+			attackHeld(ctx.player(), payload.target());
+			if (payload.target() == LET_GO_ID) {
+				for (java.util.function.Consumer<ServerPlayer> listener : LET_GO) {
+					listener.accept(ctx.player());
+				}
+			}
+		});
 		// (0.19.78) the three bars, and the double click that fills them at once
 		PayloadTypeRegistry.serverboundPlay().register(Rush.TYPE, Rush.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Rush.TYPE, (payload, ctx) -> rushed(ctx.player(), payload.target()));
@@ -854,6 +861,11 @@ public final class Finishers {
 	}
 
 	// ---- the hold ---------------------------------------------------------------------------------------------------------
+
+	/** Told when a player lets go of attack (the symbiote's executions stop on it, {@code WebExecutions}). */
+	public static final java.util.List<java.util.function.Consumer<ServerPlayer>> LET_GO = new java.util.ArrayList<>();
+	/** The id {@link Execute} carries when attack itself is let go (not just aimed off). */
+	public static final int LET_GO_ID = -2;
 
 	/** (0.17.7) {@code player}'s attack is held on the entity {@code id} now (-1: let go). */
 	private static void attackHeld(ServerPlayer player, int id) {

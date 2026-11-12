@@ -228,6 +228,8 @@ public final class WebExecutions {
 			plays(server);
 			fadeCracks(server);
 		});
+		// (Andy, 2026-11-12) letting go of attack before the killing blow calls it off, as a weapon's double-click finisher
+		com.jaymospowers.core.finisher.Finishers.LET_GO.add(WebExecutions::letGo);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			PLAYING.clear();
 			TARGETED.clear();
@@ -383,6 +385,22 @@ public final class WebExecutions {
 				end(player, body);
 			}
 		}
+	}
+
+	/** {@code player} let go of attack: an execution not yet at its killing blow stops, sparing them. */
+	static void letGo(ServerPlayer player) {
+		Playing p = PLAYING.get(player.getUUID());
+		Execution execution = of(player);
+		if (p == null || execution == null) {
+			return;
+		}
+		Move move = execution.type();
+		if (player.level().getGameTime() - execution.start() >= move.kill()) {
+			return;
+		}
+		PLAYING.remove(player.getUUID());
+		end(player, p.body());
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.stopped", p.body().getDisplayName()).withStyle(ChatFormatting.GRAY));
 	}
 
 	/**

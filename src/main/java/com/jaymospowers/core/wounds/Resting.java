@@ -1,5 +1,6 @@
 package com.jaymospowers.core.wounds;
 
+import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Meditate;
 import com.jaymospowers.core.Stance;
 import com.jaymospowers.frost.Freezing;
@@ -57,7 +58,19 @@ public final class Resting {
 	/** (0.19.24) A Nausea or Slowness shorter than this (ticks) is a daze, and a soak clears it. */
 	public static final int DAZE_MAX_TICKS = 400;
 
+	/**
+	 * Andy (2026-11-12, on a downed player by a fire): "this should work to get you back on your feet". Lying downed and
+	 * still within {@link #FIRE_RANGE} of a lit campfire, the wounds' clock is held (no bleeding out toward passing out),
+	 * the pain eases and every {@link #DOWNED_REST_INTERVAL} ticks the worst part mends {@link #REST_HEAL} (to the same
+	 * cap, never a bone), till nothing keeps them down and sneak gets them up ({@link Downed#blocksRise}). Passed out by the
+	 * fire (not bled dry), they come round after {@link #DOWNED_WAKE_TICKS}. Not while carried, adrift or knocked out.
+	 */
+	public static final int DOWNED_REST_INTERVAL = 60, DOWNED_WAKE_TICKS = 1200, DOWNED_HINT_TICKS = 60;
+
 	private static final Map<ServerPlayer, Vec3> LAST = new WeakHashMap<>();
+	/** A downed player lying by a fire: where they lay at the last look, and since when. */
+	private static final Map<ServerPlayer, long[]> BY_FIRE = new WeakHashMap<>();
+	private static final Map<ServerPlayer, Vec3> BY_FIRE_AT = new WeakHashMap<>();
 
 	private Resting() {
 	}
@@ -118,6 +131,60 @@ public final class Resting {
 				soak(player, level, server.getTickCount());
 			}
 		}
+	}
+
+	/**
+	 * A downed player's tick by a fire (from {@link Downed}'s tick): true while the fire is keeping them (their clock is
+	 * held then, as a bed holds it).
+	 */
+	static boolean downed(ServerLevel level, ServerPlayer player, long now) {
+		if (Carry.isCarried(player) || Downed.adrift(player) || player.hasAttached(Downed.KNOCKED) || !nearFire(level, player.blockPosition())) {
+			BY_FIRE.remove(player);
+			BY_FIRE_AT.remove(player);
+			return false;
+		}
+		Vec3 was = BY_FIRE_AT.get(player);
+		long[] since = BY_FIRE.get(player);
+		if (was == null || since == null) {
+			BY_FIRE_AT.put(player, player.position());
+			BY_FIRE.put(player, new long[] {now});
+			return false;
+		}
+		if (now % 20 == 0) {
+			BY_FIRE_AT.put(player, player.position());
+			if (was.distanceToSqr(player.position()) >= STILL_DISTANCE_SQR) {
+				// crawling about by the fire isn't resting by it
+				since[0] = now;
+				return false;
+			}
+		}
+		if (com.jaymospowers.core.blood.BleedOut.left(player) <= 0.01F) {
+			// bled dry: a fire can't put the blood back
+			return false;
+		}
+		long lain = now - since[0];
+		if (Downed.passedOut(player)) {
+			if (lain >= DOWNED_WAKE_TICKS) {
+				Downed.wake(player, false);
+				since[0] = now;
+			}
+			return true;
+		}
+		Downed.holdClock(player, now);
+		if (now % 20 == 0) {
+			Pain.ease(player, EASE_TICKS);
+		}
+		if (lain > 0 && lain % DOWNED_REST_INTERVAL == 0) {
+			healWorst(player, REST_HEAL);
+		}
+		if (now % DOWNED_HINT_TICKS == 0) {
+			BodyPart worst = Downed.blocksRise(player);
+			player.sendOverlayMessage((worst == null
+				? net.minecraft.network.chat.Component.translatable("message.jaymospowers.downed.fire_rise")
+				: net.minecraft.network.chat.Component.translatable("message.jaymospowers.downed.fire_rest", worst.displayName()))
+				.withStyle(net.minecraft.ChatFormatting.GOLD));
+		}
+		return true;
 	}
 
 	private static void rest(ServerPlayer player, int tick) {

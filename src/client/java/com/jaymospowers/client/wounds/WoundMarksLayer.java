@@ -7,6 +7,7 @@ import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.BodyPart;
+import com.jaymospowers.core.wounds.Scars;
 import com.jaymospowers.core.wounds.WoundMarks;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -29,6 +30,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -56,12 +58,14 @@ public final class WoundMarksLayer {
 	static final int SCORCH_CORE = 0x1C1714, SCORCH_RIM = 0x6B3A22, SCORCH_OLD = 0xA8665A;
 	/** A healed stump's scar, and the seam it closed along. */
 	static final int SCAR = 0xD19A8C, SEAM = 0x8E5A50;
+	/** Lasting scars: a burn's shine, frostbitten grey and dead black-blue, a lightning fern, hollows, an empty socket. */
+	static final int BURN_SHINE = 0xE2A79C, FROST_GREY = 0x6E7480, FROST_DEAD = 0x2E3440, FERN = 0xB0574C, HOLLOW = 0x4A342E, SOCKET = 0x1E1412;
 
 	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
-	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed) {
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed, int scars) {
 		String key() {
 			StringBuilder b = new StringBuilder();
-			b.append('s').append(this.stubs).append('r').append(this.raw).append('g').append(this.gashes).append('x').append(this.seed).append('|');
+			b.append('c').append(this.scars).append('s').append(this.stubs).append('r').append(this.raw).append('g').append(this.gashes).append('x').append(this.seed).append('|');
 			for (int i = 0; i < this.marks.size(); i++) {
 				b.append(Long.toHexString(this.marks.get(i).shape())).append(':').append(this.stages[i]).append(',');
 			}
@@ -91,7 +95,9 @@ public final class WoundMarksLayer {
 		// like the other marks: the bleeding parts that nothing is wrapped over (a person's are drawn by the dressings layer)
 		int wrapped = Bleeding.wrapped(entity);
 		int gashes = Bleeding.bleeding(entity) & ~(wrapped | wrapped >>> Bleeding.RAG_SHIFT) & (1 << Bleeding.RAG_SHIFT) - 1;
-		if (marks.isEmpty() && stubs == 0 && gashes == 0) {
+		// (Andy, 2026-11-12: "can we make them visible?") a player's lasting scars ({@link Scars}), painted for good
+		int scars = entity instanceof Player player ? scars(player) : 0;
+		if (marks.isEmpty() && stubs == 0 && gashes == 0 && scars == 0) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -110,7 +116,20 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31));
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars));
+	}
+
+	/** The scars that show, as bits by {@link Scars.Kind#ordinal()} (weak lungs are inside, and don't). */
+	static int scars(Player player) {
+		int bits = 0;
+		for (String key : Scars.of(player)) {
+			for (Scars.Kind kind : Scars.Kind.values()) {
+				if (kind.key().equals(key) && kind != Scars.Kind.WEAK_LUNGS) {
+					bits |= 1 << kind.ordinal();
+				}
+			}
+		}
+		return bits;
 	}
 
 	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
@@ -128,7 +147,7 @@ public final class WoundMarksLayer {
 				return;
 			}
 			boolean person = this.getParentModel() instanceof HumanoidModel;
-			if (person && marked.marks().isEmpty() && marked.stubs() == 0) {
+			if (person && marked.marks().isEmpty() && marked.stubs() == 0 && marked.scars() == 0) {
 				// (a person's open cut is the dressings layer's)
 				return;
 			}
@@ -184,6 +203,9 @@ public final class WoundMarksLayer {
 						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L), 1.0F, marked.blood());
 					}
 				}
+			}
+			if (layout && marked.scars() != 0) {
+				painter.scars(marked.scars());
 			}
 			if (layout) {
 				for (int part : Dismember.PARTS) {
@@ -276,6 +298,133 @@ public final class WoundMarksLayer {
 					}
 				}
 			}
+		}
+
+		/**
+		 * The lasting scars ({@link Scars}), each in the same place every time so they read as one person's: burns as shiny,
+		 * puckered pink patches down the right arm, across the left cheek and over a flank; frostbite as dead grey-blue
+		 * finger ends and toes; lightning as the branching fern it leaves, from the right shoulder down the arm and over the
+		 * chest; wasting as hollowed eyes and ribs showing; crushed ribs as an old yellowed dent on the left side; a lost eye
+		 * (carved out, or one struck out) as a dark scarred socket with a seam across it.
+		 */
+		void scars(int bits) {
+			java.util.Random random = new java.util.Random(0x5CA25L);
+			if ((bits & 1 << Scars.Kind.BURNS.ordinal()) != 0) {
+				int[] arm = rect(BodyPart.RIGHT_ARM, WoundMarks.FRONT), armSide = rect(BodyPart.RIGHT_ARM, WoundMarks.RIGHT);
+				int[] face = rect(BodyPart.HEAD, WoundMarks.FRONT), flank = rect(BodyPart.BODY, WoundMarks.FRONT);
+				this.burn(arm, 0.5, 0.35, 0.45, random);
+				this.burn(armSide, 0.5, 0.55, 0.4, random);
+				this.burn(face, 0.78, 0.72, 0.22, random);
+				this.burn(flank, 0.22, 0.6, 0.28, random);
+			}
+			if ((bits & 1 << Scars.Kind.FROSTBITE.ordinal()) != 0) {
+				for (BodyPart limb : new BodyPart[] {BodyPart.RIGHT_ARM, BodyPart.LEFT_ARM, BodyPart.RIGHT_FOOT, BodyPart.LEFT_FOOT}) {
+					for (int side : new int[] {WoundMarks.FRONT, WoundMarks.LEFT, WoundMarks.RIGHT, WoundMarks.BACK}) {
+						int[] r = rect(limb, side);
+						if (r == null) {
+							continue;
+						}
+						int rows = limb.name().endsWith("FOOT") ? 1 : 2;
+						for (int py = (r[1] + r[3] - rows) * this.unit; py < (r[1] + r[3]) * this.unit; py++) {
+							for (int px = r[0] * this.unit; px < (r[0] + r[2]) * this.unit; px++) {
+								this.dot(px, py, py >= (r[1] + r[3] - 1) * this.unit ? FROST_DEAD : FROST_GREY, 0.55F, r);
+							}
+						}
+					}
+				}
+			}
+			if ((bits & 1 << Scars.Kind.LIGHTNING.ordinal()) != 0) {
+				int[] arm = rect(BodyPart.RIGHT_ARM, WoundMarks.FRONT), chest = rect(BodyPart.BODY, WoundMarks.FRONT);
+				if (arm != null) {
+					this.fern((arm[0] + arm[2] * 0.5) * this.unit, arm[1] * this.unit, Math.PI / 2.0, arm[3] * 0.85 * this.unit, 3, random, arm);
+				}
+				if (chest != null) {
+					this.fern(chest[0] * this.unit, (chest[1] + 1) * this.unit, Math.PI / 5.0, chest[2] * 0.8 * this.unit, 3, random, chest);
+				}
+			}
+			if ((bits & 1 << Scars.Kind.WASTING.ordinal()) != 0) {
+				int[] face = rect(BodyPart.HEAD, WoundMarks.FRONT), chest = rect(BodyPart.BODY, WoundMarks.FRONT);
+				if (face != null) {
+					// the hollows under the eyes and in the cheeks
+					for (int x : new int[] {1, 2, 5, 6}) {
+						this.dot((face[0] + x) * this.unit, (face[1] + 5) * this.unit, HOLLOW, 0.4F, face);
+					}
+					this.dot((face[0] + 1) * this.unit, (face[1] + 6) * this.unit, HOLLOW, 0.3F, face);
+					this.dot((face[0] + 6) * this.unit, (face[1] + 6) * this.unit, HOLLOW, 0.3F, face);
+				}
+				if (chest != null) {
+					// the ribs showing through
+					for (int row = 3; row <= 7; row += 2) {
+						for (int x = 1; x < chest[2] - 1; x++) {
+							if (x != chest[2] / 2 && x != chest[2] / 2 - 1) {
+								this.dot((chest[0] + x) * this.unit, (chest[1] + row) * this.unit, HOLLOW, 0.3F, chest);
+							}
+						}
+					}
+				}
+			}
+			if ((bits & 1 << Scars.Kind.CRUSHED.ordinal()) != 0) {
+				int[] side = rect(BodyPart.BODY, WoundMarks.FRONT);
+				if (side != null) {
+					this.patch((side[0] + side[2] * 0.82) * this.unit, (side[1] + side[3] * 0.5) * this.unit, 2.2 * this.unit, BRUISE_OLD, 0.35F, random, side);
+					for (int k = 0; k < 3; k++) {
+						this.dot((side[0] + side[2] * 0.82) * this.unit, (side[1] + side[3] * 0.4 + k) * this.unit, SEAM, 0.3F, side);
+					}
+				}
+			}
+			boolean carved = (bits & 1 << Scars.Kind.CARVED_EYES.ordinal()) != 0;
+			if (carved || (bits & 1 << Scars.Kind.RIGHT_EYE.ordinal()) != 0) {
+				this.socket(1);
+			}
+			if (carved || (bits & 1 << Scars.Kind.LEFT_EYE.ordinal()) != 0) {
+				this.socket(5);
+			}
+		}
+
+		/** One burn: a puckered patch, shiny pink at its middle and darker at its ragged rim. */
+		private void burn(int @Nullable [] r, double across, double down, double share, java.util.Random random) {
+			if (r == null) {
+				return;
+			}
+			double cx = (r[0] + r[2] * across) * this.unit, cy = (r[1] + r[3] * down) * this.unit;
+			double radius = Math.max(1.5, Math.min(r[2], r[3]) * share) * this.unit;
+			this.patch(cx, cy, radius + this.unit * 0.8, SCORCH_OLD, 0.45F, random, r);
+			this.patch(cx, cy, radius, BURN_SHINE, 0.55F, random, r);
+			for (int k = 0; k < 3; k++) {
+				double a = random.nextDouble() * Math.PI * 2.0, d = random.nextDouble() * radius * 0.7;
+				this.dot(cx + Math.cos(a) * d, cy + Math.sin(a) * d, SEAM, 0.35F, r);
+			}
+		}
+
+		/** A lightning fern: a line that forks as it goes, each fork thinner and shorter. */
+		private void fern(double x, double y, double angle, double length, int depth, java.util.Random random, int @Nullable [] r) {
+			if (depth <= 0 || length < this.unit) {
+				return;
+			}
+			int steps = (int) Math.ceil(length);
+			double px = x, py = y;
+			for (int i = 0; i < steps; i++) {
+				angle += (random.nextDouble() - 0.5) * 0.5;
+				px += Math.cos(angle);
+				py += Math.sin(angle);
+				this.dot(px, py, FERN, 0.25F + 0.15F * depth, r);
+				if (i > 1 && random.nextFloat() < 0.18F) {
+					this.fern(px, py, angle + (random.nextBoolean() ? 0.8 : -0.8), length * 0.45, depth - 1, random, r);
+				}
+			}
+		}
+
+		/** A lost eye: a dark socket on the face (x from the face's left edge, 64ths), with a scar's seam over it. */
+		private void socket(int x) {
+			int[] face = rect(BodyPart.HEAD, WoundMarks.FRONT);
+			if (face == null) {
+				return;
+			}
+			for (int dx = 0; dx < 2; dx++) {
+				this.dot((face[0] + x + dx) * this.unit, (face[1] + 4) * this.unit, SOCKET, 0.85F, face);
+				this.dot((face[0] + x + dx) * this.unit, (face[1] + 3) * this.unit, SEAM, 0.5F, face);
+			}
+			this.dot((face[0] + x + (x < 4 ? -1 : 2)) * this.unit, (face[1] + 5) * this.unit, SEAM, 0.45F, face);
 		}
 
 		/**

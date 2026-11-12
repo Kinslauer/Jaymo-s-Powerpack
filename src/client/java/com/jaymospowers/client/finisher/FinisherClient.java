@@ -86,7 +86,13 @@ public final class FinisherClient {
 		LocalPlayer player = minecraft.player;
 		boolean down = minecraft.options.keyAttack.isDown();
 		boolean pressed = down && !attackWasDown;
+		boolean released = !down && attackWasDown;
 		attackWasDown = down;
+		if (released && player != null) {
+			// (Andy, 2026-11-12) attack let go: the symbiote's execution stops if it hasn't killed yet
+			ClientPlayNetworking.send(new Finishers.Execute(Finishers.LET_GO_ID));
+			sent = -1;
+		}
 		locked = player != null && (charging() || choosing >= 0 || locked && down);
 		if (rushHeld && (!down || player == null)) {
 			// (0.19.78) the double click's press let go: before the kill, the execution's off

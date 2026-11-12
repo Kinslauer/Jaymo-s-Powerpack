@@ -1,0 +1,5 @@
+# Left out of older PRs: companions bury the dead
+- **Companions bury you, grieve and remember** (Andy: "if you have companions they should bury you and grieve and bring you up if asked about their previous adventures"). When a player's life ends for good (Powers' final death), every MCA villager within 64 blocks they were involved with (family, hired help, a trusted friend) is a companion. The nearest walks to the body and says the words; the others gather and each grieves in their own line; then the body is taken up (with Kitchen, the player's corpse), what it carried goes into a chest under the grave, and a gravestone goes over it with a sign: "Here lies", the name, what took them, and the day. Every companion remembers (`Mourning.MOURNS`), and MCA's menu offers **Ask about their old adventures** on one who does: they speak of the one they buried, to anyone, the dead one's next life too.
+- Villagers no longer try to tend a downed body someone is carrying (`PowersCompat.isCarried`).
+- Last Stand never saves a player who gave up where they lay.
+- Built; not played.
