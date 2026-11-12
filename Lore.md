@@ -1146,6 +1146,12 @@ name shapes a beast ("Call a beast Midas and it'll shine like coin").
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
 
+(new) **Everyday weather.** The heart of a storm is a downpour: rain so thick a traveller is soaked through at once,
+chilled, and slowed until they find a roof. Mist lies on low ground and water from before dawn until mid-morning,
+thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
+lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
+breath of their dead, sailors steer by them, and the Stargazers only write down the nights they come.
+
 ## Daily life
 
 **Kitchen and table.** Food is cooked at hob, grill and oven, in pot, skillet and saucepan, and a cook can get a
