@@ -1158,7 +1158,7 @@ felt.
 chilled, and slowed until they find a roof. Mist lies on low ground and water from before dawn until mid-morning,
 thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
 lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
-breath of their dead, sailors steer by them, and the Stargazers only write down the nights they come.
+breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
 
 ## Daily life
 
