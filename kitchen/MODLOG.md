@@ -1870,3 +1870,8 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
   tables; a whole wheel still drops itself, a cut one nothing.
 - `tools/check_data_refs.py` (PR checks) now also checks every loot table and predicate's condition, function and entry
   names against 26.3's own lists. All 986 pass. Not built here.
+
+## 0.5.114 (2026-11-12): Soaking - other mods can leave a player wet for longer (#1342)
+
+- `BodyHeat.soak(player, ticks)`: for Kingdoms' downpours, which leave you wet for 3 minutes where rain leaves you wet for 1. Nothing changes without Kingdoms.
+- Built (compiles); not seen in game.
