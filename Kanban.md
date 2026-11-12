@@ -29,14 +29,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
+- [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
+- [x] [[Inbox/Done/tinkerer-cheats-death|tinkerer-cheats-death]]
+- [x] [[Inbox/Done/future-three-sided-war|future-three-sided-war]]
+- [x] [[Inbox/Done/blindness-devout-path|blindness-devout-path]]
+- [x] [[Inbox/Done/arsenal-pulls-anything|arsenal-pulls-anything]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
-- [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 
 
 %% kanban:settings
