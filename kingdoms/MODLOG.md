@@ -11714,3 +11714,10 @@ Andy ticked the left-out row "Speakeasy dens are never raided and contraband nev
 - **Waterspouts**: a tornado over the sea is a waterspout: a pale funnel, spray at its foot, nothing torn up. It swings ships round, pours water into a hold in its core, and a full-size one tears sails away. On a still warm day the sea puts up small ones of its own, which fall apart as soon as they come ashore. Players hear "A waterspout has come down" instead of a tornado.
 - **The sea's weather** (`SeaEvents`, out at sea only): fog banks (sight down to about 24 blocks), doldrums (the wind almost dies; row or wait), squalls (a small fast rain cell, gusts that shove ships on), whirlpools in deep water (pull and spin everything afloat, drag swimmers under at the eye, flood a hold that gets too close), a glowing tide at night (the water lights where hulls, boats and swimmers move), flotsam (planks and a lost ship's stores drifting nearby), and St. Elmo's fire on the mastheads under a thunderstorm. They live only in memory, like the storms.
 - Built; not played.
+
+## 0.7.776 (2026-11-12): fishing talk - fishermen buy fish by weight, hold contests
+
+- "Talk about fishing" (`FisherTalk`) in MCA's menu, only on a grown fisherman: opens Powers' fisherman screen (selling
+  fish by weight, the village fishing contest, the water's legend). Powers pays for fish through `FisherTalk.pay`, in the
+  coin of the place.
+- Built; not played.
