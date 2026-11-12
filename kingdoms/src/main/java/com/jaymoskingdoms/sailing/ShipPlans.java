@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
@@ -287,6 +288,30 @@ public final class ShipPlans {
 		plans.putInt("Fittings", fittings);
 		plans.putInt("Count", design.at().size());
 		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.put(TAG, plans));
+	}
+
+	/**
+	 * Charted plans of one of Jaki's ships (a galleon, drakkar, war trireme, cargo ship or trader), drawn already: what
+	 * a merchant at sea sells ({@code SeaTrade}), more blueprints than the kits (Andy's ocean pick-list, "Bigger ships").
+	 * Laid like any plans: in frames to fill in survival, whole in creative. Empty if her file can't be read.
+	 */
+	public static ItemStack charted(ServerLevel level, JakiShips.Design jaki) {
+		Fleet.Look look = new Fleet.Look(Blocks.OAK_PLANKS, Blocks.OAK_FENCE, Blocks.SPRUCE_LOG, Blocks.WOOL.pick(jaki.sails), null);
+		List<Fleet.Part> parts = JakiShips.parts(level, jaki, look);
+		if (parts.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		List<BlockPos> at = new ArrayList<>(parts.size());
+		List<BlockState> states = new ArrayList<>(parts.size());
+		for (Fleet.Part p : parts) {
+			at.add(p.at());
+			states.add(p.state());
+		}
+		ItemStack stack = new ItemStack(Sailing.SHIP_PLANS);
+		write(stack, new Design(at, states, Fleet.KEEL));
+		stack.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.ship_plans.charted",
+			Component.translatable("ship.jaymoskingdoms.charted." + jaki.name().toLowerCase(java.util.Locale.ROOT))));
+		return stack;
 	}
 
 	static @Nullable CompoundTag tag(ItemStack stack) {

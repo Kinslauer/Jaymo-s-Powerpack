@@ -26,6 +26,8 @@ import net.minecraft.world.level.material.MapColor;
 public final class Sailing {
 	public static Block HELM, SAIL, OAR, CANNON, FRAME;
 	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, HEAVY_SHOT, SHELL, CHAIN_SHOT, GRAPE_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT, SHIP_PLANS;
+	/** More blueprints: the cog, frigate, fishing smack and galley kits. */
+	public static Item COG_KIT, FRIGATE_KIT, SMACK_KIT, GALLEY_KIT;
 
 	private Sailing() {
 	}
@@ -61,6 +63,10 @@ public final class Sailing {
 		ROWBOAT_KIT = item(ShipKits.Kind.ROWBOAT.id(), p -> new ShipKits.KitItem(ShipKits.Kind.ROWBOAT, p), new Item.Properties().stacksTo(1));
 		SLOOP_KIT = item(ShipKits.Kind.SLOOP.id(), p -> new ShipKits.KitItem(ShipKits.Kind.SLOOP, p), new Item.Properties().stacksTo(1));
 		BRIG_KIT = item(ShipKits.Kind.BRIG.id(), p -> new ShipKits.KitItem(ShipKits.Kind.BRIG, p), new Item.Properties().stacksTo(1));
+		COG_KIT = item(ShipKits.Kind.COG.id(), p -> new ShipKits.KitItem(ShipKits.Kind.COG, p), new Item.Properties().stacksTo(1));
+		FRIGATE_KIT = item(ShipKits.Kind.FRIGATE.id(), p -> new ShipKits.KitItem(ShipKits.Kind.FRIGATE, p), new Item.Properties().stacksTo(1));
+		SMACK_KIT = item(ShipKits.Kind.FISHING_SMACK.id(), p -> new ShipKits.KitItem(ShipKits.Kind.FISHING_SMACK, p), new Item.Properties().stacksTo(1));
+		GALLEY_KIT = item(ShipKits.Kind.GALLEY.id(), p -> new ShipKits.KitItem(ShipKits.Kind.GALLEY, p), new Item.Properties().stacksTo(1));
 		// (0.7.28) kits of your own: plans drawn from a ship you've built
 		SHIP_PLANS = item("ship_plans", ShipPlans.PlansItem::new, new Item.Properties().stacksTo(1));
 		ShipShot.register();
@@ -78,7 +84,11 @@ public final class Sailing {
 			output.insertAfter(GRAPE_SHOT, ROWBOAT_KIT);
 			output.insertAfter(ROWBOAT_KIT, SLOOP_KIT);
 			output.insertAfter(SLOOP_KIT, BRIG_KIT);
-			output.insertAfter(BRIG_KIT, SHIP_PLANS);
+			output.insertAfter(BRIG_KIT, COG_KIT);
+			output.insertAfter(COG_KIT, FRIGATE_KIT);
+			output.insertAfter(FRIGATE_KIT, SMACK_KIT);
+			output.insertAfter(SMACK_KIT, GALLEY_KIT);
+			output.insertAfter(GALLEY_KIT, SHIP_PLANS);
 		});
 		ShipNet.register();
 	}

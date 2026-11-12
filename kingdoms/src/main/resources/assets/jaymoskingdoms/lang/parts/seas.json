@@ -26,5 +26,18 @@
   "dialogue.chat.jaymoskingdoms.hermit_sea_exile/1": "They rowed me out, put me on the rocks and rowed home. I watched them all the way to the horizon.",
   "dialogue.chat.jaymoskingdoms.hermit_sea_exile/2": "The king thought the sea would finish me. The sea has been kinder than he ever was, %1$s.",
   "dialogue.chat.jaymoskingdoms.hermit_sea_exile/3": "I write letters I can't send and put them in bottles. Perhaps one reached you.",
-  "dialogue.chat.jaymoskingdoms.hermit_sea_exile/4": "If you sail past the capital, don't mention me. Or do. Let him know I'm still here."
+  "dialogue.chat.jaymoskingdoms.hermit_sea_exile/4": "If you sail past the capital, don't mention me. Or do. Let him know I'm still here.",
+  "item.jaymoskingdoms.cog_kit": "Cog Build Kit",
+  "item.jaymoskingdoms.frigate_kit": "Frigate Build Kit",
+  "item.jaymoskingdoms.fishing_smack_kit": "Fishing Smack Build Kit",
+  "item.jaymoskingdoms.galley_kit": "Galley Build Kit",
+  "item.jaymoskingdoms.ship_plans.charted": "Charted Plans: %s",
+  "ship.jaymoskingdoms.charted.galleon": "Galleon",
+  "ship.jaymoskingdoms.charted.drakkar": "Drakkar",
+  "ship.jaymoskingdoms.charted.war_trireme": "War Trireme",
+  "ship.jaymoskingdoms.charted.cargo_ship": "Cargo Ship",
+  "ship.jaymoskingdoms.charted.trader": "Trader",
+  "talk.jaymoskingdoms.ship.fisher.captain": "The %s fishes for %s. We run out to the grounds, work the lines a while and bring the catch home. Fish keep to deep water now; the shallows are bare.",
+  "talk.jaymoskingdoms.ship.fisher.hand": "I'm her %s. The %s goes out to the fishing grounds and back. Ask the skipper if you want to buy from the catch.",
+  "message.jaymoskingdoms.ship.sunk.fisher": "The fishing smack %s has gone down, sunk by %s."
 }

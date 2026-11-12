@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:string",
+    "minecraft:stick",
+    "minecraft:stick",
+    "#minecraft:wool",
+    "minecraft:iron_ingot"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:galley_kit"
+  }
+}
