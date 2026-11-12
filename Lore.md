@@ -1338,5 +1338,7 @@ in the thick of it and get them up, on either side, so a fight against a band is
 and a leader who goes down leaves his band to fight each by its own habit. They drag their fallen clear of the press by the shoulder before kneeling to
 them, hold a foe from behind for a friend to strike, pin a lone traveller between two of them, and give each other a
 leg up a wall. A band that sees you first goes to ground and waits; and the greedy grab what falls, goblins most of all,
-who run off with it. Patch 6 proposes a name for the sickness
+who run off with it. Fighters learn their foes: a companion who has put down enough of a kind knows
+it and says so, and names whoever taught them; camps, villages and realms remember each traveller who has fought them,
+and from the third meeting come ready for their bow, blade, spell or fire. Patch 6 proposes a name for the sickness
 that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
