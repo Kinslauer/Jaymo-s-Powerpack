@@ -74,6 +74,12 @@ public final class ZFighterScouter {
 	static final double LIMIT_MULTIPLIER = 0.25;
 	static final double MASTERY_MULTIPLIER = 0.5;
 	static final double RAGE_MULTIPLIER = 1.5;
+	/**
+	 * Andy (2026-11-11): "elemental power users have the weakest ki auras". Smoke, Gravity and Cryokinesis come from ki
+	 * attuning to the element its holder was exposed to, so little of it shows: their power level is this share of anyone
+	 * else's, and ki sense reads them as weaker than they are.
+	 */
+	static final double ELEMENTAL_AURA = 0.4;
 
 	public static final ResourceKey<EquipmentAsset> ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("scouter"));
 	public static Item SCOUTER;
@@ -101,7 +107,8 @@ public final class ZFighterScouter {
 
 	/**
 	 * A living thing's power level. A Z Fighter's: (health x 10 + fists x 50 + max ki x 3 + stat levels x 20) times his
-	 * form, Limit Break tier, mastery of the form he's in and Rage. Anyone else's: health x 10 + attack damage x 50.
+	 * form, Limit Break tier, mastery of the form he's in and Rage. Anyone else's: health x 10 + attack damage x 50, and only
+	 * {@link #ELEMENTAL_AURA} of that for a Smoke, Gravity or Cryo user ({@link #elemental}).
 	 */
 	public static int powerLevel(LivingEntity entity) {
 		double attack = entity.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE) ? entity.getAttributeValue(Attributes.ATTACK_DAMAGE) : 1.0;
@@ -116,7 +123,16 @@ public final class ZFighterScouter {
 				level *= RAGE_MULTIPLIER;
 			}
 		}
+		if (entity instanceof ServerPlayer player && elemental(player)) {
+			level *= ELEMENTAL_AURA;
+		}
 		return (int)Math.min(Integer.MAX_VALUE / 2, Math.round(level));
+	}
+
+	/** Whether {@code player} holds an elemental power (Smoke, Gravity, Cryokinesis): the weakest ki aura of anyone's. */
+	public static boolean elemental(ServerPlayer player) {
+		return Powers.has(player, com.jaymospowers.power.smoke.SmokePower.INSTANCE) || Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE)
+			|| Powers.has(player, com.jaymospowers.power.cryo.CryoPower.INSTANCE);
 	}
 
 	/** False Super's multiplier: {@link #FALSE_SUPER_MIN} to {@link #FALSE_SUPER_MAX} by how close he is to his first Super. */

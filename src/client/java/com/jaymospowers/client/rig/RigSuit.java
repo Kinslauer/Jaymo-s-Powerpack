@@ -3,6 +3,8 @@ package com.jaymospowers.client.rig;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.EmfCompat;
 import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigCall;
+import com.jaymospowers.rig.RigFrame;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,8 +104,23 @@ public final class RigSuit {
 	/** The glow pass's colour (its lights coming up). */
 	static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_glow");
 
-	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/rig/suit.png");
-	static final Identifier GLOW_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_glow.png");
+	/** The frame this suit was built as ({@link RigFrame} ordinal), its trim paint (rgb, -1 for none), and whether its plates are flying in (a suit call). */
+	static final RenderStateDataKey<Integer> FRAME = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_frame");
+	static final RenderStateDataKey<Integer> TRIM = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_trim");
+	static final RenderStateDataKey<Boolean> FLY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_fly");
+	/** A called suit: how far (pixels) each plate starts from its place, how high above, and how much it tumbles on the way. */
+	static final float FLY_SPREAD = 110.0F, FLY_HEIGHT = 70.0F, FLY_TUMBLE = 4.0F;
+	/** The shortest a plate's flight takes (ticks). */
+	static final float MIN_FLIGHT = 6.0F;
+
+	/** The suit texture and its glow pass for each frame ({@link RigFrame} order), and the trim plates alone. */
+	static final Identifier[] TEXTURES = {JaymosPowers.id("textures/entity/rig/suit.png"), JaymosPowers.id("textures/entity/rig/suit_scrap.png"),
+		JaymosPowers.id("textures/entity/rig/suit_shade.png"), JaymosPowers.id("textures/entity/rig/suit_siege.png")};
+	static final Identifier[] GLOW_TEXTURES = {JaymosPowers.id("textures/entity/rig/suit_glow.png"), JaymosPowers.id("textures/entity/rig/suit_glow_scrap.png"),
+		JaymosPowers.id("textures/entity/rig/suit_glow_shade.png"), JaymosPowers.id("textures/entity/rig/suit_glow_siege.png")};
+	static final Identifier TRIM_TEXTURE = JaymosPowers.id("textures/entity/rig/suit_trim.png");
+	static final Identifier TEXTURE = TEXTURES[0];
+	static final Identifier GLOW_TEXTURE = GLOW_TEXTURES[0];
 	/** Narrower than this (pixels), an arm is a slim one. */
 	private static final float SLIM_BELOW = 3.5F;
 	private static final RandomSource ANY = RandomSource.create();
@@ -236,8 +253,28 @@ public final class RigSuit {
 	 * From the avatar renderer's extractRenderState, after hidden armour, costumes and forms have taken what they hide off
 	 * the state: the Rig's pieces still on it come off it (the vanilla armour layer would draw them) and onto the suit.
 	 */
+	/** The Forge screen's preview: while {@code run} extracts the local player's render state, they wear the whole suit in this frame and paint (-1: bare). */
+	static void withPreview(RigFrame frame, int plates, int trim, Runnable run) {
+		previewFrame = frame;
+		previewPlates = plates;
+		previewTrim = trim;
+		try {
+			run.run();
+		} finally {
+			previewFrame = null;
+		}
+	}
+
+	private static @org.jspecify.annotations.Nullable RigFrame previewFrame;
+	private static int previewPlates, previewTrim;
+	/** A piece this old (ticks) is fully on. */
+	private static final float PREVIEW_AGE = 10000.0F;
+
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		state.setData(AGES, null);
+		state.setData(FRAME, null);
+		state.setData(TRIM, null);
+		state.setData(FLY, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
 		if (!(entity instanceof Player player)) {
@@ -248,10 +285,20 @@ public final class RigSuit {
 		double time = now + partialTicks;
 		float[] ages = null;
 		int[] colors = null;
+		RigFrame frame = null;
+		int trim = -1;
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
 			if (onState) {
+				ItemStack stack = equipment(state, piece);
+				if (frame == null || piece == Rig.Piece.CORE) {
+					frame = RigFrame.of(stack);
+				}
+				Integer painted = stack.get(Rig.TRIM);
+				if (painted != null && (trim < 0 || piece == Rig.Piece.CORE)) {
+					trim = painted & 0xFFFFFF;
+				}
 				DyedItemColor dye = equipment(state, piece).get(DataComponents.DYED_COLOR);
 				if (dye != null) {
 					if (colors == null) {
@@ -287,7 +334,21 @@ public final class RigSuit {
 				ages[i] = age;
 			}
 		}
+		if (previewFrame != null && player == net.minecraft.client.Minecraft.getInstance().player) {
+			ages = new float[] {PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE, PREVIEW_AGE};
+			frame = previewFrame;
+			trim = previewTrim;
+			colors = previewPlates < 0 ? null : new int[] {previewPlates, previewPlates, previewPlates, previewPlates};
+			state.headEquipment = ItemStack.EMPTY;
+			state.headItem.clear();
+			state.chestEquipment = ItemStack.EMPTY;
+			state.legsEquipment = ItemStack.EMPTY;
+			state.feetEquipment = ItemStack.EMPTY;
+		}
 		state.setData(AGES, ages);
+		state.setData(FRAME, ages == null || frame == null ? null : frame.ordinal());
+		state.setData(TRIM, ages == null || trim < 0 ? null : trim);
+		state.setData(FLY, ages == null || !player.getAttachedOrElse(RigCall.FLYING_IN, false) ? null : Boolean.TRUE);
 		state.setData(COLORS, ages == null ? null : colors);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
 		state.setData(FACE, ages == null ? null : face(player, (float)time));
@@ -375,6 +436,18 @@ public final class RigSuit {
 		return cube.maxX - cube.minX < SLIM_BELOW;
 	}
 
+	/** Where each plate is scattered to before a call brings it in: {x, y, z (pixels), xRot, yRot}, spread round the wearer and above. */
+	private static final float[][] SCATTER = new float[64][];
+
+	static {
+		for (int i = 0; i < SCATTER.length; i++) {
+			double angle = i * 2.399963;
+			double radius = FLY_SPREAD * (0.45 + 0.55 * ((i * 37) % 11) / 10.0);
+			SCATTER[i] = new float[] {(float)(Math.cos(angle) * radius), -FLY_HEIGHT * (0.3F + ((i * 17) % 7) / 7.0F), (float)(Math.sin(angle) * radius),
+				FLY_TUMBLE * Mth.sin(i * 1.7F), FLY_TUMBLE * Mth.cos(i * 2.3F)};
+		}
+	}
+
 	/** 0 → 1, passing 1 and settling back to it. */
 	private static float backOut(float p) {
 		float q = p - 1.0F;
@@ -418,18 +491,26 @@ public final class RigSuit {
 			boolean slimArms = slimArm(parent.rightArm, state.skin.model() == PlayerModelType.SLIM);
 			Suit suit = slimArms ? this.slim : this.wide;
 			int[] colors = state.getData(COLORS);
+			Integer frameIndex = state.getData(FRAME);
+			int frame = frameIndex == null ? 0 : Mth.clamp(frameIndex, 0, TEXTURES.length - 1);
 			if (colors == null || same(colors)) {
-				renderColoredCutoutModel(suit, TEXTURE, poseStack, collector, lightCoords, state, tint(colors == null ? -1 : colors[0]), 1);
+				renderColoredCutoutModel(suit, TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors == null ? -1 : colors[0]), 1);
 			} else {
 				// dyed piece by piece: each piece's plates in its own colour
 				Suit[] parts = slimArms ? this.slimParts : this.wideParts;
 				for (int i = 0; i < parts.length; i++) {
-					renderColoredCutoutModel(parts[i], TEXTURE, poseStack, collector, lightCoords, state, tint(colors[i]), 1);
+					renderColoredCutoutModel(parts[i], TEXTURES[frame], poseStack, collector, lightCoords, state, tint(colors[i]), 1);
 				}
 			}
 			Integer glow = state.getData(GLOW);
-			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURES[frame]), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow == null ? 0xFFFFFFFF : glow, null, 0);
+			Integer trim = state.getData(TRIM);
+			if (trim != null) {
+				// the trim, painted: its plates alone, in the trim colour, lit
+				collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(TRIM_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+					0xFF000000 | trim, null, 0);
+			}
 		}
 
 		private static boolean same(int[] colors) {
@@ -496,7 +577,7 @@ public final class RigSuit {
 				}
 			}
 			hideSkinLayers();
-			assemble(state.getData(AGES));
+			assemble(state.getData(AGES), Boolean.TRUE.equals(state.getData(FLY)));
 			Float face = state.getData(FACE);
 			if (face != null && face > 0.0F) {
 				// (0.11.110) the faceplate swung up off the face
@@ -518,12 +599,28 @@ public final class RigSuit {
 		}
 
 		/** Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. */
-		private void assemble(float[] ages) {
+		private void assemble(float[] ages, boolean fly) {
 			for (int i = 0; i < this.plates.length; i++) {
 				ModelPart part = this.plates[i];
 				float age = ages == null || this.only >= 0 && RigSuitMesh.PIECE[i] != this.only ? -1.0F : ages[RigSuitMesh.PIECE[i]];
 				float[] time = RigSuitMesh.TIME[i];
 				float p = age < 0.0F ? -1.0F : (age - time[0]) / time[1];
+				if (fly && age > 0.0F && age < time[0] + time[1]) {
+					// a called suit: the plate flies in from where it was scattered, locking on at its time
+					float q = age / Math.max(MIN_FLIGHT, time[0] + time[1]);
+					float k = 1.0F - backOut(Math.min(1.0F, q));
+					float[] from = SCATTER[i % SCATTER.length];
+					part.x += from[0] * k;
+					part.y += from[1] * k;
+					part.z += from[2] * k;
+					part.xRot += from[3] * k;
+					part.yRot += from[4] * k;
+					part.visible = true;
+					part.xScale = this.slim && this.arm[i] ? SLIM_ARM : 1.0F;
+					part.yScale = 1.0F;
+					part.zScale = 1.0F;
+					continue;
+				}
 				if (p <= 0.0F) {
 					part.visible = false;
 					continue;

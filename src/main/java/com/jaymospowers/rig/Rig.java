@@ -75,6 +75,10 @@ public final class Rig {
 	public static DataComponentType<Integer> XP;
 	/** (0.11.87) On a Rig Core: the game time its takeover save is ready again ({@link RigTakeover}). */
 	public static DataComponentType<Long> TAKEOVER_READY;
+	/** On every Rig piece: the frame it was built as ({@link RigFrame#id}); none is the standard frame. */
+	public static DataComponentType<String> FRAME;
+	/** On every Rig piece: the trim's paint (rgb), picked at the Forge; none is unpainted. The plates' paint is the dyed colour. */
+	public static DataComponentType<Integer> TRIM;
 
 	/** (0.11.87) The Mind's levels: the experience each one starts at (level 1 at 0). */
 	public static final int MAX_LEVEL = 5;
@@ -166,6 +170,10 @@ public final class Rig {
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 		TAKEOVER_READY = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_takeover"),
 			DataComponentType.<Long>builder().persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).build());
+		FRAME = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_frame"),
+			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+		TRIM = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rig_trim"),
+			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
 		Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
 		defense.put(ArmorType.HELMET, HELM_ARMOR);
@@ -188,6 +196,8 @@ public final class Rig {
 			.sound(SoundType.NETHERITE_BLOCK).noOcclusion()));
 		FALLEN_RIG = block("fallen_rig", p -> new RigWreckBlock(true, p.mapColor(MapColor.COLOR_BLACK).strength(2.0F, 6.0F)
 			.sound(SoundType.NETHERITE_BLOCK).noOcclusion()));
+		RigForgeEntity.TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("rig_forge"),
+			new net.minecraft.world.level.block.entity.BlockEntityType<>(RigForgeEntity::new, java.util.Set.of(FORGE)));
 		item("rig_forge", p -> new BlockItem(FORGE, p.useBlockDescriptionPrefix()));
 		item("dead_rig", p -> new BlockItem(DEAD_RIG, p.useBlockDescriptionPrefix()));
 		item("fallen_rig", p -> new BlockItem(FALLEN_RIG, p.useBlockDescriptionPrefix()));
@@ -215,6 +225,8 @@ public final class Rig {
 		RigWrecks.init();
 		RigLevels.init();
 		RigCall.init();
+		RigSentry.init();
+		RigLimbs.init();
 		ServerTickEvents.END_SERVER_TICK.register(Rig::tick);
 	}
 
@@ -243,6 +255,7 @@ public final class Rig {
 			RigActives.tick(player, any && !player.isSpectator());
 		}
 		RigActives.tickMissiles(server);
+		RigLanding.tick(server);
 		RigWrecks.tick(server);
 	}
 
@@ -351,6 +364,11 @@ public final class Rig {
 			core.set(CHARGE, now);
 		}
 		return now - have;
+	}
+
+	/** The frame of the suit this player wears (standard with none). */
+	public static RigFrame frame(Player player) {
+		return RigFrame.of(player);
 	}
 
 	/** This wearer's power's augment, or null without a power. */

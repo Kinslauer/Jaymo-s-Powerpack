@@ -147,6 +147,12 @@ public final class WebPower implements Power {
 	/** Spread wings flared to airbrake (Sneak while gliding), for everyone to draw. */
 	public static final AttachmentType<Boolean> WINGS_BRAKE = AttachmentRegistry.create(JaymosPowers.id("web_wings_brake"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Hanging head down from a swing line above (everyone draws it; see {@link WebHanging}). */
+	public static final AttachmentType<Boolean> UPSIDE = AttachmentRegistry.create(JaymosPowers.id("web_upside"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Settled into a balanced crouch on a narrow top (everyone draws it; see {@link WebPerch}). */
+	public static final AttachmentType<Boolean> PERCH = AttachmentRegistry.create(JaymosPowers.id("web_perch"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
 	public static final int WINGS_TICKS = 80;
 	public static final int WINGS_COOLDOWN = 60;
@@ -361,6 +367,9 @@ public final class WebPower implements Power {
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
+		WebHanging.register();
+		WebPerch.register();
+		WebFear.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
@@ -384,6 +393,7 @@ public final class WebPower implements Power {
 		WebLead.register();
 		// (0.21.23, Rivals patch 9) takedowns, wall pins, strung up from a perch
 		WebTakedowns.register();
+		WebGlideKick.register();
 	}
 
 	@Override
@@ -1046,6 +1056,10 @@ public final class WebPower implements Power {
 		if (!down) {
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && WebHanging.webUp(player)) {
+			// hanging head down: B webs up a creature below to the ceiling
+			return;
+		}
 		if (key == PowerKey.ABILITY_4 && !com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4)) {
 			// from level 1 until Yank unlocks, B only strings weblines (they're kept: Yank builds on them)
 			startWebline(player);
@@ -1304,6 +1318,12 @@ public final class WebPower implements Power {
 	}
 
 	/** A zip (or yank-to) is reeling this player in right now. */
+	/** Whether a swing web of {@code player}'s is stuck right now (to a block or a creature). */
+	static boolean swingingNow(ServerPlayer player) {
+		State state = player.getAttached(STATE);
+		return state != null && (state.swinging[WebNet.MAIN] || state.swinging[WebNet.OFF]);
+	}
+
 	static boolean pulling(ServerPlayer player) {
 		State state = player.getAttached(STATE);
 		return state != null && state.pullTicks > 0;

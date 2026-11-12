@@ -49,19 +49,23 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Prosthetics {
 	/** A fitted limb's strength against 1 for a sound one (a broken limb is 0.4): wood is weaker, iron sturdier. */
-	public static final float WOOD_ARM = 0.5F, WOOD_LEG = 0.55F, IRON_ARM = 0.7F, IRON_LEG = 0.75F;
+	public static final float WOOD_ARM = 0.5F, WOOD_LEG = 0.55F, IRON_ARM = 0.7F, IRON_LEG = 0.75F, RIG_ARM = 0.9F, RIG_LEG = 0.95F;
 	/** Swing speed lost per fitted arm (a share of attack speed): the wooden arm is slow, the iron one a little heavy. */
 	public static final double WOOD_ARM_SWING = -0.25, IRON_ARM_SWING = -0.1;
 	/** Walking speed and jump lost per fitted leg (a missing leg costs {@link Dismember#LEG_SPEED} and {@link Dismember#LEG_JUMP}). */
 	public static final double WOOD_LEG_SPEED = -0.22, IRON_LEG_SPEED = -0.16, WOOD_LEG_JUMP = -0.25, IRON_LEG_JUMP = -0.2;
 	/** Iron's weight: walking speed lost per fitted iron limb, on top of the leg's own. */
 	public static final double IRON_WEIGHT = -0.04;
+	/** A Rig limb ({@code rig.RigLimbs}) is balanced: no swing lost, a little walking speed given for the leg's mass. */
+	public static final double RIG_LEG_SPEED = -0.04;
 	/** How often (ticks) a body is checked for a prosthetic whose limb has grown back. */
 	public static final int CHECK_EVERY = 20;
 	/** Iron ingots a forged limb takes (the smithing anvil). */
 	public static final int IRON_ARM_INGOTS = 4, IRON_LEG_INGOTS = 5;
 	/** The iron flags sit this many bits above the fitted ones in {@link #FITTED}. */
 	private static final int IRON_SHIFT = 8;
+	/** The Rig flags sit this many bits above the fitted ones; above them, the frame each Rig limb was built as (two bits a limb). */
+	private static final int RIG_SHIFT = 16, FRAME_SHIFT = 24;
 	private static final int ALL = Dismember.RIGHT_ARM | Dismember.LEFT_ARM | Dismember.RIGHT_LEG | Dismember.LEFT_LEG;
 	private static final int ARMS = Dismember.RIGHT_ARM | Dismember.LEFT_ARM, LEGS = Dismember.RIGHT_LEG | Dismember.LEFT_LEG;
 
@@ -76,21 +80,30 @@ public final class Prosthetics {
 	public static final AttachmentType<Integer> FITTED = AttachmentRegistry.create(JaymosPowers.id("prosthetics"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
-	public static Item WOODEN_ARM, WOODEN_LEG, IRON_ARM_ITEM, IRON_LEG_ITEM;
+	public static Item WOODEN_ARM, WOODEN_LEG, IRON_ARM_ITEM, IRON_LEG_ITEM, RIG_ARM_ITEM, RIG_LEG_ITEM;
+
+	/** What a limb is made of. */
+	public enum Kind {
+		WOOD, IRON, RIG
+	}
 
 	private Prosthetics() {
 	}
 
 	public static void init() {
-		WOODEN_ARM = item("wooden_arm", false, true);
-		WOODEN_LEG = item("wooden_leg", false, false);
-		IRON_ARM_ITEM = item("iron_arm", true, true);
-		IRON_LEG_ITEM = item("iron_leg", true, false);
+		WOODEN_ARM = item("wooden_arm", Kind.WOOD, true);
+		WOODEN_LEG = item("wooden_leg", Kind.WOOD, false);
+		IRON_ARM_ITEM = item("iron_arm", Kind.IRON, true);
+		IRON_LEG_ITEM = item("iron_leg", Kind.IRON, false);
+		RIG_ARM_ITEM = item("rig_arm", Kind.RIG, true);
+		RIG_LEG_ITEM = item("rig_leg", Kind.RIG, false);
 		CreativeModeTabEvents.modifyOutputEvent(com.jaymospowers.tinkering.kiln.Kiln.tab()).register(output -> {
 			output.accept(WOODEN_ARM);
 			output.accept(WOODEN_LEG);
 			output.accept(IRON_ARM_ITEM);
 			output.accept(IRON_LEG_ITEM);
+			output.accept(RIG_ARM_ITEM);
+			output.accept(RIG_LEG_ITEM);
 		});
 		// the body that falls takes nothing with it: the limbs drop where it fell
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -110,9 +123,10 @@ public final class Prosthetics {
 		});
 	}
 
-	private static Item item(String id, boolean iron, boolean arm) {
+	private static Item item(String id, Kind kind, boolean arm) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
-		return Registry.register(BuiltInRegistries.ITEM, key, new ProstheticItem(new Item.Properties().setId(key).stacksTo(16), iron, arm));
+		return Registry.register(BuiltInRegistries.ITEM, key,
+			new ProstheticItem(new Item.Properties().setId(key).stacksTo(kind == Kind.RIG ? 1 : 16), kind, arm));
 	}
 
 	// ---- queries -------------------------------------------------------------------------------------------------------
@@ -135,6 +149,35 @@ public final class Prosthetics {
 		return mask == null ? 0 : mask >> IRON_SHIFT & ALL;
 	}
 
+	/** The Rig limbs' bits, for drawing and for what they can do. */
+	public static int rigMask(net.minecraft.world.entity.Entity entity) {
+		Integer mask = entity.getAttached(FITTED);
+		return mask == null ? 0 : mask >> RIG_SHIFT & ALL;
+	}
+
+	/** Whether the prosthetic on {@code part} is a Rig limb. */
+	public static boolean rig(net.minecraft.world.entity.Entity entity, int part) {
+		return (rigMask(entity) & part) != 0;
+	}
+
+	/** Whether {@code entity} wears a Rig limb on any of {@code parts} (a {@link Dismember} arm or leg bit mask). */
+	public static boolean hasRig(net.minecraft.world.entity.Entity entity, int parts) {
+		return (rigMask(entity) & fitted(entity) & parts) != 0;
+	}
+
+	/** The id of the frame the Rig limb on {@code part} was built as (empty for the standard one). */
+	public static String rigFrame(net.minecraft.world.entity.Entity entity, int part) {
+		Integer mask = entity.getAttached(FITTED);
+		if (mask == null) {
+			return "";
+		}
+		int index = Math.max(0, Integer.numberOfTrailingZeros(part) - 1);
+		return FRAME_IDS[mask >> FRAME_SHIFT + 2 * index & 3];
+	}
+
+	/** The frames a Rig limb can carry, in the order they are saved (the same ids as {@code rig.RigFrame}). */
+	private static final String[] FRAME_IDS = {"", "scrap", "shade", "siege"};
+
 	/** How well the prosthetic on {@code part} works: 0 when there is none. */
 	public static float strength(net.minecraft.world.entity.Entity entity, int part) {
 		if ((fitted(entity) & part) == 0) {
@@ -142,6 +185,9 @@ public final class Prosthetics {
 		}
 		boolean iron = iron(entity, part);
 		boolean arm = (part & ARMS) != 0;
+		if (rig(entity, part)) {
+			return arm ? RIG_ARM : RIG_LEG;
+		}
 		return arm ? (iron ? IRON_ARM : WOOD_ARM) : (iron ? IRON_LEG : WOOD_LEG);
 	}
 
@@ -159,19 +205,33 @@ public final class Prosthetics {
 	}
 
 	/** Fits a prosthetic of this kind to the first limb of its kind that is missing and bare. True if it went on. */
-	public static boolean fit(ServerPlayer player, boolean iron, boolean arm) {
+	public static boolean fit(ServerPlayer player, Kind kind, boolean arm, String frame) {
 		int part = arm ? free(player, ARMS, Dismember.RIGHT_ARM, Dismember.LEFT_ARM) : free(player, LEGS, Dismember.RIGHT_LEG, Dismember.LEFT_LEG);
 		if (part == 0) {
 			return false;
 		}
-		int mask = fittedRaw(player) | part | (iron ? part << IRON_SHIFT : 0);
+		int mask = fittedRaw(player) | part | (kind == Kind.IRON ? part << IRON_SHIFT : 0) | (kind == Kind.RIG ? part << RIG_SHIFT : 0);
+		if (kind == Kind.RIG) {
+			int slot = FRAME_SHIFT + 2 * (Integer.numberOfTrailingZeros(part) - 1);
+			mask = mask & ~(3 << slot) | frameBits(frame) << slot;
+		}
 		player.setAttached(FITTED, mask);
 		apply(player);
 		if (player.level() instanceof ServerLevel level) {
-			SoundEvent sound = iron ? SoundEvents.ANVIL_USE : SoundEvents.WOOD_PLACE;
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, 0.8F, iron ? 1.4F : 0.9F);
+			SoundEvent sound = kind == Kind.WOOD ? SoundEvents.WOOD_PLACE : SoundEvents.ANVIL_USE;
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, 0.8F,
+				kind == Kind.IRON ? 1.4F : kind == Kind.RIG ? 1.8F : 0.9F);
 		}
 		return true;
+	}
+
+	private static int frameBits(String frame) {
+		for (int i = 0; i < FRAME_IDS.length; i++) {
+			if (FRAME_IDS[i].equals(frame)) {
+				return i;
+			}
+		}
+		return 0;
 	}
 
 	private static int fittedRaw(net.minecraft.world.entity.Entity entity) {
@@ -199,11 +259,17 @@ public final class Prosthetics {
 				continue;
 			}
 			boolean iron = iron(entity, part);
+			boolean rig = rig(entity, part);
 			boolean arm = (part & ARMS) != 0;
-			Item item = arm ? (iron ? IRON_ARM_ITEM : WOODEN_ARM) : (iron ? IRON_LEG_ITEM : WOODEN_LEG);
-			mask &= ~(part | part << IRON_SHIFT);
+			Item item = rig ? (arm ? RIG_ARM_ITEM : RIG_LEG_ITEM) : arm ? (iron ? IRON_ARM_ITEM : WOODEN_ARM) : (iron ? IRON_LEG_ITEM : WOODEN_LEG);
+			String frame = rig ? rigFrame(entity, part) : "";
+			mask &= ~(part | part << IRON_SHIFT | part << RIG_SHIFT | 3 << FRAME_SHIFT + 2 * (Integer.numberOfTrailingZeros(part) - 1));
 			if (entity.level() instanceof ServerLevel level) {
-				entity.spawnAtLocation(level, new ItemStack(item));
+				ItemStack dropped = new ItemStack(item);
+				if (!frame.isEmpty()) {
+					dropped.set(com.jaymospowers.rig.Rig.FRAME, frame);
+				}
+				entity.spawnAtLocation(level, dropped);
 				level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), iron ? SoundEvents.ITEM_BREAK.value() : SoundEvents.WOOD_BREAK,
 					SoundSource.PLAYERS, 0.8F, 1.2F);
 			}
@@ -231,7 +297,11 @@ public final class Prosthetics {
 				continue;
 			}
 			boolean iron = iron(entity, part);
-			if ((part & ARMS) != 0) {
+			if (rig(entity, part)) {
+				if ((part & ARMS) == 0) {
+					speed += RIG_LEG_SPEED;
+				}
+			} else if ((part & ARMS) != 0) {
 				swing += iron ? IRON_ARM_SWING : WOOD_ARM_SWING;
 			} else {
 				speed += iron ? IRON_LEG_SPEED : WOOD_LEG_SPEED;
@@ -261,11 +331,12 @@ public final class Prosthetics {
 
 	/** A wooden or iron arm or leg: used on yourself, it takes the place of a limb you have lost. */
 	public static final class ProstheticItem extends Item {
-		private final boolean iron, arm;
+		private final Kind kind;
+		private final boolean arm;
 
-		ProstheticItem(Item.Properties properties, boolean iron, boolean arm) {
+		ProstheticItem(Item.Properties properties, Kind kind, boolean arm) {
 			super(properties);
-			this.iron = iron;
+			this.kind = kind;
 			this.arm = arm;
 		}
 
@@ -275,7 +346,8 @@ public final class Prosthetics {
 				return InteractionResult.PASS;
 			}
 			ItemStack stack = player.getItemInHand(hand);
-			if (fit(server, this.iron, this.arm)) {
+			String frame = stack.getOrDefault(com.jaymospowers.rig.Rig.FRAME, "");
+			if (fit(server, this.kind, this.arm, frame)) {
 				stack.consume(1, player);
 				return InteractionResult.SUCCESS_SERVER;
 			}
@@ -287,7 +359,12 @@ public final class Prosthetics {
 		@SuppressWarnings("deprecation")
 		public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 			TooltipFlag flag) {
-			builder.accept(Component.translatable("tooltip.jaymospowers.prosthetic." + (this.iron ? "iron" : "wood")).withStyle(ChatFormatting.GRAY));
+			builder.accept(Component.translatable("tooltip.jaymospowers.prosthetic." + this.kind.name().toLowerCase(java.util.Locale.ROOT)
+				+ (this.kind == Kind.RIG ? "." + (this.arm ? "arm" : "leg") : "")).withStyle(ChatFormatting.GRAY));
+			if (this.kind == Kind.RIG) {
+				String frame = stack.getOrDefault(com.jaymospowers.rig.Rig.FRAME, "");
+				builder.accept(Component.translatable("rig.jaymospowers.frame." + (frame.isEmpty() ? "standard" : frame)).withStyle(ChatFormatting.DARK_AQUA));
+			}
 			builder.accept(Component.translatable("tooltip.jaymospowers.prosthetic.fit").withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}

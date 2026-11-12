@@ -2,7 +2,6 @@ package com.jaymoskingdoms.client.spirits;
 
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Mana;
-import com.jaymoskingdoms.ManaAlchemy;
 import com.jaymoskingdoms.client.ManaClient;
 import com.jaymoskingdoms.client.ManaClient.Glow;
 import com.jaymoskingdoms.spirits.SpiritState;
@@ -295,7 +294,7 @@ public final class ManaWings {
 	/** Whether this client may see {@code entity}'s mana (and so its wings): it is attuned, and the viewer is or reads magic. */
 	private static boolean seen(LivingEntity entity) {
 		LocalPlayer viewer = Minecraft.getInstance().player;
-		return viewer != null && Mana.attuned(entity) && (Mana.attuned(viewer) || ManaAlchemy.readsMagic(viewer));
+		return viewer != null && Mana.attuned(entity) && (entity == viewer || Mana.seesMana(viewer));
 	}
 
 	/** Thessaly's rose in mana's blue, taken toward white. */
