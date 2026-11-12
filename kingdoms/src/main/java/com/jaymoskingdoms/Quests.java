@@ -488,6 +488,8 @@ public final class Quests {
 			Speech.GOLD);
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.accepted", title(q)).withStyle(ChatFormatting.YELLOW));
 		level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+		// a band that saw it may be waiting where you're headed (docs/Pawn-Plan.md row B3)
+		Wayfinding.questTaken(level, player, q);
 		sync(player, true);
 	}
 
@@ -518,6 +520,8 @@ public final class Quests {
 			}
 		}
 		remove(player, q.id());
+		// (its kind is known now to the companions who saw it through: docs/Pawn-Plan.md row B3)
+		Remarks.questDone(player, q);
 		// (0.7.0) a priest's hunt: the rite, there and then
 		Cures.rite(level, player, giver, q);
 		// a Rider is paid more for carrying things and people (Riders.COURIER_PAY)

@@ -31,6 +31,8 @@
   "class.jaymoskingdoms.option.blood.desc": "Forbidden. Paid in blood, not mana: what you drink from the bleeding near you, then your own health. Your blade's blows cut. Hold J looking at a blood source (a stain, a bleeding foe, a blood grate) to gather it into your reservoir; hold J empty-handed looking anywhere else and it's thrown as a barrage of blood blasts while it lasts. Sneak and J grips a bleeding foe and drags them to you, throws a bolt that cuts, or (at nothing) bursts every cut round you. Bleeding hurts you half as much. Casting it corrupts you, and it's a crime where a realm's people see.",
   "class.jaymoskingdoms.option.blight": "Blight",
   "class.jaymoskingdoms.option.blight.desc": "Who you look at withers, and nothing heals them till it wears off. Healing magic lifts it.",
+  "class.jaymoskingdoms.option.dominion": "Dominion",
+  "class.jaymoskingdoms.option.dominion.desc": "Whoever you look at fights for you a while, against their own first. A death spell: it has its price.",
   "class.jaymoskingdoms.option.whispers": "Whispers",
   "class.jaymoskingdoms.option.whispers.desc": "A body you look at tells you how it died, and how long ago.",
   "class.jaymoskingdoms.option.deaths_door": "Death's Door",

@@ -149,6 +149,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
 		FollowersScreen.register();
+		QuickOrderKeys.register();
+		TableTalkScreen.register();
+		LoanScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
@@ -241,6 +244,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		DarkEyes.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
 		FrostTechLayer.register();

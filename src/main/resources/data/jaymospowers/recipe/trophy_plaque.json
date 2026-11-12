@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PGP",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "minecraft:gold_nugget"
+  },
+  "result": {
+    "id": "jaymospowers:trophy_plaque",
+    "count": 1
+  }
+}

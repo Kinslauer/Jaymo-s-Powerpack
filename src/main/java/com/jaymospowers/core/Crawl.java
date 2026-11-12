@@ -22,8 +22,8 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Crawling, for every player (no power needed): press the Crawl key (Down Arrow) and you drop flat until you press it
- * again (or Jump) with room to stand. The client spots all of that ({@code CrawlTaps}) and tells the server; the
+ * Crawling, for every player (no power needed): press the Crawl key (unbound by default) or Sneak + scroll down to
+ * prone and you drop flat until you press it again (or Jump) with room to stand. The client spots all of that ({@code CrawlTaps}) and tells the server; the
  * server's flag is synced to everyone so every client draws the same pose and hitbox.
  *
  * <p>While crawling, double-tapping Left or Right (A / D) rolls you one block that way: stop, drop and roll. Holding the

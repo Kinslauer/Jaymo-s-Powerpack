@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymospowers:block/ground/sulphur_pebble"
+      },
+      {
+        "model": "jaymospowers:block/ground/sulphur_pebble",
+        "y": 90
+      },
+      {
+        "model": "jaymospowers:block/ground/sulphur_pebble",
+        "y": 180
+      },
+      {
+        "model": "jaymospowers:block/ground/sulphur_pebble",
+        "y": 270
+      }
+    ]
+  }
+}

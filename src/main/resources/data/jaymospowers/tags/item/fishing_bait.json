@@ -18,6 +18,13 @@
     "jaymospowers:soft_shad",
     "jaymospowers:pirk",
     "jaymospowers:trolling_squid",
-    "jaymospowers:fishing_magnet"
+    "jaymospowers:fishing_magnet",
+    {
+      "id": "jaymoskitchen:corn",
+      "required": false
+    },
+    "jaymospowers:herring",
+    "jaymospowers:grayling",
+    "jaymospowers:shrimp"
   ]
 }

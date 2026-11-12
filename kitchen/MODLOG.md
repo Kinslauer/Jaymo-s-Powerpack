@@ -1919,3 +1919,9 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
 - **A body roasting** crackles with fat dripping and spitting into the flames.
 - **Rats and scavengers** eat with varied bites and the odd tear.
 - Built; not played.
+
+## 0.5.121 (2026-11-12): fillets from Powers' new fish
+
+- Powers' new species fillet on the cutting board by their weight: white-fleshed ones (`#jaymospowers:fish/white`) into
+  cod slices, oily ones (`#jaymospowers:fish/oily`) into salmon slices, with bone meal.
+- Built; not played.

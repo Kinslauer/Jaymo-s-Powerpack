@@ -443,6 +443,11 @@ public final class Pirates {
 			Vec3 mark = foe.position().add(foe.getDeltaMovement().multiply(flight * 0.6, 0.0, flight * 0.6))
 				.add((random.nextDouble() * 2.0 - 1.0) * stray, 0.0, (random.nextDouble() * 2.0 - 1.0) * stray);
 			Vec3 from = new Vec3(bomber.getX(), bomber.getEyeY() - 0.2, bomber.getZ());
+			if (!Dynamite.clear(level, bomber, foe, mark)) {
+				// someone who isn't in the fight is where it would land: hold it a moment (docs/Pawn-Plan.md, what not to copy)
+				this.reload = BOMB_JITTER + 1;
+				return;
+			}
 			bomber.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 			Dynamite.light(level, bomber, Dynamite.lob(from, mark, flight));
 			if (random.nextInt(3) == 0) {

@@ -2710,6 +2710,8 @@ public final class LifeStory {
 			return false;
 		}
 		Skills.refresh(player);
+		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
+		Masterless.forsaken(player);
 		// Tiv: "EVERYTHING should be reset on a reincarnate". MCA's villagers forget the player (hearts, memories,
 		// relationships), the player leaves their party, and no captain remembers having met them. This runs before
 		// MCA's creator opens, so the reset can't wipe the new character being made in it.

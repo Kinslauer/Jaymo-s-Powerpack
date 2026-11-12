@@ -158,13 +158,21 @@ public final class Drifters {
 			if (came != null && now - came > LIFETIME_TICKS && level.getNearestPlayer(v, LEAVE_RANGE) == null) {
 				LOADED.remove(v);
 				PITCHED.remove(v.getUUID());
+				if (Veterans.sell(level, v)) {
+					// an old hand sells their sword to a camp instead (docs/Pawn-Plan.md row A3)
+					v.removeAttached(DRIFTER);
+					continue;
+				}
 				v.discard();
 				continue;
 			}
-			if (!PITCHED.contains(v.getUUID()) && level.getNearestPlayer(v, PITCH_RANGE) != null) {
+			Player near = level.getNearestPlayer(v, PITCH_RANGE);
+			if (!PITCHED.contains(v.getUUID()) && near != null) {
 				PITCHED.add(v.getUUID());
-				Speech.say(level, v, Component.translatable("speech.jaymoskingdoms.drifter.pitch." + level.getRandom().nextInt(LINES), HIRE_COST),
-					Speech.WHITE, SPEECH_RANGE);
+				int grade = Veterans.grade(v);
+				Speech.say(level, v, Component.translatable(grade == Veterans.GREEN ? "speech.jaymoskingdoms.drifter.pitch." + level.getRandom().nextInt(LINES)
+					: "speech.jaymoskingdoms.veteran.pitch." + grade + "." + level.getRandom().nextInt(2), Veterans.price(v)), Speech.WHITE, SPEECH_RANGE);
+				Veterans.pitched(v, near);
 			}
 		}
 	}
@@ -179,6 +187,7 @@ public final class Drifters {
 				at = Construction.standable(level, taverns.get(random.nextInt(taverns.size())).counter(), 3);
 			}
 		}
+		boolean tavern = at != null;
 		if (at == null) {
 			at = onRoad(level, f, random);
 		}
@@ -193,6 +202,11 @@ public final class Drifters {
 		v.setAttached(DRIFTER, now);
 		LOADED.add(v);
 		weaken(v);
+		int grade = Veterans.roll(random, tavern);
+		if (grade > Veterans.GREEN) {
+			Veterans.make(v, grade);
+			Learners.apply(v);
+		}
 		String gender = v.getGenetics().getGender() == Gender.FEMALE ? "female" : "male";
 		v.setClothes(String.format(CLOTHES, gender));
 		JaymosKingdoms.LOGGER.debug("A drifter came to {}", f.name());
@@ -200,7 +214,7 @@ public final class Drifters {
 	}
 
 	/** A spot on a road leading out of {@code f}, a way from its end; null if it has none loaded. */
-	private static @Nullable BlockPos onRoad(ServerLevel level, Faction f, RandomSource random) {
+	static @Nullable BlockPos onRoad(ServerLevel level, Faction f, RandomSource random) {
 		List<Roads.Road> mine = Roads.network(level.getServer()).roads().stream().filter(r -> r.a() == f.id() || r.b() == f.id()).toList();
 		if (mine.isEmpty()) {
 			return null;
@@ -243,11 +257,12 @@ public final class Drifters {
 			return InteractionResult.PASS;
 		}
 		VillagerEntityMCA v = (VillagerEntityMCA)entity;
-		if (!v.isAlive() || !Money.canPay(sp, Money.worth(HIRE_COST))) {
-			Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.short", Money.text(sp, Money.worth(HIRE_COST))), Speech.WHITE);
+		int cost = Veterans.price(v);
+		if (!v.isAlive() || !Money.canPay(sp, Money.worth(cost))) {
+			Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.short", Money.text(sp, Money.worth(cost))), Speech.WHITE);
 			return InteractionResult.SUCCESS;
 		}
-		Money.charge(sp, Money.worth(HIRE_COST));
+		Money.charge(sp, Money.worth(cost));
 		String rags = v.getClothes();
 		v.makeMercenary();
 		// (making them a mercenary dresses them again, and so does the contract's end: keep their rags)
@@ -260,7 +275,7 @@ public final class Drifters {
 		v.removeAttached(DRIFTER);
 		LOADED.remove(v);
 		PITCHED.remove(v.getUUID());
-		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.drifter.hired", v.getName(), HIRE_COST).withStyle(ChatFormatting.GRAY), true);
+		sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.drifter.hired", v.getName(), cost).withStyle(ChatFormatting.GRAY), true);
 		Speech.sayTo(server, v, sp, Component.translatable("speech.jaymoskingdoms.drifter.hired." + server.getRandom().nextInt(LINES)), Speech.WHITE);
 		return InteractionResult.SUCCESS;
 	}

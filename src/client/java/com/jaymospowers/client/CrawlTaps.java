@@ -14,10 +14,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Going prone: press the Crawl key (Down Arrow by default, rebindable) and you stay flat with nothing held; press it
- * again (or Jump) to get up, which waits until there's room to stand. While crawling, double-tap Left or Right to roll
- * one block that way; keep holding it to keep rolling, for up to 2 s one way before you must roll back (rolling back
- * puts the fire on you out).
+ * Going prone: press the Crawl key (unbound by default, since the Down arrow is Kingdoms' Come order), or Sneak +
+ * scroll down to prone ({@link StanceScroll}), and you stay flat with nothing held; press it again (or Jump) to get
+ * up, which waits until there's room to stand. While crawling, double-tap Left or Right to roll one block that way;
+ * keep holding it to keep rolling, for up to 2 s one way before you must roll back (rolling back puts the fire on you
+ * out).
  * <p>
  * (0.15.108) Pressed while hanging from a ledge, it climbs you in onto your belly when there's room to lie up there
  * ({@link LedgeClient#proneClimb}; otherwise it does nothing, rather than dropping you). A slide that ends with Sneak still
@@ -62,7 +63,7 @@ public final class CrawlTaps {
 	}
 
 	static void init() {
-		crawlKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.crawl", InputConstants.KEY_DOWN,
+		crawlKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.crawl", InputConstants.UNKNOWN.getValue(),
 			JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(CrawlTaps::tick);
 	}

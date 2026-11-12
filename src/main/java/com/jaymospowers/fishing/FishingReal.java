@@ -56,6 +56,11 @@ public final class FishingReal {
     private static final Map<UUID, Float> WEIGHTS = new HashMap<>();
     /** A hooked fish's own size, put back if it gets away. */
     private static final Map<UUID, Float> BASE_SCALE = new HashMap<>();
+    /** (Track D) The bait each player's last fish took, for the journal. */
+    private static final Map<UUID, Item> BAIT_USED = new HashMap<>();
+    /** (Track C) A legend fights this much harder, and this many times as long before the line gives. */
+    static final float LEGEND_PULL = 1.4F;
+    static final int LEGEND_FIGHT_TIMES = 2;
 
     /** The metal fishing rod, forged through Tinkering: stronger line, bigger fish. Set in init(). */
     private static Item METAL_ROD;
@@ -118,6 +123,15 @@ public final class FishingReal {
         // (0.21.64) Track B: rods, baits, lures and the rest of the tackle box
         Tackle.init();
         FishingGear.init();
+        // Track C: every new species, the waters they keep, and the old giants of each water
+        FishSpecies.init();
+        FishLegends.init();
+        // Track B's leftovers and Track D: ice holes, rod pods, crab pots, keepnets, plaques, the journal, the market
+        IceFishing.init();
+        FishingBlocks.init();
+        CatchRelease.init();
+        FishLog.init();
+        Fishermen.init();
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(server -> Tackle.kitchen());
         FishingPayloads.register();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -160,7 +174,7 @@ public final class FishingReal {
         LivingEntity fish = HOOKED.get(player.getUUID());
         FishingHook hook = HOOKS.get(player.getUUID());
         long now = player.level().getGameTime();
-        int fightLimit = fightLimit(state);
+        int fightLimit = fightLimit(state, fish);
 
         // End the fight if the hook is gone (player switched item, hook removed).
         if (hook == null || hook.isRemoved()) {
@@ -190,9 +204,9 @@ public final class FishingReal {
             if (run == 0 && tension < tooTense) {
                 progress = Math.min(1.0F, progress + (metalRod ? PROGRESS_REEL_METAL : PROGRESS_REEL) * FishRun.reelFactor(player));
             }
-            if (metalRod && (state.fishKind() == FISH_SHARK || state.fishKind() == FISH_TUNA)) {
+            if (metalRod && big(state.fishKind())) {
                 // a big fish on the line pulls the player toward it
-                pullPlayer(player, fish, state.fishKind() == FISH_SHARK ? PULL_PLAYER : PULL_PLAYER_TUNA);
+                pullPlayer(player, fish, sharkLike(state.fishKind()) ? PULL_PLAYER : PULL_PLAYER_TUNA);
             }
         } else if (run != 0) {
             // easing off in a run: the fish still pulls and takes line
@@ -218,7 +232,7 @@ public final class FishingReal {
         }
 
         if (progress >= 1.0F && now - state.startTime() >= MIN_FIGHT_TICKS) {
-            if ((state.fishKind() == FISH_SHARK || state.fishKind() == FISH_TUNA) && !metalRod) {
+            if (big(state.fishKind()) && !metalRod) {
                 // a big fish can only be landed on the metal rod (the rod was swapped mid-fight)
                 endFight(player, false);
                 player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.too_big").withStyle(net.minecraft.ChatFormatting.RED));
@@ -248,24 +262,52 @@ public final class FishingReal {
         FishBite.begin(player, kind, fish, hook);
     }
 
+    /** (Track D) What {@code player}'s fish took, just before it's eaten off the hook. */
+    static void baited(ServerPlayer player, @Nullable Item bait) {
+        if (bait != null) {
+            BAIT_USED.put(player.getUUID(), bait);
+        }
+    }
+
+    /** A fish of {@code kind} is one of the big ones (a shark, a tuna, a swordfish): landed only on the metal rod. */
+    static boolean big(int kind) {
+        Species sp = Species.of(kind);
+        return sp != null && sp.big();
+    }
+
+    /** A fish of {@code kind} is a big shark: too big to carry, cut up on the shore, held on the line without its AI. */
+    static boolean sharkLike(int kind) {
+        Species sp = Species.of(kind);
+        return kind == FISH_SHARK || sp != null && sp.sharkish() && sp.big();
+    }
+
     /** Start a fight: hook a live fish on the player's line. Called by {@link FishBite#strike} when the player strikes. */
     public static void startFight(ServerPlayer player, int fishKind, LivingEntity fish, FishingHook hook) {
-        float strength = switch (fishKind) {
-            case 0 -> STRENGTH_COD; // cod: steady
-            case 1 -> STRENGTH_SALMON; // salmon: stronger
-            case 2 -> STRENGTH_PUFFERFISH; // pufferfish: erratic, strong
-            case FISH_SHARK -> STRENGTH_SHARK; // shark: hardest
-            case FISH_TUNA -> STRENGTH_TUNA; // tuna: big and strong
-            default -> STRENGTH_TROPICAL; // tropical: varied
-        };
-        if (fish instanceof net.minecraft.world.entity.Mob mob && fishKind == FISH_SHARK) {
+        // (Track C) every species fights its own way: a bream barely, a pike in hard runs, a catfish like a dragged log
+        Species sp = Species.of(fishKind);
+        float strength = sp == null ? STRENGTH_TROPICAL : sp.strength;
+        if (fish instanceof net.minecraft.world.entity.Mob mob && sharkLike(fishKind)) {
             // a real shark, held on the line: no AI until it's landed or breaks free
             mob.setNoAi(true);
         }
-        // a heavy fish fights harder, and looks it
-        float kg = FishCatch.roll(fishKind, player.getRandom(), FishCatch.depth(player.level(), hook.blockPosition()));
+        // a heavy fish fights harder, and looks it; one of ours already has its weight, and its size shows it
+        float kg;
+        if (fish instanceof WildFish wild) {
+            kg = wild.weight();
+            if (wild.legend()) {
+                strength *= LEGEND_PULL;
+            }
+        } else if (fish instanceof Critter critter) {
+            kg = critter.weight();
+        } else {
+            kg = FishCatch.roll(fishKind, player.getRandom());
+            Species kind = Species.of(fishKind);
+            if (kind != null) {
+                kg = FishCatch.deeper(kg, FishCatch.depth(player.level(), hook.blockPosition()), kind.kgMax);
+            }
+        }
         strength *= FishCatch.pull(fishKind, kg);
-        if (fishKind != FISH_SHARK) {
+        if (!sharkLike(fishKind) && !(fish instanceof WildFish) && !(fish instanceof Critter)) {
             net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
                     fish.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
             if (scale != null) {
@@ -280,10 +322,11 @@ public final class FishingReal {
         // (0.21.61, Andy: "tideborn will see fishing as an attack, and doing in their havens is seen as a crime")
         com.jaymospowers.compat.KingdomsCompat.fished(player, hook.blockPosition());
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.fish_on").withStyle(net.minecraft.ChatFormatting.GOLD));
-        if (fishKind == FISH_TUNA) {
+        if (fish instanceof WildFish wild && wild.legend()) {
+            player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.legend_hooked").withStyle(net.minecraft.ChatFormatting.GOLD));
+        } else if (fishKind == FISH_TUNA) {
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.tuna_hooked").withStyle(net.minecraft.ChatFormatting.GOLD));
-        }
-        if (fishKind == FISH_SHARK) {
+        } else if (sharkLike(fishKind)) {
             player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.shark_hooked").withStyle(net.minecraft.ChatFormatting.RED));
         }
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
@@ -298,25 +341,17 @@ public final class FishingReal {
         Float weighed = WEIGHTS.remove(player.getUUID());
         LivingEntity fish = HOOKED.remove(player.getUUID());
         FishingHook hook = HOOKS.remove(player.getUUID());
+        Item bait = BAIT_USED.remove(player.getUUID());
         if (fish != null) {
             if (caught) {
                 // (0.21.62) the catch is what was fought, at its weight: a whole tuna, a shark cut up for meat
                 float kg = weighed != null ? weighed : FishCatch.roll(kindFought, player.getRandom());
-                ItemStack loot = FishCatch.loot(kindFought, kg);
-                if (!loot.isEmpty()) {
-                    Component name = loot.getHoverName();
-                    if (!player.addItem(loot)) {
-                        player.spawnAtLocation(player.level(), loot, 1.0F);
-                    }
-                    player.sendOverlayMessage(Component.translatable(kindFought == FISH_SHARK
-                                    ? "message.jaymospowers.fishing.shark_landed" : "message.jaymospowers.fishing.caught_weighed",
-                            name, String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(net.minecraft.ChatFormatting.GREEN));
-                }
+                landed(player, kindFought, fish, kg, bait);
                 // a landed fish is gone from the water
                 fish.discard();
             } else if (fish instanceof net.minecraft.world.entity.Mob mob) {
                 // one that got away is a real fish still: it swims off as it was
-                if (kindFought == FISH_SHARK) {
+                if (sharkLike(kindFought)) {
                     mob.setNoAi(false);
                 }
                 net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
@@ -331,6 +366,59 @@ public final class FishingReal {
         if (hook != null) {
             hook.discard();
             player.fishing = null;
+        }
+    }
+
+    /**
+     * (Track C and D) {@code player} landed {@code fish}: give what it is (tagged with its story, alive for a while, so it
+     * can go back), a big shark's jaw, another mod's fish as its own drops; then write it in the journal, crow over a
+     * personal best, tell the water a legend is gone, and count it for any contest.
+     */
+    static void landed(ServerPlayer player, int kind, LivingEntity fish, float kg, @Nullable Item bait) {
+        net.minecraft.server.level.ServerLevel level = (net.minecraft.server.level.ServerLevel) player.level();
+        Species sp = Species.of(kind);
+        String legend = fish instanceof WildFish wild && wild.legend() ? wild.legendName() : "";
+        java.util.List<ItemStack> gives = new java.util.ArrayList<>();
+        if (sp == Species.OTHER && FishCompat.ownDrops(fish)) {
+            gives.addAll(FishCompat.drops(level, fish, player));
+        } else {
+            ItemStack loot = FishCatch.loot(kind, kg);
+            if (!loot.isEmpty() && sp != null && !loot.is(FishCatch.SHARK_MEAT)) {
+                FishCatch.tag(loot, sp, kg, player.getName().getString(), level, legend);
+            }
+            if (!loot.isEmpty()) {
+                gives.add(loot);
+            }
+            if (sharkLike(kind) && FishSpecies.SHARK_JAW != null && sp != null) {
+                // the jaw is kept: it carries the catch, so it mounts on a plaque
+                ItemStack jaw = new ItemStack(FishSpecies.SHARK_JAW);
+                FishCatch.tag(jaw, sp, kg, player.getName().getString(), level, legend);
+                jaw.set(FishCatch.CATCH, FishCatch.info(jaw).withAliveUntil(0L));
+                gives.add(jaw);
+            }
+        }
+        Component name = sp == null ? fish.getName() : Component.translatable(sp.nameKey());
+        for (ItemStack give : gives) {
+            if (!player.addItem(give)) {
+                player.spawnAtLocation(level, give, 1.0F);
+            }
+        }
+        player.sendOverlayMessage(Component.translatable(sharkLike(kind)
+                        ? "message.jaymospowers.fishing.shark_landed" : "message.jaymospowers.fishing.caught_weighed",
+                name, String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(net.minecraft.ChatFormatting.GREEN));
+        if (sp != null) {
+            boolean best = FishLog.landed(player, sp, kg, bait, level, fish.blockPosition(), legend);
+            if (best) {
+                // (Track D) a personal best: a fanfare, and the journal keeps it through death
+                level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.0F);
+                player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.personal_best", name,
+                        String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(net.minecraft.ChatFormatting.GOLD));
+            }
+            Fishermen.landed(player, sp, kg);
+        }
+        if (!legend.isEmpty()) {
+            FishLegends.landed(level, (WildFish) fish, player);
         }
     }
 
@@ -361,12 +449,11 @@ public final class FishingReal {
     }
 
     /** The longest a fight can run before exhaustion snaps the line. */
-    private static int fightLimit(FishFight state) {
-        return switch (state.fishKind()) {
-            case FISH_SHARK -> MAX_FIGHT_TICKS_SHARK;
-            case FISH_TUNA -> MAX_FIGHT_TICKS_TUNA;
-            default -> MAX_FIGHT_TICKS;
-        };
+    private static int fightLimit(FishFight state, @Nullable LivingEntity fish) {
+        int kind = state.fishKind();
+        int limit = sharkLike(kind) ? MAX_FIGHT_TICKS_SHARK : big(kind) ? MAX_FIGHT_TICKS_TUNA : MAX_FIGHT_TICKS;
+        // (Track C) a legend is a long fight
+        return fish instanceof WildFish wild && wild.legend() ? limit * LEGEND_FIGHT_TIMES : limit;
     }
 
     /** True while the player's main hand holds the metal fishing rod. */

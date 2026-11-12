@@ -114,6 +114,9 @@ final class Raids {
 		@Nullable List<BlockPos> loose;
 		final long started;
 		long phaseAt;
+		/** Raiders past the way in their camp remembers into this town; whether this raid has noted its own way in. */
+		final Set<UUID> pastWay = new HashSet<>();
+		boolean wayNoted;
 
 		Raid(int camp, int target, long now) {
 			this.camp = camp;
@@ -312,38 +315,19 @@ final class Raids {
 		int size = warpath ? Math.min(HordeCity.PARTY_MAX, PARTY_BASE + HordeCity.PARTY_EXTRA + band / PARTY_PER) : Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
-			if (illagers) {
-				int role = i % (PILLAGERS_PER_VINDICATOR + 1) == PILLAGERS_PER_VINDICATOR ? Illagers.VINDICATOR : Illagers.PILLAGER;
-				Mob raider = Illagers.spawn(level, camp, role, at, target.seat(), RAID_HOME_RADIUS, true);
-				if (raider != null) {
-					raid.party.add(raider.getUUID());
+			Mob member = member(level, camp, i, at, target.seat(), RAID_HOME_RADIUS, true);
+			if (member == null) {
+				continue;
+			}
+			if (member instanceof Worker w) {
+				// (after it's added: its load mustn't take it for a stray)
+				w.setTask(TASK);
+				// (0.5.47) some ride steppe ponies (not pirates: they come ashore from their ship)
+				if (!pirates) {
+					Stables.pony(level, w, camp, i);
 				}
-				continue;
 			}
-			Folk raider = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
-			if (raider == null) {
-				continue;
-			}
-			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			// (0.5.47) an orc war band: grunts, every third one a ranger
-			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
-					: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
-				: goblins ? i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Goblins.SLINGER : Goblins.GOBLIN
-				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
-			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
-			level.addFreshEntity(raider);
-			// (0.7.295) with MCA, an MCA villager in his place (Andy, retiring the folk: "all mca please")
-			Worker member = raider;
-			if (McaCompat.raider(level, raider) instanceof Worker v) {
-				member = v;
-			}
-			// (after it's added: its load mustn't take it for a stray)
-			member.setTask(TASK);
 			raid.party.add(member.getUUID());
-			// (0.5.47) some ride steppe ponies (not pirates: they come ashore from their ship)
-			if (!pirates) {
-				Stables.pony(level, member, camp, i);
-			}
 		}
 		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager"
 				: orcs ? "message.jaymoskingdoms.raid.announce.orc" : pirates ? "message.jaymoskingdoms.raid.announce.pirate"
@@ -356,8 +340,43 @@ final class Raids {
 			// (0.7.42) their ship stands off the landing while it's on
 			PirateCoves.raidStarted(level, camp, muster);
 		}
+		// its praised fighters and bought swords go too (docs/Pawn-Plan.md rows A3, A6)
+		BandTallies.raidStarted(level, camp, target, muster);
 		JaymosKingdoms.LOGGER.info("{} raids {} with {} raiders from {}", camp.name(), target.name(), raid.party.size(), muster);
 		return true;
+	}
+
+	/**
+	 * One of {@code camp}'s fighters, the {@code i}th of a band, made at {@code at} and kept within {@code radius} of
+	 * {@code home}: a pillager or vindicator for an illager camp, else its own kind (an MCA villager in a raider's place
+	 * with MCA). {@code raid}: on a raid (an illager's tag says so; a raider's task is the caller's to set).
+	 */
+	static @Nullable Mob member(ServerLevel level, Faction camp, int i, BlockPos at, BlockPos home, int radius, boolean raid) {
+		MinecraftServer server = level.getServer();
+		RandomSource random = level.getRandom();
+		boolean pirates = Camps.pirate(server, camp.id());
+		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id()), goblins = Camps.goblin(server, camp.id());
+		if (illagers) {
+			int role = i % (PILLAGERS_PER_VINDICATOR + 1) == PILLAGERS_PER_VINDICATOR ? Illagers.VINDICATOR : Illagers.PILLAGER;
+			return Illagers.spawn(level, camp, role, at, home, radius, raid);
+		}
+		Folk raider = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
+		if (raider == null) {
+			return null;
+		}
+		raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+		// (0.5.47) an orc war band: grunts, every third one a ranger
+		int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER
+				: i % PIRATES_PER_BOMBARDIER == 1 ? Pirates.BOMBARDIER : Pirates.DECKHAND)
+			: goblins ? i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Goblins.SLINGER : Goblins.GOBLIN
+			: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
+		raider.setup(role, camp, home, radius);
+		level.addFreshEntity(raider);
+		// (0.7.295) with MCA, an MCA villager in his place (Andy, retiring the folk: "all mca please")
+		if (McaCompat.raider(level, raider) instanceof Mob v && v instanceof Worker) {
+			return v;
+		}
+		return raider;
 	}
 
 	/** Loaded open ground on {@code target}'s land toward {@code camp}, a march from its seat. */
@@ -443,9 +462,21 @@ final class Raids {
 		switch (raid.phase) {
 			case MARCH -> {
 				boolean arrived = now - raid.phaseAt > MARCH_TICKS;
+				// a camp that has got into this town before comes the same way in (docs/Pawn-Plan.md row B2)
+				BlockPos way = Wayfinding.wayIn(server, raid.camp, raid.target);
 				for (Mob raider : party) {
+					if (way != null && !raid.pastWay.contains(raider.getUUID()) && raider.blockPosition().distSqr(way) < 6 * 6) {
+						raid.pastWay.add(raider.getUUID());
+					}
 					if (target(raider) == null) {
-						walk(level, raider, target.seat());
+						walk(level, raider, way != null && !raid.pastWay.contains(raider.getUUID()) ? way : target.seat());
+					}
+					if (!raid.wayNoted && raider.distanceToSqr(Vec3.atCenterOf(target.seat())) < Wayfinding.WAY_IN_NEAR * Wayfinding.WAY_IN_NEAR) {
+						raid.wayNoted = true;
+						Wayfinding.noteWayIn(server, raid.camp, raid.target, raider.blockPosition());
+						if (way != null) {
+							Callouts.say(raider, "raid.way", null, false);
+						}
 					}
 					arrived |= raider.distanceToSqr(Vec3.atCenterOf(target.seat())) < ARRIVE_RANGE * ARRIVE_RANGE;
 				}

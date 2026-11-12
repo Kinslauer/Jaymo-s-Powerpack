@@ -243,6 +243,11 @@ public final class Downed {
 		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG);
 	}
 
+	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
+	public static boolean tended(LivingEntity body) {
+		return TENDED.containsKey(body);
+	}
+
 	/** (0.7.84) {@code v} is tending someone downed just now. */
 	public static boolean helping(LivingEntity v) {
 		return v instanceof Villager villager && HELPING.containsKey(villager);
@@ -353,7 +358,8 @@ public final class Downed {
 		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster;
 		// (0.7.181) and players the settlement thinks well of; (0.7.186) or, either way, whomever a helper's temperament
 		// has them tend (Temperaments)
-		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || body instanceof ServerPlayer p && !helpable(p)) {
+		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || body instanceof ServerPlayer p && !helpable(p)
+			|| FieldMedics.claimed(body)) {
 			return;
 		}
 		ServerPlayer player = body instanceof ServerPlayer p ? p : null;
@@ -441,7 +447,7 @@ public final class Downed {
 	private static boolean canHelp(Villager v, LivingEntity body) {
 		// ((0.7.453) a rider may come too: he gets down at their side)
 		// (a vampire at night never tends the downed: Morven knelt by the one he'd fed on, got them up and fed again)
-		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body)
+		return v.isAlive() && v != body && !v.isBaby() && sameSide(v, body) && !FieldMedics.busy(v)
 			&& !(Vampires.isVampire(v) && Vampires.night(v.level().getOverworldClockTime())) && !VampireAlarm.defending(v) && !isDowned(v) && !v.isSleeping() && (!v.isPassenger() || Cavalry.mounted(v)) && !v.isNoAi() && v.getTarget() == null
 			&& (!Frights.afraid(v.getUUID()) || Temperaments.fearless(v)) && !McaCompat.panicking(v) && v.level() == body.level()
 			&& v.distanceToSqr(body) < Temperaments.helpRange(v) * Temperaments.helpRange(v) * 1.5;
