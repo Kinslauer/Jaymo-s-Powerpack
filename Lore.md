@@ -917,6 +917,16 @@ mostly. They fly." The last page: the Master says they do not go up again until 
 called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
 ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
 
+(new) **The two pacts** (Andy, 2026-11-12: "you improvise the lore on that yourself"). A corrupted power can be
+bent once more, and not back. The demon masters below still keep the bargain they once kept with the sorcerer: to a
+holder whose power is already corrupted, one of them will offer **the Cinder Pact**. Whoever takes it is slower and
+far harder to kill, and what they touch catches light, for the rest of their life. The other bargain has no one
+behind it. A holder who carries a void shard out of the Maw long enough begins to hear the space between worlds the
+Frostborn crossed, and can let it in: **the Hollow Pact**. Nothing can stun or hold them after, and their blows shove
+like a door slamming, but every hurt lands harder, because there is less of them to take it. A person can hold one
+pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
+speaks for the second.
+
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
 too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
