@@ -51,6 +51,7 @@ final class PowerHud {
 		if (player == null || player.isSpectator()) {
 			return;
 		}
+		swallowed(graphics, delta, minecraft, player);
 		Power power = Powers.of(player);
 		if (power == null) {
 			return;
@@ -103,6 +104,30 @@ final class PowerHud {
 			if (!PowerDock.begin(client.hudHeight(player))) {
 				return;
 			}
+			client.renderHud(graphics, delta, player);
+		}
+	}
+
+	/**
+	 * A swallowed power (a Rubber-folk's, {@link com.jaymospowers.core.SwallowedPower}): a small badge on the rail with its
+	 * icon, name and key, and its own HUD block in the dock row over the power's.
+	 */
+	private static void swallowed(GuiGraphicsExtractor graphics, DeltaTracker delta, Minecraft minecraft, LocalPlayer player) {
+		Power power = com.jaymospowers.core.SwallowedPower.swallowed(player);
+		if (power == null) {
+			return;
+		}
+		Component name = Component.translatable("hud.jaymospowers.swallowed", power.name(), SwallowedPowerClient.keyName());
+		int width = 24 + minecraft.font.width(name) + 4;
+		int[] at = HudZones.place(HudZones.RAIL, "jaymospowers:swallowed_badge", 11, width, 20);
+		if (at != null) {
+			int ox = at[0] - 2, oy = at[1] - 1;
+			graphics.fill(ox + 2, oy + 2, ox + width, oy + 20, HudStyle.PLATE_SOFT);
+			graphics.item(power.icon(), ox + 4, oy + 3);
+			graphics.text(minecraft.font, name, ox + 24, oy + 7, 0xFF000000 | power.color(), true);
+		}
+		PowerClient client = PowerClients.get(power.id());
+		if (client != null && PowerDock.beginAbove("jaymospowers:swallowed_power", client.hudHeight(player))) {
 			client.renderHud(graphics, delta, player);
 		}
 	}
