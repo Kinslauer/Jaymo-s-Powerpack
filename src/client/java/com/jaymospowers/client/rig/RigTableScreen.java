@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The wrist table: a brass table on the forearm (opened from the Rig menu, Sneak + J). Three leaves, picked along the top:
+ * The wrist table: a table on the forearm (opened from the Rig menu, Sneak + J). Three leaves, picked along the top:
  * <ul>
  * <li><b>Map</b>: a small raised map of the land the client has loaded round you, one column to every {@link #STEP} blocks,
  * each in the colour of its top block, drawn from the back to the front so hills hide what is behind them. You, your
@@ -40,7 +40,7 @@ import org.jspecify.annotations.Nullable;
  * Long text slides or scrolls ({@link UiStyle}), never cut.
  */
 final class RigTableScreen extends Screen {
-	private static final int W = 336, H = 246, ACCENT = 0xFFD9A441, BRASS_DARK = 0xFF5A3E14;
+	private static final int W = 336, H = 246, ACCENT = 0xFF5FE6FF, HULL_DARK = 0xFF1E4A5A;
 	private static final int TAB_H = 15, PAD = 8;
 	/** The map: cells to a side, blocks to a cell, pixels to a cell, pixels a block of height lifts a column, ticks between re-reads of the land. */
 	private static final int GRID = 40, STEP = 2, CELL = 3, REREAD = 20;
@@ -172,7 +172,7 @@ final class RigTableScreen extends Screen {
 		for (int t = 0; t < 3; t++) {
 			int tx = x + PAD + t * (tabW + 4), ty = y + UiStyle.HEADER;
 			boolean hover = UiStyle.over(mouseX, mouseY, tx, ty, tabW, TAB_H);
-			graphics.fill(tx, ty, tx + tabW, ty + TAB_H, t == tab ? 0x60D9A441 : hover ? UiStyle.ROW_HOVER : UiStyle.ROW);
+			graphics.fill(tx, ty, tx + tabW, ty + TAB_H, t == tab ? 0x605FE6FF : hover ? UiStyle.ROW_HOVER : UiStyle.ROW);
 			if (t == tab) {
 				graphics.fill(tx, ty + TAB_H - 2, tx + tabW, ty + TAB_H, ACCENT);
 			}
@@ -229,19 +229,19 @@ final class RigTableScreen extends Screen {
 			}
 		}
 		for (Vec3 drone : data.drones()) {
-			pin(graphics, mx, my, drone.x, drone.y, drone.z, 0xFFD9A441, 2, 1);
+			pin(graphics, mx, my, drone.x, drone.y, drone.z, 0xFF5FE6FF, 2, 1);
 		}
 		for (int k = 0; k < data.route().size(); k++) {
 			Vec3 mark = data.route().get(k);
 			double[] at = project(mark.x, mark.y, mark.z);
 			int px = mx + (int)at[0], py = my + (int)at[1];
-			graphics.fill(px - 3, py - 3, px + 4, py + 4, 0xFF5A3E14);
-			graphics.fill(px - 2, py - 2, px + 3, py + 3, 0xFFD9A441);
+			graphics.fill(px - 3, py - 3, px + 4, py + 4, 0xFF1E4A5A);
+			graphics.fill(px - 2, py - 2, px + 3, py + 3, 0xFF5FE6FF);
 			graphics.text(font, Integer.toString(k + 1), px - 2, py - 4, 0xFF20140A, false);
 		}
 		pin(graphics, mx, my, player.getX(), player.getY() + 1.0, player.getZ(), 0xFFFFFFFF, 3, 2);
 		graphics.disableScissor();
-		graphics.outline(cx, cy, cw, mapH, BRASS_DARK);
+		graphics.outline(cx, cy, cw, mapH, HULL_DARK);
 		UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.rig_table.legend"), cx, cy + mapH + 3, cw, UiStyle.DIM);
 	}
 
@@ -324,8 +324,8 @@ final class RigTableScreen extends Screen {
 		}
 		for (Button b : list) {
 			boolean hover = UiStyle.over(mouseX, mouseY, b.x, b.y, b.w, b.h);
-			graphics.fill(b.x, b.y, b.x + b.w, b.y + b.h, b.on ? 0x70D9A441 : hover ? UiStyle.ROW_HOVER : UiStyle.ROW);
-			graphics.outline(b.x, b.y, b.w, b.h, hover ? ACCENT : b.on ? 0xFFB88A30 : BRASS_DARK);
+			graphics.fill(b.x, b.y, b.x + b.w, b.y + b.h, b.on ? 0x705FE6FF : hover ? UiStyle.ROW_HOVER : UiStyle.ROW);
+			graphics.outline(b.x, b.y, b.w, b.h, hover ? ACCENT : b.on ? 0xFF3FA0B8 : HULL_DARK);
 			UiStyle.lineCentred(graphics, font, b.label, b.x + b.w / 2, b.y + 4, b.w - 6, b.on ? UiStyle.TEXT : 0xFFD8D8E0);
 			if (hover) {
 				tipShown = b.tip;

@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The decoy: a false image of the wearer, a vanilla mannequin in their skin (drawn by the mannequin's own renderer, the way
- * the Z Fighter's afterimage and Gravity's copy are), wound up out of brass and glass. Two kinds, picked at the wrist table:
+ * the Z Fighter's afterimage and Gravity's copy are), woken from the Core. Two kinds, picked at the wrist table:
  * <ul>
  * <li><b>Lure</b>: one image stands {@link #AHEAD} blocks off and every enemy within {@link #LURE_RANGE} turns on it for
  * {@link #LURE_TICKS}, while the wearer is unseen (invisible, so the armour goes too). The first blow to the image pops it.</li>
@@ -62,7 +62,7 @@ public final class RigDecoy {
 	public static final float TRIO_SHARE = 0.2F;
 	/** The mannequin's tag, so one left over from a restart can be swept away. */
 	public static final String TAG = "jaymospowers_rig_decoy";
-	public static final int GOLD = 0xE8B84A;
+	public static final int CYAN = 0x5FE6FF;
 	private static final String TABLE = "rig_decoy";
 
 	private record Set3(ServerLevel level, List<UUID> copies, List<Vec3> offsets, boolean trio, long until) {
@@ -126,7 +126,7 @@ public final class RigDecoy {
 					if (copy instanceof Mannequin && copy.isAlive() && copy.distanceToSqr(entity) <= TRIO_REACH * TRIO_REACH) {
 						entity.setInvulnerableTime(0);
 						entity.hurtServer(set.level, owner.damageSources().playerAttack(owner), taken * TRIO_SHARE);
-						MagicFx.stroke(set.level, copy.position().add(0.0, 1.0, 0.0), entity.getBoundingBox().getCenter(), 0.1F, GOLD);
+						MagicFx.stroke(set.level, copy.position().add(0.0, 1.0, 0.0), entity.getBoundingBox().getCenter(), 0.1F, CYAN);
 					}
 				}
 			} finally {
@@ -145,7 +145,7 @@ public final class RigDecoy {
 		if (!now) {
 			TRIO.remove(player.getUUID());
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.decoy.kind_" + (now ? "trio" : "lure")).withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.decoy.kind_" + (now ? "trio" : "lure")).withStyle(ChatFormatting.AQUA));
 	}
 
 	private static boolean isCopy(UUID id) {
@@ -235,8 +235,8 @@ public final class RigDecoy {
 			player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, LURE_TICKS, 0, true, false, false));
 			lure(player, set);
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_GOLEM_SPIN, SoundSource.PLAYERS, 0.9F, 1.5F);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.decoy." + (trio ? "trio" : "lure")).withStyle(ChatFormatting.GOLD));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.9F, 1.5F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.decoy." + (trio ? "trio" : "lure")).withStyle(ChatFormatting.AQUA));
 	}
 
 	/** Somewhere near {@code here + offset} the image fits, else beside the wearer. */
@@ -252,7 +252,7 @@ public final class RigDecoy {
 
 	private static void wind(ServerLevel level, Vec3 at) {
 		level.sendParticles(ParticleTypes.POOF, true, false, at.x, at.y + 1.0, at.z, 8, 0.25, 0.5, 0.25, 0.02);
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), null, 0.9F, GOLD, 10);
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), null, 0.9F, CYAN, 10);
 	}
 
 	// ---- every tick -----------------------------------------------------------------------------------------------------
@@ -326,15 +326,15 @@ public final class RigDecoy {
 		set.copies.clear();
 	}
 
-	/** An image pops: a puff of smoke and brass, and gone. */
+	/** An image pops: a puff of smoke and light, and gone. */
 	private static void pop(Entity entity) {
 		if (!(entity.level() instanceof ServerLevel level) || entity.isRemoved()) {
 			return;
 		}
 		Vec3 at = entity.position();
 		level.sendParticles(ParticleTypes.POOF, true, false, at.x, at.y + 1.0, at.z, 12, 0.3, 0.6, 0.3, 0.03);
-		MagicFx.burst(level, at.x, at.y + 1.0, at.z, GOLD, 0.6F, 8, 0.3, 0.6, 0.3);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.COPPER_GOLEM_ITEM_DROP, SoundSource.PLAYERS, 0.8F, 1.4F);
+		MagicFx.burst(level, at.x, at.y + 1.0, at.z, CYAN, 0.6F, 8, 0.3, 0.6, 0.3);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.4F);
 		entity.discard();
 	}
 }

@@ -6,10 +6,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * The Rig's picks, five devices of brass and glass wound up from the Core, each an entry in the Rig menu (Sneak + J) and
+ * The Rig's picks, five devices woken from the Core, each an entry in the Rig menu (Sneak + J) and
  * so a thing J can be set to:
  * <ul>
- * <li>{@link #DRONES} clockwork drones ({@link RigDrones}): wound up if they are home, a missile if they are out.</li>
+ * <li>{@link #DRONES} drones ({@link RigDrones}): launched if they are home, a missile if they are out.</li>
  * <li>{@link #MARK} a patrol waypoint where you look ({@link RigDrones#mark}).</li>
  * <li>{@link #TABLE} the wrist table ({@link RigTable}): the map, the studied kinds and the orders (formations, shell, fetch, mend, patrol, decoy kind, Bank).</li>
  * <li>{@link #DECOY} the decoy ({@link RigDecoy}).</li>

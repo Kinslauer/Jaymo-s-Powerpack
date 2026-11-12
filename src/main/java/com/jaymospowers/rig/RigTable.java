@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The wrist table, server side: a brass table on the forearm (a screen opened from the Rig menu) with a small map of the
+ * The wrist table, server side: a table on the forearm (a screen opened from the Rig menu) with a small map of the
  * land the client has loaded, the enemy kinds the wearer has studied ({@link RigStudy}) and the orders for the drones
  * ({@link RigDrones}), the decoy ({@link RigDecoy}) and the Bank ({@link RigBank}). The screen is the client's; this is what
  * it is told and what it may ask.

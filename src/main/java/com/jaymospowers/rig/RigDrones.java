@@ -27,8 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Rig's drones: little clockwork flyers of brass, a rotor and a lens each, wound up from the Core. The flying,
- * fighting, missile and shell are Hive's swarm logic ({@link HiveSwarm}) run with a kit of their own (brass colours, no
+ * The Rig's drones: small cold-metal flyers of the Frostborn kind, each a thruster ring and a sensor eye, launched from the Core. The flying,
+ * fighting, missile and shell are Hive's swarm logic ({@link HiveSwarm}) run with a kit of their own (the Rig's cyan, no
  * venom, a smaller share of every blow to the wearer); what is the Rig's here is how many fly (one for each level of the
  * Mind, up to five), what they do with no foe to fight, and how they are drawn.
  * <ul>
@@ -44,8 +44,8 @@ import org.jspecify.annotations.Nullable;
 public final class RigDrones {
 	/** The Core's charge to wind the drones up. */
 	public static final int DEPLOY_COST = 60;
-	/** The brass of the casings, its shadow, and the glint of the lens. */
-	public static final int BRASS = 0xD9A441, BRASS_DARK = 0x5A3E14, LENS = 0xBFE8FF;
+	/** The Rig's cyan (the palm blast's), its hull shadow, and the glint of the sensor eye. */
+	public static final int CYAN = 0x5FE6FF, HULL_DARK = 0x1E4A5A, LENS = 0xDFF8FF;
 	/** Drones' damage against Hive's stings, and the share of a blow to a drone (or the shell) that the wearer feels. */
 	public static final float DAMAGE = 1.25F, SHARE = 0.35F, SHELL_SHARE = 0.3F;
 	/** Mend: ticks between, health for each drone near the wearer, and how near counts. */
@@ -79,7 +79,7 @@ public final class RigDrones {
 	private static final Map<UUID, Crew> CREWS = new HashMap<>();
 
 	/** The kit: how many fly, where they go with no foe, how they are drawn. */
-	public static final HiveSwarm.Kit KIT = new HiveSwarm.Kit(BRASS, BRASS_DARK, false, SoundEvents.COPPER_GOLEM_SPIN, SoundEvents.LODESTONE_HIT,
+	public static final HiveSwarm.Kit KIT = new HiveSwarm.Kit(CYAN, HULL_DARK, false, SoundEvents.BEACON_ACTIVATE, SoundEvents.BEACON_POWER_SELECT,
 		DAMAGE, SHARE, SHELL_SHARE, "message.jaymospowers.rig_picks.drone.", new HiveSwarm.Hook() {
 			@Override
 			public int count(ServerPlayer player) {
@@ -148,7 +148,7 @@ public final class RigDrones {
 			return;
 		}
 		HiveSwarm.deploy(KIT, player, PickKit.aimed(player, MISSILE_REACH));
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.out", Math.max(1, Rig.level(player))).withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.out", Math.max(1, Rig.level(player))).withStyle(ChatFormatting.AQUA));
 	}
 
 	/** Brings them home for good (the wrist table's Stow). */
@@ -158,7 +158,7 @@ public final class RigDrones {
 		}
 		releaseItems(player);
 		HiveSwarm.stow(KIT, player);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.stowed").withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.stowed").withStyle(ChatFormatting.AQUA));
 	}
 
 	/** The wrist table's orders, from {@link RigTable.Order}. */
@@ -211,7 +211,7 @@ public final class RigDrones {
 	}
 
 	private static void say(ServerPlayer player, boolean on, String what) {
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone." + what + (on ? "_on" : "_off")).withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone." + what + (on ? "_on" : "_off")).withStyle(ChatFormatting.AQUA));
 	}
 
 	/** The Mark entry: the spot under the crosshair becomes the next waypoint of the patrol. */
@@ -232,9 +232,9 @@ public final class RigDrones {
 		crew.route.add(at);
 		crew.patrol = true;
 		crew.waypoint = 0;
-		MagicFx.ring(level, at, Vec3.atLowerCornerOf(hit.getDirection().getUnitVec3i()), 0.7F, BRASS, 12);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.8F, 1.4F);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.mark", crew.route.size(), ROUTE_MAX).withStyle(ChatFormatting.GOLD));
+		MagicFx.ring(level, at, Vec3.atLowerCornerOf(hit.getDirection().getUnitVec3i()), 0.7F, CYAN, 12);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.4F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.drone.mark", crew.route.size(), ROUTE_MAX).withStyle(ChatFormatting.AQUA));
 	}
 
 	// ---- every tick -----------------------------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ public final class RigDrones {
 			if (near > 0) {
 				player.heal(near * MEND_EACH);
 				Vec3 body = player.position().add(0.0, 1.0, 0.0);
-				player.level().sendParticles(MagicFx.mote(BRASS, 0.4F), body.x, body.y, body.z, 3, 0.3, 0.5, 0.3, 0.0);
+				player.level().sendParticles(MagicFx.mote(CYAN, 0.4F), body.x, body.y, body.z, 3, 0.3, 0.5, 0.3, 0.0);
 			}
 		}
 	}
@@ -298,7 +298,7 @@ public final class RigDrones {
 				if (pos.distanceTo(home) <= DROP_NEAR) {
 					drop(item);
 					crew.carry[i] = -1;
-					level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.COPPER_GOLEM_ITEM_DROP, SoundSource.PLAYERS, 0.6F, 1.3F);
+					level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.3F);
 				}
 				return home;
 			}
@@ -315,7 +315,7 @@ public final class RigDrones {
 					crew.carry[i] = goal.getId();
 					crew.goal[i] = -1;
 					goal.setNoGravity(true);
-					level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.COPPER_GOLEM_ITEM_GET, SoundSource.PLAYERS, 0.6F, 1.3F);
+					level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 1.3F);
 					return home;
 				}
 				return goal.position().add(0.0, 0.4, 0.0);
@@ -382,20 +382,20 @@ public final class RigDrones {
 	// ---- the look ------------------------------------------------------------------------------------------------------
 
 	/**
-	 * A drone is a brass core, a rotor that spins round it (two motes opposite each other), a lens that glints now and
-	 * then, and a gear's rune.
+	 * A drone is a cyan core, a thruster ring that spins round it (two motes opposite each other), a sensor eye that glints now and
+	 * then, and a glyph.
 	 */
 	private static void draw(ServerLevel level, Vec3 at, long t, int i) {
-		level.sendParticles(MagicFx.mote(BRASS, 0.55F), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
+		level.sendParticles(MagicFx.mote(CYAN, 0.55F), at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
 		double spin = t * 0.9 + i;
 		double rx = Math.cos(spin) * 0.24, rz = Math.sin(spin) * 0.24;
-		level.sendParticles(MagicFx.mote(BRASS_DARK, 0.3F), at.x + rx, at.y + 0.12, at.z + rz, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(MagicFx.mote(BRASS_DARK, 0.3F), at.x - rx, at.y + 0.12, at.z - rz, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(MagicFx.mote(HULL_DARK, 0.3F), at.x + rx, at.y + 0.12, at.z + rz, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(MagicFx.mote(HULL_DARK, 0.3F), at.x - rx, at.y + 0.12, at.z - rz, 1, 0.0, 0.0, 0.0, 0.0);
 		if ((t + i) % 4 == 0) {
 			level.sendParticles(MagicFx.spark(LENS, 0.3F), at.x, at.y - 0.1, at.z, 1, 0.04, 0.04, 0.04, 0.0);
 		}
 		if ((t + i * 5L) % 20 == 0) {
-			level.sendParticles(MagicFx.rune(BRASS, 0.35F), at.x, at.y + 0.3, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+			level.sendParticles(MagicFx.rune(CYAN, 0.35F), at.x, at.y + 0.3, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}
 	}
 

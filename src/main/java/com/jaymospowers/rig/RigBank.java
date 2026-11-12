@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Bank shot: an aim helper for anything thrown or shot while the Rig is worn and the Bank is switched on (the Rig menu).
  * <ul>
- * <li>Looking at a wall with an enemy near it, a faint dotted line of brass motes (shown to the wearer only) runs to the
+ * <li>Looking at a wall with an enemy near it, a faint dotted line of cyan motes (shown to the wearer only) runs to the
  * wall and on, bent, to the enemy it would bounce into.</li>
  * <li>A projectile the wearer shot (an arrow, a thrown rock or dagger...) that is about to strike a block is turned at
  * that block toward the enemy near it: it keeps its speed and flies at the enemy. If a second enemy stands near the first
@@ -48,7 +48,7 @@ public final class RigBank {
 	/** The aim line: ticks between draws, blocks between motes, the colour and size. */
 	public static final int LINE_EVERY = 4;
 	public static final double LINE_STEP = 0.9;
-	public static final int LINE_COLOR = 0xE8C46A;
+	public static final int LINE_COLOR = 0x5FE6FF;
 	public static final float LINE_SIZE = 0.22F;
 	/** A projectile this slow is not flying (stuck, or dropped); how far ahead of it a wall is looked for, in its own steps. */
 	public static final double MIN_SPEED = 0.3, LOOKAHEAD = 1.15;
@@ -86,7 +86,7 @@ public final class RigBank {
 		if (!now) {
 			ON.remove(player.getUUID());
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.bank." + (now ? "on" : "off")).withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.bank." + (now ? "on" : "off")).withStyle(ChatFormatting.AQUA));
 	}
 
 	// ---- picking the enemy ------------------------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ public final class RigBank {
 				track.stage = 1;
 				track.target = target.getId();
 				MagicFx.ring(level, wall, normal(hit.getDirection()), 0.5F, LINE_COLOR, 8);
-				level.playSound(null, wall.x, wall.y, wall.z, SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.6F, 1.8F);
+				level.playSound(null, wall.x, wall.y, wall.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 1.8F);
 			} else if (level.getEntity(track.target) instanceof LivingEntity first && first.isAlive()) {
 				Vec3 centre = first.getBoundingBox().getCenter();
 				if (pos.distanceTo(centre) > speed * LOOKAHEAD + first.getBbWidth() * 0.5 + 0.3) {

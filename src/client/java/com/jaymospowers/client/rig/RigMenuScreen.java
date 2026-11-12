@@ -30,6 +30,8 @@ import net.minecraft.world.item.Items;
 final class RigMenuScreen extends Screen {
 	/** Ring radius, tile size, and the dead zone in the middle (no pick). */
 	private static final int RADIUS = 84;
+	/** The ring and tile sizes in use: the full ones, shrunk when the screen is too short to hold them. */
+	private int radius = RADIUS, tile = TILE;
 	private static final int TILE = 26;
 	private static final int DEAD_ZONE = 24;
 	private static final int ACCENT = 0xFF5FE6FF;
@@ -175,6 +177,9 @@ final class RigMenuScreen extends Screen {
 		if (player == null) {
 			return;
 		}
+		int room = height - INFO_H - 8;
+		tile = Math.max(16, Math.min(TILE, (int)(Math.min(RADIUS, room / 2 - 19) * 0.4) - 1));
+		radius = Math.max(DEAD_ZONE + tile, Math.min(RADIUS, room / 2 - tile / 2 - 6));
 		int cx = width / 2;
 		int cy = height / 2;
 		int dx = mouseX - cx;
@@ -192,20 +197,20 @@ final class RigMenuScreen extends Screen {
 		}
 
 		// a dark disc behind the ring, a thin ring, and the pointer
-		int outer = RADIUS + TILE / 2 + 6;
+		int outer = radius + tile / 2 + 6;
 		for (int y = -outer; y <= outer; y++) {
 			int half = (int)Math.sqrt(outer * outer - y * y);
 			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0081018);
 		}
 		for (int k = 0; k < 96; k++) {
 			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
+			int x = cx + (int)Math.round(Math.cos(t) * (radius - tile / 2 - 6));
+			int y = cy + (int)Math.round(Math.sin(t) * (radius - tile / 2 - 6));
 			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
 		}
 		if (selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
+			for (int r = DEAD_ZONE; r < radius - tile / 2 - 6; r += 4) {
 				int x = cx + (int)Math.round(Math.cos(t) * r);
 				int y = cy + (int)Math.round(Math.sin(t) * r);
 				graphics.fill(x, y, x + 2, y + 2, ACCENT);
@@ -214,32 +219,32 @@ final class RigMenuScreen extends Screen {
 
 		for (int i = 0; i < ACTIONS.length; i++) {
 			double t = Math.toRadians(i * SLICE - 90.0);
-			int x = cx + (int)Math.round(Math.cos(t) * RADIUS) - TILE / 2;
-			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
+			int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
 			int left = left(i);
 			boolean blocked = blocker(player, i) != null;
 			boolean picked = i == selected;
 			boolean jKey = ACTIONS[i] == RigClient.selected;
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
-			graphics.item(new ItemStack(icon(i)), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
+			graphics.fill(x, y, x + tile, y + tile, UiStyle.CHIP);
+			graphics.fill(x, y, x + tile, y + tile, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
+			graphics.outline(x, y, tile, tile, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
 			if (left > 0 && COOLDOWN[i] > 0) {
-				int shade = (int)Math.ceil((TILE - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
-				graphics.fill(x + 1, y + 1 + (TILE - 2) - shade, x + TILE - 1, y + TILE - 1, 0xB0000000);
+				int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
+				graphics.fill(x + 1, y + 1 + (tile - 2) - shade, x + tile - 1, y + tile - 1, 0xB0000000);
 				String seconds = left >= 200 ? Integer.toString((left + 19) / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0);
-				graphics.text(font, seconds, x + TILE / 2 - font.width(seconds) / 2, y + TILE / 2 - 4, 0xFFFFFFFF);
+				graphics.text(font, seconds, x + tile / 2 - font.width(seconds) / 2, y + tile / 2 - 4, 0xFFFFFFFF);
 			}
 			if (Rig.level(player) < LEVEL[i]) {
 				// not yet: nearly black, with the Mind level it waits for
-				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xD8000000);
+				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0xD8000000);
 				String need = "Lv" + LEVEL[i];
-				graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF70A0B0);
+				graphics.text(font, need, x + tile / 2 - font.width(need) / 2, y + tile / 2 - 4, 0xFF70A0B0);
 			} else if (blocked) {
-				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
+				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0x90000000);
 			}
 			if (on(player, i)) {
-				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
+				graphics.fill(x + 2, y + tile - 3, x + tile - 2, y + tile - 1, ACCENT);
 			}
 		}
 

@@ -19,7 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The storing field: a barrier of brass rings that drinks the parry. Raise it (the Rig menu's Field), and for as long as
+ * The storing field: a barrier of light rings that drinks the parry. Raise it (the Rig menu's Field), and for as long as
  * it holds every blow the guard parries is not only turned aside: it is kept in the rings, up to {@link #SLOTS} of them,
  * a perfect parry kept at double strength. Use the Field again and the rings let it all go at once, a blast round the
  * wearer as strong as what was stored; unspent, they let go by themselves when {@link #HOLD_TICKS} run out.
@@ -40,7 +40,7 @@ public final class RigField {
 	public static final double KNOCK_BASE = 0.5, KNOCK_PER_BLOW = 0.35;
 	/** Ticks between a raised field's rings. */
 	public static final int RING_EVERY = 30;
-	public static final int GOLD = 0xE8B84A;
+	public static final int CYAN = 0x5FE6FF;
 
 	private static final class Field {
 		int blows;
@@ -95,9 +95,9 @@ public final class RigField {
 			field.until = player.level().getGameTime() + HOLD_TICKS;
 			FIELDS.put(player.getUUID(), field);
 			ServerLevel level = player.level();
-			MagicFx.ring(level, player.position().add(0.0, 1.0, 0.0), null, 1.4F, GOLD, 14);
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_BULB_TURN_ON, SoundSource.PLAYERS, 0.9F, 0.8F);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.up", PickKit.gauge(0.0F, SLOTS)).withStyle(ChatFormatting.GOLD));
+			MagicFx.ring(level, player.position().add(0.0, 1.0, 0.0), null, 1.4F, CYAN, 14);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.9F, 0.8F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.up", PickKit.gauge(0.0F, SLOTS)).withStyle(ChatFormatting.AQUA));
 			return;
 		}
 		if (field.blows > 0) {
@@ -118,10 +118,10 @@ public final class RigField {
 		field.stored += (noted == null ? UNKNOWN_BLOW : noted) * (perfect ? PERFECT_FACTOR : 1.0F);
 		ServerLevel level = player.level();
 		Vec3 chest = player.position().add(0.0, 1.1, 0.0);
-		MagicFx.ring(level, chest, null, 0.9F + field.blows * 0.2F, GOLD, 8);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_GOLEM_ITEM_GET, SoundSource.PLAYERS, 0.8F, 0.8F + field.blows * 0.2F);
+		MagicFx.ring(level, chest, null, 0.9F + field.blows * 0.2F, CYAN, 8);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.8F + field.blows * 0.2F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.kept", PickKit.gauge(field.blows / (float)SLOTS, SLOTS), field.blows, SLOTS)
-			.withStyle(ChatFormatting.GOLD));
+			.withStyle(ChatFormatting.AQUA));
 	}
 
 	private static void release(ServerPlayer player, Field field, boolean vented) {
@@ -130,9 +130,9 @@ public final class RigField {
 		Vec3 centre = player.position().add(0.0, 1.0, 0.0);
 		double radius = BLAST_BASE + BLAST_PER_BLOW * field.blows;
 		float damage = Mth.clamp(field.stored * BLAST_SHARE, BLAST_MIN, BLAST_MAX);
-		MagicFx.blast(level, centre, (float)radius * 0.6F, GOLD);
-		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), null, (float)radius, GOLD, 14);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 1.0F, 0.7F);
+		MagicFx.blast(level, centre, (float)radius * 0.6F, CYAN);
+		MagicFx.ring(level, player.position().add(0.0, 0.2, 0.0), null, (float)radius, CYAN, 14);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 1.0F, 0.7F);
 		Shakes.send(player, 0.5F + field.blows * 0.25F, centre);
 		double knock = KNOCK_BASE + KNOCK_PER_BLOW * field.blows;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, PickKit.around(centre, radius), c -> PickKit.foe(player, c))) {
@@ -147,7 +147,7 @@ public final class RigField {
 			e.syncVelocity = true;
 		}
 		player.sendOverlayMessage(Component.translatable(vented ? "message.jaymospowers.rig_picks.field.vented" : "message.jaymospowers.rig_picks.field.released", field.blows)
-			.withStyle(ChatFormatting.GOLD));
+			.withStyle(ChatFormatting.AQUA));
 	}
 
 	static void tick(ServerPlayer player) {
@@ -170,7 +170,7 @@ public final class RigField {
 			return;
 		}
 		if (now % RING_EVERY == 0) {
-			MagicFx.ring(player.level(), player.position().add(0.0, 0.1 + field.blows * 0.5, 0.0), null, 0.9F, GOLD, 10);
+			MagicFx.ring(player.level(), player.position().add(0.0, 0.1 + field.blows * 0.5, 0.0), null, 0.9F, CYAN, 10);
 		}
 	}
 }
