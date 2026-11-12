@@ -1,5 +1,6 @@
 package com.jaymospowers.ground;
 
+import com.jaymospowers.frost.IceCaves;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
@@ -66,10 +67,20 @@ public record BigVeinFeature(BlockState ore, Optional<BlockState> deep, int size
 						}
 						BlockState there = level.getBlockState(at);
 						BlockState into = into(there);
+						// (in the ice caves the vein runs on through the ice, in a pocket of stone)
+						BlockState stone = into == null && !nether ? IceCaves.standIn(level, at, there) : null;
+						if (stone != null) {
+							into = into(stone);
+						}
 						if (into == null || buried && touchesAir(level, at)) {
 							continue;
 						}
 						level.setBlock(at, into, Block.UPDATE_CLIENTS);
+						IceCaves.pocket(level, level::getBlockState, at.immutable(), (near, rock) -> {
+							if (IceCaves.writable(level, near) && level.getBlockState(near).is(IceCaves.ROCK)) {
+								level.setBlock(near, rock, Block.UPDATE_CLIENTS);
+							}
+						});
 						placed++;
 					}
 				}
