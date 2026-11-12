@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
 thread: 1570579626151903354
-claimed_by:
+claimed_by: hermes-b
 pr:
 suggested_owns: []
 ---
