@@ -43,6 +43,11 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   (Kingdoms: `Fx`). Never recoloured redstone dust or firework flashes; vary only colour, size and time.
 - Optional mods (Kitchen, WeaponMod) only through a compat class that checks they're loaded (`KitchenCompat`).
   Don't copy other mods' code or art unless their license allows it.
+- **Living things follow three rules** (Andy, 2026-11-12, from Klei_Wright's tundra; `docs/Tundra-Plan.md`). Every animal
+  or plant we add or rework: **sympathy** (it does what the real one does, so knowing the game teaches the real thing),
+  **feedback loops** (it changes its surroundings, and those changes come back on it: lichen eats its rock and runs out,
+  grazers follow the food, a fed predator stops hunting), **stewardship** (a player who looks after it is rewarded;
+  nobody is punished for leaving it alone). Not another mob with a new coat.
 - The symbiote never feeds on anything living: kill, grab with tendrils, carry as a corpse, then feed. Every
   autonomous symbiote action affects the player's screen.
 - Big patches run as parallel agent tracks, one per power, so they don't edit the same files; 2 at a time, since
