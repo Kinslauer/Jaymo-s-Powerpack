@@ -129,6 +129,10 @@ public final class RivalParties {
 	}
 
 	private static final Map<Integer, Hunt> HUNTS = new HashMap<>();
+	/** Without Jaymo's Powers: a carrier and the downed body it hauls along behind it by the collar. */
+	private static final Map<Villager, LivingEntity> HAULED = new java.util.IdentityHashMap<>();
+	/** A warlord's bounty is only for a knight-led party at least this big. */
+	static final int WARLORD_PARTY = 4;
 	private static final Map<String, Long> HELPED = new HashMap<>();
 
 	private static final Set<Villager> LOADED = new HashSet<>();
@@ -163,7 +167,9 @@ public final class RivalParties {
 			SAID.clear();
 			HUNTS.clear();
 			HELPED.clear();
+			HAULED.clear();
 		});
+		ServerTickEvents.END_SERVER_TICK.register(server -> haul());
 		UseEntityCallback.EVENT.register(RivalParties::use);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> helped(victim, source));
 	}
@@ -512,7 +518,7 @@ public final class RivalParties {
 		if (there) {
 			if (goal.restUntil() == 0L) {
 				GOALS.put(id, new Goal(goal.at(), false, now + REST));
-				takeBounty(level, id, leader, goal.at(), now);
+				takeBounty(level, id, leader, members, goal.at(), now);
 			} else if (now > goal.restUntil()) {
 				Goal next = choose(level, leader, goal.at());
 				if (next != null) {
@@ -557,7 +563,7 @@ public final class RivalParties {
 	// ---- bounties ------------------------------------------------------------------------------------------------------
 
 	/** Resting in a town: the party takes the best open bounty off its court's board, if there's one worth it. */
-	private static void takeBounty(ServerLevel level, int id, Villager leader, BlockPos seat, long now) {
+	private static void takeBounty(ServerLevel level, int id, Villager leader, List<Villager> members, BlockPos seat, long now) {
 		if (HUNTS.containsKey(id)) {
 			return;
 		}
@@ -569,9 +575,12 @@ public final class RivalParties {
 		}
 		Bounties.Bounty best = null;
 		for (Bounties.Bounty b : Bounties.all(server).values()) {
-			// (not a warlord in his own city, nor a miniboss: arming one waits on a player taking it)
-			if (b.dead() || b.court() != court.id() || b.takenByAnyone(now) || b.price() < BOUNTY_LEAST || b.boss() || "warlord".equals(b.crime())
-				|| best != null && b.price() <= best.price()) {
+			if (b.dead() || b.court() != court.id() || b.takenByAnyone(now) || b.price() < BOUNTY_LEAST || best != null && b.price() <= best.price()) {
+				continue;
+			}
+			// a warlord in his own city, among the horde, only for a knight's full company (a miniboss arms against them
+			// as against a player who took it: Bounties.arm)
+			if ("warlord".equals(b.crime()) && (Veterans.grade(leader) < Veterans.KNIGHT || members.size() < WARLORD_PARTY)) {
 				continue;
 			}
 			// not on a friend
@@ -601,6 +610,7 @@ public final class RivalParties {
 				if (PowersCompat.npcDragging(v) != null) {
 					PowersCompat.npcLetGo(v);
 				}
+				HAULED.remove(v);
 			}
 			HUNTS.remove(id);
 			return false;
@@ -608,10 +618,11 @@ public final class RivalParties {
 		LivingEntity target = huntFor(level, b, leader);
 		// carried in
 		for (Villager v : members) {
-			if (target != null && PowersCompat.npcDragging(v) == target) {
+			if (target != null && (PowersCompat.npcDragging(v) == target || HAULED.get(v) == target)) {
 				if (v.blockPosition().distSqr(hunt.seat()) < COURT_NEAR * COURT_NEAR) {
 					PowersCompat.npcLetGo(v);
-					if (Bounties.broughtIn(level, target, hunt.court())) {
+					HAULED.remove(v);
+					if (Bounties.broughtIn(level, target, hunt.court(), v)) {
 						Callouts.say(leader, "party.claimed", target, true, target.getDisplayName());
 					}
 					HUNTS.remove(id);
@@ -638,12 +649,11 @@ public final class RivalParties {
 			} else if (PowersCompat.npcLift(carrier, target) || PowersCompat.npcDrag(carrier, target)) {
 				Callouts.say(carrier, "party.caught", target, true, target.getDisplayName());
 				hop(level, carrier, hunt.seat(), 0.8);
-			} else if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				// (no carrying without Jaymo's Powers: they settle it where they stand)
-				if (Bounties.broughtIn(level, target, hunt.court())) {
-					Callouts.say(leader, "party.claimed", target, true, target.getDisplayName());
-				}
-				HUNTS.remove(id);
+			} else if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers") && !HAULED.containsValue(target)) {
+				// without Jaymo's Powers' carry: hauled along behind by the collar
+				HAULED.put(carrier, target);
+				Callouts.say(carrier, "party.caught", target, true, target.getDisplayName());
+				hop(level, carrier, hunt.seat(), 0.8);
 			}
 			return true;
 		}
@@ -664,6 +674,30 @@ public final class RivalParties {
 		}
 		follow(leader, members);
 		return true;
+	}
+
+	/** Every tick: each hauled body is pulled along a step behind its carrier, till it's let go or gets up. */
+	private static void haul() {
+		if (HAULED.isEmpty()) {
+			return;
+		}
+		for (var it = HAULED.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Villager carrier = e.getKey();
+			LivingEntity body = e.getValue();
+			if (!carrier.isAlive() || carrier.isRemoved() || Downed.isDowned(carrier) || !body.isAlive() || body.isRemoved()
+				|| !Downed.isDowned(body) || body.level() != carrier.level() || body.distanceTo(carrier) > 6.0) {
+				it.remove();
+				continue;
+			}
+			net.minecraft.world.phys.Vec3 back = carrier.getLookAngle().multiply(1.0, 0.0, 1.0);
+			back = back.lengthSqr() < 1.0E-4 ? net.minecraft.world.phys.Vec3.ZERO : back.normalize().scale(-1.3);
+			net.minecraft.world.phys.Vec3 to = carrier.position().add(back);
+			if (body.position().distanceToSqr(to) > 0.04) {
+				body.teleportTo(to.x, carrier.getY(), to.z);
+				body.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+			}
+		}
 	}
 
 	/** The one bounty {@code b} is on, if they're about. */

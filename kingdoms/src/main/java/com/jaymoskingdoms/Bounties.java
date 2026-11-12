@@ -929,9 +929,10 @@ public final class Bounties {
 
 	/**
 	 * (RivalParties) A party set {@code body} down, downed, by the seat of court {@code court}: the bounty's off the board,
-	 * a player is sentenced as when a hunter brings them in, a crook goes to the cells. False if there was none on them.
+	 * a player is sentenced as when a hunter brings them in, a crook goes to the cells, and the relic a miniboss fought
+	 * with is the one who brought it in ({@code by}) to carry. False if there was none on them.
 	 */
-	static boolean broughtIn(ServerLevel level, LivingEntity body, int court) {
+	static boolean broughtIn(ServerLevel level, LivingEntity body, int court, @Nullable Mob by) {
 		MinecraftServer server = level.getServer();
 		Bounty b = on(server, body, court);
 		Faction f = Factions.get(server, court);
@@ -943,6 +944,9 @@ public final class Bounties {
 		if (body instanceof ServerPlayer target) {
 			sentence(level, target, f, b);
 		} else {
+			if (by != null && Boolean.TRUE.equals(body.getAttached(ARMED)) && !body.getMainHandItem().isEmpty()) {
+				by.setItemSlot(EquipmentSlot.MAINHAND, body.getMainHandItem().copy());
+			}
 			forgetBoss(body);
 			body.discard();
 		}
@@ -1101,7 +1105,7 @@ public final class Bounties {
 			if (Downed.isDowned(boss)) {
 				continue;
 			}
-			ServerPlayer foe = null;
+			LivingEntity foe = null;
 			double best = BOSS_SIGHT * BOSS_SIGHT;
 			for (ServerPlayer p : level.players()) {
 				double d = p.distanceToSqr(boss);
@@ -1110,10 +1114,25 @@ public final class Bounties {
 					foe = p;
 				}
 			}
+			// a rival party that took its bounty: it fights them as it would a player (docs/Pawn-Plan.md H4)
+			Bounty hunted = bountyOn(level.getServer(), boss);
+			String party = hunted == null ? "" : hunted.hunter().orElse("");
+			if (party.startsWith("party:")) {
+				for (Villager v : level.getEntitiesOfClass(Villager.class, boss.getBoundingBox().inflate(BOSS_SIGHT), v -> v.isAlive()
+					&& !Downed.isDowned(v) && v.getAttached(RivalParties.PARTY) != null && party.equals("party:" + v.getAttached(RivalParties.PARTY).id()))) {
+					double d = v.distanceToSqr(boss);
+					if (d < best && boss.hasLineOfSight(v)) {
+						best = d;
+						foe = v;
+					}
+				}
+			}
 			if (foe == null) {
 				continue;
 			}
-			bar.addPlayer(foe);
+			if (foe instanceof ServerPlayer fp) {
+				bar.addPlayer(fp);
+			}
 			boss.getLookControl().setLookAt(foe);
 			if (boss.distanceTo(foe) <= BOSS_REACH) {
 				if (now >= SWING.getOrDefault(boss.getUUID(), 0L)) {

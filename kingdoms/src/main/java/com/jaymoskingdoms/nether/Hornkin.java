@@ -560,6 +560,10 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// one of its own (not another Hornkin: the bomb spares them) where it would land: it holds the throw
+		if (com.jaymoskingdoms.Dynamite.friendNear(level, this, target, target.position(), MagmaBomb.RADIUS + 0.5, e -> e instanceof Hornkin)) {
+			return;
+		}
 		MagmaBomb bomb = new MagmaBomb(level, this);
 		double dx = target.getX() - this.getX();
 		double dy = target.getY(0.33) - bomb.getY();

@@ -123,6 +123,10 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 	 * (anyone not on {@code foe}'s side whom it would hurt) within its burst. Every thrower checks before it throws.
 	 */
 	static boolean clear(ServerLevel level, LivingEntity thrower, LivingEntity foe, Vec3 mark) {
+		// nor any of the thrower's own (docs/Pawn-Plan.md, what not to copy: a friend in the blast)
+		if (friendNear(level, thrower, foe, mark, BURST_RADIUS + 1.0, e -> false)) {
+			return false;
+		}
 		String foes = Comrades.side(foe);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(mark, mark).inflate(BURST_RADIUS + 1.0),
 			e -> e.isAlive() && e != foe && e != thrower)) {
@@ -132,6 +136,27 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether one of {@code thrower}'s own (its side, a rival party's or a camp's own band, or a raider beside a raider) other
+	 * than {@code foe} stands within {@code radius} of where a throw would land, and the blast wouldn't spare them
+	 * ({@code spared}): any thrower holds an area throw then (docs/Pawn-Plan.md, what not to copy).
+	 */
+	public static boolean friendNear(ServerLevel level, LivingEntity thrower, @org.jspecify.annotations.Nullable LivingEntity foe, Vec3 mark,
+		double radius, java.util.function.Predicate<LivingEntity> spared) {
+		String ours = Comrades.side(thrower);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(mark, mark).inflate(radius), e -> e.isAlive() && e != foe
+			&& e != thrower && !e.isSpectator())) {
+			if (spared.test(e) || foe != null && Comrades.side(e).equals(Comrades.side(foe))) {
+				continue;
+			}
+			if (Comrades.side(e).equals(ours) || Loans.sameBand(thrower, e) || Masterless.sameBand(thrower, e)
+				|| thrower instanceof net.minecraft.world.entity.raid.Raider && e instanceof net.minecraft.world.entity.raid.Raider) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** A lit stick thrown by {@code thrower} from his hand, along {@code velocity}. */

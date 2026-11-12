@@ -38,7 +38,8 @@ import org.jspecify.annotations.Nullable;
  * Knock it down, or pick it up and carry it, and the hold breaks; or it wears off. A close bond holds out against it
  * ({@link Bonds#resists}).
  * <ul>
- * <li><b>Sorcerers</b>: a camp's necromancer or blood witch in a fight reaches for a companion near it, now and then
+ * <li><b>Sorcerers</b>: a camp's necromancer or blood witch, or an evoker (the Grue's shades are evokers too), in a
+ * fight reaches for a companion near it, now and then
  * ({@link #SORCERER_EVERY}, {@link #SORCERER_CHANCE}), and turns it to the camp's side.</li>
  * <li><b>A thrall-bite</b>: a vampire's own blow on someone else's companion may turn it to the vampire's side
  * ({@link #BITE_CHANCE}).</li>
@@ -255,7 +256,7 @@ public final class Possession {
 	private static void sorcerers(ServerPlayer player, long now) {
 		ServerLevel level = player.level();
 		for (Mob caster : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(PREY_NEAR), e -> e.isAlive() && !Downed.isDowned(e)
-			&& e instanceof Worker w && (w.role() == Sorcery.NECROMANCER || w.role() == Sorcery.BLOOD_WITCH) && Comrades.target(e) != null)) {
+			&& sorcerer(e) && Comrades.target(e) != null)) {
 			if (now - REACHED.getOrDefault(caster.getUUID(), -SORCERER_EVERY * 2L) < SORCERER_EVERY) {
 				continue;
 			}
@@ -273,6 +274,12 @@ public final class Possession {
 			Callouts.say(caster, "turn.cast", c, true, c.getDisplayName());
 			seize(c, Comrades.side(caster), SORCERER_TICKS, "sorcerer", caster);
 		}
+	}
+
+	/** A dark caster: a camp's necromancer or blood witch, or an evoker (the illagers' sorcerers, and the Grue's shades). */
+	static boolean sorcerer(Mob e) {
+		return e instanceof Worker w && (w.role() == Sorcery.NECROMANCER || w.role() == Sorcery.BLOOD_WITCH)
+			|| e instanceof net.minecraft.world.entity.monster.illager.Evoker;
 	}
 
 	/** The Grue, hard on its host, sets one of their companions on them. */

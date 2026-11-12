@@ -153,6 +153,10 @@ public final class Followers {
 				Languages.shrug(player, v);
 				continue;
 			}
+			// turned on you, or far gone with the Murmur (docs/Pawn-Plan.md H1, H2)
+			if (Possession.held(v) || Murmur.ignores(v, player)) {
+				continue;
+			}
 			take(v, player, kind);
 			taken++;
 		}

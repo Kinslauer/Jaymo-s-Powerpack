@@ -155,11 +155,12 @@ left out, or swapped for something easier, is now built as the row says, friend 
 - **What not to copy**: gear handed to your companion (armour, a sword, an axe) is worn if better and handed back if
   not; a pirate bombardier holds its throw while a friend is in the blast.
 
-What is still short of the row, and why: the bounty hunters skip greenskin warlords (they sit in their own city among
-the horde, and the warlord bounty is a war's, not a crook's) and minibosses (a miniboss arms itself only when a
-player takes its bounty, and a party taking it would leave it unarmed); without Jaymo's Powers there is no shoulder
-carry, so a party settles the bounty where its target falls. The blast check covers the pirates' bombs because no
-companion has an area attack yet. None of this has been played.
+The three parts first left short here are built too (after patch 6, Andy: "after its all built we can go back for
+what you omitted"): parties take miniboss bounties (the miniboss arms and fights the party as it would a player, and
+the relic it fought with goes to whoever brings it in), and a knight-led party of four takes a greenskin warlord's;
+without Jaymo's Powers a party hauls its catch along behind it by the collar to the court; and every area throw a
+fighter has holds while one of its own is in the blast, not only the pirates' dynamite: Hornkin magma bombs, imp
+fireballs and witches' harmful splashes (cannonballs already spare the gunner's side). None of this has been played.
 
 ## Patch 6: the dark mirror
 
@@ -167,7 +168,8 @@ H1 turned for a while (sorcerers, a thrall-bite or the Grue seize a companion; k
 sickness that rides between companions (the Murmur, Andy approved the name), H3 the masterless
 (a reincarnated player's old companion lives on, lost).
 
-As built (same PR): `Possession` (H1, both sides). A camp's necromancer or blood witch in a fight reaches for one of
+As built (same PR): `Possession` (H1, both sides). A camp's necromancer or blood witch, or an evoker (the Grue's shades
+are evokers), in a fight reaches for one of
 your companions within 16 blocks (once in 20 s, 35%) with a red beam; a vampire's own blow on someone else's
 companion turns it 20% of the time; the Grue, once its hold on you reaches assault, sets one of your companions on
 you (once in 2 minutes, 30%). A turned one's eyes glow red (client `DarkEyes`), it drops its orders and goes for its
@@ -194,6 +196,7 @@ stars and half its wins), side `lost:<leader>`, a 25 bounty at the nearest town;
 within 16. Meeting its old master (the same player, in any life), the band knows them as though met 12 times, with
 every way of fighting the leader saw at their side (the most any band knew of them when it was lost, or now), so it
 comes ready with the counters (FoeLore). Lines (`turn.*`, `murmur.*`, `lost.*`), five new loading tips (145-149).
+Limits: the townsfolk a loose one downs die through Jaymo's Powers' executions, so without Powers they're only downed.
 
 ## Andy's answers
 
