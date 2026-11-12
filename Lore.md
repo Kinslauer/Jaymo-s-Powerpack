@@ -1340,5 +1340,12 @@ them, hold a foe from behind for a friend to strike, pin a lone traveller betwee
 leg up a wall. A band that sees you first goes to ground and waits; and the greedy grab what falls, goblins most of all,
 who run off with it. Fighters learn their foes: a companion who has put down enough of a kind knows
 it and says so, and names whoever taught them; camps, villages and realms remember each traveller who has fought them,
-and from the third meeting come ready for their bow, blade, spell or fire. Patch 6 proposes a name for the sickness
+and from the third meeting come ready for their bow, blade, spell or fire. (patch 4) Out of a fight they talk: of the
+land, the ruins, a trap, a town's mood, of you; one who has done a kind of errand before knows the way. Sitting down at
+a fire or a table is the old custom of the road: you share your food and they ask how you would have them be, and the
+bond between a traveller and those who walk with them grows with every such evening and every time they're got back on
+their feet, and cools if they're left lying. Bands keep the same custom: at dusk they eat in a ring at their camp's
+fire, which is when the careful strike, or poison the pot. Every trade has a knack it writes down for those it
+trusts: the scholar's tongues, the cleric's field medicine, the farmer's foraging, the trader's haggling, the
+leatherworker's packing, the fletcher's quiet; the bands have their own trackers, healers and tongue-speakers. Patch 6 proposes a name for the sickness
 that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
