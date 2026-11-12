@@ -1,14 +1,15 @@
 ---
 status: running
-task: Darktide overhaul and Resonance into Blindness (proposal, waiting on Andy's picks)
+task: Darktide overhaul (power PR 1339 up, looks next), then Resonance buff and Blindness as a condition
 branch: claude/project-thread-qtqlao
 with: 
-pr: 
+pr: 1339
 mods: powers
 versions: 
 started: 2026-11-12
 owns:
-  - 
+  - src/main/java/com/jaymospowers/power/darktide/
+  - src/client/java/com/jaymospowers/client/power/darktide/
 ---
 # Darktide overhaul
 
