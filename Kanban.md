@@ -8,13 +8,13 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/omniroute-ai-gateway-experiment|omniroute-ai-gateway-experiment]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/pr1377-text-pass|pr1377-text-pass]] · for 🪶 Quill · #1377 · open
 
 
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
+- [ ] [[Inbox/omniroute-ai-gateway-experiment|omniroute-ai-gateway-experiment]] · 🍇 Bacchus · claimed
 
 
 ## In review
