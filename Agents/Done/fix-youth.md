@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: fix-youth
 branch: claude/waterskin-old-id
 with:
@@ -32,3 +32,4 @@ owns:
 
 ## Done
 - 2026-11-11 21:32 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-12 03:26 PR #1266 is merged into master; moved to Agents/Done.
