@@ -437,6 +437,15 @@ final class LifeStoryScreen extends Screen {
 	static String story(String rest) {
 		Heritage.Kind kind = bornAs();
 		if (kind != null) {
+			// who raised you can retell where you were born (a Frostborn nobody raised here was born on Hail):
+			// story.jaymoskingdoms.as.<heritage>.from_<raised>.born...
+			Answer raised = rest.startsWith("born.") ? picked(Question.RAISED) : null;
+			if (raised != null) {
+				String retold = "story.jaymoskingdoms.as." + kind.key() + ".from_" + raised.key() + "." + rest;
+				if (Language.getInstance().has(retold)) {
+					return retold;
+				}
+			}
 			String key = "story.jaymoskingdoms.as." + kind.key() + "." + rest;
 			if (Language.getInstance().has(key)) {
 				return key;

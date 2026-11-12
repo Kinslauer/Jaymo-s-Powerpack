@@ -91,7 +91,9 @@ public final class PlayerTemperaments {
 		if (story == null || story.size() < 6 || story.get(0).isEmpty()) {
 			return null;
 		}
-		Temperaments.Temperament raised = RAISED.get(story.get(1)), child = CHILD.get(story.get(2)), road = ROADS.get(story.get(5));
+		// a Frostborn nobody raised here came straight from Hail: proud, like their people, not a timid foundling
+		boolean fromHail = story.get(0).equals("north") && story.get(1).equals("foundling");
+		Temperaments.Temperament raised = fromHail ? Temperaments.Temperament.PROUD : RAISED.get(story.get(1)), child = CHILD.get(story.get(2)), road = ROADS.get(story.get(5));
 		Map<Temperaments.Temperament, Integer> score = new EnumMap<>(Temperaments.Temperament.class);
 		if (raised != null) {
 			score.merge(raised, RAISED_WEIGHT, Integer::sum);
