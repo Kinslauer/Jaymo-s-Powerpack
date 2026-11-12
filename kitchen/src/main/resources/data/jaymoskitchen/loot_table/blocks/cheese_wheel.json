@@ -9,15 +9,14 @@
           "name": "jaymoskitchen:cheese_wheel"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskitchen:cheese_wheel",
-          "properties": {
-            "cut": "0"
-          }
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:cheese_wheel",
+        "state": {
+          "cut": "0"
         }
-      ]
+      }
     }
-  ]
+  ],
+  "random_sequence": "jaymoskitchen:blocks/cheese_wheel"
 }
