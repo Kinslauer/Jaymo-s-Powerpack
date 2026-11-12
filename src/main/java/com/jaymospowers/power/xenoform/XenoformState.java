@@ -187,6 +187,12 @@ public final class XenoformState {
 	/** (0.18.113) Skitter clinging to a ceiling: every client draws it upside down, and its own camera turns over too. */
 	public static final AttachmentType<Boolean> CEILING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ceiling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
+	 * Wisp's Phase, held: the game time at which it runs dry, so every client draws it thinned out and both sides agree
+	 * that walls don't stop it ({@code WispPhaseMixin}). Absent: solid.
+	 */
+	public static final AttachmentType<Long> PHASE = AttachmentRegistry.create(JaymosPowers.id("xenoform_phase"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	/** (0.19.62) An alien's ability pose, drawn for everyone: "charge", "roll", "spin" and the rest (see XenoformPower.syncAct). */
 	public static final AttachmentType<String> ACT = AttachmentRegistry.create(JaymosPowers.id("xenoform_act"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
@@ -275,6 +281,11 @@ public final class XenoformState {
 	public static @Nullable XenoUltimate ultimate(Player player) {
 		XenoForm form = form(player);
 		return form != null && Boolean.TRUE.equals(player.getAttached(ULTIMATE)) ? form.evolved() : null;
+	}
+
+	/** Whether {@code player} is a Wisp holding Phase right now (both sides). */
+	public static boolean phasing(Player player) {
+		return player.getAttached(PHASE) != null;
 	}
 
 	/** How the player's alien is flying ({@link #FLY_NONE} when it isn't). */

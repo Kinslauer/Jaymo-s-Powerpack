@@ -145,6 +145,8 @@ public final class XenoformClient {
 		state.setData(ACT_TICKS, asterion ? actTicks(player, state.getData(ACT), partialTicks) : null);
 		state.setData(HELD, asterion ? held(player) : null);
 		XenoformFlightPose.extract(entity, state, partialTicks);
+		WispTail.extract(entity, state, partialTicks);
+		WispPhaseClient.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;

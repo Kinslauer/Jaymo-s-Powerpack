@@ -219,7 +219,8 @@ public final class Guard {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
 		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.guards(item) || item instanceof SorasDagger, (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
-				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, GUARD_SHARE)),
+				// (boxing's fist gear blocks by its own share, more the better the gear: BoxingGear.blockShare)
+				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, com.jaymospowers.boxing.BoxingGear.blockShare(item, GUARD_SHARE))),
 				new BlocksAttacks.ItemDamageFunction(3.0F, 0.0F, 0.5F),
 				Optional.of(lookup.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
 				Optional.of(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.TRIDENT_HIT)),
@@ -430,7 +431,10 @@ public final class Guard {
 			return true;
 		}
 		ItemStack guard = player.getUseItem();
-		if (melee && weaponGuard(guard) && player.isBlocking() && !Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE)))) {
+		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
+		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
+			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
+			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE))))) {
 			guardBreak(player, guard);
 		}
 		return false;

@@ -11351,3 +11351,55 @@ The dragon art credits file had leftover merge markers from an old merge; they a
   `tools/gen_ocellan.py` (skins in `textures/entity/ocellan/`).
 - Compiled (`compileClientJava`) and rendered from the skins outside the game; not played. Not checked in game: that
   every MCA layer on the smith (hair, clothes, held things) is hidden, and how his name tag sits.
+
+## 0.7.746 (2026-11-11): Read the Ground: a Survival perk that shows footprints (#1322)
+
+An idea from Yo Fadda's Batman mod (All Rights Reserved: nothing taken, our own code). Andy: "this should instead be
+added to the survivalist tree. available for everyone".
+- **Prints** (`TrailReading`): every creature walking on the ground near a player leaves a print each 1.6 blocks, with the
+  way it was heading. Prints last 8 minutes (kept in memory; a restart clears them). Nothing in water or in the air leaves
+  any, and a player sneaking with Soft Step leaves none.
+- **Read the Ground** (Survival, first page, under Forager; 2 ranks, 1 point each, no level needed): crouch and hold still
+  for a second and the prints round you show to you alone as faint motes drifting the way their maker went: pale for
+  people, rust for monsters, moss for beasts, bigger for bigger feet, fainter with age. Rank 1 reads 18 blocks and 3
+  minutes back; rank 2 reads 32 blocks and the full 8 minutes. Your own prints are not shown.
+- Blood and drag marks are already on the ground for everyone and need no perk.
+- Built and compiled; not played. To check in game: that the motes read as a trail you can follow, and where the perk
+  sits on Survival's first page.
+
+## 0.7.747 (2026-11-11): Burning steeds at the Flame Avatars' camps (#1322)
+
+Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise no steeds.
+- The Flame Avatars' camps in the Nether now keep burning steeds (Powers' horses of fire): two at each new camp, and
+  another now and then while a player is near, up to three round the hearth (`AvatarCamps`, `PowersCompat.burningSteed`).
+
+## 0.7.748 (2026-11-11): Dragons and war elephants left out of Horseman's horse tricks
+
+- Horseman (now in the pack) treats every horse-like mount as a horse. Dragons can't be hitched to a fence or put in a boat, and war elephants and mammoths can't be put in a boat (`data/horseman/tags/entity_type`, entries optional, so nothing changes without Horseman).
+- Dragons keep vanilla's speed in the air (`WindDragon.getFlyingSpeed`). Horseman's air-speed boost would have made ridden dragons several times faster in flight.
+- Built in the cloud; not played.
+
+## 0.7.749 (2026-11-11): elemental powers can't see mana or spirits (#1333)
+
+- **Smoke, Gravity and Cryo users are blind to mana** (Andy: "cannot view mana abilities or spirits because of the way their ki manifests"): even attuned or reading magic, they see no one else's mana glow, mana wings, spirit arms, spirit figure or mage hands, and get no clash bars. Their own mana still shows to them. Valor works for them as for any other power user (`Mana.blindToMana`, `seesMana`, used by `ManaClient`, `ManaWings`, `SpiritArms`, `SpiritHandRenderer`, `ClashCinematic`).
+- Built; not played.
+
+## 0.7.750 (2026-11-11): costumed gifted: vigilantes and villains (#1332)
+
+- **Who** (`CostumedFolk`): a grown gifted villager who hides their gift and isn't a ruler is weighed once: the brave, kindhearted, dutiful and devout become vigilantes and the spiteful, greedy and hotheaded villains (35% each), anyone else either side at 8%. The open gifted never take one (they use their power plainly, as before). Needs Powers with this patch.
+- **When**: the costume goes on after dark and comes off at dawn, only while no player within 16 blocks can see who is under it.
+- **Vigilantes**, suited, go after the nearest monster within 16 blocks ("Get behind me!"). **Villains**, suited, now and then (0.3% a second) pick on a player within 20 blocks (never family), or else a grown villager who isn't one of their own, for 12 seconds ("You'll do.").
+- **Rivals** (Andy: "vigilantes will fight villians as well, meaning you can stumble upon rivalries and even get involved"): a suited vigilante goes after a suited villain within 16 blocks before any monster ("Leave them be, the Squall. It's me you want."). From then on they're rivals: the vigilante goes after them from 32 blocks, and a villain with a rival about goes looking for them (2% a second). A player who hits one of them mid-fight hears from the other: the vigilante thanks them grudgingly ("Didn't need the help. ...Thanks."), the villain crows ("Ha! Even they're sick of you.").
+- **Folk talk about them** ("the villagers will talk about the ones they have seen"): villagers who see a suited one, or two rivals fighting, remember the names (their last 4), and by day now and then tell a player near ("The Gale and Black Ice were at it again last night.").
+- **Nobody likes them**: folk near a suited one grumble at a vigilante ("Go home. We managed before you lot.") or cry out at a villain ("Someone fetch the guard!"), in speech bubbles. Lines in `lang/parts/costumed-folk.json`.
+- Lore.md has the placement as a (new) paragraph for Andy to approve.
+- Built; not played.
+
+## 0.7.751 (2026-11-12): Blossom castle - the Blossom kingdom's seat rebuilt as a four-storey castle (#1337)
+
+- **The seat of a Blossom town is a castle now**, in the style of the Ninja Castle build Andy picked (our own design; that build has no stated licence, so none of it is shipped). `Blossom.tenshu` replaces the three-storey keep.
+- **Outside**: a moat along the front with a stone bridge and lanterns, steps up a footing of rough stone that is a block wider at the ground, a terrace under the eaves, then four storeys of white plaster and dark posts, each standing back under a skirt of grey stone tile with turned-up corners. A gable on the front of the two lowest roofs, a top roof with its ridge across the front and a pale horn at each end, and a gatehouse wing against the right side whose ridge runs into the keep. 25 wide, 25 deep, 30 high (the old keep was 17 x 17 x 20).
+- **Inside**: the great room is a boarded hall between two raised tatami floors, with a niche at the far end that the throne goes in (it is the only spot the seat finder can pick, so the throne is no longer in a corner). Ladders up to a guards' floor with futons, the lord's rooms, and a lookout under the roof. A door off the right-hand floor opens into the gatehouse.
+- **Town layout** (`BlossomVillages`): the castle starts 5 blocks nearer the bell, the shrine moved 5 blocks left, the last pair of road lanterns moved up, and the ground is cleared 32 high instead of 26. The footing is the land's own stone so the panic room is still dug under the throne.
+- Existing Blossom towns keep their old keep; only towns founded after this get the castle (`/kingdom found blossomtown` to see one).
+- Built (compiles); not seen in game.

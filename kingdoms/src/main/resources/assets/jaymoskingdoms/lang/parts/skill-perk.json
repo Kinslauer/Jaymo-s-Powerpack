@@ -246,5 +246,7 @@
   "skill.jaymoskingdoms.perk.couched_lance": "Couched Lance",
   "skill.jaymoskingdoms.perk.couched_lance.desc": "Spear form, mounted only: couch the lance and ride your foes down.",
   "skill.jaymoskingdoms.perk.pinning_throw": "Pinning Throw",
-  "skill.jaymoskingdoms.perk.pinning_throw.desc": "Spear masterstroke: throw the spear at a fallen foe and pin it where it lies."
+  "skill.jaymoskingdoms.perk.pinning_throw.desc": "Spear masterstroke: throw the spear at a fallen foe and pin it where it lies.",
+  "skill.jaymoskingdoms.perk.read_the_ground": "Read the Ground",
+  "skill.jaymoskingdoms.perk.read_the_ground.desc": "Crouch and hold still: the prints of whatever walked here in the last 3 minutes show within 18 blocks, drifting the way it went. Pale for people, rust for monsters, moss for beasts; bigger for bigger feet, fainter with age. Rank 2: 32 blocks and 8 minutes."
 }

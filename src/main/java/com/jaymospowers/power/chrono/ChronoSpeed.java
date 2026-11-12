@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
 public final class ChronoSpeed {
 	// ---- tuning ----
 	/** Sprinting while overclocked: movement speed x(1 + this), on top of Overclock's Speed V. */
-	static final double SPRINT_BOOST = 1.2;
+	public static final double SPRINT_BOOST = 1.2;
 	/** Extra step height while overclocked (vanilla 0.6, so 1.25 in all: a full block without jumping). */
 	static final double STEP_BOOST = 0.65;
 	/** Wall running: how fast you climb (blocks a tick), and how hard you're held against the wall (blocks a tick into it). */
@@ -113,6 +113,11 @@ public final class ChronoSpeed {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(WallRun.TYPE, WallRun.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(WallRun.TYPE, (payload, ctx) -> wallRun(ctx.player(), payload.face()));
+		ChronoGears.register();
+		ChronoRapid.register();
+		ChronoPhase.register();
+		ChronoSlowTime.register();
+		ChronoRings.register();
 	}
 
 	private static void wallRun(ServerPlayer player, int face) {
@@ -172,7 +177,13 @@ public final class ChronoSpeed {
 			player.removeAttached(FLASH);
 		}
 		boolean sprinting = overclocked && player.isSprinting();
-		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, sprinting);
+		ChronoGears.tick(player, level, overclocked);
+		ChronoPhase.tick(player, level, overclocked);
+		ChronoRings.tick(player, level, overclocked);
+		if (overclocked) {
+			ChronoRapid.tick(player, level);
+		}
+		gearedSprint(player, sprinting);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, overclocked);
 		if (sprinting) {
 			// a golden (or light blue) streak where you just were
@@ -292,6 +303,24 @@ public final class ChronoSpeed {
 		}
 	}
 
+	/** The sprint boost follows the gear: put on, replaced when the gear changes, taken off when not sprinting. */
+	private static void gearedSprint(ServerPlayer player, boolean on) {
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
+		}
+		double amount = ChronoGears.sprintBoost(ChronoGears.gear(player));
+		AttributeModifier old = speed.getModifier(SPRINT_MODIFIER);
+		if (!on) {
+			if (old != null) {
+				speed.removeModifier(SPRINT_MODIFIER);
+			}
+		} else if (old == null || Math.abs(old.amount() - amount) > 1.0E-6) {
+			speed.removeModifier(SPRINT_MODIFIER);
+			speed.addTransientModifier(new AttributeModifier(SPRINT_MODIFIER, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+	}
+
 	private static void modifier(AttributeInstance attribute, Identifier id, double amount, AttributeModifier.Operation op, boolean on) {
 		if (attribute == null || attribute.hasModifier(id) == on) {
 			return;
@@ -307,6 +336,8 @@ public final class ChronoSpeed {
 	/** Take both modifiers off (power lost, Overclock cut short, Velocity switched off). */
 	public static void clear(ServerPlayer player) {
 		control(player, false);
+		ChronoGears.clear(player);
+		ChronoRapid.clear(player);
 		if (player.getAttached(FLASH) != null) {
 			player.removeAttached(FLASH);
 		}
@@ -315,49 +346,5 @@ public final class ChronoSpeed {
 		}
 		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, false);
-	}
-
-	/**
-	 * V while overclocked: vibrate through the wall ahead. True if you went through. The wall must start within
-	 * {@link #PHASE_REACH} of you; you come out at the first spot you fit, at most {@link #PHASE_DEPTH} blocks in.
-	 */
-	static boolean phase(ServerPlayer player) {
-		ServerLevel level = player.level();
-		Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
-		if (look.lengthSqr() < 1.0E-4 || player.isPassenger()) {
-			return false;
-		}
-		look = look.normalize();
-		Vec3 here = player.position();
-		AABB box = player.getBoundingBox();
-		// a wall right ahead?
-		double wall = -1.0;
-		for (double d = 0.25; d <= PHASE_REACH; d += 0.25) {
-			if (!level.noCollision(player, box.move(look.scale(d)))) {
-				wall = d;
-				break;
-			}
-		}
-		if (wall < 0.0) {
-			return false;
-		}
-		Vec3 out = null;
-		for (double d = wall + 0.25; d <= wall + PHASE_DEPTH + 0.75; d += 0.25) {
-			Vec3 to = here.add(look.scale(d));
-			if (level.noCollision(player, box.move(to.subtract(here))) && level.getWorldBorder().isWithinBounds(to.x, to.z)) {
-				out = to;
-				break;
-			}
-		}
-		if (out == null) {
-			return false;
-		}
-		ChronoFx.particles(level, player, MagicFx.CRACKLE, here.x, here.y + 1.0, here.z, 25, 0.3, 0.7, 0.3, 0.15);
-		level.playSound(null, here.x, here.y, here.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 2.0F);
-		player.teleportTo(level, out.x, out.y, out.z, Set.of(), player.getYRot(), player.getXRot(), false);
-		ChronoFx.particles(level, player, MagicFx.CRACKLE, out.x, out.y + 1.0, out.z, 25, 0.3, 0.7, 0.3, 0.15);
-		ChronoFx.particles(level, player, MagicFx.EMBER, out.x, out.y + 1.0, out.z, 12, 0.3, 0.7, 0.3, 0.3);
-		level.playSound(null, out.x, out.y, out.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 2.0F);
-		return true;
 	}
 }

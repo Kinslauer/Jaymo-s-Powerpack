@@ -213,6 +213,7 @@ public final class ChronoPowerClient implements PowerClient {
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		ChronoFlowClient.renderHud(graphics, player);
+		ChronoSpeedHud.render(graphics, player);
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
 		float partial = delta.getGameTimeDeltaPartialTick(false);

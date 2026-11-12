@@ -129,6 +129,14 @@ public final class DodgeClient {
 		if (cooldown > 0 || player.isSpectator() || !Dodge.canDodge(player) || FreerunClient.active()) {
 			return;
 		}
+		if (com.jaymospowers.boxing.Boxing.boxing(player)) {
+			// boxing: the style's own evade (a slip, a pull, a shoulder roll) in place of the roll
+			if (com.jaymospowers.client.boxing.BoxingClient.evade(player)) {
+				cooldown = com.jaymospowers.boxing.BoxingEvades.COOLDOWN;
+				sinceDodge = 0;
+			}
+			return;
+		}
 		if (com.jaymospowers.client.freerun.moves.RunMovesClient.safetyTap(player, landing)) {
 			// (ParCool track B) at touchdown with no direction held: the safety tap, not a roll
 			cooldown = Dodge.COOLDOWN;
