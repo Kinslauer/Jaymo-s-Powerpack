@@ -329,6 +329,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.386) star-touched foes on Jaymo's Powers' far worlds (its attachment)
 		LOGGER.debug("star-touched attachment: {}", StarTouched.STAR);
 		StarTouched.register();
+		RustStorms.register();
 				// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();

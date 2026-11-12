@@ -113,5 +113,9 @@
   "relief.jaymoskingdoms.trapped.neighbours": "My neighbours dug me out at last. A day and a night in the dark, and nobody else came.",
   "quest.jaymoskingdoms.relief.trapped.quake.title": "%1$s Is Under the Rubble",
   "quest.jaymoskingdoms.relief.trapped.quake.text": "The quake brought the stones down on %1$s. We can hear them calling, but we haven't the strength to shift it all. Dig them out, near %3$s, %4$s, before the rest of it comes down on them!",
-  "quest.jaymoskingdoms.objective.dig_out": "Dig %1$s out of the rubble (%2$s, %3$s)."
+  "quest.jaymoskingdoms.objective.dig_out": "Dig %1$s out of the rubble (%2$s, %3$s).",
+  "message.jaymoskingdoms.rust_storm.warn.hermit": "\"The stars over Rustfall have gone the colour of old blood. A rust storm is gathering there. Whatever lives in it will be mad with it, so don't be out on that world when it breaks.\"",
+  "message.jaymoskingdoms.rust_storm.warn.hermit.here": "\"Smell that? Iron on the wind. A rust storm is coming, and the beasts here go mad in it. Find cover, or be ready.\"",
+  "message.jaymoskingdoms.rust_storm.warn.patrolman": "\"Patrol advisory: a rust storm front is building over Rustfall. Hostiles out there get a lot meaner while it blows. Delay any landing if you can.\"",
+  "message.jaymoskingdoms.rust_storm.warn.patrolman.here": "\"Heads up, the front's almost on us. Rust storm inbound. Everything with teeth gets meaner while it blows, so stay sharp.\""
 }
