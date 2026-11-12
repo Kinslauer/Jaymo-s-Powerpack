@@ -1377,3 +1377,11 @@ smiths keep the black powder trade: charcoal from the kiln and the saltpetre of 
 who trusts a traveller may write it down for them, and whoever learns it walks beside a marksman rolling his
 cartridges and lobs the sticks; the camps have their own, fewer and wilder. The one rule of the trade is the first
 line of every primer: never where a friend is standing.
+
+
+(new) **Sulphur and saltpetre** (Claude's placement for Andy's ask, 2026-11-12, for Andy to approve). Brimstone is the
+breath of the deep fires: it crusts yellow where lava runs near, round the hot springs of the cold north, and all over
+the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that dry ground sweats: the deserts, the
+badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
+powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
+measures where the bone heap made one.
