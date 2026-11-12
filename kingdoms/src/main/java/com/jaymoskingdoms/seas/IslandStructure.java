@@ -26,14 +26,15 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
  * says the land is an island, and, with {@code far}, only that far out to sea. The one picked is the first whose own
  * biomes take the island's biome, else any; it then stands as it would anywhere, held to this structure's biomes.
  * <p>
- * Used for the Tideborn's island villages, the sea hermit's tower, wrecks thrown up on island beaches and the caches
- * on uncharted islands (data {@code worldgen/structure}, type {@code jaymoskingdoms:island}).
+ * Used for the Tideborn's island villages, the sea hermit's tower, wrecks thrown up on island beaches, the caches
+ * on uncharted islands and (with {@code island} false) the sunken wrecks, which lie only out at sea (data {@code worldgen/structure}, type {@code jaymoskingdoms:island}).
  */
 public final class IslandStructure extends Structure {
 	public static final MapCodec<IslandStructure> CODEC = RecordCodecBuilder.<IslandStructure>mapCodec(i -> i.group(
 			settingsCodec(i),
 			RegistryCodecs.holderSet(Registries.STRUCTURE, Structure.DIRECT_CODEC).fieldOf("structures").forGetter(s -> s.structures),
-			Codec.floatRange(0.0F, 1.0F).optionalFieldOf("far", 0.0F).forGetter(s -> s.far))
+			Codec.floatRange(0.0F, 1.0F).optionalFieldOf("far", 0.0F).forGetter(s -> s.far),
+			Codec.BOOL.optionalFieldOf("island", true).forGetter(s -> s.island))
 		.apply(i, IslandStructure::new));
 
 	public static StructureType<IslandStructure> TYPE;
@@ -41,11 +42,14 @@ public final class IslandStructure extends Structure {
 	private final HolderSet<Structure> structures;
 	/** How far out to sea the island must lie ({@link Offshore#far}, 0 any island). */
 	private final float far;
+	/** False for one that needs only open sea, not an island (the wrecks on the sea floor, out of sight of land). */
+	private final boolean island;
 
-	public IslandStructure(StructureSettings settings, HolderSet<Structure> structures, float far) {
+	public IslandStructure(StructureSettings settings, HolderSet<Structure> structures, float far, boolean island) {
 		super(settings);
 		this.structures = structures;
 		this.far = far;
+		this.island = island;
 	}
 
 	public static void register() {
@@ -57,10 +61,14 @@ public final class IslandStructure extends Structure {
 		ChunkPos chunk = context.chunkPos();
 		int x = chunk.getMiddleBlockX(), z = chunk.getMiddleBlockZ();
 		Climate.Sampler sampler = context.climateSampler();
-		if (!Offshore.island(sampler, x, z)) {
-			return Optional.empty();
-		}
-		if (this.far > 0.0F && Offshore.far(Offshore.ringContinentalness(sampler, x, z)) < this.far) {
+		if (this.island) {
+			if (!Offshore.island(sampler, x, z)) {
+				return Optional.empty();
+			}
+			if (this.far > 0.0F && Offshore.far(Offshore.ringContinentalness(sampler, x, z)) < this.far) {
+				return Optional.empty();
+			}
+		} else if (Offshore.far(Offshore.continentalness(sampler, x, z)) < this.far) {
 			return Optional.empty();
 		}
 		List<Holder<Structure>> choices = new ArrayList<>();

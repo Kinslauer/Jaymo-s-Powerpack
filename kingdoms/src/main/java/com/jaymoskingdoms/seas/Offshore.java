@@ -31,6 +31,10 @@ public final class Offshore {
 		return Climate.unquantizeCoord(sampler.sample(x >> 2, 0, z >> 2).continentalness());
 	}
 
+	public static float continentalness(Climate.Sampler sampler, int x, int z) {
+		return Climate.unquantizeCoord(sampler.sample(x >> 2, 0, z >> 2).continentalness());
+	}
+
 	public static float continentalness(ServerLevel level, int x, int z) {
 		return continentalness(level.getChunkSource().randomState(), x, z);
 	}

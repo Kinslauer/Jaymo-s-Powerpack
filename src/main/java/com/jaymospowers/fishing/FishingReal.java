@@ -263,7 +263,7 @@ public final class FishingReal {
             mob.setNoAi(true);
         }
         // a heavy fish fights harder, and looks it
-        float kg = FishCatch.roll(fishKind, player.getRandom());
+        float kg = FishCatch.roll(fishKind, player.getRandom(), FishCatch.depth(player.level(), hook.blockPosition()));
         strength *= FishCatch.pull(fishKind, kg);
         if (fishKind != FISH_SHARK) {
             net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
