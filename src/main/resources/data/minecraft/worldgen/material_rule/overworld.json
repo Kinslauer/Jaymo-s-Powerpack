@@ -19,6 +19,14 @@
       },
       "then_run": "minecraft:overworld/surface"
     },
+    {
+      "type": "minecraft:condition",
+      "if_true": {
+        "type": "minecraft:biome",
+        "biome_is": "jaymospowers:ice_caves"
+      },
+      "then_run": "jaymospowers:ice_caves"
+    },
     "minecraft:overworld/underground"
   ]
 }
