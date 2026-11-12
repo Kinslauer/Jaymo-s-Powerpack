@@ -577,6 +577,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
+		Comrades.register();
+		Callouts.register();
+		FieldMedics.register();
+		BandLeaders.register();
+		QuickOrders.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)

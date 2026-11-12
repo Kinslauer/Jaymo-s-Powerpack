@@ -166,7 +166,7 @@ public final class Followers {
 	}
 
 	/** {@code v} takes the order, at the spot they stand on. */
-	private static void take(Villager v, ServerPlayer player, int kind) {
+	static void take(Villager v, ServerPlayer player, int kind) {
 		Attention.heed(v);
 		PROGRESS.remove(v.getUUID());
 		if (kind == FOLLOW || kind == FREE) {

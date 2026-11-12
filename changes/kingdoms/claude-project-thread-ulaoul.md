@@ -1,0 +1,8 @@
+# fighting together - leanings, callouts, quick orders, field medics
+- **Leanings**: every fighter has a main and a second habit (biggest foe, shooters, the wounded, guard a friend, mind the fallen, strike first, loot, hang back), drawn once and kept, nudged by temperament and role. They only pick among foes already in the fight, never start one.
+- **Callouts**: fighters say what they're doing over their heads (taking a foe, a friend's back, a friend down, going to them, badly hurt, the fight won; from the other side "they're out of arrows", "get the one tending them"). Gold to friends and onlookers, red to whoever they're fighting, in their own tongue and a voice from their temperament. No repeats: a gap per speaker, one line of a kind per side per spot, the quiet speak less, nobody repeats their last six lines.
+- **Quick orders** (rebindable, Jaymo's Quick Orders): Go on Up arrow (press on, or scout ahead out of a fight), Come on Right Shift, Wait on Right arrow (hold and stop attacking), Help on Left arrow (get the fallen up, or patch you up when nobody's down). The nearest companion answers aloud.
+- **Band leaders**: camp chiefs, warchiefs, captains, warlords and raid captains give the same orders to their band: send someone to a downed comrade, call the band onto whoever is hurting them, spread out when they outnumber you. A leader going down is shouted out.
+- **Field medics**: a fighter who minds the fallen kneels by a downed friend of its side mid-fight and gets them up in 7 s; any hit starts it over. Works for your companions on you and for raiders on raiders.
+- Classes: Comrades, Callouts, FieldMedics, BandLeaders, QuickOrders, client QuickOrderKeys; lang part comrades.json. Plan for the rest: docs/Pawn-Plan.md.
+- Built; not played.
