@@ -1,0 +1,72 @@
+{
+  "type": "minecraft:spline",
+  "spline": {
+    "coordinate": {
+      "type": "mul",
+      "left": {
+        "type": "mul",
+        "left": {
+          "type": "add",
+          "left": {
+            "type": "add",
+            "left": {
+              "type": "cache",
+              "input": {
+                "type": "cache",
+                "input": {
+                  "type": "cache",
+                  "input": "lithosphere:topography_final"
+                }
+              }
+            },
+            "right": {
+              "type": "mul",
+              "left": 0.01,
+              "right": {
+                "type": "noise",
+                "noise": "lithosphere:biome_variation",
+                "xz_scale": 11.000000000000004,
+                "y_scale": 0
+              }
+            }
+          },
+          "right": 0.6
+        },
+        "right": 0.9
+      },
+      "right": 0.75
+    },
+    "points": [
+      {
+        "location": 0.025,
+        "value": 0,
+        "derivative": 0
+      },
+      {
+        "location": 0.0375,
+        "value": 0.05,
+        "derivative": 0.43
+      },
+      {
+        "location": 0.2,
+        "value": 0.15,
+        "derivative": 0.35
+      },
+      {
+        "location": 0.75,
+        "value": 0.1,
+        "derivative": 0
+      },
+      {
+        "location": 0.95,
+        "value": 0.62,
+        "derivative": 1.1673189823874786
+      },
+      {
+        "location": 0.98,
+        "value": 0.63,
+        "derivative": 0
+      }
+    ]
+  }
+}
