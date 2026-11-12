@@ -3,6 +3,9 @@ package com.jaymospowers.client.wounds;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.wet.ArmourGrimeTextures;
 import com.jaymospowers.core.BladeBlood;
+import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.wounds.Bleeding;
+import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.WoundMarks;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -46,11 +49,14 @@ public final class WoundMarksLayer {
 	static final int MOST_KEPT = 300;
 	/** The colours of a fresh bruise and an old one, and a blast's soot. */
 	static final int BRUISE_FRESH = 0x4A2C5E, BRUISE_OLD = 0x8C8A3C, SOOT = 0x2A2522;
+	/** A healed stump's scar, and the seam it closed along. */
+	static final int SCAR = 0xD19A8C, SEAM = 0x8E5A50;
 
 	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
-	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood) {
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw) {
 		String key() {
 			StringBuilder b = new StringBuilder();
+			b.append('s').append(this.stubs).append('r').append(this.raw).append('|');
 			for (int i = 0; i < this.marks.size(); i++) {
 				b.append(Long.toHexString(this.marks.get(i).shape())).append(':').append(this.stages[i]).append(',');
 			}
@@ -74,9 +80,19 @@ public final class WoundMarksLayer {
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
 		List<WoundMarks.Mark> marks = WoundMarks.marks(entity);
-		if (marks.isEmpty()) {
+		// the lost arms and legs drawn as stumps (Dismembered), and which of them still bleed
+		int stubs = Dismember.missing(entity) & ~Dismember.HEAD & ~com.jaymospowers.core.Prosthetics.fitted(entity);
+		if (marks.isEmpty() && stubs == 0) {
 			state.setData(KEY, null);
 			return;
+		}
+		int raw = 0;
+		int bleeding = Bleeding.bleeding(entity);
+		for (int part : Dismember.PARTS) {
+			BodyPart lost = (stubs & part) != 0 ? Breaks.part(part) : null;
+			if (lost != null && (bleeding & 1 << lost.ordinal()) != 0) {
+				raw |= part;
+			}
 		}
 		long now = entity.level().getGameTime();
 		int[] stages = new int[marks.size()];
@@ -85,7 +101,7 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood));
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood, stubs, raw));
 	}
 
 	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
@@ -140,9 +156,17 @@ public final class WoundMarksLayer {
 		NativeImage out = new NativeImage(w, h, true);
 		try (base) {
 			boolean layout = humanoid && (w == h || w == h * 2) && w >= 64;
+			// (stumps are only drawn on the humanoid layout; elsewhere there is nothing to paint for them)
 			Painter painter = new Painter(base, out, layout);
 			for (int i = 0; i < marked.marks().size(); i++) {
 				painter.mark(marked.marks().get(i), marked.stages()[i] / (float) STAGES, marked.blood());
+			}
+			if (layout) {
+				for (int part : Dismember.PARTS) {
+					if ((marked.stubs() & part) != 0) {
+						painter.stump(part, (marked.raw() & part) != 0, marked.blood());
+					}
+				}
 			}
 		}
 		Identifier id = JaymosPowers.id("wound_marks/" + made++);
@@ -216,6 +240,54 @@ public final class WoundMarksLayer {
 						double a = random.nextDouble() * Math.PI * 2.0, d = random.nextDouble() * r;
 						this.dot(cx + Math.cos(a) * d, cy + Math.sin(a) * d, core, strength, rect);
 					}
+				}
+			}
+		}
+
+		/**
+		 * A lost limb's stump end ({@code part}, a {@link Dismember} bit): the limb's bottom face (what a shortened limb
+		 * shows at its end) and the last row of each side. Raw while it bleeds; capped once it has closed: the skin drawn
+		 * in over it, pink and puckered to a seam.
+		 */
+		void stump(int part, boolean raw, int blood) {
+			int x, y;
+			switch (part) {
+				case Dismember.RIGHT_ARM -> {
+					x = 40; y = 16;
+				}
+				case Dismember.LEFT_ARM -> {
+					x = this.old ? 40 : 32; y = this.old ? 16 : 48;
+				}
+				case Dismember.RIGHT_LEG -> {
+					x = 0; y = 16;
+				}
+				case Dismember.LEFT_LEG -> {
+					x = this.old ? 0 : 16; y = this.old ? 16 : 48;
+				}
+				default -> {
+					return;
+				}
+			}
+			// a limb box is 4 by 4 by 12: its bottom face lies right of its top face, at the top of its strip
+			int[] end = {x + 8, y, 4, 4};
+			double cx = (end[0] + 2) * this.unit, cy = (end[1] + 2) * this.unit;
+			for (int py = end[1] * this.unit; py < (end[1] + end[3]) * this.unit; py++) {
+				for (int px = end[0] * this.unit; px < (end[0] + end[2]) * this.unit; px++) {
+					double d = Math.hypot(px + 0.5 - cx, py + 0.5 - cy) / (2.0 * this.unit);
+					if (raw) {
+						this.dot(px, py, d < 0.55 ? scale(blood, 0.5F) : scale(blood, 0.9F), 0.9F, end);
+					} else {
+						// healed over: scar pink, a darker seam across the middle
+						boolean seam = Math.abs(py + 0.5 - cy) < 0.5 * this.unit && d < 0.8;
+						this.dot(px, py, seam ? SEAM : SCAR, seam ? 0.55F : 0.4F, end);
+					}
+				}
+			}
+			// the last row of each side, where the stump ends
+			int[] rim = {x, y + 4 + 11, 16, 1};
+			for (int py = rim[1] * this.unit; py < (rim[1] + rim[3]) * this.unit; py++) {
+				for (int px = rim[0] * this.unit; px < (rim[0] + rim[2]) * this.unit; px++) {
+					this.dot(px, py, raw ? scale(blood, 0.8F) : SCAR, raw ? 0.7F : 0.35F, rim);
 				}
 			}
 		}
