@@ -25,6 +25,6 @@
   set from the footage without seeing them on a model.
 - **Worn fist gear fits the hand:** wraps, cestus and bracers sat only just proud of the arm, inside a skin's sleeve
   layer, so they showed in patches. They now stand clear of it all the way round, are narrower on slim arms, and
-  bracers are a band round the wrist, below the elbow, so they turn with a bent forearm.
+  bracers cover the hand like a glove, from the wrist to its end, so they turn with a bent forearm.
 - The Arrow Slit's back is slightly rounded (the spine bends halfway down, the same way the limbs do), and its head
   stays up rather than tucked.

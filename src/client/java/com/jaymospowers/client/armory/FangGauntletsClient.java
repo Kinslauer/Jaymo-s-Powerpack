@@ -78,8 +78,8 @@ public final class FangGauntletsClient {
 	static final float SLIM_GEAR = 0.8F;
 	/** A cestus's band over the knuckles: from this far down, and this far proud. */
 	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.8F;
-	/** Bracers: a band round the wrist, starting below the elbow (pixels down the arm), this long, and this far proud. The hand's end is left bare. */
-	static final float BRACER_TOP = 6.0F, BRACER_GROW = 0.6F;
+	/** Bracers: worn as a glove, from the wrist (this far down the arm) over the rest of the hand to its end, and this far proud. */
+	static final float BRACER_TOP = 7.0F, BRACER_GROW = 0.6F;
 	static final int BRACER_LENGTH = 3;
 	// ================================================================================================================
 
