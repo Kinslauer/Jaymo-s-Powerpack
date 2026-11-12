@@ -8,7 +8,6 @@ import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -207,7 +206,7 @@ public final class DarktideGuard {
 		if (live.flow >= cost) {
 			live.flow -= cost;
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
-			level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
+			level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
 			return damage * share;
 		}
 		// this hit empties Flow: what Flow could pay for is blocked, the rest goes through, and the guard breaks
@@ -235,7 +234,7 @@ public final class DarktideGuard {
 		DarktideStatus.stun(player, STAGGER_TICKS);
 		DarktideMove.play(player, DarktideMove.STAGGER, DarktideMove.STAGGER_TICKS, 0);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BREAK.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.level().sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.08);
+		player.level().sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.08);
 		com.jaymospowers.core.Shakes.send(player, 0.8F);
 	}
 
@@ -255,8 +254,9 @@ public final class DarktideGuard {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.8F, 1.4F);
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
-		level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 12, 0.2, 0.2, 0.2, 0.3);
-		level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y - 0.3, at.z, 10, 0.25, 0.25, 0.25, 0.05);
+		// the blow turned: a pale ring off the guard, facing whoever swung
+		MagicFx.ring(level, at.add(0.0, -0.3, 0.0), player.getLookAngle(), 0.9F, DarktideLooks.PALE, MagicFx.RING_TICKS);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.6F), at.x, at.y - 0.3, at.z, 6, 0.25, 0.25, 0.25, 0.05);
 		boolean katana = DarktideWeapons.kit(player) == DarktideWeapons.Kit.KATANA;
 		if (player.getMainHandItem().has(net.minecraft.core.component.DataComponents.WEAPON)) {
 			// a blade turned the blow: sparks off it
@@ -297,12 +297,10 @@ public final class DarktideGuard {
 		MagicFx.blast(level, mid.x, mid.y, mid.z, MagicFx.FLASH_RADIUS, 0xFFFFFF);
 		// the streak: a diagonal line of ink from the shoulder down across
 		Vec3 right = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
-		for (int i = 0; i <= 10; i++) {
-			double t = i / 10.0 - 0.5;
-			Vec3 p = mid.add(right.scale(t * 1.6)).add(0.0, -t * 1.2, 0.0);
-			level.sendParticles(MagicFx.wisp(0x0A1430, 1.6F), p.x, p.y, p.z, 2, 0.03, 0.03, 0.03, 0.0);
-			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
+		Vec3 half = right.scale(1.1).add(0.0, -0.9, 0.0);
+		Vec3 toward = player.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+		MagicFx.stroke(level, mid.subtract(half), mid.add(half), toward.lengthSqr() < 1.0E-6 ? null : toward.normalize().scale(0.3),
+			DarktideLooks.HEAVY_STROKE, DarktideLooks.INK, DarktideLooks.CUT_TICKS + 4);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
 		DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.RIPOSTE, player.getId(), target.getId()));
 	}

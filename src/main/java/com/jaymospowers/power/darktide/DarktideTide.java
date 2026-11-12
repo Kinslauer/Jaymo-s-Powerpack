@@ -279,13 +279,13 @@ final class DarktideTide {
 		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
 		Vec3 hand = player.position().add(0.0, 1.0, 0.0);
-		level.sendParticles(ParticleTypes.SPLASH, hand.x, hand.y, hand.z, 24, 0.35, 0.3, 0.35, 0.15);
-		level.sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), hand.x, hand.y, hand.z, 12, 0.35, 0.3, 0.35, 0.15);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_FILL, SoundSource.PLAYERS, 0.9F, 0.6F);
 		if (next == DarktideState.ARMS_BARE) {
 			// the water blade dissolves back into what you held
 			Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.5, 0.0);
-			level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y, at.z, 20, 0.25, 0.3, 0.25, 0.0);
+			level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), at.x, at.y, at.z, 10, 0.25, 0.3, 0.25, 0.0);
 			level.sendParticles(MagicFx.wisp(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
 		}
@@ -326,7 +326,7 @@ final class DarktideTide {
 		live.armsSwapAt = level.getGameTime() + ARMS_SWAP_COOLDOWN;
 		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
-		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
 
@@ -407,7 +407,7 @@ final class DarktideTide {
 			live.arms = DarktideState.ARMS_BARE;
 		}
 		if (effects) {
-			player.level().sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.3, 0.3, 0.1);
+			player.level().sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
 		}
 	}
 
@@ -574,7 +574,7 @@ final class DarktideTide {
 			Oddities.mark(mob, Oddities.RISEN);
 			mob.setTarget(null);
 			mob.clearFire();
-			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + 0.3, mob.getZ(), 30, 0.4, 0.2, 0.4, 0.05);
+			level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + 0.3, mob.getZ(), 15, 0.4, 0.2, 0.4, 0.05);
 			level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 0.5, mob.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 				30, 0.4, 0.1, 0.4, 0.1);
@@ -591,7 +591,7 @@ final class DarktideTide {
 		live.risen.add(mob.getId());
 		mob.setTarget(null);
 		mob.clearFire();
-		level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + 0.3, mob.getZ(), 40, 0.4, 0.2, 0.4, 0.05);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + 0.3, mob.getZ(), 20, 0.4, 0.2, 0.4, 0.05);
 		level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 0.5, mob.getZ(), 16, 0.3, 0.5, 0.3, 0.02);
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 			30, 0.4, 0.1, 0.4, 0.1);
@@ -622,7 +622,7 @@ final class DarktideTide {
 
 	private static void melt(Mob mob) {
 		if (mob.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ(), 30, 0.3, 0.5, 0.3, 0.04);
+			level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ(), 15, 0.3, 0.5, 0.3, 0.04);
 			level.sendParticles(MagicFx.wisp(0x050510, 1.6F), mob.getX(), mob.getY() + 0.5, mob.getZ(), 20, 0.3, 0.5, 0.3, 0.0);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
@@ -697,7 +697,7 @@ final class DarktideTide {
 				}
 			}
 			if (mob.tickCount % 8 == 0 && mob.level() instanceof ServerLevel level) {
-				level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
+				level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
 			}
 		}
 	}
@@ -736,8 +736,10 @@ final class DarktideTide {
 			long now = level.getGameTime();
 			if (now >= zone.until || zone.owner.isRemoved()) {
 				it.remove();
-				level.sendParticles(ParticleTypes.SPLASH, zone.center.x, zone.center.y - DROWN_RADIUS * 0.5, zone.center.z, 80, DROWN_RADIUS * 0.5, 0.3,
-					DROWN_RADIUS * 0.5, 0.3);
+				// it lets go: the water drops and runs out over the ground
+				Vec3 floor = zone.center.add(0.0, -DROWN_RADIUS, 0.0);
+				DarktideLooks.spray(level, floor, (float) DROWN_RADIUS * 1.4F);
+				DarktideLooks.pool(level, floor, (float) DROWN_RADIUS, DarktideLooks.POOL_TICKS);
 				continue;
 			}
 			// a ball of dark water, drawn as a slow, wobbling see-through orb (ZFighterOrbs)
@@ -749,9 +751,9 @@ final class DarktideTide {
 				// bubbles through it, a shimmering skin
 				Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 				Vec3 skin = zone.center.add(dir.scale(DROWN_RADIUS));
-				level.sendParticles(ParticleTypes.FALLING_WATER, skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
 				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * DROWN_RADIUS));
-				level.sendParticles(ParticleTypes.BUBBLE_POP, inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.6F), inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
 				if (i % 3 == 0) {
 					level.sendParticles(MagicFx.wisp(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}

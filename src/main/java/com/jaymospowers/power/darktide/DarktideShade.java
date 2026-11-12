@@ -2,11 +2,11 @@ package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -105,7 +105,7 @@ final class DarktideShade {
 		live.dawnWarned = false;
 		live.sunTicks = 0;
 		ServerLevel level = player.level();
-		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.05);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
 		level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 0.9, 0.5, 0.0);
 		level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.6, 0.3, 0.02);
 		whisper(player, "shade_rises", SoundEvents.WARDEN_EMERGE, ChatFormatting.DARK_AQUA);
@@ -171,7 +171,7 @@ final class DarktideShade {
 			// black dust off the whole body, drifting down; now and then a wisp of ash
 			level.sendParticles(DUST, player.getX(), player.getY() + 0.9, player.getZ(), DUST_COUNT, 0.3, 0.55, 0.3, 0.0);
 			if (player.tickCount % 10 == 0) {
-				level.sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.35, 0.6, 0.35, 0.0);
+				level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 0.8F), player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.35, 0.6, 0.35, 0.0);
 			}
 		}
 		if (!sunlit(player) || player.isCreative()) {
@@ -181,7 +181,7 @@ final class DarktideShade {
 		if (live.sunTicks++ == 0) {
 			whisper(player, "shade_sunlit", SoundEvents.FIRE_AMBIENT, ChatFormatting.GOLD);
 		}
-		level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.6, 0.3, 0.02);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.6, 0.3, 0.02);
 		if (live.sunTicks >= SUN_GRACE_TICKS) {
 			live.sunTicks = 0;
 			burn(player);
@@ -201,9 +201,9 @@ final class DarktideShade {
 		ItemEntity ash = new ItemEntity(level, player.getX(), player.getY() + 0.2, player.getZ(), new ItemStack(ASH, ASH_DROPPED));
 		ash.setDefaultPickUpDelay();
 		level.addFreshEntity(ash);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.03);
-		level.sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 1.0, 0.5, 0.0);
-		level.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 1.0, 0.5, 0.0);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 2.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.03);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 0.8F), player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 1.0, 0.5, 0.0);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.ASH, 0.8F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 1.0, 0.5, 0.0);
 		level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.0, 0.6, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
 		// nothing but ash: no body for Jaymo's Kitchen to lay down

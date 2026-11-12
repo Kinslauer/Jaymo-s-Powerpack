@@ -37,6 +37,8 @@ final class DarktideMaelstrom {
 	/** How fast its caster swims in it (the flight speed; a walking player's is 0.05). */
 	static final float SWIM_SPEED = 0.06F, NORMAL_FLY_SPEED = 0.05F;
 	static final int COLOR = 0x12356E, FOAM = 0xCFE8FF;
+	/** The waves that roll in as it's called and out as it comes down, and how long the ones running out take (ticks). */
+	static final int WAVES = 6, WAVE_TICKS = 14;
 
 	static final class Dome {
 		final ServerPlayer owner;
@@ -79,12 +81,28 @@ final class DarktideMaelstrom {
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, center, null, RADIUS * 2.0);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 2);
 		MagicFx.ring(level, center.add(0.0, 0.1, 0.0), (float) RADIUS, FOAM);
+		// the sea comes in from every side and closes over you, and the ground under the dome is water while it stands
+		MagicFx.pool(level, center, (float) RADIUS, DarktideLooks.WATER, TICKS, SWELL_TICKS);
+		waves(level, center, true);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 2.0F, 0.4F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.CONDUIT_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, center, RADIUS * 2.0, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.maelstrom").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
 		DarktidePower.cooldown(player, DarktideState.MAELSTROM, COOLDOWN);
+	}
+
+	/** Waves round {@code center}: rolling in to it from the dome's edge, or out from it past the edge. */
+	private static void waves(ServerLevel level, Vec3 center, boolean in) {
+		for (int i = 0; i < WAVES; i++) {
+			double a = Math.PI * 2.0 * i / WAVES;
+			Vec3 out = new Vec3(Math.cos(a), 0.0, Math.sin(a));
+			if (in) {
+				MagicFx.wave(level, center.add(out.scale(RADIUS)), out.scale(-1.0), RADIUS * 0.8, (float) RADIUS * 0.9F, DarktideLooks.WATER, SWELL_TICKS);
+			} else {
+				MagicFx.wave(level, center.add(out.scale(RADIUS * 0.3)), out, RADIUS, (float) RADIUS * 0.9F, DarktideLooks.WATER, WAVE_TICKS);
+			}
+		}
 	}
 
 	private static boolean inside(Dome dome, Vec3 at) {
@@ -158,7 +176,10 @@ final class DarktideMaelstrom {
 		}
 		MagicFx.ring(level, c.add(0.0, 0.1, 0.0), (float) RADIUS * 1.3F, FOAM);
 		MagicFx.blast(level, c.add(0.0, 1.0, 0.0), (float) RADIUS * 0.5F, COLOR);
-		level.sendParticles(MagicFx.miasma(0x0A1838, 2.4F), c.x, c.y + 0.4, c.z, 160, RADIUS * 0.45, 0.3, RADIUS * 0.45, 0.02);
+		// it comes down and runs out every way, and leaves the ground wet
+		waves(level, c, false);
+		MagicFx.pool(level, c, (float) RADIUS * 0.9F, DarktideLooks.WATER, DarktideLooks.POOL_TICKS * 2, 4);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.WATER, 2.4F), c.x, c.y + 0.4, c.z, 60, RADIUS * 0.45, 0.3, RADIUS * 0.45, 0.02);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 2.5F, 0.35F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 2.0F, 0.5F);
 		com.jaymospowers.core.Shakes.heavy(dome.owner, c, RADIUS * 2.5, 1.4F);

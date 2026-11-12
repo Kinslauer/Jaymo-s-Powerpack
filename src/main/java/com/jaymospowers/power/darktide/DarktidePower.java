@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -385,8 +386,7 @@ public final class DarktidePower implements Power {
 		if (on) {
 			player.setAttached(DarktideState.VEIL, true);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SQUID_SQUIRT, SoundSource.PLAYERS, 0.6F, 0.6F);
-			player.level().sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(),
-				20, 0.4, 0.6, 0.4, 0.02);
+			player.level().sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.4, 0.6, 0.4, 0.02);
 		} else {
 			player.removeAttached(DarktideState.VEIL);
 		}

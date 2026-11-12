@@ -30,6 +30,9 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>Beam, blast, ring and orb are all the beacon beam's texture, scrolling: a tube, a swelling shell, a running band
  * and a ball. The sigil is our own circle of marks, turning on the ground.</li>
+ * <li>The wave is a wall of streaked water with a pale crest that curls over and breaks; the stroke is one brush mark
+ * turned to face whoever looks at it; the pool is a flat sheet with ripples running out over it. Each has its own
+ * texture ({@code textures/fx/wave.png}, {@code stroke.png}, {@code pool.png} and {@code ripple.png}).</li>
  * <li>{@link Mote}, {@link Miasma}, {@link Spark} and {@link Rune} are the particles: a glint of light, a puff of murk,
  * a crackle and a written mark.</li>
  * </ul>
@@ -56,6 +59,26 @@ public final class MagicFxClient {
 	static final float SIGIL_LIFT = 0.03F, SIGIL_SPIN = 0.02F, SIGIL_FADE = 6.0F;
 	static final int SIGIL_ALPHA = 0xD0;
 	static final Identifier SIGIL_TEXTURE = JaymosPowers.id("textures/fx/sigil.png");
+	/**
+	 * A wave: its height as a share of its width (and the least and most, blocks), the shares of its life it rises and
+	 * breaks over, the faces across it, how fast the water runs up it, and the alpha of the marked ground behind it.
+	 */
+	static final float WAVE_HEIGHT = 0.5F, WAVE_HEIGHT_MIN = 1.0F, WAVE_HEIGHT_MAX = 4.0F, WAVE_RISE = 0.15F, WAVE_BREAK = 0.22F, WAVE_FLOW = 0.035F;
+	static final int WAVE_FACES = 14, WAVE_TRAIL_ALPHA = 0x78, WAVE_FOAM = 3;
+	/** The wave's outline from its back foot over the crest and the curling lip to its front foot: forward, up (in heights), alpha, foam 0-1. */
+	static final float[][] WAVE_OUTLINE = {
+		{-1.6F, 0.0F, 0x00, 0.0F}, {-0.7F, 0.5F, 0xB0, 0.0F}, {-0.1F, 0.95F, 0xE0, 0.5F}, {0.3F, 1.0F, 0xF0, 1.0F}, {0.55F, 0.8F, 0xE0, 1.0F},
+		{0.3F, 0.4F, 0xE8, 0.0F}, {0.2F, 0.0F, 0xA0, 0.0F}};
+	/** A stroke: the share of its life it is painted in over and holds before it fades, its pieces, its body's and wet edge's alpha. */
+	static final float STROKE_PAINT = 0.25F, STROKE_HOLD = 0.4F, STROKE_EDGE = 0.3F;
+	static final int STROKE_PIECES = 14, STROKE_ALPHA = 0xF0, STROKE_EDGE_ALPHA = 0x90;
+	/** A pool: its alpha, the ticks it closes over, how fast it turns, and its ripples (how many, how fast, their alpha). */
+	static final int POOL_ALPHA = 0xE0, POOL_CLOSE = 10, POOL_RIPPLES = 2, POOL_RIPPLE_ALPHA = 0x58;
+	static final float POOL_TURN = 0.004F, POOL_RIPPLE_SPEED = 0.012F;
+	static final Identifier WAVE_TEXTURE = JaymosPowers.id("textures/fx/wave.png");
+	static final Identifier STROKE_TEXTURE = JaymosPowers.id("textures/fx/stroke.png");
+	static final Identifier POOL_TEXTURE = JaymosPowers.id("textures/fx/pool.png");
+	static final Identifier RIPPLE_TEXTURE = JaymosPowers.id("textures/fx/ripple.png");
 	/** Spheres are this many faces round and down (a blast's shell is thin and brief, so fewer). */
 	static final int LON = 16, LAT = 10;
 	/** The most shapes alive at once: past it the oldest go. */
@@ -97,6 +120,8 @@ public final class MagicFxClient {
 				Live live = it.next();
 				if (++live.age > live.shape.ticks()) {
 					it.remove();
+				} else if (live.shape.kind() == MagicFx.WAVE) {
+					foam(minecraft.level, live);
 				}
 			}
 		});
@@ -127,6 +152,47 @@ public final class MagicFxClient {
 	/** A sigil on the ground at {@code at} for {@code ticks}, made here: see {@link MagicFx#sigil}. */
 	public static void sigil(Vec3 at, float radius, int color, int ticks) {
 		add(new MagicFx.Shape(MagicFx.SIGIL, at.x, at.y, at.z, 0.0F, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(1, ticks)));
+	}
+
+	/** A pool on the ground at {@code at} for {@code ticks}, made here: see {@link MagicFx#pool}. */
+	public static void pool(Vec3 at, float radius, int color, int ticks) {
+		add(new MagicFx.Shape(MagicFx.POOL, at.x, at.y, at.z, MagicFx.POOL_OPEN_TICKS, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(2, ticks)));
+	}
+
+	/** A straight brush stroke from {@code from} to {@code to}, made here: see {@link MagicFx#stroke}. */
+	public static void stroke(Vec3 from, Vec3 to, float width, int color, int ticks) {
+		Vec3 d = to.subtract(from);
+		add(new MagicFx.Shape(MagicFx.STROKE, from.x, from.y, from.z, (float)d.x, (float)d.y, (float)d.z, width, color & 0xFFFFFF, Math.max(2, ticks)));
+	}
+
+	/** How high a wave {@code width} across stands at its full height. */
+	static float waveHeight(float width) {
+		return Mth.clamp(width * WAVE_HEIGHT, WAVE_HEIGHT_MIN, WAVE_HEIGHT_MAX);
+	}
+
+	/** The spray a wave throws off its crest each tick, and the murk in its trough. */
+	private static void foam(ClientLevel level, Live live) {
+		MagicFx.Shape s = live.shape;
+		float life = live.age / (float)s.ticks();
+		Vec3 roll = new Vec3(s.dx(), 0.0, s.dz());
+		if (roll.lengthSqr() < 1.0E-6) {
+			return;
+		}
+		Vec3 dir = roll.normalize();
+		Vec3 side = new Vec3(-dir.z, 0.0, dir.x);
+		Vec3 crest = new Vec3(s.x(), s.y(), s.z()).add(roll.scale(life));
+		float height = waveHeight(s.size()) * Math.min(1.0F, life / WAVE_RISE);
+		RandomSource random = level.getRandom();
+		int pale = mix(s.color(), 0xFFFFFF, 0.8F);
+		for (int i = 0; i < WAVE_FOAM; i++) {
+			double t = random.nextDouble() * 2.0 - 1.0;
+			double k = Math.sqrt(Math.max(0.0, 1.0 - t * t * t * t));
+			Vec3 p = crest.add(side.scale(t * s.size() * 0.5)).add(dir.scale(0.4 * height * k)).add(0.0, height * k * 0.95, 0.0);
+			level.addParticle(MagicFx.mote(pale, 1.1F), p.x, p.y, p.z, dir.x * 0.12, 0.03 + random.nextDouble() * 0.05, dir.z * 0.12);
+		}
+		double t = random.nextDouble() * 2.0 - 1.0;
+		Vec3 p = crest.add(side.scale(t * s.size() * 0.5)).add(dir.scale(0.4 * height));
+		level.addParticle(MagicFx.miasma(s.color(), 2.0F), p.x, p.y + 0.2, p.z, 0.0, 0.01, 0.0);
 	}
 
 	private static void add(MagicFx.Shape shape) {
@@ -173,10 +239,158 @@ public final class MagicFxClient {
 				case MagicFx.RING -> drawRing(collector, poseStack, at, new Vec3(s.dx(), s.dy(), s.dz()), s.size(), s.color(), time, life);
 				case MagicFx.ORB -> drawOrb(collector, poseStack, at, s.size(), s.color(), time, fade(live.age + partial, s.ticks(), 3.0F));
 				case MagicFx.SIGIL -> drawSigil(collector, poseStack, at, s.size(), s.color(), time, fade(live.age + partial, s.ticks(), SIGIL_FADE));
+				case MagicFx.WAVE -> drawWave(collector, poseStack, at, new Vec3(s.dx(), 0.0, s.dz()), s.size(), s.color(), time, life);
+				case MagicFx.STROKE -> drawStroke(collector, poseStack, at, at.add(s.dx(), s.dy(), s.dz()), new Vec3(s.bx(), s.by(), s.bz()), s.size(),
+					s.color(), life);
+				case MagicFx.POOL -> {
+					float age = live.age + partial;
+					float open = Mth.clamp(age / Math.max(1.0F, s.dx()), 0.0F, 1.0F);
+					float close = Mth.clamp((s.ticks() - age) / Math.min(POOL_CLOSE, s.ticks() * 0.4F), 0.0F, 1.0F);
+					drawPool(collector, poseStack, at, s.size() * (0.25F + 0.75F * (1.0F - (1.0F - open) * (1.0F - open))), s.color(), time,
+						Math.min(open * 2.0F, close));
+				}
 				default -> {
 				}
 			}
 		}
+	}
+
+	/**
+	 * One wave, camera-relative, risen at {@code from} and rolling {@code roll} over its life: a wall of water
+	 * {@code width} across, tallest in the middle and lagging at its ends, pale at the crest, whose lip reaches forward
+	 * and drops as it breaks. The ground it has crossed stays marked behind it.
+	 */
+	public static void drawWave(SubmitNodeCollector collector, PoseStack poseStack, Vec3 from, Vec3 roll, float width, int color, float time, float life) {
+		if (roll.lengthSqr() < 1.0E-6) {
+			return;
+		}
+		Vec3 dir = roll.normalize();
+		Vec3 side = new Vec3(-dir.z, 0.0, dir.x);
+		Vec3 center = from.add(roll.scale(life));
+		float breaking = life > 1.0F - WAVE_BREAK ? (life - (1.0F - WAVE_BREAK)) / WAVE_BREAK : 0.0F;
+		float rise = Math.min(1.0F, life / WAVE_RISE);
+		float height = waveHeight(width) * rise * (1.0F - 0.75F * breaking);
+		float solid = 1.0F - breaking * breaking;
+		if (height <= 0.02F || solid <= 0.01F) {
+			return;
+		}
+		int body = color & 0xFFFFFF;
+		int foam = mix(color, 0xFFFFFF, 0.8F);
+		int n = WAVE_OUTLINE.length;
+		float[] fwd = new float[n];
+		float[] up = new float[n];
+		int[] tint = new int[n];
+		for (int i = 0; i < n; i++) {
+			float[] o = WAVE_OUTLINE[i];
+			// the lip (the foam) reaches further forward as it breaks
+			fwd[i] = o[0] + o[3] * breaking * 1.1F;
+			up[i] = o[1];
+			tint[i] = (int)(o[2] * solid) << 24 | mix(body, foam, o[3]);
+		}
+		float flow = time * WAVE_FLOW;
+		float half = width * 0.5F;
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(WAVE_TEXTURE, true), (pose, buffer) -> {
+			for (int j = 0; j < WAVE_FACES; j++) {
+				float t0 = j * 2.0F / WAVE_FACES - 1.0F;
+				float t1 = (j + 1) * 2.0F / WAVE_FACES - 1.0F;
+				float k0 = Mth.sqrt(Math.max(0.0F, 1.0F - t0 * t0 * t0 * t0));
+				float k1 = Mth.sqrt(Math.max(0.0F, 1.0F - t1 * t1 * t1 * t1));
+				Vec3 c0 = center.add(side.scale(t0 * half)).add(dir.scale(-0.35 * height * t0 * t0));
+				Vec3 c1 = center.add(side.scale(t1 * half)).add(dir.scale(-0.35 * height * t1 * t1));
+				float u0 = t0 * half * 0.25F;
+				float u1 = t1 * half * 0.25F;
+				for (int i = 0; i + 1 < n; i++) {
+					Vec3 a0 = c0.add(dir.scale(fwd[i] * height * k0)).add(0.0, up[i] * height * k0 + 0.02, 0.0);
+					Vec3 b0 = c0.add(dir.scale(fwd[i + 1] * height * k0)).add(0.0, up[i + 1] * height * k0 + 0.02, 0.0);
+					Vec3 a1 = c1.add(dir.scale(fwd[i] * height * k1)).add(0.0, up[i] * height * k1 + 0.02, 0.0);
+					Vec3 b1 = c1.add(dir.scale(fwd[i + 1] * height * k1)).add(0.0, up[i + 1] * height * k1 + 0.02, 0.0);
+					float v0 = i * 0.5F - flow;
+					float v1 = (i + 1) * 0.5F - flow;
+					quad(buffer, pose, a0, tint[i], u0, v0, b0, tint[i + 1], u0, v1, b1, tint[i + 1], u1, v1, a1, tint[i], u1, v0);
+				}
+			}
+			// the marked ground behind it: clear where it rose, heaviest at its heel
+			Vec3 heel = center.add(dir.scale(-1.5 * height));
+			if (heel.subtract(from).dot(dir) > 0.1) {
+				int near = (int)(WAVE_TRAIL_ALPHA * solid) << 24 | body;
+				Vec3 w = side.scale(half * 0.85);
+				Vec3 lift = new Vec3(0.0, 0.03, 0.0);
+				float len = (float)heel.distanceTo(from) * 0.25F;
+				quad(buffer, pose, from.subtract(w).add(lift), body, -1.0F, 0.0F, heel.subtract(w).add(lift), near, -1.0F, len, heel.add(w).add(lift), near,
+					1.0F, len, from.add(w).add(lift), body, 1.0F, 0.0F);
+			}
+		});
+	}
+
+	/**
+	 * One brush stroke from {@code a} to {@code b}, camera-relative, its middle bent {@code bend} off the straight line:
+	 * a ribbon turned to face the eye, painted in from {@code a} over the first of its life, held, then fading. A thin
+	 * wet edge rides along one side of it.
+	 */
+	public static void drawStroke(SubmitNodeCollector collector, PoseStack poseStack, Vec3 a, Vec3 b, Vec3 bend, float width, int color, float life) {
+		float paint = Math.min(1.0F, life / STROKE_PAINT);
+		float fade = life < STROKE_HOLD ? 1.0F : 1.0F - (life - STROKE_HOLD) / (1.0F - STROKE_HOLD);
+		if (fade <= 0.01F || width <= 0.004F || a.distanceToSqr(b) < 1.0E-6) {
+			return;
+		}
+		boolean dark = MagicFx.dark(color);
+		int body = (int)(STROKE_ALPHA * fade) << 24 | (dark ? color & 0xFFFFFF : mix(color, 0xFFFFFF, 0.35F));
+		int edge = (int)(STROKE_EDGE_ALPHA * fade) << 24 | mix(color, 0xFFFFFF, dark ? 0.75F : 0.9F);
+		// a curve through a, the bent middle and b
+		Vec3 control = a.add(b).scale(0.5).add(bend.scale(2.0));
+		Vec3[] points = new Vec3[STROKE_PIECES + 1];
+		Vec3[] sides = new Vec3[STROKE_PIECES + 1];
+		Vec3 last = new Vec3(0.0, 1.0, 0.0);
+		for (int i = 0; i <= STROKE_PIECES; i++) {
+			double t = i / (double)STROKE_PIECES * paint;
+			double s = 1.0 - t;
+			points[i] = a.scale(s * s).add(control.scale(2.0 * s * t)).add(b.scale(t * t));
+			Vec3 tangent = control.subtract(a).scale(2.0 * s).add(b.subtract(control).scale(2.0 * t));
+			Vec3 across = tangent.cross(points[i]);
+			if (across.lengthSqr() > 1.0E-8) {
+				last = across.normalize();
+			}
+			sides[i] = last.scale(width * 0.5);
+		}
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(STROKE_TEXTURE, true), (pose, buffer) -> {
+			for (int i = 0; i < STROKE_PIECES; i++) {
+				float u0 = i / (float)STROKE_PIECES * paint;
+				float u1 = (i + 1) / (float)STROKE_PIECES * paint;
+				quad(buffer, pose, points[i].subtract(sides[i]), body, u0, 0.0F, points[i].add(sides[i]), body, u0, 1.0F, points[i + 1].add(sides[i + 1]),
+					body, u1, 1.0F, points[i + 1].subtract(sides[i + 1]), body, u1, 0.0F);
+				// the wet edge: a thin pale run just inside one side, drawn a hair nearer the eye
+				Vec3 n0 = points[i].scale(-0.004);
+				Vec3 n1 = points[i + 1].scale(-0.004);
+				Vec3 e0 = points[i].add(sides[i].scale(0.45)).add(n0);
+				Vec3 e1 = points[i + 1].add(sides[i + 1].scale(0.45)).add(n1);
+				Vec3 w0 = sides[i].scale(STROKE_EDGE);
+				Vec3 w1 = sides[i + 1].scale(STROKE_EDGE);
+				quad(buffer, pose, e0.subtract(w0), edge, u0, 0.55F, e0.add(w0), edge, u0, 0.85F, e1.add(w1), edge, u1, 0.85F, e1.subtract(w1), edge, u1,
+					0.55F);
+			}
+		});
+	}
+
+	/**
+	 * One pool lying flat at {@code at}, camera-relative: a sheet of the colour, turning slowly, with pale ripples
+	 * running out over it. {@code fade} 0-1 how solid. Public so a pool that follows something can be drawn every frame.
+	 */
+	public static void drawPool(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float radius, int color, float time, float fade) {
+		float f = Mth.clamp(fade, 0.0F, 1.0F);
+		if (radius <= 0.02F || f <= 0.01F) {
+			return;
+		}
+		Vec3 c = at.add(0.0, SIGIL_LIFT, 0.0);
+		int sheet = (int)(POOL_ALPHA * f) << 24 | (color & 0xFFFFFF);
+		int pale = mix(color, 0xFFFFFF, MagicFx.dark(color) ? 0.55F : 0.8F);
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(POOL_TEXTURE, true), (pose, buffer) -> flat(buffer, pose, c, radius, time * POOL_TURN, sheet));
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(RIPPLE_TEXTURE, true), (pose, buffer) -> {
+			for (int k = 0; k < POOL_RIPPLES; k++) {
+				float phase = Mth.frac(time * POOL_RIPPLE_SPEED + k / (float)POOL_RIPPLES);
+				int tint = (int)(POOL_RIPPLE_ALPHA * f * (1.0F - phase)) << 24 | pale;
+				flat(buffer, pose, c.add(0.0, 0.006 * (k + 1), 0.0), radius * (0.2F + 0.8F * phase), k * 1.3F - time * POOL_TURN, tint);
+			}
+		});
 	}
 
 	/** 0-1: in over the first {@code ramp} ticks, out over the last. */

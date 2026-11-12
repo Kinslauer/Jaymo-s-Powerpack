@@ -14,6 +14,9 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 | Ring | `MagicFx.ring(level, at, radius, color)` | A band running out over the ground with a low wall of light on its front | Shockwaves, pulses |
 | Orb | `MagicFx.orb(level, at, radius, color, ticks)` | A ball, see-through at the rim, round a bright heart | Power held in place (send again to keep it) |
 | Sigil | `MagicFx.sigil(level, at, radius, color, ticks)` | Our circle of marks, turning on the ground | A working laid on the ground |
+| Wave | `MagicFx.wave(level, from, direction, distance, width, color, ticks)` | A wall of streaked water, half as high as it is wide (1 to 4 blocks), pale at the crest, that rises, rolls, curls and breaks; the ground it crossed stays marked, spray flies off the crest | Power rolling over the ground: a tide, a landslide of force, a wall of flame |
+| Stroke | `MagicFx.stroke(level, from, to, width, color)`; bent: `stroke(level, from, to, bend, width, color, ticks)`, `slash(level, center, from, to, ...)`, `swing(level, center, forward, side, radius, degrees, ...)` | One brush mark facing the eye, heavy where it starts and dry where it ends, with a thin wet edge; painted in fast, held, then fades | A cut made visible: any blade or claw swing. Where the vanilla sweep or a dotted arc was |
+| Pool | `MagicFx.pool(level, at, radius, color, ticks)` | A flat sheet with a lapping rim, turning slowly, pale ripples running out over it | Power lying on the ground: water, shadow, a slick, a mirror |
 | Mote | `MagicFx.mote(color, size)` (a particle) | A four-point glint, full bright | Loose power in the air; where a redstone dust was |
 | Miasma | `MagicFx.miasma(color, size)` (a particle) | A soft puff lit by the world | Dark or heavy power, gas, smoke, blight |
 | Spark | `MagicFx.spark(color, size)` (a particle) | A short jagged fork that jumps shape every tick, full bright | Lightning, crackle, charge, static |
@@ -30,7 +33,8 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 - `MagicFx.line(level, from, to, particle, points)` and `MagicFx.circle(level, particle, at, radius, points)` are for
   helpers that used to dot a line or a circle with one particle: a mote, spark or rune becomes a thin beam or a ring in
   its colour; anything else (miasma, vanilla) is still dotted.
-- On the client alone (films, looks drawn from synced state): `MagicFxClient.beam/blast/ring/orb/sigil`, and
+- On the client alone (films, looks drawn from synced state): `MagicFxClient.beam/blast/ring/orb/sigil/pool/stroke`
+  (`drawPool` each frame for a pool that follows someone), and
   `level.addParticle(MagicFx.wisp(...), ...)`.
 - Sizes of motes and miasma are on redstone dust's scale, so old numbers carried over.
 - Dark colours draw as murk in every type: no white core, a deeper heart.
@@ -64,6 +68,18 @@ looked up at run time, old dust if Powers is missing). Textures: `tools/gen_magi
 - **Dotted lines and circles to beams and rings**: the shared helpers (`XenoForm.beam/ring`, `Rivet.line`,
   `ZFighterGift.line`, `ArsenalGift.streak`), the Sun patron's column (`PatronWeaponHits`) and the Sun Marshal's
   landing beam (`SunMarshalMoves`).
+
+## Third pass: wave, stroke, pool (2026-11-12)
+
+Added for the Darktide overhaul (Andy picked "new effect types" on its picklist); any power may use them.
+- **Wave**: Black Tide, the Maelstrom's rise and fall, the gifted villager's tide.
+- **Stroke**: every Darktide cut (Dark Strike, Crescent, Ink Cross, riposte, Fang Barrage, Pounce, the flurry, Riptide
+  Dash, Stillwater's cuts, the spring-tide blade trail), the gifted villager's lash. A swing wider than a third of a
+  turn is several strokes (`MagicFx.swing` splits it).
+- **Pool**: Undertow's two ends, Stillwater's mirror (drawn each frame on the client), the water at the feet at high
+  tide, the ground under the Maelstrom, what Drown and an ascended Black Tide leave.
+- `DarktideLooks` holds Darktide's colours and its helpers (`cut`, `stab`, `spray`, `ink`, `pool`).
+- The `Shape` packet gained a bend (three floats), used by strokes; the old ten-value constructor still works.
 
 ## Not moved
 

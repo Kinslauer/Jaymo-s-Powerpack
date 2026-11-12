@@ -19,4 +19,4 @@ picklist; this is the power half, the looks follow.
   surface anywhere rain is falling.
 - Classes: `DarktideMaelstrom`, `DarktideBlade` (new), `DarktideFlow`, `DarktideMoves`, `DarktideTide`, `DarktidePower`,
   `DarktideState` (Flow in the save, the `TIDE` attachment, the Maelstrom's cooldown slot). `docs/darktide.md` updated.
-- Compiled (main and client); not played. The Maelstrom is drawn with Drown's water orb for now; the looks pass replaces it.
+- Compiled (main and client); not played.

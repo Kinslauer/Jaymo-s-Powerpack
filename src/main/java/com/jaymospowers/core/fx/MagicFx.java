@@ -42,18 +42,25 @@ import org.jspecify.annotations.Nullable;
  * table's letters.</li>
  * <li>{@link #miasma}: dark or heavy power. A soft rolling puff, lit by the world, that thins away. Takes the place of
  * every dark dust (ink, shadow, blight, gas).</li>
+ * <li>{@link #wave}: power rolling over the ground. A wall that rises, runs, curls at its crest and breaks, leaving
+ * the ground behind it marked.</li>
+ * <li>{@link #stroke}: a cut made visible. One brush mark from a point to a point, straight or bent, heavy where it
+ * starts and dry where it ends, painted in fast and then fading. Takes the place of the vanilla sweep.</li>
+ * <li>{@link #pool}: power lying on the ground. A flat sheet with slow ripples running out over it.</li>
  * </ul>
- * The shapes (beam, blast, ring, orb, sigil) go out as one {@link Shape} packet each and are drawn by
+ * The shapes (beam, blast, ring, orb, sigil, wave, stroke, pool) go out as one {@link Shape} packet each and are drawn by
  * {@code client/fx/MagicFxClient}; motes, miasma, sparks and runes are particles ({@link Wisp}), so they drop in wherever a dust did.
  * Kingdoms reaches all of this through its own {@code Fx} class (it never compiles against this mod).
  */
 public final class MagicFx {
 	/** The shapes a {@link Shape} packet can carry. */
-	public static final int BEAM = 0, BLAST = 1, RING = 2, ORB = 3, SIGIL = 4;
+	public static final int BEAM = 0, BLAST = 1, RING = 2, ORB = 3, SIGIL = 4, WAVE = 5, STROKE = 6, POOL = 7;
 	/** Players further than this (blocks) aren't sent a shape. */
 	static final double RANGE = 96.0;
 	/** How long a blast and a ring last (ticks) when the caller doesn't say. */
 	public static final int BLAST_TICKS = 12, RING_TICKS = 14;
+	/** How long a stroke lasts (ticks) when the caller doesn't say, and the ticks a pool opens over. */
+	public static final int STROKE_TICKS = 9, POOL_OPEN_TICKS = 6;
 	/** A colour darker than this (0-1, the brightest of its three channels) is miasma when the caller doesn't choose. */
 	static final float DARK = 0.36F;
 	/** The blast that stands where a bare flash of light was (blocks). */
@@ -119,10 +126,16 @@ public final class MagicFx {
 	 * Server to client: one shape. {@code kind} is {@link #BEAM} and the rest; ({@code x}, {@code y}, {@code z}) where
 	 * it starts or sits; ({@code dx}, {@code dy}, {@code dz}) a beam's reach to its far end, or the way a ring or a sigil
 	 * faces (zero: up); {@code size} a beam's radius, or the radius the others reach; {@code color} 0xRRGGBB;
-	 * {@code ticks} how long it lasts.
+	 * {@code ticks} how long it lasts. A wave's ({@code dx}, {@code dy}, {@code dz}) is how far it rolls and its
+	 * {@code size} its width; a stroke's is the way to its far end, its {@code size} its width, and ({@code bx},
+	 * {@code by}, {@code bz}) how far its middle is bent off the straight line (zero: straight).
 	 */
-	public record Shape(int kind, double x, double y, double z, float dx, float dy, float dz, float size, int color, int ticks)
-		implements CustomPacketPayload {
+	public record Shape(int kind, double x, double y, double z, float dx, float dy, float dz, float size, int color, int ticks, float bx, float by,
+		float bz) implements CustomPacketPayload {
+		public Shape(int kind, double x, double y, double z, float dx, float dy, float dz, float size, int color, int ticks) {
+			this(kind, x, y, z, dx, dy, dz, size, color, ticks, 0.0F, 0.0F, 0.0F);
+		}
+
 		public static final Type<Shape> TYPE = new Type<>(JaymosPowers.id("magic_fx_shape"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Shape> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -136,9 +149,12 @@ public final class MagicFx {
 				buf.writeFloat(p.size);
 				buf.writeInt(p.color);
 				buf.writeVarInt(p.ticks);
+				buf.writeFloat(p.bx);
+				buf.writeFloat(p.by);
+				buf.writeFloat(p.bz);
 			},
 			buf -> new Shape(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
-				buf.readFloat(), buf.readInt(), buf.readVarInt()));
+				buf.readFloat(), buf.readInt(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat()));
 
 		@Override
 		public Type<Shape> type() {
@@ -226,6 +242,73 @@ public final class MagicFx {
 	/** A circle of marks on the ground at {@code at}, {@code radius} across, for {@code ticks}. */
 	public static void sigil(ServerLevel level, Vec3 at, float radius, int color, int ticks) {
 		send(level, at, new Shape(SIGIL, at.x, at.y, at.z, 0.0F, 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(1, ticks)));
+	}
+
+	/**
+	 * A wave rising at {@code from} and rolling {@code distance} blocks along {@code direction} over {@code ticks},
+	 * {@code width} across. It stands about half as high as it is wide (never under one block or over four).
+	 */
+	public static void wave(ServerLevel level, Vec3 from, Vec3 direction, double distance, float width, int color, int ticks) {
+		Vec3 flat = new Vec3(direction.x, 0.0, direction.z);
+		if (flat.lengthSqr() < 1.0E-6) {
+			return;
+		}
+		Vec3 d = flat.normalize().scale(distance);
+		send(level, from, new Shape(WAVE, from.x, from.y, from.z, (float)d.x, 0.0F, (float)d.z, width, color & 0xFFFFFF, Math.max(2, ticks)));
+	}
+
+	/** A straight brush stroke from {@code from} to {@code to}, {@code width} at its heaviest. */
+	public static void stroke(ServerLevel level, Vec3 from, Vec3 to, float width, int color) {
+		stroke(level, from, to, null, width, color, STROKE_TICKS);
+	}
+
+	/**
+	 * A brush stroke from {@code from} to {@code to}; its middle is bent {@code bend} off the straight line (null:
+	 * straight).
+	 */
+	public static void stroke(ServerLevel level, Vec3 from, Vec3 to, @Nullable Vec3 bend, float width, int color, int ticks) {
+		Vec3 d = to.subtract(from);
+		Vec3 b = bend == null ? Vec3.ZERO : bend;
+		send(level, from, new Shape(STROKE, from.x, from.y, from.z, (float)d.x, (float)d.y, (float)d.z, width, color & 0xFFFFFF, Math.max(2, ticks),
+			(float)b.x, (float)b.y, (float)b.z));
+	}
+
+	/**
+	 * A cut swung round {@code center}: a stroke along the arc from {@code from} to {@code to} (both about as far from
+	 * the centre). Keep each stroke under a third of a turn; a wider swing is two or three of them.
+	 */
+	public static void slash(ServerLevel level, Vec3 center, Vec3 from, Vec3 to, float width, int color, int ticks) {
+		Vec3 mid = from.add(to).scale(0.5);
+		Vec3 out = mid.subtract(center);
+		double radius = (from.distanceTo(center) + to.distanceTo(center)) * 0.5;
+		Vec3 bend = out.lengthSqr() < 1.0E-6 ? Vec3.ZERO : out.normalize().scale(Math.max(0.0, radius - out.length()));
+		stroke(level, from, to, bend, width, color, ticks);
+	}
+
+	/**
+	 * A swing of {@code degrees} round {@code center} in the plane of {@code forward} and {@code side} (unit vectors),
+	 * {@code radius} out, centred on {@code forward}: as many strokes as it takes, painted one after the other's end.
+	 */
+	public static void swing(ServerLevel level, Vec3 center, Vec3 forward, Vec3 side, double radius, double degrees, float width, int color, int ticks) {
+		int parts = Math.max(1, (int)Math.ceil(degrees / 100.0));
+		double half = Math.toRadians(degrees) * 0.5;
+		for (int i = 0; i < parts; i++) {
+			double a0 = -half + 2.0 * half * i / parts;
+			double a1 = -half + 2.0 * half * (i + 1) / parts;
+			Vec3 from = center.add(forward.scale(Math.cos(a0) * radius)).add(side.scale(Math.sin(a0) * radius));
+			Vec3 to = center.add(forward.scale(Math.cos(a1) * radius)).add(side.scale(Math.sin(a1) * radius));
+			slash(level, center, from, to, width, color, ticks);
+		}
+	}
+
+	/** A pool on the ground at {@code at}, opening out to {@code radius} and lying there for {@code ticks}. */
+	public static void pool(ServerLevel level, Vec3 at, float radius, int color, int ticks) {
+		pool(level, at, radius, color, ticks, POOL_OPEN_TICKS);
+	}
+
+	/** A pool that takes {@code open} ticks to reach its size. */
+	public static void pool(ServerLevel level, Vec3 at, float radius, int color, int ticks, int open) {
+		send(level, at, new Shape(POOL, at.x, at.y, at.z, Math.max(1, open), 0.0F, 0.0F, radius, color & 0xFFFFFF, Math.max(2, ticks)));
 	}
 
 	/**

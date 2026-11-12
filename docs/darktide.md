@@ -55,6 +55,24 @@ for the harvest, `key.mode.ascended` for the Veil, and the plain line is empty).
 Darktide users **never drown**: air never runs down (`DarktideAirMixin` on `LivingEntity.decreaseAirSupply`, plus a
 refill each tick) and drowning damage is cancelled.
 
+## Looks [DarktideLooks, client DarktideFx]
+
+Everything is a typed `MagicFx` effect (`docs/MagicFx.md`); no squid ink, rain splash or vanilla sweep is left.
+- **Cuts are strokes** of ink: Dark Strike (a fist rings instead), Crescent (one stroke round the arc, the whole circle
+  at spring tide), Ink Cross (two crossed), the riposte, Fang Barrage (two short ones a beat), Pounce (one down per
+  stab), the flurry, Riptide Dash (it paints its path), Stillwater's rising cuts.
+- **Black Tide is a wave**: a wall of dark water 2.5 blocks high (4 at spring tide) that rolls with the real one, curls
+  and breaks. Ascended, it leaves pools along its path while the puddle lasts.
+- **Undertow**: a pool where you sink, a pool where you'll rise, a shadow over the ground between, spray as you burst out.
+- **Stillwater**: the field is a mirror of still dark water spreading to 10 blocks, with slow ripples and the blue tint
+  for whoever stands in it. Each victim gets a pool under it and a rising cut.
+- **The tide on the body** (synced `TIDE`): high tide, water at the feet and a pale light at the eyes; spring tide, wider
+  water, ink off the shoulders and the blade paints a stroke behind each swing.
+- **Maelstrom**: six waves roll in as the dome rises, the ground under it is water, six roll out when it comes down.
+- A parry is a pale ring off the guard (and steel sparks from `ClashFx` when a blade turned it). Loose ink is miasma, spray
+  is pale motes. The shade sheds miasma. Gifted villagers' lash, surge and tide use the same stroke, pool and wave.
+- Colours and stroke widths: the constants at the top of `DarktideLooks`.
+
 ## Corruption [DarktidePower]
 
 Darktide **starts corrupted** (**Drowned Dark / Drowned Abyss**, shown through `statusSuffix` only, never written into
@@ -115,7 +133,7 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
 3. Katana riposte on a zombie/pillager (it runs inside `applyItemBlocking`).
 4. Arrow and WeaponMod projectile reflection (WeaponMod projectiles go through the damage path).
 5. Crippled crawl: hit a zombie and a player low; both should crawl for 5 s for every viewer.
-6. Gedan: rooting, field particles/tint, release teleports and return.
+6. Gedan: rooting, the mirror field and tint, release teleports and return.
 7. Tide Arms: items come back on switch, death and logout; conjured blades can't be dropped or stored.
 8. A new Darktide is corrupted by day (C is Drown); 60 s of Conduit Power cures it until dusk (whisper), dusk brings it
    back (whisper). Z harvest while corrupted, tap-C raise while corrupted and ascended; shift + C cycles Tide Arms.

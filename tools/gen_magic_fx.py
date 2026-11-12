@@ -1,5 +1,5 @@
 """Paints the Magic FX textures (core/fx/MagicFx): the mote's glint, the miasma's puff, the spark's crackle, the
-rune's marks and the sigil's circle of marks.
+rune's marks, the sigil's circle of marks, the wave's running water, the stroke's brush mark and the pool with its ripples.
 All white or grey: the game tints them. Run from the root: python -I tools/gen_magic_fx.py"""
 import math
 import os
@@ -152,7 +152,105 @@ def rune(index):
     return img
 
 
+def wave():
+    """Water running up a wave, 32x32, tiling both ways: streaks of lighter and darker run, a few gaps."""
+    rnd = random.Random(51)
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px = img.load()
+    for x in range(32):
+        base = rnd.choice((150, 170, 190, 210, 230))
+        solid = rnd.random() > 0.12
+        for y in range(32):
+            px[x, y] = (base, base, base, 255 if solid else 150)
+    for _ in range(26):
+        x, y, n = rnd.randrange(32), rnd.randrange(32), rnd.randint(4, 12)
+        v = rnd.choice((255, 255, 120))
+        for i in range(n):
+            px[x, (y + i) % 32] = (v, v, v, 255)
+    for _ in range(40):
+        px[rnd.randrange(32), rnd.randrange(32)] = (255, 255, 255, 255)
+    return img
+
+
+def stroke():
+    """One brush mark, 64x16, heavy at the left and dry at the right: a blob where the brush lands, a full body, then
+    the bristles part into streaks that break up and run out."""
+    rnd = random.Random(52)
+    img = Image.new("RGBA", (64, 16), (0, 0, 0, 0))
+    px = img.load()
+    bristles = [rnd.random() for _ in range(16)]
+    for x in range(64):
+        t = x / 63.0
+        # half height of the mark at this point: lands fat, settles, thins toward the end
+        if t < 0.12:
+            half = 3.0 + 4.6 * math.sin(t / 0.12 * math.pi / 2)
+        else:
+            half = 7.6 - 3.4 * ((t - 0.12) / 0.88) ** 1.4
+        half += rnd.choice((-0.5, 0.0, 0.0, 0.5))
+        dry = max(0.0, (t - 0.45) / 0.55)
+        for y in range(16):
+            d = abs(y - 7.5)
+            if d > half:
+                continue
+            # dry brush: each bristle row gives out at its own point along the mark
+            if dry > 0 and bristles[y] < dry * 1.15 and rnd.random() < 0.55 + dry * 0.45:
+                continue
+            a = 255
+            if half - d < 1.0 and rnd.random() < 0.5:
+                a = 150
+            if dry > 0.5 and rnd.random() < 0.3:
+                a = 150
+            v = 255 if rnd.random() > 0.15 else 215
+            px[x, y] = (v, v, v, a)
+    # a few flecks thrown off where it lands and where it ends
+    for fx, fy in ((1, 2), (3, 14), (0, 9), (60, 3), (62, 11), (57, 13)):
+        px[fx, fy] = (255, 255, 255, 200)
+    return img
+
+
+def pool():
+    """A sheet lying on the ground, 64x64: a solid disc with a ragged, lapping rim."""
+    rnd = random.Random(53)
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+    lobes = [(rnd.uniform(0, math.tau), rnd.choice((3, 5, 7, 9)), rnd.uniform(0.3, 0.7)) for _ in range(4)]
+    for y in range(64):
+        for x in range(64):
+            dx, dy = x - 31.5, y - 31.5
+            d = math.hypot(dx, dy)
+            a = math.atan2(dy, dx)
+            rim = 28.5 + sum(amp * math.sin(a * n + ph) for ph, n, amp in lobes)
+            if d > rim:
+                continue
+            edge = rim - d
+            alpha = 255 if edge > 2.5 else (190 if edge > 1.2 else 120)
+            v = 255 if edge > 2.5 or rnd.random() > 0.3 else 200
+            px[x, y] = (v, v, v, alpha)
+    return img
+
+
+def ripple():
+    """The ripples that run out over a pool, 64x64: two broken rings."""
+    rnd = random.Random(54)
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+    for radius, gaps in ((27.0, 5), (17.0, 3)):
+        cuts = [(rnd.uniform(0, math.tau), rnd.uniform(0.25, 0.6)) for _ in range(gaps)]
+        steps = int(radius * 8)
+        for i in range(steps):
+            a = i / steps * math.tau
+            if any(abs((a - c + math.pi) % math.tau - math.pi) < w / 2 for c, w in cuts):
+                continue
+            x, y = int(round(31.5 + math.cos(a) * radius)), int(round(31.5 + math.sin(a) * radius))
+            px[x, y] = (255, 255, 255, 255)
+    return img
+
+
 def main():
+    save(wave(), "fx", "wave.png")
+    save(stroke(), "fx", "stroke.png")
+    save(pool(), "fx", "pool.png")
+    save(ripple(), "fx", "ripple.png")
     for f in range(4):
         save(mote(f), "particle", "magic", "mote_%d.png" % f)
     rnd = random.Random(26)
