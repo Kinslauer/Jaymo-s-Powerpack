@@ -90,6 +90,11 @@ public final class WebFear {
 		COMRADES.add(new Comrade(comrade.getUUID(), level.dimension(), level.getGameTime() + COMRADE_TICKS));
 	}
 
+	/** {@code mob} loses its nerve and runs from {@code source} until game time {@code until} (the big suit's roar). */
+	public static void scare(Mob mob, Entity source, long until) {
+		SHAKEN.put(mob.getUUID(), new Shaken(Nerve.FLEE, until, source.getUUID()));
+	}
+
 	private static boolean humanoid(Mob mob) {
 		return mob instanceof Zombie || mob instanceof AbstractSkeleton || mob instanceof AbstractIllager || mob instanceof AbstractPiglin
 			|| mob instanceof Witch;

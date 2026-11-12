@@ -6,6 +6,7 @@
 		"WebFoodPropertiesMixin",
 		"WebHostZombieMixin",
 		"WebLivingEntityMixin",
+		"WebPuddleDimensionsMixin",
 		"WebServerLevelMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

@@ -865,6 +865,14 @@ public final class WebTendrils {
 		release(player, WebNet.OFF, hurl);
 		HOLDS.remove(player.getUUID());
 		WebHeldGrab.drop(player);
+		WebLatch.release(player, false);
+	}
+
+	/** A body let go in a throw (the hand's ankle swing): it batters whoever it hits on the way and hurts on its first hard knock, like a tendril throw. */
+	static void markThrown(ServerPlayer player, Entity target) {
+		THROWN.removeIf(t -> t.entity().equals(target.getUUID()));
+		THROWN.add(new Thrown(player.level().dimension(), target.getUUID(), player.getUUID(), player.level().getGameTime() + THROWN_TICKS,
+			new java.util.HashSet<>()));
 	}
 
 	/** Held (by a tendril or the hand, {@link WebHeldGrab}): no weight (so a held player isn't kicked for floating, and nothing sags). */

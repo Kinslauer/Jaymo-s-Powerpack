@@ -5583,6 +5583,9 @@ public final class WebSymbiote {
 			letGo(player, live);
 		}
 		live.roarAt = now;
+		if (!defend) {
+			WebFury.startBurst(player);
+		}
 		live.roarDefend = defend;
 		live.roarThreat = threat == null ? -1 : threat.getId();
 		WebPower.pose(player, WebPose.ROAR, 1);
@@ -5635,20 +5638,22 @@ public final class WebSymbiote {
 	/** At the roar's height: its head thrown back, a roar that hurts and hurls everything near and shakes every screen about. */
 	private static void roarBlast(ServerPlayer player) {
 		ServerLevel level = player.level();
+		boolean burst = WebFury.takeBurst(player);
+		double radius = burst ? ROAR_RADIUS * WebFury.BURST_RADIUS : ROAR_RADIUS;
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ROAR_RADIUS),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(center);
-			if (to.length() > ROAR_RADIUS + living.getBbWidth() * 0.5) {
+			if (to.length() > radius + living.getBbWidth() * 0.5) {
 				continue;
 			}
 			float before = living.getHealth();
-			living.hurtServer(level, level.damageSources().playerAttack(player), ROAR_DAMAGE);
+			living.hurtServer(level, level.damageSources().playerAttack(player), (burst ? ROAR_DAMAGE * WebFury.BURST_DAMAGE : ROAR_DAMAGE));
 			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			// the nearer, the harder it throws them
-			double force = ROAR_KNOCKBACK * (1.2 - 0.5 * Math.min(1.0, to.length() / ROAR_RADIUS));
+			double force = (burst ? ROAR_KNOCKBACK * WebFury.BURST_KNOCKBACK : ROAR_KNOCKBACK) * (1.2 - 0.5 * Math.min(1.0, to.length() / radius));
 			Vec3 push = flat.scale(force).add(0.0, 0.5, 0.0);
 			living.setDeltaMovement(living.getDeltaMovement().add(push));
 			living.needsSync = true;
@@ -5661,7 +5666,7 @@ public final class WebSymbiote {
 		Vec3 look = player.getLookAngle();
 		level.sendParticles(ParticleTypes.SONIC_BOOM, center.x + look.x * 0.8, center.y + 0.4, center.z + look.z * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
 		for (int ring = 1; ring <= 3; ring++) {
-			double r = ring * ROAR_RADIUS / 3.0;
+			double r = ring * radius / 3.0;
 			int count = 10 + ring * 6;
 			for (int k = 0; k < count; k++) {
 				double a = k * Math.PI * 2.0 / count;
@@ -5670,14 +5675,15 @@ public final class WebSymbiote {
 			}
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y + 0.4, center.z, 40, 0.5, 0.5, 0.5, 0.3);
-		surgeWave(level, center, ROAR_RADIUS);
+		surgeWave(level, center, radius);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.8F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.6F, 0.55F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 0.7F);
+		WebFury.roared(player, level, center, burst);
 		// every screen near it shakes, yours most
 		com.jaymospowers.core.Shakes.send(player, ROAR_SHAKE, null);
 		for (ServerPlayer other : level.players()) {
-			if (other != player && other.distanceTo(player) < ROAR_RADIUS * 2.5) {
+			if (other != player && other.distanceTo(player) < radius * 2.5) {
 				com.jaymospowers.core.Shakes.send(other, ROAR_SHAKE * 0.5F, player.position());
 			}
 		}

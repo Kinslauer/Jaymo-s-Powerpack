@@ -1,10 +1,12 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Powers;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.ParticleOptions;
@@ -19,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -89,13 +92,25 @@ public final class WebCounter {
 	public static final int SPEAR_FLURRY = 16;
 	/** A tendril drags it to your face, into the maw's jaws. */
 	public static final int DRAG_TO_JAWS = 17;
-	public static final int COUNTERS = 18;
+	/**
+	 * The big suit's own, on a mob up to cow size: the attacker is caught, heaved up and driven into the ground in front
+	 * (also the one counter offered right after a melee hit, with or without a dodge, see {@link #hurt}).
+	 */
+	public static final int CATCH_SLAM = 18;
+	public static final int COUNTERS = 19;
 
 	/** Damage (the web moves; then the symbiote's). */
 	static final float HEEL_DAMAGE = 8.0F, UPPERCUT_DAMAGE = 7.0F, SLAM_DAMAGE = 9.0F, JAB_DAMAGE = 3.0F, CROSS_DAMAGE = 4.0F,
 		FLIP_DAMAGE = 8.0F, COCOON_DAMAGE = 6.0F, ZIP_DAMAGE = 9.0F, SWEEP_DAMAGE = 5.0F, HAYMAKER_DAMAGE = 11.0F;
 	static final float IMPALE_DAMAGE = 11.0F, WHIP_DAMAGE = 8.0F, HURL_DAMAGE = 6.0F, SQUEEZE_DAMAGE = 4.5F, SNAP_DAMAGE = 12.0F,
 		MAUL_DAMAGE = 5.0F, ROAR_BITE_DAMAGE = 8.0F, ROAR_DAMAGE = 3.0F, STAB_DAMAGE = 4.5F, DRAG_BITE_DAMAGE = 13.0F;
+	/** Catch and slam (the big suit): its chance among the suit's counters when the attacker is small enough, its damage, and the ticks it's heaved up until / driven down at. */
+	static final float CATCH_SHARE = 0.4F, CATCH_DAMAGE = 9.0F;
+	static final int CATCH_LIFT_END = 6, CATCH_SLAM_TICK = 10;
+	/** Catch and slam: held up this high over your head, then driven down onto the ground this far ahead; stunned (Slowness) like the hand's slam. */
+	static final double CATCH_APEX = 0.5, CATCH_FORWARD = 1.3;
+	/** Catch and slam: its burst's size, and how the screen shakes (yours; the felt range as for any slam). */
+	static final float CATCH_BURST = 0.8F;
 	/** Maw Roar: how far it reaches and how hard it shoves. */
 	static final double ROAR_RADIUS = 5.0, ROAR_PUSH = 1.1;
 	/** Zip Kick: how fast you fly at it and how close counts as a hit. */
@@ -172,6 +187,8 @@ public final class WebCounter {
 		/** What was just dodged. */
 		int attacker = -1;
 		int lastKind = -1;
+		/** The window was opened by a melee hit taken in the big suit, not by a dodge: no feathers, and only the catch. */
+		boolean fromHit;
 		/** The haul under way: from where, through what high point, to where (feet), and whether it's being hauled at all. */
 		Vec3 haulFrom = Vec3.ZERO, haulApex = Vec3.ZERO, haulTo = Vec3.ZERO;
 		boolean hauling;
@@ -194,6 +211,7 @@ public final class WebCounter {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Strike.TYPE, Strike.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> strike(ctx.player()));
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> hurt(entity, source, taken, blocked));
 		WebRolls.register();
 	}
 
@@ -207,6 +225,7 @@ public final class WebCounter {
 			case IMPALE, WHIPLASH -> 20;
 			case DRAG_TO_JAWS, MAW_ROAR -> 24;
 			case MAUL, HURL -> 28;
+			case CATCH_SLAM -> 22;
 			case SPEAR_FLURRY -> 30;
 			case CONSTRICT -> 34;
 			default -> 10;
@@ -264,6 +283,29 @@ public final class WebCounter {
 		}
 		Live live = live(player);
 		live.attacker = attacker.getId();
+		live.fromHit = false;
+		player.setAttached(READY, player.level().getGameTime() + WINDOW);
+	}
+
+	/** Whether the big suit's catch could take this: a mob (not a player) no bigger than the hand's limit. */
+	static boolean catchable(LivingEntity target) {
+		return target.isAlive() && !(target instanceof Player) && !(target instanceof net.minecraft.world.entity.decoration.ArmorStand)
+			&& target.getBoundingBox().getXsize() * target.getBoundingBox().getYsize() * target.getBoundingBox().getZsize() <= WebHeldGrab.GRAB_MAX_VOLUME;
+	}
+
+	/**
+	 * Hit by a mob in melee in the big suit: for the same {@link #WINDOW} right click catches it and slams it, whether or
+	 * not Spider-Sense had a dodge for it (a dodge's own window, if one is open, is left alone).
+	 */
+	private static void hurt(LivingEntity entity, DamageSource source, float taken, boolean blocked) {
+		if (!(entity instanceof ServerPlayer player) || blocked || taken <= 0.0F || !WebSymbiote.bulked(player) || !Powers.has(player, WebPower.INSTANCE)
+			|| source.getDirectEntity() != source.getEntity() || !(source.getEntity() instanceof LivingEntity attacker) || attacker == player
+			|| !catchable(attacker) || ready(player) || WebPower.ragdolled(player)) {
+			return;
+		}
+		Live live = live(player);
+		live.attacker = attacker.getId();
+		live.fromHit = true;
 		player.setAttached(READY, player.level().getGameTime() + WINDOW);
 	}
 
@@ -284,12 +326,12 @@ public final class WebCounter {
 		if (ready == null || now > ready || player.getAttached(ACTIVE) != null || !player.isAlive() || WebPower.ragdolled(player)) {
 			return;
 		}
-		if (!WebRolls.has(player)) {
+		Live live = live(player);
+		if (!live.fromHit && !WebRolls.has(player)) {
 			// the feathers went on dodging since: no counter
 			player.removeAttached(READY);
 			return;
 		}
-		Live live = live(player);
 		LivingEntity target = level.getEntity(live.attacker) instanceof LivingEntity attacker && attacker.isAlive()
 			&& attacker.distanceTo(player) <= REACH ? attacker : null;
 		if (target == null && WebPower.entityInSight(player, AIM_REACH) instanceof LivingEntity seen && seen.isAlive()) {
@@ -301,13 +343,26 @@ public final class WebCounter {
 		}
 		boolean suit = WebSymbiote.suitShown(player);
 		int base = suit ? WEB_COUNTERS : 0;
+		boolean catchIt = WebSymbiote.bulked(player) && catchable(target);
 		int kind;
-		do {
-			kind = base + player.getRandom().nextInt(WEB_COUNTERS);
-		} while (kind == live.lastKind);
+		if (live.fromHit && !catchIt) {
+			// (a hit's window is the catch's alone)
+			player.removeAttached(READY);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 1.2F);
+			return;
+		}
+		if (live.fromHit || catchIt && player.getRandom().nextFloat() < CATCH_SHARE) {
+			kind = CATCH_SLAM;
+		} else {
+			do {
+				kind = base + player.getRandom().nextInt(WEB_COUNTERS);
+			} while (kind == live.lastKind);
+		}
 		live.lastKind = kind;
-		// every counter spends a dodge's feathers
-		WebRolls.spend(player);
+		// every dodge's counter spends its feathers (the catch after a plain hit spends none)
+		if (!live.fromHit) {
+			WebRolls.spend(player);
+		}
 		player.removeAttached(READY);
 		player.setAttached(ACTIVE, new Active(kind, target.getId(), now));
 		begin(player, level, kind, target);
@@ -408,6 +463,13 @@ public final class WebCounter {
 				sound(level, player, SoundEvents.WARDEN_AGITATED, 0.9F, 1.3F);
 			}
 			case MAW_ROAR -> sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.6F);
+			case CATCH_SLAM -> {
+				// the hand shoots out and takes it by the scruff
+				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CATCH_SLAM_TICK + 4, 6), player);
+				sound(level, target, SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
+				sound(level, player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 0.6F);
+			}
 			default -> {
 			}
 		}
@@ -543,6 +605,24 @@ public final class WebCounter {
 					bite(player, target, ROAR_BITE_DAMAGE, away.scale(0.7).add(0.0, 0.3, 0.0));
 				} else {
 					reelToJaws(player, kind, t, target);
+				}
+			}
+			case CATCH_SLAM -> {
+				Vec3 ahead = player.getLookAngle().horizontal();
+				ahead = ahead.lengthSqr() < 1.0E-4 ? away : ahead.normalize();
+				if (t <= CATCH_LIFT_END) {
+					// caught, and heaved up over your head
+					WebHaul.steer(target, player.position().add(ahead.scale(0.5)).add(0.0, player.getBbHeight() + CATCH_APEX, 0.0));
+				} else if (t <= CATCH_SLAM_TICK) {
+					WebHaul.steer(target, WebHaul.ground(level, player.position().add(ahead.scale(CATCH_FORWARD)), target));
+				}
+				if (t == CATCH_SLAM_TICK) {
+					Vec3 at = WebHaul.ground(level, target.position(), target);
+					hit(player, target, CATCH_DAMAGE, new Vec3(0.0, 0.1, 0.0), ParticleTypes.EXPLOSION, SoundEvents.MACE_SMASH_GROUND);
+					target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WebHeldGrab.SLAM_STUN_TICKS, WebHeldGrab.SLAM_STUN_LEVEL), player);
+					KitchenCompat.jolt(target);
+					WebHaul.burst(level, at, CATCH_BURST);
+					com.jaymospowers.core.Shakes.heavy(player, at, SLAM_FELT, SLAM_SHAKE);
 				}
 			}
 			case DRAG_TO_JAWS -> {

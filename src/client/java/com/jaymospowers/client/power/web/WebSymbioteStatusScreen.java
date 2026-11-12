@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.power.web.WebGrudges;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteMind;
 import com.jaymospowers.power.web.WebSymbioteState;
@@ -23,7 +24,7 @@ import net.minecraft.util.Mth;
  * (server side); the lit button is the order it holds. Everything is read from the synced state and mind.
  */
 final class WebSymbioteStatusScreen extends Screen {
-	private static final int W = 250, H = 196;
+	private static final int W = 250, BASE_H = 196, GRUDGE_ROW = 10, GRUDGE_HEAD = 14;
 	private static final int ACCENT = 0xFF8A5AB0;
 	private static final int ROW_H = 13;
 	private static final int BAR_W = 70, BAR_H = 4;
@@ -31,6 +32,13 @@ final class WebSymbioteStatusScreen extends Screen {
 	private static final int[] ORDERS = {WebSymbioteMind.PROTECT, WebSymbioteMind.HUNT, WebSymbioteMind.HIDE, WebSymbioteMind.ORDER_NONE};
 
 	private int hovered = -1;
+
+	/** The panel's height: the base page, and a section for what it holds against anyone when there is any. */
+	private int panelHeight() {
+		LocalPlayer player = minecraft == null ? null : minecraft.player;
+		int grudges = player == null ? 0 : WebGrudges.book(player).entries().size();
+		return BASE_H + (grudges == 0 ? 0 : GRUDGE_HEAD + grudges * GRUDGE_ROW);
+	}
 
 	WebSymbioteStatusScreen() {
 		super(Component.translatable("screen.jaymospowers.web_symbiote_status"));
@@ -59,7 +67,7 @@ final class WebSymbioteStatusScreen extends Screen {
 	}
 
 	private int top() {
-		return Math.max(6, (height - H) / 2);
+		return Math.max(6, (height - panelHeight()) / 2);
 	}
 
 	private int buttonX(int i) {
@@ -99,7 +107,7 @@ final class WebSymbioteStatusScreen extends Screen {
 		long now = player.level().getGameTime();
 		int x = left();
 		int y = top();
-		int h = H;
+		int h = panelHeight();
 		UiStyle.panel(graphics, x, y, W, h, ACCENT);
 		UiStyle.header(graphics, font, x, y, W, null, title,
 			Component.translatable("gui.jaymospowers.web_symbiote.status.strain." + state.kind().name().toLowerCase(Locale.ROOT))
@@ -166,6 +174,19 @@ final class WebSymbioteStatusScreen extends Screen {
 			? Component.translatable("gui.jaymospowers.web_symbiote.order." + WebSymbioteMind.orderName(ORDERS[hovered]) + ".tip")
 			: Component.translatable("gui.jaymospowers.web_symbiote.mood." + mood.key() + ".tip");
 		UiStyle.line(graphics, font, tip, x + 10, buttonY() + BUTTON_H + 5, W - 20, UiStyle.HINT);
+		// what it remembers: who hurt you, and how much
+		var grudges = WebGrudges.book(player).entries();
+		if (!grudges.isEmpty()) {
+			int gy = buttonY() + BUTTON_H + 18;
+			UiStyle.rule(graphics, x + 6, x + W - 6, gy - 3);
+			UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.grudges"), x + 10, gy, W - 20, ACCENT);
+			for (int i = 0; i < grudges.size(); i++) {
+				WebGrudges.Entry grudge = grudges.get(i);
+				Component line = Component.empty().append(grudge.display()).append(" - ").append(Component.translatable(
+					"gui.jaymospowers.web_symbiote.status.grudge_damage", String.format(Locale.ROOT, "%.1f", grudge.damage() / 2.0F)));
+				UiStyle.line(graphics, font, line, x + 14, gy + GRUDGE_HEAD - 2 + i * GRUDGE_ROW, W - 28, UiStyle.TEXT);
+			}
+		}
 		UiStyle.lineRight(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.close"), x + W - 8, y + h - 12, 60, UiStyle.HINT);
 	}
 

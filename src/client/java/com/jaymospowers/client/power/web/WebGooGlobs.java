@@ -75,7 +75,7 @@ final class WebGooGlobs {
 	 * Drawn in the suit's own skin: a plain patch of the suit's texture (the back of the torso) on the plain suit, of
 	 * the big body's hide on the big body (its back); each in 0-1 texture space (u0, v0, u1, v1).
 	 */
-	private static final float[] SUIT_PATCH = {33.0F / 64.0F, 21.0F / 64.0F, 39.0F / 64.0F, 31.0F / 64.0F};
+	static final float[] SUIT_PATCH = {33.0F / 64.0F, 21.0F / 64.0F, 39.0F / 64.0F, 31.0F / 64.0F};
 	private static final float[] HULK_PATCH = {136.0F / 256.0F, 74.0F / 128.0F, 146.0F / 256.0F, 79.0F / 128.0F};
 	/** They're out (full size) by this share of the tendrils' growth. */
 	private static final float GROWN_AT = 0.6F;
@@ -423,12 +423,12 @@ final class WebGooGlobs {
 		return new Matrix4f(stack.last().pose());
 	}
 
-	private static float[] lobe(Vector3f c, Vector3f e1, Vector3f n, Vector3f e2, float r1, float rn, float r2, float phase, float wobble) {
+	static float[] lobe(Vector3f c, Vector3f e1, Vector3f n, Vector3f e2, float r1, float rn, float r2, float phase, float wobble) {
 		return new float[] {c.x, c.y, c.z, e1.x, e1.y, e1.z, n.x, n.y, n.z, e2.x, e2.y, e2.z, r1, rn, r2, phase, wobble};
 	}
 
 	/** One lobe: a squashed ball whose surface swells and sinks in slow waves (WebBlobRenderer's body, smaller), skinned with {@code patch}. */
-	private static void sphere(VertexConsumer buffer, PoseStack.Pose pose, float[] l, float[] patch, float time, int light) {
+	static void sphere(VertexConsumer buffer, PoseStack.Pose pose, float[] l, float[] patch, float time, int light) {
 		Vec3 c = new Vec3(l[0], l[1], l[2]);
 		Vec3 e1 = new Vec3(l[3], l[4], l[5]), n = new Vec3(l[6], l[7], l[8]), e2 = new Vec3(l[9], l[10], l[11]);
 		double r1 = l[12], rn = l[13], r2 = l[14];

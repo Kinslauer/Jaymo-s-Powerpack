@@ -76,6 +76,9 @@ public final class WebFeral {
 		// the big body worn alone (its tendrils drawn in): upright; eased between that and the beast's hunch
 		boolean upright = upright(avatar);
 		float up = WebSuitGrowth.bigBody(avatar) ? smooth(UPRIGHT.to(avatar.id, upright ? 1.0F : 0.0F, UPRIGHT_BLEND_TICKS)) : upright ? 1.0F : 0.0F;
+		if (WebBrutePose.apply(humanoid, avatar, slim)) {
+			return;
+		}
 		Float slam = avatar.getData(WebSymbioteClient.SLAM);
 		if (slam != null && (tendrils != null || upright)) {
 			overhead(humanoid, avatar, slam, slim);
