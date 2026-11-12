@@ -1406,6 +1406,20 @@
 			}
 		]
 	},
+	"helm.breath": {
+		"subtitle": "subtitles.jaymospowers.helm.breath",
+		"sounds": [
+			{
+				"name": "jaymospowers:helm/breath_1"
+			},
+			{
+				"name": "jaymospowers:helm/breath_2"
+			},
+			{
+				"name": "jaymospowers:helm/breath_3"
+			}
+		]
+	},
 	"armed.draw": {
 		"subtitle": "subtitles.jaymospowers.armed.draw",
 		"sounds": [

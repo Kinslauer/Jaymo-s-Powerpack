@@ -38,3 +38,11 @@ Mill Charge and the guards' challenge:
 - A guard who walks up to challenge you ("Halt!") levels their polearm at you until they have spoken (`Levelled`; Powers
   draws it).
 - Wheel Cut, Figure Eight, Hurled Blade and Mill Charge play Powers' new blade swings instead of the vanilla sweep.
+- **Orders** (`Followers`, key: comma): one screen of orders for the villagers who take them from you (family, hired
+  help, a friend of 50 hearts). Look at one and press the key for theirs, or look at nobody for everyone of yours
+  within 24 blocks. Follow me, Fight beside me, Hold this spot, Stand still, Patrol here, Clear the monsters, As you
+  were. Strangers still refuse, a Truth villager still won't follow where they wouldn't before, and one whose tongue
+  you don't share only shrugs. Only those who can fight do, and a child is never sent at anything. MCA's own Follow
+  and Stay buttons still work.
+- **Reel what your spirit holds**: while a mana spirit's arms hold something, the scroll wheel pushes it out or reels
+  it in, from 1.5 blocks to 10; heavier things follow more slowly.

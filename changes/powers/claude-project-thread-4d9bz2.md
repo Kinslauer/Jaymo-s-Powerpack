@@ -60,3 +60,15 @@ of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
   heavy weapons, six clashes of steel and three draws, one picked at random each time with a slightly bent pitch. They
   play for the draw, the arrow swat, the both-blades cut, a thrown blade, and steel meeting steel on a guard. Better
   Combat's swing sounds are untouched. Synthesised, not yet heard in game.
+- **Reel what Lift holds**: while Gravity's Lift holds a creature, a chunk or anything else, the scroll wheel pushes it
+  out or reels it in, a block a notch, from 1 block to 16 (`GravityReel`). Heavier things follow more slowly. The
+  hotbar stays put while you hold something; sneak to scroll the hotbar as usual.
+- **Lift tears any block loose** (Andy: "it certainly should be able to grab ANYTHING"): the block you aim at comes
+  whatever it is made of, obsidian included; only what can't be broken at all and blocks with something inside (a
+  chest, a furnace) stay. The rest of the chunk still grows with the power. Harder chunks hit harder when thrown: up
+  to three quarters more at obsidian's hardness.
+- **Great-helm view** (`client/GreatHelmView`): in first person, a helmet tagged `jaymospowers:great_helms` (the
+  Paladin's Great Helm to start) narrows the view to the visor's slit and you hear your own breath, quicker while you
+  sprint or are hurt. `/helmview off` turns it off. Breath synthesised (`tools/gen_helm_breath.py`).
+- **Our own title splashes**: the title screen's yellow line now comes from 45 of the pack's own lines
+  (`assets/minecraft/texts/splashes.txt`). A first draft for Andy to cut and add to.

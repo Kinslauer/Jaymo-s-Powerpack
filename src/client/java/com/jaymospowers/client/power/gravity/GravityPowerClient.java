@@ -96,6 +96,25 @@ public final class GravityPowerClient implements PowerClient {
 		});
 	}
 
+	/**
+	 * From the scroll mixin: while Lift holds something (not a dropped item, which is drawn in), the wheel reels it in
+	 * or out. True if this scroll was a reel, so the hotbar stays where it is.
+	 */
+	public static boolean reel(double y) {
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (y == 0.0 || player == null || minecraft.gui.screen() != null || player.isShiftKeyDown()
+			|| !Powers.has(player, GravityPower.INSTANCE)) {
+			return false;
+		}
+		Integer grip = player.getAttached(GravityPower.GRIP);
+		if (grip == null || player.level().getEntity(grip) instanceof net.minecraft.world.entity.item.ItemEntity) {
+			return false;
+		}
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityReel(y > 0.0 ? 1 : -1));
+		return true;
+	}
+
 	@Override
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		long now = player.level().getGameTime();

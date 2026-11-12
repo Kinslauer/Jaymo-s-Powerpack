@@ -144,6 +144,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PigeonRenderer.register();
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
+		FollowersScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
