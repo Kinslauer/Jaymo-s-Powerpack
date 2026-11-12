@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * Kitchen jar to build or run. Without Kitchen 0.4.28 or later ({@code CorpseEntity.carryBy} and {@code throwAt}) every
  * call fails soft: nothing is a corpse.
  */
-final class KitchenCompat {
+public final class KitchenCompat {
 	static final String MOD = "jaymoskitchen";
 	private static final @Nullable Class<?> CORPSE;
 	private static final @Nullable Method HOSTILE, CARRIER, CARRY_BY, THROW_AT;
@@ -139,7 +139,7 @@ final class KitchenCompat {
 	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.6.
 	 */
-	static @Nullable String season(net.minecraft.world.level.Level level) {
+	public static @Nullable String season(net.minecraft.world.level.Level level) {
 		return invoke(SEASON_NAME, level) instanceof String name ? name : null;
 	}
 
@@ -226,6 +226,8 @@ final class KitchenCompat {
 					|| HeritageKits.coldBlooded(player));
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
+			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Downpours::bodyHeat);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
 		}

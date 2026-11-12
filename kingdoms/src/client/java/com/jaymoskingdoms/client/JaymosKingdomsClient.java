@@ -258,6 +258,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.StormsClient.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
+		// downpours, morning mist, sand winds, auroras and livelier fire
+		com.jaymoskingdoms.client.disasters.SkiesClient.register();
 		// 0.7.509: the patrons screen, the boon menu and the boon key
 		PatronKeys.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)

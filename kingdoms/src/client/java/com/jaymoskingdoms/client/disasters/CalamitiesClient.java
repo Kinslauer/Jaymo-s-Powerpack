@@ -46,7 +46,7 @@ public final class CalamitiesClient {
 	/** The fog's colour (by day) in a sandstorm and a blizzard. */
 	public static final float[] SAND_COLOUR = {0.80F, 0.62F, 0.40F}, SNOW_COLOUR = {0.86F, 0.89F, 0.93F};
 
-	private static SpriteSet sprites;
+	static SpriteSet sprites;
 
 	private CalamitiesClient() {
 	}

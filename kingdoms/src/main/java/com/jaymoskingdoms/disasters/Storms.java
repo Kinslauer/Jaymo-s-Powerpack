@@ -63,6 +63,9 @@ public final class Storms {
 	static final float WIND_MIN = 0.045F, WIND_MAX = 0.08F, WIND_WANDER = 0.002F;
 	/** Players hear about a forming supercell within this distance. */
 	static final double NEWS_RANGE = 450.0;
+	/** A downpour: the inner share of a cell's radius, once it is this gathered; every thunderstorm and supercell has one, and one rain cell in this many. */
+	static final float DOWNPOUR_CORE = 0.5F, DOWNPOUR_GATHERED = 0.6F;
+	static final int DOWNPOUR_RAIN_CELLS = 3;
 	/** How many cells can be about at once. */
 	static final int MOST = 4;
 
@@ -82,6 +85,11 @@ public final class Storms {
 	 * (its least) to 1 (its most). Ships' sails ask this. */
 	public static float windAngle() {
 		return windAngle;
+	}
+
+	/** The client's copy of {@link #windStrength}, 0..1. */
+	public static float clientWindStrength() {
+		return Mth.clamp((clientWindSpeed - WIND_MIN) / (WIND_MAX - WIND_MIN), 0.0F, 1.0F);
 	}
 
 	public static float windStrength() {
@@ -112,6 +120,19 @@ public final class Storms {
 		float best = 0.0F;
 		for (Storm s : storms) {
 			best = Math.max(best, s.over(x, z));
+		}
+		return best;
+	}
+
+	/** How hard a downpour falls at (x, z), 0..1 ({@link Storm#downpour}; on the client, its copy). The Overworld only. */
+	public static float downpour(Level level, double x, double z) {
+		if (level.dimension() != Level.OVERWORLD) {
+			return 0.0F;
+		}
+		List<Storm> storms = level.isClientSide() ? CLIENT : SERVER;
+		float best = 0.0F;
+		for (Storm s : storms) {
+			best = Math.max(best, s.downpour(x, z));
 		}
 		return best;
 	}
