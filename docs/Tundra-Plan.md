@@ -26,8 +26,8 @@ Blocks (all with items, loot tables, tool tags, creative tab entries, recipes wh
 - `banded_iron_ore`: iron ore in smooth basalt, pale bands. Drops raw iron, `BANDED_IRON_MIN/MAX` = 2..4 (vanilla 1),
   Fortune as vanilla ore. Stone pick or better. Smelts like iron ore.
 - `dwarfed_spruce_log` (a 10x10 pillar, the "dwarf log wall") and `dwarfed_spruce_post` (6x6 pillar), both with an
-  axis, waterloggable, and `stripped_` forms by axe. One log or two posts craft back into 1 spruce planks... no:
-  into spruce **wood** as the video says: 2 logs -> 1 spruce log, 4 posts -> 1 spruce log (shapeless). In `logs_that_burn`
+  axis, waterloggable, and `stripped_` forms by axe. They craft back into spruce wood, as the video says: 2 logs -> 1
+  spruce log, 4 posts -> 1 spruce log (shapeless). In `logs_that_burn`
   and the chop/felling tags other logs are in (check how `Timber`/felled trees pick logs).
 - `stunted_red_shrub`, `orange_shrub`, `yellow_shrub`: small bush plants (cross model) on dirt, grass, moss, yellow
   moss, gravel, coarse dirt. Shears or silk touch to keep them.
