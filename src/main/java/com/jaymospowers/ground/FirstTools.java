@@ -226,6 +226,11 @@ public final class FirstTools {
 	private static boolean light(ServerLevel level, Player player, BlockHitResult hit) {
 		BlockPos pos = hit.getBlockPos();
 		BlockState state = level.getBlockState(pos);
+		if (state.is(GroundSticks.BONFIRE_EDGE)) {
+			// a bonfire's ring: the fire is in the centre
+			pos = BonfireEdgeBlock.centre(pos, state);
+			state = level.getBlockState(pos);
+		}
 		if (net.minecraft.world.level.block.CampfireBlock.canLight(state) || net.minecraft.world.level.block.CandleBlock.canLight(state)
 			|| net.minecraft.world.level.block.CandleCakeBlock.canLight(state)) {
 			level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);

@@ -75,7 +75,9 @@ public class ScalebaneArcher extends Monster implements RangedAttackMob, Acting 
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(2, new RangedBowAttackGoal<>(this, 1.0, SHOT_INTERVAL, SHOT_RANGE));
+		// (MobAmmo) shoots while its quiver lasts, then closes in
+		this.goalSelector.addGoal(2, MobAmmo.bowGoal(this, 1.0, SHOT_INTERVAL, SHOT_RANGE));
+		this.goalSelector.addGoal(3, MobAmmo.meleeWhenDry(this));
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 10.0F));
@@ -129,9 +131,13 @@ public class ScalebaneArcher extends Monster implements RangedAttackMob, Acting 
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power) {
+		if (!MobAmmo.spend(this, MobAmmo.Kind.ARROWS)) {
+			return;
+		}
 		ItemStack bow = this.getItemInHand(InteractionHand.MAIN_HAND);
 		ItemStack arrowStack = new ItemStack(Items.ARROW);
 		AbstractArrow arrow = ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
+		MobAmmo.canBePickedUp(arrow);
 		double xd = target.getX() - this.getX();
 		double yd = target.getY(0.3333333333333333) - arrow.getY();
 		double zd = target.getZ() - this.getZ();

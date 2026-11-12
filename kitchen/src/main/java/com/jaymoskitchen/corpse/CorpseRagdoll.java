@@ -42,6 +42,8 @@ final class CorpseRagdoll {
 	private boolean wasAsleep;
 	private int sinceSent;
 	private int sinceTable;
+	/** The game tick of the last impact told ({@link CorpseImpacts}). */
+	private long lastImpact = Long.MIN_VALUE / 2;
 
 	CorpseRagdoll(CorpseEntity corpse, RagdollBody body) {
 		this.body = body;
@@ -75,9 +77,21 @@ final class CorpseRagdoll {
 			}
 			body.shove(pushed.x, pushed.y, pushed.z);
 		}
+		double[] before = body.speed();
 		body.step(world, corpse.isNoGravity() ? 0.0F : RagdollBody.GRAVITY);
 		if (!body.sane()) {
 			body = corpse.lyingBody();
+		} else if (!body.gripped() && !body.pinned()) {
+			// a hard hit on the ground or a wall: the speed it lost this step, less what gravity took
+			double[] after = body.speed();
+			double lx = before[0] - after[0], ly = before[1] - after[1] - (corpse.isNoGravity() ? 0.0 : RagdollBody.GRAVITY), lz = before[2] - after[2];
+			double lost = Math.sqrt(lx * lx + ly * ly + lz * lz);
+			long now = level.getGameTime();
+			if (lost >= CorpseImpacts.IMPACT && now - lastImpact >= CorpseImpacts.COOLDOWN) {
+				lastImpact = now;
+				double[] m = body.middle();
+				CorpseImpacts.impact(corpse, m[0], body.bottom(), m[2], lost);
+			}
 		}
 		// (0.5.24) a body that lands on a butcher table (set down, thrown, slid onto it) stays on it; the table broken, it falls
 		if (++sinceTable >= TABLE_EVERY) {

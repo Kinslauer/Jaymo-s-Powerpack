@@ -29,6 +29,8 @@ abstract class DismemberLivingEntityRendererMixin {
 		com.jaymospowers.client.baubles.WornFairies.extract(entity, state);
 		// (0.20.41) and the blood splashed on it
 		com.jaymospowers.client.blood.BloodCoatLayer.extract(entity, state);
+		// and the marks its wounds left
+		com.jaymospowers.client.wounds.WoundMarksLayer.extract(entity, state);
 		// (0.21.10) and a gravity user's rock ball or orbiting rocks
 		com.jaymospowers.client.power.gravity.GravityRocksLayer.extract(entity, state, partialTicks);
 	}

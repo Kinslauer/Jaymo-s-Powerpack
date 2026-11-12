@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "ash": "jaymospowers:block/ground/firepit_ash",
+    "particle": "jaymospowers:block/ground/firepit_ash"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.4,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#ash"
+        },
+        "north": {
+          "texture": "#ash"
+        },
+        "south": {
+          "texture": "#ash"
+        },
+        "west": {
+          "texture": "#ash"
+        },
+        "east": {
+          "texture": "#ash"
+        },
+        "down": {
+          "texture": "#ash",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        1.0,
+        14
+      ],
+      "faces": {
+        "up": {
+          "texture": "#ash"
+        },
+        "north": {
+          "texture": "#ash"
+        },
+        "south": {
+          "texture": "#ash"
+        },
+        "west": {
+          "texture": "#ash"
+        },
+        "east": {
+          "texture": "#ash"
+        },
+        "down": {
+          "texture": "#ash",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

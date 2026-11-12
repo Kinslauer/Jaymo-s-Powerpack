@@ -82,6 +82,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		}
 		// (0.20.41) blood splashed on bodies
 		com.jaymospowers.client.blood.BloodCoatLayer.register();
+		com.jaymospowers.client.wounds.WoundMarksLayer.register();
 		com.jaymospowers.client.blood.Flies.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
@@ -101,6 +102,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();
 		com.jaymospowers.client.fx.MagicFxClient.init();
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();

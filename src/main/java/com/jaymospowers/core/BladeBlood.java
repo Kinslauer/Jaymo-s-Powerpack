@@ -498,6 +498,27 @@ public final class BladeBlood {
 		BloodTrail.bleed(level, body, color(body), drops, w, DRIP_STAIN * size(body), FALL_TICKS);
 	}
 
+	/** A dead body hitting the ground or a wall this hard (blocks a tick) splashes; past the second, as hard as it gets. */
+	public static final double IMPACT_FROM = 0.4, IMPACT_FULL = 1.2;
+	/** An impact's stain at its softest and hardest (stain scale), and drops thrown up at the hardest. */
+	public static final float IMPACT_STAIN_MIN = 0.3F, IMPACT_STAIN_MAX = 0.8F;
+	public static final int IMPACT_DROPS = 6;
+
+	/**
+	 * Andy's Cruor pick: a ragdolling body (Jaymo's Kitchen's corpse) that hits the ground or a wall hard leaves a smear
+	 * where it struck, and throws a few drops (they splat on any wall they fly into). {@code lost} is the speed it lost.
+	 */
+	public static void impact(ServerLevel level, Entity body, int color, double x, double y, double z, double lost) {
+		if (lost < IMPACT_FROM || color == NO_BLOOD) {
+			return;
+		}
+		float k = (float) Mth.clamp((lost - IMPACT_FROM) / (IMPACT_FULL - IMPACT_FROM), 0.0, 1.0);
+		BloodTrail.blot(level, body, color, x, y + 0.3, z, Mth.lerp(k, IMPACT_STAIN_MIN, IMPACT_STAIN_MAX));
+		int drops = 1 + Math.round(k * (IMPACT_DROPS - 1));
+		BloodParticles.Spray spray = new BloodParticles.Spray(color, 0.4F + 0.3F * k, false);
+		level.sendParticles(spray, true, false, x, y + 0.25, z, drops, 0.25, 0.1, 0.25, 0.15 + 0.15 * k);
+	}
+
 	/**
 	 * (0.15.111) Andy: hitting a body on the ground splatters its blood, a blade most of all. {@code corpse} is Jaymo's
 	 * Kitchen's body of a {@code type} (Kitchen only asks for one with flesh on it), hit by {@code source} for

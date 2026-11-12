@@ -313,6 +313,10 @@ public final class Pirates {
 
 	/** A pistol ball at {@code foe} (sparing his own side, as javelins do); (0.7.267) nobody parries it. */
 	static void shoot(ServerLevel level, PathfinderMob folk, LivingEntity foe) {
+		// a ball from his pouch: none left, no shot till he restocks (MobAmmo)
+		if (!MobAmmo.spend(folk, MobAmmo.Kind.SHOT)) {
+			return;
+		}
 		Projectile ball = Javelins.WEAPONMOD_LOADED ? WeaponModJavelins.bullet(level, folk, PISTOL_DAMAGE) : null;
 		if (ball == null) {
 			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, Folk.firingWeapon(folk));

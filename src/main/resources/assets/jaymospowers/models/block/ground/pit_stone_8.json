@@ -1,0 +1,96 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": true,
+  "textures": {
+    "s0": "minecraft:block/stone",
+    "s1": "minecraft:block/andesite",
+    "s2": "minecraft:block/cobblestone",
+    "particle": "minecraft:block/stone"
+  },
+  "elements": [
+    {
+      "from": [
+        10.2426,
+        0,
+        2.3574
+      ],
+      "to": [
+        14.2426,
+        2.5,
+        5.1574
+      ],
+      "faces": {
+        "up": {
+          "texture": "#s1"
+        },
+        "north": {
+          "texture": "#s1"
+        },
+        "south": {
+          "texture": "#s1"
+        },
+        "west": {
+          "texture": "#s1"
+        },
+        "east": {
+          "texture": "#s1"
+        },
+        "down": {
+          "texture": "#s1",
+          "cullface": "down"
+        }
+      },
+      "rotation": {
+        "angle": -45.0,
+        "axis": "y",
+        "origin": [
+          12.2426,
+          0,
+          3.7574
+        ]
+      }
+    },
+    {
+      "from": [
+        10.9926,
+        2.5,
+        2.9574
+      ],
+      "to": [
+        13.4926,
+        3.4,
+        4.5574
+      ],
+      "faces": {
+        "up": {
+          "texture": "#s1"
+        },
+        "north": {
+          "texture": "#s1"
+        },
+        "south": {
+          "texture": "#s1"
+        },
+        "west": {
+          "texture": "#s1"
+        },
+        "east": {
+          "texture": "#s1"
+        },
+        "down": {
+          "texture": "#s1",
+          "cullface": "down"
+        }
+      },
+      "rotation": {
+        "angle": -45.0,
+        "axis": "y",
+        "origin": [
+          12.2426,
+          0,
+          3.7574
+        ]
+      }
+    }
+  ]
+}
