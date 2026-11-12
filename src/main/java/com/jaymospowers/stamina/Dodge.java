@@ -65,6 +65,8 @@ public final class Dodge {
 	public static final int FLIP_COST = 4;
 	public static final double FLIP_SPEED = 0.42, FLIP_UP = 0.3, FLIP_KEEP = 0.6;
 	public static final int FLIP_TICKS = 10;
+	/** The powers whose holders get the flip's lift ({@link #flipLift}): they fly, or are stronger, or bend their own weight. */
+	public static final java.util.Set<String> LIFT_POWERS = java.util.Set.of("web", "gravity", "darktide", "wind", "zfighter", "smoke");
 	// ================================================================================================================
 
 	/** Client → server: a dodge started along {@code (x, z)} (a unit vector on the ground). */
@@ -153,6 +155,19 @@ public final class Dodge {
 		return !player.onGround() && !player.isInWater() && !player.isFallFlying() && !player.getAbilities().flying && !player.isPassenger()
 			&& !player.isUsingItem() && Ledge.canHang(player) && !Ledge.onLedge(player) && Breaks.legsUsable(player)
 			&& Armed.kind(player.getMainHandItem()) != null && KingdomsCompat.knowsForms(player);
+	}
+
+	/**
+	 * Andy: the flip "gives a lift if you have a flight ability. or increased strength / weight manipulation (web gravity,
+	 * darktide, wind, zfighter, smoke, etc)". The lift {@code player}'s flip gets (both sides): {@link #FLIP_UP} for a
+	 * {@link #LIFT_POWERS} holder, anyone who may fly, anyone under Strength and anyone with brawn (Might, size); none
+	 * for the rest, whose flip only carries the jump they made.
+	 */
+	public static double flipLift(Player player) {
+		net.minecraft.resources.Identifier power = player.getAttached(com.jaymospowers.core.Powers.POWER);
+		boolean lifted = power != null && LIFT_POWERS.contains(power.getPath()) || player.getAbilities().mayfly
+			|| player.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH) || com.jaymospowers.power.web.KitchenCompat.brawn(player) > 0;
+		return lifted ? FLIP_UP : 0.0;
 	}
 
 	private static void flip(ServerPlayer player, Flip flip) {

@@ -14,7 +14,7 @@ of code is ours). Patch 1 of 6 of the SWGC swordplay picks.
 - **Mid-air flip** (`stamina/Dodge`, `DodgeClient`, `DodgeRollPose`; Andy: "tied to weapon forms but activated by dodging
   in midair, after a jump", "the camera should always follow"): Dodge pressed in the air off a jump, a weapon in hand
   and Weapon Forms learnt (any form from a teacher, or the Strength perk), turns a somersault the way your movement keys
-  point (forward with none held). Once a jump, 4 feathers, a small push and lift, and it evades like a dodge. In first
+  point (forward with none held). Once a jump, 4 feathers, a small push, and it evades like a dodge. Only those who fly, are stronger or bend their own weight get a lift from it (Web Slinger, Gravity, Darktide, Wind, Z Fighter, Smoke, anyone who may fly, Strength, Might or great size). In first
   person the view turns over with you. A dodge pressed while falling without those still queues the landing roll.
 - **Parry lines** (`client/combat/ParryPose`): a raised weapon guard is carried across the body, and when a blow meets
   it the guard goes to the line it came on: high over the head, low across the legs, or hanging point-down across the

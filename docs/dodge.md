@@ -56,7 +56,7 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
 
 - The flip: Dodge pressed in the air off a jump, with a weapon in hand (`combat/Armed.kind`) and Weapon Forms learnt
   (`KingdomsCompat.knowsForms`), turns a somersault the way you hold (`Dodge.canFlip`, `Dodge.Flip`, `FLIP_*`): once a
-  jump, `FLIP_COST` feathers, a small push and lift, the same evasion window. `Dodge.Rolling.flip` tells everyone's
+  jump, `FLIP_COST` feathers, a small push, the same evasion window, and a lift only for `Dodge.flipLift` (a `LIFT_POWERS` holder, anyone who may fly, Strength, brawn). `Dodge.Rolling.flip` tells everyone's
   `DodgeRollPose` to turn it in the air (no drop, the weapon arm left out), and your first-person view turns with it.
 
 ## To check in game

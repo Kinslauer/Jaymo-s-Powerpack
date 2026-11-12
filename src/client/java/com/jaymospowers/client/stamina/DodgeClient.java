@@ -147,7 +147,7 @@ public final class DodgeClient {
 	/**
 	 * Andy: "its tied to weapon forms but activated by dodging in midair, after a jump". Dodge pressed in the air off a
 	 * jump, a weapon in hand and Weapon Forms learnt ({@link Dodge#canFlip}): a somersault the way the movement keys point
-	 * (forward with none held), with a little push and lift, for {@link Dodge#FLIP_COST} feathers. It evades like a dodge.
+	 * (forward with none held), with a little push (and a lift for those {@link Dodge#flipLift} names), for {@link Dodge#FLIP_COST} feathers. It evades like a dodge.
 	 */
 	private static boolean tryFlip(LocalPlayer player) {
 		if (cooldown > 0 || player.isSpectator() || !Dodge.canFlip(player) || FreerunClient.active() || com.jaymospowers.boxing.Boxing.boxing(player)
@@ -164,7 +164,7 @@ public final class DodgeClient {
 		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
 		Vec3 dir = new Vec3(strafe * cos - forward * sin, 0.0, forward * cos + strafe * sin).normalize();
 		Vec3 motion = player.getDeltaMovement();
-		player.setDeltaMovement(dir.x * Dodge.FLIP_SPEED + motion.x * Dodge.FLIP_KEEP, Math.max(motion.y, 0.0) * 0.5 + Dodge.FLIP_UP,
+		player.setDeltaMovement(dir.x * Dodge.FLIP_SPEED + motion.x * Dodge.FLIP_KEEP, Dodge.flipLift(player) > 0.0 ? Math.max(motion.y, 0.0) * 0.5 + Dodge.flipLift(player) : motion.y,
 			dir.z * Dodge.FLIP_SPEED + motion.z * Dodge.FLIP_KEEP);
 		cooldown = Dodge.COOLDOWN;
 		sinceDodge = 0;
