@@ -3479,7 +3479,7 @@ public final class PowersCompat {
 	}
 
 	/** Powers' {@code Carry.npcDrag(Mob, LivingEntity)}, {@code Carry.npcLetGo(Mob)} and {@code Carry.npcDragging(Mob)}. */
-	private static java.lang.invoke.@Nullable MethodHandle npcDrag, npcLetGo, npcDragging;
+	private static java.lang.invoke.@Nullable MethodHandle npcDrag, npcLetGo, npcDragging, npcLift;
 	private static boolean lookedForDrag;
 
 	private static void lookForDrag() {
@@ -3501,6 +3501,26 @@ public final class PowersCompat {
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mob drag (older Powers?)", e);
 			npcDrag = npcLetGo = npcDragging = null;
+		}
+		try {
+			npcLift = lookup.findStatic(Class.forName("com.jaymospowers.core.Carry"), "npcLift", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// (an older Powers: they drag instead)
+			npcLift = null;
+		}
+	}
+
+	/**
+	 * {@code carrier} heaves {@code body} (someone downed, no bigger than a person) over its shoulder and carries it, drawn as
+	 * Powers' own shoulder carry; {@link #npcLetGo} sets them down. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcLift(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcLift != null && (boolean) npcLift.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
 		}
 	}
 

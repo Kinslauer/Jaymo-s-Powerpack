@@ -67,7 +67,7 @@ public final class Callouts {
 		for (Comrades.Leaning l : Comrades.Leaning.values()) {
 			LINES.put("take." + l.key(), 3);
 		}
-		for (String k : new String[] {"hurt", "behind", "down", "tending", "dragging", "legup", "ready", "spoils.give", "know.star", "drift"}) {
+		for (String k : new String[] {"hurt", "behind", "down", "tending", "dragging", "lifting", "legup", "toss", "ready", "spoils.give", "know.star", "drift"}) {
 			LINES.put(k, 2);
 			VOICED.add(k);
 		}

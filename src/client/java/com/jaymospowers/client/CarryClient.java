@@ -128,14 +128,20 @@ public final class CarryClient {
 				continue;
 			}
 			Carry.Carrying carrying = carrier.getAttached(Carry.CARRYING);
-			if (carrying == null || carrying.hold() != Carry.DRAG) {
+			if (carrying == null) {
 				continue;
 			}
 			Entity carried = level.getEntity(carrying.target());
 			if (carried == null || carried == minecraft.player && localCarrier(minecraft) != carrier) {
 				continue;
 			}
-			drag(carried, carrier);
+			if (carrying.hold() == Carry.DRAG) {
+				drag(carried, carrier);
+			} else {
+				// (or over the shoulder)
+				follow(carried, carrier);
+				sway(carried, carrier);
+			}
 		}
 		SWAY.keySet().removeIf(id -> !(level.getEntity(id) instanceof Entity e) || !Carry.isCarried(e));
 		DRAGS.keySet().removeIf(id -> !(level.getEntity(id) instanceof Entity e) || !Carry.isDragged(e));
@@ -148,7 +154,7 @@ public final class CarryClient {
 	}
 
 	/** Puts the carried body at its carrier's feet, this tick and last (so it's drawn moving with them). */
-	private static void follow(Entity carried, Player carrier) {
+	private static void follow(Entity carried, LivingEntity carrier) {
 		carried.setPos(carrier.getX(), carrier.getY(), carrier.getZ());
 		carried.setOldPosAndRot(new Vec3(carrier.xo, carrier.yo, carrier.zo), carried.getYRot(), carried.getXRot());
 		carried.setDeltaMovement(Vec3.ZERO);
@@ -242,7 +248,7 @@ public final class CarryClient {
 	}
 
 	/** Steps the loose limbs' swing from how the carrier moves and turns. */
-	private static void sway(Entity carried, Player carrier) {
+	private static void sway(Entity carried, LivingEntity carrier) {
 		float[] s = SWAY.computeIfAbsent(carried.getId(), id -> new float[] {0, 0, 0, 0, 0, 0, 0, 0, carrier.yBodyRot, 0, 0});
 		s[4] = s[0];
 		s[5] = s[1];
@@ -278,7 +284,7 @@ public final class CarryClient {
 		s[0] = Mth.clamp(s[0] + s[2], -SWAY_MAX, SWAY_MAX);
 		s[1] = Mth.clamp(s[1] + s[3], -SWAY_MAX, SWAY_MAX);
 		float speed = (float)Math.sqrt(vx * vx + vy * vy + vz * vz);
-		float trail = Carry.flying(carrier) ? Mth.clamp(speed / TRAIL_FULL_SPEED, 0.0F, 1.0F) : 0.0F;
+		float trail = carrier instanceof Player cp && Carry.flying(cp) ? Mth.clamp(speed / TRAIL_FULL_SPEED, 0.0F, 1.0F) : 0.0F;
 		s[9] += (trail - s[9]) * 0.2F;
 	}
 

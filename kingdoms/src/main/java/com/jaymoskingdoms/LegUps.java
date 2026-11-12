@@ -29,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * boosted.</li>
  * <li><b>Foe</b>: a raider whose foe stands two or three blocks above it, out of its reach, gets a boost from a mate
  * beside it: you're not safe on a low roof from a band.</li>
+ * <li><b>Across a gap</b>: jump at the lip of a gap {@link #GAP_MIN} to {@link #GAP_MAX} blocks wide with a companion beside
+ * you and it throws you over ("toss"); a raider stuck at a gap with its foe on the far side is thrown over by a mate.</li>
  * </ul>
  */
 public final class LegUps {
@@ -42,6 +44,10 @@ public final class LegUps {
 	static final int GAP = 30, FOE_GAP = 100, FOE_EVERY = 20;
 	/** A raider's foe this far above it (blocks, at least two) and this near across (blocks) gets it boosted. */
 	static final double FOE_ABOVE_MAX = 3.5, FOE_ACROSS = 4.0;
+	/** A gap this many blocks wide (at least, at most) gets a throw across. */
+	static final int GAP_MIN = 2, GAP_MAX = 5;
+	/** The throw: up (blocks a tick), and forward enough to carry the gap and this much more, over about this many ticks' flight. */
+	static final double TOSS_UP = 0.42, TOSS_SPARE = 1.5, TOSS_CARRY = 7.0;
 
 	private static final Map<UUID, Boolean> JUMP_WAS = new HashMap<>();
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
@@ -83,7 +89,8 @@ public final class LegUps {
 			return;
 		}
 		int high = wall(player.level(), player.blockPosition(), player.getDirection(), player.position());
-		if (high < 2) {
+		int across = high < 2 ? gap(player.level(), player.blockPosition(), player.getDirection()) : 0;
+		if (high < 2 && across == 0) {
 			return;
 		}
 		Villager helper = null;
@@ -100,6 +107,11 @@ public final class LegUps {
 			return;
 		}
 		NEXT.put(player.getUUID(), now + GAP);
+		if (across > 0) {
+			toss(player.level(), helper, player, player.getDirection(), across);
+			Callouts.say(helper, "toss", player, true, player.getDisplayName());
+			return;
+		}
 		lift(player.level(), helper, player, high);
 		Callouts.say(helper, "legup", player, true, player.getDisplayName());
 	}
@@ -113,12 +125,15 @@ public final class LegUps {
 		}
 		double above = t.getY() - m.getY();
 		double across = Math.sqrt(Math.pow(t.getX() - m.getX(), 2) + Math.pow(t.getZ() - m.getZ(), 2));
-		if (above < 2.0 || above > FOE_ABOVE_MAX || across > FOE_ACROSS) {
-			return;
-		}
 		Direction toward = Direction.getApproximateNearest(t.getX() - m.getX(), 0.0, t.getZ() - m.getZ());
-		int high = wall(level, m.blockPosition(), toward, m.position());
-		if (high < 2) {
+		int high = 0, gap = 0;
+		if (above >= 2.0 && above <= FOE_ABOVE_MAX && across <= FOE_ACROSS) {
+			high = wall(level, m.blockPosition(), toward, m.position());
+		} else if (Math.abs(above) <= 1.5 && across >= 3.0 && across <= GAP_MAX + 3.0 && m.getNavigation().isDone()) {
+			// across a gap it can't path over: a mate throws it over
+			gap = gap(level, m.blockPosition(), toward);
+		}
+		if (high < 2 && gap == 0) {
 			return;
 		}
 		String side = Comrades.side(m);
@@ -133,6 +148,11 @@ public final class LegUps {
 		}
 		NEXT.put(m.getUUID(), now + FOE_GAP);
 		NEXT.put(mate.getUUID(), now + FOE_GAP);
+		if (gap > 0) {
+			toss(level, mate, m, toward, gap);
+			Callouts.say(mate, "toss", m, false, m.getDisplayName());
+			return;
+		}
 		lift(level, mate, m, high);
 		Callouts.say(mate, "legup", m, false, m.getDisplayName());
 	}
@@ -163,6 +183,44 @@ public final class LegUps {
 			}
 		}
 		return !solid(level, front.above(high)) && !solid(level, front.above(high + 1)) ? high : 0;
+	}
+
+	/**
+	 * How wide a gap right ahead is (blocks) if it wants a throw across: {@link #GAP_MIN} to {@link #GAP_MAX} columns with
+	 * nothing under them for three blocks down and room to fly through, then ground on the far side a block up at most or
+	 * a block down at most; else 0. You must be standing on something.
+	 */
+	static int gap(ServerLevel level, BlockPos feet, Direction facing) {
+		if (facing.getAxis().isVertical() || !solid(level, feet.below())) {
+			return 0;
+		}
+		int w = 0;
+		for (int i = 1; i <= GAP_MAX + 1; i++) {
+			BlockPos col = feet.relative(facing, i);
+			boolean open = !solid(level, col) && !solid(level, col.above());
+			boolean empty = open && !solid(level, col.below()) && !solid(level, col.below(2)) && !solid(level, col.below(3));
+			if (empty) {
+				w++;
+				continue;
+			}
+			boolean land = open && (solid(level, col.below()) || solid(level, col.below(2)))
+				|| solid(level, col) && !solid(level, col.above()) && !solid(level, col.above(2));
+			return land && w >= GAP_MIN ? w : 0;
+		}
+		return 0;
+	}
+
+	/** {@code helper} swings {@code who} by the arm and belt and throws it across a {@code width}-block gap. */
+	private static void toss(ServerLevel level, Mob helper, LivingEntity who, Direction facing, int width) {
+		helper.getNavigation().stop();
+		helper.getLookControl().setLookAt(who, 30.0F, 30.0F);
+		helper.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		double v = (width + TOSS_SPARE) / TOSS_CARRY;
+		who.setDeltaMovement(facing.getStepX() * v, TOSS_UP, facing.getStepZ() * v);
+		who.needsSync = true;
+		who.resetFallDistance();
+		level.playSound(null, helper.getX(), helper.getY(), helper.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.NEUTRAL, 0.8F, 0.8F);
+		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.NEUTRAL, 0.4F, 0.7F);
 	}
 
 	private static boolean solid(ServerLevel level, BlockPos pos) {

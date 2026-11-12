@@ -1183,31 +1183,49 @@ public final class Carry {
 	 * if either is taken already, or the body can't be dragged.
 	 */
 	public static boolean npcDrag(Mob carrier, LivingEntity body) {
+		return npcTake(carrier, body, DRAG);
+	}
+
+	/** Mobs carrying a body over the shoulder walk this much slower (share of their speed). */
+	static final double NPC_LIFT_WEIGHT = 0.15;
+
+	/**
+	 * {@code carrier} heaves {@code body} (someone downed, no bigger than a person) over its shoulder ({@link #FIREMAN}) and
+	 * carries it, faster than a drag: every client draws the hold as a player's. As {@link #npcDrag} otherwise; {@link #npcLetGo}
+	 * sets them down.
+	 */
+	public static boolean npcLift(Mob carrier, LivingEntity body) {
+		return !tooBig(body) && npcTake(carrier, body, FIREMAN);
+	}
+
+	private static boolean npcTake(Mob carrier, LivingEntity body, int hold) {
 		if (!(carrier.level() instanceof ServerLevel level) || body.level() != level || !draggable(body) || isCarried(body) || isCarrying(body)
 			|| isCarried(carrier) || isCarrying(carrier) || body.isPassenger() || body.isVehicle() || CARRIES.containsKey(carrier.getUUID())) {
 			return false;
 		}
-		Entry entry = new Entry(carrier.getUUID(), body, DRAG, false, carrier.position(), false, false);
+		Entry entry = new Entry(carrier.getUUID(), body, hold, false, carrier.position(), false, false);
 		entry.npc = carrier;
 		Vec3[] lay = dragStep(carrier.position(), carrier.getYRot(), null, null);
 		entry.dragShoulders = lay[0];
 		entry.dragHips = lay[1];
 		CARRIES.put(carrier.getUUID(), entry);
-		carrier.setAttached(CARRYING, new Carrying(body.getId(), DRAG));
+		carrier.setAttached(CARRYING, new Carrying(body.getId(), hold));
 		body.setAttached(CARRIED_BY, carrier.getId());
 		body.removeAttached(THROWN);
 		body.resetFallDistance();
 		if (body instanceof ServerPlayer player) {
 			player.stopUsingItem();
 			ServerPlayNetworking.send(player, new Self(carrier.getId()));
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.dragged", carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable(hold == DRAG ? "message.jaymospowers.carry.dragged" : "message.jaymospowers.carry.lifted",
+				carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
 		} else if (body instanceof Mob mob) {
 			mob.getNavigation().stop();
 			mob.setTarget(null);
 		}
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (speed != null) {
-			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -NPC_DRAG_WEIGHT, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, hold == DRAG ? -NPC_DRAG_WEIGHT : -NPC_LIFT_WEIGHT,
+				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.NEUTRAL, 0.8F, 0.7F);
 		return true;
@@ -1241,6 +1259,21 @@ public final class Carry {
 		}
 		entry.lastCarrierPos = here;
 		carried.resetFallDistance();
+		if (entry.hold != DRAG) {
+			// over the shoulder: the server holds a mob at the carrier's feet, each client draws it in the hold
+			if (!(carried instanceof Player)) {
+				carried.setPos(here.x, here.y, here.z);
+				carried.setDeltaMovement(Vec3.ZERO);
+				carried.setYRot(carrier.getYRot());
+				if (carried instanceof LivingEntity living) {
+					living.yBodyRot = carrier.yBodyRot;
+				}
+				if (carried instanceof Mob mob) {
+					mob.getNavigation().stop();
+				}
+			}
+			return;
+		}
 		Vec3[] lay = dragStep(here, carrier.getYRot(), entry.dragShoulders, entry.dragHips);
 		entry.dragShoulders = lay[0];
 		entry.dragHips = lay[1];

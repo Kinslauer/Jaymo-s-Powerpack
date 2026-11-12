@@ -56,6 +56,8 @@ public final class FieldMedics {
 	/** A foe this near the fallen (blocks) is danger: they're dragged this far away from it (blocks), for at most this long (ticks). */
 	static final double DANGER = 8.0, DRAG_AWAY = 9.0;
 	static final int DRAG_TICKS = 160;
+	/** A medic at this share of its health or more lifts the fallen over its shoulder instead of dragging. */
+	static final float LIFT_HALE = 0.6F;
 
 	private static final class Medic {
 		final PathfinderMob helper;
@@ -211,10 +213,12 @@ public final class FieldMedics {
 		if (!medic.looked) {
 			medic.looked = true;
 			Vec3 to = clear(level, body);
-			if (to != null && PowersCompat.npcDrag(helper, body)) {
+			// a medic still hale heaves them over the shoulder and runs; a hurt one drags
+			boolean lift = to != null && helper.getHealth() >= helper.getMaxHealth() * LIFT_HALE && PowersCompat.npcLift(helper, body);
+			if (lift || to != null && PowersCompat.npcDrag(helper, body)) {
 				medic.dragTo = to;
 				medic.dragTicks = 0;
-				Callouts.say(helper, "dragging", body, true, body.getDisplayName());
+				Callouts.say(helper, lift ? "lifting" : "dragging", body, true, body.getDisplayName());
 				walk(helper, to);
 				return;
 			}

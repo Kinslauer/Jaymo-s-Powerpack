@@ -216,5 +216,21 @@
 	"gui.jaymoskingdoms.story.hint.136": "Companions you keep close grow fond of you. Leave one lying downed and they'll remember.",
 	"comrades.jaymoskingdoms.table.sit.0": "Mind if I sit with you, %s?",
 	"comrades.jaymoskingdoms.table.sit.1": "A fire and a rest. I needed this.",
-	"comrades.jaymoskingdoms.table.sit.2": "Let's talk a while, %s."
+	"comrades.jaymoskingdoms.table.sit.2": "Let's talk a while, %s.",
+	"comrades.jaymoskingdoms.lifting.bold.0": "Up on my shoulder, %s! Hold tight!",
+	"comrades.jaymoskingdoms.lifting.bold.1": "I've got you, %s, we're going!",
+	"comrades.jaymoskingdoms.lifting.warm.0": "I've got you, %s. Hold on to me.",
+	"comrades.jaymoskingdoms.lifting.warm.1": "Up you come, %s. Nearly safe.",
+	"comrades.jaymoskingdoms.lifting.steady.0": "Carrying %s out.",
+	"comrades.jaymoskingdoms.lifting.steady.1": "Lifting %s clear.",
+	"comrades.jaymoskingdoms.lifting.quiet.0": "Hold on, %s...",
+	"comrades.jaymoskingdoms.lifting.quiet.1": "Up. Quiet now.",
+	"comrades.jaymoskingdoms.toss.bold.0": "Over you go, %s!",
+	"comrades.jaymoskingdoms.toss.bold.1": "Fly, %s!",
+	"comrades.jaymoskingdoms.toss.warm.0": "I'll throw you across, %s. Ready?",
+	"comrades.jaymoskingdoms.toss.warm.1": "Hold on, %s, here we go!",
+	"comrades.jaymoskingdoms.toss.steady.0": "On three, %s. Across.",
+	"comrades.jaymoskingdoms.toss.steady.1": "Throwing %s over.",
+	"comrades.jaymoskingdoms.toss.quiet.0": "Go.",
+	"comrades.jaymoskingdoms.toss.quiet.1": "Across, %s."
 }

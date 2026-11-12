@@ -31,12 +31,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * A band's supper (docs/Pawn-Plan.md row D4, foe side, Andy's note: "enemy bands do the same in their camps, so you can
  * ambush, poison or confront them"). At dusk ({@link #FROM} to {@link #TO}) a camp's band, with a player anywhere
- * within {@link #WATCHED} to see it, gathers in a ring at its fire, sits and eats.
+ * within {@link #WATCHED} to see it, gathers in a ring at its fire (lit, or built if the camp has none, {@link #fire}),
+ * sits ({@link GroundSeats}) and eats.
  * <ul>
  * <li><b>Ambush</b>: while they eat they're slow to look up: a sneaking player farther than {@link #UNWARY} isn't
  * noticed, and the first blow on one who hadn't seen you lands {@link #AMBUSH} times as hard; the rest scramble up
@@ -67,6 +72,8 @@ public final class CampSuppers {
 	static final int POISON = 600, WEAK = 2400, HEAVES = 200;
 	/** Looked over this often (ticks); a bite this often (ticks). */
 	static final int EVERY = 10, BITE = 60;
+	/** A camp with no fire builds one this near its centre (blocks). */
+	static final int BUILD_NEAR = 3;
 
 	/** On the camps' level: camp id → the day its food was poisoned. Saved. */
 	static final AttachmentType<Map<String, Long>> POISONED = AttachmentRegistry.create(JaymosKingdoms.id("camp_supper_poisoned"),
@@ -172,8 +179,9 @@ public final class CampSuppers {
 		return false;
 	}
 
-	private static void start(ServerLevel level, int id, BlockPos fire, long day) {
+	private static void start(ServerLevel level, int id, BlockPos center, long day) {
 		String side = "f:" + id;
+		BlockPos fire = fire(level, center);
 		Supper s = new Supper(id, fire, day);
 		for (Mob m : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(fire).inflate(BAND),
 			m -> m.isAlive() && !m.isBaby() && !Downed.isDowned(m) && Temperaments.humanoid(m) && Comrades.side(m).equals(side)
@@ -194,6 +202,7 @@ public final class CampSuppers {
 			boolean gone = !m.isAlive() || m.isRemoved() || Downed.isDowned(m) || Comrades.busy(m);
 			if (gone) {
 				EATING.remove(m);
+				GroundSeats.standUp(m);
 			}
 			return gone;
 		});
@@ -231,20 +240,22 @@ public final class CampSuppers {
 				m.setTarget(null);
 			}
 			if (m.getTarget() != null) {
-				m.setShiftKeyDown(false);
+				GroundSeats.standUp(m);
 				continue;
 			}
 			double a = Math.PI * 2.0 * i / s.eaters.size();
 			Vec3 seat = Vec3.atBottomCenterOf(s.fire).add(Math.cos(a) * RING, 0.0, Math.sin(a) * RING);
-			if (m.position().distanceToSqr(seat) > 1.5 * 1.5) {
-				m.setShiftKeyDown(false);
+			if (!GroundSeats.sitting(m) && m.position().distanceToSqr(seat) > 1.5 * 1.5) {
 				if (m.getNavigation().isDone()) {
 					m.getNavigation().moveTo(seat.x, seat.y, seat.z, 0.5);
 				}
 				continue;
 			}
-			m.getNavigation().stop();
-			m.setShiftKeyDown(true);
+			if (!GroundSeats.sitting(m) && !GroundSeats.sitDown(m, Vec3.atBottomCenterOf(s.fire))) {
+				// no room to sit: they crouch by it
+				m.getNavigation().stop();
+				m.setShiftKeyDown(true);
+			}
 			m.getLookControl().setLookAt(s.fire.getX() + 0.5, s.fire.getY() + 0.5, s.fire.getZ() + 0.5);
 			if ((s.ticks + i * 7) % BITE < EVERY) {
 				m.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
@@ -252,7 +263,7 @@ public final class CampSuppers {
 				level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, Items.COOKED_MUTTON), m.getX(), m.getEyeY() - 0.1, m.getZ(), 4, 0.1, 0.1, 0.1, 0.05);
 			}
 		}
-		if (s.ticks % 40 == 0) {
+		if (s.ticks % 40 == 0 && !level.getBlockState(s.fire).is(net.minecraft.tags.BlockTags.CAMPFIRES)) {
 			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, s.fire.getX() + 0.5, s.fire.getY() + 0.8, s.fire.getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.01);
 		}
 		if (poisoned && !s.sickened && s.ticks >= BITE * 2) {
@@ -273,6 +284,7 @@ public final class CampSuppers {
 		for (Mob m : s.eaters) {
 			EATING.remove(m);
 			m.setShiftKeyDown(false);
+			GroundSeats.standUp(m);
 			if (scramble) {
 				m.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SCRAMBLE, 1));
 			}
@@ -280,6 +292,37 @@ public final class CampSuppers {
 		if (scramble && !s.eaters.isEmpty()) {
 			Callouts.say(s.eaters.get(0), "supper.scramble", null, true);
 		}
+	}
+
+	/**
+	 * The camp's fire: a lit one near its centre, or, if it has none, one they build there for supper (a campfire on clear
+	 * ground within {@link #BUILD_NEAR}, and it stays: a camp has a fire from then on). The centre itself if there's no room.
+	 */
+	private static BlockPos fire(ServerLevel level, BlockPos center) {
+		for (BlockPos p : BlockPos.betweenClosed(center.offset(-(int)FIRE, -2, -(int)FIRE), center.offset((int)FIRE, 2, (int)FIRE))) {
+			if (level.getBlockState(p).is(net.minecraft.tags.BlockTags.CAMPFIRES)) {
+				BlockState state = level.getBlockState(p);
+				if (state.hasProperty(CampfireBlock.LIT) && !state.getValue(CampfireBlock.LIT)) {
+					level.setBlock(p, state.setValue(CampfireBlock.LIT, true), Block.UPDATE_ALL);
+				}
+				return p.immutable();
+			}
+		}
+		for (int r = 0; r <= BUILD_NEAR; r++) {
+			for (BlockPos p : BlockPos.betweenClosed(center.offset(-r, -2, -r), center.offset(r, 2, r))) {
+				if (Math.max(Math.abs(p.getX() - center.getX()), Math.abs(p.getZ() - center.getZ())) != r) {
+					continue;
+				}
+				BlockState here = level.getBlockState(p), below = level.getBlockState(p.below());
+				if (here.isAir() && level.getBlockState(p.above()).isAir() && below.isFaceSturdy(level, p.below(), net.minecraft.core.Direction.UP)
+					&& !below.is(net.minecraft.tags.BlockTags.LOGS) && !below.is(net.minecraft.tags.BlockTags.PLANKS)) {
+					level.setBlock(p, Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
+					level.playSound(null, p, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.6F, 1.0F);
+					return p.immutable();
+				}
+			}
+		}
+		return center;
 	}
 
 	// ---- poisoning -----------------------------------------------------------------------------------------------------

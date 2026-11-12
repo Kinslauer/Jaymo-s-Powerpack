@@ -39,8 +39,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Sitting down together (docs/Pawn-Plan.md row D4, with Andy's note: you share a meal; after the pawns who ask their
  * master how they should be in Dragon's Dogma, a commercial game: ideas only). Sit (on any seat) at a table or by a
- * campfire with a companion near ({@link #NEAR}): after a moment ({@link #SIT_FOR}) one comes over, shares a meal if you
- * carry any food (one bite of yours: they're healed and rested), and asks two or three things on a small screen:
+ * campfire with a companion near ({@link #NEAR}): after a moment ({@link #SIT_FOR}) one comes over and sits beside you
+ * (a free cushion near, or the ground: {@link GroundSeats}) until you get up, shares a meal if you carry any food (one bite of yours: they're healed and rested), and asks two or three things on a small screen:
  * <ul>
  * <li>keep or change their second leaning ({@link Comrades.Leaning});</li>
  * <li>talk more, as now, or less ({@link #chatter}: their remarks come twice as often or half, and their callouts are
@@ -124,6 +124,15 @@ public final class TableTalk {
 	}
 
 	private static final Map<UUID, Integer> SEATED = new HashMap<>();
+	/** Companions walking over to sit (until when, game time), and those sat with their player. */
+	private record Coming(UUID player, long day, long until) {
+	}
+
+	private static final Map<Mob, Coming> COMING = new java.util.IdentityHashMap<>();
+	private static final Map<Mob, UUID> SAT_WITH = new java.util.IdentityHashMap<>();
+	/** How long one walks over before sitting anyway (ticks); how near counts as arrived (blocks). */
+	static final int COME_TICKS = 120;
+	static final double ARRIVED = 2.5;
 
 	private TableTalk() {
 	}
@@ -133,7 +142,11 @@ public final class TableTalk {
 		PayloadTypeRegistry.serverboundPlay().register(SetTable.TYPE, SetTable.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SetTable.TYPE, (payload, context) -> answer(context.player(), payload));
 		ServerTickEvents.END_SERVER_TICK.register(TableTalk::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SEATED.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			SEATED.clear();
+			COMING.clear();
+			SAT_WITH.clear();
+		});
 	}
 
 	// ---- what the answers change ---------------------------------------------------------------------------------------
@@ -176,6 +189,40 @@ public final class TableTalk {
 		if (server.getTickCount() % EVERY != 0) {
 			return;
 		}
+		long now = server.overworld().getGameTime();
+		// walking over: sit when beside you (or when it's taken too long), then talk
+		for (var it = COMING.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<Mob, Coming> e = it.next();
+			Mob m = e.getKey();
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getValue().player());
+			if (player == null || !m.isAlive() || m.level() != player.level() || Comrades.target(m) != null || !seatedAtTable(player)) {
+				it.remove();
+				continue;
+			}
+			if (m.distanceTo(player) > ARRIVED && now < e.getValue().until()) {
+				if (m.getNavigation().isDone()) {
+					m.getNavigation().moveTo(player, 0.6);
+				}
+				continue;
+			}
+			it.remove();
+			if (GroundSeats.sitDown(m, player.position())) {
+				SAT_WITH.put(m, player.getUUID());
+			}
+			talk(player, m);
+		}
+		// sat: up again when you stand, a fight starts, or they're called away
+		SAT_WITH.entrySet().removeIf(e -> {
+			Mob m = e.getKey();
+			ServerPlayer player = server.getPlayerList().getPlayer(e.getValue());
+			if (player != null && m.isAlive() && Comrades.target(m) == null && seatedAtTable(player) && GroundSeats.sitting(m)
+				&& m.distanceTo(player) < NEAR) {
+				m.getLookControl().setLookAt(player, 30.0F, 30.0F);
+				return false;
+			}
+			GroundSeats.standUp(m);
+			return true;
+		});
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (!seatedAtTable(player)) {
 				SEATED.remove(player.getUUID());
@@ -187,9 +234,11 @@ public final class TableTalk {
 			}
 			long day = player.level().getOverworldClockTime() / 24000L;
 			for (Mob m : Bonds.companions(player, NEAR)) {
-				if (Comrades.target(m) == null && !Comrades.busy(m) && m.getAttachedOrElse(SAT, -1L) != day) {
+				if (Comrades.target(m) == null && !Comrades.busy(m) && m.getAttachedOrElse(SAT, -1L) != day && !COMING.containsKey(m)) {
 					SEATED.put(player.getUUID(), 0);
-					sit(player, m, day);
+					m.setAttached(SAT, day);
+					m.getNavigation().moveTo(player, 0.6);
+					COMING.put(m, new Coming(player.getUUID(), day, now + COME_TICKS));
 					break;
 				}
 			}
@@ -223,10 +272,8 @@ public final class TableTalk {
 		return false;
 	}
 
-	/** {@code m} comes over, shares a meal if there is one, and asks. */
-	private static void sit(ServerPlayer player, Mob m, long day) {
-		m.setAttached(SAT, day);
-		m.getNavigation().moveTo(player, 0.6);
+	/** {@code m}, sat down beside you, shares a meal if there is one, and asks. */
+	private static void talk(ServerPlayer player, Mob m) {
 		m.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		ServerLevel level = player.level();
 		ItemStack food = food(player);
