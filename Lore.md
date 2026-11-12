@@ -1349,3 +1349,18 @@ fire, which is when the careful strike, or poison the pot. Every trade has a kna
 trusts: the scholar's tongues, the cleric's field medicine, the farmer's foraging, the trader's haggling, the
 leatherworker's packing, the fletcher's quiet; the bands have their own trackers, healers and tongue-speakers. (patch 5) A companion is still their own: while you're away they may take a day's hire from another traveller, the old tavern custom of the road, and come home with coin, a gift and the word that was said of them; they'll gather for you while you're gone. The bands take what's left lying: a companion found downed and alone is carried off and made to fight for their camp until bought back, beaten down and carried home, or until they break free; the camp sends them to you with its price, in coin or in a job of work. A companion can be left a want and a purse, and whoever hires them can finish it for the purse. Not every drifter is down and out: old soldiers and knights without a lord sell their swords on the roads, and the ones nobody takes on sell them to the camps. Companions remember the way to places they've been, and bands know their own ground. Free companies of sellswords roam the roads, clearing camps for the spoils, taking bounties off the town boards and carrying the wanted in to the court, and hiring out by the day; a company keeps its friends (food shared, help in a fight) and its grudges, and one beaten comes back down the road harder for it. A camp's tongue-speaker will sell a traveller passage before blood is drawn, a day's peace for a toll, the bands' oldest bargain; and a sellsword turned away may bring a camp's raid down on whoever turned them down. Patch 6 proposes a name for the sickness
 that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
+
+(new) **The dark mirror** (Claude's placement for the pawn picks, patch 6, 2026-11-12, for Andy to approve). What binds
+a companion to a traveller can be taken from them. The Grue's sorcerers, the camps' necromancers and blood witches,
+reach into a fighter at their foe's side and turn them for a while: the eyes go the Grue's red, and they come at the
+one they walked with. A vampire's bite does it to a thrall's measure. A hard blow or a carry breaks it, and a bond that
+runs deep holds out. The same dark is a forbidden art of the death school, **Dominion**, and a traveller who uses it
+on a foe pays as for any forbidden art: the Grue comes a step nearer. **The Murmur** is caught where the dark is
+thick, the deep places and the soul valleys, and passes between companions who rest together; it is never named by
+the sick, only seen in them, the eyes that flicker red, the hand to the head, the strength that isn't theirs. Left, it
+looses them on a town at night. A cleric or a priest of any creed can draw it out (the healing is older than the
+quarrels between faiths), a fall and a waking can shake it, and so can the rare golden fruit. **The masterless**: when
+a traveller is born again into a new life, those who walked with the old one are not born again with them. They walk
+the roads looking for someone, ask any traveller to take them on, and are not right: the Grue's red is in them, and it
+comes out once, at the one who took them in; put down, they wake free of it. Others take the mask and lead bandits,
+and they fight their old master with everything that master taught them.
