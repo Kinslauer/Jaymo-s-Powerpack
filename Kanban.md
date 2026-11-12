@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 05:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 05:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,7 +17,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/legless-crawl-cane-crutch|legless-crawl-cane-crutch]] · 💻 Odysseus · #1354 · in-review
 
 
 ## Needs Andy
