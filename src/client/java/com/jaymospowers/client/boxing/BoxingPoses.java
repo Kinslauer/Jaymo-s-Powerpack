@@ -53,8 +53,10 @@ public final class BoxingPoses {
 	/** The Arrow Slit's guard (both arms: elbows in, forearms up, gloves on the cheeks), its sway (radians, and radians a tick), and its block. */
 	static final float SLIT_PITCH = -1.5F, SLIT_IN = 0.4F, SLIT_FOLD = -1.7F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
 	static final float SLIT_BLOCK_PITCH = -1.6F, SLIT_BLOCK_IN = 0.55F, SLIT_BLOCK_FOLD = -1.65F;
-	/** The Arrow Slit's forward crouch and tucked chin (radians), standing and behind its block. */
-	static final float SLIT_CROUCH = 0.25F, SLIT_CHIN = 0.12F, SLIT_BLOCK_CROUCH = 0.3F;
+	/** The Arrow Slit's forward crouch (radians), standing and behind its block; the head stays up. */
+	static final float SLIT_CROUCH = 0.25F, SLIT_BLOCK_CROUCH = 0.3F;
+	/** Its rounded back: the upper half of the spine curled this much further forward than the lower (radians). */
+	static final float SLIT_HUNCH = 0.2F;
 	// A base is three numbers: the feet apart (each leg out this far, radians), the lead foot ahead and the rear one behind
 	// (radians at the hip), and the knees bent (each thigh this far forward, the shin folded back twice that).
 	/** The Arrow Slit's base: wide and low, and lower still behind its block. */
@@ -107,9 +109,9 @@ public final class BoxingPoses {
 
 	/**
 	 * The elbows as {@link #apply} last posed them: each arm's fold (radians, as {@code KneeBend} takes it), and whether
-	 * it folds across the body rather than forward; and both knees' fold.
+	 * it folds across the body rather than forward; both knees' fold; and the spine's, halfway down the back.
 	 */
-	public record Bends(float right, boolean rightAcross, float left, boolean leftAcross, float knees) {
+	public record Bends(float right, boolean rightAcross, float left, boolean leftAcross, float knees, float spine) {
 	}
 
 	public static final RenderStateDataKey<Bends> BENDS = RenderStateDataKey.create(() -> "jaymospowers:boxing_bends");
@@ -120,6 +122,8 @@ public final class BoxingPoses {
 		boolean across;
 		/** Both knees' fold (kept on the lead arm's elbow only, for want of a better place). */
 		float knees;
+		/** The spine's fold (kept here likewise). */
+		float spine;
 
 		void forward(float fold) {
 			this.fold = fold;
@@ -205,8 +209,7 @@ public final class BoxingPoses {
 					set(rear, !leadRight, SLIT_BLOCK_PITCH, SLIT_BLOCK_IN);
 					leadElbow.forward(SLIT_BLOCK_FOLD);
 					rearElbow.forward(SLIT_BLOCK_FOLD);
-					bend(model, SLIT_BLOCK_CROUCH);
-					model.head.xRot += SLIT_CHIN;
+					leadElbow.spine = hunch(model, SLIT_BLOCK_CROUCH, SLIT_HUNCH);
 					leadElbow.knees = base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_BLOCK_KNEES, 0.0F);
 				}
 				case LONG_GUARD -> {
@@ -266,7 +269,7 @@ public final class BoxingPoses {
 	/** Leaves the elbows on the state for {@link #bendLimbs} and the worn gear. An arm's own across is toward the body: +X for the right arm, which is a negative fold. */
 	private static void keep(AvatarRenderState state, boolean leadRight, Elbow lead, Elbow rear) {
 		Elbow right = leadRight ? lead : rear, left = leadRight ? rear : lead;
-		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across, lead.knees));
+		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across, lead.knees, lead.spine));
 	}
 
 	/** Last thing before a model is drawn: a boxer's elbows ({@link #BENDS}), put back straight once it is drawn ({@code KneeBend.restore}). */
@@ -282,6 +285,7 @@ public final class BoxingPoses {
 		com.jaymospowers.client.KneeBend.bend(h.leftArm, bends.left(), ELBOW, bends.leftAcross());
 		com.jaymospowers.client.KneeBend.bend(h.rightLeg, bends.knees());
 		com.jaymospowers.client.KneeBend.bend(h.leftLeg, bends.knees());
+		com.jaymospowers.client.KneeBend.bend(h.body, bends.spine(), TORSO * 0.5F, false);
 	}
 
 	/** The style's stance when nothing else is happening: where the hands sit, and the small movement that never stops. Returns how far the lead shoulder is turned forward. */
@@ -298,8 +302,7 @@ public final class BoxingPoses {
 				swayShoulders(model, sway);
 				lead.zRot += sway;
 				rear.zRot += sway;
-				bend(model, SLIT_CROUCH);
-				model.head.xRot += SLIT_CHIN;
+				leadElbow.spine = hunch(model, SLIT_CROUCH, SLIT_HUNCH);
 				leadElbow.knees = base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_KNEES, 0.0F);
 				return 0.0F;
 			}
@@ -480,6 +483,20 @@ public final class BoxingPoses {
 			}
 		}
 		return out;
+	}
+
+	/**
+	 * A crouch with a rounded back: the body leans {@code crouch} forward on the whole, its upper half {@code hunch}
+	 * further forward than its lower (the fold of the spine, halfway down, is returned for {@link #bendLimbs}); the
+	 * legs stay under the hips, and the head is left as it is, up.
+	 */
+	private static float hunch(HumanoidModel<?> model, float crouch, float hunch) {
+		float upper = crouch + hunch * 0.5F, lower = crouch - hunch * 0.5F;
+		model.body.xRot += upper;
+		float back = (Mth.sin(upper) + Mth.sin(lower)) * TORSO * 0.5F;
+		model.rightLeg.z += back;
+		model.leftLeg.z += back;
+		return -hunch;
 	}
 
 	/** Tips the body and head to the side ({@code amount} radians; positive is the boxer's left). */
