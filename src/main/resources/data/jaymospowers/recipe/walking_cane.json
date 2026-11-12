@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "PS",
+    " S",
+    " S"
+  ],
+  "result": {
+    "id": "jaymospowers:walking_cane",
+    "count": 1
+  }
+}
