@@ -3253,3 +3253,11 @@ Nothing here has been played in a client yet; expect tuning.
   `tools/gen_crutches.py`. Transformed Xenoforms and creative players are not held down.
 - Compiled; not played. The third-person hold (the stick hanging from the fist to the ground) is set by eye from the
   numbers and may need its angle tuned.
+
+## 0.22.65 (2026-11-12): downed enemies take executions lying down
+
+- Andy: "downed enemies should react to the executions, i just watched jung wild slam a few zombies and they popped up after, instead of being beaten into the ground".
+- **No more popping up**: a downed mob only looks laid out; to the game it still stands, so Jaymo's Kitchen started its corpse upright and let it topple. Anyone who dies downed (a finisher, a symbiote execution, a mob's execution, a takedown, bleeding out, the third hit) now hands the corpse how it lay (`DownedLie.markBody`, called from `Downed.finish`): crawlers face down, the rest on their backs or side, head the same way. Same for one tripped by a bolas and finished there.
+- **Reactions while it plays** (`ExecutionReact`, drawn through `DownedPose`): the body braces before and between blows (arms over the face, or over the back of the head face down), each crushing blow (Wild Slam, Skull Crusher, rock, flail, staff, ki, the symbiote's stomps and pounds) drives it into the ground and it bounces off, limbs flung up; a blade or spear pins it rigid and quivering; a cut or shot jerks it once; the neck snap, garrotte and the symbiote's chokes, bites and tearing are fought, hands at the grip and heels kicking. Animals, bugs and birds get the drop and bounce and kick with their own legs. No sit-ups while being finished.
+- Needs Jaymo's Kitchen's matching change for the corpse to start lying (older Kitchen: reactions only).
+- Built; not played.
