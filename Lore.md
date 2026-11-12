@@ -1035,7 +1035,7 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
   they were born and raised on the Overworld, far removed from Hail.
 
-  (new) **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
+  **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
   hail"). Not every Frostborn on the Overworld was born in the snowfields. Some come down from Hail alone, on one of
   their people's ships, grown and with nobody here who knows their name. They wear their people's glass and carry
   themselves like it. In the life story this is the Frostborn whom nobody raised here, and that line names Hail.
