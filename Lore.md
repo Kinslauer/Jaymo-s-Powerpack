@@ -1047,6 +1047,11 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   other tech found in the otherwise medieval Overworld, and people talk about it: everyone loves having Frostborn tech.
   They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
   they were born and raised on the Overworld, far removed from Hail.
+
+  **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
+  hail"). Not every Frostborn on the Overworld was born in the snowfields. Some come down from Hail alone, on one of
+  their people's ships, grown and with nobody here who knows their name. They wear their people's glass and carry
+  themselves like it. In the life story this is the Frostborn whom nobody raised here, and that line names Hail.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -1250,6 +1255,12 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+(new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
+belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
+scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
+a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
+answer, and no stick helps the one who has lost both.
+
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
@@ -1287,7 +1298,7 @@ Elements found in the mods that can't be placed without inventing something big.
 
 - **The elder alien's people.** Their species, their kingdom's name and look, and the ruler's name wait on the models
   Andy is finding inspiration for.
-- **Hail's name in the game.** Whether any line names Hail, or only Frostborn talk of "home", is open.
+- **Hail's name in the game.** The life story's traveller line names Hail (2026-11-12). Whether villagers' talk names it, or only says "home", is still open.
 
 The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,

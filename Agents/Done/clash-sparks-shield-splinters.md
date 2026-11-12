@@ -31,4 +31,4 @@ wood from shattering shields", "some of the fighters should have shields so the 
 
 ## Done
 - 2026-11-11 15:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-11 21:35 PRs #1288 and #1289 are merged (merge commits, so the auto-tidy missed them): marked done.
+- 2026-11-12 05:20 PR #1288 is merged into master; moved to Agents/Done.
