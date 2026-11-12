@@ -4,6 +4,7 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigHelm;
 import com.jaymospowers.rig.RigNet;
+import com.jaymospowers.rig.RigPicks;
 import com.jaymospowers.rig.RigScan;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Locale;
@@ -28,7 +29,7 @@ import net.minecraft.world.item.Items;
  */
 final class RigMenuScreen extends Screen {
 	/** Ring radius, tile size, and the dead zone in the middle (no pick). */
-	private static final int RADIUS = 62;
+	private static final int RADIUS = 84;
 	private static final int TILE = 26;
 	private static final int DEAD_ZONE = 24;
 	private static final int ACCENT = 0xFF5FE6FF;
@@ -38,11 +39,11 @@ final class RigMenuScreen extends Screen {
 
 	/** The entries, clockwise from the top. */
 	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
-		RigNet.FACEPLATE, RigNet.NIGHT};
-	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night"};
-	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1};
+		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK};
+	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0};
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private static final int SLICE = 360 / ACTIONS.length;
 
 	private int selected = -1;
@@ -62,6 +63,12 @@ final class RigMenuScreen extends Screen {
 			case 5 -> Items.ARMOR_STAND;
 			case 6 -> Items.SHIELD;
 			case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
+			case 9 -> Items.COPPER_INGOT;
+			case 10 -> Items.COMPASS;
+			case 11 -> Items.CLOCK;
+			case 12 -> Items.PLAYER_HEAD;
+			case 13 -> Items.GOLD_INGOT;
+			case 14 -> Items.ARROW;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -131,7 +138,7 @@ final class RigMenuScreen extends Screen {
 		if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
 			return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
 		}
-		if ((action == RigNet.CALL || action == RigNet.SENTRY) && !core) {
+		if ((action == RigNet.CALL || action == RigNet.SENTRY || action == RigPicks.DRONES || action == RigPicks.DECOY || action == RigPicks.FIELD) && !core) {
 			return Component.translatable("gui.jaymospowers.rig_menu.no_core");
 		}
 		if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM) && !Rig.fullSet(player)) {

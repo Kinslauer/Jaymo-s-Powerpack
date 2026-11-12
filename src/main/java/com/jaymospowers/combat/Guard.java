@@ -432,6 +432,7 @@ public final class Guard {
 		Timing timing = timing(player, source, player.getTicksUsingItem());
 		if (timing.parried()) {
 			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
+			com.jaymospowers.rig.RigField.noteBlow(player, amount);
 			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
 			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
 			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
