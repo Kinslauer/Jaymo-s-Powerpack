@@ -2,6 +2,7 @@ package com.jaymospowers.client.boxing;
 
 import com.jaymospowers.boxing.Boxing;
 import com.jaymospowers.boxing.BoxingEvades;
+import com.jaymospowers.boxing.BoxingGear;
 import com.jaymospowers.client.PoseTakeover;
 import com.jaymospowers.client.power.wind.CombatAnimCompat;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -64,12 +65,14 @@ public final class BoxingPoses {
 
 	/** From the avatar renderer's extractRenderState (through FangGauntletsClient): the boxer, if {@code entity} is one. */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
-		if (!(entity instanceof Player player) || !Boxing.boxing(player)) {
+		if (!(entity instanceof Player player)) {
 			state.setData(KEY, null);
 			return;
 		}
+		// not Boxing.boxing: a player's levels are told only to that player, but the style everyone sees is only ever
+		// set to a learned one (Boxing.use), so the style and fist gear in hand are enough here
 		Boxing.Style style = Boxing.style(player);
-		if (style == null) {
+		if (style == null || player.isSpectator() || !BoxingGear.isGear(player.getMainHandItem())) {
 			state.setData(KEY, null);
 			return;
 		}

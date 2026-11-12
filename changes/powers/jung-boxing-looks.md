@@ -10,3 +10,5 @@
   (`LOOK`, the breath), `boxing/BoxingEvades` (`MOVED`).
 - **Not built locally and not seen in game.** Every angle was set without a render; expect to tune the knobs at the top
   of `BoxingPoses`. First person shows none of it.
+- Other players see a boxer's stance too: the poses go by the style everyone is told and the fist gear in hand, since
+  a player's levels are told only to that player.
