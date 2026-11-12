@@ -1303,3 +1303,11 @@ Elements found in the mods that can't be placed without inventing something big.
 The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,
 costumes, the classes, valor and temperaments. The Excalibur look and the other art toggles stay out of the lore.
+
+(new) **The tundra** (Tundra thread, 2026-11-12; Andy picked all of Klei_Wright's tundra concept). In the far cold of
+the Overworld, past the snowy taiga, the soil ends. The old ice scraped it away long ago and left the world's oldest
+rock bare: dark deepslate to the surface, crossed by strips of older basalt that the smiths call greenstone, banded
+with iron. Nobody made it and no kingdom claims it. Lichen is slowly turning the rock back into soil, moss follows the
+lichen, and low red and yellow shrubs follow the moss; at the edge stands the lichen woodland, where spruce grows no
+taller than a man. Muskox graze the lichen in herds and white bears hunt the herds. Frostborn villages in the cold
+lands keep muskox for their wool. None of this is told on a screen: it is only there to be seen.
