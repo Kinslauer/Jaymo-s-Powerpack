@@ -1,6 +1,6 @@
 ---
-status: running
-task: Darktide overhaul (power PR 1339 up, looks next), then Resonance buff and Blindness as a condition
+status: in-review
+task: Darktide overhaul (power, looks) + Blindness as a condition and Resonance buff, all in PR 1339
 branch: claude/project-thread-qtqlao
 with: 
 pr: 1339
@@ -10,6 +10,11 @@ started: 2026-11-12
 owns:
   - src/main/java/com/jaymospowers/power/darktide/
   - src/client/java/com/jaymospowers/client/power/darktide/
+  - src/main/java/com/jaymospowers/power/resonance/
+  - src/main/java/com/jaymospowers/power/blindness/
+  - src/client/java/com/jaymospowers/client/power/blindness/
+  - src/main/java/com/jaymospowers/core/fx/MagicFx.java
+  - src/client/java/com/jaymospowers/client/fx/MagicFxClient.java
 ---
 # Darktide overhaul
 
@@ -23,4 +28,8 @@ owns:
 - Owns nothing yet. Once building: `power/darktide/`, `client/power/darktide/`, then `power/resonance/` and `power/blindness/`.
 
 ## Done
-Nothing built.
+PR 1339, three commits (2026-11-12), compiled, not played:
+- Darktide power: Flow only cost, tides, Maelstrom, Blade of Dark Water.
+- Darktide looks: MagicFx wave, stroke, pool; `DarktideLooks`.
+- Blindness is a condition (`Blind`), power removed; Resonance gains Quiet, Sky Sight, painted Pulse, fork awakening.
+Waiting on Andy: merge, and his word on the eye-loss chances and the vigil + fork rule (Decisions.md).
