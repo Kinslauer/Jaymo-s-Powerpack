@@ -300,7 +300,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		ItemStack hand = this.getMainHandItem();
 		// (0.7.184) after enough failed shots it puts the bow away and fights hand to hand for a while
-		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this);
+		// (out of arrows it draws its blade too: MobAmmo)
+		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand) && !RangedTactics.melee(this)
+			&& (this.level().isClientSide() || MobAmmo.has(this, MobAmmo.Kind.ARROWS));
 	}
 
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
@@ -823,9 +825,14 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			Sorcery.cast(this, target);
 			return;
 		}
+		// an arrow out of its quiver: none left, none loosed (MobAmmo)
+		if (!MobAmmo.spend(this, MobAmmo.Kind.ARROWS)) {
+			return;
+		}
 		ItemStack bow = firingWeapon(this);
 		ItemStack arrowStack = new ItemStack(Items.ARROW);
 		net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow = net.minecraft.world.entity.projectile.ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
+		MobAmmo.canBePickedUp(arrow);
 		double xd = target.getX() - this.getX();
 		double yd = target.getY(0.3333333333333333) - arrow.getY();
 		double zd = target.getZ() - this.getZ();

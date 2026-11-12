@@ -166,6 +166,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
 		RangedTactics.register();
+		MobAmmo.register();
 		Tempers.register();
 		// (0.7.184) before Retinue, Pickpocket and Quests: sneak-using your own child with an earned blood waiting
 		Lineage.register();
