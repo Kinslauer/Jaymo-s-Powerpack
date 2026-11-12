@@ -451,6 +451,14 @@ public final class Breaks {
 	}
 
 	/**
+	 * How many of {@code entity}'s arms work (0 to 2): an arm broken (out of a splint or not, unless on adrenaline) or gone
+	 * doesn't. The prone haul up a block goes by it ({@code ProneHaul}).
+	 */
+	public static int workingArms(LivingEntity entity) {
+		return (armBroken(entity, InteractionHand.MAIN_HAND) ? 0 : 1) + (armBroken(entity, InteractionHand.OFF_HAND) ? 0 : 1);
+	}
+
+	/**
 	 * (0.14.5) Whether {@code entity} can hold on to a wall or a bar (freerunning's climb and bar swing): both arms sound
 	 * (none broken or gone, splinted or not) and neither foot sprained.
 	 */
