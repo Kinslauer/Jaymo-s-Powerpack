@@ -72,6 +72,9 @@ public final class DarktideStatus {
 
 	/** Stuns {@code target} for {@code ticks} (or keeps a longer stun). */
 	public static void stun(LivingEntity target, int ticks) {
+		if (com.jaymospowers.combat.Stances.immovable(target)) {
+			return;
+		}
 		long until = target.level().getGameTime() + ticks;
 		Long now = target.getAttached(DarktideState.STUN);
 		if (now != null && now >= until) {

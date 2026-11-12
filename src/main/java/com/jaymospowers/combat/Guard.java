@@ -231,6 +231,7 @@ public final class Guard {
 		Swat.init();
 		BladeStyle.init();
 		TwoBlades.init();
+		Stances.init();
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && met(player, source, amount)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -434,6 +435,9 @@ public final class Guard {
 			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 			com.jaymospowers.rig.RigField.noteBlow(player, amount);
 			parried(player, melee ? attacker : null, from, timing == Timing.PERFECT);
+			if (melee) {
+				Stances.handBack(player, attacker, amount, timing == Timing.PERFECT);
+			}
 			// a perfect parry with a blade bats an arrow back at whoever loosed it (never a ball: timing() only blocks those)
 			if (timing == Timing.PERFECT && direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow
 				&& Armed.kind(player.getUseItem()) != null) {
@@ -532,6 +536,9 @@ public final class Guard {
 
 	/** Reeling: a mob's mind stops (Darktide's stun), a player is slowed and weakened for as long. */
 	private static void stagger(LivingEntity target, int ticks) {
+		if (Stances.immovable(target)) {
+			return;
+		}
 		DarktideStatus.stun(target, ticks);
 		if (target instanceof Player) {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, 2, false, false));
@@ -544,6 +551,7 @@ public final class Guard {
 	 * striking lands harder, once.
 	 */
 	public static float riposte(LivingEntity victim, DamageSource source, float damage) {
+		damage = Stances.adjust(victim, source, damage);
 		if (!(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player || RIPOSTES.isEmpty()) {
 			return damage;
 		}
