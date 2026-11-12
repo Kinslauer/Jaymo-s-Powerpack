@@ -1,0 +1,14 @@
+{
+  "catalyst": "minecraft:glass_bottle",
+  "essences": {
+    "mind": 6,
+    "salt": 6,
+    "shadow": 4,
+    "water": 4
+  },
+  "result": {
+    "item": "jaymospowers:dampening_draught",
+    "count": 1
+  },
+  "research": "dampening"
+}

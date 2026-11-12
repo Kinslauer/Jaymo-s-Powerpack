@@ -1,0 +1,22 @@
+{
+  "centre": "minecraft:glass_bottle",
+  "components": [
+    "minecraft:totem_of_undying",
+    "minecraft:echo_shard",
+    "jaymospowers:ichor",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "spirit": 20,
+    "arcana": 16,
+    "mind": 10,
+    "salt": 10
+  },
+  "instability": 8,
+  "result": {
+    "item": "jaymospowers:release_draught",
+    "count": 1
+  },
+  "research": "release",
+  "flux": 10
+}

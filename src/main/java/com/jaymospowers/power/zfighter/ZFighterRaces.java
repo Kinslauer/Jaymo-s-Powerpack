@@ -27,6 +27,8 @@ final class ZFighterRaces {
 		ZFighterVerdantMerge.init();
 		// (0.18.48) the Divine-born's Flying Sword and Eight-Sign Circle
 		ZFighterDivineMoves.init();
+		ZFighterSunMoon.init();
+		ZFighterKiThrow.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			ZFighterEarthlingRace.clear();
@@ -41,6 +43,8 @@ final class ZFighterRaces {
 		ZFighterVerdantMerge.forget(player);
 		ZFighterFrostReserve.forget(player);
 		ZFighterWarriorComeback.forget(player);
+		ZFighterSunMoon.forget(player);
+		ZFighterKiThrow.forget(player);
 	}
 
 	/** Every tick, per Z Fighter, before the ki is clamped. */
@@ -49,6 +53,8 @@ final class ZFighterRaces {
 			ZFighterVerdantMerge.attributes(player);
 		}
 		ZFighterBioForms.tick(player, live, max);
+		ZFighterSunMoon.tick(player, live, max);
+		ZFighterKiThrow.tick(player, live);
 		switch (ZFighterLineage.of(player)) {
 			case ZFighterLineage.EARTHLING -> ZFighterEarthlingRace.tick(player, live);
 			case ZFighterLineage.VERDANT -> ZFighterVerdantWater.tick(player, live);

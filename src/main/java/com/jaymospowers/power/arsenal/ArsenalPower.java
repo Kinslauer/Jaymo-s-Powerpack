@@ -427,6 +427,7 @@ public final class ArsenalPower implements Power {
 				com.jaymospowers.core.PowerRoads.arsenalFuture(player);
 			}
 		}
+		stacks = wild == null ? com.jaymospowers.gear.arrow.RiftArrows.sometimes(stacks, player.getRandom()) : stacks;
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
 		}

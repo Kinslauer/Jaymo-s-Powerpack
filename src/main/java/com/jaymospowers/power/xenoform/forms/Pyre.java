@@ -77,6 +77,17 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
+		// sneak + R / V / B: rays, the flame ring, a fire wall (the fire kit's gaps)
+		if (down && player.isShiftKeyDown() && (key == PowerKey.ABILITY_1 || key == PowerKey.ABILITY_3 || key == PowerKey.ABILITY_4)) {
+			if (key == PowerKey.ABILITY_1) {
+				com.jaymospowers.power.ember.FireKit.rays(player);
+			} else if (key == PowerKey.ABILITY_3) {
+				com.jaymospowers.power.ember.FireKit.ring(player, false);
+			} else {
+				com.jaymospowers.power.ember.FireKit.wall(player);
+			}
+			return;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			// a toggle: G takes off, G again ends it (the client flies it, as a Z Fighter's flight)
 			if (down) {
@@ -174,6 +185,12 @@ public final class Pyre extends XenoForm {
 			return false;
 		}
 		return true;
+	}
+
+	/** Z tap: a column of fire from the sky onto the spot looked at. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		return com.jaymospowers.power.ember.FireKit.column(player);
 	}
 
 	@Override

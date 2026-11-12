@@ -105,6 +105,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
+		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
@@ -234,6 +235,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
+		com.jaymospowers.client.gear.GearClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
 		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
 		com.jaymospowers.client.jewellery.JewelleryClient.init();

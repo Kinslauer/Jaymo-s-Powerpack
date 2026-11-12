@@ -52,7 +52,7 @@ public final class TrippedPose {
 	static final float LEGS_MID_X = 1.9F;
 
 	/** This frame's trip: {@code age} ticks in (with the partial tick), its {@code ticks} on the ground, the fall's {@code tip} (0 standing, 1 flat, a little over in the bounce). */
-	record Pose(float age, int ticks, float tip, int id) {
+	record Pose(float age, int ticks, float tip, int id, boolean back) {
 	}
 
 	static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:tripped");
@@ -78,13 +78,13 @@ public final class TrippedPose {
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		Tripped.Trip trip = entity instanceof Player ? null : entity.getAttached(Tripped.TRIP);
-		if (trip == null) {
+		Tripped.Trip trip = entity.getAttached(Tripped.TRIP);
+		if (trip == null || entity instanceof Player && !trip.back()) {
 			state.setData(KEY, null);
 			return;
 		}
 		float age = Math.max(0.0F, entity.level().getGameTime() + partialTicks - trip.start());
-		state.setData(KEY, new Pose(age, trip.ticks(), tip(age, trip.ticks()), entity.getId()));
+		state.setData(KEY, new Pose(age, trip.ticks(), tip(age, trip.ticks()), entity.getId(), trip.back()));
 	}
 
 	/**
@@ -119,6 +119,12 @@ public final class TrippedPose {
 		if (pose.age() < Tripped.WRAP_TICKS) {
 			// teetering, side to side, as the legs are pulled together
 			poseStack.rotate(Axis.ZP.rotationDegrees(TEETER_SWAY * Mth.sin(pose.age() * 1.6F) * (1.0F - pose.age() / Tripped.WRAP_TICKS)));
+		}
+		if (pose.back()) {
+			// swept off its feet: the same fall mirrored, flat on its back
+			poseStack.rotate(Axis.XP.rotationDegrees(90.0F * tip));
+			poseStack.translate(0.0F, -height * 0.555F * flat * flat, -FACE_DOWN_LIFT * flat * flat);
+			return;
 		}
 		poseStack.rotate(Axis.XP.rotationDegrees(-90.0F * tip));
 		poseStack.translate(0.0F, -height * 0.555F * flat * flat, FACE_DOWN_LIFT * flat * flat);
@@ -158,6 +164,10 @@ public final class TrippedPose {
 		float wrap = Tripped.WRAP_TICKS, falls = wrap + Tripped.FALL_TICKS;
 		int ticks = pose.ticks();
 		float a = state.ageInTicks + (pose.id() & 15);
+		if (pose.back()) {
+			swept(f, pose, a);
+			return;
+		}
 		if (age < wrap) {
 			// the cord cinches: legs pulled together, arms windmilling for balance, a look down at the feet
 			float mill = Mth.sin(a * 1.4F);
@@ -189,6 +199,29 @@ public final class TrippedPose {
 		bound(f, KICK_LIFT * kick);
 		f.set(PoseBlend.BODY, 0.0F, 0.12F * Mth.sin(a * KICK_RATE * 0.5F) * fit, 0.0F);
 		f.set(PoseBlend.HEAD, -1.0F + 0.15F * fit, 0.25F * Mth.sin(a * 0.2F), 0.0F);
+	}
+
+	/** Swept off the feet: arms thrown up as the legs go, then flat on the back, arms and legs sprawled, head up and gasping. */
+	private static void swept(PoseBlend.Frame f, Pose pose, float a) {
+		float age = pose.age();
+		int ticks = pose.ticks();
+		float falls = Tripped.WRAP_TICKS + Tripped.FALL_TICKS;
+		if (age < falls || age >= ticks) {
+			float up = age >= ticks ? PoseBlend.smooth((age - ticks) / Tripped.GET_UP_TICKS) : 0.0F;
+			f.set(PoseBlend.RIGHT_ARM, Mth.lerp(up, -2.9F, -1.3F), 0.0F, 0.6F);
+			f.set(PoseBlend.LEFT_ARM, Mth.lerp(up, -2.9F, -1.3F), 0.0F, -0.6F);
+			f.set(PoseBlend.RIGHT_LEG, -0.5F, 0.0F, 0.1F);
+			f.set(PoseBlend.LEFT_LEG, -0.5F, 0.0F, -0.1F);
+			f.set(PoseBlend.HEAD, 0.4F, 0.0F, 0.0F);
+			f.scale(1.0F - up * up);
+			return;
+		}
+		float heave = Mth.sin(a * 0.35F);
+		f.set(PoseBlend.RIGHT_ARM, 0.0F, 0.0F, 1.15F + 0.1F * heave);
+		f.set(PoseBlend.LEFT_ARM, 0.0F, 0.0F, -1.15F - 0.1F * heave);
+		f.set(PoseBlend.RIGHT_LEG, 0.0F, 0.0F, 0.28F);
+		f.set(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -0.28F);
+		f.set(PoseBlend.HEAD, -0.5F + 0.1F * heave, 0.0F, 0.0F);
 	}
 
 	/** Both legs straight and pressed together, raised back off the ground by {@code lift} (radians) as one. */
@@ -234,7 +267,7 @@ public final class TrippedPose {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S living, float yRot, float xRot) {
 			Pose pose = living.getData(KEY);
-			if (pose == null || living.isInvisible || living.deathTime > 0.0F || pose.age() >= pose.ticks()) {
+			if (pose == null || pose.back() || living.isInvisible || living.deathTime > 0.0F || pose.age() >= pose.ticks()) {
 				// (as it gets up the cord's off: Kingdoms drops the bolas at its feet)
 				return;
 			}

@@ -244,6 +244,10 @@ final class ZFighterBattle {
 			}
 			// (0.17.45) the ki weapon's edge, on top of the cap: bare-handed, so still fists
 			damage = ZFighterKiWeapon.boost(player, source, damage);
+			// Hold Fast: the nearer to going down, the harder he hits (held under the rematch edge's: see ZFighterHoldFast)
+			damage *= ZFighterHoldFast.factor(player, grudge(player, victim));
+			// and the bracers' paid-out bar (ZFighterBracers)
+			damage *= ZFighterBracers.boost(player, player.level().getGameTime());
 			return damage;
 		}
 		return damage;
