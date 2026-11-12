@@ -44,6 +44,6 @@ abstract class LivingEntityHurtMixin {
 		// (0.7.433) a tribe's king, while his captains stand (SwornCaptains)
 		// (0.7.492) last, a kneeling boss takes a riposte (BossPosture)
 		// (and Watched, the gaze built from hiding, spends itself on the blow: RogueGambits)
-		return com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))))))));
+		return com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))))));
 	}
 }
