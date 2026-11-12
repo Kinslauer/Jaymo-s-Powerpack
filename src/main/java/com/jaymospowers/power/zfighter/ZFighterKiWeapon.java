@@ -41,6 +41,24 @@ public final class ZFighterKiWeapon {
 	static final double[] REACH = {1.0, 1.5, 2.0};
 	static final int TOGGLE_COOLDOWN = 20;
 	private static final Identifier REACH_ID = JaymosPowers.id("zfighter_ki_weapon_reach");
+	/**
+	 * The ki weapon as an energy blade (Andy's pick from Star Wars: Galaxy in a Cube, ideas only; asked who should carry
+	 * one, Andy: "z fighters"). Its own sounds ({@code tools/gen_ki_blade_sounds.py}): it flares out and draws in, hums
+	 * every {@link #HUM_EVERY} ticks while it is out, and sings on each blow that lands. The body stands armed with it
+	 * (the client's {@code ArmedPose}). A parry made with it out strikes an arrow back at whoever loosed it, at
+	 * {@link #DEFLECT_SPEED} of its speed (never slower than {@link #DEFLECT_MIN} blocks a tick), scattered by
+	 * {@link #DEFLECT_SCATTER}.
+	 */
+	static final int HUM_EVERY = 36;
+	static final float HUM_VOLUME = 0.22F;
+	static final double DEFLECT_SPEED = 0.6, DEFLECT_MIN = 0.8;
+	static final float DEFLECT_SCATTER = 3.0F;
+	private static final net.minecraft.sounds.SoundEvent IGNITE = sound("ignite"), RETRACT = sound("retract"), HUM = sound("hum"),
+		SWING = sound("swing"), DEFLECT = sound("deflect");
+
+	private static net.minecraft.sounds.SoundEvent sound(String name) {
+		return net.minecraft.sounds.SoundEvent.createVariableRangeEvent(JaymosPowers.id("ki_blade." + name));
+	}
 
 	/** The shape he has chosen (kept for good; his own client's training screen shows it). */
 	public static final AttachmentType<Integer> SHAPE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ki_weapon_shape"),
@@ -78,8 +96,7 @@ public final class ZFighterKiWeapon {
 		Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
 		level.sendParticles(ZFighterPower.dust(live), true, false, hand.x, hand.y, hand.z, 12, 0.3, 0.4, 0.3, 0.05);
 		level.sendParticles(MagicFx.LIGHT, true, false, hand.x, hand.y, hand.z, 6, 0.2, 0.3, 0.2, 0.05);
-		level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.9F, 1.4F);
-		level.playSound(null, hand.x, hand.y, hand.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.5F, 2.0F);
+		level.playSound(null, hand.x, hand.y, hand.z, IGNITE, SoundSource.PLAYERS, 0.8F, 0.95F + player.getRandom().nextFloat() * 0.1F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ki_weapon_out",
 			Component.translatable("technique.jaymospowers.zfighter.ki_weapon." + SHAPE_KEYS[shape])).withStyle(ChatFormatting.AQUA));
 	}
@@ -92,7 +109,7 @@ public final class ZFighterKiWeapon {
 			range.removeModifier(REACH_ID);
 		}
 		if (was && sound) {
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.5F, 2.0F);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), RETRACT, SoundSource.PLAYERS, 0.7F, 0.95F + player.getRandom().nextFloat() * 0.1F);
 		}
 	}
 
@@ -136,6 +153,9 @@ public final class ZFighterKiWeapon {
 				range.removeModifier(REACH_ID);
 			}
 		}
+		if (bare && player.tickCount % HUM_EVERY == 0) {
+			player.level().playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), HUM, SoundSource.PLAYERS, HUM_VOLUME, 1.0F);
+		}
 		if (bare && !player.isCreative() && !live.raging()) {
 			live.ki -= DRAIN_PER_SECOND / 20.0F * ZFighterAndroid.costFactor(player);
 			if (live.ki <= 0.0F) {
@@ -151,6 +171,36 @@ public final class ZFighterKiWeapon {
 		if (shape < 0 || !player.getMainHandItem().isEmpty() || source.getDirectEntity() != player || !source.is(DamageTypes.PLAYER_ATTACK)) {
 			return damage;
 		}
+		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SWING, SoundSource.PLAYERS, 0.7F, 0.9F + player.getRandom().nextFloat() * 0.2F);
 		return damage + BONUS[shape] * ZFighterPower.kiPower(player, ZFighterPower.live(player));
+	}
+
+	/** Whether his ki weapon is out and in use (an empty hand). Both sides. */
+	public static boolean wielded(net.minecraft.world.entity.player.Player player) {
+		return out(player) >= 0 && player.getMainHandItem().isEmpty();
+	}
+
+	/**
+	 * His guard parried {@code shot} with the ki weapon out: an arrow like it flies back at whoever loosed it (the one
+	 * that struck is spent on the guard). It can't be picked up.
+	 */
+	static void deflect(ServerPlayer player, net.minecraft.world.entity.projectile.arrow.AbstractArrow shot) {
+		if (!wielded(player)) {
+			return;
+		}
+		ServerLevel level = player.level();
+		net.minecraft.world.entity.Entity shooter = shot.getOwner();
+		Vec3 from = player.getEyePosition().add(player.getLookAngle().scale(0.8));
+		Vec3 dir = shooter != null && shooter != player && shooter.isAlive()
+			? shooter.position().add(0.0, shooter.getBbHeight() * 0.6, 0.0).subtract(from).normalize() : player.getLookAngle();
+		net.minecraft.world.entity.projectile.arrow.Arrow back = new net.minecraft.world.entity.projectile.arrow.Arrow(level, player,
+			new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW), null);
+		back.setPos(from);
+		back.pickup = net.minecraft.world.entity.projectile.arrow.AbstractArrow.Pickup.DISALLOWED;
+		back.shoot(dir.x, dir.y + 0.05, dir.z, (float)Math.max(DEFLECT_MIN, shot.getDeltaMovement().length() * DEFLECT_SPEED), DEFLECT_SCATTER);
+		level.addFreshEntity(back);
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, from.x, from.y, from.z, DEFLECT, SoundSource.PLAYERS, 0.9F, 0.95F + player.getRandom().nextFloat() * 0.1F);
+		level.sendParticles(MagicFx.LIGHT, true, false, from.x, from.y, from.z, 5, 0.15, 0.15, 0.15, 0.05);
 	}
 }

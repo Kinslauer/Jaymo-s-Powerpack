@@ -1406,6 +1406,70 @@
 			}
 		]
 	},
+	"ki_blade.ignite": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.ignite",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/ignite_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/ignite_2"
+			}
+		]
+	},
+	"ki_blade.retract": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.retract",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/retract_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/retract_2"
+			}
+		]
+	},
+	"ki_blade.hum": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.hum",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/hum_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/hum_2"
+			}
+		]
+	},
+	"ki_blade.swing": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/swing_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_2"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_3"
+			},
+			{
+				"name": "jaymospowers:ki_blade/swing_4"
+			}
+		]
+	},
+	"ki_blade.deflect": {
+		"subtitle": "subtitles.jaymospowers.ki_blade.deflect",
+		"sounds": [
+			{
+				"name": "jaymospowers:ki_blade/deflect_1"
+			},
+			{
+				"name": "jaymospowers:ki_blade/deflect_2"
+			},
+			{
+				"name": "jaymospowers:ki_blade/deflect_3"
+			}
+		]
+	},
 	"helm.breath": {
 		"subtitle": "subtitles.jaymospowers.helm.breath",
 		"sounds": [

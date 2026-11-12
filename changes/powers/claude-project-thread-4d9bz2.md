@@ -72,3 +72,8 @@ of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
   sprint or are hurt. `/helmview off` turns it off. Breath synthesised (`tools/gen_helm_breath.py`).
 - **Our own title splashes**: the title screen's yellow line now comes from 45 of the pack's own lines
   (`assets/minecraft/texts/splashes.txt`). A first draft for Andy to cut and add to.
+- **The Z Fighter's ki weapon is the energy blade** (Andy, asked who should carry one: "z fighters"). It has its own
+  sounds now: it flares out and draws in, hums while it is out and sings on every blow that lands
+  (`tools/gen_ki_blade_sounds.py`). With it out he stands armed (the blade one-handed, the scythe and lance as
+  polearms). A parry made with it out strikes an arrow back at whoever loosed it. Cost, damage and reach are unchanged,
+  and its blows still count as fists.

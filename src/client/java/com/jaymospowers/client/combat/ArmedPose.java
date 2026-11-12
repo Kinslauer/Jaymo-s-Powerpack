@@ -122,6 +122,12 @@ public final class ArmedPose {
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		ItemStack main = entity.getMainHandItem();
 		Armed.Kind kind = Armed.kind(main);
+		if (kind == null && entity instanceof net.minecraft.world.entity.player.Player zf && com.jaymospowers.power.zfighter.ZFighterKiWeapon.wielded(zf)
+			&& !com.jaymospowers.power.zfighter.ZFighterGuard.guarding(zf)) {
+			// a Z Fighter's ki weapon is a weapon in the hand: the blade one-handed, the scythe and the lance as polearms
+			kind = com.jaymospowers.power.zfighter.ZFighterKiWeapon.out(zf) == com.jaymospowers.power.zfighter.ZFighterKiWeapon.BLADE
+				? Armed.Kind.ONE_HAND : Armed.Kind.POLE;
+		}
 		long now = entity.level().getGameTime();
 		Seen seen = SEEN.get(entity.getId());
 		long drawn = seen == null ? Long.MIN_VALUE : seen.drawn();
