@@ -1403,5 +1403,5 @@ the blow tells; fight up to your waist in a river, on ice or poisoned, and it gl
 (the K screen's attributes), and each keeps out something: the quick are not where the blast lands, the hardy shake
 off poison, the steady hold through fear and keep a spell through a blow, the sharp see through a charm, the
 learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
-until it drops where it stands. The dead the Grue raises are stubborn, and the first blow that drops one seldom
+until it drops where it stands. The walking dead (the old villagers, worn to almost nothing) are stubborn, and the first blow that drops one seldom
 keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
