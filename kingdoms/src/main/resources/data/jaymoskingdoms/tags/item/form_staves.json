@@ -64,6 +64,10 @@
     {
       "id": "weaponmod:halberd.netherite",
       "required": false
+    },
+    {
+      "id": "jaymospowers:twinblade",
+      "required": false
     }
   ]
 }

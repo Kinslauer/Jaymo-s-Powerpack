@@ -225,6 +225,8 @@ public final class Guard {
 				Optional.of(lookup.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypeTags.BYPASSES_SHIELD)),
 				Optional.of(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.TRIDENT_HIT)),
 				Optional.of(SoundEvents.SHIELD_BREAK)))));
+		// (a sneaking join or parting of a Twinblade comes before a raised guard)
+		com.jaymospowers.armory.Twinblade.init();
 		UseItemCallback.EVENT.register(Guard::use);
 		Swat.init();
 		BladeStyle.init();

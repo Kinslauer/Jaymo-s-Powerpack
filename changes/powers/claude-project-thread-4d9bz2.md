@@ -1,6 +1,6 @@
 # the armed body and special cuts - stance, draw, flip, parry lines, swatted shots
 Andy's picks from Star Wars: Galaxy in a Cube (All Rights Reserved, 1.20.1 only: ideas only, every pose, name and line
-of code is ours). Patches 1 to 4 of 6 (the Twinblade still to come) of the SWGC swordplay picks.
+of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
 - **Armed stance** (`client/combat/ArmedPose`, `combat/Armed`): with a weapon in hand the whole body changes. Standing,
   the weapon shoulder turns forward, the blade is held out ahead, the other hand goes back, the feet set apart and the
   weight shifts slowly. Walking, the blade is carried low at the side; running, it trails behind and you lean into it.
@@ -40,6 +40,14 @@ of code is ours). Patches 1 to 4 of 6 (the Twinblade still to come) of the SWGC 
 - **Guards at attention** (`client/combat/AttentionPose`): a humanoid mob with a polearm that is standing with nobody
   to fight holds it upright at its side; one with someone to fight (or, with Kingdoms, a guard challenging you) levels
   it in both hands. Their swings are as they were.
+- **The Twinblade** (`armory/Twinblade`; Andy: "an ancient warrior born design, not often wielded by many, and the
+  schematic is found in the stormborn dungeon"): the Twinblade Schematic turns up in the Stormborn Tomb (35% in the
+  boss's hoard, 10% in the last chest). Use it to learn the joining (the sheet is used up). Then sneak and use with two
+  swords of the same make, one in each hand: they become one Twinblade that strikes for the sword's damage plus 1, a
+  little slower, lasts as long as the two together, and is held, swung and guarded with like a quarterstaff (it takes
+  Kingdoms' Mill Charge). Sneak and use it with the other hand empty to part the two again, the wear shared. No recipe.
+  Their enchantments sleep while joined, and a Twinblade that breaks takes both swords with it. Our own sprite
+  (`tools/gen_twinblade.py`).
 - The stance and the guard are poses of ours, so Entity Model Features (Fresh Animations, Touch'n Motion) pauses on a
   body while they're on, as it does for the Fang Gauntlets' guard.
 - Compiled; not played. Every angle is a first pass set without seeing it in game: the knobs are at the top of

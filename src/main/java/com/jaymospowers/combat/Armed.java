@@ -39,7 +39,7 @@ public final class Armed {
 	/** A blow from above this share of the defender's height is met high; from below this share, low. */
 	static final double HIGH_ABOVE = 1.15, LOW_BELOW = 0.5;
 	/** Words in an item's id that make it a polearm. */
-	static final Set<String> POLE_WORDS = Set.of("spear", "halberd", "glaive", "pike", "lance", "staff", "quarterstaff", "javelin",
+	static final Set<String> POLE_WORDS = Set.of("spear", "halberd", "glaive", "twinblade", "pike", "lance", "staff", "quarterstaff", "javelin",
 		"trident", "naginata", "scythe", "poleaxe", "partisan", "bardiche");
 	// ================================================================================================================
 
