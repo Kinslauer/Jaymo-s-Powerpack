@@ -64,6 +64,7 @@ public final class FormsClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("forms_belt"), FormsClient::belt);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosKingdoms.id("forms_chain"), FormsClient::chain);
 		ClientTickEvents.END_CLIENT_TICK.register(FormsClient::lockOn);
+		ClientTickEvents.END_CLIENT_TICK.register(FormsClient::holdAttack);
 		ClientTickEvents.START_CLIENT_TICK.register(FormsClient::ctrlNoSprint);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			held = 0;
@@ -119,6 +120,33 @@ public final class FormsClient {
 				}
 			}
 			held = 0;
+		}
+	}
+
+	/** How long the attack button is held with a sword (ticks) before a Wheel Cut begins. */
+	static final int WHEEL_HOLD_TICKS = 10;
+	private static int attackHeld;
+
+	/** Wheel Cut on a held attack: once per press, after {@link #WHEEL_HOLD_TICKS}, if you know it and hold a sword. */
+	private static void holdAttack(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null || minecraft.gui.screen() != null || !minecraft.options.keyAttack.isDown()) {
+			attackHeld = 0;
+			return;
+		}
+		if (attackHeld < 0) {
+			// sent for this press already
+			return;
+		}
+		if (!Forms.book(player).knows("wheel_cut") || !Forms.Family.BLADE.holds(player.getMainHandItem())) {
+			attackHeld = 0;
+			return;
+		}
+		if (++attackHeld >= WHEEL_HOLD_TICKS) {
+			attackHeld = -1;
+			if (ClientPlayNetworking.canSend(Forms.HoldAttack.TYPE)) {
+				ClientPlayNetworking.send(new Forms.HoldAttack());
+			}
 		}
 	}
 

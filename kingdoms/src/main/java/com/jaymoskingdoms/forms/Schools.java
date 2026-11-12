@@ -423,6 +423,15 @@ public final class Schools {
 			return;
 		}
 		int standing = standing(player, s);
+		// the school's style first, once you've stood long enough in it (Styles: learnt, never given)
+		Styles.Style style = Styles.Style.of(s);
+		if (!Styles.knows(player, style)) {
+			if (standing >= Styles.STYLE_STANDING && Styles.learn(player, style)) {
+				Styles.choose(player, style);
+				say(level, master, player, "school.jaymoskingdoms.taught", player.getDisplayName(), style.displayName());
+				return;
+			}
+		}
 		List<String> arts = s.arts();
 		for (int i = 0; i < arts.size(); i++) {
 			String art = arts.get(i);
