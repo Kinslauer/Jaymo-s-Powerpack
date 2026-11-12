@@ -1364,3 +1364,9 @@ a traveller is born again into a new life, those who walked with the old one are
 the roads looking for someone, ask any traveller to take them on, and are not right: the Grue's red is in them, and it
 comes out once, at the one who took them in; put down, they wake free of it. Others take the mask and lead bandits,
 and they fight their old master with everything that master taught them.
+
+(new) **Powderheads** (Claude's placement for Andy's powderhead ask, 2026-11-12, for Andy to approve). The realms'
+smiths keep the black powder trade: charcoal from the kiln and the saltpetre of the bone heap, ground fine. A smith
+who trusts a traveller may write it down for them, and whoever learns it walks beside a marksman rolling his
+cartridges and lobs the sticks; the camps have their own, fewer and wilder. The one rule of the trade is the first
+line of every primer: never where a friend is standing.
