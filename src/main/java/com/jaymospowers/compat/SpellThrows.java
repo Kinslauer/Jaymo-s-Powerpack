@@ -1,5 +1,6 @@
 package com.jaymospowers.compat;
 
+import com.jaymospowers.armory.Armory;
 import com.jaymospowers.armory.ThrownWeapon;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
@@ -60,6 +61,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Archers' Rain of Arrows drops one of your arrows (pack or worn quiver) for each one that falls, as many as you
  * carry up to its usual count, and won't cast with none.</li>
  * <li>Archers' Barrage won't cast without its three arrows ({@link #BARRAGE}).</li>
+ * <li>Throw Net throws one of your Throwing Nets (crafted from string) and won't cast without one ({@link #THROW_NET}).</li>
  * </ul>
  */
 final class SpellThrows {
@@ -77,6 +79,8 @@ final class SpellThrows {
 	 */
 	static final Identifier BARRAGE = Identifier.fromNamespaceAndPath("archers", "barrage");
 	static final int BARRAGE_ARROWS = 3;
+	/** Rogues &amp; Warriors' Throw Net: it hurls one of your Throwing Nets ({@link Armory#THROWING_NET}), and won't cast without one. */
+	static final Identifier THROW_NET = Identifier.fromNamespaceAndPath("rogues", "throw_net");
 	/** Knives set aside for the rest of a fan that haven't flown after this long (ticks) go back to their owner. */
 	static final int FAN_HOLD = 40;
 	/** What a fan throws besides the held blade: knives and daggers, by id. */
@@ -130,6 +134,8 @@ final class SpellThrows {
 			Identifier id = idOf(event.spellEntry());
 			if (FAN_OF_KNIVES.equals(id) && event.caster() instanceof Player player && player.level() instanceof ServerLevel) {
 				fan(event.projectile(), event.mutableLaunchProperties(), player, event.sequenceIndex());
+			} else if (THROW_NET.equals(id) && event.caster() instanceof Player player && player.level() instanceof ServerLevel) {
+				net(event.projectile(), event.mutableLaunchProperties(), player, event.sequenceIndex());
 			} else {
 				launched(event.projectile(), event.caster(), id);
 			}
@@ -140,8 +146,15 @@ final class SpellThrows {
 			}
 		});
 		SpellEvents.CASTING_ATTEMPT.PRE.register(args -> {
-			int needs = arrowsNeeded(idOf(args.spell()));
-			return needs > 0 && !args.caster().hasInfiniteMaterials() && arrowsCarried(args.caster(), needs) < needs
+			Identifier spell = idOf(args.spell());
+			if (args.caster().hasInfiniteMaterials()) {
+				return null;
+			}
+			if (THROW_NET.equals(spell)) {
+				return carried(args.caster(), nets(), 1) < 1 ? SpellCast.Attempt.failMissingItem(new SpellCast.Attempt.MissingItemInfo(nets())) : null;
+			}
+			int needs = arrowsNeeded(spell);
+			return needs > 0 && carried(args.caster(), ARROWS, needs) < needs
 				? SpellCast.Attempt.failMissingItem(new SpellCast.Attempt.MissingItemInfo(ARROWS)) : null;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(SpellThrows::tick);
@@ -292,13 +305,43 @@ final class SpellThrows {
 		return BARRAGE.equals(spell) ? BARRAGE_ARROWS : 0;
 	}
 
-	/** How many arrows {@code player} carries, counting no further than {@code most}. */
-	private static int arrowsCarried(Player player, int most) {
+	/** What Throw Net spends. */
+	private static Ammo.Searched nets() {
+		return new Ammo.Searched(null, Armory.THROWING_NET);
+	}
+
+	/** How many of {@code what} {@code player} carries, counting no further than {@code most}. */
+	private static int carried(Player player, Ammo.Searched what, int most) {
 		int found = 0;
-		for (Ammo.Source source : Ammo.findSources(player, ARROWS, most)) {
+		for (Ammo.Source source : Ammo.findSources(player, what, most)) {
 			found += source.found();
 		}
 		return found;
+	}
+
+	/** Takes up to {@code count} of {@code what} from {@code player}'s pack and worn containers; returns how many. */
+	private static int spend(Player player, Ammo.Searched what, int count) {
+		int taken = 0;
+		for (Ammo.Source source : Ammo.findSources(player, what, count)) {
+			if (source.isContainer()) {
+				taken += Ammo.takeFromContainer(source.itemStack(), what, source.found());
+			} else {
+				source.itemStack().shrink(source.found());
+				taken += source.found();
+			}
+		}
+		return taken;
+	}
+
+	/** A Throw Net: the net thrown is one of yours, used up (it tangles and is lost). */
+	private static void net(SpellProjectile spell, Spell.LaunchProperties launch, Player player, int sequence) {
+		if (player.hasInfiniteMaterials()) {
+			return;
+		}
+		if (spend(player, nets(), 1) < 1) {
+			spell.discard();
+			launch.extra_launch_count = 0;
+		}
 	}
 
 	/**
@@ -309,16 +352,7 @@ final class SpellThrows {
 		if (sequence != 0 || player.hasInfiniteMaterials()) {
 			return;
 		}
-		int want = 1 + Math.max(0, launch.extra_launch_count);
-		int taken = 0;
-		for (Ammo.Source source : Ammo.findSources(player, ARROWS, want)) {
-			if (source.isContainer()) {
-				taken += Ammo.takeFromContainer(source.itemStack(), ARROWS, source.found());
-			} else {
-				source.itemStack().shrink(source.found());
-				taken += source.found();
-			}
-		}
+		int taken = spend(player, ARROWS, 1 + Math.max(0, launch.extra_launch_count));
 		if (taken <= 0) {
 			spell.discard();
 			launch.extra_launch_count = 0;
