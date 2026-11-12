@@ -1,10 +1,15 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.power.xenoform.HunterHits;
+import com.jaymospowers.power.xenoform.LurkBlend;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoStalker;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -16,6 +21,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
@@ -32,6 +39,10 @@ import net.minecraft.world.phys.Vec3;
  * weak.</li>
  * <li>B, Fade: unseen (invisible, and creatures hunting you forget you) until you strike or B again.</li>
  * </ul>
+ * It blends in, with no key: it takes the colour of the wall it touches or the ground under it ({@link LurkBlend}); held
+ * still while crouched for {@link #STILL_TICKS} ticks it fades from sight (like Fade: mobs lose it) until it moves or is
+ * hit; unseen and moving, other players see a faint outline of it; and keeping a creature in the crosshair while unseen
+ * builds a bonus on the first blow on it, up to {@link #BONUS_MAX} of the fist's damage more.
  */
 public final class Lurk extends XenoForm {
 	// ---- tuning ----
@@ -43,6 +54,32 @@ public final class Lurk extends XenoForm {
 	public static final double DREAD_RADIUS = 16.0, DREAD_LOOK = 0.8;
 	public static final int DREAD_TICKS = 120, DREAD_COOLDOWN = 300;
 	public static final int FADE_COOLDOWN = 200;
+	/** Crouched and still this long (ticks) and it fades from sight; moving faster than this (blocks a tick) is moving. */
+	public static final int STILL_TICKS = 30;
+	public static final double MOVING = 0.04;
+	/** The crosshair bonus: how far it can see a target for it (blocks), ticks of aim for the full bonus, the most it adds (share of the fist's damage), ticks of being seen it is kept for. */
+	public static final double AIM_REACH = 32.0;
+	public static final int AIM_FULL = 60, KEEP_EXPOSED = 20;
+	public static final float BONUS_MAX = 0.5F;
+
+	/** One Lurk's stealth: ticks held still crouched, where it was last tick, its colour (RGB) and the tint last set, the creature in its crosshair and for how long, ticks it has been seen. */
+	private static final class Stealth {
+		int still, charge, exposed, aim = -1;
+		Vec3 last;
+		int rgb = 0xFFFFFF, tint;
+	}
+
+	private static final Map<UUID, Stealth> STEALTH = new HashMap<>();
+
+	private static Stealth stealth(ServerPlayer player) {
+		return STEALTH.computeIfAbsent(player.getUUID(), id -> new Stealth());
+	}
+
+	/** Whether {@code player}, as Lurk, is held still and faded from sight (the pose reads it as Fade's). */
+	public static boolean hidden(ServerPlayer player) {
+		Stealth s = STEALTH.get(player.getUUID());
+		return s != null && s.still >= STILL_TICKS;
+	}
 
 	private final com.jaymospowers.power.xenoform.XenoUltimate nightfall = new com.jaymospowers.power.xenoform.forms.ultimate.Nightfall(this);
 
@@ -70,10 +107,32 @@ public final class Lurk extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		unfade(player, live);
 		live.watched = -1;
+		STEALTH.remove(player.getUUID());
+		player.removeAttached(LurkBlend.TINT);
+	}
+
+	/** A blow on Lurk breaks the stillness. */
+	@Override
+	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
+		Stealth s = STEALTH.get(player.getUUID());
+		if (s != null) {
+			s.still = 0;
+		}
+		return true;
 	}
 
 	@Override
 	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+		Stealth s = stealth(player);
+		s.still = 0;
+		if (s.aim == target.getId() && s.charge > 0 && !HunterHits.busy()) {
+			// the first blow on what it has watched unseen lands harder
+			float more = (float)(player.getAttributeValue(Attributes.ATTACK_DAMAGE) * BONUS_MAX * s.charge / AIM_FULL);
+			HunterHits.extra(player, target, more);
+			player.level().sendParticles(ParticleTypes.CRIT, target.getX(), target.getEyeY(), target.getZ(), 6 + (int)(10 * s.charge / AIM_FULL), 0.3, 0.3, 0.3, 0.2);
+		}
+		s.charge = 0;
+		s.aim = -1;
 		if (live.faded) {
 			unfade(player, live);
 			cooldown(player, live, B, FADE_COOLDOWN);
@@ -187,14 +246,57 @@ public final class Lurk extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
-		if (!live.faded) {
+		Stealth s = stealth(player);
+		// still, crouched: it fades from sight; moving ends it
+		boolean moving = s.last != null && player.position().distanceToSqr(s.last) > MOVING * MOVING;
+		s.last = player.position();
+		if (player.isCrouching() && !moving) {
+			s.still = Math.min(s.still + 1, STILL_TICKS);
+		} else {
+			s.still = 0;
+		}
+		boolean unseen = live.faded || s.still >= STILL_TICKS;
+		if (unseen) {
+			player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 10, 0, false, false));
+			if (player.tickCount % 10 == 0) {
+				for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(32.0), m -> m.getTarget() == player)) {
+					mob.setTarget(null);
+				}
+			}
+			watch(player, s);
+		} else if (++s.exposed > KEEP_EXPOSED) {
+			s.charge = 0;
+			s.aim = -1;
+		}
+		if (unseen) {
+			s.exposed = 0;
+		}
+		// the look of what it touches, and how much of it shows
+		if (player.tickCount % LurkBlend.SAMPLE_EVERY == 0) {
+			s.rgb = LurkBlend.mix(s.rgb, LurkBlend.sample(player));
+		}
+		int alpha = unseen ? (moving ? LurkBlend.FAINT_ALPHA : 0) : 255;
+		int tint = LurkBlend.tint(s.rgb, alpha);
+		if (tint != s.tint || !player.hasAttached(LurkBlend.TINT)) {
+			s.tint = tint;
+			player.setAttached(LurkBlend.TINT, tint);
+		}
+	}
+
+	/** Unseen: whatever stays in the crosshair builds the bonus on the first blow on it. */
+	private static void watch(ServerPlayer player, Stealth s) {
+		if (player.tickCount % 2 != 0) {
 			return;
 		}
-		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 10, 0, false, false));
-		if (player.tickCount % 10 == 0) {
-			for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(32.0), m -> m.getTarget() == player)) {
-				mob.setTarget(null);
-			}
+		LivingEntity target = aimed(player, AIM_REACH, e -> true);
+		if (target == null) {
+			return;
+		}
+		if (target.getId() == s.aim) {
+			s.charge = Math.min(AIM_FULL, s.charge + 2);
+		} else {
+			s.aim = target.getId();
+			s.charge = 0;
 		}
 	}
 }

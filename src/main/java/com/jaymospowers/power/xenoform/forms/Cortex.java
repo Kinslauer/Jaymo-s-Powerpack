@@ -4,6 +4,7 @@ import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.minds.CortexMind;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,9 @@ import org.jspecify.annotations.Nullable;
  * <li>G, Bubble: a mind-bubble for {@link #BUBBLE_TICKS} ticks that stops every shot.</li>
  * <li>V, Mind Lift: lift the creature you look at into the air with your mind, and drop it.</li>
  * <li>B, Spine Snap (0.19.82, was Claw Snap): its spikes lash out, hard, and it holds the target slow.</li>
+ * <li>In their heads ({@link CortexMind}): whoever strikes you is read on the HUD (health, whom it is after, what it is about to do).
+ * Sneak + G pushes everything ahead of you back with a thought; sneak + V fills the head you aim at with visions; sneak + B held is
+ * the Stare, which holds every enemy in view and walks them to your feet until you are hurt.</li>
  * </ul>
  */
 public final class Cortex extends XenoForm {
@@ -63,6 +67,7 @@ public final class Cortex extends XenoForm {
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.bubbleUntil = 0L;
+		CortexMind.forget(player);
 	}
 
 	@Override
@@ -78,6 +83,9 @@ public final class Cortex extends XenoForm {
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		if (!down) {
+			if (key == PowerKey.ABILITY_4) {
+				CortexMind.unstare(player);
+			}
 			return;
 		}
 		ServerLevel level = player.level();
@@ -95,13 +103,19 @@ public final class Cortex extends XenoForm {
 				cooldown(player, live, R, ARC_COOLDOWN);
 			}
 			case ABILITY_2 -> {
-				if (ready(player, live, G)) {
+				if (player.isShiftKeyDown()) {
+					CortexMind.push(player);
+				} else if (ready(player, live, G)) {
 					live.bubbleUntil = level.getGameTime() + BUBBLE_TICKS;
 					sound(player, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, 1.0F, 1.2F);
 					cooldown(player, live, G, BUBBLE_COOLDOWN);
 				}
 			}
 			case ABILITY_3 -> {
+				if (player.isShiftKeyDown()) {
+					CortexMind.visions(player);
+					return;
+				}
 				if (!ready(player, live, V)) {
 					return;
 				}
@@ -116,6 +130,10 @@ public final class Cortex extends XenoForm {
 				cooldown(player, live, V, LIFT_COOLDOWN);
 			}
 			case ABILITY_4 -> {
+				if (player.isShiftKeyDown()) {
+					CortexMind.stare(player);
+					return;
+				}
 				if (!ready(player, live, B)) {
 					return;
 				}
@@ -159,6 +177,7 @@ public final class Cortex extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		CortexMind.tick(player);
 		if (live.bubbleUntil > level.getGameTime() && player.tickCount % 4 == 0) {
 			ring(level, ParticleTypes.BUBBLE_POP, player.position().add(0.0, 1.0, 0.0), 1.2, 10);
 		}

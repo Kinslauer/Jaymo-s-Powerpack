@@ -526,6 +526,7 @@ public final class XenoformPower implements Power {
 		// (0.18.107, Scan B) Rime has Cryokinesis's moves lent
 		com.jaymospowers.power.cryo.CryoLent.lender = p -> XenoformState.form(p) == XenoForms.RIME;
 		XenoStalker.init();
+		XenoMinds.init();
 		// (0.18.125, patch 8) the band hunter and the rival band's aliens
 		RivalHunter.init();
 		XenoBandItem.init();
@@ -569,7 +570,7 @@ public final class XenoformPower implements Power {
 				return false;
 			}
 			// a phasing Wisp's hands pass through whatever it strikes
-			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && XenoformState.phasing(attacker)) {
+			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity && XenoformState.phasing(attacker) && !com.jaymospowers.power.xenoform.minds.WispHand.striking()) {
 				return false;
 			}
 			if (com.jaymospowers.power.xenoform.forms.ultimate.Swarm.bitesPlayer(source, entity)) {
@@ -1963,7 +1964,7 @@ public final class XenoformPower implements Power {
 				case "knell" -> act = live.burrow > 0 ? "burrow" : live.tolls > 0 ? "toll" : live.sense ? "sense" : null;
 				case "shade" -> act = live.lifted != null ? "hold" : live.stalked >= 0 ? "stare" : null;
 				case "thornwild" -> act = live.latchTicks > 0 ? "roots" : live.brood > 0 ? "bloom" : null;
-				case "lurk" -> act = live.faded ? "fade" : null;
+				case "lurk" -> act = live.faded || com.jaymospowers.power.xenoform.forms.Lurk.hidden(player) ? "fade" : null;
 				// (0.21.37) the Ultimates' big-move poses come before the base alien's own
 				case "rivet" -> act = live.ult instanceof com.jaymospowers.power.xenoform.forms.ultimate.Ironpour && com.jaymospowers.power.xenoform.forms.ultimate.Ironpour.slamming(player) ? "slam" : live.rolls > 0 ? "pour" : fighting(player, com.jaymospowers.power.xenoform.forms.Rivet.FIGHT_TICKS) ? "fight" : null;
 				case "dud" -> act = live.horn > 0 ? "dead" : live.rolls > 0 ? "roll" : null;

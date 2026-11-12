@@ -48,6 +48,14 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			state.isInvisible = false;
 			return;
 		}
+		// Lurk blended in: less than all of it shows while it is unseen (a faint outline when it moves, nothing when it holds still)
+		Integer blend = ultimate ? null : state.getData(HunterPose.TINT);
+		if (blend != null && (blend >>> 24) < 255) {
+			if ((blend >>> 24) >= 4) {
+				XenoformClient.submitGhost(state, poseStack, collector, lightCoords, blend);
+			}
+			return;
+		}
 		poseStack.pushPose();
 		// (0.20.9) with no parts listed, the whole Ultimate grows in
 		float grow = ultimateModel ? XenoMorph.whole(state.getData(XenoformClient.MORPH)) : 1.0F;
@@ -67,7 +75,7 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// (0.18.125, patch 8) the rival band's aliens are darkened
 			// (0.18.126, patch 9) in its look, its lines in the band's glow
 			renderColoredCutoutModel(model, skin(model, state, ultimate), poseStack, collector, lightCoords, state,
-				Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, 1);
+				blend != null ? blend : Boolean.TRUE.equals(state.getData(XenoformClient.DARK)) ? DARK_TINT : -1, 1);
 		}
 		if (model instanceof XenoFormModels.Lumen) {
 			// (0.19.75) Lumen is an orb of light: its own skin again, fullbright (the Ultimate's armoured one when it is),
