@@ -62,13 +62,17 @@ import org.jspecify.annotations.Nullable;
  * a few globs of magma ({@link Kind#BOMBS}) and scoops more only while calm, fighting hand to hand when out. A captain who
  * throws rocks carries a few ({@link Kind#ROCKS}); each lands as a cobblestone that he (or anyone) can pick up again.
  * The Ogre King tears his boulders out of the ground beside him ({@code OgreHolds}), leaving the hole.</li>
+ * <li><b>Knives</b>: the Cinder-Shade's Ember Knives are real daggers she carries ({@link Kind#KNIVES}, Andy 2026-11-12:
+ * they count), heated in her hands so they burn what they hit; each lands as the dagger it was, and she gathers them
+ * up again once nothing is after her. With none left she can't cast the fan. Rogues (a Knife chief, an assassin) throw a
+ * Fan of Knives of up to three of theirs the same way ({@link FanOfKnives}).</li>
  * </ul>
- * Not counted: powers and sorcery (a champion's ember knives are fire magic), and traps.
+ * Not counted: powers and sorcery.
  */
 public final class MobAmmo {
 	/** What a mob shoots or throws. */
 	public enum Kind {
-		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks");
+		ARROWS("arrows"), JAVELINS("javelins"), SHOT("shot"), POTIONS("potions"), BOMBS("bombs"), ROCKS("rocks"), KNIVES("knives");
 
 		final String key;
 
@@ -86,6 +90,10 @@ public final class MobAmmo {
 	static final int[] JAVELINS = {2, 3}, SHOT = {6, 10};
 	/** A witch's splash potions, a Hornkin hurler's magma, a rock-throwing captain's rocks. */
 	static final int[] POTIONS = {4, 7}, BOMBS = {5, 8}, ROCKS = {3, 5};
+	/** The Cinder-Shade's throwing knives (her Ember Knives throw five at a time). */
+	static final int[] KNIVES = {10, 15};
+	/** A rogue's throwing knives (a Knife chief's, an assassin's): his Fan of Knives throws up to three ({@link FanOfKnives}). */
+	static final int[] ROGUE_KNIVES = {3, 6};
 	/** How often (ticks) carriers are looked over, how near (blocks) a thing must be to be picked up, how far one goes for it. */
 	static final int CHECK_TICKS = 10;
 	static final double PICKUP_RANGE = 1.6, FETCH_RANGE = 16.0, FETCH_SPEED = 1.0;
@@ -185,6 +193,7 @@ public final class MobAmmo {
 			case POTIONS -> POTIONS;
 			case BOMBS -> BOMBS;
 			case ROCKS -> ROCKS;
+			case KNIVES -> mob instanceof PatronChampion ? KNIVES : ROGUE_KNIVES;
 			case ARROWS -> {
 				if (mob instanceof AbstractSkeleton) {
 					yield SKELETON_ARROWS;
@@ -215,8 +224,16 @@ public final class MobAmmo {
 				|| BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("javelin");
 			case POTIONS -> stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION);
 			case ROCKS -> stack.is(Items.COBBLESTONE) || stack.is(Items.MOSSY_COBBLESTONE) || stack.is(Items.COBBLED_DEEPSLATE);
+			case KNIVES -> knife(stack);
 			case SHOT, BOMBS -> false;
 		};
+	}
+
+	/** A knife or dagger anyone could throw (never Sora's Dagger, Ashfang or the Hidden Blade, which aren't for throwing). */
+	public static boolean knife(ItemStack stack) {
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		return (path.contains("knife") || path.contains("dagger")) && !path.contains("soras") && !path.contains("ashfang")
+			&& !path.contains("hidden_blade") && !path.endsWith("_blade");
 	}
 
 	// ---- thrown weapons ----------------------------------------------------------------------------------------------------
@@ -466,8 +483,8 @@ public final class MobAmmo {
 		}
 		RESTOCKED.put(mob, now);
 		for (Kind kind : List.of(Kind.values())) {
-			if (kind == Kind.ROCKS) {
-				// rocks are only ever picked up again
+			if (kind == Kind.ROCKS || kind == Kind.KNIVES) {
+				// rocks and knives are only ever picked up again
 				continue;
 			}
 			Integer left = ammo.get(kind.key);

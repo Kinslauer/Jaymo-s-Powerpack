@@ -123,6 +123,8 @@ final class Assassins {
 	static final float PARANOID_PARRY = 0.5F;
 	/** Stalking this long without reaching his mark, he gives up; he fights this long, or until he's down to this share of health, then runs. */
 	static final int STALK_TICKS = 20 * 90, FIGHT_TICKS = 20 * 12;
+	/** While his mark keeps out of reach he throws a Fan of Knives this often (ticks). */
+	static final int FAN_EVERY = 60;
 	static final float FLEE_AT = 0.5F;
 	/** Running: he's gone after this long, or this far from where he struck; the smoke hides him this long. */
 	static final int FLEE_TICKS = 20 * 15, SMOKE_TICKS = 20 * 8;
@@ -646,6 +648,9 @@ final class Assassins {
 					if (folk.getTarget() != victim) {
 						folk.setTarget(victim);
 					}
+					if (a.tickCount % FAN_EVERY == 0 && a.distanceTo(victim) > STAB_REACH) {
+						FanOfKnives.cast(level, a, victim);
+					}
 				} else {
 					// (0.7.295) a villager's blade, his own doing (his brain is set aside)
 					fight(level, a, victim);
@@ -756,6 +761,10 @@ final class Assassins {
 	private static void fight(ServerLevel level, PathfinderMob a, LivingEntity victim) {
 		a.getLookControl().setLookAt(victim, 30.0F, 30.0F);
 		if (a.distanceTo(victim) > STAB_REACH) {
+			if (a.tickCount % FAN_EVERY == 0) {
+				// his mark has backed off: a Fan of Knives after him (FanOfKnives)
+				FanOfKnives.cast(level, a, victim);
+			}
 			if (a.tickCount % 10 == 0 || a.getNavigation().isDone()) {
 				a.getNavigation().moveTo(victim, 1.2);
 			}

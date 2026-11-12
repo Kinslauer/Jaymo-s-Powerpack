@@ -165,6 +165,9 @@ public final class CaptainWays {
 	private static final Map<String, EnumMap<Cause, Float>> TALLY = new HashMap<>();
 	/** His thrown rocks and axes, and their weight. */
 	private static final Map<Projectile, Float> THROWN = Collections.synchronizedMap(new WeakHashMap<>());
+	/** Thrown blades heated red: they set what they hit alight (the Cinder-Shade's Ember Knives). */
+	private static final Set<Projectile> HOT = Collections.synchronizedSet(java.util.Collections.newSetFromMap(new WeakHashMap<>()));
+	static final int HOT_BURN_SECONDS = 3;
 	/** His wolves, and when they go. */
 	private static final Map<Wolf, Long> PACK = new WeakHashMap<>();
 	private static boolean redealing;
@@ -189,6 +192,7 @@ public final class CaptainWays {
 			BARGAINED.clear();
 			TALLY.clear();
 			THROWN.clear();
+			HOT.clear();
 			PACK.clear();
 		});
 	}
@@ -400,6 +404,9 @@ public final class CaptainWays {
 				if (source.getEntity() instanceof Mob thrower && !MobCombat.foe(thrower, victim)) {
 					return false;
 				}
+				if (HOT.remove(p)) {
+					victim.igniteForSeconds(HOT_BURN_SECONDS);
+				}
 				if (amount < weight) {
 					redealing = true;
 					try {
@@ -594,6 +601,24 @@ public final class CaptainWays {
 		mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Projectile.spawnProjectileUsingShoot(thrown, level, what, dx, dy + flat * 0.2, dz, 1.4F, 2.0F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.HOSTILE, 1.0F, 0.7F);
+		return thrown;
+	}
+
+	/**
+	 * {@code mob} throws a real blade ({@code blade}, one of its own) at {@code target}, turned {@code yaw} degrees off the
+	 * straight line (for a fan); {@code hot}: heated, it sets what it hits alight. It lands as the blade it was
+	 * ({@link MobAmmo#leaves}). The Cinder-Shade's Ember Knives.
+	 */
+	public static Snowball throwBlade(ServerLevel level, Mob mob, LivingEntity target, ItemStack blade, float damage, float yaw, boolean hot) {
+		Snowball thrown = new Snowball(level, mob, blade);
+		THROWN.put(thrown, damage);
+		if (hot) {
+			HOT.add(thrown);
+			thrown.igniteForSeconds(5.0F);
+		}
+		Vec3 to = new Vec3(target.getX() - mob.getX(), target.getY(0.5) - thrown.getY(), target.getZ() - mob.getZ()).yRot((float)Math.toRadians(yaw));
+		Projectile.spawnProjectileUsingShoot(thrown, level, blade, to.x, to.y + to.horizontalDistance() * 0.1, to.z, 1.6F, 1.0F);
+		MobAmmo.leaves(thrown, blade);
 		return thrown;
 	}
 
