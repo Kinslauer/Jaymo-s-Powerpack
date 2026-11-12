@@ -95,17 +95,23 @@ public final class BoxingPoses {
 	 */
 	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.1F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.3F, HOME_IN = 0.45F, HOME_FOLD = -1.85F;
 	/**
-	 * A hook: the upper arm level, the forearm folded across at the elbow, swept from out to in while the body turns
-	 * with it. Light in a string (the Arrow Slit's flurry); the full hook is the one a slip to the side sets up.
+	 * A hook, after the lesson Jung sent ("Throw a Perfect Lead and Rear Hook"): the arm level at shoulder height, the
+	 * elbow open between a right angle and 120 degrees (so the fist reaches, rather than hugging the chest), swung from
+	 * out wide to land ahead on the centre line while the hips and shoulders turn with it and the foot on that side
+	 * pivots. The numbers: the upper arm's pitch, its sweep (turned in, radians) from start to landing, the forearm's
+	 * fold across, the body's turn, the pivoting leg's turn and the lean into it. Light in a string (the Arrow Slit's
+	 * flurry); the full hook is the one a slip to the side sets up.
 	 */
-	static final float HOOK_PITCH = -1.45F, HOOK_ACROSS = 1.3F, HOOK_FROM = -0.7F, HOOK_TO = 0.6F, HOOK_TURN = 0.6F;
-	static final float LIGHT_HOOK_FROM = -0.3F, LIGHT_HOOK_TO = 0.4F, LIGHT_HOOK_TURN = 0.3F;
+	static final float HOOK_PITCH = -1.5F, HOOK_FROM = -1.0F, HOOK_TO = 0.2F, HOOK_ACROSS = 0.9F, HOOK_TURN = 0.7F, HOOK_PIVOT = 0.6F, HOOK_LEAN = 0.08F;
+	static final float LIGHT_HOOK_FROM = -0.55F, LIGHT_HOOK_TO = 0.15F, LIGHT_HOOK_ACROSS = 1.1F, LIGHT_HOOK_TURN = 0.4F, LIGHT_HOOK_PIVOT = 0.35F;
+	/** A hook's timing, as shares of the punch: the arm is up into the swing by the first, lands at the second, and is on its way home over the last. */
+	static final float HOOK_UP = 0.15F, HOOK_LANDS = 0.55F, HOOK_HOME = 0.3F;
 	/** A hook is the full one for this long after a slip (ticks). */
 	static final float HEAVY_HOOK_TICKS = 30.0F;
 	/** An uppercut: the upper arm from by the hip up to ahead, the forearm up, the fist rising under the chin; the body's turn into it. */
 	static final float UPPERCUT_FROM = 0.15F, UPPERCUT_TO = -1.2F, UPPERCUT_IN = 0.3F, UPPERCUT_FOLD = -1.7F, PUNCH_TURN = 0.3F;
 	/** First person: how far a punching arm goes forward, in toward the middle and up (blocks), for a straight punch, a hook and an uppercut. */
-	static final float[] FIRST_STRAIGHT = {0.5F, 0.12F, 0.04F}, FIRST_HOOK = {0.22F, 0.32F, 0.05F}, FIRST_UPPERCUT = {0.2F, 0.1F, 0.3F};
+	static final float[] FIRST_STRAIGHT = {0.5F, 0.12F, 0.04F}, FIRST_HOOK = {0.38F, 0.32F, 0.05F}, FIRST_UPPERCUT = {0.2F, 0.1F, 0.3F};
 	/** An evade's pose lasts this long (ticks): a slip's lean to the side, a bob's duck, a pull's lean back, a shoulder roll's turn and lift. */
 	static final float MOVE_TICKS = 8.0F, SLIP_LEAN = 0.3F, BOB_DUCK = 0.5F, PULL_LEAN = -0.3F, ROLL_TURN = 0.6F, ROLL_UP = 1.0F;
 	/** A shoulder roll's sway back and its tip of the head away from the blow (radians). */
@@ -442,11 +448,21 @@ public final class BoxingPoses {
 				return -CROSS_TURN * out;
 			}
 			case LEAD_HOOK, REAR_HOOK -> {
-				boolean leading = look.punch() == Boxing.Punch.LEAD_HOOK;
-				float from = look.heavy() ? HOOK_FROM : LIGHT_HOOK_FROM, to = look.heavy() ? HOOK_TO : LIGHT_HOOK_TO;
-				set(leading ? lead : rear, leading == leadRight, HOOK_PITCH, Mth.lerp(at, from, to));
-				(leading ? leadElbow : rearElbow).across(HOOK_ACROSS);
-				float turned = (look.heavy() ? HOOK_TURN : LIGHT_HOOK_TURN) * swept;
+				boolean leading = look.punch() == Boxing.Punch.LEAD_HOOK, heavy = look.heavy();
+				ModelPart arm = leading ? lead : rear;
+				boolean right = leading == leadRight;
+				// into the swing at once, home again over the end; between, the arm sweeps in to land ahead
+				float in = Math.min(1.0F, at / HOOK_UP) * Math.min(1.0F, (1.0F - at) / HOOK_HOME);
+				float sweep = Mth.sin(Mth.clamp(at / HOOK_LANDS, 0.0F, 1.0F) * Mth.HALF_PI);
+				reach(arm, right, HOOK_PITCH, Mth.lerp(sweep, heavy ? HOOK_FROM : LIGHT_HOOK_FROM, heavy ? HOOK_TO : LIGHT_HOOK_TO), in);
+				arm.zRot = 0.0F;
+				(leading ? leadElbow : rearElbow).across((heavy ? HOOK_ACROSS : LIGHT_HOOK_ACROSS));
+				// the hips turn with it: the foot on the punching side pivots, and the body leans a little in
+				float through = Mth.sin(Mth.clamp(at / HOOK_LANDS, 0.0F, 1.0F) * Mth.HALF_PI) * Math.min(1.0F, (1.0F - at) / HOOK_HOME);
+				ModelPart leg = right ? model.rightLeg : model.leftLeg;
+				leg.yRot += (right ? -1.0F : 1.0F) * (heavy ? HOOK_PIVOT : LIGHT_HOOK_PIVOT) * through;
+				bend(model, HOOK_LEAN * through);
+				float turned = (heavy ? HOOK_TURN : LIGHT_HOOK_TURN) * through;
 				return leading ? turned : -turned;
 			}
 			case UPPERCUT -> {

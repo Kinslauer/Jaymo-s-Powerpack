@@ -32,8 +32,10 @@
   Cross (1 & 2)"). A jab snaps the lead arm straight out at chin height with its shoulder up and turned in behind
   it, the rear glove staying on the cheek. A cross sends the rear arm straight out as the rear shoulder and hip turn
   through and the rear knee turns in, the lead glove coming home to the cheek. Both go out fast and come home slower.
-- The Arrow Slit's flurry hooks are light ones (a short sweep, a small turn); the full hook is the one a slip to the
-  side sets up.
+- **Hooks reach**, after a hook lesson Jung sent ("Throw a Perfect Lead and Rear Hook"): the arm level at shoulder
+  height, the elbow open past a right angle, swung from out wide to land ahead on the centre line (it folded tight
+  across the chest before), the hips and shoulders turning with it and the foot on that side pivoting. The Arrow
+  Slit's flurry hooks are a lighter, shorter swing; the full hook is the one a slip to the side sets up.
 - The punch's pose now starts when the server says a punch was thrown, so a punch queued by an early click shows
   when it lands (it showed nothing before). A click that hits nothing shows a jab.
 - First person: a boxer's arms stay in the guard and the punching arm goes out from it (the lead hand for a jab or

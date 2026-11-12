@@ -146,8 +146,9 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   - Jab: the lead arm snaps straight out at chin height, its shoulder up and turned in behind it; the rear glove stays.
   - Cross, straight, pull counter: the rear arm straight out, the rear shoulder and hip turned through, the rear knee
     turned in, a lean into it; the lead glove comes home to the cheek (the Bastion's stays low).
-  - Hook: upper arm level, forearm folded across, swept in with the body. Light in the Arrow Slit's flurry; the full
-    one within `HEAVY_HOOK_TICKS` of a slip to the side.
+  - Hook: the arm level at shoulder height, the elbow open past a right angle, swung from out wide to land ahead on
+    the centre line; the hips turn with it and the foot on that side pivots. Light in the Arrow Slit's flurry; the
+    full one within `HEAVY_HOOK_TICKS` of a slip to the side.
   - Uppercut: the fist rises under the chin with the forearm up.
   - First person: the arms stay in the guard and the punching arm goes out from it (`BoxingPoses.firstPerson`).
 - **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull; a shoulder roll turns the lead shoulder in,
