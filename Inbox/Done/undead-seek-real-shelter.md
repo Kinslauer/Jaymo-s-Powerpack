@@ -43,4 +43,4 @@ Not tested in game.
 - 2026-11-10 20:26 hermes-fixer took over the review fixes from hermes-b.
 - 2026-11-11 21:32 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-11 17:29 Text pass: reviewed PR #1262 player-visible text. changes/powers/claude-undead-seek-real-shelter.md: player-facing, describes deadlier sunlight and shelter search behavior, has 'Not tested in game.' line. Lang changes (arsenal/boxing/chrono/ember/rig/web/xenoform, kingdoms costumed-folk/skill-perk) are identical to PR #1328 blindness changes already reviewed — all plain, brief, in appropriate voice, no rewrites needed. No new lang files for undead shelter (behavioral feature only). No code changed.
-- 2026-11-11 21:05 PR #1262 is merged into master; moved to Inbox/Done.
+- 2026-11-12 03:26 PR #1262 is merged into master; moved to Inbox/Done.

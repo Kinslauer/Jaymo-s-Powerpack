@@ -122,7 +122,7 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-**The twelve powers known in the world**, as folk would describe them:
+**The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
   a while. Corrupted, the reach becomes the Void. **It can pull from literally anywhere** (Andy, 2026-11-11): a gun from
@@ -132,9 +132,18 @@ kit.
   the future, a Los Perrito handbill comes through with it: sweepers keep to their routes during the parade, "please do
   not feed the sweepers", the red and the blue open the parade at the east bridge; and in pencil on the back, "parade's
   off. the bridge is the line now. if you find this don't come".
-- **Blindness**: the holder cannot see, and sound paints the world for them a moment at a time. **The especially devout
-  choose it** (Andy, 2026-11-11): they don a blindfold or carve out their own eyes, and are given a new kind of sight
-  within the blindness. At its height, the ultimate grants an almost bird's-eye view.
+- **Blindness** is not a power (Andy, 2026-11-11: "blindness should stay as is, just no longer considered a power,
+  meaning you can go blind from battle, or malicious intent ... you can awaken resonance while blind with the fork").
+  It is a thing that happens to people: an eye lost to a blow, both taken by an enemy's blade or by one's own hand. For
+  the blind, sound paints the world a moment at a time. **The especially devout choose it**: they don a blindfold or
+  carve out their own eyes. The new kind of sight within the dark, and the bird's-eye view at its height, belong to
+  those among them whom Resonance has answered.
+  (new) **The fork in the dark** (Claude's placement, for Andy to approve). A struck tuning fork is how the blind find
+  out whether sound will answer them: one clear note held in the dark, and for some the note comes back as a world.
+  That is why the Unseeing keep forks and why a service ends with one struck over the newly bound. Most hear only the
+  note. The few who hear more are what the cult calls the Shown, and what everyone else calls a Resonance holder who
+  happens to be blind. A fighter who lost an eye in battle is owed nothing by the dark; it is the whole dark, both eyes,
+  that the fork answers.
   (new) **The devout's blindfold and the carved eyes** (Claude's placement, for Andy to approve): the blindfold is a
   plain band of black wool the devout weave and tie for themselves, and the vigil is kept in it alone; no faith owns the
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
@@ -160,8 +169,22 @@ kit.
 - **Cryokinesis**: the cold answers them; ice under their feet, frost on their breath, walls of it at a word.
 - **Darktide**: water and darkness, a guard and a blade, and a Flow that rises in the deep and the dark. Its holders
   harvest shadows; ascended, it is the Abyssal Tide.
+  (new) **The tide in them** (Darktide overhaul, 2026-11-11, for Andy to approve). The Flow keeps a tide of its own: at
+  high tide the holder's reach lengthens, and at spring tide, a full measure, the next thing they call is the great one.
+  A holder with empty hands is never unarmed: the water in them takes the shape of a blade when they raise a guard, and
+  runs back to water when it is not needed. In water or rain they are at home, quicker, and can go under anywhere the
+  rain is falling. The Abyssal Tide's height is the **Maelstrom**: the deep brought up as a standing dome of dark water,
+  which its caller swims through while everyone else in it drowns. Tideborn say the Deep Mother lends it and wants it back.
+  (new) **Ink and water** (Darktide looks, 2026-11-12, for Andy to approve). What a holder does is seen as ink on water:
+  a cut hangs in the air for a breath as a single brush stroke, the tide they call is a true wave with a pale crest, and
+  where they go under the ground lies open as a dark pool. Tideborn calligraphers say the Deep Mother writes with her
+  holders, and read a fight's strokes afterward the way others read tea leaves. A holder near full Flow can be told at
+  a glance: water gathers at their feet and their eyes go pale.
 - **Gravity**: weight taken out of things or piled on; at its height, a meteor called down.
 - **Resonance**: sound and the Deep Dark's sculk. The holder hears through walls and breaks things by their pitch.
+  (new) **What Resonance took from the blind** (2026-11-12, for Andy to approve). A holder can go wholly quiet, steps
+  and breath and all, and what their shout strikes they go on hearing through walls. In the dark, blind or blindfolded,
+  they hear the living as shapes; at their height the hearing lifts off the ground and looks down like a bird.
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
@@ -223,6 +246,28 @@ wizards (who teach the making of a staff), the **Archer** from the Green Huntsma
 the wild itself, the **Brute** in the fight pits, the **Marksman** from ships' gunners and the guards of the realms,
 the **Sorcerer** from court wizards and the old elemental schools (Death and Blood are forbidden everywhere), and the
 **Rider** in the stables and the Chivalry realms' tilt-yards. A realm's creed and faith shape which of them it honours.
+
+(new) **The Quiet Tide's later arts** (SWGC swordplay picks, 2026-11-11). The blade school keeps three arts back for
+those who stay: the **Wheel Cut** (the blade turned once overhead and brought across, a blow no guard answers), the
+**Figure Eight** (the blade kept moving so nothing reaches the one behind it) and the **Hurled Blade**. The masters say a
+thrown sword is a sword given away, and mean it: it lies where it lands. Only those whose gift can fetch it (the
+Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
+teaching.
+
+(new) **The Twinblade** (Andy, 2026-11-11: "an ancient warrior born design, not often wielded by many, and the schematic
+is found in the stormborn dungeon"). Two swords of one make joined at the hilt on a long grip, a weapon of the old
+Warrior-born that few ever carried. Nobody forges it as such: the joining is a knack, and the only drawing of it left
+lies in the Stormborn Tomb among the draugr, who were Warrior-born once. Whoever studies the sheet can join two blades
+and part them again.
+
+(new) **The Mill Charge** (SWGC swordplay picks, 2026-11-12). The Skyward Reach teaches its staff and glaive students
+to go through a press of foes with the shaft turning before them, the way a mill's sails take the wind.
+
+(new) **The schools' styles** (SWGC swordplay picks, 2026-11-12). Each school fights its own way, and its students
+carry it into every fight with the school's weapon in hand. The Quiet Tide's **Still Water** waits and turns blows; the
+Skyward Reach's **Long Measure** keeps its distance and thrusts; the Stone Root's **Deep Root** is slow and never out of
+breath; the Low Lantern's **Low Flame** is quick hands and little guard; the Ashen Fang's **Red Ember** comes on fastest
+and burns out first. A school's guards and its duellists fight the same way, which is how the knowing tell them apart.
 
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
@@ -450,6 +495,15 @@ three times their size who walks among folk disguised as a villager, and who lea
 takes most kindly to the blood that shares its weather (Notus to the Emberborn, Boreas to the Frostborn, Zephyrus to the
 Verdant and Tideborn, Eurus to the Stormborn). Over the Aether flies **Aetherion**, the star dragon, with a breath of
 starlight and a cataclysm of falling stars.
+
+(new) **First sight of the great ones** (Andy, 2026-11-11: "can bosses get intro cutscenes? ... even passive boss mobs
+can get them. just to further illustrate the majesty of the encounter"). The first time anyone lays eyes on each kind of
+great creature, the moment is shown as a short wordless film: a low look up at it, its roar, then the two of them in one
+frame. It happens once for each kind: every dragon (Ignivorus over the Nether first among them), the Giants, the
+patrons' champions, the Ogre King, chiefs and warlords, the Piglin King, the grizzly, the minotaur and gorgon, the
+Slider and the Visage of War, the Ender Dragon, Wither, Warden and Elder Guardian, and the gentle great ones, the great
+whales and the Aerwhales. Kings and lords get none; they are met in their halls by talking. Nothing is named or
+explained on screen.
 
 **The ground dragons.** Three other dragons live below the clouds, and each takes most kindly to one blood:
 the plated **Stegonaut** of the jungles, plains and lush caves (Stoneborn), the serpent frost dragon **Atroxiia** of the
@@ -911,6 +965,14 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
   was left of him went out into the world, fine as dust. Some of it found you." It never names him.
 
+  (new) **Its temper** (big suit picks, 2026-11-12). The black symbiote kept what the anti gave up: its hunger and
+  its temper. Blows given and taken heat it until a roar lets the heat out, and a host who keeps the big suit shut away
+  finds it angrier when it is finally let up. It remembers who hurt its host and wants them paid back, it answers when
+  its host speaks to it, and the first time the two are wholly bonded the host sees it face to face, standing where
+  they stand with the world gone dark around them. That meeting is not a place; nothing is travelled to. With its
+  tendrils drawn in the big suit does not run and cannot be shoved. It melts flat, spits and walls with its own body,
+  and the black strain smells blood. It still never feeds on the living.
+
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
   beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
@@ -1122,6 +1184,12 @@ name shapes a beast ("Call a beast Midas and it'll shine like coin").
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
+
+(new) **Everyday weather.** The heart of a storm is a downpour: rain so thick a traveller is soaked through at once,
+chilled, and slowed until they find a roof. Mist lies on low ground and water from before dawn until mid-morning,
+thickest in swamps and in autumn. On windy days sand runs in low streams over the dunes. And on clear nights the cold
+lands see green and violet curtains hang in the northern sky. Nobody agrees what they are: the Frostborn call them the
+breath of their dead, sailors steer by them, and the star-readers only write down the nights they come.
 
 ## Daily life
 
