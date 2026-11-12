@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 03:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 03:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,12 +13,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/Boss intro cutscenes|Boss intro cutscenes]] · 💻 Odysseus · running
 - [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/Boss intro cutscenes|Boss intro cutscenes]] · 💻 Odysseus · #1345 · in-review
 - [ ] [[Agents/swgc-swordplay|swgc-swordplay]] · 💻 Odysseus · #1341 · in-review
 
 
