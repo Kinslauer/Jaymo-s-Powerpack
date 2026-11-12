@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-b8b4vz
 with: Claude (cloud thread)
-pr: 
+pr: 1345
 mods: kingdoms
 versions: 
 started: 2026-11-12
