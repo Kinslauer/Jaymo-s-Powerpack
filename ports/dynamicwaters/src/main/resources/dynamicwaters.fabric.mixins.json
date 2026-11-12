@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.AdamNew.dynamicwaters.mixin.fabric",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "ChunkMapFabricMixin",
+    "NaturalSpawnerFabricMixin",
+    "PlayerChunkSenderFabricMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -967,9 +967,9 @@ final class Caravans {
 			for (PathfinderMob g : guards) {
 				HEADING.remove(g.getUUID());
 			}
-			if (now % 40 == 0) {
+			if (!carts.isEmpty()) {
 				Entity w = carts.get(level.getRandom().nextInt(carts.size()))[2];
-				level.playSound(null, w.blockPosition(), SoundEvents.BARREL_CLOSE, SoundSource.NEUTRAL, 0.8F, 0.9F);
+				WorldSounds.cart(level, carts.get(0)[2].getId(), w);
 			}
 			return;
 		}

@@ -1133,8 +1133,8 @@ public abstract class WindDragon extends AbstractHorse {
 			want = want.add(0.0, 0.5, 0.0);
 		}
 		this.setDeltaMovement(this.getDeltaMovement().lerp(want, TURN_EASE));
-		if (this.tickCount % 18 == 0 && want.y > -0.1) {
-			this.playSound(SoundEvents.ENDER_DRAGON_FLAP, flapVolume(), 0.7F + this.random.nextFloat() * 0.1F);
+		if (want.y > -0.1 && this.level() instanceof net.minecraft.server.level.ServerLevel server) {
+			com.jaymoskingdoms.WorldSounds.wingbeat(server, this, "flap", 15, 21, this.getSoundSource(), SoundEvents.ENDER_DRAGON_FLAP, flapVolume(), 0.75F);
 		}
 		face(this.getDeltaMovement());
 	}

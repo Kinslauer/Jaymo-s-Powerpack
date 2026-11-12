@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:max",
+  "left": 0.15,
+  "right": {
+    "type": "minecraft:mul",
+    "left": -3,
+    "right": {
+      "type": "minecraft:add",
+      "left": -0.333,
+      "right": {
+        "type": "minecraft:abs",
+        "input": {
+          "type": "minecraft:add",
+          "left": -0.666,
+          "right": {
+            "type": "minecraft:abs",
+            "input": {
+              "type": "minecraft:add",
+              "left": "tectonic:noise/island/ridges",
+              "right": {
+                "type": "minecraft:mul",
+                "left": 0.3,
+                "right": {
+                  "type": "minecraft:cube",
+                  "input": "tectonic:noise/island/ridges"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

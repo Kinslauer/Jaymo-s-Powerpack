@@ -1,0 +1,138 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:cache",
+    "input": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:add",
+          "left": 1.2,
+          "right": {
+            "type": "minecraft:mul",
+            "left": 0.4,
+            "right": {
+              "type": "minecraft:noise",
+              "noise": "tectonic:region/height_multiplier",
+              "xz_scale": 0.25,
+              "y_scale": 0
+            }
+          }
+        },
+        "min": 0.8,
+        "max": 1.6
+      },
+      "right": {
+        "type": "minecraft:spline",
+        "spline": {
+          "coordinate": "tectonic:noise/continent/erosion",
+          "points": [
+            {
+              "location": -0.02,
+              "derivative": 0,
+              "value": {
+                "coordinate": "tectonic:noise/region_selector",
+                "points": [
+                  {
+                    "location": -0.1,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/club",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "location": 0,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/club_weak",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "location": 0.1,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/heart",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "location": 0.04,
+              "derivative": 0,
+              "value": {
+                "coordinate": "tectonic:noise/region_selector",
+                "points": [
+                  {
+                    "location": -0.1,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/spade",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "location": 0,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/spade_weak",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "location": 0.1,
+                    "derivative": 0,
+                    "value": {
+                      "coordinate": "tectonic:region/diamond",
+                      "points": [
+                        {
+                          "location": 0,
+                          "derivative": 1,
+                          "value": 0
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

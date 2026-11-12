@@ -279,6 +279,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		ChestNoise.register();
 		// footsteps wolves and guards hear: louder running, on gravel or metal, in plate; quieter sneaking, crouched or crawling
 		Footsteps.register();
+		// echoes for the layered sounds (Soundscape)
+		Soundscape.register();
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();

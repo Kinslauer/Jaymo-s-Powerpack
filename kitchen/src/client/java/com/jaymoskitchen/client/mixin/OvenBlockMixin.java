@@ -25,7 +25,7 @@ abstract class OvenBlockMixin {
 		}
 		double x = pos.getX() + 0.5, y = pos.getY() + 1.0, z = pos.getZ() + 0.5;
 		if (random.nextDouble() < 0.1) {
-			level.playLocalSound(x, y, z, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 0.6F, 1.0F, false);
+			com.jaymoskitchen.sound.KitchenSounds.ovenLocal(level, x, y, z);
 		}
 		switch (OvenHob.cookware(oven)) {
 			case POT -> {
