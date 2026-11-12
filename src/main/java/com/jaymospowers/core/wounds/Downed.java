@@ -121,6 +121,8 @@ public final class Downed {
 	public static final int BLEED_OUT_TICKS = 2400;
 	/** The player's hit that kills a downed mob outright (a downed player has {@link #DOWNED_PLAYER_HEALTH} instead). */
 	public static final int MAX_WOUNDS = 10;
+	/** A player's blow on a downed body ({@link #blowLands}): the thud of the hit, and the body's own hurt cry. */
+	static final float STRUCK_THUD_VOLUME = 0.9F, STRUCK_CRY_VOLUME = 1.0F;
 	/**
 	 * The share of downed mobs who drag themselves along (the rest lie still, flailing now and then), and (0.15.142) of
 	 * downed people (Andy: "Humanoids should especially have a tendency to crawl away from the fight").
@@ -374,6 +376,10 @@ public final class Downed {
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
 				// (0.18.5) three hearts or more on the downed: that's the end of them
 				FELLED_BY.put(entity, source);
+				// (the blow still lands with its thud; the death cry is its own)
+				if (!(entity instanceof Player)) {
+					blowLands(level, entity, source, false);
+				}
 				finish(level, entity);
 				return false;
 			}
@@ -911,6 +917,8 @@ public final class Downed {
 		Entity by = felled == null ? null : felled.getEntity();
 		// ((0.20.26) and what downed it is the cause its death is rolled on, Mortality)
 		Mortality.felled(entity, felled);
+		// (dying where it lies: its body starts lying too, not on its feet)
+		DownedLie.markBody(entity);
 		forget(entity);
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(Wounds.WOUNDS_DAMAGE), by);
 		FINISHING.add(entity);
@@ -922,6 +930,9 @@ public final class Downed {
 		} finally {
 			FINISHING.remove(entity);
 			Wounds.FINISHING.remove(entity);
+			if (entity.isAlive()) {
+				DownedLie.clearBody(entity);
+			}
 		}
 	}
 
@@ -992,12 +1003,40 @@ public final class Downed {
 		// ((0.15.142) and whoever was binding it starts over)
 		DownedCrawl.hit(entity);
 		if (count >= MAX_WOUNDS) {
+			blowLands(level, entity, source, false);
 			finish(level, entity);
 			return;
 		}
 		entity.setAttached(WOUNDS, level.getGameTime() << 4 | count);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + 0.3, entity.getZ(), 3, 0.3, 0.1, 0.3, 0.1);
-		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.NEUTRAL, 0.7F, 0.8F);
+		blowLands(level, entity, source, true);
+	}
+
+	/**
+	 * A player's blow landing on a downed body, which takes no health (the wound is counted instead): it still lands like a
+	 * hit. Andy (2026-11-12): "attacking the vindicator didnt have any impact or reaction sounds". Vanilla only plays its
+	 * no-damage swish when a blow takes nothing, so here: the red flash and flinch every client draws for a hurt
+	 * ({@code broadcastDamageEvent}), the thud of a full blow for a swing (an arrow has its own), and the body's own hurt
+	 * cry at its own voice (a person's grunt for a body without one; none with {@code cry} false: a killing blow, whose
+	 * death cry follows).
+	 */
+	private static void blowLands(ServerLevel level, LivingEntity entity, DamageSource source, boolean cry) {
+		level.broadcastDamageEvent(entity, source);
+		Entity by = source.getEntity();
+		if (by != null && source.getDirectEntity() == by) {
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, by.getSoundSource(),
+				STRUCK_THUD_VOLUME, 0.9F + level.getRandom().nextFloat() * 0.2F);
+		}
+		if (!cry || entity.isSilent()) {
+			return;
+		}
+		net.minecraft.sounds.SoundEvent own = ((com.jaymospowers.mixin.LivingEntityVoiceAccessor) entity).jaymospowers$hurtSound(source);
+		if (own != null) {
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), own, entity.getSoundSource(), STRUCK_CRY_VOLUME,
+				entity.getVoicePitch());
+		} else {
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, entity.getSoundSource(), STRUCK_CRY_VOLUME, 0.8F);
+		}
 	}
 
 	// ---- downed mobs ------------------------------------------------------------------------------------------------------

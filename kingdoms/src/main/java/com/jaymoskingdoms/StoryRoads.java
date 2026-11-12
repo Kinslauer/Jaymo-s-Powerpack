@@ -78,7 +78,7 @@ public final class StoryRoads {
 		new Road("campaign", p -> CAMPAIGNERS.contains(Classes.classOf(p)), List.of(
 			new Step("first", Retaking.Act.HEARTH), new Step("second", Retaking.Act.OLD_STONES), new Step("third", Retaking.Act.LIGHTS),
 			new Step("fourth", Retaking.Act.DARK_BELOW))),
-		new Road("hermit", p -> ELEMENTAL.contains(PowersCompat.power(p)), List.of(
+		new Road("hermit", p -> PowersCompat.power(p) != null && ELEMENTAL.contains(PowersCompat.power(p)), List.of(
 			new Step("met", Retaking.Act.HEARTH), new Step("kindled", Retaking.Act.OLD_STONES), new Step("tempered", Retaking.Act.LIGHTS),
 			new Step("steeled", Retaking.Act.DARK_BELOW))),
 		new Road("common", p -> PowersCompat.power(p) == null, List.of(

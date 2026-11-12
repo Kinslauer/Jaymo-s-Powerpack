@@ -11525,3 +11525,38 @@ Mill Charge and the guards' challenge:
   dialogue mixins and `dialogues/main.json` (the new answer), lang part `boxing.json`. Needs Jaymo's Powers; without it
   nobody offers the answer.
 - **Not built locally and not played.**
+
+## 0.7.761 (2026-11-12): life story: a Frostborn nobody raised here is a traveller straight from Hail (#1353)
+
+- **Who raised you?** as a Frostborn: "Nobody: you were a foundling" is now "Nobody here: you came from Hail alone". You are a traveller come down from Hail on one of your people's ships, your story's first line becomes being born on Hail (not in the snowfields), you start wearing a scouter (with Jaymo's Powers), and the story leans your temperament proud instead of timid. The 10 free attribute points stay.
+- The same answer is retold for two more bloods: a Warrior-born's band "went back up in its pods" without them, and an Emberborn was lost by the expedition at the Nether's edge.
+- `LifeStoryScreen.story` (a blood can retell its birthplace by who raised it: `story.jaymoskingdoms.as.<heritage>.from_<raised>.born...`), `LifeStory.kit`, `PlayerTemperaments.fromStory`.
+- Built by CI; not played. The new lines have no narrator clips yet.
+
+## 0.7.762 (2026-11-12): Fix: crash on joining with no power while attuned or reading magic
+
+- (Jung) The game crashed a few seconds after joining for a player with no power who is attuned or reads magic
+  ("NullPointerException" in `Mana.blindToMana`, from the clash cinematic's tick). The check for the elemental powers
+  that can't see mana looked a missing power up in a set that throws on a missing value. A player with no power now
+  simply isn't an elemental power user.
+- The same lookup in the story roads (the hermit's road) had the same fault and is fixed the same way.
+
+## 0.7.763 (2026-11-12): lamplight follows people - lanterns last longer and passers keep them lit
+
+- **Longer burn**: a lantern set by world generation or a settlement now starts with ten days of fuel (was three), and a coal or charcoal adds five days (was three).
+- **Relit as they pass**: villagers (MCA's too) and a settlement's guards, carters and workers top up a lit lantern they walk within about four blocks of once it is under five days, and light any burnt lantern or torch they pass, without stopping. A caravan lights its road as it goes.
+- **Lanterns on posts**: villagers sent to relight a burnt lantern now reach one on a road post above their heads (before, the reach was measured straight to the lantern, so posts were out of reach and road lanterns were never relit).
+- **Places people use stay lit**: where no player is within 40 blocks, a lantern on a settlement's land or on a King's Road that caravans travel (one end serves the other, or a caravan is on it now) is kept burning, and a burnt lantern or torch there is lit again within about ten minutes. Roads between towns with no dealings, or whose towns have fallen, burn through their fuel and go dark.
+- New loading-screen hint (131).
+- Classes: Lamplight (new), Lanterns, Torches, StoryHoldScreen.
+- Built; not played.
+
+## 0.7.764 (2026-11-12): Broken loot chests spill their loot
+
+- **Broken Lootr chests no longer swallow their loot.** Lootr keeps each player's share of a loot chest or barrel apart
+  from the block, and dropped none of it when the chest was broken (sneak-break), so whatever was inside just vanished.
+  Now every share in it spills onto the floor as a random roll: each stack comes out 60% of the time, keeping 40-100% of
+  its count; the rest is lost in the smash. A chest you never opened spills a roll of your own share, so forcing a locked
+  chest still gets you something, just less than picking the lock. Creative breaks spill nothing. Plain chests drop all
+  they hold, as before. Tuning in `SpiltLoot` (`SURVIVES`, `KEPT_MIN`).
+- Built; not played.

@@ -153,6 +153,7 @@ public final class Wounds {
 		Breaks.register();
 		// (0.20.110) low and hit: broken limbs don't hold you back for a while
 		Adrenaline.register();
+		Crutches.register();
 		// (0.20.111) passing out from hunger or thirst
 		Fainting.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy

@@ -50,6 +50,11 @@ public final class Crawl {
 	/** Lie still this long after a roll and the spent direction is fresh again (and the next roll isn't a reversal). */
 	public static final int ROLL_REST_TICKS = 40;
 
+	/*
+	 * Andy (2026-11-12): "crawling players should still be able to haul themselves up one block", then: "the one block climb
+	 * while prone should be activated by holding right click". Flat on the ground the step is vanilla's: a full block is
+	 * climbed only by holding Use against it, {@link ProneHaul}.
+	 */
 	/** On a crawling player: present while they crawl (synced to everyone). */
 	public static final AttachmentType<Boolean> CRAWLING = AttachmentRegistry.create(JaymosPowers.id("crawling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));

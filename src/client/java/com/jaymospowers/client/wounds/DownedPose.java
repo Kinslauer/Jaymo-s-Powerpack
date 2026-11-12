@@ -47,6 +47,10 @@ import net.minecraft.world.entity.player.Player;
  * a person crawls face down or shuffles along on its back, or lies on its back or curled on its side; a machine lies on
  * its back shorting out or sits slumped, powered down. Animals, bugs, birds, fish, slimes and the rest are
  * {@link DownedBodies}'.
+ * <p>
+ * Andy (2026-11-12): "downed enemies should react to the executions". While a finisher or one of the symbiote's
+ * executions plays on it, the body braces, is driven into the ground by each blow, goes rigid on a blade or fights a
+ * strangle ({@link ExecutionReact}), in place of its sit-ups.
  */
 public final class DownedPose {
 	/** How long the fall to the ground takes (ticks): the knees giving way first (this share of it), then the drop. */
@@ -81,7 +85,7 @@ public final class DownedPose {
 	static final float GLITCH_EVERY = 45.0F, GLITCH_TICKS = 12.0F, GLITCH_STEP = 2.0F, GLITCH_LIMBS = 0.7F, GLITCH_JOLT = 4.0F,
 		GLITCH_TREMOR = 0.03F;
 	/** Of crawling people, the share that shuffle along on their backs (the rest crawl face down); of the lying, the share curled on their side. */
-	static final float SHUFFLE_SHARE = 0.3F, CURL_SHARE = 0.5F;
+	static final float SHUFFLE_SHARE = com.jaymospowers.core.wounds.DownedLie.SHUFFLE_SHARE, CURL_SHARE = com.jaymospowers.core.wounds.DownedLie.CURL_SHARE;
 	/** Curled on its side: how far off the ground (share of its height), the slow rock (degrees, per tick). */
 	static final float CURL_LIFT = 0.09F, CURL_ROCK = 3.0F, CURL_ROCK_RATE = 0.05F;
 	/** Shuffling on its back: the stroke (radians a tick still, per unit of walk when moving), the hips' scoot (blocks). */
@@ -105,9 +109,11 @@ public final class DownedPose {
 
 	/**
 	 * This frame's downed pose: {@code amount} of the fall (0-1, a little over in the bounce), {@code crawls}, a
-	 * {@code person}, {@code broken} limbs ({@link Dismember} bits), {@code down} ticks since it went down, the {@code id}.
+	 * {@code person}, {@code broken} limbs ({@link Dismember} bits), {@code down} ticks since it went down, the {@code id},
+	 * and what a finisher is doing to it just now ({@code react}, see {@link ExecutionReact}), if one is.
 	 */
-	record Down(float amount, boolean crawls, boolean person, int broken, float down, int id, boolean out, Kind kind, Style style) {
+	record Down(float amount, boolean crawls, boolean person, int broken, float down, int id, boolean out, Kind kind, Style style,
+		ExecutionReact.@org.jspecify.annotations.Nullable React react) {
 		boolean machine() {
 			return this.kind == Kind.MACHINE;
 		}
@@ -139,8 +145,17 @@ public final class DownedPose {
 		boolean crawls = Downed.crawls(entity);
 		Kind kind = kind(entity, person, machine);
 		Down pose = new Down(fall(down), crawls, person, Wounds.brokenLimbs(entity), Math.max(0.0F, down), entity.getId(),
-			Downed.passedOut(entity), kind, style(kind, person, crawls, entity.getId(), entity.isInWater()));
+			Downed.passedOut(entity), kind, style(kind, person, crawls, entity.getId(), entity.isInWater()),
+			ExecutionReact.of(entity, partialTicks));
 		state.setData(KEY, pose);
+		if (pose.react() != null && !person) {
+			// being finished: an animal, a bug, a bird kicks with its own legs under the blows, however it lies
+			float thrash = ExecutionReact.thrash(pose.react());
+			if (thrash > 0.0F) {
+				state.walkAnimationPos = state.ageInTicks * PADDLE_RATE;
+				state.walkAnimationSpeed = Math.max(state.walkAnimationSpeed, ExecutionReact.THRASH_SWING * thrash);
+			}
+		}
 		if (pose.style() == Style.SIDE || pose.style() == Style.FALLEN || pose.style() == Style.FLIPPED) {
 			// (0.15.142) an animal on its side paddles its legs in its fits (its own walk, run in the air); a bird kicks, a
 			// spider on its back scrabbles
@@ -195,9 +210,7 @@ public final class DownedPose {
 
 	/** A fixed value (0-1) for this body, the same every time it goes down. */
 	static float pick(int id) {
-		int h = id * 0x9E3779B1;
-		h ^= h >>> 16;
-		return (h & 0xFFFF) / 65536.0F;
+		return com.jaymospowers.core.wounds.DownedLie.pick(id);
 	}
 
 	/**
@@ -252,12 +265,25 @@ public final class DownedPose {
 		float flat = Math.min(1.0F, amount);
 		float height = state.boundingBoxHeight / Math.max(entityScale, 0.01F);
 		float width = state.boundingBoxWidth / Math.max(entityScale, 0.01F);
+		if (pose.react() != null) {
+			// a finisher's blow drives the whole body into the ground and it bounces back off it (any model, however it's built)
+			float press = ExecutionReact.press(pose.react()) * Math.min(1.5F, height / ExecutionReact.FULL_HEIGHT) * flat;
+			if (press != 0.0F) {
+				poseStack.translate(0.0F, press, 0.0F);
+			}
+			if (!pose.person()) {
+				float rock = ExecutionReact.rock(pose.react(), pose.id()) * flat;
+				if (rock != 0.0F) {
+					poseStack.rotate(Axis.ZP.rotationDegrees(rock));
+				}
+			}
+		}
 		if (pose.style() == Style.SLUMP) {
 			// (2026-11-11) sat down where it stood, legs out ahead, folded forward over them
 			poseStack.translate(0.0F, -height * SLUMP_SINK * flat, 0.0F);
 		} else if (pose.style() == Style.CURL) {
 			// (2026-11-11) on its side, curled up, rocking a little
-			float side = pick(pose.id() * 31) < 0.5F ? 1.0F : -1.0F;
+			float side = com.jaymospowers.core.wounds.DownedLie.curlSide(pose.id());
 			poseStack.translate(side * height * 0.5F * flat, height * CURL_LIFT * flat, 0.0F);
 			float rock = pose.out() ? 0.0F : CURL_ROCK * Mth.sin(state.ageInTicks * CURL_ROCK_RATE + pose.id()) * flat;
 			poseStack.rotate(Axis.ZP.rotationDegrees(side * (SIDE_ROLL * amount + rock)));
@@ -320,10 +346,10 @@ public final class DownedPose {
 		}
 		PoseBlend.Frame f = new PoseBlend.Frame(m);
 		pose(f, living, pose);
-		// ((0.15.142) stiffer while it thrashes, so the beats aren't smoothed away)
-		track.apply(m, f, pose.machine() ? 0.8F + FLAIL_STIFFNESS * 2.0F
+		// ((0.15.142) stiffer while it thrashes, so the beats aren't smoothed away; and while a finisher's blows land on it)
+		track.apply(m, f, pose.machine() || pose.react() != null ? 0.8F + FLAIL_STIFFNESS * 2.0F
 			: 0.8F + FLAIL_STIFFNESS * (pose.crawls() ? 0.0F : flail(pose)));
-		if (pose.style() == Style.BACK && !pose.machine()) {
+		if (pose.style() == Style.BACK && !pose.machine() && pose.react() == null) {
 			// now and then it tries to sit up (the upper body lifting at the hips) and sinks back
 			PoseBlend.bend(m, RISE_PITCH * rise(living, pose) * Math.min(1.0F, pose.amount()), 0.0F, 0.0F, 0.0F, 0.0F);
 		}
@@ -343,6 +369,10 @@ public final class DownedPose {
 					lie(f, living, pose);
 				}
 			}
+		}
+		if (pose.react() != null && !pose.machine()) {
+			// under a finisher: braced for it, jolted by each blow, fighting a hold
+			ExecutionReact.limbs(f, pose.react(), pose.style() != Style.CRAWL, pose.broken(), living.ageInTicks, pose.id());
 		}
 		f.scale(Mth.clamp(pose.amount(), 0.0F, 1.0F));
 	}
@@ -576,7 +606,7 @@ public final class DownedPose {
 
 	/** Lying on its back: the try at sitting up (0-1), every so often (each on its own beat), not until it's been down a while. */
 	private static float rise(LivingEntityRenderState state, Down pose) {
-		if (pose.out() || pose.down() < FALL_TICKS + RISE_TICKS) {
+		if (pose.out() || pose.react() != null || pose.down() < FALL_TICKS + RISE_TICKS) {
 			return 0.0F;
 		}
 		float every = RISE_EVERY + (pose.id() & 63) * 2.0F;

@@ -1,0 +1,9 @@
+{
+  "item.jaymospowers.walking_cane": "Walking Cane",
+  "item.jaymospowers.crutch": "Crutch",
+  "tooltip.jaymospowers.walking_cane": "A stout stick with a crook to lean on.",
+  "tooltip.jaymospowers.crutch": "Padded under the arm. It takes more of your weight than a cane, so you walk a little faster.",
+  "tooltip.jaymospowers.support.hold": "Hold it in either hand to stand and walk on one leg.",
+  "message.jaymospowers.legless.one": "You can't stand on one leg. Hold a cane or a crutch, or fit a leg.",
+  "message.jaymospowers.legless.both": "You have no legs to stand on. Fit a wooden or iron leg."
+}

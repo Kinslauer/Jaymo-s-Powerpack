@@ -3227,3 +3227,105 @@ Nothing here has been played in a client yet; expect tuning.
   of `BoxingPoses`. First person shows none of it.
 - Other players see a boxer's stance too: the poses go by the style everyone is told and the fist gear in hand, since
   a player's levels are told only to that player.
+
+## 0.22.63 (2026-11-12): Your game starts again: the Sodium beta leaves your profile
+
+- Andy's game wouldn't start (2026-11-12 00:10, "Sodium 0.9.3-beta.4 is incompatible with Iris 1.11.7"): ImmersiveVFX's
+  test (2026-11-10) brought Modrinth's Sodium beta as `sodium-2MZWfUts.jar`; when the test ended and Iris came back, the
+  profile kept it (it never downgrades a mod, and the removal list only knew CurseForge's `sodium-fabric-0.9.3` name).
+  `removedFromProfile` now lists `sodium-2MZWfUts` too, so Build Modpack moves it out and puts the pack's Sodium 0.9.2 in.
+
+## 0.22.64 (2026-11-12): no walking on a missing leg - cane, crutch, and hauling up a block on your belly
+
+- Andy: "you shouldnt be able to walk upright with no leg, unless you make a cane or crutch". A player with a leg gone
+  and nothing fitted in its place drops to a crawl and stays there (as with two broken legs). A wooden or iron leg
+  still walks as before.
+- **Walking Cane** (a plank over three sticks: `PS / .S / .S`) and **Crutch** (six sticks and a leather pad:
+  `SLS / SSS / .S.`): held in either hand, one stands you up on the leg you have left (you rise by yourself when it
+  comes to hand; put it away and you go down again). The cane walks at the pace a missing leg already cost (55%), the
+  crutch at 70%. With both legs gone and bare neither helps: fit a leg.
+- A legless crawl is hauled by the arms, so it keeps 85% of a crawl's pace with one leg gone and 65% with both
+  (the walking penalty used to carry over into the crawl).
+- Andy: "crawling players should still be able to haul themselves up one block". Every crawling player (by the key,
+  the stance wheel, broken legs, a missing leg, or downed and awake) now goes up a full block by crawling into it, then
+  moves at 30% pace for 16 ticks and pays a little food.
+- Classes: `core/wounds/Crutches` (items, `legless`, the tick), `Breaks.crawlOnly`, `Crawl.tickHaul`. Art and JSON from
+  `tools/gen_crutches.py`. Transformed Xenoforms and creative players are not held down.
+- Compiled; not played. The third-person hold (the stick hanging from the fist to the ground) is set by eye from the
+  numbers and may need its angle tuned.
+
+## 0.22.65 (2026-11-12): downed enemies take executions lying down
+
+- Andy: "downed enemies should react to the executions, i just watched jung wild slam a few zombies and they popped up after, instead of being beaten into the ground".
+- **No more popping up**: a downed mob only looks laid out; to the game it still stands, so Jaymo's Kitchen started its corpse upright and let it topple. Anyone who dies downed (a finisher, a symbiote execution, a mob's execution, a takedown, bleeding out, the third hit) now hands the corpse how it lay (`DownedLie.markBody`, called from `Downed.finish`): crawlers face down, the rest on their backs or side, head the same way. Same for one tripped by a bolas and finished there.
+- **Reactions while it plays** (`ExecutionReact`, drawn through `DownedPose`): the body braces before and between blows (arms over the face, or over the back of the head face down), each crushing blow (Wild Slam, Skull Crusher, rock, flail, staff, ki, the symbiote's stomps and pounds) drives it into the ground and it bounces off, limbs flung up; a blade or spear pins it rigid and quivering; a cut or shot jerks it once; the neck snap, garrotte and the symbiote's chokes, bites and tearing are fought, hands at the grip and heels kicking. Animals, bugs and birds get the drop and bounce and kick with their own legs. No sit-ups while being finished.
+- Needs Jaymo's Kitchen's matching change for the corpse to start lying (older Kitchen: reactions only).
+- Built; not played.
+
+## 0.22.66 (2026-11-12): prone haul up a block is a held struggle
+
+- Andy: "the one block climb while prone should be activated by holding right click and animating a struggle up the block, longer and differently animated if you only have one hand. if you let go or are interuppted during the struggle then you ragdoll. there is a third faster animation if you are perfectly healthy."
+- **Hold Use to haul up**: lying on your belly against a rise about a block high (0.55 to 1.1) with room to lie on top, hold right click. Your hands reach up onto the top, you drag yourself up the face with your legs scrabbling, a knee comes over the edge and you slide in on your belly on top. Crawling into a block no longer steps you up it by itself (the step is vanilla's again).
+- **Three ways up** (`ProneHaul.style`): perfectly healthy (full health, nothing broken or lost, not downed) is quick and clean, 0.8 s with a strong knee onto the edge; the usual is a hard 1.6 s pull with the arms shaking; with only one working arm (the other broken or gone) it's a 2.8 s one-armed heave, rolled onto the good side with the dead arm hanging, that slips back part way and has to heave again. No working arm, no haul. Downed, each takes half as long again.
+- **Let go or get hit and you fall**: release right click part way, or take damage, and the grip goes: you ragdoll back off the face (Kitchen's limp body when it's there).
+- While you're lying against a rise you could go up, right click is the haul's (no item used or block worked), unless the crosshair is on a mob or something a click is for (a door, a chest...). Downed players can haul too.
+- Code: `core/ProneHaul` (rules, path, server), `client/ProneHaulClient` (input and movement), `client/ProneHaulPose` (drawn over `CrawlPose`), `ProneHaulUseMixin`; the old automatic haul step in `Crawl` is gone. `Breaks.workingArms` added.
+- Built; not played.
+
+## 0.22.67 (2026-11-12): Daggers harvest alike; no free knives or arrows from RPG Series skills
+
+- **Rogues & Warriors' daggers** (Flint Dagger and the rest) now cut what the Tool Station dagger cuts: everything a hoe mines (hay, moss, sponge, sculk, wart blocks...) at their material's speed, plus a sword's cuts. Before they only had the sword's (armory/DaggerHarvest).
+- **Fan of Knives** no longer makes up its blades. It throws up to three of your own knives: the one in your hand first, then the same kind from your pack, then any other knife or dagger (never Sora's Dagger or Ashfang). It never throws more than you carry; with only the held one, one knife flies. Each knife shows as itself and lands to be picked up, like Impale's spear (compat/SpellThrows).
+- **Shattering Throw** (Warrior) throws the weapon itself, which leaves your hand and lands to be picked up, as Impale does.
+- **Rain of Arrows** (Archers) spends one of your arrows (pack or worn quiver) for each arrow that falls, as many as you carry up to its usual count, and won't cast with none. **Barrage** won't cast unless you carry its three arrows (Spell Engine made up any it ran short of).
+- **Throw Net** (Rogue) throws one of your new **Throwing Nets** (5 string, crafted in an X) and won't cast without one. Andy: "make a net item crafted from string".
+- Creative casts take nothing, as before. Built; not played.
+
+## 0.22.68 (2026-11-12): blood on doors swings with the door
+
+- Andy: "the blood decals that splashed on the door in the second clip did not travel with the door as it opened, so they floated in midair".
+- **Doors**: a blood splat or run on a door now swings with it when it opens or closes, turning about the hinge to wherever the door now stands (the side that faced out ends up facing into the doorway, as on a real door). Each wall mark remembers the block it lies on (`BloodWallMark.follow`, `swing`).
+- **Nothing left to lie on**: a wall mark whose wall is gone goes with it instead of hanging in the air: the block broken or replaced, a fence gate opened, a trapdoor flipped. Puddles on the ground already settled onto whatever was under them.
+- Built; not played.
+
+## 0.22.69 (2026-11-12): hits and pickups heard again - downed hits land, ImmersiveFX leaves the pack
+
+- **Hitting a downed body sounds and looks like a hit** (`Downed.blowLands`): a player's blow on anyone downed (every
+  humanoid, villagers, tamed animals) takes no health, so vanilla only played its soft no-damage swish and the only
+  answer was a quiet, low player grunt. Now each blow that counts a wound gives the thud of a full swing (arrows keep
+  their own hit sound), the red hurt flash and flinch every client sees, and the body's own hurt cry at its own voice
+  (a vindicator grunts as a vindicator). The killing blow (three hearts or more, or the tenth wound) gets the thud and
+  flash, and the death cry follows as before. Andy: "attacking the vindicator didnt have any impact or reaction sounds".
+- **ImmersiveFX: Resurrected leaves the pack** (Andy: "having both is making everyone lag so you can remove the
+  immersive"). It and Sound Physics Remastered both put their own echo and muffling filters on every sound: ImmersiveFX
+  stands down beside a sound physics mod, but it looks for the old id `soundphysics`, not Remastered's
+  `sound_physics_remastered`, so both ran. That was the likeliest reason pickups went silent and all sound dropped out
+  while sprinting, and the two together cost frames. The build moves it out of the CurseForge profile
+  (`removedIdsFromProfile`). AmbientSounds 6, which it replaced, is not brought back; Sound Physics keeps the echoes.
+- Built; not played.
+
+## 0.22.70 (2026-11-12): Z Fighter techniques, brute clashes and new moves for fire, frost, storm, weight, water and sound (#1351)
+
+**Z Fighter**
+- Four new techniques to buy with TP on the Techniques page: **Eye Beams** (sneak + V held, on a heat gauge; let go at once for a blinding shot, R while held for a spin, cold and freezing for the Frost lineage, and into the face of someone you hold), **Aerial Charge** (G while flying: carry the first foe into a wall or the ground; aimed steeply down it is a power dive), **Thunderclap** (G: a shockwave, or boxed ears up close, which deafens a player for a few seconds) and **Great Breath** (sneak + V held: a gust that pushes everything back; cold for the Frost lineage).
+- **Hold Fast**: every Z Fighter hits harder the closer they are to going down.
+- **Bracers**: guarding soaks damage into a bar that pays out as a damage boost when the guard drops, left click while guarding clashes them for a knockback, and arrows that hit the guard are sent back.
+- **Great ape**: a held punch with nothing to grab tears up a slab of ground to throw; G cracks the earth in a line and B in rings.
+- **Clash of blows**: two great blows that meet lock for a moment and one side gives. Great ape, Bulwark's charge, the big suit's ram and a combo finisher can all clash.
+- **Sun and moon**: Verdant fists are stronger in sunlight and a little weaker at night; Warrior-born are stronger under the night sky, more so at full moon. Sneak, stand still and look straight up to drink it in.
+- **Kicks**: a tornado kick joins the strings, spinning kicks pull the target in, and sprinting into a string opens with a flying kick.
+- **Throws**: a thrown body bowls into others; a thrown friend lands soft.
+- **Charged throws**: hold a rock or dagger throw longer to charge it with ki so it bursts where it lands; sneak on release sets rocks circling you.
+
+**Fire and frost**
+- **Emberborn and Pyre** run hot: a heat bar that climbs in a fight, white-hot hands that wear armour down, a vent (double-tap sneak), and a burn and burst at the top. Sneaking still with empty hands braces: blows are soaked and blasted back, and a shot that hits you is caught and returned stronger. Fire you start jumps between foes, and what it kills bursts.
+- **Pyre** (sneak + R rays, sneak + V flame ring, sneak + B fire wall, Z tap sky column) and the **Flame Avatar** (V tap wall, V hold ring) get the new fire moves.
+- **Cryokinesis and Rime**: a cold gaze that freezes after six seconds, an icicle volley that bleeds and an ice ball that roots (sneak variants of their keys).
+
+**Storm, weight, water and sound** (sneak or sprint variants of the usual keys)
+- **Wind**, in a storm mode: Bolt Rush, Bolt Clap, Bolt Slam; in Thunderhead also a lightning dome, a blink along a bolt and a ring of tornadoes; sneak + Z turns the sky (clear, rain, thunder); hits change with the weather.
+- **Gravity**: Binding Bands (sneak + B) pin up to five; Trading Places (sneak + Z) swaps with a target, blinks and leaves a copy, or drags what you hit to your feet; Last Footing snaps you back to safe ground once when badly hurt; in Collapse, sneak + C is ten seconds where nothing stops you.
+- **Darktide**: a water dome, a whirlpool, a held water beam, a bleeding trident jab, lightning on a thrown trident, a shoal that fights for you in water and drowned that side with a trident bearer.
+- **Resonance**: a held shriek, a cry that lifts you in mid-air, a sound-barrier punch and a panic cry when hit.
+
+Nothing here has been played in a client yet; expect tuning.

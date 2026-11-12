@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/tundra/lichen_ceiling",
+  "textures": {
+    "flat": "minecraft:block/glow_lichen_ground_flat_1",
+    "tuft": "minecraft:block/glow_lichen_ceiling1"
+  }
+}

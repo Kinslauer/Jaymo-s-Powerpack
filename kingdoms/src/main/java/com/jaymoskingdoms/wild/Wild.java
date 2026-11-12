@@ -32,6 +32,8 @@ public final class Wild {
 	public static EntityType<Moose> MOOSE;
 	/** (0.7.610) The grizzly mini-boss, with its spawn egg. */
 	public static EntityType<Grizzly> GRIZZLY;
+	/** The muskox of the far cold ({@link Muskox}), with its spawn egg; herds ({@link HerdPull}) and fed hunters ({@link FedPredators}) come with it. */
+	public static EntityType<Muskox> MUSKOX;
 	/** Where grizzlies roam, and their natural spawn weight (rare: one in a wide stretch, see {@link Grizzly#checkSpawn}). */
 	static final TagKey<Biome> HAS_GRIZZLY = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_grizzly"));
 	static final int GRIZZLY_WEIGHT = 3;
@@ -52,6 +54,13 @@ public final class Wild {
 			.clientTrackingRange(10), Grizzly.createAttributes());
 		SpawnPlacements.register(GRIZZLY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Grizzly::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GRIZZLY), MobCategory.CREATURE, GRIZZLY, GRIZZLY_WEIGHT, 1, 1);
+		MUSKOX = com.jaymoskingdoms.beasts.Beasts.type("muskox", EntityType.Builder.of(Muskox::new, MobCategory.CREATURE).sized(1.4F, 1.55F)
+			.clientTrackingRange(10), Muskox.createAttributes());
+		SpawnPlacements.register(MUSKOX, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Muskox::checkSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.tag(Muskox.HAS_MUSKOX), MobCategory.CREATURE, MUSKOX, Muskox.SPAWN_WEIGHT, Muskox.SPAWN_LEAST,
+			Muskox.SPAWN_MOST);
+		HerdPull.register();
+		FedPredators.register();
 	}
 
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {

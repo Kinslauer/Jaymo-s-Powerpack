@@ -411,9 +411,12 @@ public final class Breaks {
 		return !stack.isEmpty() && (stack.is(Items.SHIELD) || stack.has(DataComponents.BLOCKS_ATTACKS) || stack.getItem() instanceof ProjectileWeaponItem);
 	}
 
-	/** A person whose two legs are both broken (not severed): crawling is all that's left, (0.20.110) unless on {@link Adrenaline}. */
+	/**
+	 * A person whose two legs are both broken (not severed): crawling is all that's left, (0.20.110) unless on
+	 * {@link Adrenaline}. Or a player with a leg gone and nothing to stand on in its place ({@link Crutches#legless}).
+	 */
 	public static boolean crawlOnly(Entity entity) {
-		return bothLegsBroken(entity) && !Adrenaline.active(entity);
+		return bothLegsBroken(entity) && !Adrenaline.active(entity) || Crutches.legless(entity);
 	}
 
 	/** (0.20.110) Two broken legs (not severed, not both splinted), adrenaline or not: what {@link #crawlOnly} holds to the ground. */
@@ -445,6 +448,14 @@ public final class Breaks {
 	/** (0.14.5) Whether {@code entity} has an arm to freerun with: not both broken (or gone), splinted or not. */
 	public static boolean armsUsable(Entity entity) {
 		return !(entity instanceof LivingEntity living) || !(armBroken(living, InteractionHand.MAIN_HAND) && armBroken(living, InteractionHand.OFF_HAND));
+	}
+
+	/**
+	 * How many of {@code entity}'s arms work (0 to 2): an arm broken (out of a splint or not, unless on adrenaline) or gone
+	 * doesn't. The prone haul up a block goes by it ({@code ProneHaul}).
+	 */
+	public static int workingArms(LivingEntity entity) {
+		return (armBroken(entity, InteractionHand.MAIN_HAND) ? 0 : 1) + (armBroken(entity, InteractionHand.OFF_HAND) ? 0 : 1);
 	}
 
 	/**
