@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "jaymospowers:cooked_carp",
+    "jaymospowers:cooked_pike",
+    "jaymospowers:cooked_perch",
+    "jaymospowers:cooked_zander",
+    "jaymospowers:cooked_bream",
+    "jaymospowers:cooked_tench",
+    "jaymospowers:cooked_catfish",
+    "jaymospowers:cooked_chub",
+    "jaymospowers:cooked_grayling",
+    "jaymospowers:cooked_whitefish",
+    "jaymospowers:cooked_burbot",
+    "jaymospowers:cooked_pollock",
+    "jaymospowers:cooked_sea_bass",
+    "jaymospowers:cooked_halibut",
+    "jaymospowers:cooked_catshark",
+    "jaymospowers:cooked_dogfish",
+    "jaymospowers:cooked_eel",
+    "jaymospowers:cooked_trout",
+    "jaymospowers:cooked_char",
+    "jaymospowers:cooked_mackerel",
+    "jaymospowers:cooked_herring",
+    "jaymospowers:cooked_swordfish"
+  ]
+}

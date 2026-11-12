@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/rod_pod"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/rod_pod",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/rod_pod",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/rod_pod",
+      "y": 270
+    }
+  }
+}

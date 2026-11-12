@@ -29,6 +29,10 @@ public final class Tornado {
 	boolean killed;
 	/** A seed for its wander, so each one weaves its own way. */
 	final float seed;
+	/** Whether its foot is on open water just now: a waterspout, its funnel pale with spray, tearing nothing up. */
+	public boolean water;
+	/** A fair-weather waterspout (one of the sea's own, under no storm): it dies as soon as it comes ashore. Server only. */
+	boolean spout;
 
 	public Tornado(int id, int size, int storm, double x, double y, double z, double vx, double vz, int age, int life, float seed) {
 		this.id = id;
@@ -84,10 +88,13 @@ public final class Tornado {
 		buf.writeVarInt(age);
 		buf.writeVarInt(life);
 		buf.writeFloat(seed);
+		buf.writeBoolean(water);
 	}
 
 	static Tornado read(RegistryFriendlyByteBuf buf) {
-		return new Tornado(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
+		Tornado t = new Tornado(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
 			buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readVarInt(), buf.readFloat());
+		t.water = buf.readBoolean();
+		return t;
 	}
 }

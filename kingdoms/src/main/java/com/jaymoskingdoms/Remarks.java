@@ -62,7 +62,7 @@ public final class Remarks {
 	static final int LEARNED = 4;
 	static final float TIP_CHANCE = 0.15F;
 	/** The loading screen's tips ({@code gui.jaymoskingdoms.story.hint.N}). */
-	static final int TIPS = 151;
+	static final int TIPS = 153;
 	/** A close companion greets you after this long apart (ticks). */
 	static final int AWAY = 12000;
 	/** A band warns you off this near its camp (blocks); once per camp per player per this long (ticks). */

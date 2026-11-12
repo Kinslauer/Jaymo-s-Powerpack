@@ -3551,3 +3551,102 @@ Compiled only; not played.
   when it lands (it showed nothing before). A click that hits nothing shows a jab.
 - First person: a boxer's arms stay in the guard and the punching arm goes out from it (the lead hand for a jab or
   lead hook, the rear for the rest); before, the game's own swing took over.
+
+## 0.22.83 (2026-11-12): Our own immersive sounds - footsteps, armour, water, jets, stations, drops, stomach, beds, sound browser
+
+- What ImmersiveFX: Resurrected gave the pack before it came out for lag (#1361), built as our own and kept cheap. Nothing of it is used (AGPL, recorded sounds): 247 takes in 86 sounds are synthesised by `tools/gen_immersive_sounds.py` (sounds/immersive/, events `immersive.*` at the top of sounds.json).
+- **Lag guard** (`client/sound/ImmersiveSounds`): every extra plays on this side only, never farther than 20 blocks from the camera, at most 6 a tick, and none while the sound engine's channels are over 70% full (read once a tick from its own "Sounds: x/y"), so they can't crowd out real sounds.
+- **Footsteps by material** (`Footfalls`, `FootfallLevelMixin` on ClientLevel's sound play): every step sound the game plays gets a layer from the ground (`SoundKinds`: grass, stone, wood, sand, gravel, snow, metal, carpet, mud; dirt counts as soft earth, snow layers and carpets on top count), a harder one running, a push-off jumping, a landing as heavy as the fall. Sneaking takes the step (the game's own and ours) to 50%, the stance wheel's low crouch to 35%, crawling to 25%.
+- **Armour by material**: on each step the worn set sounds as it's made (cloth, leather, chain, scale, plate, heavy, bone, crystal), louder the more of it is worn; soft sets every other step. Tinkering's bog iron (plate), Arsenal's Void Crown (crystal), the Rig (heavy), caveman hide, ichorcloth, Kingdoms' Ronin/Kintsugi/Warlord/Paladin/Gladiator/Heavenly/Reverent/Primal and the Aether's sets are named; other mods' armour goes by its equip sound, then words in its id. Replaces Ambience's single armour clink.
+- **Wading and swimming**: sloshing while wading, strokes while swimming (quicker sprint-swimming), a deep plunge and bubbles diving in fast.
+- **Steam, fire and bubble jets** (`Jets`): steam hisses off water touching lava, some open lava pools burst into flame spouts now and then, a few sea floor spots 3+ blocks deep bubble steadily. Scanned a slice a tick (14 blocks out, 6 up and down, 24 slices); which pools and floors is fixed by the spot. Particles off on Minimal.
+- **Workstation sounds** (`Workstations`, `WorkstationSlotMixin`): each station sounds as it opens (crafting table, anvil, loom, stonecutter, smithing table, furnaces, grindstone, cartography, brewing stand, enchanting table, the Tinkers tables, the smeltery), taking a result sounds like the work (by what the item is made of at a crafting table), a furnace sizzles each time an item is done while you watch, and the stations worked in the world sound as they're used: crucible and alembics, smith's anvils and forges, forge hearth, lapidary wheel, and Kitchen's pots, pans, stoves, boards (a chop with a knife), presses and grindstones.
+- **Dropped items** (`ItemDrops`): an item sounds once as it first lands after falling: metal rings, wood thuds, coins clink, stone clacks, glass tinks, gems tick, paper flaps, bone clacks, soft things thump.
+- **Stomach** (`core/StomachSounds`, server, heard by everyone near): at 6 food or less the stomach growls every 30-90 s (to half that, and louder, when empty); at Kitchen's thirsty point a dry swallow now and then. Never androids or the Divine-born, nor anyone asleep, creative or spectator. `KitchenCompat.water` added.
+- **Beds**: a rustle as anyone lies down or gets up (sleep or Kingdoms' bed rest), and now and then as a sleeper turns over, more often while the night runs by as a timelapse.
+- **Sound browser** (`SoundBrowserScreen`, `SoundTuning`, `SoundTuningEngineMixin`, `SoundBrowserOptionsMixin`): Music & Sounds > Sound Browser... (or a key, unbound at first) lists every sound heard in the last minute, newest first, and any you've turned down; search finds any sound. Click the bar to set a volume (5% steps), the name to mute, right-click to reset. "Thin repeats" (on) drops a sound's starts past 6 in half a second (never music, records, voices, menus or loops). Saved in config/jaymospowers-sounds.txt. Covers our power sounds too.
+- Built; not played. Synthesised takes not listened to in game yet.
+
+## 0.22.84 (2026-11-12): Dynamic Waters rivers replace Streams Reflowing
+
+- **Rivers**: the pack now ships our own 26.3 port of AdamNew's Dynamic Waters (MPL-2.0, source in `ports/dynamicwaters`,
+  credits and every change in `ports/dynamicwaters/PORT.md`). Rivers run downhill from the mountains to the sea, carve
+  valleys and gorges, push swimmers, boats and dropped items along with the current (faster in rain and storms), freeze
+  over in the cold and break up into drifting ice floes. Its config screen is in Mod Menu.
+- Streams Reflowing is gone from the pack build, and so is `core/StreamsPreset` (it only set Streams' world preset).
+  `water/Currents` stays for running water outside the rivers and for splashes; Dynamic Waters pushes its own river
+  channels.
+- Needs a new world: old worlds keep their old rivers and get odd seams at new chunks.
+- Built and boot-tested on a dedicated server; not played.
+
+## 0.22.85 (2026-11-12): Ice Caves, crevasses and brittle ice from blue ice (26.4)
+
+- **Ice Caves** (`jaymospowers:ice_caves`): a new cave biome under the colder lands (temperature below -0.3), from about
+  25 blocks under the surface down to the deepslate depths, like the lush and dripstone caves. The driest cold ground
+  (the tundra and dry snowy plains) keeps its old rock. Where a lush, dripstone or sulfur cave would be, that cave wins.
+  New chunks only.
+  - The rock is packed ice with bands of calcite (material rule `jaymospowers:ice_caves`, noise
+    `jaymospowers:ice_cave_gradient`). Large icicles of packed ice hang from the ceilings and rise from the floors,
+    sometimes joined into columns. Icicles hang in patches (a few standing under them), snow and ice crystals lie on the
+    floors, and there is no glow lichen. No lava lakes or lava springs; water springs, geodes and dungeons stay.
+  - Ores come out in the ice inside a pocket of stone (deepslate below Y 0): every ore feature (ours, vanilla's and
+    other mods', `OreStandInMixin`, `ScatteredOreStandInMixin`), Powers' great veins (`BigVeinFeature`) and Kingdoms'
+    world tier veins (`GroundChanges`).
+  - Spawns: the usual cave monsters plus strays (they spawn here without sky, `StraySpawnMixin`) and Frostbites.
+    Mineshafts, trial chambers, ruined portals and strongholds can generate here. Frozen peaks music, icy fog.
+- **Crevasses** (`jaymospowers:crevasse`, the 26.4 feature's settings): winding cracks carved into ice cave floors,
+  narrowing at their ends and towards their bottoms, with a bed of powder snow down in them and roofed at floor level
+  with brittle ice. They are only carved where the walls hold, so they never break into another cave.
+- **Brittle ice from blue ice**: water with blue ice beside it (north, south, east or west) freezes into brittle ice
+  when it is placed, flows or something next to it changes (`BlueIceWaterMixin`).
+- Brittle ice: what may cross it is now the entity tag `#jaymospowers:does_not_break_brittle_ice` (Frostbites, strays).
+- Classes: `frost/IceCaves`, `frost/IceCaveFeatures`, `mixin/icecaves/*`.
+
+## 0.22.86 (2026-11-12): Rivet mans cannons; waking in your ship's berth
+
+- **Rivet**: B on a cannon (Kingdoms' guns, on land or aboard a ship) melds him into it: he lays it where he looks, Space fires, and he reloads from the gunpowder and shot he carries. Sneak or B again leaves (`KingdomsCompat.meldGun`).
+- **Death wake-up**: if your spawn is a berth aboard a Kingdoms ship that's still afloat, you wake there ("You wake in your own berth...") (`Mortality.BERTHS`).
+- Built; not played.
+
+## 0.22.87 (2026-11-12): fishing - new species, legends, rod pod, ice fishing, crab pot, journal, contests (Tracks B leftovers, C and D)
+
+- **30 new species** (docs/Plan-fishing.md Track C), each with its own model, texture, raw and cooked item, spawn egg,
+  water, climate, depth, hours, seasons and size range: carp, pike, perch, zander, bream, tench, catfish, eel, trout,
+  chub; char, grayling, whitefish, burbot; mackerel, herring, pollock, sea bass, halibut, swordfish; catshark, dogfish,
+  blue shark, hammerhead, great white; shrimp, crayfish, crab, lobster, jellyfish. Real fish (`WildFish`) that spawn
+  in schools and carry their own weight (it sets their size); walkers and the jellyfish are `Critter`s (crabs walk
+  sideways, all rest by day, a jellyfish stings). Big sharks have no item: cut up on the shore into shark meat, and
+  their jaw is kept (it mounts on a plaque). Models and art generated by `tools/gen_fishing_species.py`.
+- **Night fish, schools and hunters, seasons**: each species feeds at its own hours (eels and catfish at night, zander at
+  dusk), bites more in its seasons (Kitchen's `Seasons`, by reflection) and in rain; hungry predators chase smaller fish,
+  and where they hunt, fish round about are 1.8x keener for a minute (`FishSchools`). A fed predator stops hunting.
+- **Size curve**: weights fall away like an exponential: half in the bottom fifth of the range, about 1 in 100 in the
+  top tenth (`FishCatch.curve`).
+- **Other mods' fish** (`FishCompat`): any fish entity (or `#jaymospowers:hookable_fish`) is hooked like ours; one whose
+  name says what it is (a "catfish", a "trout") fishes and lands as our species, anything else drops its own loot.
+- **Legends** (`FishLegends`): every 256-block water (fresh and salt apart) has one named old giant of a kind that lives
+  there, 1.3-1.65x its kind's top weight, wary, rising only to someone fishing deep water there; it fights 1.4x harder
+  and twice as long. Landed and kept, the water has none for 120 days; put back, it's the water's legend again.
+- **Lure depth** (`LureDepth`): a lure on a spinning or sea rod sinks 0.05 blocks a tick while you wait, a ledger rod's
+  bait 0.15, down to the bed; the depth shows on the action bar, and fish only take bait near their own depth.
+- **Ice fishing** (`IceFishing`): the Ice Auger bores a hole in ice over water (hold use 2.5 s); it stays open 3 days
+  (`BiomeFreezeMixin`), a hook landing on the ice beside it drops in, and fish crowd under it (1.5x keener).
+- **Rod pod** (`RodPodEntity`): rest up to three baited rods; each casts ahead and fishes like a held rod. A nibble
+  clicks; a take rings the bell, lights the alarm and gives a full redstone signal for 8 s: pick that rod up with an empty
+  hand to strike.
+- **Crab pot** (`CrabPotEntity`): sink it, bait it with meat or fish; crabs, lobsters, crayfish and shrimp walk in
+  (nearby ones are drawn to it; others come in over time, three times as often at night). Six at most, a bait lasts three.
+- **Catch and release** (`CatchRelease`): a landed fish is alive for 2 minutes (kept alive in a keepnet or a crab pot in
+  water); use it on water to let it go, at its weight, and it grows on. Sneak and use to look it over.
+- **Personal bests and the Fisher's Journal** (`FishLog`, `JournalScreen`): every catch is written down (count, released,
+  best weight with its day, bait and water, the hours each kind bites for you), kept through death; beating a best plays
+  a fanfare. Read it in the Fisher's Journal (book + any fish) instead of a `/pb` command.
+- **Keepnet, trophy plaque**: the keepnet holds nine live fish in the water; the trophy plaque mounts any landed fish or
+  a shark's jaw on a wall, with its name, weight, length, angler and day.
+- **Fishermen** (`Fishermen`, `FishermanScreen`): Kingdoms' "Talk about fishing" (or hand a fisherman a fish) opens their
+  screen: they buy fish by weight (live ones 1.25x, a legend 3x; each 40 kg sold in a village in a day cuts the price),
+  paid in the local coin with Kingdoms, else emeralds with the change kept. Every 4 days a contest runs sunrise to noon:
+  enter, fish within 128 blocks of the village, your heaviest counts against three of the village's own anglers; the
+  winner gets 8 emeralds' worth and an Angler's Ribbon. They also tell you of the water's legend.
+- Landing net now scoops the new small species and critters, alive and tagged.
+- Built; not played.

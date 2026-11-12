@@ -329,10 +329,7 @@ public final class Kitchen {
 					f.level().sendParticles(ParticleTypes.CLOUD, x, y + 0.3, z, 1, 0.1, 0.05, 0.1, 0.02);
 				}
 			}
-			if (now % 20 == 0) {
-				f.level().playSound(null, f.pos(), pan ? SoundEvents.CAMPFIRE_CRACKLE : SoundEvents.BUBBLE_COLUMN_BUBBLE_POP,
-					SoundSource.BLOCKS, 0.8F, 1.0F);
-			}
+			com.jaymoskitchen.sound.KitchenSounds.finishing(f.level(), f.pos(), pan);
 			if (now >= f.readyTick()) {
 				it.remove();
 				ServerPlayer player = server.getPlayerList().getPlayer(f.player());

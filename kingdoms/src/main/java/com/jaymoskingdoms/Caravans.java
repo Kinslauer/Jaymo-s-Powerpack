@@ -119,7 +119,7 @@ final class Caravans {
 
 	/** One caravan on the road: whose, to whom, which way ({@code back}), where it is, its carts' loads, its guards. */
 	record Caravan(int id, int home, int lord, boolean back, BlockPos at, List<Map<String, Integer>> carts, int guards, boolean mounted,
-		long started, long stopUntil, int rig, boolean trade, int hold) {
+		long started, long stopUntil, int rig, boolean trade, int hold, boolean smuggle) {
 		static final Codec<Caravan> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("id").forGetter(Caravan::id),
 				Codec.INT.fieldOf("home").forGetter(Caravan::home),
@@ -134,19 +134,21 @@ final class Caravans {
 				Codec.INT.optionalFieldOf("rig", TradeRoutes.CART).forGetter(Caravan::rig),
 				Codec.BOOL.optionalFieldOf("trade", false).forGetter(Caravan::trade),
 				// ((0.7.490) an ogre hold's haul: its site's id; -1 for everyone else's)
-				Codec.INT.optionalFieldOf("hold", -1).forGetter(Caravan::hold))
+				Codec.INT.optionalFieldOf("hold", -1).forGetter(Caravan::hold),
+				// (a smuggler's handcart between two cities' back rooms: Smuggling)
+				Codec.BOOL.optionalFieldOf("smuggle", false).forGetter(Caravan::smuggle))
 			.apply(i, Caravan::new));
 
 		Caravan at(BlockPos pos) {
-			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold);
+			return new Caravan(this.id, this.home, this.lord, this.back, pos.immutable(), this.carts, this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold, this.smuggle);
 		}
 
 		Caravan carts(List<Map<String, Integer>> carts) {
-			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold);
+			return new Caravan(this.id, this.home, this.lord, this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, this.stopUntil, this.rig, this.trade, this.hold, this.smuggle);
 		}
 
 		Caravan turned(List<Map<String, Integer>> carts, long stopUntil) {
-			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil, this.rig, this.trade, this.hold);
+			return new Caravan(this.id, this.home, this.lord, !this.back, this.at, List.copyOf(carts), this.guards, this.mounted, this.started, stopUntil, this.rig, this.trade, this.hold, this.smuggle);
 		}
 
 		int load() {
@@ -239,8 +241,10 @@ final class Caravans {
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.remove(Integer.toString(c.id()));
 		Map<String, Long> next = new HashMap<>(l.next());
-		// ((0.7.490) an ogre hold's haul is timed by its hold, not by the camp it hauls to)
-		next.put(c.hold() >= 0 ? TradeRoutes.holdKey(c.hold()) : Integer.toString(c.home()), nextSend);
+		// ((0.7.490) an ogre hold's haul is timed by its hold, not by the camp it hauls to; a smuggler's run by its den)
+		if (!c.smuggle()) {
+			next.put(c.hold() >= 0 ? TradeRoutes.holdKey(c.hold()) : Integer.toString(c.home()), nextSend);
+		}
 		save(server, new Ledger(all, next, l.pending(), l.nextId()));
 	}
 
@@ -267,7 +271,7 @@ final class Caravans {
 		}
 		Ledger l = ledger(server);
 		for (Faction f : Factions.all(server, FactionType.FIEFDOM)) {
-			if (l.caravans().values().stream().anyMatch(c -> c.home() == f.id()) || now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
+			if (l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && !c.smuggle()) || now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
 				continue;
 			}
 			start(level, f, false);
@@ -284,7 +288,7 @@ final class Caravans {
 		TradeRoutes.send(level, now);
 		// ((0.7.490) and the havens, which only trade, send their output to the settlement that buys it best)
 		for (Faction f : Factions.all(server)) {
-			if (f.fallen() || f.type() == FactionType.BARBARIAN || !tradingHaven(server, f) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id())
+			if (f.fallen() || f.type() == FactionType.BARBARIAN || !tradingHaven(server, f) || l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && !c.smuggle())
 				|| now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
 				continue;
 			}
@@ -326,7 +330,7 @@ final class Caravans {
 		Ledger l = ledger(server);
 		int id = l.nextId();
 		boolean mounted = f.type().isRealm() && Wealth.atLeast(server, f, Wealth.Tier.PROSPEROUS);
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, HAVEN_GUARDS + carts.size() / CARTS_PER_GUARD, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, HAVEN_GUARDS + carts.size() / CARTS_PER_GUARD, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -452,7 +456,7 @@ final class Caravans {
 		}
 		Ledger l = ledger(server);
 		int id = l.nextId();
-		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1);
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), carts, GREEN_GUARDS + carts.size() / CARTS_PER_GUARD, false, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -511,7 +515,7 @@ final class Caravans {
 		int id = l.nextId();
 		int guards = GUARDS_BASE + carts.size() / CARTS_PER_GUARD;
 		boolean mounted = Wealth.atLeast(server, lord, Wealth.Tier.PROSPEROUS);
-		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1);
+		Caravan c = new Caravan(id, f.id(), lord.id(), false, start(f), carts, guards, mounted, now, now + STOP_TICKS / 2, TradeRoutes.CART, false, -1, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
@@ -541,12 +545,32 @@ final class Caravans {
 		Ledger l = ledger(server);
 		int id = l.nextId();
 		Caravan c = new Caravan(id, f.id(), to.id(), false, rig == TradeRoutes.BOAT ? TradeRoutes.quay(server, f) : start(f), carts, guards, mounted, now,
-			now + STOP_TICKS / 2, rig, true, -1);
+			now + STOP_TICKS / 2, rig, true, -1, false);
 		Map<String, Caravan> all = new HashMap<>(l.caravans());
 		all.put(Integer.toString(id), c);
 		Map<String, Long> next = new HashMap<>(l.next());
 		next.put(Integer.toString(f.id()), nextSend);
 		save(server, new Ledger(all, next, l.pending(), id + 1));
+		if (level.isPositionEntityTicking(c.at())) {
+			appear(level, c);
+		}
+		return c;
+	}
+
+	/**
+	 * A smuggler from {@code f}'s back room sets out for {@code to} with {@code cart} ({@link Smuggling}): one man pushing a handcart, no
+	 * guards, timed by his den rather than by the city's trade. He appears at once if anyone is near enough to see.
+	 */
+	static Caravan launchSmuggler(ServerLevel level, Faction f, Faction to, Map<String, Integer> cart) {
+		MinecraftServer server = level.getServer();
+		long now = level.getGameTime();
+		Ledger l = ledger(server);
+		int id = l.nextId();
+		Caravan c = new Caravan(id, f.id(), to.id(), false, start(f), List.of(Map.copyOf(cart)), 0, false, now, now + STOP_TICKS / 2, TradeRoutes.HAND,
+			false, -1, true);
+		Map<String, Caravan> all = new HashMap<>(l.caravans());
+		all.put(Integer.toString(id), c);
+		save(server, new Ledger(all, l.next(), l.pending(), id + 1));
 		if (level.isPositionEntityTicking(c.at())) {
 			appear(level, c);
 		}
@@ -731,6 +755,10 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		Faction home = Factions.get(server, c.home());
 		Faction lord = Factions.get(server, c.lord());
+		if (c.smuggle()) {
+			// (a smuggler at the far city, or home again)
+			return home == null || lord == null ? null : Smuggling.arrive(level, c, home, lord, now);
+		}
 		if (c.hold() >= 0 && home != null) {
 			// ((0.7.490) an ogre hold's haul at the camp it trades with, or back at its hold)
 			return TradeRoutes.arriveOgre(level, c, home, now);
@@ -967,9 +995,9 @@ final class Caravans {
 			for (PathfinderMob g : guards) {
 				HEADING.remove(g.getUUID());
 			}
-			if (now % 40 == 0) {
+			if (!carts.isEmpty()) {
 				Entity w = carts.get(level.getRandom().nextInt(carts.size()))[2];
-				level.playSound(null, w.blockPosition(), SoundEvents.BARREL_CLOSE, SoundSource.NEUTRAL, 0.8F, 0.9F);
+				WorldSounds.cart(level, carts.get(0)[2].getId(), w);
 			}
 			return;
 		}
@@ -1140,6 +1168,9 @@ final class Caravans {
 			Worker w = carter instanceof Worker hired ? hired : null;
 			carter.addTag(TAG);
 			carter.addTag(live.stamp);
+			if (c.smuggle()) {
+				carter.addTag(Smuggling.TAG);
+			}
 			Entity pull;
 			Wagon wagon;
 			if (c.hold() >= 0) {
@@ -1361,7 +1392,8 @@ final class Caravans {
 	/** A player strikes a cart: the caravan's guards turn on him. */
 	static void struck(ServerLevel level, Wagon wagon, ServerPlayer player) {
 		Faction f = Factions.get(level.getServer(), wagon.faction());
-		if (f == null) {
+		if (f == null || get(level.getServer(), wagon.caravan()) instanceof Caravan c && c.smuggle()) {
+			// (no guard of the realm stands up for a smuggler's cart)
 			return;
 		}
 		Economy.noteAttack(level.getServer(), f, player);
@@ -1379,7 +1411,10 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, wagon.faction());
 		String tribe = f != null && f.type() == FactionType.BARBARIAN ? Tribes.of(server, f.id()) : null;
-		if (tribe != null) {
+		if (get(server, wagon.caravan()) instanceof Caravan run && run.smuggle()) {
+			// (a smuggler's cart: nobody he can go to the law about)
+			Smuggling.robbed(level, wagon, player, run);
+		} else if (tribe != null) {
 			// ((0.7.490) a greenskin cart: the tribe's grudge against him rises)
 			Tribes.add(server, player.getUUID(), tribe, GREEN_ROB_GRUDGE);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.caravan.robbed.green", Tribes.name(tribe)).withStyle(ChatFormatting.RED));
@@ -1455,6 +1490,10 @@ final class Caravans {
 		List<String> parts = new ArrayList<>();
 		for (Map.Entry<String, Integer> e : c.carts().get(wagon.slot()).entrySet()) {
 			Item item = item(e.getKey());
+			if (item != null && c.smuggle() && Underworld.contraband(new ItemStack(item))) {
+				// (what's under the sacks isn't said)
+				continue;
+			}
 			if (item != null) {
 				parts.add(e.getValue() + " " + new ItemStack(item).getHoverName().getString());
 			}

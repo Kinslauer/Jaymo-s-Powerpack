@@ -78,6 +78,10 @@ abstract class McaAnswersMixin {
 			// (0.7.215) only the floating islands' hermits talk alchemy
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.FisherTalk.canAsk(villager)) {
+			// Powers' fishing: only a fisherman talks fish, the market and the contest
+			cir.getReturnValue().remove(com.jaymoskingdoms.FisherTalk.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.StarFolk.canAsk(villager)) {
 			// (0.7.384) only a floating island's hermit or a stargazer talks of the stars (and sells their charts)
 			cir.getReturnValue().remove(com.jaymoskingdoms.StarFolk.ANSWER);

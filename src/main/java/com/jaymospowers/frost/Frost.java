@@ -45,8 +45,8 @@ import net.minecraft.world.level.material.PushReaction;
  * slab, wall).</li>
  * <li>Snow settles on packed ice now (data: {@code tags/block/cannot_support_snow_layer.json}).</li>
  * </ul>
- * Without 26.4's ice caves, the icicles and crystals grow in frozen patches of the caves under snowy biomes, brittle ice
- * crusts frozen lakes, and Frostbites roam the snow ({@link FrostFeatures}).
+ * The icicles and crystals grow in the {@link IceCaves} and in frozen patches of the caves under snowy biomes, brittle ice
+ * crusts frozen lakes and roofs the ice caves' crevasses, and Frostbites roam the snow and the ice caves ({@link FrostFeatures}).
  */
 public final class Frost {
 	// ---- tuning ----

@@ -254,8 +254,10 @@ public class AetherionDragon extends WindDragon implements GeoEntity {
 		if (this.tickCount % BEAM_EVERY != 0) {
 			return;
 		}
-		if (this.tickCount % (BEAM_EVERY * 4) == 0) {
-			level.playSound(null, BlockPos.containing(mouth), SoundEvents.BEACON_AMBIENT, SoundSource.HOSTILE, 2.5F, 1.6F);
+		if (com.jaymoskingdoms.Soundscape.due(this, "beam", BEAM_EVERY * 3, BEAM_EVERY * 5)) {
+			com.jaymoskingdoms.Soundscape.play(level, mouth, SoundSource.HOSTILE,
+				com.jaymoskingdoms.Soundscape.Layer.of(2.2F, 2.7F, 1.5F, 1.7F, SoundEvents.BEACON_AMBIENT),
+				com.jaymoskingdoms.Soundscape.Layer.of(0.6F, 1.0F, 1.6F, 2.0F, SoundEvents.AMETHYST_BLOCK_RESONATE).chance(0.35F));
 		}
 		AABB box = new AABB(mouth, end).inflate(BEAM_WIDTH);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> spareable(e) && !(e instanceof WindDragon))) {

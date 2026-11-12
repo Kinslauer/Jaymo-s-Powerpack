@@ -190,8 +190,9 @@ public class Imp extends Monster implements GeoEntity {
 		}
 		// (a saved imp comes back with gravity as it was saved: set it from what it is doing)
 		this.setNoGravity(!this.resting());
-		if (!this.resting() && this.isAlive() && this.tickCount % FLAP_EVERY == 0) {
-			this.playSound(SoundEvents.PHANTOM_FLAP, 0.25F, 1.5F + this.random.nextFloat() * 0.3F);
+		if (!this.resting() && this.isAlive() && this.level() instanceof net.minecraft.server.level.ServerLevel server) {
+			com.jaymoskingdoms.WorldSounds.wingbeat(server, this, "flap", FLAP_EVERY - 3, FLAP_EVERY + 3, this.getSoundSource(), SoundEvents.PHANTOM_FLAP,
+				0.25F, 1.65F);
 		}
 	}
 

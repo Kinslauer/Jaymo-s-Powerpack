@@ -159,11 +159,21 @@ public final class FishingGear {
             if (FishingReal.hooked(sp) == target) {
                 // the fish on your own line, close enough to net: landed
                 FishingReal.endFight(sp, true);
-            } else if (kind == FishingReal.FISH_TROPICAL || kind == FishingReal.FISH_PUFFERFISH) {
+            } else if (Species.of(kind) != null && Species.of(kind).nettable()
+                    || kind == FishingReal.FISH_TROPICAL || kind == FishingReal.FISH_PUFFERFISH) {
+                // (Track C) small things a net scoops up: a crab off the bed, a shrimp, a little fish; alive, to keep or put back
                 if (FishingReal.onLine(target)) {
                     return InteractionResult.PASS;
                 }
-                ItemStack fish = FishCatch.loot(kind, FishCatch.roll(kind, level.getRandom()));
+                Species kindOf = Species.of(kind);
+                float kg = target instanceof WildFish w ? w.weight() : target instanceof Critter c ? c.weight()
+                        : FishCatch.roll(kind, level.getRandom());
+                ItemStack fish = FishCatch.loot(kind, kg);
+                if (fish.isEmpty()) {
+                    return InteractionResult.PASS;
+                }
+                FishCatch.tag(fish, kindOf, kg, player.getName().getString(), level, "");
+                FishLog.landed(sp, kindOf, kg, null, level, target.blockPosition(), "");
                 if (!player.addItem(fish)) {
                     player.spawnAtLocation(level, fish, 1.0F);
                 }
