@@ -153,6 +153,7 @@ public final class Armory {
 	public static void init() {
 		ArmoryEntities.init();
 		KnifeGuard.init();
+		DaggerHarvest.init();
 		for (Weapon weapon : WEAPONS) {
 			for (Tier tier : Tier.values()) {
 				Item item = tiered(weapon, tier);

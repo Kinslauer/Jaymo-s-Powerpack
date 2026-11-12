@@ -1,0 +1,6 @@
+# Daggers harvest alike; no free knives or arrows from RPG Series skills
+- **Rogues & Warriors' daggers** (Flint Dagger and the rest) now cut what the Tool Station dagger cuts: everything a hoe mines (hay, moss, sponge, sculk, wart blocks...) at their material's speed, plus a sword's cuts. Before they only had the sword's (armory/DaggerHarvest).
+- **Fan of Knives** no longer makes up its blades. It throws up to three of your own knives: the one in your hand first, then the same kind from your pack, then any other knife or dagger (never Sora's Dagger or Ashfang). It never throws more than you carry; with only the held one, one knife flies. Each knife shows as itself and lands to be picked up, like Impale's spear (compat/SpellThrows).
+- **Shattering Throw** (Warrior) throws the weapon itself, which leaves your hand and lands to be picked up, as Impale does.
+- **Rain of Arrows** (Archers) spends one of your arrows (pack or worn quiver) for each arrow that falls, as many as you carry up to its usual count, and won't cast with none. **Barrage** won't cast unless you carry its three arrows (Spell Engine made up any it ran short of).
+- Creative casts take nothing, as before. Built; not played.
