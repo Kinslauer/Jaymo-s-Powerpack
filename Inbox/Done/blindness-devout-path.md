@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -17,3 +17,4 @@ text_pass:
 
 ## Notes
 - 2026-11-12 01:46 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
+- 2026-11-12 01:57 PR #1328 is merged into master; moved to Inbox/Done.
