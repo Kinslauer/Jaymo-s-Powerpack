@@ -65,7 +65,7 @@ public final class Callouts {
 		for (Comrades.Leaning l : Comrades.Leaning.values()) {
 			LINES.put("take." + l.key(), 3);
 		}
-		for (String k : new String[] {"hurt", "behind", "down", "tending", "dragging", "legup", "ready", "spoils.give"}) {
+		for (String k : new String[] {"hurt", "behind", "down", "tending", "dragging", "legup", "ready", "spoils.give", "know.star", "drift"}) {
 			LINES.put(k, 2);
 			VOICED.add(k);
 		}
@@ -81,7 +81,8 @@ public final class Callouts {
 		LINES.put("foe.arrows", 3);
 		LINES.put("foe.medic", 3);
 		LINES.put("leaderdown", 3);
-		for (String k : new String[] {"hold.grab", "hold.pin", "ambush", "spoils.grab"}) {
+		for (String k : new String[] {"hold.grab", "hold.pin", "ambush", "spoils.grab", "know", "know.taught", "knows.shot", "knows.blade",
+			"knows.blunt", "knows.magic", "knows.fire", "knows.other"}) {
 			LINES.put(k, 3);
 		}
 	}

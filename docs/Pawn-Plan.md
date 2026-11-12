@@ -54,12 +54,18 @@ As built: medics drag (not lift) the fallen about 9 blocks clear before tending 
 up; camp bands crouch and spring); `Scavengers` (spoils leaning grabs weapons, tools, armour; goblins run off).
 Left for later: being boosted over gaps, and companions lifting you over a shoulder rather than dragging.
 
-## Patch 3: they learn
+## Patch 3: they learn (built, same PR)
 
 B1 foe knowledge in stars per creature kind for companions, and per player for camps, bands and realms (a camp that
 has met you three times knows you parry and feints, knows you shoot and raises shields). B4 catching up, B5 drift
 (leanings shift with how you play and with who they travel beside; enemy bands shift with what worked against you), A2
 lines that name who taught them.
+
+As built: `FoeLore` (companions' stars per kind, 2/6/14 kills, +8% damage a star, "know"/"know.taught" lines;
+bands' knowledge of each player kept on the player, counters from the third meeting, "fights like" another player);
+`Learners` past ten steps and catch-up; `LeaningDrift` (orders, kills and travel mates nudge leanings; bands that lose
+archers or leaders turn to guarding and shield their archers). Left: a captain who sits out fights catching up, and
+bands reading parries and feints (needs a hook from Powers' guard).
 
 ## Patch 4: talk and table
 

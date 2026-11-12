@@ -261,6 +261,13 @@ public final class Comrades {
 		return drawn;
 	}
 
+	/** {@link #leanings}, with a band's turn after its losses ({@link LeaningDrift#bandLeans}) as the second. */
+	static Leanings fighting(Mob m, String side) {
+		Leanings l = leanings(m);
+		Leaning band = side.startsWith("p:") ? null : LeaningDrift.bandLeans(m, side);
+		return band == null || band == l.main() ? l : new Leanings(l.main(), band);
+	}
+
 	private static @Nullable Leaning byKey(String key) {
 		for (Leaning l : Leaning.values()) {
 			if (l.key().equals(key)) {
@@ -435,7 +442,7 @@ public final class Comrades {
 			stand(m);
 			current = null;
 		}
-		Leanings leanings = leanings(m);
+		Leanings leanings = fighting(m, mine);
 		LivingEntity protectee = leader != null ? leader : BandLeaders.leaderOf(level, m, mine);
 		Map<LivingEntity, Integer> claims = SIDE_TARGETS.getOrDefault(level, Map.of()).getOrDefault(mine, Map.of());
 		LivingEntity best = null;
@@ -446,7 +453,7 @@ public final class Comrades {
 			}
 			int claimed = claims.getOrDefault(e, 0) - (e == current ? 1 : 0);
 			double score = score(leanings.main(), e, protectee, claimed, mine) + 0.5 * score(leanings.second(), e, protectee, claimed, mine)
-				- PER_BLOCK * Math.sqrt(m.distanceToSqr(e)) + (tending(e) ? TENDER_BONUS : 0.0);
+				- PER_BLOCK * Math.sqrt(m.distanceToSqr(e)) + (tending(e) ? TENDER_BONUS : 0.0) + FoeLore.knownScore(m, e);
 			if (e == current) {
 				score += STICK;
 				currentScore = score;
@@ -461,7 +468,9 @@ public final class Comrades {
 			return false;
 		}
 		aim(m, best);
-		Callouts.say(m, tending(best) ? "foe.medic" : "take." + leanings.main().key(), best, false, best.getDisplayName());
+		if (!FoeLore.taken(m, best)) {
+			Callouts.say(m, tending(best) ? "foe.medic" : "take." + leanings.main().key(), best, false, best.getDisplayName());
+		}
 		return true;
 	}
 

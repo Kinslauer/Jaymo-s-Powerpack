@@ -172,6 +172,9 @@ public final class QuickOrders {
 			default -> help(level, player, yours, now);
 		}
 		Callouts.say(first, "order." + NAMES[kind], player, true);
+		for (Villager v : yours) {
+			LeaningDrift.ordered(v, kind);
+		}
 	}
 
 	/** {@code v} goes a little way ahead of {@code player}, where they look, and comes back. */
