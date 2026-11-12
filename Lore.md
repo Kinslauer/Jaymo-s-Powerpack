@@ -1370,3 +1370,14 @@ smiths keep the black powder trade: charcoal from the kiln and the saltpetre of 
 who trusts a traveller may write it down for them, and whoever learns it walks beside a marksman rolling his
 cartridges and lobs the sticks; the camps have their own, fewer and wilder. The one rule of the trade is the first
 line of every primer: never where a friend is standing.
+
+(new) **The fisherfolk's waters** (Claude's placement for the fishing picks, Tracks B to D, 2026-11-12, for Andy to
+approve). Every river, lake and stretch of coast has its fish, each in the water and the season it keeps, and in every
+water lives one **elder**, an old giant the fisherfolk name ("Old Gnasher", "Mother Moll") and talk of on the bank. The
+Deep Mother's faith says the elder is hers: hook one and you'll fight it a long time, and the right thing is to weigh
+it, look at it and let it go. That is the Deep Mother's "a little of what she gives, given back" at its plainest, and
+a fish put back grows on. Keep it and the water goes without an elder for a season of seasons, until another grows into
+its place. Fishermen buy fish by the weight, but a village eats only so much in a day. Every few days they hold a
+contest from sunrise to noon, heaviest fish wins, and the village's own old hands fish against you. The rod pod and its
+bell, the ice auger, the crab pot and the keepnet are fisherfolk's gear, made by anyone with iron and string. A shark's
+jaw kept on a plaque is a sailor's boast.
