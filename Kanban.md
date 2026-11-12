@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-11 18:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 01:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,14 +36,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
 - [x] [[Inbox/Done/elemental-ki-limits|elemental-ki-limits]]
 - [x] [[Inbox/Done/costumed-and-everyday-power-users|costumed-and-everyday-power-users]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/lore-read-the-canon|lore-read-the-canon]]
-- [x] [[Inbox/Done/long-defence-text-pass|long-defence-text-pass]]
-- [x] [[Inbox/Done/jujutsu-mod-checklist|jujutsu-mod-checklist]]
-- [x] [[Inbox/Done/apes-xeno-voices-parasites-blood|apes-xeno-voices-parasites-blood]]
-- [x] [[Inbox/Done/ape-giant-trees-flying-screenshake-dust|ape-giant-trees-flying-screenshake-dust]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 
 
 %% kanban:settings
