@@ -43,6 +43,8 @@
 		"DownedHealMixin",
 		"DownedLimboMixin",
 		"FistGuardInventoryMixin",
+		"SunShelterSkeletonMixin",
+		"SunShelterZombieMixin",
 		"GuardOverTalkMixin",
 		"GuardRiposteMixin",
 		"DivineCounterMixin",
