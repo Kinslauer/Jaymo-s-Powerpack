@@ -62,7 +62,7 @@ of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
   Combat's swing sounds are untouched. Synthesised, not yet heard in game.
 - **Reel what Lift holds**: while Gravity's Lift holds a creature, a chunk or anything else, the scroll wheel pushes it
   out or reels it in, a block a notch, from 1 block to 16 (`GravityReel`). Heavier things follow more slowly. The
-  hotbar stays put while you hold something; sneak to scroll the hotbar as usual.
+  hotbar stays put while you hold something (sneak and scroll is still the stance wheel).
 - **Lift tears any block loose** (Andy: "it certainly should be able to grab ANYTHING"): the block you aim at comes
   whatever it is made of, obsidian included; only what can't be broken at all and blocks with something inside (a
   chest, a furnace) stay. The rest of the chunk still grows with the power. Harder chunks hit harder when thrown: up
