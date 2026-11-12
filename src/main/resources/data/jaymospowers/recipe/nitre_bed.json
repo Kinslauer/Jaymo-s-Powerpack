@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:dirt",
+    "minecraft:dirt",
+    "minecraft:dirt",
+    "minecraft:wheat",
+    "minecraft:wheat",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymospowers:nitre_bed"
+  }
+}

@@ -9,6 +9,11 @@
       "salt": 6,
       "fire": 1,
       "air": 2
+    },
+    "jaymospowers:nitre_earth": {
+      "salt": 3,
+      "earth": 3,
+      "rot": 1
     }
   }
 }

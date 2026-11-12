@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "ripe=0": {
+      "model": "jaymospowers:block/minerals/nitre_bed_0"
+    },
+    "ripe=1": {
+      "model": "jaymospowers:block/minerals/nitre_bed_0"
+    },
+    "ripe=2": {
+      "model": "jaymospowers:block/minerals/nitre_bed_0"
+    },
+    "ripe=3": {
+      "model": "jaymospowers:block/minerals/nitre_bed_1"
+    },
+    "ripe=4": {
+      "model": "jaymospowers:block/minerals/nitre_bed_1"
+    },
+    "ripe=5": {
+      "model": "jaymospowers:block/minerals/nitre_bed_1"
+    },
+    "ripe=6": {
+      "model": "jaymospowers:block/minerals/nitre_bed_1"
+    },
+    "ripe=7": {
+      "model": "jaymospowers:block/minerals/nitre_bed_2"
+    }
+  }
+}

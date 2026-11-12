@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymospowers:block/minerals/nitre_bed_top_0",
+    "side": "jaymospowers:block/minerals/nitre_bed_side",
+    "bottom": "jaymospowers:block/minerals/nitre_bed_bottom"
+  }
+}

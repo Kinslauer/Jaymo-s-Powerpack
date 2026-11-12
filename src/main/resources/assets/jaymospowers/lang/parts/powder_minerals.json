@@ -7,5 +7,7 @@
   "block.jaymospowers.saltpetre_ore": "Saltpetre Ore",
   "block.jaymospowers.sandstone_saltpetre_ore": "Sandstone Saltpetre Ore",
   "block.jaymospowers.sulphur_pebble": "Sulphur Lump",
-  "block.jaymospowers.saltpetre_pebble": "Saltpetre Crust"
+  "block.jaymospowers.saltpetre_pebble": "Saltpetre Crust",
+  "item.jaymospowers.nitre_earth": "Nitre Earth",
+  "block.jaymospowers.nitre_bed": "Nitre Bed"
 }

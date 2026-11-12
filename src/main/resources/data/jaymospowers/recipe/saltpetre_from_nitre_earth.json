@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.2,
+  "group": "saltpetre",
+  "ingredient": "jaymospowers:nitre_earth",
+  "result": {
+    "id": "jaymospowers:saltpetre"
+  }
+}

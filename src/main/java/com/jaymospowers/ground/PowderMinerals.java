@@ -39,8 +39,8 @@ import net.minecraft.world.level.material.PushReaction;
  * Andy: "add pebbles for them that spawn too, as well as deposits or however you think they should be acquired". The
  * two minerals of true black powder, found where they really are, so a marksman's powder can be made without bone meal:
  * <ul>
- * <li><b>Sulphur</b> comes up with heat. Ore deep in the overworld's stone and deepslate (below sea level, most of it near
- * the bottom), and plenty in the Nether's netherrack, more again in the basalt deltas. Yellow crust lies loose on cave
+ * <li><b>Sulphur</b> comes up with heat. Ore deep in the overworld's stone and deepslate (from the bottom up to y 8, thickest
+ * half way), and plenty in the Nether's netherrack, more again in the basalt deltas. Yellow crust lies loose on cave
  * floors beside lava and magma, on the Nether's floors, and round the rims of hot springs.</li>
  * <li><b>Saltpetre</b> (nitre) comes out of dry ground. Ore in the stone and sandstone under deserts, badlands and
  * savanna, and a thinner scatter in any cave's stone; white crust lies loose on dry sand and terracotta, and on the floors
@@ -48,11 +48,16 @@ import net.minecraft.world.level.material.PushReaction;
  * </ul>
  * Over a shallow vein of either, the ore tells' pebble is the mineral itself ({@link OreTells}): it blooms at the surface.
  * Both are soft (any pickaxe). Three saltpetre, a sulphur and a charcoal grind into four gunpowder
- * (recipe/gunpowder_from_saltpetre.json); Kingdoms' powderheads use the same mix when they have it.
+ * (recipe/gunpowder_from_saltpetre.json); Kingdoms' powderheads use the same mix when they have it. Saltpetre can also
+ * be grown the old way, in a nitre bed ({@link NitreBedBlock}).
  * Placement: worldgen/placed_feature/ore_sulphur*.json, ore_saltpetre*.json and *_crust.json.
  */
 public final class PowderMinerals {
 	public static Item SULPHUR, SALTPETRE;
+	/** Scraped off a ripe nitre bed; boiled down (smelted) into saltpetre. */
+	public static Item NITRE_EARTH;
+	/** The saltpetre bed, the old way of making saltpetre ({@link NitreBedBlock}). */
+	public static Block NITRE_BED;
 	public static Block SULPHUR_ORE, DEEPSLATE_SULPHUR_ORE, NETHER_SULPHUR_ORE, SALTPETRE_ORE, SANDSTONE_SALTPETRE_ORE;
 	/** Loose lumps of the mineral lying on the ground; a right click picks one up. */
 	public static Block SULPHUR_PEBBLE, SALTPETRE_PEBBLE;
@@ -77,6 +82,12 @@ public final class PowderMinerals {
 	public static void init() {
 		SULPHUR = item("sulphur");
 		SALTPETRE = item("saltpetre");
+		NITRE_EARTH = item("nitre_earth");
+		ResourceKey<Block> bedKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("nitre_bed"));
+		NITRE_BED = Registry.register(BuiltInRegistries.BLOCK, bedKey, new NitreBedBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DIRT)
+			.strength(0.6F).sound(SoundType.ROOTED_DIRT).setId(bedKey)));
+		ResourceKey<Item> bedItem = ResourceKey.create(Registries.ITEM, JaymosPowers.id("nitre_bed"));
+		Registry.register(BuiltInRegistries.ITEM, bedItem, new BlockItem(NITRE_BED, new Item.Properties().setId(bedItem).useBlockDescriptionPrefix()));
 		SULPHUR_ORE = block("sulphur_ore", ore(MapColor.STONE, 2.0F));
 		DEEPSLATE_SULPHUR_ORE = block("deepslate_sulphur_ore", ore(MapColor.DEEPSLATE, 3.5F).sound(SoundType.DEEPSLATE));
 		NETHER_SULPHUR_ORE = block("nether_sulphur_ore", ore(MapColor.NETHER, 1.5F).sound(SoundType.NETHER_ORE));
@@ -108,6 +119,8 @@ public final class PowderMinerals {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(SULPHUR);
 			output.accept(SALTPETRE);
+			output.accept(NITRE_EARTH);
+			output.accept(NITRE_BED);
 		});
 	}
 
