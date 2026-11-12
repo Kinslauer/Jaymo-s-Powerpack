@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -19,3 +19,4 @@ text_pass: done
 - 2026-11-11 22:21 Andy chose hostile to everyone; pushed to #1335.
 - 2026-11-11 18:15 Text pass: reviewed PR 1335 player-visible text: entity key entity.jaymospowers.frostborn_trooper, Frostborn Trooper, matching the Red Omen Blue Omen Worky Drone naming style; change note changes/powers/claude-project-thread-yseohu.md. FutureTrooper.java adds no chat lines or hard-coded player text. Everything plain, short, in voice; no rewrites needed.
 - 2026-11-12 01:48 Andy: troopers fight the Omens too; pushed to #1335.
+- 2026-11-12 01:51 PR #1335 is merged into master; moved to Inbox/Done.
