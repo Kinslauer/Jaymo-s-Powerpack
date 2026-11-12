@@ -76,6 +76,8 @@ public final class Arcana {
 	/** (0.7.212) Restoration's scrolls. */
 	public static Item SCROLL_MENDING, SCROLL_SANCTUARY, SCROLL_RESTORATION;
 	/** (0.7.231) Death's scrolls ({@link Necromancy}) and blood's ({@link Hemomancy}). */
+	/** Bulwark, Tide Pearl and Harrying Gale ({@link SorceryPicks}). */
+	public static Item SCROLL_BULWARK, SCROLL_TIDE_PEARL, SCROLL_HARRYING_GALE;
 	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
 	public static Item BAT_WING;
@@ -102,6 +104,9 @@ public final class Arcana {
 		SCROLL_HEMORRHAGE = item("scroll_of_hemorrhage", p -> new Scroll(p, "hemorrhage"));
 		SCROLL_BLOOD_GRIP = item("scroll_of_blood_grip", p -> new Scroll(p, "blood_grip"));
 		SCROLL_FRENZY = item("scroll_of_frenzy", p -> new Scroll(p, "frenzy"));
+		SCROLL_BULWARK = item("scroll_of_bulwark", p -> new Scroll(p, SorceryPicks.BULWARK));
+		SCROLL_TIDE_PEARL = item("scroll_of_tide_pearl", p -> new Scroll(p, SorceryPicks.TIDE_PEARL));
+		SCROLL_HARRYING_GALE = item("scroll_of_harrying_gale", p -> new Scroll(p, SorceryPicks.HARRYING_GALE));
 		ResourceKey<Item> wing = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("bat_wing"));
 		BAT_WING = Registry.register(BuiltInRegistries.ITEM, wing, new Item(new Item.Properties().setId(wing)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.insertAfter(Items.PHANTOM_MEMBRANE, BAT_WING));
@@ -109,7 +114,7 @@ public final class Arcana {
 			Item after = Items.TOTEM_OF_UNDYING;
 			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, SCROLL_MENDING, SCROLL_SANCTUARY,
 				SCROLL_RESTORATION, SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY,
-				BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
+				SCROLL_BULWARK, SCROLL_TIDE_PEARL, SCROLL_HARRYING_GALE, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
 				output.insertAfter(after, item);
 				after = item;
 			}
@@ -138,7 +143,11 @@ public final class Arcana {
 			};
 			case Sorcery.SHAMAN, Orcs.SHAMAN -> SCROLL_FIRE;
 			// (0.7.212) a wizard's: warding, the arcane bolt, or (now and then) mending or sanctuary
-			default -> switch (random.nextInt(6)) {
+			default -> random.nextInt(6) == 0 ? switch (random.nextInt(3)) {
+				case 0 -> SCROLL_BULWARK;
+				case 1 -> SCROLL_TIDE_PEARL;
+				default -> SCROLL_HARRYING_GALE;
+			} : switch (random.nextInt(6)) {
 				case 0, 1 -> SCROLL_WARDING;
 				case 2, 3 -> SCROLL_ARCANE;
 				case 4 -> SCROLL_MENDING;
@@ -154,7 +163,7 @@ public final class Arcana {
 
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
 	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration",
-		"blight", "whispers", "deaths_door", "hemorrhage", "blood_grip", "frenzy");
+		"blight", "whispers", "deaths_door", "hemorrhage", "blood_grip", "frenzy", "bulwark", "tide_pearl", "harrying_gale");
 
 	/**
 	 * Casts {@code spell} for {@code player} at {@code power} (1 off a scroll; a Mage's staff casts harder): true if it
@@ -184,7 +193,7 @@ public final class Arcana {
 			case "hemorrhage" -> Hemomancy.hemorrhage(level, player, power, false);
 			case "blood_grip" -> Hemomancy.gripSpell(level, player, power);
 			case "frenzy" -> Hemomancy.frenzy(level, player, power);
-			default -> false;
+			default -> SorceryPicks.ours(spell) && SorceryPicks.cast(spell, level, player, power);
 		};
 	}
 
@@ -204,6 +213,9 @@ public final class Arcana {
 			case "hemorrhage" -> SCROLL_HEMORRHAGE;
 			case "blood_grip" -> SCROLL_BLOOD_GRIP;
 			case "frenzy" -> SCROLL_FRENZY;
+			case "bulwark" -> SCROLL_BULWARK;
+			case "tide_pearl" -> SCROLL_TIDE_PEARL;
+			case "harrying_gale" -> SCROLL_HARRYING_GALE;
 			default -> SCROLL_ARCANE;
 		};
 	}
