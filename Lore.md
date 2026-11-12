@@ -254,6 +254,12 @@ thrown sword is a sword given away, and mean it: it lies where it lands. Only th
 Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
 teaching.
 
+(new) **The schools' styles** (SWGC swordplay picks, 2026-11-12). Each school fights its own way, and its students
+carry it into every fight with the school's weapon in hand. The Quiet Tide's **Still Water** waits and turns blows; the
+Skyward Reach's **Long Measure** keeps its distance and thrusts; the Stone Root's **Deep Root** is slow and never out of
+breath; the Low Lantern's **Low Flame** is quick hands and little guard; the Ashen Fang's **Red Ember** comes on fastest
+and burns out first. A school's guards and its duellists fight the same way, which is how the knowing tell them apart.
+
 **Valor and temperaments** (Andy, 2026-11-11). Every person's valor and temperament come from their own life story:
 each is acquired in its own way.
 
