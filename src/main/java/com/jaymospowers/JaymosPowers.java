@@ -92,6 +92,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
+		// a hungry stomach growls, a thirsty throat swallows dry, and those near hear it
+		com.jaymospowers.core.StomachSounds.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown

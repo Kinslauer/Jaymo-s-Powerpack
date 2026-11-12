@@ -1,4 +1,1175 @@
 {
+	"immersive.step.grass.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/grass_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_walk_4"
+			}
+		]
+	},
+	"immersive.step.grass.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/grass_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_run_3"
+			}
+		]
+	},
+	"immersive.step.grass.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/grass_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_jump_2"
+			}
+		]
+	},
+	"immersive.step.grass.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/grass_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/grass_land_3"
+			}
+		]
+	},
+	"immersive.step.stone.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/stone_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_walk_4"
+			}
+		]
+	},
+	"immersive.step.stone.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/stone_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_run_3"
+			}
+		]
+	},
+	"immersive.step.stone.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/stone_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_jump_2"
+			}
+		]
+	},
+	"immersive.step.stone.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/stone_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/stone_land_3"
+			}
+		]
+	},
+	"immersive.step.wood.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/wood_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_walk_4"
+			}
+		]
+	},
+	"immersive.step.wood.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/wood_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_run_3"
+			}
+		]
+	},
+	"immersive.step.wood.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/wood_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_jump_2"
+			}
+		]
+	},
+	"immersive.step.wood.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/wood_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/wood_land_3"
+			}
+		]
+	},
+	"immersive.step.sand.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/sand_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_walk_4"
+			}
+		]
+	},
+	"immersive.step.sand.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/sand_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_run_3"
+			}
+		]
+	},
+	"immersive.step.sand.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/sand_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_jump_2"
+			}
+		]
+	},
+	"immersive.step.sand.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/sand_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/sand_land_3"
+			}
+		]
+	},
+	"immersive.step.gravel.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/gravel_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_walk_4"
+			}
+		]
+	},
+	"immersive.step.gravel.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/gravel_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_run_3"
+			}
+		]
+	},
+	"immersive.step.gravel.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/gravel_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_jump_2"
+			}
+		]
+	},
+	"immersive.step.gravel.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/gravel_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/gravel_land_3"
+			}
+		]
+	},
+	"immersive.step.snow.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/snow_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_walk_4"
+			}
+		]
+	},
+	"immersive.step.snow.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/snow_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_run_3"
+			}
+		]
+	},
+	"immersive.step.snow.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/snow_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_jump_2"
+			}
+		]
+	},
+	"immersive.step.snow.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/snow_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/snow_land_3"
+			}
+		]
+	},
+	"immersive.step.metal.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/metal_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_walk_4"
+			}
+		]
+	},
+	"immersive.step.metal.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/metal_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_run_3"
+			}
+		]
+	},
+	"immersive.step.metal.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/metal_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_jump_2"
+			}
+		]
+	},
+	"immersive.step.metal.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/metal_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/metal_land_3"
+			}
+		]
+	},
+	"immersive.step.carpet.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/carpet_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_walk_4"
+			}
+		]
+	},
+	"immersive.step.carpet.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/carpet_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_run_3"
+			}
+		]
+	},
+	"immersive.step.carpet.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/carpet_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_jump_2"
+			}
+		]
+	},
+	"immersive.step.carpet.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/carpet_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/carpet_land_3"
+			}
+		]
+	},
+	"immersive.step.mud.walk": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/mud_walk_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_walk_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_walk_3"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_walk_4"
+			}
+		]
+	},
+	"immersive.step.mud.run": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/mud_run_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_run_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_run_3"
+			}
+		]
+	},
+	"immersive.step.mud.jump": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/mud_jump_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_jump_2"
+			}
+		]
+	},
+	"immersive.step.mud.land": {
+		"subtitle": "subtitles.jaymospowers.immersive.step",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/step/mud_land_1"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_land_2"
+			},
+			{
+				"name": "jaymospowers:immersive/step/mud_land_3"
+			}
+		]
+	},
+	"immersive.armour.cloth": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/cloth_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/cloth_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/cloth_3"
+			}
+		]
+	},
+	"immersive.armour.leather": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/leather_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/leather_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/leather_3"
+			}
+		]
+	},
+	"immersive.armour.chain": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/chain_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/chain_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/chain_3"
+			}
+		]
+	},
+	"immersive.armour.scale": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/scale_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/scale_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/scale_3"
+			}
+		]
+	},
+	"immersive.armour.plate": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/plate_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/plate_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/plate_3"
+			}
+		]
+	},
+	"immersive.armour.heavy": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/heavy_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/heavy_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/heavy_3"
+			}
+		]
+	},
+	"immersive.armour.bone": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/bone_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/bone_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/bone_3"
+			}
+		]
+	},
+	"immersive.armour.crystal": {
+		"subtitle": "subtitles.jaymospowers.immersive.armour",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/armour/crystal_1"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/crystal_2"
+			},
+			{
+				"name": "jaymospowers:immersive/armour/crystal_3"
+			}
+		]
+	},
+	"immersive.water.wade": {
+		"subtitle": "subtitles.jaymospowers.immersive.wade",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/water/wade_1"
+			},
+			{
+				"name": "jaymospowers:immersive/water/wade_2"
+			},
+			{
+				"name": "jaymospowers:immersive/water/wade_3"
+			},
+			{
+				"name": "jaymospowers:immersive/water/wade_4"
+			}
+		]
+	},
+	"immersive.water.stroke": {
+		"subtitle": "subtitles.jaymospowers.immersive.stroke",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/water/stroke_1"
+			},
+			{
+				"name": "jaymospowers:immersive/water/stroke_2"
+			},
+			{
+				"name": "jaymospowers:immersive/water/stroke_3"
+			},
+			{
+				"name": "jaymospowers:immersive/water/stroke_4"
+			}
+		]
+	},
+	"immersive.water.dive": {
+		"subtitle": "subtitles.jaymospowers.immersive.dive",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/water/dive_1"
+			},
+			{
+				"name": "jaymospowers:immersive/water/dive_2"
+			},
+			{
+				"name": "jaymospowers:immersive/water/dive_3"
+			}
+		]
+	},
+	"immersive.jet.steam": {
+		"subtitle": "subtitles.jaymospowers.immersive.jet_steam",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/jet/steam_1"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/steam_2"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/steam_3"
+			}
+		]
+	},
+	"immersive.jet.fire": {
+		"subtitle": "subtitles.jaymospowers.immersive.jet_fire",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/jet/fire_1"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/fire_2"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/fire_3"
+			}
+		]
+	},
+	"immersive.jet.bubbles": {
+		"subtitle": "subtitles.jaymospowers.immersive.jet_bubbles",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/jet/bubbles_1"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/bubbles_2"
+			},
+			{
+				"name": "jaymospowers:immersive/jet/bubbles_3"
+			}
+		]
+	},
+	"immersive.station.crafting": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/crafting_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/crafting_2"
+			}
+		]
+	},
+	"immersive.station.anvil": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/anvil_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/anvil_2"
+			}
+		]
+	},
+	"immersive.station.loom": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/loom_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/loom_2"
+			}
+		]
+	},
+	"immersive.station.stonecutter": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/stonecutter_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/stonecutter_2"
+			}
+		]
+	},
+	"immersive.station.smithing": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/smithing_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/smithing_2"
+			}
+		]
+	},
+	"immersive.station.furnace": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/furnace_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/furnace_2"
+			}
+		]
+	},
+	"immersive.station.grindstone": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/grindstone_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/grindstone_2"
+			}
+		]
+	},
+	"immersive.station.cartography": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/cartography_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/cartography_2"
+			}
+		]
+	},
+	"immersive.station.brewing": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/brewing_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/brewing_2"
+			}
+		]
+	},
+	"immersive.station.tinker": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/tinker_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/tinker_2"
+			}
+		]
+	},
+	"immersive.station.smeltery": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/smeltery_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/smeltery_2"
+			}
+		]
+	},
+	"immersive.station.crucible": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/crucible_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/crucible_2"
+			}
+		]
+	},
+	"immersive.station.kitchen": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/kitchen_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/kitchen_2"
+			}
+		]
+	},
+	"immersive.station.enchanting": {
+		"subtitle": "subtitles.jaymospowers.immersive.station",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/station/enchanting_1"
+			},
+			{
+				"name": "jaymospowers:immersive/station/enchanting_2"
+			}
+		]
+	},
+	"immersive.craft.wood": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/wood_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/wood_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/wood_3"
+			}
+		]
+	},
+	"immersive.craft.metal": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/metal_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/metal_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/metal_3"
+			}
+		]
+	},
+	"immersive.craft.cloth": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/cloth_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/cloth_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/cloth_3"
+			}
+		]
+	},
+	"immersive.craft.stone": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/stone_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/stone_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/stone_3"
+			}
+		]
+	},
+	"immersive.craft.tinker": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/tinker_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/tinker_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/tinker_3"
+			}
+		]
+	},
+	"immersive.craft.brew": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/brew_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/brew_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/brew_3"
+			}
+		]
+	},
+	"immersive.craft.food": {
+		"subtitle": "subtitles.jaymospowers.immersive.craft",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/food_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/food_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/food_3"
+			}
+		]
+	},
+	"immersive.craft.smelted": {
+		"subtitle": "subtitles.jaymospowers.immersive.smelted",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/craft/smelted_1"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/smelted_2"
+			},
+			{
+				"name": "jaymospowers:immersive/craft/smelted_3"
+			}
+		]
+	},
+	"immersive.drop.metal": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/metal_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/metal_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/metal_3"
+			}
+		]
+	},
+	"immersive.drop.wood": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/wood_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/wood_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/wood_3"
+			}
+		]
+	},
+	"immersive.drop.coin": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/coin_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/coin_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/coin_3"
+			}
+		]
+	},
+	"immersive.drop.stone": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/stone_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/stone_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/stone_3"
+			}
+		]
+	},
+	"immersive.drop.glass": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/glass_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/glass_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/glass_3"
+			}
+		]
+	},
+	"immersive.drop.soft": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/soft_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/soft_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/soft_3"
+			}
+		]
+	},
+	"immersive.drop.gem": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/gem_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/gem_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/gem_3"
+			}
+		]
+	},
+	"immersive.drop.paper": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/paper_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/paper_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/paper_3"
+			}
+		]
+	},
+	"immersive.drop.bone": {
+		"subtitle": "subtitles.jaymospowers.immersive.drop",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/drop/bone_1"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/bone_2"
+			},
+			{
+				"name": "jaymospowers:immersive/drop/bone_3"
+			}
+		]
+	},
+	"immersive.stomach.growl": {
+		"subtitle": "subtitles.jaymospowers.immersive.growl",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/stomach/growl_1"
+			},
+			{
+				"name": "jaymospowers:immersive/stomach/growl_2"
+			},
+			{
+				"name": "jaymospowers:immersive/stomach/growl_3"
+			},
+			{
+				"name": "jaymospowers:immersive/stomach/growl_4"
+			}
+		]
+	},
+	"immersive.stomach.thirst": {
+		"subtitle": "subtitles.jaymospowers.immersive.thirst",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/stomach/thirst_1"
+			},
+			{
+				"name": "jaymospowers:immersive/stomach/thirst_2"
+			},
+			{
+				"name": "jaymospowers:immersive/stomach/thirst_3"
+			}
+		]
+	},
+	"immersive.bed.lie": {
+		"subtitle": "subtitles.jaymospowers.immersive.bed",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/bed/lie_1"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/lie_2"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/lie_3"
+			}
+		]
+	},
+	"immersive.bed.rise": {
+		"subtitle": "subtitles.jaymospowers.immersive.bed",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/bed/rise_1"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/rise_2"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/rise_3"
+			}
+		]
+	},
+	"immersive.bed.turn": {
+		"subtitle": "subtitles.jaymospowers.immersive.bed",
+		"sounds": [
+			{
+				"name": "jaymospowers:immersive/bed/turn_1"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/turn_2"
+			},
+			{
+				"name": "jaymospowers:immersive/bed/turn_3"
+			}
+		]
+	},
 	"voice.symbiote.say.climb.1": {
 		"sounds": [
 			{
