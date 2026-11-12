@@ -1261,6 +1261,13 @@ scrap of leather for the pad, and every village has seen them: old soldiers, the
 a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
 answer, and no stick helps the one who has lost both.
 
+(new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
+rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
+potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
+opens. The watch knows the smell of a den that runs too hot. It comes down the ladder in force, takes the fence and his
+people up to the ruler's judgement, and nails the hatch shut under iron for a few days, until the trade creeps back.
+Townsfolk speak of raids and smugglers the way they speak of weather: something that happens to other streets.
+
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
