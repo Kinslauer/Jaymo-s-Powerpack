@@ -112,7 +112,10 @@ public final class Callouts {
 			"party.bounty.took", "party.bounty", "party.caught", "party.claimed", "want.person", "want.found", "quest.lever",
 			// the dark mirror (docs/Pawn-Plan.md patch 6)
 			"turn.resist", "turn.seized", "turn.free", "turn.cast", "murmur.well", "murmur.ignore", "murmur.brazen", "murmur.cleric", "murmur.loose",
-			"lost.mutter", "lost.ask", "lost.join", "lost.turn", "lost.free", "lost.waylay", "lost.knows", "lost.parted"}) {
+			"lost.mutter", "lost.ask", "lost.join", "lost.turn", "lost.free", "lost.waylay", "lost.knows", "lost.parted",
+			// the powderhead (Andy's ask after patch 6)
+			"powder.full", "powder.stocked", "powder.grind", "powder.sticks", "powder.cartridges", "powder.hand", "powder.mate", "powder.hold",
+			"powder.throw"}) {
 			LINES.put(k, 3);
 		}
 	}

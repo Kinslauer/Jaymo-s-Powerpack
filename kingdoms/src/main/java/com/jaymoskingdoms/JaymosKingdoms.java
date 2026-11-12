@@ -594,6 +594,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		CatchingUp.register();
 		Bonds.register();
 		Specialties.register();
+		Powderheads.register();
 		Remarks.register();
 		TableTalk.register();
 		CampSuppers.register();

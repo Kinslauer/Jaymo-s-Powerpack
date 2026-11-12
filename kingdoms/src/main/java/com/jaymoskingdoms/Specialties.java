@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The books</b>: a townsman who likes you well ({@link #GIFT_HEARTS} MCA hearts) gives you, once, the little book
  * of his own trade's knack ({@link #fromTrade}): a librarian or a mapmaker the tongue-speaker's, a cleric the field
  * medic's, a farmer, fisher or butcher the forager's, a leatherworker the packhorse's, a fletcher or a nobody the quiet
- * one's, any other trade the haggler's. Read it yourself; hand it to a companion (use it on them) and they learn it.
+ * one's, a weaponsmith or an armourer the powderhead's ({@link Powderheads}), any other trade the haggler's. Read it yourself; hand it to a companion (use it on them) and they learn it.
  * One knack each; a new book replaces the old.</li>
  * <li><b>Tongue-speaker</b>: with them by ({@link #NEAR}) you understand every tongue ({@link Languages#understands}).</li>
  * <li><b>Field medic</b>: minds the fallen whatever their leanings, and gets them up twice as fast ({@link FieldMedics}).</li>
@@ -64,12 +64,13 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * <b>Foe specialists</b>: a band member may be one ({@link #FOE_TRACKER}, {@link #FOE_MEDIC}, {@link #FOE_TONGUE}, rolled
  * once when he first fights): a <b>tracker</b> keeps after a player he lost ({@link #TRACK_FOR}, {@link #TRACK_RANGE}), a
- * <b>medic</b> minds his fallen as a companion medic does, and a <b>tongue-speaker</b> understands your companions' calls
+ * <b>medic</b> minds his fallen as a companion medic does, a <b>powderhead</b> throws the sticks he carries
+ * ({@link Powderheads}), and a <b>tongue-speaker</b> understands your companions' calls
  * and warns the mate they're coming for ({@link #overheard}); a camp's tongue-speaker also bargains with you ({@link Parleys}).
  */
 public final class Specialties {
 	public enum Specialty {
-		TONGUE, MEDIC, FORAGER, HAGGLER, PACKHORSE, QUIET, TRACKER;
+		TONGUE, MEDIC, FORAGER, HAGGLER, PACKHORSE, QUIET, TRACKER, POWDERHEAD;
 
 		public String key() {
 			return this.name().toLowerCase(Locale.ROOT);
@@ -225,6 +226,9 @@ public final class Specialties {
 		if (p.is(VillagerProfession.FLETCHER) || p.is(VillagerProfession.NITWIT) || p.is(VillagerProfession.NONE)) {
 			return Specialty.QUIET;
 		}
+		if (p.is(VillagerProfession.WEAPONSMITH) || p.is(VillagerProfession.ARMORER)) {
+			return Specialty.POWDERHEAD;
+		}
 		return Specialty.HAGGLER;
 	}
 
@@ -377,8 +381,12 @@ public final class Specialties {
 		}
 		float r = m.getRandom().nextFloat();
 		Specialty s = r < FOE_TRACKER ? Specialty.TRACKER : r < FOE_TRACKER + FOE_MEDIC ? Specialty.MEDIC
-			: r < FOE_TRACKER + FOE_MEDIC + FOE_TONGUE ? Specialty.TONGUE : null;
+			: r < FOE_TRACKER + FOE_MEDIC + FOE_TONGUE ? Specialty.TONGUE
+			: r < FOE_TRACKER + FOE_MEDIC + FOE_TONGUE + Powderheads.FOE_CHANCE ? Specialty.POWDERHEAD : null;
 		m.setAttached(SPECIALTY, s == null ? "" : s.key());
+		if (s == Specialty.POWDERHEAD) {
+			Powderheads.rollFoe(m);
+		}
 	}
 
 	/** Trackers who lost their player keep after them. */

@@ -198,6 +198,19 @@ every way of fighting the leader saw at their side (the most any band knew of th
 comes ready with the counters (FoeLore). Lines (`turn.*`, `murmur.*`, `lost.*`), five new loading tips (145-149).
 Limits: the townsfolk a loose one downs die through Jaymo's Powers' executions, so without Powers they're only downed.
 
+**The powderhead** (Andy's ask after patch 6: "a companion that crafts and throws bombs... good partner to marksmen
+that need gunpowder constantly"). A knack from the weaponsmith's or armourer's book (`Powderheads`). Use charcoal,
+bone meal, gunpowder, string, paper, an iron ingot, gravel or dynamite on yours and it packs them; it also picks up
+loose gunpowder within 6 blocks. Out of a fight, every 10 s, one job: if you carry a WeaponMod gun and have fewer than
+16 of its ammunition it rolls 8 (bullets: an iron ingot, a gunpowder, a paper; shot for a blunderbuss: gravel instead
+of iron, WeaponMod's own recipes), else hands you up to 4 gunpowder when you have under 4 (keeping 2); a companion
+musketeer that ran dry gets 4 shot for a gunpowder; it grinds one charcoal and two bone meal into a gunpowder (up to
+6 in the pack); it makes two dynamite sticks from two gunpowder and a string (up to 6). In a fight it lobs a stick at a
+foe 5 to 18 blocks off, once in 5 s, only when nobody of its side (you included) and no bystander is in the blast;
+otherwise it calls out and holds. Foe side: 5% of band members are powderheads with 2-4 sticks and 2-4 measures of
+powder: they throw with the same care, top up a mate whose musket ran dry, and drop the sticks left when they fall.
+Nothing is conjured: every stick and cartridge is made from what it carries.
+
 ## Andy's answers
 
 1. Keys: the four arrows (Andy, 2026-11-12: Come takes Down, crawl goes unbound).
