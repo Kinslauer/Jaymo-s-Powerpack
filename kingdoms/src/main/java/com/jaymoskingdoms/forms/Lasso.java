@@ -247,6 +247,20 @@ public final class Lasso {
 		return !(target instanceof Player);
 	}
 
+	/** Whether {@code entity} is held on a rope and wrapped up, bound (a Blood Sorcerer's rite may take such a captive). */
+	public static boolean wrapped(Entity entity) {
+		Hold hold = BY_HELD.get(entity.getUUID());
+		return hold != null && hold.wrapped;
+	}
+
+	/** Takes the rope off {@code entity} without a word (it is going elsewhere). */
+	public static void drop(Entity entity) {
+		Hold hold = BY_HELD.get(entity.getUUID());
+		if (hold != null) {
+			release(hold, null);
+		}
+	}
+
 	private static boolean great(LivingEntity target) {
 		return BossBars.boss(target) || target.getMaxHealth() >= GREAT_HEALTH;
 	}

@@ -9,6 +9,7 @@
 		"jaymoskingdoms:gorgon",
 		"jaymoskingdoms:great_whale",
 		"jaymoskingdoms:gaunt",
+		"jaymoskingdoms:made_brute",
 		{"id": "jaymospowers:slider", "required": false},
 		{"id": "jaymospowers:visage_of_war", "required": false},
 		{"id": "jaymospowers:aerwhale", "required": false}

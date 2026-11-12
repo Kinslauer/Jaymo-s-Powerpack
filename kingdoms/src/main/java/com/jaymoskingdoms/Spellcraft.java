@@ -71,7 +71,9 @@ public final class Spellcraft {
 		Map.entry("restoration", 20 * 60 * 5),
 		// (0.7.231) death's and blood's
 		Map.entry("blight", 20 * 10), Map.entry("whispers", 20 * 3), Map.entry("deaths_door", 20 * 60 * 5), Map.entry("hemorrhage", 20 * 8),
-		Map.entry("blood_grip", 20 * 6), Map.entry("frenzy", 20 * 60));
+		Map.entry("blood_grip", 20 * 6), Map.entry("frenzy", 20 * 60),
+		// earth's, water's and air's (SorceryPicks)
+		Map.entry("bulwark", 20 * 40), Map.entry("tide_pearl", 20 * 15), Map.entry("harrying_gale", 20 * 20));
 	/** (0.7.212) An attuned player who isn't a Mage ({@link Mana}) casts from a staff only as hard as a scroll, and waits this much longer between casts. */
 	static final float ATTUNED_POWER = 1.0F, ATTUNED_COOLDOWN = 1.5F;
 	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; the bolt's. */
@@ -140,6 +142,7 @@ public final class Spellcraft {
 		Restoration.register();
 		Necromancy.register();
 		Hemomancy.register();
+		SorceryPicks.register();
 		// (0.7.570) every other element absorbed and thrown as the blood is
 		Absorption.register();
 		// the Mage's staff (0.7.212: and an attuned caster's)
@@ -192,6 +195,7 @@ public final class Spellcraft {
 		IMBUED.clear();
 		AIR_BLOWS.clear();
 		StormArts.clear();
+		SorceryPicks.clear();
 	}
 
 	// ---- the Mage -----------------------------------------------------------------------------------------------
@@ -374,6 +378,9 @@ public final class Spellcraft {
 		if (bolt) {
 			// (0.7.231) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
 			// (patch 6) lightning's: Bolt Step when no one is in sight
+			if (element.equals("blood") && BruteRite.key(player, level)) {
+				return;
+			}
 			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)
 				|| element.equals("lightning") && StormArts.stepKey(player, level)) {
 				return;
@@ -384,6 +391,10 @@ public final class Spellcraft {
 		ItemStack held = player.getMainHandItem();
 		// (patch 6) a lightning Sorcerer with no blade in hand: the Storm Ring
 		if (!blade(held) && element.equals("lightning") && StormArts.ring(player, level)) {
+			return;
+		}
+		// the same for earth (Bulwark), water (Tide Pearl) and air (Harrying Gale)
+		if (!blade(held) && SorceryPicks.key(player, level, element)) {
 			return;
 		}
 		if (!blade(held)) {

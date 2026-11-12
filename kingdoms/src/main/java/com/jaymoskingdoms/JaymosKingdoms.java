@@ -653,6 +653,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Arcana.register();
 		// the elemental spell tomes: left-click bolts, a loaded page on right click
 		Tomes.register();
+		// a forbidden rite of blood magic: a captive made into a great foe (and its attachment)
+		BruteRite.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();

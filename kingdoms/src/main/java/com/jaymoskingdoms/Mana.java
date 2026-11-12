@@ -112,12 +112,14 @@ public final class Mana {
 		// (0.7.231) death's (blood's are paid in blood: Hemomancy.COST)
 		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("deaths_door", 50.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F),
 		// (patch 6) lightning's
-		Map.entry("bolt_step", 14.0F), Map.entry("storm_ring", 30.0F));
+		Map.entry("bolt_step", 14.0F), Map.entry("storm_ring", 30.0F),
+		// earth's, water's and air's (SorceryPicks)
+		Map.entry("bulwark", 30.0F), Map.entry("tide_pearl", 20.0F), Map.entry("harrying_gale", 25.0F));
 
 	/** (0.7.244) What each spell or key is for (the rest: harm). */
 	static final Map<String, Integer> INTENT = Map.ofEntries(
 		Map.entry("mending", HEAL), Map.entry("restoration", HEAL), Map.entry("mend", HEAL), Map.entry("renewal", HEAL),
-		Map.entry("rekindle", HEAL), Map.entry("warding", WARD), Map.entry("sanctuary", WARD), Map.entry("deaths_door", WARD),
+		Map.entry("rekindle", HEAL), Map.entry("warding", WARD), Map.entry("sanctuary", WARD), Map.entry("deaths_door", WARD), Map.entry("bulwark", WARD),
 		Map.entry("raising", WILL), Map.entry("raise", WILL), Map.entry("whispers", WILL));
 
 	/** Whether a player is attuned. Saved, kept through death, synced to everyone (who sees whose glow). */

@@ -127,6 +127,9 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		}
 		register(Monsters.ARMOURED_OGRE, ArmouredOgreModel::new, ArmouredOgreModel.createBodyLayer(), 1.2F, 1.0F,
 			state -> armoured[Math.floorMod(state.variant, armoured.length)], false);
+		// the made brute: the ogre's body in the colours of what it was (its variant)
+		Identifier[] made = {texture("ogre_made_0"), texture("ogre_made_1"), texture("ogre_made_2")};
+		register(Monsters.MADE_BRUTE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, state -> made[Math.floorMod(state.variant, made.length)], false);
 		register(Monsters.WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("wraith"), true);
 		register(Monsters.FLAME_WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("flame_wraith"), false);
 		Identifier[] mud = {texture("mud_golem"), texture("mud_golem_mossy")};
