@@ -1,0 +1,4 @@
+# Diamond and netherite only from the old world's chests
+- Andy's answer on the left-out page (2026-11-12): "They are leftover from the old world when they were abundant so you'll strictly find them in chests, more so in the nether."
+- No diamond ore or ancient debris is laid in new chunks any more (the 1-in-900 diamond pocket and 1-in-1200 debris vein are gone). Diamonds turn up in old Overworld chests (dungeons, mineshafts, strongholds, desert and jungle temples, buried treasure, wreck treasure, mansions, ancient and End cities): 8% for one, a little over 3% for a second. They turn up more often in the Nether's (fortresses, bastions, ruined portals): 25% for one, 10% for a second, 4% for a third, and a netherite scrap at 10%. This is on top of what vanilla puts in those chests. JEI pages on the diamond and the netherite scrap say where to look (`BigVeins`).
+- Built (`compileJava`); not played.

@@ -145,6 +145,8 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addIngredientInfo(net.minecraft.world.item.Items.BONE, Component.translatable("jei.jaymospowers.dogs_learn"));
 		registration.addIngredientInfo(net.minecraft.world.item.Items.WATER_BUCKET, Component.translatable("jei.jaymospowers.smell"));
 		registration.addIngredientInfo(net.minecraft.world.item.Items.CAULDRON, Component.translatable("jei.jaymospowers.smell"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.DIAMOND, Component.translatable("jei.jaymospowers.old_world_diamond"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.NETHERITE_SCRAP, Component.translatable("jei.jaymospowers.old_world_netherite"));
 		// (Havens patch 5) the kings' weapon heads: where each is taken
 		for (String part : WeaponParts.KINGS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
