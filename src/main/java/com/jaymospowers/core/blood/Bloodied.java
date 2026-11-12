@@ -42,6 +42,15 @@ import org.jspecify.annotations.Nullable;
  * {@code Corpses.ON_BODY} hook, by name): {@link #CORPSE_BLOOD}, kept with the corpse, never wearing off by itself,
  * darkening as it dries like blood on gear. Andy: "rain should wash away blood": rain and water wash a corpse as they do
  * a living body ({@link #weatherCorpse}).
+ * <p>
+ * Andy, on Cruor's splash-back: blood "does not go away until thoroughly washed especially if allowed to dry at all.
+ * rotten blood lasts the longest, stinks the worst, and is hardest to get rid of. EVERYONE will comment on it". So a
+ * player's coat is saved and never wears off by itself, and all blood ages ({@link #stage}): fresh, then dried after
+ * {@link #DRIES_IN}, then rotten after {@link #ROTS_IN}. Dried blood washes off at {@link #DRIED_WASH} of the rate and
+ * rotten at {@link #ROTTEN_WASH}, and water and rain never take the last {@link #ROT_RESIDUE} of rotten blood: only a
+ * scrub (a cauldron, a wet sponge) does. Old blood smells ({@link #reek}, added to {@code Smell}), rotten blood draws
+ * flies (client {@code Flies}), and Jaymo's Kingdoms' villagers remark on blood they can see ({@link #noticed}). Heavy
+ * hits throw more back on whoever struck and onto anyone standing close ({@link #HEAVY}, {@link #BYSTANDER_RANGE}).
  */
 public final class Bloodied {
 	/** How bloody a body or item can get (whole steps, so the data only changes now and then). */
@@ -67,6 +76,22 @@ public final class Bloodied {
 	static final double RANGE = 48.0;
 	/** Washed off per check: under water, wading (boots and greaves), rain, and a coat wearing off by itself. */
 	static final int UNDER_WATER_WASH = 40, WADING_WASH = 20, RAIN_WASH = 4, COAT_WEAR = 1;
+	/** Blood is rotten this long after it was laid (a day). */
+	public static final int ROTS_IN = 24000;
+	/** Ageing stages ({@link #stage}). */
+	public static final int FRESH = 0, DRIED = 1, ROTTEN = 2;
+	/** Washing dried and rotten blood: this share of the usual rate. Water and rain leave this much rotten blood on. */
+	static final float DRIED_WASH = 0.4F, ROTTEN_WASH = 0.15F;
+	static final int ROT_RESIDUE = 15;
+	/** A hit this hard (damage) throws more back, up to {@link #HEAVY_MAX} times as much, and splashes bystanders. */
+	static final float HEAVY = 6.0F, HEAVY_MAX = 2.0F;
+	/** Bystanders this close to whoever bled (blocks) get this share of what the attacker does, less with distance. */
+	static final double BYSTANDER_RANGE = 2.2;
+	static final float BYSTANDER_SHARE = 0.5F;
+	/** How much each stage smells, per unit of blood (0 to 1); the worst blood on a body counts. */
+	static final float[] REEK = {0.08F, 0.25F, 1.0F};
+	/** Blood others notice (Kingdoms' remarks): at least this much of it (0 to 1). */
+	public static final float NOTICE = 0.15F;
 	/** The armour slots, feet to head. */
 	static final EquipmentSlot[] SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
@@ -88,13 +113,14 @@ public final class Bloodied {
 		}
 	}
 
-	/** Blood on a body itself: how much ({@code 0..MAX}) and whose colour. */
-	public record Coat(int amount, int color) {
+	/** Blood on a body itself: how much ({@code 0..MAX}), whose colour, and when it was laid (on average). */
+	public record Coat(int amount, int color, long laid) {
 		public static final Codec<Coat> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("amount").forGetter(Coat::amount),
-			Codec.INT.fieldOf("color").forGetter(Coat::color)).apply(i, Coat::new));
+			Codec.INT.fieldOf("color").forGetter(Coat::color),
+			Codec.LONG.optionalFieldOf("laid", 0L).forGetter(Coat::laid)).apply(i, Coat::new));
 		public static final StreamCodec<io.netty.buffer.ByteBuf, Coat> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Coat::amount,
-			ByteBufCodecs.INT, Coat::color, Coat::new);
+			ByteBufCodecs.INT, Coat::color, ByteBufCodecs.VAR_LONG, Coat::laid, Coat::new);
 
 		public float level() {
 			return Mth.clamp(this.amount / (float) MAX, 0.0F, 1.0F);
@@ -105,9 +131,12 @@ public final class Bloodied {
 	public static final int DRIES_IN = 6000;
 
 	public static @Nullable DataComponentType<Blood> BLOOD;
-	/** On every body, synced to everyone near it. Not saved: a coat is gone after a restart. */
+	/** On every body, synced to everyone near it, and saved: it stays until washed. */
 	public static final AttachmentType<Coat> COAT = AttachmentRegistry.create(JaymosPowers.id("blood_coat"),
-		builder -> builder.syncWith(Coat.STREAM_CODEC, AttachmentSyncPredicate.all()));
+		builder -> builder.persistent(Coat.CODEC).syncWith(Coat.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** The server's game time at its last tick, for washes that aren't told it (item scrubs). */
+	private static long now;
 
 	/**
 	 * (0.20.55) The blood on a corpse: its coat when it died, laid then, so it dries from that moment. Saved with the corpse
@@ -117,6 +146,81 @@ public final class Bloodied {
 		builder -> builder.persistent(Blood.CODEC).syncWith(Blood.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	private Bloodied() {
+	}
+
+	/** 0 (fresh) to 1 (rotten) for blood laid at {@code laid}: how far it has gone from dried to rotten. */
+	public static float rot(long laid, long now) {
+		return Mth.clamp((now - laid - DRIES_IN) / (float) (ROTS_IN - DRIES_IN), 0.0F, 1.0F);
+	}
+
+	/** {@link #FRESH}, {@link #DRIED} or {@link #ROTTEN}, for blood laid at {@code laid}. */
+	public static int stage(long laid, long now) {
+		long age = now - laid;
+		return age >= ROTS_IN ? ROTTEN : age >= DRIES_IN ? DRIED : FRESH;
+	}
+
+	/** How much of a wash of {@code amount} gets blood laid at {@code laid} off (at least 1). */
+	static int washes(int amount, long laid, long now) {
+		return switch (stage(laid, now)) {
+			case FRESH -> amount;
+			case DRIED -> Math.max(1, Math.round(amount * DRIED_WASH));
+			default -> Math.max(1, Math.round(amount * ROTTEN_WASH));
+		};
+	}
+
+	/** How much water or rain can take off {@code amount} of blood laid at {@code laid}: rotten blood keeps a residue. */
+	static int soaks(int wash, int amount, long laid, long now) {
+		int off = washes(wash, laid, now);
+		return stage(laid, now) == ROTTEN ? Math.max(0, Math.min(off, amount - ROT_RESIDUE)) : off;
+	}
+
+	/**
+	 * How bad the blood on {@code body} smells, 0 to 1: the worst of its coat and what it wears and holds, by how much
+	 * there is and how old it is (rotten blood the worst by far, see {@link #REEK}).
+	 */
+	public static float reek(LivingEntity body) {
+		long t = body.level().getGameTime();
+		Coat coat = coat(body);
+		float worst = coat == null ? 0.0F : coat.level() * reekOf(coat.laid(), t);
+		worst = Math.max(worst, reek(blood(body.getMainHandItem()), t));
+		worst = Math.max(worst, reek(blood(body.getOffhandItem()), t));
+		for (EquipmentSlot slot : SLOTS) {
+			worst = Math.max(worst, reek(blood(body.getItemBySlot(slot)), t));
+		}
+		return worst;
+	}
+
+	private static float reek(@Nullable Blood blood, long t) {
+		return blood == null ? 0.0F : blood.level() * reekOf(blood.laid(), t);
+	}
+
+	private static float reekOf(long laid, long t) {
+		// fresh to dried, then dried to rotten
+		return t - laid < DRIES_IN ? Mth.lerp(dryness(laid, t), REEK[FRESH], REEK[DRIED]) : Mth.lerp(rot(laid, t), REEK[DRIED], REEK[ROTTEN]);
+	}
+
+	/**
+	 * The blood others would notice on {@code body} (Jaymo's Kingdoms' remarks): -1 for none worth a word, else the oldest
+	 * stage ({@link #FRESH}, {@link #DRIED}, {@link #ROTTEN}) among its coat and the armour and weapons on it that are at
+	 * least {@link #NOTICE} bloody.
+	 */
+	public static int noticed(LivingEntity body) {
+		long t = body.level().getGameTime();
+		int worst = -1;
+		Coat coat = coat(body);
+		if (coat != null && coat.level() >= NOTICE) {
+			worst = stage(coat.laid(), t);
+		}
+		worst = Math.max(worst, noticed(blood(body.getMainHandItem()), t));
+		worst = Math.max(worst, noticed(blood(body.getOffhandItem()), t));
+		for (EquipmentSlot slot : SLOTS) {
+			worst = Math.max(worst, noticed(blood(body.getItemBySlot(slot)), t));
+		}
+		return worst;
+	}
+
+	private static int noticed(@Nullable Blood blood, long t) {
+		return blood == null || blood.level() < NOTICE ? -1 : stage(blood.laid(), t);
 	}
 
 	public static void init() {
@@ -144,7 +248,9 @@ public final class Bloodied {
 	private static void toCorpse(LivingEntity dead, net.minecraft.world.entity.Entity corpse) {
 		Coat coat = coat(dead);
 		if (coat != null && coat.amount() > 0) {
-			corpse.setAttached(CORPSE_BLOOD, new Blood(coat.amount(), coat.color(), dead.level().getGameTime()));
+			// it keeps drying from when it was laid on the living body
+			long laid = coat.laid() > 0 ? coat.laid() : dead.level().getGameTime();
+			corpse.setAttached(CORPSE_BLOOD, new Blood(coat.amount(), coat.color(), laid));
 		}
 	}
 
@@ -182,21 +288,37 @@ public final class Bloodied {
 		for (int i = 0; i < SLOTS.length; i++) {
 			addBlood(target.getItemBySlot(SLOTS[i]), damage * ARMOUR_PER_DAMAGE * ARMOUR_REACH[i], color, now, target);
 		}
-		if (source == null || !(source.getEntity() instanceof LivingEntity attacker) || attacker == target) {
+		// a heavy hit throws more blood back, and onto whoever stands close
+		float heavy = damage >= HEAVY ? Math.min(HEAVY_MAX, 1.0F + (damage - HEAVY) / HEAVY) : 1.0F;
+		LivingEntity striker = source != null && source.getEntity() instanceof LivingEntity e ? e : null;
+		if (damage >= HEAVY) {
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(BYSTANDER_RANGE),
+				near -> near != target && near != striker && near.isAlive() && !near.isSpectator())) {
+				float reach = 1.0F - (float) (Math.sqrt(near.distanceToSqr(target)) / (BYSTANDER_RANGE + 1.0));
+				if (reach > 0.0F) {
+					splash(near, damage * COAT_PER_DAMAGE * ATTACKER_SHARE * heavy * BYSTANDER_SHARE * reach, color, now);
+				}
+			}
+		}
+		if (striker == null || striker == target) {
 			return;
 		}
+		LivingEntity attacker = striker;
 		ItemStack weapon = source.getWeaponItem();
 		if (weapon != null && !weapon.isEmpty() && source.getDirectEntity() == attacker) {
 			addBlood(weapon, WEAPON_PER_HIT + damage * WEAPON_PER_DAMAGE, color, now, attacker);
 		}
 		if (attacker.distanceToSqr(target) <= SPLASH_RANGE * SPLASH_RANGE && source.getDirectEntity() == attacker) {
-			float splash = damage * COAT_PER_DAMAGE * ATTACKER_SHARE;
-			addCoat(attacker, Math.round(splash * 0.5F), color);
-			// the front of whoever struck: chest and arms most, the helmet a little
-			addBlood(attacker.getItemBySlot(EquipmentSlot.CHEST), splash * 0.5F, color, now, attacker);
-			addBlood(attacker.getItemBySlot(EquipmentSlot.HEAD), splash * 0.2F, color, now, attacker);
-			addBlood(attacker.getItemBySlot(EquipmentSlot.LEGS), splash * 0.25F, color, now, attacker);
+			splash(attacker, damage * COAT_PER_DAMAGE * ATTACKER_SHARE * heavy, color, now);
 		}
+	}
+
+	/** {@code body} is splashed with {@code splash} of blood from the front: chest and arms most, the helmet a little. */
+	private static void splash(LivingEntity body, float splash, int color, long now) {
+		addCoat(body, Math.round(splash * 0.5F), color);
+		addBlood(body.getItemBySlot(EquipmentSlot.CHEST), splash * 0.5F, color, now, body);
+		addBlood(body.getItemBySlot(EquipmentSlot.HEAD), splash * 0.2F, color, now, body);
+		addBlood(body.getItemBySlot(EquipmentSlot.LEGS), splash * 0.25F, color, now, body);
 	}
 
 	/**
@@ -258,9 +380,13 @@ public final class Bloodied {
 			return;
 		}
 		Coat was = coat(body);
-		int amount = Math.min(MAX, (was == null ? 0 : was.amount()) + add);
-		if (was == null || was.amount() != amount || was.color() != color) {
-			body.setAttached(COAT, new Coat(amount, color));
+		long t = body.level().getGameTime();
+		int had = was == null ? 0 : was.amount();
+		int amount = Math.min(MAX, had + add);
+		// the fresh blood's share of the whole sets how old the coat now is
+		long laid = was == null || had <= 0 ? t : was.laid() + Math.round((t - was.laid()) * (add / (double) (had + add)));
+		if (was == null || was.amount() != amount || was.color() != color || was.laid() != laid) {
+			body.setAttached(COAT, new Coat(amount, color, laid));
 		}
 	}
 
@@ -278,13 +404,13 @@ public final class Bloodied {
 		stack.set(BLOOD, new Blood(amount, color, now));
 	}
 
-	/** Washes {@code amount} of blood off {@code stack}; true if it had any. */
+	/** Washes {@code amount} of blood off {@code stack} (less if it has dried or rotted); true if it had any. */
 	public static boolean clean(ItemStack stack, int amount) {
 		Blood was = blood(stack);
 		if (was == null) {
 			return false;
 		}
-		int left = was.amount() - amount;
+		int left = was.amount() - washes(amount, was.laid(), now);
 		if (left <= 0) {
 			stack.remove(BLOOD);
 		} else {
@@ -293,19 +419,44 @@ public final class Bloodied {
 		return true;
 	}
 
-	/** Washes {@code amount} off {@code body}'s own coat; true if it had any. */
+	/** Scrubs {@code amount} off {@code body}'s own coat (less if it has dried or rotted); true if it had any. */
 	public static boolean cleanCoat(LivingEntity body, int amount) {
 		Coat was = coat(body);
 		if (was == null) {
 			return false;
 		}
-		int left = was.amount() - amount;
+		setCoat(body, was, was.amount() - washes(amount, was.laid(), body.level().getGameTime()));
+		return true;
+	}
+
+	/** Water or rain on {@code body}'s coat: as a scrub, but rotten blood keeps its last {@link #ROT_RESIDUE}. */
+	private static void soakCoat(LivingEntity body, int amount) {
+		Coat was = coat(body);
+		if (was != null) {
+			setCoat(body, was, was.amount() - soaks(amount, was.amount(), was.laid(), body.level().getGameTime()));
+		}
+	}
+
+	private static void setCoat(LivingEntity body, Coat was, int left) {
 		if (left <= 0) {
 			body.removeAttached(COAT);
-		} else {
-			body.setAttached(COAT, new Coat(left, was.color()));
+		} else if (left != was.amount()) {
+			body.setAttached(COAT, new Coat(left, was.color(), was.laid()));
 		}
-		return true;
+	}
+
+	/** Water or rain on {@code stack}: as {@link #clean}, but rotten blood keeps its last {@link #ROT_RESIDUE}. */
+	private static void soak(ItemStack stack, int amount) {
+		Blood was = blood(stack);
+		if (was == null) {
+			return;
+		}
+		int left = was.amount() - soaks(amount, was.amount(), was.laid(), now);
+		if (left <= 0) {
+			stack.remove(BLOOD);
+		} else if (left != was.amount()) {
+			stack.set(BLOOD, new Blood(left, was.color(), was.laid()));
+		}
 	}
 
 	/** Whether {@code body} or anything it wears or holds has blood on it. */
@@ -324,6 +475,7 @@ public final class Bloodied {
 	// ---- washing ---------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
+		now = server.overworld().getGameTime();
 		if (server.getTickCount() % CHECK_TICKS != 0) {
 			return;
 		}
@@ -364,29 +516,39 @@ public final class Bloodied {
 
 	private static void weather(ServerLevel level, LivingEntity body) {
 		if (body.isUnderWater()) {
-			cleanCoat(body, UNDER_WATER_WASH);
-			clean(body.getMainHandItem(), UNDER_WATER_WASH);
-			clean(body.getOffhandItem(), UNDER_WATER_WASH);
+			soakCoat(body, UNDER_WATER_WASH);
+			soak(body.getMainHandItem(), UNDER_WATER_WASH);
+			soak(body.getOffhandItem(), UNDER_WATER_WASH);
 			for (EquipmentSlot slot : SLOTS) {
-				clean(body.getItemBySlot(slot), UNDER_WATER_WASH);
+				soak(body.getItemBySlot(slot), UNDER_WATER_WASH);
 			}
 			return;
 		}
 		if (body.isInWater()) {
-			cleanCoat(body, WADING_WASH / 2);
-			clean(body.getItemBySlot(EquipmentSlot.FEET), WADING_WASH);
-			clean(body.getItemBySlot(EquipmentSlot.LEGS), WADING_WASH);
+			soakCoat(body, WADING_WASH / 2);
+			soak(body.getItemBySlot(EquipmentSlot.FEET), WADING_WASH);
+			soak(body.getItemBySlot(EquipmentSlot.LEGS), WADING_WASH);
 			return;
 		}
 		if (body.isInWaterOrRain()) {
-			cleanCoat(body, RAIN_WASH);
-			clean(body.getMainHandItem(), RAIN_WASH);
-			clean(body.getOffhandItem(), RAIN_WASH);
+			soakCoat(body, RAIN_WASH);
+			soak(body.getMainHandItem(), RAIN_WASH);
+			soak(body.getOffhandItem(), RAIN_WASH);
 			for (EquipmentSlot slot : SLOTS) {
-				clean(body.getItemBySlot(slot), RAIN_WASH);
+				soak(body.getItemBySlot(slot), RAIN_WASH);
 			}
 			return;
 		}
-		cleanCoat(body, COAT_WEAR);
+		// a beast's coat wears off by itself (licked, rubbed off); a player's stays until washed
+		if (!(body instanceof net.minecraft.world.entity.player.Player)) {
+			setCoatWorn(body);
+		}
+	}
+
+	private static void setCoatWorn(LivingEntity body) {
+		Coat was = coat(body);
+		if (was != null) {
+			setCoat(body, was, was.amount() - COAT_WEAR);
+		}
 	}
 }
