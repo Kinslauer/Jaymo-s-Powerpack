@@ -696,6 +696,15 @@ scanning creatures and reading tablets. Bands corrupt and glitch. There is also 
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
 darkened aliens; mechs hunt band wearers at night too.
 
+(new) **What the blood and the gifts do under strain** (picks, 2026-11-12). The Verdant are fed by the sun and flag a
+little at night; the Warrior-born are quickened by the open night sky, most under the full moon that wakes the ape,
+and either can stand still, look up and drink it in. Every fighter of ki holds fast at the brink. When two great
+blows meet, ape against brute against the black suit, they lock until one gives. The Emberborn run hot when they
+fight, hot enough to ruin armour and in the end to burst; the cold kill with a look held long enough. The storm can
+be thrown and the sky turned, weight can bind many at once or trade one place for another, the dark water answers
+with shoal and drowned, and a voice can lift its owner or break the air. None of these are new gifts, only what the
+old ones do when pushed.
+
 (new) **What the bodies remember** (alien picks, 2026-11-12). A body in the band is not only a shape: it keeps the
 habits of the creature it was read from, and a wearer who stays in one long enough finds them. Bulwark's temper
 rises with every blow, Tusk runs through the wood rather than round it, Gorger bowls, Prowl clings and bleeds its
@@ -908,6 +917,29 @@ mostly. They fly." The last page: the Master says they do not go up again until 
 called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
 ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
 
+(new) **Tools, draughts and trained hands** (picks, 2026-11-12). The Frostborn rig carries more than its wearer
+has asked of it: small flyers that leave and return to the suit, a table of light at the wrist, false images of the
+wearer, a field that keeps a parried blow, and an eye for the angle of a shot. Chrono holders who dodge well enough
+begin to see where a blow will land before it is thrown, and leave copies of themselves standing where they were. The
+devout blind are not blinded twice: no flash reaches them, and they feel what stands behind them. Hunters and the
+Tinkers' smiths fit arrowheads for every kind of work (bola, net, harpoon, flare, whistle) and bandits and
+vigilantes alike carry a belt of powders, vials and darts. Guards throw a round shield and catch it again. The
+alchemists have three late draughts: one that lends the drinker the skin of whatever they next touch, one that shuts
+a power away for a while, and one, rare and dear, by which a power can be given up for good and left sealed in a
+phial for another; the blood-borne arts of the Z Fighters cannot be poured out this way. People who sew their
+costumes to one design stand a little firmer together, though the towns like them no better for it. The boxing
+teachers know where a limb goes numb.
+
+(new) **The two pacts** (Andy, 2026-11-12: "you improvise the lore on that yourself"). A corrupted power can be
+bent once more, and not back. The demon masters below still keep the bargain they once kept with the sorcerer: to a
+holder whose power is already corrupted, one of them will offer **the Cinder Pact**. Whoever takes it is slower and
+far harder to kill, and what they touch catches light, for the rest of their life. The other bargain has no one
+behind it. A holder who carries a void shard out of the Maw long enough begins to hear the space between worlds the
+Frostborn crossed, and can let it in: **the Hollow Pact**. Nothing can stun or hold them after, and their blows shove
+like a door slamming, but every hurt lands harder, because there is less of them to take it. A person can hold one
+pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
+speaks for the second.
+
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
 too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
@@ -1015,6 +1047,11 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   other tech found in the otherwise medieval Overworld, and people talk about it: everyone loves having Frostborn tech.
   They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
   they were born and raised on the Overworld, far removed from Hail.
+
+  **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
+  hail"). Not every Frostborn on the Overworld was born in the snowfields. Some come down from Hail alone, on one of
+  their people's ships, grown and with nobody here who knows their name. They wear their people's glass and carry
+  themselves like it. In the life story this is the Frostborn whom nobody raised here, and that line names Hail.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -1218,6 +1255,12 @@ Station and the smeltery. Stone and flint come first (knapped hatchets, loose ro
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
 what is learned, from hermits who guide the way.
 
+(new) **Canes and crutches** (Claude's placement, 2026-11-12, for Andy to approve). Whoever loses a leg goes on their
+belly until something holds them up. A cane or a crutch is a carpenter's work, or anyone's with a knife, sticks and a
+scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
+a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
+answer, and no stick helps the one who has lost both.
+
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
 blood red. A goblin carries whatever boards it scavenged. The risen dead keep the ones they died holding. Wood splinters
@@ -1255,8 +1298,30 @@ Elements found in the mods that can't be placed without inventing something big.
 
 - **The elder alien's people.** Their species, their kingdom's name and look, and the ruler's name wait on the models
   Andy is finding inspiration for.
-- **Hail's name in the game.** Whether any line names Hail, or only Frostborn talk of "home", is open.
+- **Hail's name in the game.** The life story's traveller line names Hail (2026-11-12). Whether villagers' talk names it, or only says "home", is still open.
 
 The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,
 costumes, the classes, valor and temperaments. The Excalibur look and the other art toggles stay out of the lore.
+
+(new) **What the wild and the outlaw keep** (Claude's placement for the Kingdoms and world picks, 2026-11-12, for Andy to
+approve). Round the Irradiated Giant's monolith the remnant leaks. Wolves that den there too long **change**: greener,
+tougher, hunting at any hour, and their bite carries the same slow **sickness** a traveller gets by lingering on that
+ground. It is cured as the other afflictions are. Tinkers make a small **ticking charm** that clicks faster the nearer
+the source; nobody who sells one can say why it works. In the snowy woods of the north the hearthlanders tell of **the
+Gaunt**, a starved, antlered thing that comes to fires lit in the snow at night and leaves at dawn. It is a monster of
+legend, not a remnant. Its bite, its heart, or carrion eaten in the snow at night can pass on **the curse of the
+hungry**: the cursed run on all fours after dark, feed on what they have killed, and for a short while grow huge. Death
+ends it. It cannot share a body with the night folk or the wolf-cursed. The **night folk** (vampires) learn older
+shapes with age: the bat, the colony, the mist, a stare that draws the weak-willed, and a way of not being where a
+blow lands. They do not take a wolf's shape; that belongs to the wolf-cursed. Among the forbidden blood arts there is
+one rite written on **stitched pages** that blood witches keep: it unmakes a bound captive into a **brute** that obeys
+for a moment and then knows no one. Realms punish it above every other forbidden art, and the captive's kin remember.
+Trades have their own lore: **hunters** keep a pack and mark a quarry with a bone, **farmhands** re-sow as they reap,
+**smiths** can raise a field forge on any campfire, and a **lord** can sound a horn for their guards. Barbarian bands
+have a pecking order: plain raiders, one or two strong ones, a heavy, and a chief known by a byname (the Knife, the
+Hammer, the Archer, the Poisoner) that the courts post a bounty under. Sorcerers of earth, water and air each have
+one more working: a **bulwark** dome, a **tide pearl** that drags a foe to the caster's feet, and a **harrying gale**.
+Kingdoms' assassins and thieves have a few more tricks (watching unseen, slipping a blow, lifting a weapon, a dry
+remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
+before it is seen.
