@@ -130,9 +130,10 @@ public class FutureOmen extends PathfinderMob implements GeoEntity {
 		builder.define(DATA_AIMING, false);
 	}
 
-	/** Who an Omen fights on sight: androids, every mech but its own kind, and the dead of the future. */
+	/** Who an Omen fights on sight: androids, every mech but its own kind, the Frostborn troopers, and the dead of the future. */
 	static boolean hostileTo(LivingEntity entity) {
-		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech || entity instanceof Zombie);
+		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech || entity instanceof FutureTrooper
+			|| entity instanceof Zombie);
 	}
 
 	@Override

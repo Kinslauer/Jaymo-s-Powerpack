@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * squads ({@link FutureMachines#check}), at war with the androids, the mechs and the Warrior-born dead; the androids
  * and the dead fight them back and fight each other. They keep their distance and fire the Rig's palm blast, and fall
  * slowly on their thrusters. They shoot players on sight too (Andy: hostile to everyone), and whoever hurts one draws
- * the whole squad. The Omens (the city's own last pilots) and they leave each other be.
+ * the whole squad. They fight the Omens (the city's own last pilots) as well, and the Omens fight them back.
  * <p>The Rig they wear stays on them (it doesn't drop); a beaten trooper leaves some Rig Salvage, the same as the
  * Dead Rigs in the ruins, which are troopers who fell.
  */
@@ -64,9 +64,10 @@ public class FutureTrooper extends PathfinderMob implements RangedAttackMob {
 			.add(Attributes.KNOCKBACK_RESISTANCE, 0.2);
 	}
 
-	/** Who a trooper fights on sight: the androids and their mechs, and the dead. */
+	/** Who a trooper fights on sight (players besides): the androids and their mechs, the Omens, and the dead. */
 	static boolean hostileTo(LivingEntity entity) {
-		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech || entity instanceof Zombie);
+		return entity.isAlive() && (entity instanceof FutureAndroid || entity instanceof FutureMech || entity instanceof FutureOmen
+			|| entity instanceof Zombie);
 	}
 
 	@Override
