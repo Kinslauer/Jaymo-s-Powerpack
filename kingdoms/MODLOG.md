@@ -11407,3 +11407,10 @@ Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise
 ## 0.7.752 (2026-11-12): Loading-screen hint for belly flops (#1263)
 
 - A new loading-screen hint: a belly flop from high up hurts like a fall, a cannonball stings less, and a head-first dive slips in clean.
+
+## 0.7.753 (2026-11-12): Barbarians keep the Unseeing's belief (#1328)
+
+- Andy: "these can be the faith barbarians follow" (the Unseeing, Powers' blinded cult). A barbarian camp's own people
+  (raiders, the chief, its casters and workers; not the illager, goblin, orc or pirate camps) hold none of the eight
+  patrons now: `Faiths.of` answers none for them (`Faiths.unseeing`), so no faith rivalry or patron talk from them.
+- Built; not played.
