@@ -39,3 +39,4 @@ first pass. Patches 2-6 not started.
 - 2026-11-12: patch 3 pushed (same PR): Powers `combat/BladeStyle`; Kingdoms `forms/Styles`, hooks in `Duels`, `SchooledGuards`, `FormsClient` belt HUD, lang part `style.json`.
 - 2026-11-12: patch 4a pushed: Powers `combat/TwoBlades`, `client/combat/AttentionPose`, dual stance + crossed guard; Kingdoms Mill Charge in `forms/SpecialCuts`, tag `form_staves`, `Levelled`. Twinblade not built yet.
 - 2026-11-12: Twinblade pushed (`armory/Twinblade`, items twinblade + twinblade_schematic, `tools/gen_twinblade.py`). Patch 4 complete. Next: patch 5 (cut marks healed by bandages, own swing/clash sounds).
+- 2026-11-12: patch 5 pushed: open cuts in `client/wounds/DressingsLayer` (`Bleeding.BLEEDING` synced to all), `combat/BladeSounds` + `sounds/blade/`, Kingdoms `PowersCompat.bladeSwing`. Next: patch 6 (reel, tear, orders, helm, splash; energy blade waits on Andy).
