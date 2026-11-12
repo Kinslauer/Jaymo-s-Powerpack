@@ -13,4 +13,33 @@
 - **The Z Fighter HUD editor** moves and scales the Ki Wave charge, the Spirit Bomb bar and the scouter panel about where the HUD zones really put them (it used their old fixed spots).
 - **Escort side jobs** (Andy: "propose some"; the four proposed), from masters and the Keeper beside the old three kinds, one at a time, 220 TP each, and only with Jaymo's Kingdoms and MCA (the one in your charge is an MCA villager): walk a **courier** to the next town while the Ash Rival's lackeys jump you partway; take a **pupil** to the nearest Aether monolith (else the Tower) and keep the night's monsters off them from dusk to dawn; see a **trader and her pack mule** to the next town past a **Giant asleep** by the road (sprint near it or strike it and it wakes); **carry a fallen fighter** from out in the wild back to the master. A ward who dies or is lost, or three days gone, fails the job (`ZFighterEscorts`).
 - **Hands to the face for every mask** (Andy: "they all need an animation removing the mask too"). The mask key now lifts both hands to the face first, and the mask comes off (or goes on) when they get there, then they come away: a costume's head piece or hood, a cloak's hood, a Rig Helm's faceplate, the symbiote's mask, and (with Kingdoms) a school mask. Everyone sees it (`MaskMotion`, `MaskPose`).
+- Tinkering routes for the tools #364 left on grid recipes. They're now put together at the Tool Station from Tinkering parts plus a plain bit or two, and their grid recipes are dropped by what they make. Only shears and flint and steel stay in the grid.
+  - Kitchen's chopper: metal broad axe head, wooden tough handle, wooden plate and a lead.
+  - Kitchen's manual chopper: metal broad blade, wooden plate and a shaft.
+  - Rolling pin: wooden tough handle and two wooden handles.
+  - Ploughs: a metal plate share, a wooden tough handle, a wheel and planks. The planks choose the plough's wood.
+  - Kitchen's cookware:
+    - cooking pot: two metal plates and a bowl;
+    - frying pan: metal plate and wooden handle;
+    - saucepan: metal plate, wooden handle and any binding;
+    - baking tray: one metal plate;
+    - kitchen knife: metal small blade, wooden handle and string.
+  - Kingdoms' hoof pick (metal pick head and a handle) and oar (wooden tough handle, wooden plate and a binding).
+  - Armory's bone knife: bone small blade, handle and string.
+  - Pantry for Blockheads' cookware:
+    - frying pan: metal plate and copper handle;
+    - pot: metal plate and a bucket;
+    - baking sheet: metal plate and paper;
+    - mixing bowl: wooden plate and wooden handle;
+    - artisan press: metal plate, wooden tough handle, an anvil and an iron chain.
+  - MCA's kit:
+    - comb: metal plate and iron bars;
+    - needle and thread: metal arrow head and string;
+    - whistle: metal handle and a gold block;
+    - villager tracker: rose gold plate, compass and eye of ender.
+  - Naturalist's capture net (wooden tough handle and two string bindings) and whistle (copper handle and string).
+  - Nature's Compass: metal plate, compass and a sapling.
+  - Traveler's Tool Belt's first belt: two leather bindings and a metal one. Its upgrades are the mod's own.
+  - WeaponMod's fire rod: wooden handle and a torch.
+  - All of them show in JEI.
 - Built; not played.

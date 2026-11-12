@@ -119,6 +119,7 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addRecipes(PART_BUILDER, parts);
 		List<SimpleCategory.Recipe> tools = toolStation();
 		weaponAssembly(tools);
+		kitBuilds(tools);
 		registration.addRecipes(TOOL_STATION, tools);
 		registration.addRecipes(CASTING, casting());
 		registration.addRecipes(CASTING_BASIN, basin());
@@ -291,6 +292,38 @@ public final class TinkeringJei implements IModPlugin {
 			List<ItemStack> needed = stone.stream().map(s -> s.copyWithCount(PartBuilderMenu.itemsNeeded(kind.stoneCost(), s))).toList();
 			recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tinkering.PATTERN)), needed),
 				List.of(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1)), List.of(note("part_builder.cost", kind.stoneCost()))));
+		}
+	}
+
+	/** Tools and kit from parts and a plain bit or two ({@link com.jaymospowers.tinkering.ToolBuilds}): each part in the materials it may be. */
+	private static void kitBuilds(List<SimpleCategory.Recipe> recipes) {
+		for (com.jaymospowers.tinkering.ToolBuilds.Build build : com.jaymospowers.tinkering.ToolBuilds.BUILDS) {
+			if (!build.loaded()) {
+				continue;
+			}
+			List<List<ItemStack>> inputs = new ArrayList<>();
+			for (com.jaymospowers.tinkering.ToolBuilds.Part part : build.parts()) {
+				List<ItemStack> any = new ArrayList<>();
+				for (TinkerMaterial material : TinkerMaterial.values()) {
+					if (material.makes(part.type().kind) && com.jaymospowers.tinkering.ToolBuilds.takes(part.family(), material)) {
+						any.add(ToolPartItem.of(part.type(), material, 1));
+					}
+				}
+				inputs.add(any);
+			}
+			for (com.jaymospowers.tinkering.ToolBuilds.Bit bit : build.bits()) {
+				inputs.add(bit.examples());
+			}
+			List<ItemStack> out = new ArrayList<>();
+			if (build.output().equals("jaymoskitchen:oak_plow")) {
+				for (String wood : com.jaymospowers.tinkering.ToolBuilds.PLOUGH_WOODS) {
+					net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", wood + "_plow"))
+						.ifPresent(i -> out.add(new ItemStack(i)));
+				}
+			} else {
+				out.add(new ItemStack(build.item()));
+			}
+			recipes.add(new SimpleCategory.Recipe(inputs, out, List.of()));
 		}
 	}
 
