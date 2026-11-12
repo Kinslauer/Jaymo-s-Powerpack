@@ -114,6 +114,8 @@ public final class FangGauntletsClient {
 
 	/** From the avatar renderer's extractRenderState: which arms wear a gauntlet, and whether they're in the guard. */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+		// (a boxer's style, punch, evade and tiredness ride along: boxing/BoxingPoses)
+		com.jaymospowers.client.boxing.BoxingPoses.extract(entity, state, partialTicks);
 		if (!isGauntlets(entity.getMainHandItem())) {
 			state.setData(KEY, null);
 			return;
@@ -146,6 +148,10 @@ public final class FangGauntletsClient {
 	 * into the guard ahead of you, still but for the walk. Not mid-attack: then the swing's own animation has the arms.
 	 */
 	public static void applyModel(Model<?> m, Object s) {
+		if (m instanceof HumanoidModel<?> boxer && s instanceof AvatarRenderState boxing && com.jaymospowers.client.boxing.BoxingPoses.apply(boxer, boxing)) {
+			// fist gear with a style: the style's own stance, block, punch and evade in place of the plain guard
+			return;
+		}
 		if (!(m instanceof HumanoidModel<?> model) || !(s instanceof AvatarRenderState state) || !guarding(state)) {
 			return;
 		}
