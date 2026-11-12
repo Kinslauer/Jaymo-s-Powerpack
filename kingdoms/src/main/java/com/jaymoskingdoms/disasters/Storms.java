@@ -256,6 +256,23 @@ public final class Storms {
 		return s;
 	}
 
+	/**
+	 * A squall at sea ({@code SeaEvents}): a small, quick cell of rain (now and then thunder) racing before the wind from
+	 * (x, z), on top of the usual cells. Null if the sky is already full.
+	 */
+	public static @Nullable Storm squall(ServerLevel level, double x, double z, float radius, int life, RandomSource random) {
+		if (SERVER.size() >= MOST + 2) {
+			return null;
+		}
+		double wx = Math.cos(windAngle), wz = Math.sin(windAngle);
+		float speed = windSpeed * (2.5F + random.nextFloat());
+		// it comes on fast: half gathered as it forms
+		Storm s = new Storm(nextId(), random.nextFloat() < 0.3F ? Storm.THUNDER : Storm.RAIN, x, z, wx * speed, wz * speed, radius,
+			GATHER_TICKS / 2, life + GATHER_TICKS / 2);
+		SERVER.add(s);
+		return s;
+	}
+
 	/** A dust devil forms a little way off from {@code near}, crossing the land with the wind. */
 	static Tornado dustDevil(ServerLevel level, Vec3 near, RandomSource random) {
 		double angle = random.nextDouble() * Math.PI * 2.0;

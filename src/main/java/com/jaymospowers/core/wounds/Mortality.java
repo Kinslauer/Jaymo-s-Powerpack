@@ -198,6 +198,13 @@ public final class Mortality {
 	public static final List<java.util.function.BiFunction<ServerPlayer, @Nullable Entity, net.minecraft.core.@Nullable GlobalPos>> SHELTERS = new ArrayList<>();
 
 	/**
+	 * Where one left for dead wakes in a berth of their own (Kingdoms: a bed aboard a ship, wherever she is now; Andy: "it
+	 * should spawn you wherever the boat is when it is still there"), asked after {@link #CAPTORS} and before
+	 * {@link #SHELTERS}. Given the player; the first to name a place has them wake there.
+	 */
+	public static final List<java.util.function.Function<ServerPlayer, net.minecraft.core.@Nullable GlobalPos>> BERTHS = new ArrayList<>();
+
+	/**
 	 * (0.20.27) Deaths that turn one instead of ending them (Kingdoms: the Hollow; Andy: "the death method that killed them turns
 	 * them into one of those specific hollows, like enthralled by a vampire, or maybe zombified by a witch"). Given the player and
 	 * whoever killed them, each may roll and hand back what to do to them as they rise; the first to hand one back has them. A
@@ -993,6 +1000,23 @@ public final class Mortality {
 				ServerLevel to = held == null ? null : server.getLevel(held.dimension());
 				if (to != null) {
 					wakeAt(player, to, held.pos(), wake, "captured");
+					return true;
+				}
+			}
+		}
+		// or back in a berth of their own (a bed aboard a ship), if she's still there (not one a boss spared: dumped far off)
+		if (wake.turn == null && wake.tries == 0 && wake.far == null && wake.cause != Cause.BOSS) {
+			for (java.util.function.Function<ServerPlayer, net.minecraft.core.GlobalPos> berth : BERTHS) {
+				net.minecraft.core.GlobalPos in;
+				try {
+					in = berth.apply(player);
+				} catch (RuntimeException e) {
+					JaymosPowers.LOGGER.warn("A berth failed to take {} back", player.getScoreboardName(), e);
+					in = null;
+				}
+				ServerLevel to = in == null ? null : server.getLevel(in.dimension());
+				if (to != null) {
+					wakeAt(player, to, in.pos(), wake, "berth");
 					return true;
 				}
 			}

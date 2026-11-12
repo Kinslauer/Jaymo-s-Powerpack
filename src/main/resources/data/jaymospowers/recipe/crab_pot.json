@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SLS",
+    "L L",
+    "SLS"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymospowers:crab_pot",
+    "count": 1
+  }
+}

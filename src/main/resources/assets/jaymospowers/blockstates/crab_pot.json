@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/crab_pot"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/crab_pot",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/crab_pot",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/crab_pot",
+      "y": 270
+    }
+  }
+}

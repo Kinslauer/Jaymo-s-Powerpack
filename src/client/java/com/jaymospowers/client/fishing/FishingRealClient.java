@@ -62,9 +62,45 @@ public final class FishingRealClient {
                 JaymosPowers.id("fishing_tension"), FishingRealClient::render);
         // (0.21.62) the skipjack tuna
         net.minecraft.client.renderer.entity.EntityRenderers.register(com.jaymospowers.fishing.Skipjack.SKIPJACK, SkipjackRenderer::new);
+        // (Track C) every new species with its own model, and (Track B leftovers, D) the angler's blocks
+        for (java.util.Map.Entry<com.jaymospowers.fishing.Species, net.minecraft.world.entity.EntityType<?>> e
+                : com.jaymospowers.fishing.FishSpecies.types().entrySet()) {
+            register(e.getValue(), e.getKey());
+        }
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.fishing.FishingBlocks.ROD_POD_ENTITY, RodPodRenderer::new);
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.fishing.FishingBlocks.TROPHY_PLAQUE_ENTITY,
+                TrophyPlaqueRenderer::new);
+        // (Track D) a fisherman's screen, and the fisher's journal
+        ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.fishing.Fishermen.View.TYPE,
+                (payload, context) -> FishermanScreen.receive(context.client(), payload));
+        net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) -> {
+            if (level.isClientSide() && com.jaymospowers.fishing.FishLog.JOURNAL != null
+                    && player.getItemInHand(hand).is(com.jaymospowers.fishing.FishLog.JOURNAL)) {
+                Minecraft.getInstance().gui.setScreen(new JournalScreen());
+                return net.minecraft.world.InteractionResult.SUCCESS;
+            }
+            return net.minecraft.world.InteractionResult.PASS;
+        });
         // (0.21.62) a landed fish shows its weight, a rod the bait on its hook
         ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
-            Float kg = FishCatch.weight(stack);
+            FishCatch.Info info = FishCatch.info(stack);
+            Float kg = info == null ? FishCatch.weight(stack) : null;
+            if (info != null) {
+                // (Track D) the catch's story: length and weight, who and when, and alive or not
+                Minecraft mc = Minecraft.getInstance();
+                long now = mc.level == null ? 0L : mc.level.getGameTime();
+                int at = Math.min(1, lines.size());
+                lines.add(at, Component.translatable("tooltip.jaymospowers.fish_catch", String.format(java.util.Locale.ROOT, "%.1f", info.kg()),
+                        info.cm()).withStyle(ChatFormatting.GRAY));
+                if (!info.angler().isEmpty()) {
+                    lines.add(at + 1, Component.translatable("tooltip.jaymospowers.fish_caught_by", info.angler(), info.day())
+                            .withStyle(ChatFormatting.DARK_GRAY));
+                }
+                if (info.alive(now)) {
+                    lines.add(at + 1, Component.translatable("tooltip.jaymospowers.fish_alive", (info.aliveUntil() - now) / 20L)
+                            .withStyle(ChatFormatting.AQUA));
+                }
+            }
             if (kg != null) {
                 lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.fish_weight",
                         String.format(java.util.Locale.ROOT, "%.1f", kg)).withStyle(ChatFormatting.GRAY));
@@ -89,12 +125,27 @@ public final class FishingRealClient {
                 lines.add(Math.min(1, lines.size()), Component.translatable(com.jaymospowers.fishing.Tackle.isLure(stack.getItem())
                         ? "tooltip.jaymospowers.lure" : "tooltip.jaymospowers.bait").withStyle(ChatFormatting.GRAY));
             }
+            // (Track B leftovers, D) what the angler's new blocks and tools are for
+            String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+            if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace().equals(JaymosPowers.MOD_ID)
+                    && java.util.Set.of("ice_auger", "rod_pod", "crab_pot", "keepnet", "trophy_plaque", "fishers_journal").contains(path)) {
+                lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers." + path).withStyle(ChatFormatting.GRAY));
+            }
+            if (info != null && info.alive(Minecraft.getInstance().level == null ? 0L : Minecraft.getInstance().level.getGameTime())) {
+                lines.add(Component.translatable("tooltip.jaymospowers.release").withStyle(ChatFormatting.DARK_GRAY));
+            }
             // (Track A) a rod shows its drag
             if (FishRun.isRod(stack)) {
                 lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.rod_drag",
                         FishRun.drag(stack), FishRun.DRAG_STEPS).withStyle(ChatFormatting.GRAY));
             }
         });
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void register(net.minecraft.world.entity.EntityType<?> type, com.jaymospowers.fishing.Species species) {
+        net.minecraft.client.renderer.entity.EntityRenderers.register((net.minecraft.world.entity.EntityType) type,
+                context -> new WildFishRenderer<>(context, species));
     }
 
     private static FishFight fight(Player player) {

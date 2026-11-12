@@ -61,6 +61,20 @@ public abstract class FishingHookMixin {
         com.jaymospowers.fishing.FishBites.tick((net.minecraft.server.level.ServerLevel) hook.level(), hook, angler);
     }
 
+    /**
+     * (Track B leftovers) After the hook's own tick, on both sides: a lure or a ledger rod's bait sinks and is held at its
+     * depth instead of bobbing back up ({@code LureDepth}); a hook dropped through an ice hole stays in it ({@code IceFishing}).
+     */
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void afterTick(CallbackInfo ci) {
+        FishingHook hook = hook();
+        if (hook.isRemoved()) {
+            return;
+        }
+        com.jaymospowers.fishing.IceFishing.tick(hook);
+        com.jaymospowers.fishing.LureDepth.tick(hook);
+    }
+
     /** While a fish is on the line, don't retrieve the hook or drop vanilla loot. */
     @Inject(method = "retrieve", at = @At("HEAD"), cancellable = true)
     private void onRetrieve(ItemStack rod, CallbackInfoReturnable<Integer> cir) {

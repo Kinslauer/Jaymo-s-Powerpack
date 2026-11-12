@@ -76,11 +76,27 @@ public final class IceCaves {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("ice_cave_floor"), IceCaveFeatures.Floor.CODEC);
 	}
 
+	private static boolean placed;
+
+	/**
+	 * From here on the Overworld's biome list holds the ice caves ({@link #placing}). Called from the server and client
+	 * entrypoints, after every mod's main entrypoint, for the same reason as {@code TundraWorld.place}: TaCZ builds a
+	 * vanilla-only {@code VanillaRegistries.createWorldLookup()} in its main entrypoint, and a list that asks for
+	 * {@code jaymospowers:ice_caves} there crashes the game on start.
+	 */
+	public static void place() {
+		placed = true;
+	}
+
 	/**
 	 * Wraps the Overworld biome list as it is built: when the underground biomes start (the dripstone caves come first),
-	 * the ice caves go in beside them, under the cold and not the driest of it.
+	 * the ice caves go in beside them, under the cold and not the driest of it. Until {@link #place} the list is left
+	 * as vanilla's.
 	 */
 	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> placing(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out) {
+		if (!placed) {
+			return out;
+		}
 		return pair -> {
 			out.accept(pair);
 			if (pair.getSecond() == Biomes.DRIPSTONE_CAVES) {
