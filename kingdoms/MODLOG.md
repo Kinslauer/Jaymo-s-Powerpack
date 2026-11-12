@@ -11703,3 +11703,14 @@ Andy ticked the left-out row "Speakeasy dens are never raided and contraband nev
 - `GroundChanges`: in Jaymo's Powers' Ice Caves a tier's veins now go through the packed ice and calcite too, each ore in
   a pocket of stone (deepslate below Y 0), so opening a tier seeds ore under the cold lands as everywhere else.
   Nothing changes without Powers.
+
+## 0.7.775 (2026-11-12): ships finished (chests, berths, salvage, workshops) and the sea's weather
+
+- **What shows aboard**: chests draw as chests again (no more barrels), and sign text, banners and other drawn blocks show on a ship under way (`Ship.SHOWN`, `ShipRenderer`). Beds and sign boards already drew as blocks.
+- **Workshops under way**: furnaces, smokers, blast furnaces and brewing stands in the hold keep working while she sails, and open from the deck as usual (`ShipWorks` and the `mixin.sailing` workshop mixins). Campfires don't cook aboard.
+- **Berths**: sleep in (or just use) a bed aboard and that's your spawn, wherever the ship is. You lie down aboard and ride with her; die and you wake in your berth while she's still afloat; when she anchors your spawn moves to the bed where it lands; if she's broken up or lost, it's gone (`Berths`, Powers' death wake-up `Mortality.BERTHS`).
+- **Salvage**: a helm put on a vanilla shipwreck lying on the seabed casts it off. It comes up with sea in its hold, floats low and shows "water in the hold" on the readout; bail it with buckets (1 block each) or sponges (32) aboard, patch it and sail it. Too much water to float, and she won't come up until you empty some. Anchoring keeps her water (`Flooding`, `Hull.floodedDraft`).
+- **Rivet's guns**: Rivet's B on a cannon (on land or aboard) melds him into its breech. He lays it where he looks (45 degrees either side of its mounting), Space fires, sneak or B again pours him out, and he loads it from the gunpowder and shot he carries, one of each per shot (`MeldedGuns`).
+- **Waterspouts**: a tornado over the sea is a waterspout: a pale funnel, spray at its foot, nothing torn up. It swings ships round, pours water into a hold in its core, and a full-size one tears sails away. On a still warm day the sea puts up small ones of its own, which fall apart as soon as they come ashore. Players hear "A waterspout has come down" instead of a tornado.
+- **The sea's weather** (`SeaEvents`, out at sea only): fog banks (sight down to about 24 blocks), doldrums (the wind almost dies; row or wait), squalls (a small fast rain cell, gusts that shove ships on), whirlpools in deep water (pull and spin everything afloat, drag swimmers under at the eye, flood a hold that gets too close), a glowing tide at night (the water lights where hulls, boats and swimmers move), flotsam (planks and a lost ship's stores drifting nearby), and St. Elmo's fire on the mastheads under a thunderstorm. They live only in memory, like the storms.
+- Built; not played.
