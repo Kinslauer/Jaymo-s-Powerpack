@@ -138,6 +138,10 @@ public final class BoxingEvades {
 	public static final AttachmentType<Long> BLUR = AttachmentRegistry.create(JaymosPowers.id("boxing_blur"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));
 
+	/** A boxer's last evade, told to everyone (not saved): the game time it began, shifted up three bits, and the {@link Move}'s place plus one. */
+	public static final AttachmentType<Long> MOVED = AttachmentRegistry.create(JaymosPowers.id("boxing_moved"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
 	private static final class State {
 		/** The last evade: when, what, and whether it has earned its reward yet. */
 		long evaded = Long.MIN_VALUE / 2;
@@ -197,6 +201,8 @@ public final class BoxingEvades {
 		}
 		state.evaded = now;
 		state.move = move(style, direction);
+		// everyone is told, for the pose
+		player.setAttached(MOVED, now << 3 | state.move.ordinal() + 1);
 		state.rewarded = false;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.6F, 1.6F);
 	}
