@@ -5,7 +5,7 @@
 	"name": "Jaymo's Kingdoms",
 	"description": "Kingdoms rise at the villages of the world, each under a king who is a boss to be reckoned with. Pledge yourself to one, climb its ranks, fill its treasury, and mind your reputation: every kingdom remembers what you've done.",
 	"authors": [],
-	"license": "MIT",
+	"license": ["GPL-3.0-only", "LicenseRef-All-Rights-Reserved"],
 	"environment": "*",
 	"entrypoints": {
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],

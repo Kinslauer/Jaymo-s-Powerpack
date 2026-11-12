@@ -5,7 +5,7 @@
 	"name": "Jaymo's Kitchen",
 	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts), the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower), and the cooking pot, skillet, cutting board, feasts, crops and art of Farmer's Delight (MIT, by vectorwing; see LICENSE_farmersdelight), and the rat and rat trap models, textures and sounds of Rats (LGPL-3.0, by Alexthe666; see LICENSE_rats).",
 	"authors": [],
-	"license": "MIT",
+	"license": "LicenseRef-All-Rights-Reserved",
 	"icon": "assets/jaymoskitchen/icon.png",
 	"environment": "*",
 	"entrypoints": {
