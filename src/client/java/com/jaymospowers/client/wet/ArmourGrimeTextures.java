@@ -69,6 +69,9 @@ public final class ArmourGrimeTextures {
 	/** (0.20.41) Dried blood is this dark a share of the fresh colour, and this much browner. */
 	static final float DRIED = 0.5F;
 	static final int DRIED_TOWARD = 0x3B1E12;
+	/** Rotten blood turns toward this brown-green, this far at its worst (Bloodied.rot, in {@link #DRY_STEPS} steps). */
+	static final int ROTTEN_TOWARD = 0x34301A;
+	static final float ROTTEN_SHARE = 0.55F;
 	private static boolean masksRead;
 	private static boolean excalibur;
 	private static int made;
@@ -165,7 +168,12 @@ public final class ArmourGrimeTextures {
 		if (bodyBlood == null) {
 			return null;
 		}
-		Smear smear = new Smear(Mth.clamp(Mth.ceil(coat.level() * STAGES), 1, STAGES), coat.color() & 0xFFFFFF);
+		// a coat dries and rots as blood on gear does (a coat from before it kept its age stays fresh)
+		Smear smear = coat.laid() > 0 ? smear(new Bloodied.Blood(coat.amount(), coat.color(), coat.laid()))
+			: new Smear(Mth.clamp(Mth.ceil(coat.level() * STAGES), 1, STAGES), coat.color() & 0xFFFFFF);
+		if (smear == null) {
+			return null;
+		}
 		Identifier painted = paint(base, null, null, null, smear, bodyBlood, true, false, layered);
 		return painted != null ? painted : paint(JaymosPowers.id("blood/whole_skin"), null, null, null, smear, bodyBlood, true, true);
 	}
@@ -209,7 +217,12 @@ public final class ArmourGrimeTextures {
 			fresh = BloodParticles.MAGMA_CRUST;
 		}
 		int darker = lerpRgb(0.5F, scale(fresh, DRIED), DRIED_TOWARD);
-		return new Smear(Mth.clamp(Mth.ceil(blood.level() * STAGES), 1, STAGES), lerpRgb(dry, fresh, darker));
+		float rot = level == null ? 0.0F : Math.round(Bloodied.rot(blood.laid(), level.getGameTime()) * DRY_STEPS) / (float) DRY_STEPS;
+		int now = lerpRgb(dry, fresh, darker);
+		if (rot > 0.0F) {
+			now = lerpRgb(rot * ROTTEN_SHARE, now, ROTTEN_TOWARD);
+		}
+		return new Smear(Mth.clamp(Mth.ceil(blood.level() * STAGES), 1, STAGES), now);
 	}
 
 	private static int scale(int rgb, float k) {
@@ -366,6 +379,11 @@ public final class ArmourGrimeTextures {
 		armourBlood = Mask.read(JaymosPowers.id("textures/blood/armour_blood.png"));
 		itemBlood = Mask.read(JaymosPowers.id("textures/blood/item_blood.png"));
 		bodyBlood = Mask.read(JaymosPowers.id("textures/blood/body_blood.png"));
+	}
+
+	/** A fresh copy of {@code texture}'s pixels (a resource, or a downloaded skin), or null if it can't be read; the caller closes it. */
+	public static @Nullable NativeImage copy(Identifier texture) {
+		return read(texture);
 	}
 
 	private static @Nullable NativeImage read(Identifier texture) {

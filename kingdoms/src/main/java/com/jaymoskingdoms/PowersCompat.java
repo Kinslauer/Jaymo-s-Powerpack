@@ -392,6 +392,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Bloodied.noticed(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle bloodSeenOf;
+	private static boolean lookedForBloodSeen;
+
+	/**
+	 * The blood others would notice on {@code body} by Jaymo's Powers: -1 none, 0 fresh, 1 dried, 2 rotten; -1 without
+	 * Powers (or an older one).
+	 */
+	public static int bloodSeen(net.minecraft.world.entity.LivingEntity body) {
+		if (!lookedForBloodSeen) {
+			lookedForBloodSeen = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					bloodSeenOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.blood.Bloodied"),
+						"noticed", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' blood on bodies (older Powers?)", e);
+				}
+			}
+		}
+		if (bloodSeenOf == null) {
+			return -1;
+		}
+		try {
+			return (int)bloodSeenOf.invoke(body);
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
 	/** Powers' {@code DivineSense.stayed(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle stayedDivine;
 	private static boolean lookedForStayed;

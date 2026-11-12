@@ -1,0 +1,23 @@
+{
+	"values": [
+		"minecraft:iron_golem",
+		{ "id": "minecraft:copper_golem", "required": false },
+		"minecraft:ravager",
+		"minecraft:armadillo",
+		"minecraft:turtle",
+		"minecraft:shulker",
+		"minecraft:warden",
+		"minecraft:guardian",
+		"minecraft:elder_guardian",
+		"minecraft:hoglin",
+		"minecraft:zoglin",
+		"minecraft:sniffer",
+		"minecraft:wither",
+		"minecraft:ender_dragon",
+		"minecraft:skeleton",
+		"minecraft:stray",
+		"minecraft:wither_skeleton",
+		{ "id": "minecraft:bogged", "required": false },
+		{ "id": "minecraft:parched", "required": false }
+	]
+}

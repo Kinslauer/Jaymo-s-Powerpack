@@ -215,6 +215,16 @@ public class SeveredPart extends Entity {
 		}
 	}
 
+	/** A cut-off part lying on the ground leaks for this long (ticks), at first every {@link #LEAK_FIRST} ticks, at the end every {@link #LEAK_LAST}. */
+	static final int LEAK_TICKS = 600, LEAK_FIRST = 20, LEAK_LAST = 90;
+	static final float LEAK_STAIN = 0.15F;
+
+	/** How often it leaks now: more seldom as it crusts over. */
+	private int leakEvery() {
+		float t = Mth.clamp(this.age / (float) LEAK_TICKS, 0.0F, 1.0F);
+		return Math.max(1, Math.round(Mth.lerp(t, LEAK_FIRST, LEAK_LAST)));
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
@@ -267,6 +277,11 @@ public class SeveredPart extends Entity {
 			if (this.age < 40 && this.age % 3 == 0 && this.blood != BladeBlood.NO_BLOOD) {
 				// a trail of blood off the cut
 				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
+			} else if (this.age < LEAK_TICKS && this.onGround() && this.blood != BladeBlood.NO_BLOOD && this.age % leakEvery() == 0) {
+				// Andy's Cruor pick: lying still, it goes on leaking from the cut for a while, slower and slower, into a
+				// small pool that lasts (BloodTrail), then crusts over
+				level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(this.blood, 0.8F), this.getX(), this.getY() + 0.05, this.getZ(), 1, 0.04, 0.0, 0.04, 0.0);
+				com.jaymospowers.core.blood.BloodTrail.bleed(level, this, this.blood, 1, 0.1, LEAK_STAIN, 4);
 			}
 		} else {
 			this.spinO = this.spin;

@@ -801,9 +801,12 @@ public final class Crewmen {
 
 	/** An arrow at {@code foe} (as a folk archer looses one). */
 	private static void loose(ServerLevel level, PathfinderMob mob, ItemStack bow, LivingEntity foe) {
+		if (!MobAmmo.spend(mob, MobAmmo.Kind.ARROWS)) {
+			return;
+		}
 		ItemStack arrows = new ItemStack(Items.ARROW);
 		AbstractArrow arrow = ProjectileUtil.getMobArrow(mob, arrows, 1.0F, bow);
-		arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+		MobAmmo.canBePickedUp(arrow);
 		double dx = foe.getX() - mob.getX(), dz = foe.getZ() - mob.getZ();
 		double dy = foe.getY(1.0 / 3.0) - arrow.getY();
 		double flat = Math.sqrt(dx * dx + dz * dz);

@@ -25,6 +25,8 @@ public final class Smell {
 	static final int CHECK_TICKS = 40;
 	/** How much the worst grime on your armour adds (at its filthiest), and a scrub at a cauldron takes off. */
 	static final float GRIME_SHARE = 40.0F, SCRUB = 70.0F;
+	/** How much old blood on you adds at its worst (soaked in rotten blood, {@code Bloodied.reek}). */
+	static final float BLOOD_SHARE = 75.0F;
 
 	/** Your own stink, before grime. Saved on the player. */
 	public static final AttachmentType<Float> STINK = AttachmentRegistry.create(JaymosPowers.id("stink"), b -> b.persistent(Codec.FLOAT).copyOnDeath());
@@ -55,7 +57,10 @@ public final class Smell {
 		}
 	}
 
-	/** How bad {@code player} smells, 0 (clean) to {@link #MAX}: their stink and the worst grime on their armour. */
+	/**
+	 * How bad {@code player} smells, 0 (clean) to {@link #MAX}: their stink, the worst grime on their armour, and old blood
+	 * on them (rotten blood stinks the worst).
+	 */
 	public static float smell(Player player) {
 		float grime = 0.0F;
 		for (net.minecraft.world.entity.EquipmentSlot slot : ArmourGrime.SLOTS) {
@@ -64,7 +69,7 @@ public final class Smell {
 				grime = Math.max(grime, g.level());
 			}
 		}
-		return Math.min(MAX, stink(player) + grime * GRIME_SHARE);
+		return Math.min(MAX, stink(player) + grime * GRIME_SHARE + com.jaymospowers.core.blood.Bloodied.reek(player) * BLOOD_SHARE);
 	}
 
 	private static void tick(MinecraftServer server) {
