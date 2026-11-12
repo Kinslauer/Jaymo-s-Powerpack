@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * The marks wounds leave ({@link WoundMarks}), drawn into the skin: a cut (a dark line with raw edges), claws (three of
  * them side by side), a puncture (a dark hole with a run of blood under it), a bruise (a purple patch that yellows as it
- * heals), a blast (specks and soot). On a humanoid skin (players, villagers, zombies and the rest of the humanoid layout)
+ * heals), a blast (specks and soot), a scorch (a charred patch with a singed rim: fire, lightning and ki). An open cut on a
+ * body that isn't shaped like a person (the dressings layer only draws on those) is painted the same way, as a gash. On a humanoid skin (players, villagers, zombies and the rest of the humanoid layout)
  * each lies on its own part and side; on anything else it lies somewhere on the skin, the same place every time. They fade
  * as they age, in a few steps, so each body's painted picture changes seldom.
  * <p>
@@ -49,14 +50,16 @@ public final class WoundMarksLayer {
 	static final int MOST_KEPT = 300;
 	/** The colours of a fresh bruise and an old one, and a blast's soot. */
 	static final int BRUISE_FRESH = 0x4A2C5E, BRUISE_OLD = 0x8C8A3C, SOOT = 0x2A2522;
+	/** A scorch: the char at its middle, the singed rim round it, and the pink it heals to. */
+	static final int SCORCH_CORE = 0x1C1714, SCORCH_RIM = 0x6B3A22, SCORCH_OLD = 0xA8665A;
 	/** A healed stump's scar, and the seam it closed along. */
 	static final int SCAR = 0xD19A8C, SEAM = 0x8E5A50;
 
 	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
-	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw) {
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed) {
 		String key() {
 			StringBuilder b = new StringBuilder();
-			b.append('s').append(this.stubs).append('r').append(this.raw).append('|');
+			b.append('s').append(this.stubs).append('r').append(this.raw).append('g').append(this.gashes).append('x').append(this.seed).append('|');
 			for (int i = 0; i < this.marks.size(); i++) {
 				b.append(Long.toHexString(this.marks.get(i).shape())).append(':').append(this.stages[i]).append(',');
 			}
@@ -82,7 +85,11 @@ public final class WoundMarksLayer {
 		List<WoundMarks.Mark> marks = WoundMarks.marks(entity);
 		// the lost arms and legs drawn as stumps (Dismembered), and which of them still bleed
 		int stubs = Dismember.missing(entity) & ~Dismember.HEAD & ~com.jaymospowers.core.Prosthetics.fitted(entity);
-		if (marks.isEmpty() && stubs == 0) {
+		// an open cut on a body the dressings layer can't draw on (anything not built like a person) is painted into its skin
+		// like the other marks: the bleeding parts that nothing is wrapped over (a person's are drawn by the dressings layer)
+		int wrapped = Bleeding.wrapped(entity);
+		int gashes = Bleeding.bleeding(entity) & ~(wrapped | wrapped >>> Bleeding.RAG_SHIFT) & (1 << Bleeding.RAG_SHIFT) - 1;
+		if (marks.isEmpty() && stubs == 0 && gashes == 0) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -101,7 +108,7 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood, stubs, raw));
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood, stubs, raw, gashes, entity.getId() * 31));
 	}
 
 	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
@@ -118,13 +125,18 @@ public final class WoundMarksLayer {
 			if (marked == null || state.isInvisible) {
 				return;
 			}
+			boolean person = this.getParentModel() instanceof HumanoidModel;
+			if (person && marked.marks().isEmpty() && marked.stubs() == 0) {
+				// (a person's open cut is the dressings layer's)
+				return;
+			}
 			Identifier skin;
 			try {
 				skin = this.renderer.getTextureLocation(state);
 			} catch (RuntimeException e) {
 				return;
 			}
-			Identifier painted = skin == null ? null : paint(skin, marked, this.getParentModel() instanceof HumanoidModel);
+			Identifier painted = skin == null ? null : paint(skin, marked, person);
 			if (painted != null) {
 				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
 			}
@@ -135,7 +147,7 @@ public final class WoundMarksLayer {
 		if (UNREADABLE.contains(skin)) {
 			return null;
 		}
-		String key = skin + "|" + humanoid + "|" + marked.key();
+		String key = skin + "|" + humanoid + "|" + (humanoid ? marked.key().replaceFirst("g\\d+x-?\\d+", "") : marked.key());
 		Identifier done = MADE.get(key);
 		if (done != null) {
 			return done;
@@ -160,6 +172,16 @@ public final class WoundMarksLayer {
 			Painter painter = new Painter(base, out, layout);
 			for (int i = 0; i < marked.marks().size(); i++) {
 				painter.mark(marked.marks().get(i), marked.stages()[i] / (float) STAGES, marked.blood());
+			}
+			if (!humanoid) {
+				// each open cut: a fresh gash, somewhere on the skin that is the same every time for this body and part
+				BodyPart[] parts = BodyPart.values();
+				for (int i = 0; i < parts.length; i++) {
+					if ((marked.gashes() & 1 << i) != 0) {
+						int seed = (marked.seed() * 17 + i * 40503) & 0xFFFF;
+						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L), 1.0F, marked.blood());
+					}
+				}
 			}
 			if (layout) {
 				for (int part : Dismember.PARTS) {
@@ -231,6 +253,16 @@ public final class WoundMarksLayer {
 				case BRUISE -> {
 					int colour = lerp(1.0F - strength, BRUISE_FRESH, BRUISE_OLD);
 					this.patch(cx, cy, Math.max(1.5 * this.unit, size * 0.35), colour, 0.5F * (0.4F + 0.6F * strength), random, rect);
+				}
+				case SCORCH -> {
+					// a charred patch with a singed rim, cracked in places; it lightens as it heals
+					double r = Math.max(2.0 * this.unit, size * 0.4);
+					this.patch(cx, cy, r + this.unit, lerp(1.0F - strength, SCORCH_RIM, SCORCH_OLD), 0.35F * strength, random, rect);
+					this.patch(cx, cy, r, lerp(1.0F - strength, SCORCH_CORE, SCORCH_OLD), 0.8F * (0.4F + 0.6F * strength), random, rect);
+					for (int k = 0; k < 3; k++) {
+						double a = random.nextDouble() * Math.PI * 2.0;
+						this.dot(cx + Math.cos(a) * r * 0.5, cy + Math.sin(a) * r * 0.5, SCORCH_CORE, strength, rect);
+					}
 				}
 				case BLAST -> {
 					this.patch(cx, cy, Math.max(2.0 * this.unit, size * 0.45), SOOT, 0.3F * strength, random, rect);

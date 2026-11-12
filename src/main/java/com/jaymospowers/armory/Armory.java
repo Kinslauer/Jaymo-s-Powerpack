@@ -180,9 +180,11 @@ public final class Armory {
 		item("iron_quarterstaff", Item::new, p -> staffBlock(p.sword(ToolMaterial.IRON, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE)));
 		// the Twinblade: two swords joined at the hilt (Twinblade), and the sheet that teaches the joining
 		Twinblade.item = item("twinblade", Item::new, p -> staffBlock(p.sword(ToolMaterial.IRON, 4.0F, Twinblade.ATTACK_SPEED)
-			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade.hint").withStyle(ChatFormatting.GRAY))))));
+			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade.hint").withStyle(ChatFormatting.GRAY),
+				Component.translatable("item.jaymospowers.twinblade.old").withStyle(ChatFormatting.DARK_GRAY))))));
 		Twinblade.schematic = item("twinblade_schematic", Item::new, p -> p.stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
-			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY)))));
+			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY),
+				Component.translatable("item.jaymospowers.twinblade_schematic.old").withStyle(ChatFormatting.DARK_GRAY)))));
 		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
 		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
 		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));

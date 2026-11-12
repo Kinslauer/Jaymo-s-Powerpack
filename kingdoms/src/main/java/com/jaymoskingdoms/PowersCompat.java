@@ -3477,4 +3477,34 @@ public final class PowersCompat {
 		}
 		return false;
 	}
+
+	/** Powers' {@code Armed.threatening(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle threatening;
+	private static boolean lookedForThreat;
+
+	/**
+	 * Whether {@code body} stands in Jaymo's Powers' drawn, crouched sword stance (a weapon in the hand, sneaking), which
+	 * villagers and guards read as a threat ({@link Menace}). Without Powers the pose doesn't exist, so false.
+	 */
+	public static boolean threatening(LivingEntity body) {
+		if (!lookedForThreat) {
+			lookedForThreat = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					threatening = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.Armed"),
+						"threatening", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' armed stance (older Powers?)", e);
+				}
+			}
+		}
+		if (threatening == null) {
+			return false;
+		}
+		try {
+			return (boolean)threatening.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

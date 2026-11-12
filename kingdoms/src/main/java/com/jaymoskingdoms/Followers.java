@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import com.jaymoskingdoms.sailing.Ship;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -41,7 +42,9 @@ import org.jspecify.annotations.Nullable;
  * family, hired help, a friend of {@link Strangers#TRUSTED_HEARTS} hearts): look at one and press the Orders key for
  * theirs, or look at nobody for everyone of yours within {@link #ALL_RANGE} blocks. Strangers still refuse, a Truth
  * villager still won't follow where their commandments forbid, and a villager whose tongue you don't share only
- * shrugs. MCA's own Follow and Stay buttons still work; this is the same and more in one place.
+ * shrugs. In MCA's menu this screen stands in place of its Follow Me, Stay Here and Go About Your Day buttons
+ * ({@code McaScreensMixin}, {@code McaWayPageMixin}); the server still answers MCA's own commands from older clients.
+ * It also serves everyone already following you and a ship's hands aboard a ship you have the helm of ({@link #takesOrders}).
  * <ul>
  * <li>{@link #FOLLOW}: MCA's follow.
  * <li>{@link #HOLD}: keep this spot. They meet any monster that comes within {@link #HOLD_GUARD} blocks, then walk back.
@@ -65,6 +68,8 @@ public final class Followers {
 	/** Orders are looked at this often (ticks); a blow of yours counts for this long. */
 	static final int EVERY = 10, FIGHT_MEMORY = 100;
 	static final float WALK = 0.6F;
+	/** A ship lies still below this speed (blocks per tick). */
+	static final double STILL = 0.05;
 
 	/** A standing order on a villager: what, whose, and the spot it was given at. */
 	public record Order(int kind, UUID by, long at) {
@@ -122,9 +127,21 @@ public final class Followers {
 		ServerTickEvents.END_SERVER_TICK.register(Followers::tick);
 	}
 
-	/** Whether {@code v} takes orders from {@code player} at all (MCA's ties, or enough hearts). */
+	/**
+	 * Whether {@code v} takes orders from {@code player} at all: MCA's ties or enough hearts, anyone already following
+	 * {@code player} (an escort, a rescued captive, a child led by the hand, a bearer behind a bier), or a ship's hand
+	 * aboard a ship {@code player} has the helm of.
+	 */
 	public static boolean takesOrders(Entity v, ServerPlayer player) {
-		return McaCompat.LOADED && v instanceof Villager villager && villager.isAlive() && McaBridge.involved(villager, player);
+		if (!McaCompat.LOADED || !(v instanceof Villager villager) || !villager.isAlive()) {
+			return false;
+		}
+		return McaBridge.involved(villager, player) || player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player);
+	}
+
+	/** {@code v} is one of the hands of a ship {@code player} has the helm of (aboard her). */
+	private static boolean crewOf(Villager v, ServerPlayer player) {
+		return Crewmen.tagged(v) && v.getVehicle() instanceof Ship ship && ship.helmsman() == player;
 	}
 
 	private static void give(ServerPlayer player, int target, int kind) {
@@ -152,6 +169,14 @@ public final class Followers {
 			if (!Languages.understands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
+			}
+			if (v.getVehicle() instanceof Ship ship && Crewmen.tagged(v) && (kind == FOLLOW || kind == FIGHT || kind == PATROL || kind == CLEAR)) {
+				// a hand leaves her only when she lies still (the others keep their stations and meet what comes aboard)
+				if (ship.getDeltaMovement().horizontalDistanceSqr() > STILL * STILL) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.underway", v.getDisplayName()).withStyle(ChatFormatting.GRAY));
+					continue;
+				}
+				v.stopRiding();
 			}
 			take(v, player, kind);
 			taken++;
