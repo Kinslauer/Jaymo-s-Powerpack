@@ -2896,3 +2896,16 @@ this update get them.
   admits anything.
 - `TinkererEchoes` (new), `ZFighterAndroid.tinkerer` (one place that makes him, used by the wandering summon and the
   android start's workshop). Built; not played. Not saved: an echo still owed when the server stops never comes.
+
+## 0.22.47 (2026-11-12): Frostborn troopers in the future (#1335)
+
+- Chrono's future (Los Perrito) now has **Frostborn Troopers**: squads of 2-4 Frostborn in a whole Rig. They keep
+  their distance and fire the Rig's palm blast, and their thrusters catch them when they fall.
+- A three-sided war in the streets: troopers fight the androids, the mechs and the dead; androids and mechs shoot
+  troopers too; and the dead, with nobody living in sight, go for the nearest android or trooper they can see.
+- Troopers are hostile to players too: they shoot on sight, and hurting one draws its whole squad. They fight the
+  Omens too, and the Omens fight them back.
+- A beaten trooper sometimes leaves Rig Salvage (its Rig doesn't drop).
+- Classes: FutureTrooper, FutureTrooperRenderer (new); FutureMachines (squads), FutureAndroid, FutureMech, FutureOmen, FutureFerals
+  (targets); skin from tools/gen_future_machines.py.
+- Built; not played.
