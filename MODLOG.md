@@ -3478,3 +3478,14 @@ Compiled only; not played.
 - **Cut-off parts leak**: a severed head or limb lying on the ground keeps leaking from the cut for 30 seconds, slower and slower (every second at first, every 4.5 s at the end), into a small lasting pool, then stops (`SeveredPart`).
 - **Ragdoll impact smears**: a corpse that hits the ground or a wall hard (thrown, blown, dropped; it lost 0.4+ blocks a tick in one step) leaves a blood blot where it struck and throws a few drops, bigger the harder it hit (`BladeBlood.impact`, through Jaymo's Kitchen's new `CorpseImpacts` hook). Bloodless bodies don't.
 - Built; not played.
+
+## 0.22.79 (2026-11-12): Blood that lingers, rots and stinks
+
+- Blood on you stays until you wash it off properly: a player's blood coat is saved and no longer wears off by itself.
+- Blood ages: fresh, dried after about five minutes, rotten after a day. It darkens as it dries and turns brown-green as it rots, on your body as well as on your gear.
+- Dried blood washes off at less than half the usual rate, and rotten blood at a sixth. Water and rain never take the last of rotten blood off: scrub it at a water cauldron or with a wet sponge.
+- Old blood smells, and rotten blood smells worst of all. It adds to how bad you smell, so beasts notice you sooner and villagers remark on it.
+- Rotten blood draws flies, on you, on mobs and on corpses.
+- Heavy hits throw more blood back on whoever struck, and splash anyone standing close.
+- Classes: core/blood/Bloodied (coat age, stages, washing, reek, noticed, splash-back), core/wet/Smell, client blood/Flies, client wet/ArmourGrimeTextures.
+- Built; not played.
