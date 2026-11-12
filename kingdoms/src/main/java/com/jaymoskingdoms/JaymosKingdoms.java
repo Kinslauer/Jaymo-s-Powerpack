@@ -632,6 +632,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("hunter attachments: {} {}", HunterPack.PACK, HunterBow.CREDITS);
 		HunterPack.register();
 		HunterBow.register();
+		// the settler's kit (farmer and smith perks, the field forge, the lord's rally) and the crews of the camps (their attachments)
+		LOGGER.debug("crew attachments: {} {}", Crews.CREW, Crews.BOSSES);
+		SettlerKit.register();
+		FieldForge.register();
+		Rally.register();
+		Crews.register();
 		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
 		RarePets.register();
 		FairyWonder.register();
