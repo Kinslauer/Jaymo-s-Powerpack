@@ -118,9 +118,9 @@
       "argument": [
         {
           "particle": {
-            "type": "minecraft:snowflake"
+            "type": "jaymospowers:snow_mote"
           },
-          "probability": 0.0015
+          "probability": 0.003
         }
       ],
       "modifier": "append"

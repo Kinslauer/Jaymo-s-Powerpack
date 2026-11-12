@@ -1,6 +1,6 @@
 package com.jaymoskingdoms.client.disasters;
 
-import com.jaymoskingdoms.KitchenCompat;
+import com.jaymoskingdoms.disasters.Mist;
 import com.jaymoskingdoms.disasters.Storms;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -11,7 +11,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -56,14 +55,8 @@ public final class SkiesClient {
 	static final double STREAK_RANGE = 12.0, SPLASH_RANGE = 10.0;
 	/** Indoors a downpour's fog is this much of itself. */
 	static final float INDOORS = 0.35F;
-	/** Mist: from when it gathers to when it is full, and from when it thins to when it is gone (time of day, ticks; it wraps past 24000). */
-	static final int MIST_FROM = 22300, MIST_FULL = 23300, MIST_THINS = 1000, MIST_GONE = 2600;
-	/** Mist by place: swamps, by water, wooded country, anywhere else that rains or snows; and how much of it is left high up. */
-	static final float MIST_SWAMP = 1.0F, MIST_WATER = 0.8F, MIST_WOODS = 0.5F, MIST_OPEN = 0.35F, MIST_HIGH = 0.2F;
-	/** Ground counts as low this far above the sea, and the camera as high up this far above it. */
-	static final int MIST_LOW = 16, MIST_HIGH_FROM = 40;
-	/** Mist by season. */
-	static final float MIST_AUTUMN = 1.3F, MIST_SUMMER = 0.7F;
+	/** Ground counts as low this far above the sea, for the fog banks to lie on it. */
+	static final int BANK_LOW = 16;
 	/** Fog banks a tick at full mist, how near and far they form, their size, and how long they last. */
 	static final float BANKS = 0.5F, BANK_MIN = 8.0F, BANK_MAX = 14.0F;
 	static final double BANK_NEAR = 10.0, BANK_FAR = 56.0;
@@ -126,6 +119,7 @@ public final class SkiesClient {
 		if (level.dimension() == Level.NETHER) {
 			nether(level, eye, random);
 		}
+		DimensionAir.tick(level, eye, random);
 		if (level.dimension() != Level.OVERWORLD) {
 			downpour = ease(downpour, 0.0F, EASE * 4.0F);
 			mist = ease(mist, 0.0F, MIST_EASE * 4.0F);
@@ -145,7 +139,7 @@ public final class SkiesClient {
 		}
 
 		float rain = Math.max(level.getRainLevel(1.0F), Storms.clientRain);
-		mist = ease(mist, mistAt(level, biome, falls, eye, time) * (1.0F - rain), MIST_EASE);
+		mist = ease(mist, mistAt(level, eye) * (1.0F - rain), MIST_EASE);
 		if (mist > 0.05F) {
 			banks(level, eye, random);
 		}
@@ -205,26 +199,9 @@ public final class SkiesClient {
 
 	// ---- morning mist ------------------------------------------------------------------------------------------------
 
-	/** How thick the mist would lie where the camera is, 0..1, before the rain's say. */
-	private static float mistAt(ClientLevel level, Holder<Biome> biome, Biome.Precipitation falls, Vec3 eye, int time) {
-		float hour;
-		if (time >= MIST_FROM) {
-			hour = Mth.clamp((time - MIST_FROM) / (float)(MIST_FULL - MIST_FROM), 0.0F, 1.0F);
-		} else {
-			hour = 1.0F - Mth.clamp((time - MIST_THINS) / (float)(MIST_GONE - MIST_THINS), 0.0F, 1.0F);
-		}
-		if (hour <= 0.0F || falls == Biome.Precipitation.NONE) {
-			return 0.0F;
-		}
-		float place = biome.is(Biomes.SWAMP) || biome.is(Biomes.MANGROVE_SWAMP) ? MIST_SWAMP
-			: biome.is(BiomeTags.IS_RIVER) || biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_BEACH) ? MIST_WATER
-			: biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_JUNGLE) ? MIST_WOODS : MIST_OPEN;
-		if (eye.y > level.getSeaLevel() + MIST_HIGH_FROM) {
-			place *= MIST_HIGH;
-		}
-		String season = KitchenCompat.season(level);
-		float year = "autumn".equals(season) ? MIST_AUTUMN : "summer".equals(season) ? MIST_SUMMER : 1.0F;
-		return Mth.clamp(hour * place * year, 0.0F, 1.0F);
+	/** How thick the mist would lie where the camera is, 0..1, before the rain's say: {@link Mist#base}, the same the server's mobs hide in. */
+	private static float mistAt(ClientLevel level, Vec3 eye) {
+		return Mist.base(level, eye);
 	}
 
 	/** Banks of fog on the low ground and the water round the camera, drifting a little with the wind. */
@@ -239,7 +216,7 @@ public final class SkiesClient {
 			int x = Mth.floor(eye.x + Math.cos(a) * r), z = Mth.floor(eye.z + Math.sin(a) * r);
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 			boolean water = level.getFluidState(new BlockPos(x, y - 1, z)).is(FluidTags.WATER);
-			if (!water && y > level.getSeaLevel() + MIST_LOW || y > eye.y + 8.0) {
+			if (!water && y > level.getSeaLevel() + BANK_LOW || y > eye.y + 8.0) {
 				continue;
 			}
 			StormsClient.fog(level, x + 0.5, y + 0.8 + random.nextDouble() * 1.4, z + 0.5, dx, dz, Mth.lerp(random.nextFloat(), BANK_MIN, BANK_MAX),

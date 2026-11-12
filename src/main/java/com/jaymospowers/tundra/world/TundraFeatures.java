@@ -1,5 +1,7 @@
 package com.jaymospowers.tundra.world;
 
+import com.jaymospowers.ground.GroundRocks;
+import com.jaymospowers.ground.LooseStonesBlock;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,14 +22,14 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluids;
 
 /**
- * What stands on the tundra's rock and in the lichen woodland ({@link TundraWorld}): boulders, the banded iron inside
+ * What stands on the tundra's rock and in the lichen woodland ({@link TundraWorld}): spills of loose stones, the banded iron inside
  * the greenstone belts, lichen patches, shrubs, yellow moss, white ice and dwarfed spruce. Each is a feature with
  * nothing to configure; how often it is placed is in {@code worldgen/placed_feature/tundra_*.json}.
  */
 public final class TundraFeatures {
 	// ---- tuning ----
-	/** Boulder radius, from 1 to this; one in this many is greenstone (smooth basalt) instead of deepslate. */
-	public static final int BOULDER_RADIUS = 3, BOULDER_GREENSTONE_ONE_IN = 4;
+	/** A spill of stones: piles in it (least, most), how far they lie from where it is placed, and how many spills in this many are greenstone (basalt) instead of deepslate. */
+	public static final int BOULDER_PILES_MIN = 4, BOULDER_PILES_MAX = 8, BOULDER_SPREAD = 4, BOULDER_GREENSTONE_ONE_IN = 4;
 	/** A banded vein: its radius, the ore's share of the belt rock inside it (in 10), and how often its heart is raw iron blocks. */
 	public static final int VEIN_RADIUS = 3, VEIN_ORE_SHARE = 6, VEIN_RAW_ONE_IN = 3;
 	/** A lichen patch: how far it reaches, how many tries, and how many of those sprout (the rest is plain lichen for grazers). */
@@ -56,7 +58,11 @@ public final class TundraFeatures {
 		return new BlockPos(at.getX(), level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, at.getX(), at.getZ()), at.getZ());
 	}
 
-	/** A loose boulder of deepslate (now and then greenstone), sunk a little into the ground. */
+	/**
+	 * A spill of loose stones on the bare ground: the pack's own throwable rocks ({@link GroundRocks}), deepslate and now
+	 * and then greenstone (basalt), a heap of four in the middle and lesser piles round it. A punch or a right click picks
+	 * a stone up, and a thrown one hurts (ThrownRocks).
+	 */
 	public record Boulder() implements Feature {
 		public static final MapCodec<Boulder> CODEC = MapCodec.unit(Boulder::new);
 
@@ -67,37 +73,27 @@ public final class TundraFeatures {
 
 		@Override
 		public boolean place(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos origin) {
-			BlockPos top = surface(level, origin);
-			BlockState ground = level.getBlockState(top.below());
-			if (!rock(ground) && !soil(ground)) {
-				return false;
-			}
 			boolean greenstone = random.nextInt(BOULDER_GREENSTONE_ONE_IN) == 0;
-			int radius = 1 + random.nextInt(BOULDER_RADIUS);
-			// (big ones are rarer)
-			if (radius == BOULDER_RADIUS && random.nextBoolean()) {
-				radius--;
-			}
-			BlockPos centre = top.above(radius - 1 - random.nextInt(2));
-			float rx = radius + random.nextFloat() * 0.6F, ry = radius * (0.7F + random.nextFloat() * 0.4F), rz = radius + random.nextFloat() * 0.6F;
-			for (int dx = -radius; dx <= radius; dx++) {
-				for (int dy = -radius; dy <= radius; dy++) {
-					for (int dz = -radius; dz <= radius; dz++) {
-						float d = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) + (dz * dz) / (rz * rz);
-						if (d > 1.0F) {
-							continue;
-						}
-						BlockPos pos = centre.offset(dx, dy, dz);
-						BlockState there = level.getBlockState(pos);
-						if (there.isAir() || there.canBeReplaced() || there.is(BlockTags.DIRT)) {
-							BlockState stone = greenstone ? Blocks.SMOOTH_BASALT.defaultBlockState()
-								: random.nextInt(4) == 0 ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : Blocks.DEEPSLATE.defaultBlockState();
-							level.setBlock(pos, stone, Block.UPDATE_CLIENTS);
-						}
-					}
+			int piles = BOULDER_PILES_MIN + random.nextInt(BOULDER_PILES_MAX - BOULDER_PILES_MIN + 1);
+			int placed = 0;
+			for (int i = 0; i < piles; i++) {
+				BlockPos at = i == 0 ? origin : origin.offset(random.nextInt(BOULDER_SPREAD * 2 + 1) - BOULDER_SPREAD, 0,
+					random.nextInt(BOULDER_SPREAD * 2 + 1) - BOULDER_SPREAD);
+				BlockPos top = surface(level, at);
+				BlockState ground = level.getBlockState(top.below());
+				if (!level.getBlockState(top).isAir() || !rock(ground) && !soil(ground)) {
+					continue;
+				}
+				// (the odd pile of the other stone, so a spill isn't all one)
+				GroundRocks.Variant kind = greenstone == (random.nextInt(5) != 0) ? GroundRocks.Variant.BASALT : GroundRocks.Variant.DEEPSLATE;
+				BlockState rocks = GroundRocks.ROCKS.get(kind).defaultBlockState()
+					.setValue(LooseStonesBlock.ROCKS, i == 0 ? 4 : 1 + random.nextInt(4)).setValue(LooseStonesBlock.WATERLOGGED, false);
+				if (rocks.canSurvive(level, top)) {
+					level.setBlock(top, rocks, Block.UPDATE_CLIENTS);
+					placed++;
 				}
 			}
-			return true;
+			return placed > 0;
 		}
 	}
 

@@ -102,6 +102,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.combat.GuardClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
+		com.jaymospowers.client.tundra.SnowMote.register();
+		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
 		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();

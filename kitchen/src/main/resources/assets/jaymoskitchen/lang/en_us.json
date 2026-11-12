@@ -1013,6 +1013,7 @@
 	"tooltip.jaymoskitchen.waterskin.hot": "Hot off the fire",
 	"tooltip.jaymoskitchen.waterskin.cold": "Chilled",
 	"tooltip.jaymoskitchen.lining.wool": "Lined with wool: keeps the cold out",
+	"tooltip.jaymoskitchen.lining.qiviut": "Lined with qiviut: keeps the cold out, and more of it than wool",
 	"tooltip.jaymoskitchen.lining.rabbit_hide": "Lined with rabbit hide: keeps the heat off",
 	"tooltip.jaymoskitchen.lining.leather": "Lined with leather: a little against cold and heat",
 	"jei.jaymoskitchen.hearth": "Feed it coal, charcoal, logs, planks or sticks. While it burns it warms the closed room around it: the air it can reach through open doors, but not out under the open sky. In a warmed room the cold can't push you past comfortable. A great hall needs more than one.",

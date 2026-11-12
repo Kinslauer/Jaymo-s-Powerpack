@@ -267,6 +267,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();
+		// layered clouds instead of the game's single sheet
+		com.jaymoskingdoms.client.disasters.CloudDecks.register();
 		// 0.7.509: the patrons screen, the boon menu and the boon key
 		PatronKeys.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)

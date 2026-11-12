@@ -76,8 +76,8 @@ public final class WoolClothes {
 		return pieces;
 	}
 
-	/** The share of the cold's penalties {@code entity}'s wool keeps off: 0 (none worn) to 1. */
+	/** The share of the cold's penalties {@code entity}'s wool and qiviut ({@link QiviutClothes}) keep off: 0 (none worn) to 1. */
 	static double warmth(LivingEntity entity) {
-		return Math.min(1.0, worn(entity) * WOOL_COLD_SHARE);
+		return Math.min(1.0, worn(entity) * WOOL_COLD_SHARE + QiviutClothes.worn(entity) * QiviutClothes.QIVIUT_COLD_SHARE);
 	}
 }

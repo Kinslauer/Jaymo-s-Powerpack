@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -57,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Grazes lichen</b> ({@link GrazeGoal}): when it's hungry (every {@link #GRAZE_EVERY} ticks or so) it walks to the
  * game's glow lichen within {@link #GRAZE_RANGE} blocks and eats it off the rock. Only the game's own lichen: a
  * sprouted or snipped one (Jaymo's Powers) is another block, and is left alone.</li>
- * <li><b>Sheds its underwool</b> ({@link #shed}): after each feed it drops string, more the better it lives
+ * <li><b>Sheds its underwool</b> ({@link #shed}): after each feed it drops qiviut (see QiviutClothes), more the better it lives
  * ({@link #comfort}): room about it, a herd of {@link #HERD_LEAST} to {@link #HERD_MOST} others near, open sky by day,
  * its home country ({@link #HOME}). Crowded ({@link #CROWD} others within {@link #CROWD_RANGE}) it sheds nothing.</li>
  * <li><b>Keeps together</b>: {@link HerdPull} draws a straggler back to its herd, and the herd toward lichen.</li>
@@ -85,7 +87,7 @@ public class Muskox extends Animal {
 	static final double GRAZE_REACH = 2.3;
 	static final int GRAZE_ANIM = 40, GRAZE_BITE = 30, GRAZE_RAMP = 6;
 	static final float GRAZE_HEAL = 2.0F;
-	/** String shed after a feed, least and most, by how many of the four comforts it has. */
+	/** Qiviut shed after a feed, least and most, by how many of the four comforts it has. */
 	static final int[] SHED_LEAST = {0, 1, 2, 4, 6}, SHED_MOST = {1, 2, 4, 6, 8};
 	/** A good herd: this many others within this far. Crowded: more than this many within this far. */
 	static final int HERD_LEAST = 2, HERD_MOST = 8, CROWD = 12;
@@ -302,9 +304,9 @@ public class Muskox extends Animal {
 				calves++;
 			}
 		}
-		int string = this.shed(level, near, crowd);
-		if (string > 0) {
-			this.spawnAtLocation(level, new ItemStack(Items.STRING, string));
+		int wool = this.shed(level, near, crowd);
+		if (wool > 0) {
+			this.spawnAtLocation(level, new ItemStack(qiviut(), wool));
 		}
 		if (level.getGameTime() < this.lossUntil && calves == 0 && herd + 1 < HERD_CAP && this.getAge() == 0 && !this.isInLove()) {
 			this.setInLoveTime(LOVE_TICKS);
@@ -313,7 +315,13 @@ public class Muskox extends Animal {
 		}
 	}
 
-	/** How much string it sheds now, with {@code near} others in its herd and {@code crowd} right on top of it. */
+	/** Qiviut, the underwool it sheds (string only if the item isn't registered, which it always is). */
+	private static Item qiviut() {
+		Item qiviut = BuiltInRegistries.ITEM.getValue(JaymosKingdoms.id("qiviut"));
+		return qiviut == null || qiviut == Items.AIR ? Items.STRING : qiviut;
+	}
+
+	/** How much qiviut it sheds now, with {@code near} others in its herd and {@code crowd} right on top of it. */
 	private int shed(ServerLevel level, int near, int crowd) {
 		if (crowd > CROWD) {
 			return 0;

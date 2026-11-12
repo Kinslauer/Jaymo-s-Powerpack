@@ -125,6 +125,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
+		// qiviut, the muskox's underwool, and the clothes knitted from it
+		QiviutClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep

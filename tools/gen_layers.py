@@ -26,6 +26,8 @@ WOOD += ["minecraft:crimson_stem", "minecraft:warped_stem", "minecraft:stripped_
 	"minecraft:bamboo_block", "minecraft:stripped_bamboo_block", "minecraft:bamboo_mosaic"]
 WOOD += [f"{NS}:{p}" for p in ["skyroot_planks", "greatroot_planks", "wisproot_planks", "amberoot_planks",
 	"skyroot_log", "stripped_skyroot_log", "golden_oak_log", "greatroot_log"]]
+# the tundra's yellow moss is cut like wood: the saw and the block in a crafting grid
+WOOD += [f"{NS}:yellow_moss"]
 
 STONE = [f"minecraft:{s}" for s in [
 	"stone", "cobblestone", "mossy_cobblestone", "smooth_stone", "stone_bricks", "mossy_stone_bricks", "cracked_stone_bricks",
