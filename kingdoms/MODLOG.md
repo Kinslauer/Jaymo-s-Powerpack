@@ -11532,3 +11532,11 @@ Mill Charge and the guards' challenge:
 - The same answer is retold for two more bloods: a Warrior-born's band "went back up in its pods" without them, and an Emberborn was lost by the expedition at the Nether's edge.
 - `LifeStoryScreen.story` (a blood can retell its birthplace by who raised it: `story.jaymoskingdoms.as.<heritage>.from_<raised>.born...`), `LifeStory.kit`, `PlayerTemperaments.fromStory`.
 - Built by CI; not played. The new lines have no narrator clips yet.
+
+## 0.7.762 (2026-11-12): Fix: crash on joining with no power while attuned or reading magic
+
+- (Jung) The game crashed a few seconds after joining for a player with no power who is attuned or reads magic
+  ("NullPointerException" in `Mana.blindToMana`, from the clash cinematic's tick). The check for the elemental powers
+  that can't see mana looked a missing power up in a set that throws on a missing value. A player with no power now
+  simply isn't an elemental power user.
+- The same lookup in the story roads (the hermit's road) had the same fault and is fixed the same way.
