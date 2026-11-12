@@ -917,6 +917,42 @@ public final class Bounties {
 		level.playSound(null, ruler.getX(), ruler.getY(), ruler.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 0.8F);
 	}
 
+	// ---- rival parties (docs/Pawn-Plan.md row H4) --------------------------------------------------------------------------
+
+	/** (RivalParties) A rival party has taken bounty {@code key} ({@code hunter}: "party:" and its id): no one else may for a while. */
+	static void takenByParty(MinecraftServer server, String key, String hunter, long now) {
+		Bounty b = all(server).get(key);
+		if (b != null && !b.dead()) {
+			put(server, b.hunted(Optional.of(hunter), now));
+		}
+	}
+
+	/**
+	 * (RivalParties) A party set {@code body} down, downed, by the seat of court {@code court}: the bounty's off the board,
+	 * a player is sentenced as when a hunter brings them in, a crook goes to the cells, and the relic a miniboss fought
+	 * with is the one who brought it in ({@code by}) to carry. False if there was none on them.
+	 */
+	static boolean broughtIn(ServerLevel level, LivingEntity body, int court, @Nullable Mob by) {
+		MinecraftServer server = level.getServer();
+		Bounty b = on(server, body, court);
+		Faction f = Factions.get(server, court);
+		if (b == null || f == null) {
+			return false;
+		}
+		remove(server, b.key());
+		unpinAll(level, b.key());
+		if (body instanceof ServerPlayer target) {
+			sentence(level, target, f, b);
+		} else {
+			if (by != null && Boolean.TRUE.equals(body.getAttached(ARMED)) && !body.getMainHandItem().isEmpty()) {
+				by.setItemSlot(EquipmentSlot.MAINHAND, body.getMainHandItem().copy());
+			}
+			forgetBoss(body);
+			body.discard();
+		}
+		return true;
+	}
+
 	/** A player brought in alive: fined what they carry (up to the price), forgiven their wanted time there, got back on their feet. */
 	private static void sentence(ServerLevel level, ServerPlayer target, Faction court, Bounty b) {
 		// (0.7.490) fined in the court's own coin first, then emeralds
@@ -1069,7 +1105,7 @@ public final class Bounties {
 			if (Downed.isDowned(boss)) {
 				continue;
 			}
-			ServerPlayer foe = null;
+			LivingEntity foe = null;
 			double best = BOSS_SIGHT * BOSS_SIGHT;
 			for (ServerPlayer p : level.players()) {
 				double d = p.distanceToSqr(boss);
@@ -1078,10 +1114,25 @@ public final class Bounties {
 					foe = p;
 				}
 			}
+			// a rival party that took its bounty: it fights them as it would a player (docs/Pawn-Plan.md H4)
+			Bounty hunted = bountyOn(level.getServer(), boss);
+			String party = hunted == null ? "" : hunted.hunter().orElse("");
+			if (party.startsWith("party:")) {
+				for (Villager v : level.getEntitiesOfClass(Villager.class, boss.getBoundingBox().inflate(BOSS_SIGHT), v -> v.isAlive()
+					&& !Downed.isDowned(v) && v.getAttached(RivalParties.PARTY) != null && party.equals("party:" + v.getAttached(RivalParties.PARTY).id()))) {
+					double d = v.distanceToSqr(boss);
+					if (d < best && boss.hasLineOfSight(v)) {
+						best = d;
+						foe = v;
+					}
+				}
+			}
 			if (foe == null) {
 				continue;
 			}
-			bar.addPlayer(foe);
+			if (foe instanceof ServerPlayer fp) {
+				bar.addPlayer(fp);
+			}
 			boss.getLookControl().setLookAt(foe);
 			if (boss.distanceTo(foe) <= BOSS_REACH) {
 				if (now >= SWING.getOrDefault(boss.getUUID(), 0L)) {

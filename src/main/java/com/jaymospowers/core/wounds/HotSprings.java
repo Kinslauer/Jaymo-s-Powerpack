@@ -107,6 +107,8 @@ public final class HotSprings {
 						if (!level.getBlockState(at.above()).isAir()) {
 							level.setBlock(at.above(), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 						}
+						// sulphur crusts round a spring's rim, as it does round real ones
+						com.jaymospowers.ground.PowderMinerals.springRim(level, at, random);
 						continue;
 					}
 					// the water, from the ground down

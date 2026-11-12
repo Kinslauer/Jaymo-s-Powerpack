@@ -282,6 +282,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Pickpocket.register();
 		RogueGambits.register();
 		ChestNoise.register();
+		// footsteps wolves and guards hear: louder running, on gravel or metal, in plate; quieter sneaking, crouched or crawling
+		Footsteps.register();
+		// echoes for the layered sounds (Soundscape)
+		Soundscape.register();
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
 		Lockpicking.register();
@@ -584,6 +588,39 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
+		Comrades.register();
+		Callouts.register();
+		FieldMedics.register();
+		BandLeaders.register();
+		QuickOrders.register();
+		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
+		Grapples.register();
+		LegUps.register();
+		Ambushes.register();
+		Scavengers.register();
+		// (pawn picks patch 3) foe knowledge both ways, leanings that drift
+		FoeLore.register();
+		LeaningDrift.register();
+		CatchingUp.register();
+		Bonds.register();
+		Specialties.register();
+		Powderheads.register();
+		Remarks.register();
+		TableTalk.register();
+		CampSuppers.register();
+		Gestures.register();
+		GroundSeats.register();
+		Loans.register();
+		Veterans.register();
+		BandTallies.register();
+		Wayfinding.register();
+		RivalParties.register();
+		PackUse.register();
+		Parleys.register();
+		Possession.register();
+		Murmur.register();
+		Masterless.register();
 		Menace.register();
 		TwinbladeSmiths.register();
 		IronVeins.register();

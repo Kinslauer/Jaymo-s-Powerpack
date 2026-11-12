@@ -137,7 +137,8 @@ public final class Followers {
 		if (!McaCompat.LOADED || !(v instanceof Villager villager) || !villager.isAlive()) {
 			return false;
 		}
-		return McaBridge.involved(villager, player) || player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player);
+		return McaBridge.involved(villager, player) || Loans.borrowedBy(villager, player) || RivalParties.hiredBy(villager, player)
+			|| player.getUUID().equals(McaCompat.following(villager)) || crewOf(villager, player);
 	}
 
 	/** {@code v} is one of the hands of a ship {@code player} has the helm of (aboard her). */
@@ -169,7 +170,7 @@ public final class Followers {
 			}
 			// (Andy: "Follow and stay should only be there for mca you have a good bond with": an escort, a captive or
 			// a ship's hand takes the other orders, but only family, hired help or a friend follows you or stays put)
-			if ((kind == FOLLOW || kind == STAND) && !McaBridge.involved(v, player)) {
+			if ((kind == FOLLOW || kind == STAND) && !McaBridge.involved(v, player) && !Loans.borrowedBy(v, player) && !RivalParties.hiredBy(v, player)) {
 				if (target >= 0) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.no_bond", v.getDisplayName(),
 						Strangers.TRUSTED_HEARTS).withStyle(ChatFormatting.GRAY));
@@ -178,6 +179,10 @@ public final class Followers {
 			}
 			if (!Languages.understands(player, v)) {
 				Languages.shrug(player, v);
+				continue;
+			}
+			// turned on you, or far gone with the Murmur (docs/Pawn-Plan.md H1, H2)
+			if (Possession.held(v) || Murmur.ignores(v, player)) {
 				continue;
 			}
 			if (v.getVehicle() instanceof Ship ship && Crewmen.tagged(v) && (kind == FOLLOW || kind == FIGHT || kind == PATROL || kind == CLEAR)) {
@@ -201,7 +206,7 @@ public final class Followers {
 	}
 
 	/** {@code v} takes the order, at the spot they stand on. */
-	private static void take(Villager v, ServerPlayer player, int kind) {
+	static void take(Villager v, ServerPlayer player, int kind) {
 		Attention.heed(v);
 		PROGRESS.remove(v.getUUID());
 		if (kind == FOLLOW || kind == FREE) {

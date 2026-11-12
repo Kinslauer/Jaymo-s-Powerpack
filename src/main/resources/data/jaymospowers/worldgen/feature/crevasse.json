@@ -1,0 +1,46 @@
+{
+  "type": "jaymospowers:crevasse",
+  "max_width": 5,
+  "max_length": 14,
+  "min_footprint": 10,
+  "cursor_surface_search_range": 6,
+  "column_surface_search_range": 6,
+  "twistiness": 6.0,
+  "tapering": 0.12,
+  "turn_factor": 0.5,
+  "carve_depth": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 6,
+    "max_inclusive": 12
+  },
+  "fill_depth": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 4,
+    "max_inclusive": 8
+  },
+  "surface_block": "jaymospowers:brittle_ice",
+  "fill_block": "minecraft:powder_snow",
+  "carvable_blocks": {
+    "type": "minecraft:any_of",
+    "predicates": [
+      {
+        "type": "minecraft:matching_block_tag",
+        "tag": "jaymospowers:ice_cave_rock"
+      },
+      {
+        "type": "minecraft:matching_blocks",
+        "blocks": [
+          "minecraft:stone",
+          "minecraft:deepslate",
+          "minecraft:tuff",
+          "minecraft:snow_block",
+          "minecraft:gravel",
+          "minecraft:dirt"
+        ]
+      }
+    ]
+  },
+  "acceptable_barrier": {
+    "type": "minecraft:solid"
+  }
+}

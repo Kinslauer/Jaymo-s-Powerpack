@@ -11,14 +11,20 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -66,6 +72,11 @@ public final class GroundChanges {
 	/** The Nether's veins by tier. */
 	static final List<List<Vein>> NETHER = List.of(
 		List.of(), List.of(), List.of(), List.of(), List.of());
+
+	/** Powers' ice caves and their rock, by id (see {@link #iceCaveRock}); an ore pocket there is deepslate below this height. */
+	static final ResourceKey<Biome> ICE_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", "ice_caves"));
+	static final TagKey<Block> ICE_CAVE_ROCK = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("jaymospowers", "ice_cave_rock"));
+	static final int ICE_POCKET_DEEPSLATE_BELOW = 0;
 
 	/** The highest tier a chunk has been seeded for. Saved with the chunk. */
 	static final AttachmentType<Integer> SEEDED = AttachmentRegistry.create(JaymosKingdoms.id("ground_seeded"), builder -> builder.persistent(Codec.INT));
@@ -168,9 +179,14 @@ public final class GroundChanges {
 			} else if (state.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES)) {
 				ore = vein.deep();
 			}
+			boolean inIce = ore == null && vein.deep() != null && iceCaveRock(level, pos, state);
+			if (inIce) {
+				ore = pos.getY() < ICE_POCKET_DEEPSLATE_BELOW ? vein.deep() : vein.stone();
+			}
 			if (ore != null && !(vein.buried() && exposed(chunk, pos))) {
 				level.setBlock(pos, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
 				laid = true;
+				icePocket(level, chunk, pos);
 				if (y > topY) {
 					topX = x;
 					topY = y;
@@ -190,6 +206,38 @@ public final class GroundChanges {
 			tell(level, vein.stone(), topX, topY, topZ, random);
 		}
 		return laid;
+	}
+
+	/**
+	 * Jaymo's Powers' ice caves: their rock is packed ice and calcite ({@code #jaymospowers:ice_cave_rock}), and ore lies in
+	 * them in pockets of stone (deepslate deep down), so a tier's veins run on through the ice as they do through stone.
+	 * Without Powers there are no ice caves and this is never true.
+	 */
+	private static boolean iceCaveRock(ServerLevel level, BlockPos pos, BlockState state) {
+		return state.is(ICE_CAVE_ROCK) && level.getBiome(pos).is(ICE_CAVES);
+	}
+
+	/**
+	 * The ice cave rock round an ore laid in an ice cave turns to stone (or deepslate): the ore's pocket. Only inside the
+	 * chunk. (An ore laid in stone an earlier ore's pocket left still gets its own pocket.)
+	 */
+	private static void icePocket(ServerLevel level, LevelChunk chunk, BlockPos ore) {
+		ChunkPos cp = chunk.getPos();
+		boolean ice = false;
+		for (Direction d : Direction.values()) {
+			BlockPos near = ore.relative(d);
+			ice |= near.getX() >> 4 == cp.x() && near.getZ() >> 4 == cp.z() && !level.isOutsideBuildHeight(near) && chunk.getBlockState(near).is(ICE_CAVE_ROCK);
+		}
+		if (!ice || !level.getBiome(ore).is(ICE_CAVES)) {
+			return;
+		}
+		for (Direction d : Direction.values()) {
+			BlockPos near = ore.relative(d);
+			if (near.getX() >> 4 != cp.x() || near.getZ() >> 4 != cp.z() || level.isOutsideBuildHeight(near) || !chunk.getBlockState(near).is(ICE_CAVE_ROCK)) {
+				continue;
+			}
+			level.setBlock(near, (near.getY() < ICE_POCKET_DEEPSLATE_BELOW ? Blocks.DEEPSLATE : Blocks.STONE).defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
 	}
 
 	/**

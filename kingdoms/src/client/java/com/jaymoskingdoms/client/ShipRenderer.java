@@ -29,9 +29,16 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.BarrelBlock;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -39,8 +46,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.7.7) A ship under sail, block for block, turned to its heading, heeling in its turns and rocking on the swell
- * (harder in a storm). Chests are drawn as barrels while it sails (a chest is drawn by its block entity, which stays
- * in the hold until the ship anchors).
+ * (harder in a storm). What the game draws with a block entity's own renderer (a chest, a sign's words, a banner) is drawn
+ * from a copy of it made here ({@link Aboard}), from what the server sends of it ({@link Ship#SHOWN}).
  */
 public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State> {
 	/** The swell: its roll and pitch (degrees) in fair weather and in a storm, and how fast it rolls. */
@@ -64,10 +71,34 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		final List<Ship.Piece> oars = new ArrayList<>();
 		final List<float[]> oarAngles = new ArrayList<>();
 		final List<MovingBlockRenderState> oarBlocks = new ArrayList<>();
+		/** Her block entities with renderers of their own: each one's piece and its render state. */
+		final List<Ship.Piece> shownPieces = new ArrayList<>();
+		final List<BlockEntityRenderState> shown = new ArrayList<>();
 	}
+
+	/**
+	 * The client's copies of a ship's block entities, made from her pieces and what the server sent of them, made again
+	 * whenever either changes (a gun loaded, a furnace lit up).
+	 */
+	static final class Aboard {
+		final List<Ship.Piece> of;
+		final @org.jspecify.annotations.Nullable List<Ship.Shown> sent;
+		final Map<Integer, BlockEntity> entities = new HashMap<>();
+
+		Aboard(List<Ship.Piece> of, @org.jspecify.annotations.Nullable List<Ship.Shown> sent) {
+			this.of = of;
+			this.sent = sent;
+		}
+	}
+
+	private static final Map<Ship, Aboard> ABOARD = new WeakHashMap<>();
+	/** A block entity of some mod's that couldn't be copied or drawn aboard is only logged the once. */
+	private static boolean warned;
 
 	/** Each hull's dry hold, as a mask that keeps the sea it floats in from showing inside it (as a boat's does). */
 	private static final Map<Hull, Model.Simple> MASKS = new WeakHashMap<>();
+	/** (salvage) The same with water still in her hold: its cells under that water left out (so the sea shows in them). */
+	private static final Map<Hull, Object[]> FLOODED_MASKS = new WeakHashMap<>();
 
 	public ShipRenderer(EntityRendererProvider.Context context) {
 		super(context);
@@ -92,6 +123,8 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		state.oars.clear();
 		state.oarAngles.clear();
 		state.oarBlocks.clear();
+		state.shownPieces.clear();
+		state.shown.clear();
 		Hull h = ship.hull();
 		if (h == null || !(ship.level() instanceof ClientLevel level)) {
 			return;
@@ -121,9 +154,6 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 				state.oarAngles.add(new float[] {facing.toYRot() + 180.0F, sweep * side, dip});
 				state.oarBlocks.add(loom);
 			}
-			if (shown.getBlock() instanceof ChestBlock) {
-				shown = Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP);
-			}
 			if (furled && shown.getBlock() instanceof SailBlock) {
 				shown = shown.setValue(SailBlock.FURLED, true);
 			}
@@ -141,7 +171,20 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			state.blocks.add(block);
 			state.pieces.add(piece);
 		}
-		state.dryMask = h.masked.length == 0 || ship.foundering() ? null : MASKS.computeIfAbsent(h, ShipRenderer::mask);
+		this.extractShown(ship, h, level, state, partialTicks);
+		int water = ship.flooded();
+		if (h.masked.length == 0 || ship.foundering()) {
+			state.dryMask = null;
+		} else if (water <= 0) {
+			state.dryMask = MASKS.computeIfAbsent(h, hull -> mask(hull, null));
+		} else {
+			Object[] cached = FLOODED_MASKS.get(h);
+			if (cached == null || (int)cached[0] != water) {
+				cached = new Object[] {water, mask(h, ship)};
+				FLOODED_MASKS.put(h, cached);
+			}
+			state.dryMask = (Model.Simple)cached[1];
+		}
 		state.yaw = Mth.rotLerp(partialTicks, ship.yRotO, ship.getYRot());
 		float storm = level.getThunderLevel(partialTicks), t = (ship.tickCount + partialTicks) * SWELL_SPEED;
 		// a bigger ship rocks less
@@ -150,15 +193,98 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		state.pitch = Mth.sin(t * 0.73F + 1.3F) * Mth.lerp(storm, PITCH_FAIR, PITCH_STORM) * size;
 	}
 
+	/** Her chests, signs, banners and the like, drawn by their own renderers from the client's copies of them. */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private void extractShown(Ship ship, Hull h, ClientLevel level, State state, float partialTicks) {
+		List<Ship.Shown> sent = ship.getAttached(Ship.SHOWN);
+		Aboard aboard = ABOARD.get(ship);
+		if (aboard == null || aboard.of != h.pieces || aboard.sent != sent) {
+			aboard = copy(h, sent, level);
+			ABOARD.put(ship, aboard);
+		}
+		if (aboard.entities.isEmpty()) {
+			return;
+		}
+		Minecraft mc = Minecraft.getInstance();
+		BlockEntityRenderDispatcher dispatcher = mc.getBlockEntityRenderDispatcher();
+		Vec3 camera = mc.gameRenderer.mainCamera().position();
+		for (Map.Entry<Integer, BlockEntity> e : aboard.entities.entrySet()) {
+			Ship.Piece piece = h.pieces.get(e.getKey());
+			BlockEntity be = e.getValue();
+			BlockEntityRenderer renderer = dispatcher.getRenderer(be);
+			if (renderer == null) {
+				continue;
+			}
+			Vec3 at = ship.toWorld(piece.x(), piece.y() + 0.5, piece.z());
+			if (at.distanceToSqr(camera) > renderer.getViewDistance() * (double)renderer.getViewDistance()) {
+				continue;
+			}
+			try {
+				BlockEntityRenderState rs = (BlockEntityRenderState)renderer.createRenderState();
+				renderer.extractRenderState(be, rs, partialTicks, camera, null);
+				rs.lightCoords = LightCoordsUtil.getLightCoords(level, BlockPos.containing(at));
+				state.shownPieces.add(piece);
+				state.shown.add(rs);
+			} catch (RuntimeException ex) {
+				if (!warned) {
+					warned = true;
+					com.jaymoskingdoms.JaymosKingdoms.LOGGER.warn("A ship's {} couldn't be drawn under way", piece.blockState().getBlock(), ex);
+				}
+			}
+		}
+	}
+
+	/** The client's copies of her block entities that have a renderer of their own. */
+	private static Aboard copy(Hull h, @org.jspecify.annotations.Nullable List<Ship.Shown> sent, ClientLevel level) {
+		Aboard aboard = new Aboard(h.pieces, sent);
+		Map<Integer, CompoundTag> tags = new HashMap<>();
+		if (sent != null) {
+			for (Ship.Shown s : sent) {
+				tags.put(s.piece(), s.tag());
+			}
+		}
+		BlockEntityRenderDispatcher dispatcher = Minecraft.getInstance().getBlockEntityRenderDispatcher();
+		for (int i = 0; i < h.pieces.size(); i++) {
+			BlockState bs = h.pieces.get(i).blockState();
+			if (!(bs.getBlock() instanceof EntityBlock block)) {
+				continue;
+			}
+			try {
+				BlockEntity be = block.newBlockEntity(BlockPos.ZERO, bs);
+				if (be == null || dispatcher.getRenderer(be) == null) {
+					continue;
+				}
+				be.setLevel(level);
+				CompoundTag tag = tags.get(i);
+				if (tag != null) {
+					be.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
+				}
+				aboard.entities.put(i, be);
+			} catch (RuntimeException ex) {
+				if (!warned) {
+					warned = true;
+					com.jaymoskingdoms.JaymosKingdoms.LOGGER.warn("A ship's {} couldn't be copied to draw", bs.getBlock(), ex);
+				}
+			}
+		}
+		return aboard;
+	}
+
 	/** A box over each column of the hold, from its lowest dry cell to the top of its highest. */
-	private static Model.Simple mask(Hull h) {
+	private static Model.@org.jspecify.annotations.Nullable Simple mask(Hull h, @org.jspecify.annotations.Nullable Ship flooded) {
 		Map<Long, int[]> columns = new HashMap<>();
 		// (0.7.259) and the part-blocks inside her walls (Hull.masked)
 		for (long cell : h.masked) {
 			BlockPos p = BlockPos.of(cell);
+			if (flooded != null && h.dry(p.getX(), p.getY(), p.getZ()) && flooded.wetInHold(h, p.getX(), p.getY(), p.getZ())) {
+				continue;
+			}
 			int[] span = columns.computeIfAbsent(BlockPos.asLong(p.getX(), 0, p.getZ()), k -> new int[] {Integer.MAX_VALUE, Integer.MIN_VALUE});
 			span[0] = Math.min(span[0], p.getY());
 			span[1] = Math.max(span[1], p.getY());
+		}
+		if (columns.isEmpty()) {
+			return null;
 		}
 		MeshDefinition mesh = new MeshDefinition();
 		CubeListBuilder boxes = CubeListBuilder.create();
@@ -183,6 +309,14 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			// a piece's place is its column's middle; a block is drawn from its corner
 			poseStack.translate(p.x() - 0.5F, p.y(), p.z() - 0.5F);
 			collector.submitMovingBlock(poseStack, state.blocks.get(i), state.outlineColor);
+			poseStack.popPose();
+		}
+		BlockEntityRenderDispatcher dispatcher = Minecraft.getInstance().getBlockEntityRenderDispatcher();
+		for (int i = 0; i < state.shown.size(); i++) {
+			Ship.Piece p = state.shownPieces.get(i);
+			poseStack.pushPose();
+			poseStack.translate(p.x() - 0.5F, p.y(), p.z() - 0.5F);
+			dispatcher.submit(state.shown.get(i), poseStack, collector, camera);
 			poseStack.popPose();
 		}
 		for (int i = 0; i < state.oars.size(); i++) {

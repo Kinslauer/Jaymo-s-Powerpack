@@ -276,6 +276,14 @@ public final class KitchenCompat {
 		return LOADED ? Kitchen.drunk(player) : 0;
 	}
 
+	/** How much water a player has by Kitchen's thirst (0 parched to {@link #FULL_WATER}), full without Kitchen. */
+	public static int water(Player player) {
+		return LOADED ? Kitchen.water(player) : FULL_WATER;
+	}
+
+	/** Kitchen's full water, and the water at which it stops you sprinting (its thirsty point). */
+	public static final int FULL_WATER = 20, THIRSTY_WATER = 6;
+
 	/** (0.14.4) Wounds: whether {@code stack} is Kitchen's strong spirits (poured on a wound, it cleans it). */
 	public static boolean isStrongSpirits(net.minecraft.world.item.ItemStack stack) {
 		return LOADED && Kitchen.spirits(stack);
@@ -327,6 +335,10 @@ public final class KitchenCompat {
 
 		static int drunk(Player player) {
 			return com.jaymoskitchen.brewing.Drunk.level(player);
+		}
+
+		static int water(Player player) {
+			return com.jaymoskitchen.climate.Thirst.water(player);
 		}
 
 		static boolean spirits(net.minecraft.world.item.ItemStack stack) {

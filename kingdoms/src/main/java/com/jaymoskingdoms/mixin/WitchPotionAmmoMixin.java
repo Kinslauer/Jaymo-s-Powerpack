@@ -21,7 +21,15 @@ abstract class WitchPotionAmmoMixin {
 	@Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$spendPotion(LivingEntity target, float power, CallbackInfo ci) {
 		Witch self = (Witch) (Object) this;
-		if (self.level().isClientSide() || MobAmmo.spend(self, MobAmmo.Kind.POTIONS)) {
+		if (ci.isCancelled() || !(self.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return;
+		}
+		// a throw she holds back for a friend in the blast (WitchBlastMixin) spends nothing
+		if (!(target instanceof net.minecraft.world.entity.raid.Raider)
+			&& com.jaymoskingdoms.Dynamite.friendNear(level, self, target, target.position(), 4.0, e -> false)) {
+			return;
+		}
+		if (MobAmmo.spend(self, MobAmmo.Kind.POTIONS)) {
 			return;
 		}
 		ci.cancel();

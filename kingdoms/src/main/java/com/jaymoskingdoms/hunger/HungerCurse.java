@@ -507,8 +507,8 @@ public final class HungerCurse {
 			return;
 		}
 		moves.devour++;
+		com.jaymoskingdoms.WorldSounds.devour(level, player);
 		if (moves.devour % 10 == 0) {
-			level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.9F, 0.6F);
 			level.sendParticles(Fx.mote(MEAL_COLOUR, 0.5F), meal.at().x, meal.at().y + 0.3, meal.at().z, 4, 0.3, 0.2, 0.3, 0.0);
 		}
 		if (moves.devour >= DEVOUR_TICKS) {

@@ -94,6 +94,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
+		// a hungry stomach growls, a thirsty throat swallows dry, and those near hear it
+		com.jaymospowers.core.StomachSounds.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
@@ -148,6 +150,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.GroundSticks.init();
 		// (0.20.89) seamed stone and rocky dirt round ore veins
 		com.jaymospowers.ground.OreTells.init();
+		// sulphur and saltpetre: ores, loose crust, and the true black powder
+		com.jaymospowers.ground.PowderMinerals.init();
 		com.jaymospowers.ground.FirstTools.init();
 		// (0.21.29) punching a log drives splinters into the hand
 		com.jaymospowers.ground.Splinters.init();
@@ -189,6 +193,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();
+		// the Ice Caves: the cave biome under the cold lands, its crevasses and large icicles
+		com.jaymospowers.frost.IceCaves.init();
 		// the tundra's blocks and plants, and the glow lichen that eats rock
 		com.jaymospowers.tundra.Tundra.init();
 		com.jaymospowers.tundra.world.TundraWorld.init();
@@ -255,7 +261,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.ember.BurningSteed", "power.heritage.HeritageMoves",
 			"power.cryo.CryoPower", "power.cryo.CryoSlide", "power.cryo.CryoBlizzard", "power.cryo.CryoMoves",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
+			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal", "fishing.LureDepth", "fishing.IceFishing", "fishing.FishLog", "fishing.FishLegends", "fishing.Fishermen",
 			"water.Dives",
 			"alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",

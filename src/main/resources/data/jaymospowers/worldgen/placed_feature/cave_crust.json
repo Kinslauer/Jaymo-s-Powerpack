@@ -1,0 +1,8 @@
+{
+  "feature": "jaymospowers:cave_crust",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

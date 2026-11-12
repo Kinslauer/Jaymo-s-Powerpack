@@ -4,6 +4,7 @@ import com.jaymoskingdoms.disasters.Calamities;
 import com.jaymoskingdoms.disasters.Calamity;
 import com.jaymoskingdoms.disasters.Disasters;
 import com.jaymoskingdoms.disasters.Storms;
+import com.jaymoskingdoms.client.WorldLoop;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -36,6 +37,11 @@ public final class CalamitiesClient {
 	/** A quake's rattle per magnitude (degrees), and how fast it rattles. */
 	static final float QUAKE_DEGREES = 0.9F, QUAKE_SPEED = 2.2F;
 	private static int clock;
+	/** The storm's howl where you stand (eased, sheltered or not), a gust swelling it now and then, and the next gust. */
+	private static float around, gust;
+	private static int nextGust, nextThump;
+	/** The howl's loudness in the open and sheltered, its pitch, and a gust's swell; a quake's rumble bed. */
+	static final float HOWL_OPEN = 0.3F, HOWL_SHELTERED = 0.12F, HOWL_PITCH = 0.5F, GUST_SWELL = 0.6F, RUMBLE = 0.35F;
 	/** How fast they ease (per tick). */
 	static final float EASE = 0.02F;
 	/** Specks a tick at full strength (sand, snow, hail), and how far round the camera they start. */
@@ -76,6 +82,8 @@ public final class CalamitiesClient {
 			snow = ease(snow, 0.0F);
 			hail = ease(hail, 0.0F);
 			quake = Math.max(0.0F, quake - 0.1F);
+			around = ease(around, 0.0F);
+			gust = Math.max(0.0F, gust - 0.02F);
 			if (Calamities.CLIENT.isEmpty() || level.dimension() != Level.OVERWORLD) {
 				return;
 			}
@@ -153,13 +161,25 @@ public final class CalamitiesClient {
 
 	/** (Stage 3) The deep rumble of a quake, and stones and timbers creaking. */
 	private static void rumble(ClientLevel level, Vec3 eye, RandomSource random) {
-		if (clock % 20 == 0) {
-			level.playLocalSound(eye.x, eye.y - 4.0, eye.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 0.25F * quake, 0.25F, false);
+		// a low bed under the whole quake, and deep thumps at uneven spacing
+		WorldLoop.keep("quake", SoundEvents.AMBIENT_BASALT_DELTAS_LOOP.value(), SoundSource.AMBIENT, () -> RUMBLE * Math.min(1.0F, quake / 2.0F),
+			() -> 0.5F + 0.1F * Math.min(1.0F, quake / 2.7F));
+		if (--nextThump <= 0) {
+			nextThump = 12 + random.nextInt(18);
+			level.playLocalSound(eye.x + random.nextGaussian() * 3.0, eye.y - 4.0, eye.z + random.nextGaussian() * 3.0, SoundEvents.GENERIC_EXPLODE.value(),
+				SoundSource.AMBIENT, (0.18F + random.nextFloat() * 0.14F) * quake, 0.2F + random.nextFloat() * 0.1F, false);
 		}
 		if (random.nextInt(8) == 0) {
 			level.playLocalSound(eye.x + random.nextGaussian() * 6.0, eye.y - 2.0, eye.z + random.nextGaussian() * 6.0,
 				random.nextBoolean() ? SoundEvents.DEEPSLATE_BREAK : SoundEvents.WOOD_BREAK, SoundSource.AMBIENT, 0.35F * quake, 0.5F, false);
 		}
+	}
+
+	/** How loud the howl is: full in the open, muffled under a roof, swelling in a gust. */
+	private static double howlVolume() {
+		float open = Math.max(sand, snow);
+		float base = open * HOWL_OPEN + Math.max(0.0F, around - open) * HOWL_SHELTERED;
+		return around < 0.05F ? 0.0 : base * (1.0F + GUST_SWELL * gust);
 	}
 
 	/** (Stage 3) Rattles the view by the quake (with the hurt bob, so your aim never moves). */
@@ -178,10 +198,17 @@ public final class CalamitiesClient {
 
 	/** The wind howling through a sandstorm or blizzard, and hailstones clattering on the ground. */
 	private static void sounds(ClientLevel level, Vec3 eye, RandomSource random, float sandHere, float snowHere) {
-		float howl = Math.max(sandHere, snowHere);
-		if (howl > 0.2F && level.getGameTime() % 50 == 0) {
-			level.playLocalSound(eye.x, eye.y, eye.z, SoundEvents.ELYTRA_FLYING, SoundSource.WEATHER, 0.25F * howl, 0.5F + random.nextFloat() * 0.15F,
-				false);
+		// the howl is a held bed that swells with the storm and with gusts, louder out in the open than under a roof
+		around = ease(around, Math.max(sandHere, snowHere));
+		gust = Math.max(0.0F, gust - 0.02F);
+		if (around > 0.15F && --nextGust <= 0) {
+			nextGust = 40 + random.nextInt(80);
+			gust = (0.4F + random.nextFloat() * 0.6F) * around;
+		}
+		WorldLoop.keep("howl", SoundEvents.ELYTRA_FLYING, SoundSource.WEATHER, CalamitiesClient::howlVolume, () -> HOWL_PITCH + 0.15F * around + 0.2F * gust);
+		if (snowHere > 0.2F && random.nextInt(14) == 0) {
+			level.playLocalSound(eye.x + random.nextGaussian() * 4.0, eye.y, eye.z + random.nextGaussian() * 4.0, SoundEvents.POWDER_SNOW_STEP,
+				SoundSource.WEATHER, 0.25F * snowHere, 0.6F + random.nextFloat() * 0.3F, false);
 		}
 		if (sandHere > 0.2F && random.nextInt(10) == 0) {
 			level.playLocalSound(eye.x + random.nextGaussian() * 4.0, eye.y, eye.z + random.nextGaussian() * 4.0, SoundEvents.SAND_IDLE,

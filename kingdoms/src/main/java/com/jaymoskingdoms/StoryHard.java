@@ -494,7 +494,8 @@ public final class StoryHard {
 		double bestD = Double.MAX_VALUE;
 		for (Faction f : Factions.all(server)) {
 			Underworld.Den den = f.type().isRealm() && !f.fallen() ? Underworld.builtDen(server, f) : null;
-			if (den != null && free.test(den)) {
+			// (not one the watch has shut after a raid: its hatch is nailed down)
+			if (den != null && !den.shutAt(Factions.level(server).getGameTime()) && free.test(den)) {
 				double d = f.seat().distSqr(from);
 				if (d < bestD) {
 					bestD = d;

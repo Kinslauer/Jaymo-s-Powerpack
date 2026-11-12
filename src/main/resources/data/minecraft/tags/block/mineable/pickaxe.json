@@ -154,6 +154,11 @@
     "jaymospowers:gravity_compressor",
     "jaymospowers:banded_iron_ore",
     "jaymospowers:white_ice",
-    "jaymospowers:gas_vent"
+    "jaymospowers:gas_vent",
+    "jaymospowers:sulphur_ore",
+    "jaymospowers:deepslate_sulphur_ore",
+    "jaymospowers:nether_sulphur_ore",
+    "jaymospowers:saltpetre_ore",
+    "jaymospowers:sandstone_saltpetre_ore"
   ]
 }

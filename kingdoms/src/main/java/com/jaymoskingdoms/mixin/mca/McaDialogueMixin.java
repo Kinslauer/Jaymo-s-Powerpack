@@ -241,6 +241,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.FisherTalk.ANSWER.equals(answer)) {
+			// Powers' fishing: the fisherman's screen (selling fish by weight, the contest, the water's legend)
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.FisherTalk.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.StarFolk.ANSWER.equals(answer)) {
 			// (0.7.384) asked about the stars: a few words about the sky, and the star charts for sale on the talk screen
 			villager.getInteractions().stopInteracting();

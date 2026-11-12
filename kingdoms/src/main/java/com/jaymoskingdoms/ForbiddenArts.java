@@ -24,7 +24,7 @@ public final class ForbiddenArts {
 	static final int DEATH_CORRUPTION = 1, BLOOD_CORRUPTION = 2, RAISING_CORRUPTION = 2;
 
 	/** The forbidden spells a scroll or a staff can hold. */
-	static final List<String> DEATH_SPELLS = List.of("raising", "draining", "blight", "whispers", "speak_with_dead", "deaths_door");
+	static final List<String> DEATH_SPELLS = List.of("raising", "draining", "blight", "whispers", "speak_with_dead", "deaths_door", "dominion");
 	static final List<String> BLOOD_SPELLS = List.of("hemorrhage", "blood_grip", "frenzy");
 
 	private ForbiddenArts() {

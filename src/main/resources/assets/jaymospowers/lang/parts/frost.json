@@ -19,5 +19,6 @@
 	"item.minecraft.potion.effect.freezing": "Potion of Freezing",
 	"item.minecraft.splash_potion.effect.freezing": "Splash Potion of Freezing",
 	"item.minecraft.lingering_potion.effect.freezing": "Lingering Potion of Freezing",
-	"item.minecraft.tipped_arrow.effect.freezing": "Arrow of Freezing"
+	"item.minecraft.tipped_arrow.effect.freezing": "Arrow of Freezing",
+	"biome.jaymospowers.ice_caves": "Ice Caves"
 }

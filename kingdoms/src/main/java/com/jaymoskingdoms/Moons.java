@@ -455,10 +455,7 @@ public final class Moons {
 				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, r.ground),
 					r.x, r.top + 0.1, r.z, 6, 0.3, 0.05, 0.3, 0.1);
 			}
-			if (r.ticks % 12 == 0) {
-				level.playSound(null, r.x, r.top, r.z, r.ticks < RISE_TICKS / 2 ? SoundEvents.GRAVEL_BREAK : SoundEvents.ROOTED_DIRT_BREAK,
-					SoundSource.HOSTILE, 0.8F, 0.7F + level.getRandom().nextFloat() * 0.2F);
-			}
+			WorldSounds.rising(level, System.identityHashCode(r), new net.minecraft.world.phys.Vec3(r.x, r.top, r.z));
 			if (r.ticks >= RISE_TICKS) {
 				it.remove();
 				free(r);

@@ -140,8 +140,8 @@ public final class ValorWings {
 			} else {
 				live.grounded = 0;
 			}
-			if (live.flying && sp.tickCount % 12 == 0) {
-				sp.level().playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.35F, 1.2F);
+			if (live.flying && sp.level() instanceof net.minecraft.server.level.ServerLevel server) {
+				WorldSounds.wingbeat(server, sp, "valor_wings", 9, 15, SoundSource.PLAYERS, SoundEvents.PHANTOM_FLAP, 0.35F, 1.2F);
 			}
 		}
 		boolean guarding = skyward(data) && (live.reinforced || live.armed);

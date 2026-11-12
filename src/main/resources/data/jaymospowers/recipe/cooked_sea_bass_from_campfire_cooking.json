@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.35,
+  "ingredient": "jaymospowers:sea_bass",
+  "result": {
+    "id": "jaymospowers:cooked_sea_bass"
+  }
+}

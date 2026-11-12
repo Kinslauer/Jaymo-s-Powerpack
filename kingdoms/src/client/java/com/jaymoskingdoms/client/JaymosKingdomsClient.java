@@ -149,6 +149,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.82: the world tier screen (from the skill screen, or its own key)
 		TierScreen.register();
 		FollowersScreen.register();
+		QuickOrderKeys.register();
+		TableTalkScreen.register();
+		LoanScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
@@ -244,6 +247,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.spirits.BarrageClient.register();
 		// villagers' heritage looks (MCA's and the folk)
 		VillagerLooks.register();
+		DarkEyes.register();
 		// (0.7.490) the Beastfolk's ears, tails, wings and legs, the fae's wings and sprigs (players and villagers)
 		BeastParts.register();
 		FrostTechLayer.register();
@@ -266,6 +270,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.dragons.DragonsClient.register();
 		// 0.6.12: storm clouds, tornado funnels and the rain under a storm
 		com.jaymoskingdoms.client.disasters.StormsClient.register();
+		// the sea's own weather: fog banks, whirlpools, the glowing tide
+		SeaEventsClient.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire

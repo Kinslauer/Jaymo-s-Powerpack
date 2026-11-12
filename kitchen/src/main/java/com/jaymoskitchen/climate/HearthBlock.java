@@ -130,8 +130,7 @@ public class HearthBlock extends BaseEntityBlock {
 			level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y + 1.1, z, 0.0, 0.05, 0.0);
 		}
 		if (random.nextInt(10) == 0) {
-			level.playLocalSound(x, y, z, net.minecraft.sounds.SoundEvents.CAMPFIRE_CRACKLE, net.minecraft.sounds.SoundSource.BLOCKS,
-				0.6F, 0.9F + random.nextFloat() * 0.2F, false);
+			com.jaymoskitchen.sound.KitchenSounds.fireLocal(level, x, y, z);
 		}
 	}
 }
