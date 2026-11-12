@@ -206,7 +206,9 @@ public final class Mana {
 	 * whether they are attuned or read magic, no one's mana glow, wings, spirit or mage hands shows on their screen.
 	 */
 	public static boolean blindToMana(Player viewer) {
-		return ELEMENTAL.contains(PowersCompat.power(viewer));
+		// Set.of throws on a null lookup, and a player with no power has a null one
+		String power = PowersCompat.power(viewer);
+		return power != null && ELEMENTAL.contains(power);
 	}
 
 	/** Whether {@code viewer} sees others' mana and spirits: attuned or reading magic, and not an elemental power user. */
