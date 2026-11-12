@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Darktide overhaul and Resonance into Blindness (proposal, waiting on Andy's picks)
 branch: claude/project-thread-qtqlao
 with: 
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 Nothing built.
+- 2026-11-12 03:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
