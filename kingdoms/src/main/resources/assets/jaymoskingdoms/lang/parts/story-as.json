@@ -210,9 +210,9 @@
   "story.jaymoskingdoms.as.warriorborn.raised.healers": "The warband's bone-setters",
   "story.jaymoskingdoms.as.warriorborn.raised.healers.tale": "Your family set the warband's bones after every fight, and you learned what the body needs to mend.",
   "story.jaymoskingdoms.as.warriorborn.raised.healers.short": "The warband's bone-setters.",
-  "story.jaymoskingdoms.as.warriorborn.raised.foundling": "Nobody: you were left behind on the march",
-  "story.jaymoskingdoms.as.warriorborn.raised.foundling.tale": "Nobody claimed you. You were left behind when the warband broke camp, and raised by whoever was kind that year, which was not many once they saw the tail.",
-  "story.jaymoskingdoms.as.warriorborn.raised.foundling.short": "Nobody. Left behind on the march.",
+  "story.jaymoskingdoms.as.warriorborn.raised.foundling": "Nobody: the band's pods left without you",
+  "story.jaymoskingdoms.as.warriorborn.raised.foundling.tale": "Nobody claimed you. The band went back up in its pods one night and you were not in one, and you were raised by whoever was kind that year, which was not many once they saw the tail.",
+  "story.jaymoskingdoms.as.warriorborn.raised.foundling.short": "Nobody. The pods left without you.",
   "story.jaymoskingdoms.as.warriorborn.childhood.fights.tale": "As a child you trained like your life depended on it, because in the camp it did: running, lifting, striking, until your hands bled and you went again.",
   "story.jaymoskingdoms.as.earthling.raised.sub": "In the city of towers, everyone had a trade. What was your family's?",
   "story.jaymoskingdoms.as.earthling.raised.wizard": "A tower scholar",
@@ -285,5 +285,13 @@
   "story.jaymoskingdoms.as.nightborn.raised.healers.short": "Healers who worked by lantern.",
   "story.jaymoskingdoms.as.stoneborn.raised.healers": "Healers of the hold",
   "story.jaymoskingdoms.as.stoneborn.raised.healers.tale": "Your family set the bones the mountain broke, and you learned what the body needs to mend.",
-  "story.jaymoskingdoms.as.stoneborn.raised.healers.short": "Healers of the hold."
+  "story.jaymoskingdoms.as.stoneborn.raised.healers.short": "Healers of the hold.",
+  "story.jaymoskingdoms.as.frostborn.raised.foundling": "Nobody here: you came from Hail alone",
+  "story.jaymoskingdoms.as.frostborn.raised.foundling.tale": "Nobody raised you here. You are a traveller, come down from Hail alone on one of your people's ships, with their glass on your brow and no one on this world who knows your name.",
+  "story.jaymoskingdoms.as.frostborn.raised.foundling.short": "A traveller, straight from Hail.",
+  "story.jaymoskingdoms.as.frostborn.from_foundling.born.north.tale": "You were born on Hail, far past the sun, where the cold never lifts and none of your people would have it any other way.",
+  "story.jaymoskingdoms.as.frostborn.from_foundling.born.north.short": "Hail, far past the sun.",
+  "story.jaymoskingdoms.as.emberborn.raised.foundling": "Nobody: the expedition lost you",
+  "story.jaymoskingdoms.as.emberborn.raised.foundling.tale": "Nobody claimed you. The expedition lost you somewhere at the Nether's edge, and you were raised by the heat and by whoever was kind that year.",
+  "story.jaymoskingdoms.as.emberborn.raised.foundling.short": "Nobody. Lost by the expedition."
 }

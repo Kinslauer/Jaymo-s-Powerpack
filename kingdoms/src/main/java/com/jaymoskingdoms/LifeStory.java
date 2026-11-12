@@ -2191,6 +2191,10 @@ public final class LifeStory {
 		if (raised.key.equals("merchants")) {
 			give(player, purse(player, MERCHANT_SILVER));
 		}
+		if (raised.key.equals("foundling") && Heritage.of(player) == Heritage.Kind.FROSTBORN) {
+			// a Frostborn nobody raised here is a traveller straight from Hail (Andy), and wears their people's glass
+			equip(player, FrostTech.scouter());
+		}
 		if (raised.key.equals("starwrights")) {
 			// their people's work goes with them: a scouter on the brow, and a made arm against the day they need one
 			equip(player, FrostTech.scouter());
