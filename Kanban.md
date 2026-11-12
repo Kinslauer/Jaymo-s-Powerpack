@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 05:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 05:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,11 +13,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/legless-crawl-cane-crutch|legless-crawl-cane-crutch]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/legless-crawl-cane-crutch|legless-crawl-cane-crutch]] · 💻 Odysseus · #1354 · in-review
 
 
 ## Needs Andy
