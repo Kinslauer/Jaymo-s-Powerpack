@@ -21,7 +21,8 @@ import org.jspecify.annotations.Nullable;
  * earns (a task set, a style learned, a task for the next levels, or only encouragement) and the teacher says it, in
  * bubbles, never chat.</li>
  * <li><b>Kills</b> of our own folk that Powers can't tell apart (an orc, a camp's chief, a bandit) are reported to it
- * ({@link #slain}); it counts them only when they were killed with fist gear in hand.</li>
+ * ({@link #slain}), and so is a blow that leaves one downed, since they go down rather than die; it counts them only
+ * with fist gear in hand.</li>
  * </ul>
  * Without Jaymo's Powers nobody offers it.
  */
@@ -39,6 +40,13 @@ public final class BoxingTeachers {
 	public static void register() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player) {
+				slain(player, entity);
+			}
+		});
+		// our folk go down rather than die (Powers' Downed): the blow that leaves one on the ground counts too
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (damageTaken > 0.0F && entity.isAlive() && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player
+				&& PowersCompat.downedState(entity) > 0) {
 				slain(player, entity);
 			}
 		});

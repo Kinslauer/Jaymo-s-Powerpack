@@ -121,7 +121,7 @@ public final class BoxingClient {
 	private static void drawStyle(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (player == null || minecraft.options.hideGui || !Boxing.boxing(player)) {
+		if (player == null || !Boxing.boxing(player)) {
 			return;
 		}
 		Boxing.Style style = Boxing.style(player);
