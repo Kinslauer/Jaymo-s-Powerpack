@@ -1421,3 +1421,12 @@ under the mountains; the Hollow, who carry the grave's cold; goblins and orcs; t
 the lizard, feline and spider kin. The five human bloods need a lantern. Folk of the road learn to crouch behind a
 wall, to take a watch by the fire, to walk softly in the dark and to catch their breath where they can; the camps
 learn it the hard way. Wolves, bandits and the pack thieves who rob sleepers come to any camp nobody watches.
+
+(new) **Great lairs and Halvard the Hollow** (Claude's placement for the fifth edition picks, patch 4, 2026-11-12,
+for Andy to approve). A great beast or a great sorcerer poisons the land it holds: round a wild dragon's den, the
+minotaur's labyrinth or a necromancer's crypt the springs go foul, the herds thin, the birds stop singing, sleep
+brings bad dreams and the crops wither, and all of it lifts when the master dies. The worst of the death school's
+sorcerers is **Halvard the Hollow**, who cut out his own heart and hid it in a soul urn so that he could not die. He
+sleeps in a crypt under a mossy hatch, far from any village, and gets up again days after anyone kills him, until
+someone finds the urn under its cairn and breaks it. The sexton who buried him kept a tally of where; the villages
+for miles around still talk.
