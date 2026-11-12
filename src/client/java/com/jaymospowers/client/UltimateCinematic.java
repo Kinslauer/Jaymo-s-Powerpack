@@ -338,6 +338,9 @@ public final class UltimateCinematic {
 			case UltimateFilm.SPEAKER -> {
 				return speaker(self, subject, partialTicks, t, eyes);
 			}
+			case UltimateFilm.MEETING -> {
+				return com.jaymospowers.client.power.web.WebMeetingClient.view(self, at, t, side);
+			}
 			default -> {
 				return null;
 			}

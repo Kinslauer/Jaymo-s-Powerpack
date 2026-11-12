@@ -199,6 +199,7 @@ public final class WebPowerClient implements PowerClient {
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		WebShootersClient.init();
+		WebMeetingClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		WebSenseGlance.init();
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves

@@ -54,6 +54,8 @@ public final class UltimateFilm {
 	public static final int ZOOM = 0, SKYWARD = 1, CRANE = 2, ORBIT = 3, PROFILE = 4, TRACK = 5, PUSH_IN = 6, CHASE = 7, DUTCH = 8, CUTS = 9;
 	/** (0.20.93) In on a speaker, rising to the words over their head (see the list above). */
 	public static final int SPEAKER = 11;
+	/** The first meeting with the symbiote ({@code WebMeeting}): a two-shot on the host and the figure facing them, then over the host's shoulder on it, then wide again; always on one side of the line between them. {@code at} is the figure's feet. */
+	public static final int MEETING = 12;
 	/**
 	 * (0.20.9) {@code MORPH}: letterboxed, it zooms on each changing part of {@code caster} in turn (the {@link Play#parts} list, in
 	 * order), holds while that part grows from the base alien into the Ultimate, then pulls back to the whole new body.
