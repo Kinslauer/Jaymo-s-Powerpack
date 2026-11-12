@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: SWGC swordplay picks (23 rows), patch 1 of 6: the armed body
 branch: claude/project-thread-4d9bz2
 with: Claude (cloud)
@@ -42,3 +42,5 @@ first pass. Patches 2-6 not started.
 - 2026-11-12: patch 5 pushed: open cuts in `client/wounds/DressingsLayer` (`Bleeding.BLEEDING` synced to all), `combat/BladeSounds` + `sounds/blade/`, Kingdoms `PowersCompat.bladeSwing`. Next: patch 6 (reel, tear, orders, helm, splash; energy blade waits on Andy).
 - 2026-11-12: patch 6 pushed: Powers `power/gravity/GravityReel`, rip-anything in `GravityPower.startRip`, `BlockCluster.hardBonus`, `client/GreatHelmView`, `texts/splashes.txt`; Kingdoms `Followers` + `client/FollowersScreen`, `spirits/HandGrip` reel. All six patches are up on PR #1341; only the energy blade waits on Andy.
 - 2026-11-12: energy blade pushed (Andy: Z Fighters): `ZFighterKiWeapon` sounds + `deflect`, hook in `ZFighterGuard`, ki weapon counted in `ArmedPose`. All 23 rows are now on PR #1341.
+- 2026-11-12: PR #1341 merged (squash b1188602) on Andy's "merge". Done; follow-ups start from master.
+- 2026-11-12 04:19 PR #1341 is merged into master; moved to Agents/Done.
