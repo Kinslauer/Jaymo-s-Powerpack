@@ -14,4 +14,4 @@ pr: 1332
 **Build:** costumed gifted NPCs (Kingdoms gifted villagers + Powers costumes), some vigilantes, some villains; villagers dislike them. Uncostumed gifted villagers use powers for chores (douse fires, cool larders and homes). Lore: Lore.md "The powers".
 
 ## Notes
-- 2026-11-11 22:26 PR #1332 is merged into master; moved to Inbox/Done.
+- 2026-11-12 01:45 PR #1332 is merged into master; moved to Inbox/Done.
