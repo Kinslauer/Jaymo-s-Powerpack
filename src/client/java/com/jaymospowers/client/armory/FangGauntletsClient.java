@@ -78,9 +78,9 @@ public final class FangGauntletsClient {
 	static final float SLIM_GEAR = 0.8F;
 	/** A cestus's band over the knuckles: from this far down, and this far proud. */
 	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.8F;
-	/** Bracers: the guard up the forearm, from the elbow down (so it turns with a bent forearm), this long, and this far proud. */
-	static final float BRACER_TOP = 5.0F, BRACER_GROW = 0.6F;
-	static final int BRACER_LENGTH = 5;
+	/** Bracers: a band round the wrist, starting below the elbow (pixels down the arm), this long, and this far proud. The hand's end is left bare. */
+	static final float BRACER_TOP = 6.0F, BRACER_GROW = 0.6F;
+	static final int BRACER_LENGTH = 3;
 	// ================================================================================================================
 
 	/** Bits on a render state: the right arm wears a gauntlet, the left does, and (4) they're in the guard (no attack swinging). */
