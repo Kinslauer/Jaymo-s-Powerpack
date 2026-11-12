@@ -34,7 +34,7 @@ public final class BladeThrow {
 			thrown.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
 		level.playSound(null, thrown, SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.9F, 0.9F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F, 0.8F);
+		BladeSounds.swing(level, player.getEyePosition(), BladeSounds.HEAVY, 0.8F, 1.1F);
 		return true;
 	}
 }

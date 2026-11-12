@@ -5,8 +5,6 @@ import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -70,6 +68,6 @@ public final class Swat {
 	/** The guard's blade is seen to swing at what it met. */
 	public static void swing(ServerPlayer player) {
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.5F);
+		BladeSounds.swing(player.level(), player.getEyePosition(), BladeSounds.weight(player.getMainHandItem()), 0.6F, 1.2F);
 	}
 }

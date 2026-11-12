@@ -149,6 +149,10 @@ public final class ClashFx {
 			}
 		} else if (steel || attacker == null) {
 			sparks(level, at, toward, sparks, scale);
+			// steel on steel rings (our own clashes, under whatever the guard itself plays)
+			if (guard.has(DataComponents.WEAPON)) {
+				BladeSounds.clash(level, at, sparks >= PARRY_SPARKS ? 0.8F : 0.55F, 1.0F);
+			}
 		} else if (!guard.isEmpty()) {
 			// a fist or a claw on steel: a few
 			sparks(level, at, toward, Math.max(2, sparks / 3), scale * 0.8F);

@@ -190,7 +190,7 @@ final class SpecialCuts {
 					PowersCompat.tellIncoming(player, foe, form.windUp(), true);
 				}
 			}
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.5F);
+			whoosh(level, player, 2, 0.8F, 0.8F);
 		} else if (form == HURLED_BLADE) {
 			PowersCompat.cutPose(player, PowersCompat.CUT_HURL, form.windUp() + HURL_SNAP_TICKS, 0);
 		}
@@ -215,6 +215,13 @@ final class SpecialCuts {
 			hurledBlade(level, player, form, rank);
 		} else if (form == MILL_CHARGE) {
 			millCharge(level, player, rank);
+		}
+	}
+
+	/** A blade's swing at {@code player}: Powers' own sound of that weight (0 light, 1 medium, 2 heavy), or vanilla's sweep without Powers. */
+	private static void whoosh(ServerLevel level, ServerPlayer player, int weight, float volume, float pitch) {
+		if (!PowersCompat.bladeSwing(level, player.getEyePosition(), weight, volume, pitch)) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, volume, pitch);
 		}
 	}
 
@@ -268,7 +275,7 @@ final class SpecialCuts {
 		arcTrail(level, player, look, Math.acos(WHEEL_ARC), reach * 0.55, 1.1);
 		Vec3 front = player.position().add(look.scale(reach * 0.7));
 		level.sendParticles(ParticleTypes.SWEEP_ATTACK, front.x, player.getY() + 1.2, front.z, 3, 0.6, 0.1, 0.6, 0.0);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.2F, 0.55F);
+		whoosh(level, player, 2, 1.2F, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.7F);
 		// no guard parries this: Powers reads the tag off the one who strikes
 		boolean tagged = player.addTag(PowersCompat.UNPARRYABLE_TAG);
@@ -380,8 +387,7 @@ final class SpecialCuts {
 		Vec3 dir = turned(flatLook(player), CUT_TURN[which]);
 		double reach = Forms.reach(EIGHT_REACH, spin.rank);
 		arcTrail(level, player, dir, Math.acos(EIGHT_ARC), reach * 0.75, which == 1 ? 0.9 : 1.3);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.6F,
-			1.3F + 0.15F * which);
+		whoosh(level, player, 1, 0.6F, 1.0F + 0.08F * which);
 		for (LivingEntity foe : inArc(level, player, reach, EIGHT_ARC, dir)) {
 			CombatArts.strike(level, player, foe, Forms.damage(player, EIGHT_DAMAGE, spin.rank));
 			level.sendParticles(ParticleTypes.SWEEP_ATTACK, foe.getX(), foe.getY(0.6), foe.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -432,7 +438,7 @@ final class SpecialCuts {
 		Vec3 dir = flatLook(player);
 		MILLS.put(player.getUUID(), new Mill(level.getGameTime() + MILL_TICKS, dir, rank));
 		PowersCompat.cutPose(player, PowersCompat.CUT_MILL, MILL_TICKS + 3, 0);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.8F);
+		whoosh(level, player, 2, 1.0F, 1.0F);
 	}
 
 	private static void tickMills(MinecraftServer server) {
@@ -459,7 +465,7 @@ final class SpecialCuts {
 			player.syncVelocity = true;
 			arcTrail(level, player, turned(mill.dir, (float)((level.getGameTime() % 4) * 90)), Math.PI / 3.0, 1.4, 1.1);
 			if (level.getGameTime() % 3 == 0) {
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.2F);
+				whoosh(level, player, 2, 0.5F, 1.15F);
 			}
 			for (LivingEntity foe : Forms.targets(level, player, player.getBoundingBox().inflate(MILL_REACH, 0.5, MILL_REACH))) {
 				if (mill.landed.contains(foe)) {

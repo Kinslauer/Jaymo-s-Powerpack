@@ -52,3 +52,11 @@ of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
   body while they're on, as it does for the Fang Gauntlets' guard.
 - Compiled; not played. Every angle is a first pass set without seeing it in game: the knobs are at the top of
   `ArmedPose` and `ParryPose`.
+- **Cuts you can see** (Andy: "the cuts are real and can be healed with bandages"): a bleeding part now shows red
+  gashes on the body, for everyone who looks (players and humanoid mobs; `DressingsLayer`, the bleeding parts are now
+  synced to all). The mark is the wound itself: a bandage or rag covers it, and it is gone when the cut closes. Armour
+  and costumes hide it as they hide dressings. Our own texture (`tools/gen_cut_marks.py`).
+- **Our own blade sounds** (`combat/BladeSounds`, `tools/gen_blade_sounds.py`): five swings each for light, medium and
+  heavy weapons, six clashes of steel and three draws, one picked at random each time with a slightly bent pitch. They
+  play for the draw, the arrow swat, the both-blades cut, a thrown blade, and steel meeting steel on a guard. Better
+  Combat's swing sounds are untouched. Synthesised, not yet heard in game.

@@ -37,3 +37,4 @@ Mill Charge and the guards' challenge:
   them too.
 - A guard who walks up to challenge you ("Halt!") levels their polearm at you until they have spoken (`Levelled`; Powers
   draws it).
+- Wheel Cut, Figure Eight, Hurled Blade and Mill Charge play Powers' new blade swings instead of the vanilla sweep.

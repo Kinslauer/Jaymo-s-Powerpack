@@ -3215,7 +3215,7 @@ public final class PowersCompat {
 	public static final int CUT_WHEEL = 0, CUT_EIGHT = 1, CUT_HURL = 2, CUT_BOTH = 3, CUT_MILL = 4;
 
 	private static boolean lookedForCuts;
-	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade, styleSet, styleClear;
+	private static java.lang.invoke.@Nullable MethodHandle feathers, cutPose, endCutPose, hurlBlade, styleSet, styleClear, bladeSwing;
 
 	private static void lookForCuts() {
 		if (lookedForCuts) {
@@ -3249,6 +3249,12 @@ public final class PowersCompat {
 			styleClear = lookup.findStatic(style, "clear", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no fighting styles (older Powers?)", e);
+		}
+		try {
+			bladeSwing = lookup.findStatic(Class.forName("com.jaymospowers.combat.BladeSounds"), "swing", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, int.class, float.class, float.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no blade sounds (older Powers?)", e);
 		}
 	}
 
@@ -3334,5 +3340,22 @@ public final class PowersCompat {
 		} catch (Throwable ignored) {
 			// the style is only its trades
 		}
+	}
+
+	/**
+	 * A blade's swing at {@code at} in Powers' own sounds ({@code weight}: 0 light, 1 medium, 2 heavy). False without
+	 * Powers, and the caller plays vanilla's sweep.
+	 */
+	public static boolean bladeSwing(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, int weight, float volume, float pitch) {
+		lookForCuts();
+		try {
+			if (bladeSwing != null) {
+				bladeSwing.invoke(level, at, weight, volume, pitch);
+				return true;
+			}
+		} catch (Throwable ignored) {
+			// only a sound
+		}
+		return false;
 	}
 }

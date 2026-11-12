@@ -1407,18 +1407,16 @@
 		]
 	},
 	"armed.draw": {
+		"subtitle": "subtitles.jaymospowers.armed.draw",
 		"sounds": [
 			{
-				"name": "minecraft:item/armor/equip_iron1",
-				"volume": 0.8
+				"name": "jaymospowers:blade/draw_1"
 			},
 			{
-				"name": "minecraft:item/armor/equip_iron3",
-				"volume": 0.8
+				"name": "jaymospowers:blade/draw_2"
 			},
 			{
-				"name": "minecraft:item/armor/equip_iron5",
-				"volume": 0.8
+				"name": "jaymospowers:blade/draw_3"
 			}
 		]
 	},
@@ -1514,6 +1512,89 @@
 		"sounds": [
 			{
 				"name": "jaymospowers:eden/diskwing_hurt"
+			}
+		]
+	},
+	"armed.swing.light": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_light_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_light_5"
+			}
+		]
+	},
+	"armed.swing.medium": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_medium_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_medium_5"
+			}
+		]
+	},
+	"armed.swing.heavy": {
+		"subtitle": "subtitles.jaymospowers.armed.swing",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/swing_heavy_1"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_2"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_3"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_4"
+			},
+			{
+				"name": "jaymospowers:blade/swing_heavy_5"
+			}
+		]
+	},
+	"armed.clash": {
+		"subtitle": "subtitles.jaymospowers.armed.clash",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/clash_1"
+			},
+			{
+				"name": "jaymospowers:blade/clash_2"
+			},
+			{
+				"name": "jaymospowers:blade/clash_3"
+			},
+			{
+				"name": "jaymospowers:blade/clash_4"
+			},
+			{
+				"name": "jaymospowers:blade/clash_5"
+			},
+			{
+				"name": "jaymospowers:blade/clash_6"
 			}
 		]
 	}
