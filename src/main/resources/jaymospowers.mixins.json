@@ -48,6 +48,7 @@
 		"GuardOverTalkMixin",
 		"GuardRiposteMixin",
 		"DivineCounterMixin",
+		"AlchemyPicksHurtMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

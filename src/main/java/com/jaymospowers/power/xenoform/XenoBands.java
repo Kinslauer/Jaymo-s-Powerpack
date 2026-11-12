@@ -168,6 +168,22 @@ public final class XenoBands {
 		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.4F);
 	}
 
+	/**
+	 * {@code player} gives the power up: the band comes off with every alien it learned, their power is gone, and the band
+	 * is returned (loose again) for the caller to leave behind.
+	 */
+	public static ItemStack surrender(ServerPlayer player) {
+		List<String> aliens = XenoformState.band(player).unlocked();
+		boolean rival = XenoformState.rival(player);
+		BandUpgrades.Upgrades upgrades = player.getAttached(BandUpgrades.UPGRADES);
+		BandStyle.Style style = player.getAttached(BandStyle.STYLE);
+		Powers.set(player, null);
+		player.removeAttached(XenoformState.BAND);
+		player.removeAttached(BandUpgrades.UPGRADES);
+		loosed(player.level().getServer(), rival);
+		return styled(item(aliens, rival, upgrades), style);
+	}
+
 	/** A band item that still holds {@code aliens} (a band taken off a wearer keeps what it learned). */
 	static ItemStack item(List<String> aliens) {
 		return item(aliens, false, null);
