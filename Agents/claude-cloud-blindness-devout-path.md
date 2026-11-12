@@ -1,1 +1,0 @@
-- Merged as #1328 on 2026-11-11 (Andy said merge). Also added: socket bleeding, the Unseeing cult, services, cave enclaves, barbarians keep the Unseeing's belief (Kingdoms).

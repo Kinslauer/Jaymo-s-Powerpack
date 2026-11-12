@@ -25,3 +25,4 @@ owns:
 
 ## Notes
 - 2026-11-12 01:57 PR #1328 is merged into master; moved to Agents/Done.
+- Merged as #1328 on 2026-11-11 (Andy said merge). Also added: socket bleeding, the Unseeing cult, services, cave enclaves, barbarians keep the Unseeing's belief (Kingdoms).
