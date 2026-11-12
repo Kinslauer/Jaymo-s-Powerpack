@@ -121,3 +121,22 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **F4 weather** (`FieldWeather`): gale arrow drift and placed torches blowing out (to the burnt torch villagers
   relight); rain douses fire arrows and cuts mob sight (x0.85, storm x0.7); deep snow -30% (sprint or horse -42%).
   Held torches and lanterns don't blow out.
+
+### Patch 4
+- **D1 legendary resistance** (`Legendary`, Powers `KingdomsCompat.shrugs`): 3 for the great bosses (dragons, the
+  Great Necromancer, patron champions, Wither, Ender Dragon), 2 for any other; one back per day; a barrage within
+  1.5 s costs one. Covers HeldFast, Charm, Nets, Fear, Chrono and Darktide stuns, Gravity Lift, Crush's pin, the
+  Gravity Well's kneel and Time Stop. Bosses that used to be simply immune to holds/nets are now holdable once
+  their resistances run out.
+- **D2 moves** (`BossMoves`): every 4th blow inside 8 s (a growl on the 3rd), 16-tick tell, 9 s cooldown; tail sweep,
+  dash, shriek by family; damage half the boss's attack (3-9).
+- **D3 lair beats** (`LairBeats`): every 7 s while a fighter is in the arena; rocks, roots (Might save or netted),
+  fog (darkness 4 s), flare (fire columns at lit fires). Homes: a wild dragon's den is where it was first seen
+  (dragons keep no fixed home), throne rooms from `Factions.keep`, the minotaur's labyrinth, the necromancer's crypt.
+- **D4 land** (`GreatLairs`, `LairLand`): radius 6/3/4 chunks; foul water (nausea, 1 damage, never below 2 hearts),
+  85% fewer animal spawns (herds left alone), songbirds muted, bad dreams, crops stuck at half. Lifts on the master's
+  death or a dragon's taming.
+- **D5** (`GreatNecromancer` "Halvard the Hollow", `Necropolis`, `Vessel`): crypt built in code near a player (one per
+  768-block cell in two, 150+ blocks from villages); soul urn in a sealed room 24-46 blocks away under a cairn; he
+  rises 2-4 days after death until it's smashed. Hints: sexton's tally (barrel), the Hollow Man's page (chest),
+  villager talk within 700 blocks, `Notice` hum. Stand-in skin: the court necromancer's. No spawn egg.

@@ -23,4 +23,9 @@
 - **Travel pace** (`Pace`, key "Walk slowly", default Caps Lock): walking slowly is quiet, hard to see and notices more; riding hard is as loud as sprinting.
 - **Darkvision by blood** (`Darkvision`, client post effect): grey shapes out to 16 blocks for Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves and the lizard, feline and arachnid beast folk; it replaces the eye perks' night vision. The five human bloods need light.
 - **Weather in the fight** (`FieldWeather`): gales push arrows and blow out placed torches, rain puts out fire arrows and shortens mobs' sight, deep snow slows a charge and a horse.
+- **Legendary resistance** (`Legendary`): bosses shrug off their first two or three holds, charms, nets, frights and stuns (and Powers' Chrono, Darktide and Gravity lockdowns), each with a flake off the hide and a stagger; one comes back a day.
+- **Moves between your blows** (`BossMoves`): every fourth blow, after a growl, a big boss answers: dragons sweep their tail (jump it), brutes dash, casters shriek and ring your ears.
+- **Lair beats** (`LairBeats`): fight a boss in its home (a dragon's den, a ruler's throne room, the minotaur's labyrinth, the necromancer's crypt) and the place joins in every few seconds: falling rocks, grasping roots, fog, flaring fires.
+- **The land around a lair** (`GreatLairs`, `LairLand`, mixins `fifth/LairSpawnMixin`, `fifth/BirdSongMixin`): foul springs, scarce animals, quiet birds, bad dreams, withering crops; all lifts when the master dies.
+- **The one who comes back** (`GreatNecromancer`, `Necropolis`, `Vessel`, `CryptWords`): Halvard the Hollow sleeps in a deep crypt in the wilds and rises days after each death until his soul urn, hidden under a cairn nearby, is smashed. A sexton's tally, a page in his chest and village talk point the way.
 - Built; not played.
