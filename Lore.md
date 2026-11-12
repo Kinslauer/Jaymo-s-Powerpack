@@ -1393,5 +1393,26 @@ breath of the deep fires: it crusts yellow where lava runs near, round the hot s
 the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that dry ground sweats: the deserts, the
 badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
 powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
-measures where the bone heap made one. Farmsteads that keep stock grow it too, the slow way: a nitre bed of earth,
-straw and dung under the barn roof, turned through the seasons and scraped when it whitens.
+measures where the bone heap made one.
+
+(new) **The old rules of the fight** (Claude's placement for the fifth edition picks, patch 1, 2026-11-12, for Andy to
+approve). Every drillmaster in the realms teaches the same few things, and the camps learn them the hard way. Turn
+your back on a blade and it takes you as you go: back off behind your shield, or don't go at all. A halberd keeps a
+doorway, which is why the guards of every gate carry one. Strike from above, or at a foe who is down or blind, and
+the blow tells; fight up to your waist in a river, on ice or poisoned, and it glances. A body has seven strengths
+(the K screen's attributes), and each keeps out something: the quick are not where the blast lands, the hardy shake
+off poison, the steady hold through fear and keep a spell through a blow, the sharp see through a charm, the
+learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
+until it drops where it stands. The walking dead (the old villagers, worn to almost nothing) are stubborn, and the first blow that drops one seldom
+keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
+
+**The fisherfolk's waters** (Claude's placement for the fishing picks, Tracks B to D, approved by Andy 2026-11-12).
+Every river, lake and stretch of coast has its fish, each in the water and the season it keeps, and in every
+water lives one **elder**, an old giant the fisherfolk name ("Old Gnasher", "Mother Moll") and talk of on the bank. The
+Deep Mother's faith says the elder is hers: hook one and you'll fight it a long time, and the right thing is to weigh
+it, look at it and let it go. That is the Deep Mother's "a little of what she gives, given back" at its plainest, and
+a fish put back grows on. Keep it and the water goes without an elder for a season of seasons, until another grows into
+its place. Fishermen buy fish by the weight, but a village eats only so much in a day. Every few days they hold a
+contest from sunrise to noon, heaviest fish wins, and the village's own old hands fish against you. The rod pod and its
+bell, the ice auger, the crab pot and the keepnet are fisherfolk's gear, made by anyone with iron and string. A shark's
+jaw kept on a plaque is a sailor's boast.
