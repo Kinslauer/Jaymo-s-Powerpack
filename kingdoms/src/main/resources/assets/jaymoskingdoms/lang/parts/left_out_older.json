@@ -81,5 +81,7 @@
   "message.jaymoskingdoms.revive.failed": "Nothing answers. Whatever this lock belonged to can't come back.",
   "message.jaymoskingdoms.revive.raised": "%s stands up again. It isn't quite the same.",
   "message.jaymoskingdoms.revive.mutated.nightmare": "Under the blood moon, %s burns into a Nightmare.",
-  "message.jaymoskingdoms.revive.mutated.bat_horse": "Under the blood moon, %s grows leather wings. It's a Bat Horse now."
+  "message.jaymoskingdoms.revive.mutated.bat_horse": "Under the blood moon, %s grows leather wings. It's a Bat Horse now.",
+  "message.jaymoskingdoms.school.mask_off": "You take off your %s.",
+  "message.jaymoskingdoms.school.mask_on": "You put on your %s."
 }
