@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "bottom=false": {
+      "model": "jaymospowers:block/eden/eden_vine"
+    },
+    "bottom=true": {
+      "model": "jaymospowers:block/eden/eden_vine_bottom"
+    }
+  }
+}

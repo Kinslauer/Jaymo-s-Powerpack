@@ -57,6 +57,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
+		com.jaymospowers.client.eden.EdenPlantsClient.init();
+		com.jaymospowers.client.eden.DiskwingClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
@@ -94,7 +96,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// (0.18.12) no body in the logout panorama
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();
-		com.jaymospowers.client.power.chrono.ChronoSpeedKeys.init();
 		com.jaymospowers.client.combat.GuardClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
@@ -203,8 +204,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 		CarryClient.init();
 		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
-		// boxing: the evades' movement and the blur
-		com.jaymospowers.client.boxing.BoxingClient.init();
 		com.jaymospowers.client.divine.DivineSenseClient.init();
 		com.jaymospowers.client.combat.TakedownClient.init();
 		SneakZoom.init();

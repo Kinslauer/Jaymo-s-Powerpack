@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymospowers:violum",
+            "state": {
+              "half": "lower"
+            }
+          },
+          "name": "jaymospowers:violum"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/violum"
+}

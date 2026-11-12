@@ -11,6 +11,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -27,7 +28,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 public record EdenFeature(Kind kind) implements Feature {
 	public enum Kind {
 		MYCELIUM_GROUND, STONE_GROUND, MYCOTIC_PLANTS, BALLOON_MUSHROOM, OLD_BALLOON_MUSHROOM, PULSE_TREE, STONE_PILLAR, STONE_BOULDER,
-		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS, GRAVILITE;
+		SAND_GROUND, POND, AQUATUS, BRAIN_TREE, METAL_GRASS, GRAVILITE,
+		VIOLUM, LONLIX, PARIGNUM, EDEN_MOSS, LIMPHIUM, EDEN_VINES, SYMBIOTIC_MOLD;
 
 		static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)), k -> k.name().toLowerCase(Locale.ROOT));
 	}
@@ -59,6 +61,11 @@ public record EdenFeature(Kind kind) implements Feature {
 	public static final int BRAIN_TRUNK = 5, BRAIN_TRUNK_SPREAD = 4, BRAIN_CROWN = 2, BRAIN_CROWN_SPREAD = 1, METAL_GRASS_TRIES = 14, METAL_GRASS_SPREAD = 5;
 	/** A stand of gravilite shards: tries and spread. */
 	public static final int GRAVILITE_TRIES = 8, GRAVILITE_SPREAD = 2;
+	/** A patch of small plants: tries and spread; a patch of moss or parignum is laid thicker. */
+	public static final int SMALL_TRIES = 10, SMALL_SPREAD = 4, COVER_TRIES = 28;
+	/** Hanging growth: columns tried, spread, how far below the surface an underside is looked for, a vine's length (most), share of mould that glows. */
+	public static final int HANG_TRIES = 12, HANG_SPREAD = 5, HANG_SEARCH = 24, VINE_LENGTH = 5;
+	public static final float MOLD_GLOW_SHARE = 0.25F;
 	/** The colours lanterns grow in wild (builders dye the rest). */
 	private static final DyeColor[] WILD_LANTERNS = {DyeColor.WHITE, DyeColor.YELLOW, DyeColor.LIGHT_BLUE, DyeColor.LIME, DyeColor.PINK, DyeColor.ORANGE,
 		DyeColor.MAGENTA, DyeColor.CYAN};
@@ -85,6 +92,13 @@ public record EdenFeature(Kind kind) implements Feature {
 			case BRAIN_TREE -> brainTree(level, random, origin);
 			case METAL_GRASS -> metalGrass(level, random, origin);
 			case GRAVILITE -> gravilite(level, random, origin);
+			case VIOLUM -> scatter(level, random, origin, Eden.VIOLUM, SMALL_TRIES);
+			case LIMPHIUM -> scatter(level, random, origin, Eden.LIMPHIUM, SMALL_TRIES);
+			case LONLIX -> scatter(level, random, origin, Eden.LONLIX, SMALL_TRIES);
+			case PARIGNUM -> scatter(level, random, origin, Eden.PARIGNUM, COVER_TRIES);
+			case EDEN_MOSS -> scatter(level, random, origin, Eden.EDEN_MOSS, COVER_TRIES);
+			case EDEN_VINES -> hang(level, random, origin, true);
+			case SYMBIOTIC_MOLD -> hang(level, random, origin, false);
 		};
 	}
 
@@ -519,6 +533,71 @@ public record EdenFeature(Kind kind) implements Feature {
 				&& !below.is(Eden.BALLOON_CAP)) {
 				level.setBlock(pos, Eden.GRAVILITE_SHARDS.defaultBlockState(), Block.UPDATE_CLIENTS);
 				placed = true;
+			}
+		}
+		return placed;
+	}
+
+	// ---------------------------------------------------------------- the small growth
+
+	/** A patch of one ground plant on whatever it can stand on (two blocks tall where the plant is). */
+	private static boolean scatter(WorldGenLevel level, RandomSource random, BlockPos origin, Block plant, int tries) {
+		boolean placed = false;
+		BlockState state = plant.defaultBlockState();
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int i = 0; i < tries; i++) {
+			int x = origin.getX() + random.nextInt(SMALL_SPREAD * 2 + 1) - SMALL_SPREAD;
+			int z = origin.getZ() + random.nextInt(SMALL_SPREAD * 2 + 1) - SMALL_SPREAD;
+			pos.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), z);
+			if (!level.getBlockState(pos).isAir() || !state.canSurvive(level, pos) || !level.getFluidState(pos.below()).isEmpty()) {
+				continue;
+			}
+			if (plant instanceof DoublePlantBlock) {
+				if (!level.getBlockState(pos.above()).isAir()) {
+					continue;
+				}
+				DoublePlantBlock.placeAt(level, state, pos, Block.UPDATE_CLIENTS);
+			} else {
+				level.setBlock(pos, state, Block.UPDATE_CLIENTS);
+			}
+			placed = true;
+		}
+		return placed;
+	}
+
+	/** Vines or mould under whatever overhangs here: caps, crowns, ledges. */
+	private static boolean hang(WorldGenLevel level, RandomSource random, BlockPos origin, boolean vines) {
+		boolean placed = false;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int i = 0; i < HANG_TRIES; i++) {
+			int x = origin.getX() + random.nextInt(HANG_SPREAD * 2 + 1) - HANG_SPREAD;
+			int z = origin.getZ() + random.nextInt(HANG_SPREAD * 2 + 1) - HANG_SPREAD;
+			int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
+			// down through the roof to the first air under a solid underside
+			pos.set(x, top, z);
+			int searched = 0;
+			while (searched < HANG_SEARCH && !(level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isFaceSturdy(level, pos.above(), Direction.DOWN))) {
+				pos.move(Direction.DOWN);
+				searched++;
+			}
+			if (searched == 0 || searched >= HANG_SEARCH) {
+				continue;
+			}
+			if (!vines) {
+				Block mold = random.nextFloat() < MOLD_GLOW_SHARE ? Eden.SYMBIOTIC_MOLD_EMISSIVE : Eden.SYMBIOTIC_MOLD;
+				level.setBlock(pos, mold.defaultBlockState(), Block.UPDATE_CLIENTS);
+				placed = true;
+				continue;
+			}
+			int length = 1 + random.nextInt(VINE_LENGTH);
+			for (int n = 0; n < length && level.getBlockState(pos).isAir(); n++) {
+				boolean last = n == length - 1 || !level.getBlockState(pos.below()).isAir();
+				level.setBlock(pos, Eden.EDEN_VINE.defaultBlockState().setValue(HangingPlantBlock.BOTTOM, last), Block.UPDATE_CLIENTS);
+				pos.move(Direction.DOWN);
+				placed = true;
+				if (last) {
+					break;
+				}
 			}
 		}
 		return placed;
