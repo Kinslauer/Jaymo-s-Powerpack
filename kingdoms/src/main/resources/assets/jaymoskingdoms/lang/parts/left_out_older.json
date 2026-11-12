@@ -95,5 +95,7 @@
   "gui.jaymoskingdoms.bout.ready": "Ready",
   "gui.jaymoskingdoms.bout.withdraw": "Withdraw",
   "gui.jaymoskingdoms.bout.later": "Not yet",
-  "gui.jaymoskingdoms.bout.close": "Close"
+  "gui.jaymoskingdoms.bout.close": "Close",
+  "message.jaymoskingdoms.hard.cast.no_map": "You don't know these lands yet. There's nothing on your map.",
+  "entity.jaymoskingdoms.ruler_unnamed": "The %1$s of %2$s"
 }

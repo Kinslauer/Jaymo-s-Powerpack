@@ -200,6 +200,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		StakeLayer.register();
 		TalkScreen.register();
 		BoutBracketScreen.register();
+		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
@@ -251,6 +252,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GreenskinLooks.register();
 		// (0.7.616, Rivals patch 1) the marks captains carry back
 		CaptainMarks.register();
+		StoryChains.register();
 		// (0.7.619) the brand of your Bane-to-be, seen by you alone
 		BaneBrand.register();
 		// (0.7.620) the marks that end it, carved at a grindstone
