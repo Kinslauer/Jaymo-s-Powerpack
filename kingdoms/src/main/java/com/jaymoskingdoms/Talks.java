@@ -366,6 +366,8 @@ public final class Talks {
 		for (TalkBook.Outcome o = outcome; o != null; o = o.next()) {
 			run(c, talk, o);
 		}
+		// (the Retaking) a talk that is a step of a road
+		StoryRoads.talked(player, talk.id());
 		level.playSound(null, v.getX(), v.getY(), v.getZ(), quarrel ? SoundEvents.VILLAGER_NO : SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.8F,
 			v.isBaby() ? 1.5F : 1.0F);
 	}

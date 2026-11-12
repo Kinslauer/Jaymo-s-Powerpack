@@ -97,8 +97,26 @@ public final class Retaking {
 	/** The Maw; setting foot in it is an Act III milestone. */
 	static final ResourceKey<Level> MAW = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "maw"));
 
-	/** The Abyss, the demons' deepest layer (Powers' demon country biome); standing in it is an Act IV milestone. */
-	static final ResourceKey<Biome> ABYSS = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", "demon_abyss"));
+	/** The demons' three layers (Powers' demon country biomes), outermost first; walking all three is an Act IV milestone ("abyss"). */
+	static final List<String> LAYERS = List.of("gloam", "ash", "abyss");
+	static final List<ResourceKey<Biome>> LAYER_BIOMES = List.of(layer("demon_gloam"), layer("demon_ash"), layer("demon_abyss"));
+
+	/**
+	 * Milestones that count for the party members who were near when one of them was done, like the town errands and the
+	 * kings do: the raider band, the star, the pod, the far world, the Maw, the demon layers, the spirit, the Bane, the
+	 * Judge's weighing and the Grue's shade. Others in the party but out of {@link #PARTY_RANGE} still have to do them.
+	 */
+	static final java.util.Set<String> SHARED = java.util.Set.of("raiders", "star", "pod", "far_world", "maw", "abyss", "spirit", "bane",
+		"weighed", "grue");
+	/** The demon layers walked, by name ({@link #LAYERS}). Saved, kept through death. */
+	static final AttachmentType<List<String>> LAYERS_WALKED = AttachmentRegistry.create(JaymosKingdoms.id("retaking_layers"),
+		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+	/** Guards {@link #share} against passing a shared milestone round the party and back. */
+	private static boolean sharing;
+
+	private static ResourceKey<Biome> layer(String biome) {
+		return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", biome));
+	}
 
 	/** Per Knowledge level 1 to 5, its king's milestone. */
 	static final String[] KINGS = {"", "goblin_king", "ogre_king", "skeleton_lord", "piglin_king", "wither"};
@@ -111,7 +129,9 @@ public final class Retaking {
 	}
 
 	static void register() {
-		JaymosKingdoms.LOGGER.debug("retaking attachment: {}", ERRANDS_DONE);
+		JaymosKingdoms.LOGGER.debug("retaking attachment: {} {}", ERRANDS_DONE, LAYERS_WALKED);
+		StoryPay.register();
+		StoryTellers.register();
 		PayloadTypeRegistry.clientboundPlay().register(State.TYPE, State.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Ask.TYPE, Ask.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Ask.TYPE, (payload, context) -> send(context.player()));
@@ -163,9 +183,7 @@ public final class Retaking {
 		if (player.level().dimension() == MAW) {
 			PackAdvancements.award(player, "maw", "done");
 		}
-		if (player.level().getBiome(player.blockPosition()).is(ABYSS)) {
-			PackAdvancements.award(player, "abyss", "done");
-		}
+		walkLayers(player);
 		// a spirit woken, or the Grue subjugated, stays so: counted whenever Act IV is open
 		SpiritState spirit = Spirits.state(player);
 		if (spirit != null) {
@@ -183,6 +201,71 @@ public final class Retaking {
 			if (player.removeTag(DEED + deed)) {
 				PackAdvancements.award(player, deed, "done");
 			}
+		}
+		StoryPay.settle(player);
+		StoryTellers.look(player);
+	}
+
+	/** Whether {@code player} has the milestone {@code name} done. */
+	public static boolean done(ServerPlayer player, String name) {
+		AdvancementHolder holder = PackAdvancements.get(player.level().getServer(), name);
+		return holder != null && player.getAdvancements().getOrStartProgress(holder).isDone();
+	}
+
+	/**
+	 * The demons' layers, one by one: standing in a layer's biome notes it (only once the act has begun), for the party near
+	 * too; the milestone is all three.
+	 */
+	private static void walkLayers(ServerPlayer player) {
+		if (!open(player, "abyss")) {
+			return;
+		}
+		for (int i = 0; i < LAYERS.size(); i++) {
+			if (player.level().getBiome(player.blockPosition()).is(LAYER_BIOMES.get(i))) {
+				walked(player, LAYERS.get(i));
+				for (ServerPlayer p : Parties.members(player)) {
+					if (p != player && p.level() == player.level() && p.distanceToSqr(player) <= PARTY_RANGE * PARTY_RANGE && open(p, "abyss")) {
+						walked(p, LAYERS.get(i));
+					}
+				}
+			}
+		}
+		if (player.getAttachedOrElse(LAYERS_WALKED, List.of()).containsAll(LAYERS)) {
+			PackAdvancements.award(player, "abyss", "done");
+		}
+	}
+
+	private static void walked(ServerPlayer player, String layer) {
+		List<String> walked = player.getAttachedOrElse(LAYERS_WALKED, List.of());
+		if (!walked.contains(layer)) {
+			List<String> more = new ArrayList<>(walked);
+			more.add(layer);
+			player.setAttached(LAYERS_WALKED, List.copyOf(more));
+		}
+	}
+
+	/** How many of the demons' layers {@code player} has walked (for the journal). */
+	public static int layersWalked(ServerPlayer player) {
+		return player.getAttachedOrElse(LAYERS_WALKED, List.of()).size();
+	}
+
+	/**
+	 * {@code player} has just been given the milestone {@code name}: if it is one that counts for the party, every member within
+	 * {@link #PARTY_RANGE} blocks (same dimension) is given it too, if their act has begun ({@link PackAdvancements#award}).
+	 */
+	static void share(ServerPlayer player, String name) {
+		if (sharing || !SHARED.contains(name)) {
+			return;
+		}
+		sharing = true;
+		try {
+			for (ServerPlayer p : Parties.members(player)) {
+				if (p != player && p.level() == player.level() && p.distanceToSqr(player) <= PARTY_RANGE * PARTY_RANGE) {
+					PackAdvancements.award(p, name, "done");
+				}
+			}
+		} finally {
+			sharing = false;
 		}
 	}
 

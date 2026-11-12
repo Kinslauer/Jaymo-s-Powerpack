@@ -37,7 +37,9 @@ import org.jspecify.annotations.Nullable;
  * the Chrono's is {@code ChronoRoad}). Each says what to do, never what it means; a few steps hand over a short book.
  * <ul>
  * <li><b>The Web Slinger's Road</b>: bond with a symbiote at a meteor crater; grow close enough that it stops fighting you
- * ({@link #WEB_DEEP_BOND}), when it gives back what it remembers ({@code web_memory}); purify it white.</li>
+ * ({@link #WEB_DEEP_BOND}), when it gives back what it remembers ({@code web_memory}); purify it white; keep the white one
+ * until it trusts you wholly ({@link #WEB_ANTI_BOND}), when it writes a few words of its own ({@code web_white}); meet the
+ * Quiet One (Kingdoms leaves {@link #QUIET_TAG} once the old war's film is seen, or he is your spirit).</li>
  * <li><b>The Xenoform's Road</b>: hear a star-reader out; set foot on the Pale Moon; have your band reforged; tear the
  * rival band off the band hunter, who leaves his orders behind ({@code hunter_orders}).</li>
  * <li><b>The Arsenal's Road</b>: claim a relic; mark a place to come back to; pull something from the future (once, a
@@ -48,11 +50,14 @@ import org.jspecify.annotations.Nullable;
 public final class PowerRoads {
 	/** The road keys and their steps, in order. */
 	public static final Map<String, List<String>> STEPS = Map.of(
-		"web", List.of("crater", "deep", "white"),
+		"web", List.of("crater", "deep", "white", "anti", "quiet"),
 		"xeno", List.of("reader", "moon", "forge", "hunter"),
 		"arsenal", List.of("relic", "place", "future", "pinned"));
 	/** The bond at which the Web road's second step is done. */
 	public static final int WEB_DEEP_BOND = 60;
+	/** The bond at which a white symbiote (the anti) writes its page, and the tag Kingdoms leaves when the Quiet One has been met. */
+	public static final int WEB_ANTI_BOND = 90;
+	public static final String QUIET_TAG = "jaymoskingdoms.retaking.quiet";
 	/** How often (ticks) the steps that are a state are looked at. */
 	static final int LOOK_EVERY = 100;
 	static final ResourceKey<Level> MOON = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("moon"));
@@ -108,7 +113,13 @@ public final class PowerRoads {
 					}
 					if (state.kind() == WebSymbioteStrain.WHITE) {
 						mark(player, "web", "white");
+						if (state.bond() >= WEB_ANTI_BOND && mark(player, "web", "anti")) {
+							give(player, LoreBook.written("web_white", "Quiet", 3), "message.jaymospowers.road.web_white");
+						}
 					}
+				}
+				if (player.entityTags().contains(QUIET_TAG)) {
+					mark(player, "web", "quiet");
 				}
 			}
 			if (yours(player, "xeno")) {

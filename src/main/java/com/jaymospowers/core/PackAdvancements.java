@@ -22,6 +22,14 @@ public final class PackAdvancements {
 	}
 
 	public static void init() {
+		// a deed left as a tag survives the death that was the deed (a life weighed and born again)
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			for (String tag : oldPlayer.entityTags()) {
+				if (tag.startsWith(DEED)) {
+					newPlayer.addTag(tag);
+				}
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % EVERY != 0) {
 				return;

@@ -53,6 +53,12 @@ public final class SpiritVoice {
 		return say(player, kind, event, false);
 	}
 
+	/** Your spirit's remark as act {@code act} (0 to 4) of the Retaking closes ({@code spirit.jaymoskingdoms.<id>.retaking.<act>}); the Quiet One has none. */
+	public static boolean sayAct(ServerPlayer player, int act) {
+		SpiritState state = Spirits.state(player);
+		return state != null && state.kind() != Spirits.QUIET && say(player, state.kind(), "retaking." + act, true);
+	}
+
 	/** A line that can't be skipped for a recent one (waking, parting): it speaks over the gap. */
 	public static boolean sayNow(ServerPlayer player, int kind, String event) {
 		return say(player, kind, event, true);
@@ -78,9 +84,9 @@ public final class SpiritVoice {
 		}
 		Spirit spirit = Spirits.of(kind);
 		int n = 1 + player.getRandom().nextInt(LINES);
-		// (the sick days have a single line each: "sick.3", not "sick.3.2")
+		// (the sick days have a single line each: "sick.3", not "sick.3.2"; so has each act of the Retaking: "retaking.2")
 		String key = event.equals("word") ? "spirit.jaymoskingdoms." + spirit.id() + ".word.1"
-			: event.startsWith("sick.") ? "spirit.jaymoskingdoms." + spirit.id() + "." + event
+			: event.startsWith("sick.") || event.startsWith("retaking.") ? "spirit.jaymoskingdoms." + spirit.id() + "." + event
 			: "spirit.jaymoskingdoms." + spirit.id() + "." + event + "." + n;
 		TextColor colour = TextColor.fromRgb(spirit.color() & 0xFFFFFF);
 		MutableComponent name = Component.translatable("spirit.jaymoskingdoms." + spirit.id() + ".name").withStyle(s -> s.withColor(colour).withItalic(true));

@@ -392,6 +392,8 @@ public final class ZFighterAndroid {
 	 * says back comes on the screen, {@link ZFighterNpcs#reply}).
 	 */
 	static void talkMenu(ServerPlayer player, net.minecraft.world.entity.LivingEntity scientist) {
+		// the Chrono's road: the Tinkerer's trail begins at his bench
+		com.jaymospowers.power.chrono.ChronoRoad.tinkerer(player);
 		Runnable back = () -> talkMenu(player, scientist);
 		Runnable next = () -> ZFighterNpcs.reply(player, scientist, () -> talk(player, scientist), back);
 		if (!ZFighterBranchForms.fighter(player) || OPERATIONS.containsKey(player.getUUID())) {

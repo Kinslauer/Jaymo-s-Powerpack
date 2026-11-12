@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import com.jaymoskingdoms.spirits.SpiritState;
+import com.jaymoskingdoms.spirits.Spirits;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
@@ -23,9 +25,11 @@ import org.jspecify.annotations.Nullable;
  * and reaches the tab its own way.
  * <ul>
  * <li><b>The Arcanist's Road</b> (Mages and Sorcerers, told by court wizards): carry a caster's staff; be told the old war
- * by an elder mage (or a demon); read a court wizard's margin notes ({@code a_wizards_margins}); learn a second spell for
- * good.</li>
- * <li><b>The Faithful Road</b> (anyone sworn to a patron): swear; reach your patron's second tier of favour; bring down
+ * by an elder mage (or a demon); hear a court wizard on why Death and Blood are forbidden ({@code retaking_wizard_forbidden});
+ * read a court wizard's margin notes ({@code a_wizards_margins}); hear what the crucible whispers when the flux runs high
+ * ({@code retaking_wizard_flux}); learn a second spell for good.</li>
+ * <li><b>The Faithful Road</b> (anyone sworn to a patron): swear; be argued with by one of the Truth's clerics
+ * ({@code retaking_truth_argues}); reach your patron's second tier of favour; bring down
  * your patron's champion; stand against a rival faith's champion; bring down your own champion three times.</li>
  * <li><b>The Thief's Road</b> (Thieves, taught by the Ash Whisperer's quick-handed faithful): pick a pocket clean; pick a
  * lock; find a den; and, behind a lock picked in the Dark Below, a contract under a black candle and the book someone paid
@@ -49,6 +53,8 @@ public final class StoryRoads {
 	public record Road(String key, Predicate<ServerPlayer> yours, List<Step> steps) {
 	}
 
+	/** The tag Jaymo's Powers reads for the Web Slinger's Road once the Quiet One has been met. */
+	static final String QUIET_TAG = "jaymoskingdoms.retaking.quiet";
 	/** The court wizard's margin notes (a lore book). */
 	static final String MARGINS = JaymosKingdoms.id("a_wizards_margins").toString();
 	/** The patron favour tier the Faithful Road's second step asks for, and the champion kills its last. */
@@ -67,10 +73,11 @@ public final class StoryRoads {
 
 	public static final List<Road> ROADS = List.of(
 		new Road("arcana", p -> Classes.is(p, Classes.PlayerClass.MAGE) || Classes.is(p, Classes.PlayerClass.SORCERER), List.of(
-			new Step("staff", Retaking.Act.HEARTH), new Step("told", Retaking.Act.OLD_STONES), new Step("margins", Retaking.Act.LIGHTS),
-			new Step("learned", Retaking.Act.DARK_BELOW))),
+			new Step("staff", Retaking.Act.HEARTH), new Step("told", Retaking.Act.OLD_STONES), new Step("forbidden", Retaking.Act.LIGHTS),
+			new Step("margins", Retaking.Act.LIGHTS), new Step("whispers", Retaking.Act.DARK_BELOW), new Step("learned", Retaking.Act.DARK_BELOW))),
 		new Road("faith", p -> Patrons.of(p) != null, List.of(
-			new Step("sworn", Retaking.Act.HEARTH), new Step("favour", Retaking.Act.OLD_STONES), new Step("champion", Retaking.Act.LIGHTS),
+			new Step("sworn", Retaking.Act.HEARTH), new Step("argued", Retaking.Act.OLD_STONES), new Step("favour", Retaking.Act.OLD_STONES),
+			new Step("champion", Retaking.Act.LIGHTS),
 			new Step("rival", Retaking.Act.DARK_BELOW), new Step("champion_three", Retaking.Act.LEGEND))),
 		new Road("thief", p -> Classes.is(p, Classes.PlayerClass.THIEF), List.of(
 			new Step("lift", Retaking.Act.HEARTH), new Step("lock", Retaking.Act.OLD_STONES), new Step("den", Retaking.Act.LIGHTS),
@@ -180,6 +187,12 @@ public final class StoryRoads {
 				}
 			}
 		}
+		// the Web Slinger's road (Jaymo's Powers) wants to know the Quiet One was met: his figure in the old war's film, or his spirit
+		SpiritState spirit = Spirits.state(player);
+		if (!player.entityTags().contains(QUIET_TAG) && (com.jaymoskingdoms.films.LoreFilms.seen(player, com.jaymoskingdoms.films.LoreFilms.LONG_DEFENCE)
+			|| spirit != null && spirit.kind() == Spirits.QUIET)) {
+			player.addTag(QUIET_TAG);
+		}
 		int valor = Valor.rank(player);
 		if (valor >= Valor.KINDLED) {
 			mark(player, "hermit", "kindled");
@@ -260,6 +273,17 @@ public final class StoryRoads {
 			}
 		}
 		box.setChanged();
+	}
+
+	/** (From {@link Talks}, a talk had: the talks that are steps of a road.) */
+	static void talked(ServerPlayer player, String talk) {
+		switch (talk) {
+			case "retaking_wizard_forbidden" -> mark(player, "arcana", "forbidden");
+			case "retaking_wizard_flux" -> mark(player, "arcana", "whispers");
+			case "retaking_truth_argues" -> mark(player, "faith", "argued");
+			default -> {
+			}
+		}
 	}
 
 	/** (From the court wizard's or a demon's telling of the old war.) */

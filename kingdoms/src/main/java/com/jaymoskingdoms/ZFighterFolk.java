@@ -218,6 +218,15 @@ public final class ZFighterFolk {
 
 	/** "Talk about work" with one of them: Powers' talk (the Judge's rebirth and writs, the Keeper's blessing...). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
+		// (the Retaking) a teller with something new to say says it first, then the work
+		String kind = kind(speaker);
+		if (kind != null && StoryTellers.offer(player, speaker, kind, () -> workTalk(player, speaker))) {
+			return;
+		}
+		workTalk(player, speaker);
+	}
+
+	private static void workTalk(ServerPlayer player, LivingEntity speaker) {
 		if ("demon_master".equals(kind(speaker)) && com.jaymoskingdoms.films.LoreFilms.canPlay(player)) {
 			// a demon master will tell the old war too, if you ask for the story over the work (LoreFilms)
 			ask(player, speaker, Component.translatable("talk.jaymoskingdoms.zfighter.demon_master.story"),

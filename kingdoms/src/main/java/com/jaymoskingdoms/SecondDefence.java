@@ -369,6 +369,7 @@ public final class SecondDefence {
 		clearLeftovers(level, f.site);
 		level.setAttached(HELD, true);
 		level.playSound(null, f.site.ford(), SoundEvents.BELL_RESONATE, SoundSource.AMBIENT, 2.0F, 0.8F);
+		leaveLastPage(level, f.site);
 		for (UUID id : f.defenders) {
 			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
 			if (player != null) {
@@ -378,6 +379,30 @@ public final class SecondDefence {
 				com.jaymoskingdoms.films.LoreFilms.play(player, com.jaymoskingdoms.films.LoreFilms.SECOND_DEFENCE);
 			}
 		}
+	}
+
+	/**
+	 * The Act V find: a last page, in a newer hand, turns up in the keep's chest beside the warden's own (or, if the chest has
+	 * been emptied or broken, on the gatehouse floor), for whoever goes to look.
+	 */
+	private static void leaveLastPage(ServerLevel level, Ford.Site site) {
+		ItemStack page = LoreBooks.book("the_wardens_last_page");
+		if (page.isEmpty()) {
+			return;
+		}
+		BlockPos keep = site.keep();
+		for (BlockPos pos : BlockPos.betweenClosed(keep.offset(-20, -3, -20), keep.offset(20, 10, 20))) {
+			if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity box) {
+				for (int i = 0; i < box.getContainerSize(); i++) {
+					if (box.getItem(i).isEmpty()) {
+						box.setItem(i, page);
+						box.setChanged();
+						return;
+					}
+				}
+			}
+		}
+		level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, keep.getX() + 0.5, keep.getY() + 1.0, keep.getZ() + 0.5, page));
 	}
 
 	/** Nobody stood: they go back down, and come again another night. */
