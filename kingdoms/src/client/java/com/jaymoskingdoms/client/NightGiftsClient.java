@@ -59,7 +59,8 @@ public final class NightGiftsClient {
 		pound = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.night_pound", InputConstants.KEY_P, category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (dash.consumeClick()) {
-				send(minecraft, 0);
+				// sneak and O: a full vampire's shapes of the night (NightForms), else the Blood Dash or Leap
+				send(minecraft, minecraft.player != null && minecraft.player.isShiftKeyDown() && com.jaymoskingdoms.nightforms.NightForms.vampire(minecraft.player) ? NightGifts.SHAPES : 0);
 			}
 			while (pound.consumeClick()) {
 				send(minecraft, 1);

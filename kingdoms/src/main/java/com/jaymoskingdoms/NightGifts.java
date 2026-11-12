@@ -147,6 +147,9 @@ public final class NightGifts {
 	static final float GOSSIP_CHANCE = 0.12F, GOSSIP_CURSED_CHANCE = 0.4F;
 	static final int GOSSIP_LINES = 18;
 
+	/** The move number the client sends for sneak and {@code O}: the shapes of the night ({@code NightForms}). */
+	public static final int SHAPES = 4;
+
 	/** What gift a player has. */
 	public static final int NONE = 0, VAMPIRE = 1, DHAMPIR = 2, WEREWOLF = 3, WOLFBLOOD = 4;
 
@@ -494,6 +497,10 @@ public final class NightGifts {
 		Gift g = player.getAttached(GIFT);
 		if (g == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
 			return false;
+		}
+		if (which == SHAPES) {
+			// a vampire's shapes of the night (sneak and O)
+			return com.jaymoskingdoms.nightforms.NightForms.menu(player);
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
