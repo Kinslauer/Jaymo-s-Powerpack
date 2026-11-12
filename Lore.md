@@ -696,6 +696,15 @@ scanning creatures and reading tablets. Bands corrupt and glitch. There is also 
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
 darkened aliens; mechs hunt band wearers at night too.
 
+(new) **What the blood and the gifts do under strain** (picks, 2026-11-12). The Verdant are fed by the sun and flag a
+little at night; the Warrior-born are quickened by the open night sky, most under the full moon that wakes the ape,
+and either can stand still, look up and drink it in. Every fighter of ki holds fast at the brink. When two great
+blows meet, ape against brute against the black suit, they lock until one gives. The Emberborn run hot when they
+fight, hot enough to ruin armour and in the end to burst; the cold kill with a look held long enough. The storm can
+be thrown and the sky turned, weight can bind many at once or trade one place for another, the dark water answers
+with shoal and drowned, and a voice can lift its owner or break the air. None of these are new gifts, only what the
+old ones do when pushed.
+
 (new) **What the bodies remember** (alien picks, 2026-11-12). A body in the band is not only a shape: it keeps the
 habits of the creature it was read from, and a wearer who stays in one long enough finds them. Bulwark's temper
 rises with every blow, Tusk runs through the wood rather than round it, Gorger bowls, Prowl clings and bleeds its
