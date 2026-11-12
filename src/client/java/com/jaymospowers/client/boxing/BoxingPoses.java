@@ -70,7 +70,7 @@ public final class BoxingPoses {
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
 	static final float BASTION_LEAD_PITCH = -0.3F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 1.35F, BASTION_REAR_PITCH = -1.1F, BASTION_REAR_IN = 0.55F, BASTION_REAR_FOLD = -2.0F;
 	/** Its base: feet under the shoulders, the lead one ahead, the knees soft. */
-	static final float BASTION_SPREAD = 0.14F, BASTION_STAGGER = 0.2F, BASTION_KNEES = 0.2F;
+	static final float BASTION_SPREAD = 0.22F, BASTION_STAGGER = 0.2F, BASTION_KNEES = 0.34F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
 	static final float BASTION_BLADE = 0.45F, BASTION_SHOULDER = 1.0F, BASTION_LEAN = -0.04F, BASTION_HEAD_TILT = 0.12F, BASTION_CHIN = 0.1F;
 	/** How much further side on its block stands. */

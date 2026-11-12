@@ -69,13 +69,18 @@ public final class FangGauntletsClient {
 	static final float FIRST_IN = 0.16F, FIRST_UP = 0.1F, FIRST_FORWARD = 0.05F, FIRST_RAISE = 12.0F, FIRST_TURN = 10.0F, FIRST_TIP = 4.0F;
 	/** First person: the shoulder the arm turns about (right arm; x right, y up, z toward you), and how far below the view the empty off hand starts. */
 	static final float FIRST_SHOULDER_X = 0.75F, FIRST_SHOULDER_Y = -0.85F, FIRST_ENTRY_DROP = 0.6F;
-	/** Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it. */
-	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.3F;
+	/**
+	 * Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it: clear of a
+	 * skin's sleeve layer (a quarter pixel proud itself), which it sank into, so it showed in patches.
+	 */
+	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.55F;
+	/** Boxing's gear is shaped for a 4 pixel arm: on a slim one (3 pixels) it is this much narrower across, to sit as close. */
+	static final float SLIM_GEAR = 0.8F;
 	/** A cestus's band over the knuckles: from this far down, and this far proud. */
-	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.55F;
-	/** Bracers: the guard up the forearm, from this far down, this long, and this far proud. */
-	static final float BRACER_TOP = 3.0F, BRACER_GROW = 0.45F;
-	static final int BRACER_LENGTH = 6;
+	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.8F;
+	/** Bracers: the guard up the forearm, from the elbow down (so it turns with a bent forearm), this long, and this far proud. */
+	static final float BRACER_TOP = 5.0F, BRACER_GROW = 0.6F;
+	static final int BRACER_LENGTH = 5;
 	// ================================================================================================================
 
 	/** Bits on a render state: the right arm wears a gauntlet, the left does, and (4) they're in the guard (no attack swinging). */
@@ -278,6 +283,9 @@ public final class FangGauntletsClient {
 		if (kind <= 0 || kind > BOXING_TEXTURES.length) {
 			collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
 		} else {
+			if (slim) {
+				poseStack.scale(SLIM_GEAR, 1.0F, 1.0F);
+			}
 			String shape = BoxingGear.WORN[kind - 1];
 			ModelPart part = shape.endsWith("bracers") ? bracer : shape.endsWith("cestus") ? cestus : wrap;
 			collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(BOXING_TEXTURES[kind - 1]), light, OverlayTexture.NO_OVERLAY, null);

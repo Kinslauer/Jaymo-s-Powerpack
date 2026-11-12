@@ -23,3 +23,6 @@
   before). A cross now brings the rear shoulder forward; it turned the wrong way.
 - `client/boxing/BoxingPoses`: every angle is still a knob at the top. Not built locally; not played, the angles are
   set from the footage without seeing them on a model.
+- **Worn fist gear fits the hand:** wraps, cestus and bracers sat only just proud of the arm, inside a skin's sleeve
+  layer, so they showed in patches. They now stand clear of it all the way round, are narrower on slim arms, and
+  bracers start at the elbow so they turn with a bent forearm.
