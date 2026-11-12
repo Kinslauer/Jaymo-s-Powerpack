@@ -41,14 +41,17 @@ import org.jspecify.annotations.Nullable;
  * crossing to keep a light in the keep at night ({@code the_wardens_page}); the dead of the old legion answer it.
  * <ul>
  * <li><b>When:</b> at night, with a light burning in the keep ({@link #lit}), and a player whose Act V has begun at the ford.
- * It comes once in a world: held, it is over ({@link #HELD}).</li>
+ * It comes once in a world, over {@link #NIGHTS} nights (the plan: "you and your party hold it for three nights"), one a
+ * night at most ({@link #NIGHTS_HELD}, {@link #LAST_NIGHT}); held on the last, it is over ({@link #HELD}).</li>
  * <li><b>The legion:</b> as in <i>The Long Defence</i>, the dead come up a few at a time, here and there across the water,
  * each group under a stroke of lightning: risen orcs ({@link RisenOrc}) and zombified piglins, never zombies or skeletons.
- * {@link #WAVES} waves, each larger, more with more defenders; then the one at the back, a shade in the sorcerer's colour
- * standing beyond the ford ({@link #shade}). When it falls, what is left of the legion goes back into the ground.</li>
+ * {@link #WAVES} waves a night, each larger, more with more defenders and more each night ({@link #NIGHT_GROWTH}). A night
+ * is held when its waves are beaten, or when dawn comes with defenders still at the ford: the dead left standing go back
+ * into the ground. On the last night, after its waves, the one at the back: a shade in the sorcerer's colour standing
+ * beyond the ford ({@link #shade}). When it falls, what is left of the legion goes back into the ground.</li>
  * <li><b>Held:</b> everyone who stood at the ford through it gets the milestone (if their Act V has begun).</li>
  * <li><b>Lost:</b> nobody standing near the ford for {@link #GIVE_UP} ticks: the legion sinks back and comes again another
- * night.</li>
+ * night. A lost night doesn't count, but the nights already held still do.</li>
  * </ul>
  * The fight isn't saved: a server stopping mid-fight leaves it to come again (leftover dead are cleared at the ford).
  */
@@ -61,6 +64,8 @@ public final class SecondDefence {
 	static final int LIGHT_REACH = 9, LIGHT_BELOW = 2, LIGHT_ABOVE = 12;
 	/** The waves, and the dead in the first (each later wave brings {@link #WAVE_GROWTH} more). */
 	static final int WAVES = 4, FIRST_WAVE = 8, WAVE_GROWTH = 4;
+	/** The nights it lasts, and how many more dead each wave brings on each night after the first. */
+	static final int NIGHTS = 3, NIGHT_GROWTH = 3;
 	/** Extra dead per defender beyond the first (fraction of a wave). */
 	static final double PER_DEFENDER = 0.4;
 	/** A group rises every this many ticks, of this many; never more than {@link #MOST_STANDING} up at once. */
@@ -80,6 +85,12 @@ public final class SecondDefence {
 	/** Held: the Second Defence is over in this world. Saved on the overworld. */
 	static final AttachmentType<Boolean> HELD = AttachmentRegistry.create(JaymosKingdoms.id("second_defence_held"),
 		builder -> builder.persistent(Codec.BOOL));
+	/** How many of its nights have been held so far. Saved on the overworld. */
+	static final AttachmentType<Integer> NIGHTS_HELD = AttachmentRegistry.create(JaymosKingdoms.id("second_defence_nights"),
+		builder -> builder.persistent(Codec.INT));
+	/** The day (game time / a day) of the last night it came, held or not: never twice in one night. Saved on the overworld. */
+	static final AttachmentType<Long> LAST_NIGHT = AttachmentRegistry.create(JaymosKingdoms.id("second_defence_last_night"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** The fight under way, or null. */
 	private static @Nullable Fight fight;
@@ -89,18 +100,21 @@ public final class SecondDefence {
 		final Vec3 away;
 		final Set<UUID> defenders = new HashSet<>();
 		final List<Mob> standing = new ArrayList<>();
+		/** Which night this is (1 to {@link #NIGHTS}). */
+		final int night;
 		int wave = 1, risen, empty;
 		long nextGroup;
 		@Nullable Mob shade;
 
-		Fight(Ford.Site site) {
+		Fight(Ford.Site site, int night) {
 			this.site = site;
+			this.night = night;
 			Vec3 d = Vec3.atCenterOf(site.ford()).subtract(Vec3.atCenterOf(site.keep())).multiply(1.0, 0.0, 1.0);
 			this.away = d.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : d.normalize();
 		}
 
 		int waveSize() {
-			int size = FIRST_WAVE + (this.wave - 1) * WAVE_GROWTH;
+			int size = FIRST_WAVE + (this.wave - 1) * WAVE_GROWTH + (this.night - 1) * NIGHT_GROWTH;
 			return (int)Math.round(size * (1.0 + PER_DEFENDER * Math.max(0, this.defenders.size() - 1)));
 		}
 	}
@@ -151,7 +165,7 @@ public final class SecondDefence {
 				starter = player;
 			}
 		}
-		if (starter != null && !held(server)) {
+		if (starter != null && !held(server) && level.getAttachedOrElse(LAST_NIGHT, -1L) != night(level)) {
 			start(level, site);
 		}
 	}
@@ -180,8 +194,14 @@ public final class SecondDefence {
 
 	// ---- the fight --------------------------------------------------------------------------------------------------
 
+	/** Which night it is now: the day the evening began on (a night after midnight is still the evening's). */
+	static long night(ServerLevel level) {
+		return Math.floorDiv(level.getOverworldClockTime() - 12000L, 24000L);
+	}
+
 	static void start(ServerLevel level, Ford.Site site) {
-		Fight f = new Fight(site);
+		level.setAttached(LAST_NIGHT, night(level));
+		Fight f = new Fight(site, Math.min(NIGHTS, level.getAttachedOrElse(NIGHTS_HELD, 0) + 1));
 		f.nextGroup = level.getGameTime() + GROUP_EVERY;
 		fight = f;
 		BlockPos at = site.ford();
@@ -215,6 +235,11 @@ public final class SecondDefence {
 			return;
 		}
 		f.standing.removeIf(m -> !m.isAlive() || m.isRemoved());
+		if (f.night < NIGHTS && !level.isDarkOutside()) {
+			// dawn, and they're still at the ford: this night is held
+			nightHeld(level, f);
+			return;
+		}
 		if (f.shade != null) {
 			if (!f.shade.isAlive()) {
 				held(level, f);
@@ -233,8 +258,27 @@ public final class SecondDefence {
 				f.risen = 0;
 				f.nextGroup = now + GROUP_EVERY * 2;
 				level.playSound(null, f.site.ford(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.AMBIENT, 2.0F, 0.5F + 0.1F * f.wave);
+			} else if (f.night < NIGHTS) {
+				nightHeld(level, f);
 			} else {
 				shade(level, f);
+			}
+		}
+	}
+
+	/** One of the first nights held: what's left of tonight's dead goes back down, to come again the next night. */
+	private static void nightHeld(ServerLevel level, Fight f) {
+		fight = null;
+		for (Mob mob : f.standing) {
+			sink(level, mob);
+		}
+		clearLeftovers(level, f.site);
+		level.setAttached(NIGHTS_HELD, f.night);
+		level.playSound(null, f.site.ford(), SoundEvents.BELL_RESONATE, SoundSource.AMBIENT, 2.0F, 0.6F);
+		for (UUID id : f.defenders) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.second_defence.night." + f.night).withStyle(ChatFormatting.GOLD));
 			}
 		}
 	}
@@ -428,7 +472,9 @@ public final class SecondDefence {
 		if (site == null || fight != null) {
 			return false;
 		}
-		start(Factions.level(server), site);
+		ServerLevel level = Factions.level(server);
+		level.removeAttached(LAST_NIGHT);
+		start(level, site);
 		return true;
 	}
 }

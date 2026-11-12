@@ -1064,6 +1064,9 @@ public final class LoreFilmClient {
 		/** Where the first shot's camera goes ({f, s}), and how far the dead are kept from it. */
 		static final double[] LENS = {25.5, 5.0, 4.0};
 		static final double FAR_NEAR = 8.0, FAR_FAR = 25.0, FAR_HALF = 13.0, APART = 2.2, SINK = 0.04, UNDER = 3.0, NO_KEEP = 30.0, LIGHT_UP = 5.0;
+		/** The defenders on the near bank: at most this many, from this near the ford, this far back from the water, this far apart. */
+		static final int HELD_MOST = 6;
+		static final double HELD_NEAR = 96.0, HELD_BACK = 4.0, HELD_APART = 2.0;
 
 		private Morning() {
 		}
@@ -1093,7 +1096,40 @@ public final class LoreFilmClient {
 				gait(f, a, Moves.IDLE, Moves.SHAMBLE);
 				place(f, a);
 			}
+			defenders(f);
 			sound(f, SoundEvents.BELL_RESONATE, 0.7F, 0.5F);
+		}
+
+		/**
+		 * The ones who held it, standing on the near bank as the dead go down: you, and every other player near the ford
+		 * (up to {@link #HELD_MOST}), each in their own skin with what they hold, in a loose line between the water and the keep.
+		 */
+		static void defenders(Film f) {
+			Minecraft minecraft = Minecraft.getInstance();
+			List<net.minecraft.client.player.AbstractClientPlayer> held = new ArrayList<>();
+			if (minecraft.player != null) {
+				held.add(minecraft.player);
+			}
+			if (minecraft.level != null) {
+				for (net.minecraft.client.player.AbstractClientPlayer p : minecraft.level.players()) {
+					if (held.size() < HELD_MOST && p != minecraft.player && !p.isSpectator() && p.position().distanceTo(f.origin) < HELD_NEAR) {
+						held.add(p);
+					}
+				}
+			}
+			for (int i = 0; i < held.size(); i++) {
+				net.minecraft.client.player.AbstractClientPlayer p = held.get(i);
+				double side = (i - (held.size() - 1) / 2.0) * HELD_APART + spread(f, 0.4);
+				double fwd = -HELD_BACK - f.rnd.nextDouble() * 1.5;
+				boolean slim = p.getSkin().model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
+				Actor a = cast(f, new FilmTape.Cast(0, FilmGear.PLAYER + p.getUUID(), slim ? FilmActor.SLIM : FilmActor.WIDE, 0, false,
+					Role.SOLDIER.ordinal(), Flesh.MAN.ordinal(), false, id(p.getMainHandItem().getItem()), id(p.getOffhandItem().getItem()),
+					new float[] {(float)fwd, (float)side, 0.0F, (float)spread(f, 10.0), 1.0F}));
+				if (a != null) {
+					gait(f, a, Moves.GUARD, Moves.RUN);
+					place(f, a);
+				}
+			}
 		}
 	}
 

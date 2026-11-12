@@ -1,5 +1,5 @@
 {
-  "parent": "jaymospowers:pack/root",
+  "parent": "jaymospowers:pack/story",
   "display": {
     "icon": {
       "id": "minecraft:iron_axe"

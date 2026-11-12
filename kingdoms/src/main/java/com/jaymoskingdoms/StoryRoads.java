@@ -193,6 +193,7 @@ public final class StoryRoads {
 			|| spirit != null && spirit.kind() == Spirits.QUIET)) {
 			player.addTag(QUIET_TAG);
 		}
+		quietSuit(player);
 		int valor = Valor.rank(player);
 		if (valor >= Valor.KINDLED) {
 			mark(player, "hermit", "kindled");
@@ -234,6 +235,62 @@ public final class StoryRoads {
 			}
 		}
 		return false;
+	}
+
+	/** Once he's been met, the Quiet One's suit lies in the old keep: near the ford, white motes lead you to it. */
+	static final String QUIET_SUIT_TAG = "jaymoskingdoms.retaking.quiet_suit";
+	/** How near the ford the motes start leading, and how near the keep's gate the suit is found (blocks). */
+	static final double SUIT_LEAD = 48.0, SUIT_FOUND = 3.0;
+	/**
+	 * Andy (2026-11-12): "you should be able to find his suit ... Or you are led to it inside the ford". The suit is Jaymo's
+	 * Powers' costume, made here from its item id and saved form only: a white bodysuit, a full mask and a cloak gone to
+	 * ribbons, as he wears it in The Long Defence.
+	 */
+	static final String QUIET_SUIT = "{id:\"jaymospowers:costume\",count:1,components:{\"jaymospowers:costume_design\":"
+		+ "{name:\"The Quiet One\",cut:\"bodysuit\",primary:\"white\",secondary:\"white\",mask:\"full_mask\",cape:\"tattered\"}}}";
+
+	/** For whoever has met the Quiet One: near the ford, motes lead to the keep; at its gate, his suit, folded under the stones. */
+	private static void quietSuit(ServerPlayer player) {
+		if (!player.entityTags().contains(QUIET_TAG) || player.entityTags().contains(QUIET_SUIT_TAG)
+			|| player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+			return;
+		}
+		Ford.Site site = Ford.site(player.level().getServer());
+		if (site == null || !site.ford().closerToCenterThan(player.position(), SUIT_LEAD) && !site.keep().closerToCenterThan(player.position(), SUIT_LEAD)) {
+			return;
+		}
+		net.minecraft.server.level.ServerLevel level = player.level();
+		net.minecraft.world.phys.Vec3 keep = net.minecraft.world.phys.Vec3.atBottomCenterOf(site.keep());
+		if (keep.distanceTo(player.position()) <= SUIT_FOUND) {
+			ItemStack suit = quietSuitStack(level);
+			if (suit.isEmpty()) {
+				return;
+			}
+			player.addTag(QUIET_SUIT_TAG);
+			give(player, suit);
+			player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.road.quiet_suit").withStyle(net.minecraft.ChatFormatting.WHITE));
+			level.playSound(null, site.keep(), net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.8F);
+			return;
+		}
+		// a few white motes, from just ahead of you toward the keep's gate
+		net.minecraft.world.phys.Vec3 from = player.getEyePosition();
+		net.minecraft.world.phys.Vec3 way = keep.add(0.0, 1.0, 0.0).subtract(from);
+		net.minecraft.world.phys.Vec3 step = way.normalize();
+		for (int i = 1; i <= 4; i++) {
+			net.minecraft.world.phys.Vec3 at = from.add(step.scale(1.5 + i * 1.2));
+			Fx.burst(level, at.x, at.y, at.z, 0xF2F0E6, 0.6F, 1, 0.05, 0.05, 0.05);
+		}
+	}
+
+	/** The Quiet One's suit (an empty stack when Jaymo's Powers isn't loaded). */
+	static ItemStack quietSuitStack(net.minecraft.server.level.ServerLevel level) {
+		try {
+			net.minecraft.nbt.CompoundTag tag = net.minecraft.nbt.TagParser.parseCompoundFully(QUIET_SUIT);
+			return ItemStack.CODEC.parse(level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), tag)
+				.result().orElse(ItemStack.EMPTY);
+		} catch (Exception e) {
+			return ItemStack.EMPTY;
+		}
 	}
 
 	private static void give(ServerPlayer player, ItemStack stack) {
