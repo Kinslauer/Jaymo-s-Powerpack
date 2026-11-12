@@ -849,6 +849,12 @@ public final class GravityPower implements Power {
 			fizzle(player);
 			return;
 		}
+		// a boss shrugs off its first lifts (Kingdoms' legendary resistances): the hold slips off its hide
+		if (target instanceof LivingEntity bossy && com.jaymospowers.compat.KingdomsCompat.shrugs(bossy)) {
+			cool(player, LIFT, LIFT_COOLDOWN);
+			fizzle(player);
+			return;
+		}
 		if (target instanceof com.jaymospowers.core.BlockCluster cluster && cluster.scripted()) {
 			// a block out of Collapsing Horizon's ring (or anyone's)
 			GravityOrbit.taken(player, target);

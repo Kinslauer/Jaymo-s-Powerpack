@@ -61,7 +61,9 @@ public final class BossBars {
 			// (0.7.518) a patron's champion
 			|| entity instanceof PatronChampion champion && !champion.decoy()
 			// (0.7.610) the grizzly mini-boss
-			|| entity instanceof com.jaymoskingdoms.wild.Grizzly;
+			|| entity instanceof com.jaymoskingdoms.wild.Grizzly
+			// the great necromancer
+			|| entity instanceof GreatNecromancer;
 	}
 
 	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */

@@ -112,9 +112,9 @@ public final class Nets {
 		return h != null && who.level().getGameTime() < h.until;
 	}
 
-	/** A net lands on {@code who}: it crawls and swings badly until it is free. Returns false for one nothing can hold (a boss). */
+	/** A net lands on {@code who}: it crawls and swings badly until it is free. Returns false for one it cannot hold (a boss spends one of its {@link Legendary} resistances first). */
 	public static boolean catchIn(LivingEntity who, @Nullable LivingEntity by) {
-		if (!(who.level() instanceof ServerLevel level) || who instanceof Mob m && Senses.boss(m) || who instanceof Player p && p.isSpectator()) {
+		if (!(who.level() instanceof ServerLevel level) || who instanceof Player p && p.isSpectator() || Legendary.shrugs(who)) {
 			return false;
 		}
 		Hold h = new Hold();

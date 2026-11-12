@@ -133,15 +133,14 @@ public final class HeldFast {
 		return h != null && h.kind == Kind.ASLEEP && who.level().getGameTime() < h.until;
 	}
 
-	/** Whether nothing can hold {@code who}: bosses, spectators, and the mindless dead who feel nothing in their limbs. */
+	/** Whether nothing can hold {@code who}: spectators and the mindless dead who feel nothing in their limbs (a boss shrugs off the first holds, {@link Legendary}). */
 	public static boolean immune(LivingEntity who) {
-		return who instanceof Player p && (p.isSpectator() || p.isCreative()) || who instanceof Mob m && Senses.boss(m)
-			|| who.is(EntityTypeTags.SKELETONS);
+		return who instanceof Player p && (p.isSpectator() || p.isCreative()) || who.is(EntityTypeTags.SKELETONS);
 	}
 
 	/** {@code who} is held for {@code ticks}, with no save to resist it first. Returns false if nothing can hold them. */
 	public static boolean hold(LivingEntity who, int ticks) {
-		return set(who, Kind.HELD, ticks);
+		return !Legendary.shrugs(who) && set(who, Kind.HELD, ticks);
 	}
 
 	/** {@code who} is held for {@code ticks} unless their Grit save turns it (rolled once, now). Returns whether it took. */
@@ -159,7 +158,7 @@ public final class HeldFast {
 
 	/** {@code who} is out cold for {@code ticks} ({@link Poisons}). */
 	static boolean sleep(LivingEntity who, int ticks) {
-		return set(who, Kind.ASLEEP, ticks);
+		return !immune(who) && !Legendary.shrugs(who) && set(who, Kind.ASLEEP, ticks);
 	}
 
 	private static boolean set(LivingEntity who, Kind kind, int ticks) {

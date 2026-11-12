@@ -217,7 +217,7 @@ public final class Senses {
 
 	static boolean boss(Mob mob) {
 		EntityType<?> type = mob.getType();
-		return type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
+		return mob instanceof GreatNecromancer || type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
 			|| type.builtInRegistryHolder().is(BOSSES);
 	}
 

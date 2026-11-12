@@ -88,14 +88,14 @@ public final class Charm {
 
 	/**
 	 * {@code charmer} charms {@code who} for {@code ticks} after a Wits save (rolled once, now). Returns whether it took.
-	 * Bosses and those who feel nothing (the dead who aren't minds) can't be charmed.
+	 * A boss shrugs off the first few ({@link Legendary}); those who feel nothing (the dead who aren't minds) can't be charmed.
 	 */
 	public static boolean charm(LivingEntity who, LivingEntity charmer, int ticks) {
-		if (who == charmer || who instanceof Mob m && Senses.boss(m) || who instanceof Player p && (p.isSpectator() || p.isCreative())
+		if (who == charmer || who instanceof Player p && (p.isSpectator() || p.isCreative())
 			|| !(who.level() instanceof ServerLevel level)) {
 			return false;
 		}
-		if (Saves.resist(who, Saves.Kind.CHARM)) {
+		if (Saves.resist(who, Saves.Kind.CHARM) || Legendary.shrugs(who)) {
 			return false;
 		}
 		SPELLS.put(who, new Spell(charmer.getUUID(), level.getGameTime() + Math.min(ticks, MOST)));

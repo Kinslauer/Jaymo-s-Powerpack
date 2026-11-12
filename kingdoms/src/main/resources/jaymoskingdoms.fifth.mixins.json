@@ -8,7 +8,9 @@
 		"BoltRingMixin",
 		"DoorHandleMixin",
 		"DosedDishMixin",
-		"ProjectileCoverMixin"
+		"ProjectileCoverMixin",
+		"LairSpawnMixin",
+		"BirdSongMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

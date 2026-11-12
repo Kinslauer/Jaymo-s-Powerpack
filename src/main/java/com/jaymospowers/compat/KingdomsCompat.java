@@ -85,6 +85,35 @@ public final class KingdomsCompat {
 		}
 	}
 
+	private static boolean shrugLooked;
+	private static Method shrugs;
+
+	/**
+	 * Whether {@code entity} is a boss that shrugs off this stun, hold or lockdown (Kingdoms' legendary resistances): one is
+	 * spent and the effect must not take. False for anything else, and for a boss with none left, or without Kingdoms.
+	 */
+	public static boolean shrugs(Entity entity) {
+		if (!LOADED || !(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
+			return false;
+		}
+		if (!shrugLooked) {
+			shrugLooked = true;
+			try {
+				shrugs = Class.forName("com.jaymoskingdoms.Legendary").getMethod("shrugs", net.minecraft.world.entity.LivingEntity.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				shrugs = null;
+			}
+		}
+		if (shrugs == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(shrugs.invoke(null, living));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.20.18) {@code player}'s sworn value for a Kingdoms key (negative: turned from that patron), 0 when unknown or Kingdoms is absent. */
 	public static float blessing(Player player, String key) {
 		if (!LOADED || player == null) {

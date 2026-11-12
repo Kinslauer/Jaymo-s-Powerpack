@@ -131,9 +131,9 @@ public final class Fear {
 		return who instanceof Villager || who instanceof WanderingTrader || who instanceof Folk || Temperaments.humanoid(who) && !(who instanceof Enemy);
 	}
 
-	/** Whether {@code who} can be frightened at all: not a boss, nor a player out of play. */
+	/** Whether {@code who} can be frightened at all: not a player out of play (a boss shrugs off the first frights, {@link Legendary}). */
 	static boolean can(LivingEntity who) {
-		return who instanceof Player p ? !p.isSpectator() && !p.isCreative() : !(who instanceof Mob m && Senses.boss(m));
+		return !(who instanceof Player p) || !p.isSpectator() && !p.isCreative();
 	}
 
 	/** Whether {@code e} is something dreadful that frightens by being seen. */
@@ -165,12 +165,12 @@ public final class Fear {
 			return false;
 		}
 		frighten(who, source, ticks);
-		return true;
+		return frightened(who);
 	}
 
 	/** {@code source} frightens {@code who} for {@code ticks}, with no save to turn it first. */
 	public static void frighten(LivingEntity who, Entity source, int ticks) {
-		if (!can(who) || who == source || !(who.level() instanceof ServerLevel level)) {
+		if (!can(who) || who == source || !(who.level() instanceof ServerLevel level) || Legendary.shrugs(who)) {
 			return;
 		}
 		long now = level.getGameTime();

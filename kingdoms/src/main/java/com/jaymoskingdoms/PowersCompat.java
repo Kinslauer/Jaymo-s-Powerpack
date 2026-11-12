@@ -3560,4 +3560,29 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	private static java.lang.invoke.@Nullable MethodHandle chronoStunned, darktideStunned;
+	private static boolean lookedForStuns;
+
+	/** Whether {@code who} is stunned by one of Powers' Time Flow or Darktide blows just now. False without Powers. */
+	public static boolean stunned(net.minecraft.world.entity.LivingEntity who) {
+		if (!lookedForStuns) {
+			lookedForStuns = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					var type = java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class);
+					var lookup = java.lang.invoke.MethodHandles.publicLookup();
+					chronoStunned = lookup.findStatic(Class.forName("com.jaymospowers.power.chrono.ChronoFlow"), "stunned", type);
+					darktideStunned = lookup.findStatic(Class.forName("com.jaymospowers.power.darktide.DarktideStatus"), "stunned", type);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stuns (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return chronoStunned != null && (boolean)chronoStunned.invoke(who) || darktideStunned != null && (boolean)darktideStunned.invoke(who);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

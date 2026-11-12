@@ -815,6 +815,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Opportunity.register();
 		Notice.register();
 		Concentration.register();
+		Necropolis.register();
 		// fifth edition picks, patch 2: conditions and fight moves
 		Afflictions.register();
 		HeldFast.register();

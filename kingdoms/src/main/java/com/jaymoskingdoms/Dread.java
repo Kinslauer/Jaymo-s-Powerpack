@@ -67,7 +67,7 @@ public final class Dread {
 		Vec3 at = victim.position();
 		long now = level.getGameTime();
 		boolean spoke = false;
-		List<Mob> near = level.getEntitiesOfClass(Mob.class, victim.getBoundingBox().inflate(RANGE), m -> m != victim && m.isAlive() && scares(m, killer));
+		List<Mob> near = level.getEntitiesOfClass(Mob.class, victim.getBoundingBox().inflate(RANGE), m -> m != victim && m.isAlive() && !Legendary.boss(m) && scares(m, killer));
 		for (Mob m : near) {
 			if (!(m instanceof PathfinderMob pm) || !m.getSensing().hasLineOfSight(killer) || level.getRandom().nextFloat() >= chance(m)) {
 				continue;

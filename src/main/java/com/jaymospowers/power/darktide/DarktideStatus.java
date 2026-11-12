@@ -75,6 +75,10 @@ public final class DarktideStatus {
 		if (com.jaymospowers.combat.Stances.immovable(target)) {
 			return;
 		}
+		// a boss shrugs off its first stuns (Kingdoms' legendary resistances)
+		if (!stunned(target) && com.jaymospowers.compat.KingdomsCompat.shrugs(target)) {
+			return;
+		}
 		long until = target.level().getGameTime() + ticks;
 		Long now = target.getAttached(DarktideState.STUN);
 		if (now != null && now >= until) {
