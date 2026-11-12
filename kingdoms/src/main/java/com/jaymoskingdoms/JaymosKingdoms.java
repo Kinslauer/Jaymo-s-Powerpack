@@ -627,6 +627,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// the hunter's pack and bow (their attachments)
+		LOGGER.debug("hunter attachments: {} {}", HunterPack.PACK, HunterBow.CREDITS);
+		HunterPack.register();
+		HunterBow.register();
 		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
 		RarePets.register();
 		FairyWonder.register();

@@ -207,6 +207,7 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Green Huntsman's meat hook blessings (needs 0.5.57): {}", e.toString());
 		}
+		HunterBow.kitchenHooks();
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
