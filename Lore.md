@@ -1430,3 +1430,12 @@ sorcerers is **Halvard the Hollow**, who cut out his own heart and hid it in a s
 sleeps in a crypt under a mossy hatch, far from any village, and gets up again days after anyone kills him, until
 someone finds the urn under its cairn and breaks it. The sexton who buried him kept a tally of where; the villages
 for miles around still talk.
+
+(new) **The Low Lantern's quiet trade, and the taverns** (Claude's placement for the fifth edition picks, patch 5,
+2026-11-12, for Andy to approve). The Underworld keeps a hushed trade: its fences and its shadiest patrons sell forged
+travel passes and pardons to those they trust, and its people chalk small signs on walls for each other (a safe
+house, a guard who takes coin, a dog inside, a mark rich and careless, danger) that look like scribbles to anyone
+else. A drink at a speakeasy table is how you're let in. Every tavern keeps dice and cards that every tongue knows,
+and a hard night out is the Low Lantern's old toll on the careless: you wake with a friend, a rumour, a debt or a
+black eye. Sages (court wizards, elders, librarians) and libraries keep what each foe fears and old sextons' ledgers;
+village teachers pass on tongues, trades and fighting styles; and the Lantern Warden's priests feed those living rough.
