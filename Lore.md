@@ -1227,6 +1227,17 @@ neither does harm. Flotsam from ships she took drifts by, and old shipwrecks can
 she gives back a little of what she keeps. Rivet, the Xenoform's machine form, can flow into a ship's cannon as he does a
 golem and fire it himself, though even he needs powder and shot.
 
+(new) **The risen sea and the far islands.** In the newest age the Deep Mother has drawn her water up over the low
+shores: the flats and river mouths of the old maps lie under her, headlands stand off as islands, and the long swell
+rolls across her face, higher when she is angry. Her children have gone out with the water: fish, squid and the rest
+keep to the open sea now, and the shallows are bare, so the fisherfolk sail their smacks out to the far grounds and
+the deepest water grows the heaviest fish. The **Tideborn** keep island villages, havens on land only a boat reaches.
+**Sea hermits** live alone in towers on far islands, scholars and exiles who wanted the sea between them and the kings.
+Wrecks she threw up lie on island beaches, the ones she keeps lie on her floor far out of sight of land, and on islands
+no chart shows there are caches someone buried and never came back for. The **white whale**, old and scarred, is born
+only far out. Merchantmen and smacks heave to for a horn blown at sea and trade over the rail, and a merchant may sell
+the charted plans of a ship drawn in some far yard.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
