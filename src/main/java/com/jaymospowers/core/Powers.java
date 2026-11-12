@@ -62,7 +62,34 @@ public final class Powers {
 	 */
 	private static final List<java.util.function.Predicate<ServerPlayer>> SILENCERS = new ArrayList<>();
 
+	/** Checks that pause a player's power altogether: its passive tick stops while one holds (Dampening). */
+	private static final List<java.util.function.Predicate<ServerPlayer>> PAUSERS = new ArrayList<>();
+
 	private Powers() {
+	}
+
+	/** Adds a check that pauses a player's power tick (see {@link #paused}). */
+	public static void addPauser(java.util.function.Predicate<ServerPlayer> pauser) {
+		PAUSERS.add(pauser);
+	}
+
+	/** Whether {@code player}'s power is shut away right now: no passive tick, and (with {@link #silenced}) no keys. */
+	public static boolean paused(ServerPlayer player) {
+		for (java.util.function.Predicate<ServerPlayer> pauser : PAUSERS) {
+			if (pauser.test(player)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Lets go of every key the player's power was holding (a power being shut away mid-use). */
+	public static void releaseKeys(ServerPlayer player) {
+		for (PowerKey key : PowerKey.values()) {
+			key(player, key, false);
+		}
+		mode(player, false);
+		ultimate(player, false);
 	}
 
 	/** Adds a check that can switch a player's power keys off (see {@link #silenced}). */
@@ -195,12 +222,18 @@ public final class Powers {
 					player.resetFallDistance();
 				}
 				// ((0.17.183) acting: what it moves of someone else is Will Over Flesh's to lessen)
-				com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+				if (!paused(player)) {
+					com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+				}
 				Mastery.tick(player);
 				continue;
 			}
 			// powerless: count down survival play towards the awakening
 			if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+				continue;
+			}
+			// one who gave their power up (the Draught of Release) does not wake another by themselves
+			if (com.jaymospowers.alchemy.picks.GivingUp.settled(player)) {
 				continue;
 			}
 			Affinity.tick(player);
