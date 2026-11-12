@@ -728,6 +728,11 @@ Twenty-two heritages. The plain folk and the elemental bloods:
   other tech found in the otherwise medieval Overworld, and people talk about it: everyone loves having Frostborn tech.
   They are a proud people and usually carry their heritage's inventions, scouters and prosthetics above all, unless
   they were born and raised on the Overworld, far removed from Hail.
+
+  (new) **Travellers from Hail** (Andy, 2026-11-12: "this specific option should make you a traveler straight from
+  hail"). Not every Frostborn on the Overworld was born in the snowfields. Some come down from Hail alone, on one of
+  their people's ships, grown and with nobody here who knows their name. They wear their people's glass and carry
+  themselves like it. In the life story this is the Frostborn whom nobody raised here, and that line names Hail.
 - **Nightborn**: their mother's people kept to the night, and daylight dulls them. The Dawnborn have never trusted
   them.
 - **Warrior-born**: an old fighting blood that came down from the stars, and the reason the word "star" makes an
@@ -952,7 +957,7 @@ Elements found in the mods that can't be placed without inventing something big.
 
 - **The elder alien's people.** Their species, their kingdom's name and look, and the ruler's name wait on the models
   Andy is finding inspiration for.
-- **Hail's name in the game.** Whether any line names Hail, or only Frostborn talk of "home", is open.
+- **Hail's name in the game.** The life story's traveller line names Hail (2026-11-12). Whether villagers' talk names it, or only says "home", is still open.
 
 The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the symbiote, Blindness and the elemental
 powers, the band's makers, the pods, the Frostborn's home, the androids, Los Perrito's dead, the demons' side,

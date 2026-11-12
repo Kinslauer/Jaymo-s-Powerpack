@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: fix-youth
 branch: claude/waterskin-old-id
 with:
@@ -36,3 +36,4 @@ owns:
 - **#1265**: Andy's 4 pick-lists in `docs/checklists/`.
 - Hermes: SOUL.md hard rules; model back to Super; Quill the only writer; Prometheus counts toward the cap;
   leftover worktrees and the duplicate skill cleaned up. Details in `Fix YOUTH.md`.
+- 2026-11-12 05:20 PR #1266 is merged into master; moved to Agents/Done.

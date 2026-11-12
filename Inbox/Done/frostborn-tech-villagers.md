@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -15,3 +15,4 @@ pr: 1285
 
 ## Notes
 - 2026-11-11 13:49 Merged 2026-11-11 (PR #1285) on Andy's word in the thread.
+- 2026-11-12 05:20 PR #1285 is merged into master; moved to Inbox/Done.
