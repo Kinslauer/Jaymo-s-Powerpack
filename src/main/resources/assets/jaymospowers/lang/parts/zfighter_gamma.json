@@ -1,0 +1,15 @@
+{
+  "technique.jaymospowers.zfighter.eye_beams": "Eye Beams",
+  "technique.jaymospowers.zfighter.eye_beams.desc": "Hold sneak + V: two thin beams from your eyes where you aim, hurting what they touch while a heat gauge in the action bar fills. At full heat the eyes shut down until they cool; they cool by themselves once you stop. Let go of V within half a second for a blinding shot that blinds whatever it strikes. R while you hold: the beams spin all round you. Holding someone in a grab, the beams find their face. A Frost-born's beams are cold: 6 s on one foe freezes it. 6 to 10 ki, and a little every moment.",
+  "technique.jaymospowers.zfighter.aerial_charge": "Aerial Charge",
+  "technique.jaymospowers.zfighter.aerial_charge.desc": "On G, in flight: you fly where you look, seize the first foe in front of you and carry it along until you hit a wall or the ground, where it takes the impact and a ring cracks out of the spot. With your look steeply down it is a power dive instead: the higher you fall from, the harder it lands. 30 ki, 12 s to recharge.",
+  "technique.jaymospowers.zfighter.thunderclap": "Thunderclap",
+  "technique.jaymospowers.zfighter.thunderclap.desc": "On G: you clap and a shockwave runs out through everything near, throwing it back and hurting it a little. With one foe right in front of you the clap goes on either side of its head instead: it reels, bleeds from the head, and a player is left deaf for 8 s, with a high ringing in place of the world. 18 ki, 10 s to recharge.",
+  "technique.jaymospowers.zfighter.great_breath": "Great Breath",
+  "technique.jaymospowers.zfighter.great_breath.desc": "Hold sneak + V: a long gust from your mouth that shoves back everything in its cone, creatures, items and shots alike, without hurting them. A Frost-born's breath is cold: whatever it stays on for 6 s freezes. Costs a little ki every moment.",
+  "message.jaymospowers.zfighter_gamma.eyes_hot": "Your eyes are too hot",
+  "message.jaymospowers.zfighter_gamma.eyes_cool": "Your eyes have cooled",
+  "message.jaymospowers.zfighter_gamma.frozen": "Frozen",
+  "message.jaymospowers.zfighter_gamma.charge_needs_flight": "You can only charge in flight.",
+  "message.jaymospowers.zfighter_gamma.bracer_boost": "Your guard pays out: +%s%% damage"
+}

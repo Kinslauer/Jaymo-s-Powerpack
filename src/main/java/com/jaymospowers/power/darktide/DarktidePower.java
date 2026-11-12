@@ -307,6 +307,9 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (DarktidePicks.key(player, key, down)) {
+			return;
+		}
 		if (down && key == PowerKey.ABILITY_2 && DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED) {
 			// empty hands: the cut draws the blade of dark water for itself
 			DarktideBlade.draw(player, live(player));
@@ -357,6 +360,9 @@ public final class DarktidePower implements Power {
 	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && player.isShiftKeyDown() && DarktidePicks.shoal(player)) {
+			return;
+		}
 		if (!down) {
 			DarktideTide.modeKey(player, false);
 			return;
@@ -451,6 +457,7 @@ public final class DarktidePower implements Power {
 			player.setAttached(DarktideState.SAVE, DarktideState.save(player).withFlow(Math.round(running.flow)));
 		}
 		DarktideFlow.dry(player);
+		DarktidePicks.forget(player);
 		DarktideBlade.dismiss(player, false);
 		DarktideMaelstrom.end(player, false);
 		DarktideGuard.drop(player);
@@ -512,6 +519,7 @@ public final class DarktidePower implements Power {
 			}
 		}
 		DarktideGuard.tick(player, live);
+		DarktidePicks.tick(player, live);
 		DarktideMoves.tick(player, live);
 		DarktideGedan.tick(player, live);
 		DarktideTide.tick(player, live);

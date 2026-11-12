@@ -76,6 +76,7 @@ public final class ResonancePower implements Power {
 		ResonanceVoice.init();
 		ResonanceFate.init();
 		ResonanceGift.init();
+		ResonancePicks.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ResonanceDebugCommand.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -95,6 +96,7 @@ public final class ResonancePower implements Power {
 		ResonanceVoice.forget(player);
 		ResonanceFate.forget(player);
 		ResonanceQuiet.forget(player);
+		ResonancePicks.forget(player);
 	}
 
 	@Override
@@ -162,10 +164,14 @@ public final class ResonancePower implements Power {
 		ResonanceFate.tick(player);
 		ResonanceQuiet.tick(player);
 		ResonanceSight.tick(player);
+		ResonancePicks.tick(player);
 	}
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if ((key == PowerKey.ABILITY_1 || key == PowerKey.ABILITY_2) && ResonancePicks.key(player, key, down)) {
+			return;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			if (down && ready(player, ResonanceState.SHATTER)) {
 				ResonanceShatter.start(player);
@@ -189,7 +195,7 @@ public final class ResonancePower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
-				if (ResonanceSight.key(player)) {
+				if (ResonanceSight.key(player) || ResonancePicks.lift(player)) {
 					return;
 				}
 				if (ready(player, ResonanceState.ECHO) && ResonanceEcho.ping(player)) {

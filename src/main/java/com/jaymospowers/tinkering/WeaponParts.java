@@ -263,6 +263,16 @@ public final class WeaponParts {
 		add(new Kind(GRAVESWORN_BLADE, "jaymospowers:gravesworn", Scheme.SINGLE, 5 * INGOT, Assembly.GUARD_TOUGH, 1));
 		add(new Kind(GRUDGE_HEAD, "jaymospowers:grudge", Scheme.SINGLE, 5 * INGOT, Assembly.TOUGH_BINDING, 1));
 		add(new Kind(HORNSCYTHE_BLADE, "jaymospowers:hornscythe", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_BINDING, 1));
+		// the gear patch (gear/): arrowheads, caltrops, darts and the bear trap are forged, on their own at the Tool Station; no grid recipes
+		add(new Kind("barbed_head_blank", "jaymospowers:head_barbed", Scheme.SINGLE, INGOT, Assembly.ALONE, 4));
+		add(new Kind("harpoon_arrowhead_blank", "jaymospowers:head_harpoon", Scheme.SINGLE, INGOT, Assembly.ALONE, 2));
+		add(new Kind("grapple_head_blank", "jaymospowers:head_grapple", Scheme.SINGLE, INGOT, Assembly.ALONE, 2));
+		add(new Kind("drill_head_blank", "jaymospowers:head_drill", Scheme.SINGLE, INGOT, Assembly.ALONE, 2));
+		add(new Kind("broadhead_blank", "jaymospowers:head_broadhead", Scheme.SINGLE, INGOT, Assembly.ALONE, 4));
+		add(new Kind("caltrop_head_blank", "jaymospowers:head_caltrop", Scheme.SINGLE, INGOT, Assembly.ALONE, 4));
+		add(new Kind("caltrops_blank", "jaymospowers:caltrops", Scheme.SINGLE, 4 * Molten.NUGGET, Assembly.ALONE, 4));
+		add(new Kind("dart_tip_blank", "jaymospowers:bleeding_dart", Scheme.SINGLE, 3 * Molten.NUGGET, Assembly.ALONE, 4));
+		add(new Kind("trap_jaws_blank", "jaymospowers:bear_trap", Scheme.SINGLE, 3 * INGOT, Assembly.ALONE, 1));
 		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
 		found.addAll(PATRONS);
 		found.addAll(BANES);

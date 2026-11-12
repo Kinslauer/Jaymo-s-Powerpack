@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -32,6 +33,11 @@ import org.jspecify.annotations.Nullable;
  * again sends one as a living missile (spent, it returns after {@link #MISSILE_RETURN} ticks); sneak + B calls them all
  * back as a shell round Hive that soaks hits. A flyer that is swatted or shot is downed for a while and Hive takes
  * {@link #SHARE} of the blow.
+ *
+ * <p>The engine takes a {@link Kit} (colours, sounds, damage, health shared, the words it says, and a {@link Hook} for what
+ * the flyers do with no foe to fight and how they are drawn), so another power can fly its own swarm on the same logic:
+ * Hive is {@link #HIVE}, and the Rig's clockwork drones are a kit of their own (see the Rig's RigDrones). The old
+ * entry points with no kit are Hive's.
  */
 public final class HiveSwarm {
 	// ---- tuning ----
@@ -58,7 +64,53 @@ public final class HiveSwarm {
 	public static final int SHELL_DOWN = 160;
 	public static final int AMBER = 0xE0A020, DARK = 0x2A2010;
 
-	private static final class Swarm {
+	/** What a kit's flyers do beyond the common swarm: how many fly, where they go with no foe, how they are drawn. */
+	public interface Hook {
+		/** How many flyers this player has flying now (at most {@link #FLYERS}). */
+		int count(ServerPlayer player);
+
+		/** Where flyer {@code i} goes when there is no foe (and no shell): null for the swarm's own loiter. */
+		@Nullable Vec3 idle(ServerPlayer player, int i, Vec3 pos, long t);
+
+		/** Draws flyer {@code i} at {@code at} (the hook's own look). */
+		void draw(ServerLevel level, Vec3 at, long t, int i);
+	}
+
+	/** One power's swarm: its own flyers per player, colours, sounds, damage, share of blows and the words it says. */
+	public static final class Kit {
+		final Map<UUID, Swarm> swarms = new HashMap<>();
+		final int color, dark;
+		final boolean venom;
+		final SoundEvent hum, sting;
+		final float damage, share, shellShare;
+		final String messages;
+		@Nullable Hook hook;
+
+		/** {@code messages}: the lang prefix, with {@code form.0..3}, {@code shell_on} and {@code shell_off} under it. */
+		public Kit(int color, int dark, boolean venom, SoundEvent hum, SoundEvent sting, float damage, float share, float shellShare, String messages,
+			@Nullable Hook hook) {
+			this.color = color;
+			this.dark = dark;
+			this.venom = venom;
+			this.hum = hum;
+			this.sting = sting;
+			this.damage = damage;
+			this.share = share;
+			this.shellShare = shellShare;
+			this.messages = messages;
+			this.hook = hook;
+		}
+
+		int count(ServerPlayer player) {
+			return hook == null ? FLYERS : Mth.clamp(hook.count(player), 0, FLYERS);
+		}
+	}
+
+	/** Hive's own swarm. */
+	public static final Kit HIVE = new Kit(AMBER, DARK, true, SoundEvents.BEE_LOOP_AGGRESSIVE, SoundEvents.BEE_STING, 1.0F, SHARE, SHELL_SHARE,
+		"message.jaymospowers.xenoform.hive.", null);
+
+	static final class Swarm {
 		final Vec3[] pos = new Vec3[FLYERS];
 		final Vec3[] dir = new Vec3[FLYERS];
 		final long[] backAt = new long[FLYERS];
@@ -70,7 +122,6 @@ public final class HiveSwarm {
 		int quarry = -1;
 	}
 
-	private static final Map<UUID, Swarm> SWARMS = new HashMap<>();
 	/** Set while Hive is taking its share of a blow to the swarm, so that blow is not soaked a second time. */
 	private static boolean passing;
 
@@ -78,19 +129,61 @@ public final class HiveSwarm {
 	}
 
 	public static boolean out(ServerPlayer player) {
-		Swarm swarm = SWARMS.get(player.getUUID());
+		return out(HIVE, player);
+	}
+
+	public static boolean out(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
 		return swarm != null && swarm.out;
 	}
 
 	public static void clear(ServerPlayer player) {
-		SWARMS.remove(player.getUUID());
+		clear(HIVE, player);
+	}
+
+	public static void clear(Kit kit, ServerPlayer player) {
+		kit.swarms.remove(player.getUUID());
 	}
 
 	/** Z tap: the next formation. */
 	public static void cycle(ServerPlayer player) {
-		Swarm swarm = SWARMS.computeIfAbsent(player.getUUID(), k -> fresh(player));
-		swarm.formation = (swarm.formation + 1) % FORMATIONS;
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.hive.form." + swarm.formation).withStyle(ChatFormatting.GOLD));
+		cycle(HIVE, player);
+	}
+
+	public static void cycle(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.computeIfAbsent(player.getUUID(), k -> fresh(player));
+		formation(kit, player, (swarm.formation + 1) % FORMATIONS);
+	}
+
+	/** Picks formation {@code which} (close in, surround, strafe, scout) and says so. */
+	public static void formation(Kit kit, ServerPlayer player, int which) {
+		Swarm swarm = kit.swarms.computeIfAbsent(player.getUUID(), k -> fresh(player));
+		swarm.formation = Mth.clamp(which, 0, FORMATIONS - 1);
+		player.sendOverlayMessage(Component.translatable(kit.messages + "form." + swarm.formation).withStyle(ChatFormatting.GOLD));
+	}
+
+	/** Whether the flyers are home as a shell. */
+	public static boolean shelled(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
+		return swarm != null && swarm.out && swarm.shell;
+	}
+
+	/** Calls the flyers in for good (they are not out any more). */
+	public static void stow(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
+		if (swarm != null) {
+			swarm.out = false;
+			swarm.shell = false;
+		}
+	}
+
+	/** Where flyer {@code i} is (null for one that is a missile in flight or downed, or not flying), for a map or a task. */
+	public static @Nullable Vec3 freeAt(Kit kit, ServerPlayer player, int i) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
+		if (swarm == null || !swarm.out || i >= kit.count(player) || swarm.flight[i] > 0 || swarm.backAt[i] > player.level().getGameTime()) {
+			return null;
+		}
+		return swarm.pos[i];
 	}
 
 	private static Swarm fresh(ServerPlayer player) {
@@ -105,30 +198,38 @@ public final class HiveSwarm {
 
 	/** B: the swarm leaves Hive and goes for {@code quarry} (or whatever is near). */
 	public static void deploy(ServerPlayer player, @Nullable LivingEntity quarry) {
-		Swarm swarm = SWARMS.computeIfAbsent(player.getUUID(), k -> fresh(player));
+		deploy(HIVE, player, quarry);
+	}
+
+	public static void deploy(Kit kit, ServerPlayer player, @Nullable LivingEntity quarry) {
+		Swarm swarm = kit.swarms.computeIfAbsent(player.getUUID(), k -> fresh(player));
 		swarm.shell = false;
 		swarm.out = true;
 		swarm.quarry = quarry == null ? -1 : quarry.getId();
 		for (int i = 0; i < FLYERS; i++) {
 			swarm.pos[i] = player.position().add(0.0, 1.0, 0.0);
 		}
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEE_LOOP_AGGRESSIVE, SoundSource.PLAYERS, 1.5F, 1.0F);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), kit.hum, SoundSource.PLAYERS, 1.5F, 1.0F);
 	}
 
 	/** B again: one flyer streaks at {@code target} (or where the player looks). False when none is free. */
 	public static boolean missile(ServerPlayer player, @Nullable LivingEntity target) {
-		Swarm swarm = SWARMS.get(player.getUUID());
+		return missile(HIVE, player, target);
+	}
+
+	public static boolean missile(Kit kit, ServerPlayer player, @Nullable LivingEntity target) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
 		long now = player.level().getGameTime();
 		if (swarm == null || !swarm.out) {
 			return false;
 		}
-		for (int i = 0; i < FLYERS; i++) {
+		for (int i = 0; i < kit.count(player); i++) {
 			if (swarm.backAt[i] <= now && swarm.flight[i] == 0) {
 				swarm.pos[i] = player.getEyePosition();
 				swarm.dir[i] = player.getLookAngle();
 				swarm.flight[i] = MISSILE_TICKS;
 				swarm.target[i] = target == null ? -1 : target.getId();
-				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEE_STING, SoundSource.PLAYERS, 1.2F, 1.6F);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), kit.sting, SoundSource.PLAYERS, 1.2F, 1.6F);
 				return true;
 			}
 		}
@@ -137,14 +238,18 @@ public final class HiveSwarm {
 
 	/** Sneak + B: the flyers come home as a shell, or fly out again. */
 	public static void shell(ServerPlayer player) {
-		Swarm swarm = SWARMS.computeIfAbsent(player.getUUID(), k -> fresh(player));
+		shell(HIVE, player);
+	}
+
+	public static void shell(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.computeIfAbsent(player.getUUID(), k -> fresh(player));
 		if (!swarm.out) {
-			deploy(player, null);
+			deploy(kit, player, null);
 			swarm.shell = true;
 		} else {
 			swarm.shell = !swarm.shell;
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.hive.shell_" + (swarm.shell ? "on" : "off")).withStyle(ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable(kit.messages + "shell_" + (swarm.shell ? "on" : "off")).withStyle(ChatFormatting.GOLD));
 	}
 
 	/**
@@ -152,16 +257,20 @@ public final class HiveSwarm {
 	 * of it. False: cancel the original blow.
 	 */
 	public static boolean soak(ServerPlayer player, DamageSource source, float amount) {
-		Swarm swarm = SWARMS.get(player.getUUID());
+		return soak(HIVE, player, source, amount);
+	}
+
+	public static boolean soak(Kit kit, ServerPlayer player, DamageSource source, float amount) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
 		if (passing || swarm == null || !swarm.out || !swarm.shell || amount <= 0.0F || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return true;
 		}
 		long now = player.level().getGameTime();
-		for (int i = 0; i < FLYERS; i++) {
+		for (int i = 0; i < kit.count(player); i++) {
 			if (swarm.backAt[i] <= now && swarm.flight[i] == 0) {
 				swarm.backAt[i] = now + SHELL_DOWN;
-				puff(player.level(), swarm.pos[i]);
-				pass(player, source, amount * SHELL_SHARE);
+				puff(kit, player.level(), swarm.pos[i]);
+				pass(player, source, amount * kit.shellShare);
 				return false;
 			}
 		}
@@ -178,8 +287,8 @@ public final class HiveSwarm {
 		}
 	}
 
-	private static void puff(ServerLevel level, Vec3 at) {
-		MagicFx.burst(level, at.x, at.y, at.z, AMBER, 0.6F, 6, 0.2, 0.2, 0.2);
+	private static void puff(Kit kit, ServerLevel level, Vec3 at) {
+		MagicFx.burst(level, at.x, at.y, at.z, kit.color, 0.6F, 6, 0.2, 0.2, 0.2);
 	}
 
 	private static boolean foe(ServerPlayer player, Entity e) {
@@ -207,25 +316,36 @@ public final class HiveSwarm {
 
 	/** Every tick as Hive. */
 	public static void tick(ServerPlayer player) {
-		Swarm swarm = SWARMS.get(player.getUUID());
+		tick(HIVE, player);
+	}
+
+	public static void tick(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
 		if (swarm == null || !swarm.out) {
 			return;
 		}
+		int flyers = kit.count(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		long t = player.tickCount;
 		LivingEntity q = swarm.shell ? null : quarry(player, level, swarm);
 		Vec3 look = player.getLookAngle();
 		Vec3 side = new Vec3(-look.z, 0.0, look.x).normalize();
-		for (int i = 0; i < FLYERS; i++) {
+		for (int i = 0; i < flyers; i++) {
 			if (swarm.flight[i] > 0) {
-				missileStep(player, level, swarm, i, now);
+				missileStep(kit, player, level, swarm, i, now);
 				continue;
 			}
 			if (swarm.backAt[i] > now) {
 				continue;
 			}
-			Vec3 want = want(player, swarm, i, q, t, look, side);
+			Vec3 want = null;
+			if (!swarm.shell && q == null && kit.hook != null) {
+				want = kit.hook.idle(player, i, swarm.pos[i], t);
+			}
+			if (want == null) {
+				want = want(player, swarm, i, q, t, look, side);
+			}
 			Vec3 pos = swarm.pos[i];
 			Vec3 step = want.subtract(pos);
 			double len = step.length();
@@ -235,15 +355,19 @@ public final class HiveSwarm {
 			}
 			swarm.pos[i] = pos;
 			if (!swarm.shell) {
-				act(player, level, swarm, i, q, t, now);
-				swat(player, level, swarm, i, now);
+				act(kit, player, level, swarm, i, q, t, now);
+				swat(kit, player, level, swarm, i, now);
 			} else {
-				shot(player, level, swarm, i, now);
+				shot(kit, player, level, swarm, i, now);
 			}
-			draw(level, pos, t, i);
+			if (kit.hook != null) {
+				kit.hook.draw(level, pos, t, i);
+			} else {
+				draw(kit, level, pos, t, i);
+			}
 		}
 		if (swarm.formation == SCOUT && !swarm.shell && t % 10 == 0) {
-			mark(player, level, swarm, now);
+			mark(player, level, swarm, now, flyers);
 		}
 	}
 
@@ -281,7 +405,7 @@ public final class HiveSwarm {
 	}
 
 	/** What a flyer does on its quarry: sting (close), dive (surround), cut across (strafe). */
-	private static void act(ServerPlayer player, ServerLevel level, Swarm swarm, int i, @Nullable LivingEntity q, long t, long now) {
+	private static void act(Kit kit, ServerPlayer player, ServerLevel level, Swarm swarm, int i, @Nullable LivingEntity q, long t, long now) {
 		if (q == null || swarm.formation == SCOUT) {
 			return;
 		}
@@ -296,26 +420,28 @@ public final class HiveSwarm {
 		if (damage > 0.0F) {
 			swarm.hitNext[i] = now + STRAFE_EVERY;
 			q.setInvulnerableTime(0);
-			q.hurtServer(level, player.damageSources().playerAttack(player), damage);
-			q.addEffect(new MobEffectInstance(MobEffects.POISON, 30, 0), player);
-			level.playSound(null, q.getX(), q.getY(), q.getZ(), SoundEvents.BEE_STING, SoundSource.PLAYERS, 0.5F, 1.4F);
+			q.hurtServer(level, player.damageSources().playerAttack(player), damage * kit.damage);
+			if (kit.venom) {
+				q.addEffect(new MobEffectInstance(MobEffects.POISON, 30, 0), player);
+			}
+			level.playSound(null, q.getX(), q.getY(), q.getZ(), kit.sting, SoundSource.PLAYERS, 0.5F, 1.4F);
 		}
 	}
 
 	/** An enemy next to a flyer swats it down; Hive takes its share. */
-	private static void swat(ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
+	private static void swat(Kit kit, ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
 		Vec3 at = swarm.pos[i];
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(0.8), m -> foe(player, m) && m.getTarget() == player)) {
 			if (level.getRandom().nextInt(8) == 0) {
-				down(player, level, swarm, i, now, level.damageSources().mobAttack(mob), SWAT_DAMAGE);
+				down(kit, player, level, swarm, i, now, level.damageSources().mobAttack(mob), SWAT_DAMAGE);
 				return;
 			}
 		}
-		shot(player, level, swarm, i, now);
+		shot(kit, player, level, swarm, i, now);
 	}
 
 	/** A flyer in the way of a shot soaks it. */
-	private static void shot(ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
+	private static void shot(Kit kit, ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
 		Vec3 at = swarm.pos[i];
 		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(at, at).inflate(0.7))) {
 			Entity owner = p.getOwner();
@@ -323,18 +449,18 @@ public final class HiveSwarm {
 				continue;
 			}
 			p.discard();
-			down(player, level, swarm, i, now, level.damageSources().generic(), SWAT_DAMAGE);
+			down(kit, player, level, swarm, i, now, level.damageSources().generic(), SWAT_DAMAGE);
 			return;
 		}
 	}
 
-	private static void down(ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now, DamageSource source, float amount) {
+	private static void down(Kit kit, ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now, DamageSource source, float amount) {
 		swarm.backAt[i] = now + DOWN_TICKS;
-		puff(level, swarm.pos[i]);
-		pass(player, source, amount * SHARE);
+		puff(kit, level, swarm.pos[i]);
+		pass(player, source, amount * kit.share);
 	}
 
-	private static void missileStep(ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
+	private static void missileStep(Kit kit, ServerPlayer player, ServerLevel level, Swarm swarm, int i, long now) {
 		Vec3 from = swarm.pos[i];
 		Entity target = swarm.target[i] >= 0 ? level.getEntity(swarm.target[i]) : null;
 		Vec3 dir = swarm.dir[i];
@@ -347,12 +473,12 @@ public final class HiveSwarm {
 		swarm.pos[i] = next;
 		swarm.flight[i]--;
 		if (swarm.flight[i] % 2 == 0) {
-			MagicFx.beam(level, from, next, 0.06F, AMBER, 4);
+			MagicFx.beam(level, from, next, 0.06F, kit.color, 4);
 		}
 		boolean spent = swarm.flight[i] <= 0 || !level.getBlockState(BlockPos.containing(next)).getCollisionShape(level, BlockPos.containing(next)).isEmpty();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(next, next).inflate(1.0), e -> foe(player, e))) {
 			e.setInvulnerableTime(0);
-			e.hurtServer(level, player.damageSources().playerAttack(player), MISSILE_DAMAGE);
+			e.hurtServer(level, player.damageSources().playerAttack(player), MISSILE_DAMAGE * kit.damage);
 			e.setDeltaMovement(e.getDeltaMovement().add(dir.scale(0.5)));
 			e.syncVelocity = true;
 			spent = true;
@@ -361,14 +487,14 @@ public final class HiveSwarm {
 		if (spent) {
 			swarm.flight[i] = 0;
 			swarm.backAt[i] = now + MISSILE_RETURN;
-			MagicFx.blast(level, next, 1.2F, AMBER);
-			level.playSound(null, next.x, next.y, next.z, SoundEvents.BEE_STING, SoundSource.PLAYERS, 1.0F, 0.8F);
+			MagicFx.blast(level, next, 1.2F, kit.color);
+			level.playSound(null, next.x, next.y, next.z, kit.sting, SoundSource.PLAYERS, 1.0F, 0.8F);
 		}
 	}
 
 	/** Scouts outline every foe they see, for the player to follow. */
-	private static void mark(ServerPlayer player, ServerLevel level, Swarm swarm, long now) {
-		for (int i = 0; i < FLYERS; i++) {
+	private static void mark(ServerPlayer player, ServerLevel level, Swarm swarm, long now, int flyers) {
+		for (int i = 0; i < flyers; i++) {
 			if (swarm.flight[i] > 0 || swarm.backAt[i] > now) {
 				continue;
 			}
@@ -380,16 +506,20 @@ public final class HiveSwarm {
 		}
 	}
 
-	private static void draw(ServerLevel level, Vec3 at, long t, int i) {
-		level.sendParticles(MagicFx.mote(AMBER, 0.5F), at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+	private static void draw(Kit kit, ServerLevel level, Vec3 at, long t, int i) {
+		level.sendParticles(MagicFx.mote(kit.color, 0.5F), at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
 		if ((t + i) % 2 == 0) {
-			level.sendParticles(MagicFx.miasma(DARK, 0.5F), at.x, at.y, at.z, 1, 0.08, 0.08, 0.08, 0.0);
+			level.sendParticles(MagicFx.miasma(kit.dark, 0.5F), at.x, at.y, at.z, 1, 0.08, 0.08, 0.08, 0.0);
 		}
 	}
 
 	/** Used by Hive for the formation name in the HUD-less status line. */
 	public static int formation(ServerPlayer player) {
-		Swarm swarm = SWARMS.get(player.getUUID());
+		return formation(HIVE, player);
+	}
+
+	public static int formation(Kit kit, ServerPlayer player) {
+		Swarm swarm = kit.swarms.get(player.getUUID());
 		return swarm == null ? CLOSE : Mth.clamp(swarm.formation, 0, FORMATIONS - 1);
 	}
 }

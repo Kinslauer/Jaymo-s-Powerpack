@@ -45,6 +45,7 @@ public final class BlindnessPowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(BlindnessPowerClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
 		BlindnessEcholocationClient.init();
+		BlindnessRadarClient.init();
 		BlindnessSockets.register();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.blindness.Unseeing.TYPE, UnseeingRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(BlindnessEcho.TYPE, (payload, context) ->
@@ -94,6 +95,7 @@ public final class BlindnessPowerClient {
 		side(graphics, w, h, false, right);
 		if (dark(player)) {
 			BlindnessEcholocationClient.render(graphics, delta);
+			BlindnessRadarClient.render(graphics, delta);
 		}
 	}
 

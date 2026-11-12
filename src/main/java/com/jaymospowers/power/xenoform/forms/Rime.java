@@ -75,7 +75,10 @@ public final class Rime extends XenoForm {
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 		switch (key) {
 			case ABILITY_1 -> {
-				if (down) {
+				// sneak + R: the cold gaze instead of the breath
+				if (down ? player.isShiftKeyDown() : CryoLent.gazing(player)) {
+					CryoLent.eyes(player, down);
+				} else if (down) {
 					if (ready(player, live, R)) {
 						CryoLent.breath(player, true);
 					}
@@ -85,7 +88,10 @@ public final class Rime extends XenoForm {
 				}
 			}
 			case ABILITY_2 -> {
-				if (down && ready(player, live, G)) {
+				if (down && player.isShiftKeyDown()) {
+					// sneak + G: a volley of bleeding icicles
+					CryoLent.volley(player);
+				} else if (down && ready(player, live, G)) {
 					CryoLent.shards(player);
 					cooldown(player, live, G, SHARDS_COOLDOWN);
 				}
@@ -97,7 +103,10 @@ public final class Rime extends XenoForm {
 				}
 			}
 			case ABILITY_4 -> {
-				if (down && ready(player, live, B)) {
+				if (down && player.isShiftKeyDown()) {
+					// sneak + B: a ball of ice that roots
+					CryoLent.ball(player);
+				} else if (down && ready(player, live, B)) {
 					CryoLent.wall(player);
 					cooldown(player, live, B, WALL_COOLDOWN);
 				}

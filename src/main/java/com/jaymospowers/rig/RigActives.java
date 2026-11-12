@@ -182,6 +182,10 @@ public final class RigActives {
 			RigSentry.use(player);
 			return;
 		}
+		if (RigPicks.is(action)) {
+			RigPicks.use(player, action);
+			return;
+		}
 		if (action == RigNet.LIMB_SHOT || action == RigNet.LIMB_KICK) {
 			// a Rig prosthetic needs no suit
 			RigLimbs.use(player, action);
@@ -470,6 +474,8 @@ public final class RigActives {
 				target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, SMOKE_BLIND_TICKS, 0), player);
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, end.x, end.y, end.z, 8, 0.3, 0.3, 0.3, 0.01);
 			}
+		} else if (hit == null && block.getType() != HitResult.Type.MISS) {
+			RigBank.palm(player, block.getLocation(), block.getDirection(), PALM_DAMAGE * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F), RigForgeBlock.FX_COLOR);
 		}
 	}
 
