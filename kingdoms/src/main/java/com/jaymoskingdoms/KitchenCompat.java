@@ -522,6 +522,20 @@ public final class KitchenCompat {
 		}
 	}
 
+	/** Kitchen's drunkenness ({@code Drunk.drink}): {@code points} more for {@code player}; false without that Kitchen. */
+	static boolean getDrunk(net.minecraft.server.level.ServerPlayer player, int points) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.brewing.Drunk").getMethod("drink", net.minecraft.server.level.ServerPlayer.class, int.class).invoke(null, player, points);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's drink failed: {}", e.toString());
+			return false;
+		}
+	}
+
 	private static @Nullable Object call(@Nullable Method method, Entity corpse, Object... args) {
 		if (method == null) {
 			return null;

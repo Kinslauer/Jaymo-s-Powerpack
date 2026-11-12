@@ -328,8 +328,9 @@ public final class Underworld {
 				// (between bouts the champion will talk)
 				return InteractionResult.SUCCESS;
 			}
-			if (v.entityTags().contains(DICER_TAG) && Coinage.held(sp.getMainHandItem()) >= Money.UNIT) {
-				dice(level, sp, v);
+			if (v.entityTags().contains(DICER_TAG) && !sp.isShiftKeyDown()) {
+				// the dice-thrower's table: dice or cards for coin, with whoever else sits down ({@link Tables})
+				Tables.sitAtDicer(level, sp, v);
 				return InteractionResult.SUCCESS;
 			}
 			if (sp.isShiftKeyDown() && contraband(sp.getMainHandItem()) && !Smuggling.isBundle(sp.getMainHandItem()) && !v.entityTags().contains(FENCE_TAG) && !v.entityTags().contains(DICER_TAG)) {
@@ -875,6 +876,9 @@ public final class Underworld {
 				buyGraded(offers, pmeh, home ? PMEH_BUY_HOME : PMEH_BUY_AWAY, BUY_STOCK);
 			}
 			offers.add(buy(SHASH_BRICK, home ? SHASH_BUY_AWAY : SHASH_BUY_HOME, BUY_STOCK));
+			// forged papers, never crafted: a fence has them
+			offers.add(sell(ForgedPapers.PASS, ForgedPapers.PASS_PRICE, ForgedPapers.STOCK));
+			offers.add(sell(ForgedPapers.PARDON, ForgedPapers.PARDON_PRICE, ForgedPapers.STOCK));
 			// and the sealed bundles a player can run to the other dens
 			Smuggling.bundles(level, f, offers);
 			if (extra > 0) {
@@ -893,6 +897,11 @@ public final class Underworld {
 			buyGraded(offers, pmeh, STREET_PMEH, STREET_STOCK);
 		}
 		offers.add(buy(SHASH_BRICK, STREET_SHASH, STREET_STOCK));
+		// and the especially shady ones sell forged papers, for more than the fence
+		if (Crooks.notoriety(v) > 0) {
+			offers.add(sell(ForgedPapers.PASS, ForgedPapers.PASS_PRICE + ForgedPapers.CROOK_EXTRA, 1));
+			offers.add(sell(ForgedPapers.PARDON, ForgedPapers.PARDON_PRICE + ForgedPapers.CROOK_EXTRA, 1));
+		}
 	}
 
 	/** A price, cheaper while there's smuggled stock. */
@@ -1059,34 +1068,10 @@ public final class Underworld {
 
 	// ---- dice ----------------------------------------------------------------------------------------------------------
 
-	/** A throw against the house: two dice each, the higher total takes the pot; a tie, the stakes back. */
-	private static void dice(ServerLevel level, ServerPlayer player, Villager dicer) {
-		long now = level.getGameTime();
-		Long next = DICE_NEXT.get(player.getUUID());
-		if (next != null && now < next) {
-			return;
-		}
-		DICE_NEXT.put(player.getUUID(), now + DICE_COOLDOWN);
-		// (0.7.498) the stake is coin out of the coins or purse in hand (or the pack, behind them), up to MOST_WAGER, in emeralds' worth
-		// (no more than the player can really pay here: foreign coins count for less)
-		int wager = (int)Math.min(Math.min(Coinage.held(player.getMainHandItem()), Money.count(player, (Faction)null)) / Money.UNIT, MOST_WAGER);
-		if (wager < 1 || !Money.charge(player, Money.worth(wager))) {
-			return;
-		}
-		RandomSource random = level.getRandom();
-		int a = 1 + random.nextInt(6), b = 1 + random.nextInt(6), c = 1 + random.nextInt(6), e = 1 + random.nextInt(6);
-		int yours = a + b, theirs = c + e;
-		dicer.getLookControl().setLookAt(player, 30.0F, 30.0F);
-		level.playSound(null, dicer.getX(), dicer.getY(), dicer.getZ(), SoundEvents.BONE_BLOCK_HIT, SoundSource.NEUTRAL, 0.8F, 1.6F);
-		String outcome = yours > theirs ? "win" : yours < theirs ? "lose" : "push";
-		Speech.tell(level, dicer, player, Component.translatable("underworld.jaymoskingdoms.dice." + outcome + "." + random.nextInt(LINES), a, b, c, e, wager),
-			yours > theirs ? Speech.GOLD : yours < theirs ? Speech.RED : Speech.WHITE);
-		int back = yours > theirs ? wager * 2 : yours == theirs ? wager : 0;
-		if (back > 0) {
-			Money.pay(player, Money.worth(back));
-		}
+	/** A hand was played at the dice-thrower's table: every so many of them warm the city. */
+	static void played(ServerLevel level, BlockPos at) {
 		if (++games % GAMES_PER_HEAT == 0) {
-			Faction f = Theft.lawAt(level, dicer.blockPosition());
+			Faction f = Theft.lawAt(level, at);
 			if (f != null) {
 				warm(level.getServer(), f, 1);
 			}

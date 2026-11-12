@@ -43,7 +43,11 @@ public final class InteractActions {
 	public static final String PROMISE = "promise";
 	/** Ask About the Old War: a court wizard tells the story of the long defence, as a film ({@code LoreFilms}). */
 	public static final String STORY = "story";
-	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY);
+	/** Talk Them Round ({@link Persuasion}), Make a Night of It ({@link Carousing}), Ask for Lessons ({@link Lessons}), Consult ({@link Research}),
+	 * Ask a Favour ({@link StartPerks}), Where Were You ({@link Liars}), Show Papers ({@link ForgedPapers}) and Ask for Alms ({@link Lifestyle}). */
+	public static final String ROUND = "round", NIGHT = "night", TEACH = "teach", CONSULT = "consult", FAVOUR = "favour", ALIBI = "alibi", PAPERS = "papers", ALMS = "alms";
+	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -99,6 +103,14 @@ public final class InteractActions {
 			case ENVOY -> Envoys.hearable(player, v);
 			case PROMISE -> v instanceof Villager villager && Promises.handable(player, villager);
 			case STORY -> CourtWizards.is(v) && com.jaymoskingdoms.films.LoreFilms.canPlay(player);
+			case ROUND -> Persuasion.offers(player, v);
+			case NIGHT -> Carousing.offers(player, v);
+			case TEACH -> Lessons.offers(player, v);
+			case CONSULT -> Research.sage(v);
+			case FAVOUR -> StartPerks.offers(player, v);
+			case ALIBI -> Liars.askable(v);
+			case PAPERS -> Liars.askable(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.PASS);
+			case ALMS -> Lifestyle.alms(player, v);
 			default -> false;
 		};
 	}
@@ -167,9 +179,48 @@ public final class InteractActions {
 				com.jaymoskingdoms.films.LoreFilms.told(player, v);
 				return null;
 			}
+			case ROUND -> {
+				Persuasion.ask(player, (Villager)v);
+				return null;
+			}
+			case NIGHT -> {
+				Carousing.ask(player, v);
+				return null;
+			}
+			case TEACH -> {
+				Lessons.ask(player, v);
+				return null;
+			}
+			case CONSULT -> {
+				Research.open(player, v, null);
+				return null;
+			}
+			case FAVOUR -> {
+				StartPerks.ask(player, v);
+				return null;
+			}
+			case ALIBI -> {
+				Liars.alibiMenu(player, v);
+				return null;
+			}
+			case PAPERS -> {
+				if (player.level() instanceof ServerLevel level && guardRealm(player, v) != null) {
+					ForgedPapers.atGate(level, player, v, guardRealm(player, v));
+				}
+				return null;
+			}
+			case ALMS -> {
+				Lifestyle.giveAlms(player, v);
+				return null;
+			}
 			default -> {
 				return null;
 			}
 		}
+	}
+
+	/** The realm {@code guard} keeps the law for, or null. */
+	private static @Nullable Faction guardRealm(ServerPlayer player, LivingEntity guard) {
+		return player.level() instanceof ServerLevel level ? Theft.lawAt(level, guard.blockPosition()) : null;
 	}
 }

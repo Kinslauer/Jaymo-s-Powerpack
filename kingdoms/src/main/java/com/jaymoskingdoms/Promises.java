@@ -299,6 +299,7 @@ public final class Promises {
 
 	public static void keep(ServerPlayer player, Promise p) {
 		close(player, p, KEPT);
+		Sparks.act(player, Sparks.Act.KEPT_WORD, false);
 	}
 
 	public static void breakOff(ServerPlayer player, Promise p, String why) {

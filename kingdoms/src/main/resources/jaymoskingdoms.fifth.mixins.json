@@ -10,7 +10,8 @@
 		"DosedDishMixin",
 		"ProjectileCoverMixin",
 		"LairSpawnMixin",
-		"BirdSongMixin"
+		"BirdSongMixin",
+		"FoeLoreMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

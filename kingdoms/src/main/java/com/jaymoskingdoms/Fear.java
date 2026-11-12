@@ -160,7 +160,7 @@ public final class Fear {
 		if (shrugged != null && now < shrugged) {
 			return false;
 		}
-		if (Saves.resist(who, Saves.Kind.FEAR)) {
+		if (Saves.resist(who, Saves.Kind.FEAR) || who instanceof ServerPlayer player && Sparks.rescue(player)) {
 			SHRUG.put(who, now + SHRUGGED);
 			return false;
 		}

@@ -316,6 +316,16 @@ public final class McaCompat {
 		return LOADED && courtable(a, b) && McaBridge.marry(a, b);
 	}
 
+	/** A grown MCA villager free to be engaged. */
+	static boolean engageable(Villager v) {
+		return LOADED && McaBridge.engageable(v);
+	}
+
+	/** {@code v} (MCA) becomes engaged to {@code player}; true if it did. */
+	static boolean engage(Villager v, ServerPlayer player) {
+		return LOADED && McaBridge.engage(v, player);
+	}
+
 	/** (0.7.21) The player an MCA villager was asked to follow (their menu's Follow), while they're following; else null. */
 	static java.util.@Nullable UUID following(Villager v) {
 		return LOADED ? McaBridge.following(v) : null;

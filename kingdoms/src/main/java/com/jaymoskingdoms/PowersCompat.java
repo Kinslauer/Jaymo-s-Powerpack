@@ -3585,4 +3585,19 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	/**
+	 * Hands Powers' guard the sparks' rescue: {@code rescue} is asked when a player's block missed its parry window, and a
+	 * {@code true} turns the block into a parry (Powers' {@code Guard.SPARK}, set by reflection).
+	 */
+	public static void sparkParry(java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> rescue) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymospowers.combat.Guard").getField("SPARK").set(null, rescue);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't hand Jaymo's Powers' guard the sparks", e);
+		}
+	}
 }

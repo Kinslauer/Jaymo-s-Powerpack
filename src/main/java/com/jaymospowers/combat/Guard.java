@@ -408,6 +408,12 @@ public final class Guard {
 		return Timing.BLOCK;
 	}
 
+	/**
+	 * Asked when a melee block missed its parry window: a {@code true} (Jaymo's Kingdoms' spark, spent) makes it a parry. Set by
+	 * Kingdoms; nothing is turned by default.
+	 */
+	public static volatile java.util.function.Predicate<ServerPlayer> SPARK = p -> false;
+
 	/** (0.17.67) A gun's ball or bullet (tagged by whoever fired it, or any of TaCZ's): blocked, never parried. */
 	public static boolean shot(@Nullable Entity direct) {
 		return direct instanceof Projectile && (direct.entityTags().contains(UNPARRYABLE_TAG)
@@ -431,6 +437,10 @@ public final class Guard {
 			return false;
 		}
 		Timing timing = timing(player, source, player.getTicksUsingItem());
+		if (timing == Timing.BLOCK && melee && !(source.getEntity() instanceof LivingEntity foe && foe.entityTags().contains(UNPARRYABLE_TAG)) && SPARK.test(player)) {
+			// a spark of Jaymo's Kingdoms (held for playing true) turns a missed parry into one
+			timing = Timing.PARRY;
+		}
 		if (timing.parried()) {
 			LivingEntity attacker = source.getEntity() instanceof LivingEntity living && living != player ? living : null;
 			com.jaymospowers.rig.RigField.noteBlow(player, amount);

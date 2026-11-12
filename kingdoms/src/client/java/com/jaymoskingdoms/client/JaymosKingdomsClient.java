@@ -202,6 +202,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
+		GameScreen.register();
+		RecallScreen.register();
+		ChalkClient.register();
+		ResearchScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,

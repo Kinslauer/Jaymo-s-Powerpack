@@ -384,6 +384,7 @@ public final class Captives {
 		int home = c == null ? -1 : c.home();
 		int standing = c == null ? FOLK : c.standingIndex();
 		bind(captive, false);
+		Sparks.act(player, Sparks.Act.FREED, false);
 		captive.setAttached(CAPTIVE, new Captive(home, Optional.of(player.getUUID()), level.getGameTime(), standing));
 		PLEADED.remove(captive.getUUID());
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);

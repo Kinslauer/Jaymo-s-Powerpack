@@ -511,8 +511,13 @@ public final class Approaches {
 			if (!free(mob) || (!forced && met(mob, player, now)) || !mob.hasLineOfSight(player)) {
 				continue;
 			}
+
 			Faction f = home(level, mob);
 			if (f == null) {
+				continue;
+			}
+			if (!forced && guard(mob) && (StartPerks.salutes(player, f.id()) || Liars.bribed(mob, player))) {
+				// an old comrade is saluted; a bought guard looks away
 				continue;
 			}
 			int[] choice = pick(level, mob, f, player, now, random, topic);
@@ -661,7 +666,8 @@ public final class Approaches {
 			// (0.7.519) a partner realm's people are let by: no halting, no search, no toll
 			boolean passage = !sworn && Treaties.passage(server, f, player);
 			if (!sworn && !passage && rep < KNOWN_REP && (halted == null || now - halted >= Blessings.haltGap(player, f, Faiths.haltGap(mob, player, Prejudice.haltGap(mob, player, HALT_TICKS))))) {
-				w[HALT] = 2;
+				// how you live shows: the rough are stopped more, the well-off less
+				w[HALT] = Math.max(1, 2 + Lifestyle.guardWeight(player));
 			}
 			// (0.6.2) the rest of a guard's business, by his king's temper
 			int tv = temper(server, f, player);
@@ -669,7 +675,7 @@ public final class Approaches {
 			if (!sworn && !passage && Captives.owed(player, f.id()) <= 0) {
 				// ((0.7.221) fewer where the ruler has eased up to keep his people: Reforms)
 				Faction rules = ruler(server, f);
-				w[SEARCH] = Reforms.guards(server, rules, SEARCH_W[tv]) + minds;
+				w[SEARCH] = Math.max(0, Reforms.guards(server, rules, SEARCH_W[tv]) + minds + Lifestyle.guardWeight(player));
 				w[TOLL] = Reforms.guards(server, rules, TOLL_W[tv]) + minds / 2;
 			}
 			w[BOUT] = BOUT_W[tv];
@@ -1136,8 +1142,14 @@ public final class Approaches {
 		return switch (a.topic) {
 			case ACCUSE -> List.of(new Option(Component.translatable(k + "confess", asked(player, a, FINE)), canPay(player, a, FINE)),
 				new Option(Component.translatable(k + "deny"), true), new Option(Component.translatable(k + "threaten"), true));
-			case HALT -> List.of(new Option(Component.translatable(k + "trade"), true), new Option(Component.translatable(k + "work"), true),
-				new Option(Component.translatable(k + "rude"), true));
+			case HALT -> {
+				List<Option> halt = new java.util.ArrayList<>(List.of(new Option(Component.translatable(k + "trade"), true),
+					new Option(Component.translatable(k + "work"), true), new Option(Component.translatable(k + "rude"), true)));
+				if (ForgedPapers.holds(player, ForgedPapers.PASS)) {
+					halt.add(new Option(Component.translatable(k + "papers"), true));
+				}
+				yield halt;
+			}
 			case QUESTION -> List.of(new Option(Component.translatable("talk.jaymoskingdoms.question." + a.variant + ".warm"), true),
 				new Option(Component.translatable("talk.jaymoskingdoms.question." + a.variant + ".plain"), true),
 				new Option(Component.translatable("talk.jaymoskingdoms.question." + a.variant + ".rude"), true));
@@ -1162,6 +1174,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (Menus.answer(player, answer)) {
+			// a short menu of a feature (talking people round, a night out, lessons, papers)
+			return;
+		}
 		if (com.jaymoskingdoms.nightforms.NightForms.answer(player, answer)) {
 			// a vampire's shape menu
 			return;
@@ -1251,7 +1267,7 @@ public final class Approaches {
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "confess", Speech.WHITE);
 				} else if (option == 1) {
-					float chance = BELIEVED_CHANCE + (f.member(player.getUUID()) != null ? BELIEVED_SWORN : 0.0F) + Charm.sway(a.mob, player);
+					float chance = BELIEVED_CHANCE + (f.member(player.getUUID()) != null ? BELIEVED_SWORN : 0.0F) + Charm.sway(a.mob, player) + Presence.talk(player);
 					if (random.nextFloat() < chance) {
 						Reputation.change(player, f, BELIEVED_REP);
 						clearSuspicion(player, f.id());
@@ -1276,6 +1292,9 @@ public final class Approaches {
 					} else {
 						reply(level, a, k + "no_work", Speech.YELLOW);
 					}
+				} else if (option == 3) {
+					// a forged pass shown at the checkpoint ({@link ForgedPapers}): the guard answers in his own words
+					ForgedPapers.show(level, player, a.mob, f);
 				} else {
 					Reputation.change(player, f, RUDE_GUARD_REP);
 					reply(level, a, k + "rude", Speech.RED);
@@ -1462,6 +1481,7 @@ public final class Approaches {
 			case TOLL -> {
 				if (option == 0 && canPay(player, a, a.price)) {
 					Commandments.act(player, "toll");
+					Sparks.act(player, Sparks.Act.PAID_TOLL, false);
 					// (0.7.490) paid in the town's coin first, then emeralds
 					toTreasury(level, f, Currencies.fine(level.getServer(), player, f, a.price));
 					Reputation.change(player, f, tv == REVELER ? REVELER_TOLL_REP : TOLL_PAID_REP);
@@ -1470,7 +1490,7 @@ public final class Approaches {
 					}
 					reply(level, a, k + "paid." + temper, Speech.GOLD);
 				} else if (option == 1) {
-					if (random.nextFloat() < Math.min(0.95F, HAGGLE_CHANCE[tv] + Charm.sway(a.mob, player) + LendAHand.haggle(level, player))) {
+					if (random.nextFloat() < Math.min(0.95F, HAGGLE_CHANCE[tv] + Charm.sway(a.mob, player) + LendAHand.haggle(level, player) + Presence.talk(player))) {
 						int half = Currencies.fine(level.getServer(), player, f, Math.max(1, a.price / 2));
 						toTreasury(level, f, half);
 						reply(level, a, k + "haggled." + temper, Speech.WHITE, Currencies.asked(level.getServer(), f, half));

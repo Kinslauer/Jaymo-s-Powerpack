@@ -186,6 +186,11 @@ public final class HavenGates {
 			return;
 		}
 		PathfinderMob g = guard.mob();
+		if (ForgedPapers.holds(player, ForgedPapers.PASS) && ForgedPapers.atGate(level, player, g, f)) {
+			// a forged pass held up at the gate
+			STOPPED.remove(player.getUUID());
+			return;
+		}
 		if (stop == null) {
 			g.getNavigation().moveTo(player, 1.1);
 			g.getLookControl().setLookAt(player, 30.0F, 30.0F);
@@ -236,6 +241,9 @@ public final class HavenGates {
 
 	/** Whether {@code player} may walk into haven {@code f}. */
 	static boolean admitted(ServerLevel level, ServerPlayer player, Faction f) {
+		if (ForgedPapers.passed(player, f)) {
+			return true;
+		}
 		if (Prejudice.degree(player) > 0 || Reputation.get(player, f.id()) >= GOOD_NAME || carriesToken(player, f)) {
 			return true;
 		}

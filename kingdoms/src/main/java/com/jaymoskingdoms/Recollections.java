@@ -676,6 +676,7 @@ public final class Recollections {
 	/** (MCA) {@code player} gave {@code who} {@code gift}, and it was {@code liked} (hearts up). */
 	public static void gifted(LivingEntity who, ServerPlayer player, ItemStack gift, boolean liked) {
 		if (liked && !gift.isEmpty()) {
+			Sparks.act(player, Sparks.Act.GIFT, false);
 			remember(who, player, Kind.GIFT, gift.getHoverName());
 		} else if (!gift.isEmpty()) {
 			remember(who, player, Kind.REBUFFED, Component.translatable("recall.jaymoskingdoms.act.gift"));

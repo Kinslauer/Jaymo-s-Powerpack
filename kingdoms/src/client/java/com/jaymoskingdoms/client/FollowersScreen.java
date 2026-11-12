@@ -58,10 +58,11 @@ final class FollowersScreen extends Screen {
 		if (camera == null) {
 			return null;
 		}
-		Vec3 eye = camera.getEyePosition(), end = eye.add(camera.getViewVector(1.0F).scale(Followers.ONE_RANGE));
+		double reach = minecraft.player == null ? Followers.ONE_RANGE : com.jaymoskingdoms.Presence.reach(minecraft.player, Followers.ONE_RANGE);
+		Vec3 eye = camera.getEyePosition(), end = eye.add(camera.getViewVector(1.0F).scale(reach));
 		EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(camera, eye, end,
 			camera.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.0), e -> e instanceof Villager && e.isAlive(),
-			Followers.ONE_RANGE * Followers.ONE_RANGE);
+			reach * reach);
 		return hit != null && hit.getEntity() instanceof Villager v ? v : null;
 	}
 

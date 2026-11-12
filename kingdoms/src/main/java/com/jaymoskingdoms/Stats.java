@@ -34,6 +34,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Endurance:</b> hunger drains slower.</li>
  * <li><b>Grit:</b> armour and a firmer stance.</li>
  * <li><b>Wits:</b> every pillar learns faster, and a little luck.</li>
+ * <li><b>Presence</b>: how you carry yourself among people. It sways persuading, lying, threatening and haggling
+ * ({@link Presence#talk}), how fast strangers warm to you ({@link Presence#warmed}) and how far your orders carry to
+ * companions ({@link Presence#reach}). Everyone starts with {@link #BASE_PRESENCE} free points, so a character made
+ * before it existed has a fair bearing; a Warlord and a Sorcerer start with {@link #STEP} more.</li>
  * <li><b>Arcana</b> (0.7.212): more mana, and it comes back faster. Only for the attuned ({@link Mana}): the row shows
  * once you are, and only they can raise it.</li>
  * </ul>
@@ -87,6 +91,8 @@ public final class Stats {
 	static final String SCALED_KEY = "stat_scale";
 	/** (0.7.540) Points a shift-click puts in at once. */
 	public static final int SHIFT_STEP = 10;
+	/** Presence: the free points everyone starts with (it is the one attribute no heritage or story gives). */
+	public static final int BASE_PRESENCE = STEP;
 	/** The sparks' colour when a trained point of Might lands. */
 	static final int MIGHT_COLOR = 0xC0503A;
 
@@ -98,7 +104,7 @@ public final class Stats {
 		builder -> builder.persistent(Codec.DOUBLE).copyOnDeath().syncWith(ByteBufCodecs.DOUBLE, AttachmentSyncPredicate.targetOnly()));
 
 	public enum Stat {
-		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA;
+		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA, PRESENCE;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -201,7 +207,12 @@ public final class Stats {
 	/** Free points in {@code stat} from {@code player}'s class. */
 	public static int fromClass(Player player, Stat stat) {
 		Classes.PlayerClass cls = Classes.classOf(player);
-		return cls != null && favoured(cls) == stat ? STEP : 0;
+		int n = cls != null && favoured(cls) == stat ? STEP : 0;
+		if (stat == Stat.PRESENCE) {
+			// everyone's bearing, and a leader's or a spellsinger's on top
+			n += BASE_PRESENCE + (cls == Classes.PlayerClass.WARLORD || cls == Classes.PlayerClass.SORCERER ? STEP : 0);
+		}
+		return n;
 	}
 
 	/** Free points in {@code stat} from {@code player}'s heritage. */
@@ -269,6 +280,8 @@ public final class Stats {
 			case WITS -> Component.translatable("stat.jaymoskingdoms.wits.now", pct(WITS_XP * value), num(WITS_LUCK * value));
 			case ARCANA -> Component.translatable("stat.jaymoskingdoms.arcana.now", num(Mana.NATURAL_PER_POINT * value), num(Mana.FOUND_PER_POINT * value),
 				num(Mana.REGEN_PER_POINT * value));
+			case PRESENCE -> Component.translatable("stat.jaymoskingdoms.presence.now", pct(Presence.TALK_PER_POINT * value),
+				pct(Presence.WARM_PER_POINT * value), pct(Presence.ORDERS_PER_POINT * value));
 		};
 	}
 

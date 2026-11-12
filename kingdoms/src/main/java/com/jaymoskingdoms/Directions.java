@@ -180,6 +180,11 @@ public final class Directions {
 		if (found.who() == v) {
 			return Component.translatable(line("self", random));
 		}
+		if (Liars.lies(v, Liars.Kind.LEAD)) {
+			// a false lead: pointed the wrong way, and a sharp ear hears it in the telling
+			Liars.tell(player, v, Liars.Kind.LEAD);
+			return point(v, Liars.misdirect(found, v), random, "point");
+		}
 		double far = Math.sqrt(found.pos().distToCenterSqr(v.position()));
 		boolean asleep = found.who() instanceof PathfinderMob m && m.isSleeping();
 		if (far > POINT_ONLY && far <= GUIDE_RANGE && !asleep && guides(v, player)) {

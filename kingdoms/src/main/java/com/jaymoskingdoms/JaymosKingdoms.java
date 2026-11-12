@@ -816,6 +816,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		Notice.register();
 		Concentration.register();
 		Necropolis.register();
+		Presence.register();
+		Sparks.register();
+		StartPerks.register();
+		FoeLore.register();
+		Carousing.register();
+		Tables.register();
+		ForgedPapers.register();
+		ChalkMarks.register();
+		Lifestyle.register();
+		Research.register();
 		// fifth edition picks, patch 2: conditions and fight moves
 		Afflictions.register();
 		HeldFast.register();

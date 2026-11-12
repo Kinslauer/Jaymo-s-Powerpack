@@ -156,7 +156,7 @@ public final class Audiences {
 			say(level, guard, "banned", f, null);
 			return;
 		}
-		if (Reputation.get(player, f.id()) < MIN_REPUTATION) {
+		if (Reputation.get(player, f.id()) < MIN_REPUTATION + Lifestyle.courtShift(player)) {
 			say(level, guard, "refused", f, null);
 			level.playSound(null, guard.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.9F);
 			return;

@@ -230,7 +230,9 @@ public final class Lockpicking {
 	}
 
 	/** How a try went. A snapped pick is used up; a picked lock opens for good, and the chest opens. */
-	private static void result(ServerPlayer player, Result result) {
+	private static void result(ServerPlayer player, Result sent) {
+		// a spark held turns a snapped pick into a picked lock
+		Result result = sent.outcome() == Result.SNAPPED && Sparks.rescue(player) ? new Result(sent.pos(), Result.PICKED) : sent;
 		BlockPos pos = PICKING.get(player.getUUID());
 		if (pos == null || !pos.equals(result.pos())) {
 			return;

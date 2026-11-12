@@ -150,6 +150,8 @@ public final class Theft {
 		BURGLARY(Weight.MEDIUM, "burglary"),
 		/** (0.7.650) fishing a Tideborn haven's waters ({@link TideFishing}). */
 		POACHING(Weight.MEDIUM, "poaching"),
+		/** A forged pass or pardon shown to a guard who saw through it ({@link ForgedPapers}). */
+		FORGERY(Weight.MEDIUM, "forgery"),
 		/** A captive made into a great foe by blood magic ({@link BruteRite}): the heaviest crime there is. */
 		UNMAKING(Weight.HEAVY, "unmaking");
 

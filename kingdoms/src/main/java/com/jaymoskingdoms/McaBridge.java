@@ -207,6 +207,20 @@ final class McaBridge {
 		return true;
 	}
 
+	/** {@link McaCompat#engageable}: a grown MCA villager with no partner, promise or engagement. */
+	static boolean engageable(Villager v) {
+		return v instanceof VillagerEntityMCA m && m.getAgeState() == AgeState.ADULT && unattached(m.getRelationships());
+	}
+
+	/** {@link McaCompat#engage}: {@code v} is engaged to {@code player} in MCA's own terms. */
+	static boolean engage(Villager v, ServerPlayer player) {
+		if (!engageable(v)) {
+			return false;
+		}
+		((VillagerEntityMCA)v).getRelationships().engage(player);
+		return true;
+	}
+
 	/** (0.7.21) {@link McaCompat#following}. */
 	static java.util.@Nullable UUID following(Villager v) {
 		if (!(v instanceof VillagerEntityMCA m) || m.getVillagerBrain().getMoveState() != net.conczin.mca.entity.ai.MoveState.FOLLOW) {
