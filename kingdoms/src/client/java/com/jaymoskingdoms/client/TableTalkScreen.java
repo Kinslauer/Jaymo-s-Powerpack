@@ -154,7 +154,7 @@ final class TableTalkScreen extends Screen {
 		}
 		if (lends()) {
 			addRenderableWidget(Button.builder(lendLabel(), b -> {
-				this.lend = (this.lend + 1) % 3;
+				this.lend = (this.lend + 1) % 4;
 				b.setMessage(lendLabel());
 			}).bounds(x, y + ROW * row++, 110, 16).build());
 		}

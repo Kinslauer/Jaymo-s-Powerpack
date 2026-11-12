@@ -957,6 +957,47 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * One loose with the Murmur finishes the townsfolk it puts down ({@link Murmur#finishes}; Andy: they can die), through
+	 * Powers' executions of downed mobs. Without Powers a downed body isn't finished by mobs at all, so nothing changes.
+	 */
+	@SuppressWarnings("unchecked")
+	static void murmurFinishes() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> executions = Class.forName("com.jaymospowers.core.wounds.MobExecutions");
+			Object list = executions.getField("FINISHES").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Murmur::finishes);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions of downed mobs (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle isCarried;
+	private static boolean lookedForCarried;
+
+	/** Powers' {@code Carry.isCarried}: {@code e} is being carried or dragged by someone. False without Powers. */
+	public static boolean carried(net.minecraft.world.entity.Entity e) {
+		if (!lookedForCarried) {
+			lookedForCarried = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					isCarried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"), "isCarried",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError ex) {
+					isCarried = null;
+				}
+			}
+		}
+		try {
+			return isCarried != null && (boolean) isCarried.invoke(e);
+		} catch (Throwable ex) {
+			return false;
+		}
+	}
+
+	/**
 	 * (0.7.623, Rivals patch 8) Powers' shields ({@code combat/Shields}): a Yank or a stun knocks an armoured ogre's shield
 	 * off ({@link com.jaymoskingdoms.monsters.Ogre#tearShield}), and its raised shield counts as one (for Powers' vault, which
 	 * an ogre's size refuses anyway). Nothing without that Powers.

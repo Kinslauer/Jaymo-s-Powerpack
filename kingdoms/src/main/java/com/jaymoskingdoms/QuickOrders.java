@@ -131,6 +131,8 @@ public final class QuickOrders {
 			}
 			yours.add(v);
 		}
+		// one turned on you takes no orders, and one far gone with the Murmur may not (docs/Pawn-Plan.md H1, H2)
+		yours.removeIf(v -> Possession.held(v) || Murmur.ignores(v, player));
 		if (yours.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.none").withStyle(ChatFormatting.GRAY));
 			return;

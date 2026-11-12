@@ -109,7 +109,10 @@ public final class Callouts {
 			"way.short", "way.quest", "ambush.net", "pack.eat", "pack.bandage", "pack.bind", "pack.feed", "pack.arrows", "pack.drink", "pack.fallback",
 			"gear.better", "gear.worse", "spec.ore", "spec.herb", "spec.junk", "spec.junk.few", "parley.offer", "parley.paid", "parley.refused",
 			"parley.short", "party.aid", "party.back", "party.rematch", "party.wary", "party.friend", "party.gift", "party.gift.friend",
-			"party.bounty.took", "party.bounty", "party.caught", "party.claimed", "want.person", "want.found", "quest.lever"}) {
+			"party.bounty.took", "party.bounty", "party.caught", "party.claimed", "want.person", "want.found", "quest.lever",
+			// the dark mirror (docs/Pawn-Plan.md patch 6)
+			"turn.resist", "turn.seized", "turn.free", "turn.cast", "murmur.well", "murmur.ignore", "murmur.brazen", "murmur.cleric", "murmur.loose",
+			"lost.mutter", "lost.ask", "lost.join", "lost.turn", "lost.free", "lost.waylay", "lost.knows", "lost.parted"}) {
 			LINES.put(k, 3);
 		}
 	}

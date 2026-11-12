@@ -302,6 +302,8 @@ public final class TableTalk {
 		}
 		Bonds.add(m, player.getUUID(), warmth);
 		Loans.tell(m, player);
+		// a shared rest: the Murmur may pass (docs/Pawn-Plan.md H2)
+		Murmur.rested(m, player);
 		if (Specialties.is(m, Specialties.Specialty.PACKHORSE) && Specialties.unpack(m, player)) {
 			Callouts.say(m, "spec.unpack", player, true);
 		}

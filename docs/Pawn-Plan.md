@@ -167,6 +167,34 @@ H1 turned for a while (sorcerers, a thrall-bite or the Grue seize a companion; k
 sickness that rides between companions (the Murmur, Andy approved the name), H3 the masterless
 (a reincarnated player's old companion lives on, lost).
 
+As built (same PR): `Possession` (H1, both sides). A camp's necromancer or blood witch in a fight reaches for one of
+your companions within 16 blocks (once in 20 s, 35%) with a red beam; a vampire's own blow on someone else's
+companion turns it 20% of the time; the Grue, once its hold on you reaches assault, sets one of your companions on
+you (once in 2 minutes, 30%). A turned one's eyes glow red (client `DarkEyes`), it drops its orders and goes for its
+own player first, then whoever was on its side; knocked down or picked up, the hold breaks, and otherwise it wears off
+(a minute; the Grue's 45 s). A close bond (G1) holds out. The foe side: the death spell **Dominion** (scroll, tier 4,
+mana 40, a minute's wait, dropped now and then by necromancers) turns the foe you look at (60 health at most) to your
+side for 30 s times the spell's power, going for its own band first; as a death spell it pays the forbidden arts'
+price (corruption, the law, the Grue drawing nearer). `Murmur` (H2): caught at 3% a minute in the deep dark or a soul
+sand valley, passed (40%) at a shared rest (sitting at the table or fire, or near a player sleeping) to a well
+companion of anyone's, which leaves the one who passed it well; 5% of rival party members set out with it. The signs,
+never told: eyes flicker red from the start, it stops and holds its head now and then (a heartbeat); after a day it
+ignores one quick order in three, hits 30% harder and talks big. After two days, on a night in a settlement while its
+player sleeps or is 48+ blocks off, it's loose (the Possession hold, until knocked down): it goes for the townsfolk
+and finishes those it downs (Jaymo's Powers' executions), and its shout wakes sleepers within 64 blocks. Cures: let it
+fall and come round; an enchanted golden apple used on it; in a settlement it walks to a cleric or priest within 48
+blocks and 5 s beside them cures it; or it passes it on at a rest. `Masterless` (H3): when a player reincarnates every
+companion of the old life is lost (those loaded at once, the rest when next met; a companion out on loan, taken by a
+camp or sold waits till it's back), and the table's lend button gains "Part ways for good". A lost one walks the
+nearest road (within 192 blocks), mutters, and asks anyone it meets within 8 blocks to take it along; use it within
+30 s and it joins. 2 to 6 minutes later, with that player by, its eyes go red and it turns on them until knocked down;
+when it comes round it's theirs for good (bond +20). The foe side: 30% at once, and any not taken in for three days,
+take up the bandit mask (once no player is within 32) with 2 or 3 men (veterans in bandanas, taught the leader's
+stars and half its wins), side `lost:<leader>`, a 25 bounty at the nearest town; they walk the road and waylay anyone
+within 16. Meeting its old master (the same player, in any life), the band knows them as though met 12 times, with
+every way of fighting the leader saw at their side (the most any band knew of them when it was lost, or now), so it
+comes ready with the counters (FoeLore). Lines (`turn.*`, `murmur.*`, `lost.*`), five new loading tips (145-149).
+
 ## Andy's answers
 
 1. Keys: the four arrows (Andy, 2026-11-12: Come takes Down, crawl goes unbound).

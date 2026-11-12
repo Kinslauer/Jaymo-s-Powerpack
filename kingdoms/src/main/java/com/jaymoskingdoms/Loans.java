@@ -170,6 +170,9 @@ public final class Loans {
 		builder -> builder.persistent(Codec.LONG));
 	public static final AttachmentType<Taken> TAKEN = AttachmentRegistry.create(JaymosKingdoms.id("comrade_taken"),
 		builder -> builder.persistent(Taken.CODEC));
+	/** When its owner last had it at their side (game time): one met after its owner started a new life is lost ({@link Masterless}). Saved. */
+	static final AttachmentType<Long> STAMPED = AttachmentRegistry.create(JaymosKingdoms.id("comrade_stamped"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** The hire screen (mode 0) or the parting screen (mode 1). */
 	public record OpenLoan(int entityId, int mode, Component name, Component owner, String main, String second, int steps, int rating,
@@ -336,12 +339,18 @@ public final class Loans {
 	// ---- the table's answers -----------------------------------------------------------------------------------------
 
 	/**
-	 * (TableTalk) how the owner wants {@code m} lent (0 when away, 1 never, 2 left at a tavern now), and an errand from
-	 * what's in hand: 0 as it is, 1 gather it while I'm away, 2 a want (bring this many of it) with purse {@code purse}
+	 * (TableTalk) how the owner wants {@code m} lent (0 when away, 1 never, 2 left at a tavern now; 3 part ways for good,
+	 * {@link Masterless#partWays}), and an errand from what's in hand: 0 as it is, 1 gather it while I'm away, 2 a want (bring this many of it) with purse {@code purse}
 	 * ({@link #PURSES}), 3 no errands.
 	 */
 	static void fromTable(ServerPlayer player, Mob m, int lend, int errand, int purse) {
 		if (!(m instanceof Villager v)) {
+			return;
+		}
+		if (lend == 3) {
+			// part ways for good: it lives on, lost (docs/Pawn-Plan.md H3)
+			refundWant(player, v);
+			Masterless.partWays(player, v);
 			return;
 		}
 		stamp(v, player);
@@ -447,6 +456,7 @@ public final class Loans {
 			}
 			v.setAttached(OWNER, new Owner(owner.getUUID().toString(), owner.getGameProfile().name()));
 		}
+		v.setAttached(STAMPED, owner.level().getGameTime());
 		TRACKED.add(v);
 	}
 
@@ -457,7 +467,8 @@ public final class Loans {
 		long now = server.overworld().getGameTime();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			for (Mob m : Bonds.companions(player, 32.0)) {
-				if (m instanceof Villager v && !v.hasAttached(LOAN) && !v.hasAttached(TAKEN) && !v.hasAttached(RivalParties.PARTY) && !SwornCaptains.free(v)) {
+				if (m instanceof Villager v && !v.hasAttached(LOAN) && !v.hasAttached(TAKEN) && !v.hasAttached(RivalParties.PARTY) && !SwornCaptains.free(v)
+					&& !Possession.held(v)) {
 					stamp(v, player);
 					if (v.getAttachedOrElse(LEND, 0) == 2 && McaCompat.following(v) != null) {
 						// picked up from the tavern

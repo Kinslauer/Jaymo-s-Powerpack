@@ -184,6 +184,15 @@ public final class Comrades {
 		if (e instanceof Player p) {
 			return "p:" + p.getUUID();
 		}
+		// turned for a while (docs/Pawn-Plan.md H1), or one of a masterless bandit's band (H3)
+		String turned = Possession.side(e);
+		if (turned != null) {
+			return turned;
+		}
+		String lost = Masterless.side(e);
+		if (lost != null) {
+			return lost;
+		}
 		String band = Loans.bandSide(e);
 		if (band != null) {
 			return band;

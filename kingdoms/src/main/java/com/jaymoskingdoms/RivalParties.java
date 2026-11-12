@@ -251,6 +251,8 @@ public final class RivalParties {
 			v.setAttached(PARTY, new Party(id, i == 0, "", 0L, now));
 			v.setPersistenceRequired();
 			LOADED.add(v);
+			// some set out with the Murmur (docs/Pawn-Plan.md H2)
+			Murmur.carrier(v);
 		}
 		JaymosKingdoms.LOGGER.debug("A rival party set out from {}{}", from.name(), back != null ? " (back again)" : "");
 	}

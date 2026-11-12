@@ -606,6 +606,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		RivalParties.register();
 		PackUse.register();
 		Parleys.register();
+		Possession.register();
+		Murmur.register();
+		Masterless.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)

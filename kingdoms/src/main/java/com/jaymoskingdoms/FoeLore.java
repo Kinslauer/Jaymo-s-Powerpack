@@ -241,7 +241,7 @@ public final class FoeLore {
 
 	/** A side that keeps what it learns of players: a faction (camp, village, realm) or the illagers. */
 	static boolean keeps(String side) {
-		return side.startsWith("f:") || side.equals("illager") || side.startsWith("party:");
+		return side.startsWith("f:") || side.equals("illager") || side.startsWith("party:") || side.startsWith("lost:");
 	}
 
 	private static void hurtBy(Mob m, ServerPlayer player, DamageSource source) {
