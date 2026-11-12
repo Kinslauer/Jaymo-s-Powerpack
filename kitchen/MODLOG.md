@@ -1854,3 +1854,10 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
 
 - `Freshness.addCold` (for other mods, by reflection): more places cold enough to keep food, still only where it's dark and out of the sky. Jaymo's Powers uses it for a gifted Cryo villager's cold larder.
 - Built; not played.
+
+## 0.5.112 (2026-11-12): The server starts again: the thermometer recipe's category
+
+- The server refused to start (2026-11-11 21:24, "Failed to load datapacks": `Unknown element name:tools`): the
+  thermometer recipe (`recipe/thermometer.json`, from the Hardrock patches) had `"category": "tools"`, which isn't a
+  crafting book category (building, redstone, equipment, misc). It's `equipment` now, beside the other tools; every
+  other recipe in Powers, Kingdoms and Kitchen was checked and has a valid category. Not built here.
