@@ -3662,3 +3662,12 @@ Compiled only; not played.
   later, from the data files, so the tundra still generates in new chunks.
 - The new ice caves biome had the same fault ("No value registered for key jaymospowers:ice_caves" would have been next)
   and waits for `IceCaves.place` the same way.
+
+## 0.22.89 (2026-11-12): crawl key unbound; mobs can drag the downed
+
+- The Crawl key starts unbound: the Down arrow goes to Kingdoms' Come order (Andy). Sneak + scroll down still takes you prone, and Crawl can be bound again in Controls. Existing worlds keep whatever key their options already hold.
+- Carry: a mob can now take someone downed by the shoulder and drag them, drawn exactly like a player's drag (Carry.npcDrag, npcLetGo, npcDragging, holderOf). Jaymo's Kingdoms' field medics use it to pull the fallen out of a fight.
+- Carry: a mob can also lift someone downed over its shoulder (Carry.npcLift, fireman hold, too big ones refused), drawn like a player's shoulder carry. Jaymo's Kingdoms' healthy field medics use it.
+- **Sulphur and saltpetre**, the two minerals of true black powder (Andy). Sulphur ore lies deep in the overworld's stone and deepslate and all through the Nether's netherrack, thickest in the basalt deltas; yellow lumps of it lie loose on cave floors beside lava and magma, on the Nether's floors and round the rims of hot springs. Saltpetre ore lies in the stone and sandstone under deserts, badlands and savanna, with a thinner scatter in any cave; white crust lies loose on dry sand and terracotta and on the floors of dry caves. A shallow vein of either shows at the surface as a loose piece of the mineral. Any pickaxe mines them. Three saltpetre, a sulphur (or brimstone) and a charcoal craft four gunpowder. Alchemy reads them too (sulphur and salt).
+- **Nitre bed**, the old way to grow saltpetre (Andy). Craft one from three dirt, two wheat and a bone meal, set it under a roof and feed it manure (Jaymo's Kitchen's), rotten flesh, bone meal or wheat; droppings and scraps that land on it are worked in by themselves, so a bed in a barn feeds itself. Fed and roofed, its top slowly whitens; turn it with a shovel to speed it up. Rain falling on an open bed washes the nitre back out, and under open sky it doesn't grow. When it's white, a shovel scrapes off 3 to 5 nitre earth, which you boil down into saltpetre in a furnace or over a campfire. A bed left alone just waits.
+- Built; not played. New world chunks only: places already explored have none.
