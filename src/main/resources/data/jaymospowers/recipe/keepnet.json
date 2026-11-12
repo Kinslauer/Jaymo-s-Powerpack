@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " I ",
+    "LLL",
+    "LLL"
+  ],
+  "key": {
+    "I": "minecraft:iron_nugget",
+    "L": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymospowers:keepnet",
+    "count": 1
+  }
+}

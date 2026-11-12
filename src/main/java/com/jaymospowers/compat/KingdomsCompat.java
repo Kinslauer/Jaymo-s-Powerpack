@@ -305,4 +305,37 @@ public final class KingdomsCompat {
 			}
 		}
 	}
+
+	private static java.lang.invoke.@Nullable MethodHandle payLocal;
+	private static boolean payLocalLooked;
+
+	/**
+	 * (Track D of docs/Plan-fishing.md) Pay {@code player} {@code milli} thousandths of an emerald for fish sold at {@code at},
+	 * in the coin of the place (Kingdoms' {@code FisherTalk.pay}); what it came to, or null without Kingdoms (the caller pays
+	 * emeralds).
+	 */
+	public static net.minecraft.network.chat.@Nullable Component payLocal(net.minecraft.server.level.ServerPlayer player,
+		net.minecraft.core.BlockPos at, long milli) {
+		if (!LOADED) {
+			return null;
+		}
+		if (!payLocalLooked) {
+			payLocalLooked = true;
+			try {
+				payLocal = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymoskingdoms.FisherTalk"), "pay",
+					java.lang.invoke.MethodType.methodType(net.minecraft.network.chat.Component.class, net.minecraft.server.level.ServerPlayer.class,
+						net.minecraft.core.BlockPos.class, long.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				payLocal = null;
+			}
+		}
+		if (payLocal == null) {
+			return null;
+		}
+		try {
+			return (net.minecraft.network.chat.Component) payLocal.invoke(player, at, milli);
+		} catch (Throwable t) {
+			return null;
+		}
+	}
 }
