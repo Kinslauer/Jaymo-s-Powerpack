@@ -125,13 +125,34 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
 ## Built so far: the looks
 
 - **Stances that move** (client `boxing/BoxingPoses`, third person, for everyone): with fist gear and a style, the
-  style's own stance replaces the plain fists-up guard. Arrow Slit: a high, tight guard, swaying a little from side
-  to side. Long Guard: the lead hand held out, pawing the air. Bastion: southpaw, the lead arm low across the body,
-  shrugging its lead shoulder now and then. The stance gives the style away, on purpose.
-- **Blocks:** Arrow Slit's hands close in by the head, Long Guard crosses its forearms, Bastion rounds its lead
-  shoulder up and tucks the rear hand in.
-- **Punches:** the throwing arm goes out by the punch (jab, cross or straight, hook, uppercut); the other stays home.
-- **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull, the lead shoulder turned in for a roll.
+  style's own stance replaces the plain fists-up guard. The shapes are copied from fight footage Jung sent ("Every
+  Boxing Guard Explained in 8 Minutes": its peekaboo, long guard and Philly shell parts). The arms bend at the elbow
+  (`KneeBend`, as the crawl's and the climb's do), and the worn fist gear turns with the forearm.
+  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves on the cheeks, a forward crouch with the chin down, the knees bent with
+    the feet flat. The shoulders and head sway from side to side without stopping; the hips and feet stay put.
+  - Long Guard: the lead arm out at shoulder height, all but straight, pawing a little; the rear glove by the chin; the body
+    upright, a little back, stood at an angle from the feet up (lead shoulder and lead foot forward).
+  - Bastion (Philly shell): side on with the right shoulder forward and held up by the chin, the lead forearm folded
+    across the belly, the rear glove folded up by the cheek, the weight back, the head tipped toward the rear
+    shoulder with the chin tucked; it still shrugs its lead shoulder now and then.
+  - Each stands on a base (`BoxingPoses.base`): feet apart, lead foot ahead, knees bent, feet flat; the bladed
+    styles' toes turn with the body. Shapes after reference pictures Jung sent (Bivol, Mayweather, a peekaboo crouch).
+  The stance gives the style away, on purpose.
+- **Blocks:** Arrow Slit pulls the gloves in tighter and crouches lower; Long Guard puts both arms out ahead with
+  the hands together, to smother; Bastion turns further side on and lifts the lead shoulder higher.
+- **Punches** are posed whole, in place of the game's arm swing (shapes after a jab and cross lesson Jung sent). The
+  pose runs on its own clock (`PUNCH_TICKS`) from when the server tells of a punch (`Boxing.LOOK`), so a queued punch
+  shows when it is thrown; a click that hits nothing shows a jab.
+  - Jab: the lead arm snaps straight out at chin height, its shoulder up and turned in behind it; the rear glove stays.
+  - Cross, straight, pull counter: the rear arm straight out, the rear shoulder and hip turned through, the rear knee
+    turned in, a lean into it; the lead glove comes home to the cheek (the Bastion's stays low).
+  - Hook: the arm level at shoulder height, the elbow open past a right angle, swung from out wide to land ahead on
+    the centre line; the hips turn with it and the foot on that side pivots. Light in the Arrow Slit's flurry; the
+    full one within `HEAVY_HOOK_TICKS` of a slip to the side.
+  - Uppercut: the fist rises under the chin with the forearm up.
+  - First person: the arms stay in the guard and the punching arm goes out from it (`BoxingPoses.firstPerson`).
+- **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull; a shoulder roll turns the lead shoulder in,
+  sways the weight back and tips the head away. The legs stay under the hips in a crouch, duck or lean.
 - **Tiring and gassed:** a faint puff of breath every 2.5 s when tiring (four icons or fewer), a clear one every second
   when gassed, no sound; gassed, the hands drop and the shoulders heave in place of the stance.
 - Everyone is told what the poses need: `Boxing.LOOK` (how spent, the last punch) and `BoxingEvades.MOVED` (the last
@@ -200,6 +221,11 @@ Nothing from the plan. See the open points below.
 26. A veteran guard's drill finished with fist gear in hand adds to the style.
 
 27. F5 with fist gear and each style: three different stances, each moving (a sway, a pawing hand, a shrug).
+    Compare each with the video: Arrow Slit crouched behind both gloves, Long Guard with a straight lead arm and an
+    upright body, Bastion side on with the right shoulder up and the lead arm across the belly. Check the arms stay
+    on the shoulders when the body turns, and the legs under the hips when it leans.
+    Check the elbows: forearms up to the cheeks (Arrow Slit, the rear hands), one across the belly (Bastion), and
+    the wraps, cestus or bracers sitting on the bent forearm, not floating where a straight arm would end.
 28. Right click in each style: three different blocks. Punch: the arm goes out; in Arrow Slit the third and later
     punches are hooks from the side.
 29. Left Alt in each style and direction: the lean, duck, pull or shoulder turn, over in under half a second.
