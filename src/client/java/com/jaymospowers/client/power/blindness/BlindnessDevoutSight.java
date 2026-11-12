@@ -2,9 +2,10 @@ package com.jaymospowers.client.power.blindness;
 
 import com.jaymospowers.client.GiantCamera;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.blindness.Blind;
 import com.jaymospowers.power.blindness.BlindnessDevotion;
-import com.jaymospowers.power.blindness.BlindnessPower;
-import com.jaymospowers.power.blindness.BlindnessState;
+import com.jaymospowers.power.resonance.ResonancePower;
+import com.jaymospowers.power.resonance.ResonanceSight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
@@ -15,9 +16,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The devout's sight ({@link BlindnessDevotion}), on their own screen: living things near them burn through the dark
- * (pale gold, a dull red for the hostile), and in Sky Sight (their Void Sight) the view rises high over them and looks
- * almost straight down, eased in and out. Ceilings stop it short.
+ * A Resonance holder's sight in the dark ({@code Blind}, {@link BlindnessDevotion}), on their own screen: living things
+ * near them burn through it (pale gold, a dull red for the hostile), and in Sky Sight ({@link ResonanceSight}) the view
+ * rises high over them and looks almost straight down, eased in and out. Ceilings stop it short.
  */
 public final class BlindnessDevoutSight {
 	static final int PASSIVE = 0xE8D9A0, HOSTILE = 0xA03A2A;
@@ -29,9 +30,9 @@ public final class BlindnessDevoutSight {
 	private BlindnessDevoutSight() {
 	}
 
-	/** Whether this client's player holds Blindness and took it on. */
+	/** Whether this client's player holds Resonance and is in the dark: both eyes gone, or a blindfold on. */
 	public static boolean devout(@Nullable LocalPlayer player) {
-		return player != null && Powers.has(player, BlindnessPower.INSTANCE) && BlindnessDevotion.devout(player);
+		return player != null && Powers.has(player, ResonancePower.INSTANCE) && Blind.sightless(player);
 	}
 
 	/** Whether this client's player is in Sky Sight now. */
@@ -39,8 +40,7 @@ public final class BlindnessDevoutSight {
 		if (!devout(player)) {
 			return false;
 		}
-		BlindnessState state = player.getAttached(BlindnessPower.STATE);
-		return state != null && state.voidSightActive();
+		return player.hasAttached(ResonanceSight.ACTIVE);
 	}
 
 	/** How far up the view is, 0 to 1. */

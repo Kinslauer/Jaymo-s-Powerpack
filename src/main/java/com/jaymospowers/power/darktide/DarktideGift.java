@@ -5,8 +5,8 @@ import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
 import com.jaymospowers.core.gifted.Gifted;
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -79,12 +79,9 @@ final class DarktideGift implements GiftKit {
 		Vec3 from = caster.getEyePosition(), to = foe.getBoundingBox().getCenter();
 		Vec3 step = to.subtract(from);
 		int steps = Math.max(1, (int)(step.length() * 2.0));
-		for (int i = 1; i <= steps; i++) {
-			Vec3 p = from.add(step.scale((double)i / steps));
-			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-			level.sendParticles(ParticleTypes.FALLING_WATER, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
-		}
-		level.sendParticles(ParticleTypes.SPLASH, to.x, to.y, to.z, 14, 0.3, 0.3, 0.3, 0.2);
+		// the lash: one long stroke from the hand to the foe
+		MagicFx.stroke(level, from, to, new Vec3(0.0, step.length() * 0.12, 0.0), DarktideLooks.BLADE_STROKE, DarktideLooks.INK, DarktideLooks.CUT_TICKS + 2);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), to.x, to.y, to.z, 8, 0.3, 0.3, 0.3, 0.2);
 		level.playSound(null, caster.getX(), caster.getEyeY(), caster.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 0.8F, 0.9F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.8F, 1.1F);
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), LASH_DAMAGE);
@@ -93,9 +90,9 @@ final class DarktideGift implements GiftKit {
 
 	private static boolean grip(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
 		Vec3 c = foe.getBoundingBox().getCenter();
-		level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y, c.z, 20, 0.3, 0.5, 0.3, 0.05);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), c.x, c.y, c.z, 10, 0.3, 0.5, 0.3, 0.05);
 		level.sendParticles(MagicFx.wisp(INK_COLOR, 1.4F), c.x, c.y, c.z, 16, 0.3, 0.5, 0.3, 0.0);
-		level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 10, 0.3, 0.4, 0.3, 0.05);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), c.x, c.y + 0.3, c.z, 10, 0.3, 0.4, 0.3, 0.05);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.CONDUIT_AMBIENT_SHORT, SoundSource.NEUTRAL, 0.8F, 0.7F);
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), GRIP_DAMAGE);
@@ -106,11 +103,9 @@ final class DarktideGift implements GiftKit {
 
 	private static boolean surge(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
 		Vec3 c = caster.position();
-		for (int i = 0; i < 24; i++) {
-			double a = i * Math.PI / 12.0;
-			level.sendParticles(ParticleTypes.SPLASH, c.x + Math.cos(a) * 1.5, c.y + 0.4, c.z + Math.sin(a) * 1.5, 3, 0.1, 0.3, 0.1, 0.2);
-		}
-		level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y + 0.5, c.z, 20, 0.5, 0.3, 0.5, 0.08);
+		DarktideLooks.spray(level, c, (float) SURGE_RADIUS);
+		DarktideLooks.pool(level, c, (float) SURGE_RADIUS * 0.8F, DarktideLooks.POOL_TICKS);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), c.x, c.y + 0.5, c.z, 10, 0.5, 0.3, 0.5, 0.08);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.NEUTRAL, 1.0F, 0.8F);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(SURGE_RADIUS),
 			e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy))) {
@@ -128,8 +123,8 @@ final class DarktideGift implements GiftKit {
 		}
 		Vec3 away = caster.position().subtract(foe.position()).horizontal();
 		away = away.lengthSqr() < 1.0E-4 ? caster.getLookAngle().horizontal().reverse() : away;
-		level.sendParticles(ParticleTypes.SQUID_INK, caster.getX(), caster.getY() + 0.2, caster.getZ(), 30, 0.4, 0.1, 0.4, 0.02);
-		level.sendParticles(ParticleTypes.SPLASH, caster.getX(), caster.getY() + 0.1, caster.getZ(), 20, 0.4, 0.05, 0.4, 0.1);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), caster.getX(), caster.getY() + 0.2, caster.getZ(), 15, 0.4, 0.1, 0.4, 0.02);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), caster.getX(), caster.getY() + 0.1, caster.getZ(), 10, 0.4, 0.05, 0.4, 0.1);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.PLAYER_SPLASH, SoundSource.NEUTRAL, 0.9F, 1.1F);
 		push(caster, away.normalize().scale(SLIP_SPEED), SLIP_LIFT);
 		caster.fallDistance = 0.0;
@@ -152,12 +147,12 @@ final class DarktideGift implements GiftKit {
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-WASH_RADIUS, -2, -WASH_RADIUS), at.offset(WASH_RADIUS, 3, WASH_RADIUS))) {
 			if (level.getBlockState(p).getBlock() instanceof BaseFireBlock) {
 				level.removeBlock(p, false);
-				level.sendParticles(ParticleTypes.SPLASH, p.getX() + 0.5, p.getY() + 0.4, p.getZ() + 0.5, 10, 0.25, 0.25, 0.25, 0.1);
+				level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), p.getX() + 0.5, p.getY() + 0.4, p.getZ() + 0.5, 10, 0.25, 0.25, 0.25, 0.1);
 				level.sendParticles(ParticleTypes.SMOKE, p.getX() + 0.5, p.getY() + 0.3, p.getZ() + 0.5, 6, 0.2, 0.2, 0.2, 0.02);
 				washed = true;
 			}
 		}
-		level.sendParticles(ParticleTypes.FALLING_WATER, mob.getX(), mob.getY(0.6), mob.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
+		level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), mob.getX(), mob.getY(0.6), mob.getZ(), 6, 0.4, 0.3, 0.4, 0.0);
 		level.sendParticles(MagicFx.wisp(INK_COLOR, 1.0F), mob.getX(), mob.getY(0.6), mob.getZ(), 3, 0.4, 0.3, 0.4, 0.0);
 		if (washed) {
 			level.playSound(null, at, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.8F, 1.2F);
@@ -172,12 +167,14 @@ final class DarktideGift implements GiftKit {
 
 	private static boolean tide(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
 		Vec3 c = foe.position();
-		for (int i = 0; i < 60; i++) {
-			double a = i * Math.PI / 10.0, r = TIDE_RADIUS * (i % 10) / 10.0;
-			level.sendParticles(ParticleTypes.SPLASH, c.x + Math.cos(a) * r, c.y + 0.3 + i * 0.05, c.z + Math.sin(a) * r, 3, 0.1, 0.2, 0.1, 0.2);
+		// the tide comes in from the caster's side and breaks over the foe
+		Vec3 in = c.subtract(caster.position()).multiply(1.0, 0.0, 1.0);
+		if (in.lengthSqr() > 1.0E-4) {
+			MagicFx.wave(level, c.subtract(in.normalize().scale(TIDE_RADIUS)), in, TIDE_RADIUS * 1.6, (float) TIDE_RADIUS * 1.6F, DarktideLooks.WATER, 16);
 		}
-		level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y + 1.0, c.z, 80, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4, 0.1);
-		level.sendParticles(ParticleTypes.FALLING_WATER, c.x, c.y + 4.0, c.z, 120, TIDE_RADIUS * 0.4, 0.5, TIDE_RADIUS * 0.4, 0.0);
+		DarktideLooks.pool(level, c, (float) TIDE_RADIUS, DarktideLooks.POOL_TICKS * 2);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), c.x, c.y + 1.0, c.z, 40, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4, 0.1);
+		level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), c.x, c.y + 4.0, c.z, 60, TIDE_RADIUS * 0.4, 0.5, TIDE_RADIUS * 0.4, 0.0);
 		MagicFx.burst(level, c.x, c.y + 1.0, c.z, INK_COLOR, 2.0F, 40, TIDE_RADIUS * 0.4, 1.0, TIDE_RADIUS * 0.4);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.NEUTRAL, 2.0F, 0.5F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.CONDUIT_ACTIVATE, SoundSource.NEUTRAL, 2.0F, 0.6F);

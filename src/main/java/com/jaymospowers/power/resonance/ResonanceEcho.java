@@ -63,6 +63,7 @@ final class ResonanceEcho {
 		listen(player, RANGE, TICKS);
 		ServerLevel level = player.level();
 		RIPPLES.add(new Ripple(level, player.position().add(0.0, 0.1, 0.0), RIPPLE_RADIUS, new int[] {0}));
+		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), (float)RIPPLE_RADIUS, ResonancePower.COLOR);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, 1.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.4F, 1.6F);
 		return true;

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.resonance;
 
+import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +33,13 @@ import net.minecraft.world.phys.Vec3;
  * in it shatter. Tuned low it knocks back harder; tuned high it hits harder. Shrieker (corrupted): sculk spreads where it
  * lands.
  */
-final class ResonancePulse {
+public final class ResonancePulse {
 	static final double RANGE = 8.0;
 	static final double RANGE_MASTERED = 12.0;
 	/** The cone's half-angle: cos(35°). */
 	static final double CONE_COS = Math.cos(Math.toRadians(35.0));
+	/** How long what a Pulse hit stays outlined for its caster (ticks), and every how many blocks a ring of sound stands in the cone. */
+	static final int PAINT_TICKS = 100, RING_EVERY = 3;
 	static final float DAMAGE = 5.0F;
 	static final double KNOCKBACK = 1.5;
 	static final double KNOCKBACK_UP = 0.35;
@@ -66,6 +69,7 @@ final class ResonancePulse {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		List<BlockPos> landings = new ArrayList<>();
+		List<LivingEntity> painted = new ArrayList<>();
 
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
@@ -78,11 +82,20 @@ final class ResonancePulse {
 			target.hurtServer(level, ResonanceDamage.source(player, deep ? ResonanceDamage.PULSE_DEEP : ResonanceDamage.PULSE), damage);
 			ResonanceDamage.push(target, to, knockback, KNOCKBACK_UP);
 			interrupt(target);
+			painted.add(target);
+			// those it leaves in the dark hear where it came from
+			if (target instanceof ServerPlayer hit && com.jaymospowers.power.blindness.Blind.sightless(hit)) {
+				com.jaymospowers.power.blindness.BlindnessEcholocation.ring(hit, eye, 1.0F, com.jaymospowers.power.blindness.BlindnessEcholocation.PULSE);
+			}
 			level.sendParticles(ParticleTypes.NOTE, target.getX(), target.getY() + target.getBbHeight() + 0.3, target.getZ(), 1, 0.0, 0.0, 0.0,
 				(tune + 2) / 4.0);
 			if (landings.size() < SCULK_LANDINGS) {
 				landings.add(target.blockPosition().below());
 			}
+		}
+		// your shout paints what it hit: outlined for you alone, through walls
+		if (!painted.isEmpty()) {
+			ResonanceEcho.send(player, painted, PAINT_TICKS, ResonanceNet.Sense.ECHO);
 		}
 		shatterPanes(player, level, eye, look, range);
 
@@ -92,6 +105,10 @@ final class ResonancePulse {
 			double spread = d * Math.tan(Math.acos(CONE_COS)) * 0.8;
 			Vec3 at = eye.add(look.scale(d));
 			level.sendParticles(ParticleTypes.SCULK_CHARGE_POP, at.x, at.y, at.z, 2 + (int)d, spread * 0.5, spread * 0.5, spread * 0.5, 0.01);
+			// and the wave itself: rings of sound standing across the cone, wider the further out
+			if ((int)d % RING_EVERY == 0) {
+				MagicFx.ring(level, at, look, (float)spread, ResonancePower.COLOR, MagicFx.RING_TICKS + (int)d);
+			}
 		}
 		if (random.nextBoolean()) {
 			level.sendParticles(ParticleTypes.SONIC_BOOM, eye.x + look.x * 1.5, eye.y + look.y * 1.5, eye.z + look.z * 1.5, 1, 0.0, 0.0, 0.0, 0.0);
@@ -114,7 +131,7 @@ final class ResonancePulse {
 	}
 
 	/** Stops whatever the creature is using (a raised shield, a meal, a drink); a player can't raise it again at once. */
-	static void interrupt(LivingEntity target) {
+	public static void interrupt(LivingEntity target) {
 		if (!target.isUsingItem()) {
 			return;
 		}

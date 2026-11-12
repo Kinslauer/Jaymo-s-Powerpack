@@ -109,9 +109,10 @@ final class DarktideHud {
 			g = Items.FLINT;
 			gSlot = DarktideState.INK_CROSS;
 		} else {
+			// empty hands draw the blade of dark water for the cut; only some other item in hand stops it
 			g = Items.NAUTILUS_SHELL;
 			gSlot = DarktideState.CRESCENT;
-			gUsable = false;
+			gUsable = kit == DarktideWeapons.Kit.UNARMED;
 		}
 		chips.add(new Chip(g, gSlot, keyName(PowerKey.ABILITY_2), JaymosPowersClient.isUnlocked(PowerKey.ABILITY_2) && gUsable, false));
 		chips.add(new Chip(Items.HEART_OF_THE_SEA, DarktideState.UNDERTOW, keyName(PowerKey.ABILITY_3), JaymosPowersClient.isUnlocked(PowerKey.ABILITY_3), false));
@@ -120,7 +121,7 @@ final class DarktideHud {
 		if (Mastery.unlocked(player) >= Mastery.ALL) {
 			KeyMapping skill = DarktidePowerClient.skillKey(Minecraft.getInstance());
 			chips.add(new Chip(Items.CONDUIT, DarktideState.GEDAN, skill == null ? "X" : skill.getTranslatedKeyMessage().getString(),
-				kit == DarktideWeapons.Kit.KATANA, DarktideMove.current(player) != null && DarktideMove.current(player).kind() == DarktideMove.STANCE));
+				kit == DarktideWeapons.Kit.KATANA || kit == DarktideWeapons.Kit.UNARMED, DarktideMove.current(player) != null && DarktideMove.current(player).kind() == DarktideMove.STANCE));
 		}
 		String z = JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString();
 		if (drowned) {
@@ -135,6 +136,8 @@ final class DarktideHud {
 			boolean necro = drowned && hud.shadows() > 0 && !player.isShiftKeyDown();
 			chips.add(new Chip(necro ? Items.SOUL_LANTERN : Items.PRISMARINE_SHARD, necro ? DarktideState.RAISE : DarktideState.ARMS, c,
 				DarktideWeapons.loaded() || necro, hud.arms() != DarktideState.ARMS_BARE));
+			// C held: the Maelstrom
+			chips.add(new Chip(Items.DARK_PRISMARINE, DarktideState.MAELSTROM, c, true, false));
 		} else if (drowned) {
 			chips.add(new Chip(Items.PUFFERFISH, DarktideState.DROWN, c, true, false));
 		}

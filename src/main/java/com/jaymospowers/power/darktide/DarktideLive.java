@@ -7,7 +7,7 @@ import java.util.Set;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
-/** One Darktide user's running state on the server (not saved: Flow and cooldowns start fresh after a restart). */
+/** One Darktide user's running state on the server (not saved, but for Flow: cooldowns start fresh after a restart). */
 final class DarktideLive {
 	float flow;
 	final long[] until = new long[DarktideState.SLOTS];
@@ -24,6 +24,16 @@ final class DarktideLive {
 
 	// R: Dark Strike's charge, since when (game time; -1: not charging)
 	long strikeStart = -1L;
+
+	/** The tide last synced ({@link DarktideFlow#tide}). */
+	int tide;
+
+	// the blade of dark water: until when it lasts without being used (0: none out)
+	long bladeUntil;
+
+	// C: since when it's held (-1: not), and the Maelstrom running
+	long ultimateDown = -1L;
+	DarktideMaelstrom.@Nullable Dome maelstrom;
 
 	// Z: Veil (ascended, cured)
 	boolean veil;
@@ -68,6 +78,8 @@ final class DarktideLive {
 	static final class Undertow {
 		final Vec3 to;
 		final long at;
+		/** Spring tide: who was dragged under with you (entity ids). */
+		final List<Integer> dragged = new ArrayList<>();
 
 		Undertow(Vec3 to, long at) {
 			this.to = to;

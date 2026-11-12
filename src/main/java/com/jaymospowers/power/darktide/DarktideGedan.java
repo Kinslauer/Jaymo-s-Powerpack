@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,10 +24,10 @@ import net.minecraft.world.phys.Vec3;
  * and come back to where you stood. Untouchable while sunken.
  */
 final class DarktideGedan {
-	public static final double FIELD_RADIUS = 10.0;
-	public static final int FIELD_GROW_TICKS = 100;
+	public static final double FIELD_RADIUS = DarktideLooks.FIELD_RADIUS;
+	public static final int FIELD_GROW_TICKS = DarktideLooks.FIELD_GROW_TICKS;
 	static final int MAX_TARGETS = 8;
-	static final float SLASH_DAMAGE = 6.0F, SLASH_PER_SECOND = 1.0F;
+	static final float SLASH_DAMAGE = 10.0F, SLASH_PER_SECOND = 2.0F;
 	/** Seconds held that count toward the slash damage. */
 	static final int MAX_SECONDS = 5;
 	static final int MAX_EXTRA_SLASHES = 2;
@@ -57,6 +56,10 @@ final class DarktideGedan {
 		if (Mastery.unlocked(player) < Mastery.ALL) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.locked").withStyle(ChatFormatting.GRAY));
 			return;
+		}
+		if (DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED) {
+			// empty hands: the stance draws the blade of dark water for itself
+			DarktideBlade.draw(player, live);
 		}
 		if (DarktideWeapons.kit(player) != DarktideWeapons.Kit.KATANA) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.katana_only").withStyle(ChatFormatting.GRAY));
@@ -105,7 +108,7 @@ final class DarktideGedan {
 		player.setAttached(DarktideState.MOVE, new DarktideState.Move(DarktideMove.STANCE, gedan.start, MAX_HOLD + 40, gedan.stance + 4 * gedan.parries));
 		Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.8));
 		MagicFx.blast(level, at.x, at.y - 0.3, at.z, MagicFx.FLASH_RADIUS, 0xBFE6FF);
-		level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y - 0.3, at.z, 14, 0.3, 0.3, 0.3, 0.05);
+		MagicFx.ring(level, at.add(0.0, -0.3, 0.0), player.getLookAngle(), 0.9F, DarktideLooks.PALE, MagicFx.RING_TICKS);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.9F);
 		DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), attacker.getId()));
 	}
@@ -129,8 +132,9 @@ final class DarktideGedan {
 			return;
 		}
 		DarktideMove.play(player, DarktideMove.STILLWATER, gedan.targets.size() * SLASH_EVERY + 6, 0);
-		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 40, 0.6, 0.05, 0.6, 0.2);
-		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 0.3, player.getZ(), 30, 0.5, 0.2, 0.5, 0.03);
+		// you go under: the mirror breaks where you stood
+		DarktideLooks.spray(level, player.position(), 1.6F);
+		DarktideLooks.pool(level, player.position(), DarktideLooks.BODY_POOL, gedan.targets.size() * SLASH_EVERY + 20);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 1.0F, 0.6F);
 		player.setInvisible(true);
 	}
@@ -163,8 +167,7 @@ final class DarktideGedan {
 				for (int i = 0; i < 6; i++) {
 					double a = random.nextDouble() * Math.PI * 2.0;
 					double d = Math.sqrt(random.nextDouble()) * r;
-					level.sendParticles(ParticleTypes.FALLING_WATER, gedan.origin.x + Math.cos(a) * d, gedan.origin.y + 0.2, gedan.origin.z + Math.sin(a) * d,
-						1, 0.0, 0.0, 0.0, 0.0);
+					level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), gedan.origin.x + Math.cos(a) * d, gedan.origin.y + 0.2, gedan.origin.z + Math.sin(a) * d, 1, 0.0, 0.0, 0.0, 0.0);
 				}
 			}
 			return;
@@ -190,9 +193,12 @@ final class DarktideGedan {
 		}
 		DarktideStatus.reel(target, target.position().add(player.getLookAngle().scale(-1.0)));
 		Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
-		level.sendParticles(ParticleTypes.SPLASH, target.getX(), target.getY() + 0.1, target.getZ(), 30, 0.4, 0.05, 0.4, 0.3);
-		level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 12, 0.3, 0.4, 0.3, 0.05);
+		// up out of a pool under it: one rising cut for each slash
+		DarktideLooks.pool(level, target.position(), DarktideLooks.BODY_POOL, SLASH_EVERY + 16);
+		for (int i = 0; i < slashes; i++) {
+			DarktideLooks.cut(level, gedan.origin.add(0.0, 1.5, 0.0), at, 2.6, DarktideLooks.HEAVY_STROKE, DarktideLooks.INK);
+		}
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), at.x, at.y, at.z, 8, 0.3, 0.4, 0.3, 0.1);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.6F + level.getRandom().nextFloat() * 0.2F);
 	}
 
@@ -206,7 +212,7 @@ final class DarktideGedan {
 			ServerLevel level = player.level();
 			player.teleportTo(level, gedan.origin.x, gedan.origin.y, gedan.origin.z, Set.of(), gedan.yaw, player.getXRot(), false);
 			player.setInvisible(false);
-			level.sendParticles(ParticleTypes.SPLASH, gedan.origin.x, gedan.origin.y + 0.1, gedan.origin.z, 30, 0.5, 0.05, 0.5, 0.2);
+			DarktideLooks.spray(level, gedan.origin, 1.4F);
 		}
 		DarktideMove.clear(player);
 	}

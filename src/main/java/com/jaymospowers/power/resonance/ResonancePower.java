@@ -28,7 +28,10 @@ import net.minecraft.world.item.ItemStack;
  * <li>R, Pulse ({@link ResonancePulse}): a cone of sound that hurts, knocks back and interrupts, and shatters panes.</li>
  * <li>G (hold), Shatter ({@link ResonanceShatter}): hum at a block until it breaks, or at a creature's armour.</li>
  * <li>V, Echolocation ({@link ResonanceEcho}): every creature in 32 blocks outlined, for you alone, for 4 s.</li>
- * <li>B, Hush ({@link ResonanceHush}): a dome of silence that switches off other players' power keys.</li>
+ * <li>B, Hush ({@link ResonanceHush}): a dome of silence that switches off other players' power keys. Held, Quiet
+ * ({@link ResonanceQuiet}): you make no sound at all.</li>
+ * <li>In the dark (eyes gone or blindfolded, {@code Blind}): the living burn through it, and sneak + V lifts an ascended
+ * holder into Sky Sight ({@link ResonanceSight}).</li>
  * <li>Z, Throw Voice ({@link ResonanceVoice}); X (hold + scroll), Tune; C, Sonic Boom or Shriek ({@link ResonanceBoom}).</li>
  * </ul>
  * The starter is passive (the heartbeat ring, drawn by the client). Fate: {@link ResonanceFate}. Items:
@@ -82,6 +85,7 @@ public final class ResonancePower implements Power {
 			ResonanceHush.clear();
 			ResonanceFate.clear();
 			ResonanceEcho.clear();
+			ResonanceQuiet.clear();
 		});
 	}
 
@@ -90,6 +94,7 @@ public final class ResonancePower implements Power {
 		ResonanceBoom.forget(player);
 		ResonanceVoice.forget(player);
 		ResonanceFate.forget(player);
+		ResonanceQuiet.forget(player);
 	}
 
 	@Override
@@ -138,12 +143,15 @@ public final class ResonancePower implements Power {
 	public void onDowned(ServerPlayer player) {
 		// a hum in progress ends without its last note
 		ResonanceShatter.stop(player, false);
+		ResonanceQuiet.forget(player);
+		ResonanceSight.end(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
 		forget(player);
 		ResonanceHush.end(player);
+		ResonanceSight.end(player);
 		player.removeAttached(STATE);
 	}
 
@@ -152,6 +160,8 @@ public final class ResonancePower implements Power {
 		ResonanceShatter.tick(player);
 		ResonanceBoom.tick(player);
 		ResonanceFate.tick(player);
+		ResonanceQuiet.tick(player);
+		ResonanceSight.tick(player);
 	}
 
 	@Override
@@ -164,6 +174,11 @@ public final class ResonancePower implements Power {
 			}
 			return;
 		}
+		if (key == PowerKey.ABILITY_4) {
+			// a tap is Hush's dome (cast as the key comes up); held, it is Quiet
+			ResonanceQuiet.key(player, down);
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -174,13 +189,11 @@ public final class ResonancePower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
+				if (ResonanceSight.key(player)) {
+					return;
+				}
 				if (ready(player, ResonanceState.ECHO) && ResonanceEcho.ping(player)) {
 					cooldown(player, ResonanceState.ECHO, ECHO_COOLDOWN);
-				}
-			}
-			case ABILITY_4 -> {
-				if (ready(player, ResonanceState.HUSH) && ResonanceHush.cast(player)) {
-					cooldown(player, ResonanceState.HUSH, HUSH_COOLDOWN);
 				}
 			}
 			default -> {

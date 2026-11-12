@@ -81,7 +81,7 @@ final class DarktideTide {
 	// ---- Drown ----
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
-	static final float DROWN_DAMAGE = 1.0F;
+	static final float DROWN_DAMAGE = 2.0F;
 	/** The water ball is a plain orb this colour, swelling to full size over this many ticks. */
 	static final int DROWN_COLOR = 0x1E5AB4, DROWN_SWELL = 8;
 
@@ -106,27 +106,47 @@ final class DarktideTide {
 	// ---- keys ---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * C. Ascended: sneaking, Tide Arms; a tap raises a shadow while corrupted (cured, the shadows are dormant).
-	 * Not ascended: Drown while corrupted.
+	 * C. Ascended: sneaking, Tide Arms; held {@link DarktideMaelstrom#HOLD_TICKS}, the Maelstrom; let go sooner, a tap,
+	 * which raises a shadow while corrupted (cured, the shadows are dormant). Not ascended: Drown while corrupted.
 	 */
 	static void ultimateKey(ServerPlayer player, boolean down) {
-		if (!down) {
-			return;
-		}
 		boolean ascended = Fate.isAscended(player);
 		boolean corrupted = DarktidePower.corrupted(player);
-		if (ascended && player.isShiftKeyDown()) {
-			cycleArms(player);
-		} else if (!ascended) {
-			if (corrupted) {
+		DarktideLive live = DarktidePower.live(player);
+		if (!ascended) {
+			if (down && corrupted) {
 				drownKey(player, true);
 			}
-		} else if (!corrupted) {
+			return;
+		}
+		if (down) {
+			if (player.isShiftKeyDown()) {
+				cycleArms(player);
+			} else {
+				// held or tapped: decided when it's let go, or by tickHold once it's been down long enough
+				live.ultimateDown = player.level().getGameTime();
+			}
+			return;
+		}
+		if (live.ultimateDown < 0L) {
+			// already the Maelstrom, or the press was Tide Arms'
+			return;
+		}
+		live.ultimateDown = -1L;
+		if (!corrupted) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
 		} else if (DarktideState.save(player).shadows().isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_shadows").withStyle(ChatFormatting.GRAY));
 		} else {
 			raise(player);
+		}
+	}
+
+	/** C still down after {@link DarktideMaelstrom#HOLD_TICKS}: the Maelstrom. */
+	static void tickHold(ServerPlayer player, DarktideLive live) {
+		if (live.ultimateDown >= 0L && player.level().getGameTime() - live.ultimateDown >= DarktideMaelstrom.HOLD_TICKS) {
+			live.ultimateDown = -1L;
+			DarktideMaelstrom.key(player);
 		}
 	}
 
@@ -205,6 +225,8 @@ final class DarktideTide {
 		if (level.getGameTime() < live.armsSwapAt || !DarktidePower.ready(player, DarktideState.ARMS)) {
 			return;
 		}
+		// the guard's own blade of dark water is no blade of yours: it goes, and the hands count as empty
+		DarktideBlade.dismiss(player, false);
 		Inventory inventory = player.getInventory();
 		if (live.arms == DarktideState.ARMS_BARE) {
 			ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
@@ -257,13 +279,13 @@ final class DarktideTide {
 		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
 		Vec3 hand = player.position().add(0.0, 1.0, 0.0);
-		level.sendParticles(ParticleTypes.SPLASH, hand.x, hand.y, hand.z, 24, 0.35, 0.3, 0.35, 0.15);
-		level.sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), hand.x, hand.y, hand.z, 12, 0.35, 0.3, 0.35, 0.15);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_FILL, SoundSource.PLAYERS, 0.9F, 0.6F);
 		if (next == DarktideState.ARMS_BARE) {
 			// the water blade dissolves back into what you held
 			Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.5, 0.0);
-			level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y, at.z, 20, 0.25, 0.3, 0.25, 0.0);
+			level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), at.x, at.y, at.z, 10, 0.25, 0.3, 0.25, 0.0);
 			level.sendParticles(MagicFx.wisp(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
 		}
@@ -304,7 +326,7 @@ final class DarktideTide {
 		live.armsSwapAt = level.getGameTime() + ARMS_SWAP_COOLDOWN;
 		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
-		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+		level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
 
@@ -385,7 +407,7 @@ final class DarktideTide {
 			live.arms = DarktideState.ARMS_BARE;
 		}
 		if (effects) {
-			player.level().sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.3, 0.3, 0.1);
+			player.level().sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.9F), player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.3, 0.3, 0.3, 0.1);
 		}
 	}
 
@@ -552,7 +574,7 @@ final class DarktideTide {
 			Oddities.mark(mob, Oddities.RISEN);
 			mob.setTarget(null);
 			mob.clearFire();
-			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + 0.3, mob.getZ(), 30, 0.4, 0.2, 0.4, 0.05);
+			level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + 0.3, mob.getZ(), 15, 0.4, 0.2, 0.4, 0.05);
 			level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 0.5, mob.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
 			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 				30, 0.4, 0.1, 0.4, 0.1);
@@ -569,7 +591,7 @@ final class DarktideTide {
 		live.risen.add(mob.getId());
 		mob.setTarget(null);
 		mob.clearFire();
-		level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + 0.3, mob.getZ(), 40, 0.4, 0.2, 0.4, 0.05);
+		level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + 0.3, mob.getZ(), 20, 0.4, 0.2, 0.4, 0.05);
 		level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 0.5, mob.getZ(), 16, 0.3, 0.5, 0.3, 0.02);
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 			30, 0.4, 0.1, 0.4, 0.1);
@@ -600,7 +622,7 @@ final class DarktideTide {
 
 	private static void melt(Mob mob) {
 		if (mob.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ(), 30, 0.3, 0.5, 0.3, 0.04);
+			level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + mob.getBbHeight() / 2.0, mob.getZ(), 15, 0.3, 0.5, 0.3, 0.04);
 			level.sendParticles(MagicFx.wisp(0x050510, 1.6F), mob.getX(), mob.getY() + 0.5, mob.getZ(), 20, 0.3, 0.5, 0.3, 0.0);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
@@ -675,7 +697,7 @@ final class DarktideTide {
 				}
 			}
 			if (mob.tickCount % 8 == 0 && mob.level() instanceof ServerLevel level) {
-				level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
+				level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), mob.getX(), mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 1, 0.2, 0.3, 0.2, 0.0);
 			}
 		}
 	}
@@ -714,8 +736,10 @@ final class DarktideTide {
 			long now = level.getGameTime();
 			if (now >= zone.until || zone.owner.isRemoved()) {
 				it.remove();
-				level.sendParticles(ParticleTypes.SPLASH, zone.center.x, zone.center.y - DROWN_RADIUS * 0.5, zone.center.z, 80, DROWN_RADIUS * 0.5, 0.3,
-					DROWN_RADIUS * 0.5, 0.3);
+				// it lets go: the water drops and runs out over the ground
+				Vec3 floor = zone.center.add(0.0, -DROWN_RADIUS, 0.0);
+				DarktideLooks.spray(level, floor, (float) DROWN_RADIUS * 1.4F);
+				DarktideLooks.pool(level, floor, (float) DROWN_RADIUS, DarktideLooks.POOL_TICKS);
 				continue;
 			}
 			// a ball of dark water, drawn as a slow, wobbling see-through orb (ZFighterOrbs)
@@ -727,9 +751,9 @@ final class DarktideTide {
 				// bubbles through it, a shimmering skin
 				Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 				Vec3 skin = zone.center.add(dir.scale(DROWN_RADIUS));
-				level.sendParticles(ParticleTypes.FALLING_WATER, skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
 				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * DROWN_RADIUS));
-				level.sendParticles(ParticleTypes.BUBBLE_POP, inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.6F), inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
 				if (i % 3 == 0) {
 					level.sendParticles(MagicFx.wisp(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}
@@ -747,7 +771,14 @@ final class DarktideTide {
 					victim.setDeltaMovement(back.x, Math.min(back.y, 0.02), back.z);
 					victim.syncVelocity = true;
 				} else {
-					victim.setDeltaMovement(victim.getDeltaMovement().multiply(0.6, 0.6, 0.6));
+					// hanging helpless in the water: no footing, drifting up toward its middle
+					Vec3 v = victim.getDeltaMovement();
+					victim.setDeltaMovement(v.x * 0.5, off.y < 0.0 ? 0.08 : Math.min(0.0, v.y * 0.5), v.z * 0.5);
+				}
+				victim.syncVelocity = true;
+				victim.resetFallDistance();
+				if (now % DROWN_EVERY == 0 && !(victim instanceof net.minecraft.world.entity.player.Player)) {
+					DarktideStatus.stun(victim, DROWN_EVERY + 2);
 				}
 				victim.setAirSupply(Math.max(-19, victim.getAirSupply() - 6));
 				victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 2), zone.owner);

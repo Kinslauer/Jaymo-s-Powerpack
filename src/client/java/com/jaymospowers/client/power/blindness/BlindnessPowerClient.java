@@ -1,12 +1,7 @@
 package com.jaymospowers.client.power.blindness;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.client.PowerClient;
-import com.jaymospowers.client.PowerClients;
-import com.jaymospowers.power.blindness.BlindnessPower;
-import com.jaymospowers.power.blindness.BlindnessState;
-import com.jaymospowers.power.blindness.BlindnessVariant;
-import com.jaymospowers.power.blindness.BlindSide;
+import com.jaymospowers.power.blindness.Blind;
 import com.jaymospowers.power.blindness.BlindnessEcho;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -17,222 +12,113 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
-import org.jspecify.annotations.Nullable;
 
 /**
- * Client-side blindness effects:
+ * The blind screen. Blindness is a condition ({@link Blind}), not a power, so this is drawn for anyone it holds:
  * <ul>
- * <li>Total blindness: pitch-black vignette covering the screen, with echolocation rings from {@link BlindnessEcholocationClient}</li>
- * <li>One-eye blind: half-screen blur (Borrado) or darken (Escuro), remaining view stretches, aim drifts</li>
- * <li>Void Sight: entity outlines through walls, heartbeat sounds</li>
- * <li>Blackout: spreading darkness vignette</li>
- * <li>Abyssal Echo: full-screen flash + blindness</li>
+ * <li><b>Both eyes gone</b>: the whole view is dark ({@link #BLIND_ALPHA}), and every sound near you ripples on it from
+ * where it came ({@link BlindnessEcholocationClient}).</li>
+ * <li><b>One eye gone</b>: that side of the view is dark, soft at its inner edge.</li>
+ * <li><b>A Resonance holder in the dark</b> (eyes gone, or blindfolded): the dark is thinner, so the living they hear
+ * burn through it ({@link BlindnessDevoutSight}), and thinner still from up in Sky Sight.</li>
  * </ul>
- * All rendering happens in a HUD element after MISC_OVERLAYS (like CorruptionClient).
+ * A blindfold on anyone else is the vanilla Blindness effect ({@code BlindedHud}); the rings play over that too.
  */
-public final class BlindnessPowerClient implements PowerClient {
-    public static final BlindnessPowerClient INSTANCE = new BlindnessPowerClient();
+public final class BlindnessPowerClient {
+	/** The dark's colour; how solid it is with both eyes gone, for a Resonance holder, and from up in Sky Sight. */
+	static final int DARK = 0x0A0A12;
+	static final int BLIND_ALPHA = 0xF4, DEVOUT_ALPHA = 0xB4, SKY_SIGHT_ALPHA = 0x8C;
+	/** One eye gone: how solid its side is, and how much of the view's middle the dark fades out over (share of the width). */
+	static final int ONE_EYE_ALPHA = 0xE6;
+	static final float ONE_EYE_SOFT = 0.12F;
+	static final int SOFT_BANDS = 12;
+	/** How fast the dark closes in and lifts (a share a tick). */
+	static final float CLOSE = 0.1F;
 
-    // ---- tuning ----
-    /** Total blindness vignette colour (near-black) and max alpha. */
-    private static final int TOTAL_BLIND_COLOUR = 0x0A0A12;
-    private static final int TOTAL_BLIND_ALPHA = 0xF0; // almost opaque
-    /** The devout's (BlindnessDevotion) thinner dark, and thinner still from up in Sky Sight. */
-    private static final int DEVOUT_BLIND_ALPHA = 0xB4;
-    private static final int SKY_SIGHT_BLIND_ALPHA = 0x8C;
-    /** One-eye Borrado (blur) - we simulate with a dark translucent overlay on one side. */
-    private static final int BORRADO_COLOUR = 0x1A1A2E;
-    private static final int BORRADO_ALPHA = 0xC0;
-    /** One-eye Escuro (darken) - solid dark overlay on one side. */
-    private static final int ESCURO_COLOUR = 0x05050A;
-    private static final int ESCURO_ALPHA = 0xE0;
-    /** Void Sight entity outline colour. */
-    private static final int VOID_SIGHT_COLOUR = 0x8A2BE2; // blue-violet
-    private static final int VOID_SIGHT_ALPHA = 0x80;
-    /** Blackout spreading vignette. */
-    private static final int BLACKOUT_COLOUR = 0x1A0000;
-    private static final int BLACKOUT_ALPHA = 0xA0;
-    /** Abyssal Echo flash. */
-    private static final int ABYSSAL_FLASH_COLOUR = 0x4B0082;
-    private static final int ABYSSAL_FLASH_ALPHA = 0xFF;
-    private static final int ABYSSAL_FLASH_DURATION = 10; // ticks
+	private static float both, left, right;
 
-    // ---- state ----
-    private float totalBlindShade = 0.0F;
-    private float oneEyeShade = 0.0F;
-    private float voidSightShade = 0.0F;
-    private float blackoutShade = 0.0F;
-    private int abyssalFlashTicks = 0;
-    private long lastGameTime = 0;
+	private BlindnessPowerClient() {
+	}
 
-    private BlindnessPowerClient() {
-    }
+	/** Called once from {@code JaymosPowersClient}. */
+	public static void init() {
+		ClientTickEvents.END_CLIENT_TICK.register(BlindnessPowerClient::tick);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
+		BlindnessEcholocationClient.init();
+		BlindnessSockets.register();
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.blindness.Unseeing.TYPE, UnseeingRenderer::new);
+		ClientPlayNetworking.registerGlobalReceiver(BlindnessEcho.TYPE, (payload, context) ->
+			context.client().execute(() -> BlindnessEcholocationClient.onEcho(payload)));
+	}
 
-    /** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: registers the PowerClient and HUD element. */
-    public static void init() {
-        PowerClients.register(BlindnessPower.ID, INSTANCE);
-        ClientTickEvents.END_CLIENT_TICK.register(BlindnessPowerClient::tick);
-        HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("blindness_overlay"), BlindnessPowerClient::render);
-        BlindnessEcholocationClient.init();
-        BlindnessSockets.register();
-        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.blindness.Unseeing.TYPE, UnseeingRenderer::new);
-        ClientPlayNetworking.registerGlobalReceiver(BlindnessEcho.TYPE, (payload, context) ->
-                context.client().execute(() -> BlindnessEcholocationClient.onEcho(payload)));
-    }
+	private static void tick(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null) {
+			both = left = right = 0.0F;
+			return;
+		}
+		if (minecraft.isPaused()) {
+			return;
+		}
+		int lost = player.isSpectator() ? 0 : Blind.eyesLost(player);
+		// a Resonance holder's blindfold is this dark too (anyone else's is the Blindness effect)
+		boolean dark = lost == Blind.BOTH || BlindnessDevoutSight.devout(player);
+		both = ease(both, dark);
+		left = ease(left, !dark && lost == Blind.LEFT);
+		right = ease(right, !dark && lost == Blind.RIGHT);
+	}
 
-    /** Client tick: update shades from server-synced BlindnessState. */
-    private static void tick(Minecraft minecraft) {
-        LocalPlayer player = minecraft.player;
-        if (player == null || minecraft.isPaused()) {
-            INSTANCE.resetShades();
-            return;
-        }
-        INSTANCE.updateShades(player);
-    }
+	private static float ease(float value, boolean on) {
+		float next = value + ((on ? 1.0F : 0.0F) - value) * CLOSE;
+		return Math.abs(next - (on ? 1.0F : 0.0F)) < 0.01F ? (on ? 1.0F : 0.0F) : next;
+	}
 
-    private void resetShades() {
-        totalBlindShade = 0.0F;
-        oneEyeShade = 0.0F;
-        voidSightShade = 0.0F;
-        blackoutShade = 0.0F;
-        if (abyssalFlashTicks > 0) abyssalFlashTicks--;
-    }
+	/** Whether the local player's view is dark now (so the rings of sound should show). */
+	static boolean dark(LocalPlayer player) {
+		return both > 0.3F || Blind.sightless(player);
+	}
 
-    private void updateShades(LocalPlayer player) {
-        long gameTime = player.level().getGameTime();
-        if (gameTime != lastGameTime) {
-            lastGameTime = gameTime;
-            if (abyssalFlashTicks > 0) abyssalFlashTicks--;
-        }
+	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		int w = graphics.guiWidth();
+		int h = graphics.guiHeight();
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (w == 0 || h == 0 || player == null) {
+			return;
+		}
+		if (both > 0.01F) {
+			int full = BlindnessDevoutSight.devout(player) ? (int) Mth.lerp(BlindnessDevoutSight.raised(), DEVOUT_ALPHA, SKY_SIGHT_ALPHA) : BLIND_ALPHA;
+			graphics.fill(0, 0, w, h, Mth.clamp((int) (full * both), 0, 255) << 24 | DARK);
+		}
+		// the wearer's left eye sees the left of the view
+		side(graphics, w, h, true, left);
+		side(graphics, w, h, false, right);
+		if (dark(player)) {
+			BlindnessEcholocationClient.render(graphics, delta);
+		}
+	}
 
-        BlindnessState state = player.getAttached(BlindnessPower.STATE);
-        if (state == null) {
-            resetShades();
-            return;
-        }
-
-        // Total blindness: always active when player has the power (fresh awakening or full blindness)
-        // For now, total blindness is the base state - the world is dark, only echolocation rings reveal it
-        totalBlindShade = Mth.clamp(totalBlindShade + (1.0F - totalBlindShade) * 0.1F, 0.0F, 1.0F);
-
-        // One-eye blind (hold G)
-        if (state.isActive(BlindnessState.ONE_EYE)) {
-            oneEyeShade = Mth.clamp(oneEyeShade + 0.1F, 0.0F, 1.0F);
-        } else {
-            oneEyeShade = Mth.clamp(oneEyeShade - 0.05F, 0.0F, 1.0F);
-        }
-
-        // Void Sight (ascended C)
-        if (state.voidSightActive()) {
-            voidSightShade = Mth.clamp(voidSightShade + 0.1F, 0.0F, 1.0F);
-        } else {
-            voidSightShade = Mth.clamp(voidSightShade - 0.05F, 0.0F, 1.0F);
-        }
-
-        // Blackout (corrupted C)
-        if (BlindnessBlackoutClient.active(player)) {
-            blackoutShade = Mth.clamp(blackoutShade + 0.05F, 0.0F, 1.0F);
-        } else {
-            blackoutShade = Mth.clamp(blackoutShade - 0.02F, 0.0F, 1.0F);
-        }
-
-        // Abyssal Echo flash (both C)
-        if (BlindnessAbyssalEchoClient.justActivated(player)) {
-            abyssalFlashTicks = ABYSSAL_FLASH_DURATION;
-        }
-    }
-
-    /** Renders all blindness overlays. */
-    private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
-        INSTANCE.doRender(graphics);
-    }
-
-    private void doRender(GuiGraphicsExtractor graphics) {
-        int w = graphics.guiWidth();
-        int h = graphics.guiHeight();
-        if (w == 0 || h == 0) return;
-
-        // 1. Total blindness vignette (base layer - covers everything)
-        if (totalBlindShade > 0.01F) {
-            // the devout's dark is thinner, so what lives burns through it, and thinner again from up in Sky Sight
-            LocalPlayer self = Minecraft.getInstance().player;
-            int full = BlindnessDevoutSight.devout(self)
-                    ? (int) Mth.lerp(BlindnessDevoutSight.raised(), DEVOUT_BLIND_ALPHA, SKY_SIGHT_BLIND_ALPHA) : TOTAL_BLIND_ALPHA;
-            int alpha = Mth.clamp((int) (full * totalBlindShade), 0, 255);
-            int colour = alpha << 24 | TOTAL_BLIND_COLOUR;
-            graphics.fill(0, 0, w, h, colour);
-        }
-
-        // 2. One-eye blind overlay (left or right half)
-        if (oneEyeShade > 0.01F) {
-            BlindnessState state = Minecraft.getInstance().player.getAttached(BlindnessPower.STATE);
-            if (state != null) {
-                boolean blindLeft = state.blindSide() == BlindSide.LEFT;
-                int x1 = blindLeft ? 0 : w / 2;
-                int x2 = blindLeft ? w / 2 : w;
-                int alpha, colour;
-                if (state.variant() == BlindnessVariant.BORRADO) {
-                    alpha = Mth.clamp((int) (BORRADO_ALPHA * oneEyeShade), 0, 255);
-                    colour = alpha << 24 | BORRADO_COLOUR;
-                } else { // ESCURO
-                    alpha = Mth.clamp((int) (ESCURO_ALPHA * oneEyeShade), 0, 255);
-                    colour = alpha << 24 | ESCURO_COLOUR;
-                }
-                graphics.fill(x1, 0, x2, h, colour);
-                // Aim drift indicator: a subtle line toward the blind side
-                int driftAlpha = (int) (80 * oneEyeShade);
-                int driftColour = driftAlpha << 24 | 0xFFFFFF;
-                int cx = w / 2;
-                int cy = h / 2;
-                int driftX = blindLeft ? cx - 20 : cx + 20;
-                graphics.fill(cx - 1, cy - 1, cx + 1, cy + 1, driftColour); // center dot
-                graphics.fill(driftX - 1, cy - 1, driftX + 1, cy + 1, driftColour); // drift target
-            }
-        }
-
-        // 3. Void Sight: entity outlines are rendered in world renderer (not here), but we can add a subtle screen tint
-        if (voidSightShade > 0.01F) {
-            int alpha = Mth.clamp((int) (VOID_SIGHT_ALPHA * voidSightShade), 0, 255);
-            int colour = alpha << 24 | VOID_SIGHT_COLOUR;
-            // Subtle full-screen tint
-            graphics.fill(0, 0, w, h, colour);
-        }
-
-        // 4. Blackout spreading vignette
-        if (blackoutShade > 0.01F) {
-            int edge = Math.max(24, (int) (h * 0.35F * blackoutShade));
-            int alpha = Mth.clamp((int) (BLACKOUT_ALPHA * blackoutShade), 0, 255);
-            int solid = alpha << 24 | BLACKOUT_COLOUR;
-            graphics.fillGradient(0, 0, w, edge, solid, BLACKOUT_COLOUR);
-            graphics.fillGradient(0, h - edge, w, h, BLACKOUT_COLOUR, solid);
-            int sideEdge = Math.max(24, (int) (w * 0.25F * blackoutShade));
-            graphics.fillGradient(0, 0, sideEdge, h, solid, BLACKOUT_COLOUR);
-            graphics.fillGradient(w - sideEdge, 0, w, h, BLACKOUT_COLOUR, solid);
-        }
-
-        // 5. Abyssal Echo flash
-        if (abyssalFlashTicks > 0) {
-            float progress = 1.0F - abyssalFlashTicks / (float) ABYSSAL_FLASH_DURATION;
-            int alpha = Mth.clamp((int) (ABYSSAL_FLASH_ALPHA * (1.0F - progress)), 0, 255);
-            int colour = alpha << 24 | ABYSSAL_FLASH_COLOUR;
-            graphics.fill(0, 0, w, h, colour);
-        }
-
-        // 6. Echolocation rings (drawn on top so they're visible through blindness)
-        BlindnessEcholocationClient.render(graphics);
-    }
-
-    // ---- PowerClient overrides ----
-
-    @Override
-    public void tick(Minecraft minecraft, LocalPlayer player) {
-        // State updates happen in the static tick callback
-    }
-
-    @Override
-    public void onActiveChanged(LocalPlayer player, boolean active) {
-        if (!active) {
-            resetShades();
-        }
-    }
+	/** One eye's half of the view gone dark: solid from the edge to near the middle, fading out across it. */
+	private static void side(GuiGraphicsExtractor graphics, int w, int h, boolean leftSide, float shade) {
+		if (shade <= 0.01F) {
+			return;
+		}
+		int soft = Math.max(SOFT_BANDS, (int) (w * ONE_EYE_SOFT));
+		int solid = w / 2 - soft / 2;
+		int alpha = Mth.clamp((int) (ONE_EYE_ALPHA * shade), 0, 255);
+		if (leftSide) {
+			graphics.fill(0, 0, solid, h, alpha << 24 | DARK);
+		} else {
+			graphics.fill(w - solid, 0, w, h, alpha << 24 | DARK);
+		}
+		for (int i = 0; i < SOFT_BANDS; i++) {
+			int a = alpha * (SOFT_BANDS - i) / (SOFT_BANDS + 1);
+			int x0 = solid + soft * i / SOFT_BANDS;
+			int x1 = solid + soft * (i + 1) / SOFT_BANDS;
+			if (leftSide) {
+				graphics.fill(x0, 0, x1, h, a << 24 | DARK);
+			} else {
+				graphics.fill(w - x1, 0, w - x0, h, a << 24 | DARK);
+			}
+		}
+	}
 }

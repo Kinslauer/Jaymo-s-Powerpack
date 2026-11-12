@@ -1,12 +1,14 @@
 package com.jaymospowers.power.blindness;
 
+import com.jaymospowers.power.resonance.ResonancePower;
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.core.Callings;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.Scars;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.util.UUID;
 import com.mojang.serialization.Codec;
@@ -47,20 +49,19 @@ import net.minecraft.world.item.equipment.Equippable;
 
 /**
  * Andy (2026-11-11): "The especially devout opt to don a blindfold or carve out their eyes granting a new type of sight
- * within the blindness power, the ultimate granting them an almost birds eye view."
+ * ... the ultimate granting them an almost birds eye view." Blindness is a condition now ({@link Blind}); the sight
+ * belongs to Resonance holders who take the dark on.
  * <ul>
- * <li>The <b>blindfold</b> (black wool and string), worn on the head. Anyone without Blindness who wears it can't see.
- * A powerless survival player who keeps it on for {@link #VIGIL_SECONDS} s in a row is called to Blindness: a day off
- * the wait, once a day.</li>
+ * <li>The <b>blindfold</b> (black wool and string), worn on the head: whoever wears it can't see. A powerless survival
+ * player who keeps it on for {@link #VIGIL_SECONDS} s in a row has kept the vigil: while it stays on, striking a Tuning
+ * Fork awakens them to Resonance.</li>
  * <li><b>Carving out the eyes</b>: sneak and use shears on nothing, twice within {@link #CONFIRM_TICKS} (the first
- * use only warns). The eyes are gone for the rest of that life ({@link Scars.Kind#CARVED_EYES}) and a powerless
- * player awakens to Blindness at once. Andy: "you must bandage your eyes to prevent bleeding out, but your vision is
- * gone even after they heal. leaving sockets where your eyes were." The fresh sockets ({@link #FRESH}) bleed as hard as
- * a stump and never close by themselves until a bandage (or a rag) goes on the head; then they're healed for good, empty
- * sockets on the face (drawn by {@code BlindnessSockets}). Only the powerless (whom no other power has called) and those who
- * already hold Blindness can do it.</li>
- * <li>Either way the holder is <b>devout</b> ({@link #devout}): the dark thins and living things near them burn through
- * it (drawn on their own screen), and Void Sight, their ultimate, lifts the view high over them: Sky Sight.</li>
+ * use only warns). The eyes are gone for the rest of that life ({@link Scars.Kind#CARVED_EYES}). Andy: "you must bandage
+ * your eyes to prevent bleeding out, but your vision is gone even after they heal. leaving sockets where your eyes
+ * were." The fresh sockets ({@link #FRESH}) bleed as hard as a stump and never close by themselves until a bandage (or a
+ * rag) goes on the head; then they're healed for good, empty sockets on the face (drawn by {@code BlindnessSockets}).</li>
+ * <li>A Resonance holder who can't see is <b>devout</b>: the dark thins and living things near them burn through it
+ * (drawn on their own screen), and an ascended one can rise into Sky Sight ({@code ResonanceSight}).</li>
  * </ul>
  */
 public final class BlindnessDevotion {
@@ -82,7 +83,8 @@ public final class BlindnessDevotion {
 
 	/** Seconds in a row each powerless player has worn the blindfold, and the day it last called them. */
 	private static final Map<UUID, Integer> VIGIL = new HashMap<>();
-	private static final Map<UUID, Long> VIGIL_DAY = new HashMap<>();
+	/** Whoever kept the vigil and still has the blindfold on: a struck Tuning Fork awakens them to Resonance. */
+	private static final Set<UUID> KEPT = new HashSet<>();
 	/** The tick each player was warned (first use of the shears). */
 	private static final Map<UUID, Long> WARNED = new HashMap<>();
 
@@ -109,11 +111,12 @@ public final class BlindnessDevotion {
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			VIGIL.remove(handler.player.getUUID());
+			KEPT.remove(handler.player.getUUID());
 			WARNED.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			VIGIL.clear();
-			VIGIL_DAY.clear();
+			KEPT.clear();
 			WARNED.clear();
 		});
 	}
@@ -128,6 +131,11 @@ public final class BlindnessDevotion {
 		return blindfolded(player) || Scars.has(player, Scars.Kind.CARVED_EYES);
 	}
 
+	/** Whether {@code player} kept the blindfold's vigil and still wears it. */
+	static boolean vigilKept(ServerPlayer player) {
+		return blindfolded(player) && KEPT.contains(player.getUUID());
+	}
+
 	/** Once a second: the blindfold blinds whoever wears it without the power, and keeps the powerless one's vigil. */
 	private static void tick(MinecraftServer server) {
 		if (server.getTickCount() % 20 != 0) {
@@ -139,23 +147,23 @@ public final class BlindnessDevotion {
 				player.removeAttached(FRESH);
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.blindness.sockets_healed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 			}
-			boolean holder = Powers.has(player, BlindnessPower.INSTANCE);
-			if (!blindfolded(player) || holder) {
+			if (!blindfolded(player)) {
 				VIGIL.remove(player.getUUID());
+				KEPT.remove(player.getUUID());
 				continue;
 			}
-			player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLINDFOLD_BLIND_TICKS, 0, true, false, false));
-			if (Powers.of(player) != null || player.isCreative() || player.isSpectator()) {
+			// a Resonance holder hears through it (the thin dark is drawn on their own screen); anyone else just can't see
+			if (!Powers.has(player, ResonancePower.INSTANCE)) {
+				player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLINDFOLD_BLIND_TICKS, 0, true, false, false));
+			}
+			if (player.getAttached(Powers.POWER) != null || player.isCreative() || player.isSpectator() || KEPT.contains(player.getUUID())) {
 				continue;
 			}
 			int seconds = VIGIL.merge(player.getUUID(), 1, Integer::sum);
 			if (seconds >= VIGIL_SECONDS) {
 				VIGIL.remove(player.getUUID());
-				long day = player.level().getOverworldClockTime() / Callings.DAY;
-				Long last = VIGIL_DAY.put(player.getUUID(), day);
-				if (last == null || last != day) {
-					Callings.call(player, "blindness", Callings.DAY);
-				}
+				KEPT.add(player.getUUID());
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.blindness.vigil_kept").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
 			}
 		}
 	}
@@ -163,12 +171,6 @@ public final class BlindnessDevotion {
 	/** Sneak + shears on nothing: warns the first time, carves the eyes out the second. True when it did either. */
 	private static boolean carve(ServerPlayer player, InteractionHand hand) {
 		if (Scars.has(player, Scars.Kind.CARVED_EYES)) {
-			return false;
-		}
-		boolean holder = Powers.has(player, BlindnessPower.INSTANCE);
-		boolean called = Powers.of(player) == null && !player.isCreative() && !player.isSpectator()
-			&& (Callings.power(player) == null || Callings.power(player) == BlindnessPower.INSTANCE);
-		if (!holder && !called) {
 			return false;
 		}
 		ServerLevel level = player.level();
@@ -182,14 +184,8 @@ public final class BlindnessDevotion {
 		WARNED.remove(player.getUUID());
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1.0F, 0.6F);
 		player.hurtServer(level, player.damageSources().generic(), Math.min(CARVE_DAMAGE, player.getHealth() - 1.0F));
-		player.setAttached(FRESH, true);
-		Bleeding.open(player, BodyPart.HEAD, false);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.blindness.sockets_bleed").withStyle(ChatFormatting.DARK_RED));
 		player.getItemInHand(hand).hurtAndBreak(1, player, hand);
-		Scars.add(player, Scars.Kind.CARVED_EYES);
-		if (!holder) {
-			Callings.call(player, "blindness", Integer.MAX_VALUE);
-		}
+		Blind.takeEye(player, Blind.BOTH);
 		return true;
 	}
 }

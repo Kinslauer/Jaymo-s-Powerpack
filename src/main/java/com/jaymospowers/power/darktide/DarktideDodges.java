@@ -3,7 +3,6 @@ package com.jaymospowers.power.darktide;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.stamina.Dodge;
 import com.jaymospowers.stamina.Feathers;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
@@ -74,8 +73,7 @@ final class DarktideDodges {
 		}
 		// a faint ink trail behind the dodge once it's slipped something
 		if (live.rollEvaded) {
-			level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 0.4, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
-			level.sendParticles(MagicFx.wisp(0x0A1430, 1.0F), player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
+			level.sendParticles(MagicFx.miasma(DarktideLooks.INK, 1.6F), player.getX(), player.getY() + 0.4, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
 			return;
 		}
 		if (live.rollHit) {

@@ -35,8 +35,14 @@ public final class DarktideWeapons {
 		return LOADED;
 	}
 
+	/** A Balkon katana, or the blade of dark water ({@link DarktideBlade}), which needs no WeaponMod. */
 	public static boolean isKatana(ItemStack stack) {
-		return LOADED && is(stack, "katana.");
+		return DarktideBlade.is(stack) || LOADED && is(stack, "katana.");
+	}
+
+	/** A Balkon blade of the user's own (not the blade of dark water): what Tide Arms works from. */
+	static boolean isBalkon(ItemStack stack) {
+		return LOADED && (is(stack, "katana.") || is(stack, "knife."));
 	}
 
 	public static boolean isKnife(ItemStack stack) {
@@ -77,7 +83,7 @@ public final class DarktideWeapons {
 
 	/** The tier of a Balkon katana or knife ({@code katana.<tier>} / {@code knife.<tier>}), or null for anything else. */
 	static @Nullable String tierOf(ItemStack stack) {
-		if (!isKatana(stack) && !isKnife(stack)) {
+		if (!isBalkon(stack)) {
 			return null;
 		}
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();

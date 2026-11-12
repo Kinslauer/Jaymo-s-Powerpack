@@ -125,6 +125,9 @@ public final class ResonanceHush {
 	 */
 	public static boolean muffles(ServerLevel level, Holder<GameEvent> event, Vec3 pos, GameEvent.Context context) {
 		Entity source = context.sourceEntity();
+		if (source != null && ResonanceQuiet.quiet(source)) {
+			return true;
+		}
 		if (source instanceof Player player && player.isShiftKeyDown() && event.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)
 			&& Powers.has(player, ResonancePower.INSTANCE) && !Fate.isCorrupted(player)) {
 			return true;
