@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-rpgtwe
 with: Claude (cloud thread)
-pr: 
+pr: 1354
 mods: powers
 versions: 
 started: 2026-11-12
@@ -25,3 +25,4 @@ owns:
 - Small edits in `Breaks.crawlOnly`, `Wounds.init`, `Crawl`.
 
 ## Done
+A bare missing leg holds a player to a crawl; a Walking Cane or Crutch in hand stands a one-legged player up; every crawling player goes up a full block. Compiled with Gradle, not played; the third-person hold angle of the cane is untested.
