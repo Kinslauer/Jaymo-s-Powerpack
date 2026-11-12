@@ -3,7 +3,7 @@ status: stalled
 task: armor-pngs-vanilla-style
 branch: claude/armor-pngs-vanilla-style
 with: hermes-modeller
-pr:
+pr: 1313
 mods: powers
 versions: Powers 0.22.11
 started: 2026-11-11
