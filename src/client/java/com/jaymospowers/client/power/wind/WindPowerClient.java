@@ -143,6 +143,7 @@ public final class WindPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		WindWeather.tick(player);
+		WindAirSense.tick(minecraft, player);
 		boolean cold = com.jaymospowers.power.wind.WindCold.isCold(player);
 		if (cold && !this.wasCold && player.tickCount - this.lastColdNotice >= COLD_NOTICE_SPACING) {
 			this.lastColdNotice = player.tickCount;
@@ -229,12 +230,14 @@ public final class WindPowerClient implements PowerClient {
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		WindHud.render(graphics, delta, player, this);
+		WindAirSense.render(graphics, delta, player);
 	}
 
 	@Override
 	public void onActiveChanged(LocalPlayer player, boolean active) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (!active) {
+			WindAirSense.clear();
 			this.flight.forceLand(player);
 			if (this.surging) {
 				this.surging = false;
