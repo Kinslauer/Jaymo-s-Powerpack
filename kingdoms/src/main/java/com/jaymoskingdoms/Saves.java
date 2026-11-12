@@ -35,6 +35,8 @@ public final class Saves {
 	static final float PLAYER_LEAST = 0.05F, PLAYER_MOST = 0.6F;
 	/** Everyone else's chance, and a boss's. */
 	static final float MOB = 0.1F, BOSS = 0.4F;
+	/** Poisoned, a save holds this share as often. */
+	static final float POISONED = 0.7F;
 	/** A save on a lasting thing shortens it by at most this share. */
 	static final float MOST_SHORTER = 0.6F;
 	/** At the top of Agility a moving body takes this share of a blast. */
@@ -69,10 +71,14 @@ public final class Saves {
 
 	/** {@code who}'s chance (0-1) of a save of {@code kind} holding. */
 	public static float chance(LivingEntity who, Kind kind) {
+		float chance;
 		if (who instanceof Player player) {
-			return PLAYER_LEAST + (PLAYER_MOST - PLAYER_LEAST) * share(player, kind.stat);
+			chance = PLAYER_LEAST + (PLAYER_MOST - PLAYER_LEAST) * share(player, kind.stat);
+		} else {
+			chance = who instanceof Mob mob && Senses.boss(mob) ? BOSS : MOB;
 		}
-		return who instanceof Mob mob && Senses.boss(mob) ? BOSS : MOB;
+		// shaking hands: poison makes every save worse
+		return who.hasEffect(MobEffects.POISON) ? chance * POISONED : chance;
 	}
 
 	/** Rolls {@code who}'s save of {@code kind}: true if it holds (heard, for a player). */

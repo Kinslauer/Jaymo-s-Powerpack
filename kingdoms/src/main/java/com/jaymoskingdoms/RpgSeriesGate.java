@@ -132,7 +132,8 @@ public final class RpgSeriesGate {
 			SpellEvents.CASTING_ATTEMPT.PRE.register(args -> {
 				Identifier spell = args.spell().unwrapKey().map(key -> key.identifier()).orElse(null);
 				if (spell == null || mayCast(args.caster(), spell)) {
-					return null;
+					// ears ringing from a blast: the words go wrong
+					return Deafened.spoils(args.caster()) ? SpellCast.Attempt.none() : null;
 				}
 				tell(args.caster(), spell);
 				return SpellCast.Attempt.none();

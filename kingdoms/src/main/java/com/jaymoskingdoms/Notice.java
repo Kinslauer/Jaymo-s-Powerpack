@@ -93,7 +93,7 @@ public final class Notice {
 
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if ((player.tickCount + player.getId()) % 20 != 0 || !player.isAlive() || player.isSpectator() || PowersCompat.helpless(player)) {
+			if ((player.tickCount + player.getId()) % 20 != 0 || !player.isAlive() || player.isSpectator() || PowersCompat.helpless(player) || Deafened.is(player)) {
 				continue;
 			}
 			List<Spot> spots = new ArrayList<>();

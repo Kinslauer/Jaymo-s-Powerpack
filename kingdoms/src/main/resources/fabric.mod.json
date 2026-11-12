@@ -55,7 +55,8 @@
 		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.iris.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.fifth.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

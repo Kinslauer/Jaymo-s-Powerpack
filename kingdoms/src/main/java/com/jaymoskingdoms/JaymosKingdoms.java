@@ -815,6 +815,18 @@ public final class JaymosKingdoms implements ModInitializer {
 		Opportunity.register();
 		Notice.register();
 		Concentration.register();
+		// fifth edition picks, patch 2: conditions and fight moves
+		Afflictions.register();
+		HeldFast.register();
+		Fear.register();
+		Charm.register();
+		Deafened.register();
+		Nets.register();
+		Poisons.register();
+		Surprise.register();
+		ThiefSneak.register();
+		RecklessBlows.register();
+		Shoves.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

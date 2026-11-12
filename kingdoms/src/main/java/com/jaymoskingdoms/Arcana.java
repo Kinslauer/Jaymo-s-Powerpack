@@ -174,6 +174,10 @@ public final class Arcana {
 		if (Will.hushed(player)) {
 			return false;
 		}
+		// ears ringing from a blast: the words go wrong, the spell fizzles
+		if (Deafened.spoils(player)) {
+			return true;
+		}
 		// (0.7.465) the spirit grabs your hand before the forbidden words are out
 		if (ForbiddenArts.forbidden(spell) && ForbiddenArts.stayed(player)) {
 			return false;

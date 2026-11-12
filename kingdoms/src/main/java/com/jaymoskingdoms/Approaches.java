@@ -1251,7 +1251,7 @@ public final class Approaches {
 					clearSuspicion(player, f.id());
 					reply(level, a, k + "confess", Speech.WHITE);
 				} else if (option == 1) {
-					float chance = BELIEVED_CHANCE + (f.member(player.getUUID()) != null ? BELIEVED_SWORN : 0.0F);
+					float chance = BELIEVED_CHANCE + (f.member(player.getUUID()) != null ? BELIEVED_SWORN : 0.0F) + Charm.sway(a.mob, player);
 					if (random.nextFloat() < chance) {
 						Reputation.change(player, f, BELIEVED_REP);
 						clearSuspicion(player, f.id());
@@ -1470,7 +1470,7 @@ public final class Approaches {
 					}
 					reply(level, a, k + "paid." + temper, Speech.GOLD);
 				} else if (option == 1) {
-					if (random.nextFloat() < HAGGLE_CHANCE[tv]) {
+					if (random.nextFloat() < HAGGLE_CHANCE[tv] + Charm.sway(a.mob, player)) {
 						int half = Currencies.fine(level.getServer(), player, f, Math.max(1, a.price / 2));
 						toTreasury(level, f, half);
 						reply(level, a, k + "haggled." + temper, Speech.WHITE, Currencies.asked(level.getServer(), f, half));

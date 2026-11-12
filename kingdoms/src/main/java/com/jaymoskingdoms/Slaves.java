@@ -438,6 +438,15 @@ public final class Slaves {
 			BlockPos column = BlockPos.containing(slave.getX() + dx / len * WAYPOINT, slave.getY(), slave.getZ() + dz / len * WAYPOINT);
 			goal = level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
 		}
+		// an orc keeping the camp's slaves nets one running off, if it has its net today
+		if (slave.tickCount % RUN_EVERY == 0 && !slave.entityTags().contains(FREED)) {
+			for (PathfinderMob orc : level.getEntitiesOfClass(PathfinderMob.class, slave.getBoundingBox().inflate(Nets.THROW_FAR),
+				e -> e instanceof Worker w && w.factionId() == slave.factionId() && Orcs.isOrc(w.role()) && !e.isSleeping() && e.isAlive())) {
+				if (Nets.guardThrow(level, orc, slave)) {
+					break;
+				}
+			}
+		}
 		// (its post moves with it, or it would be pulled back to the camp)
 		slave.setHomeTo(goal, 6);
 		slave.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, RUN_SPEED);

@@ -73,6 +73,8 @@ public final class Dread {
 				continue;
 			}
 			FRIGHTS.put(pm, new Fright(at, now + RUN_TICKS));
+			// (and the fright proper: its feet won't carry it back toward the killer)
+			Fear.frighten(pm, killer, RUN_TICKS);
 			pm.setTarget(null);
 			// (Powers' Crowds' tag: no blows, no closing in, while it runs)
 			pm.addTag(MobCombat.WAITING_TAG);

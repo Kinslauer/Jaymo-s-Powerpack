@@ -288,6 +288,8 @@ final class Arrests {
 						a.until = now + BEAT_TICKS;
 					}
 				} else if (now % 10 == 0) {
+					// a crook running past arm's reach is netted if the guard has its net
+					Nets.guardThrow(level, guard, crook);
 					guard.getNavigation().moveTo(crook, GUARD_SPEED);
 				}
 			}

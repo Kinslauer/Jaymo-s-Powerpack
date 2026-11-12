@@ -98,6 +98,10 @@ public final class Speech {
 			return;
 		}
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(range))) {
+			// one whose ears ring hears no callouts but from close by
+			if (Deafened.unheard(p, speaker)) {
+				continue;
+			}
 			// (0.7.20) in a tongue they don't speak, it's words they don't know
 			Component heard = Languages.heard(p, speaker, words);
 			if (ServerPlayNetworking.canSend(p, Said.TYPE)) {

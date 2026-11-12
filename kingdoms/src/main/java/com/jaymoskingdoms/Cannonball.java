@@ -142,6 +142,7 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 	}
 
 	private void burst(ServerLevel level, PathfinderMob gunner, Vec3 at, @Nullable Entity direct) {
+		Deafened.blast(level, at, Deafened.BLAST);
 		DamageSource source = this.damageSources().explosion(this, gunner);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),
 			e -> e != gunner && e.isAlive() && !e.isSpectator())) {
