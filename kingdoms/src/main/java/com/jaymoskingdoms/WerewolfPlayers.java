@@ -250,6 +250,10 @@ public final class WerewolfPlayers {
 			|| !(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// (a strong enough Arcana throws the curse off: fifth edition's save)
+		if (had == null && Saves.resist(player, Saves.Kind.CURSE)) {
+			return;
+		}
 		long nightNo = Vampires.nightIndex(level.getServer().overworld().getOverworldClockTime());
 		Lycans.Curse curse = had != null ? had : Lycans.roll(level, player);
 		player.setAttached(Lycans.CURSE, new Lycans.Curse(curse.coat(), curse.scale(), curse.build(), nightNo, curse.moons(), false));

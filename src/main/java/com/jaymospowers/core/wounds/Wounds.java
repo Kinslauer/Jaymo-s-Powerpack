@@ -156,6 +156,9 @@ public final class Wounds {
 		Crutches.register();
 		// (0.20.111) passing out from hunger or thirst
 		Fainting.register();
+		// fifth edition: steps of exhaustion, and zombies that get back up
+		Exhaustion.register();
+		UndeadFortitude.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
 		WoundMarks.register();

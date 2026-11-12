@@ -93,8 +93,16 @@ public final class Fainting {
 		});
 	}
 
-	/** How empty {@code player} is (0: fine, 1: no food or no water at all), from whichever is lower. Both sides. */
+	/**
+	 * How weak {@code player} is (0: fine, 1: no food or no water at all): from whichever of food and water is lower, or
+	 * the steps of exhaustion ({@link Exhaustion#weakness}) if those are worse. Both sides.
+	 */
 	public static float weakness(Player player) {
+		return Math.max(hungerWeakness(player), Exhaustion.weakness(player));
+	}
+
+	/** How empty {@code player} is of food or water alone (0-1). Both sides. */
+	public static float hungerWeakness(Player player) {
 		int least = Math.min(player.getFoodData().getFoodLevel(), water(player));
 		return Mth.clamp((LIGHTHEADED - least) / (float) LIGHTHEADED, 0.0F, 1.0F);
 	}

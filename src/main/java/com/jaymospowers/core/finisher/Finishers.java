@@ -297,7 +297,13 @@ public final class Finishers {
 		/** By the Collar: down on a knee, both fists in their collar, their head hauled up off the ground. */
 		Q_GRIP(QUESTION_TICKS, new int[0], Strike.HOLD),
 		/** (Quiet Word) The Choke Hold: taken from behind on their feet, an arm round the throat, the blade or fist at their ribs. */
-		Q_CHOKE(QUESTION_TICKS, new int[0], Strike.HOLD);
+		Q_CHOKE(QUESTION_TICKS, new int[0], Strike.HOLD),
+		// ---- bare hands on a zombie (Andy, on fifth edition's Undead Fortitude: "add a zombie head smash or stomp execution,
+		// that plays at random if you are unarmed") ----------------------------------------------------------------------
+		/** Stamped Out: stood over the head, the foot lifted and brought down on it twice, then raised high and stamped through. */
+		STOMP(38, new int[] {13, 23, 33}, Strike.CRUSH),
+		/** Head on the Stone: down on a knee, the head taken in both hands, lifted and beaten on the ground three times. */
+		HEAD_SMASH(46, new int[] {18, 30, 40}, Strike.CRUSH);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -1031,6 +1037,12 @@ public final class Finishers {
 			begin(level, player, body, com.jaymospowers.power.zfighter.ZFighterExecutions.pick(player));
 			return;
 		}
+		if (stack.isEmpty() && com.jaymospowers.core.wounds.UndeadFortitude.zombie(body)) {
+			// a zombie, bare-handed: the stamp, the head on the ground, or the neck snap, at random
+			int pick = level.getRandom().nextInt(3);
+			begin(level, player, body, pick == 0 ? Kind.STOMP : pick == 1 ? Kind.HEAD_SMASH : Kind.FIST);
+			return;
+		}
 		// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
 		Kind kind = move(player, stack);
 		if (kind != null) {
@@ -1495,6 +1507,7 @@ public final class Finishers {
 			case FIST -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
 			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
 			case ROCK -> SoundEvents.STONE_HIT;
+			case STOMP, HEAD_SMASH -> SoundEvents.ZOMBIE_AMBIENT;
 			case WHIP -> SoundEvents.FISHING_BOBBER_THROW;
 			default -> SoundEvents.ARMOR_EQUIP_IRON.value();
 		};

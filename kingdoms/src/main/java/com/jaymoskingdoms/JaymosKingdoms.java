@@ -811,6 +811,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("body attachment: {}", Bodies.BODY);
 		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
 		BeaconWatch.register();
+		// fifth edition picks: free blows on breaking off, noticing without looking, one held spell
+		Opportunity.register();
+		Notice.register();
+		Concentration.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

@@ -370,6 +370,29 @@ public final class PowersCompat {
 	private static java.lang.invoke.@Nullable MethodHandle lowOf;
 	private static boolean lookedForLow;
 
+	private static java.lang.invoke.@Nullable MethodHandle dodgingOf;
+	private static boolean lookedForDodging;
+
+	/** Whether {@code player} is in the first ticks of a dodge (Powers' {@code Dodge.evading}); false without Powers. */
+	public static boolean dodging(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDodging) {
+			lookedForDodging = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dodgingOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.stamina.Dodge"),
+						"evading", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no dodge", e);
+				}
+			}
+		}
+		try {
+			return dodgingOf != null && (boolean) dodgingOf.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Whether {@code player} holds Jaymo's Powers' low crouch (the stance wheel); false without Powers. */
 	public static boolean lowStance(Player player) {
 		if (!lookedForLow) {

@@ -39,6 +39,7 @@
 		"jaymoskingdoms.locks.mixins.json",
 		"jaymoskingdoms.spellengine.mixins.json",
 		"jaymoskingdoms.wild.mixins.json",
+		"jaymoskingdoms.fifth.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },

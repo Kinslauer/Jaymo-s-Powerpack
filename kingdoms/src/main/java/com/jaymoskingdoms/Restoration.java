@@ -394,8 +394,11 @@ public final class Restoration {
 
 	/** Sanctuary: a circle of light where they stand; friends in it heal, the undead are thrown out of it. */
 	static boolean sanctuary(ServerLevel level, Player player, float power) {
-		CIRCLES.add(new Circle(level, player.position(), level.getGameTime() + (long)(SANCTUARY_TICKS * power), SANCTUARY_HEAL * Math.max(1.0F, power * 0.75F),
-			player.getUUID()));
+		Circle circle = new Circle(level, player.position(), level.getGameTime() + (long)(SANCTUARY_TICKS * power), SANCTUARY_HEAL * Math.max(1.0F, power * 0.75F),
+			player.getUUID());
+		CIRCLES.add(circle);
+		// (a held spell: broken, the circle goes out)
+		Concentration.hold(player, "sanctuary", (int) (SANCTUARY_TICKS * power), () -> CIRCLES.remove(circle));
 		ring(level, player.position().add(0.0, 0.1, 0.0), SANCTUARY_RADIUS, GOLD);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
 		return true;

@@ -274,6 +274,9 @@ public final class Arcana {
 	private static boolean raising(ServerLevel level, Player player, float power) {
 		Climate climate = Climate.at(level, player.blockPosition());
 		int life = (int) (SCROLL_THRALL_LIFE * power);
+		// (a held spell: broken, the dead fall back)
+		java.util.UUID master = player.getUUID();
+		Concentration.hold(player, "raising", life, () -> Thralls.release(level, master));
 		Thralls.raise(level, Sorcery.zombieOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, life, null);
 		Thralls.raise(level, Sorcery.skeletonOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, life, null);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -303,7 +306,10 @@ public final class Arcana {
 	}
 
 	private static boolean warding(ServerLevel level, Player player, float power) {
-		for (Player p : level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(SCROLL_WARD_RANGE), Entity::isAlive)) {
+		java.util.List<Player> warded = level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(SCROLL_WARD_RANGE), Entity::isAlive);
+		// (a held spell: broken, the ward goes from all of them)
+		Concentration.hold(player, "warding", (int) (SCROLL_WARD_TICKS * power), () -> warded.forEach(p -> p.removeEffect(MobEffects.ABSORPTION)));
+		for (Player p : warded) {
 			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL), player);
 			level.sendParticles(Fx.LIGHT, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
 		}

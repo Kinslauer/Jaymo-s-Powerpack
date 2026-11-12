@@ -369,6 +369,8 @@ public final class Downed {
 				return false;
 			}
 			goDown(level, entity, source, false);
+			// a zombie downed by an ordinary blow gets back up (fifth edition's Undead Fortitude)
+			UndeadFortitude.downed(entity, source);
 			return false;
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {

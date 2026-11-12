@@ -731,6 +731,12 @@ public final class Sorcery {
 		caster.timers()[T_CHANT] = CHANT_COOLDOWN;
 		List<LivingEntity> allies = caster.fightingAllies(level);
 		allies.add(folk);
+		// (a held spell: strike him and the chant drops)
+		List<LivingEntity> driven = List.copyOf(allies);
+		Concentration.hold(folk, "chant", CHANT_TICKS, () -> driven.forEach(a -> {
+			a.removeEffect(MobEffects.STRENGTH);
+			a.removeEffect(MobEffects.SPEED);
+		}));
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.STRENGTH, CHANT_TICKS, 0), folk);
 			ally.addEffect(new MobEffectInstance(MobEffects.SPEED, CHANT_TICKS, 0), folk);
@@ -777,6 +783,9 @@ public final class Sorcery {
 	static void ward(ServerLevel level, LivingEntity folk, int[] timers, List<? extends LivingEntity> allies) {
 		Mana.ripple(folk, Mana.WARD);
 		timers[T_WARD] = WARD_COOLDOWN;
+		// (a held spell: strike him and the ward fades from them)
+		List<LivingEntity> warded = List.copyOf(allies);
+		Concentration.hold(folk, "ward", WARD_TICKS, () -> warded.forEach(a -> a.removeEffect(MobEffects.ABSORPTION)));
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, WARD_TICKS, WARD_LEVEL), folk);
 			level.sendParticles(Fx.LIGHT, ally.getX(), ally.getY() + 1.0, ally.getZ(), 10, 0.4, 0.6, 0.4, 0.02);

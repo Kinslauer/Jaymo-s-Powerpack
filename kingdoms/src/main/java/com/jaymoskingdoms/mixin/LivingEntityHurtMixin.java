@@ -29,6 +29,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * (0.7.217) Last, a monster's blow on a villager lands softer, and a golem's kills a creeper ({@link VillagerHunters#dealt}).
  * (0.7.640) First of all, a wooden skewer into a vampire bites like a stake ({@link com.jaymoskingdoms.Vampires#staked}),
  * then a mob vampire's torch, burning-arrow and silver weaknesses ({@link com.jaymoskingdoms.Vampires#weakness}).
+ * Before all of it, fifth edition's upper hand and bad footing ({@link com.jaymoskingdoms.UpperHand}) and a moving body's
+ * save against blasts ({@link com.jaymoskingdoms.Saves#dealt}).
  */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityHurtMixin {
@@ -36,7 +38,7 @@ abstract class LivingEntityHurtMixin {
 	private float jaymoskingdoms$classDamage(float amount, ServerLevel level, DamageSource source) {
 		LivingEntity self = (LivingEntity) (Object) this;
 		// (0.7.220) and a Master Hunter's on beasts
-		float dealt = com.jaymoskingdoms.HunterPack.dealt(self, source, Careers.dealt(self, source, Flaws.dealt(self, source, com.jaymoskingdoms.Blessings.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, com.jaymoskingdoms.BruteRage.dealt(self, source, ClassPerks.dealt(self, source, com.jaymoskingdoms.Vampires.weakness(self, source, com.jaymoskingdoms.Vampires.staked(self, source, amount))))))))))));
+		float dealt = com.jaymoskingdoms.HunterPack.dealt(self, source, Careers.dealt(self, source, Flaws.dealt(self, source, com.jaymoskingdoms.Blessings.dealt(self, source, Heritage.dealt(self, source, Valor.dealt(self, source, Will.dealt(self, source, CombatArts.dealt(self, source, com.jaymoskingdoms.BruteRage.dealt(self, source, ClassPerks.dealt(self, source, com.jaymoskingdoms.Vampires.weakness(self, source, com.jaymoskingdoms.Vampires.staked(self, source, com.jaymoskingdoms.Concentration.dealt(self, source, com.jaymoskingdoms.Saves.dealt(self, source, com.jaymoskingdoms.UpperHand.dealt(self, source, amount)))))))))))))));
 		float stabbed = HiddenBlade.dealt(self, source, dealt);
 		// (0.7.184) and a groupmate's blow cut down, anyone else's eased by groupmates near
 		// (0.7.361) Valor's: Reinforcement, Armament, King's coating, after Will's; last, a spar stops short of harm
