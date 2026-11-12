@@ -1405,3 +1405,11 @@ off poison, the steady hold through fear and keep a spell through a blow, the sh
 learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
 until it drops where it stands. The walking dead (the old villagers, worn to almost nothing) are stubborn, and the first blow that drops one seldom
 keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
+
+(new) **Hedge poisons and weighted nets** (Claude's placement for the fifth edition picks, patch 2, 2026-11-12, for
+Andy to approve). The poisons are hedge-witch and apothecary work, brewed from what grows round the witches' huts
+(poppy, wither rose, spider eye, pufferfish): the sleep draught and the truth draught are what slavers and spies have
+always bought, and the midnight poison is a witch's own. The clerics keep the antidote, and give it to anyone. The
+realms' weaponsmiths knot and weight the nets their guards throw at a fleeing crook; the orc camps' keepers carry
+cruder ones for runaway goblins. The gas bottle is a glassblower's trick sold under the counter. Dragons, wraiths, the
+Warden and a witch's curse put a fear in anyone that their legs won't walk into.
