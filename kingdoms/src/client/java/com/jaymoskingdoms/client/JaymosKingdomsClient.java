@@ -200,6 +200,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		StakeLayer.register();
 		TalkScreen.register();
 		BoutBracketScreen.register();
+		MaskedFacesClient.register();
 		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();

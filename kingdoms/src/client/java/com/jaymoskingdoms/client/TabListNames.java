@@ -22,11 +22,16 @@ public final class TabListNames {
 
 	/** The name the tab list shows for {@code profile}, or {@code username} if it shows none. */
 	public static String shown(GameProfile profile, String username) {
-		if (stranger(profile.id())) {
+		return shown(profile.id(), username);
+	}
+
+	/** The name the tab list shows for the player with {@code id}, or {@code username} if it shows none (the social screen). */
+	public static String shown(UUID id, String username) {
+		if (stranger(id)) {
 			return strangerName().getString();
 		}
 		ClientPacketListener connection = Minecraft.getInstance().getConnection();
-		PlayerInfo info = connection == null ? null : connection.getPlayerInfo(profile.id());
+		PlayerInfo info = connection == null ? null : connection.getPlayerInfo(id);
 		Component name = info == null ? null : info.getTabListDisplayName();
 		return name == null ? username : name.getString();
 	}
@@ -43,8 +48,11 @@ public final class TabListNames {
 		if (info != null && info.getTeam() != null && minecraft.player != null && info.getTeam() == minecraft.player.getTeam()) {
 			return false;
 		}
+		// a costume's name is for everyone, near or far ({@link MaskedFacesClient})
+		if (MaskedFacesClient.masked(id)) {
+			return false;
+		}
 		Player near = minecraft.level == null ? null : minecraft.level.getPlayerByUUID(id);
-		// a costume's name is for everyone
 		return near == null || Identities.maskedAs(near) == null;
 	}
 
