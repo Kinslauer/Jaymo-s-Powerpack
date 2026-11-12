@@ -3671,3 +3671,19 @@ Compiled only; not played.
 - **Sulphur and saltpetre**, the two minerals of true black powder (Andy). Sulphur ore lies deep in the overworld's stone and deepslate and all through the Nether's netherrack, thickest in the basalt deltas; yellow lumps of it lie loose on cave floors beside lava and magma, on the Nether's floors and round the rims of hot springs. Saltpetre ore lies in the stone and sandstone under deserts, badlands and savanna, with a thinner scatter in any cave; white crust lies loose on dry sand and terracotta and on the floors of dry caves. A shallow vein of either shows at the surface as a loose piece of the mineral. Any pickaxe mines them. Three saltpetre, a sulphur (or brimstone) and a charcoal craft four gunpowder. Alchemy reads them too (sulphur and salt).
 - **Nitre bed**, the old way to grow saltpetre (Andy). Craft one from three dirt, two wheat and a bone meal, set it under a roof and feed it manure (Jaymo's Kitchen's), rotten flesh, bone meal or wheat; droppings and scraps that land on it are worked in by themselves, so a bed in a barn feeds itself. Fed and roofed, its top slowly whitens; turn it with a shovel to speed it up. Rain falling on an open bed washes the nitre back out, and under open sky it doesn't grow. When it's white, a shovel scrapes off 3 to 5 nitre earth, which you boil down into saltpetre in a furnace or over a campfire. A bed left alone just waits.
 - Built; not played. New world chunks only: places already explored have none.
+
+## 0.22.90 (2026-11-12): Boxing: every punch winds up, shorter with level
+
+- (Jung, outside Wind) Every punch now winds up before it lands: click, the arm draws back, and the blow lands a
+  moment later: 0.75 seconds at level 1, a little less each level, 0.35 seconds at level 10 (Andy: "shorter wind up
+  with level"; `Boxing.WINDUP_SLOWEST`, `WINDUP_FASTEST`, `windupAt`). It lands on the one it was aimed at if they are
+  still in reach then; step out during the windup and it hits air. The punch's stamina is spent as the windup starts.
+- The next punch can't start until the last has landed. The windup shrinks in step with the punch speed, so the old
+  speed table still holds: every 0.8 seconds at level 1, about three a second at level 10. A click during a windup is
+  still kept and thrown next. Strong attacks (uppercut, pull counter, roll straight) wind up the same way.
+- The windup shows: a jab or cross draws the arm back and coils the body the other way before it snaps out; a hook
+  lifts the arm out wide as the body coils back; an uppercut drops the fist and dips. The pose starts on the click
+  and is at full reach as the blow lands. First person draws the punching arm back the same way. Everyone watching is
+  told each punch's windup, so the pose times right for every boxer.
+- A boxer knocked down or killed during the windup throws nothing.
+- Not played. The timing is worth a feel test: it changes how boxing fights.
