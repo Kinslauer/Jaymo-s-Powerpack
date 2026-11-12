@@ -1,7 +1,17 @@
-# fifth edition picks, patch 1 - upper hand, saves, opportunity attacks, noticing, one held spell
+# fifth edition picks - upper hand, saves, opportunity attacks, noticing, held spells, conditions, poisons, nets, fight moves
 - **Upper hand and bad footing** (`UpperHand`): blows land harder (and sometimes telling) on a foe who is down, blind or below you, and softer (sometimes only glancing) when you wade, stand on ice, are poisoned or blind, or strike into darkness you can't see in. Both cancel.
 - **Saves** (`Saves`, mixin `fifth/EffectSaveMixin`): your attributes resist things. Endurance shortens poisons, Grit shortens slowness and weakness and keeps a held spell through a blow, Agility softens blasts on the move, Arcana throws off the werewolf's and vampire's bite. Mobs have a plain chance, bosses a better one.
 - **Opportunity attacks and polearms** (`Opportunity`, tag `polearms`): stepping out of a foe's reach gets you a free blow unless you dodge out or back off shield up; spears, halberds and glaives also strike a foe stepping in and stop them. Works for mobs too.
 - **Noticing** (`Notice`): each second, by Wits, tripwires, shut mimics and hunters out of sight may give themselves away to you with a sound and a glint. Sneaking helps, sprinting or riding hard hurts.
 - **One held spell** (`Concentration`): raised thralls, wards, sanctuary circles and chants are held; casting another ends the first, and a blow may break it.
+- **Frightened** (`Fear`, tag `frightful`): players and people alike won't be carried toward what scares them and shake while it's in view; dragons, the Wither, the Warden, wraiths, a witch's curse and brutal kills cause it; a Grit save or losing sight of it ends it.
+- **Charmed** (`Charm`): a vampire's gaze or a witch's song turns a body's swings from its charmer; charmed traders charge the charmer less and haggle softer; hurting the charmed breaks it; a Wits save resists.
+- **Held fast** (`HeldFast`, client input lock): spiders and paralysing claws (wraiths, husks) can freeze a body with only its eyes free; every close blow on it is a crit; a Grit save breaks it.
+- **Deafened** (`Deafened`): explosions, thunderbolts, dynamite and cannons close by muffle the world under a whine, hide footsteps, callouts and far speech, and spoil spoken spells.
+- **Weighted nets** (`Nets`, `ThrownNet`): thrown and spent; the netted crawl and swing badly until a Might save or a blade frees them. Weaponsmiths sell them; guards making arrests and orc slave-keepers throw them.
+- **Poisons** (`Poisons`, `PoisonItems`, `GasBottle`): poison vial, sleep draught, stiffening venom, truth draught and midnight poison; coat a blade (three blows), smear a door handle, dose a dish or drink, or fill a gas bottle to throw. Clerics sell the antidote. Poisoned hands shake.
+- **Caught unawares** (`Surprise`): a foe you ambush, and you when ambushed, freeze for a heartbeat.
+- **Sneak attack** (`ThiefSneak`): a Thief's light blade or bow bursts on a foe busy with a friend or unaware, once a second.
+- **Reckless blows** (`RecklessBlows`): sneak while swinging a two-hander or loosing a bow: likelier to glance, much harder if not, and foes have the upper hand on you for a moment.
+- **Shove and trip** (`Shoves`, key default Insert under Jaymo's Fight Moves): an empty hand or shield shoves a foe back a block; a hooked weapon trips them prone.
 - Built; not played.

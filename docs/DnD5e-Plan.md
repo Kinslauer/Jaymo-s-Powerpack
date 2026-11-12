@@ -74,3 +74,26 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **H1 one held spell** (Kingdoms `Concentration`): raising thralls, warding, sanctuary circles, chants and the
   sorcerer's ward are held spells. Casting another ends the first; a blow may break it (a Grit save, 10+ always
   breaks).
+
+### Patch 2
+- **B1 frightened** (`Fear`): sources are dragons, the Wither, the Warden, wraiths (tag `frightful`, optional lich/hag
+  entries for later), a witch's thrown potion (the hag's curse), Dread's brutal-kill witnesses, a monster finishing a
+  downed body. Crawl toward it, aim shakes, bad footing; out of sight 3 s, a Grit save every 3 s, or 20 s ends it.
+- **B2 charmed** (`Charm`): mob vampires' gaze and witches' song; no blows on the charmer, 30% off a charmed trader,
+  softer haggles; hurting the charmed breaks it; Wits save. Vampire players have no gaze yet. `Charm.charm` for H9.
+- **B4 held fast** (`HeldFast`): spiders (12%, cave spiders 20%), claws tag (wraiths, husks; the pack has no ghoul);
+  keys locked client-side, eyes free; close blows x1.5 crits; Grit save every 3 s. `HeldFast.hold/afflict` for spells.
+- **B5 deafened** (`Deafened`): explosions, thunderbolts, dynamite, cannons; 4-30 s by distance. Sounds cut to 15%
+  under a held high note (a volume cut, not a filter); no noticing, no far speech bubbles; spoken spells fizzle 55%.
+- **B6 nets** (`Nets`, `ThrownNet`): crawl, bad swings, upper hand on them; Might save every 3 s, a blade frees
+  (yourself or another), rots off at 40 s. Weaponsmith level 2 trade, craftable, guards (arrest chase) and orc
+  slave-keepers carry one a day. Stand-in art: cobweb.
+- **B7 poisons** (`Poisons`, `PoisonItems`, `GasBottle`): five vials, coat/dose/smear/gas; sleep 20 s, stiffening
+  holds 8 s, truth 3 min (`Poisons.truthful`, tag `jaymoskingdoms_truthful`, for G2), midnight kills at the next
+  midnight. Cleric sells the antidote (no herbalist profession exists). New trades reach villagers who level after
+  this. Stand-in art: tinted potions.
+- **C4 surprise** (`Surprise`): 14-tick freeze both ways; `Surprise.addImmunity` for Alert (K10).
+- **C5 sneak attack** (`ThiefSneak`): x1.5 + 2, once a second.
+- **C6 reckless** (`RecklessBlows`): 35% glance at x0.4, else x1.75; open 2 s.
+- **C7 shove and trip** (`Shoves`): key default Insert (no free key fit; remap in Controls). Players only; Might
+  contest, bosses immune.
