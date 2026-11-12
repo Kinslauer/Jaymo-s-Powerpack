@@ -8,6 +8,7 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/pr1377-text-pass|pr1377-text-pass]] · for 🪶 Quill · #1377 · open
 
 
 ## Being built
