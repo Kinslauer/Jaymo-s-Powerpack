@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:blaze_powder",
+    "minecraft:charcoal",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:head_fire",
+    "count": 2
+  }
+}

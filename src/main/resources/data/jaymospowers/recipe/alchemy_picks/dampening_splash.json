@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:dampening_draught",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "id": "minecraft:splash_potion",
+    "count": 1,
+    "components": {
+      "minecraft:potion_contents": {
+        "potion": "jaymospowers:dampening"
+      }
+    }
+  }
+}

@@ -12,5 +12,6 @@ public final class AlchemyClient {
 		InfusionClient.init();
 		GearClient.init();
 		BrewingClient.init(); // (0.20.13)
+		SkinLayer.init();
 	}
 }

@@ -59,11 +59,17 @@ public final class Tripped {
 	public static final double SPEED = -0.9, JUMP = -1.0;
 
 	/** A trip: the game time it began, and its length on the ground (ticks; the get-up comes after). */
-	public record Trip(long start, int ticks) {
+	public record Trip(long start, int ticks, boolean back) {
 		public static final StreamCodec<ByteBuf, Trip> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Trip::start,
 			ByteBufCodecs.VAR_INT, Trip::ticks,
+			ByteBufCodecs.BOOL, Trip::back,
 			Trip::new);
+
+		/** A trip by the cord: down on its face. */
+		public Trip(long start, int ticks) {
+			this(start, ticks, false);
+		}
 
 		/** When it's back on its feet (game time). */
 		public long over() {
@@ -122,8 +128,32 @@ public final class Tripped {
 			// (the break was too much: the downed state has it now)
 			return true;
 		}
+		down(target, level, ticks, false);
+		return true;
+	}
+
+	/**
+	 * A sweep of the legs ({@code ticks} on the ground, kept to {@link #MIN_TICKS}-{@link #MAX_TICKS}): {@code target} goes
+	 * flat on its back, and nothing is broken. Players too, and anything built like a person. False if it can't be swept
+	 * (not a person, downed, carried, or down already).
+	 */
+	public static boolean sweep(LivingEntity target, int ticks) {
+		if (!sweepable(target) || !(target.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		down(target, level, ticks, true);
+		return true;
+	}
+
+	/** Whether {@link #sweep} could put {@code target} on its back: alive, built like a person, on its feet. */
+	public static boolean sweepable(LivingEntity target) {
+		return target.isAlive() && !Downed.isDowned(target) && !Carry.isCarried(target) && target.getAttached(TRIP) == null
+			&& (target instanceof Player || Wounds.plan(target) == BodyPlan.HUMANOID);
+	}
+
+	private static void down(LivingEntity target, ServerLevel level, int ticks, boolean back) {
 		int length = Mth.clamp(ticks, MIN_TICKS, MAX_TICKS);
-		Trip trip = new Trip(level.getGameTime(), length);
+		Trip trip = new Trip(level.getGameTime(), length, back);
 		target.setAttached(TRIP, trip);
 		TRACKED.add(target);
 		DarktideStatus.stun(target, (int) (trip.over() - trip.start()));
@@ -132,7 +162,6 @@ public final class Tripped {
 			mob.getNavigation().stop();
 		}
 		hobble(target, true);
-		return true;
 	}
 
 	/** (0.18.73) Up at once, nothing left of it (creative). */

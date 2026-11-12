@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glowstone_dust",
+    "minecraft:blaze_powder",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "jaymospowers:head_flash",
+    "count": 2
+  }
+}

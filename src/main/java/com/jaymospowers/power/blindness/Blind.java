@@ -73,6 +73,8 @@ public final class Blind {
 		Unseeing.register();
 		BlindnessService.init();
 		BlindnessEnclaves.init();
+		BlindnessRadar.init();
+		BlindnessPursuit.init();
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (level.isClientSide() || !(player instanceof ServerPlayer attacker) || !(entity instanceof ServerPlayer victim)
 				|| !player.isShiftKeyDown() || !player.getItemInHand(hand).is(Items.SHEARS) || !Downed.isDowned(victim)) {
