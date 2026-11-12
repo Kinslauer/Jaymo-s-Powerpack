@@ -11596,3 +11596,12 @@ Mill Charge and the guards' challenge:
 - Built (compiles); not played. Not seen in the game: the model and its poses, the grazing walk, the pen test, a
   polar bear's hunt, and whether Naturalist's, Cube Animals' and Bear Minimum's hunters pick prey the way the game's
   do (if they don't, being fed changes nothing for them).
+
+## 0.7.766 (2026-11-12): The journal remembers people, great foes and places (#1355)
+
+- The journal's quests page gains three entries: **People I have met** (everyone whose name you have learned), **Great foes I have seen** and **Places I have walked into** (structures you have stood inside, the last one marked).
+- People you already knew before this update appear once you come within 16 blocks of them again.
+
+Classes: `JournalLog` (hooks in `Journal`, `Introductions`, `BossIntros`, `JaymosKingdoms`), lang part `journal-log.json`.
+
+Compiled only; not played. The structure check was not tried in every dimension.
