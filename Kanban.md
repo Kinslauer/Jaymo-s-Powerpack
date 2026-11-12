@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 18:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 18:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,6 +27,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/omniroute-ai-gateway-experiment|omniroute-ai-gateway-experiment]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 - [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
 - [x] [[Inbox/Done/frostborn-tech-villagers|frostborn-tech-villagers]]
@@ -34,7 +35,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/future-three-sided-war|future-three-sided-war]]
 - [x] [[Inbox/Done/blindness-devout-path|blindness-devout-path]]
 - [x] [[Inbox/Done/arsenal-pulls-anything|arsenal-pulls-anything]]
-- [x] [[Inbox/Done/elemental-ki-limits|elemental-ki-limits]]
 
 
 %% kanban:settings
