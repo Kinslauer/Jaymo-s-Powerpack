@@ -152,7 +152,7 @@ public final class QuickOrders {
 						Comrades.think(level, v, true);
 					}
 				}
-				if (!fight) {
+				if (!fight && !Wayfinding.lead(level, first, player, now)) {
 					scout(level, first, player, now);
 				}
 			}

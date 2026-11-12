@@ -30,7 +30,8 @@ public abstract class ThrallTargetMixin {
 			|| Downed.holdsFire((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Commandments.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Lycans.hidden(target)
-			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)) {
+			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Loans.sameBand((LivingEntity)(Object)this, target)) {
 			cir.setReturnValue(false);
 		}
 	}

@@ -99,6 +99,13 @@ public final class Callouts {
 			"you.hungry", "you.armour", "table.sit"}) {
 			LINES.put(k, 3);
 		}
+		// hire and lend (docs/Pawn-Plan.md patch 5)
+		for (String k : new String[] {"loan.errand", "loan.tavern", "loan.wait", "loan.work", "loan.part", "loan.home", "loan.learned", "loan.back",
+			"loan.errand.done", "loan.bye", "loan.thanks", "loan.hired", "loan.hired.work", "taken.ours", "taken.ransom", "taken.help", "taken.free",
+			"sell.camp", "band.boast", "band.praise", "band.scold", "way.town", "way.chest", "way.here", "way.cut", "party.done", "party.warn",
+			"party.won", "party.race", "party.greet", "party.short", "party.hired"}) {
+			LINES.put(k, 3);
+		}
 	}
 
 	private record Claim(String side, String kind, Vec3 at, long until) {

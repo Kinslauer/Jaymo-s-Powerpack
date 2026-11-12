@@ -86,9 +86,11 @@ one bite of your food; a sworn captain's men take his chosen leaning as their se
 13800; sneaking unseen past 4 blocks, first unseen blow x2, poison on the fire within 4 blocks, open approach within 12
 calls you out). `Bonds` (0 to 100, close at 60; MCA hearts, the table, being got up with you near; left down 30 s with
 you 40 blocks off costs 10; `Bonds.resists` is ready for patch 6's turnings). `Gestures`. `Specialties` (the books
-are written books with the knack in their data; foe trackers 8%, medics 6%, tongue-speakers 5%). Not in yet: the
-companions don't sit on the seats themselves (they come and stand by you), and a band's supper has no fire built for
-it if the camp has none (they eat round its centre with a wisp of smoke).
+are written books with the knack in their data; foe trackers 8%, medics 6%, tongue-speakers 5%). Added after (Andy:
+"Add whats missing"): `GroundSeats` (a companion sits on a free cushion near, or on a cushion of its own put on the
+ground and taken away when it stands); a camp without a fire builds a campfire for supper; `LegUps` throws across gaps
+(2 to 5 wide, landing within a block up or down, both sides); Powers' `Carry.npcLift` (shoulder carry by mobs, healthy
+medics use it).
 
 ## Patch 5: hire and lend
 
@@ -96,6 +98,23 @@ A1 companions lent between players (while you're offline or left on loan at a ta
 learned, a gift and coin), A6 the parting gift and word, A3 veterans for hire on the roads (who also sell to camps),
 A5 errands left with a companion, with Andy's note: some are hired to work, not to fight, B2 they know the way
 (guidance, short cuts, a chest they once found), H4 rival parties built from the same parts.
+
+As built: `Loans` (owner stamped on every companion; lendable while the owner is offline unless told "keep me", or
+when left at a tavern from the table; coin used on one opens the hire screen, fight price 2 + learned steps / 2 +
+good words / 2 (capped 5), work half; a day's hire; the parting screen asks the borrower at the end, or when they use
+coin on them; words, gifts, coin and wins learned wait on the companion until it meets its owner; errands gather 16 a
+day of a raw thing, at most a stack; taken companions: downed, owner 24+ blocks off, none of the owner's side near,
+a camp illager within 8; ransom 3 times the price; a close bond (60+) breaks free when the owner comes within 12).
+`Veterans` (road drifters 30% veteran, 8% knight, tavern 15% veteran; health 18/24, damage 3/4, 10/24 wins, price
+5/10; an unhired one sells to a camp within 192 blocks as a guard of its band, and calls out players it pitched to).
+`Wayfinding` (settlements and loot chests within 12 blocks remembered, 32 at most; Go leads to the nearest within 30
+degrees of your look, 24 to 800 blocks; chests already opened are forgotten; bands within 64 of camp that lose sight
+of you get a short burst of speed). `BandTallies` (damage on players and companions; praise at 6+, +2 health, 3 times
+at most). `RivalParties` (3 or 4 MCA guards, a knight or veteran leading, from a road near a player's settlement,
+chance 15% every 2 minutes, two at most; camp within 320 or else a settlement within 400; rest 2 minutes in towns;
+gone after 3 days with nobody near; the leader's price is the sum of the members'). Not built: short cuts for
+companions (only the bands' own-ground run), and the best of a band being sent after you on its next raid (they're
+just tougher).
 
 ## Patch 6: the dark mirror
 

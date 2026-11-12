@@ -76,14 +76,14 @@ public final class TableTalk {
 		builder -> builder.persistent(Codec.STRING));
 
 	/** The screen: who, their leanings, how they talk and take a win, the bond, and (a captain) his men's leaning. */
-	public record OpenTable(int entityId, Component name, String main, String second, int chatter, int style, int bond, boolean captain, String men)
-		implements CustomPacketPayload {
+	public record OpenTable(int entityId, Component name, String main, String second, int chatter, int style, int bond, boolean captain, String men,
+		int lend, Component errand) implements CustomPacketPayload {
 		public static final Type<OpenTable> TYPE = new Type<>(JaymosKingdoms.id("table_talk_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, OpenTable> CODEC = new StreamCodec<>() {
 			@Override
 			public OpenTable decode(RegistryFriendlyByteBuf buf) {
 				return new OpenTable(buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf), buf.readUtf(), buf.readUtf(), buf.readVarInt(),
-					buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readUtf());
+					buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readVarInt(), ComponentSerialization.STREAM_CODEC.decode(buf));
 			}
 
 			@Override
@@ -97,6 +97,8 @@ public final class TableTalk {
 				buf.writeVarInt(p.bond);
 				buf.writeBoolean(p.captain);
 				buf.writeUtf(p.men);
+				buf.writeVarInt(p.lend);
+				ComponentSerialization.STREAM_CODEC.encode(buf, p.errand);
 			}
 		};
 
@@ -106,8 +108,11 @@ public final class TableTalk {
 		}
 	}
 
-	/** The answers: the second leaning ("" keeps it), chatter, style, his men's leaning ("" as they are). */
-	public record SetTable(int entityId, String second, int chatter, int style, String men) implements CustomPacketPayload {
+	/**
+	 * The answers: the second leaning ("" keeps it), chatter, style, his men's leaning ("" as they are), how they're lent
+	 * ({@link Loans#LEND}; -1 not asked), whether to take on the errand of what's in hand.
+	 */
+	public record SetTable(int entityId, String second, int chatter, int style, String men, int lend, boolean errand) implements CustomPacketPayload {
 		public static final Type<SetTable> TYPE = new Type<>(JaymosKingdoms.id("table_talk_set"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SetTable> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, SetTable::entityId,
@@ -115,6 +120,8 @@ public final class TableTalk {
 			ByteBufCodecs.VAR_INT, SetTable::chatter,
 			ByteBufCodecs.VAR_INT, SetTable::style,
 			ByteBufCodecs.STRING_UTF8, SetTable::men,
+			ByteBufCodecs.VAR_INT, SetTable::lend,
+			ByteBufCodecs.BOOL, SetTable::errand,
 			SetTable::new);
 
 		@Override
@@ -298,8 +305,13 @@ public final class TableTalk {
 		if (!ServerPlayNetworking.canSend(player, OpenTable.TYPE)) {
 			return;
 		}
+		// a companion of one's own (not a sworn captain, not one on loan) is asked how it's lent, and given an errand (row A1, A5)
+		boolean lends = McaCompat.LOADED && m instanceof net.minecraft.world.entity.npc.villager.Villager && !captain && !m.hasAttached(Loans.LOAN);
+		ItemStack hand = player.getMainHandItem();
+		Component errand = lends && !hand.isEmpty() && Loans.gatherable(hand.getItem()) ? hand.getHoverName() : Component.empty();
 		ServerPlayNetworking.send(player, new OpenTable(m.getId(), m.getDisplayName(), l.main().key(), l.second().key(), chatter(m),
-			m.getAttachedOrElse(STYLE, styleOf(m)), Bonds.of(m, player.getUUID()), captain, m.getAttachedOrElse(MEN, "")));
+			m.getAttachedOrElse(STYLE, styleOf(m)), Bonds.of(m, player.getUUID()), captain, m.getAttachedOrElse(MEN, ""),
+			lends ? m.getAttachedOrElse(Loans.LEND, 0) : -1, errand));
 	}
 
 	/** How {@code m} takes a win before anyone asked: by their voice. */
@@ -345,6 +357,9 @@ public final class TableTalk {
 			if (known) {
 				m.setAttached(MEN, a.men());
 			}
+		}
+		if (a.lend() >= 0 && McaCompat.LOADED && !m.hasAttached(Loans.LOAN) && !SwornCaptains.free(m)) {
+			Loans.fromTable(player, m, a.lend(), a.errand());
 		}
 		Callouts.say(m, "table.done", player, true, player.getDisplayName());
 	}

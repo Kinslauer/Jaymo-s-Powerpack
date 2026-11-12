@@ -182,6 +182,10 @@ public final class Comrades {
 		if (e instanceof Player p) {
 			return "p:" + p.getUUID();
 		}
+		String band = Loans.bandSide(e);
+		if (band != null) {
+			return band;
+		}
 		if (e instanceof Villager v) {
 			UUID following = McaCompat.following(v);
 			if (following != null) {
@@ -397,6 +401,7 @@ public final class Comrades {
 			if (m != null && m.isAlive() && !m.isRemoved() && !Downed.isDowned(m) && target(m) == null) {
 				Callouts.say(m, "won", null, false);
 				Gestures.won(m);
+				BandTallies.ended(m);
 			}
 		}
 	}
@@ -509,7 +514,7 @@ public final class Comrades {
 
 	/** Left to what they're doing. */
 	static boolean busy(Mob m) {
-		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m)) {
+		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m)) {
 			return true;
 		}
 		Followers.Order order = m instanceof Villager v ? v.getAttached(Followers.ORDER) : null;

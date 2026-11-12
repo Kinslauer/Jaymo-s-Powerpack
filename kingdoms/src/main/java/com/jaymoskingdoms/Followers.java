@@ -124,7 +124,7 @@ public final class Followers {
 
 	/** Whether {@code v} takes orders from {@code player} at all (MCA's ties, or enough hearts). */
 	public static boolean takesOrders(Entity v, ServerPlayer player) {
-		return McaCompat.LOADED && v instanceof Villager villager && villager.isAlive() && McaBridge.involved(villager, player);
+		return McaCompat.LOADED && v instanceof Villager villager && villager.isAlive() && (McaBridge.involved(villager, player) || Loans.borrowedBy(villager, player) || RivalParties.hiredBy(villager, player));
 	}
 
 	private static void give(ServerPlayer player, int target, int kind) {
