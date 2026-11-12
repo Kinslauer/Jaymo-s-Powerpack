@@ -284,3 +284,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 (Andy, SWGC picklist notes): cut marks on bodies: "the cuts are real and can be healed with bandages."
 - 2026-11-11 (Andy, SWGC picklist notes): tear a block loose: "no, it certainly should be able to grab ANYTHING" (no claim protection).
 - 2026-11-11 (Andy, SWGC picklist notes): Twinblade: "an ancient warrior born design, not often wielded by many, and the schematic is found in the stormborn dungeon."
+- 2026-11-12 (SWGC swordplay, Claude's readings in PR #1341, not yet confirmed by Andy): the flip's "tied to weapon forms" = any learnt form or the Weapon Forms perk; "camera should always follow" = the first-person view turns over (third-person camera not rolled); the armed stance shows whenever a weapon is in the main hand.

@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: SWGC swordplay picks (23 rows), patch 1 of 6: the armed body
 branch: claude/project-thread-4d9bz2
 with: Claude (cloud)
-pr: 
+pr: 1341
 mods: powers
 versions: 
 started: 2026-11-12
@@ -30,3 +30,5 @@ names and sounds.
 - Andy's row notes are in Decisions.md (2026-11-12).
 
 ## Done
+Patch 1 (PR #1341): armed stance, draw, armed crouch, mid-air flip, parry lines. Compiled, not played; pose angles are a
+first pass. Patches 2-6 not started.
