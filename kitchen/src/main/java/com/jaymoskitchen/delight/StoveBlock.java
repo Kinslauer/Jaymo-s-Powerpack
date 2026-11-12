@@ -212,7 +212,7 @@ public class StoveBlock extends BaseEntityBlock {
 		double y = pos.getY();
 		double z = pos.getZ() + 0.5;
 		if (random.nextInt(10) == 0) {
-			level.playLocalSound(x, y, z, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+			com.jaymoskitchen.sound.KitchenSounds.fireLocal(level, x, y, z);
 		}
 		Direction facing = state.getValue(HorizontalDirectionalBlock.FACING);
 		double along = random.nextDouble() * 0.6 - 0.3;

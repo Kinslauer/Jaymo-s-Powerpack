@@ -1472,9 +1472,7 @@ public class CorpseEntity extends Entity {
 	private boolean roast(ServerLevel level) {
 		roastTicks += FLAME_CHECK_TICKS;
 		level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.3, getZ(), 3, 0.15, 0.05, 0.15, 0.01);
-		if (roastTicks % 40 == 0) {
-			level.playSound(null, getX(), getY(), getZ(), SoundEvents.CAMPFIRE_CRACKLE, SoundSource.NEUTRAL, 0.8F, 1.3F);
-		}
+		com.jaymoskitchen.sound.KitchenSounds.roast(level, this);
 		if (roastTicks < ROAST_TICKS) {
 			return false;
 		}

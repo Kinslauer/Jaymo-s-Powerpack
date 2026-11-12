@@ -55,10 +55,7 @@ public final class DragonBreath {
 			Vec3 d = spread(aim, random, 0.2);
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, mouth.x, mouth.y, mouth.z, 0, d.x, d.y + 0.1, d.z, 0.4);
 		}
-		if (tick % 6 == 0) {
-			level.playSound(null, mouth.x, mouth.y, mouth.z, tick % 12 == 0 ? SoundEvents.BLAZE_SHOOT : SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE,
-				1.2F, 0.6F + random.nextFloat() * 0.2F);
-		}
+		com.jaymoskingdoms.WorldSounds.fireBreath(level, dragon, mouth);
 		if (tick % HIT_EVERY != 0) {
 			return;
 		}
