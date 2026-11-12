@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 03:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 03:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,6 +13,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
+- [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · running
 - [ ] [[Agents/swgc-swordplay|swgc-swordplay]] · 💻 Odysseus · running
 
 
@@ -22,6 +23,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Agents/darktide-overhaul|darktide-overhaul]] · 💻 Odysseus · #1339 · stalled
 
 
 ## Done
