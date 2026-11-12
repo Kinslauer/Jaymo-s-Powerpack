@@ -13,6 +13,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
+- [ ] [[Agents/Boss intro cutscenes|Boss intro cutscenes]] · 💻 Odysseus · running
 - [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · running
 
 
