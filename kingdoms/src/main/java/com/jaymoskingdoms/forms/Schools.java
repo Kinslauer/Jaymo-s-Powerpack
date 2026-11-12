@@ -95,7 +95,7 @@ public final class Schools {
 		BLADE(Forms.Family.BLADE, "weapon/katana_blade", "rain_of_cuts", "sheath_draw", "crescent_sweep", "wheel_cut", "figure_eight", "hurled_blade"),
 		SPEAR(Forms.Family.SPEAR, "weapon/spear_tip", "pinning_throw", "spear_lunge", "couched_lance", "mill_charge"),
 		FIST(Forms.Family.FIST, null, null, "ground_stomp", "falling_fist"),
-		KNIFE(Forms.Family.KNIFE, "weapon/kunai_blade", null, "marked_quarry", "cast_off_cloak", "tangle_cord"),
+		KNIFE(Forms.Family.KNIFE, "weapon/kunai_blade", null, "marked_quarry", "cast_off_cloak", "tangle_cord", "disarm_rush", "dry_remark"),
 		CLAW(Forms.Family.CLAW, "weapon/fang_blades", null, "rending_claw", "feral_pounce");
 
 		private final Forms.Family family;

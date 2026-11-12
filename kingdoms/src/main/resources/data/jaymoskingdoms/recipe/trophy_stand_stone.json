@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " B ",
+    " C ",
+    "SSS"
+  ],
+  "key": {
+    "B": "minecraft:bowl",
+    "C": "minecraft:copper_ingot",
+    "S": "minecraft:stone_bricks"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:trophy_stand_stone"
+  }
+}

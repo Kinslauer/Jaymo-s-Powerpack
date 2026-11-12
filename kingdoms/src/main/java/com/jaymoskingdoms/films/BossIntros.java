@@ -169,7 +169,12 @@ public final class BossIntros {
 	 * several great foes is told apart: each patron's champion, a chief from a warlord.
 	 */
 	public static @Nullable String key(Entity entity) {
-		if (!(entity instanceof LivingEntity living) || !living.isAlive() || entity instanceof ServerPlayer) {
+		return entity instanceof LivingEntity living && living.isAlive() ? kind(entity) : null;
+	}
+
+	/** {@link #key}, for a creature alive or fallen (the trophy it leaves, {@code Trophies}). */
+	public static @Nullable String kind(Entity entity) {
+		if (!(entity instanceof LivingEntity) || entity instanceof ServerPlayer) {
 			return null;
 		}
 		String type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();

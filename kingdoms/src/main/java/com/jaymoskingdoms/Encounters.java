@@ -136,6 +136,8 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:wraith", "jaymoskingdoms:has_wraith", 5, 1, 2, true),
 		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
 		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
+		// the Gaunt of the snowy woods (hunger/Gaunt), at night only
+		new Encounter("jaymoskingdoms:gaunt", "jaymoskingdoms:has_gaunt", 3, 1, 1, true),
 		// the mud golem is no monster of legend any more but one of the swamps' common threats (Andy), and the witches'
 		// allies at their huts (monsters/WitchHuts). The minotaur no longer roams the mountains: it keeps the great
 		// dungeons under the Overworld (beasts/Labyrinths).
@@ -214,7 +216,7 @@ public final class Encounters {
 				continue;
 			}
 			boolean legend = Monsters.legend(type), dragon = id.getPath().endsWith("_dragon"), cave = "cave_ogre".equals(id.getPath());
-			placement(type, e.night(), cave, legend, dragon, "tarantula".equals(id.getPath()));
+			placement(type, e.night(), cave, legend, dragon, "tarantula".equals(id.getPath()) || "gaunt".equals(id.getPath()));
 			BiomeModifications.addSpawn(BiomeSelectors.tag(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes()))), type.getCategory(), type,
 				e.weight(), e.min(), e.max());
 		}

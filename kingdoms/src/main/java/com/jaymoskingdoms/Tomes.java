@@ -112,6 +112,7 @@ public final class Tomes {
 	static final Map<String, Integer> TIER = Map.ofEntries(
 		Map.entry("fire", 1), Map.entry("arcane", 1), Map.entry("whispers", 1), Map.entry("blood_grip", 1),
 		Map.entry("warding", 2), Map.entry("draining", 2), Map.entry("mending", 2),
+		Map.entry("tide_pearl", 2), Map.entry("harrying_gale", 3), Map.entry("bulwark", 3),
 		Map.entry("raising", 3), Map.entry("sanctuary", 3), Map.entry("blight", 3), Map.entry("hemorrhage", 3),
 		Map.entry("frenzy", 4),
 		Map.entry("restoration", 5), Map.entry("deaths_door", 5));
@@ -120,6 +121,7 @@ public final class Tomes {
 	static final float[] MANA = {8.0F, 15.0F, 30.0F, 45.0F, 60.0F};
 	/** The element each spell belongs to (for {@link #OWN_PAGE}). */
 	static final Map<String, String> SPELL_ELEMENT = Map.ofEntries(
+		Map.entry("bulwark", "earth"), Map.entry("tide_pearl", "water"), Map.entry("harrying_gale", "air"),
 		Map.entry("fire", "fire"), Map.entry("arcane", "lightning"), Map.entry("warding", "earth"),
 		Map.entry("draining", "death"), Map.entry("raising", "death"), Map.entry("blight", "death"), Map.entry("whispers", "death"),
 		Map.entry("deaths_door", "death"), Map.entry("mending", "restoration"), Map.entry("sanctuary", "restoration"),

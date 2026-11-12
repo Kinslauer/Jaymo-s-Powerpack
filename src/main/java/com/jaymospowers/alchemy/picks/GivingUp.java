@@ -177,6 +177,10 @@ public final class GivingUp {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.release.has").withStyle(ChatFormatting.GRAY));
 				return stack;
 			}
+			// (one holder per power: the phial of a power someone holds is left unopened)
+			if (com.jaymospowers.core.OneHolder.refuses(player, power)) {
+				return stack;
+			}
 			ItemStack left = super.finishUsingItem(stack, level, entity);
 			player.removeAttached(SETTLED);
 			Powers.awakenAs(player, power);

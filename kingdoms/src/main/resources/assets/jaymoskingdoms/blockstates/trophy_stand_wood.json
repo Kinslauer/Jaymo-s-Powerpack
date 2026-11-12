@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/trophy_stand_wood"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/trophy_stand_wood",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/trophy_stand_wood",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/trophy_stand_wood",
+      "y": 270
+    }
+  }
+}

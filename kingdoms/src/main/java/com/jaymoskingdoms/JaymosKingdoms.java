@@ -273,6 +273,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Rearm.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
+		RogueGambits.register();
 		ChestNoise.register();
 		// 0.7.234: locked loot chests and the Pin and Rotary lockpicking games (and its attachment)
 		LOGGER.debug("lock attachment: {}", Lockpicking.LOCK);
@@ -334,6 +335,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LoreBooks.register();
 		com.jaymoskingdoms.films.LoreFilms.register();
 		com.jaymoskingdoms.films.BossIntros.register();
+		// great foes' themes (stems mixed on the player's own side) and the trophy stand
+		com.jaymoskingdoms.music.FoeThemes.register();
+		com.jaymoskingdoms.trophies.Trophies.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
 		BogIron.register();
@@ -630,6 +634,16 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
 		Festivals.register();
 		Pets.register();
+		// the hunter's pack and bow (their attachments)
+		LOGGER.debug("hunter attachments: {} {}", HunterPack.PACK, HunterBow.CREDITS);
+		HunterPack.register();
+		HunterBow.register();
+		// the settler's kit (farmer and smith perks, the field forge, the lord's rally) and the crews of the camps (their attachments)
+		LOGGER.debug("crew attachments: {} {}", Crews.CREW, Crews.BOSSES);
+		SettlerKit.register();
+		FieldForge.register();
+		Rally.register();
+		Crews.register();
 		// 0.7.436: now and then a villager keeps a rare animal from far off, and brags about it
 		RarePets.register();
 		FairyWonder.register();
@@ -645,6 +659,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Arcana.register();
 		// the elemental spell tomes: left-click bolts, a loaded page on right click
 		Tomes.register();
+		// a forbidden rite of blood magic: a captive made into a great foe (and its attachment)
+		BruteRite.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
@@ -698,6 +714,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// their attachments)
 		LOGGER.debug("night gift attachments: {} {}", NightGifts.GIFT, VampirePlayers.HALF_TURN);
 		NightGifts.register();
+		com.jaymoskingdoms.nightforms.NightForms.register();
 		LOGGER.debug("blood grab attachment: {}", BloodGrab.GRABBING);
 		BloodGrab.register();
 		// 0.7.88: Nightborn and vampires (the cure's trace, an attachment)
@@ -723,6 +740,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.415: the moon's curse (a life story road): feral under a blood moon
 		LOGGER.debug("moon curse attachment: {}", MoonCurse.CURSED);
 		MoonCurse.register();
+		// the sick light round the Irradiated monolith: its sickness and the wolves it changes
+		LOGGER.debug("blight attachments: {} {} {}", com.jaymoskingdoms.remnants.Blight.DOSE, com.jaymoskingdoms.remnants.Blight.DENNED,
+			com.jaymoskingdoms.remnants.Blight.BLIGHTED);
+		com.jaymoskingdoms.remnants.Blight.register();
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();
