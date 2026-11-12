@@ -56,11 +56,8 @@ public final class DragonFrost {
 			// (count 0: the particle flies along (dx, dy, dz) times speed)
 			level.sendParticles(i < SNOWFLAKES ? ParticleTypes.SNOWFLAKE : ParticleTypes.CLOUD, mouth.x, mouth.y, mouth.z, 0, d.x, d.y, d.z, speed);
 		}
-		if (tick % 6 == 0) {
-			// a cold hiss, now and then a crunch of snow
-			level.playSound(null, mouth.x, mouth.y, mouth.z, tick % 12 == 0 ? SoundEvents.SNOW_BREAK : SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 1.0F,
-				1.5F + random.nextFloat() * 0.3F);
-		}
+		// a cold hiss, now and then a crunch of snow or a tinkle of ice
+		com.jaymoskingdoms.WorldSounds.frostBreath(level, dragon, mouth);
 		if (tick % HIT_EVERY != 0) {
 			return;
 		}

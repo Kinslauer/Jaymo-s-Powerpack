@@ -1,0 +1,15 @@
+{
+  "type": "cache",
+  "input": {
+    "type": "cache",
+    "input": {
+      "type": "add",
+      "left": {
+        "type": "mul",
+        "left": "lithosphere:topography_cliffs",
+        "right": "lithosphere:lakes_placement"
+      },
+      "right": "lithosphere:lakes_depth"
+    }
+  }
+}

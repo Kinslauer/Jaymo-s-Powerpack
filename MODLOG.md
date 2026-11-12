@@ -3551,3 +3551,53 @@ Compiled only; not played.
   when it lands (it showed nothing before). A click that hits nothing shows a jab.
 - First person: a boxer's arms stay in the guard and the punching arm goes out from it (the lead hand for a jab or
   lead hook, the rear for the rest); before, the game's own swing took over.
+
+## 0.22.83 (2026-11-12): Our own immersive sounds - footsteps, armour, water, jets, stations, drops, stomach, beds, sound browser
+
+- What ImmersiveFX: Resurrected gave the pack before it came out for lag (#1361), built as our own and kept cheap. Nothing of it is used (AGPL, recorded sounds): 247 takes in 86 sounds are synthesised by `tools/gen_immersive_sounds.py` (sounds/immersive/, events `immersive.*` at the top of sounds.json).
+- **Lag guard** (`client/sound/ImmersiveSounds`): every extra plays on this side only, never farther than 20 blocks from the camera, at most 6 a tick, and none while the sound engine's channels are over 70% full (read once a tick from its own "Sounds: x/y"), so they can't crowd out real sounds.
+- **Footsteps by material** (`Footfalls`, `FootfallLevelMixin` on ClientLevel's sound play): every step sound the game plays gets a layer from the ground (`SoundKinds`: grass, stone, wood, sand, gravel, snow, metal, carpet, mud; dirt counts as soft earth, snow layers and carpets on top count), a harder one running, a push-off jumping, a landing as heavy as the fall. Sneaking takes the step (the game's own and ours) to 50%, the stance wheel's low crouch to 35%, crawling to 25%.
+- **Armour by material**: on each step the worn set sounds as it's made (cloth, leather, chain, scale, plate, heavy, bone, crystal), louder the more of it is worn; soft sets every other step. Tinkering's bog iron (plate), Arsenal's Void Crown (crystal), the Rig (heavy), caveman hide, ichorcloth, Kingdoms' Ronin/Kintsugi/Warlord/Paladin/Gladiator/Heavenly/Reverent/Primal and the Aether's sets are named; other mods' armour goes by its equip sound, then words in its id. Replaces Ambience's single armour clink.
+- **Wading and swimming**: sloshing while wading, strokes while swimming (quicker sprint-swimming), a deep plunge and bubbles diving in fast.
+- **Steam, fire and bubble jets** (`Jets`): steam hisses off water touching lava, some open lava pools burst into flame spouts now and then, a few sea floor spots 3+ blocks deep bubble steadily. Scanned a slice a tick (14 blocks out, 6 up and down, 24 slices); which pools and floors is fixed by the spot. Particles off on Minimal.
+- **Workstation sounds** (`Workstations`, `WorkstationSlotMixin`): each station sounds as it opens (crafting table, anvil, loom, stonecutter, smithing table, furnaces, grindstone, cartography, brewing stand, enchanting table, the Tinkers tables, the smeltery), taking a result sounds like the work (by what the item is made of at a crafting table), a furnace sizzles each time an item is done while you watch, and the stations worked in the world sound as they're used: crucible and alembics, smith's anvils and forges, forge hearth, lapidary wheel, and Kitchen's pots, pans, stoves, boards (a chop with a knife), presses and grindstones.
+- **Dropped items** (`ItemDrops`): an item sounds once as it first lands after falling: metal rings, wood thuds, coins clink, stone clacks, glass tinks, gems tick, paper flaps, bone clacks, soft things thump.
+- **Stomach** (`core/StomachSounds`, server, heard by everyone near): at 6 food or less the stomach growls every 30-90 s (to half that, and louder, when empty); at Kitchen's thirsty point a dry swallow now and then. Never androids or the Divine-born, nor anyone asleep, creative or spectator. `KitchenCompat.water` added.
+- **Beds**: a rustle as anyone lies down or gets up (sleep or Kingdoms' bed rest), and now and then as a sleeper turns over, more often while the night runs by as a timelapse.
+- **Sound browser** (`SoundBrowserScreen`, `SoundTuning`, `SoundTuningEngineMixin`, `SoundBrowserOptionsMixin`): Music & Sounds > Sound Browser... (or a key, unbound at first) lists every sound heard in the last minute, newest first, and any you've turned down; search finds any sound. Click the bar to set a volume (5% steps), the name to mute, right-click to reset. "Thin repeats" (on) drops a sound's starts past 6 in half a second (never music, records, voices, menus or loops). Saved in config/jaymospowers-sounds.txt. Covers our power sounds too.
+- Built; not played. Synthesised takes not listened to in game yet.
+
+## 0.22.84 (2026-11-12): Dynamic Waters rivers replace Streams Reflowing
+
+- **Rivers**: the pack now ships our own 26.3 port of AdamNew's Dynamic Waters (MPL-2.0, source in `ports/dynamicwaters`,
+  credits and every change in `ports/dynamicwaters/PORT.md`). Rivers run downhill from the mountains to the sea, carve
+  valleys and gorges, push swimmers, boats and dropped items along with the current (faster in rain and storms), freeze
+  over in the cold and break up into drifting ice floes. Its config screen is in Mod Menu.
+- Streams Reflowing is gone from the pack build, and so is `core/StreamsPreset` (it only set Streams' world preset).
+  `water/Currents` stays for running water outside the rivers and for splashes; Dynamic Waters pushes its own river
+  channels.
+- Needs a new world: old worlds keep their old rivers and get odd seams at new chunks.
+- Built and boot-tested on a dedicated server; not played.
+
+## 0.22.85 (2026-11-12): Ice Caves, crevasses and brittle ice from blue ice (26.4)
+
+- **Ice Caves** (`jaymospowers:ice_caves`): a new cave biome under the colder lands (temperature below -0.3), from about
+  25 blocks under the surface down to the deepslate depths, like the lush and dripstone caves. The driest cold ground
+  (the tundra and dry snowy plains) keeps its old rock. Where a lush, dripstone or sulfur cave would be, that cave wins.
+  New chunks only.
+  - The rock is packed ice with bands of calcite (material rule `jaymospowers:ice_caves`, noise
+    `jaymospowers:ice_cave_gradient`). Large icicles of packed ice hang from the ceilings and rise from the floors,
+    sometimes joined into columns. Icicles hang in patches (a few standing under them), snow and ice crystals lie on the
+    floors, and there is no glow lichen. No lava lakes or lava springs; water springs, geodes and dungeons stay.
+  - Ores come out in the ice inside a pocket of stone (deepslate below Y 0): every ore feature (ours, vanilla's and
+    other mods', `OreStandInMixin`, `ScatteredOreStandInMixin`), Powers' great veins (`BigVeinFeature`) and Kingdoms'
+    world tier veins (`GroundChanges`).
+  - Spawns: the usual cave monsters plus strays (they spawn here without sky, `StraySpawnMixin`) and Frostbites.
+    Mineshafts, trial chambers, ruined portals and strongholds can generate here. Frozen peaks music, icy fog.
+- **Crevasses** (`jaymospowers:crevasse`, the 26.4 feature's settings): winding cracks carved into ice cave floors,
+  narrowing at their ends and towards their bottoms, with a bed of powder snow down in them and roofed at floor level
+  with brittle ice. They are only carved where the walls hold, so they never break into another cave.
+- **Brittle ice from blue ice**: water with blue ice beside it (north, south, east or west) freezes into brittle ice
+  when it is placed, flows or something next to it changes (`BlueIceWaterMixin`).
+- Brittle ice: what may cross it is now the entity tag `#jaymospowers:does_not_break_brittle_ice` (Frostbites, strays).
+- Classes: `frost/IceCaves`, `frost/IceCaveFeatures`, `mixin/icecaves/*`.

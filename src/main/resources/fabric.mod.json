@@ -11,7 +11,7 @@
 		"main": ["com.jaymospowers.JaymosPowers"],
 		"client": ["com.jaymospowers.client.JaymosPowersClient"],
 		"server": ["com.jaymospowers.JaymosPowersServer"],
-		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset", "com.jaymospowers.core.StreamsPreset", "com.jaymospowers.client.ShaderPreset"],
+		"preLaunch": ["com.jaymospowers.client.CameraPreset", "com.jaymospowers.core.PickupPreset", "com.jaymospowers.client.ShaderPreset"],
 		"jei_mod_plugin": ["com.jaymospowers.client.jei.TinkeringJei", "com.jaymospowers.client.jei.MedicineJei",
 			"com.jaymospowers.client.jei.GatheringJei", "com.jaymospowers.client.jei.KilnJei", "com.jaymospowers.client.jei.AlchemyJei", "com.jaymospowers.client.jei.SalvageJei", "com.jaymospowers.client.jei.BackHomeJei", "com.jaymospowers.client.jei.XenoJei", "com.jaymospowers.client.jei.GearJei"],
 		"jade": ["com.jaymospowers.client.compat.JadeEntitiesOnly"]
@@ -65,6 +65,7 @@
 		"jaymospowers.toolbelt.mixins.json",
 		"jaymospowers.lithostitched.mixins.json",
 		"jaymospowers.tundraworld.mixins.json",
+		"jaymospowers.icecaves.mixins.json",
 		"jaymospowers.artifacts.mixins.json",
 		{ "config": "jaymospowers.artifacts.client.mixins.json", "environment": "client" }
 	],

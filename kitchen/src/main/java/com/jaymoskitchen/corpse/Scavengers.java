@@ -317,7 +317,7 @@ public final class Scavengers {
 				if (chew % 5 == 0 && mob.level() instanceof ServerLevel level) {
 					level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, meat.getItem().getItem()),
 						meat.getX(), meat.getY() + 0.15, meat.getZ(), 4, 0.1, 0.05, 0.1, 0.06);
-					mob.playSound(SoundEvents.GENERIC_EAT.value(), 0.7F, 0.7F + mob.getRandom().nextFloat() * 0.3F);
+					com.jaymoskitchen.sound.KitchenSounds.chew(mob, 0.7F, 0.85F);
 				}
 				return;
 			}

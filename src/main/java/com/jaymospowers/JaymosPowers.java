@@ -92,6 +92,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
+		// a hungry stomach growls, a thirsty throat swallows dry, and those near hear it
+		com.jaymospowers.core.StomachSounds.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
@@ -185,6 +187,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();
+		// the Ice Caves: the cave biome under the cold lands, its crevasses and large icicles
+		com.jaymospowers.frost.IceCaves.init();
 		// the tundra's blocks and plants, and the glow lichen that eats rock
 		com.jaymospowers.tundra.Tundra.init();
 		com.jaymospowers.tundra.world.TundraWorld.init();

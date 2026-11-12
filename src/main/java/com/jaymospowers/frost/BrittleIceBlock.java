@@ -10,7 +10,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +24,8 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
  * Brittle ice (26.4's, built for 26.3): thin ice that starts to crack the moment anything living stands on it, cracks
  * further every {@link #CRACK_TICKS} ticks whether or not they stay, and gives way at the last crack (into the water under it, if
  * there is any). Frostbites and strays are light enough on their feet to cross it. Only silk touch takes it whole. It lies as a
- * crust over frozen lakes in the snow ({@code ThinIceFeature}).
+ * crust over frozen lakes in the snow ({@code ThinIceFeature}), roofs the ice caves' crevasses, and forms where water meets blue ice
+ * ({@link IceCaves}).
  */
 public class BrittleIceBlock extends HalfTransparentBlock {
 	// ---- tuning ----
@@ -45,9 +45,9 @@ public class BrittleIceBlock extends HalfTransparentBlock {
 		builder.add(CRACKS);
 	}
 
-	/** Whether {@code entity} is heavy enough to crack it. */
+	/** Whether {@code entity} is heavy enough to crack it: anything living not light on the ice ({@code #jaymospowers:does_not_break_brittle_ice}). */
 	public static boolean cracks(Entity entity) {
-		return entity instanceof LivingEntity && !entity.getType().equals(Frost.FROSTBITE) && !entity.getType().equals(EntityTypes.STRAY);
+		return entity instanceof LivingEntity && !entity.getType().builtInRegistryHolder().is(IceCaves.LIGHT_ON_ICE);
 	}
 
 	@Override
