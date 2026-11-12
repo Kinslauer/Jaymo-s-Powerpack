@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 
 /**
  * What blood lands on changes how it lies (a pick from Cruor's ideas): cloth soaks it up into a small dark stain that
- * lasts, earth drinks it into a dull patch that's soon gone, glass and ice let it smear thin and wide, and the rest
+ * lasts, earth drinks it into a dull patch that's soon gone, glass and ice let it smear thin and wide and it soon wipes off, and the rest
  * keeps it as before. A pool on a thin floor (planks, a slab, a trapdoor, leaves, wool, hay, scaffolding) with open air
  * under it soaks through and drips from the underside while it's fresh ({@link #soaksThrough}).
  */
@@ -21,7 +21,7 @@ public final class BloodSurfaces {
 		PLAIN(1.0F, 1.0F, 1.0F, 1.0F),
 		SOAKS(0.75F, 1.15F, 0.7F, 1.5F),
 		DRINKS(0.9F, 0.75F, 0.82F, 0.5F),
-		SMEARS(1.25F, 0.55F, 1.0F, 1.0F);
+		SMEARS(1.25F, 0.55F, 1.0F, 0.25F);
 
 		public final float size, alpha, dark, life;
 

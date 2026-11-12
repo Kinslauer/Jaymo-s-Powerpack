@@ -1,0 +1,12 @@
+# Blood and collisions do what the Cruor and BONK! picks said
+- **Bandaged cuts stop dripping.** A cut you bandage or wrap stops dripping at once (`WoundMarks.drip`).
+- **Rubber-folk stumps don't bleed.** They mend instead (`Bleeding.stump`).
+- **Boxers and Z Fighters keep their fists on people.** Punching a tough body no longer bruises their knuckles. Rock still does (`Collisions.fistFighter`).
+- **Dropped bloody weapons drip** where they lie while the blood is wet, as held ones do (`WeaponDrips`).
+- **Blood has its own sounds**, made for us from noise (`tools/gen_blood_sounds.py`, `BloodSounds`). They replace the borrowed slime and honey squishes:
+  - a squelch for each step through a fresh pool (soft sneaking, loud running);
+  - a wet hit when a blade, a club or a shot draws blood (lower for heavier blows);
+  - a wet burst when a body is crushed.
+- **The Blood setting covers stains too.** Light, Normal or Heavy now also sets how long pools and lasting stains are drawn (half, as is, half again) and how many stains are drawn at once (1,500, 3,000 or 6,000, oldest first). The server still keeps every stain for tracking and blood magic (`BloodSettings`, `BloodPuddle.drawnLife`).
+- **Blood on glass and ice wipes off soon.** Pools and stains there are drawn for a quarter as long. Earth and cloth now change how long lasting stains show, too (`BloodSurfaces`).
+- These were left out of #1368, #1370, #1371 and #1373. Built (`compileJava`, `compileClientJava`); not played.

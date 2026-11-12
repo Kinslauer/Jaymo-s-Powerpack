@@ -99,6 +99,8 @@ public final class BloodTrail {
 	 */
 	static final float WALK_SOAK = 0.05F, STEP_SPILL = 0.18F, SKID = 1.4F;
 	static final double WALK_MOVING = 0.03;
+	/** How often a foot through a fresh pool squelches (ticks), walking and running. */
+	static final int SQUELCH_WALKING = 9, SQUELCH_RUNNING = 6;
 
 	/** (0.17.182) Mobs that follow blood trails to whoever left them. */
 	public static final TagKey<EntityType<?>> TRACKERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("blood_trackers"));
@@ -172,6 +174,8 @@ public final class BloodTrail {
 		Vec3 last;
 		double carry;
 		boolean right;
+		/** When this body's next squelch can sound (game time), about a stride after the last. */
+		long nextSquelch;
 
 		Feet(Vec3 at) {
 			this.last = at;
@@ -556,6 +560,13 @@ public final class BloodTrail {
 			if (v.x * v.x + v.z * v.z > WALK_MOVING * WALK_MOVING) {
 				float soak = WALK_SOAK * (body.isSprinting() ? 2.0F : 1.0F);
 				feet.wet += soak(level, at, 0.75 * pool.scale + 0.15, soak, null);
+				// each step through it squelches (Cruor's pick), soft when sneaking, loud running
+				if (now >= feet.nextSquelch) {
+					feet.nextSquelch = now + (body.isSprinting() ? SQUELCH_RUNNING : SQUELCH_WALKING);
+					float volume = body.isShiftKeyDown() ? 0.2F : body.isSprinting() ? 0.7F : 0.45F;
+					BloodSounds.squelch(level, at, body instanceof ServerPlayer ? net.minecraft.sounds.SoundSource.PLAYERS
+						: net.minecraft.sounds.SoundSource.NEUTRAL, volume);
+				}
 			}
 		} else if (feet != null && feet.left <= 0) {
 			FEET.remove(body);

@@ -283,7 +283,7 @@ public final class WoundMarks {
 		}
 	}
 
-	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes. */
+	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes; a bandaged part never does. */
 	private static void drip(ServerLevel level, LivingEntity body, List<Mark> marks, long now) {
 		Long next = NEXT_DRIP.get(body);
 		if (next != null && now < next) {
@@ -293,7 +293,8 @@ public final class WoundMarks {
 		for (Mark mark : marks) {
 			Kind kind = mark.kind();
 			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB) && now - mark.laid() < DRIP_TICKS
-				&& (Bleeding.bleeding(body) & Breaks.bit(mark.part())) == 0 && (fresh == null || mark.laid() > fresh.laid())) {
+				&& ((Bleeding.bleeding(body) | Bleeding.bandaged(body) | Bleeding.wrapped(body)) & Breaks.bit(mark.part())) == 0
+				&& (fresh == null || mark.laid() > fresh.laid())) {
 				fresh = mark;
 			}
 		}

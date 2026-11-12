@@ -23,8 +23,8 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
  * ({@link #DULL}) a little. And villagers who catch a whiff say so ({@link #tick}).
  * <p>
  * Andy, on blood that lingers: "EVERYONE will comment on it". Blood a player wears (Powers' {@code Bloodied.noticed}:
- * their own coat, or bloodied armour or weapons) is remarked on before any smell, by nearly anyone who sees it, and
- * sooner and more often ({@link #BLOOD_CHANCE}, {@link #BLOOD_COOLDOWN}): fresh blood alarms people, dried blood is
+ * their own coat, or bloodied armour or weapons) is remarked on before any smell, by everyone who sees it, one after
+ * another, each once a while ({@link #BLOOD_COOLDOWN}): fresh blood alarms people, dried blood is
  * frowned at, rotten blood disgusts them. Goblins and orcs have their own lines.
  */
 public final class Stench {
@@ -36,20 +36,27 @@ public final class Stench {
 	static final double REMARK_RANGE = 5.0;
 	static final int REMARK_TICKS = 100, REMARK_COOLDOWN = 2400, REMARK_LINES = 6, GREEN_LINES = 3;
 	static final float REMARK_CHANCE = 0.25F;
-	/** Blood on a player: the chance someone near says so each check, the wait before another, and lines per stage. */
-	static final float BLOOD_CHANCE = 0.7F;
-	static final int BLOOD_COOLDOWN = 900;
+	/**
+	 * Blood on a player: everyone in sight remarks, one a check (the nearest who hasn't yet), and each says it again only
+	 * after {@link #BLOOD_COOLDOWN} ticks. Lines per stage below.
+	 */
+	static final int BLOOD_COOLDOWN = 6000, SAID_BLOOD_MAX = 2000;
 	static final String[] BLOOD_STAGES = {"fresh", "dried", "rotten"};
 	static final int BLOOD_LINES = 6, GREEN_BLOOD_LINES = 3;
 
 	private static final Map<UUID, Long> LAST_REMARK = new HashMap<>();
+	/** When each person last remarked on each player's blood (key: speaker|player). */
+	private static final Map<String, Long> SAID_BLOOD = new HashMap<>();
 
 	private Stench() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Stench::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_REMARK.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LAST_REMARK.clear();
+			SAID_BLOOD.clear();
+		});
 	}
 
 	/** People: villagers and illagers (not goblins or orcs). Everyone else has a keener nose. */
@@ -81,8 +88,9 @@ public final class Stench {
 				continue;
 			}
 			int blood = PowersCompat.bloodSeen(player);
-			if (blood >= 0 && since >= BLOOD_COOLDOWN) {
-				if (player.getRandom().nextFloat() < BLOOD_CHANCE && remarkBlood(player, Math.min(blood, BLOOD_STAGES.length - 1))) {
+			if (blood >= 0) {
+				// everyone who sees it says so, one at a time (a check apart), each once a while
+				if (remarkBlood(player, Math.min(blood, BLOOD_STAGES.length - 1), now)) {
 					LAST_REMARK.put(player.getUUID(), now);
 				}
 				continue;
@@ -106,20 +114,33 @@ public final class Stench {
 		}
 	}
 
-	/** Someone who can see {@code player} remarks on the blood on them ({@code stage}: 0 fresh, 1 dried, 2 rotten). */
-	private static boolean remarkBlood(ServerPlayer player, int stage) {
+	/**
+	 * Someone who can see {@code player} and hasn't yet said so remarks on the blood on them ({@code stage}: 0 fresh, 1
+	 * dried, 2 rotten): the nearest of them, so over a few checks everyone in sight has had their say.
+	 */
+	private static boolean remarkBlood(ServerPlayer player, int stage, long now) {
 		ServerLevel level = player.level();
+		UUID who = player.getUUID();
 		List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(REMARK_RANGE),
-			m -> (m instanceof Villager || m instanceof Npc) && m.isAlive() && !m.isBaby() && !m.isSleeping() && m.hasLineOfSight(player));
+			m -> (m instanceof Villager || m instanceof Npc) && m.isAlive() && !m.isBaby() && !m.isSleeping() && m.hasLineOfSight(player)
+				&& now - SAID_BLOOD.getOrDefault(pair(m.getUUID(), who), Long.MIN_VALUE / 2) >= BLOOD_COOLDOWN);
 		if (near.isEmpty()) {
 			return false;
 		}
-		Mob speaker = near.get(player.getRandom().nextInt(near.size()));
+		Mob speaker = near.stream().min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(player))).orElseThrow();
+		SAID_BLOOD.put(pair(speaker.getUUID(), who), now);
+		if (SAID_BLOOD.size() > SAID_BLOOD_MAX) {
+			SAID_BLOOD.values().removeIf(at -> now - at >= BLOOD_COOLDOWN);
+		}
 		Heritage.Kind kind = VillagerHeritage.of(speaker);
 		boolean green = kind == Heritage.Kind.GOBLIN || kind == Heritage.Kind.ORC;
 		String key = "speech.jaymoskingdoms.blood." + BLOOD_STAGES[stage] + (green ? ".green." + player.getRandom().nextInt(GREEN_BLOOD_LINES)
 			: "." + player.getRandom().nextInt(BLOOD_LINES));
 		Speech.sayTo(level, speaker, player, Component.translatable(key), Speech.WHITE);
 		return true;
+	}
+
+	private static String pair(UUID speaker, UUID player) {
+		return speaker + "|" + player;
 	}
 }

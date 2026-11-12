@@ -11,7 +11,6 @@ import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -216,6 +215,7 @@ public final class BladeBlood {
 			Crushing.mark(target);
 			if (blunt(target, damage)) {
 				Bloodied.struck(target, source, damage, color(target));
+				wetHit(target, damage);
 			}
 			return;
 		}
@@ -223,6 +223,7 @@ public final class BladeBlood {
 		if (weapon != null && Dismember.blade(weapon)) {
 			if (spray(target, damage, 1.0F)) {
 				Bloodied.struck(target, source, damage, color(target));
+				wetHit(target, damage);
 			}
 			return;
 		}
@@ -234,7 +235,16 @@ public final class BladeBlood {
 			}
 			if (shot(target, dir, damage, bullet(projectile))) {
 				Bloodied.struck(target, source, damage, color(target));
+				wetHit(target, damage);
 			}
+		}
+	}
+
+	/** A blow that drew blood sounds wet (Cruor's pick): our own hit sound, lower for heavier blows. */
+	private static void wetHit(LivingEntity target, float damage) {
+		if (target.level() instanceof ServerLevel level) {
+			com.jaymospowers.core.blood.BloodSounds.hit(level, target.getBoundingBox().getCenter(), target.getSoundSource(),
+				Mth.clamp(0.35F + damage * 0.04F, 0.35F, 0.9F), Mth.clamp(1.15F - damage * 0.02F, 0.75F, 1.15F));
 		}
 	}
 
@@ -549,7 +559,7 @@ public final class BladeBlood {
 		int flecks = Math.min(CORPSE_FLECKS_MAX, Math.max(1, Mth.floor(damage * (blade ? CORPSE_BLADE_FLECKS : CORPSE_FLECKS))));
 		level.sendParticles(BloodParticles.fleck(color, CORPSE_FLECK_SIZE), at.x, at.y + 0.1, at.z, flecks, w, 0.05, w, CORPSE_FLECK_SPEED);
 		if (blade) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_STEP, SoundSource.PLAYERS, 0.6F, 0.7F + level.getRandom().nextFloat() * 0.2F);
+			com.jaymospowers.core.blood.BloodSounds.hit(level, at, SoundSource.PLAYERS, 0.6F, 0.8F);
 		}
 	}
 
@@ -567,8 +577,7 @@ public final class BladeBlood {
 		pool(level, target, 2, BURST_POOL * size(target));
 		level.sendParticles(BloodParticles.fleck(color(target), 2.0F), at.x, at.y, at.z,
 			BURST_GORE, w, h, w, BURST_GORE_SPEED);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.5F);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_BREAK, SoundSource.HOSTILE, 0.8F, 0.6F);
+		com.jaymospowers.core.blood.BloodSounds.burst(level, at, SoundSource.HOSTILE, 1.0F);
 	}
 
 	/**

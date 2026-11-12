@@ -40,7 +40,7 @@ public final class BloodClient {
 	/** The drop kinds a spray picks from, by type (filled as the particle sprites load). */
 	private static final Map<SimpleParticleType, Kind> KINDS = new LinkedHashMap<>();
 	/** (0.17.182) The server's lasting stains lying in {@link #stainsIn}, by their mark id. */
-	private static final Map<Long, BloodPuddle> STAINS = new HashMap<>();
+	private static final Map<Long, BloodPuddle> STAINS = new java.util.LinkedHashMap<>();
 	private static @Nullable ClientLevel stainsIn;
 	/** The splash pools lying in {@link #poolsIn}, by chunk, for more blood landing on them to pool into ({@link #splash}). */
 	private static final it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<List<BloodPuddle>> POOLS =
@@ -151,6 +151,12 @@ public final class BloodClient {
 		if (known != null) {
 			known.restain(options.scale(), options.age(), options.life());
 			return null;
+		}
+		// the blood setting's most stains drawn at once: the oldest laid goes first
+		java.util.Iterator<BloodPuddle> oldest = STAINS.values().iterator();
+		for (int over = STAINS.size() - BloodSettings.amount().stains + 1; over > 0 && oldest.hasNext(); over--) {
+			oldest.next().remove();
+			oldest.remove();
 		}
 		BloodPuddle stain = new BloodPuddle(level, x, y, z, sprites, options.color(), options.scale(), options.age(), options.life(),
 			options.shape());

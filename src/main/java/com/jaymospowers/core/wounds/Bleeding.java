@@ -252,7 +252,8 @@ public final class Bleeding {
 
 	/** (0.14.4) A part just severed ({@link Dismember}): its stump bleeds until it's cauterised. Not the head (that's death). */
 	public static void stump(LivingEntity entity, BodyPart part) {
-		if (part.vital() || !bleeds(entity) || BodyPlan.of(entity).index(part) < 0) {
+		// Rubber-folk stumps close on themselves and mend (Cruor pick: "Rubber-folk skip it, since they mend")
+		if (part.vital() || !bleeds(entity) || BodyPlan.of(entity).index(part) < 0 || com.jaymospowers.core.Dismember.rubber(entity)) {
 			return;
 		}
 		set(entity, BLEEDING, bleeding(entity) | Breaks.bit(part));

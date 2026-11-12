@@ -58,7 +58,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sore knuckles</b>: punching or starting to dig a hard block (one that needs a tool, as stone, ore and metal do)
  * with an empty hand bruises that arm, once per punch. Andy: "same goes for bare hands on armor or stoneborn skin, or
  * mobs with tough enough hide": punching a body that wears {@link #ARMOUR_HURTS} armour or more, a Stoneborn, or anything
- * in {@link #TOUGH_HIDE}. Fist gear spares you (it is held in the hand, so the hand isn't bare); so does being Stoneborn.</li>
+ * in {@link #TOUGH_HIDE}. Fist gear spares you (it is held in the hand, so the hand isn't bare); so does being Stoneborn.
+ * A boxer or a Z Fighter punching a body never bruises ({@link #fistFighter}); on rock they do.</li>
  * <li><b>Riders thrown</b>: a galloping horse that runs into a wall throws its rider forward, limp, and both are hurt.
  * Flying mounts ({@link #CRASH_PROOF}, anything called a dragon) never crash.</li>
  * </ul>
@@ -152,7 +153,7 @@ public final class Collisions {
 			return InteractionResult.PASS;
 		});
 		AttackEntityCallback.EVENT.register((player, level, hand, target, hit) -> {
-			if (level instanceof ServerLevel && player instanceof ServerPlayer sp && bare(sp) && target instanceof LivingEntity body && tough(body)) {
+			if (level instanceof ServerLevel && player instanceof ServerPlayer sp && bare(sp) && !fistFighter(sp) && target instanceof LivingEntity body && tough(body)) {
 				knuckles(sp, body.getArmorValue() >= ARMOUR_HURTS ? SoundEvents.ANVIL_LAND : SoundEvents.STONE_HIT);
 			}
 			return InteractionResult.PASS;
@@ -317,6 +318,16 @@ public final class Collisions {
 	/** An empty main hand, in survival. */
 	private static boolean bare(Player player) {
 		return !player.isCreative() && !player.isSpectator() && player.getMainHandItem().isEmpty() && !stoneborn(player);
+	}
+
+	/**
+	 * A fist fighter: a boxer (any style) or a Z Fighter. Their fists are hardened for people, so armour, Stoneborn skin
+	 * and thick hide don't bruise them. Rock still does (Cruor and BONK pick: "fist fighters keep their fists on people,
+	 * not on rock").
+	 */
+	private static boolean fistFighter(ServerPlayer player) {
+		return com.jaymospowers.boxing.Boxing.style(player) != null
+			|| com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE);
 	}
 
 	private static boolean stoneborn(Entity entity) {
