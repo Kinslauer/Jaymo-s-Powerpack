@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -21,3 +21,4 @@ text_pass: done
 - 2026-11-11 22:10 Merged on Andy's word (5:10 PM ET). PR Merges post still needed.
 - 2026-11-11 18:10 Text pass: reviewed PR 1326's new player text. 11 new keys in lang/parts/arsenal.json (pack_taken, pack_pulled, pack_returned, hazard.ember/puffer/wither/cactus/frost/charge, grab_holding, pack_empty) plus their call sites in ArsenalAnywhere.java and ArsenalPower.java, and changes/powers/claude-project-thread-4dzn49.md. All plain, in-world voice, short lines; every lang key and s / 1-s / 2-s placeholder kept; no rewrites needed.
 - 2026-11-11 18:12 Correction: the unchanged placeholder formats are percent-s, percent-1-s and percent-2-s, kept verbatim with every lang key.
+- 2026-11-12 02:01 PR #1326 is merged into master; moved to Inbox/Done.

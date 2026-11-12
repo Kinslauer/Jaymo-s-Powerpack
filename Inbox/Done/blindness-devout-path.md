@@ -6,7 +6,7 @@ asked: 2026-11-11
 claimed_by: claude-cloud
 pr: 1328
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Blindness: the devout path

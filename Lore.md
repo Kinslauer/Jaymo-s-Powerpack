@@ -151,8 +151,9 @@ kit.
   wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
   blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
   ("you should be able to stumble on a service of the members performing this on one of their followers").
-  (Claude, for Andy: the eight faiths already count the Truth as the eighth, so this reads the Unseeing's as a belief
-  outside them. It isn't a faith a player can swear to in Kingdoms.) What they are given is not their eyes back: living things burn
+  **It is the faith the barbarians follow** (Andy, 2026-11-11: "these can be the faith barbarians follow"): the camps
+  hold none of the eight; the Unseeing in their caves are its most zealous, the ones who went all the way. It isn't a
+  faith a player can swear to. What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
@@ -707,7 +708,7 @@ three-pronged battle: the Frostborn, the androids and the Warrior-born dead.
 firing its palm blast and dropping slowly on its thrusters. They fight the androids and their mechs (built from
 Frostborn designs) and the Warrior-born dead (the raiders who learned the void from the Frostborn); the androids and
 the dead fight each other as well. A traveller is one more enemy to them: they shoot on sight (Andy, 2026-11-11), and
-hurting one turns the whole squad; with the Omens they keep a wary peace. The **Dead Rigs** in the ruins are troopers who fell,
+hurting one turns the whole squad. They fight the Omens too (Andy, 2026-11-11). The **Dead Rigs** in the ruins are troopers who fell,
 and a beaten trooper leaves the same Rig Salvage. Nobody says who sent them, or from where.
 
 **The androids and time** (Andy, 2026-11-11). The androids came from Los Perrito. After the Maw exploded they
