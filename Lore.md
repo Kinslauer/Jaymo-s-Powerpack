@@ -1218,6 +1218,15 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
+(new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
+banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
+are her drinking, and she takes boats and swimmers with the draught. Waterspouts are the land's tornadoes come down on
+her, or small ones she puts up herself on still warm days. At night a glowing tide lights where anything moves through
+the water, and in a thunderstorm blue St. Elmo's fire crackles on the mastheads: sailors take both as her watching, and
+neither does harm. Flotsam from ships she took drifts by, and old shipwrecks can be raised, pumped dry and sailed again:
+she gives back a little of what she keeps. Rivet, the Xenoform's machine form, can flow into a ship's cannon as he does a
+golem and fire it himself, though even he needs powder and shot.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -1260,6 +1269,13 @@ belly until something holds them up. A cane or a crutch is a carpenter's work, o
 scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
 a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
 answer, and no stick helps the one who has lost both.
+
+(new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
+rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
+potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
+opens. The watch knows the smell of a den that runs too hot. It comes down the ladder in force, takes the fence and his
+people up to the ruler's judgement, and nails the hatch shut under iron for a few days, until the trade creeps back.
+Townsfolk speak of raids and smugglers the way they speak of weather: something that happens to other streets.
 
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
@@ -1347,5 +1363,61 @@ bond between a traveller and those who walk with them grows with every such even
 their feet, and cools if they're left lying. Bands keep the same custom: at dusk they eat in a ring at their camp's
 fire, which is when the careful strike, or poison the pot. Every trade has a knack it writes down for those it
 trusts: the scholar's tongues, the cleric's field medicine, the farmer's foraging, the trader's haggling, the
-leatherworker's packing, the fletcher's quiet; the bands have their own trackers, healers and tongue-speakers. (patch 5) A companion is still their own: while you're away they may take a day's hire from another traveller, the old tavern custom of the road, and come home with coin, a gift and the word that was said of them; they'll gather for you while you're gone. The bands take what's left lying: a companion found downed and alone is carried off to work their camp until bought back or until they break free. Not every drifter is down and out: old soldiers and knights without a lord sell their swords on the roads, and the ones nobody takes on sell them to the camps. Companions remember the way to places they've been, and bands know their own ground. Free companies of sellswords roam the roads, clearing camps for the spoils and hiring out by the day. Patch 6 proposes a name for the sickness
+leatherworker's packing, the fletcher's quiet; the bands have their own trackers, healers and tongue-speakers. (patch 5) A companion is still their own: while you're away they may take a day's hire from another traveller, the old tavern custom of the road, and come home with coin, a gift and the word that was said of them; they'll gather for you while you're gone. The bands take what's left lying: a companion found downed and alone is carried off and made to fight for their camp until bought back, beaten down and carried home, or until they break free; the camp sends them to you with its price, in coin or in a job of work. A companion can be left a want and a purse, and whoever hires them can finish it for the purse. Not every drifter is down and out: old soldiers and knights without a lord sell their swords on the roads, and the ones nobody takes on sell them to the camps. Companions remember the way to places they've been, and bands know their own ground. Free companies of sellswords roam the roads, clearing camps for the spoils, taking bounties off the town boards and carrying the wanted in to the court, and hiring out by the day; a company keeps its friends (food shared, help in a fight) and its grudges, and one beaten comes back down the road harder for it. A camp's tongue-speaker will sell a traveller passage before blood is drawn, a day's peace for a toll, the bands' oldest bargain; and a sellsword turned away may bring a camp's raid down on whoever turned them down. Patch 6 proposes a name for the sickness
 that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
+
+(new) **The dark mirror** (Claude's placement for the pawn picks, patch 6, 2026-11-12, for Andy to approve). What binds
+a companion to a traveller can be taken from them. The Grue's sorcerers, the camps' necromancers and blood witches,
+reach into a fighter at their foe's side and turn them for a while: the eyes go the Grue's red, and they come at the
+one they walked with. A vampire's bite does it to a thrall's measure. A hard blow or a carry breaks it, and a bond that
+runs deep holds out. The same dark is a forbidden art of the death school, **Dominion**, and a traveller who uses it
+on a foe pays as for any forbidden art: the Grue comes a step nearer. **The Murmur** is caught where the dark is
+thick, the deep places and the soul valleys, and passes between companions who rest together; it is never named by
+the sick, only seen in them, the eyes that flicker red, the hand to the head, the strength that isn't theirs. Left, it
+looses them on a town at night. A cleric or a priest of any creed can draw it out (the healing is older than the
+quarrels between faiths), a fall and a waking can shake it, and so can the rare golden fruit. **The masterless**: when
+a traveller is born again into a new life, those who walked with the old one are not born again with them. They walk
+the roads looking for someone, ask any traveller to take them on, and are not right: the Grue's red is in them, and it
+comes out once, at the one who took them in; put down, they wake free of it. Others take the mask and lead bandits,
+and they fight their old master with everything that master taught them.
+
+(new) **Powderheads** (Claude's placement for Andy's powderhead ask, 2026-11-12, for Andy to approve). The realms'
+smiths keep the black powder trade: charcoal from the kiln and the saltpetre of the bone heap, ground fine. A smith
+who trusts a traveller may write it down for them, and whoever learns it walks beside a marksman rolling his
+cartridges and lobs the sticks; the camps have their own, fewer and wilder. The one rule of the trade is the first
+line of every primer: never where a friend is standing.
+
+
+(new) **Sulphur and saltpetre** (Claude's placement for Andy's ask, 2026-11-12, for Andy to approve). Brimstone is the
+breath of the deep fires: it crusts yellow where lava runs near, round the hot springs of the cold north, and all over
+the Nether's floors, thickest in the basalt deltas. Saltpetre is the salt that dry ground sweats: the deserts, the
+badlands and the savanna are full of it, and it whitens the floors of dry caves where bats roost. The smiths' black
+powder trade began with bone heaps because they were near; whoever has travelled for the true salts makes four
+measures where the bone heap made one.
+
+(new) **The old rules of the fight** (Claude's placement for the fifth edition picks, patch 1, 2026-11-12, for Andy to
+approve). Every drillmaster in the realms teaches the same few things, and the camps learn them the hard way. Turn
+your back on a blade and it takes you as you go: back off behind your shield, or don't go at all. A halberd keeps a
+doorway, which is why the guards of every gate carry one. Strike from above, or at a foe who is down or blind, and
+the blow tells; fight up to your waist in a river, on ice or poisoned, and it glances. A body has seven strengths
+(the K screen's attributes), and each keeps out something: the quick are not where the blast lands, the hardy shake
+off poison, the steady hold through fear and keep a spell through a blow, the sharp see through a charm, the
+learned throw off a curse's bite. Nobody can go for ever: a body without sleep, food or rest wears down step by step
+until it drops where it stands. The walking dead (the old villagers, worn to almost nothing) are stubborn, and the first blow that drops one seldom
+keeps it down; the realms' answer, taught to every farmhand, is to finish it with a boot or a stone to the head.
+
+(new) **Hedge poisons and weighted nets** (Claude's placement for the fifth edition picks, patch 2, 2026-11-12, for
+Andy to approve). The poisons are hedge-witch and apothecary work, brewed from what grows round the witches' huts
+(poppy, wither rose, spider eye, pufferfish): the sleep draught and the truth draught are what slavers and spies have
+always bought, and the midnight poison is a witch's own. The clerics keep the antidote, and give it to anyone. The
+realms' weaponsmiths knot and weight the nets their guards throw at a fleeing crook; the orc camps' keepers carry
+cruder ones for runaway goblins. The gas bottle is a glassblower's trick sold under the counter. Dragons, wraiths, the
+Warden and a witch's curse put a fear in anyone that their legs won't walk into.
+
+(new) **Eyes for the dark, and the road's habits** (Claude's placement for the fifth edition picks, patch 3,
+2026-11-12, for Andy to approve). Some bloods see in the dark, in grey and without colour, as far as a stone's long
+throw: the Nightborn, whom daylight dulls; the Deepborn, who hear the world through the stone; the Stoneborn, raised
+under the mountains; the Hollow, who carry the grave's cold; goblins and orcs; the moon elves; and of the beast folk
+the lizard, feline and spider kin. The five human bloods need a lantern. Folk of the road learn to crouch behind a
+wall, to take a watch by the fire, to walk softly in the dark and to catch their breath where they can; the camps
+learn it the hard way. Wolves, bandits and the pack thieves who rob sleepers come to any camp nobody watches.
