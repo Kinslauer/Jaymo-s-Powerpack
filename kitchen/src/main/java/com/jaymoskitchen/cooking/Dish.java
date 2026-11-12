@@ -261,6 +261,10 @@ public enum Dish {
 		List.of(new Buff(MobEffects.SLOW_FALLING, 90 * 20, 0))),
 	BALLOON_MUSHROOM_SKEWER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(BALLOON_MUSHROOM, BALLOON_MUSHROOM, FLIP, FLIP), 7, 0.6F, false,
 		List.of(new Buff(MobEffects.JUMP_BOOST, 90 * 20, 0))),
+	BALLOON_MUSHROOM_OMELETTE(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(EGG, EGG, BALLOON_MUSHROOM, FLIP), 8, 0.7F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0), new Buff(MobEffects.JUMP_BOOST, 60 * 20, 0))),
+	STUFFED_BALLOON_MUSHROOMS(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(BALLOON_MUSHROOM, BALLOON_MUSHROOM, MINCED_BEEF, ONION), 10, 0.8F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 150 * 20, 0))),
 	// --- (0.5.91) Builder B: baked goods, desserts, breakfasts and sides ---
 	HONEY_BUN(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, HONEY_BOTTLE, SUGAR), 7, 0.6F, false,
 		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),

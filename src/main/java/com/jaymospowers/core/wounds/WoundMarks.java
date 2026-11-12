@@ -55,8 +55,8 @@ public final class WoundMarks {
 	public static final int FRONT = 0, RIGHT = 1, BACK = 2, LEFT = 3;
 	/** A body keeps this many marks at most (the oldest go first). */
 	public static final int MOST = 10;
-	/** A hit must take at least this much (health points) to mark. */
-	public static final float MARK_FROM = 1.0F;
+	/** A hit must take at least this much (health points) to mark: every hit that lands at all (Andy: "every hit"). */
+	public static final float MARK_FROM = 0.01F;
 	/** Burning leaves a scorch no oftener than this on one body (ticks), so a body on fire isn't covered in a turn. */
 	public static final int SCORCH_GAP = 60;
 	/** Z Fighters' ki, which scorches as fire and lightning do. */
@@ -154,8 +154,9 @@ public final class WoundMarks {
 			return;
 		}
 		Kind kind = kind(source);
-		// (a bloodless body takes no cut or bruise, but fire, lightning and ki char whatever they touch)
-		if (kind == null || kind != Kind.SCORCH && BladeBlood.color(victim) == BladeBlood.NO_BLOOD) {
+		// (Andy: marks show "on everyone, mobs and players, humanoid and otherwise": a bloodless body, a skeleton or a
+		// golem, takes them too, drawn as chips and cracks in place of blood, and never drips)
+		if (kind == null) {
 			return;
 		}
 		RandomSource random = victim.getRandom();
@@ -302,6 +303,9 @@ public final class WoundMarks {
 
 	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes; a bandaged part never does. */
 	private static void drip(ServerLevel level, LivingEntity body, List<Mark> marks, long now) {
+		if (BladeBlood.color(body) == BladeBlood.NO_BLOOD) {
+			return;
+		}
 		Long next = NEXT_DRIP.get(body);
 		if (next != null && now < next) {
 			return;

@@ -13,5 +13,6 @@
   "talk.jaymoskingdoms.menace.set_on.2": "You'd not sheathe it. Then you're for the steel yourself!",
   "talk.jaymoskingdoms.menace.set_on.3": "A threat to this place, then. Take them!",
   "gui.button.orders": "Orders",
-  "message.jaymoskingdoms.followers.underway": "%s can't leave the ship while she's underway."
+  "message.jaymoskingdoms.followers.underway": "%s can't leave the ship while she's underway.",
+  "message.jaymoskingdoms.followers.no_bond": "%s won't follow you or stay on your word. Only family, hired help or a friend of %s hearts will."
 }

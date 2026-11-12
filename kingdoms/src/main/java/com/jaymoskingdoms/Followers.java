@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * villager still won't follow where their commandments forbid, and a villager whose tongue you don't share only
  * shrugs. In MCA's menu this screen stands in place of its Follow Me, Stay Here and Go About Your Day buttons
  * ({@code McaScreensMixin}, {@code McaWayPageMixin}); the server still answers MCA's own commands from older clients.
- * It also serves everyone already following you and a ship's hands aboard a ship you have the helm of ({@link #takesOrders}).
+ * It also serves everyone already following you and a ship's hands aboard a ship you have the helm of ({@link #takesOrders}),
+ * but Follow and Stand (MCA's follow and stay) only come from those you have a good bond with (Andy, 2026-11-12).
  * <ul>
  * <li>{@link #FOLLOW}: MCA's follow.
  * <li>{@link #HOLD}: keep this spot. They meet any monster that comes within {@link #HOLD_GUARD} blocks, then walk back.
@@ -164,6 +165,15 @@ public final class Followers {
 		int taken = 0;
 		for (Villager v : asked) {
 			if ((kind == FOLLOW || kind == FIGHT) && Commandments.refusesCommand(v, player, "follow")) {
+				continue;
+			}
+			// (Andy: "Follow and stay should only be there for mca you have a good bond with": an escort, a captive or
+			// a ship's hand takes the other orders, but only family, hired help or a friend follows you or stays put)
+			if ((kind == FOLLOW || kind == STAND) && !McaBridge.involved(v, player)) {
+				if (target >= 0) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.followers.no_bond", v.getDisplayName(),
+						Strangers.TRUSTED_HEARTS).withStyle(ChatFormatting.GRAY));
+				}
 				continue;
 			}
 			if (!Languages.understands(player, v)) {

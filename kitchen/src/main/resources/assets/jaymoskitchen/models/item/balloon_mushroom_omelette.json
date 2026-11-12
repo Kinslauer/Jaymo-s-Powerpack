@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "jaymoskitchen:item/vinegar"
+    "layer0": "jaymoskitchen:item/balloon_mushroom_omelette"
   }
 }

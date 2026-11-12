@@ -17,5 +17,7 @@
   "item.jaymospowers.vein_rumour.line.south": "A vein lies about %s blocks to the south",
   "item.jaymospowers.vein_rumour.line.southwest": "A vein lies about %s blocks to the southwest",
   "item.jaymospowers.vein_rumour.line.west": "A vein lies about %s blocks to the west",
-  "item.jaymospowers.vein_rumour.line.northwest": "A vein lies about %s blocks to the northwest"
+  "item.jaymospowers.vein_rumour.line.northwest": "A vein lies about %s blocks to the northwest",
+  "jei.jaymospowers.dogs_learn": "A tamed wolf learns from what it does with you. After 10 animals killed it becomes a Hunter and bites harder; after 25, a Tracker that follows a wounded beast's blood trail. After 10 monsters killed it becomes a Guard, tougher with a thicker coat. After 2,000 blocks walked at your side it becomes a Pack Dog that carries 9 slots. After 20 minutes among farm animals it becomes a Herder: sneak near it and the animals around it walk to you. Sneak and use your dog with an empty hand to hear what it knows and open its pack.",
+  "jei.jaymospowers.smell": "Unwashed days, sweat from sprinting and grime on your armour make you smell. Beasts and monsters smell you from further away, people a little, and villagers say so. Water washes it off: at once under water, slowly when wading or in the rain. Sneak and use a water cauldron with an empty hand (a wash tub, or a bath house) to scrub most of it off for one level of water."
 }

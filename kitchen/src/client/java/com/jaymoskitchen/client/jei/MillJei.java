@@ -120,10 +120,6 @@ public final class MillJei implements IModPlugin {
 		}
 		registration.addIngredientInfo(Items.LOOM, note("tailor"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("damp"));
-		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.BRINE, note("brine"));
-		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.VINEGAR, note("vinegar"));
-		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.BRINE_CROCK, note("crock"));
-		registration.addIngredientInfo(com.jaymoskitchen.fresh.Curing.VINEGAR_CROCK, note("crock"));
 		registration.addIngredientInfo(com.jaymoskitchen.tanning.Hides.DRYING_RACK, note("drying_food"));
 		registration.addIngredientInfo(Items.BRUSH, note("familiar_brush"));
 		registration.addIngredientInfo(Items.FURNACE, note("soot"));

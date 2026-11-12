@@ -51,6 +51,8 @@ public final class WoundMarksLayer {
 	/** The colours of a fresh bruise and an old one, and a blast's soot. */
 	static final int BRUISE_FRESH = 0x4A2C5E, BRUISE_OLD = 0x8C8A3C, SOOT = 0x2A2522;
 	/** A scorch: the char at its middle, the singed rim round it, and the pink it heals to. */
+	/** A bloodless body's cuts and rakes: chipped bone, cracked stone or bark, not blood. */
+	static final int CHIPPED = 0x2B2724;
 	static final int SCORCH_CORE = 0x1C1714, SCORCH_RIM = 0x6B3A22, SCORCH_OLD = 0xA8665A;
 	/** A healed stump's scar, and the seam it closed along. */
 	static final int SCAR = 0xD19A8C, SEAM = 0x8E5A50;
@@ -108,7 +110,7 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? 0x7A0F12 : blood, stubs, raw, gashes, entity.getId() * 31));
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31));
 	}
 
 	static final class Layer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {

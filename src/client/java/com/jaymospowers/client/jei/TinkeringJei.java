@@ -141,6 +141,10 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.rough.HotAirBalloon.ITEM, Component.translatable("jei.jaymospowers.hot_air_balloon"));
 		registration.addIngredientInfo(net.minecraft.world.item.Items.ICE, Component.translatable("jei.jaymospowers.river_ice"));
 		registration.addIngredientInfo(net.minecraft.world.item.Items.EMERALD, Component.translatable("jei.jaymospowers.vein_rumour"));
+		// (Andy: "They all need jei info": the rest of Hardrock patches 6 and 7, dogs that learn and washing off the smell)
+		registration.addIngredientInfo(net.minecraft.world.item.Items.BONE, Component.translatable("jei.jaymospowers.dogs_learn"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.WATER_BUCKET, Component.translatable("jei.jaymospowers.smell"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.CAULDRON, Component.translatable("jei.jaymospowers.smell"));
 		// (Havens patch 5) the kings' weapon heads: where each is taken
 		for (String part : WeaponParts.KINGS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
