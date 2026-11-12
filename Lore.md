@@ -1218,6 +1218,15 @@ turning over to listen back. The writer stopped going to the shore.
 monkeys, bombardiers and shipwrights. Whalers hunt the **great whales** (about fourteen blocks long) with harpoons and
 firebombs, and bring the carcass in, as the Deep Mother's children do.
 
+(new) **The sea's moods.** The open sea keeps weather of its own, and sailors read it as the Deep Mother's temper. Fog
+banks roll in off the water; the doldrums are her holding her breath; squalls are her slaps; whirlpools in deep water
+are her drinking, and she takes boats and swimmers with the draught. Waterspouts are the land's tornadoes come down on
+her, or small ones she puts up herself on still warm days. At night a glowing tide lights where anything moves through
+the water, and in a thunderstorm blue St. Elmo's fire crackles on the mastheads: sailors take both as her watching, and
+neither does harm. Flotsam from ships she took drifts by, and old shipwrecks can be raised, pumped dry and sailed again:
+she gives back a little of what she keeps. Rivet, the Xenoform's machine form, can flow into a ship's cannon as he does a
+golem and fire it himself, though even he needs powder and shot.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -1260,6 +1269,13 @@ belly until something holds them up. A cane or a crutch is a carpenter's work, o
 scrap of leather for the pad, and every village has seen them: old soldiers, the gored, the ones a blade took. It lets
 a body stand and get about slowly on the leg it has left. A pegged wooden leg, or a smith's iron one, is the better
 answer, and no stick helps the one who has lost both.
+
+(new) **The back rooms and the roads between them** (Claude's placement, 2026-11-12, for Andy to approve). The back
+rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
+potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
+opens. The watch knows the smell of a den that runs too hot. It comes down the ladder in force, takes the fence and his
+people up to the ruler's judgement, and nails the hatch shut under iron for a few days, until the trade creeps back.
+Townsfolk speak of raids and smugglers the way they speak of weather: something that happens to other streets.
 
 **Shields (new, 2026-11-11).** Every people that fights on foot carries them, and each kind says whose it is. A
 realm's guard bears his realm's arms painted on the face. A barbarian's is bare planks. An orc grunt daubs his black or
