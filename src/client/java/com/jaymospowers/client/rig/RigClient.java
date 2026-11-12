@@ -89,6 +89,7 @@ public final class RigClient {
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Status.TYPE, (payload, context) -> status = payload);
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.ForgeOpen.TYPE, (payload, context) -> context.client().gui.setScreen(new RigForgeScreen(payload.pos())));
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Scan.TYPE, (payload, context) -> RigScanClient.accept(payload));
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymospowers.rig.RigTable.Show.TYPE, (payload, context) -> RigTableScreen.receive(context.client(), payload));
 		ClientPlayNetworking.registerGlobalReceiver(RigNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTicks = TAKEOVER_SCREEN;
 			takeoverThreat = payload.threat();
@@ -141,7 +142,7 @@ public final class RigClient {
 
 	/** (0.11.110) The radial menu's pick: an active becomes J's and is used now; a switch just flips. */
 	static void pick(int action) {
-		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY) {
+		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY && action != com.jaymospowers.rig.RigPicks.TABLE) {
 			selected = action;
 		}
 		send(action);
