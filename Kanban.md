@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 03:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-11 23:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,17 +13,15 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · running
 
 
 ## In review
 
-- [ ] [[Agents/Boss intro cutscenes|Boss intro cutscenes]] · 💻 Odysseus · #1345 · in-review
-- [ ] [[Agents/swgc-swordplay|swgc-swordplay]] · 💻 Odysseus · #1341 · in-review
 
 
 ## Needs Andy
 
+- [ ] [[Agents/Gamma and Thematic picks|Gamma and Thematic picks]] · 💻 Odysseus · stalled
 
 
 ## Done
@@ -35,8 +33,8 @@ kanban-plugin: board
 - [x] [[Inbox/Done/future-three-sided-war|future-three-sided-war]]
 - [x] [[Inbox/Done/blindness-devout-path|blindness-devout-path]]
 - [x] [[Inbox/Done/arsenal-pulls-anything|arsenal-pulls-anything]]
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/elemental-ki-limits|elemental-ki-limits]]
+- [x] [[Inbox/Done/costumed-and-everyday-power-users|costumed-and-everyday-power-users]]
 
 
 %% kanban:settings

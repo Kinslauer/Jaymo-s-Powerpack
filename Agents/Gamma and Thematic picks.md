@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Build Andy's 100 picks from the Gamma and Thematic picklist, big suit first
 branch: claude/project-thread-akompj
 with: Claude (cloud thread "Pick Gamma and Thematic ideas for powers")
@@ -24,5 +24,4 @@ owns:
 - The page's Save never reached the db; picks known from Andy's screenshots only.
 
 ## Done
-
-- 2026-11-12: PR 1 (big suit, 21 rows) is up as #1346 on claude/project-thread-akompj, compile-checked only. Next: aliens (Xenoform rows except xen_size) once #1346 merges, restarting the branch from master.
+- 2026-11-12 04:03 No sign of work for 30 min: marked stalled (whoever ran it stopped).
