@@ -36,6 +36,10 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Sand winds</b>: on a windy day streams of sand run low over open sand, well short of a sandstorm.</li>
  * <li><b>Auroras</b>: two clear nights in three, green and violet curtains hang in the northern sky over cold lands.</li>
  * <li><b>Livelier fire</b>: fire near you licks taller and throws sparks, and a lit campfire spits one now and then.</li>
+ * <li><b>The Nether's air</b>: ash drifts over the wastes, which had none, and embers rise off every lava lake.</li>
+ * <li><b>Shore foam</b>: flecks of white where water meets land, only while no shader pack is drawing the world
+ * (Complementary draws its own water).</li>
+ * <li><b>Dawn and dusk</b>: on a clear day the far haze warms toward amber as the sun comes up and goes down.</li>
  * </ul>
  */
 public final class SkiesClient {
@@ -79,6 +83,20 @@ public final class SkiesClient {
 	static final int FIRE_SAMPLES = 48, FIRE_RANGE = 12;
 	static final float FIRE_LICK = 0.35F, FIRE_SPARK = 0.12F, CAMPFIRE_SPARK = 0.08F;
 
+	/** The Nether: ash specks a tick over the wastes and how far round the camera; lava looked at each tick and the odds it throws an ember. */
+	static final int ASH = 2, LAVA_SAMPLES = 32;
+	static final double ASH_RANGE = 12.0;
+	static final float EMBER = 0.3F;
+	/** Shore foam: water looked at each tick, how far round the camera, and how often the shader check is made (ticks). */
+	static final int FOAM_SAMPLES = 28, FOAM_RANGE = 14, SHADER_CHECK = 40;
+	/** Dawn and dusk: when the glow peaks and how long it takes to come and go (time of day), its colour, and how much of the fog it takes. */
+	static final int DAWN_PEAK = 23500, DUSK_PEAK = 12500, GLOW_SPAN = 900;
+	public static final float[] GLOW_COLOUR = {1.0F, 0.66F, 0.42F};
+	public static final float GLOW_TINT = 0.3F;
+	/** How warm the far haze is with dawn or dusk, 0..1. {@code SkiesFogMixin} reads it. */
+	public static float glow;
+
+	private static boolean shaders;
 	private static float aurora, bankCarry, auroraCarry;
 	private static int clock;
 
@@ -86,7 +104,7 @@ public final class SkiesClient {
 	}
 
 	public static void register() {
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> downpour = mist = aurora = 0.0F);
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> downpour = mist = aurora = glow = 0.0F);
 		ClientTickEvents.END_CLIENT_TICK.register(SkiesClient::tick);
 	}
 
@@ -99,10 +117,19 @@ public final class SkiesClient {
 		Vec3 eye = minecraft.gameRenderer.mainCamera().position();
 		RandomSource random = level.getRandom();
 		fire(level, eye, random);
+		if (clock % SHADER_CHECK == 1) {
+			shaders = com.jaymoskingdoms.client.DarkNights.shaderPackOn();
+		}
+		if (!shaders) {
+			foam(minecraft, level, eye, random);
+		}
+		if (level.dimension() == Level.NETHER) {
+			nether(level, eye, random);
+		}
 		if (level.dimension() != Level.OVERWORLD) {
 			downpour = ease(downpour, 0.0F, EASE * 4.0F);
 			mist = ease(mist, 0.0F, MIST_EASE * 4.0F);
-			aurora = 0.0F;
+			aurora = glow = 0.0F;
 			return;
 		}
 		BlockPos at = BlockPos.containing(eye);
@@ -122,6 +149,10 @@ public final class SkiesClient {
 		if (mist > 0.05F) {
 			banks(level, eye, random);
 		}
+
+		int fromDawn = Math.min(Math.floorMod(time - DAWN_PEAK, 24000), Math.floorMod(DAWN_PEAK - time, 24000));
+		int fromPeak = Math.min(fromDawn, Math.abs(time - DUSK_PEAK));
+		glow = Mth.clamp(1.0F - fromPeak / (float)GLOW_SPAN, 0.0F, 1.0F) * (1.0F - rain);
 
 		if (open && CalamitiesClient.sand < 0.05F && falls == Biome.Precipitation.NONE) {
 			sandWind(minecraft, level, eye, random);
@@ -285,6 +316,56 @@ public final class SkiesClient {
 				&& random.nextFloat() < CAMPFIRE_SPARK) {
 				spark(level, at, random, 0.5);
 			}
+		}
+	}
+
+	// ---- the Nether, and the shore ------------------------------------------------------------------------------------
+
+	/** Ash on the air of the wastes (the other Nether lands have their own), and embers off the lava anywhere down there. */
+	private static void nether(ClientLevel level, Vec3 eye, RandomSource random) {
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		if (level.getBiome(BlockPos.containing(eye)).is(Biomes.NETHER_WASTES)) {
+			for (int i = 0; i < ASH; i++) {
+				at.set(Mth.floor(eye.x + (random.nextDouble() - 0.5) * 2.0 * ASH_RANGE), Mth.floor(eye.y + (random.nextDouble() - 0.3) * ASH_RANGE),
+					Mth.floor(eye.z + (random.nextDouble() - 0.5) * 2.0 * ASH_RANGE));
+				if (level.getBlockState(at).isAir()) {
+					level.addParticle(ParticleTypes.ASH, at.getX() + random.nextDouble(), at.getY() + random.nextDouble(), at.getZ() + random.nextDouble(),
+						0.0, 0.0, 0.0);
+				}
+			}
+		}
+		for (int i = 0; i < LAVA_SAMPLES; i++) {
+			at.set(Mth.floor(eye.x) + random.nextInt(FIRE_RANGE * 4 + 1) - FIRE_RANGE * 2, Mth.floor(eye.y) + random.nextInt(FIRE_RANGE * 2 + 1) - FIRE_RANGE,
+				Mth.floor(eye.z) + random.nextInt(FIRE_RANGE * 4 + 1) - FIRE_RANGE * 2);
+			if (random.nextFloat() < EMBER && level.getFluidState(at).is(FluidTags.LAVA) && level.getBlockState(at.above()).isAir()) {
+				level.addParticle(ParticleTypes.SMALL_FLAME, at.getX() + random.nextDouble(), at.getY() + 1.0, at.getZ() + random.nextDouble(),
+					(random.nextDouble() - 0.5) * 0.02, 0.02 + random.nextDouble() * 0.04, (random.nextDouble() - 0.5) * 0.02);
+			}
+		}
+	}
+
+	/** Flecks of foam on water that lies against land, on the land's side of the block. */
+	private static void foam(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random) {
+		if (CalamitiesClient.sprites == null) {
+			return;
+		}
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		for (int i = 0; i < FOAM_SAMPLES; i++) {
+			int x = Mth.floor(eye.x) + random.nextInt(FOAM_RANGE * 2 + 1) - FOAM_RANGE, z = Mth.floor(eye.z) + random.nextInt(FOAM_RANGE * 2 + 1) - FOAM_RANGE;
+			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
+			if (Math.abs(y - eye.y) > 16.0 || !level.getFluidState(at.set(x, y, z)).is(FluidTags.WATER)) {
+				continue;
+			}
+			net.minecraft.core.Direction side = net.minecraft.core.Direction.Plane.HORIZONTAL.getRandomDirection(random);
+			BlockState shore = level.getBlockState(at.set(x + side.getStepX(), y, z + side.getStepZ()));
+			if (!shore.getFluidState().isEmpty() || !shore.isSolidRender()) {
+				continue;
+			}
+			double along = random.nextDouble() - 0.5, in = 0.3 + random.nextDouble() * 0.15;
+			double px = x + 0.5 + side.getStepX() * in + side.getStepZ() * along, pz = z + 0.5 + side.getStepZ() * in + side.getStepX() * along;
+			float tone = random.nextFloat() * 0.06F;
+			minecraft.particleEngine.add(new GustParticle(level, px, y + 0.92, pz, 0.0, 0.0, 0.0, CalamitiesClient.sprites.get(random), GustParticle.SAND,
+				0.07F + random.nextFloat() * 0.07F, 28 + random.nextInt(24), 0.92F + tone, 0.95F + tone * 0.5F, 0.97F, 0.75F));
 		}
 	}
 
