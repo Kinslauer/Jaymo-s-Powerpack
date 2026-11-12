@@ -1,0 +1,325 @@
+{
+	"entity.item.pickup": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/pop_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/pop_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/pop_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.experience_orb.pickup": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/orb_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/orb_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/orb_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.arrow.shoot": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/twang_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/twang_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/twang_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.chest.open": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/creak_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/creak_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/creak_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.anvil.land": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/anvil_land_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/anvil_land_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/anvil_land_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.anvil.use": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/anvil_use_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/anvil_use_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/anvil_use_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.generic.drink": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/gulp_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/gulp_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/gulp_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.player.burp": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/burp_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/burp_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/burp_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.item.break": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/snap_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/snap_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/snap_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.lever.click": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/click_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/click_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/click_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.wooden_button.click_on": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/wood_click_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/wood_click_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/wood_click_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.fire.extinguish": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/fizz_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fizz_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fizz_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.fishing_bobber.splash": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/plop_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/plop_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/plop_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.player.small_fall": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/fall_small_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_small_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_small_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.player.big_fall": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/fall_big_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_big_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_big_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.generic.small_fall": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/fall_small_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_small_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_small_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"entity.generic.big_fall": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/fall_big_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_big_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/fall_big_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"item.flintandsteel.use": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/strike_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/strike_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/strike_3",
+				"volume": 0.8
+			}
+		]
+	},
+	"block.barrel.close": {
+		"replace": false,
+		"sounds": [
+			{
+				"name": "jaymospowers:pool/thunk_1",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/thunk_2",
+				"volume": 0.8
+			},
+			{
+				"name": "jaymospowers:pool/thunk_3",
+				"volume": 0.8
+			}
+		]
+	}
+}

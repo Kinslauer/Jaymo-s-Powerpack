@@ -1735,5 +1735,26 @@
 				"name": "jaymospowers:blood/burst_3"
 			}
 		]
+	},
+	"spot.woodpecker": {
+		"subtitle": "subtitles.jaymospowers.spot.woodpecker",
+		"sounds": [
+			{
+				"name": "jaymospowers:spot/woodpecker_1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_2",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_3",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_4",
+				"attenuation_distance": 48
+			}
+		]
 	}
 }
