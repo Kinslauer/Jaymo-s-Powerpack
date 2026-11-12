@@ -68,7 +68,7 @@ archers or leaders turn to guarding and shield their archers). Andy called the l
 bands read your parries (Powers' `Guard.PARRIED`) and then strike past the guard and feint; `CatchingUp` lifts a
 captain two ranks behind his tribe's best by one rank a day (half the time).
 
-## Patch 4: talk and table
+## Patch 4: talk and table (built, same PR)
 
 D2 talk about the world, D3 talk about you, D4 sitting down together at a tavern table or campfire (they ask two or
 three questions on a screen: keep or swap their second leaning, talk more or less, how to take a win), with Andy's note:
@@ -77,6 +77,18 @@ fire. C2 leaning shown in the body (idle, victory, pointing at a target before g
 knowledge, with Andy's note: the more learned companions give the kind of lore tips the loading screen hints give. G2
 specialties taught by books from grateful villagers (a tongue-speaker for Languages, field medic, forager, haggler,
 packhorse, the quiet one) and foe specialists.
+
+As built: `Remarks` (land kinds by biome name, ruins by structure id, tripwires and pressure plates, town mood from
+MCA moods; hurt, starving, new armour, back up; quest kinds remembered at turn-in tell the way; lore tips are the
+loading-screen hints; bands warn you off camp ground, name your quest giver, taunt). `TableTalk` and its screen (any
+seat by a lit campfire, a firepit or within two blocks of a block named "table"; one companion a day each; the meal is
+one bite of your food; a sworn captain's men take his chosen leaning as their second). `CampSuppers` (dusk, 12000 to
+13800; sneaking unseen past 4 blocks, first unseen blow x2, poison on the fire within 4 blocks, open approach within 12
+calls you out). `Bonds` (0 to 100, close at 60; MCA hearts, the table, being got up with you near; left down 30 s with
+you 40 blocks off costs 10; `Bonds.resists` is ready for patch 6's turnings). `Gestures`. `Specialties` (the books
+are written books with the knack in their data; foe trackers 8%, medics 6%, tongue-speakers 5%). Not in yet: the
+companions don't sit on the seats themselves (they come and stand by you), and a band's supper has no fire built for
+it if the camp has none (they eat round its centre with a wisp of smoke).
 
 ## Patch 5: hire and lend
 

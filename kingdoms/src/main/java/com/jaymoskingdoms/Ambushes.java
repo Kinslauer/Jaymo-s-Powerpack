@@ -129,7 +129,8 @@ public final class Ambushes {
 	private static void lieInWait(ServerPlayer player, long now) {
 		ServerLevel level = player.level();
 		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(WATCH), m -> m.isAlive() && !Downed.isDowned(m)
-			&& Temperaments.humanoid(m) && !hiding(m) && !HID.containsKey(m.getUUID()) && Comrades.target(m) == null && WorldTiers.hostile(m))) {
+			&& Temperaments.humanoid(m) && !hiding(m) && !HID.containsKey(m.getUUID()) && Comrades.target(m) == null && WorldTiers.hostile(m)
+			&& !CampSuppers.eating(m))) {
 			double d = m.distanceToSqr(player);
 			if (d < SPRING * SPRING * 2.0 || !m.hasLineOfSight(player) || seen(player, m)) {
 				continue;

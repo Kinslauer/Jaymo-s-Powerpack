@@ -164,7 +164,7 @@ public final class FieldMedics {
 		PathfinderMob medic = null;
 		double best = Double.MAX_VALUE;
 		for (PathfinderMob m : near) {
-			if (!Comrades.leanings(m).has(Comrades.Leaning.MEDIC)) {
+			if (!Comrades.leanings(m).has(Comrades.Leaning.MEDIC) && !Specialties.medic(m)) {
 				continue;
 			}
 			double d = m.distanceToSqr(body);
@@ -230,7 +230,10 @@ public final class FieldMedics {
 			medic.ticks = 0;
 			return;
 		}
-		if (++medic.ticks % 25 == 0) {
+		// a field medic by trade (docs/Pawn-Plan.md row G2) works twice as fast
+		int pace = Specialties.medic(helper) ? 2 : 1;
+		medic.ticks += pace;
+		if (medic.ticks % 25 < pace) {
 			helper.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
 		}

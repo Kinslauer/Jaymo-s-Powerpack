@@ -592,6 +592,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		FoeLore.register();
 		LeaningDrift.register();
 		CatchingUp.register();
+		Bonds.register();
+		Specialties.register();
+		Remarks.register();
+		TableTalk.register();
+		CampSuppers.register();
+		Gestures.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)

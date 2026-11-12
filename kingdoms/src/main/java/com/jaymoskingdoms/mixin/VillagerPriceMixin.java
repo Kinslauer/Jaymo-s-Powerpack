@@ -26,6 +26,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more
 		com.jaymoskingdoms.Bearings.prices((Villager)(Object)this, player);
+		// a haggler companion by you (docs/Pawn-Plan.md row G2)
+		com.jaymoskingdoms.Specialties.prices((Villager)(Object)this, player);
 		// (0.7.490) priced in the coin of the town it stands in, or a money-changer's counter
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}

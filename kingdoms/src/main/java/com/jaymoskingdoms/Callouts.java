@@ -51,6 +51,8 @@ public final class Callouts {
 	static final int REMEMBER = 6;
 	/** Chance a steady or quiet speaker keeps a line to themselves. */
 	static final float STEADY_SKIP = 0.2F, QUIET_SKIP = 0.5F;
+	/** Chance one told at the table to talk less keeps a line to themselves ({@link TableTalk#chatter}). */
+	static final float LESS_SKIP = 0.4F;
 	/** Chance a line comes with the speaker's voice. */
 	static final float VOICE_CHANCE = 0.6F;
 
@@ -83,6 +85,18 @@ public final class Callouts {
 		LINES.put("leaderdown", 3);
 		for (String k : new String[] {"hold.grab", "hold.pin", "ambush", "spoils.grab", "know", "know.taught", "knows.shot", "knows.blade",
 			"knows.blunt", "knows.magic", "knows.fire", "knows.parry", "knows.other"}) {
+			LINES.put(k, 3);
+		}
+		// talk and table (docs/Pawn-Plan.md patch 4)
+		for (String k : new String[] {"thanks", "bond.close", "bond.greet", "table.meal", "table.done"}) {
+			LINES.put(k, 2);
+			VOICED.add(k);
+		}
+		for (String k : new String[] {"bond.cool", "spec.known", "spec.learned", "spec.haggle", "spec.overheard", "spec.track", "spec.forage",
+			"spec.pack", "spec.pack.full", "spec.unpack", "land.forest", "land.desert", "land.swamp", "land.jungle", "land.snow", "land.mountain",
+			"land.coast", "land.plains", "land.trap", "land.ruin", "town.glad", "town.grim", "quest.way", "tip", "foe.ours", "foe.headed",
+			"taunt.hurt", "taunt.broken", "taunt.arrow", "supper.confront", "supper.sick", "supper.scramble", "supper.caught", "you.up", "you.hurt",
+			"you.hungry", "you.armour", "table.sit"}) {
 			LINES.put(k, 3);
 		}
 	}
@@ -121,6 +135,18 @@ public final class Callouts {
 	/** Whether a {@code voice} speaker keeps this one to themselves. */
 	private static boolean skip(Mob speaker, Voice voice) {
 		float roll = speaker.getRandom().nextFloat();
+		int chatter = TableTalk.chatter(speaker);
+		if (chatter > 0) {
+			// told at the table to talk more
+			return false;
+		}
+		if (chatter < 0 && roll < LESS_SKIP) {
+			return true;
+		}
+		if (Specialties.is(speaker, Specialties.Specialty.QUIET) && speaker.isShiftKeyDown()) {
+			// the quiet one keeps still when you creep
+			return true;
+		}
 		return voice == Voice.QUIET && roll < QUIET_SKIP || voice == Voice.STEADY && roll < STEADY_SKIP;
 	}
 
@@ -135,7 +161,7 @@ public final class Callouts {
 			return false;
 		}
 		long now = level.getGameTime();
-		Voice voice = voice(speaker);
+		Voice voice = TableTalk.voice(speaker, kind, voice(speaker));
 		String side = Comrades.side(speaker);
 		if (!force) {
 			Long last = SPOKE.get(speaker.getUUID());

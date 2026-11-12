@@ -264,6 +264,11 @@ public final class Comrades {
 	/** {@link #leanings}, with a band's turn after its losses ({@link LeaningDrift#bandLeans}) as the second. */
 	static Leanings fighting(Mob m, String side) {
 		Leanings l = leanings(m);
+		Leaning men = TableTalk.menLeaning(m, side);
+		if (men != null && men != l.main()) {
+			// a sworn captain told his men how to lean (docs/Pawn-Plan.md row D4)
+			return new Leanings(l.main(), men);
+		}
 		Leaning band = side.startsWith("p:") ? null : LeaningDrift.bandLeans(m, side);
 		return band == null || band == l.main() ? l : new Leanings(l.main(), band);
 	}
@@ -391,6 +396,7 @@ public final class Comrades {
 			HURT_SAID.remove(e.getKey());
 			if (m != null && m.isAlive() && !m.isRemoved() && !Downed.isDowned(m) && target(m) == null) {
 				Callouts.say(m, "won", null, false);
+				Gestures.won(m);
 			}
 		}
 	}
@@ -468,8 +474,13 @@ public final class Comrades {
 			return false;
 		}
 		aim(m, best);
+		// it points before it goes (docs/Pawn-Plan.md row C2)
+		Gestures.point(m, best);
 		if (!FoeLore.taken(m, best)) {
-			Callouts.say(m, tending(best) ? "foe.medic" : "take." + leanings.main().key(), best, false, best.getDisplayName());
+			if (Callouts.say(m, tending(best) ? "foe.medic" : "take." + leanings.main().key(), best, false, best.getDisplayName())) {
+				// a foe tongue-speaker understood that (row G2)
+				Specialties.overheard(level, m, best);
+			}
 		}
 		return true;
 	}
