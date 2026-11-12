@@ -254,6 +254,12 @@ thrown sword is a sword given away, and mean it: it lies where it lands. Only th
 Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home, and the masters do not count that as their
 teaching.
 
+(new) **The Twinblade** (Andy, 2026-11-11: "an ancient warrior born design, not often wielded by many, and the schematic
+is found in the stormborn dungeon"). Two swords of one make joined at the hilt on a long grip, a weapon of the old
+Warrior-born that few ever carried. Nobody forges it as such: the joining is a knack, and the only drawing of it left
+lies in the Stormborn Tomb among the draugr, who were Warrior-born once. Whoever studies the sheet can join two blades
+and part them again.
+
 (new) **The Mill Charge** (SWGC swordplay picks, 2026-11-12). The Skyward Reach teaches its staff and glaive students
 to go through a press of foes with the shaft turning before them, the way a mill's sails take the wind.
 
