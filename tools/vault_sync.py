@@ -27,7 +27,8 @@ Obsidian's Kanban plugin. It is read-only: change tasks with --set, not by dragg
 Stale work: a claim or running agent note with no sign of work for 30 minutes is handed back or marked stalled, and a running
 note whose task is done is moved to Done (tidy_stale), so dead runs don't sit in Being built.
 Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
-Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it.
+Agents/Done/ or Inbox/Done/, so the Board stays true whoever merged it and however (squash or merge commit). A cloud
+run's agent note for an Inbox task gets no card of its own: the task's card shows it.
 
 The live folder is docs/vault/Live in the main checkout: on Andy's PC a junction to E:/Jaymo Vault Live (outside git),
 in a cloud session a plain folder that --setup clones the branch into. Either way it is its own small git checkout of
@@ -125,41 +126,75 @@ def identity(live):
         git(live, "config", "user.email", email or "vault-sync@localhost")
 
 
-def merged_prs():
-    """PR numbers squash-merged into origin/master (GitHub puts "(#1234)" at the end of the commit title). Empty if
-    master can't be fetched (offline): then nothing is tidied this time."""
+def merged_prs(wanted=()):
+    """Which of `wanted` (PR numbers) are merged into origin/master, however they were merged. A squash merge's title
+    ends "(#1234)"; a merge commit's title is "Merge pull request #1234 from ..."; any other PR counts as merged when
+    GitHub's head ref for it (refs/pull/N/head) is on master, which also catches a merge commit whose title was
+    edited. Empty if master can't be fetched (offline): then nothing is tidied this time."""
     repo = main_checkout()
     if run(["git", "-C", repo, "fetch", "-q", "origin", "master"], check=False).returncode != 0:
         return set()
-    log = run(["git", "-C", repo, "log", "-400", "--format=%s", "origin/master"], check=False).stdout
-    return {int(m) for m in re.findall(r"\(#(\d+)\)\s*$", log, re.M)}
+    log = run(["git", "-C", repo, "log", "-1500", "--format=%s", "origin/master"], check=False).stdout
+    merged = {int(m) for m in re.findall(r"\(#(\d+)\)\s*$", log, re.M)}
+    merged |= {int(m) for m in re.findall(r"^Merge pull request #(\d+) from ", log, re.M)}
+    for n in sorted(set(wanted) - merged):
+        head = run(["git", "-C", repo, "ls-remote", "origin", f"refs/pull/{n}/head"], check=False).stdout.split()
+        if not head:
+            continue
+        if run(["git", "-C", repo, "cat-file", "-e", head[0]], check=False).returncode != 0:
+            run(["git", "-C", repo, "fetch", "-q", "origin", f"refs/pull/{n}/head"], check=False)
+        if run(["git", "-C", repo, "merge-base", "--is-ancestor", head[0], "origin/master"],
+               check=False).returncode == 0:
+            merged.add(n)
+    return merged
+
+
+def note_prs(props):
+    return {int(n) for n in re.findall(r"\d+", props.get("pr", ""))}
 
 
 def tidy_merged(live):
     """Once a note's PR is on master, mark it done and move it to Done/, whoever merged it (a bot, the reviewer,
     the coordinator or Andy). Agent notes go to Agents/Done/, Inbox tasks to Inbox/Done/."""
-    merged = None
-    for folder in ("Agents", "Inbox"):
+    folders = ("Agents", "Inbox")
+    notes = []  # (folder, name, props) of every note not yet done that names a PR
+    for folder in folders:
         root = os.path.join(live, folder)
         for name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
             path = os.path.join(root, name)
             if not name.endswith(".md") or not os.path.isfile(path):
                 continue
             props = frontmatter(path)
-            prs = {int(n) for n in re.findall(r"\d+", props.get("pr", ""))}
-            if not prs or props.get("status") == "done":
+            if not props and os.path.isfile(os.path.join(root, "Done", name)):
+                fold_stub(path, os.path.join(root, "Done", name))
                 continue
-            if merged is None:
-                merged = merged_prs()
-            hit = sorted(prs & merged)
-            if not hit:
-                continue
-            set_props(path, {"status": "done"})
-            add_note(path, f"PR #{hit[0]} is merged into master; moved to {folder}/Done.")
-            os.makedirs(os.path.join(root, "Done"), exist_ok=True)
-            os.replace(path, os.path.join(root, "Done", name))
+            if note_prs(props) and props.get("status") != "done":
+                notes.append((folder, name, props))
+    merged = merged_prs(set().union(*(note_prs(p) for _, _, p in notes))) if notes else set()
+    for folder, name, props in notes:
+        hit = sorted(note_prs(props) & merged)
+        if not hit:
+            continue
+        root = os.path.join(live, folder)
+        path = os.path.join(root, name)
+        set_props(path, {"status": "done"})
+        add_note(path, f"PR #{hit[0]} is merged into master; moved to {folder}/Done.")
+        os.makedirs(os.path.join(root, "Done"), exist_ok=True)
+        os.replace(path, os.path.join(root, "Done", name))
     tidy_stale(live)
 
+
+
+def fold_stub(path, done_path):
+    """A note with no frontmatter whose real copy is in Done/: someone appended a line after the note was moved, and
+    the sync's merge brought the file back with only that line. Add its lines to the Done copy and drop it."""
+    extra = open(path, encoding="utf-8").read().strip()
+    if extra:
+        text = open(done_path, encoding="utf-8").read().rstrip("\n")
+        if extra not in text:
+            with open(done_path, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(text + "\n" + extra + "\n")
+    os.remove(path)
 
 # (Andy, 2026-11-10: "claims should clear after being stale for 30m") minutes with no sign of work before a claim or
 # a running note counts as dead. Signs of work: the note itself, the agent's note for it, and the task's worktree
@@ -295,10 +330,14 @@ def write_kanban(live):
             status = p.get("status")  # no text-pass lane: tasks keep their real status
             if status in statuses:
                 lanes[lane].append(card("Inbox", name, p, "fixing review notes" if status == "changes" else ""))
+    task_prs = set().union(*(note_prs(p) for _, _, p in tasks(live)))
     agents = os.path.join(live, "Agents")
     for name in sorted(os.listdir(agents)) if os.path.isdir(agents) else []:
         if name.endswith(".md") and name[:-3] not in tasks_seen:
             p = frontmatter(os.path.join(agents, name))
+            # a cloud run's note (claude-cloud-<task>) for an Inbox task: the task's own card already shows it
+            if p.get("task") in tasks_seen or note_prs(p) & task_prs:
+                continue
             # (a thread's PR that passed review is "ready" or "sent": it waits on Andy like a blocked one)
             if p.get("status") in ("running", "in-review", "ready", "sent", "blocked", "stalled"):
                 lane = {"running": "Being built", "in-review": "In review", "ready": "Needs Andy", "sent": "Needs Andy",
