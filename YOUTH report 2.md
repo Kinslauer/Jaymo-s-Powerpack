@@ -69,3 +69,18 @@ itself posts one last shutdown notice in Tenbuki > lair, because the running gat
 - Hephaestus is **not** on the stop list: it has run all day since Andy's "stop", so Andy should say whether it
   stays stopped.
 - Dropped Discord messages / `missed.py`, the old-world waterskin check (#1266) and the page-file reminder are still open.
+
+## Restart (Nov 12)
+
+- **12:00 AM:** the old gateway (PID 16940, elevated) stopped via `hermes gateway stop -y`. That command asks the
+  gateway to exit with a marker file, which works where `Stop-Process` gets "Access is denied". It posted one last
+  shutdown notice in Tenbuki > lair, as expected.
+- **12:07 AM:** the watchdog's first start (12:02 AM) crashed. "Refusing to bind dashboard… no auth providers are
+  registered" (a Hermes bug: under the task, the basic-auth plugin registers per profile, but the dashboard check
+  reads only the global list).
+- **12:16 AM:** the watchdog's retry (12:13 AM, PID 10552) came up fine and connected as YOUTH, so the crash is
+  intermittent.
+- **New settings are live:** heartbeats off, home channel in parthenon > Bot alerts, YOUTH's fallbacks without
+  Ollama. No new post in lair since.
+- `dashboard.public_url` is commented out (Andy, 5:05 AM, after Claude reported the crash as permanent).
+  It only matters at the next restart.
