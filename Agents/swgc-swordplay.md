@@ -36,3 +36,4 @@ first pass. Patches 2-6 not started.
 - 2026-11-12: patch 2 pushed to the same branch/PR (#1341): `combat/Swat`, `combat/BladeThrow`, `Armed.CUT`, cut poses
   in `ArmedPose`, Darktide swat; Kingdoms `forms/SpecialCuts` (wheel_cut, figure_eight, hurled_blade), bridge methods in
   `PowersCompat`, blade school arts + `ART_STANDING`. Flip lift gated by `Dodge.flipLift`. Compiled, not played.
+- 2026-11-12: patch 3 pushed (same PR): Powers `combat/BladeStyle`; Kingdoms `forms/Styles`, hooks in `Duels`, `SchooledGuards`, `FormsClient` belt HUD, lang part `style.json`.
