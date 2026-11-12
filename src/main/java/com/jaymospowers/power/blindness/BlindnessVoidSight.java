@@ -11,6 +11,7 @@ import java.util.Set;
 /**
  * Ascended ability: Void Sight.
  * Total blindness becomes true sight—see entities through walls, hear heartbeats, but the world stays dark.
+ * For the devout ({@link BlindnessDevotion#devout}) it is Sky Sight: the view rises high over them, looking down.
  */
 public final class BlindnessVoidSight {
     private static final Set<ServerPlayer> ACTIVE = new HashSet<>();
@@ -36,7 +37,7 @@ public final class BlindnessVoidSight {
         BlindnessPower.set(player, state.withVoidSightActive(true));
         // Notify client to start void sight rendering
         player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
-                net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.void_sight.on")
+                net.minecraft.network.chat.Component.translatable(BlindnessDevotion.devout(player) ? "message.jaymospowers.blindness.sky_sight.on" : "message.jaymospowers.blindness.void_sight.on")
                         .withStyle(net.minecraft.ChatFormatting.DARK_PURPLE, net.minecraft.ChatFormatting.BOLD)
         ));
     }
@@ -46,7 +47,7 @@ public final class BlindnessVoidSight {
         BlindnessState state = BlindnessPower.state(player);
         BlindnessPower.set(player, state.withVoidSightActive(false));
         player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket(
-                net.minecraft.network.chat.Component.translatable("message.jaymospowers.blindness.void_sight.off")
+                net.minecraft.network.chat.Component.translatable(BlindnessDevotion.devout(player) ? "message.jaymospowers.blindness.sky_sight.off" : "message.jaymospowers.blindness.void_sight.off")
                         .withStyle(net.minecraft.ChatFormatting.GRAY)
         ));
     }

@@ -68,6 +68,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #SMOKE_SECONDS} s in a row and live. A day off, once a day.</li>
  * <li>Cryokinesis (0.14.0): stand in powder snow or out in a snowstorm, freezing, for {@link #CRYO_SECONDS} s in a row
  * and live. A day off, once a day. A Frost-born is called sooner: {@link #CRYO_FROST_BORN_SECONDS} s, and two days off.</li>
+ * <li>Blindness: wear a blindfold for {@code BlindnessDevotion.VIGIL_SECONDS} s in a row (a day off, once a day), or
+ * carve out your own eyes (awakens at once). Both live in {@code power/blindness/BlindnessDevotion}.</li>
  * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once, and it is the
  * only way: fate never hands Xenoform out and it can't be an affinity ({@code Power.fated}).</li>
  * </ul>

@@ -255,6 +255,26 @@ public final class Bleeding {
 		TRACKED.add(entity);
 	}
 
+	/**
+	 * Cuts that never close by themselves and bleed as hard as a stump, though a bandage still stops them (Blindness's
+	 * fresh-carved eye sockets, {@code BlindnessDevotion}). Each answers for a body and a part.
+	 */
+	private static final List<java.util.function.BiPredicate<LivingEntity, BodyPart>> HELD_OPEN = new java.util.ArrayList<>();
+
+	/** Adds a test for cuts held open ({@link #HELD_OPEN}). Call at start-up. */
+	public static void holdOpen(java.util.function.BiPredicate<LivingEntity, BodyPart> test) {
+		HELD_OPEN.add(test);
+	}
+
+	private static boolean held(LivingEntity body, BodyPart part) {
+		for (java.util.function.BiPredicate<LivingEntity, BodyPart> test : HELD_OPEN) {
+			if (test.test(body, part)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Stops {@code part}'s bleeding; a stump only if {@code stumps}. True if it was bleeding and has stopped. */
 	static boolean stop(LivingEntity entity, BodyPart part, boolean stumps) {
 		int bit = Breaks.bit(part);
@@ -532,7 +552,7 @@ public final class Bleeding {
 				mask &= ~bit;
 				continue;
 			}
-			boolean stump = Breaks.missing(body, part);
+			boolean stump = Breaks.missing(body, part) || held(body, part);
 			int i = part.ordinal();
 			if (since[i] == 0L) {
 				since[i] = now;
@@ -553,7 +573,7 @@ public final class Bleeding {
 			if ((mask & Breaks.bit(part)) == 0 || !body.isAlive() || Downed.isDowned(body)) {
 				continue;
 			}
-			Wounds.hurtPart(body, part, Breaks.missing(body, part) ? STUMP_BLEED : BLEED_DAMAGE, null, BLEEDING_DAMAGE);
+			Wounds.hurtPart(body, part, Breaks.missing(body, part) || held(body, part) ? STUMP_BLEED : BLEED_DAMAGE, null, BLEEDING_DAMAGE);
 		}
 	}
 

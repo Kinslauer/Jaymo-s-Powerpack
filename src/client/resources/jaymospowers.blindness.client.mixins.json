@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.blindness.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["BlindnessSightGlowMixin", "BlindnessSightOutlineMixin", "BlindnessSkyCameraMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

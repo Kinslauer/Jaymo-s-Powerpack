@@ -29,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>C (corrupted), Blackout: your blindness spreads—nearby players share your blindness, and head/eye damage blinds everyone around you.
  * <li>Both, Abyssal Echo: C is Abyssal Echo; a pulse that blinds everyone in range and leaves them navigating by sound alone.
  * </ul>
- * The calling (0.17.3): survive a fall that should kill you, landing in darkness (the Void, a deep cave, or a lightless room) with less than 2 hearts.
+ * The calling: wear a blindfold for a vigil, or carve out your own eyes ({@link BlindnessDevotion}). Those devout holders see
+ * living things through the dark, and their Void Sight lifts the view high over them (Sky Sight).
  */
 public final class BlindnessPower implements Power {
     public static final BlindnessPower INSTANCE = new BlindnessPower();
@@ -59,6 +60,10 @@ public final class BlindnessPower implements Power {
         BlindnessVoidSight.init();
         BlindnessBlackout.init();
         BlindnessAbyssalEcho.init();
+        BlindnessDevotion.init();
+        Unseeing.register();
+        BlindnessService.init();
+        BlindnessEnclaves.init();
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             BlindnessEcholocation.clear();
