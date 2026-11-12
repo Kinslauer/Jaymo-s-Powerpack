@@ -148,6 +148,7 @@ public final class XenoformClient {
 		WispTail.extract(entity, state, partialTicks);
 		WispPhaseClient.extract(entity, state, partialTicks);
 		SkitterCeiling.extract(entity, state, partialTicks);
+		HunterPose.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}

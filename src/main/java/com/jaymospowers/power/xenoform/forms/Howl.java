@@ -6,6 +6,9 @@ import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Tripped;
+import com.jaymospowers.power.xenoform.HowlNose;
+import com.jaymospowers.power.xenoform.HunterHits;
+import com.jaymospowers.power.xenoform.TailSweep;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.ChatFormatting;
@@ -36,6 +39,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>B, Lockjaw: a bite that holds on; the creature is dragged along, slowed and bled. B again lets go.</li>
  * </ul>
  * At night it hunts harder: Strength and Speed.
+ * <p>The nose ({@link HowlNose}): sneak+V picks the creature you look at as the one scent to follow (sneak+V at nothing
+ * drops it): its trail hangs behind it as a drifting thread only Howl sees, brighter the fresher, the bleeding in range
+ * show as red shapes through walls, and every blow on the tracked prey lands {@link HowlNose#PREY_BONUS} harder. Z (tap):
+ * a tail sweep ({@link TailSweep}).
  */
 public final class Howl extends XenoForm {
 	// ---- tuning ----
@@ -67,6 +74,22 @@ public final class Howl extends XenoForm {
 		letGo(player, live);
 		live.pack.clear();
 		live.packTicks = live.sniff = live.rush = 0;
+		HowlNose.clear(player);
+		TailSweep.forget(player);
+	}
+
+	/** Z (tap): the tail sweep. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		TailSweep.sweep(player, color);
+		return true;
+	}
+
+	@Override
+	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+		if (HowlNose.isPrey(player, target) && !HunterHits.busy()) {
+			HunterHits.extra(player, target, HowlNose.PREY_BONUS);
+		}
 	}
 
 	@Override
@@ -93,6 +116,21 @@ public final class Howl extends XenoForm {
 				}
 			}
 			case ABILITY_3 -> {
+				if (player.isShiftKeyDown()) {
+					// sneaking: pick the one scent to follow, or drop it
+					LivingEntity prey = aimed(player, HowlNose.PICK_REACH, e -> true);
+					if (prey != null) {
+						HowlNose.pick(player, prey);
+						sound(player, sniffSound(), 0.8F, 0.8F);
+						player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.howl.scent_picked", prey.getDisplayName()).withStyle(ChatFormatting.GOLD));
+					} else if (HowlNose.tracking(player)) {
+						HowlNose.clear(player);
+						player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.howl.scent_dropped").withStyle(ChatFormatting.GRAY));
+					} else {
+						player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.howl.no_scent").withStyle(ChatFormatting.GRAY));
+					}
+					return;
+				}
 				if (ready(player, live, V)) {
 					live.sniff = SCENT_TICKS;
 					sound(player, sniffSound(), 0.6F, 1.4F);
@@ -171,6 +209,7 @@ public final class Howl extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		HowlNose.tick(player, live.sniff > 0);
 		// the night is a wolf's
 		if (level.isDarkOutside() && player.tickCount % 40 == 0) {
 			player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 60, 0, false, false));
