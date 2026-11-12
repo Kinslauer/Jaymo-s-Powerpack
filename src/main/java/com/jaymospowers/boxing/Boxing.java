@@ -182,6 +182,7 @@ public final class Boxing {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> STATES.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
 		BoxingEvades.init();
+		BoxingTraining.init();
 		BoxingDebug.register();
 	}
 
@@ -393,6 +394,7 @@ public final class Boxing {
 		if (!blocked) {
 			BoxingEvades.landed(boxer, target, now);
 		}
+		BoxingTraining.landed(boxer, target, now);
 		ItemStack gear = boxer.getMainHandItem();
 		if (BoxingGear.isGear(gear)) {
 			gear.hurtAndBreak(1, boxer, InteractionHand.MAIN_HAND);

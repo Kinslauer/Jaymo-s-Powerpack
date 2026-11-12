@@ -556,6 +556,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.384: the fighting schools (joined, standing, mastery; their masks), their masters in the realms' halls, and the wizards' trials
 		LOGGER.debug("school attachments: {} {}", com.jaymoskingdoms.forms.Schools.SCHOOLS, com.jaymoskingdoms.forms.WizardTrials.TRIALS);
 		com.jaymoskingdoms.forms.Schools.register();
+		// who teaches Jaymo's Powers' boxing styles, and the kills their tasks ask for
+		com.jaymoskingdoms.BoxingTeachers.register();
 		com.jaymoskingdoms.forms.WizardTrials.register();
 		SchoolHalls.register();
 		// 0.7.385: schooled guards, honour duels, rival schools, festival bouts (Weapon Forms, patch 5; and the duel days' attachment)

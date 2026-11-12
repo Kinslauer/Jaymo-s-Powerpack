@@ -106,10 +106,25 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
 - **The combo breaker** doesn't count a punch that ran into a raised guard from the front.
 - The styles block alike except for the cost: the share stopped belongs to the gear, not the style.
 
+## Built so far: teachers, learning and levels
+
+- **Teachers** (Kingdoms `BoxingTeachers`): the Fist school's master, village elders and veteran guards. A teacher
+  teaches their people's style: Emberborn the Arrow Slit, Stoneborn the Long Guard, Earthlings the Bastion; the
+  Warriorborn and the school's master teach all three. "Speak of the fist" on their main menu; they answer in bubbles.
+- **Learning** (`BoxingTraining`): the teacher sets a task, `LEARN_KILLS` 15 hostile mobs killed with fist gear in
+  hand. Back with the teacher, the style is learned at level 1. Another style only once every known one is mastered;
+  a teacher of a style you already know lets you take it up again.
+- **Levels**: each punch landed on something that hit you in the last `RECENT_TICKS` 100 is a point, `XP_PER_LEVEL` 80
+  a level. A guard's drill done while boxing gives `DRILL_POINTS` 12. A sound marks a level.
+- **The teacher's tasks**: at levels 3, 6 and 9 (`GATE_LEVELS`) the style waits, its points full, until a teacher has
+  set a task and it is done with fist gear in hand: 5 armoured zombies, then an orc, then a camp's chief or a bandit.
+  Kingdoms reports its own folk's deaths to Powers; Powers counts a kill only with fist gear in hand.
+- **HUD**: while boxing, the style and its level in the bottom right corner (`BoxingClient.drawStyle`).
+- Two loading-screen hints (129, 130).
+
 ## Not built yet
 
-The breath puff and heaving shoulders, the styles' own idles and poses (blocks included), the teachers, quests and
-levelling, the HUD, and the loading-screen hints.
+The breath puff and heaving shoulders, and the styles' own idles and poses (blocks included).
 
 ## Things to know
 
@@ -158,3 +173,12 @@ levelling, the HUD, and the loading-screen hints.
 20. Two players: land six punches in a row: the sixth shoves them back and the next second of punches miss.
 21. Click twice quickly at level 1: the second punch comes by itself when the first's rhythm is up.
 22. No fist gear, or no style: Left Alt is the roll, as before.
+21. Find an Emberborn elder or veteran guard (or the Fist school's master): "Speak of the fist" is on their menu; other
+    villagers don't have it. Ask: they set the 15-kill task. Ask again: they say how many are left.
+22. Kill hostile mobs with a sword: nothing counts. With Hand Wraps: each counts. At 15 a chime; ask again: the style
+    is learned (the HUD line appears, level 1).
+23. Ask a teacher of another style: refused until the first is mastered.
+24. Box a zombie that is hitting you: the level rises (a chime) after about 80 landed punches. Punch a sheep: no gain.
+25. At level 3 with points full, ask a teacher: the armoured-zombie task. Five with fist gear: level 4 at once.
+    Likewise an orc at 6, and a chief or bandit at 9.
+26. A veteran guard's drill finished with fist gear in hand adds to the style.

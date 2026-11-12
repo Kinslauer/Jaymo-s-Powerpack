@@ -13,5 +13,6 @@
   "boxing.jaymospowers.style.arrow_slit": "Arrow Slit",
   "boxing.jaymospowers.style.long_guard": "Long Guard",
   "boxing.jaymospowers.style.bastion": "Bastion",
-  "key.jaymospowers.boxing_blur": "Boxing: blur or vignette"
+  "key.jaymospowers.boxing_blur": "Boxing: blur or vignette",
+  "boxing.jaymospowers.hud": "%s %s"
 }

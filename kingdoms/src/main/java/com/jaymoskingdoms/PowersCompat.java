@@ -3206,4 +3206,90 @@ public final class PowersCompat {
 			return -1.0F;
 		}
 	}
+	// ---- boxing (Powers' boxing/BoxingTraining) ----------------------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle boxingLesson, boxingCount, boxingKill, boxingTrained;
+	private static boolean lookedForBoxing;
+
+	private static void lookForBoxing() {
+		if (lookedForBoxing) {
+			return;
+		}
+		lookedForBoxing = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> training = Class.forName("com.jaymospowers.boxing.BoxingTraining");
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			boxingLesson = lookup.findStatic(training, "lesson", java.lang.invoke.MethodType.methodType(String.class,
+				net.minecraft.server.level.ServerPlayer.class, String.class));
+			boxingCount = lookup.findStatic(training, "lessonCount", java.lang.invoke.MethodType.methodType(int.class,
+				net.minecraft.server.level.ServerPlayer.class));
+			boxingKill = lookup.findStatic(training, "fistKill", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerPlayer.class, LivingEntity.class, String.class));
+			boxingTrained = lookup.findStatic(training, "trained", java.lang.invoke.MethodType.methodType(void.class,
+				net.minecraft.server.level.ServerPlayer.class, int.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' boxing", e);
+			boxingLesson = null;
+		}
+	}
+
+	/** Whether Jaymo's Powers and its boxing are there to teach. */
+	public static boolean boxing() {
+		lookForBoxing();
+		return boxingLesson != null && boxingCount != null && boxingKill != null && boxingTrained != null;
+	}
+
+	/**
+	 * Powers' {@code BoxingTraining.lesson(ServerPlayer, String)}: {@code player} asks a teacher of {@code style} (a style's
+	 * id, or "any") about boxing; what came of it ({@code begin}, {@code learning}, {@code learned}, ...), or null without Powers.
+	 */
+	public static @Nullable String boxingLesson(net.minecraft.server.level.ServerPlayer player, String style) {
+		if (!boxing()) {
+			return null;
+		}
+		try {
+			return (String)boxingLesson.invoke(player, style);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	/** Powers' {@code BoxingTraining.lessonCount(ServerPlayer)}: kills left of the task {@code player} is on (0 if none). */
+	public static int boxingCount(net.minecraft.server.level.ServerPlayer player) {
+		if (!boxing()) {
+			return 0;
+		}
+		try {
+			return (int)boxingCount.invoke(player);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Powers' {@code BoxingTraining.fistKill(ServerPlayer, LivingEntity, String)}: {@code player} killed one of our folk, a {@code kind}. */
+	public static void boxingKill(net.minecraft.server.level.ServerPlayer player, LivingEntity victim, String kind) {
+		if (!boxing()) {
+			return;
+		}
+		try {
+			boxingKill.invoke(player, victim, kind);
+		} catch (Throwable e) {
+			// (nothing to count)
+		}
+	}
+
+	/** Powers' {@code BoxingTraining.trained(ServerPlayer, int)}: a drill done; points toward the style, if {@code player} is boxing. */
+	public static void boxingTrained(net.minecraft.server.level.ServerPlayer player, int points) {
+		if (!boxing()) {
+			return;
+		}
+		try {
+			boxingTrained.invoke(player, points);
+		} catch (Throwable e) {
+			// (nothing to give)
+		}
+	}
 }
