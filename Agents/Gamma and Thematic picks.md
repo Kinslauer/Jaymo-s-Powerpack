@@ -24,3 +24,5 @@ owns:
 - The page's Save never reached the db; picks known from Andy's screenshots only.
 
 ## Done
+
+- 2026-11-12: PR 1 (big suit, 21 rows) is up as #1346 on claude/project-thread-akompj, compile-checked only. Next: aliens (Xenoform rows except xen_size) once #1346 merges, restarting the branch from master.
