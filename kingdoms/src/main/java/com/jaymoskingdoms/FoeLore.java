@@ -43,9 +43,10 @@ import org.jspecify.annotations.Nullable;
  * fight, and say they know it when one turns up ("know"). A star earned beside a player who isn't theirs is
  * remembered with that player's name, and they say who taught them ("know.taught").</li>
  * <li><b>Camps, bands and realms</b> keep stars on each player ({@link #KNOWN}, on the player): how often they've met
- * you ({@link #MEETING_GAP} apart) and how you hurt them (shot, blade, blunt, magic, fire). From the third meeting on
- * they come ready for it: shields against a shooter, footing against a brawler, speed against a caster, fire cloth
- * against fire ("knows.*"). A band that has never met you but met someone who fights like you says so, naming them
+ * you ({@link #MEETING_GAP} apart), how you hurt them (shot, blade, blunt, magic, fire) and how often you parry them
+ * (Powers' guard). From the third meeting on they come ready for it: shields against a shooter, footing against a
+ * brawler, speed against a caster, fire cloth against fire; against a parrier their blows go past the guard and they
+ * feint, showing a blow that never comes ({@link #FEINT_EVERY}) to draw your guard early ("knows.*"). A band that has never met you but met someone who fights like you says so, naming them
  * ("knows.other").</li>
  * </ul>
  */
@@ -79,13 +80,20 @@ public final class FoeLore {
 
 	/** The ways a player hurts a band, as counted in {@link #KNOWN} (after the meeting count). */
 	enum Way {
-		SHOT, BLADE, BLUNT, MAGIC, FIRE
+		SHOT, BLADE, BLUNT, MAGIC, FIRE, PARRY
 	}
+
+	/** A parry counts as this many blows toward what a band knows of you (a parrier is read sooner). */
+	static final int PARRY_WEIGHT = 2;
+	/** A band that reads your parries feints this often (ticks, each member) with a tell this long (ticks). */
+	static final int FEINT_EVERY = 80, FEINT_TELL = 12;
 
 	private static final Identifier FOOTING = JaymosKingdoms.id("foe_footing"), RUSH = JaymosKingdoms.id("foe_rush");
 
 	/** Side and player -> when they last met (game time). Server memory. */
 	private static final Map<String, Long> MET = new HashMap<>();
+	/** Band members reading a player's guard: their blows go past it until then (game time). */
+	private static final Map<Mob, Long> READING = new java.util.IdentityHashMap<>();
 	/** Mobs already readied against a player this fight (mob uuid + player uuid). */
 	private static final Set<String> READIED = new HashSet<>();
 	private static final Map<UUID, Long> SAID_KNOW = new HashMap<>();
@@ -102,11 +110,13 @@ public final class FoeLore {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FoeLore::tick);
+		PowersCompat.onParry(FoeLore::parried);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			MET.clear();
 			READIED.clear();
 			SAID_KNOW.clear();
 			SAID_OTHER.clear();
+			READING.clear();
 		});
 	}
 
@@ -209,11 +219,21 @@ public final class FoeLore {
 	}
 
 	private static void hurtBy(Mob m, ServerPlayer player, DamageSource source) {
+		count(m, player, way(source), 1);
+	}
+
+	/** {@code player} parried {@code attacker}: its band learns that they parry. */
+	private static void parried(ServerPlayer player, @Nullable LivingEntity attacker) {
+		if (attacker instanceof Mob m) {
+			count(m, player, Way.PARRY, PARRY_WEIGHT);
+		}
+	}
+
+	private static void count(Mob m, ServerPlayer player, @Nullable Way way, int weight) {
 		String side = Comrades.side(m);
 		if (!keeps(side)) {
 			return;
 		}
-		Way way = way(source);
 		long now = m.level().getGameTime();
 		String key = side + "|" + player.getUUID();
 		Map<String, List<Integer>> known = new HashMap<>(player.getAttachedOrElse(KNOWN, Map.of()));
@@ -229,7 +249,7 @@ public final class FoeLore {
 			}
 		}
 		if (way != null) {
-			row.set(1 + way.ordinal(), row.get(1 + way.ordinal()) + 1);
+			row.set(1 + way.ordinal(), row.get(1 + way.ordinal()) + weight);
 		}
 		known.put(side, List.copyOf(row));
 		player.setAttached(KNOWN, known);
@@ -293,6 +313,22 @@ public final class FoeLore {
 
 	/** Every second: band members fighting a player they know well come ready for how that player fights. */
 	private static void tick(MinecraftServer server) {
+		if (!READING.isEmpty()) {
+			long time = server.overworld().getGameTime();
+			for (var it = READING.entrySet().iterator(); it.hasNext();) {
+				var e = it.next();
+				Mob m = e.getKey();
+				if (time >= e.getValue() || !m.isAlive() || m.isRemoved()) {
+					m.removeTag(MobCombat.UNPARRYABLE_TAG);
+					it.remove();
+				} else if (Comrades.target(m) instanceof ServerPlayer p && (m.getId() + server.getTickCount()) % FEINT_EVERY == 0
+					&& m.distanceToSqr(p) < 16.0) {
+					// a blow shown and never thrown, to draw the guard up early
+					PowersCompat.tellIncoming(m, p, FEINT_TELL, false);
+					m.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				}
+			}
+		}
 		if (server.getTickCount() % 20 != 0) {
 			return;
 		}
@@ -307,7 +343,7 @@ public final class FoeLore {
 				}
 				Way way = most(player, side);
 				if (way != null && READIED.add(m.getUUID() + "|" + player.getUUID())) {
-					counter(m, way);
+					counter(m, way, level.getGameTime());
 					Callouts.say(m, "knows." + way.name().toLowerCase(java.util.Locale.ROOT), player, false, player.getDisplayName());
 				}
 			}
@@ -318,8 +354,12 @@ public final class FoeLore {
 	}
 
 	/** {@code m}'s answer to {@code way}. */
-	private static void counter(Mob m, Way way) {
+	private static void counter(Mob m, Way way, long now) {
 		switch (way) {
+			case PARRY -> {
+				m.addTag(MobCombat.UNPARRYABLE_TAG);
+				READING.put(m, now + COUNTER_TICKS);
+			}
 			case SHOT -> {
 				if (m.getItemBySlot(EquipmentSlot.OFFHAND).isEmpty()) {
 					m.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));

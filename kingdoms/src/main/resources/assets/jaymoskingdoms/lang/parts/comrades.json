@@ -206,5 +206,8 @@
 	"comrades.jaymoskingdoms.knows.fire.2": "We know your fire, %s!",
 	"comrades.jaymoskingdoms.knows.other.0": "Fights just like %s!",
 	"comrades.jaymoskingdoms.knows.other.1": "Another one like %s!",
-	"comrades.jaymoskingdoms.knows.other.2": "I've seen this before, from %s!"
+	"comrades.jaymoskingdoms.knows.other.2": "I've seen this before, from %s!",
+	"comrades.jaymoskingdoms.knows.parry.0": "Don't swing straight, %s parries!",
+	"comrades.jaymoskingdoms.knows.parry.1": "Feint first, then strike! It's %s!",
+	"comrades.jaymoskingdoms.knows.parry.2": "Watch the guard, go round it!"
 }

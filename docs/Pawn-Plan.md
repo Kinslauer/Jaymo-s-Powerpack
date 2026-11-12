@@ -64,8 +64,9 @@ lines that name who taught them.
 As built: `FoeLore` (companions' stars per kind, 2/6/14 kills, +8% damage a star, "know"/"know.taught" lines;
 bands' knowledge of each player kept on the player, counters from the third meeting, "fights like" another player);
 `Learners` past ten steps and catch-up; `LeaningDrift` (orders, kills and travel mates nudge leanings; bands that lose
-archers or leaders turn to guarding and shield their archers). Left: a captain who sits out fights catching up, and
-bands reading parries and feints (needs a hook from Powers' guard).
+archers or leaders turn to guarding and shield their archers). Andy called the last two vital, so they're in too:
+bands read your parries (Powers' `Guard.PARRIED`) and then strike past the guard and feint; `CatchingUp` lifts a
+captain two ranks behind his tribe's best by one rank a day (half the time).
 
 ## Patch 4: talk and table
 

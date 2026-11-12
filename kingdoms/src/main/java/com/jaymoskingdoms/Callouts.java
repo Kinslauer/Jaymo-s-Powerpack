@@ -82,7 +82,7 @@ public final class Callouts {
 		LINES.put("foe.medic", 3);
 		LINES.put("leaderdown", 3);
 		for (String k : new String[] {"hold.grab", "hold.pin", "ambush", "spoils.grab", "know", "know.taught", "knows.shot", "knows.blade",
-			"knows.blunt", "knows.magic", "knows.fire", "knows.other"}) {
+			"knows.blunt", "knows.magic", "knows.fire", "knows.parry", "knows.other"}) {
 			LINES.put(k, 3);
 		}
 	}
