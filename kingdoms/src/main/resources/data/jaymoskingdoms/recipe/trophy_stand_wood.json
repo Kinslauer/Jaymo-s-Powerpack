@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " B ",
+    " C ",
+    "PPP"
+  ],
+  "key": {
+    "B": "minecraft:bowl",
+    "C": "minecraft:copper_ingot",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:trophy_stand_wood"
+  }
+}
