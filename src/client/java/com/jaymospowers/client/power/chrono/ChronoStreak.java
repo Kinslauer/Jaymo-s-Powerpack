@@ -47,7 +47,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * All of it scales with how fast they're going ({@link #MIN_SPEED} to {@link #FULL_SPEED}) and fades out as they slow.
  * The afterimages are the runner's own render states, kept from the frames the world drew them in (never the inventory
- * screen's), so they wear the run pose ({@link ChronoRunPose}) they had.
+ * screen's), so they wear the run pose ({@link ChronoRunPose}) they had, and the gear they had on: armour, held items and
+ * worn layers are cloned onto each afterimage, tinted and faded with it ({@link GhostCollector}).
  *
  * <p>(0.15.97) Velox's Velocity leaves the same streak in light blue ({@link ChronoSpeed#SKY}: {@code FLASH}'s value picks
  * the colours), and its afterimages are the alien, not the player under it ({@code XenoformClient#submitGhost}).
@@ -295,8 +296,23 @@ public final class ChronoStreak {
 			if (!com.jaymospowers.client.power.xenoform.XenoformClient.submitGhost(state, poseStack, collector, FULL_BRIGHT, tint)) {
 				collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tint,
 					null, EntityRenderState.NO_OUTLINE);
+				// the gear too (armour, held items, worn layers), cloned as the body is: Andy, "it should clone them"
+				layers(renderer, state, poseStack, new GhostCollector(collector, tint));
 			}
 			poseStack.popPose();
+		}
+	}
+
+	/** Submits {@code renderer}'s layers for {@code state} onto {@code ghost}, as {@code LivingEntityRenderer.submit} does after the body. */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static void layers(AvatarRenderer<?> renderer, AvatarRenderState state, PoseStack poseStack, GhostCollector ghost) {
+		for (net.minecraft.client.renderer.entity.layers.RenderLayer layer : ((com.jaymospowers.client.mixin.LivingEntityRendererLayersAccessor)renderer)
+			.jaymospowers$layers()) {
+			try {
+				layer.submit(poseStack, ghost, FULL_BRIGHT, state, state.yRot, state.xRot);
+			} catch (RuntimeException e) {
+				// a modded layer that wants more than a kept frame gives it: leave it off the afterimage
+			}
 		}
 	}
 

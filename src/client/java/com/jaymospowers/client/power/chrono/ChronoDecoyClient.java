@@ -118,6 +118,8 @@ public final class ChronoDecoyClient {
 				if (!com.jaymospowers.client.power.xenoform.XenoformClient.submitGhost(state, poseStack, collector, FULL_BRIGHT, tint)) {
 					collector.submitModel(model, state, poseStack, RenderTypes.entityTranslucent(texture), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, tint,
 						null, EntityRenderState.NO_OUTLINE);
+					// in the gear the Chrono has on, as the streak's afterimages are
+					ChronoStreak.layers(renderer, state, poseStack, new GhostCollector(collector, tint));
 				}
 				poseStack.popPose();
 			}
