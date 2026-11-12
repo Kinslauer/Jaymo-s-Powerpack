@@ -91,7 +91,7 @@ log this there for later." YOUTH made a vault Inbox task (`omniroute-ai-gateway-
 makes a new post in the same forum (parthenon); asked in a text channel, a new public thread. Prints the link last.
 
 Steps for the PC Claude (tick each):
-- [ ] After Andy merges the PR, `git pull` in `E:/Origins Mod`. Test once without posting:
+- [ ] PR #1389 is merged (Nov 12). `git pull` in `E:/Origins Mod`. Test once without posting:
       `py -3 tools/discord_thread.py --in 1570579626151903354 --title "OmniRoute experiment" --message "test" --dry-run`
       (that id is the Dashboard thread). It should say "Would make a new post ... in forum #parthenon".
 - [ ] Check YOUTH's bot role can **Create Posts** in parthenon (and Create Public Threads, Send Messages in Threads
@@ -118,4 +118,8 @@ Discord threads (Andy, 2026-11-12)
 ```
 - [ ] Test it: in Dashboard, ask YOUTH "open a new test thread called Thread test and put hello in it". It should
       reply with a link to a new parthenon post. Delete the test post afterwards.
+- [ ] **PR Merges post** (Andy merged #1389 on Nov 12, 6:40 PM): have YOUTH post in parthenon > PR Merges:
+      "PR #1389 merged: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1389. Adds tools/discord_thread.py so
+      YOUTH can open a Discord thread or forum post when asked. Players see nothing (bot tool only). Not tested against
+      Discord yet: the dry run and live test are the steps above. Verdict: merged on Andy's word."
 - [ ] Write one line per box here, run `python tools/vault_sync.py`, tell Andy in one short post.
