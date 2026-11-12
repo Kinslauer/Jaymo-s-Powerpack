@@ -21,7 +21,8 @@ abstract class WebFirstPersonHandsMixin {
 	@Inject(method = "submitHandsWithItems", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$bodyArmsOnly(float partialTicks, PoseStack poseStack, SubmitNodeCollector collector, PlayerRenderState player,
 		FirstPersonHandsAndItemsRenderState hands, CallbackInfo ci) {
-		if (!hands.isScoping && WebFirstPerson.posing(player.avatarRenderState)) {
+		if (!hands.isScoping && (WebFirstPerson.posing(player.avatarRenderState)
+			|| com.jaymospowers.client.power.web.WebPuddlePose.hidden(player.avatarRenderState))) {
 			ci.cancel();
 		}
 	}
