@@ -917,6 +917,19 @@ mostly. They fly." The last page: the Master says they do not go up again until 
 called. Yet." It points at the Second Defence without saying so. Act IV's other milestones: a spirit woken, your Bane
 ended with its own marks, the Abyss walked into, the Judge asked how your page reads, the Grue beaten in its own dark.
 
+(new) **Tools, draughts and trained hands** (picks, 2026-11-12). The Frostborn rig carries more than its wearer
+has asked of it: small flyers that leave and return to the suit, a table of light at the wrist, false images of the
+wearer, a field that keeps a parried blow, and an eye for the angle of a shot. Chrono holders who dodge well enough
+begin to see where a blow will land before it is thrown, and leave copies of themselves standing where they were. The
+devout blind are not blinded twice: no flash reaches them, and they feel what stands behind them. Hunters and the
+Tinkers' smiths fit arrowheads for every kind of work (bola, net, harpoon, flare, whistle) and bandits and
+vigilantes alike carry a belt of powders, vials and darts. Guards throw a round shield and catch it again. The
+alchemists have three late draughts: one that lends the drinker the skin of whatever they next touch, one that shuts
+a power away for a while, and one, rare and dear, by which a power can be given up for good and left sealed in a
+phial for another; the blood-borne arts of the Z Fighters cannot be poured out this way. People who sew their
+costumes to one design stand a little firmer together, though the towns like them no better for it. The boxing
+teachers know where a limb goes numb.
+
 (new) **The two pacts** (Andy, 2026-11-12: "you improvise the lore on that yourself"). A corrupted power can be
 bent once more, and not back. The demon masters below still keep the bargain they once kept with the sorcerer: to a
 holder whose power is already corrupted, one of them will offer **the Cinder Pact**. Whoever takes it is slower and
