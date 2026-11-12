@@ -41,8 +41,11 @@ import net.minecraft.world.level.material.PushReaction;
  */
 public final class GroundSticks {
 	public static Block LOOSE_STICKS;
-	/** A full stick pile ringed by rock piles (FirepitBlock). */
+	/** A full stick pile in a full ring of rocks (FirepitBlock). */
 	public static Block FIREPIT;
+	/** Nine firepits in a 3x3: the centre (BonfireBlock) and its eight ring blocks (BonfireEdgeBlock). */
+	public static Block BONFIRE;
+	public static Block BONFIRE_EDGE;
 
 	private GroundSticks() {
 	}
@@ -62,8 +65,41 @@ public final class GroundSticks {
 			.mapColor(MapColor.PODZOL).strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
 			.pushReaction(PushReaction.POPPED)
 			.lightLevel(s -> s.getValue(FirepitBlock.LIT) ? FirepitBlock.LIGHT : 0).setId(pitKey)));
-		// it cooks, smokes and keeps its food in the vanilla campfire block entity
+		ResourceKey<Block> bonfireKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("bonfire"));
+		BONFIRE = Registry.register(BuiltInRegistries.BLOCK, bonfireKey, new BonfireBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.STONE).strength(1.0F).sound(SoundType.STONE).noOcclusion().ignitedByLava()
+			.pushReaction(PushReaction.IMMOVEABLE)
+			.lightLevel(s -> s.getValue(BonfireBlock.LIT) ? BonfireBlock.LIGHT : 0).setId(bonfireKey)));
+		ResourceKey<Block> edgeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("bonfire_edge"));
+		BONFIRE_EDGE = Registry.register(BuiltInRegistries.BLOCK, edgeKey, new BonfireEdgeBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.STONE).strength(1.0F).sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.IMMOVEABLE)
+			.lightLevel(s -> s.getValue(BonfireEdgeBlock.LIT) ? 13 : 0).setId(edgeKey)));
+		// they cook, smoke and keep their food in the vanilla campfire block entity
 		net.minecraft.world.level.block.entity.BlockEntityTypes.CAMPFIRE.addValidBlock(FIREPIT);
+		net.minecraft.world.level.block.entity.BlockEntityTypes.CAMPFIRE.addValidBlock(BONFIRE);
+
+		// sneak + right click a firepit with sticks lays a stick grate over it (a plain click feeds the fire);
+		// Kitchen's pot and pan go over a firepit only on a grate
+		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			BlockState pit = level.getBlockState(hit.getBlockPos());
+			if (player.isSpectator() || !pit.is(FIREPIT)) {
+				return InteractionResult.PASS;
+			}
+			ItemStack stack = player.getItemInHand(hand);
+			boolean bare = pit.getValue(FirepitBlock.GRATE) == FirepitBlock.Grate.NONE;
+			if (player.isSecondaryUseActive() && stack.is(Items.STICK) && bare) {
+				if (stack.getCount() < FirepitBlock.GRATE_STICKS && !player.getAbilities().instabuild) {
+					return InteractionResult.FAIL;
+				}
+				return FirepitBlock.setGrate(pit, level, hit.getBlockPos(), player, FirepitBlock.Grate.STICKS,
+					() -> stack.consume(FirepitBlock.GRATE_STICKS, player));
+			}
+			if (bare && FirepitBlock.isCookware(stack)) {
+				level.playSound(player, hit.getBlockPos(), SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.6F, 1.0F);
+				return InteractionResult.FAIL;
+			}
+			return InteractionResult.PASS;
+		});
 
 		// a stick laid on the ground starts a pile (sticks on a pile are the pile's own right click)
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -110,7 +146,7 @@ public final class GroundSticks {
 
 	private static BlockBehaviour.Properties sticks() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).instabreak().noCollision().noOcclusion()
-			.sound(SoundType.GRASS).pushReaction(PushReaction.POPPED).offsetType(BlockBehaviour.OffsetType.XZ);
+			.sound(SoundType.GRASS).pushReaction(PushReaction.POPPED);
 	}
 
 	private static ResourceKey<PlacedFeature> placed(String id) {

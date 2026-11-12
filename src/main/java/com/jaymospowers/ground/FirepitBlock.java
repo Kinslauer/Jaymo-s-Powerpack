@@ -1,11 +1,14 @@
 package com.jaymospowers.ground;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -18,22 +21,32 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (Powers, ground sticks) Andy: "placing a maximum pile of sticks, and then stones all around it or vice versa gives you a
- * firepit you can light, like terrafirma craft". A full pile of 4 {@link LooseSticksBlock loose sticks} with a rock pile on
- * all 8 blocks around it turns into a firepit ({@link #tryForm}), whichever is laid down last.
+ * Andy: "placing a maximum pile of sticks, and then stones all around it or vice versa gives you a firepit you can light,
+ * like terrafirma craft", then "the stone in a circle and the fire inside [...] within one block like the campfire [...]
+ * closer surrounded by stone. it can accomodate the spit and a pan raised on a grate made from sticks or iron bars."
+ * <p>
+ * A full pile of 4 {@link LooseSticksBlock loose sticks} with a full ring of {@link LooseSticksBlock#RING} rocks set
+ * round it (rocks right-clicked onto the pile) becomes a firepit ({@link #form}). Nine firepits in a 3x3 become a
+ * {@link BonfireBlock bonfire}.
  * <p>
  * It is a campfire underneath (in the campfires tag, sharing the vanilla campfire block entity): flint and steel, a flint
- * strike or a fire charge lights it, it cooks four foods, smokes, burns what stands in it, a shovel or water puts it out.
- * Unlike a campfire it burns {@link #FUEL fuel}: each unit lasts {@link #BURN_TICKS}; a stick adds one, a plank
- * {@link #PLANK_FUEL}, a log {@link #LOG_FUEL} (TFC's burn times). With none left it goes out to a bed of ash, rain puts
- * it out, and with no fuel it won't take a light.
+ * strike or a fire charge lights it, it cooks four foods, smokes, burns what stands in it, a shovel or water puts it out,
+ * and Kitchen's spit goes on top. Unlike a campfire it burns {@link #FUEL fuel}: each unit lasts {@link #BURN_TICKS}; a
+ * stick adds one, a plank {@link #PLANK_FUEL}, a log {@link #LOG_FUEL} (TFC's burn times). With none left it goes out
+ * to a bed of ash, rain puts it out, and with no fuel it won't take a light.
+ * <p>
+ * A {@link Grate grate} over it (iron bars right-clicked on, or {@link #GRATE_STICKS} sticks sneak-clicked on) holds
+ * Kitchen's cooking pot and frying pan above the flames; without one a pan can't be set there ({@link GroundSticks}).
+ * Sneak + right click with an empty hand takes the grate off. A stick grate chars through in time.
  */
 public class FirepitBlock extends CampfireBlock {
 	// ---- tuning ----
@@ -46,62 +59,60 @@ public class FirepitBlock extends CampfireBlock {
 	public static final int PLANK_FUEL = 2;
 	/** Light of a lit firepit (a campfire gives 15). */
 	public static final int LIGHT = 14;
+	/** Sticks a stick grate takes. */
+	public static final int GRATE_STICKS = 4;
+	/** Chance, each unit of fuel burnt, that a stick grate chars through and falls in. */
+	public static final float STICK_GRATE_BURN = 0.1F;
+
+	/** What's laid over the fire for pans. */
+	public enum Grate implements StringRepresentable {
+		NONE, STICKS, IRON;
+
+		@Override
+		public String getSerializedName() {
+			return this.name().toLowerCase(java.util.Locale.ROOT);
+		}
+	}
 
 	public static final IntegerProperty FUEL = IntegerProperty.create("fuel", 0, MAX_FUEL);
-	private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 2.0, 14.0);
+	public static final EnumProperty<Grate> GRATE = EnumProperty.create("grate", Grate.class);
+	private static final VoxelShape SHAPE = Block.box(0.5, 0.0, 0.5, 15.5, 3.0, 15.5);
+	private static final VoxelShape GRATE_SHAPE = Shapes.or(SHAPE, Block.box(1.0, 14.5, 1.0, 15.0, 15.5, 15.0));
 
 	public FirepitBlock(BlockBehaviour.Properties properties) {
 		super(true, 1, properties);
-		this.registerDefaultState(this.defaultBlockState().setValue(FUEL, 4).setValue(LIT, false));
+		this.registerDefaultState(this.defaultBlockState().setValue(FUEL, 4).setValue(LIT, false).setValue(GRATE, Grate.NONE));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		super.createBlockStateDefinition(builder);
-		builder.add(FUEL);
+		builder.add(FUEL, GRATE);
 	}
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return state.getValue(GRATE) == Grate.NONE ? SHAPE : GRATE_SHAPE;
+	}
+
+	@Override
+	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPE;
 	}
 
-	/** Turns a full stick pile at pos into a firepit when every block around it holds a rock pile. Whether it did. */
-	public static boolean tryForm(Level level, BlockPos pos) {
-		BlockState sticks = level.getBlockState(pos);
-		if (level.isClientSide() || !sticks.is(GroundSticks.LOOSE_STICKS) || sticks.getValue(LooseSticksBlock.STICKS) < 4
-			|| sticks.getValue(LooseSticksBlock.WATERLOGGED)) {
+	/**
+	 * Turns the stick pile about to be set at pos (pile) into a firepit when it is full and fully ringed. Whether it did;
+	 * if not, the caller sets the pile.
+	 */
+	public static boolean form(Level level, BlockPos pos, BlockState pile) {
+		if (level.isClientSide() || !pile.is(GroundSticks.LOOSE_STICKS) || pile.getValue(LooseSticksBlock.STICKS) < 4
+			|| pile.getValue(LooseSticksBlock.STONES) < LooseSticksBlock.RING || pile.getValue(LooseSticksBlock.WATERLOGGED)) {
 			return false;
 		}
-		for (int dx = -1; dx <= 1; dx++) {
-			for (int dz = -1; dz <= 1; dz++) {
-				if ((dx != 0 || dz != 0) && !isRock(level.getBlockState(pos.offset(dx, 0, dz)))) {
-					return false;
-				}
-			}
-		}
 		level.setBlock(pos, GroundSticks.FIREPIT.defaultBlockState(), Block.UPDATE_ALL);
-		level.playSound(null, pos, SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.8F, 0.8F);
+		level.playSound(null, pos, SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.9F, 0.7F);
 		level.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
 		return true;
-	}
-
-	/** Called when a rock pile is laid: a full stick pile next to it may now be ringed. */
-	public static void rockLaid(Level level, BlockPos rock) {
-		if (level.isClientSide()) {
-			return;
-		}
-		for (int dx = -1; dx <= 1; dx++) {
-			for (int dz = -1; dz <= 1; dz++) {
-				if ((dx != 0 || dz != 0) && level.getBlockState(rock.offset(dx, 0, dz)).is(GroundSticks.LOOSE_STICKS)) {
-					tryForm(level, rock.offset(dx, 0, dz));
-				}
-			}
-		}
-	}
-
-	private static boolean isRock(BlockState state) {
-		return GroundRocks.ROCKS.containsValue(state.getBlock());
 	}
 
 	/** Fuel an item adds: a stick 1, a plank {@link #PLANK_FUEL}, a log {@link #LOG_FUEL}, else 0. */
@@ -115,23 +126,76 @@ public class FirepitBlock extends CampfireBlock {
 		return stack.is(ItemTags.LOGS_THAT_BURN) ? LOG_FUEL : 0;
 	}
 
+	/** Feeds fuel from stack into a fire whose fuel is prop (up to max). The use result, or null if it isn't fuel. */
+	static InteractionResult feed(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, IntegerProperty prop, int max) {
+		int fuel = fuelOf(stack);
+		if (fuel <= 0) {
+			return null;
+		}
+		if (state.getValue(prop) >= max) {
+			return InteractionResult.PASS;
+		}
+		if (!level.isClientSide()) {
+			level.setBlock(pos, state.setValue(prop, Math.min(max, state.getValue(prop) + fuel)), Block.UPDATE_ALL);
+			stack.consume(1, player);
+			level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.7F, 1.1F);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		int fuel = fuelOf(stack);
-		if (fuel > 0) {
-			if (state.getValue(FUEL) >= MAX_FUEL) {
-				return InteractionResult.PASS;
-			}
-			if (!level.isClientSide()) {
-				level.setBlock(pos, state.setValue(FUEL, Math.min(MAX_FUEL, state.getValue(FUEL) + fuel)), Block.UPDATE_ALL);
-				stack.consume(1, player);
-				level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.7F, 1.1F);
-				level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-			}
-			return InteractionResult.SUCCESS;
+		if (stack.is(Items.IRON_BARS) && state.getValue(GRATE) == Grate.NONE) {
+			return setGrate(state, level, pos, player, Grate.IRON, () -> stack.consume(1, player));
 		}
-		return super.useItemOn(stack, state, level, pos, player, hand, hit);
+		InteractionResult fed = feed(stack, state, level, pos, player, FUEL, MAX_FUEL);
+		return fed != null ? fed : super.useItemOn(stack, state, level, pos, player, hand, hit);
+	}
+
+	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		Grate grate = state.getValue(GRATE);
+		if (player.isSecondaryUseActive() && grate != Grate.NONE) {
+			return setGrate(state, level, pos, player, Grate.NONE, () -> {
+				if (!player.getAbilities().instabuild) {
+					ItemStack back = grate == Grate.IRON ? new ItemStack(Items.IRON_BARS) : new ItemStack(Items.STICK, GRATE_STICKS);
+					player.getInventory().placeItemBackInInventory(back, Prediction.SERVER_ONLY);
+				}
+			});
+		}
+		return super.useWithoutItem(state, level, pos, player, hit);
+	}
+
+	/** Lays a grate over the pit, or (Grate.NONE) takes it off, tipping off whatever pan sat on it. */
+	static InteractionResult setGrate(BlockState state, Level level, BlockPos pos, Player player, Grate grate, Runnable pay) {
+		if (!level.isClientSide()) {
+			level.setBlock(pos, state.setValue(GRATE, grate), Block.UPDATE_ALL);
+			pay.run();
+			level.playSound(null, pos, grate == Grate.STICKS || state.getValue(GRATE) == Grate.STICKS ? SoundEvents.WOOD_PLACE
+				: SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.8F, 1.0F);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+			if (grate == Grate.NONE) {
+				dropCookware(level, pos.above());
+			}
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Kitchen's pot or pan (as an item), which needs a grate under it. */
+	static boolean isCookware(ItemStack stack) {
+		return isCookwareId(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+	}
+
+	private static boolean isCookwareId(net.minecraft.resources.Identifier id) {
+		return "jaymoskitchen".equals(id.getNamespace()) && ("cooking_pot".equals(id.getPath()) || "frying_pan".equals(id.getPath()));
+	}
+
+	private static void dropCookware(Level level, BlockPos above) {
+		if (isCookwareId(BuiltInRegistries.BLOCK.getKey(level.getBlockState(above).getBlock()))) {
+			level.destroyBlock(above, true);
+		}
 	}
 
 	@Override
@@ -142,6 +206,9 @@ public class FirepitBlock extends CampfireBlock {
 			// nothing to burn: the sparks die at once
 			level.scheduleTick(pos, this, state.getValue(FUEL) == 0 ? 10 : BURN_TICKS);
 		}
+		if (!oldState.is(this) && !level.isClientSide()) {
+			BonfireBlock.tryMerge(level, pos);
+		}
 	}
 
 	@Override
@@ -151,13 +218,18 @@ public class FirepitBlock extends CampfireBlock {
 			return;
 		}
 		int fuel = state.getValue(FUEL) - 1;
+		BlockState next = state.setValue(FUEL, Math.max(0, fuel));
+		if (state.getValue(GRATE) == Grate.STICKS && random.nextFloat() < STICK_GRATE_BURN) {
+			next = next.setValue(GRATE, Grate.NONE);
+			dropCookware(level, pos.above());
+		}
 		if (fuel <= 0 || level.isRainingAt(pos.above())) {
-			level.setBlock(pos, state.setValue(LIT, false).setValue(FUEL, Math.max(0, fuel)), Block.UPDATE_ALL);
+			level.setBlock(pos, next.setValue(LIT, false), Block.UPDATE_ALL);
 			level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.0F);
 			level.gameEvent(null, GameEvent.BLOCK_CHANGE, pos);
 			return;
 		}
-		level.setBlock(pos, state.setValue(FUEL, fuel), Block.UPDATE_ALL);
+		level.setBlock(pos, next, Block.UPDATE_ALL);
 		level.scheduleTick(pos, this, BURN_TICKS);
 	}
 }

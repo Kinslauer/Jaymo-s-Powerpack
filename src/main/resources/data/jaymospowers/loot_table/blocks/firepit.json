@@ -25,6 +25,17 @@
                 "type": "minecraft:match_block",
                 "blocks": "jaymospowers:firepit",
                 "state": {
+                  "fuel": "1"
+                }
+              },
+              "count": 1
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
                   "fuel": "2"
                 }
               },
@@ -175,6 +186,101 @@
             },
             {
               "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:stone_rock",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 8
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_bars",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
+                  "grate": "none"
+                }
+              },
+              "count": 0
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
+                  "grate": "sticks"
+                }
+              },
+              "count": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
+                  "grate": "none"
+                }
+              },
+              "count": 0
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
+                  "grate": "iron"
+                }
+              },
+              "count": 0
+            },
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:firepit",
+                "state": {
+                  "grate": "sticks"
+                }
+              },
+              "count": 4
             }
           ]
         }

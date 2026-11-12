@@ -1,0 +1,78 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": true,
+  "textures": {
+    "s0": "minecraft:block/stone",
+    "s1": "minecraft:block/andesite",
+    "s2": "minecraft:block/cobblestone",
+    "particle": "minecraft:block/stone"
+  },
+  "elements": [
+    {
+      "from": [
+        5.8,
+        0,
+        0.6
+      ],
+      "to": [
+        10.2,
+        3.0,
+        3.4
+      ],
+      "faces": {
+        "up": {
+          "texture": "#s0"
+        },
+        "north": {
+          "texture": "#s0"
+        },
+        "south": {
+          "texture": "#s0"
+        },
+        "west": {
+          "texture": "#s0"
+        },
+        "east": {
+          "texture": "#s0"
+        },
+        "down": {
+          "texture": "#s0",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        6.55,
+        3.0,
+        1.2
+      ],
+      "to": [
+        9.45,
+        3.9,
+        2.8
+      ],
+      "faces": {
+        "up": {
+          "texture": "#s0"
+        },
+        "north": {
+          "texture": "#s0"
+        },
+        "south": {
+          "texture": "#s0"
+        },
+        "west": {
+          "texture": "#s0"
+        },
+        "east": {
+          "texture": "#s0"
+        },
+        "down": {
+          "texture": "#s0",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "ambientocclusion": false,
   "textures": {
     "ash": "jaymospowers:block/ground/firepit_ash",
     "particle": "jaymospowers:block/ground/firepit_ash"
@@ -7,14 +8,14 @@
   "elements": [
     {
       "from": [
-        3,
+        3.5,
         0,
-        3
+        3.5
       ],
       "to": [
-        13,
+        12.5,
         0.5,
-        13
+        12.5
       ],
       "faces": {
         "up": {
@@ -40,14 +41,14 @@
     },
     {
       "from": [
-        4.5,
-        0.5,
-        4.5
+        5,
+        0,
+        5
       ],
       "to": [
-        11.5,
-        0.75,
-        11.5
+        11,
+        0.8,
+        11
       ],
       "faces": {
         "up": {
@@ -64,6 +65,10 @@
         },
         "east": {
           "texture": "#ash"
+        },
+        "down": {
+          "texture": "#ash",
+          "cullface": "down"
         }
       }
     }

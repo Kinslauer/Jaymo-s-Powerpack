@@ -2,6 +2,11 @@
   "multipart": [
     {
       "apply": {
+        "model": "jaymospowers:block/ground/firepit_ring"
+      }
+    },
+    {
+      "apply": {
         "model": "jaymospowers:block/ground/firepit_ash"
       }
     },
@@ -19,6 +24,22 @@
       },
       "apply": {
         "model": "jaymospowers:block/ground/firepit_fire"
+      }
+    },
+    {
+      "when": {
+        "grate": "sticks"
+      },
+      "apply": {
+        "model": "jaymospowers:block/ground/firepit_grate_sticks"
+      }
+    },
+    {
+      "when": {
+        "grate": "iron"
+      },
+      "apply": {
+        "model": "jaymospowers:block/ground/firepit_grate_iron"
       }
     }
   ]
