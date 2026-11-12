@@ -265,6 +265,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11: Andy on the Rig Forge: "they deserve a costume style UI" (RigForgeScreen, PR #1322).
 - 2026-11-11 5:10 PM ET (Andy): merge PR #1325 (Ocellan moon plan). Merged.
 - 2026-11-11: Andy: vigilantes fight villains (rivalries a player can join), and villagers talk about the costumed ones they've seen (PR #1332).
+- 2026-11-11 (Andy, four-mods thread): the Ninja Castle (Planet Minecraft, Tsk2craft) is the look for the Blossom kingdom's seat; he sent the world and a screenshot. No licence is stated, so the build is not shipped: `Blossom.tenshu` is our own castle in that style (moat and bridge, leaning stone footing, four storeys of grey turned-up roofs, front gables, ridge horns, gatehouse wing). Claude's calls, unconfirmed: about a third of the original's footprint so it fits the town, moat along the front only, grey stone-brick roofs for the castle while the town keeps dark tile.
 
 - 2026-11-11 (future-three-sided-war, PR #1335): Frostborn troopers in the future are hostile to everyone, players included (Andy, decision card).
 - 2026-11-11: Andy approved and merged PR #1333 (elemental powers: weakest ki aura, blind to mana and spirits) and its Lore.md paragraph "What an elemental user sees".
+- 2026-11-11: Andy approved the four Flame Avatar/Smoke lore paragraphs (skull under the fire, burning chain, Judgement, burning steeds); (new) markers removed.
+- 2026-11-11 (Andy, Blindness devout path, PR #1328): the Unseeing are a feral cult with a nonsense belief of their own; they do both the blindfold rite and the gouging; the blindfold and bandage must show; the gouged go mad and the zealous attack; shunned by other villagers, they live in enclaves in caves and the wild.
+- 2026-11-11 8:30 PM ET (Andy, four-mods thread): "Merge". Merged #1337 (Blossom castle) and the Eden Ring stack #1327, #1329, #1330, #1331. Weather and looks still waits on his ImmersiveVFX verdict.

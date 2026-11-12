@@ -140,12 +140,19 @@ kit.
   rite, and the devout of any of the eight take it (the Truth's clerics call it sorcery all the same). The ones who carve
   their eyes out do it once and never speak of it; they must bind the sockets or bleed out, and the sockets stay empty
   when they heal (Andy, 2026-11-11).
-  (new) **The Unseeing** (Claude's name for them, for Andy to approve): the devout who carve the eyes keep together as
-  the Unseeing, and they take followers. Out in the wild at night a traveller may come on one of their services: the
-  members, blindfolded, in a ring of candles round a follower; the chant ("What the eye takes in, it lies about"), the
-  eldest's cut, the binding, and the follower given their new sight. A watcher is left a blindfold for when they are
-  ready (Andy, 2026-11-11: "you should be able to stumble on a service of the members performing this on one of their
-  followers"). What they are given is not their eyes back: living things burn
+  **The Unseeing** (Andy, 2026-11-11: "add the unseeing as a feral cult, that believes in nonsense as an 8th belief")
+  are a feral cult with a belief of their own, beside the faiths: that the eye lies, that the sun is a great eye lying
+  to everyone, that the seven are painted faces and the Truth a book with no letters, and that when all are blind no
+  one can be watched. They keep two rites: the blindfold, tied on and never taken off, and the gouging, the eyes
+  carved out and the sockets bound in linen. The gouged lose their minds in time; the zealous among them hunt by ear
+  anyone who still has their eyes, and leave alone those who have taken the dark on themselves. Villagers who have
+  done it are shunned by their own, so the Unseeing live apart, in enclaves in caves and other dark places in the
+  wild, where they are safe to keep their belief. A traveller may come on one of their services at night out in the
+  wild: the members in a ring of candles round a follower, the chant ("What the eye takes in, it lies about"), the
+  blindfold or the cut, and the follower given their new sight; a watcher is left a blindfold for when they are ready
+  ("you should be able to stumble on a service of the members performing this on one of their followers").
+  (Claude, for Andy: the eight faiths already count the Truth as the eighth, so this reads the Unseeing's as a belief
+  outside them. It isn't a faith a player can swear to in Kingdoms.) What they are given is not their eyes back: living things burn
   through the dark for them, and at the ultimate's height they see themselves from high above, as the sky would.
 - **Chronokinesis**: the holder bends the flow of time, rewinding moments, freezing foes, hurrying themselves or the
   world. A Chrono can leap to the future (see *The future: Los Perrito*).
@@ -227,17 +234,17 @@ traits, never as a system.
 heat here feels like home. Too much like home."), and then the fire takes them whole: Consumed. Water takes the fire
 back out, and they are only Emberborn again.
 
-**The skull under the fire.** (new) When an avatar's fire is at its highest the face burns away to a bare skull wreathed
+**The skull under the fire.** When an avatar's fire is at its highest the face burns away to a bare skull wreathed
 in flame; as the fire gutters the face comes back. Nobody made it: it is what the fire does when it wins.
 
-**The burning chain.** (new) A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
+**The burning chain.** A flail or whip swung by one of the Smoke comes out hot. It sets alight what it strikes,
 and the Smoke-born wrap a foe with it and drag him in, or swing him round them. The smoke teaches it; no smith makes it.
 
-**Judgement.** (new) An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
+**Judgement.** An Emberborn who has become a Flame Avatar and carries the Smoke can hold a person's eyes and let
 what that person has done burn them. The avatars say "the fire reads". It reads the same ledger the Judge weighs (karma):
 the villagers and players killed, crimes against a realm, outlaw standing. The blameless feel nothing.
 
-**The burning steeds.** (new) The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
+**The burning steeds.** The Flame Avatars' camps in the Nether keep horses whose manes and hooves burn: the first
 living things the fire did not consume. A burning steed is faster than any horse of the Overworld, trails flame, and
 crosses water and lava as though they were stone. It carries only an avatar or one of the Smoke, whose smoke it knows as
 kin to the fire; anyone else is burned and thrown.
@@ -363,8 +370,14 @@ there is no road, and nobody below has the ships. Sky kingdoms deal with each ot
 
 (new) **The blossom towns.** Where a cherry grove is wide and level enough, the blossom folk build a town instead of a
 village: a gate of red posts, a lantern road to the bell, houses and job halls along cross streets, a shrine, and at
-the head of the road a three-storey keep with flared roofs, which is the lord's seat. A blossom town is a kingdom like
-any other great town, and keeps its own style of name.
+the head of the road the lord's castle. A blossom town is a kingdom like any other great town, and keeps its own style
+of name.
+
+(new) **The blossom castle.** The blossom lords build their seat the same way wherever they rule: a moat and a stone
+bridge, a footing of rough stone that leans in as it climbs, and on it a white keep of four storeys under grey tiled
+roofs whose corners turn up, with a pair of pale horns on the top ridge and a gatehouse against one side. The lord
+sits in a niche at the far end of the great room, between two raised matted floors where his people kneel. The grey
+tile is the castle's alone; the town below roofs in dark tile.
 
 ## The shape of the world
 
