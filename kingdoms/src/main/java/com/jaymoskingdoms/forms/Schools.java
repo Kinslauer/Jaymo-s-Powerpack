@@ -224,7 +224,7 @@ public final class Schools {
 		if (isMask(worn)) {
 			player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 			if (!player.getInventory().add(worn)) {
-				player.drop(worn, false);
+				player.drop(worn, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.school.mask_off", worn.getHoverName()));
 			return true;

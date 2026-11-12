@@ -42,14 +42,14 @@
   "tidings.jaymoskingdoms.rival.land.0": "The guards of %1$s keep to %2$s and look down on those who follow %3$s. They were not warm to you.",
   "tidings.jaymoskingdoms.rival.land.1": "In %1$s they speak of %3$s with scorn. You are known there as one of its students.",
   "tidings.jaymoskingdoms.rival.land.2": "%1$s's watch of %2$s eyes you coldly. Their realm is at odds with the home of %3$s.",
-  "tidings.jaymoskingdoms.bout.bracket": "The festival bout of %1$s: %2$s rounds. You fight %3$s.",
+  "tidings.jaymoskingdoms.bout.bracket": "The school bout of %1$s: %2$s rounds. You fight %3$s.",
   "tidings.jaymoskingdoms.bout.round": "Round %1$s of %2$s: you meet %3$s.",
   "tidings.jaymoskingdoms.bout.final": "The final, round %1$s of %2$s: you meet %3$s.",
   "tidings.jaymoskingdoms.bout.advance": "You won round %1$s of %2$s and move on in the bracket.",
-  "tidings.jaymoskingdoms.bout.won": "You won the festival bout of %1$s. Your name will be said in %2$s.",
+  "tidings.jaymoskingdoms.bout.won": "You won the school bout of %1$s. Your name will be said in %2$s.",
   "tidings.jaymoskingdoms.bout.lost": "You fell in the festival bout and are out of the bracket.",
   "tidings.jaymoskingdoms.bout.out": "The festival bout ended without a win, and you are out of the bracket.",
-  "tidings.jaymoskingdoms.bout.walked": "You left the festival bout, and the bracket was called off.",
+  "tidings.jaymoskingdoms.bout.walked": "You left the bout, and the bracket was called off.",
   "tidings.jaymoskingdoms.bout.no_show": "Your next fighter was not there to meet you, and the bracket was called off.",
   "tidings.jaymoskingdoms.inbalm.thessaly.saw": "Through borrowed eyes, Thessaly read: %1$s",
   "tidings.jaymoskingdoms.inbalm.thessaly.hunt": "Through borrowed eyes, Thessaly saw %1$s sharpening blades. They mean to hunt you.",
@@ -58,5 +58,6 @@
   "tidings.jaymoskingdoms.captain.sworn_fell": "%1$s, sworn to you, has fallen.",
   "tidings.jaymoskingdoms.cinder_forge": "Miners speak of a smith in the Nether, Ignis Vael of the Cinder Forge; the Overworld's smiths sell wayfinders to him.",
   "tidings.jaymoskingdoms.drill.taught_skill": "%s drilled you until you had it: %s.",
-  "tidings.jaymoskingdoms.trial.spell": "%s showed you the shape of a new spell: %s."
+  "tidings.jaymoskingdoms.trial.spell": "%s showed you the shape of a new spell: %s.",
+  "tidings.jaymoskingdoms.bout.withdrew": "You withdrew from the bout."
 }

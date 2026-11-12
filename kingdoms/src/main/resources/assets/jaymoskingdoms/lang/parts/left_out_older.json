@@ -83,5 +83,17 @@
   "message.jaymoskingdoms.revive.mutated.nightmare": "Under the blood moon, %s burns into a Nightmare.",
   "message.jaymoskingdoms.revive.mutated.bat_horse": "Under the blood moon, %s grows leather wings. It's a Bat Horse now.",
   "message.jaymoskingdoms.school.mask_off": "You take off your %s.",
-  "message.jaymoskingdoms.school.mask_on": "You put on your %s."
+  "message.jaymoskingdoms.school.mask_on": "You put on your %s.",
+  "gui.jaymoskingdoms.bout.title": "The school bout of %s",
+  "gui.jaymoskingdoms.bout.tavern_title": "The tavern bout of %s",
+  "gui.jaymoskingdoms.bout.round": "Round %s",
+  "gui.jaymoskingdoms.bout.final": "Final",
+  "gui.jaymoskingdoms.bout.won": "Won",
+  "gui.jaymoskingdoms.bout.next": "Next",
+  "gui.jaymoskingdoms.bout.ready_ask": "Your next fighter is waiting. The round starts when you say you're ready.",
+  "gui.jaymoskingdoms.bout.champion": "You won every round.",
+  "gui.jaymoskingdoms.bout.ready": "Ready",
+  "gui.jaymoskingdoms.bout.withdraw": "Withdraw",
+  "gui.jaymoskingdoms.bout.later": "Not yet",
+  "gui.jaymoskingdoms.bout.close": "Close"
 }
