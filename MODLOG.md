@@ -2927,3 +2927,9 @@ this update get them.
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
 - **Not built locally and not played.** The session that wrote it could not reach the build's download hosts; the PR
   checks are its compile. `docs/wind.md` has the numbers and test steps.
+
+## 0.22.49 (2026-11-12): Belly flops into water hurt (#1263)
+
+- Falling into water from 4+ blocks now hurts unless you went in head first: a belly flop deals real fall damage scaled by fall height and impact speed (about 6 HP from 12 blocks, topping out at 8 HP); a cannonball - feet first, tucked - is the middle case (capped at 4 HP); a clean dive takes nothing (landing from a sky dive, spread flat, is a belly flop), and so does going in head first without Sneak (looking down, Leap of Faith's dive, a Wind user's dive). Short drops stay harmless.
+- The entry pose shows on everyone in view: cannonball tucked into a ball, belly flop flat on impact with a short wince, clean dive with arms forward over the head - each eases out under water.
+- Built; not played in game.

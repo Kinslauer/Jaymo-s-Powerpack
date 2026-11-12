@@ -11403,3 +11403,7 @@ Built and compiled, not played. Needs Jaymo's Powers; without it the camps raise
 - **Town layout** (`BlossomVillages`): the castle starts 5 blocks nearer the bell, the shrine moved 5 blocks left, the last pair of road lanterns moved up, and the ground is cleared 32 high instead of 26. The footing is the land's own stone so the panic room is still dug under the throne.
 - Existing Blossom towns keep their old keep; only towns founded after this get the castle (`/kingdom found blossomtown` to see one).
 - Built (compiles); not seen in game.
+
+## 0.7.752 (2026-11-12): Loading-screen hint for belly flops (#1263)
+
+- A new loading-screen hint: a belly flop from high up hurts like a fall, a cannonball stings less, and a head-first dive slips in clean.
