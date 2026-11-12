@@ -1,13 +1,24 @@
-# The big suit: fury, brute moves, goo forms and a symbiote that answers back
+# Aliens: new moves for twenty Xeno-Band bodies
 
-- **Fury.** The big suit builds heat from blows given and taken (bar on the HUD). At full it hits harder, reaches further and stands taller, and a roar at full lets it all out in one bigger blast. The longer you refuse the big suit, the more fury it starts with. The roar now scares mobs off and slows players near it.
-- **The slow walk.** With its tendrils drawn in, the big suit never runs, walks faster, steps up full blocks and is almost impossible to shove.
-- **Close combat.** With something held in the left hand: swing it by the ankle into others, or pound it into the ground. A well-timed counter catches the attacker and slams them. A friend can be carried over the shoulders and thrown. Sprint and G on a big beast latches on and rides it while it is bitten.
-- **Brute moves.** G at a block rips a chunk loose to hold overhead and throw. Sneak and G at the ground tears a line of earth up under your foes. A long sprint becomes a shoulder ram that flings the first thing hit and bursts through wood, glass and leaves. G near a tree (with Kingdoms) lifts it to throw.
-- **Goo forms** (new keys, rebindable): Puddle (P) melts you flat so blows pass over and gaps let you through, Spit (O) blinds and slows and leaves a slowing patch, Goo Wall (;) throws up a short-lived wall, or a dome over you and friends while sneaking.
-- **Scent.** The black strain smells living things through walls, the wounded in red.
-- **It answers you.** Start a chat line with `~` and only the symbiote hears it; it replies about its hunger, its mood, what you are fighting, and more.
-- **Grudges.** It remembers who hurt you, nags when they are near, and trusts you more when you settle one. Shown on its Status page.
-- **Meeting it.** The first time the bond is whole, a short skippable film shows it face to face, where you stand.
+Most of these sit on a sneak-press or a Z tap of a key the alien already had, so nothing old is lost.
+
+- **Bulwark**: a fury bar that fills with blows given and taken (harder hits, less knockback at full); a long sprint becomes a charge through wood and stone; sneak + V with something held is a suplex.
+- **Tusk**: sneak + R is a rampage that fells trees and gores everything in its path.
+- **Towerback**: R with nothing to grab tears up a slab of ground to throw.
+- **Gorger**: while rolled up, V bowls along and rebounds off walls harder each time, G is a rising strike, and fireballs are batted away.
+- **Prowl**: Z tap puts the claws out (longer reach, pounce latches onto the prey's back for swipes, a stab and a kick); R while sprinting is a lunge; cuts close fast, lost limbs stay lost.
+- **Howl**: sneak + V picks one scent: its trail hangs in the air, the bleeding show through walls, and Howl hits that prey harder.
+- **Lurk**: takes the colour of the wall or ground it touches, fades when crouched and still, and builds a stronger first blow on whoever it watches unseen.
+- **Talon**: sneak + R in the air is a takedown dive, harder the further it fell, with a wingbeat on landing.
+- **Tail sweep**: Prowl (sneak + G), Howl, Slipfin and Gnasher (Z tap), and Warrior-born Z Fighters with the tail out (sneak + Z in the air) stun everyone within 2 blocks.
+- **Ooze**: sneak + G lashes a long arm in an arc, sneak + R wraps and drags, sneak + B is a mallet slam, and shots bounce off the jelly.
+- **Lumen**: a charge that makes shapes of light. Z tap picks the shape, sneak + V makes it: beam, dome, grabbing hand, missiles, a great thrown block, and a wall, bridge or cage of short-lived light blocks.
+- **Mirage**: sneak + V wears the face of a creature or player you look at; its kind leave you alone until you strike.
+- **Wisp**: V while phasing readies a hand that passes through armour; Z tap thins out (half damage, a blow sinks you through the floor to rise behind the attacker).
+- **Cortex**: reads whoever struck it on the HUD; sneak + G pushes with a thought, sneak + V fills a head with visions, and holding sneak + B stares enemies into walking to its feet.
+- **Fuse**: Z tap smothers a lit creeper, primed TNT or a fire; hurt taken fills a bar to let go with sneak + B, and a last-resort shell saves it once below a third health.
+- **Rivet**: Z tap is a pulse that stalls machines and seizes creatures; sneak + Z opens iron doors and flips levers, buttons and lamps.
+- **Hive**: B sends out five flyers that share its health. Z tap changes formation (close in, surround, strafe, scout), B again fires one as a missile, sneak + B calls them in as a shell.
+- **Murk, Slipfin, Gnasher**: under water the shoal comes to fight (Murk sneak + B, Slipfin sneak + G); Murk's Z tap is a tentacle that grabs and throws; Gnasher's sneak + V is a whirlpool and the drowned side with it while it holds a trident; Slipfin's sneak + R is a dome of water that stops shots.
 
 Nothing here has been played in a client yet; expect tuning.
