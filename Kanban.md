@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 06:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 06:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/downed-execution-reactions|downed-execution-reactions]] · 💻 Odysseus · #1356 · in-review
 
 
 ## Needs Andy
