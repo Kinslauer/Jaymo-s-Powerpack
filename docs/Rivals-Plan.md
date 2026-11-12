@@ -165,8 +165,9 @@ Andy picked all 34 rows (2026-11-06).
 - Patch 0 (Kingdoms 0.7.614): `Rivals` core; ladders for barbarian warbands, illager hosts and pirate coves (camps), the
   risen dead and the Hornkin (rising from the land); world-tier growth; temperament lines and choices.
 - Patch 1 (Kingdoms 0.7.616): 15 new traits and 4 signature moves (`CaptainWays`), learning from how they lost, six
-  visible marks (`CaptainMarks`, `tools/gen_scars.py`). Still to do: hook hand and wooden leg; marks on illagers; senses
-  ki, sworn to a patron, bog iron, never sleeps, hates fire mages (folded into watchful and witch hunter for now).
+  visible marks (`CaptainMarks`, `tools/gen_scars.py`). Later (Andy, 2026-11-12, "please add them all"): a hook
+  or a peg for a limb he came back without, marks on illagers, and senses ki, sworn to a patron, bog iron, never sleeps
+  and hates fire mages as traits of their own.
 - Patch 2 (Kingdoms 0.7.617): bodyguards (turned ones stab their boss), plants both ways (yours via "Plant in Camp",
   theirs hidden as town villagers, unmasked by a Will staredown), poisoned feasts, rigged duels, quick kills framed on
   another captain, and prices on the heads of captains who kill players (`CaptainSchemes`).

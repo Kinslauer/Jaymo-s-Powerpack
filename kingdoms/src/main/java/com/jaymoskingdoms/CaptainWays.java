@@ -120,6 +120,15 @@ public final class CaptainWays {
 	/** Grab: in this range, how hard (times his blow), how far up and out he throws you. */
 	static final double GRAB_RANGE = 2.6, GRAB_UP = 0.7, GRAB_OUT = 1.3;
 	static final float GRAB_HIT = 0.9F;
+	/** A ki sensor feels a ki user this far (through walls, hidden or not). */
+	static final double KI_RANGE = 40.0;
+	/** Sworn to a patron: his blows on another god's faithful times this; his own god's faithful's blows on him times this. */
+	static final float PATRON_FOE = 1.25F, PATRON_OWN = 1.5F;
+	/** Bog iron: armour more (no slower), none while he's wet. */
+	static final double BOG_ARMOUR = 5.0;
+	/** A fire-mage hater finds one this far, and hits them this many times as hard. */
+	static final double FIRE_MAGE_RANGE = 24.0;
+	static final float FIRE_MAGE = 1.5F;
 	/** Lines for each move and each new trait's doing. */
 	static final int LINES = 2;
 	// ================================================================================================================
@@ -142,6 +151,12 @@ public final class CaptainWays {
 
 	/** The marks a captain's body can show, in bit order ({@link #SHOWN}); a scar entry is {@code mark:<name>}. */
 	public static final List<String> MARKS = List.of("burned", "eye_patch", "iron_jaw", "stitched", "pale_eye", "claws");
+	/**
+	 * (Andy, 2026-11-12: "please add them all") What he wears for a limb he came back without: a hook for a lost arm, a
+	 * peg for a lost leg, in {@link #SHOWN}'s bits from {@link #LIMB_BIT} in this order.
+	 */
+	public static final List<String> LIMBS = List.of("hook_right", "hook_left", "peg_right", "peg_left");
+	public static final int LIMB_BIT = 16;
 	static final String MARK = "mark:", LEARNED = "learned:";
 
 	/** On a captain's body: the bits of the {@link #MARKS} he shows. Saved, and sent to every client. */
@@ -149,7 +164,7 @@ public final class CaptainWays {
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	private static final Identifier IRON_ARMOUR_ID = JaymosKingdoms.id("captain_iron_clad"), IRON_SPEED_ID = JaymosKingdoms.id("captain_iron_slow"),
-		HEAVY_ID = JaymosKingdoms.id("captain_heavy_footed");
+		HEAVY_ID = JaymosKingdoms.id("captain_heavy_footed"), BOG_ID = JaymosKingdoms.id("captain_bog_iron");
 
 	/** A move on its way: which, at whom, when it goes. */
 	private record Pending(Trait move, LivingEntity target, long at) {
@@ -170,6 +185,8 @@ public final class CaptainWays {
 	static final int HOT_BURN_SECONDS = 3;
 	/** His wolves, and when they go. */
 	private static final Map<Wolf, Long> PACK = new WeakHashMap<>();
+	/** A fire-mage hater's body, and the player who last burned him. */
+	private static final Map<UUID, UUID> BURNED_BY = new HashMap<>();
 	private static boolean redealing;
 
 	private CaptainWays() {
@@ -204,6 +221,10 @@ public final class CaptainWays {
 		AttributeInstance armour = mob.getAttribute(Attributes.ARMOR), speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (armour != null) {
 			armour.removeModifier(IRON_ARMOUR_ID);
+			armour.removeModifier(BOG_ID);
+			if (c.has(Trait.BOG_IRON)) {
+				armour.addPermanentModifier(new AttributeModifier(BOG_ID, BOG_ARMOUR, AttributeModifier.Operation.ADD_VALUE));
+			}
 			if (c.has(Trait.IRON_CLAD)) {
 				armour.addPermanentModifier(new AttributeModifier(IRON_ARMOUR_ID, IRON_ARMOUR, AttributeModifier.Operation.ADD_VALUE));
 			}
@@ -229,6 +250,16 @@ public final class CaptainWays {
 			int i = s.startsWith(MARK) ? MARKS.indexOf(s.substring(MARK.length())) : -1;
 			if (i >= 0) {
 				bits |= 1 << i;
+			}
+			int limb = LIMBS.indexOf(switch (s) {
+				case "right_arm" -> "hook_right";
+				case "left_arm" -> "hook_left";
+				case "right_leg" -> "peg_right";
+				case "left_leg" -> "peg_left";
+				default -> "";
+			});
+			if (limb >= 0) {
+				bits |= 1 << (LIMB_BIT + limb);
 			}
 		}
 		if (bits == 0) {
@@ -368,6 +399,13 @@ public final class CaptainWays {
 		if (Captains.has(self, Trait.WITCH_HUNTER) && magic(source)) {
 			out *= WITCH_HUNTER;
 		}
+		if (Captains.has(self, Trait.PATRON_SWORN) && source.getEntity() instanceof Player by && patron(self) != null && Patrons.of(by) == patron(self)) {
+			// his own god's faithful: his god won't stand between them
+			out *= PATRON_OWN;
+		}
+		if (Captains.has(self, Trait.HATES_FIRE_MAGES) && source.is(DamageTypeTags.IS_FIRE) && source.getEntity() instanceof Player by) {
+			BURNED_BY.put(self.getUUID(), by.getUUID());
+		}
 		if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by) {
 			ItemStack held = by.getMainHandItem();
 			if (Captains.has(self, Trait.IRON_JAW) && (held.isEmpty() || PowersCompat.blunt(held))) {
@@ -383,10 +421,20 @@ public final class CaptainWays {
 
 	/** (From {@link Captains#dealt}) a blow by {@code by}, a captain, on {@code victim}. */
 	static float gives(LivingEntity by, LivingEntity victim, DamageSource source, float amount) {
+		float out = amount;
 		if (Captains.has(by, Trait.EXECUTIONER) && Downed.isDowned(victim)) {
-			return amount * EXECUTIONER;
+			out *= EXECUTIONER;
 		}
-		return amount;
+		if (Captains.has(by, Trait.PATRON_SWORN) && victim instanceof Player p) {
+			Patron his = patron(by), theirs = Patrons.of(p);
+			if (his != null && theirs != null && theirs != his) {
+				out *= PATRON_FOE;
+			}
+		}
+		if (Captains.has(by, Trait.HATES_FIRE_MAGES) && fireMage(by, victim)) {
+			out *= FIRE_MAGE;
+		}
+		return out;
 	}
 
 	/** {@code by} stands before {@code self}, within his shield's half. */
@@ -496,6 +544,13 @@ public final class CaptainWays {
 			READING.remove(id);
 			mob.removeTag(MobCombat.UNPARRYABLE_TAG);
 		}
+		if (mob.tickCount % 20 == 0) {
+			bogIron(level, mob);
+			if (Captains.has(mob, Trait.NEVER_SLEEPS) && mob.isSleeping()) {
+				// never caught abed
+				mob.stopSleeping();
+			}
+		}
 		if (target == null) {
 			if (mob.tickCount % 20 == 0) {
 				seek(level, mob);
@@ -515,6 +570,16 @@ public final class CaptainWays {
 		}
 		if (Captains.has(mob, Trait.PACK_LEADER) && PACKED.add(id)) {
 			pack(level, mob, target, now);
+		}
+		if (Captains.has(mob, Trait.HATES_FIRE_MAGES) && mob.tickCount % 20 == 0 && !fireMage(mob, target)) {
+			// a fire mage in reach comes first, whoever else he's fighting
+			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, mob.getBoundingBox().inflate(FIRE_MAGE_RANGE),
+				p -> MobCombat.foe(mob, p) && fireMage(mob, p))) {
+				mob.setTarget(p);
+				target = p;
+				say(level, mob, p, "hates_fire_mages");
+				break;
+			}
 		}
 		if (Captains.has(mob, Trait.EXECUTIONER) && mob.tickCount % 20 == 0 && !Downed.isDowned(target)) {
 			for (Player p : level.getEntitiesOfClass(Player.class, mob.getBoundingBox().inflate(EXECUTE_RANGE), p -> Downed.isDowned(p) && MobCombat.foe(mob, p))) {
@@ -537,7 +602,24 @@ public final class CaptainWays {
 
 	/** With no foe: a blood tracker smells out a bleeding player; a watchful one sees one sneaking or unseen. */
 	private static void seek(ServerLevel level, PathfinderMob mob) {
-		boolean tracker = Captains.has(mob, Trait.BLOOD_TRACKER), watchful = Captains.has(mob, Trait.WATCHFUL);
+		boolean tracker = Captains.has(mob, Trait.BLOOD_TRACKER), watchful = Captains.has(mob, Trait.WATCHFUL)
+			|| Captains.has(mob, Trait.NEVER_SLEEPS) && level.isDarkOutside();
+		if (Captains.has(mob, Trait.SENSES_KI)) {
+			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, mob.getBoundingBox().inflate(KI_RANGE),
+				p -> MobCombat.foe(mob, p) && "zfighter".equals(PowersCompat.power(p)))) {
+				mob.setTarget(p);
+				say(level, mob, p, "senses_ki");
+				return;
+			}
+		}
+		if (Captains.has(mob, Trait.HATES_FIRE_MAGES)) {
+			for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, mob.getBoundingBox().inflate(FIRE_MAGE_RANGE),
+				p -> MobCombat.foe(mob, p) && fireMage(mob, p) && mob.hasLineOfSight(p))) {
+				mob.setTarget(p);
+				say(level, mob, p, "hates_fire_mages");
+				return;
+			}
+		}
 		if (!tracker && !watchful) {
 			return;
 		}
@@ -551,6 +633,44 @@ public final class CaptainWays {
 					Recollections.nameTo(p, mob)), Speech.RED, Captains.SAY_RANGE);
 				return;
 			}
+		}
+	}
+
+	private static void say(ServerLevel level, PathfinderMob mob, ServerPlayer p, String key) {
+		Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.ways." + key + "." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob)),
+			Speech.RED, Captains.SAY_RANGE);
+	}
+
+	/** The god a patron-sworn captain is sworn to: one of the seven, by his id (the same every time he comes back). */
+	static @Nullable Patron patron(LivingEntity mob) {
+		Captain c = Captains.of(mob);
+		if (c == null) {
+			return null;
+		}
+		Patron[] seven = java.util.Arrays.stream(Patron.values()).filter(p -> p != Patron.TRUTH).toArray(Patron[]::new);
+		return seven[Math.floorMod(c.id().hashCode(), seven.length)];
+	}
+
+	/** A fire mage, to one who hates them: Ember's power, or whoever has burned him. */
+	static boolean fireMage(LivingEntity captain, LivingEntity who) {
+		return who instanceof Player p && ("ember".equals(PowersCompat.power(p)) || p.getUUID().equals(BURNED_BY.get(captain.getUUID())));
+	}
+
+	/** Bog iron: soft with rust while he's wet, back to its strength once he's dry. */
+	private static void bogIron(ServerLevel level, PathfinderMob mob) {
+		if (!Captains.has(mob, Trait.BOG_IRON)) {
+			return;
+		}
+		AttributeInstance armour = mob.getAttribute(Attributes.ARMOR);
+		if (armour == null) {
+			return;
+		}
+		boolean wet = mob.isInWaterOrRain();
+		if (wet && armour.hasModifier(BOG_ID)) {
+			armour.removeModifier(BOG_ID);
+			level.playSound(null, mob.blockPosition(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.HOSTILE, 0.8F, 0.6F);
+		} else if (!wet && !armour.hasModifier(BOG_ID)) {
+			armour.addPermanentModifier(new AttributeModifier(BOG_ID, BOG_ARMOUR, AttributeModifier.Operation.ADD_VALUE));
 		}
 	}
 
@@ -778,6 +898,7 @@ public final class CaptainWays {
 	/** (From {@link Captains#died}) he's gone: what this class kept on his body. */
 	static void forget(UUID body) {
 		PARRIED.remove(body);
+		BURNED_BY.remove(body);
 		READING.remove(body);
 		NEXT_MOVE.remove(body);
 		NEXT_THROW.remove(body);
