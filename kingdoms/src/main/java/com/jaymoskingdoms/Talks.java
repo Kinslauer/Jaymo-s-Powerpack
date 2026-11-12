@@ -56,7 +56,7 @@ public final class Talks {
 	/** Lines for having nothing to say, and for sulking. */
 	static final int NONE_LINES = 3, SULK_LINES = 3;
 	/** How many rumour fallback lines exist (no news, and a clammed-up villager). */
-	static final int RUMOUR_NONE_LINES = 2, RUMOUR_CLAM_LINES = 2;
+	static final int RUMOUR_NONE_LINES = 4, RUMOUR_CLAM_LINES = 2;
 
 	private static final String KEY = "talk.jaymoskingdoms.word.";
 

@@ -209,6 +209,14 @@ public final class ZFighterComboPose {
 				TORSO, 0.0F, FWD, 0.15F, HEADX, 0.25F},
 			new float[] {DY, 0.38F, RLX, -1.5F},
 			new float[] {DY, -0.07F, LLX, -0.35F, RLX, 0.35F, PITCH, 0.15F}, 0.0F, 0.0F);
+		// the tornado kick: a hop and a wind-up, then all the way round in the air, the heel swung out wide at head height,
+		// the arms flung out, the other leg tucked; down into a crouch
+		art(ZFighterCombo.TORNADO_KICK,
+			new float[] {DY, 0.12F, RLX, 0.3F, LLX, -0.4F, PITCH, 0.1F, RAX, -1.45F, LAX, -1.45F, HEADX, 0.15F, TORSO, 0.2F, HIPS, 0.3F},
+			new float[] {DY, 0.55F, RLX, -0.4F, RLZ, 1.5F, LLX, 0.25F, LLZ, -0.1F, ROLL, 0.4F, PITCH, 0.0F, RAX, -0.5F, RAZ, 0.6F, LAX, -0.6F,
+				LAZ, -0.6F, HIPS, 0.0F, TORSO, 0.0F, HEADX, 0.1F},
+			new float[] {DY, 0.4F, RLZ, 1.2F, ROLL, 0.3F},
+			new float[] {DY, -0.08F, RLX, 0.15F, LLX, -0.3F, PITCH, 0.12F}, -0.6F, -1.0F);
 		// the rising dragon fist: crouched deep and wound right round, the fist low by the hip, then up off the ground in a
 		// corkscrew, the fist driven straight up through it, eyes following it; down into a crouch
 		art(ZFighterCombo.DRAGON_FIST,

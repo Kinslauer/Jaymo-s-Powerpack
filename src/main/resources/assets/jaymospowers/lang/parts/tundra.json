@@ -1,0 +1,15 @@
+{
+	"block.jaymospowers.banded_iron_ore": "Banded Iron Ore",
+	"block.jaymospowers.white_ice": "White Ice",
+	"block.jaymospowers.dwarfed_spruce_log": "Dwarfed Spruce Log",
+	"block.jaymospowers.dwarfed_spruce_post": "Dwarfed Spruce Post",
+	"block.jaymospowers.stripped_dwarfed_spruce_log": "Stripped Dwarfed Spruce Log",
+	"block.jaymospowers.stripped_dwarfed_spruce_post": "Stripped Dwarfed Spruce Post",
+	"block.jaymospowers.stunted_red_shrub": "Stunted Red Shrub",
+	"block.jaymospowers.orange_shrub": "Orange Shrub",
+	"block.jaymospowers.yellow_shrub": "Yellow Shrub",
+	"block.jaymospowers.yellow_moss": "Yellow Moss",
+	"block.jaymospowers.yellow_moss_carpet": "Yellow Moss Carpet",
+	"block.jaymospowers.sprouted_glow_lichen": "Sprouted Glow Lichen",
+	"block.jaymospowers.snipped_glow_lichen": "Snipped Glow Lichen"
+}

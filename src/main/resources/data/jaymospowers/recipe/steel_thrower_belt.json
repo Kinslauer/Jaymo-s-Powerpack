@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " N ",
+    "NBN",
+    " N "
+  ],
+  "key": {
+    "N": "jaymospowers:steel_nugget",
+    "B": "jaymospowers:iron_thrower_belt"
+  },
+  "result": {
+    "id": "jaymospowers:steel_thrower_belt"
+  }
+}

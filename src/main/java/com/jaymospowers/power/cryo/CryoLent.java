@@ -76,8 +76,26 @@ public final class CryoLent {
 		CryoMoves.tick(player);
 	}
 
+	/** The cold gaze, held while {@code down} (sneak + the breath key). */
+	public static void eyes(ServerPlayer player, boolean down) {
+		CryoPicks.eyes(player, down);
+	}
+
+	public static boolean gazing(ServerPlayer player) {
+		return CryoPicks.gazing(player);
+	}
+
+	public static void volley(ServerPlayer player) {
+		CryoPicks.volley(player);
+	}
+
+	public static void ball(ServerPlayer player) {
+		CryoPicks.ball(player);
+	}
+
 	/** The lend ends: everything running stops, with no cooldown of Cryokinesis's own. */
 	public static void end(ServerPlayer player) {
+		CryoPicks.end(player);
 		CryoSlide.stop(player, false);
 		CryoBreath.stop(player, false);
 		CryoBlizzard.end(player, false);

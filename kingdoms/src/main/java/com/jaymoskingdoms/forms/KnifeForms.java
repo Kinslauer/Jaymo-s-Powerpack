@@ -124,11 +124,14 @@ public final class KnifeForms {
 		forms.put(MARKED_QUARRY.id(), MARKED_QUARRY);
 		forms.put(CAST_OFF_CLOAK.id(), CAST_OFF_CLOAK);
 		forms.put(TANGLE_CORD.id(), TANGLE_CORD);
+		RogueForms.addTo(forms);
 	}
 
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Mark.TYPE, Mark.CODEC);
 		Bolas.register();
+		Lasso.register();
+		RogueForms.register();
 		ServerTickEvents.END_SERVER_TICK.register(KnifeForms::tick);
 		// the straw figure takes no harm, so mobs keep swinging at it for its whole time
 		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
@@ -170,6 +173,8 @@ public final class KnifeForms {
 			cloak(level, player);
 		} else if (form == TANGLE_CORD) {
 			cord(level, player, rank);
+		} else {
+			RogueForms.perform(player, form, rank);
 		}
 	}
 

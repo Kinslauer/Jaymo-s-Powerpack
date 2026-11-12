@@ -27,6 +27,24 @@ public final class SeasonTints {
 		{0x86704F, 70, 0x9C9A82, 55},
 		{0x7E7652, 50, 0x8F9A70, 40},
 	};
+	/**
+	 * The tundra's own year, grass only (its shrubs carry their own colour): green-gold in the short summer, then the
+	 * orange and red the autumn tundra is known for, and a dull straw through winter.
+	 */
+	private static final int[][] TUNDRA_TINT = {
+		{0x9A9460, 35}, // early spring: last year's straw
+		{0x9CB06A, 20},
+		{0x8FB86A, 25},
+		{0x86B862, 30}, // summer: as green as it gets
+		{0x9DB45C, 25},
+		{0xC9A640, 40},
+		{0xD98A2E, 60}, // autumn
+		{0xD0602A, 70},
+		{0xB8452C, 70},
+		{0x9A7A52, 60}, // winter
+		{0x968A66, 55},
+		{0x988F68, 50},
+	};
 	/** The part of the year the chunks were last drawn for, or -1. */
 	private static int drawn = -1;
 
@@ -60,6 +78,9 @@ public final class SeasonTints {
 	}
 
 	public static int grass(float baseTemperature, int color) {
+		if (Seasons.tundra(baseTemperature)) {
+			return mix(color, TUNDRA_TINT[stage()][0], TUNDRA_TINT[stage()][1]);
+		}
 		return Seasons.temperate(baseTemperature) ? mix(color, TINT[stage()][2], TINT[stage()][3]) : color;
 	}
 

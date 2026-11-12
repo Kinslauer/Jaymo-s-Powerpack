@@ -212,7 +212,9 @@ public final class Introductions {
 
 	/** {@code player} now knows {@code e}'s name. True if they didn't before. */
 	static boolean learn(ServerPlayer player, Entity e) {
-		return learn(player, e.getUUID());
+		boolean fresh = learn(player, e.getUUID());
+		JournalLog.person(player, e);
+		return fresh;
 	}
 
 	/** (0.7.473) {@code player} now knows the name of whoever has the id {@code id} (a dead player whose face they've seen). */

@@ -98,5 +98,9 @@ public class ThrowingWeaponItem extends Item {
 			weapon.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
 		level.playSound(null, weapon, SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.8F, 1.3F);
+		if (player instanceof net.minecraft.server.level.ServerPlayer server) {
+			// a Z Fighter's ki may be in it
+			com.jaymospowers.power.zfighter.ZFighterKiThrow.thrown(server, weapon, ItemStack.EMPTY);
+		}
 	}
 }

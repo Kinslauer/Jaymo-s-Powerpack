@@ -1,0 +1,21 @@
+{
+  "items": {
+    "jaymoskingdoms:gaunts_heart": {
+      "frost": 5,
+      "beast": 5,
+      "death": 4,
+      "shadow": 3,
+      "spirit": 2,
+      "war": 2
+    }
+  },
+  "entities": {
+    "jaymoskingdoms:gaunt": {
+      "frost": 4,
+      "beast": 6,
+      "death": 4,
+      "shadow": 3,
+      "war": 2
+    }
+  }
+}

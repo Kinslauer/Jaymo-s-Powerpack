@@ -136,6 +136,8 @@ public final class ChronoPower implements Power {
 		Powers.register(INSTANCE);
 		PayloadTypeRegistry.clientboundPlay().register(ChronoSync.TYPE, ChronoSync.CODEC);
 		StasisField.registerLocks();
+		ChronoCalculation.init();
+		ChronoDecoys.init();
 		ChronoSpeed.register();
 		ChronoEchoes.init();
 		ChronoDirectives.init();
@@ -263,6 +265,8 @@ public final class ChronoPower implements Power {
 		ChronoMemory.forget(player);
 		ChronoDirectives.forget(player);
 		ChronoCheatDeath.forget(player);
+		ChronoCalculation.forget(player);
+		ChronoDecoys.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];
@@ -442,6 +446,15 @@ public final class ChronoPower implements Power {
 			&& (!com.jaymospowers.core.Mastery.starterOnly(player) || com.jaymospowers.power.chrono.future.Future.wakesEarly(player))) {
 			// sneak+B, Fast Forward: a leap into the ruined future (or back), with its own recharge
 			com.jaymospowers.power.chrono.future.Future.leap(player);
+			return;
+		}
+		if (ability == STASIS && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player) && ChronoCalculation.spend(player)) {
+			// sneak+G with Calculation's bar charged: it is spent on dodging instead of casting Stasis
+			return;
+		}
+		if (ability == OVERCLOCK && state.overclockLeft > 0 && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player)) {
+			// sneak+V while overclocked: afterimage decoys (their own recharge)
+			ChronoDecoys.cast(player);
 			return;
 		}
 		if (ability == OVERCLOCK && state.overclockLeft > 0) {

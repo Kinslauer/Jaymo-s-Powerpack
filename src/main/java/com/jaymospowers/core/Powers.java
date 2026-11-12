@@ -62,7 +62,34 @@ public final class Powers {
 	 */
 	private static final List<java.util.function.Predicate<ServerPlayer>> SILENCERS = new ArrayList<>();
 
+	/** Checks that pause a player's power altogether: its passive tick stops while one holds (Dampening). */
+	private static final List<java.util.function.Predicate<ServerPlayer>> PAUSERS = new ArrayList<>();
+
 	private Powers() {
+	}
+
+	/** Adds a check that pauses a player's power tick (see {@link #paused}). */
+	public static void addPauser(java.util.function.Predicate<ServerPlayer> pauser) {
+		PAUSERS.add(pauser);
+	}
+
+	/** Whether {@code player}'s power is shut away right now: no passive tick, and (with {@link #silenced}) no keys. */
+	public static boolean paused(ServerPlayer player) {
+		for (java.util.function.Predicate<ServerPlayer> pauser : PAUSERS) {
+			if (pauser.test(player)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Lets go of every key the player's power was holding (a power being shut away mid-use). */
+	public static void releaseKeys(ServerPlayer player) {
+		for (PowerKey key : PowerKey.values()) {
+			key(player, key, false);
+		}
+		mode(player, false);
+		ultimate(player, false);
 	}
 
 	/** Adds a check that can switch a player's power keys off (see {@link #silenced}). */
@@ -120,6 +147,10 @@ public final class Powers {
 		if (old == power) {
 			return;
 		}
+		// (one holder per power, when the world asks for it)
+		if (power != null && OneHolder.refuses(player, power)) {
+			return;
+		}
 		if (old != null) {
 			old.onLost(player);
 		}
@@ -139,16 +170,19 @@ public final class Powers {
 			player.removeAttached(Callings.FIST_KILLS);
 			power.onGained(player);
 		}
+		OneHolder.record(player, power);
 	}
 
 	/** Awakens a random power (a different one, if they already have one), with the full fanfare. */
 	public static void awaken(ServerPlayer player) {
-		List<Power> choices = new ArrayList<>(fated());
+		List<Power> choices = new ArrayList<>(OneHolder.open(player, fated()));
 		Power current = of(player);
 		if (choices.size() > 1 && current != null) {
 			choices.remove(current);
 		}
 		if (choices.isEmpty()) {
+			// every power is held (one holder per power): try again in a while
+			player.setAttached(AWAKEN_IN, AWAKEN_MIN_TICKS);
 			return;
 		}
 		// a power that called them (Callings) always wins (the only way to an unfated power); then their affinity's,
@@ -162,6 +196,9 @@ public final class Powers {
 			: called != null && called != current ? called
 			: leaning != null && leaning != current && player.getRandom().nextFloat() < Affinity.CHANCE
 			? leaning : choices.get(player.getRandom().nextInt(choices.size()));
+		if (OneHolder.held(player, power)) {
+			power = choices.get(player.getRandom().nextInt(choices.size()));
+		}
 		awakenAs(player, power);
 	}
 
@@ -170,6 +207,9 @@ public final class Powers {
 	 * rest come with mastery), with the full fanfare. Jaymo's Kingdoms' "lost in time" life story calls this for Chrono.
 	 */
 	public static void awakenAs(ServerPlayer player, Power power) {
+		if (OneHolder.refuses(player, power)) {
+			return;
+		}
 		set(player, power);
 		// a natural awakening starts small: the rest of the abilities come with mastery
 		Mastery.startFresh(player);
@@ -195,12 +235,18 @@ public final class Powers {
 					player.resetFallDistance();
 				}
 				// ((0.17.183) acting: what it moves of someone else is Will Over Flesh's to lessen)
-				com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+				if (!paused(player)) {
+					com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+				}
 				Mastery.tick(player);
 				continue;
 			}
 			// powerless: count down survival play towards the awakening
 			if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+				continue;
+			}
+			// one who gave their power up (the Draught of Release) does not wake another by themselves
+			if (com.jaymospowers.alchemy.picks.GivingUp.settled(player)) {
 				continue;
 			}
 			Affinity.tick(player);
@@ -248,6 +294,9 @@ public final class Powers {
 			return;
 		}
 		if (down && power != null && silenced(player)) {
+			return;
+		}
+		if (down && power != null && com.jaymospowers.boxing.PressurePoints.keyShut(player, key)) {
 			return;
 		}
 		// (0.15.136) a press the body can't make (a severed limb the ability is done with) never starts, and its release
@@ -345,10 +394,11 @@ public final class Powers {
 			set(player, null);
 			return;
 		}
+		// (an operator's own hand ignores one holder per power)
 		Power power = get(Identifier.tryParse(id));
 		// the screen doesn't offer a power fate can't give (the band only, for Xenoform); /power set still does
 		if (power != null && power.fated()) {
-			set(player, power);
+			OneHolder.bypassed(() -> set(player, power));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chosen", power.name()));
 		}
 	}

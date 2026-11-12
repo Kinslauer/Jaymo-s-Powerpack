@@ -1,0 +1,111 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "bola",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_bola"
+        }
+      },
+      {
+        "when": "net",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_net"
+        }
+      },
+      {
+        "when": "caltrop",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_caltrop"
+        }
+      },
+      {
+        "when": "harpoon",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_harpoon"
+        }
+      },
+      {
+        "when": "grapple",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_grapple"
+        }
+      },
+      {
+        "when": "smoke",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_smoke"
+        }
+      },
+      {
+        "when": "flare",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_flare"
+        }
+      },
+      {
+        "when": "whistle",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_whistle"
+        }
+      },
+      {
+        "when": "barbed",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_barbed"
+        }
+      },
+      {
+        "when": "broadhead",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_broadhead"
+        }
+      },
+      {
+        "when": "fire",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_fire"
+        }
+      },
+      {
+        "when": "flash",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_flash"
+        }
+      },
+      {
+        "when": "drill",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_drill"
+        }
+      },
+      {
+        "when": "boomerang",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_boomerang"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/gear/arrow_bola"
+    }
+  }
+}

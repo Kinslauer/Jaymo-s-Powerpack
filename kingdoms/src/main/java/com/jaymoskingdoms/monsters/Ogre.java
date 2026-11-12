@@ -41,6 +41,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class Ogre extends LegendMonster {
 	public static final int GREEN = 0, CAVE = 1, FIRE = 2, ARMOURED = 3;
+	/** The kind of a brute made by a rite ({@link MadeBrute}). */
+	public static final int BRUTE = 4;
 	/** (0.7.623) The armoured ogre: how many skins (orc tones), its health, plate, pace and blow. */
 	public static final int ARMOURED_TONES = 6;
 	static final double ARMOURED_HEALTH = 80.0, ARMOURED_ARMOR = 12.0, ARMOURED_TOUGHNESS = 4.0, ARMOURED_SPEED = 0.22, ARMOURED_DAMAGE = 10.0;

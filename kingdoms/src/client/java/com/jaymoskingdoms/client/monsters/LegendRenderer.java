@@ -63,6 +63,7 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		state.shield = monster instanceof Ogre ogre && ogre.shield();
 		state.guard = monster instanceof Ogre ogre && ogre.guarding();
 		state.shut = monster instanceof Mimic mimic && mimic.shut();
+		state.hunched = monster instanceof com.jaymoskingdoms.hunger.Gaunt gaunt && gaunt.stalking();
 	}
 
 	@Override
@@ -126,11 +127,15 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		}
 		register(Monsters.ARMOURED_OGRE, ArmouredOgreModel::new, ArmouredOgreModel.createBodyLayer(), 1.2F, 1.0F,
 			state -> armoured[Math.floorMod(state.variant, armoured.length)], false);
+		// the made brute: the ogre's body in the colours of what it was (its variant)
+		Identifier[] made = {texture("ogre_made_0"), texture("ogre_made_1"), texture("ogre_made_2")};
+		register(Monsters.MADE_BRUTE, OgreModel::new, OgreModel.createBodyLayer(), 1.2F, 1.0F, state -> made[Math.floorMod(state.variant, made.length)], false);
 		register(Monsters.WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("wraith"), true);
 		register(Monsters.FLAME_WRAITH, WraithModel::new, WraithModel.createBodyLayer(), 0.0F, 1.0F, one("flame_wraith"), false);
 		Identifier[] mud = {texture("mud_golem"), texture("mud_golem_mossy")};
 		register(Monsters.MUD_GOLEM, MudGolemModel::new, MudGolemModel.createBodyLayer(), 0.9F, 1.2F, state -> mud[Math.floorMod(state.variant, mud.length)],
 			false);
 		register(Monsters.MIMIC, MimicModel::new, MimicModel.createBodyLayer(), 0.6F, 1.0F, one("mimic"), false);
+		register(com.jaymoskingdoms.hunger.Hunger.GAUNT, GauntModel::new, GauntModel.createBodyLayer(), 0.8F, 1.0F, one("gaunt"), false);
 	}
 }

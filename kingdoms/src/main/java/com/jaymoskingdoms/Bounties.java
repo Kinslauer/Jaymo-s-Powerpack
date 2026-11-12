@@ -388,6 +388,28 @@ public final class Bounties {
 			Factions.level(server).getGameTime(), Optional.empty(), 0L, false, false));
 	}
 
+	/**
+	 * (from {@link Crews}) A band's boss is wanted by {@code court}: posted as a crook for {@code price} under {@code name}
+	 * (his title, not his own name), unless a live bounty on {@code target} stands there already. True if it was posted.
+	 */
+	static boolean postCrew(MinecraftServer server, int court, String target, String name, BlockPos last, int price) {
+		Bounty old = all(server).get(key(court, target));
+		if (old != null && !old.dead()) {
+			return false;
+		}
+		put(server, new Bounty(target, false, false, name, court, Math.min(MOST, price), last, "crew", Factions.level(server).getGameTime(),
+			Optional.empty(), 0L, false, false));
+		return true;
+	}
+
+	/** (from {@link Crews}) Every bounty on {@code target} is off the board. */
+	static void withdraw(MinecraftServer server, String target) {
+		Map<String, Bounty> map = new HashMap<>(all(server));
+		if (map.values().removeIf(b -> b.target().equals(target) && !b.dead())) {
+			server.overworld().setAttached(ALL, Map.copyOf(map));
+		}
+	}
+
 	/** (Theft) {@code player} was seen at a medium or heavy crime ({@code cry}: its kind) against {@code f}: their bounty there grows. */
 	static void crimeBy(ServerPlayer player, ServerLevel level, Faction f, boolean heavy, String cry) {
 		MinecraftServer server = level.getServer();

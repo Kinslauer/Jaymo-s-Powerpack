@@ -66,6 +66,8 @@ public final class BulwarkCharge {
 	public static final float RUMBLE_SHAKE = 0.25F, HIT_SHAKE = 0.6F, STAGGER_SHAKE = 1.2F;
 	public static final int COLOR = 0xB8C4D0;
 
+	/** How much Bulwark's charge weighs in a clash of blows, times his attack damage. */
+	static final float CLASH_STRENGTH = 3.0F;
 	private static final Identifier SPEED_ID = JaymosPowers.id("xenoform_bulwark_charge_speed");
 	private static final Identifier KNOCKBACK_ID = JaymosPowers.id("xenoform_bulwark_charge_knockback");
 
@@ -128,6 +130,10 @@ public final class BulwarkCharge {
 			return;
 		}
 		dir = dir.normalize();
+		// charging at another brute's great blow: the two lock (BlowClash)
+		if (com.jaymospowers.core.BlowClash.meets(player, dir, (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * CLASH_STRENGTH)) {
+			return;
+		}
 		if (now % RUMBLE_EVERY == 0) {
 			Shakes.heavy(player, pos, 14.0, RUMBLE_SHAKE);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.IRON_GOLEM_STEP, SoundSource.PLAYERS, 1.0F, 0.6F);

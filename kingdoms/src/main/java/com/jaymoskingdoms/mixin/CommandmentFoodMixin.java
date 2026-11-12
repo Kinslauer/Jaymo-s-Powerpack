@@ -18,6 +18,15 @@ abstract class CommandmentFoodMixin {
 	private void jaymoskingdoms$commandments(Level level, LivingEntity eater, ItemStack stack, Consumable consumable, CallbackInfo ci) {
 		if (!level.isClientSide()) {
 			Commandments.ate(eater, stack);
+			com.jaymoskingdoms.hunger.HungerCurse.ateStart(eater, stack);
+		}
+	}
+
+	/** (the curse of the hungry) ordinary food feeds the cursed by half. */
+	@Inject(method = "onConsume", at = @At("TAIL"))
+	private void jaymoskingdoms$poorFeeding(Level level, LivingEntity eater, ItemStack stack, Consumable consumable, CallbackInfo ci) {
+		if (!level.isClientSide()) {
+			com.jaymoskingdoms.hunger.HungerCurse.ateDone(eater);
 		}
 	}
 }

@@ -64,6 +64,12 @@ public final class BossBars {
 			|| entity instanceof com.jaymoskingdoms.wild.Grizzly;
 	}
 
+	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */
+	public static boolean hasHit(LivingEntity boss, ServerPlayer player) {
+		Set<UUID> hitters = HITTERS.get(boss.getUUID());
+		return hitters != null && hitters.contains(player.getUUID());
+	}
+
 	/** {@code player} has met {@code boss} face to face (its entrance played, {@code BossIntros}): its bar shows to them as if they had struck it. */
 	public static void met(LivingEntity boss, ServerPlayer player) {
 		if (boss(boss)) {

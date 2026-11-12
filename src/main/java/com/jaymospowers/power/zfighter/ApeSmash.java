@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.BlowClash;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
@@ -47,6 +48,9 @@ public final class ApeSmash {
 	static final double RADIUS_MIN = 3.0, RADIUS_MAX = 8.0, THROW = 1.4, LIFT = 0.6;
 	static final float SHAKE_MIN = 0.4F, SHAKE_MAX = 1.2F;
 	static final double SHAKE_RANGE = 40.0;
+	/** A blow at least this charged (0-1) meets another great blow; drawn back this long (ticks) it is braced for one; its weight in a clash. */
+	static final float CLASH_CHARGE = 0.5F, CLASH_STRENGTH = 1.5F;
+	static final int CLASH_FROM = 8;
 	/** How long the blow's swing shows (ticks). */
 	public static final int SWING_TICKS = 6;
 
@@ -74,7 +78,7 @@ public final class ApeSmash {
 
 	/** Whether he can punch now: his own Great Ape, standing, not in a fit. */
 	static boolean able(ServerPlayer player) {
-		return Powers.has(player, ZFighterPower.INSTANCE) && ZFighterLineage.ape(player) && !ZFighterLineage.crippled(player)
+		return Powers.has(player, ZFighterPower.INSTANCE) && ZFighterLineage.ape(player) && !ZFighterLineage.crippled(player) && !BlowClash.locked(player)
 			&& !player.hasAttached(ApeRage.FIT) && !player.hasAttached(ZFighterLineage.BERSERK) && !ApeGrab.grabbing(player);
 	}
 
@@ -82,6 +86,8 @@ public final class ApeSmash {
 		long now = player.level().getGameTime();
 		Long start = player.getAttached(CHARGE);
 		if (down) {
+			// mashing the punch key adds to his side of a clash of blows
+			BlowClash.tap(player);
 			Long swung = player.getAttached(SWUNG);
 			if (start == null && able(player) && (swung == null || now - swung >= COOLDOWN)) {
 				player.setAttached(CHARGE, now);
@@ -111,7 +117,14 @@ public final class ApeSmash {
 		}
 		if (!able(player)) {
 			player.removeAttached(CHARGE);
-		} else if (now - start == FULL_TICKS) {
+		} else if (now - start >= CLASH_FROM) {
+			// drawn back far enough that a fist thrown at him meets it
+			BlowClash.brace(player, player.getLookAngle(), (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * DAMAGE_MAX * CLASH_STRENGTH);
+		}
+		if (!able(player)) {
+			return;
+		}
+		if (now - start == FULL_TICKS) {
 			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 1.5F, 0.6F);
 		} else if (now - start == ApeGrab.HOLD_TO_GRAB) {
 			// the grab is ready: a deeper growl, and his hand opens
@@ -125,6 +138,11 @@ public final class ApeSmash {
 	private static void smash(ServerPlayer player, float charge) {
 		ServerLevel level = player.level();
 		player.setAttached(SWUNG, level.getGameTime());
+		float clash = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX) * CLASH_STRENGTH;
+		if (charge >= CLASH_CHARGE && BlowClash.meets(player, player.getLookAngle(), clash)) {
+			// met by another great blow: neither lands (BlowClash)
+			return;
+		}
 		Vec3 eyes = player.getEyePosition();
 		Vec3 end = eyes.add(player.getLookAngle().scale(player.entityInteractionRange()));
 		HitResult hit = level.clip(new ClipContext(eyes, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

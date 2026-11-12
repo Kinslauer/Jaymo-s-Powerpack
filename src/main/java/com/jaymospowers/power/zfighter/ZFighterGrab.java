@@ -89,6 +89,7 @@ public final class ZFighterGrab {
 
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Throw.TYPE, Throw.CODEC);
+		ZFighterBowl.init();
 		ServerPlayNetworking.registerGlobalReceiver(Throw.TYPE, (payload, ctx) -> {
 			if (!HOLDS.getOrDefault(ctx.player().getUUID(), new Hold(null, 0L, true)).scripted()) {
 				throwHeld(ctx.player(), 1.0F);
@@ -228,13 +229,21 @@ public final class ZFighterGrab {
 		LivingEntity locked = LockOn.target(player);
 		if (locked != null && locked != foe) {
 			look = LockOn.aim(player);
+		} else {
+			// the throw leans toward an enemy near his line of sight
+			look = ZFighterBowl.aim(player, foe, look);
 		}
+		// a willing body (a teammate, a pet) is thrown to land soft; anyone else bowls through what it meets
+		boolean willing = ZFighterBowl.willing(player, foe);
 		double speed = Math.min(THROW_MAX, THROW_BASE + fists * THROW_PER_FIST) * power;
 		foe.setDeltaMovement(look.x * speed, look.y * speed + THROW_LIFT, look.z * speed);
 		foe.syncVelocity = true;
 		foe.needsSync = true;
-		ZFighterImpact.launched(foe, player, (float)fists * SLAM_SHARE * power);
-		ZFighterPoise.wear(foe, THROW_POISE * power);
+		ZFighterBowl.thrown(foe, player, (float)fists * power, willing);
+		if (!willing) {
+			ZFighterImpact.launched(foe, player, (float)fists * SLAM_SHARE * power);
+			ZFighterPoise.wear(foe, THROW_POISE * power);
+		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		Vec3 at = foe.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.CLOUD, true, false, at.x, at.y, at.z, 8, 0.3, 0.3, 0.3, 0.1);

@@ -1,0 +1,7 @@
+{
+  "parent": "jaymoskingdoms:block/trophy_stand",
+  "textures": {
+    "base": "jaymoskingdoms:block/trophy_stand_stone",
+    "plate": "jaymoskingdoms:block/trophy_plate"
+  }
+}

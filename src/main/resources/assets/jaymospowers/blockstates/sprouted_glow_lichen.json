@@ -1,0 +1,147 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tundra/sprouted_glow_lichen"
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tundra/sprouted_glow_lichen",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tundra/sprouted_glow_lichen",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tundra/sprouted_glow_lichen",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "north": "false",
+        "east": "false",
+        "south": "false",
+        "west": "false",
+        "up": "false",
+        "down": "false"
+      },
+      "apply": {
+        "model": "jaymospowers:block/tundra/sprouted_glow_lichen"
+      }
+    },
+    {
+      "when": {
+        "down": "true",
+        "snipped": "false"
+      },
+      "apply": [
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground"
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "up": "true",
+        "snipped": "false"
+      },
+      "apply": [
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling"
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "down": "true",
+        "snipped": "true"
+      },
+      "apply": [
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground_snipped"
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground_snipped",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground_snipped",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ground_snipped",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "up": "true",
+        "snipped": "true"
+      },
+      "apply": [
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling_snipped"
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling_snipped",
+          "y": 90
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling_snipped",
+          "y": 180
+        },
+        {
+          "model": "jaymospowers:block/tundra/sprouted_glow_lichen_ceiling_snipped",
+          "y": 270
+        }
+      ]
+    }
+  ]
+}

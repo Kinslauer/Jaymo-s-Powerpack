@@ -103,6 +103,7 @@ public final class ChronoPowerClient implements PowerClient {
 		ChronoTimeStopClient.init();
 		ChronoCheatDeathClient.init();
 		ChronoStreak.init();
+		ChronoDecoyClient.init();
 		MuzzleFlashParticle.register();
 		FutureDeadLooks.register();
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
@@ -215,6 +216,7 @@ public final class ChronoPowerClient implements PowerClient {
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		ChronoFlowClient.renderHud(graphics, player);
 		ChronoSpeedHud.render(graphics, player);
+		ChronoCalcHud.render(graphics, player);
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
 		float partial = delta.getGameTimeDeltaPartialTick(false);

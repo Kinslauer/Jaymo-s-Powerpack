@@ -347,7 +347,16 @@ public final class Skills {
 		// (astronomy.Measurements#resolution); last, so no ordinal moves
 		ASTROMETRY(Pillar.SCHOLAR, 20, 1, 0, 0, 1),
 		// anyone who crouches and holds still sees the prints of whatever walked there ({@link TrailReading}); last, so no ordinal moves
-		READ_THE_GROUND(Pillar.SURVIVAL, 2, 1, 0, 2, 1, FORAGER);
+		READ_THE_GROUND(Pillar.SURVIVAL, 2, 1, 0, 2, 1, FORAGER),
+		// the Assassin's gambits, on Stealth's fifth page ({@link RogueGambits}), and the Thief's: lifting a weapon out of a
+		// pocket, the disarm rush and the dry remark ({@link com.jaymoskingdoms.forms.RogueForms}); last, so no ordinal moves
+		WATCHED(Pillar.STEALTH, 2, 1, 6, 18, 0, MARKED_QUARRY),
+		THE_STARE(Pillar.STEALTH, 1, 1, 8, 18, 2, TANGLE_CORD),
+		SLIP_BEHIND(Pillar.STEALTH, 1, 2, 12, 19, 0, WATCHED),
+		BODY_COUNT(Pillar.STEALTH, 2, 1, 10, 19, 2, THE_STARE),
+		LIFT_WEAPON(Pillar.STEALTH, 1, 1, 6, 7, 1, QUICK_HANDS),
+		DRY_REMARK(Pillar.STEALTH, 1, 1, 5, 11, 1, ASSASSINATE),
+		DISARM_RUSH(Pillar.STEALTH, 1, 2, 9, 15, 0, MUTILATE);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

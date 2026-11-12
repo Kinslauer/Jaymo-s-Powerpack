@@ -254,4 +254,55 @@ public final class KingdomsCompat {
 			return null;
 		}
 	}
+
+	private static Method blightNearest, blightEase;
+	private static boolean blightLooked;
+
+	private static void lookForBlight() {
+		if (blightLooked) {
+			return;
+		}
+		blightLooked = true;
+		try {
+			Class<?> blight = Class.forName("com.jaymoskingdoms.remnants.Blight");
+			blightNearest = blight.getMethod("nearest", net.minecraft.server.level.ServerPlayer.class);
+			blightEase = blight.getMethod("ease", net.minecraft.server.level.ServerPlayer.class);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			blightNearest = blightEase = null;
+		}
+	}
+
+	/**
+	 * How far (blocks) {@code player} is from Kingdoms' blight: the Irradiated monolith or a changed wolf, whichever is
+	 * nearer. {@link Double#MAX_VALUE} without Kingdoms, with none, or if the call fails. The ticking charm reads this.
+	 */
+	public static double blightDistance(net.minecraft.server.level.ServerPlayer player) {
+		if (!LOADED) {
+			return Double.MAX_VALUE;
+		}
+		lookForBlight();
+		if (blightNearest == null) {
+			return Double.MAX_VALUE;
+		}
+		try {
+			return blightNearest.invoke(null, player) instanceof Double d ? d : Double.MAX_VALUE;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return Double.MAX_VALUE;
+		}
+	}
+
+	/** Honey or wild garlic taken: some of Kingdoms' blight sickness comes off. Nothing without Kingdoms. */
+	public static void easeBlight(net.minecraft.server.level.ServerPlayer player) {
+		if (!LOADED) {
+			return;
+		}
+		lookForBlight();
+		if (blightEase != null) {
+			try {
+				blightEase.invoke(null, player);
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				// (nothing eased)
+			}
+		}
+	}
 }

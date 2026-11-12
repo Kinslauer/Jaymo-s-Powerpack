@@ -395,6 +395,10 @@ final class VillagerApe {
 				live.berserkSwingAt = now + ZFighterLineage.BERSERK_SWING_EVERY;
 				live.berserkSince = now;
 				mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				if (com.jaymospowers.core.BlowClash.meets(mob, target.position().subtract(mob.position()), FIST * Math.max(0.25F, live.apeSize))) {
+					// met by another great blow (BlowClash)
+					return;
+				}
 				if (target.hurtServer(level, ZFighterLineage.blow(level, mob), FIST * Math.max(0.25F, live.apeSize))) {
 					Vec3 away = target.position().subtract(mob.position()).multiply(1.0, 0.0, 1.0).normalize();
 					target.push(away.x * 0.8, 0.4, away.z * 0.8);

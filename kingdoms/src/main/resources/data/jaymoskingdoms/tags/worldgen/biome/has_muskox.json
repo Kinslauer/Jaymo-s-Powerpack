@@ -1,0 +1,13 @@
+{
+	"values": [
+		"minecraft:snowy_plains",
+		{
+			"id": "jaymospowers:tundra",
+			"required": false
+		},
+		{
+			"id": "jaymospowers:lichen_woodland",
+			"required": false
+		}
+	]
+}

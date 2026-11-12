@@ -89,6 +89,6 @@ final class CampfireWard {
 	/** A monster that heeds the fire: not a boss, not a raider. */
 	private static boolean feared(PathfinderMob mob) {
 		return mob instanceof Enemy && !(mob instanceof Raider) && !(mob instanceof WitherBoss)
-			&& !(mob instanceof PatronChampion) && !(mob instanceof Folk);
+			&& !(mob instanceof PatronChampion) && !(mob instanceof Folk) && !(mob instanceof com.jaymoskingdoms.hunger.Gaunt);
 	}
 }

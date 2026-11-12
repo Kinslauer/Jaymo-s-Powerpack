@@ -105,6 +105,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.zfighter.RaceHoldClient.register();
 		com.jaymospowers.client.power.ember.EmberKindleClient.init();
 		com.jaymospowers.client.power.ember.FlameAvatarClient.init();
+		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
@@ -158,6 +159,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_3d"),
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// Klei_Wright's own tundra art (CC BY-NC-SA 4.0, resourcepacks/klei_tundra/CREDITS.txt) over ours for the tundra's
+		// blocks, lichen and phosphor; on by default, switched off in Resource Packs for our own art
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("klei_tundra"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Klei_Wright's Tundra art"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (0.19.72) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
 		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
@@ -235,6 +242,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		com.jaymospowers.client.backpack.BackpackClient.init();
+		com.jaymospowers.client.gear.GearClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
 		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
 		com.jaymospowers.client.jewellery.JewelleryClient.init();

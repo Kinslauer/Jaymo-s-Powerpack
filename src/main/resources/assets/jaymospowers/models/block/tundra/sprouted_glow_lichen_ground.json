@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/tundra/lichen_ground",
+  "textures": {
+    "flat": "jaymospowers:block/tundra/sprouted_glow_lichen",
+    "tuft": "jaymospowers:block/tundra/sprouted_glow_lichen_ground"
+  }
+}

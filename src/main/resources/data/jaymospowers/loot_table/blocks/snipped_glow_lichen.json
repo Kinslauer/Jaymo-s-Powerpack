@@ -1,0 +1,98 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:snipped_glow_lichen",
+          "condition": "minecraft:tool/can_shear",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "north": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "east": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "south": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "west": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "up": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": 1,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:snipped_glow_lichen",
+                "state": {
+                  "down": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "count": -1
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/snipped_glow_lichen"
+}

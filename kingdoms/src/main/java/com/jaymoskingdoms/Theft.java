@@ -149,7 +149,9 @@ public final class Theft {
 		/** (0.7.497) a lock picked or a locked block broken where a realm's law holds ({@link Locks}). */
 		BURGLARY(Weight.MEDIUM, "burglary"),
 		/** (0.7.650) fishing a Tideborn haven's waters ({@link TideFishing}). */
-		POACHING(Weight.MEDIUM, "poaching");
+		POACHING(Weight.MEDIUM, "poaching"),
+		/** A captive made into a great foe by blood magic ({@link BruteRite}): the heaviest crime there is. */
+		UNMAKING(Weight.HEAVY, "unmaking");
 
 		final Weight weight;
 		final String cry;
@@ -518,6 +520,32 @@ public final class Theft {
 			return;
 		}
 		commit(player, level, f, blood ? Crime.BLOOD_MAGIC : Crime.NECROMANCY, pos, null, false);
+	}
+
+	/** Reputation lost on top of a heavy crime, seen, for making a brute of a captive; and with the settlement a villager was made from, seen or not. */
+	static final int REP_UNMAKING_SEEN = -60, REP_UNMAKING_HOME = -120;
+
+	/**
+	 * A captive made into a brute ({@link BruteRite}) at {@code pos}: a heavy crime in the land's realm, with more
+	 * reputation lost than any other when seen, and the settlement the villager came from ({@code home}, or null) holds it
+	 * against the maker whether anyone saw or not.
+	 */
+	static void unmaking(ServerPlayer player, ServerLevel level, BlockPos pos, @Nullable Faction home) {
+		if (player.isCreative() || player.isSpectator()) {
+			return;
+		}
+		Faction f = lawAt(level, pos);
+		if (f != null && f.type() == FactionType.KINGDOM) {
+			boolean seen = !crimeWitnesses(level, f, player).isEmpty();
+			commit(player, level, f, Crime.UNMAKING, pos, null, true);
+			if (seen && !Wars.enemy(player, f)) {
+				Reputation.change(player, f, REP_UNMAKING_SEEN);
+			}
+		}
+		if (home != null && !home.fallen() && home.type() != FactionType.BARBARIAN && !Wars.enemy(player, home)) {
+			Reputation.change(player, home, REP_UNMAKING_HOME);
+			Approaches.suspect(player, home.id(), level.getGameTime());
+		}
 	}
 
 	private static void killed(ServerPlayer killer, ServerLevel level, LivingEntity victim) {
