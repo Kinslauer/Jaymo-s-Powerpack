@@ -55,18 +55,22 @@ public final class BoxingPoses {
 	static final float SLIT_BLOCK_PITCH = -1.05F, SLIT_BLOCK_IN = 0.65F, SLIT_BLOCK_FOLD = -2.2F;
 	/** The Arrow Slit's forward crouch and tucked chin (radians), standing and behind its block. */
 	static final float SLIT_CROUCH = 0.2F, SLIT_CHIN = 0.12F, SLIT_BLOCK_CROUCH = 0.3F;
+	/** The Arrow Slit's bent knees: each thigh this far forward (radians), the shin folded back twice that so the foot stays under the hip, flat on the ground. */
+	static final float SLIT_KNEES = 0.35F, SLIT_BLOCK_KNEES = 0.45F;
 	/** The Long Guard's lead arm out ahead, all but straight, and its pawing (up and down, side to side; radians and radians a tick). */
 	static final float LONG_LEAD_PITCH = -1.5F, LONG_LEAD_IN = 0.05F, LONG_LEAD_FOLD = -0.12F, LONG_PAW = 0.06F, LONG_PAW_RATE = 0.3F, LONG_PAW_SIDE = 0.06F, LONG_PAW_SIDE_RATE = 0.17F;
 	/** Its rear glove by the chin, and its block: both arms out ahead, a little bent, the hands together. */
 	static final float LONG_REAR_PITCH = -0.9F, LONG_REAR_IN = 0.55F, LONG_REAR_FOLD = -2.1F, LONG_BLOCK_PITCH = -1.35F, LONG_BLOCK_IN = 0.35F, LONG_BLOCK_FOLD = -0.35F;
 	/** The Long Guard's lead shoulder turned a little forward and its upright, slightly backward lean (radians). */
-	static final float LONG_BLADE = 0.25F, LONG_LEAN = -0.06F;
+	static final float LONG_BLADE = 0.6F, LONG_LEAN = -0.06F;
+	/** Its feet turned with the body (this share of the turn), the lead foot a little ahead and the rear one behind (radians at the hip). */
+	static final float LONG_FEET = 0.8F, LONG_STAGGER = 0.14F;
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
 	static final float BASTION_LEAD_PITCH = -0.5F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 1.05F, BASTION_REAR_PITCH = -0.9F, BASTION_REAR_IN = 0.6F, BASTION_REAR_FOLD = -2.1F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
 	static final float BASTION_BLADE = 0.45F, BASTION_SHOULDER = 1.0F, BASTION_LEAN = -0.08F, BASTION_HEAD_TILT = 0.12F, BASTION_CHIN = 0.1F;
-	/** Its slow rock of the weight, back and forth (radians, radians a tick), and how much further side on its block stands. */
-	static final float BASTION_ROCK = 0.03F, BASTION_ROCK_RATE = 0.08F, BASTION_BLOCK_BLADE = 0.65F;
+	/** How much further side on its block stands. */
+	static final float BASTION_BLOCK_BLADE = 0.65F;
 	/** The shrug: every this many ticks, this long, this high (pixels). */
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
@@ -85,6 +89,8 @@ public final class BoxingPoses {
 	static final float ROLL_LEAN = -0.25F, ROLL_HEAD = 0.15F;
 	/** A model's shoulders are this far from its middle, and its hips this far below its neck (pixels). */
 	static final float SHOULDER_OUT = 5.0F, TORSO = 12.0F;
+	/** A leg's thigh, and its shin (pixels). */
+	static final float THIGH = 6.0F, SHIN = 6.0F;
 	/** Gassed: the hands dropped, the shoulders' heave (pixels, radians a tick), the slump. */
 	static final float GASSED_PITCH = -0.3F, GASSED_IN = 0.15F, GASSED_FOLD = -0.5F, HEAVE = 0.6F, HEAVE_RATE = 0.3F, SLUMP = 0.18F;
 	// ================================================================================================================
@@ -97,9 +103,9 @@ public final class BoxingPoses {
 
 	/**
 	 * The elbows as {@link #apply} last posed them: each arm's fold (radians, as {@code KneeBend} takes it), and whether
-	 * it folds across the body rather than forward.
+	 * it folds across the body rather than forward; and both knees' fold.
 	 */
-	public record Bends(float right, boolean rightAcross, float left, boolean leftAcross) {
+	public record Bends(float right, boolean rightAcross, float left, boolean leftAcross, float knees) {
 	}
 
 	public static final RenderStateDataKey<Bends> BENDS = RenderStateDataKey.create(() -> "jaymospowers:boxing_bends");
@@ -108,6 +114,8 @@ public final class BoxingPoses {
 	private static final class Elbow {
 		float fold;
 		boolean across;
+		/** Both knees' fold (kept on the lead arm's elbow only, for want of a better place). */
+		float knees;
 
 		void forward(float fold) {
 			this.fold = fold;
@@ -195,6 +203,7 @@ public final class BoxingPoses {
 					rearElbow.forward(SLIT_BLOCK_FOLD);
 					bend(model, SLIT_BLOCK_CROUCH);
 					model.head.xRot += SLIT_CHIN;
+					leadElbow.knees = knees(model, SLIT_BLOCK_KNEES);
 				}
 				case LONG_GUARD -> {
 					set(lead, leadRight, LONG_BLOCK_PITCH, LONG_BLOCK_IN);
@@ -249,7 +258,7 @@ public final class BoxingPoses {
 	/** Leaves the elbows on the state for {@link #bendLimbs} and the worn gear. An arm's own across is toward the body: +X for the right arm, which is a negative fold. */
 	private static void keep(AvatarRenderState state, boolean leadRight, Elbow lead, Elbow rear) {
 		Elbow right = leadRight ? lead : rear, left = leadRight ? rear : lead;
-		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across));
+		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across, lead.knees));
 	}
 
 	/** Last thing before a model is drawn: a boxer's elbows ({@link #BENDS}), put back straight once it is drawn ({@code KneeBend.restore}). */
@@ -263,6 +272,8 @@ public final class BoxingPoses {
 		}
 		com.jaymospowers.client.KneeBend.bend(h.rightArm, bends.right(), ELBOW, bends.rightAcross());
 		com.jaymospowers.client.KneeBend.bend(h.leftArm, bends.left(), ELBOW, bends.leftAcross());
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, bends.knees());
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, bends.knees());
 	}
 
 	/** The style's stance when nothing else is happening: where the hands sit, and the small movement that never stops. Returns how far the lead shoulder is turned forward. */
@@ -275,11 +286,13 @@ public final class BoxingPoses {
 				set(rear, !leadRight, SLIT_PITCH, SLIT_IN);
 				leadElbow.forward(SLIT_FOLD);
 				rearElbow.forward(SLIT_FOLD);
-				lean(model, sway);
+				// the sway is in the shoulders and head; the hips and feet stay where they are
+				swayShoulders(model, sway);
 				lead.zRot += sway;
 				rear.zRot += sway;
 				bend(model, SLIT_CROUCH);
 				model.head.xRot += SLIT_CHIN;
+				leadElbow.knees = knees(model, SLIT_KNEES);
 				return 0.0F;
 			}
 			case LONG_GUARD -> {
@@ -288,6 +301,13 @@ public final class BoxingPoses {
 				leadElbow.forward(LONG_LEAD_FOLD);
 				rearElbow.forward(LONG_REAR_FOLD);
 				bend(model, LONG_LEAN);
+				// stood at an angle from the feet up: both feet turned with the body, the lead one ahead
+				ModelPart leadLeg = leadRight ? model.rightLeg : model.leftLeg, rearLeg = leadRight ? model.leftLeg : model.rightLeg;
+				float feet = (leadRight ? -LONG_BLADE : LONG_BLADE) * LONG_FEET;
+				leadLeg.yRot += feet;
+				rearLeg.yRot += feet;
+				leadLeg.xRot -= LONG_STAGGER;
+				rearLeg.xRot += LONG_STAGGER;
 				return LONG_BLADE;
 			}
 			case BASTION -> {
@@ -300,7 +320,7 @@ public final class BoxingPoses {
 				if (phase < 1.0F) {
 					lead.y -= Mth.sin(phase * Mth.PI) * SHRUG_UP;
 				}
-				bend(model, BASTION_LEAN + Mth.sin(time * BASTION_ROCK_RATE) * BASTION_ROCK);
+				bend(model, BASTION_LEAN);
 				shellHead(model, leadRight);
 				return BASTION_BLADE;
 			}
@@ -384,6 +404,36 @@ public final class BoxingPoses {
 		float back = Mth.sin(amount) * TORSO;
 		model.rightLeg.z += back;
 		model.leftLeg.z += back;
+	}
+
+	/**
+	 * Sways the shoulders and head {@code amount} radians to the side (positive is the boxer's left) about the hips,
+	 * which stay where they are: the body turns about its foot, and the head and arms ride its top.
+	 */
+	private static void swayShoulders(HumanoidModel<?> model, float amount) {
+		float across = Mth.sin(amount) * TORSO, down = (1.0F - Mth.cos(amount)) * TORSO;
+		model.body.zRot += amount;
+		model.body.x += across;
+		model.body.y += down;
+		for (ModelPart part : new ModelPart[] {model.head, model.rightArm, model.leftArm}) {
+			part.x += across;
+			part.y += down;
+		}
+		model.head.zRot += amount * 0.6F;
+	}
+
+	/**
+	 * Bends both knees: each thigh {@code amount} radians forward, the shin to fold back twice that (returned, for
+	 * {@link #bendLimbs}), so the feet stay flat under the hips; everything above sinks by what the legs shorten.
+	 */
+	private static float knees(HumanoidModel<?> model, float amount) {
+		float sink = THIGH + SHIN - (THIGH + SHIN) * Mth.cos(amount);
+		for (ModelPart part : new ModelPart[] {model.head, model.body, model.rightArm, model.leftArm, model.rightLeg, model.leftLeg}) {
+			part.y += sink;
+		}
+		model.rightLeg.xRot -= amount;
+		model.leftLeg.xRot -= amount;
+		return amount * 2.0F;
 	}
 
 	/** Tips the body and head to the side ({@code amount} radians; positive is the boxer's left). */

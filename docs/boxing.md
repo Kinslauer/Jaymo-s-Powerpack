@@ -128,12 +128,12 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   style's own stance replaces the plain fists-up guard. The shapes are copied from fight footage Jung sent ("Every
   Boxing Guard Explained in 8 Minutes": its peekaboo, long guard and Philly shell parts). The arms bend at the elbow
   (`KneeBend`, as the crawl's and the climb's do), and the worn fist gear turns with the forearm.
-  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves on the cheeks, a forward crouch with the chin down, the head and body
-    swaying from side to side without stopping.
+  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves on the cheeks, a forward crouch with the chin down, the knees bent with
+    the feet flat. The shoulders and head sway from side to side without stopping; the hips and feet stay put.
   - Long Guard: the lead arm out at shoulder height, all but straight, pawing a little; the rear glove by the chin; the body
-    upright, a little back, the lead shoulder slightly forward.
+    upright, a little back, stood at an angle from the feet up (lead shoulder and lead foot forward).
   - Bastion (Philly shell): side on with the right shoulder forward and held up by the chin, the lead forearm folded
-    across the belly, the rear glove folded up by the cheek, the weight back and rocking slowly, the head tipped toward the rear
+    across the belly, the rear glove folded up by the cheek, the weight back, the head tipped toward the rear
     shoulder with the chin tucked; it still shrugs its lead shoulder now and then.
   The stance gives the style away, on purpose.
 - **Blocks:** Arrow Slit pulls the gloves in tighter and crouches lower; Long Guard puts both arms out ahead with
