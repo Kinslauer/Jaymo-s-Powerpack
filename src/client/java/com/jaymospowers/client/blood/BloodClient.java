@@ -75,8 +75,24 @@ public final class BloodClient {
 				// spatter's star, at a spray's size, it burst out of the body like blood clipping through it (Jung's clip)
 				return new BloodDrop(level, x, y, z, 0.0, 0.0, 0.0, drops, 4, 32, false, options.color(), options.scale() * DRIP_DROP, false).drip();
 			}
+			// the player's blood setting: Light throws fewer drops, Heavy more
+			float share = BloodSettings.amount().drops;
+			if (share < 1.0F && random.nextFloat() >= share) {
+				return null;
+			}
 			Kind kind = shaped(random);
-			return kind == null ? null : kind.create(level, x, y, z, xd, yd, zd, options.color(), options.scale(), options.stains());
+			if (kind == null) {
+				return null;
+			}
+			if (share > 1.0F && random.nextFloat() < share - 1.0F) {
+				Kind more = shaped(random);
+				if (more != null) {
+					net.minecraft.client.Minecraft.getInstance().particleEngine.add(more.create(level, x, y, z,
+						xd + (random.nextDouble() - 0.5) * 0.1, yd, zd + (random.nextDouble() - 0.5) * 0.1, options.color(), options.scale() * 0.8F,
+						options.stains()));
+				}
+			}
+			return kind.create(level, x, y, z, xd, yd, zd, options.color(), options.scale(), options.stains());
 		});
 		registry.register(BloodParticles.FLECK, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> fleck(level, x, y, z, xd, yd, zd,
 			random, options.color(), options.scale()));
@@ -197,6 +213,20 @@ public final class BloodClient {
 			}
 		}
 		return best;
+	}
+
+	/** The F3 line: the blood setting, the server's stains and the splash pools lying near, and the drops in the air. */
+	public static String debugLine() {
+		ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+		long stains = level == stainsIn ? STAINS.values().stream().filter(BloodPuddle::isAlive).count() : 0;
+		long pools = 0;
+		if (level == poolsIn) {
+			for (List<BloodPuddle> chunk : POOLS.values()) {
+				pools += chunk.stream().filter(BloodPuddle::isAlive).count();
+			}
+		}
+		return "Blood (" + BloodSettings.amount().name().toLowerCase(java.util.Locale.ROOT) + "): " + stains + " stains, " + pools
+			+ " pools, " + BloodDrop.flying() + " drops";
 	}
 
 	static @Nullable SpriteSet puddleSprites() {
