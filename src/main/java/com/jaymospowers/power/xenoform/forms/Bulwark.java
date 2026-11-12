@@ -28,7 +28,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>R, Fist Combo: three quick blows on whatever is in reach, the last one sending it flying.</li>
  * <li>G, Ground Clap: a shockwave through everything within {@link #CLAP_RADIUS}.</li>
  * <li>V, Grab and Throw: pick up the creature you look at and carry it overhead; V again hurls it. Looking at a block
- * instead rips a chunk out of the ground and throws it.</li>
+ * instead rips a chunk out of the ground and throws it. Sneak + V while holding a creature is the suplex instead
+ * ({@link BulwarkSuplex}): it is driven head first into the ground behind.</li>
+ * <li>Passive, fury ({@link BulwarkFury}): blows given and taken fill a rage meter; fuller, it hits harder and is hard to shove.</li>
+ * <li>Passive, charge ({@link BulwarkCharge}): sprint a short while and Bulwark barrels through stone and wood and flings what it hits.</li>
  * <li>B, Leap Slam: a great leap; landing hits everything within {@link #SLAM_RADIUS}.</li>
  * <li>C (ascended), Titan: (0.20.9) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Titan}.</li>
  * </ul>
@@ -55,6 +58,18 @@ public final class Bulwark extends XenoForm {
 
 	/** (0.20.9) Its Ultimate, built once. */
 	private final com.jaymospowers.power.xenoform.XenoUltimate titan = new com.jaymospowers.power.xenoform.forms.ultimate.Titan(this);
+
+	@Override
+	public void onExit(ServerPlayer player, XenoformPower.Live live) {
+		BulwarkFury.clear(player);
+		BulwarkCharge.clear(player);
+		BulwarkSuplex.clear(player);
+	}
+
+	@Override
+	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+		BulwarkFury.dealt(player);
+	}
 
 	public Bulwark() {
 		super("bulwark", 1.5F, 40.0F, 7.0, -0.1, 0.6, 0.6, Items.IRON_BLOCK, 0xB8C4D0);
@@ -108,6 +123,9 @@ public final class Bulwark extends XenoForm {
 
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
+		BulwarkFury.tick(player);
+		BulwarkCharge.tick(player);
+		BulwarkSuplex.tick(player);
 		long now = player.level().getGameTime();
 		if (live.combo > 0 && now >= live.comboNext) {
 			live.combo--;
@@ -135,6 +153,9 @@ public final class Bulwark extends XenoForm {
 	/** A leap's landing never hurts the brute. */
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
+		if (amount > 0.0F && !source.is(DamageTypeTags.IS_FALL)) {
+			BulwarkFury.taken(player, amount);
+		}
 		return !(source.is(DamageTypeTags.IS_FALL) && (live.leaping || live.leapTicks > 0 && player.tickCount % 1 == 0 && live.leapTicks < 120));
 	}
 
@@ -160,7 +181,7 @@ public final class Bulwark extends XenoForm {
 			return;
 		}
 		ServerLevel level = player.level();
-		target.hurtServer(level, player.damageSources().playerAttack(player), COMBO_DAMAGE);
+		target.hurtServer(level, player.damageSources().playerAttack(player), BulwarkFury.boost(player, COMBO_DAMAGE));
 		target.hurtTime = 0;
 		if (last) {
 			shove(target, player.position(), 1.2, 0.5);
@@ -180,7 +201,7 @@ public final class Bulwark extends XenoForm {
 			if (living.getId() == live.grabbed) {
 				continue;
 			}
-			living.hurtServer(level, player.damageSources().playerAttack(player), CLAP_DAMAGE);
+			living.hurtServer(level, player.damageSources().playerAttack(player), BulwarkFury.boost(player, CLAP_DAMAGE));
 			shove(living, player.position(), 1.0, 0.5);
 		}
 		Vec3 feet = player.position();
@@ -198,6 +219,12 @@ public final class Bulwark extends XenoForm {
 		if (live.grabbed >= 0) {
 			Entity held = level.getEntity(live.grabbed);
 			live.grabbed = -1;
+			if (held instanceof LivingEntity creature && held.getVehicle() == player && player.isShiftKeyDown()) {
+				// sneak + V: the suplex
+				BulwarkSuplex.begin(player, creature);
+				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				return true;
+			}
 			if (held != null && held.getVehicle() == player) {
 				held.stopRiding();
 				Vec3 look = player.getLookAngle();
@@ -243,7 +270,7 @@ public final class Bulwark extends XenoForm {
 	private static void slam(ServerPlayer player) {
 		ServerLevel level = player.level();
 		for (LivingEntity living : around(player, SLAM_RADIUS)) {
-			living.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
+			living.hurtServer(level, player.damageSources().playerAttack(player), BulwarkFury.boost(player, SLAM_DAMAGE));
 			com.jaymospowers.core.Crushing.mark(living);
 			shove(living, player.position(), 0.8, 0.6);
 		}

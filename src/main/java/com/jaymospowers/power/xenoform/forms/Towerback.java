@@ -56,7 +56,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>R, Grab: as the Giants' grab. It rears back with a roar ({@link #WINDUP} ticks; get out of reach and the hand
  * closes on nothing), snatches what it aimed at, lifts it to its chest and squeezes, then slams it into the ground. The
- * letterbox film plays for both.</li>
+ * letterbox film plays for both. With no creature and no tree in reach, R closes on the ground instead and tears up a
+ * slab ({@link TowerSlab}), holds it and throws it where it looks.</li>
  * <li>G, Stomp: one great stamp; its shockwave runs out twice as far as a step's and throws everything up.</li>
  * <li>V, Swat: a backhand across the front of it that flings everything there aside. (0.19.28) A tap, but slow, like a
  * charged move: it draws its arm across its chest and coils ({@link #SWAT_WINDUP} ticks, slowed, with a grinding growl),
@@ -302,7 +303,9 @@ public final class Towerback extends XenoForm {
 				}
 				LivingEntity target = aimed(player, handReach(player) + GRAB_AIM, e -> e instanceof LivingEntity l && canGrab(player, l));
 				// (0.20.106) no one to grab: a tree in reach will do, to be thrown (GiantTrees)
-				if (target == null && !GiantTrees.treeNear(level, player, hand(player, 0.0), handReach(player))) {
+				// and no tree either: the ground itself, a slab of it torn up to be thrown (TowerSlab)
+				if (target == null && !GiantTrees.treeNear(level, player, hand(player, 0.0), handReach(player))
+					&& !TowerSlab.groundNear(level, player, hand(player, 0.0), GRAB_CLIMB_PER_SCALE * size)) {
 					return;
 				}
 				beginGrab(player, live, level, target);
@@ -595,6 +598,10 @@ public final class Towerback extends XenoForm {
 			// (0.20.106) a tree in its hand, lifted, then thrown where it looks
 			return;
 		}
+		if (prey == null && TowerSlab.tick(level, player, Math.max(0, t - WINDUP - SNATCH), HOLD, hand(player, 0.0))) {
+			// a slab of ground in its hand, lifted, then thrown where it looks
+			return;
+		}
 		if (prey == null) {
 			// its hand closed on nothing (or its catch is gone): it straightens up
 			if (t < WINDUP + SNATCH + HOLD + SLAM) {
@@ -640,7 +647,8 @@ public final class Towerback extends XenoForm {
 	private static void snatch(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
 		LivingEntity target = level.getEntity(live.grabPrey) instanceof LivingEntity l ? l : null;
 		if (target == null || !canGrab(player, target) || !inHandsReach(player, target)) {
-			if (GiantTrees.take(level, player, hand(player, 0.0), handReach(player))) {
+			if (GiantTrees.take(level, player, hand(player, 0.0), handReach(player))
+				|| TowerSlab.take(level, player, hand(player, 0.0), GRAB_CLIMB_PER_SCALE * size(player))) {
 				return;
 			}
 			Vec3 miss = hand(player, player.getBbWidth() * 0.3);
@@ -724,6 +732,7 @@ public final class Towerback extends XenoForm {
 	/** The grab is over (or the form is): whatever it held is let go. */
 	private static void endGrab(ServerPlayer player, XenoformPower.Live live) {
 		GiantTrees.drop(player);
+		TowerSlab.drop(player);
 		if (live.grabStart >= 0L) {
 			player.removeEffect(MobEffects.SLOWNESS);
 		}
