@@ -69,15 +69,28 @@ public final class Fuse extends XenoForm {
 		live.latched = -1;
 		live.latchTicks = live.rush = live.swell = live.blasts = 0;
 		live.hideUntil = 0L;
+		FuseStore.clear(player);
+	}
+
+	@Override
+	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
+		FuseStore.clear(player);
+	}
+
+	/** Z (tap): throw yourself on a lit creeper, primed TNT or fire and smother it. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		return FuseStore.smother(player);
 	}
 
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
-		if (!source.is(DamageTypeTags.IS_EXPLOSION)) {
-			return true;
-		}
 		// its own blasts never hurt it, and while Defuse lasts no blast does
-		return source.getEntity() != player && (live.hideUntil == 0L || player.level().getGameTime() > live.hideUntil);
+		if (source.is(DamageTypeTags.IS_EXPLOSION) && (source.getEntity() == player || live.hideUntil != 0L && player.level().getGameTime() <= live.hideUntil)) {
+			return false;
+		}
+		// the hurt it takes fills the bar; below a third health the shell goes up once
+		return FuseStore.hurt(player, source, amount);
 	}
 
 	/** Every punch pops. */
@@ -147,7 +160,10 @@ public final class Fuse extends XenoForm {
 				}
 			}
 			case ABILITY_4 -> {
-				if (ready(player, live, B)) {
+				if (player.isShiftKeyDown()) {
+					// sneak + B: let all the stored hurt go in one blast
+					FuseStore.release(player);
+				} else if (ready(player, live, B)) {
 					defuse(player, live, level);
 					cooldown(player, live, B, DEFUSE_COOLDOWN);
 				}
@@ -197,6 +213,7 @@ public final class Fuse extends XenoForm {
 	@Override
 	public void tick(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
+		FuseStore.tick(player);
 		if (live.swell > 0) {
 			live.swell = Math.min(CHARGE_FULL + 1, live.swell + 1);
 			if (player.tickCount % 3 == 0) {

@@ -220,6 +220,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.TailSweep", "power.xenoform.HowlNose", "power.xenoform.LurkBlend",
 			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
 			"power.xenoform.forms.BulwarkFury",
+			"power.xenoform.forms.FuseStore",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",

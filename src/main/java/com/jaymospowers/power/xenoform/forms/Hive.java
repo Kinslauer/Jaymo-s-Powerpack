@@ -29,7 +29,8 @@ import net.minecraft.world.phys.Vec3;
  * cloud, and holding jump lifts you in short flights.</li>
  * <li>G, Sting: a stab that poisons.</li>
  * <li>V, Honey Glue: the creature you aim at is stuck fast in honey.</li>
- * <li>B, Swarm: a cloud of insects is sent at the creature you aim at, stinging it for {@link #SWARM_TICKS} ticks.</li>
+ * <li>B, Swarm: five flyers that share Hive's health ({@link HiveSwarm}): sent out at what you aim at, then each press sends one
+ * as a living missile; sneak + B calls them home as a shell that soaks hits. Z picks the formation.</li>
  * </ul>
  */
 public final class Hive extends XenoForm {
@@ -42,8 +43,8 @@ public final class Hive extends XenoForm {
 	public static final double GLUE_REACH = 12.0;
 	public static final int GLUE_TICKS = 80, GLUE_COOLDOWN = 160;
 	public static final double SWARM_REACH = 24.0;
-	public static final int SWARM_TICKS = 120, SWARM_EVERY = 10, SWARM_COOLDOWN = 300;
-	public static final float SWARM_DAMAGE = 1.5F;
+	/** Sending the swarm out, and sending one flyer as a missile. */
+	public static final int SWARM_COOLDOWN = 100, MISSILE_COOLDOWN = 20;
 
 	private static final DustParticleOptions SPECK = new DustParticleOptions(0x2A2010, 0.6F);
 	private static final DustParticleOptions AMBER = new DustParticleOptions(0xE0A020, 0.5F);
@@ -64,6 +65,14 @@ public final class Hive extends XenoForm {
 		}
 		live.scatter = live.latchTicks = 0;
 		live.latched = -1;
+		HiveSwarm.clear(player);
+	}
+
+	/** Z (tap): the swarm's next formation. */
+	@Override
+	public boolean onModeTap(ServerPlayer player, XenoformPower.Live live) {
+		HiveSwarm.cycle(player);
+		return true;
 	}
 
 	@Override
@@ -72,7 +81,11 @@ public final class Hive extends XenoForm {
 			return false;
 		}
 		// a blow passes through the cloud
-		return live.scatter <= 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
+		if (live.scatter > 0 && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return false;
+		}
+		// the shell of flyers takes a blow and passes on only a share
+		return HiveSwarm.soak(player, source, amount);
 	}
 
 	@Override
@@ -126,18 +139,17 @@ public final class Hive extends XenoForm {
 				cooldown(player, live, V, GLUE_COOLDOWN);
 			}
 			case ABILITY_4 -> {
-				if (!ready(player, live, B)) {
-					return;
+				if (player.isShiftKeyDown()) {
+					// sneak + B: the flyers come home as a shell (again: out again)
+					HiveSwarm.shell(player);
+				} else if (!HiveSwarm.out(player)) {
+					if (ready(player, live, B)) {
+						HiveSwarm.deploy(player, aimed(player, SWARM_REACH, e -> true));
+						cooldown(player, live, B, SWARM_COOLDOWN);
+					}
+				} else if (ready(player, live, B) && HiveSwarm.missile(player, aimed(player, SWARM_REACH, e -> true))) {
+					cooldown(player, live, B, MISSILE_COOLDOWN);
 				}
-				LivingEntity target = aimed(player, SWARM_REACH, e -> true);
-				if (target == null) {
-					return;
-				}
-				live.latched = target.getId();
-				live.latchTicks = SWARM_TICKS;
-				beam(level, player.getEyePosition(), target.getBoundingBox().getCenter(), SPECK, 12);
-				sound(player, SoundEvents.BEE_LOOP_AGGRESSIVE, 1.6F, 0.9F);
-				cooldown(player, live, B, SWARM_COOLDOWN);
 			}
 			default -> {
 			}
@@ -167,26 +179,7 @@ public final class Hive extends XenoForm {
 				burst(level, SPECK, player.position().add(0.0, 0.8, 0.0), 30, 0.4, 0.02);
 			}
 		}
-		if (live.latched >= 0) {
-			swarm(player, live, level);
-		}
-	}
-
-	/** The swarm on its quarry: a cloud round it, and a sting every {@link #SWARM_EVERY} ticks. */
-	private static void swarm(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
-		Entity e = level.getEntity(live.latched);
-		if (!(e instanceof LivingEntity quarry) || !quarry.isAlive() || quarry.distanceTo(player) > SWARM_REACH * 2.0 || --live.latchTicks <= 0) {
-			live.latched = -1;
-			live.latchTicks = 0;
-			return;
-		}
-		level.sendParticles(SPECK, quarry.getX(), quarry.getY() + quarry.getBbHeight() * 0.6, quarry.getZ(), 5, 0.5, 0.5, 0.5, 0.03);
-		if (live.latchTicks % SWARM_EVERY == 0) {
-			quarry.setInvulnerableTime(0);
-			quarry.hurtServer(level, player.damageSources().playerAttack(player), SWARM_DAMAGE);
-			quarry.addEffect(new MobEffectInstance(MobEffects.POISON, 40, 0), player);
-			level.playSound(null, quarry.getX(), quarry.getY(), quarry.getZ(), SoundEvents.BEE_STING, net.minecraft.sounds.SoundSource.PLAYERS, 0.6F, 1.3F);
-		}
+		HiveSwarm.tick(player);
 	}
 
 	@Override
