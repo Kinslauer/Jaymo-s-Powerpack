@@ -86,6 +86,14 @@ public final class BoxingPoses {
 	 * far through (it snaps out and comes home slower).
 	 */
 	static final float PUNCH_TICKS = 6.0F, SNAP = 0.4F;
+	/**
+	 * Before it goes, a punch winds up for {@link Boxing#WINDUP} ticks: a straight punch's arm draws back this share
+	 * of its reach (and the body coils the other way by as much of its turn); a hook's arm rises out wide while the
+	 * body coils back this share of its turn; an uppercut dips this far (radians) as the fist drops.
+	 */
+	static final float STRAIGHT_COIL = 0.3F, HOOK_COIL = 0.4F, UPPERCUT_DIP = 0.15F;
+	/** The game's own arm swing lasts this long (ticks): how far into a click a swing is. A local windup gives way to the server's word of the punch if that comes within the second number of ticks. */
+	static final float SWING_TICKS = 6.0F, LOCAL_GRACE = 8.0F;
 	/** A jab: the lead arm straight out at chin height, its shoulder up to the chin (pixels) and turned in behind it (radians). The rear glove stays home. */
 	static final float JAB_PITCH = -1.62F, JAB_SHOULDER = 0.8F, JAB_TURN = 0.3F;
 	/**
@@ -126,15 +134,19 @@ public final class BoxingPoses {
 
 	/**
 	 * A boxer, as their render state carries them. {@code punch}: the punch being thrown right now, or null;
-	 * {@code punchAt}: how far through it is (0 to 1); {@code heavy}: a hook thrown out of a slip, the full one.
+	 * {@code wind}: how far through its windup it is (0 to 1); {@code punchAt}: how far through the punch itself (0
+	 * until the windup is done, then to 1); {@code heavy}: a hook thrown out of a slip, the full one.
 	 * {@code moveAge}: ticks since the evade began.
 	 */
-	public record Look(Boxing.Style style, int spent, Boxing.@Nullable Punch punch, float punchAt, boolean heavy, BoxingEvades.@Nullable Move move,
+	public record Look(Boxing.Style style, int spent, Boxing.@Nullable Punch punch, float wind, float punchAt, boolean heavy, BoxingEvades.@Nullable Move move,
 		float moveAge, boolean blocking) {
 	}
 
-	/** The last punch each player was told to have thrown ({@link Boxing#LOOK}, less its tiredness bits), and when its pose began (game ticks). */
-	private record Thrown(int look, float at) {
+	/**
+	 * The last punch each player was told to have thrown ({@link Boxing#LOOK}, less its tiredness bits), and when its
+	 * pose began (game ticks). {@code local}: nobody told of it; it is the click's own swing, shown as a jab.
+	 */
+	private record Thrown(int look, float at, boolean local) {
 	}
 
 	private static final java.util.Map<Integer, Thrown> THROWN = new java.util.HashMap<>();
@@ -203,28 +215,39 @@ public final class BoxingPoses {
 				}
 			}
 		}
-		// The punch's pose runs on its own clock, from when the server says a punch was thrown (so a queued punch, thrown
-		// a moment after the click, shows too). If the arm is already swinging from the click, the pose carries on from
-		// where that swing is. A click that hit nothing has no punch told: it shows as a jab, on the swing's own clock.
+		// The punch's pose (a windup, then the punch) runs on its own clock, from when the server says a punch was thrown
+		// (so a queued punch, thrown a moment after the click, shows too). The click's own swing starts it at once, as a
+		// jab; if word of the real punch comes soon after, the pose carries on as that punch from where it is.
 		Integer told = player.getAttached(Boxing.LOOK);
 		int seen = told == null ? 0 : told >> 2;
 		float now = player.level().getGameTime() + partialTicks;
 		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
+		// (the pose's windup ends a little before the server's, so the punch is at full reach as the blow lands)
+		float windup = Boxing.WINDUP - SNAP * PUNCH_TICKS, whole = windup + PUNCH_TICKS;
 		if (THROWN.size() > 512) {
 			THROWN.clear();
 		}
 		Thrown thrown = THROWN.get(player.getId());
-		if (thrown == null || thrown.look() != seen) {
-			thrown = new Thrown(seen, thrown == null ? now - PUNCH_TICKS : now - (swinging ? state.swingAnimation * PUNCH_TICKS : 0.0F));
+		if (thrown == null) {
+			thrown = new Thrown(seen, now - whole, false);
+			THROWN.put(player.getId(), thrown);
+		} else if (thrown.look() != seen) {
+			boolean carried = thrown.local() && now - thrown.at() < LOCAL_GRACE;
+			thrown = new Thrown(seen, carried ? thrown.at() : now, false);
+			THROWN.put(player.getId(), thrown);
+		} else if (swinging && state.swingAnimation < 0.34F && now - thrown.at() >= whole) {
+			thrown = new Thrown(seen, now - state.swingAnimation * SWING_TICKS, true);
 			THROWN.put(player.getId(), thrown);
 		}
-		Boxing.Punch punch = Boxing.shownPunch(player);
-		float punchAt = (now - thrown.at()) / PUNCH_TICKS;
-		if (punch == null || punchAt < 0.0F || punchAt >= 1.0F) {
-			punch = swinging ? Boxing.Punch.JAB : null;
-			punchAt = swinging ? Mth.clamp(state.swingAnimation, 0.0F, 1.0F) : 0.0F;
+		Boxing.Punch punch = thrown.local() ? Boxing.Punch.JAB : Boxing.shownPunch(player);
+		float since = now - thrown.at(), wind = 0.0F, punchAt = 0.0F;
+		if (punch != null && since >= 0.0F && since < whole) {
+			wind = Math.min(1.0F, since / windup);
+			punchAt = Math.max(0.0F, (since - windup) / PUNCH_TICKS);
+		} else {
+			punch = null;
 		}
-		state.setData(KEY, new Look(style, Boxing.spent(player), punch, punchAt, slipped, move, age, player.isBlocking()));
+		state.setData(KEY, new Look(style, Boxing.spent(player), punch, wind, punchAt, slipped, move, age, player.isBlocking()));
 	}
 
 	/**
@@ -424,14 +447,16 @@ public final class BoxingPoses {
 	 */
 	private static float punch(HumanoidModel<?> model, Look look, ModelPart lead, ModelPart rear, Elbow leadElbow, Elbow rearElbow, boolean leadRight) {
 		float at = look.punchAt();
-		// out fast, home slower
-		float out = at < SNAP ? Mth.sin(at / SNAP * Mth.HALF_PI) : Mth.cos((at - SNAP) / (1.0F - SNAP) * Mth.HALF_PI);
-		float swept = Mth.sin(at * Mth.PI);
+		boolean winding = look.wind() < 1.0F;
+		// the windup's coil (0 to 1), then the punch: out fast, home slower
+		float coil = Mth.sin(look.wind() * Mth.HALF_PI);
+		float out = drive(look);
+		float forward = Math.max(0.0F, out);
 		switch (look.punch()) {
 			case JAB -> {
 				reach(lead, leadRight, JAB_PITCH, 0.0F, out);
 				leadElbow.fold *= 1.0F - out;
-				lead.y -= JAB_SHOULDER * out;
+				lead.y -= JAB_SHOULDER * forward;
 				return JAB_TURN * out;
 			}
 			case CROSS, STRAIGHT, PULL_COUNTER -> {
@@ -439,39 +464,59 @@ public final class BoxingPoses {
 				rearElbow.fold *= 1.0F - out;
 				if (!leadElbow.across) {
 					// the lead glove comes home to the cheek (the Bastion's stays low, where it lives)
-					reach(lead, leadRight, HOME_PITCH, HOME_IN, out);
-					leadElbow.fold = Mth.lerp(out, leadElbow.fold, HOME_FOLD);
+					reach(lead, leadRight, HOME_PITCH, HOME_IN, forward);
+					leadElbow.fold = Mth.lerp(forward, leadElbow.fold, HOME_FOLD);
 				}
-				bend(model, CROSS_LEAN * out);
+				bend(model, CROSS_LEAN * forward);
 				// the rear knee turns in as the hip comes through
-				(leadRight ? model.leftLeg : model.rightLeg).yRot += (leadRight ? CROSS_KNEE : -CROSS_KNEE) * out;
+				(leadRight ? model.leftLeg : model.rightLeg).yRot += (leadRight ? CROSS_KNEE : -CROSS_KNEE) * forward;
 				return -CROSS_TURN * out;
 			}
 			case LEAD_HOOK, REAR_HOOK -> {
 				boolean leading = look.punch() == Boxing.Punch.LEAD_HOOK, heavy = look.heavy();
 				ModelPart arm = leading ? lead : rear;
 				boolean right = leading == leadRight;
-				// into the swing at once, home again over the end; between, the arm sweeps in to land ahead
-				float in = Math.min(1.0F, at / HOOK_UP) * Math.min(1.0F, (1.0F - at) / HOOK_HOME);
-				float sweep = Mth.sin(Mth.clamp(at / HOOK_LANDS, 0.0F, 1.0F) * Mth.HALF_PI);
+				// the windup lifts the arm out wide as the body coils back; then it sweeps in to land ahead, and comes home over the end
+				float home = Math.min(1.0F, (1.0F - at) / HOOK_HOME);
+				float in = winding ? coil : home;
+				float sweep = winding ? 0.0F : Mth.sin(Mth.clamp(at / HOOK_LANDS, 0.0F, 1.0F) * Mth.HALF_PI);
 				reach(arm, right, HOOK_PITCH, Mth.lerp(sweep, heavy ? HOOK_FROM : LIGHT_HOOK_FROM, heavy ? HOOK_TO : LIGHT_HOOK_TO), in);
 				arm.zRot = 0.0F;
-				(leading ? leadElbow : rearElbow).across((heavy ? HOOK_ACROSS : LIGHT_HOOK_ACROSS));
+				Elbow elbow = leading ? leadElbow : rearElbow;
+				if (!winding || look.wind() > 0.5F) {
+					elbow.across(heavy ? HOOK_ACROSS : LIGHT_HOOK_ACROSS);
+				}
 				// the hips turn with it: the foot on the punching side pivots, and the body leans a little in
-				float through = Mth.sin(Mth.clamp(at / HOOK_LANDS, 0.0F, 1.0F) * Mth.HALF_PI) * Math.min(1.0F, (1.0F - at) / HOOK_HOME);
+				float through = winding ? -HOOK_COIL * coil : Mth.lerp(sweep, -HOOK_COIL, 1.0F) * home;
+				float planted = Math.max(0.0F, through);
 				ModelPart leg = right ? model.rightLeg : model.leftLeg;
-				leg.yRot += (right ? -1.0F : 1.0F) * (heavy ? HOOK_PIVOT : LIGHT_HOOK_PIVOT) * through;
-				bend(model, HOOK_LEAN * through);
+				leg.yRot += (right ? -1.0F : 1.0F) * (heavy ? HOOK_PIVOT : LIGHT_HOOK_PIVOT) * planted;
+				bend(model, HOOK_LEAN * planted);
 				float turned = (heavy ? HOOK_TURN : LIGHT_HOOK_TURN) * through;
 				return leading ? turned : -turned;
 			}
 			case UPPERCUT -> {
-				set(rear, !leadRight, Mth.lerp(at, UPPERCUT_FROM, UPPERCUT_TO), UPPERCUT_IN);
-				rearElbow.forward(UPPERCUT_FOLD);
-				return -PUNCH_TURN * swept;
+				// the windup drops the fist by the hip and dips the body; then it rises
+				float dip = winding ? coil : 1.0F - Mth.clamp(at * 2.0F, 0.0F, 1.0F);
+				reach(rear, !leadRight, Mth.lerp(at, UPPERCUT_FROM, UPPERCUT_TO), UPPERCUT_IN, winding ? coil : 1.0F);
+				rearElbow.forward(Mth.lerp(winding ? coil : 1.0F, rearElbow.across ? 0.0F : rearElbow.fold, UPPERCUT_FOLD));
+				bend(model, UPPERCUT_DIP * dip);
+				return -PUNCH_TURN * (winding ? -HOOK_COIL * coil : Mth.sin(at * Mth.PI));
 			}
 		}
 		return 0.0F;
+	}
+
+	/**
+	 * How far out a punch is: during the windup it draws back (down to minus {@link #STRAIGHT_COIL}), then it snaps
+	 * out to 1 by {@link #SNAP} of the punch and comes home to 0 slower.
+	 */
+	private static float drive(Look look) {
+		if (look.wind() < 1.0F) {
+			return -STRAIGHT_COIL * Mth.sin(look.wind() * Mth.HALF_PI);
+		}
+		float at = look.punchAt();
+		return at < SNAP ? Mth.lerp(Mth.sin(at / SNAP * Mth.HALF_PI), -STRAIGHT_COIL, 1.0F) : Mth.cos((at - SNAP) / (1.0F - SNAP) * Mth.HALF_PI);
 	}
 
 	/**
@@ -489,8 +534,8 @@ public final class BoxingPoses {
 		if (punch == null || look.blocking() || leading != (right == leadRight)) {
 			return new float[3];
 		}
-		float at = look.punchAt();
-		float out = at < SNAP ? Mth.sin(at / SNAP * Mth.HALF_PI) : Mth.cos((at - SNAP) / (1.0F - SNAP) * Mth.HALF_PI);
+		// (drawn back a little through the windup, then out)
+		float out = drive(look);
 		float[] reach = switch (punch) {
 			case LEAD_HOOK, REAR_HOOK -> FIRST_HOOK;
 			case UPPERCUT -> FIRST_UPPERCUT;
