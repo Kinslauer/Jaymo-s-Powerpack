@@ -18,6 +18,8 @@
 		"ItemStackRenderStateAccessor",
 		"ItemLayerRenderStateAccessor",
 		"BloodItemOverlayMixin",
+		"BloodVideoSettingsMixin",
+		"BloodDebugLineMixin",
 		"FaceLivingEntityRendererMixin",
 		"TerrainParticleWaterMixin",
 		"DeathScreenFilmMixin",

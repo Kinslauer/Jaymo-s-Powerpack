@@ -3469,3 +3469,34 @@ Compiled only; not played.
 - Marks fade in four steps over their life (bruises 6 minutes, the rest 8 to 10) and go as soon as the part has mended whole. Painted into the skin as a cutout picture of just the mark pixels, so the blood coat still shows round them. Not kept over a restart (as blood coats aren't).
 - **Fresh wounds drip**: a fresh cut, claw or puncture that isn't already bleeding properly (Bleeding) drips a few drops onto the ground for 30 seconds, about every 1.5 s at first and every 7 s by the end, leaving lasting stains (BloodTrail).
 - Not yet on corpses. Built; not played.
+
+## 0.22.78 (2026-11-12): stumps and smears - lost limbs leave stumps, cut-off parts leak, bodies smear where they land
+
+- Andy's Cruor picks (ideas only).
+- **Stumps**: a humanoid's lost arm or leg is drawn as a short stump at the shoulder or hip (`Dismembered.STUBS`, 28% of the limb) instead of vanishing. Its end is raw and red while it bleeds (Bleeding's stump bleed, until cauterised), and capped once closed: scar pink, puckered to a seam (`WoundMarksLayer`). A limb with a prosthetic shows the prosthetic as before.
+- Andy: "the unarmed start starts with the lost limb capped": its long-healed limb never bleeds, so its stump is capped from the start.
+- **Cut-off parts leak**: a severed head or limb lying on the ground keeps leaking from the cut for 30 seconds, slower and slower (every second at first, every 4.5 s at the end), into a small lasting pool, then stops (`SeveredPart`).
+- **Ragdoll impact smears**: a corpse that hits the ground or a wall hard (thrown, blown, dropped; it lost 0.4+ blocks a tick in one step) leaves a blood blot where it struck and throws a few drops, bigger the harder it hit (`BladeBlood.impact`, through Jaymo's Kitchen's new `CorpseImpacts` hook). Bloodless bodies don't.
+- Built; not played.
+
+## 0.22.79 (2026-11-12): Blood that lingers, rots and stinks
+
+- Blood on you stays until you wash it off properly: a player's blood coat is saved and no longer wears off by itself.
+- Blood ages: fresh, dried after about five minutes, rotten after a day. It darkens as it dries and turns brown-green as it rots, on your body as well as on your gear.
+- Dried blood washes off at less than half the usual rate, and rotten blood at a sixth. Water and rain never take the last of rotten blood off: scrub it at a water cauldron or with a wet sponge.
+- Old blood smells, and rotten blood smells worst of all. It adds to how bad you smell, so beasts notice you sooner and villagers remark on it.
+- Rotten blood draws flies, on you, on mobs and on corpses.
+- Heavy hits throw more blood back on whoever struck, and splash anyone standing close.
+- Classes: core/blood/Bloodied (coat age, stages, washing, reek, noticed, splash-back), core/wet/Smell, client blood/Flies, client wet/ArmourGrimeTextures.
+- Built; not played.
+
+## 0.22.80 (2026-11-12): Blood in the world: surfaces, water, lava, drips, sounds, a setting
+
+- What blood lands on changes it: wool, carpets, hay and moss soak it into a small dark stain that lasts; dirt, grass, sand, gravel and snow drink it into a dull patch that is soon gone; glass and ice let it smear thin and wide.
+- A fresh pool on a thin floor (planks, slabs, trapdoors, leaves, wool, hay, scaffolding) with open air under it soaks through and drips from the underside for half a minute.
+- Blood falling into water turns into a drifting cloud that spreads and fades. Blood falling into lava hisses away in a puff of smoke.
+- Freshly bloodied weapons drip now and then for about a minute, more often the bloodier they are, on anyone carrying one.
+- Landing blood makes a quiet wet splat.
+- New Blood button in Video Settings: Light, Normal or Heavy. It changes how many drops hits throw and how long splashes lie. Trails and stains that others can track stay the same for everyone. F3 shows the setting and counts the stains, pools and drops nearby, under the particle count.
+- Classes: client blood/BloodSurfaces, BloodSettings, WeaponDrips, BloodPuddle, BloodDrop, BloodClient; mixins BloodVideoSettingsMixin, BloodDebugLineMixin.
+- Built; not played (the two mixins are untested in game).

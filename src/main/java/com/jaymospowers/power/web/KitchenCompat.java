@@ -730,6 +730,20 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen with no meat hooks
 		}
+		try {
+			// a body that hits the ground or a wall hard (thrown, blown, dropped) leaves a smear where it struck
+			Class<?> impacts = Class.forName("com.jaymoskitchen.corpse.CorpseImpacts");
+			java.util.function.BiConsumer<Entity, double[]> impact = (corpse, at) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				if (type != null && at.length >= 4 && com.jaymospowers.core.BladeBlood.bleeds(corpse, type)
+					&& corpse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+					com.jaymospowers.core.BladeBlood.impact(level, corpse, com.jaymospowers.core.BladeBlood.color(corpse, type), at[0], at[1], at[2], at[3]);
+				}
+			};
+			impacts.getMethod("setOnImpact", java.util.function.BiConsumer.class).invoke(null, impact);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen that doesn't tell of impacts
+		}
 	}
 
 	/**

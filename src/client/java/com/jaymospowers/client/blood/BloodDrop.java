@@ -35,7 +35,13 @@ final class BloodDrop extends SingleQuadParticle {
 	private final int frames;
 	private final boolean directional;
 	private final float growIn;
-	private final boolean underwater;
+	private boolean underwater;
+	/** The drops alive now, counted for the F3 line ({@link #flying}). */
+	private static final java.util.Set<BloodDrop> LIVE = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+	/** Fell into water: it spreads this much bigger as a cloud. Into lava: it hisses this loud. A splat on landing: this loud, at most every this many ticks. */
+	static final float CLOUD_GROW = 1.6F, HISS_VOLUME = 0.12F, SPLAT_VOLUME = 0.07F;
+	static final int SPLAT_GAP = 3;
+	private static long lastSplat;
 	/** (0.17.182) Whether it leaves its own splash where it lands (a cut's drip doesn't: the server lays its stain). */
 	private final boolean stains;
 	private boolean mirrored;
@@ -64,12 +70,24 @@ final class BloodDrop extends SingleQuadParticle {
 		this.growIn = 1.0F + this.random.nextFloat();
 		this.mirrored = this.random.nextBoolean();
 		this.underwater = !level.getFluidState(BlockPos.containing(x, y, z)).isEmpty();
+		LIVE.add(this);
 		if (this.underwater) {
 			this.xd *= UNDERWATER_SLOW;
 			this.yd *= UNDERWATER_SLOW;
 			this.zd *= UNDERWATER_SLOW;
 			this.gravity *= UNDERWATER_FALL;
 		}
+	}
+
+	/** How many drops are in the air now. */
+	static int flying() {
+		int n = 0;
+		for (BloodDrop drop : LIVE) {
+			if (drop.isAlive()) {
+				n++;
+			}
+		}
+		return n;
 	}
 
 	/** (0.20.41) A drop off the end of a run on a wall: no toss, it just falls. */
@@ -106,6 +124,8 @@ final class BloodDrop extends SingleQuadParticle {
 		}
 		if (this.underwater) {
 			this.gravity *= 0.99F;
+		} else if (!this.removed && this.enterFluid()) {
+			return;
 		}
 		if (this.onGround) {
 			if (this.stains && this.alpha > 0.5F) {
@@ -115,9 +135,48 @@ final class BloodDrop extends SingleQuadParticle {
 					CollisionContext.empty())).getLocation();
 				this.level.addParticle(new BloodParticles.Puddle(this.color, this.getQuadSize(0.0F)), true, false, ground.x, ground.y, ground.z,
 					0.0, 0.0, 0.0);
+				this.splat();
 			}
 			this.remove();
 		}
+	}
+
+	/**
+	 * Falling into water, it turns to a cloud that drifts, spreads and fades; into lava, it hisses away in a puff of
+	 * smoke. True if it's gone.
+	 */
+	private boolean enterFluid() {
+		BlockPos pos = BlockPos.containing(this.x, this.y, this.z);
+		var fluid = this.level.getFluidState(pos);
+		if (fluid.isEmpty()) {
+			return false;
+		}
+		if (fluid.is(net.minecraft.tags.FluidTags.LAVA)) {
+			this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, this.x, pos.getY() + fluid.getHeight(this.level, pos), this.z,
+				0.0, 0.05, 0.0);
+			this.level.playLocalSound(this.x, this.y, this.z, net.minecraft.sounds.SoundEvents.LAVA_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS,
+				HISS_VOLUME, 1.8F + this.random.nextFloat() * 0.4F, false);
+			this.remove();
+			return true;
+		}
+		this.underwater = true;
+		this.xd *= UNDERWATER_SLOW;
+		this.yd *= UNDERWATER_SLOW * 0.5;
+		this.zd *= UNDERWATER_SLOW;
+		this.gravity *= UNDERWATER_FALL;
+		this.scale(CLOUD_GROW);
+		return false;
+	}
+
+	/** A quiet wet splat where it lands, now and then (a spray of many drops makes one or two, not a rattle). */
+	private void splat() {
+		long now = this.level.getGameTime();
+		if (now - lastSplat < SPLAT_GAP || this.color == BloodParticles.MAGMA) {
+			return;
+		}
+		lastSplat = now;
+		this.level.playLocalSound(this.x, this.y, this.z, net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL, net.minecraft.sounds.SoundSource.NEUTRAL,
+			SPLAT_VOLUME, 1.3F + this.random.nextFloat() * 0.5F, false);
 	}
 
 	@Override

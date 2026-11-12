@@ -248,6 +248,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		CreeperFlight.register();
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
 		VillagerHunters.register();
