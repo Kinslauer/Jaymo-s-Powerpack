@@ -27,6 +27,9 @@ public final class GearClient {
 	/** The charge's push each tick (blocks/tick) and how long it lasts (ticks; matches the server's). */
 	static final double CHARGE_SPEED = 0.55;
 
+	/** Default buttons: the two side buttons of the mouse (every letter key near the hand is taken across the pack). The belt's own cycle key starts unbound: sneak + throw cycles. */
+	static final int BELT_BUTTON = 3, QUIVER_BUTTON = 4;
+
 	private static KeyMapping quiverKey, beltCycleKey, beltThrowKey;
 	private static boolean attackWas, sprintWas;
 	private static int charging, chargeWait;
@@ -35,9 +38,9 @@ public final class GearClient {
 	}
 
 	public static void init() {
-		quiverKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.quiver_next", InputConstants.KEY_LBRACKET, JaymosPowersClient.CATEGORY));
-		beltCycleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.belt_next", InputConstants.KEY_BACKSLASH, JaymosPowersClient.CATEGORY));
-		beltThrowKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.belt_throw", InputConstants.KEY_M, JaymosPowersClient.CATEGORY));
+		quiverKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.quiver_next", InputConstants.Type.MOUSE, QUIVER_BUTTON, JaymosPowersClient.CATEGORY));
+		beltCycleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.belt_next", InputConstants.UNKNOWN.getValue(), JaymosPowersClient.CATEGORY));
+		beltThrowKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.belt_throw", InputConstants.Type.MOUSE, BELT_BUTTON, JaymosPowersClient.CATEGORY));
 		EntityRenderers.register(GearPicks.THROWN, ThrownItemRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(GearClient::tick);
 	}
@@ -60,7 +63,8 @@ public final class GearClient {
 		}
 		while (beltThrowKey.consumeClick()) {
 			if (open) {
-				ClientPlayNetworking.send(new GearNet.Key(GearNet.BELT_THROW));
+				// sneaking, the throw key turns the belt to its next throwable instead, so the belt works from one key
+				ClientPlayNetworking.send(new GearNet.Key(player.isShiftKeyDown() ? GearNet.BELT_CYCLE : GearNet.BELT_THROW));
 			}
 		}
 		boolean shield = open && !player.isSpectator() && Guard.raised(player) && !Guard.weaponGuard(player.getUseItem());
