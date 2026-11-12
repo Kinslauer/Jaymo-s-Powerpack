@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_bottom_right_open",
+  "textures": {
+    "bottom": "jaymospowers:block/eden/sunroot_door_bottom",
+    "top": "jaymospowers:block/eden/sunroot_door_top"
+  }
+}

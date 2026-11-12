@@ -86,7 +86,7 @@ final class BlossomVillages {
 
 	// ---- the Blossom town: the same land's capital, at the scale of the great towns ----
 	/** A Blossom town's ground: its radius, the most it may rise and fall, and how high it is cleared. */
-	static final int TOWN_RADIUS = 42, TOWN_SPREAD = 10, TOWN_CLEAR = 26;
+	static final int TOWN_RADIUS = 42, TOWN_SPREAD = 10, TOWN_CLEAR = 32;
 	/** A site with no kingdom's seat this near (blocks) raises a town and its kingdom; nearer one, a village as ever. */
 	static final int TOWN_REALM_SPACING = 900;
 	/** Its buildings, in the bell's frame as a village's are: two rows of minka each side of the road, the halls at the outer corners. */
@@ -97,12 +97,12 @@ final class BlossomVillages {
 		new Spot("fishery", -18, 11, 1, 9), new Spot("training_hall", 18, 11, 3, 9));
 	private static final List<Spot> TOWN_STALLS = List.of(new Spot("stall", -5, -4, 1, 5), new Spot("stall", 5, -4, 3, 5),
 		new Spot("stall", -5, 3, 1, 5), new Spot("stall", 5, 3, 3, 5));
-	private static final Spot TOWN_KEEP = new Spot("blossom_tenshu", 0, 22, 0, 17);
-	private static final Spot TOWN_SHRINE = new Spot("blossom_shrine", -14, 24, 0, 7);
+	private static final Spot TOWN_KEEP = new Spot("blossom_tenshu", Blossom.CASTLE_WIDTH / 2 - Blossom.CASTLE_MIDDLE, 17, 0, Blossom.CASTLE_WIDTH);
+	private static final Spot TOWN_SHRINE = new Spot("blossom_shrine", -19, 24, 0, 7);
 	private static final Spot TOWN_TORII = new Spot("blossom_torii", 0, -36, 0, 7);
-	private static final int[][] TOWN_LANTERNS = {{-3, -33}, {3, -33}, {-3, -21}, {3, -21}, {-3, -8}, {3, -8}, {-3, 7}, {3, 7}, {-3, 19}, {3, 19}};
+	private static final int[][] TOWN_LANTERNS = {{-3, -33}, {3, -33}, {-3, -21}, {3, -21}, {-3, -8}, {3, -8}, {-3, 7}, {3, 7}, {-3, 15}, {3, 15}};
 	/** The main road from the torii to the keep, the lanes between the rows, and an alley behind each inner row. */
-	private static final int[][] TOWN_ROADS = {{-1, -38, 1, 22}, {-17, -22, 17, -21}, {-17, -9, 17, -8}, {-17, 4, 17, 5}, {-17, -34, -16, 17},
+	private static final int[][] TOWN_ROADS = {{-1, -38, 1, 17}, {-17, -22, 17, -21}, {-17, -9, 17, -8}, {-17, 4, 17, 5}, {-17, -34, -16, 17},
 		{16, -34, 17, 17}, {-4, -5, 4, 5}};
 
 	/** Settlement id → the land its seat stands in (it never changes). */

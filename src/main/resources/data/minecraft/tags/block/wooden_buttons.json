@@ -3,6 +3,10 @@
     "jaymospowers:skyroot_button",
     "jaymospowers:greatroot_button",
     "jaymospowers:wisproot_button",
-    "jaymospowers:amberoot_button"
+    "jaymospowers:amberoot_button",
+    "jaymospowers:balloon_mushroom_button",
+    "jaymospowers:pulse_tree_button",
+    "jaymospowers:brain_tree_button",
+    "jaymospowers:sunroot_button"
   ]
 }

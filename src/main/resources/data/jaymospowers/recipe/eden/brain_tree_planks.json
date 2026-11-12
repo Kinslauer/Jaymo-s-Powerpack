@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:brain_tree_log"
+  ],
+  "result": {
+    "id": "jaymospowers:brain_tree_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

@@ -72,6 +72,12 @@ public final class XenoformPowerClient implements PowerClient {
 		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
 		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(SkitterCeiling::tick);
+		// Wisp: the ghost tail trailing after everyone who is one, and the held Phase's look
+		ClientTickEvents.END_CLIENT_TICK.register(WispTail::tick);
+		WispPhaseClient.init();
+		ClientTickEvents.END_CLIENT_TICK.register(WispBreath::tick);
+		// the change itself: two rings of the band's light over anyone whose form changes
+		ClientTickEvents.END_CLIENT_TICK.register(XenoChangeRings::tick);
 		// (0.20.9) the change-in morph: notices an Ultimate turning on
 		ClientTickEvents.END_CLIENT_TICK.register(XenoMorph::tick);
 		PyreComet.init();
@@ -213,6 +219,7 @@ public final class XenoformPowerClient implements PowerClient {
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		XenoformHud.render(graphics, delta, player);
+		com.jaymospowers.client.power.chrono.ChronoSpeedHud.render(graphics, player);
 	}
 
 	/** Z: the wrist comes up while it's held (the wheel turns the dial), the hand lands as the band slams on letting go. */

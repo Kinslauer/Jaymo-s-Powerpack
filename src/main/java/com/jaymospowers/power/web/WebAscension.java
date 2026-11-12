@@ -187,9 +187,11 @@ public final class WebAscension {
 			return;
 		}
 		List<Integer> ids = new ArrayList<>();
-		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SENSE_RANGE),
+		// (a perch sees further: WebPerch.SENSE_SCALE)
+		double range = WebPerch.perched(player) ? SENSE_RANGE * WebPerch.SENSE_SCALE : SENSE_RANGE;
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(range),
 			m -> m.isAlive() && m.getTarget() == player)) {
-			if (mob.distanceToSqr(player) <= SENSE_RANGE * SENSE_RANGE) {
+			if (mob.distanceToSqr(player) <= range * range) {
 				ids.add(mob.getId());
 			}
 		}

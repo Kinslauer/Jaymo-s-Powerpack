@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wooden_slab",
+  "key": {
+    "#": "jaymospowers:brain_tree_planks"
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "id": "jaymospowers:brain_tree_slab",
+    "count": 6
+  }
+}

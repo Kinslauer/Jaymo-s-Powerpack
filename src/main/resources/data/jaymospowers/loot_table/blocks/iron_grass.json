@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:alternatives",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "condition": "minecraft:tool/can_shear",
+              "name": "jaymospowers:iron_grass"
+            },
+            {
+              "type": "minecraft:item",
+              "condition": {
+                "type": "minecraft:random_chance",
+                "chance": 0.1
+              },
+              "name": "minecraft:iron_nugget"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/iron_grass"
+}

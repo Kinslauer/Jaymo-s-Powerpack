@@ -186,6 +186,11 @@
       "minecraft:spring_lava"
     ],
     [
+      "jaymospowers:eden_gravilite",
+      "jaymospowers:eden_vines",
+      "jaymospowers:eden_limphium",
+      "jaymospowers:eden_violum",
+      "jaymospowers:eden_moss",
       "minecraft:glow_lichen",
       "minecraft:patch_grass_plain"
     ],

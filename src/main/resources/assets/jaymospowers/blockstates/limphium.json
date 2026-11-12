@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "jaymospowers:block/eden/limphium_stem"
+    },
+    "half=upper": [
+      {
+        "model": "jaymospowers:block/eden/limphium_top_1"
+      },
+      {
+        "model": "jaymospowers:block/eden/limphium_top_2"
+      },
+      {
+        "model": "jaymospowers:block/eden/limphium_top_3"
+      }
+    ]
+  }
+}

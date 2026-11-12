@@ -167,7 +167,7 @@ public final class ClashCinematic {
 				flashAt = bar.end();
 				flashColor = bar.winner() == 1 ? bar.colorA() : bar.winner() == 2 ? bar.colorB() : 0xFFFFFF;
 			}
-			if (self != null && minecraft.level != null && Mana.attuned(self)) {
+			if (self != null && minecraft.level != null && Mana.seesMana(self)) {
 				for (Player p : minecraft.level.players()) {
 					if (p != self && live(p) && p.distanceToSqr(self) < VIEW_RANGE * VIEW_RANGE) {
 						viewer = true;

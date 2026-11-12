@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:gravilite_shards",
+    "N": "minecraft:iron_nugget"
+  },
+  "pattern": [
+    "NNN",
+    "N#N",
+    "NNN"
+  ],
+  "result": {
+    "id": "jaymospowers:gravilite_lantern"
+  }
+}

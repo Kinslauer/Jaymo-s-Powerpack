@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "jaymospowers:clean_rag",
+    {
+      "id": "jaymoskingdoms:torn_cloth",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:hemp_cloth",
+      "required": false
+    }
+  ]
+}

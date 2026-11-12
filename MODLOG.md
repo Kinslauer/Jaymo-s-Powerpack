@@ -2596,3 +2596,303 @@ Andy's Eden Ring picks, part 1. Eden Ring (paulevs) is MIT, so its art is used, 
   day and bright at night.
 - Code: `eden/Eden` (blocks), `eden/EdenFeature` (ground, trees, rocks; tuning constants at the top),
   `eden/PulseTreeBlock`, `tools/gen_eden.py` (all models and data).
+
+## 0.22.28 (2026-11-11): Boxing: Hand Wraps and the punch
+
+- **Boxing, first part (Jung's plan, `docs/Boxing-Plan.md`).** Fist gear and the punch are in; nothing teaches a
+  style yet, so for now only gamemasters can box (`/powerdebug boxing style|level|status`).
+- **Hand Wraps:** two rags or cloths (Clean Rag, Torn Cloth, Hemp Cloth) in the crafting grid. A weak weapon by
+  themselves; with a style they are what lets you box.
+- **The punch:** with fist gear and a style, a left click inside 2 blocks is a punch for 1.5 at every level, with little
+  knockback. Arrow Slit throws a one-two then hooks, Long Guard jab-jab-cross, Bastion the right jab.
+- **Levels 1 to 10** make punches quicker (one every 0.8 s down to 0.35 s; the attack indicator shows it) and cheaper
+  on feathers (one icon a punch down to four punches an icon), never stronger. From level 8 a boxer's punches land
+  faster than the usual hit immunity allows.
+- **Gassed:** out of feathers, a boxer punches once every 1.6 s for 45% less (2 at most) until the row is 30% back.
+- **Names:** Arrow Slit, Long Guard and Bastion (Jung's names, kept by Andy).
+- Classes: `boxing/Boxing` (styles, levels, the punch), `boxing/BoxingGear` (Hand Wraps, the `boxing_gear` tag),
+  `boxing/BoxingDebug`. `docs/boxing.md` has the numbers and test steps.
+- Not in it: evades, strong attacks, blocks, blur, the combo breaker, looks, cestus and bracers, teachers, HUD, hints.
+- **Not built locally, not booted with `runServer`, not played.** The session could not reach the build's download
+  hosts; the PR checks are its compile. It adds an item, so it needs a server boot before merging. The Hand Wraps
+  texture is a placeholder.
+- Review fix: the punch takes the left click only after every other rule (a downed or armless player, a finisher,
+  Kingdoms' tag, the fight pit, captives), in a later event phase. Before, a boxer's punch skipped them all.
+
+## 0.22.29 (2026-11-11): Boxing: the cestus and the bracers
+
+- **Cestus** (leather, iron, steel): fist gear that makes a styled punch hit harder, 2, 2.5 and 3 against 1.5 in Hand
+  Wraps. **Bracers** (leather, iron, steel): fist gear for blocking; they punch like wraps, and their block comes with
+  the blocks patch. Like Hand Wraps, all of it lets a boxer use their style.
+- **Making them:** leather ones in the crafting grid round Hand Wraps (2 leather for the cestus, 4 for the bracers).
+  Iron and steel ones are forged like other metal weapons: Cestus Studs or Bracer Plates and a Tool Binding at the
+  Tool Station. No gold or diamond.
+- Classes: `boxing/BoxingGear` (the items and `punchBonus`), `boxing/Boxing` (the bonus in the punch),
+  `tinkering/WeaponParts` (four new kinds). Art from `tools/boxing_assets.py` (placeholder, drawn for this).
+- **Not built locally, not booted with `runServer`, not played.** It adds ten items (six gear, four heads), so it
+  needs a server boot before merging. Untested in particular: the whole forging route for the new heads.
+
+## 0.22.30 (2026-11-11): Boxing: evades, strong attacks, blur and the combo breaker
+
+- **Evades:** while boxing, the Dodge key (Left Alt) is the style's evade in place of the roll. Arrow Slit slips left
+  or right or bobs straight in, Long Guard pulls back, Bastion rolls the shoulder in place (or slips aside). A blow
+  that would land within 0.4 s of the press misses, and the next evade is ready 0.7 s after it. Two evades cost a feather icon at level 10, one each at
+  level 1.
+- **Perfect evade and strong attacks:** an evade pressed inside the guard's perfect-parry window (5 ticks, 7 when
+  locked on) earns the next punch: the uppercut out of a bob (4), the pull counter out of a pull (3, a block more
+  reach and a hard shove), the roll straight out of a shoulder roll (5). A shoulder roll that isn't perfect lets half
+  the blow through and earns a 2.5 straight. A strong attack costs one icon at every level.
+- **Blur and daze:** those strong attacks blur a player's sight for 1, 1.5 or 2.5 s (a pale haze under the HUD; a key
+  swaps it for a dark frame for players who get motion sick), not again for 5 s. Mobs are dazed for as long, the
+  undead never, a boss 1.5 s at most.
+- **Combo breaker:** six punches landed in a row on a player or a boss and they are shoved back; that boxer can't
+  reach them for a second, and their blur clears.
+- A click that comes too early is kept and thrown in its turn. A gassed boxer gets Mining Fatigue and can't evade.
+- Classes: `boxing/BoxingEvades` (new), `boxing/Boxing` (the punch takes strong attacks, the breaker, the queue),
+  `client/boxing/BoxingClient` (new: the evades' movement, the blur), `client/stamina/DodgeClient` (the Dodge key
+  hands over to boxing). `docs/boxing.md` has the numbers and test steps.
+- Not in it: **the blocks** (right click with fist gear), which need their own patch through `combat/Guard`; the
+  breath puff, poses and idles; teachers; the HUD.
+- **Not built locally, not booted, not played.** The haze is a wash of colour, not a true blur.
+
+## 0.22.31 (2026-11-11): Boxing: fist gear worn on the hands
+
+- **Hand Wraps, the cestus and the bracers are worn, not held**, like the Fang Gauntlets: holding them hides the item
+  and draws the gear on the hands, for everyone and in your own first person. Wraps wind round the hand, a cestus adds
+  a studded band over the knuckles, bracers run up the forearm. With the off hand empty, both hands wear it.
+- Holding fist gear also raises the arms into the Fang Gauntlets' fists-up guard when nothing is swinging (the
+  styles' own idles come later).
+- Classes: client `armory/FangGauntletsClient` (boxing's shapes and textures beside the gauntlets', through the same
+  mixins), `boxing/BoxingGear.wornIndex`. Textures `textures/entity/boxing/` from `tools/boxing_assets.py`
+  (placeholder).
+- **Not built locally and not seen in game.** The shapes' sizes and the textures' layout were set without a render.
+
+## 0.22.32 (2026-11-11): Boxing: the block
+
+- **Fist gear blocks on right click**, through the pack's weapon guard (the block, and the parry in its first ticks).
+  What it stops is the gear's own, more with each step up: Hand Wraps 50%; cestus 55 / 60 / 65% (leather, iron,
+  steel); bracers 65 / 75 / 85%. A sword's guard stops 60%.
+- **A boxer's block costs by the blow**, whatever its weight: one feather icon, an icon and a half in the Arrow Slit.
+  Better gear takes less: cestus 95 / 90 / 85% of that, bracers 90 / 80 / 70%. Without a style, fist gear blocks at the
+  usual cost.
+- **The combo breaker** no longer counts a punch that ran into a raised guard from the front.
+- Classes: `combat/Guard` (two small hooks: the gear's share in the guard's component, the boxer's cost when a blow is
+  blocked), `boxing/BoxingGear` (`blockShare`, `blockCostShare`), `boxing/Boxing` (`blockCost`).
+- **Not built locally and not played.** Untested in particular: that fist gear raises the weapon guard at all (it
+  should, being a plain weapon), and that every other weapon's guard is unchanged.
+
+## 0.22.33 (2026-11-11): Pocket Arsenal pulls from anywhere
+
+- **Someone's pack**: until the power is ascended, about 1 Reach in 25 with another player within 24 blocks goes into their inventory instead and comes back with one of their weapons, tools or armour pieces (never what they're holding, nothing stackable or placeable). They see "Something reached into your pack and took your ...". The thief gets it as an ordinary summon; the owner gets the real one back when that summon's time is up (75 s after the pull, or on their next login if they left), whatever happened to the summon (sent back early, broken, dropped).
+- **Hazards**: about 1 Reach in 30 (not yet ascended) the hand closes on something that hurts: embers (fire), a pufferfish (poison and nausea), a wither rose (wither), a cactus, powder snow (freezing) or a lit charge that goes off in the hand (breaks no blocks). Nothing is kept.
+- Once ascended (the Armory's pin) neither happens by accident: the rift answers to you. Instead, look at a player within 16 blocks and hold R for a second (motes gather on them) to reach into their pack for a random one of their things, returned the same way. Let go sooner and it's an ordinary Reach; look away and it's called off. Future handguns stay as they were (1 Reach in 600).
+- `ArsenalAnywhere` (new), `ArsenalPower` (reach roll, pull, lender tick), lang `arsenal.json`.
+- Built; not played. Not tested: the return after a server restart, the charge's damage on armoured players.
+
+## 0.22.34 (2026-11-11): Rig: frames, Rig limbs, helm view, multi-lock, Core energy, flight feel, Forge hologram, sentry, paint (#1322)
+
+- **Frames (`RigFrame`, stamped on each piece as `Rig.FRAME`):** the Rig Forge builds the suit in four frames. Standard is the suit as it was. **Scrap** is crude and heavy and costs about half (the first build you can afford): +1 armour, slower on the ground, thirsty in the air, shots weaker. **Shade** is dark and quiet with thin plates: -2 armour, a little quicker, hover drains less, and mobs notice you late (a quarter-ish of their sight range, less again sneaking; `rig/mixin/RigVisibilityMixin`, config `jaymospowers.rig.mixins.json`). **Siege** has thick plates (+4 armour, +2 toughness), a shoulder gun (the launcher fires two more missiles that burst bigger) and is slow in the air. Armour, toughness and walking speed are attribute modifiers in `RigPassives` (a share for each piece worn); air speed is read by `RigClient`, hover drain and shot damage by `RigActives`. Each frame has its own suit texture and glow colour (`tools/gen_rig_frames.py`).
+- **Forge screen (`RigForgeBlock`, `RigForgeEntity`, `client/rig/RigForgeScreen`):** right-click the Forge with a free hand for a screen in the Costume Table's style: a preview of you in the whole suit in the picked frame and paint (drag to turn it), a button for what to build (the four pieces, a Rig arm, a Rig leg) and one for the frame with that frame's numbers under them, two rows of dye swatches for the plates and the trim (plus bare metal), what the build costs against what you carry, and Paint and Build. A new paint takes one dye of that colour from your pack and also repaints the pieces you wear. Salvage in hand still feeds the Forge (it holds up to 30 points, spent first), a dye in hand still paints (Sneak: trim), a water bucket washes the paint off, and a worn-down piece in hand is refitted.
+- **Forge hologram (`client/rig/RigForgeRenderer`):** the suit stands over the Forge as a turning, flickering figure of light in the picked frame's build and the chosen paint; the piece (or limb) the Forge is set to build lights as salvage is fed in and shimmers when it can be built.
+- **Paint:** two dye colours, plates and trim, chosen at the Forge. The trim is drawn as its own tinted, lit pass over the suit (`suit_trim.png`).
+- **Rig limbs (`Prosthetics`, `RigLimbs`):** a Rig arm and a Rig leg, built at the Forge in a frame, fit through the existing prosthetic path (use on yourself where a limb is missing; stronger than iron, 0.9 / 0.95; a Rig limb remembers its frame and drops as an item with it when the real limb grows back). With **no suit worn**, G fires the arm's repulsor shot and V hops off the ground with the leg's thruster (in the air, a forward kick that hurts and throws). Frame flavour: Scrap hits weaker and throws harder, Shade is silent, Siege bursts where it hits and kicks hardest. They cost a little hunger, no charge. Drawn on the body (`ProstheticLayer`, `rig_limb.png`).
+- **Helm view (`client/rig/RigHelmView`):** with the faceplate down, in first person, the visor draws over the world (a deliberate exception to the corner-HUD rule, Helm only): a horizon line that follows the view, height over the ground, altitude, speed and climb, corner brackets with a health bar on what you look at, arrows round the middle toward incoming harm (projectiles flying at you and hostile creatures close in that have you as their target), a small figure of the suit with each plate coloured by its wear, and the frame's name.
+- **Multi-lock missiles (`RigActives.volley`, `RigNet.Volley`):** with no power, hold V (Helm worn, Mind level 2): after a moment the view marks the creature nearest the crosshair every tick it changes, up to six, with numbered brackets; letting go sends a missile to each (costs the launcher's charge plus 40 per extra target). A tap still fires the pair.
+- **Energy into the Core (`RigCharge`, `RigActives.overcharge`):** a share of fire damage (4 charge per point) and magic damage (6 per point, also dragon's breath) to a suit that is worn goes into the Core, scaled by how many pieces are on, at most 60 a hit. A lightning strike still fills the Core and now **overcharges** it for 12 seconds: palm blasts and missiles cost nothing, hit 1.8 times as hard, burst 1.5 times as big and recover twice as fast; the HUD's charge bar and the helm view turn gold.
+- **Flight feel:** hovering from the ground launches in a burst (a flame ring and blast, a screen shake, a hard lift that dies away over 8 ticks); the boot flames now swing with the steering (they trail opposite your heading and kick out against a turn); the palms-out hover and arms-back cruise poses were already there. A fall that would have hurt (4 damage or more) is caught by a full set with 40 charge to spare: **one-knee landing** (`RigLanding`, pose `RigMoves.KNEE` in `RigPose`), the ground cracks round you (block-breaking cracks that fade), the screen shakes for those near, and what stands close is thrown back and hurt. The jets, palm blast beam, missile trails and the other new effects go through `MagicFx`.
+- **Sentry (`RigSentry`):** Sneak + the call key (or the Rig menu's new Sentry entry) with the suit on, Core at Mind level 3: the suit is parked as ever and an armour stand wearing a copy of it is left where you stood, which cannot be hurt or stripped. While you are online in the same dimension it shoots the nearest hostile creature within 14 blocks and whatever last hurt you within 40 (5 damage a shot, once a second), and faces its target. Calling the suit takes the stand away and the plates fly in from where it stood.
+- **Plates fly in (`RigCall.FLYING_IN`, `RigSuit`):** a called suit's plates are scattered round and above you and each flies in and locks on in the build order (Core, Arms, Thrusters, the faceplate last) instead of swinging in from its folded place.
+- **New keys:** none new. G and V (powerless) gain the limb actions with no suit on; V held marks a volley; Sneak + C leaves the suit as a sentry; the Rig menu has a ninth entry, Sentry.
+- Built and compiled; not played. To check in game: the Forge (feed, the screen's preview, piece, frame, paints and Build, the hologram's turn, lighting and paint, building a Rig arm and leg); fitting a Rig arm / leg and G / V with no suit on; each frame's feel (Scrap speed and armour, Shade mobs noticing late, Siege missiles and slow air); hold V and sweep over several mobs; a lightning strike with the suit on (overcharge) and being burned or hit by magic (charge goes up); the launch burst and the flames swinging as you turn; falling 10+ blocks in the full set (knee landing, cracks); Sneak + C then walk away (the stand shoots mobs; C calls it back and the plates fly in); the helm view (faceplate down, first person: horizon, brackets, arrows, the wear figure). Unsure at runtime: particle velocity with count 0 for the MagicFx motes, the block-entity renderer's pose and brightness, the plate scatter distances, and the kneel pose's offsets.
+
+## 0.22.35 (2026-11-11): Smoke and Flame Avatar track: the skull, the burning chain, Judgement, burning steeds (#1322)
+
+Ideas only from another mod's fire rider (All Rights Reserved): every line of code and every texture here is our own.
+Built and compiled, not played. Check in game: the skull fades in over the char between 55% and 85% flame and back out as
+the bar drops; a Smoke user's flail and whip light what they hit; sneak + Z on a guilty player; a steed's ride over lava.
+- **The skull under the fire**: as a Flame Avatar's flame bar burns high the face burns away to a bare skull wreathed in
+  fire, and comes back as the flame drops (`avatar_skull.png`, drawn over the char in `FlameAvatarClient`).
+- **Burning chain**: a Smoke user's flail and whip burn. Every blow sets the creature alight, the whip's wrap keeps it
+  burning, and the flail's whirl no longer knocks things away: it wraps what it clips, drags it in and swings it round
+  you. The head glows with embers (`Lash`).
+- **Judgement**: an Emberborn who has become a Flame Avatar and has Smoke can seize a creature's eyes (sneak + Z, held, 16
+  blocks) and let the harm it has done burn it, through armour, for up to 3 seconds. A player burns by the weight of
+  their life (killing villagers and players, crimes against a realm, outlaw standing); an outlaw burns for half, an illager or anyone riding with a raid (not the ravager) for three quarters;
+  everyone else feels nothing, and the move does not start (`AvatarJudgement`, `Karma.guilt`).
+- **Burning steeds**: horses with a mane and hooves of fire, found at the Flame Avatars' camps in the Nether (Kingdoms
+  raises two at each new camp and keeps up to three). They are tame, saddled, 35% faster, immune to fire, leave a trail
+  of flame, and gallop over water and lava. Only a Flame Avatar or a Smoke user can ride one; anyone else who climbs on
+  is set alight and thrown (`BurningSteed`).
+
+## 0.22.36 (2026-11-11): Speedster track: gears, momentum, healing, rapid hands, held phase, rings, slow time, marked run (#1322)
+
+Overclock (V) and Velox's Velocity (R) share one speedster core; everything below works for both unless it says otherwise.
+Ideas only from another mod's speedster (All Rights Reserved): every line of code here is our own.
+- **Speed gears**: scroll the mouse wheel while sprinting at speed to shift between 5 gears (the hotbar keeps the wheel at
+  a walk). Gear 3 is the old speed; higher gears are faster, turn wider, burn more hunger and leave a longer streak. The
+  gear shows on a chip bottom right above the power's own block (`ChronoGears`, `ChronoGearsClient`, `ChronoSpeedHud`, `ChronoScrollMixin`).
+- **Momentum, skids, drift turns**: speed builds over the first strides and holds on a straight line; a sharp turn sheds
+  speed (more in a high gear) and leans the body into it; letting go of every key slides you to a stop in a spray of the
+  ground's dust (`ChronoMomentumClient`, lean drawn by `ChronoRunPose`).
+- **Speed healing**: gears 3 to 5 close wounds as healing magic does (through `Mending`, so limb wounds are respected) for
+  far more hunger than rest.
+- **Running blow**: a melee hit at a sprint deals up to triple damage by speed and gear and shoves the target along your path (`ChronoRapid`, `ChronoRunBlowMixin`).
+- **Rapid bows**: full draw after 4 ticks; crossbows load in a tick (`ChronoRapidBowMixin`, `ChronoRapidCrossbowMixin`).
+- **Catch and hurl**: at speed, use while aiming at a shot in flight within 6 blocks plucks it from the air and holds it
+  before you (a gold bar shows the hold); use again to throw it back at 2.2 times its speed.
+- **Weapon snatch**: sprinting past an armed mob and pressing use takes its main-hand weapon (into your hand, your pack, or the ground). Never players.
+- **Held phase (Overclock only)**: hold V with a wall ahead to vibrate through blocks for up to 5 s (`ChronoPhase`,
+  `ChronoHeldPhaseMixin`). Floors hold, unbreakable blocks hold; let go inside a block and you are put out at the nearest
+  clear spot; running dry inside one costs 2 hearts; a cooldown follows. Replaces the old blink.
+- **Running rings**: running a tight closed circle (radius 2 to 6, round in about 2.5 s) raises a vortex that lifts the creatures inside, spins them and puts out fire (`ChronoRings`).
+- **Slow time**: hold `.` at speed and the world drops to a fifth of its pace while you and other players move normally,
+  for as long as a meter lasts (`ChronoSlowTime`, vanilla's tick freeze with a stepped tick; no real slowed tick rate, which would slow the runner too).
+- **Marked run**: Sneak + `/` marks the place you stand (a column of light shows it); `/` later runs you there by yourself
+  along a path around obstacles, within 128 blocks on loaded chunks; any movement key cancels (`ChronoSpeedKeys`, `ChronoMarkRun`).
+- New keys (rebindable): slow time (`.`), mark / run to the mark (`/`).
+- Built and compiled; not played. To check in game: the scroll mixin and gear shifts, the bow and crossbow mixins, walking through walls without rubber-banding (and the way out), the lean direction on turns, slow time's stepped tick, and the marked run's path on stairs and ledges.
+
+## 0.22.37 (2026-11-11): Web Slinger: ledge launch, glide kick, hanging and web-up, perch, silent takedown, fear, cloth capes (#1322)
+
+- **Ledge launch (Zip):** a Zip aimed at a roof edge or ledge (a side face with open air above its top within about two blocks of the aim point, or the top face of a block with a drop beside it) no longer stops at the wall: it hauls you all the way in and throws you up and over the lip, about three blocks above it, so the web wings can open straight away. `client/power/web/WebLedge` (tuning at its top), hooked into `WebSwing.startPull`, `tickPull` and `finishPull`.
+- **Glide kick:** gliding on the web wings into a living creature at speed (0.85 blocks/tick or more) lands a both-feet kick: damage `3 + 5 x speed`, half again out of a dive, the target knocked down (`Downed.knockOut`, or a Darktide stun for what cannot go down) and you bounce back up into the glide. Everyone sees the kick pose (`WebPose.GLIDE_KICK`, drawn in `WebBodyPose`). `power/web/WebGlideKick`. Players are only kicked where PvP is allowed.
+- **Hang upside down:** holding still (16 ticks, no movement keys) on a swing line anchored well above you (a ceiling, branch or overhang) turns you head down for everyone (`WebPower.UPSIDE`, `WebPose.UPSIDE`); Jump and Sneak still reel you up and down; moving, landing or letting go puts you upright. `client/power/web/WebUpsideClient`, packet `WebNet.Upside`.
+- **Web-up on B:** while hanging, B on a creature, player or corpse below in reach (crosshair, else the nearest below) hauls it up to the ceiling over it. A downed or helpless one (or a corpse) is stuck flat against the ceiling in cobwebs (pinned for a minute); a standing one is left hanging upright on a line (`WebHitches`, so a player can still cut it by swinging) wrapped in cobwebs (`WebTraps.cling`, `ensnare`). Mobs and players. `power/web/WebHanging`.
+- **Perch:** landing on a fence post, wall top, narrow top, webline plank or the edge of a drop settles you into a balanced crouch, arms out, with nothing sliding you off until you move, jump or swing (`WebPerchClient`, `WebPerch`, `WebPower.PERCH`, `WebPose.PERCH`). Spider-Sense reaches 1.5 times as far from a perch (`WebAscension.sense`).
+- **Silent takedown:** Sneak + attack bare-handed from behind a creature that is not after you (within 2.6 blocks, in the rear of its facing), no hit streak needed: it is muffled and cocooned, down for 30 s, with no sound, and nothing nearby is alerted (`WebTakedowns.silent`; `WebTraps.ensnare` has a quiet form).
+- **Fear of the strung up:** humanoid hostiles (zombie, skeleton, illager, piglin, witch) that see a strung-up or cocooned comrade lose their nerve once per sight: with Jaymo's Kingdoms loaded, by temperament (timid and gloomy flee, brave, hotheaded, proud and spiteful keep coming, the rest bunch up; `KingdomsCompat.temperament`, by reflection), else by a per-mob roll (40 flee, 30 bunch, 30 hold). `power/web/WebFear`.
+- **Cloth capes:** the symbiote Mantle, the costume capes and the Archers' hooded cloak's hem hang as cloth: the cape is cut into hinged strips, each a damped spring following the one above, so it lags the body, swings out on turns, floats up in a fall and fans wider on a glide on the web wings. One tiny client-side state per wearer, stepped once a tick and interpolated at draw time. `client/costume/ClothCape` (used by `WebBodyLayer`, `CostumeModels`, `HoodedCloakLayer`).
+- Built and compiled; not played. Unsure at runtime: the sign of the cape's turn swing, the pose offsets, the haul-up path.
+
+## 0.22.38 (2026-11-11): Wisp: ghost tail, and a Phase you hold (#1322)
+
+Ideas from Yo Fadda's Danny Phantom mod (All Rights Reserved: nothing taken, our own code; no new art).
+- **Ghost tail** (`WispTail`): below the waist Wisp is now one tapering tail of 8 links in place of the block of tatters.
+  Hanging in the air it curls back like a comma and wavers. Moving, it streams out behind, opposite to where you are going
+  (back at a run, down on the way up, up on the way down, off to the side of a strafe), and a turn swings it wide. Every link
+  follows the one above it a moment late, so a stop or a turn runs down the tail and the tip arrives last. The ki glow
+  bends with it. Everyone sees it on every Wisp.
+- **Phase is held** (R, `Wisp`, `WispPhaseMixin`): hold R for up to 6 s and no block stops you: walk through walls and
+  doors, Jump to rise through a ceiling, Sneak to sink through the floor (the floor holds until you sneak; bedrock and
+  barriers always hold). You float while phased, as on B. Nothing hurts you and your blows hurt nothing. Let go inside a
+  block and you are put out at the nearest clear spot within 3 blocks, or where you last stood clear; run out of time inside
+  one and that costs 2 hearts. Cooldown 1.5 s plus three quarters of the time you held it. It replaces the old blink through
+  a wall up to 2 blocks thick.
+- **Phased look** (`WispPhaseClient`): a phasing Wisp thins to almost nothing over dimmer ki, and flickers through its last
+  second. Your own screen takes a pale wash that pulses as time runs out; with your eyes inside a block you see out of it
+  and the world beyond is still drawn (vanilla and Sodium).
+- Turning into Revenant ends a held Phase (Revenant keeps Wraithwalk).
+- Built and compiled; not played. To check in game: the tail's direction on strafes and turns, walking and sinking through
+  blocks with no rubber-banding, what you see from inside a wall with Sodium, and being put out when Phase ends inside stone.
+- **Overshadow** (Sneak+G): slip into the creature you look at within 5 blocks and walk it as your own for 8 s. Your
+  movement keys steer it (forward, back, strafe, sprint, jump), it faces where you look, and your swing strikes through it.
+  G again lets go; 20 s cooldown. Revenant's Possession steers the same way now.
+- **Ghost Ray** (Sneak+B, hold): a pale light gathers in your hand; let go for a bolt along your aim. A tap reaches 20
+  blocks for 2 hearts; a full 1.5 s hold reaches 32 for 6 and is much wider. 1 to 3.5 s before the next, by how long you held.
+- **Dread Wail shows and hits**: rings of pale light roll out 9 blocks ahead of you; creatures in that cone are thrown back,
+  glass in it shatters (up to 32 blocks and panes), and you are slowed and weakened for 2.5 s afterwards.
+- **Ghost breath** (`WispBreath`): a thin cold breath leaves a Wisp's mouth every couple of seconds while anything undead,
+  or another Wisp, is within 14 blocks, walls or not. Nothing explains it.
+- **Float on the move**: floating Wisps and Revenants tip forward with speed, roll into their turns and bring their arms
+  out ahead at full speed, head lifted to see. The tail is never still: hanging, its curl tightens and lets out, and every
+  few seconds the top flicks aside and the flick runs down to the tip.
+- **Change rings for every alien** (`XenoChangeRings`): whenever anyone changes form (into an alien, between aliens, or
+  back) two rings in their band's glow open at the waist and sweep up over the head and down to the feet. The band's flash
+  still goes off as before.
+- To check in game as well: steering a possessed creature (zombies, villagers, something four-legged), the ray's charge
+  feel, and whether the rings read at the flash's brightness.
+
+## 0.22.39 (2026-11-11): Horseman riding fixes in the pack
+
+- **Horseman** (MIT, mortuusars) ships unchanged in the pack. While riding, right-click a fence to hitch your horse (it needs a lead in the new slot in the horse's inventory). Horses step up a little higher, stop jittering on stairs, keep more speed going downhill and in the air, and get caught on leaves less. You mine at full speed in the saddle. Horses fit in boats. A saddled horse stays within 16 blocks of where you got off. Shears take the chest off a donkey, mule or llama. A button switches between your inventory and the horse's. The horse fades out when you look straight down.
+- Free rein stays as it was: Horseman only lets you look around while the horse is standing still.
+- Horseman's Copper Horn can't be crafted (`tinkering/Uncraftable`). It calls a horse from anywhere and can teleport it, and the whistle already does this job.
+- Built in the cloud; not played. The lead slot inside our restyled horse inventory screen still needs a look in game.
+
+## 0.22.40 (2026-11-11): elemental powers have the weakest ki aura (#1333)
+
+- **Smoke, Gravity and Cryokinesis users read weakest to ki** (Andy: "elemental power users have the weakest ki auras"): their scouter power level is 0.4 of anyone else's with the same health and attack, so ki sense shows them dimmer, as weaker than they are (`ZFighterScouter.ELEMENTAL_AURA`, `elemental`).
+- Built; not played.
+
+## 0.22.41 (2026-11-11): costumed gifted villagers, and a Cryo's cold house (#1332)
+
+- **Costumed gifted villagers** (Andy: "npc costumed power users ... either wreaking havoc or trying to help their people"): a gifted villager can own a costume of their own (`core/gifted/GiftedCostume`), made for their power and side: a vigilante's in the power's bright colours, a villain's in black with red, purple, green or grey, always with a mask that hides the face, the power's own cut, mask or cape where it has one, and a name the folk would give them ("the Gale", "Black Ice", "the Undertow"...). Kingdoms decides who gets one and when it's worn.
+- While suited they're drawn as a player body in that costume (`client/costume/GiftedCostumeClient`, `GiftedCostumeEntityRenderDispatcherMixin`), the costume's name over their head instead of theirs. The mask hides MCA's look and the villager's size and blood under it.
+- **Everyday Cryo** (Andy: "putting fires out or keeping a food store or home cold"): a gifted Cryo villager's everyday use now smothers fire near them in frost and leaves the air round their home cold for 2 minutes (`power/cryo/CryoChill`). With Jaymo's Kitchen: a chest or barrel in that cold keeps food as a cold cellar does (needs this patch's Kitchen), and a player indoors there in a hot land is cooled by 20.
+- Built; not played. Not seen in game: how the costume sits on a villager drawn as a player body, and whether any other mod's player layer minds a villager drawn that way.
+
+## 0.22.42 (2026-11-12): the Verdant World's storm, sand and wind - Brainstorm, Lakeside Desert, Wind Valley (#1327)
+
+Andy's Eden Ring picks, part 2 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Three more regions of the Verdant
+World; only chunks made after this update get them.
+- **Brainstorm**: cold grey upland of brain trees, each shot through with copper, iron or gold, with metal grasses
+  underfoot (shears take them; now and then one drops a nugget). The trees build up charge: now and then a block of the
+  crown lights and shocks every living thing within 4 blocks for 3 damage (`BrainBlock`). Anyone wearing a piece of
+  iron, golden, chainmail, copper or netherite armour is passed by (item tag `jaymospowers:grounding_armor`). Some
+  discharges show a bolt that does nothing.
+- **Lakeside Desert**: hot dry country of sand and gravel with ponds, and aquatus on their shores. An aquatus head
+  slowly turns the soil within 5 blocks of it to sand (`AquatusBlock`), so keep one away from a field. Its sapling grows
+  with bone meal.
+- **Wind Valley**: open grassland with a steady wind (`EdenWind`). Under the open sky it pushes you sideways, harder
+  off the ground, and carries thrown and shot things and dropped items. It blows from one quarter for the whole valley
+  and swings round once in five days. Sneaking braces against it.
+- **Wood**: brain tree logs and planks.
+- All numbers are constants at the top of `BrainBlock`, `AquatusBlock`, `EdenWind` and `EdenFeature`.
+
+## 0.22.43 (2026-11-12): the Verdant World's builder's pieces - wood sets, Gravilite, the Gravity Compressor (#1329)
+
+Andy's Eden Ring picks, part 3 (Eden Ring's MIT art, `tools/eden_ring_license.txt`).
+- **Wood sets**: balloon mushroom, pulse tree and brain tree planks now make stairs, slabs, fences, fence gates, doors,
+  trapdoors, buttons and pressure plates (the usual recipes).
+- **Gravilite**: glowing blue shards stand on the ground all over the Verdant World, about one chunk in five (only
+  chunks made after this update). Four shards make a Gravilite Block; a shard ringed with four glass makes a Gravilite
+  Lamp (full light); a shard ringed with eight iron nuggets makes a Gravilite Lantern, which stands or hangs.
+- **Gravity Compressor** (iron, a Gravilite Block, redstone, stone): given a redstone signal it lifts everything in the
+  column above it, 2 blocks of column per level of signal (30 at full power). Living things float up and take no fall
+  damage while in it; dropped items, arrows and carts are pushed up (`GravityCompressorBlock`).
+- All numbers are constants at the top of `GravityCompressorBlock`, `Eden` and `EdenFeature`.
+
+## 0.22.44 (2026-11-12): the Verdant World's small growth and the Diskwing (#1330)
+
+Andy's Eden Ring picks, part 4 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Only chunks made after this
+update grow them. Leaves take the grass colour of the biome.
+- **Violum**: two blocks tall, glowing bloom (pulse forest, wind valley, stone garden).
+- **Lonlix**: a leafy tuft, taken with shears (pulse forest, wind valley, lakeside desert).
+- **Parignum**: a mat of leaves with small glowing flowers (mycotic forests, brainstorm).
+- **Eden Moss**: a thin grey mat (stone garden).
+- **Eden Vine**: hangs in strings under caps and ledges, climbable (mycotic forests, stone garden).
+- **Symbiotic Mould** and **Glowing Symbiotic Mould**: tufts on the undersides of mushroom caps and brain trees.
+- **Limphium**: a stem under a head of leaves; breaking it gives 1-2 Limphium Leaves (a poor snack) that dry in a
+  furnace, smoker or campfire into Dried Limphium Leaf (3 food). Bone meal doubles the plant.
+- **Diskwing**: a flat glowing glider that drifts over every Verdant biome, in four colours by biome (Eden Ring's
+  model, skins and calls). Harmless, 10 health, drops nothing; it has a spawn egg (`Diskwing`, `DiskwingClient`).
+- Numbers are constants at the top of `Eden` and `EdenFeature`.
+
+## 0.22.45 (2026-11-12): the Aether's share of Eden Ring, and the field guide (#1331)
+
+Andy's Eden Ring picks, part 5 (Eden Ring's MIT art, `tools/eden_ring_license.txt`). Only Aether chunks made after
+this update get them.
+- **Sunroot Grove**: a new Aether biome on the wetter half of the Gilded Ridge: sunroot trees (Eden Ring's auritis
+  under our own name) with broad golden crowns, yellow moss, a golden oak now and then.
+- **Sunroot wood**: log, planks, leaves, sapling, and the full set of stairs, slab, fence, gate, door, trapdoor, button
+  and pressure plate.
+- **Volvox colonies**: hollow balls of translucent Volvox round a glowing heart of Dense Volvox, drifting high in the
+  Aether sky (y 165-250), about one chunk in 36.
+- **Hollow islands**: drifting shells of holystone, turfed on top, with one to three ways into a chamber where
+  gravilite shards stand and Eden vines hang; about one chunk in 80.
+- **A Far Country Herbal**: the field guide, a ten-page written book of a traveller's notes on the Verdant World's
+  far country. Crafted from a book, a Dried Limphium Leaf and Gravilite Shards.
+- Numbers are constants at the top of `EdenFeature` and in `tools/aether_world_features.py`.
+
+## 0.22.46 (2026-11-12): the Mad Tinkerer cheats death with his echoes (#1336)
+
+- **The Mad Tinkerer can be killed now, but death doesn't take him**: the body falls, and 3 seconds later one of his
+  echoes steps out of the air where he fell, in the Chrono echo's violet burst and pale shards, and carries on at his
+  bench (same leaving time, same quest step; an operation in progress goes on under the echo's hands while you stand
+  still). He shrugs it off in a line, and shimmers for a minute after.
+- **He's in more than one place**: when he's killed, every other Tinkerer in the world flinches and mutters about it to
+  anyone within 16 blocks.
+- **Ask about the androids that turned**: a new talk option. He blames shoddy copies or the city's orders, and never
+  admits anything.
+- `TinkererEchoes` (new), `ZFighterAndroid.tinkerer` (one place that makes him, used by the wandering summon and the
+  android start's workshop). Built; not played. Not saved: an echo still owed when the server stops never comes.
