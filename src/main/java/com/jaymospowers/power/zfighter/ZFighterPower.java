@@ -821,6 +821,10 @@ public final class ZFighterPower implements Power {
 			sync(player, live, maxKi(player));
 			return;
 		}
+		// R while the Eye Beams are held: the spin (ZFighterEyeBeams)
+		if (down && key == PowerKey.ABILITY_1 && ZFighterEyeBeams.spin(player)) {
+			return;
+		}
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down && player.getFoodData().getFoodLevel() <= 0 && !player.isCreative()) {

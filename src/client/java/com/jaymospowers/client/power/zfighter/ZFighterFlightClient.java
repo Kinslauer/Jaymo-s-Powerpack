@@ -225,6 +225,8 @@ public final class ZFighterFlightClient {
 			hover(player, input, slowed);
 		}
 		if (pose > 0) {
+			// an Aerial Charge flies him along its own line
+			velocity = ZFighterGammaClient.steer(player, velocity);
 			player.setDeltaMovement(velocity);
 		}
 	}
