@@ -5,7 +5,7 @@
 	"name": "Jaymo's Powers",
 	"description": "Every player awakens a superpower at some point in survival (or picks one in creative): Wind Control, Pocket Arsenal, Web Slinging, Chronokinesis and Gravity. Made to be played alongside Jaymo's Kitchen.",
 	"authors": [],
-	"license": "MIT",
+	"license": "LicenseRef-All-Rights-Reserved",
 	"environment": "*",
 	"entrypoints": {
 		"main": ["com.jaymospowers.JaymosPowers"],

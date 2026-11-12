@@ -10,6 +10,9 @@ it apply to you and where your power lives. If you work with an AI assistant, po
   and only when he says "merge".
 - `master` has no branch protection turned on, so collaborator access could push to it directly. **Never push to `master`, never merge, never force-push someone else's branch.** Pushing
   to `master` also fires the Release workflow, which bumps versions and commits on its own.
+- The pack is All Rights Reserved (see `LICENSE`; Kingdoms code is GPL v3). By opening a PR or pushing a branch you
+  agree your work falls under the same terms and Andy may ship it in the pack. Don't share the repo, the jars or the
+  modpack zip with anyone Andy hasn't given them to.
 - Stay inside your power where you can. If a change needs another power's or system's files, say so in the PR body.
 
 ## Getting set up

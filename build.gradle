@@ -725,6 +725,7 @@ tasks.register("curseforgePack", Zip) {
 	archiveFileName = "Jaymos-Powers-Modpack-${project.version}.zip"
 	destinationDirectory = packDir
 	from(layout.buildDirectory.file("modpack/manifest.json"))
+	from(file("LICENSE")) { rename { "LICENSE.txt" } }
 	into("overrides/mods") {
 		from configurations.packOverrideJars
 		from tasks.named("jar")
@@ -906,4 +907,9 @@ tasks.withType(JavaCompile).configureEach { it.options.release = 25; it.options.
 java {
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
+}
+
+// The pack's licence notice (LICENSE at the repo root) ships in the jar as LICENSE_jaymos.
+jar {
+	from(file("LICENSE")) { rename { "LICENSE_jaymos" } }
 }
