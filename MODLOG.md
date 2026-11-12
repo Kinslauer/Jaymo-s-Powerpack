@@ -3566,3 +3566,44 @@ Compiled only; not played.
 - **Beds**: a rustle as anyone lies down or gets up (sleep or Kingdoms' bed rest), and now and then as a sleeper turns over, more often while the night runs by as a timelapse.
 - **Sound browser** (`SoundBrowserScreen`, `SoundTuning`, `SoundTuningEngineMixin`, `SoundBrowserOptionsMixin`): Music & Sounds > Sound Browser... (or a key, unbound at first) lists every sound heard in the last minute, newest first, and any you've turned down; search finds any sound. Click the bar to set a volume (5% steps), the name to mute, right-click to reset. "Thin repeats" (on) drops a sound's starts past 6 in half a second (never music, records, voices, menus or loops). Saved in config/jaymospowers-sounds.txt. Covers our power sounds too.
 - Built; not played. Synthesised takes not listened to in game yet.
+
+## 0.22.84 (2026-11-12): Dynamic Waters rivers replace Streams Reflowing
+
+- **Rivers**: the pack now ships our own 26.3 port of AdamNew's Dynamic Waters (MPL-2.0, source in `ports/dynamicwaters`,
+  credits and every change in `ports/dynamicwaters/PORT.md`). Rivers run downhill from the mountains to the sea, carve
+  valleys and gorges, push swimmers, boats and dropped items along with the current (faster in rain and storms), freeze
+  over in the cold and break up into drifting ice floes. Its config screen is in Mod Menu.
+- Streams Reflowing is gone from the pack build, and so is `core/StreamsPreset` (it only set Streams' world preset).
+  `water/Currents` stays for running water outside the rivers and for splashes; Dynamic Waters pushes its own river
+  channels.
+- Needs a new world: old worlds keep their old rivers and get odd seams at new chunks.
+- Built and boot-tested on a dedicated server; not played.
+
+## 0.22.85 (2026-11-12): Ice Caves, crevasses and brittle ice from blue ice (26.4)
+
+- **Ice Caves** (`jaymospowers:ice_caves`): a new cave biome under the colder lands (temperature below -0.3), from about
+  25 blocks under the surface down to the deepslate depths, like the lush and dripstone caves. The driest cold ground
+  (the tundra and dry snowy plains) keeps its old rock. Where a lush, dripstone or sulfur cave would be, that cave wins.
+  New chunks only.
+  - The rock is packed ice with bands of calcite (material rule `jaymospowers:ice_caves`, noise
+    `jaymospowers:ice_cave_gradient`). Large icicles of packed ice hang from the ceilings and rise from the floors,
+    sometimes joined into columns. Icicles hang in patches (a few standing under them), snow and ice crystals lie on the
+    floors, and there is no glow lichen. No lava lakes or lava springs; water springs, geodes and dungeons stay.
+  - Ores come out in the ice inside a pocket of stone (deepslate below Y 0): every ore feature (ours, vanilla's and
+    other mods', `OreStandInMixin`, `ScatteredOreStandInMixin`), Powers' great veins (`BigVeinFeature`) and Kingdoms'
+    world tier veins (`GroundChanges`).
+  - Spawns: the usual cave monsters plus strays (they spawn here without sky, `StraySpawnMixin`) and Frostbites.
+    Mineshafts, trial chambers, ruined portals and strongholds can generate here. Frozen peaks music, icy fog.
+- **Crevasses** (`jaymospowers:crevasse`, the 26.4 feature's settings): winding cracks carved into ice cave floors,
+  narrowing at their ends and towards their bottoms, with a bed of powder snow down in them and roofed at floor level
+  with brittle ice. They are only carved where the walls hold, so they never break into another cave.
+- **Brittle ice from blue ice**: water with blue ice beside it (north, south, east or west) freezes into brittle ice
+  when it is placed, flows or something next to it changes (`BlueIceWaterMixin`).
+- Brittle ice: what may cross it is now the entity tag `#jaymospowers:does_not_break_brittle_ice` (Frostbites, strays).
+- Classes: `frost/IceCaves`, `frost/IceCaveFeatures`, `mixin/icecaves/*`.
+
+## 0.22.86 (2026-11-12): Rivet mans cannons; waking in your ship's berth
+
+- **Rivet**: B on a cannon (Kingdoms' guns, on land or aboard a ship) melds him into it: he lays it where he looks, Space fires, and he reloads from the gunpowder and shot he carries. Sneak or B again leaves (`KingdomsCompat.meldGun`).
+- **Death wake-up**: if your spawn is a berth aboard a Kingdoms ship that's still afloat, you wake there ("You wake in your own berth...") (`Mortality.BERTHS`).
+- Built; not played.

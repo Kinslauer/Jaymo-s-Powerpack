@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:large_icicle",
+  "block": "minecraft:packed_ice",
+  "radius": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 1,
+    "max_inclusive": 4
+  },
+  "floor_to_ceiling_search_range": 16,
+  "column_chance": 0.25
+}

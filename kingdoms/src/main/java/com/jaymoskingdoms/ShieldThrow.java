@@ -331,9 +331,7 @@ public final class ShieldThrow {
 		if (flight.ticks % 2 == 0) {
 			level.sendParticles(ParticleTypes.CRIT, to.x, to.y, to.z, 1, 0.05, 0.05, 0.05, 0.0);
 		}
-		if (flight.ticks % 5 == 0) {
-			level.playSound(null, to.x, to.y, to.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.35F, 1.8F);
-		}
+		WorldSounds.whirl(level, System.identityHashCode(flight), to);
 	}
 
 	private static void strike(ServerLevel level, ServerPlayer owner, Flight flight, LivingEntity target) {

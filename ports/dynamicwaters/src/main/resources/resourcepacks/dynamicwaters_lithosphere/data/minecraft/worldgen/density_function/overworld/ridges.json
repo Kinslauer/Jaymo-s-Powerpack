@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:range_choice",
+  "input": "dynamicwaters:lithosphere_ridges_base",
+  "min_inclusive": -0.15,
+  "max_exclusive": 0.15,
+  "when_out_of_range": "dynamicwaters:lithosphere_ridges_base",
+  "when_in_range": {
+    "type": "minecraft:mul",
+    "left": 0.15,
+    "right": {
+      "type": "minecraft:range_choice",
+      "input": "dynamicwaters:lithosphere_ridges_base",
+      "min_inclusive": -1000000,
+      "max_exclusive": 0,
+      "when_in_range": -1,
+      "when_out_of_range": 1
+    }
+  }
+}

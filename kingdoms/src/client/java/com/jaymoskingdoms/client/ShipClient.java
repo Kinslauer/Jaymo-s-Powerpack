@@ -89,6 +89,10 @@ public final class ShipClient {
 		return true;
 	}
 
+	private static boolean holds(LocalPlayer you, net.minecraft.world.item.Item item) {
+		return you.getMainHandItem().is(item) || you.getOffhandItem().is(item);
+	}
+
 	/** Uses the ship's helm or chest in your sights, if it's nearer than whatever block you're looking at. */
 	public static boolean use(Minecraft mc) {
 		LocalPlayer you = mc.player;
@@ -107,10 +111,18 @@ public final class ShipClient {
 				if (h == null || !ship.getBoundingBox().inflate(reach).contains(eye)) {
 				continue;
 			}
+			// (salvage) a bucket or a sponge in hand, and water in her hold: bail it out
+			boolean pumping = ship.flooded() > 0 && (holds(you, net.minecraft.world.item.Items.BUCKET) || holds(you, net.minecraft.world.item.Items.SPONGE));
 			for (double t = 0.0; t <= reach; t += 0.05) {
 				Vec3 l = ship.toLocal(eye.add(look.scale(t)));
 				int x = Mth.floor(l.x + 0.5), y = Mth.floor(l.y), z = Mth.floor(l.z + 0.5);
 				int i = h.at(x, y, z);
+				if (pumping && (i >= 0 || h.dry(x, y, z))) {
+					ClientPlayNetworking.send(new ShipNet.Use(ship.getId(), x, y, z));
+					you.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+					useCooldown = 4;
+					return true;
+				}
 				if (i < 0) {
 					continue;
 				}
@@ -128,7 +140,8 @@ public final class ShipClient {
 					continue;
 				}
 				if (!(state.getBlock() instanceof HelmBlock) && !(state.getBlock() instanceof EntityBlock)
-					&& !(state.getBlock() instanceof com.jaymoskingdoms.sailing.ShipCannonBlock)) {
+					&& !(state.getBlock() instanceof com.jaymoskingdoms.sailing.ShipCannonBlock)
+					&& !(state.getBlock() instanceof net.minecraft.world.level.block.BedBlock)) {
 					return false;
 				}
 				ClientPlayNetworking.send(new ShipNet.Use(ship.getId(), x, y, z));

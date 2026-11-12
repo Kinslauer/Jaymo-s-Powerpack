@@ -1,0 +1,9 @@
+{
+  "ship.jaymoskingdoms.berth_set": "Your berth: you'll wake here, wherever she sails",
+  "ship.jaymoskingdoms.hud.flooded": "%s water in the hold",
+  "ship.jaymoskingdoms.salvage.too_flooded": "Too much sea in her to float: patch the hull, or empty the hold before you cast off",
+  "ship.jaymoskingdoms.salvage.raised": "She comes up off the seabed",
+  "ship.jaymoskingdoms.salvage.raised_flooded": "She comes up off the seabed with %s water in her hold: bail it out with buckets or sponges",
+  "ship.jaymoskingdoms.salvage.pumping": "%s water left in the hold",
+  "ship.jaymoskingdoms.salvage.pumped": "The hold is dry"
+}

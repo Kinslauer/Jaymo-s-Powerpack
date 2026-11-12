@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:max",
+  "left": 0.15,
+  "right": {
+    "type": "minecraft:abs",
+    "input": "tectonic:noise/continent/ridges"
+  }
+}

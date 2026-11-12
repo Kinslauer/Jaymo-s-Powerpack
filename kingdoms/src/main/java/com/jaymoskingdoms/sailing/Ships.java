@@ -68,7 +68,9 @@ public final class Ships {
 			}
 			Hull h = s.hull();
 			Vec3 l = s.toLocal(mid);
-			if (h != null && h.inside(Mth.floor(l.x + 0.5), Mth.floor(l.y), Mth.floor(l.z + 0.5))) {
+			int x = Mth.floor(l.x + 0.5), y = Mth.floor(l.y), z = Mth.floor(l.z + 0.5);
+			// (salvage) not the part of her hold still under the water in it
+			if (h != null && h.inside(x, y, z) && !(h.dry(x, y, z) && s.wetInHold(h, x, y, z))) {
 				return true;
 			}
 		}

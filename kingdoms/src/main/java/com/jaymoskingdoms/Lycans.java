@@ -414,12 +414,8 @@ public final class Lycans {
 		if (!(mob instanceof net.minecraft.world.entity.player.Player)) {
 			convulseBody(mob, random, violence);
 		}
-		if (t % 6 == 0) {
-			level.playSound(null, mob.blockPosition(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.5F + random.nextFloat() * 0.4F);
-		}
-		if (t % 14 == 7) {
-			level.playSound(null, mob.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.HOSTILE, 1.0F, 0.5F + random.nextFloat() * 0.3F);
-		}
+		WorldSounds.cracking(level, mob, 4, 8, violence);
+		WorldSounds.crying(level, mob, 11, 17);
 		if (t % 3 == 0) {
 			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(0x5A4632, 1.2F), mob.getX(), mob.getY(0.6), mob.getZ(),
 				2, 0.25, 0.4, 0.25, 0.05);
@@ -486,9 +482,7 @@ public final class Lycans {
 	/** The beast changing on: shaking, swelling, growling. */
 	static void changingIn(ServerLevel level, Werewolf w, int left) {
 		RandomSource random = level.getRandom();
-		if (left % 7 == 0) {
-			level.playSound(null, w.blockPosition(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.45F + random.nextFloat() * 0.3F);
-		}
+		WorldSounds.cracking(level, w, 5, 9, 1.0F - left / (float)Werewolf.CURSE_IN_TICKS);
 		if (left == Werewolf.CURSE_IN_TICKS / 2) {
 			w.playSound(SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.ANGRY).adultSounds().growlSound().value(), 2.0F, 0.5F);
 		}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:range_choice",
+    "input": "tectonic:__constants/noise/ridge",
+    "min_inclusive": -0.15,
+    "max_exclusive": 0.15,
+    "when_out_of_range": "tectonic:__constants/noise/ridge",
+    "when_in_range": {
+      "type": "minecraft:mul",
+      "left": 0.15,
+      "right": {
+        "type": "minecraft:range_choice",
+        "input": "tectonic:__constants/noise/ridge",
+        "min_inclusive": -1000000,
+        "max_exclusive": 0,
+        "when_in_range": -1,
+        "when_out_of_range": 1
+      }
+    }
+  }
+}

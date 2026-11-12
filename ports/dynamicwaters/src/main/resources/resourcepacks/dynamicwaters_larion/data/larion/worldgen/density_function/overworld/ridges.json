@@ -1,0 +1,84 @@
+{
+  "type": "minecraft:mul",
+  "left": {
+    "type": "larion:signum",
+    "argument": "larion:overworld/continents/shapes"
+  },
+  "right": {
+    "type": "minecraft:spline",
+    "spline": {
+      "coordinate": {
+        "type": "minecraft:abs",
+        "input": "larion:overworld/ridges/rivers"
+      },
+      "points": [
+        {
+          "location": 0.0,
+          "derivative": 0.0,
+          "value": 0.05
+        },
+        {
+          "location": 0.12,
+          "derivative": 1.0,
+          "value": 0.05
+        },
+        {
+          "location": 0.22,
+          "derivative": 0.625,
+          "value": 0.1
+        },
+        {
+          "location": 1.2,
+          "derivative": 0.0,
+          "value": {
+            "coordinate": {
+              "type": "minecraft:abs",
+              "input": "larion:overworld/ridges/peaks"
+            },
+            "points": [
+              {
+                "location": 0.0,
+                "derivative": -0.33,
+                "value": {
+                  "coordinate": "larion:overworld/temperature",
+                  "points": [
+                    {
+                      "location": 0.15,
+                      "derivative": 0,
+                      "value": 0.66
+                    },
+                    {
+                      "location": 0.25,
+                      "derivative": 0,
+                      "value": 0.45
+                    },
+                    {
+                      "location": 0.45,
+                      "derivative": 0,
+                      "value": 0.45
+                    },
+                    {
+                      "location": 0.65,
+                      "derivative": 0,
+                      "value": 0.66
+                    }
+                  ]
+                }
+              },
+              {
+                "location": 2.35,
+                "derivative": -0.04,
+                "value": 0.33
+              },
+              {
+                "location": 6.0,
+                "derivative": 0.0,
+                "value": 0.22
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
