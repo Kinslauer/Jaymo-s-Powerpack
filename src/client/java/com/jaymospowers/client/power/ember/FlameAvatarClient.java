@@ -104,7 +104,7 @@ public final class FlameAvatarClient {
 	 */
 	public static boolean route(LocalPlayer player, PowerKey key, boolean physical, boolean powerHeld) {
 		int i = key.ordinal();
-		boolean mine = i == AvatarMoves.KEY_R || i == AvatarMoves.KEY_G || i == AvatarMoves.KEY_B;
+		boolean mine = i == AvatarMoves.KEY_R || i == AvatarMoves.KEY_G || i == AvatarMoves.KEY_V || i == AvatarMoves.KEY_B;
 		boolean pressed = physical && !WAS[i];
 		WAS[i] = physical;
 		if (HELD[i]) {
