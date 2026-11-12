@@ -1,6 +1,6 @@
 ---
 status: done
-task: Darktide overhaul (power, looks) + Blindness as a condition and Resonance buff, all in PR 1339
+task: Darktide overhaul and Resonance into Blindness (proposal, waiting on Andy's picks)
 branch: claude/project-thread-qtqlao
 with: 
 pr: 1339
@@ -28,10 +28,6 @@ owns:
 - Owns nothing yet. Once building: `power/darktide/`, `client/power/darktide/`, then `power/resonance/` and `power/blindness/`.
 
 ## Done
-PR 1339, three commits (2026-11-12), compiled, not played:
-- Darktide power: Flow only cost, tides, Maelstrom, Blade of Dark Water.
-- Darktide looks: MagicFx wave, stroke, pool; `DarktideLooks`.
-- Blindness is a condition (`Blind`), power removed; Resonance gains Quiet, Sky Sight, painted Pulse, fork awakening.
-Waiting on Andy: merge, and his word on the eye-loss chances and the vigil + fork rule (Decisions.md).
-
-Merged 2026-11-12 (PR #1339, squash 732a6096). Not played in game yet.
+Nothing built.
+- 2026-11-12 03:25 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-12 03:30 PR #1339 is merged into master; moved to Agents/Done.

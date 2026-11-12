@@ -15,4 +15,4 @@ pr:
 
 ## Notes
 - 2026-11-11 18:30 Text pass: changes/powers/claude-project-thread-ekfmqj.md - dropped the (Andy: ...) meta parenthetical and reworded the kill bullet as plain player-facing patch notes; new lang part zfighter_tinkerer_echoes.json already in the Tinkerer's voice, plain and brief, keys match the chat code (message.jaymospowers.tinkerer_echo.back/aside, talk.jaymospowers.tinkerer.turned.*) - no changes needed there; all other player strings go through existing lang keys.
-- 2026-11-11 21:05 PR #1336 is merged into master; moved to Inbox/Done.
+- 2026-11-12 03:26 PR #1336 is merged into master; moved to Inbox/Done.
