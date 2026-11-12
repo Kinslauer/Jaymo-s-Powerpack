@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jaymospowers:block/tundra/dwarfed_spruce_post"
+    },
+    "axis=z": {
+      "model": "jaymospowers:block/tundra/dwarfed_spruce_post",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jaymospowers:block/tundra/dwarfed_spruce_post",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

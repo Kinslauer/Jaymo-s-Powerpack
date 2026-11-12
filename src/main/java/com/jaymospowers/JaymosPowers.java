@@ -176,6 +176,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
 		com.jaymospowers.frost.Frost.init();
+		// the tundra's blocks and plants, and the glow lichen that eats rock
+		com.jaymospowers.tundra.Tundra.init();
 		// (0.17.116) snow-style layer blocks of every wooden and stone block, cut with the saw or at the stonecutter
 		com.jaymospowers.layers.Layers.init();
 		// (0.18.115) young for spiders, parrots and our wild beasts, whales and sky creatures

@@ -1,0 +1,7 @@
+{
+  "parent": "jaymospowers:block/tundra/pillar_6",
+  "textures": {
+    "side": "minecraft:block/spruce_log",
+    "end": "minecraft:block/dwarfed_spruce_post_end"
+  }
+}
