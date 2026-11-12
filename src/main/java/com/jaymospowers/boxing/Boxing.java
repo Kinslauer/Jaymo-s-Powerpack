@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -82,6 +83,10 @@ public final class Boxing {
 	static final int STRING_RESET = 30;
 	/** A boxer's block, per blow stopped (half-feathers; one icon), and the Arrow Slit's tight guard (an icon and a half). */
 	public static final float BLOCK_COST = 2.0F, ARROW_SLIT_BLOCK_COST = 3.0F;
+	/** The breath of a tiring and of a gassed boxer: a puff every this many ticks, and how many wisps a gassed one is. */
+	static final int TIRING_BREATH = 50, GASSED_BREATH = 20, GASSED_PUFFS = 3;
+	/** Where the breath shows: this far ahead of the eyes, this far below them (blocks). */
+	static final double BREATH_AHEAD = 0.35, BREATH_BELOW = 0.2;
 	/** With this many half-feathers or fewer left in the row (four icons), a boxer is tiring: a warning, nothing more. */
 	public static final int TIRING_FEATHERS = 8;
 	/** Gassed: Mining Fatigue is kept up in spells this long (ticks), renewed this often. */
@@ -136,6 +141,14 @@ public final class Boxing {
 	/** Every style's level, four bits each in {@link Style} order (0: not learned). Saved, kept through death, told to its owner. */
 	public static final AttachmentType<Integer> LEVELS = AttachmentRegistry.create(JaymosPowers.id("boxing_levels"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * How a boxer looks just now, told to everyone (not saved): how spent they are in the low two bits ({@link #FRESH},
+	 * {@link #TIRING}, {@link #GASSED}), the last punch thrown above them ({@link Punch}'s place plus one), and a count
+	 * that turns with every punch so each one is told. The client's poses read it.
+	 */
+	public static final AttachmentType<Integer> LOOK = AttachmentRegistry.create(JaymosPowers.id("boxing_look"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	public static final int FRESH = 0, TIRING = 1, GASSED = 2;
 
 	private static final Identifier SPEED = JaymosPowers.id("boxing_speed");
 
@@ -152,6 +165,8 @@ public final class Boxing {
 		/** The last one a punch landed on (entity id), and when. */
 		int victim = -1;
 		long landed = Long.MIN_VALUE / 2;
+		/** Punches told to everyone so far (so each {@link #LOOK} differs from the last). */
+		int shown;
 		/** What the attack-speed modifier was last set for (0: taken off). */
 		int applied;
 		/** A click that came too early: the one it was aimed at (entity id), thrown as soon as the rhythm allows; -1 for none. */
@@ -257,6 +272,19 @@ public final class Boxing {
 		return style != null && level(player, style) > 0 && !player.isSpectator() && BoxingGear.isGear(player.getMainHandItem());
 	}
 
+	/** How spent {@code player} looks ({@link #FRESH}, {@link #TIRING}, {@link #GASSED}), as everyone is told it (both sides). */
+	public static int spent(Player player) {
+		Integer look = player.getAttached(LOOK);
+		return look == null ? FRESH : look & 3;
+	}
+
+	/** The last punch {@code player} was seen to throw, or null (both sides). */
+	public static @Nullable Punch shownPunch(Player player) {
+		Integer look = player.getAttached(LOOK);
+		int index = look == null ? 0 : look >> 2 & 0xF;
+		return index >= 1 && index <= Punch.values().length ? Punch.values()[index - 1] : null;
+	}
+
 	/** Whether {@code player} is boxing and running low: {@link #TIRING_FEATHERS} or fewer left, but not yet {@link #gassed}. */
 	public static boolean tiring(Player player) {
 		return boxing(player) && !player.isCreative() && !gassed(player) && Feathers.view(player).feathers() <= TIRING_FEATHERS;
@@ -350,6 +378,8 @@ public final class Boxing {
 		BoxingEvades.Strong strong = gassed ? null : BoxingEvades.takeStrong(boxer, now);
 		Punch punch = strong != null ? strong.punch() : style.punch(state.step++);
 		state.last = punch;
+		// everyone is told which punch it is (and how spent the boxer is), for the poses
+		boxer.setAttached(LOOK, (gassed ? GASSED : tiring(boxer) ? TIRING : FRESH) | punch.ordinal() + 1 << 2 | (state.shown++ & 0xFF) << 6);
 		state.lastPunch = now;
 		boolean heavy = strong != null && strong.heavy();
 		if (heavy) {
@@ -403,6 +433,29 @@ public final class Boxing {
 
 	// ---- the rhythm, shown ---------------------------------------------------------------------------------------------
 
+	/**
+	 * Tiring or gassed, a boxer shows it: everyone is told ({@link #LOOK}), and their breath shows, a faint puff now and
+	 * then when tiring, a clear one with every breath when gassed. No sound.
+	 */
+	private static void breath(ServerPlayer player, boolean boxing) {
+		Integer look = player.getAttached(LOOK);
+		if (!boxing) {
+			if (look != null) {
+				player.removeAttached(LOOK);
+			}
+			return;
+		}
+		int spent = gassed(player) ? GASSED : tiring(player) ? TIRING : FRESH;
+		if ((look == null ? FRESH : look & 3) != spent) {
+			player.setAttached(LOOK, (look == null ? 0 : look & ~3) | spent);
+		}
+		if (spent == FRESH || player.tickCount % (spent == GASSED ? GASSED_BREATH : TIRING_BREATH) != 0) {
+			return;
+		}
+		Vec3 mouth = player.getEyePosition().add(player.getLookAngle().scale(BREATH_AHEAD)).add(0.0, -BREATH_BELOW, 0.0);
+		player.level().sendParticles(ParticleTypes.WHITE_SMOKE, mouth.x, mouth.y, mouth.z, spent == GASSED ? GASSED_PUFFS : 1, 0.03, 0.02, 0.03, 0.005);
+	}
+
 	/** Keeps each boxer's attack speed at their rhythm, so the game's own attack indicator fills in time with it. */
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -420,6 +473,7 @@ public final class Boxing {
 					}
 				}
 			}
+			breath(player, boxing);
 			if (boxing && player.tickCount % FATIGUE_EVERY == 0 && gassed(player)) {
 				// gassed: the arms are lead
 				player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, FATIGUE_TICKS, 0));
