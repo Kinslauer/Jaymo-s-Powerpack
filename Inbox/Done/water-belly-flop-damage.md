@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: Andy (project chat, 2026-11-10)
 asked: 2026-11-10
@@ -48,3 +48,4 @@ Each starts when Sneak marks the entry in the air (or the flop when you hit) and
 - 2026-11-11 21:30 Review (head b068240): checks green, all five 01:53 points fixed, one change needed. 1. A sky dive into water no longer hurts: Dives.java:120 makes any entry while looking down a clean dive, and a sky diver spread flat usually looks down at the ground, so it lands as a DIVE with no damage. SkyDive's javadoc and Andy's task say landing from a sky dive is the belly flop. Check SkyDive.active(player) first (remember it in Watch the tick before, in case SkyDive folds you on water first) and make that a FLOP. Rest looks right: pose clock, Leap of Faith, getKnownMovement, sync only on change, hint 128. Not tested in game.
 - 2026-11-11 18:04 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
 - 2026-11-11 18:36 Text pass: PR #1263 player-visible text reviewed - loading-screen hint gui.jaymoskingdoms.story.hint.128 (kingdoms/lang/parts/belly-flops.json) is plain, two sentences, standalone; HINTS 127->128 in StoryHoldScreen matches the new key; changes/powers/claude-water-belly-flop-damage.md and changes/kingdoms/claude-water-belly-flop-damage.md describe what the player sees (flop/cannonball/dive damage, poses) with numbers matching Dives.java constants; Dives.java and DivePose.java have no hardcoded chat lines. Nothing needed rewriting, so no commit.
+- 2026-11-12 01:57 PR #1263 is merged into master; moved to Inbox/Done.
