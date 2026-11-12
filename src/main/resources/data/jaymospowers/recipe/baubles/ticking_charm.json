@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:string",
+    "C": "minecraft:copper_ingot",
+    "K": "minecraft:clock",
+    "A": "minecraft:amethyst_shard"
+  },
+  "pattern": [
+    " S ",
+    "CKC",
+    " A "
+  ],
+  "result": {
+    "id": "jaymospowers:ticking_charm",
+    "count": 1
+  }
+}

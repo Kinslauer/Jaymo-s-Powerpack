@@ -720,6 +720,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.415: the moon's curse (a life story road): feral under a blood moon
 		LOGGER.debug("moon curse attachment: {}", MoonCurse.CURSED);
 		MoonCurse.register();
+		// the sick light round the Irradiated monolith: its sickness and the wolves it changes
+		LOGGER.debug("blight attachments: {} {} {}", com.jaymoskingdoms.remnants.Blight.DOSE, com.jaymoskingdoms.remnants.Blight.DENNED,
+			com.jaymoskingdoms.remnants.Blight.BLIGHTED);
+		com.jaymoskingdoms.remnants.Blight.register();
 		// 0.7.332: the werewolf's deception: the moon's pull among friends, scent trails, the tells of a hidden change, a locked
 		// room, the morning after, torn cloth as evidence, and what the curse asks for
 		MoonPull.register();
