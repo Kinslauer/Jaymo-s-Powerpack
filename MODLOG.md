@@ -2933,3 +2933,9 @@ this update get them.
 - Falling into water from 4+ blocks now hurts unless you went in head first: a belly flop deals real fall damage scaled by fall height and impact speed (about 6 HP from 12 blocks, topping out at 8 HP); a cannonball - feet first, tucked - is the middle case (capped at 4 HP); a clean dive takes nothing (landing from a sky dive, spread flat, is a belly flop), and so does going in head first without Sneak (looking down, Leap of Faith's dive, a Wind user's dive). Short drops stay harmless.
 - The entry pose shows on everyone in view: cannonball tucked into a ball, belly flop flat on impact with a short wince, clean dive with arms forward over the head - each eases out under water.
 - Built; not played in game.
+
+## 0.22.50 (2026-11-12): Undead seek real shelter from the sun (#1262)
+
+- **Deadlier sunlight:** zombies, skeletons, strays and the other undead that burn by day now burn whenever the Sun's rays reach any part of them (feet, chest, head or the top of the body), not only when the sky is open straight above. A roof, a cave wall or a solid cliff shades them; leaves, glass, torches and fences let the rays through, so hiding under a tree no longer works. With Jaymo's Kingdoms the rays follow the Sun's real path across the sky. Nothing burns under the future's ashen sun.
+- **Shelter search:** undead caught in the sun look for real shelter (a cave, somewhere underground, under a solid roof) up to 24 blocks away and walk there. If nothing is in reach they head away from the Sun and keep searching until they find some or the day ends. They don't dig.
+- Not tested in game.
