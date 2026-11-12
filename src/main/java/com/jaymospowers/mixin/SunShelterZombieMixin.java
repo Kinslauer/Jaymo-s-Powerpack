@@ -1,7 +1,9 @@
 package com.jaymospowers.mixin;
 
 import com.jaymospowers.core.sun.SeekShelterGoal;
+import net.minecraft.world.entity.monster.zombie.Husk;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +18,10 @@ public abstract class SunShelterZombieMixin {
     @Inject(method = "registerGoals", at = @At("HEAD"))
     private void jaymospowers$addShelterGoal(CallbackInfo ci) {
         Zombie mob = (Zombie) (Object) this;
+        if (mob instanceof Husk || mob instanceof ZombifiedPiglin) {
+            return; // they don't burn in the sun
+        }
         MobGoalsAccessor goals = (MobGoalsAccessor) mob;
-        goals.jaymospowers$goals().addGoal(5, new SeekShelterGoal(mob));
+        goals.jaymospowers$goals().addGoal(5, new SeekShelterGoal(mob, false));
     }
 }

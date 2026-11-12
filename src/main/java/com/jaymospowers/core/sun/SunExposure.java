@@ -91,4 +91,28 @@ public final class SunExposure {
         }
         return true;
     }
+
+    /**
+     * Whether the Sun's rays reach any part of {@code entity}'s body: the feet, chest and eyes down the middle, and the
+     * four top corners of its hitbox. Any one of them in the sun is enough (a head under a roof edge with the legs
+     * out in the light still burns).
+     */
+    public static boolean bodyExposed(Level level, net.minecraft.world.entity.Entity entity) {
+        net.minecraft.world.phys.AABB box = entity.getBoundingBox().deflate(0.05); // just inside, so a wall it touches isn't "in the way"
+        double x = entity.getX(), z = entity.getZ();
+        double top = box.maxY;
+        Vec3[] points = {
+            new Vec3(x, box.minY + 0.05, z),
+            new Vec3(x, (box.minY + box.maxY) * 0.5, z),
+            entity.getEyePosition(),
+            new Vec3(box.minX, top, box.minZ), new Vec3(box.maxX, top, box.minZ),
+            new Vec3(box.minX, top, box.maxZ), new Vec3(box.maxX, top, box.maxZ),
+        };
+        for (Vec3 point : points) {
+            if (exposedToSun(level, point)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

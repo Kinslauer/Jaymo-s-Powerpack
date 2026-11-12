@@ -18,6 +18,6 @@ public abstract class SunShelterSkeletonMixin {
     private void jaymospowers$addShelterGoal(CallbackInfo ci) {
         AbstractSkeleton mob = (AbstractSkeleton) (Object) this;
         MobGoalsAccessor goals = (MobGoalsAccessor) mob;
-        goals.jaymospowers$goals().addGoal(3, new SeekShelterGoal(mob));
+        goals.jaymospowers$goals().addGoal(3, new SeekShelterGoal(mob, true));
     }
 }
