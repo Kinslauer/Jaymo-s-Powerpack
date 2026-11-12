@@ -3164,3 +3164,11 @@ of code is ours). Patches 1 to 4 of 6 of the SWGC swordplay picks.
   (`tools/gen_ki_blade_sounds.py`). With it out he stands armed (the blade one-handed, the scythe and lance as
   polearms). A parry made with it out strikes an arrow back at whoever loosed it. Cost, damage and reach are unchanged,
   and its blows still count as fists.
+
+## 0.22.59 (2026-11-12): licence - All Rights Reserved
+
+- **Licence**: Jaymo's Powers is now All Rights Reserved instead of MIT (`LICENSE` at the repo root, shipped in the jar
+  as `LICENSE_jaymos`, and in the modpack zip as `LICENSE.txt`). Friends Andy gives the pack to may play it and host it;
+  nobody may re-upload or pass it on without his say. Ported MIT parts (Iron's Simple Blood, Enchanting System Overhaul)
+  keep their own licences in `licenses/`.
+- Nothing changes in game. Built; not played.

@@ -1875,3 +1875,10 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
 
 - `BodyHeat.soak(player, ticks)`: for Kingdoms' downpours, which leave you wet for 3 minutes where rain leaves you wet for 1. Nothing changes without Kingdoms.
 - Built (compiles); not seen in game.
+
+## 0.5.115 (2026-11-12): licence - All Rights Reserved
+
+- **Licence**: Jaymo's Kitchen is now All Rights Reserved instead of MIT (`LICENSE` at the repo root, shipped in the jar
+  as `LICENSE_jaymos`). The Rats and Horse Power parts (LGPL v3) and the Farmer's Delight and Nifty Carts parts (MIT)
+  keep their own licences (`LICENSE_*`).
+- Nothing changes in game. Built; not played.
