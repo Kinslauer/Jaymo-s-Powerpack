@@ -233,8 +233,9 @@ final class ZFighterEyeBeams {
 	}
 
 	private static void gauge(ServerPlayer player, Eyes eyes, boolean cold) {
+		// not the | and . charge-bar glyphs: those lock the mouse (HeldInput), and a punch must still land while the eyes burn
 		int filled = Mth.clamp(Math.round(eyes.heat / HEAT_MAX * 10.0F), 0, 10);
-		String bar = "[" + "|".repeat(filled) + ".".repeat(10 - filled) + "]";
+		String bar = "[" + "=".repeat(filled) + "-".repeat(10 - filled) + "]";
 		if (cold && eyes.chill.progress() > 0.0F) {
 			bar += " " + Math.round(eyes.chill.progress() * 100.0F) + "%";
 		}
