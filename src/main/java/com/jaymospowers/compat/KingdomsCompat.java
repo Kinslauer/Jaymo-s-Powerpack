@@ -305,4 +305,70 @@ public final class KingdomsCompat {
 			}
 		}
 	}
+
+	private static Method gunMan, gunManning, gunLeave, gunTick;
+	private static boolean gunLooked;
+
+	private static boolean guns() {
+		if (!LOADED) {
+			return false;
+		}
+		if (!gunLooked) {
+			gunLooked = true;
+			try {
+				Class<?> c = Class.forName("com.jaymoskingdoms.sailing.MeldedGuns");
+				Class<?> p = net.minecraft.server.level.ServerPlayer.class;
+				gunMan = c.getMethod("man", p, double.class);
+				gunManning = c.getMethod("manning", p);
+				gunLeave = c.getMethod("leave", p);
+				gunTick = c.getMethod("tick", p);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				gunMan = null;
+			}
+		}
+		return gunMan != null;
+	}
+
+	/**
+	 * Rivet melds into the cannon {@code player} looks at within {@code reach} (Kingdoms' {@code MeldedGuns}, a gun on land or
+	 * aboard a ship). False without Kingdoms or when there's no gun there.
+	 */
+	public static boolean meldGun(net.minecraft.server.level.ServerPlayer player, double reach) {
+		try {
+			return guns() && Boolean.TRUE.equals(gunMan.invoke(null, player, reach));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Whether Rivet is melded into a cannon. */
+	public static boolean inGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			return guns() && Boolean.TRUE.equals(gunManning.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Rivet pours out of the cannon he's melded into. */
+	public static void leaveGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			if (guns()) {
+				gunLeave.invoke(null, player);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (nothing to let go of)
+		}
+	}
+
+	/** Every tick Rivet is changed: the cannon he's melded into is laid, fired and loaded. */
+	public static void workGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			if (guns()) {
+				gunTick.invoke(null, player);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms: no guns to meld into)
+		}
+	}
 }

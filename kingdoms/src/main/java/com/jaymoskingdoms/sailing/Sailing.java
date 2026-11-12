@@ -32,6 +32,10 @@ public final class Sailing {
 
 	public static void register() {
 		Ship.register();
+		Flooding.register();
+		Berths.register();
+		MeldedGuns.register();
+		SeaEvents.register();
 		HELM = block("ship_helm", HelmBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).instrument(NoteBlockInstrument.BASS)
 			.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		SAIL = block("sail", SailBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.GUITAR)

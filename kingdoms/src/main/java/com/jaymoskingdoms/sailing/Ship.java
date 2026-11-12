@@ -153,6 +153,17 @@ public final class Ship extends Entity {
 	 */
 	public static final AttachmentType<Vec3> SEAT = AttachmentRegistry.create(JaymosKingdoms.id("ship_seat"),
 		builder -> builder.persistent(Vec3.CODEC).syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/**
+	 * What her client needs to draw the block entities aboard that have a look of their own (a sign's words, a banner's
+	 * pattern): each one's piece and the data its block sends to players ashore. Kept and sent to everyone.
+	 */
+	public record Shown(int piece, CompoundTag tag) {
+		public static final StreamCodec<ByteBuf, Shown> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Shown::piece,
+			ByteBufCodecs.COMPOUND_TAG, Shown::tag, Shown::new);
+	}
+
+	public static final AttachmentType<List<Shown>> SHOWN = AttachmentRegistry.create(JaymosKingdoms.id("ship_shown"),
+		builder -> builder.syncWith(Shown.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 	/** (0.7.42) The most crew aboard one ship. */
 	public static final int MOST_CREW = 24;
 
@@ -195,6 +206,8 @@ public final class Ship extends Entity {
 	private static final EntityDataAccessor<Byte> ROWING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BYTE);
 	/** (0.7.18) Whether she's going down (her hold's flooded). */
 	private static final EntityDataAccessor<Boolean> FOUNDERING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
+	/** How many blocks of water lie in her hold ({@link Flooding}: a raised wreck's, till it's pumped out). */
+	private static final EntityDataAccessor<Integer> FLOODED = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.INT);
 	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
 	private int sinking;
 	/** A balloon ship in the air: the height her keel is making for (NaN: she isn't flying). */
@@ -334,44 +347,32 @@ public final class Ship extends Entity {
 		if (!(helmState.getBlock() instanceof HelmBlock)) {
 			return null;
 		}
-		// every block joined to the helm (water and loose plants are where the hull ends)
-		List<BlockPos> found = new ArrayList<>();
-		LongOpenHashSet seen = new LongOpenHashSet();
-		ArrayDeque<BlockPos> open = new ArrayDeque<>();
-		open.add(helm);
-		seen.add(helm.asLong());
-		int x0 = helm.getX(), x1 = x0, y0 = helm.getY(), y1 = y0, z0 = helm.getZ(), z1 = z0;
-		while (!open.isEmpty()) {
-			BlockPos p = open.poll();
-			found.add(p);
-			if (found.size() > MOST_BLOCKS) {
-				tell(player, Component.translatable("ship.jaymoskingdoms.too_big", MOST_BLOCKS));
-				return null;
+		// every block joined to the helm (water and loose plants are where the hull ends); a wreck joined to the sea bed
+		// is searched again stopping at the ground she lies on (salvage: a vanilla shipwreck, pumped out and patched)
+		Object search = joined(level, helm, false);
+		boolean salvage = false;
+		if (search instanceof String && !"ship.jaymoskingdoms.finish_frame".equals(search)) {
+			Object wreck = joined(level, helm, true);
+			if (wreck instanceof List<?>) {
+				search = wreck;
+				salvage = true;
 			}
+		}
+		if (search instanceof String why) {
+			tell(player, why.equals("ship.jaymoskingdoms.too_big") ? Component.translatable(why, MOST_BLOCKS)
+				: why.equals("ship.jaymoskingdoms.too_long") ? Component.translatable(why, LONGEST) : Component.translatable(why));
+			return null;
+		}
+		@SuppressWarnings("unchecked")
+		List<BlockPos> found = (List<BlockPos>)search;
+		int x0 = helm.getX(), x1 = x0, y0 = helm.getY(), y1 = y0, z0 = helm.getZ(), z1 = z0;
+		for (BlockPos p : found) {
 			x0 = Math.min(x0, p.getX());
 			x1 = Math.max(x1, p.getX());
 			y0 = Math.min(y0, p.getY());
 			y1 = Math.max(y1, p.getY());
 			z0 = Math.min(z0, p.getZ());
 			z1 = Math.max(z1, p.getZ());
-			if (x1 - x0 >= LONGEST || y1 - y0 >= LONGEST || z1 - z0 >= LONGEST) {
-				tell(player, Component.translatable("ship.jaymoskingdoms.too_long", LONGEST));
-				return null;
-			}
-			for (Direction d : Direction.values()) {
-				BlockPos q = p.relative(d);
-				if (seen.add(q.asLong()) && part(level.getBlockState(q))) {
-					if (level.getBlockState(q).getBlock() instanceof ShipFrameBlock) {
-						tell(player, Component.translatable("ship.jaymoskingdoms.finish_frame"));
-						return null;
-					}
-					if (level.getBlockState(q).getDestroySpeed(level, q) < 0.0F) {
-						tell(player, Component.translatable("ship.jaymoskingdoms.land"));
-						return null;
-					}
-					open.add(q);
-				}
-			}
 		}
 		// it must float on water: water under some of its keel, and the sea's level beside it
 		int sea = Integer.MIN_VALUE;
@@ -391,8 +392,8 @@ public final class Ship extends Entity {
 				}
 			}
 		}
-		// (a balloon needs no water: looked at once her hull is worked out)
-		boolean afloat = wetKeel && sea != Integer.MIN_VALUE;
+		// (a balloon needs no water: looked at once her hull is worked out; a wreck lies on the bottom, the sea all round her)
+		boolean afloat = (wetKeel || salvage) && sea != Integer.MIN_VALUE;
 		if (!afloat) {
 			sea = Integer.MIN_VALUE;
 		}
@@ -419,8 +420,14 @@ public final class Ship extends Entity {
 		BlockPos origin = helm.offset(middle.rotate(back));
 		List<Piece> pieces = new ArrayList<>(found.size());
 		Map<Integer, CompoundTag> tags = new HashMap<>();
+		Map<Long, int[]> heads = new HashMap<>();
 		for (BlockPos p : found) {
 			BlockState state = level.getBlockState(p);
+			if (state.getBlock() instanceof net.minecraft.world.level.block.BedBlock
+				&& state.getValue(net.minecraft.world.level.block.BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.HEAD) {
+				BlockPos l = p.subtract(helm).rotate(turn).subtract(middle);
+				heads.put(p.asLong(), new int[] {l.getX(), l.getY() - keel, l.getZ()});
+			}
 			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
 				state = state.setValue(BlockStateProperties.WATERLOGGED, false);
 			}
@@ -441,11 +448,33 @@ public final class Ship extends Entity {
 			tell(player, Component.translatable("ship.jaymoskingdoms.not_afloat"));
 			return null;
 		}
-		if (!hull.floats && !hull.airworthy) {
+		// the water in her hold comes up with her: a wreck's, or one anchored with her hold still flooded (Flooding)
+		int flooded = 0;
+		boolean wasFlooded = Flooding.wasFlooded(level, helm);
+		if (afloat && (salvage || wasFlooded)) {
+			for (long cell : hull.enclosed) {
+				BlockPos at = origin.offset(BlockPos.of(cell).offset(0, keel, 0).rotate(back));
+				if (level.getFluidState(at).is(FluidTags.WATER)) {
+					flooded++;
+				}
+			}
+		}
+		if (!hull.airworthy && Float.isNaN(hull.floodedDraft(flooded))) {
+			tell(player, Component.translatable(hull.floats ? "ship.jaymoskingdoms.salvage.too_flooded" : "ship.jaymoskingdoms.too_heavy"));
+			return null;
+		}
+		if (salvage && !hull.floats && !hull.airworthy) {
 			tell(player, Component.translatable("ship.jaymoskingdoms.too_heavy"));
 			return null;
 		}
 		Ship ship = new Ship(TYPE, level);
+		ship.setFlooded(flooded);
+		if (wasFlooded) {
+			Flooding.forget(level, helm);
+		}
+		if (salvage) {
+			tell(player, Component.translatable(flooded > 0 ? "ship.jaymoskingdoms.salvage.raised_flooded" : "ship.jaymoskingdoms.salvage.raised", flooded));
+		}
 		if (!afloat || !hull.floats) {
 			// she hangs where she was moored
 			ship.aloft = origin.getY() + keel;
@@ -471,12 +500,69 @@ public final class Ship extends Entity {
 			}
 		}
 		level.addFreshEntity(ship);
+		Berths.castOff(level, ship, heads);
 		if (player != null) {
 			player.startRiding(ship);
 			level.playSound(null, helm, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 0.6F);
 			level.playSound(null, helm, afloat ? SoundEvents.BOAT_PADDLE_WATER : SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.4F, 0.7F);
 		}
 		return ship;
+	}
+
+	/**
+	 * Every block joined to the helm at {@code helm} (water and loose plants are where a hull ends), or why not (a lang key):
+	 * too big, too long, an unfinished build kit, or run into the land. A {@code wreck} is searched only as far as the ground
+	 * she lies on (sand, gravel, clay, earth, stone, coral, ice): a vanilla shipwreck on the sea bed.
+	 */
+	private static Object joined(ServerLevel level, BlockPos helm, boolean wreck) {
+		List<BlockPos> found = new ArrayList<>();
+		LongOpenHashSet seen = new LongOpenHashSet();
+		ArrayDeque<BlockPos> open = new ArrayDeque<>();
+		open.add(helm);
+		seen.add(helm.asLong());
+		int x0 = helm.getX(), x1 = x0, y0 = helm.getY(), y1 = y0, z0 = helm.getZ(), z1 = z0;
+		while (!open.isEmpty()) {
+			BlockPos p = open.poll();
+			found.add(p);
+			if (found.size() > MOST_BLOCKS) {
+				return "ship.jaymoskingdoms.too_big";
+			}
+			x0 = Math.min(x0, p.getX());
+			x1 = Math.max(x1, p.getX());
+			y0 = Math.min(y0, p.getY());
+			y1 = Math.max(y1, p.getY());
+			z0 = Math.min(z0, p.getZ());
+			z1 = Math.max(z1, p.getZ());
+			if (x1 - x0 >= LONGEST || y1 - y0 >= LONGEST || z1 - z0 >= LONGEST) {
+				return "ship.jaymoskingdoms.too_long";
+			}
+			for (Direction d : Direction.values()) {
+				BlockPos q = p.relative(d);
+				BlockState there = level.getBlockState(q);
+				if (seen.add(q.asLong()) && part(there)) {
+					if (there.getBlock() instanceof ShipFrameBlock) {
+						return "ship.jaymoskingdoms.finish_frame";
+					}
+					if (wreck && seaBed(there)) {
+						continue;
+					}
+					if (there.getDestroySpeed(level, q) < 0.0F) {
+						return "ship.jaymoskingdoms.land";
+					}
+					open.add(q);
+				}
+			}
+		}
+		return found;
+	}
+
+	/** Whether a block is the ground a wreck lies on, not part of her. */
+	static boolean seaBed(BlockState state) {
+		return state.is(net.minecraft.tags.BlockTags.SAND) || state.is(net.minecraft.tags.BlockTags.DIRT)
+			|| state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || state.is(net.minecraft.tags.BlockTags.CORAL_BLOCKS)
+			|| state.is(net.minecraft.tags.BlockTags.ICE) || state.is(net.minecraft.tags.BlockTags.SNOW) || state.is(Blocks.GRAVEL)
+			|| state.is(Blocks.CLAY) || state.is(Blocks.SUSPICIOUS_SAND) || state.is(Blocks.SUSPICIOUS_GRAVEL) || state.is(Blocks.SANDSTONE)
+			|| state.is(Blocks.MAGMA_BLOCK) || state.is(Blocks.SOUL_SAND) || state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK);
 	}
 
 	private static void tell(@Nullable ServerPlayer player, Component message) {
@@ -663,7 +749,9 @@ public final class Ship extends Entity {
 		this.setPos(to);
 		this.drift = to.subtract(from);
 		this.carry(level, h, from, yawFrom);
+		Berths.tick(level, this, h);
 		this.shine(level, h);
+		this.work(level, h);
 		// the wake and the creak of her timbers
 		if (!flying && this.speed > 0.1 && this.tickCount % 4 == 0) {
 			Vec3 bow = this.toWorld(0.0, h.draft, h.maxZ + 0.5);
@@ -759,6 +847,9 @@ public final class Ship extends Entity {
 		if (row != 0) {
 			line.append(Component.translatable(row > 0 ? "ship.jaymoskingdoms.hud.rowing" : "ship.jaymoskingdoms.hud.backing")).append(dot);
 		}
+		if (this.flooded() > 0) {
+			line.append(Component.translatable("ship.jaymoskingdoms.hud.flooded", this.flooded())).append(dot);
+		}
 		line.append(Component.translatable("ship.jaymoskingdoms.hud.speed", String.format("%.1f", this.speed * 20.0), String.format("%.1f", top * 20.0)));
 		if (h.sails > 0) {
 			float strength = Winds.strength(level, this.getX(), this.getZ());
@@ -773,7 +864,7 @@ public final class Ship extends Entity {
 		double surface = Double.NEGATIVE_INFINITY;
 		for (double z : new double[] {0.0, h.minZ + 0.5, h.maxZ - 0.5}) {
 			Vec3 w = this.toWorld(0.0, 0.0, z);
-			surface = Math.max(surface, surface(level, w.x, at.y + h.draft + 3.0, w.z));
+			surface = Math.max(surface, surface(level, w.x, at.y + this.draft(h) + 3.0, w.z));
 		}
 		if (this.flying()) {
 			// a balloon: toward the height she's making for, and onto the water if that's under it
@@ -789,7 +880,7 @@ public final class Ship extends Entity {
 		if (surface == Double.NEGATIVE_INFINITY) {
 			return at.y;
 		}
-		double target = surface - h.draft - h.minY;
+		double target = surface - this.draft(h) - h.minY;
 		return at.y + Mth.clamp((target - at.y) * SETTLE, -SETTLE_MOST, SETTLE_MOST);
 	}
 
@@ -1067,13 +1158,33 @@ public final class Ship extends Entity {
 				level.setBlockEntity(be);
 			}
 		}
-		// the dry hold is dry again
+		// the dry hold is dry again (but for what water's still in her, lying in her lowest cells: Flooding)
+		int water = this.flooded();
 		for (long cell : h.enclosed) {
 			BlockPos at = origin.offset(BlockPos.of(cell).rotate(turn));
+			BlockPos c = BlockPos.of(cell);
+			if (this.wetInHold(h, c.getX(), c.getY(), c.getZ())) {
+				if (level.getBlockState(at).isAir() || level.getBlockState(at).canBeReplaced() && level.getFluidState(at).isEmpty()) {
+					level.setBlock(at, Blocks.WATER.defaultBlockState(), quiet);
+				}
+				continue;
+			}
 			if (!level.getFluidState(at).isEmpty() && !level.getBlockState(at).hasProperty(BlockStateProperties.WATERLOGGED)) {
 				level.setBlock(at, Blocks.AIR.defaultBlockState(), quiet);
 			}
 		}
+		if (water > 0 && h.helm >= 0) {
+			Flooding.remember(level, where.get(h.helm));
+		}
+		// her berths are beds in the world again (Berths)
+		Map<Long, BlockPos> beds = new HashMap<>();
+		for (int i = 0; i < h.pieces.size(); i++) {
+			Piece p = h.pieces.get(i);
+			if (p.blockState().getBlock() instanceof net.minecraft.world.level.block.BedBlock) {
+				beds.put(BlockPos.asLong(p.x(), p.y(), p.z()), where.get(i));
+			}
+		}
+		Berths.anchored(level, this, beds);
 		this.cargo.clear();
 		this.cargoTags.clear();
 		this.ejectPassengers();
@@ -1122,6 +1233,55 @@ public final class Ship extends Entity {
 				this.cargo.put(e.getKey(), be);
 			}
 		}
+		this.refreshShown(level);
+	}
+
+	/** What her client is sent to draw the block entities aboard ({@link #SHOWN}). */
+	private void refreshShown(Level level) {
+		List<Shown> out = new ArrayList<>();
+		for (Map.Entry<Integer, BlockEntity> e : this.cargo.entrySet()) {
+			CompoundTag tag;
+			try {
+				tag = e.getValue().getUpdateTag(level.registryAccess());
+			} catch (RuntimeException ex) {
+				continue;
+			}
+			if (!tag.isEmpty()) {
+				out.add(new Shown(e.getKey(), tag));
+			}
+		}
+		if (out.isEmpty()) {
+			if (this.hasAttached(SHOWN)) {
+				this.removeAttached(SHOWN);
+			}
+		} else {
+			this.setAttached(SHOWN, List.copyOf(out));
+		}
+	}
+
+	/**
+	 * Her furnaces, smokers, blast furnaces and brewing stands work on under way ({@link ShipWorks}); a furnace that lights
+	 * up or goes out changes her piece to match.
+	 */
+	private void work(ServerLevel level, Hull h) {
+		if (this.cargo.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<Integer, BlockEntity> e : List.copyOf(this.cargo.entrySet())) {
+			BlockEntity be = e.getValue();
+			int i = e.getKey();
+			if (i >= h.pieces.size() || !ShipWorks.works(be)) {
+				continue;
+			}
+			BlockState state = h.pieces.get(i).blockState();
+			if (state.getBlock() != be.getBlockState().getBlock()) {
+				continue;
+			}
+			BlockState next = ShipWorks.tick(level, this, i, be.getBlockState(), be);
+			if (next != null && next != state) {
+				this.setPiece(i, next);
+			}
+		}
 	}
 
 	/**
@@ -1157,10 +1317,22 @@ public final class Ship extends Entity {
 			return;
 		}
 		int i = h.at(x, y, z);
-		if (i < 0 || player.position().distanceTo(this.toWorld(x, y + 0.5, z)) > REACH) {
+		if (i < 0 && !h.dry(x, y, z) || player.position().distanceTo(this.toWorld(x, y + 0.5, z)) > REACH) {
+			return;
+		}
+		// (salvage) bailing her hold with a bucket, or soaking it up with a sponge
+		if (this.flooded() > 0 && this.pump(player)) {
+			return;
+		}
+		if (i < 0) {
 			return;
 		}
 		BlockState state = h.pieces.get(i).blockState();
+		if (state.getBlock() instanceof net.minecraft.world.level.block.BedBlock) {
+			// a berth: your spawn is kept here, wherever she sails, and at night you can sleep in it
+			Berths.use(player, this, x, y, z);
+			return;
+		}
 		if (state.getBlock() instanceof HelmBlock) {
 			if (i == h.helm && !player.isPassenger()) {
 				if (this.crew != null && this.crew.captained(this)) {
@@ -1208,9 +1380,47 @@ public final class Ship extends Entity {
 			MenuType<?>[] types = {MenuType.GENERIC_9x1, MenuType.GENERIC_9x2, MenuType.GENERIC_9x3, MenuType.GENERIC_9x4, MenuType.GENERIC_9x5, MenuType.GENERIC_9x6};
 			this.level().playSound(null, player.blockPosition(), SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5F, 1.0F);
 			player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new ChestMenu(types[rows - 1], id, inventory, held, rows), state.getBlock().getName()));
+		} else if (be != null && ShipWorks.works(be)) {
+			// a furnace or brewing stand: it works on under way, and opens from the deck
+			if (be.getLevel() == null) {
+				be.setLevel(this.level());
+			}
+			Container held = new Held(be instanceof Container c ? c : new net.minecraft.world.SimpleContainer(0), this, i);
+			this.level().playSound(null, player.blockPosition(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 0.4F, 1.0F);
+			player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ShipWorks.menu(be, id, inventory, held), state.getBlock().getName()));
 		} else if (be != null) {
 			player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.anchor_to_use"));
 		}
+	}
+
+	/**
+	 * (salvage) {@code player} bails her hold with the empty bucket in their hand (a bucket of water comes up), or soaks it up
+	 * with a dry sponge. True if they did.
+	 */
+	private boolean pump(ServerPlayer player) {
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack held = player.getItemInHand(hand);
+			int water = this.flooded();
+			if (held.is(net.minecraft.world.item.Items.BUCKET)) {
+				this.setFlooded(water - Flooding.BUCKET);
+				player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(held, player,
+					new ItemStack(net.minecraft.world.item.Items.WATER_BUCKET)));
+				this.level().playSound(null, player.blockPosition(), SoundEvents.BUCKET_FILL, SoundSource.PLAYERS, 1.0F, 1.0F);
+			} else if (held.is(net.minecraft.world.item.Items.SPONGE)) {
+				this.setFlooded(water - Flooding.SPONGE);
+				player.setItemInHand(hand, net.minecraft.world.item.ItemUtils.createFilledResult(held, player,
+					new ItemStack(net.minecraft.world.item.Items.WET_SPONGE)));
+				this.level().playSound(null, player.blockPosition(), SoundEvents.SPONGE_ABSORB, SoundSource.PLAYERS, 1.0F, 1.0F);
+			} else {
+				continue;
+			}
+			player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			int left = this.flooded();
+			player.sendOverlayMessage(left > 0 ? Component.translatable("ship.jaymoskingdoms.salvage.pumping", left)
+				: Component.translatable("ship.jaymoskingdoms.salvage.pumped"));
+			return true;
+		}
+		return false;
 	}
 
 	/** A chest of its hold, open: it closes if the ship sails off or anchors. */
@@ -1404,6 +1614,35 @@ public final class Ship extends Entity {
 		this.recoil(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
 		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this, kind);
 		return true;
+	}
+
+	/** The sea's winds tear one of her sails away (a waterspout's core). False if she has none left. */
+	boolean tearSail(ServerLevel level) {
+		Hull h = this.hull();
+		if (h == null) {
+			return false;
+		}
+		List<Integer> sails = new ArrayList<>();
+		for (int i = 0; i < h.pieces.size(); i++) {
+			if (h.pieces.get(i).blockState().getBlock() instanceof SailBlock) {
+				sails.add(i);
+			}
+		}
+		if (sails.isEmpty()) {
+			return false;
+		}
+		java.util.Set<Integer> gone = new java.util.HashSet<>();
+		gone.add(sails.get(level.getRandom().nextInt(sails.size())));
+		this.smash(level, h, gone);
+		return true;
+	}
+
+	/** The sea comes aboard: {@code water} more blocks of it in her hold (no more than her hold holds). */
+	void shipWater(int water) {
+		Hull h = this.hull();
+		if (h != null && water > 0) {
+			this.setFlooded(Math.min(h.holdSize(), this.flooded() + water));
+		}
 	}
 
 	/** (0.7.206) Pulls her (a whale on a harpoon line made fast aboard, or a whale's charge), taken up at her next move. */
@@ -1667,8 +1906,10 @@ public final class Ship extends Entity {
 		this.cargo.putAll(cargo);
 		this.cargoTags.clear();
 		this.cargoTags.putAll(tags);
+		this.refreshShown(level);
 		this.volley.clear();
 		if (left.isEmpty()) {
+			Berths.lost(level, this);
 			this.ejectPassengers();
 			this.discard();
 			return;
@@ -1740,6 +1981,7 @@ public final class Ship extends Entity {
 	/** She's laid on the bottom where she sank, block for block where there's room, her holds full of what they held. */
 	private void wreck(ServerLevel level, Hull h) {
 		this.unshine(level);
+		Berths.lost(level, this);
 		int quarter = Math.floorMod(Math.round(this.getYRot() / 90.0F), 4);
 		Rotation turn = QUARTERS[quarter];
 		BlockPos origin = BlockPos.containing(this.getX(), Math.round(this.getY()), this.getZ());
@@ -1888,11 +2130,37 @@ public final class Ship extends Entity {
 		entityData.define(SET, 0.0F);
 		entityData.define(ROWING, (byte)0);
 		entityData.define(FOUNDERING, false);
+		entityData.define(FLOODED, 0);
 	}
 
 	/** Client: how far its sails are set (0 furled to 1 full). */
 	public float sailSet() {
 		return this.entityData.get(SET);
+	}
+
+	/** How many blocks of water lie in her hold, to be pumped out ({@link Flooding}). */
+	public int flooded() {
+		return this.entityData.get(FLOODED);
+	}
+
+	void setFlooded(int water) {
+		this.entityData.set(FLOODED, Math.max(0, water));
+	}
+
+	/** How deep she sits with the water in her hold (blocks below the waterline, from her bottom). */
+	public float draft(Hull h) {
+		int water = this.flooded();
+		if (water <= 0) {
+			return h.draft;
+		}
+		float d = h.floodedDraft(water);
+		return Float.isNaN(d) ? h.maxY - h.minY + 1.0F : d;
+	}
+
+	/** Whether the dry cell (x, y, z) of her hold (her frame) lies under the water in it. */
+	public boolean wetInHold(Hull h, int x, int y, int z) {
+		int water = this.flooded();
+		return water > 0 && y + 0.5F < h.floodLine(water);
 	}
 
 	/** Whether she's going down, her hold flooded. */
@@ -1932,6 +2200,7 @@ public final class Ship extends Entity {
 		this.sail = input.getDoubleOr("Sail", 0.0);
 		this.crew = input.read("Crew", Crew.CODEC).orElse(null);
 		this.sinking = input.getIntOr("Sinking", 0);
+		this.setFlooded(input.getIntOr("Flooded", 0));
 		this.aloft = input.getDoubleOr("Aloft", Double.NaN);
 		this.lit.clear();
 		for (long key : input.read("Lit", com.mojang.serialization.Codec.LONG.listOf()).orElse(List.of())) {
@@ -1979,6 +2248,7 @@ public final class Ship extends Entity {
 			output.store("Crew", Crew.CODEC, this.crew);
 		}
 		output.putInt("Sinking", this.sinking);
+		output.putInt("Flooded", this.flooded());
 		if (this.flying()) {
 			output.putDouble("Aloft", this.aloft);
 		}

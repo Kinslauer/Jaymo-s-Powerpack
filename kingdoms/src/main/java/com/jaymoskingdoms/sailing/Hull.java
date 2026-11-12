@@ -54,6 +54,8 @@ public final class Hull {
 	public final float[] layer;
 	/** The dry cells the hull's walls close in (local, packed). */
 	public final long[] enclosed;
+	/** How many of those dry cells each layer has (from the bottom, y = 0): where water in her hold lies, lowest first. */
+	public final int[] dryLayer;
 	/**
 	 * (0.7.259) The cells of her hold the sea's water must not be drawn in, for her renderer's mask: the dry cells, and
 	 * the slabs, stairs and other part-blocks inside her walls. Those count as wall, so they weren't in {@link #enclosed},
@@ -170,6 +172,7 @@ public final class Hull {
 		// layer by layer: the walls, and the dry space they close in (what the water can't reach from outside)
 		int w = x1 - x0 + 3, d = z1 - z0 + 3, height = y1 - y0 + 1;
 		this.layer = new float[Math.max(0, height)];
+		this.dryLayer = new int[Math.max(0, height)];
 		IntArrayList inside = new IntArrayList();
 		java.util.ArrayList<Long> dry = new java.util.ArrayList<>(), inner = new java.util.ArrayList<>();
 		for (int y = y0; y <= y1; y++) {
@@ -218,6 +221,7 @@ public final class Hull {
 						// a dry cell holding a slight piece (a torch, a carpet) keeps the rest of its water out too
 						kept += piece >= 0 ? 1.0F - fill[piece] : 1.0F;
 						dry.add(BlockPos.asLong(lx, y, lz));
+						this.dryLayer[y - y0]++;
 					}
 				}
 			}
@@ -276,6 +280,50 @@ public final class Hull {
 			}
 		}
 		this.skin = inside.toIntArray();
+	}
+
+	/**
+	 * With {@code flooded} blocks of water in her hold (lying in its lowest dry cells): how deep she sits (blocks below the
+	 * waterline, from her bottom), or NaN if she can't float with it.
+	 */
+	public float floodedDraft(int flooded) {
+		if (flooded <= 0) {
+			return this.floats ? this.draft : Float.NaN;
+		}
+		float held = 0.0F, total = 0.0F, depth = Float.NaN;
+		int left = flooded;
+		for (int y = 0; y < this.layer.length; y++) {
+			int wet = Math.min(this.dryLayer[y], left);
+			left -= wet;
+			float kept = Math.max(0.0F, this.layer[y] - wet);
+			total += kept;
+			if (Float.isNaN(depth) && held + kept >= this.mass) {
+				depth = y + (kept > 0.0F ? (this.mass - held) / kept : 0.0F);
+			}
+			held += kept;
+		}
+		return !Float.isNaN(depth) && this.mass <= total * MOST_LOAD ? depth : Float.NaN;
+	}
+
+	/**
+	 * The height (in her frame) the water in her hold comes up to with {@code flooded} blocks of it: her dry cells below it
+	 * are wet ({@link #minY} if she has none in her).
+	 */
+	public float floodLine(int flooded) {
+		int left = flooded;
+		for (int y = 0; y < this.dryLayer.length; y++) {
+			int dryHere = this.dryLayer[y];
+			if (left < dryHere) {
+				return this.minY + y + (dryHere > 0 ? left / (float)dryHere : 0.0F);
+			}
+			left -= dryHere;
+		}
+		return this.minY + this.dryLayer.length;
+	}
+
+	/** How much water her hold holds when it's full. */
+	public int holdSize() {
+		return this.enclosed.length;
 	}
 
 	boolean has(int x, int y, int z) {
