@@ -45,8 +45,10 @@ public final class Scars {
 
 	public enum Kind {
 		BURNS, WEAK_LUNGS, FROSTBITE, LIGHTNING, WASTING, CRUSHED,
-		/** The eyes carved out by one of Blindness's devout ({@code BlindnessDevotion}): nothing here, the power reads it. */
-		CARVED_EYES;
+		/** The eyes carved out ({@code BlindnessDevotion}, {@code Blind}): nothing here, {@code Blind} reads it. */
+		CARVED_EYES,
+		/** One eye lost to a blow ({@code Blind#struck}): nothing here, {@code Blind} reads it. */
+		LEFT_EYE, RIGHT_EYE;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);

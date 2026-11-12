@@ -56,6 +56,10 @@ public class Unseeing extends PathfinderMob {
 	static final double HEALTH = 20.0, DAMAGE = 3.0, ZEALOT_DAMAGE = 5.0, SPEED = 0.25;
 	/** How far they hear a player, and a sneaking one (blocks). */
 	static final double HEAR = 10.0, HEAR_SNEAKING = 3.0;
+	/** A zealot's Pulse: from how near to how far it screams (blocks), what it does, how hard it throws, how often (ticks). */
+	static final double PULSE_MIN = 2.5, PULSE_RANGE = 7.0, PULSE_PUSH = 0.9;
+	static final float PULSE_DAMAGE = 4.0F;
+	static final int PULSE_EVERY = 100;
 	/** Ticks after the gouging before madness takes a gouged one (a Minecraft day or two). */
 	static final int MADNESS_MIN = 24000, MADNESS_MAX = 48000;
 	/** How many creed lines there are (lang message.jaymospowers.unseeing.creed.N). */
@@ -76,6 +80,8 @@ public class Unseeing extends PathfinderMob {
 	/** Ticks left till madness (gouged only; -1 for none). */
 	private int madness = -1;
 	private boolean elder;
+	/** The tick (of its own life) a zealot may next Pulse. */
+	private int pulseAt;
 
 	public Unseeing(EntityType<? extends Unseeing> type, Level level) {
 		super(type, level);
@@ -157,10 +163,44 @@ public class Unseeing extends PathfinderMob {
 			setLook(Look.ZEALOUS);
 			say(level, "message.jaymospowers.unseeing.madness", ChatFormatting.DARK_RED);
 		}
+		if (look() == Look.ZEALOUS) {
+			pulse(level);
+		}
 		if (look() == Look.ZEALOUS && this.tickCount % 60 == 0 && getRandom().nextFloat() < 0.3F) {
 			// the linen never dries
 			BladeBlood.drip(level, this, 0.85, false);
 		}
+	}
+
+	/**
+	 * A zealot fights by sound: with its quarry near but out of arm's reach it screams a Pulse at it, as a Resonance
+	 * holder would (hurt, thrown back, a raised shield or a meal knocked down).
+	 */
+	private void pulse(ServerLevel level) {
+		net.minecraft.world.entity.LivingEntity target = getTarget();
+		if (target == null || !target.isAlive() || this.tickCount < this.pulseAt) {
+			return;
+		}
+		double distance = distanceTo(target);
+		if (distance < PULSE_MIN || distance > PULSE_RANGE || !hasLineOfSight(target)) {
+			return;
+		}
+		this.pulseAt = this.tickCount + PULSE_EVERY;
+		net.minecraft.world.phys.Vec3 eye = getEyePosition();
+		net.minecraft.world.phys.Vec3 to = target.getBoundingBox().getCenter().subtract(eye);
+		net.minecraft.world.phys.Vec3 way = to.normalize();
+		getLookControl().setLookAt(target);
+		if (target.hurtServer(level, level.damageSources().mobAttack(this), PULSE_DAMAGE)) {
+			target.push(way.x * PULSE_PUSH, 0.3, way.z * PULSE_PUSH);
+			target.syncVelocity = true;
+			com.jaymospowers.power.resonance.ResonancePulse.interrupt(target);
+		}
+		for (double d = 1.5; d <= distance; d += 2.0) {
+			com.jaymospowers.core.fx.MagicFx.ring(level, eye.add(way.scale(d)), way, (float) (0.4 + d * 0.3),
+				com.jaymospowers.power.resonance.ResonancePower.COLOR, com.jaymospowers.core.fx.MagicFx.RING_TICKS);
+		}
+		level.playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.BELL_RESONATE, net.minecraft.sounds.SoundSource.HOSTILE, 0.9F, 1.5F);
+		level.playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.SCULK_SHRIEKER_SHRIEK, net.minecraft.sounds.SoundSource.HOSTILE, 0.5F, 1.6F);
 	}
 
 	/** A line to everyone within earshot, under this one's name. */

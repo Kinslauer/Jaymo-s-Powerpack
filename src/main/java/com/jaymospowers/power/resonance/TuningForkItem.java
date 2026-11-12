@@ -78,6 +78,9 @@ public final class TuningForkItem extends Item {
 			player.getCooldowns().addCooldown(stack, COOLDOWN);
 			if (resonance) {
 				Mastery.used(serverPlayer);
+			} else if (com.jaymospowers.power.blindness.Blind.forkAwakens(serverPlayer)) {
+				// struck in the dark by someone no power has claimed: the note answers
+				Powers.awakenAs(serverPlayer, ResonancePower.INSTANCE);
 			}
 		}
 		return InteractionResult.SUCCESS;

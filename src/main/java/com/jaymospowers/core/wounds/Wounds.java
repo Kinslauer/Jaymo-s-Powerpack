@@ -716,6 +716,10 @@ public final class Wounds {
 		}
 		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
 		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
+		// a heavy blow to a bare head may take an eye
+		if (!blocked && landed == BodyPart.HEAD && victim instanceof ServerPlayer struck && victim.isAlive()) {
+			com.jaymospowers.power.blindness.Blind.struck(struck, source, loss);
+		}
 		// (0.14.4) a blade, a shot or claws that cut deep enough opens a bleeding cut
 		if (!blocked && victim.isAlive()) {
 			Bleeding.onHit(victim, plan, source, landed, was, points);

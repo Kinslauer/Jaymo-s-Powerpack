@@ -60,6 +60,9 @@ public final class BlindnessService {
 	/** The service's clock (ticks): a chant line every CHANT ticks, the cut, the binding, the end, and when the frozen members walk off. */
 	static final int CHANT = 120, CHANTS = 3, CUT_AT = CHANT * (CHANTS + 1), BIND_AT = CUT_AT + 80, END_AT = BIND_AT + 100;
 	/** Tags on the service's people (the follower also gets {@link #FOLLOWER_TAG}). */
+	/** The eldest's hush over a service: how far it reaches (blocks), how often its ring shows (ticks), its colour. */
+	static final double HUSH_RADIUS = 10.0;
+	static final int HUSH_SHOW_EVERY = 60, HUSH_COLOR = 0x8C8C9A;
 	static final String TAG = "jaymospowers_unseeing_service", FOLLOWER_TAG = "jaymospowers_unseeing_follower";
 
 	private static final List<Service> SERVICES = new ArrayList<>();
@@ -92,6 +95,7 @@ public final class BlindnessService {
 	}
 
 	static void init() {
+		com.jaymospowers.core.Powers.addSilencer(BlindnessService::hushed);
 		ServerTickEvents.END_SERVER_TICK.register(BlindnessService::tick);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (!starting && entity instanceof Unseeing villager && villager.entityTags().contains(TAG)
@@ -199,6 +203,17 @@ public final class BlindnessService {
 	}
 
 	/** One tick of a service; false when it's over (finished, or broken up). */
+	/** Whether {@code player} stands on a service's hushed ground: the eldest keeps it silent, and no power answers there. */
+	public static boolean hushed(ServerPlayer player) {
+		for (Service service : SERVICES) {
+			if (service.level == player.level() && service.elder().isAlive()
+				&& player.distanceToSqr(Vec3.atCenterOf(service.centre)) <= HUSH_RADIUS * HUSH_RADIUS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static boolean step(Service service) {
 		if (!service.follower.isAlive() || service.members.stream().anyMatch(m -> !m.isAlive())) {
 			if (service.age < CUT_AT && service.follower.isAlive()) {
@@ -207,6 +222,10 @@ public final class BlindnessService {
 			return false;
 		}
 		int age = service.age++;
+		if (age % HUSH_SHOW_EVERY == 0) {
+			// the hush, shown: a grey ring running out over the ground to its edge
+			com.jaymospowers.core.fx.MagicFx.ring(service.level, Vec3.atBottomCenterOf(service.centre).add(0.0, 0.1, 0.0), (float) HUSH_RADIUS, HUSH_COLOR);
+		}
 		ServerLevel level = service.level;
 		Unseeing elder = service.elder();
 		if (age > 0 && age % CHANT == 0 && age / CHANT <= CHANTS) {

@@ -9,16 +9,31 @@ Sound and the Deep Dark's sculk (new in 0.8.28). Forms: **Resonance**, **Choir**
 |---|---|---|---|
 | (passive) | Weak Echolocation | A faint ring round the crosshair; every creature within 12 blocks beats on it in its direction (double thump). Always on. | starter |
 | V | Echolocation | Every creature within 32 blocks is outlined through walls for 4 s, **on your screen only**. Everyone nearby sees a ripple of sculk pops and hears a faint chime and tendril clicks. 8 s cooldown. | 1st |
-| R | Pulse | A 35° cone, 8 blocks (12 with all 4 unlocked): 5 damage (through armour on `#jaymospowers:resonance_sensitive`, i.e. Wardens), knockback 1.5, stops a raised shield / meal / drink (a player can't raise it again for 1 s), shatters glass panes in the cone. Needs line of sight. 4 s cooldown. | 2nd |
+| R | Pulse | Whatever it hits stays outlined for you through walls for 5 s. A 35° cone, 8 blocks (12 with all 4 unlocked): 5 damage (through armour on `#jaymospowers:resonance_sensitive`, i.e. Wardens), knockback 1.5, stops a raised shield / meal / drink (a player can't raise it again for 1 s), shatters glass panes in the cone. Needs line of sight. 4 s cooldown. | 2nd |
 | Z | Throw Voice | Tap: a sound at the block you look at (32 blocks). Players hear it from there; it's a vibration there (sculk and Wardens turn to it, not to you); creatures within 16 blocks with no target walk to it for 6 s. Hold Z and scroll: footstep / groan / door / your voice. 3 s cooldown. | with the 2nd |
 | G (hold) | Shatter | Hum at what you look at (12 blocks) for up to 2 s. Blocks: glass (anything with glass sound) and ice at once; others take 20 ticks per 1.5 hardness (stone 1 s, so nothing harder than 3.0 in one hum; tuned low, up to 6.0). Never: hardness ≥ 50 (obsidian), unbreakable, block entities, fluids. Harder than iron ore (3.0): no drops. Creatures: every worn armour piece loses 10% of its max durability per 0.5 s; 2 damage when the hum ends. 10 s cooldown, only if the hum did something. | 3rd |
 | X (hold + scroll) | Tune | Pitch -2..+2. Low: Pulse knockback +33%/step, Shatter on blocks 25% faster/step. High: Pulse damage +25%/step (+50% at +2), armour strips 2 ticks sooner/step. A quick tap of X: back to 0. | with the 3rd |
-| B | Hush | A dome (6 blocks, **5 s**) where you stand. Inside: clients mute every sound in it and everything a listener inside would hear (music and UI excepted); no vibrations (sensors, shriekers, Wardens); other players' power keys do nothing (cooldowns keep ticking). Your own powers work; the Web symbiote's own actions aren't key presses, so it's untouched. 40 s cooldown. | 4th |
+| B | Hush (tap) / Quiet (hold) | **Hold B 0.4 s or more: Quiet.** While held (up to 20 s) you are silent: no steps, landings or hurt sounds, no vibrations, so sculk, Wardens, the Unseeing and the blind don't hear you; no dome is cast. **Tap:** a dome (6 blocks, **5 s**) where you stand, cast as the key comes up. Inside: clients mute every sound in it and everything a listener inside would hear (music and UI excepted); no vibrations (sensors, shriekers, Wardens); other players' power keys do nothing (cooldowns keep ticking). Your own powers work; the Web symbiote's own actions aren't key presses, so it's untouched. 40 s cooldown. | 4th |
 | C | Sonic Boom (Choir) | 1 s charge (Warden's charge sound), then the Warden's beam: 20 blocks, through walls, armour and shields, 14 damage, launches (2.5 along, 0.6+ up). `SONIC_BOOM` particles every block. 30 s cooldown. | ascended |
-| C | Shriek (Shrieker) | Darkness 8 s on every creature within 16 blocks, you hear their heartbeats (ring + outline) for 8 s, Wardens in range get anger 150. 60 s cooldown. Silent Choir: C is Sonic Boom, sneak + C is Shriek. | corrupted |
+| sneak + V | Sky Sight (Choir, in the dark) | Only with both eyes gone or a blindfold on: your view rises 16 blocks over you and looks down, and the living show through the dark out to 32 blocks. Again to come down. | ascended |
+| C | Shriek (Shrieker) | A blackout (the Blindness effect, 5 s) on every creature within 8 blocks, who hear a ring of sound from you. Darkness 8 s on every creature within 16 blocks, you hear their heartbeats (ring + outline) for 8 s, Wardens in range get anger 150. 60 s cooldown. Silent Choir: C is Sonic Boom, sneak + C is Shriek. | corrupted |
 
 Passives: **Footstep sense** (sneaking: your steps, landings, swims make no vibrations; Shrieker loses it).
 **Heavy hearing** (a hit from a creature outside your 60° view or behind a wall flashes red on the ring in its direction).
+
+## In the dark (2026-11-12)
+
+Andy: "blindness should stay as is, just no longer considered a power ... resonance gains the new abilities ... and you
+can awaken resonance while blind with the fork." Blindness is a condition now (`docs/blindness.md`).
+- **Awakening by the fork**: a survival player with no power who is blind (both eyes gone), or kept the blindfold's
+  5 minute vigil and still wears it, awakens to Resonance the moment they strike a Tuning Fork.
+- **Hearing the living**: a Resonance holder who can't see (blind or blindfolded) gets a thinner dark, and living things
+  within 16 blocks burn through it (pale gold, hostile ones dull red), on their screen only. A blindfold on a holder is
+  this dark, not the Blindness effect.
+- **Sky Sight** (sneak + V, ascended, in the dark) and **Quiet** (hold B): the table above.
+- Whoever held the old Blindness power holds Resonance when they next join, with their mastery and fate as they were.
+- **Looks**: Pulse stands rings of sound across its cone, Echolocation and Shriek run a ring over the ground, Sonic
+  Boom has a beam down its line, all `MagicFx` in Resonance's violet.
 
 ## Items
 
@@ -48,7 +63,7 @@ All `static final` at the top of: `ResonancePower` (cooldowns, tune range, heart
 - `power/resonance/`: `ResonancePower` (Power, keys, cooldown state), `ResonanceState` (synced HUD state, owner only),
   `ResonanceNet` (Sense/Heard to the client, Cycle/Tune to the server), `ResonancePulse`, `ResonanceShatter`,
   `ResonanceEcho` (V, ripples, Heavy hearing), `ResonanceHush` (domes, `DOME` attachment synced to all, vibrations),
-  `ResonanceVoice`, `ResonanceBoom` (C), `ResonanceFate`, `ResonanceDamage` (damage types, protection rule),
+  `ResonanceVoice`, `ResonanceBoom` (C), `ResonanceQuiet` (hold B), `ResonanceSight` (Sky Sight, `ACTIVE` attachment), `ResonanceFate`, `ResonanceDamage` (damage types, protection rule),
   `TuningForkItem`, `ResonanceDebugCommand`.
 - `power/resonance/mixin/`: `ResonanceShriekerMixin` (`SculkShriekerBlockEntity.shriek` / `trySummonWarden`),
   `ResonanceGameEventMixin` (`ServerLevel.gameEvent`).

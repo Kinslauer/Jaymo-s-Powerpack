@@ -42,6 +42,11 @@ final class ResonanceBoom {
 	static final int SHRIEK_ANGER = 150;
 
 	/** Game time each charging player's boom goes off. */
+	/** The beam of sound drawn down a Sonic Boom's line (blocks thick, ticks), and Shriek's blackout close by (blocks, ticks). */
+	static final float BEAM_FX_RADIUS = 0.45F;
+	static final int BEAM_FX_TICKS = 12, BLACKOUT_TICKS = 100;
+	static final double BLACKOUT_RADIUS = 8.0;
+
 	private static final Map<UUID, Long> CHARGING = new HashMap<>();
 
 	private ResonanceBoom() {
@@ -85,6 +90,8 @@ final class ResonanceBoom {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = eye.add(look.scale(RANGE));
+		// the note itself: a beam of sound down the line, under the Warden's ring of rings
+		com.jaymospowers.core.fx.MagicFx.beam(level, eye.add(look), end, BEAM_FX_RADIUS, ResonancePower.COLOR, BEAM_FX_TICKS);
 		// the Warden's ring of rings, every block of the way
 		for (int i = 1; i <= (int)RANGE; i++) {
 			Vec3 at = eye.add(look.scale(i));
@@ -117,6 +124,14 @@ final class ResonanceBoom {
 		List<LivingEntity> heard = ResonanceEcho.around(player, SHRIEK_RADIUS);
 		for (LivingEntity living : heard) {
 			living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, SHRIEK_TICKS, 0, false, false, true), player);
+			// close by it is a blackout: they can't see at all, and find their way by the sound of you
+			if (living.distanceToSqr(player) <= BLACKOUT_RADIUS * BLACKOUT_RADIUS) {
+				living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLACKOUT_TICKS, 0, false, false, true), player);
+				if (living instanceof ServerPlayer blinded) {
+					com.jaymospowers.power.blindness.BlindnessEcholocation.ring(blinded, player.position(), 1.0F,
+						com.jaymospowers.power.blindness.BlindnessEcholocation.PULSE);
+				}
+			}
 			if (living instanceof Warden warden) {
 				warden.increaseAngerAt(player, SHRIEK_ANGER, true);
 			}
@@ -128,6 +143,7 @@ final class ResonanceBoom {
 		for (int i = 0; i < 10; i++) {
 			level.sendParticles(new ShriekParticleOption(i * 5), player.getX(), player.getEyeY() + 0.2, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		}
+		com.jaymospowers.core.fx.MagicFx.ring(level, player.position().add(0.0, 0.1, 0.0), (float)SHRIEK_RADIUS, ResonancePower.COLOR);
 		level.gameEvent(GameEvent.SHRIEK, player.position(), GameEvent.Context.of(player));
 		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.ORBIT, SHRIEK_FILM_TICKS, SHRIEK_RADIUS);
 		return true;
