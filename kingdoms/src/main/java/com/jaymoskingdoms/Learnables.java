@@ -58,7 +58,7 @@ public final class Learnables {
 		spell(Perk.WARRIOR_LAST_STAND, "rogues:last_stand");
 		for (Perk perk : List.of(Perk.MARKED_QUARRY, Perk.TANGLE_CORD, Perk.CAST_OFF_CLOAK, Perk.SHEATH_DRAW, Perk.CRESCENT_SWEEP,
 			Perk.RAIN_OF_CUTS, Perk.GROUND_STOMP, Perk.FALLING_FIST, Perk.RENDING_CLAW, Perk.FERAL_POUNCE, Perk.SPEAR_LUNGE,
-			Perk.COUCHED_LANCE, Perk.PINNING_THROW)) {
+			Perk.COUCHED_LANCE, Perk.PINNING_THROW, Perk.DISARM_RUSH, Perk.DRY_REMARK)) {
 			FORMS.put(perk, perk.key());
 			BY_FORM.put(perk.key(), perk);
 		}

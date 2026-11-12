@@ -1,0 +1,27 @@
+{
+  "school": "spell_power:physical_melee",
+  "range": 0.0,
+  "tier": 1,
+  "group": "weapon_forms",
+  "type": "ACTIVE",
+  "active": {
+    "cast": {
+      "duration": 0.0
+    }
+  },
+  "target": {
+    "type": "NONE"
+  },
+  "deliver": {
+    "type": "CUSTOM",
+    "custom": {
+      "handler": "jaymoskingdoms:weapon_form"
+    }
+  },
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown": {
+      "duration": 5.0
+    }
+  }
+}
