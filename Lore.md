@@ -934,6 +934,14 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   hands, "we were always hungry"; "other hands, once. White ones. He said: Stay. We stayed."; and "when he went, what
   was left of him went out into the world, fine as dust. Some of it found you." It never names him.
 
+  (new) **Its temper** (big suit picks, 2026-11-12). The black symbiote kept what the anti gave up: its hunger and
+  its temper. Blows given and taken heat it until a roar lets the heat out, and a host who keeps the big suit shut away
+  finds it angrier when it is finally let up. It remembers who hurt its host and wants them paid back, it answers when
+  its host speaks to it, and the first time the two are wholly bonded the host sees it face to face, standing where
+  they stand with the world gone dark around them. That meeting is not a place; nothing is travelled to. With its
+  tendrils drawn in the big suit does not run and cannot be shoved. It melts flat, spits and walls with its own body,
+  and the black strain smells blood. It still never feeds on the living.
+
   **A symbiote wears what its host wears** (Andy, 2026-11-11: "any symbiote user with a costume has the symbiote
   take that shape for its suit instead ... That is what quiet's cape really is"). A symbiote has no shape of its own
   beyond the plain suit. Give its host a costume and it takes the costume's cut and colours instead, calling it over
