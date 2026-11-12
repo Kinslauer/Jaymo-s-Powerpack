@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:head_boomerang",
+    "count": 2
+  }
+}

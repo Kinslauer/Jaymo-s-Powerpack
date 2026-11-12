@@ -2,6 +2,9 @@
 	"replace": false,
 	"values": [
 		"jaymospowers:brawlers_belt",
+		"jaymospowers:leather_thrower_belt",
+		"jaymospowers:iron_thrower_belt",
+		"jaymospowers:steel_thrower_belt",
 		"#minecraft:lanterns",
 		"jaymospowers:bottled_fairy",
 		"jaymospowers:cloud_in_a_bottle",

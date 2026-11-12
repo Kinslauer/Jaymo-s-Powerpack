@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:flint"
+  ],
+  "result": {
+    "id": "jaymospowers:head_bola",
+    "count": 2
+  }
+}

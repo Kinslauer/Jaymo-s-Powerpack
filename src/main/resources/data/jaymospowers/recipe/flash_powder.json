@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glowstone_dust",
+    "minecraft:bone_meal",
+    "minecraft:blaze_powder"
+  ],
+  "result": {
+    "id": "jaymospowers:flash_powder",
+    "count": 4
+  }
+}

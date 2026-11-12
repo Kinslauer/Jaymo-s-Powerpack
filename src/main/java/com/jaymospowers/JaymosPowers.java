@@ -165,6 +165,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.backpack.Backpack.init();
 		// (0.17.184) Baubles-style accessory slots (amulet, two rings, belt, head, body, charm) and seven baubles to wear
 		com.jaymospowers.baubles.Baubles.init();
+		// arrowheads and fitted arrows, the belt of throwables, shield moves
+		com.jaymospowers.gear.GearPicks.init();
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
