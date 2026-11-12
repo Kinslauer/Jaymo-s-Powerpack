@@ -59,6 +59,10 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
+			if (WebBrutePose.onAttack(player, clicks)) {
+				// a chunk or tree held overhead: the click throws it
+				return true;
+			}
 			if (com.jaymospowers.power.web.WebHeldGrab.holding(player)) {
 				// (0.16.7) something held up in the left hand: the click mauls it (one of six attacks), and nothing else
 				if (clicks > 0) {
@@ -286,6 +290,10 @@ public final class WebPowerClient implements PowerClient {
 		} else {
 			return;
 		}
+		// the big suit's rip and throw: G drops what is held, and its release is not a swing's
+		if (hand == WebNet.OFF && WebBrutePose.earlyKey(player, down)) {
+			return;
+		}
 		// (0.16.7) G with the tendrils out: the left hand takes something living close by, no bigger than a cow, or lets go
 		// of what it holds (WebHeldGrab); bigger or further things fall through to the tendril's far grab below
 		if (hand == WebNet.OFF && tendrils) {
@@ -313,6 +321,10 @@ public final class WebPowerClient implements PowerClient {
 			if (target != null) {
 				grabbing[hand] = true;
 				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, target.getId()));
+				return;
+			}
+			if (hand == WebNet.OFF && WebBrutePose.startKey(player)) {
+				// the big suit's rip and throw, ground tear or tree lift
 				return;
 			}
 			if (player.isShiftKeyDown() && aimedBlock(player)) {

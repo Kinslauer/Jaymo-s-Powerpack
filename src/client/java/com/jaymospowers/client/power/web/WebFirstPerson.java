@@ -33,6 +33,7 @@ public final class WebFirstPerson {
 			|| state.getData(WebExecutionPose.KEY) != null
 			|| state.getData(WebMorphLayer.KEY) != null
 			|| state.getData(WebMorphLayer.GATHER) != null
+			|| state.getData(WebBrutePose.KEY) != null
 			|| state.getData(WebSymbioteClient.SLAM) != null
 			|| state.getData(WebSymbioteClient.EATING) != null
 			|| state.getData(WebSymbioteClient.ROAR) != null
