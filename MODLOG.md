@@ -3271,3 +3271,12 @@ Nothing here has been played in a client yet; expect tuning.
 - While you're lying against a rise you could go up, right click is the haul's (no item used or block worked), unless the crosshair is on a mob or something a click is for (a door, a chest...). Downed players can haul too.
 - Code: `core/ProneHaul` (rules, path, server), `client/ProneHaulClient` (input and movement), `client/ProneHaulPose` (drawn over `CrawlPose`), `ProneHaulUseMixin`; the old automatic haul step in `Crawl` is gone. `Breaks.workingArms` added.
 - Built; not played.
+
+## 0.22.67 (2026-11-12): Daggers harvest alike; no free knives or arrows from RPG Series skills
+
+- **Rogues & Warriors' daggers** (Flint Dagger and the rest) now cut what the Tool Station dagger cuts: everything a hoe mines (hay, moss, sponge, sculk, wart blocks...) at their material's speed, plus a sword's cuts. Before they only had the sword's (armory/DaggerHarvest).
+- **Fan of Knives** no longer makes up its blades. It throws up to three of your own knives: the one in your hand first, then the same kind from your pack, then any other knife or dagger (never Sora's Dagger or Ashfang). It never throws more than you carry; with only the held one, one knife flies. Each knife shows as itself and lands to be picked up, like Impale's spear (compat/SpellThrows).
+- **Shattering Throw** (Warrior) throws the weapon itself, which leaves your hand and lands to be picked up, as Impale does.
+- **Rain of Arrows** (Archers) spends one of your arrows (pack or worn quiver) for each arrow that falls, as many as you carry up to its usual count, and won't cast with none. **Barrage** won't cast unless you carry its three arrows (Spell Engine made up any it ran short of).
+- **Throw Net** (Rogue) throws one of your new **Throwing Nets** (5 string, crafted in an X) and won't cast without one. Andy: "make a net item crafted from string".
+- Creative casts take nothing, as before. Built; not played.
