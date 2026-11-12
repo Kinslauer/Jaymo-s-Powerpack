@@ -124,7 +124,7 @@ public final class Followers {
 
 	/** Whether {@code v} takes orders from {@code player} at all (MCA's ties, or enough hearts). */
 	public static boolean takesOrders(Entity v, ServerPlayer player) {
-		return McaCompat.LOADED && v instanceof Villager villager && villager.isAlive() && McaBridge.involved(villager, player);
+		return McaCompat.LOADED && v instanceof Villager villager && villager.isAlive() && (McaBridge.involved(villager, player) || Loans.borrowedBy(villager, player) || RivalParties.hiredBy(villager, player));
 	}
 
 	private static void give(ServerPlayer player, int target, int kind) {
@@ -153,6 +153,10 @@ public final class Followers {
 				Languages.shrug(player, v);
 				continue;
 			}
+			// turned on you, or far gone with the Murmur (docs/Pawn-Plan.md H1, H2)
+			if (Possession.held(v) || Murmur.ignores(v, player)) {
+				continue;
+			}
 			take(v, player, kind);
 			taken++;
 		}
@@ -166,7 +170,7 @@ public final class Followers {
 	}
 
 	/** {@code v} takes the order, at the spot they stand on. */
-	private static void take(Villager v, ServerPlayer player, int kind) {
+	static void take(Villager v, ServerPlayer player, int kind) {
 		Attention.heed(v);
 		PROGRESS.remove(v.getUUID());
 		if (kind == FOLLOW || kind == FREE) {

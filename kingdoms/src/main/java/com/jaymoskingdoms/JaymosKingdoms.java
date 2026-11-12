@@ -581,6 +581,39 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
+		Comrades.register();
+		Callouts.register();
+		FieldMedics.register();
+		BandLeaders.register();
+		QuickOrders.register();
+		// (pawn picks patch 2) holding a foe or pinning you, a leg up, readying and ambushes, grabbing loot mid-fight
+		Grapples.register();
+		LegUps.register();
+		Ambushes.register();
+		Scavengers.register();
+		// (pawn picks patch 3) foe knowledge both ways, leanings that drift
+		FoeLore.register();
+		LeaningDrift.register();
+		CatchingUp.register();
+		Bonds.register();
+		Specialties.register();
+		Powderheads.register();
+		Remarks.register();
+		TableTalk.register();
+		CampSuppers.register();
+		Gestures.register();
+		GroundSeats.register();
+		Loans.register();
+		Veterans.register();
+		BandTallies.register();
+		Wayfinding.register();
+		RivalParties.register();
+		PackUse.register();
+		Parleys.register();
+		Possession.register();
+		Murmur.register();
+		Masterless.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)

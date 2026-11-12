@@ -282,6 +282,11 @@ public class Imp extends Monster implements GeoEntity {
 		if (charge < 0) {
 			return false;
 		}
+		// one of its own (not another imp: its fireball spares them) by the target: it holds its fire a moment
+		if (com.jaymoskingdoms.Dynamite.friendNear(level, this, target, target.position(), ImpFireball.RADIUS + 0.5, e -> e instanceof Imp)) {
+			this.entityData.set(CHARGING, 0);
+			return false;
+		}
 		Vec3 from = this.ballPosition();
 		Vec3 aim = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0).subtract(from).normalize();
 		ImpFireball ball = new ImpFireball(level, this, aim);

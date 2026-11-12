@@ -114,7 +114,7 @@ public final class Tomes {
 		Map.entry("warding", 2), Map.entry("draining", 2), Map.entry("mending", 2),
 		Map.entry("tide_pearl", 2), Map.entry("harrying_gale", 3), Map.entry("bulwark", 3),
 		Map.entry("raising", 3), Map.entry("sanctuary", 3), Map.entry("blight", 3), Map.entry("hemorrhage", 3),
-		Map.entry("frenzy", 4),
+		Map.entry("frenzy", 4), Map.entry("dominion", 4),
 		Map.entry("restoration", 5), Map.entry("deaths_door", 5));
 	/** The wait after a spell (ticks) and its mana, by tier (index 0 is tier 1). Blood's spells are paid in blood instead ({@link Hemomancy#cost}). */
 	static final int[] COOLDOWN = {20 * 4, 20 * 12, 20 * 30, 20 * 50, 20 * 75};
@@ -124,7 +124,7 @@ public final class Tomes {
 		Map.entry("bulwark", "earth"), Map.entry("tide_pearl", "water"), Map.entry("harrying_gale", "air"),
 		Map.entry("fire", "fire"), Map.entry("arcane", "lightning"), Map.entry("warding", "earth"),
 		Map.entry("draining", "death"), Map.entry("raising", "death"), Map.entry("blight", "death"), Map.entry("whispers", "death"),
-		Map.entry("deaths_door", "death"), Map.entry("mending", "restoration"), Map.entry("sanctuary", "restoration"),
+		Map.entry("deaths_door", "death"), Map.entry("dominion", "death"), Map.entry("mending", "restoration"), Map.entry("sanctuary", "restoration"),
 		Map.entry("restoration", "restoration"), Map.entry("hemorrhage", "blood"), Map.entry("blood_grip", "blood"), Map.entry("frenzy", "blood"));
 
 	// ---- tuning: the bolt ----

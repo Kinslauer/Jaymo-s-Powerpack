@@ -984,6 +984,47 @@ public final class PowersCompat {
 	}
 
 	/**
+	 * One loose with the Murmur finishes the townsfolk it puts down ({@link Murmur#finishes}; Andy: they can die), through
+	 * Powers' executions of downed mobs. Without Powers a downed body isn't finished by mobs at all, so nothing changes.
+	 */
+	@SuppressWarnings("unchecked")
+	static void murmurFinishes() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> executions = Class.forName("com.jaymospowers.core.wounds.MobExecutions");
+			Object list = executions.getField("FINISHES").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Murmur::finishes);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions of downed mobs (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle isCarried;
+	private static boolean lookedForCarried;
+
+	/** Powers' {@code Carry.isCarried}: {@code e} is being carried or dragged by someone. False without Powers. */
+	public static boolean carried(net.minecraft.world.entity.Entity e) {
+		if (!lookedForCarried) {
+			lookedForCarried = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					isCarried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"), "isCarried",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError ex) {
+					isCarried = null;
+				}
+			}
+		}
+		try {
+			return isCarried != null && (boolean) isCarried.invoke(e);
+		} catch (Throwable ex) {
+			return false;
+		}
+	}
+
+	/**
 	 * (0.7.623, Rivals patch 8) Powers' shields ({@code combat/Shields}): a Yank or a stun knocks an armoured ogre's shield
 	 * off ({@link com.jaymoskingdoms.monsters.Ogre#tearShield}), and its raised shield counts as one (for Powers' vault, which
 	 * an ogre's size refuses anyway). Nothing without that Powers.
@@ -3503,5 +3544,86 @@ public final class PowersCompat {
 			// only a sound
 		}
 		return false;
+	}
+
+	/** Powers' {@code Carry.npcDrag(Mob, LivingEntity)}, {@code Carry.npcLetGo(Mob)} and {@code Carry.npcDragging(Mob)}. */
+	private static java.lang.invoke.@Nullable MethodHandle npcDrag, npcLetGo, npcDragging, npcLift;
+	private static boolean lookedForDrag;
+
+	private static void lookForDrag() {
+		if (lookedForDrag) {
+			return;
+		}
+		lookedForDrag = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+			npcDrag = lookup.findStatic(carry, "npcDrag", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+			npcLetGo = lookup.findStatic(carry, "npcLetGo", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class));
+			npcDragging = lookup.findStatic(carry, "npcDragging", java.lang.invoke.MethodType.methodType(net.minecraft.world.entity.Entity.class,
+				net.minecraft.world.entity.Mob.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mob drag (older Powers?)", e);
+			npcDrag = npcLetGo = npcDragging = null;
+		}
+		try {
+			npcLift = lookup.findStatic(Class.forName("com.jaymospowers.core.Carry"), "npcLift", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// (an older Powers: they drag instead)
+			npcLift = null;
+		}
+	}
+
+	/**
+	 * {@code carrier} heaves {@code body} (someone downed, no bigger than a person) over its shoulder and carries it, drawn as
+	 * Powers' own shoulder carry; {@link #npcLetGo} sets them down. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcLift(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcLift != null && (boolean) npcLift.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * {@code carrier} takes {@code body} (someone downed) by the shoulder and drags it behind as it walks, drawn as Powers'
+	 * own drag. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcDrag(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcDrag != null && (boolean) npcDrag.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** {@code carrier} lets go of whoever it drags, where they lie. */
+	public static void npcLetGo(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			if (npcLetGo != null) {
+				npcLetGo.invoke(carrier);
+			}
+		} catch (Throwable ignored) {
+			// nothing was held
+		}
+	}
+
+	/** Whom {@code carrier} is dragging, or null. */
+	public static net.minecraft.world.entity.@Nullable Entity npcDragging(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			return npcDragging == null ? null : (net.minecraft.world.entity.Entity) npcDragging.invoke(carrier);
+		} catch (Throwable e) {
+			return null;
+		}
 	}
 }

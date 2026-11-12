@@ -34,8 +34,15 @@ import net.minecraft.world.entity.monster.Enemy;
  * are kept per villager in {@link #WINS}. A step up gets one short line and a few green sparks. Without MCA none of this loads.
  */
 public final class Learners {
-	/** Wins to a step, and the most steps. */
+	/** Wins to a step, and the steps learned at that pace. */
 	static final int WINS_PER_STEP = 2, MAX_STEPS = 10;
+	/**
+	 * (Pawn picks row B4) Past {@link #MAX_STEPS} they keep learning, slower: a step every {@code LATE_WINS_PER_STEP} wins, to
+	 * {@code LATE_MAX_STEPS} in all. One who has fallen behind the best of their fellows (the same player's hired
+	 * companions within {@code CATCH_UP_NEAR} blocks) counts every win {@code CATCH_UP} times until level with them.
+	 */
+	static final int LATE_WINS_PER_STEP = 6, LATE_MAX_STEPS = 16, CATCH_UP = 2;
+	static final double CATCH_UP_NEAR = 32.0;
 	/** What each step adds: health points and attack damage. */
 	static final double HEALTH_PER_STEP = 2.0, DAMAGE_PER_STEP = 0.5;
 	/** A fight is over (and survived) after this long (ticks) with no hostile having hurt them. */
@@ -81,7 +88,11 @@ public final class Learners {
 
 	/** Steps {@code wins} come to. */
 	static int steps(int wins) {
-		return Math.min(MAX_STEPS, wins / WINS_PER_STEP);
+		int early = MAX_STEPS * WINS_PER_STEP;
+		if (wins < early) {
+			return wins / WINS_PER_STEP;
+		}
+		return Math.min(LATE_MAX_STEPS, MAX_STEPS + (wins - early) / LATE_WINS_PER_STEP);
 	}
 
 	/** The steps {@code v} has learned. */
@@ -125,10 +136,10 @@ public final class Learners {
 	/** One more fight won by {@code v}; a step up if it comes to one. */
 	static void win(VillagerEntityMCA v) {
 		int before = steps(v.getAttachedOrElse(WINS, 0));
-		int wins = v.getAttachedOrElse(WINS, 0) + 1;
-		if (before >= MAX_STEPS) {
+		if (before >= LATE_MAX_STEPS) {
 			return;
 		}
+		int wins = v.getAttachedOrElse(WINS, 0) + (behind(v, before) ? CATCH_UP : 1);
 		v.setAttached(WINS, wins);
 		if (steps(wins) > before) {
 			apply(v);
@@ -138,6 +149,21 @@ public final class Learners {
 					Speech.WHITE, SPEECH_RANGE);
 			}
 		}
+	}
+
+	/** {@code v} has fewer steps than the best of the same player's hired companions near it. */
+	private static boolean behind(VillagerEntityMCA v, int steps) {
+		String side = Comrades.side(v);
+		if (!side.startsWith("p:")) {
+			return false;
+		}
+		for (VillagerEntityMCA mate : v.level().getEntitiesOfClass(VillagerEntityMCA.class, v.getBoundingBox().inflate(CATCH_UP_NEAR),
+			m -> m != v && m.isAlive() && hired(m) && Comrades.side(m).equals(side))) {
+			if (stepsOf(mate) > steps) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** {@code v}'s modifiers for the steps they've learned (kept after they're un-hired). */
