@@ -20,6 +20,7 @@ jobs:
         with:
           fetch-depth: 0
       - run: python3 tools/pr_checks.py origin/${{ github.base_ref }}
+      - run: python3 tools/check_data_refs.py
 
   build:
     name: Build ${{ matrix.mod }}
