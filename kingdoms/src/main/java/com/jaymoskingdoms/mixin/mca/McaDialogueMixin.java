@@ -354,6 +354,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.equestrian.HorseRevival.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) a horse raised from its mane lock
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.equestrian.HorseRevival.open(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.TalkErrands.ANSWER.equals(answer)) {
 			// (Andy, 2026-11-12) festivals, war parties, plots and couriers, on a talk screen
 			villager.getInteractions().stopInteracting();

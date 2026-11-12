@@ -177,6 +177,7 @@ public final class Equestrian {
 	// ---- setup -----------------------------------------------------------------------------------------------------
 
 	public static void register() {
+		HorseRevival.register();
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("war_elephant"));
 		WAR_ELEPHANT = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.of(WarElephant::new, MobCategory.CREATURE)
 			.sized(1.5F, 2.45F)
@@ -664,7 +665,8 @@ public final class Equestrian {
 
 	// ---- death -------------------------------------------------------------------------------------------------------
 
-	/** A tamed horse that dies leaves a lock of its mane: there's no coming back (until a necromancer, one day). */
+	/** A tamed horse that dies leaves a lock of its mane: a necromancer, or one a wizard taught, can raise it from that
+	 * ({@link HorseRevival}). */
 	private static void died(LivingEntity entity, DamageSource source) {
 		if (!(entity instanceof AbstractHorse horse) || !covered(horse) || !horse.isTamed() || !(horse.level() instanceof ServerLevel level)) {
 			return;

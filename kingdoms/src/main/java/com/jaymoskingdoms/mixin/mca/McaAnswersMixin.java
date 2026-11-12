@@ -98,6 +98,10 @@ abstract class McaAnswersMixin {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseRevival.canAsk(player, villager)) {
+			// (Andy, 2026-11-12) a wizard or a necromancer, while you hold a mane lock
+			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseRevival.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.TalkErrands.canAsk(villager)) {
 			// (Andy, 2026-11-12) town business only with a realm's or a village's folk
 			cir.getReturnValue().remove(com.jaymoskingdoms.TalkErrands.ANSWER);
