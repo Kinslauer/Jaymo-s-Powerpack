@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-b8b4vz
 with: Claude (cloud thread)
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 Compiled clean; not played.
+- 2026-11-12 04:29 PR #1345 is merged into master; moved to Agents/Done.
