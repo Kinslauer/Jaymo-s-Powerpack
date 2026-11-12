@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: quill
 from: coordinator (for the "Find parts left out of PRs" thread, 2026-11-12)
 asked: 2026-11-12
-claimed_by: 
+claimed_by: hermes-writer
 pr: 1377
 writer: hermes-writer
 text_pass: none
