@@ -813,12 +813,20 @@ public final class ZFighterPower implements Power {
 			if (key == PowerKey.ABILITY_3 && down && ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
 				cooldown(player, ZFighterState.WAVE, ZFighterLineage.APE_BEAM_COOLDOWN);
 			}
+			// G: the earth-splitter, B: the ring-breaker (ApeEarthwork)
+			if (down && (key == PowerKey.ABILITY_2 || key == PowerKey.ABILITY_4)) {
+				ApeEarthwork.stomp(player, live, key == PowerKey.ABILITY_2);
+			}
 			sync(player, live, maxKi(player));
 			return;
 		}
 		// (0.18.48) a Divine-born's sneak+G (Flying Sword) and sneak+B (Eight-Sign Circle)
 		if (down && player.isShiftKeyDown() && ZFighterDivineMoves.key(player, live, key)) {
 			sync(player, live, maxKi(player));
+			return;
+		}
+		// R while the Eye Beams are held: the spin (ZFighterEyeBeams)
+		if (down && key == PowerKey.ABILITY_1 && ZFighterEyeBeams.spin(player)) {
 			return;
 		}
 		switch (key) {

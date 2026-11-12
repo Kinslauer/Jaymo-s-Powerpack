@@ -234,6 +234,7 @@ public final class ZFighterLineage {
 		ZFighterRaces.init();
 		// (0.15.148) a Z Fighter's ape has a mind of its own: its rage, its fits, his primal
 		ApeRage.init();
+		ApeEarthwork.init();
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);

@@ -83,6 +83,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterSwayPose.init();
 		ZFighterApeSteps.init();
 		ZFighterFakeMoonSky.init();
+		ZFighterGammaClient.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		// (0.18.49) the space pod, drawn from its parts
@@ -149,6 +150,7 @@ public final class ZFighterPowerClient implements PowerClient {
 			&& player.getMainHandItem().isEmpty()
 			// (0.17.7) right-click held on someone downed is the revive
 			&& !(minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit && com.jaymospowers.core.wounds.Downed.isDowned(hit.getEntity()));
+		ZFighterGammaClient.guardTick(minecraft, guard);
 		if (guard != guardWasUp) {
 			guardWasUp = guard;
 			ClientPlayNetworking.send(new ZFighterNet.Guard(guard));

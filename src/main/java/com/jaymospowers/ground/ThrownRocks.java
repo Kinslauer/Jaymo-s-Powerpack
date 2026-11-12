@@ -412,6 +412,8 @@ public final class ThrownRocks {
 		server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F,
 			0.5F + server.getRandom().nextFloat() * 0.2F);
 		stack.consume(1, player);
+		// a Z Fighter's ki may be in it
+		com.jaymospowers.power.zfighter.ZFighterKiThrow.thrown(player, ball, stack);
 	}
 
 	/** (0.20.90) A throw followed through, or a hold never finished (its client gone quiet): the arm comes back down. */
