@@ -65,7 +65,7 @@ public final class Callouts {
 		for (Comrades.Leaning l : Comrades.Leaning.values()) {
 			LINES.put("take." + l.key(), 3);
 		}
-		for (String k : new String[] {"hurt", "behind", "down", "tending"}) {
+		for (String k : new String[] {"hurt", "behind", "down", "tending", "dragging", "legup", "ready", "spoils.give"}) {
 			LINES.put(k, 2);
 			VOICED.add(k);
 		}
@@ -81,6 +81,9 @@ public final class Callouts {
 		LINES.put("foe.arrows", 3);
 		LINES.put("foe.medic", 3);
 		LINES.put("leaderdown", 3);
+		for (String k : new String[] {"hold.grab", "hold.pin", "ambush", "spoils.grab"}) {
+			LINES.put(k, 3);
+		}
 	}
 
 	private record Claim(String side, String kind, Vec3 at, long until) {

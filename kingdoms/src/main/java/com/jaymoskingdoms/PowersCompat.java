@@ -3477,4 +3477,65 @@ public final class PowersCompat {
 		}
 		return false;
 	}
+
+	/** Powers' {@code Carry.npcDrag(Mob, LivingEntity)}, {@code Carry.npcLetGo(Mob)} and {@code Carry.npcDragging(Mob)}. */
+	private static java.lang.invoke.@Nullable MethodHandle npcDrag, npcLetGo, npcDragging;
+	private static boolean lookedForDrag;
+
+	private static void lookForDrag() {
+		if (lookedForDrag) {
+			return;
+		}
+		lookedForDrag = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+			npcDrag = lookup.findStatic(carry, "npcDrag", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+			npcLetGo = lookup.findStatic(carry, "npcLetGo", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class));
+			npcDragging = lookup.findStatic(carry, "npcDragging", java.lang.invoke.MethodType.methodType(net.minecraft.world.entity.Entity.class,
+				net.minecraft.world.entity.Mob.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mob drag (older Powers?)", e);
+			npcDrag = npcLetGo = npcDragging = null;
+		}
+	}
+
+	/**
+	 * {@code carrier} takes {@code body} (someone downed) by the shoulder and drags it behind as it walks, drawn as Powers'
+	 * own drag. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcDrag(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcDrag != null && (boolean) npcDrag.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** {@code carrier} lets go of whoever it drags, where they lie. */
+	public static void npcLetGo(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			if (npcLetGo != null) {
+				npcLetGo.invoke(carrier);
+			}
+		} catch (Throwable ignored) {
+			// nothing was held
+		}
+	}
+
+	/** Whom {@code carrier} is dragging, or null. */
+	public static net.minecraft.world.entity.@Nullable Entity npcDragging(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			return npcDragging == null ? null : (net.minecraft.world.entity.Entity) npcDragging.invoke(carrier);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
 }

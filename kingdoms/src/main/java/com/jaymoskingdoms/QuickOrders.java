@@ -109,6 +109,14 @@ public final class QuickOrders {
 		return s != null && m.level().getGameTime() < s.until() ? s : null;
 	}
 
+	/** {@code v} keeps close to {@code player} for {@code ticks}, as told Come (readying before a fight, {@link Ambushes}). */
+	static void close(Villager v, ServerPlayer player, int ticks) {
+		Stance s = stance(v);
+		if (s == null || s.kind() == COME) {
+			STANCES.put(v.getUUID(), new Stance(COME, player.getUUID(), v.level().getGameTime() + ticks, null));
+		}
+	}
+
 	private static void give(ServerPlayer player, int kind) {
 		if (kind < GO || kind > HELP || !player.isAlive() || player.isSpectator()) {
 			return;

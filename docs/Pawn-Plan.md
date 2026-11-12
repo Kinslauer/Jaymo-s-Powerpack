@@ -42,11 +42,17 @@ Rows C1, D1, D5, E1, and the tending half of F1 and F4.
 - **Field medics (F1, F4).** Fighters who mind the fallen kneel and get their own side's downed up mid-fight, friend
   and foe: a raid you thought won can come back unless you stop the one tending. Companions tend you when you're down.
 
-## Patch 2: hands on
+## Patch 2: hands on (built, same PR as patch 1)
 
 F1 carrying and dragging (Powers' Carry opened to NPC carriers; companions carry you out of danger, foes drag their own
 out of reach), F2 holding a foe for you (and two raiders pinning you), F3 a hand up ledges and over gaps, F5 readying
 before a fight and ambush set-ups, H5 grabbing loot mid-fight (a goblin runs off with your dropped sword).
+
+As built: medics drag (not lift) the fallen about 9 blocks clear before tending (`FieldMedics`, Powers'
+`Carry.npcDrag`); `Grapples` (hold a foe for you, raiders pin you; hit a holder or jump to break free); `LegUps`
+(jump at a 2-3 block wall beside a companion; raiders boost each other); `Ambushes` (companions call "ready" and close
+up; camp bands crouch and spring); `Scavengers` (spoils leaning grabs weapons, tools, armour; goblins run off).
+Left for later: being boosted over gaps, and companions lifting you over a shoulder rather than dragging.
 
 ## Patch 3: they learn
 

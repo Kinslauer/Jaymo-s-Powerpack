@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -33,6 +35,10 @@ import org.jspecify.annotations.Nullable;
  * over, so a fight you thought won comes back unless you stop them.</li>
  * <li>{@link #send}: anyone else, when told to ({@link QuickOrders#HELP}, or a band leader's shout, {@link BandLeaders}).</li>
  * <li>A friend going down is called out once by one of its side ("down"), and the one coming says so ("tending").</li>
+ * <li>Out of danger first (docs/Pawn-Plan.md row F1, patch 2): when foes are close round the fallen, the medic takes them
+ * by the shoulder and drags them {@link #DRAG_AWAY} blocks clear before kneeling (Powers' drag, opened to mobs,
+ * {@link PowersCompat#npcDrag}). Your companion drags you out of the press; a raider drags his mate out of your reach.
+ * Without Powers they tend where the body lies.</li>
  * </ul>
  * Done is Powers' revive and bandage tags ({@link Downed#REVIVE_TAG}, {@link Downed#BANDAGED_TAG}), as the town's
  * tending. A downed player is tended by their own companions this way; strangers still come by their temperament
@@ -47,10 +53,17 @@ public final class FieldMedics {
 	static final float PACE = 0.9F;
 	/** Each downed body is called out once in this long (ticks). */
 	static final long DOWN_CALL_GAP = 1200L;
+	/** A foe this near the fallen (blocks) is danger: they're dragged this far away from it (blocks), for at most this long (ticks). */
+	static final double DANGER = 8.0, DRAG_AWAY = 9.0;
+	static final int DRAG_TICKS = 160;
 
 	private static final class Medic {
 		final PathfinderMob helper;
 		int ticks;
+		/** Looked for danger once they got there; where they're dragging the body to, and for how long so far. */
+		boolean looked;
+		@Nullable Vec3 dragTo;
+		int dragTicks;
 
 		Medic(PathfinderMob helper) {
 			this.helper = helper;
@@ -98,7 +111,7 @@ public final class FieldMedics {
 	/** On their feet and free to help. */
 	private static boolean able(PathfinderMob m) {
 		return m.isAlive() && !m.isRemoved() && !m.isBaby() && !m.isNoAi() && !Downed.isDowned(m) && !Downed.helping(m)
-			&& !m.isSleeping() && Temperaments.humanoid(m);
+			&& !m.isSleeping() && Temperaments.humanoid(m) && !Grapples.busy(m) && !Grapples.held(m) && !Scavengers.busy(m) && !Ambushes.hiding(m);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -175,12 +188,36 @@ public final class FieldMedics {
 			return;
 		}
 		Comrades.stand(helper);
+		if (medic.dragTo != null) {
+			// out of danger first: walking off with them in tow
+			if (PowersCompat.npcDragging(helper) != body || ++medic.dragTicks > DRAG_TICKS
+				|| helper.position().distanceToSqr(medic.dragTo) < 2.0 || medic.dragTicks > 40 && helper.getNavigation().isDone() && !(helper instanceof Villager)) {
+				PowersCompat.npcLetGo(helper);
+				medic.dragTo = null;
+			} else {
+				if (medic.dragTicks % 10 == 1) {
+					walk(helper, medic.dragTo);
+				}
+				return;
+			}
+		}
 		if (helper.distanceToSqr(body) > REACH * REACH) {
 			helper.setShiftKeyDown(false);
 			if (body.tickCount % 10 == 0) {
 				walk(helper, body);
 			}
 			return;
+		}
+		if (!medic.looked) {
+			medic.looked = true;
+			Vec3 to = clear(level, body);
+			if (to != null && PowersCompat.npcDrag(helper, body)) {
+				medic.dragTo = to;
+				medic.dragTicks = 0;
+				Callouts.say(helper, "dragging", body, true, body.getDisplayName());
+				walk(helper, to);
+				return;
+			}
 		}
 		helper.getNavigation().stop();
 		if (helper instanceof Villager v) {
@@ -216,9 +253,50 @@ public final class FieldMedics {
 		}
 	}
 
+	private static void walk(PathfinderMob helper, Vec3 to) {
+		if (helper instanceof Villager v) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, BlockPos.containing(to), PACE, 0);
+		} else {
+			helper.getNavigation().moveTo(to.x, to.y, to.z, PACE + 0.2);
+		}
+	}
+
+	/**
+	 * Whether {@code body} lies in danger (a foe of its side's on its feet within {@link #DANGER}: one set on its side, or
+	 * one its side is fighting), and if so a spot {@link #DRAG_AWAY} blocks off, away from them all; else null.
+	 */
+	private static @Nullable Vec3 clear(ServerLevel level, LivingEntity body) {
+		String side = Comrades.side(body);
+		java.util.Map<LivingEntity, Integer> fighting = Comrades.targetsOf(level, side);
+		Vec3 from = Vec3.ZERO;
+		int foes = 0;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, body.getBoundingBox().inflate(DANGER),
+			e -> e != body && e.isAlive() && !Downed.isDowned(e) && !Comrades.side(e).equals(side))) {
+			boolean foe = fighting.containsKey(e) || e instanceof Mob m && Comrades.target(m) instanceof LivingEntity t && Comrades.side(t).equals(side);
+			if (foe && e.distanceToSqr(body) < DANGER * DANGER) {
+				from = from.add(e.position());
+				foes++;
+			}
+		}
+		if (foes == 0) {
+			return null;
+		}
+		Vec3 away = body.position().subtract(from.scale(1.0 / foes)).multiply(1.0, 0.0, 1.0);
+		if (away.lengthSqr() < 1.0E-4) {
+			away = new Vec3(body.getRandom().nextDouble() - 0.5, 0.0, body.getRandom().nextDouble() - 0.5);
+		}
+		Vec3 to = body.position().add(away.normalize().scale(DRAG_AWAY));
+		BlockPos ground = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(to));
+		// (no climbing a cliff or diving off one with them in tow)
+		return Math.abs(ground.getY() - body.getY()) > 3.0 ? null : new Vec3(to.x, ground.getY(), to.z);
+	}
+
 	private static void release(LivingEntity body) {
 		Medic medic = TENDED.remove(body);
 		if (medic != null) {
+			if (PowersCompat.npcDragging(medic.helper) == body) {
+				PowersCompat.npcLetGo(medic.helper);
+			}
 			HELPING.remove(medic.helper);
 			medic.helper.setShiftKeyDown(false);
 		}

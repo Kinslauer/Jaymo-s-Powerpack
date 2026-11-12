@@ -288,6 +288,8 @@ public final class Carry {
 		final boolean windOnly;
 		/** (0.19.55) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
 		@Nullable Vec3 dragShoulders, dragHips;
+		/** Not a player but a mob dragging someone ({@link #npcDrag}); null for a player's carry. */
+		@Nullable Mob npc;
 
 		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly, boolean windOnly) {
 			this.carrier = carrier;
@@ -379,9 +381,18 @@ public final class Carry {
 		return id != null && entity.level().getEntity(id) instanceof Player player ? player : null;
 	}
 
+	/**
+	 * Whoever is carrying or dragging this entity, a player or (Jaymo's Kingdoms' field medics, {@link #npcDrag}) anyone
+	 * else, either side.
+	 */
+	public static @Nullable LivingEntity holderOf(Entity entity) {
+		Integer id = entity.getAttached(CARRIED_BY);
+		return id != null && entity.level().getEntity(id) instanceof LivingEntity holder ? holder : null;
+	}
+
 	/** (0.19.55) This entity is being dragged along the ground by the shoulder ({@link #DRAG}), either side. */
 	public static boolean isDragged(Entity entity) {
-		Player carrier = carrierOf(entity);
+		LivingEntity carrier = holderOf(entity);
 		Carrying hold = carrier == null ? null : carrier.getAttached(CARRYING);
 		return hold != null && hold.hold() == DRAG && hold.target() == entity.getId();
 	}
@@ -940,6 +951,10 @@ public final class Carry {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F, 0.5F);
 			return;
 		}
+		if (entry.npc != null) {
+			endNpc(entry);
+			return;
+		}
 		end(player.level().getServer().getPlayerList().getPlayer(entry.carrier), entry, Let.ESCAPE);
 	}
 
@@ -1076,6 +1091,10 @@ public final class Carry {
 	}
 
 	private static void tickCarry(MinecraftServer server, Entry entry) {
+		if (entry.npc != null) {
+			tickNpc(entry, entry.npc);
+			return;
+		}
 		ServerPlayer carrier = server.getPlayerList().getPlayer(entry.carrier);
 		Entity carried = entry.carried;
 		if (carrier == null || carried.isRemoved() || !carried.isAlive()) {
@@ -1152,10 +1171,128 @@ public final class Carry {
 		}
 	}
 
+	// ---- mobs dragging the downed (Jaymo's Kingdoms, by reflection)
+
+	/** Mobs drag a body this much slower than they walk (share of their speed). */
+	static final double NPC_DRAG_WEIGHT = 0.35;
+
+	/**
+	 * {@code carrier} (a mob: a companion, a raider) takes {@code body} (someone downed: a player or a mob) by the shoulder
+	 * and drags it along the ground behind it, as a player's drag ({@link #DRAG}): every client draws it the same way, and a
+	 * dragged player's own client moves them. The caller walks the mob; {@link #npcLetGo} lets go where the body lies. False
+	 * if either is taken already, or the body can't be dragged.
+	 */
+	public static boolean npcDrag(Mob carrier, LivingEntity body) {
+		if (!(carrier.level() instanceof ServerLevel level) || body.level() != level || !draggable(body) || isCarried(body) || isCarrying(body)
+			|| isCarried(carrier) || isCarrying(carrier) || body.isPassenger() || body.isVehicle() || CARRIES.containsKey(carrier.getUUID())) {
+			return false;
+		}
+		Entry entry = new Entry(carrier.getUUID(), body, DRAG, false, carrier.position(), false, false);
+		entry.npc = carrier;
+		Vec3[] lay = dragStep(carrier.position(), carrier.getYRot(), null, null);
+		entry.dragShoulders = lay[0];
+		entry.dragHips = lay[1];
+		CARRIES.put(carrier.getUUID(), entry);
+		carrier.setAttached(CARRYING, new Carrying(body.getId(), DRAG));
+		body.setAttached(CARRIED_BY, carrier.getId());
+		body.removeAttached(THROWN);
+		body.resetFallDistance();
+		if (body instanceof ServerPlayer player) {
+			player.stopUsingItem();
+			ServerPlayNetworking.send(player, new Self(carrier.getId()));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.dragged", carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
+		} else if (body instanceof Mob mob) {
+			mob.getNavigation().stop();
+			mob.setTarget(null);
+		}
+		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -NPC_DRAG_WEIGHT, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.NEUTRAL, 0.8F, 0.7F);
+		return true;
+	}
+
+	/** {@code carrier} lets go of whoever it is dragging, where they lie. False if it wasn't dragging anyone. */
+	public static boolean npcLetGo(Mob carrier) {
+		Entry entry = CARRIES.get(carrier.getUUID());
+		if (entry == null || entry.npc == null) {
+			return false;
+		}
+		endNpc(entry);
+		return true;
+	}
+
+	/** Whom {@code carrier} (a mob) is dragging, or null. */
+	public static @Nullable Entity npcDragging(Mob carrier) {
+		Entry entry = CARRIES.get(carrier.getUUID());
+		return entry == null || entry.npc == null ? null : entry.carried;
+	}
+
+	private static void tickNpc(Entry entry, Mob carrier) {
+		Entity carried = entry.carried;
+		Vec3 here = carrier.position();
+		double moved = here.distanceTo(entry.lastCarrierPos);
+		if (carrier.isRemoved() || !carrier.isAlive() || Downed.isDowned(carrier) || carrier.isPassenger() || carried.isRemoved() || !carried.isAlive()
+			|| carried.level() != carrier.level() || moved > TELEPORT_JUMP || carried.position().distanceTo(here) > LEASH + moved * LEASH_PER_SPEED
+			|| carried.isPassenger() || !Downed.isDowned(carried) || carried instanceof Player p && (p.isSleeping() || p.isSpectator())) {
+			endNpc(entry);
+			return;
+		}
+		entry.lastCarrierPos = here;
+		carried.resetFallDistance();
+		Vec3[] lay = dragStep(here, carrier.getYRot(), entry.dragShoulders, entry.dragHips);
+		entry.dragShoulders = lay[0];
+		entry.dragHips = lay[1];
+		if (!(carried instanceof Player)) {
+			carried.setPos(lay[0].x, lay[0].y, lay[0].z);
+			carried.setDeltaMovement(Vec3.ZERO);
+			float yaw = dragYaw(lay[0], lay[1]);
+			carried.setYRot(yaw);
+			if (carried instanceof LivingEntity living) {
+				living.yBodyRot = yaw;
+			}
+			if (carried instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+		}
+	}
+
+	/** A mob's drag ends: the weight comes off, and the body is let go where it lies. */
+	private static void endNpc(Entry entry) {
+		CARRIES.remove(entry.carrier);
+		Entity carried = entry.carried;
+		Mob carrier = entry.npc;
+		if (carrier != null) {
+			carrier.removeAttached(CARRYING);
+			AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
+			if (speed != null) {
+				speed.removeModifier(WEIGHT_ID);
+			}
+		}
+		carried.removeAttached(CARRIED_BY);
+		if (carried.isRemoved() || !carried.isAlive() || !(carried.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long now = level.getGameTime();
+		REGRAB.put(carried.getUUID(), now + REGRAB_TICKS);
+		carried.resetFallDistance();
+		if (carried instanceof ServerPlayer player) {
+			GRACE.put(player.getUUID(), now + RELEASE_GRACE_TICKS);
+			ServerPlayNetworking.send(player, new Self(-1));
+		} else {
+			carried.setDeltaMovement(Vec3.ZERO);
+		}
+		level.playSound(null, carried.getX(), carried.getY(), carried.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.NEUTRAL, 0.5F, 1.0F);
+	}
+
 	/** Server stopping: forget everything. */
 	private static void clear() {
 		for (Entry entry : new ArrayList<>(CARRIES.values())) {
 			entry.carried.removeAttached(CARRIED_BY);
+			if (entry.npc != null) {
+				entry.npc.removeAttached(CARRYING);
+			}
 		}
 		CARRIES.clear();
 		LIFTING.clear();
