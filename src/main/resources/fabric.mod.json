@@ -63,6 +63,7 @@
 		"jaymospowers.carryon.mixins.json",
 		"jaymospowers.toolbelt.mixins.json",
 		"jaymospowers.lithostitched.mixins.json",
+		"jaymospowers.tundraworld.mixins.json",
 		"jaymospowers.artifacts.mixins.json",
 		{ "config": "jaymospowers.artifacts.client.mixins.json", "environment": "client" }
 	],

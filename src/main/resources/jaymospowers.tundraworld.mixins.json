@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.mixin.tundraworld",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"DwarfSaplingMixin",
+		"TundraPlacementMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
