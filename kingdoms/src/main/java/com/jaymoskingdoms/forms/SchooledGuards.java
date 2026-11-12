@@ -227,7 +227,8 @@ public final class SchooledGuards {
 
 	private static void start(ServerLevel level, Mob mob, LivingEntity target, Family family, boolean duel) {
 		long now = level.getGameTime();
-		int gap = WeaponForms.experienced(mob) ? GAP_VETERAN : GAP;
+		// (the school's style: a wild one comes on faster, a warding one waits)
+		int gap = Math.round((WeaponForms.experienced(mob) ? GAP_VETERAN : GAP) * Styles.tempo(Styles.schoolOf(family), 0));
 		READY.put(mob, now + gap + level.getRandom().nextInt(GAP_JITTER + 1));
 		mob.getNavigation().stop();
 		mob.getLookControl().setLookAt(target, 60.0F, 60.0F);

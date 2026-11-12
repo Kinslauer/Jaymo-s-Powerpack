@@ -276,6 +276,8 @@ public final class Feathers {
 			boolean resting = player.isCrouching() || player.getDeltaMovement().horizontalDistanceSqr() < 1.0E-4;
 			rate *= STRAIN_REGEN * (resting ? REST_STRAIN_REGEN : 1.0F);
 		}
+		// (a fighting style's trade: combat/BladeStyle)
+		rate *= com.jaymospowers.combat.BladeStyle.regen(player);
 		s.growth += rate;
 		if (s.growth >= 1.0F) {
 			int whole = (int)s.growth;

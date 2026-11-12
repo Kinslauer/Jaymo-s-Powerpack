@@ -107,6 +107,12 @@ public final class GravityPower implements Power {
 	static final double LIFT_SLACK = 0.3, LIFT_PLAYER_SLACK = 0.9, LIFT_PLAYER_SLACK_PER_BLOCK = 0.012;
 	/** Held distance is clamped to this range (blocks from the eyes). */
 	static final double LIFT_MIN_HOLD = 3.0, LIFT_MAX_HOLD = 14.0;
+	/**
+	 * The scroll wheel reels a held thing in or out ({@link GravityReel}): {@code REEL_STEP} blocks a notch, between
+	 * {@code REEL_MIN} (plus half its width) and {@code REEL_MAX} from the eyes. It follows at {@code REEL_SPEED} blocks
+	 * a tick divided by its bulk (the cube root of its box, never under 1), so a cow trails a chicken.
+	 */
+	static final double REEL_STEP = 1.0, REEL_MIN = 1.0, REEL_MAX = 16.0, REEL_SPEED = 0.45;
 	/** How hard a lifted creature is steered toward the held point, and its top speed (b/t). */
 	static final double LIFT_STEER = 0.22, LIFT_MAX_SPEED = 0.7;
 	/** Longest a lift lasts, and the cooldown after it ends. */
@@ -384,6 +390,9 @@ public final class GravityPower implements Power {
 		/** (0.21.8) When the hurl being wound up lets go (game time), or -1. */
 		long hurlAt = -1;
 		double liftHold;
+		/** Where the wheel has asked for it (blocks from the eyes), once it has been reeled at all. */
+		double liftWant;
+		boolean reeled;
 		int liftTicks;
 		long crushFrom = -1;
 		int weightlessTicks;
@@ -473,6 +482,13 @@ public final class GravityPower implements Power {
 		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP, SLAM_POSE, KNEEL);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityGrip.TYPE, GravityGrip.CODEC);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(GravityMeteorBurst.TYPE, GravityMeteorBurst.CODEC);
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityReel.TYPE, GravityReel.CODEC);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityReel.TYPE, (payload, ctx) -> {
+			ServerPlayer player = ctx.player();
+			if (Powers.has(player, INSTANCE) && player.isAlive() && !player.isSpectator()) {
+				reel(player, state(player), payload.steps());
+			}
+		});
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityGrip.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			if (Powers.has(player, INSTANCE) && player.isAlive() && !player.isSpectator()) {
@@ -793,6 +809,19 @@ public final class GravityPower implements Power {
 
 	// ---------------------------------------------------------------- Lift
 
+	/** The wheel, while Lift holds something: {@code steps} notches further out (or nearer, below zero). */
+	private static void reel(ServerPlayer player, State state, int steps) {
+		Entity target = state.liftTarget < 0 ? null : player.level().getEntity(state.liftTarget);
+		if (target == null || state.choking || state.drawing || state.hurlAt >= 0) {
+			return;
+		}
+		if (!state.reeled) {
+			state.liftWant = state.liftHold;
+			state.reeled = true;
+		}
+		state.liftWant = Mth.clamp(state.liftWant + Mth.clamp(steps, -3, 3) * REEL_STEP, REEL_MIN + target.getBbWidth() * 0.5, REEL_MAX);
+	}
+
 	private static void startLift(ServerPlayer player, State state) {
 		if (state.liftTarget >= 0 || !ready(player, LIFT)) {
 			return;
@@ -825,6 +854,8 @@ public final class GravityPower implements Power {
 		state.liftWasNoGravity = target.isNoGravity();
 		player.setAttached(GRIP, target.getId());
 		state.liftHold = Mth.clamp(player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()), LIFT_MIN_HOLD, LIFT_MAX_HOLD);
+		state.liftWant = state.liftHold;
+		state.reeled = false;
 		modifier(target, Attributes.GRAVITY, LIFT_ID, -1.0, true);
 		if (!(target instanceof LivingEntity)) {
 			// no weight to take away (an item, a cart, a corpse...), only gravity to switch off
@@ -872,7 +903,11 @@ public final class GravityPower implements Power {
 			drawCorpse(player, state, target);
 			return;
 		}
-		if (throwable(target) && state.liftHold > THROW_HOLD) {
+		if (state.reeled) {
+			// the wheel has it: it follows to where it was asked, the heavier the slower
+			double pace = REEL_SPEED / Math.max(1.0, Math.cbrt(target.getBbWidth() * target.getBbWidth() * target.getBbHeight()));
+			state.liftHold += Mth.clamp(state.liftWant - state.liftHold, -pace, pace);
+		} else if (throwable(target) && state.liftHold > THROW_HOLD) {
 			state.liftHold = Math.max(THROW_HOLD, state.liftHold - THROW_DRIFT);
 		}
 		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE + target.getBbWidth() * 0.5 : state.liftHold));
@@ -1110,8 +1145,17 @@ public final class GravityPower implements Power {
 			return false;
 		}
 		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
-		List<BlockPos> blocks = com.jaymospowers.core.BlockCluster.crater(player.level(), hit.getBlockPos(), ripMax(player),
-			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player);
+		// Andy: "it certainly should be able to grab ANYTHING": the block aimed at comes whatever it is made of (only
+		// what can't be broken at all, and blocks with something inside, stay); the rest of the chunk is still limited
+		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(player.level(), hit.getBlockPos(), ripMax(player),
+			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player));
+		BlockPos aimed = hit.getBlockPos().immutable();
+		if (!blocks.contains(aimed) && com.jaymospowers.core.BlockCluster.takeable(player.level(), aimed, Float.MAX_VALUE, player)) {
+			blocks.addFirst(aimed);
+			while (blocks.size() > ripMax(player)) {
+				blocks.removeLast();
+			}
+		}
 		if (blocks.isEmpty()) {
 			return false;
 		}
@@ -1179,7 +1223,7 @@ public final class GravityPower implements Power {
 		}
 		List<BlockPos> blocks = new ArrayList<>();
 		for (int i = 0; i < count && i < state.ripBlocks.size(); i++) {
-			if (com.jaymospowers.core.BlockCluster.takeable(level, state.ripBlocks.get(i), 50.0F, player)) {
+			if (com.jaymospowers.core.BlockCluster.takeable(level, state.ripBlocks.get(i), Float.MAX_VALUE, player)) {
 				blocks.add(state.ripBlocks.get(i));
 			}
 		}

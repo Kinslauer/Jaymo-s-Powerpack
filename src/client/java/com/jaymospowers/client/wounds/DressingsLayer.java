@@ -49,11 +49,17 @@ import org.jspecify.annotations.Nullable;
  * (they fought it).
  */
 public final class DressingsLayer {
-	/** On a living body's render state: {wrapped parts (rags above {@link Bleeding#RAG_SHIFT}), splinted parts}, both by {@link BodyPart#ordinal()}. */
+	/** On a living body's render state: {wrapped parts (rags above {@link Bleeding#RAG_SHIFT}), splinted parts, parts with an open cut}, each by {@link BodyPart#ordinal()}. */
 	public static final RenderStateDataKey<int[]> KEY = RenderStateDataKey.create(() -> "jaymospowers:dressings");
 	static final Identifier LINEN = JaymosPowers.id("textures/entity/wounds/linen_wrap.png");
 	static final Identifier RAG = JaymosPowers.id("textures/entity/wounds/rag_wrap.png");
 	static final Identifier SPLINT = JaymosPowers.id("textures/entity/wounds/splint.png");
+	/**
+	 * An open cut (Andy's pick from Star Wars: Galaxy in a Cube, ideas only; "the cuts are real and can be healed with
+	 * bandages"): red gashes on every part that is bleeding ({@link Bleeding#BLEEDING}, synced to all), on the boxes a
+	 * bandage would use. A dressing covers it, and it is gone when the cut closes. {@code tools/gen_cut_marks.py}.
+	 */
+	static final Identifier CUT = JaymosPowers.id("textures/entity/wounds/cut.png");
 	/**
 	 * How far a wrap stands off the skin (pixels): over the sleeves and trousers (0.25), MCA's clothes (0.3125) and a
 	 * costume's suit (0.35); the head's over the hat layer (0.5) and MCA's hats (0.5625). (0.15.123) On the side that
@@ -86,7 +92,9 @@ public final class DressingsLayer {
 	/** From every living renderer's extractRenderState: what's dressed and splinted, less what's gone. */
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int wrapped = Bleeding.wrapped(entity), splinted = Breaks.splinted(entity);
-		if (wrapped == 0 && splinted == 0) {
+		// an open cut shows where nothing is wrapped over it
+		int cuts = Bleeding.bleeding(entity) & ~(wrapped | wrapped >>> Bleeding.RAG_SHIFT) & (1 << Bleeding.RAG_SHIFT) - 1;
+		if (wrapped == 0 && splinted == 0 && cuts == 0) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -98,7 +106,8 @@ public final class DressingsLayer {
 		}
 		wrapped &= ~(missing | missing << Bleeding.RAG_SHIFT);
 		splinted &= ~missing;
-		state.setData(KEY, wrapped == 0 && splinted == 0 ? null : new int[] {wrapped, splinted});
+		cuts &= ~missing;
+		state.setData(KEY, wrapped == 0 && splinted == 0 && cuts == 0 ? null : new int[] {wrapped, splinted, cuts});
 	}
 
 	/** A part cut off (Dismember's head, arms and legs; a foot goes with its leg). */
@@ -114,7 +123,7 @@ public final class DressingsLayer {
 		};
 	}
 
-	/** What shows on this body just now: {linen, rags, splints} by part, or null for nothing (armour, a costume, invisible). */
+	/** What shows on this body just now: {linen, rags, splints, open cuts} by part, or null for nothing (armour, a costume, invisible). */
 	static int @Nullable [] shown(LivingEntityRenderState living) {
 		int[] dressings = living.getData(KEY);
 		if (dressings == null || living.isInvisible || BodyCover.body(living) || !(living instanceof HumanoidRenderState state)) {
@@ -122,6 +131,7 @@ public final class DressingsLayer {
 		}
 		int wrapped = dressings[0] & (1 << Bleeding.RAG_SHIFT) - 1, rags = dressings[0] >>> Bleeding.RAG_SHIFT & wrapped;
 		int splinted = dressings[1];
+		int cuts = dressings[2];
 		int hidden = 0;
 		if (!state.headEquipment.isEmpty() || BodyCover.head(state)) {
 			hidden |= bit(BodyPart.HEAD);
@@ -138,7 +148,8 @@ public final class DressingsLayer {
 		wrapped &= ~hidden;
 		rags &= ~hidden;
 		splinted &= ~hidden;
-		return wrapped == 0 && splinted == 0 ? null : new int[] {wrapped & ~rags, rags, splinted};
+		cuts &= ~hidden;
+		return wrapped == 0 && splinted == 0 && cuts == 0 ? null : new int[] {wrapped & ~rags, rags, splinted, cuts};
 	}
 
 	// ---- the pieces --------------------------------------------------------------------------------------------------------
@@ -224,9 +235,9 @@ public final class DressingsLayer {
 	/** The names the pieces hang by, off each bone. */
 	private static final String WRAP_PIECE = "wrap", ANKLE_PIECE = "ankle", SPLINT_PIECE = "splint";
 
-	/** One renderer's worn models, for wide arms and slim: linen, rag and splint. */
+	/** One renderer's worn models, for wide arms and slim: linen, rag, splint and open cuts. */
 	private static final class Worn {
-		private final PlayerModel[] wide = new PlayerModel[3], slim = new PlayerModel[3];
+		private final PlayerModel[] wide = new PlayerModel[4], slim = new PlayerModel[4];
 		private final java.util.function.Supplier<PlayerModel> wearer;
 
 		Worn(java.util.function.Supplier<PlayerModel> wearer) {
@@ -269,7 +280,7 @@ public final class DressingsLayer {
 		return LayerDefinition.create(mesh, 32, 32);
 	}
 
-	/** As a worn model animates, for the player it's drawn on: only their pieces of this kind (0 linen, 1 rags, 2 splints). */
+	/** As a worn model animates, for the player it's drawn on: only their pieces of this kind (0 linen, 1 rags, 2 splints, 3 open cuts). */
 	private static void show(PlayerModel model, AvatarRenderState state, int kind) {
 		int[] shown = shown(state);
 		int mask = shown == null ? 0 : shown[kind];
@@ -338,8 +349,8 @@ public final class DressingsLayer {
 				}
 				CostumeModels.wear(state, parent);
 				boolean slimArms = CostumeModels.slim(parent, state);
-				Identifier[] textures = {LINEN, RAG, SPLINT};
-				for (int kind = 0; kind < 3; kind++) {
+				Identifier[] textures = {LINEN, RAG, SPLINT, CUT};
+				for (int kind = 0; kind < 4; kind++) {
 					if (shown[kind] != 0) {
 						renderColoredCutoutModel(this.worn.get(kind, slimArms), textures[kind], poseStack, collector, lightCoords, state, -1, 1);
 					}
@@ -360,6 +371,8 @@ public final class DressingsLayer {
 				int bit = bit(wraps[i]);
 				if (((shown[0] | shown[1]) & bit) != 0) {
 					submitOn(poseStack, collector, lightCoords, overlay, bones[i], parts[i], (shown[1] & bit) != 0 ? RAG : LINEN);
+				} else if ((shown[3] & bit) != 0) {
+					submitOn(poseStack, collector, lightCoords, overlay, bones[i], parts[i], CUT);
 				}
 			}
 			BodyPart[] limbs = {BodyPart.RIGHT_ARM, BodyPart.LEFT_ARM, BodyPart.RIGHT_LEG, BodyPart.LEFT_LEG};

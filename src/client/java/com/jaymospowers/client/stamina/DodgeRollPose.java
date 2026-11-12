@@ -35,10 +35,12 @@ public final class DodgeRollPose {
 	static final float TUCK_IN = 0.15F, TUCK_OUT = 0.3F;
 	/** First person: how much of the full turn the view follows (1: all the way over), and how far it dips (blocks). */
 	static final float VIEW_ROLL = 1.0F, VIEW_DIP = 0.35F;
+	/** The flip in the air: how much of the roll's tuck the legs, the arms (the weapon stays out) and the back take. */
+	static final float FLIP_LEGS = 0.7F, FLIP_ARMS = 0.25F, FLIP_CURL = 0.5F;
 	// ================================================================================================================
 
 	/** {@code t}: how far through the roll (0 to 1); {@code (x, z)}: the way it goes, a unit vector on the ground. */
-	public record Roll(float t, float x, float z) {
+	public record Roll(float t, float x, float z, boolean flip) {
 	}
 
 	public static final RenderStateDataKey<Roll> KEY = RenderStateDataKey.create(() -> "jaymospowers:dodge_roll");
@@ -58,11 +60,13 @@ public final class DodgeRollPose {
 		long now = player.level().getGameTime();
 		long start;
 		float x, z;
+		boolean flip;
 		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
 			// our own roll: drawn the moment we hop, not when the server's copy comes back
 			start = DodgeClient.rollStart;
 			x = DodgeClient.rollX;
 			z = DodgeClient.rollZ;
+			flip = DodgeClient.rollFlip;
 		} else {
 			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
 			if (rolling == null) {
@@ -71,9 +75,10 @@ public final class DodgeRollPose {
 			start = rolling.start();
 			x = rolling.x();
 			z = rolling.z();
+			flip = rolling.flip();
 		}
-		float t = (now - start + partialTicks) / Dodge.ROLL_TICKS;
-		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z);
+		float t = (now - start + partialTicks) / (flip ? Dodge.FLIP_TICKS : Dodge.ROLL_TICKS);
+		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip);
 	}
 
 	/** How tucked the body is (0 to 1): curling in at the start, opening out to land on its feet. */
@@ -99,8 +104,10 @@ public final class DodgeRollPose {
 		float t = roll.t();
 		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
-		// down into a ball near the ground, and back up to the feet
-		poseStack.translate(0.0F, -DROP * Mth.sin(Mth.PI * t), 0.0F);
+		if (!roll.flip()) {
+			// down into a ball near the ground, and back up to the feet (the flip turns where it is, in the air)
+			poseStack.translate(0.0F, -DROP * Mth.sin(Mth.PI * t), 0.0F);
+		}
 		// the top tips toward the way of the dodge: about (up x way), round the body's middle
 		poseStack.rotateAround(new Quaternionf().rotateAxis(turn, -forward / length, 0.0F, -right / length), 0.0F, middle, 0.0F);
 	}
@@ -127,7 +134,9 @@ public final class DodgeRollPose {
 		float t = roll.t();
 		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI * VIEW_ROLL;
 		// (the view turns the opposite way to the body: the world swings round the other way)
-		poseStack.translate(0.0F, VIEW_DIP * Mth.sin(Mth.PI * t), 0.0F);
+		if (!roll.flip()) {
+			poseStack.translate(0.0F, VIEW_DIP * Mth.sin(Mth.PI * t), 0.0F);
+		}
 		poseStack.rotate(new Quaternionf().rotateAxis(-turn, -forward / length, 0.0F, -right / length));
 	}
 
@@ -147,12 +156,14 @@ public final class DodgeRollPose {
 			return;
 		}
 		float w = tuck(roll.t());
-		set(h.rightLeg, LEG_TUCK, 0.0F, 0.05F, w);
-		set(h.leftLeg, LEG_TUCK, 0.0F, -0.05F, w);
-		set(h.rightArm, ARM_TUCK, 0.0F, -ARM_IN, w);
-		set(h.leftArm, ARM_TUCK, 0.0F, ARM_IN, w);
-		h.body.xRot = Mth.lerp(w, h.body.xRot, BODY_CURL);
-		h.head.xRot = Mth.lerp(w, h.head.xRot, CHIN);
+		// (the flip: knees up, the back barely rounded, and the arms left nearly as they are so the weapon stays out)
+		float legs = roll.flip() ? w * FLIP_LEGS : w, arms = roll.flip() ? w * FLIP_ARMS : w, curl = roll.flip() ? w * FLIP_CURL : w;
+		set(h.rightLeg, LEG_TUCK, 0.0F, 0.05F, legs);
+		set(h.leftLeg, LEG_TUCK, 0.0F, -0.05F, legs);
+		set(h.rightArm, ARM_TUCK, 0.0F, -ARM_IN, arms);
+		set(h.leftArm, ARM_TUCK, 0.0F, ARM_IN, arms);
+		h.body.xRot = Mth.lerp(curl, h.body.xRot, BODY_CURL);
+		h.head.xRot = Mth.lerp(curl, h.head.xRot, CHIN);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float amount) {

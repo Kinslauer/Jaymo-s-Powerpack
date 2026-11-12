@@ -124,3 +124,15 @@ attracting mobs (or repelling sensitive ones...)".
 - Metal on metal (`ShieldBang.metal`: metal words in the item id, or the `jaymospowers:clanging_metal` tag) also calls
   `WebSymbiote.noise` (hosts within 12 flinch) and startles `WebSymbioteBlob`s within 12. Tinkers-built weapons whose
   ids carry no metal name don't count unless added to the tag.
+
+## The body's side (ArmedPose, ParryPose)
+- `combat/Armed.kind` says how a held weapon is carried (one hand, two hands, polearm); `client/combat/ArmedPose` draws
+  the stance, the draw and the low guard from it on every player.
+- `ClashFx.met` (every block, parry and fighter's parry) calls `Armed.met`, which sets `Armed.MET` (synced to all): the
+  time, the line (high, low, hanging, from the height the blow came from) and whether it was a parry.
+  `client/combat/ParryPose` holds a raised weapon guard across the body, moves it to that line for `HOLD_TICKS`, and
+  rocks the body back for `RECOIL_TICKS`. It runs on any humanoid model, so mobs show it too.
+
+- A perfect parry made with a blade bats an arrow back at its shooter at half speed (`combat/Swat`); balls and
+  unparryable shots are only ever blocked. Darktide's guard is seen swinging at every shot it meets.
+- A Wheel Cut (Kingdoms' `forms/SpecialCuts`) tags its striker unparryable for the blow, as a heavy tell does.
