@@ -11697,3 +11697,9 @@ Andy ticked the left-out row "Speakeasy dens are never raided and contraband nev
 - **Sealed bundles** (new item): each fence sells a Sealed Bundle (4) for each of the 2 nearest other open dens, one a day each, and pays 14 for any sealed for his own. It's contraband all the way (open carry, busts take it) and adds to the far fence's stock.
 - Two new loading-screen hints. Iron-trapdoor dens are skipped as Hideout story starts.
 - Built and compiled; not played. Numbers are my picks, in the constants at the top of `DenRaids` and `Smuggling`.
+
+## 0.7.774 (2026-11-12): World tier veins run through the ice caves
+
+- `GroundChanges`: in Jaymo's Powers' Ice Caves a tier's veins now go through the packed ice and calcite too, each ore in
+  a pocket of stone (deepslate below Y 0), so opening a tier seeds ore under the cold lands as everywhere else.
+  Nothing changes without Powers.
