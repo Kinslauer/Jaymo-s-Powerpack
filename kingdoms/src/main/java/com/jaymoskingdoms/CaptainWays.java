@@ -518,9 +518,11 @@ public final class CaptainWays {
 		}
 		if (Captains.has(mob, Trait.ROCK_THROWER) && now >= NEXT_THROW.getOrDefault(id, 0L) && !PENDING.containsKey(id)) {
 			double d = mob.distanceTo(target);
-			if (d >= THROW_MIN && d <= THROW_MAX && mob.hasLineOfSight(target)) {
+			if (d >= THROW_MIN && d <= THROW_MAX && mob.hasLineOfSight(target) && MobAmmo.spend(mob, MobAmmo.Kind.ROCKS)) {
+				// a rock from the few he carries; it lands as a cobblestone he can pick up again
 				NEXT_THROW.put(id, now + THROW_EVERY + mob.getRandom().nextInt(THROW_EVERY / 2));
-				hurl(level, mob, target, new ItemStack(Items.COBBLESTONE), ROCK_DAMAGE, false);
+				Snowball rock = hurl(level, mob, target, new ItemStack(Items.COBBLESTONE), ROCK_DAMAGE, false);
+				MobAmmo.leaves(rock, new ItemStack(Items.COBBLESTONE));
 			}
 		}
 		return moves(level, mob, c, target, now);
