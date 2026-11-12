@@ -166,6 +166,11 @@ kit.
   runs back to water when it is not needed. In water or rain they are at home, quicker, and can go under anywhere the
   rain is falling. The Abyssal Tide's height is the **Maelstrom**: the deep brought up as a standing dome of dark water,
   which its caller swims through while everyone else in it drowns. Tideborn say the Deep Mother lends it and wants it back.
+  (new) **Ink and water** (Darktide looks, 2026-11-12, for Andy to approve). What a holder does is seen as ink on water:
+  a cut hangs in the air for a breath as a single brush stroke, the tide they call is a true wave with a pale crest, and
+  where they go under the ground lies open as a dark pool. Tideborn calligraphers say the Deep Mother writes with her
+  holders, and read a fight's strokes afterward the way others read tea leaves. A holder near full Flow can be told at
+  a glance: water gathers at their feet and their eyes go pale.
 - **Gravity**: weight taken out of things or piled on; at its height, a meteor called down.
 - **Resonance**: sound and the Deep Dark's sculk. The holder hears through walls and breaks things by their pitch.
   Ascended it becomes the Choir, corrupted the Shrieker.
