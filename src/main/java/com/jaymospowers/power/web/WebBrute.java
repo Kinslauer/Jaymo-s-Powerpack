@@ -646,6 +646,9 @@ public final class WebBrute {
 
 	// ===== shoulder ram ==============================================================================================
 
+	/** How much a ram weighs in a clash of blows, times its damage. */
+	static final float CLASH_STRENGTH = 2.0F;
+
 	private static void tickRam(ServerPlayer player, Run run, long now) {
 		Vec3 pos = player.position();
 		Vec3 moved = run.last == null ? Vec3.ZERO : pos.subtract(run.last).multiply(1.0, 0.0, 1.0);
@@ -706,6 +709,10 @@ public final class WebBrute {
 			return;
 		}
 		dir = dir.normalize();
+		// ramming into another brute's great blow: the two lock (BlowClash)
+		if (com.jaymospowers.core.BlowClash.meets(player, dir, RAM_DAMAGE * CLASH_STRENGTH)) {
+			return;
+		}
 		if (now % RAM_RUMBLE_EVERY == 0) {
 			Shakes.send(player, RAM_RUMBLE);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STEP, SoundSource.PLAYERS, 0.8F, 0.6F);

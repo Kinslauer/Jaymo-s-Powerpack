@@ -89,6 +89,7 @@ public class JaymosPowers implements ModInitializer {
 		// (0.20.89) blunt and large arrow heads
 		com.jaymospowers.tinkering.ranged.ArrowHeads.init();
 		com.jaymospowers.core.BeamClash.init();
+		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();

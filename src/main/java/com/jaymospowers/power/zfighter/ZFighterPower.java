@@ -813,6 +813,10 @@ public final class ZFighterPower implements Power {
 			if (key == PowerKey.ABILITY_3 && down && ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
 				cooldown(player, ZFighterState.WAVE, ZFighterLineage.APE_BEAM_COOLDOWN);
 			}
+			// G: the earth-splitter, B: the ring-breaker (ApeEarthwork)
+			if (down && (key == PowerKey.ABILITY_2 || key == PowerKey.ABILITY_4)) {
+				ApeEarthwork.stomp(player, live, key == PowerKey.ABILITY_2);
+			}
 			sync(player, live, maxKi(player));
 			return;
 		}

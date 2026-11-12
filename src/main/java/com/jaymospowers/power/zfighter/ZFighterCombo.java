@@ -57,16 +57,16 @@ public final class ZFighterCombo {
 	 */
 	public static final int JAB = 0, REVERSE_PUNCH = 1, ELBOW = 2, CHI_PALM = 3, RISING_KNEE = 4, FRONT_KICK = 5, ROUNDHOUSE = 6,
 		LEG_SWEEP = 7, CRESCENT_KICK = 8, AXE_KICK = 9, SPIN_BACK_KICK = 10, SPIN_HOOK_KICK = 11, DOUBLE_PALM = 12, FLYING_KNEE = 13,
-		FLYING_DOUBLE_KICK = 14, DRAGON_FIST = 15;
-	public static final int MOVES = 16;
+		FLYING_DOUBLE_KICK = 14, DRAGON_FIST = 15, TORNADO_KICK = 16;
+	public static final int MOVES = 17;
 
 	/** Each tier's string, the last move its finisher. */
 	static final int[][] STRINGS = {
 		{JAB, REVERSE_PUNCH, ELBOW, CHI_PALM},
 		{JAB, REVERSE_PUNCH, FRONT_KICK, ROUNDHOUSE, DOUBLE_PALM},
 		{JAB, REVERSE_PUNCH, RISING_KNEE, LEG_SWEEP, AXE_KICK, SPIN_BACK_KICK},
-		{JAB, REVERSE_PUNCH, ELBOW, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, CHI_PALM, SPIN_HOOK_KICK},
-		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, FLYING_DOUBLE_KICK, DRAGON_FIST},
+		{JAB, REVERSE_PUNCH, ELBOW, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, TORNADO_KICK, CHI_PALM, SPIN_HOOK_KICK},
+		{JAB, REVERSE_PUNCH, ELBOW, RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, DOUBLE_PALM, TORNADO_KICK, FLYING_DOUBLE_KICK, DRAGON_FIST},
 	};
 	/**
 	 * (0.18.47, Andy: "Kicks only") Each tier's string with both arms broken ({@link Breaks#armless}): the hands can't
@@ -76,8 +76,8 @@ public final class ZFighterCombo {
 		{FRONT_KICK, FRONT_KICK, ROUNDHOUSE},
 		{FRONT_KICK, ROUNDHOUSE, LEG_SWEEP, ROUNDHOUSE},
 		{RISING_KNEE, FRONT_KICK, LEG_SWEEP, AXE_KICK, SPIN_BACK_KICK},
-		{RISING_KNEE, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, LEG_SWEEP, SPIN_HOOK_KICK},
-		{RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, FLYING_KNEE, AXE_KICK, ROUNDHOUSE, FLYING_DOUBLE_KICK},
+		{RISING_KNEE, CRESCENT_KICK, ROUNDHOUSE, FLYING_KNEE, LEG_SWEEP, TORNADO_KICK, SPIN_HOOK_KICK},
+		{RISING_KNEE, LEG_SWEEP, CRESCENT_KICK, SPIN_BACK_KICK, FLYING_KNEE, AXE_KICK, ROUNDHOUSE, TORNADO_KICK, FLYING_DOUBLE_KICK},
 	};
 	/**
 	 * Ticks a blow takes, by tier (the finisher takes {@link #FINISHER_LENGTH} times as long). (0.13.34) Twice as slow
@@ -103,7 +103,7 @@ public final class ZFighterCombo {
 	 */
 	static final float[] HIT_SHARE = {0.6F, 0.52F, 0.45F, 0.4F, 0.34F};
 	/** ...times the move's own weight (punches 1, kicks harder), in move order. */
-	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.0F, 1.15F, 1.25F, 1.3F, 1.15F, 1.25F, 1.35F, 1.4F, 1.4F, 1.1F, 1.3F, 1.35F, 1.2F};
+	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.0F, 1.15F, 1.25F, 1.3F, 1.15F, 1.25F, 1.35F, 1.4F, 1.4F, 1.1F, 1.3F, 1.35F, 1.2F, 1.45F};
 	/** The finisher hits for this many fists, by tier, and throws the foe this far (horizontal, up). */
 	static final float[] FINISHER_SHARE = {1.4F, 1.45F, 1.5F, 1.55F, 1.6F};
 	static final double[] FINISHER_PUSH = {1.4, 1.6, 1.9, 2.2, 2.7};
@@ -130,13 +130,30 @@ public final class ZFighterCombo {
 	 * The step into every blow, by move (blocks a tick added to his motion; on the ground that carries him about
 	 * {@link #STEP_PROBE} times as far: a fifth to a quarter of a block). Flying moves go further, through the air.
 	 */
-	static final double[] STEP_IN = {0.1, 0.08, 0.09, 0.1, 0.07, 0.06, 0.06, 0.04, 0.06, 0.07, 0.04, 0.05, 0.12, 0.08, 0.08, 0.1};
+	static final double[] STEP_IN = {0.1, 0.08, 0.09, 0.1, 0.07, 0.06, 0.06, 0.04, 0.06, 0.07, 0.04, 0.05, 0.12, 0.08, 0.08, 0.1, 0.08};
 	/** Closer than this (centre to the foe's edge) he doesn't step any more: the step is all in the hips. */
 	static final double STEP_MIN_GAP = 0.9;
 	/** A hop up into the flying knee and the flying double kick, and the dragon fist's jump (about 3/4 of a block). */
 	static final double HOP_FLYING = 0.25;
 	static final double HOP_DRAGON = 0.34;
 	/** How far ahead he looks for ground before a step (times the step), on the ground and for a hop. */
+	/**
+	 * The hooking kicks pull the foe in toward him as they land (a share of a block's travel, by move; 0: none), and the
+	 * tornado kick also catches whoever stands round him ({@link #TORNADO_RADIUS}, {@link #TORNADO_SHARE} of its blow).
+	 */
+	static final double PULL_CRESCENT = 0.35, PULL_HOOK = 0.45, PULL_TORNADO = 0.55;
+	/** Closer than this (blocks, flat) a foe is no longer pulled. */
+	static final double PULL_MIN_GAP = 1.1;
+	static final double TORNADO_RADIUS = 2.4;
+	static final float TORNADO_SHARE = 0.6F;
+	/**
+	 * Sprinting into a string opens it with a running two-footed jump kick (the flying double kick, thrown from a dash): how
+	 * fast he goes in, the hop, and how long before the next one (ticks).
+	 */
+	static final double DASH_SPEED = 0.5, HOP_DASH = 0.3;
+	static final int DASH_COOLDOWN = 120;
+	/** How much a finisher weighs in a clash of blows, times its damage. */
+	static final float CLASH_STRENGTH = 1.5F;
 	static final double STEP_PROBE = 2.5;
 	static final double HOP_PROBE = 5.0;
 	/** A step is only taken if there's ground ahead no more than this many blocks down. */
@@ -191,7 +208,7 @@ public final class ZFighterCombo {
 	public static boolean kick(int move) {
 		return switch (move) {
 			case RISING_KNEE, FRONT_KICK, ROUNDHOUSE, LEG_SWEEP, CRESCENT_KICK, AXE_KICK, SPIN_BACK_KICK, SPIN_HOOK_KICK, FLYING_KNEE,
-				FLYING_DOUBLE_KICK -> true;
+				FLYING_DOUBLE_KICK, TORNADO_KICK -> true;
 			default -> false;
 		};
 	}
@@ -216,15 +233,30 @@ public final class ZFighterCombo {
 		@Nullable UUID chase;
 		long rushUntil = -1L;
 		long rushedAt = -1L;
+		/** The string opens with a running jump kick. */
+		final boolean dash;
 
 		Run(ServerPlayer player) {
 			this.tier = tier(player);
-			this.string = (Breaks.armless(player) ? KICK_STRINGS : STRINGS)[this.tier];
+			int[] base = (Breaks.armless(player) ? KICK_STRINGS : STRINGS)[this.tier];
+			long now = player.level().getGameTime();
+			this.dash = player.isSprinting() && player.onGround() && this.tier >= 1 && now >= DASHED.getOrDefault(player.getUUID(), 0L);
+			if (this.dash) {
+				DASHED.put(player.getUUID(), now + DASH_COOLDOWN);
+				int[] opened = new int[base.length + 1];
+				opened[0] = FLYING_DOUBLE_KICK;
+				System.arraycopy(base, 0, opened, 1, base.length);
+				this.string = opened;
+			} else {
+				this.string = base;
+			}
 		}
 	}
 
 	private static final Map<UUID, Boolean> HELD = new HashMap<>();
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
+	/** When each fighter may open a string with a running jump kick again (game time). */
+	private static final Map<UUID, Long> DASHED = new HashMap<>();
 
 	private ZFighterCombo() {
 	}
@@ -233,6 +265,7 @@ public final class ZFighterCombo {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			HELD.remove(handler.player.getUUID());
 			RUNS.remove(handler.player.getUUID());
+			DASHED.remove(handler.player.getUUID());
 		});
 	}
 
@@ -271,7 +304,7 @@ public final class ZFighterCombo {
 	}
 
 	private static boolean able(ServerPlayer player, ZFighterPower.Live live) {
-		return player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty() && !Powers.silenced(player)
+		return player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty() && !Powers.silenced(player) && !com.jaymospowers.core.BlowClash.locked(player)
 			&& !ZFighterLineage.ape(player) && !live.guarding && !live.charging && live.spiritFrom < 0 && live.waveFrom < 0
 			&& live.barrageFrom < 0 && !player.isSleeping()
 			&& !ZFighterRush.active(player) && !ZFighterGrab.holding(player) && !ZFighterPoise.stunned(player);
@@ -401,7 +434,12 @@ public final class ZFighterCombo {
 			dir = Vec3.directionFromRotation(0.0F, player.getYRot());
 			dir = new Vec3(dir.x, 0.0, dir.z);
 		}
-		double hop = !grounded ? 0.0 : move == DRAGON_FIST ? HOP_DRAGON : move == FLYING_KNEE || move == FLYING_DOUBLE_KICK ? HOP_FLYING : 0.0;
+		double hop = !grounded ? 0.0 : move == DRAGON_FIST ? HOP_DRAGON : move == FLYING_KNEE || move == FLYING_DOUBLE_KICK || move == TORNADO_KICK ? HOP_FLYING : 0.0;
+		if (run.dash && run.step == 0 && grounded) {
+			// the running jump kick: in fast and up
+			speed = Math.max(speed, DASH_SPEED);
+			hop = HOP_DASH;
+		}
 		if (dir.lengthSqr() < 1.0E-4) {
 			speed = 0.0;
 		} else {
@@ -460,6 +498,10 @@ public final class ZFighterCombo {
 		}
 		run.target = target.getUUID();
 		double fists = fists(player, move);
+		if (finisher && com.jaymospowers.core.BlowClash.meets(player, target.position().subtract(player.position()), (float)fists * FINISHER_SHARE[run.tier] * CLASH_STRENGTH)) {
+			// met by another great blow (BlowClash)
+			return;
+		}
 		float damage = (float)fists * (finisher ? FINISHER_SHARE[run.tier] : HIT_SHARE[run.tier] * MOVE_WEIGHT[move]);
 		if (stretched && !finisher) {
 			damage *= ZFighterStretchCombo.STRETCH_DAMAGE;
@@ -528,6 +570,16 @@ public final class ZFighterCombo {
 			double lift = move == RISING_KNEE ? KNEE_LIFT : move == FLYING_KNEE ? FLYING_KNEE_LIFT : Math.min(motion.y, 0.1);
 			target.setDeltaMovement(motion.x * REEL, lift, motion.z * REEL);
 		}
+		double pull = move == CRESCENT_KICK ? PULL_CRESCENT : move == SPIN_HOOK_KICK ? PULL_HOOK : move == TORNADO_KICK ? PULL_TORNADO : 0.0;
+		Vec3 toward = player.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
+		if (pull > 0.0 && toward.length() > PULL_MIN_GAP) {
+			// a hooking kick drags the foe in toward him
+			Vec3 drag = toward.normalize().scale(pull);
+			target.setDeltaMovement(target.getDeltaMovement().add(drag.x, 0.0, drag.z));
+		}
+		if (move == TORNADO_KICK) {
+			tornado(player, level, target, damage, live);
+		}
 		target.syncVelocity = true;
 		level.sendParticles(ParticleTypes.CRIT, true, false, at.x, at.y, at.z, 4 + run.tier, 0.2, 0.2, 0.2, 0.25);
 		if (run.tier >= 3) {
@@ -536,6 +588,22 @@ public final class ZFighterCombo {
 		level.playSound(null, at.x, at.y, at.z, kick(move) ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS,
 			0.8F, 0.9F + 0.08F * run.tier + level.getRandom().nextFloat() * 0.15F);
 		Shakes.send(player, HIT_SHAKE + HIT_SHAKE_PER_TIER * run.tier, at);
+	}
+
+	/** The tornado kick's turn catches everyone else round him too, for a share of its blow, and flings them off. */
+	private static void tornado(ServerPlayer player, ServerLevel level, LivingEntity hit, float damage, ZFighterPower.Live live) {
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TORNADO_RADIUS, 1.0, TORNADO_RADIUS),
+			e -> e != player && e != hit && valid(player, e))) {
+			other.setInvulnerableTime(0);
+			if (other.hurtServer(level, player.damageSources().playerAttack(player), damage * TORNADO_SHARE)) {
+				Vec3 away = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+				if (away.lengthSqr() > 1.0E-4) {
+					ZFighterKi.push(other, away.normalize(), 0.7, 0.2);
+				}
+			}
+		}
+		level.sendParticles(ParticleTypes.SWEEP_ATTACK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 3, 1.2, 0.2, 1.2, 0.0);
+		level.sendParticles(ZFighterPower.dust(live), true, false, player.getX(), player.getY() + 0.9, player.getZ(), 12, 1.4, 0.3, 1.4, 0.05);
 	}
 
 	/** His fists' damage for {@code move}: a kick never loses any to broken arms (0.18.47). */
