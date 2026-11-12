@@ -253,6 +253,17 @@ public final class BorderClashes {
 			}
 			party.men.add(man.mob().getUUID());
 		}
+		if (!party.men.isEmpty() && !militia) {
+			// (Andy, 2026-11-12) the realm's court casters march with its raid, all but one
+			for (Worker caster : WarParties.casters(level, from)) {
+				PathfinderMob mob = caster.mob();
+				BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2));
+				mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, mob.getYRot(), 0.0F);
+				mob.setHomeTo(target.seat(), Raids.RAID_HOME_RADIUS);
+				mob.addTag(WarParties.CASTER_TAG);
+				party.men.add(mob.getUUID());
+			}
+		}
 		if (party.men.isEmpty()) {
 			return false;
 		}
@@ -344,7 +355,9 @@ public final class BorderClashes {
 					if (Raids.horizontal(m.blockPosition(), party.muster) < HOME_REACH
 						&& level.getNearestPlayer(m.getX(), m.getY(), m.getZ(), VANISH_RANGE, false) == null) {
 						party.men.remove(m.getUUID());
-						McaCompat.vanish(m);
+						if (!WarParties.homeCaster(level, m)) {
+							McaCompat.vanish(m);
+						}
 					}
 				}
 			}
@@ -382,7 +395,9 @@ public final class BorderClashes {
 	private static void end(Party party, List<PathfinderMob> men) {
 		ACTIVE.remove(party.target);
 		for (PathfinderMob m : men) {
-			McaCompat.vanish(m);
+			if (!(m.level() instanceof ServerLevel level) || !WarParties.homeCaster(level, m)) {
+				McaCompat.vanish(m);
+			}
 		}
 	}
 
