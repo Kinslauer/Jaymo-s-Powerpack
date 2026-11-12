@@ -648,8 +648,9 @@ public final class Ledge {
 
 	/** Server: a player on a ledge (or just off one) moves however the hang and climb put them, without being kicked. */
 	public static boolean relaxesMovement(ServerPlayer player) {
-		// (0.14.3) and a freerunner clinging to a wall, hanging from a bar or running along a wall (Freerun)
-		if (HOLDING.containsKey(player.getUUID()) || com.jaymospowers.freerun.Freerun.relaxesMovement(player)) {
+		// (0.14.3) and a freerunner clinging to a wall, hanging from a bar or running along a wall (Freerun), and a player
+		// hauling themselves up a block while prone (ProneHaul)
+		if (HOLDING.containsKey(player.getUUID()) || com.jaymospowers.freerun.Freerun.relaxesMovement(player) || ProneHaul.relaxesMovement(player)) {
 			return true;
 		}
 		Long until = GRACE.get(player.getUUID());

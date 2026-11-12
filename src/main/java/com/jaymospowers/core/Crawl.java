@@ -50,22 +50,11 @@ public final class Crawl {
 	/** Lie still this long after a roll and the spent direction is fresh again (and the next roll isn't a reversal). */
 	public static final int ROLL_REST_TICKS = 40;
 
-	/**
-	 * Andy (2026-11-12): "crawling players should still be able to haul themselves up one block". Flat on the ground a
-	 * player's step reaches a full block (vanilla's is 0.6): crawl into a one-block rise and you go up onto it, however
-	 * few legs you have to jump with. The haul costs you: {@link #HAUL_SLOW} of your pace for {@link #HAUL_TICKS}
-	 * after it, and {@link #HAUL_EXHAUSTION} food.
+	/*
+	 * Andy (2026-11-12): "crawling players should still be able to haul themselves up one block", then: "the one block climb
+	 * while prone should be activated by holding right click". Flat on the ground the step is vanilla's: a full block is
+	 * climbed only by holding Use against it, {@link ProneHaul}.
 	 */
-	public static final double HAUL_STEP = 1.0, HAUL_SLOW = -0.7;
-	public static final int HAUL_TICKS = 16;
-	public static final float HAUL_EXHAUSTION = 0.2F;
-	/** A rise of at least this much between two ticks, on the ground, was a haul up (not a slab or a stair). */
-	private static final double HAUL_RISE = 0.6;
-	private static final net.minecraft.resources.Identifier HAUL_STEP_ID = JaymosPowers.id("crawl_haul_step"),
-		HAUL_SLOW_ID = JaymosPowers.id("crawl_haul_slow");
-	/** Crawling players: where they were last tick (y) and the game time their haul's slow ends (0 when none). */
-	private static final java.util.Map<java.util.UUID, double[]> HAULING = new java.util.HashMap<>();
-
 	/** On a crawling player: present while they crawl (synced to everyone). */
 	public static final AttachmentType<Boolean> CRAWLING = AttachmentRegistry.create(JaymosPowers.id("crawling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
@@ -161,12 +150,6 @@ public final class Crawl {
 		PayloadTypeRegistry.serverboundPlay().register(Roll.TYPE, Roll.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Key.TYPE, (payload, ctx) -> set(ctx.player(), payload.down()));
 		ServerPlayNetworking.registerGlobalReceiver(Roll.TYPE, (payload, ctx) -> roll(ctx.player(), payload.right()));
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
-			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-				tickHaul(player);
-			}
-			HAULING.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
-		});
 		PayloadTypeRegistry.serverboundPlay().register(Supine.TYPE, Supine.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Supine.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
@@ -176,54 +159,6 @@ public final class Crawl {
 				player.removeAttached(SUPINE);
 			}
 		});
-	}
-
-	/** The haul up a block: the longer step while flat, and the slow and the hunger after each rise. */
-	private static void tickHaul(ServerPlayer player) {
-		java.util.UUID id = player.getUUID();
-		boolean flat = player.hasAttached(CRAWLING) && canCrawl(player) && !com.jaymospowers.core.wounds.Downed.passedOut(player);
-		double[] state = HAULING.get(id);
-		if (!flat) {
-			if (state != null) {
-				HAULING.remove(id);
-				modifier(player, net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT, HAUL_STEP_ID, 0.0, false);
-				modifier(player, net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, HAUL_SLOW_ID, 0.0, true);
-			}
-			return;
-		}
-		long now = player.level().getGameTime();
-		if (state == null) {
-			state = new double[] {player.getY(), 0.0};
-			HAULING.put(id, state);
-			double step = player.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT);
-			modifier(player, net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT, HAUL_STEP_ID, Math.max(0.0, HAUL_STEP - step), false);
-		}
-		if (player.onGround() && player.getY() - state[0] >= HAUL_RISE) {
-			state[1] = now + HAUL_TICKS;
-			modifier(player, net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, HAUL_SLOW_ID, HAUL_SLOW, true);
-			player.causeFoodExhaustion(HAUL_EXHAUSTION);
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(),
-				SoundSource.PLAYERS, 0.6F, 0.7F);
-		} else if (state[1] != 0.0 && now >= state[1]) {
-			state[1] = 0.0;
-			modifier(player, net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED, HAUL_SLOW_ID, 0.0, true);
-		}
-		state[0] = player.getY();
-	}
-
-	private static void modifier(ServerPlayer player, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
-		net.minecraft.resources.Identifier id, double amount, boolean multiplied) {
-		net.minecraft.world.entity.ai.attributes.AttributeInstance instance = player.getAttribute(attribute);
-		if (instance == null) {
-			return;
-		}
-		if (amount == 0.0) {
-			instance.removeModifier(id);
-		} else {
-			instance.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(id, amount, multiplied
-				? net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
-				: net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
-		}
 	}
 
 	private static void set(ServerPlayer player, boolean down) {

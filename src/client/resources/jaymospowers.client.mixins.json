@@ -81,6 +81,7 @@
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",
 		"CarryUseMixin",
+		"ProneHaulUseMixin",
 		"ContainerScreenAccessor",
 		"CostumeAvatarRendererMixin",
 		"GiftedCostumeEntityRenderDispatcherMixin",
