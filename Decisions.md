@@ -285,3 +285,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-11 (Andy, SWGC picklist notes): cut marks on bodies: "the cuts are real and can be healed with bandages."
 - 2026-11-11 (Andy, SWGC picklist notes): tear a block loose: "no, it certainly should be able to grab ANYTHING" (no claim protection).
 - 2026-11-11 (Andy, SWGC picklist notes): Twinblade: "an ancient warrior born design, not often wielded by many, and the schematic is found in the stormborn dungeon."
+- 2026-11-11 10:26 PM ET (Andy, Gamma and Thematic picklist, screenshots): the five rows NOT picked are the shrinking/growing alien, the miner's kit, the modern army, the orbital laser and teleporter, and the named heroes' suits. Everything else (100 rows) is picked, including "A room inside your head". His note on the modern army row: "this should be what the frostborn in the future do".
