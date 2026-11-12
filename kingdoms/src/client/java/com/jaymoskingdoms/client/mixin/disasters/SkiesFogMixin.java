@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * The everyday weather's fog ({@link SkiesClient}): morning mist pales and shortens the view, a downpour closes it in
- * to a grey few dozen blocks. Dimmed by night like the sky's own fog, as a sandstorm's is ({@link CalamityFogMixin}).
+ * to a grey few dozen blocks, and dawn and dusk warm its colour. Dimmed by night like the sky's own fog, as a sandstorm's is ({@link CalamityFogMixin}).
  */
 @Mixin(FogRenderer.class)
 abstract class SkiesFogMixin {
@@ -22,6 +22,13 @@ abstract class SkiesFogMixin {
 	private void jaymoskingdoms$skiesFog(Camera camera, int renderDistanceInChunks, DeltaTracker deltaTracker, float darkenWorldAmount,
 		ClientLevel level, CallbackInfoReturnable<FogData> cir) {
 		FogData fog = cir.getReturnValue();
+		// dawn and dusk warm the far haze, its colour only
+		float warm = SkiesClient.glow * SkiesClient.GLOW_TINT;
+		if (warm > 0.001F) {
+			float light = Math.max(fog.color.x(), Math.max(fog.color.y(), fog.color.z()));
+			fog.color.set(Mth.lerp(warm, fog.color.x(), SkiesClient.GLOW_COLOUR[0] * light), Mth.lerp(warm, fog.color.y(), SkiesClient.GLOW_COLOUR[1] * light),
+				Mth.lerp(warm, fog.color.z(), SkiesClient.GLOW_COLOUR[2] * light), fog.color.w());
+		}
 		jaymoskingdoms$veil(fog, SkiesClient.mist * SkiesClient.MIST_FOG, SkiesClient.MIST_SIGHT, SkiesClient.MIST_COLOUR);
 		jaymoskingdoms$veil(fog, SkiesClient.downpour, SkiesClient.DOWNPOUR_SIGHT, SkiesClient.DOWNPOUR_COLOUR);
 	}

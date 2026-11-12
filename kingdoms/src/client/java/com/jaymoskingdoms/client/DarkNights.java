@@ -84,6 +84,11 @@ public final class DarkNights {
 		}
 	}
 
+	/** Whether a shader pack is drawing the world right now (Iris, by reflection; false without it). */
+	public static boolean shaderPackOn() {
+		return Iris.inUse();
+	}
+
 	/** Iris's public API, by reflection. */
 	private static final class Iris {
 		private static final boolean LOADED = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("iris");
