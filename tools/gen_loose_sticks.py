@@ -25,6 +25,7 @@ STICKS = [
 ]
 
 TEX = 'jaymospowers:block/ground/loose_sticks'
+FIREPIT_MAX_FUEL = 15  # FirepitBlock.MAX_FUEL
 
 # display transforms from the rock piles
 DISPLAY = {
@@ -220,6 +221,74 @@ def stick_texture():
     img.save(path)
 
 
+def firepit():
+    """The firepit (FirepitBlock): an ash bed, the full stick pile while it has fuel, a flame while lit."""
+    import random
+    rnd = random.Random(7)
+    path = os.path.join(ASSETS, 'textures', 'block', 'ground', 'firepit_ash.png')
+    img = Image.new('RGBA', (16, 16))
+    for y in range(16):
+        for x in range(16):
+            r = rnd.random()
+            c = (52, 50, 48) if r < 0.35 else (78, 75, 72) if r < 0.7 else (104, 100, 96) if r < 0.93 else (32, 28, 26)
+            img.putpixel((x, y), c + (255,))
+    for _ in range(5):  # charcoal bits
+        img.putpixel((rnd.randrange(16), rnd.randrange(16)), (24, 20, 18, 255))
+    img.save(path)
+    ground = os.path.join(ASSETS, 'models', 'block', 'ground')
+    faces = {d: {'texture': '#ash'} for d in ('up', 'north', 'south', 'west', 'east')}
+    faces['down'] = {'texture': '#ash', 'cullface': 'down'}
+    write(os.path.join(ground, 'firepit_ash.json'), {
+        'parent': 'minecraft:block/block',
+        'textures': {'ash': f'{NS}:block/ground/firepit_ash', 'particle': f'{NS}:block/ground/firepit_ash'},
+        'elements': [
+            {'from': [3, 0, 3], 'to': [13, 0.5, 13], 'faces': faces},
+            {'from': [4.5, 0.5, 4.5], 'to': [11.5, 0.75, 11.5], 'faces': {d: {'texture': '#ash'} for d in ('up', 'north', 'south', 'west', 'east')}},
+        ],
+    })
+    write(os.path.join(ground, 'firepit_sticks.json'), {
+        'parent': f'{NS}:block/ground/sticks_4',
+        'textures': {'all': TEX},
+    })
+    flame = {'rotation': {'origin': [8, 0, 8], 'axis': 'y', 'angle': 45}, 'shade_direction_override': 'up'}
+    write(os.path.join(ground, 'firepit_fire.json'), {
+        'parent': 'minecraft:block/block',
+        'ambientocclusion': False,
+        'textures': {'fire': 'minecraft:block/campfire_fire', 'particle': 'minecraft:block/campfire_fire'},
+        'elements': [
+            {'from': [2.5, 0.5, 8], 'to': [13.5, 11.5, 8], **flame,
+             'faces': {d: {'uv': [0, 0, 16, 16], 'texture': '#fire'} for d in ('north', 'south')}},
+            {'from': [8, 0.5, 2.5], 'to': [8, 11.5, 13.5], **flame,
+             'faces': {d: {'uv': [0, 0, 16, 16], 'texture': '#fire'} for d in ('west', 'east')}},
+        ],
+    })
+    fuels = '|'.join(str(n) for n in range(1, FIREPIT_MAX_FUEL + 1))
+    write(os.path.join(ASSETS, 'blockstates', 'firepit.json'), {'multipart': [
+        {'apply': {'model': f'{NS}:block/ground/firepit_ash'}},
+        {'when': {'fuel': fuels}, 'apply': {'model': f'{NS}:block/ground/firepit_sticks'}},
+        {'when': {'lit': 'true'}, 'apply': {'model': f'{NS}:block/ground/firepit_fire'}},
+    ]})
+    # broken: the sticks still in it, at most a pile's worth
+    write(os.path.join(DATA, 'loot_table', 'blocks', 'firepit.json'), {
+        'type': 'minecraft:block',
+        'pools': [{
+            'rolls': 1,
+            'entries': [{
+                'type': 'minecraft:item',
+                'name': 'minecraft:stick',
+                'modifier': [{
+                    'type': 'minecraft:set_count',
+                    'condition': {'type': 'minecraft:match_block', 'blocks': f'{NS}:firepit', 'state': {'fuel': str(n)}},
+                    'count': min(n, 4),
+                } for n in range(0, FIREPIT_MAX_FUEL + 1) if n != 1] + [{'type': 'minecraft:explosion_decay'}],
+            }],
+        }],
+        'random_sequence': f'{NS}:blocks/firepit',
+    })
+    # a campfire underneath: flint and steel, flint strikes, shovels, sitting by the fire all know the tag
+    write(os.path.join(ROOT, 'data', 'minecraft', 'tags', 'block', 'campfires.json'), {'values': [f'{NS}:firepit']})
+
+
 def main():
     stick_templates()
     for n in range(1, len(STICKS) + 1):
@@ -231,6 +300,7 @@ def main():
     write(os.path.join(ASSETS, 'items', 'loose_sticks.json'),
           {'model': {'type': 'minecraft:model', 'model': f'{NS}:block/ground/loose_sticks_4'}})
     stick_texture()
+    firepit()
 
     # worldgen: the feature picks the pile size itself (LooseSticksFeature)
     write(os.path.join(DATA, 'worldgen', 'feature', 'loose_sticks.json'), {'type': f'{NS}:loose_sticks'})

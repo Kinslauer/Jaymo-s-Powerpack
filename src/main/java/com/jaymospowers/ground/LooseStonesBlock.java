@@ -97,6 +97,15 @@ public abstract class LooseStonesBlock extends Block implements SimpleWaterlogge
 		}
 
 		@Override
+		protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+			super.onPlace(state, level, pos, oldState, movedByPiston);
+			if (!oldState.is(this)) {
+				// the last rock of a ring around a full stick pile makes it a firepit
+				FirepitBlock.rockLaid(level, pos);
+			}
+		}
+
+		@Override
 		protected boolean isRandomlyTicking(BlockState state) {
 			return state.getValue(NATURAL) && state.getValue(WATERLOGGED);
 		}

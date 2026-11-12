@@ -73,8 +73,17 @@ public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		// whatever is in hand (sticks too: a stick isn't a block item, so it can't be placed back on the pile),
-		// a right click picks one stick up
+		// a stick in hand goes on the pile (a full pile ringed by rocks becomes a firepit, FirepitBlock.tryForm)
+		if (stack.is(net.minecraft.world.item.Items.STICK) && state.getValue(STICKS) < 4) {
+			if (!level.isClientSide()) {
+				level.setBlock(pos, state.setValue(STICKS, state.getValue(STICKS) + 1), Block.UPDATE_ALL);
+				stack.consume(1, player);
+				level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.5F, 1.2F);
+				level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		// whatever else is in hand, a right click picks one stick up
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
@@ -95,6 +104,14 @@ public class LooseSticksBlock extends Block implements SimpleWaterloggedBlock {
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	@Override
+	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		super.onPlace(state, level, pos, oldState, movedByPiston);
+		if (state.getValue(STICKS) == 4 && !(oldState.is(this) && oldState.getValue(STICKS) == 4)) {
+			FirepitBlock.tryForm(level, pos);
+		}
 	}
 
 	@Override
