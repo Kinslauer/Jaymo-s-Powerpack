@@ -42,4 +42,5 @@
   - Traveler's Tool Belt's first belt: two leather bindings and a metal one. Its upgrades are the mod's own.
   - WeaponMod's fire rod: wooden handle and a torch.
   - All of them show in JEI.
+- F5 already toggles only first and third person; the front camera moves to F7 (from F6) and Simple Voice Chat's menu to F6, moved once per install; our shoulder view is unchanged.
 - Built; not played.
