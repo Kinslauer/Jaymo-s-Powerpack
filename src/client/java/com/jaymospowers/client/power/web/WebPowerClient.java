@@ -477,6 +477,7 @@ public final class WebPowerClient implements PowerClient {
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
+		WebFuryClient.renderHud(graphics, player);
 		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
