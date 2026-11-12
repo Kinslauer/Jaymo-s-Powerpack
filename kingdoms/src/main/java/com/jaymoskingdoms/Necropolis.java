@@ -108,6 +108,9 @@ public final class Necropolis {
 			.apply(i, Crypt::new));
 	}
 
+	/** How near (blocks) a crypt must be for a sage or a library to have its records. */
+	static final int LOOKUP_RANGE = 1500;
+
 	static final AttachmentType<List<Crypt>> CRYPTS = AttachmentRegistry.create(JaymosKingdoms.id("necromancer_crypts"), b -> b.persistent(Crypt.CODEC.listOf()));
 	/** The cells already seen to (with a crypt or without), packed. */
 	static final AttachmentType<List<Long>> CELLS = AttachmentRegistry.create(JaymosKingdoms.id("necromancer_cells"), b -> b.persistent(Codec.LONG.listOf()));
@@ -134,6 +137,44 @@ public final class Necropolis {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			cache = null;
 			HEARD.clear();
+		});
+		// a sage or a library can tell where his heart is hid (looking it up)
+		Research.addTopic(new Research.Topic() {
+			@Override
+			public String id() {
+				return "vessels";
+			}
+
+			@Override
+			public Component title() {
+				return Component.translatable("research.jaymoskingdoms.topic.vessels");
+			}
+
+			@Override
+			public List<Research.Subject> subjects(ServerPlayer player) {
+				List<Research.Subject> out = new ArrayList<>();
+				if (player.level().dimension() != Level.OVERWORLD) {
+					return out;
+				}
+				for (Crypt c : crypts(player.level().getServer())) {
+					if (c.whole() && !c.done() && player.blockPosition().distSqr(c.hall()) <= LOOKUP_RANGE * LOOKUP_RANGE) {
+						out.add(new Research.Subject(c.id().toString(), Component.translatable("research.jaymoskingdoms.vessels.subject",
+							CryptWords.point(player.blockPosition(), c.hall()))));
+					}
+				}
+				return out;
+			}
+
+			@Override
+			public Component learn(ServerPlayer player, String subject) {
+				for (Crypt c : crypts(player.level().getServer())) {
+					if (c.id().toString().equals(subject)) {
+						return Component.translatable("research.jaymoskingdoms.vessels.learned", CryptWords.paces(c.hatch(), c.vessel(), 5),
+							CryptWords.point(c.hatch(), c.vessel()), c.cairn().getY() - c.vessel().getY());
+					}
+				}
+				return Component.translatable("research.jaymoskingdoms.vessels.gone");
+			}
 		});
 		// the urn hums to a good ear that passes near it
 		Notice.add((player, into) -> {

@@ -140,3 +140,31 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
   768-block cell in two, 150+ blocks from villages); soul urn in a sealed room 24-46 blocks away under a cairn; he
   rises 2-4 days after death until it's smashed. Hints: sexton's tally (barrel), the Hollow Man's page (chest),
   villager talk within 700 blocks, `Notice` hum. Stand-in skin: the court necromancer's. No spawn egg.
+
+### Patch 5
+- **G5 starts** (`StartPerks`): 36 starts mapped to a circle of folk and boons (passive: Underworld trust, discount,
+  guard salute; asked once a day per villager via "Ask a Favour": food, hiding, bed and healing, news, passage, a
+  foe lesson). Several starts share a perk pair.
+- **A3 Presence** (`Stats.PRESENCE`, `Presence`): +0.4% talk odds, +0.5% warming, +0.6% order reach per point; 10 free
+  points for everyone (20 Warlord/Sorcerer); migration for old saves.
+- **A4 sparks** (`Sparks`): ideal/bond/flaw picked on the life story summary page; the flaw list is its own (temper,
+  greed, drink, pride) because life-story Flaws are physical. One spark at most; rescues a failed parry (Powers
+  `Guard`), lockpick or fright; gift from the Standing screen.
+- **G1** (`Persuasion`): "Talk Them Round"; remembered failures (`Recollections`); seen threats are ASSAULT.
+- **G2** (`Liars`): price lies +30%, wrong directions, guard alibis; Wits tell as a bubble stage direction; truth
+  draught stops it. Zone of Truth hook `Liars.zone` for patch 7 (H9).
+- **G3** (`Carousing`, `RecallScreen`): three purses (2/6/18 emeralds); outcomes are real (villager hearts, a real
+  structure rumour, a real crook's debt collected after 2 days, real cells via `Busts.lockUp`, MCA engagement via
+  `McaBridge.engage` on the villager's side). A 5 s blackout, then Andy's first-person recall screen; world time
+  doesn't jump.
+- **G4** (`Tables`, `GameScreen`): server-side dice and twenty-one, up to 4 players, villager house when alone,
+  stakes 1-25 emeralds; Finesse cheat, Wits catch. Faces drawn as plain shapes.
+- **G6** (`ChalkMarks`): dawn marks on real places; readable by the Underworld-trusted; player chalk (bone meal +
+  clay). Own glyph textures.
+- **G7** (`ForgedPapers`): per Andy, sold only by speakeasy fences and shady crooks; pass and pardon; FORGERY crime.
+- **G8** (`Lifestyle`): sleep, spending, tailor clothes, baths (5 s soaking in still water); audiences +-20 rep floor,
+  guard halts, priests' alms.
+- **G9** (`Lessons`): tongues (4 lessons), trades (3), fighting styles (3, plus a Powers boxing lesson).
+- **G10** (`Research`, `FoeLore` new): sage or a lectern with 6+ shelves; topics "creature fears" and (added by the
+  lead) "where a heart is hid" for Halvard's urn within 1500 blocks. `Research.addTopic` for I3 later. A day's study
+  is 1-2 minutes, once a game day. FoeLore stars at 3/12/30 kills: +4% dealt, -3% taken each.

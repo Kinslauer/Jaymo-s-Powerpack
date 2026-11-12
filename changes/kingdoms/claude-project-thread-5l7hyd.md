@@ -28,4 +28,16 @@
 - **Lair beats** (`LairBeats`): fight a boss in its home (a dragon's den, a ruler's throne room, the minotaur's labyrinth, the necromancer's crypt) and the place joins in every few seconds: falling rocks, grasping roots, fog, flaring fires.
 - **The land around a lair** (`GreatLairs`, `LairLand`, mixins `fifth/LairSpawnMixin`, `fifth/BirdSongMixin`): foul springs, scarce animals, quiet birds, bad dreams, withering crops; all lifts when the master dies.
 - **The one who comes back** (`GreatNecromancer`, `Necropolis`, `Vessel`, `CryptWords`): Halvard the Hollow sleeps in a deep crypt in the wilds and rises days after each death until his soul urn, hidden under a cairn nearby, is smashed. A sexton's tally, a page in his chest and village talk point the way.
+- **Presence** (`Presence`, `Stats.PRESENCE`): an eighth attribute for talk: haggling, persuading, lying, threatening, how fast strangers warm, how far companion orders carry. Everyone gets 10 free points (20 for Warlords and Sorcerers); old saves load.
+- **Sparks** (`Sparks`): pick an ideal, a bond and a flaw on the story page; acting on them earns one spark, which turns your next failed parry, lockpick or fright into a success, or can be given to a friend from the new Standing screen.
+- **Starts that keep giving** (`StartPerks`): every start leaves a lasting circle of folk who favour you (discounts, trust, a salute) or do you a favour once a day (food, a hiding place, a bed, news, passage, a lesson).
+- **Talk them round** (`Persuasion`): persuade, lie or threaten a villager, by Presence or Wits, their nature and mood; failures are remembered, threats seen are a crime.
+- **Liars** (`Liars`): traders cheat prices, strangers point the wrong way, guards claim their post; sharp Wits sees the tell; the truth draught stops it, and a bribed guard confesses.
+- **A night on the town** (`Carousing`, `RecallScreen`): pay for a night at a tavern or speakeasy and wake to a first-person recall of what you did: a new friend, a treasure rumour, a debt to a crook, a rival, a black eye and a cell, or a betrothal.
+- **Dice and twenty-one** (`Tables`, `GameScreen`): at tavern tables and the speakeasy dicer, for coin, up to four players together or against the house; cheat by Finesse, get caught by Wits.
+- **Chalk marks** (`ChalkMarks`, chalk item): the Underworld chalks safe houses, bribable guards, dogs, rich marks and danger; only the trusted can read them; chalk your own.
+- **Forged papers** (`ForgedPapers`): travel passes and pardons, sold only by speakeasy fences and shady crooks; show them at checkpoints, haven gates or sentencing; a sharp guard spots the fake (a new crime, forgery).
+- **How you live shows** (`Lifestyle`): where you sleep, what you spend, fresh tailor's clothes and baths open courts to you, or get you watched by guards and pitied by priests.
+- **Teachers** (`Lessons`): pay a villager to teach a tongue, a trade or a fighting style over a few days.
+- **Looking it up** (`Research`, `ResearchScreen`, `FoeLore`): a sage or a library teaches what a foe fears (foe knowledge stars: harder blows, softer hits) or where Halvard's heart is hid.
 - Built; not played.

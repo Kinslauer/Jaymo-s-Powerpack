@@ -19,5 +19,9 @@
   "journal.jaymoskingdoms.hollow.3": "Mossy stones, three of them, and a skull on top, because I could not help myself. Anyone who looks will find it. Few will look.",
   "talk.jaymoskingdoms.crypt_gossip.0": "There's an old crypt %s of here, about %s paces. Nobody goes. Nobody who goes comes back easy.",
   "talk.jaymoskingdoms.crypt_gossip.1": "The bone-man in the crypt can't be killed, they say. He's put his heart somewhere else. Kill him and he's back in a few days.",
-  "talk.jaymoskingdoms.crypt_gossip.2": "My gran said the bone-man hid his heart %s of his crypt, under a pile of mossy stones with a skull on top. She wouldn't go and look."
+  "talk.jaymoskingdoms.crypt_gossip.2": "My gran said the bone-man hid his heart %s of his crypt, under a pile of mossy stones with a skull on top. She wouldn't go and look.",
+  "research.jaymoskingdoms.topic.vessels": "Where a heart is hid",
+  "research.jaymoskingdoms.vessels.subject": "The crypt to the %s",
+  "research.jaymoskingdoms.vessels.learned": "The sexton's ledger: about %s paces %s of the hatch, under a cairn of mossy stone, some %s down. Break the urn and he stays dead.",
+  "research.jaymoskingdoms.vessels.gone": "The ledger's page is blotted out. Whatever was hid there is gone."
 }

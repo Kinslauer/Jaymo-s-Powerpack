@@ -3,4 +3,5 @@
 - **Undead fortitude** (`core/wounds/UndeadFortitude`): a downed zombie gets back up after four seconds, three times in four, once, unless the blow was fire, a beheading, a Smite blade or a crit.
 - **Zombie finishers**: an unarmed finisher on a zombie is a stomp, a head smash or the fist, at random (`Finishers` STOMP, HEAD_SMASH; `FinisherPose`).
 - **Bosses shrug off lockdowns** (through Kingdoms' legendary resistances, `KingdomsCompat.shrugs`): a boss's first Chrono and Darktide stuns, Gravity Lift, Crush pin, Gravity Well kneel and Time Stop slip off it (`ChronoFlow`, `DarktideStatus`, `GravityPower`, `ChronoTimeStop`, mixin `TimeStopFreezeMixin`); a boss walking through a Time Stop takes the Chrono's blows at once.
+- **Guard**: a Kingdoms spark can turn a missed parry into a parry (`Guard.SPARK` hook).
 - Built; not played.
