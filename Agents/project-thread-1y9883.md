@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Klei_Wright's tundra, all 34 picks (docs/Tundra-Plan.md)
 branch: claude/project-thread-1y9883
 with: 
-pr: 
+pr: 1358
 mods: powers, kingdoms, kitchen
 versions: 
 started: 2026-11-12
@@ -29,3 +29,4 @@ owns:
 - Cloud session; tracks A and B run as two agents in worktrees, merged into the one branch.
 
 ## Done
+A player in new chunks finds the tundra and lichen woodland, living glow lichen, muskox herds and predators that get full. Change notes: changes/powers/tundra.md, tundra-world.md, changes/kingdoms/tundra.md, changes/kitchen/tundra.md. Compiles; nothing played; worldgen JSON not load-tested.
