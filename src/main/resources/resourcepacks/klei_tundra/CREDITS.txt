@@ -1,0 +1,20 @@
+Klei_Wright's Tundra art
+========================
+
+Every image in this folder (and pack.png) is by Klei_Wright, from "Tundra Game Drop Assets":
+https://www.planetminecraft.com/texture-pack/tundra-game-drop-assets/
+made for the video "How can we make Minecraft feel alive? (It isn't structures)":
+https://youtu.be/cBmt2FNP1Ug
+
+Licence: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+(Klei_Wright offers these assets "under the same license as Matcha", his Matcha Flavoured pack.)
+
+This folder is its own resource pack under that licence, separate from the mod's code and art. The files are his,
+unchanged; only a subset is here (the textures that have a block of ours to go on), with pack.mcmeta and this file
+added. Switch it off under Options > Resource Packs to see the mod's own art for the same blocks.
+
+Not included from his pack: the muskox model and coats (they fit his own model, not ours), his glow lichen models,
+and the recoloured wool and packed ice.
+
+Klei_Wright does not endorse this mod.

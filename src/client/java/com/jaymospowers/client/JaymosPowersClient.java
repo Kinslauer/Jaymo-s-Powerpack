@@ -159,6 +159,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D items and plants"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
+		// Klei_Wright's own tundra art (CC BY-NC-SA 4.0, resourcepacks/klei_tundra/CREDITS.txt) over ours for the tundra's
+		// blocks, lichen and phosphor; on by default, switched off in Resource Packs for our own art
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("klei_tundra"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Klei_Wright's Tundra art"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		// (0.19.72) the optional Excalibur look (ExcaliburLook, docs/Excalibur-Style.md): our own textures graded toward
 		// Excalibur's colours (tools/excalibur_style) and calmer leaves (Excalibur's leaves hang fringes off every leaf
 		// block that repeat like a hall of mirrors inside a canopy; plain leaf cubes turned at random instead). Off by
