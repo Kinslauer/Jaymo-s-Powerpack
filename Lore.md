@@ -1336,4 +1336,4 @@ temper gives it (the bold shout, the warm reassure, the steady report, the quiet
 gives their own: press on, come to me, hold, get the fallen up. Those who mind the fallen kneel beside a downed friend
 in the thick of it and get them up, on either side, so a fight against a band is won by putting down its healers first,
 and a leader who goes down leaves his band to fight each by its own habit. Patch 6 proposes a name for the sickness
-that turns companions against the realm: **the Murmur**, for Andy to approve or rename.
+that turns companions against the realm: **the Murmur** (Andy approved the name). Townsfolk it turns companions on can die; the sick can be healed at a cleric or priest.
