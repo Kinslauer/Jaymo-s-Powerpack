@@ -113,6 +113,22 @@ public final class GiantTrees {
 		return false;
 	}
 
+	/**
+	 * Thrown now, on the giant's say rather than the grab's clock: along its aim at {@code speed} blocks a tick with the usual
+	 * lift. False if it holds no tree.
+	 */
+	public static boolean throwHeld(ServerLevel level, LivingEntity giant, double speed) {
+		Hold h = HELD.remove(giant.getUUID());
+		if (h == null || !(level.getEntity(h.tree()) instanceof Entity tree) || tree.isRemoved()) {
+			return false;
+		}
+		Vec3 v = giant.getViewVector(1.0F).scale(speed).add(0.0, THROW_LIFT, 0.0);
+		invoke(mHurl, tree, v, TUMBLE, giant);
+		level.playSound(null, giant.getX(), giant.getEyeY(), giant.getZ(), SoundEvents.RAVAGER_ROAR, giant instanceof Player ? SoundSource.PLAYERS
+			: SoundSource.HOSTILE, 2.0F, 0.6F);
+		return true;
+	}
+
 	/** Its grab is over: a tree still in its hand drops where it is. */
 	public static void drop(LivingEntity giant) {
 		Hold h = HELD.remove(giant.getUUID());
