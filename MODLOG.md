@@ -3461,3 +3461,11 @@ Compiled only; not played.
 - **Sore knuckles**: an empty fist that punches or starts to dig a block that needs a tool (stone, ore, metal) bruises that arm by half a point, once per punch; so does punching anyone with 8+ armour, a Stoneborn, or a `jaymospowers:tough_hide` mob (golems, ravagers, armadillos, turtles, shulkers, wardens, guardians, hoglins, sniffers, skeletons, withers, the dragon). Fist gear spares you, and so does being Stoneborn. Logs still splinter (Splinters).
 - **Riders thrown**: a galloping horse (0.4 blocks/tick into a wall) throws its rider forward limp; both are hurt. `jaymospowers:crash_proof`, no-gravity mounts and anything called a dragon never crash.
 - Built; not played.
+
+## 0.22.77 (2026-11-12): wound marks - hits leave a mark of what made them, fresh cuts drip
+
+- Andy's Cruor picks (ideas only; Cruor is All Rights Reserved). New `core/wounds/WoundMarks` (synced attachment, fed from `Wounds` after each routed hit) and `client/wounds/WoundMarksLayer`.
+- **Wound marks by weapon**: a hit of half a heart or more leaves a mark on the part it was routed to, on the side it came from: a blade a cut (dark line, raw edges), claws and teeth three raking cuts, arrows, bolts, cactus and berry bushes a puncture with a short run of blood under it, fists, blunt weapons, falls and wall slams a bruise that yellows as it heals, a blast specks and soot over up to three parts. Up to 10 marks a body. On humanoid skins (players, MCA folk, zombies) each lies on its own part and side; on other creatures somewhere on the skin. Bloodless bodies (skeletons, Stoneborn) get none.
+- Marks fade in four steps over their life (bruises 6 minutes, the rest 8 to 10) and go as soon as the part has mended whole. Painted into the skin as a cutout picture of just the mark pixels, so the blood coat still shows round them. Not kept over a restart (as blood coats aren't).
+- **Fresh wounds drip**: a fresh cut, claw or puncture that isn't already bleeding properly (Bleeding) drips a few drops onto the ground for 30 seconds, about every 1.5 s at first and every 7 s by the end, leaving lasting stains (BloodTrail).
+- Not yet on corpses. Built; not played.
