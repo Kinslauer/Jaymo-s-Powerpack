@@ -7,3 +7,4 @@
 
   Turn your head toward any of them and walk to it.
 - These were left out of #1303 and #1361. Built (`compileClientJava`); not played.
+- **Biome ambience is back** (Andy: "Bring it back"): AmbientSounds 6 and CreativeCore return to the pack (biome, cave, water and weather ambience). They had left for ImmersiveFX: Resurrected, which has since gone (build.gradle `packMods`, and they're no longer moved out of the CurseForge profile).
