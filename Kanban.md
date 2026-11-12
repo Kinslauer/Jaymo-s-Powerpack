@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-12 06:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-12 06:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,11 +13,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/project-thread-1y9883|project-thread-1y9883]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/project-thread-1y9883|project-thread-1y9883]] · 💻 Odysseus · #1358 · in-review
 
 
 ## Needs Andy
