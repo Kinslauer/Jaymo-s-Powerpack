@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Darktide overhaul (power, looks) + Blindness as a condition and Resonance buff, all in PR 1339
 branch: claude/project-thread-qtqlao
 with: 
@@ -33,3 +33,5 @@ PR 1339, three commits (2026-11-12), compiled, not played:
 - Darktide looks: MagicFx wave, stroke, pool; `DarktideLooks`.
 - Blindness is a condition (`Blind`), power removed; Resonance gains Quiet, Sky Sight, painted Pulse, fork awakening.
 Waiting on Andy: merge, and his word on the eye-loss chances and the vigil + fork rule (Decisions.md).
+
+Merged 2026-11-12 (PR #1339, squash 732a6096). Not played in game yet.
