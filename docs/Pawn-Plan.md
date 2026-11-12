@@ -205,7 +205,8 @@ loose gunpowder within 6 blocks. Out of a fight, every 10 s, one job: if you car
 16 of its ammunition it rolls 8 (bullets: an iron ingot, a gunpowder, a paper; shot for a blunderbuss: gravel instead
 of iron, WeaponMod's own recipes), else hands you up to 4 gunpowder when you have under 4 (keeping 2); a companion
 musketeer that ran dry gets 4 shot for a gunpowder; it grinds one charcoal and two bone meal into a gunpowder (up to
-6 in the pack); it makes two dynamite sticks from two gunpowder and a string (up to 6). In a fight it lobs a stick at a
+6 in the pack; players craft the same, Andy: "charcoal and bonemeal should be a recipe for players too", recipe
+`black_powder`); it makes two dynamite sticks from two gunpowder and a string (up to 6). In a fight it lobs a stick at a
 foe 5 to 18 blocks off, once in 5 s, only when nobody of its side (you included) and no bystander is in the blast;
 otherwise it calls out and holds. Foe side: 5% of band members are powderheads with 2-4 sticks and 2-4 measures of
 powder: they throw with the same care, top up a mate whose musket ran dry, and drop the sticks left when they fall.

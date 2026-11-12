@@ -41,7 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Stocking it</b>: use charcoal, bone meal, gunpowder, string, paper, an iron ingot, gravel or a dynamite stick
  * on your powderhead and it packs the lot ({@link #STOCK}). It also picks up loose gunpowder near it (a creeper's).</li>
  * <li><b>Black powder</b>: out of a fight it grinds one charcoal and two bone meal (the saltpetre of the bone heap)
- * into a gunpowder ({@link #GRIND_EVERY}), keeping a few in hand.</li>
+ * into a gunpowder ({@link #GRIND_EVERY}), keeping a few in hand; players craft it the same way (recipe
+ * {@code black_powder}).</li>
  * <li><b>For the marksman</b>: if you carry a gun (a WeaponMod musket, flintlock or blunderbuss) and run low on its
  * ammunition ({@link #LOW_AMMO}), it rolls you cartridges from its pack by the gunsmith's own measure (an iron ingot
  * or gravel, a gunpowder and a paper for eight: bullets, or shot for a blunderbuss); without the makings it hands you
