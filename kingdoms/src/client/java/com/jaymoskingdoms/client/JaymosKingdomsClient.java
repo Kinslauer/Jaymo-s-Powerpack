@@ -264,6 +264,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.StormsClient.register();
 		// the sea's own weather: fog banks, whirlpools, the glowing tide
 		SeaEventsClient.register();
+		SeaSwell.register();
 		// 0.7.31: sandstorms, blizzards and hail (stage 2)
 		com.jaymoskingdoms.client.disasters.CalamitiesClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
