@@ -93,7 +93,8 @@ public final class Fletching {
 	}
 
 	public static boolean isShaft(ItemStack stack) {
-		return stack.is(Items.STICK) || stack.getItem() instanceof ToolPartItem part && part.part.kind == PartType.Kind.ARROW_SHAFT;
+		return stack.is(Items.STICK) || com.jaymospowers.gear.arrow.Fitting.isHead(stack)
+			|| stack.getItem() instanceof ToolPartItem part && part.part.kind == PartType.Kind.ARROW_SHAFT;
 	}
 
 	public static boolean isFletching(ItemStack stack) {
@@ -128,6 +129,10 @@ public final class Fletching {
 	public static @Nullable Craft craft(ItemStack head, ItemStack shaft, ItemStack fletching, ItemStack potion) {
 		if (!potion.isEmpty() && !isPotion(potion)) {
 			return null;
+		}
+		Craft fitted = com.jaymospowers.gear.arrow.Fitting.craft(head, shaft, fletching, potion);
+		if (fitted != null) {
+			return fitted;
 		}
 		PotionContents contents = potion.get(DataComponents.POTION_CONTENTS);
 		if (head.is(Items.ARROW)) {

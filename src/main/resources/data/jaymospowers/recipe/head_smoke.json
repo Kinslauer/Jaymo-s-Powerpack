@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:clay_ball",
+    "minecraft:charcoal",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:head_smoke",
+    "count": 2
+  }
+}
