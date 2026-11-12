@@ -1413,7 +1413,8 @@ public final class Quests {
 			case Quest.RELIEF -> Component.translatable("quest.jaymoskingdoms.objective.rubble", o.place(), o.progress(), o.count());
 			case Quest.ESCORT -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.escorting" : "quest.jaymoskingdoms.objective.escort",
 				q.giver().name(), o.place(), x(q), z(q));
-			case Quest.RESCUE -> Component.translatable("quest.jaymoskingdoms.objective.rescue", o.otherName(), x(q), z(q));
+			case Quest.RESCUE -> Component.translatable(QuakeRescue.digOut(q) ? "quest.jaymoskingdoms.objective.dig_out" : "quest.jaymoskingdoms.objective.rescue",
+				o.otherName(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
