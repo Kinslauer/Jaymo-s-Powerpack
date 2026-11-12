@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Rivers that flow (Andy's TFC Hardrock picks, after Dynamic Waters and Realistic Water Engine, our own code).
  * <ul>
- * <li><b>Currents</b>: flowing water (Streams' rivers, waterfalls, any running water) carries what floats in it
+ * <li><b>Currents</b>: running water (waterfalls, springs, any flowing block) carries what floats in it
  * downstream, {@link #CURRENT} on top of the game's own push, half again in rain and twice in a storm: swimmers, boats
  * (Shippy Ships' and our ships too, anything standing on the flow), items and mobs. Each side moves what it owns: the
  * server mobs, items and empty boats, a player's own client the player and the boat they steer ({@code CurrentsClient}).</li>
@@ -31,6 +31,9 @@ import net.minecraft.world.phys.Vec3;
  * down into water sends out a ring of waves {@link #WAVE_RADIUS} across that rocks boats and pushes swimmers away.</li>
  * </ul>
  * Rivers freezing is Kitchen's Seasons: winter cools temperate land enough for still water to freeze over.
+ * <p>The big rivers are Dynamic Waters' (ports/dynamicwaters): their channels are still water that Dynamic Waters pushes
+ * along itself (its own current, with its rain and storm boosts) and where it floats its ice floes, so this only adds to
+ * water that is really flowing.</p>
  */
 public final class Currents {
 	/** Extra push a tick along the flow (blocks a tick squared), and how much more in rain and in a thunderstorm. */

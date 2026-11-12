@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "dynamicwaters",
+  "version": "${version}",
+  "name": "Dynamic Waters",
+  "description": "Reworks water systems to form realistic rivers that flow naturally through the terrain. Ported to Minecraft 26.3 for Jaymo's Powers.",
+  "authors": ["AdamNew"],
+  "contributors": ["Jaymo's Powers (26.3 port)"],
+  "contact": {
+    "homepage": "https://github.com/AdamNewGames/dynamicwaters-public",
+    "sources": "https://github.com/Kinslauer/jaymo-s-powerpack/tree/master/ports/dynamicwaters",
+    "issues": "https://github.com/AdamNewGames/dynamicwaters-public/issues"
+  },
+  "license": "MPL-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.AdamNew.dynamicwaters.platform.fabric.FabricEntrypoint"],
+    "client": ["com.AdamNew.dynamicwaters.platform.fabric.FabricClientEntrypoint"],
+    "modmenu": ["com.AdamNew.dynamicwaters.platform.fabric.ModMenuIntegration"]
+  },
+  "mixins": ["dynamicwaters.mixins.json", "dynamicwaters.fabric.mixins.json"],
+  "accessWidener": "dynamicwaters.accesswidener",
+  "depends": {
+    "minecraft": "~26.3",
+    "fabricloader": ">=0.19.5",
+    "fabric-api": "*",
+    "forgeconfigapiport": "*"
+  }
+}
