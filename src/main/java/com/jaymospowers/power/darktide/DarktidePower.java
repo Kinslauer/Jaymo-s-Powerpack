@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Z shadow harvest (corrupted) / Veil (ascended, cured), X Gedan: Stillwater ({@link DarktideGedan}), C Tide Arms (sneaking) / Necromancy / Drown
  * ({@link DarktideTide}).</li>
  * </ul>
- * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. Darktide starts corrupted (the
+ * Ascends after {@link #ASCEND_PARRIES} parries with every ability unlocked. Darktide starts corrupted (the
  * Drowned Dark, {@link #corrupted}): {@link #CURE_TICKS} of Conduit Power in a row cure it until the next nightfall, when
  * it comes back. That's Darktide's own state, never written into Fate. Darktide users never drown, and dying at night
  * brings them back as their shadow until the next nightfall ({@link DarktideShade}).
@@ -51,13 +51,15 @@ public final class DarktidePower implements Power {
 	public static final DarktidePower INSTANCE = new DarktidePower();
 	public static final Identifier ID = JaymosPowers.id("darktide");
 
-	/** Katana parries (with all four abilities unlocked) to ascend, and the whispers on the way. */
+	/** Parries (with all four abilities unlocked) to ascend, and the whispers on the way. */
 	public static final int ASCEND_PARRIES = 40;
 	static final int[] WHISPER_AT = {15, 30};
 	/** Veil: Flow drained a second. */
 	static final float VEIL_DRAIN_PER_SECOND = 2.0F;
 	/** Veil: mobs past this many blocks lose you, in the dark / in light. */
 	public static final double VEIL_DARK_RANGE = 6.0, VEIL_LIGHT_RANGE = 12.0;
+	/** Flow goes into the save this often (ticks), and when its holder leaves. */
+	static final int FLOW_SAVE_EVERY = 100;
 	/** The cure: this many ticks of Conduit Power in a row (60 s). */
 	static final int CURE_TICKS = 1200;
 	/** The overworld's clock: a day's length and when night falls (ticks into the day). */
@@ -73,6 +75,7 @@ public final class DarktidePower implements Power {
 		// (0.17.3) what a gifted villager does with Darktide
 		DarktideGift.init();
 		DarktideShade.registerItems();
+		DarktideBlade.registerItems();
 		DarktideNet.register();
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Guard.TYPE, (payload, ctx) -> DarktideGuard.setGuard(ctx.player(), payload.up()));
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Skill.TYPE, (payload, ctx) -> {
@@ -100,6 +103,7 @@ public final class DarktidePower implements Power {
 			DarktideGuard.tickReflections();
 			DarktideMoves.tickWorld(server);
 			DarktideTide.tickWorld(server);
+			DarktideMaelstrom.tickWorld(server);
 		});
 		// Balkon's knives throw on right click: for a Darktide user plain right click is the guard; sneak + right click throws
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -129,6 +133,7 @@ public final class DarktidePower implements Power {
 			DarktideStatus.clear();
 			DarktideMoves.clear();
 			DarktideTide.clear();
+			DarktideMaelstrom.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> DarktideDebugCommand.register(dispatcher));
 	}
@@ -212,7 +217,12 @@ public final class DarktidePower implements Power {
 	}
 
 	static DarktideLive live(ServerPlayer player) {
-		return LIVE.computeIfAbsent(player.getUUID(), uuid -> new DarktideLive());
+		return LIVE.computeIfAbsent(player.getUUID(), uuid -> {
+			// Flow is kept through a relog
+			DarktideLive live = new DarktideLive();
+			live.flow = Math.min(DarktideFlow.MAX, DarktideState.save(player).flow());
+			return live;
+		});
 	}
 
 	static @Nullable DarktideLive liveIfAny(Player player) {
@@ -235,6 +245,39 @@ public final class DarktidePower implements Power {
 		}
 		live.flow -= amount;
 		return true;
+	}
+
+	/** The tide follows Flow: synced for the look, a sound and a line when it turns to spring, and Flow written to the save. */
+	private static void tickTide(ServerPlayer player, DarktideLive live) {
+		int tide = DarktideFlow.tide(live.flow);
+		if (tide != live.tide) {
+			if (tide == DarktideFlow.EBB) {
+				player.removeAttached(DarktideState.TIDE);
+			} else {
+				player.setAttached(DarktideState.TIDE, tide);
+			}
+			if (tide > live.tide) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide." + (tide == DarktideFlow.SPRING ? "spring_tide" : "high_tide"))
+					.withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+					tide == DarktideFlow.SPRING ? SoundEvents.CONDUIT_ACTIVATE : SoundEvents.CONDUIT_AMBIENT_SHORT, SoundSource.PLAYERS, 0.6F, tide == DarktideFlow.SPRING ? 0.7F : 1.2F);
+			}
+			live.tide = tide;
+		}
+		if (player.tickCount % FLOW_SAVE_EVERY == 0) {
+			DarktideState.Save save = DarktideState.save(player);
+			if (save.flow() != Math.round(live.flow)) {
+				player.setAttached(DarktideState.SAVE, save.withFlow(Math.round(live.flow)));
+			}
+		}
+	}
+
+	/**
+	 * Whether this move is the spring tide's (a full bar when it's cast): the caller makes it the big version. Read before
+	 * {@link #spend}.
+	 */
+	static boolean springTide(ServerPlayer player) {
+		return DarktideFlow.tide(live(player).flow) == DarktideFlow.SPRING;
 	}
 
 	// ---- cooldowns ----------------------------------------------------------------------------------------------------
@@ -263,6 +306,10 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (down && key == PowerKey.ABILITY_2 && DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED) {
+			// empty hands: the cut draws the blade of dark water for itself
+			DarktideBlade.draw(player, live(player));
+		}
 		DarktideWeapons.Kit kit = DarktideWeapons.kit(player);
 		boolean knives = kit == DarktideWeapons.Kit.KNIFE && Fate.isAscended(player);
 		switch (key) {
@@ -352,7 +399,7 @@ public final class DarktidePower implements Power {
 
 	// ---- fate ---------------------------------------------------------------------------------------------------------
 
-	/** A katana parry: one step toward ascension, once every ability is unlocked. */
+	/** A parry (with anything): one step toward ascension, once every ability is unlocked. */
 	static void countParry(ServerPlayer player) {
 		if (Fate.isAscended(player) || Mastery.unlocked(player) < Mastery.ALL) {
 			return;
@@ -394,10 +441,18 @@ public final class DarktidePower implements Power {
 		player.removeAttached(DarktideState.SAVE);
 		player.removeAttached(DarktideState.CURED);
 		player.removeAttached(DarktideState.SHADE);
+		player.removeAttached(DarktideState.TIDE);
 	}
 
 	/** Ends everything running and hands the real items back (logging out, losing the power, the server stopping). */
 	private static void cleanUp(ServerPlayer player, boolean lost) {
+		DarktideLive running = LIVE.get(player.getUUID());
+		if (running != null && !lost) {
+			player.setAttached(DarktideState.SAVE, DarktideState.save(player).withFlow(Math.round(running.flow)));
+		}
+		DarktideFlow.dry(player);
+		DarktideBlade.dismiss(player, false);
+		DarktideMaelstrom.end(player, false);
 		DarktideGuard.drop(player);
 		setVeil(player, false);
 		DarktideGedan.cancel(player);
@@ -419,7 +474,7 @@ public final class DarktidePower implements Power {
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		DarktideLive live = LIVE.get(player.getUUID());
-		return live != null && (DarktideMoves.moving(live) || live.gedan != null);
+		return live != null && (DarktideMoves.moving(live) || live.gedan != null || live.maelstrom != null);
 	}
 
 	@Override
@@ -435,6 +490,8 @@ public final class DarktidePower implements Power {
 			return;
 		}
 		live.flow = Math.max(0.0F, Math.min(DarktideFlow.MAX, live.flow + DarktideFlow.tickGain(player, live.flow)));
+		DarktideFlow.tickWet(player);
+		tickTide(player, live);
 		if (player.getAirSupply() < player.getMaxAirSupply()) {
 			player.setAirSupply(player.getMaxAirSupply());
 		}
@@ -458,6 +515,9 @@ public final class DarktidePower implements Power {
 		DarktideMoves.tick(player, live);
 		DarktideGedan.tick(player, live);
 		DarktideTide.tick(player, live);
+		DarktideTide.tickHold(player, live);
+		DarktideBlade.tick(player, live);
+		DarktideMaelstrom.tick(player, live);
 		DarktideDodges.tickEvasion(player, live);
 		sync(player, live);
 	}

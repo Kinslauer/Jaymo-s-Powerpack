@@ -81,7 +81,7 @@ final class DarktideTide {
 	// ---- Drown ----
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
-	static final float DROWN_DAMAGE = 1.0F;
+	static final float DROWN_DAMAGE = 2.0F;
 	/** The water ball is a plain orb this colour, swelling to full size over this many ticks. */
 	static final int DROWN_COLOR = 0x1E5AB4, DROWN_SWELL = 8;
 
@@ -106,27 +106,47 @@ final class DarktideTide {
 	// ---- keys ---------------------------------------------------------------------------------------------------------
 
 	/**
-	 * C. Ascended: sneaking, Tide Arms; a tap raises a shadow while corrupted (cured, the shadows are dormant).
-	 * Not ascended: Drown while corrupted.
+	 * C. Ascended: sneaking, Tide Arms; held {@link DarktideMaelstrom#HOLD_TICKS}, the Maelstrom; let go sooner, a tap,
+	 * which raises a shadow while corrupted (cured, the shadows are dormant). Not ascended: Drown while corrupted.
 	 */
 	static void ultimateKey(ServerPlayer player, boolean down) {
-		if (!down) {
-			return;
-		}
 		boolean ascended = Fate.isAscended(player);
 		boolean corrupted = DarktidePower.corrupted(player);
-		if (ascended && player.isShiftKeyDown()) {
-			cycleArms(player);
-		} else if (!ascended) {
-			if (corrupted) {
+		DarktideLive live = DarktidePower.live(player);
+		if (!ascended) {
+			if (down && corrupted) {
 				drownKey(player, true);
 			}
-		} else if (!corrupted) {
+			return;
+		}
+		if (down) {
+			if (player.isShiftKeyDown()) {
+				cycleArms(player);
+			} else {
+				// held or tapped: decided when it's let go, or by tickHold once it's been down long enough
+				live.ultimateDown = player.level().getGameTime();
+			}
+			return;
+		}
+		if (live.ultimateDown < 0L) {
+			// already the Maelstrom, or the press was Tide Arms'
+			return;
+		}
+		live.ultimateDown = -1L;
+		if (!corrupted) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
 		} else if (DarktideState.save(player).shadows().isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_shadows").withStyle(ChatFormatting.GRAY));
 		} else {
 			raise(player);
+		}
+	}
+
+	/** C still down after {@link DarktideMaelstrom#HOLD_TICKS}: the Maelstrom. */
+	static void tickHold(ServerPlayer player, DarktideLive live) {
+		if (live.ultimateDown >= 0L && player.level().getGameTime() - live.ultimateDown >= DarktideMaelstrom.HOLD_TICKS) {
+			live.ultimateDown = -1L;
+			DarktideMaelstrom.key(player);
 		}
 	}
 
@@ -205,6 +225,8 @@ final class DarktideTide {
 		if (level.getGameTime() < live.armsSwapAt || !DarktidePower.ready(player, DarktideState.ARMS)) {
 			return;
 		}
+		// the guard's own blade of dark water is no blade of yours: it goes, and the hands count as empty
+		DarktideBlade.dismiss(player, false);
 		Inventory inventory = player.getInventory();
 		if (live.arms == DarktideState.ARMS_BARE) {
 			ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
@@ -747,7 +769,14 @@ final class DarktideTide {
 					victim.setDeltaMovement(back.x, Math.min(back.y, 0.02), back.z);
 					victim.syncVelocity = true;
 				} else {
-					victim.setDeltaMovement(victim.getDeltaMovement().multiply(0.6, 0.6, 0.6));
+					// hanging helpless in the water: no footing, drifting up toward its middle
+					Vec3 v = victim.getDeltaMovement();
+					victim.setDeltaMovement(v.x * 0.5, off.y < 0.0 ? 0.08 : Math.min(0.0, v.y * 0.5), v.z * 0.5);
+				}
+				victim.syncVelocity = true;
+				victim.resetFallDistance();
+				if (now % DROWN_EVERY == 0 && !(victim instanceof net.minecraft.world.entity.player.Player)) {
+					DarktideStatus.stun(victim, DROWN_EVERY + 2);
 				}
 				victim.setAirSupply(Math.max(-19, victim.getAirSupply() - 6));
 				victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 2), zone.owner);

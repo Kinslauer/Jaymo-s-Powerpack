@@ -68,38 +68,41 @@ final class DarktideMoves {
 	static final float PUNCH_MIN = 2.0F, PUNCH_MAX = 10.0F;
 	static final double PUNCH_RADIUS = 0.9;
 	static final float EMPOWER_FLOW = 25.0F;
-	static final int STRIKE_COOLDOWN = 60;
+	static final int STRIKE_COOLDOWN = 20;
 	// ---- V: Undertow ----
 	static final double UNDERTOW_RANGE = 12.0, UNDERTOW_RANGE_MASTERED = 18.0;
 	static final float UNDERTOW_FLOW = 15.0F;
-	static final int UNDERTOW_COOLDOWN = 120, UNDERTOW_DELAY = 8;
-	static final float UNDERTOW_SURFACE_DAMAGE = 3.0F;
-	static final double UNDERTOW_SURFACE_RADIUS = 1.6;
+	static final int UNDERTOW_COOLDOWN = 20, UNDERTOW_DELAY = 8;
+	static final float UNDERTOW_SURFACE_DAMAGE = 8.0F;
+	static final double UNDERTOW_SURFACE_RADIUS = 2.0, UNDERTOW_SURFACE_RADIUS_MASTERED = 3.0, UNDERTOW_LAUNCH = 0.75;
+	/** Spring tide: foes this near are dragged under and come up with you. */
+	static final double UNDERTOW_DRAG_RADIUS = 3.5;
 	// ---- G: Crescent (katana) ----
 	static final double CRESCENT_RANGE = 4.0, CRESCENT_ARC = 120.0;
-	static final int CRESCENT_TARGETS = 3;
-	static final float CRESCENT_BONUS = 4.0F, CRESCENT_FLOW = 15.0F;
-	static final int CRESCENT_COOLDOWN = 160;
+	static final int CRESCENT_TARGETS = 5;
+	static final float CRESCENT_BONUS = 8.0F, CRESCENT_FLOW = 15.0F;
+	static final int CRESCENT_COOLDOWN = 20;
 	static final int CRESCENT_COLOR = 0x10285A;
 	// ---- G: Ink Cross (knife) ----
 	static final double INK_CROSS_RANGE = 3.0;
 	static final float INK_CROSS_FACTOR = 1.5F, INK_CROSS_FLOW = 10.0F;
-	static final int INK_CROSS_COOLDOWN = 120, INK_CROSS_SLOW_TICKS = 60, INK_CROSS_SLOW_AMPLIFIER = 2;
+	static final int INK_CROSS_COOLDOWN = 20, INK_CROSS_SLOW_TICKS = 60, INK_CROSS_SLOW_AMPLIFIER = 2;
 	// ---- B: Black Tide ----
-	static final int TIDE_LENGTH = 10;
-	static final double TIDE_WIDTH = 5.0, TIDE_HEIGHT = 2.5, TIDE_PUSH = 0.55;
-	static final float TIDE_DAMAGE = 6.0F, TIDE_FLOW = 40.0F;
-	static final int TIDE_COOLDOWN = 400, TIDE_EFFECT_TICKS = 40, TIDE_SLOW_AMPLIFIER = 1;
+	static final int TIDE_LENGTH = 16;
+	static final double TIDE_WIDTH = 5.0, TIDE_HEIGHT = 2.5, TIDE_PUSH = 0.8;
+	static final float TIDE_DAMAGE = 12.0F, TIDE_FLOW = 40.0F;
+	static final int TIDE_COOLDOWN = 300, TIDE_EFFECT_TICKS = 40, TIDE_SLOW_AMPLIFIER = 1;
 	/** Mastered (ascended): the wave lingers as a shallow puddle you can Undertow into. */
 	static final int PUDDLE_TICKS = 60;
 	// ---- R: Pounce (knives, ascended) ----
-	static final int POUNCE_AIM_MAX = 20, POUNCE_FLIGHT = 15, POUNCE_COOLDOWN = 120;
+	static final int POUNCE_AIM_MAX = 20, POUNCE_FLIGHT = 15, POUNCE_COOLDOWN = 20;
+	static final float POUNCE_FLOW = 15.0F;
 	/** Launch speed: about {@code POUNCE_RANGE} blocks of leap. */
 	static final double POUNCE_SPEED = 1.25, POUNCE_LIFT = 0.28, POUNCE_RANGE = 6.0;
 	static final float POUNCE_FACTOR = 2.0F;
 	static final int POUNCE_STABS_CRIPPLED = 3;
 	// ---- G: Fang Barrage (knives, ascended) ----
-	static final int BARRAGE_MAX = 80, BARRAGE_EVERY = 4, BARRAGE_COOLDOWN = 360, BARRAGE_STUN = 40;
+	static final int BARRAGE_MAX = 80, BARRAGE_EVERY = 4, BARRAGE_COOLDOWN = 40, BARRAGE_STUN = 40;
 	static final float BARRAGE_DAMAGE = 2.0F, BARRAGE_FLOW = 40.0F;
 	static final double BARRAGE_REACH = 2.2, BARRAGE_HOLD_AT = 1.5;
 	// ---- B: Riptide Dash (knives, ascended) ----
@@ -119,15 +122,20 @@ final class DarktideMoves {
 		final Vec3 origin;
 		final Vec3 dir;
 		final boolean linger;
+		/** How wide the front is and how far it rolls (the tide it was cast at decides both). */
+		final double width;
+		final int length;
 		final Set<Integer> hit = new HashSet<>();
 		int step;
 
-		Wave(ServerPlayer owner, Vec3 origin, Vec3 dir, boolean linger) {
+		Wave(ServerPlayer owner, Vec3 origin, Vec3 dir, boolean linger, double width, int length) {
 			this.owner = owner;
 			this.level = owner.level();
 			this.origin = origin;
 			this.dir = dir;
 			this.linger = linger;
+			this.width = width;
+			this.length = length;
 		}
 	}
 
@@ -264,7 +272,8 @@ final class DarktideMoves {
 		boolean empowered = now < live.empoweredUntil && live.flow >= EMPOWER_FLOW;
 		DarktideMove.play(player, DarktideMove.STRIKE, DarktideMove.STRIKE_TICKS, (empowered ? 1 : 0) | (fist ? 0 : 2));
 		swing(player);
-		LivingEntity target = fist ? pickWide(player, STRIKE_REACH, PUNCH_RADIUS) : pick(player, STRIKE_REACH);
+		double reach = DarktideFlow.reach(player, STRIKE_REACH);
+		LivingEntity target = fist ? pickWide(player, reach, PUNCH_RADIUS) : pick(player, reach);
 		if (target != null) {
 			float damage = fist ? Mth.lerp(charge, PUNCH_MIN, PUNCH_MAX) : weapon(player) * Mth.lerp(charge, 1.0F, STRIKE_FACTOR);
 			if (empowered) {
@@ -305,20 +314,27 @@ final class DarktideMoves {
 	// ---- G: Crescent / Ink Cross --------------------------------------------------------------------------------------
 
 	static void crescent(ServerPlayer player) {
-		if (!readyOrSilent(player, DarktideState.CRESCENT) || !DarktidePower.spend(player, CRESCENT_FLOW)) {
+		if (!readyOrSilent(player, DarktideState.CRESCENT)) {
+			return;
+		}
+		// spring tide: the cut goes all the way round, and takes everyone in it
+		boolean spring = DarktidePower.springTide(player);
+		double range = DarktideFlow.reach(player, CRESCENT_RANGE);
+		if (!DarktidePower.spend(player, CRESCENT_FLOW)) {
 			return;
 		}
 		ServerLevel level = player.level();
 		Vec3 look = Vec3.directionFromRotation(0.0F, player.getYRot());
-		double cos = Math.cos(Math.toRadians(CRESCENT_ARC / 2.0));
-		List<LivingEntity> targets = around(player, player.getBoundingBox().inflate(CRESCENT_RANGE, 1.0, CRESCENT_RANGE));
+		double arc = spring ? 360.0 : CRESCENT_ARC;
+		double cos = Math.cos(Math.toRadians(arc / 2.0));
+		List<LivingEntity> targets = around(player, player.getBoundingBox().inflate(range, 1.0, range));
 		targets.removeIf(e -> {
 			Vec3 to = e.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
-			return to.length() > CRESCENT_RANGE + e.getBbWidth() / 2.0 || to.lengthSqr() > 0.01 && to.normalize().dot(look) < cos;
+			return to.length() > range + e.getBbWidth() / 2.0 || !spring && to.lengthSqr() > 0.01 && to.normalize().dot(look) < cos;
 		});
 		targets.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
 		float damage = weapon(player) + CRESCENT_BONUS;
-		for (int i = 0; i < Math.min(CRESCENT_TARGETS, targets.size()); i++) {
+		for (int i = 0; i < Math.min(spring ? targets.size() : CRESCENT_TARGETS, targets.size()); i++) {
 			// aimed: low takes the legs (and cripples), high goes for the neck, between for the arms
 			LivingEntity target = targets.get(i);
 			int part = Dismember.aimedPart(player, target);
@@ -336,9 +352,10 @@ final class DarktideMoves {
 		// the arc trail, at the height it's aimed
 		double aimed = Mth.clamp(player.getLookAngle().y * 2.6, -player.getBbHeight() * 0.55, player.getBbHeight() * 0.45);
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6 + aimed, 0.0);
-		for (int i = 0; i <= 16; i++) {
-			float yaw = player.getYRot() - (float) CRESCENT_ARC / 2.0F + (float) CRESCENT_ARC * i / 16.0F;
-			Vec3 p = center.add(Vec3.directionFromRotation(0.0F, yaw).scale(2.6));
+		int points = spring ? 48 : 16;
+		for (int i = 0; i <= points; i++) {
+			float yaw = player.getYRot() - (float) arc / 2.0F + (float) arc * i / points;
+			Vec3 p = center.add(Vec3.directionFromRotation(0.0F, yaw).scale(range * 0.65));
 			level.sendParticles(MagicFx.wisp(CRESCENT_COLOR, 1.8F), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0.0);
 			level.sendParticles(ParticleTypes.SQUID_INK, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
@@ -351,7 +368,7 @@ final class DarktideMoves {
 		if (!readyOrSilent(player, DarktideState.INK_CROSS)) {
 			return;
 		}
-		LivingEntity target = pick(player, INK_CROSS_RANGE);
+		LivingEntity target = pick(player, DarktideFlow.reach(player, INK_CROSS_RANGE));
 		if (target == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_target").withStyle(ChatFormatting.GRAY));
 			return;
@@ -387,7 +404,9 @@ final class DarktideMoves {
 		}
 		ServerLevel level = player.level();
 		boolean mastered = Fate.isAscended(player);
-		double range = mastered ? UNDERTOW_RANGE_MASTERED : UNDERTOW_RANGE;
+		double range = DarktideFlow.reach(player, mastered ? UNDERTOW_RANGE_MASTERED : UNDERTOW_RANGE);
+		// spring tide: whoever stands near is dragged under too
+		boolean spring = DarktidePower.springTide(player);
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(range));
 		BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
@@ -396,10 +415,18 @@ final class DarktideMoves {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_shadow").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (!DarktidePower.spend(player, UNDERTOW_FLOW)) {
+		// at home in water: wet, it costs nothing
+		if (!DarktideFlow.wet(player) && !DarktidePower.spend(player, UNDERTOW_FLOW)) {
 			return;
 		}
 		live.undertow = new DarktideLive.Undertow(to, level.getGameTime() + UNDERTOW_DELAY);
+		if (spring) {
+			for (LivingEntity near : around(player, player.getBoundingBox().inflate(UNDERTOW_DRAG_RADIUS, 1.0, UNDERTOW_DRAG_RADIUS))) {
+				live.undertow.dragged.add(near.getId());
+				DarktideStatus.stun(near, UNDERTOW_DELAY + 10);
+				level.sendParticles(ParticleTypes.SQUID_INK, near.getX(), near.getY() + 0.2, near.getZ(), 16, 0.3, 0.1, 0.3, 0.02);
+			}
+		}
 		DarktideMove.play(player, DarktideMove.SINK, UNDERTOW_DELAY, 0);
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 0.2, player.getZ(), 30, 0.4, 0.1, 0.4, 0.02);
 		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 20, 0.4, 0.05, 0.4, 0.1);
@@ -422,7 +449,8 @@ final class DarktideMoves {
 				continue;
 			}
 			boolean water = level.getFluidState(at).is(FluidTags.WATER) || level.getFluidState(at.below()).is(FluidTags.WATER);
-			if (water || DarktideFlow.shadow(level, at) || puddle(level, spot)) {
+			// rain counts as shadow: wherever it's falling, the ground is the tide's
+			if (water || DarktideFlow.shadow(level, at) || puddle(level, spot) || level.isRainingAt(at)) {
 				return spot;
 			}
 			return null;
@@ -447,9 +475,21 @@ final class DarktideMoves {
 		level.sendParticles(ParticleTypes.SQUID_INK, to.x, to.y + 0.3, to.z, 30, 0.4, 0.2, 0.4, 0.03);
 		level.sendParticles(ParticleTypes.SPLASH, to.x, to.y + 0.2, to.z, 24, 0.5, 0.1, 0.5, 0.15);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.7F, 0.8F);
-		if (Fate.isAscended(player)) {
-			for (LivingEntity near : around(player, new AABB(to, to).inflate(UNDERTOW_SURFACE_RADIUS, 1.5, UNDERTOW_SURFACE_RADIUS))) {
-				hit(player, near, UNDERTOW_SURFACE_DAMAGE);
+		// the dragged come up with you, a step off, and take the burst like anyone standing there
+		int n = 0;
+		for (int id : undertow.dragged) {
+			if (level.getEntity(id) instanceof LivingEntity dragged && dragged.isAlive()) {
+				double a = Math.PI * 2.0 * n++ / Math.max(1, undertow.dragged.size());
+				dragged.teleportTo(level, to.x + Math.cos(a) * 1.4, to.y, to.z + Math.sin(a) * 1.4, Set.of(), dragged.getYRot(), dragged.getXRot(), false);
+			}
+		}
+		double radius = Fate.isAscended(player) ? UNDERTOW_SURFACE_RADIUS_MASTERED : UNDERTOW_SURFACE_RADIUS;
+		for (LivingEntity near : around(player, new AABB(to, to).inflate(radius, 1.5, radius))) {
+			if (hit(player, near, UNDERTOW_SURFACE_DAMAGE)) {
+				Vec3 away = near.position().subtract(to).multiply(1.0, 0.0, 1.0);
+				Vec3 out = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize().scale(0.35);
+				near.setDeltaMovement(out.x, UNDERTOW_LAUNCH, out.z);
+				near.syncVelocity = true;
 			}
 		}
 	}
@@ -457,13 +497,19 @@ final class DarktideMoves {
 	// ---- B: Black Tide ------------------------------------------------------------------------------------------------
 
 	static void blackTide(ServerPlayer player) {
-		if (!readyOrSilent(player, DarktideState.BLACK_TIDE) || !DarktidePower.spend(player, TIDE_FLOW)) {
+		if (!readyOrSilent(player, DarktideState.BLACK_TIDE)) {
+			return;
+		}
+		// spring tide: a front twice as wide; from high tide it rolls further
+		boolean spring = DarktidePower.springTide(player);
+		int length = (int) Math.round(DarktideFlow.reach(player, TIDE_LENGTH));
+		if (!DarktidePower.spend(player, TIDE_FLOW)) {
 			return;
 		}
 		ServerLevel level = player.level();
 		Vec3 dir = Vec3.directionFromRotation(0.0F, player.getYRot());
 		player.clearFire();
-		WAVES.add(new Wave(player, player.position().add(dir.scale(0.5)), dir, Fate.isAscended(player)));
+		WAVES.add(new Wave(player, player.position().add(dir.scale(0.5)), dir, Fate.isAscended(player), spring ? TIDE_WIDTH * 2.0 : TIDE_WIDTH, length));
 		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 0);
 		swing(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.2F, 0.5F);
@@ -478,8 +524,9 @@ final class DarktideMoves {
 		Vec3 side = new Vec3(-wave.dir.z, 0.0, wave.dir.x);
 		Vec3 front = wave.origin.add(wave.dir.scale(wave.step));
 		// the crest: a line of dark water across the front
-		for (int i = 0; i <= 10; i++) {
-			double t = (i / 10.0 - 0.5) * TIDE_WIDTH;
+		int columns = (int) Math.round(wave.width * 2.0);
+		for (int i = 0; i <= columns; i++) {
+			double t = (i / (double) columns - 0.5) * wave.width;
 			Vec3 p = front.add(side.scale(t));
 			level.sendParticles(ParticleTypes.SPLASH, p.x, p.y + 0.4, p.z, 3, 0.15, 0.3, 0.15, 0.2);
 			level.sendParticles(MagicFx.wisp(0x0A1838, 1.8F), p.x, p.y + 0.3 + level.getRandom().nextDouble() * 1.2, p.z, 1, 0.1, 0.2, 0.1, 0.0);
@@ -494,7 +541,7 @@ final class DarktideMoves {
 				}
 			}
 		}
-		AABB crest = new AABB(front, front).inflate(TIDE_WIDTH / 2.0 + 0.5, 0.0, TIDE_WIDTH / 2.0 + 0.5).expandTowards(0.0, TIDE_HEIGHT, 0.0)
+		AABB crest = new AABB(front, front).inflate(wave.width / 2.0 + 0.5, 0.0, wave.width / 2.0 + 0.5).expandTowards(0.0, TIDE_HEIGHT, 0.0)
 			.expandTowards(wave.dir.scale(-1.2));
 		if (!wave.owner.isRemoved()) {
 			for (LivingEntity target : around(wave.owner, crest)) {
@@ -512,10 +559,10 @@ final class DarktideMoves {
 		if (wave.step % 3 == 0) {
 			Soundscape.play(level, front, SoundSource.PLAYERS, WASH);
 		}
-		if (wave.step >= TIDE_LENGTH) {
+		if (wave.step >= wave.length) {
 			if (wave.linger) {
-				Vec3 a = wave.origin.add(side.scale(TIDE_WIDTH / 2.0));
-				Vec3 b = front.add(side.scale(-TIDE_WIDTH / 2.0));
+				Vec3 a = wave.origin.add(side.scale(wave.width / 2.0));
+				Vec3 b = front.add(side.scale(-wave.width / 2.0));
 				PUDDLES.add(new Puddle(level, new AABB(a, b).inflate(0.0, 1.0, 0.0), level.getGameTime() + PUDDLE_TICKS));
 			}
 			return true;
@@ -528,7 +575,7 @@ final class DarktideMoves {
 	static void pounce(ServerPlayer player, boolean down) {
 		DarktideLive live = DarktidePower.live(player);
 		if (down) {
-			if (live.pounce != null || !readyOrSilent(player, DarktideState.POUNCE)) {
+			if (live.pounce != null || !readyOrSilent(player, DarktideState.POUNCE) || !DarktidePower.spend(player, POUNCE_FLOW)) {
 				return;
 			}
 			live.pounce = new DarktideLive.Pounce(player.level().getGameTime());

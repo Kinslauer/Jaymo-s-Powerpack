@@ -26,9 +26,9 @@ import net.minecraft.world.phys.Vec3;
  */
 final class DarktideGedan {
 	public static final double FIELD_RADIUS = 10.0;
-	public static final int FIELD_GROW_TICKS = 100;
+	public static final int FIELD_GROW_TICKS = 60;
 	static final int MAX_TARGETS = 8;
-	static final float SLASH_DAMAGE = 6.0F, SLASH_PER_SECOND = 1.0F;
+	static final float SLASH_DAMAGE = 10.0F, SLASH_PER_SECOND = 2.0F;
 	/** Seconds held that count toward the slash damage. */
 	static final int MAX_SECONDS = 5;
 	static final int MAX_EXTRA_SLASHES = 2;
@@ -57,6 +57,10 @@ final class DarktideGedan {
 		if (Mastery.unlocked(player) < Mastery.ALL) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.locked").withStyle(ChatFormatting.GRAY));
 			return;
+		}
+		if (DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED) {
+			// empty hands: the stance draws the blade of dark water for itself
+			DarktideBlade.draw(player, live);
 		}
 		if (DarktideWeapons.kit(player) != DarktideWeapons.Kit.KATANA) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.katana_only").withStyle(ChatFormatting.GRAY));

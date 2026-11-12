@@ -1,6 +1,13 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.JaymosPowers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
@@ -8,9 +15,13 @@ import net.minecraft.world.level.LightLayer;
 
 /**
  * Flow, Darktide's 0-{@link #MAX} resource: it rises in water and in the dark, at least {@link #NIGHT_FLOW} a second
- * anywhere at night, and from parries and roll evasions; it drains only in full daylight under open sky above
- * {@link #DAYLIGHT_FLOOR}. Named {@code DarktideFlow} in code so it's
- * never confused with Chronokinesis' Time Flow.
+ * anywhere at night, and from parries and roll evasions; anywhere else it still trickles in at {@link #BASE_PER_SECOND},
+ * and nothing drains it but what it's spent on. It's the only thing Darktide's moves cost (their cooldowns are a
+ * second or so), and it's kept through a relog ({@link DarktideState.Save#flow}). Named {@code DarktideFlow} in code so
+ * it's never confused with Chronokinesis' Time Flow.
+ * <p>
+ * The tide ({@link #tide}): from {@link #HIGH_TIDE} Flow it's high tide and moves reach {@link #HIGH_TIDE_REACH}× as
+ * far; at {@link #MAX} it's spring tide and the next Black Tide, Crescent or Undertow is its big version.
  */
 public final class DarktideFlow {
 	public static final int MAX = 100;
@@ -25,9 +36,16 @@ public final class DarktideFlow {
 	static final int DARK_BLOCK_LIGHT = 4;
 	/** At night (anywhere, in a dimension with a day): at least this much a second, or the day's gains if they're more. */
 	static final float NIGHT_FLOW = 3.0F;
-	/** Full daylight under open sky drains this much a second, while above {@link #DAYLIGHT_FLOOR}. */
-	static final float DAYLIGHT_DRAIN_PER_SECOND = 1.0F;
-	static final int DAYLIGHT_FLOOR = 50;
+	/** Anywhere, whatever the light: at least this much a second. */
+	static final float BASE_PER_SECOND = 1.0F;
+	/** The tide: ebb, high (from {@link #HIGH_TIDE} Flow), spring (a full bar). */
+	public static final int EBB = 0, HIGH = 1, SPRING = 2;
+	public static final int HIGH_TIDE = 50;
+	/** High tide and above: how much further moves reach. */
+	static final double HIGH_TIDE_REACH = 1.25;
+	/** At home in water: this much faster on foot in water or rain; Dolphin's Grace while swimming. */
+	static final double WET_SPEED = 0.2;
+	private static final Identifier WET_SPEED_ID = JaymosPowers.id("darktide_wet_speed");
 	/** Night: from dusk to dawn on the dimension's clock (ticks into the day). */
 	public static final long NIGHT_START = 12000L, NIGHT_END = 23500L;
 	/** (0.15.31) In winter night comes this much sooner and lasts this much past {@link #NIGHT_END} (ticks). */
@@ -81,12 +99,47 @@ public final class DarktideFlow {
 		if (night(level)) {
 			gain = Math.max(NIGHT_FLOW, gain);
 		}
-		if (gain > 0.0F) {
-			return gain / 20.0F;
+		return Math.max(BASE_PER_SECOND, gain) / 20.0F;
+	}
+
+	/** The tide for this much Flow: {@link #EBB}, {@link #HIGH} or {@link #SPRING}. Both sides. */
+	public static int tide(float flow) {
+		return flow >= MAX - 0.5F ? SPRING : flow >= HIGH_TIDE ? HIGH : EBB;
+	}
+
+	/** {@code reach} as far as it goes at the player's tide. */
+	static double reach(ServerPlayer player, double reach) {
+		return tide(DarktidePower.live(player).flow) >= HIGH ? reach * HIGH_TIDE_REACH : reach;
+	}
+
+	/** Wet: standing or swimming in water, or out in the rain. */
+	static boolean wet(ServerPlayer player) {
+		return player.isInWaterOrRain();
+	}
+
+	/** At home in water: quicker on foot while wet, and a dolphin's speed while swimming. */
+	static void tickWet(ServerPlayer player) {
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed == null) {
+			return;
 		}
-		if (flow > DAYLIGHT_FLOOR && level.isBrightOutside() && level.canSeeSky(pos) && !player.isInWater()) {
-			return -DAYLIGHT_DRAIN_PER_SECOND / 20.0F;
+		boolean wet = wet(player);
+		if (wet != speed.hasModifier(WET_SPEED_ID)) {
+			if (wet) {
+				speed.addOrUpdateTransientModifier(new AttributeModifier(WET_SPEED_ID, WET_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			} else {
+				speed.removeModifier(WET_SPEED_ID);
+			}
 		}
-		return 0.0F;
+		if (player.isInWater() && player.tickCount % 20 == 0) {
+			player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 40, 0, true, false, false));
+		}
+	}
+
+	static void dry(ServerPlayer player) {
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.removeModifier(WET_SPEED_ID);
+		}
 	}
 }

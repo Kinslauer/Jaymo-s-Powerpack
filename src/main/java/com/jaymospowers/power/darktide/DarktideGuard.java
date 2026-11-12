@@ -63,7 +63,7 @@ public final class DarktideGuard {
 	static final int STAGGER_TICKS = 12, BREAK_LOCK_TICKS = 40;
 	/** The riposte: stun on a humanoid, damage on top of the katana's, shove for anything else. */
 	static final int RIPOSTE_STUN_TICKS = 24;
-	static final float RIPOSTE_DAMAGE = 6.0F;
+	static final float RIPOSTE_DAMAGE = 10.0F;
 	static final double PARRY_KNOCKBACK = 0.9;
 	/** Reflect at mastery level 1 and 4 (in between, evenly): aim (how tightly at the shooter's chest) and speed kept. */
 	static final double REFLECT_AIM_MIN = 0.2, REFLECT_AIM_MAX = 0.7;
@@ -98,6 +98,8 @@ public final class DarktideGuard {
 			|| DarktideStatus.stunned(player) || live.gedan != null) {
 			return;
 		}
+		// both hands empty: a blade of dark water forms in them, and the guard is a katana's
+		DarktideBlade.draw(player, live);
 		live.guarding = true;
 		live.guardStart = now;
 		player.setAttached(DarktideState.GUARD, now);
@@ -261,9 +263,8 @@ public final class DarktideGuard {
 			com.jaymospowers.combat.ClashFx.met(level, player, player.getMainHandItem(), attacker, null, com.jaymospowers.combat.ClashFx.PARRY_SPARKS,
 				com.jaymospowers.combat.ClashFx.PARRY_SCALE, 0);
 		}
-		if (katana) {
-			DarktidePower.countParry(player);
-		}
+		// any parry is a step toward the Abyssal Tide: fists and knives too
+		DarktidePower.countParry(player);
 		if (attacker == null || !attacker.isAlive()) {
 			DarktideNet.fx(player, player, new DarktideNet.Fx(DarktideNet.Fx.PARRY, player.getId(), -1));
 			return;

@@ -35,45 +35,51 @@ import net.minecraft.world.item.component.ItemContainerContents;
 public final class DarktideState {
 	/** Ability slots for cooldowns. */
 	public static final int STRIKE = 0, POUNCE = 1, CRESCENT = 2, INK_CROSS = 3, BARRAGE = 4, UNDERTOW = 5, BLACK_TIDE = 6, DASH = 7,
-		GEDAN = 8, ARMS = 9, DROWN = 10, RAISE = 11, SLOTS = 12;
+		GEDAN = 8, ARMS = 9, DROWN = 10, RAISE = 11, MAELSTROM = 12, SLOTS = 13;
 
 	/** Tide Arms: what's conjured. */
 	public static final int ARMS_BARE = 0, ARMS_DAGGERS = 1, ARMS_KATANA = 2;
 
 	/**
 	 * Saved: katana parries counted toward ascension, stored shadows (entity type ids; a villager's is its whole saved data, so it rises as itself), Tide Arms' stored items and slot,
-	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), and the overworld clock time a shade
-	 * (died at night and came back as their shadow, {@link DarktideShade}) is flesh again (0: not a shade).
+	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), the overworld clock time a shade
+	 * (died at night and came back as their shadow, {@link DarktideShade}) is flesh again (0: not a shade), and the Flow
+	 * they had (written every few seconds, so it's there after a relog).
 	 */
-	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil, long shadeUntil) {
-		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L, 0L);
+	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil, long shadeUntil, int flow) {
+		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L, 0L, 0);
 		public static final Codec<Save> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("parries", 0).forGetter(Save::parries),
 				Codec.STRING.listOf().optionalFieldOf("shadows", List.of()).forGetter(Save::shadows),
 				ItemContainerContents.CODEC.optionalFieldOf("stored", ItemContainerContents.EMPTY).forGetter(Save::stored),
 				Codec.INT.optionalFieldOf("stored_slot", -1).forGetter(Save::storedSlot),
 				Codec.LONG.optionalFieldOf("cured_until", 0L).forGetter(Save::curedUntil),
-				Codec.LONG.optionalFieldOf("shade_until", 0L).forGetter(Save::shadeUntil))
+				Codec.LONG.optionalFieldOf("shade_until", 0L).forGetter(Save::shadeUntil),
+				Codec.INT.optionalFieldOf("flow", 0).forGetter(Save::flow))
 			.apply(i, Save::new));
 
 		Save withParries(int value) {
-			return new Save(value, shadows, stored, storedSlot, curedUntil, shadeUntil);
+			return new Save(value, shadows, stored, storedSlot, curedUntil, shadeUntil, flow);
 		}
 
 		Save withShadows(List<String> value) {
-			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil, shadeUntil);
+			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil, shadeUntil, flow);
 		}
 
 		Save withStored(ItemContainerContents value, int slot) {
-			return new Save(parries, shadows, value, slot, curedUntil, shadeUntil);
+			return new Save(parries, shadows, value, slot, curedUntil, shadeUntil, flow);
 		}
 
 		Save withCuredUntil(long value) {
-			return new Save(parries, shadows, stored, storedSlot, value, shadeUntil);
+			return new Save(parries, shadows, stored, storedSlot, value, shadeUntil, flow);
+		}
+
+		Save withFlow(int value) {
+			return new Save(parries, shadows, stored, storedSlot, curedUntil, shadeUntil, value);
 		}
 
 		Save withShadeUntil(long value) {
-			return new Save(parries, shadows, stored, storedSlot, curedUntil, value);
+			return new Save(parries, shadows, stored, storedSlot, curedUntil, value, flow);
 		}
 	}
 
@@ -149,6 +155,10 @@ public final class DarktideState {
 
 	public static final AttachmentType<Boolean> HOLLOW = AttachmentRegistry.create(JaymosPowers.id("darktide_hollow"),
 		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
+	/** The tide a user stands at ({@link DarktideFlow#HIGH} or {@link DarktideFlow#SPRING}; absent at ebb), synced to everyone for the look. */
+	public static final AttachmentType<Integer> TIDE = AttachmentRegistry.create(JaymosPowers.id("darktide_tide"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
 	public static final AttachmentType<Boolean> SHADE = AttachmentRegistry.create(JaymosPowers.id("darktide_shade"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
