@@ -696,6 +696,14 @@ scanning creatures and reading tablets. Bands corrupt and glitch. There is also 
 the stars: an outcast, the band hunter, wears it and comes some night for a band wearer, fighting as one of its
 darkened aliens; mechs hunt band wearers at night too.
 
+(new) **What the bodies remember** (alien picks, 2026-11-12). A body in the band is not only a shape: it keeps the
+habits of the creature it was read from, and a wearer who stays in one long enough finds them. Bulwark's temper
+rises with every blow, Tusk runs through the wood rather than round it, Gorger bowls, Prowl clings and bleeds its
+prey, Howl follows one scent, Lurk takes the colour of the wall, Talon stoops. Ooze stretches, Lumen makes brief
+shapes of its own light, Mirage wears a face it has seen, Wisp reaches through, Cortex gets into heads. Fuse lies down
+on the blast and keeps the hurt, Rivet quiets machines and opens what iron keeps shut, Hive's flyers move as one body,
+and the sea bodies are answered by the sea. None of it is taught; the band only held it.
+
 **Who made the bands** (Andy, 2026-11-11). An **elder alien** on the **Pale Moon** developed the band, and the band's
 upgrades are done there, at the elder's forge. The elder's people have an extremely advanced society, a kingdom of
 their own on the moon, built in a futuristic style and home to a species of its own. The **band hunter** was made on
