@@ -36,6 +36,9 @@ public final class Chopping {
 	static final Identifier POWERS_TUNA = Identifier.fromNamespaceAndPath("jaymospowers", "tuna");
 	static final Identifier POWERS_TUNA_STEAK = Identifier.fromNamespaceAndPath("jaymospowers", "tuna_steak");
 	static final Identifier POWERS_FISH_WEIGHT = Identifier.fromNamespaceAndPath("jaymospowers", "fish_weight");
+	/** Powers' new fish (its Track C species): white-fleshed ones fillet like a cod, oily ones like a salmon, by their weight. */
+	static final TagKey<Item> POWERS_WHITE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("jaymospowers", "fish/white"));
+	static final TagKey<Item> POWERS_OILY = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("jaymospowers", "fish/oily"));
 	/** The cooking groups (item tags, see cooking/Step) whose meats cut like beef, pork, chicken and mutton. */
 	static final TagKey<Item> RED_MEAT = group("red_meat"), PORK = group("pork"), POULTRY = group("poultry"), MUTTON = group("mutton");
 	static final int CABBAGE_LEAVES = 2;
@@ -76,6 +79,12 @@ public final class Chopping {
 			return List.of(new ItemStack(Delight.COD_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
 		}
 		if (item == Items.SALMON) {
+			return List.of(new ItemStack(Delight.SALMON_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
+		}
+		if (stack.is(POWERS_WHITE)) {
+			return List.of(new ItemStack(Delight.COD_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
+		}
+		if (stack.is(POWERS_OILY)) {
 			return List.of(new ItemStack(Delight.SALMON_SLICE, fillets(stack)), new ItemStack(Items.BONE_MEAL));
 		}
 		// any other meat of the same kind cuts the same way (the cooking groups, see cooking/Step): venison minces like beef

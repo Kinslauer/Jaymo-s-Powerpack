@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymospowers:block/keepnet"
+    },
+    "facing=east": {
+      "model": "jaymospowers:block/keepnet",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymospowers:block/keepnet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymospowers:block/keepnet",
+      "y": 270
+    }
+  }
+}
