@@ -501,6 +501,7 @@ public final class GravityPower implements Power {
 		GravityGift.init();
 		// (0.21.10) the rock ball and the orbiting rocks (B+G)
 		GravityRocks.init();
+		GravityPicks.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
@@ -657,6 +658,10 @@ public final class GravityPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		State state = state(player);
+		if (down && key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && state.liftTarget < 0 && !state.chunkHold && state.ripFrom < 0 && ownWell(player) == null
+			&& GravityPicks.bands(player)) {
+			return;
+		}
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down) {
@@ -754,6 +759,9 @@ public final class GravityPower implements Power {
 	/** Z: the Immense Field (a dome of heavy gravity to train in), or take yours down. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && player.isShiftKeyDown() && GravityPicks.trade(player)) {
+			return;
+		}
 		if (down) {
 			GravityTrainingField.toggle(player);
 		}
@@ -768,6 +776,9 @@ public final class GravityPower implements Power {
 	/** C: the Meteor (ascended), the black hole (corrupted), Skyfall (both). */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
+		if (down && player.isShiftKeyDown() && GravityPicks.unstoppable(player)) {
+			return;
+		}
 		boolean ascended = Fate.isAscended(player), corrupted = Fate.isCorrupted(player);
 		State state = state(player);
 		if (ascended && !corrupted) {
@@ -1863,6 +1874,7 @@ public final class GravityPower implements Power {
 		}
 		State state = state(player);
 		smallThings(player);
+		GravityPicks.tick(player);
 		GravityWeight.tick(player);
 		if (state.meteorFrom >= 0) {
 			if (Fate.isAscended(player) && !Fate.isCorrupted(player)) {
