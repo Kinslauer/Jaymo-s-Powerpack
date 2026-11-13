@@ -101,6 +101,11 @@ public final class StoryGround {
 	 * its ends load), and how far from the first town a second one is raised when the world has only one (blocks).
 	 */
 	static final int ROAD_GIVE_UP_TICKS = 4800, SECOND_TOWN_MIN = 220, SECOND_TOWN_MAX = 320;
+	/**
+	 * A village or shipwreck start's land, made ready before they're put there ({@link #ahead}): the chunks round the
+	 * place (radius), and how long it's waited for (ticks) before the start goes ahead and makes what it still needs.
+	 */
+	static final int AHEAD_RADIUS = 1, AHEAD_GIVE_UP_TICKS = 2400;
 
 	/** Something being made: tried each {@link #TRY_EVERY} ticks till {@code attempt} says it's done, or its time is up. */
 	private static final class Job {
@@ -110,6 +115,8 @@ public final class StoryGround {
 		final java.util.function.Consumer<ServerLevel> fallback;
 		final List<Runnable> then = new ArrayList<>();
 		final List<UUID> waiting = new ArrayList<>();
+		/** Chunks kept loaded round {@link #at} while it's tried. */
+		int radius = TICKET_RADIUS;
 		/** (0.7.350) The capital's village still being looked for (null: found, or not looked for). */
 		@Nullable VillageSearch search;
 
@@ -127,6 +134,8 @@ public final class StoryGround {
 	/** (0.7.414) Each trader's milestone being waited for, and the milestone found for each (taken by {@link #stone}). */
 	private static final Map<UUID, Job> ROADWAYS = new HashMap<>();
 	private static final Map<UUID, Roads.Stone> STONES = new HashMap<>();
+	/** Each player whose start's land is being made ready first ({@link #ahead}). */
+	private static final Map<UUID, Job> AHEAD = new HashMap<>();
 	/** Each player's realm whose whaler was made ready, while they sign on. */
 	private static final Map<UUID, Integer> WHALER_REALMS = new HashMap<>();
 	/** (0.7.236) Player → server tick their arrival's loading screen comes down; and the hold last sent to each. */
@@ -161,6 +170,7 @@ public final class StoryGround {
 			capital = null;
 			HARBOURS.clear();
 			ROADWAYS.clear();
+			AHEAD.clear();
 			STONES.clear();
 			WHALER_REALMS.clear();
 			SETTLING.clear();
@@ -744,7 +754,7 @@ public final class StoryGround {
 	/** (0.7.304) Whether {@code player} waits on a capital or a harbour being made for their start. */
 	static boolean waiting(ServerPlayer player) {
 		UUID id = player.getUUID();
-		return capital != null && capital.waiting.contains(id) || HARBOURS.containsKey(id) || ROADWAYS.containsKey(id);
+		return capital != null && capital.waiting.contains(id) || HARBOURS.containsKey(id) || ROADWAYS.containsKey(id) || AHEAD.containsKey(id);
 	}
 
 	/** What {@code player} is held for (the loading screen's line), or null: free to go. */
@@ -758,6 +768,9 @@ public final class StoryGround {
 		}
 		if (ROADWAYS.containsKey(id)) {
 			return "gui.jaymoskingdoms.story.hold.road";
+		}
+		if (AHEAD.containsKey(id)) {
+			return ARRIVING;
 		}
 		if (LifeStory.of(player) != null && PowersCompat.waitingForFuture(player)) {
 			return "gui.jaymoskingdoms.story.hold.future";
@@ -799,7 +812,7 @@ public final class StoryGround {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (capital == null && HARBOURS.isEmpty() && ROADWAYS.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
+		if (capital == null && HARBOURS.isEmpty() && ROADWAYS.isEmpty() && AHEAD.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
 			return;
 		}
 		ServerLevel level = Factions.level(server);
@@ -826,11 +839,48 @@ public final class StoryGround {
 				job.then.forEach(Runnable::run);
 			}
 		}
+		for (UUID id : List.copyOf(AHEAD.keySet())) {
+			Job job = AHEAD.get(id);
+			// (gone meanwhile: the start's own check sees it and keeps the road owed for when they're back)
+			if (server.getPlayerList().getPlayer(id) == null || step(level, job, "")) {
+				AHEAD.remove(id);
+				job.then.forEach(Runnable::run);
+			}
+		}
+	}
+
+	/**
+	 * Makes the land round {@code at} ready in the background, then runs {@code then}; {@code player} waits behind the
+	 * loading screen meanwhile (Andy: longer loading screens are fine, the tips are on them). Made while the start runs,
+	 * each chunk held the server thread, and right after a join the world generation queue is long: the Steam Deck's
+	 * server ran past its watchdog (crash 2026-11-13 07:43). Taking too long, the start goes ahead and makes what it needs.
+	 */
+	static void ahead(ServerPlayer player, BlockPos at, Runnable then) {
+		ServerLevel level = player.level().getServer().overworld();
+		Job job = new Job(at, level.getGameTime() + AHEAD_GIVE_UP_TICKS, l -> ready(l, at), l -> {
+		});
+		job.radius = AHEAD_RADIUS;
+		job.waiting.add(player.getUUID());
+		job.then.add(then);
+		AHEAD.put(player.getUUID(), job);
+	}
+
+	/** Whether every chunk within {@link #AHEAD_RADIUS} of {@code at} is made and loaded. */
+	private static boolean ready(ServerLevel level, BlockPos at) {
+		ChunkPos centre = ChunkPos.containing(at);
+		for (int dx = -AHEAD_RADIUS; dx <= AHEAD_RADIUS; dx++) {
+			for (int dz = -AHEAD_RADIUS; dz <= AHEAD_RADIUS; dz++) {
+				if (level.getChunkSource().getChunkNow(centre.x() + dx, centre.z() + dz) == null) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/** One try at {@code job} (its land kept loaded, its waiting players kept safe): whether it's over, made or given up. */
 	private static boolean step(ServerLevel level, Job job, String making) {
-		level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(job.at), TICKET_RADIUS);
+		level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(job.at), job.radius);
 		for (UUID id : job.waiting) {
 			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
 			if (player != null) {

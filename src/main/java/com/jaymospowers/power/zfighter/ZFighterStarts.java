@@ -405,7 +405,8 @@ public final class ZFighterStarts {
 		// further off); with none free, a plain spot of their own further out from the first
 		BlockPos village = null, first = null, from = below;
 		for (int i = 0; i <= FREE_TRIES; i++) {
-			BlockPos found = verdant.findNearestMapStructure(StructureTags.VILLAGE, from, VILLAGE_SEARCH, false);
+			// (Scout: worked out without making chunks; making them held the server thread behind a long generation queue)
+			BlockPos found = com.jaymospowers.core.Scout.nearest(verdant, StructureTags.VILLAGE, from, VILLAGE_SEARCH);
 			if (found == null) {
 				break;
 			}

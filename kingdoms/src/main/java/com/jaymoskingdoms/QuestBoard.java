@@ -760,7 +760,7 @@ final class QuestBoard {
 		if (wanted.isEmpty()) {
 			return null;
 		}
-		Pair<BlockPos, Holder<Structure>> found = level.getChunkSource().getGenerator().findNearestMapStructure(level, HolderSet.direct(wanted), from, chunks, false);
+		Pair<BlockPos, Holder<Structure>> found = Scout.find(level, HolderSet.direct(wanted), from, chunks);
 		if (found == null) {
 			return null;
 		}
