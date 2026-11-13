@@ -455,6 +455,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		Duellists.register();
 		// (0.7.105) Just-In COMBAT's ideas, our own way: shields raised, blades that clash
 		MobShields.register();
 		MobParry.register();
