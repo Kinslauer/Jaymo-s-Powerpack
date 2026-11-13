@@ -13,4 +13,5 @@
 - **Thin ice** (`frost/FrostFeatures.LakeCrust`): still shallow water in cold lands gets a crust of brittle ice that cracks under weight.
 - **Calling back the first deaths**: for a minute after a player is left for dead (one of the two deaths that always wake), a cleric or a scroll of Calling Back can stand them up where they lie; they wake nowhere and the sure wake is not spent.
 - **Healer feat**: bandages heal half as much again and treatments go a fifth quicker (read from Kingdoms).
+- **Returning thrown weapons** (`armory/ThrownWeapon`): a thrown weapon a Tinkerer has given the returning infusion flies back to the hand.
 - Built; not played.

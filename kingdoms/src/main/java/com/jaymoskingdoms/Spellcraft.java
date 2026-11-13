@@ -276,7 +276,7 @@ public final class Spellcraft {
 		// (0.7.231) blood spells are paid in blood, not mana
 		boolean blood = ForbiddenArts.blood(spell);
 		// a Warlock's magic is bought from a patron, in pact slots, not mana ({@link Warlocks})
-		boolean pact = Classes.is(player, PlayerClass.WARLOCK);
+		boolean pact = ClassCasters.pact(player, spell);
 		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
 		if (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
 			if (blood && !pact) {

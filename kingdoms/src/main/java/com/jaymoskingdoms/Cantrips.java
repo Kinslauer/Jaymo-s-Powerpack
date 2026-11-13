@@ -130,6 +130,29 @@ public final class Cantrips {
 		return true;
 	}
 
+	/** Those whose light is a glowing shield's (a Tinkerer's infusion), not the cantrip's; and when each was last seen holding it up. */
+	private static final java.util.Set<UUID> SHIELDS = new java.util.HashSet<>();
+	private static final Map<UUID, Long> SHIELDS_SEEN = new HashMap<>();
+
+	/**
+	 * A glowing shield in {@code player}'s hand: the same soft light as the cantrip's goes with them while this is called
+	 * (every half second or so), and goes out when it stops. A cantrip's light already burning is left as it is.
+	 */
+	static void carried(ServerPlayer player, boolean on) {
+		UUID id = player.getUUID();
+		if (!on || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		if (LIGHTS.containsKey(id) && !SHIELDS.contains(id)) {
+			return;
+		}
+		SHIELDS.add(id);
+		SHIELDS_SEEN.put(id, level.getGameTime());
+		if (!LIGHTS.containsKey(id)) {
+			LIGHTS.put(id, new Glow(level, player.blockPosition(), Long.MAX_VALUE));
+		}
+	}
+
 	private static boolean holdsFocus(ServerPlayer player) {
 		return SpellParts.focus(player.getMainHandItem()) || SpellParts.focus(player.getOffhandItem());
 	}
@@ -155,7 +178,9 @@ public final class Cantrips {
 			for (UUID id : List.copyOf(LIGHTS.keySet())) {
 				Glow glow = LIGHTS.get(id);
 				ServerPlayer player = server.getPlayerList().getPlayer(id);
-				if (player == null || !player.isAlive() || player.level() != glow.level || glow.level.getGameTime() >= glow.until || !holdsFocus(player)) {
+				if (player == null || !player.isAlive() || player.level() != glow.level || glow.level.getGameTime() >= glow.until
+					|| !(SHIELDS.contains(id) ? SHIELDS_SEEN.getOrDefault(id, 0L) + 40 > glow.level.getGameTime() : holdsFocus(player))) {
+					SHIELDS.remove(id);
 					put(id, null);
 					continue;
 				}

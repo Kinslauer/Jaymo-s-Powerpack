@@ -389,7 +389,12 @@ public final class Druids {
 
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (!(player.level() instanceof ServerLevel level) || !player.isAlive()) {
+			if (!(player.level() instanceof ServerLevel level)) {
+				continue;
+			}
+			if (!player.isAlive()) {
+				// the shape dies with them: nothing of it is left to wake up in
+				end(player, false);
 				continue;
 			}
 			Shape shape = SHAPES_WORN.get(player.getUUID());

@@ -199,7 +199,7 @@ public final class ClassTeachers {
 		Money.charge(player, Money.worth(price(kind)));
 		player.awardRecipesByKey(RECIPES.get(kind));
 		Speech.tell(level, teacher, player, Component.translatable("talk.jaymoskingdoms.teacher.taught." + kind), Speech.GOLD);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.taught." + kind).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.class.taught." + kind).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 		return true;
 	}

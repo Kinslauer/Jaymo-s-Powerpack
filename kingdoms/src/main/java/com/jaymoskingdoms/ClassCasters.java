@@ -56,6 +56,19 @@ public final class ClassCasters {
 		return Classes.is(player, PlayerClass.CLERIC) || Classes.is(player, PlayerClass.DRUID) || Classes.is(player, PlayerClass.WARLOCK);
 	}
 
+	/**
+	 * Whether {@code player} pays for {@code spell} from a Warlock's pact: always for a first-class Warlock; for one who
+	 * learned the pact second, only the patron's own spells, and only when their first class has no mana of its own to cast with.
+	 */
+	static boolean pact(Player player, String spell) {
+		PlayerClass first = Classes.classOf(player);
+		if (first == PlayerClass.WARLOCK) {
+			return true;
+		}
+		return Classes.second(player) == PlayerClass.WARLOCK && first != PlayerClass.MAGE && first != PlayerClass.CLERIC && first != PlayerClass.DRUID
+			&& ALLOWED.get(PlayerClass.WARLOCK).contains(spell);
+	}
+
 	/** Whether {@code player}'s mana is a natural's (a Cleric's or a Druid's), like a Mage's. */
 	public static boolean natural(Player player) {
 		return Classes.is(player, PlayerClass.CLERIC) || Classes.is(player, PlayerClass.DRUID);

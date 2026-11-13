@@ -54,6 +54,13 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	public ThrownWeapon(Level level, LivingEntity owner, ItemStack weapon) {
 		super(ArmoryEntities.THROWN_WEAPON, owner, level, weapon, null);
 		this.entityData.set(DATA_ITEM, weapon.copyWithCount(1));
+		this.comesBack = returning(weapon);
+	}
+
+	/** Whether {@code weapon} carries a Tinkerer's returning infusion (Jaymo's Kingdoms marks it; read by name, no Kingdoms needed). */
+	private static boolean returning(ItemStack weapon) {
+		net.minecraft.world.item.component.CustomData data = weapon.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		return data != null && "returning".equals(data.copyTag().getStringOr("jaymoskingdoms_infusion", ""));
 	}
 
 	@Override
@@ -77,7 +84,7 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	/** This is a hurled blade ({@code BladeThrow}): it deals {@code damage}, and {@code comesBack} to its thrower's hand. */
 	public void hurled(float damage, boolean comesBack) {
 		this.hurled = damage;
-		this.comesBack = comesBack;
+		this.comesBack = comesBack || returning(this.getItem());
 	}
 
 	/** A blade that comes back: once it has struck, stuck or flown its length it turns and flies home through anything. True when it was caught (and is gone). */

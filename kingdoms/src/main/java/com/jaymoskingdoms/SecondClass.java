@@ -33,8 +33,8 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
  * foe, a first spell) opens the class screen on that class alone, and the lesson is paid when the pick is sealed.
  * <p>
  * The second class climbs slower: its perks, pools and spell power are {@link Classes#SECOND_SHARE} of the first class's
- * ({@link Classes#share}). Both classes' abilities work: the class key {@code J} answers the first; held with {@code Alt}
- * it answers the second ({@link Abilities#second}), each with sneak as before. A Sorcerer's element is woken, not
+ * ({@link Classes#share}). Both classes' abilities work: the class key {@code J} answers the first; the second class's own key
+ * (Right Alt unless rebound) answers the second ({@link Abilities#second}), each with sneak as before. A Sorcerer's element is woken, not
  * taught: a master librarian knows the rite, and the element is picked as it wakes. The Writ of Rebirth unmakes both classes (and the paths and
  * feats with them).
  */
@@ -72,7 +72,7 @@ public final class SecondClass {
 	private SecondClass() {
 	}
 
-	/** Player → server: the class key was pressed with Alt held ({@code sneak}: with sneak too): the second class's button. */
+	/** Player → server: the second class's key was pressed ({@code sneak}: with sneak too). */
 	public record Key(boolean sneak) implements CustomPacketPayload {
 		public static final Type<Key> TYPE = new Type<>(JaymosKingdoms.id("second_key"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Key> CODEC = CustomPacketPayload.codec(
@@ -185,6 +185,6 @@ public final class SecondClass {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7F, 0.8F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.class.second", Component.translatable("class.jaymoskingdoms." + cls.key()),
-			Math.round(Classes.SECOND_SHARE * 100)).withStyle(net.minecraft.ChatFormatting.GOLD));
+			Math.round(Classes.SECOND_SHARE * 100), Component.keybind("key.jaymoskingdoms.imbue"), Component.keybind("key.jaymoskingdoms.second_class")).withStyle(net.minecraft.ChatFormatting.GOLD));
 	}
 }

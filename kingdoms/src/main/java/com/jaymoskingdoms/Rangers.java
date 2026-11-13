@@ -65,18 +65,89 @@ public final class Rangers {
 	private Rangers() {
 	}
 
+	/** On favoured land the favoured foe's trail shows by itself this often (ticks): the trail is never lost there. */
+	static final int TRAIL_EVERY = 60;
+	/** A menu shows at most this many lands at once. */
+	private static final int LANDS_A_PAGE = 5;
+	/** Those still to be asked what they hunt and where, and how long after joining they are (ticks). */
+	private static final java.util.Set<UUID> TO_ASK = new java.util.HashSet<>();
+	private static final int ASK_AFTER = 20 * 10;
+
 	static void register() {
+		// an old Archer or Survivalist, a Ranger now, hasn't said what they hunt or where they are at home: they are asked
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ServerPlayer player = handler.player;
+			if (Classes.is(player, PlayerClass.RANGER) && player.getAttached(FAVOUR) == null) {
+				String picked = Classes.optionOf(player, PlayerClass.RANGER);
+				player.setAttached(FAVOUR, new Favour(picked.isEmpty() ? "monsters" : picked, land(player.level(), player.blockPosition())));
+				// (asked once they are in and looking about, not into the loading screen)
+				TO_ASK.add(player.getUUID());
+			}
+		});
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				if (player.tickCount > ASK_AFTER && player.isAlive() && TO_ASK.remove(player.getUUID())) {
+					if (Classes.optionOf(player, PlayerClass.RANGER).isEmpty()) {
+						askFoe(player);
+					} else {
+						askLand(player, 0);
+					}
+				}
+				if ((player.tickCount + player.getId()) % TRAIL_EVERY != 0 || !player.isAlive() || player.isSpectator()
+					|| !Classes.is(player, PlayerClass.RANGER) || !(player.level() instanceof ServerLevel level)
+					|| !land(level, player.blockPosition()).equals(land(player))) {
+					continue;
+				}
+				String kind = foe(player);
+				TrailReading.read(level, player, 1, e -> e instanceof LivingEntity living && isFoe(kind, living), true);
+			}
+		});
+	}
+
+	/** Asks {@code player} what they hunt (an old Archer or Survivalist who never said), then where they are at home. */
+	private static void askFoe(ServerPlayer player) {
+		java.util.List<Menus.Choice> choices = new java.util.ArrayList<>();
+		for (String foe : PlayerClass.RANGER.options) {
+			choices.add(Menus.Choice.of(Component.translatable("class.jaymoskingdoms.option." + foe), p -> {
+				p.setAttached(FAVOUR, new Favour(foe, land(p)));
+				askLand(p, 0);
+			}));
+		}
+		Menus.ask(player, player, Component.translatable("message.jaymoskingdoms.ranger.ask_foe"), choices);
+	}
+
+	/** Asks {@code player} which country they know: a page of lands, and a way to the rest. Left unanswered, it is where they stand. */
+	private static void askLand(ServerPlayer player, int page) {
+		java.util.List<Menus.Choice> choices = new java.util.ArrayList<>();
+		int from = page * LANDS_A_PAGE;
+		for (int i = from; i < Math.min(LANDS.length, from + LANDS_A_PAGE); i++) {
+			String land = LANDS[i];
+			choices.add(Menus.Choice.of(Component.translatable("option.jaymoskingdoms.land." + land), p -> {
+				p.setAttached(FAVOUR, new Favour(foe(p), land));
+				p.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.ranger.land", Component.translatable("option.jaymoskingdoms.land." + land)));
+			}));
+		}
+		int next = from + LANDS_A_PAGE < LANDS.length ? page + 1 : 0;
+		choices.add(Menus.Choice.of(Component.translatable("message.jaymoskingdoms.ranger.other_lands"), p -> askLand(p, next)));
+		Menus.ask(player, player, Component.translatable("message.jaymoskingdoms.ranger.ask_land"), choices);
 	}
 
 	static void clear() {
+		TO_ASK.clear();
 		TRACKED.clear();
 	}
 
-	/** A new Ranger's favoured foe is the one they picked, their favoured land the one they stand in. */
+	/** A new Ranger's favoured foe is the one they picked; their favoured land they are asked for. */
 	static void begin(ServerPlayer player) {
 		String foe = Classes.optionOf(player, PlayerClass.RANGER);
 		String land = land(player.level(), player.blockPosition());
 		player.setAttached(FAVOUR, new Favour(foe.isEmpty() ? "monsters" : foe, land));
+		// the land is theirs to name (unanswered, it is where they stand)
+		if (foe.isEmpty()) {
+			askFoe(player);
+		} else {
+			askLand(player, 0);
+		}
 	}
 
 	/** The Ranger's favoured foe ("monsters" if unsaid). */

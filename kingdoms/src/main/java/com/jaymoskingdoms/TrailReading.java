@@ -144,6 +144,12 @@ public final class TrailReading {
 	 * are read as far and as old as the best tracker reads, and stand out larger ({@link #QUARRY_SIZE}).
 	 */
 	static void read(ServerLevel level, ServerPlayer player, int rank, java.util.function.@org.jspecify.annotations.Nullable Predicate<net.minecraft.world.entity.Entity> quarry) {
+		read(level, player, rank, quarry, false);
+	}
+
+	/** As above; {@code only}: nothing but the quarry's prints are shown (a Ranger's favoured foe on favoured land, unasked). */
+	static void read(ServerLevel level, ServerPlayer player, int rank, java.util.function.@org.jspecify.annotations.Nullable Predicate<net.minecraft.world.entity.Entity> quarry,
+		boolean only) {
 		ArrayDeque<Print> prints = PRINTS.get(level.dimension());
 		if (prints == null) {
 			return;
@@ -167,7 +173,7 @@ public final class TrailReading {
 				net.minecraft.world.entity.Entity maker = level.getEntity(id);
 				return maker != null && quarry.test(maker);
 			});
-			if (age > READ_AGE[prey ? best : rank] || player.distanceToSqr(print.x, print.y, print.z) > (prey ? far : reach)) {
+			if (only && !prey || age > READ_AGE[prey ? best : rank] || player.distanceToSqr(print.x, print.y, print.z) > (prey ? far : reach)) {
 				continue;
 			}
 			float size = print.size * Mth.lerp(age / (float)KEEP_TICKS, 1.0F, OLD_SIZE) * (prey ? QUARRY_SIZE : 1.0F);

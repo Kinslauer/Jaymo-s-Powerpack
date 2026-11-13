@@ -140,8 +140,9 @@ public final class Warlocks {
 		}
 		long today = Patrons.today(player.level().getServer());
 		String kind = KINDS[(int) Math.floorMod(today + player.getRandom().nextInt(KINDS.length), KINDS.length)];
-		player.setAttached(PACT, new Pact(0, kind, today + Paths.debtDays(player, DEBT_DAYS)));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), DEBT_DAYS).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
+		int days = Paths.debtDays(player, DEBT_DAYS);
+		player.setAttached(PACT, new Pact(0, kind, today + days));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), days).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 
@@ -239,7 +240,7 @@ public final class Warlocks {
 		Rests.spend(player, Rests.PACT, slots(player), slots(player));
 		player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, CURSE_TICKS, 0));
 		player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 20, 0));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.warlock.collected").withStyle(net.minecraft.ChatFormatting.DARK_RED));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.collected").withStyle(net.minecraft.ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.8F, 0.5F);
 	}
 }

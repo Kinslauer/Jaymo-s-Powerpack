@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -29,13 +28,14 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * The Tinkerer. At a tinkering station of Jung's Powers (the tool station, tool forge, part builder, crafting station, rig forge, star
+ * The Tinkerer. At a tinkering station of Jaymo's Powers (the tool station, tool forge, part builder, crafting station, rig forge, star
  * forge) a Tinkerer sneaks and uses a piece of gear to put a small enchantment on it, for some materials from the pack:
  *
  * <ul>
- * <li><b>Returning</b> (a trident): it comes back to the hand when thrown, as the Loyalty enchantment does. It is the real trident.</li>
+ * <li><b>Returning</b> (a trident, a sword or a throwing weapon): it comes back to the hand when thrown. A trident takes Loyalty;
+ * a thrown blade flies home by Jaymo's Powers' own thrown weapon. It is always the real item that flies.</li>
  * <li><b>Springing</b> (boots): the wearer leaps higher and lands softly.</li>
- * <li><b>Glowing</b> (a shield): the holder sees by it in the dark, and a soft light moves with them.</li>
+ * <li><b>Glowing</b> (a shield): a real light moves with the holder ({@link Cantrips#carried}), and they see by it in the dark.</li>
  * </ul>
  *
  * A Tinkerer keeps up to {@link #MOST} infusions at once on the gear they carry. The class key tells which they have. The Tinkerer also
@@ -82,7 +82,7 @@ public final class Tinkerers {
 	}
 
 	static void begin(ServerPlayer player) {
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.tinkerer.begin").withStyle(net.minecraft.ChatFormatting.GRAY));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.begin").withStyle(net.minecraft.ChatFormatting.GRAY));
 	}
 
 	private static boolean station(BlockState state) {
@@ -92,7 +92,8 @@ public final class Tinkerers {
 
 	/** Which infusion {@code stack} takes ("" for none). */
 	static String kindFor(ItemStack stack) {
-		if (stack.is(Items.TRIDENT)) {
+		// anything thrown from the hand: a trident, a sword (the hurled blade), Powers' daggers, hatchets and spears
+		if (stack.is(Items.TRIDENT) || stack.getMaxStackSize() == 1 && (stack.is(ItemTags.SWORDS) || PowersCompat.throwingWeapon(stack))) {
 			return "returning";
 		}
 		if (stack.is(ItemTags.FOOT_ARMOR)) {
@@ -154,11 +155,10 @@ public final class Tinkerers {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.materials", need, new net.minecraft.world.item.ItemStack(mat).getHoverName()));
 			return;
 		}
-		CompoundTag tag = new CompoundTag();
-		tag.putString(TAG, kind);
-		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		// (added to whatever the thing already carries: an imbue's charge, another mod's marks)
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(TAG, kind));
 		stack.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymoskingdoms.infusion." + kind).withStyle(net.minecraft.ChatFormatting.AQUA))));
-		if (kind.equals("returning")) {
+		if (kind.equals("returning") && stack.is(Items.TRIDENT)) {
 			stack.enchant(player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOYALTY), LOYALTY);
 		}
 		if (player.level() instanceof ServerLevel level) {
@@ -208,6 +208,7 @@ public final class Tinkerers {
 			}
 			if (infusion(player.getMainHandItem()).equals("glowing") || infusion(player.getOffhandItem()).equals("glowing")) {
 				player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, GLOW_TICKS, 0, true, false, false));
+				Cantrips.carried(player, true);
 				if (player.level() instanceof ServerLevel level && server.getTickCount() % 40 == 0) {
 					level.sendParticles(Fx.GLOW, player.getX(), player.getY(1.0), player.getZ(), 2, 0.4, 0.5, 0.4, 0.0);
 				}

@@ -293,17 +293,18 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
   `TrailReading` (the favoured foe's prints read farthest/oldest and larger: lead's addition); quieter.
 - **K7 Warlock** (`Warlocks`): 2 pact slots, x1.5 power, 0.4x cooldown; a debt every 5 casts due in 3 days (favour,
   errand, blood, coin); unpaid: slots withheld, then favour -25, weakness and darkness.
-- **K8 Tinkerer** (`Tinkerers`): infusions at Powers tinkering stations, 3 at once: returning (tridents only, real
-  Loyalty), springing boots, glowing shield (night vision + glow, no placed light); recipes for rod, rope, jug,
+- **K8 Tinkerer** (`Tinkerers`): infusions at Powers tinkering stations, 3 at once: returning (tridents by real
+  Loyalty, swords and throwing weapons by the thrown weapon's own flight home), springing boots, glowing shield
+  (night vision and a carried light); recipes for rod, rope, jug,
   light, smoke bottle (invented, need a balance pass); hound and horn stay loot-only.
 
 ### Patch 11b (second class, feats, paths)
 - **K9 Second class** (`SecondClass`): taught by a master villager (profession level 5) of a matching trade, knowledge
   level 3, 60 silver. `Classes.SECOND_SHARE` = 50% on perks, pools, spell power and cooldown, tomes, counterspell,
   catch-breath and paths; the bespoke systems (brute rage, thief sneak attack, riders, valor, weapon forms) switch on
-  at full strength for a second class. Alt+J answers the second class. One patron only. The Sorcerer was first left
+  at full strength for a second class. The second class has its own key (Right Alt by default; Alt+J was dropped because Left Alt rolls). One patron only. The Sorcerer was first left
   out by the builder; the lead put it back (a master librarian wakes the element; the element readers now use
-  `Classes.optionOf`, the bolt scales by share, Alt+J runs the imbue).
+  `Classes.optionOf`, the bolt scales by share, the second class key runs the imbue).
 - **K10 Feats** (`Feats*`, `GrowthScreen`): one owed per knowledge level, picked on the H menu's Feats and Paths tab
   (an unbound key as a fallback). All eighteen hooked. Differences: Mounted Fighter uses the horse-trust system, not
   Free Rein or Horseman; Crossbow Expert is a faster load and harder bolts (the game has no close-range penalty to
@@ -333,5 +334,20 @@ Patches 1 to 10: 81 rows, 65 built in full, 16 with a part missing, none broken.
 - **J9**: bog lights lead to a swamp hut when one is within 5 chunks (there are no hags: J7 was not picked).
 Left as they are, for Andy to know: F4 rain shortens mob sight only (players already have rain fog); NPC guards and
 orcs throw one net a day from a tally rather than a held item; scrying is a top-down live map; plant growth is
-instant; Limbo is a tethered spectator with a black frame; the death knight is a strengthened wither skeleton; the
-returning infusion works on tridents only; new mobs, familiars and druid shapes use stand-in art.
+instant; Limbo is a tethered spectator with a black frame; the death knight is a strengthened wither skeleton; new
+mobs, familiars and druid shapes use stand-in art.
+
+## After the class check (K2 to K11)
+
+- **K6 Ranger**: the land is picked from a menu (`Rangers.askLand`, five a page); a Ranger with no `FAVOUR` (an old
+  Archer or Survivalist) is asked foe and land ten seconds after joining; on favoured land the quarry's trail shows
+  unasked every 3 s (`TrailReading.read(…, only)`). Move bonus is `ARCHER_MOVE + SURVIVALIST_MOVE`.
+- **K8 Tinkerer**: returning also on non-stackable swords and Powers throwing weapons (`ThrownWeapon.returning`
+  reads the custom data key `jaymoskingdoms_infusion`); the glowing shield carries a real light (`Cantrips.carried`).
+- **Second class key**: its own mapping `key.jaymoskingdoms.second_class`, default Right Alt.
+- **Druid**: a dead Druid's shape ends in the tick. **Warlock second**: `ClassCasters.pact(player, spell)`.
+- Class messages moved from chat to the overlay (Tinkerer, Paladin, Warlock, class teachers).
+
+Left as they are: class items are ordinary shaped recipes, like the wizard's staff; about twenty older checks read
+the first class only (`Classes.classOf`), so those older perks do not come with a second class; the outrider's
+no-fall needs the class at full strength; "slower to climb" is half strength for a second class.

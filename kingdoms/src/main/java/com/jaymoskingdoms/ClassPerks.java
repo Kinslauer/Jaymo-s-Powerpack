@@ -191,7 +191,7 @@ public final class ClassPerks {
 			default -> 0.0;
 		};
 		double move = switch (cls) {
-			case RANGER -> ARCHER_MOVE;
+			case RANGER -> ARCHER_MOVE + SURVIVALIST_MOVE;
 			case MONK -> MONK_MOVE;
 			case BRUTE -> BRUTE_MOVE;
 			case RIDER -> RIDER_FOOT_MOVE;
@@ -390,7 +390,7 @@ public final class ClassPerks {
 					oxygen += s * (SURVIVALIST_OXYGEN);
 					health += s * (survivalistHealth(player));
 					fall += s * (SURVIVALIST_FALL);
-					move += s * (ARCHER_MOVE);
+					move += s * (ARCHER_MOVE + SURVIVALIST_MOVE);
 				}
 				case WARLOCK -> health += s * WARLOCK_HEALTH;
 				case PALADIN -> {

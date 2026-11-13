@@ -81,8 +81,8 @@
 - **Paladin**: an oath of mercy, justice or honour; holy smites; laying on hands from a daily pool; an aura that steadies friends; break the oath and it all goes until you atone at a shrine or with a priest.
 - **Ranger** replaces the Archer and the Survivalist (old characters load as Rangers, keeping Headshot and Second Wind): a favoured foe (harder blows, its trail read farther and standing out) and a favoured land (never lose the trail, move quietly).
 - **Warlock**: a pact with a patron: two strong spells that come back on a short rest, and a debt the patron calls in favour, an errand, blood or coin, and collects if left.
-- **Tinkerer**: infuses gear at the tinkering stations (a returning trident, springing boots, a glowing shield, three at a time) and learns to build five of the wondrous gadgets.
-- **A second class** (`SecondClass`): a master villager (top profession rank) of a matching trade teaches one for 60 silver once you hold knowledge level 3; it works at half strength. Alt+J is its class key. A master librarian wakes a Sorcerer's element. The Writ of Rebirth unmakes both classes, the paths and the feats.
+- **Tinkerer**: infuses gear at the tinkering stations (a returning trident, sword or throwing weapon, springing boots, a glowing shield that lights the way, three at a time) and learns to build five of the wondrous gadgets.
+- **A second class** (`SecondClass`): a master villager (top profession rank) of a matching trade teaches one for 60 silver once you hold knowledge level 3; it works at half strength. It has its own key (Right Alt unless rebound), since Left Alt rolls. A master librarian wakes a Sorcerer's element. The Writ of Rebirth unmakes both classes, the paths and the feats.
 - **Feats** (`Feats`, `FeatsBody`, `FeatsFight`, `FeatsTrade`, `GrowthScreen`): one per knowledge level, picked on the new Feats and Paths tab of the H menu: Alert, Lucky, Mobile, Sentinel, Tough, Healer, Chef, Shield Master, Mage Slayer, Skulker, Observant, Mounted Fighter, Charger, Linguist, Actor, Inspiring Leader, Crossbow Expert, Dungeon Delver.
 - **Paths** (`Paths`): every class picks one of two or three paths once (Thief: assassin, burglar, swashbuckler; Mage: evocation, abjuration, divination; Warlord: champion, battlemaster; and so on for all fourteen).
 - **After the row-by-row check** (every picked row read against the code):
@@ -96,4 +96,11 @@
   - **Geas** now has a task the caster names: serve at my side (and fight who I fight), guard this spot, or be gone and stay away. Breaking it burns.
   - **Gorgons** have the gaze that turns you to stone (a mirror turns it back), and a gorgon's ring of broken columns with her statues is found by ruins as often as a basilisk's den.
   - Bog lights lead to a witch's hut when one stands near, as well as into quicksand.
+- **After the class check** (the eleven class rows read against the code):
+  - A Ranger names the land they know from a list, as well as their quarry. An old Archer or Survivalist is asked both when they next join. On that land the quarry's trail shows by itself.
+  - The Ranger keeps the Survivalist's lighter step as well as the Archer's.
+  - The Tinkerer's returning infusion goes on swords and throwing weapons too, and a glowing shield gives real light.
+  - A Druid who dies in a beast's shape leaves it behind.
+  - A Warlock learned as a second class pays the pact only for the patron's own spells; a Mage, Cleric or Druid who learns it second keeps casting from mana.
+  - Class lines that went to chat (oaths, debts, lessons, the Tinkerer's first hint) show over the hotbar instead.
 - Built; not played.

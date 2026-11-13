@@ -70,7 +70,7 @@ public final class Paladins {
 	/** A new Paladin takes the oath they picked (and the symbol's making is a priest's to teach). */
 	static void begin(ServerPlayer player, String oath) {
 		player.removeAttached(BROKEN);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.paladin.sworn", Component.translatable("option.jaymoskingdoms.oath." + oath)));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.sworn", Component.translatable("option.jaymoskingdoms.oath." + oath)));
 	}
 
 	/** The class no longer. */
@@ -199,7 +199,7 @@ public final class Paladins {
 		}
 		player.setAttached(BROKEN, true);
 		READY.remove(player.getUUID());
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.paladin.oath_broken." + oath(player), Component.translatable("message.jaymoskingdoms.paladin.why." + why))
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.oath_broken." + oath(player), Component.translatable("message.jaymoskingdoms.paladin.why." + why))
 			.withStyle(net.minecraft.ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8F, 0.4F);
 	}
@@ -252,7 +252,7 @@ public final class Paladins {
 			Fx.burst(level, player.getX(), player.getY() + 1.0, player.getZ(), 0xFFE9A0, 1.2F, 24, 0.5, 0.8, 0.5);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.2F);
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.paladin.atoned").withStyle(net.minecraft.ChatFormatting.GOLD));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.atoned").withStyle(net.minecraft.ChatFormatting.GOLD));
 		return true;
 	}
 

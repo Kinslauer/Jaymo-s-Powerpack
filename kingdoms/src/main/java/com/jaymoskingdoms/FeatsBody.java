@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
  * The feats that change how a body copes (see {@link Feats}):
  * <ul>
  * <li><b>Alert</b>: never surprised ({@link Surprise#addImmunity}: no frozen heartbeat from an ambush).</li>
- * <li><b>Lucky</b>: {@link #LUCKY_PER_DAY} sparks a day, spent like a held spark ({@link Sparks#rescue}: a failed parry, pick or fear turns).</li>
+ * <li><b>Lucky</b>: {@link #LUCKY_PER_DAY} sparks a day, spent like a held spark ({@link Sparks#rescue}: a failed lock pick or a lost nerve turns).</li>
  * <li><b>Mobile</b>: {@link #MOBILE_SPEED} faster afoot, and breaking off from a foe costs no free blow ({@link Opportunity}).</li>
  * <li><b>Tough</b>: {@link #TOUGH_BASE} more health and {@link #TOUGH_PER_LEVEL} more for each knowledge level ({@link Feats#attributes}).</li>
  * <li><b>Skulker</b>: mobs see you from {@link #SKULKER_DIM} of the distance in dim light and {@link #SKULKER_SNEAK} when you sneak ({@link Senses#factor}).</li>

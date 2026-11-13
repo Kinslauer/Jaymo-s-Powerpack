@@ -3909,4 +3909,22 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	private static @Nullable Class<?> throwingWeapon;
+	private static boolean lookedForThrowing;
+
+	/** Whether {@code stack} is one of Powers' weapons thrown from the hand (a dagger, a hatchet, a spear). False without Powers. */
+	public static boolean throwingWeapon(net.minecraft.world.item.ItemStack stack) {
+		if (!lookedForThrowing) {
+			lookedForThrowing = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					throwingWeapon = Class.forName("com.jaymospowers.armory.ThrowingWeaponItem");
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no throwing weapons (older Powers?)", e);
+				}
+			}
+		}
+		return throwingWeapon != null && throwingWeapon.isInstance(stack.getItem());
+	}
 }
