@@ -51,14 +51,14 @@ public final class Surprise {
 			STARTLED.clear();
 			FOUGHT.clear();
 		});
-		// being hit by a monster you hadn't noticed, when at ease
+		// being hit by a monster, or by anyone out for your blood (a band's ambush), you hadn't noticed, when at ease
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, base, taken, blocked) -> {
 			if (victim instanceof ServerPlayer player && player.level() instanceof ServerLevel level && taken > 0.0F) {
 				long now = level.getGameTime();
 				Long fought = FOUGHT.get(player);
 				boolean atEase = fought == null || now - fought > AT_EASE;
 				FOUGHT.put(player, now);
-				if (atEase && source.getEntity() instanceof Mob attacker && attacker instanceof Enemy && outOfSight(player, attacker)) {
+				if (atEase && source.getEntity() instanceof Mob attacker && hostile(attacker, player) && outOfSight(player, attacker)) {
 					ambushed(player);
 				}
 			}
@@ -99,6 +99,23 @@ public final class Surprise {
 		return true;
 	}
 
+	/** A monster, or anyone else out for {@code player}'s blood: a bandit band, a raider, a war party. */
+	private static boolean hostile(Mob attacker, ServerPlayer player) {
+		return attacker instanceof Enemy || attacker.getTarget() == player;
+	}
+
+	/**
+	 * Whether {@code player} is off their guard against {@code attacker}: no fight for a while, and the attacker out of their
+	 * sight. The first blow of an ambush; the blow itself puts them on guard.
+	 */
+	public static boolean offGuard(ServerPlayer player, Mob attacker) {
+		if (immune(player) || !hostile(attacker, player)) {
+			return false;
+		}
+		Long fought = FOUGHT.get(player);
+		return (fought == null || player.level().getGameTime() - fought > AT_EASE) && outOfSight(player, attacker);
+	}
+
 	/** Whether {@code attacker} is behind {@code player}'s eyes or out of their sight. */
 	private static boolean outOfSight(ServerPlayer player, Mob attacker) {
 		Vec3 look = player.getLookAngle();
@@ -108,6 +125,10 @@ public final class Surprise {
 
 	/** {@code target} taking a blow or arrow from {@code source}: a monster that hadn't noticed the player freezes a heartbeat. */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
+		if (amount > 0.0F && source.getEntity() instanceof ServerPlayer fighter) {
+			// (one already trading blows isn't at ease for an ambush to catch)
+			FOUGHT.put(fighter, fighter.level().getGameTime());
+		}
 		if (amount > 0.0F && source.getEntity() instanceof ServerPlayer sp && target instanceof Mob mob && !Senses.cooling(target, source)
 			&& (source.getDirectEntity() == sp || source.getDirectEntity() instanceof Projectile) && Senses.unaware(mob, sp)) {
 			ambushed(mob);

@@ -488,7 +488,9 @@ public final class Spellcraft {
 		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
-		Vec3 step = target.getBoundingBox().getCenter().subtract(start);
+		// what the foe crouches behind may take the bolt instead
+		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, player, target);
+		Vec3 step = (cover != null ? cover.getLocation() : target.getBoundingBox().getCenter()).subtract(start);
 		int n = Math.max(2, (int) (step.length() * 3.0));
 		ParticleOptions trail = particle(element);
 		for (int i = 0; i <= n; i++) {
@@ -496,6 +498,11 @@ public final class Spellcraft {
 			level.sendParticles(trail, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 1.0F, 1.3F);
+		if (cover != null) {
+			Cover.stuck(level, cover, target);
+			afterCast(player, level, element);
+			return;
+		}
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE);
 		strike(level, player, target, element, true);
 		afterCast(player, level, element);

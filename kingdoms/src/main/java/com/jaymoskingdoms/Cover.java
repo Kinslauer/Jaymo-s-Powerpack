@@ -27,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * shield's own business.
  * <p>
  * Hooked at the projectile's moment of hitting ({@code mixin.fifth.ProjectileCoverMixin}); the shooters it is for are
- * arrows and bolts and whatever is in {@code #jaymoskingdoms:cover_stops} (spell bolts, harpoons, bullets). The NPC
+ * arrows and bolts and whatever is in {@code #jaymoskingdoms:cover_stops} (harpoons, bullets, thrown lances and fire).
+ * A Sorcerer's bolt and a court wizard's are lances of light with nothing in flight, so they ask {@link #takesBolt} themselves. The NPC
  * shooters look for cover and lean out to shoot through {@link RangedTactics}, which asks {@link #spot} for a place.
  */
 public final class Cover {
@@ -62,12 +63,33 @@ public final class Cover {
 		if (dir.lengthSqr() < 1.0E-4) {
 			return null;
 		}
-		Vec3 back = projectile.position().subtract(dir.normalize().scale(BACK));
+		return roll(level, projectile.position().subtract(dir.normalize().scale(BACK)), projectile, target);
+	}
+
+	/**
+	 * A spell bolt from {@code caster} about to strike {@code target} (the bolts here are lances of light, not things in
+	 * flight): the block it bursts on if cover takes it, or null if it strikes the body. Read the same way as a shot's.
+	 */
+	public static @Nullable BlockHitResult takesBolt(ServerLevel level, LivingEntity caster, LivingEntity target) {
+		if (caster == target || target.isSpectator()) {
+			return null;
+		}
+		Vec3 centre = target.getBoundingBox().getCenter();
+		Vec3 dir = centre.subtract(caster.getEyePosition());
+		if (dir.lengthSqr() < 1.0) {
+			return null;
+		}
+		Vec3 back = dir.lengthSqr() <= BACK * BACK ? caster.getEyePosition() : centre.subtract(dir.normalize().scale(BACK));
+		return roll(level, back, caster, target);
+	}
+
+	/** Lines from {@code back} to the legs, belly and chest of {@code target}: the first block in the way, if the roll says the cover took it. */
+	private static @Nullable BlockHitResult roll(ServerLevel level, Vec3 back, net.minecraft.world.entity.Entity from, LivingEntity target) {
 		BlockHitResult best = null;
 		int covered = 0;
 		for (double line : LINES) {
 			Vec3 body = new Vec3(target.getX(), target.getY() + target.getBbHeight() * line, target.getZ());
-			BlockHitResult hit = level.clip(new ClipContext(back, body, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, projectile));
+			BlockHitResult hit = level.clip(new ClipContext(back, body, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, from));
 			if (hit.getType() == HitResult.Type.BLOCK) {
 				covered++;
 				if (best == null) {
@@ -81,7 +103,7 @@ public final class Cover {
 		double share = covered / (double) LINES.length;
 		boolean low = target.isCrouching() || target instanceof net.minecraft.world.entity.player.Player p && PowersCompat.lowStance(p);
 		double chance = Math.min(MOST, low ? share : share * STANDING);
-		return projectile.getRandom().nextDouble() < chance ? best : null;
+		return level.getRandom().nextDouble() < chance ? best : null;
 	}
 
 	/** The shot sticks in the cover: a dull thud and a puff of the block's dust at the spot. */

@@ -790,6 +790,14 @@ public final class Sorcery {
 	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
 		// (0.7.244) every cast ripples the caster's aura with its intent
 		Mana.ripple(folk, Mana.HARM);
+		// what the target crouches behind may take the bolt instead
+		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, folk, target);
+		if (cover != null) {
+			beam(level, folk, cover.getLocation(), BOLT_COLOUR);
+			Cover.stuck(level, cover, target);
+			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.NEUTRAL, 0.9F, 1.3F);
+			return;
+		}
 		beam(level, folk, target.getBoundingBox().getCenter(), BOLT_COLOUR);
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);

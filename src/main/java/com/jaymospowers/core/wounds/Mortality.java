@@ -263,6 +263,8 @@ public final class Mortality {
 		final ResourceKey<Level> dimension;
 		final BlockPos fell;
 		final long moveAt;
+		/** The server tick they were left for dead on. */
+		long since;
 		final @Nullable Entity by;
 		/** (0.20.27) What they rise as (see {@link #TURNINGS}), or null for a plain wake. */
 		final @Nullable Runnable turn;
@@ -504,6 +506,22 @@ public final class Mortality {
 			player.getBoundingBox().inflate(IGNORE_RANGE), mob -> mob.getTarget() == player)) {
 			mob.setTarget(null);
 		}
+	}
+
+	/**
+	 * Whether {@code player} was left for dead within the last {@code window} ticks and lies there still, not yet moved to
+	 * where they'd wake and not rising as anything else: a death a reviver may still call back ({@link Revival}).
+	 */
+	static boolean freshlyLeft(ServerPlayer player, int window) {
+		Wake wake = WAKES.get(player.getUUID());
+		return wake != null && wake.turn == null && !wake.midTurn && !wake.chosen && wake.far == null
+			&& player.level().getServer().getTickCount() - wake.since <= window;
+	}
+
+	/** A reviver called back one left for dead: no waking anywhere, and the sure wake it spent is theirs again (the caller stands them up). */
+	static void calledBack(ServerPlayer player) {
+		cancelWake(player);
+		player.removeAttached(WAKE_LINE);
 	}
 
 	/** (0.20.50) Chrono rewound a left-for-dead: they won't wake anywhere (the caller stands them up). */
@@ -849,6 +867,7 @@ public final class Mortality {
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
+		wake.since = level.getServer().getTickCount();
 		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
 		if (turn != null) {
 			wake.chosen = true;

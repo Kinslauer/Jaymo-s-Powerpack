@@ -46,8 +46,10 @@ public final class InteractActions {
 	/** Talk Them Round ({@link Persuasion}), Make a Night of It ({@link Carousing}), Ask for Lessons ({@link Lessons}), Consult ({@link Research}),
 	 * Ask a Favour ({@link StartPerks}), Where Were You ({@link Liars}), Show Papers ({@link ForgedPapers}) and Ask for Alms ({@link Lifestyle}). */
 	public static final String ROUND = "round", NIGHT = "night", TEACH = "teach", CONSULT = "consult", FAVOUR = "favour", ALIBI = "alibi", PAPERS = "papers", ALMS = "alms";
+	/** Show the Lord's Seal and Show a Deed: the other two forged papers ({@link ForgedPapers}). */
+	public static final String SEAL = "seal", DEED = "deed";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -111,6 +113,9 @@ public final class InteractActions {
 			case ALIBI -> Liars.askable(v);
 			case PAPERS -> Liars.askable(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.PASS);
 			case ALMS -> Lifestyle.alms(player, v);
+			case SEAL -> Liars.askable(v) && Downed.isGuard(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.SEAL);
+			case DEED -> Liars.askable(v) && Downed.isGuard(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.DEED)
+				&& !ForgedPapers.householder(player, guardRealm(player, v));
 			default -> false;
 		};
 	}
@@ -211,6 +216,17 @@ public final class InteractActions {
 			}
 			case ALMS -> {
 				Lifestyle.giveAlms(player, v);
+				return null;
+			}
+			case SEAL, DEED -> {
+				Faction realm = guardRealm(player, v);
+				if (player.level() instanceof ServerLevel level && realm != null) {
+					if (action.equals(SEAL)) {
+						ForgedPapers.seal(level, player, v, realm);
+					} else {
+						ForgedPapers.deed(level, player, v, realm);
+					}
+				}
 				return null;
 			}
 			default -> {

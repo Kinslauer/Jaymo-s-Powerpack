@@ -21,7 +21,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The lights of the bog at night. Now and then, near a player alone in a swamp after dark, one light rises a little way off
- * and begins to lead: toward quicksand that is already there, or deep water, or the lip of a drop, and where none is near, to a
+ * and begins to lead: to the door of a witch's hut if one stands near (there are no hags in this world; the swamp witch and
+ * her mud golems are who keeps the lights), else toward quicksand that is already there, or deep water, or the lip of a drop, and where none is near, to a
  * pit of quicksand it lays down at the spot (a few blocks across, the depth of a man and more, looking like the sand of
  * the shore). A patient eye finds quicksand before it finds you ({@link Notice}).
  */
@@ -32,6 +33,9 @@ public final class BogLights {
 	static final int MOST_NEAR = 2;
 	/** A light rises this far from the player (blocks), and the goal it picks is this far from them (least, most). */
 	static final int RISES_MIN = 10, RISES_MAX = 16, GOAL_MIN = 16, GOAL_MAX = 34;
+	/** How often a light leads to a witch's hut when one stands within this many chunks. */
+	static final float TO_HUT = 0.5F;
+	static final int HUT_CHUNKS = 5;
 	/** A hazard is looked for within this far (blocks) of the goal ring. */
 	static final int LOOK_RADIUS = 30;
 	/** A pit of quicksand: half-width and depth. */
@@ -79,7 +83,11 @@ public final class BogLights {
 
 	private static void lead(ServerLevel level, ServerPlayer player) {
 		RandomSource random = level.getRandom();
-		BlockPos goal = existing(level, player, random);
+		// to the witch's door, when her hut stands near (the bog's lights are hers as often as not); else to the mire
+		BlockPos goal = random.nextFloat() < TO_HUT ? hut(level, player) : null;
+		if (goal == null) {
+			goal = existing(level, player, random);
+		}
 		if (goal == null) {
 			goal = pit(level, player, random);
 		}
@@ -96,6 +104,33 @@ public final class BogLights {
 		light.snapTo(spot.getX() + 0.5, spot.getY() + BogLight.HOVER, spot.getZ() + 0.5, 0.0F, 0.0F);
 		light.leads(player, goal);
 		level.addFreshEntity(light);
+	}
+
+	/** The door of a witch's hut within {@link #HUT_CHUNKS} chunks of {@code player}, or null. */
+	private static BlockPos hut(ServerLevel level, ServerPlayer player) {
+		var structure = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE)
+			.getValue(net.minecraft.world.level.levelgen.structure.BuiltinStructures.SWAMP_HUT);
+		if (structure == null) {
+			return null;
+		}
+		int cx = player.chunkPosition().x(), cz = player.chunkPosition().z();
+		for (int dx = -HUT_CHUNKS; dx <= HUT_CHUNKS; dx++) {
+			for (int dz = -HUT_CHUNKS; dz <= HUT_CHUNKS; dz++) {
+				if (!level.hasChunk(cx + dx, cz + dz)) {
+					continue;
+				}
+				for (var start : level.structureManager().startsForStructure(cx + dx, cz + dz, s -> s == structure)) {
+					if (start.isValid()) {
+						var box = start.getBoundingBox();
+						BlockPos door = new BlockPos(box.getCenter().getX(), box.minY(), box.getCenter().getZ());
+						if (door.distSqr(player.blockPosition()) > (double) GOAL_MIN * GOAL_MIN) {
+							return door;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	/** Quicksand, deep water or a drop already lying a good way off. */

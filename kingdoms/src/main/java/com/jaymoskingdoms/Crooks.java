@@ -307,6 +307,16 @@ public final class Crooks {
 		return entity instanceof Villager v && Boolean.TRUE.equals(v.getAttached(CROOK));
 	}
 
+	/** A crook creeping up on {@code player}'s pocket, or with a hand already in it, within {@code range} blocks (null: none). */
+	public static @Nullable Villager picking(ServerPlayer player, double range) {
+		for (Job job : JOBS.values()) {
+			if (job.kind == Kind.PICK && job.mark == player && job.crook.isAlive() && job.crook.distanceToSqr(player) <= range * range) {
+				return job.crook;
+			}
+		}
+		return null;
+	}
+
 	/** {@code entity} has been found out at a crime. Server side. */
 	public static boolean isCriminal(Entity entity) {
 		return notoriety(entity) > 0;

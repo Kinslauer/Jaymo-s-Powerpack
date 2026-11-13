@@ -119,6 +119,11 @@ public final class SpellParts {
 			refuse(player, Gags.gagged(player) ? "message.jaymoskingdoms.parts.gagged" : "message.jaymoskingdoms.parts.silenced");
 			return false;
 		}
+		// a big spell's words must be heard to be said right: a deafened caster's fail outright (a small one's only now and then)
+		if (part.spoken() && PARTS.containsKey(spell) && Deafened.is(player)) {
+			refuse(player, "message.jaymoskingdoms.parts.deafened");
+			return false;
+		}
 		if (part.handed() && !handFree(player, scroll)) {
 			refuse(player, "message.jaymoskingdoms.parts.hands");
 			return false;

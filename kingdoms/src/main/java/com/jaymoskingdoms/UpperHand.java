@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -10,6 +11,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.monster.zombie.Drowned;
@@ -24,10 +26,11 @@ import java.util.List;
  * things favour whoever strikes, the blow lands harder and is likelier to be a telling one; when they don't, it lands
  * softer and may only glance. It works the same for players and everyone else.
  * <ul>
- * <li><b>The upper hand</b>: the one struck lies prone, crawling, tripped or downed, or is blinded, or the striker stands
- * well above them.</li>
- * <li><b>Bad footing</b>: the striker is waist-deep in water, on ice, poisoned or blinded, or (a player, with no way to
- * see in the dark) can't see the one they strike for darkness.</li>
+ * <li><b>The upper hand</b>: the one struck lies prone, crawling, tripped or downed, or is blinded, or hasn't noticed the
+ * striker (a mob {@link Senses#unaware unaware} of a player; a player at ease struck from out of their sight), or the striker
+ * stands well above them.</li>
+ * <li><b>Bad footing</b>: the striker is waist-deep in water, on ice, poisoned or blinded, or (a player or a villager of a
+ * blood with no way to see in the dark) can't see the one they strike for darkness.</li>
  * </ul>
  * Both at once cancel out, and neither stacks: one is as good as three, as in the books. Other systems add their own
  * reasons ({@link #add}): frightened, charmed, netted, pack tactics and the rest.
@@ -91,11 +94,15 @@ public final class UpperHand {
 		if (lowered(target) || target.hasEffect(MobEffects.BLINDNESS)) {
 			up++;
 		}
+		if (attacker instanceof ServerPlayer sp && Senses.unaware(target, sp)
+			|| target instanceof ServerPlayer struck && attacker instanceof Mob mob && Surprise.offGuard(struck, mob)) {
+			up++;
+		}
 		if (attacker.getY() - target.getY() >= HIGH_GROUND && attacker.distanceToSqr(target) <= HIGH_REACH * HIGH_REACH) {
 			up++;
 		}
 		if (wading(attacker) || onIce(attacker) || attacker.hasEffect(MobEffects.POISON) || attacker.hasEffect(MobEffects.BLINDNESS)
-			|| attacker instanceof Player && !seesInDark(attacker) && dark(target)) {
+			|| needsLight(attacker) && !seesInDark(attacker) && dark(target)) {
 			down++;
 		}
 		for (Reason r : REASONS) {
@@ -123,6 +130,11 @@ public final class UpperHand {
 	private static boolean wading(LivingEntity who) {
 		return who.isInWater() && !who.isUnderWater() && who.getFluidHeight(FluidTags.WATER) >= WADING && !(who instanceof WaterAnimal)
 			&& !(who instanceof Drowned);
+	}
+
+	/** A player, or a villager or other person of a blood: eyes that need light unless their blood sees without it. */
+	private static boolean needsLight(LivingEntity who) {
+		return who instanceof Player || VillagerHeritage.of(who) != null;
 	}
 
 	private static boolean onIce(LivingEntity who) {

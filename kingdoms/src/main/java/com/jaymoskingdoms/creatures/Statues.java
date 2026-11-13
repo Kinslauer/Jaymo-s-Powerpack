@@ -26,6 +26,14 @@ final class Statues {
 
 	/** Lays the den round {@code middle} (at the surface) and puts the basilisk in it; true if it was built. */
 	static boolean den(ServerLevel level, BlockPos middle) {
+		return den(level, middle, false);
+	}
+
+	/**
+	 * Lays the den round {@code middle}. {@code gorgon}: it is a gorgon's instead, a ring of broken columns among the statues
+	 * and the snake-haired archer standing in it.
+	 */
+	static boolean den(ServerLevel level, BlockPos middle, boolean gorgon) {
 		RandomSource random = level.getRandom();
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, middle);
 		if (level.getBlockState(ground.below()).isAir() || !level.getFluidState(ground).isEmpty()) {
@@ -58,6 +66,33 @@ final class Statues {
 					box.setItem(random.nextInt(box.getContainerSize()), loot[i]);
 				}
 			}
+		}
+		if (gorgon) {
+			// her ruin: a ring of broken columns, no two the same height
+			int columns = 5 + random.nextInt(3);
+			for (int i = 0; i < columns; i++) {
+				double angle = Math.PI * 2.0 * i / columns + random.nextDouble() * 0.3;
+				BlockPos foot = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, ground.offset((int) Math.round(Math.cos(angle) * (FAR + 2)), 0, (int) Math.round(Math.sin(angle) * (FAR + 2))));
+				if (Math.abs(foot.getY() - ground.getY()) > 3 || !level.getFluidState(foot).isEmpty() || !level.getBlockState(foot.below()).isSolid()) {
+					continue;
+				}
+				int tall = 1 + random.nextInt(4);
+				for (int y = 0; y < tall; y++) {
+					float roll = random.nextFloat();
+					level.setBlock(foot.above(y), (roll < 0.3F ? Blocks.CRACKED_STONE_BRICKS : roll < 0.6F ? Blocks.MOSSY_STONE_BRICKS : Blocks.STONE_BRICKS).defaultBlockState(), Block.UPDATE_ALL);
+				}
+				if (random.nextBoolean()) {
+					level.setBlock(foot.above(tall), Blocks.STONE_BRICK_SLAB.defaultBlockState(), Block.UPDATE_ALL);
+				}
+			}
+			net.minecraft.world.entity.Mob her = com.jaymoskingdoms.beasts.Beasts.GORGON.create(level, EntitySpawnReason.EVENT);
+			if (her != null) {
+				her.snapTo(ground.getX() + 0.5, ground.getY() + 1.0, ground.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+				her.finalizeSpawn(level, level.getCurrentDifficultyAt(ground), EntitySpawnReason.EVENT, null);
+				her.setPersistenceRequired();
+				level.addFreshEntity(her);
+			}
+			return true;
 		}
 		Basilisk beast = Creatures.BASILISK.create(level, EntitySpawnReason.EVENT);
 		if (beast == null) {

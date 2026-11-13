@@ -17,6 +17,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -28,10 +30,18 @@ import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
  * Geas (fifth edition): a sworn task that hurts to break. Laid on someone who cannot refuse it (a captive in chains or just
- * freed, one held fast or downed, a sworn captain) or who fails a Wits save, it binds them for three days to the caster:
+ * freed, one held fast or downed, a sworn captain) or who fails a Wits save, it binds them for three days to the caster,
+ * who names the task as it takes hold ({@link #TASKS}):
+ * <ul>
+ * <li><b>serve</b> (what it is until another is named): stay within {@link #LEASH} blocks of the caster and fight whoever
+ * the caster fights or is set upon by;</li>
+ * <li><b>guard</b>: keep to within {@link #POST} blocks of the spot they were sworn on, a watchman who cannot leave it;</li>
+ * <li><b>begone</b>: leave, and stay {@link #AWAY} blocks from the spot they were sworn on (they are given {@link #GRACE}
+ * ticks to get clear).</li>
+ * </ul>
+ * Breaking the task burns ({@link #PAIN}, never to death). And whatever the task:
  * <ul>
  * <li>they never raise a hand to the caster, and a blow tried is lost and hurts them;</li>
- * <li>they stay within {@link #LEASH} blocks of the caster, and each moment past it burns ({@link #PAIN}), never to death;</li>
  * <li>a rescued captive does not go their own way, and a sworn captain does not turn back on his lord at dawn.</li>
  * </ul>
  * It ends with the days, with the caster's death, or with a dispel. Held by the bound one, so it outlasts a restart.
@@ -44,11 +54,20 @@ public final class Geas {
 	/** How often (ticks) the oath is checked. */
 	static final int EVERY = 40;
 	static final int COLOUR = 0x7A3AA8;
+	/** The tasks, by the name saved. */
+	static final List<String> TASKS = List.of("serve", "guard", "begone");
+	/** Guard: how far from the post; begone: how far to stay from it, and the time (ticks) given to get there. */
+	static final double POST = 10.0, AWAY = 48.0;
+	static final int GRACE = 20 * 60;
 
-	record Oath(String lord, long until) {
+	record Oath(String lord, long until, String task, long post) {
 		static final Codec<Oath> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.STRING.fieldOf("lord").forGetter(Oath::lord),
-			Codec.LONG.fieldOf("until").forGetter(Oath::until)).apply(i, Oath::new));
+			Codec.LONG.fieldOf("until").forGetter(Oath::until), Codec.STRING.optionalFieldOf("task", "serve").forGetter(Oath::task),
+			Codec.LONG.optionalFieldOf("post", 0L).forGetter(Oath::post)).apply(i, Oath::new));
 	}
+
+	/** When each one told to be gone must be clear by (game time). */
+	private static final Map<LivingEntity, Long> CLEAR_BY = new WeakHashMap<>();
 
 	static final AttachmentType<Oath> SWORN = AttachmentRegistry.create(JaymosKingdoms.id("geas"), b -> b.persistent(Oath.CODEC));
 	/** On the overworld: sworn captains' ids, with the time their oath ends. */
@@ -120,8 +139,14 @@ public final class Geas {
 			return true;
 		}
 		long until = level.getGameTime() + Math.round(TICKS * power);
-		target.setAttached(SWORN, new Oath(caster.getUUID().toString(), until));
+		target.setAttached(SWORN, new Oath(caster.getUUID().toString(), until, "serve", target.blockPosition().asLong()));
 		BOUND.add(target);
+		// the caster names the task (left unnamed, it is to serve)
+		List<Menus.Choice> tasks = new java.util.ArrayList<>();
+		for (String task : TASKS) {
+			tasks.add(Menus.Choice.of(Component.translatable("geas.jaymoskingdoms.task." + task), p -> charge(p, target, task)));
+		}
+		Menus.ask(caster, target, Component.translatable("geas.jaymoskingdoms.sworn"), tasks);
 		if (SwornCaptains.free(target) && caster.getUUID().equals(SwornCaptains.lordOf(target))) {
 			String id = Captains.idOf(target);
 			if (id != null) {
@@ -133,6 +158,27 @@ public final class Geas {
 		Fx.sigil(level, target.position().add(0.0, 0.05, 0.0), 1.4F, COLOUR, 60);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		return true;
+	}
+
+	/** {@code caster} names the task of the one they bound. */
+	private static void charge(ServerPlayer caster, LivingEntity bound, String task) {
+		Oath o = bound.getAttached(SWORN);
+		if (o == null || !o.lord().equals(caster.getUUID().toString()) || !bound.isAlive() || !(bound.level() instanceof ServerLevel level)) {
+			return;
+		}
+		bound.setAttached(SWORN, new Oath(o.lord(), o.until(), task, bound.blockPosition().asLong()));
+		if (task.equals("begone")) {
+			CLEAR_BY.put(bound, level.getGameTime() + GRACE);
+		}
+		Speech.tell(level, bound, caster, Component.translatable("geas.jaymoskingdoms.answer." + task), COLOUR);
+	}
+
+	private static void walk(LivingEntity who, BlockPos to) {
+		if (who instanceof Villager v) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, to, 1.0F, 2);
+		} else if (who instanceof Mob mob) {
+			mob.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 1.0);
+		}
 	}
 
 	/** Pain for a broken oath: a burn and a cry, never enough to kill. */
@@ -175,12 +221,45 @@ public final class Geas {
 			if (who instanceof Mob mob && mob.getTarget() == lord) {
 				mob.setTarget(null);
 			}
-			if (lord != null && lord.level() == level && lord.distanceTo(who) > LEASH) {
-				hurt(who, PAIN);
-				if (who instanceof Villager v) {
-					BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(lord, false), 1.0F, 2);
-				} else if (who instanceof Mob mob) {
-					mob.getNavigation().moveTo(lord, 1.0);
+			BlockPos post = BlockPos.of(o.post());
+			double fromPost = Math.sqrt(who.blockPosition().distSqr(post));
+			switch (o.task()) {
+				case "guard" -> {
+					if (fromPost > POST) {
+						hurt(who, PAIN);
+						walk(who, post);
+					}
+				}
+				case "begone" -> {
+					if (fromPost < AWAY) {
+						// away from the spot, the way they already stand from it
+						double dx = who.getX() - (post.getX() + 0.5), dz = who.getZ() - (post.getZ() + 0.5);
+						double d = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
+						walk(who, BlockPos.containing(who.getX() + dx / d * 16.0, who.getY(), who.getZ() + dz / d * 16.0));
+						Long clearBy = CLEAR_BY.get(who);
+						if (clearBy == null) {
+							CLEAR_BY.put(who, level.getGameTime() + GRACE);
+						} else if (level.getGameTime() > clearBy) {
+							hurt(who, PAIN);
+						}
+					}
+				}
+				default -> {
+					if (lord != null && lord.level() == level && lord.distanceTo(who) > LEASH) {
+						hurt(who, PAIN);
+						if (who instanceof Villager v) {
+							BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(lord, false), 1.0F, 2);
+						} else if (who instanceof Mob mob) {
+							mob.getNavigation().moveTo(lord, 1.0);
+						}
+					}
+					// their lord's fight is theirs: whoever set on the lord, else whoever the lord last struck
+					if (who instanceof Mob mob && lord instanceof LivingEntity master && (mob.getTarget() == null || !mob.getTarget().isAlive())) {
+						LivingEntity foe = master.getLastHurtByMob() != null && master.getLastHurtByMob().isAlive() ? master.getLastHurtByMob() : master.getLastHurtMob();
+						if (foe != null && foe.isAlive() && foe != who && foe != master && foe.distanceToSqr(who) < LEASH * LEASH && !sworn(foe)) {
+							mob.setTarget(foe);
+						}
+					}
 				}
 			}
 		}

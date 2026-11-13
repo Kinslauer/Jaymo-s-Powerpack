@@ -121,9 +121,17 @@ public final class Cantrips {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 1.6F);
 			return true;
 		}
+		// it burns on the tip of a staff (or wand, tome or holy symbol) held in the hand
+		if (!holdsFocus(player)) {
+			return false;
+		}
 		LIGHTS.put(player.getUUID(), new Glow(level, player.blockPosition(), level.getGameTime() + LIGHT_TICKS));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.6F);
 		return true;
+	}
+
+	private static boolean holdsFocus(ServerPlayer player) {
+		return SpellParts.focus(player.getMainHandItem()) || SpellParts.focus(player.getOffhandItem());
 	}
 
 	/** Takes the light block {@code id} placed away, and (if {@code to} is given) sets it at a new place. */
@@ -147,7 +155,7 @@ public final class Cantrips {
 			for (UUID id : List.copyOf(LIGHTS.keySet())) {
 				Glow glow = LIGHTS.get(id);
 				ServerPlayer player = server.getPlayerList().getPlayer(id);
-				if (player == null || !player.isAlive() || player.level() != glow.level || glow.level.getGameTime() >= glow.until) {
+				if (player == null || !player.isAlive() || player.level() != glow.level || glow.level.getGameTime() >= glow.until || !holdsFocus(player)) {
 					put(id, null);
 					continue;
 				}

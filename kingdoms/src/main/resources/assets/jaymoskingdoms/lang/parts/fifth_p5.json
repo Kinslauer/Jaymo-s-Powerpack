@@ -314,5 +314,19 @@
   "foe.fear.cats": "cats",
   "foe.fear.water": "water",
   "foe.fear.fungus": "fungus",
-  "foe.fear.fireball": "its own fireballs"
+  "foe.fear.fireball": "its own fireballs",
+  "item.jaymoskingdoms.forged_seal": "Forged Writ Under the Lord's Seal",
+  "item.jaymoskingdoms.forged_deed": "Forged Deed",
+  "gui.button.act.seal": "Show the Lord's Seal",
+  "gui.button.act.deed": "Show a Deed",
+  "papers.jaymoskingdoms.seal_held.0": "The lord's own seal. Go where you please, the week is yours.",
+  "papers.jaymoskingdoms.seal_held.1": "By his lordship's hand. I'll tell the others to let you by.",
+  "papers.jaymoskingdoms.seal_released.0": "An order of release, sealed by the lord. Out you come, then.",
+  "papers.jaymoskingdoms.seal_released.1": "His lordship wants you out? It's his wax. The door is open.",
+  "papers.jaymoskingdoms.seal_spotted.0": "That is not my lord's seal. You'll pay for trying it.",
+  "papers.jaymoskingdoms.seal_spotted.1": "I see that seal every day, and this isn't it. Forgery!",
+  "papers.jaymoskingdoms.deed_held.0": "So the old house is yours now. Welcome home.",
+  "papers.jaymoskingdoms.deed_held.1": "Signed and witnessed. I'll know you for one of ours.",
+  "papers.jaymoskingdoms.deed_spotted.0": "That house was never sold, and that hand is no clerk's. Forgery!",
+  "papers.jaymoskingdoms.deed_spotted.1": "The witness on this deed died ten years ago. You're coming with me."
 }

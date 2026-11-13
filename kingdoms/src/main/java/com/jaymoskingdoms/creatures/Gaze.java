@@ -3,6 +3,8 @@ package com.jaymoskingdoms.creatures;
 import com.jaymoskingdoms.HeldFast;
 import com.jaymoskingdoms.UpperHand;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -21,12 +23,14 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The gaze that turns you to stone (the basilisk's). Looking at it, with it looking back, fills a creeping stone in you: first
+ * The gaze that turns you to stone: the basilisk's, and the gorgon's (the snake-haired archer of the jungles and swamps, and
+ * of the ruins where she keeps her statues, {@link Statues}). Looking at it, with it looking back, fills a creeping stone in you: first
  * a heaviness (slowness that deepens), then at full {@link HeldFast held fast} like a statue until a Grit save breaks it or
  * a friend chips you free with a pickaxe. It ebbs when you look away. Looking away is safe but costs you: your blows at it
  * are bad footing ({@link UpperHand}), for you are fighting half blind. A mirror held up in front of you (hand mirror,
@@ -61,7 +65,7 @@ public final class Gaze {
 			AWAY.clear();
 		});
 		// looking away to fight it: bad footing for the blow
-		UpperHand.add((attacker, target) -> target instanceof Basilisk && attacker instanceof ServerPlayer p && lookingAway(p) ? -1 : 0);
+		UpperHand.add((attacker, target) -> gazer(target) && attacker instanceof ServerPlayer p && lookingAway(p) ? -1 : 0);
 		// a friend chips you free
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (level instanceof ServerLevel server && entity instanceof ServerPlayer stoned && HeldFast.held(stoned) && STONE.containsKey(stoned.getUUID())
@@ -76,7 +80,12 @@ public final class Gaze {
 		});
 	}
 
-	/** Whether {@code p} has been keeping their eyes off a basilisk lately. */
+	/** Whether {@code who} has the gaze: a basilisk or a gorgon. */
+	static boolean gazer(net.minecraft.world.entity.Entity who) {
+		return who instanceof Basilisk || who instanceof com.jaymoskingdoms.beasts.Gorgon;
+	}
+
+	/** Whether {@code p} has been keeping their eyes off a basilisk or a gorgon lately. */
 	static boolean lookingAway(ServerPlayer p) {
 		Long until = AWAY.get(p.getUUID());
 		return until != null && p.level().getGameTime() < until;
@@ -106,7 +115,13 @@ public final class Gaze {
 			}
 			long now = level.getGameTime();
 			java.util.Set<UUID> eyed = new java.util.HashSet<>();
-			for (Basilisk beast : level.getEntities(Creatures.BASILISK, b -> b.isAlive() && b.getTarget() != null || b.isAlive())) {
+			List<Mob> gazers = new ArrayList<>(level.getEntities(Creatures.BASILISK, LivingEntity::isAlive));
+			gazers.addAll(level.getEntities(com.jaymoskingdoms.beasts.Beasts.GORGON, LivingEntity::isAlive));
+			for (Mob beast : gazers) {
+				// (one turned to stone by its own gaze sees nothing)
+				if (HeldFast.held(beast)) {
+					continue;
+				}
 				for (ServerPlayer p : level.players()) {
 					if (p.isSpectator() || p.isCreative() || p.distanceTo(beast) > REACH || !p.hasLineOfSight(beast)) {
 						continue;

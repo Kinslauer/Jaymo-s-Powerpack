@@ -55,6 +55,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link #revive}: up on their feet at {@link #HEALTH} of their health, wounds closed, the death undone, and it is not
  * counted as one of their sure wakes. It costs: weakness and a slow foot for {@link #SICK} ticks, and half their levels.</li>
  * <li>Beyond bringing back: a head taken, the void, lava ({@link #BEYOND}).</li>
+ * <li>The first deaths of a life, which always wake ({@link Mortality#SURE_WAKES}), can be called back too: for the same
+ * minute after one is left for dead, while they still lie where they fell, {@link #revive} stands them up there. They wake
+ * nowhere, and the sure wake it would have spent is theirs again.</li>
  * </ul>
  */
 public final class Revival {
@@ -148,11 +151,14 @@ public final class Revival {
 		return HELD.containsKey(entity.getUUID());
 	}
 
-	/** Those dying and waiting for a reviver in {@code level} within {@code range} of {@code at}. */
+	/**
+	 * Those dying and waiting for a reviver in {@code level} within {@code range} of {@code at}: a final death held back, or
+	 * one left for dead this last minute and lying there still.
+	 */
 	public static List<ServerPlayer> dyingNear(ServerLevel level, Vec3 at, double range) {
 		List<ServerPlayer> near = new ArrayList<>();
 		for (ServerPlayer player : level.players()) {
-			if (HELD.containsKey(player.getUUID()) && player.position().distanceToSqr(at) <= range * range) {
+			if ((HELD.containsKey(player.getUUID()) || Mortality.freshlyLeft(player, WINDOW)) && player.position().distanceToSqr(at) <= range * range) {
 				near.add(player);
 			}
 		}
@@ -273,13 +279,18 @@ public final class Revival {
 	 */
 	public static boolean revive(ServerPlayer dead, @Nullable Entity by) {
 		Held held = HELD.remove(dead.getUUID());
-		if (held == null) {
-			return false;
-		}
 		ServerLevel level = dead.level();
-		dead.removeAttached(WAITING);
-		dead.setInvisible(held.wasInvisible);
-		Mortality.undoFinal(dead);
+		if (held == null) {
+			// one of the deaths that wake: called back where they lie, before they are carried off to wake
+			if (!Mortality.freshlyLeft(dead, WINDOW)) {
+				return false;
+			}
+			Mortality.calledBack(dead);
+		} else {
+			dead.removeAttached(WAITING);
+			dead.setInvisible(held.wasInvisible);
+			Mortality.undoFinal(dead);
+		}
 		if (Downed.isDowned(dead)) {
 			Downed.undo(level, dead);
 		}

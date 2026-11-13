@@ -164,6 +164,24 @@ public final class Busts {
 		return player.hasAttached(JAILED);
 	}
 
+	/** A prisoner's sentence runs {@code ticks} longer (a forged writ seen through). */
+	static void longer(ServerPlayer player, long ticks) {
+		Jail jail = player.getAttached(JAILED);
+		if (jail != null) {
+			player.setAttached(JAILED, new Jail(jail.realm(), jail.cell(), jail.until() + ticks));
+		}
+	}
+
+	/** A prisoner is let out now, the cell door opened for them (a forged writ that held). */
+	static void letOut(ServerLevel level, ServerPlayer player) {
+		Jail jail = player.getAttached(JAILED);
+		if (jail != null) {
+			player.removeAttached(JAILED);
+			Speakeasy.openDoor(level, jail.cell());
+			level.playSound(null, Speakeasy.doorAt(jail.cell()), SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
+		}
+	}
+
 	// ---- the tick ------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {

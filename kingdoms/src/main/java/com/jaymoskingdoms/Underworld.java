@@ -879,6 +879,8 @@ public final class Underworld {
 			// forged papers, never crafted: a fence has them
 			offers.add(sell(ForgedPapers.PASS, ForgedPapers.PASS_PRICE, ForgedPapers.STOCK));
 			offers.add(sell(ForgedPapers.PARDON, ForgedPapers.PARDON_PRICE, ForgedPapers.STOCK));
+			offers.add(sell(ForgedPapers.SEAL, ForgedPapers.SEAL_PRICE, 1));
+			offers.add(sell(ForgedPapers.DEED, ForgedPapers.DEED_PRICE, 1));
 			// and the sealed bundles a player can run to the other dens
 			Smuggling.bundles(level, f, offers);
 			if (extra > 0) {
@@ -901,6 +903,11 @@ public final class Underworld {
 		if (Crooks.notoriety(v) > 0) {
 			offers.add(sell(ForgedPapers.PASS, ForgedPapers.PASS_PRICE + ForgedPapers.CROOK_EXTRA, 1));
 			offers.add(sell(ForgedPapers.PARDON, ForgedPapers.PARDON_PRICE + ForgedPapers.CROOK_EXTRA, 1));
+			// and the worst of them, the two that can hang a man: a writ under the lord's seal, a deed
+			if (Crooks.notoriety(v) > 1) {
+				offers.add(sell(ForgedPapers.SEAL, ForgedPapers.SEAL_PRICE + ForgedPapers.CROOK_EXTRA, 1));
+				offers.add(sell(ForgedPapers.DEED, ForgedPapers.DEED_PRICE + ForgedPapers.CROOK_EXTRA, 1));
+			}
 		}
 	}
 

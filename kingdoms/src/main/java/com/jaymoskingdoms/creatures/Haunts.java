@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * return. It happens only in the tiers the player has opened.
  * <ul>
  * <li><b>Ruins</b> (a Grim ruin or any structure with "ruin" in its name): shadows in the dark of them, and sometimes a
- * basilisk's den with its statues ({@link Statues}).</li>
+ * basilisk's den with its statues, or a gorgon's ring of broken columns with hers ({@link Statues}).</li>
  * <li><b>Mineshafts, strongholds, trial chambers:</b> a clear cube in the corridors.</li>
  * <li><b>Hills, taiga, savanna:</b> a digger warren ringed with pits ({@link Warrens}).</li>
  * <li><b>Near a settlement:</b> a cellar with a stolen life tied up in it ({@link Doubles}); villagers found shut in under a
@@ -170,7 +170,8 @@ public final class Haunts {
 		}
 		if (random.nextFloat() < DEN) {
 			BoundingBox box = start.getBoundingBox();
-			Statues.den(level, new BlockPos(box.maxX() + 6, box.minY(), box.getCenter().getZ()));
+			// a basilisk's den, or as often a gorgon's ruin
+			Statues.den(level, new BlockPos(box.maxX() + 6, box.minY(), box.getCenter().getZ()), random.nextBoolean());
 		}
 	}
 
