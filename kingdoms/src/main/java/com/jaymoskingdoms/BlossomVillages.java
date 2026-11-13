@@ -399,6 +399,7 @@ final class BlossomVillages {
 		}
 		farmsteads(level, village, bell, random, homes, built);
 		watchTower(level, village, bell, gate, random);
+		ruin(level, village, bell, random);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));
 			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
@@ -479,6 +480,43 @@ final class BlossomVillages {
 			Shrine.Dedication patron = patrons[random.nextInt(patrons.length)];
 			place(level, Blossom.wayside(Healing.SHRINE.defaultBlockState().setValue(Shrine.DEDICATION, patron)), FARM_SHRINE, middle, toVillage, null);
 			raised++;
+		}
+	}
+
+	/** A ruin: how often a new village has one near, how far from the bell (at least, plus up to), its ground's radius and the most it may rise and fall. */
+	static final float RUIN_CHANCE = 0.5F;
+	static final int RUIN_MIN = 72, RUIN_SPREAD = 24, RUIN_RADIUS = 8, RUIN_SLOPE = 5, RUIN_TRIES = 4;
+	/** What is left in a ruin's tansu. */
+	static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> RUIN_LOOT = net.minecraft.resources.ResourceKey.create(
+		net.minecraft.core.registries.Registries.LOOT_TABLE, JaymosKingdoms.id("chests/blossom_ruin"));
+
+	/**
+	 * Now and then, an older house that did not last: a ruined minka out beyond the farmsteads on nobody's land, what its
+	 * people left still in its tansu.
+	 */
+	private static void ruin(ServerLevel level, Faction village, BlockPos bell, RandomSource random) {
+		if (random.nextFloat() >= RUIN_CHANCE) {
+			return;
+		}
+		for (int tries = 0; tries < RUIN_TRIES; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = RUIN_MIN + random.nextInt(RUIN_SPREAD);
+			BlockPos at = bell.offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			int floor = IllagerBuildings.floor(level, at, RUIN_SLOPE, RUIN_RADIUS);
+			Faction owner = Factions.at(level.getServer(), level, at);
+			if (floor == Integer.MIN_VALUE || owner != null && owner.id() != village.id()) {
+				continue;
+			}
+			BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+			Blueprint house = Blossom.ruin(kit(level, village, random), random);
+			BlockPos inside = place(level, house, new Spot("blossom_ruin", 0, -house.depth() / 2, 0, house.width()), middle, Direction.NORTH, null);
+			for (BlockPos p : BlockPos.betweenClosed(inside.offset(-RUIN_RADIUS, -2, -RUIN_RADIUS), inside.offset(RUIN_RADIUS, 2, RUIN_RADIUS))) {
+				if (level.getBlockEntity(p) instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity store
+					&& level.getBlockState(p).is(com.jaymoskingdoms.blossomland.BlossomFurnishings.TANSU)) {
+					store.setLootTable(RUIN_LOOT, random.nextLong());
+				}
+			}
+			return;
 		}
 	}
 

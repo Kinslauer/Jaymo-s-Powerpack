@@ -144,6 +144,9 @@ Armory has the glaive, claymore and flanged mace), heirlooms, the shadow suit, t
 Hired shadows sent by rival lords. A rare outlaw castle held by a warlord (`BossPosture`, `BossTurns`). Blossom ruins
 as quest sites.
 
+*Built (2026-11-13, `Blossom.ruin`, `BlossomVillages.ruin`, loot `chests/blossom_ruin`): a fallen house outside about
+half of new villages, its chest left behind. Not built: hired shadows, the warlord's castle, ruins as quest sites.*
+
 ## Patch 10: the land (wl_autumn, wl_flowers, wl_bamboo, wl_koi)
 
 Maple and ginkgo that turn with the seasons, flower fields, wisteria, bamboo stands villagers cut, koi ponds in towns.

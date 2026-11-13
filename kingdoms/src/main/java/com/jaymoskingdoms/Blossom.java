@@ -369,6 +369,40 @@ final class Blossom {
 		return s.done();
 	}
 
+	/** How much of a ruined minka is gone, by height: its floor stays, the first row mostly, the walls by halves, the roof nearly all. */
+	static final float RUIN_LOW = 0.15F, RUIN_WALL = 0.45F, RUIN_ROOF = 0.8F;
+	/** The share of a ruin's mats that have rotted to earth. */
+	static final float RUIN_ROT = 0.4F;
+
+	/**
+	 * A ruined minka: a house of {@code k} with its door, bedding and lanterns gone, its hearth cold, more of it fallen
+	 * the higher it stood, and its tansu still against the wall (the one who places it fills that).
+	 */
+	static Blueprint ruin(Buildings.Kit k, net.minecraft.util.RandomSource random) {
+		Blueprint whole = minka(k);
+		java.util.List<Blueprint.Placement> left = new java.util.ArrayList<>();
+		for (Blueprint.Placement p : whole.blocks()) {
+			BlockState state = p.state();
+			Block block = state.getBlock();
+			if (block instanceof net.minecraft.world.level.block.DoorBlock || block instanceof net.minecraft.world.level.block.BedBlock
+				|| block == BlossomBlocks.PAPER_LANTERN || state.is(BONSAI.getBlock())) {
+				continue;
+			}
+			int y = p.offset().getY();
+			float gone = y == 0 || block == BlossomFurnishings.TANSU ? 0.0F : y == 1 ? RUIN_LOW : y <= 3 ? RUIN_WALL : RUIN_ROOF;
+			if (random.nextFloat() < gone) {
+				continue;
+			}
+			if (block == BlossomFurnishings.HEARTH) {
+				state = state.setValue(net.minecraft.world.level.block.CampfireBlock.LIT, false);
+			} else if (block == BlossomBlocks.TATAMI && random.nextFloat() < RUIN_ROT) {
+				state = Blocks.COARSE_DIRT.defaultBlockState();
+			}
+			left.add(new Blueprint.Placement(p.offset(), state));
+		}
+		return new Blueprint("blossom_ruin", whole.width(), whole.depth(), whole.height(), java.util.List.copyOf(left));
+	}
+
 	/** The watch tower's footprint (square). */
 	static final int WATCH_SIZE = 5;
 
