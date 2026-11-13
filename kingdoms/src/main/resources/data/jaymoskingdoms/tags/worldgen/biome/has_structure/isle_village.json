@@ -8,6 +8,14 @@
     "#minecraft:has_structure/village_taiga",
     "#minecraft:is_forest",
     "#minecraft:is_jungle",
-    "#minecraft:is_beach"
+    "#minecraft:is_beach",
+    "#minecraft:is_taiga",
+    "#minecraft:is_savanna",
+    "minecraft:swamp",
+    "minecraft:meadow",
+    "minecraft:cherry_grove",
+    "minecraft:stony_shore",
+    "minecraft:sunflower_plains",
+    "minecraft:birch_forest"
   ]
 }

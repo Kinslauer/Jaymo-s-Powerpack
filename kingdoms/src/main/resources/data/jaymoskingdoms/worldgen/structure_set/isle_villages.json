@@ -1,11 +1,14 @@
 {
   "structures": [
-    {"structure": "jaymoskingdoms:isle_village", "weight": 1}
+    {
+      "structure": "jaymoskingdoms:isle_village",
+      "weight": 1
+    }
   ],
   "placement": {
     "type": "minecraft:random_spread",
-    "spacing": 12,
-    "separation": 5,
+    "spacing": 6,
+    "separation": 2,
     "salt": 581230447
   }
 }

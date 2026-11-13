@@ -62,7 +62,7 @@ public final class IslandStructure extends Structure {
 		int x = chunk.getMiddleBlockX(), z = chunk.getMiddleBlockZ();
 		Climate.Sampler sampler = context.climateSampler();
 		if (this.island) {
-			if (!Offshore.island(sampler, x, z)) {
+			if (!Offshore.island(context.chunkGenerator(), context.heightAccessor(), context.randomState(), x, z)) {
 				return Optional.empty();
 			}
 			if (this.far > 0.0F && Offshore.far(Offshore.ringContinentalness(sampler, x, z)) < this.far) {

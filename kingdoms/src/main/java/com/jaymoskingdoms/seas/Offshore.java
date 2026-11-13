@@ -2,7 +2,10 @@ package com.jaymoskingdoms.seas;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 
@@ -18,9 +21,15 @@ public final class Offshore {
 	public static final float OPEN = -0.6F;
 	/** Above this the land is land, not shore (the game's inland line). */
 	public static final float LAND = -0.11F;
-	/** An island: land here, and sea all round at one of these distances (blocks), checked at this many points. */
-	static final int[] ISLAND_RINGS = {96, 160, 256};
-	static final int ISLAND_POINTS = 12;
+	/**
+	 * An island: land here, and sea all round at one of these distances (blocks), checked at least this many points
+	 * round (one every {@link #ISLAND_SPACING} blocks on a big ring), all but {@link #ISLAND_GAPS} of them sea (a reef or
+	 * a skerry on the ring doesn't join it to a continent).
+	 */
+	static final int[] ISLAND_RINGS = {96, 160, 256, 384, 512};
+	static final int ISLAND_POINTS = 12, ISLAND_SPACING = 48, ISLAND_GAPS = 2;
+	/** By the ground itself ({@link #island(ChunkGenerator, LevelHeightAccessor, RandomState, int, int)}): sea all round at one of these (blocks). */
+	static final int[] SHORE_RINGS = {64, 128, 192, 256};
 
 	private Offshore() {
 	}
@@ -53,13 +62,42 @@ public final class Offshore {
 			return false;
 		}
 		for (int r : ISLAND_RINGS) {
-			boolean round = true;
-			for (int i = 0; i < ISLAND_POINTS && round; i++) {
+			int points = Math.max(ISLAND_POINTS, (int)Math.ceil(Math.PI * 2.0 * r / ISLAND_SPACING)), land = 0;
+			for (int i = 0; i < points && land <= ISLAND_GAPS; i++) {
+				double a = Math.PI * 2.0 * i / points;
+				int px = x + (int)Math.round(Math.cos(a) * r), pz = z + (int)Math.round(Math.sin(a) * r);
+				if (Climate.unquantizeCoord(sampler.sample(px >> 2, 0, pz >> 2).continentalness()) >= SEA) {
+					land++;
+				}
+			}
+			if (land <= ISLAND_GAPS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether (x, z) is on an island by the ground itself: dry land here (above the sea's level, as the higher sea stands
+	 * in a world made with it), and under the sea all round at one of {@link #SHORE_RINGS}' distances (all but
+	 * {@link #ISLAND_GAPS} of {@link #ISLAND_POINTS} points). Reads the ground's shape only, so nothing is loaded; a hill
+	 * the risen sea cut off counts as much as an island the continent noise made. Costs up to a few dozen height reads.
+	 */
+	public static boolean island(ChunkGenerator generator, LevelHeightAccessor heights, RandomState state, int x, int z) {
+		int sea = generator.getSeaLevel();
+		if (generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, state) < sea) {
+			return false;
+		}
+		for (int r : SHORE_RINGS) {
+			int land = 0;
+			for (int i = 0; i < ISLAND_POINTS && land <= ISLAND_GAPS; i++) {
 				double a = Math.PI * 2.0 * i / ISLAND_POINTS;
 				int px = x + (int)Math.round(Math.cos(a) * r), pz = z + (int)Math.round(Math.sin(a) * r);
-				round = Climate.unquantizeCoord(sampler.sample(px >> 2, 0, pz >> 2).continentalness()) < SEA;
+				if (generator.getBaseHeight(px, pz, Heightmap.Types.OCEAN_FLOOR_WG, heights, state) >= sea) {
+					land++;
+				}
 			}
-			if (round) {
+			if (land <= ISLAND_GAPS) {
 				return true;
 			}
 		}
@@ -67,7 +105,7 @@ public final class Offshore {
 	}
 
 	public static boolean island(ServerLevel level, int x, int z) {
-		return island(level.getChunkSource().randomState(), x, z);
+		return island(level.getChunkSource().getGenerator(), level, level.getChunkSource().randomState(), x, z);
 	}
 
 	public static boolean island(RandomState state, int x, int z) {
