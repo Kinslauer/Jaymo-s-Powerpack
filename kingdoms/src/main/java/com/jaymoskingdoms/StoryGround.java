@@ -117,6 +117,8 @@ public final class StoryGround {
 		final List<UUID> waiting = new ArrayList<>();
 		/** Chunks kept loaded round {@link #at} while it's tried. */
 		int radius = TICKET_RADIUS;
+		/** More chunks made and kept loaded while it's tried, each on its own ({@link #ahead(ServerPlayer, List, Runnable)}). */
+		List<ChunkPos> chunks = List.of();
 		/** (0.7.350) The capital's village still being looked for (null: found, or not looked for). */
 		@Nullable VillageSearch search;
 
@@ -414,11 +416,10 @@ public final class StoryGround {
 	static @Nullable BlockPos monolith(ServerLevel level, BlockPos from, RandomSource random) {
 		BlockPos rough = null;
 		int[] made = {LifeStory.NEW_CHUNKS};
-		for (int i = 0; i < MONOLITH_TRIES; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0;
-			int r = MONOLITH_MIN + random.nextInt(MONOLITH_MAX - MONOLITH_MIN + 1);
-			BlockPos column = from.offset(Mth.floor(Math.cos(angle) * r), 0, Mth.floor(Math.sin(angle) * r));
-			// spots in land not yet made are made only while the budget lasts: 24 new chunks held the server past its watchdog
+		// (land a start's earlier try had made in the background looked at first: LifeStory.Wanted)
+		for (BlockPos column : LifeStory.columns(from, MONOLITH_MIN, MONOLITH_MAX, random, MONOLITH_TRIES)) {
+			// spots in land not yet made are made only while the budget lasts (24 new chunks held the server past its
+			// watchdog), and never while a start is tried: that has them made in the background and tries again
 			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
@@ -865,6 +866,33 @@ public final class StoryGround {
 		AHEAD.put(player.getUUID(), job);
 	}
 
+	/**
+	 * Makes {@code chunks} in the background, then runs {@code then}; {@code player} waits behind the loading screen. The
+	 * land a start looked at and found not made yet ({@link LifeStory.Wanted}): it's tried again once this is done, or
+	 * once it's taken too long.
+	 */
+	static void ahead(ServerPlayer player, List<ChunkPos> chunks, Runnable then) {
+		ServerLevel level = player.level().getServer().overworld();
+		BlockPos at = chunks.getFirst().getMiddleBlockPosition(level.getSeaLevel());
+		Job job = new Job(at, level.getGameTime() + AHEAD_GIVE_UP_TICKS, l -> made(l, chunks), l -> {
+		});
+		job.radius = 0;
+		job.chunks = List.copyOf(chunks);
+		job.waiting.add(player.getUUID());
+		job.then.add(then);
+		AHEAD.put(player.getUUID(), job);
+	}
+
+	/** Whether each of {@code chunks} is made and loaded. */
+	private static boolean made(ServerLevel level, List<ChunkPos> chunks) {
+		for (ChunkPos chunk : chunks) {
+			if (level.getChunkSource().getChunkNow(chunk.x(), chunk.z()) == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** Whether every chunk within {@link #AHEAD_RADIUS} of {@code at} is made and loaded. */
 	private static boolean ready(ServerLevel level, BlockPos at) {
 		ChunkPos centre = ChunkPos.containing(at);
@@ -881,6 +909,9 @@ public final class StoryGround {
 	/** One try at {@code job} (its land kept loaded, its waiting players kept safe): whether it's over, made or given up. */
 	private static boolean step(ServerLevel level, Job job, String making) {
 		level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(job.at), job.radius);
+		for (ChunkPos chunk : job.chunks) {
+			level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, chunk, 0);
+		}
 		for (UUID id : job.waiting) {
 			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
 			if (player != null) {

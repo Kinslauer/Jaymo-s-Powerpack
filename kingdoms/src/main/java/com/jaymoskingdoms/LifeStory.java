@@ -51,6 +51,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -107,8 +108,16 @@ public final class LifeStory {
 	static final int ARRIVAL_GRACE_TICKS = 100;
 	/** Spots tried for a dry, open place to stand before giving up on one. */
 	static final int GROUND_TRIES = 16;
-	/** (0.7.607) New chunks one search for a place to stand may make (see {@link #reach}); made ones are free. */
+	/**
+	 * Land not made yet that one try at a start asks for, at most (chunks): made in the background while the player waits
+	 * behind the loading screen, then the start tries again ({@link Wanted}).
+	 */
 	static final int NEW_CHUNKS = 6;
+	/**
+	 * Tries at a start, at most: the chosen start's place is waited for this many times ({@code CHOSEN_TRIES}), then the
+	 * wild's; on the last the start makes do with the land there is (as it always did with nothing found).
+	 */
+	static final int CHOSEN_TRIES = 3, LAND_TRIES = 5;
 	/** (0.7.584) How far under a roof (blocks) a spot to stand indoors is looked for. */
 	static final int INDOOR_DEPTH = 8;
 	/**
@@ -1202,23 +1211,8 @@ public final class LifeStory {
 		Start road0 = byFate ? fated(server, player, random) : chosen;
 		// (0.7.605) fate may now give a realm's road (banished, sworn, the cells): a realm of its own choosing
 		Faction realmFor = byFate && road0.realm && roadRealm == null ? capital(server, random) : roadRealm;
-		// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
-		java.util.function.Consumer<Start> go = start -> {
-			ServerPlayer p = server.getPlayerList().getPlayer(id);
-			if (p == null || !departing(p)) {
-				// gone meanwhile: the road is still owed, and set out on again when they're back
-				DEPARTED.remove(id);
-				return;
-			}
-			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
-			RoadLocks.note(p, start);
-			// (the loading screen up before they're let down out of stasis and moved: a new body may not have it yet)
-			StoryGround.holdNow(p, StoryGround.ARRIVING);
-			p.removeAttached(ROAD);
-			DEPARTED.remove(id);
-			StoryStasis.release(p);
-			arrive(p, start, realmFor, bornAs, raised, cls, option, calling, byFate);
-		};
+		Departure departure = new Departure(id, road, realmFor, bornAs, raised, cls, option, calling, byFate, new Wanted());
+		java.util.function.Consumer<Start> go = start -> departure.go(server, start);
 		// (0.7.228) what the start needs and the world hasn't got is made first: a capital, a harbour (they wait a moment)
 		if (road0 == Start.CITY && capital(server, random) == null) {
 			StoryGround.capital(server, player, () -> go.accept(Start.CITY));
@@ -1245,6 +1239,49 @@ public final class LifeStory {
 	}
 
 	/**
+	 * A player setting out on their road ({@link #depart}), to be put at {@code start} once what it needs is ready, and
+	 * once its land is made ({@link Wanted}): tried again till it is, at most {@link #LAND_TRIES} times.
+	 */
+	private record Departure(java.util.UUID id, String road, @Nullable Faction realmFor, Heritage.Kind bornAs, Answer raised,
+		Classes.PlayerClass cls, String option, String calling, boolean byFate, Wanted wanted) {
+		void go(MinecraftServer server, Start start) {
+			// (0.7.304) whoever they are by the time it's ready: a death on the way makes a new body
+			ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p == null || !departing(p)) {
+				// gone meanwhile: the road is still owed, and set out on again when they're back
+				DEPARTED.remove(id);
+				return;
+			}
+			// (0.7.419) the road fate (or a fallback) set them on stays theirs as well
+			RoadLocks.note(p, start);
+			// (the loading screen up before they're let down out of stasis and moved: a new body may not have it yet)
+			StoryGround.holdNow(p, StoryGround.ARRIVING);
+			p.removeAttached(ROAD);
+			DEPARTED.remove(id);
+			StoryStasis.release(p);
+			wanted.tries++;
+			boolean arrived;
+			WANTED = wanted;
+			try {
+				arrived = arrive(p, start, realmFor, bornAs, raised, cls, option, calling, byFate);
+			} finally {
+				WANTED = null;
+			}
+			if (arrived) {
+				return;
+			}
+			// the land isn't made yet: the road stays owed (a disconnect meanwhile keeps it), they're held again behind the
+			// loading screen, and it's made in the background before the next try
+			p.setAttached(ROAD, road);
+			DEPARTED.add(id);
+			List<ChunkPos> land = wanted.next();
+			JaymosKingdoms.LOGGER.info("{}'s start ({}) waits for {} chunks of land to be made first (try {})", p.getName().getString(), start,
+				land.size(), wanted.tries);
+			StoryGround.ahead(p, land, () -> go(server, start));
+		}
+	}
+
+	/**
 	 * Where a village or shipwreck start will most likely put {@code player}: the place {@link #begin} looks at first (a
 	 * realm of their own people's seat, else the nearest fitting village; a beached wreck, else any), so its land can be
 	 * made ready before they're put there ({@link StoryGround#ahead}). Null: nowhere found (the start makes do as ever).
@@ -1264,8 +1301,11 @@ public final class LifeStory {
 		return village != null ? village : Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH);
 	}
 
-	/** Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. */
-	private static void arrive(ServerPlayer player, Start start, @Nullable Faction roadRealm, Heritage.Kind bornAs, Answer raised,
+	/**
+	 * Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. False: the
+	 * land the start needs isn't made yet ({@link #WANTED}), nothing done; it's made and they're put there after.
+	 */
+	private static boolean arrive(ServerPlayer player, Start start, @Nullable Faction roadRealm, Heritage.Kind bornAs, Answer raised,
 		Classes.PlayerClass cls, String option, String calling, boolean fated) {
 		RandomSource random = player.getRandom();
 		Start landed;
@@ -1283,6 +1323,9 @@ public final class LifeStory {
 				}
 			}
 			landed = begin(player, start, roadRealm, bornAs, random);
+			if (landed == null) {
+				return false;
+			}
 			StartPerks.landed(player, landed);
 		} finally {
 			OTHERS = java.util.Map.of();
@@ -1350,6 +1393,7 @@ public final class LifeStory {
 			player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
 				Component.translatable("message.jaymoskingdoms.story.fated.title", Component.translatable(road)).withStyle(ChatFormatting.GOLD)));
 		}
+		return true;
 	}
 
 	/**
@@ -1432,9 +1476,10 @@ public final class LifeStory {
 
 	/**
 	 * Puts {@code player} where their story starts and does what it means to the realms; returns the start that came
-	 * to pass (one that can't be found falls back to the wild, and that to where they stand).
+	 * to pass (one that can't be found falls back to the wild, and that to where they stand). Null, while {@link #WANTED}
+	 * says to wait: the land the start looked at isn't made yet, and it's tried again once it is.
 	 */
-	private static Start begin(ServerPlayer player, Start start, @Nullable Faction named, Heritage.Kind heritage, RandomSource random) {
+	private static @Nullable Start begin(ServerPlayer player, Start start, @Nullable Faction named, Heritage.Kind heritage, RandomSource random) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = server.overworld();
 		BlockPos spawn = level.getRespawnData().pos();
@@ -1840,12 +1885,22 @@ public final class LifeStory {
 			}
 		}
 		Start landed = start;
+		// (Deck crash 2026-11-13 10:12) the land the start looked at isn't made yet: it's made in the background while they
+		// wait behind the loading screen, then they try again (depart), rather than making it here and holding the server
+		Wanted wanted = WANTED;
+		if (to == null && wanted != null && wanted.waitFor(true)) {
+			return null;
+		}
 		if (to == null) {
 			landed = Start.WILD;
+			if (wanted != null) {
+				// (the wild's own land is what's made next, not the start's that won't be waited for any longer)
+				wanted.forget();
+			}
 			to = spot(level, start == Start.WILD ? mate : null, spawn, WILD_MIN, WILD_MAX, random);
 		}
 		if (to == null) {
-			return landed;
+			return wanted != null && wanted.waitFor(false) ? null : landed;
 		}
 		// (fallen from the sky: you drift down into your own crater)
 		double y = landed == Start.SKYFALL ? to.getY() + SKYFALL_HEIGHT : to.getY();
@@ -2019,49 +2074,41 @@ public final class LifeStory {
 
 	/** A dry, open place to stand {@code min}-{@code max} blocks from {@code center} (horizontally), or null. */
 	static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random) {
-		return ground(level, center, min, max, random, at -> true, new int[] {NEW_CHUNKS});
+		return ground(level, center, min, max, random, at -> true);
 	}
 
-	/** The same, only where {@code ok} (a column, its y unused), making at most {@code made[0]} new chunks ({@link #reach}). */
+	/** The same, only where {@code ok} (a column, its y unused), in land already made ({@link #reach}). */
 	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
-		java.util.function.Predicate<BlockPos> ok, int[] made) {
+		java.util.function.Predicate<BlockPos> ok) {
+		int[] made = {NEW_CHUNKS};
 		// (0.7.584) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
-		for (int i = 0; i < GROUND_TRIES * 2; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0;
-			int d = min + random.nextInt(Math.max(1, max - min + 1));
-			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			if (!ok.test(new BlockPos(x, 0, z)) || !reach(level, x, z, made)) {
+		for (BlockPos column : columns(center, min, max, random, GROUND_TRIES * 2)) {
+			if (!ok.test(column) || !reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
-			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			if (standable(level, top) && openGround(level.getBlockState(top.below()))) {
 				return top;
 			}
 		}
 		// (0.7.584, Andy: "spawning inside is fine too, as long as they have room") then a floor under a roof, room to stand
-		for (int i = 0; i < GROUND_TRIES; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0;
-			int d = min + random.nextInt(Math.max(1, max - min + 1));
-			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			if (!ok.test(new BlockPos(x, 0, z)) || !reach(level, x, z, made)) {
+		for (BlockPos column : columns(center, min, max, random, GROUND_TRIES)) {
+			if (!ok.test(column) || !reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
-			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			for (int y = top.getY() - 2; y >= top.getY() - INDOOR_DEPTH; y--) {
-				BlockPos in = new BlockPos(x, y, z);
+				BlockPos in = new BlockPos(column.getX(), y, column.getZ());
 				if (standable(level, in)) {
 					return in;
 				}
 			}
 		}
-		for (int i = 0; i < GROUND_TRIES; i++) {
-			double angle = random.nextDouble() * Math.PI * 2.0;
-			int d = min + random.nextInt(Math.max(1, max - min + 1));
-			int x = center.getX() + Mth.floor(Math.cos(angle) * d), z = center.getZ() + Mth.floor(Math.sin(angle) * d);
-			if (!ok.test(new BlockPos(x, 0, z)) || !reach(level, x, z, made)) {
+		for (BlockPos column : columns(center, min, max, random, GROUND_TRIES)) {
+			if (!ok.test(column) || !reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
-			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
+			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			if (standable(level, top)) {
 				return top;
 			}
@@ -2070,14 +2117,43 @@ public final class LifeStory {
 	}
 
 	/**
-	 * (0.7.607) Whether {@code (x, z)}'s chunk is there to look at. One already made always is; one that isn't is made now
-	 * only while {@code made[0]} lasts ({@link #NEW_CHUNKS} per search). Making one stops the whole server till it's done,
-	 * which on this pack can be seconds a chunk: a search that made dozens (ground() tried up to 64 spots) held the server
-	 * past its watchdog (crash 2026-11-05 15:00, a road being set out on).
+	 * The columns (y 0) a search {@code min}-{@code max} blocks from {@code center} looks at: first those an earlier try
+	 * asked to be made that fall in that ring ({@link Wanted#primed}, made by now), then {@code tries} at random.
+	 */
+	static List<BlockPos> columns(BlockPos center, int min, int max, RandomSource random, int tries) {
+		List<BlockPos> out = new ArrayList<>();
+		Wanted wanted = WANTED;
+		if (wanted != null) {
+			for (BlockPos column : wanted.primed) {
+				double d = Math.sqrt(flat(column, center));
+				if (d >= min - 2 && d <= max + 2) {
+					out.add(column);
+				}
+			}
+		}
+		for (int i = 0; i < tries; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int d = min + random.nextInt(Math.max(1, max - min + 1));
+			out.add(new BlockPos(center.getX() + Mth.floor(Math.cos(angle) * d), 0, center.getZ() + Mth.floor(Math.sin(angle) * d)));
+		}
+		return out;
+	}
+
+	/**
+	 * Whether {@code (x, z)}'s chunk is made and loaded, to look at. While a start is tried ({@link #WANTED}) one that
+	 * isn't is never made here: making a chunk stops the whole server till it's done, and right after a join the world
+	 * generation queue is long, so even one could hold the server past its watchdog (Deck crashes 2026-11-05 15:00 and
+	 * 2026-11-13 10:12, a road being set out on). It's noted instead, to be made in the background before the next try.
+	 * Outside a start try (camps, captors, shelters, a harbour's shore) one is still made now while {@code made[0]} lasts.
 	 */
 	static boolean reach(ServerLevel level, int x, int z, int[] made) {
 		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
 			return true;
+		}
+		Wanted wanted = WANTED;
+		if (wanted != null) {
+			wanted.want(x, z);
+			return false;
 		}
 		if (made[0] <= 0) {
 			return false;
@@ -2087,12 +2163,69 @@ public final class LifeStory {
 		return true;
 	}
 
+	/**
+	 * The land one player's start asked for and didn't find made. {@code fresh}: this try's (at most {@link #NEW_CHUNKS}
+	 * chunks), made in the background ({@link StoryGround#ahead(ServerPlayer, List, Runnable)}) before the next try, which
+	 * looks at them first ({@code primed}). Server thread only.
+	 */
+	static final class Wanted {
+		final List<BlockPos> fresh = new ArrayList<>();
+		final java.util.LinkedHashSet<ChunkPos> freshChunks = new java.util.LinkedHashSet<>();
+		List<BlockPos> primed = List.of();
+		/** Tries made so far (the one running counts). */
+		int tries;
+
+		void want(int x, int z) {
+			ChunkPos chunk = new ChunkPos(x >> 4, z >> 4);
+			if (freshChunks.contains(chunk) || freshChunks.size() < NEW_CHUNKS) {
+				freshChunks.add(chunk);
+				fresh.add(new BlockPos(x, 0, z));
+			}
+		}
+
+		/** Whether a failed search should wait for its land and try again rather than make do ({@code chosen}: the start's own place). */
+		boolean waitFor(boolean chosen) {
+			return !freshChunks.isEmpty() && tries < (chosen ? CHOSEN_TRIES : LAND_TRIES);
+		}
+
+		/** Lets go of this try's land so far (not to be made). */
+		void forget() {
+			fresh.clear();
+			freshChunks.clear();
+		}
+
+		/** This try's land, to make before the next; it's looked at first then. */
+		List<ChunkPos> next() {
+			primed = List.copyOf(fresh);
+			List<ChunkPos> chunks = List.copyOf(freshChunks);
+			fresh.clear();
+			freshChunks.clear();
+			return chunks;
+		}
+	}
+
+	/** The start being tried now, if one is (server thread only): what it asked for and didn't find made ({@link #reach}). */
+	static @Nullable Wanted WANTED;
+
 	/** A hollow underground near {@code center}, deep and roofed, with room to stand, (Tiv) nowhere near where anyone else woke; or null. */
 	private static @Nullable BlockPos cave(ServerLevel level, BlockPos center, RandomSource random) {
-		int[] made = {NEW_CHUNKS};
+		List<BlockPos> columns = new ArrayList<>();
+		Wanted wanted = WANTED;
+		if (wanted != null) {
+			for (BlockPos column : wanted.primed) {
+				if (Math.abs(column.getX() - center.getX()) <= CAVE_RADIUS && Math.abs(column.getZ() - center.getZ()) <= CAVE_RADIUS) {
+					columns.add(column);
+				}
+			}
+		}
 		for (int i = 0; i < CAVE_TRIES; i++) {
-			int x = center.getX() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS, z = center.getZ() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS;
-			if (!freeSpot(level, new BlockPos(x, 0, z)) || !reach(level, x, z, made)) {
+			columns.add(new BlockPos(center.getX() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS, 0,
+				center.getZ() + random.nextInt(CAVE_RADIUS * 2 + 1) - CAVE_RADIUS));
+		}
+		int[] made = {NEW_CHUNKS};
+		for (BlockPos column : columns) {
+			int x = column.getX(), z = column.getZ();
+			if (!freeSpot(level, column) || !reach(level, x, z, made)) {
 				continue;
 			}
 			int top = Math.min(CAVE_MAX_Y, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 12);
@@ -2592,9 +2725,8 @@ public final class LifeStory {
 		if (by != null) {
 			return by;
 		}
-		int[] made = {NEW_CHUNKS};
-		BlockPos at = ground(level, center, min, max, random, p -> freeSpot(level, p), made);
-		return at != null ? at : ground(level, center, max, max + FREE_WIDEN, random, p -> freeSpot(level, p), made);
+		BlockPos at = ground(level, center, min, max, random, p -> freeSpot(level, p));
+		return at != null ? at : ground(level, center, max, max + FREE_WIDEN, random, p -> freeSpot(level, p));
 	}
 
 	/** (0.7.417) The camp a chained mate is held by, if it still stands. */
