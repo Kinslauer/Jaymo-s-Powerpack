@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:paper_pulp"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:paper"
+  }
+}

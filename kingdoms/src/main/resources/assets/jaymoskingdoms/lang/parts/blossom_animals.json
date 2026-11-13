@@ -1,4 +1,18 @@
 {
   "entity.jaymoskingdoms.koi": "Koi",
-  "item.jaymoskingdoms.koi_spawn_egg": "Koi Spawn Egg"
+  "item.jaymoskingdoms.koi_spawn_egg": "Koi Spawn Egg",
+  "entity.jaymoskingdoms.snow_monkey": "Snow Monkey",
+  "item.jaymoskingdoms.snow_monkey_spawn_egg": "Snow Monkey Spawn Egg",
+  "entity.jaymoskingdoms.crane": "Crane",
+  "item.jaymoskingdoms.crane_spawn_egg": "Crane Spawn Egg",
+  "entity.jaymoskingdoms.shrine_deer": "Shrine Deer",
+  "item.jaymoskingdoms.shrine_deer_spawn_egg": "Shrine Deer Spawn Egg",
+  "entity.jaymoskingdoms.raccoon_dog": "Raccoon Dog",
+  "item.jaymoskingdoms.raccoon_dog_spawn_egg": "Raccoon Dog Spawn Egg",
+  "entity.jaymoskingdoms.serow": "Serow",
+  "item.jaymoskingdoms.serow_spawn_egg": "Serow Spawn Egg",
+  "entity.jaymoskingdoms.hornet": "Paper Hornet",
+  "item.jaymoskingdoms.hornet_spawn_egg": "Paper Hornet Spawn Egg",
+  "entity.jaymoskingdoms.giant_salamander": "Giant Salamander",
+  "item.jaymoskingdoms.giant_salamander_spawn_egg": "Giant Salamander Spawn Egg"
 }

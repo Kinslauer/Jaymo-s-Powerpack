@@ -160,6 +160,9 @@ public final class BlossomWilds {
 				super.randomTick(state, level, pos, random);
 				return;
 			}
+			if (Mohknee.on(pos.getX(), pos.getZ())) {
+				HornetNest.tryStart(level, pos, random);
+			}
 			String season = KitchenCompat.season(level);
 			boolean turned = season == null || season.equals("autumn") || season.equals("winter");
 			if (state.getValue(TURNED) != turned) {

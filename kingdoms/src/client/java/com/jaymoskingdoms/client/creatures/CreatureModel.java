@@ -24,7 +24,7 @@ import net.minecraft.util.Mth;
  * A creature's model, built from its shape file ({@code assets/jaymoskingdoms/creature_models/<name>.json}, written together
  * with its texture by {@code tools/gen_creatures.py}): a list of boxes, each with a pivot, a size, where it sits on the
  * sheet, and how it moves ("head" turns, "legR"/"legL" and "armR"/"armL" swing, "tail" sways, "feeler" quivers, "wingL"/"wingR"
- * flap, "wobble" bobs, "crawl" writhes).
+ * flap, "wobble" bobs, "crawl" writhes, "neck" turns half as far as a head and lowers in pose 1).
  */
 final class CreatureModel extends EntityModel<CreatureState> {
 	/** A shape file read: its sheet size, scale, whether it is drawn see-through, and its boxes. */
@@ -36,6 +36,9 @@ final class CreatureModel extends EntityModel<CreatureState> {
 
 	private record Moving(ModelPart part, String anim, int index) {
 	}
+
+	/** How far a "neck" swings down in pose 1 (radians). */
+	private static final float NECK_DOWN = 1.1F;
 
 	private final ModelPart root;
 	private final List<Moving> moving = new ArrayList<>();
@@ -113,6 +116,11 @@ final class CreatureModel extends EntityModel<CreatureState> {
 				case "head" -> {
 					p.yRot += state.yRot * Mth.DEG_TO_RAD;
 					p.xRot += state.xRot * Mth.DEG_TO_RAD;
+				}
+				case "neck" -> {
+					// a long neck: it turns a little with the head, and goes down to feed, to bow or to sleep (pose 1)
+					p.yRot += state.yRot * Mth.DEG_TO_RAD * 0.5F;
+					p.xRot += state.look == 1 ? NECK_DOWN : state.xRot * Mth.DEG_TO_RAD * 0.5F;
 				}
 				case "legR" -> p.xRot += Mth.cos(walk * 0.6662F) * 1.4F * speed;
 				case "legL" -> p.xRot += Mth.cos(walk * 0.6662F + Mth.PI) * 1.4F * speed;

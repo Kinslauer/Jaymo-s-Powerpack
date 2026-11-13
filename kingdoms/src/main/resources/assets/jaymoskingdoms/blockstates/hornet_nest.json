@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "pulp=0": {
+      "model": "jaymoskingdoms:block/hornet_nest_0"
+    },
+    "pulp=1": {
+      "model": "jaymoskingdoms:block/hornet_nest_1"
+    },
+    "pulp=2": {
+      "model": "jaymoskingdoms:block/hornet_nest_2"
+    },
+    "pulp=3": {
+      "model": "jaymoskingdoms:block/hornet_nest_3"
+    }
+  }
+}

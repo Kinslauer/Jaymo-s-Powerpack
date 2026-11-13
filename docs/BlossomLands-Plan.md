@@ -162,6 +162,10 @@ moss fields, bare winter trees.*
 
 Each by the three rules (sympathy, feedback loops, stewardship), as written in the pick list rows.
 
+*Built (2026-11-13, `blossomland.BlossomAnimal`, `SnowMonkey`, `Crane`, `ShrineDeer`, `RaccoonDog`, `Serow`, `Hornet`,
+`HornetNest`, `Salamander`): all seven, each a first cut of its three rules. Not built: monkeys raiding stalls, crane
+nests, boar in the fields, the hunting lodge's part. Not seen in game.*
+
 ## Patch 13: night things I (ng_river, ng_mountain, ng_moon)
 
 ## Patch 14: night things II (ng_snow, ng_bones, ng_crow, ng_sea)

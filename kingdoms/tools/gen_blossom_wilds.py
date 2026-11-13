@@ -19,6 +19,7 @@ own = lambda n: NS + ":" + n
 NAMES = {
     "maple_leaves": "Maple Leaves", "ginkgo_leaves": "Ginkgo Leaves", "maple_sapling": "Maple Sapling",
     "ginkgo_sapling": "Ginkgo Sapling", "red_spider_lily": "Red Spider Lily", "wisteria": "Wisteria",
+    "hornet_nest": "Paper Hornet Nest",
 }
 
 GREEN = [(0x2c, 0x5a, 0x24), (0x3a, 0x72, 0x2e), (0x4c, 0x8a, 0x38), (0x66, 0xa4, 0x48)]
@@ -102,7 +103,59 @@ def draw_wisteria():
     g.save(img, "wisteria")
 
 
+PAPER = [(0x8a, 0x7c, 0x66), (0xa6, 0x98, 0x80), (0xc0, 0xb4, 0x9c), (0xd8, 0xce, 0xb8)]
+
+
+def draw_nest():
+    """the nest's paper: wavy grey-buff bands, the way the wasps lay it; and the pulp cut from it"""
+    rng = random.Random(41)
+    for pulp in range(4):
+        img = g.canvas()
+        for y in range(16):
+            for x in range(16):
+                wave = (y + (1 if (x // 3) % 2 else 0) + (x // 7)) % 4
+                c = PAPER[min(3, (wave + pulp) // 2)] if wave else PAPER[0]
+                if rng.random() < 0.08:
+                    c = g.shade(c, 0.9)
+                g.put(img, x, y, c)
+        for x in range(6, 10):
+            g.put(img, x, 14, (0x1e, 0x18, 0x12))
+            g.put(img, x, 15, (0x1e, 0x18, 0x12))
+        g.save(img, "hornet_nest_%d" % pulp)
+    item = g.canvas()
+    for y in range(4, 13):
+        for x in range(3, 13):
+            if (x - 8) ** 2 + (y - 8.5) ** 2 * 1.6 < 24:
+                g.put(item, x, y, PAPER[1 + (x + y * 2) % 3])
+    path = ASSETS + "textures/item/paper_pulp.png"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    item.save(path)
+
+
+def nest_assets():
+    variants = {}
+    for pulp in range(4):
+        t = g.tex("hornet_nest_%d" % pulp)
+        g.write(ASSETS + "models/block/hornet_nest_%d.json" % pulp, {"parent": "minecraft:block/block", "textures": {"all": t, "particle": t},
+            "elements": [
+                {"from": [5, 13, 5], "to": [11, 16, 11], "faces": {d: {"uv": [5, 0, 11, 3], "texture": "#all"} for d in ("north", "south", "east", "west", "down")}},
+                {"from": [3, 5, 3], "to": [13, 13, 13], "faces": {d: {"uv": [3, 3, 13, 11], "texture": "#all"} for d in ("north", "south", "east", "west", "up", "down")}},
+                {"from": [5, 2, 5], "to": [11, 5, 11], "faces": {d: {"uv": [5, 11, 11, 14], "texture": "#all"} for d in ("north", "south", "east", "west", "up")}
+                    | {"down": {"uv": [5, 10, 11, 16], "texture": "#all"}}}]})
+        variants["pulp=%d" % pulp] = {"model": g.mdl("hornet_nest_%d" % pulp)}
+    g.write(ASSETS + "blockstates/hornet_nest.json", {"variants": variants})
+    g.item("hornet_nest", g.mdl("hornet_nest_3"))
+    g.flat_item("paper_pulp")
+    # a broken nest gives nothing but its paper
+    g.write(DATA + "loot_table/blocks/hornet_nest.json", {"type": "minecraft:block", "pools": [
+        {"rolls": 1, "entries": [{"type": "minecraft:item", "name": own("paper_pulp")}]}], "random_sequence": own("blocks/hornet_nest")})
+    g.write(DATA + "recipe/paper_from_paper_pulp.json", {"type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": [own("paper_pulp")], "result": {"count": 1, "id": "minecraft:paper"}})
+    g.merge_tag(RES + "data/minecraft/tags/block/mineable/axe.json", [own("hornet_nest")])
+
+
 def textures():
+    draw_nest()
     draw_leaves("maple_leaves", GREEN, 11, False)
     draw_leaves("maple_leaves_turned", RED, 11, False)
     draw_leaves("ginkgo_leaves", PALE_GREEN, 12, True)
@@ -199,7 +252,10 @@ if __name__ == "__main__":
     textures()
     assets()
     loot()
+    nest_assets()
     worldgen()
     tags()
-    g.write(ASSETS + "lang/parts/blossom_wilds.json", {"block." + NS + "." + k: v for k, v in NAMES.items()})
+    names = {"block." + NS + "." + k: v for k, v in NAMES.items()}
+    names["item." + NS + ".paper_pulp"] = "Paper Pulp"
+    g.write(ASSETS + "lang/parts/blossom_wilds.json", names)
     print("blossom wilds: %d" % len(NAMES))
