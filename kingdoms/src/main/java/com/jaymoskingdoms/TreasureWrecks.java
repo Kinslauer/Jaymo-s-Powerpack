@@ -100,6 +100,8 @@ final class TreasureWrecks {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
 		if (now % 100 == 0) {
+			// under some of them, something lies
+			com.jaymoskingdoms.beasts.WreckThing.wake(level, level.getAttachedOrElse(LAID, List.of()));
 			List<Long> charted = level.getAttachedOrElse(CHARTED, List.of());
 			if (!charted.isEmpty()) {
 				for (ServerPlayer player : level.players()) {

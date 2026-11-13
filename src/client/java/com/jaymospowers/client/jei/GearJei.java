@@ -54,6 +54,8 @@ public final class GearJei implements IModPlugin {
 		registration.addIngredientInfo(GearPicks.LEATHER_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 		registration.addIngredientInfo(GearPicks.IRON_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 		registration.addIngredientInfo(com.jaymospowers.baubles.TickingCharm.CHARM, Component.translatable("jei.jaymospowers.ticking_charm"));
+		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.COIL, Component.translatable("jei.jaymospowers.clinging_coil"));
+		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.DEEP_TOOTH, Component.translatable("jei.jaymospowers.deep_tooth"));
 		registration.addIngredientInfo(GearPicks.STEEL_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 	}
 }

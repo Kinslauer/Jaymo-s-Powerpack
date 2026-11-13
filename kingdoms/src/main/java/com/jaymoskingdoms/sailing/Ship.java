@@ -88,6 +88,8 @@ public final class Ship extends Entity {
 	static final double KEDGE = 0.09, KEDGE_GATHER = 0.08;
 	/** (0.7.307) How fast her way comes off her riding at anchor (share a tick). */
 	static final double RIDING_GATHER = 0.25;
+	/** How quickly she loses her way with something holding her hull. */
+	static final double HELD_GATHER = 0.35;
 	/** (0.7.285) The least a crew at her sweeps rows her (blocks a tick), however heavy she is. */
 	static final double CREW_SWEEPS = 0.07;
 	/** How far (blocks) it may be nudged to find room to drop anchor. */
@@ -221,6 +223,8 @@ public final class Ship extends Entity {
 	private int kedging;
 	/** (0.7.307) Server: ticks still to ride at anchor out at sea ({@link #rideAtAnchor}). */
 	private int riding;
+	/** Server: ticks still held fast by something under her ({@link #holdFast}). */
+	private int heldFast;
 	/**
 	 * (0.7.28) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
 	 * the world from an entity, so each one aboard leaves an invisible light block in the world cell it's passing
@@ -701,6 +705,13 @@ public final class Ship extends Entity {
 				this.towed = Vec3.ZERO;
 				input = Input.EMPTY;
 			}
+		}
+		if (this.heldFast > 0) {
+			// something has her by the hull: her sails and oars do nothing, and she stops dead
+			this.heldFast--;
+			wanted = 0.0;
+			gather = HELD_GATHER;
+			this.towed = Vec3.ZERO;
 		}
 		this.speed += (wanted - this.speed) * gather;
 		if (Math.abs(this.speed) < 1.0E-4) {
@@ -1660,6 +1671,15 @@ public final class Ship extends Entity {
 	 */
 	public void kedge(int ticks) {
 		this.kedging = Math.max(this.kedging, ticks);
+	}
+
+	/** Something under her takes her by the hull for {@code ticks}: no way on her whatever her helm, sails or oars say (she still turns). */
+	public void holdFast(int ticks) {
+		this.heldFast = Math.max(this.heldFast, ticks);
+	}
+
+	public boolean heldFast() {
+		return this.heldFast > 0;
 	}
 
 	/**
