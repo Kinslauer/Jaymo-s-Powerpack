@@ -369,3 +369,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 13: barrow knights and the revenant built** (models thread, on PR #1390, Andy's fixed points: the knight "needs a different head and should wield a sword from our pack, and correctly"). Claude's placement, not yet approved: buried cobblestone monster rooms are the old barrows; half hold 2-3 knights, 30% of those the revenant; lantern carriers pass. Lore.md "(new) The barrow's oath".
 - **Nov 12: sand worm built** (BossRise plan patch 6). Claude's calls, unconfirmed: one wakes per desert pyramid when a player goes inside; it only moves through sand, gravel and earth; 380 health, hurt only while it stands up; our own hand-coded ring model; Stoneborn players faint too (12 s knock-out, once a fight), not only villagers; it drops nothing special yet (trophies are patch 8).
 - **Nov 12, 9:33 PM: PR #1396 merged** (Andy: "merge"). The sand worm (BossRise plan, patch 6).
+
+- 2026-11-13 (boss-mods thread, patch 7, my calls, not yet confirmed by Andy): the thing under the wreck lies beside
+  about 1 in 3 treasure wrecks (each looked at once, old wrecks too) and can come up under a whaler 6+ steps out in the
+  far grounds with a player aboard; it stays in the water, 5 blocks under its quarry; 320 HP; lash 11, grab 4 per
+  squeeze broken by 14 damage, ink at 50% and 20%; holds boats and block ships (Ship.holdFast); shown name "The Thing
+  Under the Wreck" since sailors never name it; drops Clinging Coil (charm, saves one death under water) and Deep
+  Teeth. The teeth as a Tinkers material are put off to patch 8 with dragon bone (same generator work).
