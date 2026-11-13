@@ -21,6 +21,10 @@ import net.minecraft.world.level.levelgen.structure.Structure;
  * tavern, a workshop, a windmill, farm plots and one mooring with its balloon skiff. Lots off the island's edge are left
  * out, so a town takes the shape of its island; one with too few lots is not built at all.
  * <p>
+ * A town is raised only on one of the great landmasses: every lot must be island at the plaza's height under nearly all of it
+ * ({@link #LOT_COVER}, counted column by column, not from a few corners), and the island round the plaza must be far bigger than
+ * the town ({@link #ISLAND_LEAST}). Only rock and soil count; an aercloud, or open sky with cloud far below, never does.
+ * <p>
  * Every piece says what it is ({@link #name}), the way a village's templates do, so Jaymo's Kingdoms can read the town as
  * it reads any village: its bell founds a kingdom, the great hall is the seat, the library the storehouse, the farm
  * plots the first farm. Without Kingdoms it is a town of villagers.
@@ -31,6 +35,18 @@ final class SkyTowns {
 	static final int LOT = 17, REACH = 3, LEAST_LOTS = 14;
 	/** A lot's ground may lie this far above or below the plaza's and be this uneven and still be built on (blocks). */
 	static final int LOT_OFF = 5, LOT_TOLERANCE = 8;
+	/**
+	 * Of a lot's columns (every {@link #COVER_STEP} blocks, edges included), the share that must have island within
+	 * {@link #LOT_TOLERANCE} of the plaza's floor; the rest is the odd dip the foundation fills.
+	 */
+	static final float LOT_COVER = 0.9F;
+	static final int COVER_STEP = 4;
+	/**
+	 * The island under the plaza: at least this much land (blocks, about 160 by 160, beyond the largest town's 119 by 119)
+	 * joined to it within {@link #ISLAND_BAND} of the floor's height, looked for {@link #ISLAND_REACH} blocks out on an
+	 * {@link #ISLAND_STEP} grid. The great landmasses are hundreds of blocks across; the islets and shelves are not.
+	 */
+	static final int ISLAND_LEAST = 160 * 160, ISLAND_BAND = 24, ISLAND_REACH = 192, ISLAND_STEP = 8;
 	/** How high a lot is cleared, and how deep its foundation goes. */
 	static final int LOT_H = 14, FOUNDATION = 16;
 	/** Streets: this wide along each side of a lot (two lots make a street of twice this). */
@@ -76,7 +92,8 @@ final class SkyTowns {
 	/** The town round (cx, cz), or nothing if the island has no room for one. */
 	static Optional<Structure.GenerationStub> plan(Ground ground, RandomSource random, int cx, int cz, Direction facing, int palette) {
 		int y = ground.flat(cx, cz, LOT / 2, LOT / 2, LOT_TOLERANCE);
-		if (y == Ground.NONE) {
+		if (y == Ground.NONE || !island(ground, cx, cz, y)
+			|| ground.island(cx, cz, y, ISLAND_BAND, ISLAND_STEP, ISLAND_REACH, ISLAND_LEAST) < ISLAND_LEAST) {
 			return Optional.empty();
 		}
 		Direction right = facing.getClockWise();
@@ -97,7 +114,7 @@ final class SkyTowns {
 				}
 				int x = cx + right.getStepX() * i * LOT + facing.getStepX() * j * LOT, z = cz + right.getStepZ() * i * LOT + facing.getStepZ() * j * LOT;
 				int top = ground.flat(x, z, LOT / 2, LOT / 2, LOT_TOLERANCE);
-				if (top != Ground.NONE && Math.abs(top - y) <= LOT_OFF) {
+				if (top != Ground.NONE && Math.abs(top - y) <= LOT_OFF && island(ground, x, z, y)) {
 					has[i + REACH][j + REACH] = true;
 					open.add(new int[] {i, j});
 				}
@@ -140,6 +157,11 @@ final class SkyTowns {
 			pieces.add(new AetherPiece(AetherPiece.Kind.TOWN_BUILDING, box, door, random.nextLong(), palette | lot.ordinal() << 2));
 		}
 		return Optional.of(new Structure.GenerationStub(new BlockPos(cx, y, cz), builder -> pieces.forEach(builder::addPiece)));
+	}
+
+	/** Whether the lot round (x, z) is island at the town's floor {@code y} under nearly all of it ({@link #LOT_COVER}). */
+	private static boolean island(Ground ground, int x, int z, int y) {
+		return ground.cover(x, z, LOT / 2, LOT / 2, y, LOT_TOLERANCE, COVER_STEP) >= LOT_COVER;
 	}
 
 	private static AetherPiece ground(int x, int z, int y, Direction facing, RandomSource random, int palette, boolean plaza) {

@@ -55,6 +55,14 @@ public final class AetherStructure extends Structure {
 	/** The sky villages (variants 0 to 2 lived in, 3 to 5 the same in ruins) and the sky lord's castle. */
 	public static final int VILLAGE_SIZE = 47, VILLAGE_H = 19, VILLAGE_TOLERANCE = 6;
 	public static final int CASTLE_SIZE = 49, CASTLE_H = 25, CASTLE_TOLERANCE = 8;
+	/**
+	 * The villages and the castle stand only on a great landmass: of their footprint's columns (every
+	 * {@link #SETTLEMENT_STEP} blocks) this share must be island near their floor, and the island round them must hold at least
+	 * {@link #SETTLEMENT_ISLAND} blocks of land within {@link #SETTLEMENT_BAND} of that floor ({@link Ground#island}), looked for
+	 * {@link #SETTLEMENT_REACH} blocks out. Only rock and soil count, never an aercloud.
+	 */
+	public static final float SETTLEMENT_COVER = 0.9F;
+	public static final int SETTLEMENT_STEP = 4, SETTLEMENT_ISLAND = 112 * 112, SETTLEMENT_BAND = 24, SETTLEMENT_REACH = 128, SETTLEMENT_ISLAND_STEP = 8;
 	/** How uneven (blocks, highest column to lowest of nine) the ground under a surface structure may be. */
 	public static final int TOLERANCE = 3, WIDE_TOLERANCE = 5, AQUEDUCT_TOLERANCE = 12;
 	/** The mineshaft: corridors from the hub, branches and the farthest a piece may reach, and how deep (below ground) it lies. */
@@ -124,8 +132,8 @@ public final class AetherStructure extends Structure {
 					variant == 0 ? BUNKER_DEPTH : 0);
 			}
 			case GUARDIAN -> surface(ground, AetherPiece.Kind.GUARDIAN, cx, cz, GUARDIAN_SIZE, GUARDIAN_SIZE, GUARDIAN_H, WIDE_TOLERANCE, facing, seed, 0, 0);
-			case VILLAGE -> surface(ground, AetherPiece.Kind.SKY_VILLAGE, cx, cz, VILLAGE_SIZE, VILLAGE_SIZE, VILLAGE_H, VILLAGE_TOLERANCE, facing, seed, Math.max(variant, 0), 0);
-			case CASTLE -> surface(ground, AetherPiece.Kind.SKY_CASTLE, cx, cz, CASTLE_SIZE, CASTLE_SIZE, CASTLE_H, CASTLE_TOLERANCE, facing, seed, 0, 0);
+			case VILLAGE -> settlement(ground, AetherPiece.Kind.SKY_VILLAGE, cx, cz, VILLAGE_SIZE, VILLAGE_H, VILLAGE_TOLERANCE, facing, seed, Math.max(variant, 0));
+			case CASTLE -> settlement(ground, AetherPiece.Kind.SKY_CASTLE, cx, cz, CASTLE_SIZE, CASTLE_H, CASTLE_TOLERANCE, facing, seed, 0);
 			case TOWN -> SkyTowns.plan(ground, random, cx, cz, facing, Math.max(variant, 0) % 3);
 			case LIBRARY -> library(ground, cx, cz, facing, seed, Math.max(variant, 0));
 			case AQUEDUCT -> aqueduct(ground, cx, cz, facing, seed);
@@ -144,6 +152,17 @@ public final class AetherStructure extends Structure {
 		BoundingBox box = centered(cx, cz, across, along, facing, y - sink, height);
 		AetherPiece piece = new AetherPiece(kind, box, facing, seed, variant);
 		return Optional.of(new GenerationStub(new BlockPos(cx, y, cz), builder -> builder.addPiece(piece)));
+	}
+
+	/** A sky village or the sky castle: as {@link #surface}, but only where nearly all its square is island on a great landmass. */
+	private static Optional<GenerationStub> settlement(Ground ground, AetherPiece.Kind kind, int cx, int cz, int size, int height, int tolerance,
+		Direction facing, long seed, int variant) {
+		int y = ground.flat(cx, cz, size / 2, size / 2, tolerance);
+		if (y == Ground.NONE || ground.cover(cx, cz, size / 2, size / 2, y, tolerance, SETTLEMENT_STEP) < SETTLEMENT_COVER
+			|| ground.island(cx, cz, y, SETTLEMENT_BAND, SETTLEMENT_ISLAND_STEP, SETTLEMENT_REACH, SETTLEMENT_ISLAND) < SETTLEMENT_ISLAND) {
+			return Optional.empty();
+		}
+		return surface(ground, kind, cx, cz, size, size, height, tolerance, facing, seed, variant, 0);
 	}
 
 	private static Optional<GenerationStub> library(Ground ground, int cx, int cz, Direction facing, long seed, int variant) {
