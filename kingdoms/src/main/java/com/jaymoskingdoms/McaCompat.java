@@ -656,6 +656,22 @@ public final class McaCompat {
 		return LOADED && McaBridge.outlawOpening(villager, player);
 	}
 
+	/** {@code villager} ends the talk with {@code player}: their talk screen closes (nothing without MCA). */
+	static void endTalk(net.minecraft.server.level.ServerPlayer player, Villager villager) {
+		if (LOADED) {
+			McaBridge.endTalk(player, villager);
+		}
+	}
+
+	/** A villager who has turned their back on you won't talk: their menu closes as it opens ({@link Introductions#shunned}); true if so. */
+	public static boolean shunOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		if (!LOADED || !(villager instanceof Villager v) || !Introductions.shuns(player, v)) {
+			return false;
+		}
+		Introductions.shunned(player, v);
+		return true;
+	}
+
 	/** (0.7.597) A wary villager's cold opening, never MCA's friendly stranger's welcome ({@link McaBridge#waryOpening}). */
 	public static boolean waryOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.waryOpening(villager, player);

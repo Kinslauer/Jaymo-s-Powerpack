@@ -511,6 +511,8 @@
   "message.jaymoskingdoms.greet.came_waved": "They wave and tell you their name: %s.",
   "message.jaymoskingdoms.greet.came_waved_foreign": "They wave, tap their chest and say a name: %s.",
   "message.jaymoskingdoms.handshake.wary": "They step back from you. They want nothing to do with you yet.",
+  "message.jaymoskingdoms.rebuff.pestered": "You pushed too far. They've turned their back on you, and think less of you for it.",
+  "message.jaymoskingdoms.rebuff.shunned": "%s won't look at you. Asking again only makes it worse.",
   "message.jaymoskingdoms.bow.bowed": "You bow.",
   "message.jaymoskingdoms.bow.known": "They incline their head. You know them now: %s.",
   "message.jaymoskingdoms.bow.foreign": "They incline their head and give a name: %s.",

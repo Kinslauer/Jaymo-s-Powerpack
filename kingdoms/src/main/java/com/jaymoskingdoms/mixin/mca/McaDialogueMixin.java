@@ -64,7 +64,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
  * (0.7.424) Held down on the execution hold for questioning ({@link com.jaymoskingdoms.Questioning}): the questions only.
  * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
- * (0.7.597) Opening it on one wary of you ({@link Introductions#wary}): the cold word they'd give for your name, likewise.
+ * (0.7.597) Opening it on one wary of you ({@link Introductions#wary}): the cold word they'd give for your name, likewise
+ * (once a day: after that a look, {@link Introductions#waryOpening}). Opening it on one who turned their back on you for
+ * asking again ({@link Introductions#shuns}): it closes, and costs hearts ({@link Introductions#shunned}).
  * (0.7.380) Opening the menu just after something passed between you (carried out, got up, a monster drawn off, a blow):
  * they open with that ({@link Recollections#opening}).
  * (0.7.340) "Speak of the rescue" ({@link com.jaymoskingdoms.Captives#ANSWER}): a guard of a town that owes you says what it means.
@@ -84,6 +86,11 @@ abstract class McaDialogueMixin {
 
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("root".equals(question) && McaCompat.shunOpening(villager, player)) {
+			// one who turned their back on you for pestering them won't talk yet (Introductions#shunned)
+			ci.cancel();
+			return;
+		}
 		if ("root".equals(question) && McaCompat.questioningOpening(villager, player)) {
 			// (0.7.424) held down for questioning: they beg or glare, and only the questions show
 			ci.cancel();

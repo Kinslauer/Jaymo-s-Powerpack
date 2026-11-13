@@ -22,7 +22,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -73,6 +76,19 @@ public final class Introductions {
 	static final int PROVEN_HEARTS_PER_DEGREE = 8, PROVEN_HEARTS_REP = 20;
 
 	/**
+	 * Andy: "these messages shouldnt repeat, they should end the interaction with loss of hearts if you annoy them with
+	 * that". Once one who won't give you their name has told you so today, asking again (their name, your hand) annoys
+	 * them: they say they're done with you ({@link #PESTERED_LINES} ways), the talk ends, you lose {@link #PESTER_HEARTS}
+	 * of MCA's hearts, and they turn their back on you for {@link #SHUN_TICKS}. Trying them while their back is turned
+	 * costs {@link #SHUNNED_HEARTS} more (no more often than every {@link #SHUNNED_GAP} ticks) and gets no words at all.
+	 */
+	static final int PESTER_HEARTS = 5, SHUNNED_HEARTS = 2, SHUN_TICKS = 6000, SHUNNED_GAP = 40, PESTERED_LINES = 4, WARNED_LINES = 3;
+	/** Their cold word and the menu that opens straight after it (a step back from your hand, then the menu) are one saying. */
+	static final int ECHO_TICKS = 60;
+	/** Ways a wary villager's menu opens once they've already given you their cold word today: a look, not the words again. */
+	static final int WARY_AGAIN_LINES = 3;
+
+	/**
 	 * (0.7.204) Taking an offered hand ({@link Handshakes#offerTo}): the odds before anything else, what each heart and
 	 * each point of mood adds, what a warm or sour temper adds per step, and the least and most they can be.
 	 */
@@ -111,6 +127,19 @@ public final class Introductions {
 	/** Player → the last player who introduced themselves to them (who {@code /introduce} answers). */
 	private static final Map<UUID, UUID> LAST = new HashMap<>();
 
+	/** "villager/player" → how today has gone between a villager who won't give their name and a player who keeps asking. */
+	private static final Map<String, Rebuff> REBUFFS = new HashMap<>();
+
+	/** Today's refusals between one villager and one player: when they last said no, how often the menu opened since, when their back's turned till. */
+	private static final class Rebuff {
+		long day;
+		long saidAt = -1L;
+		boolean asked;
+		int openings;
+		long shunUntil = -1L;
+		long lastShun = -1L;
+	}
+
 	private Introductions() {
 	}
 
@@ -125,7 +154,10 @@ public final class Introductions {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LAST.remove(handler.player.getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			LAST.clear();
+			REBUFFS.clear();
+		});
 	}
 
 	/** Whose names are kept from strangers: players, and MCA's villagers. */
@@ -268,20 +300,121 @@ public final class Introductions {
 		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + variant);
 	}
 
+	private static Rebuff rebuff(ServerPlayer player, Villager villager) {
+		long today = Deeds.today(player.level().getServer());
+		Rebuff r = REBUFFS.computeIfAbsent(villager.getUUID() + "/" + player.getUUID(), k -> new Rebuff());
+		if (r.day != today) {
+			// a new day: yesterday's no is forgotten (a turned back still holds till its time is up)
+			r.day = today;
+			r.saidAt = -1L;
+			r.asked = false;
+			r.openings = 0;
+		}
+		return r;
+	}
+
+	/**
+	 * {@code player} asked {@code villager}, who won't give their name, for it (or held out a hand to one wary of them). The
+	 * same words are never said twice: the first time today they say {@code first}, or, if their menu already opened on that
+	 * cold word ({@link #waryOpening}), that you heard them ({@link #WARNED_LINES} ways, a warning); asked again after that,
+	 * they've had enough ({@link #pester}) and say so in words of their own.
+	 */
+	public static Component refusal(ServerPlayer player, Villager villager, Supplier<Component> first) {
+		Rebuff r = rebuff(player, villager);
+		long now = player.level().getGameTime();
+		if (r.asked) {
+			return pester(player, villager, r, now);
+		}
+		r.asked = true;
+		if (r.saidAt < 0L) {
+			r.saidAt = now;
+			return first.get();
+		}
+		int variant = Math.floorMod(java.util.Objects.hash(villager.getUUID(), player.getUUID(), r.day, "warned"), WARNED_LINES);
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_warned." + variant);
+	}
+
+	/**
+	 * Asked again after they'd said no: {@code villager} ends the talk, {@code player} loses {@link #PESTER_HEARTS} with them,
+	 * and they turn their back on {@code player} for {@link #SHUN_TICKS}. What they say as they do (never the line they
+	 * gave before; an orc or goblin in its own dialect).
+	 */
+	private static Component pester(ServerPlayer player, Villager villager, Rebuff r, long now) {
+		r.shunUntil = now + SHUN_TICKS;
+		r.lastShun = now;
+		McaCompat.hearts(villager, player, -PESTER_HEARTS);
+		McaCompat.endTalk(player, villager);
+		villager.getLookControl().setLookAt(player);
+		ServerLevel level = player.level();
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.85F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rebuff.pestered").withStyle(ChatFormatting.GRAY), true);
+		int variant = Math.floorMod(java.util.Objects.hash(villager.getUUID(), player.getUUID(), r.day, "pester"), PESTERED_LINES);
+		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_pestered." + variant);
+	}
+
+	/** {@code villager} has turned their back on {@code player} for pestering them ({@link #pester}), and won't talk yet. */
+	public static boolean shuns(ServerPlayer player, Villager villager) {
+		Rebuff r = REBUFFS.get(villager.getUUID() + "/" + player.getUUID());
+		return r != null && player.level().getGameTime() < r.shunUntil;
+	}
+
+	/**
+	 * {@code player} tried {@code villager} again while their back's turned ({@link #shuns}): the talk closes before it
+	 * starts, with no words (so nothing repeats), and it costs {@link #SHUNNED_HEARTS} (not more often than every
+	 * {@link #SHUNNED_GAP} ticks, so a few quick clicks count once).
+	 */
+	public static void shunned(ServerPlayer player, Villager villager) {
+		Rebuff r = REBUFFS.get(villager.getUUID() + "/" + player.getUUID());
+		if (r == null) {
+			return;
+		}
+		McaCompat.endTalk(player, villager);
+		long now = player.level().getGameTime();
+		if (now - r.lastShun < SHUNNED_GAP) {
+			return;
+		}
+		r.lastShun = now;
+		McaCompat.hearts(villager, player, -SHUNNED_HEARTS);
+		ServerLevel level = player.level();
+		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.6F, 0.8F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rebuff.shunned", Introductions.knows(player, villager)
+			? Component.literal(villager.getName().getString()) : what(villager)).withStyle(ChatFormatting.GRAY), true);
+	}
+
+	/**
+	 * What a {@linkplain #wary wary} villager's menu opens with: their cold word ({@link #waryLine}) the first time today, or
+	 * straight after they said it (the menu that follows a step back from your hand); after that a look, never the words
+	 * again ({@link #WARY_AGAIN_LINES} of them, in turn). Opening their menu costs nothing; asking again does ({@link #refusal}).
+	 */
+	public static Component waryOpening(ServerPlayer player, Villager villager) {
+		Rebuff r = rebuff(player, villager);
+		long now = player.level().getGameTime();
+		if (r.saidAt < 0L) {
+			r.saidAt = now;
+			return waryLine(villager, player);
+		}
+		if (now - r.saidAt <= ECHO_TICKS) {
+			return waryLine(villager, player);
+		}
+		return Component.translatable("dialogue.chat.jaymoskingdoms.wary_opening.again." + (r.openings++ % WARY_AGAIN_LINES));
+	}
+
 	/** {@code player} asked {@code villager}'s name (MCA's menu): what they answer, and {@code player} knows it from then. */
 	public static Component askName(ServerPlayer player, Villager villager) {
 		if (Recollections.refuses(villager, player)) {
 			// (0.7.490) an orc or goblin with a grudge refuses in its own dialect
-			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused");
+			// (asked again the same day, they've had enough of you: refusal)
+			return refusal(player, villager, () -> Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_refused"));
 		}
 		if (!Outlaws.is(villager) && !ZFighterFolk.is(villager) && wary(player, villager)) {
 			// (0.7.504) one who minds you keeps their name until you've proven yourself
-			return waryLine(villager, player);
+			return refusal(player, villager, () -> waryLine(villager, player));
 		}
 		if (Outlaws.is(villager)) {
 			// (0.7.397) a looter, a bandit or a camp's raider keeps their name to themselves
 			// (0.7.490) an orc or goblin refuses in its own dialect
-			return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES));
+			return refusal(player, villager,
+				() -> Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES)));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {
@@ -389,6 +522,10 @@ public final class Introductions {
 	private static void tick(MinecraftServer server) {
 		if (!McaCompat.LOADED || server.getTickCount() % FAMILY_TICKS != 0) {
 			return;
+		}
+		if (!REBUFFS.isEmpty()) {
+			long today = Deeds.today(server), now = server.overworld().getGameTime();
+			REBUFFS.values().removeIf(r -> r.day != today && r.shunUntil < now);
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			for (Villager v : player.level().getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(FAMILY_RANGE),
