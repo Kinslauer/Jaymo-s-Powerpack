@@ -189,3 +189,28 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **H8** (`BattleSpells`, `Fields`): web (GRAB save or netted), grease (trips), fog, darkness (blinds, blocks mob
   sight), silence (no spoken spells), spike growth. Fire burns web and grease.
 - 20 new scrolls with own textures (`tools/gen_fifth_p6.py`); casters carry one 1 in 4.
+
+### Patch 9
+- Placement: `Haunts` rolls places near players every 5 s (persisted, tier-gated), not worldgen structures.
+- **J1 troll** (`Troll`, `TrollLimb`): heals 1.5/0.5 s; severed arms crawl back; falls and rises unless burned.
+  Swamps/mangroves, tier 1. The model doesn't show missing arms.
+- **J2 rust beast** (`RustBeast`): rusts iron gear 25% per touch, iron weapons 20% per hit; eats iron; fed, calm
+  for 2 days. Caves below y50.
+- **J3 basilisk** (`Basilisk`, `Gaze`, `Statues`): the great lizard (the row's "or a snake-haired woman": the lore's
+  gorgon stays a legend); stone builds while you look, held fast at full (40 s); looking away is bad footing; hand
+  mirror turns it back; a friend's pickaxe frees; statue den in about 20% of Grim/ruin rolls.
+- **J4 clear cube** (`ClearCube`): swallow, 2 acid/s, gear wear, GRAB save every 2 s, out after 15 s; floating items
+  rendered. Mineshafts, strongholds, trial chambers.
+- **J5** (`Piercer`, `CloakFlier`): drop damage 3 + 1.2/block (max 16); cloak flier below y10, snuffs lights, wraps
+  the head; a held light or a pull frees you.
+- **J6 blood bats** (`BloodBat`, `Latches`): per Andy the vampire bats now behave the same way.
+- **J8 stolen lives** (`Doubles`): the real ones are found in dungeon captive rooms, new cellars near settlements and
+  shut underground under grim_kingdoms/village structures (the Grim buried villagers come from that mod, caught by a
+  scan; test with the real mod). They plead with true facts and lead you home; copies appear near the seat and slip.
+- **J9 bog lights** (`BogLight`, `QuicksandBlock`): lead to hazards or lay a quicksand pit; feed on Fear.
+- **J10 harpies** (`Harpy`, `Song`): sea cliffs; CHARM save each second; deafened or in a boat exempt; ear wax.
+- **J12** (`Packs`, `Digger`, `Warrens`): UpperHand reason; digger warrens with trap-cover pits (sneak passes).
+- **J13** (`OldRules`): homes = roofed area with a bed; invitations by sneak-use, kept; running water; coffin =
+  bed with dark oak slabs; stake in the coffin kills for good (players too).
+- **J14** (`Shadow`, `ShadowDrain`): -5 Might a touch, mends 1 per 30 s; at the floor knocked out, your shadow
+  peels off carrying the points.
