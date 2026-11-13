@@ -12687,3 +12687,12 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   down (2026-11-13 15:36). Every such guard now goes through `Loaded.made`: on the server, true only for land that is
   made and loaded (`getChunkNow`); on the client and in world generation, the game's own check as before.
 - Built; tested on the Deck server.
+
+## 0.8.34 (2026-11-13): Monsters notice you again: darkvision, footsteps, fighting diggers (#1463)
+
+- **Why monsters seemed passive**: mob senses (the Stealth system) cut how far a monster notices you to a quarter in the dark, and to under a third of that again when it wasn't looking your way. A Shadow in its own darkness noticed a walking player at under two blocks unless it happened to face them; the Unburied and many others stood about while you walked up. With mob senses switched off in a test, nearly every Kingdoms monster went for the player within two seconds, so the code was fine and the senses were the cause.
+- **Darkvision**: creatures of the night and the dark (the new `jaymoskingdoms:darkvision` tag: every undead, spiders, endermen, the creaking, Shadows, Diggers, the Unburied, shapeshifters, the Snow Widow, wraiths, night bleeders, vampire and blood bats, gaunts, werewolves, cave ogres, trolls, cloak fliers, piercers, clear cubes, tarantulas, goblin scouts, imps, mimics, mimes) see in the dark as in dim light (`Senses.DARKVISION_LIGHT`).
+- **Footsteps**: anyone walking about within 8 blocks who isn't sneaking is heard, whatever the light or the way the monster faces (a Ranger's quiet tread makes that nearer). Sneaking and standing still work as before, so the Stealth tree still pays.
+- **Bosses**: anything that shows a boss bar (the Unburied, the Snow Widow, rulers, warlords, the giants) now senses as a boss: it never loses track of you and stealth can't blind it below 40%.
+- **Diggers fight**: still skittish (a lone one runs for its warren and lies low), but two or more out of their hole hunt you as a pack, a lone one caught within 4 blocks turns and bites, one you strike fights back for 10 seconds, and one hiding in its hole goes for whoever corners it. A lone one under half health still runs (`Digger.fights`).
+- Tested in a cloud dev server: 76 Kingdoms monsters each against a walking survival player in the dark, at night and sneaking. Before: many never noticed the player at 8 blocks. After: they notice a walking player at about 8 blocks (farther when they see you), a sneaking one mostly only at 2 to 4 blocks. Not played in the pack.
