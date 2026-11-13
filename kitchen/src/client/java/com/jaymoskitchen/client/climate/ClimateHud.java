@@ -82,6 +82,11 @@ public final class ClimateHud {
 				}
 			} else if (stack.is(Climate.CLEAN_WATER)) {
 				lines.add(Component.translatable("tooltip.jaymoskitchen.clean_water").withStyle(ChatFormatting.AQUA));
+			} else if (stack.is(Climate.WATER_FILTER)) {
+				lines.add(Component.translatable("tooltip.jaymoskitchen.water_filter").withStyle(ChatFormatting.GRAY));
+			} else if (stack.is(net.minecraft.world.item.Items.POTION) && com.jaymoskitchen.climate.Thirst.bottledWater(stack)) {
+				// a plain water bottle: river water until it's purified
+				lines.add(Component.translatable("tooltip.jaymoskitchen.unpurified_water").withStyle(ChatFormatting.DARK_GREEN));
 			} else if (stack.is(Warmth.THERMOMETER)) {
 				lines.add(Component.translatable("tooltip.jaymoskitchen.thermometer").withStyle(ChatFormatting.GRAY));
 			}

@@ -32,14 +32,27 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
+import com.jaymoskitchen.delight.CookwareBlock;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRuleCategory;
 
 /**
- * (0.5.25) Thirst ({@link Thirst}) and body heat ({@link BodyHeat}): their items, rules and server loop. Water is
- * boiled clean by using a bottle of it or a {@link WaterskinItem} on a lit campfire. Ops can switch either off with
- * the game rules {@code jaymoskitchen:thirst} and {@code jaymoskitchen:body_heat}.
+ * (0.5.25) Thirst ({@link Thirst}) and body heat ({@link BodyHeat}): their items, rules and server loop. Ops can switch
+ * either off with the game rules {@code jaymoskitchen:thirst} and {@code jaymoskitchen:body_heat}.
+ * <p>
+ * Water is unpurified until it's purified (Andy: "you should also have to purify the water inside"). A bottle of it or a
+ * {@link WaterskinItem} is boiled clean by using it on anything you can cook over ({@link #purifiesAt}): a lit campfire,
+ * firepit or bonfire, a lit hearth, or a cooking pot or frying pan sitting on heat. A glass bottle dipped in a water
+ * cauldron standing over heat draws Clean Water straight out ({@link #drawBoiled}). Or the water goes through a
+ * {@link WaterFilterItem}.
  * <p>
  * (0.5.80) Waterskins come in three tiers: Leather (3 sips), Iron (6 sips), Dragon (8 sips, cleans water as it fills).
  */
@@ -48,6 +61,7 @@ public final class Climate {
 	public static Item WATERSKIN_LEATHER;
 	public static Item WATERSKIN_IRON;
 	public static Item WATERSKIN_DRAGON;
+	public static Item WATER_FILTER;
 	public static DataComponentType<WaterskinItem.Water> WATERSKIN_WATER;
 	public static GameRule<Boolean> THIRST;
 	public static GameRule<Boolean> BODY_HEAT;
@@ -71,6 +85,7 @@ public final class Climate {
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
 		WATERSKIN_DRAGON = item("waterskin_dragon", p -> new WaterskinItem(WaterskinItem.Tier.DRAGON, p), new Item.Properties().stacksTo(1)
 			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK));
+		WATER_FILTER = item("water_filter", WaterFilterItem::new, new Item.Properties().durability(WaterFilterItem.USES));
 		ParasiteEffect.register();
 		Warmth.register();
 		Soot.register();
@@ -79,6 +94,7 @@ public final class Climate {
 			output.accept(WATERSKIN_LEATHER);
 			output.accept(WATERSKIN_IRON);
 			output.accept(WATERSKIN_DRAGON);
+			output.accept(WATER_FILTER);
 		});
 
 		// class-load the synced attachments on both sides (a dedicated server's clients must know them)
@@ -99,9 +115,16 @@ public final class Climate {
 				return InteractionResult.PASS;
 			}
 			BlockPos pos = hit.getBlockPos();
-			if (CampfireBlock.isLitCampfire(level.getBlockState(pos)) && boils(player.getMainHandItem())) {
+			if (boils(player.getMainHandItem()) && purifiesAt(level, pos)) {
 				if (player instanceof ServerPlayer server) {
 					boil(server, pos);
+				}
+				return InteractionResult.SUCCESS;
+			}
+			// a glass bottle in a water cauldron over heat: the water in it has boiled
+			if (player.getMainHandItem().is(Items.GLASS_BOTTLE) && boiledCauldron(level, pos)) {
+				if (player instanceof ServerPlayer server) {
+					drawBoiled(server, pos);
 				}
 				return InteractionResult.SUCCESS;
 			}
@@ -157,6 +180,42 @@ public final class Climate {
 			return WaterskinItem.water(held).sips() > 0;
 		}
 		return false;
+	}
+
+	/**
+	 * Heat that boils water held to it: a lit campfire, firepit or bonfire (the campfires tag), a lit bonfire's stone
+	 * edge or hearth, or Kitchen's cooking pot or frying pan standing on heat.
+	 */
+	public static boolean purifiesAt(Level level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		if (CampfireBlock.isLitCampfire(state) || CookwareBlock.heated(level, pos)) {
+			return true;
+		}
+		boolean lit = state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT);
+		return lit && (state.getBlock() instanceof HearthBlock || BONFIRE_EDGE.equals(BuiltInRegistries.BLOCK.getKey(state.getBlock())));
+	}
+
+	/** Jaymo's Powers' bonfire edge, the stone ring round a 3x3 bonfire. */
+	private static final net.minecraft.resources.Identifier BONFIRE_EDGE = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "bonfire_edge");
+
+	/** A water cauldron with heat under it (anything Kitchen's cookware cooks on). */
+	static boolean boiledCauldron(Level level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		return state.is(Blocks.WATER_CAULDRON) && CookwareBlock.hot(level.getBlockState(pos.below()));
+	}
+
+	/** A bottle of Clean Water drawn from a boiled cauldron, which drops a level as a bottle from any cauldron does. */
+	private static void drawBoiled(ServerPlayer player, BlockPos pos) {
+		ServerLevel level = player.level();
+		BlockState state = level.getBlockState(pos);
+		ItemStack held = player.getMainHandItem();
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemUtils.createFilledResult(held, player, new ItemStack(CLEAN_WATER)));
+		player.awardStat(Stats.USE_CAULDRON);
+		player.awardStat(Stats.ITEM_USED.get(Items.GLASS_BOTTLE));
+		LayeredCauldronBlock.lowerFillLevel(state, level, pos);
+		level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
+		level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
+		level.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 4, 0.15, 0.1, 0.15, 0.02);
 	}
 
 	/** It comes off the fire clean. */
