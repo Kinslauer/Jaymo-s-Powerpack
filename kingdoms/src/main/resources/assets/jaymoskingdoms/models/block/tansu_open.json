@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "jaymoskingdoms:block/tansu_top",
+    "front": "jaymoskingdoms:block/tansu_front_open",
+    "side": "jaymoskingdoms:block/tansu_side"
+  }
+}

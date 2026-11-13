@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SPS",
+    "SPS"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "count": 6,
+    "id": "jaymoskingdoms:shoji"
+  }
+}

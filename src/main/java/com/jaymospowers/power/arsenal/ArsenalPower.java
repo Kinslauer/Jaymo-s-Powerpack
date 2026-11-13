@@ -175,6 +175,7 @@ public final class ArsenalPower implements Power {
 		VoidCrown.register();
 		ArsenalFlintlock.register();
 		ArsenalItems.init();
+		EchoBow.register();
 		ArsenalDebugCommand.init();
 		Powers.register(INSTANCE);
 		// (0.17.3) what a gifted villager does with the Pocket Arsenal

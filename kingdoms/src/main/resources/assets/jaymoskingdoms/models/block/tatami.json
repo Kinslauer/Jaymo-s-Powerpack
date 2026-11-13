@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskingdoms:block/tatami_top",
+    "side": "jaymoskingdoms:block/tatami_side"
+  }
+}

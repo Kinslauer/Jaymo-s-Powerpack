@@ -140,6 +140,7 @@
   "block.jaymospowers.training_post": "Training Post",
   "entity.jaymospowers.sparring_partner": "%s's Sparring Partner",
   "entity.jaymospowers.practice_dummy": "Practice Dummy",
+  "message.jaymospowers.practice_dummy.bout": "Blow %1$s, total %2$s, %3$s a second",
   "message.jaymospowers.zfighter_spar_start": "Your shadow stands up to fight you.",
   "message.jaymospowers.zfighter_spar_lost": "You're beaten. Get up and train.",
   "message.jaymospowers.zfighter_spar_won": "Your partner yields. +%s TP",

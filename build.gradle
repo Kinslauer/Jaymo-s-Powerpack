@@ -412,6 +412,17 @@ def packMods = [
 	[dep: "maven.modrinth:critter-armory:Qcu5lZ5g", cf: [1198794, 8914440]],
 	// Kaffee's Dual Ride (GPL-3.0): a second player can ride behind you on a horse. 1.2.0.
 	[dep: "maven.modrinth:kaffees_dual_ride:T14PXNLz", cf: [683156, 9183919]],
+	// The Graveyard (GPL-3.0, by finallion; github.com/finallion/The_Graveyard; shipped unchanged): graveyards, crypts,
+	// a haunted house, overrun villages, its own undead and the Corrupted Champion. Client and server. 4.0.0 for 26.3.
+	// Needs GeckoLib (above) and VillagersTradingPlus (GPL-3.0, same author; a JSON villager-trade library). 1.1.0.
+	[dep: "maven.modrinth:the-graveyard-fabric:yeFv1Dnk", cf: [514468, 9346789]],
+	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
+	// Re:Animal (all rights reserved, by SSKirillSS and the Re:Animal Team; its page: "feel free to include it" in
+	// modpacks, no reposting; linked, never edited): more wild animals with their own behaviour, taming and breeding.
+	// Client and server. 0.6.12 for 26.3. Needs GeckoLib (above) and ShatterLib / OctoLib (all rights reserved, same
+	// team; linked, never edited). 0.7.0-beta.5.
+	[dep: "maven.modrinth:re-animal:dcNJpLZ7", cf: [1387943, 9579385]],
+	[dep: "maven.modrinth:shatterbyte-lib:yGChlg17", cf: [916747, 9573422]],
 	// JamLib (MIT, JamCoreModding): the library RightClickHarvest (packModsNoCf, below) needs. 2.3.1.
 	[dep: "maven.modrinth:jamlib:EbhilCj8", cf: [623764, 8914234]],
 ]

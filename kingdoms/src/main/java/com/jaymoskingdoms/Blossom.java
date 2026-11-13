@@ -1,6 +1,9 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.blossomland.BlossomBlocks;
+import com.jaymoskingdoms.blossomland.BlossomFurnishings;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,13 +22,16 @@ import net.minecraft.world.level.block.state.BlockState;
  * y = 0 the floor laid in place of the ground.
  */
 final class Blossom {
-	/** The frame's dark timber, the paper of the windows, the tatami, a futon, the torii's vermilion (all looked up by name). */
+	/**
+	 * The frame's dark timber and the bonsai (looked up by name), and the blossom folk's own blocks ({@link BlossomBlocks},
+	 * {@link BlossomFurnishings}): shoji for the windows, tatami, a futon, red lacquer for the torii, paper and stone lanterns.
+	 */
 	private static final BlockState TIMBER = named("stripped_dark_oak_log", Blocks.STRIPPED_SPRUCE_LOG);
 	private static final BlockState BEAM = named("dark_oak_log", Blocks.SPRUCE_LOG);
-	private static final BlockState PAPER = named("white_stained_glass_pane", Blocks.GLASS_PANE);
-	private static final BlockState TATAMI = named("bamboo_mosaic", Blocks.BIRCH_PLANKS);
-	private static final BlockState FUTON = named("white_bed", Blocks.HAY_BLOCK);
-	private static final BlockState VERMILION = named("red_concrete", Blocks.MANGROVE_PLANKS);
+	private static final BlockState PAPER = BlossomBlocks.SHOJI.defaultBlockState();
+	private static final BlockState TATAMI = BlossomBlocks.TATAMI.defaultBlockState();
+	private static final BlockState FUTON = BlossomFurnishings.FUTON.defaultBlockState();
+	private static final BlockState VERMILION = BlossomBlocks.RED_LACQUER.defaultBlockState();
 	private static final BlockState BONSAI = named("potted_cherry_sapling", Blocks.FLOWER_POT);
 
 	private Blossom() {
@@ -60,7 +66,7 @@ final class Blossom {
 				s.set(x, 4, z, post ? TIMBER : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
 			}
 		}
-		s.door(mid, 1, front, Direction.NORTH, k.door);
+		s.door(mid, 1, front, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
 		// paper windows: either side of the door, either side of each side's middle post, the back
 		for (int z : new int[] {front, d}) {
 			s.set(mid - 2, 2, z, PAPER);
@@ -95,18 +101,20 @@ final class Blossom {
 			}
 		}
 		int ridge = 4 + (Math.min(w, d) + 1) / 2;
-		// inside: futons at the back, a low table on the tatami, a bonsai, a barrel, a paper lantern under the ridge
+		// inside: futons at the back, the hearth in the middle of the tatami (a low table in a small house), a bonsai,
+		// a tansu against the wall, a paper lantern under the ridge
 		s.bed(2, 1, d - 2, Direction.SOUTH, FUTON);
 		if (w >= 9 || k.chance(0.5)) {
 			s.bed(w - 1, 1, d - 2, Direction.SOUTH, FUTON);
 		}
-		s.set(mid, 1, zm, Buildings.Sketch.facing(k.p.trapdoor().getBlock(), Direction.NORTH));
+		s.set(mid, 1, zm, w >= 9 || d >= 9 ? BlossomFurnishings.HEARTH.defaultBlockState()
+			: Buildings.Sketch.facing(k.p.trapdoor().getBlock(), Direction.NORTH));
 		s.set(2, 1, front + 1, BONSAI);
-		s.set(w - 1, 1, front + 1, Blocks.BARREL.defaultBlockState());
-		s.set(mid, ridge - 1, (d + 1) / 2, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(w - 1, 1, front + 1, BlossomFurnishings.TANSU.defaultBlockState().setValue(BarrelBlock.FACING, Direction.WEST));
+		s.set(mid, ridge - 1, (d + 1) / 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// a lantern by the door, hung from the eaves
 		if (k.chance(0.6)) {
-			s.set(mid + 1, 3, 0, Buildings.Sketch.hanging(Blocks.LANTERN));
+			s.set(mid + 1, 3, 0, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		}
 		return s.done();
 	}
@@ -180,11 +188,11 @@ final class Blossom {
 		s.set(3, 2, 3, Blocks.BARREL.defaultBlockState());
 		s.set(3, 2, 5, BONSAI);
 		s.hip(0, 6, 0, 6, 5, Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(), Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
-		s.set(3, 6, 4, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(3, 6, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// the stone lanterns
 		for (int x : new int[] {0, 6}) {
 			s.set(x, 1, 0, Blocks.STONE_BRICK_WALL.defaultBlockState());
-			s.set(x, 2, 0, Blocks.LANTERN.defaultBlockState());
+			s.set(x, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
 		}
 		return s.done();
 	}
@@ -193,8 +201,7 @@ final class Blossom {
 	static Blueprint stoneLantern() {
 		Buildings.Sketch s = new Buildings.Sketch("blossom_lantern", 1, 1, 4);
 		s.set(0, 1, 0, Blocks.STONE_BRICK_WALL.defaultBlockState());
-		s.set(0, 2, 0, Blocks.LANTERN.defaultBlockState());
-		s.set(0, 3, 0, Blocks.STONE_BRICK_SLAB.defaultBlockState());
+		s.set(0, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
 		return s.done();
 	}
 
@@ -335,10 +342,10 @@ final class Blossom {
 				}
 			}
 		}
-		s.set(mid - 3, 2, 0, Blocks.LANTERN.defaultBlockState());
-		s.set(mid + 3, 2, 0, Blocks.LANTERN.defaultBlockState());
-		s.set(mid - 3, 2, KEEP_Z0 - 1, Blocks.LANTERN.defaultBlockState());
-		s.set(mid + 3, 2, KEEP_Z0 - 1, Blocks.LANTERN.defaultBlockState());
+		s.set(mid - 3, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(mid + 3, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(mid - 3, 2, KEEP_Z0 - 1, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(mid + 3, 2, KEEP_Z0 - 1, BlossomBlocks.STONE_LANTERN.defaultBlockState());
 		// the footing: rough stone, a block wider at the ground than above, the keep's walls flush with it at the sides and back
 		for (int x = KEEP_X0; x <= KEEP_X1; x++) {
 			for (int z = KEEP_Z0; z <= KEEP_Z1; z++) {
@@ -456,7 +463,7 @@ final class Blossom {
 		s.set(wx1 - 1, FOOT + 2, wz0 + 1, Blocks.BARREL.defaultBlockState());
 		s.bed(wx1 - 1, FOOT + 2, wz1 - 1, Direction.SOUTH, FUTON);
 		s.bed(wx1 - 3, FOOT + 2, wz1 - 1, Direction.SOUTH, FUTON);
-		s.set((wx0 + wx1) / 2, Y1[0] + 7, wmid, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set((wx0 + wx1) / 2, Y1[0] + 7, wmid, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// the ladders: guards' floor from the left-hand tatami, the lord's rooms, the lookout
 		ladder(s, GREAT_X0 + 6, GREAT_Z1 - 6, Y0[0] + 1, Y1[0] + 1);
 		ladder(s, x2 + 1, z3 - 1, Y0[1], Y1[1] + 1);
@@ -464,7 +471,7 @@ final class Blossom {
 		// lanterns under the great room's ceiling and either side of the niche
 		for (int[] at : new int[][] {{10, 16}, {40, 16}, {10, 25}, {40, 25}, {10, 34}, {40, 34}, {19, 12}, {31, 12}, {mid - 4, GREAT_Z1 - 5},
 			{mid + 4, GREAT_Z1 - 5}, {mid, 14}}) {
-			s.set(at[0], Y1[0], at[1], Buildings.Sketch.hanging(Blocks.LANTERN));
+			s.set(at[0], Y1[0], at[1], Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		}
 		s.set(GREAT_X0 + 2, Y0[0] + 1, GREAT_Z1 - 2, BONSAI);
 		s.set(GREAT_X1 - 2, Y0[0] + 1, GREAT_Z1 - 2, BONSAI);
@@ -474,17 +481,17 @@ final class Blossom {
 		}
 		s.set(GREAT_X0 + INSET + 2, Y0[1], GREAT_Z0 + INSET + 2, Blocks.BARREL.defaultBlockState());
 		s.set(GREAT_X1 - INSET - 2, Y0[1], GREAT_Z0 + INSET + 2, Blocks.BARREL.defaultBlockState());
-		s.set(mid, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
-		s.set(mid - 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
-		s.set(mid + 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(mid - 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(mid + 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// the lord's rooms, and the lookout
 		s.bed(x3 - 4, Y0[2], z3 - 2, Direction.SOUTH, FUTON);
 		s.bed(x3 - 6, Y0[2], z3 - 2, Direction.SOUTH, FUTON);
 		s.set(x2 + 2, Y0[2], z2 + 2, Blocks.BARREL.defaultBlockState());
 		s.set(x3 - 2, Y0[2], z2 + 2, BONSAI);
-		s.set(mid, Y1[2], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid, Y1[2], mid_z(z2, z3), Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		s.set(lx1 - 2, Y0[3], lz0 + 2, BONSAI);
-		s.set(mid, ridge - 1, rz, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid, ridge - 1, rz, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		return s.done();
 	}
 

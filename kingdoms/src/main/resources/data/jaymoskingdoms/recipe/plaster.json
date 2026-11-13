@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:clay_ball",
+    "minecraft:clay_ball",
+    "minecraft:bone_meal",
+    "minecraft:sand"
+  ],
+  "result": {
+    "count": 4,
+    "id": "jaymoskingdoms:plaster"
+  }
+}

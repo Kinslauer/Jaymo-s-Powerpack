@@ -83,6 +83,8 @@ public final class ArsenalPool {
 		vanilla(entries, Items.TRIDENT, 20, Kind.TRIDENT);
 		vanilla(entries, Items.BOW, 45, Kind.BOW);
 		vanilla(entries, Items.CROSSBOW, 35, Kind.CROSSBOW);
+		// the Echo Bow: a rare pull, dressed like any bow (Infinity and one arrow)
+		vanilla(entries, EchoBow.ITEM, EchoBow.POOL_WEIGHT, Kind.BOW);
 		bladeItems.addAll(List.of(Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.IRON_AXE, Items.IRON_SPEAR, Items.DIAMOND_SPEAR, Items.TRIDENT));
 
 		// Balkon's WeaponMod: Legacy, whatever its ids look like

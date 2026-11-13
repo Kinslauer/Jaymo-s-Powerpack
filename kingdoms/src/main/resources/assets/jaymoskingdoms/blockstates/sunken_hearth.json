@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymoskingdoms:block/sunken_hearth"
+    },
+    "lit=true": {
+      "model": "jaymoskingdoms:block/sunken_hearth_lit"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+Dark Fantasy: Church of Sin - MIT licence
+
+Original: "Dark Fantasy: Church of Sin" by Tada_no_ahiru (mods.toml author: bulochka_s_tiltom)
+Modrinth project LEQGVg4B (modrinth.com/mod/dark-fantasy-church-of-sin-vanilla), file church_of_sin_Forge_v1.0.jar
+(Forge 1.20.1). Its mods.toml declares license="MIT" and its Modrinth page lists the MIT License. The jar ships no
+licence text, so the standard MIT text follows.
+
+Used in Jaymo's Powers: its one structure template, as data/jaymospowers/structure/darkened_chapel.nbt (the Darkened
+Chapel), changed by tools/church_of_sin_port.py: Forge's leftover data and Supplementaries' items are taken out, a
+"Work In Progress" sign is removed, the two written books are rewritten, and its icon paintings are replaced by Jaymo's
+Powers' own votive panels. Its worldgen settings (biomes, spacing, terrain) are kept. None of its code or paintings
+is used.
+
+MIT License
+
+Copyright (c) Tada_no_ahiru (bulochka_s_tiltom)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

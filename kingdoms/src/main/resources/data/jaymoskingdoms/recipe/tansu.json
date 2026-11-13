@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LLL",
+    "NBN",
+    "LLL"
+  ],
+  "key": {
+    "L": "jaymoskingdoms:black_lacquered_planks",
+    "N": "minecraft:iron_nugget",
+    "B": "minecraft:barrel"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:tansu"
+  }
+}

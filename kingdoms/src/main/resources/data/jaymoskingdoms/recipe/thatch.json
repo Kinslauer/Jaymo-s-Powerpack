@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "WW",
+    "WW"
+  ],
+  "key": {
+    "W": "minecraft:wheat"
+  },
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:thatch"
+  }
+}
