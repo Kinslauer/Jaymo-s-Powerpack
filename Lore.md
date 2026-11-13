@@ -1671,3 +1671,10 @@ approve). The Underworld's forgers also turn out a writ under a lord's seal and 
 and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
 as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
 The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
+
+(new) **What grows on Mohknee** (Claude's placement for the Blossom Lands plan, patch 10, 2026-11-13, for Andy to
+approve). Beside the cherry the far land grows the maple and the ginkgo, green all summer and red and gold from the
+first cold; the blossom folk count their year by them as much as by the blossom. Bamboo stands in thickets at the
+groves' edges. The red lily is the flower of their dead: it is planted on every grave, it comes up without leaves, and
+it is poison, which is why nothing digs where it grows. Wisteria is trained over the arbours of their gardens, and in
+a walled town's garden there is a pond of koi, which come to the hand that feeds them and are kept for generations.
