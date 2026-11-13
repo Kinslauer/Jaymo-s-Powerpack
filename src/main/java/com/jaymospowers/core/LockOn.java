@@ -98,6 +98,7 @@ public final class LockOn {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> drop(handler.player));
+		LockOnRegions.init();
 	}
 
 	private static void set(ServerPlayer player, int id, int region) {

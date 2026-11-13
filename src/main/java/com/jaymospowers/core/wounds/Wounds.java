@@ -751,6 +751,10 @@ public final class Wounds {
 		}
 		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
 		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
+		// the last of its legs gone black: a giant can't stand (Giants), the Great Ape goes down
+		if (!blocked) {
+			Giants.afterHit(victim, plan, was, points);
+		}
 		// a heavy blow to a bare head may take an eye
 		if (!blocked && landed == BodyPart.HEAD && victim instanceof ServerPlayer struck && victim.isAlive()) {
 			com.jaymospowers.power.blindness.Blind.struck(struck, source, loss);

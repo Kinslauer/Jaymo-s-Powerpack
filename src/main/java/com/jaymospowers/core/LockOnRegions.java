@@ -9,7 +9,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.network.chat.Component;
+import com.jaymospowers.power.zfighter.ZFighterLineage;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -47,6 +54,8 @@ public final class LockOnRegions {
 	 * share of aimed head hits lands on the torso instead (no head bonus).
 	 */
 	public static final float HEAD_GLANCE = 0.35F;
+	/** Andy (2026-11-13): "hits toward the head are less accurate too, so you have a higher chance to miss". This share of aimed head hits misses outright. */
+	public static final float HEAD_MISS = 0.2F;
 	/** The last aimed hit's roll on each victim, so the one blow asked twice (routing, then its damage) glances the same. */
 	private static final Map<LivingEntity, Rolled> ROLLED = new WeakHashMap<>();
 
@@ -55,7 +64,9 @@ public final class LockOnRegions {
 
 	/** Where on the body the lock aims, top to bottom (the scroll wheel's order). */
 	public enum Region {
-		HEAD, TORSO, ARMS, LEGS;
+		HEAD, TORSO, ARMS, LEGS,
+		/** The Great Ape's tail (only it has one to aim at): a blow there lands on the body, a blade while it lies crippled cuts it off. */
+		TAIL;
 
 		public static final Region[] ALL = values();
 
@@ -71,6 +82,47 @@ public final class LockOnRegions {
 	}
 
 	private LockOnRegions() {
+	}
+
+	public static void init() {
+		// an aimed head hit may miss outright
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !missesHead(entity, source));
+	}
+
+	/** Whether this blow, aimed at {@code victim}'s head through the lock, misses ({@link #HEAD_MISS}); a whiff is heard. */
+	private static boolean missesHead(LivingEntity victim, DamageSource source) {
+		if (aimedRegion(victim, source) != Region.HEAD || victim.getRandom().nextFloat() >= HEAD_MISS
+			|| !(victim.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 1.2F);
+		return true;
+	}
+
+	/** A blow, shot or throw that lands on one place (not a fall, blast, fire, drowning or magic). */
+	private static boolean aimable(DamageSource source) {
+		return !(source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypeTags.IS_DROWNING)
+			|| source.is(DamageTypes.IN_WALL) || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC)
+			|| source.is(DamageTypes.INDIRECT_MAGIC) || source.is(DamageTypes.LIGHTNING_BOLT));
+	}
+
+	/**
+	 * The region of {@code victim} this blow is aimed at through its attacker's lock: the player's own swing, or something
+	 * they shot or threw, while locked onto {@code victim}. Null for anything else (another's blow, a stray, a blast).
+	 */
+	public static @Nullable Region aimedRegion(LivingEntity victim, DamageSource source) {
+		Entity by = source.getEntity();
+		Entity direct = source.getDirectEntity();
+		if (!(by instanceof ServerPlayer player) || direct != by && (direct == null || direct instanceof LivingEntity) || !aimable(source)
+			|| LockOn.target(player) != victim) {
+			return null;
+		}
+		return fit(victim, LockOn.region(player));
+	}
+
+	/** Whether {@code target} is the Great Ape (a player's or a villager's), the one body with a tail to aim at. */
+	public static boolean greatApe(LivingEntity target) {
+		return Boolean.TRUE.equals(target.getAttached(ZFighterLineage.GREAT_APE));
 	}
 
 	/** The regions {@code target} can be hit in, top to bottom (always at least the torso). */
@@ -94,6 +146,9 @@ public final class LockOnRegions {
 			|| plan == BodyPlan.HUMANOID && (missing & (Dismember.LEFT_LEG | Dismember.RIGHT_LEG)) != (Dismember.LEFT_LEG | Dismember.RIGHT_LEG)) {
 			out.add(Region.LEGS);
 		}
+		if (greatApe(target)) {
+			out.add(Region.TAIL);
+		}
 		return out;
 	}
 
@@ -109,7 +164,7 @@ public final class LockOnRegions {
 	public static BodyPart part(LivingEntity target, BodyPlan plan, Region region, Vec3 from) {
 		return switch (region) {
 			case HEAD -> BodyPart.HEAD;
-			case TORSO -> BodyPart.BODY;
+			case TORSO, TAIL -> BodyPart.BODY;
 			case ARMS -> plan == BodyPlan.FLYER ? BodyPart.WINGS : nearer(target, BodyPart.RIGHT_ARM, BodyPart.LEFT_ARM, from);
 			case LEGS -> switch (plan) {
 				case QUADRUPED -> facing(target, from) >= 0.0 ? BodyPart.FRONT_LEGS : BodyPart.HIND_LEGS;
@@ -163,6 +218,11 @@ public final class LockOnRegions {
 		if (plan == null || plan == BodyPlan.SIMPLE || region == Region.TORSO && plan != BodyPlan.HUMANOID) {
 			return centre;
 		}
+		if (region == Region.TAIL) {
+			// low behind its back
+			Vec3 back = Vec3.directionFromRotation(0.0F, target.yBodyRot).scale(-box.getXsize() * 0.55);
+			return new Vec3(target.getX(), box.minY + box.getYsize() * 0.4, target.getZ()).add(back);
+		}
 		BodyPart part = part(target, plan, region, from);
 		int limb = plan == BodyPlan.HUMANOID ? (region == Region.TORSO ? LimbBoxes.TORSO : Breaks.limb(part)) : -1;
 		if (limb >= 0) {
@@ -200,23 +260,19 @@ public final class LockOnRegions {
 	}
 
 	/**
-	 * The part a blow on {@code victim} lands on because its attacker is locked onto it with a region picked: the player's
-	 * own swing, or something they shot or threw. Null for anything else (another's blow, a stray, a blast).
+	 * The part a blow on {@code victim} lands on because its attacker is locked onto it ({@link #aimedRegion}), a head shot
+	 * glancing off onto the torso {@link #HEAD_GLANCE} of the time; null when it isn't aimed through a lock.
 	 */
 	public static @Nullable BodyPart aimedPart(LivingEntity victim, BodyPlan plan, DamageSource source) {
-		Entity by = source.getEntity();
-		Entity direct = source.getDirectEntity();
-		if (!(by instanceof ServerPlayer player) || direct != by && (direct == null || direct instanceof LivingEntity)) {
-			return null;
-		}
-		if (LockOn.target(player) != victim) {
+		Region aimed = aimedRegion(victim, source);
+		if (aimed == null || !(source.getEntity() instanceof ServerPlayer player)) {
 			return null;
 		}
 		Rolled rolled = ROLLED.get(victim);
 		if (rolled != null && rolled.source() == source) {
 			return plan.index(rolled.part()) >= 0 ? rolled.part() : null;
 		}
-		Region region = fit(victim, LockOn.region(player));
+		Region region = aimed;
 		// a head shot may glance off onto the torso
 		if (region == Region.HEAD && victim.getRandom().nextFloat() < HEAD_GLANCE) {
 			region = Region.TORSO;
@@ -236,7 +292,7 @@ public final class LockOnRegions {
 			return null;
 		}
 		Region region = fit(target, LockOn.region(player));
-		if (region == Region.TORSO) {
+		if (region == Region.TORSO || region == Region.TAIL) {
 			return null;
 		}
 		if (region == Region.HEAD && target.getRandom().nextFloat() < HEAD_GLANCE) {

@@ -845,8 +845,12 @@ public final class Breaks {
 		modifier(entity, Attributes.ATTACK_DAMAGE, ARM_DAMAGE_ID, ARM_DAMAGE * arms);
 		modifier(entity, Attributes.ATTACK_SPEED, ARM_SPEED_ID, ARM_ATTACK_SPEED * arms);
 		modifier(entity, Attributes.BLOCK_BREAK_SPEED, ARM_DIG_ID, ARM_DIG * arms);
-		modifier(entity, Attributes.MOVEMENT_SPEED, LEG_SPEED_ID, legs == 0 ? 0.0 : (allLegs ? ALL_LEGS_SPEED : LEG_SPEED) * legWeight);
-		modifier(entity, Attributes.JUMP_STRENGTH, LEG_JUMP_ID, legs == 0 ? 0.0 : (allLegs ? ALL_LEGS_JUMP : LEG_JUMP) * legWeight);
+		// a giant on no legs can't move at all (Giants)
+		boolean giant = allLegs && Giants.giant(entity);
+		modifier(entity, Attributes.MOVEMENT_SPEED, LEG_SPEED_ID, legs == 0 ? 0.0
+			: giant ? Giants.CRIPPLED_SPEED : (allLegs ? ALL_LEGS_SPEED : LEG_SPEED) * legWeight);
+		modifier(entity, Attributes.JUMP_STRENGTH, LEG_JUMP_ID, legs == 0 ? 0.0
+			: giant ? Giants.CRIPPLED_JUMP : (allLegs ? ALL_LEGS_JUMP : LEG_JUMP) * legWeight);
 		modifier(entity, Attributes.MOVEMENT_SPEED, FOOT_SPEED_ID, FOOT_SPEED * feet);
 		modifier(entity, Attributes.MOVEMENT_SPEED, SPLINT_SPEED_ID, down ? 0.0 : SPLINT_SPEED * splints);
 		modifier(entity, Attributes.FLYING_SPEED, WING_FLY_ID, (mask & bit(BodyPart.WINGS)) != 0 ? WING_FLY : 0.0);

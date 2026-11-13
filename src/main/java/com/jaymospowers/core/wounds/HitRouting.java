@@ -70,11 +70,6 @@ final class HitRouting {
 	 * blow, shot or throw {@link #route} would land on one part; else null.
 	 */
 	static @Nullable BodyPart lockAimed(LivingEntity victim, BodyPlan plan, DamageSource source) {
-		if (source.is(DamageTypeTags.IS_FALL) || source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypeTags.IS_DROWNING)
-			|| source.is(DamageTypes.IN_WALL) || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC)
-			|| source.is(DamageTypes.INDIRECT_MAGIC) || source.is(DamageTypes.LIGHTNING_BOLT)) {
-			return null;
-		}
 		BodyPart aimed = LockOnRegions.aimedPart(victim, plan, source);
 		return aimed == null ? null : plan.resolve(aimed);
 	}
