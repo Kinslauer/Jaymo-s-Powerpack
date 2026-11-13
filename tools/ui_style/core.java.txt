@@ -1,3 +1,33 @@
+	private static boolean grey() {
+		Path file = FabricLoader.getInstance().getConfigDir().resolve("jaymospowers-screenlook.properties");
+		if (!Files.exists(file)) {
+			return false;
+		}
+		try (InputStream in = Files.newInputStream(file)) {
+			Properties state = new Properties();
+			state.load(in);
+			return "grey".equals(state.getProperty("look"));
+		} catch (java.io.IOException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	private static int c(int dark, int grey) {
+		return GREY ? grey : dark;
+	}
+
+	/** Shared by the three mods through Fabric Loader's object share: true from a grey panel being drawn to the end of the frame. */
+	private static boolean @Nullable [] ink;
+
+	/** Marks this frame as drawn on a grey panel, so text after it is drawn dark and without a shadow (Powers' {@code GreyInk}). */
+	private static void inked() {
+		if (ink == null) {
+			FabricLoader.getInstance().getObjectShare().putIfAbsent("jaymos:grey_ink", new boolean[1]);
+			ink = FabricLoader.getInstance().getObjectShare().get("jaymos:grey_ink") instanceof boolean[] shared ? shared : new boolean[1];
+		}
+		ink[0] = true;
+	}
+
 	/** The panel and its stripe. */
 	public static void panel(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent) {
 		panel(graphics, x, y, w, h, accent, PANEL);
@@ -5,6 +35,12 @@
 
 	/** The same, with another fill (a lighter one where what's behind should show). */
 	public static void panel(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent, int fill) {
+		if (GREY) {
+			// (vanilla's inventory window, with the stripe inside its bevel)
+			window(graphics, x, y, w, h);
+			graphics.fill(x + 3, y + 3, x + w - 3, y + 5, accent);
+			return;
+		}
 		graphics.fill(x, y, x + w, y + h, fill);
 		graphics.fill(x, y, x + w, y + 2, accent);
 	}
@@ -14,6 +50,9 @@
 	 * inventory, in dark tones, because it sits where the inventory does. Other screens use {@link #panel}.
 	 */
 	public static void window(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		if (GREY) {
+			inked();
+		}
 		graphics.fill(x, y, x + w, y + h, WINDOW_EDGE);
 		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, WINDOW_SHADE);
 		graphics.fill(x + 1, y + 1, x + w - 3, y + h - 3, WINDOW_LIGHT);
@@ -114,7 +153,7 @@
 		for (int k = 0; k < 120; k++) {
 			double t = k * Math.PI * 2.0 / 120.0;
 			int x = cx + (int)Math.round(Math.cos(t) * inner), y = cy + (int)Math.round(Math.sin(t) * inner);
-			graphics.fill(x, y, x + 1, y + 1, ROW);
+			graphics.fill(x, y, x + 1, y + 1, 0x30FFFFFF);
 		}
 	}
 
@@ -133,8 +172,8 @@
 
 	/** One tile of a wheel (or a toggle chip in its middle): a dark plate, lighter when picked, with a 1 px rim. */
 	public static void wheelTile(GuiGraphicsExtractor graphics, int x, int y, int size, int index, boolean picked, int rim) {
-		graphics.fill(x, y, x + size, y + size, CHIP);
-		graphics.fill(x, y, x + size, y + size, picked ? ROW_HOVER : index % 2 == 0 ? ROW : ROW_ALT);
+		graphics.fill(x, y, x + size, y + size, 0xA0000000);
+		graphics.fill(x, y, x + size, y + size, picked ? 0x50FFFFFF : index % 2 == 0 ? 0x30FFFFFF : 0x18FFFFFF);
 		graphics.fill(x, y, x + size, y + 1, rim);
 		graphics.fill(x, y + size - 1, x + size, y + size, rim);
 		graphics.fill(x, y + 1, x + 1, y + size - 1, rim);
@@ -321,8 +360,8 @@
 		}
 		int thumb = Math.max(8, track * view / content);
 		int at = top + (track - thumb) * scroll / Math.max(1, content - view);
-		graphics.fill(x, top, x + 2, top + track, 0x40FFFFFF);
-		graphics.fill(x, at, x + 2, at + thumb, 0xC0FFFFFF);
+		graphics.fill(x, top, x + 2, top + track, c(0x40FFFFFF, 0x40000000));
+		graphics.fill(x, at, x + 2, at + thumb, c(0xC0FFFFFF, 0xC0000000));
 	}
 
 	public static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {

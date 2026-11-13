@@ -4132,3 +4132,29 @@ enter limbo if they don't come to."
 - The Aether altar and the bomb glider use the shared panel and slot wells.
 - Z Fighter first-time tips show on the pack's own tip card (top right, gold title) instead of Minecraft's toast.
 - HUD pieces that drew their own black plate, gold or red now take them from the shared HUD look.
+
+## 0.23.14 (2026-11-13): Aether towns and villages only on great landmasses
+
+- **Sky towns, sky villages (and their ruins) and the sky castle** are now built only on one of the Aether's great
+  landmasses, never over open sky and cloud. Before, each town lot and each village was checked at nine spots, so a
+  town could spread across islets and holes with aerclouds showing underneath and still pass the "enough lots" check.
+- Now, every lot of a town (and a village's or castle's whole square) must be island at the town's own floor height in
+  at least 90% of its columns, sampled every 4 blocks (`SkyTowns.LOT_COVER`, `AetherStructure.SETTLEMENT_COVER`). The island under it
+  must also be one big landmass joined at that height: at least 160 x 160 blocks of land for a town and 112 x 112 for a
+  village or castle (`Ground.island`, `SkyTowns.ISLAND_LEAST`, `AetherStructure.SETTLEMENT_ISLAND`).
+- Only rock and soil count as land (`Ground.land`): holystone and the other Aether stones, Aether dirt and grass. An
+  aercloud never does.
+- New worlds and newly generated Aether only; towns already built stay where they are. Built; not played.
+
+## 0.23.15 (2026-11-13): Kingdoms shadows have no body to fall
+
+- The `body/simple` tag now includes Kingdoms' Shadow, so it never goes down or gets carried like a downed person.
+- Built; not played.
+
+## 0.23.16 (2026-11-13): Screens in dark or vanilla grey, your pick (#1436)
+
+- `/screenlook grey` turns every screen vanilla grey and `/screenlook dark` turns them dark again (dark is the default). It is your own setting and is remembered.
+- In the dark look, other mods' light grey screens are painted dark with light labels: Cooking for Blockheads (cooking table, oven, spice rack, sink, cookie jar), Pantry's artisan press, Shippy Ships' holds, the rune altar, the spell binding table, the elephant's packs, the creeper minion tracker, Better Advancements' window and Simple Voice Chat's panels. Nothing of those mods is copied: their grey is swapped as the game loads their textures. Their screens that reuse Minecraft's own chest picture stay grey, like the inventory.
+- In the grey look, those screens are left as their mods ship them, and our own screens (the H menu, stations, lists) are drawn as vanilla's bevelled grey window with grey slots and dark text.
+- Other mods' screens swap at once. Our own screens swap when you restart the game.
+- The six wheels, full-screen scenes and the HUD stay dark in both looks.

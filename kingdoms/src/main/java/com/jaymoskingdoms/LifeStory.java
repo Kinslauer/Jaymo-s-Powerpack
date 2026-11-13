@@ -646,6 +646,12 @@ public final class LifeStory {
 	 * the start looks past their places. Empty otherwise, and in single player.
 	 */
 	private static java.util.Map<String, Born> OTHERS = java.util.Map.of();
+	/**
+	 * Andy, 2026-11-13 ("NONE of the starts should be up there except divine born"): while a road is set out on
+	 * ({@link #arrive}), whether it must keep off the Aether (its own world, or the top band of a One Dimension world). True for
+	 * every start but a Divine-born one's (and the afterlife's, which makes you Divine-born); false outside a start.
+	 */
+	private static boolean GROUNDED;
 	/** (Tiv) Lost in time, not in Powers' future yet: their start is noted where they arrive there ({@link #leftWorld}). */
 	private static final Set<java.util.UUID> TIMELOST_PENDING = new java.util.HashSet<>();
 	/** (0.7.356) Players asked for their road since they joined. */
@@ -1316,11 +1322,20 @@ public final class LifeStory {
 		Start landed;
 		// (Tiv) everyone else's start, so this one looks past their places
 		OTHERS = others(player);
+		GROUNDED = bornAs != Heritage.Kind.DIVINE && start != Start.AFTERLIFE;
 		Faction asked = null;
+		boolean skyRealm = false;
 		try {
-			// (Tiv) a realm's road whose seat is already someone else's start goes to the nearest realm whose isn't (a party mate
-			// on the same road and realm shares it); with every realm taken, the one named, and a spot of their own there
-			if (start.realm && roadRealm != null && together(player, start, roadRealm) == null && !freePlace(Factions.level(player.level().getServer()), roadRealm.seat())) {
+			ServerLevel factions = Factions.level(player.level().getServer());
+			if (start.realm && roadRealm != null && aloft(factions, roadRealm.seat())) {
+				// (Andy 2026-11-13) a realm in the Aether is no road for anyone but the Divine-born: the nearest free realm on
+				// the ground instead, else none (the start falls back to the wild)
+				skyRealm = true;
+				asked = roadRealm;
+				roadRealm = freeRealm(player.level().getServer(), roadRealm.seat());
+			} else if (start.realm && roadRealm != null && together(player, start, roadRealm) == null && !freePlace(factions, roadRealm.seat())) {
+				// (Tiv) a realm's road whose seat is already someone else's start goes to the nearest realm whose isn't (a party mate
+				// on the same road and realm shares it); with every realm taken, the one named, and a spot of their own there
 				Faction free = freeRealm(player.level().getServer(), roadRealm.seat());
 				if (free != null) {
 					asked = roadRealm;
@@ -1334,10 +1349,11 @@ public final class LifeStory {
 			StartPerks.landed(player, landed);
 		} finally {
 			OTHERS = java.util.Map.of();
+			GROUNDED = false;
 		}
-		if (asked != null && landed == start) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.story.realm_taken", asked.name(), roadRealm.name())
-				.withStyle(ChatFormatting.GRAY));
+		if (asked != null && landed == start && roadRealm != null) {
+			player.sendSystemMessage(Component.translatable(skyRealm ? "message.jaymoskingdoms.story.realm_aloft" : "message.jaymoskingdoms.story.realm_taken",
+				asked.name(), roadRealm.name()).withStyle(ChatFormatting.GRAY));
 		}
 		if (landed == Start.UNARMED || landed == Start.ROCK_BOTTOM) {
 			// an old loss, long healed over: one arm or one leg
@@ -1485,6 +1501,20 @@ public final class LifeStory {
 	 * says to wait: the land the start looked at isn't made yet, and it's tried again once it is.
 	 */
 	private static @Nullable Start begin(ServerPlayer player, Start start, @Nullable Faction named, Heritage.Kind heritage, RandomSource random) {
+		ServerLevel overworld = player.level().getServer().overworld();
+		int sea = overworld.getSeaLevel();
+		if (!GROUNDED || OTHER_WORLDS.contains(start) || Stacked.realm(overworld, sea) != net.minecraft.world.level.Level.OVERWORLD) {
+			return beginHere(player, start, named, heritage, random);
+		}
+		// (Andy 2026-11-13) worked out as if in the Overworld's band of a One Dimension world, so every "top of the ground" the
+		// start asks for is the Overworld's, never an Aether island's overhead (an ordinary world: just run)
+		Start[] landed = new Start[1];
+		Stacked.within(overworld, sea, () -> landed[0] = beginHere(player, start, named, heritage, random));
+		return landed[0];
+	}
+
+	/** {@link #begin}'s work. */
+	private static @Nullable Start beginHere(ServerPlayer player, Start start, @Nullable Faction named, Heritage.Kind heritage, RandomSource random) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel level = server.overworld();
 		BlockPos spawn = level.getRespawnData().pos();
@@ -1493,6 +1523,10 @@ public final class LifeStory {
 		Landing mate = together(player, start, named);
 		if (mate != null && !mate.dimension.equals(level.dimension()) && !OTHER_WORLDS.contains(start)) {
 			// (a mate woken in another world is only followed where Powers puts you in one itself)
+			mate = null;
+		}
+		if (mate != null && mate.dimension.equals(level.dimension()) && aloft(level, mate.pos)) {
+			// (Andy 2026-11-13) nor up into the Aether, unless you're Divine-born yourself
 			mate = null;
 		}
 		if (mate != null) {
@@ -1889,6 +1923,16 @@ public final class LifeStory {
 				}
 			}
 		}
+		if (to != null && aloft(level, to)) {
+			// (Andy 2026-11-13) never woken in the Aether but by a Divine-born start: the places looked at keep off it
+			// (freePlace, ground), so this is only a last guard; the wild instead
+			JaymosKingdoms.LOGGER.warn("{}'s start ({}) chose a spot in the Aether at {}; waking them in the wild instead",
+				player.getName().getString(), start, to);
+			to = null;
+			place = null;
+			StoryHomes.clear(player);
+			HUNTS.remove(player.getUUID());
+		}
 		Start landed = start;
 		// (Deck crash 2026-11-13 10:12) the land the start looked at isn't made yet: it's made in the background while they
 		// wait behind the loading screen, then they try again (depart), rather than making it here and holding the server
@@ -1905,7 +1949,17 @@ public final class LifeStory {
 			to = spot(level, start == Start.WILD ? mate : null, spawn, WILD_MIN, WILD_MAX, random);
 		}
 		if (to == null) {
-			return wanted != null && wanted.waitFor(false) ? null : landed;
+			if (wanted != null && wanted.waitFor(false)) {
+				return null;
+			}
+			if (!aloft(player.level(), player.blockPosition())) {
+				return landed;
+			}
+			// (Andy 2026-11-13) nowhere found, and where they stand is the Aether: the world's spawn, on the Overworld's ground
+			to = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spawn);
+			if (aloft(level, to)) {
+				return landed;
+			}
 		}
 		// (fallen from the sky: you drift down into your own crater)
 		double y = landed == Start.SKYFALL ? to.getY() + SKYFALL_HEIGHT : to.getY();
@@ -2092,7 +2146,7 @@ public final class LifeStory {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-			if (standable(level, top) && openGround(level.getBlockState(top.below()))) {
+			if (!aloft(level, top) && standable(level, top) && openGround(level.getBlockState(top.below()))) {
 				return top;
 			}
 		}
@@ -2104,7 +2158,7 @@ public final class LifeStory {
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			for (int y = top.getY() - 2; y >= top.getY() - INDOOR_DEPTH; y--) {
 				BlockPos in = new BlockPos(column.getX(), y, column.getZ());
-				if (standable(level, in)) {
+				if (!aloft(level, in) && standable(level, in)) {
 					return in;
 				}
 			}
@@ -2114,7 +2168,7 @@ public final class LifeStory {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-			if (standable(level, top)) {
+			if (!aloft(level, top) && standable(level, top)) {
 				return top;
 			}
 		}
@@ -2676,6 +2730,10 @@ public final class LifeStory {
 
 	/** No one else's start ({@link #OTHERS}) within {@code apart} blocks of {@code at}: their place ({@code place}), else where they woke. */
 	private static boolean clear(ServerLevel level, BlockPos at, int apart, boolean place) {
+		if (aloft(level, at)) {
+			// (Andy 2026-11-13) nor in the Aether, but for a Divine-born start
+			return false;
+		}
 		String dimension = level.dimension().identifier().toString();
 		for (Born b : OTHERS.values()) {
 			if (b.dimension.equals(dimension) && flat(BlockPos.of(place ? b.place : b.wake), at) < (double) apart * apart) {
@@ -2683,6 +2741,11 @@ public final class LifeStory {
 			}
 		}
 		return true;
+	}
+
+	/** Whether a start being set out on must keep off {@code at}: it's in the Aether, and the start isn't a Divine-born one's ({@link #GROUNDED}). */
+	private static boolean aloft(net.minecraft.world.level.Level level, BlockPos at) {
+		return GROUNDED && SkyFolk.at(level, at);
 	}
 
 	/** The horizontal distance between {@code a} and {@code b}, squared. */

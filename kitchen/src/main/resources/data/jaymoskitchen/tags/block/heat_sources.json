@@ -10,6 +10,18 @@
     "minecraft:magma_block",
     "minecraft:furnace",
     "minecraft:smoker",
-    "minecraft:blast_furnace"
+    "minecraft:blast_furnace",
+    {
+      "id": "jaymospowers:firepit",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bonfire",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bonfire_edge",
+      "required": false
+    }
   ]
 }

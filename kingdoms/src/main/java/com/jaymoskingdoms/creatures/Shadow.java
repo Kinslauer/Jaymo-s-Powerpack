@@ -33,7 +33,9 @@ import org.jspecify.annotations.Nullable;
  * A shadow of the ruins: a cold, thin dark shape that lives where it is dim and withers in the light (a bright place, or the
  * day, hurts it). Its touch drains Might ({@link ShadowDrain}); a player drained to nothing goes down, never to death, and
  * their own shadow peels away from them and joins the others (it carries the Might it took, and gives it back when slain).
- * It slips through gaps a man cannot, and plain blows do half as much to it.
+ * It slips through gaps a man cannot, and plain blows do half as much to it. It has no body to fall: it never goes down
+ * like a person (Powers' body/simple tag), and at its end it breaks up into smoke and leaves nothing to carry or butcher
+ * (Kitchen's no_corpse tag).
  */
 public class Shadow extends Beast {
 	static final double HEALTH = 14.0, SPEED = 0.3, DAMAGE = 1.0;
@@ -96,6 +98,15 @@ public class Shadow extends Beast {
 	}
 
 	@Override
+	public void tick() {
+		super.tick();
+		// one left lying downed from before shadows stopped going down (or laid out some other way) is unmade at once
+		if (this.level() instanceof ServerLevel level && this.isAlive() && this.tickCount % 10 == 0 && com.jaymoskingdoms.Downed.isDowned(this)) {
+			this.kill(level);
+		}
+	}
+
+	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
 		if (this.tickCount % 20 == 0 && level.getMaxLocalRawBrightness(this.blockPosition()) >= BRIGHT) {
@@ -107,8 +118,12 @@ public class Shadow extends Beast {
 	@Override
 	public void die(DamageSource source) {
 		super.die(source);
-		if (this.owner != null && this.level() instanceof ServerLevel level) {
-			ShadowDrain.returned(level, this.owner, this.carries);
+		if (this.level() instanceof ServerLevel level) {
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY(0.5), this.getZ(), 24, 0.25, 0.6, 0.25, 0.02);
+			level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(0.5), this.getZ(), 30, 0.3, 0.7, 0.3, 0.04);
+			if (this.owner != null) {
+				ShadowDrain.returned(level, this.owner, this.carries);
+			}
 		}
 	}
 
