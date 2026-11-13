@@ -17,7 +17,7 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
 - **The punch**: left click on a living thing, with fist gear in the main hand and a style. The server throws it in
   place of the game's own attack. `PUNCH_DAMAGE` 1.5 at every level, reach `RANGE` 2 blocks (a click from further
   out is a punch at the air and still costs), `PUNCH_KNOCKBACK` 25% of the usual shove.
-- **Strings**: Arrow Slit throws a one-two then alternating hooks; Long Guard jab, jab, cross; Bastion the right jab
+- **Strings**: Arrow Slit throws jab, lead hook, cross, round and round (Jung's order; it was a one-two then alternating hooks); Long Guard jab, jab, cross; Bastion the right jab
   only. A pause of `STRING_RESET` 30 ticks starts the string again. So far the punches differ only in sound.
 - **Windup** (Jung's idea; Andy made it shorten with level): every punch lands a moment after it is thrown,
   `WINDUP_SLOWEST` 15 ticks (0.75 s) at level 1, one tick or so less a level, down to `WINDUP_FASTEST` 7 (0.35 s) at
@@ -134,12 +134,12 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   style's own stance replaces the plain fists-up guard. The shapes are copied from fight footage Jung sent ("Every
   Boxing Guard Explained in 8 Minutes": its peekaboo, long guard and Philly shell parts). The arms bend at the elbow
   (`KneeBend`, as the crawl's and the climb's do), and the worn fist gear turns with the forearm.
-  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves on the cheeks, a forward crouch with the chin down, the knees bent with
+  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves together in front of the chin with a slit between them, a forward crouch with the chin down, the knees bent with
     the feet flat. The shoulders and head sway from side to side without stopping; the hips and feet stay put.
   - Long Guard: the lead arm out at shoulder height, all but straight, pawing a little; the rear glove by the chin; the body
     upright, a little back, stood at an angle from the feet up (lead shoulder and lead foot forward).
-  - Bastion (Philly shell): side on with the right shoulder forward and held up by the chin, the lead forearm folded
-    across the belly, the rear glove folded up by the cheek, the weight back, the head tipped toward the rear
+  - Bastion (Philly shell): side on with the right shoulder rolled forward and up by the chin, the lead upper arm
+    hanging down and in with the forearm across the belly, the rear elbow down in front of the ribs and the glove at the chin, the weight back, the head tipped toward the rear
     shoulder with the chin tucked; it still shrugs its lead shoulder now and then.
   - Each stands on a base (`BoxingPoses.base`): feet apart, lead foot ahead, knees bent, feet flat; the bladed
     styles' toes turn with the body. Shapes after reference pictures Jung sent (Bivol, Mayweather, a peekaboo crouch).
@@ -157,8 +157,18 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
     full one within `HEAVY_HOOK_TICKS` of a slip to the side.
   - Uppercut: the fist rises under the chin with the forearm up.
   - First person: the arms stay in the guard and the punching arm goes out from it (`BoxingPoses.firstPerson`).
-- **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull; a shoulder roll turns the lead shoulder in,
-  sways the weight back and tips the head away. The legs stay under the hips in a crouch, duck or lean.
+- **One connected body** (`BoxingPoses.Trunk`, `settle`): every lean, crouch, side lean and turn is added up and put
+  on the model last, turned about the **hips** rather than the neck the model's body pivots on. The waist stays on
+  the legs, and the neck, head and shoulders ride the top of the trunk; a crouch or duck sinks the hips by what the
+  bent legs shorten, so the feet stay on the ground. Punches lean the trunk in over the hit and sit a little into the
+  knees (`JAB_LEAN`, `CROSS_LEAN`, `HOOK_LEAN`, `HOOK_TILT`, the `_DUCK`s); a punching arm keeps its own aim.
+- **No air between the parts:** the body sits `HIP_TUCK` (1 px) down over the thighs, and a turned upper arm's
+  shoulder is moved in onto the chest's side (`BoxingPoses.seat`). Elbows, knees and the waist are drawn bent with
+  their cut mitred (`KneeBend`), so they close.
+- **Evades** step in and duck, the body kept together: a slip leans off the line about the hips and goes a little
+  forward with the knees bending (`SLIP_LEAN`, `SLIP_FORWARD`, `SLIP_DUCK`); a bob folds forward and sinks into the
+  knees (`BOB_DUCK`, `BOB_KNEES`); the pull shifts the weight back over the rear leg, still sitting into the knees;
+  a shoulder roll turns the lead shoulder in and dips in and away, tipping the head away. The gloves stay at the face.
 - **Tiring and gassed:** a faint puff of breath every 2.5 s when tiring (four icons or fewer), a clear one every second
   when gassed, no sound; gassed, the hands drop and the shoulders heave in place of the stance.
 - Everyone is told what the poses need: `Boxing.LOOK` (how spent, the last punch) and `BoxingEvades.MOVED` (the last
@@ -231,11 +241,12 @@ Nothing from the plan. See the open points below.
 27. F5 with fist gear and each style: three different stances, each moving (a sway, a pawing hand, a shrug).
     Compare each with the video: Arrow Slit crouched behind both gloves, Long Guard with a straight lead arm and an
     upright body, Bastion side on with the right shoulder up and the lead arm across the belly. Check the arms stay
-    on the shoulders when the body turns, and the legs under the hips when it leans.
+    on the shoulders when the body turns, and the waist on the legs when it leans: no air between the body's parts.
     Check the elbows: forearms up to the cheeks (Arrow Slit, the rear hands), one across the belly (Bastion), and
     the wraps, cestus or bracers sitting on the bent forearm, not floating where a straight arm would end.
 28. Right click in each style: three different blocks. Punch: the arm goes out; in Arrow Slit the third and later
     punches are hooks from the side.
-29. Left Alt in each style and direction: the lean, duck, pull or shoulder turn, over in under half a second.
+29. Left Alt in each style and direction: the slip, bob, pull or shoulder roll, over in under half a second; the
+    knees bend and the trunk goes with the hips (no gap at the waist, the head on the shoulders).
 30. Run the feathers down to four icons: a faint breath puff now and then. Empty: clear puffs and heaving shoulders.
 31. A second player sees all of it.

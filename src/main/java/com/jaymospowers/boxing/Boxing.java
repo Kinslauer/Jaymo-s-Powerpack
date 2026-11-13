@@ -107,7 +107,7 @@ public final class Boxing {
 
 	/** The three styles. Their order is saved: add new ones at the end. */
 	public enum Style {
-		/** Inside pressure: a one-two, then hooks from side to side for as long as the flurry lasts. */
+		/** Inside pressure: jab, lead hook, cross, and round again for as long as the flurry lasts. */
 		ARROW_SLIT("arrow_slit"),
 		/** Range and control: jab, jab, cross. */
 		LONG_GUARD("long_guard"),
@@ -123,7 +123,8 @@ public final class Boxing {
 		/** The punch at {@code step} of this style's string (0 = the first). */
 		public Punch punch(int step) {
 			return switch (this) {
-				case ARROW_SLIT -> step == 0 ? Punch.JAB : step == 1 ? Punch.CROSS : step % 2 == 0 ? Punch.LEAD_HOOK : Punch.REAR_HOOK;
+				// (Jung) jab, lead hook, cross, and round again
+				case ARROW_SLIT -> step % 3 == 0 ? Punch.JAB : step % 3 == 1 ? Punch.LEAD_HOOK : Punch.CROSS;
 				case LONG_GUARD -> step % 3 == 2 ? Punch.CROSS : Punch.JAB;
 				case BASTION -> Punch.JAB;
 			};
