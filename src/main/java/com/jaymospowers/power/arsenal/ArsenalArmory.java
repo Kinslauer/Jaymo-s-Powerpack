@@ -44,7 +44,8 @@ public final class ArsenalArmory {
 	public static @Nullable Item pinned(Player player) {
 		Identifier id = player.getAttached(PIN);
 		if (id == null || !Fate.isAscended(player)) {
-			return null;
+			// (the glass gauntlet, once the rift keeps it for this hand, comes first as a pin does: GlassGauntlet)
+			return GlassGauntlet.favoured(player) ? GlassGauntlet.ITEM : null;
 		}
 		Item item = BuiltInRegistries.ITEM.getValue(id);
 		return item == null || item == Items.AIR ? null : item;

@@ -171,6 +171,7 @@ public final class ArsenalPower implements Power {
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
+		GlassGauntlet.register();
 		VoidCrown.register();
 		ArsenalFlintlock.register();
 		ArsenalItems.init();
@@ -310,6 +311,7 @@ public final class ArsenalPower implements Power {
 	public void onLost(ServerPlayer player) {
 		ArsenalGates.close(player);
 		ArsenalArmory.onLost(player);
+		GlassGauntlet.onLost(player);
 		ArsenalAnywhere.release(player);
 		HundredBlades.onLost(player);
 		ArsenalDamocles.onLost(player);
@@ -387,7 +389,7 @@ public final class ArsenalPower implements Power {
 		if (PENDING.containsKey(player.getUUID())) {
 			return;
 		}
-		if (from == null && ArsenalArmory.tryPin(player)) {
+		if (from == null && (ArsenalArmory.tryPin(player) || GlassGauntlet.trySetAside(player))) {
 			return;
 		}
 		Cooldowns cd = cooldowns(player);
@@ -417,10 +419,12 @@ public final class ArsenalPower implements Power {
 		} else {
 			List<ItemStack> pair = ArsenalFlintlock.pairFor(player, player.getRandom());
 			// (0.19.26) now and then a handgun from the future, one magazine in it (ArsenalFutureGun)
-			List<ItemStack> future = pair == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
+			// once in a long while, for a hand that has never held it, the glass gauntlet (the rift keeps it from then on)
+			List<ItemStack> glass = pair == null ? GlassGauntlet.roll(player, player.getRandom()) : null;
+			List<ItemStack> future = pair == null && glass == null ? ArsenalFutureGun.roll(player, player.getRandom()) : null;
 			// until it's mastered the rift pulls from anywhere: someone's pack, or something that hurts (ArsenalAnywhere)
-			wild = pair == null && future == null ? ArsenalAnywhere.roll(player, level, player.getRandom(), SUMMON_TICKS) : null;
-			stacks = pair != null ? pair : future != null ? future
+			wild = pair == null && glass == null && future == null ? ArsenalAnywhere.roll(player, level, player.getRandom(), SUMMON_TICKS) : null;
+			stacks = pair != null ? pair : glass != null ? glass : future != null ? future
 				: wild != null ? (wild.hazard() != null ? new ArrayList<>() : ArsenalAnywhere.stacksFor(wild))
 				: new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
 			if (pair == null && future != null) {

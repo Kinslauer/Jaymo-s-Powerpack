@@ -217,7 +217,8 @@ public final class Guard {
 
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Parried.TYPE, Parried.CODEC);
-		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.guards(item) || item instanceof SorasDagger, (builder, lookup, item) ->
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> guardable(item) || HammerSlam.isWarhammer(item) || KnifeGuard.guards(item) || item instanceof SorasDagger
+			|| item instanceof com.jaymospowers.power.arsenal.GlassGauntlet.GauntletItem, (builder, lookup, item) ->
 			builder.set(DataComponents.BLOCKS_ATTACKS, new BlocksAttacks(0.0F, 1.0F,
 				// (boxing's fist gear blocks by its own share, more the better the gear: BoxingGear.blockShare)
 				List.of(new BlocksAttacks.DamageReduction(GUARD_ANGLE, Optional.empty(), 0.0F, com.jaymospowers.boxing.BoxingGear.blockShare(item, GUARD_SHARE))),
@@ -297,6 +298,10 @@ public final class Guard {
 		boolean knife = hand == InteractionHand.MAIN_HAND && !player.isSpectator() && KnifeGuard.guards(player.getMainHandItem().getItem());
 		if (!knife && (hand != InteractionHand.MAIN_HAND || !weaponGuard(player.getMainHandItem()) || player.isSpectator()
 			|| HammerSlam.isWarhammer(player.getMainHandItem().getItem()))) {
+			return InteractionResult.PASS;
+		}
+		if (player.isShiftKeyDown() && com.jaymospowers.power.arsenal.GlassGauntlet.is(player.getMainHandItem())) {
+			// sneak + use turns the glass gauntlet from claws to open hand and back (GlassGauntlet.GauntletItem#use)
 			return InteractionResult.PASS;
 		}
 		if (player.isShiftKeyDown() && player.getMainHandItem().getItem() instanceof SorasDagger) {

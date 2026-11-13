@@ -542,7 +542,7 @@ public final class Forms {
 		List<String> out = new ArrayList<>();
 		for (String id : book.belt()) {
 			Form form = FORMS.get(id);
-			if (form != null && book.knows(id) && form.family().holds(main) && !out.contains(id)) {
+			if (form != null && book.knows(id) && form.family().holds(main) && ClawForms.fits(form, main) && !out.contains(id)) {
 				out.add(id);
 			}
 		}
@@ -785,7 +785,8 @@ public final class Forms {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.bare").withStyle(ChatFormatting.GRAY));
 			return false;
 		}
-		if (!form.family().holds(player.getMainHandItem()) || !SpecialCuts.fits(form, player.getMainHandItem())) {
+		if (!form.family().holds(player.getMainHandItem()) || !SpecialCuts.fits(form, player.getMainHandItem())
+			|| !ClawForms.fits(form, player.getMainHandItem())) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.form.weapon", form.name()).withStyle(ChatFormatting.GRAY));
 			return false;
 		}

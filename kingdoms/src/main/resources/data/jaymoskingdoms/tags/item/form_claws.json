@@ -8,6 +8,10 @@
     {
       "id": "jaymospowers:rimeclaw",
       "required": false
+    },
+    {
+      "id": "jaymospowers:glass_gauntlet",
+      "required": false
     }
   ]
 }
