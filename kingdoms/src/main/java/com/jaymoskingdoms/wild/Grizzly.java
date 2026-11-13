@@ -528,6 +528,7 @@ public class Grizzly extends WildBeast implements Acting {
 		@Nullable SpawnGroupData groupData) {
 		SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, groupData);
 		this.setHomeTo(this.blockPosition(), TERRITORY);
+		com.jaymoskingdoms.BeastLairs.grizzly(level, this.blockPosition(), reason);
 		return data;
 	}
 

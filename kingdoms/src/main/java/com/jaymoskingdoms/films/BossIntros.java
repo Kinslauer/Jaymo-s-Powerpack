@@ -137,6 +137,8 @@ public final class BossIntros {
 		}
 	}
 
+	/** Creatures on their way to a staged entrance ({@link #stage}), by entity id: no film of them until they arrive. */
+	private static final java.util.Set<Integer> STAGED = new java.util.HashSet<>();
 	private static final Map<UUID, Watch> WATCHING = new HashMap<>();
 	/** When each player may next be offered a film (game time). */
 	private static final Map<UUID, Long> NEXT_OFFER = new HashMap<>();
@@ -158,6 +160,7 @@ public final class BossIntros {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WATCHING.clear();
 			NEXT_OFFER.clear();
+			STAGED.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
 			.then(Commands.literal("bossintro").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
@@ -243,7 +246,7 @@ public final class BossIntros {
 				continue;
 			}
 			String key = key(e);
-			if (key != null && !seen.contains(key) && !e.isInvisible() && player.hasLineOfSight(e)) {
+			if (key != null && !seen.contains(key) && !e.isInvisible() && !STAGED.contains(e.getId()) && player.hasLineOfSight(e)) {
 				best = e;
 				bestD = d;
 			}
@@ -274,6 +277,29 @@ public final class BossIntros {
 		watch.ticks = ticks;
 		watch.roarAfter = roarAfter;
 		WATCHING.put(player.getUUID(), watch);
+		return true;
+	}
+
+	/** {@code boss} is on its way to an entrance staged for it: it gets no film on sight until {@link #stage} or {@link #unhold}. */
+	public static void hold(Entity boss) {
+		STAGED.add(boss.getId());
+	}
+
+	public static void unhold(Entity boss) {
+		STAGED.remove(boss.getId());
+	}
+
+	/**
+	 * The staged entrance: {@code boss}'s film for {@code player} now, in sight or not, if they haven't seen its kind's
+	 * (a dragon coming down on its roost, {@code nether.DragonRoosts}). False if they have, or are in another film.
+	 */
+	public static boolean stage(ServerPlayer player, LivingEntity boss) {
+		String key = key(boss);
+		if (key == null || player.getAttachedOrElse(SEEN, List.of()).contains(key) || WATCHING.containsKey(player.getUUID())
+			|| !ServerPlayNetworking.canSend(player, Play.TYPE)) {
+			return false;
+		}
+		offer(player, boss, key);
 		return true;
 	}
 
