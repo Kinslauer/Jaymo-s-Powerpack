@@ -138,7 +138,7 @@ public final class BogLights {
 		for (int i = 0; i < 24; i++) {
 			double a = random.nextDouble() * Math.PI * 2;
 			int d = GOAL_MIN + random.nextInt(GOAL_MAX - GOAL_MIN + 1);
-			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
+			BlockPos top = com.jaymoskingdoms.Loaded.top(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
 			if (!com.jaymoskingdoms.Loaded.made(level, top)) {
 				continue;
 			}
@@ -162,7 +162,7 @@ public final class BogLights {
 		for (int i = 0; i < 16; i++) {
 			double a = random.nextDouble() * Math.PI * 2;
 			int d = GOAL_MIN + random.nextInt(GOAL_MAX - GOAL_MIN + 1);
-			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
+			BlockPos top = com.jaymoskingdoms.Loaded.top(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
 			if (!com.jaymoskingdoms.Loaded.made(level, top) || !bog(level, top)) {
 				continue;
 			}

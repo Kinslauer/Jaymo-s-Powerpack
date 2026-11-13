@@ -167,7 +167,7 @@ public final class BandTallies {
 			if (!sword && sent >= SEND_BEST) {
 				continue;
 			}
-			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(m.getRandom().nextInt(7) - 3, 0,
+			BlockPos at = com.jaymoskingdoms.Loaded.top(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(m.getRandom().nextInt(7) - 3, 0,
 				m.getRandom().nextInt(7) - 3));
 			if (!com.jaymoskingdoms.Loaded.made(level, at) || level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), 24.0, false) != null) {
 				continue;

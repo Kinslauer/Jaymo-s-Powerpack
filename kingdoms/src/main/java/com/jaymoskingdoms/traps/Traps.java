@@ -216,10 +216,13 @@ public final class Traps {
 		RandomSource random = level.getRandom();
 		double a = random.nextDouble() * Math.PI * 2;
 		int d = PIT_MIN + random.nextInt(PIT_MAX - PIT_MIN + 1);
-		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
-		if (!com.jaymoskingdoms.Loaded.made(level, top)) {
+		BlockPos column = player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d));
+		// (checked before the ground is read: reading a chunk still being made waited on the server thread, Deck crash
+		// 2026-11-13 15:36 beside a player just set down on Mohknee's fresh land)
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return;
 		}
+		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 		boolean desert = level.getBiome(top).is(Biomes.DESERT);
 		boolean swamp = level.getBiome(top).is(Biomes.SWAMP) || level.getBiome(top).is(Biomes.MANGROVE_SWAMP);
 		if (!desert && !swamp) {

@@ -301,7 +301,7 @@ public class RuneColossus extends ActingMonster {
 			for (int tries = 0; tries < 8 && at == null; tries++) {
 				double turn = random.nextDouble() * Math.PI * 2.0, far = Mth.lerp(random.nextDouble(), RISE_MIN, RISE_MAX);
 				BlockPos column = BlockPos.containing(giant.getX() + Math.cos(turn) * far, giant.getY(), giant.getZ() + Math.sin(turn) * far);
-				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+				BlockPos top = com.jaymoskingdoms.Loaded.top(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 				if (com.jaymoskingdoms.Loaded.made(level, top) && Math.abs(top.getY() - giant.getY()) < 12 && level.getFluidState(top).isEmpty()
 					&& level.noCollision(colossus.getType().getSpawnAABB(top.getX() + 0.5, top.getY(), top.getZ() + 0.5))) {
 					at = top;

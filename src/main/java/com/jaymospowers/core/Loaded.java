@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * Whether land is there to read without waiting. In 26.3 {@code Level.isLoaded} and {@code hasChunkAt} are also true of a
@@ -30,5 +31,13 @@ public final class Loaded {
 			return server.getChunkSource().getChunkNow(x >> 4, z >> 4) != null;
 		}
 		return level.hasChunkAt(x, z);
+	}
+
+	/**
+	 * {@code level.getHeightmapPos(type, pos)} when {@code pos}'s chunk is made and loaded; else {@code pos} itself, unread
+	 * (a {@link #made} check on it after then turns it down), so finding the ground never waits on land being made.
+	 */
+	public static BlockPos top(LevelReader level, Heightmap.Types type, BlockPos pos) {
+		return made(level, pos) ? level.getHeightmapPos(type, pos) : pos;
 	}
 }

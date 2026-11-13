@@ -334,7 +334,7 @@ public final class XenoFinds {
 			}
 			RandomSource random = player.getRandom();
 			double angle = random.nextDouble() * Math.PI * 2.0, d = HUNT_FROM_MIN + random.nextDouble() * (HUNT_FROM_MAX - HUNT_FROM_MIN);
-			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			BlockPos at = com.jaymospowers.core.Loaded.top(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
 				BlockPos.containing(player.getX() + Math.cos(angle) * d, 0.0, player.getZ() + Math.sin(angle) * d));
 			if (!com.jaymospowers.core.Loaded.made(level, at) || !level.getFluidState(at.below()).isEmpty()) {
 				continue;
