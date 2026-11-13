@@ -2046,7 +2046,7 @@ public final class LifeStory {
 	 * which on this pack can be seconds a chunk: a search that made dozens (ground() tried up to 64 spots) held the server
 	 * past its watchdog (crash 2026-11-05 15:00, a road being set out on).
 	 */
-	private static boolean reach(ServerLevel level, int x, int z, int[] made) {
+	static boolean reach(ServerLevel level, int x, int z, int[] made) {
 		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
 			return true;
 		}

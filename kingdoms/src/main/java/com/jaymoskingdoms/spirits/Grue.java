@@ -150,7 +150,7 @@ public final class Grue {
 	 * fences, crops, lights, the bell) or sets wood alight ({@link #FIRE_CHANCE}), {@link #WRECK_RADIUS} blocks round it. The
 	 * smashing and burning follow the mobGriefing rule. No village anywhere: it keeps to your routine, as before.
 	 */
-	static final int VILLAGE_LOOK_EVERY = 1200, VILLAGE_SEARCH_CHUNKS = 48, WRECK_EVERY = 16, WRECK_TRIES = 6;
+	static final int VILLAGE_LOOK_EVERY = 1200, VILLAGE_SEARCH_CHUNKS = 8, WRECK_EVERY = 16, WRECK_TRIES = 6;
 	static final double IN_VILLAGE = 40.0, WRECK_RADIUS = 6.0, VICTIM_RANGE = 16.0;
 	static final float FIRE_CHANCE = 0.2F;
 	/** Your own words don't come out while it has you. */

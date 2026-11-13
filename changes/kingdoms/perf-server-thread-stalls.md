@@ -1,0 +1,4 @@
+# keep tavern rumours, quests, monolith and harbour starts from freezing the server
+- Rumours (a tavern night, a lie that wins, the news boon), villagers' fetch quests, kings' champion quests and the Grue's village hunt looked for their place 32 to 56 rings of structure spacing out (findNearestMapStructure counts in spacings, not chunks), making each candidate chunk on the server thread; with nothing near that ran past the Steam Deck's watchdog. They now reach 8 rings (still thousands of blocks), and a tavern night reuses one rumour search for all its draws.
+- The monolith start (no free monolith near) and the whaler's walk in from the sea made up to 24 and about 75 new chunks at once. They now make at most 6 and 12; past that a monolith goes on the first dry ground tried, and a whaler's shore is given up on as when no shore is in reach.
+- Built in CI; not played.
