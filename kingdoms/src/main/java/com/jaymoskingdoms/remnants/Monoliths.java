@@ -447,7 +447,7 @@ public final class Monoliths {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int r = RAISE_NEAREST + random.nextInt(RAISE_FURTHEST - RAISE_NEAREST + 1);
 			BlockPos column = player.blockPosition().offset(Mth.floor(Math.cos(angle) * r), 0, Mth.floor(Math.sin(angle) * r));
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos foot = fit(level, column);

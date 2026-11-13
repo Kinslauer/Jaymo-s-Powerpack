@@ -565,11 +565,11 @@ final class Hordes {
 		// (the whole arc loaded, or it waits: no gaps left for want of a chunk)
 		for (double edge : new double[] {-0.5, 0.5}) {
 			double a = Math.toRadians((arc + edge) * 360.0 / ARCS);
-			if (!level.isLoaded(frame.at((int)Math.round(Math.sin(a) * (r + 1)), 0, (int)Math.round(-Math.cos(a) * (r + 1))))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, frame.at((int)Math.round(Math.sin(a) * (r + 1)), 0, (int)Math.round(-Math.cos(a) * (r + 1))))) {
 				return false;
 			}
 		}
-		if (!level.isLoaded(middle)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, middle)) {
 			return false;
 		}
 		if (!unseen && Raids.playerNear(level, middle, BUILD_HIDE_RANGE)) {
@@ -816,7 +816,7 @@ final class Hordes {
 		CampBuildings.Placer frame = new CampBuildings.Placer(data.center(), data.gate(), 0);
 		// (the four ways out loaded from the fire to past the new wall, or it waits)
 		for (int[] end : new int[][] {{0, -now - 2}, {now + 2, 0}, {0, now + 2}, {-now - 2, 0}}) {
-			if (!level.isLoaded(frame.at(end[0], 0, end[1]))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, frame.at(end[0], 0, end[1]))) {
 				return false;
 			}
 		}
@@ -1108,7 +1108,7 @@ final class Hordes {
 		for (int x = b[0]; x <= b[2]; x++) {
 			for (int z = b[1]; z <= b[3]; z++) {
 				BlockPos column = flat.at(x, 0, z);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return Raise.WAIT;
 				}
 				if (!ours(level, camp, column)) {
@@ -1195,7 +1195,7 @@ final class Hordes {
 	private static boolean greatHall(ServerLevel level, Camps.CampData data, boolean orc, boolean unseen) {
 		IllagerBuildings.Spot spot = orc ? OrcBuildings.LONGHOUSE : GoblinBuildings.GREAT_HUT;
 		CampBuildings.Placer placer = spot.placer(data.center(), data.gate());
-		if (!level.isLoaded(placer.at(0, 0, 0)) || !unseen && Raids.playerNear(level, placer.at(0, 0, 0), BUILD_HIDE_RANGE)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, placer.at(0, 0, 0)) || !unseen && Raids.playerNear(level, placer.at(0, 0, 0), BUILD_HIDE_RANGE)) {
 			return false;
 		}
 		Blueprint old = spot.design().get(), hall = orc ? HordeBuildings.orcGreatHall() : HordeBuildings.goblinGreatHall();

@@ -816,7 +816,7 @@ public abstract class WindDragon extends AbstractHorse {
 		if (this.getNavigation().isDone() && this.random.nextInt(WANDER_EVERY) == 0 && this.home != null) {
 			int x = Mth.floor(this.home.x) + this.random.nextInt(WANDER_RADIUS * 2 + 1) - WANDER_RADIUS;
 			int z = Mth.floor(this.home.z) + this.random.nextInt(WANDER_RADIUS * 2 + 1) - WANDER_RADIUS;
-			if (level.isLoaded(new BlockPos(x, 0, z))) {
+			if (com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, 0, z))) {
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 				if (Math.abs(top.getY() - this.getBlockY()) < 8 && (swims() || level.getFluidState(top.below()).isEmpty())) {
 					this.getNavigation().moveTo(x + 0.5, top.getY(), z + 0.5, WANDER_SPEED);
@@ -861,7 +861,7 @@ public abstract class WindDragon extends AbstractHorse {
 			int x = Mth.floor(centre.x) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
 			int z = Mth.floor(centre.z) + this.random.nextInt(PERCH_SEARCH * 2 + 1) - PERCH_SEARCH;
 			BlockPos top;
-			if (!level.isLoaded(new BlockPos(x, 0, z))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
 			if (nether) {

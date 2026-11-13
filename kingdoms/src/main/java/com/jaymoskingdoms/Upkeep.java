@@ -197,7 +197,7 @@ final class Upkeep {
 		double bestDist = Double.MAX_VALUE;
 		for (long key : waiting) {
 			BlockPos p = BlockPos.of(key);
-			if (!level.isLoaded(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				continue;
 			}
 			if (Weathering.undone(level.getBlockState(p)) == null) {

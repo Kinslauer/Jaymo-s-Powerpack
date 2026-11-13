@@ -355,7 +355,7 @@ public final class GravityRocks {
 	private static boolean tickBall(ServerLevel level, @Nullable ServerPlayer owner, Flying flying, long t) {
 		Throw thrown = flying.thrown();
 		Vec3 from = thrown.at(Math.max(0, t - 1)), to = thrown.at(t);
-		if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(to)) || t > THROW_TICKS) {
+		if (!com.jaymospowers.core.Loaded.made(level, net.minecraft.core.BlockPos.containing(to)) || t > THROW_TICKS) {
 			burst(level, owner, flying, from, null);
 			return true;
 		}

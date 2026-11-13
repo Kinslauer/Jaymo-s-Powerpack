@@ -112,7 +112,7 @@ final class Speakeasy {
 
 	/** The top block of the ground at {@code x, z} (loaded only), or null. */
 	private static @Nullable BlockPos ground(ServerLevel level, int x, int z) {
-		if (!level.isLoaded(new BlockPos(x, 0, z))) {
+		if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, 0, z))) {
 			return null;
 		}
 		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1, z);
@@ -312,7 +312,7 @@ final class Speakeasy {
 		for (int out = 1; out <= n + 1; out++) {
 			for (int side = -h - 1; side <= h + 1; side++) {
 				BlockPos column = pitAt(door, way, out, side, top);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return false;
 				}
 				// earth over it all (checked at its corners and middle)

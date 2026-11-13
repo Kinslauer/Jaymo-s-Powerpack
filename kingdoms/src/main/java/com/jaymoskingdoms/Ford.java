@@ -150,7 +150,7 @@ public final class Ford {
 		int reach = HALF * 2 + KEEP_BACK + FORD_LONGEST;
 		for (int dx = -reach; dx <= reach; dx += reach) {
 			for (int dz = -reach; dz <= reach; dz += reach) {
-				if (!level.isLoaded(column.offset(dx, 0, dz))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column.offset(dx, 0, dz))) {
 					return false;
 				}
 			}
@@ -239,7 +239,7 @@ public final class Ford {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int r = nearest + random.nextInt(Math.max(1, furthest - nearest + 1));
 			BlockPos column = from.offset(Mth.floor(Math.cos(angle) * r), 0, Mth.floor(Math.sin(angle) * r));
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos water = surface(level, column);
@@ -252,7 +252,7 @@ public final class Ford {
 					continue;
 				}
 				BlockPos keep = surface(level, edge.relative(d, KEEP_BACK));
-				if (!level.isLoaded(keep) || !wooded(level.getBiome(keep)) || !level.getFluidState(keep).isEmpty()
+				if (!com.jaymoskingdoms.Loaded.made(level, keep) || !wooded(level.getBiome(keep)) || !level.getFluidState(keep).isEmpty()
 					|| Factions.around(level.getServer(), level, keep, SETTLEMENT_CLEARANCE) != null) {
 					continue;
 				}

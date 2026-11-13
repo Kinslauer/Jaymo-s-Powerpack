@@ -278,7 +278,7 @@ final class ThessalyHands {
 					it.remove();
 					continue;
 				}
-				if (!level.isLoaded(trap.pos)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, trap.pos)) {
 					continue;
 				}
 				if (now % TRAP_SHOW == 0) {

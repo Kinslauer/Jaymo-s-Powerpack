@@ -97,7 +97,7 @@ public final class Floods {
 		queue.enqueue(start.asLong());
 		while (!queue.isEmpty()) {
 			BlockPos at = BlockPos.of(queue.dequeueLong());
-			if (seen.size() > MOST_CELLS || !level.hasChunkAt(at)) {
+			if (seen.size() > MOST_CELLS || !com.jaymospowers.core.Loaded.made(level, at)) {
 				return null;
 			}
 			if (at.getY() >= floor) {
@@ -136,7 +136,7 @@ public final class Floods {
 		if (level.getGameTime() - flood.since < RUN_UP) {
 			return true;
 		}
-		if (!level.hasChunkAt(flood.breach) || ++flood.steps[0] > MOST_STEPS) {
+		if (!com.jaymospowers.core.Loaded.made(level, flood.breach) || ++flood.steps[0] > MOST_STEPS) {
 			return false;
 		}
 		// the water must be seen running out through the gap, or there is nowhere for it to go

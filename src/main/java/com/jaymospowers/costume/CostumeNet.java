@@ -159,7 +159,7 @@ public final class CostumeNet {
 	}
 
 	private static boolean atTable(ServerPlayer player, BlockPos pos) {
-		return player.level().isLoaded(pos) && player.level().getBlockState(pos).is(Costume.TABLE)
+		return com.jaymospowers.core.Loaded.made(player.level(), pos) && player.level().getBlockState(pos).is(Costume.TABLE)
 			&& player.isWithinBlockInteractionRange(pos, REACH_BUFFER);
 	}
 

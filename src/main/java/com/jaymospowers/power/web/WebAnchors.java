@@ -180,7 +180,7 @@ public final class WebAnchors {
 		BlockPos min = BlockPos.containing(pos.x - 0.5, pos.y - 0.5, pos.z - 0.5);
 		BlockPos max = BlockPos.containing(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5);
 		for (BlockPos p : BlockPos.betweenClosed(min, max)) {
-			if (level.isLoaded(p) && !level.getBlockState(p).getCollisionShape(level, p).isEmpty()) {
+			if (com.jaymospowers.core.Loaded.made(level, p) && !level.getBlockState(p).getCollisionShape(level, p).isEmpty()) {
 				return true;
 			}
 		}

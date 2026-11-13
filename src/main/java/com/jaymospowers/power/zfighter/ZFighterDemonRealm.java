@@ -455,7 +455,7 @@ public final class ZFighterDemonRealm {
 				break;
 			}
 		}
-		if (!near || !level.hasChunkAt(village)) {
+		if (!near || !com.jaymospowers.core.Loaded.made(level, village)) {
 			return;
 		}
 		AABB around = new AABB(village).inflate(VILLAGE_RADIUS, 5.0, VILLAGE_RADIUS);
@@ -604,7 +604,7 @@ public final class ZFighterDemonRealm {
 		for (int i = 0; i < count; i++) {
 			int x = Mth.floor(player.getX() + Math.cos(angle) * distance + random.nextInt(5) - 2);
 			int z = Mth.floor(player.getZ() + Math.sin(angle) * distance + random.nextInt(5) - 2);
-			if (!level.hasChunkAt(new BlockPos(x, Mth.floor(player.getY()), z))) {
+			if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, Mth.floor(player.getY()), z))) {
 				continue;
 			}
 			int y = groundNear(level, x, Mth.floor(player.getY()), z);

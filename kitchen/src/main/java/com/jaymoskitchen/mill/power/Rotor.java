@@ -67,7 +67,7 @@ public enum Rotor {
 					continue;
 				}
 				at.setWithOffset(pos, across.getStepX() * a, b, across.getStepZ() * a);
-				if (!level.isLoaded(at)) {
+				if (!com.jaymoskitchen.Loaded.made(level, at)) {
 					return false;
 				}
 				BlockState state = level.getBlockState(at);

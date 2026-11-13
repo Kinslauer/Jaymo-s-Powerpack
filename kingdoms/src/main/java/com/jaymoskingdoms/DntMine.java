@@ -294,7 +294,7 @@ final class DntMine {
 					continue;
 				}
 				BlockPos column = seat.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

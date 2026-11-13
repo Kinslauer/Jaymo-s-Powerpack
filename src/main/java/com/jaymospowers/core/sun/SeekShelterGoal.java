@@ -155,7 +155,7 @@ public class SeekShelterGoal extends Goal {
                     }
                     for (int dy = -2; dy <= 2; dy++) {
                         BlockPos cand = pos.offset(dx, dy, dz);
-                        if (!this.level.isLoaded(cand)
+                        if (!com.jaymospowers.core.Loaded.made(this.level, cand)
                             || !this.level.getBlockState(cand.below()).isFaceSturdy(this.level, cand.below(), Direction.UP)
                             || this.level.getBlockState(cand).isSolidRender() || this.level.getBlockState(cand.above()).isSolidRender()) {
                             continue; // nothing to stand on, or no room to stand

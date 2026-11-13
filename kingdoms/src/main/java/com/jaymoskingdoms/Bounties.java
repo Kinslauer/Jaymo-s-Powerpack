@@ -1182,7 +1182,7 @@ public final class Bounties {
 			BlockPos had = boards.get(id);
 			Placing best = null;
 			if (had != null) {
-				if (!level.isLoaded(had)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, had)) {
 					continue;
 				}
 				BlockState there = level.getBlockState(had);
@@ -1344,7 +1344,7 @@ public final class Bounties {
 		// stale notices: the bounty paid, gone, dead or taken
 		for (var e : List.copyOf(pinned(level).entrySet())) {
 			BlockPos pos = BlockPos.of(Long.parseLong(e.getKey()));
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				continue;
 			}
 			Bounty b = all.get(e.getValue());
@@ -1364,7 +1364,7 @@ public final class Bounties {
 		List<BlockPos> keep = new ArrayList<>();
 		RandomSource random = level.getRandom();
 		for (BlockPos anchor : spots) {
-			if (!level.isLoaded(anchor)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, anchor)) {
 				keep.add(anchor);
 				continue;
 			}

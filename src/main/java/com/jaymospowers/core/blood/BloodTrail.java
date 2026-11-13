@@ -629,7 +629,7 @@ public final class BloodTrail {
 				continue;
 			}
 			pos.set(mark.x, mark.y + 0.5, mark.z);
-			if (!level.isLoaded(pos) || !level.isRainingAt(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos) || !level.isRainingAt(pos)) {
 				continue;
 			}
 			mark.scale -= RAIN_WASH;

@@ -223,7 +223,7 @@ public final class Infusion {
 			for (int dx = -REACH; dx <= REACH; dx++) {
 				for (int dz = -REACH; dz <= REACH; dz++) {
 					BlockPos pos = centre.offset(dx, dy, dz);
-					if ((dx != 0 || dz != 0 || dy != 0) && level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof PedestalEntity p) {
+					if ((dx != 0 || dz != 0 || dy != 0) && com.jaymospowers.core.Loaded.made(level, pos) && level.getBlockEntity(pos) instanceof PedestalEntity p) {
 						found.add(p);
 					}
 				}
@@ -244,7 +244,7 @@ public final class Infusion {
 		for (PedestalEntity p : loaded(all)) {
 			BlockPos at = p.getBlockPos();
 			BlockPos mirror = new BlockPos(2 * centre.getX() - at.getX(), at.getY(), 2 * centre.getZ() - at.getZ());
-			if (!level.hasChunkAt(mirror) || !(level.getBlockEntity(mirror) instanceof PedestalEntity m) || m.stack().isEmpty() || all.stream().noneMatch(o -> o == m)) {
+			if (!com.jaymospowers.core.Loaded.made(level, mirror) || !(level.getBlockEntity(mirror) instanceof PedestalEntity m) || m.stack().isEmpty() || all.stream().noneMatch(o -> o == m)) {
 				lone++;
 			}
 		}
@@ -256,7 +256,7 @@ public final class Infusion {
 		int steady = 0;
 		int r = STABILISER_RANGE;
 		for (BlockPos pos : BlockPos.betweenClosed(matrix.offset(-r, -r, -r), matrix.offset(r, r, r))) {
-			if (!level.hasChunkAt(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);

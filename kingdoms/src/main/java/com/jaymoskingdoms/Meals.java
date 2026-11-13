@@ -537,7 +537,7 @@ public final class Meals {
 	/** Where an eatery's meals are handed over: its smoker (the kitchen), else its middle. */
 	private static BlockPos counter(ServerLevel level, Works.Built b) {
 		BlockPos top = b.top();
-		if (level.isLoaded(b.min()) && level.isLoaded(top)) {
+		if (com.jaymoskingdoms.Loaded.made(level, b.min()) && com.jaymoskingdoms.Loaded.made(level, top)) {
 			for (BlockPos p : BlockPos.betweenClosed(b.min(), new BlockPos(top.getX(), Math.min(top.getY(), b.min().getY() + 3), top.getZ()))) {
 				if (level.getBlockState(p).is(Blocks.SMOKER)) {
 					return p.immutable();

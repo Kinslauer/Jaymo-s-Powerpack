@@ -103,7 +103,7 @@ final class GravityMeteorSweep {
 			for (int i = 0; i < BREAK_PER_TICK && !pending.left().isEmpty(); i++) {
 				BlockPos pos = pending.left().poll();
 				pending.going().remove(pos.asLong());
-				if (!level.isLoaded(pos)) {
+				if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 					continue;
 				}
 				BlockState state = level.getBlockState(pos);

@@ -160,7 +160,7 @@ public final class WebHitches {
 			}
 			Vec3 to = hitch.anchor().subtract(center(entity));
 			double distance = to.length();
-			boolean blockGone = !level.isLoaded(hitch.block()) || level.getBlockState(hitch.block()).getCollisionShape(level, hitch.block()).isEmpty();
+			boolean blockGone = !com.jaymospowers.core.Loaded.made(level, hitch.block()) || level.getBlockState(hitch.block()).getCollisionShape(level, hitch.block()).isEmpty();
 			if (blockGone || clock >= hitch.until() || distance > hitch.length() + SNAP_OVER) {
 				// this line snaps; any others hold
 				it.remove();

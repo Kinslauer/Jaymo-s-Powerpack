@@ -208,7 +208,7 @@ public class Taegore extends ZoneAnimal {
 				double angle = self.getRandom().nextDouble() * Math.PI * 2.0;
 				double dist = DIG_MIN + self.getRandom().nextDouble() * (DIG_MAX - DIG_MIN);
 				BlockPos column = BlockPos.containing(self.getX() + Math.cos(angle) * dist, self.getY(), self.getZ() + Math.sin(angle) * dist);
-				if (!self.level().hasChunkAt(column)) {
+				if (!com.jaymospowers.core.Loaded.made(self.level(), column)) {
 					continue;
 				}
 				// the ground near its own height (a ledge it can reach), not the top of some island overhead

@@ -527,7 +527,7 @@ public final class Calamities {
 	private static void pile(ServerLevel level, BlockPos near, RandomSource random, int kind) {
 		int x = near.getX() + random.nextInt(PILE_RANGE * 2 + 1) - PILE_RANGE, z = near.getZ() + random.nextInt(PILE_RANGE * 2 + 1) - PILE_RANGE;
 		BlockPos column = new BlockPos(x, near.getY(), z);
-		if (!level.isLoaded(column) || cover(level, kind, x + 0.5, z + 0.5) < 0.3F) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column) || cover(level, kind, x + 0.5, z + 0.5) < 0.3F) {
 			return;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -572,7 +572,7 @@ public final class Calamities {
 	private static void batter(ServerLevel level, BlockPos near, RandomSource random) {
 		int x = near.getX() + random.nextInt(65) - 32, z = near.getZ() + random.nextInt(65) - 32;
 		BlockPos column = new BlockPos(x, near.getY(), z);
-		if (!level.isLoaded(column) || cover(level, Calamity.HAIL, x + 0.5, z + 0.5) < 0.4F) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column) || cover(level, Calamity.HAIL, x + 0.5, z + 0.5) < 0.4F) {
 			return;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column);
@@ -597,7 +597,7 @@ public final class Calamities {
 		double a = Storms.windAngle + Math.PI + (random.nextDouble() - 0.5) * 1.6;
 		double d = Mth.lerp(random.nextDouble(), FIRE_MIN, FIRE_MAX);
 		BlockPos column = BlockPos.containing(near.x + Math.cos(a) * d, near.y, near.z + Math.sin(a) * d);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -683,7 +683,7 @@ public final class Calamities {
 						continue;
 					}
 					BlockPos column = BlockPos.containing(nx, f.getY(), nz);
-					if (level.isLoaded(column)) {
+					if (com.jaymoskingdoms.Loaded.made(level, column)) {
 						ignite(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column));
 					}
 				}
@@ -700,7 +700,7 @@ public final class Calamities {
 						puffs++;
 					}
 				}
-				front.removeIf(f -> level.isLoaded(f) && !level.getBlockState(f).is(BlockTags.FIRE) && random.nextInt(3) == 0);
+				front.removeIf(f -> com.jaymoskingdoms.Loaded.made(level, f) && !level.getBlockState(f).is(BlockTags.FIRE) && random.nextInt(3) == 0);
 			}
 			return true;
 		}
@@ -739,7 +739,7 @@ public final class Calamities {
 		Map<Integer, List<BlockPos>> byHeight = new HashMap<>();
 		for (int i = 0; i < 500; i++) {
 			BlockPos column = near.offset(random.nextInt(FLOOD_LOOK * 2 + 1) - FLOOD_LOOK, 0, random.nextInt(FLOOD_LOOK * 2 + 1) - FLOOD_LOOK);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column).below();
@@ -813,7 +813,7 @@ public final class Calamities {
 			}
 			for (int i = 0; i < FLOOD_PER_TICK && !pending.isEmpty(); i++) {
 				BlockPos pos = pending.removeFirst();
-				if (!level.isLoaded(pos) || !floodable(level, pos)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, pos) || !floodable(level, pos)) {
 					continue;
 				}
 				if (!level.getBlockState(pos).isAir()) {
@@ -843,7 +843,7 @@ public final class Calamities {
 							continue;
 						}
 						BlockPos below = new BlockPos(center.getX() + dx, center.getY(), center.getZ() + dz);
-						if (level.isLoaded(below) && level.getFluidState(below).is(FluidTags.WATER)) {
+						if (com.jaymoskingdoms.Loaded.made(level, below) && level.getFluidState(below).is(FluidTags.WATER)) {
 							seeds.add(below.above());
 						}
 					}
@@ -861,7 +861,7 @@ public final class Calamities {
 			List<BlockPos> fill = new ArrayList<>();
 			while (!open.isEmpty() && placed.size() + fill.size() < FLOOD_MOST) {
 				BlockPos p = open.removeFirst();
-				if (!level.isLoaded(p) || !floodable(level, p) || !held(level, p.below())) {
+				if (!com.jaymoskingdoms.Loaded.made(level, p) || !floodable(level, p) || !held(level, p.below())) {
 					continue;
 				}
 				fill.add(p);

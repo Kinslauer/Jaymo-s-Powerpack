@@ -336,7 +336,7 @@ public final class SeaEvents {
 			z = near.z + Math.sin(a) * d;
 		}
 		BlockPos column = BlockPos.containing(x, level.getMinY(), z);
-		if (!level.isLoaded(column) || !level.getBiome(column.atY(level.getSeaLevel())).is(BiomeTags.IS_OCEAN)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column) || !level.getBiome(column.atY(level.getSeaLevel())).is(BiomeTags.IS_OCEAN)) {
 			return null;
 		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, column.getX(), column.getZ());
@@ -498,7 +498,7 @@ public final class SeaEvents {
 		double wx = Math.cos(wind), wz = Math.sin(wind);
 		double x = p.getX() - wx * back - wz * across, z = p.getZ() - wz * back + wx * across;
 		BlockPos column = BlockPos.containing(x, level.getMinY(), z);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return;
 		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, column.getX(), column.getZ());

@@ -197,7 +197,7 @@ public final class Haunts {
 		for (int tries = 0; tries < 24; tries++) {
 			BoundingBox box = pieces.get(random.nextInt(pieces.size())).getBoundingBox();
 			BlockPos p = new BlockPos(box.minX() + random.nextInt(box.getXSpan()), box.minY() + random.nextInt(box.getYSpan()), box.minZ() + random.nextInt(box.getZSpan()));
-			if (!level.hasChunkAt(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				continue;
 			}
 			while (level.getBlockState(p).isAir() && level.getBlockState(p.below()).isAir() && p.getY() > box.minY() - 1) {
@@ -258,7 +258,7 @@ public final class Haunts {
 			double angle = a * Math.PI / 4.0;
 			for (int r : new int[] {6, 10, 14}) {
 				BlockPos p = new BlockPos(top.getX() + (int) Math.round(Math.cos(angle) * r), sea - 1, top.getZ() + (int) Math.round(Math.sin(angle) * r));
-				if (level.hasChunkAt(p) && !level.getFluidState(p).isEmpty() && level.getFluidState(p).is(net.minecraft.tags.FluidTags.WATER)) {
+				if (com.jaymoskingdoms.Loaded.made(level, p) && !level.getFluidState(p).isEmpty() && level.getFluidState(p).is(net.minecraft.tags.FluidTags.WATER)) {
 					return true;
 				}
 			}
@@ -276,7 +276,7 @@ public final class Haunts {
 		boolean deep = Creatures.open(player, 2) && player.getY() < 10.0 && random.nextFloat() < DEEP / CEILING;
 		for (int tries = 0; tries < 16; tries++) {
 			BlockPos p = player.blockPosition().offset(random.nextInt(41) - 20, random.nextInt(17) - 8, random.nextInt(41) - 20);
-			if (p.distSqr(player.blockPosition()) < 100.0 || !level.hasChunkAt(p) || !level.getBlockState(p).isAir() || !level.getBlockState(p.above()).isSolid()
+			if (p.distSqr(player.blockPosition()) < 100.0 || !com.jaymoskingdoms.Loaded.made(level, p) || !level.getBlockState(p).isAir() || !level.getBlockState(p.above()).isSolid()
 				|| level.getBrightness(LightLayer.BLOCK, p) > 5 || level.canSeeSky(p)) {
 				continue;
 			}

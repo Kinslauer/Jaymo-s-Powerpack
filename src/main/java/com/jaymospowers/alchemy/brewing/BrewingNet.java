@@ -64,7 +64,7 @@ public final class BrewingNet {
 		ServerPlayNetworking.registerGlobalReceiver(BrewStroke.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
 			BlockPos pos = payload.pos();
-			if (player.blockPosition().distSqr(pos) > REACH_SQ || !player.level().isLoaded(pos)) {
+			if (player.blockPosition().distSqr(pos) > REACH_SQ || !com.jaymospowers.core.Loaded.made(player.level(), pos)) {
 				return;
 			}
 			if (payload.game() == BrewQuality.GRIND_GAME) {

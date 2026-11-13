@@ -202,7 +202,7 @@ public final class Roost extends Block {
 			if (level == null || pos == null) {
 				continue;
 			}
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				kept.add(entry);
 				found = true;
 				continue;

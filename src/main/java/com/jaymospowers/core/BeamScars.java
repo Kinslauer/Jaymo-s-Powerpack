@@ -106,7 +106,7 @@ public final class BeamScars {
 			Mark mark = DUE.poll();
 			QUEUED.remove(mark);
 			ServerLevel level = server.getLevel(mark.dimension());
-			if (level == null || !level.isLoaded(mark.pos())) {
+			if (level == null || !com.jaymospowers.core.Loaded.made(level, mark.pos())) {
 				continue;
 			}
 			BlockPos pos = mark.pos();

@@ -723,7 +723,7 @@ public final class Camps {
 		Holds.Hold held = Holds.get(server, camp.id());
 		boolean grim = held != null && held.isGrim();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, high, reach))) {
-			if (!grim && level.isLoaded(pos) && (pirates ? PirateCoves.perishable(level.getBlockState(pos)) : perishable(goblins, orcs, level.getBlockState(pos)))) {
+			if (!grim && com.jaymoskingdoms.Loaded.made(level, pos) && (pirates ? PirateCoves.perishable(level.getBlockState(pos)) : perishable(goblins, orcs, level.getBlockState(pos)))) {
 				rot.add(pos.asLong());
 			}
 		}

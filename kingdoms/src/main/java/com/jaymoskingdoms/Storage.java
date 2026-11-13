@@ -44,7 +44,7 @@ public final class Storage {
 			return false;
 		}
 		for (BlockPos pos : faction.holdings().storage()) {
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				return false;
 			}
 		}

@@ -167,7 +167,7 @@ public final class NightThings {
 		int x = at.getX() + (int)Math.round(Math.cos(angle) * r), z = at.getZ() + (int)Math.round(Math.sin(angle) * r);
 		BlockPos ground = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
 		// only where the snow lies
-		if (!level.isLoaded(ground) || !(level.getBlockState(ground).is(Blocks.SNOW) || level.getBlockState(ground.below()).is(Blocks.SNOW_BLOCK)
+		if (!com.jaymoskingdoms.Loaded.made(level, ground) || !(level.getBlockState(ground).is(Blocks.SNOW) || level.getBlockState(ground.below()).is(Blocks.SNOW_BLOCK)
 			|| level.getBlockState(ground.below()).is(Blocks.POWDER_SNOW))) {
 			return;
 		}
@@ -220,7 +220,7 @@ public final class NightThings {
 		}
 		Vec3 ahead = Vec3.directionFromRotation(0.0F, player.getYRot()).scale(SWELL_AHEAD);
 		BlockPos rise = BlockPos.containing(at.x + ahead.x, level.getSeaLevel() - 1, at.z + ahead.z);
-		if (!level.isLoaded(rise) || !level.getFluidState(rise).is(net.minecraft.tags.FluidTags.WATER)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, rise) || !level.getFluidState(rise).is(net.minecraft.tags.FluidTags.WATER)) {
 			return;
 		}
 		BlackSwell swell = BLACK_SWELL.create(level, EntitySpawnReason.EVENT);

@@ -182,7 +182,7 @@ public final class RivalHunter {
 			double d = ARRIVE_MIN + level.getRandom().nextDouble() * (ARRIVE_MAX - ARRIVE_MIN);
 			int x = Mth.floor(prey.getX() - Mth.sin(yaw) * d);
 			int z = Mth.floor(prey.getZ() + Mth.cos(yaw) * d);
-			if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+			if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

@@ -155,7 +155,7 @@ public final class Wayfinding {
 			if (d < LEAD_MIN || d > bestD || to.normalize().dot(flat) < LOOK_COS) {
 				continue;
 			}
-			if (k.what().get(i).equals("chest") && level.isLoaded(p) && !unlooted(level.getBlockEntity(p))) {
+			if (k.what().get(i).equals("chest") && com.jaymoskingdoms.Loaded.made(level, p) && !unlooted(level.getBlockEntity(p))) {
 				// opened since: nothing to lead to
 				forget(v, i);
 				return lead(level, v, player, now);
@@ -268,7 +268,7 @@ public final class Wayfinding {
 				BlockPos at = q.objective().pos().get();
 				double d = Math.sqrt(player.blockPosition().distSqr(at));
 				Faction f = Factions.get(server, camp);
-				if (d > WAIT_FROM || d < WAIT_NOT_NEARER || f == null || f.fallen() || !player.level().isLoaded(at)) {
+				if (d > WAIT_FROM || d < WAIT_NOT_NEARER || f == null || f.fallen() || !com.jaymoskingdoms.Loaded.made(player.level(), at)) {
 					continue;
 				}
 				ServerLevel level = player.level();

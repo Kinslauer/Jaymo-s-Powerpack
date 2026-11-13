@@ -72,7 +72,7 @@ final class Plunder {
 		BlockPos bestAt = null;
 		int bestScore = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-LOOSE_ACROSS, -LOOSE_UP, -LOOSE_ACROSS), centre.offset(LOOSE_ACROSS, LOOSE_UP, LOOSE_ACROSS))) {
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);
@@ -190,7 +190,7 @@ final class Plunder {
 		BlockPos seat = target.seat();
 		List<BlockPos> out = new ArrayList<>();
 		for (BlockPos pos : BlockPos.betweenClosed(seat.offset(-across, -LOOSE_UP * 2, -across), seat.offset(across, LOOSE_UP * 2, across))) {
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);
@@ -210,7 +210,7 @@ final class Plunder {
 	static @Nullable BlockPos looseNear(ServerLevel level, Faction target, BlockPos at, int across) {
 		MinecraftServer server = level.getServer();
 		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-across, -LOOSE_UP, -across), at.offset(across, LOOSE_UP, across))) {
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);

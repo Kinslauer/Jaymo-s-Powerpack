@@ -260,7 +260,7 @@ public final class Looters {
 		}
 		if (now % POOR_CHECK == 0) {
 			for (Faction f : Factions.all(server)) {
-				if (!f.fallen() && f.type() != FactionType.BARBARIAN && level.isLoaded(f.seat()) && level.getRandom().nextFloat() < POOR_CHANCE) {
+				if (!f.fallen() && f.type() != FactionType.BARBARIAN && com.jaymoskingdoms.Loaded.made(level, f.seat()) && level.getRandom().nextFloat() < POOR_CHANCE) {
 					tempt(level, f, now);
 				}
 			}

@@ -135,7 +135,7 @@ public class HearthEntity extends BlockEntity {
 				|| Math.abs(at.getY() - worldPosition.getY()) > REACH || Math.abs(at.getZ() - worldPosition.getZ()) > REACH) {
 				continue;
 			}
-			if (!level.isLoaded(at) || !open(level, at, level.getBlockState(at)) || level.canSeeSky(at)) {
+			if (!com.jaymoskitchen.Loaded.made(level, at) || !open(level, at, level.getBlockState(at)) || level.canSeeSky(at)) {
 				continue;
 			}
 			room.add(packed);

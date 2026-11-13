@@ -402,7 +402,7 @@ public final class ChronoEchoes {
 		for (int k = 0; k <= range * 2; k++) {
 			int dy = (k % 2 == 0) ? k / 2 : -(k + 1) / 2;
 			BlockPos pos = new BlockPos(x, y + dy, z);
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 				return null;
 			}
 			BlockPos below = pos.below();

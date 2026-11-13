@@ -147,7 +147,7 @@ public final class Tornadoes {
 	/** Whether a funnel standing at (x, y, z) (y its foot) has open water under it. */
 	static boolean onWater(ServerLevel level, double x, double y, double z) {
 		BlockPos foot = BlockPos.containing(x, y - 1.0, z);
-		return level.isLoaded(foot) && level.getFluidState(foot).is(net.minecraft.tags.FluidTags.WATER)
+		return com.jaymoskingdoms.Loaded.made(level, foot) && level.getFluidState(foot).is(net.minecraft.tags.FluidTags.WATER)
 			&& level.getFluidState(foot.below()).is(net.minecraft.tags.FluidTags.WATER);
 	}
 
@@ -162,7 +162,7 @@ public final class Tornadoes {
 			t.z += t.vz;
 			t.age++;
 			BlockPos column = BlockPos.containing(t.x, t.y, t.z);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			t.y = ground(level, t.x, t.z, t.y);
@@ -231,7 +231,7 @@ public final class Tornadoes {
 	/** The ground under (x, z) (leaves and plants don't count), or {@code was} if it isn't loaded. */
 	static double ground(ServerLevel level, double x, double z, double was) {
 		BlockPos column = BlockPos.containing(x, level.getMinY(), z);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return was;
 		}
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
@@ -324,7 +324,7 @@ public final class Tornadoes {
 			double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * swath;
 			int x = Mth.floor(t.x + Math.cos(a) * r), z = Mth.floor(t.z + Math.sin(a) * r);
 			BlockPos column = new BlockPos(x, level.getMinY(), z);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos pos = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, column).below();

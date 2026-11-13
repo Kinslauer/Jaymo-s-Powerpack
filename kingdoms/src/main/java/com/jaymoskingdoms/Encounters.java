@@ -323,7 +323,7 @@ public final class Encounters {
 	}
 
 	private static @Nullable BlockPos dry(ServerLevel level, BlockPos column, int y) {
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return null;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

@@ -136,7 +136,7 @@ public final class Undertakers {
 			LEFT.values().removeIf(until -> until < now);
 			BUSY.values().removeIf(until -> until < now);
 			for (Faction f : Factions.all(server)) {
-				if (!f.fallen() && f.type() != FactionType.BARBARIAN && level.isLoaded(f.seat())) {
+				if (!f.fallen() && f.type() != FactionType.BARBARIAN && com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 					assign(level, f, now);
 				}
 			}
@@ -380,7 +380,7 @@ public final class Undertakers {
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
 		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-reach, -PYRE_DEPTH, -reach), at.offset(reach, PYRE_DEPTH, reach))) {
-			if (!level.isLoaded(pos) || !isPyre(level, pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos) || !isPyre(level, pos)) {
 				continue;
 			}
 			double d = pos.distSqr(at);

@@ -668,7 +668,7 @@ final class RoamingCaravans {
 		Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
 		Vec3 ahead = road != null ? road : flat.length() > WAYPOINT ? here.add(flat.normalize().scale(WAYPOINT)) : to;
 		BlockPos next = BlockPos.containing(ahead);
-		if (level.isLoaded(next)) {
+		if (com.jaymoskingdoms.Loaded.made(level, next)) {
 			next = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, next);
 		}
 		if (g.kind.hostile()) {

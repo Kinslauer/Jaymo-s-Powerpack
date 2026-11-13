@@ -36,7 +36,7 @@ final class Outbuild {
 		BlockPos column = centre.offset((int)Math.round(Math.cos(angle) * ring), 0, (int)Math.round(Math.sin(angle) * ring));
 		for (int dx = -half - 1; dx <= half + 1; dx += half + 1) {
 			for (int dz = -half - 1; dz <= half + 1; dz += half + 1) {
-				if (!level.isLoaded(column.offset(dx, 0, dz))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column.offset(dx, 0, dz))) {
 					return null;
 				}
 			}

@@ -367,7 +367,7 @@ final class CampBuildings {
 					continue;
 				}
 				BlockPos column = center.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return Integer.MIN_VALUE;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -488,7 +488,7 @@ final class CampBuildings {
 					continue;
 				}
 				BlockPos column = fire.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return Integer.MIN_VALUE;
 				}
 				for (BoundingBox box : keepOff) {

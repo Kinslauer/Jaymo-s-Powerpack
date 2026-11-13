@@ -302,7 +302,7 @@ final class QuestFoes {
 							break;
 						}
 						double d = p.distSqr(middle);
-						if (d < best && level.isLoaded(p) && level.getBlockState(p).getBlock() instanceof BrushableBlock
+						if (d < best && com.jaymoskingdoms.Loaded.made(level, p) && level.getBlockState(p).getBlock() instanceof BrushableBlock
 							&& level.getBlockEntity(p) instanceof BrushableBlockEntity) {
 							found = p.immutable();
 							best = d;
@@ -571,7 +571,7 @@ final class QuestFoes {
 	/** Whether a {@code type} fits at {@code p}: a sturdy floor under it, and its whole body clear of blocks and water. */
 	private static boolean standable(ServerLevel level, BlockPos p, EntityType<?> type) {
 		AABB body = type.getDimensions().makeBoundingBox(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
-		if (!level.isLoaded(BlockPos.containing(body.minX, body.minY, body.minZ)) || !level.isLoaded(BlockPos.containing(body.maxX, body.maxY, body.maxZ))) {
+		if (!com.jaymoskingdoms.Loaded.made(level, BlockPos.containing(body.minX, body.minY, body.minZ)) || !com.jaymoskingdoms.Loaded.made(level, BlockPos.containing(body.maxX, body.maxY, body.maxZ))) {
 			return false;
 		}
 		BlockPos below = p.below();
@@ -591,7 +591,7 @@ final class QuestFoes {
 			BlockPos at = next.poll();
 			for (Direction d : Direction.values()) {
 				BlockPos to = at.relative(d);
-				if (seen.contains(to) || !level.isLoaded(to)) {
+				if (seen.contains(to) || !com.jaymoskingdoms.Loaded.made(level, to)) {
 					continue;
 				}
 				BlockState s = level.getBlockState(to);

@@ -160,7 +160,7 @@ public final class CampSuppers {
 				continue;
 			}
 			BlockPos fire = e.getValue().center();
-			if (SUPPERS.containsKey(id) || DONE.getOrDefault(id, -1L) == day || !level.isLoaded(fire) || !watched(level, fire)) {
+			if (SUPPERS.containsKey(id) || DONE.getOrDefault(id, -1L) == day || !com.jaymoskingdoms.Loaded.made(level, fire) || !watched(level, fire)) {
 				continue;
 			}
 			start(level, id, fire, day);

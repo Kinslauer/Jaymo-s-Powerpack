@@ -262,7 +262,7 @@ final class GravityMeteor {
 	 */
 	private static Vec3 ground(ServerLevel level, Vec3 aim) {
 		net.minecraft.core.BlockPos.MutableBlockPos pos = net.minecraft.core.BlockPos.containing(aim.x, aim.y - 0.01, aim.z).mutable();
-		if (!level.isLoaded(pos)) {
+		if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 			return aim;
 		}
 		for (int y = pos.getY(); y >= level.getMinY(); y--) {
@@ -472,7 +472,7 @@ final class GravityMeteor {
 		it.unimi.dsi.fastutil.longs.LongOpenHashSet goingAt = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 		for (int i = 1; i <= steps && broken < CARVE_MAX_PER_TICK; i++) {
 			Vec3 c = from.lerp(to, i / (double)steps);
-			if (c.y < level.getMinY() || c.y > level.getMaxY() || !level.isLoaded(net.minecraft.core.BlockPos.containing(c))) {
+			if (c.y < level.getMinY() || c.y > level.getMaxY() || !com.jaymospowers.core.Loaded.made(level, net.minecraft.core.BlockPos.containing(c))) {
 				continue;
 			}
 			int ri = Mth.ceil(r);

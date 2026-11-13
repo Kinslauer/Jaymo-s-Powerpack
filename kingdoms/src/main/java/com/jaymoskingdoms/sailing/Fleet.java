@@ -273,7 +273,7 @@ public final class Fleet {
 	public static boolean deep(ServerLevel level, BlockPos at, int depth) {
 		for (int d = 1; d <= depth; d++) {
 			BlockPos p = at.below(d);
-			if (!level.hasChunkAt(p) || !level.getFluidState(p).is(FluidTags.WATER)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p) || !level.getFluidState(p).is(FluidTags.WATER)) {
 				return false;
 			}
 		}
@@ -315,7 +315,7 @@ public final class Fleet {
 		for (int dx = -reach; dx <= reach; dx += 7) {
 			for (int dz = -reach; dz <= reach; dz += 7) {
 				BlockPos p = top.offset(dx, 0, dz);
-				if (!level.hasChunkAt(p) || !level.getFluidState(p).is(FluidTags.WATER) || !deep(level, p, 3)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, p) || !level.getFluidState(p).is(FluidTags.WATER) || !deep(level, p, 3)) {
 					return false;
 				}
 			}
@@ -394,7 +394,7 @@ public final class Fleet {
 		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
 		for (int y = keel; y <= top; y++) {
 			p.set(Mth.floor(x), y, Mth.floor(z));
-			if (!level.hasChunkAt(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				return false;
 			}
 			BlockState there = level.getBlockState(p);
@@ -524,7 +524,7 @@ public final class Fleet {
 				continue;
 			}
 			BlockPos at = origin.offset(part.at().rotate(turn));
-			if (!level.hasChunkAt(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				continue;
 			}
 			BlockState there = level.getBlockState(at);

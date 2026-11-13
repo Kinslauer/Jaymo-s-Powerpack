@@ -300,7 +300,7 @@ public final class Nightfalls {
 		RandomSource random = level.getRandom();
 		double a = random.nextDouble() * Math.PI * 2.0, d = 20.0 + random.nextDouble() * 10.0;
 		BlockPos column = BlockPos.containing(p.getX() + Math.cos(a) * d, p.getY(), p.getZ() + Math.sin(a) * d);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return;
 		}
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

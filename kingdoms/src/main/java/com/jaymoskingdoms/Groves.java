@@ -100,7 +100,7 @@ public final class Groves {
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < 12; tries++) {
 			BlockPos spot = here.offset(random.nextInt(48) - 24, 0, random.nextInt(48) - 24);
-			if (Math.abs(spot.getX() - here.getX()) < 12 && Math.abs(spot.getZ() - here.getZ()) < 12 || !level.isLoaded(spot)) {
+			if (Math.abs(spot.getX() - here.getX()) < 12 && Math.abs(spot.getZ() - here.getZ()) < 12 || !com.jaymoskingdoms.Loaded.made(level, spot)) {
 				continue;
 			}
 			BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spot);

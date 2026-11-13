@@ -428,7 +428,7 @@ public final class Tribes {
 		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
 			String tribe = camp.fallen() || mapped.contains(camp.id()) ? null : of(server, camp.id());
 			Faction seat = tribe == null ? null : seat(server, tribe);
-			if (seat == null || seat.id() == camp.id() || !level.isLoaded(camp.seat()) || !Storage.loaded(level, camp)) {
+			if (seat == null || seat.id() == camp.id() || !com.jaymoskingdoms.Loaded.made(level, camp.seat()) || !Storage.loaded(level, camp)) {
 				continue;
 			}
 			ItemStack left = Storage.put(level, camp, seatMap(level, tribe, seat));
@@ -527,7 +527,7 @@ public final class Tribes {
 		double angle = random.nextDouble() * Math.PI * 2.0;
 		int r = HUNT_NEAR + random.nextInt(HUNT_FAR - HUNT_NEAR);
 		BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * r, player.getY(), player.getZ() + Math.sin(angle) * r);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

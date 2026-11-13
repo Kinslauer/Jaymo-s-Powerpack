@@ -199,7 +199,7 @@ public final class OutOfBody {
 			return;
 		}
 		Vec3 place = leashed(player, new Vec3(to.x, to.y, to.z));
-		if (!ghost.level().isLoaded(BlockPos.containing(place))) {
+		if (!com.jaymospowers.core.Loaded.made(ghost.level(), BlockPos.containing(place))) {
 			return;
 		}
 		float yRot = Mth.wrapDegrees(to.yRot), xRot = Mth.clamp(to.xRot, -90.0F, 90.0F);

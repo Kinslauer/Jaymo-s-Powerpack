@@ -292,7 +292,7 @@ public final class Disguises {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double r = SPAWN_MIN + random.nextDouble() * (SPAWN_MAX - SPAWN_MIN);
 			BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * r, player.getY(), player.getZ() + Math.sin(angle) * r);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos spot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

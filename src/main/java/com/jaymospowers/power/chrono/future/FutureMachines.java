@@ -120,7 +120,7 @@ public final class FutureMachines {
 		int dist = SPAWN_MIN + random.nextInt(SPAWN_MAX - SPAWN_MIN + 1);
 		int x = (int) Math.floor(player.getX() + Math.cos(angle) * dist);
 		int z = (int) Math.floor(player.getZ() + Math.sin(angle) * dist);
-		if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+		if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, 0, z))) {
 			return null;
 		}
 		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);

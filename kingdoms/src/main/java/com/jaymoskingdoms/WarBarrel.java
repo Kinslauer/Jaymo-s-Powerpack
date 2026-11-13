@@ -261,7 +261,7 @@ public class WarBarrel extends ActingMonster {
 	/** Goblin village {@code camp} sets its war barrel by its gate, unless it has one about it already. */
 	static void hire(ServerLevel level, int camp) {
 		Camps.CampData data = Camps.data(level.getServer(), camp);
-		if (Beasts.WAR_BARREL == null || data == null || !level.isLoaded(data.center())) {
+		if (Beasts.WAR_BARREL == null || data == null || !com.jaymoskingdoms.Loaded.made(level, data.center())) {
 			return;
 		}
 		if (!level.getEntitiesOfClass(WarBarrel.class, new AABB(data.center()).inflate(COUNT_RANGE), b -> b.camp == camp).isEmpty()) {

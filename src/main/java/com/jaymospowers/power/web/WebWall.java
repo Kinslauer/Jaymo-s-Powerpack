@@ -89,7 +89,7 @@ public final class WebWall {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (Cell cell : CELLS) {
 				ServerLevel level = server.getLevel(cell.dimension());
-				if (level != null && level.isLoaded(cell.pos()) && level.getBlockState(cell.pos()).is(WALL)) {
+				if (level != null && com.jaymospowers.core.Loaded.made(level, cell.pos()) && level.getBlockState(cell.pos()).is(WALL)) {
 					level.setBlock(cell.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				}
 			}
@@ -173,7 +173,7 @@ public final class WebWall {
 
 	/** Adds {@code pos} when it is empty air with nothing standing in it. */
 	private static void place(ServerLevel level, BlockPos pos, Set<BlockPos> cells) {
-		if (cells.size() >= MAX_CELLS || !level.isLoaded(pos) || !level.getBlockState(pos).isAir() || !level.getFluidState(pos).isEmpty()) {
+		if (cells.size() >= MAX_CELLS || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).isAir() || !level.getFluidState(pos).isEmpty()) {
 			return;
 		}
 		if (!level.getEntities((net.minecraft.world.entity.Entity)null, new net.minecraft.world.phys.AABB(pos), e -> !e.isSpectator()).isEmpty()) {
@@ -194,7 +194,7 @@ public final class WebWall {
 				it.remove();
 				continue;
 			}
-			if (!level.isLoaded(cell.pos())) {
+			if (!com.jaymospowers.core.Loaded.made(level, cell.pos())) {
 				continue; // waits for its chunk to come back
 			}
 			it.remove();

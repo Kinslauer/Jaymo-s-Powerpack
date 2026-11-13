@@ -482,7 +482,7 @@ public final class Blessings {
 			double angle = sp.getRandom().nextDouble() * Math.PI * 2.0;
 			double dist = WHALE_ROAD_MIN + sp.getRandom().nextDouble() * (WHALE_ROAD_MAX - WHALE_ROAD_MIN);
 			BlockPos at = BlockPos.containing(sp.getX() + Math.cos(angle) * dist, level.getSeaLevel() - 2, sp.getZ() + Math.sin(angle) * dist);
-			if (level.isLoaded(at) && level.getFluidState(at).is(FluidTags.WATER)) {
+			if (com.jaymoskingdoms.Loaded.made(level, at) && level.getFluidState(at).is(FluidTags.WATER)) {
 				com.jaymoskingdoms.whaling.Whaling.GREAT_WHALE.spawn(level, at, EntitySpawnReason.NATURAL);
 			}
 		}

@@ -204,7 +204,7 @@ public final class Pedlars {
 		double angle = random.nextDouble() * Math.PI * 2.0;
 		int r = SPAWN_NEAR + random.nextInt(SPAWN_FAR - SPAWN_NEAR);
 		BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * r, player.getY(), player.getZ() + Math.sin(angle) * r);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos ground = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

@@ -158,7 +158,7 @@ public final class SkyFolk {
 		RandomSource random = level.getRandom();
 		double angle = random.nextDouble() * Math.PI * 2.0, far = FALL_NEAR + random.nextDouble() * (FALL_FAR - FALL_NEAR);
 		BlockPos over = BlockPos.containing(player.getX() + Math.cos(angle) * far, player.getY() + FALL_HEIGHT, player.getZ() + Math.sin(angle) * far);
-		if (!level.isLoaded(over) || !level.canSeeSky(over)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, over) || !level.canSeeSky(over)) {
 			return;
 		}
 		ItemEntity item = new ItemEntity(level, over.getX() + 0.5, over.getY(), over.getZ() + 0.5, fallen(random));

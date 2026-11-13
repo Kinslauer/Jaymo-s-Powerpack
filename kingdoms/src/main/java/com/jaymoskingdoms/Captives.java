@@ -318,7 +318,7 @@ public final class Captives {
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
 			BlockPos center = data != null ? data.center() : camp.seat();
-			if (!level.isLoaded(center) || level.getNearestPlayer(center.getX() + 0.5, center.getY(), center.getZ() + 0.5, PUT_IN_RANGE, false) == null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, center) || level.getNearestPlayer(center.getX() + 0.5, center.getY(), center.getZ() + 0.5, PUT_IN_RANGE, false) == null) {
 				continue;
 			}
 			String id = Integer.toString(camp.id());
@@ -354,7 +354,7 @@ public final class Captives {
 	private static void dungeons(ServerLevel level, long now) {
 		RandomSource random = level.getRandom();
 		for (BlockPos pos : new ArrayList<>(SPAWNERS)) {
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				SPAWNERS.remove(pos);
 				continue;
 			}

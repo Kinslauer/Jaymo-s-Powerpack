@@ -235,7 +235,7 @@ public final class LoreFilms {
 		}
 		int x = (int)Math.floor(seat.getX() + 0.5 + dx / len * SEAT_BACK), z = (int)Math.floor(seat.getZ() + 0.5 + dz / len * SEAT_BACK);
 		net.minecraft.server.level.ServerLevel level = player.level();
-		if (!level.hasChunkAt(new BlockPos(x, seat.getY(), z))) {
+		if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, seat.getY(), z))) {
 			return null;
 		}
 		int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

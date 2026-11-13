@@ -649,7 +649,7 @@ public final class Gatherers {
 		for (int dx = -TREE_RANGE; dx <= TREE_RANGE; dx++) {
 			for (int dz = -TREE_RANGE; dz <= TREE_RANGE; dz++) {
 				BlockPos column = home.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).below();

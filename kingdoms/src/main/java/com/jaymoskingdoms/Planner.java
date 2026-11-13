@@ -442,7 +442,7 @@ public final class Planner {
 			for (int i = 0; i < angles && candidates < MAX_CANDIDATES; i++) {
 				double a = start + (i + (ringIndex % 2) * 0.5) / angles * Math.PI * 2.0;
 				BlockPos center = f.seat().offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
-				if (!level.isLoaded(center)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, center)) {
 					continue;
 				}
 				candidates++;
@@ -540,7 +540,7 @@ public final class Planner {
 		for (int x = x0 - MARGIN; x <= x1 + MARGIN; x++) {
 			for (int z = z0 - MARGIN; z <= z1 + MARGIN; z++) {
 				BlockPos column = new BlockPos(x, 0, z);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return null;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -674,7 +674,7 @@ public final class Planner {
 					continue;
 				}
 				BlockPos column = new BlockPos(x, 0, z);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

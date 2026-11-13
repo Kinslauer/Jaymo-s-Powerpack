@@ -286,7 +286,7 @@ public final class ShipKits {
 		List<BlockPos> where = new ArrayList<>(cells.size());
 		for (BlockPos c : cells) {
 			BlockPos at = origin.offset(c.rotate(turn));
-			if (!level.hasChunkAt(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				return null;
 			}
 			BlockState there = level.getBlockState(at);

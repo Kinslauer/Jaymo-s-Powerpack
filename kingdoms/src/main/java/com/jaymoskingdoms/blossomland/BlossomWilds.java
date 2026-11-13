@@ -125,7 +125,7 @@ public final class BlossomWilds {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int r = PLANT_MIN + random.nextInt(PLANT_SPREAD);
 			int x = bell.getX() + (int)Math.round(Math.cos(angle) * r), z = bell.getZ() + (int)Math.round(Math.sin(angle) * r);
-			if (!level.isLoaded(new BlockPos(x, bell.getY(), z))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, bell.getY(), z))) {
 				continue;
 			}
 			BlockPos at = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);

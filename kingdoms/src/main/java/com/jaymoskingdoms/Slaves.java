@@ -436,7 +436,7 @@ public final class Slaves {
 		BlockPos goal = site;
 		if (len > WAYPOINT) {
 			BlockPos column = BlockPos.containing(slave.getX() + dx / len * WAYPOINT, slave.getY(), slave.getZ() + dz / len * WAYPOINT);
-			goal = level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
+			goal = com.jaymoskingdoms.Loaded.made(level, column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
 		}
 		// an orc keeping the camp's slaves nets one running off, if it has its net today
 		if (slave.tickCount % RUN_EVERY == 0 && !slave.entityTags().contains(FREED)) {

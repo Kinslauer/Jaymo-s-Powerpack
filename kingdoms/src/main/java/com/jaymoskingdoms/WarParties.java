@@ -570,7 +570,7 @@ final class WarParties {
 		double far = flat.length();
 		if (far > CART_WAYPOINT) {
 			BlockPos column = BlockPos.containing(here.add(flat.scale(CART_WAYPOINT / far)));
-			to = Vec3.atBottomCenterOf(level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column);
+			to = Vec3.atBottomCenterOf(com.jaymoskingdoms.Loaded.made(level, column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column);
 		}
 		// (a wall, a roof, a ravine: stuck a while short of where it's headed, it's helped over)
 		long now = level.getGameTime();
@@ -877,7 +877,7 @@ final class WarParties {
 		BlockPos goal = to;
 		if (len > WAYPOINT) {
 			BlockPos column = BlockPos.containing(soldier.getX() + dx / len * WAYPOINT, soldier.getY(), soldier.getZ() + dz / len * WAYPOINT);
-			goal = level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
+			goal = com.jaymoskingdoms.Loaded.made(level, column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
 		}
 		soldier.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, MARCH_SPEED);
 	}

@@ -340,7 +340,7 @@ public final class Milestones {
 
 	/** What a charted sign is called: the words on its face, else where it stands. */
 	private static Component name(ServerLevel level, BlockPos sign) {
-		if (level.isLoaded(sign) && level.getBlockEntity(sign) instanceof SignBlockEntity s) {
+		if (com.jaymoskingdoms.Loaded.made(level, sign) && level.getBlockEntity(sign) instanceof SignBlockEntity s) {
 			StringBuilder words = new StringBuilder();
 			for (Component line : s.getText(SignTextSlot.FRONT).getMessages(false)) {
 				String text = line.getString().strip();

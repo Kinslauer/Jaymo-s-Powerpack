@@ -479,7 +479,7 @@ final class Corsairs implements Ship.Captaincy {
 		}
 		for (double reach = Math.min(flat, SHORE_SIGHT - 6.0); reach >= GUN_NEAREST; reach -= SHORE_STEP) {
 			BlockPos column = BlockPos.containing(from.x + dx / flat * reach, from.y, from.z + dz / flat * reach);
-			if (!level.hasChunkAt(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

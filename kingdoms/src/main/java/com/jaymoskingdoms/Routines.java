@@ -736,7 +736,7 @@ final class Routines {
 		for (int dx = -LANDMARK_RANGE; dx <= LANDMARK_RANGE; dx += 2) {
 			for (int dz = -LANDMARK_RANGE; dz <= LANDMARK_RANGE; dz += 2) {
 				int x = seat.getX() + dx, z = seat.getZ() + dz;
-				if (!level.isLoaded(p.set(x, seat.getY(), z))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, p.set(x, seat.getY(), z))) {
 					continue;
 				}
 				int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

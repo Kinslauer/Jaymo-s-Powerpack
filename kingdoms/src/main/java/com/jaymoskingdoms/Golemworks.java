@@ -143,7 +143,7 @@ public final class Golemworks {
 			return;
 		}
 		for (Faction f : Factions.all(server)) {
-			if (!f.type().isRealm() || f.fallen() || !level.isLoaded(f.seat())) {
+			if (!f.type().isRealm() || f.fallen() || !com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 				continue;
 			}
 			BlockPos seat = f.seat();

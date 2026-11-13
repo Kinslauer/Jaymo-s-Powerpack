@@ -82,7 +82,7 @@ public final class LightBlocks {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (Cell cell : CELLS) {
 				ServerLevel level = server.getLevel(cell.dimension());
-				if (level != null && level.isLoaded(cell.pos()) && level.getBlockState(cell.pos()).is(BLOCK)) {
+				if (level != null && com.jaymospowers.core.Loaded.made(level, cell.pos()) && level.getBlockState(cell.pos()).is(BLOCK)) {
 					level.setBlock(cell.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				}
 			}
@@ -145,7 +145,7 @@ public final class LightBlocks {
 
 	/** Adds {@code pos} when the player may build there, it is empty air and nothing stands in it. */
 	private static void add(ServerPlayer player, ServerLevel level, BlockPos pos, Set<BlockPos> cells) {
-		if (cells.size() >= MAX_CELLS || !level.isLoaded(pos) || !level.getBlockState(pos).isAir() || !level.getFluidState(pos).isEmpty()
+		if (cells.size() >= MAX_CELLS || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).isAir() || !level.getFluidState(pos).isEmpty()
 			|| !player.mayBuild() || !level.mayInteract(player, pos)) {
 			return;
 		}
@@ -182,7 +182,7 @@ public final class LightBlocks {
 				it.remove();
 				continue;
 			}
-			if (!level.isLoaded(cell.pos())) {
+			if (!com.jaymospowers.core.Loaded.made(level, cell.pos())) {
 				continue; // waits for its chunk to come back
 			}
 			it.remove();

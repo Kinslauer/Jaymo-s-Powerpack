@@ -124,7 +124,7 @@ public final class WebTraps {
 
 	/** The same, kept for {@code ticks} (the webbing round something hung or stuck up). */
 	static void cling(ServerLevel level, BlockPos pos, boolean dark, int ticks) {
-		if (level.isLoaded(pos) && level.getBlockState(pos).isAir()) {
+		if (com.jaymospowers.core.Loaded.made(level, pos) && level.getBlockState(pos).isAir()) {
 			level.setBlockAndUpdate(pos, dark ? WebPower.SYMBIOTE_WEB.defaultBlockState() : Blocks.COBWEB.defaultBlockState());
 			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + ticks));
 		}
@@ -173,7 +173,7 @@ public final class WebTraps {
 				continue;
 			}
 			ServerLevel level = server.getLevel(web.dimension());
-			if (level != null && !level.isLoaded(web.pos())) {
+			if (level != null && !com.jaymospowers.core.Loaded.made(level, web.pos())) {
 				continue; // wait for the chunk to come back
 			}
 			it.remove();

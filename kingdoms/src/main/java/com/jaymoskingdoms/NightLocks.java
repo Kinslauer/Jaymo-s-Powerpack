@@ -132,7 +132,7 @@ public final class NightLocks {
 		for (Iterator<Candidate> it = night.list.iterator(); it.hasNext();) {
 			Candidate c = it.next();
 			BlockPos anchor = c.anchor();
-			if (!level.isLoaded(anchor)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, anchor)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(anchor);
@@ -175,7 +175,7 @@ public final class NightLocks {
 				continue;
 			}
 			BlockPos top = b.top();
-			if (!level.isLoaded(b.min()) || !level.isLoaded(top)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, b.min()) || !com.jaymoskingdoms.Loaded.made(level, top)) {
 				continue;
 			}
 			night.scanned.add(b.min().asLong());
@@ -214,7 +214,7 @@ public final class NightLocks {
 					return;
 				}
 				double dx = p.getX() - bed.getX(), dz = p.getZ() - bed.getZ();
-				if (dx * dx + dz * dz > HOME_DOOR_RANGE * HOME_DOOR_RANGE || !level.isLoaded(p)) {
+				if (dx * dx + dz * dz > HOME_DOOR_RANGE * HOME_DOOR_RANGE || !com.jaymoskingdoms.Loaded.made(level, p)) {
 					continue;
 				}
 				BlockState state = level.getBlockState(p);
@@ -244,7 +244,7 @@ public final class NightLocks {
 		for (BlockPos p : BlockPos.betweenClosed(bed.offset(-r, -HOME_DOOR_HEIGHT, -r), bed.offset(r, HOME_DOOR_HEIGHT, r))) {
 			double dx = p.getX() - bed.getX(), dz = p.getZ() - bed.getZ();
 			double d = dx * dx + dz * dz;
-			if (d > bestD || !level.isLoaded(p)) {
+			if (d > bestD || !com.jaymoskingdoms.Loaded.made(level, p)) {
 				continue;
 			}
 			if (isLowerDoor(level.getBlockState(p)) && !Placed.any(level, p)) {
@@ -312,7 +312,7 @@ public final class NightLocks {
 		List<Long> left = new ArrayList<>();
 		for (long packed : mine) {
 			BlockPos pos = BlockPos.of(packed);
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 				left.add(packed);
 				continue;
 			}

@@ -186,7 +186,7 @@ public final class ZFighterChapel {
 			}
 			it.remove();
 			ServerLevel level = rising.level;
-			if (!level.isLoaded(BlockPos.containing(rising.at)) || !masters(level, rising.at, HOLD_RADIUS).isEmpty()) {
+			if (!com.jaymospowers.core.Loaded.made(level, BlockPos.containing(rising.at)) || !masters(level, rising.at, HOLD_RADIUS).isEmpty()) {
 				continue;
 			}
 			if (ZFighterNpcs.villager(level, rising.at, rising.yaw, ZFighterDemonRealm.MASTER_TAG, NAME, false) == null) {

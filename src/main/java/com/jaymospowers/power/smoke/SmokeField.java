@@ -481,7 +481,7 @@ public final class SmokeField {
 	 * smoke ({@link ChimneyCompat}).
 	 */
 	static float cell(Level level, BlockPos pos) {
-		if (level.isOutsideBuildHeight(pos) || !level.isLoaded(pos)) {
+		if (level.isOutsideBuildHeight(pos) || !com.jaymospowers.core.Loaded.made(level, pos)) {
 			return 0.0F;
 		}
 		BlockState state = level.getBlockState(pos);
@@ -917,7 +917,7 @@ public final class SmokeField {
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 		for (long key : field.frozen.keySet()) {
 			cursor.set(key);
-			if (!level.isLoaded(cursor)) {
+			if (!com.jaymospowers.core.Loaded.made(level, cursor)) {
 				continue;
 			}
 			if (SmokeHeat.hot(level.getBlockState(cursor)) || SmokeHeat.hot(level.getBlockState(cursor.move(Direction.DOWN)))) {
@@ -984,7 +984,7 @@ public final class SmokeField {
 		BlockState snow = Blocks.SNOW.defaultBlockState();
 		for (int i = 0; i < FROST_TRIES; i++) {
 			BlockPos pos = BlockPos.of(keys[level.getRandom().nextInt(keys.length)]);
-			if (!level.isLoaded(pos) || !level.getBlockState(pos).isAir() || !level.canSeeSky(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).isAir() || !level.canSeeSky(pos)) {
 				continue;
 			}
 			for (int drop = 0; drop < FROST_DROP && level.getBlockState(pos.below()).isAir(); drop++) {

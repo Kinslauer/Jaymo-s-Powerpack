@@ -372,7 +372,7 @@ final class PirateCoves {
 		int overWater = 0;
 		for (int i = 0; i < JETTY_MOST; i++) {
 			at = start.relative(way, i);
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				break;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
@@ -620,7 +620,7 @@ final class PirateCoves {
 			Direction side = cove.seaward().getClockWise();
 			int offset = (n / 4 % 2 == 0 ? 1 : -1) * (4 + 3 * (n / 8));
 			BlockPos start = data.center().relative(cove.seaward(), RADIUS - 1).relative(side, offset);
-			built = level.isLoaded(start);
+			built = com.jaymoskingdoms.Loaded.made(level, start);
 			if (built) {
 				jetty(level, start, cove.seaward(), side);
 			}
@@ -845,7 +845,7 @@ final class PirateCoves {
 			if (!cove.haul().isEmpty()) {
 				net.minecraft.world.phys.Vec3 at = ship != null ? ship.position()
 					: net.minecraft.world.phys.Vec3.atCenterOf(cove.seen().orElse(cove.mooring()));
-				if (level.isLoaded(BlockPos.containing(at))) {
+				if (com.jaymoskingdoms.Loaded.made(level, BlockPos.containing(at))) {
 					Plunder.spill(level, at.add(0.0, 1.0, 0.0), cove.haul());
 					cove = cove.withHaul(List.of());
 				}

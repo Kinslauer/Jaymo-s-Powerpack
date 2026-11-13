@@ -132,7 +132,7 @@ public final class FieldForge {
 			end(server, forge, level);
 			return false;
 		}
-		if (!level.isLoaded(forge.pos())) {
+		if (!com.jaymoskingdoms.Loaded.made(level, forge.pos())) {
 			return true;
 		}
 		BlockState state = level.getBlockState(forge.pos());

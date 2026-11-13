@@ -178,7 +178,7 @@ public final class BandForge {
 		double angle = random.nextDouble() * Math.PI * 2.0, out = BUILD_MIN + random.nextDouble() * (BUILD_MAX - BUILD_MIN);
 		int x = Mth.floor(near.getX() + Math.cos(angle) * out), z = Mth.floor(near.getZ() + Math.sin(angle) * out);
 		BlockPos probe = new BlockPos(x, near.getBlockY(), z);
-		if (!level.isLoaded(probe) || !level.isLoaded(probe.offset(4, 0, 4)) || !level.isLoaded(probe.offset(-4, 0, -4))) {
+		if (!com.jaymospowers.core.Loaded.made(level, probe) || !com.jaymospowers.core.Loaded.made(level, probe.offset(4, 0, 4)) || !com.jaymospowers.core.Loaded.made(level, probe.offset(-4, 0, -4))) {
 			return null;
 		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

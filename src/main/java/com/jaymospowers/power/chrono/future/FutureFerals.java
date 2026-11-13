@@ -193,7 +193,7 @@ public final class FutureFerals {
 		for (int i = 0; i < count; i++) {
 			int x = cx + random.nextInt(7) - 3;
 			int z = cz + random.nextInt(7) - 3;
-			if (!level.hasChunkAt(new BlockPos(x, 0, z))) {
+			if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

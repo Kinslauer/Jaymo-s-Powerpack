@@ -560,7 +560,7 @@ public final class IllagerTongue {
 			for (int t = 0; t < PAINTING_TRIES; t++) {
 				BlockPos pos = new BlockPos(box.minX() + random.nextInt(box.getXSpan()), box.minY() + random.nextInt(box.getYSpan()),
 					box.minZ() + random.nextInt(box.getZSpan()));
-				if (!level.isLoaded(pos) || !level.getBlockState(pos).isAir() || level.canSeeSky(pos) || !level.structureManager().structureHasPieceAt(pos, start)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, pos) || !level.getBlockState(pos).isAir() || level.canSeeSky(pos) || !level.structureManager().structureHasPieceAt(pos, start)) {
 					continue;
 				}
 				Direction facing = Direction.Plane.HORIZONTAL.getRandomDirection(random);

@@ -177,6 +177,6 @@ public final class Soundscape {
 	/** Whether {@code at} is shut in (a cave, a cellar, deep indoors): little or no sky light reaches it. */
 	public static boolean enclosed(Level level, Vec3 at) {
 		BlockPos pos = BlockPos.containing(at);
-		return level.isLoaded(pos) && level.getBrightness(LightLayer.SKY, pos) <= ENCLOSED_SKY_LIGHT;
+		return com.jaymoskingdoms.Loaded.made(level, pos) && level.getBrightness(LightLayer.SKY, pos) <= ENCLOSED_SKY_LIGHT;
 	}
 }

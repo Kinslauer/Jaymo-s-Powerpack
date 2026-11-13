@@ -26,7 +26,7 @@ public class BlightedSoilBlock extends Block {
 			return;
 		}
 		BlockPos target = pos.offset(random.nextInt(3) - 1, random.nextInt(3) - 1, random.nextInt(3) - 1);
-		if (level.hasChunkAt(target) && FluxEffects.soil(level.getBlockState(target)) && !level.getBlockState(target.above()).isSolid()) {
+		if (com.jaymospowers.core.Loaded.made(level, target) && FluxEffects.soil(level.getBlockState(target)) && !level.getBlockState(target.above()).isSolid()) {
 			level.setBlockAndUpdate(target, this.defaultBlockState());
 		}
 	}

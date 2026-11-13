@@ -359,7 +359,7 @@ public class CrystalBeetle extends ActingMonster {
 			for (int i = 0; i < LOOK_TRIES; i++) {
 				BlockPos pos = player.blockPosition().offset(random.nextInt(LOOK_RANGE * 2 + 1) - LOOK_RANGE,
 					random.nextInt(LOOK_HEIGHT * 2 + 1) - LOOK_HEIGHT, random.nextInt(LOOK_RANGE * 2 + 1) - LOOK_RANGE);
-				if (!level.isLoaded(pos) || !level.getBlockState(pos).is(Blocks.BUDDING_AMETHYST)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, pos) || !level.getBlockState(pos).is(Blocks.BUDDING_AMETHYST)) {
 					continue;
 				}
 				BlockPos floor = floor(level, pos);

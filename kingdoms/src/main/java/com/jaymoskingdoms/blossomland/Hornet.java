@@ -105,7 +105,7 @@ public class Hornet extends PathfinderMob implements Looks {
 		}
 		if (this.tickCount % 100 == 0) {
 			// a hornet with no nest does not last
-			boolean has = this.nest != null && (!level.isLoaded(this.nest) || level.getBlockState(this.nest).getBlock() instanceof HornetNest);
+			boolean has = this.nest != null && (!com.jaymoskingdoms.Loaded.made(level, this.nest) || level.getBlockState(this.nest).getBlock() instanceof HornetNest);
 			this.orphaned = has ? 0 : this.orphaned + 100;
 			if (this.orphaned >= ORPHAN_TICKS && !this.hasCustomName()) {
 				this.discard();
