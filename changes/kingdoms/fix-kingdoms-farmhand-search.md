@@ -1,3 +1,3 @@
-# fix the server freezing when a Family farmhand sets out
-- Setting out on the Family farmhand road could freeze the server until its watchdog shut it down: the farmhouse search looked 100 chunks out (making every chunk it checked) and tried again past a taken house. It now looks 40 chunks out, and the whole hunt stops after 15 seconds; with no farmhouse found by then you get the village start, as when none is in reach.
+# fix the server freezing when a Life Story start looks for its place
+- Setting out on the Family farmhand, Shipwreck and village roads could freeze the server until its watchdog shut it down: their searches for a farmhouse, wreck or village reached 100 structure spacings (thousands of chunks, each made on the server thread while it waited) and tried again past taken ones. They now reach 8 spacings (still thousands of blocks out), and a start's search with its retries stops after 15 seconds; with nothing found by then you get that road's usual fallback, as when nothing is in reach.
 - Built in CI; not played.

@@ -48,14 +48,9 @@ public final class FarmhandHome {
 	/** Homesteads' lone farmsteads (each comes with its own villagers), if no barn is in reach. */
 	static final List<ResourceKey<Structure>> HOMESTEADS = List.of(key("homesteads", "flower_home_steads"),
 		key("homesteads", "forest_home_steads"), key("homesteads", "taiga_home_steads"), key("homesteads", "swamp_home_steads"));
-	/**
-	 * How far a farmhouse is looked for (chunks, as findNearestMapStructure counts). The search runs on the server thread
-	 * and makes every chunk it looks at, so 100 (with a retry or two past a taken house) stalled the Steam Deck server
-	 * past its 60 s watchdog; 40 is what StoryGround's village search settled on.
-	 */
-	static final int SEARCH_CHUNKS = 40;
-	/** Time the whole farmhouse hunt may take (ms, retries included); past it the road falls back to the village start. */
-	static final long SEARCH_BUDGET_MS = 15_000;
+	/** How far a farmhouse is looked for: in structure spacings, as findNearestMapStructure counts (see {@link LifeStory#STRUCTURE_SEARCH}). */
+	static final int SEARCH_CHUNKS = LifeStory.STRUCTURE_SEARCH;
+
 	/** Fewer grown villagers than this in the house: a farming couple moves in. */
 	static final int FAMILY_LEAST = 2;
 	/** The chance the couple has a child with them. */
@@ -110,7 +105,7 @@ public final class FarmhandHome {
 
 	/** The deadline (nanoTime) for a farmhouse hunt starting now. */
 	static long deadline() {
-		return System.nanoTime() + SEARCH_BUDGET_MS * 1_000_000L;
+		return LifeStory.searchDeadline();
 	}
 
 	private static @Nullable House find(ServerLevel level, Registry<Structure> structures, List<ResourceKey<Structure>> keys, BlockPos from,
