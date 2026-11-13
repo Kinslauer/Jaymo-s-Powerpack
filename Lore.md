@@ -1016,6 +1016,28 @@ like a door slamming, but every hurt lands harder, because there is less of them
 pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
 speaks for the second.
 
+(new) **The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
+their master, the demon master can come up from the nether and speak to them there"; the rest is Claude's placement for
+him to approve). In the birch woods and the dark forest stand a few chapels of the Lantern Warden whose parishes stopped
+keeping the light: the **darkened chapels**. The lamp is out, the parish dead walk the nave and the cellars, and the
+keepers' votive panels still hang on the walls (the lantern, the candle, the bone, the deep glow). The last keeper's
+journal is still on a shelf there, and it only hints at what the parish knelt to instead. A holder whose power has
+turned feels such a place from far off on a dark night, as a direction and nothing more. When one of them stands before
+the altar, the floor opens like an ember and the **Master of the Gloam** comes up through it, teaches and bargains as he
+does below (the lesson in blood, the Cinder Pact), and goes down again when they leave. For anyone else he never comes.
+It is a tear, like the imps', not a gate: nothing stands open after him. (The building is Tada_no_ahiru's Church of
+Sin, MIT; its icons and its two books were replaced with the pack's own.)
+
+(new) **The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
+The graveyards, crypts and burnt-out villages are ground the Lantern Warden's keepers lost: graves nobody lights a
+candle on any more, so the dead in them walk. They are not the barrow knights, who keep their own oath. The mod's own
+book, the Chronicle, tells its own tale of a champion and a lich; in the pack that is one parish's telling, not canon.
+
+(new) **The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
+placement). The Arsenal's reach pulls from anywhere, and now and then it comes back with a pale bow nobody here
+strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
+it is from; like everything the rift gives, it goes back.
+
 **The demons and the sorcerer** (Andy, 2026-11-11). The sorcerer and the demon master had an alliance, and the demons
 joined his battle. Among them were the **imps**: flying Nether creatures of a piglin-like make (with zombified ones
 too), who fly, lunge and strike from every angle, and charge a great fireball over a few breaths that a precisely timed
