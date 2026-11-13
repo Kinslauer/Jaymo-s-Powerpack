@@ -4,10 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 17:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 17:36). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · for pc-claude · #1467 · open
 
 
 ## Being built
@@ -23,7 +24,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · 🍇 Bacchus · blocked
 
 
 ## Done
