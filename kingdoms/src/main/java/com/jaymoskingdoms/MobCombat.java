@@ -116,6 +116,9 @@ public final class MobCombat {
 	static final String PUNCH = "bettercombat:one_handed_punch", UPPERCUT = "bettercombat:one_handed_uppercut_right",
 		CUT = "bettercombat:one_handed_slash_horizontal_right";
 
+	/** A punishing swing ({@link #quicken}): its share of a swing's usual time, and how long the chance stays open (ticks). */
+	static final double QUICK_SWING = 0.7;
+	static final int QUICK_WINDOW = 30;
 	private static final Identifier COMBO_DAMAGE = JaymosKingdoms.id("combo_damage");
 	private static final Identifier SWING_SLOW = JaymosKingdoms.id("swing_slow");
 
@@ -141,6 +144,8 @@ public final class MobCombat {
 		int combo;
 		/** (0.7.283) A plain blow ({@link #plainBlow}): one target, no Better Combat move. */
 		boolean plain;
+		/** ({@link Duellists}) Until this game time the next swing is a quick one ({@link #quicken}). */
+		long quickUntil;
 	}
 
 	private static final Map<Mob, Swing> SWINGS = new WeakHashMap<>();
@@ -206,6 +211,7 @@ public final class MobCombat {
 	 * nothing more): starts the next swing of the combo when the target is in reach and the last swing is over.
 	 */
 	public static void attackTick(Mob mob, LivingEntity target) {
+		Duellists.engaged(mob, target);
 		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
 		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
 			return;
@@ -227,7 +233,17 @@ public final class MobCombat {
 		if (gap(mob, target) > reach * START_REACH_SHARE || !mob.getSensing().hasLineOfSight(target)) {
 			return;
 		}
+		start(level, mob, target, moves, move, swing, now);
+	}
+
+	/** Starts {@code move} at {@code target}: the tell, the wind-up, the slow, and the animation for those watching. */
+	private static void start(ServerLevel level, Mob mob, LivingEntity target, Moves moves, Move move, Swing swing, long now) {
 		int length = swingTicks(mob);
+		if (now < swing.quickUntil) {
+			// (Duellists) a punishing swing comes quicker
+			length = Math.max(MIN_SWING_TICKS, (int) Math.round(length * QUICK_SWING));
+			swing.quickUntil = 0;
+		}
 		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
 		tell(level, mob, heavy(moves, move));
 		swing.target = target;
@@ -258,12 +274,48 @@ public final class MobCombat {
 	}
 
 	/**
+	 * A closing blow ({@link Duellists}): the weapon's heaviest move this mob knows, started now from out of reach (the
+	 * leap that follows carries it in; the blow still only lands on what is in reach when it falls). False if the mob
+	 * is mid-swing, waiting its turn or has no moves.
+	 */
+	static boolean lunge(Mob mob, LivingEntity target) {
+		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || !handles(mob)) {
+			return false;
+		}
+		Moves moves = BetterCombatBridge.moves(mob.getMainHandItem());
+		if (moves == null || moves.attacks().isEmpty()) {
+			return false;
+		}
+		long now = level.getGameTime();
+		Swing swing = SWINGS.computeIfAbsent(mob, m -> new Swing());
+		if (now < swing.endsAt + RECOVERY_TICKS || swing.hitAt >= 0) {
+			return false;
+		}
+		Move heaviest = pick(mob, moves, 0);
+		for (int i = 1; i < moves.attacks().size(); i++) {
+			Move other = pick(mob, moves, i);
+			if (other.damage() > heaviest.damage()) {
+				heaviest = other;
+			}
+		}
+		swing.combo = 0;
+		start(level, mob, target, moves, heaviest, swing, now);
+		return true;
+	}
+
+	/** ({@link Duellists}) Its next swing, if it starts within {@link #QUICK_WINDOW} ticks, takes {@link #QUICK_SWING} of the time. */
+	static void quicken(Mob mob) {
+		SWINGS.computeIfAbsent(mob, m -> new Swing()).quickUntil = mob.level().getGameTime() + QUICK_WINDOW;
+	}
+
+	/**
 	 * (0.7.283) Andy: "it doesnt seem like MCA villagers have animations when attacking". An MCA villager's blow that
 	 * isn't a Better Combat move (fists, or a weapon it doesn't know) still winds up like one: the glint, an animation
 	 * watchers see (a punch or uppercut barehanded, a cut with anything else), and the blow a moment later if the target
 	 * is still in reach and sight. Called every tick its melee task would strike; does nothing mid-swing.
 	 */
 	public static void plainBlow(Mob mob, LivingEntity target) {
+		Duellists.engaged(mob, target);
 		// ((0.7.622) one waiting its turn in a crowd holds its blow: Powers' Crowds)
 		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG)) {
 			return;
