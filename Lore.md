@@ -1678,3 +1678,14 @@ first cold; the blossom folk count their year by them as much as by the blossom.
 groves' edges. The red lily is the flower of their dead: it is planted on every grave, it comes up without leaves, and
 it is poison, which is why nothing digs where it grows. Wisteria is trained over the arbours of their gardens, and in
 a walled town's garden there is a pond of koi, which come to the hand that feeds them and are kept for generations.
+
+(new) **The animals of the blossom lands** (Claude's placement for the Blossom Lands plan, patches 11 and 12,
+2026-11-13, for Andy to approve). The cherry hills have their own animals, and the blossom folk have a use or a
+saying for each. Snow monkeys go in troops, rob the fields when they are hungry and sit in the bath house water in
+winter; a village that feeds its troop loses no rice to it and is warned by it. Cranes pair for life, dance in
+spring and pick the paddies clean, so nobody runs at a crane. The small spotted deer belong to the shrines and are
+not hunted there, which is why they bow to a stranger for bread and run from him in the hills. The raccoon dog
+cleans up after a village by night and sleeps the winter. The serow keeps one hillside all its life and stares at
+whoever passes. Paper hornets nest under the maples and ginkgos, and the paper for screens and lanterns is cut from
+their nests under smoke. In the cold rivers lies the giant salamander, which is only ever found where the water is
+clean, and a river that has one is counted a good river.
