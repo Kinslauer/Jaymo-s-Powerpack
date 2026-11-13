@@ -474,3 +474,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 Andy: merge living nightmares (PR #1426, squash-merged).
 - 2026-11-13 7:11 AM ET (Illager Structures thread): Andy: "its ok" to the Lore.md paragraph "The old pillager holds". Approved; the (new) mark is off.
 - 2026-11-13 7:31 AM ET (Power pack admin thread): Andy: "Can i have you take control and live monitor the server launch? I can give you auto merge too so you can just fix it". Read as: while monitoring this launch, Claude may merge its own fix PRs once CI passes, without asking each time.
+
+- 2026-11-13 11:15 AM (Andy, Deck admin session): a start waiting for its land should give up after about a minute and use the fallback (#1431, LAND_WAIT_MS = 60 s).

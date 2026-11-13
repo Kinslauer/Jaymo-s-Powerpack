@@ -1,28 +1,52 @@
 ---
 status: done
-task: Live-monitor the Deck server launch and fix what breaks until it's stable (Andy, 2026-11-13 07:31 / 07:45)
-branch: (several, all merged)
-with: cloud session "Power pack admin session"
-pr: "#1425, #1427, #1428, #1429 (merged)"
-mods: Powers, Kingdoms, Dynamic Waters port
-versions: Powers 0.23.11, Kingdoms 0.8.6 (deployed by the 07:59 pbdr, not yet confirmed up)
+task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
+branch: deck-start-waits-for-land, start-wait-one-minute
+with: local desktop session (PC)
+pr: "#1430, #1431 (merged)"
+mods: Kingdoms
+versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
 owns:
-  - (nothing open)
+  - kingdoms/src/main/java/com/jaymoskingdoms/LifeStory.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/StoryGround.java
+  - changes/kingdoms/deck-start-waits-for-land.md
 ---
 # Power pack admin: Deck server stability
 
-**Task:** Andy: "take control and live monitor the server launch ... keep going until it is stable". He allowed merging fixes on green CI, launching the CurseForge profile, testing joins, and closing the game. Longer loading screens are fine ("players have to read the hints").
+**Task:** Andy: get the Deck server stable, then stop. Merge fixes on green CI, launch the CurseForge profile, join,
+let the owed village start run, close the game when needed. Long loading screens are fine.
 
 ## Notes
-- Every Deck crash on 2026-11-12/13 was the server thread making chunks while it waited (watchdog at 60 s). Right after a join the worldgen queue is long, so even one synchronous chunk can wait past the watchdog. Rule: never make chunks on the server thread; predict (Scout) or load in the background (tickets) and wait over ticks.
-- Scout (kingdoms Scout.java, powers core/Scout.java): structure finder that never loads chunks (placement grid, surface biome check, StructureManager.checkStructurePresence, CHUNK_LOAD_NEEDED taken as found).
-- StoryGround.ahead: a village/shipwreck start's 3x3 chunks loaded in the background (PORTAL ticket) before the start runs; player held on the loading screen up to 2 min.
-- PC helper (local, not in git): "Watch Deck Server.bat" + deck\watch-server.ps1 stream the Deck's logs/latest.log into modpack\deck-live\server.log (reconnects by itself). Get Deck Logs.bat for crash reports.
-- 07:59 pbdr (keep world) started by Claude via Explorer; result not confirmed (PC link dropped at ~08:50).
+- Every Deck crash on 2026-11-12/13 was the server thread making chunks while it waited (watchdog at 60 s). Rule: never
+  make chunks on the server thread; predict (Scout) or load in the background (tickets) and wait over ticks.
+- Scout (kingdoms Scout.java, powers core/Scout.java): structure finder that never loads chunks.
+- StoryGround.ahead: a village/shipwreck start's 3x3 chunks loaded in the background before the start runs.
+- PC helpers (local, not in git): "Watch Deck Server.bat" + deck\watch-server.ps1; "Get Deck Logs.bat". SSH key is
+  `~/.ssh/jaymos_deck` (deck@10.0.0.164).
+
+## Log
+- 10:12 AM: the 08:08 deploy (Powers 0.23.11, Kingdoms 0.8.6) was up; Hendrikus joined 10:10:56 and the server hit the
+  watchdog at 10:12 (crash-2026-11-13_10.12.00). Stack: road packet -> depart -> (village landAhead found nothing, so
+  no ahead job) -> begin -> village found no ground -> wild fallback spot() -> ground() -> reach() -> level.getChunk.
+- Fix on `deck-start-waits-for-land`: reach() never makes chunks; a start notes the land it wanted (LifeStory.Wanted),
+  StoryGround.ahead(player, chunks) makes it in the background, and the start tries again (3 tries for the chosen
+  start, 5 in all). Kingdoms builds.
+
+- Review (3 lenses + verifiers): outside a start the no-make rule broke the whaler shore, trader second town, citadel,
+  captors, shelter, so it applies only while a start is tried (old budget elsewhere). Monolith reuses primed land.
+  PR #1430 merged on green CI ~10:50 AM; keep-world deploy started.
+
+- 10:48 AM deploy (Kingdoms 0.8.7) up. Andy joined ~11:04: no crash; the village start waited 4 times, 2-3 min each
+  (~9 min in all), then landed. Andy: "taking far too long, maybe after a minute it should just give the fallback".
+- #1431 (merged ~11:20 AM): LAND_WAIT_MS = 60 s real time across all waits, then it makes do. Redeploying.
 
 ## Still to do
-- Confirm the 07:59 deploy finished; watch Andy's rejoin (Hendrikus's village start is still owed: it exercises Scout + ahead).
-- Confirmed by the stall audit but not fixed: FutureStart.restore placeInWorld on every leap into an empty future; ZFighterAfterlife first build at x=20000; ZFighterSites tower/Lookout one-time builds; LifeStory.reach still makes up to 6 chunks synchronously for starts without an ahead job.
+- Deploy #1431, rejoin and watch 30 min.
+- Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
+  neighbours, SENTENCED seat; out-of-start budgets (shore 12, ground 6) should move to background jobs too.
+- From the stall audit, not fixed: FutureStart.restore placeInWorld on every leap into an empty future;
+  ZFighterAfterlife first build at x=20000; ZFighterSites tower/Lookout one-time builds; many other `level.getChunk`
+  calls in Kingdoms (Couriers, Elders, Emigrants, Envoys, Roads, Speakeasy, Milestones...).
 - FarmhandHome farmhouse hunt is off (SEARCH_OFF): rebuild it on Scout + ahead.
-- 2026-11-13 09:47 PR #1425 is merged into master; moved to Agents/Done.
+- 2026-11-13 11:38 PR #1430 is merged into master; moved to Agents/Done.
