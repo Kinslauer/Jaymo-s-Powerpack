@@ -389,3 +389,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   bones and deep tooth are Part Builder materials like bone (not cast); 14 trophy looks, old trophies keep the mask;
   dragonhide shield is a grid recipe (6 hide + 1 bone), blocks all fire from any side while raised. Lore.md has a
   `(new)` paragraph "What the great ones leave".
+- **Nov 12, 9:55 PM: giants PR merged** (models thread, Andy: "merge"). PR #1398 squash-merged: Aether Giants on GeckoLib from Blockbench, Snow Giant upright body at 2x. Not played before merge.
