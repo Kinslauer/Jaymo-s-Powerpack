@@ -397,13 +397,13 @@ def assets():
 def loot(name):
     entry = {"type": "minecraft:item", "name": NS + ":" + name}
     if name.endswith("_slab"):
-        # a double slab drops two
-        entry["functions"] = [{"function": "minecraft:set_count", "add": False, "count": 2, "conditions": [{
-            "condition": "minecraft:block_state_property", "block": NS + ":" + name, "properties": {"type": "double"}}]},
-            {"function": "minecraft:explosion_decay"}]
+        # a double slab drops two (26.3's loot format: modifier, type, one condition)
+        entry["modifier"] = [{"type": "minecraft:set_count", "count": 2, "condition": {
+            "type": "minecraft:match_block", "blocks": NS + ":" + name, "state": {"type": "double"}}},
+            {"type": "minecraft:explosion_decay"}]
         pool = {"entries": [entry], "rolls": 1}
     else:
-        pool = {"conditions": [{"condition": "minecraft:survives_explosion"}], "entries": [entry], "rolls": 1}
+        pool = {"condition": {"type": "minecraft:survives_explosion"}, "entries": [entry], "rolls": 1}
     write(DATA + "loot_table/blocks/" + name + ".json", {"type": "minecraft:block", "pools": [pool],
         "random_sequence": NS + ":blocks/" + name})
 

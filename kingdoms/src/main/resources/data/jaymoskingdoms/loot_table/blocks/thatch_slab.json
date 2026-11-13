@@ -6,23 +6,20 @@
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:thatch_slab",
-          "functions": [
+          "modifier": [
             {
-              "function": "minecraft:set_count",
-              "add": false,
+              "type": "minecraft:set_count",
               "count": 2,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "jaymoskingdoms:thatch_slab",
-                  "properties": {
-                    "type": "double"
-                  }
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymoskingdoms:thatch_slab",
+                "state": {
+                  "type": "double"
                 }
-              ]
+              }
             },
             {
-              "function": "minecraft:explosion_decay"
+              "type": "minecraft:explosion_decay"
             }
           ]
         }
