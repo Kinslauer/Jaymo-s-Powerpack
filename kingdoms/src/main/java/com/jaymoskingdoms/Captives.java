@@ -293,7 +293,8 @@ public final class Captives {
 		Map<String, Long> next = null;
 		RandomSource random = level.getRandom();
 		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
-			if (camp.fallen()) {
+			if (camp.fallen() || IllagerSites.is(server, camp.id())) {
+				// (a held place's captives are its own: IllagerSites)
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());

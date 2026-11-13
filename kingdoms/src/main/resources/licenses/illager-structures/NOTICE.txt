@@ -1,0 +1,16 @@
+The places under data/jaymoskingdoms/structure/illager_sites/ and data/jaymoskingdoms/worldgen/*/illager_sites/ (and the
+biome tags under data/jaymoskingdoms/tags/worldgen/biome/illager_sites/) are taken from Illager Structures by the Dawn of
+Time team (TheGoldenWorld, Jackie): https://github.com/Dawn-of-Time-Project/illagerstructures (branch 26.3, commit
+03ac671c1ec9180f5651e5f07ba6ebee25e8126c), https://www.curseforge.com/minecraft/mc-mods/illager-structures, licensed
+under the GNU General Public License v3 (LICENSE, beside this file).
+
+Changed from the original, by tools/illager_sites_port.py (in the Jaymo's Powerpack repository):
+- moved to the jaymoskingdoms namespace under illager_sites/, the structure sets' salts shifted by 7;
+- the mobs taken out of the templates (where each stood is kept in com.jaymoskingdoms.SitePosts);
+- Amendments' wall lanterns and ceiling banners swapped for vanilla torches, lanterns and chains;
+- every container pointed at our own loot tables; the Ruined Church's suspicious gravel at our own archaeology table;
+- the Monk Tower's framed Totem of Undying swapped for a book;
+- the Mohai Illager left out; the Tipi places the single tipi.
+
+Jaymo's Kingdoms' own code is licensed under the GNU GPL v3 as well; its source is in the Jaymo's Powerpack repository
+(kingdoms/src).

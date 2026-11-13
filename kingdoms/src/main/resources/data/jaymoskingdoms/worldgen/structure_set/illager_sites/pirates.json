@@ -1,0 +1,31 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_floating_outpost",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_galleon",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/submarine",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/ocean_citadel",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_small_sub",
+      "weight": 5
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 50,
+    "separation": 20,
+    "spread_type": "triangular",
+    "salt": 86317499
+  }
+}
