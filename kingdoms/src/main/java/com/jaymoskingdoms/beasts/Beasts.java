@@ -49,6 +49,9 @@ public final class Beasts {
 	public static EntityType<Gorgon> GORGON;
 	public static EntityType<com.jaymoskingdoms.WarBarrel> WAR_BARREL;
 	public static EntityType<HauntedStand> HAUNTED_STAND;
+	/** The goblin villages' scouts, and the ghosts at fresh graves. */
+	public static EntityType<com.jaymoskingdoms.GoblinScout> GOBLIN_SCOUT;
+	public static EntityType<com.jaymoskingdoms.GraveGhost> GRAVE_GHOST;
 
 	/** Natural spawn weights (each also gated in its own spawn check), and the boar's herd size. */
 	static final int PIGLIN_KING_WEIGHT = 2, REDSTONE_GOLEM_WEIGHT = 3, SKULK_GOLEM_WEIGHT = 10, WILD_BOAR_WEIGHT = 6, BOAR_MIN = 2, BOAR_MAX = 4;
@@ -83,6 +86,10 @@ public final class Beasts {
 			.clientTrackingRange(10), com.jaymoskingdoms.WarBarrel.createAttributes());
 		HAUNTED_STAND = type("haunted_stand", EntityType.Builder.of(HauntedStand::new, MobCategory.MONSTER).sized(0.6F, 2.0F).clientTrackingRange(10),
 			HauntedStand.createAttributes());
+		GOBLIN_SCOUT = type("goblin_scout", EntityType.Builder.of(com.jaymoskingdoms.GoblinScout::new, MobCategory.MONSTER).sized(0.5F, 1.2F)
+			.clientTrackingRange(10), com.jaymoskingdoms.GoblinScout.createAttributes());
+		GRAVE_GHOST = type("grave_ghost", EntityType.Builder.of(com.jaymoskingdoms.GraveGhost::new, MobCategory.MISC).sized(0.6F, 1.9F)
+			.clientTrackingRange(8), com.jaymoskingdoms.GraveGhost.createAttributes());
 
 		SpawnPlacements.register(PIGLIN_KING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PiglinKing::checkSpawn);
 		SpawnPlacements.register(REDSTONE_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, RedstoneGolem::checkSpawn);
