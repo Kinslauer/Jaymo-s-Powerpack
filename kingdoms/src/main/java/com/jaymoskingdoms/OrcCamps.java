@@ -322,7 +322,7 @@ final class OrcCamps {
 				continue;
 			}
 			BlockPos at = placer.at(p.offset());
-			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
+			if (!level.isLoaded(at)) {
 				return false;
 			}
 			BlockState there = level.getBlockState(at);

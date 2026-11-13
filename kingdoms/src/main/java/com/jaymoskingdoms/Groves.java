@@ -55,7 +55,7 @@ public final class Groves {
 	public static boolean isGrove(ServerLevel level, BlockPos at) {
 		int logs = 0, leaves = 0;
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-REACH, -3, -REACH), at.offset(REACH, HEIGHT, REACH))) {
-			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
+			if (!level.isLoaded(p)) {
 				continue;
 			}
 			BlockState s = level.getBlockState(p);

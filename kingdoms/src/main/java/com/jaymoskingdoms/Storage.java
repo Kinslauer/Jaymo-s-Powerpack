@@ -31,7 +31,7 @@ public final class Storage {
 		List<Container> out = new ArrayList<>();
 		for (BlockPos pos : faction.holdings().storage()) {
 			// (0.7.497) not one under a player's lock
-			if (com.jaymoskingdoms.Loaded.made(level, pos) && level.getBlockEntity(pos) instanceof Container container && !Locks.barredTo(level, pos, faction)) {
+			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof Container container && !Locks.barredTo(level, pos, faction)) {
 				out.add(container);
 			}
 		}

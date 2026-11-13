@@ -90,7 +90,7 @@ public final class WebBridges {
 			// a stopping server takes its weblines with it (nothing left hanging in the save)
 			for (Plank plank : PLANKS) {
 				ServerLevel level = server.getLevel(plank.dimension());
-				if (level != null && com.jaymospowers.core.Loaded.made(level, plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
+				if (level != null && level.isLoaded(plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
 					level.setBlock(plank.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				}
 			}
@@ -155,7 +155,7 @@ public final class WebBridges {
 				continue;
 			}
 			it.remove();
-			if (com.jaymospowers.core.Loaded.made(level, plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
+			if (level.isLoaded(plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
 				level.setBlock(plank.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}

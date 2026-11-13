@@ -247,7 +247,7 @@ public final class TribePacts {
 
 	/** The tribute goes into a chest of the king's hold, if it's loaded ((0.7.490) as bent copper, so many to the emerald). */
 	private static void hoard(ServerLevel level, BlockPos at, int emeralds) {
-		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
+		if (!level.isLoaded(at)) {
 			return;
 		}
 		int r = OgreHolds.HOLD_RADIUS;

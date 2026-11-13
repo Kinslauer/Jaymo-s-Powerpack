@@ -488,7 +488,7 @@ public final class Slaves {
 	private static boolean cornersLoaded(ServerLevel level, BlockPos at) {
 		int r = GoblinBuildings.CLEAR_RADIUS;
 		for (BlockPos corner : new BlockPos[] {at.offset(-r, 0, -r), at.offset(r, 0, -r), at.offset(-r, 0, r), at.offset(r, 0, r)}) {
-			if (!com.jaymoskingdoms.Loaded.made(level, corner)) {
+			if (!level.isLoaded(corner)) {
 				return false;
 			}
 		}

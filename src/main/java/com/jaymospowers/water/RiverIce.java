@@ -160,7 +160,7 @@ public final class RiverIce {
 		for (long packed : all) {
 			BlockPos from = BlockPos.of(packed);
 			floes.remove(packed);
-			if (!com.jaymospowers.core.Loaded.made(level, from) || !level.getBlockState(from).is(Blocks.ICE)) {
+			if (!level.hasChunkAt(from) || !level.getBlockState(from).is(Blocks.ICE)) {
 				continue;
 			}
 			if (!cold(level, from)) {

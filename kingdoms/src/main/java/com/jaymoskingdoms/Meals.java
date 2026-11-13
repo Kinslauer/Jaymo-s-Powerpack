@@ -492,7 +492,7 @@ public final class Meals {
 		}
 		BlockPos found = null;
 		GlobalPos home = McaCompat.home(v).orElse(null);
-		if (home != null && home.dimension() == level.dimension() && com.jaymoskingdoms.Loaded.made(level, home.pos())) {
+		if (home != null && home.dimension() == level.dimension() && level.isLoaded(home.pos())) {
 			double best = Double.MAX_VALUE;
 			for (BlockPos p : BlockPos.betweenClosed(home.pos().offset(-STOVE_REACH, -2, -STOVE_REACH), home.pos().offset(STOVE_REACH, 2, STOVE_REACH))) {
 				BlockState state = level.getBlockState(p);

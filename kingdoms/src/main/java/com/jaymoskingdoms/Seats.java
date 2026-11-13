@@ -542,7 +542,7 @@ final class Seats {
 			}
 		}
 		for (BlockPos column : columns) {
-			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
+			if (!level.isLoaded(column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

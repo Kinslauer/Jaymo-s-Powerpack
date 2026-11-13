@@ -458,7 +458,7 @@ final class WarParties {
 			if (left.isEmpty()) {
 				continue;
 			}
-			if (com.jaymoskingdoms.Loaded.made(level, from.seat())) {
+			if (level.isLoaded(from.seat())) {
 				net.minecraft.world.entity.item.ItemEntity item = new net.minecraft.world.entity.item.ItemEntity(level, from.seat().getX() + 0.5,
 					from.seat().getY() + 1.0, from.seat().getZ() + 0.5, left);
 				level.addFreshEntity(item);

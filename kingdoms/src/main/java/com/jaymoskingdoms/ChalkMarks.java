@@ -274,7 +274,7 @@ public final class ChalkMarks {
 				continue;
 			}
 			BlockPos seat = f.seat();
-			if (!com.jaymoskingdoms.Loaded.made(level, seat)) {
+			if (!level.hasChunkAt(seat)) {
 				continue;
 			}
 			add(all, wall(level, den.hatch(), SAFE, day));

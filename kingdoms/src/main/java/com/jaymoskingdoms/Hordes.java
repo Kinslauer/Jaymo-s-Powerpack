@@ -548,7 +548,7 @@ final class Hordes {
 
 	/** {@code column} (camp frame {@code (x, z)}) is the camp's to build on: loaded, its own land or nobody's, and on dry land. */
 	static boolean ours(ServerLevel level, Faction camp, BlockPos column) {
-		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
+		if (!level.isLoaded(column)) {
 			return false;
 		}
 		Faction owner = Factions.at(level.getServer(), level, column);
