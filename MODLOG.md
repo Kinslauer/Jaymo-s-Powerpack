@@ -4243,3 +4243,9 @@ enter limbo if they don't come to."
 - **Music under the films** (client/sound/SceneMusic, new; the same player Jaymo's Kingdoms has). Andy: "it should fade in with the letterboxing and out as it ends. lingering for 5s", and "any of the discs can play for the other scenes too". Your own ultimate's film and a beam battle draw a music disc at random (never the same twice running; disc 11 left out, it's footsteps and breathing, not music). It fades in as the bars slide in, plays through, and from when the bars start to go it fades out, gone about 5 s after they are. Someone who only watches an ultimate gets the bars and no music.
 - Plays as Music, so the Music slider rules it; the game's own music is stopped while it sounds and comes back after. Shares the stage with Jaymo's Kingdoms' films so the two never play at once.
 - Built; not played.
+
+## 0.23.24 (2026-11-13): Sunfang held the right way round, hot silver ingot icon
+
+- **Sunfang**: the 3D model was turned a quarter the wrong way, so in the hand its hooked tip bent back toward the wielder and it looked backwards. It now leans away the way the Blockbench file's own hold has it. The inventory and item frame icon still read grip low left, tip up right (`tools/blockbench/sunfang.py`, regenerated `models/item/sunfang.json`).
+- **Hot silver ingot**: its model pointed at `item/tinkering/silver_ingot`, which doesn't exist, so it showed as a purple-black box. It now uses `item/silver/silver_ingot` (`items/hot_ingot.json`).
+- Checked in a cloud test game on armour stands, held, dropped and in the inventory; not played in the pack.
