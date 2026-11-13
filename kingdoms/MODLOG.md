@@ -12224,3 +12224,10 @@ giants being worked on, as its own upright model."
   Ignivorus, rime from Boreas and Atroxiia, venom from Zephyrus and Varasuchus, storm from Eurus, Aeolus, Aetherion and
   Stegonaut.
 - Compiles; not played in game.
+
+## 0.7.805 (2026-11-13): A mana spirit only wakes in a real fight
+
+- The one-in-eighteen chance that a brush with death wakes a mana spirit is now only rolled while Powers' hidden fight
+  meter stands past 80% (damage dealt and taken against things that fight back). Falling to death's door off a cliff
+  or in lava no longer rolls it. A spirit already stirring is still stirred by any brush with death, and without
+  Powers installed nothing changes.
