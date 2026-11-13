@@ -1689,3 +1689,14 @@ cleans up after a village by night and sleeps the winter. The serow keeps one hi
 whoever passes. Paper hornets nest under the maples and ginkgos, and the paper for screens and lanterns is cut from
 their nests under smoke. In the cold rivers lies the giant salamander, which is only ever found where the water is
 clean, and a river that has one is counted a good river.
+
+(new) **What the blossom folk do not name** (Claude's placement for the Blossom Lands plan, patches 13 and 14,
+2026-11-13, for Andy to approve). Mohknee has its own things of the night, and its people speak of them only by what
+to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
+which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
+the Snow Widow, and the cold walks with her; she is gone by morning. Where many dead are left lying together they get
+up as one, the Unburied, a giant of all their bones, which is the reason the blossom folk bury friend and enemy alike
+and at once. On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
+of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
+full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
+does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
