@@ -4118,3 +4118,17 @@ enter limbo if they don't come to."
   answers for a chunk that is made and loaded: `SkyfallCleanup` (also the blocks beside a spring), `WildRoom`,
   `Mortality`, `GravityMeteorSweep`, `ZFighterAfterlife`. `SkySpringFeature` (world generation) is unchanged.
 - Built; tested on the Deck server.
+
+## 0.23.13 (2026-11-13): one look for screens, part 1: the shared style and a flat button (#1434)
+
+- **Flat buttons**: the buttons on our own screens (training, costume table, Rig, band, questions and the rest) are no longer Minecraft's stone buttons. They are flat plates with a thin rim that brighten under the mouse and go dim when they can't be pressed, so they sit on the dark panels the same way with any resource pack. Buttons that were 18 or 20 high are 16 like the others. Buttons we add to Minecraft's own screens (video settings, the death screen) and the baubles screen keep the vanilla look.
+- **One gold, one red**: the H menu's badge and health bar and the HUD's warning red now use the same red as every screen.
+- **The style can't drift**: `UiStyle` and the new `client/ui/FlatButton` are written by `tools/ui_style.py` from `tools/ui_style/`, the same source Kingdoms' `Ui` and Kitchen's `KitchenUi` come from; the PR checks fail if a copy is edited by hand. `UiStyle` gained wells, slot wells, a second panel fill, `button`, and the named `GOLD`, `GOOD`, `BAD`. `TinkerUi` now takes its colours and panel from `UiStyle`.
+- Compiled; not played. The first of six patches from Andy's UI checklist.
+- **One H menu frame**: the H menu's window and sunken areas are now `UiStyle.window` / `UiStyle.recess` in the shared style, so Kingdoms' tabs draw the very same frame.
+- **One wheel** (Andy picked "all like the symbiote"): the Rig, technique, form and Arsenal places wheels draw the symbiote wheel's disc, ring, pointer and tiles through `UiStyle.wheel`, `wheelPointer` and `wheelTile`. In play that means the same disc tint on all of them and a pointer that starts at the ring, not the middle. The Rig keeps its bigger radius for its 15 tiles.
+- **Text shadow**: labels on the see-through station panels (altar, bomb glider, enchanting, jeweller's bench, knapping, the Tinkers tables), the Rig HUD and helmet view and the heart readout now have the drop shadow every other panel and HUD text has. The H menu's solid window and books keep unshadowed text, like vanilla's inventory.
+- Hover text on our screens (colour swatches, tabs, gauges, the smeltery, the enchanting list) shows in a flat dark box with a thin rim instead of Minecraft's purple one. Items keep their normal tooltip, and so do the inventory's own buttons.
+- The Aether altar and the bomb glider use the shared panel and slot wells.
+- Z Fighter first-time tips show on the pack's own tip card (top right, gold title) instead of Minecraft's toast.
+- HUD pieces that drew their own black plate, gold or red now take them from the shared HUD look.

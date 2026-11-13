@@ -1987,3 +1987,11 @@ From the camping-campfire Blockbench model Andy uploaded.
 
 - Body heat's thin-air cold (colder a block above 40 over the sea) no longer applies in the Aether. Stacked over the Overworld in a One Dimension world the Aether stands 400-odd blocks over the Overworld's sea, which read as deep frostbite: everyone there froze, and the frostbite's hurt woke a sleeper partway through the night, so the night never reached morning (Andy, Morkeep). The Aether's own biomes still set its warmth (its arctic lands stay cold).
 - Built; not played.
+
+## 0.6.2 (2026-11-13): one look for screens, part 1: the shared style and a flat button (#1434)
+
+- **Flat buttons**: the cooking, dough, rolling, hearth and butcher screens use flat plates with a thin rim in place of Minecraft's stone buttons.
+- **Header in step**: titles sit one pixel higher (and one left when there is no icon), where Powers' screens put them. `KitchenUi` is now written by `tools/ui_style.py` from the same source as Powers' `UiStyle` and Kingdoms' `Ui`; `lineCentered` is `lineCentred` and `header` takes the text's width like the others.
+- Compiled; not played.
+- The plow's labels have the drop shadow the other panels' text has.
+- The familiarity readout takes its gold and red from the shared HUD look; the shared style gains the flat hover box and the paper colours.
