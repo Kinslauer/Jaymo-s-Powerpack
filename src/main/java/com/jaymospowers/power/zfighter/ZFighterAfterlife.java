@@ -552,7 +552,7 @@ public final class ZFighterAfterlife {
 			at = home.pos();
 		}
 		ChunkPos chunk = ChunkPos.containing(at);
-		if (to.getChunkSource().hasChunk(chunk.x(), chunk.z())) {
+		if (to.getChunkSource().getChunkNow(chunk.x(), chunk.z()) != null) {
 			wake(player, to, at, after);
 			return;
 		}

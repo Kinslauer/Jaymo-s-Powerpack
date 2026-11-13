@@ -498,7 +498,7 @@ final class QuestFoes {
 	 * what's loaded (null till a room is found); on the ground there only for a structure with no pieces to search.
 	 */
 	static @Nullable BlockPos spot(ServerLevel level, BlockPos located, String structureId, EntityType<?> type) {
-		if (!level.hasChunk(located.getX() >> 4, located.getZ() >> 4)) {
+		if (level.getChunkSource().getChunkNow(located.getX() >> 4, located.getZ() >> 4) == null) {
 			return null;
 		}
 		Identifier id = Identifier.tryParse(structureId);
@@ -528,7 +528,7 @@ final class QuestFoes {
 				}
 			}
 		}
-		if (!level.hasChunk(over.getX() >> 4, over.getZ() >> 4)) {
+		if (level.getChunkSource().getChunkNow(over.getX() >> 4, over.getZ() >> 4) == null) {
 			over = located.offset(8, 0, 8);
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, over);

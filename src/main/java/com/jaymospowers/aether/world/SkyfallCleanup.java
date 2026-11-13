@@ -107,7 +107,9 @@ public final class SkyfallCleanup {
 		for (int i = 0; i < PER_TICK && !QUEUE.isEmpty(); i++) {
 			ChunkPos pos = QUEUE.poll();
 			QUEUED.remove(pos);
-			if (level.hasChunk(pos.x(), pos.z())) {
+			// (made and loaded only: hasChunk is also true of a chunk still being made, and reading one of those waits for it
+			// on the server thread; right after a join the sweep's chunks are mostly that, Deck crash 2026-11-13 11:57)
+			if (level.getChunkSource().getChunkNow(pos.x(), pos.z()) != null) {
 				check(level, pos, floor, top);
 			}
 		}
@@ -145,7 +147,7 @@ public final class SkyfallCleanup {
 			}
 			for (Direction direction : Direction.values()) {
 				BlockPos next = pos.relative(direction);
-				if (next.getY() < floor || next.getY() > top || !level.hasChunk(next.getX() >> 4, next.getZ() >> 4)) {
+				if (next.getY() < floor || next.getY() > top || level.getChunkSource().getChunkNow(next.getX() >> 4, next.getZ() >> 4) == null) {
 					continue;
 				}
 				if (seen.add(next.asLong()) && water(level.getFluidState(next))) {
@@ -188,7 +190,12 @@ public final class SkyfallCleanup {
 	private static BlockState stoneBeside(ServerLevel level, BlockPos pos) {
 		Map<BlockState, Integer> counts = new HashMap<>();
 		for (Direction direction : Direction.values()) {
-			BlockState state = level.getBlockState(pos.relative(direction));
+			BlockPos side = pos.relative(direction);
+			// (a chunk next door not loaded yet is skipped: reading it would make it on the server thread)
+			if (level.getChunkSource().getChunkNow(side.getX() >> 4, side.getZ() >> 4) == null) {
+				continue;
+			}
+			BlockState state = level.getBlockState(side);
 			if (state.isSolid() && state.getFluidState().isEmpty() && !state.hasBlockEntity()) {
 				counts.merge(state.getBlock().defaultBlockState(), 1, Integer::sum);
 			}

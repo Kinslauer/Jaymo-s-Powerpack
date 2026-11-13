@@ -159,7 +159,7 @@ final class GravityMeteorSweep {
 		for (int dx = 0; dx < sx; dx++) {
 			for (int dz = 0; dz < sz; dz++) {
 				int x = x0 + dx, z = z0 + dz;
-				boolean loaded = level.hasChunk(x >> 4, z >> 4);
+				boolean loaded = level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null;
 				for (int dy = 0; dy < sy; dy++) {
 					int i = (dx * sz + dz) * sy + dy;
 					if (!loaded) {

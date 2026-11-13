@@ -155,7 +155,7 @@ final class Debris {
 			int x = box.minX() + w.column % box.getXSpan(), z = box.minZ() + w.column / box.getXSpan();
 			w.column++;
 			done++;
-			if (!level.hasChunk(x >> 4, z >> 4)) {
+			if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 				continue;
 			}
 			for (int y = box.minY() + 1; y <= box.maxY(); y++) {

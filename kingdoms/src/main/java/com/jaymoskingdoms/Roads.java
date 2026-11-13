@@ -400,7 +400,7 @@ public final class Roads {
 		roads.add(road);
 		save(server, new Network(roads));
 		for (long chunk : chunks(road)) {
-			if (level.hasChunk(ChunkPos.getX(chunk), ChunkPos.getZ(chunk))) {
+			if (level.getChunkSource().getChunkNow(ChunkPos.getX(chunk), ChunkPos.getZ(chunk)) != null) {
 				queue(chunk);
 			}
 		}
@@ -574,7 +574,7 @@ public final class Roads {
 			long chunk = QUEUE.poll();
 			QUEUED.remove(chunk);
 			int cx = ChunkPos.getX(chunk), cz = ChunkPos.getZ(chunk);
-			if (!level.hasChunk(cx, cz)) {
+			if (level.getChunkSource().getChunkNow(cx, cz) == null) {
 				continue;
 			}
 			List<Integer> which = index(server).get(chunk);

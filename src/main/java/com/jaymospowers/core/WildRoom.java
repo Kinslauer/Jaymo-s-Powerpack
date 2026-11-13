@@ -57,7 +57,7 @@ public final class WildRoom {
 				if (!free.test(level, new BlockPos(x0, 0, z0))) {
 					continue;
 				}
-				if (pass == 0 && !(level.getChunkSource().hasChunk(x0 >> 4, z0 >> 4) && level.getChunkSource().hasChunk(x0 + w >> 4, z0 + d >> 4))) {
+				if (pass == 0 && !(level.getChunkSource().getChunkNow(x0 >> 4, z0 >> 4) != null && level.getChunkSource().getChunkNow(x0 + w >> 4, z0 + d >> 4) != null)) {
 					continue;
 				}
 				BlockPos origin = site(level, x0, z0, w, d, h);

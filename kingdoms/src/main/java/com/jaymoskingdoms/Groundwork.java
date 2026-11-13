@@ -202,7 +202,7 @@ final class Groundwork {
 
 	/** The height folk stand at on column x/z (the first air over its ground), or {@link Integer#MIN_VALUE} if its chunk isn't loaded. */
 	private static int height(ServerLevel level, int x, int z) {
-		if (!level.hasChunk(x >> 4, z >> 4)) {
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 			return Integer.MIN_VALUE;
 		}
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);

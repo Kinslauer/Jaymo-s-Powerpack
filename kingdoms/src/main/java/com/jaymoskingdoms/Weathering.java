@@ -118,7 +118,7 @@ public final class Weathering {
 			for (int i = 0; i < SAMPLES; i++) {
 				int x = player.getBlockX() + random.nextInt(RADIUS * 2 + 1) - RADIUS;
 				int z = player.getBlockZ() + random.nextInt(RADIUS * 2 + 1) - RADIUS;
-				if (!level.hasChunk(x >> 4, z >> 4)) {
+				if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 					continue;
 				}
 				int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);

@@ -117,7 +117,7 @@ final class Seats {
 	 */
 	static Found structureAt(ServerLevel level, BlockPos pos, Predicate<Holder<Structure>> which) {
 		int cx = SectionPos.blockToSectionCoord(pos.getX()), cz = SectionPos.blockToSectionCoord(pos.getZ());
-		if (!level.hasChunk(cx, cz)) {
+		if (level.getChunkSource().getChunkNow(cx, cz) == null) {
 			return Found.UNREADY;
 		}
 		Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
