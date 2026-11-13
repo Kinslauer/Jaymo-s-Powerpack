@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 00:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 00:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,12 +13,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · claimed
 - [ ] [[Agents/dungeon-mods-chapel-echo-bow|dungeon-mods-chapel-echo-bow]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · in-review
 - [ ] [[Agents/blossom-lands|blossom-lands]] · 💻 Odysseus · #1413 · in-review
 
 
