@@ -45,7 +45,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>The {@link RiverChild} in the rivers by their villages.</li>
  * <li>The {@link SnowWidow}, who walks snowed-over cherry land on winter nights ({@link #widow}).</li>
- * <li>The {@link Unburied}, which gets up where many dead have been left lying ({@link #unburied}).</li>
+ * <li>The {@link Unburied}, which gets up where many dead have been left lying, made of those dead, and comes apart
+ * into them again at daybreak ({@link #unburied}).</li>
  * <li>The {@link BlackSwell}, which rises in a fog bank on the sea round Mohknee ({@link #swell}).</li>
  * <li>The dark of the moon: under the open sky the night's monsters are fewer the fuller the moon is and none at
  * the full; at the new moon and the thin crescents more come ({@link #moonKeepsAway}, {@link #darkMoonBrings}).
@@ -200,8 +201,9 @@ public final class NightThings {
 			}
 			for (Entity dead : heap) {
 				level.sendParticles(ParticleTypes.SOUL, dead.getX(), dead.getY() + 0.3, dead.getZ(), 6, 0.3, 0.2, 0.3, 0.02);
-				dead.discard();
 			}
+			// the dead are what it is made of: taken into it whole, and let go again at daybreak
+			giant.take(level, heap);
 			level.addFreshEntity(giant);
 			level.playSound(null, giant.blockPosition(), SoundEvents.SKELETON_HORSE_DEATH, SoundSource.HOSTILE, 3.0F, 0.4F);
 			return;

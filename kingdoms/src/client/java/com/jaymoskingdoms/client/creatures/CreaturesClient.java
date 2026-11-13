@@ -42,7 +42,9 @@ public final class CreaturesClient {
 		// and their night things
 		creature(com.jaymoskingdoms.blossomland.NightThings.RIVER_CHILD, "river_child", 0.3F, -1, -1, false);
 		creature(com.jaymoskingdoms.blossomland.NightThings.SNOW_WIDOW, "snow_widow", 0.4F, -1, -1, false);
-		creature(com.jaymoskingdoms.blossomland.NightThings.UNBURIED, "unburied", 1.4F, -1, -1, false);
+		// drawn as the dead it is made of (the bone giant when it has none)
+		CreatureModel.Spec unburied = CreatureModel.load("unburied");
+		EntityRenderers.register(com.jaymoskingdoms.blossomland.NightThings.UNBURIED, context -> new UnburiedRenderer(context, unburied));
 		creature(com.jaymoskingdoms.blossomland.NightThings.BLACK_SWELL, "black_swell", 0.0F, -1, -1, false);
 	}
 

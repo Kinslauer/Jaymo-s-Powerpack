@@ -28,6 +28,8 @@ public final class KitchenCompat {
 	private static final @Nullable Method ROB_BY, HAS_VALUABLES, LOOK_TAG, CARRIED_BY, SINCE_DEATH;
 	/** (0.7.123) Kitchen's seasons: {@code Seasons.seasonName(Level)}, {@code dayOfYear(Level)}, {@code temperate(float)}. */
 	private static final @Nullable Method SEASON_NAME, DAY_OF_YEAR, TEMPERATE;
+	/** For the Unburied coming apart: Kitchen's {@code CorpseEntity.spill(Vec3)}, a body let fall turning over as it drops. */
+	private static final @Nullable Method SPILL;
 
 	static {
 		Class<?> corpse = null;
@@ -110,6 +112,15 @@ public final class KitchenCompat {
 			}
 		}
 		SEASON_NAME = seasonName;
+		Method spill = null;
+		if (corpse != null) {
+			try {
+				spill = corpse.getMethod("spill", Vec3.class);
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Unburied's dead to tumble out of it: {}", e.toString());
+			}
+		}
+		SPILL = spill;
 		DAY_OF_YEAR = dayOfYear;
 		TEMPERATE = temperate;
 	}
@@ -545,6 +556,18 @@ public final class KitchenCompat {
 	/** Whoever is carrying the corpse throws it at {@code at}. */
 	static void throwAt(Entity corpse, Vec3 at) {
 		call(THROW_AT, corpse, at);
+	}
+
+	/**
+	 * A body let fall from up off the ground with {@code velocity} (the Unburied coming apart): turning over as it drops
+	 * when Kitchen can, else just thrown that way.
+	 */
+	public static void spill(Entity corpse, Vec3 velocity) {
+		if (SPILL == null) {
+			corpse.setDeltaMovement(velocity);
+			return;
+		}
+		call(SPILL, corpse, velocity);
 	}
 
 	/**
