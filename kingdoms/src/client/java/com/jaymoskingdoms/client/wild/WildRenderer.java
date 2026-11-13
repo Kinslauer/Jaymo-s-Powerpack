@@ -25,6 +25,8 @@ import org.jspecify.annotations.Nullable;
  * them (the coyote's only while it's hostile), the moose 1.5x.
  */
 public final class WildRenderer<T extends Mob & WildLook> extends MobRenderer<T, WildRenderer.State, WildModel> {
+	/** The snow giant: drawn at its model's own size (3.4 blocks to the crown), its shadow, the seconds of its walk to a block, and how fast it must go to run. */
+	static final float SNOW_GIANT_SCALE = 1.0F, SNOW_GIANT_SHADOW = 1.6F, SNOW_GIANT_WALK = 0.6F, SNOW_GIANT_RUN = 0.9F;
 	public static final class State extends LivingEntityRenderState {
 		int variant;
 		boolean hostile;
@@ -112,7 +114,10 @@ public final class WildRenderer<T extends Mob & WildLook> extends MobRenderer<T,
 			null, null);
 		// (0.7.610) the grizzly mini-boss, by its own model and poses
 		EntityRenderers.register(Wild.GRIZZLY, GrizzlyRenderer::new);
-		EntityRenderers.register(Wild.SNOW_GIANT, GrizzlyRenderer::snowGiant);
+		// the snow giant's own upright body (kingdoms/art/snow_giant.bbmodel); its moves are named for the grizzly's actions
+		EntityRenderers.register(Wild.SNOW_GIANT, context -> new com.jaymoskingdoms.client.beasts.BbMobRenderer<com.jaymoskingdoms.wild.SnowGiant>(context,
+			new com.jaymoskingdoms.client.beasts.BbMobRenderer.Look("snow_giant", SNOW_GIANT_SCALE, SNOW_GIANT_SHADOW, "idle", "walk", "run", "death",
+				SNOW_GIANT_WALK, SNOW_GIANT_RUN, "head")));
 		EntityRenderers.register(Wild.MUSKOX, MuskoxRenderer::new);
 	}
 }
