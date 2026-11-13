@@ -42,7 +42,7 @@ else
 	echo "(Not keeping the Deck awake: started outside the desktop session. Keep it plugged in with sleep off.)"
 fi
 
-$INHIBIT jdk/bin/java -Xms2G -Xmx6G -jar fabric-server-launch.jar nogui
+$INHIBIT jdk/bin/java -Xms2G -Xmx8G -jar fabric-server-launch.jar nogui
 
 if [ -n "$PLAYIT_PID" ]; then
 	kill "$PLAYIT_PID" 2>/dev/null
