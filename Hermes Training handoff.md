@@ -318,12 +318,17 @@ add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The 
 
 ## AMD free models as a backup (added Nov 13, cloud thread "Add AMD free models to Hermes")
 
-What it is: AMD's AI Developer Program has "Token Factory" (Radeon Cloud), free hosted models with an
-OpenAI-compatible API. It is real, but run from AMD's China site and meant for testing, not production. Docs:
-https://amd-aim.github.io/radeon-cloud-docs/ (quickstart, api/rate-limits, models/overview, api/terms).
+**Correction (Nov 13, cloud thread): Andy's account is AMD's US "Token Lab", not the China "Token Factory".
+His `tl-` key is right; the base URL was wrong.** Token Lab base URL: `https://api.tokenlab.amd.com/v1`
+(checked from the cloud: it answers `401 Invalid Token Lab API key` to a fake key, and lists its endpoints as
+`/v1/chat/completions`, `/v1/messages`, `/v1/models`, `/v1/ocr`, `/v1/audio/speech`, `/v1/systemone`; the key is
+managed at https://notebooks.amd.com/tokenlab). Auth: `Authorization: Bearer <key>`, keys start with `tl-`. There
+is no `/usage` endpoint: watch points on Andy's Token Lab page. Token Lab has no public docs; the model list,
+limits and terms below come from the China Token Factory docs (https://amd-aim.github.io/radeon-cloud-docs/),
+which seems to be the same AMD backend, so treat them as a guide and trust `GET /v1/models` for the real IDs.
+One user report says Token Lab often returns 429s, another reason to keep it last.
 
-- Base URL: `https://developer.amd.com.cn/radeon/api/v1` (OpenAI chat at `/chat/completions`, list at `/models`,
-  remaining allowance at `/usage`). Auth: `Authorization: Bearer <key>`, keys start with `rc-`.
+- Base URL: `https://api.tokenlab.amd.com/v1` (NOT `developer.amd.com.cn`, which rejects `tl-` keys).
 - Models on Andy's account (checked his Token Factory page Nov 13; there is NO GLM model). Send the model ID, not
   the card title: AMD's docs say the card title and ID can differ. Confirm the IDs with `GET /models` before
   using them. All have tool calling.
@@ -347,13 +352,13 @@ https://amd-aim.github.io/radeon-cloud-docs/ (quickstart, api/rate-limits, model
   sensitive data may be sent. So: backup only, never first in the chain, and nothing secret in prompts (the
   bots must never paste a key or `.env` content into a prompt anyway).
 
-Andy's part (all done Nov 13): signed up, saved the key in `E:\hermes\.env` as `AMD_API_KEY` himself, and
+Andy's part (all done Nov 13): signed up, saved the `tl-` key in `E:\hermes\.env` as `AMD_API_KEY` himself, and
 checked the allowance (10 points to Dec 13). Never print, copy or move the key.
 
 PC Claude's part (ready to start):
 - [ ] 1. Check the key works without printing it: call `GET /models` with the key from the env var and confirm the
       IDs `DeepSeek-V4-Flash`, `Qwen3.8-27B` and `Gemma-4-31B-IT` are listed (use whatever IDs it returns). Then one small chat call with a tool definition to each;
-      note seconds to first token and total (it's served from China, so it may be slow from the US).
+      note seconds to first token and total. Point `amd_check.py` at `https://api.tokenlab.amd.com/v1`.
   - [!] **Blocked Nov 13 (PC Claude): the saved key is rejected.** `GET /models` on the base URL above returns
     `401 {"detail":"Invalid bearer token"}`. `AMD_API_KEY` in `E:\hermes\.env` is `tl-` + 48 hex characters (checked
     without printing it). Token Factory keys are `rc-` + 48 hex (AMD docs, api/authentication), so this looks like a
@@ -362,6 +367,10 @@ PC Claude's part (ready to start):
     **Your API key** card (it starts with `rc-`) and replace the `AMD_API_KEY` value in `E:\hermes\.env` yourself.
     If the card has no key, the account may still be under review. Steps 2-5 wait for a working key. Test script:
     `py -3 -I E:/hermes/scripts/amd_check.py` (lists models; add a model ID to make one tool call with timing; never prints the key).
+  - **Unblocked (cloud thread, Nov 13): wrong base URL, not a wrong key.** The `tl-` key is a Token Lab key and
+    goes to `https://api.tokenlab.amd.com/v1` (an AMD domain, so it's safe to send it there). Andy does NOT need
+    a new key. Change the base URL in `amd_check.py` and re-run step 1. If the IDs differ from the table, use the
+    ones `/v1/models` returns in steps 3-4.
 - [ ] 2. Back up `E:/hermes/config.yaml` and Quill's profile config. In the ONE existing `providers:` block add an
       OpenAI-compatible provider `amd` (base URL above, key from `AMD_API_KEY`), the same way NVIDIA is set up.
       Don't make a second `providers:` block.
@@ -376,7 +385,7 @@ PC Claude's part (ready to start):
       Check with `hermes fallback list`.
 - [ ] 4. Restart with `schtasks /run /tn Hermes_Gateway` (never `hermes gateway restart`), run one real bot task
       that falls to AMD (e.g. temporarily point a test run at AMD first), and watch the `X-RateLimit-Remaining-User-Daily-USD`
-      header or `GET /usage` to see how many points one bot call costs. Write that here.
-- [ ] 5. Append to `Decisions.md` that Andy added AMD Token Factory as the last backup, with the date. Once a week,
+      header (if Token Lab sends it) or Andy's Token Lab points before/after, to see how many points one bot call costs. Write that here.
+- [ ] 5. Append to `Decisions.md` that Andy added AMD Token Lab as the last backup, with the date. Once a week,
       write points left here; if more than half is gone before Dec 1, tell Andy in 2 lines.
 - [ ] If anything breaks: restore the backup config and restart the gateway.
