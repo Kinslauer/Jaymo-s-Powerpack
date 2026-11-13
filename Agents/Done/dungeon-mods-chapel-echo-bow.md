@@ -3,7 +3,7 @@ status: stalled
 task: 
 branch: claude/project-thread-53idu7
 with: Claude (cloud thread "Find more dungeon mods to add")
-pr: 
+pr: 1417
 mods: powers
 versions: 
 started: 2026-11-12

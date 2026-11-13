@@ -1016,7 +1016,7 @@ like a door slamming, but every hurt lands harder, because there is less of them
 pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
 speaks for the second.
 
-(new) **The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
+**The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
 their master, the demon master can come up from the nether and speak to them there"; the rest is Claude's placement for
 him to approve). In the birch woods and the dark forest stand a few chapels of the Lantern Warden whose parishes stopped
 keeping the light: the **darkened chapels**. The lamp is out, the parish dead walk the nave and the cellars, and the
@@ -1028,12 +1028,12 @@ does below (the lesson in blood, the Cinder Pact), and goes down again when they
 It is a tear, like the imps', not a gate: nothing stands open after him. (The building is Tada_no_ahiru's Church of
 Sin, MIT; its icons and its two books were replaced with the pack's own.)
 
-(new) **The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
+**The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
 The graveyards, crypts and burnt-out villages are ground the Lantern Warden's keepers lost: graves nobody lights a
 candle on any more, so the dead in them walk. They are not the barrow knights, who keep their own oath. The mod's own
 book, the Chronicle, tells its own tale of a champion and a lich; in the pack that is one parish's telling, not canon.
 
-(new) **The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
+**The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
 placement). The Arsenal's reach pulls from anywhere, and now and then it comes back with a pale bow nobody here
 strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
 it is from; like everything the rift gives, it goes back.
@@ -1374,6 +1374,19 @@ is rolled out at night, a chest of drawers bound in iron, doors that slide along
 is the blossom tree's own sap, scored from the bark of a living tree into a bowl. A log gives once and is left bare, so
 a grove is tapped a little each year and planted behind, and lacquer is dear on the home continent for that reason.
 
+**How a blossom village lives** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). A
+village thatches and a walled town tiles: tile is what a lord's walls pay for. Rice stands in flooded paddies behind a
+bund of packed mud, and beside it a row of ramie, the nettle whose bark is their thread, cut and left to come again.
+Farmsteads stand a little way out, each with a wayside shrine kept to whichever of the eight that family holds to.
+High villages gather round their shrine and low ones round a market. A town has a tea house where the home continent
+has a tavern, a dojo, a bath of still water, and in time a pagoda. The dead lie under narrow posts of grey stone.
+
+**The blossom smiths' steel** (Blossom lands thread, 2026-11-13; Andy: "their smiths will teach you about the
+process"; the steps are Claude's for him to approve). Mohknee has little ore. Its iron is washed out of the rivers as
+black sand, burnt to a rough bloom, and folded on the anvil until the slag is gone. It is the same steel the home
+continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
+each step to someone who has done the one before.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
@@ -1658,3 +1671,49 @@ approve). The Underworld's forgers also turn out a writ under a lord's seal and 
 and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
 as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
 The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
+
+**What grows on Mohknee** (Claude's placement for the Blossom Lands plan, patch 10, 2026-11-13, for Andy to
+approve). Beside the cherry the far land grows the maple and the ginkgo, green all summer and red and gold from the
+first cold; the blossom folk count their year by them as much as by the blossom. Bamboo stands in thickets at the
+groves' edges. The red lily is the flower of their dead: it is planted on every grave, it comes up without leaves, and
+it is poison, which is why nothing digs where it grows. Wisteria is trained over the arbours of their gardens, and in
+a walled town's garden there is a pond of koi, which come to the hand that feeds them and are kept for generations.
+
+**The animals of the blossom lands** (Claude's placement for the Blossom Lands plan, patches 11 and 12,
+2026-11-13, for Andy to approve). The cherry hills have their own animals, and the blossom folk have a use or a
+saying for each. Snow monkeys go in troops, rob the fields when they are hungry and sit in the bath house water in
+winter; a village that feeds its troop loses no rice to it and is warned by it. Cranes pair for life, dance in
+spring and pick the paddies clean, so nobody runs at a crane. The small spotted deer belong to the shrines and are
+not hunted there, which is why they bow to a stranger for bread and run from him in the hills. The raccoon dog
+cleans up after a village by night and sleeps the winter. The serow keeps one hillside all its life and stares at
+whoever passes. Paper hornets nest under the maples and ginkgos, and the paper for screens and lanterns is cut from
+their nests under smoke. In the cold rivers lies the giant salamander, which is only ever found where the water is
+clean, and a river that has one is counted a good river.
+
+**What the blossom folk do not name** (Claude's placement for the Blossom Lands plan, patches 13 and 14,
+2026-11-13, for Andy to approve). Mohknee has its own things of the night, and its people speak of them only by what
+to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
+which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
+the Snow Widow, and the cold walks with her; she is gone by morning. Where many dead are left lying together they get
+up as one, the Unburied, a giant of all their bones, which is the reason the blossom folk bury friend and enemy alike
+and at once. On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
+of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
+full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
+does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
+
+**The pale grove** (Claude's placement for the Blossom Lands plan, patch 15, 2026-11-13, for Andy to approve).
+There is a wood in the demons' country. Pale moss lies over the netherrack there, pale oaks stand in it, and from
+their boughs and from every roof of rock hangs wisteria with the colour gone out of it, giving a little light of its
+own. The air is white with ash and the horned things' ogres walk it as their own ground. The blossom folk have never
+seen it and describe it exactly: a white wood under the world where the wisteria has no colour, where the wicked go.
+It is the same Nether the home continent's wicked wake in; the blossom folk only know a different part of it, and
+nobody has asked how.
+
+**The sunken palace** (Blossom lands thread, 2026-11-13; Andy: "the palace is of tideborn origin"; the rest is
+Claude's placement for him to approve). In the deep water off Mohknee, on three headings from the land, a palace
+stands whole on the seabed: green sea stone, a pillared hall under a double roof with its corners turned up, lamps
+burning in it that nobody tends. The Tideborn built it, before the island villages, when they held court under the
+water and not beside it. The blossom folk did not sink it and do not claim it. Their roofs are copied from its roofs,
+which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
+it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
+Tideborn of the crossing's islands do not speak of it to strangers.
