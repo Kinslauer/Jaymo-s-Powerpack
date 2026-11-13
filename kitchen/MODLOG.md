@@ -1970,3 +1970,11 @@ From the camping-campfire Blockbench model Andy uploaded.
   of blocks beside it.
 - Credits: yair (@yairtalmy2111), Blockbench Workshop, CC BY 4.0.
 - Compiled; not played. Unseen in game: a whole carcass on the lower crossbar may dip into the fire's logs.
+
+## 0.5.127 (2026-11-13): fifth edition picks - kept bodies and graves
+
+- **Kept bodies** (`corpse/Keeping`): a body under a rite of keeping or a salt-and-herb wrap neither rots nor rises while it's kept; fire and butchering still work on it.
+- **Graves** (`corpse/Burial`): bodies can be lowered into a grave and raised again; a player's body gives back its hotbar for a rebirth (`CorpseEntity.takeHotbar`).
+- Kingdoms' cold mould counts as cold for food.
+- `Stomach.addMealBoost`: another mod can raise what meals heal per player (Kingdoms' Chef feat).
+- Built; not played.
