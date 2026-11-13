@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.mixin.spookydoors",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["ServerSpookyDoorLockMixin", "SpookyDoorPushMixin"],
+	"injectors": { "defaultRequire": 0 }
+}

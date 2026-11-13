@@ -25,7 +25,12 @@ public final class ModelPoses {
 			BioForms.apply(model, state);
 		}
 		HandshakePose.apply(model, state);
-		MobAnimations.apply(model, state);
+		// Andy (2026-11-13): "the villager's costume was clipping outside its body". A villager's Better Combat swing is added
+		// to the bones it finds, and MCA's skin, clothes and hair bodies take the pose it captured with the swing already on:
+		// added again, those arms swung twice as far while the clothes' sleeves (synced before this) stayed with the real arm
+		if (!McaCompat.LOADED || !McaLookModels.posedByMca(model, state)) {
+			MobAnimations.apply(model, state);
+		}
 		HiddenBladeClient.pose(model, state);
 		GoblinBody.apply(model, state);
 		OcellanBody.apply(model, state);
