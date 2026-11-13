@@ -56,9 +56,14 @@ MODS = [
 
 HEAD = """package {package};
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
@@ -79,12 +84,19 @@ import org.jspecify.annotations.Nullable;
  * the same. Change the look there and run the tool; an edit made here is overwritten, and the PR checks fail on it.
  */
 public final class {cls} {{
-	public static final int PANEL = 0xD0101018, ROW = 0x30FFFFFF, ROW_ALT = 0x18FFFFFF, ROW_HOVER = 0x50FFFFFF, ROW_PICKED = 0x40FFFFFF,
-		CHIP = 0xA0000000, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, BAR_BACK = 0xFF303030, WELL_EDGE = 0xFF34343E,
-		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050, WHEEL_DISC = 0xA0101018;
+	/**
+	 * The player's pick between the dark look and vanilla's inventory grey ({{@code /screenlook dark|grey}}, kept in
+	 * {{@code config/jaymospowers-screenlook.properties}}), read once when the game starts: every colour below has a grey twin.
+	 * Text keeps its light colours here; on a grey panel Jaymo's Powers draws it dark ({{@link #panel}} marks the frame).
+	 */
+	public static final boolean GREY = grey();
+	public static final int PANEL = c(0xD0101018, 0xFFC6C6C6), ROW = c(0x30FFFFFF, 0x18000000), ROW_ALT = c(0x18FFFFFF, 0x0C000000),
+		ROW_HOVER = c(0x50FFFFFF, 0x38000000), ROW_PICKED = c(0x40FFFFFF, 0x28000000), CHIP = c(0xA0000000, 0xFF8B8B8B), TEXT = 0xFFFFFFFF,
+		DIM = 0xFFA8A8B8, HINT = 0xFF707080, BAR_BACK = c(0xFF303030, 0xFF555555), WELL_EDGE = c(0xFF34343E, 0xFF373737),
+		WELL = c(0xFF0C0C12, 0xFF8B8B8B), BUTTON_RIM_OFF = c(0xA0505050, 0xFF8B8B8B), WHEEL_DISC = 0xA0101018;
 	/** The H character menu's solid window ({{@link #window}}, {{@link #recess}}). */
-	public static final int WINDOW_EDGE = 0xFF0A0A0E, WINDOW_LIGHT = 0xFF4A4A52, WINDOW_SHADE = 0xFF141418, WINDOW_BODY = 0xFF2B2B2F,
-		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;
+	public static final int WINDOW_EDGE = c(0xFF0A0A0E, 0xFF000000), WINDOW_LIGHT = c(0xFF4A4A52, 0xFFFFFFFF), WINDOW_SHADE = c(0xFF141418, 0xFF555555),
+		WINDOW_BODY = c(0xFF2B2B2F, 0xFFC6C6C6), WINDOW_CANVAS = c(0xFF1E1E22, 0xFF8B8B8B), WINDOW_WELL_LIGHT = c(0xFF3E3E46, 0xFFFFFFFF);
 	/** The pack's one gold, green (good, ready, done) and red (bad, missing, broken), the same on screens and the HUD. */
 	public static final int GOLD = 0xFFFFD54A, GOOD = 0xFF66C266, BAD = 0xFFE05050;
 	/** Books, letters and pages: the paper, its darker edge, the ink and faint ink (a struck line, a margin note). */

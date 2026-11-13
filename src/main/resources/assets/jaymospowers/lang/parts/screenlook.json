@@ -1,6 +1,6 @@
 {
-	"message.jaymospowers.screenlook.is_dark": "Other mods' screens are painted dark. /screenlook grey puts them back to vanilla grey.",
-	"message.jaymospowers.screenlook.is_grey": "Other mods' screens are vanilla grey. /screenlook dark paints them dark.",
-	"message.jaymospowers.screenlook.dark": "Other mods' screens: dark.",
-	"message.jaymospowers.screenlook.grey": "Other mods' screens: vanilla grey."
+	"message.jaymospowers.screenlook.is_dark": "Screens are dark. /screenlook grey turns them vanilla grey.",
+	"message.jaymospowers.screenlook.is_grey": "Screens are vanilla grey. /screenlook dark turns them dark.",
+	"message.jaymospowers.screenlook.dark": "Screens: dark. Other mods' screens have changed now; our own change when you restart the game.",
+	"message.jaymospowers.screenlook.grey": "Screens: vanilla grey. Other mods' screens have changed now; our own change when you restart the game."
 }
