@@ -11,10 +11,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.IntFunction;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -38,6 +41,10 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Nothing is sent for it: both tracks are attachments already synced to their own player, so the meter watches them
  * each tick and shows whatever went up. One meter shows at a time; gains in another track wait their turn.
+ *
+ * <p>Jaymo's Powers shows its own training here too (a power's mastery, a Z Fighter's Training Points and form mastery,
+ * its {@code client.hud.MeterFeed}). The mods don't depend on each other, so its gains come by a queue in Fabric
+ * Loader's object share ({@link #SHARE}), each entry the arguments of {@link #show}.
  */
 public final class SkillMeter {
 	/** The bar: width (the boss bar's), height, and the gap from the screen's top (below any boss bars). */
@@ -64,6 +71,8 @@ public final class SkillMeter {
 	static final float CHIME_PITCH = 0.55F, CHIME_VOLUME = 0.45F;
 	/** After joining, respawning or changing world, changes for this many ticks are the save arriving, not gains. */
 	static final int SETTLE_TICKS = 60;
+	/** The other mods' queue of gains: each entry {id, colour, highest level, label by level, toast lines by level, from, to}. */
+	static final String SHARE = "jaymos:skill_meter";
 
 	/** One track's meter: where the fill is drawn, where it's headed (level + share of the next), and how it reads. */
 	private static final class Track {
@@ -117,8 +126,26 @@ public final class SkillMeter {
 
 	// ---- watching ----------------------------------------------------------------------------------------------
 
+	@SuppressWarnings("unchecked")
+	private static void drainShared() {
+		if (FabricLoader.getInstance().getObjectShare().get(SHARE) == null) {
+			FabricLoader.getInstance().getObjectShare().putIfAbsent(SHARE, new ConcurrentLinkedQueue<Object[]>());
+		}
+		if (!(FabricLoader.getInstance().getObjectShare().get(SHARE) instanceof Queue<?> shared)) {
+			return;
+		}
+		Object next;
+		while ((next = shared.poll()) != null) {
+			if (next instanceof Object[] e && e.length == 7 && e[0] instanceof String id && e[1] instanceof Integer color && e[2] instanceof Integer max
+				&& e[3] instanceof IntFunction<?> label && e[4] instanceof IntFunction<?> toast && e[5] instanceof Float from && e[6] instanceof Float to) {
+				show(id, color, max, (IntFunction<Component>)label, (IntFunction<@Nullable List<Component>>)toast, from, to);
+			}
+		}
+	}
+
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
+		drainShared();
 		if (player == null) {
 			watched = null;
 			LAST.clear();

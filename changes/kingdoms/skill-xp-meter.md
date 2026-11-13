@@ -14,4 +14,6 @@
   the big fanfare, and the meter only flashes for those.
 - Nothing new is sent or saved: the meter watches the skill and career attachments the client already gets. Changes in
   the first 3 s after joining, respawning or changing world count as the save arriving, not as gains.
-- Compiled; not played. Powers' mastery and Z Fighter training don't show on it yet (`SkillMeter.show` takes any track).
+- Jaymo's Powers feeds its own training in (mastery, a Z Fighter's Training Points and form mastery) through a queue
+  in Fabric Loader's object share, `jaymos:skill_meter`; the meter empties it each tick.
+- Compiled; not played.

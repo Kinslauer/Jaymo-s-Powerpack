@@ -1,0 +1,8 @@
+{
+  "hud.jaymospowers.meter.mastery": "%s Mastery",
+  "hud.jaymospowers.meter.rank": "%s %s",
+  "hud.jaymospowers.meter.training": "Training %s TP",
+  "hud.jaymospowers.meter.stat_ready": "Enough for a stat level",
+  "hud.jaymospowers.meter.stat_ready.hint": "Spend it in training [%s]",
+  "hud.jaymospowers.meter.form": "%s %s%%"
+}

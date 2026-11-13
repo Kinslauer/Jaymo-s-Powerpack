@@ -57,6 +57,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.frost.IceCaves.place();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		// Powers' training on the experience meter (Kingdoms' SkillMeter)
+		com.jaymospowers.client.hud.MeterFeed.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
