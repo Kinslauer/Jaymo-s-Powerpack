@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Add Illager Structures with Andy's picks of who lives in each place
 branch: claude/project-thread-fzaxhy
 with: cloud Claude (Illager Structures thread)
@@ -32,3 +32,4 @@ owns:
 PR #1423. Built, dev-server checked (bandit camp, deep mole, monk tower, stable with fence, smeltery with ogres and a
 captive moved in; chests relabelled; bandit leader kill clears the camp). Not played. Untested: realm garrisons, sea
 places, the fence's trade screen, greetings. Crew capped at 40 per place (citadel had 65 mobs).
+- 2026-11-13 06:52 PR #1423 is merged into master; moved to Agents/Done.
