@@ -65,7 +65,7 @@ final class ZFighterYard {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = reach + OUTSIDE_MIN + random.nextDouble() * (OUTSIDE_MAX - OUTSIDE_MIN);
 			int x = Mth.floor(post.getX() + Math.cos(angle) * distance), z = Mth.floor(post.getZ() + Math.sin(angle) * distance);
-			BlockPos ground =ZFighterSpace.surface(level, x, z);
+			BlockPos ground = ZFighterSpace.surface(level, x, z);
 			if (ground != null) {
 				return ground;
 			}

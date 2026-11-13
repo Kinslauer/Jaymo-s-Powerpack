@@ -177,7 +177,7 @@ public final class ZFighterRaiders {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = LAND_MIN + random.nextDouble() * (LAND_MAX - LAND_MIN);
 			int x = seat.getX() + (int)Math.round(Math.cos(angle) * distance), z = seat.getZ() + (int)Math.round(Math.sin(angle) * distance);
-			middle =ZFighterSpace.surface(level, x, z);
+			middle = ZFighterSpace.surface(level, x, z);
 		}
 		if (middle == null) {
 			return false;
