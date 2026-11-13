@@ -37,6 +37,21 @@ From two Blockbench models Andy uploaded (goblin-scout, ghost).
   hurting it. After 6 meals what it leaves behind turns a plain amethyst block near it into a budding one; two beetles
   with 4 meals each lay another, up to 4 to a geode. A beetle that finds nothing to eat neither seeds nor lays. Killed, it
   drops a shard at most. Spawn egg.
-- Lore: "(new) The pillar's stone" and "(new) Crystal beetles" in Lore.md, for Andy to approve.
+- **Barrow knight** (`barrow/ZombieKnight`, yair's Zombie Knight). Andy: "this zombie knight needs a different head and
+  should wield a sword from our pack, and correctly." Its head is our own now (a dead villager's face under a rusted
+  kettle helm, `kingdoms/tools/gen_zombie_knight.py`) and the modelled sword is gone: he holds a real item, Powers'
+  forged iron sword (a plain iron sword without Powers), drawn in his fist the way the game seats any held item
+  (`BbMobRenderer.holding`, which any Blockbench mob can now use). 30 health, 10 armour, an overhead hew every 1.3 s for
+  the blade's own damage, 8% to leave the sword. Undead. Spawn egg.
+- **Cryptbound revenant** (`barrow/Revenant`, yair's model at 0.62, 2.7 blocks tall). The knights' lord: 120 health, 12
+  armour, a cleave (12), a shield blow that throws you back (4), and at two thirds and one third of his health his oath:
+  the blue light rings out 6 blocks (5 magic damage) and 2 more knights climb out of the floor (4 at most about him).
+  Drops a soul lantern, iron and bones. Undead. Spawn egg.
+- **The old barrows** (`barrow/Barrows`). The Overworld's buried cobblestone rooms (a spawner on cobblestone, in no
+  structure): when a player first comes within 40 blocks, half of them get 2-3 knights, and 30% of those the revenant
+  too, fixed by where the room is. They keep to the room. None of them goes for a player holding a lantern or soul
+  lantern in either hand unless that player strikes one.
+- Lore: "(new) The pillar's stone", "(new) Crystal beetles" and "(new) The barrow's oath" in Lore.md, for Andy to approve.
 - Compiled; not played. Unseen in game: the colossus' size beside the Giant and whether five to seven are too many,
-  the beetle's pace, how its shell reads with no crystal stages drawn (the count isn't shown).
+  the beetle's pace, how its shell reads with no crystal stages drawn (the count isn't shown), how the knight's sword
+  sits in his fist through his swing, and whether the revenant fits the smaller rooms.

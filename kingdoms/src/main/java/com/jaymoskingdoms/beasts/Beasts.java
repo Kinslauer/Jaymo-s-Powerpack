@@ -54,6 +54,9 @@ public final class Beasts {
 	public static EntityType<com.jaymoskingdoms.remnants.RuneColossus> RUNE_COLOSSUS;
 	public static EntityType<com.jaymoskingdoms.wild.CrystalBeetle> CRYSTAL_BEETLE;
 	public static EntityType<com.jaymoskingdoms.GraveGhost> GRAVE_GHOST;
+	/** The old barrows' dead: the household knights and their lord. */
+	public static EntityType<com.jaymoskingdoms.barrow.ZombieKnight> ZOMBIE_KNIGHT;
+	public static EntityType<com.jaymoskingdoms.barrow.Revenant> REVENANT;
 
 	/** Natural spawn weights (each also gated in its own spawn check), and the boar's herd size. */
 	static final int PIGLIN_KING_WEIGHT = 2, REDSTONE_GOLEM_WEIGHT = 3, SKULK_GOLEM_WEIGHT = 10, WILD_BOAR_WEIGHT = 6, BOAR_MIN = 2, BOAR_MAX = 4;
@@ -97,6 +100,12 @@ public final class Beasts {
 		com.jaymoskingdoms.wild.CrystalBeetle.register();
 		GRAVE_GHOST = type("grave_ghost", EntityType.Builder.of(com.jaymoskingdoms.GraveGhost::new, MobCategory.MISC).sized(0.6F, 1.9F)
 			.clientTrackingRange(8), com.jaymoskingdoms.GraveGhost.createAttributes());
+
+		ZOMBIE_KNIGHT = type("zombie_knight", EntityType.Builder.of(com.jaymoskingdoms.barrow.ZombieKnight::new, MobCategory.MONSTER)
+			.sized(0.6F, 2.0F).clientTrackingRange(8), com.jaymoskingdoms.barrow.ZombieKnight.createAttributes());
+		REVENANT = type("revenant", EntityType.Builder.of(com.jaymoskingdoms.barrow.Revenant::new, MobCategory.MONSTER)
+			.sized(0.9F, 2.7F).clientTrackingRange(10), com.jaymoskingdoms.barrow.Revenant.createAttributes());
+		com.jaymoskingdoms.barrow.Barrows.register();
 
 		SpawnPlacements.register(PIGLIN_KING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PiglinKing::checkSpawn);
 		SpawnPlacements.register(REDSTONE_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, RedstoneGolem::checkSpawn);

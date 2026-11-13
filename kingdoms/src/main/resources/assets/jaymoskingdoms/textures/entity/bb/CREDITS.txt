@@ -167,3 +167,13 @@ crystal_beetle.png (bbmodels/crystal_beetle.json): the crystal beetle
   "Crystal Beetle" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/crystal-beetle, CC BY 4.0
   (tools/bbmodels/crystal-beetle.bbmodel). Changes: baked to our loader's format (its glow sheet stacked under its
   skin), drawn at 0.8.
+
+zombie_knight.png (bbmodels/zombie_knight.json): the barrow knight
+  "Zombie Knight" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/zombie-knight, CC BY 4.0
+  (tools/bbmodels/zombie-knight.bbmodel). Changes (kingdoms/tools/gen_zombie_knight.py, kingdoms/art/zombie_knight.bbmodel):
+  its head and helm replaced with our own dead villager's head under a kettle helm, its modelled sword taken out (he
+  holds a real item on the empty sword bone), baked to our loader's format, drawn at 0.9.
+
+cryptbound_revenant.png (bbmodels/cryptbound_revenant.json): the cryptbound revenant
+  "Cryptbound Revenant" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/cryptbound-revenant,
+  CC BY 4.0 (tools/bbmodels/cryptbound-revenant.bbmodel). Changes: baked to our loader's format, drawn at 0.62.
