@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: quill
 from: coordinator (for the "Find parts left out of PRs" thread, 2026-11-13)
 asked: 2026-11-13
@@ -23,3 +23,4 @@ PR #1377 merged into master before its round 4 commits (Impaler gear, hide trait
 ## Notes
 - Andy merges only on "merge".
 - 2026-11-13 00:09 Text pass: rewrote kitchen/lang/parts/left_out_older.json (2 messages: bones.boiling 'go in to boil' -> 'boil', beetles_restocked 'come back to the flesh' -> 'return to the flesh', keys unchanged); reviewed kingdoms/lang/parts/inhabitants.json round-4 strings (names and subtitles already plain, no rewording); added changes/kingdoms/claude-pr1377-round4-text.md and changes/kitchen/claude-pr1377-round4-text.md. PR #1416.
+- 2026-11-13 06:31 PR #1416 is merged into master; moved to Inbox/Done.

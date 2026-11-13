@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Sengoku Jidai picks for the blossom villages, on a far continent
 branch: claude/project-thread-795vuu-p3
 with: Andy
@@ -32,3 +32,4 @@ PR #1410 merged 2026-11-13. Second half of patch 2 (blossom merchantmen, bought 
 Patch 2 second half (BlossomTraders, passage) is PR #1411, 2026-11-13.
 PR #1411 merged 2026-11-13. Patch 2 done. Patch 3 (building blocks) next on -p3.
 Patch 3 first half (BlossomBlocks, Wards) is PR #1413, 2026-11-13.
+- 2026-11-13 06:31 PR #1413 is merged into master; moved to Agents/Done.
