@@ -416,3 +416,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:29 PM ET (Sengoku picks thread): Andy, after reading the lore paragraph: "it is called Mohknee and you
   can encounter tideborn islands on the way." The blossom continent is Mohknee; Tideborn island villages stand along
   the crossing. Taken as his yes to the paragraph (my reading); patch 1 started.
+- 2026-11-12 11:18 PM ET (Sengoku picks thread, patch 1, my calls, not yet confirmed by Andy): Mohknee's middle is at
+  x 28,000 z 0, 3,000 blocks in radius; its sea begins 7,500 east of the origin; eight crossing islands about 350 blocks
+  across, each with one village; vanilla villages and other mods' surface structures are kept off Mohknee; every
+  settlement there is Blossom; cherry groves cover about 13% of it. PR #1407.
