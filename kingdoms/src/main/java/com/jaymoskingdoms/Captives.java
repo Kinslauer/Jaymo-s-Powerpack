@@ -613,7 +613,7 @@ public final class Captives {
 	 */
 	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home, int standing) {
 		v.removeAttached(CAPTIVE);
-		Doubles.arrived(level, v);
+		Doubles.arrived(level, v, player);
 		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
 		BorderClashes.home(level.getServer(), v.getUUID());
 		Quests.rescued(player, v);
