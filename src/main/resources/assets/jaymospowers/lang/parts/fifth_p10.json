@@ -1,0 +1,10 @@
+{
+  "deathScreen.jaymospowers.limbo": "Limbo",
+  "deathScreen.jaymospowers.waiting": "Someone may yet reach you. %s seconds left.",
+  "key.jaymospowers.limbo_leave": "Leave Limbo (hold)",
+  "limbo.jaymospowers.title": "You are in Limbo",
+  "limbo.jaymospowers.line": "Watch over your body. Your friends may bury you, or a druid may give you another.",
+  "limbo.jaymospowers.leave": "Hold %s to give it up and reincarnate",
+  "message.jaymospowers.limbo.reborn": "You wake in another body. Your name and your memories are yours still; the old body's gifts are not.",
+  "message.jaymospowers.limbo.no_spirit": "No one is waiting in the dark for this body."
+}

@@ -34,6 +34,8 @@ public final class FrostFeatures {
 	public static final int CRYSTAL_SHARE = 2, SNOW_SHARE = 2;
 	/** Thin ice blob radius (blocks, from 2 to this). */
 	public static final int THIN_RADIUS = 4;
+	/** The deepest water a lake crust is laid over (blocks): deeper is sea. */
+	public static final int LAKE_DEPTH = 7;
 
 	private FrostFeatures() {
 	}
@@ -161,6 +163,55 @@ public final class FrostFeatures {
 
 		private static boolean frozenWater(WorldGenLevel level, BlockPos pos) {
 			return level.getBlockState(pos).is(Blocks.ICE) && level.getFluidState(pos.below()).is(FluidTags.WATER);
+		}
+	}
+
+	/**
+	 * Thin ice on a cold lake that has not frozen through (Andy's pick F3): a crust of brittle ice over still water, in the
+	 * cold biomes that are not snowy ones (the snowy ones have {@link ThinIce}). Only a shallow lake with a bottom within
+	 * {@link #LAKE_DEPTH} blocks takes it (never the sea), and it is laid over the middle of the water as a blob, so a walker
+	 * who trusts the white finds out under their feet: it cracks as brittle ice does, and the water takes them.
+	 */
+	public record LakeCrust() implements Feature {
+		public static final MapCodec<LakeCrust> CODEC = MapCodec.unit(LakeCrust::new);
+
+		@Override
+		public MapCodec<LakeCrust> codec() {
+			return CODEC;
+		}
+
+		/** {@code origin} is the first open block over the ground (the heightmap): the lake's surface is just under it. */
+		@Override
+		public boolean place(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos origin) {
+			BlockPos centre = origin.below();
+			if (!lake(level, centre)) {
+				return false;
+			}
+			int radius = 2 + random.nextInt(THIN_RADIUS - 1);
+			boolean placed = false;
+			for (int dx = -radius; dx <= radius; dx++) {
+				for (int dz = -radius; dz <= radius; dz++) {
+					BlockPos pos = centre.offset(dx, 0, dz);
+					if (dx * dx + dz * dz <= radius * radius - random.nextInt(2) && lake(level, pos)) {
+						level.setBlock(pos, Frost.BRITTLE_ICE.defaultBlockState(), Block.UPDATE_CLIENTS);
+						placed = true;
+					}
+				}
+			}
+			return placed;
+		}
+
+		/** Still water at the top, open air over it, and a bottom not far below. */
+		private static boolean lake(WorldGenLevel level, BlockPos pos) {
+			if (!level.getFluidState(pos).isSource() || !level.getFluidState(pos).is(FluidTags.WATER) || !level.getBlockState(pos.above()).isAir()) {
+				return false;
+			}
+			for (int i = 1; i <= LAKE_DEPTH; i++) {
+				if (!level.getFluidState(pos.below(i)).is(FluidTags.WATER)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

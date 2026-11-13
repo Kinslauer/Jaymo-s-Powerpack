@@ -791,6 +791,18 @@ public class CorpseEntity extends Entity {
 		swingLeft = Mth.clamp(swingLeft + swingLeftVel, -1.4F, 1.4F);
 	}
 
+	/** A dead player's hotbar, taken off the body for them to have again (a rebirth); the body keeps none. */
+	public List<ItemStack> takeHotbar() {
+		List<ItemStack> taken = new ArrayList<>();
+		for (int i = 0; i < this.hotbar.size(); i++) {
+			if (!this.hotbar.get(i).isEmpty()) {
+				taken.add(this.hotbar.get(i));
+				this.hotbar.set(i, ItemStack.EMPTY);
+			}
+		}
+		return taken;
+	}
+
 	public String ownerId() {
 		return this.entityData.get(OWNER);
 	}
@@ -1512,6 +1524,10 @@ public class CorpseEntity extends Entity {
 
 	private void serverTick(ServerLevel level) {
 		age++;
+		if (Keeping.kept(this, level)) {
+			// kept fresh (a priest's rite, a salt-and-herb wrap): its clock stands still, so it neither rots nor gets up
+			age--;
+		}
 		if (!isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && roasts() && onLitCampfire(level)) {
 			// (0.5.77) a small animal laid on a campfire roasts instead of burning away
 			if (roast(level)) {

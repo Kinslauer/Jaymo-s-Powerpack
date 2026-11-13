@@ -177,6 +177,9 @@ public final class Wounds {
 		HealStruggle.register();
 		// (0.20.26) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
 		Mortality.register();
+		// Andy's picks E3 and E5: a minute for a reviver before a final death, and Limbo beside Reincarnate
+		Revival.register();
+		Limbo.register();
 		// (0.19.20) hostiles walk up and finish a downed player off, filmed for them
 		MobExecutions.register();
 		// (0.15.82) up from the downed, but battered

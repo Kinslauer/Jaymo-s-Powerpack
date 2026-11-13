@@ -432,10 +432,11 @@ public final class KitchenCompat {
 		return Boolean.TRUE.equals(call(HOSTILE, corpse));
 	}
 
-	/** (0.5.37) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */
+	/** A corpse a necromancer can raise: lying free, not a player's (their things stay safe), and not kept fresh by a rite or a wrap. */
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
-			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity));
+			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
+			&& !BodyKeeping.isPreserved(entity);
 	}
 
 	/** (0.5.37) What the corpse was in life, or null. */

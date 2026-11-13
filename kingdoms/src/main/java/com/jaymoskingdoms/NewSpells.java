@@ -30,7 +30,8 @@ public final class NewSpells {
 	public static final List<String> IDS = List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "speak_animals", "hut",
 		"create_food", "purify_food", "feather_fall", "spider_climb", "water_walk", "long_jump", "misty_step", "web", "grease", "fog", "darkness",
 		"silence", "spike_growth", "charm", "command", "suggestion", "hold", "zone_of_truth", "geas", "modify_memory", "locate_object",
-		"locate_creature", "augury", "scrying", "plant_growth", "control_weather", "moonbeam", "heroes_feast", "find_familiar");
+		"locate_creature", "augury", "scrying", "plant_growth", "control_weather", "moonbeam", "heroes_feast", "find_familiar",
+		"calling_back", "keeping", "rebirth");
 
 	/** What each costs in mana at the staff. */
 	static final Map<String, Float> COST = Map.ofEntries(
@@ -42,7 +43,8 @@ public final class NewSpells {
 		Map.entry("charm", 18.0F), Map.entry("command", 8.0F), Map.entry("suggestion", 14.0F), Map.entry("hold", 22.0F), Map.entry("zone_of_truth", 16.0F),
 		Map.entry("geas", 30.0F), Map.entry("modify_memory", 24.0F), Map.entry("locate_object", 10.0F), Map.entry("locate_creature", 12.0F),
 		Map.entry("augury", 8.0F), Map.entry("scrying", 28.0F), Map.entry("plant_growth", 30.0F), Map.entry("control_weather", 60.0F),
-		Map.entry("moonbeam", 24.0F), Map.entry("heroes_feast", 50.0F), Map.entry("find_familiar", 20.0F));
+		Map.entry("moonbeam", 24.0F), Map.entry("heroes_feast", 50.0F), Map.entry("find_familiar", 20.0F),
+		Map.entry("calling_back", 70.0F), Map.entry("keeping", 12.0F), Map.entry("rebirth", 80.0F));
 	/** The wait after a staff cast of each (ticks). */
 	static final Map<String, Integer> COOLDOWN = Map.ofEntries(
 		Map.entry("counterspell", 20 * 3), Map.entry("dispel", 20 * 8), Map.entry("ward_line", 20 * 20), Map.entry("find_magic", 20 * 5),
@@ -53,7 +55,8 @@ public final class NewSpells {
 		Map.entry("charm", 20 * 20), Map.entry("command", 20 * 6), Map.entry("suggestion", 20 * 20), Map.entry("hold", 20 * 25), Map.entry("zone_of_truth", 20 * 30),
 		Map.entry("geas", 20 * 60), Map.entry("modify_memory", 20 * 60), Map.entry("locate_object", 20 * 10), Map.entry("locate_creature", 20 * 10),
 		Map.entry("augury", 20 * 30), Map.entry("scrying", 20 * 60), Map.entry("plant_growth", 20 * 60), Map.entry("control_weather", 20 * 60 * 5),
-		Map.entry("moonbeam", 20 * 40), Map.entry("heroes_feast", 20 * 60 * 5), Map.entry("find_familiar", 20 * 60 * 2));
+		Map.entry("moonbeam", 20 * 40), Map.entry("heroes_feast", 20 * 60 * 5), Map.entry("find_familiar", 20 * 60 * 2),
+		Map.entry("calling_back", 20 * 60 * 10), Map.entry("keeping", 20 * 30), Map.entry("rebirth", 20 * 60 * 20));
 	/** What each is for, as {@link Mana} counts it (harm is the default). */
 	static final Map<String, Integer> INTENT = Map.ofEntries(
 		Map.entry("counterspell", Mana.WARD), Map.entry("dispel", Mana.WILL), Map.entry("ward_line", Mana.WARD), Map.entry("find_magic", Mana.WILL),
@@ -64,9 +67,10 @@ public final class NewSpells {
 		Map.entry("charm", Mana.WILL), Map.entry("command", Mana.WILL), Map.entry("suggestion", Mana.WILL), Map.entry("hold", Mana.WILL),
 		Map.entry("zone_of_truth", Mana.WARD), Map.entry("geas", Mana.WILL), Map.entry("modify_memory", Mana.WILL), Map.entry("locate_object", Mana.WILL),
 		Map.entry("locate_creature", Mana.WILL), Map.entry("augury", Mana.WILL), Map.entry("scrying", Mana.WILL), Map.entry("plant_growth", Mana.HEAL),
-		Map.entry("control_weather", Mana.WILL), Map.entry("moonbeam", Mana.WARD), Map.entry("heroes_feast", Mana.HEAL), Map.entry("find_familiar", Mana.WARD));
+		Map.entry("control_weather", Mana.WILL), Map.entry("moonbeam", Mana.WARD), Map.entry("heroes_feast", Mana.HEAL), Map.entry("find_familiar", Mana.WARD),
+		Map.entry("calling_back", Mana.HEAL), Map.entry("keeping", Mana.WARD), Map.entry("rebirth", Mana.HEAL));
 	/** The small useful ones that can be cast slowly with no mana ({@link Rituals}). */
-	public static final Set<String> RITUALS = Set.of("ward_line", "dispel", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar");
+	public static final Set<String> RITUALS = Set.of("ward_line", "dispel", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar", "keeping");
 	/** The rite of calling a familiar back from its ash: no spell of its own, known with the one that bound it. */
 	public static final String CALL_FAMILIAR = "call_familiar";
 	/** What a Sorcerer is born knowing: the quick, small ones. */
@@ -134,6 +138,9 @@ public final class NewSpells {
 		}
 		if (NatureRites.ours(spell)) {
 			return NatureRites.cast(spell, level, player, power);
+		}
+		if (DeathRites.ours(spell)) {
+			return DeathRites.cast(spell, level, player, power);
 		}
 		return switch (spell) {
 			case "find_familiar", "call_familiar" -> Familiars.cast(spell, level, player);

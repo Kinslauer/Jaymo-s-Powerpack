@@ -44,6 +44,7 @@
 		"DownedMobMixin",
 		"DownedHealMixin",
 		"DownedLimboMixin",
+		"RevivalRespawnMixin",
 		"FistGuardInventoryMixin",
 		"SunShelterSkeletonMixin",
 		"SunShelterZombieMixin",
