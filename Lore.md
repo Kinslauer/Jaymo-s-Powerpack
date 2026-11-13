@@ -1222,6 +1222,13 @@ traveller in a goblin mask is laughed past. With its village gone a scout runs w
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
 
+(new) **The wood-wisps** (Andy, 2026-11-13). The Sylvan elders live so long that they forget nothing, and they send what
+they know out on the wind. A wood-wisp is a little of an elder's memory given wings: a small, half-there Sylvan shape that
+comes when someone says its name aloud and asks a question in earnest. It knows the workings of the world (the powers,
+the kingdoms, the kitchen) because the elders watched them made. It cannot fight, cannot be hurt, and goes back to the
+trees when nobody is asking. Folk call the one that answers them **Youth**, because it always looks young. (In game:
+the Youth wisp, Kingdoms PR #1467, which Hermes's YOUTH answers players through.)
+
 ## Why the peoples don't like each other
 
 Every grudge below rests on something the game already does to a blood, or on an old quarrel between the faiths. They
