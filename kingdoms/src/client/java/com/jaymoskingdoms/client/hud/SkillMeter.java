@@ -28,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,6 +39,12 @@ import org.jspecify.annotations.Nullable;
  * drops in at the top of the screen with its name and level, the fill burns along to the new amount (a white-hot front
  * throwing sparks back, the fresh part glowing and cooling to the track's colour), waits a moment and slides back out.
  * A level reached flashes the bar, starts it again from empty, and puts a small toast under it with a low, quiet chime.
+ *
+ * <p>Andy: "if there are repeat gains it should wait and show it all as one burn. also it shouldnt show in combat,
+ * instead each increased stat should burn in afterward." So a gain isn't shown at once: its track waits until nothing
+ * more has come to it for {@link #GATHER_TICKS}, and until the fight is over (nobody hurt near you for
+ * {@link #COMBAT_QUIET_TICKS}); then every track that grew burns in, one after another, each with all it gathered. A
+ * fight that starts while the meter is up sends it back out, to pick up where it stopped.
  *
  * <p>Nothing is sent for it: both tracks are attachments already synced to their own player, so the meter watches them
  * each tick and shows whatever went up. One meter shows at a time; gains in another track wait their turn.
@@ -71,6 +78,13 @@ public final class SkillMeter {
 	static final float CHIME_PITCH = 0.55F, CHIME_VOLUME = 0.45F;
 	/** After joining, respawning or changing world, changes for this many ticks are the save arriving, not gains. */
 	static final int SETTLE_TICKS = 60;
+	/** A track shows once nothing more has come to it for this long (ticks), so a run of gains is one burn. */
+	static final int GATHER_TICKS = 50;
+	/** A fight is on until nobody within {@link #COMBAT_RANGE} blocks (you included) has been hurt for this long (ticks). */
+	static final int COMBAT_QUIET_TICKS = 100;
+	static final double COMBAT_RANGE = 12.0;
+	/** How often the fight is looked for (ticks). */
+	static final int COMBAT_CHECK_EVERY = 5;
 	/** The other mods' queue of gains: each entry {id, colour, highest level, label by level, toast lines by level, from, to}. */
 	static final String SHARE = "jaymos:skill_meter";
 
@@ -84,6 +98,8 @@ public final class SkillMeter {
 		/** The toast for reaching a level (its lines), or null for none (a milestone has its own fanfare). */
 		final IntFunction<@Nullable List<Component>> toast;
 		float shown, target;
+		/** When it last gained ({@link #ticks}). */
+		int lastGain;
 		/** The share of the bar where the still-glowing part starts. */
 		float coolFrom;
 
@@ -96,6 +112,7 @@ public final class SkillMeter {
 			this.shown = from;
 			this.target = to;
 			this.coolFrom = share(from);
+			this.lastGain = ticks;
 		}
 
 		float share(float position) {
@@ -103,6 +120,8 @@ public final class SkillMeter {
 		}
 	}
 
+	/** Client ticks counted here, and the last one a fight was seen on. */
+	private static int ticks, lastFight = -COMBAT_QUIET_TICKS;
 	private static @Nullable WeakReference<LocalPlayer> watched;
 	private static int settle;
 	/** Track id -> the experience last seen. */
@@ -154,6 +173,11 @@ public final class SkillMeter {
 			slide = 0.0F;
 			toastLeft = 0.0F;
 			return;
+		}
+		ticks++;
+		if (player.hurtTime > 0 || ticks % COMBAT_CHECK_EVERY == 0 && !player.level().getEntitiesOfClass(LivingEntity.class,
+			player.getBoundingBox().inflate(COMBAT_RANGE), e -> e != player && e.isAlive() && e.hurtTime > 0).isEmpty()) {
+			lastFight = ticks;
 		}
 		if (watched == null || watched.get() != player) {
 			watched = new WeakReference<>(player);
@@ -229,17 +253,17 @@ public final class SkillMeter {
 		if (to <= from) {
 			return;
 		}
-		if (current != null && current.id.equals(id)) {
-			current.target = Math.max(current.target, to);
-			hold = HOLD;
-			return;
-		}
 		Track waiting = WAITING.get(id);
 		if (waiting != null) {
 			waiting.target = Math.max(waiting.target, to);
+			waiting.lastGain = ticks;
 			return;
 		}
-		WAITING.put(id, new Track(id, color & 0xFFFFFF, maxLevel, label, toast, from, to));
+		// (more for the track that's up now gathers too, and carries on from where that one ends)
+		float start = current != null && current.id.equals(id) ? Math.max(from, current.target) : from;
+		if (to > start) {
+			WAITING.put(id, new Track(id, color & 0xFFFFFF, maxLevel, label, toast, start, to));
+		}
 	}
 
 	// ---- drawing -----------------------------------------------------------------------------------------------
@@ -280,24 +304,49 @@ public final class SkillMeter {
 	private static void advance(float dt) {
 		toastLeft = Math.max(0.0F, toastLeft - dt);
 		heat = Math.max(0.0F, heat - dt);
+		boolean fight = ticks - lastFight < COMBAT_QUIET_TICKS;
 		if (current == null) {
-			Iterator<Track> next = WAITING.values().iterator();
-			if (!next.hasNext()) {
+			if (fight) {
 				return;
 			}
-			current = next.next();
-			next.remove();
+			// the first track that has finished gathering
+			Iterator<Track> next = WAITING.values().iterator();
+			while (current == null && next.hasNext()) {
+				Track waiting = next.next();
+				if (ticks - waiting.lastGain >= GATHER_TICKS) {
+					current = waiting;
+					next.remove();
+				}
+			}
+			if (current == null) {
+				return;
+			}
 			slide = 0.0F;
 			hold = HOLD;
 			flash = 0.0F;
 		}
 		Track track = current;
+		// (what gathered for this track while it was up: on from where it stands)
+		Track more = WAITING.get(track.id);
+		if (more != null && !fight && ticks - more.lastGain >= GATHER_TICKS) {
+			WAITING.remove(track.id);
+			track.target = Math.max(track.target, more.target);
+			hold = HOLD;
+		}
 		boolean filling = track.shown < track.target;
-		// (it stays while it fills, while it waits, and while its toast is up; then makes way)
-		boolean stay = filling || flash > 0.0F || hold > 0.0F || toastLeft > TOAST_FADE;
+		// (it stays while it fills, while it waits, and while its toast is up; then makes way. A fight sends it out at once)
+		boolean stay = !fight && (filling || flash > 0.0F || hold > 0.0F || toastLeft > TOAST_FADE);
 		slide = Mth.clamp(slide + (stay ? dt : -dt) / SLIDE, 0.0F, 1.0F);
 		if (!stay && slide <= 0.0F) {
 			current = null;
+			if (filling) {
+				// (a fight cut it short: the rest waits with whatever else gathers, ready as soon as it's quiet)
+				Track rest = WAITING.remove(track.id);
+				track.target = rest == null ? track.target : Math.max(track.target, rest.target);
+				track.lastGain = rest == null ? ticks - GATHER_TICKS : rest.lastGain;
+				track.coolFrom = track.share(track.shown);
+				WAITING.put(track.id, track);
+			}
 			return;
 		}
 		if (slide < 1.0F) {
