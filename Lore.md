@@ -521,14 +521,14 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
-**What the great ones leave** (new). A dragon's breath is in its marrow, and the bone keeps it after the dragon is dead:
+**What the great ones leave** (Andy approved, 2026-11-12). A dragon's breath is in its marrow, and the bone keeps it after the dragon is dead:
 ember bone from the fire dragons (Notus, Ignivorus), rime bone from the frost ones (Boreas, Atroxiia), venom bone from the
 acid ones (Zephyrus, Varasuchus), storm bone from the rest (Eurus, Aeolus, Aetherion, Stegonaut). Smiths shape it like any
 bone and the tool keeps the breath. Dragon hide does not burn, which is why the old dragon hunters carried it as a
 shield. The teeth of the thing under the wreck are hooked and hold in the water. Whoever fells a great one takes its
 likeness for a trophy: a dragon's skull, the knight's helm, the worm's maw; nothing is written on them.
 
-**The chain axe** (new). A boarding weapon of the corsairs: an axe on a ship's chain, thrown across the gap between two
+**The chain axe** (Andy approved, 2026-11-12). A boarding weapon of the corsairs: an axe on a ship's chain, thrown across the gap between two
 decks to bite a rail or a man and haul him over. Any smith with iron can forge one; it has no magic in it.
 
 **Four more great ones** (Andy approved, 2026-11-12). The **thing under
@@ -543,7 +543,7 @@ anyone told him to; his sword lies with him and nowhere else.
 **The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
 Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
 
-(new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
+**The roosts, the ring and the den** (BossRise patch 3; Andy approved, 2026-11-12). The **roosts** are the demons' country's own
 watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
 for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
 where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
@@ -964,7 +964,7 @@ builds them, and clockwork hornets, on purpose. He rebuilds fighters into androi
 reaped, a body raised as a thrall) and **Blood** (paid in blood rather than mana). Practising them is a crime and
 brings corruption. The **blood witch** is their face in the world.
 
-(new) **Volcanic glass and the black flame** (BossRise patch 11, 2026-11-13). The black glass comes from the demons'
+**Volcanic glass and the black flame** (BossRise patch 11; Andy approved, 2026-11-12). The black glass comes from the demons'
 country in the Nether, where the fire rivers cool: the same glass the gauntlet is made of. Working it is a craft and no
 bloodline, so a Sorcerer of any element can learn it from a scroll: splinters, spires out of the ground, a skin of it,
 a pool poured molten. The court wizards and the camps' shamans carry those scrolls. The **black flame** is the demons'

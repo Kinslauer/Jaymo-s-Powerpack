@@ -447,3 +447,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
   fire dive went to Pyre and replaced Magma Trail (B), my pick of its weakest move; the Emberborn kit is unchanged.
 - 2026-11-13 (Blossom lands thread): Andy said "merge" for PR #1407 (Mohknee, patch 1). Merged by squash.
   Patch 2 (villagers' talk of Mohknee, blossom merchantmen, a hired captain or companion at the helm) is next.
+- 2026-11-12 11:24 PM ET (Boss anim mods thread): Andy: "the lore is fine". Approved the four BossRise paragraphs in
+  Lore.md: "The roosts, the ring and the den", "What the great ones leave", "The chain axe", "Volcanic glass and the
+  black flame" (the (new) marks are off). All twelve BossRise patches are merged (last: #1406).
