@@ -81,6 +81,16 @@ public final class BoxingClient {
 				save(state);
 			}
 		});
+		// (Jung) a boxer's left click at the air or a block is a punch too: the server throws the string's next one at
+		// nobody (Boxing.AirPunch), so shadowboxing shows the jab, cross... A click on a living thing goes the usual way
+		// (Boxing's attack event); the click itself is left alone either way (the swing, breaking a block)
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (clicks > 0 && !player.isUsingItem() && !(minecraft.hitResult instanceof net.minecraft.world.phys.EntityHitResult) && Boxing.boxing(player)
+				&& ClientPlayNetworking.canSend(Boxing.AirPunch.TYPE)) {
+				ClientPlayNetworking.send(new Boxing.AirPunch());
+			}
+			return false;
+		});
 		HudElementRegistry.addFirst(JaymosPowers.id("boxing_blur"), BoxingClient::draw);
 		HudElementRegistry.addLast(JaymosPowers.id("boxing_style"), BoxingClient::drawStyle);
 	}
