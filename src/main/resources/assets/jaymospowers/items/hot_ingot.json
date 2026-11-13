@@ -47,7 +47,7 @@
         "when": "silver",
         "model": {
           "type": "minecraft:model",
-          "model": "jaymospowers:item/tinkering/silver_ingot",
+          "model": "jaymospowers:item/silver/silver_ingot",
           "tints": [
             {
               "type": "minecraft:constant",

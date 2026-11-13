@@ -10,7 +10,10 @@ The file: 17 cubes (16 of the sword, one tall plane for the energy sheet), two a
 blade's (19 frames) and the sheet's (27), each its own texture with its own .mcmeta, seven frames a second (three ticks a
 frame). The sheet is drawn at full light. The cubes' turns (all about x, 52.5 and so on) are kept exactly (26.3 reads an
 element's rotation as free x/y/z degrees: freeform.py). The model is turned a quarter about y so it lies like a sprite
-(the sheet facing front, the tip leaning right), and our display() puts its grip in the fist like the other 3D relics.
+(the sheet facing front, the tip leaning left), and our display() puts its grip in the fist like the other 3D relics.
+Held, display()'s quarter turn back sends the model's -x away from the wielder, so the hooked tip leans forward the way
+the file's own hold has it (Andy: turned the other way, +x, it came back toward the player and looked backwards). The
+inventory and item frame views are turned half round so the icon still reads like a sprite: grip low left, tip up right.
 
 Run from the repo root: python3 -I tools/blockbench/sunfang.py
 """
@@ -31,10 +34,11 @@ NAMES = ["sunfang_fx", "sunfang_blade"]
 FRAMETIME = 3
 # the energy sheet's texture, drawn at full light
 SHEET = 0
-# The file stands the sword upright with its sheet facing sideways (x) and its tip leaning toward -z. The model is turned
-# a quarter about y (x' = -z, z' = x) so the sheet faces front and the tip leans toward +x like every other sprite-style
-# blade, which is what display() holds in the fist; the sword's axis (x 7.75, z 7.6) goes to the middle of the model box.
-FRAME = ((0, 0, -1), (0, 1, 0), (1, 0, 0))
+# The file stands the sword upright with its sheet facing sideways (x) and its tip leaning toward -z, away from whoever
+# holds it (its own held display has no turn). The model is turned a quarter about y (x' = z, z' = -x) so the sheet faces
+# front and the tip leans toward -x: display()'s -90 about y in the hand takes -x back to -z, so it still leans away.
+# The sword's axis (x 7.75, z 7.6) goes to the middle of the model box.
+FRAME = ((0, 0, 1), (0, 1, 0), (-1, 0, 0))
 PIVOT, CENTRE = (7.75, 0, 7.6), (8, 0, 8)
 
 bb = json.load(open(SRC))
@@ -88,5 +92,10 @@ model = {
     # the grip (the handle, y 1 to 5) in the fist, the blade's length (y -1.75 to 28) centred on 13
     "display": display(tp=0.75, fp=0.6, gui=0.5, center_y=13, grip_y=3),
 }
+# the icon and the item frame: half round about y first, so the tip's hook bows the way it did (the roll goes the other
+# way to keep the grip low left and the tip up right)
+for view in ("gui", "fixed"):
+    r = model["display"][view]["rotation"]
+    model["display"][view]["rotation"] = [r[0], 180, -r[2]]
 write_json(f"{ASSETS}/models/item/sunfang.json", model)
 print(len(elements), "elements")

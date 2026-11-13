@@ -5,6 +5,8 @@
     "iron": "jaymoskingdoms:block/ship_cannon_iron",
     "wood": "jaymoskingdoms:block/ship_cannon_wood",
     "band": "jaymoskingdoms:block/ship_cannon_band",
+    "gun": "#iron",
+    "brass": "#band",
     "bore": "jaymoskingdoms:block/ship_cannon_bore",
     "rope": "jaymoskingdoms:block/sail_rope"
   },
