@@ -198,6 +198,41 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/accessory_bog_iron"
                   }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/accessory_deep_tooth"
+                  }
                 }
               ],
               "fallback": {
@@ -390,6 +425,41 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/handle_bog_iron"
+                  }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/handle_deep_tooth"
                   }
                 }
               ],
@@ -588,6 +658,41 @@
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_broken_bog_iron"
                     }
+                  },
+                  {
+                    "when": "ember_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_ember_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "rime_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_rime_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "venom_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_venom_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "storm_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_storm_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "deep_tooth",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_broken_deep_tooth"
+                    }
                   }
                 ],
                 "fallback": {
@@ -780,6 +885,41 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/scythe/head_bog_iron"
+                    }
+                  },
+                  {
+                    "when": "ember_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_ember_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "rime_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_rime_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "venom_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_venom_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "storm_dragon_bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_storm_dragon_bone"
+                    }
+                  },
+                  {
+                    "when": "deep_tooth",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/scythe/head_deep_tooth"
                     }
                   }
                 ],
@@ -996,6 +1136,41 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/scythe/binding_bog_iron"
                   }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/scythe/binding_deep_tooth"
+                  }
                 }
               ],
               "fallback": {
@@ -1196,6 +1371,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/accessory_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/accessory_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -1388,6 +1598,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/handle_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/handle_deep_tooth"
               }
             }
           ],
@@ -1586,6 +1831,41 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_broken_bog_iron"
                 }
+              },
+              {
+                "when": "ember_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_ember_dragon_bone"
+                }
+              },
+              {
+                "when": "rime_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_rime_dragon_bone"
+                }
+              },
+              {
+                "when": "venom_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_venom_dragon_bone"
+                }
+              },
+              {
+                "when": "storm_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_storm_dragon_bone"
+                }
+              },
+              {
+                "when": "deep_tooth",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_broken_deep_tooth"
+                }
               }
             ],
             "fallback": {
@@ -1778,6 +2058,41 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/scythe/large/head_bog_iron"
+                }
+              },
+              {
+                "when": "ember_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_ember_dragon_bone"
+                }
+              },
+              {
+                "when": "rime_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_rime_dragon_bone"
+                }
+              },
+              {
+                "when": "venom_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_venom_dragon_bone"
+                }
+              },
+              {
+                "when": "storm_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_storm_dragon_bone"
+                }
+              },
+              {
+                "when": "deep_tooth",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/scythe/large/head_deep_tooth"
                 }
               }
             ],
@@ -1993,6 +2308,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/scythe/large/binding_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/scythe/large/binding_deep_tooth"
               }
             }
           ],

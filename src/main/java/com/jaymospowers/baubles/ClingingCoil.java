@@ -36,7 +36,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * would die under water, of drowning or anything else: then it lets go of them for good (it is used up), and they are
  * left alive with a full breath, {@link #BREATH_TICKS} ticks of water breathing and a shove toward the surface.
  * <p>
- * The deep tooth is one of the hooks from its arms, a plain item for now.
+ * The deep tooth is one of the hooks from its arms: a Tinkering material ({@code TinkerMaterial.DEEP_TOOTH}), shaped at
+ * the Part Builder like bone.
  */
 public final class ClingingCoil extends BaubleItem {
 	/** What the wearer is left with: health, ticks of water breathing and of regeneration, and the shove upward. */
@@ -55,6 +56,7 @@ public final class ClingingCoil extends BaubleItem {
 		COIL = Baubles.add(Registry.register(BuiltInRegistries.ITEM, key, new ClingingCoil(new Item.Properties().setId(key).stacksTo(1).rarity(Rarity.RARE))));
 		ResourceKey<Item> tooth = ResourceKey.create(Registries.ITEM, JaymosPowers.id("deep_tooth"));
 		DEEP_TOOTH = Registry.register(BuiltInRegistries.ITEM, tooth, new Item(new Item.Properties().setId(tooth).rarity(Rarity.UNCOMMON)));
+		com.jaymospowers.tinkering.TinkerMaterial.own(com.jaymospowers.tinkering.TinkerMaterial.DEEP_TOOTH, 1, DEEP_TOOTH);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(DEEP_TOOTH));
 		// (default phase: before Downed's, which runs last)
 		ServerLivingEntityEvents.ALLOW_DEATH.register(ClingingCoil::letGo);

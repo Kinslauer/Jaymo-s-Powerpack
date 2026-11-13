@@ -188,6 +188,41 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/battlesign/handle_bog_iron"
             }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/battlesign/handle_deep_tooth"
+            }
           }
         ],
         "fallback": {
@@ -385,6 +420,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_broken_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_broken_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -577,6 +647,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/battlesign/head_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/battlesign/head_deep_tooth"
               }
             }
           ],

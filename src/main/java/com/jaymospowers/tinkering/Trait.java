@@ -52,7 +52,13 @@ public enum Trait {
 	// (0.18.56) back home: star metal's own trait, and the two edges a quench in a far world's cold or ember gives
 	STARLIT("starlit", ChatFormatting.LIGHT_PURPLE),
 	COLD_EDGE("cold_edge", ChatFormatting.AQUA),
-	HOT_EDGE("hot_edge", ChatFormatting.GOLD);
+	HOT_EDGE("hot_edge", ChatFormatting.GOLD),
+	// the great ones' leavings: a dragon's bone keeps its breath (one trait a breath), a deep tooth holds in the water
+	EMBER_MARROW("ember_marrow", ChatFormatting.RED),
+	RIME_MARROW("rime_marrow", ChatFormatting.AQUA),
+	VENOM_MARROW("venom_marrow", ChatFormatting.GREEN),
+	STORM_MARROW("storm_marrow", ChatFormatting.YELLOW),
+	HOOKED("hooked", ChatFormatting.DARK_AQUA);
 
 	public final String id;
 	public final ChatFormatting colour;

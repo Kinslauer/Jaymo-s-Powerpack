@@ -188,6 +188,41 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickadze/handle_bog_iron"
             }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/handle_deep_tooth"
+            }
           }
         ],
         "fallback": {
@@ -385,6 +420,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickadze/pick_broken_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_broken_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -577,6 +647,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickadze/pick_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickadze/pick_deep_tooth"
               }
             }
           ],
@@ -771,6 +876,41 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickadze/adze_bog_iron"
+            }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickadze/adze_deep_tooth"
             }
           }
         ],

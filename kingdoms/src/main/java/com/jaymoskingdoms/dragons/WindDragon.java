@@ -80,6 +80,8 @@ import org.jspecify.annotations.Nullable;
  * its favourite best) and an exhausted dragon glides down. R breathes where the rider looks.
  */
 public abstract class WindDragon extends AbstractHorse {
+	/** What a wild one leaves when it is killed: this many bones and hides at least, and up to this many more. */
+	static final int BONES_LEAST = 3, BONES_MORE = 3, HIDES_LEAST = 2, HIDES_MORE = 2;
 	// ---- body (the defaults are Notus's; a species overrides the hooks) ----
 	/** Where its riders sit: height, and how far forward the rider and back the passenger. */
 	static final double SEAT_Y = 1.85, SEAT_FRONT = 0.3, SEAT_BACK = -0.6;
@@ -1597,7 +1599,24 @@ public abstract class WindDragon extends AbstractHorse {
 				}
 			}
 		}
+		if (!this.isTamed() && !this.isRemoved() && this.level() instanceof ServerLevel level) {
+			this.leaveParts(level);
+		}
 		super.die(source);
+	}
+
+	/** A wild dragon's bones keep its breath (Powers' dragon bones, one a breath), and its hide comes off whole. */
+	private void leaveParts(ServerLevel level) {
+		String bone = switch (species()) {
+			case "notus", "ignivorus" -> "ember_dragon_bone";
+			case "boreas", "atroxiia" -> "rime_dragon_bone";
+			case "zephyrus", "varasuchus" -> "venom_dragon_bone";
+			default -> "storm_dragon_bone";
+		};
+		BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", bone))
+			.ifPresent(item -> this.spawnAtLocation(level, new net.minecraft.world.item.ItemStack(item, BONES_LEAST + this.random.nextInt(BONES_MORE + 1))));
+		BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "dragon_hide"))
+			.ifPresent(item -> this.spawnAtLocation(level, new net.minecraft.world.item.ItemStack(item, HIDES_LEAST + this.random.nextInt(HIDES_MORE + 1))));
 	}
 
 	/**

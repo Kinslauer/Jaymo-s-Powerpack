@@ -41,6 +41,41 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/throwing_axe/shaft_blaze_rod"
             }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/shaft_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/shaft_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/shaft_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/shaft_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/shaft_deep_tooth"
+            }
           }
         ],
         "fallback": {
@@ -233,6 +268,41 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/throwing_axe/head_bog_iron"
+            }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/throwing_axe/head_deep_tooth"
             }
           }
         ],

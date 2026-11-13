@@ -188,6 +188,41 @@
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/handle_bog_iron"
             }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/handle_deep_tooth"
+            }
           }
         ],
         "fallback": {
@@ -385,6 +420,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_broken_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -577,6 +647,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/minotaur_axe/front_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/minotaur_axe/front_deep_tooth"
               }
             }
           ],
@@ -771,6 +876,41 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/minotaur_axe/back_bog_iron"
+            }
+          },
+          {
+            "when": "ember_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_ember_dragon_bone"
+            }
+          },
+          {
+            "when": "rime_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_rime_dragon_bone"
+            }
+          },
+          {
+            "when": "venom_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_venom_dragon_bone"
+            }
+          },
+          {
+            "when": "storm_dragon_bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_storm_dragon_bone"
+            }
+          },
+          {
+            "when": "deep_tooth",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/minotaur_axe/back_deep_tooth"
             }
           }
         ],
