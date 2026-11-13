@@ -32,6 +32,10 @@
 		{
 			"id": "cubeanimals:snail",
 			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:shadow",
+			"required": false
 		}
 	]
 }
