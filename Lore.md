@@ -465,6 +465,13 @@ their **Giants**: a broken pillar with a heart floating in it, and one Giant for
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
 heart goes out for good, and the first one to fall raises the world tier.
 
+(new) **The pillar's stone** (models thread; Andy, 2026-11-12: the colossi "can spawn among the high field giant as
+fodder"; the rest is Claude's placement for him to approve). A monolith is more than its Giant. When the Highfield Giant
+has someone to fight, broken blocks of its pillar get up out of the ground round it: **rune-bound colossi**, half again
+a man's height and more, grey holystone banded in moss-green, cut with gold runes that are the same hum folk say the
+old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
+it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
+
 What folk believe about the sky (village talk, not proven):
 
 - Some stars never move with the rest, "because they aren't hung on the same nail".
@@ -514,6 +521,24 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
+**Four more great ones** (Andy approved, 2026-11-12). The **thing under
+the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
+hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
+under the desert's ruins, the Stoneborn talk of it the way people talk of a thing their grandfathers saw, and a
+Stoneborn who is there when it comes up faints at the sight. The **snow giant** of the cold plains lives in the Arctic
+stone's country; the Frostborn count it a neighbour, and it leaves alone whoever leaves it alone. The **fortress
+knight** is one of the old war's dead, a champion of the demons' country still holding a Nether fortress long after
+anyone told him to; his sword lies with him and nowhere else.
+
+**The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
+Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
+
+(new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
+watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
+where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
+its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
+
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
 witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
@@ -557,6 +582,27 @@ with the demons' country beneath them and every horned thing aware of them: "tho
 always the demons' to keep. Somewhere down there a way up stands lit, and a cold draught runs from it. Walk out through
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
+
+**The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
+not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
+dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
+A flower or a candle given to one is enough: it thanks whoever came and goes to the Judge that night. Left alone it goes
+after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
+to be called."
+
+**(new) Limbo's ghosts** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
+while in limbo, so you can kind of haunt your friends"). The buried are not the only ones who stand outside themselves.
+Someone whose life has ended and who waits in Limbo rather than be born again is seen by the living the same way: pale
+blue and see-through, a hand off the ground, never far from the body. They touch nothing and nothing touches them. Their
+voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
+standing over the body they are burying. (To be built once Limbo itself has merged.)
+
+**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghosts you implemented can stay, as long as they can
+still enter limbo if they don't come to"). Someone left for dead, not yet dead and not yet back, comes loose from the
+body the same way: pale blue and see-through, able to drift a little way from where they lie and no further, through no
+wall. Beasts and monsters don't see them. The living do, and hear them. Carry the body and the ghost comes after it. The
+moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
+dead choose, Limbo among it.
 
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
@@ -813,6 +859,18 @@ none.
 **The Lantern Warden**: the night and the dead. He wants a lantern, a candle, a bone, the glow of the deep squid: light
 given back to the one who keeps the dark at bay. The dead that walk are his to put down, and the blood-drinkers hate
 his light.
+
+(new) **The barrow's oath** (models thread, 2026-11-13; Andy asked for lore for yair's Cryptbound Revenant and Zombie
+Knight and fixed two points: the knight "needs a different head and should wield a sword from our pack, and
+correctly"; the rest is Claude's placement for him to approve). Before the kingdoms there were lords on the moor who were
+buried with their household, and the greatest of them swore to the Lantern Warden to keep the light over their own
+dead. They are keeping it still. The old barrows are the buried cobblestone rooms under the Overworld. In about half
+of them two or three **barrow knights** stand: dead villagers' faces under rusted kettle helms, each with a real forged
+sword in his fist. In the deepest, their lord stands with them, the **cryptbound revenant**, in rusted plate with the
+Warden's blue light in his helm, his breast and along his blade. They let pass whoever comes carrying a lantern, as the
+lantern-keepers of the barrows do, and they fight anyone else, and anyone who strikes one of them. Hard pressed, the
+revenant raises his sword, the blue light rings out, and more of his knights climb out of the floor. He leaves a soul
+lantern behind. They are not a Bane's barrow-host: a Bane's dead hunt one person, these only keep a grave.
 
 **The Crowned Sun**: kings, law and war. He takes tribute as a king does: gold in small coin, the sunflower, glowstone,
 the golden root. He is warm to those who serve a crown and march under a banner. Thieves, and the smoke they hide in,
@@ -1093,6 +1151,11 @@ slingers, send loot goblins running with what they stole, and roll **war barrels
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
 
+**Goblin scouts** (models thread; Andy, 2026-11-12: "the lore is good"). A goblin village keeps two or
+three scouts ranging outside its ring: small even for goblins, hooded, a pack on the back, a dagger and a buckler. They
+see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
+traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
+
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
 
@@ -1245,6 +1308,12 @@ boar, tarantulas and the grizzly. Barrow beetles live in the cold barrows and ca
 flowers of a quiet forest on the darkest nights; folk say a fairy keeps death off the one who carries her, once, and
 would kill for one. Frostbites, frozen dead, walk the powder snow. Rats get into stores. Pets are named, and folk say a
 name shapes a beast ("Call a beast Midas and it'll shine like coin").
+
+(new) **Crystal beetles** (models thread; Andy, 2026-11-12: "these should spawn in amethyst geodes"; the rest is Claude's
+placement for him to approve). The barrow beetle has a cousin that lives only inside amethyst geodes. It grazes the
+crystal buds, and what it eats grows out of its shell. A few of them keep a geode alive: where they have fed, plain
+amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
+crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
@@ -1450,3 +1519,69 @@ else. A drink at a speakeasy table is how you're let in. Every tavern keeps dice
 and a hard night out is the Low Lantern's old toll on the careless: you wake with a friend, a rumour, a debt or a
 black eye. Sages (court wizards, elders, librarians) and libraries keep what each foe fears and old sextons' ledgers;
 village teachers pass on tongues, trades and fighting styles; and the Lantern Warden's priests feed those living rough.
+
+(new) **The hand that shapes the well** (Claude's placement for the fifth edition picks, patch 6, 2026-11-12, for
+Andy to approve; under "Ki and mana are the same thing"). A spell is the same well shaped by hand, and it asks three
+things of the one who shapes it: a voice (a gag or a bubble of silence stills a caster), a free hand, and for the
+great ones a costly thing burned up, diamond dust, a pearl, a bone. A staff, a tome or a holy sign stands in for the
+small ones. The slow rites, ten still seconds over an open book, need no mana at all. Anyone may try a scroll beyond
+their learning, and it may fizzle or bite back. A caster's raised staff and turning sigil give the spell away a
+heartbeat before it lands, which is how court wizards and camp shamans snuff each other's work.
+
+(new) **Creatures of the dark corners** (Claude's placement for the fifth edition picks, patch 9, 2026-11-13, for
+Andy to approve). Each keeps to the ground that suits it. **Trolls** of the swamps and mangroves are kin to the Bogre:
+they heal from anything but fire and acid, a cut limb crawls back to them, and they stay dead only once burned. The
+iron-eating **rust beast** of the caves is why old miners worked in bone, stone and gold. The **basilisk**, the great
+lizard, lairs in old ruins among the stone shapes of those who met its eye (the snake-haired gorgon is its cousin of
+legend), and a glass held up turns its gaze back. **Clear cubes** keep the halls of old mines and strongholds;
+**piercers** and the lamp-snuffing **cloak fliers** hang in cave roofs; **blood bats** are what the vampire bats are
+in the wild. **Diggers**, small kobold-kin, ring their warrens in the hills with hidden pits and fight in packs, as
+goblins and wolves do. **Bog lights** lead the lost into quicksand and feed on their fear. **Harpies** sing from the sea
+cliffs, which is why sailors stop their ears with wax. **Shadows** are the ruins' own dark: they drain a fighter's
+might, and one drained to nothing loses their own shadow to them. **Shapeshifters** steal villagers' lives and wear
+them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
+the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
+water crossed unaided, and a stake in the coffin by day ends them.
+
+(new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
+to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
+it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
+sworn word that burns the one who breaks it, laid on captives and on captains who swear to a lord. A lock of hair is
+a handle on its owner, and hedge-witches and court wizards alike will pay for one; thrown bones answer only in light
+or smoke. A familiar is a small spirit given a body, owl, raven, cat, rat or frog, bound to one caster and born
+again from its ash. Moonlight called down by a caster shows a shapechanger for what it is. Some Sorcerers' blood is
+wild, and so is the well in a great lair's blighted land: there a spell can come out as something else entirely.
+
+(new) **Relics, wands and the Deck of Fates** (Claude's placement for the fifth edition picks, patch 8, 2026-11-13, for Andy to approve). Old things found in deep places keep their own minds. A relic, a ring or an old pair of boots is made by someone long gone, and it takes to one carrier at a time: it must be borne through a night's rest to bond, and no one can bond more than three. Until it is known it shows no face; use wears the veil off, and a court wizard will read one for a fee. Some carry a curse laid by their makers (clinging, thirst, whispers, misfortune); a cleric at a shrine can lift it. A few blades wake with a will and a want (the dead, the weak, gold) and take the arm of one who ignores them. Wands and staffs are cut from a dead tree's heartwood and fill again at dawn. The wondrous gadgets (rod, rope, jug, lantern, stone hound, horn, bottle of smoke) are the work of smiths of the ages this world has forgotten, found in its ruins and deep places. The Deck of Fates is a fortune-teller's gift to a king who wished to be told his end; whoever draws from it draws from the old gods, and it is not kind. Potions drunk close together clash, for the brewer's craft was never meant to be mixed in the belly.
+
+(new) **The body kept and the body given** (Claude's placement for the fifth edition picks, patch 10, 2026-11-13, for
+Andy to approve; under "The dead"). A cleric can call the freshly fallen back before the Judge opens the book, a
+minute at most, for the price of a diamond, and rests three days after. The settlements' priests keep their dead
+in salt and herbs so they wait whole for the burying and no necromancer can lift them. One who has died for good may
+wait in the dark beside their own body, watching their friends bury it. The old druids of the forest groves, hermits
+no village names, can give such a one a new body within ten days, laid at their feet, in a blood the wood chooses:
+they keep their name and memory and lose what the old blood gave them. In the caves the damp grows its own moulds:
+a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
+and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
+
+(new) **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, for Andy to
+approve). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
+Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
+the Druid and the Ranger to the wild the villages keep out of (the Ranger is what the realms now call their archers
+and survivalists alike), the Monk to the discipline the boxers teach, and the Tinkerer to the smiths' benches.
+Priests teach the symbol, farmers the sprig, librarians the seal and smiths the gadgets. The Warrior-born have none
+of them.
+
+(new) **Second callings, marks and paths** (Claude's placement for the fifth edition picks, patch 11b, 2026-11-13, for
+Andy to approve). A calling can be joined by a second, but only late and only from a master: a villager at the top of
+a trade teaches the calling that trade feeds (the fletcher the Marksman and the Ranger, the priest the Cleric and the
+Paladin, the smiths the Warlord and the Tinkerer), and a second calling never grows as tall as the first. A Sorcerer's
+element is not taught but woken, and the master librarians keep the rite. Each great foe that falls leaves a mark on
+whoever was there (the feats), and each calling narrows in time into a path: the thief into assassin, burglar or
+swashbuckler, the mage into a school.
+
+(new) **Forged seals and deeds; the gorgon's gaze** (Claude's placement, the row-check fixes, 2026-11-13, for Andy to
+approve). The Underworld's forgers also turn out a writ under a lord's seal and a deed to a house, and only the fences
+and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
+as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
+The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
