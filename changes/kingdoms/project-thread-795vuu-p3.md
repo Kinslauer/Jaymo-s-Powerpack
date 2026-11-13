@@ -11,3 +11,4 @@
 - **Blossom villages are built from all of it**: shoji windows, tatami floors, plaster walls, a red lacquered torii, paper lanterns under the roofs, stone lanterns on the road, and in each house futons, a tansu, a sliding door, and a hearth in the larger ones. Villages already standing keep what they were built from.
 - `blossomland.BlossomFurnishings`, `mixin/tweaks/PoiTypeAccessor`, `PoiTypesInvoker`, `TansuNameMixin`.
 - Built. A dev server placed every block: the tansu holds a barrel's store, the hearth a campfire's, the futon is found as a home. Not seen in game: every texture and model is a first draft, and no village has been walked through. Thatch roofs on the villages come with patch 4.
+- `/kingdom mohknee go` (operators): sets you down on Mohknee's western shore, on dry ground a little way in. Built; not run with a player.

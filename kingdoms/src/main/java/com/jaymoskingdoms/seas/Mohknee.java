@@ -72,6 +72,9 @@ public final class Mohknee {
 	/** A ship lies to with the land's shore this near ahead of her (blocks). */
 	public static final int SHORE_AHEAD = 96;
 
+	/** {@code /kingdom mohknee go}: how far above the sea the ground must stand, how far in from the shore, and the step along the line. */
+	static final int GO_DRY = 2, GO_INLAND = 32, GO_STEP = 8;
+
 	private Mohknee() {
 	}
 
@@ -141,9 +144,10 @@ public final class Mohknee {
 
 	// ---- operators ------------------------------------------------------------------------------------------------------
 
-	/** {@code /kingdom mohknee}: where the land lies from here; {@code map [blocks per pixel] [reach] [x z]}: a picture of what the world makes of it. */
+	/** {@code /kingdom mohknee}: where the land lies from here; {@code go}: sets you down on its western shore; {@code map [blocks per pixel] [reach] [x z]}: a picture of what the world makes of it. */
 	public static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("mohknee").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(Mohknee::where)
+			.then(Commands.literal("go").executes(Mohknee::go))
 			.then(Commands.literal("map").executes(c -> map(c, 48, edge() + 1500, CENTRE_X, CENTRE_Z))
 				.then(Commands.argument("scale", IntegerArgumentType.integer(4, 256))
 					.executes(c -> map(c, IntegerArgumentType.getInteger(c, "scale"), edge() + 1500, CENTRE_X, CENTRE_Z))
@@ -152,6 +156,36 @@ public final class Mohknee {
 						.then(Commands.argument("x", IntegerArgumentType.integer()).then(Commands.argument("z", IntegerArgumentType.integer())
 							.executes(c -> map(c, IntegerArgumentType.getInteger(c, "scale"), IntegerArgumentType.getInteger(c, "reach"),
 								IntegerArgumentType.getInteger(c, "x"), IntegerArgumentType.getInteger(c, "z"))))))));
+	}
+
+	/**
+	 * Sets the player down on Mohknee's western shore, where a ship from the home world makes land: the first ground
+	 * standing {@link #GO_DRY} above the sea on the line east to the land's middle, then {@link #GO_INLAND} further in.
+	 * The line is read from the world's shape, so only the chunk they land in is made.
+	 */
+	private static int go(CommandContext<CommandSourceStack> c) {
+		net.minecraft.server.level.ServerPlayer player = c.getSource().getPlayer();
+		if (player == null) {
+			c.getSource().sendFailure(Component.literal("Only a player can be sent to Mohknee."));
+			return 0;
+		}
+		ServerLevel level = c.getSource().getServer().overworld();
+		RandomState state = level.getChunkSource().randomState();
+		ChunkGenerator generator = level.getChunkSource().getGenerator();
+		int x = CENTRE_X - LAND - WOBBLE, dry = generator.getSeaLevel() + GO_DRY;
+		while (x < CENTRE_X && generator.getBaseHeight(x, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) < dry) {
+			x += GO_STEP;
+		}
+		for (int more = 0; more < GO_INLAND && generator.getBaseHeight(x + GO_STEP, CENTRE_Z, Heightmap.Types.OCEAN_FLOOR_WG, level, state) >= dry;
+			more += GO_STEP) {
+			x += GO_STEP;
+		}
+		level.getChunk(x >> 4, CENTRE_Z >> 4);
+		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, CENTRE_Z);
+		player.teleportTo(level, x + 0.5, y, CENTRE_Z + 0.5, java.util.Set.of(), -90.0F, 0.0F, false);
+		int at = x;
+		c.getSource().sendSuccess(() -> Component.literal("Set down on Mohknee's western shore at " + at + ", " + y + ", " + CENTRE_Z + "."), false);
+		return 1;
 	}
 
 	private static int where(CommandContext<CommandSourceStack> c) {
