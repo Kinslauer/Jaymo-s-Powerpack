@@ -562,6 +562,34 @@ public final class KitchenCompat {
 	 * A body let fall from up off the ground with {@code velocity} (the Unburied coming apart): turning over as it drops
 	 * when Kitchen can, else just thrown that way.
 	 */
+	/** Whether Kitchen is there to leave bodies at all. */
+	public static boolean makesCorpses() {
+		return CORPSE != null;
+	}
+
+	/**
+	 * The body {@code mob} (never in the world) would leave lying where it is: Kitchen's {@code Corpses.spawnCorpse},
+	 * and the corpse it put there. Null without Kitchen, or if none appeared.
+	 */
+	public static @Nullable Entity bodyOf(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.LivingEntity mob) {
+		if (CORPSE == null) {
+			return null;
+		}
+		try {
+			java.util.Set<Entity> before = new java.util.HashSet<>(level.getEntities((Entity)null, mob.getBoundingBox().inflate(2.0), CORPSE::isInstance));
+			Class.forName("com.jaymoskitchen.corpse.Corpses").getMethod("spawnCorpse", net.minecraft.world.entity.LivingEntity.class, java.util.List.class)
+				.invoke(null, mob, java.util.List.of());
+			for (Entity e : level.getEntities((Entity)null, mob.getBoundingBox().inflate(2.0), CORPSE::isInstance)) {
+				if (!before.contains(e)) {
+					return e;
+				}
+			}
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen could not leave a body for {}: {}", mob.getType(), e.toString());
+		}
+		return null;
+	}
+
 	public static void spill(Entity corpse, Vec3 velocity) {
 		if (SPILL == null) {
 			corpse.setDeltaMovement(velocity);

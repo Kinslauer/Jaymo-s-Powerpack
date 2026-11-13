@@ -176,6 +176,20 @@ public class CorpseEntity extends Entity {
 	private static final int LAVA_BURN_TICKS = 30;
 	/** Bodies at least this big standing (the smaller of width and height; a ghast is 4) lie as big as they are. */
 	private static final float HUGE = 1.9F;
+	/** A body this long or tall standing (a giant) is huge too, however narrow: no one's arms take it, nor drag it. */
+	private static final float HUGE_LONG = 3.2F;
+	/** A body that isn't an animal's is too big to lift past this size standing (a big man in armour still fits). */
+	private static final float BIG_WIDTH = 1.0F, BIG_HEIGHT = 2.4F;
+	/** The parts a body can lose, as {@link #missing()} bits (the same bits Jaymo's Powers' Dismember uses). */
+	public static final int PART_HEAD = 1, PART_RIGHT_ARM = 2, PART_LEFT_ARM = 4, PART_RIGHT_LEG = 8, PART_LEFT_LEG = 16;
+	public static final int LIMBS = PART_RIGHT_ARM | PART_LEFT_ARM | PART_RIGHT_LEG | PART_LEFT_LEG, ALL_PARTS = LIMBS | PART_HEAD;
+	/**
+	 * Struck where it lies, the chance a part is knocked off it for each point of the blow's damage: bare bones, rotten
+	 * flesh, and a fresh body under a blade (nothing else cuts one up); never more than {@link #APART_MOST} a blow.
+	 */
+	private static final net.minecraft.tags.TagKey<EntityType<?>> DISMEMBERABLE = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "dismemberable"));
+	private static final float APART_BONE = 0.12F, APART_ROTTEN = 0.08F, APART_FRESH = 0.035F, APART_MOST = 0.9F;
 	/** A burning creeper corpse explodes after this many ticks alight. */
 	private static final int CREEPER_FUSE = 160;
 	/** A looted heavy corpse falls apart over this many ticks, then it's gone (iron doesn't rot or burn). */
@@ -1866,6 +1880,11 @@ public class CorpseEntity extends Entity {
 		boolean drags = dragOnly || tooBigToLift() && !(Hauling.canLiftBig(player) && !isHuge());
 		if (held >= LIFT_TICKS) {
 			liftBy = null;
+			if (!dragOnly && comesApart() && losePart(level, LIMBS, player, true)) {
+				// rotten through, or bare bone: the limb you took hold of comes away and the rest stays lying
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.came_away"));
+				return InteractionResult.SUCCESS_SERVER;
+			}
 			return drags ? drag(level, player) : carry(level, player);
 		}
 		player.sendOverlayMessage(Component.translatable(drags ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
@@ -2138,17 +2157,22 @@ public class CorpseEntity extends Entity {
 			return true;
 		}
 		EntityType<?> type = sourceType();
-		if (kind != CorpseKind.ANIMAL || type == null) {
+		if (type == null || kind == CorpseKind.PLAYER) {
 			return false;
 		}
 		var size = type.getDimensions();
+		if (kind != CorpseKind.ANIMAL) {
+			// Andy: "i also should not be able to lift something that large": a monster's body past a big man's size
+			return size.width() > BIG_WIDTH || size.height() > BIG_HEIGHT;
+		}
 		return size.width() > SLING_WIDTH || size.height() > SLING_HEIGHT;
 	}
 
 	/** (0.5.36) Something huge (a ghast): lies as big as it is, and no one's arms take it, however strong. */
 	private boolean isHuge() {
 		EntityType<?> type = sourceType();
-		return type != null && Math.min(type.getDimensions().width(), type.getDimensions().height()) >= HUGE;
+		return type != null && (Math.min(type.getDimensions().width(), type.getDimensions().height()) >= HUGE
+			|| Math.max(type.getDimensions().width(), type.getDimensions().height()) >= HUGE_LONG);
 	}
 
 	/**
@@ -3204,6 +3228,7 @@ public class CorpseEntity extends Entity {
 			smack(source, damage);
 			// (0.5.17) and bleeds (Jaymo's Powers' blood), see addOnHit
 			hit(source, damage);
+			knockApart(level, source, damage);
 			// (0.5.20) a dead spider is still smashed to legs by a crushing blow
 			return SpiderCrush.crushCorpse(this, level, source);
 		}
@@ -3232,6 +3257,130 @@ public class CorpseEntity extends Entity {
 		spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)), 0.2F);
 		// (0.5.21) blown apart: chunks of it fly, its blood bursts, its loot drops loose
 		return Gibs.blowApartCorpse(this, level, source, damage);
+	}
+
+	// ---- coming apart ---------------------------------------------------------------------------------------------------
+
+	/**
+	 * Told of each part that comes off a body lying dead: the corpse, and {the part (an Integer, one of the
+	 * {@code PART_} bits), where it was (a Vec3), who took or struck it off (an Entity, or null), whether it came away in
+	 * their hand (a Boolean)}. Jaymo's Powers makes it a severed part to carry, kick or throw; without a hook a skeleton's
+	 * is a loose bone and a zombie's a scrap of rotten flesh. Plain Java types, so it can be set by reflection from a mod
+	 * built against an older Kitchen.
+	 */
+	private static java.util.function.@Nullable BiConsumer<Entity, Object[]> onPart;
+
+	public static void setOnPart(java.util.function.BiConsumer<Entity, Object[]> hook) {
+		onPart = hook;
+	}
+
+	/**
+	 * Andy: "same with zombies, they are decaying and dead": the long dead (a zombie's body, a skeleton's), built like a
+	 * person. Lifted, it doesn't come up whole: a limb comes away. Struck, it comes apart easily.
+	 */
+	public boolean comesApart() {
+		return (kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON) && !isPlayerCorpse() && rig().shape == RagdollRig.Shape.HUMANOID;
+	}
+
+	/** Where {@code part} is on the body as it lies. */
+	private Vec3 partPosition(int part) {
+		RagdollBody body = ragdoll == null ? null : ragdoll.body;
+		if (body == null || body.rig.shape != RagdollRig.Shape.HUMANOID) {
+			return position().add(0.0, 0.2, 0.0);
+		}
+		int point = switch (part) {
+			case PART_HEAD -> RagdollRig.HEAD;
+			case PART_RIGHT_ARM -> RagdollRig.R_HAND;
+			case PART_LEFT_ARM -> RagdollRig.L_HAND;
+			case PART_RIGHT_LEG -> RagdollRig.R_FOOT;
+			default -> RagdollRig.L_FOOT;
+		};
+		return new Vec3(body.x[point], body.y[point], body.z[point]);
+	}
+
+	/**
+	 * One of the parts in {@code among} it still has comes off (picked at random). False when it has none of them left
+	 * (or isn't a body with such parts).
+	 */
+	public boolean losePart(ServerLevel level, int among, @Nullable Entity by, boolean toHand) {
+		if (rig().shape != RagdollRig.Shape.HUMANOID) {
+			return false;
+		}
+		int left = among & ALL_PARTS & ~missing();
+		if (left == 0) {
+			return false;
+		}
+		int skip = random.nextInt(Integer.bitCount(left));
+		int part = Integer.lowestOneBit(left);
+		for (; skip > 0; skip--) {
+			left &= ~part;
+			part = Integer.lowestOneBit(left);
+		}
+		shed(level, part, by, toHand);
+		jolt(true);
+		play(level, kind == CorpseKind.SKELETON ? SoundEvents.SKELETON_HURT : SoundEvents.ZOMBIE_HURT, 0.6F);
+		return true;
+	}
+
+	/** {@code part} is off it: no longer drawn on the body, and lying loose (or in {@code by}'s hand). */
+	private void shed(ServerLevel level, int part, @Nullable Entity by, boolean toHand) {
+		Vec3 at = partPosition(part);
+		setMissing(missing() | part);
+		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
+		if (hook != null) {
+			try {
+				hook.accept(this, new Object[] {part, at, by, toHand});
+				return;
+			} catch (RuntimeException | LinkageError e) {
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A corpse-part hook failed: {}", e.toString());
+			}
+		}
+		ItemStack scrap = kind == CorpseKind.SKELETON ? new ItemStack(Items.BONE) : kind == CorpseKind.ZOMBIE ? new ItemStack(Items.ROTTEN_FLESH) : ItemStack.EMPTY;
+		if (!scrap.isEmpty()) {
+			level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, scrap));
+		}
+	}
+
+	/**
+	 * Andy: "skeletons should actually always fall to pieces on death, retaining maybe the central torso and legs if not
+	 * otherwise knocked off". A skeleton's body as it drops: the skull and both arms come loose; the ribs and legs stay
+	 * together. Called before the body is in the world.
+	 */
+	void fallToPieces(ServerLevel level) {
+		if (kind != CorpseKind.SKELETON || !comesApart()) {
+			return;
+		}
+		for (int part : new int[] {PART_HEAD, PART_RIGHT_ARM, PART_LEFT_ARM}) {
+			if ((missing() & part) == 0) {
+				shed(level, part, null, false);
+			}
+		}
+	}
+
+	/**
+	 * Andy: "hits to these corpses on the ground should further dismember". A blow on a body lying dead may knock a part
+	 * off it: easily off bare bones, readily off the rotten, and off a fresh body only under a blade. Never a player's.
+	 */
+	private void knockApart(ServerLevel level, DamageSource source, float damage) {
+		if (damage < 1.0F || kind == CorpseKind.PLAYER || kind == CorpseKind.FISH || isPlayerCorpse() || isMachine() || isPassenger()
+			|| rig().shape != RagdollRig.Shape.HUMANOID) {
+			return;
+		}
+		float each;
+		if (comesApart()) {
+			each = kind == CorpseKind.SKELETON ? APART_BONE : APART_ROTTEN;
+		} else {
+			EntityType<?> type = sourceType();
+			ItemStack weapon = source.getWeaponItem();
+			// only what Jaymo's Powers says can lose parts alive (its tag, by name: nothing without that mod)
+			if (type == null || !type.builtInRegistryHolder().is(DISMEMBERABLE) || weapon == null || !(weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(net.minecraft.tags.ItemTags.AXES))) {
+				return;
+			}
+			each = APART_FRESH;
+		}
+		if (random.nextFloat() < Math.min(APART_MOST, each * damage)) {
+			losePart(level, ALL_PARTS, source.getEntity(), false);
+		}
 	}
 
 	/** (0.5.17) Told of each blow or arrow that lands on a fleshy body; see {@link #addOnHit}. */
