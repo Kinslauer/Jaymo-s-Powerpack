@@ -371,3 +371,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12, 9:33 PM: PR #1390 merged** (models thread, Andy: "merge"). Scouts, ghosts, colossi, crystal beetles, barrow knights, revenant, spit frame.
 - **Nov 12, 9:33 PM: PR #1396 merged** (Andy: "merge"). The sand worm (BossRise plan, patch 6).
 - **Nov 12, night: giants PR #1398 opened** (models thread). Aether Giants on GeckoLib from a Blockbench project; Snow Giant's own upright body. Awaiting Andy's merge.
+
+- 2026-11-13 (boss-mods thread, patch 7, my calls, not yet confirmed by Andy): the thing under the wreck lies beside
+  about 1 in 3 treasure wrecks (each looked at once, old wrecks too) and can come up under a whaler 6+ steps out in the
+  far grounds with a player aboard; it stays in the water, 5 blocks under its quarry; 320 HP; lash 11, grab 4 per
+  squeeze broken by 14 damage, ink at 50% and 20%; holds boats and block ships (Ship.holdFast); shown name "The Thing
+  Under the Wreck" since sailors never name it; drops Clinging Coil (charm, saves one death under water) and Deep
+  Teeth. The teeth as a Tinkers material are put off to patch 8 with dragon bone (same generator work).

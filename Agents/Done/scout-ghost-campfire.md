@@ -40,4 +40,4 @@ Andy then kept the left-for-dead ghosts: back on this branch as Powers `core/wou
 ghost and voice for a player in Limbo.
 
 - 2026-11-13: barrow knights, revenant and Barrows pushed to PR #1390 (commit 0cb346a5). Files owned: kingdoms/src/main/java/com/jaymoskingdoms/barrow/*, BbMobRenderer.holding. Next: giants via GeckoLib + Snow Giant body, new PR after #1390 merges.
-- 2026-11-13 02:34 PR #1390 is merged into master; moved to Agents/Done.
+- 2026-11-13 02:44 PR #1390 is merged into master; moved to Agents/Done.
