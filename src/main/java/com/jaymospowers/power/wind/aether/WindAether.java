@@ -176,6 +176,8 @@ public final class WindAether {
 		}
 		int x = leader.getBlockX();
 		int z = leader.getBlockZ();
+		// (the arrival column is made here; the probes beside it only read chunks that are already made)
+		aether.getChunk(x >> 4, z >> 4);
 		int[] spot = findIsland(aether, x, z);
 		for (int i = 0; i < going.size(); i++) {
 			arrive(going.get(i), aether, x, z, spot, i, going.size());
@@ -201,9 +203,11 @@ public final class WindAether {
 		return null;
 	}
 
-	/** The height just above the top solid block at (x, z), loading the chunk; the world's floor if the column is empty. */
+	/** The height just above the top solid block at (x, z), only if the chunk is already made (an unmade one counts as empty); the world's floor if the column is empty. */
 	private static int topAt(ServerLevel level, int x, int z) {
-		level.getChunk(x >> 4, z >> 4);
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
+			return level.getMinY();
+		}
 		return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 	}
 
