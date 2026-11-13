@@ -452,6 +452,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
   black flame" (the (new) marks are off). All twelve BossRise patches are merged (last: #1406).
 - 2026-11-12 11:32 PM ET (Blossom lands thread): Andy said "merge" for PR #1410 (helmsmen and talk of the east, patch 2 first half). Merged by squash.
 - 2026-11-12 11:39 PM ET (Blossom lands thread): Andy said "merge" for PR #1411 (blossom traders and passage, patch 2 second half). Merged by squash.
+- 2026-11-13 12:11 AM ET (Blossom lands thread): Andy asked for a command to get to Mohknee; "okay add that" to `/kingdom mohknee go` (PR #1413).
 - 2026-11-12 11:53 PM ET (Dungeon mods thread): Andy: add Re:Animal and The Graveyard, and the Church of Sin: "the church can be where the corrupted go to find their master, the demon master can come up from the nether and speak to them there". Stormborn Tomb was already in (PR #1388).
 - 2026-11-12 11:54 PM ET (Dungeon mods thread): Andy: add MmmMmmMmmMmm (target dummy) and Simply Bows: "the echo bow should be a weapon that spawns for arsenal". Neither has a 26.3 build; the dummy's ideas went into our Practice Dummy (CC0), the Echo Bow is our own (Simply Bows' licence forbids ports and bundling).
 - 2026-11-13 12:12 AM ET (Dungeon mods thread): Andy: "approved. merge" for PR #1417 (Darkened Chapel, Echo Bow, target dummy, The Graveyard, Re:Animal). The three Lore.md paragraphs (the chapel where the lantern went out, the untended graves, the Echo Bow) are approved; the (new) marks are off.
