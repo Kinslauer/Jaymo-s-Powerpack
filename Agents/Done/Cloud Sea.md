@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-lqqzjc
 with: Claude (cloud thread "Add a cloud layer between overworld and Aether")
@@ -30,3 +30,4 @@ owns:
 
 ## Done
 New One Dimension worlds have the Cloud Sea between the Overworld and the Aether: low banks, an overcast with wells (a ceiling from below, a floor from above), the Aether hidden until you are above the overcast. Compiled; world generation loaded and generated in a plain 26.3 server; not played in a stacked world.
+- 2026-11-13 18:09 PR #1469 is merged into master; moved to Agents/Done.

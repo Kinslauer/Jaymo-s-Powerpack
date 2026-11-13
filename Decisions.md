@@ -491,3 +491,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 4:57 PM ET (Plan Minecraft server bot for Hermes thread): Andy wants YOUTH to have a body on the server: "I'd like a body that can spawn and relay information about any mechanic to players."
 - 2026-11-13 5:13 PM ET (same thread): "the youth bot should be a wispy winged sylvan animating in the world near where you asked, doing some variation of 8 gecko libbed idle animations." Built as our own Kingdoms GeckoLib mob (YouthWisp, PR #1467), driven by Hermes over RCON with /youth commands. No Carpet, no Mineflayer, no second account.
 - 2026-11-13 5:34 PM ET (same thread): Andy approved the Lore.md paragraph "The wood-wisps".
+- 2026-11-13 5:55 PM (Andy, Deck admin session): /screenlook keeps its live full reload; the fix for its out-of-memory crash is more memory (CurseForge profile 8 GB), not a code change.
+- 2026-11-13 6:10 PM (Andy, Deck admin session): start a NEW world on the Deck with Chunky pre-generating 2,500 blocks round spawn (the old world is renamed on the Deck, kept).

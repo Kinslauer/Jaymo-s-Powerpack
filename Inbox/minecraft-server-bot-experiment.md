@@ -4,7 +4,7 @@ for: pc-claude
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
 thread: 1570840212869746910
-claimed_by:
+claimed_by: pc-claude
 pr: 1467
 suggested_owns: []
 ---

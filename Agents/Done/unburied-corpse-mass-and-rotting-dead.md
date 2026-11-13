@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Unburied stood whole by day with no corpses; the long dead come apart
 branch: claude/project-thread-gy0d2v
 with: Claude (cloud thread "Fix the Unburied's corpse mass")
@@ -23,3 +23,4 @@ be liftable, lifting the undead should tear off a limb at most, skeletons fall t
 
 ## Done
 Built; not played.
+- 2026-11-13 18:09 PR #1470 is merged into master; moved to Agents/Done.

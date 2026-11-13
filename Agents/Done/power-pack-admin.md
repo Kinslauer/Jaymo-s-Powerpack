@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459 (merged)"
+pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459, #1466, #1471, #1472 (merged)"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -63,6 +63,13 @@ let the owed village start run, close the game when needed. Long loading screens
   swapped; 24 sites verified harmful (data lost / one-shot) kept on isLoaded; Loaded.top for 8 read-before-check sites.
   Merged ~5:05 PM, redeploying. Follow-up: the 24 kept sites still block on generating chunks; fix each with
   skip-and-retry (fixes listed in the verify workflow wf_c631bde4-f56).
+- 4:45 PM crash: ShyDeer.home read the player's bed at spawn (chunk [2,8]) while far away; even a saved chunk load waited
+  60 s behind world generation. Andy: keep the 60 s watchdog. #1466: far bed reads (ShyDeer, LifeAims, OldRules) guarded.
+- Stored-position audit (8 scanners + verifiers): 14 confirmed. #1471 Kingdoms (Emigrants, BeastLairs, SpiderKinds,
+  DoorPounding, Bounties, Cabs, BaneHolds, Strays, Camps, Mines), #1472 Powers (Floods, RiverIce, ArsenalStanding).
+  Merged ~6:05 PM, redeploying.
+- Andy's client crashed on /screenlook grey: full resource reload ran out of memory at 5 GB. Andy chose more memory:
+  the CurseForge profile is now 8192 MB (set in Profile Options).
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
