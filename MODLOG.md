@@ -3959,3 +3959,8 @@ enter limbo if they don't come to."
   `config/jaymospowers-server.properties` to a share of full health (0.25 = no single ability hit takes more than a
   quarter). Plain weapon swings, arrows and tridents are never capped.
 - The moves use the plain arm swing: none of this has its own animation yet. Compiles; not played in game.
+
+## 0.23.0 (2026-11-13): 0.23.0
+
+- Andy asked for the version to step to 0.23.0 after "Fighting without a power" (boss patch 9). Nothing in the game
+  changes with this entry: patches 1 to 9 of the boss plan are in, patches 10 to 12 follow from here.
