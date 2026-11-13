@@ -151,6 +151,11 @@ public final class MenuCompat {
 		rows.add(row("menu.jaymoskingdoms.character.patron", patron == null ? none : Component.translatable("patron.jaymoskingdoms." + patron.key)));
 		// what you have seen of the other side (Exposure), and a sleep the living nightmare haunts (LivingNightmare)
 		rows.add(row("menu.jaymoskingdoms.character.exposure", com.jaymoskingdoms.Exposure.describe(com.jaymoskingdoms.Exposure.of(player))));
+		// (the illager tongue, once you have any of it: IllagerTongue)
+		int illager = player.getAttachedOrElse(com.jaymoskingdoms.IllagerTongue.POINTS, 0);
+		if (illager > 0) {
+			rows.add(row("menu.jaymoskingdoms.character.illager_tongue", com.jaymoskingdoms.IllagerTongue.describe(illager)));
+		}
 		if (com.jaymoskingdoms.LivingNightmare.nights(player) > 0) {
 			rows.add(row("menu.jaymoskingdoms.character.sleep", Component.translatable("menu.jaymoskingdoms.character.sleep.haunted")));
 		}

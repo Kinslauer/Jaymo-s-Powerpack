@@ -12600,3 +12600,56 @@ giants being worked on, as its own upright model."
 - `StoryHoldScreen` passes over a hint number with no line yet (another open branch's hint), so the screen never shows a
   bare key while hints from different PRs land out of order.
 - Built; not played.
+
+## 0.8.23 (2026-11-13): Loading-screen hint for lock-on body regions
+
+- New loading-screen hint (161) on aiming at a region while locked on, and swapping targets with middle mouse on the crosshair (`lang/parts/lock-on-regions.json`).
+- Finesse now also steadies lock-on head shots: Kingdoms hands Powers the stat at server start (`PowersCompat.shareFinesse`), and at full Finesse a head shot misses and glances 75% less. The stat's description says so.
+- Built; not played.
+
+## 0.8.24 (2026-11-13): /kingdom mohknee go waits behind the loading screen (#1451)
+
+- **Fix (watchdog crash)**: `/kingdom mohknee go` made the landing chunk at x 28,000 on the server thread; on the Deck
+  it took over a minute and the server shut down (crash 2026-11-13 13:51). Andy: "go waits behind loading". Now the
+  land round the western shore is made in the background (`StoryGround.travel`, PORTAL tickets) while you wait
+  behind the loading screen ("Mohknee's western shore rises out of the sea"), then you're set down. After two
+  minutes without it, you're told to try again and stay where you are. A second `go` while waiting, or while held
+  for your story, is refused.
+- Built; tested on the Deck server.
+
+## 0.8.25 (2026-11-13): illager tongue: learn their language, then talk with illagers
+
+- **The illager tongue** (Andy: "make the illagers interactable like MCA, but only once you learn their language. it can be acquired through books or paintings / time spent in their structures"). Learned bit by bit, 0 to 100 (`IllagerTongue`):
+  - **Their writings**, as loot in pillager outposts, woodland mansions and every Illager Structures chest, and now and then on their dead: Torn Illager Page (+3, teaches up to 40), Illager Ledger (+8, up to 70), Evoker's Grimoire (+20, all the way). Hold use for 3 s to study one; it is spent.
+  - **Their banners and paintings**: sneak and use an empty hand on an ominous banner where it hangs (+4 each banner, up to 35), or on one of six new illager paintings (+6 each picture, once). The paintings aren't placeable: a few go up on the walls of each of their structures the first time a player walks in.
+  - **Time in their structures** (Illager Structures places, pillager outposts, mansions, illager camps' land): +1 a minute, +1 more with illagers about.
+  - No chat lines: progress shows over the hotbar. The level shows on the H menu's Character page ("Illager tongue: Halting (54%)"). Linguist doubles it. Deck of Fates' forgetting takes it.
+- **What they say**: illagers now chatter among themselves (speech bubbles), and everything they say (chatter, callouts, the talk card) is their gibberish with none of the tongue, partly translated as you learn (each word has its own mark, so the same words come first and stay; the rest greyed gibberish, `IllagerWords`), and plain once fluent.
+- **Talking with illagers** (`IllagerTalk`), from 50%: sneak and use on one (or use with an empty hand). Each has a name (given when asked, then over its head for you alone), a nature (brutal, greedy, proud, cunning, zealous, weary, superstitious, craven), a mood and hearts per player; the card's head shows them.
+  - Learning the tongue doesn't make them friendly. A hostile one holds its hand while it hears you out (25 s; left unanswered, it loses patience). The parley: calm them (a chance by Presence, nature, mood, hearts, how well you speak), pay them off (by who they are and how many are near), bluff (from 75%), or back away. Won, a truce for them and their own near (and the camp's ravager and vexes); lost, they attack and won't hear you for 2 minutes. Striking any of them ends every truce near.
+  - At peace (a truce, or 40+ hearts, when they leave you be on their own): ask their name, talk a while (once a day), ask what they want (by nature) and bring it (hearts, coin and a ledger), give what you hold, trade (goods by who they are; they buy iron), ask about their hold (who leads, captives, where another illager camp lies), Talk Them Round (persuade, bluff, threaten), goodbye. Their attitude is set when the card opens and holds for that talk.
+- **Disarmed and spared** (Andy: "disarmed illagers that dont attack you will speak, and will improve standing if you spare them after downing"): an illager seen armed whose hands are now empty (knocked away, or taken off it while it's down: plain use on a downed illager now disarms it as it does a guard) yields unless it is brutal or proud (those fight on bare-handed). A yielding illager attacks no player, calls out to you when you're near (by its nature, in its tongue), and its talk card opens at peace with no parley. One you down and leave to get back up is spared: +25 hearts with it (+5 with its own near), a truce with it, and a word of thanks.
+- Loading-screen hint 166. Art drawn by `tools/gen_illager_tongue_art.py` (placeholder pixel art; a modeller pass would help).
+- Built, dev server booted; not played.
+
+## 0.8.26 (2026-11-13): Diggers, goblin scouts, loot goblins and Imps can lose limbs
+
+- Diggers, goblin scouts, loot goblins, Imps and zombified Imps were never in the dismemberable list, so a blade or a blast could never take a part off them. They are now (data/jaymospowers/tags/entity_type/dismemberable.json), and being small they lose parts more often than a person (Powers' size scaling).
+- Imps (1.4 tall) are cut about 1.3x as often as a person; Powers now hides lost limbs on GeckoLib models, which Imps are.
+- Built; not played.
+
+## 0.8.27 (2026-11-13): Rumours of beasts no longer load land to read its biome (#1454)
+
+- **Fix (watchdog crash)**: a rumour of a monster of legend (`Sightings.rumour`) picks a spot hundreds of blocks out
+  from a settlement and read its biome with `level.getBiome`, which waited on the server thread for a chunk not loaded
+  or still being made (Deck crash 2026-11-13 14:23, 58 s on chunk [20, -9]). Loaded land is read as before; elsewhere
+  the world's biome source answers without touching a chunk.
+- Built; tested on the Deck server.
+
+## 0.8.28 (2026-11-13): scene music - the aerwhale rises to Featherfall, every other film draws a music disc
+
+- **Music under the films** (SceneMusic, new): Andy: "it should fade in with the letterboxing and out as it ends. lingering for 5s", and "any of the discs can play for the other scenes too". The music fades in as the bars slide in (about 0.75 s), plays through, and from when the bars start to go it fades out, gone about 5 s after they are.
+- **The aerwhale's entrance plays Featherfall** (Aaron Cherof), from the game's own soundtrack: `scene_music.aerwhale` in sounds.json points at the game's own file, so nothing is copied or shipped. It starts straight away (no silent intro), and it is soft and airy.
+- **Every other film draws a music disc at random**, never the same one twice running: every great creature's entrance, a boss's turn and fall, the lore films, the farmhand's wake-up talk, a special villager's handshake, and a spirit clash (for the two in it). Disc 11 is left out (footsteps and breathing, not music). The barrage clash keeps its own drum track and gets no disc, since players strike to its beat.
+- Plays as Music, so the Music slider rules it. The game's own music is stopped while it sounds and comes back by itself after; a great foe's theme (FoeMusicClient) goes quiet under it and comes back as it fades. A film starting while another's music still lingers takes over (the old track fades in 1 s); the same film again keeps its track and brings it back up. Shares the stage with Jaymo's Powers' films through a system property, so the two mods never play two tracks at once.
+- Built; not played.

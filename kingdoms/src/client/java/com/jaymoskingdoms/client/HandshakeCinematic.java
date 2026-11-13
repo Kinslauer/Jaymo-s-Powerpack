@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.client.hud.HudZones;
+import com.jaymoskingdoms.client.music.SceneMusic;
 import com.jaymoskingdoms.Handshakes;
 import com.jaymoskingdoms.JaymosKingdoms;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -113,6 +114,8 @@ public final class HandshakeCinematic {
 				self.setXRot((float)(-Mth.atan2(to.y, to.horizontalDistance()) * Mth.RAD_TO_DEG));
 			}
 		}
+		// music under it, in with the bars and lingering after them ({@link SceneMusic})
+		SceneMusic.scene("handshake", running);
 		bars += ((running ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!running && bars < 0.01F) {
 			bars = 0.0F;

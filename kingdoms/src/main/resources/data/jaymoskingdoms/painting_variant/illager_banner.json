@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymoskingdoms:illager_banner",
+  "width": 1,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymoskingdoms.illager_banner.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymoskingdoms.illager_banner.author"
+  }
+}

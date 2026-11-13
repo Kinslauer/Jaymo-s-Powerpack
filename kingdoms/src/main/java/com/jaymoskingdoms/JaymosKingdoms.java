@@ -47,6 +47,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
 		McaCompat.register();
+		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// (0.7.251) spoken lines: the narrator and the spirits
@@ -681,6 +683,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();
+		// the illager tongue, learned from their writings, banners, paintings and holds, and talking with illagers once you know it
+		IllagerTongue.register();
+		IllagerTalk.register();
 		// (0.6.9) tag, little ones, daily routines, suspicion in their homes
 		Tag.register();
 		Families.register();

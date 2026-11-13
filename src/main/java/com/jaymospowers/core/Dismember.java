@@ -115,6 +115,13 @@ public final class Dismember {
 	public static final float SEVER_OVERKILL = 0.5F;
 	/** (0.14.2) Overkill's chance to sever, times the blade's scale ({@link #scale}). */
 	public static final float SEVER_BASE = 0.6F;
+	/**
+	 * Andy: "smaller enemies like the digger should dismember more often". A mob standing shorter than this (blocks) loses
+	 * parts more often to a cutting blow or a blast, by {@code (SMALL_HEIGHT / height)^2}, at most {@link #SMALL_MAX} times:
+	 * a goblin scout (1.2) about 1.8 times, a Digger (1.1) about 2.1, a loot goblin or a baby zombie (1.0 and under) 2.5.
+	 * Anything this tall or taller is as before. Players keep their own chance, and village children aren't cut more.
+	 */
+	public static final float SMALL_HEIGHT = 1.6F, SMALL_MAX = 2.5F;
 
 	/** The parts this creature has lost (a {@link #HEAD}... bitmask). Saved, synced to everyone, not kept through death. */
 	/** (0.18.87) Kingdoms' Rubber-folk heritage tag: a blade severs their limbs this many times as often. */
@@ -304,7 +311,8 @@ public final class Dismember {
 	// ---- where a blow lands ----------------------------------------------------------------------------------------------
 
 	/**
-	 * The part a blow from {@code attacker} lands on: for a player, the part their crosshair crosses
+	 * The part a blow from {@code attacker} lands on: for a player locked on with a region picked, that region's part
+	 * ({@link LockOnRegions#aimedLimb}); for any other player, the part their crosshair crosses
 	 * ({@link LimbBoxes#aimedPart}; for a body without parts, by height: top {@link #HEAD_SHARE} the head, bottom
 	 * {@link #LEG_SHARE} a leg, between an arm, the side it's on picking which); for anything else, at random.
 	 */
@@ -320,6 +328,11 @@ public final class Dismember {
 				case 2 -> RIGHT_LEG;
 				default -> LEFT_LEG;
 			};
+		}
+		// locked on with the head, an arm or the legs picked: that part (LockOnRegions)
+		Integer locked = LockOnRegions.aimedLimb(attacker, target);
+		if (locked != null) {
+			return locked;
 		}
 		Vec3 eye = attacker.getEyePosition();
 		Vec3 look = attacker.getLookAngle();
@@ -416,6 +429,8 @@ public final class Dismember {
 		}
 		// (0.17.183) Will's Grim Hand: likelier (Kingdoms)
 		scale *= com.jaymospowers.core.wounds.WillSkill.severScale(attacker, target);
+		// small bodies come apart easier
+		scale *= smallScale(target);
 		if (target.getRandom().nextFloat() >= Math.min(1.0F, SEVER_BASE * scale)) {
 			return false;
 		}
@@ -477,6 +492,7 @@ public final class Dismember {
 		}
 		float extra = target.entityTags().contains(RUBBER_TAG) ? RUBBER_SEVER_SCALE : 1.0F;
 		extra *= com.jaymospowers.core.wounds.WillSkill.severScale(striker, target);
+		extra *= smallScale(target);
 		float chance = zombie(target) ? ZOMBIE_HALVE_CHANCE : HALVE_CHANCE;
 		if (target.getRandom().nextFloat() >= Math.min(1.0F, chance * extra)) {
 			return false;
@@ -560,6 +576,23 @@ public final class Dismember {
 	static float scale(LivingEntity target, float base) {
 		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, base);
 		return RATE * chance / BLADE_CHANCE;
+	}
+
+	/**
+	 * How much more often {@code target} loses parts for being small ({@link #SMALL_HEIGHT}, {@link #SMALL_MAX}): 1 for
+	 * players, village children and anything full-sized. Its standing height, so a crouch or a crawl doesn't count, but a
+	 * baby's or a shrunken body's size does.
+	 */
+	public static float smallScale(LivingEntity target) {
+		if (target instanceof Player || target.isBaby() && !(target instanceof net.minecraft.world.entity.monster.Enemy)) {
+			return 1.0F;
+		}
+		float height = target.getDimensions(net.minecraft.world.entity.Pose.STANDING).height();
+		if (height >= SMALL_HEIGHT || height <= 0.0F) {
+			return 1.0F;
+		}
+		float ratio = SMALL_HEIGHT / height;
+		return Math.min(SMALL_MAX, ratio * ratio);
 	}
 
 	/** A humanoid mob's chance to lose a part to a blow ({@code base}), raised for skeletons. */

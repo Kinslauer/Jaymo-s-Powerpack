@@ -21,7 +21,8 @@ final class TalkScreen extends Screen {
 
 	private TalkScreen(TalkNet.Ask ask) {
 		super(ask.speaker());
-		this.ask = ask;
+		// (an illager's words, as far as you know their tongue: IllagerWords)
+		this.ask = new TalkNet.Ask(ask.entityId(), ask.speaker(), IllagerWords.resolve(ask.words()), ask.options(), ask.enabled());
 	}
 
 	/**

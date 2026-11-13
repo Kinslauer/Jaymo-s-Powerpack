@@ -10,6 +10,7 @@ import com.jaymoskingdoms.inhabitants.Draugr;
 import com.jaymoskingdoms.nether.Imp;
 import com.jaymoskingdoms.nether.Imps;
 import com.jaymoskingdoms.inhabitants.Inhabitants;
+import com.jaymoskingdoms.client.music.SceneMusic;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.math.Transformation;
 import java.io.IOException;
@@ -2270,6 +2271,8 @@ public final class LoreFilmClient {
 		barsO = bars;
 		Film f = film;
 		bars += ((f != null ? 1.0F : 0.0F) - bars) * 0.25F;
+		// music under it, in with the bars and lingering after them ({@link SceneMusic})
+		SceneMusic.scene("lore_film", f != null && minecraft.level == f.level && minecraft.player != null);
 		if (f == null) {
 			return;
 		}

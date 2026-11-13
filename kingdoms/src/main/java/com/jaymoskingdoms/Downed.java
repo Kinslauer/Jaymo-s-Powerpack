@@ -240,7 +240,8 @@ public final class Downed {
 
 	/** (0.7.98) Ours to disarm: a villager or one of our folk (not a downed player or someone's dog). Server side. */
 	private static boolean ours(LivingEntity body) {
-		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG);
+		// (and a downed illager: IllagerTalk counts it disarmed once its hands are empty)
+		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG) || IllagerTongue.speaker(body);
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -492,6 +493,9 @@ public final class Downed {
 	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */
 	private static void disarm(Player player, LivingEntity body) {
 		boolean took = false;
+		if (IllagerTongue.speaker(body) && !body.getMainHandItem().isEmpty()) {
+			body.addTag(IllagerTalk.ARMED_TAG);
+		}
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
 			ItemStack held = body.getItemBySlot(slot);
 			if (held.isEmpty()) {

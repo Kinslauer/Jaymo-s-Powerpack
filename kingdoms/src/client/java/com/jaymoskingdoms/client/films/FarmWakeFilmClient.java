@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.films;
 import com.jaymoskingdoms.FarmhandWake;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
+import com.jaymoskingdoms.client.music.SceneMusic;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -147,6 +148,8 @@ public final class FarmWakeFilmClient {
 				}
 			}
 		}
+		// music under the talk, in with the bars and lingering after them ({@link SceneMusic})
+		SceneMusic.scene("farm_wake", running);
 		bars += ((running ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!running && bars < 0.01F) {
 			bars = 0.0F;

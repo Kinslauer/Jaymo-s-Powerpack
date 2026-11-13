@@ -26,6 +26,7 @@ import net.minecraft.util.RandomSource;
  * <li>Every stem is {@link SoundSource#MUSIC}, so the Music volume slider rules it. While a theme sounds, the game's own
  * music is stopped every {@link #DUCK_EVERY} ticks so the two do not play over each other; it comes back by itself
  * afterwards.</li>
+ * <li>Under a letterboxed scene's music ({@link SceneMusic}) the theme goes quiet, and comes back as that fades.</li>
  * </ul>
  */
 public final class FoeMusicClient {
@@ -170,7 +171,8 @@ public final class FoeMusicClient {
 
 		@Override
 		public void tick() {
-			this.volume = Math.max(0.0001F, this.base * gain * gain);
+			// (silent under a scene's music: SceneMusic)
+			this.volume = Math.max(0.0001F, this.base * gain * gain * (1.0F - SceneMusic.cover()));
 			if (gain <= 0.0F) {
 				this.stop();
 			}

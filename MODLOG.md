@@ -4213,3 +4213,33 @@ enter limbo if they don't come to."
 - Players only: Spell Engine runs held casts only for players and spell summons, so no villager, guard or mob ever holds
   the spin. Not in creative or spectator.
 - Built; not played.
+
+## 0.23.21 (2026-11-13): Lock-on body regions; middle mouse swaps to the one on your crosshair
+
+- **Body regions**: while locked on, scroll down moves your aim down the target's body and scroll up moves it up: head, torso, arms, legs (animals and spiders: head, torso, legs; flyers: head, torso, wings; bosses and other bodies without parts: torso only; a cut-off head, both arms or both legs drop out of the list). A new lock starts on the torso; a swap keeps your region if the new target has it.
+- The camera eases onto the region, the lock-on bracket sits on it (smaller off the torso) with the region's name under it.
+- Your own blows, arrows, throws and power cuts on the locked target land on that part (`LockOnRegions.aimedPart` in the wounds' `HitRouting`, `Dismember.aimedPart`), so its part takes the damage, breaks and can come off. Of a pair, the arm or leg nearer you (or the one still on); an animal's front or hind legs by which end you're at. Falls, blasts, fire and magic still spread as before.
+- On top of that: an aimed head hit does 25% more damage, but 35% of aimed head hits glance off onto the torso (no bonus; for a power cut, onto the nearer arm), so weaker mobs aren't felled in one hit every time; an aimed leg hit slows 2 s (Slowness II from 6 damage); an aimed arm hit weakens 2 s (Weakness II from 6 damage); a wing hit slows. Tuning at the top of `LockOnRegions`.
+- **Head shots can miss**: 20% of aimed head hits miss outright (a whiff, no damage); of the rest, 35% glance onto the torso. So roughly half of head-aimed blows land on the head. Finesse (Kingdoms' stat) steadies the aim: at full Finesse both chances are cut by 75% (5% miss, about 9% glance), in step with the stat (`LockOnRegions.FINESSE_AIM`).
+- **Tail**: the Great Ape (a Warrior-born player's or a villager's) has a fifth region, its tail. A blow there lands on the body; a blade on the tail while the ape lies crippled cuts it off. While locked on another region, a blade on the crippled ape no longer takes the tail (unlocked, it still does as before). Locked onto its legs, every blow counts toward crippling it whatever height it came from; locked elsewhere, none do.
+- **Giants go down on black legs** (Andy: "they should all go crippled if both legs go black in a fight"): new `jaymospowers:giants` entity tag (ogres, Bogre, troll, minotaur, Piglin King, Made Brute, the four Aether Giants, warden). With every leg at zero a giant can't walk or jump at all (other mobs still crawl at -70%) and goes down with a thud; the Great Ape is crippled at once (`Giants.LEGS_GONE`).
+- **Swapping targets**: scrolling no longer moves the lock sideways. Middle mouse while locked swaps to whatever living thing is right on your crosshair (within 0.3 blocks of its box), or lets go if nothing else is. Turning the camera yourself pauses the lock's easing for half a second so you can line the next one up.
+- Sneak + scroll stays the stance's and the ledge grab's; a Z Fighter holding Z still scrolls flight; scroll picks hotbar slots when not locked.
+- `LockOn.Packet` now carries the region (`Packet(int)` kept for Kingdoms' Battle Stance).
+- Built; not played.
+
+## 0.23.22 (2026-11-13): small bodies dismember more often
+
+- Andy: "smaller enemies like the digger should dismember more often". A mob that stands shorter than 1.6 blocks loses parts more often, by (1.6 / its height) squared, at most 2.5 times: an Imp (1.4 tall) about 1.3x, a goblin scout (1.2) about 1.8x, a Digger (1.1) about 2.1x, a loot goblin or a baby zombie 2.5x. Anything 1.6 or taller is as before.
+- It raises every cutting roll: the blade's overkill sever (30% on a plain blade becomes about 53% on a goblin scout, 64% on a Digger, 75% on a loot goblin), power cuts, the axe/greatsword double-leg cleave and the waist halving, and a blast's chance to tear a limb off a survivor or a corpse. Skeletons, Rubber-folk and Grim Hand still stack on top. Blunt blows still never cut. A blast's chance to gib a body outright is unchanged.
+- Players keep their own chance, and village children (babies that aren't monsters) aren't cut more often. Height is the standing height, so crouching or crawling doesn't count, but a baby's or a shrunken body's size does.
+- Severed limbs and stumps now also work on Kingdoms creature models (part names armR/legL, Blockbench arm_right/leg_left, the loot goblin's thigh/thigh2), and a creature's severed limb is drawn where it hung (its parents' pivots counted). Broken limbs on those models now hang limp too.
+- GeckoLib mobs (a Kingdoms Imp) can show lost parts too: DismemberGeoEntityRendererMixin puts the lost parts on GeoEntityRenderer's render state and hides those bones (and what hangs off them) in each render pass (Dismembered.hideGeo); a severed GeckoLib limb is drawn alone, at its bone's height (SeveredPartRenderer.geoHeight). No stumps or limp broken limbs on GeckoLib models.
+- Classes: Dismember (SMALL_HEIGHT, SMALL_MAX, smallScale), BlastGore.chance, client Dismembered.names/limb, SeveredPartRenderer.middle.
+- Built; not played.
+
+## 0.23.23 (2026-11-13): scene music - a music disc under the ultimate's film and the beam battle
+
+- **Music under the films** (client/sound/SceneMusic, new; the same player Jaymo's Kingdoms has). Andy: "it should fade in with the letterboxing and out as it ends. lingering for 5s", and "any of the discs can play for the other scenes too". Your own ultimate's film and a beam battle draw a music disc at random (never the same twice running; disc 11 left out, it's footsteps and breathing, not music). It fades in as the bars slide in, plays through, and from when the bars start to go it fades out, gone about 5 s after they are. Someone who only watches an ultimate gets the bars and no music.
+- Plays as Music, so the Music slider rules it; the game's own music is stopped while it sounds and comes back after. Shares the stage with Jaymo's Kingdoms' films so the two never play at once.
+- Built; not played.

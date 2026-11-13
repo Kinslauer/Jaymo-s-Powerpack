@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymoskingdoms:illager_raid",
+  "width": 2,
+  "height": 1,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymoskingdoms.illager_raid.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymoskingdoms.illager_raid.author"
+  }
+}

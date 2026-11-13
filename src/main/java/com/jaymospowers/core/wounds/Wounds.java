@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.LockOnRegions;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,7 +110,7 @@ public final class Wounds {
 	private static int tickCounter;
 
 	/** (0.15.94) A hit already taken from the parts as it landed ({@link #takeHit}), waiting for the after-damage event. */
-	private record Routed(DamageSource source, @Nullable BodyPart landed, float[] was, float[] now, float loss) {
+	private record Routed(DamageSource source, @Nullable BodyPart landed, float[] was, float[] now, float loss, boolean aimed) {
 	}
 
 	/** (0.15.94) Hits {@link #takeHit} routed, picked up by {@link #onDamage} in the same blow. */
@@ -686,14 +687,21 @@ public final class Wounds {
 		// (0.14.2) a power's own cut (Dismember.cut) lands where it was aimed
 		BodyPart aimed = Dismember.cutAim(victim);
 		BodyPart landed;
+		boolean locked = false;
 		if (aimed != null && plan.index(aimed) >= 0) {
 			HitRouting.damage(points, plan, aimed, loss);
 			landed = aimed;
 		} else {
+			// a player locked onto it aims at a region (LockOnRegions): an aimed head hit bites harder
+			BodyPart lock = HitRouting.lockAimed(victim, plan, source);
+			if (lock != null) {
+				locked = true;
+				loss = LockOnRegions.scale(lock, loss);
+			}
 			landed = HitRouting.route(victim, plan, source, points, max, loss);
 		}
 		store(victim, plan, points);
-		return new Routed(source, landed, was, points, loss);
+		return new Routed(source, landed, was, points, loss, locked);
 	}
 
 	private static void onDamage(LivingEntity victim, DamageSource source, float base, float taken, boolean blocked) {
@@ -745,6 +753,10 @@ public final class Wounds {
 		}
 		// (0.14.2) a limb this hit took to zero breaks (a fall's breaks heal by themselves: no priest for a hard landing)
 		markBreaks(victim, plan, was, points, by, source.is(DamageTypeTags.IS_FALL));
+		// the last of its legs gone black: a giant can't stand (Giants), the Great Ape goes down
+		if (!blocked) {
+			Giants.afterHit(victim, plan, was, points);
+		}
 		// a heavy blow to a bare head may take an eye
 		if (!blocked && landed == BodyPart.HEAD && victim instanceof ServerPlayer struck && victim.isAlive()) {
 			com.jaymospowers.power.blindness.Blind.struck(struck, source, loss);
@@ -752,6 +764,10 @@ public final class Wounds {
 		// (0.14.4) a blade, a shot or claws that cut deep enough opens a bleeding cut
 		if (!blocked && victim.isAlive()) {
 			Bleeding.onHit(victim, plan, source, landed, was, points);
+			// a lock-on aimed leg slows, an aimed arm weakens
+			if (hit.aimed() && landed != null) {
+				LockOnRegions.onAimedHit(victim, source, landed, loss);
+			}
 			// a mark of what made it, where it landed
 			WoundMarks.onHit(victim, plan, source, landed, loss);
 		}
