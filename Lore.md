@@ -964,6 +964,14 @@ builds them, and clockwork hornets, on purpose. He rebuilds fighters into androi
 reaped, a body raised as a thrall) and **Blood** (paid in blood rather than mana). Practising them is a crime and
 brings corruption. The **blood witch** is their face in the world.
 
+(new) **Volcanic glass and the black flame** (BossRise patch 11, 2026-11-13). The black glass comes from the demons'
+country in the Nether, where the fire rivers cool: the same glass the gauntlet is made of. Working it is a craft and no
+bloodline, so a Sorcerer of any element can learn it from a scroll: splinters, spires out of the ground, a skin of it,
+a pool poured molten. The court wizards and the camps' shamans carry those scrolls. The **black flame** is the demons'
+own fire and a third forbidden art beside Death and Blood: water does not put it out, it leaps from one body to the
+next, and only healing magic ends it. The camps' necromancers carry its scroll. Fire's own Sorcerers have the ring, the
+pillars and the lance; lightning's have the storm cloak.
+
 **Banes.** Something you bury may not stay down. A foe you killed, or one that killed you, can come back with a
 name and a mark on its brow that flares and does not go out when it dies, and it comes for you alone ("You put me in
 the ground. The ground gave me back. It always will."; "Not by your hand. Tell them I'll be waiting."). A Bane learns

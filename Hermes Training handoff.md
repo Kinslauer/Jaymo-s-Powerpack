@@ -231,7 +231,21 @@ Skip steps 2 and 5 (they were for a paid provider); Groq's key is already set.
     | Gemini Flash | 503 "high demand" | 503 "high demand" |
     | OpenRouter :free | no `OPENROUTER_API_KEY` in Hermes `.env` | - |
 
-    Nothing in config.yaml was changed.
+    **Andy's call (Nov 12, ~10:30 PM): "NVIDIA first, drop Groq".** Steps 2-5 below were for Groq-first and are
+    replaced by this (done Nov 12, 10:35 PM, PC Claude):
+    - [x] Backups: `E:/hermes/backups/config.yaml.2026-11-12-drop-groq.bak`, and the same name under
+      `profiles/quill/backups/` and `profiles/hermes-modeller/backups/`.
+    - [x] Groq out of every fallback chain. `hermes fallback list` now shows: YOUTH = Super -> Lightning -> Gemini;
+      Quill = Super -> Lightning -> Gemini -> Ultra; Prometheus = Super -> Gemini (reads images) -> Lightning.
+      Apollo, Bacchus and Hephaestus never had Groq. The `providers: groq` definition stays (one block, unused).
+    - [x] No restart needed: the gateway re-reads `fallback_providers` on each agent create/reuse
+      (`gateway/run_config_loaders.py:581`) and cron re-reads per job. `schtasks /run` was a no-op (gateway up).
+    - [ ] Not done: the `hermes chat --oneshot` test from this PC fails with "gateway_other_session" (the gateway
+      runs in Windows session 0 from the boot task, so a user-session CLI can't reach it). The direct API timing
+      above stands in. Fixing that means stopping the session-0 gateway from an admin prompt: Andy's call.
+    - Gemini Flash returned 503 "high demand" on every try tonight, so in practice the chain is NVIDIA-only.
+      OpenRouter `:free` would need an `OPENROUTER_API_KEY` (Andy makes it, sets it himself) if he wants a non-NVIDIA
+      fallback that works.
 - [ ] 2. If Andy picks a paid fast primary: he makes the account (Cerebras or Groq Developer) and sets the key
       himself as an environment variable / in Hermes's `.env`. Never put a key in a command, file or chat.
 - [ ] 3. Back up `E:/hermes/config.yaml` (and Quill's profile config). In the ONE existing `providers:` block, add
@@ -244,3 +258,60 @@ Skip steps 2 and 5 (they were for a paid provider); Groq's key is already set.
 - [ ] 5. Set a spend cap on the paid provider's console (Andy). After 3 days, write tokens used and dollars spent
       here, run `python tools/vault_sync.py`, and tell Andy in 2 lines.
 - [ ] If anything breaks: restore the backup config and restart the gateway.
+
+## New (Nov 12, 10:50 PM): OpenRouter free models as the non-NVIDIA backup
+
+**Andy's call:** add OpenRouter's free models after the NVIDIA entries, so the bots keep going when NVIDIA is down
+or rate limited. Andy makes the key at https://openrouter.ai/keys and sets `OPENROUTER_API_KEY` himself (user env
+var and `E:/hermes/.env`). Never put the key in a command, file or chat.
+
+**Limits:** `:free` models allow 20 requests a minute and **50 a day per account**, or 1,000 a day once the account
+has bought $10 of credit one time (Andy's choice; not needed to start). 50 a day only covers a few bot runs, so it's
+a backup, not a primary. A 429 from OpenRouter has to fall through to the next provider right away.
+
+**Models** (from OpenRouter's model list Nov 13: free, take tool calls, >= 128k context; a bot call is 64-135k):
+`google/gemma-4-31b-it:free` (262k), then `thinkingmachines/inkling-2-small:free` (1M), then
+`cohere/north-mini-code:free` (256k). Skip the `nvidia/...:free` ones: they are NVIDIA models again, so they don't
+add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The list changes often, so re-check.
+
+- [ ] 1. PR #1403 (`tools/openrouter_check.py`) is merged: pull master. Run `py -3 -m pip install openai`, then
+      `py -3 tools/openrouter_check.py --list` (no key needed) and confirm the three models are still listed.
+- [ ] 2. Once Andy says the key is set: `py -3 tools/openrouter_check.py`, then the same with
+      `--model thinkingmachines/inkling-2-small:free`. Pass = `OK ... called get_server_status(...)`. A `WEAK` line
+      means the model ignored the tool; drop it from the chain.
+- [ ] 3. Back up `E:/hermes/config.yaml` and each bot profile's config (`*.2026-11-13-openrouter.bak`). In the ONE
+      existing `providers:` block, add an `openrouter` provider: base URL `https://openrouter.ai/api/v1`, key from
+      `OPENROUTER_API_KEY` (the env var name, never the value). Use Hermes's built-in OpenRouter provider if
+      `hermes` has one; don't make a second `providers:` block.
+- [ ] 4. Add the models that passed step 2 after the NVIDIA entries in every chain, before Gemini:
+      YOUTH = Super -> Lightning -> OpenRouter models -> Gemini; Quill = its NVIDIA entries (with Ultra) -> OpenRouter
+      -> Gemini; the other bots the same way. Check with `hermes fallback list`.
+- [ ] 5. Restart with `schtasks /run /tn Hermes_Gateway` (never `hermes gateway restart`). Test one fallback call:
+      temporarily put an OpenRouter model first for one oneshot chat (or use Hermes's per-call model flag if it has
+      one), confirm it answers and uses a tool, then put the order back.
+- [ ] 6. Write one line per box here (the decision is already in `Decisions.md`), run `python tools/vault_sync.py`, and
+      tell Andy in 2 lines. If anything breaks, restore the backups and restart the gateway.
+
+**Done Nov 12, ~11:20 PM (PC Claude):**
+- [x] 1. Pulled master, installed `openai`. `--list` still shows all three models.
+- [x] 2. Key set (user env + `E:/hermes/.env`). `cohere/north-mini-code:free`: **OK** (called the tool).
+  `thinkingmachines/inkling-2-small:free`: 403 "only available on agentic harnesses" from the check script, but
+  **OK** when sent with Hermes's own attribution headers (`X-Title: Hermes Agent`, which Hermes's built-in OpenRouter
+  provider always sends). `google/gemma-4-31b-it:free`: 429 three times, "temporarily rate-limited upstream"
+  (Google AI Studio's shared free pool), so not verified and **left out**. Re-test it later; add it if it passes.
+- [x] Profiles don't read the root `.env` (each has its own), so the key line was copied by script, never printed,
+  into the `.env` of hermes-a, hermes-b, hermes-fixer, hermes-modeller and quill. Hermes re-reads `.env` on each call
+  (`agent/credential_pool.py:get_env_prefer_dotenv`), so no restart is needed for it.
+- [x] 3. Backups `config.yaml.2026-11-13-openrouter.bak` in `E:/hermes/backups/` and each bot's `backups/`. Hermes has
+  a built-in `openrouter` provider, so no `providers:` entry was added (still one block).
+- [x] 4. `hermes fallback list`: YOUTH = Super -> Lightning -> Inkling -> Cohere -> Gemini. Quill = Super ->
+  Lightning -> Ultra -> Inkling -> Cohere -> Gemini. Prometheus = Super -> Gemini (images) -> Lightning -> Inkling ->
+  Cohere. Apollo, Bacchus, Hephaestus had no chain; now primary -> Inkling -> Cohere -> Gemini. A 429 switches to the
+  next entry at once (`agent/turn_recovery.py:1921`, "Eager fallback").
+- [~] 5. Gateway restart not needed (chains and `.env` are re-read live; `schtasks /run` is a no-op while it's up).
+  The Hermes oneshot test can't run from this PC session: "gateway_other_session" (the gateway runs in Windows
+  session 0). The same calls made directly (same endpoint, model, Hermes headers, one tool) passed for both models.
+  First real proof will be the next time NVIDIA fails; look for `via openrouter` in `logs/agent.log`.
+- Left alone: `claude-writer` (retired since Quill took over Nov 10; no dispatch since).
+
+**Nov 12, 11:10 PM (PC Claude):** the Discord board (	ools/discord_kanban.py) was down since the morning reboot (nothing started it). Restarted it, and added Task Scheduler task `Discord_Kanban` (at logon, 1 min delay) running `E:/hermes/scripts/start_discord_kanban.ps1`, which skips if a copy is already running. Logs: `E:/hermes/logs/discord-kanban.out.log` / `.err.log`.

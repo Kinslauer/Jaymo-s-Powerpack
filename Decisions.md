@@ -410,9 +410,19 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:16 PM ET (Sengoku picks thread): Andy chose "Two days and nights" for the sail to the blossom
   continent: 16,000 blocks of open sea (about 40 real minutes in an ordinary ship). Land radius 2,500 and centre
   34,000 east are my figures.
+- 2026-11-12 10:31 PM ET (boss and animation mods thread): Andy: "bump the version with this merge. so we should be on
+  .23.0". Powers stepped from 0.22.109 to 0.23.0 with a `bump: minor` change note (PR #1401).
+- 2026-11-12 (BossRise patch 10, the glass gauntlet). Claude's calls, unconfirmed: "favourited" is read as the rift
+  keeping it for that Arsenal (1 Reach in 300 finds it once; from then on it comes first on every Reach like a pin,
+  still a summon that goes back; sneak + Reach empty-handed leaves it in the rift or calls it back; lost with the
+  power). The open hand is a diamond tool of all four kinds; it strips and tills but makes no paths. Its seven-blow
+  form is "Seven Facets", known by whoever holds the gauntlet, no teacher. The clawed guard also goes to Rimeclaw.
+  The stretch dodge replaces the tumble for Rubber-folk and Verdants (a look only). The gauntlet is drawn held, not
+  worn on the hand.
 - 2026-11-12 10:17 PM ET (Sengoku picks thread): Andy: "can there be an MCA captain or companion that can pilot the
   ship for you? thats just too long to be sailing manually." Added to patch 2 of docs/BlossomLands-Plan.md: a hired MCA
   sea captain or a companion takes the helm of your ship, or you buy passage on a blossom merchantman.
+- 2026-11-12 10:30 PM ET (Andy, PC Claude thread): Groq-first is off. Hermes bots stay on NVIDIA Super first, then Lightning; Groq taken out of every fallback chain. Reason: Groq free allows 8,000 tokens a minute and a bot call is 64k-135k, so it refuses every call (413) and Hermes compresses history on a 413. Measurements in Hermes Training handoff.md.
 - 2026-11-12 10:29 PM ET (Sengoku picks thread): Andy, after reading the lore paragraph: "it is called Mohknee and you
   can encounter tideborn islands on the way." The blossom continent is Mohknee; Tideborn island villages stand along
   the crossing. Taken as his yes to the paragraph (my reading); patch 1 started.
@@ -420,3 +430,18 @@ Andy: "any feature that requires another PR to work as intended should be held a
   x 28,000 z 0, 3,000 blocks in radius; its sea begins 7,500 east of the origin; eight crossing islands about 350 blocks
   across, each with one village; vanilla villages and other mods' surface structures are kept off Mohknee; every
   settlement there is Blossom; cherry groves cover about 13% of it. PR #1407.
+- 2026-11-13 (Boss anim mods thread, patch 11, my calls, not yet confirmed by Andy): nine Sorcerer spells, each with a
+  scroll. Glass (Shards, Spires, Skin, Molten Glass) and Black Flame can be kept by a Sorcerer of any element; Fire
+  Ring, Fire Pillars and Fire Lance only by a fire Sorcerer, Storm Cloak only by a lightning one (anyone can still
+  read a scroll once; Mages and other staff casters learn them as any spell). A Sorcerer learns them for good by
+  reading the scroll (Knowledge 4) and casts them from the Magic screen, since the class key is full. Black Flame is a
+  third forbidden art (crime and corruption as Death's); healing magic or a dispel puts it out; it leaps once to the
+  nearest body, friend or foe. Fire Lance joins Powers' beam clashes as a fifth kind (fire); the class key shoves.
+  Scrolls come from wizards, shamans and (Black Flame) necromancers; Warlocks may learn glass, fire and Black Flame,
+  Druids Storm Cloak. Lore placement added as a (new) paragraph: the glass is from the demons' country.
+- 2026-11-12 10:50 PM ET (Andy): add OpenRouter :free models after NVIDIA in every Hermes bot chain as the non-NVIDIA backup; Andy makes and sets OPENROUTER_API_KEY himself. Steps: Hermes Training handoff.md, "OpenRouter free models".
+- 2026-11-13 (Boss anim mods thread, patch 12, my calls, not yet confirmed by Andy): light bending is drawn with the
+  game's own post effect whether or not a shader pack is on (off in low-end mode; it turns itself off if it errors),
+  for Gravity's Singularity and Nadir's Event Horizon. Beam scars are for ki waves and Pyre's Sunray only (not wind,
+  smoke, soot or Kingdoms' Fire Lance); soft ground only, no drops, mobGriefing and mayBuild, 4 blocks a tick. The
+  fire dive went to Pyre and replaced Magma Trail (B), my pick of its weakest move; the Emberborn kit is unchanged.
