@@ -1,5 +1,5 @@
 ---
-status: running
+status: blocked
 task: minecraft-server-bot-experiment
 branch: 
 with: 
