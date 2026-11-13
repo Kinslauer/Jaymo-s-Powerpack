@@ -135,6 +135,10 @@ riverbeds and folded steel as a Tinkers material: **blossom smiths teach the pro
 and at their forge, and it cannot be made before one has shown you. One heirloom per house. The shadow suit and the
 lord's armour.
 
+*Built (2026-11-13, `BlossomSteel`): iron sand from Mohknee's riverbeds, the bloom (blast furnace), folding on an anvil
+into Powers' steel ingot, taught in three steps by a Blossom smith ("Ask About Steel"). Not built: new weapon heads (the
+Armory has the glaive, claymore and flanged mace), heirlooms, the shadow suit, the lord's armour.*
+
 ## Patch 9: shadows, the warlord and ruins (fk_shadow, fk_warlord, bv_ruins)
 
 Hired shadows sent by rival lords. A rare outlaw castle held by a warlord (`BossPosture`, `BossTurns`). Blossom ruins

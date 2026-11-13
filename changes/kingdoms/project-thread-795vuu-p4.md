@@ -18,3 +18,6 @@
 - **The levy** (needs MCA): one Blossom guard in three is a sworn man in the ronin harness, as all of them were; the other two are the levy, in straw hats with spears.
 - **Watch towers**: each new village raises a timber watch tower 52 to 64 blocks out along the way to its torii, where the ground will take one. Nobody is posted in it yet.
 - Not built from patch 7: matchlocks for the levy and a matchlock look for the musket, glaive guards at shrines, mounted road patrols.
+- **The blossom smiths' steel.** Iron Sand comes up now and then (15%) with sand or gravel dug from under a river on Mohknee. A blast furnace burns it into a Steel Bloom. The bloom is folded on an anvil, six blows with it in hand, into the pack's steel ingot (an iron ingot without Powers).
+- **It has to be taught.** A smith in a Blossom settlement has "Ask About Steel" on the Interact page and tells one step each time: the first for the asking, the second to someone holding iron sand, the third to someone holding a bloom. Until all three are heard the bloom will not fold for that player. Nothing on screen explains it otherwise.
+- Not built from patch 8: new weapon heads (the Armory already has the glaive, claymore and flanged mace), a heirloom for each house, the shadow suit and the lord's armour. Not seen in game.

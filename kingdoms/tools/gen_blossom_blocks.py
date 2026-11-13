@@ -493,7 +493,30 @@ def draw_dress():
     worn.save(path)
 
 
+def draw_steel():
+    """a heap of black river sand with a few bright grains, and a rough bloom: dark iron, slag pits, a hot seam"""
+    rng = random.Random(41)
+    sand = canvas()
+    for y in range(7, 14):
+        half = 1 + (y - 7) * 6 // 6
+        for x in range(8 - half, 8 + half):
+            put(sand, x, y, IRON[rng.choice([0, 0, 0, 1])] if rng.random() > 0.08 else IRON[2])
+    save_item(sand, "iron_sand")
+    bloom = canvas()
+    rows = {4: (6, 10), 5: (4, 11), 6: (3, 12), 7: (3, 13), 8: (2, 13), 9: (3, 13), 10: (3, 12), 11: (4, 11), 12: (6, 9)}
+    for y, (a, b) in rows.items():
+        for x in range(a, b + 1):
+            edge = x in (a, b) or y in (4, 12)
+            put(bloom, x, y, COAL[0] if edge else IRON[rng.choice([0, 1, 1, 2])])
+    for x, y in ((5, 6), (9, 9), (11, 7), (6, 10)):
+        put(bloom, x, y, COAL[0])
+    for x, y in ((7, 7), (8, 8), (9, 8)):
+        put(bloom, x, y, GLOW[0])
+    save_item(bloom, "steel_bloom")
+
+
 def textures():
+    draw_steel()
     draw_ramie()
     draw_dress()
     draw_shoji()
@@ -757,7 +780,7 @@ def dress():
     hat("straw_hat", tex("thatch"), [([-4, 12, -4], [20, 13, 20]), ([-1, 13, -1], [17, 15, 17]), ([2, 15, 2], [14, 17, 14]),
         ([5, 17, 5], [11, 19, 11]), ([7, 19, 7], [9, 20, 9])])
     hat("basket_hat", tex("basket_hat"), [([0.5, 1, 0.5], [15.5, 17, 15.5])])
-    for name in ("straw_cape", "ramie_seeds", "ramie_fibre"):
+    for name in ("straw_cape", "ramie_seeds", "ramie_fibre", "iron_sand", "steel_bloom"):
         flat_item(name)
     write(ASSETS + "equipment/straw_cape.json", {"layers": {"humanoid": [{"texture": NS + ":straw_cape"}]}})
     variants = {}
@@ -851,6 +874,8 @@ def recipes():
     shaped("straw_hat", ["TTT", "T T"], {"T": own("thatch")}, 1, "equipment")
     shaped("basket_hat", ["MMM", "M M", "M M"], {"M": own("tatami")}, 1, "equipment")
     shaped("straw_cape", ["T T", "TTT", "TTT"], {"T": own("thatch")}, 1, "equipment")
+    write(DATA + "recipe/steel_bloom_from_blasting_iron_sand.json", {"type": "minecraft:blasting", "cookingtime": 200, "experience": 0.3,
+        "ingredient": own("iron_sand"), "result": {"id": own("steel_bloom")}})
     write(DATA + "recipe/string_from_ramie_fibre.json", {"type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": [own("ramie_fibre")] * 3, "result": {"count": 2, "id": "minecraft:string"}})
 
