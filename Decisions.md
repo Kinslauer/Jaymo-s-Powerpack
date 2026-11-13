@@ -491,3 +491,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 4:57 PM ET (Plan Minecraft server bot for Hermes thread): Andy wants YOUTH to have a body on the server: "I'd like a body that can spawn and relay information about any mechanic to players."
 - 2026-11-13 5:13 PM ET (same thread): "the youth bot should be a wispy winged sylvan animating in the world near where you asked, doing some variation of 8 gecko libbed idle animations." Built as our own Kingdoms GeckoLib mob (YouthWisp, PR #1467), driven by Hermes over RCON with /youth commands. No Carpet, no Mineflayer, no second account.
 - 2026-11-13 5:34 PM ET (same thread): Andy approved the Lore.md paragraph "The wood-wisps".
+- 2026-11-13 5:42 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "its fine" to the Lore.md paragraph "The Cloud Sea". Approved; the (new) mark is off.

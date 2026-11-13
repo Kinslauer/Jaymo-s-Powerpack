@@ -23,3 +23,4 @@ be liftable, lifting the undead should tear off a limb at most, skeletons fall t
 
 ## Done
 Built; not played.
+- 2026-11-13 22:52 PR #1470 is merged into master; moved to Agents/Done.
