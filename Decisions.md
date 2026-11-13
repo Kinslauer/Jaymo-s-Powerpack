@@ -410,3 +410,12 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:16 PM ET (Sengoku picks thread): Andy chose "Two days and nights" for the sail to the blossom
   continent: 16,000 blocks of open sea (about 40 real minutes in an ordinary ship). Land radius 2,500 and centre
   34,000 east are my figures.
+- 2026-11-12 10:31 PM ET (boss and animation mods thread): Andy: "bump the version with this merge. so we should be on
+  .23.0". Powers stepped from 0.22.109 to 0.23.0 with a `bump: minor` change note (PR #1401).
+- 2026-11-12 (BossRise patch 10, the glass gauntlet). Claude's calls, unconfirmed: "favourited" is read as the rift
+  keeping it for that Arsenal (1 Reach in 300 finds it once; from then on it comes first on every Reach like a pin,
+  still a summon that goes back; sneak + Reach empty-handed leaves it in the rift or calls it back; lost with the
+  power). The open hand is a diamond tool of all four kinds; it strips and tills but makes no paths. Its seven-blow
+  form is "Seven Facets", known by whoever holds the gauntlet, no teacher. The clawed guard also goes to Rimeclaw.
+  The stretch dodge replaces the tumble for Rubber-folk and Verdants (a look only). The gauntlet is drawn held, not
+  worn on the hand.
