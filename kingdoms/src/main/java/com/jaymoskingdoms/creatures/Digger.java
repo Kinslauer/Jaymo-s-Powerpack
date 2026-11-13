@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * sends them scurrying back down their warren's hole (or just away, for one with no warren), and they lie low there till
  * the player has gone; they climb their burrow walls to get out again. They only fight when they have the upper hand: a
  * pit lid gives under someone (they all come for whoever fell through), a pack of them is set on in their own warren, or
- * one is cornered with nowhere left to run. Out of their holes they fight as a pack ({@link Packs}: one with another beside
+ * one is cornered with nowhere left to run. One waits in a nook in the wall of each pit ({@link #lurk}): it keeps to its
+ * nook, is on whoever drops in beside it at once, and goes back to wait when the fight is over. Out of their holes they fight as a pack ({@link Packs}: one with another beside
  * you has the upper hand), and a lone hurt one loses its nerve and runs again.
  */
 public class Digger extends Monster {
@@ -60,6 +61,9 @@ public class Digger extends Monster {
 	/** Diggers (it included) at hand that make a pack bold enough to stand and fight for the warren, and how near counts. */
 	static final int PACK_STANDS = 3;
 	static final double PACK_NEAR = 12.0, WARREN_GROUND = 10.0;
+	/** A pit's digger: how near its nook (blocks, flat) and how far above the nook's floor a player counts as in its pit, and how often (ticks) it looks. */
+	static final double PIT_NEAR = 1.6, PIT_TOP = 2.0;
+	static final int PIT_LOOK = 5;
 
 	private static final EntityDataAccessor<Boolean> CLIMBING = SynchedEntityData.defineId(Digger.class, EntityDataSerializers.BOOLEAN);
 
@@ -67,6 +71,8 @@ public class Digger extends Monster {
 	private @Nullable BlockPos home;
 	/** Game time until which it stands and fights instead of running. */
 	private long boldUntil;
+	/** Whether it waits in a pit's nook ({@link #home}) instead of roaming. */
+	private boolean lurks;
 
 	public Digger(EntityType<? extends Digger> type, Level level) {
 		super(type, level);
@@ -83,7 +89,14 @@ public class Digger extends Monster {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new HideGoal());
 		this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, false));
-		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
+		this.goalSelector.addGoal(4, new ReturnGoal());
+		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8) {
+			@Override
+			public boolean canUse() {
+				// a pit's digger keeps to its nook
+				return !Digger.this.lurks && super.canUse();
+			}
+		});
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
@@ -111,6 +124,23 @@ public class Digger extends Monster {
 		super.tick();
 		if (!this.level().isClientSide()) {
 			this.entityData.set(CLIMBING, this.horizontalCollision);
+			if (this.lurks && this.home != null && this.tickCount % PIT_LOOK == 0 && !this.bold()) {
+				this.watchPit();
+			}
+		}
+	}
+
+	/** A pit's digger: anyone who has dropped into its pit (lid or no lid) is set on. */
+	private void watchPit() {
+		BlockPos nook = this.home;
+		Player in = this.level().getNearestPlayer(nook.getX() + 0.5, nook.getY(), nook.getZ() + 0.5, PIT_NEAR + PIT_TOP, EntitySelector.NO_CREATIVE_OR_SPECTATOR);
+		if (in == null || in.getY() > nook.getY() + PIT_TOP) {
+			return;
+		}
+		double dx = in.getX() - (nook.getX() + 0.5), dz = in.getZ() - (nook.getZ() + 0.5);
+		if (dx * dx + dz * dz < PIT_NEAR * PIT_NEAR && this.level().getDifficulty() != Difficulty.PEACEFUL) {
+			this.embolden();
+			this.setTarget(in);
 		}
 	}
 
@@ -139,6 +169,12 @@ public class Digger extends Monster {
 		this.home = chamber.immutable();
 	}
 
+	/** {@link Warrens}: it waits in {@code nook}, in the wall of a pit, for someone to fall in. */
+	void lurk(BlockPos nook) {
+		this.home(nook);
+		this.lurks = true;
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		boolean hurt = super.hurtServer(level, source, damage);
@@ -161,12 +197,38 @@ public class Digger extends Monster {
 		if (this.home != null) {
 			output.putLong("Home", this.home.asLong());
 		}
+		output.putBoolean("Lurks", this.lurks);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.home = input.getLong("Home").map(BlockPos::of).orElse(null);
+		this.lurks = input.getBooleanOr("Lurks", false);
+	}
+
+	/** A pit's digger, the fight over, goes back to its nook to wait. */
+	final class ReturnGoal extends Goal {
+		ReturnGoal() {
+			this.setFlags(EnumSet.of(Flag.MOVE));
+		}
+
+		@Override
+		public boolean canUse() {
+			return Digger.this.lurks && Digger.this.home != null && !Digger.this.bold() && Digger.this.getTarget() == null
+				&& Digger.this.home.distToCenterSqr(Digger.this.position()) > IN_HOME * IN_HOME && Digger.this.getRandom().nextInt(10) == 0;
+		}
+
+		@Override
+		public void start() {
+			BlockPos h = Digger.this.home;
+			Digger.this.getNavigation().moveTo(h.getX() + 0.5, h.getY(), h.getZ() + 0.5, 1.0);
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return !Digger.this.bold() && Digger.this.getTarget() == null && !Digger.this.getNavigation().isDone();
+		}
 	}
 
 	/**

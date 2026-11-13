@@ -159,6 +159,8 @@ public final class Wounds {
 		Fainting.register();
 		// fifth edition: steps of exhaustion, and zombies that get back up
 		Exhaustion.register();
+		// held the big axes' spin too long: dizzy, then out cold
+		SpinDizzy.register();
 		UndeadFortitude.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();

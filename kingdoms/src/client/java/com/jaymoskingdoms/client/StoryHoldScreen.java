@@ -32,7 +32,7 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 161, HINT_W = 320;
+	private static final int HINTS = 162, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */
@@ -76,8 +76,21 @@ final class StoryHoldScreen extends Screen {
 		super(Component.translatable("gui.jaymoskingdoms.story.hold.title"));
 	}
 
-	/** The next hint off the deck (1..HINTS), reshuffling once every hint has been shown. */
+	/**
+	 * The next hint off the deck (1..HINTS), reshuffling once every hint has been shown. A number with no line yet (another
+	 * branch's hint not merged) is passed over, so the screen never shows a bare key.
+	 */
 	private static int dealHint() {
+		for (int tries = 0; tries < HINTS; tries++) {
+			int hint = dealAny();
+			if (net.minecraft.locale.Language.getInstance().has("gui.jaymoskingdoms.story.hint." + hint)) {
+				return hint;
+			}
+		}
+		return lastHint;
+	}
+
+	private static int dealAny() {
 		if (dealt >= HINTS) {
 			java.util.concurrent.ThreadLocalRandom random = java.util.concurrent.ThreadLocalRandom.current();
 			for (int i = 0; i < HINTS; i++) {
