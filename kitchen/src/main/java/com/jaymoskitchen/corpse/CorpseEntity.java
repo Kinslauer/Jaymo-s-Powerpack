@@ -2203,6 +2203,18 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
+	/**
+	 * Let fall from whatever held it up off the ground (Kingdoms' Unburied coming apart at daybreak, the dead it was made
+	 * of dropping out of it): it turns over as it falls, as a body let go of from someone's arms does, and lands as one.
+	 */
+	public void spill(Vec3 velocity) {
+		setOnGround(false);
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(TUMBLING, true);
+		setDeltaMovement(velocity);
+		fallFromHold(velocity, false);
+	}
+
 	/** Carried in your arms, in front of you (one at a time). */
 	private InteractionResult carry(ServerLevel level, Player player) {
 		if (carriedBy(player) != null) {
