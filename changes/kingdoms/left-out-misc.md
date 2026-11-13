@@ -1,5 +1,5 @@
 # left out of earlier PRs: Picks 5, the long defence film, the Blossom castle
-- **Cooked on the spot** (`HunterBow`): game a Hunter's bullseye kills drops cooked meat (the shot's heat cooks what it would have dropped), plus more cooked cuts.
+- **Cooked on the spot** (`HunterBow`): when a Hunter's bullseye kills, it drops cooked meat (the shot's heat cooks what it would have dropped), plus more cooked cuts.
 - **Ghostly crossbow** (`GhostlyCrossbow`, art by `kingdoms/tools/left_out_assets.py`): a pale crossbow a wraith carries over from the hunt it died in (6% drop from a wraith, not crafted). Its bolts glow and are never left to pick up.
 - **Pitchfork carried** (`Careers`, `Worker`, `Folk`): farmhands and Farmers carry the Powers pitchfork when it is loaded (found by id, never a hard link), otherwise the hoe as before.
 - **Fused ground** (`remnants/FusedGround`, `Monoliths`): round the Irradiated Giant's monolith the top block of sand and soil is fused to clear and green glass, solid at the foot and patchy out to 30 blocks. New monoliths are fused as they are raised; old ones once, when a player comes within 96 blocks.
