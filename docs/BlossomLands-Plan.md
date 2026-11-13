@@ -47,9 +47,9 @@ and place waits on its Lore.md `(new)` paragraph. Patches 1 and 2 come first; th
 - Check first, against the 26.3 sources: registering a density function type, and that William Wythers' Overhauled
   Overworld and Lithostitched leave our four files in force.
 
-Proposed numbers (open question 1): centre 22,000 blocks east of the world's origin, land 2,500 blocks in radius,
-8,000 blocks of open sea on every side. About 8 minutes for the fastest ship at full sail, 20 or more for an
-ordinary one: roughly one day and night at sea.
+Numbers: Andy chose "Two days and nights" (2026-11-12): 16,000 blocks of open sea on every side, about 40 real
+minutes for an ordinary ship and 17 for the fastest at full sail. Land 2,500 blocks in radius, its centre 34,000
+blocks east of the world's origin (my figures for the land's size and place).
 
 ## Patch 2: word of it, and the way there
 
@@ -133,8 +133,8 @@ A rare drowned palace in the deep sea off the far land, guarded by sea folk.
 
 ## Open questions
 
-1. **How long is the voyage?** Proposed: 8,000 blocks of open sea, about one day and night for an ordinary ship.
-2. **Flight and pods.** Proposed: nothing stops a flier (8,000 blocks is long for them too), but pods cannot be set
+1. **How long is the voyage?** Answered: two days and nights, 16,000 blocks of open sea.
+2. **Flight and pods.** Proposed: nothing stops a flier (16,000 blocks is long for them too), but pods cannot be set
    down there and no coach or teleport fare reaches it.
 3. **Blossom villages already standing on the home continent** in the worlds we have. Proposed: they stay, as
    settlers from over the sea; no new ones rise there.
