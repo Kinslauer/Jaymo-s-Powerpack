@@ -3,7 +3,7 @@ status: running
 task: 
 branch: claude/project-thread-0hjevc
 with: Claude (cloud, "Make every UI screen match" thread)
-pr: 
+pr: 1434
 mods: powers, kingdoms, kitchen
 versions: 
 started: 2026-11-13
