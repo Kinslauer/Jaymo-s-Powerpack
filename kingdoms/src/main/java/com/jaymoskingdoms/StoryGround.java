@@ -117,7 +117,7 @@ public final class StoryGround {
 		final List<UUID> waiting = new ArrayList<>();
 		/** Chunks kept loaded round {@link #at} while it's tried. */
 		int radius = TICKET_RADIUS;
-		/** More chunks made and kept loaded while it's tried, each on its own ({@link #ahead(ServerPlayer, List, Runnable)}). */
+		/** More chunks made and kept loaded while it's tried, each on its own ({@link #ahead(ServerPlayer, List, long, Runnable)}). */
 		List<ChunkPos> chunks = List.of();
 		/** (0.7.350) The capital's village still being looked for (null: found, or not looked for). */
 		@Nullable VillageSearch search;
@@ -871,10 +871,11 @@ public final class StoryGround {
 	 * land a start looked at and found not made yet ({@link LifeStory.Wanted}): it's tried again once this is done, or
 	 * once it's taken too long.
 	 */
-	static void ahead(ServerPlayer player, List<ChunkPos> chunks, Runnable then) {
+	static void ahead(ServerPlayer player, List<ChunkPos> chunks, long deadline, Runnable then) {
 		ServerLevel level = player.level().getServer().overworld();
 		BlockPos at = chunks.getFirst().getMiddleBlockPosition(level.getSeaLevel());
-		Job job = new Job(at, level.getGameTime() + AHEAD_GIVE_UP_TICKS, l -> made(l, chunks), l -> {
+		// (Andy: after a minute it should just give the fallback) given up at {@code deadline} (System.nanoTime) too
+		Job job = new Job(at, level.getGameTime() + AHEAD_GIVE_UP_TICKS, l -> made(l, chunks) || System.nanoTime() >= deadline, l -> {
 		});
 		job.radius = 0;
 		job.chunks = List.copyOf(chunks);

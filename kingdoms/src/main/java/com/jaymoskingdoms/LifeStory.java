@@ -118,6 +118,11 @@ public final class LifeStory {
 	 * wild's; on the last the start makes do with the land there is (as it always did with nothing found).
 	 */
 	static final int CHOSEN_TRIES = 3, LAND_TRIES = 5;
+	/**
+	 * Andy: "taking far too long, maybe after a minute it should just give the fallback". How long (real time, ms: the
+	 * server falls behind while land is made, so ticks run slow) a start waits for its land in all before it makes do.
+	 */
+	static final long LAND_WAIT_MS = 60_000L;
 	/** (0.7.584) How far under a roof (blocks) a spot to stand indoors is looked for. */
 	static final int INDOOR_DEPTH = 8;
 	/**
@@ -1277,7 +1282,7 @@ public final class LifeStory {
 			List<ChunkPos> land = wanted.next();
 			JaymosKingdoms.LOGGER.info("{}'s start ({}) waits for {} chunks of land to be made first (try {})", p.getName().getString(), start,
 				land.size(), wanted.tries);
-			StoryGround.ahead(p, land, () -> go(server, start));
+			StoryGround.ahead(p, land, wanted.deadline(), () -> go(server, start));
 		}
 	}
 
@@ -2165,7 +2170,7 @@ public final class LifeStory {
 
 	/**
 	 * The land one player's start asked for and didn't find made. {@code fresh}: this try's (at most {@link #NEW_CHUNKS}
-	 * chunks), made in the background ({@link StoryGround#ahead(ServerPlayer, List, Runnable)}) before the next try, which
+	 * chunks), made in the background ({@link StoryGround#ahead(ServerPlayer, List, long, Runnable)}) before the next try, which
 	 * looks at them first ({@code primed}). Server thread only.
 	 */
 	static final class Wanted {
@@ -2174,6 +2179,21 @@ public final class LifeStory {
 		List<BlockPos> primed = List.of();
 		/** Tries made so far (the one running counts). */
 		int tries;
+		/** When the first wait began (System.nanoTime), or 0: none yet. */
+		long waitingSince;
+
+		/** Whether the time to wait for land ({@link #LAND_WAIT_MS}) is up. */
+		boolean outOfTime() {
+			return waitingSince != 0L && System.nanoTime() - waitingSince >= LAND_WAIT_MS * 1_000_000L;
+		}
+
+		/** When the wait for land is over (System.nanoTime), starting it now if it hasn't begun. */
+		long deadline() {
+			if (waitingSince == 0L) {
+				waitingSince = System.nanoTime();
+			}
+			return waitingSince + LAND_WAIT_MS * 1_000_000L;
+		}
 
 		void want(int x, int z) {
 			ChunkPos chunk = new ChunkPos(x >> 4, z >> 4);
@@ -2185,7 +2205,7 @@ public final class LifeStory {
 
 		/** Whether a failed search should wait for its land and try again rather than make do ({@code chosen}: the start's own place). */
 		boolean waitFor(boolean chosen) {
-			return !freshChunks.isEmpty() && tries < (chosen ? CHOSEN_TRIES : LAND_TRIES);
+			return !freshChunks.isEmpty() && tries < (chosen ? CHOSEN_TRIES : LAND_TRIES) && !outOfTime();
 		}
 
 		/** Lets go of this try's land so far (not to be made). */
