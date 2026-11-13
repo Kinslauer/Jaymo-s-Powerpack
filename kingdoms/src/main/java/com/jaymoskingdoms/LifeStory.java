@@ -1472,7 +1472,9 @@ public final class LifeStory {
 				// (0.7.605, Andy) the Family farmhand: inside a lone farmhouse, taken in by the family there (FarmhandHome).
 				// A party mate's farmhouse is yours too; with no farmhouse in reach, the old village start below.
 				// (Tiv) one nobody else was taken in at, looked past a few taken ones
-				FarmhandHome.House house = lookPast(mate != null ? mate.pos : spawn, from -> FarmhandHome.find(level, from, random),
+				// the hunt has a time limit: it runs on the server thread, and past the watchdog the server shuts down
+				long farmDeadline = FarmhandHome.deadline();
+				FarmhandHome.House house = lookPast(mate != null ? mate.pos : spawn, from -> FarmhandHome.find(level, from, random, farmDeadline),
 					h -> freePlace(level, h.box().getCenter()), random);
 				if (house != null) {
 					place = house.box().getCenter();
