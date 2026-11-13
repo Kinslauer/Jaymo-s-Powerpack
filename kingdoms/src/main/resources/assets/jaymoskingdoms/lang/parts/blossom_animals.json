@@ -14,5 +14,13 @@
   "entity.jaymoskingdoms.hornet": "Paper Hornet",
   "item.jaymoskingdoms.hornet_spawn_egg": "Paper Hornet Spawn Egg",
   "entity.jaymoskingdoms.giant_salamander": "Giant Salamander",
-  "item.jaymoskingdoms.giant_salamander_spawn_egg": "Giant Salamander Spawn Egg"
+  "item.jaymoskingdoms.giant_salamander_spawn_egg": "Giant Salamander Spawn Egg",
+  "entity.jaymoskingdoms.river_child": "River Child",
+  "item.jaymoskingdoms.river_child_spawn_egg": "River Child Spawn Egg",
+  "entity.jaymoskingdoms.snow_widow": "Snow Widow",
+  "item.jaymoskingdoms.snow_widow_spawn_egg": "Snow Widow Spawn Egg",
+  "entity.jaymoskingdoms.unburied": "The Unburied",
+  "item.jaymoskingdoms.unburied_spawn_egg": "The Unburied Spawn Egg",
+  "entity.jaymoskingdoms.black_swell": "Black Swell",
+  "item.jaymoskingdoms.black_swell_spawn_egg": "Black Swell Spawn Egg"
 }

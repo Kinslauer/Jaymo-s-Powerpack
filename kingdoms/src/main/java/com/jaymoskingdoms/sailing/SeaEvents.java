@@ -270,7 +270,7 @@ public final class SeaEvents {
 	}
 
 	/** Whether {@code at} is out at sea: over an ocean, near the water's surface. */
-	static boolean atSea(ServerLevel level, Vec3 at) {
+	public static boolean atSea(ServerLevel level, Vec3 at) {
 		BlockPos pos = BlockPos.containing(at);
 		return Math.abs(at.y - level.getSeaLevel()) < SEA_HEIGHT && level.getBiome(pos).is(BiomeTags.IS_OCEAN);
 	}

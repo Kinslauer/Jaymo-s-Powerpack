@@ -134,6 +134,48 @@ creature("giant_salamander", "Giant Salamander", ("#5e4a36", "#2e2218"), 0.75, (
 ])
 
 
+# ---- the night things ------------------------------------------------------------------------------------------------
+
+# the River Child: small and slick, dark green over a pale belly, a wide head under a fringe of reed, long arms
+creature("river_child", "River Child", ("#3e5a3a", "#c8c890"), 0.8, ("#3e5a3a", "#263a26"), [
+    P("body", [0, 16, 0], [-3, -7, -2, 6, 7, 4], style="slick"),
+    P("head", [0, -7, 0], [-3.5, -5, -3.5, 7, 5, 7], "neck", "slick", "body", eyes=dict(c="#e8d85a", at=[1, 2], s=[2, 1])),
+    P("fringe", [0, -5, 0], [-4, -1, -4, 8, 2, 8], "", "#55662c", "head"),
+    P("armR", [-4, -6, 0], [-1, 0, -1, 2, 10, 2], "armR", "slick", "body"),
+    P("armL", [4, -6, 0], [-1, 0, -1, 2, 10, 2], "armL", "slick", "body"),
+    P("legR", [-1.5, 16, 0], [-1.5, 0, -1.5, 3, 8, 3], "legR", "slick"),
+    P("legL", [1.5, 16, 0], [-1.5, 0, -1.5, 3, 8, 3], "legL", "slick"),
+])
+
+# the Snow Widow: tall, a white robe to the ground, a white face, black hair to the waist
+creature("snow_widow", "Snow Widow", ("#f2f4f8", "#0e0e14"), 1.0, ("#f2f4f8", "#c8d2e6"), [
+    P("body", [0, 12, 0], [-4, -12, -2, 8, 12, 4], style="robe"),
+    P("head", [0, -12, 0], [-4, -8, -4, 8, 8, 8], "head", "#eef0f6", "body", eyes=dict(c="#1c2c5a", at=[1, 4], s=[2, 1])),
+    P("hair", [0, 0, 0], [-4.5, -8.5, 2.5, 9, 19, 2], "", "#0e0e14", "head"),
+    P("crown", [0, -8, 0], [-4.5, -1, -4.5, 9, 2, 7], "", "#0e0e14", "head"),
+    P("armR", [-6, -10, 0], [-2, 0, -2, 4, 13, 4], "armR", "robe", "body"),
+    P("armL", [6, -10, 0], [-2, 0, -2, 4, 13, 4], "armL", "robe", "body"),
+    P("skirt", [0, 12, 0], [-4.5, 0, -2.5, 9, 12, 5], "", "robe"),
+])
+
+# the Unburied: a skeleton three times a man's height, drawn at a man's size and scaled
+creature("unburied", "The Unburied", ("#d8d2bc", "#3a3630"), 2.6, ("#d8d2bc", "#3a3630"), [
+    P("body", [0, 12, 0], [-4, -12, -2, 8, 12, 4], style="ribs"),
+    P("head", [0, -12, 0], [-4, -8, -4, 8, 8, 8], "head", "bone", "body", eyes=dict(c="#101010", at=[1, 3], s=[2, 2])),
+    P("jaw", [0, 0, -1], [-3, 0, -3, 6, 2, 5], "", "bone", "head"),
+    P("armR", [-5, -10, 0], [-1, 0, -1, 2, 14, 2], "armR", "bone", "body"),
+    P("armL", [5, -10, 0], [-1, 0, -1, 2, 14, 2], "armL", "bone", "body"),
+    P("legR", [-2, 12, 0], [-1, 0, -1, 2, 12, 2], "legR", "bone"),
+    P("legL", [2, 12, 0], [-1, 0, -1, 2, 12, 2], "legL", "bone"),
+])
+
+# the Black Swell: a smooth dark dome and a smaller one on it, two pale round eyes and nothing else
+creature("black_swell", "Black Swell", ("#0c0e14", "#e8eef2"), 2.2, ("#0c0e14", "#06070a"), [
+    P("body", [0, 24, 0], [-12, -22, -12, 24, 22, 24], "wobble", "swell"),
+    P("head", [0, 2, 0], [-9, -32, -9, 18, 10, 18], "", "swell", eyes=dict(c="#e8eef2", at=[2, 4], s=[3, 3])),
+])
+
+
 # ---- painting --------------------------------------------------------------------------------------------------------
 
 _base_pixel = gc.pixel
@@ -164,6 +206,27 @@ def pixel(style, face, fx, fy, w, h, pal, rng):
         return c + (235,)
     if style.startswith("#"):
         return shade(jitter(hexc(style), rng, 6), f) + (255,)
+    if style == "slick":
+        c = jitter(base, rng, 6)
+        if face == "front" and 0.2 < fx < 0.8 and fy > 0.3 or face == "bottom":
+            c = jitter((0xc8, 0xc8, 0x90), rng, 6)
+        elif rng.random() < 0.1:
+            c = shade(c, 1.3)  # the wet shine
+        return shade(c, f) + (255,)
+    if style == "robe":
+        c = jitter(base, rng, 3)
+        if int(fx * w) % 3 == 0:
+            c = jitter(dark, rng, 3)  # the folds
+        return shade(c, 1.0 - 0.08 * fy) + (255,)
+    if style == "ribs":
+        # ribs with the dark between them, and the spine down the middle
+        gap = int(fy * h) % 3 == 2 and abs(fx - 0.5) > 0.12 and fy < 0.8
+        return (jitter(dark, rng, 4) if gap else shade(jitter(base, rng, 6), f)) + (255,)
+    if style == "swell":
+        c = jitter(base, rng, 3)
+        if rng.random() < 0.04:
+            c = (0x1c, 0x24, 0x30)
+        return shade(c, 1.15 if face == "top" else 1.0) + (255,)
     if style == "fur":
         c = jitter(base, rng, 9)
         if face == "bottom" or (fy > 0.75 and face in ("left", "right", "front", "back")):
@@ -233,6 +296,9 @@ DROPS = {
     "koi": [], "snow_monkey": [], "hornet": [], "giant_salamander": [("minecraft:slime_ball", 0, 1)],
     "crane": [("minecraft:feather", 1, 3)], "shrine_deer": [("minecraft:leather", 0, 2), ("minecraft:mutton", 1, 2)],
     "raccoon_dog": [("minecraft:rabbit_hide", 0, 2)], "serow": [("minecraft:leather", 1, 2), ("minecraft:mutton", 1, 3)],
+    "river_child": [("minecraft:slime_ball", 0, 2), ("minecraft:kelp", 0, 2)],
+    "snow_widow": [("minecraft:packed_ice", 2, 4), ("minecraft:white_wool", 1, 2), ("minecraft:diamond", 1, 2)],
+    "unburied": [("minecraft:bone", 8, 16), ("minecraft:bone_block", 2, 4)], "black_swell": [],
 }
 
 

@@ -65,7 +65,9 @@ public final class BossBars {
 			// (0.7.610) the grizzly mini-boss
 			|| entity instanceof com.jaymoskingdoms.wild.Grizzly
 			// the great necromancer
-			|| entity instanceof GreatNecromancer;
+			|| entity instanceof GreatNecromancer
+			// the blossom lands' great night things
+			|| entity instanceof com.jaymoskingdoms.blossomland.SnowWidow || entity instanceof com.jaymoskingdoms.blossomland.Unburied;
 	}
 
 	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */

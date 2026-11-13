@@ -37,6 +37,11 @@ public final class CreaturesClient {
 		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SEROW, "serow", 0.5F, -1, -1, false);
 		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.HORNET, "hornet", 0.1F, -1, 0, false);
 		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SALAMANDER, "giant_salamander", 0.5F, -1, -1, false);
+		// and their night things
+		creature(com.jaymoskingdoms.blossomland.NightThings.RIVER_CHILD, "river_child", 0.3F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.SNOW_WIDOW, "snow_widow", 0.4F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.UNBURIED, "unburied", 1.4F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.BLACK_SWELL, "black_swell", 0.0F, -1, -1, false);
 	}
 
 	private static <T extends Mob> void creature(EntityType<T> type, String name, float shadow, int lieAt, int flapsFrom, boolean glows) {

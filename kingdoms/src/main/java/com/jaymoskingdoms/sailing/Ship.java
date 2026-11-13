@@ -1671,7 +1671,7 @@ public final class Ship extends Entity {
 	}
 
 	/** The sea comes aboard: {@code water} more blocks of it in her hold (no more than her hold holds). */
-	void shipWater(int water) {
+	public void shipWater(int water) {
 		Hull h = this.hull();
 		if (h != null && water > 0) {
 			this.setFlooded(Math.min(h.holdSize(), this.flooded() + water));

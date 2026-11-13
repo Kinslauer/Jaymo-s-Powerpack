@@ -172,6 +172,10 @@ nests, boar in the fields, the hunting lodge's part. Not seen in game.*
 
 Our own names; told of by blossom folk, never explained on screen. The sea giant belongs to the crossing.
 
+*Built (2026-11-13, `blossomland.NightThings`, `RiverChild`, `SnowWidow`, `Unburied`, `BlackSwell`): the moon's phases
+on open-sky monster spawns, the River Child, the Snow Widow, the Unburied, the Black Swell, and ten lines of blossom
+gossip. Not built: the mountain beasts, the crow-winged hermit, festivals on full moons. Not seen in game.*
+
 ## Patch 15: the pale grove in the Nether (ow_yomi_biome)
 
 A Nether biome, not a replacement: pale wisteria, a slow river, an ogre keep as a demon stronghold. It is the

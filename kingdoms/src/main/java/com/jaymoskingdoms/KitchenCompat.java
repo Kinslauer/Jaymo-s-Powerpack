@@ -404,6 +404,23 @@ public final class KitchenCompat {
 		return best;
 	}
 
+	/**
+	 * The unburied dead within {@code range} of {@code at}: free corpses of people and monsters (not animals, never a
+	 * player's). Empty without Kitchen.
+	 */
+	public static java.util.List<Entity> fallenNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range) {
+		if (CORPSE == null) {
+			return java.util.List.of();
+		}
+		return level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), e -> {
+			if (!isFreeCorpse(e) || isPlayerCorpse(e)) {
+				return false;
+			}
+			net.minecraft.world.entity.EntityType<?> was = sourceType(e);
+			return was != null && (was.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER || was.getCategory() == net.minecraft.world.entity.MobCategory.MISC);
+		});
+	}
+
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */
 	static boolean burials() {
 		return ROB_BY != null;

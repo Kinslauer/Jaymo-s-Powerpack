@@ -11,7 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 
 /**
  * Now and then a mob vanilla spawns naturally is a loot goblin instead ({@link LootGoblins#replace}); a monster spawned
- * near a ward rope isn't spawned at all ({@code Wards}).
+ * near a ward rope isn't spawned at all ({@code Wards}); and the moon's phase thins or thickens what comes out under
+ * the open sky ({@code NightThings}).
  */
 @Mixin(NaturalSpawner.class)
 abstract class NaturalSpawnerMixin {
@@ -23,6 +24,12 @@ abstract class NaturalSpawnerMixin {
 			entity.discard();
 			return;
 		}
+		if (com.jaymoskingdoms.blossomland.NightThings.moonKeepsAway(level, entity)) {
+			// a bright moon: less comes out under the open sky
+			entity.discard();
+			return;
+		}
 		original.call(level, LootGoblins.replace(level, entity));
+		com.jaymoskingdoms.blossomland.NightThings.darkMoonBrings(level, entity);
 	}
 }
