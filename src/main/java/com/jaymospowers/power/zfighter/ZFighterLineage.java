@@ -27,6 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.damagesource.DamageSource;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -227,6 +228,8 @@ public final class ZFighterLineage {
 				VillagerApe.hurt((net.minecraft.world.entity.Mob)entity, source, damageTaken);
 			}
 		});
+		// both legs gone black bring the Great Ape down
+		com.jaymospowers.core.wounds.Giants.LEGS_GONE.add(ZFighterLineage::legsGone);
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
 		RaceMoves.init();
@@ -871,31 +874,65 @@ public final class ZFighterLineage {
 			flee(player, live, source, now);
 		}
 		ApeRage.hurt(player, taken);
+		// a lock-on aimed blow (LockOnRegions) goes where it's aimed, whatever height it came from
+		com.jaymospowers.core.LockOnRegions.Region aimed = com.jaymospowers.core.LockOnRegions.aimedRegion(player, source);
 		if (crippled(player)) {
 			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by
-				&& com.jaymospowers.core.Dismember.blade(by.getMainHandItem())) {
+				&& com.jaymospowers.core.Dismember.blade(by.getMainHandItem()) && tailBlow(aimed)) {
 				cutTail(player, live, level, now);
 			}
 			return;
 		}
-		Vec3 from = source.getSourcePosition();
-		if (now < live.crippleSafeUntil || from == null || from.y > player.getY() + player.getBbHeight() * LEG_SHARE || live.apeSize < 0.5F) {
+		if (now < live.crippleSafeUntil || !legBlow(player, source, aimed) || live.apeSize < 0.5F) {
 			return;
 		}
 		boolean wild = wild(player);
 		live.legHits++;
 		if (taken >= (wild ? WILD_CRIPPLE_BLOW : CRIPPLE_BLOW) || live.legHits >= (wild ? WILD_CRIPPLE_HITS : CRIPPLE_HITS)) {
-			live.legHits = 0;
-			live.crippledUntil = now + (wild ? WILD_CRIPPLED_TICKS : CRIPPLED_TICKS);
-			live.crippleSafeUntil = live.crippledUntil + CRIPPLE_SAFE_TICKS;
-			player.setAttached(CRIPPLED, true);
-			attributes(player, live);
-			ApeRage.crippled(player);
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.PLAYERS, 4.0F, 0.4F);
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
-			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ape_crippled").withStyle(ChatFormatting.RED));
+			cripple(player, live, now);
 		}
+	}
+
+	/** Whether a blow on the Great Ape is on its legs: aimed there through a lock, or (not aimed) landing low. */
+	static boolean legBlow(LivingEntity ape, DamageSource source, com.jaymospowers.core.LockOnRegions.@Nullable Region aimed) {
+		if (aimed != null) {
+			return aimed == com.jaymospowers.core.LockOnRegions.Region.LEGS;
+		}
+		Vec3 from = source.getSourcePosition();
+		return from != null && from.y <= ape.getY() + ape.getBbHeight() * LEG_SHARE;
+	}
+
+	/** Whether a blade's blow on the crippled ape is on its tail: aimed there through a lock, or not aimed at all. */
+	static boolean tailBlow(com.jaymospowers.core.LockOnRegions.@Nullable Region aimed) {
+		return aimed == null || aimed == com.jaymospowers.core.LockOnRegions.Region.TAIL;
+	}
+
+	/**
+	 * Andy (2026-11-13): giants "should all go crippled if both legs go black in a fight". Both of the Great Ape's legs
+	 * at zero bring it down at once (a player's or a villager's).
+	 */
+	static void legsGone(LivingEntity entity) {
+		if (entity instanceof ServerPlayer player && ape(player) && !crippled(player)) {
+			cripple(player, ZFighterPower.live(player), player.level().getGameTime());
+		} else if (VillagerApe.raging(entity) && !crippled(entity)) {
+			VillagerApe.cripple((net.minecraft.world.entity.Mob)entity);
+		}
+	}
+
+	/** The Great Ape goes down on its back. */
+	private static void cripple(ServerPlayer player, ZFighterPower.Live live, long now) {
+		ServerLevel level = player.level();
+		boolean wild = wild(player);
+		live.legHits = 0;
+		live.crippledUntil = now + (wild ? WILD_CRIPPLED_TICKS : CRIPPLED_TICKS);
+		live.crippleSafeUntil = live.crippledUntil + CRIPPLE_SAFE_TICKS;
+		player.setAttached(CRIPPLED, true);
+		attributes(player, live);
+		ApeRage.crippled(player);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.PLAYERS, 4.0F, 0.4F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_ape_crippled").withStyle(ChatFormatting.RED));
 	}
 
 	/** The tail's cut off: he shrinks back, and it takes {@link #TAIL_REGROW_TICKS} to grow again. */
