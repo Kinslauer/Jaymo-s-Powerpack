@@ -27,6 +27,12 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
+import it.unimi.dsi.fastutil.HashCommon;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.497) Townsfolk lock their homes and shops at night (Andy's plan). Ownership-aware: player-placed blocks are theirs
@@ -37,6 +43,13 @@ import net.minecraft.world.phys.AABB;
  * shops, and its shops' chests and barrels (never its storehouse). A village's house doors are found from each
  * villager's bed. A building with a player inside waits, so nobody is locked in. A realm's own folk pass its night locks
  * ({@link Locks#mayPass}).
+ *
+ * <p>Andy (2026-11-13): "they should ACTUALLY lock their doors with real locks at night". A night lock is a real lock: it
+ * opens to its key, a lockpick or force (broken down, slowly), and to nothing else: no push or drag of a Spooky Doors door
+ * swings it ({@link Locks#pushBarred}). Each house door has its own key ({@link #houseKey}), the same every night, and the
+ * villagers who sleep behind it carry it: a pickpocket may lift it ({@link #pocketKey}), and it lets them in for as long as
+ * the household keeps that door. The household's key works the lock by hand too (sneak with it), but nobody takes a
+ * household's lock off its door.
  */
 public final class NightLocks {
 	/** Ticks between passes. */
@@ -53,6 +66,8 @@ public final class NightLocks {
 	static final int LEVEL_VILLAGE = 1, LEVEL_FIEFDOM = 2, LEVEL_KINGDOM = 2, SHOP_BONUS = 1;
 	/** A night lock's pick seed: its anchor xor this. */
 	static final long NIGHT_SALT = 0x6E696768746CL;
+	/** A villager carrying their house key turns it up in a picked pocket this often (out of 1). */
+	static final float POCKET_KEY_CHANCE = 0.3F;
 
 	/** Faction id → the positions (packed) it night-locked. On the Overworld level. Saved, not synced. */
 	static final AttachmentType<Map<String, List<Long>>> INDEX = AttachmentRegistry.create(JaymosKingdoms.id("night_locks"),
@@ -137,8 +152,8 @@ public final class NightLocks {
 				}
 				Locks.close(level, anchor);
 			}
-			long seed = anchor.asLong() ^ NIGHT_SALT;
-			Locks.put(level, anchor, new Locks.Fitted(0L, (int)Math.floorMod(seed, 2L), levelFor(f, c.shop()), f.id(), true, true));
+			long key = houseKey(anchor);
+			Locks.put(level, anchor, new Locks.Fitted(key, Locks.kind(key), levelFor(f, c.shop()), f.id(), true, true));
 			mine.add(anchor.asLong());
 			changed = true;
 			it.remove();
@@ -208,6 +223,58 @@ public final class NightLocks {
 				}
 			}
 		}
+	}
+
+	/** The key a house door's night lock answers: the same for that door every night, never 0 (a realm lock with no key). */
+	static long houseKey(BlockPos anchor) {
+		long key = HashCommon.mix(anchor.asLong() ^ NIGHT_SALT);
+		return key == 0L ? NIGHT_SALT : key;
+	}
+
+	/** The door of {@code villager}'s house: the lower half of the wooden door nearest their bed, or null (no home, none near). */
+	static @Nullable BlockPos homeDoor(ServerLevel level, Villager villager) {
+		GlobalPos home = McaCompat.home(villager).orElse(null);
+		if (home == null || !home.dimension().equals(level.dimension())) {
+			return null;
+		}
+		BlockPos bed = home.pos();
+		int r = (int)Math.ceil(HOME_DOOR_RANGE);
+		BlockPos best = null;
+		double bestD = HOME_DOOR_RANGE * HOME_DOOR_RANGE;
+		for (BlockPos p : BlockPos.betweenClosed(bed.offset(-r, -HOME_DOOR_HEIGHT, -r), bed.offset(r, HOME_DOOR_HEIGHT, r))) {
+			double dx = p.getX() - bed.getX(), dz = p.getZ() - bed.getZ();
+			double d = dx * dx + dz * dz;
+			if (d > bestD || !level.isLoaded(p)) {
+				continue;
+			}
+			if (isLowerDoor(level.getBlockState(p)) && !Placed.any(level, p)) {
+				bestD = d;
+				best = p.immutable();
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * A picked pocket ({@link Pickpocket}): sometimes the mark's house key, if they're a realm's villager with a door to lock
+	 * (their name on it); otherwise empty.
+	 */
+	static ItemStack pocketKey(ServerLevel level, LivingEntity mark, RandomSource random) {
+		if (!(mark instanceof Villager villager) || random.nextFloat() >= POCKET_KEY_CHANCE) {
+			return ItemStack.EMPTY;
+		}
+		Faction law = Theft.lawAt(level, villager.blockPosition());
+		if (law == null || law.fallen() || law.type() == FactionType.BARBARIAN) {
+			return ItemStack.EMPTY;
+		}
+		BlockPos door = homeDoor(level, villager);
+		if (door == null) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack key = new ItemStack(Locks.KEY);
+		key.set(Locks.LOCK_ID, houseKey(door));
+		key.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.key.house", villager.getDisplayName()));
+		return key;
 	}
 
 	private static boolean isLowerDoor(BlockState state) {

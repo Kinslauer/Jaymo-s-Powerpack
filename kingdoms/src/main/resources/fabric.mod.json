@@ -38,6 +38,7 @@
 		"jaymoskingdoms.beacons.mixins.json",
 		"jaymoskingdoms.omni.mixins.json",
 		"jaymoskingdoms.locks.mixins.json",
+		"jaymoskingdoms.spookydoors.mixins.json",
 		"jaymoskingdoms.spellengine.mixins.json",
 		"jaymoskingdoms.wild.mixins.json",
 		"jaymoskingdoms.fifth.mixins.json",
@@ -58,7 +59,8 @@
 		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.fifth.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.occult.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.occult.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.spookydoors.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

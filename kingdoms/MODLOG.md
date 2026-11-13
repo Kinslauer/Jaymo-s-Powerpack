@@ -12489,3 +12489,12 @@ giants being worked on, as its own upright model."
   else where they stand. Each background make (`StoryGround.ahead` with a chunk list) ends at that deadline too.
   On the Deck each wait took 2-3 minutes (village start, tries 1-3).
 - Built; tested on the Deck by rejoining with an owed start.
+
+## 0.8.9 (2026-11-13): Night locks hold: real house locks and keys, and villagers' clothes stay on their swing
+
+- **Night locks hold** (Andy: "i was able to open a locked door without a pick"): Spooky Doors swings a door through its own route when it's walked into, dragged with the use key held, or shoved by a mob or a downed player's struggle, and none of that met the lock. Now a door locked against you doesn't give to any of it (`Locks.pushBarred`; `mixin/spookydoors` on Spooky Doors' server door and its walk-in push, `client/mixin/spookydoors` on its drag): pushing it says "Locked up for the night" (or the lock's kind) with the locked rattle, and clicking it gets you the lockpicking game. Swinging a door shut is never stopped. A door Spooky Doors left ajar is pushed to when a lock goes on.
+- **Doors open with a click again** (Andy: "can everyone also open doors with a click like the old function?"): Spooky Doors took every use press on its doors for a drag. Now a plain click swings the door fully open or shut (with Spooky Doors' creak), for everyone; sneak while you press use to drag a door partway, as before (only on a door with no lock fitted: sneaking at a lock is for its key).
+- **Real house keys**: every house door's night lock answers its own key, the same every night (`NightLocks.houseKey`), and the villagers who sleep behind it carry it. A picked pocket sometimes turns it up (30%, "<name>'s House Key"); it opens that door at night like any key, from the hand, pack or a key ring. A night lock still opens to a lockpick (seen in town, burglary) or to force (broken down, slowly). The household's key can lock and unlock it by hand, but a night lock can't be taken off, and breaking one drops no lock.
+- **Villagers' clothes on a swing** (Andy: "the villager's costume was clipping outside its body"): a villager's Better Combat swing was laid twice on MCA's skin, clothes and hair bodies (they take the pose the body had with the swing already on), so their arms swung twice as far while the clothes' sleeves stayed with the real arm and the held item. The swing now goes on those bodies once (`ModelPoses.after`).
+- Hint 157 (house keys and locks that don't give).
+- Built; not played.

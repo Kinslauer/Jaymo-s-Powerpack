@@ -449,6 +449,13 @@ public final class Pickpocket {
 		if (!weapon.isEmpty()) {
 			return weapon;
 		}
+		// a villager's house key: their door's night lock opens to it (NightLocks)
+		if (mark.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			ItemStack key = NightLocks.pocketKey(level, mark, random);
+			if (!key.isEmpty()) {
+				return key;
+			}
+		}
 		if (mark instanceof Villager v) {
 			SimpleContainer bag = v.getInventory();
 			List<Integer> full = new ArrayList<>();
