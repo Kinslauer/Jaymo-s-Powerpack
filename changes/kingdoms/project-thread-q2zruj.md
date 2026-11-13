@@ -13,7 +13,7 @@ From two Blockbench models Andy uploaded (goblin-scout, ghost).
   it any flower or a candle and it thanks you and goes for good (12 experience, +2 reputation with its settlement).
   Left alone it stops coming after the third night. Ghosts are never saved; each night's is raised from the grave record.
   Spawn egg (that one just waits for morning).
-- Lore: two `(new)` paragraphs in Lore.md ("Goblin scouts", "The nights at the grave") for Andy to approve.
-- Credits: the maker and licence of both models are not recorded yet (CREDITS.txt says so).
+- Lore: "Goblin scouts" and "The nights at the grave" in Lore.md, approved by Andy.
+- Credits: Blockbench Workshop, CC BY 4.0 (Andy); the makers' names are still to be filled in.
 - Compiled (`compileClientJava`); not played. Unseen in game: the scout's size and animation timing, the ghost's
   see-through look, whether MCA goblins answer the cackle.

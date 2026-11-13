@@ -1,6 +1,6 @@
 spit_frame.png, models/block/spit.json: the spit's frame
   The posts and crossbar of the Blockbench file "camping_campfire", given to us by Andy on 2026-11-13
-  (tools/bbmodels/camping-campfire.bbmodel). MAKER AND LICENCE NOT YET RECORDED: ask Andy and fill this in before the
-  next release.
+  (tools/bbmodels/camping-campfire.bbmodel). Andy (2026-11-12): from Blockbench Workshop, CC BY 4.0
+  (https://creativecommons.org/licenses/by/4.0/). MAKER'S NAME AND PAGE NOT YET RECORDED: fill in when Andy sends the link.
   Changes: only its frame is used (its logs, stones and flames are left out), set down over the fire under the spit,
   each post carried on to the ground (kitchen/tools/gen_spit_frame.py).
