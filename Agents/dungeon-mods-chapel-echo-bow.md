@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: 
 branch: claude/project-thread-53idu7
 with: Claude (cloud thread "Find more dungeon mods to add")
-pr: 
+pr: 1417
 mods: powers
 versions: 
 started: 2026-11-12
@@ -33,3 +33,6 @@ master), the MmmMmmMmmMmm target dummy and Simply Bows' Echo Bow as an Arsenal w
 - Compiles; not run in game (a cloud session can't boot the server).
 
 ## Done
+PR #1417. A Darkened Chapel in birch and dark forests where a demon master comes up for the corrupted; a rare Echo Bow
+from the Arsenal's rift; the Practice Dummy shows damage and wears armour; The Graveyard and Re:Animal in the pack.
+Compiles; nothing was run in game.
