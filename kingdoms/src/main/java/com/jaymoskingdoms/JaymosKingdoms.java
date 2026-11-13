@@ -815,6 +815,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		Opportunity.register();
 		Notice.register();
 		Concentration.register();
+		SecondClass.register();
+		Feats.register();
+		Paths.register();
+		FeatsBody.register();
+		FeatsFight.register();
+		FeatsTrade.register();
 		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
 		Gadgets.register();
 		RelicCurses.register();

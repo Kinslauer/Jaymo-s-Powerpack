@@ -15,7 +15,19 @@ public final class Abilities {
 
 	/** Answers the class key for the classes that have a button of their own; false for the others (Sorcerers' imbue goes on). */
 	static boolean key(ServerPlayer player, boolean sneak) {
-		PlayerClass cls = Classes.classOf(player);
+		return answer(player, Classes.classOf(player), sneak);
+	}
+
+	/** The class key held with Alt: the second class's button, with sneak as for the first. */
+	static void second(ServerPlayer player, boolean sneak) {
+		PlayerClass cls = Classes.second(player);
+		if (cls == PlayerClass.SORCERER) {
+			return;
+		}
+		answer(player, cls, sneak);
+	}
+
+	private static boolean answer(ServerPlayer player, PlayerClass cls, boolean sneak) {
 		if (cls == null || player.isSpectator() || !player.isAlive()) {
 			return false;
 		}

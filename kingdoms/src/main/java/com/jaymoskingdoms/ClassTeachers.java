@@ -83,11 +83,11 @@ public final class ClassTeachers {
 		if (!(teacher instanceof Villager v)) {
 			return out;
 		}
-		PlayerClass cls = Classes.classOf(player);
-		if (cls == null) {
+		if (Classes.classOf(player) == null) {
 			return out;
 		}
 		boolean priest = Restoration.cleric(v);
+		for (PlayerClass cls : Classes.both(player)) {
 		switch (cls) {
 			case CLERIC, PALADIN -> {
 				if (priest) {
@@ -116,6 +116,8 @@ public final class ClassTeachers {
 			default -> {
 			}
 		}
+		}
+		out.addAll(SecondClass.offers(player, v));
 		out.removeIf(k -> RECIPES.containsKey(k) && known(player, k));
 		return out;
 	}
@@ -126,14 +128,18 @@ public final class ClassTeachers {
 	}
 
 	static boolean handles(String kind) {
-		return kind.equals("atone") || RECIPES.containsKey(kind);
+		return kind.equals("atone") || kind.startsWith("learn:") || RECIPES.containsKey(kind);
 	}
 
 	private static int price(String kind) {
-		return kind.equals("atone") ? Paladins.ATONE_SILVER : LESSON_SILVER;
+		return kind.equals("atone") ? Paladins.ATONE_SILVER : kind.startsWith("learn:") ? SecondClass.FEE_SILVER : LESSON_SILVER;
 	}
 
 	static Component line(ServerPlayer player, String kind) {
+		if (kind.startsWith("learn:")) {
+			return Component.translatable("talk.jaymoskingdoms.teacher.learn", Component.translatable("class.jaymoskingdoms." + kind.substring(6)),
+				Money.text(player, Money.worth(price(kind))));
+		}
 		return Component.translatable("talk.jaymoskingdoms.teacher." + kind, Money.text(player, Money.worth(price(kind))));
 	}
 
@@ -180,6 +186,10 @@ public final class ClassTeachers {
 			return true;
 		}
 		ServerLevel level = player.level();
+		if (kind.startsWith("learn:")) {
+			SecondClass.accept(player, teacher, kind);
+			return true;
+		}
 		if (kind.equals("atone")) {
 			Money.charge(player, Money.worth(price(kind)));
 			Paladins.atone(player);

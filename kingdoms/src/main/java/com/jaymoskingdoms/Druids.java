@@ -142,6 +142,11 @@ public final class Druids {
 		RESTING.clear();
 	}
 
+	/** How many shapes a day {@code player} has: the second class's is a share, and the Moon path one more. */
+	static int shapes(ServerPlayer player) {
+		return Classes.scaled(player, PlayerClass.DRUID, SHAPES) + Paths.extraShapes(player);
+	}
+
 	static void begin(ServerPlayer player) {
 		player.setAttached(SELECTED, "");
 	}
@@ -218,7 +223,7 @@ public final class Druids {
 		if (Downed.isDowned(player) || player.isPassenger() && !player.isCreative()) {
 			return;
 		}
-		if (!Rests.spend(player, Rests.SHAPE, 1, SHAPES)) {
+		if (!Rests.spend(player, Rests.SHAPE, 1, shapes(player))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.tired"));
 			return;
 		}
@@ -235,7 +240,7 @@ public final class Druids {
 		}
 		follow(player, beast);
 		level.addFreshEntity(beast);
-		SHAPES_WORN.put(player.getUUID(), new Shape(beast, level.getGameTime() + SHAPE_TICKS));
+		SHAPES_WORN.put(player.getUUID(), new Shape(beast, level.getGameTime() + Paths.shapeTicks(player, SHAPE_TICKS)));
 		player.setAttached(FORM, form);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		double extra = switch (form) {

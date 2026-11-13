@@ -185,7 +185,8 @@ public final class Sparks {
 	/** If a spark is held, spends it and says so with light and sound: the failure just met is a success instead. */
 	public static boolean rescue(ServerPlayer player) {
 		if (!held(player)) {
-			return false;
+			// a Lucky player has three a day besides ({@link FeatsBody#luck})
+			return FeatsBody.luck(player);
 		}
 		player.removeAttached(HELD);
 		glow(player, 0.7F);

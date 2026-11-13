@@ -45,6 +45,11 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class Tinkerers {
 	/** Infusions at once. */
 	static final int MOST = 3;
+
+	/** The infusions at once {@code player} may keep (the second class has a share; a Battle Smith one more). */
+	static int most(net.minecraft.world.entity.player.Player player) {
+		return Classes.scaled(player, PlayerClass.TINKERER, MOST) + Paths.extraInfusions(player);
+	}
 	/** The gadgets a Tinkerer can learn to make (their recipes are taught by a smith). */
 	static final List<String> GADGETS = List.of("immovable_rod", "climbing_rope", "endless_jug", "floating_light", "smoke_bottle");
 	/** The stations. */
@@ -139,8 +144,8 @@ public final class Tinkerers {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.already"));
 			return;
 		}
-		if (carried(player) >= MOST) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.most", MOST));
+		if (carried(player) >= most(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.most", most(player)));
 			return;
 		}
 		Item mat = material(kind);
@@ -187,7 +192,7 @@ public final class Tinkerers {
 	/** The class key: what is infused. */
 	static void key(ServerPlayer player, boolean sneak) {
 		int n = carried(player);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.infusions", n, MOST));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.tinkerer.infusions", n, most(player)));
 	}
 
 	private static void tick(MinecraftServer server) {

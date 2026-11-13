@@ -431,7 +431,8 @@ public final class Tomes {
 
 	/** How hard {@code player}'s magic hits through a tome. */
 	static float strength(Player player) {
-		float base = Classes.is(player, Classes.PlayerClass.MAGE) ? MAGE_STRENGTH : Classes.is(player, Classes.PlayerClass.SORCERER) ? SORCERER_STRENGTH : ATTUNED_STRENGTH;
+		float base = Classes.is(player, Classes.PlayerClass.SORCERER) && !Classes.is(player, Classes.PlayerClass.MAGE) ? SORCERER_STRENGTH
+			: ATTUNED_STRENGTH + (MAGE_STRENGTH - ATTUNED_STRENGTH) * Classes.share(player, Classes.PlayerClass.MAGE);
 		return base * (POWER_BASE + POWER_PER_POINT * Math.max(1, Mana.power(player)));
 	}
 

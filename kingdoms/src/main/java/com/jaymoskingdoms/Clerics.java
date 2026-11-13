@@ -88,7 +88,10 @@ public final class Clerics {
 	/** How many turnings a day {@code player} has in all. */
 	public static int channels(Player player) {
 		int tier = Patrons.state(player).tier();
-		return (Classes.is(player, PlayerClass.PALADIN) ? PALADIN_CHANNEL : CHANNEL_BASE) + tier;
+		int base = Classes.is(player, PlayerClass.PALADIN) ? PALADIN_CHANNEL : CHANNEL_BASE;
+		// the second class has a share of the turnings, and a Warden's patron path one more
+		PlayerClass held = Classes.is(player, PlayerClass.CLERIC) ? PlayerClass.CLERIC : PlayerClass.PALADIN;
+		return Classes.scaled(player, held, base + tier) + Paths.extraChannels(player);
 	}
 
 	/** The health the dead may have for {@code player}'s symbol to unmake them. */

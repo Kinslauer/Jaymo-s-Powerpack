@@ -133,6 +133,22 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * The Chef feat ({@link FeatsTrade}): Kitchen's {@code Stomach.addMealBoost}, so a Chef's meals give more health and mend them faster.
+	 * Without that Kitchen, nothing.
+	 */
+	static void registerChef() {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> boost = FeatsTrade::meals;
+			Class.forName("com.jaymoskitchen.stomach.Stomach").getMethod("addMealBoost", java.util.function.ToDoubleFunction.class).invoke(null, boost);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for a Chef's meals to heal more (needs addMealBoost): {}", e.toString());
+		}
+	}
+
 	/** (0.7.353) Might points to a point of hauling brawn. */
 	static final int MIGHT_PER_BRAWN = 3;
 

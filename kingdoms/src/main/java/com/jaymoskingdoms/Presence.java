@@ -37,7 +37,7 @@ public final class Presence {
 
 	/** The points that carry a word: the better of {@code player}'s Presence and Wits. */
 	public static int skill(Player player) {
-		return Math.max(0, Math.max(Stats.value(player, Stats.Stat.PRESENCE), Stats.value(player, Stats.Stat.WITS)) - Carousing.eyePenalty(player));
+		return Math.max(0, Math.max(Stats.value(player, Stats.Stat.PRESENCE), Stats.value(player, Stats.Stat.WITS)) + FeatsTrade.actorPoints(player) - Carousing.eyePenalty(player));
 	}
 
 	/** The extra chance (0 to {@link #TALK_PER_POINT} times 100) {@code player} brings to talking people round. */
@@ -62,6 +62,6 @@ public final class Presence {
 
 	/** {@code base} blocks, stretched by {@code player}'s Presence: how far their orders carry. */
 	public static double reach(Player player, double base) {
-		return base * (1.0 + ORDERS_PER_POINT * Stats.value(player, Stats.Stat.PRESENCE));
+		return base * (1.0 + ORDERS_PER_POINT * Stats.value(player, Stats.Stat.PRESENCE)) * Paths.orders(player);
 	}
 }

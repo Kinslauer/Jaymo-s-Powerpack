@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Absorption;
+import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.SecondClass;
 import com.jaymoskingdoms.BloodBlasts;
 import com.jaymoskingdoms.Hemomancy;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -17,7 +19,7 @@ import net.minecraft.network.chat.Component;
 
 /** (0.6.0) The classes' key: {@code J} imbues a Sorcerer's blade ({@link Spellcraft}); sneak and {@code J} throws the bolt. */
 final class ClassKeys {
-	private static KeyMapping imbue;
+	private static KeyMapping imbue, growth;
 	/** (0.7.554) A Blood Sorcerer's J is down (BloodBlasts.Hold sent). */
 	private static boolean bloodHeld;
 	/** (0.7.570) Any other Sorcerer's J is down (Absorption.Hold sent). */
@@ -26,12 +28,29 @@ final class ClassKeys {
 	private ClassKeys() {
 	}
 
+	/** Whether either Alt key is down. */
+	private static boolean altHeld(Minecraft minecraft) {
+		return InputConstants.isKeyDown(InputConstants.KEY_LALT) || InputConstants.isKeyDown(InputConstants.KEY_RALT);
+	}
+
 	static void register() {
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("classes"));
 		imbue = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.imbue", InputConstants.KEY_J, category));
+		// the feats and paths screen, for a pack without the H menu (unbound unless the player binds it)
+		growth = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.growth", InputConstants.UNKNOWN.getValue(), category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			while (growth.consumeClick()) {
+				if (minecraft.player != null && minecraft.gui.screen() == null) {
+					minecraft.gui.setScreen(new GrowthScreen());
+				}
+			}
 			while (imbue.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null) {
+					// Alt held: the second class's button (the first class's J is unchanged)
+					if (Classes.second(minecraft.player) != null && altHeld(minecraft)) {
+						ClientPlayNetworking.send(new SecondClass.Key(minecraft.player.isShiftKeyDown()));
+						continue;
+					}
 					// (0.7.554) a Blood Sorcerer's J is held, not pressed: gather the blood near, empty-handed throw it
 					// (BloodBlasts; a tap is still the Imbue, decided on the server when it's let go)
 					if (Hemomancy.bloodMage(minecraft.player) && !minecraft.player.isShiftKeyDown()) {

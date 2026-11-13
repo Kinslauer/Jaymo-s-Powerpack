@@ -74,6 +74,8 @@ import com.jaymoskingdoms.money.Money;
  * {@code /kingdom class get <player>}.
  */
 public final class Classes {
+	/** The share of a class's perks, pools and numbers its holder has when it is their second class. */
+	public static final float SECOND_SHARE = 0.5F;
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
 	static final long WRIT_EVERY = 24000L * 7L;
 	/** What he asks for one. */
@@ -175,15 +177,24 @@ public final class Classes {
 	/** Each player's class. Saved, kept through death, synced to its own player (the screens). */
 	public static final AttachmentType<Chosen> CLASS = AttachmentRegistry.create(JaymosKingdoms.id("class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** The second class a player learned from a master ({@link SecondClass}); same shape as the first. Saved, kept through death, synced to its own player. */
+	public static final AttachmentType<Chosen> SECOND = AttachmentRegistry.create(JaymosKingdoms.id("second_class"),
+		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
-	/** Server → player: pick a class (the screen opens; {@code forced}: it can't be shut without picking). */
-	public record Open(boolean forced) implements CustomPacketPayload {
+	/**
+	 * Server → player: pick a class (the screen opens; {@code forced}: it can't be shut without picking). {@code second}: 0 for the
+	 * first class, else one more than the ordinal of the class a master is teaching them as their second (the screen shows only that).
+	 */
+	public record Open(boolean forced, int second) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("class_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
+			(p, buf) -> {
+				buf.writeBoolean(p.forced);
+				buf.writeVarInt(p.second);
+			}, buf -> new Open(buf.readBoolean(), buf.readVarInt()));
 
 		@Override
 		public Type<Open> type() {
@@ -191,14 +202,15 @@ public final class Classes {
 		}
 	}
 
-	/** Player → server: they picked class {@code cls} (its ordinal) and {@code option} (an index into its options, or -1). */
-	public record Choose(int cls, int option) implements CustomPacketPayload {
+	/** Player → server: they picked class {@code cls} (its ordinal) and {@code option} (an index into its options, or -1); {@code second}: as the class a master teaches. */
+	public record Choose(int cls, int option, boolean second) implements CustomPacketPayload {
 		public static final Type<Choose> TYPE = new Type<>(JaymosKingdoms.id("class_choose"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Choose> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.cls);
 				buf.writeVarInt(p.option + 1);
-			}, buf -> new Choose(buf.readVarInt(), buf.readVarInt() - 1));
+				buf.writeBoolean(p.second);
+			}, buf -> new Choose(buf.readVarInt(), buf.readVarInt() - 1, buf.readBoolean()));
 
 		@Override
 		public Type<Choose> type() {
@@ -267,6 +279,9 @@ public final class Classes {
 			Rangers.clear();
 			Tinkerers.clear();
 			ClassTeachers.clear();
+			SecondClass.clear();
+			Feats.clear();
+			Paths.clear();
 			WRIT_OFFERS.clear();
 			OFFER_KINDS.clear();
 			ClassPerks.clear();
@@ -301,6 +316,7 @@ public final class Classes {
 			}
 			if (player.isAlive() && !player.isSpectator()) {
 				ClassPerks.tick(player);
+				Paths.tick(player);
 				Spellcraft.tick(player);
 				Mana.tick(player);
 				com.jaymoskingdoms.spirits.Spirits.tick(player);
@@ -316,8 +332,40 @@ public final class Classes {
 		return of(player).playerClass();
 	}
 
+	/** Whether {@code player} holds {@code cls}, as their first class or the second they learned. */
 	public static boolean is(Player player, PlayerClass cls) {
-		return classOf(player) == cls;
+		return classOf(player) == cls || second(player) == cls;
+	}
+
+	/** The second class {@code player} learned from a master, or null. */
+	public static @Nullable PlayerClass second(Player player) {
+		return player.getAttachedOrElse(SECOND, Chosen.NONE).playerClass();
+	}
+
+	/** What {@code player} picked with their second class. */
+	public static Chosen secondOf(Player player) {
+		return player.getAttachedOrElse(SECOND, Chosen.NONE);
+	}
+
+	/** The classes {@code player} holds: the first, then the second (none for a character not yet made). */
+	public static List<PlayerClass> both(Player player) {
+		PlayerClass first = classOf(player), second = second(player);
+		return first == null ? List.of() : second == null ? List.of(first) : List.of(first, second);
+	}
+
+	/** How much of {@code cls}'s numbers {@code player} has: all of the first class, {@link #SECOND_SHARE} of the second, none of the rest. */
+	public static float share(Player player, PlayerClass cls) {
+		return classOf(player) == cls ? 1.0F : second(player) == cls ? SECOND_SHARE : 0.0F;
+	}
+
+	/** What {@code player} picked with {@code cls} (a patron, an oath, a foe), from whichever slot holds it. */
+	public static String optionOf(Player player, PlayerClass cls) {
+		return classOf(player) == cls ? of(player).option() : second(player) == cls ? secondOf(player).option() : "";
+	}
+
+	/** A pool of {@code n} (turnings, shapes, ki) as {@code player} has it in {@code cls}: the second class's is a share of it, at least one. */
+	public static int scaled(Player player, PlayerClass cls, int n) {
+		return share(player, cls) >= 1.0F ? n : Math.max(1, Math.round(n * SECOND_SHARE));
 	}
 
 	/** Puts {@code player}'s class on them as they stand (their attributes). */
@@ -325,6 +373,9 @@ public final class Classes {
 		ClassPerks.attributes(player);
 		// (0.7.57) a class gives a free point in its favoured attribute
 		Stats.attributes(player);
+		// feats and paths that work through the body
+		Feats.attributes(player);
+		Paths.attributes(player);
 	}
 
 	/**
@@ -361,18 +412,22 @@ public final class Classes {
 	/** Opens the class screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(forced));
+			ServerPlayNetworking.send(player, new Open(forced, 0));
 		}
 	}
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
-		if (choose.cls() < 0 || choose.cls() >= all.length || classOf(player) != null) {
+		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
 		String option = choose.option() >= 0 && choose.option() < cls.options.size() ? cls.options.get(choose.option()) : "";
 		if (!cls.options.isEmpty() && option.isEmpty()) {
+			return;
+		}
+		if (choose.second()) {
+			SecondClass.chosen(player, cls, option);
 			return;
 		}
 		set(player, cls, option);
@@ -389,20 +444,13 @@ public final class Classes {
 
 	/** Makes {@code player} a {@code cls}: their attributes, their first things (a Mage's staff), the word of it. */
 	static void set(ServerPlayer player, PlayerClass cls, String option) {
+		// a first class that is the second one already held takes its place
+		if (second(player) == cls) {
+			player.removeAttached(SECOND);
+		}
 		player.setAttached(CLASS, new Chosen(cls.key(), option, startingSpells(cls, option), 0));
 		refresh(player);
-		// the new classes' own beginnings (a patron sworn, an oath taken, a foe and land to pick, a first style of fighting)
-		switch (cls) {
-			case CLERIC -> Clerics.begin(player, option);
-			case PALADIN -> Paladins.begin(player, option);
-			case RANGER -> Rangers.begin(player);
-			case WARLOCK -> Warlocks.begin(player, option);
-			case MONK -> Monks.begin(player);
-			case DRUID -> Druids.begin(player);
-			case TINKERER -> Tinkerers.begin(player);
-			default -> {
-			}
-		}
+		begin(player, cls, option);
 		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
@@ -416,11 +464,33 @@ public final class Classes {
 			.withStyle(ChatFormatting.GOLD));
 	}
 
-	/** Takes {@code player}'s class away (their attributes with it), and what the class gave them. */
+	/** The classes' own beginnings: a patron sworn, an oath taken, a foe and land to pick, a first style of fighting. */
+	static void begin(ServerPlayer player, PlayerClass cls, String option) {
+		switch (cls) {
+			case CLERIC -> Clerics.begin(player, option);
+			case PALADIN -> Paladins.begin(player, option);
+			case RANGER -> Rangers.begin(player);
+			case WARLOCK -> Warlocks.begin(player, option);
+			case MONK -> Monks.begin(player);
+			case DRUID -> Druids.begin(player);
+			case TINKERER -> Tinkerers.begin(player);
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * Takes {@code player}'s classes away (their attributes with them), and what the classes gave them: the second class, the
+	 * paths and the feats too (a Writ of Rebirth remakes the whole character).
+	 */
 	static void clear(ServerPlayer player) {
 		Druids.unmake(player);
 		Paladins.unmake(player);
 		Warlocks.unmake(player);
+		SecondClass.unmake(player);
+		Feats.unmake(player);
+		Paths.unmake(player);
+		player.removeAttached(SECOND);
 		player.removeAttached(CLASS);
 		refresh(player);
 	}

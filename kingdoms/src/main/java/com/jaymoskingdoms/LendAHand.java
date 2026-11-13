@@ -111,12 +111,12 @@ public final class LendAHand {
 
 	/** The factor on the lockpicking game's sweet spots for {@code picker}: wider with a friend by. */
 	public static float lockWidth(ServerPlayer picker) {
-		return friends(picker, LOCK_NEAR).isEmpty() ? 1.0F : LOCK_WIDER;
+		return (friends(picker, LOCK_NEAR).isEmpty() ? 1.0F : LOCK_WIDER) * Paths.lockWidth(picker);
 	}
 
 	/** The factor on the pick's strain for {@code picker}: less with a friend by. */
 	public static float lockStrain(ServerPlayer picker) {
-		return friends(picker, LOCK_NEAR).isEmpty() ? 1.0F : LOCK_EASIER;
+		return (friends(picker, LOCK_NEAR).isEmpty() ? 1.0F : LOCK_EASIER) * Paths.lockStrain(picker);
 	}
 
 	// ---- a lift ------------------------------------------------------------------------------------------------------------

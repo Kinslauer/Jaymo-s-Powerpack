@@ -87,6 +87,11 @@ public final class Warlocks {
 	}
 
 	/** A new Warlock swears to the patron they picked. */
+	/** The pact slots {@code player} has (the second class has a share; the Tome path one more). */
+	static int slots(ServerPlayer player) {
+		return Classes.scaled(player, PlayerClass.WARLOCK, SLOTS) + Paths.extraSlots(player);
+	}
+
 	static void begin(ServerPlayer player, String option) {
 		Patron patron = Patron.byKey(option);
 		if (patron != null && Patrons.of(player) != patron) {
@@ -109,7 +114,7 @@ public final class Warlocks {
 			return true;
 		}
 		Pact pact = pact(player);
-		if (Rests.left(player, Rests.PACT, SLOTS) <= 0) {
+		if (Rests.left(player, Rests.PACT, slots(player)) <= 0) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.no_slots"));
 			return false;
 		}
@@ -122,7 +127,7 @@ public final class Warlocks {
 
 	/** A cast was made: a slot is spent and the patron's account grows. */
 	static void pay(ServerPlayer player, String spell) {
-		Rests.spend(player, Rests.PACT, 1, SLOTS);
+		Rests.spend(player, Rests.PACT, 1, slots(player));
 		Pact pact = pact(player);
 		int casts = pact.casts() + 1;
 		if (pact.owing()) {
@@ -135,7 +140,7 @@ public final class Warlocks {
 		}
 		long today = Patrons.today(player.level().getServer());
 		String kind = KINDS[(int) Math.floorMod(today + player.getRandom().nextInt(KINDS.length), KINDS.length)];
-		player.setAttached(PACT, new Pact(0, kind, today + DEBT_DAYS));
+		player.setAttached(PACT, new Pact(0, kind, today + Paths.debtDays(player, DEBT_DAYS)));
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.warlock.debt", debtName(kind), DEBT_DAYS).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
@@ -150,7 +155,7 @@ public final class Warlocks {
 		if (!pact.owing() || sneak) {
 			long days = pact.owing() ? Math.max(0L, pact.due() - Patrons.today(player.level().getServer())) : 0L;
 			player.sendOverlayMessage(pact.owing() ? Component.translatable("message.jaymoskingdoms.warlock.owing", debtName(pact.kind()), days)
-				: Component.translatable("message.jaymoskingdoms.warlock.clear", Rests.left(player, Rests.PACT, SLOTS)));
+				: Component.translatable("message.jaymoskingdoms.warlock.clear", Rests.left(player, Rests.PACT, slots(player))));
 			return;
 		}
 		boolean paid = switch (pact.kind()) {
@@ -208,7 +213,7 @@ public final class Warlocks {
 	/** A short rest: the slots are back (they are, by {@link Rests}); the patron is quiet for a while. */
 	static void rested(ServerPlayer player) {
 		if (Classes.is(player, PlayerClass.WARLOCK)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.rested", SLOTS));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.warlock.rested", slots(player)));
 		}
 	}
 
@@ -231,7 +236,7 @@ public final class Warlocks {
 	private static void collect(ServerPlayer player) {
 		player.setAttached(PACT, Pact.NONE);
 		Patrons.lose(player, COLLECT_FAVOUR);
-		Rests.spend(player, Rests.PACT, SLOTS, SLOTS);
+		Rests.spend(player, Rests.PACT, slots(player), slots(player));
 		player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, CURSE_TICKS, 0));
 		player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 20, 0));
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.warlock.collected").withStyle(net.minecraft.ChatFormatting.DARK_RED));

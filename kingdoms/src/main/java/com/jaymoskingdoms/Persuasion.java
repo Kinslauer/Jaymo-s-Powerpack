@@ -88,6 +88,9 @@ public final class Persuasion {
 	static float chance(ServerPlayer player, Villager v, Move move) {
 		float c = move.base + Presence.talk(player) + personality(McaCompat.personality(v), move) + McaCompat.mood(v) * MOOD_LEAN
 			+ McaCompat.heartsOf(v, player) * HEARTS_LEAN * (move == Move.THREATEN ? -0.3F : 1.0F) + Charm.sway(v, player) * CHARM_LEAN;
+		if (move == Move.LIE) {
+			c += FeatsTrade.actorLie(player);
+		}
 		if (Downed.isGuard(v)) {
 			c += GUARD_LEAN;
 		}

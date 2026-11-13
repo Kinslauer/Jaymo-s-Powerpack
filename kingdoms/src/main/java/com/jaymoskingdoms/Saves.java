@@ -84,7 +84,7 @@ public final class Saves {
 			chance = who instanceof Mob mob && Senses.boss(mob) ? BOSS : MOB;
 		}
 		// a cleric's blessing and a paladin's aura steady the nerve
-		chance = Math.min(BLESSED_MOST, chance + Clerics.saveBonus(who) + Paladins.auraBonus(who));
+		chance = Math.min(BLESSED_MOST, chance + Clerics.saveBonus(who) + Paladins.auraBonus(who) + FeatsTrade.saves(who) + Paths.guardSaves(who));
 		// shaking hands: poison makes every save worse
 		return who.hasEffect(MobEffects.POISON) ? chance * POISONED : chance;
 	}
@@ -110,6 +110,7 @@ public final class Saves {
 		if (who.level().isClientSide() || effect.isInfiniteDuration() || effect.isAmbient() || effect.getDuration() < 40) {
 			return effect;
 		}
+		effect = Paths.draught(who, effect);
 		Kind kind = POISONS.contains(effect.getEffect()) ? Kind.POISON : HOLDS.contains(effect.getEffect()) ? Kind.HOLD : null;
 		if (kind == null) {
 			return effect;

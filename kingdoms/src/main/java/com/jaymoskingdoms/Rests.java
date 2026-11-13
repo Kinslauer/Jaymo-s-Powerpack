@@ -60,6 +60,8 @@ public final class Rests {
 			Warlocks.rested(player);
 		}
 		Clerics.rested(player);
+		FeatsTrade.rested(player);
+		Paths.rested(player);
 	}
 
 	/** A long rest (a night's sleep): everything comes back. */

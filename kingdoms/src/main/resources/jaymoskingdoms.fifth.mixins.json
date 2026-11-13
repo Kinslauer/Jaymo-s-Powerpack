@@ -14,7 +14,8 @@
 		"FoeLoreMixin",
 		"SlotCurseMixin",
 		"PlayerDropMixin",
-		"PotionClashMixin"
+		"PotionClashMixin",
+		"CrossbowChargeMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

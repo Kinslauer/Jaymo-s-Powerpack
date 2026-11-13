@@ -309,7 +309,7 @@ public final class ClassPerks {
 
 	/** The factor on {@code player}'s food exhaustion (a Survivalist's hunger drains slower). */
 	public static float exhaustion(ServerPlayer player) {
-		return Classes.is(player, PlayerClass.RANGER) ? SURVIVALIST_EXHAUSTION : 1.0F;
+		return 1.0F + (SURVIVALIST_EXHAUSTION - 1.0F) * Classes.share(player, PlayerClass.RANGER);
 	}
 
 	/**
@@ -318,10 +318,18 @@ public final class ClassPerks {
 	 * anything a Rider swings from the saddle. Jaymo's Powers asks, by reflection: a Z Fighter hits at full only with these.
 	 */
 	public static boolean trainedWith(ServerPlayer player, ItemStack weapon) {
-		PlayerClass cls = Classes.classOf(player);
-		if (cls == null || weapon.isEmpty()) {
+		if (weapon.isEmpty()) {
 			return false;
 		}
+		for (PlayerClass cls : Classes.both(player)) {
+			if (trainedAs(player, cls, weapon)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean trainedAs(ServerPlayer player, PlayerClass cls, ItemStack weapon) {
 		return switch (cls) {
 			case THIEF -> weapon.is(LIGHT_BLADES);
 			case WARLORD -> weapon.is(TWO_HANDED);
@@ -359,63 +367,64 @@ public final class ClassPerks {
 			}
 		}
 		double fist = 0.0, fistSpeed = 0.0, damage = 0.0, attackSpeed = 0.0, armor = 0.0, health = 0.0, move = 0.0, weight = HEAVY_ARMOR_SLOW * heavy, oxygen = 0.0, fall = 0.0, knockback = 0.0, sneak = 0.0;
-		if (cls != null) {
-			switch (cls) {
+		for (PlayerClass c : Classes.both(player)) {
+			double s = Classes.share(player, c);
+			switch (c) {
 				case THIEF -> {
 					if (held.is(LIGHT_BLADES)) {
-						damage = THIEF_DAMAGE;
-						attackSpeed = THIEF_SPEED;
+						damage += s * (THIEF_DAMAGE);
+						attackSpeed += s * (THIEF_SPEED);
 					}
-					armor = THIEF_ARMOR_PER_PIECE * light;
-					sneak = THIEF_PROWL;
+					armor += s * (THIEF_ARMOR_PER_PIECE * light);
+					sneak += s * (THIEF_PROWL);
 				}
 				case WARLORD -> {
 					if (held.is(TWO_HANDED)) {
-						damage = WARLORD_DAMAGE;
+						damage += s * (WARLORD_DAMAGE);
 					}
-					weight *= WARLORD_WEIGHT;
-					armor = WARLORD_HEAVY_ARMOR_PER_PIECE * heavy;
+					weight *= 1.0 + (WARLORD_WEIGHT - 1.0) * s;
+					armor += s * (WARLORD_HEAVY_ARMOR_PER_PIECE * heavy);
 				}
-				case MAGE -> health = MAGE_HEALTH;
+				case MAGE -> health += s * MAGE_HEALTH;
 				case RANGER -> {
-					oxygen = SURVIVALIST_OXYGEN;
-					health = survivalistHealth(player);
-					fall = SURVIVALIST_FALL;
-					move = ARCHER_MOVE;
+					oxygen += s * (SURVIVALIST_OXYGEN);
+					health += s * (survivalistHealth(player));
+					fall += s * (SURVIVALIST_FALL);
+					move += s * (ARCHER_MOVE);
 				}
-				case WARLOCK -> health = WARLOCK_HEALTH;
+				case WARLOCK -> health += s * WARLOCK_HEALTH;
 				case PALADIN -> {
-					weight *= PALADIN_WEIGHT;
-					armor = PALADIN_HEAVY_ARMOR_PER_PIECE * heavy;
+					weight *= 1.0 + (PALADIN_WEIGHT - 1.0) * s;
+					armor += s * (PALADIN_HEAVY_ARMOR_PER_PIECE * heavy);
 				}
 				case MONK -> {
-					move = MONK_MOVE;
-					fall = MONK_FALL;
+					move += s * (MONK_MOVE);
+					fall += s * (MONK_FALL);
 					if (heavy == 0 && Monks.fists(held)) {
-						fist = MONK_FIST_DAMAGE;
-						fistSpeed = MONK_FIST_SPEED;
+						fist += s * (MONK_FIST_DAMAGE);
+						fistSpeed += s * (MONK_FIST_SPEED);
 					}
 				}
 				case CLERIC, DRUID, TINKERER -> {
 				}
 				case BRUTE -> {
 					if (held.is(BLUDGEONS)) {
-						damage = BRUTE_DAMAGE;
+						damage += s * (BRUTE_DAMAGE);
 					}
-					health = BRUTE_HEALTH;
-					move = BRUTE_MOVE;
-					weight *= BRUTE_WEIGHT;
-					knockback = BRUTE_KNOCKBACK_RESIST;
+					health += s * (BRUTE_HEALTH);
+					move += s * (BRUTE_MOVE);
+					weight *= 1.0 + (BRUTE_WEIGHT - 1.0) * s;
+					knockback += s * (BRUTE_KNOCKBACK_RESIST);
 				}
 				case MARKSMAN -> {
-					health = MARKSMAN_HEALTH;
-					armor = MARKSMAN_ARMOR_PER_PIECE * light;
+					health += s * (MARKSMAN_HEALTH);
+					armor += s * (MARKSMAN_ARMOR_PER_PIECE * light);
 				}
 				case SORCERER -> {
 				}
 				case RIDER -> {
-					move = RIDER_FOOT_MOVE;
-					fall = RIDER_FALL;
+					move += s * (RIDER_FOOT_MOVE);
+					fall += s * (RIDER_FALL);
 				}
 			}
 		}
@@ -463,20 +472,21 @@ public final class ClassPerks {
 			MOUNTS.put(player.getUUID(), mount);
 			AttributeInstance speed = mount.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
-				speed.addOrUpdateTransientModifier(new AttributeModifier(JaymosKingdoms.id(MOUNT_ID), RIDER_MOUNT_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+				speed.addOrUpdateTransientModifier(new AttributeModifier(JaymosKingdoms.id(MOUNT_ID), RIDER_MOUNT_SPEED * Classes.share(player, PlayerClass.RIDER), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			}
 		}
-		Skills.modifier(player, Attributes.ATTACK_DAMAGE, MOUNTED_ID, mount == null ? 0.0 : RIDER_MOUNTED_DAMAGE, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		Skills.modifier(player, Attributes.ATTACK_DAMAGE, MOUNTED_ID, mount == null ? 0.0 : RIDER_MOUNTED_DAMAGE * Classes.share(player, PlayerClass.RIDER), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 	}
 
 	/** How fast a horse under {@code rider} spends its stamina (a Rider's tires slower). */
 	public static double stamina(net.minecraft.world.entity.@Nullable Entity rider) {
-		return rider instanceof ServerPlayer sp && Classes.is(sp, PlayerClass.RIDER) ? RIDER_STAMINA : 1.0;
+		return rider instanceof ServerPlayer sp && Classes.is(sp, PlayerClass.RIDER) ? 1.0 + (RIDER_STAMINA - 1.0) * Classes.share(sp, PlayerClass.RIDER) : 1.0;
 	}
 
 	/** The trust a horse gains in {@code player} from {@code delta} (a Rider wins it sooner). */
 	public static float trust(net.minecraft.world.entity.player.Player player, float delta) {
-		return delta > 0.0F && Classes.is(player, PlayerClass.RIDER) ? delta * RIDER_TRUST : delta;
+		delta = FeatsFight.trust(player, delta);
+		return delta > 0.0F && Classes.is(player, PlayerClass.RIDER) ? delta * (1.0F + (RIDER_TRUST - 1.0F) * Classes.share(player, PlayerClass.RIDER)) : delta;
 	}
 
 	/** An Archer's drawn bow: the two-block jump and the soft landing while it's drawn. */
@@ -499,24 +509,26 @@ public final class ClassPerks {
 	}
 
 	static void tick(ServerPlayer player) {
-		PlayerClass cls = Classes.classOf(player);
-		if ((cls == PlayerClass.RIDER) != player.entityTags().contains(RIDER_TAG)) {
-			if (cls == PlayerClass.RIDER) {
+		boolean rider = Classes.is(player, PlayerClass.RIDER);
+		if (rider != player.entityTags().contains(RIDER_TAG)) {
+			if (rider) {
 				player.addTag(RIDER_TAG);
 			} else {
 				player.removeTag(RIDER_TAG);
 			}
 		}
-		if (cls == PlayerClass.RIDER) {
+		if (rider) {
 			mounted(player, player.getVehicle() instanceof LivingEntity mount && mount.getControllingPassenger() == player ? mount : null);
-		} else if (cls == PlayerClass.RANGER) {
+		}
+		if (Classes.is(player, PlayerClass.RANGER)) {
 			drawing(player, drawingBow(player));
 			// Second Wind: a while unhurt, they mend on their own
 			int since = player.tickCount - LAST_HURT.getOrDefault(player.getUUID(), Integer.MIN_VALUE / 2);
 			if (since >= SURVIVALIST_CALM && player.tickCount % SURVIVALIST_MEND_EVERY == 0 && player.getHealth() < player.getMaxHealth() && !Downed.isDowned(player)) {
-				player.heal(SURVIVALIST_MEND);
+				player.heal(SURVIVALIST_MEND * Classes.share(player, PlayerClass.RANGER));
 			}
-		} else if (cls == PlayerClass.BRUTE) {
+		}
+		if (Classes.is(player, PlayerClass.BRUTE)) {
 			// a shield knocked aside (an axe, a mace) comes back in half the time: the cooldown is put back shorter when it starts
 			ItemStack shield = player.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) ? player.getOffhandItem()
 				: player.getMainHandItem().has(DataComponents.BLOCKS_ATTACKS) ? player.getMainHandItem() : ItemStack.EMPTY;
@@ -535,23 +547,27 @@ public final class ClassPerks {
 	 */
 	public static float dealt(LivingEntity target, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		if (target instanceof ServerPlayer hurt) {
-			PlayerClass cls = Classes.classOf(hurt);
-			if (cls == PlayerClass.RANGER) {
+			if (Classes.is(hurt, PlayerClass.RANGER)) {
 				LAST_HURT.put(hurt.getUUID(), hurt.tickCount);
-			} else if (cls == PlayerClass.SORCERER && ownElement(Spellcraft.element(hurt), source)) {
+			} else if (Classes.is(hurt, PlayerClass.SORCERER) && ownElement(Spellcraft.element(hurt), source)) {
 				amount *= SORCERER_WARD;
 			}
 		}
 		if (target.getControllingPassenger() instanceof ServerPlayer rider && Classes.is(rider, PlayerClass.RIDER)) {
-			amount *= RIDER_BARDING;
+			amount *= 1.0F + (RIDER_BARDING - 1.0F) * Classes.share(rider, PlayerClass.RIDER);
 		}
 		if (!(source.getEntity() instanceof ServerPlayer sp) || target == sp) {
 			return amount;
 		}
-		PlayerClass cls = Classes.classOf(sp);
-		if (cls == null) {
-			return amount;
+		float out = amount;
+		for (PlayerClass cls : Classes.both(sp)) {
+			out += (strike(sp, cls, target, source, amount) - amount) * Classes.share(sp, cls);
 		}
+		return out;
+	}
+
+	/** What {@code cls} alone would make of the blow (the second class takes a share of the difference). */
+	private static float strike(ServerPlayer sp, PlayerClass cls, LivingEntity target, net.minecraft.world.damagesource.DamageSource source, float amount) {
 		if (cls == PlayerClass.RANGER) {
 			// a favoured foe, struck by arrow or blade
 			amount = Rangers.dealt(sp, target, amount);
@@ -780,6 +796,6 @@ public final class ClassPerks {
 	 * didn't stop (what bypasses shields: explosions, magic, fire, and the leftover of a partial block).
 	 */
 	public static float blocked(ServerPlayer player, float amount) {
-		return Classes.is(player, PlayerClass.BRUTE) && player.isBlocking() ? amount * (1.0F - BRUTE_BLOCK_LEFTOVER) : amount;
+		return Classes.is(player, PlayerClass.BRUTE) && player.isBlocking() ? amount * (1.0F - BRUTE_BLOCK_LEFTOVER * Classes.share(player, PlayerClass.BRUTE)) : amount;
 	}
 }

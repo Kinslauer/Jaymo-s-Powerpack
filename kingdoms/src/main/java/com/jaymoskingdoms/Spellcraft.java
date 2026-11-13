@@ -456,13 +456,14 @@ public final class Spellcraft {
 		boolean sameBlade = had != null && had.sorcerer().equals(player.getUUID()) && live(held, now) != null;
 		Current before = IMBUED.get(player.getUUID());
 		// one blade at a time: this one takes the element, the last one goes cold wherever it is
-		IMBUED.put(player.getUUID(), new Current(now, now + IMBUE_TICKS));
-		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + IMBUE_TICKS, now));
+		int lasts = Paths.imbueTicks(player, IMBUE_TICKS);
+		IMBUED.put(player.getUUID(), new Current(now, now + lasts));
+		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + lasts, now));
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			stripIfDead(inv.getItem(i), now);
 		}
-		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), IMBUE_COOLDOWN);
+		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), Paths.imbueCooldown(player, IMBUE_COOLDOWN));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(particle(element), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 0.8F, 1.1F);
@@ -519,6 +520,7 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		Paths.cast(player, level);
 		// a cast may surge into something else (the wild bloodline, a cursed place)
 		WildMagic.cast(player, level);
 		// (0.7.244) the caster's aura ripples with what the cast is for (an element's blade or bolt: harm; restoration: healing)

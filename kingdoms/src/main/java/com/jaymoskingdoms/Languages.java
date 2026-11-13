@@ -463,6 +463,7 @@ public final class Languages {
 		if (before >= NATIVE || points <= 0) {
 			return before;
 		}
+		points = FeatsTrade.linguistPoints(player, points);
 		int after = Math.min(NATIVE, before + points);
 		Map<String, Integer> learned = new HashMap<>(player.getAttachedOrElse(LEARNED, Map.of()));
 		learned.put(t.id(), after);

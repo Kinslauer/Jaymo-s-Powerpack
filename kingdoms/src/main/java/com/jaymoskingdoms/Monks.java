@@ -82,7 +82,7 @@ public final class Monks {
 
 	/** How much ki {@code player} has in all. */
 	public static int ki(ServerPlayer player) {
-		return KI_BASE + Stats.value(player, Stats.Stat.GRIT) / GRIT_PER_KI;
+		return Classes.scaled(player, PlayerClass.MONK, KI_BASE + Stats.value(player, Stats.Stat.GRIT) / GRIT_PER_KI);
 	}
 
 	// ---- the key ---------------------------------------------------------------------------------------------------------------

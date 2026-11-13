@@ -109,7 +109,7 @@ public final class Liars {
 
 	/** The chance {@code player} sees a liar's tell: sharper Wits see more. */
 	public static float sharp(ServerPlayer player) {
-		return Math.min(0.95F, SEE_BASE + SEE_PER_WIT * Stats.value(player, Stats.Stat.WITS));
+		return Math.min(0.95F, SEE_BASE + SEE_PER_WIT * Stats.value(player, Stats.Stat.WITS) + FeatsBody.sharper(player) + FeatsTrade.actorSharp(player));
 	}
 
 	/** If {@code player} is sharp enough, {@code liar} gives themselves away in a bubble (once a day per kind); true if shown. */

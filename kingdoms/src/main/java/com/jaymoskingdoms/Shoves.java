@@ -97,7 +97,7 @@ public final class Shoves {
 		}
 		long now = level.getGameTime();
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < COOLDOWN) {
+		if (last != null && now - last < (FeatsFight.shieldMaster(player) ? FeatsFight.SHIELD_SHOVE_GAP : COOLDOWN)) {
 			return;
 		}
 		ItemStack main = player.getMainHandItem();
@@ -131,7 +131,8 @@ public final class Shoves {
 			}
 			away = away.normalize();
 			Vec3 v = foe.getDeltaMovement();
-			foe.setDeltaMovement(away.x * PUSH, Math.max(v.y, HOP), away.z * PUSH);
+			double push = PUSH * (FeatsFight.shieldMaster(player) ? FeatsFight.SHIELD_PUSH : 1.0F);
+			foe.setDeltaMovement(away.x * push, Math.max(v.y, HOP), away.z * push);
 			foe.syncVelocity = true;
 			level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.9F, 1.2F);
 		}
@@ -153,7 +154,7 @@ public final class Shoves {
 	/** The contest: {@code foe}'s size and Might save against {@code player}'s Might. */
 	private static boolean wins(ServerPlayer player, LivingEntity foe, ServerLevel level) {
 		float size = Math.max(0.0F, foe.getBbWidth() * foe.getBbHeight() - PERSON);
-		float chance = BASE - SAVE_TAKES * Saves.chance(foe, Saves.Kind.GRAB) - SIZE_TAKES * size + MIGHT_ADDS * Saves.share(player, Stats.Stat.MIGHT);
+		float chance = BASE - SAVE_TAKES * Saves.chance(foe, Saves.Kind.GRAB) - SIZE_TAKES * size + MIGHT_ADDS * Saves.share(player, Stats.Stat.MIGHT) + (FeatsFight.shieldMaster(player) ? FeatsFight.SHIELD_SHOVE_ODDS : 0.0F) + Paths.shoveOdds(player);
 		return level.getRandom().nextFloat() < Math.max(FLOOR, Math.min(CEILING, chance));
 	}
 }

@@ -40,9 +40,14 @@ final class ClassScreen extends Screen {
 	/** Each class's gear, made once for the screen. */
 	private final java.util.Map<PlayerClass, List<ItemStack>> kits = new java.util.EnumMap<>(PlayerClass.class);
 
-	ClassScreen(boolean forced) {
-		super(Component.translatable("gui.jaymoskingdoms.class.title"));
+	/** The class a master is teaching as a second class (the screen shows that one only), or null. */
+	private final @Nullable PlayerClass teaching;
+
+	ClassScreen(boolean forced, int second) {
+		super(Component.translatable(second > 0 ? "gui.jaymoskingdoms.class.title_second" : "gui.jaymoskingdoms.class.title"));
 		this.forced = forced;
+		this.teaching = second > 0 && second <= PlayerClass.values().length ? PlayerClass.values()[second - 1] : null;
+		this.picked = this.teaching;
 	}
 
 	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
@@ -54,7 +59,7 @@ final class ClassScreen extends Screen {
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(Classes.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
-			context.client().gui.setScreen(new ClassScreen(payload.forced()));
+			context.client().gui.setScreen(new ClassScreen(payload.forced(), payload.second()));
 		});
 		// (0.7.45) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -64,7 +69,7 @@ final class ClassScreen extends Screen {
 			if (Classes.classOf(minecraft.player) != null) {
 				owed = false;
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
-				minecraft.gui.setScreen(new ClassScreen(true));
+				minecraft.gui.setScreen(new ClassScreen(true, 0));
 			}
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> owed = false);
@@ -126,7 +131,7 @@ final class ClassScreen extends Screen {
 	@Override
 	protected void init() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && Classes.classOf(minecraft.player) != null) {
+		if (this.teaching == null && minecraft.player != null && Classes.classOf(minecraft.player) != null) {
 			onClose();
 			return;
 		}
@@ -138,7 +143,7 @@ final class ClassScreen extends Screen {
 		}
 		this.choose = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {
-				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option));
+				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option, this.teaching != null));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
 				onClose();
 			}
@@ -198,6 +203,9 @@ final class ClassScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		PlayerClass row = rowAt(mx, my);
 		if (row != null) {
+			if (this.teaching != null && row != this.teaching) {
+				return true;
+			}
 			if (row != this.picked) {
 				this.picked = row;
 				this.option = -1;
@@ -224,7 +232,7 @@ final class ClassScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && Classes.classOf(minecraft.player) != null) {
+		if (this.teaching == null && minecraft.player != null && Classes.classOf(minecraft.player) != null) {
 			onClose();
 			return;
 		}

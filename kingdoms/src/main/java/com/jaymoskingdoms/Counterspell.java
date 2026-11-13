@@ -149,6 +149,9 @@ public final class Counterspell {
 			if (!open.snuffed && now - open.begun >= REACTS_AFTER) {
 				answerByRival(level, open, now);
 			}
+			if (!open.snuffed) {
+				answerBySlayer(level, open, now);
+			}
 			if ((now - open.begun) % 6L == 0L && now < open.due && !open.snuffed) {
 				level.sendParticles(Fx.rune(open.colour, 1.1F), mob.getX(), mob.getY() + 2.2, mob.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 				mob.getLookControl().setLookAt(mob.getTarget() != null ? mob.getTarget() : mob);
@@ -165,6 +168,18 @@ public final class Counterspell {
 				continue;
 			}
 			open.cast.run();
+		}
+	}
+
+	/** A Mage Slayer near the caster strikes it down mid-spell ({@link FeatsFight#slay}). */
+	private static void answerBySlayer(ServerLevel level, Open open, long now) {
+		for (ServerPlayer player : level.players()) {
+			if (PLAYER_READY.getOrDefault(player.getUUID(), 0L) > now || !foeOf(player, open.mob) || !FeatsFight.slay(level, open.mob, player)) {
+				continue;
+			}
+			PLAYER_READY.put(player.getUUID(), now + FeatsFight.SLAYER_GAP);
+			snuff(level, open, player);
+			return;
 		}
 	}
 
@@ -278,7 +293,7 @@ public final class Counterspell {
 		if (!Mana.cast(player, "counterspell")) {
 			return true;
 		}
-		float power = Classes.is(player, Classes.PlayerClass.MAGE) ? Spellcraft.MAGE_POWER : Spellcraft.ATTUNED_POWER;
+		float power = Spellcraft.ATTUNED_POWER + (Spellcraft.MAGE_POWER - Spellcraft.ATTUNED_POWER) * Classes.share(player, Classes.PlayerClass.MAGE);
 		react(level, player, power);
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Spellcraft.afterCast(player, level, "counterspell");

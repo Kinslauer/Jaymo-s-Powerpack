@@ -107,9 +107,8 @@ public final class CatchBreath {
 	/** The most health {@code player} can breathe back in a day. */
 	public static float reserve(ServerPlayer player) {
 		float r = BASE_RESERVE + ENDURANCE_RESERVE * Saves.share(player, Stats.Stat.ENDURANCE);
-		Classes.PlayerClass cls = Classes.classOf(player);
-		if (cls != null) {
-			r += switch (cls) {
+		for (Classes.PlayerClass cls : Classes.both(player)) {
+			r += Classes.share(player, cls) * switch (cls) {
 				// the Ranger took the Survivalist's breath (and has the Archer's light hands besides)
 				case RANGER -> SURVIVALIST;
 				case BRUTE -> BRUTE;

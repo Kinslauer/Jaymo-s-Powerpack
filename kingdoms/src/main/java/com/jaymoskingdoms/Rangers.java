@@ -74,7 +74,7 @@ public final class Rangers {
 
 	/** A new Ranger's favoured foe is the one they picked, their favoured land the one they stand in. */
 	static void begin(ServerPlayer player) {
-		String foe = Classes.of(player).option();
+		String foe = Classes.optionOf(player, PlayerClass.RANGER);
 		String land = land(player.level(), player.blockPosition());
 		player.setAttached(FAVOUR, new Favour(foe.isEmpty() ? "monsters" : foe, land));
 	}

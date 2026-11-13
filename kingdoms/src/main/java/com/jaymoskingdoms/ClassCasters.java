@@ -53,14 +53,12 @@ public final class ClassCasters {
 
 	/** Whether {@code player} is a Cleric, a Druid or a Warlock. */
 	public static boolean caster(Player player) {
-		PlayerClass cls = Classes.classOf(player);
-		return cls == PlayerClass.CLERIC || cls == PlayerClass.DRUID || cls == PlayerClass.WARLOCK;
+		return Classes.is(player, PlayerClass.CLERIC) || Classes.is(player, PlayerClass.DRUID) || Classes.is(player, PlayerClass.WARLOCK);
 	}
 
 	/** Whether {@code player}'s mana is a natural's (a Cleric's or a Druid's), like a Mage's. */
 	public static boolean natural(Player player) {
-		PlayerClass cls = Classes.classOf(player);
-		return cls == PlayerClass.CLERIC || cls == PlayerClass.DRUID;
+		return Classes.is(player, PlayerClass.CLERIC) || Classes.is(player, PlayerClass.DRUID);
 	}
 
 	/** The spells {@code cls} begins with; a Warlock's second is the patron's own ({@link Warlocks#patronSpell}). */
@@ -84,39 +82,58 @@ public final class ClassCasters {
 
 	/** Whether {@code player}'s calling lets them learn {@code spell} from a scroll (anyone else's scroll is read once). */
 	public static boolean mayLearn(Player player, String spell) {
-		PlayerClass cls = Classes.classOf(player);
-		if (cls == null || !ALLOWED.containsKey(cls)) {
+		List<PlayerClass> held = Classes.both(player);
+		if (held.isEmpty()) {
 			return true;
 		}
-		return ALLOWED.get(cls).contains(spell);
+		for (PlayerClass cls : held) {
+			if (!ALLOWED.containsKey(cls) || ALLOWED.get(cls).contains(spell)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether {@code player} is born knowing the ritual {@code spell} ({@link NewSpells#knows}). */
 	public static boolean born(Player player, String spell) {
-		PlayerClass cls = Classes.classOf(player);
-		return cls != null && BORN.getOrDefault(cls, Set.of()).contains(spell);
+		for (PlayerClass cls : Classes.both(player)) {
+			if (BORN.getOrDefault(cls, Set.of()).contains(spell)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	/** How hard {@code player}'s staff and focus spells hit as a share of a scroll's. */
+	/**
+	 * How hard {@code player}'s staff and focus spells hit as a share of a scroll's: the best of their classes', the second
+	 * class's gain over a scroll cut to {@link Classes#SECOND_SHARE}; an Evocation Mage's path adds to it.
+	 */
 	static float power(Player player, boolean mage, float attuned) {
-		PlayerClass cls = Classes.classOf(player);
-		if (cls == null || mage) {
-			return mage ? Spellcraft.MAGE_POWER : attuned;
+		float best = attuned;
+		for (PlayerClass cls : Classes.both(player)) {
+			float v = switch (cls) {
+				case MAGE -> Spellcraft.MAGE_POWER;
+				case CLERIC -> CLERIC_POWER;
+				case DRUID -> DRUID_POWER;
+				case WARLOCK -> Warlocks.POWER;
+				default -> attuned;
+			};
+			best = Math.max(best, attuned + (v - attuned) * Classes.share(player, cls));
 		}
-		return switch (cls) {
-			case CLERIC -> CLERIC_POWER;
-			case DRUID -> DRUID_POWER;
-			case WARLOCK -> Warlocks.POWER;
-			default -> attuned;
-		};
+		return best * Paths.spellPower(player);
 	}
 
-	/** How long a cast waits as a share of the spell's own cooldown. */
+	/** How long a cast waits as a share of the spell's own cooldown: the quickest of their classes'. */
 	static float cooldown(Player player, boolean mage, float attuned) {
-		PlayerClass cls = Classes.classOf(player);
-		if (mage || cls == PlayerClass.CLERIC || cls == PlayerClass.DRUID) {
-			return 1.0F;
+		float best = attuned;
+		for (PlayerClass cls : Classes.both(player)) {
+			float v = switch (cls) {
+				case MAGE, CLERIC, DRUID -> 1.0F;
+				case WARLOCK -> WARLOCK_COOLDOWN;
+				default -> attuned;
+			};
+			best = Math.min(best, attuned + (v - attuned) * Classes.share(player, cls));
 		}
-		return cls == PlayerClass.WARLOCK ? WARLOCK_COOLDOWN : attuned;
+		return best;
 	}
 }

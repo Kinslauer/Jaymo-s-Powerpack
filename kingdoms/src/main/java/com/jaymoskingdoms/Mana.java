@@ -314,7 +314,7 @@ public final class Mana {
 
 	/** (0.7.244) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
 	static float price(ServerPlayer player, float cost) {
-		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player);
+		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player) * Paths.manaFactor(player);
 	}
 
 	/** Whether {@code player} has {@code cost} to spend (a word on the screen if not). Creative players always have. */

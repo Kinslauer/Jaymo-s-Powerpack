@@ -84,8 +84,17 @@ public final class Paladins {
 		return Classes.is(player, PlayerClass.PALADIN) && !player.getAttachedOrElse(BROKEN, false);
 	}
 
+	/** The smites a day {@code player} has, and the health of their hands (the second class has a share). */
+	static int smites(Player player) {
+		return Classes.scaled(player, PlayerClass.PALADIN, SMITES);
+	}
+
+	static int hands(Player player) {
+		return Classes.scaled(player, PlayerClass.PALADIN, (int) HANDS_POOL);
+	}
+
 	static String oath(Player player) {
-		return Classes.of(player).option();
+		return Classes.optionOf(player, PlayerClass.PALADIN);
 	}
 
 	// ---- keys ---------------------------------------------------------------------------------------------------------
@@ -100,12 +109,12 @@ public final class Paladins {
 			return;
 		}
 		if (sneak) {
-			if (Rests.left(player, Rests.SMITE, SMITES) <= 0) {
+			if (Rests.left(player, Rests.SMITE, smites(player)) <= 0) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.no_smite"));
 				return;
 			}
 			READY.put(player.getUUID(), level.getGameTime() + READY_TICKS);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.smite_ready", Rests.left(player, Rests.SMITE, SMITES)));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.smite_ready", Rests.left(player, Rests.SMITE, smites(player))));
 			Fx.ring(level, player.position().add(0.0, 0.1, 0.0), 1.2F, 0xFFE9A0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.5F);
 			return;
@@ -113,13 +122,13 @@ public final class Paladins {
 		LivingEntity target = Arcana.sighted(player);
 		LivingEntity who = target != null && player.distanceTo(target) <= HANDS_REACH && Restoration.friend(player, target) ? target : player;
 		float missing = who.getMaxHealth() - who.getHealth();
-		int left = Rests.left(player, Rests.HANDS, (int) HANDS_POOL);
+		int left = Rests.left(player, Rests.HANDS, hands(player));
 		if (missing < 0.5F) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.hands_whole"));
 			return;
 		}
 		int give = (int) Math.min(Math.ceil(missing), left);
-		if (give <= 0 || !Rests.spend(player, Rests.HANDS, give, (int) HANDS_POOL)) {
+		if (give <= 0 || !Rests.spend(player, Rests.HANDS, give, hands(player))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.hands_spent"));
 			return;
 		}
@@ -127,7 +136,7 @@ public final class Paladins {
 		Fx.beam(level, player.getEyePosition().add(0.0, -0.3, 0.0), who.getBoundingBox().getCenter(), 0.05F, 0xFFE9A0, 8);
 		level.sendParticles(ParticleTypes.HEART, who.getX(), who.getY(1.0), who.getZ(), 5, 0.3, 0.4, 0.3, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.4F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.hands", give, Rests.left(player, Rests.HANDS, (int) HANDS_POOL)));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.hands", give, Rests.left(player, Rests.HANDS, hands(player))));
 	}
 
 	// ---- the blow -----------------------------------------------------------------------------------------------------
@@ -143,7 +152,7 @@ public final class Paladins {
 			return amount;
 		}
 		READY.remove(player.getUUID());
-		if (until < player.level().getGameTime() || !Rests.spend(player, Rests.SMITE, 1, SMITES)) {
+		if (until < player.level().getGameTime() || !Rests.spend(player, Rests.SMITE, 1, smites(player))) {
 			return amount;
 		}
 		float extra = Restoration.undead(target) ? SMITE_BONUS * 2.0F : SMITE_BONUS;

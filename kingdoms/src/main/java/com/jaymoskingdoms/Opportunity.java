@@ -134,8 +134,8 @@ public final class Opportunity {
 		Vec3 away = mover.position().subtract(striker.position());
 		Vec3 moved = mover.getDeltaMovement();
 		double along = moved.x * away.x + moved.z * away.z;
-		if (was <= reach && d > reach && along > 0.0 && !cleanBreak(mover, away)) {
-			strike(level, time, striker, mover, false);
+		if (was <= reach && d > reach && along > 0.0 && !cleanBreak(mover, away) && !FeatsBody.slipsAway(mover) && !Paths.slipsAway(mover)) {
+			strike(level, time, striker, mover, FeatsFight.sentinel(striker));
 		} else if (pole && was > reach && d <= reach && along < 0.0) {
 			strike(level, time, striker, mover, true);
 		}
@@ -163,7 +163,7 @@ public final class Opportunity {
 
 	private static void strike(ServerLevel level, long time, LivingEntity striker, LivingEntity mover, boolean stop) {
 		Long when = STRUCK.get(striker.getId());
-		if (when != null && time - when < COOLDOWN || !striker.hasLineOfSight(mover)) {
+		if (when != null && time - when < (FeatsFight.sentinel(striker) ? FeatsFight.SENTINEL_GAP : COOLDOWN) || !striker.hasLineOfSight(mover)) {
 			return;
 		}
 		if (striker instanceof ServerPlayer player) {

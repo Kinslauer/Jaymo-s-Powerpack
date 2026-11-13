@@ -97,7 +97,8 @@ public final class Notice {
 	public static float chance(ServerPlayer player) {
 		Skills.Progress skills = Skills.of(player);
 		float c = LEAST + WITS * Saves.share(player, Stats.Stat.WITS)
-			+ STEALTH * skills.level(Skills.Pillar.STEALTH) / (float) Skills.Pillar.STEALTH.maxLevel;
+			+ STEALTH * skills.level(Skills.Pillar.STEALTH) / (float) Skills.Pillar.STEALTH.maxLevel
+			+ FeatsBody.noticing(player) + Paths.noticing(player);
 		if (player.isShiftKeyDown()) {
 			c += SNEAKING;
 		} else if (Pace.slow(player)) {
