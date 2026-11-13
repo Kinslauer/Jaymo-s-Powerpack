@@ -1432,8 +1432,8 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
-(new) **The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
-books, their paintings and time in their holds; the rest is Claude's placement for him to approve). The pillagers kept
+**The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
+books, their paintings and time in their holds; the rest Claude's placement, approved by Andy 2026-11-13). The pillagers kept
 their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
 ominous banner are its oldest letters, and still answer when spoken right. Nobody grows up speaking it and no village
 teacher knows it. It is learned the hard way: from the pages, ledgers and evokers' grimoires left in their holds and on

@@ -481,3 +481,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 12:00 PM ET (Make every UI screen match thread): Andy picked "All like the symbiote" for the six wheels: every wheel gets the symbiote disc tint, ring and centre layout (name, a bar where it has one, toggle chips where it has toggles); the Rig keeps its bigger radius.
 - 2026-11-13 12:00 PM ET (Make every UI screen match thread): Andy: "put them all on the same pr" and "ill merge after". Every UI patch goes onto PR #1434; Claude does not merge it, Andy does when all are in.
 - 2026-11-13: Illagers can be talked with once the player learns the illager tongue, from their books, paintings/banners and time in their structures (thread: Let players learn illager language).
+- 2026-11-13 2:11 PM ET: Andy approved the Lore.md paragraph "The illager tongue".
