@@ -712,6 +712,16 @@ public final class Bearers {
 		}
 		BlockState stone = headstone(level, f, random);
 		level.setBlock(head, Block.updateFromNeighbourShapes(stone, level, head), Block.UPDATE_ALL);
+		if (BlossomVillages.blossom(level, f)) {
+			// the blossom folk plant the red lily on their dead; it comes up beside the stone
+			for (net.minecraft.core.Direction side : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+				BlockPos by = head.relative(side);
+				if (!by.equals(plot) && level.getBlockState(by).isAir() && level.getBlockState(by.below()).is(net.minecraft.tags.BlockTags.DIRT)) {
+					level.setBlock(by, com.jaymoskingdoms.blossomland.BlossomWilds.SPIDER_LILY.defaultBlockState(), Block.UPDATE_ALL);
+					break;
+				}
+			}
+		}
 		if (d.royal && level.getBlockState(head.above()).isAir()) {
 			// (0.7.546) a ruler's grave: a candle kept lit on the stone
 			level.setBlock(head.above(), Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.LIT, true), Block.UPDATE_ALL);

@@ -151,6 +151,11 @@ half of new villages, its chest left behind. Not built: hired shadows, the warlo
 
 Maple and ginkgo that turn with the seasons, flower fields, wisteria, bamboo stands villagers cut, koi ponds in towns.
 
+*Built (2026-11-13, `blossomland.BlossomWilds`, `Koi`, `BlossomAnimals`, `Blossom.koiPond`, `tools/gen_blossom_wilds.py`,
+`tools/gen_blossom_creatures.py`): maple and ginkgo with turning leaves and saplings, red spider lily (graves, patches),
+wisteria, bamboo thickets, the koi pond and koi that are fed, grow and breed. Not built: villagers cutting bamboo, pink
+moss fields, bare winter trees.*
+
 ## Patch 11: animals I (wl_monkey, wl_crane, wl_deer)
 
 ## Patch 12: animals II (wl_raccoon, wl_serow, wl_hornet, wl_salamander)

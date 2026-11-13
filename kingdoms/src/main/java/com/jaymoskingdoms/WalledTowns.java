@@ -1048,6 +1048,7 @@ final class WalledTowns {
 					piece(out, level, f, tier, "lodge", 1, JobHalls::huntingLodge);
 					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 8));
 					piece(out, level, f, tier, "bath_house", 1, Blossom::bathHouse);
+					piece(out, level, f, tier, "koi_pond", 1, Blossom::koiPond);
 					piece(out, level, f, tier, "farm", 1, Buildings::farm);
 					fixed(out, f, tier, "lantern", 4, Blossom::stoneLantern);
 				}

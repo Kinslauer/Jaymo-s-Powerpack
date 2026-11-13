@@ -301,6 +301,47 @@ final class Blossom {
 	}
 
 	/**
+	 * The koi pond (9 x 7): a garden pool a block deep inside a rim of mossy stone, lily pads on it, a stone lantern at one
+	 * corner and at one end a timber arbour hung with wisteria. Koi find their own way into it
+	 * ({@link com.jaymoskingdoms.blossomland.Koi}).
+	 */
+	static Blueprint koiPond(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("koi_pond", 9, 7, 6);
+		BlockState rim = Blocks.MOSSY_COBBLESTONE.defaultBlockState(), stone = Blocks.COBBLESTONE.defaultBlockState();
+		for (int x = 0; x <= 8; x++) {
+			for (int z = 0; z <= 6; z++) {
+				boolean edge = x == 0 || x == 8 || z == 0 || z == 6;
+				boolean corner = (x == 1 || x == 7) && (z == 1 || z == 5);
+				s.set(x, 0, z, edge || corner ? ((x * 3 + z * 5) % 4 == 0 ? stone : rim) : Blocks.WATER.defaultBlockState());
+			}
+		}
+		for (int[] pad : new int[][] {{2, 2}, {3, 4}, {6, 3}, {5, 1}}) {
+			s.set(pad[0], 1, pad[1], Blocks.LILY_PAD.defaultBlockState());
+		}
+		s.set(8, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		// the arbour over the far end
+		for (int z : new int[] {0, 6}) {
+			for (int y = 1; y <= 3; y++) {
+				s.set(0, y, z, TIMBER);
+				s.set(2, y, z, TIMBER);
+			}
+		}
+		BlockState wisteria = com.jaymoskingdoms.blossomland.BlossomWilds.WISTERIA.defaultBlockState();
+		for (int z = 0; z <= 6; z++) {
+			s.set(0, 4, z, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(2, 4, z, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(1, 4, z, k.roofSlab);
+			if (z >= 1 && z <= 5) {
+				s.set(z % 2 == 0 ? 0 : 2, 3, z, wisteria);
+				if (z % 3 == 0) {
+					s.set(1, 3, z, wisteria);
+				}
+			}
+		}
+		return s.done();
+	}
+
+	/**
 	 * The bath house (9 x 9): a stone floor round a pool one block deep, open on three sides under a hipped roof on four
 	 * posts, a screen along the back. Its water is still, so a soak in it counts as a bath ({@link Lifestyle}).
 	 */

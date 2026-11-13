@@ -28,6 +28,8 @@ public final class CreaturesClient {
 		creature(Creatures.SHADOW, "shadow", 0.0F, -1, -1, false);
 		creature(Creatures.SHAPESHIFTER, "shapeshifter", 0.5F, -1, -1, false);
 		creature(Creatures.BOG_LIGHT, "bog_light", 0.0F, -1, -1, true);
+		// the blossom lands' animals
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.KOI, "koi", 0.15F, -1, -1, false);
 	}
 
 	private static <T extends Mob> void creature(EntityType<T> type, String name, float shadow, int lieAt, int flapsFrom, boolean glows) {

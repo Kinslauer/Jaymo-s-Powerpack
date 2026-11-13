@@ -46,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * {@link Armory}: a realm's folk guards through {@link Outfits}, and (with MCA) the village's own MCA guards here, in
  * the settlement's colour.
  */
-final class BlossomVillages {
+public final class BlossomVillages {
 	/** How often (ticks) a Blossom village may rise near a player, and the chance each time. */
 	static final int RISE_TICKS = 20 * 60;
 	static final float RISE_CHANCE = 0.35F;
@@ -400,6 +400,7 @@ final class BlossomVillages {
 		farmsteads(level, village, bell, random, homes, built);
 		watchTower(level, village, bell, gate, random);
 		ruin(level, village, bell, random);
+		com.jaymoskingdoms.blossomland.BlossomWilds.plantRound(level, bell, random);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));
 			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
@@ -614,7 +615,7 @@ final class BlossomVillages {
 	}
 
 	/** (0.7.490) {@code f} stands among the cherry trees: it walls itself in the Blossom way ({@link WalledTowns}). */
-	static boolean blossom(ServerLevel level, Faction f) {
+	public static boolean blossom(ServerLevel level, Faction f) {
 		return climate(level, f) == Climate.CHERRY;
 	}
 
