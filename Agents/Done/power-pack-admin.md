@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431 (merged)"
+pr: "#1430, #1431, #1435 (merged)"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -43,6 +43,9 @@ let the owed village start run, close the game when needed. Long loading screens
 
 - 11:36 AM deploy (Kingdoms 0.8.8) up. Andy rejoined as Niels 11:53 AM: "it seems to be working for now".
   Watching till 12:23 PM (30 min clean).
+- 11:57 AM crash (round 2): Powers SkyfallCleanup sweep read a chunk that `hasChunk` said was there but was still being
+  made (26.3 hasChunk = holder at FULL ticket level, not made). #1435 (merged ~12:45 PM): 23 server-side hasChunk guards
+  -> getChunkSource().getChunkNow; Seats.java:133 kept (one-shot kingdom founding would found a castle). Redeploying.
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater

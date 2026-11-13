@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: 
 branch: claude/project-thread-0hjevc
 with: Claude (cloud, "Make every UI screen match" thread)
@@ -35,3 +35,4 @@ owns:
 - Baubles stays vanilla light grey (row not ticked; "vanilla for inventory").
 
 ## Done
+- 2026-11-13 12:15 PR #1434 is merged into master; moved to Agents/Done.
