@@ -12319,3 +12319,8 @@ giants being worked on, as its own upright model."
 - Ops: `/kingdom blossomtrader` brings one to the nearest realm harbour now.
 - `BlossomTraders` (new), `Crew.flag`, `SeaTrade.lie/sail` and her stock, `Corsairs` (her arrival home), `ShipTalk`, `InteractActions` (`passage`), `Mohknee.shoreAhead`, `Helmsmen`.
 - Built and compiled; not played. Her crew wear the harbour realm's dress and she is one of the two merchant hulls recoloured: the blossom land's own dress and ship come with later patches, and so do tea, rice wine, lacquer and steel in her hold. There is no harbour on Mohknee yet, so the only ship home is the one that brought you, for a day.
+
+## 0.7.812 (2026-11-13): fix the Life Story screen crashing the game when it draws your figure (#1414)
+
+- The game crashed on the Life Story screen ("Cannot get config value before config is loaded", from Horseman): the figure is dressed in the story's gear for the drawing, and each change fires the equip hook other mods listen to. A failure in another mod's equip hook no longer takes the screen down; the figure is still drawn in its gear.
+- Built in CI; screen not opened here.
