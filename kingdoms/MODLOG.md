@@ -12659,3 +12659,7 @@ giants being worked on, as its own upright model."
 - **Ship cannon**: the muzzle, breech, cascabel knob and touch-hole fitting used texture keys (`#gun`, `#brass`) the model never defined, so those parts drew as purple-black missing texture. `gun` now points at the cannon's iron and `brass` at its band (`models/block/ship_cannon.json`).
 - A scan of every model in all three mods found no other undefined texture keys.
 - Checked in a cloud test game; not played in the pack.
+
+## 0.8.30 (2026-11-13): Far reads no longer stall the server (#1457)
+
+The server thread no longer waits for chunks to be made. Road milestone searches (`Roads.stoneNear`, `openEnds`), elders and couriers arriving or going home (`Elders.putBack`, `Couriers.putBack`), the night mine catch-up (`Mines.catchUp`) and a ride arriving at a far seat (`Journeys.arrive`, `Milestones`) now check the chunk is already loaded and, if not, skip it or ask for it with a ticket and try again later: an elder or courier waits at the end of the road, a ride waits for the far end before setting the traveller down, and a sleeping mine only digs as far as loaded ground. Not tested on a live server.
