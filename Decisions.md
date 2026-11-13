@@ -445,3 +445,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
   for Gravity's Singularity and Nadir's Event Horizon. Beam scars are for ki waves and Pyre's Sunray only (not wind,
   smoke, soot or Kingdoms' Fire Lance); soft ground only, no drops, mobGriefing and mayBuild, 4 blocks a tick. The
   fire dive went to Pyre and replaced Magma Trail (B), my pick of its weakest move; the Emberborn kit is unchanged.
+- 2026-11-13 (Blossom lands thread): Andy said "merge" for PR #1407 (Mohknee, patch 1). Merged by squash.
+  Patch 2 (villagers' talk of Mohknee, blossom merchantmen, a hired captain or companion at the helm) is next.
