@@ -1458,3 +1458,18 @@ great ones a costly thing burned up, diamond dust, a pearl, a bone. A staff, a t
 small ones. The slow rites, ten still seconds over an open book, need no mana at all. Anyone may try a scroll beyond
 their learning, and it may fizzle or bite back. A caster's raised staff and turning sigil give the spell away a
 heartbeat before it lands, which is how court wizards and camp shamans snuff each other's work.
+
+(new) **Creatures of the dark corners** (Claude's placement for the fifth edition picks, patch 9, 2026-11-13, for
+Andy to approve). Each keeps to the ground that suits it. **Trolls** of the swamps and mangroves are kin to the Bogre:
+they heal from anything but fire and acid, a cut limb crawls back to them, and they stay dead only once burned. The
+iron-eating **rust beast** of the caves is why old miners worked in bone, stone and gold. The **basilisk**, the great
+lizard, lairs in old ruins among the stone shapes of those who met its eye (the snake-haired gorgon is its cousin of
+legend), and a glass held up turns its gaze back. **Clear cubes** keep the halls of old mines and strongholds;
+**piercers** and the lamp-snuffing **cloak fliers** hang in cave roofs; **blood bats** are what the vampire bats are
+in the wild. **Diggers**, small kobold-kin, ring their warrens in the hills with hidden pits and fight in packs, as
+goblins and wolves do. **Bog lights** lead the lost into quicksand and feed on their fear. **Harpies** sing from the sea
+cliffs, which is why sailors stop their ears with wax. **Shadows** are the ruins' own dark: they drain a fighter's
+might, and one drained to nothing loses their own shadow to them. **Shapeshifters** steal villagers' lives and wear
+them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
+the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
+water crossed unaided, and a stake in the coffin by day ends them.
