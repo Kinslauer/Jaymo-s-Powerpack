@@ -1700,3 +1700,11 @@ and at once. On the sea round the far land, in fog, at night, a black round thin
 of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
 full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
 does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
+
+(new) **The pale grove** (Claude's placement for the Blossom Lands plan, patch 15, 2026-11-13, for Andy to approve).
+There is a wood in the demons' country. Pale moss lies over the netherrack there, pale oaks stand in it, and from
+their boughs and from every roof of rock hangs wisteria with the colour gone out of it, giving a little light of its
+own. The air is white with ash and the horned things' ogres walk it as their own ground. The blossom folk have never
+seen it and describe it exactly: a white wood under the world where the wisteria has no colour, where the wicked go.
+It is the same Nether the home continent's wicked wake in; the blossom folk only know a different part of it, and
+nobody has asked how.
