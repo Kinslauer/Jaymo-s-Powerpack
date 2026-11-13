@@ -258,3 +258,36 @@ Skip steps 2 and 5 (they were for a paid provider); Groq's key is already set.
 - [ ] 5. Set a spend cap on the paid provider's console (Andy). After 3 days, write tokens used and dollars spent
       here, run `python tools/vault_sync.py`, and tell Andy in 2 lines.
 - [ ] If anything breaks: restore the backup config and restart the gateway.
+
+## New (Nov 12, 10:50 PM): OpenRouter free models as the non-NVIDIA backup
+
+**Andy's call:** add OpenRouter's free models after the NVIDIA entries, so the bots keep going when NVIDIA is down
+or rate limited. Andy makes the key at https://openrouter.ai/keys and sets `OPENROUTER_API_KEY` himself (user env
+var and `E:/hermes/.env`). Never put the key in a command, file or chat.
+
+**Limits:** `:free` models allow 20 requests a minute and **50 a day per account**, or 1,000 a day once the account
+has bought $10 of credit one time (Andy's choice; not needed to start). 50 a day only covers a few bot runs, so it's
+a backup, not a primary. A 429 from OpenRouter has to fall through to the next provider right away.
+
+**Models** (from OpenRouter's model list Nov 13: free, take tool calls, >= 128k context; a bot call is 64-135k):
+`google/gemma-4-31b-it:free` (262k), then `thinkingmachines/inkling-2-small:free` (1M), then
+`cohere/north-mini-code:free` (256k). Skip the `nvidia/...:free` ones: they are NVIDIA models again, so they don't
+add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The list changes often, so re-check.
+
+- [ ] 1. Check out PR #1403 (`tools/openrouter_check.py`) or wait for it to merge. Run `py -3 -m pip install openai`, then
+      `py -3 tools/openrouter_check.py --list` (no key needed) and confirm the three models are still listed.
+- [ ] 2. Once Andy says the key is set: `py -3 tools/openrouter_check.py`, then the same with
+      `--model thinkingmachines/inkling-2-small:free`. Pass = `OK ... called get_server_status(...)`. A `WEAK` line
+      means the model ignored the tool; drop it from the chain.
+- [ ] 3. Back up `E:/hermes/config.yaml` and each bot profile's config (`*.2026-11-13-openrouter.bak`). In the ONE
+      existing `providers:` block, add an `openrouter` provider: base URL `https://openrouter.ai/api/v1`, key from
+      `OPENROUTER_API_KEY` (the env var name, never the value). Use Hermes's built-in OpenRouter provider if
+      `hermes` has one; don't make a second `providers:` block.
+- [ ] 4. Add the models that passed step 2 after the NVIDIA entries in every chain, before Gemini:
+      YOUTH = Super -> Lightning -> OpenRouter models -> Gemini; Quill = its NVIDIA entries (with Ultra) -> OpenRouter
+      -> Gemini; the other bots the same way. Check with `hermes fallback list`.
+- [ ] 5. Restart with `schtasks /run /tn Hermes_Gateway` (never `hermes gateway restart`). Test one fallback call:
+      temporarily put an OpenRouter model first for one oneshot chat (or use Hermes's per-call model flag if it has
+      one), confirm it answers and uses a tool, then put the order back.
+- [ ] 6. Write one line per box here, append the decision to `Decisions.md`, run `python tools/vault_sync.py`, and
+      tell Andy in 2 lines. If anything breaks, restore the backups and restart the gateway.

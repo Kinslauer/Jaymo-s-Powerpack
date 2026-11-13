@@ -426,3 +426,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:29 PM ET (Sengoku picks thread): Andy, after reading the lore paragraph: "it is called Mohknee and you
   can encounter tideborn islands on the way." The blossom continent is Mohknee; Tideborn island villages stand along
   the crossing. Taken as his yes to the paragraph (my reading); patch 1 started.
+- 2026-11-12 10:50 PM ET (Andy): add OpenRouter :free models after NVIDIA in every Hermes bot chain as the non-NVIDIA backup; Andy makes and sets OPENROUTER_API_KEY himself. Steps: Hermes Training handoff.md, "OpenRouter free models".
