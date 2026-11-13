@@ -33,6 +33,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -50,6 +51,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -390,7 +392,11 @@ final class Couriers {
 
 	/** Puts the courier on {@code e} back in the world on the ground at {@code at} (on a horse, if they ride); them, or null. */
 	private static @Nullable Villager putBack(ServerLevel level, Errand e, BlockPos at) {
-		level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+		if (level.getChunkSource().getChunkNow(at.getX() >> 4, at.getZ() >> 4) == null) {
+			// (not made yet: ask for it without waiting, and try again at the next check)
+			level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(at), 0);
+			return null;
+		}
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
 		Villager courier;
 		if (level.getEntity(e.courier()) instanceof Villager v && !v.isRemoved()) {

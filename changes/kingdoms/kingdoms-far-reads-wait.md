@@ -1,0 +1,3 @@
+# Far reads no longer stall the server
+
+The server thread no longer waits for chunks to be made. Road milestone searches (`Roads.stoneNear`, `openEnds`), elders and couriers arriving or going home (`Elders.putBack`, `Couriers.putBack`), the night mine catch-up (`Mines.catchUp`) and a ride arriving at a far seat (`Journeys.arrive`, `Milestones`) now check the chunk is already loaded and, if not, skip it or ask for it with a ticket and try again later: an elder or courier waits at the end of the road, a ride waits for the far end before setting the traveller down, and a sleeping mine only digs as far as loaded ground. Not tested on a live server.
