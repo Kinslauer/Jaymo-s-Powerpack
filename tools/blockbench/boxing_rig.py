@@ -482,6 +482,17 @@ def box_faces(u, v, w, h, d):
     }
 
 
+def legacy(channel, v):
+    """A keyframe as a format 4.10 project stores it. Blockbench 5 flips a 4.10 project's rotation X and Y and position X
+    as it opens it (its animation axes changed in 5.0; bbmodel.js processCompatibility), so they are written flipped
+    here and come out as meant. (Jung's Blockbench showed the body falling apart before this: every turn mirrored.)"""
+    if channel == "rotation":
+        return [-v[0], -v[1], v[2]]
+    if channel == "position":
+        return [-v[0], v[1], v[2]]
+    return v
+
+
 def uid(*parts):
     return str(uuid.uuid5(uuid.NAMESPACE_URL, "jaymospowers/boxing/" + "/".join(parts)))
 
@@ -561,6 +572,7 @@ def project(style):
             kfs = []
             for ch, vals in chans:
                 for t, v in vals:
+                    v = legacy(ch, v)
                     kfs.append({"channel": ch, "data_points": [{"x": round(v[0], 3), "y": round(v[1], 3), "z": round(v[2], 3)}],
                                 "uuid": uid(sid, name, bone, ch, "%.3f" % t), "time": round(t / 20.0, 4), "color": -1,
                                 "interpolation": "linear"})

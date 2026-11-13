@@ -61,6 +61,7 @@ def main():
               "forearm": (198, 140, 104), "hand wrap": (226, 214, 188), "thigh": (54, 58, 74), "shin": (40, 36, 34),
               "elbow": (60, 92, 128), "knee": (54, 58, 74), "waist joint": (60, 92, 128)}
     anims = d["animations"]
+    old = [int(x) for x in str(d["meta"].get("format_version", "5.0")).split(".")[:2]] < [5, 0]
     cols, cw, ch = 5, 170, 210
     img = Image.new("RGB", (cols * cw + 150, len(anims) * ch), (236, 232, 222))
     draw = ImageDraw.Draw(img)
@@ -73,7 +74,13 @@ def main():
         for bu, an in anim["animators"].items():
             for k in an["keyframes"]:
                 p = k["data_points"][0]
-                tracks.setdefault((bu, k["channel"]), []).append((float(k["time"]), [float(p["x"]), float(p["y"]), float(p["z"])]))
+                v = [float(p["x"]), float(p["y"]), float(p["z"])]
+                # as Blockbench 5 opens a project older than format 5.0: rotation X and Y and position X flipped
+                if old and k["channel"] in ("rotation", "position"):
+                    v[0] = -v[0]
+                    if k["channel"] == "rotation":
+                        v[1] = -v[1]
+                tracks.setdefault((bu, k["channel"]), []).append((float(k["time"]), v))
         for col in range(cols):
             t = length * col / (cols - 1)
             ox, oy = 150 + col * cw + cw // 2, row * ch + ch - 20
