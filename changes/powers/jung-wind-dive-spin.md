@@ -9,3 +9,7 @@
 - Nothing about the dive's speed, steering, landing ring or cooldown changes. Third person and other players only;
   first person is as it was.
 - Not built locally; not played: the tip and spin are set by numbers at the top of `WindMovePose`.
+- **Airflow sense is now on crouch + hold V, and bolder.** It was always on and too faint to notice (three single
+  pixels a streak). Crouch and hold V: a faint ring of ticks shows round the crosshair so you know it is on, and each
+  moving thing near you draws a streak of five larger dots with a dark edge on its side of the ring. That hold of V
+  is the sense's, so V's own ability doesn't charge; V without crouching is unchanged.

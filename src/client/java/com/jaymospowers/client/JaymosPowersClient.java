@@ -401,7 +401,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			boolean physical = !seized && minecraft.gui.screen() == null && (ABILITY_KEYS[key.ordinal()].isDown() || tapped[key.ordinal()] > 0);
 			// (0.15.151) a Flame Avatar's R, G and B (sneak + the key beside a power) go to the avatar instead
 			boolean avatar = com.jaymospowers.client.power.ember.FlameAvatarClient.route(player, key, physical, wasDown[key.ordinal()]);
-			boolean down = power != null && physical && !avatar
+			// (Jung) a Wind user's crouch + V is the airflow sense, not V's channel
+			boolean sensing = com.jaymospowers.client.power.wind.WindAirSense.route(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar && !sensing
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));

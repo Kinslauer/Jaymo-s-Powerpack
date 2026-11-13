@@ -640,13 +640,19 @@ client half is `client/BeamClashClient`.
   inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
 - Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
 
-## Airflow sense (always on; client `WindAirSense`)
+## Airflow sense (crouch and hold V; client `WindAirSense`)
 
 Jung's idea: a Wind user feels the air that moving things stir. It is information, not strength.
 
-- **What you see:** round the crosshair, a faint pale streak on the side each moving thing is on (ahead is up, behind is
+- **Turning it on** (Jung's call; it was always on, and too faint to notice): crouch, then hold V. That hold of V
+  is the sense's: the core reports V as up (`WindAirSense.route`, in `JaymosPowersClient`'s key loop, beside the Flame
+  Avatar's), so V's own channel doesn't start, and it stays the sense's until V is let go. Standing up mid-hold stops
+  the sense. A faint ring of `RING_TICKS` 12 ticks round the crosshair shows it is on, even when nothing stirs. V
+  without crouching is V's ability as before.
+- **What you see:** round the crosshair, a pale streak (five dots, each 3 pixels across with a dark edge, never
+  fainter than `MIN_ALPHA` 130 of 255 at its first dot) on the side each moving thing is on (ahead is up, behind is
   down, like the incoming-blow cues). It is brighter the faster the thing moves and the nearer it is, thicker for
-  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall), and fades over about a second once it stops (`FADE`
+  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall; 5 pixels), and fades over about a second once it stops (`FADE`
   0.05 a tick). At most `MAX_MARKS` 12 streaks, the strongest.
 - **What it feels:** any living thing but you (and your mount or rider) within reach that moved `MOVE_MIN` 0.08 b/t or
   more this tick, through walls, in the dark, invisible or not. Full strength at `MOVE_FULL` 0.3 b/t.
@@ -663,7 +669,10 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
 
 ### Testing (airflow sense)
-1. `/power set @s wind`. Stand in the open with zombies or animals walking near: a streak shows round the crosshair on
+0. Stand still, crouch and hold V: a faint ring of ticks round the crosshair, and V's ability doesn't charge. Let go
+   of V: the ring goes. Hold V without crouching: V's ability charges as before, no ring. Crouch + hold V, then stand
+   up still holding V: the ring goes and V still doesn't charge until you let go and press again.
+1. `/power set @s wind`. Crouch and hold V in the open with zombies or animals walking near: a streak shows round the crosshair on
    each one's side and follows it as you turn. When one stops, its streak fades in about a second.
 2. Put a wall between you and a walking zombie: the streak still shows.
 3. A second player walks near you: a streak. They sneak or stand still: nothing.
