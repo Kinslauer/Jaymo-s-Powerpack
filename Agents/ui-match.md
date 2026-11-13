@@ -35,3 +35,5 @@ owns:
 - Baubles stays vanilla light grey (row not ticked; "vanilla for inventory").
 
 ## Done
+
+2026-11-13: all six patches are on PR 1434 (4 commits). Andy merges it himself. Other-mods list added to the checklist artifact, awaiting picks.
