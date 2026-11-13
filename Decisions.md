@@ -378,3 +378,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
   squeeze broken by 14 damage, ink at 50% and 20%; holds boats and block ships (Ship.holdFast); shown name "The Thing
   Under the Wreck" since sailors never name it; drops Clinging Coil (charm, saves one death under water) and Deep
   Teeth. The teeth as a Tinkers material are put off to patch 8 with dragon bone (same generator work).
+
+- 2026-11-12 9:45 PM ET (Andy): Hermes bots use Groq gpt-oss-120b first (free), then NVIDIA Super, NVIDIA nemotron-3.5-lightning, OpenRouter :free, Gemini Flash; Ollama out of the bots' chain until it resets. Steps: Hermes Training handoff.md, "Faster models for the bots".
