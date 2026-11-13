@@ -101,6 +101,19 @@ public final class IllagerTalk {
 	static final int PURSE_MIN = 2, PURSE_SPREAD = 4, FRIGHT_TICKS = 400;
 	/** Prices: those who trust you sell for less, those who don't for more; the greedy for more; a persuaded one for less today. */
 	static final float TRUSTED_PRICE = 0.8F, COLD_PRICE = 1.3F, GREEDY_PRICE = 1.2F, PERSUADED_PRICE = 0.85F;
+	/**
+	 * Disarmed and spared (Andy, 2026-11-13: "disarmed illagers that dont attack you will speak, and will improve standing if
+	 * you spare them after downing"). An illager seen armed whose hands are now empty is disarmed ({@link #ARMED_TAG}); unless
+	 * brutal or proud ({@link #FIGHTS_ON}), it yields: it attacks no one, calls out to a player near ({@link #YIELD_GAP} between
+	 * calls), and talks at peace. One downed by players and left to get back up is spared: each who struck it gains
+	 * {@link #SPARED_HEARTS} with it (and {@link #SPARED_BAND} with its own near), and it keeps a truce with them.
+	 */
+	public static final String ARMED_TAG = "jaymoskingdoms.illager_armed";
+	static final java.util.Set<String> FIGHTS_ON = java.util.Set.of("brutal", "proud");
+	static final int YIELD_GAP = 20 * 45, SPARED_HEARTS = 25, SPARED_BAND = 5;
+	static final double YIELD_RANGE = 10.0, WATCH_RANGE = 32.0;
+	/** How long the players who struck an illager are remembered for its sparing (ticks since the last blow). */
+	static final int DOWNERS_TICKS = 20 * 60 * 5;
 	/** Their colour on the card's head. */
 	static final int HEAD_COLOR = 0xB8C4A0;
 	/** A conversation lapses this long after it opened (ticks). */
@@ -202,6 +215,16 @@ public final class IllagerTalk {
 	private static final Map<String, Long> PERSUADED = new HashMap<>(), TRIED = new HashMap<>();
 	/** "f:camp|player" → until when a camp's beasts keep its truce with a player (game time). */
 	private static final Map<String, Long> SIDE_TRUCE = new HashMap<>();
+	/** An illager players have struck: who, when last, and whether it has been down since. */
+	private static final class Downers {
+		final java.util.Set<UUID> players = new java.util.HashSet<>();
+		int last;
+		boolean down;
+	}
+
+	private static final Map<AbstractIllager, Downers> DOWNERS = new java.util.WeakHashMap<>();
+	/** "illager|player" → when a yielding illager last called out to that player (server tick). */
+	private static final Map<String, Integer> CALLED = new HashMap<>();
 
 	private IllagerTalk() {
 	}
@@ -226,6 +249,8 @@ public final class IllagerTalk {
 			PERSUADED.clear();
 			TRIED.clear();
 			SIDE_TRUCE.clear();
+			DOWNERS.clear();
+			CALLED.clear();
 		});
 	}
 
@@ -282,8 +307,21 @@ public final class IllagerTalk {
 		if (until != null && until > now) {
 			return true;
 		}
+		if (yields(illager, s)) {
+			return true;
+		}
 		Long refusing = REFUSING.get(illager.getUUID() + "|" + player.getUUID());
 		return s.heartsOf(player.getUUID()) >= TRUSTED && (refusing == null || refusing <= now);
+	}
+
+	/** Seen armed, and its hands empty now. */
+	public static boolean disarmed(AbstractIllager illager) {
+		return illager.entityTags().contains(ARMED_TAG) && illager.getMainHandItem().isEmpty() && illager.getOffhandItem().isEmpty();
+	}
+
+	/** Disarmed and not one to fight on bare-handed: it attacks no one, and talks at peace. */
+	static boolean yields(AbstractIllager illager, Self s) {
+		return disarmed(illager) && !FIGHTS_ON.contains(s.nature());
 	}
 
 	/** (ThrallTargetMixin) an illager hearing {@code target} out, or at peace with them, doesn't go for them. */
@@ -309,6 +347,9 @@ public final class IllagerTalk {
 			return true;
 		}
 		Self s = illager.getAttached(SELF);
+		if (s == null && disarmed(illager)) {
+			s = self(illager);
+		}
 		return s != null && atPeace(illager, s, player);
 	}
 
@@ -960,6 +1001,9 @@ public final class IllagerTalk {
 			|| !(illager.level() instanceof ServerLevel level)) {
 			return;
 		}
+		Downers d = DOWNERS.computeIfAbsent(illager, k -> new Downers());
+		d.players.add(player.getUUID());
+		d.last = level.getServer().getTickCount();
 		long until = level.getGameTime() + REFUSE_TICKS;
 		SIDE_TRUCE.remove(Comrades.side(illager) + "|" + player.getUUID());
 		for (AbstractIllager e : band(illager)) {
@@ -978,6 +1022,88 @@ public final class IllagerTalk {
 		Talk t = TALKS.get(player.getUUID());
 		if (t != null && t.illager() == illager.getId()) {
 			TALKS.remove(player.getUUID());
+		}
+	}
+
+	/** Illagers players struck: one that went down and is back up, alive, was spared by them. */
+	private static void spared(MinecraftServer server, int now) {
+		for (var it = DOWNERS.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<AbstractIllager, Downers> e = it.next();
+			AbstractIllager illager = e.getKey();
+			Downers d = e.getValue();
+			if (!illager.isAlive() || illager.isRemoved() || !(illager.level() instanceof ServerLevel level)) {
+				it.remove();
+				continue;
+			}
+			if (Downed.isDowned(illager)) {
+				d.down = true;
+				continue;
+			}
+			if (!d.down) {
+				if (now - d.last > DOWNERS_TICKS) {
+					it.remove();
+				}
+				continue;
+			}
+			it.remove();
+			long truce = level.getGameTime() + CALM_TRUCE;
+			ServerPlayer nearest = null;
+			for (UUID id : d.players) {
+				for (AbstractIllager other : band(illager)) {
+					Self o = self(other);
+					if (other == illager) {
+						o = o.withHearts(id, SPARED_HEARTS).withMood(2).withTruce(id, truce);
+					} else {
+						o = o.withHearts(id, SPARED_BAND);
+					}
+					put(other, o);
+					REFUSING.remove(other.getUUID() + "|" + id);
+				}
+				ServerPlayer p = server.getPlayerList().getPlayer(id);
+				if (p != null && p.level() == level && (nearest == null || p.distanceToSqr(illager) < nearest.distanceToSqr(illager))) {
+					nearest = p;
+				}
+				if (p != null && illager.getTarget() == p) {
+					illager.setTarget(null);
+				}
+			}
+			if (nearest != null && nearest.distanceTo(illager) < WATCH_RANGE) {
+				say(level, illager, nearest, line("spared", level.getRandom()), Speech.GOLD);
+			}
+		}
+	}
+
+	/** Illagers near players: marked armed while they hold a weapon; a yielding one calls out to a player near. */
+	private static void yielding(MinecraftServer server, int now) {
+		CALLED.values().removeIf(t -> now - t > YIELD_GAP * 4);
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.isSpectator() || !(player.level() instanceof ServerLevel level)) {
+				continue;
+			}
+			for (AbstractIllager illager : level.getEntitiesOfClass(AbstractIllager.class, player.getBoundingBox().inflate(WATCH_RANGE), IllagerTongue::speaker)) {
+				if (!illager.getMainHandItem().isEmpty()) {
+					illager.addTag(ARMED_TAG);
+					continue;
+				}
+				if (!disarmed(illager) || Downed.isDowned(illager) || Captives.bound(illager) || illager.distanceTo(player) > YIELD_RANGE
+					|| !illager.hasLineOfSight(player)) {
+					continue;
+				}
+				Self s = self(illager);
+				if (!yields(illager, s)) {
+					continue;
+				}
+				if (illager.getTarget() instanceof ServerPlayer) {
+					illager.setTarget(null);
+				}
+				String key = illager.getUUID() + "|" + player.getUUID();
+				Integer last = CALLED.get(key);
+				if (last != null && now - last < YIELD_GAP) {
+					continue;
+				}
+				CALLED.put(key, now);
+				say(level, illager, player, line("yield." + s.nature(), level.getRandom()), Speech.WHITE);
+			}
 		}
 	}
 
@@ -1004,6 +1130,8 @@ public final class IllagerTalk {
 			}
 		}
 		TALKS.values().removeIf(t -> now - t.opened() > TALK_TICKS);
+		spared(server, now);
+		yielding(server, now);
 		// (one hearing you out keeps still and looks at you)
 		for (Map.Entry<Entity, Hearing> e : HEARING.entrySet()) {
 			if (e.getKey() instanceof AbstractIllager illager && server.getPlayerList().getPlayer(e.getValue().player()) instanceof ServerPlayer p) {
