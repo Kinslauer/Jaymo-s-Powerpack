@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr:
 suggested_owns: []
 writer: hermes-writer
+text_pass: none
 ---
 
 # DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED experiment
