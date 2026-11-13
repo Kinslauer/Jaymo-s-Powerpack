@@ -12,3 +12,6 @@
 - A cross brings the lead glove home to the Arrow Slit's guard spot.
 - Long Guard legs: the feet stand about under the hips, toes straight ahead, the knees soft; they were turned out
   with the body and spread.
+- (Jung, in-game tuning) The Arrow Slit's gloves sit a little higher (they may brush the chin); the Bastion's lead
+  forearm is tucked in closer across the body; the Long Guard's thighs are a little wider apart.
+- Arrow Slit's string is now jab, lead hook, cross, and round again (it was a one-two, then alternating hooks).

@@ -17,7 +17,7 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
 - **The punch**: left click on a living thing, with fist gear in the main hand and a style. The server throws it in
   place of the game's own attack. `PUNCH_DAMAGE` 1.5 at every level, reach `RANGE` 2 blocks (a click from further
   out is a punch at the air and still costs), `PUNCH_KNOCKBACK` 25% of the usual shove.
-- **Strings**: Arrow Slit throws a one-two then alternating hooks; Long Guard jab, jab, cross; Bastion the right jab
+- **Strings**: Arrow Slit throws jab, lead hook, cross, round and round (Jung's order; it was a one-two then alternating hooks); Long Guard jab, jab, cross; Bastion the right jab
   only. A pause of `STRING_RESET` 30 ticks starts the string again. So far the punches differ only in sound.
 - **Windup** (Jung's idea; Andy made it shorten with level): every punch lands a moment after it is thrown,
   `WINDUP_SLOWEST` 15 ticks (0.75 s) at level 1, one tick or so less a level, down to `WINDUP_FASTEST` 7 (0.35 s) at
