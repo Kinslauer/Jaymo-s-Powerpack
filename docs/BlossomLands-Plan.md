@@ -201,4 +201,4 @@ keepers. Builds on the dev server; not seen in game.*
 3. **Blossom villages already standing on the home continent** in the worlds we have. Proposed: they stay, as
    settlers from over the sea; no new ones rise there.
 4. **The land's name**: answered, **Mohknee** (Andy, 2026-11-12). The houses' names are still open.
-5. **Starts.** A blossom-born life story start on the far land: wanted, or is everyone a stranger there?
+5. **Starts.** Answered (Andy, 2026-11-13): no starts there. Nobody begins on Mohknee; everyone arrives as a stranger.
