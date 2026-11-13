@@ -29,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * the server checks it (alive, in sight, within {@link #RANGE}) and keeps it. The client turns the camera to it, so
  * every power, bow and blow aims there; a Z Fighter's hold combo, Flash Step and ki blasts also aim at it directly
  * ({@link #target}, {@link #aim}). It lets go on its own past {@link #RANGE}, or after {@link #BLIND_TICKS} out of sight.
+ * The packet also says which region of the target the scroll wheel picked ({@link LockOnRegions}): his hits on it land
+ * there, and {@link #aim} goes there.
  */
 public final class LockOn {
 	public static final double RANGE = 32.0;
@@ -37,12 +39,23 @@ public final class LockOn {
 	/** Ticks out of sight before the lock lets go (a pillar flickering past isn't losing sight). */
 	static final int BLIND_TICKS = 15;
 
-	/** Client to server: lock onto entity {@code id}, or let go (-1). */
-	public record Packet(int id) implements CustomPacketPayload {
+	/**
+	 * Client to server: lock onto entity {@code id}, or let go (-1), aiming at {@code region} of it
+	 * ({@link LockOnRegions.Region}'s ordinal; the scroll wheel picks it).
+	 */
+	public record Packet(int id, int region) implements CustomPacketPayload {
 		public static final Type<Packet> TYPE = new Type<>(JaymosPowers.id("lock_on"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Packet> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.id),
-			buf -> new Packet(buf.readVarInt()));
+			(p, buf) -> {
+				buf.writeVarInt(p.id);
+				buf.writeVarInt(p.region);
+			},
+			buf -> new Packet(buf.readVarInt(), buf.readVarInt()));
+
+		/** A lock on {@code id} aimed at the torso (Kingdoms' Battle Stance builds this one by reflection). */
+		public Packet(int id) {
+			this(id, LockOnRegions.Region.TORSO.ordinal());
+		}
 
 		@Override
 		public Type<Packet> type() {
@@ -52,10 +65,12 @@ public final class LockOn {
 
 	private static final class Lock {
 		final UUID target;
+		final LockOnRegions.Region region;
 		int blind;
 
-		Lock(UUID target) {
+		Lock(UUID target, LockOnRegions.Region region) {
 			this.target = target;
+			this.region = region;
 		}
 	}
 
@@ -68,28 +83,31 @@ public final class LockOn {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** (0.17.130) The client's own lock (LockOnClient fills it in), so code run on both sides can ask either. */
 	public static Function<Player, @Nullable LivingEntity> clientTarget = player -> null;
+	/** The client's own picked region (LockOnClient fills it in). */
+	public static Function<Player, LockOnRegions.Region> clientRegion = player -> LockOnRegions.Region.TORSO;
 
 	private LockOn() {
 	}
 
 	public static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Packet.TYPE, Packet.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Packet.TYPE, (payload, ctx) -> set(ctx.player(), payload.id()));
+		ServerPlayNetworking.registerGlobalReceiver(Packet.TYPE, (payload, ctx) -> set(ctx.player(), payload.id(), payload.region()));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				tick(player);
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> drop(handler.player));
+		LockOnRegions.init();
 	}
 
-	private static void set(ServerPlayer player, int id) {
+	private static void set(ServerPlayer player, int id, int region) {
 		if (id < 0 || !player.isAlive()) {
 			drop(player);
 			return;
 		}
 		if (player.level().getEntity(id) instanceof LivingEntity living && usable(player, living)) {
-			LOCKS.put(player.getUUID(), new Lock(living.getUUID()));
+			LOCKS.put(player.getUUID(), new Lock(living.getUUID(), LockOnRegions.Region.of(region)));
 			player.setAttached(LOCKED, true);
 		}
 	}
@@ -143,11 +161,21 @@ public final class LockOn {
 			: player.level().isClientSide() ? clientTarget.apply(player) : null;
 	}
 
-	/** The way his shot goes: at the locked foe, else wherever he looks. */
+	/** The region of his target that {@code player} aims at (the torso when not locked), on whichever side this runs. */
+	public static LockOnRegions.Region region(Player player) {
+		if (player instanceof ServerPlayer) {
+			Lock lock = LOCKS.get(player.getUUID());
+			return lock == null ? LockOnRegions.Region.TORSO : lock.region;
+		}
+		return player.level().isClientSide() ? clientRegion.apply(player) : LockOnRegions.Region.TORSO;
+	}
+
+	/** The way his shot goes: at the picked region of the locked foe, else wherever he looks. */
 	public static Vec3 aim(ServerPlayer player) {
 		LivingEntity locked = target(player);
 		if (locked != null) {
-			Vec3 to = locked.getBoundingBox().getCenter().subtract(player.getEyePosition());
+			Vec3 eye = player.getEyePosition();
+			Vec3 to = LockOnRegions.point(locked, LockOnRegions.fit(locked, region(player)), eye).subtract(eye);
 			if (to.lengthSqr() > 1.0E-4) {
 				return to.normalize();
 			}

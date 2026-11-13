@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Might:</b> every blow hits harder.</li>
  * <li><b>Agility:</b> quicker on your feet.</li>
- * <li><b>Finesse:</b> quicker swings.</li>
+ * <li><b>Finesse:</b> quicker swings, and (Powers' lock-on) head shots that miss and glance less.</li>
  * <li><b>Endurance:</b> hunger drains slower.</li>
  * <li><b>Grit:</b> armour and a firmer stance.</li>
  * <li><b>Wits:</b> every pillar learns faster, and a little luck.</li>

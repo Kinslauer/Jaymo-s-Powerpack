@@ -311,7 +311,8 @@ public final class Dismember {
 	// ---- where a blow lands ----------------------------------------------------------------------------------------------
 
 	/**
-	 * The part a blow from {@code attacker} lands on: for a player, the part their crosshair crosses
+	 * The part a blow from {@code attacker} lands on: for a player locked on with a region picked, that region's part
+	 * ({@link LockOnRegions#aimedLimb}); for any other player, the part their crosshair crosses
 	 * ({@link LimbBoxes#aimedPart}; for a body without parts, by height: top {@link #HEAD_SHARE} the head, bottom
 	 * {@link #LEG_SHARE} a leg, between an arm, the side it's on picking which); for anything else, at random.
 	 */
@@ -327,6 +328,11 @@ public final class Dismember {
 				case 2 -> RIGHT_LEG;
 				default -> LEFT_LEG;
 			};
+		}
+		// locked on with the head, an arm or the legs picked: that part (LockOnRegions)
+		Integer locked = LockOnRegions.aimedLimb(attacker, target);
+		if (locked != null) {
+			return locked;
 		}
 		Vec3 eye = attacker.getEyePosition();
 		Vec3 look = attacker.getLookAngle();

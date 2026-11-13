@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.LimbBoxes;
+import com.jaymospowers.core.LockOnRegions;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -53,13 +54,24 @@ final class HitRouting {
 			|| source.is(DamageTypes.LIGHTNING_BOLT)) {
 			damage(points, plan, BodyPart.BODY, loss);
 		} else if (source.getDirectEntity() != null || source.getEntity() != null) {
-			BodyPart landed = plan.resolve(landed(victim, plan, source));
+			// a player locked onto it lands where the lock aims (LockOnRegions), else where the blow came
+			BodyPart aimed = LockOnRegions.aimedPart(victim, plan, source);
+			BodyPart landed = plan.resolve(aimed != null ? aimed : landed(victim, plan, source));
 			damage(points, plan, landed, loss);
 			return landed;
 		} else {
 			damage(points, plan, BodyPart.BODY, loss);
 		}
 		return null;
+	}
+
+	/**
+	 * The part a hit from a player locked onto {@code victim} lands on ({@link LockOnRegions#aimedPart}), when it's a
+	 * blow, shot or throw {@link #route} would land on one part; else null.
+	 */
+	static @Nullable BodyPart lockAimed(LivingEntity victim, BodyPlan plan, DamageSource source) {
+		BodyPart aimed = LockOnRegions.aimedPart(victim, plan, source);
+		return aimed == null ? null : plan.resolve(aimed);
 	}
 
 	/** Takes {@code amount} from {@code first}; what it can't give spills to {@link BodyPart#overflow}, and on until spent or nothing is left. */
