@@ -12631,3 +12631,9 @@ giants being worked on, as its own upright model."
 - **Disarmed and spared** (Andy: "disarmed illagers that dont attack you will speak, and will improve standing if you spare them after downing"): an illager seen armed whose hands are now empty (knocked away, or taken off it while it's down: plain use on a downed illager now disarms it as it does a guard) yields unless it is brutal or proud (those fight on bare-handed). A yielding illager attacks no player, calls out to you when you're near (by its nature, in its tongue), and its talk card opens at peace with no parley. One you down and leave to get back up is spared: +25 hearts with it (+5 with its own near), a truce with it, and a word of thanks.
 - Loading-screen hint 166. Art drawn by `tools/gen_illager_tongue_art.py` (placeholder pixel art; a modeller pass would help).
 - Built, dev server booted; not played.
+
+## 0.8.26 (2026-11-13): Diggers, goblin scouts, loot goblins and Imps can lose limbs
+
+- Diggers, goblin scouts, loot goblins, Imps and zombified Imps were never in the dismemberable list, so a blade or a blast could never take a part off them. They are now (data/jaymospowers/tags/entity_type/dismemberable.json), and being small they lose parts more often than a person (Powers' size scaling).
+- Imps (1.4 tall) are cut about 1.3x as often as a person; Powers now hides lost limbs on GeckoLib models, which Imps are.
+- Built; not played.
