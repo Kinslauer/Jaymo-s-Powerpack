@@ -400,6 +400,10 @@ public final class Sunheart extends XenoUltimate {
 		if (entityHit != null) {
 			end = entityHit.getLocation();
 		}
+		if (entityHit == null && blockHit.getType() == HitResult.Type.BLOCK) {
+			// the ray scars soft ground where it rests
+			com.jaymospowers.core.BeamScars.touch(player, blockHit, 0.5);
+		}
 		double length = end.distanceTo(eye);
 		for (double d = 0.5; d < length; d += 0.5) {
 			Vec3 p = eye.add(look.scale(d));

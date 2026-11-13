@@ -168,7 +168,7 @@ identity), and with a Rig Helm and no costume head piece it flips the faceplate;
 | 159 | Pyre | R | Fire Bolt | A small fireball where you look. 1 s. | |
 | 160 | Pyre | G (hold) | Flame Jet | Fly where you look on jets of fire from your hands and feet, free; slow falling on release. | |
 | 161 | Pyre | V | Fire Nova | 6 damage and 5 s of fire to all within 5 blocks. 10 s. | |
-| 162 | Pyre | B | Magma Trail | Fire under your feet for 6 s. 15 s. | |
+| 162 | Pyre | B | Fire Dive | Rise, then dive the way you look as a bird of fire; a burning blast where you land. 15 s. | |
 | 163 | Pyre | passive | Living magma | Fire and lava can't hurt it; water and rain do 1 hp/s. | |
 | 164 | Velox | R | Velocity | Toggle, like Chrono's Overclock: +100% speed (more sprinting), steps up whole blocks, runs up walls holding forward and over water and lava sprinting, no fall damage, Shift walks; a light blue streak behind you. R again stops it. 2 s. | |
 | 165 | Velox | G | Rapid Punches | 6 double hits on the creature you aim at within 3.5 blocks, one every 2 ticks; the last shoves. 5 s. | |

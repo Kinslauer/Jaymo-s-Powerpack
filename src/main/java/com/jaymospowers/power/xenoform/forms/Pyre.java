@@ -5,8 +5,6 @@ import com.jaymospowers.core.Flames;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,8 +20,6 @@ import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
-import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -35,7 +31,9 @@ import net.minecraft.world.phys.Vec3;
  * with WASD, Jump and Sneak, Sprint to streak along your look; G again (or Sneak on the ground) ends it, and you drift
  * down. Free. It leaves a comet's tail of flame ({@code PyreComet}).</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
- * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
+ * <li>B, Fire Dive: from the ground you rise first, then you dive the way you look as a bird of fire, steering a
+ * little, burning whatever you pass through; where you come down everything within {@link #DIVE_RADIUS} is burnt and
+ * thrown back. From the air (the jet) the dive starts at once and ends the jet. It took Magma Trail's place.</li>
  * <li>C (ascended), Sunheart: (0.20.21) its Ultimate is its own evolved form, {@link com.jaymospowers.power.xenoform.forms.ultimate.Sunheart}.</li>
  * </ul>
  */
@@ -52,7 +50,15 @@ public final class Pyre extends XenoForm {
 	public static final double NOVA_SHAKE_RANGE = 14.0;
 	public static final float NOVA_DAMAGE = 6.0F;
 	public static final int NOVA_BURN_SECONDS = 5;
-	public static final int TRAIL_COOLDOWN = 300, TRAIL_TICKS = 120;
+	/** The dive: its wait, how long it can last, the rise before it from the ground (ticks), its speeds and how much the look steers it each tick. */
+	public static final int DIVE_COOLDOWN = 300, DIVE_TICKS = 40, DIVE_RISE = 7;
+	public static final double DIVE_SPEED = 1.5, DIVE_RISE_SPEED = 0.95, DIVE_STEER = 0.1;
+	/** The dive never goes flatter than this (the look's y is held under it), so it always comes down. */
+	public static final double DIVE_DOWN = -0.3;
+	/** What it does on the way (within {@link #DIVE_TOUCH}) and where it lands (within {@link #DIVE_RADIUS}). */
+	public static final double DIVE_TOUCH = 1.6, DIVE_RADIUS = 5.0;
+	public static final float DIVE_PASS_DAMAGE = 4.0F, DIVE_DAMAGE = 10.0F, DIVE_SHAKE = 1.1F;
+	public static final int DIVE_BURN_SECONDS = 6;
 	/** In water or rain: this much damage every this many ticks. */
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
@@ -72,6 +78,7 @@ public final class Pyre extends XenoForm {
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.jet = false;
+		live.diveTicks = 0;
 		player.removeEffect(MobEffects.LEVITATION);
 	}
 
@@ -118,10 +125,9 @@ public final class Pyre extends XenoForm {
 				}
 			}
 			case ABILITY_4 -> {
-				if (ready(player, live, B)) {
-					live.trailTicks = TRAIL_TICKS;
-					sound(player, SoundEvents.BLAZE_BURN, 1.0F, 0.7F);
-					cooldown(player, live, B, TRAIL_COOLDOWN);
+				if (ready(player, live, B) && live.diveTicks <= 0 && !player.isInWater() && !player.isPassenger()) {
+					startDive(player, live);
+					cooldown(player, live, B, DIVE_COOLDOWN);
 				}
 			}
 			default -> {
@@ -143,16 +149,9 @@ public final class Pyre extends XenoForm {
 				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, 1.3F);
 			}
 		}
-		// the trail
-		if (live.trailTicks > 0) {
-			live.trailTicks--;
-			if (player.onGround() && player.tickCount % 2 == 0) {
-				BlockPos at = player.blockPosition();
-				if (level.getBlockState(at).isAir() && BaseFireBlock.canBePlacedAt(level, at, Direction.NORTH)) {
-					level.setBlock(at, BaseFireBlock.getState(level, at), Block.UPDATE_ALL);
-				}
-				level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.2, 0.0, 0.2, 0.0);
-			}
+		// the dive
+		if (live.diveTicks > 0) {
+			dive(player, live);
 		}
 		// always smouldering; wet, it hisses and hurts
 		if (player.tickCount % 3 == 0) {
@@ -195,12 +194,12 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.jet || player.hasEffect(MobEffects.SLOW_FALLING);
+		return live.jet || live.diveTicks > 0 || player.hasEffect(MobEffects.SLOW_FALLING);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
-		return live.jet;
+		return live.jet || live.diveTicks > 0;
 	}
 
 	@Override
@@ -225,6 +224,101 @@ public final class Pyre extends XenoForm {
 		level.addFreshEntity(bolt);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 1.2F);
+	}
+
+	// ---- B: Fire Dive ----
+
+	private static void startDive(ServerPlayer player, XenoformPower.Live live) {
+		boolean fromGround = player.onGround();
+		if (live.jet) {
+			// the dive takes over from the jet
+			live.jet = false;
+			player.removeEffect(MobEffects.LEVITATION);
+		}
+		live.diveTicks = DIVE_TICKS + (fromGround ? DIVE_RISE : 0);
+		Vec3 heading = diveWay(player.getLookAngle());
+		live.diveX = heading.x;
+		live.diveY = heading.y;
+		live.diveZ = heading.z;
+		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.5F);
+		sound(player, SoundEvents.FIRECHARGE_USE, 1.0F, 0.7F);
+	}
+
+	/** The way a dive goes for a look: the same way, but always downward. */
+	private static Vec3 diveWay(Vec3 look) {
+		return new Vec3(look.x, Math.min(look.y, DIVE_DOWN), look.z).normalize();
+	}
+
+	private static void drive(ServerPlayer player, Vec3 velocity) {
+		player.setDeltaMovement(velocity);
+		player.needsSync = true;
+		player.syncVelocity = true;
+	}
+
+	private static void dive(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		live.diveTicks--;
+		player.resetFallDistance();
+		if (player.isInWater() || player.isPassenger()) {
+			live.diveTicks = 0;
+			return;
+		}
+		Vec3 look = player.getLookAngle();
+		if (live.diveTicks >= DIVE_TICKS) {
+			// the rise before it: up, drifting the way you look
+			drive(player, new Vec3(look.x * 0.25, DIVE_RISE_SPEED, look.z * 0.25));
+			level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 6, 0.3, 0.2, 0.3, 0.03);
+			return;
+		}
+		Vec3 heading = new Vec3(live.diveX, live.diveY, live.diveZ).scale(1.0 - DIVE_STEER).add(diveWay(look).scale(DIVE_STEER)).normalize();
+		live.diveX = heading.x;
+		live.diveY = heading.y;
+		live.diveZ = heading.z;
+		boolean diving = live.diveTicks < DIVE_TICKS - 2;
+		if (diving && (player.onGround() || player.horizontalCollision || player.verticalCollision)) {
+			live.diveTicks = 0;
+			land(player);
+			return;
+		}
+		if (live.diveTicks <= 0) {
+			// it ran out in the air: no burst, a soft way down
+			player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, JET_SLOW_FALL_TICKS, 0, false, false));
+			return;
+		}
+		drive(player, heading.scale(DIVE_SPEED));
+		// the bird: two swept wings of fire and the flame it trails
+		Vec3 chest = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
+		Vec3 side = heading.cross(new Vec3(0.0, 1.0, 0.0));
+		side = side.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : side.normalize();
+		if (live.diveTicks % 2 == 0) {
+			Vec3 back = chest.subtract(heading.scale(1.3)).add(0.0, 0.45, 0.0);
+			com.jaymospowers.core.fx.MagicFx.beam(level, chest, back.add(side.scale(1.7)), 0.18F, 0xFF8A2A, 4);
+			com.jaymospowers.core.fx.MagicFx.beam(level, chest, back.subtract(side.scale(1.7)), 0.18F, 0xFF8A2A, 4);
+		}
+		level.sendParticles(ParticleTypes.FLAME, chest.x, chest.y, chest.z, 8, 0.35, 0.35, 0.35, 0.02);
+		for (LivingEntity living : around(player, DIVE_TOUCH)) {
+			if (living.hurtServer(level, player.damageSources().playerAttack(player), DIVE_PASS_DAMAGE)) {
+				living.igniteForSeconds(DIVE_BURN_SECONDS);
+			}
+		}
+	}
+
+	private static void land(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, 0.5, 0.0);
+		player.resetFallDistance();
+		drive(player, Vec3.ZERO);
+		for (LivingEntity living : around(player, DIVE_RADIUS)) {
+			living.hurtServer(level, player.damageSources().playerAttack(player), DIVE_DAMAGE);
+			shove(living, player.position(), 0.9, 0.45);
+		}
+		Flames.area(level, at, DIVE_RADIUS, DIVE_BURN_SECONDS, player, e -> e != player);
+		com.jaymospowers.core.fx.MagicFx.blast(level, at, (float) DIVE_RADIUS, 0xFF8A2A);
+		ring(level, ParticleTypes.FLAME, at, DIVE_RADIUS, 40);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 24, 1.2, 0.5, 1.2, 0.0);
+		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.1F);
+		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.5F);
+		com.jaymospowers.core.Shakes.heavy(player, at, NOVA_SHAKE_RANGE, DIVE_SHAKE);
 	}
 
 	private static void nova(ServerPlayer player) {

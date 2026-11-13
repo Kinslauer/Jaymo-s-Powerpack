@@ -50,6 +50,7 @@ public final class GravityPowerClient implements PowerClient {
 		PowerClients.register(GravityPower.ID, INSTANCE);
 		GravityHeldClient.init();
 		GravityMeteorFx.init();
+		LensClient.init();
 		// (0.21.10) the rock ball and the orbiting rocks, on every client
 		GravityRocksLayer.init();
 		// every gravity user's aura, on every client
