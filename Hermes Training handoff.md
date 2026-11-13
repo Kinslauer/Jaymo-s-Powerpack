@@ -289,5 +289,5 @@ add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The 
 - [ ] 5. Restart with `schtasks /run /tn Hermes_Gateway` (never `hermes gateway restart`). Test one fallback call:
       temporarily put an OpenRouter model first for one oneshot chat (or use Hermes's per-call model flag if it has
       one), confirm it answers and uses a tool, then put the order back.
-- [ ] 6. Write one line per box here, append the decision to `Decisions.md`, run `python tools/vault_sync.py`, and
+- [ ] 6. Write one line per box here (the decision is already in `Decisions.md`), run `python tools/vault_sync.py`, and
       tell Andy in 2 lines. If anything breaks, restore the backups and restart the gateway.
