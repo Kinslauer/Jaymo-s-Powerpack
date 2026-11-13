@@ -460,6 +460,16 @@ trees on top, clouds you can walk into. Wind is the way in; there is no portal. 
 **Highfields** (green and windy), the **Magnetic** lands (floating lodestone pillars), the **Arctic** (frozen peaks)
 and the **Irradiated** (Ambrosium-sick forests that glow).
 
+(new) **The Cloud Sea** (cloud layer thread; Andy, 2026-11-13: "another dimension that is just clouds and air between
+the overworld and aether ... that way players wont be able to see it or get there at all easily"; the name and the
+detail are Claude's placement for him to approve). Between the world's own clouds and the Aether's islands lies a great
+depth of empty sky, and near the top of it one bank of cloud from horizon to horizon: the **overcast**. Nobody made it.
+It is the Aether's own weather, the same soft cloud its islands trail, gathered under them. It is why nobody below has
+ever seen the islands, and why the things that fall come out of a clear sky "from nowhere". The cloud is soft to walk
+into and too deep to push up through. Here and there a **well** stands open in it, a shaft of blue: the geese go up by
+the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
+whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
+
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces are the **monoliths** and
 their **Giants**: a broken pillar with a heart floating in it, and one Giant for each highland's element (Highfield,
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
@@ -1432,6 +1442,16 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
+**The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
+books, their paintings and time in their holds; the rest Claude's placement, approved by Andy 2026-11-13). The pillagers kept
+their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
+ominous banner are its oldest letters, and still answer when spoken right. Nobody grows up speaking it and no village
+teacher knows it. It is learned the hard way: from the pages, ledgers and evokers' grimoires left in their holds and on
+their dead, from the banners and the paintings they hung in every fort, tower and mine they built (the raid, the warlord,
+the rite, the march, and lessons in their letters), and from time spent within those walls listening. Knowing their words
+doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
+lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
@@ -1726,8 +1746,10 @@ clean, and a river that has one is counted a good river.
 to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
 which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
 the Snow Widow, and the cold walks with her; she is gone by morning. Where many dead are left lying together they get
-up as one, the Unburied, a giant of all their bones, which is the reason the blossom folk bury friend and enemy alike
-and at once. On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
+up as one, the Unburied, a giant heaped together out of the dead themselves, their bodies its legs and arms and
+trunk, which is the reason the blossom folk bury friend and enemy alike and at once. It cannot bear the day: at first
+light it comes apart where it stands and lets its dead fall, and those left lying there will rise again with the next
+dark (amended 2026-11-13, the Unburied made of its bodies; merged with PR #1460). On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
 of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
 full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
 does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.

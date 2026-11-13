@@ -484,3 +484,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 1:55 PM (Andy, Deck admin session): `/kingdom mohknee go` should wait behind the loading screen while the shore is made in the background, not a separate load command (#1451).
 
 - 2026-11-13 4:50 PM (Andy, Deck admin session): keep the server watchdog at 60 s (max-tick-time); fix each code path that waits on a chunk instead.
+- 2026-11-13: Illagers can be talked with once the player learns the illager tongue, from their books, paintings/banners and time in their structures (thread: Let players learn illager language).
+- 2026-11-13 2:11 PM ET: Andy approved the Lore.md paragraph "The illager tongue".
+- 2026-11-13 5:20 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "can we add another dimension that is just clouds and air between the overworld and aether? that way players wont be able to see it or get there at all easily". An exception to "no new dimensions", for this one: built as a band of the One Dimension stack (the Cloud Sea), not a place with a portal. New worlds only.
