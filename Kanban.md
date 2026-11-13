@@ -19,7 +19,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Agents/unburied-corpse-mass-and-rotting-dead|unburied-corpse-mass-and-rotting-dead]] · 💻 Odysseus · #1470 · in-review
 
 
 ## Needs Andy
