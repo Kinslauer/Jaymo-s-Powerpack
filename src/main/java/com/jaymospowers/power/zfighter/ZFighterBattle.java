@@ -373,7 +373,8 @@ final class ZFighterBattle {
 			}
 		}
 		rage(player, live, inFight && share <= RAGE_HEALTH);
-		if (inFight && share <= BREAKTHROUGH_HEALTH && ZFighterPower.hardship(player) >= SUPER_HARDSHIP && Fate.canAscend(player)) {
+		if (inFight && share <= BREAKTHROUGH_HEALTH && ZFighterPower.hardship(player) >= SUPER_HARDSHIP && Fate.canAscend(player)
+			&& com.jaymospowers.core.Brink.past(player)) {
 			breakthrough(player, live);
 		}
 	}

@@ -55,6 +55,7 @@
 		"GuardRiposteMixin",
 		"DivineCounterMixin",
 		"AlchemyPicksHurtMixin",
+		"PvpCapMixin",
 		"ImpactShakeMixin",
 		"LeavesEntityMixin",
 		"LedgePacketListenerMixin",

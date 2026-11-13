@@ -2478,6 +2478,35 @@ public final class PowersCompat {
 	private static java.lang.invoke.@Nullable MethodHandle slipperyOf;
 	private static boolean slipperyLooked;
 
+	private static java.lang.invoke.@Nullable MethodHandle brinkPast;
+	private static boolean brinkLooked;
+
+	/**
+	 * Whether {@code player} is far enough into a real fight for a brush with death to wake something (Powers' hidden
+	 * fight meter, {@code core/Brink}). Without Powers there is no meter, and any brush with death counts.
+	 */
+	public static boolean brinkPast(net.minecraft.world.entity.player.Player player) {
+		if (!brinkLooked) {
+			brinkLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					brinkPast = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Brink"), "past",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.player.Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Brink.past (older Powers?)", e);
+				}
+			}
+		}
+		if (brinkPast == null) {
+			return true;
+		}
+		try {
+			return (boolean) brinkPast.invoke(player);
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
 	/** {@code entity} is a player in Slipfin's form, too slick to grab (Powers' {@code Slipfin.slippery}); false without Powers. */
 	public static boolean slippery(net.minecraft.world.entity.@Nullable Entity entity) {
 		if (!slipperyLooked) {

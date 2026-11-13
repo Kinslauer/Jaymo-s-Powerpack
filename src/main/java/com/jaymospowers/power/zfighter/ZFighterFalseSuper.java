@@ -124,6 +124,10 @@ public final class ZFighterFalseSuper {
 		if (!inFight || player.getHealth() / player.getMaxHealth() > TRIGGER_HEALTH) {
 			return;
 		}
+		if (!com.jaymospowers.core.Brink.past(player)) {
+			// (only deep in a real fight: the fight meter)
+			return;
+		}
 		Long last = player.getAttached(LAST);
 		long cooldown = live.lineage == ZFighterLineage.WARRIOR ? WARRIOR_COOLDOWN : COOLDOWN;
 		if (last != null && now - last < cooldown) {
