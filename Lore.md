@@ -1374,14 +1374,14 @@ is rolled out at night, a chest of drawers bound in iron, doors that slide along
 is the blossom tree's own sap, scored from the bark of a living tree into a bowl. A log gives once and is left bare, so
 a grove is tapped a little each year and planted behind, and lacquer is dear on the home continent for that reason.
 
-(new) **How a blossom village lives** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). A
+**How a blossom village lives** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). A
 village thatches and a walled town tiles: tile is what a lord's walls pay for. Rice stands in flooded paddies behind a
 bund of packed mud, and beside it a row of ramie, the nettle whose bark is their thread, cut and left to come again.
 Farmsteads stand a little way out, each with a wayside shrine kept to whichever of the eight that family holds to.
 High villages gather round their shrine and low ones round a market. A town has a tea house where the home continent
 has a tavern, a dojo, a bath of still water, and in time a pagoda. The dead lie under narrow posts of grey stone.
 
-(new) **The blossom smiths' steel** (Blossom lands thread, 2026-11-13; Andy: "their smiths will teach you about the
+**The blossom smiths' steel** (Blossom lands thread, 2026-11-13; Andy: "their smiths will teach you about the
 process"; the steps are Claude's for him to approve). Mohknee has little ore. Its iron is washed out of the rivers as
 black sand, burnt to a rough bloom, and folded on the anvil until the slag is gone. It is the same steel the home
 continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
@@ -1672,14 +1672,14 @@ and the most notorious crooks dare sell them. The gorgon who keeps an old ruin t
 as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
 The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
 
-(new) **What grows on Mohknee** (Claude's placement for the Blossom Lands plan, patch 10, 2026-11-13, for Andy to
+**What grows on Mohknee** (Claude's placement for the Blossom Lands plan, patch 10, 2026-11-13, for Andy to
 approve). Beside the cherry the far land grows the maple and the ginkgo, green all summer and red and gold from the
 first cold; the blossom folk count their year by them as much as by the blossom. Bamboo stands in thickets at the
 groves' edges. The red lily is the flower of their dead: it is planted on every grave, it comes up without leaves, and
 it is poison, which is why nothing digs where it grows. Wisteria is trained over the arbours of their gardens, and in
 a walled town's garden there is a pond of koi, which come to the hand that feeds them and are kept for generations.
 
-(new) **The animals of the blossom lands** (Claude's placement for the Blossom Lands plan, patches 11 and 12,
+**The animals of the blossom lands** (Claude's placement for the Blossom Lands plan, patches 11 and 12,
 2026-11-13, for Andy to approve). The cherry hills have their own animals, and the blossom folk have a use or a
 saying for each. Snow monkeys go in troops, rob the fields when they are hungry and sit in the bath house water in
 winter; a village that feeds its troop loses no rice to it and is warned by it. Cranes pair for life, dance in
@@ -1690,7 +1690,7 @@ whoever passes. Paper hornets nest under the maples and ginkgos, and the paper f
 their nests under smoke. In the cold rivers lies the giant salamander, which is only ever found where the water is
 clean, and a river that has one is counted a good river.
 
-(new) **What the blossom folk do not name** (Claude's placement for the Blossom Lands plan, patches 13 and 14,
+**What the blossom folk do not name** (Claude's placement for the Blossom Lands plan, patches 13 and 14,
 2026-11-13, for Andy to approve). Mohknee has its own things of the night, and its people speak of them only by what
 to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
 which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
@@ -1701,7 +1701,7 @@ of a ship; it wants a barrel, and every blossom captain carries an empty one. An
 full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
 does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
 
-(new) **The pale grove** (Claude's placement for the Blossom Lands plan, patch 15, 2026-11-13, for Andy to approve).
+**The pale grove** (Claude's placement for the Blossom Lands plan, patch 15, 2026-11-13, for Andy to approve).
 There is a wood in the demons' country. Pale moss lies over the netherrack there, pale oaks stand in it, and from
 their boughs and from every roof of rock hangs wisteria with the colour gone out of it, giving a little light of its
 own. The air is white with ash and the horned things' ogres walk it as their own ground. The blossom folk have never
@@ -1709,7 +1709,7 @@ seen it and describe it exactly: a white wood under the world where the wisteria
 It is the same Nether the home continent's wicked wake in; the blossom folk only know a different part of it, and
 nobody has asked how.
 
-(new) **The sunken palace** (Blossom lands thread, 2026-11-13; Andy: "the palace is of tideborn origin"; the rest is
+**The sunken palace** (Blossom lands thread, 2026-11-13; Andy: "the palace is of tideborn origin"; the rest is
 Claude's placement for him to approve). In the deep water off Mohknee, on three headings from the land, a palace
 stands whole on the seabed: green sea stone, a pillared hall under a double roof with its corners turned up, lamps
 burning in it that nobody tends. The Tideborn built it, before the island villages, when they held court under the
