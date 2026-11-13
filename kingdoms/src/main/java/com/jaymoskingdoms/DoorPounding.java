@@ -258,13 +258,21 @@ final class DoorPounding {
 			}
 			BlockPos pos = e.getKey().pos();
 			long now = level.getGameTime();
+			if (now - d.tick > FORGET_TICKS) {
+				clearCracks(level, pos, d);
+				it.remove();
+				continue;
+			}
+			if (!Loaded.made(level, pos)) {
+				continue;
+			}
 			if (d.rattleShut >= 0L && now >= d.rattleShut) {
 				d.rattleShut = -1L;
 				if (level.getBlockState(pos).getBlock() instanceof DoorBlock) {
 					SpookyDoors.operate(level, pos, null, 0.0F);
 				}
 			}
-			if (now - d.tick > FORGET_TICKS || !(level.getBlockState(pos).getBlock() instanceof DoorBlock)) {
+			if (!(level.getBlockState(pos).getBlock() instanceof DoorBlock)) {
 				clearCracks(level, pos, d);
 				it.remove();
 			}

@@ -305,7 +305,9 @@ public final class Emigrants {
 	}
 
 	private static @Nullable Villager putBack(ServerLevel level, Road road, BlockPos at) {
-		level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+		if (!Loaded.made(level, at)) {
+			return null;
+		}
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
 		Entity there = level.getEntity(road.who());
 		Villager v;
