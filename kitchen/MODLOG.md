@@ -2000,3 +2000,7 @@ From the camping-campfire Blockbench model Andy uploaded.
 
 - The `no_corpse` tag now includes Kingdoms' Shadow: it breaks up into smoke instead of leaving a body.
 - Built; not played.
+
+## 0.6.4 (2026-11-13): Screens can be vanilla grey (#1436)
+
+- With `/screenlook grey` (Jaymo's Powers) this mod's screens are drawn as vanilla's bevelled grey window with grey slots and dark text after a restart. Dark stays the default.
