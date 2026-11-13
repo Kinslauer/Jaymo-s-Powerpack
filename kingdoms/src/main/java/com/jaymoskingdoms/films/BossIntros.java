@@ -204,6 +204,9 @@ public final class BossIntros {
 		if (Monoliths.giant(entity) || entity instanceof Grizzly || entity.is(BOSSES) || entity.is(GREAT)) {
 			return type;
 		}
+		if (com.jaymoskingdoms.nether.FortressKnight.is(entity)) {
+			return "jaymoskingdoms:fortress_knight";
+		}
 		if (com.jaymoskingdoms.nether.NetherForts.warlord(entity)
 			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD) {
 			return type + "/warlord";

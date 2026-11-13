@@ -87,6 +87,9 @@ public final class Nether {
 		CinderForge.register();
 		// (0.7.351) the possessed who walk the fortress halls, in Kintsugi
 		FortressHaunts.register();
+		// the fortress knight, one to a fortress
+		JaymosKingdoms.LOGGER.debug("fortress knight attachments: {} {}", FortressKnight.KNIGHT, FortressKnight.HELD);
+		FortressKnight.register();
 		// the imps: the demons' flying kin
 		Imps.register();
 	}
