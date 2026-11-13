@@ -291,3 +291,25 @@ add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The 
       one), confirm it answers and uses a tool, then put the order back.
 - [ ] 6. Write one line per box here (the decision is already in `Decisions.md`), run `python tools/vault_sync.py`, and
       tell Andy in 2 lines. If anything breaks, restore the backups and restart the gateway.
+
+**Done Nov 12, ~11:20 PM (PC Claude):**
+- [x] 1. Pulled master, installed `openai`. `--list` still shows all three models.
+- [x] 2. Key set (user env + `E:/hermes/.env`). `cohere/north-mini-code:free`: **OK** (called the tool).
+  `thinkingmachines/inkling-2-small:free`: 403 "only available on agentic harnesses" from the check script, but
+  **OK** when sent with Hermes's own attribution headers (`X-Title: Hermes Agent`, which Hermes's built-in OpenRouter
+  provider always sends). `google/gemma-4-31b-it:free`: 429 three times, "temporarily rate-limited upstream"
+  (Google AI Studio's shared free pool), so not verified and **left out**. Re-test it later; add it if it passes.
+- [x] Profiles don't read the root `.env` (each has its own), so the key line was copied by script, never printed,
+  into the `.env` of hermes-a, hermes-b, hermes-fixer, hermes-modeller and quill. Hermes re-reads `.env` on each call
+  (`agent/credential_pool.py:get_env_prefer_dotenv`), so no restart is needed for it.
+- [x] 3. Backups `config.yaml.2026-11-13-openrouter.bak` in `E:/hermes/backups/` and each bot's `backups/`. Hermes has
+  a built-in `openrouter` provider, so no `providers:` entry was added (still one block).
+- [x] 4. `hermes fallback list`: YOUTH = Super -> Lightning -> Inkling -> Cohere -> Gemini. Quill = Super ->
+  Lightning -> Ultra -> Inkling -> Cohere -> Gemini. Prometheus = Super -> Gemini (images) -> Lightning -> Inkling ->
+  Cohere. Apollo, Bacchus, Hephaestus had no chain; now primary -> Inkling -> Cohere -> Gemini. A 429 switches to the
+  next entry at once (`agent/turn_recovery.py:1921`, "Eager fallback").
+- [~] 5. Gateway restart not needed (chains and `.env` are re-read live; `schtasks /run` is a no-op while it's up).
+  The Hermes oneshot test can't run from this PC session: "gateway_other_session" (the gateway runs in Windows
+  session 0). The same calls made directly (same endpoint, model, Hermes headers, one tool) passed for both models.
+  First real proof will be the next time NVIDIA fails; look for `via openrouter` in `logs/agent.log`.
+- Left alone: `claude-writer` (retired since Quill took over Nov 10; no dispatch since).
