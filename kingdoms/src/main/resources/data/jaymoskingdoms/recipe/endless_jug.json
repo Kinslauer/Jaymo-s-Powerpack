@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:water_bucket",
+    "minecraft:ender_pearl"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:endless_jug"
+  }
+}

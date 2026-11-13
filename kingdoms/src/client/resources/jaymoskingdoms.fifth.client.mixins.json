@@ -6,7 +6,8 @@
 		"LockedInputMixin",
 		"LockedActionsMixin",
 		"SoundEngineMixin",
-		"DarkvisionMixin"
+		"DarkvisionMixin",
+		"DruidHidesPlayerMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

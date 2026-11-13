@@ -281,6 +281,8 @@ public final class Senses {
 		f *= Turning.sight(player, looker, level);
 		// (Hardrock picks) a smelly player is noticed further off, keen noses most (Stench)
 		f *= Stench.factor(player, looker);
+		// a Ranger moves quietly through the country (Rangers)
+		f *= Rangers.quiet(player);
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 

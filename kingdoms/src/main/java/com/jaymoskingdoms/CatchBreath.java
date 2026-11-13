@@ -44,7 +44,7 @@ public final class CatchBreath {
 	/** The reserve (health points) with no Endurance, and what the top of Endurance adds. */
 	static final float BASE_RESERVE = 8.0F, ENDURANCE_RESERVE = 12.0F;
 	/** What a class adds to the reserve: a Survivalist most, a Brute and a Warlord next, then the rest. */
-	static final float SURVIVALIST = 4.0F, BRUTE = 3.0F, WARLORD = 2.0F, RIDER = 2.0F, LIGHT_HANDS = 1.0F;
+	static final float SURVIVALIST = 4.0F, BRUTE = 3.0F, WARLORD = 2.0F, RIDER = 2.0F, LIGHT_HANDS = 1.0F, HEALER_HANDS = 2.0F, DISCIPLINE = 3.0F;
 	/** The sitting it takes (ticks): a minute. */
 	static final int REST_TICKS = 1200;
 	/** What one minute heals at most (health points): the base, and what the top of Endurance adds. */
@@ -68,6 +68,8 @@ public final class CatchBreath {
 	/** One sitting: when it began, where, and whether it has been told to the player. */
 	private static final class Sitting {
 		int ticks;
+		/** Calm seated time toward a short rest, whether hurt or not. */
+		int rest;
 		net.minecraft.world.phys.Vec3 at;
 		boolean told;
 	}
@@ -108,11 +110,14 @@ public final class CatchBreath {
 		Classes.PlayerClass cls = Classes.classOf(player);
 		if (cls != null) {
 			r += switch (cls) {
-				case SURVIVALIST -> SURVIVALIST;
+				// the Ranger took the Survivalist's breath (and has the Archer's light hands besides)
+				case RANGER -> SURVIVALIST;
 				case BRUTE -> BRUTE;
 				case WARLORD -> WARLORD;
 				case RIDER -> RIDER;
-				case ARCHER, MARKSMAN, THIEF -> LIGHT_HANDS;
+				case MARKSMAN, THIEF -> LIGHT_HANDS;
+				case CLERIC, DRUID -> HEALER_HANDS;
+				case MONK, PALADIN -> DISCIPLINE;
 				default -> 0.0F;
 			};
 		}
@@ -143,9 +148,13 @@ public final class CatchBreath {
 			}
 			return;
 		}
-		if (SLEPT.remove(id) && player.level().isBrightOutside() && player.getAttachedOrElse(SPENT, 0.0F) > 0.0F) {
-			player.removeAttached(SPENT);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.breath.slept"));
+		if (SLEPT.remove(id) && player.level().isBrightOutside()) {
+			// a night's sleep is a long rest for the classes' pools too
+			Rests.longRest(player);
+			if (player.getAttachedOrElse(SPENT, 0.0F) > 0.0F) {
+				player.removeAttached(SPENT);
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.breath.slept"));
+			}
 		}
 	}
 
@@ -159,11 +168,19 @@ public final class CatchBreath {
 		if (s.at == null || s.at.distanceTo(player.position()) > WANDER) {
 			s.at = player.position();
 			s.ticks = 0;
+			s.rest = 0;
 			s.told = false;
 		}
 		if (!calm(level, player)) {
 			s.ticks = 0;
+			s.rest = 0;
 			return;
+		}
+		// a minute seated and calm is a short rest, hurt or not: the classes' short-rest pools come back
+		s.rest += EVERY;
+		if (s.rest >= REST_TICKS) {
+			s.rest = 0;
+			Rests.shortRest(player);
 		}
 		boolean hurt = player.getHealth() < player.getMaxHealth();
 		float left = left(player);

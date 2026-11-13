@@ -67,12 +67,12 @@ public final class RpgSeriesGate {
 		String path = spell.getPath();
 		return switch (spell.getNamespace()) {
 			case "wizards" -> EnumSet.of(PlayerClass.MAGE);
-			case "archers" -> EnumSet.of(PlayerClass.ARCHER, PlayerClass.MARKSMAN);
+			case "archers" -> EnumSet.of(PlayerClass.RANGER, PlayerClass.MARKSMAN);
 			case "rogues" -> {
 				EnumSet<PlayerClass> classes = ROGUE_SPELLS.contains(path) ? EnumSet.of(PlayerClass.THIEF)
 					: EnumSet.of(PlayerClass.WARLORD, PlayerClass.BRUTE, PlayerClass.RIDER);
 				if (SURVIVALIST_SPELLS.contains(path)) {
-					classes.add(PlayerClass.SURVIVALIST);
+					classes.add(PlayerClass.RANGER);
 				}
 				yield classes;
 			}

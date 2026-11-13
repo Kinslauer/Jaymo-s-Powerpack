@@ -198,8 +198,11 @@ public final class Stats {
 			case THIEF, MARKSMAN -> Stat.FINESSE;
 			case WARLORD -> Stat.MIGHT;
 			case MAGE, SORCERER -> Stat.WITS;
-			case ARCHER, RIDER -> Stat.AGILITY;
-			case SURVIVALIST -> Stat.ENDURANCE;
+			case RIDER, MONK -> Stat.AGILITY;
+			case RANGER -> Stat.AGILITY;
+			case CLERIC, DRUID, WARLOCK -> Stat.ARCANA;
+			case PALADIN -> Stat.GRIT;
+			case TINKERER -> Stat.WITS;
 			case BRUTE -> Stat.GRIT;
 		};
 	}

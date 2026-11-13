@@ -28,6 +28,8 @@ import org.jspecify.annotations.Nullable;
  * shut without picking) and when a Writ of Rebirth is read.
  */
 final class ClassScreen extends Screen {
+	/** The first class showing down the list (the list scrolls with the wheel). */
+	private int scroll;
 	static final int MAX_W = 420, MAX_H = 266, LIST_W = 118, LIST_ROW = 20, HEADER = 34, STAT_ROW = 13, CHIP_H = 14, FOOTER = 24, DETAIL_MIN_LINES = 4;
 
 	private final boolean forced;
@@ -103,7 +105,22 @@ final class ClassScreen extends Screen {
 	}
 
 	private int rowY(int index) {
-		return top() + HEADER + index * LIST_ROW;
+		return top() + HEADER + (index - this.scroll) * LIST_ROW;
+	}
+
+	/** How many classes fit down the list, and the most it can scroll. */
+	private int fits() {
+		return Math.max(1, (panelH() - HEADER - 4) / LIST_ROW);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (mouseX < left() + LIST_W) {
+			int most = Math.max(0, PlayerClass.values().length - fits());
+			this.scroll = Math.max(0, Math.min(most, this.scroll - (int) Math.signum(scrollY)));
+			return true;
+		}
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 
 	@Override
@@ -130,7 +147,7 @@ final class ClassScreen extends Screen {
 
 	private @Nullable PlayerClass rowAt(int mouseX, int mouseY) {
 		PlayerClass[] all = PlayerClass.values();
-		for (int i = 0; i < all.length; i++) {
+		for (int i = this.scroll; i < all.length; i++) {
 			int ry = rowY(i);
 			if (ry + LIST_ROW > top() + panelH() - 4) {
 				break;
@@ -316,7 +333,7 @@ final class ClassScreen extends Screen {
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
 		PlayerClass[] all = PlayerClass.values();
 		PlayerClass hover = rowAt(mouseX, mouseY);
-		for (int i = 0; i < all.length; i++) {
+		for (int i = this.scroll; i < all.length; i++) {
 			PlayerClass cls = all[i];
 			int ry = rowY(i);
 			if (ry + LIST_ROW > y + panelH() - 4) {

@@ -220,7 +220,7 @@ public final class Mana {
 
 	/** A natural: an attuned Mage or Sorcerer. */
 	public static boolean natural(Player player) {
-		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER));
+		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player));
 	}
 
 	public static float current(Player player) {
@@ -482,7 +482,7 @@ public final class Mana {
 		long now = player.level().getGameTime();
 		if (!attuned(player)) {
 			// (0.7.247) never while a newcomer can't see it: the flare waits till they're out from the story's screens
-			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER)) {
+			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player)) {
 				if (!StoryGround.unseen(player)) {
 					attune(player);
 				}

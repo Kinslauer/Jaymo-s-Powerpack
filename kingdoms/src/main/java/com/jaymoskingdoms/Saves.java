@@ -35,6 +35,8 @@ public final class Saves {
 	static final float PLAYER_LEAST = 0.05F, PLAYER_MOST = 0.6F;
 	/** Everyone else's chance, and a boss's. */
 	static final float MOB = 0.1F, BOSS = 0.4F;
+	/** A blessing or an aura never lifts a save past this. */
+	static final float BLESSED_MOST = 0.85F;
 	/** Poisoned, a save holds this share as often. */
 	static final float POISONED = 0.7F;
 	/** A save on a lasting thing shortens it by at most this share. */
@@ -81,6 +83,8 @@ public final class Saves {
 		} else {
 			chance = who instanceof Mob mob && Senses.boss(mob) ? BOSS : MOB;
 		}
+		// a cleric's blessing and a paladin's aura steady the nerve
+		chance = Math.min(BLESSED_MOST, chance + Clerics.saveBonus(who) + Paladins.auraBonus(who));
 		// shaking hands: poison makes every save worse
 		return who.hasEffect(MobEffects.POISON) ? chance * POISONED : chance;
 	}

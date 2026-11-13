@@ -132,7 +132,8 @@ public final class TrailReading {
 	}
 
 	/** Shows {@code player} the prints round them (not their own), nearest in time last so the freshest stand out. */
-	private static void read(ServerLevel level, ServerPlayer player, int rank) {
+	/** Shows {@code player} the prints round them at once (a Ranger tracking), as far as rank {@code rank} (0 or 1) reads. */
+	static void read(ServerLevel level, ServerPlayer player, int rank) {
 		ArrayDeque<Print> prints = PRINTS.get(level.dimension());
 		if (prints == null) {
 			return;

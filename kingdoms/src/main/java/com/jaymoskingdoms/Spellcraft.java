@@ -205,7 +205,21 @@ public final class Spellcraft {
 	 * {@code J}.
 	 */
 	static boolean staffCaster(Player player) {
-		return Classes.is(player, PlayerClass.MAGE) || Mana.attuned(player) && !Classes.is(player, PlayerClass.SORCERER);
+		return Classes.is(player, PlayerClass.MAGE) || ClassCasters.caster(player) || Mana.attuned(player) && !Classes.is(player, PlayerClass.SORCERER);
+	}
+
+	/** A Cleric's, a Druid's or a Warlock's focus in hand casts the spell it is turned to ({@link CastingFocus}). */
+	static void castFocus(ServerPlayer player, ServerLevel level, ItemStack focus) {
+		if (ClassCasters.caster(player)) {
+			castStaff(player, level, focus);
+		}
+	}
+
+	/** Turns a focus to the next spell its holder knows. */
+	static void turnFocus(ServerPlayer player) {
+		if (ClassCasters.caster(player)) {
+			turn(player);
+		}
 	}
 
 	/**
@@ -214,7 +228,7 @@ public final class Spellcraft {
 	 */
 	static boolean learn(ServerPlayer player, String spell) {
 		Classes.Chosen c = Classes.of(player);
-		if (!staffCaster(player) || c.spells().contains(spell)) {
+		if (!staffCaster(player) || c.spells().contains(spell) || !ClassCasters.mayLearn(player, spell)) {
 			return false;
 		}
 		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
@@ -261,9 +275,11 @@ public final class Spellcraft {
 		boolean mage = Classes.is(player, PlayerClass.MAGE);
 		// (0.7.231) blood spells are paid in blood, not mana
 		boolean blood = ForbiddenArts.blood(spell);
-		float cost = blood ? Hemomancy.cost(spell) : Mana.cost(spell);
-		if (!blood && !Mana.afford(player, cost) || blood && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
-			if (blood) {
+		// a Warlock's magic is bought from a patron, in pact slots, not mana ({@link Warlocks})
+		boolean pact = Classes.is(player, PlayerClass.WARLOCK);
+		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
+		if (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
+			if (blood && !pact) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			}
 			return;
@@ -272,12 +288,14 @@ public final class Spellcraft {
 		if (!SpellParts.allow(player, spell, null)) {
 			return;
 		}
-		if (!Arcana.cast(spell, level, player, (mage ? MAGE_POWER : ATTUNED_POWER) * (blood ? Hemomancy.power(player) : 1.0F))) {
+		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * (blood && !pact ? Hemomancy.power(player) : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
 		SpellParts.spend(player, spell);
-		if (blood) {
+		if (pact) {
+			Warlocks.pay(player, spell);
+		} else if (blood) {
 			Hemomancy.pay(player, cost);
 		} else {
 			Mana.take(player, cost);
@@ -297,7 +315,7 @@ public final class Spellcraft {
 			level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
 			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, NewSpells.COOLDOWN.getOrDefault(spell, 40));
-			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
+			player.getCooldowns().addCooldown(staff, Math.round(cooldown * ClassCasters.cooldown(player, mage, ATTUNED_COOLDOWN)));
 		}
 		afterCast(player, level, spell);
 	}
@@ -380,6 +398,10 @@ public final class Spellcraft {
 	}
 
 	static void imbue(ServerPlayer player, boolean bolt) {
+		// the key is every class's own button: the second set of classes answer it before the Sorcerer's imbue does
+		if (Abilities.key(player, bolt)) {
+			return;
+		}
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;

@@ -637,6 +637,8 @@ public final class Restoration {
 		if (wizard && reputation(player, healer) >= HONOURED_REP) {
 			out.add("scroll_restoration");
 		}
+		// the lessons of the new classes (a priest teaches a Cleric the symbol, and lifts a Paladin's broken oath)
+		out.addAll(ClassTeachers.services(player, healer));
 		return out;
 	}
 
@@ -648,7 +650,7 @@ public final class Restoration {
 			case "heal_free" -> Component.translatable("talk.jaymoskingdoms.healer.heal_free");
 			case "scroll_mending" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_mending", Money.text(player, Money.worth(MENDING_SCROLL_EMERALDS)));
 			case "scroll_restoration" -> Component.translatable("talk.jaymoskingdoms.healer.scroll_restoration", Money.text(player, Money.worth(RESTORATION_SCROLL_EMERALDS)));
-			default -> Component.translatable("talk.jaymoskingdoms.wizard.respec.no");
+			default -> ClassTeachers.handles(kind) ? ClassTeachers.line(player, kind) : Component.translatable("talk.jaymoskingdoms.wizard.respec.no");
 		};
 	}
 
@@ -660,7 +662,7 @@ public final class Restoration {
 			case "heal_free" -> hurt(player);
 			case "scroll_mending" -> Money.canPay(player, Money.worth(MENDING_SCROLL_EMERALDS));
 			case "scroll_restoration" -> Money.canPay(player, Money.worth(RESTORATION_SCROLL_EMERALDS)) && restorationDue(player);
-			default -> true;
+			default -> !ClassTeachers.handles(kind) || ClassTeachers.open(player, kind);
 		};
 	}
 
@@ -700,6 +702,9 @@ public final class Restoration {
 	/** Does what {@code kind} asks of {@code healer} for {@code player}, if they can pay; true if it was a healer's kind. */
 	static boolean serve(ServerPlayer player, LivingEntity healer, String kind) {
 		ServerLevel level = player.level();
+		if (ClassTeachers.handles(kind)) {
+			return ClassTeachers.serve(player, healer, kind);
+		}
 		if (!optionOpen(player, kind)) {
 			return kind.startsWith("heal") || kind.startsWith("scroll_") || kind.equals("treatment");
 		}

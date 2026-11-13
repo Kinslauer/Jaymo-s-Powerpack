@@ -3319,6 +3319,53 @@ public final class PowersCompat {
 		}
 	}
 
+	// ---- the Monk's fists (Powers' boxing/Boxing and BoxingGear) --------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle fistGear, boxingLearn, boxingStyleById;
+	private static boolean lookedForFists;
+
+	private static void lookForFists() {
+		if (lookedForFists) {
+			return;
+		}
+		lookedForFists = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> gear = Class.forName("com.jaymospowers.boxing.BoxingGear");
+			Class<?> boxing = Class.forName("com.jaymospowers.boxing.Boxing");
+			Class<?> style = Class.forName("com.jaymospowers.boxing.Boxing$Style");
+			fistGear = lookup.findStatic(gear, "isGear", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
+			boxingStyleById = lookup.findStatic(style, "byId", java.lang.invoke.MethodType.methodType(style, String.class));
+			boxingLearn = lookup.findStatic(boxing, "learn", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, style));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' boxing gear", e);
+			fistGear = null;
+		}
+	}
+
+	/** Whether {@code stack} is boxing fist gear (a cestus, knuckles); false without Powers. */
+	public static boolean fistGear(net.minecraft.world.item.ItemStack stack) {
+		lookForFists();
+		try {
+			return fistGear != null && (boolean)fistGear.invoke(stack);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Teaches {@code player} the boxing style with id {@code style} at level 1 (Powers' {@code Boxing.learn}); false if they can't learn it or without Powers. */
+	public static boolean boxingTeach(net.minecraft.server.level.ServerPlayer player, String style) {
+		lookForFists();
+		try {
+			return boxingLearn != null && boxingStyleById != null && (boolean)boxingLearn.invoke(player, boxingStyleById.invoke(style));
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Whether Jaymo's Powers and its boxing are there to teach. */
 	public static boolean boxing() {
 		lookForBoxing();

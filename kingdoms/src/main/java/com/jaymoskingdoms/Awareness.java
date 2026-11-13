@@ -181,6 +181,10 @@ public final class Awareness {
 
 	/** How far {@code player}'s own noise carries, as a share: less sneaking, and less with Quiet Step. */
 	static double noise(ServerPlayer player) {
+		return Rangers.quiet(player) * baseNoise(player);
+	}
+
+	private static double baseNoise(ServerPlayer player) {
 		if (!player.isCrouching()) {
 			return Pace.slow(player) ? Pace.NOISE : 1.0;
 		}

@@ -162,7 +162,7 @@ public final class NewSpells {
 		if (Classes.is(player, Classes.PlayerClass.SORCERER) && SORCERER_KNOWS.contains(spell)) {
 			return true;
 		}
-		return Classes.of(player).spells().contains(spell);
+		return Classes.of(player).spells().contains(spell) || ClassCasters.born(player, spell);
 	}
 
 	/** The ground where {@code player} looks, settled onto what is below it. */

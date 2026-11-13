@@ -63,7 +63,7 @@ public final class StoryRoads {
 	/** The powers the Hermit's Road is for (their ids' paths). */
 	static final Set<String> ELEMENTAL = Set.of("smoke", "gravity", "cryo");
 	static final Set<Classes.PlayerClass> CAMPAIGNERS = EnumSet.of(Classes.PlayerClass.WARLORD, Classes.PlayerClass.BRUTE,
-		Classes.PlayerClass.RIDER, Classes.PlayerClass.MARKSMAN, Classes.PlayerClass.ARCHER, Classes.PlayerClass.SURVIVALIST);
+		Classes.PlayerClass.RIDER, Classes.PlayerClass.MARKSMAN, Classes.PlayerClass.RANGER, Classes.PlayerClass.PALADIN, Classes.PlayerClass.MONK);
 
 	public static final List<Road> ROADS = List.of(
 		new Road("arcana", p -> Classes.is(p, Classes.PlayerClass.MAGE) || Classes.is(p, Classes.PlayerClass.SORCERER), List.of(
@@ -172,7 +172,7 @@ public final class StoryRoads {
 		}
 		Classes.PlayerClass cls = Classes.classOf(player);
 		if (cls != null && CAMPAIGNERS.contains(cls)) {
-			Skills.Pillar pillar = cls == Classes.PlayerClass.ARCHER || cls == Classes.PlayerClass.SURVIVALIST ? Skills.Pillar.SURVIVAL : Skills.Pillar.STRENGTH;
+			Skills.Pillar pillar = cls == Classes.PlayerClass.RANGER ? Skills.Pillar.SURVIVAL : Skills.Pillar.STRENGTH;
 			int level = Skills.of(player).level(pillar);
 			for (int i = 0; i < CAMPAIGN_STEPS.size() && level >= (i + 1) * CAMPAIGN_EVERY; i++) {
 				if (mark(player, "campaign", CAMPAIGN_STEPS.get(i))) {

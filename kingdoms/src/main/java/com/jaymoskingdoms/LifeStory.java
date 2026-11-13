@@ -516,8 +516,8 @@ public final class LifeStory {
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),
 				Answer.youth("apprentice", Items.BOOKSHELF, Classes.PlayerClass.MAGE),
 				Answer.youth("hermit", Items.BLAZE_POWDER, Classes.PlayerClass.SORCERER),
-				Answer.youth("hunted", Items.ARROW, Classes.PlayerClass.ARCHER),
-				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.SURVIVALIST),
+				Answer.youth("hunted", Items.ARROW, Classes.PlayerClass.RANGER),
+				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.RANGER),
 				Answer.youth("pits", Items.SHIELD, Classes.PlayerClass.BRUTE),
 				Answer.youth("gunsmith", Items.GUNPOWDER, Classes.PlayerClass.MARKSMAN),
 				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER)));
