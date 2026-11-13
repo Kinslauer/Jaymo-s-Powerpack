@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.armorapi",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["GeoArmourPoseMixin"],
+	"injectors": { "defaultRequire": 0 }
+}
