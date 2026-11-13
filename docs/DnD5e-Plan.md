@@ -168,3 +168,24 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **G10** (`Research`, `FoeLore` new): sage or a lectern with 6+ shelves; topics "creature fears" and (added by the
   lead) "where a heart is hid" for Halvard's urn within 1500 blocks. `Research.addTopic` for I3 later. A day's study
   is 1-2 minutes, once a game day. FoeLore stars at 3/12/30 kills: +4% dealt, -3% taken each.
+
+### Patch 6
+- **H2** (`SpellParts`): voice + free hand for every staff/tome/scroll cast (Spell Engine: voice and hand only).
+  Parts: diamond dust (restoration, sanctuary, dispel), bones (raising 2, death's door 3), ender pearl (dome,
+  identify); foci (staffs, tomes, mana wands, tag `spell_foci`: totem, enchanted book, totem staff) replace string,
+  slime, bat wing, sticks, kelp. The pack had no gag: new Rag Gag (wool + string), used on the helpless; captives
+  gagged only mumble.
+- **H3** (`Rituals`): Magic key (Page Up, the one free key) opens the screen; 10 s still with a book; identify shows
+  enchantments/curses/imbues; `Rituals.onIdentify` hook for I3. Known rituals only (Sorcerers know all four).
+- **H4** (`Counterspell`, `Dispel`): NPC cast tell 18 ticks; NPC rivals and players snuff it; player staff casts are
+  instant so NPCs can't counter them. Dispel respects boss resistances and saves.
+- **H5** (`Cantrips`): Kitchen has no dish temperature, so warm/chill marks the dish and eating it shifts body heat
+  for 3 minutes.
+- **H14** (`ScrollGamble`): below Knowledge 4: work once / fizzle (scroll crumbles) / backfire (hurt + mana strain).
+- **H6** (`CampSpells`): ward line 12 blocks for 10 min; dome for a night (projectiles back, hostiles out, body heat
+  held; rain still shows); create food drops bread; purify cleans poison and spoilage. Fields don't survive a restart.
+- **H7** (`Strides`, Powers `MagicMoves`): feather fall (you and allies in 4), spider climb 1 min (held), water walk,
+  long jump, misty step 7 blocks.
+- **H8** (`BattleSpells`, `Fields`): web (GRAB save or netted), grease (trips), fog, darkness (blinds, blocks mob
+  sight), silence (no spoken spells), spike growth. Fire burns web and grease.
+- 20 new scrolls with own textures (`tools/gen_fifth_p6.py`); casters carry one 1 in 4.

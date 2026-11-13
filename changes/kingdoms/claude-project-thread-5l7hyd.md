@@ -40,4 +40,11 @@
 - **How you live shows** (`Lifestyle`): where you sleep, what you spend, fresh tailor's clothes and baths open courts to you, or get you watched by guards and pitied by priests.
 - **Teachers** (`Lessons`): pay a villager to teach a tongue, a trade or a fighting style over a few days.
 - **Looking it up** (`Research`, `ResearchScreen`, `FoeLore`): a sage or a library teaches what a foe fears (foe knowledge stars: harder blows, softer hits) or where Halvard's heart is hid.
+- **Words, hands and things** (`SpellParts`, `Gags`, diamond dust): staff, tome, scroll and Spell Engine casts need a voice and a free hand; a gag, a silence bubble or bonds stop them. Great spells spend a part (diamond dust, a pearl, bones); a staff, tome or holy focus stands in for the cheap ones. New Rag Gag for helpless captives.
+- **Magic screen** (key Page Up, `MagicMenu`, `MagicScreen`): rituals, cantrips and counterspell in one place.
+- **Rituals** (`Rituals`, `ItemCurses`): ten still seconds with a book open, no mana: ward line, find magic, identify (shows enchantments, curses and imbues), speak with animals.
+- **Counterspell and dispel** (`Counterspell`, `Dispel`): NPC casters show a turning sigil before a spell lands; rival casters and players who know counterspell can snuff it. Dispel ends lasting spells, frights, charms, holds, nets, curses and fields; court wizards and camp shamans undo each other's work.
+- **Cantrips** (`Cantrips`): light on the staff tip, mend a tool (never in a fight), wash off blood, warm or chill a dish, whisper to someone in sight, tell tomorrow's weather.
+- **Scrolls above your skill** (`ScrollGamble`): below Knowledge 4 a scroll can still be tried; it works once, fizzles, or bites back.
+- **Twenty new spells** (`NewSpells`, `CampSpells`, `Strides`, `BattleSpells`, `Fields`) on their own scrolls: ward line, dome of force, create food, purify food, feather fall, spider climb, water walk, long jump, misty step, web, grease, fog, darkness, silence, spike growth and the rituals; ward lines and domes keep a camp's watch.
 - Built; not played.

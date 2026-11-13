@@ -4,4 +4,6 @@
 - **Zombie finishers**: an unarmed finisher on a zombie is a stomp, a head smash or the fist, at random (`Finishers` STOMP, HEAD_SMASH; `FinisherPose`).
 - **Bosses shrug off lockdowns** (through Kingdoms' legendary resistances, `KingdomsCompat.shrugs`): a boss's first Chrono and Darktide stuns, Gravity Lift, Crush pin, Gravity Well kneel and Time Stop slip off it (`ChronoFlow`, `DarktideStatus`, `GravityPower`, `ChronoTimeStop`, mixin `TimeStopFreezeMixin`); a boss walking through a Time Stop takes the Chrono's blows at once.
 - **Guard**: a Kingdoms spark can turn a missed parry into a parry (`Guard.SPARK` hook).
+- **Walking spells** (`core/MagicMoves`, mixin `SpellJumpMixin`; `ChronoWaterRunMixin`, `SkitterClimbMixin`): Kingdoms' water walk, spider climb and long jump spells.
+- **Clean cantrip** (`core/blood/MagicWash`): washes blood off a body's coat and gear.
 - Built; not played.
