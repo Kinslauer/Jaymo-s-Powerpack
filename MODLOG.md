@@ -4298,3 +4298,10 @@ enter limbo if they don't come to."
   front of the ribs, the glove at the chin. Its block lifts the lead shoulder and forearm higher.
 - Arrow Slit's gloves sit together in front of the chin, a slit between them, the forearms up and in (the arms are
   too short in a Minecraft body to reach the cheeks in front of the face without going into it).
+
+## 0.23.27 (2026-11-13): Boxing: hard to hit after a pull or a shoulder roll
+
+- (Andy, from Jung's idea) A pull (Long Guard) or a shoulder roll (Bastion) now leaves the boxer hard to hit for a
+  moment after the sure miss ends: for 12 ticks more, blows and shots aimed at them miss 40% of the time after a pull
+  and 30% after a roll, with a whiff sound. Slips and bobs are unchanged, and these misses earn no strong attack.
+  Knobs: `BoxingEvades.OFF_LINE_TICKS`, `PULL_MISS`, `ROLL_MISS`.
