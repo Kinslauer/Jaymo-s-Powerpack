@@ -61,6 +61,8 @@ public final class BossPosture {
 	static final float RIPOSTE = 2.25F;
 	/** After a kneel, how long its posture can't be worn. */
 	static final int IMMUNE_TICKS = 160;
+	/** What an armoured foe ({@link #armoured}) takes of a blow while it is on its feet. */
+	static final float ARMOURED_SHARE = 0.5F;
 	/** How the head bows while it kneels (degrees). */
 	static final float BOW_PITCH = 55.0F;
 
@@ -116,12 +118,25 @@ public final class BossPosture {
 
 	/** From {@code LivingEntityHurtMixin}: a melee blow on a kneeling foe is a riposte. */
 	public static float dealt(LivingEntity self, DamageSource source, float amount) {
-		Posture p = POSTURES.get(self);
-		if (p == null || amount <= 0.0F || !riposteBlow(source)) {
+		if (amount <= 0.0F) {
 			return amount;
 		}
+		Posture p = POSTURES.get(self);
 		long now = self.level().getGameTime();
-		return p.kneeling(now) && now >= p.kneelFrom ? amount * RIPOSTE : amount;
+		if (p != null && p.kneeling(now) && now >= p.kneelFrom) {
+			return riposteBlow(source) ? amount * RIPOSTE : amount;
+		}
+		// hide and plate: only a share gets through until its posture breaks
+		return source.getEntity() instanceof LivingEntity && armoured(self) ? amount * ARMOURED_SHARE : amount;
+	}
+
+	/**
+	 * Great foes in stone hide or heavy plate: the Aether Giants and the Ogre King. On their feet they take
+	 * {@link #ARMOURED_SHARE} of a blow; kneeling, all of it (and the riposte). Their posture wears as if the whole
+	 * blow had landed, so breaking it is the way through.
+	 */
+	public static boolean armoured(Entity entity) {
+		return entity instanceof Mob && (com.jaymoskingdoms.remnants.Monoliths.giant(entity) || OgreHolds.king(entity));
 	}
 
 	private static boolean riposteBlow(DamageSource source) {
@@ -158,6 +173,11 @@ public final class BossPosture {
 			wear = damageTaken * MELEE_SHARE * (heavy ? HEAVY_FACTOR : 1.0F);
 		} else {
 			wear = damageTaken * RANGED_SHARE;
+		}
+		if (armoured(entity)) {
+			// the share its hide turned still counts against its posture, and is heard
+			wear /= ARMOURED_SHARE;
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ANVIL_PLACE, SoundSource.HOSTILE, 0.5F, 0.6F);
 		}
 		wear(level, entity, wear);
 	}
@@ -202,6 +222,7 @@ public final class BossPosture {
 		level.sendParticles(ParticleTypes.ENCHANTED_HIT, chest.x, chest.y, chest.z, 16, 0.4, 0.4, 0.4, 0.2);
 		level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.4F, 0.7F);
 		level.playSound(null, boss.getX(), boss.getY(), boss.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 1.0F, 0.6F);
+		PowersCompat.impactFrame(level, chest);
 		rise(boss, p, now);
 	}
 

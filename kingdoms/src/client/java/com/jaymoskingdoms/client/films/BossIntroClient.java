@@ -67,6 +67,8 @@ public final class BossIntroClient {
 
 	private static boolean running, calm;
 	private static int boss = -1, tick, length, roarAt, sneak, hurtBefore;
+	/** Which film this is ({@link BossIntros.Play#INTRO}, a turn or a fall: those two are the creature's own shot throughout). */
+	private static int mode;
 	private static boolean handsBefore;
 	private static @Nullable CameraType viewBefore;
 	private static float side = 1.0F, bars, barsO;
@@ -117,9 +119,10 @@ public final class BossIntroClient {
 		}
 		running = true;
 		calm = play.calm();
+		mode = play.mode();
 		boss = play.entity();
 		tick = 0;
-		length = Math.max(40, play.ticks());
+		length = Math.max(20, play.ticks());
 		roarAt = play.roarAt();
 		sneak = 0;
 		handsBefore = true;
@@ -145,8 +148,12 @@ public final class BossIntroClient {
 			sneak = minecraft.options.keyShift.isDown() ? sneak + 1 : 0;
 			boolean skipped = hands && !handsBefore || sneak >= SKIP_HOLD || self != null && self.hurtTime > hurtBefore;
 			handsBefore = hands;
-			if (self == null || !self.isAlive() || it == null || it instanceof LivingEntity living && !living.isAlive() || skipped || ++tick >= length) {
+			// (a fall is filmed through the creature's death: the camera stays where it was last seen)
+			boolean gone = mode != BossIntros.Play.DEATH && (it == null || it instanceof LivingEntity living && !living.isAlive());
+			if (self == null || !self.isAlive() || gone || skipped || ++tick >= length) {
 				stop(minecraft, true);
+			} else if (it == null) {
+				hurtBefore = self.hurtTime;
 			} else {
 				hurtBefore = self.hurtTime;
 				seen(it);
@@ -206,7 +213,8 @@ public final class BossIntroClient {
 		Vec3 across = new Vec3(axis.z, 0.0, -axis.x).scale(side);
 		double size = Math.max(wide, tall);
 		float t = tick + partialTicks;
-		double k = t / length;
+		// (a turn or a fall is the creature's own shot from first frame to last)
+		double k = mode == BossIntros.Play.INTRO ? t / length : REVEAL_END + (HERO_END - REVEAL_END) * Math.min(0.999, t / length);
 		Vec3 pos;
 		Vec3 look;
 		if (k < REVEAL_END) {

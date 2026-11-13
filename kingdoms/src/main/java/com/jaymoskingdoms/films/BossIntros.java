@@ -93,10 +93,12 @@ public final class BossIntros {
 	}
 
 	/** Tells a player's game to play {@code entity}'s entrance; {@code calm} for one that isn't after them (no shake). */
-	public record Play(int entity, int ticks, int roarAt, boolean calm) implements CustomPacketPayload {
+	public record Play(int entity, int ticks, int roarAt, boolean calm, int mode) implements CustomPacketPayload {
+		/** The whole entrance; the short film of a boss's turn at half health; the film of its fall ({@code BossTurns}). */
+		public static final int INTRO = 0, TURN = 1, DEATH = 2;
 		public static final Type<Play> TYPE = new Type<>(JaymosKingdoms.id("boss_intro"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Play::entity,
-			ByteBufCodecs.VAR_INT, Play::ticks, ByteBufCodecs.VAR_INT, Play::roarAt, ByteBufCodecs.BOOL, Play::calm, Play::new);
+			ByteBufCodecs.VAR_INT, Play::ticks, ByteBufCodecs.VAR_INT, Play::roarAt, ByteBufCodecs.BOOL, Play::calm, ByteBufCodecs.VAR_INT, Play::mode, Play::new);
 
 		@Override
 		public Type<Play> type() {
@@ -124,6 +126,8 @@ public final class BossIntros {
 		final Vec3 at;
 		long until, roarAt;
 		boolean began, roared;
+		/** How long this film runs once begun, and when in it the creature roars (ticks; no roar below 0). */
+		int ticks = FILM_TICKS, roarAfter = ROAR_AT;
 
 		Watch(int entity, @Nullable String key, Vec3 at, long until) {
 			this.entity = entity;
@@ -250,9 +254,27 @@ public final class BossIntros {
 	private static void offer(ServerPlayer player, LivingEntity boss, @Nullable String key) {
 		long now = player.level().getGameTime();
 		boolean calm = !(boss instanceof Enemy) && !(boss instanceof Mob mob && mob.getTarget() == player);
-		ServerPlayNetworking.send(player, new Play(boss.getId(), FILM_TICKS, ROAR_AT, calm));
+		ServerPlayNetworking.send(player, new Play(boss.getId(), FILM_TICKS, ROAR_AT, calm, Play.INTRO));
 		WATCHING.put(player.getUUID(), new Watch(boss.getId(), key, player.position(), now + ANSWER_TICKS));
 		NEXT_OFFER.put(player.getUUID(), now + OFFER_GAP);
+	}
+
+	/**
+	 * A short film of {@code boss} for {@code player} in the middle of its fight ({@code BossTurns}: {@link Play#TURN} or
+	 * {@link Play#DEATH}), {@code ticks} long, with a roar {@code roarAfter} ticks in (none below 0). The player is kept
+	 * from harm while it plays, as in an entrance. False if they are in another film or their game can't play it.
+	 */
+	public static boolean play(ServerPlayer player, LivingEntity boss, int mode, int ticks, int roarAfter) {
+		if (WATCHING.containsKey(player.getUUID()) || !ServerPlayNetworking.canSend(player, Play.TYPE)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		ServerPlayNetworking.send(player, new Play(boss.getId(), ticks, Math.max(0, roarAfter), roarAfter < 0, mode));
+		Watch watch = new Watch(boss.getId(), null, player.position(), now + ANSWER_TICKS);
+		watch.ticks = ticks;
+		watch.roarAfter = roarAfter;
+		WATCHING.put(player.getUUID(), watch);
+		return true;
 	}
 
 	/** {@code /kingdom bossintro}: the nearest great creature's film again, seen or not. */
@@ -285,8 +307,8 @@ public final class BossIntros {
 		long now = player.level().getGameTime();
 		if (state.what() == State.BEGAN && !watch.began) {
 			watch.began = true;
-			watch.until = now + FILM_TICKS;
-			watch.roarAt = now + ROAR_AT;
+			watch.until = now + watch.ticks;
+			watch.roarAt = watch.roarAfter < 0 ? Long.MAX_VALUE : now + watch.roarAfter;
 			if (watch.key != null) {
 				List<String> seen = new ArrayList<>(player.getAttachedOrElse(SEEN, List.of()));
 				if (!seen.contains(watch.key)) {
