@@ -135,7 +135,7 @@ public final class OldRules {
 		BlockPos bed = BlockPos.of(key);
 		if (who instanceof ServerPlayer p) {
 			ServerPlayer.RespawnConfig cfg = p.getRespawnConfig();
-			return cfg != null && cfg.respawnData().dimension() == level.dimension() && cfg.respawnData().pos().distSqr(bed) <= 100.0
+			return cfg != null && cfg.respawnData().dimension() == level.dimension() && com.jaymoskingdoms.Loaded.made(level, cfg.respawnData().pos()) && cfg.respawnData().pos().distSqr(bed) <= 100.0
 				&& home(level, cfg.respawnData().pos()) instanceof Long k && k == key;
 		}
 		if (who instanceof Villager v) {
