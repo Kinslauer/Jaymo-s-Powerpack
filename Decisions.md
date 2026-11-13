@@ -413,3 +413,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:17 PM ET (Sengoku picks thread): Andy: "can there be an MCA captain or companion that can pilot the
   ship for you? thats just too long to be sailing manually." Added to patch 2 of docs/BlossomLands-Plan.md: a hired MCA
   sea captain or a companion takes the helm of your ship, or you buy passage on a blossom merchantman.
+- 2026-11-12 10:29 PM ET (Sengoku picks thread): Andy, after reading the lore paragraph: "it is called Mohknee and you
+  can encounter tideborn islands on the way." The blossom continent is Mohknee; Tideborn island villages stand along
+  the crossing. Taken as his yes to the paragraph (my reading); patch 1 started.
