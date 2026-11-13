@@ -12467,3 +12467,16 @@ giants being worked on, as its own upright model."
 - Setting out on the village road froze the Steam Deck server past its watchdog (crash 2026-11-13 07:43), like the farmhand road before it: looking for the nearest village made each likely chunk on the server thread, and right after a join the world generation queue is long, so the server waited behind it. Every structure search in Kingdoms (Life Story villages and wrecks, rumours, villager and king quests, the Grue) now works the place out without making any chunk (Scout): vanilla's own check whether one can be made there, taken as the answer.
 - A village or shipwreck start now has its land made ready in the background before you're put there; you wait behind the loading screen a little longer meanwhile (its tips stay up).
 - Built in CI; not played.
+
+## 0.8.7 (2026-11-13): A start waits for its land instead of making it (Deck crash 10:12) (#1430)
+
+- **Fix (server froze, watchdog crash)**: setting out on a road (a village start, and any start whose place wasn't
+  made yet) no longer makes chunks on the server thread. `LifeStory.reach` now only looks at land already made; the
+  land a start looked at and found missing (up to 6 chunks a try, `LifeStory.Wanted`) is made in the background
+  (`StoryGround.ahead` with a chunk list, PORTAL tickets) while the player waits behind the loading screen, and the
+  start tries again, looking at that land first. The chosen start is waited for up to 3 tries, the wild after it up to
+  5; the last try makes do as before. Deck crash 2026-11-13 10:12: Hendrikus's owed village start fell back to the
+  wild and made chunks 600-1200 blocks out, holding the server 60 s.
+- Only while a start is tried: outside one (a harbour's shore, a trader's second town, camps, captors, shelters)
+  `reach` still makes a few chunks as before. A monolith start's search looks at the land made for it first too.
+- Built; tested on the Deck server by rejoining with the owed start.
