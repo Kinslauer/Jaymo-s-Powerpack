@@ -13,6 +13,8 @@ A PR now adds a note instead (see changes/README.md): `changes/<powers|kingdoms|
 `# <title>`, then the MODLOG text. For each note, oldest first, this script:
   1. raises that mod's patch version in its gradle.properties (0.21.64 -> 0.21.65), or, when the note has a
      `bump: minor` line, the minor version (0.21.109 -> 0.22.0; `bump: major` gives 1.0.0). Only when Andy asks;
+     a patch release that would reach PATCH_ROLLOVER becomes a minor one instead (0.21.99 -> 0.22.0), so every 100
+     patch releases of a mod step its minor version (Andy, 2026-11-13);
   2. appends `## <version> (<date>): <title> (#<PR>)` and the note's text to the end of the mod's MODLOG;
   3. deletes the note.
 Then it updates the version table in docs/vault/Home.md and regenerates docs/codemap/ (also kept out of PRs).
@@ -30,6 +32,8 @@ MODS = {  # note folder -> (name, properties file, MODLOG, row name on docs/vaul
     "kitchen": ("Kitchen", "kitchen/gradle.properties", "kitchen/MODLOG.md", "Jaymo's Kitchen"),
 }
 VERSION = re.compile(r"^(version\s*=\s*)(\S+)", re.M)
+# A patch number this high rolls over into the next minor version: x.y.99 -> x.(y+1).0, so 100 patch releases per minor.
+PATCH_ROLLOVER = 100
 
 
 def git(*args):
@@ -73,8 +77,11 @@ def pr_number(f):
 
 
 def bump(v, level="patch"):
-    """0.21.109 -> 0.21.110 (patch), 0.22.0 (minor) or 1.0.0 (major)."""
+    """0.21.64 -> 0.21.65 (patch), 0.22.0 (minor) or 1.0.0 (major). A patch bump that would reach PATCH_ROLLOVER is a
+    minor bump instead (0.21.99 -> 0.22.0; a mod already past it, 0.7.815, goes to 0.8.0)."""
     parts = v.split(".")
+    if level == "patch" and len(parts) >= 3 and int(parts[-1]) + 1 >= PATCH_ROLLOVER:
+        level = "minor"
     at = {"major": 0, "minor": 1}.get(level, len(parts) - 1)
     at = min(at, len(parts) - 1)
     parts[at] = str(int(parts[at]) + 1)
