@@ -26,3 +26,4 @@ A separate Minecraft bot client (Mineflayer, Baritone, or similar) with its own 
 ## Notes
 
 Not urgent. Logged for later evaluation alongside OmniRoute, Pirate Face, and OpenCode experiments.
+- 2026-11-13 11:46 hermes-b: reviewed and concur with the assessment - Hermes has no Minecraft client or authentication and cannot join Andy's server as a bot. A separate bot client (Mineflayer/Baritone) with its own account would be needed, outside Hermes scope. Not urgent; stays logged for later evaluation. No code branch or PR.
