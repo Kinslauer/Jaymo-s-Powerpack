@@ -28,6 +28,17 @@ public final class PowerDock {
 		return true;
 	}
 
+	/** Places a second block in the row over the power's (a swallowed power's), {@code height} tall; false while hidden. */
+	public static boolean beginAbove(String id, int height) {
+		int[] at = HudZones.place(HudZones.DOCK_RIGHT, id, ROW + 1, 0, height);
+		if (at == null) {
+			return false;
+		}
+		left = at[0];
+		bottom = at[1] + height;
+		return true;
+	}
+
 	/** Top-left of a chip row {@code rowHeight} tall (a chip: {@link HudStyle#CHIP}), on the block's bottom edge. */
 	public static int[] origin(int rowHeight) {
 		return new int[] {left, bottom - rowHeight};

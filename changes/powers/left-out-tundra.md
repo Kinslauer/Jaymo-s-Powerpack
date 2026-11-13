@@ -1,0 +1,11 @@
+# tundra - the parts the first patch left out
+- **Yellow moss layers**: yellow moss now has layers like the pack's other building blocks (the Saw cuts them, hoes mine them); `tools/gen_layers.py` lists it. The generator's loot-table format is out of date, so the yellow moss loot table was copied by hand from the oak log layer's and the others were left as they were.
+- **Lichen and claims**: lichen no longer eats, breaks down or seeds onto land a Kingdoms faction holds (`KingdomsCompat#claimed`, reflecting `Factions.at`; without Kingdoms nothing is claimed).
+- **Dwarfed spruce logs are logs**: they are in `minecraft:logs` (block and item), so felling a tree, bare-hand chopping and the other log checks treat them as logs.
+- **Boulders are loose stones**: a tundra boulder is now a spill of the pack's loose stones (deepslate or basalt, greenstone now and then) instead of a solid lump (`TundraFeatures`).
+- **Snow motes**: the vanilla snowflake in the tundra and lichen woodland is replaced by our own `jaymospowers:snow_mote` (`SnowMote`, drawn by `tools/snow_mote_assets.py`); it is left out in low-end mode.
+- **White ice later**: water that turns up in the tundra after the land was made (a dug lake, a spring, a bucket) freezes to white ice, not plain ice (`TundraFreezeMixin`). Only the tundra biome is covered, not the lichen woodland.
+- **Grass colour**: grass fades through the lichen woodland into the tundra instead of one flat colour (`TundraGrass`, `TundraGrassMixin`, client side, cached per 4 by 4 cell).
+- **Burnt taiga regrows**: a log burning away in a taiga or the lichen woodland scorches the soil under it to coarse dirt (`BurntLogMixin`); then (`Regrowth`) yellow moss takes hold, moss patches turn the coarse dirt to podzol, and on that podzol shrubs and spruce saplings replace the moss if the stand is not already crowded. Nothing happens on claimed land.
+- **Lichen woodland on the taiga edge** (Andy: "Yes"): the woodland no longer takes a band of the Snowy Plains; it is the dry edge of the Snowy Taiga, the open stunted forest where the taiga thins out, as the plan said. It still rings the tundra's warmer side (`TundraWorld.placing`). New chunks only.
+- Built (`compileJava`); not played.

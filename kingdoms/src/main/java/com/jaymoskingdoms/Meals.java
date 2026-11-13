@@ -511,6 +511,16 @@ public final class Meals {
 
 	// ---- eateries and cooks --------------------------------------------------------------------------------------
 
+	/** The middle of {@code f}'s first standing tavern at its floor, or null without one (school bouts are held there of an evening). */
+	public static @org.jspecify.annotations.Nullable BlockPos tavern(ServerLevel level, Faction f) {
+		for (Works.Built b : Works.of(level.getServer(), f.id()).built()) {
+			if (b.ruined() == 0 && b.entry().equals(Planner.TAVERN)) {
+				return new BlockPos((b.min().getX() + b.max().getX()) / 2, b.min().getY() + 1, (b.min().getZ() + b.max().getZ()) / 2);
+			}
+		}
+		return null;
+	}
+
 	/** {@code f}'s standing cookhouses and taverns. */
 	static List<Eatery> eateries(ServerLevel level, Faction f) {
 		List<Eatery> out = new ArrayList<>();

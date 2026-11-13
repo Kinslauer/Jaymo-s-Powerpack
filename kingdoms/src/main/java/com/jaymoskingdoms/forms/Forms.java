@@ -271,6 +271,20 @@ public final class Forms {
 		}
 	}
 
+	/**
+	 * Player → server: the attack button has been held down with a sword (Andy, 2026-11-12: Wheel Cut on "Hold attack",
+	 * like the warhammer's overhead charge): a Wheel Cut begins its wind-up, if they know it ({@link #cast}).
+	 */
+	public record HoldAttack() implements CustomPacketPayload {
+		public static final Type<HoldAttack> TYPE = new Type<>(JaymosKingdoms.id("form_hold_attack"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HoldAttack> CODEC = StreamCodec.unit(new HoldAttack());
+
+		@Override
+		public Type<HoldAttack> type() {
+			return TYPE;
+		}
+	}
+
 	/** Player → server: move the selected slot (Ctrl and scroll); {@code delta} is -1 or 1. */
 	public record Pick(int delta) implements CustomPacketPayload {
 		public static final Type<Pick> TYPE = new Type<>(JaymosKingdoms.id("form_pick"));
@@ -335,12 +349,19 @@ public final class Forms {
 	public static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Stance.TYPE, Stance.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Fire.TYPE, Fire.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HoldAttack.TYPE, HoldAttack.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Pick.TYPE, Pick.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Assign.TYPE, Assign.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenBelt.TYPE, OpenBelt.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Chain.TYPE, Chain.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Stance.TYPE, (payload, context) -> stance(context.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(Fire.TYPE, (payload, context) -> fire(context.player(), payload.sneaking()));
+		ServerPlayNetworking.registerGlobalReceiver(HoldAttack.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (book(player).knows(SpecialCuts.WHEEL_CUT.id()) && Family.BLADE.holds(player.getMainHandItem())) {
+				cast(player, SpecialCuts.WHEEL_CUT.id());
+			}
+		});
 		ServerPlayNetworking.registerGlobalReceiver(Pick.TYPE, (payload, context) -> pick(context.player(), payload.delta()));
 		ServerPlayNetworking.registerGlobalReceiver(Assign.TYPE, (payload, context) -> assign(context.player(), payload.slot(), payload.form()));
 		ServerTickEvents.END_SERVER_TICK.register(Forms::tick);

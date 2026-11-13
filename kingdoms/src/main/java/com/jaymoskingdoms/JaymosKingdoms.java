@@ -71,6 +71,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
 		Senses.register();
 		Stench.register();
+		SmogFolk.register();
 		// (0.7.155) zombie awareness (Zombie Awareness, remade): zombies hear noise, see lights and smell blood, and call the horde
 		Awareness.register();
 		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
@@ -125,6 +126,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Armory.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
+		// qiviut, the muskox's underwool, and the clothes knitted from it
+		QiviutClothes.register();
 		Buildings.register();
 		Construction.register();
 		// 0.7.202: the world weathers (moss, cracks, mud, leaf litter, tufts); a settlement's builders keep up its upkeep
@@ -228,10 +231,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.62: Jaymo's Powers' costumes: a masked player is a stranger, the costume someone of its own (and its attachments)
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
+		MaskedFaces.register();
 		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
 		Introductions.register();
+		DeadNames.register();
 		// (0.7.184) handshakes between players, and the groups they make
 		Groups.register();
 		Handshakes.register();
@@ -328,6 +333,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.386) star-touched foes on Jaymo's Powers' far worlds (its attachment)
 		LOGGER.debug("star-touched attachment: {}", StarTouched.STAR);
 		StarTouched.register();
+		RustStorms.register();
 				// (0.7.381) the ground changes under each rung, and the Rung Journal hints at them (their attachments)
 		GroundChanges.register();
 		com.jaymoskingdoms.journal.RungJournal.register();
@@ -516,6 +522,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoadPace.register();
 		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
 		Milestones.register();
+		GhostlyCrossbow.register();
 		Cavalry.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
@@ -614,6 +621,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Possession.register();
 		Murmur.register();
 		Masterless.register();
+		Menace.register();
+		TwinbladeSmiths.register();
+		IronVeins.register();
+		Mourning.register();
 		com.jaymoskingdoms.forms.Rivals.register();
 		com.jaymoskingdoms.forms.Bouts.register();
 		// 0.7.109: each villager remembers each player (gifts, trades, crimes, rescues...), and the chat AI is told (and its attachment)
@@ -711,7 +722,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Heavens.register();
 		SkyFolk.register();
 		SkyCourt.register();
+		SkyUsurpers.register();
 		SkyFerries.register();
+		SkyTrades.register();
 		Starfall.register();
 		// the wild beasts after Better Animals Plus (0.5.55), spawning on their own since 0.7.526 (Encounters)
 		com.jaymoskingdoms.wild.Wild.register();

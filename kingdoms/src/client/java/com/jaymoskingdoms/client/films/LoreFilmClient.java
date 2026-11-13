@@ -671,6 +671,8 @@ public final class LoreFilmClient {
 		/** How long it runs (ticks). The Second Defence's closing ({@link Morning}): set at the ford, the keep this far behind the stage's origin. */
 		int length = LENGTH;
 		boolean second;
+		/** Staged on a kingdom's seat: the real seat stands where the Keep does, so the film builds none and lays no hill under it. */
+		boolean onSeat;
 		double keepBack;
 		/** The weather as it was when a film that clears it began. */
 		float rain, thunder;
@@ -757,7 +759,8 @@ public final class LoreFilmClient {
 	public static void register() {
 		ShadowFlameParticle.register();
 		ClientPlayNetworking.registerGlobalReceiver(LoreFilms.Play.TYPE,
-			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY), payload.ford(), payload.keep())));
+			(payload, context) -> context.client().execute(() -> start(context.client(), payload.film(), Boolean.getBoolean(RECORD_PROPERTY), payload.ford(), payload.keep(),
+				payload.seat())));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				tick(minecraft);
@@ -788,7 +791,7 @@ public final class LoreFilmClient {
 			return 0;
 		}
 		// (once the chat screen has closed)
-		minecraft.execute(() -> start(minecraft, name, record, null, null));
+		minecraft.execute(() -> start(minecraft, name, record, null, null, false));
 		return 1;
 	}
 
@@ -884,6 +887,13 @@ public final class LoreFilmClient {
 		return h * smooth((float)edge) * smooth((float)near);
 	}
 
+	/** On a kingdom's seat: how much of the hills is laid at {@code (fw, s)}: none within SEAT_BARE of the seat, all of it SEAT_EASE beyond that. */
+	static final double SEAT_BARE = 38.0, SEAT_EASE = 26.0;
+
+	static double seatClear(double fw, double s) {
+		return Mth.clamp((Math.sqrt((fw - KEEP_F) * (fw - KEEP_F) + s * s) - SEAT_BARE) / SEAT_EASE, 0.0, 1.0);
+	}
+
 	/** Lays the land (see {@link #hill}); {@link #unlay} takes it away. */
 	private static void lay(Film f) {
 		double[][] corners = {{LAND_BACK, -LAND_HALF}, {LAND_BACK, LAND_HALF}, {LAND_FRONT, -LAND_HALF}, {LAND_FRONT, LAND_HALF}};
@@ -907,7 +917,7 @@ public final class LoreFilmClient {
 				if (fw < LAND_BACK || fw > LAND_FRONT || Math.abs(s) > LAND_HALF || !f.level.hasChunkAt(pos.set(x, 0, z))) {
 					continue;
 				}
-				int ground = Mth.floor(f.real(x + 0.5, z + 0.5)), up = (int)Math.round(hill(fw, s));
+				int ground = Mth.floor(f.real(x + 0.5, z + 0.5)), up = (int)Math.round(hill(fw, s) * (f.onSeat ? seatClear(fw, s) : 1.0));
 				// (one column's own number, the same every time the film is laid here)
 				int roll = Math.floorMod((int)Math.round(fw * 7.0) * 73_856_093 ^ (int)Math.round(s * 7.0) * 19_349_663, 1_000);
 				boolean track = fw > TRACK_FROM && fw < TRACK_TO && Math.abs(s + Math.sin(fw * 0.21) * 0.8) < TRACK_HALF - (roll % 3) * 0.3;
@@ -962,7 +972,7 @@ public final class LoreFilmClient {
 	 * Plays {@code name} where you stand: off its tape (this game's own recording, else the one shipped), or staged
 	 * afresh when there's none or {@code record} asks for a new tape to be made of it.
 	 */
-	private static void start(Minecraft minecraft, String name, boolean record, @Nullable BlockPos ford, @Nullable BlockPos keep) {
+	private static void start(Minecraft minecraft, String name, boolean record, @Nullable BlockPos ford, @Nullable BlockPos keep, boolean seat) {
 		if (!LoreFilms.ALL.contains(name) || minecraft.level == null || minecraft.player == null) {
 			return;
 		}
@@ -971,7 +981,12 @@ public final class LoreFilmClient {
 			startMorning(minecraft, name, record, ford, keep);
 			return;
 		}
-		Film f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
+		// (staged on a kingdom's seat: the stage's origin is on the land outside it, facing away, the seat standing where the Keep does)
+		boolean onSeat = seat && ford != null && keep != null && (ford.getX() != keep.getX() || ford.getZ() != keep.getZ());
+		Vec3 origin = onSeat ? Vec3.atBottomCenterOf(ford) : minecraft.player.position();
+		float yaw = onSeat ? (float)(Math.atan2(-(ford.getX() - keep.getX()), ford.getZ() - keep.getZ()) * 180.0 / Math.PI) : minecraft.player.getYRot();
+		Film f = new Film(name, minecraft.level, origin, yaw);
+		f.onSeat = onSeat;
 		f.viewBefore = minecraft.options.getCameraType();
 		film = f;
 		lay(f);
@@ -982,7 +997,8 @@ public final class LoreFilmClient {
 		if (tape != null) {
 			// (a tape that asked for something this game hasn't got: clear away what it had set up)
 			stop(minecraft);
-			f = new Film(name, minecraft.level, minecraft.player.position(), minecraft.player.getYRot());
+			f = new Film(name, minecraft.level, origin, yaw);
+			f.onSeat = onSeat;
 			f.viewBefore = minecraft.options.getCameraType();
 			film = f;
 			lay(f);
@@ -1048,6 +1064,9 @@ public final class LoreFilmClient {
 		/** Where the first shot's camera goes ({f, s}), and how far the dead are kept from it. */
 		static final double[] LENS = {25.5, 5.0, 4.0};
 		static final double FAR_NEAR = 8.0, FAR_FAR = 25.0, FAR_HALF = 13.0, APART = 2.2, SINK = 0.04, UNDER = 3.0, NO_KEEP = 30.0, LIGHT_UP = 5.0;
+		/** The defenders on the near bank: at most this many, from this near the ford, this far back from the water, this far apart. */
+		static final int HELD_MOST = 6;
+		static final double HELD_NEAR = 96.0, HELD_BACK = 4.0, HELD_APART = 2.0;
 
 		private Morning() {
 		}
@@ -1077,7 +1096,40 @@ public final class LoreFilmClient {
 				gait(f, a, Moves.IDLE, Moves.SHAMBLE);
 				place(f, a);
 			}
+			defenders(f);
 			sound(f, SoundEvents.BELL_RESONATE, 0.7F, 0.5F);
+		}
+
+		/**
+		 * The ones who held it, standing on the near bank as the dead go down: you, and every other player near the ford
+		 * (up to {@link #HELD_MOST}), each in their own skin with what they hold, in a loose line between the water and the keep.
+		 */
+		static void defenders(Film f) {
+			Minecraft minecraft = Minecraft.getInstance();
+			List<net.minecraft.client.player.AbstractClientPlayer> held = new ArrayList<>();
+			if (minecraft.player != null) {
+				held.add(minecraft.player);
+			}
+			if (minecraft.level != null) {
+				for (net.minecraft.client.player.AbstractClientPlayer p : minecraft.level.players()) {
+					if (held.size() < HELD_MOST && p != minecraft.player && !p.isSpectator() && p.position().distanceTo(f.origin) < HELD_NEAR) {
+						held.add(p);
+					}
+				}
+			}
+			for (int i = 0; i < held.size(); i++) {
+				net.minecraft.client.player.AbstractClientPlayer p = held.get(i);
+				double side = (i - (held.size() - 1) / 2.0) * HELD_APART + spread(f, 0.4);
+				double fwd = -HELD_BACK - f.rnd.nextDouble() * 1.5;
+				boolean slim = p.getSkin().model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
+				Actor a = cast(f, new FilmTape.Cast(0, FilmGear.PLAYER + p.getUUID(), slim ? FilmActor.SLIM : FilmActor.WIDE, 0, false,
+					Role.SOLDIER.ordinal(), Flesh.MAN.ordinal(), false, id(p.getMainHandItem().getItem()), id(p.getOffhandItem().getItem()),
+					new float[] {(float)fwd, (float)side, 0.0F, (float)spread(f, 10.0), 1.0F}));
+				if (a != null) {
+					gait(f, a, Moves.GUARD, Moves.RUN);
+					place(f, a);
+				}
+			}
 		}
 	}
 
@@ -1117,6 +1169,10 @@ public final class LoreFilmClient {
 		f.play = tape;
 		for (FilmTape.Box box : tape.set) {
 			float[] at = box.at();
+			if (f.onSeat && at[0] == (float)KEEP_F) {
+				// (the tape's Keep: the real seat is there instead)
+				continue;
+			}
 			box(f, block(box.block()), at[0], at[1], at[2], at[3], at[4], at[5], at[6], at[7], box.lit());
 		}
 		for (FilmTape.Cast c : tape.cast) {
@@ -1151,7 +1207,9 @@ public final class LoreFilmClient {
 	private static void stage(Film f) {
 		float facing = 0.0F, facingBack = 180.0F;
 		forest(f);
-		keep(f);
+		if (!f.onSeat) {
+			keep(f);
+		}
 		// the four heroes in among the fighting, and the fifth off to one side
 		// (Grimsby is a Sylvan elf, the others hearthlanders: long ears, and slighter than a man as the Sylvan are)
 		f.grimsby = cast(f, new FilmTape.Cast(0, "grimsby", FilmActor.WIDE, FilmActor.ELF, false, Role.MAGE.ordinal(), Flesh.MAN.ordinal(), false, id(Items.IRON_SWORD), "",
@@ -1882,8 +1940,12 @@ public final class LoreFilmClient {
 	private static void replay(Film f, FilmTape tape, int t) {
 		if (t < tape.frames.size()) {
 			FilmTape.Frame frame = tape.frames.get(t);
-			for (FilmTape.Event e : frame.events) {
-				happen(f, e);
+			boolean[] skip = new boolean[frame.events.size()];
+			oldSparks(f, frame.events, skip);
+			for (int i = 0; i < frame.events.size(); i++) {
+				if (!skip[i]) {
+					happen(f, frame.events.get(i));
+				}
 			}
 			for (float[] m : frame.moves) {
 				int index = (int)m[0];
@@ -1962,6 +2024,11 @@ public final class LoreFilmClient {
 				if (e.a() >= 0 && e.a() < f.palette.length && v.length >= 6) {
 					Vec3 way = f.way(v[3], v[4], v[5]);
 					particle(f, f.palette[e.a()], f.at(v[0], v[1], v[2]), way.x, way.y, way.z);
+				}
+			}
+			case FilmTape.CLASH -> {
+				if (v.length >= 3 && !shower(f, f.at(v[0], v[1], v[2]), e.a(), e.b() / 10.0F)) {
+					particle(f, ParticleTypes.CRIT, f.at(v[0], v[1], v[2]), 0.0, 0.2, 0.0);
 				}
 			}
 			case FilmTape.BOLT -> {
@@ -3911,8 +3978,14 @@ public final class LoreFilmClient {
 		b.nextSwing = Math.max(b.nextSwing, f.tick + SHATTER_STUN + 4);
 	}
 
-	/** Sparks struck off steel at {@code at}: {@code many} of them thrown every way, hot ones among the white. */
+	/** Sparks struck off steel at {@code at}: Jaymo's Powers' clash sparks ({@code ClashFx}), the same shower every fight in the game throws. */
 	private static void sparks(Film f, Vec3 at, int many) {
+		float scale = many >= CLASH_SPARKS ? CLASH_SCALE : CLASH_SCALE * 0.8F;
+		if (shower(f, at, many, scale)) {
+			particle(f, ParticleTypes.CRIT, at, spread(f, 0.3), 0.2, spread(f, 0.3));
+			return;
+		}
+		// (without Jaymo's Powers: sparks of our own)
 		for (int i = 0; i < many; i++) {
 			particle(f, ParticleTypes.ELECTRIC_SPARK, at, spread(f, SPARK_SPEED), f.rnd.nextDouble() * SPARK_SPEED, spread(f, SPARK_SPEED));
 			if (i % 3 == 0) {
@@ -3920,6 +3993,81 @@ public final class LoreFilmClient {
 			}
 		}
 		particle(f, ParticleTypes.CRIT, at, spread(f, 0.3), 0.2, spread(f, 0.3));
+	}
+
+	/** Size of a clash's shower in Powers' own measure ({@code ClashFx.CLASH_SCALE}). */
+	static final float CLASH_SCALE = 1.2F;
+	/** Powers' {@code ClashFxClient.sparks(ClientLevel, Vec3, Vec3, int, float)}, looked up once (null: Jaymo's Powers isn't here). */
+	private static java.lang.invoke.@Nullable MethodHandle clashShower;
+	private static boolean lookedForClash;
+
+	private static boolean clashHere() {
+		if (!lookedForClash) {
+			lookedForClash = true;
+			if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					clashShower = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.client.combat.ClashFxClient"), "sparks",
+						java.lang.invoke.MethodType.methodType(void.class, ClientLevel.class, Vec3.class, Vec3.class, int.class, float.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' clash sparks for the films", e);
+				}
+			}
+		}
+		return clashShower != null;
+	}
+
+	/** A shower of Powers' clash sparks at {@code at} (taped as one), false if Jaymo's Powers isn't here to throw it. */
+	private static boolean shower(Film f, Vec3 at, int many, float scale) {
+		if (!clashHere()) {
+			return false;
+		}
+		if (f.rec != null) {
+			float[] staged = f.staged(at);
+			tape(f, FilmTape.CLASH, many, Math.round(scale * 10.0F), new float[] {staged[0], staged[1], staged[2]}, "");
+		}
+		try {
+			clashShower.invoke(f.level, at, (Vec3)null, many, scale);
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * A tape made before the clash sparks was staged with its own sparks: a burst of electric sparks all at one point, in
+	 * one tick, and the embers beside them. On a game with Jaymo's Powers each such burst is thrown as its one shower of
+	 * clash sparks instead (the burst's size is the shower's). Marks the events it took over in {@code skip}.
+	 */
+	private static void oldSparks(Film f, List<FilmTape.Event> events, boolean[] skip) {
+		if (!clashHere()) {
+			return;
+		}
+		Map<String, List<Integer>> bursts = new HashMap<>();
+		for (int i = 0; i < events.size(); i++) {
+			FilmTape.Event e = events.get(i);
+			if (e.type() == FilmTape.PARTICLE && e.a() >= 0 && e.a() < f.palette.length && f.palette[e.a()] == ParticleTypes.ELECTRIC_SPARK && e.v().length >= 3) {
+				bursts.computeIfAbsent(e.v()[0] + "," + e.v()[1] + "," + e.v()[2], k -> new ArrayList<>()).add(i);
+			}
+		}
+		for (List<Integer> burst : bursts.values()) {
+			if (burst.size() < 3) {
+				continue;
+			}
+			float[] v = events.get(burst.get(0)).v();
+			Vec3 at = f.at(v[0], v[1], v[2]);
+			for (int i : burst) {
+				skip[i] = true;
+			}
+			for (int i = 0; i < events.size(); i++) {
+				FilmTape.Event e = events.get(i);
+				// the embers thrown with them (small orange and pale dust within a block)
+				if (e.type() == FilmTape.PARTICLE && e.a() >= 0 && e.a() < f.palette.length && f.palette[e.a()] instanceof DustParticleOptions dust
+					&& Math.abs(dust.getScale() - 0.45F) < 0.01F && e.v().length >= 3 && f.at(e.v()[0], e.v()[1], e.v()[2]).distanceToSqr(at) < 1.0) {
+					skip[i] = true;
+				}
+			}
+			shower(f, at, burst.size(), burst.size() >= CLASH_SPARKS ? CLASH_SCALE : CLASH_SCALE * 0.8F);
+		}
 	}
 
 	private static Finish begin(Film f, Actor winner, Actor loser, int kind, int t) {

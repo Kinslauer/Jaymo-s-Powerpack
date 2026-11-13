@@ -732,6 +732,54 @@ public final class FallingTree extends Entity {
 			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 0.4F, 1.7F);
 			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, middle.x, middle.y, middle.z, 6, 1.5, 0.2, 1.5, 0.01);
 		}
+		this.splash(level, pieces, turn);
+	}
+
+	/** (Hardrock picks) Logs most that strike water within this many blocks make a splash this wide, at the most. */
+	private static final double SPLASH_REACH = 3.0, SPLASH_MOST = 7.0, SPLASH_PUSH = 0.6, SPLASH_LIFT = 0.22;
+
+	/**
+	 * (Hardrock picks) Andy: a felled trunk that lands in water splashes. The logs that came down in water (in the block,
+	 * or the one just under it) throw up a spray along their length, and the wave they make, wider for a longer trunk, shoves
+	 * swimmers, boats and floating things away from it and rocks them.
+	 */
+	private void splash(ServerLevel level, List<Piece> pieces, Quaternionf turn) {
+		List<Vec3> wet = new ArrayList<>();
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			Vec3 at = this.where(p, turn);
+			BlockPos pos = BlockPos.containing(at);
+			if (level.getFluidState(pos).is(FluidTags.WATER) || level.getFluidState(pos.below()).is(FluidTags.WATER)) {
+				wet.add(at);
+			}
+		}
+		if (wet.isEmpty()) {
+			return;
+		}
+		Vec3 centre = Vec3.ZERO;
+		for (Vec3 at : wet) {
+			centre = centre.add(at);
+			level.sendParticles(ParticleTypes.SPLASH, at.x, at.y + 0.4, at.z, 10, 0.5, 0.2, 0.5, 0.25);
+			level.sendParticles(ParticleTypes.BUBBLE_POP, at.x, at.y + 0.2, at.z, 3, 0.5, 0.1, 0.5, 0.05);
+		}
+		centre = centre.scale(1.0 / wet.size());
+		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 2.0F, 0.5F);
+		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.BLOCKS, 1.0F, 0.6F);
+		double reach = Math.min(SPLASH_MOST, SPLASH_REACH + wet.size() * 0.4);
+		AABB box = new AABB(centre, centre).inflate(reach, 2.5, reach);
+		for (Entity e : level.getEntities(this, box, x -> x.isInWater() || x instanceof net.minecraft.world.entity.vehicle.boat.AbstractBoat
+			|| x instanceof net.minecraft.world.entity.item.ItemEntity)) {
+			double dx = e.getX() - centre.x, dz = e.getZ() - centre.z;
+			double d = Math.sqrt(dx * dx + dz * dz);
+			if (d > reach || d < 1.0E-3) {
+				continue;
+			}
+			double f = (1.0 - d / reach) * SPLASH_PUSH;
+			e.push(dx / d * f, SPLASH_LIFT * (1.0 - d / reach), dz / d * f);
+			e.needsSync = true;
+		}
 	}
 
 	/** Lain a moment, it breaks apart where it lies, giving what it would have. */

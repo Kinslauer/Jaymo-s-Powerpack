@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * Andy's Cruor picks (2026-11-12, ideas only: Cruor is All Rights Reserved): a hit leaves a mark that says what made it,
  * where it landed. A blade leaves a cut, claws and teeth a raking of three, an arrow or a bolt a puncture, a blunt blow, a
  * fist, a fall or a slam a bruise, a blast a peppering of small cuts over several parts. Each mark sits on the part the
- * hit was routed to ({@link Wounds}) and on the side it came from, is synced to everyone and drawn into the skin by the
+ * hit was routed to ({@link Wounds}) and on the side it came from (fire, lightning and ki leave a scorch), is synced to everyone and drawn into the skin by the
  * client's {@code WoundMarksLayer}, fades as it ages ({@link Kind#life}), and goes once the part has mended whole.
  * <p>
  * A fresh cut or puncture drips a few drops for a while ({@link #DRIP_TICKS}), more seldom as it closes; the deep cuts
@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
 public final class WoundMarks {
 	/** The kinds of mark, and how long each lasts at most (ticks). */
 	public enum Kind {
-		CUT(12000), CLAW(12000), STAB(12000), BRUISE(7200), BLAST(9600);
+		CUT(12000), CLAW(12000), STAB(12000), BRUISE(7200), BLAST(9600), SCORCH(9600);
 
 		public final int life;
 
@@ -55,8 +55,13 @@ public final class WoundMarks {
 	public static final int FRONT = 0, RIGHT = 1, BACK = 2, LEFT = 3;
 	/** A body keeps this many marks at most (the oldest go first). */
 	public static final int MOST = 10;
-	/** A hit must take at least this much (health points) to mark. */
-	public static final float MARK_FROM = 1.0F;
+	/** A hit must take at least this much (health points) to mark: every hit that lands at all (Andy: "every hit"). */
+	public static final float MARK_FROM = 0.01F;
+	/** Burning leaves a scorch no oftener than this on one body (ticks), so a body on fire isn't covered in a turn. */
+	public static final int SCORCH_GAP = 60;
+	/** Z Fighters' ki, which scorches as fire and lightning do. */
+	static final net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> KI = net.minecraft.resources.ResourceKey.create(
+		net.minecraft.core.registries.Registries.DAMAGE_TYPE, JaymosPowers.id("zfighter_ki"));
 	/** A blast marks this many parts at most. */
 	public static final int BLAST_PARTS = 3;
 	/** A fresh cut drips for this long (ticks): at first about every {@link #DRIP_EVERY_FIRST} ticks, by the end every {@link #DRIP_EVERY_LAST}. */
@@ -76,7 +81,7 @@ public final class WoundMarks {
 		public static final StreamCodec<io.netty.buffer.ByteBuf, Mark> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Mark::shape, ByteBufCodecs.VAR_LONG, Mark::laid, Mark::new);
 
-		static Mark of(BodyPart part, Kind kind, int side, int across, int down, int angle, int seed, long laid) {
+		public static Mark of(BodyPart part, Kind kind, int side, int across, int down, int angle, int seed, long laid) {
 			long s = part.ordinal() & 0xF | (long) (kind.ordinal() & 0x7) << 4 | (long) (side & 0x3) << 7 | (long) (across & 0xFF) << 9
 				| (long) (down & 0xFF) << 17 | (long) (angle & 0xFF) << 25 | (long) (seed & 0xFFFF) << 33;
 			return new Mark(s, laid);
@@ -145,15 +150,24 @@ public final class WoundMarks {
 
 	/** From {@link Wounds}: {@code victim} took {@code loss} from {@code source}, routed to {@code landed}. */
 	static void onHit(LivingEntity victim, BodyPlan plan, DamageSource source, @Nullable BodyPart landed, float loss) {
-		if (loss < MARK_FROM || !(victim.level() instanceof ServerLevel level) || BladeBlood.color(victim) == BladeBlood.NO_BLOOD) {
+		if (loss < MARK_FROM || !(victim.level() instanceof ServerLevel level)) {
 			return;
 		}
 		Kind kind = kind(source);
+		// (Andy: marks show "on everyone, mobs and players, humanoid and otherwise": a bloodless body, a skeleton or a
+		// golem, takes them too, drawn as chips and cracks in place of blood, and never drips)
 		if (kind == null) {
 			return;
 		}
 		RandomSource random = victim.getRandom();
 		long now = level.getGameTime();
+		if (kind == Kind.SCORCH) {
+			for (Mark mark : marks(victim)) {
+				if (mark.kind() == Kind.SCORCH && now - mark.laid() < SCORCH_GAP) {
+					return;
+				}
+			}
+		}
 		int side = side(victim, source.getSourcePosition(), random);
 		List<Mark> marks = new ArrayList<>(marks(victim));
 		if (kind == Kind.BLAST) {
@@ -182,10 +196,14 @@ public final class WoundMarks {
 		return Mark.of(part, kind, side, across, down, random.nextInt(256), random.nextInt(65536), now);
 	}
 
-	/** What a hit from {@code source} marks, or null for one that leaves none (fire, magic, drowning, hunger). */
+	/** What a hit from {@code source} marks, or null for one that leaves none (magic, drowning, hunger). */
 	static @Nullable Kind kind(DamageSource source) {
 		if (source.is(DamageTypeTags.IS_EXPLOSION)) {
 			return Kind.BLAST;
+		}
+		// (Andy's pick: fire, lightning and ki leave scorch marks)
+		if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.LIGHTNING_BOLT) || source.is(KI)) {
+			return Kind.SCORCH;
 		}
 		if (source.is(DamageTypeTags.IS_PROJECTILE)) {
 			return Kind.STAB;
@@ -283,8 +301,11 @@ public final class WoundMarks {
 		}
 	}
 
-	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes. */
+	/** The freshest open cut or puncture not already bleeding properly drips, more seldom as it closes; a bandaged part never does. */
 	private static void drip(ServerLevel level, LivingEntity body, List<Mark> marks, long now) {
+		if (BladeBlood.color(body) == BladeBlood.NO_BLOOD) {
+			return;
+		}
 		Long next = NEXT_DRIP.get(body);
 		if (next != null && now < next) {
 			return;
@@ -293,7 +314,8 @@ public final class WoundMarks {
 		for (Mark mark : marks) {
 			Kind kind = mark.kind();
 			if ((kind == Kind.CUT || kind == Kind.CLAW || kind == Kind.STAB) && now - mark.laid() < DRIP_TICKS
-				&& (Bleeding.bleeding(body) & Breaks.bit(mark.part())) == 0 && (fresh == null || mark.laid() > fresh.laid())) {
+				&& ((Bleeding.bleeding(body) | Bleeding.bandaged(body) | Bleeding.wrapped(body)) & Breaks.bit(mark.part())) == 0
+				&& (fresh == null || mark.laid() > fresh.laid())) {
 				fresh = mark;
 			}
 		}

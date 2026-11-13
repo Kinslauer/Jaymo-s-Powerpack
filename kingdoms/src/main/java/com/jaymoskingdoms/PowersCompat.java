@@ -2475,6 +2475,55 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle slipperyOf;
+	private static boolean slipperyLooked;
+
+	/** {@code entity} is a player in Slipfin's form, too slick to grab (Powers' {@code Slipfin.slippery}); false without Powers. */
+	public static boolean slippery(net.minecraft.world.entity.@Nullable Entity entity) {
+		if (!slipperyLooked) {
+			slipperyLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					slipperyOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.xenoform.forms.Slipfin"),
+						"slippery", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Slipfin.slippery (older Powers?)", e);
+				}
+			}
+		}
+		if (slipperyOf == null || entity == null) {
+			return false;
+		}
+		try {
+			return (boolean)slipperyOf.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle carried;
+	private static boolean carriedLooked;
+
+	/** Someone is carrying {@code entity} in their arms or dragging it (Powers' {@code Carry.isCarried}); false without Powers. */
+	public static boolean isCarried(net.minecraft.world.entity.Entity entity) {
+		if (!carriedLooked) {
+			carriedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					carried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"),
+						"isCarried", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Carry.isCarried (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return carried != null && (boolean)carried.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
 	public static int powerLevel(LivingEntity entity) {
 		lookForWill();
@@ -3544,6 +3593,36 @@ public final class PowersCompat {
 			// only a sound
 		}
 		return false;
+	}
+
+	/** Powers' {@code Armed.threatening(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle threatening;
+	private static boolean lookedForThreat;
+
+	/**
+	 * Whether {@code body} stands in Jaymo's Powers' drawn, crouched sword stance (a weapon in the hand, sneaking), which
+	 * villagers and guards read as a threat ({@link Menace}). Without Powers the pose doesn't exist, so false.
+	 */
+	public static boolean threatening(LivingEntity body) {
+		if (!lookedForThreat) {
+			lookedForThreat = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					threatening = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.Armed"),
+						"threatening", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' armed stance (older Powers?)", e);
+				}
+			}
+		}
+		if (threatening == null) {
+			return false;
+		}
+		try {
+			return (boolean)threatening.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/** Powers' {@code Carry.npcDrag(Mob, LivingEntity)}, {@code Carry.npcLetGo(Mob)} and {@code Carry.npcDragging(Mob)}. */

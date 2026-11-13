@@ -83,6 +83,12 @@ public final class SmokeSmog {
 	public static final AttachmentType<Long> SINCE = AttachmentRegistry.create(JaymosPowers.id("smoke_smog_since"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.LONG).copyOnDeath());
 
+	/**
+	 * On a Smog user (Andy, 2026-11-12: "they should react"): Kingdoms' folk smell the corruption on them. And while they
+	 * stand in clean open air: no natural healing there ({@link #CLEAN_AIR_TAG}; Kitchen's meals read it too).
+	 */
+	public static final String SMOG_TAG = "jaymospowers.smog", CLEAN_AIR_TAG = "jaymospowers.clean_air";
+
 	private static final class Data {
 		int black, grey, clean, rain, cough;
 		boolean coughed, hinted;
@@ -120,6 +126,8 @@ public final class SmokeSmog {
 		if (player.getAttached(SINCE) != null) {
 			player.removeAttached(SINCE);
 		}
+		player.removeTag(SMOG_TAG);
+		player.removeTag(CLEAN_AIR_TAG);
 		if (!Fate.canCorrupt(player) || !(pouring(player) || SmokeVapour.active(player))) {
 			return;
 		}
@@ -165,8 +173,11 @@ public final class SmokeSmog {
 		long now = level.getGameTime();
 		SmokeField.markSmog(player, now + 40);
 		if (cure(player, level)) {
+			player.removeTag(SMOG_TAG);
+			player.removeTag(CLEAN_AIR_TAG);
 			return;
 		}
+		player.addTag(SMOG_TAG);
 		if (player.tickCount % DOSE_EVERY == 0) {
 			poison(player, level);
 		}
@@ -179,11 +190,15 @@ public final class SmokeSmog {
 			if (!player.getAbilities().instabuild) {
 				player.causeFoodExhaustion(CLEAN_AIR_EXHAUSTION);
 			}
+			// (the plan's other cost: clean air heals nothing in them)
+			player.addTag(CLEAN_AIR_TAG);
 			Data d = data(player);
 			if (++d.cough >= COUGH_EVERY) {
 				d.cough = 0;
 				cough(player, false);
 			}
+		} else {
+			player.removeTag(CLEAN_AIR_TAG);
 		}
 	}
 
@@ -284,6 +299,8 @@ public final class SmokeSmog {
 
 	static void forget(ServerPlayer player) {
 		DATA.remove(player.getUUID());
+		player.removeTag(SMOG_TAG);
+		player.removeTag(CLEAN_AIR_TAG);
 	}
 
 	static void clear() {

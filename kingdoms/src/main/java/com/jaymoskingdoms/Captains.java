@@ -237,6 +237,17 @@ public final class Captains {
 		BARGAINER(Sort.WEAKNESS),
 		/** A shot at him, or near him: he runs. */
 		GUN_SHY(Sort.FEAR),
+		// ---- (Andy, 2026-11-12: "please add them all") the plan's five that had been folded into others ----
+		/** Feels a ki user's energy from afar, through walls, hidden or not, and comes for them. */
+		SENSES_KI(Sort.STRENGTH),
+		/** Sworn to a patron god ({@link CaptainWays#patron}): harder on those of other gods, softer to his own god's faithful. */
+		PATRON_SWORN(Sort.STRENGTH),
+		/** Armoured in bog iron: as tough as iron, no slower, but it rusts soft while he's wet. */
+		BOG_IRON(Sort.STRENGTH),
+		/** Never sleeps: never caught abed, and keeps a watch all night. */
+		NEVER_SLEEPS(Sort.STRENGTH),
+		/** Hates fire mages: goes for one before anyone else, and hits them harder. */
+		HATES_FIRE_MAGES(Sort.STRENGTH),
 		/** Signature moves (rank 4 and up), each with a red glint first. */
 		SHIELD_CHARGE(Sort.MOVE),
 		GROUND_SLAM(Sort.MOVE),
@@ -266,7 +277,8 @@ public final class Captains {
 		boolean clashes(Trait other) {
 			return pair(other, ARROW_PROOF, SOFT_TO_ARROWS) || pair(other, FIRE_BORN, BURNS_EASILY) || pair(other, FIRE_BORN, FEARS_FIRE)
 				|| pair(other, WATCHFUL, BLIND_SIDE) || pair(other, IRON_JAW, GLASS_JAW) || pair(other, IRON_CLAD, HEAVY_FOOTED)
-				|| pair(other, PACK_LEADER, FEARS_BEASTS);
+				|| pair(other, PACK_LEADER, FEARS_BEASTS) || pair(other, BOG_IRON, IRON_CLAD) || pair(other, HATES_FIRE_MAGES, FEARS_FIRE)
+				|| pair(other, NEVER_SLEEPS, SOT);
 		}
 
 		private boolean pair(Trait other, Trait a, Trait b) {

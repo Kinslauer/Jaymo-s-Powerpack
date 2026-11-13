@@ -168,7 +168,7 @@ final class StoryFigure {
 		scene("road.whalers", Act.USE, com.jaymoskingdoms.whaling.Whaling.HARPOON_ITEM, null, null, lc, null, lb);
 		// (0.7.364) Andy: "he shouldnt still have his limb"; (0.7.402) the sword arm, so what the hand held lies on the floor
 		SCENES.put("road.unarmed", new Scene(Act.STAND, null, null, null, null, null, null, false, RIGHT_ARM));
-		// (0.7.412) the hard roads: chained is bare like the captive (no chains drawn: a held item would end "bare"), rock bottom is
+		// (0.7.412) the hard roads: chained is bare like the captive (its chains are StoryChains'), rock bottom is
 		// short a limb with nothing in hand, the sentenced hold the bars, the evicted carry their purse and a bundle, the hideout's
 		// guest wears an outlaw's cap, the cast out walk on with nothing
 		SCENES.put("road.chained", new Scene(Act.LOOK_DOWN, null, null, null, null, null, null, true, 0));
@@ -416,7 +416,10 @@ final class StoryFigure {
 				default -> 0F;
 			};
 			int size = Math.max(10, (int)((y1 - y0) * SCALE));
+			// (Andy, 2026-11-12) the chained road's figure in its irons
+			StoryChains.drawing = scenes.contains("road.chained") ? target : null;
 			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, lookX, lookY, target);
+			StoryChains.drawing = null;
 			for (int h = 0; h < 2; h++) {
 				if (dropped[h] != null) {
 					// the figure faces you, so its right side is on your left
@@ -426,6 +429,7 @@ final class StoryFigure {
 				}
 			}
 		} finally {
+			StoryChains.drawing = null;
 			if (using) {
 				target.stopUsingItem();
 			}

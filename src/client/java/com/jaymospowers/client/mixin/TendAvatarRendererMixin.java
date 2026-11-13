@@ -22,6 +22,8 @@ abstract class TendAvatarRendererMixin {
 		com.jaymospowers.client.CrouchPose.extract(entity, state, partialTicks);
 		// (0.16.21) a hand to a wound now and then
 		com.jaymospowers.client.wounds.WoundNursePose.extract(entity, state, partialTicks);
+		// (Andy, 2026-11-12) the hands at the face while a mask comes off or goes on
+		com.jaymospowers.client.costume.MaskPose.extract(entity, state, partialTicks);
 	}
 
 	@Inject(

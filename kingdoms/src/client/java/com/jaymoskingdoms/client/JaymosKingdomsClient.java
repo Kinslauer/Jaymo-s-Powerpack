@@ -202,6 +202,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
+		BoutBracketScreen.register();
+		MaskedFacesClient.register();
+		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
@@ -254,6 +257,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GreenskinLooks.register();
 		// (0.7.616, Rivals patch 1) the marks captains carry back
 		CaptainMarks.register();
+		StoryChains.register();
 		// (0.7.619) the brand of your Bane-to-be, seen by you alone
 		BaneBrand.register();
 		// (0.7.620) the marks that end it, carved at a grindstone
@@ -274,6 +278,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();
+		// layered clouds instead of the game's single sheet
+		com.jaymoskingdoms.client.disasters.CloudDecks.register();
 		// 0.7.509: the patrons screen, the boon menu and the boon key
 		PatronKeys.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)

@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymoskingdoms:qiviut"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymoskingdoms:qiviut"
+      }
+    ]
+  }
+}

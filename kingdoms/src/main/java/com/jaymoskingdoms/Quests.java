@@ -548,8 +548,10 @@ public final class Quests {
 			Speech.GOLD);
 		// (0.7.109) and they remember it
 		Recollections.remember(giver, player, Recollections.Kind.QUEST_DONE, title(q));
-		// a town errand toward the story's first act, for the party near too
-		Retaking.errand(player);
+		// a town errand toward the story's first act, for the party near too (only the ones marked as such: storyErrand)
+		if (storyErrand(q)) {
+			Retaking.errand(player);
+		}
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.complete", title(q)).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, player.blockPosition(), q.royal() ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
 			1.0F, 1.0F);
@@ -1266,6 +1268,27 @@ public final class Quests {
 		}
 	}
 
+	/**
+	 * Whether {@code q} is one of the town's own errands that count toward the story's first act (Andy, 2026-11-12: "mark
+	 * some"). Work the town needs done for its own folk: a letter carried, goods brought, a thing fetched, animals led,
+	 * rubble cleared, a child brought home, a merchantman seen safe. Of the everyday ones (letters, goods, fetching,
+	 * animals) about one in {@link #STORY_ONE_IN}, by the quest's own id, so the same quest is always the same; clearing
+	 * rubble, a rescue and an escort always. A king's quests, killing, horses and grudges never count. The journal marks them.
+	 */
+	public static boolean storyErrand(Quest q) {
+		if (q.royal()) {
+			return false;
+		}
+		return switch (q.kind()) {
+			case Quest.RELIEF, Quest.RESCUE, Quest.ESCORT -> true;
+			case Quest.DELIVER, Quest.GATHER, Quest.FETCH, Quest.LEAD -> Math.floorMod(q.id().hashCode(), STORY_ONE_IN) == 0;
+			default -> false;
+		};
+	}
+
+	/** About one in this many everyday quests is a story errand ({@link #storyErrand}). */
+	static final int STORY_ONE_IN = 3;
+
 	static Component title(Quest q) {
 		String key = Rulers.her("quest.jaymoskingdoms." + q.template() + ".title", ruled(q));
 		return switch (q.kind()) {
@@ -1394,7 +1417,8 @@ public final class Quests {
 			case Quest.RELIEF -> Component.translatable("quest.jaymoskingdoms.objective.rubble", o.place(), o.progress(), o.count());
 			case Quest.ESCORT -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.escorting" : "quest.jaymoskingdoms.objective.escort",
 				q.giver().name(), o.place(), x(q), z(q));
-			case Quest.RESCUE -> Component.translatable("quest.jaymoskingdoms.objective.rescue", o.otherName(), x(q), z(q));
+			case Quest.RESCUE -> Component.translatable(QuakeRescue.digOut(q) ? "quest.jaymoskingdoms.objective.dig_out" : "quest.jaymoskingdoms.objective.rescue",
+				o.otherName(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

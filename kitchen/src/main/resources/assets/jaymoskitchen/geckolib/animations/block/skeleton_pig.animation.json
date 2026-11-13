@@ -1,0 +1,52 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "standing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "rooting": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "neck": {
+     "rotation": [
+      30,
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      25,
+      0,
+      0
+     ]
+    },
+    "front_left": {
+     "rotation": [
+      -8,
+      0,
+      0
+     ]
+    },
+    "front_right": {
+     "rotation": [
+      -8,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

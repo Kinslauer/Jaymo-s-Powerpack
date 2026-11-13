@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.383, Andy's SevTech picks: "The Ground Changes") Nobody needs fresh land for the next metal. When a player opens a
  * world tier, the chunks already loaded round them get that tier's veins, now and then a big vein of ore laid over deep stone: iron and
- * copper for Borderlands, gold and lapis for Wildlands, diamond for Dread and, in the Nether, ancient debris for Legend.
+ * copper for Borderlands, gold and lapis for Wildlands. (Diamond and ancient debris are never laid: they lie only in chests.)
  * Each chunk remembers the highest tier it has been seeded for ({@link #SEEDED}, saved with the chunk) so a tier is
  * seeded once per chunk however many players pass through. It runs lazily: every {@link #SCAN_TICKS} ticks each player's
  * surroundings are walked a few chunks at a time ({@link #LOOKS_PER_WALK}), and at most {@link #SEEDS_PER_WALK} chunks are
@@ -54,7 +54,7 @@ public final class GroundChanges {
 	/**
 	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), one chunk in how many gets
 	 * one, how many blocks it is, the height range it sits in, and whether a block touching air is passed over (buried ore).
-	 * Andy's Hardrock picks: few big veins, as Powers' BigVeins lays at worldgen, and diamond and debris all but never.
+	 * Andy's Hardrock picks: few big veins, as Powers' BigVeins lays at worldgen, and never diamond or debris.
 	 */
 	record Vein(Block stone, @Nullable Block deep, int chance, int size, int minY, int maxY, boolean buried) {
 	}
@@ -66,12 +66,12 @@ public final class GroundChanges {
 			new Vein(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, 20, 110, -16, 96, false)),
 		List.of(new Vein(Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, 48, 60, -64, 32, false),
 			new Vein(Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE, 12, 20, -32, 32, false)),
-		List.of(new Vein(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, 900, 3, -64, -24, true)),
+		// (Dread lays no diamond: Andy, 2026-11-12, diamond and netherite are the old world's leftovers, found only in chests)
+		List.of(),
 		List.of());
 	/** The Nether's veins by tier. */
 	static final List<List<Vein>> NETHER = List.of(
-		List.of(), List.of(), List.of(), List.of(),
-		List.of(new Vein(Blocks.ANCIENT_DEBRIS, null, 1200, 2, 8, 118, true)));
+		List.of(), List.of(), List.of(), List.of(), List.of());
 
 	/** Powers' ice caves and their rock, by id (see {@link #iceCaveRock}); an ore pocket there is deepslate below this height. */
 	static final ResourceKey<Biome> ICE_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", "ice_caves"));

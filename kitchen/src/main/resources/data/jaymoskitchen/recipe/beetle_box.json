@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "PRP",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "#minecraft:wooden_slabs",
+    "R": "minecraft:rotten_flesh"
+  },
+  "result": {
+    "id": "jaymoskitchen:beetle_box",
+    "count": 1
+  }
+}

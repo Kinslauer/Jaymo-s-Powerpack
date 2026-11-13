@@ -43,6 +43,15 @@ public final class Armed {
 		"trident", "naginata", "scythe", "poleaxe", "partisan", "bardiche");
 	// ================================================================================================================
 
+	/**
+	 * Whether {@code body} stands in the drawn, crouched sword stance (a weapon in the main hand, sneaking): the stance
+	 * villagers and guards read as a threat. Kingdoms asks this by name ({@code PowersCompat.threatening}); the same
+	 * answer on both sides.
+	 */
+	public static boolean threatening(LivingEntity body) {
+		return body.isShiftKeyDown() && kind(body.getMainHandItem()) != null;
+	}
+
 	/** How a weapon is carried. */
 	public enum Kind {
 		ONE_HAND, TWO_HAND, POLE

@@ -181,6 +181,37 @@ public final class KitchenCompat {
 		}
 	}
 
+	/** Kitchen's freshness clock: {@code Freshness.today(Level)} and {@code left(ItemStack, long)}, looked up the first time. */
+	private static @Nullable Method FRESH_TODAY, FRESH_LEFT;
+	private static boolean freshLooked;
+
+	/**
+	 * How fresh Kitchen's freshness clock says {@code stack} still is, 1 (just made) to 0 (about to turn), or -1 if it
+	 * isn't dated (not perishable, never carried, or no Kitchen).
+	 */
+	static float freshness(net.minecraft.world.level.Level level, net.minecraft.world.item.ItemStack stack) {
+		if (!freshLooked) {
+			freshLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					Class<?> fresh = Class.forName("com.jaymoskitchen.fresh.Freshness");
+					FRESH_TODAY = fresh.getMethod("today", net.minecraft.world.level.Level.class);
+					FRESH_LEFT = fresh.getMethod("left", net.minecraft.world.item.ItemStack.class, long.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.debug("Kitchen freshness not found: {}", e.toString());
+				}
+			}
+		}
+		if (FRESH_TODAY == null || FRESH_LEFT == null) {
+			return -1.0F;
+		}
+		try {
+			return (Float)FRESH_LEFT.invoke(null, stack, (Long)FRESH_TODAY.invoke(null, level));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1.0F;
+		}
+	}
+
 	private KitchenCompat() {
 	}
 
@@ -362,6 +393,23 @@ public final class KitchenCompat {
 	/** (0.7.132) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
 	static boolean hasValuables(Entity corpse) {
 		return Boolean.TRUE.equals(call(HAS_VALUABLES, corpse));
+	}
+
+	/** A player's corpse's owner (their UUID as text), or null (not a corpse, or Kitchen too old). */
+	static @Nullable String corpseOwner(Entity corpse) {
+		if (CORPSE == null || !CORPSE.isInstance(corpse)) {
+			return null;
+		}
+		try {
+			return CORPSE.getMethod("ownerId").invoke(corpse) instanceof String s ? s : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/** {@link Mourning}: a companion takes up a player's body to bury it, and what it carried with it (to lay in the grave). */
+	static java.util.List<net.minecraft.world.item.ItemStack> robCorpse(Entity corpse, Entity by) {
+		return robBy(corpse, by);
 	}
 
 	/** (0.7.132) {@code robber} strips the body of what it carries and wears; what was taken (empty if nothing). */

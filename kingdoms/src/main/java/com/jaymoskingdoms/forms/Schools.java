@@ -196,6 +196,51 @@ public final class Schools {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> MASKS.values().forEach(output::accept));
 	}
 
+	// ---- the mask key (Powers' ' key, by reflection from its Costume.toggleMask) ------------------------------------
+
+	private static boolean isMask(ItemStack stack) {
+		return !stack.isEmpty() && MASKS.containsValue(stack.getItem());
+	}
+
+	/** Whether the mask key has a school mask to take off (worn) or put on (carried). */
+	public static boolean maskable(ServerPlayer player) {
+		if (isMask(player.getItemBySlot(EquipmentSlot.HEAD))) {
+			return true;
+		}
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (isMask(player.getInventory().getItem(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * (Andy, 2026-11-12) The mask key on a school mask: worn, it comes off into the pack (or drops, if the pack's full);
+	 * carried, it goes on (whatever was on the head going into the pack in its place). True if one moved.
+	 */
+	public static boolean toggleMask(ServerPlayer player) {
+		ItemStack worn = player.getItemBySlot(EquipmentSlot.HEAD);
+		if (isMask(worn)) {
+			player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+			if (!player.getInventory().add(worn)) {
+				player.drop(worn, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.school.mask_off", worn.getHoverName()));
+			return true;
+		}
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack mask = player.getInventory().getItem(i);
+			if (isMask(mask)) {
+				player.getInventory().setItem(i, worn);
+				player.setItemSlot(EquipmentSlot.HEAD, mask);
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.school.mask_on", mask.getHoverName()));
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// ---- the public interface (Patch 5 and the masters' talk) ----------------------------------------------------------
 
 	private static State state(Player player) {
@@ -423,6 +468,15 @@ public final class Schools {
 			return;
 		}
 		int standing = standing(player, s);
+		// the school's style first, once you've stood long enough in it (Styles: learnt, never given)
+		Styles.Style style = Styles.Style.of(s);
+		if (!Styles.knows(player, style)) {
+			if (standing >= Styles.STYLE_STANDING && Styles.learn(player, style)) {
+				Styles.choose(player, style);
+				say(level, master, player, "school.jaymoskingdoms.taught", player.getDisplayName(), style.displayName());
+				return;
+			}
+		}
 		List<String> arts = s.arts();
 		for (int i = 0; i < arts.size(); i++) {
 			String art = arts.get(i);

@@ -88,6 +88,26 @@ public class HearthBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (level.getBlockEntity(pos) instanceof HearthEntity entity) {
+			if (player instanceof net.minecraft.server.level.ServerPlayer server) {
+				entity.open(server);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		return InteractionResult.PASS;
+	}
+
+	/** The screen's Add fuel button: the player at {@code pos} feeds it from their pockets. */
+	static void feed(net.minecraft.server.level.ServerPlayer player, BlockPos pos) {
+		if (player.level().isLoaded(pos) && player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0
+			&& player.level().getBlockEntity(pos) instanceof HearthEntity entity) {
+			entity.feedFrom(player);
+			entity.open(player);
+		}
+	}
+
+	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (!state.getValue(LIT)) {
 			return;

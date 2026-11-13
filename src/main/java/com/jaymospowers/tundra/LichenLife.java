@@ -1,5 +1,6 @@
 package com.jaymospowers.tundra;
 
+import com.jaymospowers.compat.KingdomsCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +27,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
  * How sprouted glow lichen lives. By day, in the open, it either breaks the rock it clings to down one step (rock to
  * gravel, gravel to sand or coarse dirt, coarse dirt to dirt) or seeds a plain glow lichen onto some other breakable
  * rock nearby. When there is nothing left to break within reach it stops: the colony runs out of food. A crowd of
- * lichen stops seeding too, so a colony can't carpet a chunk. What counts as rock is the block tags
+ * lichen stops seeding too, so a colony can't carpet a chunk. Land a Kingdoms faction holds ({@link KingdomsCompat#claimed})
+ * is never eaten or seeded. What counts as rock is the block tags
  * {@code jaymospowers:lichen/*}; ores and blocks that hold something (a block entity) are never touched.
  *
  * <p>Also the three things a player's hand does to lichen: bone meal sprouts vanilla glow lichen, shears snip vanilla
@@ -55,9 +57,15 @@ public final class LichenLife {
 		if (!level.isBrightOutside() || level.getBrightness(LightLayer.SKY, pos) < SUN_LIGHT || random.nextInt(ACT_CHANCE) != 0) {
 			return;
 		}
+		// land a kingdom holds is left as it is: the lichen neither eats its rock nor seeds onto it
+		if (KingdomsCompat.claimed(level, pos)) {
+			return;
+		}
 		BlockPos host = host(level, pos, state);
 		if (host != null && random.nextBoolean()) {
-			breakDown(level, host, random);
+			if (!KingdomsCompat.claimed(level, host)) {
+				breakDown(level, host, random);
+			}
 		} else {
 			seed(level, pos, random);
 		}
@@ -116,7 +124,7 @@ public final class LichenLife {
 				}
 			}
 		}
-		if (chosen != null) {
+		if (chosen != null && !KingdomsCompat.claimed(level, chosen)) {
 			level.setBlockAndUpdate(chosen, Blocks.GLOW_LICHEN.defaultBlockState().setValue(MultifaceBlock.getFaceProperty(Direction.DOWN), true));
 			level.gameEvent(null, GameEvent.BLOCK_PLACE, chosen);
 		}

@@ -1,5 +1,12 @@
 package com.jaymospowers.power.chrono;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Powers;
@@ -66,8 +73,14 @@ import org.jspecify.annotations.Nullable;
  * included. Outside the Nether any hurt shatters it, and it comes back later near its owner; only in the Nether can it
  * die, for good, and there it fights with its owner's own abilities ({@link ChronoEchoFight}). In the future
  * (0.10.111) it can die too, and it carries a flintlock and shoots. See {@link ChronoEchoes} for spawning, returning and following.
+ * <p>
+ * It is a mimic (Andy, 2026-11-08: "I want that to replace the way the echos function"). Its owner's face is only worn:
+ * while it walks their routes and does their work it looks like them, but the moment it fights, the face splits and its
+ * true form unfolds (Prometheus's Mimic: {@code geckolib/models/entity/mimic.geo.json}), lanky and ashen with a hinged
+ * jaw and claws, and it fights like that until it has had nothing to fight for a while ({@link #UNMASK_HOLD}); then it
+ * puts the face back on.
  */
-public class ChronoEcho extends Monster {
+public class ChronoEcho extends Monster implements GeoEntity {
 	// ---- tuning ----
 	public static final double MAX_HEALTH = 30.0;
 	/** Melee damage, fixed (the held item doesn't add to it). */
@@ -107,11 +120,28 @@ public class ChronoEcho extends Monster {
 	public static final int TINT = 0x9AB8F4FF;
 	static final ParticleOptions SHARD = MagicFx.wisp(0xA8E8FF, 0.7F);
 	static final ParticleOptions SHARD_GREY = MagicFx.wisp(0xC8D0D8, 0.6F);
+	/** It keeps its true form this long (ticks) after its last foe; then it wears its owner's face again. */
+	static final int UNMASK_HOLD = 100;
+	/** Its true form's look: ashen, nearly solid. ARGB, used by the client renderer. */
+	public static final int TRUE_TINT = 0xE0D8E4F0;
+
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+	static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+	static final RawAnimation RUN = RawAnimation.begin().thenLoop("run");
+	static final RawAnimation TRANSFORM = RawAnimation.begin().thenPlay("transform");
+	static final RawAnimation ATTACK = RawAnimation.begin().thenPlay("attack");
+	static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
+	static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("death");
 
 	private static final EntityDataAccessor<ResolvableProfile> DATA_PROFILE = SynchedEntityData.defineId(ChronoEcho.class,
 		EntityDataSerializers.RESOLVABLE_PROFILE);
 	private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> DATA_OWNER = SynchedEntityData.defineId(ChronoEcho.class,
 		EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
+	private static final EntityDataAccessor<Boolean> DATA_TRUE_FORM = SynchedEntityData.defineId(ChronoEcho.class, EntityDataSerializers.BOOLEAN);
+
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	/** (Server) ticks it keeps its true form for. */
+	private int unmasked;
 
 	// server-side state (saved)
 	private @Nullable UUID owner;
@@ -157,6 +187,54 @@ public class ChronoEcho extends Monster {
 		super.defineSynchedData(builder);
 		builder.define(DATA_PROFILE, ResolvableProfile.Static.EMPTY);
 		builder.define(DATA_OWNER, Optional.empty());
+		builder.define(DATA_TRUE_FORM, false);
+	}
+
+	/** Has it dropped its owner's face (it's fighting)? */
+	public boolean trueForm() {
+		return this.entityData.get(DATA_TRUE_FORM);
+	}
+
+	/** While it fights it is what it is; a while after, it wears its owner's face again. */
+	private void unmask(ServerLevel level) {
+		LivingEntity foe = this.getTarget();
+		if (foe != null && foe.isAlive()) {
+			this.unmasked = UNMASK_HOLD;
+		} else if (this.unmasked > 0) {
+			this.unmasked--;
+		}
+		boolean shown = this.unmasked > 0;
+		if (shown != this.trueForm()) {
+			this.entityData.set(DATA_TRUE_FORM, shown);
+			ChronoEchoes.shatterFx(level, this);
+			if (shown) {
+				this.triggerAnim("action", "transform");
+				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.HOSTILE, 0.8F, 0.5F);
+			}
+		}
+	}
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<ChronoEcho>("move", 4, test -> {
+			ChronoEcho echo = test.animatable();
+			if (echo.isDeadOrDying()) {
+				return PlayState.STOP;
+			}
+			if (!test.isMoving()) {
+				return test.setAndContinue(IDLE);
+			}
+			return test.setAndContinue(echo.isAggressive() ? RUN : WALK);
+		}));
+		controllers.add(new AnimationController<ChronoEcho>("action", 2, test -> PlayState.STOP).triggerableAnim("transform", TRANSFORM)
+			.triggerableAnim("attack", ATTACK));
+		controllers.add(new AnimationController<ChronoEcho>("hurt", test -> PlayState.STOP).triggerableAnim("hurt", HURT));
+		controllers.add(new AnimationController<ChronoEcho>("death", 0, test -> test.animatable().isDeadOrDying() ? test.setAndContinue(DEATH) : PlayState.STOP));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.cache;
 	}
 
 	@Override
@@ -297,6 +375,7 @@ public class ChronoEcho extends Monster {
 		if (this.gone) {
 			return;
 		}
+		this.unmask(level);
 		if (this.tickCount % OWNER_CHECK_INTERVAL == 0 && !checkOwner(level)) {
 			return;
 		}
@@ -502,6 +581,9 @@ public class ChronoEcho extends Monster {
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
 		DamageSource source = this.damageSources().mobAttack(this);
 		boolean hurt = target.hurtServer(level, source, ATTACK_DAMAGE);
+		if (this.trueForm()) {
+			this.triggerAnim("action", "attack");
+		}
 		if (hurt) {
 			if (target instanceof LivingEntity living) {
 				living.knockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ(), source, ATTACK_DAMAGE);
@@ -541,7 +623,7 @@ public class ChronoEcho extends Monster {
 				shatter(level);
 				return true;
 			}
-			return super.hurtServer(level, source, damage);
+			return this.flinch(super.hurtServer(level, source, damage));
 		}
 		// (0.10.111) in the future too it bleeds and can die, and dying for good opens the future to its owner
 		if (source.is(DamageTypes.GENERIC_KILL) || Stacked.in(this, Level.NETHER)
@@ -550,7 +632,7 @@ public class ChronoEcho extends Monster {
 				// (0.8.50) whoever strikes it (or shoots it, or hits it with a power) sees its bar
 				this.fight.hitBy(player);
 			}
-			return super.hurtServer(level, source, damage);
+			return this.flinch(super.hurtServer(level, source, damage));
 		}
 		if (this.isInvulnerableTo(level, source) || damage <= 0.0F) {
 			return false;
@@ -563,6 +645,14 @@ public class ChronoEcho extends Monster {
 		}
 		shatter(level);
 		return true;
+	}
+
+	/** A blow that landed on its true form shows. */
+	private boolean flinch(boolean hurt) {
+		if (hurt && this.isAlive() && this.trueForm()) {
+			this.triggerAnim("hurt", "hurt");
+		}
+		return hurt;
 	}
 
 	@Override

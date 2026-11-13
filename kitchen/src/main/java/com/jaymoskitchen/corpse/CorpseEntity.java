@@ -1830,6 +1830,12 @@ public class CorpseEntity extends Entity {
 			// (someone's already hauling it)
 			return InteractionResult.SUCCESS_SERVER;
 		}
+		if (touchGap(player) > LIFT_GAP) {
+			// Andy (2026-11-12): "you shouldnt be able to grab them unless you are able to touch it": the lift people have
+			liftBy = null;
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.too_far"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		long now = level.getGameTime();
 		if (!player.getUUID().equals(liftBy)) {
 			liftBy = player.getUUID();
@@ -1849,6 +1855,21 @@ public class CorpseEntity extends Entity {
 		player.sendOverlayMessage(Component.translatable(drags ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
 			bar(held, LIFT_TICKS)));
 		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/**
+	 * How far apart (blocks of open air between the two boxes) a body may be and still be taken hold of: the 1 block
+	 * Jaymo's Powers lets players lift people and mobs from ({@code Carry.LIFT_GAP}).
+	 */
+	public static final double LIFT_GAP = 1.0;
+
+	/** The open air between {@code who}'s box and this body's (0 when they touch). */
+	private double touchGap(Entity who) {
+		net.minecraft.world.phys.AABB a = who.getBoundingBox(), b = this.getBoundingBox();
+		double dx = Math.max(0.0, Math.max(a.minX - b.maxX, b.minX - a.maxX));
+		double dy = Math.max(0.0, Math.max(a.minY - b.maxY, b.minY - a.maxY));
+		double dz = Math.max(0.0, Math.max(a.minZ - b.maxZ, b.minZ - a.maxZ));
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	/** (0.5.31) Taken by the legs and dragged behind {@code player} (one thing at a time, in the arms or behind). */

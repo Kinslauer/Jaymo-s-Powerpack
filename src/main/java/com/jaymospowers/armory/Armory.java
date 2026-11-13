@@ -180,9 +180,11 @@ public final class Armory {
 		item("iron_quarterstaff", Item::new, p -> staffBlock(p.sword(ToolMaterial.IRON, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE)));
 		// the Twinblade: two swords joined at the hilt (Twinblade), and the sheet that teaches the joining
 		Twinblade.item = item("twinblade", Item::new, p -> staffBlock(p.sword(ToolMaterial.IRON, 4.0F, Twinblade.ATTACK_SPEED)
-			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade.hint").withStyle(ChatFormatting.GRAY))))));
+			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade.hint").withStyle(ChatFormatting.GRAY),
+				Component.translatable("item.jaymospowers.twinblade.old").withStyle(ChatFormatting.DARK_GRAY))))));
 		Twinblade.schematic = item("twinblade_schematic", Item::new, p -> p.stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
-			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY)))));
+			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY),
+				Component.translatable("item.jaymospowers.twinblade_schematic.old").withStyle(ChatFormatting.DARK_GRAY)))));
 		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
 		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
 		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
@@ -201,6 +203,9 @@ public final class Armory {
 				.build()));
 		item("throwing_star", props -> new ThrowingWeaponItem(props, 3.0F, true, false), p -> p.stacksTo(16));
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
+		// the pitchfork: a farm tool (hay, leaves and undergrowth go fast), forged at the Tool Station, and held back and thrown like a
+		// trident; the thrown fork is the item itself (spent from the hand, lying where it lands to be picked up), never a free shot
+		throwing("pitchfork", p -> p.sword(ToolMaterial.IRON, 3.0F, -2.7F).component(DataComponents.TOOL, pitchforkTool()), PITCHFORK_THROWN, false);
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
 		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
 		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only
@@ -348,6 +353,21 @@ public final class Armory {
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(props.apply(new Item.Properties().setId(key))));
 		ITEMS.put(id, item);
 		return item;
+	}
+
+	/** What a thrown pitchfork does when it hits. */
+	static final float PITCHFORK_THROWN = 6.0F;
+	/** How fast a pitchfork cuts hay and leaves and undergrowth. */
+	static final float PITCHFORK_HAY_SPEED = 9.0F, PITCHFORK_LEAF_SPEED = 5.0F;
+
+	/** A sword's cuts, but hay bales go down fast, and leaves and undergrowth a little slower: the farm tool. */
+	private static Tool pitchforkTool() {
+		HolderGetter<Block> blocks = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
+		return new Tool(List.of(
+			Tool.Rule.minesAndDrops(HolderSet.direct(new Holder[] {Blocks.COBWEB.builtInRegistryHolder()}), 15.0F),
+			Tool.Rule.minesAndDrops(HolderSet.direct(new Holder[] {Blocks.HAY_BLOCK.builtInRegistryHolder()}), PITCHFORK_HAY_SPEED),
+			Tool.Rule.overrideSpeed(blocks.getOrThrow(BlockTags.SWORD_INSTANTLY_MINES), Float.MAX_VALUE),
+			Tool.Rule.overrideSpeed(blocks.getOrThrow(BlockTags.LEAVES), PITCHFORK_LEAF_SPEED)), 1.0F, 2, false);
 	}
 
 	/** A sword's cuts, but leaves, vines and crops go down fast. */

@@ -1,5 +1,12 @@
 package com.jaymospowers.core;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -131,6 +138,12 @@ public class BlockCluster extends Entity {
 	/** Never real blocks (debris conjured from nothing): it gives nothing back, pocketed or broken. */
 	private boolean temporary;
 	private boolean crumbling;
+	/**
+	 * What a block with a block entity (a chest, a furnace, a bed, a sign, a spawner) comes with, by its piece: its item with
+	 * the block entity's data on it, so a chest torn loose keeps its contents. Server side only; the other pieces are
+	 * plain blocks.
+	 */
+	private final java.util.Map<Piece, ItemStack> held = new java.util.HashMap<>();
 	/** Kept: left lying it stays put for good (a chunk the symbiote's tendrils tore out), until something moves or breaks it. */
 	private boolean kept;
 	/** What happens once it has crumbled or broken away (a symbiote crawling out of a meteor's wreck). */
@@ -233,11 +246,82 @@ public class BlockCluster extends Entity {
 			&& (by == null || level.mayInteract(by, pos));
 	}
 
+	/**
+	 * Anything that is a block: obsidian, bedrock, a chest, a furnace, a bed, a sign, a spawner (what has a block entity
+	 * comes with its contents: {@link #of}). Only air and bare liquid stay, and what {@code by} may not touch (the world
+	 * border, spawn protection).
+	 */
+	public static boolean takeableAny(ServerLevel level, BlockPos pos, @Nullable Player by) {
+		BlockState state = level.getBlockState(pos);
+		return !state.isAir() && !(state.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) && (by == null || level.mayInteract(by, pos));
+	}
+
+	/**
+	 * The other half of a two-block thing: a bed's head and foot, a door's or a tall plant's upper and lower. Null for
+	 * anything else (or when that half is gone).
+	 */
+	public static @Nullable BlockPos partner(ServerLevel level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		BlockPos other = null;
+		if (state.hasProperty(BlockStateProperties.BED_PART) && state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+			Direction toward = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+			other = state.getValue(BlockStateProperties.BED_PART) == BedPart.FOOT ? pos.relative(toward) : pos.relative(toward.getOpposite());
+		} else if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+			other = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? pos.above() : pos.below();
+		}
+		return other != null && level.getBlockState(other).is(state.getBlock()) ? other : null;
+	}
+
+	/** {@code blocks} with the other half of every two-block thing in them put in right after its mate (each only once). */
+	public static List<BlockPos> withPartners(ServerLevel level, List<BlockPos> blocks) {
+		List<BlockPos> out = new ArrayList<>();
+		for (BlockPos pos : blocks) {
+			if (!out.contains(pos)) {
+				out.add(pos);
+			}
+			BlockPos other = partner(level, pos);
+			if (other != null && !out.contains(other) && !blocks.contains(other)) {
+				out.add(other);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * What {@code piece} gives back as an item: a block with a block entity, the item it came as (with its contents); the
+	 * other half of a bed, a door or a tall plant, nothing (its mate gives the one item); anything else, its block.
+	 */
+	private ItemStack stackOf(Piece piece) {
+		ItemStack kept = this.held.get(piece);
+		if (kept != null) {
+			return kept.copy();
+		}
+		BlockState state = piece.blockState();
+		if (state.hasProperty(BlockStateProperties.BED_PART) && state.getValue(BlockStateProperties.BED_PART) == BedPart.HEAD
+			|| state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF) && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
+			return ItemStack.EMPTY;
+		}
+		return new ItemStack(state.getBlock());
+	}
+
 	/** A chunk made of the blocks at {@code taken} (they're torn out), set down at their middle plus {@code out}. */
 	public static @Nullable BlockCluster of(ServerLevel level, List<BlockPos> taken, Vec3 out, @Nullable Player by) {
 		List<BlockState> states = new ArrayList<>();
+		// (what each block holds, taken before any is removed: a chest, a furnace, a bed, a sign, a spawner)
+		List<ItemStack> contents = new ArrayList<>();
 		for (BlockPos pos : taken) {
-			states.add(level.getBlockState(pos));
+			BlockState state = level.getBlockState(pos);
+			states.add(state);
+			ItemStack stack = ItemStack.EMPTY;
+			BlockEntity entity = state.hasBlockEntity() ? level.getBlockEntity(pos) : null;
+			if (entity != null) {
+				stack = new ItemStack(state.getBlock());
+				if (!stack.isEmpty()) {
+					stack.applyComponents(entity.collectComponents());
+					stack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(entity.getType(), entity.saveCustomOnly(level.registryAccess())));
+				}
+			}
+			contents.add(stack);
 		}
 		if (taken.isEmpty()) {
 			return null;
@@ -250,9 +334,18 @@ public class BlockCluster extends Entity {
 		BlockPos base = BlockPos.containing(middle);
 		// (base: the chunk's middle block; each piece sits relative to it)
 		List<Piece> pieces = new ArrayList<>();
+		java.util.Map<Piece, ItemStack> held = new java.util.HashMap<>();
 		for (int i = 0; i < taken.size(); i++) {
 			BlockPos pos = taken.get(i);
-			pieces.add(new Piece(Block.getId(states.get(i)), pos.getX() - base.getX(), pos.getY() - base.getY(), pos.getZ() - base.getZ()));
+			Piece piece = new Piece(Block.getId(states.get(i)), pos.getX() - base.getX(), pos.getY() - base.getY(), pos.getZ() - base.getZ());
+			pieces.add(piece);
+			if (!contents.get(i).isEmpty()) {
+				held.put(piece, contents.get(i));
+			}
+			if (states.get(i).hasBlockEntity()) {
+				// (gone before the block, so nothing spills out of it as it goes)
+				level.removeBlockEntity(pos);
+			}
 			level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			Debris.puff(level, pos, states.get(i), 1.4F);
 		}
@@ -261,6 +354,7 @@ public class BlockCluster extends Entity {
 		Vec3 at = Vec3.atCenterOf(base).add(out).subtract(0.0, 0.7, 0.0);
 		cluster.setPos(at);
 		cluster.setAttached(PIECES, pieces);
+		cluster.held.putAll(held);
 		level.addFreshEntity(cluster);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, states.get(0).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.2F, 0.7F);
@@ -377,7 +471,7 @@ public class BlockCluster extends Entity {
 			return;
 		}
 		for (Piece piece : this.pieces()) {
-			ItemStack stack = new ItemStack(piece.blockState().getBlock());
+			ItemStack stack = this.stackOf(piece);
 			if (!stack.isEmpty() && !player.getInventory().add(stack) && this.level() instanceof ServerLevel level) {
 				level.addFreshEntity(new ItemEntity(level, player.getX(), player.getY() + 0.5, player.getZ(), stack));
 			}
@@ -448,6 +542,10 @@ public class BlockCluster extends Entity {
 		}
 		Piece off = pieces.remove(level.getRandom().nextInt(pieces.size()));
 		Debris.puff(level, this.blockPosition(), off.blockState(), 1.2F);
+		if (this.held.containsKey(off) && !this.temporary) {
+			// (a chest knocked off still gives up what was in it)
+			level.addFreshEntity(new ItemEntity(level, this.getX(), this.getY() + 0.5, this.getZ(), this.stackOf(off)));
+		}
 		if (pieces.isEmpty()) {
 			this.gone();
 			this.discard();
@@ -462,8 +560,9 @@ public class BlockCluster extends Entity {
 			BlockPos at = BlockPos.containing(this.position().add(piece.x(), piece.y() + 0.7, piece.z()));
 			BlockState state = piece.blockState();
 			Debris.puff(level, at, state, 1.6F);
-			if (!this.temporary && level.getRandom().nextFloat() < DROP_CHANCE && !state.isAir()) {
-				ItemStack drop = new ItemStack(state.getBlock());
+			// (what holds something always drops it: a chest's contents are never lost to chance)
+			if (!this.temporary && (this.held.containsKey(piece) || level.getRandom().nextFloat() < DROP_CHANCE) && !state.isAir()) {
+				ItemStack drop = this.stackOf(piece);
 				if (!drop.isEmpty()) {
 					level.addFreshEntity(new ItemEntity(level, this.getX(), this.getY() + 0.5, this.getZ(), drop));
 				}
@@ -499,8 +598,8 @@ public class BlockCluster extends Entity {
 		if (pieces.size() % 2 == 0) {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), offState.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.5F, 0.6F);
 		}
-		if (!this.temporary && level.getRandom().nextFloat() < DROP_CHANCE && !offState.isAir()) {
-			ItemStack drop = new ItemStack(offState.getBlock());
+		if (!this.temporary && (this.held.containsKey(off) || level.getRandom().nextFloat() < DROP_CHANCE) && !offState.isAir()) {
+			ItemStack drop = this.stackOf(off);
 			if (!drop.isEmpty()) {
 				level.addFreshEntity(new ItemEntity(level, this.getX(), this.getY() + 0.5, this.getZ(), drop));
 			}

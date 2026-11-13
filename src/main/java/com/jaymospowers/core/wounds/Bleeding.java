@@ -44,8 +44,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Bleeding</b> ({@link #BLEEDING}): a blade's blow, a shot or a zombie's claws that takes at least
  * {@link #BLEED_FROM} from a part opens a cut there. A cut loses {@link #BLEED_DAMAGE} every {@link #BLEED_TICKS} (through
  * {@link Wounds#hurtPart}, the {@code jaymospowers:bleeding} damage) and closes by itself after {@link #BLEED_STOP_TICKS};
- * while open, its part never heals past {@link #CUT_CAP}. A severed stump bleeds {@link #STUMP_BLEED} and never stops by
- * itself: only cautery ({@link Treatment}) closes it. Bosses and the bloodless ({@link BladeBlood#BLOODLESS}) never
+ * while open, its part never heals past {@link #CUT_CAP}. A severed stump bleeds {@link #STUMP_BLEED} and crusts over by
+ * itself only after {@link #STUMP_CRUST_TICKS}, long enough that an untended stump can kill (Andy: "they crust over after
+ * a while but you bleed longer so you might die"); cautery ({@link Treatment}) closes it at once. Bosses and the bloodless ({@link BladeBlood#BLOODLESS}) never
  * bleed.</li>
  * <li><b>Festering</b> ({@link #FESTERING}): a dirty cut (a zombie's, or one dressed with a rag: {@link #DIRTY}) rolls
  * {@link #FESTER_CHANCE} every bleed tick while it bleeds or is dressed. A festering part never heals above where it is;
@@ -69,6 +70,8 @@ public final class Bleeding {
 	public static final float BLEED_DAMAGE = 0.5F, STUMP_BLEED = 1.0F;
 	/** (0.14.4) How often the bleeding bleeds (ticks), and how long a cut stays open by itself. */
 	public static final int BLEED_TICKS = 80, BLEED_STOP_TICKS = 600;
+	/** How long a severed stump bleeds before it crusts over by itself (ticks): 90 s at {@link #STUMP_BLEED}, about 22 health. */
+	public static final int STUMP_CRUST_TICKS = 1800;
 	/** (0.14.4) An open cut's part heals no further than this fraction (stitching or a bandage closes it). */
 	public static final float CUT_CAP = 0.5F;
 	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
@@ -169,7 +172,7 @@ public final class Bleeding {
 		return entity.getAttachedOrElse(WRAPPED, 0);
 	}
 
-	/** The bleeding parts that are stumps (severed): only cautery closes them. */
+	/** The bleeding parts that are stumps (severed): cautery closes them, or they crust over after {@link #STUMP_CRUST_TICKS}. */
 	static int stumps(LivingEntity entity) {
 		int mask = bleeding(entity);
 		int stumps = 0;
@@ -252,7 +255,8 @@ public final class Bleeding {
 
 	/** (0.14.4) A part just severed ({@link Dismember}): its stump bleeds until it's cauterised. Not the head (that's death). */
 	public static void stump(LivingEntity entity, BodyPart part) {
-		if (part.vital() || !bleeds(entity) || BodyPlan.of(entity).index(part) < 0) {
+		// Rubber-folk stumps close on themselves and mend (Cruor pick: "Rubber-folk skip it, since they mend")
+		if (part.vital() || !bleeds(entity) || BodyPlan.of(entity).index(part) < 0 || com.jaymospowers.core.Dismember.rubber(entity)) {
 			return;
 		}
 		set(entity, BLEEDING, bleeding(entity) | Breaks.bit(part));
@@ -561,8 +565,9 @@ public final class Bleeding {
 			if (since[i] == 0L) {
 				since[i] = now;
 			}
-			if (!stump && now - since[i] >= BLEED_STOP_TICKS) {
-				// it has closed by itself
+			boolean crusted = stump && !held(body, part) && now - since[i] >= STUMP_CRUST_TICKS;
+			if (!stump && now - since[i] >= BLEED_STOP_TICKS || crusted) {
+				// it has closed by itself (a stump crusts over, much later)
 				mask &= ~bit;
 				since[i] = 0L;
 				continue;

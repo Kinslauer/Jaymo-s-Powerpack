@@ -63,6 +63,8 @@ public final class ZFighterFolk {
 	static final String PATROL_TAG = "jaymospowers.patrolman";
 	/** (0.7.446) Powers' band hunter (and the same man, bandless, running): Powers walks him to his prey and away. */
 	static final String HUNTER_TAG = "jaymospowers_band_hunter", HUNTER_FLED_TAG = "jaymospowers_band_hunter_fled";
+	/** Powers' escort jobs' wards (a courier, a pupil, a trader, a fallen fighter): Powers walks them beside the player. */
+	static final String WARD_TAG = "jaymospowers_escort_ward";
 
 	/** Powers' tags for its characters, and the outfits each wears ({@code skins/clothing/zfighter/<kind>_<n>}). */
 	static final Map<String, String> KINDS = Map.ofEntries(
@@ -82,7 +84,8 @@ public final class ZFighterFolk {
 		Map.entry("jaymospowers_star_smith", "star_smith"),
 		// (0.7.446) Powers' band hunter, an outcast with the rival band who hunts Xeno-Band wearers (and runs once it's torn off)
 		Map.entry(HUNTER_TAG, "band_hunter"),
-		Map.entry(HUNTER_FLED_TAG, "band_hunter"));
+		Map.entry(HUNTER_FLED_TAG, "band_hunter"),
+		Map.entry(WARD_TAG, "escort_ward"));
 	/**
 	 * (0.7.405) Andy: the Judge's MCA screen said "Jobless" and "Mood: Depressed". Which character they are ({@link #KINDS}),
 	 * synced so MCA's screen shows their part and bearing in place of a trade and a mood ({@code McaZFighterInfoMixin}).
@@ -172,7 +175,7 @@ public final class ZFighterFolk {
 			}
 		}
 		if (mob.entityTags().contains(PILOT_TAG) || mob.entityTags().contains(PATROL_TAG) || mob.entityTags().contains(HUNTER_TAG)
-			|| mob.entityTags().contains(HUNTER_FLED_TAG)) {
+			|| mob.entityTags().contains(HUNTER_FLED_TAG) || mob.entityTags().contains(WARD_TAG)) {
 			// (0.7.348) an Omen's pilot: Powers walks them to whoever they're curious about, and has them look
 			// ((0.7.359) a galactic patrolman: Powers walks them round the town and into fights)
 			// ((0.7.446) the band hunter: Powers walks him down his prey, and off once he's beaten)
@@ -218,6 +221,15 @@ public final class ZFighterFolk {
 
 	/** "Talk about work" with one of them: Powers' talk (the Judge's rebirth and writs, the Keeper's blessing...). */
 	public static void talk(ServerPlayer player, LivingEntity speaker) {
+		// (the Retaking) a teller with something new to say says it first, then the work
+		String kind = kind(speaker);
+		if (kind != null && StoryTellers.offer(player, speaker, kind, () -> workTalk(player, speaker))) {
+			return;
+		}
+		workTalk(player, speaker);
+	}
+
+	private static void workTalk(ServerPlayer player, LivingEntity speaker) {
 		if ("demon_master".equals(kind(speaker)) && com.jaymoskingdoms.films.LoreFilms.canPlay(player)) {
 			// a demon master will tell the old war too, if you ask for the story over the work (LoreFilms)
 			ask(player, speaker, Component.translatable("talk.jaymoskingdoms.zfighter.demon_master.story"),

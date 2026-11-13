@@ -827,18 +827,59 @@ public final class OgreHolds {
 		long now = level.getGameTime();
 		if (phase == 3 && target != null && target.isAlive() && king.distanceTo(target) > BOULDER_MIN
 			&& now >= NEXT_BOULDER.getOrDefault(king.getUUID(), 0L) && king.hasLineOfSight(target)) {
-			// (a third: he tears up a boulder and hurls it)
+			// (a third: he tears up a boulder and hurls it). It is a real block torn from the ground beside him, which
+			// leaves its hole; with nothing to tear (standing on planks, bedrock, air) he has nothing to throw.
 			NEXT_BOULDER.put(king.getUUID(), now + BOULDER_TICKS);
-			Snowball boulder = new Snowball(level, king, new ItemStack(Items.MOSSY_COBBLESTONE));
+			BlockPos torn = tearable(level, king);
+			if (torn == null) {
+				return;
+			}
+			BlockState ground = level.getBlockState(torn);
+			level.destroyBlock(torn, false, king);
+			ItemStack rock = ground.getBlock().asItem() == Items.AIR ? new ItemStack(Items.COBBLESTONE) : new ItemStack(ground.getBlock().asItem());
+			Snowball boulder = new Snowball(level, king, rock);
 			boulder.setPos(king.getX(), king.getY() + king.getBbHeight() * 0.8, king.getZ());
 			Vec3 to = target.getEyePosition().subtract(boulder.position());
 			boulder.shoot(to.x, to.y + to.horizontalDistance() * 0.15, to.z, 1.3F, 2.0F);
 			level.addFreshEntity(boulder);
 			BOULDERS.add(boulder);
+			// where it lands, it lies as the block it was
+			MobAmmo.leaves(boulder, rock.copy());
 			BOULDERS.removeIf(b -> b.isRemoved());
 			king.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			level.playSound(null, king.getX(), king.getY(), king.getZ(), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.5F, 0.5F);
 		}
+	}
+
+	/** How far round the Ogre King's feet he reaches for a boulder to tear up. */
+	static final int TEAR_REACH = 3;
+
+	/**
+	 * A block of earth or stone beside the Ogre King that he can tear out of the ground: the nearest solid, natural one
+	 * within {@link #TEAR_REACH} at or below his feet with open air above it (so he never pulls out a wall's footing).
+	 */
+	private static @org.jspecify.annotations.Nullable BlockPos tearable(ServerLevel level, Ogre king) {
+		BlockPos feet = king.blockPosition();
+		BlockPos best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-TEAR_REACH, -2, -TEAR_REACH), feet.offset(TEAR_REACH, 0, TEAR_REACH))) {
+			if (Math.abs(pos.getX() - feet.getX()) <= 1 && Math.abs(pos.getZ() - feet.getZ()) <= 1) {
+				continue; // never from under his own feet
+			}
+			BlockState state = level.getBlockState(pos);
+			boolean natural = state.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD) || state.is(net.minecraft.tags.BlockTags.DIRT)
+				|| state.is(Blocks.COBBLESTONE) || state.is(Blocks.MOSSY_COBBLESTONE) || state.is(Blocks.GRAVEL)
+				|| state.is(net.minecraft.tags.BlockTags.BASE_STONE_NETHER);
+			if (!natural || !level.getBlockState(pos.above()).isAir()) {
+				continue;
+			}
+			double d = pos.distSqr(feet);
+			if (d < bestDist) {
+				bestDist = d;
+				best = pos.immutable();
+			}
+		}
+		return best;
 	}
 
 	/** A boulder hits with its weight (a snowball does nothing on its own). */

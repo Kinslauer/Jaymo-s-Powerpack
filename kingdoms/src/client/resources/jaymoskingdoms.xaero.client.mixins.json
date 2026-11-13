@@ -2,6 +2,13 @@
 	"required": false,
 	"package": "com.jaymoskingdoms.client.mixin.xaero",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["XaeroTrackerRendererMixin", "XaeroTrackerReaderMixin"],
-	"injectors": { "defaultRequire": 0 }
+	"client": [
+		"XaeroTrackerRendererMixin",
+		"XaeroTrackerReaderMixin",
+		"XaeroHudEmptyMixin",
+		"XaeroWaypointsOffMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
 }

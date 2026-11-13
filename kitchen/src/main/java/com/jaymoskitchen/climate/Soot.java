@@ -35,6 +35,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * <li>From {@link #COUGH}: you cough now and then (a little hunger, a line on screen), as a smoky town would make you.</li>
  * <li>From {@link #WILT}: crops in the open wilt back a stage, a few columns a check.</li>
  * </ul>
+ * <p>
+ * Chimneys carry it further (our own take on the idea that a tall flue sends smoke far; none of Advanced Chimneys is used): a
+ * lit source with a flue, a shaft of air walled in on all four sides above it ({@link #flue}), puts only part of its soot
+ * into its own chunk ({@link #FLUE_LOCAL}), and sends the rest {@link #FLUE_REACH} chunks downwind plus one for every
+ * {@link #FLUE_PER_CHUNK} blocks of flue, since the higher the smoke leaves, the further the wind takes it. The wind is the
+ * day's: it turns a quarter each day and swings to the rain's side when it rains. A town of short chimneys keeps its
+ * smog at home; a tall stack gives it to the next valley.
+ * <p>
  * It starts gentle: one furnace never reaches the ashy line; a town of forges does.
  */
 public final class Soot {
@@ -49,6 +57,9 @@ public final class Soot {
 	/** How often (ticks), how many chunks round each player, the cough chance at the most soot, columns tried for wilting. */
 	static final int CHECK_TICKS = 200, RADIUS = 2, WILT_TRIES = 4;
 	static final float COUGH_CHANCE = 0.6F, COUGH_EXHAUSTION = 0.6F;
+	/** A flue: the share of its soot a chimneyed source keeps at home at the most, the chunks it carries the rest downwind to start with, and the blocks of flue for each chunk more; the tallest flue counted. */
+	static final float FLUE_LOCAL = 0.35F;
+	static final int FLUE_REACH = 1, FLUE_PER_CHUNK = 6, FLUE_MOST = 24;
 
 	/** The soot in a chunk. Saved with the chunk. */
 	public static final AttachmentType<Float> SOOT = AttachmentRegistry.create(JaymosKitchen.id("soot"), b -> b.persistent(Codec.FLOAT));
@@ -100,15 +111,31 @@ public final class Soot {
 	}
 
 	private static void update(ServerLevel level, LevelChunk chunk) {
-		int sources = 0;
+		float sources = 0.0F;
+		int counted = 0, tallest = 0;
+		float carried = 0.0F;
 		for (BlockEntity be : chunk.getBlockEntities().values()) {
 			BlockState state = be.getBlockState();
-			if (state.getValueOrElse(BlockStateProperties.LIT, false) && ++sources >= MAX_SOURCES) {
-				break;
+			if (state.getValueOrElse(BlockStateProperties.LIT, false)) {
+				int flue = flue(level, be.getBlockPos());
+				if (flue > 0) {
+					// the chimney keeps some of it at home and gives the rest to the wind
+					sources += FLUE_LOCAL;
+					carried += 1.0F - FLUE_LOCAL;
+					tallest = Math.max(tallest, flue);
+				} else {
+					sources += 1.0F;
+				}
+				if (++counted >= MAX_SOURCES) {
+					break;
+				}
 			}
 		}
+		if (carried > 0.0F) {
+			carry(level, chunk.getPos(), carried * PER_SOURCE, tallest);
+		}
 		float was = chunk.getAttachedOrElse(SOOT, 0.0F);
-		if (sources == 0 && was <= 0.0F) {
+		if (sources <= 0.0F && was <= 0.0F) {
 			return;
 		}
 		ChunkPos pos = chunk.getPos();
@@ -135,6 +162,48 @@ public final class Soot {
 		}
 	}
 
+	/**
+	 * How tall the flue over a lit source at {@code pos} is: the blocks above it that are air with a wall on all four sides
+	 * (a shaft), up to {@link #FLUE_MOST}; 0 if the air over it is open, or too short a shaft (under 2) to count.
+	 */
+	static int flue(ServerLevel level, BlockPos pos) {
+		int height = 0;
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		for (int y = 1; y <= FLUE_MOST; y++) {
+			at.set(pos.getX(), pos.getY() + y, pos.getZ());
+			if (!level.getBlockState(at).isAir() && !level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
+				break;
+			}
+			boolean walled = true;
+			for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+				BlockPos side = at.relative(d);
+				walled &= level.getBlockState(side).isFaceSturdy(level, side, d.getOpposite());
+			}
+			if (!walled) {
+				break;
+			}
+			height++;
+		}
+		return height >= 2 ? height : 0;
+	}
+
+	/** The day's wind: a way along the ground, turning a quarter a day, and to the side the rain comes from when it rains. */
+	static net.minecraft.core.Direction wind(ServerLevel level) {
+		long day = level.getOverworldClockTime() / 24000L;
+		net.minecraft.core.Direction d = net.minecraft.core.Direction.from2DDataValue((int) Math.floorMod(day, 4L));
+		return level.isRaining() ? d.getClockWise() : d;
+	}
+
+	/** {@code amount} of soot sent downwind of {@code from}, as far as a flue {@code flue} blocks tall reaches. */
+	private static void carry(ServerLevel level, ChunkPos from, float amount, int flue) {
+		net.minecraft.core.Direction wind = wind(level);
+		int far = FLUE_REACH + flue / FLUE_PER_CHUNK;
+		LevelChunk target = level.getChunkSource().getChunkNow(from.x() + wind.getStepX() * far, from.z() + wind.getStepZ() * far);
+		if (target != null) {
+			set(target, target.getAttachedOrElse(SOOT, 0.0F) + amount);
+		}
+	}
+
 	private static void set(LevelChunk chunk, float soot) {
 		float s = Math.min(MAX, soot);
 		if (s <= 0.05F) {
@@ -148,7 +217,7 @@ public final class Soot {
 		chunk.markUnsaved();
 	}
 
-	/** A few open columns: a crop on top wilts back a stage. */
+	/** A few open columns: a crop on top wilts back a stage, and a leaf at the top of a tree starts to wilt and fall. */
 	private static void wilt(ServerLevel level, LevelChunk chunk, RandomSource random) {
 		ChunkPos pos = chunk.getPos();
 		for (int i = 0; i < WILT_TRIES; i++) {
@@ -158,6 +227,11 @@ public final class Soot {
 			if (state.getBlock() instanceof CropBlock crop && crop.getAge(state) > 0) {
 				level.setBlockAndUpdate(top, crop.getStateForAge(crop.getAge(state) - 1));
 				level.sendParticles(ParticleTypes.ASH, x + 0.5, top.getY() + 0.6, z + 0.5, 6, 0.3, 0.2, 0.3, 0.0);
+			} else if (state.getBlock() instanceof net.minecraft.world.level.block.LeavesBlock && state.hasProperty(net.minecraft.world.level.block.LeavesBlock.PERSISTENT)) {
+				// a wilting leaf: let go of the tree, and the game's own leaf decay takes it, dropping what it would
+				level.setBlockAndUpdate(top, state.setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, false)
+					.setValue(net.minecraft.world.level.block.LeavesBlock.DISTANCE, 7));
+				level.sendParticles(ParticleTypes.ASH, x + 0.5, top.getY() + 0.6, z + 0.5, 4, 0.3, 0.2, 0.3, 0.0);
 			}
 		}
 	}

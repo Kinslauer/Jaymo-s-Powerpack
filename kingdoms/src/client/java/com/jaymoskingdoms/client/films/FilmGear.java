@@ -57,6 +57,28 @@ final class FilmGear {
 	private FilmGear() {
 	}
 
+	/** A cast skin that is a player's own: {@code PLAYER + <their uuid>}. */
+	static final String PLAYER = "@player:";
+
+	/** The skin of the player with id {@code uuid} in this level, or the default skin for that id if they're not here. */
+	private static Identifier playerSkin(String uuid) {
+		Minecraft minecraft = Minecraft.getInstance();
+		java.util.UUID id;
+		try {
+			id = java.util.UUID.fromString(uuid);
+		} catch (IllegalArgumentException e) {
+			return net.minecraft.client.resources.DefaultPlayerSkin.getDefaultTexture();
+		}
+		if (minecraft.level != null) {
+			for (net.minecraft.client.player.AbstractClientPlayer player : minecraft.level.players()) {
+				if (player.getUUID().equals(id)) {
+					return player.getSkin().body().texturePath();
+				}
+			}
+		}
+		return net.minecraft.client.resources.DefaultPlayerSkin.get(id).body().texturePath();
+	}
+
 	/** What {@code actor} wears, as one word ("" for nothing): the same for the same armour on the same shape of arm. */
 	static String key(FilmActor actor) {
 		StringBuilder key = new StringBuilder();
@@ -71,6 +93,10 @@ final class FilmGear {
 
 	/** {@code skin} with the armour of {@code key} on it. */
 	static Identifier texture(String skin, String key) {
+		if (skin.startsWith(PLAYER)) {
+			// a real player cast as themselves (the Second Defence's morning): their own skin, as their game has it
+			return playerSkin(skin.substring(PLAYER.length()));
+		}
 		Identifier plain = JaymosKingdoms.id("textures/entity/film/" + skin + ".png");
 		return key.isEmpty() ? plain : MADE.computeIfAbsent(skin + "|" + key, k -> make(plain, key, MADE.size()));
 	}

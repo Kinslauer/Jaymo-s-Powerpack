@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/carpet",
+  "textures": {
+    "wool": "jaymoskitchen:block/hoglin_hide_rug"
+  }
+}

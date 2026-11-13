@@ -98,7 +98,7 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				@Override
 				public boolean mayPlace(ItemStack stack) {
 					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof WeaponPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
-						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD) || WeaponParts.isExtra(stack)
+						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD) || WeaponParts.isExtra(stack) || ToolBuilds.isBit(stack)
 						|| Modifier.ingredient(stack);
 				}
 			});
@@ -247,6 +247,10 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 		if (weapon != null) {
 			return weapon;
 		}
+		ItemStack kit = assembleBuild();
+		if (kit != null) {
+			return kit;
+		}
 		List<Integer> parts = new ArrayList<>();
 		for (int i = 0; i < inputCount; i++) {
 			ItemStack stack = inputs.getItem(i);
@@ -298,6 +302,45 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			}
 		}
 		return ItemStack.EMPTY;
+	}
+
+	/**
+	 * Tools and kit put together from parts and a plain bit or two ({@link ToolBuilds}): what they make (null when nothing
+	 * fits, so the Tinkering tools are tried; empty when it fits but can't be made here or yet).
+	 */
+	private @Nullable ItemStack assembleBuild() {
+		List<ItemStack> parts = new ArrayList<>(), bits = new ArrayList<>();
+		List<Integer> slots = new ArrayList<>();
+		for (int i = 0; i < inputCount; i++) {
+			ItemStack stack = inputs.getItem(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			slots.add(i);
+			if (stack.getItem() instanceof ToolPartItem && ToolPartItem.material(stack) != null) {
+				parts.add(stack);
+			} else {
+				bits.add(stack);
+			}
+		}
+		ToolBuilds.Built built = ToolBuilds.match(parts, bits);
+		if (built == null) {
+			return null;
+		}
+		Component forge = forgeOnly(parts.size());
+		if (forge != null) {
+			status = forge;
+			return ItemStack.EMPTY;
+		}
+		Component refusal = refusal(slots);
+		if (refusal != null) {
+			status = refusal;
+			return ItemStack.EMPTY;
+		}
+		for (int i : slots) {
+			uses[i] = 1;
+		}
+		return new ItemStack(built.item());
 	}
 
 	/**

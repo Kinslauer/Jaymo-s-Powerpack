@@ -255,6 +255,37 @@ public final class KingdomsCompat {
 		}
 	}
 
+	private static Method claimedBy;
+	private static boolean claimLooked;
+
+	/**
+	 * Whether {@code pos} lies on land a Kingdoms faction holds (a claimed chunk of a standing kingdom: {@code Factions.at}).
+	 * Things that eat or reshape the ground on their own (the sprouted lichen) leave claimed land alone. False without
+	 * Kingdoms, or if the call fails: with nobody holding land there is nothing to protect.
+	 */
+	public static boolean claimed(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
+		if (!LOADED || level == null) {
+			return false;
+		}
+		if (!claimLooked) {
+			claimLooked = true;
+			try {
+				claimedBy = Class.forName("com.jaymoskingdoms.Factions").getMethod("at", net.minecraft.server.MinecraftServer.class,
+					net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				claimedBy = null;
+			}
+		}
+		if (claimedBy == null) {
+			return false;
+		}
+		try {
+			return claimedBy.invoke(null, level.getServer(), level, pos) != null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	private static Method blightNearest, blightEase;
 	private static boolean blightLooked;
 

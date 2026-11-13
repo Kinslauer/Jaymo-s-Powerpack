@@ -361,6 +361,27 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.equestrian.HorseRevival.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) a horse raised from its mane lock
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.equestrian.HorseRevival.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.TalkErrands.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) festivals, war parties, plots and couriers, on a talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.TalkErrands.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Mourning.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) a companion they buried, brought up
+			villager.sendChatMessage(com.jaymoskingdoms.Mourning.tale(player, villager), player);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && SharedHistory.ASK_AFTER.equals(answer)) {
 			// (0.7.254) one you saved, freed or brought home: how they are
 			villager.sendChatMessage(SharedHistory.askAfter(player, villager), player);

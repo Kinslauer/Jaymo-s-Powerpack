@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.hunger;
 
 import com.jaymoskingdoms.Fx;
+import com.jaymoskingdoms.disasters.Mist;
 import com.jaymoskingdoms.monsters.LegendMonster;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
@@ -108,7 +109,9 @@ public class Gaunt extends LegendMonster {
 
 	/** A player it goes for: at night, close by, or sat at a lit campfire it can smell. */
 	private boolean drawnTo(LivingEntity target) {
-		if (!(target instanceof Player player) || player.isCreative() || player.isSpectator() || this.level().isBrightOutside()) {
+		// (it hunts in thick morning mist too, as it does at night: Mist)
+		if (!(target instanceof Player player) || player.isCreative() || player.isSpectator()
+			|| this.level().isBrightOutside() && !Mist.covers(this.level(), this.position())) {
 			return false;
 		}
 		return this.distanceToSqr(player) <= NOTICE_RANGE * NOTICE_RANGE || litFireNear(this.level(), player.blockPosition(), CAMP_RADIUS) != null;

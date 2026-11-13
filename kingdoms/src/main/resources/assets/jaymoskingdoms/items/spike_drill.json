@@ -1,0 +1,85 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "minecraft:custom_model_data",
+		"index": 1,
+		"on_true": {
+			"type": "minecraft:range_dispatch",
+			"property": "minecraft:custom_model_data",
+			"index": 0,
+			"fallback": {
+				"type": "minecraft:model",
+				"model": "jaymoskingdoms:item/spike_drill/spike_drill_anim"
+			},
+			"entries": [
+				{
+					"threshold": 30,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_25_anim"
+					}
+				},
+				{
+					"threshold": 60,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_50_anim"
+					}
+				},
+				{
+					"threshold": 90,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_75_anim"
+					}
+				},
+				{
+					"threshold": 120,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_100_anim"
+					}
+				}
+			]
+		},
+		"on_false": {
+			"type": "minecraft:range_dispatch",
+			"property": "minecraft:custom_model_data",
+			"index": 0,
+			"fallback": {
+				"type": "minecraft:model",
+				"model": "jaymoskingdoms:item/spike_drill/spike_drill"
+			},
+			"entries": [
+				{
+					"threshold": 30,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_25"
+					}
+				},
+				{
+					"threshold": 60,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_50"
+					}
+				},
+				{
+					"threshold": 90,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_75"
+					}
+				},
+				{
+					"threshold": 120,
+					"model": {
+						"type": "minecraft:model",
+						"model": "jaymoskingdoms:item/spike_drill/spike_drill_heat_100"
+					}
+				}
+			]
+		}
+	}
+}

@@ -100,8 +100,10 @@ public final class StoryHard {
 	static final AttachmentType<Integer> EVICTED = AttachmentRegistry.create(JaymosKingdoms.id("story_evicted"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 	/** On a player cast out by their own: the game time it ends. Saved, kept through death. */
-	static final AttachmentType<Long> CAST_OUT = AttachmentRegistry.create(JaymosKingdoms.id("story_cast_out"),
-		builder -> builder.persistent(Codec.LONG).copyOnDeath());
+	public static final AttachmentType<Long> CAST_OUT = AttachmentRegistry.create(JaymosKingdoms.id("story_cast_out"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath()
+			// (Andy, 2026-11-12) sent to the player themselves: their map is empty while it holds (CastOutMap)
+			.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 
 	/** Player → ticks spent perfectly still and sneaking at night; where they stood at the last look. */
 	private static final Map<UUID, Integer> SLIPPING = new HashMap<>();
@@ -463,7 +465,7 @@ public final class StoryHard {
 	}
 
 	/** {@code e} is a player their own kind are still turning away. */
-	static boolean castOutActive(Entity e) {
+	public static boolean castOutActive(Entity e) {
 		Long until = e instanceof Player ? e.getAttached(CAST_OUT) : null;
 		return until != null && e.level().getGameTime() < until;
 	}

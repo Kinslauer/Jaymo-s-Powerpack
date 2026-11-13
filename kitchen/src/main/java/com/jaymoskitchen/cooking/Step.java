@@ -99,6 +99,8 @@ public enum Step {
 	// (0.5.38) the far-world pantry
 	VERDANT_FRUIT(() -> powers("verdant_fruit"), null),
 	GLACIA_SALT(() -> powers("glacia_salt"), null),
+	// the small balloon mushroom of Jaymo's Powers' mycotic forest
+	BALLOON_MUSHROOM(() -> powers("balloon_mushroom_small"), null),
 	// vanilla's cooked fish and meat, and bread
 	COOKED_COD(() -> Items.COOKED_COD, null, "cooked_white_fish"),
 	COOKED_SALMON(() -> Items.COOKED_SALMON, null, "cooked_oily_fish"),

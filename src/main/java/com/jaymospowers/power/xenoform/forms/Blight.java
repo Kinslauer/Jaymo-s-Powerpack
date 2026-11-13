@@ -111,6 +111,8 @@ public final class Blight extends XenoForm {
 				}
 				target.hurtServer(level, player.damageSources().playerAttack(player), ROT_DAMAGE);
 				target.addEffect(new MobEffectInstance(MobEffects.WITHER, ROT_TICKS, 1), player);
+				// the flesh it touches rots open and bleeds (a dirty wound, so it may fester)
+				rotOpen(target);
 				rot(level, target.blockPosition());
 				live.hurt = true;
 				sound(player, SoundEvents.WITHER_AMBIENT, 0.8F, 1.4F);
@@ -143,6 +145,21 @@ public final class Blight extends XenoForm {
 		skull.setPos(from.x, from.y, from.z);
 		skull.setDangerous(blue);
 		level.addFreshEntity(skull);
+	}
+
+	/** Rot Touch opens a bleeding, dirty wound on one of {@code target}'s parts (the body where it has one). */
+	private static void rotOpen(LivingEntity target) {
+		com.jaymospowers.core.wounds.BodyPlan plan = com.jaymospowers.core.wounds.Wounds.plan(target);
+		if (plan == null || plan.size() == 0) {
+			return;
+		}
+		com.jaymospowers.core.wounds.BodyPart part = plan.part(0);
+		for (int i = 0; i < plan.size(); i++) {
+			if (plan.part(i) == com.jaymospowers.core.wounds.BodyPart.BODY) {
+				part = plan.part(i);
+			}
+		}
+		com.jaymospowers.core.wounds.Bleeding.open(target, part, true);
 	}
 
 	/** Grass, leaves, flowers and crops round {@code at} rot away (where the game lets mobs grief). */

@@ -137,8 +137,9 @@ public final class Powers {
 		return get(player.getAttached(POWER));
 	}
 
+	/** Whether {@code player} has {@code power}: their own, or one a Rubber-folk swallowed ({@link SwallowedPower}). */
 	public static boolean has(Player player, Power power) {
-		return of(player) == power;
+		return of(player) == power || power != null && player.hasAttached(SwallowedPower.SWALLOWED) && SwallowedPower.swallowed(player) == power;
 	}
 
 	/** Gives the player {@code power} (or takes theirs away, for null). */

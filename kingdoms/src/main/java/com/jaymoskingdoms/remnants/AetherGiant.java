@@ -487,6 +487,12 @@ public class AetherGiant extends Monster {
 		int t = this.grabTick();
 		this.getNavigation().stop();
 		LivingEntity prey = this.held(level);
+		if (prey != null && com.jaymoskingdoms.PowersCompat.slippery(prey)) {
+			// turned slick in its fist: out they slide
+			this.entityData.set(GRAB_HELD, -1);
+			this.slipped(level, prey);
+			prey = null;
+		}
 		if (t < GRAB_WINDUP) {
 			// drawn back, watching its target: the warning
 			LivingEntity target = this.getTarget();
@@ -569,6 +575,11 @@ public class AetherGiant extends Monster {
 			level.sendParticles(ParticleTypes.POOF, miss.x, miss.y + 0.5, miss.z, 20, 2.0, 0.3, 2.0, 0.05);
 			return;
 		}
+		if (com.jaymoskingdoms.PowersCompat.slippery(target)) {
+			// Slipfin's slick skin: the hand closes and it squirts out between the fingers
+			this.slipped(level, target);
+			return;
+		}
 		this.entityData.set(GRAB_HELD, target.getId());
 		this.snatchAt = target.position();
 		this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.2F, 0.6F);
@@ -579,6 +590,16 @@ public class AetherGiant extends Monster {
 		// the film: its catch (a player) sees the Giant's face come down on them; everyone near gets the bars
 		com.jaymoskingdoms.PowersCompat.film(this, target instanceof net.minecraft.server.level.ServerPlayer sp ? sp : null, com.jaymoskingdoms.PowersCompat.FILM_PUSH_IN,
 			GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM, this.position(), this, FILM_RANGE);
+	}
+
+	/** A Slipfin slid out of its grab (Andy, 2026-11-12: too slippery to hold): a wet squelch, and a word to them. */
+	private void slipped(ServerLevel level, LivingEntity prey) {
+		this.playSound(SoundEvents.SLIME_SQUISH, 2.0F, 0.6F);
+		level.sendParticles(ParticleTypes.SPLASH, prey.getX(), prey.getY() + prey.getBbHeight() * 0.5, prey.getZ(), 30, 0.6, 0.6, 0.6, 0.2);
+		if (prey instanceof Player p) {
+			p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.giant.slipped", this.getDisplayName())
+				.withStyle(net.minecraft.ChatFormatting.AQUA));
+		}
 	}
 
 	/**

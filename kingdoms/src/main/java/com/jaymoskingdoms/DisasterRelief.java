@@ -56,6 +56,7 @@ public final class DisasterRelief {
 	}
 
 	static void register() {
+		QuakeRescue.register();
 		PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer sp && world instanceof ServerLevel level) {
 				cleared(level, sp, pos, state);
@@ -117,6 +118,10 @@ public final class DisasterRelief {
 			blame(level, f);
 		}
 		ask(level, f, kind);
+		if (kind.equals("quake")) {
+			// folk shut in by the rubble, and a neighbour asking for them
+			QuakeRescue.struck(level, f, magnitude);
+		}
 	}
 
 	/** News to the players near {@code f}'s seat. */
@@ -182,7 +187,7 @@ public final class DisasterRelief {
 		}
 		for (Quest q : Quests.log(player)) {
 			Quest.Objective o = q.objective();
-			if (q.kind() != Quest.RELIEF || q.counted() || o.pos().isEmpty() || !o.pos().get().closerThan(pos, RUBBLE_RANGE)) {
+			if (q.kind() != Quest.RELIEF || !o.target().equals("rubble") || q.counted() || o.pos().isEmpty() || !o.pos().get().closerThan(pos, RUBBLE_RANGE)) {
 				continue;
 			}
 			Quest next = q.withProgress(o.progress() + 1);

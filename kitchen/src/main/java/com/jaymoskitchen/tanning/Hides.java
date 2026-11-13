@@ -98,11 +98,15 @@ public final class Hides {
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(new ItemStack(DRYING_RACK)));
 
-		// animals give hides, not leather
+		HideOrigin.register();
+		HideTraits.register();
+
+		// animals give hides, not leather, stamped with the animal (HideOrigin)
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			boolean entity = table.unwrapKey().map(key -> key.identifier().getPath().startsWith("entities/")).orElse(false);
 			if (entity) {
-				drops.replaceAll(Hides::hideFor);
+				net.minecraft.world.entity.Entity animal = context.getOptional(net.minecraft.world.level.storage.loot.parameters.LootContextParams.THIS_ENTITY);
+				drops.replaceAll(drop -> HideOrigin.stamp(hideFor(drop), animal == null ? null : animal.getType()));
 			}
 		});
 
@@ -146,13 +150,19 @@ public final class Hides {
 	/** What a stack hung on a drying rack dries into, or null if it doesn't go on one. */
 	public static @Nullable ItemStack dried(ItemStack stack) {
 		if (stack.is(SALTED_HIDE)) {
-			return new ItemStack(DRIED_HIDE);
+			return HideOrigin.carry(stack, new ItemStack(DRIED_HIDE));
 		}
 		if (stack.is(WET_TANNED_HIDE)) {
-			return new ItemStack(Items.LEATHER);
+			return HideOrigin.carry(stack, new ItemStack(Items.LEATHER));
 		}
 		if (stack.is(com.jaymoskitchen.herb.PmehFarming.FRESH_PMEH)) {
 			return com.jaymoskitchen.herb.PmehFarming.dried(stack);
+		}
+		// (Hardrock picks) raw meat, fish and fruit dry into jerky and dried fruit, which keep
+		if (com.jaymoskitchen.fresh.Curing.takes("dried", stack)) {
+			ItemStack food = stack.copy();
+			com.jaymoskitchen.fresh.Curing.cure(food, "dried");
+			return food;
 		}
 		return null;
 	}

@@ -55,6 +55,21 @@ final class OwnWants {
 		});
 	}
 
+	/**
+	 * These wants and, with Jaymo's Kitchen in, one of its things: the scholar's cleaned skeleton (any animal's) for the
+	 * study.
+	 */
+	private static List<Want> withKitchen(List<Want> wants, String path, int count, int emeralds, int uses) {
+		Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM
+			.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", path)).orElse(null);
+		if (item == null) {
+			return wants;
+		}
+		List<Want> more = new ArrayList<>(wants);
+		more.add(new Want(item, count, emeralds, uses));
+		return List.copyOf(more);
+	}
+
 	private static void wants() {
 		if (byTrade != null) {
 			return;
@@ -68,8 +83,8 @@ final class OwnWants {
 				new Want(Items.SUGAR, 10, 2, 12))),
 			Map.entry(VillagerProfession.CLERIC, List.of(new Want(Items.GLOWSTONE_DUST, 6, 4, 10), new Want(Items.NETHER_WART, 8, 4, 10),
 				new Want(Items.SPIDER_EYE, 4, 3, 12))),
-			Map.entry(VillagerProfession.LIBRARIAN, List.of(new Want(Items.FEATHER, 12, 2, 12), new Want(Items.INK_SAC, 6, 3, 12),
-				new Want(Items.GLOW_INK_SAC, 2, 6, 6))),
+			Map.entry(VillagerProfession.LIBRARIAN, withKitchen(List.of(new Want(Items.FEATHER, 12, 2, 12), new Want(Items.INK_SAC, 6, 3, 12),
+				new Want(Items.GLOW_INK_SAC, 2, 6, 6)), "cleaned_bones", 1, 12, 2)),
 			Map.entry(VillagerProfession.CARTOGRAPHER, List.of(new Want(Items.COMPASS, 1, 6, 4), new Want(Items.GLASS_PANE, 8, 3, 10),
 				new Want(Items.SPYGLASS, 1, 12, 2))),
 			Map.entry(VillagerProfession.LEATHERWORKER, List.of(new Want(Items.RABBIT_HIDE, 6, 4, 10), new Want(Items.STRING, 12, 2, 12),

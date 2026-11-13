@@ -28,9 +28,10 @@ final class KeyConflicts {
 	 * button 2. v7 (0.20.65): OK Zoomer's zoom comes off Left Alt (Andy: "alt should be roll"); double-tap-and-hold Sneak
 	 * zooms instead ({@code SneakZoom}). v8: Simple Voice Chat's menu sat on V (it opens a screen, which ate every power's V:
 	 * Resonance's Echolocation never fired), so it goes on F7 (no vanilla key, not even an F3 combo, uses it); its group
-	 * screen (G) and hide-icons (H) keys are unbound, both being buttons in that menu.
+	 * screen (G) and hide-icons (H) keys are unbound, both being buttons in that menu. v9: Andy wants the front camera on F7,
+	 * so it moves there from F6 and the voice chat menu takes F6.
 	 */
-	private static final String MARKER = "jaymospowers-keys-v8";
+	private static final String MARKER = "jaymospowers-keys-v9";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
@@ -51,7 +52,8 @@ final class KeyConflicts {
 		Map.entry("key.socialInteractions", new Move("key.keyboard.p", "key.keyboard.unknown")),
 		Map.entry("key.jaymoskingdoms.combat_art", new Move("key.keyboard.y", "key.mouse.4")),
 		Map.entry("keybindings.spell_engine.bypass_spell_hotbar", new Move("key.keyboard.left.alt", "key.mouse.5")),
-		Map.entry("key.voice_chat", new Move("key.keyboard.v", "key.keyboard.f7")),
+		Map.entry("key.voice_chat", new Move("key.keyboard.v|key.keyboard.f7", "key.keyboard.f6")),
+		Map.entry("key.jaymospowers.front_camera", new Move("key.keyboard.f6", "key.keyboard.f7")),
 		Map.entry("key.voice_chat_group", new Move("key.keyboard.g", "key.keyboard.unknown")),
 		Map.entry("key.hide_icons", new Move("key.keyboard.h", "key.keyboard.unknown")));
 

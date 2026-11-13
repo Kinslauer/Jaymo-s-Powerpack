@@ -44,6 +44,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #MARKED_EXTRA} (marked) or {@link #BULLSEYE_EXTRA} (bullseye) more times, a Master one more. The credit is
  * kept on the hunter ({@link #CREDITS}, saved, kept through death), one credit a carcass. Without Kitchen there are
  * no carcasses, and the kill drops the beast's meat and what it is hunted for instead.</li>
+ * <li><b>Cooked on the spot</b>: game a bullseye kills drops cooked meat, not raw. The shot's heat cooks what the animal would
+ * have dropped (without Kitchen), and a bullseye kill also leaves {@link #COOKED_EXTRA} more cooked cuts of its meat.</li>
  * <li><b>From the saddle</b> (Journeyman): a bow is drawn twice as fast on horseback.</li>
  * </ul>
  */
@@ -64,6 +66,10 @@ public final class HunterBow {
 	static final int MARKED_EXTRA = 1, BULLSEYE_EXTRA = 2, MASTER_EXTRA = 1;
 	/** Credits kept for carcasses of each kind, at most. */
 	static final int CREDIT_MOST = 6;
+	/** A bullseye kill leaves this many more cooked cuts of its meat (at most one more is added by chance). */
+	static final int COOKED_EXTRA = 1;
+	/** How long (ticks) the shot's heat is on a bullseye kill, long enough for the loot to be rolled cooked. */
+	static final int HEAT_TICKS = 40;
 	/** Entity tag on an arrow loosed as a bullseye. */
 	public static final String BULLSEYE = "jaymoskingdoms.bullseye";
 
@@ -98,6 +104,7 @@ public final class HunterBow {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(HunterBow::tick);
 		ServerEntityEvents.ENTITY_LOAD.register(HunterBow::loosed);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(HunterBow::cooking);
 		ServerLivingEntityEvents.AFTER_DEATH.register(HunterBow::died);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> AIMS.clear());
 	}
@@ -220,6 +227,36 @@ public final class HunterBow {
 
 	// ---- the kill ------------------------------------------------------------------------------------------------------
 
+	/** A bullseye is about to kill game: the animal is alight as its loot is rolled, so what it drops is cooked (vanilla's own rule for burning animals). */
+	private static boolean cooking(LivingEntity entity, DamageSource source, float amount) {
+		if (!kitchen && isBullseyeKill(entity, source)) {
+			entity.igniteForTicks(HEAT_TICKS);
+		}
+		return true;
+	}
+
+	private static boolean isBullseyeKill(LivingEntity entity, DamageSource source) {
+		return source.getEntity() instanceof ServerPlayer hunter && entity.level() instanceof ServerLevel && entity instanceof Animal && !(entity instanceof Enemy)
+			&& !entity.isBaby() && Careers.heldRank(hunter, Careers.Job.HUNTER) >= 0 && source.getDirectEntity() != null
+			&& source.getDirectEntity().entityTags().contains(BULLSEYE);
+	}
+
+	/** The cooked cut of a raw one, or null. */
+	static @Nullable Item cooked(@Nullable Item raw) {
+		if (raw == Items.BEEF) {
+			return Items.COOKED_BEEF;
+		} else if (raw == Items.PORKCHOP) {
+			return Items.COOKED_PORKCHOP;
+		} else if (raw == Items.MUTTON) {
+			return Items.COOKED_MUTTON;
+		} else if (raw == Items.CHICKEN) {
+			return Items.COOKED_CHICKEN;
+		} else if (raw == Items.RABBIT) {
+			return Items.COOKED_RABBIT;
+		}
+		return null;
+	}
+
 	private static void died(LivingEntity entity, DamageSource source) {
 		if (!(source.getEntity() instanceof ServerPlayer hunter) || !(entity.level() instanceof ServerLevel level)
 			|| !(entity instanceof Animal) || entity instanceof Enemy || entity.isBaby()) {
@@ -233,6 +270,13 @@ public final class HunterBow {
 		if (!bullseye && !marked) {
 			return;
 		}
+		if (bullseye) {
+			// the bullseye's cuts come cooked
+			Item cooked = cooked(Careers.cut(entity));
+			if (cooked != null) {
+				entity.spawnAtLocation(level, new ItemStack(cooked, COOKED_EXTRA + (level.getRandom().nextBoolean() ? 1 : 0)));
+			}
+		}
 		if (kitchen) {
 			Credits c = hunter.getAttachedOrCreate(CREDITS, () -> Credits.NONE);
 			hunter.setAttached(CREDITS, bullseye ? new Credits(c.marked(), Math.min(CREDIT_MOST, c.bullseye() + 1))
@@ -242,7 +286,7 @@ public final class HunterBow {
 		// no butchery in the pack: no carcass to cut, so the kill itself gives more
 		Item cut = Careers.cut(entity);
 		if (cut != null) {
-			entity.spawnAtLocation(level, new ItemStack(cut, 1 + (bullseye ? 1 : 0)));
+			entity.spawnAtLocation(level, new ItemStack(cut, 1));
 		}
 		Item hunted = huntedFor(entity);
 		if (hunted != null) {

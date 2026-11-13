@@ -22,6 +22,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ARGB;
@@ -61,6 +64,9 @@ public final class ClimateHud {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, JaymosKitchen.id("thirst"), ClimateHud::thirst);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("body_heat"), ClimateHud::heat);
 		ClientTickEvents.END_CLIENT_TICK.register(ClimateHud::tick);
+		// the hearth's and the icebox's screen, with its fuel bar
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskitchen.net.Payloads.OpenHearth.TYPE,
+			(payload, ctx) -> ctx.client().gui.setScreen(new HearthScreen(payload)));
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (stack.is(Climate.WATERSKIN_LEATHER) || stack.is(Climate.WATERSKIN_IRON) || stack.is(Climate.WATERSKIN_DRAGON)) {
 				WaterskinItem.Water water = WaterskinItem.water(stack);
@@ -82,10 +88,28 @@ public final class ClimateHud {
 			// (Hardrock picks) a lining sewn in at a loom
 			Lining lining = stack.get(Warmth.LINING);
 			if (lining != null) {
-				lines.add(Component.translatable("tooltip.jaymoskitchen.lining." + lining.id)
-					.withStyle(lining.warm > lining.cool ? ChatFormatting.GOLD : lining.cool > lining.warm ? ChatFormatting.AQUA : ChatFormatting.YELLOW));
+				// the lining's name, then its flame and snowflake pips (our own little glyphs, font jaymoskitchen:pips)
+				MutableComponent line = Component.translatable("tooltip.jaymoskitchen.lining." + lining.id)
+					.withStyle(lining.warm > lining.cool ? ChatFormatting.GOLD : lining.cool > lining.warm ? ChatFormatting.AQUA : ChatFormatting.YELLOW);
+				lines.add(line);
+				lines.add(pips(lining));
 			}
 		});
+	}
+
+	/** Font with the two pips: a flame at U+E000 and a snowflake at U+E001. */
+	static final FontDescription PIPS = new FontDescription.Resource(JaymosKitchen.id("pips"));
+
+	/** A row of flame pips for the warm a lining gives and snowflake pips for the cool, as many as half-pieces of it. */
+	static Component pips(Lining lining) {
+		MutableComponent row = Component.empty();
+		for (int i = 0; i < lining.warmPips(); i++) {
+			row.append(Component.literal("\uE000").withStyle(Style.EMPTY.withFont(PIPS).withColor(0xFFFFFF)));
+		}
+		for (int i = 0; i < lining.coolPips(); i++) {
+			row.append(Component.literal("\uE001").withStyle(Style.EMPTY.withFont(PIPS).withColor(0xFFFFFF)));
+		}
+		return row;
 	}
 
 	private static void tick(Minecraft minecraft) {

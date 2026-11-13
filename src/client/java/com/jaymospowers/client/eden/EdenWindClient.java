@@ -1,6 +1,8 @@
 package com.jaymospowers.client.eden;
 
+import com.jaymospowers.core.Powers;
 import com.jaymospowers.eden.EdenWind;
+import com.jaymospowers.power.wind.WindPower;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.player.LocalPlayer;
 
@@ -17,6 +19,9 @@ public final class EdenWindClient {
 				return;
 			}
 			double push = player.onGround() ? EdenWind.PUSH_GROUND : EdenWind.PUSH_AIR;
+			if (Powers.has(player, WindPower.INSTANCE)) {
+				push *= EdenWind.WIND_KIN;
+			}
 			player.setDeltaMovement(player.getDeltaMovement().add(EdenWind.blowing(player.level()).scale(push)));
 		});
 	}

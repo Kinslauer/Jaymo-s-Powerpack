@@ -24,3 +24,11 @@ Port changes for Jaymo's Kingdoms:
 - Added `impaler.bbmodel`, an editable GeckoLib Blockbench project with the texture embedded and every bone keyframe.
 - Checked the fields against the pack's GeckoLib `kSxHvs99` jar (5.5.7): its 1.12.0 geometry and 1.8.0 animation parsers support the source fields, including per-face UVs, Catmull-Rom interpolation, `sound_effects` and `timeline`; no format downgrade was needed.
 - `impaler-render.png` is the visual front/side/back inspection render from `tools/mesh_to_cubes/bbrender.py`.
+
+Added for the Impaler's gear and coats (same upstream release, same MIT notice):
+
+- The other three coats and every coat's glow mask: `textures/entity/impaler/{default,albino,dripstone,forlorn_hollows}{,_glowmask}.png`, now under `textures/entity/impaler/` (the old `textures/entity/impaler.png` was the default coat).
+- Item art: `textures/item/impaler_spike.png`, `textures/item/concussion_arrow.png` (as `concussive_arrow.png`), and the spike drill's ten heat and running frames in `textures/item/spike_drill/`.
+- `textures/entity/concussion_arrow.png` (as `concussive_arrow.png`) and `textures/mob_effect/concussion.png`.
+- Sounds: the Impaler's attack, death, hurt, idle, scream, spikes and concussion takes (`sounds/entity/impaler/`, now `sounds/impaler/`), the concussion buzz (`sounds/effects/concussion_buzz.ogg`, now `sounds/effect/`), and the spike drill's start, dig and stop (`sounds/item/spike_drill/`).
+- The concussive arrow and spike drill recipes follow upstream's shapes. The items' behaviour is written fresh for Kingdoms.

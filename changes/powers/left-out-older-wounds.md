@@ -1,0 +1,48 @@
+# Left out of older PRs: wounds and the downed
+- **Back on your feet by a fire** (Andy: "this should work to get you back on your feet"). Lying downed and still within 3 blocks of a lit campfire, your clock is held (no bleeding out toward passing out), the pain eases and every 3 s the worst part mends a little, to the 60% self-care cap and never a bone, until nothing keeps you down and sneak gets you up. Passed out by the fire (not bled dry), you come round after a minute. Not while carried, in water or knocked out (`Resting.downed`).
+- **The getup is keyframed in GeckoLib format** (Andy: "revisit the getup animation with gecko lib"). The rise from downed is `geckolib/animations/entity/player_getup.animation.json` (the `getup` animation: `root` x is how far the body is turned up, then head, arms and legs), so it opens and edits in Blockbench. `KeyframeClip` reads it (linear and catmull-rom keys) and `CrawlPose` plays it; without the file the old curves stay.
+- **Lasting scars show on the body** (Andy: "can we make them visible?"). Painted into the skin with the wound marks, the same place every time: burns as shiny, puckered pink patches on the right arm, left cheek and a flank; frostbite as grey-blue finger ends and toes; lightning as a branching fern from the right shoulder down the arm and over the chest; wasting as hollow eyes and ribs showing; crushed ribs as an old yellowed dent on the left side; a lost eye (carved out or struck out) as a dark scarred socket. Weak lungs are inside and don't show.
+- **No armour repairs mid-fight at the grindstone or in the crafting grid** (two worn pieces put together), as at the anvil: the mended piece can't be taken from the result slot till the fight is over (`ArmourWearSlotMixin`).
+- **Letting go of attack stops the symbiote's execution** before its killing blow, sparing them (the client sends the release; `WebExecutions.letGo`).
+- **Wounds leftovers**: Kingdoms' Last Stand never turns away a death you gave up to (the `jaymospowers.finishing` tag while it's let through); food's healing no longer burns hunger when nothing may heal (a broken part held at its cap: `Wounds.canHealMore`); a broken leg stops the sprint on your own client too, not only the server (`Breaks.NO_SPRINT`, `BrokenLegSprintMixin`).
+- **Smog's clean-air cost is built**: while the smog holds you and you stand in clean open air (high up, no smoke about), you don't heal naturally there, from full hunger or (with Kitchen) from meals. Powers tags the player `jaymospowers.smog` while the smog holds them and `jaymospowers.clean_air` while they stand in clean air, for Kingdoms and Kitchen to read.
+- **Overclock's afterimages clone the runner** (Andy: "it should clone them"): armour, held items, capes and worn layers are drawn on each afterimage, tinted and fading with it; the Chrono's decoys wear them too (`GhostCollector`).
+- **The Frost Beam's arm points along it** (Andy: "use the proper modeling"): while a Frost-born's beam is out, their right arm is held straight out along their look for everyone (synced `FrostBeam.BEAMING`), and in first person the hand points it with a slight cold tremble.
+- **A swallowed power is whole on the client** (Andy: "fix that"): the swallowed power is synced, its HUD block sits over your own power's with a badge naming it and its key, its client half ticks and hears its key (so its visuals and charge-ups show), and every check for a power (`Powers.has`) counts a swallowed one.
+- **Rime walks on powder snow**, as a snow golem does; **Blight's Rot Touch** opens a bleeding, dirty wound on the body as well as withering.
+- **The Z Fighter HUD editor** moves and scales the Ki Wave charge, the Spirit Bomb bar and the scouter panel about where the HUD zones really put them (it used their old fixed spots).
+- **Escort side jobs** (Andy: "propose some"; the four proposed), from masters and the Keeper beside the old three kinds, one at a time, 220 TP each, and only with Jaymo's Kingdoms and MCA (the one in your charge is an MCA villager): walk a **courier** to the next town while the Ash Rival's lackeys jump you partway; take a **pupil** to the nearest Aether monolith (else the Tower) and keep the night's monsters off them from dusk to dawn; see a **trader and her pack mule** to the next town past a **Giant asleep** by the road (sprint near it or strike it and it wakes); **carry a fallen fighter** from out in the wild back to the master. A ward who dies or is lost, or three days gone, fails the job (`ZFighterEscorts`).
+- **Hands to the face for every mask** (Andy: "they all need an animation removing the mask too"). The mask key now lifts both hands to the face first, and the mask comes off (or goes on) when they get there, then they come away: a costume's head piece or hood, a cloak's hood, a Rig Helm's faceplate, the symbiote's mask, and (with Kingdoms) a school mask. Everyone sees it (`MaskMotion`, `MaskPose`).
+- Tinkering routes for the tools #364 left on grid recipes. They're now put together at the Tool Station from Tinkering parts plus a plain bit or two, and their grid recipes are dropped by what they make. Only the shears, flint and steel, and the flint tools (the flint knife among them, a first tool) stay in the grid.
+  - Kitchen's chopper: metal broad axe head, wooden tough handle, wooden plate and a lead.
+  - Kitchen's manual chopper: metal broad blade, wooden plate and a shaft.
+  - Rolling pin: wooden tough handle and two wooden handles.
+  - Ploughs: a metal plate share, a wooden tough handle, a wheel and planks. The planks choose the plough's wood.
+  - Kitchen's cookware:
+    - cooking pot: two metal plates and a bowl;
+    - frying pan: metal plate and wooden handle;
+    - saucepan: metal plate, wooden handle and any binding;
+    - baking tray: one metal plate;
+    - kitchen knife: metal small blade, wooden handle and string.
+  - Kingdoms' hoof pick (metal pick head and a handle) and oar (wooden tough handle, wooden plate and a binding).
+  - Armory's bone knife: bone small blade, handle and string.
+  - Pantry for Blockheads' cookware:
+    - frying pan: metal plate and copper handle;
+    - pot: metal plate and a bucket;
+    - baking sheet: metal plate and paper;
+    - mixing bowl: wooden plate and wooden handle;
+    - artisan press: metal plate, wooden tough handle, an anvil and an iron chain.
+  - MCA's kit:
+    - comb: metal plate and iron bars;
+    - needle and thread: metal arrow head and string;
+    - whistle: metal handle and a gold block;
+    - villager tracker: rose gold plate, compass and eye of ender.
+  - Naturalist's capture net (wooden tough handle and two string bindings) and whistle (copper handle and string).
+  - Nature's Compass: metal plate, compass and a sapling.
+  - Traveler's Tool Belt's first belt: two leather bindings and a metal one. Its upgrades are the mod's own.
+  - WeaponMod's fire rod: wooden handle and a torch.
+  - All of them show in JEI.
+- F5 already toggles only first and third person; the front camera moves to F7 (from F6) and Simple Voice Chat's menu to F6, moved once per install; our shoulder view is unchanged.
+- Chrono's echo is a mimic now: it wears its owner's face while it walks their routes and does their work, but when it fights the face splits and it shows its true form (Prometheus's Mimic model and animations), and it keeps that form until it has had nothing to fight for a few seconds. Its blows, flinches and death play on the true form.
+- The Kingdoms harpoon is built at the Tool Station from a metal arrow head, a wooden tough handle and a lead; its grid recipe is gone. The spike drill is built from a copper plate and a copper tough handle, with three Impaler spikes and redstone.
+- Built; not played.

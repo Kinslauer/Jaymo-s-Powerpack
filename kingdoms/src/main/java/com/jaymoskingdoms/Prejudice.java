@@ -308,6 +308,10 @@ public final class Prejudice {
 			return by;
 		}
 		float m;
+		if (Havens.sky(player.level().getServer(), kingdom)) {
+			// (a sky village holds no one's blood against them, SkyHavens)
+			return by;
+		}
 		if (Havens.is(player.level().getServer(), kingdom)) {
 			// (a haven: a human is the outsider, and their own kind are welcome; (0.7.412) not one who's been cast out by them)
 			if (d > 0 && !StoryHard.castOutActive(player)) {

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.disasters.Mist;
 import java.util.EnumSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +44,9 @@ final class Stalkers {
 		if (distance < 1.0E-3) {
 			return true;
 		}
-		return player.getViewVector(1.0F).dot(to.scale(1.0 / distance)) > WATCHED && player.hasLineOfSight(creeper);
+		// (morning mist, Mist: a creeper farther off than anything is seen through it isn't watched, so it creeps on)
+		return distance <= Mist.seenWithin(creeper.level(), creeper.position(), Double.MAX_VALUE)
+			&& player.getViewVector(1.0F).dot(to.scale(1.0 / distance)) > WATCHED && player.hasLineOfSight(creeper);
 	}
 
 	/** Holds the creeper still (stealing its legs from the chase) while its target watches it. */

@@ -97,12 +97,22 @@ final class BlossomVillages {
 		new Spot("fishery", -18, 11, 1, 9), new Spot("training_hall", 18, 11, 3, 9));
 	private static final List<Spot> TOWN_STALLS = List.of(new Spot("stall", -5, -4, 1, 5), new Spot("stall", 5, -4, 3, 5),
 		new Spot("stall", -5, 3, 1, 5), new Spot("stall", 5, 3, 3, 5));
-	private static final Spot TOWN_KEEP = new Spot("blossom_tenshu", Blossom.CASTLE_WIDTH / 2 - Blossom.CASTLE_MIDDLE, 17, 0, Blossom.CASTLE_WIDTH);
-	private static final Spot TOWN_SHRINE = new Spot("blossom_shrine", -19, 24, 0, 7);
+	/**
+	 * The castle's front (where its moat begins) lies this far from the bell, past the halls' row, and its keep's middle is on the
+	 * road's line. It is built at the full size of the Ninja Castle build it takes after ({@link Blossom#CASTLE_WIDTH} x
+	 * {@link Blossom#CASTLE_DEPTH}), so it has ground of its own: a second levelled circle, {@link #CASTLE_REACH} round the
+	 * castle's middle (its far corners are 39 from it), cleared {@link #CASTLE_CLEAR} high, joined to the town's.
+	 */
+	static final int CASTLE_FRONT = 26, CASTLE_REACH = 42, CASTLE_CLEAR = 46;
+	private static final Spot TOWN_KEEP = new Spot("blossom_tenshu", Blossom.CASTLE_WIDTH / 2 - Blossom.CASTLE_MIDDLE, CASTLE_FRONT, 0, Blossom.CASTLE_WIDTH);
+	/** The castle's middle in the bell's frame: x across, z ahead. */
+	private static final int CASTLE_CX = Blossom.CASTLE_WIDTH / 2 - Blossom.CASTLE_MIDDLE + (Blossom.CASTLE_WIDTH - 1) / 2 - Blossom.CASTLE_WIDTH / 2,
+		CASTLE_CZ = CASTLE_FRONT + Blossom.CASTLE_DEPTH / 2;
+	private static final Spot TOWN_SHRINE = new Spot("blossom_shrine", -30, 6, 0, 7);
 	private static final Spot TOWN_TORII = new Spot("blossom_torii", 0, -36, 0, 7);
-	private static final int[][] TOWN_LANTERNS = {{-3, -33}, {3, -33}, {-3, -21}, {3, -21}, {-3, -8}, {3, -8}, {-3, 7}, {3, 7}, {-3, 15}, {3, 15}};
+	private static final int[][] TOWN_LANTERNS = {{-3, -33}, {3, -33}, {-3, -21}, {3, -21}, {-3, -8}, {3, -8}, {-3, 7}, {3, 7}, {-3, 15}, {3, 15}, {-3, 23}, {3, 23}};
 	/** The main road from the torii to the keep, the lanes between the rows, and an alley behind each inner row. */
-	private static final int[][] TOWN_ROADS = {{-1, -38, 1, 17}, {-17, -22, 17, -21}, {-17, -9, 17, -8}, {-17, 4, 17, 5}, {-17, -34, -16, 17},
+	private static final int[][] TOWN_ROADS = {{-1, -38, 1, CASTLE_FRONT - 1}, {-17, -22, 17, -21}, {-17, -9, 17, -8}, {-17, 4, 17, 5}, {-17, -34, -16, 17},
 		{16, -34, 17, 17}, {-4, -5, 4, 5}};
 
 	/** Settlement id → the land its seat stands in (it never changes). */
@@ -153,6 +163,14 @@ final class BlossomVillages {
 			Direction gate = Direction.getApproximateNearest(player.getX() - at.getX(), 0, player.getZ() - at.getZ());
 			// with no kingdom in reach and room enough, the land's capital; else a village
 			int wide = townSite(level, at) ? IllagerBuildings.floor(level, at, TOWN_SPREAD, TOWN_RADIUS) : Integer.MIN_VALUE;
+			if (wide != Integer.MIN_VALUE) {
+				// the castle's ground, beyond the town's, must be loaded and level enough as well
+				BlockPos castle = new CampBuildings.Placer(at, gate, 0).at(CASTLE_CX, 0, CASTLE_CZ);
+				int castleFloor = IllagerBuildings.floor(level, castle, TOWN_SPREAD, CASTLE_REACH);
+				if (castleFloor == Integer.MIN_VALUE || Math.abs(castleFloor - wide) > TOWN_SPREAD) {
+					wide = Integer.MIN_VALUE;
+				}
+			}
 			if (wide != Integer.MIN_VALUE && foundTown(level, at, wide, gate) != null) {
 				return;
 			}
@@ -208,8 +226,10 @@ final class BlossomVillages {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
 		BlockPos bell = new BlockPos(center.getX(), floor, center.getZ());
-		CampBuildings.level(level, bell, TOWN_RADIUS, TOWN_CLEAR);
 		CampBuildings.Placer frame = new CampBuildings.Placer(bell, gate, 0);
+		CampBuildings.level(level, bell, TOWN_RADIUS, TOWN_CLEAR);
+		// the castle's own ground, widened past the town's to hold a keep at the full size of its model
+		CampBuildings.level(level, frame.at(CASTLE_CX, 0, CASTLE_CZ), CASTLE_REACH, CASTLE_CLEAR);
 		for (int[] road : TOWN_ROADS) {
 			for (int x = road[0]; x <= road[2]; x++) {
 				for (int z = road[1]; z <= road[3]; z++) {

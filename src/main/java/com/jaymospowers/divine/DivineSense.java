@@ -58,6 +58,10 @@ import net.minecraft.world.phys.Vec3;
  * sky or in the Aether). Being hit, sneaking or the key again ends it; the sense is shut while it lasts.</li>
  * <li><b>Hover.</b> Jump pressed again in the air and held: the fall slows to a drift, for a feather every
  * {@link #HOVER_EVERY} ticks, and no fall is counted.</li>
+ * <li><b>Trained fists</b> (Andy, 2026-11-12, on their "Z Fighter scaling": "they can train their fists to deal more
+ * damage"). Every bare-handed blow a Divine-born lands, on a foe or a practice dummy, is practice for the fists
+ * ({@link #FIST_PRACTICE}, at most one every {@link #FIST_GAP} ticks); each rank ({@link #FIST_RANK_AT}) makes their
+ * bare hands hit {@link #FIST_PER_RANK} harder ({@link #fists}).</li>
  * </ul>
  * Motion is the client's ({@code DivineSenseClient}); the server spends, times and shows.
  */
@@ -80,6 +84,10 @@ public final class DivineSense {
 	public static final float PER_LEVEL = 0.01F, LEVEL_CAP = 0.5F, PER_RANK = 0.15F;
 	public static final int SLIP_PRACTICE = 1, COUNTER_PRACTICE = 3;
 	public static final int[] RANK_AT = {0, 40, 120, 280, 560, 1000};
+	/** Trained fists: practice per bare-handed blow landed, the least wait between two that count (ticks), the ranks, and the extra a rank adds (times the blow). */
+	public static final int FIST_PRACTICE = 1, FIST_GAP = 8;
+	public static final int[] FIST_RANK_AT = {0, 60, 200, 450, 850, 1400};
+	public static final float FIST_PER_RANK = 0.12F;
 	/** Alight: ticks per half-feather (on the ground under a roof, and under the sky or in the Aether), the longest it lasts, and the wait after. */
 	public static final int ALIGHT_EVERY = 4, ALIGHT_EVERY_SKY = 2, ALIGHT_MAX = 20 * 12, ALIGHT_COOLDOWN = 20 * 20;
 	/** Alight ends if they are carried this far from where it began. */
@@ -100,6 +108,12 @@ public final class DivineSense {
 	/** Practice at the sense and the answer. Saved, kept through death. */
 	public static final AttachmentType<Integer> PRACTICE = AttachmentRegistry.create(JaymosPowers.id("divine_practice"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
+	/** Practice of the fists (bare-handed blows landed). Saved, kept through death. */
+	public static final AttachmentType<Integer> FISTS = AttachmentRegistry.create(JaymosPowers.id("divine_fists"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT).copyOnDeath());
+	/** When each Divine-born's last bare-handed blow counted as practice (game time). Not saved. */
+	private static final java.util.Map<java.util.UUID, Long> LAST_FIST = new java.util.HashMap<>();
+
 	/** While Alight lasts, synced to them alone (their client holds them in the air). */
 	public static final AttachmentType<Boolean> ALIGHT = AttachmentRegistry.create(JaymosPowers.id("divine_alight"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
@@ -264,6 +278,39 @@ public final class DivineSense {
 		MagicFx.blast(level, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 0.7F, LIGHT);
 		practise(player, COUNTER_PRACTICE);
 		return damage * counterBonus(player);
+	}
+
+	/** The rank of {@code player}'s trained fists, 0 to 5. */
+	public static int fistRank(Player player) {
+		int points = player.getAttachedOrElse(FISTS, 0), rank = 0;
+		while (rank + 1 < FIST_RANK_AT.length && points >= FIST_RANK_AT[rank + 1]) {
+			rank++;
+		}
+		return rank;
+	}
+
+	/**
+	 * Trained fists ({@code DivineCounterMixin}, on every blow): a Divine-born's bare-handed blow is practice, and lands harder
+	 * by their rank.
+	 */
+	public static float fists(LivingEntity target, DamageSource source, float damage) {
+		if (!(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player || damage <= 0.0F
+			|| !player.getMainHandItem().isEmpty() || !is(player) || target == player) {
+			return damage;
+		}
+		long now = player.level().getGameTime();
+		Long last = LAST_FIST.get(player.getUUID());
+		if (last == null || now - last >= FIST_GAP) {
+			LAST_FIST.put(player.getUUID(), now);
+			int before = fistRank(player);
+			player.setAttached(FISTS, Math.min(FIST_RANK_AT[FIST_RANK_AT.length - 1], player.getAttachedOrElse(FISTS, 0) + FIST_PRACTICE));
+			int after = fistRank(player);
+			if (after > before) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.divine.fists." + after).withStyle(ChatFormatting.GOLD));
+				player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.7F, 1.2F);
+			}
+		}
+		return damage * (1.0F + fistRank(player) * FIST_PER_RANK);
 	}
 
 	// ---- Alight ------------------------------------------------------------------------------------------------------

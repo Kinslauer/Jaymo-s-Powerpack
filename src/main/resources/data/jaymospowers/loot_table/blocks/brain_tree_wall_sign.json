@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:brain_tree_sign"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/brain_tree_wall_sign"
+}

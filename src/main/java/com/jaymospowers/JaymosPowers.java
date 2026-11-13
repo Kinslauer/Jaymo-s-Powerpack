@@ -42,6 +42,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.freerun.moves.RunMoves.init();
 		com.jaymospowers.water.Dives.init();
 		com.jaymospowers.water.Currents.init();
+		com.jaymospowers.water.RiverIce.init();
+		com.jaymospowers.water.Floods.init();
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
@@ -138,6 +140,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.ground.Panning.init();
 		com.jaymospowers.rough.SleepingBag.init();
 		com.jaymospowers.rough.ParagliderItem.init();
+		com.jaymospowers.rough.Hammock.init();
+		com.jaymospowers.rough.HotAirBalloon.init();
 		// Andy's TFC Hardrock picks: tamed dogs learn skills
 		com.jaymospowers.dogs.Dogs.init();
 		// how bad you smell (Kingdoms' mob senses read it)
@@ -222,7 +226,7 @@ public class JaymosPowers implements ModInitializer {
 	private static void registerAttachments() {
 		String[] holders = {
 			"boxing.PressurePoints",
-			"core.OneHolder",
+			"core.OneHolder", "costume.MaskMotion",
 			"core.Affinity", "divine.DivineSense", "dogs.Dogs", "core.wet.Smell", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Perch", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.ProneHaul", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.DownedStruggle", "core.wounds.Mortality", "core.wounds.Karma", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Bleeding", "core.wounds.WoundMarks", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.wounds.HeartCrystals", "core.blood.Bloodied", "core.blood.BleedOut", "core.finisher.Finishers", "core.gifted.Gifted", "core.gifted.GiftedCostume", "core.mobs.BlightMobs", "combat.Guard", "combat.HitStreak", "combat.Armed", "combat.BladeStyle", "armory.Twinblade",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalAnywhere", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
@@ -243,7 +247,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.forms.FuseStore",
 			"power.ember.RunningHot", "power.ember.EmberSoak",
 			"power.xenoform.XenoMinds",
-			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
+			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe","power.zfighter.RaceMoves", "power.zfighter.FrostBeam", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterAerialCharge",
 			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
@@ -251,7 +255,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterAura", "power.zfighter.ZFighterSlots", "power.zfighter.ZFighterKiWeapon","power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
 			"power.zfighter.ZFighterFusionItems", "power.zfighter.ZFighterFiveFusion", "power.zfighter.ZFighterMasterFusion", "power.zfighter.ZFighterFalseSuper", "power.zfighter.ZFighterGoldenApe", "power.zfighter.ZFighterGod", "power.zfighter.ZFighterGodRitual", "power.zfighter.ZFighterInstinct", "power.zfighter.ZFighterLegendary",
 			"power.zfighter.ZFighterEarthlingRace", "power.zfighter.ZFighterVerdantMerge", "power.zfighter.ZFighterFrostReserve", "power.zfighter.ZFighterWarriorComeback", "power.zfighter.ZFighterSonicSway", "power.zfighter.ZFighterSelfDestruct", "power.zfighter.ZFighterCreator",
-			"power.zfighter.ZFighterLookout", "power.zfighter.ZFighterWishExtras", "power.zfighter.ZFighterSagas", "power.zfighter.ZFighterSideQuests", "power.zfighter.ZFighterAfterlife", "power.zfighter.ZFighterDemonRealm",
+			"power.zfighter.ZFighterLookout", "power.zfighter.ZFighterWishExtras", "power.zfighter.ZFighterSagas", "power.zfighter.ZFighterSideQuests", "power.zfighter.ZFighterEscorts", "power.zfighter.ZFighterAfterlife", "power.zfighter.ZFighterDemonRealm",
 			"power.zfighter.pod.PodWrecks", "power.zfighter.sky.Charts", "power.zfighter.farworld.FarWorlds", "power.zfighter.farworld.PatrolWrit",
 			"power.zfighter.ZFighterSpace", "power.zfighter.ZFighterPodTrip", "power.zfighter.ZFighterPatrol", "power.zfighter.ZFighterRaiders", "power.zfighter.ZFighterSpaceMissions", "power.zfighter.ZFighterStarts", "power.blindness.BlindnessDevotion",
 			"power.ember.EmberKindle", "power.ember.FlameAvatar", "power.ember.AvatarMoves", "power.ember.BurningSteed", "power.heritage.HeritageMoves",

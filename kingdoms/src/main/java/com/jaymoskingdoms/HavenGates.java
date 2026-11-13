@@ -172,7 +172,7 @@ public final class HavenGates {
 			return;
 		}
 		Faction f = Havens.at(level, player.blockPosition());
-		if (f == null || player.distanceToSqr(Vec3.atCenterOf(f.seat())) > GATE_RANGE * GATE_RANGE || admitted(level, player, f)) {
+		if (f == null || Havens.sky(level.getServer(), f) || player.distanceToSqr(Vec3.atCenterOf(f.seat())) > GATE_RANGE * GATE_RANGE || admitted(level, player, f)) {
 			STOPPED.remove(player.getUUID());
 			return;
 		}

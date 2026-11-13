@@ -1,0 +1,93 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "standing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "grazing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "neck": {
+     "rotation": [
+      62,
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      24.8,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "rearing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "spine": {
+     "rotation": [
+      -38,
+      0,
+      0
+     ]
+    },
+    "front_left": {
+     "rotation": [
+      62,
+      0,
+      0
+     ]
+    },
+    "front_right": {
+     "rotation": [
+      45,
+      0,
+      0
+     ]
+    },
+    "hind_left": {
+     "rotation": [
+      -12,
+      0,
+      0
+     ]
+    },
+    "hind_right": {
+     "rotation": [
+      -12,
+      0,
+      0
+     ]
+    },
+    "neck": {
+     "rotation": [
+      10,
+      0,
+      0
+     ]
+    },
+    "tail": {
+     "rotation": [
+      15,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

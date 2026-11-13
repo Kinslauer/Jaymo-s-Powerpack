@@ -93,6 +93,10 @@ public final class TinkererEchoes {
 		if (!entity.entityTags().contains(ZFighterAndroid.TAG) || !(entity.level() instanceof ServerLevel level)) {
 			return;
 		}
+		// the Chrono's road: whoever brought him down has seen the trail's end
+		if (source.getEntity() instanceof ServerPlayer killer) {
+			com.jaymospowers.power.chrono.ChronoRoad.tinkererFell(killer);
+		}
 		OWED.add(new Owed(entity.getUUID(), level.dimension(), entity.position(), entity.getYRot(), List.copyOf(entity.entityTags()),
 			level.getGameTime() + RETURN_DELAY));
 		SHIMMERING.remove(entity.getUUID());

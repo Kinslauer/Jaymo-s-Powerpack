@@ -66,8 +66,8 @@ final class ButcheringBonus {
 		for (Extra extra : type == null ? BONES : EXTRAS.getOrDefault(type, BONES)) {
 			if (random.nextFloat() < extra.chance()) {
 				// (0.5.27) leather comes off as a hide, to be tanned (Hides)
-				drops.add(com.jaymoskitchen.tanning.Hides.hideFor(
-					new ItemStack(extra.item(), extra.min() + random.nextInt(extra.max() - extra.min() + 1))));
+				drops.add(com.jaymoskitchen.tanning.HideOrigin.stamp(com.jaymoskitchen.tanning.Hides.hideFor(
+					new ItemStack(extra.item(), extra.min() + random.nextInt(extra.max() - extra.min() + 1))), type));
 			}
 		}
 		Fat fat = type == null ? null : FAT.get(type);

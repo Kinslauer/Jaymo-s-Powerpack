@@ -90,6 +90,13 @@ public final class CafeBoard {
 	static final long LEAST_PRICE = 100;
 	/** What a dish without food values sells for (milli). */
 	static final long PLAIN_PRICE = 250;
+	/** What a drinking potion sells for before its brew grade (milli). */
+	static final long TONIC_PRICE = 500;
+	/** Jaymo's Powers' brew grade on a potion (Crude to Masterwork), read by id so there's no tie to Powers. */
+	static final Identifier BREW_GRADE = Identifier.fromNamespaceAndPath("jaymospowers", "brew_grade");
+	/** Freshness (Kitchen's clock): above this share left it's fresh, above the next stale, else nearly off; their price shares. */
+	static final float FRESH = 0.6F, STALE = 0.25F;
+	static final double STALE_PRICE = 0.75, OFF_PRICE = 0.4;
 
 	/** A tavern's fare, the first of these that exist (Kitchen's own where it's loaded). */
 	static final List<String> TAVERN_FARE = List.of("minecraft:bread", "minecraft:baked_potato", "minecraft:cooked_beef", "minecraft:cooked_chicken",
@@ -138,6 +145,9 @@ public final class CafeBoard {
 
 	/** A dish's fair price (milli) by how filling it is. */
 	static long fair(ItemStack stack) {
+		if (stack.is(Items.POTION)) {
+			return TONIC_PRICE;
+		}
 		FoodProperties food = stack.get(DataComponents.FOOD);
 		if (food == null) {
 			return PLAIN_PRICE;
@@ -147,9 +157,20 @@ public final class CafeBoard {
 
 	/**
 	 * (0.7.578, patch 8) Quality sells: Kitchen's cooking grade (read off the dish's name, so no hard tie to Kitchen) sets
-	 * a share of the price. Perfect sells for half again as much; burnt, charred or undercooked for half.
+	 * a share of the price. Perfect sells for half again as much; burnt, charred or undercooked for half. A brewed potion
+	 * sells by its brew grade instead ({@link #brew}).
 	 */
 	static double quality(ItemStack stack) {
+		String brew = brew(stack);
+		if (brew != null) {
+			return switch (brew) {
+				case "crude" -> 0.6;
+				case "fine" -> 1.3;
+				case "expert" -> 1.7;
+				case "masterwork" -> 2.5;
+				default -> 1.0;
+			};
+		}
 		Component name = stack.get(DataComponents.ITEM_NAME);
 		if (name != null && name.getContents() instanceof TranslatableContents t && t.getKey().startsWith("quality.jaymoskitchen.")) {
 			String grade = t.getKey().substring("quality.jaymoskitchen.".length());
@@ -162,14 +183,34 @@ public final class CafeBoard {
 		return 1.0;
 	}
 
+	/** The brew grade on a potion ("crude" to "masterwork"), or null: none, or no Powers. */
+	static @Nullable String brew(ItemStack stack) {
+		net.minecraft.core.component.DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(BREW_GRADE);
+		return type != null && stack.get(type) instanceof String grade ? grade : null;
+	}
+
+	/**
+	 * How fresh it is sells too (Kitchen's freshness clock): fresh at full price, going stale for {@link #STALE_PRICE},
+	 * nearly off for {@link #OFF_PRICE}. Undated food (or no Kitchen) counts as fresh.
+	 */
+	static double freshness(net.minecraft.world.level.Level level, ItemStack stack) {
+		float left = KitchenCompat.freshness(level, stack);
+		return left < 0.0F || left > FRESH ? 1.0 : left > STALE ? STALE_PRICE : OFF_PRICE;
+	}
+
 	static boolean perfect(ItemStack stack) {
-		return quality(stack) > 1.0;
+		String brew = brew(stack);
+		return brew != null ? brew.equals("masterwork") || brew.equals("expert") : quality(stack) > 1.0;
 	}
 
 	/** Can go on a menu: something to eat or drink. */
 	static boolean dish(ItemStack stack) {
-		return !stack.isEmpty() && (stack.has(DataComponents.FOOD) || stack.has(DataComponents.CONSUMABLE)) && !stack.is(Items.POTION)
-			&& !stack.is(Items.SPLASH_POTION) && !stack.is(Items.LINGERING_POTION);
+		if (!stack.isEmpty() && stack.is(Items.POTION)) {
+			// (a brewed potion is a tonic to serve: graded drinks sell by their grade)
+			return brew(stack) != null;
+		}
+		return !stack.isEmpty() && (stack.has(DataComponents.FOOD) || stack.has(DataComponents.CONSUMABLE)) && !stack.is(Items.SPLASH_POTION)
+			&& !stack.is(Items.LINGERING_POTION);
 	}
 
 	// ---- the block -----------------------------------------------------------------------------------------------------

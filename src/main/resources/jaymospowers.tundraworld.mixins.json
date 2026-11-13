@@ -3,7 +3,9 @@
 	"package": "com.jaymospowers.mixin.tundraworld",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"BurntLogMixin",
 		"DwarfSaplingMixin",
+		"TundraFreezeMixin",
 		"TundraPlacementMixin"
 	],
 	"injectors": {

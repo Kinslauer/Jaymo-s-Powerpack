@@ -325,7 +325,7 @@ public final class Crews {
 		}
 		double d = mob.distanceTo(foe);
 		boolean used = switch (style) {
-			case KNIFE -> lunge(mob, foe, d);
+			case KNIFE -> lunge(mob, foe, d) || FanOfKnives.cast(level, mob, foe);
 			case HAMMER -> slam(level, mob, d);
 			case ARCHER -> volley(level, mob, foe, d);
 			case POISONER -> cloud(level, mob, foe, d, now);

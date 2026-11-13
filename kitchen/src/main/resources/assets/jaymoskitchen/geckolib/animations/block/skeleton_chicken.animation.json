@@ -1,0 +1,79 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "standing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "pecking": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "spine": {
+     "rotation": [
+      12,
+      0,
+      0
+     ]
+    },
+    "neck": {
+     "rotation": [
+      55,
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      20,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "flapping": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "wing_left": {
+     "rotation": [
+      0,
+      0,
+      -70
+     ]
+    },
+    "wing_right": {
+     "rotation": [
+      0,
+      0,
+      70
+     ]
+    },
+    "neck": {
+     "rotation": [
+      -10,
+      0,
+      0
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      15,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

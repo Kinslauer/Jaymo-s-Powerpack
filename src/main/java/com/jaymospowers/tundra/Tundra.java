@@ -4,9 +4,11 @@ import com.jaymospowers.JaymosPowers;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -69,14 +71,18 @@ public final class Tundra {
 	public static Block STUNTED_RED_SHRUB, ORANGE_SHRUB, YELLOW_SHRUB;
 	public static Block YELLOW_MOSS, YELLOW_MOSS_CARPET;
 	public static Block SPROUTED_GLOW_LICHEN, SNIPPED_GLOW_LICHEN;
+	/** The tundra's drifting snow (the biomes' ambient particle); the client's side is {@code client.tundra.SnowMote}. */
+	public static SimpleParticleType SNOW_MOTE;
 
 	private Tundra() {
 	}
 
 	public static void init() {
+		SNOW_MOTE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("snow_mote"), FabricParticleTypes.simple());
 		blocks();
 		burning();
 		tabs();
+		Regrowth.init();
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player.isSpectator() || !player.mayBuild() || !level.mayInteract(player, hit.getBlockPos())) {
 				return InteractionResult.PASS;

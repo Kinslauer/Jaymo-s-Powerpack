@@ -331,13 +331,17 @@ public final class Classes {
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
-		if (choose.cls() < 0 || choose.cls() >= all.length || classOf(player) != null) {
+		// (a creative player may switch, from the H menu's class tab)
+		if (choose.cls() < 0 || choose.cls() >= all.length || classOf(player) != null && !player.isCreative()) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
 		String option = choose.option() >= 0 && choose.option() < cls.options.size() ? cls.options.get(choose.option()) : "";
 		if (!cls.options.isEmpty() && option.isEmpty()) {
 			return;
+		}
+		if (classOf(player) != null) {
+			clear(player);
 		}
 		set(player, cls, option);
 	}

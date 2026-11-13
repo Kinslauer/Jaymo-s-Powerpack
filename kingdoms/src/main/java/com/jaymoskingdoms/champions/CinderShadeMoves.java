@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.champions;
 
+import com.jaymoskingdoms.CaptainWays;
+import com.jaymoskingdoms.MobAmmo;
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.PatronChampion;
 import com.jaymoskingdoms.PatronChampions;
@@ -11,20 +13,27 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.518) The Cinder-Shade's moves: Smokestep (behind you at once), Ember Knives (a fan of small fireballs), Ash Cloud (fight
- * her from outside it); in a group, smoke doubles of herself.
+ * (0.7.518) The Cinder-Shade's moves: Smokestep (behind you at once), Ember Knives (a fan of her own daggers, heated red so
+ * they burn: real knives she carries and must gather again, {@code MobAmmo.Kind.KNIVES}), Ash Cloud (fight her from outside
+ * it); in a group, smoke doubles of herself.
  */
 final class CinderShadeMoves implements Moves {
 	static final int STEP_WINDUP = 10, STEP_COOLDOWN = 120, STEP_BLOW_TICKS = 20;
 	static final double STEP_RANGE = 16.0, STEP_BEHIND = 2.0;
 	static final float STEP_BLOW = 1.4F;
 	static final int KNIVES_WINDUP = 15, KNIVES_COOLDOWN = 160, KNIVES_COUNT = 5;
-	static final double KNIVES_MIN = 4.0, KNIVES_MAX = 20.0, KNIVES_DEGREES = 40.0, KNIVES_SPEED = 0.6;
+	static final double KNIVES_MIN = 4.0, KNIVES_MAX = 20.0, KNIVES_DEGREES = 40.0;
+	static final float KNIVES_DAMAGE = 5.0F;
+	/** The dagger she carries and throws (Powers' iron dagger). */
+	static final net.minecraft.resources.Identifier KNIFE = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "iron_dagger");
 	static final int CLOUD_WINDUP = 20, CLOUD_COOLDOWN = 360, CLOUD_TICKS = 200, CLOUD_BLIND = 40, CLOUD_EVERY = 20;
 	static final double CLOUD_RADIUS = 6.0;
 	static final float CLOUD_TAKES = 0.5F;
@@ -75,15 +84,19 @@ final class CinderShadeMoves implements Moves {
 		if (t == null) {
 			return;
 		}
-		Vec3 base = t.getEyePosition().subtract(c.getEyePosition()).normalize();
-		for (int i = 0; i < KNIVES_COUNT; i++) {
-			double off = (i - (KNIVES_COUNT - 1) / 2.0) * Math.toRadians(KNIVES_DEGREES) / (KNIVES_COUNT - 1);
-			Vec3 dir = base.yRot((float)off).scale(KNIVES_SPEED);
-			SmallFireball ball = new SmallFireball(level, c, dir);
-			ball.setPos(c.getX() + dir.x, c.getEyeY() - 0.2, c.getZ() + dir.z);
-			level.addFreshEntity(ball);
+		Item dagger = BuiltInRegistries.ITEM.getValue(KNIFE);
+		if (dagger == Items.AIR) {
+			return;
 		}
-		MoveKit.sound(level, c.position(), SoundEvents.BLAZE_SHOOT, 1.5F, 1.4F);
+		int thrown = 0;
+		for (int i = 0; i < KNIVES_COUNT && MobAmmo.spend(c, MobAmmo.Kind.KNIVES); i++) {
+			float off = (float)((i - (KNIVES_COUNT - 1) / 2.0) * KNIVES_DEGREES / (KNIVES_COUNT - 1));
+			CaptainWays.throwBlade(level, c, t, new ItemStack(dagger), KNIVES_DAMAGE, off, true);
+			thrown++;
+		}
+		if (thrown > 0) {
+			MoveKit.sound(level, c.position(), SoundEvents.BLAZE_SHOOT, 1.5F, 1.4F);
+		}
 	}
 
 	private void cloudTell(ServerLevel level, PatronChampion c, @Nullable LivingEntity target, int left) {

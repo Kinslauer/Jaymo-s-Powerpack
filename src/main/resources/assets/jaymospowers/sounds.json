@@ -2846,5 +2846,94 @@
 				"name": "jaymospowers:blade/clash_6"
 			}
 		]
+	},
+	"blood.squelch": {
+		"subtitle": "subtitles.jaymospowers.blood.squelch",
+		"sounds": [
+			{
+				"name": "jaymospowers:blood/squelch_1"
+			},
+			{
+				"name": "jaymospowers:blood/squelch_2"
+			},
+			{
+				"name": "jaymospowers:blood/squelch_3"
+			},
+			{
+				"name": "jaymospowers:blood/squelch_4"
+			},
+			{
+				"name": "jaymospowers:blood/squelch_5"
+			},
+			{
+				"name": "jaymospowers:blood/squelch_6"
+			}
+		]
+	},
+	"blood.hit": {
+		"subtitle": "subtitles.jaymospowers.blood.hit",
+		"sounds": [
+			{
+				"name": "jaymospowers:blood/hit_1"
+			},
+			{
+				"name": "jaymospowers:blood/hit_2"
+			},
+			{
+				"name": "jaymospowers:blood/hit_3"
+			},
+			{
+				"name": "jaymospowers:blood/hit_4"
+			},
+			{
+				"name": "jaymospowers:blood/hit_5"
+			},
+			{
+				"name": "jaymospowers:blood/hit_6"
+			}
+		]
+	},
+	"blood.burst": {
+		"subtitle": "subtitles.jaymospowers.blood.burst",
+		"sounds": [
+			{
+				"name": "jaymospowers:blood/burst_1"
+			},
+			{
+				"name": "jaymospowers:blood/burst_2"
+			},
+			{
+				"name": "jaymospowers:blood/burst_3"
+			}
+		]
+	},
+	"spot.woodpecker": {
+		"subtitle": "subtitles.jaymospowers.spot.woodpecker",
+		"sounds": [
+			{
+				"name": "jaymospowers:spot/woodpecker_1",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_2",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_3",
+				"attenuation_distance": 48
+			},
+			{
+				"name": "jaymospowers:spot/woodpecker_4",
+				"attenuation_distance": 48
+			}
+		]
+	},
+	"rough.balloon.burner": {
+		"subtitle": "subtitles.jaymospowers.balloon.burner",
+		"sounds": [
+			{
+				"name": "jaymospowers:rough/burner"
+			}
+		]
 	}
 }

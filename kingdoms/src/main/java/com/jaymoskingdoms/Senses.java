@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import com.jaymoskingdoms.mixin.MobAccessor;
 import net.minecraft.ChatFormatting;
+import com.jaymoskingdoms.disasters.Mist;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -277,6 +278,8 @@ public final class Senses {
 		f *= Turning.sight(player, looker, level);
 		// (Hardrock picks) a smelly player is noticed further off, keen noses most (Stench)
 		f *= Stench.factor(player, looker);
+		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
+		f *= Mist.sight(level, player.getEyePosition());
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
 	}
 

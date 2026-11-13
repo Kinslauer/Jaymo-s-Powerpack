@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "SCS",
+    "PPP"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:string",
+    "C": "minecraft:campfire",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymospowers:hot_air_balloon",
+    "count": 1
+  }
+}

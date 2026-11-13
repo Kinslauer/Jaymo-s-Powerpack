@@ -1156,17 +1156,20 @@ public final class GravityPower implements Power {
 			return false;
 		}
 		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
-		// Andy: "it certainly should be able to grab ANYTHING": the block aimed at comes whatever it is made of (only
-		// what can't be broken at all, and blocks with something inside, stay); the rest of the chunk is still limited
-		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(player.level(), hit.getBlockPos(), ripMax(player),
+		// Andy: "it certainly should be able to grab ANYTHING": the block aimed at comes whatever it is made of (obsidian,
+		// bedrock, a chest with its contents, a furnace, a bed, a sign, a spawner); the rest of the chunk is still limited.
+		// A bed or a door comes whole, both halves.
+		ServerLevel world = player.level();
+		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(world, hit.getBlockPos(), ripMax(player),
 			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player));
 		BlockPos aimed = hit.getBlockPos().immutable();
-		if (!blocks.contains(aimed) && com.jaymospowers.core.BlockCluster.takeable(player.level(), aimed, Float.MAX_VALUE, player)) {
+		if (!blocks.contains(aimed) && com.jaymospowers.core.BlockCluster.takeableAny(world, aimed, player)) {
 			blocks.addFirst(aimed);
 			while (blocks.size() > ripMax(player)) {
 				blocks.removeLast();
 			}
 		}
+		blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.withPartners(world, blocks));
 		if (blocks.isEmpty()) {
 			return false;
 		}
@@ -1234,10 +1237,12 @@ public final class GravityPower implements Power {
 		}
 		List<BlockPos> blocks = new ArrayList<>();
 		for (int i = 0; i < count && i < state.ripBlocks.size(); i++) {
-			if (com.jaymospowers.core.BlockCluster.takeable(level, state.ripBlocks.get(i), Float.MAX_VALUE, player)) {
+			if (com.jaymospowers.core.BlockCluster.takeableAny(level, state.ripBlocks.get(i), player)) {
 				blocks.add(state.ripBlocks.get(i));
 			}
 		}
+		// (a bed or a door torn at all is torn whole)
+		blocks = com.jaymospowers.core.BlockCluster.withPartners(level, blocks);
 		BlockHitResult hit = state.ripHit;
 		state.ripFrom = -1;
 		state.ripHit = null;

@@ -197,6 +197,8 @@ public final class Monoliths {
 		AncientRemnantsCompat.register();
 		// (0.7.581) the glyphs round their feet
 		MonolithGlyphs.register();
+		// the sand and soil round an Irradiated one fused to glass
+		FusedGround.register();
 	}
 
 	/** Whether {@code entity} is one of the Aether's Giants. */
@@ -505,6 +507,10 @@ public final class Monoliths {
 					set(level, top, element.ground().defaultBlockState());
 				}
 			}
+		}
+		// the Irradiated one burns the ground it stands on to fused glass, out to the edge of the paving and well past it
+		if (element == Element.IRRADIATED) {
+			FusedGround.fuse(level, foot, random);
 		}
 		// the pillar: a broad 5x5 foot (its corners cut), a 3x3 shaft, then a 1x1 crown, broken off (each of its blocks
 		// SCALE across, the middle one over the foot)

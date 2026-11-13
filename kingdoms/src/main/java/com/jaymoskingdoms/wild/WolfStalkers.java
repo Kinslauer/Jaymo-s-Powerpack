@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.ScentTrails;
+import com.jaymoskingdoms.disasters.Mist;
 import com.jaymoskingdoms.Vampires;
 import com.jaymoskingdoms.mixin.MobAccessor;
 import java.util.ArrayList;
@@ -89,6 +90,8 @@ public final class WolfStalkers {
 	/** In undergrowth or the dark (light at or below DARK), it's only seen this close. */
 	static final double HIDDEN_SEEN = 6.0;
 	static final int DARK = 4;
+	/** A spot in thick mist counts as this much cover when a stalker weighs where to hide (a block between, undergrowth: see {@link #cover}). */
+	static final double MIST_COVER = 3.0;
 	/** Frozen this long when watched before slinking off. */
 	static final int FREEZE_TICKS = 30;
 	/** It rushes from this close; seen this close, it commits anyway. */
@@ -180,7 +183,7 @@ public final class WolfStalkers {
 		if (player.getMainHandItem().is(Items.BONE) || player.getOffhandItem().is(Items.BONE)) {
 			return false;
 		}
-		return night((ServerLevel) wolf.level()) || wounded(player);
+		return night((ServerLevel) wolf.level()) || wounded(player) || Mist.covers(wolf.level(), wolf.position());
 	}
 
 	static boolean night(ServerLevel level) {
@@ -424,7 +427,8 @@ public final class WolfStalkers {
 		if (d > HIDDEN_SEEN && (undergrowth(level, wolf.blockPosition()) || level.getMaxLocalRawBrightness(wolf.blockPosition().above()) <= DARK)) {
 			return false;
 		}
-		return true;
+		// morning mist (Mist): through it nothing is seen past a few blocks, so a stalker in it is in cover
+		return d <= Mist.seenWithin(level, wolf.position(), WATCH_RANGE);
 	}
 
 	/** Whether {@code player} is looking right at {@code wolf} and can see it. */
@@ -589,6 +593,10 @@ public final class WolfStalkers {
 			BlockHitResult hit = level.clip(new ClipContext(eye, head, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, quarry));
 			boolean hidden = hit.getType() != HitResult.Type.MISS && hit.getLocation().distanceToSqr(head) > 0.5;
 			double score = (hidden ? 4.0 : 0.0) + (undergrowth(level, feet) ? 2.5 : 0.0);
+			// thick mist hides a spot too, once it is farther off than anything is seen through it
+			if (at.distanceTo(eye) > Mist.seenWithin(level, at, WATCH_RANGE)) {
+				score += MIST_COVER;
+			}
 			score += Math.cos(angle - home) * 1.5;
 			Vec3 off = at.subtract(quarry.position()).multiply(1.0, 0.0, 1.0);
 			if (off.lengthSqr() > 1.0E-4) {

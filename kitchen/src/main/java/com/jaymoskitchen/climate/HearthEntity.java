@@ -39,6 +39,40 @@ public class HearthEntity extends BlockEntity {
 		super(Warmth.HEARTH_ENTITY, pos, state);
 	}
 
+	int fuel() {
+		return fuel;
+	}
+
+	/** The air this one fills right now. */
+	int cells() {
+		return level instanceof ServerLevel server ? Warmth.cells(server, worldPosition) : 0;
+	}
+
+	/** What the screen is told: see {@link com.jaymoskitchen.net.Payloads.OpenHearth}. */
+	void open(net.minecraft.server.level.ServerPlayer player) {
+		boolean canFeed = false;
+		for (int i = 0; i < player.getInventory().getContainerSize() && !canFeed; i++) {
+			canFeed = Warmth.burnTicks(player.getInventory().getItem(i), cold()) > 0;
+		}
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymoskitchen.net.Payloads.OpenHearth(worldPosition, fuel,
+			MAX_FUEL, cold(), getBlockState().getValue(HearthBlock.LIT), cells(), canFeed));
+	}
+
+	/** Takes one thing the player carries that it burns, and feeds it; false if there is none or it is full. */
+	boolean feedFrom(net.minecraft.server.level.ServerPlayer player) {
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			net.minecraft.world.item.ItemStack stack = player.getInventory().getItem(i);
+			int burn = Warmth.burnTicks(stack, cold());
+			if (burn > 0 && feed(burn)) {
+				if (!player.getAbilities().instabuild) {
+					stack.shrink(1);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
 	boolean cold() {
 		return getBlockState().getBlock() instanceof HearthBlock hearth && hearth.cold;
 	}

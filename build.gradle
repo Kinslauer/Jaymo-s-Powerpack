@@ -73,6 +73,11 @@ def packMods = [
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:gA7nKz5g", cf: [535489, 9280065]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
+	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
+	// the part of Dynamic Surroundings that has a 26.3 build. Client-only. Back in the pack (Andy, 2026-11-12, "Bring it
+	// back") now that ImmersiveFX: Resurrected, which had taken its place, has gone.
+	[dep: "maven.modrinth:ambientsounds:LFUkYKC1", cf: [254284, 9254861]],
+	[dep: "maven.modrinth:creativecore:mzuUQoPB", cf: [257814, 9265584]],
 	// Subtle Effects (all rights reserved, by MincraftEinstein; "use this mod in modpacks with credit and a link",
 	// modrinth.com/mod/subtle-effects): sparks on fires, snoring, dust clouds, burning entities, heartbeat at low health
 	// and more, all toggled in its config. Server-side too (some effects need it), so every client needs it to join.
@@ -620,12 +625,12 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
 // dodge, but stayed in the profile and still drew its roll arrows and key hint beside the hotbar); CTOV (0.20.32, a 26.2 build that stops a 26.3 server loading);
-// AmbientSounds and CreativeCore (ImmersiveFX: Resurrected took their place);
+// (AmbientSounds and CreativeCore left for ImmersiveFX: Resurrected, then came back when it went: Andy, 2026-11-12);
 // ImmersiveVFX (its test ended: Andy, 2026-11-11, "revert the immersive vfx changes"; Iris and Complementary are back);
 // ImmersiveFX: Resurrected (Andy, 2026-11-12: with Sound Physics Remastered both filtered every sound and everyone lagged,
 // "you can remove the immersive"; it checks for Sound Physics by an old mod id, so it never stood down);
 // Streams Reflowing (Dynamic Waters took its place)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "ambientsounds", "creativecore", "immersivevfx", "immersivefx", "streamsreflowing"]
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modJson = { File jar ->
 	try {

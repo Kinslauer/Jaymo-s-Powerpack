@@ -1,0 +1,18 @@
+{
+  "talk.jaymoskingdoms.menace.wary.1": "Put that blade down. Please.",
+  "talk.jaymoskingdoms.menace.wary.2": "Easy now. There's no one here you need to cut.",
+  "talk.jaymoskingdoms.menace.wary.3": "Why are you crouched over that steel like that? Stay back.",
+  "talk.jaymoskingdoms.menace.wary.4": "I want no trouble. Keep it away from me.",
+  "talk.jaymoskingdoms.menace.child.1": "Mama! They've got a sword out!",
+  "talk.jaymoskingdoms.menace.child.2": "Don't hurt me!",
+  "talk.jaymoskingdoms.menace.child.3": "Run! Run!",
+  "talk.jaymoskingdoms.menace.warn.1": "Halt. Sheathe that blade, or I take it for a threat.",
+  "talk.jaymoskingdoms.menace.warn.2": "You. Stand easy and put that steel away. This is your warning.",
+  "talk.jaymoskingdoms.menace.warn.3": "Crouched with a drawn blade among peaceful folk? Sheathe it. Now.",
+  "talk.jaymoskingdoms.menace.set_on.1": "I warned you! Guards, to me!",
+  "talk.jaymoskingdoms.menace.set_on.2": "You'd not sheathe it. Then you're for the steel yourself!",
+  "talk.jaymoskingdoms.menace.set_on.3": "A threat to this place, then. Take them!",
+  "gui.button.orders": "Orders",
+  "message.jaymoskingdoms.followers.underway": "%s can't leave the ship while she's underway.",
+  "message.jaymoskingdoms.followers.no_bond": "%s won't follow you or stay on your word. Only family, hired help or a friend of %s hearts will."
+}

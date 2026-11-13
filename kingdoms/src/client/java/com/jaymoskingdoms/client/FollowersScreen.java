@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * theirs; with nobody there it speaks to everyone of yours near. Seven buttons, one an order; the server decides who
  * listens.
  */
-final class FollowersScreen extends Screen {
+public final class FollowersScreen extends Screen {
 	private static final int W = 176, ROW = 20, TOP = 24;
 	/** The buttons, top to bottom. */
 	private static final int[] ORDERS = {Followers.FOLLOW, Followers.FIGHT, Followers.HOLD, Followers.STAND, Followers.PATROL, Followers.CLEAR, Followers.FREE};
@@ -50,6 +50,14 @@ final class FollowersScreen extends Screen {
 				}
 			}
 		});
+	}
+
+	/** Opens the orders for {@code villager} (from MCA's menu, which Orders stands in for), if the server can take orders. */
+	public static void open(Entity villager) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)) {
+			minecraft.gui.setScreen(new FollowersScreen(villager.getId(), villager.getDisplayName()));
+		}
 	}
 
 	/** The villager under the crosshair within {@link Followers#ONE_RANGE} blocks, or null. */

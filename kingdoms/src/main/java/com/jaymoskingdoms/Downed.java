@@ -358,7 +358,8 @@ public final class Downed {
 		// (0.7.132) only their own are tended: villagers and a settlement's folk, not a looter, a raider or a downed monster;
 		// (0.7.181) and players the settlement thinks well of; (0.7.186) or, either way, whomever a helper's temperament
 		// has them tend (Temperaments)
-		if (body.isPassenger() || body.isOnFire() || body.entityTags().contains(REVIVE_TAG) || body instanceof ServerPlayer p && !helpable(p)
+		// (Andy, 2026-11-12) nor one someone is carrying: whoever carries them is seeing to them
+		if (body.isPassenger() || body.isOnFire() || PowersCompat.isCarried(body) || body.entityTags().contains(REVIVE_TAG) || body instanceof ServerPlayer p && !helpable(p)
 			|| FieldMedics.claimed(body)) {
 			return;
 		}
@@ -398,7 +399,7 @@ public final class Downed {
 
 	/** (0.7.84) The helper walks over, kneels and sees to them. True once they've been at it long enough to get them up. */
 	private static boolean tend(ServerLevel level, LivingEntity body, Tending tending) {
-		if (body.isPassenger() || body.isOnFire() || !canHelp(tending.helper, body)) {
+		if (body.isPassenger() || body.isOnFire() || PowersCompat.isCarried(body) || !canHelp(tending.helper, body)) {
 			untend(body);
 			return false;
 		}

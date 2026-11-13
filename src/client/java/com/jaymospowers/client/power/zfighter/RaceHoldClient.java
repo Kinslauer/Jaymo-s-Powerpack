@@ -52,8 +52,12 @@ public final class RaceHoldClient {
 	/** (0.16.12) While a Frost-born's beam is held, how often the server is told so (ticks; see FrostBeam.KEEP_TICKS). */
 	static final int FROST_KEEP = 4;
 	public static final RenderStateDataKey<Float> STRETCH = RenderStateDataKey.create(() -> "jaymospowers:verdant_stretch");
+	/** A Frost-born's beam is out: the right arm points along the look, where the beam leaves the hand. */
+	public static final RenderStateDataKey<Boolean> FROST_ARM = RenderStateDataKey.create(() -> "jaymospowers:frost_beam_arm");
 	/** The arm's 12 pixels, in blocks; and how far the shoulder sits from the eyes, roughly (blocks). */
 	static final float ARM = 0.75F, SHOULDER = 0.35F;
+	/** How far the beam's arm turns in toward the line of sight (radians). */
+	static final float FROST_ARM_IN = 0.1F;
 
 	private static int held;
 	private static boolean fired;
@@ -212,6 +216,7 @@ public final class RaceHoldClient {
 			}
 		}
 		state.setData(STRETCH, out);
+		state.setData(FROST_ARM, entity instanceof Player beamer && beamer.hasAttached(com.jaymospowers.power.zfighter.FrostBeam.BEAMING) ? Boolean.TRUE : null);
 	}
 
 	/** The right arm thrown straight out along the look and drawn out long. */
@@ -221,6 +226,12 @@ public final class RaceHoldClient {
 		}
 		Float scale = avatar.getData(STRETCH);
 		if (scale == null) {
+			if (Boolean.TRUE.equals(avatar.getData(FROST_ARM))) {
+				// the beam's arm straight out along the look, a touch in toward the line of sight
+				h.rightArm.xRot = -Mth.HALF_PI + avatar.xRot * Mth.DEG_TO_RAD;
+				h.rightArm.yRot = h.head.yRot - FROST_ARM_IN;
+				h.rightArm.zRot = 0.0F;
+			}
 			return;
 		}
 		h.rightArm.xRot = -Mth.HALF_PI + avatar.xRot * Mth.DEG_TO_RAD;

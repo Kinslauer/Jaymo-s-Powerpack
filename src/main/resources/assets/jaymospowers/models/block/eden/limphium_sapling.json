@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "jaymospowers:block/eden/limphium_sapling"
+  }
+}
