@@ -315,3 +315,60 @@ add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The 
 - Left alone: `claude-writer` (retired since Quill took over Nov 10; no dispatch since).
 
 **Nov 12, 11:10 PM (PC Claude):** the Discord board (	ools/discord_kanban.py) was down since the morning reboot (nothing started it). Restarted it, and added Task Scheduler task `Discord_Kanban` (at logon, 1 min delay) running `E:/hermes/scripts/start_discord_kanban.ps1`, which skips if a copy is already running. Logs: `E:/hermes/logs/discord-kanban.out.log` / `.err.log`.
+
+## AMD free models as a backup (added Nov 13, cloud thread "Add AMD free models to Hermes")
+
+What it is: AMD's AI Developer Program has "Token Factory" (Radeon Cloud), free hosted models with an
+OpenAI-compatible API. It is real, but run from AMD's China site and meant for testing, not production. Docs:
+https://amd-aim.github.io/radeon-cloud-docs/ (quickstart, api/rate-limits, models/overview, api/terms).
+
+- Base URL: `https://developer.amd.com.cn/radeon/api/v1` (OpenAI chat at `/chat/completions`, list at `/models`,
+  remaining allowance at `/usage`). Auth: `Authorization: Bearer <key>`, keys start with `rc-`.
+- Models on Andy's account (checked his Token Factory page Nov 13; there is NO GLM model). Send the model ID, not
+  the card title: AMD's docs say the card title and ID can differ. Confirm the IDs with `GET /models` before
+  using them. All have tool calling.
+  | Card title | ID to send | Context | Pts per 1M in / out | Notes |
+  |---|---|---|---|---|
+  | DeepSeek-V4-Flash-0731 | `DeepSeek-V4-Flash` | 1M | 0.14 / 0.28 | text only, thinking off by default; 4% busy |
+  | Qwen3.8-27B | `Qwen3.8-27B` | 256k | 0.035 / 0.07 | thinking ON by default (`reasoning_effort` low/medium/xhigh; `high` gives a 400); 3% busy |
+  | Gemma-4-31B-IT | `Gemma-4-31B-IT` | 256k | 0.035 / 0.07 | thinking off by default; 4% busy |
+  | DeepSeek-V4.1-Flash-1017 | `DeepSeek-V4.1-Flash` | 1M | 0.28 / 0.56 | vision, 31% busy, so most likely to queue |
+  | MiniCPM5-2B | `MiniCPM5-2B` | 128k | 0.035 / 0.07 | 2B is too small for agent work; skip |
+  A 64-135k bot call fits all of the first four.
+- Limits: 20 requests/min per account, 30/min per key, 8 at once per key. No tokens-per-minute limit is
+  published (the thing that killed Groq). **Allowance: Andy's account has 10 points TOTAL for a 29-day access
+  period that ends Dec 13 2026 (seen on his Token Lab page Nov 13). It is not daily.** What happens after Dec 13
+  (renewal or nothing) is unknown; check his Token Lab page then. At ~100k tokens a call, 10 points is roughly
+  700 DeepSeek-V4-Flash calls or ~2,800 Qwen3.8-27B / Gemma calls for the whole period. So AMD is a LAST-RESORT
+  backup, and Qwen is the better value.
+  Over a limit it returns 429 with `Retry-After` (60 s for per-minute, seconds-to-reset when the allowance is used up).
+- Terms: one key per person, no extra accounts. "Do not put a production workload behind these endpoints", no
+  uptime promise, can be cut or changed any time. Prompts are logged for 2 days, not used for training, and no
+  sensitive data may be sent. So: backup only, never first in the chain, and nothing secret in prompts (the
+  bots must never paste a key or `.env` content into a prompt anyway).
+
+Andy's part (all done Nov 13): signed up, saved the key in `E:\hermes\.env` as `AMD_API_KEY` himself, and
+checked the allowance (10 points to Dec 13). Never print, copy or move the key.
+
+PC Claude's part (ready to start):
+- [ ] 1. Check the key works without printing it: call `GET /models` with the key from the env var and confirm the
+      IDs `DeepSeek-V4-Flash`, `Qwen3.8-27B` and `Gemma-4-31B-IT` are listed (use whatever IDs it returns). Then one small chat call with a tool definition to each;
+      note seconds to first token and total (it's served from China, so it may be slow from the US).
+- [ ] 2. Back up `E:/hermes/config.yaml` and Quill's profile config. In the ONE existing `providers:` block add an
+      OpenAI-compatible provider `amd` (base URL above, key from `AMD_API_KEY`), the same way NVIDIA is set up.
+      Don't make a second `providers:` block.
+- [ ] 3. Put AMD at the END of each chain (last resort, the points must last to Dec 13): `Qwen3.8-27B` first
+      (set `reasoning_effort: low`, or medium, so its default thinking doesn't eat time), then `DeepSeek-V4-Flash`.
+      If Qwen fumbles tool calls in step 1, swap in `Gemma-4-31B-IT` (same price). Skip DeepSeek-V4.1-Flash
+      (busiest, pricier) and MiniCPM5-2B (too small).
+      YOUTH: Super -> Lightning -> Gemini -> AMD Qwen -> AMD DeepSeek.
+      Quill: Super -> Lightning -> Gemini -> Ultra -> AMD Qwen -> AMD DeepSeek.
+      Prometheus: Super -> Gemini -> Lightning -> AMD Qwen -> AMD DeepSeek.
+      If OpenRouter free goes in too, put it before AMD. A 429 from AMD must fall through right away, no long wait.
+      Check with `hermes fallback list`.
+- [ ] 4. Restart with `schtasks /run /tn Hermes_Gateway` (never `hermes gateway restart`), run one real bot task
+      that falls to AMD (e.g. temporarily point a test run at AMD first), and watch the `X-RateLimit-Remaining-User-Daily-USD`
+      header or `GET /usage` to see how many points one bot call costs. Write that here.
+- [ ] 5. Append to `Decisions.md` that Andy added AMD Token Factory as the last backup, with the date. Once a week,
+      write points left here; if more than half is gone before Dec 1, tell Andy in 2 lines.
+- [ ] If anything breaks: restore the backup config and restart the gateway.
