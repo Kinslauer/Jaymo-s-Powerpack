@@ -4,6 +4,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.beasts.Beasts;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -27,7 +28,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * <p>The barrow beetle is the small example the others copy; the Bogre (Inhabitants') keeps to itself in the mangroves; the
  * Impaler (Inhabitants') lurks in the deep caves at night; the Warped Clam (Inhabitants') sits on the End's islands; the draugr guards the Stormborn Tomb's halls (placed by the
  * tomb's spawners, never in the open). The tomb's skeletons and its boss are the silver skeleton and the Skeleton Lord,
- * drawn with GeckoLib too ({@code SilverSkeleton}, {@code SkeletonLord}).
+ * drawn with GeckoLib too ({@code SilverSkeleton}, {@code SkeletonLord}). Youth, the wood-wisp, never spawns by itself: Hermes
+ * calls it to a player with /youth ({@link YouthCommand}).
  */
 public final class Inhabitants {
 	public static EntityType<BarrowBeetle> BARROW_BEETLE;
@@ -37,6 +39,8 @@ public final class Inhabitants {
 	public static EntityType<WarpedClam> WARPED_CLAM;
 	/** The spikes an Impaler throws off its arm. */
 	public static EntityType<ImpalerSpike> IMPALER_SPIKE;
+	/** Youth, the wood-wisp Hermes answers players through (no spawn egg; only /youth calls it). */
+	public static EntityType<YouthWisp> YOUTH_WISP;
 
 	/** The beetle's natural spawn: its weight among the ambient mobs, and how many come together. */
 	static final int BEETLE_WEIGHT = 6, BEETLE_MIN = 2, BEETLE_MAX = 4;
@@ -69,6 +73,11 @@ public final class Inhabitants {
 		ResourceKey<EntityType<?>> spike = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("impaler_spike"));
 		IMPALER_SPIKE = Registry.register(BuiltInRegistries.ENTITY_TYPE, spike, EntityType.Builder.<ImpalerSpike>of(ImpalerSpike::new, MobCategory.MISC)
 			.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(10).build(spike));
+		ResourceKey<EntityType<?>> wisp = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("youth_wisp"));
+		YOUTH_WISP = Registry.register(BuiltInRegistries.ENTITY_TYPE, wisp, EntityType.Builder.of(YouthWisp::new, MobCategory.MISC)
+			.sized(0.5F, 0.9F).clientTrackingRange(8).updateInterval(2).build(wisp));
+		FabricDefaultAttributeRegistry.register(YOUTH_WISP, YouthWisp.createAttributes());
+		YouthCommand.register();
 
 		SpawnPlacements.register(BARROW_BEETLE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BarrowBeetle::checkSpawn);
 		SpawnPlacements.register(DRAUGR, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);
