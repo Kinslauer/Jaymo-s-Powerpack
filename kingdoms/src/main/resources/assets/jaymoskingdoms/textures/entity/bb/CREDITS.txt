@@ -130,7 +130,8 @@ bbmodels/valor_wings_eurus.json, textures/entity/valor/wings_eurus_*.png: a Skyw
 goblin_scout.png (bbmodels/goblin_scout.json): the goblin scout
 grave_ghost.png (bbmodels/grave_ghost.json): the ghost at a fresh grave
   Blockbench files "goblin_scout" and "ghost", given to us by Andy on 2026-11-13 (tools/bbmodels/goblin-scout.bbmodel,
-  ghost.bbmodel). Andy (2026-11-12): from Blockbench Workshop, CC BY 4.0. MAKER'S NAME AND PAGE NOT YET RECORDED: fill in when Andy sends the link.
+  ghost.bbmodel), by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair (Andy, 2026-11-12: all three are yair's). CC BY 4.0. The scout's page:
+  https://blockbenchworkshop.com/model/yair/goblin-scout
   Changes: baked to our loader's format; the scout's glow sheet stacked under its skin. The ghost keeps the file's body
   and its floating idle; its skin is redrawn in the file's own pale blue with eyes and legs that thin away
   (kingdoms/tools/gen_scout_ghost.py).

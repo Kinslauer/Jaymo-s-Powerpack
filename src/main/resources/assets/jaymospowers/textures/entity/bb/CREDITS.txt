@@ -81,5 +81,6 @@ textures/entity/gun_flintlock*.png, geckolib/*/entity/gun_flintlock.*: WeaponMod
 
 ../player_ghost.png
   The same skin as Kingdoms' grave_ghost.png (kingdoms/tools/gen_scout_ghost.py), after the ghost model from the
-  Blockbench Workshop, CC BY 4.0 (tools/bbmodels/ghost.bbmodel; maker's name to be filled in). Drawn on the vanilla
+  Blockbench Workshop by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair, CC BY 4.0
+  (tools/bbmodels/ghost.bbmodel). Drawn on the vanilla
   player model.

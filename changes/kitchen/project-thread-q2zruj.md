@@ -6,5 +6,5 @@ From the camping-campfire Blockbench model Andy uploaded.
 - The roast turns on the crossbar, about 3 pixels above the spit block's floor (it used to float a block higher).
 - The spit's outline and collision are the low half of its block (it was a full cube), and it no longer hides the faces
   of blocks beside it.
-- Credits: Blockbench Workshop, CC BY 4.0 (Andy); the makers' names are still to be filled in.
+- Credits: yair (@yairtalmy2111), Blockbench Workshop, CC BY 4.0.
 - Compiled; not played. Unseen in game: a whole carcass on the lower crossbar may dip into the fire's logs.

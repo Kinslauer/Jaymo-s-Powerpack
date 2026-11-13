@@ -14,7 +14,7 @@ From two Blockbench models Andy uploaded (goblin-scout, ghost).
   Left alone it stops coming after the third night. Ghosts are never saved; each night's is raised from the grave record.
   Spawn egg (that one just waits for morning).
 - Lore: "Goblin scouts" and "The nights at the grave" in Lore.md, approved by Andy.
-- Credits: Blockbench Workshop, CC BY 4.0 (Andy); the makers' names are still to be filled in.
+- Credits: yair (@yairtalmy2111), Blockbench Workshop, CC BY 4.0.
 - Compiled (`compileClientJava`); not played. Unseen in game: the scout's size and animation timing, the ghost's
   see-through look, whether MCA goblins answer the cackle.
 - **A ghost's voice** (`VoiceMasks.Mask.GHOST`, `VoiceRange`). Andy: "the voice changer automatically makes you sound
