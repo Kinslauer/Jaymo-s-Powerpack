@@ -570,14 +570,36 @@ public final class ZFighterSpace {
 		return spot;
 	}
 
+	/**
+	 * New chunks one search for ground may make. Making a chunk holds the server thread till it's done, which on the Steam
+	 * Deck can be seconds a chunk, and the searches here tried 24-40 random spots in land nobody had seen.
+	 */
+	static final int NEW_CHUNKS = 6;
+
+	/** Whether (x, z)'s chunk is there to look at: made ones always; one not yet made only while {@code made[0]} lasts. */
+	static boolean reach(ServerLevel level, int x, int z, int[] made) {
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) != null) {
+			return true;
+		}
+		if (made[0] <= 0) {
+			return false;
+		}
+		made[0]--;
+		level.getChunk(x >> 4, z >> 4);
+		return true;
+	}
+
 	/** A flat place of this world to stand: the surface, or a floor in the forge's caves. Falls back to the middle of the map. */
 	private static BlockPos find(ServerLevel level, Dest dest) {
+		int[] made = {NEW_CHUNKS};
 		for (int i = 0; i < SEARCH_TRIES; i++) {
 			double angle = i * 2.399963;
 			double distance = i == 0 ? 0.0 : SEARCH_STEP * (1.0 + i / 6.0);
 			int x = (int)Math.round(Math.cos(angle) * distance);
 			int z = (int)Math.round(Math.sin(angle) * distance);
-			level.getChunk(x >> 4, z >> 4);
+			if (!reach(level, x, z, made)) {
+				continue;
+			}
 			BlockPos spot = dest.kind() == Kind.FORGE ? forgeFloor(level, x, z) : surface(level, x, z);
 			if (spot != null) {
 				return spot;

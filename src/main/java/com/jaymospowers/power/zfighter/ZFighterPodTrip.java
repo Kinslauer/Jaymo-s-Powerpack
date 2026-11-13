@@ -651,10 +651,13 @@ public final class ZFighterPodTrip {
 			List<BlockPos> decks = MawWorld.decks();
 			return decks.get(random.nextInt(decks.size()));
 		}
+		int[] made = {ZFighterSpace.NEW_CHUNKS};
 		for (int i = 0; i < LAND_TRIES; i++) {
 			int x = random.nextInt(LAND_RANGE * 2 + 1) - LAND_RANGE;
 			int z = random.nextInt(LAND_RANGE * 2 + 1) - LAND_RANGE;
-			level.getChunk(x >> 4, z >> 4);
+			if (!ZFighterSpace.reach(level, x, z, made)) {
+				continue;
+			}
 			BlockPos spot = dest.kind() == ZFighterSpace.Kind.FORGE ? ZFighterSpace.forgeFloor(level, x, z) : ZFighterSpace.surface(level, x, z);
 			if (spot != null) {
 				return spot;

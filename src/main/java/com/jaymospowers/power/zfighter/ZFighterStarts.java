@@ -98,8 +98,12 @@ public final class ZFighterStarts {
 	static final int SCORCH_RADIUS = 4, DEBRIS = 6;
 	/** The moon start's torches. */
 	static final int MOON_TORCHES = 16;
-	/** The Verdant World: how far the village is looked for from where the Lookout floats over it (chunks), and how far from the village the gate is (blocks). */
-	static final int VILLAGE_SEARCH = 100, VILLAGE_NEAR = 14, GATE_MIN = 150, GATE_MAX = 300;
+	/**
+	 * The Verdant World: how far the village is looked for from where the Lookout floats over it, and how far from the
+	 * village the gate is (blocks). The search counts rings of the village spacing (findNearestMapStructure's unit, not
+	 * chunks), each candidate made on the server thread: 100 could run past the watchdog; 8 still reaches thousands of blocks.
+	 */
+	static final int VILLAGE_SEARCH = 8, VILLAGE_NEAR = 14, GATE_MIN = 150, GATE_MAX = 300;
 	/** The Verdant start's seeds and bandages. */
 	static final int VERDANT_SEEDS = 8, VERDANT_BANDAGES = 3;
 	/** Rustfall: how far from the Iron-Master's pad the mine mouth is (blocks). */
@@ -215,8 +219,10 @@ public final class ZFighterStarts {
 	}
 
 	/** Open ground at column (x, z): two clear blocks over a dry floor; null if not. */
-	private static @Nullable BlockPos open(ServerLevel level, int x, int z) {
-		level.getChunk(x >> 4, z >> 4);
+	private static @Nullable BlockPos open(ServerLevel level, int x, int z, int[] made) {
+		if (!ZFighterSpace.reach(level, x, z, made)) {
+			return null;
+		}
 		BlockPos feet = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));
 		BlockState floor = level.getBlockState(feet.below());
 		if (feet.getY() <= level.getMinY() + 4 || !floor.getFluidState().isEmpty() || !floor.isFaceSturdy(level, feet.below(), Direction.UP)
@@ -235,6 +241,7 @@ public final class ZFighterStarts {
 	private static @Nullable BlockPos spotNear(ServerLevel level, BlockPos centre, int min, int max, RandomSource random, boolean flat,
 		java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
 		BlockPos rough = null;
+		int[] made = {ZFighterSpace.NEW_CHUNKS};
 		for (int i = 0; i < SPOT_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int d = min + random.nextInt(Math.max(1, max - min + 1));
@@ -242,7 +249,7 @@ public final class ZFighterStarts {
 			if (!free.test(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
-			BlockPos feet = open(level, x, z);
+			BlockPos feet = open(level, x, z, made);
 			if (feet == null) {
 				continue;
 			}
