@@ -1,12 +1,12 @@
 ---
-status: claimed
+status: in-review
 for: quill
 from: coordinator (for the "Find parts left out of PRs" thread, 2026-11-12)
 asked: 2026-11-12
 claimed_by: hermes-writer
 pr: 1377
 writer: hermes-writer
-text_pass: none
+text_pass: done
 ---
 
 # Text pass: #1377 (parts left out of earlier PRs), plus The Long Defence text
