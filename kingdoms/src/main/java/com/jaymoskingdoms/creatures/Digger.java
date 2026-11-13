@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -38,11 +39,13 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A digger: a kobold-like scrap of a creature, quick and small and brave only in numbers. Diggers burrow warrens
- * ({@link Warrens}) and ring them with pits, stakes and webs. They are skittish: a player in sight, or close enough to hear,
- * sends them scurrying back down their warren's hole (or just away, for one with no warren), and they lie low there till
- * the player has gone; they climb their burrow walls to get out again. They only fight when they have the upper hand: a
- * pit lid gives under someone (they all come for whoever fell through), a pack of them is set on in their own warren, or
- * one is cornered with nowhere left to run. One waits in a nook in the wall of each pit ({@link #lurk}): it keeps to its
+ * ({@link Warrens}) and ring them with pits, stakes and webs. They are hostile but skittish ({@link #fights}): a lone one
+ * that sees a player, or hears one close by, scurries back down its warren's hole (or just away, for one with no warren)
+ * and lies low there till the player has gone; they climb their burrow walls to get out again. But they do fight: two or
+ * more out of their hole together hunt a player as a pack, a lone one caught within {@link #BITES} blocks turns and bites,
+ * one that is struck bites back, and one hiding in its hole goes for whoever corners it there. They are boldest when they
+ * have the upper hand: a pit lid gives under someone (they all come for whoever fell through), a pack of them is set on
+ * in their own warren. One waits in a nook in the wall of each pit ({@link #lurk}): it keeps to its
  * nook, is on whoever drops in beside it at once, and goes back to wait when the fight is over. Out of their holes they fight as a pack ({@link Packs}: one with another beside
  * you has the upper hand), and a lone hurt one loses its nerve and runs again.
  */
@@ -54,8 +57,14 @@ public class Digger extends Monster {
 	static final double SHY = 18.0, HEARS = 7.0, RUN = 1.45;
 	/** How far (blocks) it will run home to its warren (farther, it just runs away), and how near the chamber counts as in. */
 	static final double HOME_RANGE = 48.0, IN_HOME = 1.6;
-	/** A player this near (blocks) one hiding in its hole has it cornered: it stops lying low (and bites back when struck). */
+	/** A player this near (blocks) one hiding in its hole has it cornered: it stops lying low and goes for them. */
 	static final double CORNERED = 2.5;
+	/**
+	 * (Andy 2026-11-13: diggers "should be hostile") A lone digger out of its hole with a player this near (blocks) turns
+	 * and fights instead of running; one struck by a player fights them back for this long (ticks).
+	 */
+	static final double BITES = 4.0;
+	static final int BITES_BACK_TICKS = 200;
 	/** How long (ticks) a pit's alarm, or a pack set on at home, keeps diggers bold. */
 	static final int BOLD_TICKS = 400;
 	/** Diggers (it included) at hand that make a pack bold enough to stand and fight for the warren, and how near counts. */
@@ -100,9 +109,9 @@ public class Digger extends Monster {
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-		// players only while bold (a pit's alarm, a pack at home): otherwise they are run from, not hunted
+		// players when it has the nerve (fights: a pack, close, struck, cornered, or bold); otherwise they are run from
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> level.getDifficulty() != Difficulty.PEACEFUL
-			&& this.bold()));
+			&& this.fights(target)));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
 	}
@@ -157,6 +166,34 @@ public class Digger extends Monster {
 	/** Whether it stands and fights now: bold, and not a lone one that has lost its nerve. */
 	boolean bold() {
 		return this.level().getGameTime() < this.boldUntil && !(this.lone() && this.getHealth() < this.getMaxHealth() * LOSES_NERVE);
+	}
+
+	/** Whether it is in its warren's chamber (or a pit digger's nook). */
+	boolean atHome() {
+		return this.home != null && this.home.distToCenterSqr(this.position()) < IN_HOME * IN_HOME;
+	}
+
+	/**
+	 * Whether it stands and fights {@code who} rather than run: bold; or, unless it is a lone one that has lost its nerve,
+	 * struck by them lately, cornered by them in its hole, or out of its hole with them within {@link #BITES} or with
+	 * another digger at hand (a pack hunts).
+	 */
+	boolean fights(LivingEntity who) {
+		if (this.bold()) {
+			return true;
+		}
+		boolean lone = this.lone();
+		if (lone && this.getHealth() < this.getMaxHealth() * LOSES_NERVE) {
+			return false;
+		}
+		if (this.getLastHurtByMob() == who && this.tickCount - this.getLastHurtByMobTimestamp() < BITES_BACK_TICKS) {
+			return true;
+		}
+		double d2 = this.distanceToSqr(who);
+		if (this.atHome()) {
+			return d2 < CORNERED * CORNERED;
+		}
+		return d2 < BITES * BITES || !lone;
 	}
 
 	/** Bold for a while ({@link Warrens#alarm}, or a pack set on at home). */
@@ -252,11 +289,7 @@ public class Digger extends Monster {
 		}
 
 		private boolean atHome() {
-			return Digger.this.home != null && Digger.this.home.distToCenterSqr(Digger.this.position()) < IN_HOME * IN_HOME;
-		}
-
-		private boolean cornered() {
-			return this.from != null && Digger.this.distanceToSqr(this.from) < CORNERED * CORNERED;
+			return Digger.this.atHome();
 		}
 
 		private @Nullable Path route() {
@@ -277,12 +310,13 @@ public class Digger extends Monster {
 				return false;
 			}
 			this.from = this.nearest();
-			if (this.from == null) {
+			// (one it would fight, a pack, close, struck or cornered, isn't run from)
+			if (this.from == null || Digger.this.fights(this.from)) {
 				return false;
 			}
 			if (this.atHome()) {
 				this.path = null;
-				return !this.cornered();
+				return true;
 			}
 			this.path = this.route();
 			return this.path != null;
@@ -290,10 +324,11 @@ public class Digger extends Monster {
 
 		@Override
 		public boolean canContinueToUse() {
-			if (Digger.this.bold() || this.from == null || !this.from.isAlive() || Digger.this.distanceToSqr(this.from) > (SHY + 6.0) * (SHY + 6.0)) {
+			if (this.from == null || !this.from.isAlive() || Digger.this.distanceToSqr(this.from) > (SHY + 6.0) * (SHY + 6.0)
+				|| Digger.this.fights(this.from)) {
 				return false;
 			}
-			return this.atHome() ? !this.cornered() : !Digger.this.getNavigation().isDone();
+			return this.atHome() || !Digger.this.getNavigation().isDone();
 		}
 
 		@Override

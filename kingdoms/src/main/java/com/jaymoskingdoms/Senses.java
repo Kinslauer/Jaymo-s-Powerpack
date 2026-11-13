@@ -58,7 +58,14 @@ import org.jspecify.annotations.Nullable;
  * first and this multiplies on top. It is the light at the eyes (down to {@link #LIGHT_MIN}), sneaking ({@link #SNEAK}, or
  * Quiet Step's), standing still ({@link #STILL}), where the mob looks ({@link #BEHIND} outside its {@link #VIEW_COS} cone,
  * unless within {@link #BEHIND_CLOSE}), a hood ({@link Identities#HOOD_SIGHT}), glowing or burning ({@link #LIT}). A mob
- * already after you, with you in sight, sees you at full range. Creative and spectator players are untouched.</li>
+ * already after you, with you in sight, sees you at full range. Creative and spectator players are untouched.
+ * Andy (2026-11-13): "the unburied and digger and shadow have all been passive toward me ... they should be
+ * hostile no?" They were nearly blind: in the dark sight fell to a quarter, and a mob not looking your way saw a third of
+ * that again, so a Shadow (24 blocks' range) in its own darkness noticed a walking player at under two blocks unless it
+ * happened to face them. Now the creatures of the night and the dark ({@link #DARKVISION}, the undead among them) see in
+ * the dark as in dim light ({@link #DARKVISION_LIGHT}); anyone walking about within {@link #HEARD} blocks who isn't sneaking
+ * is heard whatever the light or the way the mob faces (a Ranger's quiet tread, {@link Rangers#quiet}, makes that nearer); and whatever shows a boss bar
+ * ({@link BossBars#boss}, the Unburied and the Snow Widow among them) senses as a boss.</li>
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
  * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
@@ -84,6 +91,12 @@ public final class Senses {
 	static final double SHADOWED_PER_RANK = 0.1;
 	/** A mob sees in front of it within this cosine of its look (0.5: a 120 degree cone); outside, this share, unless closer than {@link #BEHIND_CLOSE} blocks. */
 	static final double VIEW_COS = 0.5, BEHIND = 0.3, BEHIND_CLOSE = 2.0;
+	/** A mob with darkvision sees in the dark as in this much light (0 dark, 1 full light). */
+	static final double DARKVISION_LIGHT = 0.6;
+	/** A player walking about (moving, not sneaking) this near (blocks) is heard, whatever the light or where the mob looks. */
+	static final double HEARD = 8.0;
+	/** Creatures of the night and the dark, that see in it: {@code jaymoskingdoms:darkvision}. */
+	static final TagKey<EntityType<?>> DARKVISION = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("darkvision"));
 	/** The least a mob's sight may be cut to. */
 	static final double MIN_FACTOR = 0.05;
 	/** Horizontal movement (blocks squared per tick) above which a player is moving, not standing still. */
@@ -218,7 +231,8 @@ public final class Senses {
 
 	static boolean boss(Mob mob) {
 		EntityType<?> type = mob.getType();
-		return mob instanceof GreatNecromancer || type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
+		// and whatever shows a boss bar (the Unburied, the Snow Widow, rulers, warlords, the giants)
+		return mob instanceof GreatNecromancer || BossBars.boss(mob) || type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
 			|| type.builtInRegistryHolder().is(BOSSES);
 	}
 
@@ -258,7 +272,9 @@ public final class Senses {
 		}
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
 		double light = level.getMaxLocalRawBrightness(eyes) / 15.0;
-		double f = LIGHT_MIN + (LIGHT_MAX - LIGHT_MIN) * light;
+		// the creatures of the dark see in it
+		double seen = looker.getType().builtInRegistryHolder().is(DARKVISION) ? Math.max(light, DARKVISION_LIGHT) : light;
+		double f = LIGHT_MIN + (LIGHT_MAX - LIGHT_MIN) * seen;
 		f *= 1.0 - SHADOWED_PER_RANK * Skills.rank(player, Skills.Perk.SHADOWED) * (1.0 - light);
 		if (player.isCrouching()) {
 			int quiet = Skills.rank(player, Skills.Perk.QUIET_STEP);
@@ -288,7 +304,15 @@ public final class Senses {
 		f *= FeatsBody.sight(player, light) * Paths.sight(player, light);
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
 		f *= Mist.sight(level, player.getEyePosition());
-		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
+		f = Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);
+		// heard: someone walking about close by, not sneaking, is noticed in the dark or behind its back
+		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
+			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
+			if (range > 0.0) {
+				f = Math.max(f, HEARD * Rangers.quiet(player) / range);
+			}
+		}
+		return f;
 	}
 
 	// ---- losing track and searching ----------------------------------------------------------------------------------
