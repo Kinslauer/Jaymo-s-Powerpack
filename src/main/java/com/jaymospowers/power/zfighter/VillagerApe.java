@@ -444,8 +444,11 @@ final class VillagerApe {
 		}
 		ZFighterPower.Live live = ape.live();
 		long now = level.getGameTime();
+		// a lock-on aimed blow (LockOnRegions) goes where it's aimed, whatever height it came from
+		com.jaymospowers.core.LockOnRegions.Region aimed = com.jaymospowers.core.LockOnRegions.aimedRegion(mob, source);
 		if (ZFighterLineage.crippled(mob)) {
-			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by && com.jaymospowers.core.Dismember.blade(by.getMainHandItem())) {
+			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by && com.jaymospowers.core.Dismember.blade(by.getMainHandItem())
+				&& ZFighterLineage.tailBlow(aimed)) {
 				cutTail(mob, live, level);
 			}
 			return;
@@ -453,24 +456,34 @@ final class VillagerApe {
 		if (taken > 0.0F) {
 			ZFighterLineage.flee(mob, live, source, now);
 		}
-		Vec3 from = source.getSourcePosition();
-		if (now < live.crippleSafeUntil || from == null || from.y > mob.getY() + mob.getBbHeight() * ZFighterLineage.LEG_SHARE || live.apeSize < 0.5F) {
+		if (now < live.crippleSafeUntil || !ZFighterLineage.legBlow(mob, source, aimed) || live.apeSize < 0.5F) {
 			return;
 		}
 		live.legHits++;
 		if (taken >= ZFighterLineage.WILD_CRIPPLE_BLOW || live.legHits >= ZFighterLineage.WILD_CRIPPLE_HITS) {
-			live.legHits = 0;
-			live.crippledUntil = now + ZFighterLineage.WILD_CRIPPLED_TICKS;
-			live.crippleSafeUntil = live.crippledUntil + ZFighterLineage.CRIPPLE_SAFE_TICKS;
-			live.fleeUntil = -1L;
-			mob.removeAttached(ZFighterLineage.WILD_GOAL);
-			mob.setAttached(ZFighterLineage.CRIPPLED, true);
-			body(mob, live);
-			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 4.0F, 0.4F);
-			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 2.0F, 0.4F);
-			ZFighterLineage.shake(mob, mob.position(), ZFighterLineage.APE_STEP_RANGE * 1.5, ZFighterLineage.APE_CHANGE_SHAKE);
-			tell(mob, level, "message.jaymospowers.villager_ape_crippled", ChatFormatting.GOLD);
+			cripple(mob);
 		}
+	}
+
+	/** It goes down on its back (enough blows to the legs, or both legs gone black). */
+	static void cripple(Mob mob) {
+		Ape ape = APES.get(mob.getUUID());
+		if (ape == null || !(mob.level() instanceof ServerLevel level)) {
+			return;
+		}
+		ZFighterPower.Live live = ape.live();
+		long now = level.getGameTime();
+		live.legHits = 0;
+		live.crippledUntil = now + ZFighterLineage.WILD_CRIPPLED_TICKS;
+		live.crippleSafeUntil = live.crippledUntil + ZFighterLineage.CRIPPLE_SAFE_TICKS;
+		live.fleeUntil = -1L;
+		mob.removeAttached(ZFighterLineage.WILD_GOAL);
+		mob.setAttached(ZFighterLineage.CRIPPLED, true);
+		body(mob, live);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 4.0F, 0.4F);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 2.0F, 0.4F);
+		ZFighterLineage.shake(mob, mob.position(), ZFighterLineage.APE_STEP_RANGE * 1.5, ZFighterLineage.APE_CHANGE_SHAKE);
+		tell(mob, level, "message.jaymospowers.villager_ape_crippled", ChatFormatting.GOLD);
 	}
 
 	/** The tail's off: it shrinks back, and it's cut for good (it never turns again). */

@@ -2657,6 +2657,23 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-13): "finesse stat should increase accuracy". Hands Powers' lock-on (its {@code LockOnRegions.finesse})
+	 * how far a player's Finesse has come (0 to 1), so their aimed head shots miss and glance less. Server side.
+	 */
+	public static void shareFinesse() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.reflect.Field field = Class.forName("com.jaymospowers.core.LockOnRegions").getField("finesse");
+			java.util.function.ToDoubleFunction<Player> share = player -> Stats.value(player, Stats.Stat.FINESSE) / (double)Stats.MAX;
+			field.set(null, share);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the Finesse stat (older Powers?)", e);
+		}
+	}
+
 	/** Powers' {@code LockOnClient}: its private {@code pick(Minecraft, LocalPlayer)} and {@code locked}/{@code blind} fields, and the {@code LockOn.Packet(int)} record. */
 	private static java.lang.reflect.@Nullable Method lockPick;
 	private static java.lang.reflect.@Nullable Field lockLocked, lockBlind;

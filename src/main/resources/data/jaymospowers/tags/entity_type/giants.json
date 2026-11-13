@@ -1,0 +1,18 @@
+{
+	"values": [
+		"minecraft:warden",
+		{"id": "jaymoskingdoms:ogre", "required": false},
+		{"id": "jaymoskingdoms:cave_ogre", "required": false},
+		{"id": "jaymoskingdoms:fire_ogre", "required": false},
+		{"id": "jaymoskingdoms:armoured_ogre", "required": false},
+		{"id": "jaymoskingdoms:bogre", "required": false},
+		{"id": "jaymoskingdoms:troll", "required": false},
+		{"id": "jaymoskingdoms:minotaur", "required": false},
+		{"id": "jaymoskingdoms:piglin_king", "required": false},
+		{"id": "jaymoskingdoms:made_brute", "required": false},
+		{"id": "jaymoskingdoms:highfield_giant", "required": false},
+		{"id": "jaymoskingdoms:magnetic_giant", "required": false},
+		{"id": "jaymoskingdoms:arctic_giant", "required": false},
+		{"id": "jaymoskingdoms:irradiated_giant", "required": false}
+	]
+}

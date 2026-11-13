@@ -138,6 +138,9 @@ public final class StoryGround {
 	private static final Map<UUID, Roads.Stone> STONES = new HashMap<>();
 	/** Each player whose start's land is being made ready first ({@link #ahead}). */
 	private static final Map<UUID, Job> AHEAD = new HashMap<>();
+	/** Each player being taken somewhere far ({@link #travel}), and the line their loading screen shows meanwhile. */
+	private static final Map<UUID, Job> TRAVEL = new HashMap<>();
+	private static final Map<UUID, String> TRAVEL_LINE = new HashMap<>();
 	/** Each player's realm whose whaler was made ready, while they sign on. */
 	private static final Map<UUID, Integer> WHALER_REALMS = new HashMap<>();
 	/** (0.7.236) Player → server tick their arrival's loading screen comes down; and the hold last sent to each. */
@@ -173,6 +176,8 @@ public final class StoryGround {
 			HARBOURS.clear();
 			ROADWAYS.clear();
 			AHEAD.clear();
+			TRAVEL.clear();
+			TRAVEL_LINE.clear();
 			STONES.clear();
 			WHALER_REALMS.clear();
 			SETTLING.clear();
@@ -773,6 +778,9 @@ public final class StoryGround {
 		if (AHEAD.containsKey(id)) {
 			return ARRIVING;
 		}
+		if (TRAVEL.containsKey(id)) {
+			return TRAVEL_LINE.getOrDefault(id, ARRIVING);
+		}
 		if (LifeStory.of(player) != null && PowersCompat.waitingForFuture(player)) {
 			return "gui.jaymoskingdoms.story.hold.future";
 		}
@@ -813,7 +821,7 @@ public final class StoryGround {
 	}
 
 	private static void tick(MinecraftServer server) {
-		if (capital == null && HARBOURS.isEmpty() && ROADWAYS.isEmpty() && AHEAD.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
+		if (capital == null && HARBOURS.isEmpty() && ROADWAYS.isEmpty() && AHEAD.isEmpty() && TRAVEL.isEmpty() || server.getTickCount() % TRY_EVERY != 0) {
 			return;
 		}
 		ServerLevel level = Factions.level(server);
@@ -837,6 +845,14 @@ public final class StoryGround {
 				ROADWAYS.remove(id);
 			} else if (step(level, job, "message.jaymoskingdoms.story.making.road")) {
 				ROADWAYS.remove(id);
+				job.then.forEach(Runnable::run);
+			}
+		}
+		for (UUID id : List.copyOf(TRAVEL.keySet())) {
+			Job job = TRAVEL.get(id);
+			if (server.getPlayerList().getPlayer(id) == null || step(level, job, "")) {
+				TRAVEL.remove(id);
+				TRAVEL_LINE.remove(id);
 				job.then.forEach(Runnable::run);
 			}
 		}
@@ -892,6 +908,37 @@ public final class StoryGround {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Takes {@code player} somewhere far ({@code at}, in the Overworld) without making its land on the server thread: the
+	 * land round it is made in the background while they wait behind the loading screen ({@code line}, a lang key), then
+	 * {@code arrive} puts them there. Taking too long ({@link #AHEAD_GIVE_UP_TICKS}), or gone meanwhile, {@code gaveUp}
+	 * runs instead and they stay where they are. Andy, after the Deck froze making Mohknee's shore for
+	 * {@code /kingdom mohknee go} (crash 2026-11-13 13:51): "go waits behind loading".
+	 */
+	public static void travel(ServerPlayer player, BlockPos at, String line, Runnable arrive, Runnable gaveUp) {
+		ServerLevel level = player.level().getServer().overworld();
+		UUID id = player.getUUID();
+		Job job = new Job(at, level.getGameTime() + AHEAD_GIVE_UP_TICKS, l -> ready(l, at), l -> {
+		});
+		job.radius = AHEAD_RADIUS;
+		job.waiting.add(id);
+		job.then.add(() -> {
+			if (level.getServer().getPlayerList().getPlayer(id) != null && ready(level, at)) {
+				arrive.run();
+			} else {
+				gaveUp.run();
+			}
+		});
+		TRAVEL.put(id, job);
+		TRAVEL_LINE.put(id, line);
+		holdNow(player, line);
+	}
+
+	/** Whether {@code player} is waiting to be taken somewhere far ({@link #travel}). */
+	public static boolean travelling(ServerPlayer player) {
+		return TRAVEL.containsKey(player.getUUID());
 	}
 
 	/** Whether every chunk within {@link #AHEAD_RADIUS} of {@code at} is made and loaded. */
