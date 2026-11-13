@@ -12696,3 +12696,8 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - **Bosses**: anything that shows a boss bar (the Unburied, the Snow Widow, rulers, warlords, the giants) now senses as a boss: it never loses track of you and stealth can't blind it below 40%.
 - **Diggers fight**: still skittish (a lone one runs for its warren and lies low), but two or more out of their hole hunt you as a pack, a lone one caught within 4 blocks turns and bites, one you strike fights back for 10 seconds, and one hiding in its hole goes for whoever corners it. A lone one under half health still runs (`Digger.fights`).
 - Tested in a cloud dev server: 76 Kingdoms monsters each against a walking survival player in the dark, at night and sneaking. Before: many never noticed the player at 8 blocks. After: they notice a walking player at about 8 blocks (farther when they see you), a sneaking one mostly only at 2 to 4 blocks. Not played in the pack.
+
+## 0.8.35 (2026-11-13): Spirit arms sit on the moving shoulders
+
+- A spirit's arms take their shoulders from the wearer's own arms; under Fresh Animations they took the plain pose while the real arms swayed. They now take the body's kept pose first (`SpiritArms.ArmModel`, `WornModel.loadKeptBody`).
+- Built; not played.
