@@ -245,7 +245,6 @@ public class JaymosPowersClient implements ClientModInitializer {
 		StanceHud.init();
 		com.jaymospowers.client.wounds.WoundsHud.init();
 		com.jaymospowers.client.wounds.DownedHud.init();
-		com.jaymospowers.client.wounds.LimboClient.init();
 		com.jaymospowers.client.wounds.MedicineHud.init();
 		com.jaymospowers.client.wounds.HeartHud.init();
 		LedgeClient.init();

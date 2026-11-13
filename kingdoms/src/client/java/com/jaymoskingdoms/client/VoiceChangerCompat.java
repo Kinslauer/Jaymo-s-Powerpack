@@ -25,10 +25,6 @@ public final class VoiceChangerCompat {
 	/** Behind a mask: a little lower, muffled behind cloth. */
 	static final double MASKED_PITCH = 0.88, MASKED_FORMANT = 0.92, MASKED_HIGH_EQ = -6.0;
 
-	/** A ghost: thin and a little high, the top taken off, wavering, and mostly the echo of a big empty place. */
-	static final double GHOST_PITCH = 1.06, GHOST_FORMANT = 1.12, GHOST_HIGH_EQ = -4.0, GHOST_WAVER = 0.35, GHOST_WAVER_RATE = 5.0,
-		GHOST_REVERB = 0.7, GHOST_ROOM = 0.9, GHOST_DECAY = 0.85;
-
 	private static @Nullable VoiceOverride current;
 
 	private VoiceChangerCompat() {
@@ -56,16 +52,10 @@ public final class VoiceChangerCompat {
 			case TITAN -> base(api, "titan");
 			case GOBLIN -> base(api, "kid").with(VoiceParameter.PITCH, GOBLIN_PITCH).with(VoiceParameter.FORMANT, GOBLIN_FORMANT)
 				.with(VoiceParameter.GROWL, GOBLIN_GROWL);
-			case GHOST -> VoiceProfile.builder().set(VoiceParameter.MIX, 1.0).set(VoiceParameter.PITCH, GHOST_PITCH)
-				.set(VoiceParameter.FORMANT, GHOST_FORMANT).set(VoiceParameter.HIGH_EQ, GHOST_HIGH_EQ)
-				.set(VoiceParameter.TREMOLO_DEPTH, GHOST_WAVER).set(VoiceParameter.TREMOLO_RATE, GHOST_WAVER_RATE)
-				.set(VoiceParameter.REVERB_MIX, GHOST_REVERB).set(VoiceParameter.REVERB_SIZE, GHOST_ROOM)
-				.set(VoiceParameter.REVERB_DECAY, GHOST_DECAY).build();
 			default -> VoiceProfile.builder().set(VoiceParameter.MIX, 1.0).set(VoiceParameter.PITCH, MASKED_PITCH)
 				.set(VoiceParameter.FORMANT, MASKED_FORMANT).set(VoiceParameter.HIGH_EQ, MASKED_HIGH_EQ).build();
 		};
-		boolean curse = mask == VoiceMasks.Mask.BEAST || mask == VoiceMasks.Mask.APE || mask == VoiceMasks.Mask.TITAN
-			|| mask == VoiceMasks.Mask.GHOST;
+		boolean curse = mask == VoiceMasks.Mask.BEAST || mask == VoiceMasks.Mask.APE || mask == VoiceMasks.Mask.TITAN;
 		VoiceOverride.Builder request = VoiceOverride.request(OWNER, curse ? CURSE_PRIORITY : DISGUISE_PRIORITY).profile(profile);
 		if (curse) {
 			request.forceEnabled();

@@ -329,7 +329,6 @@ public final class Mortality {
 			FELLED.clear();
 			EXECUTED.clear();
 		});
-		Limbo.register();
 		Afflictions.register();
 		Scars.register();
 		Karma.register();
@@ -375,15 +374,6 @@ public final class Mortality {
 	public static boolean lying(Player player) {
 		Wake wake = WAKES.get(player.getUUID());
 		return wake != null && !wake.chosen;
-	}
-
-	/**
-	 * Whether {@code player} lies left for dead with the black lifted and hasn't chosen to come to: out of their body, a
-	 * ghost near it ({@link Limbo}).
-	 */
-	static boolean outOfBody(ServerPlayer player) {
-		Wake wake = WAKES.get(player.getUUID());
-		return wake != null && !wake.chosen && player.isAlive() && player.level().getServer().getTickCount() >= wake.moveAt;
 	}
 
 	/** (0.21.7) A hostile is near enough {@code body} that bringing it round here would only get it killed again. */

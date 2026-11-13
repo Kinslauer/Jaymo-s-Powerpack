@@ -28,10 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link Mask#GOBLIN}: in a goblin {@link Disguise}, a goblin's reedy voice.</li>
  * <li>{@link Mask#MASKED}: behind a full mask (a costume's, a bandit's; {@link Identities}), a voice nobody knows. A hood
  * leaves the voice alone, as it leaves the face known.</li>
- * <li>{@link Mask#GHOST}: Andy: "the voice changer automatically makes you sound like a ghost if you speak otherwise it
- * is muted". Out of their body, left for dead (Powers' limbo), a player's voice is a ghost's: thin, hollow and far off
- * (forced). It comes from where the ghost is, not the body ({@link VoiceRange}), and a ghost whose client has no voice
- * changer to turn it ({@link #changer}) isn't heard at all.</li>
  * </ul>
  * The disguises follow the player's own on/off switch for the voice changer; the curses and the titans don't.
  * <p>The ape and the xeno forms speak with a titan's voice ({@link #titan}), and how much taller than a man each player
@@ -43,7 +39,7 @@ public final class VoiceMasks {
 	static final int CHECK_TICKS = 10;
 
 	/** Saved by ordinal in the packet only, so the order may change between versions (both sides ship together). */
-	public enum Mask { NONE, BEAST, APE, GOBLIN, MASKED, TITAN, GHOST }
+	public enum Mask { NONE, BEAST, APE, GOBLIN, MASKED, TITAN }
 
 	/** A man's height (blocks): anyone taller counts as grown by the difference. */
 	static final float MAN_HEIGHT = 1.8F;
@@ -60,22 +56,6 @@ public final class VoiceMasks {
 		}
 	}
 
-	/** Player → server, once on joining: their client has the voice changer, so a voice we ask it to turn is turned. */
-	public record Changer() implements CustomPacketPayload {
-		public static final Changer INSTANCE = new Changer();
-		public static final Type<Changer> TYPE = new Type<>(JaymosKingdoms.id("voice_changer"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Changer> CODEC = StreamCodec.unit(INSTANCE);
-
-		@Override
-		public Type<Changer> type() {
-			return TYPE;
-		}
-	}
-
-	/** Who has the voice changer, and where each ghost out of its body is as of the last check; for voice chat's thread too. */
-	private static final Set<UUID> CHANGERS = ConcurrentHashMap.newKeySet();
-	private static final Map<UUID, net.minecraft.world.phys.Vec3> GHOSTS = new ConcurrentHashMap<>();
-
 	/** The mask each player was last sent. */
 	private static final Map<UUID, Mask> SENT = new HashMap<>();
 	/** As of the last check, for voice chat's own thread: who speaks with a titan's voice, and how far past a man's height each tall player stands. */
@@ -87,22 +67,16 @@ public final class VoiceMasks {
 
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
-		PayloadTypeRegistry.serverboundPlay().register(Changer.TYPE, Changer.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Changer.TYPE, (payload, context) -> CHANGERS.add(context.player().getUUID()));
 		ServerTickEvents.END_SERVER_TICK.register(VoiceMasks::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			SENT.remove(handler.player.getUUID());
 			TITANS.remove(handler.player.getUUID());
 			GROWN.remove(handler.player.getUUID());
-			CHANGERS.remove(handler.player.getUUID());
-			GHOSTS.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SENT.clear();
 			TITANS.clear();
 			GROWN.clear();
-			CHANGERS.clear();
-			GHOSTS.clear();
 		});
 	}
 
@@ -116,12 +90,6 @@ public final class VoiceMasks {
 				TITANS.add(player.getUUID());
 			} else {
 				TITANS.remove(player.getUUID());
-			}
-			net.minecraft.world.phys.Vec3 ghost = mask == Mask.GHOST ? PowersCompat.limboGhost(player.getUUID()) : null;
-			if (ghost != null) {
-				GHOSTS.put(player.getUUID(), ghost);
-			} else {
-				GHOSTS.remove(player.getUUID());
 			}
 			float grown = player.getBbHeight() - MAN_HEIGHT;
 			if (grown > 0.0F) {
@@ -138,10 +106,6 @@ public final class VoiceMasks {
 
 	/** What {@code player}'s voice is to sound like now. */
 	static Mask of(ServerPlayer player) {
-		// (out of the body nothing of the body speaks: not the beast, not the mask)
-		if (PowersCompat.limboGhost(player.getUUID()) != null) {
-			return Mask.GHOST;
-		}
 		if (WerewolfPlayers.beastUp(player)) {
 			return Mask.BEAST;
 		}
@@ -163,16 +127,6 @@ public final class VoiceMasks {
 	/** Whether {@code player} speaks with a titan's voice (the Great Ape, a xeno form), as of the last check. Any thread. */
 	static boolean titan(UUID player) {
 		return TITANS.contains(player);
-	}
-
-	/** Whether {@code player}'s client said it has the voice changer. Any thread. */
-	static boolean changer(UUID player) {
-		return CHANGERS.contains(player);
-	}
-
-	/** The players out of their bodies and where each one's ghost is, as of the last check. Any thread; not to be changed. */
-	static Map<UUID, net.minecraft.world.phys.Vec3> ghosts() {
-		return GHOSTS;
 	}
 
 	/** How far past a man's height {@code player} stands (blocks; 0 for anyone a man's size or less), as of the last check. Any thread. */

@@ -19,12 +19,6 @@ public final class VoiceMaskClient {
 			}
 		});
 		if (loaded) {
-			// (the server mutes a ghost it can't count on being turned: VoiceRange)
-			ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-				if (ClientPlayNetworking.canSend(VoiceMasks.Changer.TYPE)) {
-					sender.sendPacket(VoiceMasks.Changer.INSTANCE);
-				}
-			});
 			ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> VoiceChangerCompat.apply(VoiceMasks.Mask.NONE));
 		}
 	}

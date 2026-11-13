@@ -59,9 +59,6 @@ public final class DownedHud {
 	 */
 	static final float TURN_STRENGTH = 0.25F, TURN_GLOW = 1.1F, TURN_BREATH = 70.0F;
 
-	/** Out of the body (LimboClient): the pale blue laid over the screen (RGB), and how thick (0-255). */
-	static final int GHOST = 0x8ACEFF, GHOST_ALPHA = 0x26;
-
 	/** (0.20.94) The line on the black now (a lang key), kept while the black lifts. */
 	private static @org.jspecify.annotations.Nullable String line;
 
@@ -86,8 +83,7 @@ public final class DownedHud {
 		blackBefore = black;
 		// ((0.20.94) and black while a life that ended waits for the new character: Mortality.REBORNING)
 		boolean reborning = player != null && player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING);
-		// (out of their body, the black lifts: they look out of their ghost, LimboClient)
-		boolean knocked = player != null && (player.hasAttached(Downed.KNOCKED) && !LimboClient.drifting() || reborning);
+		boolean knocked = player != null && (player.hasAttached(Downed.KNOCKED) || reborning);
 		String said = player == null ? null : reborning ? "message.jaymospowers.mortality.ended"
 			: player.getAttached(com.jaymospowers.core.wounds.Mortality.WAKE_LINE);
 		if (said != null) {
@@ -127,10 +123,7 @@ public final class DownedHud {
 
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player != null && LimboClient.drifting()) {
-			// a ghost's eyes: the world a little pale and blue, not the grey of the dying
-			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), GHOST_ALPHA << 24 | GHOST);
-		} else if (player != null && Downed.isDowned(player)) {
+		if (player != null && Downed.isDowned(player)) {
 			int alpha = Downed.passedOut(player) ? OUT_ALPHA : DOWN_ALPHA;
 			alpha = alpha * Math.min(downTicks, FADE_IN_TICKS) / FADE_IN_TICKS;
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), alpha << 24 | GREY);

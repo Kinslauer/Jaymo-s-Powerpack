@@ -78,8 +78,3 @@ textures/entity/gun_musket*.png, geckolib/*/entity/gun_musket.*: WeaponMod's mus
 textures/entity/gun_flintlock*.png, geckolib/*/entity/gun_flintlock.*: WeaponMod's flintlock and the Void Flintlock, held and animated
   "Dueling Pistol", Blockbench Workshop (maker's name not in the file)
   Changes: a GeckoLib model with our animations; the void sheet recoloured (tools/gen_guns_geckolib.py).
-
-../limbo_ghost.png
-  The same skin as Kingdoms' grave_ghost.png (kingdoms/tools/gen_scout_ghost.py), after the ghost model from the
-  Blockbench Workshop, CC BY 4.0 (tools/bbmodels/ghost.bbmodel; maker's name to be filled in). Drawn on the vanilla
-  player model.
