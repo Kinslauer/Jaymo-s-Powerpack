@@ -480,6 +480,14 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 11:58 AM ET (Make every UI screen match thread): Andy said "merge" for PR #1434 (UI look, part 1: shared style and flat button). Set to squash-merge once CI is green.
 - 2026-11-13 12:00 PM ET (Make every UI screen match thread): Andy picked "All like the symbiote" for the six wheels: every wheel gets the symbiote disc tint, ring and centre layout (name, a bar where it has one, toggle chips where it has toggles); the Rig keeps its bigger radius.
 - 2026-11-13 12:00 PM ET (Make every UI screen match thread): Andy: "put them all on the same pr" and "ill merge after". Every UI patch goes onto PR #1434; Claude does not merge it, Andy does when all are in.
+
+- 2026-11-13 1:55 PM (Andy, Deck admin session): `/kingdom mohknee go` should wait behind the loading screen while the shore is made in the background, not a separate load command (#1451).
+
+- 2026-11-13 4:50 PM (Andy, Deck admin session): keep the server watchdog at 60 s (max-tick-time); fix each code path that waits on a chunk instead.
 - 2026-11-13: Illagers can be talked with once the player learns the illager tongue, from their books, paintings/banners and time in their structures (thread: Let players learn illager language).
 - 2026-11-13 2:11 PM ET: Andy approved the Lore.md paragraph "The illager tongue".
 - 2026-11-13 5:20 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "can we add another dimension that is just clouds and air between the overworld and aether? that way players wont be able to see it or get there at all easily". An exception to "no new dimensions", for this one: built as a band of the One Dimension stack (the Cloud Sea), not a place with a portal. New worlds only.
+- 2026-11-13 5:28 PM ET (Fix the Unburied's corpse mass thread): Andy: the Unburied must always show as a conglomeration of corpses and not stand "alive and well"; nothing that large can be lifted; trying to lift a zombie's or skeleton's body takes off a limb at most ("they are decaying and dead"); "skeletons should actually always fall to pieces on death, retaining maybe the central torso and legs if not otherwise knocked off"; "hits to these corpses on the ground should further dismember".
+- 2026-11-13 4:57 PM ET (Plan Minecraft server bot for Hermes thread): Andy wants YOUTH to have a body on the server: "I'd like a body that can spawn and relay information about any mechanic to players."
+- 2026-11-13 5:13 PM ET (same thread): "the youth bot should be a wispy winged sylvan animating in the world near where you asked, doing some variation of 8 gecko libbed idle animations." Built as our own Kingdoms GeckoLib mob (YouthWisp, PR #1467), driven by Hermes over RCON with /youth commands. No Carpet, no Mineflayer, no second account.
+- 2026-11-13 5:34 PM ET (same thread): Andy approved the Lore.md paragraph "The wood-wisps".

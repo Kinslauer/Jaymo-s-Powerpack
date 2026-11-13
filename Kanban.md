@@ -4,16 +4,18 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 22:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 22:36). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · for pc-claude · #1467 · open
 
 
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
 - [ ] [[Agents/Cloud Sea|Cloud Sea]] · 💻 Odysseus · running
+- [ ] [[Agents/unburied-corpse-mass-and-rotting-dead|unburied-corpse-mass-and-rotting-dead]] · 💻 Odysseus · running
 
 
 ## In review
@@ -23,7 +25,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · 🍇 Bacchus · blocked
 
 
 ## Done

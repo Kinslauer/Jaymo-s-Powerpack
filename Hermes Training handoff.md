@@ -435,3 +435,39 @@ PC Claude's part (ready to start):
 - [x] 5. In `Decisions.md` (Nov 13, 7:09 AM). Points left after all tests: ~$9.9999 of $10.
 - [ ] Weekly: write points left here (`py -3 -I E:/hermes/scripts/amd_check.py Qwen3.8-27B` prints the budget
   header for ~$0.00002); if more than $5 is gone before Dec 1, tell Andy in 2 lines.
+
+## New (Nov 13): Minecraft server bot experiment (cloud thread "Plan Minecraft server bot for Hermes")
+
+Andy said yes to scoping Tiv's "server bot experiment". The full plan is in project files `plans/Minecraft-Server-Bot-Plan.md`
+(this cloud thread can't write to the PC; also in the vault as `Minecraft server bot plan.md`).
+
+**Vault task** `Inbox/minecraft-server-bot-experiment.md`: the cloud thread already reopened it for you (Nov 13). The "not possible" verdict from hermes-b on Nov 13 is wrong. Set `status: open`, `for: pc-claude`, clear `claimed_by`,
+and replace the assessment with: "Possible without a Minecraft account. Step 1: YOUTH in game chat through RCON
+(`deck/rcon.py` over the PC's SSH link to the Deck). Step 2: a Sylvan wisp mob (our own GeckoLib entity, `/youth summon`),
+driven by the same script. Mineflayer is out for now: no official 26.3 support, and our modded Fabric server would
+likely reject it. See Minecraft server bot plan.md." Then run `python tools/vault_sync.py`.
+
+**Andy's choices (Nov 13, append both to `Decisions.md`):** 4:57 PM ET "I'd like a body that can spawn and relay
+information about any mechanic to players." 5:13 PM ET "the youth bot should be a wispy winged sylvan animating in the
+world near where you asked, doing some variation of 8 gecko libbed idle animations."
+
+**This changes the build: no Carpet.** The body is a new Kingdoms GeckoLib mob (`YouthWisp`) with `/youth summon|say|
+dismiss|status` commands, sent over RCON. The plan (rewritten) has the look, the 8 idles, behaviour, commands, the
+wood-wisp lore paragraph for Andy to approve, and the steps. Your part is the Hermes side below; skip the Carpet step.
+The mod side is built: **PR #1467** (merge only on Andy's word; then pbdr). `/youth say <player> <text>` takes plain
+text as its last argument. Before it's merged you can test the brain with plain `tellraw` in place of `/youth say`.
+Andy approved the wood-wisp lore (in Lore.md since Nov 13) and his decisions are in Decisions.md.
+
+**What to build:**
+1. `E:/hermes/scripts/mcbot.py` with fixed verbs only (`say`, `who`, `where`, `listen`, `off`/`on`; later `spawn`,
+   `despawn`, `come`, `look`, `jump`, `stop`, `walk`). It SSHes to the Deck and runs `~/jaymos-server/rcon.py`. It never
+   passes raw text to the console (only escaped inside `tellraw`), checks player names, and rate-limits itself
+   (1 command/s, 1 chat line/5 s, 10 lines/min). The RCON password stays on the Deck.
+2. A YOUTH skill `minecraft` and a SOUL rule: in game chat answer only people who name YOUTH, 1-2 short lines, server
+   commands only through `mcbot.py`, never stop or restart the server.
+3. A listener (scheduled task or 1-minute cron) that tails `~/jaymos-server/logs/latest.log` over SSH and hands chat
+   mentions to YOUTH with `hermes chat -q ... --oneshot`.
+4. (Carpet step dropped: the wisp is our own mob, built as a Kingdoms PR.)
+
+Ask Andy before the first in-game test with friends online. No account,
+no offline mode, no key handling needed. Estimated 2-4 hours for step 1, 3-6 for step 2.

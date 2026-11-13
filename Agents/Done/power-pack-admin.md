@@ -3,7 +3,7 @@ status: done
 task: Get the Deck server stable (Andy, 2026-11-13 10:10 AM): check the deploy, watch the log, join with the owed village start, fix crashes, stop after 30 min clean or 2 rounds with no progress
 branch: deck-start-waits-for-land, start-wait-one-minute
 with: local desktop session (PC)
-pr: "#1430, #1431, #1435 (merged)"
+pr: "#1430, #1431, #1435, #1451, #1454, #1457, #1458, #1459 (merged)"
 mods: Kingdoms
 versions: Deck runs Powers 0.23.11, Kingdoms 0.8.6 (the 08:08 AM deploy came up fine)
 started: 2026-11-13
@@ -45,7 +45,24 @@ let the owed village start run, close the game when needed. Long loading screens
   Watching till 12:23 PM (30 min clean).
 - 11:57 AM crash (round 2): Powers SkyfallCleanup sweep read a chunk that `hasChunk` said was there but was still being
   made (26.3 hasChunk = holder at FULL ticket level, not made). #1435 (merged ~12:45 PM): 23 server-side hasChunk guards
-  -> getChunkSource().getChunkNow; Seats.java:133 kept (one-shot kingdom founding would found a castle). Redeploying.
+  -> getChunkSource().getChunkNow; Seats.java:133 kept (one-shot kingdom founding would found a castle).
+- 12:14 PM deploy up (built from #1435's merge commit, so the jar names lag: Powers 0.23.11, Kingdoms 0.8.10). Niels =
+  Jungxxv (friend); Andy = Manigraphic78 / Hendrikus, on from 12:30:52 PM. Stable: no crash or freeze from 12:14 to
+  past 1:04 PM, 30+ min with Andy logged in. Task done.
+- 1:51 PM and 1:58 PM crashes: `/kingdom mohknee go` made the landing chunk [1750,0] on the server thread. Andy chose
+  "go waits behind loading": #1451 (merged ~2:30 PM) adds StoryGround.travel (background PORTAL ticket, loading screen,
+  2-min give-up); go refused while held in story stasis.
+- 2:23 PM crash: Sightings.rumour read a far spot's biome (level.getBiome waited on chunk [20,-9]). #1454: biome
+  source when unloaded.
+- Audit (8 scanners over 323 tick files + verifiers): 9 more far reads. #1457 Kingdoms (Roads stoneNear/openEnds,
+  Elders/Couriers putBack, Mines catch-up, Journeys arrive, Milestones), #1458 Powers (Karma descent, WindAether
+  topAt, ZFighter raiders/yard/surface). Merged ~3:50 PM, redeploying. WindAether still makes its one arrival chunk.
+- 3:36 PM crash: Traps.pits read the ground beside Andy just set down on Mohknee (fresh land), via Powers'
+  Stacked.surface getHeight hook, chunk [1748,1] still generating. Root cause: 26.3 Level.isLoaded == hasChunk (true for
+  scheduled chunks). #1459: Loaded.made(level,pos) per mod (getChunkNow on ServerLevel, unchanged elsewhere), 359 sites
+  swapped; 24 sites verified harmful (data lost / one-shot) kept on isLoaded; Loaded.top for 8 read-before-check sites.
+  Merged ~5:05 PM, redeploying. Follow-up: the 24 kept sites still block on generating chunks; fix each with
+  skip-and-retry (fixes listed in the verify workflow wf_c631bde4-f56).
 
 ## Still to do
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
