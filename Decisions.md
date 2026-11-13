@@ -351,3 +351,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12, 8:20 PM: volcanic glass spells** (same thread, Andy: "anyone can learn"). The glass spells are not a tenth Sorcerer element; any Sorcerer can learn them (BossRise plan, patch 11).
 - **Nov 12, 8:24 PM: PR #1391 merged** (Andy: "merge"). Duellists (BossRise plan, patch 1) and docs/BossRise-Plan.md.
 - **Nov 12: boss turns built** (BossRise plan patch 2, PR #1392). Claude's calls, unconfirmed: the turn is at half health, 50 ticks, once per foe; turned foes are 15% quicker and hit 20% harder and gain a shove; bosses with their own phases (champions, dragons, kings and chiefs, grizzly, Ogre King, Wither, Ender Dragon) get the film only; one shared death scene of 50 ticks; Giants and the Ogre King are the armoured ones at half damage.
+- **Nov 12, 8:32 PM: PR #1392 merged** (Andy: "merge"). Boss turns (BossRise plan, patch 2).
