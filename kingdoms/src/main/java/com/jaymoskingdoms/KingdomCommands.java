@@ -80,6 +80,8 @@ final class KingdomCommands {
 			.then(Camps.command())
 			.then(WalledTowns.command())
 			.then(FleetCommands.command())
+			// ops: where Mohknee lies from here, and a picture of what the world makes of it
+			.then(com.jaymoskingdoms.seas.Mohknee.command())
 			.then(Roads.command())
 			.then(RoamingCaravans.command())
 			.then(Milestones.command())

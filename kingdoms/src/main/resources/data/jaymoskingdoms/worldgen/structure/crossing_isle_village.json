@@ -1,0 +1,52 @@
+{
+  "type": "jaymoskingdoms:island",
+  "biomes": "#jaymoskingdoms:has_structure/isle_village",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "structures": [
+    "minecraft:village_plains"
+  ],
+  "only_at": [
+    [
+      12500,
+      64,
+      -900
+    ],
+    [
+      17000,
+      64,
+      1100
+    ],
+    [
+      21500,
+      64,
+      -500
+    ],
+    [
+      28000,
+      64,
+      -9000
+    ],
+    [
+      28000,
+      64,
+      9500
+    ],
+    [
+      20500,
+      64,
+      -8000
+    ],
+    [
+      20000,
+      64,
+      8500
+    ],
+    [
+      38500,
+      64,
+      600
+    ]
+  ]
+}

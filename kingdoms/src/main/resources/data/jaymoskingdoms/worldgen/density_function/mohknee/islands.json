@@ -1,0 +1,304 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:max",
+    "left": {
+      "type": "minecraft:max",
+      "left": {
+        "type": "minecraft:max",
+        "left": {
+          "type": "minecraft:max",
+          "left": {
+            "type": "minecraft:max",
+            "left": {
+              "type": "minecraft:max",
+              "left": {
+                "type": "minecraft:max",
+                "left": {
+                  "type": "minecraft:clamp",
+                  "input": {
+                    "type": "minecraft:add",
+                    "left": 2.5,
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": -0.010416666666666666,
+                      "right": {
+                        "type": "minecraft:add",
+                        "left": {
+                          "type": "minecraft:slice",
+                          "axis": "y",
+                          "coordinate": 0,
+                          "input": {
+                            "type": "minecraft:distance_to_point",
+                            "point": [
+                              12500,
+                              0,
+                              -900
+                            ],
+                            "metric": "euclidean"
+                          }
+                        },
+                        "right": {
+                          "type": "minecraft:mul",
+                          "left": 60,
+                          "right": "jaymoskingdoms:mohknee/wobble"
+                        }
+                      }
+                    }
+                  },
+                  "min": 0.0,
+                  "max": 1.0
+                },
+                "right": {
+                  "type": "minecraft:clamp",
+                  "input": {
+                    "type": "minecraft:add",
+                    "left": 2.5,
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": -0.011363636363636364,
+                      "right": {
+                        "type": "minecraft:add",
+                        "left": {
+                          "type": "minecraft:slice",
+                          "axis": "y",
+                          "coordinate": 0,
+                          "input": {
+                            "type": "minecraft:distance_to_point",
+                            "point": [
+                              17000,
+                              0,
+                              1100
+                            ],
+                            "metric": "euclidean"
+                          }
+                        },
+                        "right": {
+                          "type": "minecraft:mul",
+                          "left": 60,
+                          "right": "jaymoskingdoms:mohknee/wobble"
+                        }
+                      }
+                    }
+                  },
+                  "min": 0.0,
+                  "max": 1.0
+                }
+              },
+              "right": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:add",
+                  "left": 2.5,
+                  "right": {
+                    "type": "minecraft:mul",
+                    "left": -0.01,
+                    "right": {
+                      "type": "minecraft:add",
+                      "left": {
+                        "type": "minecraft:slice",
+                        "axis": "y",
+                        "coordinate": 0,
+                        "input": {
+                          "type": "minecraft:distance_to_point",
+                          "point": [
+                            21500,
+                            0,
+                            -500
+                          ],
+                          "metric": "euclidean"
+                        }
+                      },
+                      "right": {
+                        "type": "minecraft:mul",
+                        "left": 60,
+                        "right": "jaymoskingdoms:mohknee/wobble"
+                      }
+                    }
+                  }
+                },
+                "min": 0.0,
+                "max": 1.0
+              }
+            },
+            "right": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:add",
+                "left": 2.5,
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": -0.010869565217391304,
+                  "right": {
+                    "type": "minecraft:add",
+                    "left": {
+                      "type": "minecraft:slice",
+                      "axis": "y",
+                      "coordinate": 0,
+                      "input": {
+                        "type": "minecraft:distance_to_point",
+                        "point": [
+                          28000,
+                          0,
+                          -9000
+                        ],
+                        "metric": "euclidean"
+                      }
+                    },
+                    "right": {
+                      "type": "minecraft:mul",
+                      "left": 60,
+                      "right": "jaymoskingdoms:mohknee/wobble"
+                    }
+                  }
+                }
+              },
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "right": {
+            "type": "minecraft:clamp",
+            "input": {
+              "type": "minecraft:add",
+              "left": 2.5,
+              "right": {
+                "type": "minecraft:mul",
+                "left": -0.010869565217391304,
+                "right": {
+                  "type": "minecraft:add",
+                  "left": {
+                    "type": "minecraft:slice",
+                    "axis": "y",
+                    "coordinate": 0,
+                    "input": {
+                      "type": "minecraft:distance_to_point",
+                      "point": [
+                        28000,
+                        0,
+                        9500
+                      ],
+                      "metric": "euclidean"
+                    }
+                  },
+                  "right": {
+                    "type": "minecraft:mul",
+                    "left": 60,
+                    "right": "jaymoskingdoms:mohknee/wobble"
+                  }
+                }
+              }
+            },
+            "min": 0.0,
+            "max": 1.0
+          }
+        },
+        "right": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:add",
+            "left": 2.5,
+            "right": {
+              "type": "minecraft:mul",
+              "left": -0.011363636363636364,
+              "right": {
+                "type": "minecraft:add",
+                "left": {
+                  "type": "minecraft:slice",
+                  "axis": "y",
+                  "coordinate": 0,
+                  "input": {
+                    "type": "minecraft:distance_to_point",
+                    "point": [
+                      20500,
+                      0,
+                      -8000
+                    ],
+                    "metric": "euclidean"
+                  }
+                },
+                "right": {
+                  "type": "minecraft:mul",
+                  "left": 60,
+                  "right": "jaymoskingdoms:mohknee/wobble"
+                }
+              }
+            }
+          },
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "right": {
+        "type": "minecraft:clamp",
+        "input": {
+          "type": "minecraft:add",
+          "left": 2.5,
+          "right": {
+            "type": "minecraft:mul",
+            "left": -0.010416666666666666,
+            "right": {
+              "type": "minecraft:add",
+              "left": {
+                "type": "minecraft:slice",
+                "axis": "y",
+                "coordinate": 0,
+                "input": {
+                  "type": "minecraft:distance_to_point",
+                  "point": [
+                    20000,
+                    0,
+                    8500
+                  ],
+                  "metric": "euclidean"
+                }
+              },
+              "right": {
+                "type": "minecraft:mul",
+                "left": 60,
+                "right": "jaymoskingdoms:mohknee/wobble"
+              }
+            }
+          }
+        },
+        "min": 0.0,
+        "max": 1.0
+      }
+    },
+    "right": {
+      "type": "minecraft:clamp",
+      "input": {
+        "type": "minecraft:add",
+        "left": 2.5,
+        "right": {
+          "type": "minecraft:mul",
+          "left": -0.010869565217391304,
+          "right": {
+            "type": "minecraft:add",
+            "left": {
+              "type": "minecraft:slice",
+              "axis": "y",
+              "coordinate": 0,
+              "input": {
+                "type": "minecraft:distance_to_point",
+                "point": [
+                  38500,
+                  0,
+                  600
+                ],
+                "metric": "euclidean"
+              }
+            },
+            "right": {
+              "type": "minecraft:mul",
+              "left": 60,
+              "right": "jaymoskingdoms:mohknee/wobble"
+            }
+          }
+        }
+      },
+      "min": 0.0,
+      "max": 1.0
+    }
+  }
+}

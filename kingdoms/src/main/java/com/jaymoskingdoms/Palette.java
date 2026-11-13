@@ -72,6 +72,10 @@ record Palette(BlockState wall, BlockState mossy, BlockState cracked, BlockState
 	 * through its town, so those don't count: the town's biome is the commonest other one round the bell.
 	 */
 	static Palette at(ServerLevel level, BlockPos pos) {
+		// all of Mohknee is the Blossom land, whichever of its biomes the bell stands in
+		if (com.jaymoskingdoms.seas.Mohknee.on(level, pos)) {
+			return CHERRY;
+		}
 		Holder<Biome> here = level.getBiome(pos);
 		if (!waterside(here)) {
 			return of(here);

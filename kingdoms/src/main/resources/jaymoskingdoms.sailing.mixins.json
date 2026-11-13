@@ -18,7 +18,8 @@
 		"BlockEntityShipWorksMixin",
 		"SeaLifeSpawnMixin",
 		"HighSeaLevelMixin",
-		"HighSeaStructureMixin"
+		"HighSeaStructureMixin",
+		"MohkneeStructureMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

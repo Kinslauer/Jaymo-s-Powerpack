@@ -29,7 +29,7 @@ public final class Offshore {
 	static final int[] ISLAND_RINGS = {96, 160, 256, 384, 512};
 	static final int ISLAND_POINTS = 12, ISLAND_SPACING = 48, ISLAND_GAPS = 2;
 	/** By the ground itself ({@link #island(ChunkGenerator, LevelHeightAccessor, RandomState, int, int)}): sea all round at one of these (blocks). */
-	static final int[] SHORE_RINGS = {64, 128, 192, 256};
+	static final int[] SHORE_RINGS = {64, 128, 192, 256, 320, 384};
 
 	private Offshore() {
 	}
