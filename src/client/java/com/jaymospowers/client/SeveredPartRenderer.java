@@ -62,6 +62,8 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 
 	/** Severed part → the body it's drawn from (client only, never in the world). */
 	private static final Map<SeveredPart, Entity> BODIES = new WeakHashMap<>();
+	/** How far each limb's parents move it (model units), worked out once per model part. */
+	private static final java.util.Map<ModelPart, Vector3f> HUNG_FROM = java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
 	private final PlayerModel wide;
 	private final PlayerModel slim;
 
@@ -144,7 +146,10 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			living.xRot = 0.0F;
 			scale = living.scale;
 		}
-		Vector3f mid = renderer instanceof LivingEntityRenderer<?, ?, ?> living ? middle(living.getModel().root(), first) : null;
+		// the first of the part's names this model has (a creature's arm isn't called "right_arm")
+		ModelPart root = renderer instanceof LivingEntityRenderer<?, ?, ?> living ? living.getModel().root() : null;
+		ModelPart own = root != null ? Dismembered.limb(root, part) : null;
+		Vector3f mid = own != null ? middle(root, own) : null;
 		if (mid != null) {
 			// drawn turned round (facing 0), flipped and lifted: model units to blocks from its feet
 			state.centre.set(mid.x / 16.0F, 1.501F - mid.y / 16.0F, -mid.z / 16.0F).mul(scale);
@@ -158,9 +163,30 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 	/** The middle of a part of the model as it rests (model units), from its pivot and its box. */
 	private static @Nullable Vector3f middle(ModelPart root, String name) {
 		ModelPart part = Dismembered.find(root, name);
-		if (part == null) {
-			return null;
-		}
+		return part == null ? null : middle(part);
+	}
+
+	/**
+	 * The middle of {@code part} of the model at {@code root} as it rests (model units): its own middle, moved by the pivots
+	 * of the parts it hangs from (a creature's arm hangs off its body; the game's limbs hang off the root).
+	 */
+	private static Vector3f middle(ModelPart root, ModelPart part) {
+		Vector3f mid = middle(part);
+		Vector3f up = HUNG_FROM.computeIfAbsent(part, p -> {
+			Vector3f sum = new Vector3f();
+			for (ModelPart above : root.getAllParts()) {
+				if (above != p && above.getAllParts().contains(p)) {
+					var pose = above.getInitialPose();
+					sum.add(pose.x(), pose.y(), pose.z());
+				}
+			}
+			return sum;
+		});
+		return mid.add(up);
+	}
+
+	/** The middle of {@code part} as it rests (model units), from its pivot and its box. */
+	private static Vector3f middle(ModelPart part) {
 		var pose = part.getInitialPose();
 		Vector3f mid = new Vector3f(pose.x(), pose.y(), pose.z());
 		if (!part.isEmpty()) {

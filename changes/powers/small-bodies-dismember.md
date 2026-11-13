@@ -1,0 +1,7 @@
+# small bodies dismember more often
+- Andy: "smaller enemies like the digger should dismember more often". A mob that stands shorter than 1.6 blocks loses parts more often, by (1.6 / its height) squared, at most 2.5 times: a goblin scout (1.2 tall) about 1.8x, a Digger (1.1) about 2.1x, a loot goblin or a baby zombie 2.5x. Anything 1.6 or taller is as before.
+- It raises every cutting roll: the blade's overkill sever (30% on a plain blade becomes about 53% on a goblin scout, 64% on a Digger, 75% on a loot goblin), power cuts, the axe/greatsword double-leg cleave and the waist halving, and a blast's chance to tear a limb off a survivor or a corpse. Skeletons, Rubber-folk and Grim Hand still stack on top. Blunt blows still never cut. A blast's chance to gib a body outright is unchanged.
+- Players keep their own chance, and village children (babies that aren't monsters) aren't cut more often. Height is the standing height, so crouching or crawling doesn't count, but a baby's or a shrunken body's size does.
+- Severed limbs and stumps now also work on Kingdoms creature models (part names armR/legL, Blockbench arm_right/leg_left, the loot goblin's thigh/thigh2), and a creature's severed limb is drawn where it hung (its parents' pivots counted). Broken limbs on those models now hang limp too.
+- Classes: Dismember (SMALL_HEIGHT, SMALL_MAX, smallScale), BlastGore.chance, client Dismembered.names/limb, SeveredPartRenderer.middle.
+- Built; not played.

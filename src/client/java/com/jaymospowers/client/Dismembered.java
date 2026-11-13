@@ -74,15 +74,30 @@ public final class Dismembered {
 	private Dismembered() {
 	}
 
-	/** The model parts that make up {@code part}, by name (a part and what's layered over it). */
+	/**
+	 * The model parts that make up {@code part}, by name (a part and what's layered over it). After the game's own names
+	 * come our creatures' ones: Kingdoms' shape-file creatures (a Digger's "armR", "legL"), Blockbench mobs (a goblin
+	 * scout's "arm_right", "leg_left") and the loot goblin ("thigh", "thigh2").
+	 */
 	public static String[] names(int part) {
 		return switch (part) {
 			case Dismember.HEAD -> new String[] {"head", "hat", "nose"};
-			case Dismember.RIGHT_ARM -> new String[] {"right_arm", "right_sleeve"};
-			case Dismember.LEFT_ARM -> new String[] {"left_arm", "left_sleeve"};
-			case Dismember.RIGHT_LEG -> new String[] {"right_leg", "right_pants"};
-			default -> new String[] {"left_leg", "left_pants"};
+			case Dismember.RIGHT_ARM -> new String[] {"right_arm", "right_sleeve", "armR", "arm_right"};
+			case Dismember.LEFT_ARM -> new String[] {"left_arm", "left_sleeve", "armL", "arm_left"};
+			case Dismember.RIGHT_LEG -> new String[] {"right_leg", "right_pants", "legR", "leg_right", "thigh"};
+			default -> new String[] {"left_leg", "left_pants", "legL", "leg_left", "thigh2"};
 		};
+	}
+
+	/** The model's own part for {@code part}: the first of its {@link #names} the model has, or null. */
+	public static @Nullable ModelPart limb(ModelPart root, int part) {
+		for (String name : names(part)) {
+			ModelPart found = find(root, name);
+			if (found != null) {
+				return found;
+			}
+		}
+		return null;
 	}
 
 	public static @Nullable ModelPart find(ModelPart root, String name) {
@@ -190,7 +205,7 @@ public final class Dismembered {
 			if ((broken & part) == 0) {
 				continue;
 			}
-			ModelPart limb = find(root, names(part)[0]);
+			ModelPart limb = limb(root, part);
 			if (limb == null) {
 				continue;
 			}
