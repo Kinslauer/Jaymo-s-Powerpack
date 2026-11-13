@@ -4,7 +4,7 @@ task: Bring in Andy's three Blockbench models (goblin scout, ghost, camping camp
 branch: claude/project-thread-q2zruj
 with: 
 pr: 1390
-mods: kingdoms, kitchen
+mods: kingdoms, kitchen, powers
 versions: 
 started: 2026-11-13
 owns:
@@ -34,3 +34,7 @@ Follow-up (Andy): the ghost is also how a player looks in Limbo, with a ghost's 
 death screen (PR #1387), so this waits for that merge. A first version tied to lying left for dead was built and reverted
 on this branch (commit 11474b03: `LimboGhost` entity and renderer, `VoiceMasks.Mask.GHOST`, `VoiceRange.spoken` are
 reusable; its `Limbo` class name collides with #1387's).
+
+Andy then kept the left-for-dead ghosts: back on this branch as Powers `core/wounds/OutOfBody` + `PlayerGhost`
+(`client/wounds/OutOfBodyClient`, `PlayerGhostRenderer`) and the Kingdoms ghost voice. Still to do after #1387: the same
+ghost and voice for a player in Limbo.
