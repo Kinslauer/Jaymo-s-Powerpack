@@ -383,4 +383,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12, 9:51 PM: snow giant twice as large** (models thread, Andy: "make it twice as larfe"). Drawn 2x (6.9 blocks), hitbox 4.0 x 6.8; on PR #1398.
 
 - 2026-11-12 9:45 PM ET (Andy): Hermes bots use Groq gpt-oss-120b first (free), then NVIDIA Super, NVIDIA nemotron-3.5-lightning, OpenRouter :free, Gemini Flash; Ollama out of the bots' chain until it resets. Steps: Hermes Training handoff.md, "Faster models for the bots".
+
+- 2026-11-13 (boss-mods thread, patch 8, my calls, not yet confirmed by Andy): "a trait per dragon kind" built as one
+  bone per breath (ember/rime/venom/storm), with Varasuchus put with the acid dragons and Stegonaut with the storm ones;
+  bones and deep tooth are Part Builder materials like bone (not cast); 14 trophy looks, old trophies keep the mask;
+  dragonhide shield is a grid recipe (6 hide + 1 bone), blocks all fire from any side while raised. Lore.md has a
+  `(new)` paragraph "What the great ones leave".
 - **Nov 12, 9:55 PM: giants PR merged** (models thread, Andy: "merge"). PR #1398 squash-merged: Aether Giants on GeckoLib from Blockbench, Snow Giant upright body at 2x. Not played before merge.

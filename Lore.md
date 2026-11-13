@@ -521,6 +521,13 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
+**What the great ones leave** (new). A dragon's breath is in its marrow, and the bone keeps it after the dragon is dead:
+ember bone from the fire dragons (Notus, Ignivorus), rime bone from the frost ones (Boreas, Atroxiia), venom bone from the
+acid ones (Zephyrus, Varasuchus), storm bone from the rest (Eurus, Aeolus, Aetherion, Stegonaut). Smiths shape it like any
+bone and the tool keeps the breath. Dragon hide does not burn, which is why the old dragon hunters carried it as a
+shield. The teeth of the thing under the wreck are hooked and hold in the water. Whoever fells a great one takes its
+likeness for a trophy: a dragon's skull, the knight's helm, the worm's maw; nothing is written on them.
+
 **Four more great ones** (Andy approved, 2026-11-12). The **thing under
 the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
 hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
