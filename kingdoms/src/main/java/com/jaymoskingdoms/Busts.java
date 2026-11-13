@@ -246,6 +246,8 @@ public final class Busts {
 		RandomSource random = level.getRandom();
 		String key = Integer.toString(f.id());
 		// a forged pardon shown to the guard who takes you: dropped if it holds, forgery if it is spotted
+		// the jailer speaks a circle of truth over the prisoner: no forged paper passes in it
+		Truth.court(level, guard.position());
 		int pardon = ForgedPapers.pardon(level, player, guard, f);
 		if (pardon == 1) {
 			drop(player, key);

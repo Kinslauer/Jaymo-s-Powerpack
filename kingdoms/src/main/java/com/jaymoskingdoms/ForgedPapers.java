@@ -139,7 +139,7 @@ public final class ForgedPapers {
 		if (!take(player, PARDON)) {
 			return 0;
 		}
-		if (level.getRandom().nextFloat() < spot(player, guard)) {
+		if (Liars.honest(guard) || level.getRandom().nextFloat() < spot(player, guard)) {
 			Speech.tell(level, guard, player, Component.translatable("papers.jaymoskingdoms.pardon_spotted." + level.getRandom().nextInt(2)), Speech.RED);
 			return 2;
 		}

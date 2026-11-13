@@ -469,6 +469,13 @@ public final class Captives {
 			return;
 		}
 		boolean far = p == null || p.level() != level || p.distanceTo(v) > LOST_RANGE;
+		if (Geas.sworn(v)) {
+			// sworn to see it through: they do not go their own way, and the oath draws them on
+			if (p != null && p.level() == level && p.distanceTo(v) > FOLLOW_CLOSE) {
+				BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(p, false), FOLLOW_SPEED, 2);
+			}
+			return;
+		}
 		if (far) {
 			long since = LOST.computeIfAbsent(v.getUUID(), u -> now);
 			if (now - since >= LOST_TICKS) {

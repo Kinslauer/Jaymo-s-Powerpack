@@ -104,6 +104,9 @@ public final class Dispel {
 			Charm.free(who);
 			any = true;
 		}
+		if (Geas.lift(who)) {
+			any = true;
+		}
 		if (HeldFast.locked(who)) {
 			HeldFast.release(who);
 			any = true;

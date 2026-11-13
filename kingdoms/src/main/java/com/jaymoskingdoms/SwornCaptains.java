@@ -551,7 +551,7 @@ public final class SwornCaptains {
 				// ((0.7.617) planted in his old camp: word of one more of its captains each dawn)
 				planted(level, c, lord);
 			}
-			if (dawn && betrays(level.getRandom(), b)) {
+			if (dawn && !Geas.bindsCaptain(server, c.id(), now) && betrays(level.getRandom(), b)) {
 				betray(level, c, b);
 			}
 		}

@@ -103,6 +103,8 @@ public final class WerewolfPlayers {
 		/** (0.7.185) It came on its own on a night that isn't the full moon ({@link FeralCurse}): it lasts till dawn. */
 		boolean wild;
 		boolean leaving;
+		/** A moonbeam forced the change: it lets go at this game time (0: not so). */
+		long beamUntil;
 		/** (0.7.574) The lean wolf, not the great beast. */
 		boolean lean;
 
@@ -346,6 +348,24 @@ public final class WerewolfPlayers {
 		}
 	}
 
+	/**
+	 * A moonbeam falls on {@code player}: if the curse is on them and they wear their own face, the change comes now and
+	 * holds until {@code until} (game time). True if the beam showed what they are.
+	 */
+	public static boolean moonbeam(ServerPlayer player, long until) {
+		Lycans.Curse curse = player.getAttached(Lycans.CURSE);
+		if (curse == null || curse.half() || !player.isAlive()) {
+			return false;
+		}
+		Form f = FORMS.get(player.getUUID());
+		if (f == null) {
+			begin(player, player.level().getGameTime(), false);
+			f = FORMS.get(player.getUUID());
+		}
+		f.beamUntil = Math.max(f.beamUntil, until);
+		return true;
+	}
+
 	private static void begin(ServerPlayer player, long now, boolean forced) {
 		if (player.isPassenger()) {
 			player.stopRiding();
@@ -397,6 +417,10 @@ public final class WerewolfPlayers {
 				f.beast.setLean(f.lean);
 				level.addFreshEntity(f.beast);
 				w = f.beast;
+			}
+			if (f.beamUntil > 0L && now >= f.beamUntil && !f.leaving) {
+				f.leaving = true;
+				w.changeBack();
 			}
 			if (f.forced && !(f.wild ? Vampires.night(clock) : moon) && !f.leaving) {
 				// (dawn)

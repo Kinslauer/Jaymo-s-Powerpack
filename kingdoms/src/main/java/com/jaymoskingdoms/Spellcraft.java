@@ -388,6 +388,10 @@ public final class Spellcraft {
 		if (Counterspell.key(player, level)) {
 			return;
 		}
+		if (element.equals(WildMagic.WILD)) {
+			// the wild bloodline's blade and bolt take a different element every time
+			element = WildMagic.element(level.getRandom());
+		}
 		if (element.equals("restoration")) {
 			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their blade never takes a charge
 			Restoration.key(player, level, bolt);
@@ -486,6 +490,8 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		// a cast may surge into something else (the wild bloodline, a cursed place)
+		WildMagic.cast(player, level);
 		// (0.7.244) the caster's aura ripples with what the cast is for (an element's blade or bolt: harm; restoration: healing)
 		Mana.ripple(player, Mana.intent(spellOrElement));
 		if (ForbiddenArts.forbidden(spellOrElement)) {

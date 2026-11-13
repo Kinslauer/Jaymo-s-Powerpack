@@ -37,10 +37,11 @@ public final class MagicMenu {
 	}
 
 	/** Server to player: open the Magic screen (the cantrips and rituals they know, listed by id). */
-	public record Open(List<String> cantrips, List<String> rituals) implements CustomPacketPayload {
+	public record Open(List<String> cantrips, List<String> rituals, List<String> choices) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("magic_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(
-			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::cantrips, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::rituals, Open::new);
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::cantrips, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::rituals,
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::choices, Open::new);
 
 		@Override
 		public Type<Open> type() {
@@ -81,7 +82,7 @@ public final class MagicMenu {
 		if (Counterspell.key(player, level)) {
 			return;
 		}
-		ServerPlayNetworking.send(player, new Open(Cantrips.IDS, Rituals.known(player)));
+		ServerPlayNetworking.send(player, new Open(Cantrips.IDS, Rituals.known(player), Choices.open(player)));
 	}
 
 	/** Shows {@code player} a page of lines. */
@@ -99,7 +100,17 @@ public final class MagicMenu {
 			key(player);
 		} else if (Cantrips.IDS.contains(pick.id())) {
 			Cantrips.cast(pick.id(), level, player, pick.text());
-		} else if (NewSpells.RITUALS.contains(pick.id()) && NewSpells.knows(player, pick.id())) {
+		} else if (pick.id().startsWith("choose.")) {
+			String key = pick.id().substring("choose.".length());
+			if (key.equals("send")) {
+				Familiars.send(player);
+			} else if (Choices.ALL.stream().anyMatch(c -> c.key().equals(key) && NewSpells.knows(player, c.spell()))) {
+				Choices.cycle(player, key);
+				key(player);
+			}
+		} else if (pick.id().equals("scry_stop")) {
+			Scrying.stop(player);
+		} else if ((NewSpells.RITUALS.contains(pick.id()) || pick.id().equals(NewSpells.CALL_FAMILIAR)) && NewSpells.knows(player, pick.id())) {
 			Rituals.begin(player, pick.id());
 		}
 	}

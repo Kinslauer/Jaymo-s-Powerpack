@@ -133,7 +133,7 @@ public final class Fear {
 
 	/** Whether {@code who} can be frightened at all: not a player out of play (a boss shrugs off the first frights, {@link Legendary}). */
 	static boolean can(LivingEntity who) {
-		return !(who instanceof Player p) || !p.isSpectator() && !p.isCreative();
+		return (!(who instanceof Player p) || !p.isSpectator() && !p.isCreative()) && !HeroesFeast.fed(who);
 	}
 
 	/** Whether {@code e} is something dreadful that frightens by being seen. */

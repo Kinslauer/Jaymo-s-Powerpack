@@ -221,7 +221,7 @@ public final class Absorption {
 			return "";
 		}
 		String option = Classes.of(player).option();
-		return option == null || option.equals("blood") ? "" : option;
+		return option == null || option.equals("blood") || option.equals("wild") ? "" : option;
 	}
 
 	/** A Sorcerer who absorbs their element here (every element but blood). */

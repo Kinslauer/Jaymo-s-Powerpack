@@ -195,6 +195,9 @@ public final class Poisons {
 			|| victim instanceof Player p && (p.isSpectator() || p.isCreative())) {
 			return;
 		}
+		if (HeroesFeast.fed(victim)) {
+			return;
+		}
 		boolean turned = Saves.resist(victim, Saves.Kind.POISON);
 		switch (kind) {
 			case PLAIN -> victim.addEffect(new MobEffectInstance(MobEffects.POISON, turned ? PLAIN_TICKS / 3 : PLAIN_TICKS, 0));

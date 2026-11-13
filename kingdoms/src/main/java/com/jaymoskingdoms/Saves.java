@@ -71,6 +71,10 @@ public final class Saves {
 
 	/** {@code who}'s chance (0-1) of a save of {@code kind} holding. */
 	public static float chance(LivingEntity who, Kind kind) {
+		// fed at a heroes' feast: fear and poison cannot take
+		if ((kind == Kind.FEAR || kind == Kind.POISON) && HeroesFeast.fed(who)) {
+			return 1.0F;
+		}
 		float chance;
 		if (who instanceof Player player) {
 			chance = PLAYER_LEAST + (PLAYER_MOST - PLAYER_LEAST) * share(player, kind.stat);

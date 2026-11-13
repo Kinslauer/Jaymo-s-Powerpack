@@ -34,7 +34,7 @@ public final class MagicKeys {
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(MagicMenu.Open.TYPE, (payload, context) ->
-			context.client().execute(() -> context.client().gui.setScreen(new MagicScreen(payload.cantrips(), payload.rituals()))));
+			context.client().execute(() -> context.client().gui.setScreen(new MagicScreen(payload.cantrips(), payload.rituals(), payload.choices()))));
 		ClientPlayNetworking.registerGlobalReceiver(MagicMenu.Page.TYPE, (payload, context) ->
 			context.client().execute(() -> context.client().gui.setScreen(new MagicPageScreen(payload.title(), payload.lines()))));
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {

@@ -63,7 +63,7 @@ public final class Rituals {
 
 	private static final List<Consumer<Reveal>> LISTENERS = new ArrayList<>();
 
-	private record Going(String spell, Vec3 at, long begun, float health) {
+	private record Going(String spell, Vec3 at, long begun, float health, int ticks) {
 	}
 
 	private static final Map<UUID, Going> GOING = new HashMap<>();
@@ -101,6 +101,9 @@ public final class Rituals {
 				known.add(id);
 			}
 		}
+		if (NewSpells.knows(player, "find_familiar") && Familiars.hasAsh(player)) {
+			known.add(NewSpells.CALL_FAMILIAR);
+		}
 		return known;
 	}
 
@@ -126,10 +129,11 @@ public final class Rituals {
 		if (!SpellParts.allow(player, spell, null)) {
 			return;
 		}
-		GOING.put(player.getUUID(), new Going(spell, player.position(), level.getGameTime(), player.getHealth()));
-		Concentration.hold(player, "ritual", TICKS + 5, () -> {
+		int ticks = spell.equals("control_weather") ? NatureRites.RITE_TICKS : TICKS;
+		GOING.put(player.getUUID(), new Going(spell, player.position(), level.getGameTime(), player.getHealth(), ticks));
+		Concentration.hold(player, "ritual", ticks + 5, () -> {
 		});
-		Fx.sigil(level, player.position().add(0.0, 0.05, 0.0), 1.6F, SIGIL, TICKS + 10);
+		Fx.sigil(level, player.position().add(0.0, 0.05, 0.0), spell.equals("control_weather") ? 3.0F : 1.6F, SIGIL, ticks + 10);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.7F);
 	}
 
@@ -162,7 +166,7 @@ public final class Rituals {
 				level.sendParticles(Fx.rune(SIGIL, 0.8F), player.getX() + Math.cos(a) * 1.2, player.getY() + 0.1 + gone * 0.008, player.getZ() + Math.sin(a) * 1.2,
 					1, 0.0, 0.0, 0.0, 0.0);
 			}
-			if (gone >= TICKS) {
+			if (gone >= g.ticks) {
 				GOING.remove(e.getKey());
 				Concentration.hold(player, "ritual_done", 1, () -> {
 				});
@@ -364,6 +368,10 @@ public final class Rituals {
 
 	/** {@code animal} says something to {@code player}, and only them: how it feels first, else what its kind thinks. */
 	static void hear(ServerLevel level, ServerPlayer player, Animal animal) {
+		if (level.getRandom().nextFloat() < Passers.TELLS && Passers.tell(level, player, animal)) {
+			level.sendParticles(Fx.GLYPH, animal.getX(), animal.getY(1.2), animal.getZ(), 4, 0.2, 0.2, 0.2, 0.1);
+			return;
+		}
 		String key;
 		if (animal.getHealth() < animal.getMaxHealth() * 0.5F) {
 			key = "hurt." + level.getRandom().nextInt(2);

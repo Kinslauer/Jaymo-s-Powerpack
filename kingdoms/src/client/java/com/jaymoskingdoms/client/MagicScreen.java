@@ -15,13 +15,14 @@ import net.minecraft.network.chat.Component;
  */
 final class MagicScreen extends Screen {
 	private static final int W = 230, PAD = 10, BUTTON_H = 16, GAP = 3;
-	private final List<String> cantrips, rituals;
+	private final List<String> cantrips, rituals, choices;
 	private EditBox whisper;
 
-	MagicScreen(List<String> cantrips, List<String> rituals) {
+	MagicScreen(List<String> cantrips, List<String> rituals, List<String> choices) {
 		super(Component.translatable("gui.jaymoskingdoms.magic.title"));
 		this.cantrips = cantrips;
 		this.rituals = rituals;
+		this.choices = choices;
 	}
 
 	@Override
@@ -30,7 +31,7 @@ final class MagicScreen extends Screen {
 	}
 
 	private int height() {
-		int rows = (this.cantrips.size() + 1) / 2 + this.rituals.size();
+		int rows = (this.cantrips.size() + 1) / 2 + this.rituals.size() + this.choices.size();
 		return 44 + rows * (BUTTON_H + GAP) + 30;
 	}
 
@@ -54,6 +55,13 @@ final class MagicScreen extends Screen {
 		for (String id : this.rituals) {
 			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.ritual", Component.translatable("class.jaymoskingdoms.option." + id)),
 				b -> pick(id)).bounds(left + PAD, y, W - 2 * PAD, BUTTON_H).build());
+			y += BUTTON_H + GAP;
+		}
+		for (String choice : this.choices) {
+			String key = choice.substring(0, choice.indexOf('='));
+			String option = choice.substring(choice.indexOf('=') + 1);
+			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.choice", Component.translatable("magic.jaymoskingdoms.choice." + key),
+				Component.translatable("magic.jaymoskingdoms.choice." + key + "." + option)), b -> pick("choose." + key)).bounds(left + PAD, y, W - 2 * PAD, BUTTON_H).build());
 			y += BUTTON_H + GAP;
 		}
 	}

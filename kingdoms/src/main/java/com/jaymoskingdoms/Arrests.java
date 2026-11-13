@@ -120,6 +120,8 @@ final class Arrests {
 		Stage stage = Stage.CHASE;
 		long until, next;
 		@Nullable Sentence sentence;
+		/** The court's circle of truth is up. */
+		boolean truthSpoken;
 		int blows;
 		Vec3 away = Vec3.ZERO;
 
@@ -387,6 +389,10 @@ final class Arrests {
 	/** At the audience: everyone stands still and faces the ruler (or the guard, with none). */
 	private static void hold(ServerLevel level, Arrest a, Faction f) {
 		LivingEntity judge = judge(level, f);
+		if (!a.truthSpoken) {
+			a.truthSpoken = true;
+			Truth.court(level, (judge != null ? judge : a.guard).position());
+		}
 		Entity facing = judge != null ? judge : a.guard;
 		a.guard.getNavigation().stop();
 		a.crook.getNavigation().stop();
@@ -405,7 +411,9 @@ final class Arrests {
 		RandomSource random = level.getRandom();
 		Tempers.Temper temper = Tempers.of(f);
 		int lean = TEMPER_LEAN[temper == null ? TEMPER_LEAN.length - 1 : temper.ordinal()];
-		int score = a.notoriety * PER_NOTORIETY + lean + random.nextInt(CHANCE_SPREAD + 1);
+		// in the circle of truth the record decides more than the dice
+		int spread = Liars.honest(a.crook) ? CHANCE_SPREAD / 3 : CHANCE_SPREAD;
+		int score = a.notoriety * PER_NOTORIETY + lean + random.nextInt(spread + 1);
 		a.sentence = score >= EXECUTE_FROM ? Sentence.EXECUTE : score >= EXILE_FROM ? Sentence.EXILE : score >= FLOG_FROM ? Sentence.FLOG : Sentence.PARDON;
 		if (a.sentence == Sentence.EXILE && a.looter()) {
 			// (0.7.132) no realm lets a looter go to rob the next field: the cells

@@ -29,7 +29,8 @@ public final class NewSpells {
 	/** Every spell here, in the order their scrolls are shown. */
 	public static final List<String> IDS = List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "speak_animals", "hut",
 		"create_food", "purify_food", "feather_fall", "spider_climb", "water_walk", "long_jump", "misty_step", "web", "grease", "fog", "darkness",
-		"silence", "spike_growth");
+		"silence", "spike_growth", "charm", "command", "suggestion", "hold", "zone_of_truth", "geas", "modify_memory", "locate_object",
+		"locate_creature", "augury", "scrying", "plant_growth", "control_weather", "moonbeam", "heroes_feast", "find_familiar");
 
 	/** What each costs in mana at the staff. */
 	static final Map<String, Float> COST = Map.ofEntries(
@@ -37,23 +38,37 @@ public final class NewSpells {
 		Map.entry("identify", 8.0F), Map.entry("speak_animals", 6.0F), Map.entry("hut", 35.0F), Map.entry("create_food", 15.0F),
 		Map.entry("purify_food", 8.0F), Map.entry("feather_fall", 6.0F), Map.entry("spider_climb", 14.0F), Map.entry("water_walk", 16.0F),
 		Map.entry("long_jump", 8.0F), Map.entry("misty_step", 14.0F), Map.entry("web", 18.0F), Map.entry("grease", 10.0F), Map.entry("fog", 14.0F),
-		Map.entry("darkness", 22.0F), Map.entry("silence", 20.0F), Map.entry("spike_growth", 22.0F));
+		Map.entry("darkness", 22.0F), Map.entry("silence", 20.0F), Map.entry("spike_growth", 22.0F),
+		Map.entry("charm", 18.0F), Map.entry("command", 8.0F), Map.entry("suggestion", 14.0F), Map.entry("hold", 22.0F), Map.entry("zone_of_truth", 16.0F),
+		Map.entry("geas", 30.0F), Map.entry("modify_memory", 24.0F), Map.entry("locate_object", 10.0F), Map.entry("locate_creature", 12.0F),
+		Map.entry("augury", 8.0F), Map.entry("scrying", 28.0F), Map.entry("plant_growth", 30.0F), Map.entry("control_weather", 60.0F),
+		Map.entry("moonbeam", 24.0F), Map.entry("heroes_feast", 50.0F), Map.entry("find_familiar", 20.0F));
 	/** The wait after a staff cast of each (ticks). */
 	static final Map<String, Integer> COOLDOWN = Map.ofEntries(
 		Map.entry("counterspell", 20 * 3), Map.entry("dispel", 20 * 8), Map.entry("ward_line", 20 * 20), Map.entry("find_magic", 20 * 5),
 		Map.entry("identify", 20 * 3), Map.entry("speak_animals", 20 * 5), Map.entry("hut", 20 * 60 * 2), Map.entry("create_food", 20 * 15),
 		Map.entry("purify_food", 20 * 5), Map.entry("feather_fall", 20 * 6), Map.entry("spider_climb", 20 * 20), Map.entry("water_walk", 20 * 20),
 		Map.entry("long_jump", 20 * 8), Map.entry("misty_step", 20 * 4), Map.entry("web", 20 * 12), Map.entry("grease", 20 * 8),
-		Map.entry("fog", 20 * 15), Map.entry("darkness", 20 * 25), Map.entry("silence", 20 * 25), Map.entry("spike_growth", 20 * 25));
+		Map.entry("fog", 20 * 15), Map.entry("darkness", 20 * 25), Map.entry("silence", 20 * 25), Map.entry("spike_growth", 20 * 25),
+		Map.entry("charm", 20 * 20), Map.entry("command", 20 * 6), Map.entry("suggestion", 20 * 20), Map.entry("hold", 20 * 25), Map.entry("zone_of_truth", 20 * 30),
+		Map.entry("geas", 20 * 60), Map.entry("modify_memory", 20 * 60), Map.entry("locate_object", 20 * 10), Map.entry("locate_creature", 20 * 10),
+		Map.entry("augury", 20 * 30), Map.entry("scrying", 20 * 60), Map.entry("plant_growth", 20 * 60), Map.entry("control_weather", 20 * 60 * 5),
+		Map.entry("moonbeam", 20 * 40), Map.entry("heroes_feast", 20 * 60 * 5), Map.entry("find_familiar", 20 * 60 * 2));
 	/** What each is for, as {@link Mana} counts it (harm is the default). */
 	static final Map<String, Integer> INTENT = Map.ofEntries(
 		Map.entry("counterspell", Mana.WARD), Map.entry("dispel", Mana.WILL), Map.entry("ward_line", Mana.WARD), Map.entry("find_magic", Mana.WILL),
 		Map.entry("identify", Mana.WILL), Map.entry("speak_animals", Mana.WILL), Map.entry("hut", Mana.WARD), Map.entry("create_food", Mana.HEAL),
 		Map.entry("purify_food", Mana.HEAL), Map.entry("feather_fall", Mana.WILL), Map.entry("spider_climb", Mana.WILL), Map.entry("water_walk", Mana.WILL),
 		Map.entry("long_jump", Mana.WILL), Map.entry("misty_step", Mana.WILL), Map.entry("web", Mana.WILL), Map.entry("grease", Mana.WILL),
-		Map.entry("fog", Mana.WILL), Map.entry("darkness", Mana.WILL), Map.entry("silence", Mana.WILL));
+		Map.entry("fog", Mana.WILL), Map.entry("darkness", Mana.WILL), Map.entry("silence", Mana.WILL),
+		Map.entry("charm", Mana.WILL), Map.entry("command", Mana.WILL), Map.entry("suggestion", Mana.WILL), Map.entry("hold", Mana.WILL),
+		Map.entry("zone_of_truth", Mana.WARD), Map.entry("geas", Mana.WILL), Map.entry("modify_memory", Mana.WILL), Map.entry("locate_object", Mana.WILL),
+		Map.entry("locate_creature", Mana.WILL), Map.entry("augury", Mana.WILL), Map.entry("scrying", Mana.WILL), Map.entry("plant_growth", Mana.HEAL),
+		Map.entry("control_weather", Mana.WILL), Map.entry("moonbeam", Mana.WARD), Map.entry("heroes_feast", Mana.HEAL), Map.entry("find_familiar", Mana.WARD));
 	/** The small useful ones that can be cast slowly with no mana ({@link Rituals}). */
-	public static final Set<String> RITUALS = Set.of("ward_line", "find_magic", "identify", "speak_animals");
+	public static final Set<String> RITUALS = Set.of("ward_line", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar");
+	/** The rite of calling a familiar back from its ash: no spell of its own, known with the one that bound it. */
+	public static final String CALL_FAMILIAR = "call_familiar";
 	/** What a Sorcerer is born knowing: the quick, small ones. */
 	public static final Set<String> SORCERER_KNOWS = Set.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "speak_animals");
 	/** How far a ground spell reaches from the caster's eyes. */
@@ -80,6 +95,19 @@ public final class NewSpells {
 		Counterspell.register();
 		Rituals.register();
 		Cantrips.register();
+		Choices.register();
+		MindSpells.register();
+		Truth.register();
+		Geas.register();
+		Divination.register();
+		Hair.register();
+		Scrying.register();
+		NatureRites.register();
+		Passers.register();
+		Moonbeam.register();
+		HeroesFeast.register();
+		Familiars.register();
+		WildMagic.register();
 	}
 
 	/** Whether {@code spell} is one of these. */
@@ -98,7 +126,17 @@ public final class NewSpells {
 		if (Strides.ours(spell)) {
 			return Strides.cast(spell, level, player, power);
 		}
+		if (MindSpells.ours(spell)) {
+			return MindSpells.cast(spell, level, player, power);
+		}
+		if (Divination.ours(spell)) {
+			return Divination.cast(spell, level, player, power);
+		}
+		if (NatureRites.ours(spell)) {
+			return NatureRites.cast(spell, level, player, power);
+		}
 		return switch (spell) {
+			case "find_familiar", "call_familiar" -> Familiars.cast(spell, level, player);
 			case "counterspell" -> Counterspell.react(level, player, power);
 			case "dispel" -> Dispel.cast(level, player, power);
 			case "find_magic", "identify", "speak_animals" -> Rituals.cast(spell, level, player, power);
@@ -110,6 +148,9 @@ public final class NewSpells {
 	public static boolean knows(Player player, String spell) {
 		if (player.isCreative()) {
 			return true;
+		}
+		if (spell.equals(CALL_FAMILIAR)) {
+			return knows(player, "find_familiar");
 		}
 		if (Classes.is(player, Classes.PlayerClass.SORCERER) && SORCERER_KNOWS.contains(spell)) {
 			return true;

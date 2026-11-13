@@ -29,7 +29,7 @@ public final class Fields {
 	/** What a field is. */
 	public enum Kind {
 		WEB(0xE8E8E8, true), GREASE(0x6B5A2B, false), FOG(0xD8E2E8, true), DARKNESS(0x0B0A12, true), SILENCE(0x7C6FA0, true),
-		THORNS(0x4C7A34, false), WARD_LINE(0x9FD8FF, false), DOME(0xC8D6E8, true);
+		THORNS(0x4C7A34, false), WARD_LINE(0x9FD8FF, false), DOME(0xC8D6E8, true), TRUTH(0xF2D98A, false), MOONBEAM(0xCFE0FF, false);
 
 		public final int colour;
 		/** A sphere or dome (it has height); the rest lie on the ground. */
@@ -273,6 +273,9 @@ public final class Fields {
 			switch (f.kind) {
 				case WEB, GREASE, FOG, DARKNESS, SILENCE, THORNS -> BattleSpells.tick(f, now);
 				case WARD_LINE, DOME -> CampSpells.tick(f, now);
+				case MOONBEAM -> Moonbeam.tick(f, now);
+				case TRUTH -> {
+				}
 			}
 		}
 	}
@@ -329,6 +332,18 @@ public final class Fields {
 					double u = f.radius * i / 4.0;
 					level.sendParticles(Fx.rune(c, 0.7F), f.at.x + f.axis.x * u, f.at.y + 0.3, f.at.z + f.axis.z * u, 1, 0.05, 0.1, 0.05, 0.0);
 				}
+			}
+			case TRUTH -> {
+				if (sheets) {
+					Fx.sigil(level, floor, r, c, sheet);
+				}
+				level.sendParticles(Fx.mote(c, 0.6F), f.at.x, f.at.y + 0.2, f.at.z, 3, f.radius * 0.6, 0.1, f.radius * 0.6, 0.0);
+			}
+			case MOONBEAM -> {
+				if (sheets) {
+					Fx.pool(level, floor, r, c, sheet);
+				}
+				Fx.beam(level, floor, floor.add(0.0, 8.0, 0.0), r * 0.9F, c, DRAW_EVERY + 4);
 			}
 			case DOME -> {
 				Fx.orb(level, f.at, r, c, DRAW_EVERY + 4);
