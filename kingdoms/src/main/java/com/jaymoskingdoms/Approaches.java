@@ -987,6 +987,10 @@ public final class Approaches {
 					said = VillagerHeritage.neighbours(level, a.mob, player);
 				}
 				if (said == null) {
+					// the land east over the water, spoken of sideways (MohkneeTalk)
+					said = MohkneeTalk.gossip(level, a.mob);
+				}
+				if (said == null) {
 					said = Oddities.gossip(level, a.mob);
 				}
 				if (said == null) {
@@ -1200,6 +1204,10 @@ public final class Approaches {
 		}
 		if (ShipTalk.answer(player, answer)) {
 			// (0.7.270) a talk about work aboard ship: your berth, your lay
+			return;
+		}
+		if (Helmsmen.answer(player, answer)) {
+			// a helmsman asked for his course
 			return;
 		}
 		if (Skills.answer(player, answer)) {
