@@ -50,6 +50,8 @@ public final class FarmhandHome {
 		key("homesteads", "forest_home_steads"), key("homesteads", "taiga_home_steads"), key("homesteads", "swamp_home_steads"));
 	/** How far a farmhouse is looked for: in structure spacings, as findNearestMapStructure counts (see {@link LifeStory#STRUCTURE_SEARCH}). */
 	static final int SEARCH_CHUNKS = LifeStory.STRUCTURE_SEARCH;
+	/** The farmhouse hunt is switched off (see {@link #find(ServerLevel, BlockPos, RandomSource, long)}). */
+	static final boolean SEARCH_OFF = true;
 
 	/** Fewer grown villagers than this in the house: a farming couple moves in. */
 	static final int FAMILY_LEAST = 2;
@@ -92,7 +94,11 @@ public final class FarmhandHome {
 
 	/** As {@link #find(ServerLevel, BlockPos, RandomSource)}, but null without searching once {@code deadline} (nanoTime) has passed. */
 	static @Nullable House find(ServerLevel level, BlockPos from, RandomSource random, long deadline) {
-		if (System.nanoTime() >= deadline) {
+		// Off for now: the search makes every candidate chunk on the server thread, and on this pack a new chunk can take
+		// seconds (worldgen waits on Dynamic Waters' rivers), so even 8 rings held the Steam Deck server past its watchdog
+		// (crash 2026-11-13 07:02). A farmhand gets the village start, as when no farmhouse is in reach, until the hunt runs
+		// spread over ticks with chunks loaded asynchronously.
+		if (SEARCH_OFF || System.nanoTime() >= deadline) {
 			return null;
 		}
 		Registry<Structure> structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);

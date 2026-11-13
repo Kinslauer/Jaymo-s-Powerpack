@@ -39,8 +39,12 @@ final class QuestBoard {
 	static final int LEAD_EMERALDS = 6, LEAD_SPREAD = 4, LEAD_HEARTS = 4;
 	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
 	static final int BEAST_EMERALDS = 10;
-	/** How far a villager's (and a king's) fetch or champion quest looks for its ruin (chunks). */
-	static final int VILLAGER_SEARCH_CHUNKS = 32, KING_SEARCH_CHUNKS = 56;
+	/**
+	 * How far a villager's (and a king's) fetch or champion quest looks for its ruin: rings of the structure's spacing, as
+	 * findNearestMapStructure counts, each candidate made on the server thread. 32 and 56 meant thousands of chunks when no
+	 * ruin was near; 8 still reaches thousands of blocks out.
+	 */
+	static final int VILLAGER_SEARCH_CHUNKS = LifeStory.STRUCTURE_SEARCH, KING_SEARCH_CHUNKS = LifeStory.STRUCTURE_SEARCH;
 	/** A ruin nearer any settlement's seat than this is lived in. */
 	static final double RUIN_SETTLED = 72.0;
 	/** A letter goes to another settlement this far (blocks) at most; this share of letters go elsewhere if there's one. */

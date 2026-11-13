@@ -84,6 +84,8 @@ public final class StoryGround {
 	static final int OCEAN_SEARCH = 4800, OCEAN_STEP = 32, OCEAN_VERTICAL_STEP = 64;
 	/** A new coastal capital: walked in from the sea in steps to the shore, then this far inland. */
 	static final int SHORE_STEP = 8, SHORE_WALK = 1200, SHORE_INLAND = 40;
+	/** New chunks the walk in from the sea may make (several steps share a chunk); out of them, the shore is given up on. */
+	static final int SHORE_NEW_CHUNKS = 12;
 	/** (0.7.236) How long the loading screen stays up after a story puts you somewhere, while the land there loads. */
 	static final int SETTLE_TICKS = 60;
 	/** (0.7.236) How often who's held is looked at, and the loading screen raised or let down. */
@@ -401,11 +403,15 @@ public final class StoryGround {
 	/** A new monolith a few hundred blocks from {@code from}: its foot. */
 	static @Nullable BlockPos monolith(ServerLevel level, BlockPos from, RandomSource random) {
 		BlockPos rough = null;
+		int[] made = {LifeStory.NEW_CHUNKS};
 		for (int i = 0; i < MONOLITH_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int r = MONOLITH_MIN + random.nextInt(MONOLITH_MAX - MONOLITH_MIN + 1);
 			BlockPos column = from.offset(Mth.floor(Math.cos(angle) * r), 0, Mth.floor(Math.sin(angle) * r));
-			level.getChunk(column.getX() >> 4, column.getZ() >> 4);
+			// spots in land not yet made are made only while the budget lasts: 24 new chunks held the server past its watchdog
+			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
+				continue;
+			}
 			BlockPos foot = Monoliths.fit(level, column);
 			if (foot == null) {
 				if (rough == null && level.getFluidState(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).below()).isEmpty()) {
@@ -656,14 +662,20 @@ public final class StoryGround {
 		BlockPos water = sea.getFirst();
 		double dx = from.getX() - water.getX(), dz = from.getZ() - water.getZ();
 		double len = Math.max(1.0, Math.sqrt(dx * dx + dz * dz));
+		// land not yet made is made only while the budget lasts (each new chunk holds the server while it's made)
+		int[] made = {SHORE_NEW_CHUNKS};
 		for (int d = 0; d < Math.min(len, SHORE_WALK); d += SHORE_STEP) {
 			BlockPos column = water.offset(Mth.floor(dx / len * d), 0, Mth.floor(dz / len * d));
-			level.getChunk(column.getX() >> 4, column.getZ() >> 4);
+			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
+				return null;
+			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			if (level.getFluidState(top.below()).isEmpty()) {
 				// on land: a little further in, for the castle
 				BlockPos inland = water.offset(Mth.floor(dx / len * (d + SHORE_INLAND)), 0, Mth.floor(dz / len * (d + SHORE_INLAND)));
-				level.getChunk(inland.getX() >> 4, inland.getZ() >> 4);
+				if (!LifeStory.reach(level, inland.getX(), inland.getZ(), made)) {
+					return top;
+				}
 				BlockPos seat = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, inland);
 				return level.getFluidState(seat.below()).isEmpty() ? seat : top;
 			}
