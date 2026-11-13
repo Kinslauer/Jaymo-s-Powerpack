@@ -4048,3 +4048,29 @@ enter limbo if they don't come to."
   has not been seen generated (its template is still in 1.20.1's data version, which the game upgrades on load, as it
   does the Stormborn Tomb's), the master's coming up, the Echo Bow's ghost bows and the dummy's numbers are untested,
   and the two mods were not booted beside the rest of the pack.
+
+## 0.23.6 (2026-11-13): Fix: worn fist gear floats off the arms with Fresh Animations (#1420)
+
+- (Jung) With Fresh Animations (its player extension, through Entity Model Features) in the pack, worn wraps, cestus,
+  bracers and the Fang Gauntlets floated in front of a boxer while the arms were somewhere else: during a punch, a
+  block, or any time the plain guard was off. The gear is drawn where our pose puts the arms, but Fresh Animations
+  moved the arms again as the body was drawn, and it was only told to step aside while the plain guard was up.
+- It now steps aside whenever fist gear is worn (`PoseTakeover.posed`: `FangGauntletsClient.worn`, was `guarding`), so
+  the arms stay where the gear is. A boxer's arms and legs then move by the game's and our own poses, not Fresh
+  Animations', while the gear is in hand.
+
+## 0.23.7 (2026-11-13): Wind: the Spiral Dive goes down head first, spinning (#1408)
+
+- (Jung) The Spiral Dive (tap X in the air, looking steeply down) looked like a belly flop: the diver lay about flat
+  and turned like a pinwheel. It now tips right over within a third of a second and goes down head first, arms
+  together ahead like a spear's point, legs together behind, spinning about its own length like a drill.
+- Why it lay flat: the dive borrowed the Zephyr's upright spin, and on top of it a falling Wind user's slow tip
+  forward (which only reaches head-down at over twice the dive's speed) was still running. The dive has its own
+  pose now (`WindMoves.DIVE`, drawn by `WindMovePose`), and that falling tip is off while it lasts.
+- Nothing about the dive's speed, steering, landing ring or cooldown changes. Third person and other players only;
+  first person is as it was.
+- Not built locally; not played: the tip and spin are set by numbers at the top of `WindMovePose`.
+- **Airflow sense is now on crouch + hold V, and bolder.** It was always on and too faint to notice (three single
+  pixels a streak). Crouch and hold V: a faint ring of ticks shows round the crosshair so you know it is on, and each
+  moving thing near you draws a streak of five larger dots with a dark edge on its side of the ring. That hold of V
+  is the sense's, so V's own ability doesn't charge; V without crouching is unchanged.
