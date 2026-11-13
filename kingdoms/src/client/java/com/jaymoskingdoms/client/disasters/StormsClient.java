@@ -203,11 +203,12 @@ public final class StormsClient {
 				float h = random.nextFloat() * t.height() * 0.85F;
 				float angle = random.nextFloat() * Mth.TWO_PI;
 				float tone = random.nextFloat() * 0.1F;
-				// the funnel's dark grey (a dust devil's sandy), browner near the ground where it picks up dirt
+				// the funnel's dark grey (a dust devil's sandy), browner near the ground where it picks up dirt; a
+				// waterspout's is pale, whitest at its foot where the sea is drawn up in spray
 				float low = 1.0F - Math.min(1.0F, h / 20.0F);
-				float r = devil ? 0.72F + tone : 0.5F + tone + 0.08F * low;
-				float g = devil ? 0.62F + tone : 0.5F + tone + 0.02F * low;
-				float b = devil ? 0.46F + tone : 0.52F + tone - 0.08F * low;
+				float r = t.water ? 0.68F + tone + 0.2F * low : devil ? 0.72F + tone : 0.5F + tone + 0.08F * low;
+				float g = t.water ? 0.72F + tone + 0.18F * low : devil ? 0.62F + tone : 0.5F + tone + 0.02F * low;
+				float b = t.water ? 0.78F + tone + 0.16F * low : devil ? 0.46F + tone : 0.52F + tone - 0.08F * low;
 				float size = WISP_SIZE[t.size] * (0.7F + 0.6F * random.nextFloat()) * (0.6F + 0.8F * h / t.height());
 				StormParticle p = new StormParticle(level, t.x, t.y + h, t.z, funnelSprites.get(random), StormParticle.FUNNEL, t.id, size,
 					50 + random.nextInt(40), r, g, b, devil ? 0.55F : 0.9F).funnel(h, angle, 0.75F + random.nextFloat() * 0.35F,
@@ -230,7 +231,8 @@ public final class StormsClient {
 				float tone = random.nextFloat() * 0.12F;
 				StormParticle p = new StormParticle(level, t.x, t.y, t.z, funnelSprites.get(random), StormParticle.DEBRIS, t.id,
 					WISP_SIZE[t.size] * (0.5F + random.nextFloat() * 0.5F), 30 + random.nextInt(30),
-					0.42F + tone, 0.35F + tone, 0.26F + tone, devil ? 0.5F : 0.75F).funnel(random.nextFloat() * 2.0F, angle,
+					t.water ? 0.82F + tone : 0.42F + tone, t.water ? 0.88F + tone : 0.35F + tone, t.water ? 0.94F : 0.26F + tone,
+					devil ? 0.5F : 0.75F).funnel(random.nextFloat() * 2.0F, angle,
 					1.6F + random.nextFloat() * 0.8F, 0.05F + random.nextFloat() * 0.1F);
 				minecraft.particleEngine.add(p);
 			}

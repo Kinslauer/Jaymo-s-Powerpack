@@ -2,7 +2,7 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "OldDeadSkinMixin", "OldDeadHuskSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin", "GoblinHandMixin",
+	"client": ["ArmorPoseLivingEntityRendererMixin", "MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor", "SpeechEntityRenderDispatcherMixin", "SpiderKindStateMixin", "SpiderSkinMixin", "OldDeadSkinMixin", "OldDeadHuskSkinMixin", "SpiderLegsMixin", "ShieldPoseHumanoidMobRendererMixin", "GoblinHandMixin", "ConcussionMouseMixin", "ConcussionSoundMixin",
 		"blade.HiddenBladeUseMixin", "blade.HiddenBladeAvatarRendererMixin", "blade.HiddenBladeFirstPersonMixin",
 		"bb.BbBodyLivingEntityRendererMixin", "forms.FormsScrollMixin", "ValorHandMixin", "StakeScrollMixin", "spirits.SpiritReelScrollMixin"],
 	"injectors": { "defaultRequire": 1 }

@@ -127,6 +127,8 @@ public final class PackAdvancements {
 		AdvancementProgress progress = player.getAdvancements().getOrStartProgress(holder);
 		if (!progress.isDone()) {
 			player.getAdvancements().award(holder, criterion);
+			// the milestones the party shares go to those who were near
+			Retaking.share(player, name);
 		}
 	}
 }

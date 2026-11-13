@@ -121,6 +121,13 @@ public final class Breaks {
 	public static final AttachmentType<Integer> SPLINTED = AttachmentRegistry.create(JaymosPowers.id("wounds_splinted"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
+	/**
+	 * A broken leg keeps them from sprinting right now (what {@link #apply} works out, numbness and adrenaline allowed for),
+	 * told to its owner so their own client stops the sprint too, not only the server. Not saved.
+	 */
+	public static final AttachmentType<Boolean> NO_SPRINT = AttachmentRegistry.create(JaymosPowers.id("wounds_no_sprint"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	/** Sleep counted toward setting the next unset break (clock ticks, {@link #SLEEP_SET_TICKS} a break). Saved, server side only, not kept through death. */
 	public static final AttachmentType<Integer> SLEPT = AttachmentRegistry.create(JaymosPowers.id("wounds_slept_on"),
 		builder -> builder.persistent(Codec.INT));
@@ -845,6 +852,13 @@ public final class Breaks {
 		modifier(entity, Attributes.FLYING_SPEED, WING_FLY_ID, (mask & bit(BodyPart.WINGS)) != 0 ? WING_FLY : 0.0);
 		if (legs > 0 && entity.isSprinting()) {
 			entity.setSprinting(false);
+		}
+		if (entity instanceof Player) {
+			if (legs > 0 && !entity.hasAttached(NO_SPRINT)) {
+				entity.setAttached(NO_SPRINT, true);
+			} else if (legs == 0 && entity.hasAttached(NO_SPRINT)) {
+				entity.removeAttached(NO_SPRINT);
+			}
 		}
 	}
 

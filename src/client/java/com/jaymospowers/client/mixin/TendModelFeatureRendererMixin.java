@@ -16,6 +16,7 @@ abstract class TendModelFeatureRendererMixin {
 		TendPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.CrouchPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.wounds.WoundNursePose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.costume.MaskPose.applyModel(submit.model(), submit.state());
 	}
 
 	/** (0.17.18) Last thing before the model is drawn, every pose laid: on one knee, the front knee bent (see KneeBend). */

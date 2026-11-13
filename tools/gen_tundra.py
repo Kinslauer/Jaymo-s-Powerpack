@@ -665,7 +665,7 @@ def tags():
     merge_tag(os.path.join(t, "block", "mineable", "pickaxe.json"), [jp("banded_iron_ore"), jp("white_ice")])
     merge_tag(os.path.join(t, "block", "needs_stone_tool.json"), [jp("banded_iron_ore")])
     merge_tag(os.path.join(t, "block", "mineable", "axe.json"), logs + lichens)
-    merge_tag(os.path.join(t, "block", "mineable", "hoe.json"), [jp("yellow_moss"), jp("yellow_moss_carpet")])
+    merge_tag(os.path.join(t, "block", "mineable", "hoe.json"), [jp("yellow_moss"), jp("yellow_moss_carpet"), jp("yellow_moss_layer")])
     merge_tag(os.path.join(t, "block", "ice.json"), [jp("white_ice")])
     merge_tag(os.path.join(t, "block", "combination_step_sound_blocks.json"), [jp("yellow_moss_carpet")])
     for tag in ("sword_efficient", "replaceable", "inside_step_sound_blocks", "shears_minor_breaking_speed"):
@@ -674,6 +674,9 @@ def tags():
     for kind in ("block", "item"):
         merge_tag(os.path.join(t, kind, "iron_ores.json"), [jp("banded_iron_ore")])
         merge_tag(os.path.join(t, kind, "logs_that_burn.json"), ["#" + jp("dwarfed_spruce_logs")])
+        # dwarfed spruce is wood like any log: felling a tree, chopping with bare hands (which wants an axe) and the recipes
+        # that ask for "a log" all go by minecraft:logs
+        merge_tag(os.path.join(t, kind, "logs.json"), ["#" + jp("dwarfed_spruce_logs")])
         merge_tag(os.path.join(t, kind, "moss_blocks.json"), [jp("yellow_moss")])
         merge_tag(os.path.join(own, kind, "dwarfed_spruce_logs.json"), logs)
         merge_tag(os.path.join(own, kind, "glow_lichens.json"), [mc("glow_lichen")] + lichens)

@@ -58,30 +58,61 @@ public final class Tackle {
             this.kinds = kinds;
         }
 
-        /** A fish of {@code kind} will come to this rod. */
+        /**
+         * A fish of {@code kind} will come to this rod. The first six kinds keep their lists; (Track C) the new species go
+         * by size: the sea rod takes anything a hook can, the others anything that isn't big, and the cane pole only the
+         * small ones (as it never took a salmon).
+         */
         public boolean takes(int kind) {
-            for (int k : this.kinds) {
-                if (k == kind) {
-                    return true;
+            if (kind <= FishingReal.FISH_TUNA) {
+                for (int k : this.kinds) {
+                    if (k == kind) {
+                        return true;
+                    }
                 }
+                return false;
             }
-            return false;
+            Species sp = Species.of(kind);
+            if (sp == null || !sp.hookable()) {
+                return false;
+            }
+            return switch (this) {
+                case SEA -> true;
+                case POLE -> !sp.big() && sp.usualKg() <= POLE_MOST_KG;
+                default -> !sp.big();
+            };
+        }
+
+        /** (Track B leftovers) Bait on this rod lies on the bottom (the ledger rod) instead of hanging under a float. */
+        public boolean bottom() {
+            return this == LEDGER;
         }
     }
+
+    /** The cane pole takes fish that usually weigh this much or less (kg). */
+    static final float POLE_MOST_KG = 2.5F;
+
+    /** (Track C) What kind of bait something is, for the new species' tastes ({@link Species#likes}). */
+    public enum Cat { WORM, PLANT, MEAT, LIVE, LURE, HEAVY }
 
     /**
      * A bait or lure: how much it draws each kind of fish ({@code draws[kind]}, by {@code FishingReal.FISH_*}: cod, salmon,
      * pufferfish, tropical, shark, tuna; 0 = not at all), whether it's a lure (stays on, needs a spinning or sea rod),
      * and a lure's chance to snap off on a strike.
      */
-    public record Bait(int[] draws, boolean lure, float snap) {
+    public record Bait(int[] draws, boolean lure, float snap, Cat cat) {
+        /** How much it draws a fish of {@code kind}: the first six by their own table, (Track C) the rest by their tastes. */
         public int draw(int kind) {
-            return kind >= 0 && kind < this.draws.length ? this.draws[kind] : 0;
+            if (kind >= 0 && kind < this.draws.length) {
+                return this.draws[kind];
+            }
+            Species sp = Species.of(kind);
+            return sp == null ? 0 : sp.likes(this.cat);
         }
     }
 
     /** Bait an angler put on that isn't in the table (another mod's, through the tag): any small fish, evenly. */
-    static final Bait ANY = new Bait(new int[]{2, 2, 1, 1, 0, 0}, false, 0.0F);
+    static final Bait ANY = new Bait(new int[]{2, 2, 1, 1, 0, 0}, false, 0.0F, Cat.WORM);
     /** A lure snaps off on a strike this often. */
     static final float LURE_SNAP = 0.08F, HEAVY_LURE_SNAP = 0.05F;
 
@@ -100,22 +131,22 @@ public final class Tackle {
         SPINNING_ROD = rod("spinning_rod", Rod.SPINNING, 96);
         LEDGER_ROD = rod("ledger_rod", Rod.LEDGER, 96);
         // natural baits:                   cod salmon puffer tropical shark tuna
-        EARTHWORM = bait("earthworm", new int[]{3, 3, 1, 1, 0, 0});
-        MAGGOTS = bait("maggots", new int[]{2, 3, 0, 2, 0, 0});
-        DOUGH_BAIT = bait("dough_bait", new int[]{2, 3, 0, 1, 0, 0});
-        BOILIE = bait("boilie", new int[]{1, 3, 0, 0, 0, 0});
-        LUGWORM = bait("lugworm", new int[]{4, 1, 2, 2, 0, 1});
+        EARTHWORM = bait("earthworm", new int[]{3, 3, 1, 1, 0, 0}, Cat.WORM);
+        MAGGOTS = bait("maggots", new int[]{2, 3, 0, 2, 0, 0}, Cat.WORM);
+        DOUGH_BAIT = bait("dough_bait", new int[]{2, 3, 0, 1, 0, 0}, Cat.PLANT);
+        BOILIE = bait("boilie", new int[]{1, 3, 0, 0, 0, 0}, Cat.PLANT);
+        LUGWORM = bait("lugworm", new int[]{4, 1, 2, 2, 0, 1}, Cat.WORM);
         // lures (spinning or sea rod only)
-        SPINNER = lure("spinner", new int[]{1, 4, 0, 0, 0, 1}, LURE_SNAP);
-        WOBBLER = lure("wobbler", new int[]{2, 3, 0, 0, 0, 1}, LURE_SNAP);
-        SOFT_SHAD = lure("soft_shad", new int[]{3, 2, 1, 1, 0, 0}, LURE_SNAP);
-        PIRK = lure("pirk", new int[]{4, 0, 0, 0, 1, 2}, HEAVY_LURE_SNAP);
-        TROLLING_SQUID = lure("trolling_squid", new int[]{0, 0, 0, 0, 2, 4}, LURE_SNAP);
+        SPINNER = lure("spinner", new int[]{1, 4, 0, 0, 0, 1}, LURE_SNAP, Cat.LURE);
+        WOBBLER = lure("wobbler", new int[]{2, 3, 0, 0, 0, 1}, LURE_SNAP, Cat.LURE);
+        SOFT_SHAD = lure("soft_shad", new int[]{3, 2, 1, 1, 0, 0}, LURE_SNAP, Cat.LURE);
+        PIRK = lure("pirk", new int[]{4, 0, 0, 0, 1, 2}, HEAVY_LURE_SNAP, Cat.HEAVY);
+        TROLLING_SQUID = lure("trolling_squid", new int[]{0, 0, 0, 0, 2, 4}, LURE_SNAP, Cat.HEAVY);
         // what was already bait, and live bait: a small fish on the hook draws the big ones
-        BAITS.put(Items.BREAD, new Bait(new int[]{1, 2, 0, 1, 0, 0}, false, 0.0F));
-        BAITS.put(Items.ROTTEN_FLESH, new Bait(new int[]{1, 0, 1, 0, 2, 0}, false, 0.0F));
-        BAITS.put(Items.SPIDER_EYE, new Bait(new int[]{0, 2, 1, 0, 0, 0}, false, 0.0F));
-        BAITS.put(Items.TROPICAL_FISH, new Bait(new int[]{0, 1, 0, 0, 4, 3}, false, 0.0F));
+        BAITS.put(Items.BREAD, new Bait(new int[]{1, 2, 0, 1, 0, 0}, false, 0.0F, Cat.PLANT));
+        BAITS.put(Items.ROTTEN_FLESH, new Bait(new int[]{1, 0, 1, 0, 2, 0}, false, 0.0F, Cat.MEAT));
+        BAITS.put(Items.SPIDER_EYE, new Bait(new int[]{0, 2, 1, 0, 0, 0}, false, 0.0F, Cat.MEAT));
+        BAITS.put(Items.TROPICAL_FISH, new Bait(new int[]{0, 1, 0, 0, 4, 3}, false, 0.0F, Cat.LIVE));
         RODS.put(Items.FISHING_ROD, Rod.VANILLA);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
             for (Item item : ALL) {
@@ -127,7 +158,10 @@ public final class Tackle {
     /** (Server start) Kitchen's fish bait, if it's there, draws as it always has: cod and salmon, some small sea fish. */
     static void kitchen() {
         BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymoskitchen", "fish_bait"))
-            .ifPresent(item -> BAITS.putIfAbsent(item, new Bait(new int[]{2, 2, 1, 1, 0, 0}, false, 0.0F)));
+            .ifPresent(item -> BAITS.putIfAbsent(item, new Bait(new int[]{2, 2, 1, 1, 0, 0}, false, 0.0F, Cat.MEAT)));
+        // (Track C) Kitchen's corn on the hook, the carp angler's sweetcorn
+        BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymoskitchen", "corn"))
+            .ifPresent(item -> BAITS.putIfAbsent(item, new Bait(new int[]{1, 3, 0, 0, 0, 0}, false, 0.0F, Cat.PLANT)));
     }
 
     private static Item rod(String id, Rod kind, int durability) {
@@ -136,16 +170,28 @@ public final class Tackle {
         return item;
     }
 
-    private static Item bait(String id, int[] draws) {
+    private static Item bait(String id, int[] draws, Cat cat) {
         Item item = register(id, new Item(props(id)));
-        BAITS.put(item, new Bait(draws, false, 0.0F));
+        BAITS.put(item, new Bait(draws, false, 0.0F, cat));
         return item;
     }
 
-    private static Item lure(String id, int[] draws, float snap) {
+    private static Item lure(String id, int[] draws, float snap, Cat cat) {
         Item item = register(id, new Item(props(id).stacksTo(16)));
-        BAITS.put(item, new Bait(draws, true, snap));
+        BAITS.put(item, new Bait(draws, true, snap, cat));
         return item;
+    }
+
+    /**
+     * (Track C) Live bait: a small fish of ours on the hook draws the predators and the big fish, as the tropical fish
+     * always did; a shrimp is bait for most sea fish. Called once the species' items are registered.
+     */
+    static void liveBait(Item item, Species sp) {
+        if (sp == Species.SHRIMP) {
+            BAITS.put(item, new Bait(new int[]{3, 1, 1, 1, 1, 1}, false, 0.0F, Cat.MEAT));
+        } else if (!sp.predator() && sp.kgMax <= 2.0F && sp.hookable()) {
+            BAITS.put(item, new Bait(new int[]{0, 1, 0, 0, 4, 3}, false, 0.0F, Cat.LIVE));
+        }
     }
 
     static Item.Properties props(String id) {

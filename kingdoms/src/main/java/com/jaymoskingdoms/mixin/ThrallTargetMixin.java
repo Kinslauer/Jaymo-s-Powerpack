@@ -19,7 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * and innocent ({@link com.jaymoskingdoms.Commandments#spares}). Nor anyone at someone hidden inside their werewolf
  * ({@link com.jaymoskingdoms.Lycans#hidden}). (0.7.584) Nor a captor at a captive keeping their place
  * ({@link com.jaymoskingdoms.CaptiveConduct#spares}). Nor a villager, guard, golem or captor at a downed player
- * ({@link Downed#holdsFire}).
+ * ({@link Downed#holdsFire}). Nor a band at someone who paid its tongue-speaker's toll, or is hearing it out
+ * ({@link com.jaymoskingdoms.Parleys#spares}). Nor a masterless bandit's men their leader, or each other
+ * ({@link com.jaymoskingdoms.Masterless#sameBand}).
  */
 @Mixin(LivingEntity.class)
 public abstract class ThrallTargetMixin {
@@ -30,7 +32,10 @@ public abstract class ThrallTargetMixin {
 			|| Downed.holdsFire((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Commandments.spares((LivingEntity)(Object)this, target)
 			|| com.jaymoskingdoms.Lycans.hidden(target)
-			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)) {
+			|| com.jaymoskingdoms.CaptiveConduct.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Loans.sameBand((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Parleys.spares((LivingEntity)(Object)this, target)
+			|| com.jaymoskingdoms.Masterless.sameBand((LivingEntity)(Object)this, target)) {
 			cir.setReturnValue(false);
 		}
 	}

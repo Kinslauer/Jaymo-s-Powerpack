@@ -22,13 +22,14 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The Chrono's road through the Retaking (shown in Jaymo's Kingdoms' Story tab, through the client's {@code StoryRoads}):
- * end your own echo; go forward to the future; hear an Omen pilot out (who hands over a few folded drawings); wake holding
+ * end your own echo; go forward to the future; hear an Omen pilot out (who hands over a few folded drawings); the
+ * Tinkerer's trail (find his workshop and let him talk; bring him down once and see who gets up); wake holding
  * the Stopped Clock. It says what to do, never what it means: the drawings are a great clock and the sweepers' parts with
  * the maker's name scraped off, and nothing anywhere says whose they are.
  */
 public final class ChronoRoad {
 	/** The steps, in order. */
-	public static final List<String> STEPS = List.of("echo", "future", "omen", "clock");
+	public static final List<String> STEPS = List.of("echo", "future", "omen", "workshop", "fell", "clock");
 	/** How often (ticks) the steps that are a state (echo ended, in the future, holding the clock) are looked at. */
 	static final int LOOK_EVERY = 100;
 	/** The drawings the pilot hands over: lang pages {@code book.jaymospowers.clock_drawings.page1..n}. */
@@ -80,6 +81,16 @@ public final class ChronoRoad {
 				mark(player, "clock");
 			}
 		}
+	}
+
+	/** (From the Mad Tinkerer's talk.) The Tinkerer's trail: a Chrono has found his workshop and heard what he has to say of time. */
+	public static void tinkerer(ServerPlayer player) {
+		mark(player, "workshop");
+	}
+
+	/** (From the Mad Tinkerer's fall.) The Tinkerer's trail: a Chrono saw him fall, and who stood up where he fell. */
+	public static void tinkererFell(ServerPlayer player) {
+		mark(player, "fell");
 	}
 
 	/** (From an Omen pilot's talk.) The first time, the pilot hands over the drawings. */

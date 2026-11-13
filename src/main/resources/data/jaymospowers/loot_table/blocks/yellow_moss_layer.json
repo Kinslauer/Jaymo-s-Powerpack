@@ -1,0 +1,105 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:yellow_moss_layer",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "2"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "3"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 4,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "4"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 5,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "5"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 6,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "6"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 7,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "7"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 8,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:yellow_moss_layer",
+                "state": {
+                  "layers": "8"
+                }
+              }
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/yellow_moss_layer"
+}

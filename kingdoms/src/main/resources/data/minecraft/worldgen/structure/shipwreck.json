@@ -1,0 +1,17 @@
+{
+  "type": "jaymoskingdoms:island",
+  "biomes": "#minecraft:has_structure/shipwreck",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "island": false,
+  "far": 0.25,
+  "structures": [
+    {
+      "type": "minecraft:shipwreck",
+      "biomes": "#minecraft:has_structure/shipwreck",
+      "is_beached": false,
+      "spawn_overrides": {},
+      "step": "surface_structures"
+    }
+  ]
+}

@@ -107,6 +107,8 @@ import org.jspecify.annotations.Nullable;
  * eating. Too wounded, or passed out, sneak gives up as before. The crippled (off their feet, not downed) are as they were.
  */
 public final class Downed {
+	/** On someone for the moment their wounds' death is let through (they gave up, or bled out): no save may turn it away. */
+	public static final String FINISHING_TAG = "jaymospowers.finishing";
 	/** A downed one's health: what mobs, fire and falls have left to take. */
 	public static final float DOWNED_HEALTH = 6.0F;
 	/**
@@ -926,10 +928,13 @@ public final class Downed {
 		FINISHING.add(entity);
 		// (and Wounds doesn't route the blow, should something else cancel this death)
 		Wounds.FINISHING.add(entity);
+		// (Andy, 2026-11-12) a death let come (given up, bled out): Kingdoms' Last Stand reads the tag and lets it be
+		entity.addTag(FINISHING_TAG);
 		try {
 			entity.setInvulnerableTime(0);
 			entity.hurtServer(level, source, Float.MAX_VALUE);
 		} finally {
+			entity.removeTag(FINISHING_TAG);
 			FINISHING.remove(entity);
 			Wounds.FINISHING.remove(entity);
 			if (entity.isAlive()) {
@@ -1126,6 +1131,8 @@ public final class Downed {
 		long now = level.getGameTime();
 		// (0.21.49) lying in a bed they struggled into, mending: never bleeding out ({@link DownedStruggle})
 		boolean resting = DownedStruggle.tick(level, player, now);
+		// (Andy, 2026-11-12) or lying still by a lit fire, which mends them till they can rise ({@link Resting#downed})
+		resting |= Resting.downed(level, player, now);
 		boolean out = passedOut(player);
 		if (!out && !resting && now - since(player) >= BLEED_OUT_TICKS) {
 			// (Andy: "Lie until roused or give up": no respawn for bleeding out)

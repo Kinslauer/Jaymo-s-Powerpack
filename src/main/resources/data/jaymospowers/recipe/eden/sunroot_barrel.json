@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "P": "jaymospowers:sunroot_planks",
+    "S": "jaymospowers:sunroot_slab"
+  },
+  "pattern": [
+    "PSP",
+    "P P",
+    "PSP"
+  ],
+  "result": {
+    "id": "jaymospowers:sunroot_barrel"
+  },
+  "group": "barrel"
+}

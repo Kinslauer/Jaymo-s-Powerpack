@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
- * Where the 26.4 ice shows up in a 26.3 world (we have no ice caves, so it goes where the cold already is), placed in
+ * Where the 26.4 ice shows up outside the {@link IceCaves} (where the cold already is), placed in
  * snowy and icy overworld biomes ({@code worldgen/placed_feature/frozen_cave_patch.json} and {@code thin_ice.json}):
  * <ul>
  * <li>{@link FrozenCave}: in a cave under the snow, a patch of the ceiling turns to packed ice with icicles hanging from

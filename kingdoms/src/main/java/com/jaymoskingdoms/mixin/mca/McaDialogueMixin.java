@@ -241,6 +241,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.FisherTalk.ANSWER.equals(answer)) {
+			// Powers' fishing: the fisherman's screen (selling fish by weight, the contest, the water's legend)
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.FisherTalk.talk(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.StarFolk.ANSWER.equals(answer)) {
 			// (0.7.384) asked about the stars: a few words about the sky, and the star charts for sale on the talk screen
 			villager.getInteractions().stopInteracting();
@@ -350,6 +357,27 @@ abstract class McaDialogueMixin {
 				player.sendSystemMessage(why.copy().withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
 			}
 			com.jaymoskingdoms.ComingOver.answered(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.equestrian.HorseRevival.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) a horse raised from its mane lock
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.equestrian.HorseRevival.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.TalkErrands.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) festivals, war parties, plots and couriers, on a talk screen
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.TalkErrands.open(player, villager);
+			ci.cancel();
+			return;
+		}
+		if ("main".equals(question) && com.jaymoskingdoms.Mourning.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-12) a companion they buried, brought up
+			villager.sendChatMessage(com.jaymoskingdoms.Mourning.tale(player, villager), player);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
 			return;

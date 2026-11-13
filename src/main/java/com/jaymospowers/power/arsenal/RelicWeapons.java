@@ -64,10 +64,17 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Tidebreaker</b> (shipwrecks, buried treasure, ocean ruins): cuts harder in water or rain; right click hurls you
  * forward in a spinning riptide.</li>
  * <li><b>Sunfang</b> (desert and jungle temples): sets what it cuts alight; right click blasts a cone of scouring sand.</li>
+ * <li><b>The Long Vigil</b> (nowhere but in the fortress knight's hand; Kingdoms' {@code nether.FortressKnight}): a
+ * greatsword that withers what it cuts; right click plants you in his stance: for a few seconds blows barely hurt you,
+ * and your next cut inside it lands far harder.</li>
+ * <li><b>Rimeclaw</b> (nowhere but off a fallen snow giant; Kingdoms' {@code wild.SnowGiant}): a clawed gauntlet of
+ * the giant's own paw, quick as a dagger and one of the claw family (Kingdoms' claw forms work with it). It chills what
+ * it cuts, frozen through and slowed; right click brings it down in the giant's slam, a ring of frost that hurts, throws
+ * and chills everyone about you.</li>
  * </ul>
  */
 public final class RelicWeapons {
-	public enum Kind { SOUL_SABER, GRAND_SHIELD, VOIDREAVER, ECHO_CLEAVER, TIDEBREAKER, SUNFANG }
+	public enum Kind { SOUL_SABER, GRAND_SHIELD, VOIDREAVER, ECHO_CLEAVER, TIDEBREAKER, SUNFANG, LONG_VIGIL, RIMECLAW }
 
 	/** Soul Saber: share of the damage dealt that heals you; the slash's reach, width, damage, cooldown. */
 	static final float LIFE_STEAL = 0.3F;
@@ -98,6 +105,17 @@ public final class RelicWeapons {
 	static final double SAND_RANGE = 6.0, SAND_CONE = 0.6;
 	static final float SAND_DAMAGE = 3.0F;
 	static final int SAND_COOLDOWN = 80;
+
+	/** The Long Vigil: wither on a cut (ticks); the stance's length, its resistance level, its cooldown, and what the cut inside it adds. */
+	static final int VIGIL_WITHER_TICKS = 60, VIGIL_STANCE_TICKS = 80, VIGIL_RESISTANCE = 1, VIGIL_COOLDOWN = 260;
+	static final float VIGIL_ANSWER = 7.0F;
+	/** Who stands in the Long Vigil's stance, and until when (game time). */
+	private static final Map<java.util.UUID, Long> VIGILS = new java.util.HashMap<>();
+
+	/** Rimeclaw: how long a cut freezes and slows (ticks), the slowness level; the slam's reach, damage, lift and cooldown. */
+	static final int RIME_CHILL_TICKS = 80, RIME_SLOW = 1, RIME_SLAM_COOLDOWN = 160;
+	static final double RIME_SLAM_REACH = 4.5, RIME_SLAM_LIFT = 0.45;
+	static final float RIME_SLAM_DAMAGE = 7.0F;
 
 	static final Map<Kind, Item> ITEMS = new java.util.EnumMap<>(Kind.class);
 
@@ -133,6 +151,10 @@ public final class RelicWeapons {
 		item(Kind.ECHO_CLEAVER, "echo_cleaver", new Item.Properties().sword(ToolMaterial.NETHERITE, 6.0F, -3.0F));
 		item(Kind.TIDEBREAKER, "tidebreaker", new Item.Properties().sword(ToolMaterial.DIAMOND, 4.0F, -2.4F));
 		item(Kind.SUNFANG, "sunfang", new Item.Properties().sword(ToolMaterial.DIAMOND, 3.5F, -2.2F));
+		// (every one of them is a relic from the start: it's handed over by a fallen knight, never by a relic chest)
+		item(Kind.LONG_VIGIL, "long_vigil", new Item.Properties().sword(ToolMaterial.NETHERITE, 6.0F, -2.9F).fireResistant()
+			.component(ArsenalRelics.RELIC, true));
+		item(Kind.RIMECLAW, "rimeclaw", new Item.Properties().sword(ToolMaterial.DIAMOND, 2.0F, -1.6F).component(ArsenalRelics.RELIC, true));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ITEMS.values().forEach(output::accept));
 
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -162,10 +184,22 @@ public final class RelicWeapons {
 					Flames.area(level, entity.getBoundingBox().inflate(SUN_SPLASH), SUN_FIRE_SECONDS, attacker,
 						e -> e != entity && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == attacker));
 				}
+				case RIMECLAW -> chill(level, entity, attacker);
+				case LONG_VIGIL -> {
+					entity.addEffect(new MobEffectInstance(MobEffects.WITHER, VIGIL_WITHER_TICKS, 0), attacker);
+					Long until = VIGILS.remove(attacker.getUUID());
+					if (until != null && until >= level.getGameTime() && entity.isAlive()) {
+						entity.setInvulnerableTime(0);
+						entity.hurtServer(level, level.damageSources().magic(), VIGIL_ANSWER);
+						level.sendParticles(ParticleTypes.SOUL, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 14, 0.3, 0.4, 0.3, 0.05);
+						level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.WITHER_BREAK_BLOCK, SoundSource.PLAYERS, 0.7F, 0.6F);
+					}
+				}
 				default -> {
 				}
 			}
 		});
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> VIGILS.clear());
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				if (player.isBlocking() && kind(player.getUseItem()) == Kind.GRAND_SHIELD) {
@@ -184,6 +218,13 @@ public final class RelicWeapons {
 		ITEMS.put(kind, Registry.register(BuiltInRegistries.ITEM, key, item));
 	}
 
+	/** Rimeclaw's cold: frozen through and slowed. */
+	private static void chill(ServerLevel level, LivingEntity entity, LivingEntity by) {
+		entity.setTicksFrozen(Math.max(entity.getTicksFrozen(), entity.getTicksRequiredToFreeze() + RIME_CHILL_TICKS));
+		entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, RIME_CHILL_TICKS, RIME_SLOW), by);
+		level.sendParticles(ParticleTypes.SNOWFLAKE, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
+	}
+
 	/** Which relic weapon this is, if any. */
 	static @Nullable Kind kind(ItemStack stack) {
 		if (stack.getItem() instanceof Relic relic) {
@@ -195,7 +236,7 @@ public final class RelicWeapons {
 	/** A relic weapon for a chest of {@code table} (its own kind there, any kind elsewhere). */
 	static ItemStack make(@Nullable ResourceKey<LootTable> table, RandomSource random) {
 		Kind kind = table == null ? null : THEMES.get(table);
-		if (kind == null) {
+		while (kind == null || kind == Kind.LONG_VIGIL || kind == Kind.RIMECLAW) {
 			kind = Kind.values()[random.nextInt(Kind.values().length)];
 		}
 		return new ItemStack(ITEMS.get(kind));
@@ -260,6 +301,8 @@ public final class RelicWeapons {
 				case ECHO_CLEAVER -> boom(server, serverPlayer);
 				case TIDEBREAKER -> riptide(server, serverPlayer, stack);
 				case SUNFANG -> sand(server, serverPlayer);
+				case LONG_VIGIL -> vigil(server, serverPlayer);
+				case RIMECLAW -> rimeSlam(server, serverPlayer);
 				default -> 0;
 			};
 			if (cooldown <= 0) {
@@ -268,6 +311,30 @@ public final class RelicWeapons {
 			player.getCooldowns().addCooldown(stack, cooldown);
 			player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			return InteractionResult.SUCCESS;
+		}
+
+		private static int rimeSlam(ServerLevel level, ServerPlayer player) {
+			for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RIME_SLAM_REACH, 1.0, RIME_SLAM_REACH),
+				e -> e != player && e.isAlive() && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == player))) {
+				if (target.hurtServer(level, level.damageSources().playerAttack(player), RIME_SLAM_DAMAGE)) {
+					target.setDeltaMovement(target.getDeltaMovement().add(0.0, RIME_SLAM_LIFT, 0.0));
+					target.needsSync = true;
+					chill(level, target, player);
+				}
+			}
+			level.sendParticles(ParticleTypes.SNOWFLAKE, player.getX(), player.getY() + 0.2, player.getZ(), 70, RIME_SLAM_REACH * 0.5, 0.15, RIME_SLAM_REACH * 0.5,
+				0.06);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
+			return RIME_SLAM_COOLDOWN;
+		}
+
+		private static int vigil(ServerLevel level, ServerPlayer player) {
+			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, VIGIL_STANCE_TICKS, VIGIL_RESISTANCE, false, false, true));
+			VIGILS.put(player.getUUID(), level.getGameTime() + VIGIL_STANCE_TICKS);
+			level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY() + 0.1, player.getZ(), 24, 0.6, 0.05, 0.6, 0.02);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NETHERITE_BLOCK_PLACE, SoundSource.PLAYERS, 1.2F, 0.5F);
+			return VIGIL_COOLDOWN;
 		}
 
 		private static int slash(ServerLevel level, ServerPlayer player) {

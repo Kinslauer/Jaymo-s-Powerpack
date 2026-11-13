@@ -898,8 +898,19 @@ public final class CrawlPose {
 	}
 
 	/** (0.18.5) How far the body is turned up off the ground {@code t} through the rise (degrees; 90 stands). */
+	/**
+	 * Andy (2026-11-12): "can we also revisit the getup animation with gecko lib?" The rise is keyframed in
+	 * {@code geckolib/animations/entity/player_getup.animation.json} (the {@code getup} animation; {@link KeyframeClip}):
+	 * its {@code root} bone's x is how far the body is turned up off the ground (90 stands), and the head, arms and legs
+	 * are posed from their bones. Without the file the hand-written curves below are used.
+	 */
+	static final @Nullable KeyframeClip GETUP = KeyframeClip.load("jaymospowers", "player_getup", "getup");
+
 	static float riseDegrees(float t) {
 		t = Mth.clamp(t, 0.0F, 1.0F);
+		if (GETUP != null && GETUP.has("root")) {
+			return GETUP.degrees("root", 0, t);
+		}
 		if (t < PUSH_SHARE) {
 			// (0.19.41) a slow start off the ground, then on at a steady pace (no ease-out: no pause before kneeling)
 			float x = t / PUSH_SHARE;
@@ -918,6 +929,24 @@ public final class CrawlPose {
 	 */
 	private static void rise(PoseBlend.Frame f, State crawl, boolean rightArm, boolean leftArm) {
 		float t = crawl.rise();
+		if (GETUP != null) {
+			// (the keyframed rise, with the strain's shake on the arms until they stand)
+			float shake = Mth.sin(crawl.age() * 2.3F) * 0.05F * (1.0F - Mth.clamp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), 0.0F, 1.0F));
+			if (rightArm) {
+				f.set(PoseBlend.RIGHT_ARM, GETUP.partX("right_arm", t), GETUP.partY("right_arm", t), GETUP.partZ("right_arm", t));
+				f.shake(PoseBlend.RIGHT_ARM, shake);
+			}
+			if (leftArm) {
+				f.set(PoseBlend.LEFT_ARM, GETUP.partX("left_arm", t), GETUP.partY("left_arm", t), GETUP.partZ("left_arm", t));
+				f.shake(PoseBlend.LEFT_ARM, -shake);
+			}
+			f.set(PoseBlend.RIGHT_LEG, GETUP.partX("right_leg", t), GETUP.partY("right_leg", t), GETUP.partZ("right_leg", t));
+			f.set(PoseBlend.LEFT_LEG, GETUP.partX("left_leg", t), GETUP.partY("left_leg", t), GETUP.partZ("left_leg", t));
+			f.set(PoseBlend.BODY + 1, 0.0F);
+			f.set(PoseBlend.HIP_YAW, 0.0F);
+			f.set(PoseBlend.HEAD, GETUP.partX("head", t), GETUP.partY("head", t), GETUP.partZ("head", t));
+			return;
+		}
 		float press = 1.0F - PoseBlend.seg(t, PUSH_SHARE * 0.7F, KNEEL_SHARE);
 		// (0.19.41) the knees and arms straighten steadily through the standing, done only at the end
 		float stand = Mth.clamp((t - KNEEL_SHARE) / (1.0F - KNEEL_SHARE), 0.0F, 1.0F);

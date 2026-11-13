@@ -126,7 +126,7 @@ public final class CarryPose {
 		state.setData(CARRIER_KEY, carrying == null ? null
 			: new Holding(carrying.hold(), !Carry.person(target), entity.tickCount + partialTicks, target == null ? 0.6F : target.getBbWidth()));
 		state.setData(THROWN_KEY, ThrownFlight.of(entity, state.bodyRot, partialTicks));
-		Player carrier = Carry.carrierOf(entity);
+		LivingEntity carrier = Carry.holderOf(entity);
 		Carry.Carrying hold = carrier == null ? null : carrier.getAttached(Carry.CARRYING);
 		if (hold == null || hold.target() != entity.getId()) {
 			state.setData(HELD_KEY, null);
@@ -576,7 +576,7 @@ public final class CarryPose {
 	 * if they aren't carried.
 	 */
 	public static @Nullable Vec3 carriedEyes(Minecraft minecraft, float partialTicks) {
-		Player carrier = CarryClient.localCarrier(minecraft);
+		LivingEntity carrier = CarryClient.localCarrier(minecraft);
 		if (carrier == null || minecraft.player == null) {
 			return null;
 		}

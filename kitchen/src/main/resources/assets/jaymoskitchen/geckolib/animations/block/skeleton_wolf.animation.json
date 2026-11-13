@@ -1,0 +1,115 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "standing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "howling": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "neck": {
+     "rotation": [
+      -35,
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      -30,
+      0,
+      0
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      18,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "sitting": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "spine": {
+     "rotation": [
+      -32,
+      0,
+      0
+     ],
+     "position": [
+      0,
+      -3,
+      0
+     ]
+    },
+    "front_left": {
+     "rotation": [
+      32,
+      0,
+      0
+     ]
+    },
+    "front_right": {
+     "rotation": [
+      32,
+      0,
+      0
+     ]
+    },
+    "hind_left": {
+     "rotation": [
+      -70,
+      0,
+      0
+     ],
+     "position": [
+      0,
+      -3,
+      1
+     ]
+    },
+    "hind_right": {
+     "rotation": [
+      -70,
+      0,
+      0
+     ],
+     "position": [
+      0,
+      -3,
+      1
+     ]
+    },
+    "neck": {
+     "rotation": [
+      15,
+      0,
+      0
+     ]
+    },
+    "tail": {
+     "rotation": [
+      -25,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

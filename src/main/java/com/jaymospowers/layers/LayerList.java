@@ -48,6 +48,7 @@ final class LayerList {
 		"jaymospowers:stripped_skyroot_log",
 		"jaymospowers:golden_oak_log",
 		"jaymospowers:greatroot_log",
+		"jaymospowers:yellow_moss",
 		"minecraft:stone",
 		"minecraft:cobblestone",
 		"minecraft:mossy_cobblestone",

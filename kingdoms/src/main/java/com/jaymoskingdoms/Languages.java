@@ -268,7 +268,9 @@ public final class Languages {
 	/** Whether {@code player} and {@code speaker} understand each other (always, with anyone who isn't townsfolk). */
 	public static boolean understands(ServerPlayer player, Entity speaker) {
 		Tongue t = of(speaker);
-		return t == null || speaks(player, t) || (speaker instanceof Villager v && McaCompat.family(v, player));
+		return t == null || speaks(player, t) || (speaker instanceof Villager v && McaCompat.family(v, player))
+			// (a tongue-speaker companion by you puts it into words you know: docs/Pawn-Plan.md row G2)
+			|| Specialties.translated(player);
 	}
 
 	/** (0.7.61) MCA voice lines that are words (hello, yes, no, a cheer, an angry shout) → the plain grunt heard instead without the tongue. */

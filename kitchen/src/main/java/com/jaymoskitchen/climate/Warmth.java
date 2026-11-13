@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -61,6 +62,9 @@ public final class Warmth {
 	static final int SKIN_KEEPS = 5 * 60 * 20;
 	/** The land's cold per thousand blocks north of the world's spawn (warmth to the south), and its most. */
 	static final float NORTH_COLD = 5.0F, NORTH_MOST = 25.0F;
+	/** Damp air near the sea: how much colder it makes cold air feel and hotter hot air, at the most, and how far (blocks) round you it is read. */
+	static final float DAMP_COLD = 8.0F, DAMP_HEAT = 6.0F;
+	static final int DAMP_REACH = 24;
 
 	public static HearthBlock HEARTH_BLOCK;
 	public static HearthBlock ICEBOX_BLOCK;
@@ -104,6 +108,9 @@ public final class Warmth {
 			DRINKS.clear();
 		});
 
+		ServerPlayNetworking.registerGlobalReceiver(com.jaymoskitchen.net.Payloads.FeedHearth.TYPE, (payload, ctx) -> HearthBlock.feed(ctx.player(), payload.pos()));
+		Furs.register();
+		Tailoring.register();
 		// a lining: the piece in your main hand, the wool, rabbit hide or leather in your other, used on a loom
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || player.isSpectator() || !level.getBlockState(hit.getBlockPos()).is(Blocks.LOOM)) {
@@ -112,7 +119,7 @@ public final class Warmth {
 			ItemStack piece = player.getMainHandItem();
 			ItemStack cloth = player.getOffhandItem();
 			Lining lining = Lining.of(cloth);
-			if (lining == null || !linable(piece) || piece.get(LINING) == lining) {
+			if (lining == null || lining.tailored || !linable(piece) || piece.get(LINING) == lining) {
 				return InteractionResult.PASS;
 			}
 			if (!level.isClientSide()) {
@@ -158,6 +165,13 @@ public final class Warmth {
 
 	static void set(ServerLevel level, BlockPos hearth, boolean cold, LongOpenHashSet cells) {
 		ROOMS.computeIfAbsent(level.dimension(), k -> new HashMap<>()).put(hearth.asLong(), new Room(cold, cells));
+	}
+
+	/** How much air the hearth at {@code hearth} fills. */
+	static int cells(ServerLevel level, BlockPos hearth) {
+		Map<Long, Room> rooms = ROOMS.get(level.dimension());
+		Room room = rooms == null ? null : rooms.get(hearth.asLong());
+		return room == null ? 0 : room.cells().size();
 	}
 
 	static boolean has(ServerLevel level, BlockPos hearth) {
@@ -230,6 +244,45 @@ public final class Warmth {
 		int spawnZ = level.getServer().overworld().getRespawnData().pos().getZ();
 		// north is toward -Z
 		return Math.max(-NORTH_MOST, Math.min(NORTH_MOST, (float) (z - spawnZ) / 1000.0F * NORTH_COLD));
+	}
+
+	/** How damp the air is (0 to 1): the share of the land round {@code at} that is sea, shore or river. */
+	static float dampness(ServerLevel level, BlockPos at) {
+		int wet = 0, n = 0;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				BlockPos p = at.offset(dx * DAMP_REACH, 0, dz * DAMP_REACH);
+				if (!level.hasChunkAt(p)) {
+					continue;
+				}
+				n++;
+				var biome = level.getBiome(p);
+				if (biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN) || biome.is(net.minecraft.tags.BiomeTags.IS_BEACH)
+					|| biome.is(net.minecraft.tags.BiomeTags.IS_RIVER)) {
+					wet += dx == 0 && dz == 0 ? 2 : 1;
+				}
+			}
+		}
+		return n == 0 ? 0.0F : Math.min(1.0F, wet / (float) (n + 1));
+	}
+
+	/**
+	 * Damp's push on the air, in body heat: near the sea, on the shore and in a river's valley the air is wet, and wet air
+	 * takes the heat out of cold ({@link #DAMP_COLD}, "a damp cold gets into the bones") and clings to hot ({@link #DAMP_HEAT},
+	 * "muggy"); only under the open sky, and half again as much in rain. {@code land} is the dry land's push.
+	 */
+	static float damp(ServerLevel level, BlockPos at, boolean sky, float land) {
+		if (!sky) {
+			return 0.0F;
+		}
+		float damp = dampness(level, at);
+		if (damp <= 0.0F) {
+			return 0.0F;
+		}
+		if (level.isRaining()) {
+			damp = Math.min(1.0F, damp * 1.5F);
+		}
+		return land > 0.0F ? DAMP_HEAT * damp : -DAMP_COLD * damp;
 	}
 
 	/** Worn linings: how many warm pieces and how many cool pieces they add up to. */

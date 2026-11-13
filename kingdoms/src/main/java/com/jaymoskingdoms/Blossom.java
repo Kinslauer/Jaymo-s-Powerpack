@@ -232,10 +232,22 @@ final class Blossom {
 		}
 	}
 
-	/** The castle's size (its blueprint), and where its keep's middle is across it: the gatehouse wing stands off to the right. */
-	static final int CASTLE_WIDTH = 31, CASTLE_DEPTH = 25, CASTLE_HEIGHT = 30, CASTLE_MIDDLE = 12;
+	/**
+	 * The castle's size (its blueprint), and where its keep's middle is across it: the gatehouse wing stands off to the right.
+	 * Andy: at the full size of the Ninja Castle build it takes after, not a third of it, so the town's levelled ground is widened
+	 * to hold it ({@code BlossomVillages#CASTLE_REACH}). The keep's footing is {@link #KEEP_X0}..{@link #KEEP_X1} across and
+	 * {@link #KEEP_Z0}..{@link #KEEP_Z1} deep, the moat {@link #MOAT} wide all round it and the wing.
+	 */
+	static final int CASTLE_WIDTH = 62, CASTLE_DEPTH = 48, CASTLE_HEIGHT = 42, CASTLE_MIDDLE = 25;
+	static final int MOAT = 4, FOOT = 4, INSET = 4, RINGS = 6;
+	static final int KEEP_X0 = MOAT, KEEP_X1 = 46, KEEP_Z0 = MOAT, KEEP_Z1 = 43;
+	/** The wing's footing; its walls are one inside it, and the keep's right wall (GREAT_X1) is its left. */
+	static final int WING_X0 = 45, WING_X1 = 57, WING_Z0 = 18, WING_Z1 = 30;
+	/** The great room's walls (the storeys above stand INSET further in each side), and each storey's first and last rows. */
+	static final int GREAT_X0 = 6, GREAT_X1 = 44, GREAT_Z0 = 9, GREAT_Z1 = 41;
+	private static final int[] Y0 = {5, 12, 19, 26}, Y1 = {10, 17, 24, 31};
 	/** How wide the gables on the castle's front eaves are, lowest first (half their width). */
-	private static final int[] GABLE_HALF = {3, 2};
+	private static final int[] GABLE_HALF = {5, 4};
 
 	/** The castle's roofs: grey stone tile, as the Blossom lords have always roofed their seats; the horns on the ridge are pale. */
 	private static final BlockState ROOF = Blocks.STONE_BRICK_STAIRS.defaultBlockState();
@@ -293,166 +305,204 @@ final class Blossom {
 	}
 
 	/**
-	 * A castle in the Blossom way (25 x 25, and a gatehouse wing to its right): the seat of a Blossom town's kingdom. A
-	 * moat along its front with a stone bridge over it, steps up a footing of rough stone that leans in as it rises, and
-	 * on that a keep of four storeys, each standing back from the one below under a skirt of grey tile with turned-up
-	 * corners (a gable on the front of the two lowest). White plaster between dark posts, paper windows, and a roof on
-	 * top whose ridge ends in a pair of pale horns. Inside, the great room: a boarded hall between two raised tatami
-	 * floors, and at its far end a niche for whoever rules there. Ladders climb to the guards' floor, the lord's rooms and
-	 * the lookout; a door off the right-hand floor leads into the gatehouse.
+	 * A castle in the Blossom way, at the full size of the Ninja Castle build it takes after (62 wide, 48 deep, 42 high; the
+	 * keep itself 43 across): the seat of a Blossom town's kingdom. A moat runs all the way round it (four blocks of water
+	 * on every side, the wing's included) with a stone bridge across the front, steps up a footing of rough stone that leans
+	 * in as it rises, and on that a keep of four storeys, each standing back from the one below under a skirt of grey tile
+	 * with turned-up corners (a gable on the front of the two lowest). White plaster between dark posts, paper windows, and
+	 * a roof on top whose ridge ends in a pair of pale horns. Inside, the great room: a boarded hall between two raised
+	 * tatami floors, and at its far end a niche for whoever rules there. Ladders climb to the guards' floor, the lord's
+	 * rooms and the lookout; a door off the right-hand floor leads into the gatehouse wing.
 	 */
 	static Blueprint tenshu(Buildings.Kit k) {
 		Buildings.Sketch s = new Buildings.Sketch("blossom_tenshu", CASTLE_WIDTH, CASTLE_DEPTH, CASTLE_HEIGHT);
-		BlockState boards = k.p.planks(), brick = Blocks.STONE_BRICKS.defaultBlockState();
+		BlockState boards = k.p.planks(), brick = Blocks.STONE_BRICKS.defaultBlockState(), air = Blocks.AIR.defaultBlockState();
 		BlockState steps = Blocks.STONE_BRICK_STAIRS.defaultBlockState(), rail = Blocks.STONE_BRICK_WALL.defaultBlockState();
+		BlockState water = Blocks.WATER.defaultBlockState();
 		int mid = CASTLE_MIDDLE;
-		// the moat along the front, and the bridge over it
-		for (int x = 0; x <= 24; x++) {
-			for (int z = 0; z <= 1; z++) {
-				boolean bridge = Math.abs(x - mid) <= 2;
-				s.set(x, 0, z, bridge ? brick : Blocks.WATER.defaultBlockState());
-				if (Math.abs(x - mid) == 2) {
-					s.set(x, 1, z, rail);
-				}
-			}
-		}
-		s.set(mid - 2, 2, 0, Blocks.LANTERN.defaultBlockState());
-		s.set(mid + 2, 2, 0, Blocks.LANTERN.defaultBlockState());
-		// the footing: rough stone, a block wider at the ground than above, the keep's walls flush with it at the sides and back
-		for (int x = 1; x <= 23; x++) {
-			for (int z = 3; z <= 23; z++) {
-				s.set(x, 1, z, rock(x, 1, z));
-				if (x >= 2 && x <= 22 && z >= 4 && z <= 22) {
-					s.set(x, 2, z, rock(x, 2, z));
-					s.set(x, 3, z, z <= 5 || x == 2 || x == 22 || z == 22 ? brick : x >= 8 && x <= 16 || z <= 8 ? boards : rock(x, 3, z));
-				}
-			}
-		}
-		// the steps up it from the bridge
-		for (int x = mid - 1; x <= mid + 1; x++) {
-			for (int i = 0; i < 3; i++) {
-				s.set(x, 1 + i, 2 + i, Buildings.Sketch.stair(steps, Direction.SOUTH));
-				for (int y = 1; y <= i; y++) {
-					s.set(x, y, 2 + i, brick);
-				}
-			}
-		}
-		// the great room: x 2..22, z 6..22, five high, behind a terrace under the eaves
-		storey(s, k, 2, 22, 6, 22, 4, 8, 2);
-		s.door(mid, 4, 6, Direction.NORTH, k.door);
-		eaves(s, 0, 24, 4, 24, 8, 4);
-		gablet(s, k, mid, 8, 4, GABLE_HALF[0]);
-		// a raised tatami floor down each side of it, the boarded hall between them
-		for (int z = 9; z <= 21; z++) {
-			for (int x = 3; x <= 7; x++) {
-				s.set(x, 4, z, TATAMI);
-				s.set(24 - x, 4, z, TATAMI);
-			}
-		}
-		// the niche at the hall's far end: the only place along the back wall to set a seat
-		for (int x = 8; x <= 16; x++) {
-			if (x == mid) {
-				continue;
-			}
-			for (int y = 4; y <= 8; y++) {
-				s.set(x, y, 21, Math.abs(x - mid) == 1 ? TIMBER : y == 6 && x % 2 == 0 ? PAPER : k.infill);
-			}
-		}
-		// its ceiling is the guards' floor
-		for (int x = 3; x <= 21; x++) {
-			for (int z = 7; z <= 21; z++) {
-				s.set(x, 9, z, boards);
-			}
-		}
-		// the second storey: x 4..20, z 8..20
-		storey(s, k, 4, 20, 8, 20, 10, 13, 0);
-		eaves(s, 2, 22, 6, 22, 13, 4);
-		gablet(s, k, mid, 13, 6, GABLE_HALF[1]);
-		for (int x = 5; x <= 19; x++) {
-			for (int z = 9; z <= 19; z++) {
-				s.set(x, 14, z, boards);
-			}
-		}
-		// the third: x 6..18, z 10..18
-		storey(s, k, 6, 18, 10, 18, 15, 18, 0);
-		eaves(s, 4, 20, 8, 20, 18, 4);
-		for (int x = 7; x <= 17; x++) {
-			for (int z = 11; z <= 17; z++) {
-				s.set(x, 19, z, boards);
-			}
-		}
-		// the lookout: x 8..16, z 12..16, under the top roof, whose ridge runs across the front
-		storey(s, k, 8, 16, 12, 16, 20, 23, 0);
-		for (int i = 0; i <= 4; i++) {
-			for (int x = 6; x <= 18; x++) {
-				boolean end = i == 0 && (x == 6 || x == 18);
-				if (i == 4) {
-					s.set(x, 27, 14, ROOF_SLAB);
-				} else {
-					s.set(x, 23 + i, 10 + i, end ? Buildings.Sketch.top(ROOF_SLAB) : Buildings.Sketch.stair(ROOF, Direction.SOUTH));
-					s.set(x, 23 + i, 18 - i, end ? Buildings.Sketch.top(ROOF_SLAB) : Buildings.Sketch.stair(ROOF, Direction.NORTH));
-				}
-			}
-			// the gable ends, over the lookout's side walls
-			for (int z = 10 + i + 1; z <= 18 - i - 1; z++) {
-				if (23 + i >= 25) {
-					s.set(8, 23 + i, z, k.infill);
-					s.set(16, 23 + i, z, k.infill);
-				}
-			}
-		}
-		// the horns at the ridge's ends, curling up and out
-		s.set(7, 27, 14, HORN);
-		s.set(17, 27, 14, HORN);
-		s.set(7, 28, 14, HORN);
-		s.set(17, 28, 14, HORN);
-		s.set(7, 29, 14, Buildings.Sketch.stair(HORN_TIP, Direction.WEST));
-		s.set(17, 29, 14, Buildings.Sketch.stair(HORN_TIP, Direction.EAST));
-		// the gatehouse wing against the great room's right side: its own footing, its floor a step up, its ridge dying into the keep
-		for (int x = 23; x <= 29; x++) {
-			for (int z = 7; z <= 15; z++) {
-				s.set(x, 1, z, rock(x, 1, z));
-				if (x <= 28 && z >= 8 && z <= 14) {
-					s.set(x, 2, z, rock(x, 2, z));
-					s.set(x, 3, z, brick);
-					for (int y = 4; y <= 10; y++) {
-						s.set(x, y, z, y == 4 ? boards : Blocks.AIR.defaultBlockState());
+		// the moat: four blocks of water round the keep's footing and the wing's, on every side
+		for (int x = 0; x < CASTLE_WIDTH; x++) {
+			for (int z = 0; z < CASTLE_DEPTH; z++) {
+				boolean on = in(x, z, KEEP_X0, KEEP_X1, KEEP_Z0, KEEP_Z1) || in(x, z, WING_X0, WING_X1, WING_Z0, WING_Z1);
+				boolean near = in(x, z, KEEP_X0 - MOAT, KEEP_X1 + MOAT, KEEP_Z0 - MOAT, KEEP_Z1 + MOAT)
+					|| in(x, z, WING_X0 - MOAT, WING_X1 + MOAT, WING_Z0 - MOAT, WING_Z1 + MOAT);
+				if (near && !on) {
+					boolean bridge = z < KEEP_Z0 && Math.abs(x - mid) <= 3;
+					s.set(x, 0, z, bridge ? brick : water);
+					if (bridge && Math.abs(x - mid) == 3) {
+						s.set(x, 1, z, rail);
 					}
 				}
 			}
 		}
-		storey(s, k, 22, 28, 8, 14, 4, 8, 1);
-		s.gableX(22, 28, 7, 15, 9, ROOF, ROOF_SLAB, k.infill);
-		s.door(22, 5, 11, Direction.EAST, k.door);
-		s.set(24, 5, 9, Blocks.BARREL.defaultBlockState());
-		s.set(27, 5, 9, Blocks.BARREL.defaultBlockState());
-		s.bed(27, 5, 12, Direction.SOUTH, FUTON);
-		s.set(25, 12, 11, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid - 3, 2, 0, Blocks.LANTERN.defaultBlockState());
+		s.set(mid + 3, 2, 0, Blocks.LANTERN.defaultBlockState());
+		s.set(mid - 3, 2, KEEP_Z0 - 1, Blocks.LANTERN.defaultBlockState());
+		s.set(mid + 3, 2, KEEP_Z0 - 1, Blocks.LANTERN.defaultBlockState());
+		// the footing: rough stone, a block wider at the ground than above, the keep's walls flush with it at the sides and back
+		for (int x = KEEP_X0; x <= KEEP_X1; x++) {
+			for (int z = KEEP_Z0; z <= KEEP_Z1; z++) {
+				s.set(x, 1, z, rock(x, 1, z));
+				if (x > KEEP_X0 && x < KEEP_X1 && z > KEEP_Z0 && z < KEEP_Z1) {
+					for (int y = 2; y < FOOT; y++) {
+						s.set(x, y, z, rock(x, y, z));
+					}
+					boolean edge = x == KEEP_X0 + 1 || x == KEEP_X1 - 1 || z == KEEP_Z1 - 1;
+					s.set(x, FOOT, z, z <= KEEP_Z0 + 2 || edge ? brick : Math.abs(x - mid) <= 7 || z <= KEEP_Z0 + 7 ? boards : rock(x, FOOT, z));
+				}
+			}
+		}
+		// the steps up it from the bridge
+		for (int x = mid - 2; x <= mid + 2; x++) {
+			for (int i = 0; i < FOOT; i++) {
+				s.set(x, 1 + i, KEEP_Z0 + i, Buildings.Sketch.stair(steps, Direction.SOUTH));
+				for (int y = 1; y <= i; y++) {
+					s.set(x, y, KEEP_Z0 + i, brick);
+				}
+				for (int y = 2 + i; y <= FOOT; y++) {
+					s.set(x, y, KEEP_Z0 + i, air);
+				}
+			}
+		}
+		// the great room, behind a terrace under the eaves
+		storey(s, k, GREAT_X0, GREAT_X1, GREAT_Z0, GREAT_Z1, Y0[0], Y1[0], 2);
+		s.door(mid, Y0[0], GREAT_Z0, Direction.NORTH, k.door);
+		eaves(s, GREAT_X0 - 2, GREAT_X1 + 2, GREAT_Z0 - 2, GREAT_Z1 + 2, Y1[0], RINGS);
+		gablet(s, k, mid, Y1[0], GREAT_Z0 - 2, GABLE_HALF[0]);
+		// a raised tatami floor down each side of it, the boarded hall between them
+		for (int z = GREAT_Z0 + 4; z <= GREAT_Z1 - 1; z++) {
+			for (int x = GREAT_X0 + 1; x <= GREAT_X0 + 6; x++) {
+				s.set(x, Y0[0], z, TATAMI);
+				s.set(2 * mid - x, Y0[0], z, TATAMI);
+			}
+		}
+		// the niche at the hall's far end, a notch four deep and one wide in a dais wall across the hall: the only place along
+		// the back to set a seat (the seat finder takes the open cell furthest from the door with a wall behind it, so the
+		// notch's end is further than any corner of the hall)
+		for (int x = GREAT_X0 + 7; x <= GREAT_X1 - 7; x++) {
+			if (x == mid) {
+				continue;
+			}
+			for (int z = GREAT_Z1 - 4; z <= GREAT_Z1 - 1; z++) {
+				for (int y = Y0[0]; y <= Y1[0]; y++) {
+					s.set(x, y, z, Math.abs(x - mid) == 1 ? TIMBER : y == Y0[0] + 2 && x % 2 == 0 && z == GREAT_Z1 - 4 ? PAPER : k.infill);
+				}
+			}
+		}
+		// its ceiling is the guards' floor
+		ceiling(s, boards, GREAT_X0, GREAT_X1, GREAT_Z0, GREAT_Z1, Y1[0] + 1);
+		// the second storey
+		storey(s, k, GREAT_X0 + INSET, GREAT_X1 - INSET, GREAT_Z0 + INSET, GREAT_Z1 - INSET, Y0[1], Y1[1], 0);
+		eaves(s, GREAT_X0 + INSET - 2, GREAT_X1 - INSET + 2, GREAT_Z0 + INSET - 2, GREAT_Z1 - INSET + 2, Y1[1], RINGS);
+		gablet(s, k, mid, Y1[1], GREAT_Z0 + INSET - 2, GABLE_HALF[1]);
+		ceiling(s, boards, GREAT_X0 + INSET, GREAT_X1 - INSET, GREAT_Z0 + INSET, GREAT_Z1 - INSET, Y1[1] + 1);
+		// the third
+		int x2 = GREAT_X0 + 2 * INSET, x3 = GREAT_X1 - 2 * INSET, z2 = GREAT_Z0 + 2 * INSET, z3 = GREAT_Z1 - 2 * INSET;
+		storey(s, k, x2, x3, z2, z3, Y0[2], Y1[2], 0);
+		eaves(s, x2 - 2, x3 + 2, z2 - 2, z3 + 2, Y1[2], RINGS);
+		ceiling(s, boards, x2, x3, z2, z3, Y1[2] + 1);
+		// the lookout, under the top roof, whose ridge runs across the front
+		int lx0 = GREAT_X0 + 3 * INSET, lx1 = GREAT_X1 - 3 * INSET, lz0 = GREAT_Z0 + 3 * INSET, lz1 = GREAT_Z1 - 3 * INSET;
+		storey(s, k, lx0, lx1, lz0, lz1, Y0[3], Y1[3], 0);
+		int rise = (lz1 - lz0 + 4) / 2;
+		for (int i = 0; i <= rise; i++) {
+			for (int x = lx0 - 2; x <= lx1 + 2; x++) {
+				boolean end = i == 0 && (x == lx0 - 2 || x == lx1 + 2);
+				if (i == rise) {
+					s.set(x, Y1[3] + i, mid_z(lz0, lz1), ROOF_SLAB);
+				} else {
+					s.set(x, Y1[3] + i, lz0 - 2 + i, end ? Buildings.Sketch.top(ROOF_SLAB) : Buildings.Sketch.stair(ROOF, Direction.SOUTH));
+					s.set(x, Y1[3] + i, lz1 + 2 - i, end ? Buildings.Sketch.top(ROOF_SLAB) : Buildings.Sketch.stair(ROOF, Direction.NORTH));
+				}
+			}
+			// the gable ends, over the lookout's side walls
+			for (int z = lz0 - 2 + i + 1; z <= lz1 + 2 - i - 1; z++) {
+				if (i >= 2) {
+					s.set(lx0, Y1[3] + i, z, k.infill);
+					s.set(lx1, Y1[3] + i, z, k.infill);
+				}
+			}
+		}
+		// the horns at the ridge's ends, curling up and out
+		int ridge = Y1[3] + rise, rz = mid_z(lz0, lz1);
+		for (int h = 0; h < 3; h++) {
+			s.set(lx0 - 1, ridge + h, rz, HORN);
+			s.set(lx1 + 1, ridge + h, rz, HORN);
+		}
+		s.set(lx0 - 1, ridge + 3, rz, Buildings.Sketch.stair(HORN_TIP, Direction.WEST));
+		s.set(lx1 + 1, ridge + 3, rz, Buildings.Sketch.stair(HORN_TIP, Direction.EAST));
+		// the gatehouse wing against the great room's right side: its own footing, its floor a step up, its ridge dying into the keep
+		for (int x = WING_X0; x <= WING_X1; x++) {
+			for (int z = WING_Z0; z <= WING_Z1; z++) {
+				s.set(x, 1, z, rock(x, 1, z));
+				if (x < WING_X1 && z > WING_Z0 && z < WING_Z1) {
+					for (int y = 2; y < FOOT; y++) {
+						s.set(x, y, z, rock(x, y, z));
+					}
+					s.set(x, FOOT, z, brick);
+					for (int y = FOOT + 1; y <= Y1[0]; y++) {
+						s.set(x, y, z, y == FOOT + 1 ? boards : air);
+					}
+				}
+			}
+		}
+		int wx0 = GREAT_X1, wx1 = WING_X1 - 1, wz0 = WING_Z0 + 1, wz1 = WING_Z1 - 1;
+		storey(s, k, wx0, wx1, wz0, wz1, FOOT + 1, Y1[0], 1);
+		s.gableX(wx0, wx1, wz0 - 2, wz1 + 2, Y1[0] + 1, ROOF, ROOF_SLAB, k.infill);
+		int wmid = (wz0 + wz1) / 2;
+		s.door(wx0, FOOT + 2, wmid, Direction.EAST, k.door);
+		s.set(wx0 + 3, FOOT + 2, wz0 + 1, Blocks.BARREL.defaultBlockState());
+		s.set(wx0 + 4, FOOT + 2, wz0 + 1, Blocks.BARREL.defaultBlockState());
+		s.set(wx1 - 1, FOOT + 2, wz0 + 1, Blocks.BARREL.defaultBlockState());
+		s.bed(wx1 - 1, FOOT + 2, wz1 - 1, Direction.SOUTH, FUTON);
+		s.bed(wx1 - 3, FOOT + 2, wz1 - 1, Direction.SOUTH, FUTON);
+		s.set((wx0 + wx1) / 2, Y1[0] + 7, wmid, Buildings.Sketch.hanging(Blocks.LANTERN));
 		// the ladders: guards' floor from the left-hand tatami, the lord's rooms, the lookout
-		ladder(s, 6, 18, 5, 9);
-		ladder(s, 9, 15, 10, 14);
-		ladder(s, 10, 14, 15, 19);
+		ladder(s, GREAT_X0 + 6, GREAT_Z1 - 6, Y0[0] + 1, Y1[0] + 1);
+		ladder(s, x2 + 1, z3 - 1, Y0[1], Y1[1] + 1);
+		ladder(s, lx0 + 3, lz1 - 1, Y0[2], Y1[2] + 1);
 		// lanterns under the great room's ceiling and either side of the niche
-		for (int[] at : new int[][] {{5, 11}, {19, 11}, {5, 17}, {19, 17}, {10, 8}, {14, 8}, {mid - 2, 19}, {mid + 2, 19}}) {
-			s.set(at[0], 8, at[1], Buildings.Sketch.hanging(Blocks.LANTERN));
+		for (int[] at : new int[][] {{10, 16}, {40, 16}, {10, 25}, {40, 25}, {10, 34}, {40, 34}, {19, 12}, {31, 12}, {mid - 4, GREAT_Z1 - 5},
+			{mid + 4, GREAT_Z1 - 5}, {mid, 14}}) {
+			s.set(at[0], Y1[0], at[1], Buildings.Sketch.hanging(Blocks.LANTERN));
 		}
-		s.set(4, 5, 20, BONSAI);
-		s.set(20, 5, 20, BONSAI);
+		s.set(GREAT_X0 + 2, Y0[0] + 1, GREAT_Z1 - 2, BONSAI);
+		s.set(GREAT_X1 - 2, Y0[0] + 1, GREAT_Z1 - 2, BONSAI);
 		// the guards' floor: futons along the back, barrels by the ladder
-		for (int x = 8; x <= 16; x += 4) {
-			s.bed(x, 10, 17, Direction.SOUTH, FUTON);
+		for (int x = x2; x <= x3; x += 6) {
+			s.bed(x, Y0[1], GREAT_Z1 - INSET - 4, Direction.SOUTH, FUTON);
 		}
-		s.set(5, 10, 9, Blocks.BARREL.defaultBlockState());
-		s.set(19, 10, 9, Blocks.BARREL.defaultBlockState());
-		s.set(mid, 13, 14, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(GREAT_X0 + INSET + 2, Y0[1], GREAT_Z0 + INSET + 2, Blocks.BARREL.defaultBlockState());
+		s.set(GREAT_X1 - INSET - 2, Y0[1], GREAT_Z0 + INSET + 2, Blocks.BARREL.defaultBlockState());
+		s.set(mid, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid - 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(mid + 8, Y1[1], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
 		// the lord's rooms, and the lookout
-		s.bed(15, 15, 15, Direction.SOUTH, FUTON);
-		s.set(7, 15, 11, Blocks.BARREL.defaultBlockState());
-		s.set(17, 15, 11, BONSAI);
-		s.set(mid, 18, 14, Buildings.Sketch.hanging(Blocks.LANTERN));
-		s.set(14, 20, 13, BONSAI);
-		s.set(mid, 26, 14, Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.bed(x3 - 4, Y0[2], z3 - 2, Direction.SOUTH, FUTON);
+		s.bed(x3 - 6, Y0[2], z3 - 2, Direction.SOUTH, FUTON);
+		s.set(x2 + 2, Y0[2], z2 + 2, Blocks.BARREL.defaultBlockState());
+		s.set(x3 - 2, Y0[2], z2 + 2, BONSAI);
+		s.set(mid, Y1[2], mid_z(z2, z3), Buildings.Sketch.hanging(Blocks.LANTERN));
+		s.set(lx1 - 2, Y0[3], lz0 + 2, BONSAI);
+		s.set(mid, ridge - 1, rz, Buildings.Sketch.hanging(Blocks.LANTERN));
 		return s.done();
+	}
+
+	private static boolean in(int x, int z, int x0, int x1, int z0, int z1) {
+		return x >= x0 && x <= x1 && z >= z0 && z <= z1;
+	}
+
+	private static int mid_z(int z0, int z1) {
+		return (z0 + z1) / 2;
+	}
+
+	/** The boards of a floor across the inside of the walls x0..x1, z0..z1 at {@code y}. */
+	private static void ceiling(Buildings.Sketch s, BlockState boards, int x0, int x1, int z0, int z1, int y) {
+		for (int x = x0 + 1; x < x1; x++) {
+			for (int z = z0 + 1; z < z1; z++) {
+				s.set(x, y, z, boards);
+			}
+		}
 	}
 
 	private static BlockState named(String name, Block fallback) {

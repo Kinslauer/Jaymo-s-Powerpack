@@ -216,7 +216,10 @@ public final class Journal {
 				: Component.translatable("journal.jaymoskingdoms.giver", q.giver().name(), f.name());
 			boolean ready = Quests.ready(player, q);
 			Optional<BlockPos> target = ready ? f == null ? Optional.empty() : Optional.of(f.seat()) : q.objective().pos();
-			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, Quests.text(q), Quests.objective(level, player, q), target));
+			Component text = Quests.storyErrand(q)
+				? Quests.text(q).copy().append("\n\n").append(Component.translatable("journal.jaymoskingdoms.story_errand").withStyle(net.minecraft.ChatFormatting.DARK_GREEN))
+				: Quests.text(q);
+			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, text, Quests.objective(level, player, q), target));
 		}
 		// (0.7.220) your jobs' orders
 		entries.addAll(Careers.journal(player));

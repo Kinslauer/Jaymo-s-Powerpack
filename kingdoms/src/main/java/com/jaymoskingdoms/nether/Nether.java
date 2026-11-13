@@ -75,6 +75,9 @@ public final class Nether {
 		// (0.7.142) stage 2: the war forts, their warlords and war hosts (and their attachments)
 		JaymosKingdoms.LOGGER.debug("nether fort attachments: {} {}", NetherForts.FORTS, NetherForts.TAG);
 		NetherForts.register();
+		// the Ignivorus' roost towers and the dragon's staged entrance
+		JaymosKingdoms.LOGGER.debug("dragon roost attachment: {}", DragonRoosts.ROOSTS);
+		DragonRoosts.register();
 		// (0.7.147) stage 3: portal raids on the towns, trophies
 		NetherTrophies.register();
 		PortalRaids.register();
@@ -84,6 +87,9 @@ public final class Nether {
 		CinderForge.register();
 		// (0.7.351) the possessed who walk the fortress halls, in Kintsugi
 		FortressHaunts.register();
+		// the fortress knight, one to a fortress
+		JaymosKingdoms.LOGGER.debug("fortress knight attachments: {} {}", FortressKnight.KNIGHT, FortressKnight.HELD);
+		FortressKnight.register();
 		// the imps: the demons' flying kin
 		Imps.register();
 	}

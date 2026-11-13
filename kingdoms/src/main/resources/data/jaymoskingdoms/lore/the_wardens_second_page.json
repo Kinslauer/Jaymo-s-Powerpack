@@ -1,0 +1,16 @@
+{
+  "title": "A Second Page",
+  "author": "a gate-warden",
+  "pages": [
+    {"translate": "lore.jaymoskingdoms.the_wardens_second_page.1"},
+    {"translate": "lore.jaymoskingdoms.the_wardens_second_page.2"},
+    {"translate": "lore.jaymoskingdoms.the_wardens_second_page.3"},
+    {"translate": "lore.jaymoskingdoms.the_wardens_second_page.4"}
+  ],
+  "drop": {
+    "dimensions": ["minecraft:overworld"],
+    "chief": true,
+    "chance": 0.2,
+    "camp": true
+  }
+}

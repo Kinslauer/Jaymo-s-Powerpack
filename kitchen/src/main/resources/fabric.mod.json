@@ -36,7 +36,8 @@
 		"java": ">=25",
 		"fabric-api": "*",
 		"cookingforblockheads": ">=26.3.0.2",
-		"balm": "*"
+		"balm": "*",
+		"geckolib": ">=5.5.7"
 	},
 	"contributors": [
 		"MennoMax, paul101, jmb19905 (NiftyCarts carts, MIT)",

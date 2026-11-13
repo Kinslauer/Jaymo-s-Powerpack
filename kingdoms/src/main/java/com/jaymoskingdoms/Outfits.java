@@ -70,8 +70,6 @@ public final class Outfits {
 	static final int ARMOURY_REALMS = 2;
 	/** (0.7.105) A guard's chance of fencing with a rapier from Jaymo's Powers (a lord always does), when it's there. */
 	static final float GUARD_RAPIER_CHANCE = 0.2F;
-	/** One realm in this many has iron enough to arm its folk (Andy's TFC Hardrock picks: iron is scarce). */
-	static final int IRON_REALMS = 4;
 	/** (0.5.30) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
 	static final float RAIDER_HORNS_CHANCE = 0.3F;
 
@@ -202,7 +200,7 @@ public final class Outfits {
 				}
 			}
 			fencer(folk, random);
-			if (folk.role() != Folk.KING && folk.role() != Folk.LORD && !ironRich(faction)) {
+			if (folk.role() != Folk.KING && folk.role() != Folk.LORD && !ironRich(folk, faction)) {
 				ironPoor(folk);
 			}
 		} catch (RuntimeException e) {
@@ -213,20 +211,26 @@ public final class Outfits {
 
 	/**
 	 * Andy's TFC Hardrock picks: "most villages will not have iron armor or tools and will be more encouraged to trade for
-	 * it". Only one realm in {@link #IRON_REALMS} sits near enough iron to arm its folk with it; the rest make do with
-	 * copper (bronze) plate and copper blades, mail and leather. Its rulers keep their iron either way.
+	 * it". A realm arms its folk with iron only if a great iron vein lies near its seat ({@link IronVeins}, Andy 2026-11-12:
+	 * "iron as planned"); the rest make do with leather, bronze (copper) and mail. Its rulers keep their iron either way.
 	 */
-	static boolean ironRich(Faction faction) {
-		return Math.floorMod(faction.id() * 0x9E3779B9L >>> 7, (long)IRON_REALMS) == 0;
+	static boolean ironRich(net.minecraft.world.entity.Mob folk, Faction faction) {
+		return folk.level() instanceof net.minecraft.server.level.ServerLevel level && IronVeins.near(level, faction);
 	}
 
-	/** Swaps {@code folk}'s iron plate and blades for copper ones, trims and dye kept. */
+	/** Swaps {@code folk}'s iron for what an ironless realm has: bronze (copper), mail or leather, piece by piece; copper blades. */
 	static void ironPoor(net.minecraft.world.entity.Mob folk) {
+		net.minecraft.util.RandomSource random = folk.getRandom();
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			ItemStack worn = folk.getItemBySlot(slot);
 			Item copper = IRON_TO_COPPER.get(worn.getItem());
 			if (copper != null) {
-				folk.setItemSlot(slot, worn.transmuteCopy(copper));
+				Item instead = copper;
+				if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+					float roll = random.nextFloat();
+					instead = roll < BRONZE_SHARE ? copper : roll < BRONZE_SHARE + MAIL_SHARE ? IRON_TO_MAIL.get(worn.getItem()) : IRON_TO_LEATHER.get(worn.getItem());
+				}
+				folk.setItemSlot(slot, worn.transmuteCopy(instead));
 			} else if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(worn.getItem()).getPath().startsWith("iron_")
 				&& slot == EquipmentSlot.MAINHAND) {
 				// another mod's iron weapon (a rapier, a glaive): a copper sword instead
@@ -234,6 +238,14 @@ public final class Outfits {
 			}
 		}
 	}
+
+	/** In a realm without iron, the share of iron armour pieces that become bronze, and mail (the rest leather). */
+	static final float BRONZE_SHARE = 0.5F, MAIL_SHARE = 0.35F;
+
+	private static final java.util.Map<Item, Item> IRON_TO_MAIL = java.util.Map.of(Items.IRON_HELMET, Items.CHAINMAIL_HELMET,
+		Items.IRON_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.IRON_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.IRON_BOOTS, Items.CHAINMAIL_BOOTS);
+	private static final java.util.Map<Item, Item> IRON_TO_LEATHER = java.util.Map.of(Items.IRON_HELMET, Items.LEATHER_HELMET,
+		Items.IRON_CHESTPLATE, Items.LEATHER_CHESTPLATE, Items.IRON_LEGGINGS, Items.LEATHER_LEGGINGS, Items.IRON_BOOTS, Items.LEATHER_BOOTS);
 
 	private static final java.util.Map<Item, Item> IRON_TO_COPPER = java.util.Map.of(Items.IRON_HELMET, Items.COPPER_HELMET,
 		Items.IRON_CHESTPLATE, Items.COPPER_CHESTPLATE, Items.IRON_LEGGINGS, Items.COPPER_LEGGINGS, Items.IRON_BOOTS, Items.COPPER_BOOTS,

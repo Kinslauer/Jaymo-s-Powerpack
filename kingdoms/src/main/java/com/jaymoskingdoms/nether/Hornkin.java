@@ -209,7 +209,29 @@ public class Hornkin extends Monster implements RangedAttackMob {
 		this.goalSelector.addGoal(0, new com.jaymoskingdoms.RangedTactics.RepositionGoal(this));
 		this.goalSelector.addGoal(1, new AdmireGoal());
 		if (this.kind == Kind.HURLER) {
-			this.goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, THROW_EVERY, THROW_RANGE));
+			// it lobs magma while it has any (MobAmmo), and comes in with its fists once it's out
+			this.goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, THROW_EVERY, THROW_RANGE) {
+				@Override
+				public boolean canUse() {
+					return com.jaymoskingdoms.MobAmmo.has(Hornkin.this, com.jaymoskingdoms.MobAmmo.Kind.BOMBS) && super.canUse();
+				}
+
+				@Override
+				public boolean canContinueToUse() {
+					return com.jaymoskingdoms.MobAmmo.has(Hornkin.this, com.jaymoskingdoms.MobAmmo.Kind.BOMBS) && super.canContinueToUse();
+				}
+			});
+			this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.1, false) {
+				@Override
+				public boolean canUse() {
+					return !com.jaymoskingdoms.MobAmmo.has(Hornkin.this, com.jaymoskingdoms.MobAmmo.Kind.BOMBS) && super.canUse();
+				}
+
+				@Override
+				public boolean canContinueToUse() {
+					return !com.jaymoskingdoms.MobAmmo.has(Hornkin.this, com.jaymoskingdoms.MobAmmo.Kind.BOMBS) && super.canContinueToUse();
+				}
+			});
 		} else {
 			this.goalSelector.addGoal(2, new MeleeAttackGoal(this, this.zombified() ? 1.0 : 1.15, false));
 		}
@@ -557,7 +579,11 @@ public class Hornkin extends Monster implements RangedAttackMob {
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power) {
-		if (!(this.level() instanceof ServerLevel level)) {
+		if (!(this.level() instanceof ServerLevel level) || !com.jaymoskingdoms.MobAmmo.spend(this, com.jaymoskingdoms.MobAmmo.Kind.BOMBS)) {
+			return;
+		}
+		// one of its own (not another Hornkin: the bomb spares them) where it would land: it holds the throw
+		if (com.jaymoskingdoms.Dynamite.friendNear(level, this, target, target.position(), MagmaBomb.RADIUS + 0.5, e -> e instanceof Hornkin)) {
 			return;
 		}
 		MagmaBomb bomb = new MagmaBomb(level, this);

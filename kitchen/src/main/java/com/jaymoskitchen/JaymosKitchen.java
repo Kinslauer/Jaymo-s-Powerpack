@@ -90,6 +90,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		com.jaymoskitchen.butchery.Skeletons.register();
 		// rats after food left out, and the traps for them
 		com.jaymoskitchen.rats.Rats.register();
 		com.jaymoskitchen.farm.Manure.register();
@@ -98,6 +99,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.LayingHens.register();
 		com.jaymoskitchen.stomach.Stomach.register();
 		com.jaymoskitchen.fresh.Freshness.register();
+		com.jaymoskitchen.fresh.Curing.register();
 		com.jaymoskitchen.fresh.Cheese.register();
 		com.jaymoskitchen.season.Seasons.register();
 		// (0.5.25) thirst and body heat (their attachments are class-loaded there; its block use goes before the kitchen's)

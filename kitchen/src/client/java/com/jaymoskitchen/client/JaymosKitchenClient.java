@@ -43,7 +43,11 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
+		// (Hardrock picks) a familiar farm animal shows its hearts
+		com.jaymoskitchen.client.farm.FamiliarityHud.register();
 		com.jaymoskitchen.client.fresh.FreshTooltip.register();
+		com.jaymoskitchen.client.tanning.HideTooltip.register();
+		com.jaymoskitchen.client.butchery.BoneStandRenderer.register();
 		// (0.5.43) low on water: faint veins at the screen edges
 		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();

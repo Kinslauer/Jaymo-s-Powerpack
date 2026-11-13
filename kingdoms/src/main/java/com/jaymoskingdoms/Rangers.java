@@ -126,7 +126,7 @@ public final class Rangers {
 
 	/** Whether {@code foe} is of the kind {@code kind}. */
 	static boolean isFoe(String kind, LivingEntity foe) {
-		String id = FoeLore.kind(foe);
+		String id = FoeStudy.kind(foe);
 		return switch (kind) {
 			case "undead" -> Restoration.undead(foe);
 			case "raiders" -> foe instanceof AbstractIllager || id.equals("ravager") || id.equals("witch") || id.equals("vex") || id.equals("evoker");

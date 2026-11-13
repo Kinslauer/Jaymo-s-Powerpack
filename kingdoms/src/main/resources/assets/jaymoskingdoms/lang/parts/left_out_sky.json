@@ -1,0 +1,19 @@
+{
+  "entity.minecraft.villager.jaymoskingdoms.cloudwright": "Cloudwright",
+  "title.jaymoskingdoms.haven.divine.king": "Warden of the Green",
+  "title.jaymoskingdoms.haven.divine.queen": "Warden of the Green",
+  "title.jaymoskingdoms.haven.divine.lord": "Keeper of the Well",
+  "title.jaymoskingdoms.haven.divine.lady": "Keeper of the Well",
+  "entity.minecraft.villager.jaymoskingdoms.sky_whaler": "Sky Whaler",
+  "entity.minecraft.villager.jaymoskingdoms.ambrosia_farmer": "Ambrosia Farmer",
+  "talk.jaymoskingdoms.sky_usurper.claim.1": "This hall wants a stronger hand than yours. I've come to take it.",
+  "talk.jaymoskingdoms.sky_usurper.claim.2": "I didn't climb all this way to bow. Step down, or be put down.",
+  "talk.jaymoskingdoms.sky_usurper.claim.3": "A castle in the clouds, and a soft lord in it. That ends today.",
+  "talk.jaymoskingdoms.sky_usurper.answer.1": "Wardens! Throw this upstart off my wall!",
+  "talk.jaymoskingdoms.sky_usurper.answer.2": "You'll find the fall from here is a long one.",
+  "talk.jaymoskingdoms.sky_usurper.answer.3": "Another one who thinks a seat is taken with a sword. To me, wardens!",
+  "talk.jaymoskingdoms.sky_usurper.taken.1": "The seat is mine. Kneel, all of you, and keep your places.",
+  "talk.jaymoskingdoms.sky_usurper.taken.2": "The old lord is done. This castle answers to me now.",
+  "talk.jaymoskingdoms.sky_usurper.failed.1": "Not today... not today.",
+  "talk.jaymoskingdoms.sky_usurper.failed.2": "Enough. Keep your castle."
+}

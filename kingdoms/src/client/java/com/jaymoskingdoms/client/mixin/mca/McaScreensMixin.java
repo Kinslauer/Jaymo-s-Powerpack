@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.jaymoskingdoms.Professions;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
  * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.29) The main page
  * offers Quests. (0.7.454) The Interact page offers Ask the Way, which opens a page of places ({@code McaWayPageMixin}).
+ * The Interact page's Follow Me, Stay Here and Go About Your Day are replaced by Orders, which opens the orders screen
+ * ({@code Followers}) for that villager.
  */
 @Mixin(MCAScreens.class)
 abstract class McaScreensMixin {
@@ -43,7 +46,10 @@ abstract class McaScreensMixin {
 	private static final String WAY = "gui.button.way", WAY_PAGE = "way";
 	private static final String[] PLACES = {"healer", "butcher", "smith", "tailor", "tavern", "stables", "ruler", "changer", "emeralds"};
 	/** The Interact row Ask the Way goes on: under MCA's own (gift ... professions on row 8). */
-	private static final int WAY_ROW = 9;
+	private static final int WAY_ROW = 8;
+	/** MCA's Follow Me, Stay Here and Go About Your Day, which Orders replaces; the row Orders goes on; the last row of MCA's own that stays put. */
+	private static final String FOLLOW = "gui.button.follow", STAY = "gui.button.stay", MOVE = "gui.button.move", ORDERS = "gui.button.orders";
+	private static final int ORDERS_ROW = 3, OWN_ROWS_END = 4;
 
 	/** How many rows of buttons MCA's own Professions page has. */
 	private static final int MCA_ROWS = 3;
@@ -101,7 +107,23 @@ abstract class McaScreensMixin {
 		if (interact == null || Arrays.stream(interact).anyMatch(b -> b.identifier().equals(WAY))) {
 			return;
 		}
-		List<MCAButton> all = new ArrayList<>(Arrays.asList(interact));
+		// Orders takes the place of MCA's Follow Me, Stay Here and Go About Your Day (rows 3 and 4): one button that opens the
+		// orders screen (McaWayPageMixin), and what lay below moves up a row
+		List<MCAButton> all = new ArrayList<>();
+		for (MCAButton b : interact) {
+			String id = b.identifier();
+			if (id.equals(FOLLOW) || id.equals(STAY) || id.equals(MOVE)) {
+				continue;
+			}
+			JsonObject o = Resources.GSON.toJsonTree(b).getAsJsonObject();
+			int row = o.get("row").getAsInt();
+			if (row > OWN_ROWS_END) {
+				o.addProperty("row", row - 1);
+			}
+			all.add(Resources.GSON.fromJson(o, MCAButton.class));
+		}
+		all.addAll(Arrays.asList(Resources.GSON.fromJson("[{\"identifier\":\"" + ORDERS + "\",\"x\":-90,\"y\":10,\"row\":" + ORDERS_ROW
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}]", MCAButton[].class)));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson("[{\"identifier\":\"" + WAY + "\",\"x\":-90,\"y\":10,\"row\":" + WAY_ROW
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":false,\"targetServer\":false,\"constraints\":\"\"}]", MCAButton[].class)));
 		// (0.7.454) and the actions moved off the talk menu under it (InteractActions; McaActionButtonsMixin shows only those

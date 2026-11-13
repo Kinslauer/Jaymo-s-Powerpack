@@ -43,7 +43,9 @@ public final class Fleet {
 		SLOOP, BRIGANTINE, FRIGATE, COG,
 		/** (0.7.112) Jaki's ships ({@link JakiShips}): a pirate's galleon and drakkar, a navy's war trireme, a merchant's cargo ship and trader. */
 		GALLEON(JakiShips.Design.GALLEON), DRAKKAR(JakiShips.Design.DRAKKAR), WAR_TRIREME(JakiShips.Design.WAR_TRIREME),
-		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER);
+		CARGO_SHIP(JakiShips.Design.CARGO_SHIP), TRADER(JakiShips.Design.TRADER),
+		/** A realm's fishing smack ({@code Fishers}), drawn as her kit is ({@link ShipKits.Kind#FISHING_SMACK}). */
+		SMACK;
 
 		/** Her design, if she's one of Jaki's (null: one of ours, drawn as the kits are). */
 		final JakiShips.@Nullable Design jaki;
@@ -89,6 +91,7 @@ public final class Fleet {
 		switch (rig) {
 			case SLOOP -> cells.addAll(ShipKits.design(ShipKits.Kind.SLOOP));
 			case BRIGANTINE -> cells.addAll(ShipKits.design(ShipKits.Kind.BRIG));
+			case SMACK -> cells.addAll(ShipKits.design(ShipKits.Kind.FISHING_SMACK));
 			case COG -> {
 				// a sloop's hull with no guns, and more hold
 				for (ShipKits.Cell c : ShipKits.design(ShipKits.Kind.SLOOP)) {

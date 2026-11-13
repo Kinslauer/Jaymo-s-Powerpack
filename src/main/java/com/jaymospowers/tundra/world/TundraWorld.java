@@ -20,7 +20,8 @@ import net.minecraft.world.level.block.Blocks;
  * <ul>
  * <li>{@link #TUNDRA}: bare old rock. Deepslate from bedrock to the surface, crossed by greenstone belts (strips of
  * smooth basalt carrying banded iron), thin grass and yellow moss, boulders, lichen, no trees and no snowfall.</li>
- * <li>{@link #LICHEN_WOODLAND}: the belt between the tundra and everything else, where spruce grows dwarfed.</li>
+ * <li>{@link #LICHEN_WOODLAND}: the tundra's warmer rim, and the dry edge of the snowy taiga where its spruce thins and
+ * grows dwarfed (the plan's "band of snowy taiga cells", Andy 2026-11-12: "Yes" to moving it there).</li>
  * </ul>
  * They take over the driest part of what was Snowy Plains ({@link #placing}), so new chunks only. The ground itself is
  * the material rule {@code jaymospowers:tundra}, run from our copy of {@code minecraft:overworld}; the rest is
@@ -30,7 +31,9 @@ public final class TundraWorld {
 	// ---- tuning ----
 	/** Snowy Plains drier than this (humidity, in 1/10000) becomes tundra or woodland; vanilla's driest cell ends here. */
 	static final long DRY_BELOW = -3500L;
-	/** Past the dry cell, this much more humidity is still lichen woodland before Snowy Plains begins. */
+	/** Snowy Taiga's driest edge (humidity, 1/10000): vanilla's frozen row turns from Snowy Plains to Snowy Taiga here. */
+	static final long TAIGA_FROM = 1000L;
+	/** This much of Snowy Taiga's dry edge is lichen woodland: the open, stunted forest where the taiga thins out. */
 	static final long WOODLAND_BAND = 1000L;
 	/** In the dry cell, colder than this (temperature, 1/10000) is tundra; the warmer rim is lichen woodland. */
 	static final long TUNDRA_COLDER_THAN = -6000L;
@@ -55,6 +58,20 @@ public final class TundraWorld {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("dwarfed_spruce"), TundraFeatures.DwarfSpruce.CODEC);
 	}
 
+	private static boolean placed;
+
+	/**
+	 * From here on the Overworld's biome list holds the two tundra biomes ({@link #placing}). Called from the server and
+	 * client entrypoints, which run after every mod's main entrypoint, never from {@link #init}: once the list asks for
+	 * them, every registry bootstrap must have them, and TaCZ builds {@code VanillaRegistries.createWorldLookup()} in
+	 * its main entrypoint, where only vanilla's biomes exist ("No value registered for key jaymospowers:tundra", the
+	 * game crashed on start). A world's own registries are loaded later, from the data files, so the biomes still
+	 * generate. The same as the demon realm's Nether biomes ({@code ZFighterDemonRealm.addBiomes}).
+	 */
+	public static void place() {
+		placed = true;
+	}
+
 	/** A tundra block by its path, or {@code fallback} while that block isn't registered. */
 	static Block block(String path, Block fallback) {
 		Block found = BuiltInRegistries.BLOCK.getValue(JaymosPowers.id(path));
@@ -63,15 +80,28 @@ public final class TundraWorld {
 
 	/**
 	 * Wraps the Overworld biome list as it is built: each Snowy Plains cell in the dry end of the frozen row is handed
-	 * out again as tundra (the cold, dry core), lichen woodland (its warmer rim, and a band on its humid side) and what
-	 * is left of Snowy Plains. So the tundra is wrapped in woodland wherever it would have met Snowy Plains or Plains.
+	 * out again as tundra (the cold, dry core) and lichen woodland (its warmer rim), and the dry edge of each Snowy Taiga
+	 * cell in the frozen row becomes lichen woodland, so the woodland runs along the taiga where it thins out.
+	 * Until {@link #place} the list is left as vanilla's.
 	 */
 	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> placing(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out) {
+		if (!placed) {
+			return out;
+		}
 		return pair -> {
 			Climate.ParameterPoint at = pair.getFirst();
 			Climate.Parameter hum = at.humidity(), temp = at.temperature();
-			if (pair.getSecond() != Biomes.SNOWY_PLAINS || temp.max() > FROZEN_BELOW) {
+			if (temp.max() > FROZEN_BELOW || pair.getSecond() != Biomes.SNOWY_PLAINS && pair.getSecond() != Biomes.SNOWY_TAIGA) {
 				out.accept(pair);
+				return;
+			}
+			if (pair.getSecond() == Biomes.SNOWY_TAIGA) {
+				if (hum.min() == TAIGA_FROM && hum.max() > TAIGA_FROM + WOODLAND_BAND) {
+					out.accept(Pair.of(with(at, temp, new Climate.Parameter(TAIGA_FROM, TAIGA_FROM + WOODLAND_BAND)), LICHEN_WOODLAND));
+					out.accept(Pair.of(with(at, temp, new Climate.Parameter(TAIGA_FROM + WOODLAND_BAND, hum.max())), Biomes.SNOWY_TAIGA));
+				} else {
+					out.accept(pair);
+				}
 				return;
 			}
 			if (hum.max() <= DRY_BELOW) {
@@ -81,9 +111,6 @@ public final class TundraWorld {
 				} else {
 					out.accept(Pair.of(at, temp.max() <= TUNDRA_COLDER_THAN ? TUNDRA : LICHEN_WOODLAND));
 				}
-			} else if (hum.min() == DRY_BELOW && hum.max() > DRY_BELOW + WOODLAND_BAND) {
-				out.accept(Pair.of(with(at, temp, new Climate.Parameter(DRY_BELOW, DRY_BELOW + WOODLAND_BAND)), LICHEN_WOODLAND));
-				out.accept(Pair.of(with(at, temp, new Climate.Parameter(DRY_BELOW + WOODLAND_BAND, hum.max())), Biomes.SNOWY_PLAINS));
 			} else {
 				out.accept(pair);
 			}

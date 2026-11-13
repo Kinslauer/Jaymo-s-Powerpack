@@ -19,8 +19,24 @@ public final class GrizzlyRenderer extends MobRenderer<Grizzly, GrizzlyRenderer.
 		float actionAge;
 	}
 
+	/** The snow giant (SnowGiant): the same body in a white coat, drawn this much bigger again. */
+	static final float SNOW_GIANT_SCALE = 2.0F;
+	private static final Identifier SNOW_GIANT_TEXTURE = JaymosKingdoms.id("textures/entity/wild/snow_giant.png");
+	private final Identifier texture;
+	private final float scale;
+
 	public GrizzlyRenderer(EntityRendererProvider.Context context) {
-		super(context, new GrizzlyModel(GrizzlyModel.createBodyLayer().bakeRoot()), 1.1F);
+		this(context, TEXTURE, SCALE);
+	}
+
+	private GrizzlyRenderer(EntityRendererProvider.Context context, Identifier texture, float scale) {
+		super(context, new GrizzlyModel(GrizzlyModel.createBodyLayer().bakeRoot()), 1.1F * scale / SCALE);
+		this.texture = texture;
+		this.scale = scale;
+	}
+
+	public static GrizzlyRenderer snowGiant(EntityRendererProvider.Context context) {
+		return new GrizzlyRenderer(context, SNOW_GIANT_TEXTURE, SNOW_GIANT_SCALE);
 	}
 
 	@Override
@@ -37,11 +53,11 @@ public final class GrizzlyRenderer extends MobRenderer<Grizzly, GrizzlyRenderer.
 
 	@Override
 	protected void scale(State state, PoseStack poseStack) {
-		poseStack.scale(SCALE, SCALE, SCALE);
+		poseStack.scale(this.scale, this.scale, this.scale);
 	}
 
 	@Override
 	public Identifier getTextureLocation(State state) {
-		return TEXTURE;
+		return this.texture;
 	}
 }

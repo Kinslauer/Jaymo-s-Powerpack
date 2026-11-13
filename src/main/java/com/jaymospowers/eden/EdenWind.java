@@ -26,6 +26,8 @@ public final class EdenWind {
 	public static final double PUSH_GROUND = 0.008, PUSH_AIR = 0.022;
 	/** The push per tick on thrown and shot things and on dropped items. */
 	public static final double PUSH_LOOSE = 0.012;
+	/** Wind users are pushed this many times harder: the valley wind is theirs, and takes them with it. */
+	public static final double WIND_KIN = 2.5;
 	/** Ticks for the wind to swing once round the compass (five days). */
 	public static final long TURN_TICKS = 120000L;
 	/** Loose things are pushed within this many blocks of a player. */

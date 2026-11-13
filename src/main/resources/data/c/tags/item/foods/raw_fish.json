@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "jaymospowers:carp",
+    "jaymospowers:pike",
+    "jaymospowers:perch",
+    "jaymospowers:zander",
+    "jaymospowers:bream",
+    "jaymospowers:tench",
+    "jaymospowers:catfish",
+    "jaymospowers:chub",
+    "jaymospowers:grayling",
+    "jaymospowers:whitefish",
+    "jaymospowers:burbot",
+    "jaymospowers:pollock",
+    "jaymospowers:sea_bass",
+    "jaymospowers:halibut",
+    "jaymospowers:catshark",
+    "jaymospowers:dogfish",
+    "jaymospowers:eel",
+    "jaymospowers:trout",
+    "jaymospowers:char",
+    "jaymospowers:mackerel",
+    "jaymospowers:herring",
+    "jaymospowers:swordfish"
+  ]
+}

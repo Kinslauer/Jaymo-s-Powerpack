@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.fresh;
 
+import com.jaymoskitchen.fresh.Curing;
 import com.jaymoskitchen.fresh.Freshness;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -24,7 +25,9 @@ public final class FreshTooltip {
 				lines.add(Component.translatable("tooltip.jaymoskitchen.fresh." + key).withStyle(colour));
 			}
 			if (stack.has(Freshness.PRESERVED)) {
-				lines.add(Component.translatable("tooltip.jaymoskitchen.fresh.preserved").withStyle(ChatFormatting.GOLD));
+				String how = stack.get(Curing.CURED);
+				lines.add(Component.translatable(how == null ? "tooltip.jaymoskitchen.fresh.preserved" : "tooltip.jaymoskitchen.fresh.cured." + how)
+					.withStyle(ChatFormatting.GOLD));
 			}
 		});
 	}

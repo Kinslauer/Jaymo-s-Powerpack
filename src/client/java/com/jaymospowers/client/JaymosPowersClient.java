@@ -52,12 +52,16 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.armory.PatronWeapons.VIEWER = () -> Minecraft.getInstance().player;
 		// (0.17.67) after every mod's main entrypoint (TaCZ's vanilla registry lookup), for singleplayer worlds
 		com.jaymospowers.power.zfighter.ZFighterDemonRealm.addBiomes();
+		// (and the tundra's place in the Overworld, for the same reason)
+		com.jaymospowers.tundra.world.TundraWorld.place();
+		com.jaymospowers.frost.IceCaves.place();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
 		com.jaymospowers.client.eden.EdenPlantsClient.init();
+		com.jaymospowers.client.eden.EdenChestClient.init();
 		com.jaymospowers.client.eden.DiskwingClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
@@ -70,6 +74,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.mode", InputConstants.KEY_Z, CATEGORY));
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.BlockCluster.TYPE, BlockClusterRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.rough.HotAirBalloon.TYPE,
+			com.jaymospowers.client.rough.HotAirBalloonRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.blood.BloodClient.init();
 		// (0.20.51) Subtle Effects' skeleton bone sprites off, and again now and then (the server's config syncs on join)
@@ -85,6 +91,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.wounds.WoundMarksLayer.register();
 		com.jaymospowers.client.blood.Flies.register();
 		com.jaymospowers.client.blood.WeaponDrips.register();
+		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
@@ -102,6 +109,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.combat.GuardClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
+		com.jaymospowers.client.tundra.SnowMote.register();
+		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
 		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();

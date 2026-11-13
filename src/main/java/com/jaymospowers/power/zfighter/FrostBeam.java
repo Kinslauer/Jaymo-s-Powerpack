@@ -85,6 +85,14 @@ public final class FrostBeam {
 	public static final int GAZE_TICKS = 20, GAZE_COLOR = 0xD0101C;
 	public static final double EYE_OUT = 0.3, EYE_SIDE = 0.11;
 
+	/**
+	 * On a Frost-born while their beam is out, for every client: the arm the beam leaves points along it (Andy,
+	 * 2026-11-12: "use the proper modeling to get that done"; {@code RaceHoldClient}, {@code FirstPersonArms}).
+	 */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> BEAMING = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		com.jaymospowers.JaymosPowers.id("frost_beaming"), builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
+
 	private static final boolean KINGDOMS = FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 	/** When each player last hurt something with it (game time). Not saved: a restart only clears a few seconds. */
 	private static final Map<UUID, Long> LAST = new HashMap<>();
@@ -159,7 +167,13 @@ public final class FrostBeam {
 			if (player == null || !player.isAlive() || player.isSpectator() || ZFighterLineage.of(player) != ZFighterLineage.FROST
 				|| player.level().getGameTime() > on.getValue()) {
 				it.remove();
+				if (player != null && player.hasAttached(BEAMING)) {
+					player.removeAttached(BEAMING);
+				}
 				continue;
+			}
+			if (!player.hasAttached(BEAMING)) {
+				player.setAttached(BEAMING, Boolean.TRUE);
 			}
 			beam(player, false);
 		}

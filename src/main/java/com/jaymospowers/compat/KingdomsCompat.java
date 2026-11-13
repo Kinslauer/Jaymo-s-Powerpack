@@ -284,6 +284,37 @@ public final class KingdomsCompat {
 		}
 	}
 
+	private static Method claimedBy;
+	private static boolean claimLooked;
+
+	/**
+	 * Whether {@code pos} lies on land a Kingdoms faction holds (a claimed chunk of a standing kingdom: {@code Factions.at}).
+	 * Things that eat or reshape the ground on their own (the sprouted lichen) leave claimed land alone. False without
+	 * Kingdoms, or if the call fails: with nobody holding land there is nothing to protect.
+	 */
+	public static boolean claimed(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
+		if (!LOADED || level == null) {
+			return false;
+		}
+		if (!claimLooked) {
+			claimLooked = true;
+			try {
+				claimedBy = Class.forName("com.jaymoskingdoms.Factions").getMethod("at", net.minecraft.server.MinecraftServer.class,
+					net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				claimedBy = null;
+			}
+		}
+		if (claimedBy == null) {
+			return false;
+		}
+		try {
+			return claimedBy.invoke(null, level.getServer(), level, pos) != null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	private static Method blightNearest, blightEase;
 	private static boolean blightLooked;
 
@@ -332,6 +363,105 @@ public final class KingdomsCompat {
 			} catch (ReflectiveOperationException | RuntimeException e) {
 				// (nothing eased)
 			}
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle payLocal;
+	private static boolean payLocalLooked;
+
+	/**
+	 * (Track D of docs/Plan-fishing.md) Pay {@code player} {@code milli} thousandths of an emerald for fish sold at {@code at},
+	 * in the coin of the place (Kingdoms' {@code FisherTalk.pay}); what it came to, or null without Kingdoms (the caller pays
+	 * emeralds).
+	 */
+	public static net.minecraft.network.chat.@Nullable Component payLocal(net.minecraft.server.level.ServerPlayer player,
+		net.minecraft.core.BlockPos at, long milli) {
+		if (!LOADED) {
+			return null;
+		}
+		if (!payLocalLooked) {
+			payLocalLooked = true;
+			try {
+				payLocal = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymoskingdoms.FisherTalk"), "pay",
+					java.lang.invoke.MethodType.methodType(net.minecraft.network.chat.Component.class, net.minecraft.server.level.ServerPlayer.class,
+						net.minecraft.core.BlockPos.class, long.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				payLocal = null;
+			}
+		}
+		if (payLocal == null) {
+			return null;
+		}
+		try {
+			return (net.minecraft.network.chat.Component) payLocal.invoke(player, at, milli);
+		} catch (Throwable t) {
+			return null;
+		}
+	}
+
+	private static Method gunMan, gunManning, gunLeave, gunTick;
+	private static boolean gunLooked;
+
+	private static boolean guns() {
+		if (!LOADED) {
+			return false;
+		}
+		if (!gunLooked) {
+			gunLooked = true;
+			try {
+				Class<?> c = Class.forName("com.jaymoskingdoms.sailing.MeldedGuns");
+				Class<?> p = net.minecraft.server.level.ServerPlayer.class;
+				gunMan = c.getMethod("man", p, double.class);
+				gunManning = c.getMethod("manning", p);
+				gunLeave = c.getMethod("leave", p);
+				gunTick = c.getMethod("tick", p);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				gunMan = null;
+			}
+		}
+		return gunMan != null;
+	}
+
+	/**
+	 * Rivet melds into the cannon {@code player} looks at within {@code reach} (Kingdoms' {@code MeldedGuns}, a gun on land or
+	 * aboard a ship). False without Kingdoms or when there's no gun there.
+	 */
+	public static boolean meldGun(net.minecraft.server.level.ServerPlayer player, double reach) {
+		try {
+			return guns() && Boolean.TRUE.equals(gunMan.invoke(null, player, reach));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Whether Rivet is melded into a cannon. */
+	public static boolean inGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			return guns() && Boolean.TRUE.equals(gunManning.invoke(null, player));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** Rivet pours out of the cannon he's melded into. */
+	public static void leaveGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			if (guns()) {
+				gunLeave.invoke(null, player);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (nothing to let go of)
+		}
+	}
+
+	/** Every tick Rivet is changed: the cannon he's melded into is laid, fired and loaded. */
+	public static void workGun(net.minecraft.server.level.ServerPlayer player) {
+		try {
+			if (guns()) {
+				gunTick.invoke(null, player);
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// (an older Kingdoms: no guns to meld into)
 		}
 	}
 }

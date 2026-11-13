@@ -68,6 +68,14 @@ public class BrainBlock extends Block {
 		if (state.getValue(ACTIVE) || random.nextFloat() >= DISCHARGE_CHANCE) {
 			return;
 		}
+		discharge(state, level, pos, random);
+	}
+
+	/** Lets the block go now (as a random tick does, or a bolt that strikes near it makes it): lit, the shock, and sometimes a bolt for show. */
+	public void discharge(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		if (state.getValue(ACTIVE)) {
+			return;
+		}
 		level.setBlock(pos, state.setValue(ACTIVE, true), Block.UPDATE_CLIENTS);
 		level.scheduleTick(pos, this, LIT_TICKS);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 12, 0.6, 0.6, 0.6, 0.15);

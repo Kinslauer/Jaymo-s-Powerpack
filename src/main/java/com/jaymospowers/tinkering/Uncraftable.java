@@ -5,6 +5,7 @@ import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.8.124) Andy: no craftable diamond weapons. Vanilla's and Armory's recipes are switched off in data
@@ -115,8 +116,21 @@ public final class Uncraftable {
 		return recipe.value().getType() == RecipeType.CRAFTING && (path.endsWith("_planks") || path.contains("_planks_from_"));
 	}
 
+	/** What a grid recipe makes, or null for any other recipe (Tool Station builds drop the grid recipes of what they make). */
+	static @Nullable String result(Recipe<?> recipe) {
+		net.minecraft.world.item.ItemStackTemplate result = recipe instanceof net.minecraft.world.item.crafting.ShapedRecipe shaped
+			? ((com.jaymospowers.tinkering.mixin.GridShapedResultAccessor)shaped).jaymospowers$result()
+			: recipe instanceof net.minecraft.world.item.crafting.ShapelessRecipe shapeless
+				? ((com.jaymospowers.tinkering.mixin.GridShapelessResultAccessor)shapeless).jaymospowers$result() : null;
+		return result == null ? null : result.typeHolder().unwrapKey().map(k -> k.identifier().toString()).orElse(null);
+	}
+
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
+		String made = result(recipe.value());
+		if (made != null && ToolBuilds.MADE.contains(made)) {
+			return false;
+		}
 		return !planks(recipe) && !RECIPES.contains(id) && !FORGED.contains(id) && !WOODEN.contains(id) && !FORGED_TOOLS.contains(id) && !TANNED.contains(id) && !HORSEMAN.contains(id) && !TACZ.contains(id) && !RPG_SERIES.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

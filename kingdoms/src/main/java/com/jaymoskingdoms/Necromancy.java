@@ -353,6 +353,51 @@ public final class Necromancy {
 		return true;
 	}
 
+	/**
+	 * Speak with Dead (Andy, 2026-11-12; after the old rite of that name): a Death Sorcerer asks the body they look at, and
+	 * the dead answer. Who they were, how they died, and who killed them, as they knew them ({@link DeadNames}); from then on
+	 * the caster knows the dead one's name. Only a Death Sorcerer can cast it.
+	 */
+	static boolean speakWithDead(ServerLevel level, Player player) {
+		if (!necromancer(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.death.speak_not_yours").withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		Entity corpse = corpseInSight(player, level, WHISPER_REACH);
+		if (corpse == null) {
+			return false;
+		}
+		java.util.UUID id = null;
+		String owner = KitchenCompat.corpseOwner(corpse);
+		if (owner != null) {
+			try {
+				id = java.util.UUID.fromString(owner);
+			} catch (IllegalArgumentException e) {
+				id = null;
+			}
+		}
+		if (id == null) {
+			net.minecraft.nbt.CompoundTag look = KitchenCompat.lookTag(corpse);
+			id = look == null ? null : look.read("UUID", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
+		}
+		DeadNames.Dead dead = id == null ? null : DeadNames.of(id);
+		level.sendParticles(ParticleTypes.SOUL, corpse.getX(), corpse.getY() + 0.5, corpse.getZ(), 20, 0.3, 0.4, 0.3, 0.02);
+		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.2F, 0.45F);
+		if (dead == null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.death.speak_silent").withStyle(ChatFormatting.DARK_PURPLE));
+			return true;
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.death.speak_name", dead.name()).withStyle(ChatFormatting.DARK_PURPLE));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.death.speak_how", dead.how()).withStyle(ChatFormatting.DARK_PURPLE));
+		if (!dead.killer().getString().isEmpty()) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.death.speak_killer", dead.killer()).withStyle(ChatFormatting.DARK_PURPLE));
+		}
+		if (player instanceof ServerPlayer sp) {
+			Introductions.learn(sp, id);
+		}
+		return true;
+	}
+
 	/** Death's Door: a ward for a while; the next time you fall, you get straight back up. */
 	static boolean deathsDoor(ServerLevel level, Player player, float power) {
 		if (!(player instanceof ServerPlayer sp)) {

@@ -185,6 +185,8 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			this.targetSize = this.baseSize;
 			if (!this.stain) {
 				this.lifetime = Math.max(FADE + 20, Math.round(this.lifetime * this.surface.life * BloodSettings.amount().life));
+			} else {
+				this.lifetime = this.age + this.drawnLife(life);
 			}
 			this.soakThrough = BloodSurfaces.soaksThrough(level, x, y, z);
 		} else {
@@ -226,6 +228,18 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	}
 
 	/** (0.17.182) The server grew this stain (more blood fell on it): its new size, age and the ticks it has left. */
+	/**
+	 * How long a lasting stain with {@code life} ticks left is drawn here: the surface's share (glass and ice wipe off
+	 * soon, earth drinks it, cloth keeps it) and the blood setting's. Only the drawing: the server keeps the stain for
+	 * tracking and blood magic all the same. A stain being drawn dry ({@link #QUICK_FADE_UNDER}) keeps its own time.
+	 */
+	private int drawnLife(int life) {
+		if (life < QUICK_FADE_UNDER || this.surface == null) {
+			return life;
+		}
+		return Math.max(FADE + 20, Math.round(life * this.surface.life * BloodSettings.amount().life));
+	}
+
 	void restain(float scale, int age, int life) {
 		this.targetSize = SIZE * scale;
 		if (this.targetSize > this.baseSize) {
@@ -233,7 +247,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 			this.baseSize = this.targetSize;
 		}
 		this.age = Math.max(this.age, age);
-		this.lifetime = this.age + life;
+		this.lifetime = this.age + this.drawnLife(life);
 		// (0.19.62) drawn dry: it fades over the little time it has left, not all at once (fresh blood on it: as before)
 		this.quickFade = life < QUICK_FADE_UNDER ? Math.max(1, life) : 0;
 	}

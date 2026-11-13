@@ -45,6 +45,7 @@ public final class Panning {
 		SLUICE = block("sluice", BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F).sound(SoundType.WOOD).ignitedByLava()
 			.noOcclusion(), SluiceBlock::new);
 		CaveIns.init();
+		VeinRumours.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(PROSPECTOR_PICK);
 			output.accept(PAN);

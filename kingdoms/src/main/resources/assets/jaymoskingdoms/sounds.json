@@ -1902,5 +1902,88 @@
 				"name": "jaymoskingdoms:foe/warlord/stab"
 			}
 		]
+	},
+	"impaler.attack": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.attack",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_attack_0",
+			"jaymoskingdoms:impaler/impaler_attack_1",
+			"jaymoskingdoms:impaler/impaler_attack_2"
+		]
+	},
+	"impaler.death": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.death",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_death_0"
+		]
+	},
+	"impaler.hurt": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.hurt",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_hurt_0",
+			"jaymoskingdoms:impaler/impaler_hurt_1",
+			"jaymoskingdoms:impaler/impaler_hurt_2"
+		]
+	},
+	"impaler.idle": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.idle",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_idle_0",
+			"jaymoskingdoms:impaler/impaler_idle_1",
+			"jaymoskingdoms:impaler/impaler_idle_2",
+			"jaymoskingdoms:impaler/impaler_idle_3"
+		]
+	},
+	"impaler.scream": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.scream",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_scream_0",
+			"jaymoskingdoms:impaler/impaler_scream_1",
+			"jaymoskingdoms:impaler/impaler_scream_2"
+		]
+	},
+	"impaler.spikes": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.spikes",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_spikes_0",
+			"jaymoskingdoms:impaler/impaler_spikes_1",
+			"jaymoskingdoms:impaler/impaler_spikes_2",
+			"jaymoskingdoms:impaler/impaler_spikes_3"
+		]
+	},
+	"impaler.concussion": {
+		"subtitle": "subtitles.jaymoskingdoms.impaler.concussion",
+		"sounds": [
+			"jaymoskingdoms:impaler/impaler_concussion"
+		]
+	},
+	"effect.concussion.buzz": {
+		"subtitle": "subtitles.jaymoskingdoms.effect.concussion.buzz",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:effect/concussion_buzz",
+				"stream": true
+			}
+		]
+	},
+	"item.spike_drill.start": {
+		"subtitle": "subtitles.jaymoskingdoms.item.spike_drill.start",
+		"sounds": [
+			"jaymoskingdoms:item/spike_drill/drilling_start"
+		]
+	},
+	"item.spike_drill.dig": {
+		"subtitle": "subtitles.jaymoskingdoms.item.spike_drill.dig",
+		"sounds": [
+			"jaymoskingdoms:item/spike_drill/dig_0",
+			"jaymoskingdoms:item/spike_drill/dig_1",
+			"jaymoskingdoms:item/spike_drill/dig_2"
+		]
+	},
+	"item.spike_drill.stop": {
+		"subtitle": "subtitles.jaymoskingdoms.item.spike_drill.stop",
+		"sounds": [
+			"jaymoskingdoms:item/spike_drill/drilling_stopped"
+		]
 	}
 }

@@ -151,7 +151,9 @@ public final class SurvivalSkill {
 			Skills.grant(sp, Skills.Pillar.SURVIVAL, Math.max(1, (int) (damageTaken / XP_DAMAGE_PER)));
 		});
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			if (!(entity instanceof ServerPlayer sp) || Skills.rank(sp, Skills.Perk.LAST_STAND) == 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			if (!(entity instanceof ServerPlayer sp) || Skills.rank(sp, Skills.Perk.LAST_STAND) == 0 || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+				// (Andy, 2026-11-12) never one who gave up where they lay (Powers' downed death, let through)
+				|| sp.entityTags().contains("jaymospowers.finishing")) {
 				return true;
 			}
 			long now = sp.level().getGameTime();

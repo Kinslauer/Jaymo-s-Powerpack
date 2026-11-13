@@ -119,6 +119,8 @@ public final class Sorcery {
 	static final int BLOOD_WITCH_DAYS = 4;
 	/** A kingdom with this much in its treasury keeps a second wizard. */
 	static final long SECOND_WIZARD_TREASURY = 300;
+	/** A kingdom that believes in magic keeps at least this many court casters (wizards, or a tyrant's necromancers). */
+	static final int COURT_CASTERS = 2;
 	/** The share of kingdoms that hold with magic at all (the rest keep no court mage). */
 	static final float MAGIC_BELIEF = 0.6F;
 	/** How often the roster is checked for them (ticks). */
@@ -318,9 +320,13 @@ public final class Sorcery {
 				return 0;
 			}
 			boolean tyrant = Tempers.of(f) == Tempers.Temper.TYRANT;
+			// (Andy, 2026-11-12, on casters marching to war: "they should have at least two if they do send one so that they
+			// are never without. richer kingdoms will have more") two at the least, a third once prosperous, a fourth wealthy
+			int court = COURT_CASTERS + (Wealth.atLeast(server, f, Wealth.Tier.PROSPEROUS) || f.treasury() >= SECOND_WIZARD_TREASURY ? 1 : 0)
+				+ (Wealth.atLeast(server, f, Wealth.Tier.WEALTHY) ? 1 : 0);
 			return switch (role) {
-				case NECROMANCER -> tyrant ? 1 : 0;
-				case WIZARD -> (tyrant ? 0 : 1) + (f.treasury() >= SECOND_WIZARD_TREASURY ? 1 : 0);
+				case NECROMANCER -> tyrant ? court : 0;
+				case WIZARD -> tyrant ? 0 : court;
 				default -> 0;
 			};
 		}

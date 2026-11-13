@@ -110,7 +110,15 @@ public final class Havens {
 
 	/** ... and {@code always}: a haven whatever the share (a ChoiceTheorem village's, {@link #ctov}). */
 	private static String draw(ServerLevel level, Faction f, boolean always) {
-		if (f.fallen() || f.type() == FactionType.BARBARIAN || Tempers.of(f) == Tempers.Temper.PURIST) {
+		if (f.fallen() || f.type() == FactionType.BARBARIAN) {
+			return NONE;
+		}
+		// (Andy's ocean pick-list: "Tideborn islands") a settlement out on an island, one only a boat reaches, is
+		// always a Tideborn haven
+		if (com.jaymoskingdoms.seas.Offshore.island(level, f.seat().getX(), f.seat().getZ())) {
+			return Heritage.Kind.TIDEBORN.key();
+		}
+		if (Tempers.of(f) == Tempers.Temper.PURIST) {
 			return NONE;
 		}
 		long mix = (f.seat().asLong() * 0x9E3779B97F4A7C15L) ^ ((long)f.id() << 21);
@@ -242,6 +250,14 @@ public final class Havens {
 		return !of(server, f).isEmpty();
 	}
 
+	/**
+	 * {@code f} is a sky village, a haven of the Divine-born ({@link SkyHavens}): the one blood the land-drawn havens never take,
+	 * so a haven that holds it is the sky's. Its halfway folk (Dawnborn) belong in it as well, and no human is turned away.
+	 */
+	static boolean sky(MinecraftServer server, @Nullable Faction f) {
+		return Heritage.Kind.DIVINE.key().equals(of(server, f));
+	}
+
 	/** The haven whose land {@code pos} is on, or null. */
 	static @Nullable Faction at(ServerLevel level, BlockPos pos) {
 		Faction f = Factions.around(level.getServer(), level, pos, LAND_RANGE);
@@ -267,6 +283,10 @@ public final class Havens {
 		if (greenskin(server, f) && random.nextFloat() < (orcRuled(server, f) ? ORC_RULED_BIRTHS : GREENSKIN_BIRTHS)) {
 			// (0.7.441) one of the goblins and orcs who live there
 			return orcRuled(server, f) || random.nextBoolean() ? Heritage.Kind.ORC : Heritage.Kind.GOBLIN;
+		}
+		if (Heritage.Kind.DIVINE.key().equals(haven)) {
+			// a sky village's people: Divine-born, a few of them halfway folk
+			return SkyFolk.born(random);
 		}
 		if (!MIXED.equals(haven)) {
 			return Heritage.Kind.byKey(haven);
@@ -296,6 +316,10 @@ public final class Havens {
 		String haven = of(server, f);
 		if (kind != null && kind.brood && greenskin(server, f)) {
 			// (0.7.441) its goblins and orcs
+			return true;
+		}
+		if (kind == Heritage.Kind.DAWNBORN && Heritage.Kind.DIVINE.key().equals(haven)) {
+			// the halfway folk of a sky village
 			return true;
 		}
 		return haven.isEmpty() || (MIXED.equals(haven) ? Prejudice.degree(kind) > 0 : kind != null && haven.equals(kind.key()));

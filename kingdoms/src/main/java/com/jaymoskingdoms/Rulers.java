@@ -111,6 +111,8 @@ public final class Rulers {
 	/** Each villager ruler's day ({@link Royals.Round}), and their boss bar. */
 	private static final Map<PathfinderMob, Royals.Round> ROUNDS = new WeakHashMap<>();
 	private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
+	/** (Andy, 2026-11-12) The same ruler's bar for those not yet introduced to them: their title and realm, no name. */
+	private static final Map<UUID, ServerBossEvent> STRANGER_BARS = new HashMap<>();
 	/** Rulers who have sounded the horn since they were last whole. */
 	private static final Map<UUID, Boolean> RALLIED = new HashMap<>();
 	private static @Nullable MinecraftServer server;
@@ -127,6 +129,10 @@ public final class Rulers {
 				bar.removeAllPlayers();
 			}
 			BARS.clear();
+			for (ServerBossEvent bar : STRANGER_BARS.values()) {
+				bar.removeAllPlayers();
+			}
+			STRANGER_BARS.clear();
 			RALLIED.clear();
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> dropBar(entity.getUUID()));
@@ -137,6 +143,10 @@ public final class Rulers {
 		ServerBossEvent bar = BARS.remove(id);
 		if (bar != null) {
 			bar.removeAllPlayers();
+		}
+		ServerBossEvent stranger = STRANGER_BARS.remove(id);
+		if (stranger != null) {
+			stranger.removeAllPlayers();
 		}
 	}
 
@@ -484,11 +494,18 @@ public final class Rulers {
 			}
 		}
 		if (mob.tickCount % 5 == 0) {
+			BossEvent.BossBarColor colour = role == Folk.LORD ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.YELLOW;
 			ServerBossEvent bar = BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(id,
 				Component.translatable("entity.jaymoskingdoms.ruler_titled", title(s, f, role, McaCompat.female(mob)), mob.getDisplayName(), f.name()),
-				role == Folk.LORD ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10));
+				colour, BossEvent.BossBarOverlay.NOTCHED_10));
+			// (Andy, 2026-11-12: "fix it") their name only for those they've been introduced to; the rest see the title
+			ServerBossEvent stranger = STRANGER_BARS.computeIfAbsent(mob.getUUID(), id -> new ServerBossEvent(UUID.nameUUIDFromBytes(("stranger:" + id)
+				.getBytes(java.nio.charset.StandardCharsets.UTF_8)), Component.translatable("entity.jaymoskingdoms.ruler_unnamed",
+				title(s, f, role, McaCompat.female(mob)), f.name()), colour, BossEvent.BossBarOverlay.NOTCHED_10));
 			bar.setProgress(mob.getHealth() / mob.getMaxHealth());
-			BossBars.show(level, mob, bar);
+			stranger.setProgress(bar.getProgress());
+			BossBars.show(level, mob, bar, p -> Introductions.knows(p, mob));
+			BossBars.show(level, mob, stranger, p -> !Introductions.knows(p, mob));
 		}
 		rally(level, mob, f);
 		if (Arrests.judging(mob)) {

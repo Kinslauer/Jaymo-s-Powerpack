@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>The land.</b> Within {@link #LAND_RADIUS} blocks of an Irradiated monolith (found the way every monolith is,
  * {@link Monoliths}; its structure files are never touched) a player who lingers takes a dose each second, more within
- * {@link #CORE_RADIUS}. Away from it the dose slowly wears off. The terrain itself is left as it is.</li>
+ * {@link #CORE_RADIUS}. Away from it the dose slowly wears off. The ground itself is fused to glass round the monolith ({@link FusedGround}); beyond that the terrain is left as it is.</li>
  * <li><b>The sickness.</b> Three stages by dose ({@link #STAGE_AT}), shown by the body and the screen, never by numbers: a
  * sour mouth and now and then a swimming head; shaking hands and heavy legs; weakness, a dimming of sight and a rolling
  * stomach. It never kills. Cured by the Potion of Cleansing (its effect) and by a healer's work or a spell of mending

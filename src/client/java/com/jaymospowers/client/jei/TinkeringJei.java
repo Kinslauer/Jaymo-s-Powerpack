@@ -119,6 +119,7 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addRecipes(PART_BUILDER, parts);
 		List<SimpleCategory.Recipe> tools = toolStation();
 		weaponAssembly(tools);
+		kitBuilds(tools);
 		registration.addRecipes(TOOL_STATION, tools);
 		registration.addRecipes(CASTING, casting());
 		registration.addRecipes(CASTING_BASIN, basin());
@@ -134,6 +135,19 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.PAN, Component.translatable("jei.jaymospowers.pan"));
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SLUICE, Component.translatable("jei.jaymospowers.sluice"));
 		registration.addIngredientInfo(com.jaymospowers.ground.Panning.SUPPORT_BEAM, Component.translatable("jei.jaymospowers.support_beam"));
+		// Hardrock parts left out of the first patch: rough travel, rumours, rivers
+		registration.addIngredientInfo(com.jaymospowers.rough.SleepingBag.SLEEPING_BAG_ITEM, Component.translatable("jei.jaymospowers.sleeping_bag"));
+		registration.addIngredientInfo(com.jaymospowers.rough.Hammock.HAMMOCK_ITEM, Component.translatable("jei.jaymospowers.hammock"));
+		registration.addIngredientInfo(com.jaymospowers.rough.ParagliderItem.PARAGLIDER, Component.translatable("jei.jaymospowers.paraglider"));
+		registration.addIngredientInfo(com.jaymospowers.rough.HotAirBalloon.ITEM, Component.translatable("jei.jaymospowers.hot_air_balloon"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.ICE, Component.translatable("jei.jaymospowers.river_ice"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.EMERALD, Component.translatable("jei.jaymospowers.vein_rumour"));
+		// (Andy: "They all need jei info": the rest of Hardrock patches 6 and 7, dogs that learn and washing off the smell)
+		registration.addIngredientInfo(net.minecraft.world.item.Items.BONE, Component.translatable("jei.jaymospowers.dogs_learn"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.WATER_BUCKET, Component.translatable("jei.jaymospowers.smell"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.CAULDRON, Component.translatable("jei.jaymospowers.smell"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.DIAMOND, Component.translatable("jei.jaymospowers.old_world_diamond"));
+		registration.addIngredientInfo(net.minecraft.world.item.Items.NETHERITE_SCRAP, Component.translatable("jei.jaymospowers.old_world_netherite"));
 		// (Havens patch 5) the kings' weapon heads: where each is taken
 		for (String part : WeaponParts.KINGS) {
 			WeaponParts.Kind kind = WeaponParts.KINDS.get(part);
@@ -278,6 +292,38 @@ public final class TinkeringJei implements IModPlugin {
 			List<ItemStack> needed = stone.stream().map(s -> s.copyWithCount(PartBuilderMenu.itemsNeeded(kind.stoneCost(), s))).toList();
 			recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tinkering.PATTERN)), needed),
 				List.of(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1)), List.of(note("part_builder.cost", kind.stoneCost()))));
+		}
+	}
+
+	/** Tools and kit from parts and a plain bit or two ({@link com.jaymospowers.tinkering.ToolBuilds}): each part in the materials it may be. */
+	private static void kitBuilds(List<SimpleCategory.Recipe> recipes) {
+		for (com.jaymospowers.tinkering.ToolBuilds.Build build : com.jaymospowers.tinkering.ToolBuilds.BUILDS) {
+			if (!build.loaded()) {
+				continue;
+			}
+			List<List<ItemStack>> inputs = new ArrayList<>();
+			for (com.jaymospowers.tinkering.ToolBuilds.Part part : build.parts()) {
+				List<ItemStack> any = new ArrayList<>();
+				for (TinkerMaterial material : TinkerMaterial.values()) {
+					if (material.makes(part.type().kind) && com.jaymospowers.tinkering.ToolBuilds.takes(part.family(), material)) {
+						any.add(ToolPartItem.of(part.type(), material, 1));
+					}
+				}
+				inputs.add(any);
+			}
+			for (com.jaymospowers.tinkering.ToolBuilds.Bit bit : build.bits()) {
+				inputs.add(bit.examples());
+			}
+			List<ItemStack> out = new ArrayList<>();
+			if (build.output().equals("jaymoskitchen:oak_plow")) {
+				for (String wood : com.jaymospowers.tinkering.ToolBuilds.PLOUGH_WOODS) {
+					net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", wood + "_plow"))
+						.ifPresent(i -> out.add(new ItemStack(i)));
+				}
+			} else {
+				out.add(new ItemStack(build.item()));
+			}
+			recipes.add(new SimpleCategory.Recipe(inputs, out, List.of()));
 		}
 	}
 

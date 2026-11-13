@@ -297,6 +297,11 @@ public final class Eden {
 			.strength(COMPRESSOR_HARDNESS).sound(SoundType.COPPER).requiresCorrectToolForDrops()
 			.lightLevel(state -> state.getValue(GravityCompressorBlock.POWER) > 0 ? 7 : 0));
 
+		EdenWoodwork.init();
+		EdenGravilite.init();
+		EdenBrainstorm.init();
+		EdenCaves.init();
+		EdenLimphium.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> TAB.forEach(output::accept));
 	}
 }

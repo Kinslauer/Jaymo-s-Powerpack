@@ -267,8 +267,8 @@ public final class StartPerks {
 			}
 			case PASSAGE -> passage(level, player, v, key + "." + line);
 			case LORE -> {
-				String kind = FoeLore.studyable(player).stream().findFirst().orElse(null);
-				if (kind != null && FoeLore.teach(player, kind)) {
+				String kind = FoeStudy.studyable(player).stream().findFirst().orElse(null);
+				if (kind != null && FoeStudy.teach(player, kind)) {
 					Speech.tell(level, v, player, Component.translatable(key + "." + line, Component.translatable("entity.minecraft." + kind)), Speech.GOLD);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 				} else {

@@ -12,7 +12,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Tiv: "F5 should only toggle between first and 3rd person, the front facing camera should be toggled on w/ f6."
- * The front camera's own key (F6 by default, under Miscellaneous in the controls beside Toggle Perspective) turns the
+ * Andy (2026-11-12): "f5 should toggle between first and third person, and f7 should be the front facing view. our custom
+ * third person should remain as is." So the front camera's own key (F7 by default; Simple Voice Chat's menu moved to F6,
+ * {@code KeyConflicts} under Miscellaneous in the controls beside Toggle Perspective) turns the
  * view round to look at you; pressed again, it goes back to the view you had before (first person or from behind),
  * or from behind if that isn't known. F5 never lands on it ({@code FrontCameraCycleMixin}, and
  * {@code ShoulderSurfingFrontMixin} for Shoulder Surfing's F5).
@@ -30,7 +32,7 @@ public final class FrontCamera {
 	}
 
 	static void init() {
-		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.front_camera", InputConstants.KEY_F6, KeyMapping.Category.MISC));
+		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.front_camera", InputConstants.KEY_F7, KeyMapping.Category.MISC));
 		// before the tick's films and powers set the view, so one that holds it puts it straight back
 		ClientTickEvents.START_CLIENT_TICK.register(FrontCamera::tick);
 	}

@@ -5,7 +5,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -23,6 +31,8 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 	public static final class State extends EntityRenderState {
 		final List<MovingBlockRenderState> blocks = new ArrayList<>();
 		final List<Vec3> offsets = new ArrayList<>();
+		/** For each block that isn't drawn as a model (a chest, a bed, a sign...): its item, drawn in its place; else an empty one. */
+		final List<ItemStackRenderState> items = new ArrayList<>();
 		float tumble;
 		float yaw;
 		boolean steady;
@@ -36,6 +46,11 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		 */
 		@org.jspecify.annotations.Nullable Vec3 follow;
 		float heading, turn, lean, tilt, bob, pivot;
+	}
+
+	/** The head of a bed gives no second item: its foot is drawn as the whole bed. */
+	private static boolean skipsItem(BlockState block) {
+		return block.hasProperty(BlockStateProperties.BED_PART) && block.getValue(BlockStateProperties.BED_PART) == BedPart.HEAD;
 	}
 
 	/** Each ridden board's rider heading when first seen ridden (its turn is drawn from there). */
@@ -67,6 +82,7 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		Vec3 middle = bounds.getCenter();
 		state.blocks.clear();
 		state.offsets.clear();
+		state.items.clear();
 		BlockPos at = BlockPos.containing(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
 		for (BlockCluster.Piece piece : pieces) {
 			MovingBlockRenderState block = new MovingBlockRenderState();
@@ -79,6 +95,16 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 				block.lightEngine = level.getLightEngine();
 			}
 			state.blocks.add(block);
+			ItemStackRenderState item = new ItemStackRenderState();
+			if (block.blockState.getRenderShape() != RenderShape.MODEL && !skipsItem(block.blockState)) {
+				// (a chest, a bed, a sign, a banner has no block model to draw: its item stands in)
+				ItemStack stack = new ItemStack(block.blockState.getBlock());
+				if (!stack.isEmpty()) {
+					Minecraft.getInstance().getItemModelResolver().updateForTopItem(item, stack, ItemDisplayContext.NONE, entity.level(), null,
+						(int)(at.asLong() ^ piece.x() * 31L ^ piece.z() * 17L));
+				}
+			}
+			state.items.add(item);
 			state.offsets.add(new Vec3(piece.x() - middle.x, piece.y() - middle.y, piece.z() - middle.z));
 		}
 		// a thrown chunk tumbles; a held one turns slowly
@@ -159,6 +185,14 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		for (int i = 0; i < state.blocks.size(); i++) {
 			MovingBlockRenderState block = state.blocks.get(i);
 			if (block.blockState.getRenderShape() != RenderShape.MODEL) {
+				ItemStackRenderState item = state.items.get(i);
+				if (!item.isEmpty()) {
+					Vec3 at = state.offsets.get(i);
+					poseStack.pushPose();
+					poseStack.translate(at.x + 0.5, at.y + 0.5, at.z + 0.5);
+					item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+					poseStack.popPose();
+				}
 				continue;
 			}
 			Vec3 off = state.offsets.get(i);

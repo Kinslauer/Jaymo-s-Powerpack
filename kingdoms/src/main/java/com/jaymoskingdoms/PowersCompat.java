@@ -370,29 +370,6 @@ public final class PowersCompat {
 	private static java.lang.invoke.@Nullable MethodHandle lowOf;
 	private static boolean lookedForLow;
 
-	private static java.lang.invoke.@Nullable MethodHandle dodgingOf;
-	private static boolean lookedForDodging;
-
-	/** Whether {@code player} is in the first ticks of a dodge (Powers' {@code Dodge.evading}); false without Powers. */
-	public static boolean dodging(net.minecraft.server.level.ServerPlayer player) {
-		if (!lookedForDodging) {
-			lookedForDodging = true;
-			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-				try {
-					dodgingOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.stamina.Dodge"),
-						"evading", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
-				} catch (ReflectiveOperationException | LinkageError e) {
-					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no dodge", e);
-				}
-			}
-		}
-		try {
-			return dodgingOf != null && (boolean) dodgingOf.invoke(player);
-		} catch (Throwable e) {
-			return false;
-		}
-	}
-
 	/** Whether {@code player} holds Jaymo's Powers' low crouch (the stance wheel); false without Powers. */
 	public static boolean lowStance(Player player) {
 		if (!lookedForLow) {
@@ -1003,6 +980,47 @@ public final class PowersCompat {
 			});
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions of downed mobs (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * One loose with the Murmur finishes the townsfolk it puts down ({@link Murmur#finishes}; Andy: they can die), through
+	 * Powers' executions of downed mobs. Without Powers a downed body isn't finished by mobs at all, so nothing changes.
+	 */
+	@SuppressWarnings("unchecked")
+	static void murmurFinishes() {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> executions = Class.forName("com.jaymospowers.core.wounds.MobExecutions");
+			Object list = executions.getField("FINISHES").get(null);
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Murmur::finishes);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions of downed mobs (older Powers?)", e);
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle isCarried;
+	private static boolean lookedForCarried;
+
+	/** Powers' {@code Carry.isCarried}: {@code e} is being carried or dragged by someone. False without Powers. */
+	public static boolean carried(net.minecraft.world.entity.Entity e) {
+		if (!lookedForCarried) {
+			lookedForCarried = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					isCarried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"), "isCarried",
+						java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError ex) {
+					isCarried = null;
+				}
+			}
+		}
+		try {
+			return isCarried != null && (boolean) isCarried.invoke(e);
+		} catch (Throwable ex) {
+			return false;
 		}
 	}
 
@@ -2457,6 +2475,55 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle slipperyOf;
+	private static boolean slipperyLooked;
+
+	/** {@code entity} is a player in Slipfin's form, too slick to grab (Powers' {@code Slipfin.slippery}); false without Powers. */
+	public static boolean slippery(net.minecraft.world.entity.@Nullable Entity entity) {
+		if (!slipperyLooked) {
+			slipperyLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					slipperyOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.xenoform.forms.Slipfin"),
+						"slippery", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Slipfin.slippery (older Powers?)", e);
+				}
+			}
+		}
+		if (slipperyOf == null || entity == null) {
+			return false;
+		}
+		try {
+			return (boolean)slipperyOf.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle carried;
+	private static boolean carriedLooked;
+
+	/** Someone is carrying {@code entity} in their arms or dragging it (Powers' {@code Carry.isCarried}); false without Powers. */
+	public static boolean isCarried(net.minecraft.world.entity.Entity entity) {
+		if (!carriedLooked) {
+			carriedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					carried = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Carry"),
+						"isCarried", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Carry.isCarried (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return carried != null && (boolean)carried.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.342) {@code entity}'s power level, as a Z Fighter's scouter reads it; 0 without Powers. */
 	public static int powerLevel(LivingEntity entity) {
 		lookForWill();
@@ -3319,53 +3386,6 @@ public final class PowersCompat {
 		}
 	}
 
-	// ---- the Monk's fists (Powers' boxing/Boxing and BoxingGear) --------------------------------------------------------------
-
-	private static java.lang.invoke.@Nullable MethodHandle fistGear, boxingLearn, boxingStyleById;
-	private static boolean lookedForFists;
-
-	private static void lookForFists() {
-		if (lookedForFists) {
-			return;
-		}
-		lookedForFists = true;
-		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
-			return;
-		}
-		try {
-			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
-			Class<?> gear = Class.forName("com.jaymospowers.boxing.BoxingGear");
-			Class<?> boxing = Class.forName("com.jaymospowers.boxing.Boxing");
-			Class<?> style = Class.forName("com.jaymospowers.boxing.Boxing$Style");
-			fistGear = lookup.findStatic(gear, "isGear", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
-			boxingStyleById = lookup.findStatic(style, "byId", java.lang.invoke.MethodType.methodType(style, String.class));
-			boxingLearn = lookup.findStatic(boxing, "learn", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, style));
-		} catch (ReflectiveOperationException | LinkageError e) {
-			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' boxing gear", e);
-			fistGear = null;
-		}
-	}
-
-	/** Whether {@code stack} is boxing fist gear (a cestus, knuckles); false without Powers. */
-	public static boolean fistGear(net.minecraft.world.item.ItemStack stack) {
-		lookForFists();
-		try {
-			return fistGear != null && (boolean)fistGear.invoke(stack);
-		} catch (Throwable e) {
-			return false;
-		}
-	}
-
-	/** Teaches {@code player} the boxing style with id {@code style} at level 1 (Powers' {@code Boxing.learn}); false if they can't learn it or without Powers. */
-	public static boolean boxingTeach(net.minecraft.server.level.ServerPlayer player, String style) {
-		lookForFists();
-		try {
-			return boxingLearn != null && boxingStyleById != null && (boolean)boxingLearn.invoke(player, boxingStyleById.invoke(style));
-		} catch (Throwable e) {
-			return false;
-		}
-	}
-
 	/** Whether Jaymo's Powers and its boxing are there to teach. */
 	public static boolean boxing() {
 		lookForBoxing();
@@ -3573,6 +3593,187 @@ public final class PowersCompat {
 			// only a sound
 		}
 		return false;
+	}
+
+	/** Powers' {@code Armed.threatening(LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle threatening;
+	private static boolean lookedForThreat;
+
+	/**
+	 * Whether {@code body} stands in Jaymo's Powers' drawn, crouched sword stance (a weapon in the hand, sneaking), which
+	 * villagers and guards read as a threat ({@link Menace}). Without Powers the pose doesn't exist, so false.
+	 */
+	public static boolean threatening(LivingEntity body) {
+		if (!lookedForThreat) {
+			lookedForThreat = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					threatening = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.Armed"),
+						"threatening", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' armed stance (older Powers?)", e);
+				}
+			}
+		}
+		if (threatening == null) {
+			return false;
+		}
+		try {
+			return (boolean)threatening.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code Carry.npcDrag(Mob, LivingEntity)}, {@code Carry.npcLetGo(Mob)} and {@code Carry.npcDragging(Mob)}. */
+	private static java.lang.invoke.@Nullable MethodHandle npcDrag, npcLetGo, npcDragging, npcLift;
+	private static boolean lookedForDrag;
+
+	private static void lookForDrag() {
+		if (lookedForDrag) {
+			return;
+		}
+		lookedForDrag = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+			npcDrag = lookup.findStatic(carry, "npcDrag", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+			npcLetGo = lookup.findStatic(carry, "npcLetGo", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class));
+			npcDragging = lookup.findStatic(carry, "npcDragging", java.lang.invoke.MethodType.methodType(net.minecraft.world.entity.Entity.class,
+				net.minecraft.world.entity.Mob.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mob drag (older Powers?)", e);
+			npcDrag = npcLetGo = npcDragging = null;
+		}
+		try {
+			npcLift = lookup.findStatic(Class.forName("com.jaymospowers.core.Carry"), "npcLift", java.lang.invoke.MethodType.methodType(boolean.class,
+				net.minecraft.world.entity.Mob.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// (an older Powers: they drag instead)
+			npcLift = null;
+		}
+	}
+
+	/**
+	 * {@code carrier} heaves {@code body} (someone downed, no bigger than a person) over its shoulder and carries it, drawn as
+	 * Powers' own shoulder carry; {@link #npcLetGo} sets them down. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcLift(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcLift != null && (boolean) npcLift.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * {@code carrier} takes {@code body} (someone downed) by the shoulder and drags it behind as it walks, drawn as Powers'
+	 * own drag. False without Powers, or if either is taken already.
+	 */
+	public static boolean npcDrag(net.minecraft.world.entity.Mob carrier, LivingEntity body) {
+		lookForDrag();
+		try {
+			return npcDrag != null && (boolean) npcDrag.invoke(carrier, body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** {@code carrier} lets go of whoever it drags, where they lie. */
+	public static void npcLetGo(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			if (npcLetGo != null) {
+				npcLetGo.invoke(carrier);
+			}
+		} catch (Throwable ignored) {
+			// nothing was held
+		}
+	}
+
+	/** Whom {@code carrier} is dragging, or null. */
+	public static net.minecraft.world.entity.@Nullable Entity npcDragging(net.minecraft.world.entity.Mob carrier) {
+		lookForDrag();
+		try {
+			return npcDragging == null ? null : (net.minecraft.world.entity.Entity) npcDragging.invoke(carrier);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle dodgingOf;
+	private static boolean lookedForDodging;
+
+	/** Whether {@code player} is in the first ticks of a dodge (Powers' {@code Dodge.evading}); false without Powers. */
+	public static boolean dodging(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDodging) {
+			lookedForDodging = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dodgingOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.stamina.Dodge"),
+						"evading", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no dodge", e);
+				}
+			}
+		}
+		try {
+			return dodgingOf != null && (boolean) dodgingOf.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	// ---- the Monk's fists (Powers' boxing/Boxing and BoxingGear) --------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle fistGear, boxingLearn, boxingStyleById;
+	private static boolean lookedForFists;
+
+	private static void lookForFists() {
+		if (lookedForFists) {
+			return;
+		}
+		lookedForFists = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> gear = Class.forName("com.jaymospowers.boxing.BoxingGear");
+			Class<?> boxing = Class.forName("com.jaymospowers.boxing.Boxing");
+			Class<?> style = Class.forName("com.jaymospowers.boxing.Boxing$Style");
+			fistGear = lookup.findStatic(gear, "isGear", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
+			boxingStyleById = lookup.findStatic(style, "byId", java.lang.invoke.MethodType.methodType(style, String.class));
+			boxingLearn = lookup.findStatic(boxing, "learn", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, style));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' boxing gear", e);
+			fistGear = null;
+		}
+	}
+
+	/** Whether {@code stack} is boxing fist gear (a cestus, knuckles); false without Powers. */
+	public static boolean fistGear(net.minecraft.world.item.ItemStack stack) {
+		lookForFists();
+		try {
+			return fistGear != null && (boolean)fistGear.invoke(stack);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Teaches {@code player} the boxing style with id {@code style} at level 1 (Powers' {@code Boxing.learn}); false if they can't learn it or without Powers. */
+	public static boolean boxingTeach(net.minecraft.server.level.ServerPlayer player, String style) {
+		lookForFists();
+		try {
+			return boxingLearn != null && boxingStyleById != null && (boolean)boxingLearn.invoke(player, boxingStyleById.invoke(style));
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	// ---- (fifth edition) lifting together: whether Powers' Carry has {@code entity} holding someone up -----------------------------

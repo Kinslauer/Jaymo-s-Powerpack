@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:sunroot_barrel"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/sunroot_barrel"
+}

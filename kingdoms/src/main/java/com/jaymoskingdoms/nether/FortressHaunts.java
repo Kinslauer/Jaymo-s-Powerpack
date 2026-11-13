@@ -147,7 +147,7 @@ public final class FortressHaunts {
 	}
 
 	/** A spot in the same fortress's halls near {@code around}: brick underfoot, room to stand, out of reach. */
-	private static @Nullable BlockPos site(ServerLevel level, BlockPos around) {
+	static @Nullable BlockPos site(ServerLevel level, BlockPos around) {
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < SITE_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;

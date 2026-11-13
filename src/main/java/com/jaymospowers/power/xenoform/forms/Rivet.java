@@ -59,7 +59,8 @@ import org.jspecify.annotations.Nullable;
  * <li>V, Pour: a quick flowing dash, nothing landing on you while you pour.</li>
  * <li>B, Ride a machine: climb into the minecart, iron or clockwork golem, or android mech you look at and drive it
  * (forward goes where you look). Inside it's faster, stronger and lit with your green; it fights what you hit. B again
- * climbs out.</li>
+ * climbs out. On a cannon (Kingdoms, on land or aboard a ship) he melds into its breech: it's laid where he looks, Space
+ * fires it and he loads it again from the gunpowder and shot he carries.</li>
  * </ul>
  * The shells ({@link #SHELLS}): furnace (fire breath, fire shot, Smelt, smoke), piston (leap, Brace, Shove, Rebound),
  * anvil (high leap, Drop, eye beam, Iron Skin), stonecutter (saw, Burrow, Climb, Spin), smithing table (Brace, Temper,
@@ -174,6 +175,7 @@ public final class Rivet extends XenoForm {
 		if (player.getVehicle() != null && driven(player) != null) {
 			player.stopRiding();
 		}
+		com.jaymospowers.compat.KingdomsCompat.leaveGun(player);
 	}
 
 	// ---------------------------------------------------------------- keys
@@ -302,9 +304,17 @@ public final class Rivet extends XenoForm {
 			sound(player, SoundEvents.BUCKET_EMPTY, 0.8F, 1.2F);
 			return true;
 		}
+		if (com.jaymospowers.compat.KingdomsCompat.inGun(player)) {
+			com.jaymospowers.compat.KingdomsCompat.leaveGun(player);
+			return true;
+		}
 		Entity ride = aimed(player, reach, Rivet::machine);
 		if (ride == null) {
 			ride = aimedCart(player, reach);
+		}
+		// a cannon (on land or aboard a ship): he melds into its breech and lays it himself
+		if (ride == null && player.getVehicle() == null && com.jaymospowers.compat.KingdomsCompat.meldGun(player, reach)) {
+			return true;
 		}
 		if (ride == null || !player.startRiding(ride, true, true)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.rivet.no_machine").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -900,6 +910,7 @@ public final class Rivet extends XenoForm {
 
 	/** The machine Rivet drives: steered toward where it looks while forward is held, faster and stronger, lit green. */
 	public static void drive(ServerPlayer player, XenoformPower.Live live) {
+		com.jaymospowers.compat.KingdomsCompat.workGun(player);
 		Entity machine = driven(player);
 		if (machine == null) {
 			return;

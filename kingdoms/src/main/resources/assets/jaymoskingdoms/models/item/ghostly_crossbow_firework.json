@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:item/ghostly_crossbow",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/ghostly_crossbow_firework"
+  }
+}

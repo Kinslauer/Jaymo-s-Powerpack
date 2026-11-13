@@ -208,7 +208,7 @@ final class Frights {
 	}
 
 	/** A spot on the ground {@link #RUN} blocks from {@code monster}, the way {@code v} already is from it. */
-	private static BlockPos away(ServerLevel level, Villager v, Vec3 monster) {
+	static BlockPos away(ServerLevel level, Villager v, Vec3 monster) {
 		Vec3 off = v.position().subtract(monster).multiply(1.0, 0.0, 1.0);
 		if (off.lengthSqr() < 1.0E-3) {
 			off = new Vec3(1.0, 0.0, 0.0);

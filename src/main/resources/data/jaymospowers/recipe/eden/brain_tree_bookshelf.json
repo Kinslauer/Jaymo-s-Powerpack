@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "jaymospowers:brain_tree_planks",
+    "X": "minecraft:book"
+  },
+  "pattern": [
+    "###",
+    "XXX",
+    "###"
+  ],
+  "result": {
+    "id": "jaymospowers:brain_tree_bookshelf"
+  },
+  "group": "bookshelf"
+}

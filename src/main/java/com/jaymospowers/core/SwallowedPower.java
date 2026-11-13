@@ -39,7 +39,7 @@ import org.jspecify.annotations.Nullable;
 public final class SwallowedPower {
 	/** The power they swallowed. Saved; lost on death. */
 	public static final AttachmentType<Identifier> SWALLOWED = AttachmentRegistry.create(JaymosPowers.id("swallowed_power"),
-		builder -> builder.persistent(Identifier.CODEC));
+		builder -> builder.persistent(Identifier.CODEC).syncWith(Identifier.STREAM_CODEC, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 
 	/** Client → server: the swallowed power's key went down or up. */
 	public record Key(boolean down) implements CustomPacketPayload {
@@ -72,7 +72,19 @@ public final class SwallowedPower {
 
 	/** The power {@code player} swallowed and is running beside their own, or null. */
 	public static @Nullable Power of(ServerPlayer player) {
-		Power power = Powers.get(player.getAttached(SWALLOWED));
+		return swallowed(player);
+	}
+
+	/**
+	 * The same on either side (the attachment is synced, so a client draws the swallowed power's HUD and visuals, and every
+	 * {@link Powers#has} check counts it: Andy, 2026-11-12, "fix that").
+	 */
+	public static @Nullable Power swallowed(net.minecraft.world.entity.player.Player player) {
+		Identifier id = player.getAttached(SWALLOWED);
+		if (id == null) {
+			return null;
+		}
+		Power power = Powers.get(id);
 		return power == null || power == Powers.of(player) ? null : power;
 	}
 

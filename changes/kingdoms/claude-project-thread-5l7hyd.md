@@ -39,7 +39,7 @@
 - **Forged papers** (`ForgedPapers`): travel passes and pardons, sold only by speakeasy fences and shady crooks; show them at checkpoints, haven gates or sentencing; a sharp guard spots the fake (a new crime, forgery).
 - **How you live shows** (`Lifestyle`): where you sleep, what you spend, fresh tailor's clothes and baths open courts to you, or get you watched by guards and pitied by priests.
 - **Teachers** (`Lessons`): pay a villager to teach a tongue, a trade or a fighting style over a few days.
-- **Looking it up** (`Research`, `ResearchScreen`, `FoeLore`): a sage or a library teaches what a foe fears (foe knowledge stars: harder blows, softer hits) or where Halvard's heart is hid.
+- **Looking it up** (`Research`, `ResearchScreen`, `FoeStudy`): a sage or a library teaches what a foe fears (foe knowledge stars: harder blows, softer hits) or where Halvard's heart is hid.
 - **Words, hands and things** (`SpellParts`, `Gags`, diamond dust): staff, tome, scroll and Spell Engine casts need a voice and a free hand; a gag, a silence bubble or bonds stop them. Great spells spend a part (diamond dust, a pearl, bones); a staff, tome or holy focus stands in for the cheap ones. New Rag Gag for helpless captives.
 - **Magic screen** (key Page Up, `MagicMenu`, `MagicScreen`): rituals, cantrips and counterspell in one place.
 - **Rituals** (`Rituals`, `ItemCurses`): ten still seconds with a book open, no mana: ward line, find magic, identify (shows enchantments, curses and imbues), speak with animals.

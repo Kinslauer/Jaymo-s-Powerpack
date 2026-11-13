@@ -81,6 +81,7 @@ public final class Costume {
 	}
 
 	public static void init() {
+		MaskMotion.register();
 		DESIGN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("costume_design"),
 			DataComponentType.<CostumeDesign>builder().persistent(CostumeDesign.CODEC).networkSynchronized(CostumeDesign.STREAM_CODEC).build());
 		ResourceKey<Block> tableKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("costume_table"));
@@ -191,19 +192,33 @@ public final class Costume {
 		if (worn == null || worn.mask() == CostumeDesign.Mask.NONE) {
 			if (worn == null && HoodedCloak.wears(player)) {
 				// (0.21.41) a hood joined to a cloak: down onto the back, or back up
-				HoodedCloak.toggle(player);
+				MaskMotion.begin(player, () -> HoodedCloak.toggle(player));
 				return;
 			}
 			if (com.jaymospowers.rig.Rig.wears(player, com.jaymospowers.rig.Rig.Piece.HELM)) {
-				com.jaymospowers.rig.RigHelm.toggleFace(player);
+				MaskMotion.begin(player, () -> com.jaymospowers.rig.RigHelm.toggleFace(player));
 				return;
 			}
 			if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
 				// (0.13.23) the symbiote's suit: its mask comes off (or flows back over the face)
-				com.jaymospowers.power.web.WebSymbiote.toggleMask(player);
+				MaskMotion.begin(player, () -> com.jaymospowers.power.web.WebSymbiote.toggleMask(player));
+				return;
+			}
+			if (schoolMask(player, false)) {
+				// (Andy, 2026-11-12) a Weapon Forms school's mask (Jaymo's Kingdoms): off into the pack, or on from it
+				MaskMotion.begin(player, () -> schoolMask(player, true));
 				return;
 			}
 			player.sendOverlayMessage(Component.translatable(worn == null ? "message.jaymospowers.costume.none" : "message.jaymospowers.costume.no_mask"));
+			return;
+		}
+		MaskMotion.begin(player, () -> flipMask(player));
+	}
+
+	/** The worn costume's head piece, off or back on (the hands are at the face). */
+	private static void flipMask(ServerPlayer player) {
+		CostumeDesign worn = worn(player);
+		if (worn == null || worn.mask() == CostumeDesign.Mask.NONE) {
 			return;
 		}
 		boolean off = !unmasked(player);
@@ -218,6 +233,39 @@ public final class Costume {
 		player.sendOverlayMessage(Component.translatable(off ? "message.jaymospowers.costume.mask_off" : "message.jaymospowers.costume.mask_on", piece));
 		// the face is out (or hidden again): who you're seen as follows
 		SecretIdentity.update(player);
+	}
+
+	private static java.lang.invoke.@org.jspecify.annotations.Nullable MethodHandle schoolMaskable, schoolToggle;
+	private static boolean schoolLooked;
+
+	/** Jaymo's Kingdoms' school masks ({@code Schools.maskable} / {@code toggleMask}, by reflection): whether there's one, or flip it. */
+	private static boolean schoolMask(ServerPlayer player, boolean flip) {
+		if (!schoolLooked) {
+			schoolLooked = true;
+			try {
+				Class<?> schools = Class.forName("com.jaymoskingdoms.forms.Schools");
+				java.lang.invoke.MethodType type = java.lang.invoke.MethodType.methodType(boolean.class, ServerPlayer.class);
+				schoolMaskable = java.lang.invoke.MethodHandles.publicLookup().findStatic(schools, "maskable", type);
+				schoolToggle = java.lang.invoke.MethodHandles.publicLookup().findStatic(schools, "toggleMask", type);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				schoolMaskable = schoolToggle = null;
+			}
+		}
+		java.lang.invoke.MethodHandle h = flip ? schoolToggle : schoolMaskable;
+		if (h == null) {
+			return false;
+		}
+		try {
+			boolean moved = (boolean)h.invokeExact(player);
+			if (moved && flip) {
+				player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.7F,
+					MASK_OFF_PITCH);
+				SecretIdentity.update(player);
+			}
+			return moved;
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/**

@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Orcs, the pit fight:</b> their champion, in the fighting pit, until one of you is down.</li>
  * <li><b>Goblins, the trap hall:</b> from the door to the king's throne within {@link #HALL_SECONDS} seconds while the hall's
- * traps go off round you (darts, caltrops, nets).</li>
+ * traps go off round you (darts, caltrops, nets). The darts are arrows anyone can pick up where they land.</li>
  * <li><b>Ogres, the stone-lifting brawl:</b> heave the stone (hold sneak, {@link #LIFT_TICKS}), then knock the guard down to
  * half with your bare fists (a weapon ends it).</li>
  * </ul>
@@ -398,7 +398,8 @@ public final class Trials {
 				Vec3 to = player.getEyePosition().subtract(from);
 				dart.shoot(to.x, to.y, to.z, 1.6F, 4.0F);
 				dart.setBaseDamage(DART_DAMAGE);
-				dart.pickup = net.minecraft.world.entity.projectile.arrow.AbstractArrow.Pickup.DISALLOWED;
+				// (Andy 2026-11-12: trap darts can be picked up, like any other arrow)
+				dart.pickup = net.minecraft.world.entity.projectile.arrow.AbstractArrow.Pickup.ALLOWED;
 				level.addFreshEntity(dart);
 				level.playSound(null, from.x, from.y, from.z, SoundEvents.DISPENSER_LAUNCH, SoundSource.HOSTILE, 1.0F, 1.4F);
 			}

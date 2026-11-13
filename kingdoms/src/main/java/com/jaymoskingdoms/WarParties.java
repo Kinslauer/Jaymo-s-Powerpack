@@ -89,6 +89,10 @@ final class WarParties {
 	/** Marching soldiers wait for their cart when they're this far ahead of it; it's steered this far ahead at a time. */
 	static final double CART_WAIT = 20.0, CART_WAYPOINT = 18.0;
 	static final String CART_TAG = "jaymoskingdoms.war_cart";
+	/** A realm's court caster marching with its party (and how far from its seat they're looked for, how many go). */
+	static final String CASTER_TAG = "jaymoskingdoms.war_caster";
+	static final double CASTER_RANGE = 128.0;
+	static final int CASTERS_MAX = 2;
 	/** The players' cut of the spoils' silver (percent, shared among them), and the reputation each gains. */
 	static final int PLAYERS_CUT = 25, SPOILS_REPUTATION = 15;
 
@@ -254,6 +258,17 @@ final class WarParties {
 				Cavalry.mount(level, soldier, from, true);
 			}
 			party.soldiers.add(soldier.getUUID());
+		}
+		// (Andy, 2026-11-12) its court casters march too, all but one, who stays so the realm is never without
+		if (!party.soldiers.isEmpty()) {
+			for (Worker caster : casters(level, from)) {
+				PathfinderMob mob = caster.mob();
+				BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2));
+				mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, mob.getYRot(), 0.0F);
+				mob.setHomeTo(target.seat(), Raids.RAID_HOME_RADIUS);
+				mob.addTag(CASTER_TAG);
+				party.soldiers.add(mob.getUUID());
+			}
 		}
 		if (party.soldiers.isEmpty() || !hitchCart(level, party, from, muster, target)) {
 			// (no spoils cart, no march)
@@ -867,11 +882,54 @@ final class WarParties {
 		soldier.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, MARCH_SPEED);
 	}
 
+	/**
+	 * The court casters of {@code from} to march with a party: all but one of those it keeps (the one nearest the seat stays
+	 * home), at most {@link #CASTERS_MAX}; none if it keeps fewer than two. Only those about the seat now (loaded).
+	 */
+	static List<Worker> casters(ServerLevel level, Faction from) {
+		List<Worker> court = new ArrayList<>(Workers.near(level, new net.minecraft.world.phys.AABB(from.seat()).inflate(CASTER_RANGE),
+			w -> w.isAlive() && w.factionId() == from.id() && (w.role() == Sorcery.WIZARD || w.role() == Sorcery.NECROMANCER)
+				&& !w.mob().entityTags().contains(CASTER_TAG) && !Downed.isDowned(w.mob()) && !w.mob().isPassenger()));
+		int kept = from.holdings().count(Sorcery.WIZARD) + from.holdings().count(Sorcery.NECROMANCER);
+		if (kept < 2 || court.isEmpty()) {
+			return List.of();
+		}
+		Vec3 seat = Vec3.atCenterOf(from.seat());
+		court.sort((a, b) -> Double.compare(a.mob().distanceToSqr(seat), b.mob().distanceToSqr(seat)));
+		// the nearest stays (and any not loaded count as staying)
+		int send = Math.min(CASTERS_MAX, Math.min(kept - 1, court.size() - (court.size() >= kept ? 1 : 0)));
+		return send <= 0 ? List.of() : List.copyOf(court.subList(court.size() - send, court.size()));
+	}
+
 	private static void vanish(ServerLevel level, PathfinderMob soldier) {
+		if (homeCaster(level, soldier)) {
+			return;
+		}
 		Cavalry.dismiss(soldier);
 		level.sendParticles(ParticleTypes.POOF, soldier.getX(), soldier.getY() + 1.0, soldier.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
 		// ((0.7.295) a villager out of MCA's family tree too)
 		McaCompat.vanish(soldier);
+	}
+
+	/**
+	 * A court caster back from a march (a war party's or a purist raid's, {@link BorderClashes}): not mustered for it but the
+	 * realm's own, so home to the hall, not out of the world. False for anyone else.
+	 */
+	static boolean homeCaster(ServerLevel level, PathfinderMob soldier) {
+		if (soldier.entityTags().contains(CASTER_TAG)) {
+			soldier.removeTag(CASTER_TAG);
+			Worker w = soldier instanceof Worker worker ? worker : null;
+			Faction f = w == null ? null : Factions.get(level.getServer(), w.factionId());
+			if (f != null) {
+				Castle.Keep keep = Factions.keep(level.getServer(), f.id());
+				BlockPos hall = keep != null ? keep.hall() : f.seat();
+				level.sendParticles(ParticleTypes.ENCHANT, soldier.getX(), soldier.getY() + 1.0, soldier.getZ(), 20, 0.3, 0.6, 0.3, 0.4);
+				soldier.snapTo(hall.getX() + 0.5, hall.getY(), hall.getZ() + 0.5, soldier.getYRot(), 0.0F);
+				soldier.setHomeTo(hall, Folk.HOME_RADIUS);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private static String name(@Nullable Faction f) {
@@ -901,6 +959,18 @@ final class WarParties {
 				}
 			}
 			STRAY_CARTS.add(entity);
+			return;
+		}
+		if (entity instanceof PathfinderMob caster && entity.entityTags().contains(CASTER_TAG) && entity.level() instanceof ServerLevel level) {
+			// a court caster still out from a march lost to a restart: home with them
+			for (Party party : ACTIVE.values()) {
+				if (party.soldiers.contains(caster.getUUID())) {
+					return;
+				}
+			}
+			if (!BorderClashes.member(caster)) {
+				STRAYS.add(caster);
+			}
 			return;
 		}
 		if (entity instanceof PathfinderMob folk && folk instanceof Worker w && isSoldier(w)) {

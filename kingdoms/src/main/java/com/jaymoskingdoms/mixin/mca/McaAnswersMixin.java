@@ -78,6 +78,10 @@ abstract class McaAnswersMixin {
 			// (0.7.215) only the floating islands' hermits talk alchemy
 			cir.getReturnValue().remove(HermitAlchemy.ANSWER);
 		}
+		if ("main".equals(name) && !com.jaymoskingdoms.FisherTalk.canAsk(villager)) {
+			// Powers' fishing: only a fisherman talks fish, the market and the contest
+			cir.getReturnValue().remove(com.jaymoskingdoms.FisherTalk.ANSWER);
+		}
 		if ("main".equals(name) && !com.jaymoskingdoms.StarFolk.canAsk(villager)) {
 			// (0.7.384) only a floating island's hermit or a stargazer talks of the stars (and sells their charts)
 			cir.getReturnValue().remove(com.jaymoskingdoms.StarFolk.ANSWER);
@@ -97,6 +101,18 @@ abstract class McaAnswersMixin {
 		if ("main".equals(name) && !GiftTales.canAsk(player, villager)) {
 			// (0.7.227) only a gift you've seen at work, and only until they've told you
 			cir.getReturnValue().remove(GiftTales.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.equestrian.HorseRevival.canAsk(player, villager)) {
+			// (Andy, 2026-11-12) a wizard or a necromancer, while you hold a mane lock
+			cir.getReturnValue().remove(com.jaymoskingdoms.equestrian.HorseRevival.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.TalkErrands.canAsk(villager)) {
+			// (Andy, 2026-11-12) town business only with a realm's or a village's folk
+			cir.getReturnValue().remove(com.jaymoskingdoms.TalkErrands.ANSWER);
+		}
+		if ("main".equals(name) && !com.jaymoskingdoms.Mourning.canAsk(villager)) {
+			// (Andy, 2026-11-12) only one who buried a companion speaks of their old adventures
+			cir.getReturnValue().remove(com.jaymoskingdoms.Mourning.ANSWER);
 		}
 		if ("main".equals(name) && !com.jaymoskingdoms.Accusations.canAccuse(player, villager)) {
 			// (0.7.332) only a priest, with someone here to accuse

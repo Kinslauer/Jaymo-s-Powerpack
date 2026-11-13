@@ -125,12 +125,37 @@ public final class ZFighterHudLayout {
 			case FORM_NAME -> new Rect(chips[0], barY - 18, FORM_W, 18, 0.0F);
 			case COMBO -> new Rect(chips[0] + chips[2] / 2 - 24, barY - 9, 48, 9, 0.5F);
 			case CHIPS -> new Rect(chips[0], chips[1], chips[2], CHIP, 0.0F);
-			case CHARGE -> new Rect(cx - 26, cy - 39, 52, 16, 0.5F);
-			case SPIRIT -> new Rect(cx - 40, cy - 51, 80, 16, 0.5F);
+			// (the zone-stacked pieces: where the zone last put them, else their usual spot in it: the ABOVE zone stacks up from
+			// just over the crosshair, the INSPECT zone sits to its right; so a custom scale pivots about where they really are)
+			case CHARGE -> zoned(piece, new Rect(cx - com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W / 2,
+				cy - com.jaymospowers.client.hud.HudZones.ABOVE_BOTTOM - com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H,
+				com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H, 0.5F));
+			case SPIRIT -> zoned(piece, new Rect(cx - 40, cy - com.jaymospowers.client.hud.HudZones.ABOVE_BOTTOM - 16, 80, 16, 0.5F));
 			// (the bar now sits in the shared FOCUS zone; this is its usual spot when nothing else is stacked under it)
 			case APE_RAGE -> new Rect(cx - ApeRageClient.BAR_W / 2, gh - com.jaymospowers.client.hud.HudZones.FOCUS_BOTTOM - 17, ApeRageClient.BAR_W, 17, 0.5F);
-			case SCOUTER -> new Rect(cx + 14, cy - 12, 90, 22, 0.0F);
+			case SCOUTER -> zoned(piece, new Rect(cx + com.jaymospowers.client.hud.HudZones.INSPECT_X, cy + com.jaymospowers.client.hud.HudZones.INSPECT_TOP, 90, 22, 0.0F));
 		};
+	}
+
+	/** Where the HUD's zones last put each zone-stacked piece (gui pixels), and on what size of screen. */
+	private static final Map<Piece, Rect> ZONED = new EnumMap<>(Piece.class);
+	private static int zonedW, zonedH;
+
+	/** A zone-stacked piece's draw call says where its zone put it (before {@link #begin}). */
+	public static void zonedAt(Piece piece, int x, int y, int w, int h, int gw, int gh) {
+		if (gw != zonedW || gh != zonedH) {
+			ZONED.clear();
+			zonedW = gw;
+			zonedH = gh;
+		}
+		Rect usual = ZONED.get(piece);
+		float pivot = usual != null ? usual.pivot : piece == Piece.SCOUTER ? 0.0F : 0.5F;
+		ZONED.put(piece, new Rect(x, y, w, h, pivot));
+	}
+
+	private static Rect zoned(Piece piece, Rect fallback) {
+		Rect at = ZONED.get(piece);
+		return at == null ? fallback : at;
 	}
 
 	/** {@code rect} where {@code place} puts it. */

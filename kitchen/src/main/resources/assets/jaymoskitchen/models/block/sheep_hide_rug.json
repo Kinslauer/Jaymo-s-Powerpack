@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/carpet",
+  "textures": {
+    "wool": "jaymoskitchen:block/sheep_hide_rug"
+  }
+}

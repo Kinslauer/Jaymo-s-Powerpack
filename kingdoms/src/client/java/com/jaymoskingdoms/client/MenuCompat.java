@@ -46,7 +46,7 @@ public final class MenuCompat {
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
-	static final int ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
+	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -66,6 +66,11 @@ public final class MenuCompat {
 				Function.class, BooleanSupplier.class);
 			tab(register, "skills", ORDER_SKILLS, () -> new ItemStack(Items.EXPERIENCE_BOTTLE), "menu.jaymoskingdoms.tab.skills",
 				() -> Minecraft.getInstance().gui.setScreen(new SkillScreen()), s -> s instanceof SkillScreen, s -> ((SkillScreen)s).corner());
+			// (docs/Classes-Plan.md: a creative player switches class from a tab on the H menu)
+			register.invoke(null, "class", ORDER_CLASS, (Supplier<ItemStack>)() -> new ItemStack(Items.IRON_SWORD),
+				Component.translatable("menu.jaymoskingdoms.tab.class"), (Runnable)() -> Minecraft.getInstance().gui.setScreen(new ClassScreen(false, true)),
+				(Predicate<Screen>)s -> s instanceof ClassScreen, (Function<Screen, int[]>)s -> ((ClassScreen)s).corner(),
+				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative());
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
 			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",

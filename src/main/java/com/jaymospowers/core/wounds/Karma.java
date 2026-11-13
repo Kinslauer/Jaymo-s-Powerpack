@@ -324,6 +324,8 @@ public final class Karma {
 	 * marks nothing (the caller ends the life as before).
 	 */
 	static Verdict weigh(ServerPlayer player) {
+		// dying and coming back is being weighed too, the Retaking's milestone as much as asking the Judge
+		com.jaymospowers.core.PackAdvancements.deed(player, "weighed");
 		MinecraftServer server = player.level().getServer();
 		float weight = of(player);
 		if (weight >= JUST && ZFighterAfterlife.open(server)) {

@@ -316,9 +316,9 @@ public final class DeckOfFates {
 
 	/** What you knew of your foes and the tongues you had is gone. */
 	private static void forget(ServerPlayer player) {
-		player.removeAttached(FoeLore.FOUGHT);
-		player.removeAttached(FoeLore.TAUGHT);
-		player.removeAttached(FoeLore.LEARNED);
+		player.removeAttached(FoeStudy.FOUGHT);
+		player.removeAttached(FoeStudy.TAUGHT);
+		player.removeAttached(FoeStudy.LEARNED);
 		player.removeAttached(Languages.LEARNED);
 	}
 

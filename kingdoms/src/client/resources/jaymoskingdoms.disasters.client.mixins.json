@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.client.mixin.disasters",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["CalamityFogMixin", "CalamityShakeMixin", "SkiesFogMixin"],
+	"client": ["CalamityFogMixin", "CalamityShakeMixin", "CloudRendererMixin", "SkiesFogMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

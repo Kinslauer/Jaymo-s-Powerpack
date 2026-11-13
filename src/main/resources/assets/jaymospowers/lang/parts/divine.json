@@ -8,5 +8,10 @@
   "talk.jaymospowers.judge.stay": "Ask to stay",
   "talk.jaymospowers.judge.stay_ask": "\"Stay? Few ask. A page as light as yours may. There would be no road home after, no tournament, no second asking. You would keep the ring, and walk up here as one of ours for as long as you last. Well?\"",
   "talk.jaymospowers.judge.stay_yes": "Let me stay",
-  "talk.jaymospowers.judge.stay_done": "\"Then it is written. Go where you like up here. Nobody will call you back to this hall, and nobody will send you down. Mind the edges.\""
+  "talk.jaymospowers.judge.stay_done": "\"Then it is written. Go where you like up here. Nobody will call you back to this hall, and nobody will send you down. Mind the edges.\"",
+  "message.jaymospowers.divine.fists.1": "Your hands have learned something.",
+  "message.jaymospowers.divine.fists.2": "Your knuckles have stopped feeling the blows.",
+  "message.jaymospowers.divine.fists.3": "Your hands strike where they mean to.",
+  "message.jaymospowers.divine.fists.4": "Every blow of yours lands whole.",
+  "message.jaymospowers.divine.fists.5": "Your bare hands are a weapon now."
 }

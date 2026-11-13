@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  * <p><b>Topics are a hook</b> ({@link #addTopic}): other systems add their own and are listed beside the built-in one.
  * A {@link Topic} says what can be looked up ({@link Topic#subjects}) and what reading it does ({@link Topic#learn}); the
  * boss vessels and relic properties plug in this way. The built-in topic is <b>creature fears</b>
- * ({@link FoeLore#teach}): a kind you have fought gains a star and shows what it dreads.
+ * ({@link FoeStudy#teach}): a kind you have fought gains a star and shows what it dreads.
  * <p>A day's study is {@link #STUDY_TICKS} ticks at a library and {@link #SAGE_TICKS} with a sage, who charges more.
  */
 public final class Research {
@@ -154,7 +154,7 @@ public final class Research {
 			@Override
 			public List<Subject> subjects(ServerPlayer player) {
 				List<Subject> out = new ArrayList<>();
-				for (String kind : FoeLore.studyable(player)) {
+				for (String kind : FoeStudy.studyable(player)) {
 					out.add(new Subject(kind, Component.translatable("entity.minecraft." + kind)));
 				}
 				return out;
@@ -162,15 +162,15 @@ public final class Research {
 
 			@Override
 			public Component learn(ServerPlayer player, String subject) {
-				boolean fear = FoeLore.fears(subject) != null && !FoeLore.learned(player, subject);
-				FoeLore.teach(player, subject);
+				boolean fear = FoeStudy.fears(subject) != null && !FoeStudy.learned(player, subject);
+				FoeStudy.teach(player, subject);
 				Component kind = Component.translatable("entity.minecraft." + subject);
-				FoeLore.Fears f = FoeLore.fears(subject);
+				FoeStudy.Fears f = FoeStudy.fears(subject);
 				if (fear && f != null) {
 					return Component.translatable("research.jaymoskingdoms.fears.learned", kind, Component.translatable("foe.fear." + f.key()),
-						FoeLore.stars(player, subject));
+						FoeStudy.stars(player, subject));
 				}
-				return Component.translatable("research.jaymoskingdoms.fears.stars", kind, FoeLore.stars(player, subject));
+				return Component.translatable("research.jaymoskingdoms.fears.stars", kind, FoeStudy.stars(player, subject));
 			}
 		};
 	}

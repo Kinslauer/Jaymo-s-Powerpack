@@ -11,14 +11,20 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +34,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.383, Andy's SevTech picks: "The Ground Changes") Nobody needs fresh land for the next metal. When a player opens a
  * world tier, the chunks already loaded round them get that tier's veins, now and then a big vein of ore laid over deep stone: iron and
- * copper for Borderlands, gold and lapis for Wildlands, diamond for Dread and, in the Nether, ancient debris for Legend.
+ * copper for Borderlands, gold and lapis for Wildlands. (Diamond and ancient debris are never laid: they lie only in chests.)
  * Each chunk remembers the highest tier it has been seeded for ({@link #SEEDED}, saved with the chunk) so a tier is
  * seeded once per chunk however many players pass through. It runs lazily: every {@link #SCAN_TICKS} ticks each player's
  * surroundings are walked a few chunks at a time ({@link #LOOKS_PER_WALK}), and at most {@link #SEEDS_PER_WALK} chunks are
@@ -48,7 +54,7 @@ public final class GroundChanges {
 	/**
 	 * A kind of vein: the ore laid over stone and over deepslate (deepslate null: Nether stone), one chunk in how many gets
 	 * one, how many blocks it is, the height range it sits in, and whether a block touching air is passed over (buried ore).
-	 * Andy's Hardrock picks: few big veins, as Powers' BigVeins lays at worldgen, and diamond and debris all but never.
+	 * Andy's Hardrock picks: few big veins, as Powers' BigVeins lays at worldgen, and never diamond or debris.
 	 */
 	record Vein(Block stone, @Nullable Block deep, int chance, int size, int minY, int maxY, boolean buried) {
 	}
@@ -60,12 +66,17 @@ public final class GroundChanges {
 			new Vein(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, 20, 110, -16, 96, false)),
 		List.of(new Vein(Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, 48, 60, -64, 32, false),
 			new Vein(Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE, 12, 20, -32, 32, false)),
-		List.of(new Vein(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE, 900, 3, -64, -24, true)),
+		// (Dread lays no diamond: Andy, 2026-11-12, diamond and netherite are the old world's leftovers, found only in chests)
+		List.of(),
 		List.of());
 	/** The Nether's veins by tier. */
 	static final List<List<Vein>> NETHER = List.of(
-		List.of(), List.of(), List.of(), List.of(),
-		List.of(new Vein(Blocks.ANCIENT_DEBRIS, null, 1200, 2, 8, 118, true)));
+		List.of(), List.of(), List.of(), List.of(), List.of());
+
+	/** Powers' ice caves and their rock, by id (see {@link #iceCaveRock}); an ore pocket there is deepslate below this height. */
+	static final ResourceKey<Biome> ICE_CAVES = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("jaymospowers", "ice_caves"));
+	static final TagKey<Block> ICE_CAVE_ROCK = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("jaymospowers", "ice_cave_rock"));
+	static final int ICE_POCKET_DEEPSLATE_BELOW = 0;
 
 	/** The highest tier a chunk has been seeded for. Saved with the chunk. */
 	static final AttachmentType<Integer> SEEDED = AttachmentRegistry.create(JaymosKingdoms.id("ground_seeded"), builder -> builder.persistent(Codec.INT));
@@ -168,9 +179,14 @@ public final class GroundChanges {
 			} else if (state.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES)) {
 				ore = vein.deep();
 			}
+			boolean inIce = ore == null && vein.deep() != null && iceCaveRock(level, pos, state);
+			if (inIce) {
+				ore = pos.getY() < ICE_POCKET_DEEPSLATE_BELOW ? vein.deep() : vein.stone();
+			}
 			if (ore != null && !(vein.buried() && exposed(chunk, pos))) {
 				level.setBlock(pos, ore.defaultBlockState(), Block.UPDATE_CLIENTS);
 				laid = true;
+				icePocket(level, chunk, pos);
 				if (y > topY) {
 					topX = x;
 					topY = y;
@@ -190,6 +206,38 @@ public final class GroundChanges {
 			tell(level, vein.stone(), topX, topY, topZ, random);
 		}
 		return laid;
+	}
+
+	/**
+	 * Jaymo's Powers' ice caves: their rock is packed ice and calcite ({@code #jaymospowers:ice_cave_rock}), and ore lies in
+	 * them in pockets of stone (deepslate deep down), so a tier's veins run on through the ice as they do through stone.
+	 * Without Powers there are no ice caves and this is never true.
+	 */
+	private static boolean iceCaveRock(ServerLevel level, BlockPos pos, BlockState state) {
+		return state.is(ICE_CAVE_ROCK) && level.getBiome(pos).is(ICE_CAVES);
+	}
+
+	/**
+	 * The ice cave rock round an ore laid in an ice cave turns to stone (or deepslate): the ore's pocket. Only inside the
+	 * chunk. (An ore laid in stone an earlier ore's pocket left still gets its own pocket.)
+	 */
+	private static void icePocket(ServerLevel level, LevelChunk chunk, BlockPos ore) {
+		ChunkPos cp = chunk.getPos();
+		boolean ice = false;
+		for (Direction d : Direction.values()) {
+			BlockPos near = ore.relative(d);
+			ice |= near.getX() >> 4 == cp.x() && near.getZ() >> 4 == cp.z() && !level.isOutsideBuildHeight(near) && chunk.getBlockState(near).is(ICE_CAVE_ROCK);
+		}
+		if (!ice || !level.getBiome(ore).is(ICE_CAVES)) {
+			return;
+		}
+		for (Direction d : Direction.values()) {
+			BlockPos near = ore.relative(d);
+			if (near.getX() >> 4 != cp.x() || near.getZ() >> 4 != cp.z() || level.isOutsideBuildHeight(near) || !chunk.getBlockState(near).is(ICE_CAVE_ROCK)) {
+				continue;
+			}
+			level.setBlock(near, (near.getY() < ICE_POCKET_DEEPSLATE_BELOW ? Blocks.DEEPSLATE : Blocks.STONE).defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
 	}
 
 	/**

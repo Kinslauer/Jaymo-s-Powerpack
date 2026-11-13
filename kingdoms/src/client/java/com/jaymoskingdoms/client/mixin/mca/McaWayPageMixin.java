@@ -20,7 +20,11 @@ abstract class McaWayPageMixin {
 	private void jaymoskingdoms$wayPage(MCAButton button, CallbackInfo ci) {
 		InteractScreen self = (InteractScreen)(Object)this;
 		String id = button.identifier();
-		if (WAY.equals(id)) {
+		if ("gui.button.orders".equals(id) && self instanceof McaInteractScreenAccessor interact) {
+			// Orders stands in for MCA's Follow Me and Stay Here: our own orders screen for this villager
+			com.jaymoskingdoms.client.FollowersScreen.open(interact.jaymoskingdoms$villager().asEntity());
+			ci.cancel();
+		} else if (WAY.equals(id)) {
 			self.setLayout(WAY_PAGE);
 			ci.cancel();
 		} else if ("gui.button.backarrow".equals(id) && WAY_PAGE.equals(self.getActiveScreen())) {

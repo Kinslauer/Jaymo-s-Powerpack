@@ -44,38 +44,41 @@ Built in Powers 0.21.63 (branch `claude/fishing-fight-track-a`): `FishBite`, `Fi
       (tuna, sharks); the metal rod becomes the sea rod's tier (Reel to Fish, Advanced Fishing)
 - [x] Baits: natural baits used up per catch (worm, maggots, dough, corn, boilie, bait fish, lugworm) and lures that stay on
       but can snap (spinner, wobbler, soft shad, pirk, trolling squid); each rod + bait has its own catch table (Reel to Fish)
-- [ ] Lure depth: let the lure sink before reeling to reach deeper fish (Advanced Fishing)
+- [x] Lure depth: let the lure sink before reeling to reach deeper fish (Advanced Fishing)
 - [x] Groundbait: thrown into a spot, raises bites there for a while (Advanced Fishing, Legendary Fishing)
-- [ ] Rod pod with a bite alarm: holds up to three rods, beeps and gives a redstone signal on a bite (Reel to Fish,
+- [x] Rod pod with a bite alarm: holds up to three rods, beeps and gives a redstone signal on a bite (Reel to Fish,
       Advanced Fishing)
 - [x] Landing net: scoops small fish, shrimp, crabs and jellyfish (Reel to Fish)
 - [x] Live bait: a small fish you caught, put on the hook, draws predators and big fish (True Fishing)
 - [x] Villager fishermen sell bait and lures (True Fishing)
-- [ ] Ice fishing: cut a hole in ice and fish through it (True Fishing)
+- [x] Ice fishing: cut a hole in ice and fish through it (True Fishing)
 - [x] Trolling: fish from a moving boat with the line out behind (True Fishing)
 - [x] Magnet fishing: a magnet on the line pulls up scrap and lost things (True Fishing)
-- [ ] Crab pot: baited underwater, catches crabs, lobster, shrimp and crayfish over time (Reel to Fish)
+- [x] Crab pot: baited underwater, catches crabs, lobster, shrimp and crayfish over time (Reel to Fish)
 
 ## Track C: fish
-- [ ] Many more species, each with its own water, climate, time of day and size range: freshwater (carp, pike, perch,
+- [x] Many more species, each with its own water, climate, time of day and size range: freshwater (carp, pike, perch,
       zander, bream, tench, catfish, eel, trout, chub...), northern (char, grayling, whitefish, burbot), sea (mackerel,
       herring, pollock, sea bass, halibut, swordfish), sharks (catshark, dogfish, blue shark, hammerhead, great white),
       critters (crayfish, crab, lobster, shrimp, jellyfish); our own names, models and textures (Reel to Fish, Aquaculture)
-- [ ] Night fish: eels and catfish after dark, zander at dusk (Reel to Fish)
-- [ ] Schools and hunters: fish come in schools, and predators chase them, so where the predators hunt the fishing is better (True Fishing)
-- [ ] Fish from other mods count (Naturalist, Aquaculture-style mods) through a compat class (True Fishing)
-- [ ] Seasons: fish activity by Kitchen's seasons (Advanced Fishing uses Serene Seasons)
-- [ ] Size curve: half of all fish small, about 1 in 100 at the top of its range (Reel to Fish)
-- [ ] Legendary trophy fish: one rare named giant per water, a long fight, mounts on a wall plaque (Advanced Fishing)
+- [x] Night fish: eels and catfish after dark, zander at dusk (Reel to Fish)
+- [x] Schools and hunters: fish come in schools, and predators chase them, so where the predators hunt the fishing is better (True Fishing)
+- [x] Fish from other mods count (Naturalist, Aquaculture-style mods) through a compat class (True Fishing)
+- [x] Seasons: fish activity by Kitchen's seasons (Advanced Fishing uses Serene Seasons)
+- [x] Size curve: half of all fish small, about 1 in 100 at the top of its range (Reel to Fish)
+- [x] Legendary trophy fish: one rare named giant per water, a long fight, mounts on a wall plaque (Advanced Fishing)
 
 ## Track D: catch and records
-- [ ] Catch and release: a landed fish can be put back alive into water or an aquarium; sneak + use shows its stats (Reel to Fish)
-- [ ] Personal bests: the heaviest of each species is kept through death, a fanfare on a new record, `/pb` lists them (Reel to Fish)
-- [ ] Fisher's journal: species found, where and when they bite, best bait, your records (Advanced Fishing)
-- [ ] Keepnet: holds live fish in the water (Advanced Fishing)
-- [ ] Mounted trophies: a big catch hangs on a wall plaque with its weight (True Fishing, Advanced Fishing)
-- [ ] Tournaments: a village fishing contest, heaviest fish in a time wins (True Fishing)
-- [ ] Selling fish by weight to fishermen villagers (Advanced Fishing's market, done through villager trades instead)
+- [x] Catch and release: a landed fish can be put back alive into water or an aquarium; sneak + use shows its stats (Reel to Fish)
+- [x] Personal bests: the heaviest of each species is kept through death, a fanfare on a new record, `/pb` lists them (Reel to Fish);
+      built as the Fisher's Journal screen instead of `/pb` (no slash commands for player features)
+- [x] Fisher's journal: species found, where and when they bite, best bait, your records (Advanced Fishing)
+- [x] Keepnet: holds live fish in the water (Advanced Fishing)
+- [x] Mounted trophies: a big catch hangs on a wall plaque with its weight (True Fishing, Advanced Fishing)
+- [x] Tournaments: a village fishing contest, heaviest fish in a time wins (True Fishing)
+- [x] Selling fish by weight to fishermen villagers (Advanced Fishing's market, done through villager trades instead);
+      built as a fisherman screen (Kingdoms' "Talk about fishing", or hand a fisherman a fish), since a vanilla trade can't
+      price by weight
 
 ## Not taken
 - Realistic 3D rods (Andy: too realistic looking), bait boats, GPS and sonar, camp chairs and shelters, used-gear market:

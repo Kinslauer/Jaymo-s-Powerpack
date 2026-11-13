@@ -32,6 +32,8 @@ public final class Wild {
 	public static EntityType<Moose> MOOSE;
 	/** (0.7.610) The grizzly mini-boss, with its spawn egg. */
 	public static EntityType<Grizzly> GRIZZLY;
+	public static EntityType<SnowGiant> SNOW_GIANT;
+	static final int SNOW_GIANT_WEIGHT = 1;
 	/** The muskox of the far cold ({@link Muskox}), with its spawn egg; herds ({@link HerdPull}) and fed hunters ({@link FedPredators}) come with it. */
 	public static EntityType<Muskox> MUSKOX;
 	/** Where grizzlies roam, and their natural spawn weight (rare: one in a wide stretch, see {@link Grizzly#checkSpawn}). */
@@ -54,6 +56,12 @@ public final class Wild {
 			.clientTrackingRange(10), Grizzly.createAttributes());
 		SpawnPlacements.register(GRIZZLY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Grizzly::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GRIZZLY), MobCategory.CREATURE, GRIZZLY, GRIZZLY_WEIGHT, 1, 1);
+		SNOW_GIANT = com.jaymoskingdoms.beasts.Beasts.type("snow_giant", EntityType.Builder.of(SnowGiant::new, MobCategory.CREATURE).sized(3.4F, 3.3F)
+			.clientTrackingRange(10), SnowGiant.createAttributes());
+		SpawnPlacements.register(SNOW_GIANT, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SnowGiant::checkSnowSpawn);
+		BiomeModifications.addSpawn(BiomeSelectors.includeByKey(net.minecraft.world.level.biome.Biomes.SNOWY_PLAINS, net.minecraft.world.level.biome.Biomes.ICE_SPIKES),
+			MobCategory.CREATURE, SNOW_GIANT, SNOW_GIANT_WEIGHT, 1, 1);
+		SnowGiant.register();
 		MUSKOX = com.jaymoskingdoms.beasts.Beasts.type("muskox", EntityType.Builder.of(Muskox::new, MobCategory.CREATURE).sized(1.4F, 1.55F)
 			.clientTrackingRange(10), Muskox.createAttributes());
 		SpawnPlacements.register(MUSKOX, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Muskox::checkSpawn);

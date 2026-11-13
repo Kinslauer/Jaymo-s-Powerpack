@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymospowers:block/eden/pulse_tree_planks",
+    "side": "jaymospowers:block/eden/pulse_tree_bookshelf"
+  }
+}

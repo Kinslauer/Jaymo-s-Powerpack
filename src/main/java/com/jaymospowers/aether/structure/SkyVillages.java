@@ -3,6 +3,7 @@ package com.jaymospowers.aether.structure;
 import com.jaymospowers.aether.monster.AetherMonsters;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -195,6 +196,13 @@ final class SkyVillages {
 				s.set(row[0][0], f, row[0][1], Kit.with(Kit.other("jaymoskitchen:stove", Kit.v("smoker")), BlockStateProperties.HORIZONTAL_FACING, s.dir(door)));
 				s.set(row[1][0], f, row[1][1], Kit.with(Kit.other("jaymoskitchen:oak_cabinet", Kit.v("barrel")), BlockStateProperties.HORIZONTAL_FACING, s.dir(door)));
 				s.set(row[2][0], f, row[2][1], Kit.other("jaymoskitchen:cooking_pot", Kit.v("cauldron")));
+				// the menu board (Kingdoms') on the cabinet, only where Kitchen is there to stock it
+				if (!Kit.other("jaymoskitchen:stove", Blocks.AIR.defaultBlockState()).isAir()) {
+					BlockState board = Kit.other("jaymoskingdoms:menu_board", Blocks.AIR.defaultBlockState());
+					if (!board.isAir()) {
+						s.set(row[1][0], f + 1, row[1][1], Kit.with(board, BlockStateProperties.HORIZONTAL_FACING, s.dir(door)));
+					}
+				}
 				s.set(u0 + 1, f, v1 - 1, Kit.other("jaymoskitchen:cabbage_crate", Kit.v("hay_block")));
 				s.set(u1 - 1, f, v1 - 1, Kit.other("jaymoskitchen:carrot_crate", Kit.v("hay_block")));
 				s.set(mu, f, mv, Kit.b(p.wood + "_fence"));

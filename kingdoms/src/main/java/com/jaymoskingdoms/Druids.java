@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <ul>
  * <li><b>Studying.</b> A Druid knows a beast's shape ({@link #WOLF}, {@link #BEAR}, {@link #HAWK}, {@link #FISH}) once they have
- * either fought it ({@link FoeLore} one star of that kind of beast) or watched it a while: {@link #STUDY_TICKS} of calm
+ * either fought it ({@link FoeStudy} one star of that kind of beast) or watched it a while: {@link #STUDY_TICKS} of calm
  * looking (standing still, sneaking or walking slowly) within {@link #STUDY_RANGE} blocks of one in plain sight.</li>
  * <li><b>The shape.</b> The class key takes the selected shape (sneak and the key picks the next one studied) for
  * {@link #SHAPE_TICKS}, or lets it go sooner. It is a choice with a timer, not a curse ({@link WerewolfPlayers} is the curse): a
@@ -174,7 +174,7 @@ public final class Druids {
 			return true;
 		}
 		for (String kind : KIN.get(form)) {
-			if (FoeLore.stars(player, kind) >= 1) {
+			if (FoeStudy.stars(player, kind) >= 1) {
 				return true;
 			}
 		}
@@ -423,7 +423,7 @@ public final class Druids {
 		Map<String, Integer> watched = null;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(STUDY_RANGE),
 			x -> x.isAlive() && x != player && !(x instanceof Player) && !isStandIn(x))) {
-			String path = FoeLore.kind(e);
+			String path = FoeStudy.kind(e);
 			for (String form : FORMS) {
 				if (KIN.get(form).contains(path) && player.hasLineOfSight(e)) {
 					if (watched == null) {

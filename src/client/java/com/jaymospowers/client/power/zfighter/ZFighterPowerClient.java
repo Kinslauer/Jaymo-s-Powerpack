@@ -287,15 +287,16 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.bomb() < 0) {
 			return;
 		}
-		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SPIRIT, Minecraft.getInstance().player);
 		float fill = Mth.clamp(state.bomb() / 100.0F, 0.0F, 1.0F);
 		int width = 80;
 		// (HUD rework) Spirit Bomb bar (kept 80 wide): ABOVE zone, row 21
 		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:zfighter_spirit", 21, width, 16);
 		if (at == null) {
-			ZFighterHudLayout.end(graphics);
 			return;
 		}
+		// (the editor's move and scale go about where the zone put it)
+		ZFighterHudLayout.zonedAt(ZFighterHudLayout.Piece.SPIRIT, at[0], at[1], width, 16, graphics.guiWidth(), graphics.guiHeight());
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SPIRIT, Minecraft.getInstance().player);
 		int cx = at[0] + width / 2;
 		int x0 = at[0];
 		int y = at[1] + 11;
@@ -322,7 +323,6 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (state.waveFrom() < 0) {
 			return;
 		}
-		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.CHARGE, player);
 		float fill = Mth.clamp((now - state.waveFrom()) / (float)com.jaymospowers.power.zfighter.ZFighterArts.full(ZFighterTraining.of(player).charged(), WAVE_FULL), 0.0F, 1.0F);
 		// (0.13.27) his own ki colour in base form
 		Integer ki = Minecraft.getInstance().player == null ? null : Minecraft.getInstance().player.getAttached(ZFighterPower.KI_COLOR);
@@ -330,9 +330,11 @@ public final class ZFighterPowerClient implements PowerClient {
 		// (HUD rework) Ki Wave charge: ABOVE zone, row 20
 		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.ABOVE, "jaymospowers:zfighter_wave", 20, com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H);
 		if (at == null) {
-			ZFighterHudLayout.end(graphics);
 			return;
 		}
+		ZFighterHudLayout.zonedAt(ZFighterHudLayout.Piece.CHARGE, at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W,
+			com.jaymospowers.client.hud.HudStyle.LABELLED_BAR_H, graphics.guiWidth(), graphics.guiHeight());
+		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.CHARGE, player);
 		// (0.13.31) named for what's on V: the lineage's own wave (Crimson Cannon, Spiral Lance, Frost Needle) or the Ki Bomb
 		Component name = ZFighterLineage.techniqueName(player, ZFighterTraining.of(player).charged());
 		com.jaymospowers.client.hud.HudStyle.labelledBar(graphics, font, name.copy().withColor(color), at[0], at[1], com.jaymospowers.client.hud.HudStyle.CENTRE_BAR_W, fill, fill >= 1.0F ? pulse(0xFFFFFF, color, time * 0.6F) : color);

@@ -66,12 +66,24 @@ public final class Tanning {
 	public static Item TANNED_LEATHER;
 	public static Item LEATHER_STRAPS;
 
-	/** A batch soaking in one cauldron: how many hides, and the game time they're done. */
-	public record Soak(int hides, long ready) {
+	/**
+	 * A batch soaking in one cauldron: how many hides, the game time they're done, and the animal they all came off
+	 * ({@link HideOrigin}: empty if plain, {@link #MIXED} once two animals' leather share the water).
+	 */
+	public record Soak(int hides, long ready, String hide) {
+		public static final String MIXED = "-";
 		public static final Codec<Soak> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("hides").forGetter(Soak::hides),
-			Codec.LONG.fieldOf("ready").forGetter(Soak::ready)
+			Codec.LONG.fieldOf("ready").forGetter(Soak::ready),
+			Codec.STRING.optionalFieldOf("hide", MIXED).forGetter(Soak::hide)
 		).apply(i, Soak::new));
+
+		/** The batch's animal with one more piece of leather in: the same animal, or mixed. */
+		String with(int had, ItemStack leather) {
+			net.minecraft.resources.Identifier animal = HideOrigin.of(leather);
+			String its = animal == null ? MIXED : animal.toString();
+			return had == 0 || its.equals(this.hide) ? its : MIXED;
+		}
 	}
 
 	/** Every soaking cauldron in a dimension, by packed block position, saved with the level. Server only. */
@@ -188,12 +200,13 @@ public final class Tanning {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.tanning.no_bark"));
 			return;
 		}
+		String hide = was == null ? new Soak(0, 0L, Soak.MIXED).with(0, leather) : was.with(hides, leather);
 		if (!player.hasInfiniteMaterials()) {
 			player.getInventory().getItem(bark).shrink(1);
 			leather.shrink(1);
 		}
 		Map<String, Soak> more = new HashMap<>(soaks);
-		more.put(key(pos), new Soak(hides + 1, level.getGameTime() + TAN_TICKS));
+		more.put(key(pos), new Soak(hides + 1, level.getGameTime() + TAN_TICKS, hide));
 		level.setAttached(SOAKS, more);
 		level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.6F, 1.3F);
 		level.sendParticles(ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 8, 0.25, 0.05, 0.25, 0.1);
@@ -223,7 +236,12 @@ public final class Tanning {
 		Map<String, Soak> less = new HashMap<>(soaks);
 		less.remove(key(pos));
 		level.setAttached(SOAKS, less);
-		player.getInventory().placeItemBackInInventory(new ItemStack(TANNED_LEATHER, soak.hides()), Prediction.SERVER_ONLY);
+		ItemStack tanned = new ItemStack(TANNED_LEATHER, soak.hides());
+		net.minecraft.resources.Identifier animal = soak.hide().equals(Soak.MIXED) ? null : net.minecraft.resources.Identifier.tryParse(soak.hide());
+		if (animal != null && HideOrigin.HIDE_OF != null) {
+			tanned.set(HideOrigin.HIDE_OF, animal);
+		}
+		player.getInventory().placeItemBackInInventory(tanned, Prediction.SERVER_ONLY);
 		LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 		level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 0.8F, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.tanning.done", soak.hides()));

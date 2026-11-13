@@ -425,6 +425,7 @@ final class Navies {
 
 	/** A ship that's done (made harbour): her crew and she are gone. */
 	static void stow(Ship ship) {
+		SeaTrade.forget(ship);
 		for (LivingEntity hand : List.copyOf(ship.crewAboard())) {
 			hand.discard();
 		}

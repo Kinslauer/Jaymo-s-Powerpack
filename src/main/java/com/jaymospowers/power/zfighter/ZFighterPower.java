@@ -466,6 +466,7 @@ public final class ZFighterPower implements Power {
 		// (0.17.146) the Z Fighter characters as MCA villagers, and their talk screens
 		ZFighterNpcs.init();
 		ZFighterPatrol.init();
+		ZFighterEscorts.init();
 		ZFighterRaiders.init();
 		ZFighterHighSky.init();
 		ZFighterCorruption.init();

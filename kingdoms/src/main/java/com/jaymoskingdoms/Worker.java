@@ -62,7 +62,9 @@ public interface Worker {
 	/** The tool for {@code role} (a camp's builders have stone ones). */
 	static ItemStack toolFor(int role, boolean wild) {
 		if (role == Folk.FARMER) {
-			return new ItemStack(Items.IRON_HOE);
+			// (Jaymo's Powers' pitchfork when it is here: farmers carry one)
+			net.minecraft.world.item.Item fork = Careers.pitchfork();
+			return new ItemStack(fork != null ? fork : Items.IRON_HOE);
 		}
 		if (role == Folk.MINER) {
 			return new ItemStack(Items.IRON_PICKAXE);

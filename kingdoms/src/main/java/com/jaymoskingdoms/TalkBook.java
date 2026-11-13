@@ -241,6 +241,22 @@ final class TalkBook {
 		return c -> grown(c) && Knowledge.level(c.player()) >= least && Knowledge.level(c.player()) <= most;
 	}
 
+	// what the tellers of a town say once a milestone is done (Retaking, StoryTellers): priests, the Truth's clerics, court wizards
+	private static Gate story(String milestone) {
+		return c -> grown(c) && Retaking.done(c.player(), milestone);
+	}
+
+	private static Gate level(int least) {
+		return c -> grown(c) && Knowledge.level(c.player()) >= least;
+	}
+
+	private static final Gate SEVEN_PRIEST = c -> grown(c) && Accusations.priest(c.v()) && c.faith() != Patron.TRUTH;
+	private static final Gate TRUTH_PRIEST = c -> grown(c) && Accusations.priest(c.v()) && c.faith() == Patron.TRUTH;
+	private static final Gate COURT_WIZARD = c -> grown(c) && c.job().equals("wizard");
+	private static final Gate CASTER = c -> Classes.is(c.player(), Classes.PlayerClass.MAGE) || Classes.is(c.player(), Classes.PlayerClass.SORCERER);
+	private static final Gate WARRIOR_BORN = c -> Heritage.is(c.player(), Heritage.Kind.WARRIORBORN);
+	private static final Gate FROSTBORN = c -> Heritage.is(c.player(), Heritage.Kind.FROSTBORN);
+
 	private static final Gate READ_DEFENCE = c -> LoreCodex.holds(c.player(), Retaking.LONG_DEFENCE_BOOK)
 		|| com.jaymoskingdoms.films.LoreFilms.seen(c.player(), com.jaymoskingdoms.films.LoreFilms.LONG_DEFENCE);
 	/** How far (blocks) the keep is before the ford talk calls it a long way, and a very long way. */
@@ -572,6 +588,27 @@ final class TalkBook {
 			r("a", 1, 0, 1), r("b", 0, -1, -1), r("c", 1, 0, 2)));
 		t.add(lifeOnce("retaking_songs", act(4, 5), NO_ARGS,
 			r("a", 1, 1, 2), r("b", 0, 1, 1), r("c", 1, 2, 1)));
+		// ---- the Retaking's tellers (Retaking): priests, the Truth's clerics and court wizards, each with something new once a milestone is done
+		t.add(lifeOnce("retaking_priest_oath", SEVEN_PRIEST.and(story("sworn")), NO_ARGS, r("a", 1, 0, 1), r("b", 1, 0, 2)));
+		t.add(lifeOnce("retaking_priest_stones", SEVEN_PRIEST.and(story("monolith")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 1)));
+		t.add(lifeOnce("retaking_priest_sky", SEVEN_PRIEST.and(story("star")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, -1, 1)));
+		t.add(lifeOnce("retaking_priest_below", SEVEN_PRIEST.and(story("abyss")), NO_ARGS, r("a", 1, 1, 1), r("b", 1, 0, 0)));
+		t.add(lifeOnce("retaking_priest_light", SEVEN_PRIEST.and(story("dragon")), NO_ARGS, r("a", 1, 0, 2), r("b", 0, 1, 1)));
+		t.add(lifeOnce("retaking_truth_book", TRUTH_PRIEST.and(story("long_defence")), NO_ARGS, r("a", 0, 1, 0), r("b", 1, 0, 0)));
+		t.add(lifeOnce("retaking_truth_stones", TRUTH_PRIEST.and(story("monolith")), NO_ARGS, r("a", 0, 1, 0), r("b", 0, 0, 1)));
+		t.add(lifeOnce("retaking_truth_argues", TRUTH_OLD.and(level(1)), NO_ARGS, r("a", 0, 1, 0), r("b", 0, 1, -1)));
+		t.add(lifeOnce("retaking_truth_weighed", TRUTH_PRIEST.and(story("weighed")), NO_ARGS, r("a", 0, 0, 0), r("b", 1, 0, 0)));
+		t.add(lifeOnce("retaking_truth_light", TRUTH_PRIEST.and(story("dragon")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 1)));
+		t.add(lifeOnce("retaking_wizard_goblin", COURT_WIZARD.and(story("goblin_king")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 0)));
+		t.add(lifeOnce("retaking_wizard_stones", COURT_WIZARD.and(story("monolith")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 0)));
+		t.add(lifeOnce("retaking_wizard_aether", COURT_WIZARD.and(story("aether")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 0)));
+		t.add(lifeOnce("retaking_wizard_fallen", COURT_WIZARD.and(story("star")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 0)));
+		t.add(lifeOnce("retaking_wizard_grue", COURT_WIZARD.and(story("grue")), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 1, 0)));
+		t.add(lifeOnce("retaking_wizard_forbidden", COURT_WIZARD.and(CASTER).and(level(2)), NO_ARGS, r("a", 1, 1, 1), r("b", 1, 0, 0)));
+		t.add(lifeOnce("retaking_wizard_flux", COURT_WIZARD.and(CASTER).and(level(3)), NO_ARGS, r("a", 1, 1, 1), r("b", 1, 0, 0)));
+		// ---- heritage (Retaking): the Warrior-born watched in the first act, the Frostborn hearing "home" in the third
+		t.add(lifeOnce("retaking_blood_warrior", WARRIOR_BORN.and(level(0)).and(c -> Knowledge.level(c.player()) == 0), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 0, -1)));
+		t.add(lifeOnce("retaking_blood_frost", FROSTBORN.and(c -> grown(c) && Knowledge.level(c.player()) == 2), NO_ARGS, r("a", 1, 0, 1), r("b", 0, 0, 1)));
 		// ---- trust
 		t.add(talk("money_loan", LENDER, c -> new Object[] {com.jaymoskingdoms.money.Money.text(c.player(), com.jaymoskingdoms.money.Money.worth(Talks.LOAN_EMERALDS))}, Talks.WEIGHT_LENDER, false, false,
 			r("a", 1, 0, 1, Outcome.of(Out.LOAN)), r("b", 0, 1, 0), r("c", 0, 0, -2)));

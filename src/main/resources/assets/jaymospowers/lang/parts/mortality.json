@@ -49,6 +49,7 @@
 	"message.jaymospowers.mortality.arrow_out": "With the leg held still, you work the arrowhead free.",
 	"message.jaymospowers.mortality.mended": "You've mended. You're no longer living on borrowed time.",
 	"message.jaymospowers.mortality.wake.sheltered": "You wake to low voices and the smell of herbs. Someone found you and carried you in.",
+	"message.jaymospowers.mortality.wake.berth": "You wake in your own berth, the deck creaking and the sea moving under you. You don't remember coming aboard.",
 	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone.",
 	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating.",
 	"message.jaymospowers.mortality.turning": "Everything goes dark. Something in your blood keeps moving after your heart stops.",

@@ -438,6 +438,12 @@ public final class FirstPersonArms {
 		if (avatar.deathTime > 0.0F) {
 			return;
 		}
+		if (main && self.hasAttached(com.jaymospowers.power.zfighter.FrostBeam.BEAMING)) {
+			// a Frost-born's beam: the hand points it, steady but for a slight cold tremble
+			mix.add(1.0F, KI_POINT);
+			mix.shake(1.0F, PITCH, Mth.sin(avatar.ageInTicks / 20.0F * KI_BEAT) * KI_TREMBLE_TURN * 0.5F);
+			return;
+		}
 		int pose = ZFighterHandsPose.heldPose(self);
 		boolean firing = ZFighterWaveBeam.out(self) && !com.jaymospowers.power.zfighter.ZFighterLineage.ape(self);
 		float[] t = ZFighterHandsPose.arm(self.getId(), right, avatar.ageInTicks);

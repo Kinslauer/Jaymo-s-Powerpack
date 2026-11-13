@@ -1080,7 +1080,7 @@ public final class Careers {
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.0);
 	}
 
-	private static boolean ore(BlockState state) {
+	static boolean ore(BlockState state) {
 		return state.is(BlockItemTags.COAL_ORES.block()) || state.is(BlockTags.IRON_ORES) || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.GOLD_ORES)
 			|| state.is(BlockItemTags.REDSTONE_ORES.block()) || state.is(BlockItemTags.LAPIS_ORES.block()) || state.is(BlockItemTags.DIAMOND_ORES.block()) || state.is(BlockItemTags.EMERALD_ORES.block());
 	}
@@ -1518,13 +1518,30 @@ public final class Careers {
 		};
 	}
 
+	/** Jaymo's Powers' pitchfork (a farm tool, thrown spent from the hand), or null without Powers. */
+	static @Nullable Item pitchfork() {
+		return BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "pitchfork")).orElse(null);
+	}
+
+	private static List<ItemStack> farmerKit() {
+		List<ItemStack> kit = new java.util.ArrayList<>(List.of(new ItemStack(Items.IRON_HOE)));
+		Item fork = pitchfork();
+		if (fork != null) {
+			kit.add(new ItemStack(fork));
+		}
+		kit.add(new ItemStack(Items.WHEAT_SEEDS, 16));
+		kit.add(new ItemStack(Items.BONE_MEAL, 8));
+		return kit;
+	}
+
 	/** A job's tools and stock. */
 	static List<ItemStack> kit(Job job) {
 		return switch (job) {
 			case BUTCHER -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.COOKED_BEEF, 6));
 			case WOODCUTTER -> List.of(new ItemStack(Items.IRON_AXE), new ItemStack(Items.OAK_LOG, 16));
 			case BUILDER -> List.of(new ItemStack(Items.IRON_SHOVEL), new ItemStack(Items.OAK_PLANKS, 32), new ItemStack(Items.LADDER, 8));
-			case FARMER -> List.of(new ItemStack(Items.IRON_HOE), new ItemStack(Items.WHEAT_SEEDS, 16), new ItemStack(Items.BONE_MEAL, 8));
+			// (a farmhand carries the pitchfork Jaymo's Powers forges, when it is here: a farm tool that can be thrown)
+			case FARMER -> farmerKit();
 			case MINER -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.TORCH, 16));
 			case FISHER -> List.of(new ItemStack(Items.FISHING_ROD), new ItemStack(Items.COD, 6));
 			case SMITH -> List.of(new ItemStack(Items.IRON_PICKAXE), new ItemStack(Items.IRON_INGOT, 6));

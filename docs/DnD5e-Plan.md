@@ -165,9 +165,9 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **G8** (`Lifestyle`): sleep, spending, tailor clothes, baths (5 s soaking in still water); audiences +-20 rep floor,
   guard halts, priests' alms.
 - **G9** (`Lessons`): tongues (4 lessons), trades (3), fighting styles (3, plus a Powers boxing lesson).
-- **G10** (`Research`, `FoeLore` new): sage or a lectern with 6+ shelves; topics "creature fears" and (added by the
+- **G10** (`Research`, `FoeStudy` new): sage or a lectern with 6+ shelves; topics "creature fears" and (added by the
   lead) "where a heart is hid" for Halvard's urn within 1500 blocks. `Research.addTopic` for I3 later. A day's study
-  is 1-2 minutes, once a game day. FoeLore stars at 3/12/30 kills: +4% dealt, -3% taken each.
+  is 1-2 minutes, once a game day. FoeStudy stars at 3/12/30 kills: +4% dealt, -3% taken each.
 
 ### Patch 6
 - **H2** (`SpellParts`): voice + free hand for every staff/tome/scroll cast (Spell Engine: voice and hand only).

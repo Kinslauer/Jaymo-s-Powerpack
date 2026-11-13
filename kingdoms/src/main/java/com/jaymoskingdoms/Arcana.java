@@ -80,7 +80,9 @@ public final class Arcana {
 	/** (0.7.231) Death's scrolls ({@link Necromancy}) and blood's ({@link Hemomancy}). */
 	/** Bulwark, Tide Pearl and Harrying Gale ({@link SorceryPicks}). */
 	public static Item SCROLL_BULWARK, SCROLL_TIDE_PEARL, SCROLL_HARRYING_GALE;
-	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
+	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_SPEAK_WITH_DEAD, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
+	/** Dominion: a foe turned to your side a while (docs/Pawn-Plan.md H1, {@link Possession#dominion}). */
+	public static Item SCROLL_DOMINION;
 	/** The scrolls of the magic rules' spells ({@link NewSpells}), by spell. */
 	static final java.util.Map<String, Item> NEW_SCROLLS = new java.util.HashMap<>();
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
@@ -104,7 +106,9 @@ public final class Arcana {
 		SCROLL_RESTORATION = item("scroll_of_restoration", p -> new Scroll(p, "restoration"));
 		SCROLL_BLIGHT = item("scroll_of_blight", p -> new Scroll(p, "blight"));
 		SCROLL_WHISPERS = item("scroll_of_whispers", p -> new Scroll(p, "whispers"));
+		SCROLL_SPEAK_WITH_DEAD = item("scroll_of_speak_with_dead", p -> new Scroll(p, "speak_with_dead"));
 		SCROLL_DEATHS_DOOR = item("scroll_of_deaths_door", p -> new Scroll(p, "deaths_door"));
+		SCROLL_DOMINION = item("scroll_of_dominion", p -> new Scroll(p, "dominion"));
 		SCROLL_HEMORRHAGE = item("scroll_of_hemorrhage", p -> new Scroll(p, "hemorrhage"));
 		SCROLL_BLOOD_GRIP = item("scroll_of_blood_grip", p -> new Scroll(p, "blood_grip"));
 		SCROLL_FRENZY = item("scroll_of_frenzy", p -> new Scroll(p, "frenzy"));
@@ -117,7 +121,7 @@ public final class Arcana {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.TOTEM_OF_UNDYING;
 			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, SCROLL_MENDING, SCROLL_SANCTUARY,
-				SCROLL_RESTORATION, SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY,
+				SCROLL_RESTORATION, SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_SPEAK_WITH_DEAD, SCROLL_DEATHS_DOOR, SCROLL_DOMINION, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY,
 				SCROLL_BULWARK, SCROLL_TIDE_PEARL, SCROLL_HARRYING_GALE, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF, HEALER_STAFF)) {
 				output.insertAfter(after, item);
 				after = item;
@@ -151,8 +155,12 @@ public final class Arcana {
 			case Sorcery.NECROMANCER -> switch (random.nextInt(6)) {
 				case 0, 1 -> SCROLL_RAISING;
 				case 2, 3 -> SCROLL_DRAINING;
-				case 4 -> random.nextBoolean() ? SCROLL_BLIGHT : SCROLL_WHISPERS;
-				default -> random.nextInt(3) == 0 ? SCROLL_DEATHS_DOOR : SCROLL_BLIGHT;
+				case 4 -> switch (random.nextInt(3)) {
+					case 0 -> SCROLL_BLIGHT;
+					case 1 -> SCROLL_WHISPERS;
+					default -> SCROLL_SPEAK_WITH_DEAD;
+				};
+				default -> random.nextInt(3) == 0 ? SCROLL_DEATHS_DOOR : random.nextInt(3) == 0 ? SCROLL_DOMINION : SCROLL_BLIGHT;
 			};
 			case Sorcery.BLOOD_WITCH -> switch (random.nextInt(5)) {
 				case 0, 1 -> SCROLL_HEMORRHAGE;
@@ -181,7 +189,7 @@ public final class Arcana {
 
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
 	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration",
-		"blight", "whispers", "deaths_door", "hemorrhage", "blood_grip", "frenzy", "bulwark", "tide_pearl", "harrying_gale");
+		"blight", "whispers", "speak_with_dead", "deaths_door", "dominion", "hemorrhage", "blood_grip", "frenzy", "bulwark", "tide_pearl", "harrying_gale");
 	/** Every spell with a scroll, the magic rules' too. */
 	public static List<String> allSpells() {
 		List<String> all = new java.util.ArrayList<>(SPELLS);
@@ -217,7 +225,9 @@ public final class Arcana {
 			case "restoration" -> Restoration.restoration(level, player, power);
 			case "blight" -> Necromancy.blightSpell(level, player, power);
 			case "whispers" -> Necromancy.whispers(level, player);
+			case "speak_with_dead" -> Necromancy.speakWithDead(level, player);
 			case "deaths_door" -> Necromancy.deathsDoor(level, player, power);
+			case "dominion" -> Possession.dominion(level, player, power);
 			case "hemorrhage" -> Hemomancy.hemorrhage(level, player, power, false);
 			case "blood_grip" -> Hemomancy.gripSpell(level, player, power);
 			case "frenzy" -> Hemomancy.frenzy(level, player, power);
@@ -237,7 +247,9 @@ public final class Arcana {
 			case "restoration" -> SCROLL_RESTORATION;
 			case "blight" -> SCROLL_BLIGHT;
 			case "whispers" -> SCROLL_WHISPERS;
+			case "speak_with_dead" -> SCROLL_SPEAK_WITH_DEAD;
 			case "deaths_door" -> SCROLL_DEATHS_DOOR;
+			case "dominion" -> SCROLL_DOMINION;
 			case "hemorrhage" -> SCROLL_HEMORRHAGE;
 			case "blood_grip" -> SCROLL_BLOOD_GRIP;
 			case "frenzy" -> SCROLL_FRENZY;

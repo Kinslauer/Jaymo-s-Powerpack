@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 final class SwallowedPowerClient {
 	private static KeyMapping key;
 	private static boolean wasDown;
+	private static net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier lastSwallowed;
 
 	private SwallowedPowerClient() {
 	}
@@ -24,15 +25,43 @@ final class SwallowedPowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(SwallowedPowerClient::tick);
 	}
 
+	/** The key's name, for the HUD badge. */
+	static net.minecraft.network.chat.Component keyName() {
+		return key.getTranslatedKeyMessage();
+	}
+
 	private static void tick(Minecraft minecraft) {
-		if (minecraft.player == null || minecraft.getConnection() == null) {
+		net.minecraft.client.player.LocalPlayer player = minecraft.player;
+		if (player == null || minecraft.getConnection() == null) {
 			wasDown = false;
+			lastSwallowed = null;
 			return;
 		}
+		// the swallowed power's client half runs as the server's does: its tick, its visuals, its R on this key
+		com.jaymospowers.api.Power power = SwallowedPower.swallowed(player);
+		net.minecraft.resources.Identifier id = power == null ? null : power.id();
+		if (!java.util.Objects.equals(id, lastSwallowed)) {
+			PowerClient old = PowerClients.get(lastSwallowed);
+			if (old != null) {
+				old.onActiveChanged(player, false);
+			}
+			PowerClient now = PowerClients.get(id);
+			if (now != null) {
+				now.onActiveChanged(player, true);
+			}
+			lastSwallowed = id;
+		}
+		PowerClient client = PowerClients.get(id);
 		boolean down = key.isDown() && minecraft.gui.screen() == null;
 		if (down != wasDown) {
 			wasDown = down;
 			ClientPlayNetworking.send(new SwallowedPower.Key(down));
+			if (client != null) {
+				client.onKey(player, com.jaymospowers.api.PowerKey.ABILITY_1, down);
+			}
+		}
+		if (client != null) {
+			client.tick(minecraft, player);
 		}
 	}
 }

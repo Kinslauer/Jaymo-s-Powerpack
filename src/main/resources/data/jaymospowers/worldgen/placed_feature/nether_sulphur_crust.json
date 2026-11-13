@@ -1,0 +1,8 @@
+{
+  "feature": "jaymospowers:nether_sulphur_crust",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

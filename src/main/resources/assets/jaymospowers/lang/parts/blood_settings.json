@@ -3,5 +3,8 @@
   "options.jaymospowers.blood.light": "Light",
   "options.jaymospowers.blood.normal": "Normal",
   "options.jaymospowers.blood.heavy": "Heavy",
-  "options.jaymospowers.blood.tooltip": "How much blood you see: drops thrown by hits, and how long splashes lie. Trails and stains that others can track stay the same."
+  "options.jaymospowers.blood.tooltip": "How much blood you see: drops thrown by hits, how long pools and stains stay, and how many stains are shown at once. Others can still track the trails and stains.",
+  "subtitles.jaymospowers.blood.squelch": "Footsteps squelch in blood",
+  "subtitles.jaymospowers.blood.hit": "Wet hit",
+  "subtitles.jaymospowers.blood.burst": "Body bursts"
 }

@@ -240,6 +240,25 @@ public final class Wounds {
 		return index < 0 ? 0.0F : fraction(entity, part) * cap(entity, plan, index);
 	}
 
+	/** Whether any part of {@code entity} is below what it may heal to now ({@link Breaks#caps}): healing would take. */
+	public static boolean canHealMore(LivingEntity entity) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE) {
+			return entity.getHealth() < entity.getMaxHealth();
+		}
+		float max = entity.getMaxHealth();
+		float[] points = load(entity, plan);
+		float[] caps = Breaks.caps(entity, plan);
+		reconcile(points, plan, max, entity.getHealth(), caps);
+		for (int i = 0; i < points.length; i++) {
+			float most = plan.share(i) * max * (caps == null ? 1.0F : caps[i]);
+			if (points[i] < most - 0.01F) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static float cap(LivingEntity entity, BodyPlan plan, int index) {
 		return plan.share(index) * entity.getMaxHealth();
 	}

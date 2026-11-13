@@ -55,6 +55,8 @@ public final class BossBars {
 			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed()
 			// (0.7.142) the Nether forts' warlords and warbosses
 			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
+			// the fortress knight
+			|| com.jaymoskingdoms.nether.FortressKnight.is(entity)
 			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD
 			// (0.7.145) the Aether Giants
 			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity)
@@ -81,6 +83,11 @@ public final class BossBars {
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */
 	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar) {
+		show(level, boss, bar, p -> true);
+	}
+
+	/** As {@link #show(ServerLevel, LivingEntity, ServerBossEvent)}, only to those of them {@code to} lets see this bar. */
+	public static void show(ServerLevel level, LivingEntity boss, ServerBossEvent bar, java.util.function.Predicate<ServerPlayer> to) {
 		Set<UUID> hitters = HITTERS.get(boss.getUUID());
 		double r2 = RANGE * RANGE;
 		if (hitters != null) {
@@ -95,14 +102,14 @@ public final class BossBars {
 			}
 		}
 		for (ServerPlayer player : List.copyOf(bar.getPlayers())) {
-			if (hitters == null || !hitters.contains(player.getUUID()) || player.isSpectator()) {
+			if (hitters == null || !hitters.contains(player.getUUID()) || player.isSpectator() || !to.test(player)) {
 				bar.removePlayer(player);
 			}
 		}
 		if (hitters != null) {
 			for (UUID id : hitters) {
 				ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
-				if (player != null && !player.isSpectator()) {
+				if (player != null && !player.isSpectator() && to.test(player)) {
 					bar.addPlayer(player);
 				}
 			}

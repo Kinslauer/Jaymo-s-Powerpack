@@ -64,6 +64,14 @@ public final class LoreFilms {
 	/** The Second Defence's closing is set at the ford when the player is within this of it; else where they stand, a keep taken to be this far behind them. */
 	static final double SITE_NEAR = 96.0;
 	static final int NO_KEEP_BACK = 30;
+	/**
+	 * Andy: "take an area outside of an actually generated kingdom seat, and set the stage there". The Long Defence is staged
+	 * on the land outside the nearest kingdom's seat when one is within {@link #SEAT_NEAR} of the player (its ground is
+	 * loaded and real), the seat standing in the distance as the film's Keep, {@link #SEAT_BACK} behind the stage's origin
+	 * (the film's own Keep stood that far back).
+	 */
+	static final double SEAT_NEAR = 110.0;
+	static final int SEAT_BACK = 62;
 	static final double LEFT_SPOT = 1.5;
 	/** (Server) players in a film just now: until when (game time), and where they stood. */
 	private static final Map<java.util.UUID, Long> WATCHING = new java.util.HashMap<>();
@@ -73,11 +81,15 @@ public final class LoreFilms {
 	static final AttachmentType<List<String>> SEEN = AttachmentRegistry.create(JaymosKingdoms.id("lore_films_seen"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
-	/** Tells a player's game to play a film. */
-	public record Play(String film, BlockPos ford, BlockPos keep) implements CustomPacketPayload {
+	/**
+	 * Tells a player's game to play a film. {@code seat}: the Long Defence is staged on a kingdom's seat ({@link #seatStage}):
+	 * {@code ford} is the stage's origin, on the land outside the seat, and {@code keep} is the seat itself, which stands
+	 * where the film's Keep does (so the film does not build one of its own).
+	 */
+	public record Play(String film, BlockPos ford, BlockPos keep, boolean seat) implements CustomPacketPayload {
 		public static final Type<Play> TYPE = new Type<>(JaymosKingdoms.id("lore_film"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Play> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Play::film,
-			BlockPos.STREAM_CODEC, Play::ford, BlockPos.STREAM_CODEC, Play::keep, Play::new);
+			BlockPos.STREAM_CODEC, Play::ford, BlockPos.STREAM_CODEC, Play::keep, ByteBufCodecs.BOOL, Play::seat, Play::new);
 
 		@Override
 		public Type<Play> type() {
@@ -173,10 +185,61 @@ public final class LoreFilms {
 				ford = site.ford();
 				keep = site.keep();
 			}
-			ServerPlayNetworking.send(player, new Play(film, ford, keep));
+			boolean seat = false;
+			if (LONG_DEFENCE.equals(film)) {
+				BlockPos[] stage = seatStage(player);
+				if (stage != null) {
+					ford = stage[0];
+					keep = stage[1];
+					seat = true;
+				}
+			}
+			ServerPlayNetworking.send(player, new Play(film, ford, keep, seat));
 			WATCHING.put(player.getUUID(), player.level().getGameTime() + ticks(film));
 			WATCHING_AT.put(player.getUUID(), player.position());
 		}
+	}
+
+	/**
+	 * The stage on a kingdom's seat: {the stage's origin, the seat}, or null when no realm's seat is within {@link #SEAT_NEAR}
+	 * of {@code player} on the Overworld. The origin lies {@link #SEAT_BACK} from the seat, on the side the player is on (the
+	 * way they face if they stand at the seat itself), on the ground there.
+	 */
+	static BlockPos @org.jspecify.annotations.Nullable [] seatStage(ServerPlayer player) {
+		if (player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+			return null;
+		}
+		net.minecraft.server.MinecraftServer server = player.level().getServer();
+		com.jaymoskingdoms.Faction best = null;
+		double bestD = SEAT_NEAR * SEAT_NEAR;
+		for (com.jaymoskingdoms.Faction f : com.jaymoskingdoms.Factions.all(server)) {
+			if (!f.type().isRealm() || f.fallen()) {
+				continue;
+			}
+			double dx = f.seat().getX() + 0.5 - player.getX(), dz = f.seat().getZ() + 0.5 - player.getZ(), d = dx * dx + dz * dz;
+			if (d < bestD) {
+				best = f;
+				bestD = d;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		BlockPos seat = best.seat();
+		double dx = player.getX() - (seat.getX() + 0.5), dz = player.getZ() - (seat.getZ() + 0.5), len = Math.sqrt(dx * dx + dz * dz);
+		if (len < 8.0) {
+			net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+			dx = look.x;
+			dz = look.z;
+			len = Math.max(1.0E-3, Math.sqrt(dx * dx + dz * dz));
+		}
+		int x = (int)Math.floor(seat.getX() + 0.5 + dx / len * SEAT_BACK), z = (int)Math.floor(seat.getZ() + 0.5 + dz / len * SEAT_BACK);
+		net.minecraft.server.level.ServerLevel level = player.level();
+		if (!level.hasChunkAt(new BlockPos(x, seat.getY(), z))) {
+			return null;
+		}
+		int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+		return new BlockPos[] {new BlockPos(x, y, z), seat};
 	}
 
 	/** No harm to a player while their film plays; a blow they strike, or walking away from the spot, ends that. */

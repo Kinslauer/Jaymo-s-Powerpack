@@ -418,7 +418,8 @@ public final class Classes {
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
-		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null) {
+		// (a creative player may switch, from the H menu's class tab)
+		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null && !player.isCreative()) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
@@ -429,6 +430,9 @@ public final class Classes {
 		if (choose.second()) {
 			SecondClass.chosen(player, cls, option);
 			return;
+		}
+		if (classOf(player) != null) {
+			clear(player);
 		}
 		set(player, cls, option);
 	}

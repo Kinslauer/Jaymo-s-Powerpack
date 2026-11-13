@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "P": "jaymospowers:brain_tree_planks",
+    "S": "jaymospowers:brain_tree_slab"
+  },
+  "pattern": [
+    "PSP",
+    "P P",
+    "PSP"
+  ],
+  "result": {
+    "id": "jaymospowers:brain_tree_barrel"
+  },
+  "group": "barrel"
+}

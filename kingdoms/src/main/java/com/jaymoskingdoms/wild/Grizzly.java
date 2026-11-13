@@ -164,16 +164,25 @@ public class Grizzly extends WildBeast implements Acting {
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false, (target, level) -> this.notices(target, level)));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, false,
-			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && !this.calm(level) && target.distanceTo(this) < VILLAGER_NOTICE));
+			(target, level) -> level.getDifficulty() != Difficulty.PEACEFUL && !this.wary() && !this.calm(level) && target.distanceTo(this) < VILLAGER_NOTICE));
 	}
 
 	/** Whether it marks {@code target}: near enough (a sneaking one only half as far), and it isn't leaving people be. */
 	private boolean notices(LivingEntity target, ServerLevel level) {
-		if (level.getDifficulty() == Difficulty.PEACEFUL || this.calm(level)) {
+		if (this.wary() || level.getDifficulty() == Difficulty.PEACEFUL || this.calm(level)) {
 			return false;
 		}
 		double range = target.isDiscrete() ? NOTICE * SNEAK_NOTICE : NOTICE;
 		return target.distanceTo(this) < range;
+	}
+
+	/** A kind that leaves people be until it's hurt (the snow giant): it never goes for anyone on sight. */
+	protected boolean wary() {
+		return false;
+	}
+
+	/** Called for each blow of its that lands on {@code struck}. */
+	protected void struck(ServerLevel level, LivingEntity struck) {
 	}
 
 	private boolean calm(ServerLevel level) {
@@ -206,7 +215,7 @@ public class Grizzly extends WildBeast implements Acting {
 		}
 	}
 
-	private void act(String anim, int ticks) {
+	protected void act(String anim, int ticks) {
 		for (int i = 0; i < ACTIONS.length; i++) {
 			if (ACTIONS[i].equals(anim)) {
 				this.entityData.set(ACTION, i, true);
@@ -217,13 +226,18 @@ public class Grizzly extends WildBeast implements Acting {
 		}
 	}
 
-	private void stopActing() {
+	protected void stopActing() {
 		this.entityData.set(ACTION, -1);
 		this.actionLeft = 0;
 		this.mauling = null;
 	}
 
-	private boolean acting() {
+	/** (Server) how many ticks the move it's making has run. */
+	protected int actionRun() {
+		return this.actionRun;
+	}
+
+	protected boolean acting() {
 		return this.actionLeft > 0;
 	}
 
@@ -489,6 +503,7 @@ public class Grizzly extends WildBeast implements Acting {
 			e.setDeltaMovement(e.getDeltaMovement().add(0.0, up, 0.0));
 			e.needsSync = true;
 		}
+		this.struck(level, e);
 		return true;
 	}
 
@@ -528,6 +543,9 @@ public class Grizzly extends WildBeast implements Acting {
 		@Nullable SpawnGroupData groupData) {
 		SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, groupData);
 		this.setHomeTo(this.blockPosition(), TERRITORY);
+		if (this.getType() == Wild.GRIZZLY) {
+			com.jaymoskingdoms.BeastLairs.grizzly(level, this.blockPosition(), reason);
+		}
 		return data;
 	}
 

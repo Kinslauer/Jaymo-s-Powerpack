@@ -11,7 +11,7 @@
 		"ProjectileCoverMixin",
 		"LairSpawnMixin",
 		"BirdSongMixin",
-		"FoeLoreMixin",
+		"FoeStudyMixin",
 		"SlotCurseMixin",
 		"PlayerDropMixin",
 		"PotionClashMixin",

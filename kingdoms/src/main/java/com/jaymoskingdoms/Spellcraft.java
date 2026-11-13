@@ -70,7 +70,7 @@ public final class Spellcraft {
 		Map.entry("draining", 20 * 8), Map.entry("raising", 20 * 90), Map.entry("mending", 20 * 6), Map.entry("sanctuary", 20 * 60),
 		Map.entry("restoration", 20 * 60 * 5),
 		// (0.7.231) death's and blood's
-		Map.entry("blight", 20 * 10), Map.entry("whispers", 20 * 3), Map.entry("deaths_door", 20 * 60 * 5), Map.entry("hemorrhage", 20 * 8),
+		Map.entry("blight", 20 * 10), Map.entry("whispers", 20 * 3), Map.entry("speak_with_dead", 20 * 20), Map.entry("deaths_door", 20 * 60 * 5), Map.entry("dominion", 20 * 60), Map.entry("hemorrhage", 20 * 8),
 		Map.entry("blood_grip", 20 * 6), Map.entry("frenzy", 20 * 60),
 		// earth's, water's and air's (SorceryPicks)
 		Map.entry("bulwark", 20 * 40), Map.entry("tide_pearl", 20 * 15), Map.entry("harrying_gale", 20 * 20));

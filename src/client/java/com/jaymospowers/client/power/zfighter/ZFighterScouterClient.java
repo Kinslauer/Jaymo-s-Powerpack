@@ -157,6 +157,7 @@ public final class ZFighterScouterClient {
 		if (at == null) {
 			return;
 		}
+		ZFighterHudLayout.zonedAt(ZFighterHudLayout.Piece.SCOUTER, at[0], at[1], w, 22, graphics.guiWidth(), graphics.guiHeight());
 		int x = at[0];
 		int y = at[1];
 		if (glitching) {

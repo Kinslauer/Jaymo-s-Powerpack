@@ -48,9 +48,12 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The punch</b>: a left click on a living thing. The server throws it in place of the game's own attack, so
  * it does {@link #PUNCH_DAMAGE} whatever the level (a cestus adds its own): levels never add damage. Which punch it is comes from the style's
  * string ({@link Style#punch}); a pause of {@link #STRING_RESET} ticks starts the string again.</li>
+ * <li><b>The windup</b>: a punch lands {@link #windupAt} ticks after it is thrown ({@link #WINDUP_SLOWEST} at level
+ * 1, down to {@link #WINDUP_FASTEST} at level {@link #MAX_LEVEL}; its stamina is spent as it starts), on the one it was
+ * aimed at if they are still in reach then; the next can't start until it has.</li>
  * <li><b>Speed</b>: one punch every {@link #interval} ticks, {@link #SLOWEST} at level 1 down to {@link #FASTEST}
- * at level {@link #MAX_LEVEL}. The attack-speed attribute is set to match, so the game's own attack indicator shows
- * the rhythm.</li>
+ * at level {@link #MAX_LEVEL}, never quicker than the windup (which shrinks with the level to keep up). The
+ * attack-speed attribute is set to match, so the game's own attack indicator shows the rhythm.</li>
  * <li><b>Hit immunity</b>: a boxer's punch is never swallowed by the immunity their own last punch left, so the
  * levels whose rhythm is quicker than the game's ten ticks (8 and up) really land that fast. Other weapons gain
  * nothing from it.</li>
@@ -66,6 +69,11 @@ public final class Boxing {
 	public static final int MAX_LEVEL = 10;
 	/** Ticks between punches at level 1 and at level {@link #MAX_LEVEL} (one tick quicker a level; 7 is just under three a second). */
 	public static final int SLOWEST = 16, FASTEST = 7;
+	/**
+	 * Every punch winds up first: it lands this many ticks after it is thrown, 0.75 s at level 1 down to 0.35 s at
+	 * level {@link #MAX_LEVEL} (Andy: "shorter wind up with level"), and the next can't start until it has.
+	 */
+	public static final int WINDUP_SLOWEST = 15, WINDUP_FASTEST = 7;
 	/** A punch that comes this many ticks early still counts (lag); the rhythm is kept on average. */
 	static final int EARLY_SLACK = 2;
 	/** A basic punch, at any level. */
@@ -144,10 +152,13 @@ public final class Boxing {
 	/**
 	 * How a boxer looks just now, told to everyone (not saved): how spent they are in the low two bits ({@link #FRESH},
 	 * {@link #TIRING}, {@link #GASSED}), the last punch thrown above them ({@link Punch}'s place plus one), and a count
-	 * that turns with every punch so each one is told. The client's poses read it.
+	 * that turns with every punch so each one is told, and above that how long the punch winds up ({@link
+	 * #LOOK_WINDUP_SHIFT}). The client's poses read it.
 	 */
 	public static final AttachmentType<Integer> LOOK = AttachmentRegistry.create(JaymosPowers.id("boxing_look"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** Where {@link #LOOK} keeps the windup (ticks, five bits), above the punch count. */
+	static final int LOOK_WINDUP_SHIFT = 14;
 	public static final int FRESH = 0, TIRING = 1, GASSED = 2;
 
 	private static final Identifier SPEED = JaymosPowers.id("boxing_speed");
@@ -171,6 +182,11 @@ public final class Boxing {
 		int applied;
 		/** A click that came too early: the one it was aimed at (entity id), thrown as soon as the rhythm allows; -1 for none. */
 		int queued = -1;
+		/** A punch winding up: the one it is aimed at (entity id; -1 for none), when it lands, its strong attack if it is one, and whether it was thrown gassed. */
+		int winding = -1;
+		long landAt;
+		BoxingEvades.@Nullable Strong strong;
+		boolean windGassed;
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
@@ -296,9 +312,28 @@ public final class Boxing {
 		return !player.isCreative() && Feathers.view(player).exhausted();
 	}
 
-	/** Ticks between punches at {@code level}. */
+	/** Ticks a punch winds up for at {@code level}: {@link #WINDUP_SLOWEST} at level 1 down to {@link #WINDUP_FASTEST}. */
+	public static int windupAt(int level) {
+		return WINDUP_SLOWEST - (WINDUP_SLOWEST - WINDUP_FASTEST) * (Mth.clamp(level, 1, MAX_LEVEL) - 1) / (MAX_LEVEL - 1);
+	}
+
+	/**
+	 * How long {@code player}'s punches wind up, as everyone is told it ({@link #LOOK}, from their first punch), else
+	 * from their own level (both sides; only the player themself knows their level).
+	 */
+	public static int windup(Player player) {
+		Integer look = player.getAttached(LOOK);
+		int told = look == null ? 0 : look >> LOOK_WINDUP_SHIFT & 0x1F;
+		if (told > 0) {
+			return told;
+		}
+		Style style = style(player);
+		return windupAt(style == null ? 1 : level(player, style));
+	}
+
+	/** Ticks between punches at {@code level}: never fewer than its {@link #windupAt windup}. */
 	public static int intervalAt(int level) {
-		return SLOWEST - (SLOWEST - FASTEST) * (Mth.clamp(level, 1, MAX_LEVEL) - 1) / (MAX_LEVEL - 1);
+		return Math.max(windupAt(level), SLOWEST - (SLOWEST - FASTEST) * (Mth.clamp(level, 1, MAX_LEVEL) - 1) / (MAX_LEVEL - 1));
 	}
 
 	/** Ticks between {@code player}'s punches now (their style's level, or the gassed pace). */
@@ -362,8 +397,8 @@ public final class Boxing {
 		}
 		State state = STATES.computeIfAbsent(boxer.getUUID(), id -> new State());
 		long now = level.getGameTime();
-		if (now < state.readyAt - EARLY_SLACK) {
-			// too soon: one punch waits its turn ({@link #tick}); nothing is spent yet
+		if (state.winding >= 0 || now < state.readyAt - EARLY_SLACK) {
+			// too soon (or the last punch is still winding up): one punch waits its turn ({@link #tick}); nothing is spent yet
 			state.queued = target.getId();
 			return;
 		}
@@ -380,7 +415,9 @@ public final class Boxing {
 		Punch punch = strong != null ? strong.punch() : style.punch(state.step++);
 		state.last = punch;
 		// everyone is told which punch it is (and how spent the boxer is), for the poses
-		boxer.setAttached(LOOK, (gassed ? GASSED : tiring(boxer) ? TIRING : FRESH) | punch.ordinal() + 1 << 2 | (state.shown++ & 0xFF) << 6);
+		int windup = windupAt(level(boxer, style));
+		boxer.setAttached(LOOK, (gassed ? GASSED : tiring(boxer) ? TIRING : FRESH) | punch.ordinal() + 1 << 2 | (state.shown++ & 0xFF) << 6
+			| windup << LOOK_WINDUP_SHIFT);
 		state.lastPunch = now;
 		boolean heavy = strong != null && strong.heavy();
 		if (heavy) {
@@ -389,6 +426,22 @@ public final class Boxing {
 		} else if (!gassed) {
 			spend(boxer, costAt(level(boxer, style)));
 		}
+		// the windup: the blow lands in a moment ({@link #tick}, {@link #land}), if the foe is still there to hit
+		state.winding = target.getId();
+		state.landAt = now + windup;
+		state.strong = strong;
+		state.windGassed = gassed;
+	}
+
+	/** The punch {@code boxer} wound up lands on {@code target}, if it is still in reach. */
+	private static void land(ServerPlayer boxer, LivingEntity target, State state) {
+		ServerLevel level = boxer.level();
+		long now = level.getGameTime();
+		Punch punch = state.last;
+		BoxingEvades.Strong strong = state.strong;
+		boolean gassed = state.windGassed;
+		boolean heavy = strong != null && strong.heavy();
+		state.strong = null;
 		float pitch = punch == Punch.JAB ? 1.3F : punch == Punch.CROSS ? 0.9F : heavy ? 0.7F : 1.05F;
 		double reach = RANGE + (strong == null ? 0.0 : strong.reach());
 		if (!target.isAlive() || target.getBoundingBox().distanceToSqr(boxer.getEyePosition()) > reach * reach
@@ -465,6 +518,15 @@ public final class Boxing {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			boolean boxing = boxing(player);
 			State state = STATES.get(player.getUUID());
+			if (state != null && state.winding >= 0 && (!boxing || player.level().getGameTime() >= state.landAt)) {
+				// the windup is over: the blow lands (a boxer who put the gear away meanwhile throws nothing)
+				int id = state.winding;
+				state.winding = -1;
+				// (nor does one knocked down or killed while it wound up)
+				if (boxing && player.isAlive() && !com.jaymospowers.core.wounds.Downed.isDowned(player) && player.level().getEntity(id) instanceof LivingEntity target) {
+					land(player, target, state);
+				}
+			}
 			if (state != null && state.queued >= 0) {
 				if (!boxing) {
 					state.queued = -1;

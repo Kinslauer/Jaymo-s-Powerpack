@@ -82,6 +82,14 @@
       ]
     },
     {
+      "name": "jaymoskingdoms_fishing",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
       "name": "jaymoskingdoms_stars",
       "results": [
         {
@@ -147,6 +155,30 @@
     },
     {
       "name": "jaymoskingdoms_whats_up",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_revive_horse",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_errands",
+      "results": [
+        {
+          "actions": {}
+        }
+      ]
+    },
+    {
+      "name": "jaymoskingdoms_old_adventures",
       "results": [
         {
           "actions": {}
