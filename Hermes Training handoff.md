@@ -313,3 +313,5 @@ add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The 
   session 0). The same calls made directly (same endpoint, model, Hermes headers, one tool) passed for both models.
   First real proof will be the next time NVIDIA fails; look for `via openrouter` in `logs/agent.log`.
 - Left alone: `claude-writer` (retired since Quill took over Nov 10; no dispatch since).
+
+**Nov 12, 11:10 PM (PC Claude):** the Discord board (	ools/discord_kanban.py) was down since the morning reboot (nothing started it). Restarted it, and added Task Scheduler task `Discord_Kanban` (at logon, 1 min delay) running `E:/hermes/scripts/start_discord_kanban.ps1`, which skips if a copy is already running. Logs: `E:/hermes/logs/discord-kanban.out.log` / `.err.log`.
