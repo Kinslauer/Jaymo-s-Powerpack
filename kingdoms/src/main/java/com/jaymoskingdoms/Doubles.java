@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
@@ -31,6 +32,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -60,6 +62,10 @@ public final class Doubles {
 	/** A freed stolen life leads while you are within this (blocks) of them, until this close to the seat (blocks). */
 	static final double LEAD_RANGE = 16.0, LEAD_UNTIL = 10.0;
 	static final int EVERY = 40;
+	/** A copy struck down to this share of its health drops its face; it comes out of it at least this hale. */
+	static final float PAIN_SLIP = 0.5F, PAIN_LEAST = 0.3F;
+	/** Unmasked with nobody named who found it out, it turns on the nearest player within this (blocks). */
+	static final double UNMASK_SEEN = 24.0;
 
 	static final List<String> WIVES = List.of("Mara", "Elsbeth", "Tilda", "Odile", "Wenna", "Bryn", "Hesper", "Ysolde");
 	static final List<String> DOGS = List.of("Biscuit", "Rook", "Moss", "Pickle", "Barley", "Tuck", "Nell", "Clod");
@@ -90,6 +96,21 @@ public final class Doubles {
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Doubles::tick);
+		ShapeshifterAlarm.register();
+		// struck hard enough (or struck down), the face slips: the pain shows what it is
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
+			if (entity instanceof Villager copy && copy.hasAttached(COPY) && copy.isAlive() && copy.level() instanceof ServerLevel level
+				&& (copy.getHealth() <= copy.getMaxHealth() * PAIN_SLIP || Downed.isDowned(copy))) {
+				expose(level, copy, source.getEntity() instanceof LivingEntity by ? by : null);
+			}
+		});
+		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			if (entity instanceof Villager copy && copy.hasAttached(COPY) && copy.level() instanceof ServerLevel level) {
+				expose(level, copy, source.getEntity() instanceof LivingEntity by ? by : null);
+				return false;
+			}
+			return true;
+		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Villager copy) || !copy.hasAttached(COPY) || !player.isShiftKeyDown()
 				|| !player.getMainHandItem().isEmpty() || !(world instanceof ServerLevel level)) {
@@ -99,7 +120,7 @@ public final class Doubles {
 			if (heard == null || !heard.contains(player.getUUID())) {
 				return InteractionResult.PASS;
 			}
-			expose(level, copy);
+			expose(level, copy, player);
 			return InteractionResult.SUCCESS;
 		});
 	}
@@ -265,13 +286,13 @@ public final class Doubles {
 		return true;
 	}
 
-	/** The real one has come home: whatever wears their face drops it. */
-	static void arrived(ServerLevel level, Villager real) {
+	/** The real one has come home ({@code rescuer} brought them): whatever wears their face drops it. */
+	static void arrived(ServerLevel level, Villager real, @Nullable ServerPlayer rescuer) {
 		if (!real.hasAttached(STOLEN)) {
 			return;
 		}
 		for (Villager copy : level.getEntitiesOfClass(Villager.class, real.getBoundingBox().inflate(96.0), c -> real.getUUID().equals(c.getAttached(COPY)))) {
-			expose(level, copy);
+			expose(level, copy, rescuer);
 		}
 	}
 
@@ -294,7 +315,10 @@ public final class Doubles {
 			for (Villager copy : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(48.0), c -> c.hasAttached(COPY))) {
 				UUID real = copy.getAttached(COPY);
 				if (!level.getEntitiesOfClass(Villager.class, copy.getBoundingBox().inflate(MEET), r -> r.getUUID().equals(real) && r.isAlive()).isEmpty()) {
-					expose(level, copy);
+					// (it turns on the player there, who most likely brought the real one)
+					expose(level, copy, player);
+				} else if (Downed.isDowned(copy)) {
+					expose(level, copy, null);
 				} else if (copy.distanceTo(player) < SLIP_RANGE) {
 					slip(level, copy, player, real, now);
 				}
@@ -382,25 +406,40 @@ public final class Doubles {
 		Speech.say(level, copy, line, Speech.WHITE, SLIP_RANGE + 6.0);
 	}
 
-	/** The copy drops its face. */
-	static void expose(ServerLevel level, Villager copy) {
+	/**
+	 * The copy drops its face ({@code by}: whoever found it out, if anyone; else the nearest player who saw it). It comes out
+	 * as hurt as the copy was, and at once fights or flees ({@link Shapeshifter#unmasked}); whoever saw it reacts
+	 * ({@link ShapeshifterAlarm}). Every way a copy is found out comes here: a slip caught out, the real one met or brought
+	 * home, a moonbeam, and a blow that hurts it badly or downs it.
+	 */
+	static void expose(ServerLevel level, Villager copy, @Nullable LivingEntity by) {
+		if (copy.isRemoved() || !copy.hasAttached(COPY)) {
+			return;
+		}
 		Shapeshifter s = Creatures.SHAPESHIFTER.create(level, EntitySpawnReason.EVENT);
 		if (s == null) {
 			return;
 		}
+		UUID real = copy.getAttached(COPY);
+		Component wore = copy.getName();
+		float hale = Math.max(PAIN_LEAST, Math.min(1.0F, copy.getHealth() / copy.getMaxHealth()));
 		s.snapTo(copy.getX(), copy.getY(), copy.getZ(), copy.getYRot(), 0.0F);
-		s.setCustomName(copy.getName());
+		s.setCustomName(wore);
 		s.setPersistenceRequired();
 		HEARD.remove(copy.getUUID());
 		SLIPPED.remove(copy.getUUID());
+		copy.removeAttached(COPY);
 		copy.discard();
 		level.addFreshEntity(s);
+		s.setHealth(s.getMaxHealth() * hale);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, s.getX(), s.getY() + 1.0, s.getZ(), 24, 0.3, 0.6, 0.3, 0.02);
 		level.playSound(null, s.getX(), s.getY(), s.getZ(), SoundEvents.HUSK_CONVERTED_TO_ZOMBIE, SoundSource.HOSTILE, 1.0F, 0.6F);
-		Player near = level.getNearestPlayer(s, 24.0);
-		if (near != null) {
-			s.setTarget(near);
+		if (by == null || by instanceof Player p && (p.isSpectator() || p.distanceTo(s) > UNMASK_SEEN)) {
+			Player near = level.getNearestPlayer(s, UNMASK_SEEN);
+			by = near != null && !near.isSpectator() ? near : by;
 		}
+		s.unmasked(level, by);
+		ShapeshifterAlarm.seen(level, s, wore, by, real);
 	}
 
 	/** Where a villager lives (their bed), or null: MCA's home, else the vanilla villager's. */
