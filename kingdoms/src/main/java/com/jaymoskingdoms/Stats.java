@@ -243,7 +243,9 @@ public final class Stats {
 
 	/** {@code stat}'s value for {@code player}: {@link #total}, at most (0.7.540) their tier's {@link #cap}. */
 	public static int value(Player player, Skills.Progress p, Stat stat) {
-		return Math.min(cap(player), total(player, p, stat));
+		int v = Math.min(cap(player), total(player, p, stat));
+		// what a shadow has drained of Might (ShadowDrain)
+		return stat == Stat.MIGHT ? ShadowDrain.apply(player, v) : v;
 	}
 
 	public static int value(Player player, Stat stat) {

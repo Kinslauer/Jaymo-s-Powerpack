@@ -23,6 +23,7 @@ final class NightBatRenderer<T extends Bat> extends MobRenderer<T, NightBatRende
 
 	static final class State extends BatRenderState {
 		int variant;
+		float belly;
 	}
 
 	@Override
@@ -37,11 +38,13 @@ final class NightBatRenderer<T extends Bat> extends MobRenderer<T, NightBatRende
 		state.flyAnimationState.copyFrom(entity.flyAnimationState);
 		state.restAnimationState.copyFrom(entity.restAnimationState);
 		state.variant = entity instanceof Blightwing wing ? wing.variant() : 0;
+		state.belly = entity instanceof com.jaymoskingdoms.creatures.BloodBat bat ? bat.belly() : 0.0F;
 	}
 
 	@Override
 	protected void scale(State state, PoseStack poseStack) {
-		poseStack.scale(this.scale, this.scale, this.scale);
+		float fat = this.scale * (1.0F + 0.5F * state.belly);
+		poseStack.scale(fat, fat, fat);
 	}
 
 	@Override

@@ -270,7 +270,7 @@ public final class Captives {
 		return roll < KIN_CHANCE + GUARD_CHANCE ? GUARD : FOLK;
 	}
 
-	private static @Nullable Faction nearestSettlement(MinecraftServer server, BlockPos at) {
+	public static @Nullable Faction nearestSettlement(MinecraftServer server, BlockPos at) {
 		Faction best = null;
 		double bestD = HOME_SEARCH * HOME_SEARCH;
 		for (Faction f : Factions.all(server)) {
@@ -353,7 +353,7 @@ public final class Captives {
 			}
 			BlockPos spot = roomSpot(level, pos, random);
 			if (spot != null) {
-				take(level, spot);
+				Doubles.maybeStolen(level, take(level, spot));
 			}
 		}
 	}
@@ -444,7 +444,10 @@ public final class Captives {
 			return;
 		}
 		PLEADED.put(v.getUUID(), now);
-		// (a gagged captive can only mumble)
+		// (a gagged captive can only mumble; a stolen life pleads with what only the real one knows)
+		if (!Gags.gagged(v) && Doubles.plead(level, v)) {
+			return;
+		}
 		Speech.say(level, v, Component.translatable(Gags.gagged(v) ? "speech.jaymoskingdoms.gagged" : Oddities.line("talk.jaymoskingdoms.deed.rescue.plead", level.getRandom())),
 			Gags.gagged(v) ? Speech.WHITE : Speech.YELLOW, PLEAD_RANGE + 4.0);
 		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.0F);
@@ -478,6 +481,9 @@ public final class Captives {
 			lose(v, p);
 			return;
 		}
+		if (Doubles.leads(level, v, home, p)) {
+			return;
+		}
 		if (p.distanceTo(v) > FOLLOW_CLOSE) {
 			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(p, false), FOLLOW_SPEED, 2);
 		}
@@ -490,6 +496,7 @@ public final class Captives {
 	 */
 	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home, int standing) {
 		v.removeAttached(CAPTIVE);
+		Doubles.arrived(level, v);
 		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
 		BorderClashes.home(level.getServer(), v.getUUID());
 		Quests.rescued(player, v);

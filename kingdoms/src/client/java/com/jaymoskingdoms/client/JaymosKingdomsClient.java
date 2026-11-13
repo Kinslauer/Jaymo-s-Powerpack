@@ -88,6 +88,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
+		com.jaymoskingdoms.client.creatures.CreaturesClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();

@@ -817,6 +817,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Concentration.register();
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
+		com.jaymoskingdoms.creatures.Creatures.register();
 		Necropolis.register();
 		Presence.register();
 		Sparks.register();

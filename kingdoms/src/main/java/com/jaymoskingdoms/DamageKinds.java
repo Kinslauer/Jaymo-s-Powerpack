@@ -146,7 +146,7 @@ public final class DamageKinds {
 		ServerTickEvents.END_SERVER_TICK.register(DamageKinds::tick);
 	}
 
-	private static Map<Kind, Float> kinds(Object... pairs) {
+	public static Map<Kind, Float> kinds(Object... pairs) {
 		Map<Kind, Float> map = new EnumMap<>(Kind.class);
 		for (int i = 0; i + 1 < pairs.length; i += 2) {
 			map.put((Kind) pairs[i], (Float) pairs[i + 1]);

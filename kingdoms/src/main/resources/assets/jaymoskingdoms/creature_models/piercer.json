@@ -1,0 +1,77 @@
+{
+ "width": 64,
+ "height": 64,
+ "scale": 1.0,
+ "translucent": false,
+ "parts": [
+  {
+   "name": "top",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -4,
+    -16,
+    -4,
+    8,
+    5,
+    8
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "mid",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -3,
+    -11,
+    -3,
+    6,
+    5,
+    6
+   ],
+   "uv": [
+    32,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "tip",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -1,
+    -6,
+    -1,
+    2,
+    6,
+    2
+   ],
+   "uv": [
+    56,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  }
+ ]
+}
