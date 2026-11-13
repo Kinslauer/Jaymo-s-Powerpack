@@ -1,0 +1,6 @@
+# Out cold: 3 to 5 presses of sneak to come round
+- **Mashing sneak while out cold** (Andy: "it requires too many presses, it should be closer to 3-5"): each press now takes an even share off what's left of the knock-out, so a short one (15 s or less: a felling streak, a Web takedown kick, a rock to the head at its lightest) takes 3 presses, up to a minute takes 4, and anything longer (exhaustion's collapse, a poppy overdose) 5. Waiting counts too: the bar fills as time passes, and fewer presses are left.
+- **Presses count from the first** (Andy: "i cant come to with shift, until after a long wait"): the bar used to measure only the last 45 s of a knock-out at 0.6 s a press, so in a long one (up to 2 minutes) it sat empty and presses seemed to do nothing. It now measures the whole knock-out and moves with every press. Sneak already held as you drop still needs letting go once.
+- **A scene's black isn't mashed**: a death turned away, a turning, the descent below and being born again keep their own time and their own line, with no "mash sneak" prompt over them (the prompt used to show there). Left for dead stays as it was (sneak held is coming to).
+- Fainting from hunger, thirst or being overcome is its own 13 s lie-out with no prompt (a blow or a villager wakes you); unchanged.
+- `Downed` (`mashPresses`, `mashedLeft`, `MASH_LENGTH`). Built; not played.
