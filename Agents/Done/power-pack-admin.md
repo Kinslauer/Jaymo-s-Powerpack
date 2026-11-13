@@ -41,8 +41,10 @@ let the owed village start run, close the game when needed. Long loading screens
   (~9 min in all), then landed. Andy: "taking far too long, maybe after a minute it should just give the fallback".
 - #1431 (merged ~11:20 AM): LAND_WAIT_MS = 60 s real time across all waits, then it makes do. Redeploying.
 
+- 11:36 AM deploy (Kingdoms 0.8.8) up. Andy rejoined as Niels 11:53 AM: "it seems to be working for now".
+  Watching till 12:23 PM (30 min clean).
+
 ## Still to do
-- Deploy #1431, rejoin and watch 30 min.
 - Review follow-ups (start path still makes chunks): BURNED burningVillage scan (72-block box), SKYFALL crater
   neighbours, SENTENCED seat; out-of-start budgets (shore 12, ground 6) should move to background jobs too.
 - From the stall audit, not fixed: FutureStart.restore placeInWorld on every leap into an empty future;
