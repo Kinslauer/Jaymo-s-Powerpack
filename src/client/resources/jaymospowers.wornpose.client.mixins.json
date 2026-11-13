@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.mixin.wornpose",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["KitchenQuiverPoseMixin"],
+	"injectors": { "defaultRequire": 0 }
+}

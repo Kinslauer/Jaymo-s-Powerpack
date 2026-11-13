@@ -27,6 +27,8 @@ public final class TransformCopyingHumanoidModel<S extends HumanoidRenderState> 
         delegate.setupAnim(renderState);
         // setup source model pose
         source.setupAnim(renderState);
+        // (jaymospowers) the body as Fresh Animations moved it, and MCA's head size (WornPose)
+        com.jaymospowers.client.WornPose.fit(source, renderState);
         // copy transforms to delegate
         copyTransforms(delegate, source);
     }

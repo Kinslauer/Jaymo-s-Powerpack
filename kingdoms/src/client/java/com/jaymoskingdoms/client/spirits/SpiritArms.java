@@ -795,6 +795,8 @@ public final class SpiritArms {
 			Look look = state.getData(LOOK);
 			HumanoidModel parent = this.wearer.get();
 			parent.setupAnim(state);
+			// the wearer's arms as Fresh Animations moved them, so the shoulders sit on them
+			com.jaymoskingdoms.client.WornModel.loadKeptBody(state, parent);
 			if (look == null) {
 				this.rightArm.visible = false;
 				this.leftArm.visible = false;
