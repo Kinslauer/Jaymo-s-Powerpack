@@ -1,0 +1,14 @@
+{
+  "type": "jaymoskingdoms:island",
+  "biomes": "#jaymoskingdoms:has_structure/isle_village",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "structures": [
+    "minecraft:village_plains",
+    "minecraft:village_desert",
+    "minecraft:village_savanna",
+    "minecraft:village_snowy",
+    "minecraft:village_taiga"
+  ]
+}

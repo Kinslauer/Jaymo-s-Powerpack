@@ -80,6 +80,9 @@ public final class ShipTalk {
 		Component words;
 		if (ship == null || side == null) {
 			words = Component.translatable("talk.jaymoskingdoms.ship.ashore");
+		} else if (captain && SeaTrade.talk(level, player, speaker, ship)) {
+			// (hove to for a hail: he opens his hold)
+			return;
 		} else if (captain && side == Crew.Side.MERCHANT) {
 			Faction from = Factions.get(level.getServer(), ship.crew.faction);
 			Faction to = ship.crew.boundFor < 0 ? null : Factions.get(level.getServer(), ship.crew.boundFor);

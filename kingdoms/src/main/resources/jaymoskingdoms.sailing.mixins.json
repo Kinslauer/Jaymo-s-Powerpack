@@ -15,7 +15,10 @@
 		"ContainersShipWorksMixin",
 		"ServerPlayerBerthMixin",
 		"LivingBerthMixin",
-		"BlockEntityShipWorksMixin"
+		"BlockEntityShipWorksMixin",
+		"SeaLifeSpawnMixin",
+		"HighSeaLevelMixin",
+		"HighSeaStructureMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

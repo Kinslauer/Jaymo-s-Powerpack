@@ -37,14 +37,20 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.18) Build kits: a rowboat, a sloop and a brig, each a set of plans that, used on open water, lays out the whole
+ * (0.7.18) Build kits: a rowboat, a sloop and a brig (and a cog, a frigate, a fishing smack and a galley), each a set of plans that, used on open water, lays out the whole
  * ship in {@link ShipFrameBlock frames} ahead of you, her bow the way you face. Fill every frame with what it wants and
  * she's built (her hold bailed dry), ready to cast off from her helm like any ship of blocks. (AlekiShips, MIT, builds its
  * ships from in-world frames; these designs and how they go together are our own.)
  */
 public final class ShipKits {
 	public enum Kind {
-		ROWBOAT, SLOOP, BRIG;
+		ROWBOAT, SLOOP, BRIG,
+		/**
+		 * More blueprints (Andy's ocean pick-list, "Bigger ships"): a merchant's cog (a sloop's hull, no guns, a bigger
+		 * hold), a kingdom's frigate (three masts, eight guns), a fishing smack (small, decked, one mast, a fish hold) and
+		 * a galley (long and low, ten oars, a bow chaser).
+		 */
+		COG, FRIGATE, FISHING_SMACK, GALLEY;
 
 		public String id() {
 			return this.name().toLowerCase(Locale.ROOT) + "_kit";
@@ -83,7 +89,8 @@ public final class ShipKits {
 	}
 
 	/** How deep her keel sits below the sea's top layer when she's laid down. */
-	private static final Map<Kind, Integer> KEEL = Map.of(Kind.ROWBOAT, 0, Kind.SLOOP, 1, Kind.BRIG, 1);
+	private static final Map<Kind, Integer> KEEL = Map.of(Kind.ROWBOAT, 0, Kind.SLOOP, 1, Kind.BRIG, 1, Kind.COG, 1, Kind.FRIGATE, 1,
+		Kind.FISHING_SMACK, 1, Kind.GALLEY, 1);
 	private static final Map<Kind, List<Cell>> DESIGNS = new EnumMap<>(Kind.class);
 
 	private ShipKits() {
@@ -127,6 +134,30 @@ public final class ShipKits {
 				mast(cells, s, 3, 11);
 				mast(cells, s, -3, 9);
 				cells.add(new Cell(0, 4, -7, ShipFrameBlock.Want.HELM, Direction.SOUTH));
+			}
+			// the merchants' and the kingdoms' ships, drawn as the crews' are (Fleet)
+			case COG -> cells.addAll(Fleet.cells(Fleet.Rig.COG));
+			case FRIGATE -> cells.addAll(Fleet.cells(Fleet.Rig.FRIGATE));
+			case FISHING_SMACK -> {
+				// small and decked, her fish hold under a hatch amidships, one mast forward of it, sweeps aft
+				s = new Shape(5, 2, 2, 2, 2, true);
+				holes.add(BlockPos.asLong(0, 2, 0));
+				hull(cells, s, holes);
+				cells.add(new Cell(0, 1, 0, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+				rail(cells, s, Map.of(-2, ShipFrameBlock.Want.OAR));
+				mast(cells, s, 2, 7);
+				cells.add(new Cell(0, 3, -3, ShipFrameBlock.Want.HELM, Direction.SOUTH));
+			}
+			case GALLEY -> {
+				// long and low: five banks of oars a side, a gun in her bows each side, one mast, her stores under a hatch aft
+				s = new Shape(10, 2, 3, 2, 2, true);
+				holes.add(BlockPos.asLong(0, 2, -5));
+				hull(cells, s, holes);
+				cells.add(new Cell(0, 1, -5, ShipFrameBlock.Want.CHEST, Direction.NORTH));
+				rail(cells, s, Map.of(-6, ShipFrameBlock.Want.OAR, -3, ShipFrameBlock.Want.OAR, 0, ShipFrameBlock.Want.OAR,
+					3, ShipFrameBlock.Want.OAR, 5, ShipFrameBlock.Want.OAR, 7, ShipFrameBlock.Want.CANNON));
+				mast(cells, s, 1, 9);
+				cells.add(new Cell(0, 3, -8, ShipFrameBlock.Want.HELM, Direction.SOUTH));
 			}
 		}
 		return List.copyOf(cells);

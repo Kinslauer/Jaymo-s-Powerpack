@@ -1,0 +1,14 @@
+{
+  "type": "jaymoskingdoms:island",
+  "biomes": "#jaymoskingdoms:has_structure/isle_village",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "structures": [
+    {
+      "type": "minecraft:buried_treasure",
+      "biomes": "#minecraft:has_structure/buried_treasure",
+      "spawn_overrides": {},
+      "step": "underground_structures"
+    }
+  ]
+}

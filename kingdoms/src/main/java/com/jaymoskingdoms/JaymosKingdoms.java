@@ -835,6 +835,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// treasure wrecks (and their attachments)
 		Corsairs.register();
 		Navies.register();
+		Fishers.register();
+		SeaTrade.register();
 		Whalers.register();
 		// 0.7.437: the far grounds: whalers go further out with every voyage home with whales (and their attachments)
 		LOGGER.debug("far ground attachments: {} {}", FarGrounds.REACH, FarGrounds.ROVERS);

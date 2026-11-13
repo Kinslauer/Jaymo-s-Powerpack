@@ -3687,3 +3687,8 @@ Compiled only; not played.
   told each punch's windup, so the pose times right for every boxer.
 - A boxer knocked down or killed during the windup throws nothing.
 - Not played. The timing is worth a feel test: it changes how boxing fights.
+
+## 0.22.91 (2026-11-13): deep water grows bigger fish
+
+- **Deep water, bigger fish** (Andy's ocean pick-list, "Something worth sailing for"): a fish found over 12 or more blocks of water is heavier, up to 1.6 times at 40 blocks, never past its kind's largest (legends keep their size). It counts for the wild fish when their weight is first drawn and for any other fish when it's hooked (`FishCatch.deeper`, `FishCatch.depth`).
+- Built; not played.
