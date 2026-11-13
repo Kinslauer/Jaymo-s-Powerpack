@@ -12606,3 +12606,13 @@ giants being worked on, as its own upright model."
 - New loading-screen hint (161) on aiming at a region while locked on, and swapping targets with middle mouse on the crosshair (`lang/parts/lock-on-regions.json`).
 - Finesse now also steadies lock-on head shots: Kingdoms hands Powers the stat at server start (`PowersCompat.shareFinesse`), and at full Finesse a head shot misses and glances 75% less. The stat's description says so.
 - Built; not played.
+
+## 0.8.24 (2026-11-13): /kingdom mohknee go waits behind the loading screen (#1451)
+
+- **Fix (watchdog crash)**: `/kingdom mohknee go` made the landing chunk at x 28,000 on the server thread; on the Deck
+  it took over a minute and the server shut down (crash 2026-11-13 13:51). Andy: "go waits behind loading". Now the
+  land round the western shore is made in the background (`StoryGround.travel`, PORTAL tickets) while you wait
+  behind the loading screen ("Mohknee's western shore rises out of the sea"), then you're set down. After two
+  minutes without it, you're told to try again and stay where you are. A second `go` while waiting, or while held
+  for your story, is refused.
+- Built; tested on the Deck server.
