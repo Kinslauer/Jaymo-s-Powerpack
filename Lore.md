@@ -570,7 +570,7 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
-(new) **The nights at the grave** (models thread, 2026-11-13; Claude's placement, waiting on Andy). The weighing is
+**The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
 not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
 dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
 A flower or a candle given to one is enough: it thanks whoever came and goes to the Judge that night. Left alone it goes
@@ -1112,7 +1112,7 @@ slingers, send loot goblins running with what they stole, and roll **war barrels
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
 
-(new) **Goblin scouts** (models thread, 2026-11-13; Claude's placement, waiting on Andy). A goblin village keeps two or
+**Goblin scouts** (models thread; Andy, 2026-11-12: "the lore is good"). A goblin village keeps two or
 three scouts ranging outside its ring: small even for goblins, hooded, a pack on the back, a dagger and a buckler. They
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
@@ -1497,3 +1497,12 @@ might, and one drained to nothing loses their own shadow to them. **Shapeshifter
 them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
+
+(new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
+to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
+it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
+sworn word that burns the one who breaks it, laid on captives and on captains who swear to a lord. A lock of hair is
+a handle on its owner, and hedge-witches and court wizards alike will pay for one; thrown bones answer only in light
+or smoke. A familiar is a small spirit given a body, owl, raven, cat, rat or frog, bound to one caster and born
+again from its ash. Moonlight called down by a caster shows a shapechanger for what it is. Some Sorcerers' blood is
+wild, and so is the well in a great lair's blighted land: there a spell can come out as something else entirely.
