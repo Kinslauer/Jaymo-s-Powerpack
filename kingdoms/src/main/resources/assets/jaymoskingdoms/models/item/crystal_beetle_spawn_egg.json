@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "jaymoskingdoms:item/crystal_beetle_spawn_egg"
+	}
+}

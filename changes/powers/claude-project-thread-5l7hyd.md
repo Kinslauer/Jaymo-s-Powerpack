@@ -14,4 +14,5 @@
 - **Calling back the first deaths**: for a minute after a player is left for dead (one of the two deaths that always wake), a cleric or a scroll of Calling Back can stand them up where they lie; they wake nowhere and the sure wake is not spent.
 - **Healer feat**: bandages heal half as much again and treatments go a fifth quicker (read from Kingdoms).
 - **Returning thrown weapons** (`armory/ThrownWeapon`): a thrown weapon a Tinkerer has given the returning infusion flies back to the hand.
+- **Limbo ghost** (`core/wounds/OutOfBody`): a player waiting in Limbo is seen by everyone else as the same ghost a left-for-dead player is, at the spot they watch from.
 - Built; not played.

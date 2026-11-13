@@ -351,3 +351,6 @@ mobs, familiars and druid shapes use stand-in art.
 Left as they are: class items are ordinary shaped recipes, like the wizard's staff; about twenty older checks read
 the first class only (`Classes.classOf`), so those older perks do not come with a second class; the outrider's
 no-fall needs the class at full strength; "slower to climb" is half strength for a second class.
+
+**E5 and the ghost**: master's `OutOfBody` ghost (a left-for-dead player) is reused for Limbo: `OutOfBody.tick` keeps a
+`PlayerGhost` at a Limbo watcher's own position (no `OUT` flag, the view stays the spectator's).

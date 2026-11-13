@@ -1,0 +1,14 @@
+{
+  "entity.jaymoskingdoms.goblin_scout": "Goblin Scout",
+  "entity.jaymoskingdoms.grave_ghost": "Ghost",
+  "item.jaymoskingdoms.goblin_scout_spawn_egg": "Goblin Scout Spawn Egg",
+  "item.jaymoskingdoms.grave_ghost_spawn_egg": "Ghost Spawn Egg",
+  "speech.jaymoskingdoms.grave_ghost.idle.0": "Nobody has left anything.",
+  "speech.jaymoskingdoms.grave_ghost.idle.1": "Is it morning yet?",
+  "speech.jaymoskingdoms.grave_ghost.idle.2": "They cut my name a little crooked.",
+  "speech.jaymoskingdoms.grave_ghost.idle.3": "I keep waiting to be called.",
+  "speech.jaymoskingdoms.grave_ghost.idle.4": "It is so quiet. Stay a while.",
+  "speech.jaymoskingdoms.grave_ghost.thanks.0": "For me? Then I can go.",
+  "speech.jaymoskingdoms.grave_ghost.thanks.1": "That will do. Thank you.",
+  "speech.jaymoskingdoms.grave_ghost.thanks.2": "Somebody came. I'll go and hear how it sits."
+}

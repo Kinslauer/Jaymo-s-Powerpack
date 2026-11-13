@@ -120,6 +120,8 @@ final class GoblinVillages {
 		ScalebaneArcher.hire(level, id, fire, ScalebaneArcher.START);
 		// (0.7.339) and its war barrel by the gate
 		WarBarrel.hire(level, id);
+		// and scouts ranging outside the ring
+		GoblinScout.hire(level, id, fire, GoblinScout.START);
 		JaymosKingdoms.LOGGER.info("A goblin village, {}, rose at {}", village.name(), fire);
 		return Factions.get(server, id);
 	}

@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -44,6 +45,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +54,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The spit: crafted from sticks, it goes on top of a lit campfire or another lit heat source
+ * The spit: a frame of forked posts and a crossbar (kitchen/tools/gen_spit_frame.py), crafted from sticks, it goes on top of a lit campfire or another lit heat source
  * ({@link Delight#HEAT_SOURCES}). One roastable stack turns over the flames and cooks from raw to cooked to burnt
  * (see {@link SpitBlockEntity}); right-click with an empty hand to tear a cooked chunk off, or sneak + right-click
  * to take the whole cooked product when it's done.
@@ -68,6 +71,7 @@ public class SpitBlock extends BaseEntityBlock {
 			.instrument(NoteBlockInstrument.BASS)
 			.strength(2.0F)
 			.sound(SoundType.WOOD)
+			.noOcclusion()
 			.setId(key);
 		SPIT = Registry.register(BuiltInRegistries.BLOCK, key, new SpitBlock(properties));
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("spit"));
@@ -81,6 +85,14 @@ public class SpitBlock extends BaseEntityBlock {
 
 	public SpitBlock(BlockBehaviour.Properties properties) {
 		super(properties);
+	}
+
+	/** The crossbar and what turns on it: the low half of its block (the frame's posts stand outside, round the fire below). */
+	private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
+
+	@Override
+	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return SHAPE;
 	}
 
 	@Override

@@ -103,7 +103,8 @@ public final class BossTurns {
 	/** Foes whose fights already change as they go: they get the turn's film and nothing else. */
 	static boolean ownFight(Entity entity) {
 		return entity instanceof PatronChampion || entity instanceof WindDragon || entity instanceof Folk || entity instanceof EnderDragon
-			|| entity instanceof WitherBoss || entity instanceof com.jaymoskingdoms.wild.Grizzly || OgreHolds.king(entity);
+			|| entity instanceof WitherBoss || entity instanceof com.jaymoskingdoms.wild.Grizzly || entity instanceof com.jaymoskingdoms.beasts.SandWorm
+			|| OgreHolds.king(entity);
 	}
 
 	/** Foes that keep the death they have. */
