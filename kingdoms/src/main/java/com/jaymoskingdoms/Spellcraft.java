@@ -265,7 +265,7 @@ public final class Spellcraft {
 
 	private static void castStaff(ServerPlayer player, ServerLevel level, ItemStack staff) {
 		String spell = Classes.of(player).spell();
-		if (spell.isEmpty()) {
+		if (spell.isEmpty() || ElementSpells.lanceKey(player)) {
 			return;
 		}
 		if (player.getCooldowns().isOnCooldown(staff)) {

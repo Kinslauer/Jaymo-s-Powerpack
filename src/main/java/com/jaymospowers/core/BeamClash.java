@@ -148,6 +148,10 @@ public final class BeamClash {
 
 	/** What a stream is, for its look and for what it does to whoever it overwhelms. */
 	public static final int KIND_WIND = 0, KIND_SMOKE = 1, KIND_SOOT = 2, KIND_KI = 3;
+	/** A held stream of fire that is a spell's, not a power's ({@link SpellBeam}). */
+	public static final int KIND_FIRE = 4;
+	/** Fire overwhelms: the loser is set alight this long (ticks). */
+	public static final int FIRE_BURN_TICKS = 120;
 	// ---- ki ----
 	/** Ki overwhelms: the loser is also burned this much more and set alight this long (ticks). */
 	public static final float KI_OVERWHELM_DAMAGE = 4.0F;
@@ -699,6 +703,13 @@ public final class BeamClash {
 			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 30, 0.6, 0.8, 0.6, 0.15);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
 			screen(loser, 0xE8F4FF);
+		} else if (win.kind == KIND_FIRE) {
+			// the fire washes over them: set alight
+			loser.igniteForTicks(FIRE_BURN_TICKS);
+			level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 50, 0.6, 0.8, 0.6, 0.08);
+			level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 10, 0.4, 0.5, 0.4, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.3F, 0.7F);
+			screen(loser, 0xFFB060);
 		} else if (win.kind == KIND_KI) {
 			// the ki rolls over them and bursts: burned and set alight
 			loser.hurtServer(level, winner.damageSources().playerAttack(winner), KI_OVERWHELM_DAMAGE);
@@ -748,7 +759,8 @@ public final class BeamClash {
 		int n = Math.max(1, (int)(dir.length() / 0.6));
 		for (int i = 0; i <= n; i++) {
 			Vec3 p = from.add(dir.scale(i / (double)n));
-			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : hold.kind == KIND_KI ? MagicFx.CRACKLE : ParticleTypes.LARGE_SMOKE,
+			level.sendParticles(hold.kind == KIND_WIND ? ParticleTypes.CLOUD : hold.kind == KIND_KI ? MagicFx.CRACKLE
+				: hold.kind == KIND_FIRE ? ParticleTypes.FLAME : ParticleTypes.LARGE_SMOKE,
 				p.x, p.y, p.z, 2, 0.15, 0.15, 0.15, 0.02);
 		}
 		level.playSound(null, to.x, to.y, to.z, hold.kind == KIND_WIND ? SoundEvents.BREEZE_SHOOT : hold.kind == KIND_KI ? SoundEvents.BEACON_DEACTIVATE

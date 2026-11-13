@@ -1560,6 +1560,8 @@ public final class PowersCompat {
 	public static float mend(net.minecraft.world.entity.LivingEntity entity, float amount) {
 		// (0.7.231) healing magic lifts a death blight first
 		Necromancy.cleanse(entity);
+		// and puts out the black flame
+		ElementSpells.quench(entity);
 		mending();
 		if (mend != null) {
 			try {
@@ -1626,6 +1628,7 @@ public final class PowersCompat {
 	/** Restoration: bones set, festering cured, cuts closed, up if downed, and whole again (without Powers, full health). */
 	public static void restore(net.minecraft.world.entity.LivingEntity entity) {
 		Necromancy.cleanse(entity);
+		ElementSpells.quench(entity);
 		// (0.7.415) and the moon's curse
 		if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
 			MoonCurse.cure(player);
@@ -3985,5 +3988,85 @@ public final class PowersCompat {
 			}
 		}
 		return throwingWeapon != null && throwingWeapon.isInstance(stack.getItem());
+	}
+
+	// ---- the Fire Lance among Powers' beam clashes -------------------------------------------------------------------------
+
+	private static boolean lookedForLance;
+	/** Powers' {@code SpellBeam.start}, {@code stop}, {@code active}, {@code clashing} and {@code tap}, each taking the caster. */
+	private static java.lang.invoke.@Nullable MethodHandle lanceStart, lanceStop, lanceActive, lanceClashing, lanceTap;
+
+	private static void lookForLance() {
+		if (lookedForLance) {
+			return;
+		}
+		lookedForLance = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		Class<?> sp = net.minecraft.server.level.ServerPlayer.class;
+		try {
+			Class<?> type = Class.forName("com.jaymospowers.core.SpellBeam");
+			lanceStart = lookup.findStatic(type, "start", java.lang.invoke.MethodType.methodType(boolean.class, sp));
+			lanceStop = lookup.findStatic(type, "stop", java.lang.invoke.MethodType.methodType(void.class, sp));
+			lanceActive = lookup.findStatic(type, "active", java.lang.invoke.MethodType.methodType(boolean.class, sp));
+			lanceClashing = lookup.findStatic(type, "clashing", java.lang.invoke.MethodType.methodType(boolean.class, sp));
+			lanceTap = lookup.findStatic(type, "tap", java.lang.invoke.MethodType.methodType(boolean.class, sp));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no spell beam (older Powers?)", e);
+		}
+	}
+
+	/** A Fire Lance begins: Powers counts it among the streams that can clash. False only while a lost clash rests the caster's streams. */
+	public static boolean lanceStart(net.minecraft.server.level.ServerPlayer caster) {
+		lookForLance();
+		try {
+			return lanceStart == null || (boolean)lanceStart.invoke(caster);
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
+	/** The Fire Lance ends. */
+	public static void lanceStop(net.minecraft.server.level.ServerPlayer caster) {
+		lookForLance();
+		try {
+			if (lanceStop != null) {
+				lanceStop.invoke(caster);
+			}
+		} catch (Throwable e) {
+			// (no clash to leave, then)
+		}
+	}
+
+	/** Whether the lance still burns as Powers has it (a lost clash puts it out); true without Powers. */
+	public static boolean lanceActive(net.minecraft.server.level.ServerPlayer caster) {
+		lookForLance();
+		try {
+			return lanceActive == null || (boolean)lanceActive.invoke(caster);
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
+	/** Whether the lance is locked with another stream just now; false without Powers. */
+	public static boolean lanceClashing(net.minecraft.server.level.ServerPlayer caster) {
+		lookForLance();
+		try {
+			return lanceClashing != null && (boolean)lanceClashing.invoke(caster);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** A press of the caster's key while locked: a shove of the knot. False if they are in no clash. */
+	public static boolean lanceTap(net.minecraft.server.level.ServerPlayer caster) {
+		lookForLance();
+		try {
+			return lanceTap != null && (boolean)lanceTap.invoke(caster);
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 }

@@ -36,9 +36,10 @@ public final class ClassCasters {
 			"purify_food", "create_food", "heroes_feast", "zone_of_truth", "augury", "find_magic", "identify", "locate_object", "feather_fall", "keeping", REVIVE)));
 		ALLOWED.put(PlayerClass.DRUID, new HashSet<>(Set.of("plant_growth", "moonbeam", "control_weather", "speak_animals", "heroes_feast", "mending",
 			"feather_fall", "spider_climb", "water_walk", "long_jump", "spike_growth", "web", "grease", "fog", "tide_pearl", "harrying_gale", "purify_food",
-			"create_food", "find_magic", "locate_creature", "hut", "rebirth")));
+			"create_food", "find_magic", "locate_creature", "hut", "rebirth", "storm_cloak")));
 		ALLOWED.put(PlayerClass.WARLOCK, new HashSet<>(Set.of("arcane", "fire", "draining", "darkness", "silence", "web", "fog", "misty_step", "charm", "command",
-			"hold", "suggestion", "geas", "counterspell", "dispel", "grease", "find_magic", "identify", "whispers", "blight")));
+			"hold", "suggestion", "geas", "counterspell", "dispel", "grease", "find_magic", "identify", "whispers", "blight",
+			"glass_shards", "glass_spires", "glass_skin", "molten_glass", "fire_ring", "fire_pillars", "fire_lance", "black_flame")));
 		BORN.put(PlayerClass.CLERIC, Set.of("dispel", "identify", "create_food", "purify_food"));
 		BORN.put(PlayerClass.DRUID, Set.of("speak_animals", "control_weather", "plant_growth", "moonbeam"));
 	}

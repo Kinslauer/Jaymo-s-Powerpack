@@ -15,11 +15,18 @@ public final class Abilities {
 
 	/** Answers the class key for the classes that have a button of their own; false for the others (Sorcerers' imbue goes on). */
 	static boolean key(ServerPlayer player, boolean sneak) {
+		// a Fire Lance locked with another stream: the key shoves the knot
+		if (ElementSpells.lanceKey(player)) {
+			return true;
+		}
 		return answer(player, Classes.classOf(player), sneak);
 	}
 
 	/** The class key held with Alt: the second class's button, with sneak as for the first. */
 	static void second(ServerPlayer player, boolean sneak) {
+		if (ElementSpells.lanceKey(player)) {
+			return;
+		}
 		PlayerClass cls = Classes.second(player);
 		if (cls == PlayerClass.SORCERER) {
 			Spellcraft.sorcerer(player, sneak);

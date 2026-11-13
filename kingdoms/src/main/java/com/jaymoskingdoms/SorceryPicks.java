@@ -222,7 +222,7 @@ public final class SorceryPicks {
 	}
 
 	/** Whether {@code e} is a foe of {@code caster}: not a friend, and either hostile, set on them, or (a player) fair game. */
-	private static boolean foe(Player caster, LivingEntity e) {
+	static boolean foe(Player caster, LivingEntity e) {
 		if (e == caster || !e.isAlive() || e.isSpectator() || Downed.isDowned(e) || caster.isAlliedTo(e)) {
 			return false;
 		}
