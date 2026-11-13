@@ -12,14 +12,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * While a lore film plays ({@link LoreFilmClient}) you aren't drawn: the film is shot in third person from wherever its
- * camera is, and you would be standing in the back of its shots.
+ * camera is, and you would be standing in the back of its shots. Nor while you wake in a farm family's bed
+ * ({@code FarmWakeFilmClient}): its camera is at your head.
  */
 @Mixin(EntityRenderDispatcher.class)
 abstract class FilmHidesViewerMixin {
 	@Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
 	private <E extends Entity> void jaymoskingdoms$filmHidesViewer(E entity, Frustum frustum, double camX, double camY, double camZ, float partialTicks,
 		CallbackInfoReturnable<Boolean> cir) {
-		if (LoreFilmClient.locked() && entity == Minecraft.getInstance().player) {
+		if ((LoreFilmClient.locked() || com.jaymoskingdoms.client.films.FarmWakeFilmClient.running()) && entity == Minecraft.getInstance().player) {
 			cir.setReturnValue(false);
 		}
 	}
