@@ -110,6 +110,15 @@ public final class Dodge {
 	public static final AttachmentType<Rolling> ROLLING = AttachmentRegistry.create(JaymosPowers.id("dodge_roll"),
 		builder -> builder.syncWith(Rolling.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
+	/**
+	 * Rubber-folk and Verdants (Kingdoms' heritage tags) do not tumble: their dodge is a long lean away, the body drawn
+	 * out thin ({@code DodgeRollPose}). Seen by all, set by the server every {@link #STRETCHY_EVERY} ticks; not saved.
+	 */
+	public static final AttachmentType<Boolean> STRETCHY = AttachmentRegistry.create(JaymosPowers.id("dodge_stretchy"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	static final int STRETCHY_EVERY = 40;
+	private static final List<String> STRETCHY_TAGS = List.of("jaymoskingdoms_heritage_rubberfolk", "jaymoskingdoms_heritage_verdant");
+
 	/** Told of every dodge the server lets through. */
 	@FunctionalInterface
 	public interface Listener {
@@ -130,6 +139,24 @@ public final class Dodge {
 		ServerPlayNetworking.registerGlobalReceiver(Flip.TYPE, (payload, ctx) -> flip(ctx.player(), payload));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && evades(player, source)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LAST.remove(handler.player.getUUID()));
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % STRETCHY_EVERY != 0) {
+				return;
+			}
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				boolean stretchy = false;
+				for (String tag : STRETCHY_TAGS) {
+					stretchy |= player.entityTags().contains(tag);
+				}
+				if (stretchy != Boolean.TRUE.equals(player.getAttached(STRETCHY))) {
+					if (stretchy) {
+						player.setAttached(STRETCHY, true);
+					} else {
+						player.removeAttached(STRETCHY);
+					}
+				}
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> LAST.clear());
 	}
 

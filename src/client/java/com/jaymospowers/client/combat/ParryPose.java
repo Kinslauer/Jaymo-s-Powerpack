@@ -42,6 +42,12 @@ public final class ParryPose {
 	static final float[] HANGING = {-1.85F, -0.55F, 0.85F, -0.6F, 0.3F, 0.0F};
 	/** The hips with each: bent forward, the weapon shoulder turned forward, tipped (radians), and lowered (pixels). */
 	static final float[] GUARD_HIPS = {0.05F, 0.2F, 0.0F, 0.3F};
+	/**
+	 * The clawed guard (the glass gauntlet, Rimeclaw), in place of the plain one: the claw hand high before the face,
+	 * fingers spread toward the foe, the other hand drawn back to the hip, the body low and turned behind the claw.
+	 */
+	static final float[] CLAW = {-1.95F, 0.3F, 0.2F, 0.55F, -0.15F, 0.3F};
+	static final float[] CLAW_HIPS = {0.14F, 0.45F, 0.0F, 1.3F};
 	static final float[] HIGH_HIPS = {-0.05F, 0.1F, 0.0F, 0.6F};
 	static final float[] LOW_HIPS = {0.28F, 0.3F, 0.0F, 1.4F};
 	static final float[] HANGING_HIPS = {0.0F, -0.35F, -0.08F, 0.3F};
@@ -55,7 +61,7 @@ public final class ParryPose {
 	 * What's on a render state: whose it is (entity id), which arm guards, the line met ({@link Armed#HIGH}...; -1: only
 	 * held up), how long ago (ticks; -1: nothing lately) and whether that was a parry.
 	 */
-	public record Parry(int id, boolean right, int line, float since, boolean parried, boolean dual) {
+	public record Parry(int id, boolean right, int line, float since, boolean parried, boolean dual, boolean claw) {
 	}
 
 	/** Two blades guard crossed: how much lower the second arm is held than the first, and how much further across the body. */
@@ -87,7 +93,8 @@ public final class ParryPose {
 		if (up && entity.getUsedItemHand() == InteractionHand.OFF_HAND) {
 			right = !right;
 		}
-		return new Parry(entity.getId(), right, lately ? met.line() : -1, lately ? since : -1.0F, lately && met.parried(), Armed.dual(entity));
+		return new Parry(entity.getId(), right, lately ? met.line() : -1, lately ? since : -1.0F, lately && met.parried(), Armed.dual(entity),
+			up && com.jaymospowers.power.arsenal.GlassGauntlet.clawed(entity.getUseItem()));
 	}
 
 	/** Right after a model is animated (for the layers, and as each model is drawn). */
@@ -126,8 +133,8 @@ public final class ParryPose {
 				hips = HANGING_HIPS;
 			}
 			default -> {
-				arms = GUARD;
-				hips = GUARD_HIPS;
+				arms = parry.claw() ? CLAW : GUARD;
+				hips = parry.claw() ? CLAW_HIPS : GUARD_HIPS;
 			}
 		}
 		// the rock back: sharp at the blow, gone by RECOIL_TICKS

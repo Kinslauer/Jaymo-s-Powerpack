@@ -37,10 +37,16 @@ public final class DodgeRollPose {
 	static final float VIEW_ROLL = 1.0F, VIEW_DIP = 0.35F;
 	/** The flip in the air: how much of the roll's tuck the legs, the arms (the weapon stays out) and the back take. */
 	static final float FLIP_LEGS = 0.7F, FLIP_ARMS = 0.25F, FLIP_CURL = 0.5F;
+	/**
+	 * The stretch dodge of Rubber-folk and Verdants ({@link Dodge#STRETCHY}), in place of the tumble: the body leans this
+	 * far the way of the dodge from the feet (radians), is drawn out this much longer and this much thinner, and the
+	 * arms are thrown this far up along it (radians).
+	 */
+	static final float STRETCH_LEAN = 0.95F, STRETCH_LONGER = 0.7F, STRETCH_THINNER = 0.18F, STRETCH_ARMS = -2.9F;
 	// ================================================================================================================
 
 	/** {@code t}: how far through the roll (0 to 1); {@code (x, z)}: the way it goes, a unit vector on the ground. */
-	public record Roll(float t, float x, float z, boolean flip) {
+	public record Roll(float t, float x, float z, boolean flip, boolean stretch) {
 	}
 
 	public static final RenderStateDataKey<Roll> KEY = RenderStateDataKey.create(() -> "jaymospowers:dodge_roll");
@@ -78,7 +84,8 @@ public final class DodgeRollPose {
 			flip = rolling.flip();
 		}
 		float t = (now - start + partialTicks) / (flip ? Dodge.FLIP_TICKS : Dodge.ROLL_TICKS);
-		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip);
+		// (a flip in the air is a flip for everyone)
+		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
 	}
 
 	/** How tucked the body is (0 to 1): curling in at the start, opening out to land on its feet. */
@@ -102,6 +109,13 @@ public final class DodgeRollPose {
 			return;
 		}
 		float t = roll.t();
+		if (roll.stretch()) {
+			// no tumble: out from the feet the way of the dodge, long and thin, and back
+			float out = Mth.sin(Mth.PI * t);
+			poseStack.rotateAround(new Quaternionf().rotateAxis(STRETCH_LEAN * out, -forward / length, 0.0F, -right / length), 0.0F, 0.0F, 0.0F);
+			poseStack.scale(1.0F - STRETCH_THINNER * out, 1.0F + STRETCH_LONGER * out, 1.0F - STRETCH_THINNER * out);
+			return;
+		}
 		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 		if (!roll.flip()) {
@@ -119,7 +133,7 @@ public final class DodgeRollPose {
 			return;
 		}
 		Roll roll = roll(minecraft.player, partialTicks);
-		if (roll == null) {
+		if (roll == null || roll.stretch()) {
 			return;
 		}
 		// the dodge's way in view space (forward is -Z, right is +X), from where we face
@@ -153,6 +167,15 @@ public final class DodgeRollPose {
 		}
 		Roll roll = living.getData(KEY);
 		if (roll == null) {
+			return;
+		}
+		if (roll.stretch()) {
+			// drawn out: the arms thrown up along the body, the legs straight under it
+			float out = Mth.sin(Mth.PI * roll.t());
+			set(h.rightArm, STRETCH_ARMS, 0.0F, 0.1F, out);
+			set(h.leftArm, STRETCH_ARMS, 0.0F, -0.1F, out);
+			set(h.rightLeg, 0.0F, 0.0F, 0.02F, out);
+			set(h.leftLeg, 0.0F, 0.0F, -0.02F, out);
 			return;
 		}
 		float w = tuck(roll.t());

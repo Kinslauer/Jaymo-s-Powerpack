@@ -1,0 +1,11 @@
+{
+  "item.jaymospowers.glass_gauntlet": "Glass Gauntlet",
+  "item.jaymospowers.glass_gauntlet.lore1": "Black glass, still warm. It fits whatever hand finds it.",
+  "item.jaymospowers.glass_gauntlet.lore2": "Sneak and right click: claws out, or an open hand that digs, chops, shovels and tills.",
+  "item.jaymospowers.glass_gauntlet.lore3": "Sneak and Reach, empty-handed: leave it in the rift, or call it back.",
+  "message.jaymospowers.glass_gauntlet.work": "Open hand",
+  "message.jaymospowers.glass_gauntlet.fight": "Claws out",
+  "message.jaymospowers.glass_gauntlet.left": "The gauntlet stays in the rift.",
+  "message.jaymospowers.glass_gauntlet.called": "The rift will bring the gauntlet first.",
+  "jei.jaymospowers.glass_gauntlet": "Nobody makes one and no chest holds one. Once in a long while an Arsenal's Reach closes on it, and from then on the rift brings it first. Claws out it is a quick claw that guards; sneak and right click opens the hand, which digs, chops, shovels and tills like diamond, strips logs and tills soil."
+}

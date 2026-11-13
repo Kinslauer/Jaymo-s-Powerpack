@@ -57,6 +57,7 @@ public final class GearJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.COIL, Component.translatable("jei.jaymospowers.clinging_coil"));
 		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.DEEP_TOOTH, Component.translatable("jei.jaymospowers.deep_tooth"));
 		registration.addIngredientInfo(com.jaymospowers.mortal.Mortal.CHAIN_AXE, Component.translatable("jei.jaymospowers.chain_axe"));
+		registration.addIngredientInfo(com.jaymospowers.power.arsenal.GlassGauntlet.ITEM, Component.translatable("jei.jaymospowers.glass_gauntlet"));
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.EMBER_BONE, Component.translatable("jei.jaymospowers.ember_dragon_bone"));
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.RIME_BONE, Component.translatable("jei.jaymospowers.rime_dragon_bone"));
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.VENOM_BONE, Component.translatable("jei.jaymospowers.venom_dragon_bone"));
