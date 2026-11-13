@@ -175,12 +175,18 @@ public class DynamicWaters {
                     for (int dz = -1; dz <= 1; dz++) {
                         final long key = ((long) (mrx + dx) << 32) | ((mrz + dz) & 0xFFFFFFFFL);
                         if (!sentLowland.add(key)) continue;
-                        java.util.List<com.AdamNew.dynamicwaters.river.RiverGraphEdge> mainRivers = com.AdamNew.dynamicwaters.MainRivers.getRegion(
-                            mrx + dx, mrz + dz, com.AdamNew.dynamicwaters.compat.OneDimension.generator(serverPlayer.level()), serverPlayer.level(),
-                            com.AdamNew.dynamicwaters.compat.OneDimension.randomState(serverPlayer.level()));
-                        Platform.sendToPlayer(
-                            serverPlayer,
-                            new com.AdamNew.dynamicwaters.network.SyncMainRiversPacket(mrx + dx, mrz + dz, mainRivers));
+                        // built off the server thread: waiting here for a region build froze the server on join
+                        final int nrx = mrx + dx, nrz = mrz + dz;
+                        final net.minecraft.server.level.ServerLevel riverLevel = serverPlayer.level();
+                        com.AdamNew.dynamicwaters.MainRivers.getRegionAsync(
+                            nrx, nrz, com.AdamNew.dynamicwaters.compat.OneDimension.generator(riverLevel), riverLevel,
+                            com.AdamNew.dynamicwaters.compat.OneDimension.randomState(riverLevel),
+                            mainRivers -> riverLevel.getServer().execute(() -> {
+                                if (!serverPlayer.hasDisconnected()) {
+                                    Platform.sendToPlayer(serverPlayer,
+                                        new com.AdamNew.dynamicwaters.network.SyncMainRiversPacket(nrx, nrz, mainRivers));
+                                }
+                            }));
                     }
                 }
             }
