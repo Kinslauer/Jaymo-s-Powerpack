@@ -59,6 +59,7 @@ final class Warrens {
 			if (d != null) {
 				d.snapTo(top.getX() + 0.5 + random.nextInt(3) - 1, top.getY(), top.getZ() + 0.5 + random.nextInt(3) - 1, random.nextFloat() * 360.0F, 0.0F);
 				d.setPersistenceRequired();
+				d.home(floor);
 				level.addFreshEntity(d);
 			}
 		}
@@ -91,6 +92,7 @@ final class Warrens {
 	/** A lid gave way under {@code victim}: the diggers about come for them. */
 	static void alarm(ServerLevel level, BlockPos at, LivingEntity victim) {
 		for (Digger d : level.getEntitiesOfClass(Digger.class, new net.minecraft.world.phys.AABB(at).inflate(ALARM), x -> x.isAlive())) {
+			d.embolden();
 			d.setTarget(victim);
 		}
 	}
