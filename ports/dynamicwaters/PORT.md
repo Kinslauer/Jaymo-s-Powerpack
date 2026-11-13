@@ -86,6 +86,12 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   server thread; on the Steam Deck that ran past the 60 s watchdog and the server shut down as a player joined. The
   sync now uses `MainRivers.getRegionAsync`: cached regions go out at once, the rest are built on the prefetch threads
   and sent from the server thread when ready (if the player is still on).
+- **The server thread never builds a river region**: mob spawning (`SpawningEvents.riverSpawns` → `getRiverFlow` →
+  `MainRivers.findNearest`) built missing regions on the server thread too, and the watchdog killed the Deck server
+  the same way. `MainRivers.getRegion` called from "Server thread" now returns the cached region or, if it isn't built
+  yet, no main rivers while it is built on the prefetch threads (`buildLater`). Chunk generation runs on worker threads,
+  so the rivers carved into terrain are unchanged; only a moment of river spawns or river current right after a region
+  first comes into reach can be missed.
 
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary
