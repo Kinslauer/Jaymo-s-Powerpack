@@ -617,6 +617,14 @@ public final class ZFighterSpace {
 		int low = Integer.MAX_VALUE;
 		int high = Integer.MIN_VALUE;
 		int y = 0;
+		// (a pad over a chunk not yet made is no ground: never make one on the server thread)
+		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx += PAD_RADIUS) {
+			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz += PAD_RADIUS) {
+				if (level.getChunkSource().getChunkNow((x + dx) >> 4, (z + dz) >> 4) == null) {
+					return null;
+				}
+			}
+		}
 		for (int dx = -PAD_RADIUS; dx <= PAD_RADIUS; dx += PAD_RADIUS) {
 			for (int dz = -PAD_RADIUS; dz <= PAD_RADIUS; dz += PAD_RADIUS) {
 				int height = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x + dx, z + dz);
