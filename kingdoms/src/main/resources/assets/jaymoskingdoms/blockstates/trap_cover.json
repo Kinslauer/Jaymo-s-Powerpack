@@ -1,7 +1,154 @@
 {
   "variants": {
-    "": {
-      "model": "jaymoskingdoms:block/trap_cover"
-    }
+    "look=grass": [
+      {
+        "model": "minecraft:block/grass_block"
+      },
+      {
+        "model": "minecraft:block/grass_block",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/grass_block",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/grass_block",
+        "y": 270
+      }
+    ],
+    "look=dirt": [
+      {
+        "model": "minecraft:block/dirt"
+      },
+      {
+        "model": "minecraft:block/dirt",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/dirt",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/dirt",
+        "y": 270
+      }
+    ],
+    "look=coarse_dirt": {
+      "model": "minecraft:block/coarse_dirt"
+    },
+    "look=rooted_dirt": [
+      {
+        "model": "minecraft:block/rooted_dirt"
+      },
+      {
+        "model": "minecraft:block/rooted_dirt",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/rooted_dirt",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/rooted_dirt",
+        "y": 270
+      }
+    ],
+    "look=podzol": [
+      {
+        "model": "minecraft:block/podzol"
+      },
+      {
+        "model": "minecraft:block/podzol",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/podzol",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/podzol",
+        "y": 270
+      }
+    ],
+    "look=mycelium": [
+      {
+        "model": "minecraft:block/mycelium"
+      },
+      {
+        "model": "minecraft:block/mycelium",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/mycelium",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/mycelium",
+        "y": 270
+      }
+    ],
+    "look=moss": {
+      "model": "minecraft:block/moss_block"
+    },
+    "look=mud": {
+      "model": "minecraft:block/mud"
+    },
+    "look=sand": [
+      {
+        "model": "minecraft:block/sand"
+      },
+      {
+        "model": "minecraft:block/sand",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/sand",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/sand",
+        "y": 270
+      }
+    ],
+    "look=red_sand": [
+      {
+        "model": "minecraft:block/red_sand"
+      },
+      {
+        "model": "minecraft:block/red_sand",
+        "y": 90
+      },
+      {
+        "model": "minecraft:block/red_sand",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/red_sand",
+        "y": 270
+      }
+    ],
+    "look=gravel": {
+      "model": "minecraft:block/gravel"
+    },
+    "look=snow": {
+      "model": "minecraft:block/snow_block"
+    },
+    "look=stone": [
+      {
+        "model": "minecraft:block/stone"
+      },
+      {
+        "model": "minecraft:block/stone_mirrored"
+      },
+      {
+        "model": "minecraft:block/stone",
+        "y": 180
+      },
+      {
+        "model": "minecraft:block/stone_mirrored",
+        "y": 180
+      }
+    ]
   }
 }
