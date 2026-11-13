@@ -90,11 +90,22 @@ public final class Butchery {
 		HIDE_RUG = Registry.register(BuiltInRegistries.BLOCK, rugKey, new net.minecraft.world.level.block.CarpetBlock(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_BROWN).strength(0.1F).sound(SoundType.WOOL).ignitedByLava().setId(rugKey)));
 		blockItem("hide_rug", HIDE_RUG);
+		// each animal's own rug, tinted and named for it (HideOrigin)
+		com.jaymoskitchen.tanning.HideOrigin.registerRugs(id -> {
+			ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id(id));
+			Block rug = Registry.register(BuiltInRegistries.BLOCK, key, new net.minecraft.world.level.block.CarpetBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BROWN).strength(0.1F).sound(SoundType.WOOL).ignitedByLava().setId(key)));
+			blockItem(id, rug);
+			return rug;
+		});
 		Spoilage.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(new ItemStack(MEAT_HOOK));
 			output.accept(new ItemStack(BLOOD_GRATE));
 			output.accept(new ItemStack(HIDE_RUG));
+			for (Block rug : com.jaymoskitchen.tanning.HideOrigin.RUGS.values()) {
+				output.accept(new ItemStack(rug));
+			}
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.accept(new ItemStack(BLOOD_BOTTLE));

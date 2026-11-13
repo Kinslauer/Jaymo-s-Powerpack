@@ -1,3 +1,19 @@
 {
-	"message.jaymoskitchen.corpse.too_far": "Too far to take hold. Get right up to the body"
+	"message.jaymoskitchen.corpse.too_far": "Too far to take hold. Get right up to the body",
+	"block.jaymoskitchen.cow_hide_rug": "Cowhide Rug",
+	"block.jaymoskitchen.mooshroom_hide_rug": "Mooshroom Hide Rug",
+	"block.jaymoskitchen.horse_hide_rug": "Horsehide Rug",
+	"block.jaymoskitchen.donkey_hide_rug": "Donkey Hide Rug",
+	"block.jaymoskitchen.mule_hide_rug": "Mule Hide Rug",
+	"block.jaymoskitchen.llama_hide_rug": "Llama Hide Rug",
+	"block.jaymoskitchen.camel_hide_rug": "Camel Hide Rug",
+	"block.jaymoskitchen.goat_hide_rug": "Goatskin Rug",
+	"block.jaymoskitchen.pig_hide_rug": "Pigskin Rug",
+	"block.jaymoskitchen.sheep_hide_rug": "Sheepskin Rug",
+	"block.jaymoskitchen.hoglin_hide_rug": "Hoglin Hide Rug",
+	"block.jaymoskitchen.zebra_hide_rug": "Zebra-hide Rug",
+	"block.jaymoskitchen.deer_hide_rug": "Deerskin Rug",
+	"block.jaymoskitchen.rhino_hide_rug": "Rhino Hide Rug",
+	"block.jaymoskitchen.alligator_hide_rug": "Alligator Hide Rug",
+	"tooltip.jaymoskitchen.hide_of": "%s hide"
 }

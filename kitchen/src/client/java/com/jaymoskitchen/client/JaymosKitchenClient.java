@@ -46,6 +46,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		// (Hardrock picks) a familiar farm animal shows its hearts
 		com.jaymoskitchen.client.farm.FamiliarityHud.register();
 		com.jaymoskitchen.client.fresh.FreshTooltip.register();
+		com.jaymoskitchen.client.tanning.HideTooltip.register();
 		// (0.5.43) low on water: faint veins at the screen edges
 		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();

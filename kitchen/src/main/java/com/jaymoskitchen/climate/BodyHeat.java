@@ -410,7 +410,7 @@ public final class BodyHeat {
 
 		// what you wear
 		float warm = warmPieces(player);
-		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false);
+		float cool = pieces(player, COOL_CLOTHING) + Warmth.lined(player, false) + com.jaymoskitchen.tanning.HideTraits.coolPieces(player);
 		if (air < 0.0F) {
 			air = Math.min(0.0F, air + warm * WARM_PIECE);
 		} else {
@@ -461,9 +461,9 @@ public final class BodyHeat {
 		return best;
 	}
 
-	/** Warm clothes worn, and warm linings sewn into what's worn ({@link Lining}). */
+	/** Warm clothes worn, warm linings sewn into what's worn ({@link Lining}), and llama leather (half a piece each). */
 	static float warmPieces(Player player) {
-		return pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true);
+		return pieces(player, WinterCold.WARM_CLOTHING) + Warmth.lined(player, true) + com.jaymoskitchen.tanning.HideTraits.warmPieces(player);
 	}
 
 	static int pieces(Player player, TagKey<Item> tag) {
