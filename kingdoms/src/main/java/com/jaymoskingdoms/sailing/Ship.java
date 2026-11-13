@@ -194,6 +194,20 @@ public final class Ship extends Entity {
 
 	public static @Nullable Skyfaring skyfaring;
 
+	/**
+	 * Who sails a ship with no crew of her own when no player has her wheel: someone her owner has put at the helm
+	 * ({@code com.jaymoskingdoms.Helmsmen}: a hired sea captain, or one of their own companions).
+	 */
+	public interface Helmsmanship {
+		/** Her helm this tick, or null if nobody is posted at her wheel. */
+		@Nullable Input helm(ServerLevel level, Ship ship);
+
+		/** Whether somebody is posted at her wheel (she isn't anchored by a player stepping away from it). */
+		boolean posted(Ship ship);
+	}
+
+	public static @Nullable Helmsmanship helmsmanship;
+
 	public static EntityType<Ship> TYPE;
 	/** The client's part each tick (carrying you with the deck), set by the client. */
 	public static Consumer<Ship> clientTick = ship -> {
@@ -616,6 +630,10 @@ public final class Ship extends Entity {
 		ServerPlayer pilot = this.pilot();
 		// (0.7.42) a crewed ship with nobody at her wheel is sailed by her captain, if she still has one
 		Input steered = pilot == null && this.crew != null && captaincy != null ? captaincy.helm(level, this, this.crew) : null;
+		if (steered == null && pilot == null && this.crew == null && helmsmanship != null) {
+			// her owner's captain or companion, posted at her wheel
+			steered = helmsmanship.helm(level, this);
+		}
 		if (steered == null && pilot == null && this.crew == null && skyfaring != null && this.flying()) {
 			// one of the sky folk's ferries, flown by her own
 			steered = skyfaring.helm(level, this);
@@ -1072,7 +1090,7 @@ public final class Ship extends Entity {
 		}
 		// leaving the wheel of a ship lying still drops anchor; under way, she drifts (sails furling) with you on deck
 		if (this.level() instanceof ServerLevel && !this.isRemoved() && passenger instanceof ServerPlayer player && player.isShiftKeyDown()) {
-			if (Math.abs(this.speed) > STILL) {
+			if (Math.abs(this.speed) > STILL || this.crew == null && helmsmanship != null && helmsmanship.posted(this)) {
 				player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.left_helm"));
 			} else {
 				this.anchor(player);
@@ -1208,6 +1226,11 @@ public final class Ship extends Entity {
 		level.playSound(null, origin, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.4F, 0.6F);
 		level.playSound(null, origin, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.7F);
 		return true;
+	}
+
+	/** Her anchor let go by someone aboard who isn't a player (a helmsman told to): false if there's no room for her. */
+	public boolean dropAnchor() {
+		return this.anchor(null);
 	}
 
 	/** Where each of its blocks would go, put down at {@code origin} turned {@code turn}; null if anything's in the way. */

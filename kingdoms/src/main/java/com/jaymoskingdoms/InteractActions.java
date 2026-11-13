@@ -48,8 +48,10 @@ public final class InteractActions {
 	public static final String ROUND = "round", NIGHT = "night", TEACH = "teach", CONSULT = "consult", FAVOUR = "favour", ALIBI = "alibi", PAPERS = "papers", ALMS = "alms";
 	/** Show the Lord's Seal and Show a Deed: the other two forged papers ({@link ForgedPapers}). */
 	public static final String SEAL = "seal", DEED = "deed";
+	/** Take the Helm and Hire as Captain: someone else to sail your ship ({@link Helmsmen}). */
+	public static final String HELM = Helmsmen.HELM, HIRE_HELM = Helmsmen.HIRE;
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -116,6 +118,8 @@ public final class InteractActions {
 			case SEAL -> Liars.askable(v) && Downed.isGuard(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.SEAL);
 			case DEED -> Liars.askable(v) && Downed.isGuard(v) && guardRealm(player, v) != null && ForgedPapers.holds(player, ForgedPapers.DEED)
 				&& !ForgedPapers.householder(player, guardRealm(player, v));
+			case HELM -> Helmsmen.offersHelm(player, v);
+			case HIRE_HELM -> Helmsmen.offersHire(player, v);
 			default -> false;
 		};
 	}
@@ -216,6 +220,14 @@ public final class InteractActions {
 			}
 			case ALMS -> {
 				Lifestyle.giveAlms(player, v);
+				return null;
+			}
+			case HELM -> {
+				Helmsmen.talk(player, v);
+				return null;
+			}
+			case HIRE_HELM -> {
+				Helmsmen.hire(player, v);
 				return null;
 			}
 			case SEAL, DEED -> {

@@ -600,7 +600,7 @@ public final class Crewmen {
 		double bestD = Double.MAX_VALUE;
 		for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, new net.minecraft.world.phys.AABB(home).inflate(PORT_RANGE),
 			m -> m.isAlive() && !m.isPassenger() && tagged(m) && m.entityTags().contains(tag) && role(m) == role && faction(m) == faction
-				&& !Downed.isDowned(m))) {
+				&& !Downed.isDowned(m) && !Helmsmen.hired(m))) {
 			double d = m.distanceToSqr(Vec3.atCenterOf(home));
 			if (d < bestD) {
 				best = m;
