@@ -1982,3 +1982,8 @@ From the camping-campfire Blockbench model Andy uploaded.
 ## 0.6.0 (2026-11-13): Clearer bone-boiling messages (#1416)
 
 - Two messages from the bone pot and the beetle box read more simply: "The bones boil, about N minutes" and "The beetles return to the flesh".
+
+## 0.6.1 (2026-11-13): No thin-air frostbite in the Aether
+
+- Body heat's thin-air cold (colder a block above 40 over the sea) no longer applies in the Aether. Stacked over the Overworld in a One Dimension world the Aether stands 400-odd blocks over the Overworld's sea, which read as deep frostbite: everyone there froze, and the frostbite's hurt woke a sleeper partway through the night, so the night never reached morning (Andy, Morkeep). The Aether's own biomes still set its warmth (its arctic lands stay cold).
+- Built; not played.

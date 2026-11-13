@@ -12498,3 +12498,9 @@ giants being worked on, as its own upright model."
 - **Villagers' clothes on a swing** (Andy: "the villager's costume was clipping outside its body"): a villager's Better Combat swing was laid twice on MCA's skin, clothes and hair bodies (they take the pose the body had with the swing already on), so their arms swung twice as far while the clothes' sleeves stayed with the real arm and the held item. The swing now goes on those bodies once (`ModelPoses.after`).
 - Hint 157 (house keys and locks that don't give).
 - Built; not played.
+
+## 0.8.10 (2026-11-13): Sky town builders dig Aether rock; bed chat fades
+
+- **Builders in the Aether**: a kingdom's builders now count the Aether's own ground as natural ground (new block tag `jaymoskingdoms:natural_ground`: holystone, ferrosite, quicksoil, aether dirt and grass, icestone, undershale, agiosite, arctic snow and ice and the rest, all optional entries). Before, they could neither dig it out nor build where it stood, so a house on uneven Aether ground was left sunk into the rock with ferrosite over its floor and lumps of holystone in its rooms (Andy's Morkeep house). Site picking, levelling, foundations and roads all use the same check. Houses already built that way keep their rock until it's mined out.
+- **Chat in bed**: lying in bed (and through the night's timelapse film) the chat no longer stands on screen in full: until you type in the bed's chat box it shows as with the chat closed, new lines fading after a while (`ChatScreenBedMixin`). Typing brings the whole chat back.
+- Built; not played.
