@@ -695,7 +695,7 @@ public final class Grue {
 		if (best == null && level.structureManager().shouldGenerateStructures()) {
 			var villages = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE).get(net.minecraft.tags.StructureTags.VILLAGE);
 			if (villages.isPresent()) {
-				var found = level.getChunkSource().getGenerator().findNearestMapStructure(level, villages.get(), player.blockPosition(), VILLAGE_SEARCH_CHUNKS, false);
+				var found = com.jaymoskingdoms.Scout.find(level, villages.get(), player.blockPosition(), VILLAGE_SEARCH_CHUNKS);
 				if (found != null) {
 					best = found.getFirst();
 				}

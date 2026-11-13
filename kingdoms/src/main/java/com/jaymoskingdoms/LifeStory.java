@@ -1230,9 +1230,38 @@ public final class LifeStory {
 		} else if (road0 == Start.TRADER) {
 			// (0.7.414) a milestone to wake beside: a capital, a second town and the road between them are raised if the world has none
 			StoryGround.milestone(player, () -> go.accept(Start.TRADER), () -> go.accept(Start.WILD));
+		} else if (road0 == Start.VILLAGE || road0 == Start.SHIPWRECK) {
+			// (Deck crash 2026-11-13 07:43) the land where the start will most likely put them is made first, in the
+			// background, while they wait behind the loading screen; making it as the start ran held the server thread
+			BlockPos there = together(player, road0, null) == null ? landAhead(server, player, road0, bornAs) : null;
+			if (there != null) {
+				StoryGround.ahead(player, there, () -> go.accept(road0));
+			} else {
+				go.accept(road0);
+			}
 		} else {
 			go.accept(road0);
 		}
+	}
+
+	/**
+	 * Where a village or shipwreck start will most likely put {@code player}: the place {@link #begin} looks at first (a
+	 * realm of their own people's seat, else the nearest fitting village; a beached wreck, else any), so its land can be
+	 * made ready before they're put there ({@link StoryGround#ahead}). Null: nowhere found (the start makes do as ever).
+	 */
+	private static @Nullable BlockPos landAhead(MinecraftServer server, ServerPlayer player, Start start, Heritage.Kind heritage) {
+		ServerLevel level = server.overworld();
+		BlockPos spawn = level.getRespawnData().pos();
+		if (start == Start.SHIPWRECK) {
+			BlockPos beached = structure(level, BuiltinStructures.SHIPWRECK_BEACHED, spawn);
+			return beached != null ? beached : Scout.nearest(level, StructureTags.SHIPWRECK, spawn, STRUCTURE_SEARCH);
+		}
+		Faction standing = StoryHomes.standing(server, player, heritage, spawn, f -> freePlace(level, f.seat()));
+		if (standing != null) {
+			return standing.seat();
+		}
+		BlockPos village = Scout.nearest(level, villages(heritage), spawn, STRUCTURE_SEARCH);
+		return village != null ? village : Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH);
 	}
 
 	/** Puts {@code player} at {@code start}, kits them out and tells them where their story has brought them. */
@@ -1472,7 +1501,7 @@ public final class LifeStory {
 					}
 					BlockPos beached = structure(level, BuiltinStructures.SHIPWRECK_BEACHED, from);
 					return beached != null && freePlace(level, beached) ? beached
-						: level.findNearestMapStructure(StructureTags.SHIPWRECK, from, STRUCTURE_SEARCH, false);
+						: Scout.nearest(level, StructureTags.SHIPWRECK, from, STRUCTURE_SEARCH);
 				}, w -> freePlace(level, w), random);
 				if (wreck != null) {
 					place = wreck;
@@ -1694,7 +1723,7 @@ public final class LifeStory {
 			}
 			case MOON_CURSED -> {
 				// (0.7.417) the wild, or the edge of a village if one stands near (with a mate, beside them)
-				BlockPos village = mate == null && random.nextBoolean() ? level.findNearestMapStructure(StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH, false) : null;
+				BlockPos village = mate == null && random.nextBoolean() ? Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH) : null;
 				to = village != null ? spot(level, null, village, MOON_CURSED_VILLAGE_MIN, MOON_CURSED_VILLAGE_MAX, random) : null;
 				if (to == null) {
 					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
@@ -1939,9 +1968,9 @@ public final class LifeStory {
 		int tries = heritage == Heritage.Kind.TIDEBORN ? StoryHomes.FRESH_TRIES * 2 : StoryHomes.FRESH_TRIES;
 		long deadline = searchDeadline();
 		for (int i = 0; i <= tries && System.nanoTime() < deadline; i++) {
-			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
+			BlockPos village = Scout.nearest(level, villages(heritage), from, STRUCTURE_SEARCH);
 			if (village == null) {
-				village = level.findNearestMapStructure(StructureTags.VILLAGE, from, STRUCTURE_SEARCH, false);
+				village = Scout.nearest(level, StructureTags.VILLAGE, from, STRUCTURE_SEARCH);
 			}
 			if (village == null) {
 				break;
@@ -1985,7 +2014,7 @@ public final class LifeStory {
 	/** The nearest {@code key} structure to {@code from}, or null. */
 	private static @Nullable BlockPos structure(ServerLevel level, ResourceKey<Structure> key, BlockPos from) {
 		java.util.Optional<Holder.Reference<Structure>> holder = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(key);
-		return holder.isEmpty() ? null : level.findNearestMapStructure(HolderSet.direct(holder.get()), from, STRUCTURE_SEARCH, false);
+		return holder.isEmpty() ? null : Scout.nearest(level, HolderSet.direct(holder.get()), from, STRUCTURE_SEARCH);
 	}
 
 	/** A dry, open place to stand {@code min}-{@code max} blocks from {@code center} (horizontally), or null. */

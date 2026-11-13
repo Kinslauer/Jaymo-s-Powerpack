@@ -248,7 +248,7 @@ public final class ZFighterChapel {
 			if (chapel.isEmpty()) {
 				return;
 			}
-			sought = new Sought(here, level.findNearestMapStructure(HolderSet.direct(chapel.get()), here, PULL_CHUNKS, false));
+			sought = new Sought(here, com.jaymospowers.core.Scout.nearest(level, HolderSet.direct(chapel.get()), here, PULL_CHUNKS));
 			SOUGHT.put(player.getUUID(), sought);
 		}
 		if (sought.chapel == null) {

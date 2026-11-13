@@ -50,12 +50,13 @@ final class Rumours {
 	}
 
 	private static @Nullable BlockPos search(ServerLevel level, BlockPos from) {
-		BlockPos at = level.findNearestMapStructure(StructureTags.ON_TREASURE_MAPS, from, SEARCH_CHUNKS, false);
+		// (Scout: the place worked out without making chunks; making them held the server past its watchdog)
+		BlockPos at = Scout.nearest(level, StructureTags.ON_TREASURE_MAPS, from, SEARCH_CHUNKS);
 		if (at == null) {
-			at = level.findNearestMapStructure(StructureTags.ON_OCEAN_MONUMENT_MAPS, from, SEARCH_CHUNKS, false);
+			at = Scout.nearest(level, StructureTags.ON_OCEAN_MONUMENT_MAPS, from, SEARCH_CHUNKS);
 		}
 		if (at == null) {
-			at = level.findNearestMapStructure(StructureTags.ON_WOODLAND_MANSION_MAPS, from, SEARCH_CHUNKS, false);
+			at = Scout.nearest(level, StructureTags.ON_WOODLAND_MANSION_MAPS, from, SEARCH_CHUNKS);
 		}
 		return at;
 	}
