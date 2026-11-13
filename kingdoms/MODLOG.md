@@ -12456,3 +12456,8 @@ giants being worked on, as its own upright model."
 - **Overcome** (`Overcome`, client `OccultClient`): with an overwhelming thing (the `overwhelming` tag, supernatural bosses, the frightful that are supernatural, Banes, anything supernatural with 100+ health) in sight within 24 blocks, unease builds, faster for the timid and gloomy, slower for the devout, proud and hotheaded, slower the more exposure, none at all for the Brave or the Unveiled. Uneasy (35+): a player's screen edges go cold and their heartbeat thumps louder and quicker; villagers say so in a bubble and may withdraw (timid 85%, gloomy 60%, kind/cheerful 45%, others 35%, dutiful/devout 15%, proud/hotheaded 8%): a fighter (guards, companions, hired swords) breaks off and runs, anyone else runs home. Below Seasoned, at full unease, a 20% chance each half second to faint: players go down in Powers' faint (wakers have new lines for it), folk crumple out cold for 15 s (a blow wakes them).
 - Hint 156. Lore.md paragraph "The other side, and what it does to the unready" (new).
 - Built; mixin targets checked against the 26.3 sources; not played.
+
+## 0.8.5 (2026-11-13): stop the server failing to load Kingdoms' Jade plugin at every start (#1428)
+
+- The server logged "Failed to load plugin from Jaymo's Kingdoms" (NoClassDefFoundError: NarrationSupplier) at every start: Jade loads plugin classes on the server too, and the strangers-and-goblins tooltip callback inside the plugin class reached client-only Minecraft classes. The callback now lives in its own client class that only the client calls; nothing changes in game.
+- Built in CI; server start not tested here.
