@@ -715,7 +715,7 @@ public final class Roads {
 	private static boolean natural(BlockState s) {
 		return s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SNOW)
 			|| s.is(BlockTags.TERRACOTTA) || s.is(BlockTags.MUD) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.SANDSTONE)
-			|| s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.ICE) || s.is(Blocks.PACKED_ICE);
+			|| s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.ICE) || s.is(Blocks.PACKED_ICE) || s.is(Castle.NATURAL_GROUND);
 	}
 
 	/** What may be cleared off a road: plants, snow, air. */

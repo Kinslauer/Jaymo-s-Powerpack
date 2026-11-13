@@ -7,9 +7,11 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -121,11 +123,19 @@ final class Castle {
 		return new Site(center, facing, floor, spread + built * 4.0 * step * step + (water ? 500.0 : 0.0));
 	}
 
+	/**
+	 * The ground of other lands than the Overworld's ({@code jaymoskingdoms:natural_ground}): the Aether's holystone,
+	 * ferrosite, quicksoil, aether dirt and grass and the rest. Without it a sky town's builders could neither dig that
+	 * ground out nor build where it stands, so a house on uneven Aether ground was left with lumps of rock inside it.
+	 */
+	static final TagKey<Block> NATURAL_GROUND = TagKey.create(Registries.BLOCK, JaymosKingdoms.id("natural_ground"));
+
 	/** Ground the land made, not the village. */
 	static boolean natural(BlockState state) {
 		return state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
 			|| state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.GRAVEL) || state.is(BlockTags.TERRACOTTA)
-			|| state.is(Blocks.SANDSTONE) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS);
+			|| state.is(Blocks.SANDSTONE) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS)
+			|| state.is(NATURAL_GROUND);
 	}
 
 	/** Builds the kingdom's seat (a random kind) and its watchtowers, in the village's materials. */
