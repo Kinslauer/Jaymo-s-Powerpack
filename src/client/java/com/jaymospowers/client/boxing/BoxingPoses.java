@@ -51,8 +51,8 @@ public final class BoxingPoses {
 	/** The elbow: this far down the arm from the shoulder (pixels; the arm reaches 10, so the forearm is as long as the upper arm). */
 	public static final float ELBOW = 5.0F;
 	/** The Arrow Slit's guard (both arms: elbows in, forearms up, gloves on the cheeks), its sway (radians, and radians a tick), and its block. */
-	static final float SLIT_PITCH = -1.6F, SLIT_IN = 0.0F, SLIT_FOLD = -0.6F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
-	static final float SLIT_BLOCK_PITCH = -1.4F, SLIT_BLOCK_IN = 0.3F, SLIT_BLOCK_FOLD = -0.9F;
+	static final float SLIT_PITCH = -1.6F, SLIT_IN = -0.15F, SLIT_FOLD = -0.6F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
+	static final float SLIT_BLOCK_PITCH = -1.35F, SLIT_BLOCK_IN = 0.1F, SLIT_BLOCK_FOLD = -0.9F;
 	/** The Arrow Slit's forward crouch (radians), standing and behind its block; the head stays up. */
 	static final float SLIT_CROUCH = 0.25F, SLIT_BLOCK_CROUCH = 0.3F;
 	/** Its rounded back: the upper half of the spine curled this much further forward than the lower (radians). */
@@ -73,17 +73,19 @@ public final class BoxingPoses {
 	 */
 	static final float LONG_SPREAD = 0.1F, LONG_STAGGER = 0.2F, LONG_KNEES = 0.2F, FEET_TURN = 0.8F;
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
-	static final float BASTION_LEAD_PITCH = -0.9F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 0.95F, BASTION_REAR_PITCH = -1.2F, BASTION_REAR_IN = -0.3F, BASTION_REAR_FOLD = -1.2F;
+	static final float BASTION_LEAD_PITCH = -0.75F, BASTION_LEAD_IN = 0.3F, BASTION_LEAD_ACROSS = 1.4F, BASTION_REAR_PITCH = -1.1F, BASTION_REAR_IN = 0.2F, BASTION_REAR_FOLD = -1.2F;
 	/** Its base: feet under the shoulders, the lead one ahead, the knees soft. */
 	static final float BASTION_SPREAD = 0.22F, BASTION_STAGGER = 0.2F, BASTION_KNEES = 0.34F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
 	static final float BASTION_BLADE = 0.45F, BASTION_SHOULDER = 1.0F, BASTION_LEAN = -0.04F, BASTION_HEAD_TILT = 0.12F, BASTION_CHIN = 0.1F;
 	/** How much further side on its block stands. */
 	static final float BASTION_BLOCK_BLADE = 0.45F;
+	/** (Jung: "make it look like the video with overlapping") How far forward each shoulder rolls round the chest (pixels). */
+	static final float BASTION_LEAD_ROLL = 2.0F, BASTION_REAR_ROLL = 2.5F;
 	/** The shrug: every this many ticks, this long, this high (pixels). */
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
-	static final float BASTION_BLOCK_LEAD_PITCH = -1.1F, BASTION_BLOCK_UP = 0.4F, BASTION_BLOCK_ACROSS = 1.35F, BASTION_BLOCK_REAR_PITCH = -1.35F, BASTION_BLOCK_REAR_IN = -0.35F, BASTION_BLOCK_REAR_FOLD = -1.0F;
+	static final float BASTION_BLOCK_LEAD_PITCH = -0.95F, BASTION_BLOCK_UP = 0.4F, BASTION_BLOCK_ACROSS = 1.6F, BASTION_BLOCK_REAR_PITCH = -1.1F, BASTION_BLOCK_REAR_IN = 0.1F, BASTION_BLOCK_REAR_FOLD = -1.2F;
 	/**
 	 * A punch lasts this long (ticks), whatever the game's own arm swing does; a straight one is at full reach this
 	 * far through (it snaps out and comes home slower).
@@ -94,7 +96,15 @@ public final class BoxingPoses {
 	 * of its reach (and the body coils the other way by as much of its turn); a hook's arm rises out wide while the
 	 * body coils back this share of its turn; an uppercut dips this far (radians) as the fist drops.
 	 */
+	/** How far a straight's windup draws the glove itself back (of the arm's whole reach; the body coils the rest). */
+	static final float STRAIGHT_GLOVE_COIL = 0.05F;
 	static final float STRAIGHT_COIL = 0.3F, HOOK_COIL = 0.4F, UPPERCUT_DIP = 0.15F;
+	/**
+	 * (Jung: "the torso set more over the hits") How far each punch leans the trunk in about the hips (the cross's
+	 * and the hook's are with their own numbers), and how much deeper it sits into the knees as it lands (radians);
+	 * a hook's tilt over the leg on its side.
+	 */
+	static final float JAB_LEAN = 0.12F, JAB_DUCK = 0.08F, CROSS_DUCK = 0.12F, HOOK_DUCK = 0.1F, HOOK_TILT = 0.07F, UPPERCUT_DUCK = 0.2F;
 	/** The game's own arm swing lasts this long (ticks): how far into a click a swing is. A local windup gives way to the server's word of the punch if that comes within the second number of ticks. */
 	static final float SWING_TICKS = 6.0F, LOCAL_GRACE = 8.0F;
 	/** A jab: the lead arm straight out at chin height, its shoulder up to the chin (pixels) and turned in behind it (radians). The rear glove stays home. */
@@ -104,7 +114,7 @@ public final class BoxingPoses {
 	 * right through, the body leaning into it, the rear knee turned in on the ball of the foot, and the lead glove
 	 * brought home to the cheek (its upper arm's pitch and turn in, and its fold).
 	 */
-	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.1F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.6F, HOME_IN = 0.0F, HOME_FOLD = -0.6F;
+	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.2F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.6F, HOME_IN = 0.0F, HOME_FOLD = -0.6F;
 	/**
 	 * A hook, after the lesson Jung sent ("Throw a Perfect Lead and Rear Hook"): the arm level at shoulder height, the
 	 * elbow open between a right angle and 120 degrees (so the fist reaches, rather than hugging the chest), swung from
@@ -113,7 +123,7 @@ public final class BoxingPoses {
 	 * fold across, the body's turn, the pivoting leg's turn and the lean into it. Light in a string (the Arrow Slit's
 	 * flurry); the full hook is the one a slip to the side sets up.
 	 */
-	static final float HOOK_PITCH = -1.5F, HOOK_FROM = -1.0F, HOOK_TO = 0.2F, HOOK_ACROSS = 0.9F, HOOK_TURN = 0.7F, HOOK_PIVOT = 0.6F, HOOK_LEAN = 0.08F;
+	static final float HOOK_PITCH = -1.5F, HOOK_FROM = -1.0F, HOOK_TO = 0.2F, HOOK_ACROSS = 0.9F, HOOK_TURN = 0.7F, HOOK_PIVOT = 0.6F, HOOK_LEAN = 0.14F;
 	static final float LIGHT_HOOK_FROM = -0.55F, LIGHT_HOOK_TO = 0.15F, LIGHT_HOOK_ACROSS = 1.1F, LIGHT_HOOK_TURN = 0.4F, LIGHT_HOOK_PIVOT = 0.35F;
 	/** A hook's timing, as shares of the punch: the arm is up into the swing by the first, lands at the second, and is on its way home over the last. */
 	static final float HOOK_UP = 0.15F, HOOK_LANDS = 0.55F, HOOK_HOME = 0.3F;
@@ -124,15 +134,23 @@ public final class BoxingPoses {
 	/** First person: how far a punching arm goes forward, in toward the middle and up (blocks), for a straight punch, a hook and an uppercut. */
 	static final float[] FIRST_STRAIGHT = {0.5F, 0.12F, 0.04F}, FIRST_HOOK = {0.38F, 0.32F, 0.05F}, FIRST_UPPERCUT = {0.2F, 0.1F, 0.3F};
 	/** An evade's pose lasts this long (ticks): a slip's lean to the side, a bob's duck, a pull's lean back, a shoulder roll's turn and lift. */
-	static final float MOVE_TICKS = 8.0F, SLIP_LEAN = 0.3F, BOB_DUCK = 0.5F, PULL_LEAN = -0.3F, ROLL_TURN = 0.6F, ROLL_UP = 1.0F;
-	/** A shoulder roll's sway back and its tip of the head away from the blow (radians). */
-	static final float ROLL_LEAN = -0.25F, ROLL_HEAD = 0.15F;
+	static final float MOVE_TICKS = 8.0F, ROLL_TURN = 0.6F, ROLL_UP = 1.0F;
+	/**
+	 * (Jung: "a step forward and duck at the same time keeping the body connected") Each evade's side lean and forward
+	 * lean about the hips, and how much deeper it bends the knees (radians). A slip leans off the line and in; a bob
+	 * folds forward and sinks; the pull shifts the weight back over the rear leg, still sitting down into the knees; a
+	 * shoulder roll dips in and away from the blow. The roll also tips the head away ({@code ROLL_HEAD}).
+	 */
+	static final float SLIP_LEAN = 0.26F, SLIP_FORWARD = 0.16F, SLIP_DUCK = 0.25F;
+	static final float BOB_DUCK = 0.38F, BOB_KNEES = 0.45F;
+	static final float PULL_LEAN = -0.18F, PULL_DUCK = 0.15F;
+	static final float ROLL_SIDE = 0.14F, ROLL_FORWARD = 0.12F, ROLL_DUCK = 0.3F, ROLL_HEAD = 0.15F;
 	/** A model's shoulders are this far from its middle, and its hips this far below its neck (pixels). */
 	static final float SHOULDER_OUT = 5.0F, TORSO = 12.0F;
 	/** A leg's thigh, and its shin (pixels). */
 	static final float THIGH = 6.0F, SHIN = 6.0F;
 	/** Gassed: the hands dropped, the shoulders' heave (pixels, radians a tick), the slump. */
-	static final float GASSED_PITCH = -0.3F, GASSED_IN = 0.15F, GASSED_FOLD = -0.5F, HEAVE = 0.6F, HEAVE_RATE = 0.3F, SLUMP = 0.18F;
+	static final float GASSED_PITCH = -0.45F, GASSED_IN = 0.15F, GASSED_FOLD = -0.5F, HEAVE = 0.6F, HEAVE_RATE = 0.3F, SLUMP = 0.18F;
 	// ================================================================================================================
 
 	/**
@@ -166,6 +184,37 @@ public final class BoxingPoses {
 	public static final RenderStateDataKey<Bends> BENDS = RenderStateDataKey.create(() -> "jaymospowers:boxing_bends");
 
 	/** One arm's elbow while a pose is worked out: its fold, and whether that is across the body (then positive is in toward it). */
+	/**
+	 * (Jung: "the body looks disconnected") The trunk as the pose builds it up, put on the model at the end by
+	 * {@link #settle}: it leans and turns about the <b>hips</b>, not about the neck the model's body part pivots on, so
+	 * the waist stays on the legs, and the neck, head and shoulders ride its top. Render thread only, reset each pose.
+	 */
+	private static final class Trunk {
+		/** Forward lean of the lower back (radians; negative is back), the upper back's further curl, the side lean (positive is the boxer's left) and the twist. */
+		float pitch, curl, side, twist;
+		/** The part of the lean and side lean an evade adds (the guard tips with its side lean; a punch's leaves the punching arm aimed). */
+		float evadePitch, evadeSide;
+		/** How far a punch or an evade turns the body past the stance (the guard turns with it), and the punching arm (which doesn't). */
+		float guardTwist;
+		@Nullable ModelPart punching;
+		/** How much of that turn the punching arm goes with: all of it while it is home or winding up, none at full reach. */
+		float ride;
+		/** The head's own side tip, on top of the look. */
+		float headSide;
+		/** The stance's base ({@link #base}), and how much deeper an evade or punch bends the knees. */
+		float spread, stagger, knees, blade, duck;
+		boolean based;
+
+		void reset() {
+			pitch = curl = side = twist = evadePitch = evadeSide = guardTwist = headSide = spread = stagger = knees = blade = duck = 0.0F;
+			punching = null;
+			ride = 0.0F;
+			based = false;
+		}
+	}
+
+	private static final Trunk TRUNK = new Trunk();
+
 	private static final class Elbow {
 		float fold;
 		boolean across;
@@ -268,6 +317,7 @@ public final class BoxingPoses {
 		}
 		// the Bastion stands southpaw: its lead is the right arm; the others lead with the left
 		boolean leadRight = look.style() == Boxing.Style.BASTION;
+		TRUNK.reset();
 		ModelPart lead = leadRight ? model.rightArm : model.leftArm, rear = leadRight ? model.leftArm : model.rightArm;
 		float time = state.ageInTicks;
 		boolean swinging = look.punch() != null;
@@ -293,6 +343,7 @@ public final class BoxingPoses {
 			rear.y += heave;
 			bend(model, SLUMP);
 			model.head.xRot += SLUMP;
+			settle(model, leadRight, leadElbow);
 			keep(state, leadRight, leadElbow, rearElbow);
 			return true;
 		}
@@ -303,8 +354,8 @@ public final class BoxingPoses {
 					set(rear, !leadRight, SLIT_BLOCK_PITCH, SLIT_BLOCK_IN);
 					leadElbow.forward(SLIT_BLOCK_FOLD);
 					rearElbow.forward(SLIT_BLOCK_FOLD);
-					leadElbow.spine = hunch(model, SLIT_BLOCK_CROUCH, SLIT_HUNCH);
-					leadElbow.knees = base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_BLOCK_KNEES, 0.0F);
+					hunch(model, SLIT_BLOCK_CROUCH, SLIT_HUNCH);
+					base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_BLOCK_KNEES, 0.0F);
 				}
 				case LONG_GUARD -> {
 					set(lead, leadRight, LONG_BLOCK_PITCH, LONG_BLOCK_IN);
@@ -314,23 +365,25 @@ public final class BoxingPoses {
 					bend(model, LONG_LEAN);
 					model.head.xRot += LONG_CHIN;
 					turn += LONG_BLADE;
-					leadElbow.knees = base(model, leadRight, LONG_SPREAD, LONG_STAGGER, LONG_KNEES, 0.0F);
+					base(model, leadRight, LONG_SPREAD, LONG_STAGGER, LONG_KNEES, 0.0F);
 				}
 				case BASTION -> {
 					set(lead, leadRight, BASTION_BLOCK_LEAD_PITCH, BASTION_LEAD_IN);
 					leadElbow.across(BASTION_BLOCK_ACROSS);
 					lead.y -= BASTION_BLOCK_UP;
+					rollShoulders(lead, rear);
 					set(rear, !leadRight, BASTION_BLOCK_REAR_PITCH, BASTION_BLOCK_REAR_IN);
 					rearElbow.forward(BASTION_BLOCK_REAR_FOLD);
 					turn += BASTION_BLOCK_BLADE;
 					bend(model, BASTION_LEAN);
 					shellHead(model, leadRight);
-					leadElbow.knees = base(model, leadRight, BASTION_SPREAD, BASTION_STAGGER, BASTION_KNEES, BASTION_BLADE);
+					base(model, leadRight, BASTION_SPREAD, BASTION_STAGGER, BASTION_KNEES, BASTION_BLADE);
 				}
 			}
 		} else {
 			turn += stance(model, look.style(), lead, rear, leadElbow, rearElbow, leadRight, time);
 		}
+		float stood = turn;
 		if (swinging && !look.blocking()) {
 			turn += punch(model, look, lead, rear, leadElbow, rearElbow, leadRight);
 		}
@@ -338,23 +391,28 @@ public final class BoxingPoses {
 			// out and back over the evade's few ticks
 			float amount = Mth.sin(Mth.clamp(look.moveAge() / MOVE_TICKS, 0.0F, 1.0F) * Mth.PI);
 			switch (look.move()) {
-				case SLIP_LEFT -> lean(model, SLIP_LEAN * amount);
-				case SLIP_RIGHT -> lean(model, -SLIP_LEAN * amount);
+				// a slip, a bob or a roll steps in and ducks: the knees bend and the trunk goes forward over the lead leg,
+				// the slip leaning off the line about the hips; the pull shifts the weight back the same way, about the hips
+				case SLIP_LEFT -> evade(SLIP_LEAN * amount, SLIP_FORWARD * amount, SLIP_DUCK * amount);
+				case SLIP_RIGHT -> evade(-SLIP_LEAN * amount, SLIP_FORWARD * amount, SLIP_DUCK * amount);
 				case BOB -> {
-					bend(model, BOB_DUCK * amount);
-					model.head.xRot += BOB_DUCK * amount * 0.5F;
+					evade(0.0F, BOB_DUCK * amount, BOB_KNEES * amount);
+					model.head.xRot += BOB_DUCK * amount * 0.3F;
 				}
-				case PULL -> bend(model, PULL_LEAN * amount);
+				case PULL -> evade(0.0F, PULL_LEAN * amount, PULL_DUCK * amount);
 				case ROLL -> {
-					// the lead shoulder turns in to take the blow, the weight goes back and the head tips away from it
+					// the lead shoulder turns in to take the blow, and the body dips under and away from it
 					turn += ROLL_TURN * amount;
 					lead.y -= ROLL_UP * amount;
-					bend(model, ROLL_LEAN * amount);
+					evade((leadRight ? ROLL_SIDE : -ROLL_SIDE) * amount, ROLL_FORWARD * amount, ROLL_DUCK * amount);
 					model.head.zRot += (leadRight ? ROLL_HEAD : -ROLL_HEAD) * amount;
 				}
 			}
 		}
 		turn(model, leadRight ? -turn : turn);
+		// the guard turns with the body as a punch or a shoulder roll turns it (the stance's own turn is in its numbers)
+		TRUNK.guardTwist = leadRight ? stood - turn : turn - stood;
+		settle(model, leadRight, leadElbow);
 		keep(state, leadRight, leadElbow, rearElbow);
 		return true;
 	}
@@ -362,7 +420,7 @@ public final class BoxingPoses {
 	/** Leaves the elbows on the state for {@link #bendLimbs} and the worn gear. An arm's own across is toward the body: +X for the right arm, which is a negative fold. */
 	private static void keep(AvatarRenderState state, boolean leadRight, Elbow lead, Elbow rear) {
 		Elbow right = leadRight ? lead : rear, left = leadRight ? rear : lead;
-		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across, lead.knees, lead.spine));
+		state.setData(BENDS, new Bends(right.across ? -right.fold : right.fold, right.across, left.fold, left.across, lead.knees, -TRUNK.curl));
 	}
 
 	/** Last thing before a model is drawn: a boxer's elbows ({@link #BENDS}), put back straight once it is drawn ({@code KneeBend.restore}). */
@@ -395,8 +453,8 @@ public final class BoxingPoses {
 				swayShoulders(model, sway);
 				lead.zRot += sway;
 				rear.zRot += sway;
-				leadElbow.spine = hunch(model, SLIT_CROUCH, SLIT_HUNCH);
-				leadElbow.knees = base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_KNEES, 0.0F);
+				hunch(model, SLIT_CROUCH, SLIT_HUNCH);
+				base(model, leadRight, SLIT_SPREAD, SLIT_STAGGER, SLIT_KNEES, 0.0F);
 				return 0.0F;
 			}
 			case LONG_GUARD -> {
@@ -406,7 +464,7 @@ public final class BoxingPoses {
 				rearElbow.forward(LONG_REAR_FOLD);
 				bend(model, LONG_LEAN);
 				model.head.xRot += LONG_CHIN;
-				leadElbow.knees = base(model, leadRight, LONG_SPREAD, LONG_STAGGER, LONG_KNEES, 0.0F);
+				base(model, leadRight, LONG_SPREAD, LONG_STAGGER, LONG_KNEES, 0.0F);
 				return LONG_BLADE;
 			}
 			case BASTION -> {
@@ -415,13 +473,14 @@ public final class BoxingPoses {
 				leadElbow.across(BASTION_LEAD_ACROSS);
 				rearElbow.forward(BASTION_REAR_FOLD);
 				lead.y -= BASTION_SHOULDER;
+				rollShoulders(lead, rear);
 				float phase = time % SHRUG_EVERY / SHRUG_TICKS;
 				if (phase < 1.0F) {
 					lead.y -= Mth.sin(phase * Mth.PI) * SHRUG_UP;
 				}
 				bend(model, BASTION_LEAN);
 				shellHead(model, leadRight);
-				leadElbow.knees = base(model, leadRight, BASTION_SPREAD, BASTION_STAGGER, BASTION_KNEES, BASTION_BLADE);
+				base(model, leadRight, BASTION_SPREAD, BASTION_STAGGER, BASTION_KNEES, BASTION_BLADE);
 				return BASTION_BLADE;
 			}
 		}
@@ -455,22 +514,32 @@ public final class BoxingPoses {
 		float coil = Mth.sin(look.wind() * Mth.HALF_PI);
 		float out = drive(look);
 		float forward = Math.max(0.0F, out);
+		TRUNK.ride = 1.0F - forward;
 		switch (look.punch()) {
 			case JAB -> {
-				reach(lead, leadRight, JAB_PITCH, 0.0F, out);
-				leadElbow.fold *= 1.0F - out;
+				TRUNK.punching = lead;
+				// (a forearm folded across, the Bastion's, isn't drawn back into the body by the windup)
+				reach(lead, leadRight, JAB_PITCH, 0.0F, leadElbow.across ? forward : out);
+				leadElbow.fold *= 1.0F - (leadElbow.across ? forward : out);
 				lead.y -= JAB_SHOULDER * forward;
+				// the trunk goes in behind it, over the lead knee
+				bend(model, JAB_LEAN * forward);
+				TRUNK.duck += JAB_DUCK * forward;
 				return JAB_TURN * out;
 			}
 			case CROSS, STRAIGHT, PULL_COUNTER -> {
-				reach(rear, !leadRight, STRAIGHT_PITCH, 0.0F, out);
-				rearElbow.fold *= 1.0F - out;
+				TRUNK.punching = rear;
+				// the windup coils the body; the glove barely leaves the chin, so it isn't drawn back into the face
+				float straight = Math.max(out, -STRAIGHT_GLOVE_COIL);
+				reach(rear, !leadRight, STRAIGHT_PITCH, 0.0F, straight);
+				rearElbow.fold *= 1.0F - straight;
 				if (!leadElbow.across) {
 					// the lead glove comes home to the cheek (the Bastion's stays low, where it lives)
 					reach(lead, leadRight, HOME_PITCH, HOME_IN, forward);
 					leadElbow.fold = Mth.lerp(forward, leadElbow.fold, HOME_FOLD);
 				}
 				bend(model, CROSS_LEAN * forward);
+				TRUNK.duck += CROSS_DUCK * forward;
 				// the rear knee turns in as the hip comes through
 				(leadRight ? model.leftLeg : model.rightLeg).yRot += (leadRight ? CROSS_KNEE : -CROSS_KNEE) * forward;
 				return -CROSS_TURN * out;
@@ -478,6 +547,7 @@ public final class BoxingPoses {
 			case LEAD_HOOK, REAR_HOOK -> {
 				boolean leading = look.punch() == Boxing.Punch.LEAD_HOOK, heavy = look.heavy();
 				ModelPart arm = leading ? lead : rear;
+				TRUNK.punching = arm;
 				boolean right = leading == leadRight;
 				// the windup lifts the arm out wide as the body coils back; then it sweeps in to land ahead, and comes home over the end
 				float home = Math.min(1.0F, (1.0F - at) / HOOK_HOME);
@@ -495,15 +565,20 @@ public final class BoxingPoses {
 				ModelPart leg = right ? model.rightLeg : model.leftLeg;
 				leg.yRot += (right ? -1.0F : 1.0F) * (heavy ? HOOK_PIVOT : LIGHT_HOOK_PIVOT) * planted;
 				bend(model, HOOK_LEAN * planted);
+				// the weight sits over the leg on the punching side
+				TRUNK.side += (right ? -HOOK_TILT : HOOK_TILT) * planted;
+				TRUNK.duck += HOOK_DUCK * planted;
 				float turned = (heavy ? HOOK_TURN : LIGHT_HOOK_TURN) * through;
 				return leading ? turned : -turned;
 			}
 			case UPPERCUT -> {
 				// the windup drops the fist by the hip and dips the body; then it rises
+				TRUNK.punching = rear;
 				float dip = winding ? coil : 1.0F - Mth.clamp(at * 2.0F, 0.0F, 1.0F);
 				reach(rear, !leadRight, Mth.lerp(at, UPPERCUT_FROM, UPPERCUT_TO), UPPERCUT_IN, winding ? coil : 1.0F);
 				rearElbow.forward(Mth.lerp(winding ? coil : 1.0F, rearElbow.across ? 0.0F : rearElbow.fold, UPPERCUT_FOLD));
 				bend(model, UPPERCUT_DIP * dip);
+				TRUNK.duck += UPPERCUT_DUCK * dip;
 				return -PUNCH_TURN * (winding ? -HOOK_COIL * coil : Mth.sin(at * Mth.PI));
 			}
 		}
@@ -567,23 +642,22 @@ public final class BoxingPoses {
 	 * arms point is left alone, so a jab from a side-on stance still goes straight at the foe.
 	 */
 	private static void turn(HumanoidModel<?> model, float amount) {
-		if (amount == 0.0F) {
-			return;
-		}
-		model.body.yRot += amount;
-		float all = model.body.yRot;
-		model.rightArm.z = Mth.sin(all) * SHOULDER_OUT;
-		model.rightArm.x = -Mth.cos(all) * SHOULDER_OUT;
-		model.leftArm.z = -Mth.sin(all) * SHOULDER_OUT;
-		model.leftArm.x = Mth.cos(all) * SHOULDER_OUT;
+		TRUNK.twist += amount;
 	}
 
-	/** Leans the body {@code amount} radians forward from the neck (negative: back), and moves the legs to stay under the hips. */
+	/** Leans the trunk {@code amount} radians forward about the hips (negative: back); the head and shoulders ride its top. */
 	private static void bend(HumanoidModel<?> model, float amount) {
-		model.body.xRot += amount;
-		float back = Mth.sin(amount) * TORSO;
-		model.rightLeg.z += back;
-		model.leftLeg.z += back;
+		TRUNK.pitch += amount;
+	}
+
+	/** An evade's share of the trunk: a side lean, a forward lean (both about the hips; the guard goes with them) and a deeper knee bend. */
+	private static void evade(float side, float forward, float duck) {
+		TRUNK.side += side;
+		TRUNK.evadeSide += side;
+		TRUNK.pitch += forward;
+		TRUNK.evadePitch += forward;
+		TRUNK.duck += duck;
+		TRUNK.headSide += side * 0.6F;
 	}
 
 	/**
@@ -591,15 +665,8 @@ public final class BoxingPoses {
 	 * which stay where they are: the body turns about its foot, and the head and arms ride its top.
 	 */
 	private static void swayShoulders(HumanoidModel<?> model, float amount) {
-		float across = Mth.sin(amount) * TORSO, down = (1.0F - Mth.cos(amount)) * TORSO;
-		model.body.zRot += amount;
-		model.body.x += across;
-		model.body.y += down;
-		for (ModelPart part : new ModelPart[] {model.head, model.rightArm, model.leftArm}) {
-			part.x += across;
-			part.y += down;
-		}
-		model.head.zRot += amount * 0.6F;
+		TRUNK.side += amount;
+		TRUNK.headSide += amount * 0.6F;
 	}
 
 	/**
@@ -610,14 +677,65 @@ public final class BoxingPoses {
 	 * stance's feet don't cross. Everything above the feet sinks by what the legs shorten, so the feet stay grounded.
 	 */
 	private static float base(HumanoidModel<?> model, boolean leadRight, float spread, float stagger, float knees, float blade) {
-		float sink = (THIGH + SHIN) * (1.0F - Mth.cos(knees) * Mth.cos(stagger) * Mth.cos(spread));
-		for (ModelPart part : new ModelPart[] {model.head, model.body, model.rightArm, model.leftArm, model.rightLeg, model.leftLeg}) {
-			part.y += sink;
-		}
-		float feet = (leadRight ? -blade : blade) * FEET_TURN;
-		leg(model.rightLeg, spread, leadRight ? -stagger : stagger, feet, knees);
-		leg(model.leftLeg, -spread, leadRight ? stagger : -stagger, feet, knees);
+		TRUNK.spread = spread;
+		TRUNK.stagger = stagger;
+		TRUNK.knees = knees;
+		TRUNK.blade = blade;
+		TRUNK.based = true;
 		return knees * 2.0F;
+	}
+
+	/**
+	 * Puts the trunk on the model, last of all. The legs take the base, the knees bent by the stance and whatever an
+	 * evade adds; the hips sink by what the legs shorten, so the feet stay on the ground. The body part is turned
+	 * about the hips: its waist is put back on them, so its neck (the part's own pivot) moves with the lean, and the
+	 * head and shoulders go with the neck. The shoulders turn round with the twist and lean; an arm's own aim is left
+	 * alone (a punch still goes where it is thrown, and the gloves stay at the face as the trunk dips) except that the
+	 * guard tips with an evade's side lean.
+	 */
+	private static void settle(HumanoidModel<?> model, boolean leadRight, Elbow leadElbow) {
+		Trunk t = TRUNK;
+		float knees = t.knees + t.duck;
+		float sink = t.based || t.duck != 0.0F ? (THIGH + SHIN) * (1.0F - Mth.cos(knees) * Mth.cos(t.stagger) * Mth.cos(t.spread)) : 0.0F;
+		if (t.based || t.duck != 0.0F) {
+			model.rightLeg.y += sink;
+			model.leftLeg.y += sink;
+			float feet = (leadRight ? -t.blade : t.blade) * FEET_TURN;
+			// (a punch's pivot of a foot is in the leg's turn already)
+			leg(model.rightLeg, t.spread, leadRight ? -t.stagger : t.stagger, feet + model.rightLeg.yRot, knees);
+			leg(model.leftLeg, -t.spread, leadRight ? t.stagger : -t.stagger, feet + model.leftLeg.yRot, knees);
+			leadElbow.knees = knees * 2.0F;
+		}
+		float upper = t.pitch + t.curl;
+		float[] lower = times(times(turnZ(t.side), turnY(t.twist)), turnX(t.pitch));
+		float[] top = times(times(turnZ(t.side), turnY(t.twist)), turnX(upper));
+		// the hips, and from them up the lower back, then the upper back, to the neck
+		float hipY = TORSO + sink, half = TORSO * 0.5F;
+		float neckX = -(lower[1] + top[1]) * half, neckY = hipY - (lower[4] + top[4]) * half, neckZ = -(lower[7] + top[7]) * half;
+		model.body.x += neckX;
+		model.body.y += neckY;
+		model.body.z += neckZ;
+		model.body.xRot += upper;
+		model.body.yRot += t.twist;
+		model.body.zRot += t.side;
+		model.head.x += neckX;
+		model.head.y += neckY;
+		model.head.z += neckZ;
+		model.head.zRot += t.headSide;
+		for (ModelPart arm : new ModelPart[] {model.rightArm, model.leftArm}) {
+			float[] guard = times(turnZ(t.evadeSide), turnY(arm == t.punching ? t.guardTwist * t.ride : t.guardTwist));
+			// the shoulder, where the stance put it relative to the neck, carried by the upper back
+			float x = arm.x, y = arm.y, z = arm.z;
+			arm.x = neckX + top[0] * x + top[1] * y + top[2] * z;
+			arm.y = neckY + top[3] * x + top[4] * y + top[5] * z;
+			arm.z = neckZ + top[6] * x + top[7] * y + top[8] * z;
+			if (t.evadeSide != 0.0F || t.guardTwist != 0.0F) {
+				float[] m = times(guard, times(times(turnZ(arm.zRot), turnY(arm.yRot)), turnX(arm.xRot)));
+				arm.yRot = -(float) Math.asin(Mth.clamp(m[6], -1.0F, 1.0F));
+				arm.xRot = (float) Math.atan2(m[7], m[8]);
+				arm.zRot = (float) Math.atan2(m[3], m[0]);
+			}
+		}
 	}
 
 	/**
@@ -664,17 +782,25 @@ public final class BoxingPoses {
 	 * legs stay under the hips, and the head is left as it is, up.
 	 */
 	private static float hunch(HumanoidModel<?> model, float crouch, float hunch) {
-		float upper = crouch + hunch * 0.5F, lower = crouch - hunch * 0.5F;
-		model.body.xRot += upper;
-		float back = (Mth.sin(upper) + Mth.sin(lower)) * TORSO * 0.5F;
-		model.rightLeg.z += back;
-		model.leftLeg.z += back;
+		TRUNK.pitch += crouch - hunch * 0.5F;
+		TRUNK.curl += hunch;
 		return -hunch;
+	}
+
+	/**
+	 * The Bastion's shoulders rolled forward round the chest ({@link #BASTION_LEAD_ROLL}, {@link #BASTION_REAR_ROLL},
+	 * pixels): the arms stay against the body's sides, a little further forward, so the lead forearm can lie across the
+	 * belly and the rear glove reach the chin past a body turned side on.
+	 */
+	private static void rollShoulders(ModelPart lead, ModelPart rear) {
+		lead.z -= BASTION_LEAD_ROLL;
+		rear.z -= BASTION_REAR_ROLL;
 	}
 
 	/** Tips the body and head to the side ({@code amount} radians; positive is the boxer's left). */
 	private static void lean(HumanoidModel<?> model, float amount) {
-		model.body.zRot += amount;
-		model.head.zRot += amount * 0.6F;
+		TRUNK.side += amount;
+		TRUNK.headSide += amount * 0.6F;
 	}
+
 }

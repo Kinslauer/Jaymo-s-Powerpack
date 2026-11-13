@@ -157,8 +157,15 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
     full one within `HEAVY_HOOK_TICKS` of a slip to the side.
   - Uppercut: the fist rises under the chin with the forearm up.
   - First person: the arms stay in the guard and the punching arm goes out from it (`BoxingPoses.firstPerson`).
-- **Evades:** a lean for a slip, a duck for a bob, a lean back for a pull; a shoulder roll turns the lead shoulder in,
-  sways the weight back and tips the head away. The legs stay under the hips in a crouch, duck or lean.
+- **One connected body** (`BoxingPoses.Trunk`, `settle`): every lean, crouch, side lean and turn is added up and put
+  on the model last, turned about the **hips** rather than the neck the model's body pivots on. The waist stays on
+  the legs, and the neck, head and shoulders ride the top of the trunk; a crouch or duck sinks the hips by what the
+  bent legs shorten, so the feet stay on the ground. Punches lean the trunk in over the hit and sit a little into the
+  knees (`JAB_LEAN`, `CROSS_LEAN`, `HOOK_LEAN`, `HOOK_TILT`, the `_DUCK`s); a punching arm keeps its own aim.
+- **Evades** step in and duck, the body kept together: a slip leans off the line about the hips and goes a little
+  forward with the knees bending (`SLIP_LEAN`, `SLIP_FORWARD`, `SLIP_DUCK`); a bob folds forward and sinks into the
+  knees (`BOB_DUCK`, `BOB_KNEES`); the pull shifts the weight back over the rear leg, still sitting into the knees;
+  a shoulder roll turns the lead shoulder in and dips in and away, tipping the head away. The gloves stay at the face.
 - **Tiring and gassed:** a faint puff of breath every 2.5 s when tiring (four icons or fewer), a clear one every second
   when gassed, no sound; gassed, the hands drop and the shoulders heave in place of the stance.
 - Everyone is told what the poses need: `Boxing.LOOK` (how spent, the last punch) and `BoxingEvades.MOVED` (the last
@@ -231,11 +238,12 @@ Nothing from the plan. See the open points below.
 27. F5 with fist gear and each style: three different stances, each moving (a sway, a pawing hand, a shrug).
     Compare each with the video: Arrow Slit crouched behind both gloves, Long Guard with a straight lead arm and an
     upright body, Bastion side on with the right shoulder up and the lead arm across the belly. Check the arms stay
-    on the shoulders when the body turns, and the legs under the hips when it leans.
+    on the shoulders when the body turns, and the waist on the legs when it leans: no air between the body's parts.
     Check the elbows: forearms up to the cheeks (Arrow Slit, the rear hands), one across the belly (Bastion), and
     the wraps, cestus or bracers sitting on the bent forearm, not floating where a straight arm would end.
 28. Right click in each style: three different blocks. Punch: the arm goes out; in Arrow Slit the third and later
     punches are hooks from the side.
-29. Left Alt in each style and direction: the lean, duck, pull or shoulder turn, over in under half a second.
+29. Left Alt in each style and direction: the slip, bob, pull or shoulder roll, over in under half a second; the
+    knees bend and the trunk goes with the hips (no gap at the waist, the head on the shoulders).
 30. Run the feathers down to four icons: a faint breath puff now and then. Empty: clear puffs and heaving shoulders.
 31. A second player sees all of it.

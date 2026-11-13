@@ -101,29 +101,29 @@ def pose(style, mode, time, thrown=None, move=None):
     lead, rear = (rightArm, leftArm) if lead_right else (leftArm, rightArm)
     le, re_ = {"fold": 0.0, "across": False}, {"fold": 0.0, "across": False}
     turn = 0.0
+    # the trunk, settled about the hips at the end (BoxingPoses.Trunk)
+    t = dict(pitch=0.0, curl=0.0, side=0.0, twist=0.0, evadePitch=0.0, evadeSide=0.0, headSide=0.0, spread=0.0,
+             stagger=0.0, knees=0.0, blade=0.0, duck=0.0, based=False, guardTwist=0.0, punching=None, ride=0.0)
 
     def set_(arm, right, pitch, inn):
         arm.xRot, arm.yRot, arm.zRot = pitch, (-inn if right else inn), 0.0
 
     def bend(a):
-        body.xRot += a
-        back = math.sin(a) * K["TORSO"]
-        rightLeg.z += back
-        leftLeg.z += back
+        t["pitch"] += a
 
     def lean(a):
-        body.zRot += a
-        head.zRot += a * 0.6
+        t["side"] += a
+        t["headSide"] += a * 0.6
 
-    def sway_shoulders(a):
-        across, down = math.sin(a) * K["TORSO"], (1 - math.cos(a)) * K["TORSO"]
-        body.zRot += a
-        body.x += across
-        body.y += down
-        for q in (head, rightArm, leftArm):
-            q.x += across
-            q.y += down
-        head.zRot += a * 0.6
+    sway_shoulders = lean
+
+    def evade_(side, forward, duck):
+        t["side"] += side
+        t["evadeSide"] += side
+        t["pitch"] += forward
+        t["evadePitch"] += forward
+        t["duck"] += duck
+        t["headSide"] += side * 0.6
 
     def leg(l, spread, step, toes, knee):
         M = mul(mul(mul(RZ(spread), RX(step)), RY(toes)), RX(l.xRot - knee))
@@ -132,21 +132,46 @@ def pose(style, mode, time, thrown=None, move=None):
         l.zRot = math.atan2(M[3], M[0])
 
     def base(spread, stagger, knees, blade):
-        sink = (K["THIGH"] + K["SHIN"]) * (1 - math.cos(knees) * math.cos(stagger) * math.cos(spread))
-        for q in (head, body, rightArm, leftArm, rightLeg, leftLeg):
-            q.y += sink
-        feet = (-blade if lead_right else blade) * K["FEET_TURN"]
-        leg(rightLeg, spread, -stagger if lead_right else stagger, feet, knees)
-        leg(leftLeg, -spread, stagger if lead_right else -stagger, feet, knees)
-        m.knees = knees * 2
+        t.update(spread=spread, stagger=stagger, knees=knees, blade=blade, based=True)
 
     def hunch(crouch, h):
-        upper, lower = crouch + h * 0.5, crouch - h * 0.5
-        body.xRot += upper
-        back = (math.sin(upper) + math.sin(lower)) * K["TORSO"] * 0.5
-        rightLeg.z += back
-        leftLeg.z += back
-        m.spine = -h
+        t["pitch"] += crouch - h * 0.5
+        t["curl"] += h
+
+    def euler(M):
+        return math.atan2(M[7], M[8]), -math.asin(max(-1.0, min(1.0, M[6]))), math.atan2(M[3], M[0])
+
+    def settle():
+        knees = t["knees"] + t["duck"]
+        sink = 0.0
+        if t["based"] or t["duck"] != 0:
+            sink = (K["THIGH"] + K["SHIN"]) * (1 - math.cos(knees) * math.cos(t["stagger"]) * math.cos(t["spread"]))
+            rightLeg.y += sink
+            leftLeg.y += sink
+            feet = (-t["blade"] if lead_right else t["blade"]) * K["FEET_TURN"]
+            leg(rightLeg, t["spread"], -t["stagger"] if lead_right else t["stagger"], feet + rightLeg.yRot, knees)
+            leg(leftLeg, -t["spread"], t["stagger"] if lead_right else -t["stagger"], feet + leftLeg.yRot, knees)
+            m.knees = knees * 2
+        upper = t["pitch"] + t["curl"]
+        low = mul(mul(RZ(t["side"]), RY(t["twist"])), RX(t["pitch"]))
+        top = mul(mul(RZ(t["side"]), RY(t["twist"])), RX(upper))
+        half = K["TORSO"] * 0.5
+        nx = -(low[1] + top[1]) * half
+        ny = K["TORSO"] + sink - (low[4] + top[4]) * half
+        nz = -(low[7] + top[7]) * half
+        body.x += nx; body.y += ny; body.z += nz
+        body.xRot += upper; body.yRot += t["twist"]; body.zRot += t["side"]
+        head.x += nx; head.y += ny; head.z += nz
+        head.zRot += t["headSide"]
+        for arm in (rightArm, leftArm):
+            guard = mul(RZ(t["evadeSide"]), RY(t["guardTwist"] * (t["ride"] if arm is t["punching"] else 1.0)))
+            x, y, z = arm.x, arm.y, arm.z
+            arm.x = nx + top[0] * x + top[1] * y + top[2] * z
+            arm.y = ny + top[3] * x + top[4] * y + top[5] * z
+            arm.z = nz + top[6] * x + top[7] * y + top[8] * z
+            if t["evadeSide"] != 0 or t["guardTwist"] != 0:
+                arm.xRot, arm.yRot, arm.zRot = euler(mul(guard, mul(mul(RZ(arm.zRot), RY(arm.yRot)), RX(arm.xRot))))
+        m.spine = -t["curl"]
 
     def shell_head():
         head.zRot += K["BASTION_HEAD_TILT"] if lead_right else -K["BASTION_HEAD_TILT"]
@@ -171,6 +196,7 @@ def pose(style, mode, time, thrown=None, move=None):
         rear.y += heave
         bend(K["SLUMP"])
         head.xRot += K["SLUMP"]
+        settle()
         return finish()
 
     blocking = mode == "block"
@@ -193,6 +219,8 @@ def pose(style, mode, time, thrown=None, move=None):
             set_(lead, lead_right, K["BASTION_BLOCK_LEAD_PITCH"], K["BASTION_LEAD_IN"])
             le["fold"], le["across"] = K["BASTION_BLOCK_ACROSS"], True
             lead.y -= K["BASTION_BLOCK_UP"]
+            lead.z -= K["BASTION_LEAD_ROLL"]
+            rear.z -= K["BASTION_REAR_ROLL"]
             set_(rear, not lead_right, K["BASTION_BLOCK_REAR_PITCH"], K["BASTION_BLOCK_REAR_IN"])
             re_["fold"] = K["BASTION_BLOCK_REAR_FOLD"]
             turn += K["BASTION_BLOCK_BLADE"]
@@ -224,6 +252,8 @@ def pose(style, mode, time, thrown=None, move=None):
         le["fold"], le["across"] = K["BASTION_LEAD_ACROSS"], True
         re_["fold"] = K["BASTION_REAR_FOLD"]
         lead.y -= K["BASTION_SHOULDER"]
+        lead.z -= K["BASTION_LEAD_ROLL"]
+        rear.z -= K["BASTION_REAR_ROLL"]
         phase = (time % K["SHRUG_EVERY"]) / K["SHRUG_TICKS"]
         if phase < 1:
             lead.y -= math.sin(phase * math.pi) * K["SHRUG_UP"]
@@ -232,6 +262,7 @@ def pose(style, mode, time, thrown=None, move=None):
         turn = K["BASTION_BLADE"]
         base(K["BASTION_SPREAD"], K["BASTION_STAGGER"], K["BASTION_KNEES"], K["BASTION_BLADE"])
 
+    stood = turn
     if thrown is not None and not blocking:
         wind, at = thrown
         winding = wind < 1
@@ -243,31 +274,41 @@ def pose(style, mode, time, thrown=None, move=None):
         else:
             out = math.cos((at - K["SNAP"]) / (1 - K["SNAP"]) * math.pi / 2)
         fwd = max(0.0, out)
+        t["ride"] = 1 - fwd
         if mode == "jab":
-            reach(lead, lead_right, K["JAB_PITCH"], 0.0, out)
-            le["fold"] *= 1 - out
+            t["punching"] = lead
+            reach(lead, lead_right, K["JAB_PITCH"], 0.0, fwd if le["across"] else out)
+            le["fold"] *= 1 - (fwd if le["across"] else out)
             lead.y -= K["JAB_SHOULDER"] * fwd
+            bend(K["JAB_LEAN"] * fwd)
+            t["duck"] += K["JAB_DUCK"] * fwd
             turn += K["JAB_TURN"] * out
         elif mode in ("cross", "straight"):
-            reach(rear, not lead_right, K["STRAIGHT_PITCH"], 0.0, out)
-            re_["fold"] *= 1 - out
+            t["punching"] = rear
+            straight = max(out, -K["STRAIGHT_GLOVE_COIL"])
+            reach(rear, not lead_right, K["STRAIGHT_PITCH"], 0.0, straight)
+            re_["fold"] *= 1 - straight
             if not le["across"]:
                 reach(lead, lead_right, K["HOME_PITCH"], K["HOME_IN"], fwd)
                 le["fold"] += (K["HOME_FOLD"] - le["fold"]) * fwd
             bend(K["CROSS_LEAN"] * fwd)
+            t["duck"] += K["CROSS_DUCK"] * fwd
             (leftLeg if lead_right else rightLeg).yRot += (K["CROSS_KNEE"] if lead_right else -K["CROSS_KNEE"]) * fwd
             turn -= K["CROSS_TURN"] * out
         elif mode == "uppercut":
+            t["punching"] = rear
             dip = coil if winding else 1 - min(1.0, max(0.0, at * 2))
             reach(rear, not lead_right, K["UPPERCUT_FROM"] + (K["UPPERCUT_TO"] - K["UPPERCUT_FROM"]) * at, K["UPPERCUT_IN"], coil if winding else 1.0)
             amt = coil if winding else 1.0
             start = 0.0 if re_["across"] else re_["fold"]
             re_["fold"], re_["across"] = start + (K["UPPERCUT_FOLD"] - start) * amt, False
             bend(K["UPPERCUT_DIP"] * dip)
+            t["duck"] += K["UPPERCUT_DUCK"] * dip
             turn += -K["PUNCH_TURN"] * (-K["HOOK_COIL"] * coil if winding else math.sin(at * math.pi))
         else:
             leading, heavy = mode != "rear_hook", mode == "lead_hook_full"
             arm = lead if leading else rear
+            t["punching"] = arm
             right = leading == lead_right
             home = min(1.0, (1 - at) / K["HOOK_HOME"])
             inn = coil if winding else home
@@ -282,6 +323,8 @@ def pose(style, mode, time, thrown=None, move=None):
             planted = max(0.0, through)
             (rightLeg if right else leftLeg).yRot += (-1 if right else 1) * (K["HOOK_PIVOT"] if heavy else K["LIGHT_HOOK_PIVOT"]) * planted
             bend(K["HOOK_LEAN"] * planted)
+            t["side"] += (-K["HOOK_TILT"] if right else K["HOOK_TILT"]) * planted
+            t["duck"] += K["HOOK_DUCK"] * planted
             turned = (K["HOOK_TURN"] if heavy else K["LIGHT_HOOK_TURN"]) * through
             turn += turned if leading else -turned
 
@@ -289,25 +332,23 @@ def pose(style, mode, time, thrown=None, move=None):
         kind, age = move
         amount = math.sin(min(1.0, max(0.0, age / K["MOVE_TICKS"])) * math.pi)
         if kind == "slip_left":
-            lean(K["SLIP_LEAN"] * amount)
+            evade_(K["SLIP_LEAN"] * amount, K["SLIP_FORWARD"] * amount, K["SLIP_DUCK"] * amount)
         elif kind == "slip_right":
-            lean(-K["SLIP_LEAN"] * amount)
+            evade_(-K["SLIP_LEAN"] * amount, K["SLIP_FORWARD"] * amount, K["SLIP_DUCK"] * amount)
         elif kind == "bob":
-            bend(K["BOB_DUCK"] * amount)
-            head.xRot += K["BOB_DUCK"] * amount * 0.5
+            evade_(0.0, K["BOB_DUCK"] * amount, K["BOB_KNEES"] * amount)
+            head.xRot += K["BOB_DUCK"] * amount * 0.3
         elif kind == "pull":
-            bend(K["PULL_LEAN"] * amount)
+            evade_(0.0, K["PULL_LEAN"] * amount, K["PULL_DUCK"] * amount)
         elif kind == "roll":
             turn += K["ROLL_TURN"] * amount
             lead.y -= K["ROLL_UP"] * amount
-            bend(K["ROLL_LEAN"] * amount)
+            evade_((K["ROLL_SIDE"] if lead_right else -K["ROLL_SIDE"]) * amount, K["ROLL_FORWARD"] * amount, K["ROLL_DUCK"] * amount)
             head.zRot += (K["ROLL_HEAD"] if lead_right else -K["ROLL_HEAD"]) * amount
 
-    a = -turn if lead_right else turn
-    if a != 0:
-        body.yRot += a
-        rightArm.z, rightArm.x = math.sin(a) * K["SHOULDER_OUT"], -math.cos(a) * K["SHOULDER_OUT"]
-        leftArm.z, leftArm.x = -math.sin(a) * K["SHOULDER_OUT"], math.cos(a) * K["SHOULDER_OUT"]
+    t["twist"] += -turn if lead_right else turn
+    t["guardTwist"] = stood - turn if lead_right else turn - stood
+    settle()
     return finish()
 
 
