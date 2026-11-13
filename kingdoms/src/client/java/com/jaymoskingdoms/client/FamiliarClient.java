@@ -95,7 +95,7 @@ public final class FamiliarClient {
 		EntityRenderers.register(FamiliarBodies.RAT, Rat::new);
 		EntityRenderers.register(FamiliarBodies.FROG, Toad::new);
 		eyes = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.familiar_eyes", InputConstants.KEY_PAGEDOWN,
-			KeyMapping.Category.register(JaymosKingdoms.id("classes"))));
+			ClassKeys.category()));
 		ClientPlayNetworking.registerGlobalReceiver(Familiars.Seeing.TYPE, (payload, context) -> context.client().execute(() -> {
 			seeing = payload.entity();
 			missing = 0;
