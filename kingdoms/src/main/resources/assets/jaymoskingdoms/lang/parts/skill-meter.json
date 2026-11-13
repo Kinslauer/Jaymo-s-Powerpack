@@ -1,0 +1,8 @@
+{
+  "hud.jaymoskingdoms.skill_meter.level": "%s %s",
+  "hud.jaymoskingdoms.skill_meter.lv": "Lv.%s",
+  "hud.jaymoskingdoms.skill_meter.level_up": "%s reaches level %s",
+  "hud.jaymoskingdoms.skill_meter.point": "A point to spend [%s]",
+  "hud.jaymoskingdoms.skill_meter.point_journal": "A point to spend in your Astronomer's Journal",
+  "hud.jaymoskingdoms.skill_meter.promoted": "Promoted: %s"
+}

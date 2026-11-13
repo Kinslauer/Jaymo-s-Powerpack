@@ -837,6 +837,12 @@ public final class Skills {
 			Component chat = milestone
 				? Component.translatable("message.jaymoskingdoms.skills.milestone" + where, name, now)
 				: Component.translatable("message.jaymoskingdoms.skills.level" + where, name, now);
+			if (size == Fanfare.MINOR) {
+				// an ordinary level is the experience meter's to tell (the client's SkillMeter: a flash, a small toast, a low
+				// chime); only the sparks are left here, for those standing by
+				Fanfare.burst(player, pillar.color, size);
+				return;
+			}
 			Fanfare.fanfare(player, Component.translatable(top ? "message.jaymoskingdoms.skills.top_title" : "message.jaymoskingdoms.skills.level_title", name),
 				Component.translatable("message.jaymoskingdoms.skills.level_subtitle", now), chat, pillar.color, size);
 		}
