@@ -875,6 +875,13 @@ public class HydrologyManager {
         if (generator == null || randomState == null) {
             return new WatershedRegionData(java.util.Collections.emptyList(), java.util.Collections.emptyList(), rx, rz);
         }
+        // The server thread never builds or waits for a basin tile (a 1024-block build can run past the watchdog on the
+        // Steam Deck; tree growth reached here from sapling ticks and bonemeal). It sees no watershed till the tile is
+        // ready, and the tile is built on the prefetch threads meanwhile (not cached, so the next ask sees the real one).
+        if ("Server thread".equals(Thread.currentThread().getName())) {
+            buildTileLater(BasinTile.tileCoord(rx), BasinTile.tileCoord(rz), generator, randomState);
+            return new WatershedRegionData(java.util.Collections.emptyList(), java.util.Collections.emptyList(), rx, rz);
+        }
         ensureTileBuilt(BasinTile.tileCoord(rx), BasinTile.tileCoord(rz), generator, randomState);
         data = WATERSHED_REGION_CACHE.get(key);
         if (data == null) {
@@ -1028,6 +1035,23 @@ public class HydrologyManager {
 
     private static volatile java.util.concurrent.ConcurrentHashMap.KeySetView<Long, Boolean> inFlightTilePrefetch = java.util.concurrent.ConcurrentHashMap
             .newKeySet();
+
+    /** Builds a basin tile on the prefetch threads unless it is being built already. */
+    private static void buildTileLater(int tx, int tz,
+            net.minecraft.world.level.chunk.ChunkGenerator generator,
+            net.minecraft.world.level.levelgen.RandomState randomState) {
+        final long tileKey = BasinTile.tileKey(tx, tz);
+        if (TILE_BUILDS.containsKey(tileKey) || !inFlightTilePrefetch.add(tileKey)) return;
+        PREFETCH_POOL.submit(() -> {
+            try {
+                ensureTileBuilt(tx, tz, generator, randomState);
+            } catch (Throwable e) {
+                com.mojang.logging.LogUtils.getLogger().error("[Dynamic Waters] Basin tile build failed", e);
+            } finally {
+                inFlightTilePrefetch.remove(tileKey);
+            }
+        });
+    }
 
     public static void prefetchWatershedsAround(int blockX, int blockZ,
             net.minecraft.world.level.chunk.ChunkGenerator generator,

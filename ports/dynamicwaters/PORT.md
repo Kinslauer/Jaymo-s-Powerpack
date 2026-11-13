@@ -92,6 +92,10 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   yet, no main rivers while it is built on the prefetch threads (`buildLater`). Chunk generation runs on worker threads,
   so the rivers carved into terrain are unchanged; only a moment of river spawns or river current right after a region
   first comes into reach can be missed.
+- **Nor a basin tile**: tree growth (sapling ticks, bonemeal) reached `HydrologyManager.getWatershedRegion` with the
+  cache off, which built a whole 1024-block `BasinTile` on the server thread or joined another thread's build. On
+  "Server thread" it now returns an empty, uncached region and queues the tile on the watershed prefetch threads
+  (`buildTileLater`); a tree placed before its tile is ready just doesn't see the watershed.
 
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary

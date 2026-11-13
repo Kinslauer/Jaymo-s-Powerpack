@@ -67,10 +67,14 @@ public final class ZFighterChapel {
 	/** The pool he comes and goes through: its radius and colour (Nether ember). */
 	static final float POOL_RADIUS = 1.8F;
 	static final int POOL_COLOR = 0xD8421C;
-	/** The pull: how often a corrupted holder may feel it (ticks), its chance then, and how far it reaches (chunks). */
+	/**
+	 * The pull: how often a corrupted holder may feel it (ticks), its chance then, and how far it reaches: rings of the
+	 * chapels' 60-chunk spacing (findNearestMapStructure's unit), each candidate made on the server thread, and overworld
+	 * chunks are slow to make on this pack. 64 rings could freeze the server; 2 still reach about 2000 blocks.
+	 */
 	static final int PULL_EVERY = 20 * 60 * 5;
 	static final float PULL_CHANCE = 0.5F;
-	static final int PULL_CHUNKS = 64;
+	static final int PULL_CHUNKS = 2;
 	/** Nearer than this (blocks) the pull says nothing: they can see the place. */
 	static final double PULL_MIN = 64.0;
 	/** A holder who has moved this far (blocks) from where the nearest chapel was last looked for is looked for again. */
