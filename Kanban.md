@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 11:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 11:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · 🍇 Bacchus · claimed
 
 
 ## In review
@@ -22,6 +21,7 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · 🍇 Bacchus · blocked
 
 
 ## Done
