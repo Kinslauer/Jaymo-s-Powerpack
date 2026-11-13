@@ -12310,3 +12310,12 @@ giants being worked on, as its own upright model."
 - **Word of it**: villagers on the home continent now and then gossip of the land in the east (strange ships, lacquer, a steel no smith can match, men who sailed after them), more often by the shore, and sailors most of all. No name, no bearing, no map.
 - `Helmsmen` (new; `Ship.Helmsmanship` hook, `Ship.dropAnchor`), `MohkneeTalk` (new), `InteractActions` (`helm`, `hire_helm`), `Approaches`, `Crewmen.waiting`, lang part `helmsmen.json`.
 - Built and compiled; not played. Not tested: a helmsman holding a course in game, the hired captain's follow and contract end, MCA's own Follow against a posted helmsman. A helmsman and a player at the wheel stand in the same spot. Still to come for this patch: blossom merchant ships, bought passage and the rutter.
+
+## 0.7.811 (2026-11-13): Blossom merchant ships, and passage over the eastern sea (#1411)
+
+- **Blossom traders**: now and then a ship from over the eastern sea, dark timbers and red sails, lies off a realm's harbour for a day (no sooner than three days after the last at that harbour). Go aboard and talk work with her captain and he opens his hold: paper, bamboo, cherry saplings, petals, lanterns and iron, for leather, wool and whale oil. Then she sails east, and is gone once nobody is near enough to see her go. A helmsman told to follow her will keep in her wake.
+- **Buy Passage**: aboard her while she lies there, her captain has Buy Passage on the Interact page, 20 emeralds' worth. She sails at once and carries you the whole crossing, lies off Mohknee's shore for a day, and will carry you home for the same.
+- A hired captain making for the land in the east now lies to when the shore itself is within about 100 blocks ahead, not at a fixed distance from the land's middle.
+- Ops: `/kingdom blossomtrader` brings one to the nearest realm harbour now.
+- `BlossomTraders` (new), `Crew.flag`, `SeaTrade.lie/sail` and her stock, `Corsairs` (her arrival home), `ShipTalk`, `InteractActions` (`passage`), `Mohknee.shoreAhead`, `Helmsmen`.
+- Built and compiled; not played. Her crew wear the harbour realm's dress and she is one of the two merchant hulls recoloured: the blossom land's own dress and ship come with later patches, and so do tea, rice wine, lacquer and steel in her hold. There is no harbour on Mohknee yet, so the only ship home is the one that brought you, for a day.
