@@ -60,6 +60,9 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   can't evade.
 - **Missing a blow:** a melee blow or a shot that would land within `EVADE_TICKS` 8 of the press misses. That is shorter than the
   cooldown, so evades can't be chained into lasting immunity.
+- **Hard to hit after a pull or a roll** (Andy, from Jung): for `OFF_LINE_TICKS` 12 more ticks after the sure miss, blows
+  and shots aimed at the boxer miss at `PULL_MISS` 40% after a pull and `ROLL_MISS` 30% after a shoulder roll (a whiff
+  sound). Slips and bobs don't get it. These misses earn no strong attack.
 - **Perfect evade:** within the guard's perfect-parry window of the press (`Guard.PERFECT_TICKS` 5, +2 when locked onto
   the attacker). It earns the next punch inside `STRONG_TICKS` 30:
   - bob: the **uppercut**, `UPPERCUT_DAMAGE` 4;
@@ -250,3 +253,5 @@ Nothing from the plan. See the open points below.
     knees bend and the trunk goes with the hips (no gap at the waist, the head on the shoulders).
 30. Run the feathers down to four icons: a faint breath puff now and then. Empty: clear puffs and heaving shoulders.
 31. A second player sees all of it.
+32. Long Guard: pull just before a zombie's swing lands, then let it swing again at once: about two swings in five
+    miss for the next half second or so, with a whiff. Bastion's shoulder roll: about three in ten.
