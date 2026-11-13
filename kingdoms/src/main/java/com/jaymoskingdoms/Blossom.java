@@ -369,6 +369,46 @@ final class Blossom {
 		return s.done();
 	}
 
+	/** The watch tower's footprint (square). */
+	static final int WATCH_SIZE = 5;
+
+	/**
+	 * A watch tower (5 x 5, 11 high) out on the road: four timber legs braced with fences, a ladder up the middle of the
+	 * back, a railed deck, and a small hipped roof over a lantern. Open below, so the road runs under it.
+	 */
+	static Blueprint watchTower(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_watch", WATCH_SIZE, WATCH_SIZE, 12);
+		int last = WATCH_SIZE - 1;
+		for (int x = 0; x <= last; x++) {
+			for (int z = 0; z <= last; z++) {
+				boolean leg = (x == 0 || x == last) && (z == 0 || z == last);
+				boolean edge = x == 0 || x == last || z == 0 || z == last;
+				if (leg) {
+					for (int y = 1; y <= 8; y++) {
+						s.set(x, y, z, TIMBER);
+					}
+				}
+				// the deck, and its rail
+				if (!(x == 2 && z == last - 1)) {
+					s.set(x, 5, z, leg ? TIMBER : k.p.planks());
+				}
+				if (edge && !leg) {
+					s.set(x, 6, z, k.p.fence());
+				}
+			}
+		}
+		BlockState ladder = Buildings.Sketch.facing(Blocks.LADDER, Direction.NORTH);
+		for (int y = 1; y <= 5; y++) {
+			s.set(2, y, last - 1, ladder);
+		}
+		for (int y = 1; y <= 4; y++) {
+			s.set(2, y, last, y == 4 ? Buildings.Sketch.lying(BEAM, Direction.Axis.X) : k.p.planks());
+		}
+		s.hip(0, last, 0, last, 9, k.roofStairs, k.roofSlab);
+		s.set(2, 10, 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
 	/** A row of ramie (1 x {@link #PADDY_DEPTH}) on tilled ground along a paddy's bund, which keeps it wet: half grown, and one stand ready to cut. */
 	static Blueprint fibreRow() {
 		Buildings.Sketch s = new Buildings.Sketch("blossom_fibre", 1, PADDY_DEPTH, 3);

@@ -124,6 +124,10 @@ Not built: villagers in hats, house crests.*
 A levy rank with spears and matchlocks under the ronin-armoured sworn men. Shrine and pagoda guards with glaives.
 Mounted road patrols. Border watch forts. A matchlock look for our musket.
 
+*Built (2026-11-13, `BlossomVillages.sworn`, `dressGuards`, `watchTower`): the levy (two guards in three, straw hat and
+spear) under the sworn men, a watch tower on the road to each new village. Not built: matchlocks, glaive guards, mounted
+patrols, guards posted in the towers.*
+
 ## Patch 8: the forge (ar_heads, ar_steel, ar_heirloom, ar_suit)
 
 New `WeaponParts` kinds (glaive, great blade, studded club) with Weapon Forms moves. Iron sand in the land's

@@ -15,3 +15,6 @@
 - **Straw Hat, Basket Hat, Straw Cape**: craftable from thatch and tatami, worn on the head and chest. The hats are drawn from their own models.
 - **Ramie**, a fibre crop: a grown stand is cut by hand for 2 to 4 fibre and comes again from the root half grown; one cut in five leaves the root spent and it starts over. Breaking a grown stand gives seed. Three fibre make two string. A row of it grows by each farmstead's paddy, which is where seed comes from.
 - Not built from patch 6: villagers wearing the hats, and a crest for each blossom house. The hats have not been seen on a head.
+- **The levy** (needs MCA): one Blossom guard in three is a sworn man in the ronin harness, as all of them were; the other two are the levy, in straw hats with spears.
+- **Watch towers**: each new village raises a timber watch tower 52 to 64 blocks out along the way to its torii, where the ground will take one. Nobody is posted in it yet.
+- Not built from patch 7: matchlocks for the levy and a matchlock look for the musket, glaive guards at shrines, mounted road patrols.

@@ -10,6 +10,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -105,6 +109,9 @@ final class BlossomVillages {
 	private static final Spot FARM_PADDY = new Spot("blossom_paddy", 0, -8, 0, Blossom.PADDY_WIDTH);
 	/** The ramie row along the paddy's other side. */
 	private static final Spot FARM_FIBRE = new Spot("blossom_fibre", -5, -8, 0, 1);
+	/** The watch tower: how far out along the road from the torii (at least, plus up to), its ground's radius, and the most that may rise and fall. */
+	static final int WATCH_MIN = 52, WATCH_SPREAD = 12, WATCH_RADIUS = 4, WATCH_SLOPE = 4;
+	private static final Spot WATCH = new Spot("blossom_watch", 0, -2, 0, Blossom.WATCH_SIZE);
 	/** The wayside shrine by a farmstead's paddy, facing the way to the village. */
 	private static final Spot FARM_SHRINE = new Spot("blossom_wayside", 7, -5, 0, 3);
 
@@ -391,6 +398,7 @@ final class BlossomVillages {
 			}
 		}
 		farmsteads(level, village, bell, random, homes, built);
+		watchTower(level, village, bell, gate, random);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));
 			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
@@ -474,6 +482,20 @@ final class BlossomVillages {
 		}
 	}
 
+	/** A watch tower out along the way to the village's torii, if the ground there will take one (loaded, dry, level enough, nobody else's). */
+	private static void watchTower(ServerLevel level, Faction village, BlockPos bell, Direction gate, RandomSource random) {
+		int r = WATCH_MIN + random.nextInt(WATCH_SPREAD);
+		BlockPos at = bell.relative(gate, r);
+		int floor = IllagerBuildings.floor(level, at, WATCH_SLOPE, WATCH_RADIUS);
+		Faction owner = Factions.at(level.getServer(), level, at);
+		if (floor == Integer.MIN_VALUE || owner != null && owner.id() != village.id()) {
+			return;
+		}
+		BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+		CampBuildings.level(level, middle, WATCH_RADIUS, CLEAR_HEIGHT);
+		place(level, Blossom.watchTower(kit(level, village, random)), WATCH, middle, gate, null);
+	}
+
 	/** One building's kit from the village's own look, its materials and details rolled (never the plain design). */
 	private static Buildings.Kit kit(ServerLevel level, Faction village, RandomSource random) {
 		long variant = random.nextLong();
@@ -516,7 +538,18 @@ final class BlossomVillages {
 
 	// ---- the Blossom land's guards -----------------------------------------------------------------------------------------
 
-	/** With MCA: every settlement among the cherry trees puts its MCA guards in the ronin harness, in its colour. */
+	/** One guard in this many is a sworn man in the ronin harness; the rest are the levy. */
+	static final int SWORN_ONE_IN = 3;
+
+	/** {@code guard} is one of the lord's sworn men (the same guard always is, or never). */
+	static boolean sworn(Entity guard) {
+		return Math.floorMod(guard.getUUID().hashCode(), SWORN_ONE_IN) == 0;
+	}
+
+	/**
+	 * With MCA: every settlement among the cherry trees arms its MCA guards its own way. One in {@link #SWORN_ONE_IN}
+	 * is a sworn man in the ronin harness, in its colour; the rest are the levy, in straw hats with spears.
+	 */
 	private static void dressGuards(ServerLevel level) {
 		if (!McaCompat.LOADED) {
 			return;
@@ -528,8 +561,16 @@ final class BlossomVillages {
 			}
 			DyeColor colour = f.styleColor(server);
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(GUARD_RANGE),
-				v -> v.isAlive() && !v.isBaby() && McaCompat.isGuard(v) && !Outfits.wearsRonin(v))) {
-				Outfits.ronin(v, colour);
+				v -> v.isAlive() && !v.isBaby() && McaCompat.isGuard(v))) {
+				if (sworn(v)) {
+					if (!Outfits.wearsRonin(v)) {
+						Outfits.ronin(v, colour);
+					}
+				} else if (!v.getItemBySlot(EquipmentSlot.HEAD).is(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT)) {
+					// the levy: a straw hat and a spear, no harness
+					v.setItemSlot(EquipmentSlot.HEAD, new ItemStack(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT));
+					v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SPEAR));
+				}
 			}
 		}
 	}
