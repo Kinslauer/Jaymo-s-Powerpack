@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * A Z Fighter's scroll while holding Z is his flight (take off, poses, land), not the hotbar's. (0.17.45) Anyone's scroll
- * while locked on moves the lock left or right ({@link LockOnClient#scroll}).
+ * while locked on picks the region of the target's body the lock aims at ({@link LockOnClient#scroll}).
  */
 @Mixin(MouseHandler.class)
 abstract class ZFighterScrollMixin {
