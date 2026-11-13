@@ -1047,6 +1047,7 @@ final class WalledTowns {
 					piece(out, level, f, tier, "fishery", 1, JobHalls::fishery);
 					piece(out, level, f, tier, "lodge", 1, JobHalls::huntingLodge);
 					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 8));
+					piece(out, level, f, tier, "bath_house", 1, Blossom::bathHouse);
 					piece(out, level, f, tier, "farm", 1, Buildings::farm);
 					fixed(out, f, tier, "lantern", 4, Blossom::stoneLantern);
 				}
@@ -1056,6 +1057,7 @@ final class WalledTowns {
 					piece(out, level, f, tier, "butcher", 1, JobHalls::butcher);
 					piece(out, level, f, tier, "lodge", 1, JobHalls::huntingLodge);
 					piece(out, level, f, tier, "dojo", 1, JobHalls::trainingHall);
+					piece(out, level, f, tier, "pagoda", 1, Blossom::pagoda);
 					piece(out, level, f, tier, "infirmary", 1, JobHalls::infirmary);
 					piece(out, level, f, tier, "tavern", 1, k -> Buildings.tavern(k, 14));
 					piece(out, level, f, tier, "market", 1, Buildings::market);

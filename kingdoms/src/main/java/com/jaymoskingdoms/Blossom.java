@@ -211,7 +211,7 @@ final class Blossom {
 			s.set(x, 6, 2, Blocks.DARK_OAK_PLANKS.defaultBlockState());
 		}
 		s.set(3, 2, 3, Blocks.BARREL.defaultBlockState());
-		s.set(3, 2, 5, BONSAI);
+		s.set(3, 2, 5, Healing.SHRINE.defaultBlockState());
 		s.hip(0, 6, 0, 6, 5, Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(), Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
 		s.set(3, 6, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// the stone lanterns
@@ -219,6 +219,173 @@ final class Blossom {
 			s.set(x, 1, 0, Blocks.STONE_BRICK_WALL.defaultBlockState());
 			s.set(x, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
 		}
+		return s.done();
+	}
+
+	/**
+	 * Walls round x0..x1, z0..z1 from y0 to y1 with posts at the corners only: boards on the first row, shoji on the
+	 * second, plaster above, and the top plate over them.
+	 */
+	private static void frame(Buildings.Sketch s, Buildings.Kit k, int x0, int x1, int z0, int z1, int y0, int y1, BlockState post) {
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (x != x0 && x != x1 && z != z0 && z != z1) {
+					continue;
+				}
+				boolean alongX = z == z0 || z == z1, corner = (x == x0 || x == x1) && alongX;
+				for (int y = y0; y <= y1; y++) {
+					s.set(x, y, z, corner ? post : y == y0 ? k.p.planks() : y == y0 + 1 ? PAPER : k.infill);
+				}
+				s.set(x, y1 + 1, z, corner ? post : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
+			}
+		}
+	}
+
+	/**
+	 * The tea house (13 x 11, the Blossom land's tavern): a long minka with tables on the tatami, the hearth in the
+	 * middle, and along the back the counter's stores and the brewer's corner (a cauldron, a brewing stand on a cask).
+	 */
+	static Blueprint teaHouse(Buildings.Kit k) {
+		int w = 11, d = 9, mid = (w + 1) / 2;
+		Buildings.Sketch s = new Buildings.Sketch("tavern", w + 2, d + 2, 14);
+		for (int x = 1; x <= w; x++) {
+			for (int z = 1; z <= d; z++) {
+				s.set(x, 0, z, x == 1 || x == w || z == 1 || z == d ? k.p.wall() : TATAMI);
+			}
+		}
+		storey(s, k, 1, w, 1, d, 1, 3, 0);
+		s.door(mid, 1, 1, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.hip(0, w + 1, 0, d + 1, 4, k.roofStairs, k.roofSlab);
+		for (int x : new int[] {3, w - 2}) {
+			Buildings.table(s, k, x, 1, 3, false);
+			Buildings.table(s, k, x, 1, 6, false);
+		}
+		s.set(mid, 1, 5, BlossomFurnishings.HEARTH.defaultBlockState());
+		for (int x = 3; x <= w - 4; x++) {
+			s.set(x, 1, d - 1, BlossomFurnishings.TANSU.defaultBlockState().setValue(BarrelBlock.FACING, Direction.NORTH));
+		}
+		s.set(w - 2, 1, d - 1, Blocks.BARREL.defaultBlockState());
+		s.set(w - 2, 2, d - 1, Blocks.BREWING_STAND.defaultBlockState());
+		s.set(w - 1, 1, d - 1, Blocks.WATER_CAULDRON.defaultBlockState().setValue(net.minecraft.world.level.block.LayeredCauldronBlock.LEVEL, 3));
+		s.set(2, 1, d - 1, BONSAI);
+		int ridge = 4 + (d + 1) / 2;
+		s.set(mid, ridge - 1, (d + 1) / 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(mid + 1, 3, 0, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The dojo (9 x 9, the Blossom land's training hall; the school master stands at its middle): a bare tatami floor
+	 * inside shoji walls, training posts and racks at the back, under a hipped roof.
+	 */
+	static Blueprint dojo(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("training_hall", 9, 9, 12);
+		for (int x = 1; x <= 7; x++) {
+			for (int z = 1; z <= 7; z++) {
+				s.set(x, 0, z, x == 1 || x == 7 || z == 1 || z == 7 ? k.p.wall() : TATAMI);
+			}
+		}
+		frame(s, k, 1, 7, 1, 7, 1, 3, TIMBER);
+		s.door(4, 1, 1, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.hip(0, 8, 0, 8, 4, k.roofStairs, k.roofSlab);
+		BlockState post = JobHalls.trainingPost();
+		s.set(2, 1, 6, post);
+		s.set(6, 1, 6, post);
+		BlockState rack = Displays.rack(Direction.NORTH);
+		if (rack != null) {
+			s.set(3, 2, 6, rack);
+			s.set(5, 2, 6, rack);
+		}
+		s.set(4, 7, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The bath house (9 x 9): a stone floor round a pool one block deep, open on three sides under a hipped roof on four
+	 * posts, a screen along the back. Its water is still, so a soak in it counts as a bath ({@link Lifestyle}).
+	 */
+	static Blueprint bathHouse(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("bath_house", 9, 9, 10);
+		for (int x = 0; x <= 8; x++) {
+			for (int z = 0; z <= 8; z++) {
+				boolean pool = x >= 2 && x <= 6 && z >= 3 && z <= 5;
+				s.set(x, 0, z, pool ? Blocks.WATER.defaultBlockState() : k.p.wall());
+			}
+		}
+		for (int x : new int[] {1, 7}) {
+			for (int z : new int[] {1, 7}) {
+				for (int y = 1; y <= 3; y++) {
+					s.set(x, y, z, TIMBER);
+				}
+			}
+		}
+		for (int i = 1; i <= 7; i++) {
+			s.set(i, 4, 1, Buildings.Sketch.lying(BEAM, Direction.Axis.X));
+			s.set(i, 4, 7, Buildings.Sketch.lying(BEAM, Direction.Axis.X));
+			s.set(1, 4, i, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(7, 4, i, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+		}
+		for (int x = 2; x <= 6; x++) {
+			s.set(x, 1, 7, k.p.planks());
+			s.set(x, 2, 7, PAPER);
+			s.set(x, 3, 7, k.infill);
+		}
+		s.hip(0, 8, 0, 8, 4, k.roofStairs, k.roofSlab);
+		s.set(1, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(7, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(4, 7, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The pagoda (11 x 11, 20 high): three storeys, each standing a block inside the one below under its own skirt of
+	 * roof, red posts, shoji and plaster, an altar on the ground floor and a spire on top. A walled town's building.
+	 */
+	static Blueprint pagoda(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("pagoda", 11, 11, 21);
+		BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
+		for (int x = 1; x <= 9; x++) {
+			for (int z = 1; z <= 9; z++) {
+				s.set(x, 0, z, stone);
+			}
+		}
+		// each storey: its walls' first and last column, its first and last row
+		int[][] storeys = {{2, 8, 1, 4}, {3, 7, 6, 9}, {4, 6, 11, 13}};
+		for (int[] st : storeys) {
+			frame(s, k, st[0], st[1], st[0], st[1], st[2], st[3], VERMILION);
+			if (st[2] > 1) {
+				ceiling(s, Blocks.DARK_OAK_PLANKS.defaultBlockState(), st[0] - 1, st[1] + 1, st[0] - 1, st[1] + 1, st[2] - 1);
+			}
+		}
+		skirt(s, 0, 10, 0, 10, 4, 2, k.roofStairs);
+		skirt(s, 1, 9, 1, 9, 9, 2, k.roofStairs);
+		s.hip(2, 8, 2, 8, 13, k.roofStairs, k.roofSlab);
+		s.door(5, 1, 2, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.set(5, 1, 7, Healing.SHRINE.defaultBlockState());
+		s.set(5, 4, 5, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(5, 17, 5, Blocks.STONE_BRICK_WALL.defaultBlockState());
+		s.set(5, 18, 5, Blocks.STONE_BRICK_WALL.defaultBlockState());
+		s.set(5, 19, 5, named("lightning_rod", Blocks.IRON_BARS));
+		return s.done();
+	}
+
+	/**
+	 * A wayside shrine (3 x 3): an altar on a stone footing between two red posts, under a thatch cap. {@code altar} is
+	 * the altar as it stands (given to one of the eight, or plain).
+	 */
+	static Blueprint wayside(BlockState altar) {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_wayside", 3, 3, 5);
+		for (int x = 0; x < 3; x++) {
+			for (int z = 0; z < 3; z++) {
+				s.set(x, 0, z, Blocks.STONE_BRICKS.defaultBlockState());
+				s.set(x, 3, z, BlossomBlocks.THATCH_SLAB.defaultBlockState());
+			}
+		}
+		for (int x : new int[] {0, 2}) {
+			s.set(x, 1, 2, VERMILION);
+			s.set(x, 2, 2, VERMILION);
+		}
+		s.set(1, 1, 1, altar);
 		return s.done();
 	}
 

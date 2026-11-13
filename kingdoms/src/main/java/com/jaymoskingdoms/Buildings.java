@@ -941,6 +941,10 @@ final class Buildings {
 	 * beer garden.
 	 */
 	static Blueprint tavern(Kit k, int people) {
+		if (k.blossom && !k.classic) {
+			// among the cherry trees the tavern is a tea house
+			return Blossom.teaHouse(k);
+		}
 		if (people < TAVERN_GRAND) {
 			return tavernAlehouse(k);
 		}
@@ -967,7 +971,7 @@ final class Buildings {
 	 * A table (a post and a plate) with a stool (a slab) either side, east and west ({@code ew}) or north and south. Each
 	 * stool gets a cushion to sit on when the building's finished ({@link Cushions}).
 	 */
-	private static void table(Sketch s, Kit k, int x, int y, int z, boolean ew) {
+	static void table(Sketch s, Kit k, int x, int y, int z, boolean ew) {
 		s.set(x, y, z, k.p.fence());
 		s.set(x, y + 1, z, k.plate());
 		for (int side : new int[] {-1, 1}) {

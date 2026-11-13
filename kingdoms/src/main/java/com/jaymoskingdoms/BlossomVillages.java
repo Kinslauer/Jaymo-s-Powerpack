@@ -103,6 +103,8 @@ final class BlossomVillages {
 	/** A farmstead in the frame of its own middle, its front toward the village: the paddy before the house. */
 	private static final Spot FARM_HOUSE = new Spot("house", 0, 1, 0, 0);
 	private static final Spot FARM_PADDY = new Spot("blossom_paddy", 0, -8, 0, Blossom.PADDY_WIDTH);
+	/** The wayside shrine by a farmstead's paddy, facing the way to the village. */
+	private static final Spot FARM_SHRINE = new Spot("blossom_wayside", 7, -5, 0, 3);
 
 	static Kind kind(ServerLevel level, int floor, RandomSource random) {
 		return floor - level.getSeaLevel() >= TEMPLE_ABOVE_SEA ? Kind.TEMPLE : random.nextFloat() < MARKET_SHARE ? Kind.MARKET : Kind.HAMLET;
@@ -459,6 +461,10 @@ final class BlossomVillages {
 			homes.add(place(level, house, new Spot(FARM_HOUSE.id(), FARM_HOUSE.x(), FARM_HOUSE.z(), FARM_HOUSE.turns(), house.width()), middle, toVillage, built));
 			Blueprint paddy = Blossom.paddy();
 			place(level, paddy != null ? paddy : Buildings.farm(kit(level, village, random)), FARM_PADDY, middle, toVillage, paddy != null ? null : built);
+			// its wayside shrine, kept to one of the eight
+			Shrine.Dedication[] patrons = Shrine.Dedication.values();
+			Shrine.Dedication patron = patrons[random.nextInt(patrons.length)];
+			place(level, Blossom.wayside(Healing.SHRINE.defaultBlockState().setValue(Shrine.DEDICATION, patron)), FARM_SHRINE, middle, toVillage, null);
 			raised++;
 		}
 	}

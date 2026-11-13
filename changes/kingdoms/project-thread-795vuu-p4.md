@@ -5,3 +5,9 @@
 - **Farmsteads**: up to two outlying minka round each new village, 44 to 60 blocks from the bell where the ground will take one, each with its paddy (a plain field without Kitchen). Their people are the village's.
 - **Graves**: a Blossom settlement's dead are buried under narrow andesite posts.
 - Built; not seen in game (the dev server has no player to found a village for). Not built from this patch: stilt and snow villages (villages only rise in cherry groves so far) and the lighthouse.
+- **Tea house**: a Blossom settlement's tavern is a tea house (tables on tatami, a hearth, tansu along the back, a brewer's corner with a cauldron and a brewing stand). It is the tavern to everything that uses one.
+- **Dojo**: the Blossom land's training hall (tatami, shoji walls, training posts and racks); the school master stands in it as in any training hall.
+- **Bath house** (walled Blossom towns, tier 3): a roofed stone pool. A soak in it counts as a bath.
+- **Pagoda** (walled Blossom towns, tier 4): three storeys under skirts of roof, an altar on the ground floor.
+- **Wayside shrines**: one by each farmstead, its altar given to one of the eight (or plain). The village shrine now holds an altar too.
+- Not built from patch 5: a separate brewery (it is the tea house's back corner), roadside inns away from a village. None of these halls has been seen in game.

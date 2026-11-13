@@ -228,6 +228,10 @@ final class JobHalls {
 	 * a tool rack either side of the back wall under wall torches.
 	 */
 	static Blueprint trainingHall(Buildings.Kit k) {
+		if (k.blossom && !k.classic) {
+			// the Blossom land's school hall is a dojo
+			return Blossom.dojo(k);
+		}
 		Buildings.Sketch s = new Buildings.Sketch("training_hall", 9, 9, 12);
 		Palette p = k.p;
 		for (int x = 0; x < 9; x++) {
@@ -574,7 +578,7 @@ final class JobHalls {
 	}
 
 	/** Powers' training post, where Powers is loaded (the belt can be set at it), else a bale of hay. */
-	private static BlockState trainingPost() {
+	static BlockState trainingPost() {
 		Block post = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse("jaymospowers:training_post"));
 		return (post == Blocks.AIR ? Blocks.HAY_BLOCK : post).defaultBlockState();
 	}

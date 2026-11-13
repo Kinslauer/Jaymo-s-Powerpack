@@ -106,6 +106,10 @@ villages (villages rise only in cherry groves), the lighthouse.*
 (`Resting`), dojo (guards drill, `Bouts`, a master teaches Weapon Forms). Roadside inns. The pagoda as a
 `WalledTowns` tier building. Wayside shrines, each kept to one of the eight faiths.
 
+*Built (2026-11-13, `Blossom.teaHouse`, `dojo`, `bathHouse`, `pagoda`, `wayside`): the tea house is the Blossom tavern
+(`Buildings.tavern`), the dojo the Blossom training hall (`JobHalls.trainingHall`), bath house at tier 3 and pagoda at
+tier 4 in `WalledTowns`, a wayside shrine by each farmstead. Not built: a separate brewery, roadside inns.*
+
 ## Patch 6: folk and dress (fk_hats, fk_dress, fk_fibre, fk_houses)
 
 Straw hats, basket hat and rain cape. Blossom outfits in `Uniforms`. A fibre crop for string and cloth. Each blossom
