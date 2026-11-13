@@ -370,13 +370,22 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	// ---------------------------------------------------------------- for /youth status
 
-	/** The online players as one line of JSON: name, dimension, block position, and whether their wisp is about. */
+	/**
+	 * The online players as one line of JSON: name, the display name chat shows (a nickname can differ from the account
+	 * name, and Hermes reads chat from the log), dimension, block position, and whether their wisp is about.
+	 */
 	static String status(List<ServerPlayer> players) {
 		List<String> rows = new ArrayList<>();
 		for (ServerPlayer p : players) {
-			rows.add(String.format("{\"name\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b}", p.getName().getString(),
-				p.level().dimension().identifier(), p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p)));
+			rows.add(String.format("{\"name\":\"%s\",\"display\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b}",
+				json(p.getName().getString()), json(p.getDisplayName().getString()), p.level().dimension().identifier(),
+				p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p)));
 		}
 		return "{\"players\":[" + String.join(",", rows) + "]}";
+	}
+
+	/** Text made safe inside a JSON string: quotes and backslashes escaped, control characters dropped. */
+	private static String json(String text) {
+		return text.replace("\\", "\\\\").replace("\"", "\\\"").replaceAll("\\p{Cntrl}", "");
 	}
 }
