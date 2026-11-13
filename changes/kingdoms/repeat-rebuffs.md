@@ -1,0 +1,5 @@
+# Villagers who won't give their name don't repeat themselves
+- Andy: "these messages shouldnt repeat, they should end the interaction with loss of hearts if you annoy them with that." A villager who won't tell you their name (wary of your blood or your reputation, holding a grudge, or an outlaw) says their cold word once a day. If their menu already opened on it, asking gets "you heard me" instead (a warning). Ask again, or hold out your hand again, and they've had enough: a line of their own, the talk ends, you lose 5 hearts with them, and they turn their back on you for 5 minutes.
+- While their back is turned their menu closes as it opens, with no words, and each try costs 2 more hearts (quick repeated clicks count once).
+- Opening a wary villager's menu again the same day shows a look, not the same words again. Orcs and goblins say the new lines in their own dialect.
+- `Introductions` (refusal, pester, shuns, shunned, waryOpening), `Handshakes`, `McaBridge.endTalk`, `McaDialogueMixin`; lang `dialogue`, `message`, `dialect-orc`, `dialect-goblin`. Built; not played.

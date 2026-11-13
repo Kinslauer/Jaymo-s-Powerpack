@@ -1179,6 +1179,14 @@ final class McaBridge {
 		return false;
 	}
 
+	/** {@code villager} ends the talk with {@code player}: MCA's talk screen closes on them ({@link Introductions#pester}). */
+	static void endTalk(ServerPlayer player, Villager villager) {
+		if (villager instanceof VillagerEntityMCA v && v.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent()) {
+			v.getInteractions().stopInteracting();
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.OpenGuiRequest(net.conczin.mca.network.s2c.OpenGuiRequest.Type.CLOSE), player);
+	}
+
 	/** (0.7.424) {@code body} can be questioned on the execution hold ({@link Questioning}): one of MCA's grown villagers. */
 	static boolean questionable(LivingEntity body) {
 		return body instanceof VillagerEntityMCA villager && !villager.isBaby() && villager.isAlive();
@@ -1261,7 +1269,8 @@ final class McaBridge {
 		if (main == null) {
 			return false;
 		}
-		Component line = Languages.understands(player, villager) ? Introductions.waryLine(villager, player)
+		// (the cold word once a day; after that a look, never the words again: Introductions#waryOpening)
+		Component line = Languages.understands(player, villager) ? Introductions.waryOpening(player, villager)
 			: Component.translatable("dialogue.chat.jaymoskingdoms.wary_opening.wordless");
 		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);

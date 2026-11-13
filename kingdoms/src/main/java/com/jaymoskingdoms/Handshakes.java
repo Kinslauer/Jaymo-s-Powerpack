@@ -373,6 +373,11 @@ public final class Handshakes {
 		if (!can(player) || shaking(player.getUUID()) || busy(villager) || !villager.isAlive()) {
 			return;
 		}
+		if (Introductions.shuns(player, villager)) {
+			// their back's turned on you for pestering them: no hand, no words (Introductions#shunned)
+			Introductions.shunned(player, villager);
+			return;
+		}
 		if (Identities.masked(player)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.introduce.masked").withStyle(ChatFormatting.GRAY), true);
 			return;
@@ -451,7 +456,7 @@ public final class Handshakes {
 			send(player, -1, Hand.DOWN);
 			if (Introductions.wary(player, villager)) {
 				// (0.7.504) one who minds you steps back from it
-				standOff(player, villager);
+				standOff(player, villager, true);
 				return;
 			}
 			Speech.say(level, villager, Component.translatable("handshake.jaymoskingdoms.refused"), Speech.WHITE, 12.0);
@@ -786,7 +791,9 @@ public final class Handshakes {
 		}
 		if (!McaCompat.isMca(villager) || player.isShiftKeyDown() || !can(player) || greetedBy(player, villager) || !villager.isAlive()
 			|| villager.isBaby() || villager.isSleeping() || villager.isTrading() || villager.getTarget() != null || McaCompat.panicking(villager)
-			|| shaking(player.getUUID()) || busy(villager) || Identities.masked(player) || Recollections.refuses(villager, player)) {
+			|| shaking(player.getUUID()) || busy(villager) || Identities.masked(player) || Recollections.refuses(villager, player)
+			|| Introductions.shuns(player, villager)) {
+			// (one whose back is turned on you: their menu closes as it opens, McaCompat#shunOpening)
 			return false;
 		}
 		if (Rulers.is(villager) && !Introductions.knows(player, villager)) {
@@ -835,7 +842,7 @@ public final class Handshakes {
 		send(player, -1, Hand.DOWN);
 		if (Introductions.wary(player, villager)) {
 			// (0.7.504) no wave from one who minds you: a step back and a cold word, then their menu (no name in it)
-			standOff(player, villager);
+			standOff(player, villager, false);
 			menu(player, villager);
 			return;
 		}
@@ -889,15 +896,26 @@ public final class Handshakes {
 		}
 	}
 
-	/** (0.7.504) {@code villager}, wary of {@code player}, steps back from them with a cold word in place of their name. */
-	private static void standOff(ServerPlayer player, Villager villager) {
+	/**
+	 * (0.7.504) {@code villager}, wary of {@code player}, steps back from them with a cold word in place of their name.
+	 * {@code offered}: you held your hand out to them yourself (counts as asking, {@link Introductions#refusal}); else it was
+	 * the hand of a first greeting, which only gets the cold word once ({@link Introductions#waryOpening}).
+	 */
+	private static void standOff(ServerPlayer player, Villager villager, boolean offered) {
 		ServerLevel level = player.level();
 		Vec3 away = new Vec3(villager.getX() - player.getX(), 0.0, villager.getZ() - player.getZ());
 		if (away.lengthSqr() > 1.0E-4) {
 			villager.push(away.normalize().scale(STEP_BACK));
 		}
 		villager.getLookControl().setLookAt(player);
-		Speech.say(level, villager, Introductions.waryLine(villager, player), Speech.WHITE, 12.0);
+		// (the cold word once; a hand held out again after it annoys them: Introductions#refusal)
+		Component words = offered ? Introductions.refusal(player, villager, () -> Introductions.waryLine(villager, player))
+			: Introductions.waryOpening(player, villager);
+		Speech.say(level, villager, words, Speech.WHITE, 12.0);
+		if (Introductions.shuns(player, villager)) {
+			// (they've turned their back: pester said so)
+			return;
+		}
 		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.handshake.wary").withStyle(ChatFormatting.GRAY), true);
 	}
