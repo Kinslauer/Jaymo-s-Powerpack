@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:lerp",
+    "alpha": "jaymoskingdoms:mohknee/island_climate",
+    "first": "jaymoskingdoms:mohknee/home_ridges",
+    "second": 0.5
+  }
+}

@@ -139,10 +139,11 @@ final class BlossomVillages {
 
 	// ---- rising --------------------------------------------------------------------------------------------------------
 
-	/** Looks round a player in a cherry grove for a site, and raises a village there. */
+	/** Looks round a player in a cherry grove on Mohknee for a site, and raises a village there. */
 	private static void tryRise(ServerLevel level) {
-		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator() && level.getBiome(p.blockPosition()).is(Biomes.CHERRY_GROVE))
-			.toList();
+		// only on Mohknee, the blossom folk's own continent: the home continent's cherry groves are wild ones
+		List<ServerPlayer> players = level.players().stream().filter(p -> !p.isSpectator() && com.jaymoskingdoms.seas.Mohknee.on(level, p.blockPosition())
+			&& level.getBiome(p.blockPosition()).is(Biomes.CHERRY_GROVE)).toList();
 		if (players.isEmpty()) {
 			return;
 		}
@@ -182,7 +183,7 @@ final class BlossomVillages {
 	/** {@code at} is free for a Blossom village: loaded, a cherry grove all round, nobody's land, no settlement or bell near, out of sight. */
 	private static boolean open(ServerLevel level, BlockPos at) {
 		MinecraftServer server = level.getServer();
-		if (!level.isPositionEntityTicking(at)) {
+		if (!level.isPositionEntityTicking(at) || !com.jaymoskingdoms.seas.Mohknee.on(level, at)) {
 			return false;
 		}
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, 0, -RADIUS), at.offset(-RADIUS, 0, RADIUS),

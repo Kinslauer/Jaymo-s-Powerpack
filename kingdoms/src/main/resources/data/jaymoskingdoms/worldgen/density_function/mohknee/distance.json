@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:add",
+    "left": {
+      "type": "minecraft:slice",
+      "axis": "y",
+      "coordinate": 0,
+      "input": {
+        "type": "minecraft:distance_to_point",
+        "point": [
+          28000,
+          0,
+          0
+        ],
+        "metric": "euclidean"
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": 450,
+      "right": "jaymoskingdoms:mohknee/wobble"
+    }
+  }
+}

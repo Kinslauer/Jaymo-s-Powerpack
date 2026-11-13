@@ -21,6 +21,9 @@ public final class SharedPools {
 	/** The sets whose spacing the shared ones keep. */
 	static final Identifier VILLAGES = Identifier.withDefaultNamespace("villages"), OUTPOSTS = Identifier.withDefaultNamespace("pillager_outposts");
 
+	/** A set that keeps its own placement: the villages on the islands of Mohknee's crossing stand at exact places ({@code IslandStructure}'s only_at). */
+	static final Identifier OWN_PLACES = JaymosKingdoms.id("crossing_isle_villages");
+
 	private SharedPools() {
 	}
 
@@ -51,7 +54,8 @@ public final class SharedPools {
 		List<Holder<StructureSet>> group = new ArrayList<>();
 		for (Holder<StructureSet> h : sets) {
 			List<StructureSet.StructureSelectionEntry> entries = h.value().structures();
-			if (!entries.isEmpty() && entries.stream().allMatch(e -> which.test(e.structure()))) {
+			if (!entries.isEmpty() && !h.unwrapKey().map(k -> k.identifier().equals(OWN_PLACES)).orElse(false)
+				&& entries.stream().allMatch(e -> which.test(e.structure()))) {
 				group.add(h);
 			}
 		}

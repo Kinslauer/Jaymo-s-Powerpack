@@ -14,11 +14,10 @@ code, our own names in the Blossom tongue, our own vanilla-style art, clean-room
 - Folded steel from iron sand: "their smiths will teach you about the process". Patch 8.
 
 **Is the continent achievable? Yes, in the Overworld, with no new dimension or portal.** Kingdoms already owns the
-Overworld's land shape: `data/minecraft/worldgen/density_function/overworld/continents.json` (and `temperature`,
-`vegetation`, `erosion`) are our files, and `seas/Offshore` reads the same noise. Patch 1 adds one density function of
-our own that knows how far a place is from a fixed point, and the four files use it. Ships top out at 0.8 blocks a
-tick (`Ship.FASTEST`), so the width of the sea sets the length of the voyage. The land lies far outside anything
-generated so far (the server is pre-generated to 2,500 blocks), so it appears in the worlds we have: no reset.
+Overworld's land shape (`data/minecraft/worldgen/density_function/overworld/continents.json` and its neighbours), and
+26.3's own density functions can measure the distance to a point. Ships top out at 0.8 blocks a tick
+(`Ship.FASTEST`), so the width of the sea sets the length of the voyage. The land lies far outside anything generated
+so far (the server is pre-generated to 2,500 blocks), so it appears in the worlds we have: no reset.
 
 **What it builds on.** `Blossom`, `BlossomVillages`, `JobHalls`, `WalledTowns`, `Buildings`, `Climate`/`Languages`
 (the Blossom tongue), `Careers`, `Cafe`, `Carousing`, `Festivals`/`Bouts`, `Shrine`, `McaGraves`, `Uniforms`,
@@ -30,26 +29,26 @@ Weapon Forms, `ArsenalRelics`, Kitchen's rice, tatami and brewing through `Kitch
 One PR per patch, each with its change notes. Two tracks at a time, each with its own verifier. Every creature, people
 and place waits on its Lore.md `(new)` paragraph. Patches 1 and 2 come first; the rest need the land to stand on.
 
-## Patch 1: the far land
+## Patch 1: the far land (built)
 
-- **`jaymoskingdoms:far_land`**, a density function type registered in Kingdoms: 1 at the land's middle, 0 beyond
-  its sea, from the block's distance to a fixed centre (constants `CENTRE_X`, `CENTRE_Z`, `LAND_RADIUS`, `SEA_WIDTH`).
-- `continents.json`: inside the ring of sea the noise is pushed down to deep ocean, except that a few islands are let
-  through along the crossing for Tideborn island villages (Andy: "you can encounter tideborn islands on the way"); inside the land's radius it is pushed up to land, with the noise still shaping
-  the coast, bays and a few offshore islands.
-- `temperature.json`, `vegetation.json`: on the land they are held to the band that gives cherry groves, meadows,
-  forests, bamboo and snowy peaks, so no desert, jungle or badlands turns up there. `erosion.json`: more level
-  ground for towns and terraced fields, with one high range.
-- `BlossomVillages` founds only on the far land from now on (villages, towns, the castle). Cherry groves on the home
-  continent stay as wild groves.
-- `Climate.CHERRY`, the Blossom tongue and names follow the land, not just the biome.
-- `/kingdom blossom where` (operators): bearing and distance, for testing.
-- Check first, against the 26.3 sources: registering a density function type, and that William Wythers' Overhauled
-  Overworld and Lithostitched leave our four files in force.
+No code shapes the land: 26.3 has `minecraft:distance_to_point`, `slice`, `lerp` and `clamp` density functions, so
+`tools/gen_mohknee.py` writes it all as data and `seas/Mohknee` holds the same numbers for the game's rules.
 
-Numbers: Andy chose "Two days and nights" (2026-11-12): 16,000 blocks of open sea on every side, about 40 real
-minutes for an ordinary ship and 17 for the fastest at full sail. Land 2,500 blocks in radius, its centre 34,000
-blocks east of the world's origin (my figures for the land's size and place).
+- **Mohknee**: middle at x 28,000, z 0; 3,000 blocks in radius with a shore that strays up to 450 from the circle.
+- **The crossing**: 16,000 blocks of deep sea on every side (Andy: "Two days and nights"), then 1,500 where the home
+  world's shape fades back in. The sea begins 7,500 blocks east of the world's origin. Eight islands stand in it,
+  three on the way from the west (Andy: "you can encounter tideborn islands on the way"), each with one village at
+  its middle (`crossing_isle_village`, the island structure's `only_at`); `Havens` makes an island's settlement
+  Tideborn.
+- **Its country**: the heart is held far inland and high, mild and dry, with its own finer climate noise, which is
+  where the game puts cherry groves. A test world gave cherry groves 13% of the land, spread all over it, with
+  meadows, plains, flower forests, forests and rivers between; no desert, jungle or badlands.
+- `BlossomVillages` rises only on Mohknee. `Palette.at` makes every settlement there Blossom. `MohkneeStructureMixin`
+  keeps vanilla villages and other mods' surface structures off it.
+- `/kingdom mohknee` (bearing and distance) and `/kingdom mohknee map [scale] [reach]` (paints `mohknee.png` from the
+  generator itself, no chunks loaded): how the shape was checked, in a Kingdoms dev server.
+- Not checked: the full pack's worldgen mods (William Wythers' Overhauled Overworld, Lithostitched, Geophilic) over
+  it, and the land walked in game.
 
 ## Patch 2: word of it, and the way there
 
