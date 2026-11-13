@@ -3985,3 +3985,9 @@ enter limbo if they don't come to."
   (`DodgeRollPose`, told by `Dodge.STRETCHY`). A look only: the dodge itself, its cost and the flip in the air are
   unchanged, and the first person view does not turn over for them.
 - The gauntlet is drawn held in the hand, not worn on it. Compiles; not played in game.
+
+## 0.23.2 (2026-11-13): Fire streams join the beam clashes
+
+- Beam clashes have a fifth kind, **fire**, for Jaymo's Kingdoms' new Fire Lance spell: it locks with Wind Whistle,
+  smoke, soot and ki streams like any other, with an orange knot and flames along it. The winner's fire rolls through
+  and sets the loser alight. The prompt shows the class key.
