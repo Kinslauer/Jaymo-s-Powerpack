@@ -205,8 +205,14 @@ public final class Locks {
 		});
 		PlayerBlockBreakEvents.AFTER.register(Locks::broken);
 		ServerTickEvents.END_SERVER_TICK.register(Locks::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SLOW_TOLD.clear());
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SLOW_TOLD.remove(handler.getPlayer().getUUID()));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			SLOW_TOLD.clear();
+			PUSH_TOLD.clear();
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			SLOW_TOLD.remove(handler.getPlayer().getUUID());
+			PUSH_TOLD.remove(handler.getPlayer().getUUID());
+		});
 	}
 
 	private static Item item(String name, java.util.function.Function<ResourceKey<Item>, Item> make) {
@@ -312,6 +318,11 @@ public final class Locks {
 	static @Nullable Fitted entry(Level level, BlockPos pos) {
 		Hit hit = find(level, pos);
 		return hit == null ? null : hit.fitted();
+	}
+
+	/** {@link #entry} for the client's mixins (Spooky Doors' drag). */
+	public static @Nullable Fitted lockOn(Level level, BlockPos pos) {
+		return entry(level, pos);
 	}
 
 	// ---- who has the key -----------------------------------------------------------------------------------------
@@ -443,7 +454,7 @@ public final class Locks {
 		}
 		for (BlockPos anchor : anchors(pos, state)) {
 			Fitted f = raw(level, anchor);
-			if (f != null && f.locked() && (f.faction() >= 0 || !holdsKey(player, f.key()))) {
+			if (f != null && f.locked() && !holdsKey(player, f.key())) {
 				return true;
 			}
 		}
@@ -465,7 +476,7 @@ public final class Locks {
 	static float breakFactor(Level level, BlockPos pos, BlockState state, Player player) {
 		int lockLevel = 0;
 		Fitted f = entry(level, pos);
-		if (f != null && f.locked() && (f.faction() >= 0 || !holdsKey(player, f.key()))) {
+		if (f != null && f.locked() && !holdsKey(player, f.key())) {
 			lockLevel = f.level();
 		}
 		for (BlockPos half : Lockpicking.halves(level, pos)) {
@@ -492,6 +503,58 @@ public final class Locks {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms." + key, args).withStyle(colour));
 	}
 
+	/** What a locked lock says to someone without its key: "Locked up for the night", or the kind of lock it is. Both sides. */
+	public static Component refusal(Fitted f) {
+		if (f.night()) {
+			return Component.translatable("message.jaymoskingdoms.locks.night").withStyle(ChatFormatting.GRAY);
+		}
+		Lockpicking.Kind[] kinds = Lockpicking.Kind.values();
+		Lockpicking.Kind kind = kinds[Math.floorMod(f.kind(), kinds.length)];
+		return Component.translatable("message.jaymoskingdoms.locks.no_key." + (kind == Lockpicking.Kind.ROTARY ? "rotary" : "pin"),
+			Component.translatable("message.jaymoskingdoms.lock.level." + f.level())).withStyle(ChatFormatting.GRAY);
+	}
+
+	// ---- pushed, not used ----------------------------------------------------------------------------------------
+
+	/** The client's notice for a push refused on its side (set by the client: the lock's words on the action bar, its rattle). */
+	public static java.util.function.BiConsumer<Level, BlockPos> clientRefused = (level, pos) -> {
+	};
+
+	/** Player → when they were last told a door they pushed is locked (game time). */
+	private static final Map<UUID, Long> PUSH_TOLD = new HashMap<>();
+	/** A pushed door says it's locked at most this often per player (ticks). */
+	static final int PUSH_MESSAGE_TICKS = 40;
+
+	/**
+	 * Spooky Doors (see {@code mixin/spookydoors}) swings a door partway open when it's walked into, dragged with the use
+	 * key held, or pushed by a mob or a downed player's struggle, none of it through a click, so none of it met the lock:
+	 * Andy (2026-11-13) "i was able to open a locked door without a pick". Whether {@code by} (null: no one) may not swing
+	 * the door at {@code pos} open; if not, the one refused is told, as a click on it would tell them, at most every
+	 * {@link #PUSH_MESSAGE_TICKS}. Both sides.
+	 */
+	public static boolean pushBarred(Level level, BlockPos pos, @Nullable Entity by) {
+		Fitted f = entry(level, pos);
+		if (f == null || !f.locked() || mayPass(by, f, level)) {
+			return false;
+		}
+		if (level.isClientSide()) {
+			if (by instanceof Player player && player.isLocalPlayer()) {
+				clientRefused.accept(level, pos);
+			}
+			return true;
+		}
+		if (by instanceof ServerPlayer sp) {
+			long now = sp.level().getGameTime();
+			Long told = PUSH_TOLD.get(sp.getUUID());
+			if (told == null || now - told >= PUSH_MESSAGE_TICKS || now < told) {
+				PUSH_TOLD.put(sp.getUUID(), now);
+				sp.sendOverlayMessage(refusal(f));
+				level.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 0.6F, 1.0F);
+			}
+		}
+		return true;
+	}
+
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
 		if (player.isSpectator()) {
 			return InteractionResult.PASS;
@@ -514,7 +577,7 @@ public final class Locks {
 			if (e.locked() && !player.isCreative() && !holdsKey(player, e.key())) {
 				return InteractionResult.SUCCESS;
 			}
-			if (sneak && e.keyed() && (matches(main, e) || main.isEmpty() && !e.locked() && holdsKey(player, e.key()))) {
+			if (sneak && e.keyed() && (matches(main, e) || main.isEmpty() && !e.locked() && !e.night() && holdsKey(player, e.key()))) {
 				return InteractionResult.SUCCESS;
 			}
 			return InteractionResult.PASS;
@@ -549,7 +612,8 @@ public final class Locks {
 			say(sp, lock ? "locks.locked" : "locks.unlocked", ChatFormatting.GRAY);
 			return InteractionResult.SUCCESS;
 		}
-		if (sneak && hand == InteractionHand.MAIN_HAND && main.isEmpty() && f.keyed() && !f.locked() && holdsKey(sp, f.key())) {
+		// (a house's night lock is the household's: its key works it, but it isn't the player's to take off)
+		if (sneak && hand == InteractionHand.MAIN_HAND && main.isEmpty() && f.keyed() && !f.locked() && !f.night() && holdsKey(sp, f.key())) {
 			remove(server, anchor);
 			ItemStack lock = new ItemStack(LOCK);
 			lock.set(LOCK_ID, f.key());
@@ -568,12 +632,7 @@ public final class Locks {
 		Lockpicking.Kind[] kinds = Lockpicking.Kind.values();
 		Lockpicking.Kind kind = kinds[Math.floorMod(f.kind(), kinds.length)];
 		if (!Lockpicking.pickLock(sp, anchor, kind, f.level(), f.seed(anchor), () -> picked(sp, anchor))) {
-			if (f.night()) {
-				say(sp, "locks.night", ChatFormatting.GRAY);
-			} else {
-				say(sp, "locks.no_key." + (kind == Lockpicking.Kind.ROTARY ? "rotary" : "pin"), ChatFormatting.GRAY,
-					Component.translatable("message.jaymoskingdoms.lock.level." + f.level()));
-			}
+			sp.sendOverlayMessage(refusal(f));
 			return InteractionResult.FAIL;
 		}
 		return InteractionResult.SUCCESS;
@@ -591,11 +650,14 @@ public final class Locks {
 		}
 	}
 
-	/** Shuts the door, trapdoor or gate at {@code pos} if it is open. */
+	/** Shuts the door, trapdoor or gate at {@code pos} if it is open (a door Spooky Doors left ajar is pushed to, too). */
 	static void close(ServerLevel level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		if (state.getBlock() instanceof DoorBlock door) {
 			door.setOpen(null, level, state, pos, false);
+			if (SpookyDoors.percentOpen(level, pos) > 0.0F) {
+				SpookyDoors.operate(level, pos, null, 0.0F);
+			}
 		} else if ((state.getBlock() instanceof TrapDoorBlock || state.getBlock() instanceof FenceGateBlock) && state.getValue(TrapDoorBlock.OPEN)) {
 			level.setBlock(pos, state.setValue(TrapDoorBlock.OPEN, false), 10);
 		}
@@ -704,7 +766,7 @@ public final class Locks {
 				continue;
 			}
 			remove(level, anchor);
-			if (f.keyed() && !player.isCreative()) {
+			if (f.keyed() && !f.night() && !player.isCreative()) {
 				ItemStack lock = new ItemStack(LOCK);
 				lock.set(LOCK_ID, f.key());
 				Block.popResource(level, pos, lock);
