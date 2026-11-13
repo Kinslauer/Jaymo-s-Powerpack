@@ -1,0 +1,8 @@
+{
+	"item.minecraft.potion.effect.water": "Unpurified Water",
+	"item.jaymoskitchen.water_filter": "Water Filter",
+	"tooltip.jaymoskitchen.unpurified_water": "Unpurified: it may make you sick. Boil it over a fire or run it through a water filter",
+	"tooltip.jaymoskitchen.water_filter": "Hold water in your other hand and use this to run it through",
+	"message.jaymoskitchen.water_filter.nothing": "Hold unpurified water in your other hand",
+	"jei.jaymoskitchen.purifying_water": "Water from a river, pond or rain-filled cauldron is unpurified, and drinking it may give you a parasite. To purify a bottle or a waterskin, use it on a lit campfire, firepit, bonfire or hearth, or on a cooking pot or frying pan standing over heat. A glass bottle dipped in a water cauldron standing over heat comes out full of Clean Water. A Water Filter (cloth, charcoal and sand) cleans the water held in your other hand, one use per bottle or per sip in a waterskin. Every bottle of water gives you its glass bottle back once you drink it."
+}
