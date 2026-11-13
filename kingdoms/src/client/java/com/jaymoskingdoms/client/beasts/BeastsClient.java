@@ -18,7 +18,7 @@ public final class BeastsClient {
 	static final float KING_LEG_SWING = 32.0F, KING_ARM_SWING = 24.0F, KING_FOREARM_BEND = -12.0F, KING_BREATH = 3.0F;
 
 	/** The goblin scout stands a little over a block tall (as the village's goblins do); the ghost is a person's height. */
-	static final float SCOUT_SCALE = 1.05F, GHOST_SCALE = 0.9375F;
+	static final float SCOUT_SCALE = 1.05F, COLOSSUS_SCALE = 1.4F, BEETLE_SCALE = 0.8F, GHOST_SCALE = 0.9375F;
 
 	private BeastsClient() {
 	}
@@ -45,6 +45,9 @@ public final class BeastsClient {
 		look(Beasts.WAR_BARREL, new BbMobRenderer.Look("war_barrel", 0.9F, 1.4F, "idle", "walk", null, null, 0.5F, 1.0F, null));
 		look(Beasts.HAUNTED_STAND, new BbMobRenderer.Look("haunted_stand", 1.0F, 0.4F, "none", "none", null, null, 0.5F, 1.0F, "head"));
 		// the scout's own four animations; the ghost only hangs and bobs, drawn see-through and lit from within
+		look(Beasts.RUNE_COLOSSUS,
+			new BbMobRenderer.Look("rune_bound_colossus", COLOSSUS_SCALE, 1.0F, "idle", "walk", "run", "death", 0.75F, 1.5F, "head"));
+		look(Beasts.CRYSTAL_BEETLE, new BbMobRenderer.Look("crystal_beetle", BEETLE_SCALE, 0.4F, "idle", "walk", null, null, 0.9F, 1.0F, "head"));
 		look(Beasts.GOBLIN_SCOUT, new BbMobRenderer.Look("goblin_scout", SCOUT_SCALE, 0.3F, "idle", "walk", null, null, 0.8F, 1.0F, "head"));
 		EntityRenderers.register(Beasts.GRAVE_GHOST, context -> new BbMobRenderer<com.jaymoskingdoms.GraveGhost>(context,
 			new BbMobRenderer.Look("grave_ghost", GHOST_SCALE, 0.0F, "Idle", "none", null, null, 0.5F, 1.0F, "Head")) {

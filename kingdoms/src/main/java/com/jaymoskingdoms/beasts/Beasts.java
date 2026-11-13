@@ -51,6 +51,8 @@ public final class Beasts {
 	public static EntityType<HauntedStand> HAUNTED_STAND;
 	/** The goblin villages' scouts, and the ghosts at fresh graves. */
 	public static EntityType<com.jaymoskingdoms.GoblinScout> GOBLIN_SCOUT;
+	public static EntityType<com.jaymoskingdoms.remnants.RuneColossus> RUNE_COLOSSUS;
+	public static EntityType<com.jaymoskingdoms.wild.CrystalBeetle> CRYSTAL_BEETLE;
 	public static EntityType<com.jaymoskingdoms.GraveGhost> GRAVE_GHOST;
 
 	/** Natural spawn weights (each also gated in its own spawn check), and the boar's herd size. */
@@ -88,6 +90,11 @@ public final class Beasts {
 			HauntedStand.createAttributes());
 		GOBLIN_SCOUT = type("goblin_scout", EntityType.Builder.of(com.jaymoskingdoms.GoblinScout::new, MobCategory.MONSTER).sized(0.5F, 1.2F)
 			.clientTrackingRange(10), com.jaymoskingdoms.GoblinScout.createAttributes());
+		RUNE_COLOSSUS = type("rune_colossus", EntityType.Builder.of(com.jaymoskingdoms.remnants.RuneColossus::new, MobCategory.MONSTER)
+			.sized(1.6F, 3.4F).clientTrackingRange(10), com.jaymoskingdoms.remnants.RuneColossus.createAttributes());
+		CRYSTAL_BEETLE = type("crystal_beetle", EntityType.Builder.of(com.jaymoskingdoms.wild.CrystalBeetle::new, MobCategory.CREATURE)
+			.sized(0.9F, 0.7F).clientTrackingRange(8), com.jaymoskingdoms.wild.CrystalBeetle.createAttributes());
+		com.jaymoskingdoms.wild.CrystalBeetle.register();
 		GRAVE_GHOST = type("grave_ghost", EntityType.Builder.of(com.jaymoskingdoms.GraveGhost::new, MobCategory.MISC).sized(0.6F, 1.9F)
 			.clientTrackingRange(8), com.jaymoskingdoms.GraveGhost.createAttributes());
 

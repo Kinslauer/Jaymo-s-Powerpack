@@ -159,3 +159,11 @@ geckolib/models/entity/stegonaut.geo.json, geckolib/animations/entity/stegonaut.
   Dragons is a gameplay reference only; none of its All Rights Reserved art or animation data is used.
   Sources and renders: kingdoms/art/stegonaut*.
 
+rune_bound_colossus.png (bbmodels/rune_bound_colossus.json): the rune-bound colossus
+  "Rune Bound Colossus" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/rune-bound-colossus,
+  CC BY 4.0 (tools/bbmodels/rune-bound-colossus.bbmodel). Changes: baked to our loader's format, drawn 1.4 times over.
+
+crystal_beetle.png (bbmodels/crystal_beetle.json): the crystal beetle
+  "Crystal Beetle" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/crystal-beetle, CC BY 4.0
+  (tools/bbmodels/crystal-beetle.bbmodel). Changes: baked to our loader's format (its glow sheet stacked under its
+  skin), drawn at 0.8.
