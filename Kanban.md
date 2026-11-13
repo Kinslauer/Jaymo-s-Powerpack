@@ -13,11 +13,11 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Inbox/pr1377-text-pass|pr1377-text-pass]] · 🪶 Quill · #1377 · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/pr1377-text-pass|pr1377-text-pass]] · 🪶 Quill · #1377 · in-review
 
 
 ## Needs Andy
