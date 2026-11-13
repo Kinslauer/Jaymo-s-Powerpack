@@ -545,8 +545,9 @@ def project(style):
                            "override": False, "length": round(length / 20.0, 4), "snapping": 20, "selected": False,
                            "anim_time_update": "", "blend_weight": "", "start_delay": "", "loop_delay": "", "animators": animators})
     return {
-        "meta": {"format_version": "4.10", "model_format": "animated_entity_model", "box_uv": True},
-        "name": sid, "model_identifier": "", "modded_entity_entity_class": "", "modded_entity_version": "",
+        # the GeckoLib plugin's format id now (its old one, "animated_entity_model", no longer opens)
+        "meta": {"format_version": "4.10", "model_format": "geckolib_model", "box_uv": True},
+        "name": sid, "model_identifier": sid, "modded_entity_entity_class": "", "modded_entity_version": "",
         "modded_entity_flip_y": True, "visible_box": [1, 1, 0], "variable_placeholders": "",
         "variable_placeholder_buttons": [], "timeline_setups": [], "unhandled_root_fields": {},
         "resolution": {"width": 64, "height": 64}, "elements": elements, "outliner": outliner,

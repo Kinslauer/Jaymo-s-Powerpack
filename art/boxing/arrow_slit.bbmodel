@@ -1,11 +1,11 @@
 {
  "meta": {
   "format_version": "4.10",
-  "model_format": "animated_entity_model",
+  "model_format": "geckolib_model",
   "box_uv": true
  },
  "name": "arrow_slit",
- "model_identifier": "",
+ "model_identifier": "arrow_slit",
  "modded_entity_entity_class": "",
  "modded_entity_version": "",
  "modded_entity_flip_y": true,
