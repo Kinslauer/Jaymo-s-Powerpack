@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 02:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 02:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -18,7 +18,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/scout-ghost-campfire|scout-ghost-campfire]] · 💻 Odysseus · #1390 · in-review
 
 
 ## Needs Andy
