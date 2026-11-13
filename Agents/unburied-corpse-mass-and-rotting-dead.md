@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Unburied stood whole by day with no corpses; the long dead come apart
 branch: claude/project-thread-gy0d2v
 with: Claude (cloud thread "Fix the Unburied's corpse mass")
-pr: 
+pr: 1470
 mods: Kingdoms, Kitchen, Powers
 versions: 
 started: 2026-11-13
