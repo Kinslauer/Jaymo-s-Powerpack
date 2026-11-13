@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Sengoku Jidai picks for the blossom villages, on a far continent
 branch: claude/project-thread-795vuu-p4
 with: Andy
@@ -33,3 +33,4 @@ Patch 2 second half (BlossomTraders, passage) is PR #1411, 2026-11-13.
 PR #1411 merged 2026-11-13. Patch 2 done. Patch 3 (building blocks) next on -p3.
 Patch 3 first half (BlossomBlocks, Wards) is PR #1413, 2026-11-13.
 Patches 4 to 16 are first cuts on PR #1419 (branch -p4), 2026-11-13, built overnight on Andy's "put the rest of these on the same PR". Waiting on Andy: not to be merged without his word. What is not built is listed per patch in changes/kingdoms/project-thread-795vuu-p4.md. Nothing seen in game.
+- 2026-11-13 11:36 PR #1419 is merged into master; moved to Agents/Done.

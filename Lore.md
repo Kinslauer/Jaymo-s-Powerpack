@@ -1401,6 +1401,24 @@ crystal buds, and what it eats grows out of its shell. A few of them keep a geod
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
+(new) **The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
+placement for him to approve). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
+towers and lookouts, balloon towers, tipi camps, stables, and on the cold seas citadels, galleons, icebound yards and
+small iron boats that go under the water. They also dug: the copper works (the lava extractor and the smeltery) and the
+moles, great boring engines for copper and iron. As the world is retaken the pillagers have pulled back to their best
+holds, and the rest stand empty until other people find them. **Greenskins** took the works: orcs run the smeltery and
+the extractor, and goblins crew the moles, still digging copper and iron from under the hills (the deep mole most of
+all). **Bandits**, masked outlaws of the common folk, hold the camps, the empty carts and the towers no realm has
+reached; where a realm is near, its own soldiers hold those towers for the road. **Pirates** took the galleon, the
+citadel, the lookout balloon and the icebound outposts, and keep captives there. **Smugglers**, the underworld's
+runners, keep to the stable, the floating outpost, the shipyard and the small boats: they let a stranger be until he
+touches their goods, and every den of theirs has a fence. **Barbarians** pitched in the tipis. The monastery, its tower
+and the herbalist's house belong to a quiet **order of brothers**, common folk who took the walls for prayer, with a
+prior and an herbalist who mends whoever comes in hurt; they hold to no patron of the seven by name, only the hours.
+A lone house far out is home to one **recluse** with a past (an old soldier, a widow, an exile, a deserter). The wells,
+the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
+lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
