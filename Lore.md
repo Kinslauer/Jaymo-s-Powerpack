@@ -1414,8 +1414,8 @@ crystal buds, and what it eats grows out of its shell. A few of them keep a geod
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
-(new) **The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
-placement for him to approve). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
+**The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
+placement, approved by Andy). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
 towers and lookouts, balloon towers, tipi camps, stables, and on the cold seas citadels, galleons, icebound yards and
 small iron boats that go under the water. They also dug: the copper works (the lava extractor and the smeltery) and the
 moles, great boring engines for copper and iron. As the world is retaken the pillagers have pulled back to their best
