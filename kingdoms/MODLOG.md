@@ -12672,3 +12672,9 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - The dead it lets go are ordinary corpses again: left lying, eight or more can raise it again the next night; bury or burn them.
 - Code: `blossomland/Unburied` (bodies, `SLOTS`, `take`, `spill`, coming apart, save), `NightThings.unburied` (takes the heap instead of deleting it), `KitchenCompat.spill`, client `creatures/UnburiedRenderer` (rebuilds and draws the bodies; Kitchen's Ragdoll/ClosedEyes/Severed by reflection).
 - Built; not played.
+
+## 0.8.32 (2026-11-13): 3D armour follows the head (Warrior Helmet)
+
+- **Armor Model API pieces** (Rogues & Warriors' Warrior Helmet and the other RPG-series 3D sets) now follow the body the way vanilla armour does. Fresh Animations moves the head and body as they are drawn, and these pieces stayed in the plain pose, so the head turned and bobbed through the helmet. They now take the same kept pose our own worn pieces use (`GeoArmourFit`, `WornModel.loadKeptBody`, mixin `GeoArmourPoseMixin` on the API's `PoseCopyingModel`, skipped without the API).
+- On MCA bodies (players and villagers), these pieces also take MCA's head size, so a child's or teen's bigger head no longer pokes through (`McaHeadSize`).
+- Checked in a cloud test game with Fresh Animations on an MCA player: the helmet now turns with the head. Not played in the pack.
