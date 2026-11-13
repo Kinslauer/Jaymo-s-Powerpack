@@ -590,6 +590,13 @@ blue and see-through, a hand off the ground, never far from the body. They touch
 voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
 standing over the body they are burying. (To be built once Limbo itself has merged.)
 
+**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghosts you implemented can stay, as long as they can
+still enter limbo if they don't come to"). Someone left for dead, not yet dead and not yet back, comes loose from the
+body the same way: pale blue and see-through, able to drift a little way from where they lie and no further, through no
+wall. Beasts and monsters don't see them. The living do, and hear them. Carry the body and the ghost comes after it. The
+moment the body wakes or is brought round there is no ghost; and if the life ends instead, they go on to whatever the
+dead choose, Limbo among it.
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
