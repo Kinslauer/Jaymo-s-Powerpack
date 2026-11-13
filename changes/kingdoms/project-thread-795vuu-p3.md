@@ -4,3 +4,4 @@
 - Paper, rope and thatch burn readily.
 - `blossomland.BlossomBlocks`, `blossomland.Wards`, `NaturalSpawnerMixin`; data and art from `kingdoms/tools/gen_blossom_blocks.py`.
 - Built, and a dev server loaded the blocks, a recipe and a loot table without errors. Not seen in game: the textures and the two lantern models are first drafts. Still to come for this patch: the tansu chest, futon, sunken hearth, sliding doors villagers open, sap for lacquer, and the Blossom villages built from these blocks.
+- Blossom villages, their shrines, torii and castles are now built from these blocks: shoji in the windows, tatami floors, lime plaster walls, a red lacquered torii, paper lanterns under the roofs and stone lanterns along the road. Villages already standing keep what they were built from.
