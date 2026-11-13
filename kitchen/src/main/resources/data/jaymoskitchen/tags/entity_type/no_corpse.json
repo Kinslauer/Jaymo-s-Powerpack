@@ -24,6 +24,7 @@
     { "id": "jaymoskingdoms:flame_wraith", "required": false },
     { "id": "jaymoskingdoms:mud_golem", "required": false },
     { "id": "jaymoskingdoms:mimic", "required": false },
-    { "id": "jaymoskingdoms:shadow", "required": false }
+    { "id": "jaymoskingdoms:shadow", "required": false },
+    { "id": "jaymoskingdoms:unburied", "required": false }
   ]
 }

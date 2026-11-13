@@ -344,6 +344,8 @@ public final class Corpses {
 		corpse.markJustDied();
 		corpse.startRagdoll(deathBody(mob));
 		pinFrom(mob, corpse);
+		// a skeleton drops in pieces: skull and arms loose, ribs and legs together
+		corpse.fallToPieces(level);
 		tellBody(mob, corpse);
 		level.addFreshEntity(corpse);
 	}

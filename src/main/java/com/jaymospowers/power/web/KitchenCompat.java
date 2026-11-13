@@ -664,6 +664,8 @@ public final class KitchenCompat {
 	 */
 	/** (0.19.62) The stain a hung carcass's blood leaves on the ground each second it has no grate to run into (it grows as more falls). */
 	static final float HUNG_SPILL_STAIN = 0.35F;
+	/** A part knocked or fallen off a body lying dead: how far it's thrown sideways and up (blocks a tick, at most). */
+	static final double PART_FLING = 0.3, PART_FLING_UP = 0.25;
 
 	public static void registerCorpseBlood() {
 		if (!LOADED) {
@@ -691,6 +693,33 @@ public final class KitchenCompat {
 			addOnHit.invoke(null, crush);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen that doesn't say when a body is hit: the dead don't bleed
+		}
+		try {
+			// a part come off a body lying dead (a skeleton fallen to pieces, a rotten limb torn away, a corpse struck where
+			// it lies) is a severed part: it lies there, is kicked about, carried or thrown, and bleeds if the body did
+			java.util.function.BiConsumer<Entity, Object[]> off = (corpse, what) -> {
+				net.minecraft.world.entity.EntityType<?> type = sourceType(corpse);
+				String look = lookOf(corpse);
+				if (type == null || look == null || !(corpse.level() instanceof net.minecraft.server.level.ServerLevel level)
+					|| what.length < 4 || !(what[0] instanceof Integer part) || !(what[1] instanceof net.minecraft.world.phys.Vec3 at)) {
+					return;
+				}
+				Object by = what[2];
+				boolean toHand = Boolean.TRUE.equals(what[3]);
+				net.minecraft.util.RandomSource random = level.getRandom();
+				net.minecraft.world.phys.Vec3 fling = toHand ? net.minecraft.world.phys.Vec3.ZERO
+					: new net.minecraft.world.phys.Vec3((random.nextDouble() - 0.5) * PART_FLING, PART_FLING_UP * random.nextDouble(), (random.nextDouble() - 0.5) * PART_FLING);
+				int blood = com.jaymospowers.core.BladeBlood.bleeds(corpse, type) ? com.jaymospowers.core.BladeBlood.color(corpse, type)
+					: com.jaymospowers.core.BladeBlood.NO_BLOOD;
+				com.jaymospowers.core.SeveredPart severed = com.jaymospowers.core.SeveredPart.drop(level, look, part, type.getDimensions().height(),
+					corpse.getYRot(), at.add(0.0, 0.1, 0.0), fling, blood);
+				if (toHand && by instanceof net.minecraft.server.level.ServerPlayer player) {
+					com.jaymospowers.core.Carry.takePart(player, severed);
+				}
+			};
+			Class.forName("com.jaymoskitchen.corpse.CorpseEntity").getMethod("setOnPart", java.util.function.BiConsumer.class).invoke(null, off);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen whose dead stay in one piece
 		}
 		try {
 			// (0.15.128) a body blown apart by a blast (Kitchen 0.5.21 throws its chunks): its blood bursts
