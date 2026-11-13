@@ -354,6 +354,14 @@ PC Claude's part (ready to start):
 - [ ] 1. Check the key works without printing it: call `GET /models` with the key from the env var and confirm the
       IDs `DeepSeek-V4-Flash`, `Qwen3.8-27B` and `Gemma-4-31B-IT` are listed (use whatever IDs it returns). Then one small chat call with a tool definition to each;
       note seconds to first token and total (it's served from China, so it may be slow from the US).
+  - [!] **Blocked Nov 13 (PC Claude): the saved key is rejected.** `GET /models` on the base URL above returns
+    `401 {"detail":"Invalid bearer token"}`. `AMD_API_KEY` in `E:\hermes\.env` is `tl-` + 48 hex characters (checked
+    without printing it). Token Factory keys are `rc-` + 48 hex (AMD docs, api/authentication), so this looks like a
+    key from another page or service, maybe the "Token Lab" page. Not sent anywhere else, since that would hand the
+    key to a third party. **Andy:** open https://developer.amd.com.cn/radeon/tokenfactory, copy the key from the
+    **Your API key** card (it starts with `rc-`) and replace the `AMD_API_KEY` value in `E:\hermes\.env` yourself.
+    If the card has no key, the account may still be under review. Steps 2-5 wait for a working key. Test script:
+    `amd_check.py` (lists models, then `amd_check.py <model-id>` makes one tool call with timing; never prints the key).
 - [ ] 2. Back up `E:/hermes/config.yaml` and Quill's profile config. In the ONE existing `providers:` block add an
       OpenAI-compatible provider `amd` (base URL above, key from `AMD_API_KEY`), the same way NVIDIA is set up.
       Don't make a second `providers:` block.
