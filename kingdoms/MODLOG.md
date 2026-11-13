@@ -12348,3 +12348,8 @@ giants being worked on, as its own upright model."
 - Andy's film rules: plain FOV for the whole film (`FilmPlainFovMixin`), nothing can hurt you while it runs, you aren't drawn (the camera is at your head), and the in-bed screen is hidden and ignores keys, so Escape can't get you up mid-talk. Backspace skips it (hint in the lower bar); the rest of the talk goes into chat and you get up facing the chest.
 - Classes: `FarmhandWake` (Shot/Skip payloads, speaker hold, damage guard, stand-up), `FarmhandHome`, client `films/FarmWakeFilmClient`, `HandshakeCameraMixin`, `FilmHidesViewerMixin`, `InBedChatScreenMixin`, lang `farm-wake.json`.
 - Built; not played.
+
+## 0.7.815 (2026-11-13): fix the server freezing when a Life Story start looks for its place (#1421)
+
+- Setting out on the Family farmhand, Shipwreck and village roads could freeze the server until its watchdog shut it down: their searches for a farmhouse, wreck or village reached 100 structure spacings (thousands of chunks, each made on the server thread while it waited) and tried again past taken ones. They now reach 8 spacings (still thousands of blocks out), and a start's search with its retries stops after 15 seconds; with nothing found by then you get that road's usual fallback, as when nothing is in reach.
+- Built in CI; not played.
