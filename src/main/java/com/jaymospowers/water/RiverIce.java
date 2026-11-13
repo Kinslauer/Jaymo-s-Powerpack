@@ -159,8 +159,12 @@ public final class RiverIce {
 		LongArrayList all = new LongArrayList(floes);
 		for (long packed : all) {
 			BlockPos from = BlockPos.of(packed);
+			if (!com.jaymospowers.core.Loaded.made(level, from)) {
+				// its land isn't made and loaded: the floe stays tracked and is tried again later
+				continue;
+			}
 			floes.remove(packed);
-			if (!level.hasChunkAt(from) || !level.getBlockState(from).is(Blocks.ICE)) {
+			if (!level.getBlockState(from).is(Blocks.ICE)) {
 				continue;
 			}
 			if (!cold(level, from)) {
@@ -174,8 +178,12 @@ public final class RiverIce {
 			Direction dir = Direction.getApproximateNearest(heading.x + (random.nextDouble() - 0.5) * 0.4, 0.0,
 				heading.z + (random.nextDouble() - 0.5) * 0.4);
 			BlockPos to = from.relative(dir);
+			if (!com.jaymospowers.core.Loaded.made(level, to)) {
+				floes.add(packed);
+				continue;
+			}
 			BlockState ahead = level.getBlockState(to);
-			if (!com.jaymospowers.core.Loaded.made(level, to) || !ahead.is(Blocks.WATER) || !level.getBlockState(to.above()).isAir()) {
+			if (!ahead.is(Blocks.WATER) || !level.getBlockState(to.above()).isAir()) {
 				// jammed against the bank or other ice: it stays and joins the sheet
 				continue;
 			}

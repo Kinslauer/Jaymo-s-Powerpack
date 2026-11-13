@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:cloud_sea",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "jaymospowers:cloud_sea",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jaymospowers:cloud_sea"
+    }
+  }
+}

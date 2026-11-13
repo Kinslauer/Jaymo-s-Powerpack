@@ -363,7 +363,11 @@ public final class Mines {
 	private static boolean flatGround(ServerLevel level, BlockPos at) {
 		for (int dx = -2; dx <= 2; dx++) {
 			for (int dz = -2; dz <= 2; dz++) {
-				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.offset(dx, 0, dz));
+				BlockPos sample = at.offset(dx, 0, dz);
+				if (!Loaded.made(level, sample)) {
+					return false;
+				}
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sample);
 				if (Math.abs(top.getY() - at.getY()) > 1 || !level.getFluidState(top.below()).isEmpty()) {
 					return false;
 				}

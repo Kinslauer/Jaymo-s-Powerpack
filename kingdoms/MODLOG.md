@@ -12710,3 +12710,24 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   just don't learn it this time); the same for a life aim's "has a bed in a realm" (`LifeAims`) and the old rules'
   bed check (`OldRules`).
 - Built; tested on the Deck server.
+
+## 0.8.37 (2026-11-13): entity names - Fallen Tree, Spirit Javelin (#1468)
+
+- A felled tree showed the raw key `entity.jaymoskingdoms.falling_tree` in the look-at tooltip; it now reads **Fallen Tree**.
+  The spirit javelin (**Spirit Javelin**) and the lore films' actor (**Figure**) had no name either.
+- Lang only (`tree-knocks.json`, `spirits.json`, `lore-films.json`). Checked every item, block and entity id against the lang
+  parts; not played.
+
+## 0.8.38 (2026-11-13): The Unburied really comes apart by day, and is always made of the dead (#1470)
+
+- **It stood whole all day** (Andy: "the unburied was here alive and well, and had no conglomeration of corpses like it should"). Coming apart ran in its AI step, and the game stops a mob's AI step the moment it can't move, which is what coming apart makes it: so at first light it took one step into falling apart and froze there, whole, for good. The night-and-day check now runs in its own tick. Any Unburied still standing from before (the old bone giant, with no dead in it) falls away to bone dust the first morning after this.
+- **One raised with no dead is made of the dead too**: from a spawn egg or a summons it takes whatever bodies lie unburied within 16 blocks, and makes up the rest (to 10) with the old dead of the place, zombies and husks come up with it; they fall out of it as corpses like any others. Only without Jaymo's Kitchen (no bodies at all) is it still the giant of bones.
+- **It leaves no body of its own.** Killed, the dead it was made of are all that is left (it used to leave a giant's corpse as well, which could be picked up whole; Kitchen's `no_corpse` tag).
+- Code: `blossomland/Unburied` (`tick`, `nightAndDay`, `finalizeSpawn`), `KitchenCompat.bodyOf`/`makesCorpses`.
+- Built; not played. The screenshot's fire is not from us (the Unburied is not in `burn_in_daylight`); left as it is.
+
+## 0.8.39 (2026-11-13): stored positions wait for their land (Deck watchdog) (#1471)
+
+- **Nothing to see in play**: code that reads a saved position (a road's goal, a web, a door, a board, a camp's rotting blocks, a siege's banner and keep, a cab's stand, a shooing's door, a mine site, a lair's ground) now waits until that chunk is made and loaded, instead of making the server thread wait on world generation. Nothing is dropped: the record is kept and retried on a later tick.
+- Classes: `Emigrants` (putBack no longer forces a chunk), `BeastLairs`, `SpiderKinds`, `DoorPounding` (expiry runs first, with no world read), `Bounties`, `Cabs`, `BaneHolds`, `Strays` (a door that can't be shut yet is shut later), `Camps`, `Mines`.
+- Built; tested on the Deck server.

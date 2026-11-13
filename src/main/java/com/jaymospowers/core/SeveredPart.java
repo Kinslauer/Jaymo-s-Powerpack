@@ -152,6 +152,24 @@ public class SeveredPart extends Entity {
 		level.addFreshEntity(severed);
 	}
 
+	/**
+	 * A part come off a body already lying dead (Jaymo's Kitchen: a skeleton falling to pieces, a rotten limb torn away,
+	 * a corpse struck where it lies): drawn from the corpse's {@code look}, at {@code at}, flung with {@code velocity};
+	 * {@code blood} is the body's blood colour, or {@code BladeBlood.NO_BLOOD}.
+	 */
+	public static SeveredPart drop(ServerLevel level, String look, int part, float height, float yaw, Vec3 at, Vec3 velocity, int blood) {
+		SeveredPart severed = new SeveredPart(TYPE, level);
+		severed.setPos(at.x, at.y, at.z);
+		severed.setDeltaMovement(velocity);
+		severed.setYRot(yaw);
+		severed.entityData.set(PART, part);
+		severed.entityData.set(HEIGHT, height);
+		severed.entityData.set(LOOK, look.length() > MAX_LOOK ? "{}" : look);
+		severed.blood = blood;
+		level.addFreshEntity(severed);
+		return severed;
+	}
+
 	/** How {@code body} looks, as saved data (without its gear and the things that don't show). */
 	static String look(LivingEntity body) {
 		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, body.registryAccess());

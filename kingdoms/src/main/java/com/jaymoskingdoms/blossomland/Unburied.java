@@ -23,7 +23,11 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -53,11 +57,12 @@ import org.jspecify.annotations.Nullable;
  * shoulders as its arms, more lie crosswise as its trunk and one is its head; with more dead it grows a shoulder yoke,
  * bodies clinging front and back and doubled limbs ({@link #SLOTS}, up to {@link #DRAWN} drawn). Each is drawn as that
  * body looks (its kind, its skin, an MCA villager's own face and clothes, the parts it had lost), limbs splayed and
- * eyes shut as a corpse's are. One raised from an egg (no dead) is the old giant of bones.</li>
- * <li><b>It comes apart by day.</b> It never burns. Once the night is over it stops where it stands, shudders, and
+ * eyes shut as a corpse's are. One raised from an egg gathers the dead round it and the old dead of the place
+ * ({@link #finalizeSpawn}); only without Kitchen (no bodies at all) is it the old giant of bones.</li>
+ * <li><b>It comes apart by day.</b> Once the night is over it stops where it stands, shudders, and
  * the dead drop out of it one by one from the top down ({@link #DROP_EVERY} ticks apart), each a real corpse again
  * (loot, rot and all), tumbling to the ground from where it was in the giant; then there is nothing left of it.
- * Killed, all its dead fall out of it at once.</li>
+ * Killed, all its dead fall out of it at once, and they are all that is left of it (it leaves no body of its own).</li>
  * </ul>
  * A great foe (its own bar, a posture to break). It is slow and its blows throw people. A field where the dead are
  * buried or burned never raises one.
@@ -214,6 +219,40 @@ public class Unburied extends Beast {
 		refreshLooks();
 	}
 
+	/** One raised with no dead of its own (an egg, a summons) is made of this many, and of these. */
+	static final int RAISED_DEAD = 10;
+
+	/**
+	 * Raised from nothing (an egg, a summons), it is still made of the dead: whatever lies unburied round it, and for
+	 * the rest the old dead of the place, come up out of the ground with it. Without Kitchen there are no bodies to be
+	 * made of, and it is the giant of bones.
+	 */
+	@Override
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+		@Nullable SpawnGroupData groupData) {
+		SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, groupData);
+		if (this.bodies.isEmpty() && KitchenCompat.makesCorpses()) {
+			ServerLevel world = level.getLevel();
+			List<Entity> dead = new ArrayList<>(KitchenCompat.fallenNear(world, this.position(), NightThings.DEAD_RANGE));
+			List<EntityType<? extends net.minecraft.world.entity.Mob>> kinds = List.of(EntityTypes.ZOMBIE, EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.ZOMBIE);
+			for (int i = dead.size(); i < RAISED_DEAD; i++) {
+				net.minecraft.world.entity.Mob old = kinds.get(this.random.nextInt(kinds.size())).create(world, EntitySpawnReason.EVENT);
+				if (old == null) {
+					continue;
+				}
+				old.snapTo(this.getX(), this.getY(), this.getZ(), this.random.nextFloat() * 360.0F, 0.0F);
+				Entity body = KitchenCompat.bodyOf(world, old);
+				if (body != null) {
+					dead.add(body);
+				}
+			}
+			if (!dead.isEmpty()) {
+				take(world, dead);
+			}
+		}
+		return data;
+	}
+
 	/** Each drawn slot's look, from the body in it (none once it has fallen out). */
 	private void refreshLooks() {
 		for (int i = 0; i < DRAWN; i++) {
@@ -314,8 +353,16 @@ public class Unburied extends Beast {
 	// ---- night and day -------------------------------------------------------------------------------------------------
 
 	@Override
-	protected void customServerAiStep(ServerLevel level) {
-		super.customServerAiStep(level);
+	public void tick() {
+		super.tick();
+		// not in its AI step: that stops running the moment it stops moving (isImmobile), and it would stand there
+		// whole all day
+		if (this.level() instanceof ServerLevel level && this.isAlive()) {
+			nightAndDay(level);
+		}
+	}
+
+	private void nightAndDay(ServerLevel level) {
 		if (this.tickCount % 5 == 0) {
 			this.bar.setProgress(this.getHealth() / this.getMaxHealth());
 			BossBars.show(level, this, this.bar);

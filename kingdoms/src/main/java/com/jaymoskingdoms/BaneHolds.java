@@ -430,6 +430,12 @@ public final class BaneHolds {
 
 	/** The banner held: none of its band near, it's held; its band go to tear it down; held long enough, the hold falls. */
 	private static void siege(ServerLevel level, Captain c, Hold h, Siege s) {
+		BlockPos heart = h.heart();
+		if (!Loaded.made(level, s.banner) || !Loaded.made(level, heart) || !Loaded.made(level, heart.offset(-2, 0, HALF))
+			|| !Loaded.made(level, heart.offset(2, 0, HALF))) {
+			// (its land isn't loaded: the siege waits, unread, and goes on when it is)
+			return;
+		}
 		if (!isBanner(level, s.banner)) {
 			// (torn down, or taken up)
 			end(c.id(), s);

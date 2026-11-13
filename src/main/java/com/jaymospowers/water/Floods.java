@@ -108,6 +108,9 @@ public final class Floods {
 				if (seen.contains(next.asLong())) {
 					continue;
 				}
+				if (!com.jaymospowers.core.Loaded.made(level, next)) {
+					return null;
+				}
 				BlockState state = level.getBlockState(next);
 				if (state.is(Blocks.WATER) && state.getFluidState().isSource()) {
 					seen.add(next.asLong());
@@ -138,6 +141,14 @@ public final class Floods {
 		}
 		if (!com.jaymospowers.core.Loaded.made(level, flood.breach) || ++flood.steps[0] > MOST_STEPS) {
 			return false;
+		}
+		// the gap's whole neighbourhood must be made and loaded before it is read; otherwise wait for the next step
+		for (int dx = -2; dx <= 2; dx += 4) {
+			for (int dz = -2; dz <= 2; dz += 4) {
+				if (!com.jaymospowers.core.Loaded.made(level, flood.breach.offset(dx, 0, dz))) {
+					return true;
+				}
+			}
 		}
 		// the water must be seen running out through the gap, or there is nowhere for it to go
 		boolean running = false;

@@ -16,9 +16,10 @@ import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * (0.20.30) The pack's default stack for One Dimension (CodxIO; shipped unchanged with CustomChunks, Planeshift and CodxLib):
- * the high sky on top (0.20.36), then the Aether, the Overworld, the Nether underneath, so you fly up into the islands and on
- * up to the edge of space ({@link com.jaymospowers.power.zfighter.ZFighterHighSky}), and dig down into the Nether's
- * sky, with no portal and no loading screen. The End stays a dimension of its own (its portal, the dragon, Enderscape), and
+ * the high sky on top (0.20.36), then the Aether, the Cloud Sea ({@link com.jaymospowers.aether.cloudsea.CloudSea}), the
+ * Overworld, the Nether underneath, so you fly up through the clouds into the islands and on up to the edge of space
+ * ({@link com.jaymospowers.power.zfighter.ZFighterHighSky}), and dig down into the Nether's sky, with no portal and no
+ * loading screen. The End stays a dimension of its own (its portal, the dragon, Enderscape), and
  * so does every world of ours you reach some other way (the future, the moons, the Arsenal's pocket...).
  * <p>
  * One Dimension reads {@code config/one-dimension.json} when a world is made (the create-world screen starts from it; a
@@ -28,9 +29,14 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class OneDimensionDefaults {
 	/** Top to bottom. (0.20.36, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
-	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether");
-	/** The stack this wrote before the high sky: a file still holding exactly this order is ours, unedited, and is brought up to date. */
-	static final List<String> OLD_ORDER = List.of("jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether");
+	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "jaymospowers:cloud_sea", "minecraft:overworld",
+		"minecraft:the_nether");
+	/** The stacks this wrote before: a file still holding exactly one of these orders is ours, unedited, and is brought up to date. */
+	static final List<List<String>> OLD_ORDERS = List.of(
+		List.of("jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether"),
+		List.of("jaymospowers:high_sky", "jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether"));
+	private static final String ABOUT = "Jaymo's Powers' defaults: the high sky over the Aether over the Cloud Sea over the Overworld over the Nether."
+		+ " Each world keeps the order it was made with; changing this file never changes a world that exists.";
 	/** Not stacked: reached as before. */
 	static final List<String> LEFT_OUT = List.of("minecraft:the_end", "jaymospowers:future", "jaymospowers:moon", "jaymospowers:verdant_world",
 		"jaymospowers:rustfall", "jaymospowers:cinder", "jaymospowers:glacia", "jaymospowers:maw", "jaymospowers:time_chamber",
@@ -50,8 +56,7 @@ public final class OneDimensionDefaults {
 			return;
 		}
 		JsonObject root = new JsonObject();
-		root.addProperty("_about", "Jaymo's Powers' defaults: the high sky over the Aether over the Overworld over the Nether. Each world keeps the order"
-			+ " it was made with; changing this file never changes a world that exists.");
+		root.addProperty("_about", ABOUT);
 		root.addProperty("one_dimension_on_new_worlds", true);
 		JsonArray order = new JsonArray();
 		for (String id : ORDER) {
@@ -76,15 +81,15 @@ public final class OneDimensionDefaults {
 		try {
 			Files.createDirectories(path.getParent());
 			Files.writeString(path, new GsonBuilder().setPrettyPrinting().create().toJson(root), StandardCharsets.UTF_8);
-			JaymosPowers.LOGGER.info("Wrote the pack's One Dimension stack (high sky, Aether, Overworld, Nether) to {}", path);
+			JaymosPowers.LOGGER.info("Wrote the pack's One Dimension stack (high sky, Aether, Cloud Sea, Overworld, Nether) to {}", path);
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Could not write {}", path, e);
 		}
 	}
 
 	/**
-	 * (0.20.36) A file written before the high sky (its order exactly {@link #OLD_ORDER}) gets the high sky put on top, for the
-	 * worlds made from now on; anything else in it, and any order someone changed, is left as it is.
+	 * A file this wrote before (its order exactly one of {@link #OLD_ORDERS}) gets today's order, for the worlds made from now
+	 * on; anything else in it, and any order someone changed, is left as it is.
 	 */
 	private static void update(Path path) {
 		try {
@@ -100,21 +105,31 @@ public final class OneDimensionDefaults {
 				}
 				ids.add(entry.getAsJsonObject().get("dimension").getAsString());
 			}
-			if (!ids.equals(OLD_ORDER)) {
+			if (!OLD_ORDERS.contains(ids)) {
 				return;
 			}
-			JsonObject top = new JsonObject();
-			top.addProperty("dimension", ORDER.get(0));
+			// (the entries are kept as they are, so whatever One Dimension holds beside each dimension's id stays)
 			JsonArray next = new JsonArray();
-			next.add(top);
-			order.forEach(next::add);
+			for (String id : ORDER) {
+				JsonElement kept = null;
+				for (JsonElement entry : order) {
+					if (id.equals(entry.getAsJsonObject().get("dimension").getAsString())) {
+						kept = entry;
+					}
+				}
+				if (kept == null) {
+					JsonObject added = new JsonObject();
+					added.addProperty("dimension", id);
+					kept = added;
+				}
+				next.add(kept);
+			}
 			root.add("order", next);
 			if (root.has("_about")) {
-				root.addProperty("_about", "Jaymo's Powers' defaults: the high sky over the Aether over the Overworld over the Nether. Each world keeps the"
-					+ " order it was made with; changing this file never changes a world that exists.");
+				root.addProperty("_about", ABOUT);
 			}
 			Files.writeString(path, new GsonBuilder().setPrettyPrinting().create().toJson(root), StandardCharsets.UTF_8);
-			JaymosPowers.LOGGER.info("Put the high sky on top of the One Dimension stack in {} (new worlds only)", path);
+			JaymosPowers.LOGGER.info("Brought the One Dimension stack in {} up to date: high sky, Aether, Cloud Sea, Overworld, Nether (new worlds only)", path);
 		} catch (IOException | RuntimeException e) {
 			JaymosPowers.LOGGER.warn("Could not update {}", path, e);
 		}

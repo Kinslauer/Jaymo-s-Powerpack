@@ -151,5 +151,6 @@
 	"screen.jaymospowers.mastery.skill_tree": "Your skill tree is on K.",
 	"message.jaymospowers.carry.temper.bites": "%s bites you and twists free.",
 	"message.jaymospowers.carry.temper.scratches": "%s scratches you and leaps from your arms.",
-	"message.jaymospowers.carry.temper.squirms": "%s squirms out of your arms."
+	"message.jaymospowers.carry.temper.squirms": "%s squirms out of your arms.",
+	"entity.jaymospowers.block_cluster": "Torn Chunk"
 }

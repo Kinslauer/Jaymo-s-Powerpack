@@ -265,6 +265,22 @@ the underside; falling out below y -8 and landing home; day and night; a moa on 
 - **Watched vault** (`VaultHeartEntity`, `SkyFeature` kind `watched_vault`): rarity 70 at heights 14 to 44, only set into rock.
 - All worldgen is the one feature type `jaymospowers:sky` with a `kind`.
 
+## The Cloud Sea [aether.cloudsea]
+
+In a One Dimension world a band of open air and cloud, `jaymospowers:cloud_sea` (256 tall), lies between the Overworld and
+the Aether (`compat/OneDimensionDefaults`: high sky, Aether, Cloud Sea, Overworld, Nether). Nothing else is in it: no
+ground, no mobs, no structures. New worlds only; a world keeps the stack it was made with.
+
+- **Cloudbank** (`CloudbankBlock`): a cold aercloud that daylight passes straight down through, so the sky under the
+  overcast stays bright. One layer you sink into and stand in; two deep is solid.
+- **Low banks**: loose clouds about 72 blocks up the band, over about a quarter of the sky.
+- **The overcast**: one bank about 184 blocks up (between 166 and 202), 6 to 22 thick, with wells through about 6% of
+  it. From underneath it is a ceiling (find a well, or dig); from on top it is a floor, and it catches most of what
+  falls off the Aether. Dropping on out of the band's floor gives Slow Falling as leaving the Aether did (`WindAether`).
+- **Veils** (`client/aether/AetherVeil`): under the Overworld's clouds neither the Cloud Sea nor the Aether is drawn;
+  above them the Cloud Sea is; the Aether only once the camera is above the overcast.
+- All of it is world generation data written by `tools/gen_cloud_sea.py` (heights, cover, thickness, wells at the top).
+
 ## What is not in yet
 
 - Aether tools and armour (skyroot, holystone, zanite, gravitite) and Skyroot's double drops, the Holystone tool's

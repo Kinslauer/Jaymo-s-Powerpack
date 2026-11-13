@@ -2,6 +2,7 @@ package com.jaymospowers.client.aether;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import com.jaymospowers.aether.cloudsea.CloudSea;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,11 @@ import net.minecraft.world.level.LevelHeightAccessor;
  * It turns on above the clouds' top and off below their bottom, so walking a ridge at cloud height never flickers it, and the
  * change itself happens inside the cloud. Only a stacked world's Overworld level is touched: an ordinary world, or the Aether
  * reached as a dimension of its own, is drawn as before.
+ * <p>
+ * With the Cloud Sea between the two ({@link CloudSea}) there are two veils. Under the Overworld's clouds neither the Cloud
+ * Sea nor the Aether is drawn, so the sky from the ground is the one it always was (the overcast would otherwise sit in
+ * front of the sun at a long view distance). Over them the Cloud Sea is there, and the Aether stays hidden until the camera
+ * is up through the overcast.
  */
 public final class AetherVeil {
 	// ---- tuning ----
@@ -27,7 +33,7 @@ public final class AetherVeil {
 	static final double CLOUD_BOTTOM = 192.33, CLOUD_TOP = CLOUD_BOTTOM + 4.0;
 	/** How often (ticks) to look again for the Aether band while the stack's layout hasn't reached the client yet. */
 	static final int RETRY_TICKS = 40;
-	static final String AETHER = "jaymospowers:aether", OVERWORLD = "minecraft:overworld";
+	static final String AETHER = "jaymospowers:aether", OVERWORLD = "minecraft:overworld", CLOUD_SEA = "jaymospowers:cloud_sea";
 
 	/** Nothing hidden. */
 	public static final double NONE = Double.POSITIVE_INFINITY;
@@ -35,6 +41,8 @@ public final class AetherVeil {
 	private static volatile double ceiling = NONE;
 	/** Whether the camera is under the clouds (kept between the clouds' bottom and top, so it only flips when through them). */
 	private static boolean below = true;
+	/** Whether the camera is under the Cloud Sea's overcast (kept between its bottom and top, like {@link #below}). */
+	private static boolean under = true;
 
 	/** The top (exclusive) of the band the player stands in, for the minimap ({@link #mapTop}); MAX_VALUE: the level's own. */
 	private static volatile int mapTop = Integer.MAX_VALUE;
@@ -49,6 +57,8 @@ public final class AetherVeil {
 	private static int retry;
 	/** This level's Aether floor, and its Overworld's cloud heights; floor {@link #NONE} when it has no Aether band. */
 	private static double floor = NONE, cloudBottom, cloudTop;
+	/** This level's Cloud Sea floor and its overcast's heights; floor {@link #NONE} when no Cloud Sea lies under the Aether. */
+	private static double sea = NONE, overcastBottom, overcastTop;
 
 	private static final boolean STACKS = FabricLoader.getInstance().isModLoaded("customchunks");
 	private static final boolean SODIUM = FabricLoader.getInstance().isModLoaded("sodium");
@@ -106,6 +116,7 @@ public final class AetherVeil {
 			retry = RETRY_TICKS;
 			read(level);
 			below = true;
+			under = true;
 		}
 		double feet = minecraft.player == null ? Double.NaN : minecraft.player.getY();
 		mapTop = Double.isNaN(feet) ? Integer.MAX_VALUE : topAbove(feet);
@@ -120,7 +131,14 @@ public final class AetherVeil {
 		} else if (y < cloudBottom) {
 			below = true;
 		}
-		set(below ? floor : NONE);
+		if (sea != NONE) {
+			if (y > overcastTop) {
+				under = false;
+			} else if (y < overcastBottom) {
+				under = true;
+			}
+		}
+		set(below ? Math.min(floor, sea) : sea != NONE && under ? floor : NONE);
 	}
 
 	/** The lowest band floor above height y (the top of y's band), or MAX_VALUE. */
@@ -157,6 +175,7 @@ public final class AetherVeil {
 	/** This level's Aether floor and its Overworld's cloud heights, from CustomChunks' stack layout (synced to the client). */
 	private static void read(LevelHeightAccessor level) {
 		floor = NONE;
+		sea = NONE;
 		floors = new int[0];
 		if (!api()) {
 			return;
@@ -170,7 +189,7 @@ public final class AetherVeil {
 				}
 				return;
 			}
-			double aether = NONE;
+			double aether = NONE, cloudSea = NONE;
 			int overworldShift = 0;
 			List<?> all = (List<?>) layers.invoke(layout);
 			int[] bands = new int[all.size()];
@@ -180,6 +199,8 @@ public final class AetherVeil {
 				String id = String.valueOf(source.invoke(layer));
 				if (AETHER.equals(id)) {
 					aether = (Integer) minY.invoke(layer);
+				} else if (CLOUD_SEA.equals(id)) {
+					cloudSea = (Integer) minY.invoke(layer);
 				} else if (OVERWORLD.equals(id)) {
 					overworldShift = (Integer) shift.invoke(layer);
 				}
@@ -190,11 +211,17 @@ public final class AetherVeil {
 			cloudTop = CLOUD_TOP + overworldShift;
 			// only when the Aether sits over the clouds (a stack in another order is left alone)
 			floor = aether > cloudTop ? aether : NONE;
+			// the Cloud Sea, when it lies between the two (its floor is 0 in its own heights)
+			sea = floor != NONE && cloudSea > cloudTop && cloudSea < aether ? cloudSea : NONE;
+			overcastBottom = cloudSea + CloudSea.OVERCAST_BOTTOM;
+			overcastTop = cloudSea + CloudSea.OVERCAST_TOP;
 			// (0.21.2) Andy still saw the Aether from the ground: say what was read, so latest.log shows why
-			com.jaymospowers.JaymosPowers.LOGGER.info("Aether veil: band floors {}, Aether floor {}, Overworld clouds {} to {}, veil {}",
-				java.util.Arrays.toString(bands), aether, cloudBottom, cloudTop, floor == NONE ? "off (the Aether isn't over the clouds)" : "on");
+			com.jaymospowers.JaymosPowers.LOGGER.info("Aether veil: band floors {}, Aether floor {}, Overworld clouds {} to {}, veil {}, Cloud Sea {}",
+				java.util.Arrays.toString(bands), aether, cloudBottom, cloudTop, floor == NONE ? "off (the Aether isn't over the clouds)" : "on",
+				sea == NONE ? "none" : "from " + sea + ", overcast " + overcastBottom + " to " + overcastTop);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			floor = NONE;
+			sea = NONE;
 			floors = new int[0];
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Aether veil: couldn't read the stack layout", e);
 		}

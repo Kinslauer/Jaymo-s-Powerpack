@@ -4322,3 +4322,45 @@ enter limbo if they don't come to."
 - **Hooded cloak**: its sway (the back and hem swinging with your stride, the hood hanging down when the head slot is empty, the narrower collar and mantles with no chestplate) was set when the cloak was submitted, and the model is set up again just before it is drawn, which put all of that back at rest. It is now posed as it is drawn (`HoodedCloakLayer.Model.setupAnim`).
 - Third-party pieces checked and already following the body: Traveler's Tool Belt, Weapon Master's worn weapons, Not Enough Animations' sword on the back, Entity Texture Features' player extras.
 - Built and loaded in a cloud test game (no errors); the pieces weren't each put on and looked at. Not played.
+
+## 0.23.30 (2026-11-13): entity names - Hot Air Balloon, Torn Chunk, Thrown Gear (#1468)
+
+- Three entities showed raw keys in the look-at tooltip: the hot air balloon (**Hot Air Balloon**), a chunk of blocks torn
+  loose by Living Armor or Gravity's Lift (**Torn Chunk**) and gear thrown from the thrower belt (**Thrown Gear**).
+- Lang only (`living_rough.json`, `core.json`, `gear_picks.json`). Checked every item, block and entity id against the lang
+  parts; not played.
+
+## 0.23.31 (2026-11-13): the Cloud Sea - a band of cloud and open air between the Overworld and the Aether (#1469)
+
+- **The Cloud Sea** (Andy: "another dimension that is just clouds and air between the overworld and aether ... that way
+  players wont be able to see it or get there at all easily"). New One Dimension worlds stack `jaymospowers:cloud_sea`
+  between the Overworld and the Aether: 256 blocks of open sky with nothing in it but cloud. The islands are now that much
+  farther up. **New worlds only**: a world keeps the stack it was made with (`compat/OneDimensionDefaults` brings an
+  unedited `config/one-dimension.json` up to date for the next world).
+- **The overcast**: near the top of the band one bank of cloud runs from horizon to horizon, 6 to 22 blocks thick. From
+  underneath it is a ceiling: two layers of cloud are solid, so you find one of the wide wells through it (about 6% of
+  the sky) or dig up through. From on top it is a floor you sink ankle-deep into, and it catches most of what falls off
+  the Aether, unhurt. Lower down, loose banks drift over about a quarter of the sky.
+- **Cloudbank**, the new block it is made of: a cold aercloud that daylight passes through, so the sky under the overcast
+  is as bright as the sky over it. It drops itself.
+- **Out of sight** (`client/aether/AetherVeil`): from under the Overworld's own clouds the sky looks as it always did
+  (neither the Cloud Sea nor the Aether is drawn). Above them you see the Cloud Sea; the Aether only appears once you are
+  up through the overcast.
+- **The fall home**: Slow Falling now comes as you drop out of the Cloud Sea's floor into the Overworld's sky
+  (`WindAether.stackedTick`), where it used to come as you left the Aether.
+- Nothing spawns in the Cloud Sea and nothing is built there. The cloud shapes are world generation data from
+  `tools/gen_cloud_sea.py` (deck heights, cover, thickness, wells: tune them at the top of that file).
+- Compiled. The world generation data was loaded by a plain 26.3 server, which made the decks as planned (the overcast in
+  every column probed, clear air between the decks). Not played in a stacked world.
+
+## 0.23.32 (2026-11-13): Parts off the dead are severed parts (#1470)
+
+- A part that comes off a body lying dead (Jaymo's Kitchen: a skeleton falling to pieces, a rotten limb torn away when you try to lift a zombie, a corpse struck where it lies) is a real severed part: drawn as that body's head, arm or leg, kicked about, carried and thrown like any other, and it drips only if the body bled. A limb that tears off in a lift is in your hand at once.
+- Code: `SeveredPart.drop`, `Carry.takePart`, `KitchenCompat.registerCorpseBlood` (Kitchen's `setOnPart`, by reflection: an older Kitchen changes nothing).
+- Built; not played.
+
+## 0.23.33 (2026-11-13): stored reads wait for the land (Deck watchdog crash) (#1472)
+
+- **Floods, river ice floes, Arsenal portals**: they no longer read blocks in land that isn't made and loaded yet. A flood waits a step if the land around its gap isn't there, a floe stays tracked and drifts when its land (or the water ahead) comes back, and a portal pass waits until the far exit's land is loaded. Nothing is dropped; nobody sees a change except no more server hangs.
+- Classes: `Floods`, `RiverIce`, `ArsenalStanding`, all through `core.Loaded`.
+- Built; tested on the Deck server.

@@ -825,6 +825,16 @@ public final class Carry {
 		pickUp(carrier, body);
 	}
 
+	/**
+	 * A severed part that came away in {@code carrier}'s hand (a rotten limb off a corpse they tried to lift): held at
+	 * once, if their arms are free; otherwise it lies where it fell.
+	 */
+	public static void takePart(ServerPlayer carrier, SeveredPart part) {
+		if (!isCarrying(carrier) && !isCarried(carrier) && !Downed.isDowned(carrier) && !KitchenCompat.isCarryingCorpse(carrier) && !carrier.isPassenger()) {
+			pickUp(carrier, part);
+		}
+	}
+
 	static void pickUp(ServerPlayer carrier, Entity target) {
 		boolean flying = flying(carrier);
 		boolean light = GravityWeight.lightens(carrier);
