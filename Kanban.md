@@ -13,13 +13,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
-- [ ] [[Agents/dungeon-mods-chapel-echo-bow|dungeon-mods-chapel-echo-bow]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · in-review
 - [ ] [[Agents/blossom-lands|blossom-lands]] · 💻 Odysseus · #1413 · in-review
+- [ ] [[Agents/dungeon-mods-chapel-echo-bow|dungeon-mods-chapel-echo-bow]] · 💻 Odysseus · #1417 · in-review
 
 
 ## Needs Andy
