@@ -514,6 +514,18 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
+(new) **Four more great ones** (Andy picked them 2026-11-12; placements are Claude's, to approve). The **thing under
+the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
+hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
+under the desert's ruins, the Stoneborn talk of it the way people talk of a thing their grandfathers saw, and a
+Stoneborn who is there when it comes up faints at the sight. The **snow giant** of the cold plains lives in the Arctic
+stone's country; the Frostborn count it a neighbour, and it leaves alone whoever leaves it alone. The **fortress
+knight** is one of the old war's dead, a champion of the demons' country still holding a Nether fortress long after
+anyone told him to; his sword lies with him and nowhere else.
+
+(new) **The glass gauntlet** (Andy, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
+Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
+
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
 witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
@@ -1485,3 +1497,12 @@ might, and one drained to nothing loses their own shadow to them. **Shapeshifter
 them; the real ones are kept tied up underground, under Grim ruins and in cellars near the villages, and they know
 the right wife's name and the right dog. The night folk keep the old rules: no threshold crossed unasked, no running
 water crossed unaided, and a stake in the coffin by day ends them.
+
+(new) **Mind, sight and the wild well** (Claude's placement for the fifth edition picks, patch 7, 2026-11-13, for Andy
+to approve). The realms' judges, jailers and rulers sit inside a circle of truth when they hear a case: nobody lies in
+it, which is why a forged paper is shown at the gate and never at the bench. A geas is the oldest binding there is, a
+sworn word that burns the one who breaks it, laid on captives and on captains who swear to a lord. A lock of hair is
+a handle on its owner, and hedge-witches and court wizards alike will pay for one; thrown bones answer only in light
+or smoke. A familiar is a small spirit given a body, owl, raven, cat, rat or frog, bound to one caster and born
+again from its ash. Moonlight called down by a caster shows a shapechanger for what it is. Some Sorcerers' blood is
+wild, and so is the well in a great lair's blighted land: there a spell can come out as something else entirely.
