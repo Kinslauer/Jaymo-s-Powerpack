@@ -163,7 +163,7 @@ final class GrowthScreen extends Screen {
 			return;
 		}
 		int x = left(), y = top(), w = panelW(), h = panelH(), px = x + LIST_W, pw = w - LIST_W;
-		Ui.panel(graphics, x, y, w, h, Ui.GOLD);
+		Ui.window(graphics, x, y, w, h);
 		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
 		int owed = Feats.owed(player);
 		Ui.line(graphics, this.font, this.feats ? Component.translatable("gui.jaymoskingdoms.growth.owed", owed, Knowledge.level(player))

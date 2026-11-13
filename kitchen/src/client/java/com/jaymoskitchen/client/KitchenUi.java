@@ -24,6 +24,9 @@ public final class KitchenUi {
 	public static final int PANEL = 0xD0101018, ROW = 0x30FFFFFF, ROW_ALT = 0x18FFFFFF, ROW_HOVER = 0x50FFFFFF, ROW_PICKED = 0x40FFFFFF,
 		CHIP = 0xA0000000, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, BAR_BACK = 0xFF303030, WELL_EDGE = 0xFF34343E,
 		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050;
+	/** The H character menu's solid window ({@link #window}, {@link #recess}). */
+	public static final int WINDOW_EDGE = 0xFF0A0A0E, WINDOW_LIGHT = 0xFF4A4A52, WINDOW_SHADE = 0xFF141418, WINDOW_BODY = 0xFF2B2B2F,
+		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;
 	/** The pack's one gold, green (good, ready, done) and red (bad, missing, broken), the same on screens and the HUD. */
 	public static final int GOLD = 0xFFFFD54A, GOOD = 0xFF66C266, BAD = 0xFFE05050;
 	/** The Kitchen's accent: a warm, cooked-crust orange. */
@@ -45,6 +48,24 @@ public final class KitchenUi {
 	public static void panel(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent, int fill) {
 		graphics.fill(x, y, x + w, y + h, fill);
 		graphics.fill(x, y, x + w, y + 2, accent);
+	}
+
+	/**
+	 * The solid window of the H character menu (every tab of it, in whichever mod): opaque and bevelled like vanilla's
+	 * inventory, in dark tones, because it sits where the inventory does. Other screens use {@link #panel}.
+	 */
+	public static void window(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		graphics.fill(x, y, x + w, y + h, WINDOW_EDGE);
+		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, WINDOW_SHADE);
+		graphics.fill(x + 1, y + 1, x + w - 3, y + h - 3, WINDOW_LIGHT);
+		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, WINDOW_BODY);
+	}
+
+	/** A sunken area of a {@link #window}: shadow on top and left, light on bottom and right. */
+	public static void recess(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
+		graphics.fill(x, y, x + w, y + h, WINDOW_WELL_LIGHT);
+		graphics.fill(x, y, x + w - 1, y + h - 1, WINDOW_SHADE);
+		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, WINDOW_CANVAS);
 	}
 
 	/**

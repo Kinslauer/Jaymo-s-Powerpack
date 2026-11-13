@@ -140,7 +140,7 @@ final class PartyScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		LocalPlayer me = this.minecraft.player;
 		int x = left(), y = top(), w = panelW();
-		Ui.panel(graphics, x, y, w, PANEL_H, Ui.GOLD);
+		Ui.window(graphics, x, y, w, PANEL_H);
 		graphics.item(new ItemStack(Items.SHIELD), x + 8, y + 8);
 		Ui.line(graphics, this.font, this.title, x + 28, y + 7, w - 36, Ui.GOLD);
 		List<Parties.Entry> party = PartyClient.party();

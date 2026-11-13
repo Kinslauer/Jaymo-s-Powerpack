@@ -202,7 +202,7 @@ final class RetakingScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW(), h = panelH();
-		Ui.panel(graphics, x, y, w, h, Ui.GOLD);
+		Ui.window(graphics, x, y, w, h);
 		Retaking.Act current = current();
 		Retaking.Act[] all = Retaking.Act.values();
 

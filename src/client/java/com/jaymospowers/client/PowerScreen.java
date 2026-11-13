@@ -50,13 +50,13 @@ public class PowerScreen extends Screen {
 	static final int TAB_W = 26, TAB_H = 28, TAB_STEP = 28, TAB_LEFT = 8, TAB_OUT = 26;
 	static final int SLOT = 18;
 	// the vanilla window, dark
-	public static final int COLOR_EDGE = 0xFF0A0A0E;
-	public static final int COLOR_LIGHT = 0xFF4A4A52;
-	public static final int COLOR_SHADE = 0xFF141418;
-	public static final int COLOR_BODY = 0xFF2B2B2F;
-	public static final int COLOR_CANVAS = 0xFF1E1E22;
+	public static final int COLOR_EDGE = UiStyle.WINDOW_EDGE;
+	public static final int COLOR_LIGHT = UiStyle.WINDOW_LIGHT;
+	public static final int COLOR_SHADE = UiStyle.WINDOW_SHADE;
+	public static final int COLOR_BODY = UiStyle.WINDOW_BODY;
+	public static final int COLOR_CANVAS = UiStyle.WINDOW_CANVAS;
 	public static final int COLOR_WELL = 0xFF242429;
-	public static final int COLOR_WELL_LIGHT = 0xFF3E3E46;
+	public static final int COLOR_WELL_LIGHT = UiStyle.WINDOW_WELL_LIGHT;
 	public static final int COLOR_TAB = 0xFF222226;
 	public static final int COLOR_TEXT = 0xFFE0E0E8;
 	public static final int COLOR_DIM = 0xFF8A8A98;
@@ -352,17 +352,12 @@ public class PowerScreen extends Screen {
 
 	/** Vanilla's raised window: a dark edge, a light bevel on top and left, a shadow on bottom and right. */
 	static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, COLOR_EDGE);
-		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, COLOR_SHADE);
-		graphics.fill(x + 1, y + 1, x + w - 3, y + h - 3, COLOR_LIGHT);
-		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, COLOR_BODY);
+		UiStyle.window(graphics, x, y, w, h);
 	}
 
 	/** A sunken area: shadow on top and left, light on bottom and right. */
 	static void recess(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, COLOR_WELL_LIGHT);
-		graphics.fill(x, y, x + w - 1, y + h - 1, COLOR_SHADE);
-		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, COLOR_CANVAS);
+		UiStyle.recess(graphics, x, y, w, h);
 	}
 
 	/** An 18x18 item slot well. */

@@ -699,7 +699,7 @@ final class SkillScreen extends Screen {
 	private void attributes(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = Ui.GOLD;
-		Ui.panel(graphics, x, y, w, panelH(), accent);
+		Ui.window(graphics, x, y, w, panelH());
 		var player = this.minecraft.player;
 		int level = Stats.characterLevel(shown), points = player == null ? 0 : Stats.points(player, shown);
 		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
@@ -822,7 +822,7 @@ final class SkillScreen extends Screen {
 	private void jobs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = JOB_ACCENT;
-		Ui.panel(graphics, x, y, w, panelH(), accent);
+		Ui.window(graphics, x, y, w, panelH());
 		Careers.Career c = this.minecraft.player == null ? Careers.Career.EMPTY : Careers.of(this.minecraft.player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.title"), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.held", c.posts().size()), x + 9, y + 19, w / 2 - 12,

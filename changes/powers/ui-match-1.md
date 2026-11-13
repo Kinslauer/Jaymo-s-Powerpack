@@ -3,3 +3,4 @@
 - **One gold, one red**: the H menu's badge and health bar and the HUD's warning red now use the same red as every screen.
 - **The style can't drift**: `UiStyle` and the new `client/ui/FlatButton` are written by `tools/ui_style.py` from `tools/ui_style/`, the same source Kingdoms' `Ui` and Kitchen's `KitchenUi` come from; the PR checks fail if a copy is edited by hand. `UiStyle` gained wells, slot wells, a second panel fill, `button`, and the named `GOLD`, `GOOD`, `BAD`. `TinkerUi` now takes its colours and panel from `UiStyle`.
 - Compiled; not played. The first of six patches from Andy's UI checklist.
+- **One H menu frame**: the H menu's window and sunken areas are now `UiStyle.window` / `UiStyle.recess` in the shared style, so Kingdoms' tabs draw the very same frame.
