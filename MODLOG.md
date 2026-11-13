@@ -4352,3 +4352,9 @@ enter limbo if they don't come to."
   `tools/gen_cloud_sea.py` (deck heights, cover, thickness, wells: tune them at the top of that file).
 - Compiled. The world generation data was loaded by a plain 26.3 server, which made the decks as planned (the overcast in
   every column probed, clear air between the decks). Not played in a stacked world.
+
+## 0.23.32 (2026-11-13): Parts off the dead are severed parts (#1470)
+
+- A part that comes off a body lying dead (Jaymo's Kitchen: a skeleton falling to pieces, a rotten limb torn away when you try to lift a zombie, a corpse struck where it lies) is a real severed part: drawn as that body's head, arm or leg, kicked about, carried and thrown like any other, and it drips only if the body bled. A limb that tears off in a lift is in your hand at once.
+- Code: `SeveredPart.drop`, `Carry.takePart`, `KitchenCompat.registerCorpseBlood` (Kitchen's `setOnPart`, by reflection: an older Kitchen changes nothing).
+- Built; not played.
