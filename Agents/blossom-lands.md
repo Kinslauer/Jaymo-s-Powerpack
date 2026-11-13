@@ -20,6 +20,7 @@ owns:
 ## Notes
 - Patch 1 (Mohknee, the far land) was PR #1407, merged 2026-11-13: tools/gen_mohknee.py, seas/Mohknee, MohkneeStructureMixin, IslandStructure only_at.
 - Andy's answers so far: two days and nights (16,000 blocks of sea); the land is Mohknee; Tideborn islands on the way; a captain or companion can pilot (patch 2).
+- Patch 3 (blocks, furnishings, villages built from them) is PR #1413, whole, waiting on Andy's "merge". Patch 4 (kinds of village, thatch roofs, paddies) is next.
 - Still open: fliers/pods, old mainland blossom villages, house names, a blossom-born start.
 
 ## Done
