@@ -2013,3 +2013,8 @@ From the camping-campfire Blockbench model Andy uploaded.
 - **Water Filter**: a new item crafted from wool, charcoal and sand stacked in a column (24 uses). Hold unpurified water in your other hand and use the filter: a bottle becomes Clean Water, and a waterskin's river water becomes clean (one use per sip). Filtered water is clean but not hot. `WaterFilterItem`; placeholder 16x16 art.
 - Clean Water's tooltip reads "Purified"; the waterskin's dirty line says how to purify it. JEI info on Clean Water and the filter.
 - Built; not played.
+
+## 0.6.6 (2026-11-13): corpses can be spilled from a height (for Kingdoms' Unburied) (#1460)
+
+- `CorpseEntity.spill(Vec3)`: a body let fall from whatever held it up, turning over as it drops as one let go of from someone's arms does. Kingdoms' Unburied uses it to drop its dead at daybreak.
+- Built; not played.
