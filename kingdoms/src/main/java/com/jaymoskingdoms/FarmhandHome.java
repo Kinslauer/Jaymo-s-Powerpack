@@ -48,8 +48,9 @@ public final class FarmhandHome {
 	/** Homesteads' lone farmsteads (each comes with its own villagers), if no barn is in reach. */
 	static final List<ResourceKey<Structure>> HOMESTEADS = List.of(key("homesteads", "flower_home_steads"),
 		key("homesteads", "forest_home_steads"), key("homesteads", "taiga_home_steads"), key("homesteads", "swamp_home_steads"));
-	/** How far a farmhouse is looked for (chunks, as findNearestMapStructure counts). */
-	static final int SEARCH_CHUNKS = 100;
+	/** How far a farmhouse is looked for: in structure spacings, as findNearestMapStructure counts (see {@link LifeStory#STRUCTURE_SEARCH}). */
+	static final int SEARCH_CHUNKS = LifeStory.STRUCTURE_SEARCH;
+
 	/** Fewer grown villagers than this in the house: a farming couple moves in. */
 	static final int FAMILY_LEAST = 2;
 	/** The chance the couple has a child with them. */
@@ -86,9 +87,25 @@ public final class FarmhandHome {
 
 	/** The nearest farmhouse to {@code from} (a barn first, then a farmstead), or null if neither mod is loaded or none is in reach. */
 	static @Nullable House find(ServerLevel level, BlockPos from, RandomSource random) {
+		return find(level, from, random, Long.MAX_VALUE);
+	}
+
+	/** As {@link #find(ServerLevel, BlockPos, RandomSource)}, but null without searching once {@code deadline} (nanoTime) has passed. */
+	static @Nullable House find(ServerLevel level, BlockPos from, RandomSource random, long deadline) {
+		if (System.nanoTime() >= deadline) {
+			return null;
+		}
 		Registry<Structure> structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 		House barn = find(level, structures, List.of(BARN), from, random);
-		return barn != null ? barn : find(level, structures, HOMESTEADS, from, random);
+		if (barn != null || System.nanoTime() >= deadline) {
+			return barn;
+		}
+		return find(level, structures, HOMESTEADS, from, random);
+	}
+
+	/** The deadline (nanoTime) for a farmhouse hunt starting now. */
+	static long deadline() {
+		return LifeStory.searchDeadline();
 	}
 
 	private static @Nullable House find(ServerLevel level, Registry<Structure> structures, List<ResourceKey<Structure>> keys, BlockPos from,

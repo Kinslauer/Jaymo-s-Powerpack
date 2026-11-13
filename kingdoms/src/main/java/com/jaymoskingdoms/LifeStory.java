@@ -89,8 +89,15 @@ public final class LifeStory {
 	static final int WILD_MIN = 600, WILD_MAX = 1200;
 	/** Drawn to a monolith: how far from its foot you wake (blocks). */
 	static final int MONOLITH_MIN = 36, MONOLITH_MAX = 56;
-	/** How far a village or a wreck is looked for (chunks), and how close to it you wake (blocks). */
-	static final int STRUCTURE_SEARCH = 100, STRUCTURE_NEAR = 14;
+	/**
+	 * How far a village or a wreck is looked for, and how close to it you wake (blocks). findNearestMapStructure counts
+	 * the reach in the structure's spacing (rings of possible starts, a few dozen chunks apart), not in chunks, and makes
+	 * every candidate chunk on the server thread: 100 meant thousands of chunks and stalled the Steam Deck server past
+	 * its 60 s watchdog. 8 rings still reach thousands of blocks out.
+	 */
+	static final int STRUCTURE_SEARCH = 8, STRUCTURE_NEAR = 14;
+	/** Time a start's search may take with its retries (ms); past it, it settles for what it has (or the fallback start). */
+	static final long STRUCTURE_BUDGET_MS = 15_000;
 	/** A caving trip gone wrong: columns tried, how deep a hollow must lie (at most this Y), and the bite (ticks of Poison). */
 	static final int CAVE_TRIES = 64, CAVE_MAX_Y = 40, CAVE_RADIUS = 96, BITE_TICKS = 140;
 	/** (Andy: "poisoned, wounded, and barely breathing") the health you wake with, and how long the Slowness and Weakness last (ticks). */
@@ -1458,7 +1465,11 @@ public final class LifeStory {
 			}
 			case SHIPWRECK -> {
 				// (Tiv) a wreck nobody else washed up at: a beached one first, else any; looked past a few taken ones
+				long wreckDeadline = searchDeadline();
 				BlockPos wreck = lookPast(spawn, from -> {
+					if (System.nanoTime() >= wreckDeadline) {
+						return null;
+					}
 					BlockPos beached = structure(level, BuiltinStructures.SHIPWRECK_BEACHED, from);
 					return beached != null && freePlace(level, beached) ? beached
 						: level.findNearestMapStructure(StructureTags.SHIPWRECK, from, STRUCTURE_SEARCH, false);
@@ -1472,7 +1483,9 @@ public final class LifeStory {
 				// (0.7.605, Andy) the Family farmhand: inside a lone farmhouse, taken in by the family there (FarmhandHome).
 				// A party mate's farmhouse is yours too; with no farmhouse in reach, the old village start below.
 				// (Tiv) one nobody else was taken in at, looked past a few taken ones
-				FarmhandHome.House house = lookPast(mate != null ? mate.pos : spawn, from -> FarmhandHome.find(level, from, random),
+				// the hunt has a time limit: it runs on the server thread, and past the watchdog the server shuts down
+				long farmDeadline = FarmhandHome.deadline();
+				FarmhandHome.House house = lookPast(mate != null ? mate.pos : spawn, from -> FarmhandHome.find(level, from, random, farmDeadline),
 					h -> freePlace(level, h.box().getCenter()), random);
 				if (house != null) {
 					place = house.box().getCenter();
@@ -1924,7 +1937,8 @@ public final class LifeStory {
 		BlockPos from = spawn;
 		// (0.7.486) a Tideborn's is by the shore: a free one inland is kept only if no shore one turns up
 		int tries = heritage == Heritage.Kind.TIDEBORN ? StoryHomes.FRESH_TRIES * 2 : StoryHomes.FRESH_TRIES;
-		for (int i = 0; i <= tries; i++) {
+		long deadline = searchDeadline();
+		for (int i = 0; i <= tries && System.nanoTime() < deadline; i++) {
 			BlockPos village = level.findNearestMapStructure(villages(heritage), from, STRUCTURE_SEARCH, false);
 			if (village == null) {
 				village = level.findNearestMapStructure(StructureTags.VILLAGE, from, STRUCTURE_SEARCH, false);
@@ -1961,6 +1975,11 @@ public final class LifeStory {
 			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
 			default -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
 		};
+	}
+
+	/** The deadline (nanoTime) for a start's structure search beginning now ({@link #STRUCTURE_BUDGET_MS}). */
+	static long searchDeadline() {
+		return System.nanoTime() + STRUCTURE_BUDGET_MS * 1_000_000L;
 	}
 
 	/** The nearest {@code key} structure to {@code from}, or null. */
