@@ -214,3 +214,22 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
   bed with dark oak slabs; stake in the coffin kills for good (players too).
 - **J14** (`Shadow`, `ShadowDrain`): -5 Might a touch, mends 1 per 30 s; at the floor knocked out, your shadow
   peels off carrying the points.
+
+### Patch 7
+(Resumed after a machine restart; the partial work was kept and finished.)
+- **H9** (`MindSpells`, `Truth`, `Geas`, `Forgetting`, `Choices`): charm and hold are held spells; command (flee,
+  drop, grovel) and suggestion (come, wait, leave, sleep, follow, 30-60 s) picked on the Magic screen; zone of truth
+  is a held field wired to `Liars`, raised by judges (Arrests), jailers (Busts), rulers (Audiences), and in
+  `Questioning`/`ForgedPapers`; geas 3 days (can't strike the caster, straying past 40 burns, captains don't betray);
+  modify memory wipes bad memories and witnessed crimes, but not an already-set wanted mark or bounty.
+- **H10** (`Divination`, `Hair`, `Scrying`): detect magic is patch 6's find magic; locate object (128) and creature
+  (600, needs hair) as a mote thread; augury 9 in 10 right, signs only; scrying is a top-down live map of 20 blocks
+  around them for 30 s (not a camera), needs their land loaded.
+- **H11** (`NatureRites`, `Passers`, `Moonbeam`, `HeroesFeast`): passer log per 16-block square (2 days, lost on
+  restart); plant growth is instant in 12 blocks (not overnight) and dries the farmland; control weather sets vanilla
+  weather for half a day (FieldWeather follows); moonbeam reveals werewolves (mob and player), disguised dragons, and
+  (wired by the lead) shapeshifter copies; heroes' feast at any "table" block, a day without fear or poison.
+- **H12** (`Familiars`, `FamiliarBodies`, `FamiliarClient`): five bodies on vanilla models with recoloured skins
+  (stand-ins); eyes key Page Down; send to hand an item over; touch spells through its eyes; ash and recall ritual.
+- **H13** (`WildMagic`): Sorcerer "wild" option (1 in 6 casts) and great-lair land or `addCursedPlace` (1 in 8);
+  13 surges; the fireball can hurt a very low-health caster (players go down, not die).

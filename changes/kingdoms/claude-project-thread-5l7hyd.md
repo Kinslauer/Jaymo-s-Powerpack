@@ -54,4 +54,13 @@
 - **Stolen lives** (`Doubles`, `Shapeshifter`): villagers found shut underground (Grim ruins, villages, cellars, dungeons) are the real ones whose lives a shapeshifter stole; freed, they say they were kidnapped and lead you home, where the copy slips on a spouse's name or the dog and turns on you when unmasked.
 - **Shadows drain Might** (`ShadowDrain`): at nothing you go down, and your own shadow peels off to join them; kill it to get your strength back.
 - New acid damage, hand mirror, ear wax, quicksand and trap cover; stand-in art from `tools/gen_creatures.py`.
+- **Sixteen more spells** on their own scrolls: charm, command (flee, drop, grovel), suggestion, hold, zone of truth, geas, modify memory, locate object, locate creature, augury, scrying, plant growth, control weather, moonbeam, heroes' feast and find familiar (`MindSpells`, `Truth`, `Geas`, `Forgetting`, `Divination`, `Scrying`, `NatureRites`, `Moonbeam`, `HeroesFeast`, `Familiars`).
+- **Circles of truth**: judges, rulers at audience and jailers raise one; inside it nobody lies, and verdicts follow the record.
+- **Geas**: binds captives and sworn captains to their word; breaking it burns.
+- **Locks of hair** (`Hair`): snipped from the helpless or taken from a bed; locate a creature or scry them in a water cauldron (a living map of their surroundings).
+- **Augury**: thrown bones answer in gold light or dark smoke, never in words.
+- **Speak with animals** now tells who passed by (`Passers`).
+- **Moonbeam**: forces werewolves, disguised dragons and shapeshifter copies into their true form.
+- **Familiars** (owl, raven, cat, rat, frog): follow, scout, carry an item, deliver touch spells; hold Page Down to see through their eyes; a ritual calls them back from their ash.
+- **Wild magic** (`WildMagic`): a wild Sorcerer bloodline, and casting in a great lair's blighted land, can surge into a random effect.
 - Built; not played.

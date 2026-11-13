@@ -56,6 +56,14 @@ public final class Moonbeam {
 		});
 		addReveal((level, who, caster, until) -> who instanceof ServerPlayer p && WerewolfPlayers.moonbeam(p, until));
 		addReveal((level, who, caster, until) -> who instanceof Villager v && Disguises.moonReveal(level, caster, v));
+		// a shapeshifter wearing a stolen life drops its face in the moonlight
+		addReveal((level, who, caster, until) -> {
+			if (who instanceof Villager v && Doubles.isCopy(v)) {
+				Doubles.expose(level, v);
+				return true;
+			}
+			return false;
+		});
 	}
 
 	static boolean cast(ServerLevel level, ServerPlayer caster, float power) {
