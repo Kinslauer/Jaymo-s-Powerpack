@@ -453,3 +453,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 11:32 PM ET (Blossom lands thread): Andy said "merge" for PR #1410 (helmsmen and talk of the east, patch 2 first half). Merged by squash.
 - 2026-11-12 11:39 PM ET (Blossom lands thread): Andy said "merge" for PR #1411 (blossom traders and passage, patch 2 second half). Merged by squash.
 - 2026-11-13 12:11 AM ET (Blossom lands thread): Andy asked for a command to get to Mohknee; "okay add that" to `/kingdom mohknee go` (PR #1413).
+- 2026-11-12 11:53 PM ET (Dungeon mods thread): Andy: add Re:Animal and The Graveyard, and the Church of Sin: "the church can be where the corrupted go to find their master, the demon master can come up from the nether and speak to them there". Stormborn Tomb was already in (PR #1388).
+- 2026-11-12 11:54 PM ET (Dungeon mods thread): Andy: add MmmMmmMmmMmm (target dummy) and Simply Bows: "the echo bow should be a weapon that spawns for arsenal". Neither has a 26.3 build; the dummy's ideas went into our Practice Dummy (CC0), the Echo Bow is our own (Simply Bows' licence forbids ports and bundling).
