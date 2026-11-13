@@ -1985,5 +1985,14 @@
 		"sounds": [
 			"jaymoskingdoms:item/spike_drill/drilling_stopped"
 		]
+	},
+	"scene_music.aerwhale": {
+		"sounds": [
+			{
+				"name": "minecraft:music/game/featherfall",
+				"stream": true,
+				"volume": 0.8
+			}
+		]
 	}
 }

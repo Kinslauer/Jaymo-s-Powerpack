@@ -3,6 +3,7 @@ package com.jaymospowers.client;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.power.xenoform.XenoMorph;
 import com.jaymospowers.core.UltimateFilm;
+import com.jaymospowers.client.sound.SceneMusic;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -199,6 +200,8 @@ public final class UltimateCinematic {
 			// the film needs the body drawn and no hand in view
 			minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 		}
+		// music for the caster, in with the bars and lingering after them (SceneMusic); not for anyone who only watches
+		SceneMusic.scene("ultimate", running && !witness);
 		bars += ((running ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!running && bars < 0.01F) {
 			bars = 0.0F;

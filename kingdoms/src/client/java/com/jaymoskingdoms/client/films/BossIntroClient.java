@@ -2,6 +2,8 @@ package com.jaymoskingdoms.client.films;
 
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
+import com.jaymoskingdoms.client.music.SceneMusic;
+import java.util.Map;
 import com.jaymoskingdoms.films.BossIntros;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -14,6 +16,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -35,6 +38,9 @@ import org.jspecify.annotations.Nullable;
  * Andy's rules for our films hold: the camera stays on one side of the line between you and it (the 180 degree rule),
  * subjects sit on the thirds, and the shots are low. Every distance grows with the creature's size. A fresh attack or use
  * press, or holding sneak, skips it; a hit taken, its death, or yours ends it.
+ * <p>
+ * Andy: "it just needs music. it should fade in with the letterboxing and out as it ends. lingering for 5s." Every film
+ * here has music ({@link SceneMusic}): the aerwhale's is Featherfall, the rest draw a music disc.
  */
 public final class BossIntroClient {
 	/** Each bar's height as a share of the screen's; how much of the way they slide a tick; how long before the end they go (ticks). */
@@ -75,6 +81,10 @@ public final class BossIntroClient {
 	/** Where the creature's feet were last seen, and its size (width, height). */
 	private static Vec3 bossAt = Vec3.ZERO;
 	private static double wide = 1.0, tall = 2.0;
+	/** The film's music ({@link SceneMusic}): the creature's own track, or null for a random disc. */
+	private static @Nullable Identifier music;
+	/** Great creatures with a track of their own (by entity id): the aerwhale rises to Featherfall. */
+	static final Map<String, Identifier> OWN_MUSIC = Map.of("jaymospowers:aerwhale", JaymosKingdoms.id("scene_music.aerwhale"));
 
 	private BossIntroClient() {
 	}
@@ -129,6 +139,7 @@ public final class BossIntroClient {
 		hurtBefore = self.hurtTime;
 		viewBefore = minecraft.options.getCameraType();
 		side = self.getRandom().nextBoolean() ? 1.0F : -1.0F;
+		music = OWN_MUSIC.get(BuiltInRegistries.ENTITY_TYPE.getKey(it.getType()).toString());
 		seen(it);
 		ClientPlayNetworking.send(new BossIntros.State(boss, BossIntros.State.BEGAN));
 	}
@@ -170,6 +181,8 @@ public final class BossIntroClient {
 			}
 		}
 		boolean up = running && tick < length - BARS_OUT;
+		// the music comes in with the bars and lingers after them
+		SceneMusic.scene("boss_intro", up, music);
 		bars += ((up ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!up && bars < 0.01F) {
 			bars = 0.0F;

@@ -9,6 +9,7 @@ import com.jaymoskingdoms.spirits.SpiritClash;
 import com.jaymoskingdoms.spirits.SpiritClash.Clash;
 import com.jaymoskingdoms.spirits.SpiritState;
 import com.jaymoskingdoms.spirits.Spirits;
+import com.jaymoskingdoms.client.music.SceneMusic;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -190,6 +191,9 @@ public final class ClashCinematic {
 				self.setXRot(0.0F);
 			}
 		}
+		// music for the two in it, in with the bars and lingering after them ({@link SceneMusic}); not a barrage's, whose drum
+		// track is the beat they strike to, nor a watcher's
+		SceneMusic.scene("clash", running && !barrage);
 		bars += (((running || viewer) ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!running && !viewer && bars < 0.01F) {
 			bars = 0.0F;
