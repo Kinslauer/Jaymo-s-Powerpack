@@ -1016,7 +1016,7 @@ like a door slamming, but every hurt lands harder, because there is less of them
 pact only, and no wish, cure or cleansing undoes either. The demons call the first a kindness. Nobody is left who
 speaks for the second.
 
-**The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
+(new) **The chapel where the lantern went out** (Andy, 2026-11-12: "the church can be where the corrupted go to find
 their master, the demon master can come up from the nether and speak to them there"; the rest is Claude's placement for
 him to approve). In the birch woods and the dark forest stand a few chapels of the Lantern Warden whose parishes stopped
 keeping the light: the **darkened chapels**. The lamp is out, the parish dead walk the nave and the cellars, and the
@@ -1028,12 +1028,12 @@ does below (the lesson in blood, the Cinder Pact), and goes down again when they
 It is a tear, like the imps', not a gate: nothing stands open after him. (The building is Tada_no_ahiru's Church of
 Sin, MIT; its icons and its two books were replaced with the pack's own.)
 
-**The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
+(new) **The untended graves** (The Graveyard mod, shipped unchanged, 2026-11-12; Claude's placement for Andy to approve).
 The graveyards, crypts and burnt-out villages are ground the Lantern Warden's keepers lost: graves nobody lights a
 candle on any more, so the dead in them walk. They are not the barrow knights, who keep their own oath. The mod's own
 book, the Chronicle, tells its own tale of a champion and a lich; in the pack that is one parish's telling, not canon.
 
-**The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
+(new) **The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
 placement). The Arsenal's reach pulls from anywhere, and now and then it comes back with a pale bow nobody here
 strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
 it is from; like everything the rift gives, it goes back.
