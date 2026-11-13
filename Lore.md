@@ -558,6 +558,13 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
+(new) **The nights at the grave** (models thread, 2026-11-13; Claude's placement, waiting on Andy). The weighing is
+not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
+dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
+A flower or a candle given to one is enough: it thanks whoever came and goes to the Judge that night. Left alone it goes
+after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
+to be called."
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
@@ -1092,6 +1099,11 @@ Also in the world: ogres, giants, piglins with a king, and the drowned.
 slingers, send loot goblins running with what they stole, and roll **war barrels** (walking barrels of planks and iron
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
+
+(new) **Goblin scouts** (models thread, 2026-11-13; Claude's placement, waiting on Andy). A goblin village keeps two or
+three scouts ranging outside its ring: small even for goblins, hooded, a pack on the back, a dagger and a buckler. They
+see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
+traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
 
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
