@@ -32,3 +32,4 @@ If you ever self-host models locally instead of cloud API calls — this is a de
 ## Notes
 
 Not urgent. Logged alongside OmniRoute, Pirate Face, OpenCode, and Minecraft server bot experiments.
+- 2026-11-13 12:18 Text pass complete: this is a research assessment (DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED), not a modpack PR — there is no in-game/lang text to change, so text_pass=none. Research already marked Done in the agent note.
