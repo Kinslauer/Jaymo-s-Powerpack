@@ -1333,6 +1333,12 @@ was raised by settlers from over the sea. No road, coach or milestone reaches it
 faiths as everyone, at their own shrines and pagodas, and tell the old stories their own way: what the home
 continent calls the demons' country they tell of as a pale grove by a slow river. Its people call it **Mohknee**.
 
+(new) **The ones who came back** (Blossom lands thread, 2026-11-13; Andy asked for a captain or companion who can sail
+the crossing for you; the rest is Claude's placement for him to approve). There is still no chart of the crossing, but
+a few sailors about the home harbours have made it once, in the wake of a blossom trader, and can raise that shore
+again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
+harbour will sail any course you name and has only stories about the east.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
