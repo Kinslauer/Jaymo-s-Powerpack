@@ -183,6 +183,10 @@ public final class CoarseHeightField {
 
         final NoiseRouter router = generator instanceof NoiseBasedChunkGenerator ? WiredRouter.of(randomState) : null;
         final int cellX0 = bx << BLOCK_SHIFT, cellZ0 = bz << BLOCK_SHIFT;
+        // One caching context for the whole block (this thread only): the walk down each column asks the same x and z
+        // at many heights, and the y-independent parts of the terrain (continents, erosion, Mohknee's land and sea)
+        // are then worked out once per column instead of at every step. Same values, many times fewer noise reads.
+        final SamplerContext ctx = router != null ? SamplerContext.builder().enableCaches().build() : null;
         final boolean was = HydrologyManager.isGeneratingRivers();
         HydrologyManager.setGeneratingRivers(true);
         final long t0 = System.nanoTime();
@@ -193,7 +197,7 @@ public final class CoarseHeightField {
                 for (int i = 0; i < BLOCK_CELLS; i++) {
                     final int blockX = (cellX0 + i) << CELL_SHIFT;
                     int y = router != null
-                            ? surfaceFromDensity(randomState, router, blockX, blockZ, minY, maxY, CELL_HEIGHT)
+                            ? surfaceFromDensity(randomState, router, ctx, blockX, blockZ, minY, maxY, CELL_HEIGHT)
                             : generator.getBaseHeight(blockX, blockZ, Heightmap.Types.OCEAN_FLOOR_WG, accessor, randomState);
                     b[row | i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, y));
                 }
@@ -216,7 +220,8 @@ public final class CoarseHeightField {
         final long t0 = System.nanoTime();
         try {
             if (generator instanceof NoiseBasedChunkGenerator) {
-                return surfaceFromDensity(randomState, WiredRouter.of(randomState), x, z, minY, maxY, CELL_HEIGHT);
+                return surfaceFromDensity(randomState, WiredRouter.of(randomState),
+                        SamplerContext.builder().enableCaches().build(), x, z, minY, maxY, CELL_HEIGHT);
             }
             return generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG,
                     LevelHeightAccessor.create(minY, generator.getGenDepth()), randomState);
@@ -236,10 +241,10 @@ public final class CoarseHeightField {
      */
     public static final int CELL_HEIGHT = 8;
 
-    static int surfaceFromDensity(RandomState randomState, NoiseRouter router, int x, int z, int minY, int maxY, int cellHeight) {
+    static int surfaceFromDensity(RandomState randomState, NoiseRouter router, SamplerContext ctx, int x, int z,
+            int minY, int maxY, int cellHeight) {
         final DensitySampler preliminary = randomState.getSampler(router.chunkSurfaceLevel());
         final DensitySampler density = randomState.getSampler(router.finalDensity());
-        final SamplerContext ctx = SamplerContext.EMPTY_UNCACHED;
 
         int bracket = Math.max(minY, Math.min(maxY - 1, Mth.floor(preliminary.sampleValue(ctx, x, 0, z))));
 
