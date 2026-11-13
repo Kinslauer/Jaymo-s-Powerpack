@@ -514,7 +514,7 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
-(new) **Four more great ones** (Andy picked them 2026-11-12; placements are Claude's, to approve). The **thing under
+**Four more great ones** (Andy approved, 2026-11-12). The **thing under
 the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
 hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
 under the desert's ruins, the Stoneborn talk of it the way people talk of a thing their grandfathers saw, and a
@@ -523,7 +523,7 @@ stone's country; the Frostborn count it a neighbour, and it leaves alone whoever
 knight** is one of the old war's dead, a champion of the demons' country still holding a Nether fortress long after
 anyone told him to; his sword lies with him and nowhere else.
 
-(new) **The glass gauntlet** (Andy, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
+**The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
 Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
 
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
@@ -570,12 +570,20 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
-(new) **The nights at the grave** (models thread, 2026-11-13; Claude's placement, waiting on Andy). The weighing is
+**The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
 not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
 dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
 A flower or a candle given to one is enough: it thanks whoever came and goes to the Judge that night. Left alone it goes
 after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
 to be called."
+
+**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
+while in limbo, so you can kind of haunt your friends"). The buried are not the only ones who stand outside themselves.
+Someone left for dead, not yet dead and not yet back, comes loose from the body the same way: pale blue and see-through,
+a hand off the ground, able to drift a little way from where they lie and no further. They can touch nothing and nothing
+touches them; beasts and monsters don't see them. The living do, and hear them, thin and far off, as if from the bottom
+of a well. Carry the body and the ghost comes after it. The moment the body wakes, or is brought round, there is no ghost.
+Nobody is told this: a player finds it out by being left for dead, and their friends by seeing who is standing over them.
 
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
@@ -1112,7 +1120,7 @@ slingers, send loot goblins running with what they stole, and roll **war barrels
 hoops with a lantern on top) into battle. **Scalebane sellswords**, lizardfolk bowmen, sell their aim to barbarian
 camps and goblin villages. Orcs keep rangers and shamans, and are sighted before they come.
 
-(new) **Goblin scouts** (models thread, 2026-11-13; Claude's placement, waiting on Andy). A goblin village keeps two or
+**Goblin scouts** (models thread; Andy, 2026-11-12: "the lore is good"). A goblin village keeps two or
 three scouts ranging outside its ring: small even for goblins, hooded, a pack on the back, a dagger and a buckler. They
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
