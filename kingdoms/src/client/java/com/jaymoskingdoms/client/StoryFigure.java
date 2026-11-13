@@ -376,7 +376,7 @@ final class StoryFigure {
 		boolean using = false, lent = !standIn && kind != null;
 		for (int i = 0; i < slots.length; i++) {
 			was[i] = target.getItemBySlot(slots[i]);
-			target.setItemSlot(slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
+			wear(target, slots[i], gear[i] == null ? ItemStack.EMPTY : new ItemStack(gear[i]));
 		}
 		// (0.7.364) a lost limb lent while drawn (Powers draws a body without its lost parts), and your own clothes taken off
 		// for a bare scene
@@ -434,7 +434,7 @@ final class StoryFigure {
 				target.stopUsingItem();
 			}
 			for (int i = 0; i < slots.length; i++) {
-				target.setItemSlot(slots[i], was[i]);
+				wear(target, slots[i], was[i]);
 			}
 			if (lent) {
 				restore(player, Heritage.HERITAGE, heritageWas);
@@ -525,6 +525,19 @@ final class StoryFigure {
 			entity.removeAttached(type);
 		} else {
 			entity.setAttached(type, was);
+		}
+	}
+
+	/**
+	 * Puts a stack in the figure's slot for the drawing. setItemSlot stores the stack, then fires onEquipItem, which other
+	 * mods hook (Horseman reads its config there and throws when that isn't loaded on the client yet): a throw from that
+	 * hook must not take the screen down, and the stack is already in place by then.
+	 */
+	private static void wear(LivingEntity target, EquipmentSlot slot, ItemStack stack) {
+		try {
+			target.setItemSlot(slot, stack);
+		} catch (RuntimeException e) {
+			// another mod's equip hook failed; the figure is still dressed
 		}
 	}
 }
