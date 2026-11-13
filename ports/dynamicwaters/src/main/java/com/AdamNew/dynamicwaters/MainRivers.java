@@ -138,6 +138,30 @@ public final class MainRivers
         PREFETCH_POOL.submit(() -> then.accept(getRegion(rx, rz, generator, level, randomState)));
     }
 
+    /** Vanilla's main server thread ({@code MinecraftServer} names it "Server thread"). */
+    private static boolean onServerThread()
+    {
+        return "Server thread".equals(Thread.currentThread().getName());
+    }
+
+    /** Starts building a region on the prefetch threads, unless it is cached or already on its way. */
+    private static void buildLater(int rx, int rz, ChunkGenerator generator, LevelHeightAccessor level, RandomState randomState)
+    {
+        final long key = RiverMathUtils.pack(rx, rz);
+        final KeySetView<Long, Boolean> flying = inFlight;
+        if (regionCache.containsKey(key) || !flying.add(key)) return;
+        PREFETCH_POOL.submit(() -> {
+            try
+            {
+                getRegion(rx, rz, generator, level, randomState);
+            }
+            finally
+            {
+                flying.remove(key);
+            }
+        });
+    }
+
     public static List<RiverGraphEdge> getRegion(int rx, int rz,
         ChunkGenerator generator, LevelHeightAccessor level, RandomState randomState)
     {
@@ -147,6 +171,15 @@ public final class MainRivers
         if (cached != null) return cached;
 
         if (generator == null || randomState == null) return java.util.Collections.emptyList();
+
+        // The server thread never builds or waits for a region: a build can run past the 60 s watchdog on a slow host
+        // (the Steam Deck), and mob spawning, river flow and the join sync all ask from there. Until the region is
+        // ready it reads as having no main rivers, and it is built on the prefetch threads meanwhile.
+        if (onServerThread())
+        {
+            buildLater(rx, rz, generator, level, randomState);
+            return java.util.Collections.emptyList();
+        }
 
         final ConcurrentHashMap<Long, CompletableFuture<List<RiverGraphEdge>>> builds = building;
 
