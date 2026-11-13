@@ -55,6 +55,8 @@ public final class BossBars {
 			|| entity instanceof com.jaymoskingdoms.dragons.WindDragon dragon && !dragon.isTamed()
 			// (0.7.142) the Nether forts' warlords and warbosses
 			|| com.jaymoskingdoms.nether.NetherForts.warlord(entity)
+			// the fortress knight
+			|| com.jaymoskingdoms.nether.FortressKnight.is(entity)
 			|| entity instanceof com.jaymoskingdoms.nether.Hornkin hornkin && hornkin.kind() == com.jaymoskingdoms.nether.Hornkin.Kind.WARLORD
 			// (0.7.145) the Aether Giants
 			|| com.jaymoskingdoms.remnants.Monoliths.giant(entity)

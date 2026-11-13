@@ -278,7 +278,7 @@ public final class MobCombat {
 	 * leap that follows carries it in; the blow still only lands on what is in reach when it falls). False if the mob
 	 * is mid-swing, waiting its turn or has no moves.
 	 */
-	static boolean lunge(Mob mob, LivingEntity target) {
+	public static boolean lunge(Mob mob, LivingEntity target) {
 		if (!(mob.level() instanceof ServerLevel level) || mob.entityTags().contains(WAITING_TAG) || !handles(mob)) {
 			return false;
 		}
