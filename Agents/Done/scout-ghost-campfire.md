@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Bring in Andy's three Blockbench models (goblin scout, ghost, camping campfire)
 branch: claude/project-thread-q2zruj
 with: 
@@ -38,3 +38,4 @@ reusable; its `Limbo` class name collides with #1387's).
 Andy then kept the left-for-dead ghosts: back on this branch as Powers `core/wounds/OutOfBody` + `PlayerGhost`
 (`client/wounds/OutOfBodyClient`, `PlayerGhostRenderer`) and the Kingdoms ghost voice. Still to do after #1387: the same
 ghost and voice for a player in Limbo.
+- 2026-11-13 02:37 PR #1390 is merged into master; moved to Agents/Done.
