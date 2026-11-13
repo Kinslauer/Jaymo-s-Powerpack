@@ -50,12 +50,23 @@ public class WornModel extends HumanoidModel<HumanoidRenderState> {
 			to[i].zScale = from[i].zScale;
 			to[i].visible = from[i].visible;
 		}
+		loadKeptBody(state, this);
+	}
+
+	/**
+	 * Lays the body's kept pose (as EMF animated it, {@link #keepBody}) on {@code model}; false, and nothing changed, when
+	 * none was kept. Also used for the Armor Model API's pieces ({@link GeoArmourFit}).
+	 */
+	public static boolean loadKeptBody(EntityRenderState state, HumanoidModel<?> model) {
 		PartPose[] body = state.getData(BODY);
-		if (body != null) {
-			for (int i = 0; i < to.length; i++) {
-				to[i].loadPose(body[i]);
-			}
+		if (body == null) {
+			return false;
 		}
+		ModelPart[] to = parts(model);
+		for (int i = 0; i < to.length; i++) {
+			to[i].loadPose(body[i]);
+		}
+		return true;
 	}
 
 	/** Just before the layers: keeps the body's pose if EMF has just animated it. */
