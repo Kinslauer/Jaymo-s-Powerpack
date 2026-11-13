@@ -1,4 +1,4 @@
-# Blossom Lands Plan: the far continent and everything on it
+# Blossom Lands Plan: Mohknee, the far continent, and everything on it
 
 Andy (2026-11-12) linked Sengoku Jidai, Japanese Overhaul (QwikSand; All Rights Reserved, Fabric 1.21.1 only) to aid
 the blossom villages, and ticked 59 of the 63 rows of the pick list (https://claude.ai/artifact/GEmrtBD44ntMuLdmnj3Rz6,
@@ -34,8 +34,8 @@ and place waits on its Lore.md `(new)` paragraph. Patches 1 and 2 come first; th
 
 - **`jaymoskingdoms:far_land`**, a density function type registered in Kingdoms: 1 at the land's middle, 0 beyond
   its sea, from the block's distance to a fixed centre (constants `CENTRE_X`, `CENTRE_Z`, `LAND_RADIUS`, `SEA_WIDTH`).
-- `continents.json`: inside the ring of sea the noise is pushed down to deep ocean (no islands to hop along, though
-  the sea's own events still happen); inside the land's radius it is pushed up to land, with the noise still shaping
+- `continents.json`: inside the ring of sea the noise is pushed down to deep ocean, except that a few islands are let
+  through along the crossing for Tideborn island villages (Andy: "you can encounter tideborn islands on the way"); inside the land's radius it is pushed up to land, with the noise still shaping
   the coast, bays and a few offshore islands.
 - `temperature.json`, `vegetation.json`: on the land they are held to the band that gives cherry groves, meadows,
   forests, bamboo and snowy peaks, so no desert, jungle or badlands turns up there. `erosion.json`: more level
@@ -146,5 +146,5 @@ A rare drowned palace in the deep sea off the far land, guarded by sea folk.
    down there and no coach or teleport fare reaches it.
 3. **Blossom villages already standing on the home continent** in the worlds we have. Proposed: they stay, as
    settlers from over the sea; no new ones rise there.
-4. **The land's name**, and the houses' names, in the Blossom tongue.
+4. **The land's name**: answered, **Mohknee** (Andy, 2026-11-12). The houses' names are still open.
 5. **Starts.** A blossom-born life story start on the far land: wanted, or is everyone a stranger there?
