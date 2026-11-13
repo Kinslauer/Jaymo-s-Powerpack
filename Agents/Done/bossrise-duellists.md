@@ -11,4 +11,4 @@ Cloud thread "Pick ideas from boss and animation mods". Plan: docs/BossRise-Plan
 Files owned: kingdoms/.../Duellists.java, MobCombat.java (lunge, quicken, start), changes/kingdoms/duellists.md, docs/BossRise-Plan.md.
 
 ## Notes
-- 2026-11-13 01:25 PR #1391 is merged into master; moved to Agents/Done.
+- 2026-11-13 01:45 PR #1391 is merged into master; moved to Agents/Done.
