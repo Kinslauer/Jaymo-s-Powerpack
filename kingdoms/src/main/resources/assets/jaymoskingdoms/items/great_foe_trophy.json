@@ -1,6 +1,111 @@
 {
-  "model": {
-    "type": "minecraft:model",
-    "model": "jaymoskingdoms:item/great_foe_trophy"
-  }
+	"model": {
+		"type": "minecraft:select",
+		"property": "minecraft:custom_model_data",
+		"index": 0,
+		"cases": [
+			{
+				"when": "dragon",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/dragon"
+				}
+			},
+			{
+				"when": "wither",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/wither"
+				}
+			},
+			{
+				"when": "warden",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/warden"
+				}
+			},
+			{
+				"when": "elder_guardian",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/elder_guardian"
+				}
+			},
+			{
+				"when": "minotaur",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/minotaur"
+				}
+			},
+			{
+				"when": "gorgon",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/gorgon"
+				}
+			},
+			{
+				"when": "grizzly",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/grizzly"
+				}
+			},
+			{
+				"when": "snow_giant",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/snow_giant"
+				}
+			},
+			{
+				"when": "sand_worm",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/sand_worm"
+				}
+			},
+			{
+				"when": "wreck_thing",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/wreck_thing"
+				}
+			},
+			{
+				"when": "fortress_knight",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/fortress_knight"
+				}
+			},
+			{
+				"when": "great_whale",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/great_whale"
+				}
+			},
+			{
+				"when": "ogre",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/ogre"
+				}
+			},
+			{
+				"when": "giant",
+				"model": {
+					"type": "minecraft:model",
+					"model": "jaymoskingdoms:item/trophy/giant"
+				}
+			}
+		],
+		"fallback": {
+			"type": "minecraft:model",
+			"model": "jaymoskingdoms:item/great_foe_trophy"
+		}
+	}
 }

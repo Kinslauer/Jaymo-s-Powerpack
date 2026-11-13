@@ -150,6 +150,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_bottom_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -300,6 +335,41 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/limb_top_bog_iron"
+              }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/limb_top_deep_tooth"
               }
             }
           ],
@@ -484,6 +554,41 @@
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
               }
+            },
+            {
+              "when": "ember_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_ember_dragon_bone"
+              }
+            },
+            {
+              "when": "rime_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_rime_dragon_bone"
+              }
+            },
+            {
+              "when": "venom_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_venom_dragon_bone"
+              }
+            },
+            {
+              "when": "storm_dragon_bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_storm_dragon_bone"
+              }
+            },
+            {
+              "when": "deep_tooth",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
+              }
             }
           ],
           "fallback": {
@@ -643,6 +748,41 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_bottom_bog_iron"
                 }
+              },
+              {
+                "when": "ember_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_ember_dragon_bone"
+                }
+              },
+              {
+                "when": "rime_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_rime_dragon_bone"
+                }
+              },
+              {
+                "when": "venom_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_venom_dragon_bone"
+                }
+              },
+              {
+                "when": "storm_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_storm_dragon_bone"
+                }
+              },
+              {
+                "when": "deep_tooth",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_bottom_deep_tooth"
+                }
               }
             ],
             "fallback": {
@@ -793,6 +933,41 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/limb_top_bog_iron"
+                }
+              },
+              {
+                "when": "ember_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_ember_dragon_bone"
+                }
+              },
+              {
+                "when": "rime_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_rime_dragon_bone"
+                }
+              },
+              {
+                "when": "venom_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_venom_dragon_bone"
+                }
+              },
+              {
+                "when": "storm_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_storm_dragon_bone"
+                }
+              },
+              {
+                "when": "deep_tooth",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/limb_top_deep_tooth"
                 }
               }
             ],
@@ -977,6 +1152,41 @@
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
                 }
+              },
+              {
+                "when": "ember_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_ember_dragon_bone"
+                }
+              },
+              {
+                "when": "rime_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_rime_dragon_bone"
+                }
+              },
+              {
+                "when": "venom_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_venom_dragon_bone"
+                }
+              },
+              {
+                "when": "storm_dragon_bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_storm_dragon_bone"
+                }
+              },
+              {
+                "when": "deep_tooth",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
+                }
               }
             ],
             "fallback": {
@@ -1139,6 +1349,41 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_bog_iron"
                       }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_2_deep_tooth"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1289,6 +1534,41 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_2_bog_iron"
+                      }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_2_deep_tooth"
                       }
                     }
                   ],
@@ -1473,6 +1753,41 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
                       }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1632,6 +1947,41 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_bog_iron"
                       }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_bottom_3_deep_tooth"
+                      }
                     }
                   ],
                   "fallback": {
@@ -1782,6 +2132,41 @@
                       "model": {
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/limb_top_3_bog_iron"
+                      }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/limb_top_3_deep_tooth"
                       }
                     }
                   ],
@@ -1966,6 +2351,41 @@
                         "type": "minecraft:model",
                         "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
                       }
+                    },
+                    {
+                      "when": "ember_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_ember_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "rime_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_rime_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "venom_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_venom_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "storm_dragon_bone",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_storm_dragon_bone"
+                      }
+                    },
+                    {
+                      "when": "deep_tooth",
+                      "model": {
+                        "type": "minecraft:model",
+                        "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
+                      }
                     }
                   ],
                   "fallback": {
@@ -2124,6 +2544,41 @@
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_bog_iron"
                   }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_bottom_1_deep_tooth"
+                  }
                 }
               ],
               "fallback": {
@@ -2274,6 +2729,41 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/limb_top_1_bog_iron"
+                  }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/limb_top_1_deep_tooth"
                   }
                 }
               ],
@@ -2457,6 +2947,41 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/longbow/grip_bog_iron"
+                  }
+                },
+                {
+                  "when": "ember_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_ember_dragon_bone"
+                  }
+                },
+                {
+                  "when": "rime_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_rime_dragon_bone"
+                  }
+                },
+                {
+                  "when": "venom_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_venom_dragon_bone"
+                  }
+                },
+                {
+                  "when": "storm_dragon_bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_storm_dragon_bone"
+                  }
+                },
+                {
+                  "when": "deep_tooth",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/longbow/grip_deep_tooth"
                   }
                 }
               ],

@@ -52,6 +52,11 @@ public final class TraitEffects {
 	static final double MAGNET_RANGE = 3.0, MAGNET_PULL = 0.08;
 	/** Searing: extra damage per level against anything that isn't fireproof. */
 	static final float SEARING_DAMAGE = 1.5F;
+	/** The marrows, per level: seconds alight; ticks slowed and freeze ticks added; ticks poisoned; the shock's chance and harm. */
+	static final int EMBER_SECONDS = 3, RIME_TICKS = 60, RIME_FREEZE = 50, VENOM_TICKS = 70;
+	static final float STORM_CHANCE = 0.2F, STORM_DAMAGE = 4.0F;
+	/** Hooked: extra damage per level on anything in water. */
+	static final float HOOKED_DAMAGE = 2.0F;
 	/** Tempered (steel): damage per level that goes through armour, against anything wearing some. */
 	static final float TEMPERED_ARMOR_PIERCE = 1.0F;
 	/** Tasty: hunger at or under which it can be nibbled, chance per level a use, food and saturation, durability it costs. */
@@ -181,6 +186,7 @@ public final class TraitEffects {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), pierce * PIERCE_DAMAGE);
 		}
+		marrow(stats, target, attacker, level);
 		int tempered = stats.level(Trait.TEMPERED);
 		if (tempered > 0 && target.isAlive() && target.getArmorValue() > 0) {
 			target.setInvulnerableTime(0);
@@ -214,6 +220,45 @@ public final class TraitEffects {
 		ToolActions.afterHit(stats, target, attacker);
 		tasty(stack, attacker, stats);
 		gainXp(stack, attacker, XP_PER_HIT);
+	}
+
+	/**
+	 * A dragon's bone keeps its breath, and a deep tooth holds in the water: Ember Marrow sets what it strikes alight,
+	 * Rime Marrow slows and chills it, Venom Marrow poisons it, Storm Marrow now and then shocks it, and Hooked hits
+	 * harder on anything in water.
+	 */
+	private static void marrow(ToolStats.Stats stats, LivingEntity target, LivingEntity attacker, ServerLevel level) {
+		if (!target.isAlive()) {
+			return;
+		}
+		int ember = stats.level(Trait.EMBER_MARROW);
+		if (ember > 0 && !target.fireImmune()) {
+			target.igniteForSeconds(EMBER_SECONDS * ember);
+		}
+		int rime = stats.level(Trait.RIME_MARROW);
+		if (rime > 0) {
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, RIME_TICKS, Math.min(2, rime - 1)), attacker);
+			target.setTicksFrozen(Math.min(target.getTicksRequiredToFreeze() + 60, target.getTicksFrozen() + RIME_FREEZE * rime));
+		}
+		int venom = stats.level(Trait.VENOM_MARROW);
+		if (venom > 0) {
+			target.addEffect(new MobEffectInstance(MobEffects.POISON, VENOM_TICKS, Math.min(2, venom - 1)), attacker);
+		}
+		int storm = stats.level(Trait.STORM_MARROW);
+		if (storm > 0 && level.getRandom().nextFloat() < STORM_CHANCE * storm) {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), STORM_DAMAGE);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(),
+				14, 0.3, 0.4, 0.3, 0.2);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT,
+				net.minecraft.sounds.SoundSource.PLAYERS, 0.35F, 1.7F);
+		}
+		int hooked = stats.level(Trait.HOOKED);
+		if (hooked > 0 && target.isAlive() && target.isInWater()) {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
+				: level.damageSources().mobAttack(attacker), hooked * HOOKED_DAMAGE);
+		}
 	}
 
 	/** After a block is mined: Magnetic starts pulling. */

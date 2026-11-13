@@ -267,6 +267,71 @@
               }
             ]
           }
+        },
+        {
+          "when": "ember_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_ember_dragon_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "rime_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_rime_dragon_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "venom_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_venom_dragon_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "storm_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_storm_dragon_bone",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
+        },
+        {
+          "when": "deep_tooth",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_deep_tooth",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -26040
+              }
+            ]
+          }
         }
       ],
       "fallback": {
@@ -423,6 +488,41 @@
           "model": {
             "type": "minecraft:model",
             "model": "jaymospowers:item/tinkering/part/bow_grip_bog_iron"
+          }
+        },
+        {
+          "when": "ember_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_ember_dragon_bone"
+          }
+        },
+        {
+          "when": "rime_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_rime_dragon_bone"
+          }
+        },
+        {
+          "when": "venom_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_venom_dragon_bone"
+          }
+        },
+        {
+          "when": "storm_dragon_bone",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_storm_dragon_bone"
+          }
+        },
+        {
+          "when": "deep_tooth",
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/part/bow_grip_deep_tooth"
           }
         }
       ],

@@ -71,7 +71,15 @@ public enum TinkerMaterial {
 	STAR_METAL("star_metal", Stats.STAR_METAL, Trait.STARLIT, true),
 	// ---- (0.18.102) bog iron (Jaymo's Kingdoms: swamp ore held by the Ogre Kings) ----
 	/** Melted from Kingdoms' raw bog iron or its ore, cast and forged only: heavy, tough, iron-tier, Jagged. */
-	BOG_IRON("bog_iron", Stats.BOG_IRON, Trait.JAGGED, true);
+	BOG_IRON("bog_iron", Stats.BOG_IRON, Trait.JAGGED, true),
+	// ---- the great ones' leavings ({@link GreatParts}): shaped at the Part Builder like bone ----
+	/** A dragon's bone, one material a breath (fire, frost, acid, storm): diamond-tier, and it keeps the breath as its trait. */
+	EMBER_DRAGON_BONE("ember_dragon_bone", Stats.DRAGON_BONE, Trait.EMBER_MARROW),
+	RIME_DRAGON_BONE("rime_dragon_bone", Stats.DRAGON_BONE, Trait.RIME_MARROW),
+	VENOM_DRAGON_BONE("venom_dragon_bone", Stats.DRAGON_BONE, Trait.VENOM_MARROW),
+	STORM_DRAGON_BONE("storm_dragon_bone", Stats.DRAGON_BONE, Trait.STORM_MARROW),
+	/** A tooth of the thing under the wreck: iron-tier, quick in the hand, Hooked. */
+	DEEP_TOOTH("deep_tooth", Stats.DEEP_TOOTH, Trait.HOOKED);
 
 	/** Mining tiers, weakest first: what each can't harvest. */
 	public enum Tier {
@@ -125,6 +133,10 @@ public enum TinkerMaterial {
 		static final Stats CINDER_BRONZE = new Stats(640, 7.0F, 2.5F, Tier.DIAMOND, 0.1F, 0.05F, 0.05F, 0.0F);
 		static final Stats VOID_SHARD = new Stats(500, 8.0F, 3.0F, Tier.DIAMOND, -0.1F, 0.1F, 0.1F, 0.1F);
 		static final Stats AMBER_BRONZE = new Stats(460, 6.5F, 2.0F, Tier.IRON, 0.15F, 0.0F, 0.0F, 0.05F);
+		/** Dragon bone: diamond-tier, lighter and quicker than the diamond-tier metals, less lasting than steel. */
+		static final Stats DRAGON_BONE = new Stats(560, 6.5F, 2.75F, Tier.DIAMOND, 0.05F, 0.0F, 0.05F, 0.1F);
+		/** Deep tooth: iron-tier, sharp and quick, not lasting. */
+		static final Stats DEEP_TOOTH = new Stats(280, 4.5F, 2.25F, Tier.IRON, -0.1F, 0.0F, 0.05F, 0.1F);
 	}
 
 	/** (0.15.x) A bow limb's stats (Tinkers'): durability, and draw speed, arrow velocity and accuracy it adds (0.1 = +10%). */
@@ -151,6 +163,8 @@ public enum TinkerMaterial {
 		limb(Stats.STEEL, new Limb(775, -0.2F, 0.2F, -0.1F), new Grip(0.05F, -0.05F, 2.75F));
 		limb(Stats.BOG_IRON, new Limb(340, -0.25F, 0.1F, -0.05F), new Grip(0.15F, -0.05F, 2.5F));
 		limb(Stats.STAR_METAL, new Limb(640, 0.1F, 0.05F, 0.1F), new Grip(0.0F, 0.1F, 2.0F));
+		limb(Stats.DRAGON_BONE, new Limb(560, 0.0F, 0.15F, 0.05F), new Grip(0.05F, 0.05F, 2.75F));
+		limb(Stats.DEEP_TOOTH, new Limb(280, 0.1F, -0.05F, 0.05F), new Grip(-0.1F, 0.05F, 2.25F));
 	}
 
 	private static void limb(Stats family, Limb limb, Grip grip) {
@@ -203,7 +217,7 @@ public enum TinkerMaterial {
 	}
 
 	/** Our own items (seared bricks, alloy ingots), added once they're registered. */
-	static void own(TinkerMaterial material, int units, Item item) {
+	public static void own(TinkerMaterial material, int units, Item item) {
 		units(material, units, item);
 	}
 

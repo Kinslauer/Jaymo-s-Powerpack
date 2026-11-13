@@ -37,8 +37,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The trophy stand and what is set on it. A great foe (whatever has an entrance, {@link BossIntros#kind}, and the monsters
- * of legend, {@link Monsters#legends}) leaves one {@link #FOE_TROPHY} when a player fells it: a carved mask the stand shows
- * upright and facing out. The stand ({@link TrophyStandBlock}, in wood and in stone) holds one item of any kind (a great
+ * of legend, {@link Monsters#legends}) leaves one {@link #FOE_TROPHY} when a player fells it: its own likeness where it
+ * has one ({@link #look}: a dragon's skull, the knight's helm, the worm's maw), a carved mask otherwise, which the stand
+ * shows upright and facing out. The stand ({@link TrophyStandBlock}, in wood and in stone) holds one item of any kind (a great
  * foe's head, a relic, a trophy) and names a foe's trophy on its plate only to someone who has learned the foe's name.
  */
 public final class Trophies {
@@ -48,6 +49,10 @@ public final class Trophies {
 	public static final int REMARK_RANGE = 8;
 	/** How many different remarks there are (lang keys {@code speech.jaymoskingdoms.trophy.0..}). */
 	static final int REMARK_LINES = 4;
+
+	/** The great ones with a trophy look of their own, by their type's path ({@link #look}). */
+	static final Set<String> LOOKS = Set.of("wither", "warden", "elder_guardian", "minotaur", "gorgon", "grizzly", "snow_giant", "sand_worm",
+		"wreck_thing", "fortress_knight", "great_whale");
 
 	public static Block WOOD_STAND, STONE_STAND;
 	public static Item FOE_TROPHY;
@@ -116,8 +121,27 @@ public final class Trophies {
 			tag.putString(SLAYER_KEY, slayer.getUUID().toString());
 		}
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		String look = look(kind);
+		if (look != null) {
+			stack.set(DataComponents.CUSTOM_MODEL_DATA, new net.minecraft.world.item.component.CustomModelData(java.util.List.of(), java.util.List.of(),
+				java.util.List.of(look), java.util.List.of()));
+		}
 		stack.set(DataComponents.ITEM_NAME, Component.translatable("item.jaymoskingdoms.great_foe_trophy"));
 		return stack;
+	}
+
+	/**
+	 * What a trophy of {@code kind} looks like (a case of the trophy's item definition, painted by
+	 * {@code kingdoms/tools/gen_trophies.py}), or null for the carved mask: a great one's own look, a dragon's skull for
+	 * any dragon, an ogre's head for any ogre, a face of the old stone for the Aether's giants.
+	 */
+	public static @Nullable String look(String kind) {
+		String base = kind.indexOf('/') < 0 ? kind : kind.substring(0, kind.indexOf('/'));
+		String path = base.substring(base.indexOf(':') + 1);
+		if (LOOKS.contains(path)) {
+			return path;
+		}
+		return path.endsWith("_dragon") ? "dragon" : path.contains("ogre") ? "ogre" : path.endsWith("giant") ? "giant" : null;
 	}
 
 	/** The foe a trophy stack is of (its kind key), or null for any other item. */

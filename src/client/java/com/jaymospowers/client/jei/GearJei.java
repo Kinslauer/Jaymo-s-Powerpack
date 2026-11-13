@@ -56,6 +56,12 @@ public final class GearJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.baubles.TickingCharm.CHARM, Component.translatable("jei.jaymospowers.ticking_charm"));
 		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.COIL, Component.translatable("jei.jaymospowers.clinging_coil"));
 		registration.addIngredientInfo(com.jaymospowers.baubles.ClingingCoil.DEEP_TOOTH, Component.translatable("jei.jaymospowers.deep_tooth"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.EMBER_BONE, Component.translatable("jei.jaymospowers.ember_dragon_bone"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.RIME_BONE, Component.translatable("jei.jaymospowers.rime_dragon_bone"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.VENOM_BONE, Component.translatable("jei.jaymospowers.venom_dragon_bone"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.STORM_BONE, Component.translatable("jei.jaymospowers.storm_dragon_bone"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.HIDE, Component.translatable("jei.jaymospowers.dragon_hide"));
+		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.SHIELD, Component.translatable("jei.jaymospowers.dragonhide_round_shield"));
 		registration.addIngredientInfo(GearPicks.STEEL_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 	}
 }

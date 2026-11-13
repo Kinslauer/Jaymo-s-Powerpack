@@ -130,6 +130,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.fishing.FishingReal.init();
 		com.jaymospowers.fishing.FishRun.init(); // (Track A) the rod's drag and fish runs
 		com.jaymospowers.tinkering.Tinkering.init();
+		// what the dragons leave: dragon bone (a Tinkering material a breath), dragon hide and its shield
+		com.jaymospowers.tinkering.GreatParts.init();
 		// (0.21.29) GregTech's hand route: hammer raw ore into crushed ore, wash it in a cauldron or running water
 		com.jaymospowers.tinkering.ore.OreWashing.init();
 		// (0.16.3) loose rocks and flint on the ground, and RLCraft's start: knapped flint, plant string, no crafted planks
