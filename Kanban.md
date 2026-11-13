@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 03:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 03:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,7 +28,6 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/pr1377-text-pass|pr1377-text-pass]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
@@ -36,6 +35,7 @@ kanban-plugin: board
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
+- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
 
 
 %% kanban:settings
