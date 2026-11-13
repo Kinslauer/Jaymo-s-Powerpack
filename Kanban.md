@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 05:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 05:14). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,7 +19,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · in-review
 - [ ] [[Agents/blossom-lands|blossom-lands]] · 💻 Odysseus · #1413 · in-review
-- [ ] [[Agents/dungeon-mods-chapel-echo-bow|dungeon-mods-chapel-echo-bow]] · 💻 Odysseus · #1417 · in-review
 
 
 ## Needs Andy
