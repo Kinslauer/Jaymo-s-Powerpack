@@ -4322,3 +4322,10 @@ enter limbo if they don't come to."
 - **Hooded cloak**: its sway (the back and hem swinging with your stride, the hood hanging down when the head slot is empty, the narrower collar and mantles with no chestplate) was set when the cloak was submitted, and the model is set up again just before it is drawn, which put all of that back at rest. It is now posed as it is drawn (`HoodedCloakLayer.Model.setupAnim`).
 - Third-party pieces checked and already following the body: Traveler's Tool Belt, Weapon Master's worn weapons, Not Enough Animations' sword on the back, Entity Texture Features' player extras.
 - Built and loaded in a cloud test game (no errors); the pieces weren't each put on and looked at. Not played.
+
+## 0.23.30 (2026-11-13): entity names - Hot Air Balloon, Torn Chunk, Thrown Gear (#1468)
+
+- Three entities showed raw keys in the look-at tooltip: the hot air balloon (**Hot Air Balloon**), a chunk of blocks torn
+  loose by Living Armor or Gravity's Lift (**Torn Chunk**) and gear thrown from the thrower belt (**Thrown Gear**).
+- Lang only (`living_rough.json`, `core.json`, `gear_picks.json`). Checked every item, block and entity id against the lang
+  parts; not played.

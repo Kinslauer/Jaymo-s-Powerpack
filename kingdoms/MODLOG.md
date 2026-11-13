@@ -12710,3 +12710,10 @@ The server thread no longer waits for chunks to be made. Road milestone searches
   just don't learn it this time); the same for a life aim's "has a bed in a realm" (`LifeAims`) and the old rules'
   bed check (`OldRules`).
 - Built; tested on the Deck server.
+
+## 0.8.37 (2026-11-13): entity names - Fallen Tree, Spirit Javelin (#1468)
+
+- A felled tree showed the raw key `entity.jaymoskingdoms.falling_tree` in the look-at tooltip; it now reads **Fallen Tree**.
+  The spirit javelin (**Spirit Javelin**) and the lore films' actor (**Figure**) had no name either.
+- Lang only (`tree-knocks.json`, `spirits.json`, `lore-films.json`). Checked every item, block and entity id against the lang
+  parts; not played.
