@@ -231,7 +231,21 @@ Skip steps 2 and 5 (they were for a paid provider); Groq's key is already set.
     | Gemini Flash | 503 "high demand" | 503 "high demand" |
     | OpenRouter :free | no `OPENROUTER_API_KEY` in Hermes `.env` | - |
 
-    Nothing in config.yaml was changed.
+    **Andy's call (Nov 12, ~10:30 PM): "NVIDIA first, drop Groq".** Steps 2-5 below were for Groq-first and are
+    replaced by this (done Nov 12, 10:35 PM, PC Claude):
+    - [x] Backups: `E:/hermes/backups/config.yaml.2026-11-12-drop-groq.bak`, and the same name under
+      `profiles/quill/backups/` and `profiles/hermes-modeller/backups/`.
+    - [x] Groq out of every fallback chain. `hermes fallback list` now shows: YOUTH = Super -> Lightning -> Gemini;
+      Quill = Super -> Lightning -> Gemini -> Ultra; Prometheus = Super -> Gemini (reads images) -> Lightning.
+      Apollo, Bacchus and Hephaestus never had Groq. The `providers: groq` definition stays (one block, unused).
+    - [x] No restart needed: the gateway re-reads `fallback_providers` on each agent create/reuse
+      (`gateway/run_config_loaders.py:581`) and cron re-reads per job. `schtasks /run` was a no-op (gateway up).
+    - [ ] Not done: the `hermes chat --oneshot` test from this PC fails with "gateway_other_session" (the gateway
+      runs in Windows session 0 from the boot task, so a user-session CLI can't reach it). The direct API timing
+      above stands in. Fixing that means stopping the session-0 gateway from an admin prompt: Andy's call.
+    - Gemini Flash returned 503 "high demand" on every try tonight, so in practice the chain is NVIDIA-only.
+      OpenRouter `:free` would need an `OPENROUTER_API_KEY` (Andy makes it, sets it himself) if he wants a non-NVIDIA
+      fallback that works.
 - [ ] 2. If Andy picks a paid fast primary: he makes the account (Cerebras or Groq Developer) and sets the key
       himself as an environment variable / in Hermes's `.env`. Never put a key in a command, file or chat.
 - [ ] 3. Back up `E:/hermes/config.yaml` (and Quill's profile config). In the ONE existing `providers:` block, add
