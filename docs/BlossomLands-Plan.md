@@ -63,6 +63,14 @@ blocks east of the world's origin (my figures for the land's size and place).
   pole star. Sail east along it.
 - **Only by sea.** `Milestones` coaches and teleport fares never cross. A harbour town on the land's west coast is
   where ships make landfall. Flight and pods: open question 2.
+- **Someone else at the helm** (Andy, 2026-11-12: "can there be an MCA captain or companion that can pilot the ship
+  for you? thats just too long to be sailing manually"). Crewed ships already steer themselves (`Ship.Captaincy.helm`,
+  `SeaRoutes`, `Corsairs`; the sky ferries are sailed by two villagers). Three ways, all on that: (1) hire an MCA sea
+  captain at a harbour for coin, who takes the wheel of your own ship and holds a course you give him (a harbour you
+  know, a rutter's bearing, "follow that ship"); (2) a companion, hired hand or family member with sea experience
+  can be told to take the helm the same way, slower and less sure in a blow than a captain; (3) buy passage on a
+  blossom merchantman and ride as a passenger. With someone else steering you are free to walk the deck, fish, cook,
+  fight what comes, or sleep in a berth, and sleeping aboard passes the night as it does ashore.
 - **The crossing.** `SeaEvents` run the whole way; `Berths` keeps your spawn aboard; stores matter (the sea is
   empty of land). A blossom navy patrols the last stretch and hails strangers.
 
