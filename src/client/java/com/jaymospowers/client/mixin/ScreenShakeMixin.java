@@ -21,5 +21,7 @@ abstract class ScreenShakeMixin {
 		com.jaymospowers.client.stamina.DodgeRollPose.applyCamera(poseStack, partialTicks);
 		// (Motion patch 1) a jumpy player looks back over the shoulder while fleeing
 		com.jaymospowers.client.PanicCam.applyCamera(poseStack, partialTicks);
+		// spun too long: the view rolls as the world keeps turning
+		com.jaymospowers.client.wounds.SpinDizzyHud.applyCamera(poseStack, partialTicks);
 	}
 }
