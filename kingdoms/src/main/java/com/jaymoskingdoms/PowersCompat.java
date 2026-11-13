@@ -3284,6 +3284,36 @@ public final class PowersCompat {
 		}
 	}
 
+	private static volatile java.lang.invoke.@Nullable MethodHandle ghostOf;
+	private static volatile boolean ghostAtLooked;
+
+	/**
+	 * Where {@code player}'s ghost is while they're out of their body, left for dead (Powers' {@code OutOfBody.ghostAt}); null
+	 * for anyone in their body, or without Powers. Any thread.
+	 */
+	static net.minecraft.world.phys.@Nullable Vec3 ghostOf(java.util.UUID player) {
+		if (!ghostAtLooked) {
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					ghostOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.OutOfBody"),
+						"ghostAt", java.lang.invoke.MethodType.methodType(net.minecraft.world.phys.Vec3.class, java.util.UUID.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' OutOfBody.ghostAt (older Powers?)", e);
+				}
+			}
+			ghostAtLooked = true;
+		}
+		java.lang.invoke.MethodHandle handle = ghostOf;
+		if (handle == null) {
+			return null;
+		}
+		try {
+			return (net.minecraft.world.phys.Vec3)handle.invoke(player);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle waking;
 	private static boolean wakingLooked;
 

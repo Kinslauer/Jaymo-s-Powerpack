@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "jaymoskingdoms:item/goblin_scout_spawn_egg"
+	}
+}

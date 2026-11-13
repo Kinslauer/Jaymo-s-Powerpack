@@ -4,6 +4,9 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.beasts.Acting;
 import com.jaymoskingdoms.client.bb.BbModel;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -31,6 +34,8 @@ public class BbMobRenderer<T extends Mob & Acting> extends MobRenderer<T, BbMobR
 	public static final class State extends LivingEntityRenderState {
 		public @Nullable String action;
 		public float actionAge;
+		/** What it holds in its main hand, for a creature drawn holding it ({@link BbMobRenderer#holding}). */
+		public final ItemStackRenderState held = new ItemStackRenderState();
 	}
 
 	/**
@@ -62,6 +67,7 @@ public class BbMobRenderer<T extends Mob & Acting> extends MobRenderer<T, BbMobR
 
 	private final Look look;
 	private final Identifier texture;
+	private boolean holds;
 
 	public BbMobRenderer(EntityRendererProvider.Context context, Look look) {
 		this(context, look, BbModel.load(JaymosKingdoms.MOD_ID, look.model()));
@@ -86,6 +92,19 @@ public class BbMobRenderer<T extends Mob & Acting> extends MobRenderer<T, BbMobR
 		super.extractRenderState(mob, state, partialTicks);
 		state.action = mob.action();
 		state.actionAge = mob.actionAge() + partialTicks;
+		if (this.holds) {
+			this.itemModelResolver.updateForLiving(state.held, mob.getMainHandItem(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, mob);
+		}
+	}
+
+	/**
+	 * Draws what it holds in its main hand as the game draws a held item, in the hand at the end of {@code bones}: the
+	 * chain of bones from the model's first down to an (empty) bone whose pivot is the palm. Returns this.
+	 */
+	public BbMobRenderer<T> holding(String... bones) {
+		this.holds = true;
+		this.addLayer(new Held(this, bones));
+		return this;
 	}
 
 	@Override
@@ -140,6 +159,37 @@ public class BbMobRenderer<T extends Mob & Acting> extends MobRenderer<T, BbMobR
 			if (this.look.extra() != null) {
 				this.look.extra().pose(this.bb, state);
 			}
+		}
+	}
+
+	/** The item in its hand ({@link #holding}). */
+	private static final class Held extends RenderLayer<State, Model> {
+		/** How far out of the palm the grip sits (blocks), as in a player's fist. */
+		static final float GRIP = 0.125F;
+		private final String[] bones;
+
+		Held(BbMobRenderer<?> parent, String[] bones) {
+			super(parent);
+			this.bones = bones;
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, State state, float yRot, float xRot) {
+			if (state.held.isEmpty()) {
+				return;
+			}
+			BbModel bb = this.getParentModel().bb;
+			poseStack.pushPose();
+			bb.root.translateAndRotate(poseStack);
+			for (String bone : this.bones) {
+				bb.part(bone).translateAndRotate(poseStack);
+			}
+			// (as the game seats an item in a hand: laid along the forearm's front, blade forward)
+			poseStack.mulPose(new org.joml.Matrix4f().rotation(Axis.XP.rotationDegrees(-90.0F)));
+			poseStack.mulPose(new org.joml.Matrix4f().rotation(Axis.YP.rotationDegrees(180.0F)));
+			poseStack.translate(0.0F, GRIP, 0.0F);
+			state.held.submit(poseStack, collector, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+			poseStack.popPose();
 		}
 	}
 

@@ -547,6 +547,7 @@ public final class Camps {
 			if (goblins != null) {
 				ScalebaneArcher.grow(level, camp.id(), goblins.center(), days);
 				WarBarrel.grow(level, camp.id(), days);
+				GoblinScout.grow(level, camp.id(), goblins.center(), days);
 			}
 			return;
 		}
