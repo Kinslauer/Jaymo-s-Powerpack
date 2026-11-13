@@ -1,0 +1,33 @@
+{
+  "feature": "jaymoskingdoms:pale_grove_tree",
+  "placement": [
+    {
+      "type": "minecraft:count_on_every_layer",
+      "count": 5
+    },
+    {
+      "type": "minecraft:biome"
+    },
+    {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:all_of",
+        "predicates": [
+          {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:pale_moss_block",
+            "offset": [
+              0,
+              -1,
+              0
+            ]
+          },
+          {
+            "type": "minecraft:matching_block_tag",
+            "tag": "minecraft:air"
+          }
+        ]
+      }
+    }
+  ]
+}

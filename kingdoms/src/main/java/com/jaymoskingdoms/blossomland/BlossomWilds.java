@@ -51,12 +51,22 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * from {@code kingdoms/tools/gen_blossom_wilds.py}.
  */
 public final class BlossomWilds {
-	public static Block MAPLE_LEAVES, GINKGO_LEAVES, MAPLE_SAPLING, GINKGO_SAPLING, SPIDER_LILY, WISTERIA;
+	public static Block MAPLE_LEAVES, GINKGO_LEAVES, MAPLE_SAPLING, GINKGO_SAPLING, SPIDER_LILY, WISTERIA, PALE_WISTERIA;
 
 	public static final ResourceKey<Feature> MAPLE = ResourceKey.create(Registries.FEATURE, JaymosKingdoms.id("maple"));
 	public static final ResourceKey<Feature> GINKGO = ResourceKey.create(Registries.FEATURE, JaymosKingdoms.id("ginkgo"));
 	/** The far land's scattered growth, in the order it is laid down. */
 	static final String[] SCATTERED = {"mohknee_maples", "mohknee_ginkgos", "mohknee_bamboo", "mohknee_spider_lilies"};
+
+	/**
+	 * The pale grove: the Nether biome the blossom folk's telling of the demons' country comes from (its moss, trees and
+	 * hanging wisteria are in {@code worldgen/}), and where it lies among the Nether's climates.
+	 */
+	public static final ResourceKey<net.minecraft.world.level.biome.Biome> PALE_GROVE = ResourceKey.create(Registries.BIOME, JaymosKingdoms.id("pale_grove"));
+	static final float GROVE_TEMPERATURE = -0.45F, GROVE_HUMIDITY = 0.55F, GROVE_OFFSET = 0.2F;
+	/** The light pale wisteria gives. */
+	static final int PALE_LIGHT = 6;
+	private static boolean biomesAdded;
 
 	/** Trees planted round a new village: how many, how far from its bell (at least, plus up to), and the tries it gets. */
 	static final int PLANTED = 5, PLANT_MIN = 40, PLANT_SPREAD = 24, PLANT_TRIES = 24;
@@ -74,6 +84,8 @@ public final class BlossomWilds {
 		SPIDER_LILY = BlossomBlocks.block("red_spider_lily", new FlowerBlock(MobEffects.POISON, LILY_POISON, BlossomBlocks.copy("red_spider_lily", Blocks.POPPY)), 60, 100);
 		WISTERIA = BlossomBlocks.block("wisteria", new Wisteria(BlossomBlocks.props("wisteria").mapColor(MapColor.COLOR_PURPLE).noCollision().instabreak()
 			.sound(SoundType.CAVE_VINES).pushReaction(PushReaction.POPPED).noOcclusion()), 15, 60);
+		PALE_WISTERIA = BlossomBlocks.block("pale_wisteria", new Wisteria(BlossomBlocks.props("pale_wisteria").mapColor(MapColor.TERRACOTTA_WHITE).noCollision().instabreak()
+			.sound(SoundType.CAVE_VINES).pushReaction(PushReaction.POPPED).noOcclusion().lightLevel(state -> PALE_LIGHT)), 0, 0);
 
 		Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, JaymosKingdoms.id("on_mohknee"), OnMohknee.CODEC);
 		for (String name : SCATTERED) {
@@ -81,6 +93,20 @@ public final class BlossomWilds {
 					Biomes.MEADOW, Biomes.PLAINS), GenerationStep.Decoration.VEGETAL_DECORATION,
 				ResourceKey.create(Registries.PLACED_FEATURE, JaymosKingdoms.id(name)));
 		}
+	}
+
+	/**
+	 * Adds the pale grove to the Nether's biomes. Called from the server and client entrypoints, which run after every
+	 * mod's main entrypoint, never from {@link #register}: once it is added the Nether preset asks for it in every registry
+	 * bootstrap, and a mod that builds vanilla's world lookup in its main entrypoint would find no such biome and crash.
+	 */
+	public static void addBiomes() {
+		if (biomesAdded) {
+			return;
+		}
+		biomesAdded = true;
+		net.fabricmc.fabric.api.biome.v1.NetherBiomes.addNetherBiome(PALE_GROVE,
+			net.minecraft.world.level.biome.Climate.parameters(GROVE_TEMPERATURE, GROVE_HUMIDITY, 0.0F, 0.0F, 0.0F, 0.0F, GROVE_OFFSET));
 	}
 
 	private static net.minecraft.world.level.block.state.BlockBehaviour.Properties leaves(String name, MapColor color) {

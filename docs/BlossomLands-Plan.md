@@ -181,6 +181,10 @@ gossip. Not built: the mountain beasts, the crow-winged hermit, festivals on ful
 A Nether biome, not a replacement: pale wisteria, a slow river, an ogre keep as a demon stronghold. It is the
 blossom folk's telling of the demons' country.
 
+*Built (2026-11-13, `BlossomWilds.addBiomes`, `worldgen/biome/pale_grove.json`, `tools/gen_blossom_wilds.py`): the
+biome with pale moss, pale oaks and hanging Pale Wisteria, pale fog, fire ogres. Not built: the slow river, the ogre
+keep. Generates on the dev server; not seen in game.*
+
 ## Patch 16: the sunken palace (ow_palace)
 
 A rare drowned palace in the deep sea off the far land, guarded by sea folk.

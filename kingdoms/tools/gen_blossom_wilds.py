@@ -19,7 +19,7 @@ own = lambda n: NS + ":" + n
 NAMES = {
     "maple_leaves": "Maple Leaves", "ginkgo_leaves": "Ginkgo Leaves", "maple_sapling": "Maple Sapling",
     "ginkgo_sapling": "Ginkgo Sapling", "red_spider_lily": "Red Spider Lily", "wisteria": "Wisteria",
-    "hornet_nest": "Paper Hornet Nest",
+    "hornet_nest": "Paper Hornet Nest", "pale_wisteria": "Pale Wisteria",
 }
 
 GREEN = [(0x2c, 0x5a, 0x24), (0x3a, 0x72, 0x2e), (0x4c, 0x8a, 0x38), (0x66, 0xa4, 0x48)]
@@ -85,22 +85,27 @@ def draw_lily():
     g.save(img, "red_spider_lily")
 
 
-def draw_wisteria():
+def draw_wisteria(name="wisteria", flowers=LILAC, stalk=PALE_GREEN, seed=77):
     """a hanging raceme: a thin green stem and pea flowers down it, wide at the top and thinning to a point"""
-    rng = random.Random(77)
+    rng = random.Random(seed)
     img = g.canvas()
     for stem, top, length in ((4, 0, 13), (9, 0, 16), (13, 0, 10)):
         for y in range(top, top + length):
-            g.put(img, stem, y, PALE_GREEN[1])
+            g.put(img, stem, y, stalk[1])
             width = 2 if y < top + length * 0.5 else 1 if y < top + length - 2 else 0
             for dx in range(-width, width + 1):
                 if dx and rng.random() < 0.8:
-                    g.put(img, stem + dx, y, LILAC[rng.choice((1, 2, 2, 3))])
+                    g.put(img, stem + dx, y, flowers[rng.choice((1, 2, 2, 3))])
             if rng.random() < 0.5:
-                g.put(img, stem, y, LILAC[0])
+                g.put(img, stem, y, flowers[0])
     for x in (2, 3, 6, 7, 11, 12, 14):
-        g.put(img, x, 0, PALE_GREEN[2])
-    g.save(img, "wisteria")
+        g.put(img, x, 0, stalk[2])
+    g.save(img, name)
+
+
+# the pale grove's wisteria: the flower with the colour gone out of it, on an ashen stem
+PALE = [(0x9a, 0x98, 0xa8), (0xc0, 0xbe, 0xcc), (0xdc, 0xda, 0xe6), (0xf4, 0xf2, 0xfa)]
+ASHEN = [(0x4a, 0x48, 0x4e), (0x62, 0x60, 0x68), (0x7c, 0x7a, 0x84)]
 
 
 PAPER = [(0x8a, 0x7c, 0x66), (0xa6, 0x98, 0x80), (0xc0, 0xb4, 0x9c), (0xd8, 0xce, 0xb8)]
@@ -164,6 +169,7 @@ def textures():
     draw_sapling("ginkgo_sapling", GOLD, True)
     draw_lily()
     draw_wisteria()
+    draw_wisteria("pale_wisteria", PALE, ASHEN, 78)
 
 
 def assets():
@@ -173,7 +179,7 @@ def assets():
             g.write(ASSETS + "models/block/" + name + suffix + ".json", {"parent": "minecraft:block/leaves", "textures": {"all": g.tex(name + suffix)}})
         g.write(ASSETS + "blockstates/" + name + ".json", {"variants": {"turned=false": {"model": g.mdl(name)}, "turned=true": {"model": g.mdl(name + "_turned")}}})
         g.item(name, g.mdl(name + "_turned"))
-    for name in ("maple_sapling", "ginkgo_sapling", "red_spider_lily", "wisteria"):
+    for name in ("maple_sapling", "ginkgo_sapling", "red_spider_lily", "wisteria", "pale_wisteria"):
         g.write(ASSETS + "models/block/" + name + ".json", {"parent": "minecraft:block/cross", "textures": {"cross": g.tex(name)}})
         g.write(ASSETS + "blockstates/" + name + ".json", {"variants": {"": {"model": g.mdl(name)}}})
         g.write(ASSETS + "models/item/" + name + ".json", {"parent": "minecraft:item/generated", "textures": {"layer0": g.tex(name)}})
@@ -195,7 +201,7 @@ def loot():
                 "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "max": 2, "min": 1}}, {"type": "minecraft:explosion_decay"}],
                 "name": "minecraft:stick"}]}],
             "random_sequence": own("blocks/" + name)})
-    for name in ("maple_sapling", "ginkgo_sapling", "red_spider_lily", "wisteria"):
+    for name in ("maple_sapling", "ginkgo_sapling", "red_spider_lily", "wisteria", "pale_wisteria"):
         g.loot(name)
 
 
@@ -237,6 +243,66 @@ def worldgen():
         far, {"type": "minecraft:rarity_filter", "chance": 12}, square, {"type": "minecraft:count", "count": 28}, spread(4, 0), ground, biome, air]})
 
 
+def pale_grove():
+    """
+    The pale grove (Blossom Lands patch 15): a Nether biome. Pale moss lies over the netherrack in wide patches, pale oaks
+    stand on it with pale wisteria under their leaves, and more of it hangs in long strings from every roof.
+    """
+    biome = {"type": "minecraft:biome"}
+    wisteria = {"id": own("pale_wisteria")}
+    g.write(DATA + "worldgen/feature/pale_grove_moss.json", {"type": "minecraft:vegetation_patch", "depth": 1, "extra_bottom_block_chance": 0.0,
+        "extra_edge_column_chance": 0.6, "ground_state": {"id": "minecraft:pale_moss_block"}, "replaceable": "#minecraft:base_stone_nether",
+        "surface": "floor", "vegetation_chance": 0.25, "vegetation_feature": {"feature": own("pale_grove_carpet"), "placement": []},
+        "vertical_range": 5, "xz_radius": {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}})
+    g.write(DATA + "worldgen/feature/pale_grove_carpet.json", {"type": "minecraft:simple_block", "to_place": {"id": "minecraft:pale_moss_carpet",
+        "properties": {"bottom": "true", "east": "none", "north": "none", "south": "none", "west": "none"}}})
+    g.write(DATA + "worldgen/feature/pale_wisteria.json", {"type": "minecraft:block_column",
+        "allowed_placement": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "down",
+        "layers": [{"height": {"type": "minecraft:weighted_list", "distribution": [
+            {"data": {"type": "minecraft:uniform", "max_inclusive": 3, "min_inclusive": 1}, "weight": 6},
+            {"data": {"type": "minecraft:uniform", "max_inclusive": 9, "min_inclusive": 3}, "weight": 3},
+            {"data": {"type": "minecraft:uniform", "max_inclusive": 18, "min_inclusive": 8}, "weight": 1}]}, "provider": wisteria}],
+        "prioritize_tip": False})
+    g.write(DATA + "worldgen/feature/pale_grove_tree.json", {
+        "type": "minecraft:tree", "below_trunk_provider": {"id": "minecraft:pale_moss_block"},
+        "decorators": [{"type": "minecraft:attached_to_leaves", "block_provider": wisteria, "directions": ["down"], "exclusion_radius_xz": 0,
+            "exclusion_radius_y": 0, "probability": 0.45, "required_empty_blocks": 1}],
+        "foliage_placer": {"type": "minecraft:blob_foliage_placer", "height": 3, "offset": 0, "radius": 3},
+        "foliage_provider": {"id": "minecraft:pale_oak_leaves", "properties": {"distance": "7", "persistent": "false", "waterlogged": "false"}},
+        "ignore_vines": True, "minimum_size": {"type": "minecraft:two_layers_feature_size"},
+        "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": 4, "height_rand_a": 3, "height_rand_b": 0},
+        "trunk_provider": {"id": "minecraft:pale_oak_log", "properties": {"axis": "y"}}})
+    layers = lambda n: {"type": "minecraft:count_on_every_layer", "count": n}
+    g.write(DATA + "worldgen/placed_feature/pale_grove_moss.json", {"feature": own("pale_grove_moss"), "placement": [layers(3), biome]})
+    g.write(DATA + "worldgen/placed_feature/pale_grove_trees.json", {"feature": own("pale_grove_tree"), "placement": [layers(5), biome,
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_blocks", "blocks": "minecraft:pale_moss_block", "offset": [0, -1, 0]},
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}]}}]})
+    g.write(DATA + "worldgen/placed_feature/pale_grove_wisteria.json", {"feature": own("pale_wisteria"), "placement": [
+        {"type": "minecraft:count", "count": 90}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"below_top": 4}, "min_inclusive": {"above_bottom": 8}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+            "direction_of_search": "up", "max_steps": 12, "target_condition": {"type": "minecraft:has_sturdy_face", "direction": "down"}},
+        {"type": "minecraft:offset", "x": 0, "y": -1, "z": 0}, biome]})
+    spawn = lambda kind, weight, count: {"type": kind, "count": count, "weight": weight}
+    g.write(DATA + "worldgen/biome/pale_grove.json", {
+        "attributes": {
+            "minecraft:audio/ambient_sounds": {"loop": "minecraft:ambient.soul_sand_valley.loop", "mood": {"block_search_extent": 8, "offset": 2.0,
+                "sound": "minecraft:ambient.soul_sand_valley.mood", "tick_delay": 6000}},
+            "minecraft:gameplay/natural_mob_spawns": {"argument": {"spawn_costs": {}, "spawns_by_category": {
+                "creature": [spawn("minecraft:strider", 20, {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1})],
+                "monster": [spawn(own("fire_ogre"), 6, 1), spawn("minecraft:skeleton", 20, 3), spawn("minecraft:enderman", 2, 1)]}},
+                "modifier": "overlay"},
+            "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.03}], "modifier": "append"},
+            "minecraft:visual/fog_color": "#b4aec4"},
+        "carvers": "minecraft:nether_cave", "downfall": 0.0, "effects": {"water_color": "#8a8fa8"},
+        "features": [[], [], [], [], [], [], [], ["minecraft:spring_open", "minecraft:glowstone_extra", "minecraft:glowstone", "minecraft:spring_closed",
+            "minecraft:ore_gravel_nether", "minecraft:ore_blackstone", "minecraft:ore_gold_nether", "minecraft:ore_quartz_nether",
+            "minecraft:ore_ancient_debris_large", "minecraft:ore_debris_small"], [],
+            ["minecraft:spring_lava", own("pale_grove_moss"), own("pale_grove_trees"), own("pale_grove_wisteria")]],
+        "has_precipitation": False, "temperature": 2.0})
+
+
 def tags():
     leaves, saplings = [own("maple_leaves"), own("ginkgo_leaves")], [own("maple_sapling"), own("ginkgo_sapling")]
     for kind in ("block", "item"):
@@ -244,7 +310,7 @@ def tags():
         g.merge_tag(RES + "data/minecraft/tags/" + kind + "/saplings.json", saplings)
         g.merge_tag(RES + "data/minecraft/tags/" + kind + "/small_flowers.json", [own("red_spider_lily")])
     g.merge_tag(RES + "data/minecraft/tags/block/mineable/hoe.json", leaves)
-    g.merge_tag(RES + "data/minecraft/tags/block/sword_efficient.json", [own("wisteria")])
+    g.merge_tag(RES + "data/minecraft/tags/block/sword_efficient.json", [own("wisteria"), own("pale_wisteria")])
     g.merge_tag(RES + "data/minecraft/tags/block/bee_attractive.json", [own("wisteria")])
 
 
@@ -254,6 +320,7 @@ if __name__ == "__main__":
     loot()
     nest_assets()
     worldgen()
+    pale_grove()
     tags()
     names = {"block." + NS + "." + k: v for k, v in NAMES.items()}
     names["item." + NS + ".paper_pulp"] = "Paper Pulp"

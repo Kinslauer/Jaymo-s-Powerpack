@@ -10,6 +10,7 @@
 	"entrypoints": {
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
 		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"],
+		"server": ["com.jaymoskingdoms.JaymosKingdomsServer"],
 		"jade": ["com.jaymoskingdoms.client.compat.JadeIntroductions"],
 		"jei_mod_plugin": ["com.jaymoskingdoms.client.compat.TierJei"],
 		"voicechat": ["com.jaymoskingdoms.VoiceRange"]
