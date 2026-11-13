@@ -51,8 +51,8 @@ public final class BoxingPoses {
 	/** The elbow: this far down the arm from the shoulder (pixels; the arm reaches 10, so the forearm is as long as the upper arm). */
 	public static final float ELBOW = 5.0F;
 	/** The Arrow Slit's guard (both arms: elbows in, forearms up, gloves on the cheeks), its sway (radians, and radians a tick), and its block. */
-	static final float SLIT_PITCH = -1.25F, SLIT_IN = 0.1F, SLIT_FOLD = -1.0F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
-	static final float SLIT_BLOCK_PITCH = -1.3F, SLIT_BLOCK_IN = 0.3F, SLIT_BLOCK_FOLD = -0.9F;
+	static final float SLIT_PITCH = -1.6F, SLIT_IN = 0.0F, SLIT_FOLD = -0.6F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
+	static final float SLIT_BLOCK_PITCH = -1.4F, SLIT_BLOCK_IN = 0.3F, SLIT_BLOCK_FOLD = -0.9F;
 	/** The Arrow Slit's forward crouch (radians), standing and behind its block; the head stays up. */
 	static final float SLIT_CROUCH = 0.25F, SLIT_BLOCK_CROUCH = 0.3F;
 	/** Its rounded back: the upper half of the spine curled this much further forward than the lower (radians). */
@@ -71,9 +71,9 @@ public final class BoxingPoses {
 	 * Its base: the feet about under the hips, the lead one a little ahead, the knees soft, and the toes straight ahead
 	 * (Jung: turned out with the body they looked awkward). The Bastion's feet turn with its body by {@code FEET_TURN} of its turn.
 	 */
-	static final float LONG_SPREAD = 0.04F, LONG_STAGGER = 0.2F, LONG_KNEES = 0.2F, FEET_TURN = 0.8F;
+	static final float LONG_SPREAD = 0.1F, LONG_STAGGER = 0.2F, LONG_KNEES = 0.2F, FEET_TURN = 0.8F;
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
-	static final float BASTION_LEAD_PITCH = -0.9F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 0.65F, BASTION_REAR_PITCH = -1.2F, BASTION_REAR_IN = -0.3F, BASTION_REAR_FOLD = -1.2F;
+	static final float BASTION_LEAD_PITCH = -0.9F, BASTION_LEAD_IN = 0.0F, BASTION_LEAD_ACROSS = 0.95F, BASTION_REAR_PITCH = -1.2F, BASTION_REAR_IN = -0.3F, BASTION_REAR_FOLD = -1.2F;
 	/** Its base: feet under the shoulders, the lead one ahead, the knees soft. */
 	static final float BASTION_SPREAD = 0.22F, BASTION_STAGGER = 0.2F, BASTION_KNEES = 0.34F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
@@ -83,7 +83,7 @@ public final class BoxingPoses {
 	/** The shrug: every this many ticks, this long, this high (pixels). */
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
-	static final float BASTION_BLOCK_LEAD_PITCH = -1.1F, BASTION_BLOCK_UP = 0.4F, BASTION_BLOCK_ACROSS = 1.1F, BASTION_BLOCK_REAR_PITCH = -1.35F, BASTION_BLOCK_REAR_IN = -0.35F, BASTION_BLOCK_REAR_FOLD = -1.0F;
+	static final float BASTION_BLOCK_LEAD_PITCH = -1.1F, BASTION_BLOCK_UP = 0.4F, BASTION_BLOCK_ACROSS = 1.35F, BASTION_BLOCK_REAR_PITCH = -1.35F, BASTION_BLOCK_REAR_IN = -0.35F, BASTION_BLOCK_REAR_FOLD = -1.0F;
 	/**
 	 * A punch lasts this long (ticks), whatever the game's own arm swing does; a straight one is at full reach this
 	 * far through (it snaps out and comes home slower).
@@ -104,7 +104,7 @@ public final class BoxingPoses {
 	 * right through, the body leaning into it, the rear knee turned in on the ball of the foot, and the lead glove
 	 * brought home to the cheek (its upper arm's pitch and turn in, and its fold).
 	 */
-	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.1F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.25F, HOME_IN = 0.1F, HOME_FOLD = -1.0F;
+	static final float STRAIGHT_PITCH = -1.57F, CROSS_TURN = 0.75F, CROSS_LEAN = 0.1F, CROSS_KNEE = 0.5F, HOME_PITCH = -1.6F, HOME_IN = 0.0F, HOME_FOLD = -0.6F;
 	/**
 	 * A hook, after the lesson Jung sent ("Throw a Perfect Lead and Rear Hook"): the arm level at shoulder height, the
 	 * elbow open between a right angle and 120 degrees (so the fist reaches, rather than hugging the chest), swung from
