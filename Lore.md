@@ -528,6 +528,9 @@ bone and the tool keeps the breath. Dragon hide does not burn, which is why the 
 shield. The teeth of the thing under the wreck are hooked and hold in the water. Whoever fells a great one takes its
 likeness for a trophy: a dragon's skull, the knight's helm, the worm's maw; nothing is written on them.
 
+**The chain axe** (new). A boarding weapon of the corsairs: an axe on a ship's chain, thrown across the gap between two
+decks to bite a rail or a man and haul him over. Any smith with iron can forge one; it has no magic in it.
+
 **Four more great ones** (Andy approved, 2026-11-12). The **thing under
 the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
 hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves

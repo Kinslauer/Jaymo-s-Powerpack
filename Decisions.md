@@ -393,6 +393,12 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-12 10:08 PM ET (boss-mods thread): Andy said "merge" for patch 8; PR #1399 (trophy looks, dragon bone, deep tooth, dragonhide shield) merged.
 
+- 2026-11-13 (boss-mods thread, patch 9, my calls, not yet confirmed by Andy): the Brink gates False Super, the first
+  Super breakthrough and the mana spirit's waking roll; it does NOT gate the symbiote's self-saving takeover, the
+  Earthling ki surge or adrenaline. Mortal kit on R/G/V/B: Power Strike, Sweep Kick, Second Wind, Battle Cry. Air
+  combos for Wind, Z Fighter, Smoke, Xenoform (any form), Web, Darktide, Gravity. Chain axe = head + Tool Handle +
+  iron chain at the Tool Station. PvP cap = pvp_ability_cap in jaymospowers-server.properties, default 0 (off).
+  Lore.md has a `(new)` paragraph "The chain axe".
 - 2026-11-12 10:07 PM ET (Sengoku picks thread): Andy ticked 59 of 63 rows of the Sengoku Jidai pick list
   (https://claude.ai/artifact/GEmrtBD44ntMuLdmnj3Rz6); not the throwing blades ("we have kunai") nor the three
   rule-breaking rows. His notes, verbatim. Rework vanilla: "yeah absolutely not, but i would like all this to be on a
