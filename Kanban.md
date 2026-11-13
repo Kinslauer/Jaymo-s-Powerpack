@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 05:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 12:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -17,7 +17,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · in-review
 
 
 ## Needs Andy
