@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.dragons;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.equestrian.FreeReinClient;
 import com.jaymoskingdoms.client.hud.HudZones;
@@ -289,7 +290,7 @@ public final class DragonsClient {
 		int x0 = at[0];
 		int y = at[1] + 12;
 		share = Mth.clamp(share, 0.0F, 1.0F);
-		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, 0x90000000);
+		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, HudStyle.PLATE);
 		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * share), y + 2, 0xFF000000 | color);
 		if (mark > 0.0F) {
 			int markX = x0 + Math.round(BAR_WIDTH * mark);

@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -104,7 +103,7 @@ final class RulersDeskScreen extends Screen {
 			}).bounds(rx + (k % 2) * (kw + 4), y + 102 + (k / 2) * 16, kw, 14).build();
 			int odds = r.odds().get(k);
 			b.active = odds != -1;
-			b.setTooltip(Tooltip.create(odds == -1 ? closed(r, k) : Component.translatable("treaty.jaymoskingdoms." + KINDS[k] + ".about")));
+			b.setTooltip(Ui.tipOf(odds == -1 ? closed(r, k) : Component.translatable("treaty.jaymoskingdoms." + KINDS[k] + ".about")));
 			this.kindButtons[k] = b;
 			addRenderableWidget(b);
 		}
@@ -186,7 +185,7 @@ final class RulersDeskScreen extends Screen {
 			this.armedKind = -1;
 		}
 		Ui.panel(graphics, x, y, W, H, ACCENT);
-		Ui.line(graphics, this.font, this.title, x + PAD, y + 7, W - 2 * PAD, ACCENT);
+		Ui.line(graphics, this.font, this.title, x + PAD, y + 8, W - 2 * PAD, ACCENT);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.desk.treasury", this.desk.treasury()), x + PAD, y + 18, W - 2 * PAD, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + W - 6, y + 30);
 		int lx = x + PAD, ly = y + 34;

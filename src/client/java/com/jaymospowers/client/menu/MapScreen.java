@@ -219,7 +219,7 @@ public class MapScreen extends Screen {
 		}
 		graphics.text(this.font, Component.translatable("menu.jaymospowers.map.zoom", this.zoom), mx + 2, my + MAP_SIZE - 9, PowerScreen.COLOR_DIM, true);
 		if (!hover.isEmpty()) {
-			graphics.setComponentTooltipForNextFrame(this.font, hover, mouseX, mouseY);
+			UiStyle.tip(graphics, this.font, hover, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}

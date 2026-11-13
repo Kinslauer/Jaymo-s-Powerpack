@@ -75,7 +75,7 @@ final class BeltScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Ui.panel(graphics, this.left, this.top, WIDTH, HEAD + Forms.BELT_SLOTS * ROW + 50, Ui.GOLD);
-		graphics.centeredText(this.font, this.title, this.left + WIDTH / 2, this.top + 9, Ui.TEXT);
+		Ui.line(graphics, this.font, this.title, this.left + 9, this.top + 8, WIDTH - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.belt.hint"), this.left + PAD,
 			this.top + HEAD + Forms.BELT_SLOTS * ROW + 6, WIDTH - 2 * PAD, Ui.DIM);
 		super.extractRenderState(graphics, mouseX, mouseY, a);

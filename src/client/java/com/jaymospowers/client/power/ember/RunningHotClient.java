@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.ember;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.hud.HudZones;
 import com.jaymospowers.power.ember.EmberSoak;
@@ -58,7 +59,7 @@ public final class RunningHotClient {
 	}
 
 	private static void bar(GuiGraphicsExtractor graphics, int x, int y, float share, int color) {
-		graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 4, 0xB0000000);
+		graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 4, HudStyle.PLATE);
 		graphics.fill(x, y, x + WIDTH, y + 3, 0x90303030);
 		graphics.fill(x, y, x + Mth.ceil(WIDTH * Mth.clamp(share, 0.0F, 1.0F)), y + 3, 0xFF000000 | color);
 	}

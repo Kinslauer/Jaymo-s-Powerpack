@@ -184,7 +184,7 @@ final class TableTalkScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, height(), Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.main", leaning(this.ask.main())), x + 10, y + 22, W - 20, Ui.DIM);
 		int bond = Math.max(0, Math.min(100, this.ask.bond()));
 		Ui.line(graphics, this.font, Component.translatable(bond >= 60 ? "gui.jaymoskingdoms.table.bond.close" : bond >= 25

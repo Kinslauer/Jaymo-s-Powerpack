@@ -283,7 +283,7 @@ public class SuitEditorScreen extends Screen {
 		String[] powers = {design().cut().power, design().mask().power, design().cape().power};
 		for (int i = 0; i < buttons.length; i++) {
 			if (powers[i] != null && buttons[i].isMouseOver(mouseX, mouseY)) {
-				graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.costume.from_set", CostumeSets.powerName(powers[i])),
+				UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.costume.from_set", CostumeSets.powerName(powers[i])),
 					mouseX, mouseY);
 			}
 		}
@@ -338,7 +338,7 @@ public class SuitEditorScreen extends Screen {
 			}
 			DyeColor hovered = swatchAt(mouseX, mouseY, which);
 			if (hovered != null) {
-				graphics.setTooltipForNextFrame(this.font, Costume.colourName(hovered), mouseX, mouseY);
+				UiStyle.tip(graphics, this.font, Costume.colourName(hovered), mouseX, mouseY);
 			}
 		}
 	}
@@ -375,7 +375,7 @@ public class SuitEditorScreen extends Screen {
 			}
 		}
 		if (hovered >= 0) {
-			graphics.setTooltipForNextFrame(this.font, Component.translatable(hovered == 0 ? "screen.jaymospowers.suit.mark_none"
+			UiStyle.tip(graphics, this.font, Component.translatable(hovered == 0 ? "screen.jaymospowers.suit.mark_none"
 				: "screen.jaymospowers.suit.mark." + SuitMarks.KEYS[hovered - 1]), mouseX, mouseY);
 		}
 	}

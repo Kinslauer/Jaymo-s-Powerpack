@@ -1,5 +1,6 @@
 package com.jaymospowers.client.rig;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Powers;
@@ -108,7 +109,7 @@ final class RigHud {
 			float share = Rig.chargeShare(player);
 			boolean low = (warnings & RigNet.WARN_LOW_CHARGE) != 0;
 			int barX = x + 26, barW = 36;
-			graphics.fill(barX, row + 2, barX + barW, row + 6, 0x60000000);
+			graphics.fill(barX, row + 2, barX + barW, row + 6, HudStyle.PLATE_SOFT);
 			graphics.fill(barX, row + 2, barX + Math.round(barW * share), row + 6,
 				low && blink ? LOW : status.overcharge() > 0 ? RigHelmView.OVER : ACCENT);
 			graphics.text(font, Math.round(share * 100) + "%", barX + barW + 3, row, low ? LOW : 0xFFFFFFFF);

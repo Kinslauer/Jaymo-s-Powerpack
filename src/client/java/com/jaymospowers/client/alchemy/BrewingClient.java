@@ -1,5 +1,6 @@
 package com.jaymospowers.client.alchemy;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.alchemy.brewing.BrewGrade;
 import com.jaymospowers.alchemy.brewing.BrewGrades;
@@ -37,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class BrewingClient {
 	private static final int BAR_HALF = 80, BAR_HEIGHT = 7;
-	private static final int MISS_COLOR = 0xFFE04040;
+	private static final int MISS_COLOR = HudStyle.WARN;
 	/** How long a stroke's colour flashes on the bar (ticks). */
 	private static final int FLASH_TICKS = 8;
 	/** Further than this from the block and the game is put away (blocks, squared). */

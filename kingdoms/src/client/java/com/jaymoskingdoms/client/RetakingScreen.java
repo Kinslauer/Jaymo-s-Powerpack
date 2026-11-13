@@ -207,7 +207,7 @@ final class RetakingScreen extends Screen {
 		Retaking.Act[] all = Retaking.Act.values();
 
 		// the acts down the left
-		Ui.line(graphics, this.font, this.title, x + 8, y + 7, LIST_W - 12, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, LIST_W - 12, Ui.GOLD);
 		Ui.line(graphics, this.font, state == null ? Component.translatable("menu.jaymoskingdoms.story.asking")
 			: Component.translatable("menu.jaymoskingdoms.story.sub", current.ordinal() + 1), x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + h - 4, Ui.ROW);

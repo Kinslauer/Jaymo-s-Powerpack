@@ -249,6 +249,28 @@
 		}
 	}
 
+	/**
+	 * The hover box for something that has no room for a detail box (a swatch, a tab, a gauge): vanilla's tooltip, so it
+	 * sits above everything and stays on the screen, in the flat panel look. Item slots keep the item's own tooltip.
+	 */
+	public static void tip(GuiGraphicsExtractor graphics, Font font, Component text, int mouseX, int mouseY) {
+		graphics.setTooltipForNextFrame(font, font.split(text, TIP_W), mouseX, mouseY, TIP);
+	}
+
+	/** The same for several lines (each wraps on its own). */
+	public static void tip(GuiGraphicsExtractor graphics, Font font, List<Component> lines, int mouseX, int mouseY) {
+		List<FormattedCharSequence> rows = new ArrayList<>();
+		for (Component line : lines) {
+			rows.addAll(font.split(line, TIP_W));
+		}
+		graphics.setTooltipForNextFrame(font, rows, mouseX, mouseY, TIP);
+	}
+
+	/** A button's or widget's hover text in the same look ({@code widget.setTooltip(tipOf(text))}). */
+	public static Tooltip tipOf(Component text) {
+		return Tooltip.create(text, Optional.empty(), TIP);
+	}
+
 	/** How many lines {@link #detail} needs for these, at this width. */
 	public static int detailLines(Font font, int w, @Nullable Component name, List<Component> text) {
 		int n = name != null && !name.getString().isEmpty() ? 1 : 0;

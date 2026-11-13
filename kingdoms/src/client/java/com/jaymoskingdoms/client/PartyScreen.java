@@ -142,7 +142,7 @@ final class PartyScreen extends Screen {
 		int x = left(), y = top(), w = panelW();
 		Ui.window(graphics, x, y, w, PANEL_H);
 		graphics.item(new ItemStack(Items.SHIELD), x + 8, y + 8);
-		Ui.line(graphics, this.font, this.title, x + 28, y + 7, w - 36, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 28, y + 8, w - 36, Ui.GOLD);
 		List<Parties.Entry> party = PartyClient.party();
 		Ui.line(graphics, this.font, inParty() ? Component.translatable("menu.jaymoskingdoms.party.count", party.size(), Parties.MAX_SIZE)
 			: Component.translatable("menu.jaymoskingdoms.party.none"), x + 28, y + 18, w - 36, Ui.DIM);

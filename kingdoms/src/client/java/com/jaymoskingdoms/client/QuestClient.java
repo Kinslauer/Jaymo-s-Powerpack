@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.QuestNet;
 import com.jaymoskingdoms.Quests;
@@ -42,7 +43,7 @@ public final class QuestClient {
 	/** Marks: how big; how far over the name tag spot their foot is (blocks), clear of the name tag; over a speech bubble, this much more per line. */
 	static final float MARK_SCALE = 0.065F;
 	static final double MARK_LIFT = 0.8, BUBBLE_LINE = 0.25, BUBBLE_LIFT = 0.85;
-	static final int GOLD = 0xFFFFC21A, GREY = 0xFFB0B0B0, ROYAL = 0xFFFF5544;
+	static final int GOLD = HudStyle.GOLD, GREY = 0xFFB0B0B0, ROYAL = HudStyle.WARN;
 
 	/** The player's quests, as last sent. */
 	private static List<QuestNet.Tracked> log = List.of();
@@ -138,7 +139,7 @@ public final class QuestClient {
 			List<FormattedCharSequence> goal = font.split(t.objective(), WIDTH);
 			Component where = t.target().map(pos -> direction(player, pos)).orElse(null);
 			int lines = Math.min(1, title.size()) + Math.min(2, goal.size()) + (where == null ? 0 : 1);
-			graphics.fill(x - 3, y - 2, x + WIDTH + 2, y + lines * 10, 0x60000000);
+			graphics.fill(x - 3, y - 2, x + WIDTH + 2, y + lines * 10, HudStyle.PLATE_SOFT);
 			graphics.text(font, title.get(0), x, y, t.royal() ? ROYAL : GOLD);
 			y += 10;
 			for (int i = 0; i < Math.min(2, goal.size()); i++) {

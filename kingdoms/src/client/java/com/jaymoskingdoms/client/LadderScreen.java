@@ -110,7 +110,7 @@ public final class LadderScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW();
 		Ui.panel(graphics, x, y, w, PANEL_H, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 7, w - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, w - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("ladder.jaymoskingdoms.sub", board.ladders().size()), x + 9, y + 18, w - 18, Ui.DIM);
 		if (board.ladders().isEmpty()) {
 			Ui.line(graphics, this.font, Component.translatable("ladder.jaymoskingdoms.none"), x + 9, bodyTop() + 4, w - 18, Ui.DIM);

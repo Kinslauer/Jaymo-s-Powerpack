@@ -384,7 +384,7 @@ public class PowerScreen extends Screen {
 			icon(graphics, tab.id(), ix, iy);
 		}
 		if (over(mouseX, mouseY, x, y, TAB_W, TAB_OUT)) {
-			graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.tab." + tab.id()), mouseX, mouseY);
+			UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.tab." + tab.id()), mouseX, mouseY);
 		}
 	}
 
@@ -493,7 +493,7 @@ public class PowerScreen extends Screen {
 			}
 		}
 		if (hover != null) {
-			graphics.setTooltipForNextFrame(this.font, this.font.split(hover, 160), mouseX, mouseY);
+			UiStyle.tip(graphics, this.font, hover, mouseX, mouseY);
 		}
 	}
 

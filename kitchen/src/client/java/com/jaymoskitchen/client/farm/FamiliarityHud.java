@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.farm;
 
+import com.jaymoskitchen.client.hud.HudStyle;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.farm.Familiarity;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -17,7 +18,7 @@ import net.minecraft.world.entity.animal.Animal;
  * Nothing shows on an animal that isn't a farm animal, or while a screen is open.
  */
 public final class FamiliarityHud {
-	private static final int FULL = 0xFFE04050, GOLD = 0xFFFFD54A, EMPTY = 0xFF3A3A44;
+	private static final int FULL = HudStyle.WARN, GOLD = HudStyle.GOLD, EMPTY = 0xFF3A3A44;
 	private static final int HEARTS = 5, GAP = 9;
 
 	private FamiliarityHud() {

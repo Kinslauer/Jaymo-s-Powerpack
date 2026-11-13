@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.tinkering.smeltery.Molten;
 import com.jaymospowers.tinkering.smeltery.SmelteryEntity;
@@ -139,14 +140,14 @@ public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
 			if (index > 0) {
 				lines.add(Component.translatable("gui.jaymospowers.smeltery.to_bottom").withStyle(ChatFormatting.DARK_GRAY));
 			}
-			graphics.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
+			UiStyle.tip(graphics, font, lines, mouseX, mouseY);
 		} else if (smeltery != null && mouseX >= leftPos + POOL_X && mouseX < leftPos + POOL_X + POOL_W && mouseY >= topPos + POOL_Y
 			&& mouseY < topPos + POOL_Y + POOL_H) {
-			graphics.setComponentTooltipForNextFrame(font, List.of(Component.translatable("gui.jaymospowers.smeltery.capacity",
+			UiStyle.tip(graphics, font, List.of(Component.translatable("gui.jaymospowers.smeltery.capacity",
 				Molten.amount(smeltery.tank().total(), true), Molten.amount(smeltery.tank().capacity(), true))), mouseX, mouseY);
 		} else if (mouseX >= leftPos + GAUGE_X && mouseX < leftPos + GAUGE_X + GAUGE_W && mouseY >= topPos + GAUGE_Y
 			&& mouseY < topPos + GAUGE_Y + GAUGE_H) {
-			graphics.setComponentTooltipForNextFrame(font, List.of(Component.translatable("gui.jaymospowers.smeltery.fuel", menu.fuel(),
+			UiStyle.tip(graphics, font, List.of(Component.translatable("gui.jaymospowers.smeltery.fuel", menu.fuel(),
 				SmelteryEntity.FUEL_MAX), Component.translatable("gui.jaymospowers.smeltery.fuel_hint").withStyle(ChatFormatting.GRAY)), mouseX, mouseY);
 		}
 	}

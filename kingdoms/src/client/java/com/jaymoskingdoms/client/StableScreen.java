@@ -176,7 +176,7 @@ final class StableScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), h = panelHeight();
 		Ui.panel(graphics, x, y, PANEL_W, h, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 7, PANEL_W - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, PANEL_W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, open.subtitle(), x + 9, y + 18, PANEL_W - 18, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 4);
 		int top = viewTop(), view = viewHeight();

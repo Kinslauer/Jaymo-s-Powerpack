@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.BeamClash;
 import com.jaymospowers.core.BeamClashTiming;
@@ -29,7 +30,7 @@ public final class BeamClashTimingClient {
 	static final int BAR_W = 120, BAR_H = 7;
 	/** The result's words stay up this many ticks. */
 	static final int RESULT_TICKS = 24;
-	private static final int[] GRADE_COLORS = {0xFFFF5050, 0xFF7CC8FF, 0xFFFFD54A};
+	private static final int[] GRADE_COLORS = {0xFFFF5050, 0xFF7CC8FF, HudStyle.GOLD};
 
 	/** The clash age the bar last drew (what the player saw). */
 	private static float shownAge;
@@ -129,7 +130,7 @@ public final class BeamClashTimingClient {
 		int perfectFrom = x + Math.round(w * (centre - BeamClashTiming.PERFECT_HALF)), perfectTo = x + Math.round(w * (centre + BeamClashTiming.PERFECT_HALF));
 		graphics.fill(x, y, x + w, y + BAR_H, 0xFF202028);
 		graphics.fill(goodFrom, y, goodTo, y + BAR_H, tried ? 0xFF2A3A55 : 0xFF3A7BD5);
-		graphics.fill(perfectFrom, y, perfectTo, y + BAR_H, tried ? 0xFF6A5A24 : 0xFFFFD54A);
+		graphics.fill(perfectFrom, y, perfectTo, y + BAR_H, tried ? 0xFF6A5A24 : HudStyle.GOLD);
 		int mark = x + Math.round(w * BeamClashTiming.marker(age));
 		graphics.fill(mark - 1, y - 2, mark + 1, y + BAR_H + 2, 0xFFFFFFFF);
 		graphics.outline(x - 1, y - 1, w + 2, BAR_H + 2, result ? GRADE_COLORS[Mth.clamp(grade, 0, 2)] : 0xFFFFFFFF);

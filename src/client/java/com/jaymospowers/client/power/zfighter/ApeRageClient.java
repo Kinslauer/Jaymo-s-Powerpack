@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.power.zfighter.ApeRage;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -60,14 +61,14 @@ public final class ApeRageClient {
 		if (fit != null) {
 			// the fight against the fit: a fuller, throbbing bar
 			int fill = Math.round(BAR_W * Mth.clamp(fit, 0.0F, 1.0F));
-			graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 6, 0xA0000000);
+			graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 6, HudStyle.PLATE);
 			graphics.fill(x, y, x + fill, y + 5, 0xFF000000 | FIT_COLOR);
 			graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_fit"), x + BAR_W / 2, y - 11,
 				0xFF000000 | (Mth.sin(time * 0.4F) > 0.0F ? 0xFF6040 : 0xFFD0C0));
 			return;
 		}
 		float rage = Mth.clamp(ApeRage.rage(player) / 100.0F, 0.0F, 1.0F);
-		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 3, 0x80000000);
+		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + 3, HudStyle.PLATE);
 		graphics.fill(x, y, x + Math.round(BAR_W * rage), y + 2, 0xFF000000 | RAGE_COLOR);
 		graphics.centeredText(font, Component.translatable("hud.jaymospowers.zfighter.ape_rage", ApeRage.primal(player)), x + BAR_W / 2,
 			y - 10, 0xFFC0A0A0);

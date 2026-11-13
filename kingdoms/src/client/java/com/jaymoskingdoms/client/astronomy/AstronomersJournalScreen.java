@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.astronomy;
 
+import com.jaymoskingdoms.client.Ui;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Skills;
 import com.jaymoskingdoms.astronomy.AstronomersJournal;
@@ -50,7 +51,7 @@ public final class AstronomersJournalScreen extends Screen {
 	/** Where the page links sit (from the book's top). */
 	static final int FOOT_Y = 212;
 	/** Inks, from the astronomy art's palette: the hand, the faint construction line, the red of a rubric, the brass. */
-	static final int INK = 0xFF2B211A, FAINT = 0xFF7A6247, RUBRIC = 0xFF7A2E1E, BRASS = 0xFF8A6526;
+	static final int INK = Ui.INK, FAINT = Ui.INK_FAINT, RUBRIC = 0xFF7A2E1E, BRASS = 0xFF8A6526;
 	/** The study's chapters, in order ({@code gui.jaymoskingdoms.astronomy_journal.study.<key>.title} and {@code .body}). */
 	static final String[] STUDY = {"sphere", "places", "time", "latitude", "longitude", "year", "precision", "limits"};
 	static final String KEY = "gui.jaymoskingdoms.astronomy_journal.";

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering.smithing;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.tinkering.smithing.Forging;
 import com.jaymospowers.tinkering.smithing.Grade;
@@ -35,7 +36,7 @@ public final class SmithingClient {
 	/** The bar: half its width (px) and height. (HUD rework) Where it goes is the BELOW zone's. */
 	private static final int BAR_HALF = 80, BAR_HEIGHT = 7;
 	private static final int BACK = TimingBar.BACK, GOOD_COLOR = TimingBar.GOOD_COLOR, PERFECT_COLOR = TimingBar.PERFECT_COLOR,
-		MISS_COLOR = 0xFFE04040;
+		MISS_COLOR = HudStyle.WARN;
 	/** How long a blow's colour flashes on the bar (ticks). */
 	private static final int FLASH_TICKS = 8;
 	/** Further than this from the anvil and the game is put away (blocks, squared). */

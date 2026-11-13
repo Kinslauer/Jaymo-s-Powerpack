@@ -92,7 +92,7 @@ public final class FollowersScreen extends Screen {
 				ClientPlayNetworking.send(new Followers.Give(this.target, kind));
 				onClose();
 			}).bounds(x + 8, y + i * ROW, W - 16, 18)
-				.tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.jaymoskingdoms.followers.order." + kind + ".desc"))).build());
+				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.followers.order." + kind + ".desc"))).build());
 		}
 	}
 

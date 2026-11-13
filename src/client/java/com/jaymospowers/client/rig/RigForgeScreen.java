@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
@@ -116,7 +115,7 @@ public class RigForgeScreen extends Screen {
 			.bounds(left() + W - 8 - 64, by, 64, 14).build());
 		this.paint = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.rig_forge.paint"), b -> send(true, false))
 			.bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
-		this.paint.setTooltip(Tooltip.create(Component.translatable("screen.jaymospowers.rig_forge.paint_tip")));
+		this.paint.setTooltip(UiStyle.tipOf(Component.translatable("screen.jaymospowers.rig_forge.paint_tip")));
 		labels();
 	}
 
@@ -351,7 +350,7 @@ public class RigForgeScreen extends Screen {
 			}
 			int hovered = swatchAt(mouseX, mouseY, trimRow);
 			if (hovered >= 0) {
-				graphics.setTooltipForNextFrame(this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
+				UiStyle.tip(graphics, this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
 			}
 		}
 		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.dye_cost"), x, swatchY(true) + 3 * SWATCH_H + 8, wide,

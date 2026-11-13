@@ -6,3 +6,7 @@
 - **One H menu frame** (Andy: "Solid for H menu, vanilla for inventory"): the Kingdoms tabs of the character menu (Skills, Story, Feats and paths, Faction, Party) now draw the same solid bevelled window as the Character, Powers and Map pages, in place of the see-through striped panel, so flipping tabs no longer changes the window. `Ui.window` / `Ui.recess`.
 - **One wheel**: the horse command wheel draws the same disc, ring, pointer and tiles as the symbiote's (`Ui.wheel`).
 - **Titles and shadows**: the class, heritage, tier, feats and story screens' titles are gold like every other title (they were white), and labels on the tack, roster, handbook and mount inventory panels have the drop shadow the other panels' text has.
+- Hover text on the journal map, ruler's desk and follower orders shows in the flat dark box.
+- Every screen's title sits at the same margin; the Patron and belt titles are gold like the rest.
+- Books share one paper and ink (journal, lore codex, commandments, astronomer's journal).
+- The quest tracker, speech line and other HUD pieces take their plate, gold and red from the shared HUD look.

@@ -70,7 +70,7 @@ final class RiteScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, H, this.from.colour);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, W - 18, Ui.GOLD);
 		int tx = x + 10, tw = W - 20, ty = y + 22;
 		boolean trial = this.offer.daysLeft() >= 0;
 		ty = paragraph(graphics, trial

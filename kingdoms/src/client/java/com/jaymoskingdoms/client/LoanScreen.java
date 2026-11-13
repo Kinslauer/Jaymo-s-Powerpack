@@ -106,7 +106,7 @@ final class LoanScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, height(), Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, W - 18, Ui.GOLD);
 		if (hire()) {
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.whose", this.ask.owner()), x + 10, y + 22, W - 20, Ui.DIM);
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.leanings", leaning(this.ask.main()), leaning(this.ask.second())),

@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.ground.knapping.Knapping;
 import com.jaymospowers.ground.knapping.KnappingMenu;
 import java.util.List;
@@ -139,9 +140,9 @@ public class KnappingScreen extends AbstractContainerScreen<KnappingMenu> implem
 		int tile = tileAt(mouseX, mouseY);
 		if (tile >= 0) {
 			ItemStack made = Knapping.icon(shapes().get(tile));
-			graphics.setTooltipForNextFrame(font, made.getHoverName(), mouseX, mouseY);
+			UiStyle.tip(graphics, font, made.getHoverName(), mouseX, mouseY);
 		} else if (overReset(mouseX, mouseY)) {
-			graphics.setTooltipForNextFrame(font, Component.translatable("gui.jaymospowers.knapping.start_over.tip"), mouseX, mouseY);
+			UiStyle.tip(graphics, font, Component.translatable("gui.jaymospowers.knapping.start_over.tip"), mouseX, mouseY);
 		}
 	}
 

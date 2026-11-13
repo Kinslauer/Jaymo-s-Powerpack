@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.BeamClash;
@@ -291,7 +292,7 @@ public final class BeamClashClient {
 		float time = state.age() + delta.getGameTimeDeltaPartialTick(false);
 		boolean losing = state.balance() < -0.5F;
 		int rim = losing ? pulse(0xFF5050, 0xFFFFFF, time * 0.5F) : 0xFFFFFF;
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, 0x90000000);
+		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, HudStyle.PLATE);
 		graphics.outline(x, y, PANEL_W, PANEL_H, 0xC0000000 | rim);
 		// the title, and the key to mash
 		boolean ki = state.kind() == BeamClash.KIND_KI;

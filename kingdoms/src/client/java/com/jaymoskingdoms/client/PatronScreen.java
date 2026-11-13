@@ -146,7 +146,7 @@ final class PatronScreen extends Screen {
 
 	/** Your standing, under the title. */
 	private void header(GuiGraphicsExtractor graphics, int px, int y, int pw, Patrons.State s, @Nullable Patron mine) {
-		Ui.line(graphics, this.font, this.title, px + 8, y + 7, pw - 16, Ui.TEXT);
+		Ui.line(graphics, this.font, this.title, px + 9, y + 8, pw - 18, Ui.GOLD);
 		Component standing;
 		int color = Ui.DIM;
 		if (mine != null) {

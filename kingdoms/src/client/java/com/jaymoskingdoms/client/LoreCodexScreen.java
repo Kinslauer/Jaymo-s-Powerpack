@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
  */
 final class LoreCodexScreen extends Screen {
 	static final int PANEL_W = 360, PANEL_H = 230, HEADER = 30, FOOTER = 24, LIST_W = 124, ROW = 16, PAGE_PAD = 6;
-	static final int PARCHMENT = 0xFFD8C8A0, INK = 0xFF2A1E10, EDGE = 0xFF8A7650;
+	static final int PARCHMENT = Ui.PAPER, INK = Ui.INK, EDGE = Ui.PAPER_EDGE;
 	private static String lastBook = "";
 
 	private final List<LoreCodex.Entry> entries;
@@ -118,7 +118,7 @@ final class LoreCodexScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, PANEL_W, PANEL_H, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, PANEL_W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, PANEL_W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("lore.jaymoskingdoms.codex.count", this.entries.size()), x + 10, y + 18, LIST_W, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 3);
 		if (this.entries.isEmpty()) {

@@ -21,6 +21,7 @@ MODS = [
         "dir": "src/client/java/com/jaymospowers/client",
         "package": "com.jaymospowers.client",
         "cls": "UiStyle",
+        "ns": "jaymospowers",
         "doc": "The look every Jaymo's Powers screen shares (the same one Jaymo's Kingdoms' {@code Ui} and Jaymo's Kitchen's\n"
                " * {@code KitchenUi} draw)",
         "accent": "GOLD",
@@ -31,6 +32,7 @@ MODS = [
         "dir": "kingdoms/src/client/java/com/jaymoskingdoms/client",
         "package": "com.jaymoskingdoms.client",
         "cls": "Ui",
+        "ns": "jaymoskingdoms",
         "doc": "The look every Jaymo's Kingdoms screen shares (the same one Jaymo's Powers' {@code UiStyle} and Jaymo's Kitchen's\n"
                " * {@code KitchenUi} draw)",
         "accent": "GOLD",
@@ -42,6 +44,7 @@ MODS = [
         "dir": "kitchen/src/client/java/com/jaymoskitchen/client",
         "package": "com.jaymoskitchen.client",
         "cls": "KitchenUi",
+        "ns": "jaymoskitchen",
         "doc": "The look every Jaymo's Kitchen screen shares (the same one Jaymo's Powers' {@code UiStyle} and Jaymo's Kingdoms'\n"
                " * {@code Ui} draw)",
         "accent": "0xFFE0A050",
@@ -55,9 +58,12 @@ HEAD = """package {package};
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
 import net.minecraft.world.inventory.Slot;
@@ -81,10 +87,16 @@ public final class {cls} {{
 		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;
 	/** The pack's one gold, green (good, ready, done) and red (bad, missing, broken), the same on screens and the HUD. */
 	public static final int GOLD = 0xFFFFD54A, GOOD = 0xFF66C266, BAD = 0xFFE05050;
+	/** Books, letters and pages: the paper, its darker edge, the ink and faint ink (a struck line, a margin note). */
+	public static final int PAPER = 0xFFD8C8A0, PAPER_EDGE = 0xFF8A7650, INK = 0xFF2A1E10, INK_FAINT = 0xFF7A6247;
 	/** {accent_doc} */
 	public static final int ACCENT = {accent};
 {extras}	/** Height of the header (title, dim line, rule), of one wrapped line in a detail box, and of a flat button. */
 	public static final int HEADER = 34, LINE = 9, BUTTON_H = 16;
+	/** The hover box's look ({{@link #tip}}): the flat panel with a thin rim, from {{@code textures/gui/sprites/tooltip/flat_*.png}}. */
+	public static final Identifier TIP = Identifier.fromNamespaceAndPath("{ns}", "flat");
+	/** The widest a hover box's text runs before it wraps. */
+	public static final int TIP_W = 180;
 
 	private {cls}() {{
 	}}

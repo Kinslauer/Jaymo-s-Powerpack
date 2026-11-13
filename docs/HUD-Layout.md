@@ -41,6 +41,34 @@ Left where they were: vanilla-style icon rows (feathers, thirst), the quest trac
 crosshair marks (Gravity lift, Web reticle, Resonance ring, lock-on brackets, aim crosshair), Web's spider-sense
 bolts, full-screen washes, the film bars and what films draw inside them.
 
+These also keep their own spot, because each belongs to something on screen that isn't the hotbar or the crosshair. They
+take their plate, gold and red from `HudStyle`, so only the place differs:
+
+| Piece | Where | Why not a zone |
+|---|---|---|
+| Tip card (Powers `TipCard`) | top right, 4 px in | where Minecraft's toasts go; first-time tips, one at a time |
+| Quest tracker (Kingdoms `QuestClient`) | right edge, under the effect icons | a standing list, taller than any zone row |
+| Own speech line (Kingdoms `OwnSpeechHud`) | centred over the hotbar | it is what you said, where chat would be |
+| Spirit barrage beat (Kingdoms `BarrageClient`) | over the clash film's tug bar | part of a film: the beat square, your tap's timing and what came of it |
+| Fishing cast and tension bar (Powers `FishingRealClient`) | centred, 40 px up from the bottom | only while a rod is in use; should move to `FOCUS` next |
+| Boxing blur setting line (Powers `BoxingClient`) | bottom right corner | a one-line setting readout, not a status |
+| Downed and limbo (Powers `DownedHud`, `LimboHud`) | screen centre | take the whole view while you are down or dead |
+| Heart crystal run (Powers `HeartHud`) | under vanilla's health bar | an extra run of the health bar itself |
+| Familiarity (Kitchen `FamiliarityHud`) | 12 px under the crosshair | the animal you are looking at; only while you look |
+
+A new piece that isn't one of these kinds goes in a zone.
+
+## Which notice to use
+| What happened | Use |
+|---|---|
+| Experience gained, a level reached | the experience meter and its low toast (`SkillMeter.show`; from Powers, `MeterFeed`) |
+| A milestone: an ability, rank, form or title earned | the fanfare (Powers `Milestones`, Kingdoms `Fanfare`) |
+| Something to learn once (a first-time tip) | a tip card (Powers `TipCard.show`) |
+| News from the world or from someone | Tidings; a speaker's own words go in a speech bubble |
+| An action that failed, or a state while a key is held | the action-bar line |
+
+Never Minecraft's own toast (`SystemToast`), and nothing new in plain chat.
+
 ## Adding a piece
 Pick the zone by what it is (an ability or mount: right dock; your body: left dock; a struggle or stance strip: focus;
 a charge: above; a timing or target readout: below; a look-at readout: inspect; standing status: rail), add its row

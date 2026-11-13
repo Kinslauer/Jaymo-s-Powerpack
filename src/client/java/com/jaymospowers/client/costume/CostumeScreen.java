@@ -346,7 +346,7 @@ public class CostumeScreen extends Screen {
 	/** (0.11.78) Over a piece of a power's set: whose it is. */
 	private void pieceTooltip(GuiGraphicsExtractor graphics, Button button, @Nullable String power, int mouseX, int mouseY) {
 		if (power != null && button.isMouseOver(mouseX, mouseY)) {
-			graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.costume.from_set", CostumeSets.powerName(power)),
+			UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.costume.from_set", CostumeSets.powerName(power)),
 				mouseX, mouseY);
 		}
 	}
@@ -399,7 +399,7 @@ public class CostumeScreen extends Screen {
 			}
 			DyeColor hovered = swatchAt(mouseX, mouseY, secondary);
 			if (hovered != null) {
-				graphics.setTooltipForNextFrame(this.font, Costume.colourName(hovered), mouseX, mouseY);
+				UiStyle.tip(graphics, this.font, Costume.colourName(hovered), mouseX, mouseY);
 			}
 		}
 	}
@@ -435,7 +435,7 @@ public class CostumeScreen extends Screen {
 			}
 			graphics.outline(cx - 1, py - 1, CHIP + 2, CHIP + 2, i == brush ? UiStyle.TEXT : UiStyle.ROW);
 			if (UiStyle.over(mouseX, mouseY, cx, py, CHIP, CHIP)) {
-				graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.costume.palette." + i), mouseX, mouseY);
+				UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.costume.palette." + i), mouseX, mouseY);
 			}
 		}
 		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.costume.paint_hint"), ex, py + CHIP + 4, size, UiStyle.HINT);

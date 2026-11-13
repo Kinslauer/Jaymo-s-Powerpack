@@ -2,9 +2,12 @@ package com.jaymoskingdoms.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
 import net.minecraft.world.inventory.Slot;
@@ -29,12 +32,18 @@ public final class Ui {
 		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;
 	/** The pack's one gold, green (good, ready, done) and red (bad, missing, broken), the same on screens and the HUD. */
 	public static final int GOLD = 0xFFFFD54A, GOOD = 0xFF66C266, BAD = 0xFFE05050;
+	/** Books, letters and pages: the paper, its darker edge, the ink and faint ink (a struck line, a margin note). */
+	public static final int PAPER = 0xFFD8C8A0, PAPER_EDGE = 0xFF8A7650, INK = 0xFF2A1E10, INK_FAINT = 0xFF7A6247;
 	/** The Kingdoms accent: the shared gold (journal, class pick, stables). */
 	public static final int ACCENT = GOLD;
 	/** One accent per skill pillar. */
 	public static final int SURVIVAL = 0xFF66C266, STEALTH = 0xFF9A7BE0, STRENGTH = 0xFFE06A4A;
 	/** Height of the header (title, dim line, rule), of one wrapped line in a detail box, and of a flat button. */
 	public static final int HEADER = 34, LINE = 9, BUTTON_H = 16;
+	/** The hover box's look ({@link #tip}): the flat panel with a thin rim, from {@code textures/gui/sprites/tooltip/flat_*.png}. */
+	public static final Identifier TIP = Identifier.fromNamespaceAndPath("jaymoskingdoms", "flat");
+	/** The widest a hover box's text runs before it wraps. */
+	public static final int TIP_W = 180;
 
 	private Ui() {
 	}
@@ -288,6 +297,28 @@ public final class Ui {
 			graphics.disableScissor();
 			scrollbar(graphics, x + w - 6, ty, view - 1, view, view + over, shift);
 		}
+	}
+
+	/**
+	 * The hover box for something that has no room for a detail box (a swatch, a tab, a gauge): vanilla's tooltip, so it
+	 * sits above everything and stays on the screen, in the flat panel look. Item slots keep the item's own tooltip.
+	 */
+	public static void tip(GuiGraphicsExtractor graphics, Font font, Component text, int mouseX, int mouseY) {
+		graphics.setTooltipForNextFrame(font, font.split(text, TIP_W), mouseX, mouseY, TIP);
+	}
+
+	/** The same for several lines (each wraps on its own). */
+	public static void tip(GuiGraphicsExtractor graphics, Font font, List<Component> lines, int mouseX, int mouseY) {
+		List<FormattedCharSequence> rows = new ArrayList<>();
+		for (Component line : lines) {
+			rows.addAll(font.split(line, TIP_W));
+		}
+		graphics.setTooltipForNextFrame(font, rows, mouseX, mouseY, TIP);
+	}
+
+	/** A button's or widget's hover text in the same look ({@code widget.setTooltip(tipOf(text))}). */
+	public static Tooltip tipOf(Component text) {
+		return Tooltip.create(text, Optional.empty(), TIP);
 	}
 
 	/** How many lines {@link #detail} needs for these, at this width. */

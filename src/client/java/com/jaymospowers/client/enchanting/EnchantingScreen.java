@@ -202,7 +202,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 				if (key != null && net.minecraft.locale.Language.getInstance().has(key)) {
 					lines.add(Component.translatable(key).withStyle(ChatFormatting.DARK_GRAY));
 				}
-				graphics.setTooltipForNextFrame(lines.stream().flatMap(c -> font.split(c, 180).stream()).toList(), mouseX, mouseY);
+				UiStyle.tip(graphics, font, lines, mouseX, mouseY);
 				return;
 			}
 		}
@@ -211,7 +211,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			return;
 		}
 		if (EssenceEnchanting.available(minecraft.player) && UiStyle.over(mouseX, mouseY, lx + TOGGLE_X, topPos + COST_Y, TOGGLE_W, TOGGLE_H)) {
-			graphics.setTooltipForNextFrame(font.split(Component.translatable("gui.jaymospowers.enchanting.essence.tip"), 160), mouseX, mouseY);
+			UiStyle.tip(graphics, font, Component.translatable("gui.jaymospowers.enchanting.essence.tip"), mouseX, mouseY);
 			return;
 		}
 		if (essenceMode()) {
@@ -220,9 +220,9 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			for (Essence e : price.amounts().keySet()) {
 				if (UiStyle.over(mouseX, mouseY, lx + 2 + n++ * 26, topPos + COST_Y, 16, 16)) {
 					Component name = Codex.seenByViewer(e) ? Component.translatable(e.key()) : Component.translatable("item.jaymospowers.essence_phial.unknown");
-					graphics.setTooltipForNextFrame(List.of(Component.literal(price.get(e) + " x ").append(name).getVisualOrderText(),
+					UiStyle.tip(graphics, font, List.<Component>of(Component.literal(price.get(e) + " x ").append(name),
 						Component.translatable("gui.jaymospowers.enchanting.essence.carried", Phials.carried(minecraft.player).get(e))
-							.withStyle(ChatFormatting.GRAY).getVisualOrderText()), mouseX, mouseY);
+							.withStyle(ChatFormatting.GRAY)), mouseX, mouseY);
 					return;
 				}
 			}
@@ -237,7 +237,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 				if (ing.options().size() > 1 || ing.options().getFirst().startsWith("#")) {
 					lines.add(Component.translatable("gui.jaymospowers.enchanting.any_of").withStyle(ChatFormatting.GRAY));
 				}
-				graphics.setTooltipForNextFrame(lines.stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
+				UiStyle.tip(graphics, font, lines, mouseX, mouseY);
 				return;
 			}
 		}

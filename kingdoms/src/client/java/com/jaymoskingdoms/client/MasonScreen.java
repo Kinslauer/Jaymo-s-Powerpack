@@ -258,7 +258,7 @@ final class MasonScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x0 = left(), y0 = top(), x = x0 + PAD, cw = colW();
 		Ui.panel(graphics, x0, y0, W, panelH(), ACCENT);
-		Ui.line(graphics, this.font, this.title, x, y0 + 7, W / 2, ACCENT);
+		Ui.line(graphics, this.font, this.title, x, y0 + 8, W / 2, ACCENT);
 		Ui.lineRight(graphics, this.font, Component.translatable("gui.jaymoskingdoms.mason.plans", this.open.blankPlans()), x0 + W - PAD, y0 + 7, W / 2,
 			this.open.blankPlans() > 0 ? Ui.DIM : Ui.BAD);
 		// the two lists
