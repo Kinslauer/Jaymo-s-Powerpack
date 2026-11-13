@@ -815,6 +815,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		Opportunity.register();
 		Notice.register();
 		Concentration.register();
+		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
+		Gadgets.register();
+		RelicCurses.register();
+		Unknowns.register();
+		SentientBlades.register();
+		BondRest.register();
+		Nemesis.register();
+		PotionClash.register();
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
 		com.jaymoskingdoms.creatures.Creatures.register();

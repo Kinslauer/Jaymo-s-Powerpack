@@ -79,6 +79,17 @@ public final class Dispel {
 				any = true;
 			}
 		}
+		// what hangs on them too: a cursed bauble in a slot, a relic's hidden curse
+		if (caster instanceof net.minecraft.server.level.ServerPlayer sp) {
+			for (ItemStack stack : ItemBonds.carried(sp)) {
+				if (ItemCurses.tag(stack) != null && ItemCurses.lift(stack)) {
+					any = true;
+				}
+			}
+			if (any) {
+				ItemBonds.resync(sp);
+			}
+		}
 		if (any) {
 			level.sendParticles(Fx.LIGHT, caster.getX(), caster.getY(1.0), caster.getZ(), 20, 0.4, 0.5, 0.4, 0.05);
 		}

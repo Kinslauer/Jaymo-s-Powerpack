@@ -11,7 +11,10 @@
 		"ProjectileCoverMixin",
 		"LairSpawnMixin",
 		"BirdSongMixin",
-		"FoeLoreMixin"
+		"FoeLoreMixin",
+		"SlotCurseMixin",
+		"PlayerDropMixin",
+		"PotionClashMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

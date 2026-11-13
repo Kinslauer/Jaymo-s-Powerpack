@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/ladder",
+  "textures": {
+    "particle": "jaymoskingdoms:block/climbing_knot",
+    "texture": "jaymoskingdoms:block/climbing_knot"
+  }
+}

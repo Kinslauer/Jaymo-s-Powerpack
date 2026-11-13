@@ -226,7 +226,7 @@ public final class CatchBreath {
 	}
 
 	/** Nothing hunting them near, and no blow lately. */
-	private static boolean calm(ServerLevel level, ServerPlayer player) {
+	static boolean calm(ServerLevel level, ServerPlayer player) {
 		@Nullable Long hurt = HURT.get(player.getUUID());
 		if (hurt != null && level.getGameTime() - hurt < HURT_GAP) {
 			return false;

@@ -47,6 +47,16 @@ public class BaubleItem extends Item {
 		return this.kind;
 	}
 
+	/** Whether this bauble must be bonded (a rest spent with it) before it does anything. Plain lantern poles need none. */
+	public boolean needsBond() {
+		return this != Baubles.LANTERN_POLE;
+	}
+
+	/** Whether this kind of bauble is only ever found, so its powers show as unknown until studied or used. */
+	public boolean found() {
+		return false;
+	}
+
 	public List<Bonus> bonuses() {
 		return this.bonuses;
 	}
@@ -79,6 +89,10 @@ public class BaubleItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
 		builder.accept(Component.translatable("item.jaymospowers.bauble.slot", this.slotName()).withStyle(ChatFormatting.GRAY));
+		if (Bonds.unknown(stack)) {
+			builder.accept(Component.translatable("tooltip.jaymospowers.unknown").withStyle(ChatFormatting.DARK_PURPLE));
+			return;
+		}
 		for (Bonus bonus : bonuses(stack)) {
 			boolean percent = bonus.operation() != AttributeModifier.Operation.ADD_VALUE;
 			double amount = percent ? bonus.amount() * 100.0 : bonus.amount();

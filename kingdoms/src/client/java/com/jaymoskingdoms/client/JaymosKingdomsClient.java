@@ -193,6 +193,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		KinshipClient.register();
 		WarriorFury.register();
 		BruteRageHud.register();
+		OwnSpeechHud.register();
 		BloodReservoirHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/climbing_knot"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/climbing_knot",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/climbing_knot",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/climbing_knot",
+      "y": 270
+    }
+  }
+}
