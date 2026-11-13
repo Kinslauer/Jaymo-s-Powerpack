@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>The shape.</b> The class key takes the selected shape (sneak and the key picks the next one studied) for
  * {@link #SHAPE_TICKS}, or lets it go sooner. It is a choice with a timer, not a curse ({@link WerewolfPlayers} is the curse): a
  * stand-in beast takes the body's place for everyone's eyes and a blow to it is a blow to the Druid. Each shape gives its
- * strengths and a price: the wolf is quick and keen-nosed, the bear tough and strong but slow, the hawk light, high-leaping
+ * strengths and a price: the wolf is quick and keen-nosed, the bear tough and strong but slow, the hawk flies, light
  * and slow-falling but frail, the fish swift and breathing in water but helpless on land. A beast casts nothing (no focus, no
  * scroll). {@link #SHAPES} shapes come back with each short rest ({@link Rests}). A Druid downed or dead is themselves again.</li>
  * <li><b>Rites.</b> The sprig casts the spell it is turned to (plant growth, moonbeam, and the rest of nature's rites from
@@ -66,6 +66,9 @@ public final class Druids {
 	static final int STUDY_TICKS = 20 * 90;
 	static final double STUDY_RANGE = 8.0, STUDY_SPEED = 0.03;
 	/** Each shape's extra health, the bear's push-back resistance and the frail hawk's loss. */
+	/** The hawk flies: how fast (a player's own creative flight is 0.05), and the tag that marks wings to take back. */
+	static final float HAWK_FLY_SPEED = 0.035F, OWN_FLY_SPEED = 0.05F;
+	static final String WINGS_TAG = "jaymoskingdoms_hawk_wings";
 	static final double WOLF_HEALTH = 4.0, BEAR_HEALTH = 10.0, HAWK_HEALTH = -4.0, FISH_HEALTH = 0.0, BEAR_KNOCKBACK = 0.5;
 	/** The stand-in beasts' kin: the entity paths each shape is studied from. */
 	static final Map<String, List<String>> KIN = Map.of(WOLF, List.of("wolf", "feral_wolf", "coyote"), BEAR, List.of("polar_bear", "grizzly"),
@@ -125,6 +128,8 @@ public final class Druids {
 			return true;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> end(handler.player, false));
+		// (wings left on by a crash are taken back at the door)
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> fold(handler.player));
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				end(player, false);
@@ -253,6 +258,13 @@ public final class Druids {
 				kb.addTransientModifier(new AttributeModifier(KNOCKBACK, BEAR_KNOCKBACK, AttributeModifier.Operation.ADD_VALUE));
 			}
 		}
+		if (form.equals(HAWK)) {
+			// a hawk flies
+			player.addTag(WINGS_TAG);
+			player.getAbilities().mayfly = true;
+			player.getAbilities().setFlyingSpeed(HAWK_FLY_SPEED);
+			player.onUpdateAbilities();
+		}
 		buffs(player, form);
 		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(0.5), player.getZ(), 24, 0.4, 0.6, 0.4, 0.05);
 		level.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, player.getX(), player.getY(0.5), player.getZ(), 16, 0.5, 0.6, 0.5, 0.02);
@@ -321,6 +333,19 @@ public final class Druids {
 		}
 	}
 
+	/** Takes the hawk's wings back (creative and spectator keep their own flight). */
+	private static void fold(ServerPlayer player) {
+		if (!player.removeTag(WINGS_TAG)) {
+			return;
+		}
+		player.getAbilities().setFlyingSpeed(OWN_FLY_SPEED);
+		if (!player.isCreative() && !player.isSpectator()) {
+			player.getAbilities().mayfly = false;
+			player.getAbilities().flying = false;
+		}
+		player.onUpdateAbilities();
+	}
+
 	/** The shape is shed ({@code pause}: they chose it, and wait a moment before the next). */
 	static void end(ServerPlayer player, boolean pause) {
 		Shape shape = SHAPES_WORN.remove(player.getUUID());
@@ -338,6 +363,7 @@ public final class Druids {
 		if (kb != null) {
 			kb.removeModifier(KNOCKBACK);
 		}
+		fold(player);
 		for (var effect : List.of(MobEffects.SPEED, MobEffects.STRENGTH, MobEffects.JUMP_BOOST, MobEffects.RESISTANCE, MobEffects.SLOWNESS, MobEffects.SLOW_FALLING,
 			MobEffects.WATER_BREATHING, MobEffects.DOLPHINS_GRACE, MobEffects.WEAKNESS, MobEffects.NIGHT_VISION)) {
 			MobEffectInstance on = player.getEffect(effect);

@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
  */
 public final class ClassCasters {
 	/** The id the revive prayer takes when it exists; a Cleric may learn it. */
-	public static final String REVIVE = "revive";
+	public static final String REVIVE = "calling_back";
 	/** How much harder a Cleric's, a Druid's and a Warlock's spells are than a scroll's (the Mage's is {@link Spellcraft#MAGE_POWER}). */
 	static final float CLERIC_POWER = 1.4F, DRUID_POWER = 1.4F;
 	/** A Warlock's wait between casts as a share of a Mage's: their magic comes back fast. */
@@ -33,10 +33,10 @@ public final class ClassCasters {
 
 	static {
 		ALLOWED.put(PlayerClass.CLERIC, new HashSet<>(Set.of("mending", "sanctuary", "restoration", "warding", "bulwark", "dispel", "counterspell", "ward_line",
-			"purify_food", "create_food", "heroes_feast", "zone_of_truth", "augury", "find_magic", "identify", "locate_object", "feather_fall", REVIVE)));
+			"purify_food", "create_food", "heroes_feast", "zone_of_truth", "augury", "find_magic", "identify", "locate_object", "feather_fall", "keeping", REVIVE)));
 		ALLOWED.put(PlayerClass.DRUID, new HashSet<>(Set.of("plant_growth", "moonbeam", "control_weather", "speak_animals", "heroes_feast", "mending",
 			"feather_fall", "spider_climb", "water_walk", "long_jump", "spike_growth", "web", "grease", "fog", "tide_pearl", "harrying_gale", "purify_food",
-			"create_food", "find_magic", "locate_creature", "hut")));
+			"create_food", "find_magic", "locate_creature", "hut", "rebirth")));
 		ALLOWED.put(PlayerClass.WARLOCK, new HashSet<>(Set.of("arcane", "fire", "draining", "darkness", "silence", "web", "fog", "misty_step", "charm", "command",
 			"hold", "suggestion", "geas", "counterspell", "dispel", "grease", "find_magic", "identify", "whispers", "blight")));
 		BORN.put(PlayerClass.CLERIC, Set.of("dispel", "identify", "create_food", "purify_food"));

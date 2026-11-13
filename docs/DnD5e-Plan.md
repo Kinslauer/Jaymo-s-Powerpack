@@ -272,3 +272,27 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **F3** (Powers lake crust, Kingdoms `traps/Traps`, `ColdMouldBlock`, `SporeMouldBlock`, `SlimeMouldBlock`):
   holding your breath is sneaking (air drains, spores take you when it's out); vinegar is a new item (bottle +
   2 apples), Kitchen has none. Moulds drop themselves; textures from `tools/gen_fifth_p10.py`.
+
+### Patch 11a (new classes)
+- All: class key J via `Abilities`; `Rests` pools (short rest = `CatchBreath`, sleep = all); teachers (`ClassTeachers`:
+  priest = holy symbol, farmer/shepherd = sprig, librarian = pact seal, smiths = gadget recipes; 4 silver a lesson);
+  14 cards on the class screen (portraits are gear icons as stand-ins); no class NPCs added.
+- **K2 Cleric** (`Clerics`): patron as the class option; turnings 2 + patron tier per rest; bless (absorption, +15%
+  saves, fright lifted); allowed spells include Calling Back and keeping.
+- **K3 Druid** (`Druids`): study by watching a beast 90 s; shape 3 min, 2 per rest; stand-in beast bodies (wolf, polar
+  bear, parrot, cod) with the player's body hidden; the hawk has real flight (lead's fix), the fish water breathing;
+  first-person hand still shows. May learn rebirth.
+- **K4 Monk** (`Monks`): fist damage with no plate; arrow catch on a timed key, thrown back from the pack (flat
+  damage); stun via `HeldFast` (bosses resist); slow fall by walls.
+- **K5 Paladin** (`Paladins`): 3 smites (+6, doubled on the dead), 20 health of hands, aura +12% saves in 10 blocks,
+  fearless; oath breaking: mercy = killing the helpless, justice = any crime, honour = theft or striking the unaware
+  non-hostile; atone by shrine prayer or 8 silver to a priest.
+- **K6 Ranger** (`Rangers`): per Andy replaces Archer and Survivalist (save migration; their perks and boons kept
+  in `ClassPerks`). Foe picked as the class option (dead, raiders, beasts, spiders, greenskins, monsters): +25%, +15%
+  more on favoured land; land set from the starting biome, re-claimed with sneak + key once a day; tracking via
+  `TrailReading` (the favoured foe's prints read farthest/oldest and larger: lead's addition); quieter.
+- **K7 Warlock** (`Warlocks`): 2 pact slots, x1.5 power, 0.4x cooldown; a debt every 5 casts due in 3 days (favour,
+  errand, blood, coin); unpaid: slots withheld, then favour -25, weakness and darkness.
+- **K8 Tinkerer** (`Tinkerers`): infusions at Powers tinkering stations, 3 at once: returning (tridents only, real
+  Loyalty), springing boots, glowing shield (night vision + glow, no placed light); recipes for rod, rope, jug,
+  light, smoke bottle (invented, need a balance pass); hound and horn stay loot-only.

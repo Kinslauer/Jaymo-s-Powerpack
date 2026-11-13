@@ -34,7 +34,8 @@ import net.minecraft.world.level.biome.Biome;
  * <li><b>Favoured land:</b> a kind of country (forest, taiga, jungle, mountain, desert, swamp, plains, snow, underground, water).
  * A Ranger begins with the land they start in; with sneak held, the class key claims the land they stand in instead, once a day.
  * There they move quietly ({@link #quiet}).</li>
- * <li><b>Tracking:</b> the class key reads the ground ({@link TrailReading}) at once, farther on favoured land.</li>
+ * <li><b>Tracking:</b> the class key reads the ground ({@link TrailReading}) at once, farther on favoured land; the favoured
+ * foe's prints are read at the farthest and oldest and stand out larger.</li>
  * <li><b>Quiet:</b> a Ranger's noise carries less ({@link Awareness#noise}) and mobs notice them from less far ({@link Senses#factor}).</li>
  * </ul>
  */
@@ -178,7 +179,9 @@ public final class Rangers {
 		}
 		TRACKED.put(player.getUUID(), now);
 		boolean home = land(level, player.blockPosition()).equals(land(player));
-		TrailReading.read(level, player, home ? 1 : 0);
+		String kind = foe(player);
+		// their favoured foe's trail is read as far and as old as any tracker reads, and stands out
+		TrailReading.read(level, player, home ? 1 : 0, e -> e instanceof LivingEntity living && isFoe(kind, living));
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.ranger.tracking"));
 	}
 }

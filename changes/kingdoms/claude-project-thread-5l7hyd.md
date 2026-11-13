@@ -74,4 +74,12 @@
 - **Graves** (`Graves`, `GraveBlock`): bury a body with a shovel; dig it up and it comes back.
 - **Rebirth** (`Rebirths`, `Groves`, `DeathRites`): an old druid at a forest grove, or a player with the Scroll of Rebirth there, brings a dead-for-good player back within ten days, with the body, in a new random blood: name, memories, class, skills and belongings kept; the old blood's gifts lost.
 - **Nature's traps** (`traps/Traps`): quicksand pits in deserts and swamps; cave moulds: a cold mould that feeds on fire, a spore mould you hold your breath (sneak) past, and a slime mould that eats wood and metal and dies to fire or vinegar (new vinegar item).
+- **Seven new classes** (`Clerics`, `Druids`, `Monks`, `Paladins`, `Rangers`, `Warlocks`, `Tinkerers`, `Abilities`, `Rests`, `ClassCasters`, `ClassTeachers`): the class key (J) works for each; pools come back on a short rest or a night's sleep; no starting gear, village teachers sell the recipes.
+- **Cleric**: sworn to a patron; raise the holy symbol and the dead flee or crumble; healing prayers; bless the band; may learn Calling Back and the rite of keeping.
+- **Druid**: watch a wolf, bear, hawk or fish to learn its shape, then wear it for three minutes (the hawk flies, the fish breathes water); born knowing nature's rites.
+- **Monk**: bare hands hit like weapons (built on the boxing styles); catch an arrow (the real one) and throw it back; slow fall beside walls; a stunning blow.
+- **Paladin**: an oath of mercy, justice or honour; holy smites; laying on hands from a daily pool; an aura that steadies friends; break the oath and it all goes until you atone at a shrine or with a priest.
+- **Ranger** replaces the Archer and the Survivalist (old characters load as Rangers, keeping Headshot and Second Wind): a favoured foe (harder blows, its trail read farther and standing out) and a favoured land (never lose the trail, move quietly).
+- **Warlock**: a pact with a patron: two strong spells that come back on a short rest, and a debt the patron calls in favour, an errand, blood or coin, and collects if left.
+- **Tinkerer**: infuses gear at the tinkering stations (a returning trident, springing boots, a glowing shield, three at a time) and learns to build five of the wondrous gadgets.
 - Built; not played.
