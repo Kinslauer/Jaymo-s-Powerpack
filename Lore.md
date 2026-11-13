@@ -1450,3 +1450,11 @@ else. A drink at a speakeasy table is how you're let in. Every tavern keeps dice
 and a hard night out is the Low Lantern's old toll on the careless: you wake with a friend, a rumour, a debt or a
 black eye. Sages (court wizards, elders, librarians) and libraries keep what each foe fears and old sextons' ledgers;
 village teachers pass on tongues, trades and fighting styles; and the Lantern Warden's priests feed those living rough.
+
+(new) **The hand that shapes the well** (Claude's placement for the fifth edition picks, patch 6, 2026-11-12, for
+Andy to approve; under "Ki and mana are the same thing"). A spell is the same well shaped by hand, and it asks three
+things of the one who shapes it: a voice (a gag or a bubble of silence stills a caster), a free hand, and for the
+great ones a costly thing burned up, diamond dust, a pearl, a bone. A staff, a tome or a holy sign stands in for the
+small ones. The slow rites, ten still seconds over an open book, need no mana at all. Anyone may try a scroll beyond
+their learning, and it may fizzle or bite back. A caster's raised staff and turning sigil give the spell away a
+heartbeat before it lands, which is how court wizards and camp shamans snuff each other's work.
