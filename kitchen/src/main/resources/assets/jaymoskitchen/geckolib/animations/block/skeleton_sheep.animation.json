@@ -1,0 +1,38 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "standing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "grazing": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "neck": {
+     "rotation": [
+      40,
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      16.0,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

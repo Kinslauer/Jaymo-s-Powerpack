@@ -15,5 +15,20 @@
 	"block.jaymoskitchen.deer_hide_rug": "Deerskin Rug",
 	"block.jaymoskitchen.rhino_hide_rug": "Rhino Hide Rug",
 	"block.jaymoskitchen.alligator_hide_rug": "Alligator Hide Rug",
-	"tooltip.jaymoskitchen.hide_of": "%s hide"
+	"tooltip.jaymoskitchen.hide_of": "%s hide",
+	"item.jaymoskitchen.frame_bones": "Frame Bones",
+	"item.jaymoskitchen.frame_bones.of": "Bones of a %s",
+	"item.jaymoskitchen.cleaned_bones": "Cleaned Bones",
+	"item.jaymoskitchen.cleaned_bones.of": "Cleaned Bones of a %s",
+	"block.jaymoskitchen.bone_stand": "Bone Stand",
+	"block.jaymoskitchen.beetle_box": "Beetle Box",
+	"message.jaymoskitchen.bones.pot_full": "There are bones in this pot already",
+	"message.jaymoskitchen.bones.pot_cold": "The pot needs a fire under it",
+	"message.jaymoskitchen.bones.boiling": "The bones go in to boil, about %s minutes",
+	"message.jaymoskitchen.bones.boiling_left": "Still boiling, about %s minutes more",
+	"message.jaymoskitchen.bones.beetles_restocked": "The beetles come back to the flesh",
+	"message.jaymoskitchen.bones.box_full": "The box already holds bones",
+	"message.jaymoskitchen.bones.beetles_gone": "The beetles have starved. Feed them rotten flesh",
+	"message.jaymoskitchen.bones.beetles_at_work": "The beetles set to work, about %s day",
+	"message.jaymoskitchen.bones.beetles_left": "The beetles are still at it, about %s minutes more"
 }

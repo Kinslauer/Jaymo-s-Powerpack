@@ -25,4 +25,5 @@
 - The spike drill (three spikes, copper and redstone; a Tool Station build in Powers) mines as an iron pickaxe, faster the longer it runs. It heats as it goes; too hot, it burns your hand and stalls until it cools. It cools at rest, and a snowball dropped on it in the inventory cools it at once.
 - The Warped Clam (Inhabitants', MIT) lives on the End's outer islands, and so turns up in Arsenal's pocket rooms too. It never moves or hurts anyone; stand on it and it throws you high. It grows an ender pearl every day or two (faster beside chorus) and sits open with it showing; brush the pearl out and it starts another. A shovel eases it a block over, and anyone can lift and carry it.
 - Powers' escort wards are walked by Powers, as its patrolmen are.
+- With Jaymo's Kitchen in: a bone stand makes a cafe cosier (as rugs do), and a librarian may want a cleaned skeleton for their study.
 - Built; not played.

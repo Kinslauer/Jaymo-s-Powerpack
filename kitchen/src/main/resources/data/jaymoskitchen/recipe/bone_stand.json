@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " I ",
+    "SSS"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:oak_slab"
+  },
+  "result": {
+    "id": "jaymoskitchen:bone_stand",
+    "count": 1
+  }
+}

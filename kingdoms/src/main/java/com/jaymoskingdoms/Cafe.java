@@ -342,7 +342,8 @@ final class Cafe {
 		}
 		Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
 		return id.getNamespace().equals("beautify")
-			|| id.getNamespace().equals("jaymoskitchen") && (id.getPath().endsWith("_cabinet") || id.getPath().endsWith("_rug"));
+			|| id.getNamespace().equals("jaymoskitchen") && (id.getPath().endsWith("_cabinet") || id.getPath().endsWith("_rug")
+				|| id.getPath().equals("bone_stand"));
 	}
 
 	/** How high one sits on {@code state} (above its block), or 0 if it isn't a seat. */
