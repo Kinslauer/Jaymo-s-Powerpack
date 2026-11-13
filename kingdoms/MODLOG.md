@@ -12637,3 +12637,11 @@ giants being worked on, as its own upright model."
 - Diggers, goblin scouts, loot goblins, Imps and zombified Imps were never in the dismemberable list, so a blade or a blast could never take a part off them. They are now (data/jaymospowers/tags/entity_type/dismemberable.json), and being small they lose parts more often than a person (Powers' size scaling).
 - Imps (1.4 tall) are cut about 1.3x as often as a person; Powers now hides lost limbs on GeckoLib models, which Imps are.
 - Built; not played.
+
+## 0.8.27 (2026-11-13): Rumours of beasts no longer load land to read its biome (#1454)
+
+- **Fix (watchdog crash)**: a rumour of a monster of legend (`Sightings.rumour`) picks a spot hundreds of blocks out
+  from a settlement and read its biome with `level.getBiome`, which waited on the server thread for a chunk not loaded
+  or still being made (Deck crash 2026-11-13 14:23, 58 s on chunk [20, -9]). Loaded land is read as before; elsewhere
+  the world's biome source answers without touching a chunk.
+- Built; tested on the Deck server.
