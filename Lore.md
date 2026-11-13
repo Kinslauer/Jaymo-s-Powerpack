@@ -514,7 +514,7 @@ dragons and Aetherion fly about the Aether's islands, and Ignivorus (with Notus 
 Nether. None of them comes down to the Overworld, wind, ground or in a villager's disguise, until someone in the world has
 killed a dragon, any dragon, the Ender Dragon too. After the first one dies the rest come down to the lands named above.
 
-(new) **Four more great ones** (Andy picked them 2026-11-12; placements are Claude's, to approve). The **thing under
+**Four more great ones** (Andy approved, 2026-11-12). The **thing under
 the wreck** is the Deep Mother's own: it lies under some of the treasure wrecks and out in the far grounds, and it takes
 hold of ships. Sailors speak round it and never name it. The **sand worm** is an old Stoneborn legend (Andy): it moves
 under the desert's ruins, the Stoneborn talk of it the way people talk of a thing their grandfathers saw, and a
@@ -523,7 +523,7 @@ stone's country; the Frostborn count it a neighbour, and it leaves alone whoever
 knight** is one of the old war's dead, a champion of the demons' country still holding a Nether fortress long after
 anyone told him to; his sword lies with him and nowhere else.
 
-(new) **The glass gauntlet** (Andy, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
+**The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
 Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
 
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
