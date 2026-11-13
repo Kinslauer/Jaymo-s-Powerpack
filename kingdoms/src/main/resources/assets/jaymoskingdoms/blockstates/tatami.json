@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jaymoskingdoms:block/tatami"
+    },
+    "axis=x": {
+      "model": "jaymoskingdoms:block/tatami",
+      "y": 90
+    },
+    "axis=z": {
+      "model": "jaymoskingdoms:block/tatami"
+    }
+  }
+}

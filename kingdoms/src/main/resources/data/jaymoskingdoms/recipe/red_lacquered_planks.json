@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "minecraft:red_dye",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "count": 4,
+    "id": "jaymoskingdoms:red_lacquered_planks"
+  }
+}

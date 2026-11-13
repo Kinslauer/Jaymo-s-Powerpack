@@ -80,6 +80,11 @@ for it), the navy patrol, keeping coaches and fares off the land, and a harbour 
 
 ## Patch 3: building blocks (bl_shoji, bl_tatami, bl_plaster, bl_lacquer, bl_paperlantern, bl_stonelantern, bl_thatch, bl_tansu, bl_futon, bl_hearth, bl_ward)
 
+*Built (2026-11-13, `blossomland.BlossomBlocks`, `Wards`, `kingdoms/tools/gen_blossom_blocks.py`): shoji, tatami,
+plaster, red and black lacquered planks, paper lantern, stone lantern, thatch (block, slab, stairs), ward rope. Not
+built: tansu, futon, hearth, sliding doors through `Doorways`, sap for lacquer (honeycomb stands in), and the swap of
+`Blossom`'s palette onto these blocks.*
+
 Our own blocks in Kingdoms, then `Blossom`'s palette swapped onto them (paper for glass panes, plaster, lacquer for
 red concrete, the one-block stone lantern, tatami through `KitchenCompat`). Sliding doors open for villagers through
 `Doorways`. Sap is tapped from trees for lacquer. Ward ropes stop night spawns close by. Thatch is for the whole pack.

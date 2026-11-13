@@ -1,0 +1,6 @@
+# Blossom building blocks: shoji, tatami, plaster, lacquer, lanterns, thatch, the ward rope
+- **Eleven new blocks**, all craftable and in the Building Blocks tab: Shoji Panel (paper in a lattice, joins like glass panes; sticks and paper), Tatami (string over thatch), Plaster (clay, bone meal, sand), Red and Black Lacquered Planks (planks, dye, honeycomb), Paper Lantern (stands or hangs, light 14), Stone Lantern (one block, light 13), Thatch with its slab and stairs (wheat; for anyone's roof), and the Ward Rope.
+- **Ward Rope**: a straw rope hung with folded paper, joining like panes, no collision. No monster is spawned by the night within 12 blocks of one in the Overworld. It does nothing to a monster that walks in, to spawners or to raids.
+- Paper, rope and thatch burn readily.
+- `blossomland.BlossomBlocks`, `blossomland.Wards`, `NaturalSpawnerMixin`; data and art from `kingdoms/tools/gen_blossom_blocks.py`.
+- Built, and a dev server loaded the blocks, a recipe and a loot table without errors. Not seen in game: the textures and the two lantern models are first drafts. Still to come for this patch: the tansu chest, futon, sunken hearth, sliding doors villagers open, sap for lacquer, and the Blossom villages built from these blocks.
