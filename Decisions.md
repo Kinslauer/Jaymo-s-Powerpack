@@ -452,3 +452,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   black flame" (the (new) marks are off). All twelve BossRise patches are merged (last: #1406).
 - 2026-11-12 11:32 PM ET (Blossom lands thread): Andy said "merge" for PR #1410 (helmsmen and talk of the east, patch 2 first half). Merged by squash.
 - 2026-11-12 11:39 PM ET (Blossom lands thread): Andy said "merge" for PR #1411 (blossom traders and passage, patch 2 second half). Merged by squash.
+- 2026-11-13 12:11 AM ET (Blossom lands thread): Andy asked for a command to get to Mohknee; "okay add that" to `/kingdom mohknee go` (PR #1413).
