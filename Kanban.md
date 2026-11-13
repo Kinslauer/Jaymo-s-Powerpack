@@ -4,16 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 12:07). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 12:08). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
+- [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · claimed
 - [ ] [[Agents/ui-match|ui-match]] · 💻 Odysseus · #1434 · running
 
 
