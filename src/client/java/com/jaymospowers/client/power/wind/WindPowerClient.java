@@ -65,7 +65,11 @@ public final class WindPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(
 			net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.MISC_OVERLAYS,
 			com.jaymospowers.JaymosPowers.id("wind_screen_fx"), WindScreenFx::render);
-		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WindScreenFx.clear());
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			WindScreenFx.clear();
+			// (the focus's hush mustn't outlive the world)
+			WindAirSense.clear();
+		});
 		// poses of everyone in view (other players may fly even when the local player has another power)
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
