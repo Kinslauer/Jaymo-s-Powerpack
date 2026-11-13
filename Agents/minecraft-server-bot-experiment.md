@@ -1,9 +1,9 @@
 ---
-status: blocked
+status: done
 task: minecraft-server-bot-experiment
 branch: 
 with: 
-pr: 
+pr: 1467
 mods: 
 versions: 
 started: 2026-11-13
@@ -26,3 +26,6 @@ owns:
 
 ## Done
 Verdict: not possible with Hermes. No player-visible change; nothing tested in game (no code written).
+
+- 2026-11-13 (cloud thread "Plan Minecraft server bot for Hermes"): the verdict above is superseded. Andy chose a
+  Sylvan wisp body; the mod is PR #1467 and the Hermes side is reopened in the Inbox task for PC Claude.

@@ -4,10 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 22:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 17:36). Don't edit. -->
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · for pc-claude · #1467 · open
 
 
 ## Being built
@@ -23,20 +24,19 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · 🍇 Bacchus · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/waterskin-tiers|waterskin-tiers]]
+- [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
+- [x] [[Inbox/Done/pirateface-worth-rescuing-experiment|pirateface-worth-rescuing-experiment]]
+- [x] [[Inbox/Done/pr1377-text-pass|pr1377-text-pass]]
+- [x] [[Inbox/Done/omniroute-ai-gateway-experiment|omniroute-ai-gateway-experiment]]
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
-- [x] [[Inbox/Done/warped-clam-model|warped-clam-model]]
+- [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
+- [x] [[Inbox/Done/frostborn-tech-villagers|frostborn-tech-villagers]]
+- [x] [[Inbox/Done/tinkerer-cheats-death|tinkerer-cheats-death]]
 
 
 %% kanban:settings

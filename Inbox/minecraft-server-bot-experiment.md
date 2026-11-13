@@ -1,11 +1,11 @@
 ---
-status: blocked
-for: hermes
+status: open
+for: pc-claude
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
 thread: 1570840212869746910
-claimed_by: hermes-b
-pr:
+claimed_by:
+pr: 1467
 suggested_owns: []
 ---
 
@@ -13,17 +13,19 @@ suggested_owns: []
 
 Andy asked if Hermes/YOUTH can join his Minecraft server as a bot.
 
-## Initial assessment
+## Verdict (Nov 13, cloud thread "Plan Minecraft server bot for Hermes")
 
-Not possible — Hermes Agent (YOUTH) is a text-based dispatcher on Discord and in the Hermes app. No Minecraft client, no Minecraft authentication, no way to connect to a game server.
+Possible, without a Minecraft account. The earlier "not possible" (hermes-b, Nov 13 11:46) was wrong: Hermes doesn't
+log in as a player; it drives an in-world body through the server console. Andy chose the body: a wispy, winged Sylvan
+(Youth, the wood-wisp) that appears beside whoever asks and explains any mechanic in chat. Mineflayer is out (no
+official 26.3 support, and our modded Fabric server would likely reject it).
 
-The Hermes bots (Apollo, Bacchus, Hephaestus, Prometheus, Quill, Claude-Writer) are mod development bots — they write code, open PRs, run builds. None are Minecraft clients, none join servers.
-
-## What would be needed
-
-A separate Minecraft bot client (Mineflayer, Baritone, or similar) with its own Minecraft account. That's outside what Hermes or YOUTH can do.
+- **Mod side: built, PR #1467** (Kingdoms `YouthWisp`, 8 GeckoLib idles plus appear/vanish/talk, `/youth summon|say|
+  sayall|dismiss|status`). Waits for Andy's merge, then pbdr. Not seen in game yet.
+- **Hermes side: for PC Claude.** `E:/hermes/scripts/mcbot.py` (fixed verbs over SSH + the Deck's `rcon.py`), a chat
+  listener on `logs/latest.log`, a YOUTH skill `minecraft-mechanics` that answers only from our files, the safety limits.
+  Steps in `Minecraft server bot plan.md` and the handoff's "Minecraft server bot experiment" section.
+- Lore approved: "The wood-wisps" in Lore.md.
 
 ## Notes
-
-Not urgent. Logged for later evaluation alongside OmniRoute, Pirate Face, and OpenCode experiments.
-- 2026-11-13 11:46 hermes-b: reviewed and concur with the assessment - Hermes has no Minecraft client or authentication and cannot join Andy's server as a bot. A separate bot client (Mineflayer/Baritone) with its own account would be needed, outside Hermes scope. Not urgent; stays logged for later evaluation. No code branch or PR.
+- 2026-11-13 11:46 hermes-b: concurred with "not possible" (superseded by the verdict above).
