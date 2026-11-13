@@ -34,7 +34,8 @@ On a narrow screen (less than 150 gui px right of the hotbar) both docks move ov
 focus band goes over them.
 
 The experience meter (Kingdoms `SkillMeter`) has the top middle to itself: it drops in at y 6 (under vanilla's boss
-bars when any show) when a skill pillar or a job gains experience, and slides back out. It hides with films.
+bars when any show) when a skill pillar or a job gains experience, and slides back out. It hides with films. Powers' mastery and Z Fighter training reach it through the object share
+(`jaymos:skill_meter`, Powers `MeterFeed`).
 
 Left where they were: vanilla-style icon rows (feathers, thirst), the quest tracker (top-right under the effects),
 crosshair marks (Gravity lift, Web reticle, Resonance ring, lock-on brackets, aim crosshair), Web's spider-sense
