@@ -664,6 +664,12 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 - **Weather:** in a storm the streaks wander up to `STORM_WOBBLE` 20 degrees off true, so it reaches further and tells
   you less. In the rain or the cold (`WindCold`) soft movement is lost: the least it feels is `DULLED_MIN` x1.5.
 - **Under water** (eyes in water) it feels nothing.
+- **The focus** (Jung): while listening, the world goes quiet and grey. Over `FOCUS_IN` 8 ticks every world sound
+  drops to `HUSH` 0.3 of its volume (music, records, menus and voices keep theirs; `WindSenseSoundMixin`, the same two
+  places the sound browser's volume works: a sound's start, and the volume of one that keeps it up to date), and the
+  view fades toward an even grey (`GREY` at up to `GREY_ALPHA` 0x5A) under a soft white frame (`FRAME_ALPHA` 0x6E at
+  the edge, gone `FRAME_DEPTH` 0.2 of the way in). No tunnel: the middle is as clear as the edges, only greyer, and
+  the streaks are drawn over it. Letting go brings it back over `FOCUS_OUT` 6 ticks.
 - **Client side only**, from what the client already knows of the things round it (so never beyond the server's entity
   tracking range): no packets, no server code, no cost. Run from `WindPowerClient.tick` and `renderHud`.
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
@@ -682,6 +688,9 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 7. Put your head under water: no streaks.
 8. `/power level @s 0`: no streaks. `/power level @s 1`: 12 blocks. `/power level @s 4`: 24 blocks.
 9. Another power, or no power: no streaks.
+10. Crouch and hold V by a noisy farm or a river: over a moment the sounds drop to about a third and the screen
+    greys under a white edge; you can still see clearly through the middle. Music and menu clicks stay as loud. Let
+    go of V: sound and colour come back in about a third of a second. Log out mid-focus and back in: sound is normal.
 
 ## 0.15.58: the way into the Aether (`power/wind/aether/WindAether.java`)
 

@@ -35,6 +35,12 @@ import net.minecraft.world.phys.Vec3;
  * <p>Client side only, from what this client already knows of the things round it: nothing is sent, and it costs
  * nothing. From {@link #MIN_MASTERY} unlocked abilities. While listening a faint ring of ticks shows round the
  * crosshair, so it is plain the sense is on even when nothing stirs.
+ *
+ * <p>(Jung: "make the world quieter around you and give your screen a greyed effect that doesn't blind you") Listening
+ * is a focus: over {@link #FOCUS_IN} ticks the world's sounds drop to {@link #HUSH} of their volume (music and menus
+ * keep theirs; {@code WindSenseSoundMixin}), and the screen fades toward grey under a soft white frame. There is no
+ * tunnel: the middle of the view stays as clear as the edges, only greyer. Letting go brings it all back over
+ * {@link #FOCUS_OUT} ticks.
  */
 public final class WindAirSense {
 	// ---- tuning ----
@@ -74,6 +80,13 @@ public final class WindAirSense {
 	static final int COLOR = 0xDFF6FF, MAX_ALPHA = 255;
 	/** The faintest a streak's first dot is drawn (0-255), however weak or far its maker. */
 	static final int MIN_ALPHA = 130;
+	/** The focus: ticks to come on and to go off, and the world's sounds at full focus (a share of their volume). */
+	static final float FOCUS_IN = 8.0F, FOCUS_OUT = 6.0F, HUSH = 0.3F;
+	/** The grey laid over the whole view (0xRRGGBB, and its most opaque, 0-255): enough to drain the colour, not the light. */
+	static final int GREY = 0x8C9096, GREY_ALPHA = 0x5A;
+	/** The white frame: its most opaque at the very edge (0-255), its depth (a share of the smaller screen side), and its soft steps. */
+	static final int FRAME_ALPHA = 0x6E, FRAME_STEPS = 12;
+	static final float FRAME_DEPTH = 0.2F;
 
 	/** entity id → how strongly its movement is felt now (0..1]. */
 	private static final Map<Integer, Float> SIGNALS = new HashMap<>();
@@ -87,10 +100,18 @@ public final class WindAirSense {
 
 	/** Whether the sense is on right now (crouched, V held), and whether this hold of V is the sense's (until V is let go). */
 	private static boolean listening, latched;
+	/** How far into the focus (0..1), now and last tick. */
+	private static float focus, focusO;
 
 	static void clear() {
 		SIGNALS.clear();
 		listening = latched = false;
+		focus = focusO = 0.0F;
+	}
+
+	/** (WindSenseSoundMixin) What the world's sounds are multiplied by just now: 1, down to {@link #HUSH} in full focus. */
+	public static float hush() {
+		return 1.0F - (1.0F - HUSH) * focus;
 	}
 
 	/**
@@ -136,6 +157,8 @@ public final class WindAirSense {
 
 	/** Every tick, for the local Wind user: what moved near them, and the fading of what has stopped. */
 	static void tick(Minecraft minecraft, LocalPlayer player) {
+		focusO = focus;
+		focus = listening && feels(player) ? Math.min(1.0F, focus + 1.0F / FOCUS_IN) : Math.max(0.0F, focus - 1.0F / FOCUS_OUT);
 		ClientLevel level = minecraft.level;
 		if (level == null || !feels(player)) {
 			SIGNALS.clear();
@@ -162,14 +185,15 @@ public final class WindAirSense {
 		}
 	}
 
-	/** The streaks round the crosshair. */
+	/** The focus's grey and white frame, then the streaks round the crosshair. */
 	static void render(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		Minecraft minecraft = Minecraft.getInstance();
 		ClientLevel level = minecraft.level;
+		float partial = delta.getGameTimeDeltaPartialTick(false);
+		focus(graphics, Mth.lerp(partial, focusO, focus));
 		if (!listening || level == null || !feels(player)) {
 			return;
 		}
-		float partial = delta.getGameTimeDeltaPartialTick(false);
 		float yaw = player.getViewYRot(partial);
 		Vec3 eye = player.getEyePosition(partial);
 		double range = range(player);
@@ -216,6 +240,38 @@ public final class WindAirSense {
 				graphics.fill(x - half - 1, y - half - 1, x + half + 2, y + half + 2, Math.round(alpha * EDGE) << 24);
 				graphics.fill(x - half, y - half, x + half + 1, y + half + 1, alpha << 24 | COLOR);
 			}
+		}
+	}
+
+	/**
+	 * The focus over the whole view, {@code amount} of the way in: an even grey that drains the colour (the middle as
+	 * much as the edges, so no tunnel), and a white frame, densest at the very edge and gone a fifth of the way in.
+	 */
+	private static void focus(GuiGraphicsExtractor graphics, float amount) {
+		if (amount <= 0.0F) {
+			return;
+		}
+		// eased, so it settles in rather than snapping
+		float eased = amount * amount * (3.0F - 2.0F * amount);
+		int width = graphics.guiWidth(), height = graphics.guiHeight();
+		int grey = Math.round(GREY_ALPHA * eased);
+		if (grey > 0) {
+			graphics.fill(0, 0, width, height, grey << 24 | GREY);
+		}
+		int alpha = Math.round(FRAME_ALPHA * eased);
+		int depth = Math.max(8, Math.round(Math.min(width, height) * FRAME_DEPTH));
+		int step = Math.max(1, depth / FRAME_STEPS);
+		// nested bands, each step in fainter than the last: brightest at the very edge
+		for (int i = 0; i < FRAME_STEPS; i++) {
+			int a = alpha * (FRAME_STEPS - i) * (FRAME_STEPS - i) / (FRAME_STEPS * FRAME_STEPS);
+			if (a <= 0) {
+				break;
+			}
+			int c = a << 24 | 0xFFFFFF, o = i * step;
+			graphics.fill(o, o, width - o, o + step, c);
+			graphics.fill(o, height - o - step, width - o, height - o, c);
+			graphics.fill(o, o + step, o + step, height - o - step, c);
+			graphics.fill(width - o - step, o + step, width - o, height - o - step, c);
 		}
 	}
 }
