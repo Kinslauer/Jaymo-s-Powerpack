@@ -11,9 +11,9 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -84,11 +84,11 @@ public class ZFighterHudEditor extends Screen {
 	@Override
 	protected void init() {
 		int by = this.height - 24;
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_hud.reset"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_hud.reset"), b -> {
 			ZFighterHudLayout.resetAll();
 			this.picked = null;
 		}).bounds(this.width / 2 - 68, by, 64, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_hud.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_hud.done"), b -> onClose())
 			.bounds(this.width / 2 + 4, by, 64, 16).build());
 	}
 

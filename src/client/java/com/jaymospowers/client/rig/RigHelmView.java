@@ -112,10 +112,10 @@ final class RigHelmView {
 		int climb = (int)Math.round(move.y * 20.0);
 		int x = Math.round(w * 0.5F - w * HORIZON_HALF) - 70;
 		int y = h / 2 - 12;
-		g.text(font, Component.translatable("rig.jaymospowers.view.height", height < 0 ? "--" : Integer.toString(height)), x, y, LINE, false);
-		g.text(font, Component.translatable("rig.jaymospowers.view.altitude", Math.round(player.getY())), x, y + 10, SOFT, false);
-		g.text(font, Component.translatable("rig.jaymospowers.view.speed", speed), x, y + 22, LINE, false);
-		g.text(font, Component.translatable("rig.jaymospowers.view.climb", (climb > 0 ? "+" : "") + climb), x, y + 32, SOFT, false);
+		g.text(font, Component.translatable("rig.jaymospowers.view.height", height < 0 ? "--" : Integer.toString(height)), x, y, LINE);
+		g.text(font, Component.translatable("rig.jaymospowers.view.altitude", Math.round(player.getY())), x, y + 10, SOFT);
+		g.text(font, Component.translatable("rig.jaymospowers.view.speed", speed), x, y + 22, LINE);
+		g.text(font, Component.translatable("rig.jaymospowers.view.climb", (climb > 0 ? "+" : "") + climb), x, y + 32, SOFT);
 	}
 
 	// ---- incoming harm ----------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ final class RigHelmView {
 		g.fill(r - arm, b - 1, r, b, color);
 		g.fill(r - 1, b - arm, r, b, color);
 		if (number != null) {
-			g.text(font, Integer.toString(number), r + 3, t, color, false);
+			g.text(font, Integer.toString(number), r + 3, t, color);
 		}
 		if (health) {
 			float share = Mth.clamp(entity.getHealth() / Math.max(1.0F, entity.getMaxHealth()), 0.0F, 1.0F);
@@ -200,8 +200,8 @@ final class RigHelmView {
 			g.fill(bx, by, bx + Math.round(bar * share), by + 3, share > 0.5F ? SOUND : share > 0.25F ? WORN : RUINED);
 			String name = entity.getDisplayName().getString();
 			String hp = Math.round(entity.getHealth()) + "/" + Math.round(entity.getMaxHealth());
-			g.text(font, name, cx - font.width(name) / 2, t - 10, 0xFFE0F4FF, false);
-			g.text(font, hp, cx - font.width(hp) / 2, by + 5, 0xFFB0C8D0, false);
+			g.text(font, name, cx - font.width(name) / 2, t - 10, 0xFFE0F4FF);
+			g.text(font, hp, cx - font.width(hp) / 2, by + 5, 0xFFB0C8D0);
 		}
 	}
 
@@ -224,7 +224,7 @@ final class RigHelmView {
 		box(g, cx - 2 * c, top + 8 * c + 4, 2 * c - 1, c, boots);
 		box(g, cx + 1, top + 8 * c + 4, 2 * c - 1, c, boots);
 		String frame = Component.translatable("rig.jaymospowers.frame." + Rig.frame(player).id()).getString();
-		g.text(font, frame, cx - font.width(frame) / 2, top + 9 * c + 8, SOFT, false);
+		g.text(font, frame, cx - font.width(frame) / 2, top + 9 * c + 8, SOFT);
 	}
 
 	private static void box(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {

@@ -38,7 +38,7 @@ public class PlowScreen extends AbstractContainerScreen<PlowMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, KitchenUi.ACCENT, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, KitchenUi.DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, KitchenUi.ACCENT);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, KitchenUi.DIM);
 	}
 }

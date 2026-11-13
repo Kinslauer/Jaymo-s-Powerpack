@@ -7,8 +7,8 @@ import com.jaymoskitchen.net.Payloads;
 import com.jaymoskitchen.net.Payloads.PrepUpdate;
 import java.util.Random;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskitchen.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
@@ -112,12 +112,12 @@ public class RollingScreen extends Screen {
 		if (phase == Phase.RESULT) {
 			int cx = this.width / 2;
 			int by = top() + PANEL_H - 28;
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.roll.again"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.roll.again"), b -> {
 				started = false;
 				phase = Phase.WAITING;
 				rebuildWidgets();
 			}).bounds(cx - 105, by, 100, BUTTON_H).build());
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
 				.bounds(cx + 5, by, 100, BUTTON_H).build());
 		}
 	}
@@ -319,7 +319,7 @@ public class RollingScreen extends Screen {
 		};
 		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(ModItems.JOINT),
 			this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.roll")), Component.translatable(sub),
-			KitchenUi.ACCENT, x + PANEL_W - 9);
+			KitchenUi.ACCENT, PANEL_W - 37);
 		super.extractRenderState(graphics, mx, my, a);
 
 		switch (phase) {

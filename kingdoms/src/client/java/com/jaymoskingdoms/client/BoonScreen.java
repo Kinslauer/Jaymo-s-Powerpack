@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.Patrons;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -50,11 +51,11 @@ final class BoonScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left(), y = top() + H - 24;
-		this.call = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.patrons.boon.call"), b -> {
+		this.call = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.patrons.boon.call"), b -> {
 			ClientPlayNetworking.send(Patrons.CallBoon.INSTANCE);
 			onClose();
 		}).bounds(x + 10, y, 80, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.patrons.button").append("..."),
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.patrons.button").append("..."),
 			b -> this.minecraft.gui.setScreen(new PatronScreen(this, null))).bounds(x + W - 100, y, 90, 16).build());
 	}
 

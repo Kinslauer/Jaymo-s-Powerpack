@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.hud.TipCard;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterFusion;
 import com.jaymospowers.power.zfighter.ZFighterPower;
@@ -7,7 +8,6 @@ import com.jaymospowers.power.zfighter.ZFighterTraining;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
@@ -21,9 +21,6 @@ import net.minecraft.network.chat.Component;
  * The client command {@code /zfighterhud} and the HUD editor are mentioned in the first tip.
  */
 public final class ZFighterTips {
-	/** How long a tip's toast stays up (ms). */
-	private static final long TOAST_MS = 9000L;
-	private static final SystemToast.SystemToastId TOAST = new SystemToast.SystemToastId(TOAST_MS);
 	private static final String PREFIX = "zfighter_tip.";
 
 	/** The tips, each with the id its line in the file and its lang keys are named by. */
@@ -53,15 +50,14 @@ public final class ZFighterTips {
 		return "true".equals(ZFighterClientConfig.get(PREFIX + tip.id, "false"));
 	}
 
-	/** Shows {@code tip} as a toast, unless it has been shown before. */
+	/** Shows {@code tip} as a tip card ({@link TipCard}), unless it has been shown before. */
 	public static void show(Tip tip) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (seen(tip) || minecraft.player == null) {
 			return;
 		}
 		ZFighterClientConfig.set(PREFIX + tip.id, "true");
-		SystemToast.add(minecraft.gui.toastManager(), TOAST, Component.translatable("tip.jaymospowers.zfighter." + tip.id + ".title"),
-			Component.translatable("tip.jaymospowers.zfighter." + tip.id));
+		TipCard.show(Component.translatable("tip.jaymospowers.zfighter." + tip.id + ".title"), Component.translatable("tip.jaymospowers.zfighter." + tip.id));
 	}
 
 	private static void tick(Minecraft minecraft) {

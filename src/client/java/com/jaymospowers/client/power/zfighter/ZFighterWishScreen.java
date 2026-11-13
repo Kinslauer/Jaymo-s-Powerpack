@@ -5,8 +5,8 @@ import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterWishes;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -60,7 +60,7 @@ public class ZFighterWishScreen extends Screen {
 	protected void init() {
 		for (int i = 0; i < ZFighterWishes.WISHES; i++) {
 			int wish = i;
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.wish_button"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter.wish_button"), b -> {
 				ClientPlayNetworking.send(new ZFighterNet.Wish(wish));
 				this.onClose();
 			}).bounds(left() + panelW() - BUTTON_W - 8, rowY(i) + 1, BUTTON_W, 12).build());

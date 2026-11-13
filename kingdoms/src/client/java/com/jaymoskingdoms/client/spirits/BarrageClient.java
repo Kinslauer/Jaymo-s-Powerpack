@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.spirits;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.spirits.SpiritBarrage;
 import com.jaymoskingdoms.spirits.SpiritBarrage.Barrage;
@@ -186,7 +187,7 @@ public final class BarrageClient {
 		if (bar.rush() != 0L) {
 			boolean won = bar.winner() == (first ? 1 : 2);
 			Component line = Component.translatable(won ? "message.jaymoskingdoms.spirit.barrage.break_yours" : "message.jaymoskingdoms.spirit.barrage.break_theirs");
-			graphics.text(font, line, cx - font.width(line) / 2, cy - 4, won ? 0xFFFFD34D : 0xFFFF5A5A, true);
+			graphics.text(font, line, cx - font.width(line) / 2, cy - 4, won ? HudStyle.GOLD : HudStyle.WARN, true);
 			return;
 		}
 		int k = next(t);
@@ -213,9 +214,9 @@ public final class BarrageClient {
 		double age = now - tappedAt;
 		if (age < SHOW_TICKS && !tapped.isEmpty()) {
 			int c = switch (tapped) {
-				case "perfect" -> 0xFFFFD34D;
+				case "perfect" -> HudStyle.GOLD;
 				case "good" -> 0xFFFFFFFF;
-				default -> 0xFFFF5A5A;
+				default -> HudStyle.WARN;
 			};
 			Component line = Component.translatable("message.jaymoskingdoms.spirit.barrage." + tapped);
 			graphics.text(font, line, cx + FIST + 8, cy - 4, fade(c, age), true);

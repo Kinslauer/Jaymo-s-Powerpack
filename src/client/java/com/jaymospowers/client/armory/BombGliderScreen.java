@@ -1,5 +1,6 @@
 package com.jaymospowers.client.armory;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.armory.BombGlider;
 import com.jaymospowers.armory.BombGliderMenu;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,8 +17,7 @@ import net.minecraft.world.item.Items;
  * An empty slot shows faintly what goes in it.
  */
 public class BombGliderScreen extends AbstractContainerScreen<BombGliderMenu> {
-	static final int PANEL = 0xD0101018, ACCENT = 0xFFD0843A, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, WELL_EDGE = 0xFF34343E, WELL = 0xFF0C0C12,
-		GAUGE = 0xFFE8742A, GAUGE_TOP = 0xFFFFD25A;
+	static final int ACCENT = 0xFFD0843A, TEXT = UiStyle.TEXT, DIM = UiStyle.DIM, GAUGE = 0xFFE8742A, GAUGE_TOP = 0xFFFFD25A;
 	/** Laid over a ghost item so it reads as a faint outline. */
 	static final int GHOST_FADE = 0xA80C0C12;
 	/** The fuel gauge: right of the fuel slot, this tall. */
@@ -32,21 +32,14 @@ public class BombGliderScreen extends AbstractContainerScreen<BombGliderMenu> {
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		int x = this.leftPos, y = this.topPos;
-		graphics.fill(x, y, x + this.imageWidth, y + this.imageHeight, PANEL);
-		graphics.fill(x, y, x + this.imageWidth, y + 2, ACCENT);
-		for (Slot slot : this.menu.slots) {
-			if (slot.isActive()) {
-				graphics.fill(x + slot.x - 1, y + slot.y - 1, x + slot.x + 17, y + slot.y + 17, WELL_EDGE);
-				graphics.fill(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, WELL);
-			}
-		}
+		UiStyle.panel(graphics, x, y, this.imageWidth, this.imageHeight, ACCENT);
+		UiStyle.slots(graphics, this.menu.slots, x, y);
 		// what goes where
 		this.ghost(graphics, BombGlider.FUEL_SLOT, new ItemStack(Items.BLAZE_ROD));
 		this.ghost(graphics, BombGlider.DYNAMITE_SLOT, new ItemStack(Items.TNT));
 		// the burner's gauge
 		int gx = x + GAUGE_X, gy = y + BombGliderMenu.FUEL_Y;
-		graphics.fill(gx - 1, gy - 1, gx + GAUGE_W + 1, gy + GAUGE_H + 1, WELL_EDGE);
-		graphics.fill(gx, gy, gx + GAUGE_W, gy + GAUGE_H, WELL);
+		UiStyle.well(graphics, gx - 1, gy - 1, GAUGE_W + 2, GAUGE_H + 2);
 		int max = this.menu.burnMax();
 		if (max > 0 && this.menu.burn() > 0) {
 			int h = Math.max(1, Math.round(GAUGE_H * Math.min(1.0F, this.menu.burn() / (float)max)));
@@ -67,18 +60,18 @@ public class BombGliderScreen extends AbstractContainerScreen<BombGliderMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM);
 		graphics.text(this.font, Component.translatable("gui.jaymospowers.bomb_glider.fuel"), BombGliderMenu.FUEL_X - 2, BombGliderMenu.FUEL_Y - 12, DIM,
 			false);
 		Component rack = Component.translatable("gui.jaymospowers.bomb_glider.rack");
-		graphics.text(this.font, rack, BombGliderMenu.RACK_X + 8 - this.font.width(rack) / 2, BombGliderMenu.RACK_Y - 12, DIM, false);
+		graphics.text(this.font, rack, BombGliderMenu.RACK_X + 8 - this.font.width(rack) / 2, BombGliderMenu.RACK_Y - 12, DIM);
 		int count = this.menu.getSlot(BombGlider.DYNAMITE_SLOT).getItem().getCount();
 		Component of = Component.translatable("gui.jaymospowers.bomb_glider.count", count, BombGlider.MAX_DYNAMITE);
-		graphics.text(this.font, of, BombGliderMenu.RACK_X + 8 - this.font.width(of) / 2, BombGliderMenu.RACK_Y + 20, TEXT, false);
+		graphics.text(this.font, of, BombGliderMenu.RACK_X + 8 - this.font.width(of) / 2, BombGliderMenu.RACK_Y + 20, TEXT);
 		if (this.menu.burn() > 0) {
 			Component left = Component.translatable("gui.jaymospowers.bomb_glider.seconds", (this.menu.burn() + 19) / 20);
-			graphics.text(this.font, left, GAUGE_X + GAUGE_W + 4, BombGliderMenu.FUEL_Y + 4, TEXT, false);
+			graphics.text(this.font, left, GAUGE_X + GAUGE_W + 4, BombGliderMenu.FUEL_Y + 4, TEXT);
 		}
 	}
 }

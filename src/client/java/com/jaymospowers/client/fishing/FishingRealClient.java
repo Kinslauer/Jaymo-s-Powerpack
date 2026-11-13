@@ -1,5 +1,6 @@
 package com.jaymospowers.client.fishing;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.fishing.FishCast;
 import com.jaymospowers.fishing.FishCatch;
@@ -232,7 +233,7 @@ public final class FishingRealClient {
             return;
         }
         float strain = state.strain();
-        bar(graphics, x, y, strain, strain >= CREAK_AT ? 0xFFFF3030 : 0xFFFF8050);
+        bar(graphics, x, y, strain, strain >= CREAK_AT ? HudStyle.WARN : 0xFFFF8050);
         // the drag's slip point
         int drag = FishRun.drag(FishRun.rodInHand(player));
         int slipX = x + Math.round(BAR_W * FishRun.DRAG_SLIP[drag - 1]);
@@ -241,7 +242,7 @@ public final class FishingRealClient {
         if (state.run() != 0) {
             String arrows = state.run() > 0 ? ">>" : "<<";
             int ax = state.run() > 0 ? x + BAR_W + 4 : x - 4 - font.width(arrows);
-            graphics.text(font, Component.literal(arrows), ax, y - 1, 0xFFFFD040, true);
+            graphics.text(font, Component.literal(arrows), ax, y - 1, HudStyle.GOLD, true);
         }
         int percent = Mth.clamp(Math.round(strain * 100), 0, 100);
         Component label = Component.translatable("hud.jaymospowers.fishing.tension_drag", percent, drag, FishRun.DRAG_STEPS);

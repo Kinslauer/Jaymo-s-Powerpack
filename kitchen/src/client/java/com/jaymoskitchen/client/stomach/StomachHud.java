@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.stomach;
 
+import com.jaymoskitchen.client.hud.HudStyle;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.stomach.FoodGroups;
@@ -92,13 +93,13 @@ public final class StomachHud {
 	private static final int[] GROUP_COLOURS = {0xFFE8C060, 0xFFE04848, 0xFF60C050, 0xFFB06040, 0xFFF4F0E8};
 
 	private static void slot(GuiGraphicsExtractor graphics, Minecraft minecraft, Stomach.Meal meal, int x, int y, int colour) {
-		graphics.fill(x, y, x + 17, y + 19, 0x60000000);
+		graphics.fill(x, y, x + 17, y + 19, HudStyle.PLATE_SOFT);
 		ItemStack icon = new ItemStack(meal.item());
 		graphics.item(icon, x, y);
 		int minutes = (meal.left() + 1199) / 1200;
 		graphics.itemDecorations(minecraft.font, icon, x, y, minutes + "m");
 		graphics.fill(x, y + 17, x + 17, y + 19, 0xFF000000);
-		graphics.fill(x, y + 17, x + Math.max(1, Math.round(17 * meal.fraction())), y + 19, meal.fraction() <= Stomach.EAT_AGAIN ? 0xFFE04040 : colour);
+		graphics.fill(x, y + 17, x + Math.max(1, Math.round(17 * meal.fraction())), y + 19, meal.fraction() <= Stomach.EAT_AGAIN ? HudStyle.WARN : colour);
 	}
 
 	private static void empty(GuiGraphicsExtractor graphics, int x, int y) {

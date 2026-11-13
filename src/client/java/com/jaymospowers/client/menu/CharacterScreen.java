@@ -77,7 +77,7 @@ public class CharacterScreen extends Screen {
 		}
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.health"),
 			Component.translatable("menu.jaymospowers.character.of", Mth.ceil(player.getHealth()), Mth.ceil(player.getMaxHealth())), -1.0F, PowerScreen.COLOR_TEXT));
-		rows.add(new Row(Component.empty(), null, player.getMaxHealth() <= 0.0F ? 0.0F : player.getHealth() / player.getMaxHealth(), 0xFFD84040));
+		rows.add(new Row(Component.empty(), null, player.getMaxHealth() <= 0.0F ? 0.0F : player.getHealth() / player.getMaxHealth(), UiStyle.BAD));
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.armour"), Component.literal(Integer.toString(player.getArmorValue())), -1.0F,
 			PowerScreen.COLOR_TEXT));
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.level"), Component.literal(Integer.toString(player.experienceLevel)), -1.0F,
@@ -154,18 +154,13 @@ public class CharacterScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
-	/** The H screen's raised window. */
+	/** The H menu's raised window. */
 	static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, PowerScreen.COLOR_EDGE);
-		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, PowerScreen.COLOR_SHADE);
-		graphics.fill(x + 1, y + 1, x + w - 3, y + h - 3, PowerScreen.COLOR_LIGHT);
-		graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, PowerScreen.COLOR_BODY);
+		UiStyle.window(graphics, x, y, w, h);
 	}
 
-	/** The H screen's sunken area. */
+	/** The H menu's sunken area. */
 	static void recess(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, PowerScreen.COLOR_WELL_LIGHT);
-		graphics.fill(x, y, x + w - 1, y + h - 1, PowerScreen.COLOR_SHADE);
-		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, PowerScreen.COLOR_CANVAS);
+		UiStyle.recess(graphics, x, y, w, h);
 	}
 }

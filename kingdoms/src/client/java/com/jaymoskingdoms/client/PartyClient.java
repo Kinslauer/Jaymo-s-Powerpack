@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Parties;
@@ -27,7 +28,7 @@ public final class PartyClient {
 	static final int TOP = 48, LEFT = 4, WIDTH = 96;
 	/** A row's height, and the bar heights (health, hunger). */
 	static final int ROW = 18, BAR = 3, THIN = 1;
-	static final int LEADER = 0xFFFFC21A, NAME = 0xFFFFFFFF, FAR = 0xFFB0B0B0, HEALTH = 0xFFD84040, LOW = 0xFFFF9020, HUNGER = 0xFFC8872A;
+	static final int LEADER = HudStyle.GOLD, NAME = 0xFFFFFFFF, FAR = 0xFFB0B0B0, HEALTH = 0xFFD84040, LOW = 0xFFFF9020, HUNGER = 0xFFC8872A;
 	static final int BACK = 0x60000000, EMPTY = 0xA0202020;
 
 	/** The party as last sent (empty without one). */

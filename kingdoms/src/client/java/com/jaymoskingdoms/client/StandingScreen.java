@@ -9,8 +9,8 @@ import com.jaymoskingdoms.StartPerks;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
@@ -59,7 +59,7 @@ final class StandingScreen extends Screen {
 
 	@Override
 	protected void init() {
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + W - 70 - PAD, this.height - 28, 70, 18).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + W - 70 - PAD, this.height - 28, 70, 16).build());
 		if (this.minecraft.player != null && Sparks.held(this.minecraft.player)) {
 			int y = this.height - 28;
 			int x = left() + PAD;
@@ -67,10 +67,10 @@ final class StandingScreen extends Screen {
 				if (x + 80 > left() + W - 90) {
 					break;
 				}
-				addRenderableWidget(Button.builder(Component.translatable("standing.jaymoskingdoms.give", friend.getName()), b -> {
+				addRenderableWidget(FlatButton.builder(Component.translatable("standing.jaymoskingdoms.give", friend.getName()), b -> {
 					ClientPlayNetworking.send(new Sparks.Give(friend.getUUID()));
 					onClose();
-				}).bounds(x, y, 80, 18).build());
+				}).bounds(x, y, 80, 16).build());
 				x += 84;
 			}
 		}

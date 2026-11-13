@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.forms;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.CombatArts;
 import com.jaymoskingdoms.JaymosKingdoms;
@@ -37,12 +38,12 @@ public final class FormsClient {
 	static final int LOCK_RETRY_TICKS = 10;
 	/** The chain counter: shown from this many links, graded at these, fading over the last ticks of the chain's window. */
 	static final int COUNTER_FROM = 2, GOOD = 3, FIERCE = 6, RELENTLESS = 10, FADE_TICKS = 10;
-	static final int GOOD_COLOR = 0xFFE8E8E8, FIERCE_COLOR = 0xFFFFC21A, RELENTLESS_COLOR = 0xFFE05050;
+	static final int GOOD_COLOR = 0xFFE8E8E8, FIERCE_COLOR = HudStyle.GOLD, RELENTLESS_COLOR = HudStyle.WARN;
 	/** The counter's gap right of the crosshair (pixels). */
 	static final int COUNTER_GAP = 14;
 	/** The belt strip: a slot's size, the gap between, and how far above the screen's bottom the strip sits (over the hearts and armour). */
 	static final int SLOT_W = 38, SLOT_H = 12, SLOT_GAP = 2, STRIP_ABOVE = 66;
-	static final int SLOT_BACK = 0xA0000000, SLOT_PICKED = 0xFFFFC21A, SLOT_WRONG = 0xFF9A6A6A;
+	static final int SLOT_BACK = 0xA0000000, SLOT_PICKED = HudStyle.GOLD, SLOT_WRONG = 0xFF9A6A6A;
 
 	private static int held;
 	private static boolean holdDone, wasStance;

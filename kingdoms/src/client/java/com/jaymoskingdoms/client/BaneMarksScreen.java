@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -63,22 +64,22 @@ public final class BaneMarksScreen extends Screen {
 		for (int i = 0; i < BaneMarks.MARKS.size(); i++) {
 			String mark = BaneMarks.MARKS.get(i);
 			int x = left() + 6 + (i % cols) * (w + GAP), y = top() + HEADER + (i / cols) * (BUTTON_H + 26);
-			Button b = Button.builder(Component.translatable("bane.jaymoskingdoms.mark." + mark), btn -> pick(mark)).bounds(x, y, w, BUTTON_H).build();
+			Button b = FlatButton.builder(Component.translatable("bane.jaymoskingdoms.mark." + mark), btn -> pick(mark)).bounds(x, y, w, BUTTON_H).build();
 			b.active = !picked.contains(mark) && picked.size() < BaneMarks.KEY_LENGTH;
 			addRenderableWidget(b);
 		}
 		int fy = top() + PANEL_H - 24;
-		addRenderableWidget(Button.builder(Component.translatable("bane.jaymoskingdoms.screen.clear"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("bane.jaymoskingdoms.screen.clear"), b -> {
 			picked.clear();
 			rebuildWidgets();
 		}).bounds(left() + 6, fy, BUTTON_W, BUTTON_H).build());
-		Button carve = Button.builder(Component.translatable("bane.jaymoskingdoms.screen.carve"), b -> {
+		Button carve = FlatButton.builder(Component.translatable("bane.jaymoskingdoms.screen.carve"), b -> {
 			ClientPlayNetworking.send(new BaneMarks.Carve(List.copyOf(picked)));
 			onClose();
 		}).bounds(left() + 6 + BUTTON_W + GAP, fy, BUTTON_W, BUTTON_H).build();
 		carve.active = picked.isEmpty() || picked.size() == BaneMarks.KEY_LENGTH;
 		addRenderableWidget(carve);
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose())
 			.bounds(left() + panelW() - 6 - BUTTON_W, fy, BUTTON_W, BUTTON_H).build());
 	}
 
@@ -108,7 +109,7 @@ public final class BaneMarksScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW();
 		Ui.panel(graphics, x, y, w, PANEL_H, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 7, w - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, w - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("bane.jaymoskingdoms.screen.sub", board.bane()), x + 9, y + 18, w - 18, Ui.DIM);
 		int cols = 4, bw = (w - 12 - (cols - 1) * GAP) / cols;
 		for (int i = 0; i < BaneMarks.MARKS.size(); i++) {

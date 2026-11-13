@@ -1,5 +1,6 @@
 package com.jaymospowers.client.rig;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.core.Powers;
@@ -101,21 +102,21 @@ final class RigHud {
 		// the charge, the Mind and its level
 		ItemStack core = Rig.core(player);
 		String mind = core.isEmpty() ? null : core.get(Rig.MIND);
-		graphics.text(font, Component.translatable("rig.jaymospowers.hud.title"), x + 3, row, ACCENT, false);
+		graphics.text(font, Component.translatable("rig.jaymospowers.hud.title"), x + 3, row, ACCENT);
 		if (core.isEmpty()) {
-			graphics.text(font, Component.translatable("rig.jaymospowers.hud.no_core"), x + 26, row, DIM, false);
+			graphics.text(font, Component.translatable("rig.jaymospowers.hud.no_core"), x + 26, row, DIM);
 		} else {
 			float share = Rig.chargeShare(player);
 			boolean low = (warnings & RigNet.WARN_LOW_CHARGE) != 0;
 			int barX = x + 26, barW = 36;
-			graphics.fill(barX, row + 2, barX + barW, row + 6, 0x60000000);
+			graphics.fill(barX, row + 2, barX + barW, row + 6, HudStyle.PLATE_SOFT);
 			graphics.fill(barX, row + 2, barX + Math.round(barW * share), row + 6,
 				low && blink ? LOW : status.overcharge() > 0 ? RigHelmView.OVER : ACCENT);
-			graphics.text(font, Math.round(share * 100) + "%", barX + barW + 3, row, low ? LOW : 0xFFFFFFFF, false);
+			graphics.text(font, Math.round(share * 100) + "%", barX + barW + 3, row, low ? LOW : 0xFFFFFFFF);
 			if (mind != null) {
 				String tag = Component.translatable("rig.jaymospowers.hud.mind." + mind).getString() + " "
 					+ Component.translatable("rig.jaymospowers.hud.level", level).getString();
-				graphics.text(font, tag, x + WIDTH - 3 - font.width(tag), row, DIM, false);
+				graphics.text(font, tag, x + WIDTH - 3 - font.width(tag), row, DIM);
 			}
 		}
 		row += LINE;
@@ -123,7 +124,7 @@ final class RigHud {
 		// the actives
 		boolean powerless = Powers.of(player) == null;
 		if (!Rig.fullSet(player)) {
-			graphics.text(font, Component.translatable("rig.jaymospowers.hud.incomplete"), x + 3, row, DIM, false);
+			graphics.text(font, Component.translatable("rig.jaymospowers.hud.incomplete"), x + 3, row, DIM);
 		} else {
 			// (0.11.107) the Unibeam joins them at level 4
 			boolean uni = level >= Rig.UNIBEAM_LEVEL;
@@ -192,8 +193,8 @@ final class RigHud {
 			}
 			String hp = Math.round(target.getHealth()) + "/" + Math.round(target.getMaxHealth());
 			int hpWidth = font.width(hp);
-			graphics.text(font, cut(font, name, WIDTH - hpWidth - 10), x + 3, row, target == lock ? 0xFF000000 | RigScanClient.LOCK_COLOR : 0xFFE0E0E0, false);
-			graphics.text(font, hp, x + WIDTH - 3 - hpWidth, row, 0xFFFF7070, false);
+			graphics.text(font, cut(font, name, WIDTH - hpWidth - 10), x + 3, row, target == lock ? 0xFF000000 | RigScanClient.LOCK_COLOR : 0xFFE0E0E0);
+			graphics.text(font, hp, x + WIDTH - 3 - hpWidth, row, 0xFFFF7070);
 			row += LINE;
 		}
 
@@ -209,7 +210,7 @@ final class RigHud {
 				if (wx + w > x + WIDTH - 2) {
 					break;
 				}
-				graphics.text(font, word, wx, row, blink || i >= 5 ? LOW : 0xFFFFB0A0, false);
+				graphics.text(font, word, wx, row, blink || i >= 5 ? LOW : 0xFFFFB0A0);
 				wx += w + 4;
 			}
 		}
@@ -224,7 +225,7 @@ final class RigHud {
 			graphics.fill(cx, row + 7, cx + w, row + 9, 0xC0FF8040);
 		}
 		String text = key.isEmpty() ? label : key + " " + label;
-		graphics.text(font, cut(font, text, cell - 3), cx + 2, row, cooldown > 0 ? DIM : 0xFFFFFFFF, false);
+		graphics.text(font, cut(font, text, cell - 3), cx + 2, row, cooldown > 0 ? DIM : 0xFFFFFFFF);
 	}
 
 	/** A key's name, short (the first letters of a long one). */

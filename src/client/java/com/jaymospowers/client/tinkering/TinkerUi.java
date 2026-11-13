@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.client.UiStyle;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -11,21 +12,21 @@ import net.minecraft.world.inventory.Slot;
  * grey: a dark see-through panel with a bronze stripe along its top, sunken wells for the slots, light labels.
  */
 public final class TinkerUi {
-	public static final int PANEL = 0xD0101018, ACCENT = 0xFFD0843A, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, ROW = 0x30FFFFFF, ROW_HOVER = 0x50FFFFFF,
-		WELL_EDGE = 0xFF34343E, WELL = 0xFF0C0C12;
+	/** The stations' bronze stripe; everything else is the shared screen style's ({@link UiStyle}). */
+	public static final int ACCENT = 0xFFD0843A;
+	public static final int PANEL = UiStyle.PANEL, TEXT = UiStyle.TEXT, DIM = UiStyle.DIM, ROW = UiStyle.ROW, ROW_HOVER = UiStyle.ROW_HOVER,
+		WELL_EDGE = UiStyle.WELL_EDGE, WELL = UiStyle.WELL;
 
 	private TinkerUi() {
 	}
 
 	public static void panel(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, PANEL);
-		graphics.fill(x, y, x + w, y + 2, ACCENT);
+		UiStyle.panel(graphics, x, y, w, h, ACCENT);
 	}
 
 	/** A sunken box an item, a slot or a pool sits in. */
 	public static void well(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-		graphics.fill(x, y, x + w, y + h, WELL_EDGE);
-		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, WELL);
+		UiStyle.well(graphics, x, y, w, h);
 	}
 
 	/** A well behind every slot that's showing; the slot numbered {@code big} (an output) gets a larger one. */
@@ -62,7 +63,7 @@ public final class TinkerUi {
 
 	/** The screen's title in the accent and the inventory's in dim, where vanilla puts them. */
 	public static void labels(GuiGraphicsExtractor graphics, Font font, Component title, int titleX, int titleY, Component inventory, int invX, int invY) {
-		graphics.text(font, title, titleX, titleY, ACCENT, false);
-		graphics.text(font, inventory, invX, invY, DIM, false);
+		graphics.text(font, title, titleX, titleY, ACCENT);
+		graphics.text(font, inventory, invX, invY, DIM);
 	}
 }

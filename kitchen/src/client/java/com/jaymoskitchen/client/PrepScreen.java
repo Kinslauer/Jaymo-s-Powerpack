@@ -10,6 +10,7 @@ import com.jaymoskitchen.net.Payloads.PrepUpdate;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskitchen.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -100,31 +101,31 @@ public class PrepScreen extends Screen {
 				boolean board = isBoard();
 				int w = board ? 100 : 120;
 				int x0 = board ? cx - 155 : cx - 125;
-				Button start = Button.builder(Component.translatable("screen.jaymoskitchen.prep.start"), b -> start())
+				Button start = FlatButton.builder(Component.translatable("screen.jaymoskitchen.prep.start"), b -> start())
 					.bounds(x0, by, w, BUTTON_H).build();
 				start.active = canMake(Prep.Recipe.DOUGH);
 				addRenderableWidget(start);
-				Button roll = Button.builder(Component.translatable("screen.jaymoskitchen.roll.start"),
+				Button roll = FlatButton.builder(Component.translatable("screen.jaymoskitchen.roll.start"),
 						b -> this.minecraft.gui.setScreen(new RollingScreen(pos)))
 					.bounds(x0 + w + 5, by, w, BUTTON_H).build();
 				roll.active = canMake(Prep.Recipe.JOINT);
 				addRenderableWidget(roll);
 				if (board) {
-					addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.chop"),
+					addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.prep.chop"),
 							b -> this.minecraft.gui.setScreen(new CookingScreen(pos, Station.BOARD, new java.util.BitSet())))
 						.bounds(x0 + 2 * (w + 5), by, w, BUTTON_H).build());
 				}
 			}
 			case KNEAD -> {
-				addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.knead_left"), b -> knead(-1))
+				addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.prep.knead_left"), b -> knead(-1))
 					.bounds(cx - 105, by, 100, BUTTON_H).build());
-				addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.knead_right"), b -> knead(1))
+				addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.prep.knead_right"), b -> knead(1))
 					.bounds(cx + 5, by, 100, BUTTON_H).build());
 			}
 			case RESULT -> {
-				addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.again"), b -> setPhase(Phase.INTRO))
+				addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.prep.again"), b -> setPhase(Phase.INTRO))
 					.bounds(cx - 105, by, 100, BUTTON_H).build());
-				addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
+				addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
 					.bounds(cx + 5, by, 100, BUTTON_H).build());
 			}
 			default -> {
@@ -328,7 +329,7 @@ public class PrepScreen extends Screen {
 		};
 		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(ModItems.DOUGH),
 			this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.prep")), Component.translatable(sub),
-			KitchenUi.ACCENT, x + PANEL_W - 9);
+			KitchenUi.ACCENT, PANEL_W - 37);
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 

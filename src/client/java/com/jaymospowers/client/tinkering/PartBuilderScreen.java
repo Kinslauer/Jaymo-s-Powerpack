@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.tinkering.PartBuilderMenu;
 import com.jaymospowers.tinkering.PartType;
@@ -194,9 +195,9 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			Component name = button >= PartBuilderMenu.WEAPON_BUTTONS
 				? Component.translatable("item.jaymospowers." + WeaponParts.shaped().get(button - PartBuilderMenu.WEAPON_BUTTONS).part())
 				: Component.translatable("item.jaymospowers." + PartType.values()[button].id);
-			graphics.setTooltipForNextFrame(font, name, mouseX, mouseY);
+			UiStyle.tip(graphics, font, name, mouseX, mouseY);
 		} else if (pageArrowAt(mouseX, mouseY) != 0) {
-			graphics.setTooltipForNextFrame(font, pageName(), mouseX, mouseY);
+			UiStyle.tip(graphics, font, pageName(), mouseX, mouseY);
 		}
 		TableUi.tooltip(graphics, font, menu.extras(), leftPos, topPos, mouseX, mouseY);
 	}

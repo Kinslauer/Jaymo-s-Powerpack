@@ -178,23 +178,10 @@ final class HorseWheelScreen extends Screen {
 
 		// a dark disc behind the ring, a thin ring, and the pointer
 		int outer = RADIUS + TILE / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0081018);
-		}
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, Ui.ROW);
-		}
+		Ui.wheel(graphics, cx, cy, RADIUS, TILE);
 		if (this.selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			Ui.wheelPointer(graphics, cx, cy, RADIUS, TILE, t, ACCENT);
 		}
 
 		Herd herd = this.horse == null ? null : this.horse.getAttached(Herding.HERD);
@@ -207,9 +194,7 @@ final class HorseWheelScreen extends Screen {
 			boolean picked = i == this.selected;
 			boolean usable = usable(slice);
 			boolean on = slice.command() && slice != Slice.SET_HOME && slice.order == current || slice == Slice.RIDE_ON && EquestrianClient.cruising();
-			graphics.fill(x, y, x + TILE, y + TILE, Ui.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW : Ui.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : on ? 0xA0FFC21A : usable ? 0x60FFFFFF : Ui.ROW_ALT);
+			Ui.wheelTile(graphics, x, y, TILE, i, picked, picked ? ACCENT : on ? 0xA0000000 | Ui.GOLD & 0xFFFFFF : usable ? 0x60FFFFFF : Ui.ROW_ALT);
 			graphics.item(slice.icon(), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!usable) {
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xA0101018);

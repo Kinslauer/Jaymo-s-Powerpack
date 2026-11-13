@@ -166,7 +166,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			if (viaEssence) {
 				graphics.fill(tx + 2, ty + 5, tx + 8, ty + 11, ACCENT);
 			}
-			graphics.text(font, Component.translatable("gui.jaymospowers.enchanting.essence"), tx + 14, ty + 4, over ? UiStyle.TEXT : UiStyle.DIM, false);
+			graphics.text(font, Component.translatable("gui.jaymospowers.enchanting.essence"), tx + 14, ty + 4, over ? UiStyle.TEXT : UiStyle.DIM);
 		}
 		boolean hover = UiStyle.over(mouseX, mouseY, x + BUTTON_X, y + BUTTON_Y, BUTTON_W, BUTTON_H);
 		int bx = x + BUTTON_X, by = y + BUTTON_Y;
@@ -181,8 +181,8 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(font, title, 8, 6, ACCENT, false);
-		graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, UiStyle.DIM, false);
+		graphics.text(font, title, 8, 6, ACCENT);
+		graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, UiStyle.DIM);
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 				if (key != null && net.minecraft.locale.Language.getInstance().has(key)) {
 					lines.add(Component.translatable(key).withStyle(ChatFormatting.DARK_GRAY));
 				}
-				graphics.setTooltipForNextFrame(lines.stream().flatMap(c -> font.split(c, 180).stream()).toList(), mouseX, mouseY);
+				UiStyle.tip(graphics, font, lines, mouseX, mouseY);
 				return;
 			}
 		}
@@ -211,7 +211,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			return;
 		}
 		if (EssenceEnchanting.available(minecraft.player) && UiStyle.over(mouseX, mouseY, lx + TOGGLE_X, topPos + COST_Y, TOGGLE_W, TOGGLE_H)) {
-			graphics.setTooltipForNextFrame(font.split(Component.translatable("gui.jaymospowers.enchanting.essence.tip"), 160), mouseX, mouseY);
+			UiStyle.tip(graphics, font, Component.translatable("gui.jaymospowers.enchanting.essence.tip"), mouseX, mouseY);
 			return;
 		}
 		if (essenceMode()) {
@@ -220,9 +220,9 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			for (Essence e : price.amounts().keySet()) {
 				if (UiStyle.over(mouseX, mouseY, lx + 2 + n++ * 26, topPos + COST_Y, 16, 16)) {
 					Component name = Codex.seenByViewer(e) ? Component.translatable(e.key()) : Component.translatable("item.jaymospowers.essence_phial.unknown");
-					graphics.setTooltipForNextFrame(List.of(Component.literal(price.get(e) + " x ").append(name).getVisualOrderText(),
+					UiStyle.tip(graphics, font, List.<Component>of(Component.literal(price.get(e) + " x ").append(name),
 						Component.translatable("gui.jaymospowers.enchanting.essence.carried", Phials.carried(minecraft.player).get(e))
-							.withStyle(ChatFormatting.GRAY).getVisualOrderText()), mouseX, mouseY);
+							.withStyle(ChatFormatting.GRAY)), mouseX, mouseY);
 					return;
 				}
 			}
@@ -237,7 +237,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 				if (ing.options().size() > 1 || ing.options().getFirst().startsWith("#")) {
 					lines.add(Component.translatable("gui.jaymospowers.enchanting.any_of").withStyle(ChatFormatting.GRAY));
 				}
-				graphics.setTooltipForNextFrame(lines.stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
+				UiStyle.tip(graphics, font, lines, mouseX, mouseY);
 				return;
 			}
 		}

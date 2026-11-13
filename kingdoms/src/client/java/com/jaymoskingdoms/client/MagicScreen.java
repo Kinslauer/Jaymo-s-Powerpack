@@ -3,8 +3,8 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.MagicMenu;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -43,7 +43,7 @@ final class MagicScreen extends Screen {
 		for (int i = 0; i < this.cantrips.size(); i++) {
 			String id = this.cantrips.get(i);
 			int x = left + PAD + (i % 2) * (half + GAP);
-			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.cantrip." + id), b -> pick(id)).bounds(x, y, half, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("magic.jaymoskingdoms.cantrip." + id), b -> pick(id)).bounds(x, y, half, BUTTON_H).build());
 			if (i % 2 == 1 || i == this.cantrips.size() - 1) {
 				y += BUTTON_H + GAP;
 			}
@@ -54,14 +54,14 @@ final class MagicScreen extends Screen {
 		addRenderableWidget(this.whisper);
 		y += BUTTON_H + GAP + 12;
 		for (String id : this.rituals) {
-			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.ritual", Component.translatable("class.jaymoskingdoms.option." + id)),
+			addRenderableWidget(FlatButton.builder(Component.translatable("magic.jaymoskingdoms.ritual", Component.translatable("class.jaymoskingdoms.option." + id)),
 				b -> pick(id)).bounds(left + PAD, y, W - 2 * PAD, BUTTON_H).build());
 			y += BUTTON_H + GAP;
 		}
 		for (String choice : this.choices) {
 			String key = choice.substring(0, choice.indexOf('='));
 			String option = choice.substring(choice.indexOf('=') + 1);
-			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.choice", Component.translatable("magic.jaymoskingdoms.choice." + key),
+			addRenderableWidget(FlatButton.builder(Component.translatable("magic.jaymoskingdoms.choice", Component.translatable("magic.jaymoskingdoms.choice." + key),
 				Component.translatable("magic.jaymoskingdoms.choice." + key + "." + option)), b -> pick("choose." + key)).bounds(left + PAD, y, W - 2 * PAD, BUTTON_H).build());
 			y += BUTTON_H + GAP;
 		}
@@ -69,7 +69,7 @@ final class MagicScreen extends Screen {
 		for (int i = 0; i < this.spells.size(); i++) {
 			String id = this.spells.get(i);
 			int x = left + PAD + (i % 2) * (half + GAP);
-			addRenderableWidget(Button.builder(Component.translatable("class.jaymoskingdoms.option." + id), b -> pick("cast." + id)).bounds(x, y, half, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("class.jaymoskingdoms.option." + id), b -> pick("cast." + id)).bounds(x, y, half, BUTTON_H).build());
 			if (i % 2 == 1) {
 				y += BUTTON_H + GAP;
 			}

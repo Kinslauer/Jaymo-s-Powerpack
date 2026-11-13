@@ -2,8 +2,8 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.forms.BoutNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -57,13 +57,13 @@ final class BoutBracketScreen extends Screen {
 		int y = top() + 24 + ROW_H + this.bracket.fighters().size() * ROW_H + 8 + this.font.split(words(), PANEL_W - PAD * 2).size() * 10 + 8;
 		int x = left() + PAD, w = PANEL_W - PAD * 2;
 		if (this.bracket.asking()) {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.bout.ready"), b -> answer(true)).bounds(x, y, w, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.bout.ready"), b -> answer(true)).bounds(x, y, w, BUTTON_H).build());
 			y += BUTTON_H + GAP;
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.bout.later"), b -> super.onClose()).bounds(x, y, w, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.bout.later"), b -> super.onClose()).bounds(x, y, w, BUTTON_H).build());
 			y += BUTTON_H + GAP;
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.bout.withdraw"), b -> answer(false)).bounds(x, y, w, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.bout.withdraw"), b -> answer(false)).bounds(x, y, w, BUTTON_H).build());
 		} else {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.bout.close"), b -> super.onClose()).bounds(x, y, w, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.bout.close"), b -> super.onClose()).bounds(x, y, w, BUTTON_H).build());
 		}
 	}
 

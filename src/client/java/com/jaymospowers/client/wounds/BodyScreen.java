@@ -7,6 +7,7 @@ import com.jaymospowers.core.wounds.Treatment;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -137,7 +138,7 @@ public class BodyScreen extends Screen {
 	protected void init() {
 		for (int i = 0; i < count(); i++) {
 			int index = i;
-			Button button = addRenderableWidget(Button.builder(label(i), b -> {
+			Button button = addRenderableWidget(FlatButton.builder(label(i), b -> {
 				ClientPlayNetworking.send(new Treatment.Treat(this.body.entity(), this.body.parts().get(index)));
 				// to the game, where the treatment's bar shows
 				this.minecraft.gui.setScreen(null);

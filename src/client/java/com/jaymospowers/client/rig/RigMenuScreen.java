@@ -198,23 +198,10 @@ final class RigMenuScreen extends Screen {
 
 		// a dark disc behind the ring, a thin ring, and the pointer
 		int outer = radius + tile / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0081018);
-		}
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (radius - tile / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (radius - tile / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
-		}
+		UiStyle.wheel(graphics, cx, cy, radius, tile);
 		if (selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < radius - tile / 2 - 6; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			UiStyle.wheelPointer(graphics, cx, cy, radius, tile, t, ACCENT);
 		}
 
 		for (int i = 0; i < ACTIONS.length; i++) {
@@ -225,9 +212,7 @@ final class RigMenuScreen extends Screen {
 			boolean blocked = blocker(player, i) != null;
 			boolean picked = i == selected;
 			boolean jKey = ACTIONS[i] == RigClient.selected;
-			graphics.fill(x, y, x + tile, y + tile, UiStyle.CHIP);
-			graphics.fill(x, y, x + tile, y + tile, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
-			graphics.outline(x, y, tile, tile, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			UiStyle.wheelTile(graphics, x, y, tile, i, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
 			graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
 			if (left > 0 && COOLDOWN[i] > 0) {
 				int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));

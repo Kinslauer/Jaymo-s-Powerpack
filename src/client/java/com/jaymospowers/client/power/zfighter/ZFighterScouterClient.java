@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterScouter;
 import com.jaymospowers.power.zfighter.ZFighterSensesNet;
@@ -146,7 +147,7 @@ public final class ZFighterScouterClient {
 		} else if ((readFlags & ZFighterSensesNet.PAST_CAP) != 0) {
 			// past its cap: it can only say "more", and the digits shiver
 			number = (now / 3 % 2 == 0 ? ZFighterScouter.CAP : ZFighterScouter.CAP - 1) + "+";
-			color = 0xFFFFD54A;
+			color = HudStyle.GOLD;
 		} else {
 			number = Integer.toString(readLevel);
 		}

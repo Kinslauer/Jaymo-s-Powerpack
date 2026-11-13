@@ -6,10 +6,10 @@ import com.jaymospowers.power.xenoform.nadir.NadirRules;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -75,19 +75,19 @@ public class NadirRulesScreen extends Screen {
 		for (int i = 0; i < NadirRules.SLOTS; i++) {
 			int slot = i;
 			int y = rowY(i) + 3;
-			addRenderableWidget(Button.builder(word(slot, 0), b -> {
+			addRenderableWidget(FlatButton.builder(word(slot, 0), b -> {
 				cycle(slot, 0, NadirRules.WHO.length);
 				b.setMessage(word(slot, 0));
 			}).bounds(c[0], y, c[1], 16).build());
-			addRenderableWidget(Button.builder(word(slot, 1), b -> {
+			addRenderableWidget(FlatButton.builder(word(slot, 1), b -> {
 				cycle(slot, 1, NadirRules.WHAT.length);
 				b.setMessage(word(slot, 1));
 			}).bounds(c[2], y, c[3], 16).build());
-			addRenderableWidget(Button.builder(word(slot, 2), b -> {
+			addRenderableWidget(FlatButton.builder(word(slot, 2), b -> {
 				cycle(slot, 2, NadirRules.WHEN.length);
 				b.setMessage(word(slot, 2));
 			}).bounds(c[4], y, c[5], 16).build());
-			addRenderableWidget(Button.builder(onOff(slot), b -> {
+			addRenderableWidget(FlatButton.builder(onOff(slot), b -> {
 				toggle(slot);
 				this.rebuildWidgets();
 			}).bounds(c[6], y, c[7], 16).build());

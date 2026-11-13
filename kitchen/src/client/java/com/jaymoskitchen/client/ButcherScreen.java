@@ -5,6 +5,7 @@ import com.jaymoskitchen.net.Payloads.OpenButcher;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskitchen.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -53,14 +54,14 @@ public class ButcherScreen extends Screen {
 	protected void init() {
 		int cx = this.width / 2;
 		int by = top() + PANEL_H - 28;
-		Button deal = Button.builder(Component.translatable("screen.jaymoskitchen.butcher.deal", offer.price()), b -> {
+		Button deal = FlatButton.builder(Component.translatable("screen.jaymoskitchen.butcher.deal", offer.price()), b -> {
 				ClientPlayNetworking.send(new Payloads.ButcherDeal(offer.villager()));
 				onClose();
 			})
 			.bounds(cx - 115, by, 110, BUTTON_H).build();
 		deal.active = canPay();
 		addRenderableWidget(deal);
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.butcher.keep"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.butcher.keep"), b -> onClose())
 			.bounds(cx + 5, by, 110, BUTTON_H).build());
 	}
 
@@ -75,7 +76,7 @@ public class ButcherScreen extends Screen {
 		Component tier = Component.translatable(known ? "screen.jaymoskitchen.butcher.tier." + offer.tier() : "screen.jaymoskitchen.butcher.tier.unknown");
 		int pipW = 12, pipGap = 3, pipsW = TIERS * pipW + (TIERS - 1) * pipGap, pipsX = x + PANEL_W - 9 - pipsW;
 		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(Items.SMOKER), this.title,
-			Component.translatable("screen.jaymoskitchen.butcher.skill", tier), KitchenUi.ACCENT, pipsX - 6);
+			Component.translatable("screen.jaymoskitchen.butcher.skill", tier), KitchenUi.ACCENT, pipsX - 6 - (x + 28));
 		for (int i = 0; i < TIERS; i++) {
 			int px = pipsX + i * (pipW + pipGap);
 			graphics.fill(px, y + 21, px + pipW, y + 25, known && i <= offer.tier() ? KitchenUi.ACCENT : KitchenUi.BAR_BACK);

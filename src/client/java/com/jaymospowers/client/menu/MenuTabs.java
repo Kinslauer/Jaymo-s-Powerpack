@@ -1,5 +1,6 @@
 package com.jaymospowers.client.menu;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.PowerScreen;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -214,7 +215,7 @@ public final class MenuTabs {
 			}
 		}
 		if (hovered != null) {
-			graphics.setTooltipForNextFrame(Minecraft.getInstance().font, hovered.label(), mouseX, mouseY);
+			UiStyle.tip(graphics, Minecraft.getInstance().font, hovered.label(), mouseX, mouseY);
 		}
 	}
 

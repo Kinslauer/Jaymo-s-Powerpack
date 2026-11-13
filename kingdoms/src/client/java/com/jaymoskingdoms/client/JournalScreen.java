@@ -5,6 +5,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Journal;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -43,7 +44,7 @@ final class JournalScreen extends Screen {
 	static final int[] ZOOMS = {1, 2, 4, 8, 16, 32};
 	static final int DEFAULT_ZOOM = 2;
 	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,
-		COLOR_PARCHMENT = 0xFFD8C8A0, COLOR_HATED = 0xFFE04040;
+		COLOR_PARCHMENT = Ui.PAPER, COLOR_HATED = 0xFFE04040;
 	static final int QUESTS = 0, MAP = 1, REPUTATION = 2;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
@@ -120,16 +121,16 @@ final class JournalScreen extends Screen {
 		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
 			int bx = left() + 12 + mapSize() + 12;
-			Button in = Button.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
-			Button out = Button.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
+			Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
+			Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
 			in.active = zoom > 0;
 			out.active = zoom < ZOOMS.length - 1;
 			addRenderableWidget(in);
 			addRenderableWidget(out);
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
 		// ((0.7.618, Rivals patch 3) the ladders of captains you know of)
-		addRenderableWidget(Button.builder(Component.translatable("ladder.jaymoskingdoms.button"), b -> LadderScreen.ask()).bounds(left() + 6, fy, 70, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("ladder.jaymoskingdoms.button"), b -> LadderScreen.ask()).bounds(left() + 6, fy, 70, 16).build());
 	}
 
 	private void show(int which) {
@@ -207,7 +208,7 @@ final class JournalScreen extends Screen {
 		Ui.panel(graphics, x, y, w, panelH(), COLOR_GOLD);
 		// the header: the journal, and what this page holds
 		graphics.item(new ItemStack(Journal.JOURNAL), x + 8, y + 8);
-		Ui.line(graphics, this.font, this.title, x + 28, y + 7, w - 36, COLOR_GOLD);
+		Ui.line(graphics, this.font, this.title, x + 28, y + 8, w - 36, COLOR_GOLD);
 		long rated = book.places().stream().filter(Journal.Place::rated).count();
 		Component sub = switch (page) {
 			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
@@ -402,7 +403,7 @@ final class JournalScreen extends Screen {
 			}
 		}
 		if (!hover.isEmpty()) {
-			graphics.setComponentTooltipForNextFrame(this.font, hover, mouseX, mouseY);
+			Ui.tip(graphics, this.font, hover, mouseX, mouseY);
 		}
 	}
 

@@ -7,9 +7,9 @@ import com.jaymospowers.rig.RigForgeEntity;
 import com.jaymospowers.rig.RigFrame;
 import com.jaymospowers.rig.RigNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
@@ -108,14 +108,14 @@ public class RigForgeScreen extends Screen {
 			this.trim = dyeOf(forge.trim());
 		}
 		int mx = middleX(), y = contentY();
-		this.pieceButton = addRenderableWidget(Button.builder(Component.empty(), b -> cyclePiece(1)).bounds(mx, y + 2, MIDDLE_W, 14).build());
-		this.frameButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleFrame(1)).bounds(mx, y + 20, MIDDLE_W, 14).build());
+		this.pieceButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cyclePiece(1)).bounds(mx, y + 2, MIDDLE_W, 14).build());
+		this.frameButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleFrame(1)).bounds(mx, y + 20, MIDDLE_W, 14).build());
 		int by = top() + H - 20;
-		this.build = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.rig_forge.build"), b -> send(true, true))
+		this.build = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.rig_forge.build"), b -> send(true, true))
 			.bounds(left() + W - 8 - 64, by, 64, 14).build());
-		this.paint = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.rig_forge.paint"), b -> send(true, false))
+		this.paint = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.rig_forge.paint"), b -> send(true, false))
 			.bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
-		this.paint.setTooltip(Tooltip.create(Component.translatable("screen.jaymospowers.rig_forge.paint_tip")));
+		this.paint.setTooltip(UiStyle.tipOf(Component.translatable("screen.jaymospowers.rig_forge.paint_tip")));
 		labels();
 	}
 
@@ -350,7 +350,7 @@ public class RigForgeScreen extends Screen {
 			}
 			int hovered = swatchAt(mouseX, mouseY, trimRow);
 			if (hovered >= 0) {
-				graphics.setTooltipForNextFrame(this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
+				UiStyle.tip(graphics, this.font, Component.translatable("color.minecraft." + DyeColor.byId(hovered).getName()), mouseX, mouseY);
 			}
 		}
 		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.rig_forge.dye_cost"), x, swatchY(true) + 3 * SWATCH_H + 8, wide,

@@ -435,12 +435,12 @@ public class CodexScreen extends Screen {
 		for (int i = 0; i < tabs(); i++) {
 			if (UiStyle.over(mouseX, mouseY, left() + 6 + i * tw, ty, tw, TAB_H)) {
 				String key = i < Research.Category.values().length ? Research.Category.values()[i].name().toLowerCase() : "essences";
-				graphics.setTooltipForNextFrame(font, Component.translatable("gui.jaymospowers.codex.tab." + key), mouseX, mouseY);
+				UiStyle.tip(graphics, font, Component.translatable("gui.jaymospowers.codex.tab." + key), mouseX, mouseY);
 				return;
 			}
 		}
 		if (hovered != null) {
-			graphics.setTooltipForNextFrame(font, Component.translatable(hovered.entry().key()), mouseX, mouseY);
+			UiStyle.tip(graphics, font, Component.translatable(hovered.entry().key()), mouseX, mouseY);
 		}
 	}
 

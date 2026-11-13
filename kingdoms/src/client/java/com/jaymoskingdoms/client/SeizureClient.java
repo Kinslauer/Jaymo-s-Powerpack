@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Seizures;
@@ -254,7 +255,7 @@ public final class SeizureClient {
 		int y = at[1] + 11 + 1;
 		int fill = Math.round(BAR_W * share());
 		int colour = kind == Seizures.Kind.FEVER ? 0xFFB01010 : kind == Seizures.Kind.BLADE ? 0xFF4FB0A8 : 0xFFC08020;
-		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + BAR_H + 1, 0xA0000000);
+		graphics.fill(x - 1, y - 1, x + BAR_W + 1, y + BAR_H + 1, HudStyle.PLATE);
 		graphics.fill(x, y, x + fill, y + BAR_H, colour);
 		Component line = canGiveIn
 			? Component.translatable("hud.jaymoskingdoms.seize.fight_or_give_in", WerewolfKey.name())

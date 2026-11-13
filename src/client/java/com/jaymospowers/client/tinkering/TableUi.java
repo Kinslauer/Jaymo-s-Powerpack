@@ -1,5 +1,6 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.tinkering.StationBlock;
 import com.jaymospowers.tinkering.table.TableExtras;
 import java.util.List;
@@ -99,7 +100,7 @@ final class TableUi {
 	static void tooltip(GuiGraphicsExtractor graphics, Font font, TableExtras extras, int left, int top, int mouseX, int mouseY) {
 		StationBlock.Kind kind = tabAt(extras, left, top, mouseX, mouseY);
 		if (kind != null) {
-			graphics.setTooltipForNextFrame(font, kind.block().getName(), mouseX, mouseY);
+			UiStyle.tip(graphics, font, kind.block().getName(), mouseX, mouseY);
 		}
 	}
 

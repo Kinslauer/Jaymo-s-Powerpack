@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.LoreCodex;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,7 +18,7 @@ import net.minecraft.util.Mth;
  */
 final class LoreCodexScreen extends Screen {
 	static final int PANEL_W = 360, PANEL_H = 230, HEADER = 30, FOOTER = 24, LIST_W = 124, ROW = 16, PAGE_PAD = 6;
-	static final int PARCHMENT = 0xFFD8C8A0, INK = 0xFF2A1E10, EDGE = 0xFF8A7650;
+	static final int PARCHMENT = Ui.PAPER, INK = Ui.INK, EDGE = Ui.PAPER_EDGE;
 	private static String lastBook = "";
 
 	private final List<LoreCodex.Entry> entries;
@@ -64,9 +65,9 @@ final class LoreCodexScreen extends Screen {
 	protected void init() {
 		int y = top() + PANEL_H - FOOTER + 4;
 		int px = left() + LIST_W + 12;
-		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(px, y, 20, 16).build());
-		this.next = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(px + 24, y, 20, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + PANEL_W - 66, y, 60, 16).build());
+		this.prev = addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> turn(-1)).bounds(px, y, 20, 16).build());
+		this.next = addRenderableWidget(FlatButton.builder(Component.literal(">"), b -> turn(1)).bounds(px + 24, y, 20, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + PANEL_W - 66, y, 60, 16).build());
 		turn(0);
 	}
 
@@ -117,7 +118,7 @@ final class LoreCodexScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, PANEL_W, PANEL_H, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, PANEL_W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, PANEL_W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("lore.jaymoskingdoms.codex.count", this.entries.size()), x + 10, y + 18, LIST_W, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 3);
 		if (this.entries.isEmpty()) {

@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Ladders;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -70,20 +71,20 @@ public final class LadderScreen extends Screen {
 		int w = shown == 0 ? 0 : (panelW() - 12 - arrows - (shown - 1) * 4) / shown;
 		int x = left() + 6 + (arrows > 0 ? 18 : 0), y = top() + HEADER;
 		if (arrows > 0) {
-			Button back = Button.builder(Component.literal("<"), b -> tabs(-1)).bounds(left() + 6, y, 16, TAB_H).build();
+			Button back = FlatButton.builder(Component.literal("<"), b -> tabs(-1)).bounds(left() + 6, y, 16, TAB_H).build();
 			back.active = tabScroll > 0;
 			addRenderableWidget(back);
-			Button on = Button.builder(Component.literal(">"), b -> tabs(1)).bounds(left() + panelW() - 22, y, 16, TAB_H).build();
+			Button on = FlatButton.builder(Component.literal(">"), b -> tabs(1)).bounds(left() + panelW() - 22, y, 16, TAB_H).build();
 			on.active = tabScroll + TABS_SHOWN < ladders.size();
 			addRenderableWidget(on);
 		}
 		for (int i = 0; i < shown; i++) {
 			int which = tabScroll + i;
-			Button tab = Button.builder(ladders.get(which).name(), b -> pick(which)).bounds(x + i * (w + 4), y, w, TAB_H).build();
+			Button tab = FlatButton.builder(ladders.get(which).name(), b -> pick(which)).bounds(x + i * (w + 4), y, w, TAB_H).build();
 			tab.active = which != ladder;
 			addRenderableWidget(tab);
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose())
 			.bounds(left() + panelW() - 66, top() + PANEL_H - FOOTER + 3, 60, 16).build());
 	}
 
@@ -109,7 +110,7 @@ public final class LadderScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW();
 		Ui.panel(graphics, x, y, w, PANEL_H, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 7, w - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, w - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("ladder.jaymoskingdoms.sub", board.ladders().size()), x + 9, y + 18, w - 18, Ui.DIM);
 		if (board.ladders().isEmpty()) {
 			Ui.line(graphics, this.font, Component.translatable("ladder.jaymoskingdoms.none"), x + 9, bodyTop() + 4, w - 18, Ui.DIM);

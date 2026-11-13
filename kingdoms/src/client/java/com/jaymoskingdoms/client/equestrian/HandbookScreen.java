@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client.equestrian;
 
 import com.jaymoskingdoms.client.Ui;
 import com.jaymoskingdoms.equestrian.Breed;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,9 +49,9 @@ final class HandbookScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left(), y = top() + H - 22;
-		this.back = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(x + MARGIN, y, 20, 16).build());
-		this.next = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(x + W - MARGIN - 20, y, 20, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(x + W / 2 - 28, y, 56, 16).build());
+		this.back = addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> turn(-1)).bounds(x + MARGIN, y, 20, 16).build());
+		this.next = addRenderableWidget(FlatButton.builder(Component.literal(">"), b -> turn(1)).bounds(x + W - MARGIN - 20, y, 20, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(x + W / 2 - 28, y, 56, 16).build());
 		turn(0);
 	}
 
@@ -70,9 +71,9 @@ final class HandbookScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, H, Ui.GOLD);
-		graphics.text(this.font, this.title, x + MARGIN, y + 8, Ui.DIM, false);
+		graphics.text(this.font, this.title, x + MARGIN, y + 8, Ui.DIM);
 		String count = this.page + " / " + PAGES;
-		graphics.text(this.font, count, x + W - MARGIN - this.font.width(count), y + 8, Ui.HINT, false);
+		graphics.text(this.font, count, x + W - MARGIN - this.font.width(count), y + 8, Ui.HINT);
 		Ui.line(graphics, this.font, Component.translatable("handbook.jaymoskingdoms." + this.page + ".title"), x + MARGIN, y + 22, W - 2 * MARGIN,
 			Ui.GOLD);
 		Ui.rule(graphics, x + 4, x + W - 4, y + 33);

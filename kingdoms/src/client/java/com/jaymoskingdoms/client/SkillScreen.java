@@ -13,6 +13,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -172,18 +173,18 @@ final class SkillScreen extends Screen {
 			tabs(x, y, tabW);
 			int fy = top() + panelH() - FOOTER + 3;
 			int right = left() + panelW() - 6;
-			addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 			// (0.7.82) the world tiers, beside Done
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 				.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
-			addRenderableWidget(Button.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
+			addRenderableWidget(FlatButton.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
 				.bounds(right - 60 - 4 - 80 - 4 - 70, fy, 70, 16).build());
 			// a small arrow on the panel's left edge collapses it; the strip on the left brings it back
 			if (!panelCollapsed) {
-				addRenderableWidget(Button.builder(Component.literal("<"), b -> {
+				addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> {
 					panelCollapsed = true;
 					rebuildWidgets();
-				}).bounds(left() - 20, top() + panelH() / 2 - 10, 16, 20).build());
+				}).bounds(left() - 20, top() + panelH() / 2 - 10, 16, 16).build());
 			}
 			return;
 		}
@@ -191,21 +192,21 @@ final class SkillScreen extends Screen {
 		int tabW = Math.min(TAB_W, Math.max(40, (this.width - 12) / 8));
 		tabs(this.width - 6 - tabW * 3 - 8, 8, tabW);
 		int fy = this.height - WEB_FOOTER + 3, right = this.width - 6;
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 			.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
 		// (0.7.361) Valor's page, from Strength
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.valor.button"), b -> this.minecraft.gui.setScreen(new ValorScreen(this)))
 			.bounds(right - 60 - 4 - 80 - 4 - 60, fy, 60, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.web.center"), b -> fit())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.skills.web.center"), b -> fit())
 			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60, fy, 60, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
+		addRenderableWidget(FlatButton.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
 			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60 - 4 - 70, fy, 70, 16).build());
 	}
 
 	/** The three tabs: the web, Attributes, Jobs. */
 	private void tabs(int x, int y, int tabW) {
-		Button webTab = Button.builder(Component.translatable("gui.jaymoskingdoms.skills.web.tab"), b -> {
+		Button webTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.skills.web.tab"), b -> {
 			stats = false;
 			jobs = false;
 			rebuildWidgets();
@@ -213,7 +214,7 @@ final class SkillScreen extends Screen {
 		webTab.active = stats || jobs;
 		addRenderableWidget(webTab);
 		x += tabW + 4;
-		Button statsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
+		Button statsTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
 			listScroll = 0;
 			stats = true;
 			jobs = false;
@@ -222,7 +223,7 @@ final class SkillScreen extends Screen {
 		statsTab.active = !stats;
 		addRenderableWidget(statsTab);
 		x += tabW + 4;
-		Button jobsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.jobs.tab"), b -> {
+		Button jobsTab = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.jobs.tab"), b -> {
 			listScroll = 0;
 			jobs = true;
 			stats = false;
@@ -698,7 +699,7 @@ final class SkillScreen extends Screen {
 	private void attributes(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = Ui.GOLD;
-		Ui.panel(graphics, x, y, w, panelH(), accent);
+		Ui.window(graphics, x, y, w, panelH());
 		var player = this.minecraft.player;
 		int level = Stats.characterLevel(shown), points = player == null ? 0 : Stats.points(player, shown);
 		int cap = player == null ? Stats.TIER_CAP[0] : Stats.cap(player), tier = player == null ? 0 : Stats.tier(player);
@@ -821,7 +822,7 @@ final class SkillScreen extends Screen {
 	private void jobs(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top(), w = panelW();
 		int accent = JOB_ACCENT;
-		Ui.panel(graphics, x, y, w, panelH(), accent);
+		Ui.window(graphics, x, y, w, panelH());
 		Careers.Career c = this.minecraft.player == null ? Careers.Career.EMPTY : Careers.of(this.minecraft.player);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.title"), x + 9, y + 8, w / 2 - 12, accent);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.jobs.held", c.posts().size()), x + 9, y + 19, w / 2 - 12,

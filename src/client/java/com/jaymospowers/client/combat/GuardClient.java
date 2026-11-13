@@ -1,5 +1,6 @@
 package com.jaymospowers.client.combat;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.LockOnClient;
 import com.jaymospowers.combat.Guard;
@@ -159,7 +160,7 @@ public final class GuardClient {
 		y = at[1] + 2;
 		int left = cx - BAR_HALF, width = BAR_HALF * 2;
 		int perfectX = left + width * perfect / span, fromX = left + width * from / span, parryX = left + width * Math.max(from, parry) / span;
-		graphics.fill(left - 1, y - 1, left + width + 1, y + BAR_HEIGHT + 1, 0x80000000);
+		graphics.fill(left - 1, y - 1, left + width + 1, y + BAR_HEIGHT + 1, HudStyle.PLATE);
 		graphics.fill(left, y, perfectX, y + BAR_HEIGHT, PERFECT_COLOR);
 		graphics.fill(perfectX, y, fromX, y + BAR_HEIGHT, BLOCK_COLOR);
 		graphics.fill(fromX, y, parryX, y + BAR_HEIGHT, PARRY_COLOR);

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -100,38 +101,38 @@ public class ZFighterTrainingScreen extends Screen {
 		int tabW = (w - 16) / 3;
 		for (int i = 0; i < 3; i++) {
 			int tab = i;
-			tabButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter." + TAB_KEYS[i]), b -> page = tab)
+			tabButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter." + TAB_KEYS[i]), b -> page = tab)
 				.bounds(left() + 8 + i * (tabW + 0), top() + 30, tabW - 2, 16).build()));
 		}
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int stat = i;
-			statButtons.add(addRenderableWidget(Button.builder(Component.literal("+"), b -> send(ZFighterNet.BUY_STAT, stat))
+			statButtons.add(addRenderableWidget(FlatButton.builder(Component.literal("+"), b -> send(ZFighterNet.BUY_STAT, stat))
 				.bounds(left() + w - 26, contentY() + 12 + i * ROW - 3, 20, 14).build()));
 		}
 		for (int form = 2; form <= ZFighterTraining.FORMS; form++) {
 			int f = form;
-			formButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_FORM, f))
+			formButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_FORM, f))
 				.bounds(buttonX(), contentY() + (form - 1) * FORM_ROW - 3, BUTTON_W, 14).build()));
 		}
 		// (0.17.60) the HUD editor, and the first-time tip
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.hud_button"),
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter.hud_button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterHudEditor(this))).bounds(left() + 8, top() + 7, 44, 14).build());
 		// the old Story button is gone: the story is the character menu's Story tab (Kingdoms' Retaking) for everyone
 		// (0.18.94) the technique creator
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_creator.button"),
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_creator.button"),
 			b -> this.minecraft.gui.setScreen(new ZFighterCreatorScreen(this))).bounds(left() + panelW() - 52, top() + 7, 44, 14).build());
 		ZFighterTips.show(ZFighterTips.Tip.TRAINING);
-		auraButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+		auraButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> {
 			int next = (com.jaymospowers.power.zfighter.ZFighterAura.style(this.minecraft.player) + 1) % com.jaymospowers.power.zfighter.ZFighterAura.STYLES;
 			send(ZFighterNet.AURA_STYLE, next);
 		}).bounds(buttonX(), auraY() - 3, BUTTON_W, 14).build());
-		limitButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_LIMIT, 0))
+		limitButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_LIMIT, 0))
 			.bounds(buttonX(), limitY() - 3, BUTTON_W, 14).build());
 		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
 			int technique = i;
-			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
+			techniqueButtons.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> techniqueAction(technique))
 				.bounds(buttonX(), contentY() + i * ROW - 3, BUTTON_W, 14).build()));
-			wheelButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> send(ZFighterNet.WHEEL_SLOT, technique))
+			wheelButtons.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(ZFighterNet.WHEEL_SLOT, technique))
 				.bounds(buttonX() - WHEEL_W - 2, contentY() + i * ROW - 3, WHEEL_W, 14).build()));
 		}
 	}

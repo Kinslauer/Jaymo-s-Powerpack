@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -76,7 +76,7 @@ public class MapScreen extends Screen {
 		KeyMapping xaero = xaeroKey();
 		if (xaero != null) {
 			int lx = left() + MAP_X + MAP_SIZE + 8;
-			addRenderableWidget(Button.builder(Component.translatable("menu.jaymospowers.map.full"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymospowers.map.full"), b -> {
 				InputConstants.Key key = InputConstants.getKey(xaero.saveString());
 				onClose();
 				KeyMapping.click(key);
@@ -219,7 +219,7 @@ public class MapScreen extends Screen {
 		}
 		graphics.text(this.font, Component.translatable("menu.jaymospowers.map.zoom", this.zoom), mx + 2, my + MAP_SIZE - 9, PowerScreen.COLOR_DIM, true);
 		if (!hover.isEmpty()) {
-			graphics.setComponentTooltipForNextFrame(this.font, hover, mouseX, mouseY);
+			UiStyle.tip(graphics, this.font, hover, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}

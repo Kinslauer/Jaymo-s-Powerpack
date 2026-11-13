@@ -4,8 +4,8 @@ import com.jaymoskingdoms.Lineage;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -51,11 +51,11 @@ final class LineageScreen extends Screen {
 		}
 		this.lines = out;
 		int x = left() + PAD, y = top() + panelH() - PAD - 2 * BUTTON_H - GAP, bw = (W - 2 * PAD - GAP) / 2;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.lineage.hand_down"), b -> answer(Lineage.HAND_DOWN))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.lineage.hand_down"), b -> answer(Lineage.HAND_DOWN))
 			.bounds(x, y, bw, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.lineage.elder_keeps"), b -> answer(Lineage.ELDER_KEEPS))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.lineage.elder_keeps"), b -> answer(Lineage.ELDER_KEEPS))
 			.bounds(x + bw + GAP, y, bw, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.lineage.not_yet"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.lineage.not_yet"), b -> onClose())
 			.bounds(x, y + BUTTON_H + GAP, W - 2 * PAD, BUTTON_H).build());
 	}
 

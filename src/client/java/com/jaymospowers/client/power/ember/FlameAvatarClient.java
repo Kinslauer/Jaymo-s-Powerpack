@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.ember;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
@@ -151,7 +152,7 @@ public final class FlameAvatarClient {
 		float flame = FlameAvatar.flame(player);
 		int color = flame < 0.25F ? LOW_COLOR : COLOR;
 		int barY = y - 6;
-		graphics.fill(x - 1, barY - 1, x + total + 1, barY + 4, 0x90000000);
+		graphics.fill(x - 1, barY - 1, x + total + 1, barY + 4, HudStyle.PLATE);
 		graphics.fill(x, barY, x + Mth.ceil(total * Mth.clamp(flame, 0.0F, 1.0F)), barY + 3, 0xFF000000 | color);
 		String amount = Integer.toString(Mth.ceil(flame * FlameAvatar.MAX_FLAME));
 		Component label = Component.translatable("hud.jaymospowers.avatar.flame").append(" " + amount);
@@ -169,12 +170,12 @@ public final class FlameAvatarClient {
 	private static void chip(GuiGraphicsExtractor graphics, Font font, int x, int y, PowerKey key, Item icon, long left, int length, boolean sneak) {
 		String label = font.plainSubstrByWidth((sneak ? "⇧" : "") + JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage().getString(), CHIP - 2);
 		boolean ready = left <= 0;
-		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
+		graphics.fill(x, y, x + CHIP, y + CHIP, HudStyle.PLATE);
 		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFF000000 | COLOR : 0xA0505050);
 		graphics.item(new ItemStack(icon), x + 2, y + 2);
 		if (!ready) {
 			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)Math.max(1, length)));
-			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
+			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, HudStyle.PLATE);
 			String seconds = left >= 200 ? Long.toString((left + 19) / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		}

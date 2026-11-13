@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -62,7 +63,7 @@ final class RetakingScreen extends Screen {
 			ClientPlayNetworking.send(new Retaking.Ask());
 		}
 		int px = left() + LIST_W, pw = panelW() - LIST_W;
-		this.roadButton = addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> {
+		this.roadButton = addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> {
 			if (this.roadOpen != null) {
 				RoadCompat.open(this.roadOpen, this);
 			}
@@ -201,12 +202,12 @@ final class RetakingScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), w = panelW(), h = panelH();
-		Ui.panel(graphics, x, y, w, h, Ui.GOLD);
+		Ui.window(graphics, x, y, w, h);
 		Retaking.Act current = current();
 		Retaking.Act[] all = Retaking.Act.values();
 
 		// the acts down the left
-		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, LIST_W - 12, Ui.GOLD);
 		Ui.line(graphics, this.font, state == null ? Component.translatable("menu.jaymoskingdoms.story.asking")
 			: Component.translatable("menu.jaymoskingdoms.story.sub", current.ordinal() + 1), x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + h - 4, Ui.ROW);

@@ -87,7 +87,7 @@ final class FactionScreen extends Screen {
 		int x = left(), y = top(), w = panelW();
 		MenuNet.Info i = info;
 		int accent = i != null && i.sworn() ? 0xFF000000 | i.color() : Ui.GOLD;
-		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		Ui.window(graphics, x, y, w, PANEL_H);
 		graphics.item(new ItemStack(Items.BELL), x + 8, y + 8);
 		Component name = i == null ? this.title : i.sworn() ? Component.literal(i.name()) : Component.translatable("menu.jaymoskingdoms.faction.unsworn");
 		Ui.line(graphics, this.font, name, x + 28, y + 7, w - 36, accent);

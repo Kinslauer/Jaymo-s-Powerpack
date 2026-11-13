@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Tables;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -69,14 +70,14 @@ final class GameScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left(), y = top() + H - 52;
-		this.game = addRenderableWidget(Button.builder(Component.empty(), b -> send(Tables.GAME, this.state.game() + 1)).bounds(x + PAD, y, 84, 20).build());
-		this.stakeLess = addRenderableWidget(Button.builder(Component.literal("-"), b -> send(Tables.STAKE, -1)).bounds(x + PAD + 88, y, 20, 20).build());
-		this.stakeMore = addRenderableWidget(Button.builder(Component.literal("+"), b -> send(Tables.STAKE, 1)).bounds(x + PAD + 110, y, 20, 20).build());
-		this.deal = addRenderableWidget(Button.builder(Component.empty(), b -> send(Tables.DEAL, 0)).bounds(x + PAD + 136, y, 80, 20).build());
-		this.hit = addRenderableWidget(Button.builder(Component.translatable("table.jaymoskingdoms.hit"), b -> send(Tables.HIT, 0)).bounds(x + PAD, y + 24, 60, 20).build());
-		this.stand = addRenderableWidget(Button.builder(Component.translatable("table.jaymoskingdoms.stand"), b -> send(Tables.STAND, 0)).bounds(x + PAD + 64, y + 24, 60, 20).build());
-		this.cheat = addRenderableWidget(Button.builder(Component.empty(), b -> send(Tables.CHEAT, 0)).bounds(x + PAD + 128, y + 24, 96, 20).build());
-		addRenderableWidget(Button.builder(Component.translatable("table.jaymoskingdoms.leave"), b -> onClose()).bounds(x + W - PAD - 70, y + 24, 70, 20).build());
+		this.game = addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(Tables.GAME, this.state.game() + 1)).bounds(x + PAD, y, 84, 16).build());
+		this.stakeLess = addRenderableWidget(FlatButton.builder(Component.literal("-"), b -> send(Tables.STAKE, -1)).bounds(x + PAD + 88, y, 20, 16).build());
+		this.stakeMore = addRenderableWidget(FlatButton.builder(Component.literal("+"), b -> send(Tables.STAKE, 1)).bounds(x + PAD + 110, y, 20, 16).build());
+		this.deal = addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(Tables.DEAL, 0)).bounds(x + PAD + 136, y, 80, 16).build());
+		this.hit = addRenderableWidget(FlatButton.builder(Component.translatable("table.jaymoskingdoms.hit"), b -> send(Tables.HIT, 0)).bounds(x + PAD, y + 24, 60, 16).build());
+		this.stand = addRenderableWidget(FlatButton.builder(Component.translatable("table.jaymoskingdoms.stand"), b -> send(Tables.STAND, 0)).bounds(x + PAD + 64, y + 24, 60, 16).build());
+		this.cheat = addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(Tables.CHEAT, 0)).bounds(x + PAD + 128, y + 24, 96, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("table.jaymoskingdoms.leave"), b -> onClose()).bounds(x + W - PAD - 70, y + 24, 70, 16).build());
 		sync();
 	}
 

@@ -18,8 +18,8 @@ final class CommandmentsScreen extends Screen {
 	static final int PAGE_W = 132, H = 176, SPINE = 6, PAD = 9, GAP = 4;
 	static final int W = PAGE_W * 2 + SPINE;
 	/** Parchment, its shade at the edges, the gilt frame, the red spine, the ink, the struck ink. */
-	static final int PAPER = 0xFFF4E6C4, PAPER_EDGE = 0xFFE2CC98, GILT = 0xFFB8862B, GILT_DARK = 0xFF7A5618, SPINE_RED = 0xFF8E1C1C,
-		SPINE_DARK = 0xFF5A0F0F, INK = 0xFF3A2A18, STRUCK = 0xFFA02020, FAINT = 0xFF8A7656;
+	static final int PAPER = Ui.PAPER, PAPER_EDGE = Ui.PAPER_EDGE, GILT = 0xFFB8862B, GILT_DARK = 0xFF7A5618, SPINE_RED = 0xFF8E1C1C,
+		SPINE_DARK = 0xFF5A0F0F, INK = Ui.INK, STRUCK = 0xFFA02020, FAINT = Ui.INK_FAINT;
 
 	private final Patron patron;
 

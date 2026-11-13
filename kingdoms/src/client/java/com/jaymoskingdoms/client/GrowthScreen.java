@@ -8,6 +8,7 @@ import com.jaymoskingdoms.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -65,15 +66,15 @@ final class GrowthScreen extends Screen {
 	@Override
 	protected void init() {
 		int y = top() + panelH() - FOOTER + 4;
-		this.featsTab = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.feats"), b -> {
+		this.featsTab = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.feats"), b -> {
 			this.feats = true;
 			this.scroll = 0;
 		}).bounds(left() + panelW() - 150, top() + 7, 68, 16).build());
-		this.pathsTab = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.paths"), b -> {
+		this.pathsTab = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.paths"), b -> {
 			this.feats = false;
 			this.scroll = 0;
 		}).bounds(left() + panelW() - 78, top() + 7, 68, 16).build());
-		this.take = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.take"), b -> confirm())
+		this.take = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.take"), b -> confirm())
 			.bounds(left() + panelW() - 130, y, 120, 16).build());
 	}
 
@@ -162,8 +163,8 @@ final class GrowthScreen extends Screen {
 			return;
 		}
 		int x = left(), y = top(), w = panelW(), h = panelH(), px = x + LIST_W, pw = w - LIST_W;
-		Ui.panel(graphics, x, y, w, h, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
+		Ui.window(graphics, x, y, w, h);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, LIST_W - 12, Ui.GOLD);
 		int owed = Feats.owed(player);
 		Ui.line(graphics, this.font, this.feats ? Component.translatable("gui.jaymoskingdoms.growth.owed", owed, Knowledge.level(player))
 			: Component.translatable("gui.jaymoskingdoms.growth.paths_sub"), x + 8, y + 19, LIST_W - 12, owed > 0 && this.feats ? Ui.GOOD : Ui.DIM);

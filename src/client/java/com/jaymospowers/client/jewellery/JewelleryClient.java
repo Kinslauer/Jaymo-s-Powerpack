@@ -1,5 +1,6 @@
 package com.jaymospowers.client.jewellery;
 
+import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.hud.HudZones;
 import com.jaymospowers.client.tinkering.smithing.TimingBar;
@@ -29,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class JewelleryClient {
 	private static final int BAR_HALF = 80, BAR_HEIGHT = 7;
-	private static final int DIM = 0x90000000, SPIN_LINE = 0xFFB0B0C0, CHIP_COLOR = 0xFFB060FF, MISS_COLOR = 0xFFE04040;
+	private static final int DIM = 0x90000000, SPIN_LINE = 0xFFB0B0C0, CHIP_COLOR = 0xFFB060FF, MISS_COLOR = HudStyle.WARN;
 	/** How long a stroke's colour flashes on the bar (ticks). */
 	private static final int FLASH_TICKS = 8;
 	/** Further than this from the wheel and the game is put away (blocks, squared). */

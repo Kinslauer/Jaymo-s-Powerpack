@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.equestrian;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.client.mixin.equestrian.AbstractContainerScreenAccessor;
@@ -305,7 +306,7 @@ public final class EquestrianClient {
 		}
 		int x0 = at[0];
 		int y = at[1] + 16;
-		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, 0x90000000);
+		graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, HudStyle.PLATE);
 		graphics.fill(x0, y, x0 + Mth.ceil(BAR_WIDTH * share), y + 2, 0xFF000000 | color);
 		int mark = x0 + (int)Math.round(BAR_WIDTH * Equestrian.WIND_BACK);
 		graphics.fill(mark, y - 1, mark + 1, y + 3, 0xFF606060);
@@ -314,7 +315,7 @@ public final class EquestrianClient {
 		float charge = Mounted.charge(horse);
 		if (charge > 0.0F) {
 			int cc = charge >= Mounted.CHARGE_READY ? pulse(CHARGE_COLOR, 0xFFFFFF, time * 0.6F) : 0x806040;
-			graphics.fill(x0 - 1, y + 4, x0 + BAR_WIDTH + 1, y + 6, 0x90000000);
+			graphics.fill(x0 - 1, y + 4, x0 + BAR_WIDTH + 1, y + 6, HudStyle.PLATE);
 			graphics.fill(x0, y + 4, x0 + Mth.ceil(BAR_WIDTH * charge), y + 5, 0xFF000000 | cc);
 		}
 		// the gait ladder: five pips, lit to the current one
@@ -340,7 +341,7 @@ public final class EquestrianClient {
 	}
 
 	private static void bar(GuiGraphicsExtractor graphics, int x, int y, int width, float share, int color) {
-		graphics.fill(x - 1, y - 1, x + width + 1, y + 3, 0x90000000);
+		graphics.fill(x - 1, y - 1, x + width + 1, y + 3, HudStyle.PLATE);
 		graphics.fill(x, y, x + Mth.ceil(width * Mth.clamp(share, 0.0F, 1.0F)), y + 2, 0xFF000000 | color);
 	}
 
@@ -405,10 +406,10 @@ public final class EquestrianClient {
 		graphics.text(font, label, cx - font.width(label) / 2, y, 0xFFFFFFFF);
 		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
 		int x = cx - 45;
-		graphics.fill(x - 2, y + 10, x + 92, y + 11 + STATS.length * 9 + 1, 0x90000000);
+		graphics.fill(x - 2, y + 10, x + 92, y + 11 + STATS.length * 9 + 1, HudStyle.PLATE);
 		for (int i = 0; i < STATS.length; i++) {
 			int row = y + 12 + i * 9;
-			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT);
 			int bx = x + 46;
 			int bw = 40;
 			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);
@@ -470,7 +471,7 @@ public final class EquestrianClient {
 		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
 		for (int i = 0; i < STATS.length; i++) {
 			int row = y + 11 + i * 9;
-			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT);
 			int bx = x + 46;
 			int bw = 40;
 			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);

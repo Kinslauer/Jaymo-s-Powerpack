@@ -9,6 +9,7 @@ import com.jaymospowers.power.zfighter.ZFighterTraining;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -87,25 +88,25 @@ public class ZFighterCreatorScreen extends Screen {
 		int w = panelW();
 		int fx = fieldX();
 		int fw = Math.min(160, x + w - 8 - fx);
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_story.back"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_story.back"), b -> onClose())
 			.bounds(x + 8, y + 7, 44, 14).build());
-		kindButton = addRenderableWidget(Button.builder(Component.empty(), b -> charged = !charged).bounds(fx, y + 26, fw, 14).build());
+		kindButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> charged = !charged).bounds(fx, y + 26, fw, 14).build());
 		nameBox = addRenderableWidget(new EditBox(this.font, fx, y + 44, fw, 14, Component.translatable("screen.jaymospowers.zfighter_creator.name")));
 		nameBox.setMaxLength(ZFighterCreator.NAME_MAX);
 		nameBox.setValue(name);
 		nameBox.setHint(Component.translatable("screen.jaymospowers.zfighter_creator.name_hint"));
 		nameBox.setResponder(s -> name = s);
-		shapeButton = addRenderableWidget(Button.builder(Component.empty(), b -> shape = (shape + 1) % ZFighterCreator.SHAPES)
+		shapeButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> shape = (shape + 1) % ZFighterCreator.SHAPES)
 			.bounds(fx, y + 62, fw, 14).build());
 		for (int i = 0; i < ZFighterCreator.COLORS.length; i++) {
 			int pick = i;
-			swatches.add(addRenderableWidget(Button.builder(Component.empty(), b -> color = pick)
+			swatches.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> color = pick)
 				.bounds(fx + i * (SWATCH + 2), y + 98, SWATCH, SWATCH).build()));
 		}
-		addRenderableWidget(Button.builder(Component.literal("-"), b -> power = Math.max(1, power - 1)).bounds(fx, y + 116, 14, 14).build());
-		addRenderableWidget(Button.builder(Component.literal("+"), b -> power = Math.min(ZFighterCreator.POWER_MAX, power + 1))
+		addRenderableWidget(FlatButton.builder(Component.literal("-"), b -> power = Math.max(1, power - 1)).bounds(fx, y + 116, 14, 14).build());
+		addRenderableWidget(FlatButton.builder(Component.literal("+"), b -> power = Math.min(ZFighterCreator.POWER_MAX, power + 1))
 			.bounds(fx + 54, y + 116, 14, 14).build());
-		createButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_creator.create"), b -> {
+		createButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_creator.create"), b -> {
 			ClientPlayNetworking.send(new ZFighterCreator.Make(charged, name, shape, ZFighterCreator.COLORS[color], power));
 			name = "";
 			nameBox.setValue("");
@@ -113,11 +114,11 @@ public class ZFighterCreatorScreen extends Screen {
 		for (int i = 0; i < 2 * ZFighterCreator.EACH; i++) {
 			int ry = listY() + 12 + i * ROW;
 			int index = index(i);
-			useButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.equip"),
+			useButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter.equip"),
 				b -> send(ZFighterNet.EQUIP_TECHNIQUE, index)).bounds(x + w - 128, ry - 2, 54, 12).build()));
-			wheelButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> send(ZFighterNet.WHEEL_SLOT, index))
+			wheelButtons.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(ZFighterNet.WHEEL_SLOT, index))
 				.bounds(x + w - 72, ry - 2, 14, 12).build()));
-			forgetButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_creator.forget"),
+			forgetButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_creator.forget"),
 				b -> ClientPlayNetworking.send(new ZFighterCreator.Forget(index))).bounds(x + w - 56, ry - 2, 48, 12).build()));
 		}
 	}

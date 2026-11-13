@@ -2,8 +2,8 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Loans;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -74,31 +74,31 @@ final class LoanScreen extends Screen {
 	protected void init() {
 		int x = left(), y = top(), by = y + height() - 24;
 		if (hire()) {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.loan.fight", this.ask.fight()), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.loan.fight", this.ask.fight()), b -> {
 				ClientPlayNetworking.send(new Loans.LoanAct(this.ask.entityId(), 0, 0, false));
 				onClose();
 			}).bounds(x + 10, by - 22, (W - 30) / 2, 16).build());
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.loan.work", this.ask.work()), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.loan.work", this.ask.work()), b -> {
 				ClientPlayNetworking.send(new Loans.LoanAct(this.ask.entityId(), 1, 0, false));
 				onClose();
 			}).bounds(x + 20 + (W - 30) / 2, by - 22, (W - 30) / 2, 16).build());
 		} else {
-			addRenderableWidget(Button.builder(wordLabel(), b -> {
+			addRenderableWidget(FlatButton.builder(wordLabel(), b -> {
 				this.word = (this.word + 1) % 4;
 				b.setMessage(wordLabel());
 			}).bounds(x + W - 140, y + 46, 130, 16).build());
 			if (hasGift()) {
-				addRenderableWidget(Button.builder(giftLabel(), b -> {
+				addRenderableWidget(FlatButton.builder(giftLabel(), b -> {
 					this.gift = !this.gift;
 					b.setMessage(giftLabel());
 				}).bounds(x + W - 140, y + 68, 130, 16).build());
 			}
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.loan.send"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.loan.send"), b -> {
 				ClientPlayNetworking.send(new Loans.LoanAct(this.ask.entityId(), 2, this.word, this.gift));
 				onClose();
 			}).bounds(x + 10, by, 90, 16).build());
 		}
-		addRenderableWidget(Button.builder(Component.translatable(hire() ? "gui.jaymoskingdoms.table.leave" : "gui.jaymoskingdoms.loan.later"),
+		addRenderableWidget(FlatButton.builder(Component.translatable(hire() ? "gui.jaymoskingdoms.table.leave" : "gui.jaymoskingdoms.loan.later"),
 			b -> onClose()).bounds(x + W - 100, by, 90, 16).build());
 	}
 
@@ -106,7 +106,7 @@ final class LoanScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, height(), Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, W - 18, Ui.GOLD);
 		if (hire()) {
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.whose", this.ask.owner()), x + 10, y + 22, W - 20, Ui.DIM);
 			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.loan.leanings", leaning(this.ask.main()), leaning(this.ask.second())),

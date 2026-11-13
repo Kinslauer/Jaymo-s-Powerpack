@@ -4,6 +4,7 @@ import com.jaymoskitchen.client.KitchenUi;
 import com.jaymoskitchen.climate.Warmth;
 import com.jaymoskitchen.net.Payloads;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskitchen.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -37,14 +38,14 @@ public class HearthScreen extends Screen {
 	@Override
 	protected void init() {
 		int by = top() + PANEL_H - 28;
-		Button feed = Button.builder(Component.translatable(data.cold() ? "screen.jaymoskitchen.hearth.add_cold" : "screen.jaymoskitchen.hearth.add"), b -> {
+		Button feed = FlatButton.builder(Component.translatable(data.cold() ? "screen.jaymoskitchen.hearth.add_cold" : "screen.jaymoskitchen.hearth.add"), b -> {
 				ClientPlayNetworking.send(new Payloads.FeedHearth(data.pos()));
 				b.active = false;
 			})
 			.bounds(left() + 8, by, PANEL_W / 2 - 12, BUTTON_H).build();
 		feed.active = data.canFeed() && data.fuel() < data.most();
 		addRenderableWidget(feed);
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.hearth.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.hearth.done"), b -> onClose())
 			.bounds(left() + PANEL_W / 2 + 4, by, PANEL_W / 2 - 12, BUTTON_H).build());
 	}
 
@@ -56,7 +57,7 @@ public class HearthScreen extends Screen {
 		Component state = Component.translatable(data.lit() ? (data.cold() ? "screen.jaymoskitchen.hearth.cooling" : "screen.jaymoskitchen.hearth.burning")
 			: "screen.jaymoskitchen.hearth.out");
 		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(data.cold() ? Warmth.ICEBOX_BLOCK : Warmth.HEARTH_BLOCK), this.title, state,
-			accent, x + PANEL_W - 9);
+			accent, PANEL_W - 37);
 		int ry = y + KitchenUi.HEADER;
 		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + 26, 0, false);
 		KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.hearth.fuel"), x + 9, ry + 3, PANEL_W - 18, KitchenUi.TEXT);

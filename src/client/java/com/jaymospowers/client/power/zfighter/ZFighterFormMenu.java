@@ -219,23 +219,10 @@ public final class ZFighterFormMenu extends Screen {
 
 		// a dark disc behind the ring, a thin ring, and the pointer
 		int outer = RADIUS + TILE / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0081018);
-		}
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
-		}
+		UiStyle.wheel(graphics, cx, cy, RADIUS, TILE);
 		if (selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			UiStyle.wheelPointer(graphics, cx, cy, RADIUS, TILE, t, ACCENT);
 		}
 
 		for (int i = 0; i < n; i++) {
@@ -246,11 +233,9 @@ public final class ZFighterFormMenu extends Screen {
 			boolean picked = i == selected;
 			boolean on = on(player, form);
 			int color = 0xFF000000 | (form == ZFighterForms.SPIRIT_BOMB_PICK ? BOMB_COLOR : ZFighterKiGlow.color(player, form));
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
+			UiStyle.wheelTile(graphics, x, y, TILE, i, picked, picked ? ACCENT : on ? color : 0x60FFFFFF);
 			// the form's own colour, as a band across the tile
 			graphics.fill(x + 3, y + 3, x + TILE - 3, y + 8, color);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : on ? color : 0x60FFFFFF);
 			String tag = tag(form);
 			graphics.text(font, tag, x + TILE / 2 - font.width(tag) / 2, y + TILE / 2 - 1, picked || on ? UiStyle.TEXT : UiStyle.DIM);
 			if (on) {

@@ -6,6 +6,7 @@ import com.jaymoskingdoms.equestrian.Equine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -135,7 +136,7 @@ final class StableScreen extends Screen {
 				StableNet.Button b = buttons.get(i);
 				int w = this.font.width(b.text()) + 12;
 				bx -= w;
-				Button button = Button.builder(b.text(), x -> ClientPlayNetworking.send(new StableNet.Act(open.workerId(), b.action(), b.arg())))
+				Button button = FlatButton.builder(b.text(), x -> ClientPlayNetworking.send(new StableNet.Act(open.workerId(), b.action(), b.arg())))
 					.bounds(bx, 0, w, BUTTON_H).build();
 				button.active = b.active();
 				addRenderableWidget(button);
@@ -145,9 +146,9 @@ final class StableScreen extends Screen {
 		}
 		place();
 		int bottom = top() + panelHeight() - FOOTER + 4, edge = left() + PANEL_W - 6;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.stable.quests"),
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.stable.quests"),
 			b -> ClientPlayNetworking.send(new StableNet.Act(open.workerId(), StableNet.QUESTS, 0))).bounds(left() + 6, bottom, 70, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(edge - 60, bottom, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(edge - 60, bottom, 60, 16).build());
 	}
 
 	/** Moves the rows' buttons with the scroll; those not wholly in view are hidden. */
@@ -175,7 +176,7 @@ final class StableScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), h = panelHeight();
 		Ui.panel(graphics, x, y, PANEL_W, h, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 7, PANEL_W - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, PANEL_W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, open.subtitle(), x + 9, y + 18, PANEL_W - 18, Ui.DIM);
 		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 4);
 		int top = viewTop(), view = viewHeight();

@@ -5,8 +5,8 @@ import com.jaymoskingdoms.Valor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
@@ -48,7 +48,7 @@ final class ValorScreen extends Screen {
 	@Override
 	protected void init() {
 		int fy = top() + PANEL_H - 19, right = left() + panelW() - 6;
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 	}
 
 	@Override

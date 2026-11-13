@@ -4,8 +4,8 @@ import com.jaymoskingdoms.TableTalk;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -133,58 +133,58 @@ final class TableTalkScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left() + W - 120, y = top() + 58;
-		addRenderableWidget(Button.builder(secondLabel(), b -> {
+		addRenderableWidget(FlatButton.builder(secondLabel(), b -> {
 			this.second = (this.second + 1) % this.seconds.size();
 			b.setMessage(secondLabel());
 		}).bounds(x, y, 110, 16).build());
-		addRenderableWidget(Button.builder(chatterLabel(), b -> {
+		addRenderableWidget(FlatButton.builder(chatterLabel(), b -> {
 			this.chatter = this.chatter >= 1 ? -1 : this.chatter + 1;
 			b.setMessage(chatterLabel());
 		}).bounds(x, y + ROW, 110, 16).build());
-		addRenderableWidget(Button.builder(styleLabel(), b -> {
+		addRenderableWidget(FlatButton.builder(styleLabel(), b -> {
 			this.style = (this.style + 1) % 3;
 			b.setMessage(styleLabel());
 		}).bounds(x, y + ROW * 2, 110, 16).build());
 		int row = 3;
 		if (this.ask.captain()) {
-			addRenderableWidget(Button.builder(menLabel(), b -> {
+			addRenderableWidget(FlatButton.builder(menLabel(), b -> {
 				this.man = (this.man + 1) % this.men.size();
 				b.setMessage(menLabel());
 			}).bounds(x, y + ROW * row++, 110, 16).build());
 		}
 		if (lends()) {
-			addRenderableWidget(Button.builder(lendLabel(), b -> {
+			addRenderableWidget(FlatButton.builder(lendLabel(), b -> {
 				this.lend = (this.lend + 1) % 4;
 				b.setMessage(lendLabel());
 			}).bounds(x, y + ROW * row++, 110, 16).build());
 		}
 		if (errands()) {
-			addRenderableWidget(Button.builder(errandLabel(), b -> {
+			addRenderableWidget(FlatButton.builder(errandLabel(), b -> {
 				this.errand = (this.errand + 1) % 4;
 				if (this.errand == 1 && !this.ask.gather()) {
 					this.errand = 2;
 				}
 				b.setMessage(errandLabel());
 			}).bounds(x, y + ROW * row++, 110, 16).build());
-			addRenderableWidget(Button.builder(purseLabel(), b -> {
+			addRenderableWidget(FlatButton.builder(purseLabel(), b -> {
 				this.purse = (this.purse + 1) % PURSES.length;
 				b.setMessage(purseLabel());
 			}).bounds(x, y + ROW * row, 110, 16).build());
 		}
 		int by = top() + height() - 24;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.table.done"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.table.done"), b -> {
 			ClientPlayNetworking.send(new TableTalk.SetTable(this.ask.entityId(), this.second == 0 ? "" : this.seconds.get(this.second), this.chatter,
 				this.style, this.men.get(this.man), lends() ? this.lend : -1, this.errand, this.purse));
 			onClose();
 		}).bounds(left() + 10, by, 90, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.table.leave"), b -> onClose()).bounds(left() + W - 100, by, 90, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.table.leave"), b -> onClose()).bounds(left() + W - 100, by, 90, 16).build());
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, height(), Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 10, y + 8, W - 20, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 8, W - 18, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.table.main", leaning(this.ask.main())), x + 10, y + 22, W - 20, Ui.DIM);
 		int bond = Math.max(0, Math.min(100, this.ask.bond()));
 		Ui.line(graphics, this.font, Component.translatable(bond >= 60 ? "gui.jaymoskingdoms.table.bond.close" : bond >= 25

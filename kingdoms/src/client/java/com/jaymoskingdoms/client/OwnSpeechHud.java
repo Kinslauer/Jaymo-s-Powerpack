@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.client.hud.HudStyle;
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public final class OwnSpeechHud {
 			for (FormattedCharSequence row : line.getKey()) {
 				int w = minecraft.font.width(row);
 				int x = (graphics.guiWidth() - w) / 2;
-				graphics.fill(x - 2, y - 1, x + w + 2, y + ROW - 1, 0x90000000);
+				graphics.fill(x - 2, y - 1, x + w + 2, y + ROW - 1, HudStyle.PLATE);
 				graphics.text(minecraft.font, row, x, y, 0xFF000000 | line.getValue());
 				y += ROW;
 			}

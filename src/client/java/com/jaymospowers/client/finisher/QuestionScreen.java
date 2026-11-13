@@ -5,6 +5,7 @@ import com.jaymospowers.core.finisher.PlayerQuestioning;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -103,7 +104,7 @@ public class QuestionScreen extends Screen {
 				: new int[] {PlayerQuestioning.LEADER, PlayerQuestioning.HOME, PlayerQuestioning.THREATEN, PlayerQuestioning.SPARE, PlayerQuestioning.FINISH};
 			for (int i = 0; i < questions.length; i++) {
 				int q = questions[i];
-				addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.question.q" + q), b -> {
+				addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.question.q" + q), b -> {
 					ClientPlayNetworking.send(new PlayerQuestioning.Ask(q));
 					if (q == PlayerQuestioning.SPARE || q == PlayerQuestioning.FINISH) {
 						this.onClose();
@@ -116,13 +117,13 @@ public class QuestionScreen extends Screen {
 		int[] hows = {PlayerQuestioning.TRUTH, PlayerQuestioning.LIE, PlayerQuestioning.SILENT};
 		for (int i = 0; i < 3; i++) {
 			int how = hows[i];
-			answers.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.question." + keys[i]), b -> send(how, ""))
+			answers.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.question." + keys[i]), b -> send(how, ""))
 				.bounds(x, rowY(i) + 1, w, 14).build()));
 		}
 		int wy = rowY(3) + 2;
 		this.words = addRenderableWidget(new EditBox(this.font, x, wy, w - 54, 14, Component.translatable("screen.jaymospowers.question.words")));
 		this.words.setMaxLength(PlayerQuestioning.WORDS_MAX);
-		answers.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.question.say"), b -> {
+		answers.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.question.say"), b -> {
 			if (this.words != null) {
 				send(PlayerQuestioning.WORDS, this.words.getValue());
 				this.words.setValue("");

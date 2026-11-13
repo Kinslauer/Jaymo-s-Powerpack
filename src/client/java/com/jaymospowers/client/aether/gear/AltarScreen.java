@@ -1,5 +1,6 @@
 package com.jaymospowers.client.aether.gear;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.aether.AetherItems;
 import com.jaymospowers.aether.gear.AltarBlockEntity;
 import com.jaymospowers.aether.gear.AltarMenu;
@@ -16,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
  * goes, and the output on the right. Empty shard slots show a faint shard.
  */
 public class AltarScreen extends AbstractContainerScreen<AltarMenu> {
-	static final int PANEL = 0xD0101018, ACCENT = 0xFFE8C24A, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, WELL_EDGE = 0xFF34343E, WELL = 0xFF0C0C12,
-		NEED_EDGE = 0xFFE8C24A, ARROW = 0xFF6F3DB8, ARROW_TOP = 0xFFBB8BF5;
+	static final int ACCENT = UiStyle.GOLD, TEXT = UiStyle.TEXT, DIM = UiStyle.DIM, WELL_EDGE = UiStyle.WELL_EDGE, WELL = UiStyle.WELL,
+		NEED_EDGE = UiStyle.GOLD, ARROW = 0xFF6F3DB8, ARROW_TOP = 0xFFBB8BF5;
 	/** Laid over a ghost item so it reads as a faint outline. */
 	static final int GHOST_FADE = 0xA80C0C12;
 	/** The progress arrow: left, top, width, height. */
@@ -34,8 +35,7 @@ public class AltarScreen extends AbstractContainerScreen<AltarMenu> {
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		int x = this.leftPos, y = this.topPos;
-		graphics.fill(x, y, x + this.imageWidth, y + this.imageHeight, PANEL);
-		graphics.fill(x, y, x + this.imageWidth, y + 2, ACCENT);
+		UiStyle.panel(graphics, x, y, this.imageWidth, this.imageHeight, ACCENT);
 		int needed = this.menu.needed();
 		for (Slot slot : this.menu.slots) {
 			if (!slot.isActive()) {
@@ -57,8 +57,7 @@ public class AltarScreen extends AbstractContainerScreen<AltarMenu> {
 		}
 		// the arrow
 		int ax = x + ARROW_X, ay = y + ARROW_Y;
-		graphics.fill(ax - 1, ay - 1, ax + ARROW_W + 1, ay + ARROW_H + 1, WELL_EDGE);
-		graphics.fill(ax, ay, ax + ARROW_W, ay + ARROW_H, WELL);
+		UiStyle.well(graphics, ax - 1, ay - 1, ARROW_W + 2, ARROW_H + 2);
 		int total = this.menu.total();
 		if (total > 0 && this.menu.progress() > 0) {
 			int w = Math.max(1, Math.round(ARROW_W * Math.min(1.0F, this.menu.progress() / (float)total)));
@@ -69,10 +68,10 @@ public class AltarScreen extends AbstractContainerScreen<AltarMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM);
 		int needed = this.menu.needed();
 		Component line = needed > 0 ? Component.translatable("gui.jaymospowers.altar.shards", needed) : Component.translatable("gui.jaymospowers.altar.idle");
-		graphics.text(this.font, line, 44, 78, needed > 0 ? TEXT : DIM, false);
+		graphics.text(this.font, line, 44, 78, needed > 0 ? TEXT : DIM);
 	}
 }
