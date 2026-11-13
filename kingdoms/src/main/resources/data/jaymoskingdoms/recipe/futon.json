@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "TTT"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "T": "jaymoskingdoms:thatch"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:futon"
+  }
+}

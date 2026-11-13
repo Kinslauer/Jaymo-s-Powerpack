@@ -1,7 +1,9 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.blossomland.BlossomBlocks;
+import com.jaymoskingdoms.blossomland.BlossomFurnishings;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,14 +23,14 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 final class Blossom {
 	/**
-	 * The frame's dark timber, a futon and the bonsai (looked up by name), and the blossom folk's own blocks
-	 * ({@link BlossomBlocks}): shoji for the windows, tatami, red lacquer for the torii, paper and stone lanterns.
+	 * The frame's dark timber and the bonsai (looked up by name), and the blossom folk's own blocks ({@link BlossomBlocks},
+	 * {@link BlossomFurnishings}): shoji for the windows, tatami, a futon, red lacquer for the torii, paper and stone lanterns.
 	 */
 	private static final BlockState TIMBER = named("stripped_dark_oak_log", Blocks.STRIPPED_SPRUCE_LOG);
 	private static final BlockState BEAM = named("dark_oak_log", Blocks.SPRUCE_LOG);
 	private static final BlockState PAPER = BlossomBlocks.SHOJI.defaultBlockState();
 	private static final BlockState TATAMI = BlossomBlocks.TATAMI.defaultBlockState();
-	private static final BlockState FUTON = named("white_bed", Blocks.HAY_BLOCK);
+	private static final BlockState FUTON = BlossomFurnishings.FUTON.defaultBlockState();
 	private static final BlockState VERMILION = BlossomBlocks.RED_LACQUER.defaultBlockState();
 	private static final BlockState BONSAI = named("potted_cherry_sapling", Blocks.FLOWER_POT);
 
@@ -64,7 +66,7 @@ final class Blossom {
 				s.set(x, 4, z, post ? TIMBER : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
 			}
 		}
-		s.door(mid, 1, front, Direction.NORTH, k.door);
+		s.door(mid, 1, front, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
 		// paper windows: either side of the door, either side of each side's middle post, the back
 		for (int z : new int[] {front, d}) {
 			s.set(mid - 2, 2, z, PAPER);
@@ -99,14 +101,16 @@ final class Blossom {
 			}
 		}
 		int ridge = 4 + (Math.min(w, d) + 1) / 2;
-		// inside: futons at the back, a low table on the tatami, a bonsai, a barrel, a paper lantern under the ridge
+		// inside: futons at the back, the hearth in the middle of the tatami (a low table in a small house), a bonsai,
+		// a tansu against the wall, a paper lantern under the ridge
 		s.bed(2, 1, d - 2, Direction.SOUTH, FUTON);
 		if (w >= 9 || k.chance(0.5)) {
 			s.bed(w - 1, 1, d - 2, Direction.SOUTH, FUTON);
 		}
-		s.set(mid, 1, zm, Buildings.Sketch.facing(k.p.trapdoor().getBlock(), Direction.NORTH));
+		s.set(mid, 1, zm, w >= 9 || d >= 9 ? BlossomFurnishings.HEARTH.defaultBlockState()
+			: Buildings.Sketch.facing(k.p.trapdoor().getBlock(), Direction.NORTH));
 		s.set(2, 1, front + 1, BONSAI);
-		s.set(w - 1, 1, front + 1, Blocks.BARREL.defaultBlockState());
+		s.set(w - 1, 1, front + 1, BlossomFurnishings.TANSU.defaultBlockState().setValue(BarrelBlock.FACING, Direction.WEST));
 		s.set(mid, ridge - 1, (d + 1) / 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// a lantern by the door, hung from the eaves
 		if (k.chance(0.6)) {

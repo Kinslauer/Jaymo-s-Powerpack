@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -37,7 +38,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * The blossom land's building blocks (docs/BlossomLands-Plan.md, patch 3; the ideas are from Andy's Sengoku Jidai picks,
  * the blocks and their art are ours): shoji panels (paper in a lattice, joining like panes), tatami, lime plaster, red
  * and black lacquered planks, the paper lantern (standing or hung), the one-block stone lantern, thatch for anyone's
- * roof (block, slab, stairs), and the ward rope ({@link Wards}). Models, textures, recipes, loot and names come from
+ * roof (block, slab, stairs), and the ward rope ({@link Wards}); what stands inside a house is in
+ * {@link BlossomFurnishings}. Models, textures, recipes, loot and names come from
  * {@code kingdoms/tools/gen_blossom_blocks.py}.
  */
 public final class BlossomBlocks {
@@ -50,7 +52,7 @@ public final class BlossomBlocks {
 	public static Block SHOJI, TATAMI, PLASTER, RED_LACQUER, BLACK_LACQUER, PAPER_LANTERN, STONE_LANTERN, THATCH, THATCH_SLAB, THATCH_STAIRS, WARD_ROPE;
 	public static ResourceKey<PoiType> WARD = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, JaymosKingdoms.id("ward_rope"));
 
-	private static final List<Item> ITEMS = new ArrayList<>();
+	static final List<Item> ITEMS = new ArrayList<>();
 
 	private BlossomBlocks() {
 	}
@@ -77,6 +79,7 @@ public final class BlossomBlocks {
 		WARD_ROPE = block("ward_rope", new IronBarsBlock(props("ward_rope").mapColor(MapColor.SAND).strength(0.2F).sound(SoundType.WOOL)
 			.ignitedByLava().noOcclusion().noCollision()), PAPER_BURN, PAPER_SPREAD);
 		PoiHelper.register(JaymosKingdoms.id("ward_rope"), 0, 1, WARD_ROPE);
+		BlossomFurnishings.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output -> ITEMS.forEach(output::accept));
 	}
 
@@ -85,19 +88,24 @@ public final class BlossomBlocks {
 	}
 
 	/** New properties with the block's id (which 26.3 wants before the block is made). */
-	private static BlockBehaviour.Properties props(String name) {
+	static BlockBehaviour.Properties props(String name) {
 		return BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id(name)));
 	}
 
-	private static BlockBehaviour.Properties copy(String name, Block of) {
+	static BlockBehaviour.Properties copy(String name, Block of) {
 		return BlockBehaviour.Properties.ofFullCopy(of).setId(ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id(name)));
 	}
 
-	private static Block block(String name, Block block, int burn, int spread) {
+	static Block block(String name, Block block, int burn, int spread) {
+		return block(name, block, burn, spread, BlockItem::new);
+	}
+
+	/** Registers a block and its item ({@code item} makes it: a door's item sets both halves). */
+	static Block block(String name, Block block, int burn, int spread, BiFunction<Block, Item.Properties, Item> item) {
 		Registry.register(BuiltInRegistries.BLOCK, ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id(name)), block);
 		BLOCKS.put(name, block);
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
-		ITEMS.add(Registry.register(BuiltInRegistries.ITEM, key, new BlockItem(block, new Item.Properties().setId(key).useBlockDescriptionPrefix())));
+		ITEMS.add(Registry.register(BuiltInRegistries.ITEM, key, item.apply(block, new Item.Properties().setId(key).useBlockDescriptionPrefix())));
 		if (burn > 0) {
 			FlammableBlockRegistry.getDefaultInstance().add(block, burn, spread);
 		}

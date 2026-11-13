@@ -9,5 +9,11 @@
   "block.jaymoskingdoms.thatch": "Thatch",
   "block.jaymoskingdoms.thatch_slab": "Thatch Slab",
   "block.jaymoskingdoms.thatch_stairs": "Thatch Stairs",
-  "block.jaymoskingdoms.ward_rope": "Ward Rope"
+  "block.jaymoskingdoms.ward_rope": "Ward Rope",
+  "block.jaymoskingdoms.tansu": "Tansu",
+  "block.jaymoskingdoms.futon": "Futon",
+  "block.jaymoskingdoms.sunken_hearth": "Sunken Hearth",
+  "block.jaymoskingdoms.sliding_door": "Sliding Door",
+  "item.jaymoskingdoms.lacquer_sap": "Bowl of Lacquer Sap",
+  "container.jaymoskingdoms.tansu": "Tansu"
 }

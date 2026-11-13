@@ -80,10 +80,11 @@ for it), the navy patrol, keeping coaches and fares off the land, and a harbour 
 
 ## Patch 3: building blocks (bl_shoji, bl_tatami, bl_plaster, bl_lacquer, bl_paperlantern, bl_stonelantern, bl_thatch, bl_tansu, bl_futon, bl_hearth, bl_ward)
 
-*Built (2026-11-13, `blossomland.BlossomBlocks`, `Wards`, `kingdoms/tools/gen_blossom_blocks.py`): shoji, tatami,
-plaster, red and black lacquered planks, paper lantern, stone lantern, thatch (block, slab, stairs), ward rope. Not
-built: tansu, futon, hearth, sliding doors through `Doorways`, sap for lacquer (honeycomb stands in). `Blossom`'s
-palette is on these blocks (shoji, tatami, plaster, red lacquer, both lanterns); thatch roofs wait for patch 4.*
+*Built (2026-11-13, `blossomland.BlossomBlocks`, `BlossomFurnishings`, `Wards`, `kingdoms/tools/gen_blossom_blocks.py`):
+shoji, tatami, plaster, red and black lacquered planks, paper lantern, stone lantern, thatch (block, slab, stairs), ward
+rope, tansu (a barrel), futon (a bed, a villager home), sunken hearth (a campfire that burns nobody), sliding door (a
+wooden door to `Doorways`), lacquer sap (a bowl on a living cherry log, which is left stripped). `Blossom` builds with
+them. Tatami through `KitchenCompat` is not done; thatch roofs wait for patch 4.*
 
 Our own blocks in Kingdoms, then `Blossom`'s palette swapped onto them (paper for glass panes, plaster, lacquer for
 red concrete, the one-block stone lantern, tatami through `KitchenCompat`). Sliding doors open for villagers through
