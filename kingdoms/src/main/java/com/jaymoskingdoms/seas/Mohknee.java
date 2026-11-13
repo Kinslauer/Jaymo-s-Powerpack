@@ -162,7 +162,9 @@ public final class Mohknee {
 	/**
 	 * Sets the player down on Mohknee's western shore, where a ship from the home world makes land: the first ground
 	 * standing {@link #GO_DRY} above the sea on the line east to the land's middle, then {@link #GO_INLAND} further in.
-	 * The line is read from the world's shape, so only the chunk they land in is made.
+	 * The line is read from the world's shape; the land they're set down on is made in the background first while they
+	 * wait behind the loading screen ({@code StoryGround.travel}): made at once, it held the Steam Deck's server past its
+	 * watchdog (crash 2026-11-13 13:51).
 	 */
 	private static int go(CommandContext<CommandSourceStack> c) {
 		net.minecraft.server.level.ServerPlayer player = c.getSource().getPlayer();
@@ -181,11 +183,33 @@ public final class Mohknee {
 			more += GO_STEP) {
 			x += GO_STEP;
 		}
-		level.getChunk(x >> 4, CENTRE_Z >> 4);
-		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, CENTRE_Z);
-		player.teleportTo(level, x + 0.5, y, CENTRE_Z + 0.5, java.util.Set.of(), -90.0F, 0.0F, false);
 		int at = x;
-		c.getSource().sendSuccess(() -> Component.literal("Set down on Mohknee's western shore at " + at + ", " + y + ", " + CENTRE_Z + "."), false);
+		if (com.jaymoskingdoms.StoryStasis.holding(player)) {
+			// (held over the world for their story: stasis would only put them back where it took them from)
+			c.getSource().sendFailure(Component.literal("You're held for your story; go once it's done."));
+			return 0;
+		}
+		if (com.jaymoskingdoms.StoryGround.travelling(player)) {
+			c.getSource().sendFailure(Component.literal("Already on the way."));
+			return 0;
+		}
+		java.util.UUID id = player.getUUID();
+		net.minecraft.server.MinecraftServer server = c.getSource().getServer();
+		c.getSource().sendSuccess(() -> Component.literal("Making Mohknee's western shore at " + at + ", " + CENTRE_Z + "; you're set down once it's made."), false);
+		com.jaymoskingdoms.StoryGround.travel(player, new BlockPos(at, 0, CENTRE_Z), "gui.jaymoskingdoms.mohknee.hold", () -> {
+			net.minecraft.server.level.ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p == null) {
+				return;
+			}
+			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, at, CENTRE_Z);
+			p.teleportTo(level, at + 0.5, y, CENTRE_Z + 0.5, java.util.Set.of(), -90.0F, 0.0F, false);
+			p.sendSystemMessage(Component.literal("Set down on Mohknee's western shore at " + at + ", " + y + ", " + CENTRE_Z + "."));
+		}, () -> {
+			net.minecraft.server.level.ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p != null) {
+				p.sendSystemMessage(Component.literal("Mohknee's shore took too long to make; try /kingdom mohknee go again (what's made so far is kept)."));
+			}
+		});
 		return 1;
 	}
 
