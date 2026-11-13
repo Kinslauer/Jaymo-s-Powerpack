@@ -1,4 +1,5 @@
 {
 	"block.jaymospowers.sleeping_bag": "Sleeping Bag",
-	"item.jaymospowers.paraglider": "Paraglider"
+	"item.jaymospowers.paraglider": "Paraglider",
+	"entity.jaymospowers.hot_air_balloon": "Hot Air Balloon"
 }
