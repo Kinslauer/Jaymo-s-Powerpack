@@ -157,7 +157,9 @@ public final class PoseTakeover {
 
 	public static boolean posed(AvatarRenderState s) {
 		return posedOtherwise(s) || s.getData(com.jaymospowers.client.wounds.WoundNursePose.KEY) != null
-			|| com.jaymospowers.client.armory.FangGauntletsClient.guarding(s)
+			// worn fist gear (the Fang Gauntlets, boxing's wraps, cestus and bracers), whether in the guard or not: the gear
+			// is drawn on the arms as our poses leave them, so Fresh Animations may not move the arms out from under it
+			|| com.jaymospowers.client.armory.FangGauntletsClient.worn(s)
 			|| s.getData(com.jaymospowers.client.combat.ParryPose.KEY) != null || com.jaymospowers.client.combat.ArmedPose.on(s);
 	}
 
