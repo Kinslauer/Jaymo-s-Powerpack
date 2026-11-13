@@ -4005,3 +4005,8 @@ enter limbo if they don't come to."
 - **Fire Dive** takes the place of Pyre's Magma Trail (B). From the ground you rise first, then dive the way you look
   as a bird of fire, steering a little and burning what you pass through; where you come down everything within 5
   blocks takes 10, is thrown back and burns. From the Flame Jet the dive starts at once and ends the jet. 15 seconds.
+
+## 0.23.4 (2026-11-13): fix being kicked on join ("Network Protocol Error") by the Headed Arrows in the Combat tab (#1409)
+
+- Joining a server kicked you with "Network Protocol Error": the Combat creative tab listed Headed Arrows as stacks of 16, and 26.3's creative tabs only accept single items, so building the tab threw while the join packets were handled (also left the Combat tab missing from JEI). They're listed one at a time now.
+- Built; join not tested here.
