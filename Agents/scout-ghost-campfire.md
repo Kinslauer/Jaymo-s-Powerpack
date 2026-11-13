@@ -4,15 +4,12 @@ task: Bring in Andy's three Blockbench models (goblin scout, ghost, camping camp
 branch: claude/project-thread-q2zruj
 with: 
 pr: 1390
-mods: kingdoms, kitchen, powers
+mods: kingdoms, kitchen
 versions: 
 started: 2026-11-13
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/GoblinScout.java
   - kingdoms/src/main/java/com/jaymoskingdoms/GraveGhost.java
-  - src/main/java/com/jaymospowers/core/wounds/Limbo.java
-  - src/main/java/com/jaymospowers/core/wounds/LimboGhost.java
-  - src/client/java/com/jaymospowers/client/wounds/Limbo*.java
   - kitchen/src/main/resources/assets/jaymoskitchen/models/block/spit*.json
 ---
 # Scout, ghost and campfire models
@@ -33,6 +30,7 @@ Goblin scouts range round goblin villages and cackle the village onto prey; ghos
 nights; the spit is a frame of posts. Compiled (Kingdoms, Kitchen), PR checks pass, not played. Open: model credits,
 two (new) Lore.md paragraphs.
 
-Follow-up (Andy): players left for dead are out of their body as the ghost (Powers `Limbo`), with a ghost's voice from
-where the ghost is (Kingdoms `VoiceMasks.GHOST`, `VoiceRange.spoken`). Compiled, not played. Open: "(new) Out of the body"
-in Lore.md, makers' names for the credits.
+Follow-up (Andy): the ghost is also how a player looks in Limbo, with a ghost's voice. Limbo = the button on the final
+death screen (PR #1387), so this waits for that merge. A first version tied to lying left for dead was built and reverted
+on this branch (commit 11474b03: `LimboGhost` entity and renderer, `VoiceMasks.Mask.GHOST`, `VoiceRange.spoken` are
+reusable; its `Limbo` class name collides with #1387's).

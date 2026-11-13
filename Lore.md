@@ -528,7 +528,7 @@ Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, w
 
 (new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
 watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
-for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. A **gorgon** keeps an old ruin:
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
 where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
 its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
 
@@ -583,13 +583,12 @@ A flower or a candle given to one is enough: it thanks whoever came and goes to 
 after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
 to be called."
 
-**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
+**(new) Limbo's ghosts** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
 while in limbo, so you can kind of haunt your friends"). The buried are not the only ones who stand outside themselves.
-Someone left for dead, not yet dead and not yet back, comes loose from the body the same way: pale blue and see-through,
-a hand off the ground, able to drift a little way from where they lie and no further. They can touch nothing and nothing
-touches them; beasts and monsters don't see them. The living do, and hear them, thin and far off, as if from the bottom
-of a well. Carry the body and the ghost comes after it. The moment the body wakes, or is brought round, there is no ghost.
-Nobody is told this: a player finds it out by being left for dead, and their friends by seeing who is standing over them.
+Someone whose life has ended and who waits in Limbo rather than be born again is seen by the living the same way: pale
+blue and see-through, a hand off the ground, never far from the body. They touch nothing and nothing touches them. Their
+voice is thin and far off, as if from the bottom of a well. Nobody is told this: friends find it out by seeing who is
+standing over the body they are burying. (To be built once Limbo itself has merged.)
 
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
