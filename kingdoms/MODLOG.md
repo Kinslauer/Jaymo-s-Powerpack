@@ -12556,3 +12556,8 @@ giants being worked on, as its own upright model."
 - A gagged captive only mumbles on the talk card; "Pull the gag out" takes it off (you get the rag) and they talk at once. A plain right-click with a rag gag in hand ties one on, as the gag was always meant to.
 - New loading-screen hint (158). Lines in `lang/parts/captive-talk.json`; code in `Captives` (`talk`, `hearMeOut`).
 - Built; not played.
+
+## 0.8.18 (2026-11-13): loading-screen hint numbers: captive talk hint moved to 159
+
+- The captive-talk hint (#1440) and the unpurified-water hint (#1442) both took number 158, so one hid the other. The captive one is now 159 and the hint count is 159, so both show.
+- Built; not played.
