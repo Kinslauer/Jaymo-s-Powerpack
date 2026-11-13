@@ -1,5 +1,16 @@
 {
+  "replace": false,
   "values": [
-    "jaymospowers:pressed_leaf"
+    "jaymospowers:pressed_leaf",
+    "jaymospowers:votive_1",
+    "jaymospowers:votive_2",
+    "jaymospowers:votive_3",
+    "jaymospowers:votive_4",
+    "jaymospowers:votive_5",
+    "jaymospowers:votive_6",
+    "jaymospowers:votive_7",
+    "jaymospowers:votive_8",
+    "jaymospowers:votive_9",
+    "jaymospowers:votive_10"
   ]
 }
