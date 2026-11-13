@@ -1709,10 +1709,11 @@ seen it and describe it exactly: a white wood under the world where the wisteria
 It is the same Nether the home continent's wicked wake in; the blossom folk only know a different part of it, and
 nobody has asked how.
 
-(new) **The sunken palace** (Claude's placement for the Blossom Lands plan, patch 16, 2026-11-13, for Andy to approve).
-In the deep water off Mohknee, on three headings from the land, a palace stands whole on the seabed: green sea stone,
-a pillared hall under a double roof with its corners turned up the way the blossom folk still build, lamps burning
-in it that nobody tends. The blossom folk did not sink it and do not claim it. Their roofs are copied from its roofs,
+(new) **The sunken palace** (Blossom lands thread, 2026-11-13; Andy: "the palace is of tideborn origin"; the rest is
+Claude's placement for him to approve). In the deep water off Mohknee, on three headings from the land, a palace
+stands whole on the seabed: green sea stone, a pillared hall under a double roof with its corners turned up, lamps
+burning in it that nobody tends. The Tideborn built it, before the island villages, when they held court under the
+water and not beside it. The blossom folk did not sink it and do not claim it. Their roofs are copied from its roofs,
 which is the wrong way round for a people who say they have always built so, and nobody on Mohknee will be drawn on
-it. The sea's guardians keep it. Fishers know where the lamps show on a calm day and do not anchor there. Who held
-court in it, and whether the Tideborn know, is not said anywhere. (Open for Andy: whether it was the Tideborn's.)
+it. The sea's guardians keep it now. Fishers know where the lamps show on a calm day and do not anchor there. The
+Tideborn of the crossing's islands do not speak of it to strangers.
