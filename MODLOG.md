@@ -3839,3 +3839,11 @@ Built (`compileJava`); not played.
 - Chrono's echo is a mimic now: it wears its owner's face while it walks their routes and does their work, but when it fights the face splits and it shows its true form (Prometheus's Mimic model and animations), and it keeps that form until it has had nothing to fight for a few seconds. Its blows, flinches and death play on the true form.
 - The Kingdoms harpoon is built at the Tool Station from a metal arrow head, a wooden tough handle and a lead; its grid recipe is gone. The spike drill is built from a copper plate and a copper tough handle, with three Impaler spikes and redstone.
 - Built; not played.
+
+## 0.22.103 (2026-11-13): The Long Vigil
+
+- **The Long Vigil**, a new relic greatsword. It is not in any relic chest: only the Fortress Knight (Jaymo's Kingdoms)
+  carries one, and he always drops it. An Arsenal user who picks it up claims it like any relic.
+- It swings as a claymore and withers what it cuts. Right click stands the vigil: four seconds of heavy resistance, and
+  your next cut inside them lands 7 harder. 13 second cooldown.
+- Compiled, not yet played.
