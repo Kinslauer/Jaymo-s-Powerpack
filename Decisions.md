@@ -436,3 +436,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
   Scrolls come from wizards, shamans and (Black Flame) necromancers; Warlocks may learn glass, fire and Black Flame,
   Druids Storm Cloak. Lore placement added as a (new) paragraph: the glass is from the demons' country.
 - 2026-11-12 10:50 PM ET (Andy): add OpenRouter :free models after NVIDIA in every Hermes bot chain as the non-NVIDIA backup; Andy makes and sets OPENROUTER_API_KEY himself. Steps: Hermes Training handoff.md, "OpenRouter free models".
+- 2026-11-13 (Boss anim mods thread, patch 12, my calls, not yet confirmed by Andy): light bending is drawn with the
+  game's own post effect whether or not a shader pack is on (off in low-end mode; it turns itself off if it errors),
+  for Gravity's Singularity and Nadir's Event Horizon. Beam scars are for ki waves and Pyre's Sunray only (not wind,
+  smoke, soot or Kingdoms' Fire Lance); soft ground only, no drops, mobGriefing and mayBuild, 4 blocks a tick. The
+  fire dive went to Pyre and replaced Magma Trail (B), my pick of its weakest move; the Emberborn kit is unchanged.
