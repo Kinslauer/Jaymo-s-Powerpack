@@ -4145,3 +4145,8 @@ enter limbo if they don't come to."
 - Only rock and soil count as land (`Ground.land`): holystone and the other Aether stones, Aether dirt and grass. An
   aercloud never does.
 - New worlds and newly generated Aether only; towns already built stay where they are. Built; not played.
+
+## 0.23.15 (2026-11-13): Kingdoms shadows have no body to fall
+
+- The `body/simple` tag now includes Kingdoms' Shadow, so it never goes down or gets carried like a downed person.
+- Built; not played.

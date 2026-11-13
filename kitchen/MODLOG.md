@@ -1995,3 +1995,8 @@ From the camping-campfire Blockbench model Andy uploaded.
 - Compiled; not played.
 - The plow's labels have the drop shadow the other panels' text has.
 - The familiarity readout takes its gold and red from the shared HUD look; the shared style gains the flat hover box and the paper colours.
+
+## 0.6.3 (2026-11-13): Kingdoms shadows leave no corpse
+
+- The `no_corpse` tag now includes Kingdoms' Shadow: it breaks up into smoke instead of leaving a body.
+- Built; not played.

@@ -1,4 +1,0 @@
-# shadows fade, diggers skittish
-- **Shadows** no longer go down at zero health like a person (so they can't be carried off). They break up into smoke and leave no body, and a player's own Shadow gives its stolen Might back as it goes. Any Shadow already lying downed in a world is unmade on load. (`Shadow`)
-- **Diggers** are skittish now. A player they can see, or hear nearby (sneaking is quiet), sends them running down their warren's hole (or just away, if they have no warren). They stay hidden there until the player leaves, and they climb the burrow walls to get out again. They no longer hunt players on sight. They fight only when they have the edge: when a pit lid gives way under someone, when a pack of 3 or more is attacked in its own warren (they stand together for 20 s), or when one is cornered in its hole. A lone digger that is badly hurt still runs. (`Digger.HideGoal`, `Warrens`)
-- Built; not played.
