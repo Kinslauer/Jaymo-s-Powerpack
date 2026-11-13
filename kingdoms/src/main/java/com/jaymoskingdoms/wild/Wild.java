@@ -56,7 +56,7 @@ public final class Wild {
 			.clientTrackingRange(10), Grizzly.createAttributes());
 		SpawnPlacements.register(GRIZZLY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Grizzly::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GRIZZLY), MobCategory.CREATURE, GRIZZLY, GRIZZLY_WEIGHT, 1, 1);
-		SNOW_GIANT = com.jaymoskingdoms.beasts.Beasts.type("snow_giant", EntityType.Builder.of(SnowGiant::new, MobCategory.CREATURE).sized(3.4F, 3.3F)
+		SNOW_GIANT = com.jaymoskingdoms.beasts.Beasts.type("snow_giant", EntityType.Builder.of(SnowGiant::new, MobCategory.CREATURE).sized(4.0F, 6.8F)
 			.clientTrackingRange(10), SnowGiant.createAttributes());
 		SpawnPlacements.register(SNOW_GIANT, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SnowGiant::checkSnowSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.includeByKey(net.minecraft.world.level.biome.Biomes.SNOWY_PLAINS, net.minecraft.world.level.biome.Biomes.ICE_SPIKES),

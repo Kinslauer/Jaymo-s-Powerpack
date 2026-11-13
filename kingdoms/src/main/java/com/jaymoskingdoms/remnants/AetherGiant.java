@@ -1,5 +1,12 @@
 package com.jaymoskingdoms.remnants;
 
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.util.GeckoLibUtil;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.FallingTree;
 import java.util.ArrayList;
@@ -74,7 +81,42 @@ import org.jspecify.annotations.Nullable;
  * Badly hurt it rages: faster, and its power comes twice as often. Its boss bar is its element's colour. The first Giant
  * to fall in a world raises the world tier ({@link Monoliths#slain}).
  */
-public class AetherGiant extends Monster {
+public class AetherGiant extends Monster implements GeoEntity {
+	/**
+	 * Its moves, keyframed (kingdoms/art/aether_giant.bbmodel, written by kingdoms/tools/gen_giant_geo.py; Andy: "is it
+	 * possible to animate our giants with blockbench and geckolib?"). It breathes ({@code idle}) or stands with its fists
+	 * half raised ({@code ready}); the server starts each blow, stamp, grab and its fall on a controller of its own, and
+	 * a later controller's bones win over an earlier one's. Its stride, where it looks, its flinch and its break-up stay
+	 * in code (client GiantRenderer).
+	 */
+	static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle"), READY = RawAnimation.begin().thenLoop("ready"),
+		BLOW_RIGHT = RawAnimation.begin().thenPlay("blow_right"), BLOW_LEFT = RawAnimation.begin().thenPlay("blow_left"),
+		STAMP = RawAnimation.begin().thenPlay("stamp"), GRAB = RawAnimation.begin().thenPlay("grab"),
+		GRAB_RECOVERY = RawAnimation.begin().thenPlay("grab_recover"),
+		DEATH_RIGHT = RawAnimation.begin().thenPlayAndHold("death_right"), DEATH_LEFT = RawAnimation.begin().thenPlayAndHold("death_left");
+	/** How long it takes to go between breathing and its fists raised (ticks). */
+	static final int STANCE_BLEND = 6;
+
+	private final AnimatableInstanceCache animations = GeckoLibUtil.createInstanceCache(this);
+
+	@Override
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+		controllers.add(new AnimationController<AetherGiant>("stance", STANCE_BLEND,
+			test -> test.setAndContinue(test.animatable().isAggressive() ? READY : IDLE)));
+		controllers.add(new AnimationController<AetherGiant>("right", 0, test -> PlayState.STOP).triggerableAnim("blow_right", BLOW_RIGHT));
+		controllers.add(new AnimationController<AetherGiant>("left", 0, test -> PlayState.STOP).triggerableAnim("blow_left", BLOW_LEFT));
+		controllers.add(new AnimationController<AetherGiant>("stamp", 0, test -> PlayState.STOP).triggerableAnim("stamp", STAMP));
+		controllers.add(new AnimationController<AetherGiant>("grab", 0, test -> PlayState.STOP).triggerableAnim("grab", GRAB)
+			.triggerableAnim("grab_recover", GRAB_RECOVERY));
+		controllers.add(new AnimationController<AetherGiant>("death", 0, test -> PlayState.STOP).triggerableAnim("death_right", DEATH_RIGHT)
+			.triggerableAnim("death_left", DEATH_LEFT));
+	}
+
+	@Override
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return this.animations;
+	}
+
 	/**
 	 * (0.7.152) Andy: "make all the giants the same size as warrior born great apes". As tall as a Warrior-born's Great
 	 * Ape (a player's 1.8 blocks, 17 times over: about 30 blocks), and as broad in proportion. The vanilla Giant too
@@ -320,6 +362,15 @@ public class AetherGiant extends Monster {
 	private void swingArm(int arm) {
 		this.entityData.set(SWING, (byte)arm);
 		this.swingTicks = SWING_TICKS;
+		if ((arm & RIGHT) != 0) {
+			this.triggerAnim("right", "blow_right");
+		}
+		if ((arm & LEFT) != 0) {
+			this.triggerAnim("left", "blow_left");
+		}
+		if (arm == BOTH) {
+			this.triggerAnim("stamp", "stamp");
+		}
 	}
 
 	@Override
@@ -487,6 +538,7 @@ public class AetherGiant extends Monster {
 		this.snatchAt = null;
 		this.slamAt = null;
 		this.grabCooldown = GRAB_TICKS + this.random.nextInt(GRAB_TICKS / 2);
+		this.triggerAnim("grab", "grab");
 		this.playSound(SoundEvents.WARDEN_ROAR, 3.0F, 0.45F);
 		this.playSound(SoundEvents.RAVAGER_ROAR, 2.5F, 0.4F);
 	}
@@ -525,6 +577,7 @@ public class AetherGiant extends Monster {
 			// its hand closed on nothing (or its catch is gone): it straightens up
 			if (t < GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM) {
 				this.entityData.set(GRAB_START, level.getGameTime() - (GRAB_WINDUP + GRAB_SNATCH + GRAB_HOLD + GRAB_SLAM));
+				this.triggerAnim("grab", "grab_recover");
 			}
 			return;
 		}
@@ -935,9 +988,18 @@ public class AetherGiant extends Monster {
 	@Override
 	public void die(DamageSource source) {
 		super.die(source);
+		if (this.level() instanceof ServerLevel) {
+			// which way it falls is its own, the same for everyone watching
+			this.triggerAnim("death", fallsRight(this.getId()) ? "death_right" : "death_left");
+		}
 		this.entityData.set(GRAB_START, Long.MIN_VALUE);
 		this.entityData.set(GRAB_HELD, -1);
 		this.heldTree = -1;
+	}
+
+	/** Whether the Giant with this id throws its right arm out ahead as it falls (else its left). */
+	public static boolean fallsRight(int id) {
+		return (id & 1) == 0;
 	}
 
 	/** Its haul on or off: sprinting (seen on the client, its longer stride), and faster. */
