@@ -371,6 +371,24 @@ PC Claude's part (ready to start):
     goes to `https://api.tokenlab.amd.com/v1` (an AMD domain, so it's safe to send it there). Andy does NOT need
     a new key. Change the base URL in `amd_check.py` and re-run step 1. If the IDs differ from the table, use the
     ones `/v1/models` returns in steps 3-4.
+  - [x] **Done Nov 13 (PC Claude), base URL `https://api.tokenlab.amd.com/v1`, same key.** `GET /v1/models`: Clef,
+    d3, d3-flash, DeepSeek-V4.1-Flash, DeepSeek-V4-Flash, Gemma-4-31B-IT, MiniCPM5-2B, MiniCPM-V-4.7-1B,
+    MiniCPM-V-4.7-35B-A3B, Qwen3.8-27B. The three IDs match the table. One streamed call with one tool each (small prompt):
+
+    | Model | First token / total | Tool call |
+    |---|---|---|
+    | `Qwen3.8-27B` (`reasoning_effort: low`) | 3.5 s / 4.5 s | OK (32 reasoning tokens) |
+    | `DeepSeek-V4-Flash` | 3.0 s / 3.6 s | OK |
+    | `Gemma-4-31B-IT` | **43.4 s** / 45.9 s | OK, but slow (queued) |
+
+    Rate-limit headers: `x-ratelimit-limit-user-rpm: 20`, `x-ratelimit-limit-user-budget-usd: 10`,
+    `x-ratelimit-remaining-user-budget-usd` (use this one in step 4; there is no `...-Daily-USD` header), budget resets
+    Dec 13 2026, 11:24 AM UTC. Points = US dollars: each response carries `usage.cost`, and Qwen's matched the table
+    price exactly (312 in / 60 out = $0.0000151). So a ~100k-token bot call is ~$0.004 on Qwen (~2,800 calls for the
+    $10) and ~$0.014 on DeepSeek-V4-Flash (~700). The test calls cost $0.00007; $9.99993 left. Token Lab has no
+    `/usage` endpoint (404 lists the supported ones: chat/completions, messages, models, ocr, audio/speech, systemone).
+    Plan for step 3 stands: Qwen, then DeepSeek; Gemma is too slow to swap in. Script:
+    `AMD_BASE_URL=https://api.tokenlab.amd.com/v1 py -3 -I E:/hermes/scripts/amd_check.py [model-id]`.
 - [ ] 2. Back up `E:/hermes/config.yaml` and Quill's profile config. In the ONE existing `providers:` block add an
       OpenAI-compatible provider `amd` (base URL above, key from `AMD_API_KEY`), the same way NVIDIA is set up.
       Don't make a second `providers:` block.
