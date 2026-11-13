@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:poison",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:glow_berries",
+    "minecraft:glowstone_dust",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:truth_draught"
+  }
+}

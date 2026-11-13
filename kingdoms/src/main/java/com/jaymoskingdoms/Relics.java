@@ -77,6 +77,8 @@ public final class Relics {
 	/** Bulwark: chance per blow of absorption this long, this strong. */
 	static final float BULWARK_CHANCE = 0.2F;
 	static final int BULWARK_TICKS = 100, BULWARK_AMP = 0;
+	/** A found relic: the share of them that are royal, cursed (the curse hidden until bonded), or have a mind of their own. */
+	static final float FOUND_ROYAL = 0.2F, FOUND_CURSED = 0.14F, FOUND_SENTIENT = 0.04F;
 	/** How often worn passives (Fleetfoot, Flameward) are refreshed (ticks). */
 	static final int WORN_TICKS = 20;
 
@@ -149,6 +151,14 @@ public final class Relics {
 
 	/** The relic a spec names, made up: named, enchanted, its passive written on it; EMPTY if the spec's unknown. */
 	static ItemStack make(ServerLevel level, String spec, String giverName) {
+		return make(level, spec, giverName, false);
+	}
+
+	/**
+	 * The relic a spec names. A {@code found} one was not given by anyone: it is an old thing out of a chest, named for its
+	 * metal alone, its passive hidden (it must be bonded, then used a while or read) until it is known ({@link #relabel}).
+	 */
+	static ItemStack make(ServerLevel level, String spec, String giverName, boolean found) {
 		String[] parts = spec.split("@");
 		Passive passive = parts.length >= 2 ? Passive.of(parts[0]) : null;
 		Identifier id = parts.length >= 2 ? Identifier.tryParse(parts[1]) : null;
@@ -158,21 +168,69 @@ public final class Relics {
 		}
 		boolean royal = parts.length >= 3;
 		ItemStack stack = new ItemStack(item);
+		stack.set(DataComponents.RARITY, royal ? Rarity.EPIC : Rarity.RARE);
+		CompoundTag tag = new CompoundTag();
+		tag.putString(KEY, passive.key());
+		if (found) {
+			tag.putBoolean("jaymos_found", true);
+		}
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		describe(stack, passive, item, royal, found ? null : giverName);
+		enchant(level, stack, item, royal);
+		return stack;
+	}
+
+	/** Names a relic and writes its lore: its passive shown, or hidden while it is a found thing not yet known. */
+	private static void describe(ItemStack stack, Passive passive, Item item, boolean royal, @Nullable String giverName) {
+		boolean hidden = giverName == null && ItemBonds.unknown(stack);
+		ChatFormatting colour = royal ? ChatFormatting.GOLD : ChatFormatting.LIGHT_PURPLE;
+		if (hidden) {
+			stack.set(DataComponents.CUSTOM_NAME, Component.translatable("relic.jaymoskingdoms.found_name", Component.translatable(pieceKey(item)))
+				.withStyle(style -> style.withItalic(false).withColor(colour)));
+			stack.set(DataComponents.LORE, new ItemLore(List.of(Component.translatable("relic.jaymoskingdoms.unknown")
+				.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.DARK_PURPLE)))));
+			return;
+		}
 		stack.set(DataComponents.CUSTOM_NAME, Component.translatable("relic.jaymoskingdoms.name",
 				Component.translatable("relic.jaymoskingdoms." + passive.key()), Component.translatable(pieceKey(item)))
-			.withStyle(style -> style.withItalic(false).withColor(royal ? ChatFormatting.GOLD : ChatFormatting.LIGHT_PURPLE)));
-		stack.set(DataComponents.RARITY, royal ? Rarity.EPIC : Rarity.RARE);
+			.withStyle(style -> style.withItalic(false).withColor(colour)));
 		List<Component> lore = new ArrayList<>();
 		lore.add(Component.translatable("relic.jaymoskingdoms.passive", Component.translatable("relic.jaymoskingdoms." + passive.key()))
 			.withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GOLD)));
 		lore.add(Component.translatable("relic.jaymoskingdoms." + passive.key() + ".desc").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)));
-		lore.add(Component.translatable(royal ? "relic.jaymoskingdoms.royal_gift" : "relic.jaymoskingdoms.gift", giverName)
+		lore.addAll(SentientBlades.lore(stack));
+		lore.add(Component.translatable(giverName == null ? "relic.jaymoskingdoms.found" : royal ? "relic.jaymoskingdoms.royal_gift" : "relic.jaymoskingdoms.gift", giverName == null ? "" : giverName)
 			.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 		stack.set(DataComponents.LORE, new ItemLore(lore));
-		CompoundTag tag = new CompoundTag();
-		tag.putString(KEY, passive.key());
-		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-		enchant(level, stack, item, royal);
+	}
+
+	static boolean hasKey(ItemStack stack, String key) {
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		return data != null && data.copyTag().contains(key);
+	}
+
+	/** A found relic that has just become known: its name and lore say what it does. */
+	static void relabel(ItemStack stack) {
+		Passive passive = passive(stack);
+		if (passive == null || !hasKey(stack, "jaymos_found") || ItemBonds.unknown(stack)) {
+			return;
+		}
+		describe(stack, passive, stack.getItem(), stack.getRarity() == Rarity.EPIC, null);
+	}
+
+	/** An old relic out of a chest: a random one, its passive hidden, now and then cursed or with a mind of its own. */
+	static ItemStack found(ServerLevel level, RandomSource random) {
+		boolean royal = random.nextFloat() < FOUND_ROYAL;
+		ItemStack stack = make(level, roll(random, random.nextBoolean(), royal), "", true);
+		if (stack.isEmpty()) {
+			return stack;
+		}
+		if (random.nextFloat() < FOUND_CURSED) {
+			ItemCurses.curse(stack, RelicCurses.KINDS.get(random.nextInt(RelicCurses.KINDS.size())));
+		}
+		if (random.nextFloat() < FOUND_SENTIENT && passive(stack) != null && passive(stack).weapon) {
+			SentientBlades.awaken(stack, random);
+		}
 		return stack;
 	}
 
@@ -243,14 +301,14 @@ public final class Relics {
 			ItemStack weapon = source.getDirectEntity() == attacker ? attacker.getMainHandItem()
 				: source.getDirectEntity() instanceof AbstractArrow arrow ? arrow.getWeaponItem() : null;
 			Passive p = passive(weapon);
-			if (p != null && p.weapon) {
+			if (p != null && p.weapon && ItemBonds.works(attacker, weapon)) {
 				weaponPassive(level, p, attacker, victim, damage);
 			}
 		}
 		if (victim instanceof Player) {
 			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
 				Passive p = passive(victim.getItemBySlot(slot));
-				if (p != null && !p.weapon) {
+				if (p != null && !p.weapon && ItemBonds.works(victim, victim.getItemBySlot(slot))) {
 					armorPassive(level, p, victim, source, damage);
 				}
 			}
@@ -334,8 +392,18 @@ public final class Relics {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			ItemStack held = player.getMainHandItem();
+			if (passive(held) != null && ItemBonds.bonded(player, held) && ItemBonds.use(held, WORN_TICKS)) {
+				player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9F, 1.3F);
+			}
 			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
 				Passive p = passive(player.getItemBySlot(slot));
+				if (p != null && ItemBonds.bonded(player, player.getItemBySlot(slot)) && ItemBonds.use(player.getItemBySlot(slot), WORN_TICKS)) {
+					player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9F, 1.3F);
+				}
+				if (p != null && !ItemBonds.works(player, player.getItemBySlot(slot))) {
+					continue;
+				}
 				if (p == Passive.FLEETFOOT) {
 					player.addEffect(new MobEffectInstance(MobEffects.SPEED, WORN_TICKS + 20, 0, true, false, true));
 				} else if (p == Passive.FLAMEWARD && player.isOnFire()) {

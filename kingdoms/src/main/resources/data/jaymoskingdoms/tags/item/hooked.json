@@ -1,0 +1,27 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:axes",
+    { "id": "jaymospowers:wooden_glaive", "required": false },
+    { "id": "jaymospowers:stone_glaive", "required": false },
+    { "id": "jaymospowers:iron_glaive", "required": false },
+    { "id": "jaymospowers:golden_glaive", "required": false },
+    { "id": "jaymospowers:diamond_glaive", "required": false },
+    { "id": "jaymospowers:netherite_glaive", "required": false },
+    { "id": "jaymospowers:wooden_war_scythe", "required": false },
+    { "id": "jaymospowers:stone_war_scythe", "required": false },
+    { "id": "jaymospowers:iron_war_scythe", "required": false },
+    { "id": "jaymospowers:golden_war_scythe", "required": false },
+    { "id": "jaymospowers:diamond_war_scythe", "required": false },
+    { "id": "jaymospowers:netherite_war_scythe", "required": false },
+    { "id": "jaymospowers:gutting_hook", "required": false },
+    { "id": "jaymospowers:tinker_halberd", "required": false },
+    { "id": "jaymospowers:tinker_glaive", "required": false },
+    { "id": "weaponmod:halberd.wood", "required": false },
+    { "id": "weaponmod:halberd.stone", "required": false },
+    { "id": "weaponmod:halberd.iron", "required": false },
+    { "id": "weaponmod:halberd.gold", "required": false },
+    { "id": "weaponmod:halberd.diamond", "required": false },
+    { "id": "weaponmod:halberd.netherite", "required": false }
+  ]
+}

@@ -28,6 +28,8 @@ import org.jspecify.annotations.Nullable;
  * shut without picking) and when a Writ of Rebirth is read.
  */
 final class ClassScreen extends Screen {
+	/** The first class showing down the list (the list scrolls with the wheel). */
+	private int scroll;
 	static final int MAX_W = 420, MAX_H = 266, LIST_W = 118, LIST_ROW = 20, HEADER = 34, STAT_ROW = 13, CHIP_H = 14, FOOTER = 24, DETAIL_MIN_LINES = 4;
 
 	private final boolean forced;
@@ -38,8 +40,16 @@ final class ClassScreen extends Screen {
 	/** Each class's gear, made once for the screen. */
 	private final java.util.Map<PlayerClass, List<ItemStack>> kits = new java.util.EnumMap<>(PlayerClass.class);
 
+	/** The class a master is teaching as a second class (the screen shows that one only), or null. */
+	private final @Nullable PlayerClass teaching;
+	private final boolean switching;
+
 	ClassScreen(boolean forced) {
-		this(forced, false);
+		this(forced, 0, false);
+	}
+
+	ClassScreen(boolean forced, int second) {
+		this(forced, second, false);
 	}
 
 	/**
@@ -47,21 +57,25 @@ final class ClassScreen extends Screen {
 	 * on the H powers screen too"): open with a class already chosen, and Choose swaps it, the screen staying up.
 	 */
 	ClassScreen(boolean forced, boolean switching) {
-		super(Component.translatable("gui.jaymoskingdoms.class.title"));
-		this.forced = forced;
-		this.switching = switching;
+		this(forced, 0, switching);
 	}
 
-	private final boolean switching;
+	private ClassScreen(boolean forced, int second, boolean switching) {
+		super(Component.translatable(second > 0 ? "gui.jaymoskingdoms.class.title_second" : "gui.jaymoskingdoms.class.title"));
+		this.forced = forced;
+		this.switching = switching;
+		this.teaching = second > 0 && second <= PlayerClass.values().length ? PlayerClass.values()[second - 1] : null;
+		this.picked = this.teaching;
+	}
 
 	/** The panel's top-left corner, for the H menu's tabs. */
 	int[] corner() {
 		return new int[] {left(), top()};
 	}
 
-	/** Whether the screen is done: a class chosen (not while a creative player is switching). */
+	/** Whether the screen is done: a class chosen (not while a master teaches a second, nor while a creative player is switching). */
 	private boolean done(Minecraft minecraft) {
-		return !this.switching && minecraft.player != null && Classes.classOf(minecraft.player) != null;
+		return this.teaching == null && !this.switching && minecraft.player != null && Classes.classOf(minecraft.player) != null;
 	}
 
 	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
@@ -73,7 +87,7 @@ final class ClassScreen extends Screen {
 	static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(Classes.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
-			context.client().gui.setScreen(new ClassScreen(payload.forced()));
+			context.client().gui.setScreen(new ClassScreen(payload.forced(), payload.second()));
 		});
 		// (0.7.45) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -83,7 +97,7 @@ final class ClassScreen extends Screen {
 			if (Classes.classOf(minecraft.player) != null) {
 				owed = false;
 			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
-				minecraft.gui.setScreen(new ClassScreen(true));
+				minecraft.gui.setScreen(new ClassScreen(true, 0));
 			}
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> owed = false);
@@ -124,7 +138,22 @@ final class ClassScreen extends Screen {
 	}
 
 	private int rowY(int index) {
-		return top() + HEADER + index * LIST_ROW;
+		return top() + HEADER + (index - this.scroll) * LIST_ROW;
+	}
+
+	/** How many classes fit down the list, and the most it can scroll. */
+	private int fits() {
+		return Math.max(1, (panelH() - HEADER - 4) / LIST_ROW);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (mouseX < left() + LIST_W) {
+			int most = Math.max(0, PlayerClass.values().length - fits());
+			this.scroll = Math.max(0, Math.min(most, this.scroll - (int) Math.signum(scrollY)));
+			return true;
+		}
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 
 	@Override
@@ -142,7 +171,7 @@ final class ClassScreen extends Screen {
 		}
 		this.choose = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {
-				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option));
+				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option, this.teaching != null));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
 				if (!this.switching) {
 					onClose();
@@ -153,7 +182,7 @@ final class ClassScreen extends Screen {
 
 	private @Nullable PlayerClass rowAt(int mouseX, int mouseY) {
 		PlayerClass[] all = PlayerClass.values();
-		for (int i = 0; i < all.length; i++) {
+		for (int i = this.scroll; i < all.length; i++) {
 			int ry = rowY(i);
 			if (ry + LIST_ROW > top() + panelH() - 4) {
 				break;
@@ -204,6 +233,9 @@ final class ClassScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		PlayerClass row = rowAt(mx, my);
 		if (row != null) {
+			if (this.teaching != null && row != this.teaching) {
+				return true;
+			}
 			if (row != this.picked) {
 				this.picked = row;
 				this.option = -1;
@@ -339,7 +371,7 @@ final class ClassScreen extends Screen {
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
 		PlayerClass[] all = PlayerClass.values();
 		PlayerClass hover = rowAt(mouseX, mouseY);
-		for (int i = 0; i < all.length; i++) {
+		for (int i = this.scroll; i < all.length; i++) {
 			PlayerClass cls = all[i];
 			int ry = rowY(i);
 			if (ry + LIST_ROW > y + panelH() - 4) {

@@ -145,7 +145,7 @@ public final class Flaws {
 
 	/** (From {@link LifeStory#road}) A road told after the creator can add points of its own to what was given up. */
 	static void giveUpMore(ServerPlayer player, Stats.Stat stat, int n) {
-		List<Integer> given = player.getAttached(GIVEN_UP);
+		List<Integer> given = upgraded(player.getAttached(GIVEN_UP));
 		if (given == null || given.size() != SLOTS || n <= 0) {
 			return;
 		}
@@ -182,9 +182,22 @@ public final class Flaws {
 		return given != null && !given.isEmpty();
 	}
 
+	/**
+	 * A saved {@link #GIVEN_UP} list made before Presence existed has one slot fewer (the free point's was last): Presence's slot
+	 * is slid in at 0 so every number stays on its own attribute.
+	 */
+	private static List<Integer> upgraded(List<Integer> given) {
+		if (given == null || given.size() != SLOTS - 1) {
+			return given;
+		}
+		List<Integer> out = new ArrayList<>(given);
+		out.add(Stats.Stat.PRESENCE.ordinal(), 0);
+		return List.copyOf(out);
+	}
+
 	/** (From {@link LifeStory#points}) What a finished aim pays back in {@code slot} ({@link Stats.Stat#ordinal}, or the free-point slot): double what was given up. */
 	static int repaid(Player player, int slot) {
-		List<Integer> given = player.getAttached(GIVEN_UP);
+		List<Integer> given = upgraded(player.getAttached(GIVEN_UP));
 		if (given == null || slot < 0 || slot >= given.size() || !LifeAims.finished(player)) {
 			return 0;
 		}

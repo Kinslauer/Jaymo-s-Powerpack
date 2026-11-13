@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:poison",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:poppy",
+    "minecraft:sugar",
+    "minecraft:spider_eye"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:sleep_draught"
+  }
+}

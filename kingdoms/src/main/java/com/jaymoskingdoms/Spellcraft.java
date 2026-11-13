@@ -205,7 +205,21 @@ public final class Spellcraft {
 	 * {@code J}.
 	 */
 	static boolean staffCaster(Player player) {
-		return Classes.is(player, PlayerClass.MAGE) || Mana.attuned(player) && !Classes.is(player, PlayerClass.SORCERER);
+		return Classes.is(player, PlayerClass.MAGE) || ClassCasters.caster(player) || Mana.attuned(player) && !Classes.is(player, PlayerClass.SORCERER);
+	}
+
+	/** A Cleric's, a Druid's or a Warlock's focus in hand casts the spell it is turned to ({@link CastingFocus}). */
+	static void castFocus(ServerPlayer player, ServerLevel level, ItemStack focus) {
+		if (ClassCasters.caster(player)) {
+			castStaff(player, level, focus);
+		}
+	}
+
+	/** Turns a focus to the next spell its holder knows. */
+	static void turnFocus(ServerPlayer player) {
+		if (ClassCasters.caster(player)) {
+			turn(player);
+		}
 	}
 
 	/**
@@ -214,7 +228,7 @@ public final class Spellcraft {
 	 */
 	static boolean learn(ServerPlayer player, String spell) {
 		Classes.Chosen c = Classes.of(player);
-		if (!staffCaster(player) || c.spells().contains(spell)) {
+		if (!staffCaster(player) || c.spells().contains(spell) || !ClassCasters.mayLearn(player, spell)) {
 			return false;
 		}
 		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {
@@ -261,18 +275,27 @@ public final class Spellcraft {
 		boolean mage = Classes.is(player, PlayerClass.MAGE);
 		// (0.7.231) blood spells are paid in blood, not mana
 		boolean blood = ForbiddenArts.blood(spell);
-		float cost = blood ? Hemomancy.cost(spell) : Mana.cost(spell);
-		if (!blood && !Mana.afford(player, cost) || blood && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
-			if (blood) {
+		// a Warlock's magic is bought from a patron, in pact slots, not mana ({@link Warlocks})
+		boolean pact = ClassCasters.pact(player, spell);
+		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
+		if (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
+			if (blood && !pact) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			}
 			return;
 		}
-		if (!Arcana.cast(spell, level, player, (mage ? MAGE_POWER : ATTUNED_POWER) * (blood ? Hemomancy.power(player) : 1.0F))) {
+		// words, a free hand and what the spell spends
+		if (!SpellParts.allow(player, spell, null)) {
+			return;
+		}
+		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * (blood && !pact ? Hemomancy.power(player) : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
-		if (blood) {
+		SpellParts.spend(player, spell);
+		if (pact) {
+			Warlocks.pay(player, spell);
+		} else if (blood) {
 			Hemomancy.pay(player, cost);
 		} else {
 			Mana.take(player, cost);
@@ -291,8 +314,8 @@ public final class Spellcraft {
 			// the spell echoes: no cooldown this time
 			level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
-			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, 40);
-			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
+			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, NewSpells.COOLDOWN.getOrDefault(spell, 40));
+			player.getCooldowns().addCooldown(staff, Math.round(cooldown * ClassCasters.cooldown(player, mage, ATTUNED_COOLDOWN)));
 		}
 		afterCast(player, level, spell);
 	}
@@ -341,6 +364,15 @@ public final class Spellcraft {
 		});
 	}
 
+	/** Takes any imbued element out of {@code stack} (a dispel); true if there was one. */
+	static boolean unimbue(ItemStack stack) {
+		if (charge(stack) == null) {
+			return false;
+		}
+		strip(stack);
+		return true;
+	}
+
 	private static void strip(ItemStack stack) {
 		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(CHARGE_KEY));
 	}
@@ -354,10 +386,9 @@ public final class Spellcraft {
 		return false;
 	}
 
-	/** The Sorcerer's element, or "" for anyone else. */
+	/** The Sorcerer's element (as a first class or a second), or "" for anyone else. */
 	static String element(ServerPlayer player) {
-		Classes.Chosen c = Classes.of(player);
-		return c.playerClass() == PlayerClass.SORCERER ? c.option() : "";
+		return Classes.optionOf(player, PlayerClass.SORCERER);
 	}
 
 	/** A blade the Imbue takes: a sword, or anything the classes count as a blade. */
@@ -366,9 +397,26 @@ public final class Spellcraft {
 	}
 
 	static void imbue(ServerPlayer player, boolean bolt) {
+		// the key is every class's own button: the second set of classes answer it before the Sorcerer's imbue does
+		if (Abilities.key(player, bolt)) {
+			return;
+		}
+		sorcerer(player, bolt);
+	}
+
+	/** The Sorcerer's own answer to the class key: the imbue, the bolt, their element's spell. */
+	static void sorcerer(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
+		}
+		// a cast in the window is answered first, if they know counterspell
+		if (Counterspell.key(player, level)) {
+			return;
+		}
+		if (element.equals(WildMagic.WILD)) {
+			// the wild bloodline's blade and bolt take a different element every time
+			element = WildMagic.element(level.getRandom());
 		}
 		if (element.equals("restoration")) {
 			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their blade never takes a charge
@@ -412,13 +460,14 @@ public final class Spellcraft {
 		boolean sameBlade = had != null && had.sorcerer().equals(player.getUUID()) && live(held, now) != null;
 		Current before = IMBUED.get(player.getUUID());
 		// one blade at a time: this one takes the element, the last one goes cold wherever it is
-		IMBUED.put(player.getUUID(), new Current(now, now + IMBUE_TICKS));
-		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + IMBUE_TICKS, now));
+		int lasts = Paths.imbueTicks(player, IMBUE_TICKS);
+		IMBUED.put(player.getUUID(), new Current(now, now + lasts));
+		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + lasts, now));
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			stripIfDead(inv.getItem(i), now);
 		}
-		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), IMBUE_COOLDOWN);
+		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), Paths.imbueCooldown(player, IMBUE_COOLDOWN));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(particle(element), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 0.8F, 1.1F);
@@ -444,7 +493,9 @@ public final class Spellcraft {
 		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
-		Vec3 step = target.getBoundingBox().getCenter().subtract(start);
+		// what the foe crouches behind may take the bolt instead
+		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, player, target);
+		Vec3 step = (cover != null ? cover.getLocation() : target.getBoundingBox().getCenter()).subtract(start);
 		int n = Math.max(2, (int) (step.length() * 3.0));
 		ParticleOptions trail = particle(element);
 		for (int i = 0; i <= n; i++) {
@@ -452,7 +503,12 @@ public final class Spellcraft {
 			level.sendParticles(trail, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 1.0F, 1.3F);
-		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE);
+		if (cover != null) {
+			Cover.stuck(level, cover, target);
+			afterCast(player, level, element);
+			return;
+		}
+		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE * Math.max(Classes.SECOND_SHARE, Classes.share(player, PlayerClass.SORCERER)));
 		strike(level, player, target, element, true);
 		afterCast(player, level, element);
 	}
@@ -468,6 +524,9 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		Paths.cast(player, level);
+		// a cast may surge into something else (the wild bloodline, a cursed place)
+		WildMagic.cast(player, level);
 		// (0.7.244) the caster's aura ripples with what the cast is for (an element's blade or bolt: harm; restoration: healing)
 		Mana.ripple(player, Mana.intent(spellOrElement));
 		if (ForbiddenArts.forbidden(spellOrElement)) {

@@ -122,6 +122,7 @@ public final class Tailors {
 		}
 		// (0.7.498) as much of the fee as they carry, in silver coins
 		Money.chargeUpTo(player, Money.worth(fitting.fee()));
+		Lifestyle.dressed(player);
 		Entity tailor = level.getEntity(fitting.tailor());
 		if (tailor != null) {
 			Speech.tell(level, tailor, player, Component.translatable("tailor.jaymoskingdoms.done"), Speech.WHITE);

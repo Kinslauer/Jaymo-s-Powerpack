@@ -134,7 +134,7 @@ final class Lairs {
 		return air <= all * AIR_ALLOWED;
 	}
 
-	private static boolean natural(BlockState s) {
+	static boolean natural(BlockState s) {
 		return !s.hasBlockEntity() && s.getFluidState().isEmpty() && (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SUBSTRATE_OVERWORLD)
 			|| s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(BlockTags.ORES) || s.is(Blocks.SNOW) || s.is(Blocks.SNOW_BLOCK)
 			|| s.is(BlockTags.REPLACEABLE_BY_TREES) || s.is(Blocks.SANDSTONE) || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.TERRACOTTA)

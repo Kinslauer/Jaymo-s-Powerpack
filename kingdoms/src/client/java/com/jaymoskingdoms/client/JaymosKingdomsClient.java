@@ -88,11 +88,13 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.145) the Aether's Giants
 		com.jaymoskingdoms.client.remnants.GiantRenderer.register();
 		com.jaymoskingdoms.client.nightfall.NightfallClient.register();
+		com.jaymoskingdoms.client.creatures.CreaturesClient.register();
 		// 0.7.131: the Hornkin of the Nether
 		com.jaymoskingdoms.client.nether.HornkinRenderer.register();
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();
 		// (0.7.518) the patron champions
 		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
+		GreatNecromancerRenderer.register();
 		// (0.7.206) whaling: great whales, their carcasses, harpoons and their lines
 		com.jaymoskingdoms.client.whaling.GreatWhaleRenderer.register();
 		MobAnimations.register();
@@ -153,6 +155,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TableTalkScreen.register();
 		LoanScreen.register();
 		ClassKeys.register();
+		MagicKeys.register();
+		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
@@ -167,6 +171,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PurseCoins.register();
 		TomeFloat.register();
 		WerewolfKey.register();
+		PaceKey.register();
 		FrostPrisonKey.register();
 		NightGiftsClient.register();
 		BloodVision.register();
@@ -191,9 +196,11 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		KinshipClient.register();
 		WarriorFury.register();
 		BruteRageHud.register();
+		OwnSpeechHud.register();
 		BloodReservoirHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
+		FifthClient.register();
 		// (0.7.330) a werewolf's, an ape's or a disguise's voice, through Simple Voice Voice Changer when loaded
 		VoiceMaskClient.register();
 		// 0.7.111: the awareness gauge (mob senses)
@@ -202,6 +209,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
+		GameScreen.register();
+		RecallScreen.register();
+		ChalkClient.register();
+		ResearchScreen.register();
 		BoutBracketScreen.register();
 		MaskedFacesClient.register();
 		CastOutMap.register();

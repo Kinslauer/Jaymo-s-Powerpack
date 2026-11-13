@@ -118,6 +118,21 @@ public final class SpeechBubbles {
 		}
 	}
 
+	/** The words still showing over {@code entityId}'s head, newest last, with their colours (the player's own head is not drawn in first person, so a small HUD repeats it). */
+	static List<Map.Entry<List<FormattedCharSequence>, Integer>> own(int entityId) {
+		Deque<Line> lines = SAID.get(entityId);
+		List<Map.Entry<List<FormattedCharSequence>, Integer>> out = new java.util.ArrayList<>();
+		long now = Util.getMillis();
+		if (lines != null) {
+			for (Line line : lines) {
+				if (line.until > now) {
+					out.add(Map.entry(line.rows, line.color));
+				}
+			}
+		}
+		return out;
+	}
+
 	private static void prune() {
 		long now = Util.getMillis();
 		SAID.values().removeIf(lines -> {

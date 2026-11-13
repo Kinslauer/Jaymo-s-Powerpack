@@ -218,7 +218,7 @@ public final class Senses {
 
 	static boolean boss(Mob mob) {
 		EntityType<?> type = mob.getType();
-		return type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
+		return mob instanceof GreatNecromancer || type == EntityTypes.WITHER || type == EntityTypes.ENDER_DRAGON || type == EntityTypes.WARDEN || type == EntityTypes.ELDER_GUARDIAN
 			|| type.builtInRegistryHolder().is(BOSSES);
 	}
 
@@ -267,6 +267,10 @@ public final class Senses {
 		if (!MOVING.getOrDefault(player.getUUID(), true)) {
 			f *= STILL;
 		}
+		if (Pace.slow(player)) {
+			f *= Pace.SIGHT;
+		}
+		f *= FieldWeather.sight(level, looker);
 		if (player.distanceTo(looker) > BEHIND_CLOSE && !inCone(looker, player)) {
 			f *= BEHIND;
 		}
@@ -278,6 +282,10 @@ public final class Senses {
 		f *= Turning.sight(player, looker, level);
 		// (Hardrock picks) a smelly player is noticed further off, keen noses most (Stench)
 		f *= Stench.factor(player, looker);
+		// a Ranger moves quietly through the country (Rangers)
+		f *= Rangers.quiet(player);
+		// a Skulker is hard to see in the dim and when sneaking, a shadow Monk too
+		f *= FeatsBody.sight(player, light) * Paths.sight(player, light);
 		// morning mist (Mist): a mob sees less far through it, so a player in it is noticed at half the range at its thickest
 		f *= Mist.sight(level, player.getEyePosition());
 		return Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f);

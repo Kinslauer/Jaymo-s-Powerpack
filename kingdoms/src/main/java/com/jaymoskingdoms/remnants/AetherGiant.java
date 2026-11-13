@@ -211,6 +211,8 @@ public class AetherGiant extends Monster {
 	private int heldTree = -1;
 	private @Nullable Vec3 treeFrom;
 	private boolean raging;
+	/** (Highfield) how many times its monolith's stone has got up to fight beside it ({@link RuneColossus}): 0 to 3. */
+	private int colossi;
 	/** (Client) how far each arm's swing has run. */
 	private int leftCounter, rightCounter;
 	/** (Server) its boss bar, made when first wanted. */
@@ -380,6 +382,13 @@ public class AetherGiant extends Monster {
 			this.aura(level);
 		}
 		LivingEntity chase = this.getTarget();
+		// (Highfield) pieces of its monolith get up to fight beside it: when it first has someone to fight, and again at
+		// each third of its health gone
+		if (this.element == Element.HIGHFIELD && this.colossi < 3 && chase != null && chase.isAlive() && this.tickCount % 20 == 0
+			&& this.getHealth() <= this.getMaxHealth() * (3 - this.colossi) / 3.0F) {
+			RuneColossus.rise(level, this, this.colossi == 0 ? RuneColossus.FIRST_WAVE : RuneColossus.LATER_WAVE);
+			this.colossi++;
+		}
 		this.haul(chase != null && chase.isAlive() && this.windup <= 0 && !this.grabbing()
 			&& this.distanceToSqr(chase) > Mth.square(this.getBbWidth() / 2.0 + HAUL_FROM));
 		if (this.windup > 0) {
@@ -1184,6 +1193,7 @@ public class AetherGiant extends Monster {
 			output.putLong("monolith", this.monolith.asLong());
 		}
 		output.putBoolean("raging", this.raging);
+		output.putInt("colossi", this.colossi);
 	}
 
 	@Override
@@ -1196,5 +1206,6 @@ public class AetherGiant extends Monster {
 			this.setHomeTo(this.monolith, Monoliths.HOME_RADIUS);
 		}
 		this.raging = input.getBooleanOr("raging", false);
+		this.colossi = input.getIntOr("colossi", 0);
 	}
 }

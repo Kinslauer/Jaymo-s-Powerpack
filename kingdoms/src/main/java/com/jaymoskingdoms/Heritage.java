@@ -352,6 +352,10 @@ public final class Heritage {
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
 			// (0.7.490) the kit: its ability, its gift, its flaw (the look's own once a look is picked, see card(Variant))
 			out.addAll(HeritageKits.card(HeritageKits.kit(this, variant)));
+			// (fifth edition) bloods that see in the dark as grey shapes ({@link Darkvision})
+			if (Darkvision.has(this, variant)) {
+				out.add(Component.translatable("heritage.jaymoskingdoms.darkvision"));
+			}
 			// (0.7.221) and how far from human folk think it ({@link Prejudice})
 			int shunned = Prejudice.degree(this);
 			if (shunned > 0) {

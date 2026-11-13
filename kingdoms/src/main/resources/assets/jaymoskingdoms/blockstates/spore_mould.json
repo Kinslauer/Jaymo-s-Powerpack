@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "charge=0": {
+      "model": "jaymoskingdoms:block/spore_mould_spent"
+    },
+    "charge=1": {
+      "model": "jaymoskingdoms:block/spore_mould"
+    },
+    "charge=2": {
+      "model": "jaymoskingdoms:block/spore_mould"
+    },
+    "charge=3": {
+      "model": "jaymoskingdoms:block/spore_mould"
+    }
+  }
+}

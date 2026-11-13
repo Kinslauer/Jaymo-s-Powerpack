@@ -59,6 +59,8 @@ public final class ChronoTimeStop {
 	static final int MAX_HITS = 64;
 	/** Knockback released on a held creature is capped to this speed (blocks/tick), so a pile of blows can't fling it across the map. */
 	static final double MAX_RELEASE_SPEED = 1.6;
+	/** How far from the Chrono a boss is asked whether it shrugs the stop off (blocks). */
+	static final double SHRUG_RANGE = 96.0;
 	/** A held player drifting further than this (blocks, squared) from where time caught them is put back. */
 	private static final double DRIFT_SQR = 0.04;
 
@@ -105,6 +107,15 @@ public final class ChronoTimeStop {
 		return stop != null && !player.getUUID().equals(stop.owner) && !player.isSpectator();
 	}
 
+	/**
+	 * Whether {@code entity} walks on through the stop: a boss that shrugged it off (Kingdoms' legendary resistances, one
+	 * spent when time stopped). It is not frozen ({@code TimeStopFreezeMixin}) and the Chrono's blows on it land at once.
+	 */
+	public static boolean free(Entity entity) {
+		Stop stop = active;
+		return stop != null && stop.free.contains(entity);
+	}
+
 	/** Ticks until {@code player}'s time stop is ready again. */
 	static int cooldownLeft(ServerPlayer player) {
 		Integer ready = READY_AT.get(player.getUUID());
@@ -132,6 +143,13 @@ public final class ChronoTimeStop {
 		for (ServerPlayer other : server.getPlayerList().getPlayers()) {
 			if (held(other)) {
 				stop.hold(other);
+			}
+		}
+		// a boss near shrugs the stop off, as it does any lockdown: it spends one of its resistances and walks on
+		for (net.minecraft.world.entity.LivingEntity near : player.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+			player.getBoundingBox().inflate(SHRUG_RANGE), e -> e != player && !(e instanceof Player))) {
+			if (com.jaymospowers.compat.KingdomsCompat.shrugs(near)) {
+				stop.free.add(near);
 			}
 		}
 		broadcast(server, new ChronoTimeStopSync(player.getId(), DURATION, DURATION));
@@ -178,7 +196,7 @@ public final class ChronoTimeStop {
 			return true;
 		}
 		Entity attacker = source.getEntity();
-		if (attacker != null && attacker.getUUID().equals(stop.owner)) {
+		if (attacker != null && attacker.getUUID().equals(stop.owner) && !stop.free.contains(entity)) {
 			if (stop.hits < MAX_HITS) {
 				stop.hits++;
 				stop.banked.computeIfAbsent(entity, e -> new ArrayList<>()).add(new Hit(source, amount));
@@ -265,6 +283,8 @@ public final class ChronoTimeStop {
 		/** Each held player: where time caught them, and whether they had no gravity before (to put back). */
 		final Map<UUID, Pin> pins = new HashMap<>();
 		final Map<Entity, List<Hit>> banked = new LinkedHashMap<>();
+		/** Bosses that shrugged the stop off: they are not frozen. */
+		final java.util.Set<Entity> free = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 
 		Stop(UUID owner, int ownerEntityId) {
 			this.owner = owner;

@@ -3854,3 +3854,43 @@ Built (`compileJava`); not played.
   (Jaymo's Kingdoms) leaves one. Quick as a dagger, it freezes and slows what it cuts. Right click is the giant's slam:
   a ring of frost that hurts, lifts and chills everyone within 4.5 blocks, on an 8 second cooldown.
 - Compiled, not yet played.
+
+## 0.22.105 (2026-11-13): out of your body while left for dead (#1390)
+
+Andy: "the ghost should also be how the player character appears while in limbo, so you can kind of haunt your friends";
+then, limbo being the choice on the final death screen: "the ghosts you implemented can stay, as long as they can still
+enter limbo if they don't come to."
+- **Out of the body** (`core/wounds/OutOfBody`, `PlayerGhost`): lying left for dead, once the black has lifted and until you hold sneak
+  to come to, you are out of your body as the ghost from the graveyards: the black screen is gone, your view hangs over
+  your body, and the moving keys drift it the way you look (forward and back along your gaze, so looking up rises), 0.2
+  blocks a tick, up to 48 blocks from the body. Blocks stop it. Everyone else sees a pale see-through figure, lit from
+  within and bobbing, turning its head as you look. Nothing touches it, it touches nothing, and no mob sees it.
+- The body stays where it fell and everything about it is as before: it can be carried (the ghost is drawn along at the
+  end of its leash), brought round somewhere safe, or you hold sneak to come to. Any of those ends the ghost.
+- The screen is tinted a little blue instead of the grey of the downed. One line of chat says you can move.
+- A life that ends instead of coming to goes on as before: the ghost is gone the moment the wait ends, the view is back
+  in the body, and the final death screen follows with its choices (Limbo, once that has merged, among them).
+- Kingdoms reads where each ghost is (`OutOfBody.ghostAt`) for the ghost's voice.
+- Lore: "(new) Out of the body" under The dead in Lore.md, for Andy to approve.
+- Compiled (`compileClientJava`); not played. Unseen in game: how the camera feels, whether another mod that takes the
+  camera or redraws the first person view argues with it, the ghost's look on a player-shaped model.
+
+## 0.22.106 (2026-11-13): fifth edition picks, patch 1 - exhaustion steps, undead fortitude, zombie stomps
+
+- **Exhaustion** (`core/wounds/Exhaustion`): six steps, from two days without sleep (and one more each day), three minutes of sprinting without a breather, two minutes near empty of food or water, or a minute frozen through. Each step is felt: slower afoot, slower digging, weaker and slower blows, dark edges, swooning (Fainting now takes the worse of hunger and exhaustion), and at six a collapse, out cold for two minutes, never death. Sleep takes the sleepless steps and one more away.
+- **Undead fortitude** (`core/wounds/UndeadFortitude`): a downed zombie gets back up after four seconds, three times in four, once, unless the blow was fire, a beheading, a Smite blade or a crit.
+- **Zombie finishers**: an unarmed finisher on a zombie is a stomp, a head smash or the fist, at random (`Finishers` STOMP, HEAD_SMASH; `FinisherPose`).
+- **Bosses shrug off lockdowns** (through Kingdoms' legendary resistances, `KingdomsCompat.shrugs`): a boss's first Chrono and Darktide stuns, Gravity Lift, Crush pin, Gravity Well kneel and Time Stop slip off it (`ChronoFlow`, `DarktideStatus`, `GravityPower`, `ChronoTimeStop`, mixin `TimeStopFreezeMixin`); a boss walking through a Time Stop takes the Chrono's blows at once.
+- **Guard**: a Kingdoms spark can turn a missed parry into a parry (`Guard.SPARK` hook).
+- **Walking spells** (`core/MagicMoves`, mixin `SpellJumpMixin`; `ChronoWaterRunMixin`, `SkitterClimbMixin`): Kingdoms' water walk, spider climb and long jump spells.
+- **Clean cantrip** (`core/blood/MagicWash`): washes blood off a body's coat and gear.
+- **Bonding baubles** (`baubles/Bonds`, client `BondsScreen`): found baubles and relics do nothing until bonded on a full night's sleep (or Kingdoms' seated rest); three at most; a Bonds button on the bauble screen and tooltip lines.
+- **Boots of Long Strides and Cloak of the Depths** (`Wondrous`): found baubles.
+- **Held deaths** (`core/wounds/Revival`, mixin `RevivalRespawnMixin`): a final death with a reviver near waits up to a minute ("Someone may yet reach you"); Reincarnate still works at once.
+- **Limbo** (`Limbo`, `LimboHud`, mixin `DeathScreenLimboMixin`): a Limbo button beside Reincarnate on the final death screen: a black frame where you watch over your own body (14 blocks) while friends bury you or bring you back in a new blood; kept across logouts; hold Backspace to choose Reincarnate after all.
+- **Thin ice** (`frost/FrostFeatures.LakeCrust`): still shallow water in cold lands gets a crust of brittle ice that cracks under weight.
+- **Calling back the first deaths**: for a minute after a player is left for dead (one of the two deaths that always wake), a cleric or a scroll of Calling Back can stand them up where they lie; they wake nowhere and the sure wake is not spent.
+- **Healer feat**: bandages heal half as much again and treatments go a fifth quicker (read from Kingdoms).
+- **Returning thrown weapons** (`armory/ThrownWeapon`): a thrown weapon a Tinkerer has given the returning infusion flies back to the hand.
+- **Limbo ghost** (`core/wounds/OutOfBody`): a player waiting in Limbo is seen by everyone else as the same ghost a left-for-dead player is, at the spot they watch from.
+- Built; not played.

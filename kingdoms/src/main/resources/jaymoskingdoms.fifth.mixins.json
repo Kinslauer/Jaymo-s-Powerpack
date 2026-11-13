@@ -1,0 +1,21 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.mixin.fifth",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"EffectSaveMixin",
+		"ExplosionRingMixin",
+		"BoltRingMixin",
+		"DoorHandleMixin",
+		"DosedDishMixin",
+		"ProjectileCoverMixin",
+		"LairSpawnMixin",
+		"BirdSongMixin",
+		"FoeStudyMixin",
+		"SlotCurseMixin",
+		"PlayerDropMixin",
+		"PotionClashMixin",
+		"CrossbowChargeMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

@@ -38,6 +38,11 @@ public class BaublesMenu extends AbstractContainerMenu {
 				}
 
 				@Override
+				public boolean mayPickup(Player player) {
+					return !Bonds.clinging(this.getItem());
+				}
+
+				@Override
 				public int getMaxStackSize() {
 					return 1;
 				}

@@ -401,6 +401,8 @@ public final class Patrons {
 			return;
 		}
 		met(sp, shrine, pos);
+		Paladins.prayed(sp);
+		Warlocks.prayed(sp, shrine);
 		State s = state(sp);
 		if (!s.sworn()) {
 			Streak st = s.streak;

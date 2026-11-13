@@ -3284,6 +3284,36 @@ public final class PowersCompat {
 		}
 	}
 
+	private static volatile java.lang.invoke.@Nullable MethodHandle ghostOf;
+	private static volatile boolean ghostAtLooked;
+
+	/**
+	 * Where {@code player}'s ghost is while they're out of their body, left for dead (Powers' {@code OutOfBody.ghostAt}); null
+	 * for anyone in their body, or without Powers. Any thread.
+	 */
+	static net.minecraft.world.phys.@Nullable Vec3 ghostOf(java.util.UUID player) {
+		if (!ghostAtLooked) {
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					ghostOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.OutOfBody"),
+						"ghostAt", java.lang.invoke.MethodType.methodType(net.minecraft.world.phys.Vec3.class, java.util.UUID.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' OutOfBody.ghostAt (older Powers?)", e);
+				}
+			}
+			ghostAtLooked = true;
+		}
+		java.lang.invoke.MethodHandle handle = ghostOf;
+		if (handle == null) {
+			return null;
+		}
+		try {
+			return (net.minecraft.world.phys.Vec3)handle.invoke(player);
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle waking;
 	private static boolean wakingLooked;
 
@@ -3704,5 +3734,227 @@ public final class PowersCompat {
 		} catch (Throwable e) {
 			return null;
 		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle dodgingOf;
+	private static boolean lookedForDodging;
+
+	/** Whether {@code player} is in the first ticks of a dodge (Powers' {@code Dodge.evading}); false without Powers. */
+	public static boolean dodging(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForDodging) {
+			lookedForDodging = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dodgingOf = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.stamina.Dodge"),
+						"evading", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no dodge", e);
+				}
+			}
+		}
+		try {
+			return dodgingOf != null && (boolean) dodgingOf.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	// ---- the Monk's fists (Powers' boxing/Boxing and BoxingGear) --------------------------------------------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle fistGear, boxingLearn, boxingStyleById;
+	private static boolean lookedForFists;
+
+	private static void lookForFists() {
+		if (lookedForFists) {
+			return;
+		}
+		lookedForFists = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+			Class<?> gear = Class.forName("com.jaymospowers.boxing.BoxingGear");
+			Class<?> boxing = Class.forName("com.jaymospowers.boxing.Boxing");
+			Class<?> style = Class.forName("com.jaymospowers.boxing.Boxing$Style");
+			fistGear = lookup.findStatic(gear, "isGear", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.item.ItemStack.class));
+			boxingStyleById = lookup.findStatic(style, "byId", java.lang.invoke.MethodType.methodType(style, String.class));
+			boxingLearn = lookup.findStatic(boxing, "learn", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class, style));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' boxing gear", e);
+			fistGear = null;
+		}
+	}
+
+	/** Whether {@code stack} is boxing fist gear (a cestus, knuckles); false without Powers. */
+	public static boolean fistGear(net.minecraft.world.item.ItemStack stack) {
+		lookForFists();
+		try {
+			return fistGear != null && (boolean)fistGear.invoke(stack);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Teaches {@code player} the boxing style with id {@code style} at level 1 (Powers' {@code Boxing.learn}); false if they can't learn it or without Powers. */
+	public static boolean boxingTeach(net.minecraft.server.level.ServerPlayer player, String style) {
+		lookForFists();
+		try {
+			return boxingLearn != null && boxingStyleById != null && (boolean)boxingLearn.invoke(player, boxingStyleById.invoke(style));
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	// ---- (fifth edition) lifting together: whether Powers' Carry has {@code entity} holding someone up -----------------------------
+
+	private static java.lang.invoke.@Nullable MethodHandle carrying, dragged;
+	private static boolean lookedForCarry;
+
+	private static void lookForCarry() {
+		if (lookedForCarry) {
+			return;
+		}
+		lookedForCarry = true;
+		if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+				Class<?> carry = Class.forName("com.jaymospowers.core.Carry");
+				java.lang.invoke.MethodType type = java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class);
+				carrying = lookup.findStatic(carry, "isCarrying", type);
+				dragged = lookup.findStatic(carry, "isDragged", type);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' carrying (older Powers?)", e);
+			}
+		}
+	}
+
+	/** Whether {@code who} has someone or something in their arms (Powers' Carry, a body or a block), or is dragging a downed body. */
+	public static boolean carrying(net.minecraft.world.entity.Entity who) {
+		lookForCarry();
+		try {
+			return carrying != null && ((boolean)carrying.invoke(who) || (boolean)dragged.invoke(who));
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	private static java.lang.invoke.@Nullable MethodHandle chronoStunned, darktideStunned;
+	private static boolean lookedForStuns;
+
+	/** Whether {@code who} is stunned by one of Powers' Time Flow or Darktide blows just now. False without Powers. */
+	public static boolean stunned(net.minecraft.world.entity.LivingEntity who) {
+		if (!lookedForStuns) {
+			lookedForStuns = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					var type = java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.LivingEntity.class);
+					var lookup = java.lang.invoke.MethodHandles.publicLookup();
+					chronoStunned = lookup.findStatic(Class.forName("com.jaymospowers.power.chrono.ChronoFlow"), "stunned", type);
+					darktideStunned = lookup.findStatic(Class.forName("com.jaymospowers.power.darktide.DarktideStatus"), "stunned", type);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' stuns (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return chronoStunned != null && (boolean)chronoStunned.invoke(who) || darktideStunned != null && (boolean)darktideStunned.invoke(who);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Hands Powers' guard the sparks' rescue: {@code rescue} is asked when a player's block missed its parry window, and a
+	 * {@code true} turns the block into a parry (Powers' {@code Guard.SPARK}, set by reflection).
+	 */
+	public static void sparkParry(java.util.function.Predicate<net.minecraft.server.level.ServerPlayer> rescue) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymospowers.combat.Guard").getField("SPARK").set(null, rescue);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't hand Jaymo's Powers' guard the sparks", e);
+		}
+	}
+
+	// ---- fifth edition picks, patch 6: walking spells and the wash cantrip ----
+
+	/** Powers' {@code MagicMoves.grant}, {@code MagicMoves.clear} and {@code MagicWash.wash}. */
+	private static java.lang.invoke.@Nullable MethodHandle grantMove, clearMove, washBlood;
+	private static boolean lookedForMagic;
+
+	private static void lookForMagic() {
+		if (lookedForMagic) {
+			return;
+		}
+		lookedForMagic = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> moves = Class.forName("com.jaymospowers.core.MagicMoves");
+			grantMove = lookup.findStatic(moves, "grant", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, String.class, int.class));
+			clearMove = lookup.findStatic(moves, "clear", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, String.class));
+			washBlood = lookup.findStatic(Class.forName("com.jaymospowers.core.blood.MagicWash"), "wash",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no walking spells or blood wash (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * A walking spell on {@code who} for {@code ticks}: {@code "water"}, {@code "climb"} or {@code "jump"} (Powers'
+	 * {@code MagicMoves}); false without Powers.
+	 */
+	public static boolean moves(LivingEntity who, String kind, int ticks) {
+		lookForMagic();
+		try {
+			return grantMove != null && (boolean)grantMove.invoke(who, kind, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Ends a walking spell on {@code who} ({@code null}: all three). */
+	public static void endMoves(LivingEntity who, @Nullable String kind) {
+		lookForMagic();
+		try {
+			if (clearMove != null) {
+				clearMove.invoke(who, kind);
+			}
+		} catch (Throwable e) {
+			// nothing to end without Powers
+		}
+	}
+
+	/** Scrubs the blood off {@code body}'s coat and what it wears and holds (Powers' {@code MagicWash}); false if none, or without Powers. */
+	public static boolean washBlood(LivingEntity body) {
+		lookForMagic();
+		try {
+			return washBlood != null && (boolean)washBlood.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	private static @Nullable Class<?> throwingWeapon;
+	private static boolean lookedForThrowing;
+
+	/** Whether {@code stack} is one of Powers' weapons thrown from the hand (a dagger, a hatchet, a spear). False without Powers. */
+	public static boolean throwingWeapon(net.minecraft.world.item.ItemStack stack) {
+		if (!lookedForThrowing) {
+			lookedForThrowing = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					throwingWeapon = Class.forName("com.jaymospowers.armory.ThrowingWeaponItem");
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no throwing weapons (older Powers?)", e);
+				}
+			}
+		}
+		return throwingWeapon != null && throwingWeapon.isInstance(stack.getItem());
 	}
 }

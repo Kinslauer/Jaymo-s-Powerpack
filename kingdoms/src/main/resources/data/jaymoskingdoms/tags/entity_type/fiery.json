@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:blaze",
+    "minecraft:magma_cube",
+    "minecraft:ghast",
+    "minecraft:strider",
+    { "id": "jaymoskingdoms:flame_wraith", "required": false },
+    { "id": "jaymoskingdoms:fire_ogre", "required": false }
+  ]
+}

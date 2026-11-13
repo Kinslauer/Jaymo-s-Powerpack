@@ -48,6 +48,9 @@ public final class NightfallClient {
 			new IllagerModel<>(IllagerModel.createBodyLayer().bakeRoot()), bleeders));
 		EntityRenderers.register(Nightfall.BLIGHTWING, context -> new NightBatRenderer<Blightwing>(context,
 			new BatModel(BatModel.createBodyLayer().bakeRoot()), 0.6F, 2.2F, state -> wings[Math.floorMod(state.variant, wings.length)]));
+		Identifier blood = JaymosKingdoms.id("textures/entity/creatures/blood_bat.png");
+		EntityRenderers.register(com.jaymoskingdoms.creatures.Creatures.BLOOD_BAT, context -> new NightBatRenderer<com.jaymoskingdoms.creatures.BloodBat>(context,
+			new BatModel(BatModel.createBodyLayer().bakeRoot()), 0.25F, 1.0F, state -> blood));
 		EntityRenderers.register(Nightfall.VAMPIRE_BAT, context -> new NightBatRenderer<VampireBat>(context,
 			new BatModel(BatModel.createBodyLayer().bakeRoot()), 0.25F, 1.1F, state -> bat));
 

@@ -421,6 +421,34 @@ public final class Recollections {
 		return leaning(who, player) <= REFUSE || Bearings.cold(who, player);
 	}
 
+	/**
+	 * {@code who} forgets every ill they hold of {@code player} (a memory that weighs against them), and the sour feeling with it;
+	 * how many memories went.
+	 */
+	static int forgetIll(LivingEntity who, ServerPlayer player) {
+		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
+		UUID id = key(player, who);
+		Person p = all.get(id);
+		if (p == null) {
+			return 0;
+		}
+		List<Recollection> kept = new ArrayList<>();
+		int gone = 0;
+		for (Recollection r : p.memories()) {
+			Kind k = r.type();
+			if (k != null && k.weight < 0) {
+				gone++;
+			} else {
+				kept.add(r);
+			}
+		}
+		Bearing b = p.bearing();
+		Bearing eased = new Bearing(Math.max(0, b.trust()), Math.max(0, b.respect()), Math.max(0, b.warmth()), b.settled(), b.talks(), -1L);
+		all.put(id, new Person(p.name(), p.last(), List.copyOf(kept), eased));
+		who.setAttached(MEMORIES, Map.copyOf(all));
+		return gone;
+	}
+
 	/** (0.7.254) {@code who} lets go of {@code r} about {@code player} (an apology taken: {@link SharedHistory}). */
 	static void forget(LivingEntity who, ServerPlayer player, Recollection r) {
 		Map<UUID, Person> all = new HashMap<>(who.getAttachedOrElse(MEMORIES, Map.of()));
@@ -676,6 +704,7 @@ public final class Recollections {
 	/** (MCA) {@code player} gave {@code who} {@code gift}, and it was {@code liked} (hearts up). */
 	public static void gifted(LivingEntity who, ServerPlayer player, ItemStack gift, boolean liked) {
 		if (liked && !gift.isEmpty()) {
+			Sparks.act(player, Sparks.Act.GIFT, false);
 			remember(who, player, Kind.GIFT, gift.getHoverName());
 		} else if (!gift.isEmpty()) {
 			remember(who, player, Kind.REBUFFED, Component.translatable("recall.jaymoskingdoms.act.gift"));

@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.fifth",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"LockedInputMixin",
+		"LockedActionsMixin",
+		"SoundEngineMixin",
+		"DarkvisionMixin",
+		"DruidHidesPlayerMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

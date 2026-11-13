@@ -102,8 +102,8 @@ public final class Learnables {
 		if (classes == null || player.isCreative()) {
 			return false;
 		}
-		PlayerClass cls = Classes.classOf(player);
-		return cls == null || !classes.contains(cls);
+		List<PlayerClass> held = Classes.both(player);
+		return held.isEmpty() || held.stream().noneMatch(classes::contains);
 	}
 
 	/** Whether {@code player} knows {@code spell} (a perk learned or taught), or needs not (a weapon's own, any other mod's). */

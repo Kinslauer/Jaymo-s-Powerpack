@@ -67,12 +67,12 @@ public final class RpgSeriesGate {
 		String path = spell.getPath();
 		return switch (spell.getNamespace()) {
 			case "wizards" -> EnumSet.of(PlayerClass.MAGE);
-			case "archers" -> EnumSet.of(PlayerClass.ARCHER, PlayerClass.MARKSMAN);
+			case "archers" -> EnumSet.of(PlayerClass.RANGER, PlayerClass.MARKSMAN);
 			case "rogues" -> {
 				EnumSet<PlayerClass> classes = ROGUE_SPELLS.contains(path) ? EnumSet.of(PlayerClass.THIEF)
 					: EnumSet.of(PlayerClass.WARLORD, PlayerClass.BRUTE, PlayerClass.RIDER);
 				if (SURVIVALIST_SPELLS.contains(path)) {
-					classes.add(PlayerClass.SURVIVALIST);
+					classes.add(PlayerClass.RANGER);
 				}
 				yield classes;
 			}
@@ -132,7 +132,8 @@ public final class RpgSeriesGate {
 			SpellEvents.CASTING_ATTEMPT.PRE.register(args -> {
 				Identifier spell = args.spell().unwrapKey().map(key -> key.identifier()).orElse(null);
 				if (spell == null || mayCast(args.caster(), spell)) {
-					return null;
+					// ears ringing from a blast: the words go wrong
+					return Deafened.spoils(args.caster()) || SpellParts.engineBlocked(args.caster(), spell) ? SpellCast.Attempt.none() : null;
 				}
 				tell(args.caster(), spell);
 				return SpellCast.Attempt.none();

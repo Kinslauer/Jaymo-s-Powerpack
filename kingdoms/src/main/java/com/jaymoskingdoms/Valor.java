@@ -526,7 +526,7 @@ public final class Valor {
 	}
 
 	public static boolean proficientSenses(Classes.@Nullable PlayerClass c) {
-		return c == Classes.PlayerClass.ARCHER || c == Classes.PlayerClass.MARKSMAN || c == Classes.PlayerClass.SURVIVALIST;
+		return c == Classes.PlayerClass.RANGER || c == Classes.PlayerClass.MARKSMAN;
 	}
 
 	static Classes.@Nullable PlayerClass classOf(Entity e) {
@@ -952,7 +952,7 @@ public final class Valor {
 			return false;
 		}
 		Classes.PlayerClass c = Classes.classOf(owner);
-		return c == Classes.PlayerClass.MARKSMAN || c == Classes.PlayerClass.ARCHER && rank(owner) >= STEELED;
+		return c == Classes.PlayerClass.MARKSMAN || c == Classes.PlayerClass.RANGER && rank(owner) >= STEELED;
 	}
 
 	/** Packs what's up into {@link #STATE}, setting it only when it changed. */

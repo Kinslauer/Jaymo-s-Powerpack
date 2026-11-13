@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:charcoal",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:smoke_bottle"
+  }
+}

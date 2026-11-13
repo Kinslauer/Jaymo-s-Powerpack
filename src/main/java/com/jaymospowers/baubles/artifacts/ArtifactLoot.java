@@ -112,11 +112,11 @@ public final class ArtifactLoot {
 			Home home = HOMES.get(key);
 			if (home != null) {
 				if (context.getRandom().nextFloat() < home.chance()) {
-					drops.add(new ItemStack(home.pool().get(context.getRandom().nextInt(home.pool().size()))));
+					drops.add(com.jaymospowers.baubles.Wondrous.dress(new ItemStack(home.pool().get(context.getRandom().nextInt(home.pool().size()))), context.getRandom()));
 				}
 			} else if (!"minecraft".equals(key.identifier().getNamespace()) && key.identifier().getPath().startsWith("chests/")
 				&& context.getRandom().nextFloat() < MODDED_CHEST) {
-				drops.add(new ItemStack(ALL.get(context.getRandom().nextInt(ALL.size()))));
+				drops.add(com.jaymospowers.baubles.Wondrous.dress(new ItemStack(ALL.get(context.getRandom().nextInt(ALL.size()))), context.getRandom()));
 			}
 		});
 	}

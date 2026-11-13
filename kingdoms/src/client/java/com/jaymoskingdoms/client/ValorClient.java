@@ -177,7 +177,7 @@ public final class ValorClient {
 		}
 		double reach = Valor.sensesReach(player);
 		boolean survivalist = Valor.proficientSenses(com.jaymoskingdoms.Classes.classOf(player))
-			&& com.jaymoskingdoms.Classes.classOf(player) == com.jaymoskingdoms.Classes.PlayerClass.SURVIVALIST;
+			&& com.jaymoskingdoms.Classes.classOf(player) == com.jaymoskingdoms.Classes.PlayerClass.RANGER;
 		double far = Math.max(reach * (survivalist ? 1.5 : 1.0), SHOT_REACH);
 		for (Entity e : minecraft.level.getEntities(player, player.getBoundingBox().inflate(far))) {
 			double d2 = e.distanceToSqr(player);

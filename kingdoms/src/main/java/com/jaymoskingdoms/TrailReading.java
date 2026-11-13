@@ -48,6 +48,8 @@ public final class TrailReading {
 	static final int[] READ_AGE = {20 * 60 * 3, KEEP_TICKS};
 	/** The most prints shown in one reading. */
 	static final int READ_MOST = 160;
+	/** A tracker's own quarry's prints are drawn this much larger. */
+	static final float QUARRY_SIZE = 1.6F;
 	/** Colours: people, monsters, beasts. */
 	static final int PEOPLE = 0xE8DFC4, MONSTER = 0xC0644E, BEAST = 0xA9BD86;
 	/** A print's mote: size for a creature a block wide, when fresh; an old one is this share of it. Its drift along the heading. */
@@ -132,25 +134,49 @@ public final class TrailReading {
 	}
 
 	/** Shows {@code player} the prints round them (not their own), nearest in time last so the freshest stand out. */
-	private static void read(ServerLevel level, ServerPlayer player, int rank) {
+	/** Shows {@code player} the prints round them at once (a Ranger tracking), as far as rank {@code rank} (0 or 1) reads. */
+	static void read(ServerLevel level, ServerPlayer player, int rank) {
+		read(level, player, rank, null);
+	}
+
+	/**
+	 * As {@link #read(ServerLevel, ServerPlayer, int)}, but the prints of whatever {@code quarry} picks out (a Ranger's favoured foe)
+	 * are read as far and as old as the best tracker reads, and stand out larger ({@link #QUARRY_SIZE}).
+	 */
+	static void read(ServerLevel level, ServerPlayer player, int rank, java.util.function.@org.jspecify.annotations.Nullable Predicate<net.minecraft.world.entity.Entity> quarry) {
+		read(level, player, rank, quarry, false);
+	}
+
+	/** As above; {@code only}: nothing but the quarry's prints are shown (a Ranger's favoured foe on favoured land, unasked). */
+	static void read(ServerLevel level, ServerPlayer player, int rank, java.util.function.@org.jspecify.annotations.Nullable Predicate<net.minecraft.world.entity.Entity> quarry,
+		boolean only) {
 		ArrayDeque<Print> prints = PRINTS.get(level.dimension());
 		if (prints == null) {
 			return;
 		}
 		long now = level.getGameTime();
-		double reach = READ_RANGE[rank] * READ_RANGE[rank];
+		int best = READ_RANGE.length - 1;
+		double reach = READ_RANGE[rank] * READ_RANGE[rank], far = READ_RANGE[best] * READ_RANGE[best];
 		int shown = 0;
+		java.util.Map<Integer, Boolean> hunted = new java.util.HashMap<>();
 		// newest first, so a crowded patch of ground shows what is fresh
 		for (Iterator<Print> it = prints.descendingIterator(); it.hasNext() && shown < READ_MOST;) {
 			Print print = it.next();
 			long age = now - print.at;
-			if (age > READ_AGE[rank]) {
+			if (age > READ_AGE[quarry == null ? rank : best]) {
 				break;
 			}
-			if (print.maker == player.getId() || player.distanceToSqr(print.x, print.y, print.z) > reach) {
+			if (print.maker == player.getId()) {
 				continue;
 			}
-			float size = print.size * Mth.lerp(age / (float)KEEP_TICKS, 1.0F, OLD_SIZE);
+			boolean prey = quarry != null && hunted.computeIfAbsent(print.maker, id -> {
+				net.minecraft.world.entity.Entity maker = level.getEntity(id);
+				return maker != null && quarry.test(maker);
+			});
+			if (only && !prey || age > READ_AGE[prey ? best : rank] || player.distanceToSqr(print.x, print.y, print.z) > (prey ? far : reach)) {
+				continue;
+			}
+			float size = print.size * Mth.lerp(age / (float)KEEP_TICKS, 1.0F, OLD_SIZE) * (prey ? QUARRY_SIZE : 1.0F);
 			// (count 0: the offsets are the mote's own drift, the way the maker went)
 			level.sendParticles(player, Fx.mote(print.color, size), true, false, print.x, print.y, print.z, 0, print.hx, 0.0, print.hz, DRIFT);
 			shown++;

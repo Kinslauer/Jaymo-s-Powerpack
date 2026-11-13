@@ -39,8 +39,15 @@ public class ArtifactItem extends BaubleItem {
 	}
 
 	@Override
+	public boolean found() {
+		return true;
+	}
+
+	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-		builder.accept(Component.translatable("tooltip.jaymospowers.artifact." + this.id).withStyle(ChatFormatting.GOLD));
+		if (!com.jaymospowers.baubles.Bonds.unknown(stack)) {
+			builder.accept(Component.translatable("tooltip.jaymospowers.artifact." + this.id).withStyle(ChatFormatting.GOLD));
+		}
 		super.appendHoverText(stack, context, display, builder, flag);
 	}
 }

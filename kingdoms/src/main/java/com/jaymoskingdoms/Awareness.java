@@ -181,8 +181,12 @@ public final class Awareness {
 
 	/** How far {@code player}'s own noise carries, as a share: less sneaking, and less with Quiet Step. */
 	static double noise(ServerPlayer player) {
+		return Rangers.quiet(player) * baseNoise(player);
+	}
+
+	private static double baseNoise(ServerPlayer player) {
 		if (!player.isCrouching()) {
-			return 1.0;
+			return Pace.slow(player) ? Pace.NOISE : 1.0;
 		}
 		int quiet = Skills.rank(player, Skills.Perk.QUIET_STEP);
 		return quiet <= 0 ? SNEAK_NOISE : QUIET_STEP_NOISE[Math.min(quiet, QUIET_STEP_NOISE.length) - 1];
@@ -224,6 +228,9 @@ public final class Awareness {
 			}
 			if (tick % STEP_TICKS == 0 && player.isSprinting() && player.onGround()) {
 				sound(level, player.position(), SPRINT_NOISE * noise(player), player.getUUID());
+			} else if (tick % STEP_TICKS == 0 && Pace.ridingHard(player)) {
+				// hooves at a gallop carry as far as a sprinting player's feet
+				sound(level, player.position(), Pace.HOOVES, player.getUUID());
 			}
 			if ((tick + player.getId()) % LIGHT_TICKS == 0) {
 				light(level, player);

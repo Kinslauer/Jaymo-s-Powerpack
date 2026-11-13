@@ -508,6 +508,16 @@ public final class Disguises {
 		return true;
 	}
 
+	/** A moonbeam of {@code caster}'s shows {@code villager} for what it is, if it is a dragon in disguise; true if it did. */
+	public static boolean moonReveal(ServerLevel level, ServerPlayer caster, Villager villager) {
+		Kind kind = kind(villager);
+		if (kind == null) {
+			return false;
+		}
+		reveal(level, caster, villager, kind);
+		return true;
+	}
+
 	/** Having heard enough: if the player has the right, it shows itself; if not, it shoos them off. */
 	private static void verdict(ServerLevel level, ServerPlayer player, Villager villager, Kind kind) {
 		if (DragonRecords.trusted(player) || DragonRecords.beaten(player) >= kind.beaten) {

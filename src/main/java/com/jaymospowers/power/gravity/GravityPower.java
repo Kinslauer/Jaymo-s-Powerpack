@@ -849,6 +849,12 @@ public final class GravityPower implements Power {
 			fizzle(player);
 			return;
 		}
+		// a boss shrugs off its first lifts (Kingdoms' legendary resistances): the hold slips off its hide
+		if (target instanceof LivingEntity bossy && com.jaymospowers.compat.KingdomsCompat.shrugs(bossy)) {
+			cool(player, LIFT, LIFT_COOLDOWN);
+			fizzle(player);
+			return;
+		}
 		if (target instanceof com.jaymospowers.core.BlockCluster cluster && cluster.scripted()) {
 			// a block out of Collapsing Horizon's ring (or anyone's)
 			GravityOrbit.taken(player, target);
@@ -1793,7 +1799,10 @@ public final class GravityPower implements Power {
 					crushing = false;
 				}
 			}
-			// too heavy to move
+			// too heavy to move (a boss shrugs off its first pins: Kingdoms' legendary resistances)
+			if (com.jaymospowers.compat.KingdomsCompat.shrugs(target)) {
+				continue;
+			}
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CRUSH_PIN_TICKS, CRUSH_PIN_SLOWNESS), player);
 			target.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, CRUSH_PIN_TICKS, 128, false, false), player);
 			modifier(target, Attributes.GRAVITY, CRUSH_ID, CRUSH_WEIGHT, true);
@@ -2275,7 +2284,10 @@ public final class GravityPower implements Power {
 			e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !(e instanceof Player p && p.isCreative())
 				&& e.getBoundingBox().distanceToSqr(at) <= radius * radius)) {
 			touch(living, owner);
-			kneel(living, level.getGameTime() + KNEEL_WELL_LINGER);
+			// a boss shrugs off the Well's weight while its legendary resistances last (Kingdoms)
+			if (!com.jaymospowers.compat.KingdomsCompat.shrugs(living)) {
+				kneel(living, level.getGameTime() + KNEEL_WELL_LINGER);
+			}
 		}
 		if (left % 2 == 0) {
 			// its edge, a ring of pressure pressing down round you

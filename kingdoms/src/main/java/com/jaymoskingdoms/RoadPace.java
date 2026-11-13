@@ -63,9 +63,14 @@ public final class RoadPace {
 				// in the air (a jump) the pace it had holds
 				AttributeInstance speed = horse.getAttribute(Attributes.MOVEMENT_SPEED);
 				double going = horse.onGround() ? going(horse) : speed != null && speed.hasModifier(PACE_ID) ? ROAD_BONUS : 0.0;
+				double deep = horse.onGround() ? FieldWeather.deepSnow(horse, horse.level().getBlockState(horse.blockPosition())) : 0.0;
 				if (going > 0.0) {
 					// (0.7.220) a Courier's horse too
 					pace(horse, going * Careers.roadPace(player));
+					paced.add(horse);
+				} else if (deep < 0.0) {
+					// deep snow drags a horse (a charge through it most of all)
+					pace(horse, deep);
 					paced.add(horse);
 				}
 				continue;
@@ -92,6 +97,10 @@ public final class RoadPace {
 		Level level = who.level();
 		// a snow layer or carpet of leaves is the block at the feet; anything else the one under them
 		BlockState feet = level.getBlockState(who.blockPosition());
+		double deep = FieldWeather.deepSnow(who, feet);
+		if (deep != 0.0) {
+			return deep;
+		}
 		if (feet.is(SLOW)) {
 			return SLOW_DRAG;
 		}

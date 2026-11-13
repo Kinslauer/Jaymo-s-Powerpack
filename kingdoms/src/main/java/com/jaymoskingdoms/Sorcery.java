@@ -438,6 +438,7 @@ public final class Sorcery {
 		switch (folk.role()) {
 			case BLOOD_WITCH, SHAMAN, Orcs.SHAMAN -> support(level, of(folk));
 			case WIZARD -> {
+				Dispel.answer(level, of(folk));
 				com.jaymoskingdoms.spirits.FolkSpirits.tick(level, folk, target);
 				List<Folk> fighting = fightingAllies(level, folk);
 				if (timers[T_WARD] <= 0 && (target != null || !fighting.isEmpty())) {
@@ -464,6 +465,22 @@ public final class Sorcery {
 		PathfinderMob mob = caster.mob();
 		// ((0.7.342) not while a Spellbreaker Blow has them hushed: Will)
 		if (!(mob.level() instanceof ServerLevel level) || Will.hushed(mob)) {
+			return;
+		}
+		// a gagged caster, or one in a bubble of silence, only mumbles
+		if (!SpellParts.canSpeak(mob)) {
+			return;
+		}
+		// the spell takes a moment, with a tell a rival caster (or a player who knows counterspell) can answer
+		if (Counterspell.wind(caster, () -> perform(level, caster, target))) {
+			return;
+		}
+	}
+
+	/** The spell itself, once its window has passed unsnuffed. */
+	static void perform(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob mob = caster.mob();
+		if (!mob.isAlive() || !target.isAlive() || Will.hushed(mob) || !SpellParts.canSpeak(mob)) {
 			return;
 		}
 		int[] timers = caster.timers();
@@ -512,6 +529,7 @@ public final class Sorcery {
 			return;
 		}
 		int[] timers = caster.timers();
+		Dispel.answer(level, caster);
 		switch (caster.role()) {
 			case BLOOD_WITCH -> Hemomancy.witchTick(level, caster);
 			case SHAMAN, Orcs.SHAMAN -> {
@@ -737,6 +755,12 @@ public final class Sorcery {
 		caster.timers()[T_CHANT] = CHANT_COOLDOWN;
 		List<LivingEntity> allies = caster.fightingAllies(level);
 		allies.add(folk);
+		// (a held spell: strike him and the chant drops)
+		List<LivingEntity> driven = List.copyOf(allies);
+		Concentration.hold(folk, "chant", CHANT_TICKS, () -> driven.forEach(a -> {
+			a.removeEffect(MobEffects.STRENGTH);
+			a.removeEffect(MobEffects.SPEED);
+		}));
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.STRENGTH, CHANT_TICKS, 0), folk);
 			ally.addEffect(new MobEffectInstance(MobEffects.SPEED, CHANT_TICKS, 0), folk);
@@ -772,6 +796,14 @@ public final class Sorcery {
 	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
 		// (0.7.244) every cast ripples the caster's aura with its intent
 		Mana.ripple(folk, Mana.HARM);
+		// what the target crouches behind may take the bolt instead
+		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, folk, target);
+		if (cover != null) {
+			beam(level, folk, cover.getLocation(), BOLT_COLOUR);
+			Cover.stuck(level, cover, target);
+			level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.NEUTRAL, 0.9F, 1.3F);
+			return;
+		}
 		beam(level, folk, target.getBoundingBox().getCenter(), BOLT_COLOUR);
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);
@@ -783,6 +815,9 @@ public final class Sorcery {
 	static void ward(ServerLevel level, LivingEntity folk, int[] timers, List<? extends LivingEntity> allies) {
 		Mana.ripple(folk, Mana.WARD);
 		timers[T_WARD] = WARD_COOLDOWN;
+		// (a held spell: strike him and the ward fades from them)
+		List<LivingEntity> warded = List.copyOf(allies);
+		Concentration.hold(folk, "ward", WARD_TICKS, () -> warded.forEach(a -> a.removeEffect(MobEffects.ABSORPTION)));
 		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, WARD_TICKS, WARD_LEVEL), folk);
 			level.sendParticles(Fx.LIGHT, ally.getX(), ally.getY() + 1.0, ally.getZ(), 10, 0.4, 0.6, 0.4, 0.02);

@@ -262,6 +262,32 @@ public final class FinisherPose {
 			at(heave, 36), at(drop, 40), at(drop, 44),
 			k(48, 0.3F, 15, 0, -0.5F, -0.1F, 0.1F, -0.4F, 0.1F, -0.1F, -1.0F, 1.2F, 0.5F, 0),
 			rest(52, 0)});
+		// Stamped Out (a zombie, bare-handed): stood at the head, arms out for balance, the right foot lifted high and
+		// stamped down twice, then lifted higher still and driven through with the whole weight behind it
+		Key lift = k(0, -0.02F, -6, 0, -0.35F, 0, 0.3F, -0.35F, 0, -0.3F, -1.35F, 0.1F, 0.55F, 0);
+		Key stamp = k(0, 0.08F, 14, 0, -0.2F, 0, 0.2F, -0.2F, 0, -0.2F, 0.05F, 0.05F, 0.7F, 0);
+		KEYS.put(Finishers.Kind.STOMP, new Key[] {
+			rest(0, 0),
+			at(lift, 8), at(stamp, 13), at(stamp, 15),
+			turned(lift, 19, 4), turned(stamp, 23, 4), turned(stamp, 25, 2),
+			k(29, -0.05F, -12, 0, -0.6F, 0, 0.45F, -0.6F, 0, -0.45F, -1.65F, 0.15F, 0.6F, 0),
+			k(33, 0.14F, 20, 0, -0.15F, 0, 0.25F, -0.15F, 0, -0.25F, 0.1F, 0.1F, 0.75F, 0),
+			k(35, 0.12F, 18, 0, -0.2F, 0, 0.2F, -0.2F, 0, -0.2F, 0.05F, 0.05F, 0.72F, 0),
+			rest(38, 0)});
+		// Head on the Stone (a zombie, bare-handed): down on a knee at the head, both hands on it, lifted and beaten on the
+		// ground three times, the last from higher up
+		Key hold = k(0, 0.5F, 42, 0, -0.45F, -0.3F, -0.05F, -0.4F, 0.3F, 0.05F, -1.15F, 1.35F, 0.7F, 0);
+		Key hoist = k(0, 0.45F, 26, 0, -0.95F, -0.3F, -0.05F, -0.95F, 0.3F, 0.05F, -1.15F, 1.35F, 0.55F, 0);
+		Key beat = k(0, 0.56F, 50, 0, -0.3F, -0.3F, -0.05F, -0.3F, 0.3F, 0.05F, -1.15F, 1.35F, 0.8F, 0);
+		KEYS.put(Finishers.Kind.HEAD_SMASH, new Key[] {
+			rest(0, 0),
+			k(7, 0.45F, 30, 0, -0.6F, 0.1F, -0.1F, -0.6F, -0.1F, 0.1F, -1.15F, 1.35F, 0.6F, 0),
+			at(hold, 11), at(hoist, 15), at(beat, 18), at(beat, 20),
+			turned(hoist, 26, 5), turned(beat, 30, 3), at(beat, 32),
+			k(36, 0.4F, 14, 0, -1.25F, -0.3F, -0.05F, -1.25F, 0.3F, 0.05F, -1.15F, 1.35F, 0.5F, 0),
+			k(40, 0.58F, 54, 0, -0.25F, -0.3F, -0.05F, -0.25F, 0.3F, 0.05F, -1.15F, 1.35F, 0.82F, 0),
+			at(beat, 42),
+			rest(46, 0)});
 		zfighter();
 	}
 
@@ -479,6 +505,7 @@ public final class FinisherPose {
 			// (0.15.146) the neck snap kneels to the head, not the middle; (0.17.181) so does the rock
 			// (0.20.100) and a future gun's shots stand over it
 			net.minecraft.world.phys.Vec3 at = (kind == Finishers.Kind.FIST || kind == Finishers.Kind.ROCK || kind == Finishers.Kind.Q_BLADE
+				|| kind == Finishers.Kind.STOMP || kind == Finishers.Kind.HEAD_SMASH
 				|| kind == Finishers.Kind.Q_GRIP || kind == Finishers.Kind.FUTURE_SHOT || kind == Finishers.Kind.FUTURE_BURST
 				|| kind == Finishers.Kind.FUTURE_AUTO || kind == Finishers.Kind.FUTURE_WILD) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();

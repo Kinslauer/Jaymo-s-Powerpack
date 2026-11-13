@@ -25,6 +25,7 @@ public final class BaublesClient {
 		// (0.20.12) the pink fairy: her flat sprite, wings flapping, always fully lit
 		EntityRenderers.register(Fairies.PINK_FAIRY, ctx -> new ThrownItemRenderer<>(ctx, 0.75F, true));
 		WornFairies.init();
+		BondsClient.init();
 		// (0.21.37) every other worn bauble drawn on the body
 		WornLooks.init();
 		// (Artifacts) the Artifacts baubles' moves

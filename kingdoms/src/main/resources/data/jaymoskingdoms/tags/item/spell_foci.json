@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:totem_of_undying",
+    "minecraft:enchanted_book",
+    {
+      "id": "jaymoskingdoms:totem_staff",
+      "required": false
+    },
+    "jaymoskingdoms:holy_symbol",
+    "jaymoskingdoms:druid_sprig",
+    "jaymoskingdoms:pact_seal"
+  ]
+}

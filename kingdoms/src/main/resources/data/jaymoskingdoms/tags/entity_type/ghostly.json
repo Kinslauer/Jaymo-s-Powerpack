@@ -1,0 +1,7 @@
+{
+  "values": [
+    "minecraft:vex",
+    { "id": "jaymoskingdoms:wraith", "required": false },
+    { "id": "jaymoskingdoms:flame_wraith", "required": false }
+  ]
+}

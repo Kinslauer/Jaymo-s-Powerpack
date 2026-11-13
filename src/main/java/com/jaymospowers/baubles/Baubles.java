@@ -150,8 +150,11 @@ public final class Baubles {
 		TickingCharm.init();
 		// what the thing under the wreck leaves: a charm that saves its wearer from the water once, and a tooth
 		ClingingCoil.init();
+		// the boots of long strides and the cloak of the depths
+		Wondrous.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		BaublesNet.init();
+		Bonds.init();
 		BaublesQuickEquip.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -226,7 +229,7 @@ public final class Baubles {
 		}
 		for (int i = 0; i < saved.size() && i < SIZE; i++) {
 			ItemStack stack = saved.get(i);
-			if (stack.is(item) && fits(i, stack)) {
+			if (stack.is(item) && fits(i, stack) && Bonds.works(player, stack)) {
 				return true;
 			}
 		}
@@ -238,7 +241,7 @@ public final class Baubles {
 		List<ItemStack> saved = player.getAttached(WORN);
 		if (saved != null) {
 			for (int i = 0; i < saved.size() && i < SIZE; i++) {
-				if (saved.get(i).is(item) && fits(i, saved.get(i))) {
+				if (saved.get(i).is(item) && fits(i, saved.get(i)) && Bonds.works(player, saved.get(i))) {
 					return saved.get(i);
 				}
 			}
@@ -248,7 +251,7 @@ public final class Baubles {
 
 	/** Whether this player wears {@code item} in any slot (server). */
 	public static boolean wearing(Player player, Item item) {
-		return worn(player).stream().anyMatch(stack -> stack.is(item));
+		return worn(player).stream().anyMatch(stack -> stack.is(item) && Bonds.works(player, stack));
 	}
 
 	/** The id of the modifier the {@code bonus}th bonus of the bauble in slot {@code slot} puts on. */
@@ -269,7 +272,7 @@ public final class Baubles {
 				continue;
 			}
 			for (int slot = 0; slot < SIZE; slot++) {
-				List<BaubleItem.Bonus> bonuses = worn.get(slot).getItem() instanceof BaubleItem bauble && fits(slot, worn.get(slot))
+				List<BaubleItem.Bonus> bonuses = worn.get(slot).getItem() instanceof BaubleItem bauble && fits(slot, worn.get(slot)) && Bonds.works(player, worn.get(slot))
 					? bauble.bonuses(worn.get(slot)) : List.of();
 				for (int i = 0; i < BaubleItem.MAX_BONUSES; i++) {
 					Identifier id = modifierId(slot, i);
@@ -432,8 +435,12 @@ public final class Baubles {
 			return;
 		}
 		for (ItemStack stack : saved) {
-			if (!stack.isEmpty()) {
+			if (!stack.isEmpty() && Bonds.works(player, stack)) {
 				stack.getItem().inventoryTick(stack, player.level(), player, null);
+				if (Bonds.needs(stack) && player.tickCount % Bonds.USE_STEP == 0 && Bonds.use(stack, Bonds.USE_STEP)) {
+					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9F, 1.3F);
+					player.setAttached(WORN, new ArrayList<>(saved));
+				}
 			}
 		}
 	}

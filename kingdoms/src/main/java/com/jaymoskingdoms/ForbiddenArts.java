@@ -45,8 +45,8 @@ public final class ForbiddenArts {
 	/** A known practitioner: a Death or Blood Sorcerer, or a caster who has learned a forbidden spell (raising and draining excepted: old, common scrolls). */
 	static boolean known(Player player) {
 		Classes.Chosen c = Classes.of(player);
-		if (c.playerClass() == PlayerClass.SORCERER) {
-			return forbidden(c.option());
+		if (Classes.is(player, PlayerClass.SORCERER)) {
+			return forbidden(Classes.optionOf(player, PlayerClass.SORCERER));
 		}
 		for (String spell : c.spells()) {
 			if (forbidden(spell) && !spell.equals("raising") && !spell.equals("draining")) {

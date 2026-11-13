@@ -43,6 +43,9 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 		@Nullable EntityRenderer<Entity, EntityRenderState> corpseRenderer;
 	}
 
+	/** How high the frame's crossbar runs above the spit block's floor (blocks; kitchen/tools/gen_spit_frame.py prints it). */
+	static final float BAR_HEIGHT = 0.204F;
+
 	/** The game time a tear started at each position, for the tearing countdown. */
 	private static final Map<BlockPos, Long> RIP_START = new HashMap<>();
 
@@ -126,7 +129,7 @@ public class SpitBlockEntityRenderer implements BlockEntityRenderer<SpitBlockEnt
 			return;
 		}
 		poseStack.pushPose();
-		poseStack.translate(0.5F, 1.05F, 0.5F);
+		poseStack.translate(0.5F, BAR_HEIGHT, 0.5F);
 		poseStack.rotateDegrees(Axis.XP, state.turn);
 		if (state.corpseState != null && state.corpseRenderer != null) {
 			state.corpseRenderer.submit(state.corpseState, poseStack, collector, camera);

@@ -137,7 +137,7 @@ public final class Necromancy {
 
 	/** A Death Sorcerer. */
 	static boolean necromancer(Player player) {
-		return Classes.is(player, PlayerClass.SORCERER) && "death".equals(Classes.of(player).option());
+		return "death".equals(Classes.optionOf(player, PlayerClass.SORCERER));
 	}
 
 	// ---- the blight --------------------------------------------------------------------------------------------------

@@ -338,6 +338,9 @@ public final class Vampires {
 		if (kind == null || !STAKE_ITEM.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(attacker.getMainHandItem().getItem()).toString())) {
 			return amount;
 		}
+		if (self.level() instanceof ServerLevel asleep && com.jaymoskingdoms.creatures.OldRules.stakeAsleep(asleep, self)) {
+			return 0.0F;
+		}
 		if (self.level() instanceof ServerLevel level) {
 			level.sendParticles(Fx.wisp(0x5A0A0A, 1.2F), self.getX(), self.getY(0.65), self.getZ(), 14, 0.2, 0.2, 0.2, 0.0);
 			level.sendParticles(ParticleTypes.SMOKE, self.getX(), self.getY(0.65), self.getZ(), 6, 0.15, 0.15, 0.15, 0.01);

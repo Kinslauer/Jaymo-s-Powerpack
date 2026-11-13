@@ -1958,3 +1958,23 @@ Built (`compileJava`); not played.
 - Two hides of one animal make that animal's own rug, coloured and named for it (15 animals).
 - Butchering a cow, mooshroom, pig, sheep, horse, donkey, mule, wolf, chicken or deer to its last cut leaves Frame Bones of that animal. Clean them by boiling in a heated cooking pot (about a minute) or in a Beetle Box fed rotten flesh (a day; the beetles starve after three days unfed). Stand them up on a Bone Stand (oak slab and an iron ingot); sneak and use to change the pose (grazing, rearing, howling and so on), use to take them down. Dirty bones on a stand look yellowed and give off a little dust.
 - Built; not played.
+
+## 0.5.126 (2026-11-13): the spit is a frame of forked posts (#1390)
+
+From the camping-campfire Blockbench model Andy uploaded.
+- **Spit**: the bare pole is gone. A spit is now two pairs of leaning forked posts and a crossbar, standing on the
+  ground either side of the fire it sits over (`kitchen/tools/gen_spit_frame.py` makes the model from the file's frame;
+  the file's own logs, stones and flames aren't used, the fire underneath keeps its own).
+- The roast turns on the crossbar, about 3 pixels above the spit block's floor (it used to float a block higher).
+- The spit's outline and collision are the low half of its block (it was a full cube), and it no longer hides the faces
+  of blocks beside it.
+- Credits: yair (@yairtalmy2111), Blockbench Workshop, CC BY 4.0.
+- Compiled; not played. Unseen in game: a whole carcass on the lower crossbar may dip into the fire's logs.
+
+## 0.5.127 (2026-11-13): fifth edition picks - kept bodies and graves
+
+- **Kept bodies** (`corpse/Keeping`): a body under a rite of keeping or a salt-and-herb wrap neither rots nor rises while it's kept; fire and butchering still work on it.
+- **Graves** (`corpse/Burial`): bodies can be lowered into a grave and raised again; a player's body gives back its hotbar for a rebirth (`CorpseEntity.takeHotbar`).
+- Kingdoms' cold mould counts as cold for food.
+- `Stomach.addMealBoost`: another mod can raise what meals heal per player (Kingdoms' Chef feat).
+- Built; not played.

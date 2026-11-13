@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:oak_leaves",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:druid_sprig"
+  }
+}
