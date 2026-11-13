@@ -103,7 +103,7 @@ Rubber-folk and Verdants.
 
 ## Patch 11: Sorcerer spells (om_glass_school, om_fire_rings, om_fire_pillars, om_black_flame, om_fire_beam, om_storm_cloak)
 
-Volcanic glass as a new spell type (four spells). Fire: ring ward, orbiting pillars, a held beam that registers with
+Volcanic glass as a new spell type (four spells) that any Sorcerer can learn, whatever their element (Andy: "anyone can learn"); it is not a tenth element. Fire: ring ward, orbiting pillars, a held beam that registers with
 `BeamClash`. The flame that won't go out, a forbidden art that Restoration puts out. The lightning cloak.
 
 ## Patch 12: screen and world (au_lensing, au_beam_scars, au_phoenix)
@@ -115,6 +115,6 @@ fire dive for Ember or Pyre in place of a weak move.
 
 1. Patch 1's flinch: should a player's own wind-up be broken the same way by a fighter's blow?
 2. The glass gauntlet with no Arsenal user on the server: is it then simply not in that world?
-3. Volcanic glass as a spell type: a tenth Sorcerer element that is chosen like the others, or spells any Sorcerer learns?
+3. Answered (Andy, 2026-11-12): any Sorcerer can learn the glass spells.
 4. Which near-death unlocks the Brink gates is listed in patch 9's PR for a yes or no each.
-5. Lore placements for the knight, snow giant, sand worm and kraken are `(new)` in Lore.md, waiting on approval.
+5. Answered (Andy, 2026-11-12): the lore placements for the knight, snow giant, sand worm, kraken and the glass gauntlet are approved.
