@@ -1,0 +1,104 @@
+{
+  "values": [
+    {
+      "id": "jaymospowers:aether_grass_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:enchanted_aether_grass_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:aether_dirt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:coarse_aether_dirt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:quicksoil",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:holystone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:mossy_holystone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:irradiated_holystone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:agiosite",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:icestone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:undershale",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ferrosite",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ferrosite_sand",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ferrosite_mud",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:shimmering_silt",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:ambrelinn_moss_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bryalinn_moss_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:shayelinn_moss_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arctic_snow_block",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arctic_snow",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arctic_ice",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arctic_packed_ice",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:fragile_arctic_ice",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:white_ice",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cinder_rock",
+      "required": false
+    }
+  ]
+}

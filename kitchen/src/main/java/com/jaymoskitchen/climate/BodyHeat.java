@@ -27,6 +27,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -88,6 +89,8 @@ public final class BodyHeat {
 	/** Thin air: this much colder a block above {@code HEIGHT_FROM} over the sea. */
 	static final int HEIGHT_FROM = 40;
 	static final float HEIGHT_COLD = 0.25F;
+	/** Jaymo's Powers' Aether (its own dimension, or its band of a One Dimension world): no thin-air cold there. */
+	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
 	static final float RAIN = -15.0F, SNOW = -20.0F, IN_WATER = -25.0F, WET = -10.0F, POWDER_SNOW = -40.0F;
 	/** Ticks you stay wet after getting out of the water or the rain. */
 	static final int WET_TICKS = 1200;
@@ -372,7 +375,9 @@ public final class BodyHeat {
 				land *= SHELTER;
 			}
 			int above = at.getY() - level.getSeaLevel() - HEIGHT_FROM;
-			if (above > 0) {
+			// the Aether's islands keep their own weather: its height is the sky's, not thin air over the Overworld's sea
+			// (stacked over the Overworld it stands hundreds of blocks up, which read as deep frostbite)
+			if (above > 0 && realm != AETHER) {
 				land -= above * HEIGHT_COLD;
 			}
 			if (realm == Level.OVERWORLD) {
