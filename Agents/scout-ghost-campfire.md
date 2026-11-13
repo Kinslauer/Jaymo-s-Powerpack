@@ -38,3 +38,5 @@ reusable; its `Limbo` class name collides with #1387's).
 Andy then kept the left-for-dead ghosts: back on this branch as Powers `core/wounds/OutOfBody` + `PlayerGhost`
 (`client/wounds/OutOfBodyClient`, `PlayerGhostRenderer`) and the Kingdoms ghost voice. Still to do after #1387: the same
 ghost and voice for a player in Limbo.
+
+- 2026-11-13: barrow knights, revenant and Barrows pushed to PR #1390 (commit 0cb346a5). Files owned: kingdoms/src/main/java/com/jaymoskingdoms/barrow/*, BbMobRenderer.holding. Next: giants via GeckoLib + Snow Giant body, new PR after #1390 merges.

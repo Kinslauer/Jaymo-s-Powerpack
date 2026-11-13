@@ -860,6 +860,18 @@ none.
 given back to the one who keeps the dark at bay. The dead that walk are his to put down, and the blood-drinkers hate
 his light.
 
+(new) **The barrow's oath** (models thread, 2026-11-13; Andy asked for lore for yair's Cryptbound Revenant and Zombie
+Knight and fixed two points: the knight "needs a different head and should wield a sword from our pack, and
+correctly"; the rest is Claude's placement for him to approve). Before the kingdoms there were lords on the moor who were
+buried with their household, and the greatest of them swore to the Lantern Warden to keep the light over their own
+dead. They are keeping it still. The old barrows are the buried cobblestone rooms under the Overworld. In about half
+of them two or three **barrow knights** stand: dead villagers' faces under rusted kettle helms, each with a real forged
+sword in his fist. In the deepest, their lord stands with them, the **cryptbound revenant**, in rusted plate with the
+Warden's blue light in his helm, his breast and along his blade. They let pass whoever comes carrying a lantern, as the
+lantern-keepers of the barrows do, and they fight anyone else, and anyone who strikes one of them. Hard pressed, the
+revenant raises his sword, the blue light rings out, and more of his knights climb out of the floor. He leaves a soul
+lantern behind. They are not a Bane's barrow-host: a Bane's dead hunt one person, these only keep a grave.
+
 **The Crowned Sun**: kings, law and war. He takes tribute as a king does: gold in small coin, the sunflower, glowstone,
 the golden root. He is warm to those who serve a crown and march under a banner. Thieves, and the smoke they hide in,
 are his shame.
@@ -1559,3 +1571,17 @@ the Druid and the Ranger to the wild the villages keep out of (the Ranger is wha
 and survivalists alike), the Monk to the discipline the boxers teach, and the Tinkerer to the smiths' benches.
 Priests teach the symbol, farmers the sprig, librarians the seal and smiths the gadgets. The Warrior-born have none
 of them.
+
+(new) **Second callings, marks and paths** (Claude's placement for the fifth edition picks, patch 11b, 2026-11-13, for
+Andy to approve). A calling can be joined by a second, but only late and only from a master: a villager at the top of
+a trade teaches the calling that trade feeds (the fletcher the Marksman and the Ranger, the priest the Cleric and the
+Paladin, the smiths the Warlord and the Tinkerer), and a second calling never grows as tall as the first. A Sorcerer's
+element is not taught but woken, and the master librarians keep the rite. Each great foe that falls leaves a mark on
+whoever was there (the feats), and each calling narrows in time into a path: the thief into assassin, burglar or
+swashbuckler, the mage into a school.
+
+(new) **Forged seals and deeds; the gorgon's gaze** (Claude's placement, the row-check fixes, 2026-11-13, for Andy to
+approve). The Underworld's forgers also turn out a writ under a lord's seal and a deed to a house, and only the fences
+and the most notorious crooks dare sell them. The gorgon who keeps an old ruin turns those who meet her eyes to stone,
+as the basilisk does, and her ruin is ringed with the statues of those who did; a mirror turns the gaze back on her.
+The lights of the bog are the swamp witches' as often as not, and lead the lost to a witch's door.
