@@ -2,6 +2,7 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.BeamClash;
+import com.jaymospowers.client.sound.SceneMusic;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -112,6 +113,8 @@ public final class BeamCinematic {
 				nextShot(self.getRandom());
 			}
 		}
+		// music under the struggle, in with the bars and lingering after them (SceneMusic)
+		SceneMusic.scene("beam_battle", running);
 		bars += ((running ? 1.0F : 0.0F) - bars) * BAR_EASE;
 		if (!running && bars < 0.01F) {
 			bars = 0.0F;
