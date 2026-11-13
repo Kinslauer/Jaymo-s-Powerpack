@@ -84,6 +84,7 @@ public final class BlossomBlocks {
 		BlossomWilds.register();
 		BlossomAnimals.register();
 		NightThings.register();
+		SunkenPalace.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output -> ITEMS.forEach(output::accept));
 	}
 

@@ -77,7 +77,7 @@ public final class NightThings {
 	static final double SWELL_AHEAD = 30.0, SWELL_ONE_WITHIN = 200.0;
 	/** What the blossom folk say of the night: how often, and how many lines. */
 	static final float GOSSIP = 0.1F;
-	static final int GOSSIP_LINES = 10;
+	static final int GOSSIP_LINES = 12;
 
 	private NightThings() {
 	}

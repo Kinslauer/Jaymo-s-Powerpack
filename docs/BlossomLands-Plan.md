@@ -189,6 +189,10 @@ keep. Generates on the dev server; not seen in game.*
 
 A rare drowned palace in the deep sea off the far land, guarded by sea folk.
 
+*Built (2026-11-13, `blossomland.SunkenPalace`, `/kingdom mohknee palace`): three palaces at seed-fixed places in the
+deep water, built when a player first comes near, guardians, four chests, two gossip hints. Not built: Tideborn
+keepers. Builds on the dev server; not seen in game.*
+
 ## Open questions
 
 1. **How long is the voyage?** Answered: two days and nights, 16,000 blocks of open sea.
