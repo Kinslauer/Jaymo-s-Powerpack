@@ -161,11 +161,14 @@ public final class Downed {
 	/** (0.18.5) The hit that breaks off a held action (rising, a revive, Second Wind's eating), before Unflinching. */
 	public static final int HOLD_HITS = 2;
 	/**
-	 * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Each press of sneak while knocked out
-	 * brings them round this much sooner (ticks), and the bar of how far off coming round is (its length, and the
-	 * longest knock-out it measures, ticks).
+	 * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Andy (2026-11-13): presses count from the
+	 * first, and it takes "closer to 3-5". Each press of sneak while knocked out takes an even share off what's left, so a
+	 * knock-out of up to {@link #MASH_SHORT} ticks takes {@link #MASH_LEAST} presses, up to {@link #MASH_LONG} one more,
+	 * and anything longer {@link #MASH_MOST}. The bar ({@link #MASH_BAR} long) measures the whole knock-out, so it moves
+	 * from the first press and as time passes. Not for a scene's black (a death turned away, a turning, the descent below:
+	 * {@code Mortality.WAKE_LINE}), which runs its own time.
 	 */
-	public static final int MASH_TICKS = 12, MASH_BAR = 12, MASH_BAR_TICKS = 900;
+	public static final int MASH_LEAST = 3, MASH_MOST = 5, MASH_SHORT = 300, MASH_LONG = 1200, MASH_BAR = 12;
 	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
 	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
@@ -329,6 +332,8 @@ public final class Downed {
 	private static final Map<UUID, Rise> RISES = new HashMap<>();
 	/** (0.18.84) Knocked-out players holding sneak last tick (a press is sneak coming down). Not saved. */
 	private static final Set<UUID> MASH_HELD = new java.util.HashSet<>();
+	/** Knocked-out player → how long their knock-out was in all (ticks), for the presses it takes and the bar. Not saved. */
+	private static final Map<UUID, Integer> MASH_LENGTH = new HashMap<>();
 
 	private Downed() {
 	}
@@ -492,6 +497,7 @@ public final class Downed {
 			RISES.clear();
 			SINKING.clear();
 			MASH_HELD.clear();
+			MASH_LENGTH.clear();
 		});
 	}
 
@@ -872,7 +878,9 @@ public final class Downed {
 		entity.setAttached(OUT, true);
 		entity.setAttached(KNOCKED, (level.getGameTime() + ticks) << 1 | (was ? 1L : 0L));
 		if (entity instanceof ServerPlayer player) {
+			// (sneak already down as they drop isn't a press: it counts once let go and pressed again)
 			MASH_HELD.add(player.getUUID());
+			MASH_LENGTH.put(player.getUUID(), Math.max(1, ticks));
 			player.sendOverlayMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE));
 		}
 		return true;
@@ -888,6 +896,25 @@ public final class Downed {
 		}
 		var size = entity.getType().getDimensions();
 		return size.width() <= 2.0F && size.height() <= 3.0F;
+	}
+
+	/** How many presses of sneak bring round one knocked out for {@code length} ticks in all ({@link #MASH_LEAST} to {@link #MASH_MOST}). */
+	public static int mashPresses(int length) {
+		return length <= MASH_SHORT ? MASH_LEAST : length <= MASH_LONG ? (MASH_LEAST + MASH_MOST) / 2 : MASH_MOST;
+	}
+
+	/**
+	 * What's left of a knock-out ({@code left} ticks of {@code length} in all) after one more press: an even share of it
+	 * comes off for each press still to go, so the last one brings them round there and then.
+	 */
+	static long mashedLeft(long left, int length) {
+		if (left <= 0L) {
+			return 0L;
+		}
+		// presses still to go, from how far the bar has come (time passing counts toward it too)
+		int need = mashPresses(length);
+		int toGo = Math.max(1, (int) Math.ceil(need * Math.min(1.0, left / (double) length) - 1.0E-6));
+		return left * (toGo - 1) / toGo;
 	}
 
 	/** (0.14.4) A knock-out's end: they come round (still down if they were before it, else up). True if it ended just now. */
@@ -1171,24 +1198,33 @@ public final class Downed {
 				Mortality.lie(player, now);
 				return;
 			}
-			// (0.18.84) and mashing sneak brings them round sooner
+			if (player.hasAttached(Mortality.WAKE_LINE)) {
+				// a scene's black (a death turned away, a turning, the descent below): its own time, its own line, no mashing
+				MASH_HELD.remove(player.getUUID());
+				return;
+			}
+			// (0.18.84) and mashing sneak brings them round sooner: each press counts, 3 to 5 of them in all
 			boolean press = player.isShiftKeyDown() && MASH_HELD.add(player.getUUID());
 			if (!player.isShiftKeyDown()) {
 				MASH_HELD.remove(player.getUUID());
 			}
 			long until = knocked >> 1;
+			// (after a reload or relog the length isn't known: what's left is taken for all of it)
+			long left = until - now;
+			int length = MASH_LENGTH.computeIfAbsent(player.getUUID(), id -> (int) Math.max(1L, Math.min(Integer.MAX_VALUE, left)));
 			if (press) {
-				until = Math.max(now, until - MASH_TICKS);
+				until = now + mashedLeft(until - now, length);
 				player.setAttached(KNOCKED, until << 1 | (knocked & 1L));
 			}
 			if (press || now % HINT_TICKS == 0) {
-				int filled = MASH_BAR - Math.round(MASH_BAR * Math.min(1.0F, (until - now) / (float) MASH_BAR_TICKS));
+				int filled = MASH_BAR - Math.round(MASH_BAR * Math.min(1.0F, (until - now) / (float) length));
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_mash",
 					"|".repeat(filled) + ".".repeat(MASH_BAR - filled)).withStyle(ChatFormatting.DARK_PURPLE));
 			}
 			return;
 		}
 		MASH_HELD.remove(player.getUUID());
+		MASH_LENGTH.remove(player.getUUID());
 		// (0.18.5) not too wounded: sneak gets them up instead (carried or adrift, they can't)
 		if (!out && !tooHurt(player) && !Carry.isCarried(player) && !adrift(player)) {
 			rise(level, player, now);
