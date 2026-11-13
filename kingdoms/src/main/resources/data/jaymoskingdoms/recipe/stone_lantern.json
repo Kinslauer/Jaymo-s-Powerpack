@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "B",
+    "T",
+    "W"
+  ],
+  "key": {
+    "B": "minecraft:stone_brick_slab",
+    "T": "minecraft:torch",
+    "W": "minecraft:stone_brick_wall"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:stone_lantern"
+  }
+}

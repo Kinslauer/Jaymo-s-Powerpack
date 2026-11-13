@@ -1608,11 +1608,11 @@ final class Buildings {
 			boolean dry = land == Palette.DESERT || land == Palette.BADLANDS || land == Palette.SAVANNA;
 			boolean blossom = land == Palette.CHERRY;
 			if (blossom) {
-				// (0.7.250) the Blossom land roofs in dark tile over white plaster, whatever the town was before
+				// the Blossom land roofs in dark tile over its own lime plaster, whatever the town was before
 				roofStairs = Blocks.DEEPSLATE_TILE_STAIRS;
 				roofSlab = Blocks.DEEPSLATE_TILE_SLAB;
 				roofBlock = Blocks.DEEPSLATE_TILES;
-				infill = or(Townscape.named("white_terracotta"), Blocks.CALCITE.defaultBlockState());
+				infill = com.jaymoskingdoms.blossomland.BlossomBlocks.PLASTER.defaultBlockState();
 			}
 			return new Kit(p, village, wood, main, accent, roofStairs.defaultBlockState(), roofSlab.defaultBlockState(), roofBlock.defaultBlockState(),
 				infill, colours, dry, blossom, land, RandomSource.create(details ^ 0x5DEECE66DL));

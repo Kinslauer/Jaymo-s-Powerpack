@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "TTT"
+  ],
+  "key": {
+    "T": "jaymoskingdoms:thatch"
+  },
+  "result": {
+    "count": 6,
+    "id": "jaymoskingdoms:thatch_slab"
+  }
+}

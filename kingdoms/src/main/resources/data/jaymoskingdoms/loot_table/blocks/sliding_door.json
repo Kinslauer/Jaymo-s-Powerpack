@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sliding_door",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskingdoms:sliding_door",
+            "state": {
+              "half": "lower"
+            }
+          }
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/sliding_door"
+}

@@ -1,0 +1,14 @@
+# Blossom building blocks and furnishings, and the villages built from them
+- **Eleven building blocks**, all craftable and in the Building Blocks tab: Shoji Panel (paper in a lattice, joins like glass panes; sticks and paper), Tatami (string over thatch), Plaster (clay, bone meal, sand), Red and Black Lacquered Planks (planks, dye, honeycomb), Paper Lantern (stands or hangs, light 14), Stone Lantern (one block, light 13), Thatch with its slab and stairs (wheat; for anyone's roof), and the Ward Rope.
+- **Ward Rope**: a straw rope hung with folded paper, joining like panes, no collision. No monster is spawned by the night within 12 blocks of one in the Overworld. It does nothing to a monster that walks in, to spawners or to raids.
+- Paper, rope and thatch burn readily.
+- `blossomland.BlossomBlocks`, `blossomland.Wards`, `NaturalSpawnerMixin`; data and art from `kingdoms/tools/gen_blossom_blocks.py`.
+- **Tansu**: a chest of drawers (black lacquered planks, iron nuggets, a barrel). It is a barrel underneath, with its own name on its screen and a drawer that stands out while it is open.
+- **Futon**: a bed laid on the floor (wool over thatch). Sleeps and sets spawn as a bed does, and villagers take one as a home.
+- **Sunken Hearth**: a campfire in a low wooden frame (planks, sand, coal). Cooks four foods, smokes, takes Kitchen's spit. Its coals lie under ash, so walking over it burns nobody.
+- **Sliding Door**: six shoji make three. It slides along the wall toward its hinge side instead of swinging; villagers open it as they do a wooden door.
+- **Lacquer sap**: hold a bowl to the bark of a living cherry tree. That log is left stripped and the bowl fills; each log gives once. Lacquered planks now take a Bowl of Lacquer Sap in place of honeycomb (the bowl comes back).
+- **Blossom villages are built from all of it**: shoji windows, tatami floors, plaster walls, a red lacquered torii, paper lanterns under the roofs, stone lanterns on the road, and in each house futons, a tansu, a sliding door, and a hearth in the larger ones. Villages already standing keep what they were built from.
+- `blossomland.BlossomFurnishings`, `mixin/tweaks/PoiTypeAccessor`, `PoiTypesInvoker`, `TansuNameMixin`.
+- Built. A dev server placed every block: the tansu holds a barrel's store, the hearth a campfire's, the futon is found as a home. Not seen in game: every texture and model is a first draft, and no village has been walked through. Thatch roofs on the villages come with patch 4.
+- `/kingdom mohknee go` (operators): sets you down on Mohknee's western shore, on dry ground a little way in. Built; not run with a player.

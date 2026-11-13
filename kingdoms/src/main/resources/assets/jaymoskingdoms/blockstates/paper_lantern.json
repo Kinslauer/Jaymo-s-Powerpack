@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "jaymoskingdoms:block/paper_lantern"
+    },
+    "hanging=true": {
+      "model": "jaymoskingdoms:block/paper_lantern_hanging"
+    }
+  }
+}

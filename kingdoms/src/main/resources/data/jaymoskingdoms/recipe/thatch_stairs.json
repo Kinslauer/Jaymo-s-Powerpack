@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "T  ",
+    "TT ",
+    "TTT"
+  ],
+  "key": {
+    "T": "jaymoskingdoms:thatch"
+  },
+  "result": {
+    "count": 4,
+    "id": "jaymoskingdoms:thatch_stairs"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=east,half=lower,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom"
+    },
+    "facing=east,half=lower,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_left"
+    },
+    "facing=east,half=lower,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom"
+    },
+    "facing=east,half=lower,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_right"
+    },
+    "facing=east,half=upper,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top"
+    },
+    "facing=east,half=upper,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_left"
+    },
+    "facing=east,half=upper,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top"
+    },
+    "facing=east,half=upper,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_right"
+    },
+    "facing=south,half=lower,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 90
+    },
+    "facing=south,half=lower,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_left",
+      "y": 90
+    },
+    "facing=south,half=lower,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 90
+    },
+    "facing=south,half=lower,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_right",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_left",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_right",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 180
+    },
+    "facing=west,half=lower,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_left",
+      "y": 180
+    },
+    "facing=west,half=lower,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 180
+    },
+    "facing=west,half=lower,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_right",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_left",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_right",
+      "y": 180
+    },
+    "facing=north,half=lower,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 270
+    },
+    "facing=north,half=lower,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_left",
+      "y": 270
+    },
+    "facing=north,half=lower,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom",
+      "y": 270
+    },
+    "facing=north,half=lower,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_bottom_open_right",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_left",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=right,open=false": {
+      "model": "jaymoskingdoms:block/sliding_door_top",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=right,open=true": {
+      "model": "jaymoskingdoms:block/sliding_door_top_open_right",
+      "y": 270
+    }
+  }
+}

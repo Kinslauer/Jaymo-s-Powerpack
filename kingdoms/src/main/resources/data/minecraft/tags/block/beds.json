@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jaymoskingdoms:infirmary_cot"
+    "jaymoskingdoms:infirmary_cot",
+    "jaymoskingdoms:futon"
   ]
 }
