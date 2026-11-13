@@ -149,6 +149,11 @@ public final class MenuCompat {
 		rows.add(row("menu.jaymoskingdoms.character.tier", WorldTiers.of(player).title()));
 		Patron patron = Patrons.of(player);
 		rows.add(row("menu.jaymoskingdoms.character.patron", patron == null ? none : Component.translatable("patron.jaymoskingdoms." + patron.key)));
+		// what you have seen of the other side (Exposure), and a sleep the living nightmare haunts (LivingNightmare)
+		rows.add(row("menu.jaymoskingdoms.character.exposure", com.jaymoskingdoms.Exposure.describe(com.jaymoskingdoms.Exposure.of(player))));
+		if (com.jaymoskingdoms.LivingNightmare.nights(player) > 0) {
+			rows.add(row("menu.jaymoskingdoms.character.sleep", Component.translatable("menu.jaymoskingdoms.character.sleep.haunted")));
+		}
 		MenuNet.Info info = FactionScreen.info;
 		if (info != null) {
 			rows.add(row("menu.jaymoskingdoms.character.realm", info.sworn()

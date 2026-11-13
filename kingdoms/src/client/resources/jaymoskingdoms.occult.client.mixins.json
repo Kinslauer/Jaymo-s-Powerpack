@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.occult",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["EtherealSightMixin", "UnveiledGlowMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

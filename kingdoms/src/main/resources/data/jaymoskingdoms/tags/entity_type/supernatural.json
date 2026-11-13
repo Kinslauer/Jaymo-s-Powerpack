@@ -1,0 +1,129 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:phantom",
+    "minecraft:vex",
+    "minecraft:evoker",
+    "minecraft:illusioner",
+    "minecraft:witch",
+    "minecraft:enderman",
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:wither_skeleton",
+    "minecraft:warden",
+    "minecraft:creaking",
+    "minecraft:ghast",
+    {
+      "id": "jaymoskingdoms:wraith",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:flame_wraith",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:grave_ghost",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:revenant",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:zombie_knight",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:skeleton_lord",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:great_necromancer",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:night_bleeder",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:blightwing",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:vampire_bat",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:draugr",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:silver_skeleton",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:risen_orc",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:unburied",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:shadow",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:shapeshifter",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:bog_light",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gaunt",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:haunted_stand",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:wreck_thing",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:black_swell",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cinder_shade",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:tide_bride",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:werewolf",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:lich",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hag",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:flux_wisp",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:player_ghost",
+      "required": false
+    }
+  ]
+}
