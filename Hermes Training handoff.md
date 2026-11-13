@@ -274,7 +274,7 @@ a backup, not a primary. A 429 from OpenRouter has to fall through to the next p
 `cohere/north-mini-code:free` (256k). Skip the `nvidia/...:free` ones: they are NVIDIA models again, so they don't
 add a real backup. `openai/gpt-oss-120b:free` no longer lists tool support. The list changes often, so re-check.
 
-- [ ] 1. Check out PR #1403 (`tools/openrouter_check.py`) or wait for it to merge. Run `py -3 -m pip install openai`, then
+- [ ] 1. PR #1403 (`tools/openrouter_check.py`) is merged: pull master. Run `py -3 -m pip install openai`, then
       `py -3 tools/openrouter_check.py --list` (no key needed) and confirm the three models are still listed.
 - [ ] 2. Once Andy says the key is set: `py -3 tools/openrouter_check.py`, then the same with
       `--model thinkingmachines/inkling-2-small:free`. Pass = `OK ... called get_server_status(...)`. A `WEAK` line
