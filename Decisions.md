@@ -401,3 +401,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
   "their smiths will teach you about the process". Found achievable in the Overworld (our own continents density
   files + one density function type); plan docs/BlossomLands-Plan.md, 16 patches, 5 open questions (my proposals, not
   yet confirmed by Andy: 8,000 blocks of sea, 22,000 east; no pods or coaches there; old mainland blossom villages stay).
+- 2026-11-12 10:16 PM ET (Sengoku picks thread): Andy chose "Two days and nights" for the sail to the blossom
+  continent: 16,000 blocks of open sea (about 40 real minutes in an ordinary ship). Land radius 2,500 and centre
+  34,000 east are my figures.

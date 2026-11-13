@@ -1310,7 +1310,7 @@ the charted plans of a ship drawn in some far yard.
 
 (new) **The land east over the water** (Sengoku picks thread, 2026-11-12; Andy: "i would like all this to be on a
 seperate continent spoken about by villagers, and reached by LONG sailing"). The blossom folk have a country of their
-own, a whole continent a day and a night's sail east across empty deep water, with no island on the way. It is in the
+own, a whole continent two days and nights' sail east across empty deep water, with no island on the way. It is in the
 Overworld like everything else under this sky; only the sea is between. Nobody on the home continent has a map of it.
 Harbour folk, sailors and old soldiers speak of it sideways: the ships of strange build that come in now and then with
 tea, rice wine, lacquer, paper and a steel no smith here can make, the men who sailed east after them, the ones who
