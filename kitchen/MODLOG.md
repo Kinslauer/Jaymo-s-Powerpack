@@ -1925,3 +1925,36 @@ A waterskin from before the tier update turns into a Leather Waterskin instead o
 - Powers' new species fillet on the cutting board by their weight: white-fleshed ones (`#jaymospowers:fish/white`) into
   cod slices, oily ones (`#jaymospowers:fish/oily`) into salmon slices, with bone meal.
 - Built; not played.
+
+## 0.5.122 (2026-11-13): tundra - qiviut lining
+
+- **Qiviut lining**: clothes made of Kingdoms' qiviut (the muskox's underwool) count as the warmest lining there is, warmer than wool and no help in the heat (`Lining.QIVIUT`, item tag `jaymoskitchen:qiviut`, which lists Kingdoms' qiviut as optional). Kitchen has no lang parts folder, so its tooltip line is in `en_us.json`.
+- Built (`compileJava`); not played.
+
+## 0.5.123 (2026-11-13): Balloon mushroom dishes
+
+- Four new dishes from the small balloon mushroom of the Verdant World's mycotic forest (Andy: "Add some?"): Balloon Mushroom Soup (a slow-falling bowl food), Balloon Mushroom Skewer (a campfire grill that lifts the jump), Balloon Mushroom Omelette (two eggs and a mushroom on the campfire: a short slow fall and a lift) and Stuffed Balloon Mushrooms (two mushrooms, minced beef and onion baked in the oven: the longest slow fall). Powers' mushroom is reached by registry id, and the recipes load only when it exists.
+- Kitchen's lang now merges small part files (`lang/parts/*.json`) into `en_us.json` at build, so new features keep their own keys.
+- Built (`compileJava`); not played.
+
+## 0.5.124 (2026-11-13): Hardrock parts left out: furs, tailor, curing, soot, familiars
+
+- **Furs and linings**: wolves, bears and lions/tigers drop fur; a grown shepherd (the village tailor) sews fur or cloth linings into armour for a fee; lining tooltips show flame and snowflake pips.
+- **Hearth screen** with a fuel bar and an Add fuel button.
+- **Damp**: near sea, beach and river the air is damp, so cold bites harder and heat clings, more in rain.
+- **Curing**: the drying rack now dries raw meat, fish and fruit, which then keep five times as long. (Brine and vinegar crocks were left out: Andy, "maybe no brine or vinegar because salt can handle that".)
+- **Soot**: tall chimneys keep less soot at home and carry it downwind; thick soot wilts the top leaves of trees.
+- **Tired fields**: bone meal and compost rest a field.
+- **Familiar animals**: brush a farm animal once a day; familiar cows and goats can give a second bucket; hearts show under the crosshair.
+- JEI info pages for all of these.
+Built (`compileJava`); not played.
+
+## 0.5.125 (2026-11-13): Left out of older PRs: corpses are lifted from 1 block; hides remember their animal; skeleton displays
+
+- A corpse can only be taken hold of (lifted or dragged) from 1 block of open air away, the same reach Powers gives for lifting people (Andy: "you shouldnt be able to grab them unless you are able to touch it"). Further off, "Too far to take hold".
+- Meals don't heal a Smog user standing in clean open air (Jaymo's Powers' `jaymospowers.clean_air` tag).
+- Hides remember the animal they came off, through every tanning step, the bark-soaked tanned leather and its finishes. Leather stacks by animal, and its tooltip names it ("Cow hide"). Crafting takes the animal most of the hides came from; a tie or any plain leather gives plain leather.
+- Leather armour made of one animal's leather takes that animal's small trait, which nothing in game lists: cow sturdier, horse cheaper sprinting, goat softer falls, llama warmer, hoglin tougher, mooshroom shorter poison, rabbit cooler, alligator unharmed by soaking, a rhino chestplate one armour more, zebra and deer harder for mobs to notice. Leather armour worn in water now slowly wears.
+- Two hides of one animal make that animal's own rug, coloured and named for it (15 animals).
+- Butchering a cow, mooshroom, pig, sheep, horse, donkey, mule, wolf, chicken or deer to its last cut leaves Frame Bones of that animal. Clean them by boiling in a heated cooking pot (about a minute) or in a Beetle Box fed rotten flesh (a day; the beetles starve after three days unfed). Stand them up on a Bone Stand (oak slab and an iron ingot); sneak and use to change the pose (grazing, rearing, howling and so on), use to take them down. Dirty bones on a stand look yellowed and give off a little dust.
+- Built; not played.

@@ -1,5 +1,0 @@
-# Iron only near a vein; diamond and debris never laid
-- Andy's answers on the left-out page (2026-11-12).
-- **Iron as planned** (the Hardrock plan: "Kingdoms villages without a vein nearby lose iron gear: guards wear leather, bronze or chain, and smiths ask a lot for iron"). A realm has iron only if a great iron vein (8 or more iron ores together) lies within 6 chunks of its seat; one realm in four by chance is gone. Without one, each iron piece its folk would wear becomes bronze (copper) half the time, mail a third of the time, or leather; blades are copper. Its rulers keep their iron. Its weaponsmiths, armourers and toolsmiths ask half as much again for anything of iron. Until the country round a seat has loaded, a realm counts as ironless, so folk dressed then wear no iron (`IronVeins`, `Outfits.ironRich`).
-- **No diamond or debris at a new tier** (Andy: diamonds "are leftover from the old world ... you'll strictly find them in chests, more so in the nether"). Dread no longer lays diamond ore, and Legend no longer lays ancient debris in the Nether (`GroundChanges`).
-- Built (`compileJava`, `compileClientJava`); not played.

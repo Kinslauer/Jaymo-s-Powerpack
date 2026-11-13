@@ -3692,3 +3692,150 @@ Compiled only; not played.
 
 - **Deep water, bigger fish** (Andy's ocean pick-list, "Something worth sailing for"): a fish found over 12 or more blocks of water is heavier, up to 1.6 times at 40 blocks, never past its kind's largest (legends keep their size). It counts for the wild fish when their weight is first drawn and for any other fish when it's hooked (`FishCatch.deeper`, `FishCatch.depth`).
 - Built; not played.
+
+## 0.22.92 (2026-11-13): Blood and collisions do what the Cruor and BONK! picks said
+
+- **Bandaged cuts stop dripping.** A cut you bandage or wrap stops dripping at once (`WoundMarks.drip`).
+- **Rubber-folk stumps don't bleed.** They mend instead (`Bleeding.stump`).
+- **Boxers and Z Fighters keep their fists on people.** Punching a tough body no longer bruises their knuckles. Rock still does (`Collisions.fistFighter`).
+- **Dropped bloody weapons drip** where they lie while the blood is wet, as held ones do (`WeaponDrips`).
+- **Blood has its own sounds**, made for us from noise (`tools/gen_blood_sounds.py`, `BloodSounds`). They replace the borrowed slime and honey squishes:
+  - a squelch for each step through a fresh pool (soft sneaking, loud running);
+  - a wet hit when a blade, a club or a shot draws blood (lower for heavier blows);
+  - a wet burst when a body is crushed.
+- **The Blood setting covers stains too.** Light, Normal or Heavy now also sets how long pools and lasting stains are drawn (half, as is, half again) and how many stains are drawn at once (1,500, 3,000 or 6,000, oldest first). The server still keeps every stain for tracking and blood magic (`BloodSettings`, `BloodPuddle.drawnLife`).
+- **Blood on glass and ice wipes off soon.** Pools and stains there are drawn for a quarter as long. Earth and cloth now change how long lasting stains show, too (`BloodSurfaces`).
+- These were left out of #1368, #1370, #1371 and #1373. Built (`compileJava`, `compileClientJava`); not played.
+
+## 0.22.93 (2026-11-13): swordplay left-out parts - scorch marks, cuts on every body, Lift tears anything, the Twinblade's lineage
+
+What the SWGC swordplay patch (#1341) left out of Andy's ticked picks, built now.
+- **Scorch marks** (`core/wounds/WoundMarks`, `client/wounds/WoundMarksLayer`): a hit from fire, lightning or the Z Fighter's ki leaves a charred patch with a singed rim on the part it landed on, on the side it came from, for everyone to see. It lightens as it ages and goes once the part has mended (bandages mend a part faster, as with the other marks). A body on fire gets one at most every 3 seconds, and the bloodless (golems, skeletons) take them too.
+- **Open cuts on every body** (Andy: "the cuts are real and can be healed with bandages"): the red gashes of a bleeding part were drawn only on people (`DressingsLayer`). On any other body (animals, vanilla villagers, golems, mobs of other mods) a bleeding part that nothing is wrapped over is painted into the skin as a gash (`WoundMarksLayer`), the same place every time, and goes when the cut closes or is dressed. Only a body whose skin can't be read as a picture cannot show them; invisible bodies show nothing.
+- **Lift tears ANYTHING loose** (Andy: "it certainly should be able to grab ANYTHING"): bedrock, chests, furnaces, beds, signs and spawners come too (`BlockCluster.takeableAny`). A block with a block entity keeps it: its item is made with the block entity's data on it (`DataComponents.BLOCK_ENTITY_DATA`), so a chest torn loose and pocketed or broken still gives back a chest with its contents (a block that holds something always drops, never by chance). Beds and doors come whole, both halves, and give one item. Only air and bare liquid stay, and what the world border or spawn protection forbids. A block drawn by no model (a chest, a bed, a sign) shows in the chunk as its item.
+- **The Twinblade** is an ancient Warrior-born design that few have wielded, and its schematic tells so (tooltips of both).
+- Built (`compileJava`); not played.
+
+## 0.22.94 (2026-11-13): The Retaking: Web Slinger and Chrono roads, the Judge
+
+- **Web Slinger's Road** gains "keep it white until it trusts you wholly" (the white one writes a few words, `web_white`) and "meet the Quiet One" (the old war's film seen, or he is your spirit).
+- **Chrono's Road** gains the Tinkerer's trail: find his workshop and let him talk; bring him down once and see who stands up where he fell.
+- **The Judge**: a life weighed at death (and born again) now counts for the Retaking's "weighed" milestone, not only asking the Judge; the deed survives the respawn.
+- Built (`compileJava`); not played.
+
+## 0.22.95 (2026-11-13): tundra - the parts the first patch left out
+
+- **Yellow moss layers**: yellow moss now has layers like the pack's other building blocks (the Saw cuts them, hoes mine them); `tools/gen_layers.py` lists it. The generator's loot-table format is out of date, so the yellow moss loot table was copied by hand from the oak log layer's and the others were left as they were.
+- **Lichen and claims**: lichen no longer eats, breaks down or seeds onto land a Kingdoms faction holds (`KingdomsCompat#claimed`, reflecting `Factions.at`; without Kingdoms nothing is claimed).
+- **Dwarfed spruce logs are logs**: they are in `minecraft:logs` (block and item), so felling a tree, bare-hand chopping and the other log checks treat them as logs.
+- **Boulders are loose stones**: a tundra boulder is now a spill of the pack's loose stones (deepslate or basalt, greenstone now and then) instead of a solid lump (`TundraFeatures`).
+- **Snow motes**: the vanilla snowflake in the tundra and lichen woodland is replaced by our own `jaymospowers:snow_mote` (`SnowMote`, drawn by `tools/snow_mote_assets.py`); it is left out in low-end mode.
+- **White ice later**: water that turns up in the tundra after the land was made (a dug lake, a spring, a bucket) freezes to white ice, not plain ice (`TundraFreezeMixin`). Only the tundra biome is covered, not the lichen woodland.
+- **Grass colour**: grass fades through the lichen woodland into the tundra instead of one flat colour (`TundraGrass`, `TundraGrassMixin`, client side, cached per 4 by 4 cell).
+- **Burnt taiga regrows**: a log burning away in a taiga or the lichen woodland scorches the soil under it to coarse dirt (`BurntLogMixin`); then (`Regrowth`) yellow moss takes hold, moss patches turn the coarse dirt to podzol, and on that podzol shrubs and spruce saplings replace the moss if the stand is not already crowded. Nothing happens on claimed land.
+- **Lichen woodland on the taiga edge** (Andy: "Yes"): the woodland no longer takes a band of the Snowy Plains; it is the dry edge of the Snowy Taiga, the open stunted forest where the taiga thins out, as the plan said. It still rings the tundra's warmer side (`TundraWorld.placing`). New chunks only.
+- Built (`compileJava`); not played.
+
+## 0.22.96 (2026-11-13): Verdant World: the rest of the woods, tended limphium, living islands
+
+- The four new woods (balloon mushroom, pulse tree, brain tree, sunroot) now have standing, wall, hanging and wall hanging signs, chests, barrels, bookshelves and ladders, with recipes, loot, tags, models and our own textures. The chests draw their own wood through a small renderer and never join into a double chest; ladders climb, bookshelves feed enchanting tables.
+- Limphium: a sapling (four leaves make one) that grows into the tall plant in good light, a pressed-leaf painting (a painting variant, and a dried leaf with a painting makes one), and a limphium leaf held in the hand lets a faller down slowly. The new plants, gravilite and the gas vent have alchemy essences.
+- Diskwings circle a spot of sky, as gliders ride a rising column of air, and now and then move their circle elsewhere.
+- Large volvox colonies hold a room: a pool, a mossy planted shore and a gap in the skin to fly in by, so a flyer can rest. The small ones stay dense.
+- Caves now wind through the Aether's own islands, and one in four islands' caves (and one in four hollow islands) is a gas cave: new gas vents breathe the Hestveil's green haze, poisonous without a sky mask.
+- Power hooks: wind users are pushed two and a half times harder by the Wind Valley; gravity users feel nearby gravilite as rising motes; a lightning bolt near brain trees sets off every charged block about it, and a Stormborn in the Brainstorm calls the Thunderclap back as fast as in a thunderstorm. (Sorcerers drawing mana from pulse trees is in Kingdoms.)
+- The Stone Garden gets the pack's loose rocks, which the overworld's biomes already had.
+- The sky tavern's kitchen gets a menu board (Kingdoms') on its cabinet when Kitchen and Kingdoms are loaded.
+- Built (`compileJava`); not played.
+
+## 0.22.97 (2026-11-13): Sounds pick from a pool, and the land is heard from where it is
+
+- **A real pool.** Andy asked for sounds to "choose from a pool so the outcomes are more varied". Before, only the pitch was nudged. Now nineteen of the game's sounds that had only one recording each have three takes of our own beside it, made from noise and tones (`tools/gen_pool_sounds.py`, `assets/minecraft/sounds.json`). They are: picking up an item or experience, a bow loosed, a chest opened, an anvil landing or used, drinking, a burp, a tool breaking, a lever or button, fire put out, the bobber's splash, small and big falls, flint and steel, and a barrel shut. The small pitch steps stay on top.
+- **Spot sounds from a direction** (`SpotSounds`, this pick went out with ImmersiveFX):
+  - Out under the sky in the woods by day, a woodpecker drums on a real trunk near you, with our own drumming sound (`tools/gen_spot_sounds.py`).
+  - At night by a swamp or river, frogs call from the water.
+  - A village you can't yet see is heard faintly from where its folk are.
+
+  Turn your head toward any of them and walk to it.
+- These were left out of #1303 and #1361. Built (`compileClientJava`); not played.
+- **Biome ambience is back** (Andy: "Bring it back"): AmbientSounds 6 and CreativeCore return to the pack (biome, cave, water and weather ambience). They had left for ImmersiveFX: Resurrected, which has since gone (build.gradle `packMods`, and they're no longer moved out of the CurseForge profile).
+
+## 0.22.98 (2026-11-13): left out of Picks 5: the pitchfork
+
+- **Pitchfork** (`armory/Armory`, `tinkering/WeaponParts` kind `pitchfork_tines`): a farm tool forged at the Tool Station from two ingots of tines and a rod. It cuts hay, leaves and undergrowth fast, is held back and thrown with the existing throwing system (`throwing(...)`), and is spent when thrown unless the thrower picks it up; never free. Added to the swords tag.
+- Art by script (`tools/left_out_assets.py`): the item sprite, model and the tines part in stone and iron; lang in `left_out_misc.json`.
+- Built (`compileJava`); not played.
+
+## 0.22.99 (2026-11-13): Hardrock parts left out: rivers, floods, balloon, hammock, rumours
+
+- **Rivers**: `RiverRun` gives still river water a downstream flow; `RiverIce` freezes rivers in the cold from the banks and lets floes drift downstream carrying what stands on them; they thaw when it warms. Our own version of the Dynamic Waters idea (its source was not reachable, so nothing is ported).
+- **Floods**: `Floods` lets a block broken beside a small water body (up to 360 sources) drain it downhill for a while.
+- **Hot air balloon** (`HotAirBalloon`, craftable): burner on jump, vent on back, fuel from coal, logs, planks or sticks; not steerable, it drifts on a wind that differs at each height. New burner sound `rough.balloon.burner`.
+- **Hammock** (`Hammock`, craftable): hung between two anchors, sleeps through the night, never sets spawn.
+- **Rumours** (`VeinRumours`): village masons sell a paper rumour or a vein map pointing at a nearby iron, copper, gold or silver vein.
+- JEI pages for sleeping bag, hammock, paraglider, balloon, river ice and rumours, and (Andy: "They all need jei info") for dogs that learn (on the bone) and washing off the smell (on the water bucket and cauldron). Lang part `left_out_hardrock.json`.
+Built (`compileJava`); not played.
+
+## 0.22.100 (2026-11-13): Stumps crust over, after a long bleed; loose advancements go into the acts
+
+- Andy (2026-11-12): stumps "crust over after a while but you bleed longer so you might die". A severed stump still bleeds hard, and now crusts over by itself after 90 seconds, about 22 health later, so an untended stump can still kill. Cautery closes it at once, as before (`Bleeding.STUMP_CRUST_TICKS`).
+- Built (`compileJava`); not played.
+- **Advancements**: Home Cooking, Forged, Executioner and First Insight now sit in Act I, and Cast Off (with the whale) in Act II, instead of hanging off the root (Andy: "if they make sense").
+- **Divine-born fists** (Andy: "They can train their fists to deal more damage"). Every bare-handed blow a Divine-born lands is practice. Their fists rank up five times (60, 200, 450, 850 and 1,400 blows), each rank adding 12% damage, so a master's punch does 60% more (`DivineSense.fists`).
+- **Cut marks on every hit and every body** (Andy: "It should effect all 3 and be visible on everyone, mobs and players humanoid and otherwise"). Every hit that lands now leaves its mark, however light, not only hits of a heart or more (`WoundMarks.MARK_FROM`). Bloodless bodies (skeletons, golems and the like) now take cuts, rakes and bruises too, drawn as dark chips and cracks instead of blood, and they never drip; before, only fire, lightning and ki marked them.
+
+## 0.22.101 (2026-11-13): Diamond and netherite only from the old world's chests
+
+- Andy's answer on the left-out page (2026-11-12): "They are leftover from the old world when they were abundant so you'll strictly find them in chests, more so in the nether."
+- No diamond ore or ancient debris is laid in new chunks any more (the 1-in-900 diamond pocket and 1-in-1200 debris vein are gone). Diamonds turn up in old Overworld chests (dungeons, mineshafts, strongholds, desert and jungle temples, buried treasure, wreck treasure, mansions, ancient and End cities): 8% for one, a little over 3% for a second. They turn up more often in the Nether's (fortresses, bastions, ruined portals): 25% for one, 10% for a second, 4% for a third, and a netherite scrap at 10%. This is on top of what vanilla puts in those chests. JEI pages on the diamond and the netherite scrap say where to look (`BigVeins`).
+- Built (`compileJava`); not played.
+
+## 0.22.102 (2026-11-13): Left out of older PRs: wounds and the downed
+
+- **Back on your feet by a fire** (Andy: "this should work to get you back on your feet"). Lying downed and still within 3 blocks of a lit campfire, your clock is held (no bleeding out toward passing out), the pain eases and every 3 s the worst part mends a little, to the 60% self-care cap and never a bone, until nothing keeps you down and sneak gets you up. Passed out by the fire (not bled dry), you come round after a minute. Not while carried, in water or knocked out (`Resting.downed`).
+- **The getup is keyframed in GeckoLib format** (Andy: "revisit the getup animation with gecko lib"). The rise from downed is `geckolib/animations/entity/player_getup.animation.json` (the `getup` animation: `root` x is how far the body is turned up, then head, arms and legs), so it opens and edits in Blockbench. `KeyframeClip` reads it (linear and catmull-rom keys) and `CrawlPose` plays it; without the file the old curves stay.
+- **Lasting scars show on the body** (Andy: "can we make them visible?"). Painted into the skin with the wound marks, the same place every time: burns as shiny, puckered pink patches on the right arm, left cheek and a flank; frostbite as grey-blue finger ends and toes; lightning as a branching fern from the right shoulder down the arm and over the chest; wasting as hollow eyes and ribs showing; crushed ribs as an old yellowed dent on the left side; a lost eye (carved out or struck out) as a dark scarred socket. Weak lungs are inside and don't show.
+- **No armour repairs mid-fight at the grindstone or in the crafting grid** (two worn pieces put together), as at the anvil: the mended piece can't be taken from the result slot till the fight is over (`ArmourWearSlotMixin`).
+- **Letting go of attack stops the symbiote's execution** before its killing blow, sparing them (the client sends the release; `WebExecutions.letGo`).
+- **Wounds leftovers**: Kingdoms' Last Stand never turns away a death you gave up to (the `jaymospowers.finishing` tag while it's let through); food's healing no longer burns hunger when nothing may heal (a broken part held at its cap: `Wounds.canHealMore`); a broken leg stops the sprint on your own client too, not only the server (`Breaks.NO_SPRINT`, `BrokenLegSprintMixin`).
+- **Smog's clean-air cost is built**: while the smog holds you and you stand in clean open air (high up, no smoke about), you don't heal naturally there, from full hunger or (with Kitchen) from meals. Powers tags the player `jaymospowers.smog` while the smog holds them and `jaymospowers.clean_air` while they stand in clean air, for Kingdoms and Kitchen to read.
+- **Overclock's afterimages clone the runner** (Andy: "it should clone them"): armour, held items, capes and worn layers are drawn on each afterimage, tinted and fading with it; the Chrono's decoys wear them too (`GhostCollector`).
+- **The Frost Beam's arm points along it** (Andy: "use the proper modeling"): while a Frost-born's beam is out, their right arm is held straight out along their look for everyone (synced `FrostBeam.BEAMING`), and in first person the hand points it with a slight cold tremble.
+- **A swallowed power is whole on the client** (Andy: "fix that"): the swallowed power is synced, its HUD block sits over your own power's with a badge naming it and its key, its client half ticks and hears its key (so its visuals and charge-ups show), and every check for a power (`Powers.has`) counts a swallowed one.
+- **Rime walks on powder snow**, as a snow golem does; **Blight's Rot Touch** opens a bleeding, dirty wound on the body as well as withering.
+- **The Z Fighter HUD editor** moves and scales the Ki Wave charge, the Spirit Bomb bar and the scouter panel about where the HUD zones really put them (it used their old fixed spots).
+- **Escort side jobs** (Andy: "propose some"; the four proposed), from masters and the Keeper beside the old three kinds, one at a time, 220 TP each, and only with Jaymo's Kingdoms and MCA (the one in your charge is an MCA villager): walk a **courier** to the next town while the Ash Rival's lackeys jump you partway; take a **pupil** to the nearest Aether monolith (else the Tower) and keep the night's monsters off them from dusk to dawn; see a **trader and her pack mule** to the next town past a **Giant asleep** by the road (sprint near it or strike it and it wakes); **carry a fallen fighter** from out in the wild back to the master. A ward who dies or is lost, or three days gone, fails the job (`ZFighterEscorts`).
+- **Hands to the face for every mask** (Andy: "they all need an animation removing the mask too"). The mask key now lifts both hands to the face first, and the mask comes off (or goes on) when they get there, then they come away: a costume's head piece or hood, a cloak's hood, a Rig Helm's faceplate, the symbiote's mask, and (with Kingdoms) a school mask. Everyone sees it (`MaskMotion`, `MaskPose`).
+- Tinkering routes for the tools #364 left on grid recipes. They're now put together at the Tool Station from Tinkering parts plus a plain bit or two, and their grid recipes are dropped by what they make. Only the shears, flint and steel, and the flint tools (the flint knife among them, a first tool) stay in the grid.
+  - Kitchen's chopper: metal broad axe head, wooden tough handle, wooden plate and a lead.
+  - Kitchen's manual chopper: metal broad blade, wooden plate and a shaft.
+  - Rolling pin: wooden tough handle and two wooden handles.
+  - Ploughs: a metal plate share, a wooden tough handle, a wheel and planks. The planks choose the plough's wood.
+  - Kitchen's cookware:
+    - cooking pot: two metal plates and a bowl;
+    - frying pan: metal plate and wooden handle;
+    - saucepan: metal plate, wooden handle and any binding;
+    - baking tray: one metal plate;
+    - kitchen knife: metal small blade, wooden handle and string.
+  - Kingdoms' hoof pick (metal pick head and a handle) and oar (wooden tough handle, wooden plate and a binding).
+  - Armory's bone knife: bone small blade, handle and string.
+  - Pantry for Blockheads' cookware:
+    - frying pan: metal plate and copper handle;
+    - pot: metal plate and a bucket;
+    - baking sheet: metal plate and paper;
+    - mixing bowl: wooden plate and wooden handle;
+    - artisan press: metal plate, wooden tough handle, an anvil and an iron chain.
+  - MCA's kit:
+    - comb: metal plate and iron bars;
+    - needle and thread: metal arrow head and string;
+    - whistle: metal handle and a gold block;
+    - villager tracker: rose gold plate, compass and eye of ender.
+  - Naturalist's capture net (wooden tough handle and two string bindings) and whistle (copper handle and string).
+  - Nature's Compass: metal plate, compass and a sapling.
+  - Traveler's Tool Belt's first belt: two leather bindings and a metal one. Its upgrades are the mod's own.
+  - WeaponMod's fire rod: wooden handle and a torch.
+  - All of them show in JEI.
+- F5 already toggles only first and third person; the front camera moves to F7 (from F6) and Simple Voice Chat's menu to F6, moved once per install; our shoulder view is unchanged.
+- Chrono's echo is a mimic now: it wears its owner's face while it walks their routes and does their work, but when it fights the face splits and it shows its true form (Prometheus's Mimic model and animations), and it keeps that form until it has had nothing to fight for a few seconds. Its blows, flinches and death play on the true form.
+- The Kingdoms harpoon is built at the Tool Station from a metal arrow head, a wooden tough handle and a lead; its grid recipe is gone. The spike drill is built from a copper plate and a copper tough handle, with three Impaler spikes and redstone.
+- Built; not played.
