@@ -250,6 +250,8 @@ public final class BlastGore {
 			chance *= Dismember.RUBBER_SEVER_SCALE;
 		}
 		chance *= com.jaymospowers.core.wounds.WillSkill.severScale(by, entity);
+		// small bodies lose limbs to a blast more often too
+		chance *= Dismember.smallScale(entity);
 		return Math.min(1.0F, chance);
 	}
 
