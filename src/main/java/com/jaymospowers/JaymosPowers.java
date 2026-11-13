@@ -93,6 +93,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.tinkering.ranged.ArrowHeads.init();
 		com.jaymospowers.core.BeamClash.init();
 		com.jaymospowers.core.SpellBeam.init();
+		com.jaymospowers.core.Lens.init();
+		com.jaymospowers.core.BeamScars.init();
 		com.jaymospowers.core.BlowClash.init();
 		com.jaymospowers.core.Impacts.init();
 		// a hungry stomach growls, a thirsty throat swallows dry, and those near hear it

@@ -4,6 +4,9 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"GravityLivingEntityRendererMixin",
+		"LensGameRendererMixin",
+		"LensPostChainAccessor",
+		"LensPostPassAccessor",
 		"GravityModelFeatureRendererMixin",
 		"GravityReelScrollMixin",
 		"GravityStunInputMixin"

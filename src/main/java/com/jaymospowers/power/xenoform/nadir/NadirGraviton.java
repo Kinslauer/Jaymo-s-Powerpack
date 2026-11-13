@@ -50,6 +50,8 @@ public final class NadirGraviton {
 
 	public static final int HORIZON_HOLD = 20;
 	public static final double HORIZON_REACH = 32.0, HORIZON_PULL = 16.0, HORIZON_CORE = 4.0;
+	/** How far round the Event Horizon the light is seen to bend (blocks). */
+	public static final float HORIZON_LENS = 8.0F;
 	/** It opens over this many ticks, holds this long, then collapses. */
 	public static final int HORIZON_OPEN = 20, HORIZON_HOLD_TICKS = 120, HORIZON_COOLDOWN = 900;
 	public static final float HORIZON_DAMAGE = 1.5F, COLLAPSE_DAMAGE = 12.0F;
@@ -136,6 +138,7 @@ public final class NadirGraviton {
 		st.horizon = at;
 		st.horizonAt = level.getGameTime();
 		st.horizonNext = level.getGameTime() + HORIZON_COOLDOWN;
+		com.jaymospowers.core.Lens.open(level, at, HORIZON_LENS, HORIZON_OPEN + HORIZON_HOLD_TICKS);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 1.5F, 0.4F);
 	}
 
@@ -286,6 +289,7 @@ public final class NadirGraviton {
 		ServerLevel level = player.level();
 		Vec3 c = st.horizon;
 		st.horizon = null;
+		com.jaymospowers.core.Lens.close(level, c);
 		List<Entity> caught = level.getEntities(player, new AABB(c, c).inflate(HORIZON_PULL), e -> e.isAlive() && !e.isSpectator());
 		for (Entity e : caught) {
 			if (e instanceof ItemEntity || e instanceof ExperienceOrb) {

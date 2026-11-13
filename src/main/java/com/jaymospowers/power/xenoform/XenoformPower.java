@@ -202,6 +202,9 @@ public final class XenoformPower implements Power {
 		/** Pyre: ticks left of the magma trail; the jet is held. */
 		public int trailTicks;
 		public boolean jet;
+		/** Pyre: ticks left of the Fire Dive (the rise first), and the way it is going. */
+		public int diveTicks;
+		public double diveX, diveY, diveZ;
 		/** Velox: Velocity is switched on; the chain strike's targets and its clock. */
 		public boolean velocity;
 		public final List<Integer> chain = new ArrayList<>();
@@ -423,6 +426,7 @@ public final class XenoformPower implements Power {
 			leaping = false;
 			leapTicks = 0;
 			trailTicks = 0;
+			diveTicks = 0;
 			jet = false;
 			velocity = false;
 			chain.clear();

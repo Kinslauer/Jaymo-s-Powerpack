@@ -248,9 +248,12 @@ public final class ZFighterWaveBeam {
 				if (hit.getType() != HitResult.Type.MISS) {
 					next = wave.start.distanceTo(hit.getLocation());
 					done = true;
+					com.jaymospowers.core.BeamScars.touch(player, hit, spec.radius());
 				}
 			}
 			wave.length = next;
+			// a wave skimming soft ground leaves a groove along its path
+			com.jaymospowers.core.BeamScars.under(player, wave.start.add(wave.dir.scale(next)), spec.radius());
 			done |= wave.length >= spec.range() - 1.0E-3 || wave.age >= wave.maxAge;
 		}
 		Vec3 head = wave.head();
