@@ -407,3 +407,31 @@ PC Claude's part (ready to start):
 - [ ] 5. Append to `Decisions.md` that Andy added AMD Token Lab as the last backup, with the date. Once a week,
       write points left here; if more than half is gone before Dec 1, tell Andy in 2 lines.
 - [ ] If anything breaks: restore the backup config and restart the gateway.
+
+**Steps 2-5 done Nov 13, 7:10 AM (PC Claude), on Andy's "yes":**
+- [x] 2. Backups `config.yaml.2026-11-13-amd.bak` in `E:/hermes/backups/` and in `backups/` of quill, hermes-modeller,
+  hermes-a, hermes-b and hermes-fixer. **No `providers:` entry**: the bot profiles have no `providers:` block, so a
+  named provider in the root file wouldn't reach them. Each chain entry instead carries its own
+  `provider: custom`, `base_url: https://api.tokenlab.amd.com/v1` and `key_env: AMD_API_KEY` (Hermes reads these per
+  entry: `hermes_cli/fallback_config.py:resolve_entry_api_key`, `agent/route_binding.py`). Still one `providers:` block.
+  Profiles don't read the root `.env`, so the key line was copied by script, never printed, into the `.env` of
+  those five profiles.
+- [x] 3. `hermes fallback list` (AMD after OpenRouter and Gemini, as planned):
+  YOUTH = Super -> Lightning -> Inkling -> Cohere -> Gemini -> AMD Qwen -> AMD DeepSeek.
+  Quill = Super -> Lightning -> Ultra -> Inkling -> Cohere -> Gemini -> AMD Qwen -> AMD DeepSeek.
+  Prometheus = Super -> Gemini -> Lightning -> Inkling -> Cohere -> AMD Qwen -> AMD DeepSeek.
+  Apollo (Ultra), Bacchus (Super), Hephaestus (Lightning) = primary -> Inkling -> Cohere -> Gemini -> AMD Qwen -> AMD DeepSeek.
+  Thinking per model in `agent.reasoning_overrides` of every config: `Qwen3.8-27B: low`, `DeepSeek-V4-Flash: none`.
+  DeepSeek would otherwise inherit the global `medium`, which switches its thinking on: 22 s to first token instead
+  of 3 s. A 429 moves to the next entry at once ("Eager fallback"); AMD is last, so nothing comes after it.
+- [~] 4. Gateway restart not needed: chains, `.env` and `reasoning_overrides` are re-read per agent/fallback
+  (`gateway/run_config_loaders.py:581`, `chat_completion_helpers.py:_reresolve_fallback_reasoning_config`).
+  The `hermes chat --oneshot` test still fails with "gateway_other_session" (gateway in session 0). Instead, Hermes's
+  own code was run from each profile's home: key resolved (`tl-`), client built on the Token Lab URL, thinking
+  low/off as set, and one real call through that client with a `read_file` tool came back as a correct tool call
+  (7.2 s, 311 in / 59 out, $0.000015). Cost per real bot call: ~$0.004 on Qwen at ~100k tokens (from `usage.cost`
+  at the listed price). Budget header to watch: `x-ratelimit-remaining-user-budget-usd`. First real proof will be
+  the next time everything above AMD fails: look for `via custom` with `tokenlab` in `logs/agent.log`.
+- [x] 5. In `Decisions.md` (Nov 13, 7:09 AM). Points left after all tests: ~$9.9999 of $10.
+- [ ] Weekly: write points left here (`py -3 -I E:/hermes/scripts/amd_check.py Qwen3.8-27B` prints the budget
+  header for ~$0.00002); if more than $5 is gone before Dec 1, tell Andy in 2 lines.
