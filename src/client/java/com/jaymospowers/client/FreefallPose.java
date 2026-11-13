@@ -42,6 +42,12 @@ public final class FreefallPose {
 			state.setData(KEY, null);
 			return;
 		}
+		com.jaymospowers.power.wind.WindMoves.Move move = player.getAttached(com.jaymospowers.power.wind.WindMoves.MOVE);
+		if (move != null && move.kind() == com.jaymospowers.power.wind.WindMoves.DIVE) {
+			// a Spiral Dive has its own body (WindMovePose): head first and spinning, not this fall's slow tip onto the belly
+			state.setData(KEY, null);
+			return;
+		}
 		float falling = (float)(player.yo - player.getY());
 		float strength = Mth.clamp((falling - START) / (FULL - START), 0.0F, 1.0F);
 		// (0.14.3) and a freerunner with Leap of Faith, falling looking down

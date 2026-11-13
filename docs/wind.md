@@ -716,9 +716,11 @@ Jung's move: a way down and a way to clear a landing, not a damage move.
   packet, key or client code. For a fully mastered Wind user this takes one thing away: a Tempest Kick aimed steeply
   down from 6 or more blocks up is now the dive.
 - **The plunge:** the server sets your speed every tick, down from `DIVE_SPEED_START` 0.7 to `DIVE_SPEED` 1.6 b/t
-  (`DIVE_ACCEL` 0.09 a tick), with `STEER` 0.45 of your aim's sideways heading. You spin (the Zephyr's spin pose,
-  `WindMoves.SPIN`, renewed while the dive lasts) and two strands of cloud wind round you, with a breeze whirl every
-  10 ticks. It runs at most `MAX_TICKS` 100.
+  (`DIVE_ACCEL` 0.09 a tick), with `STEER` 0.45 of your aim's sideways heading. You go down head first, spinning
+  about your own length like a drill, arms together ahead and legs together behind (its own pose, `WindMoves.DIVE`,
+  drawn by `WindMovePose`: `DIVE_TIP` 172 degrees over, `DIVE_SPIN` 24 degrees a tick, tipped over in `DIVE_EASE` 6
+  ticks). The slow belly-down tip a falling Wind user gets (`FreefallPose`) is off while it lasts. Two strands of
+  cloud wind round you, with a breeze whirl every 10 ticks. It runs at most `MAX_TICKS` 100.
 - **Pulling out:** taking flight again (R) later than `FLIGHT_GRACE` 10 ticks into the dive ends it with no ring.
   Water, a mount, being picked up or going down end it too.
 - **The landing:** a ring of wind runs out along the ground. By how far you fell (full at `FULL_DROP` 30 blocks):
@@ -736,6 +738,10 @@ Jung's move: a way down and a way to clear a landing, not a damage move.
 - There is no HUD chip for its cooldown yet.
 
 ### Testing (Spiral Dive)
+
+0. F5, then dive: within a third of a second you are upside down, head toward the ground, arms pointing down past
+   your head, spinning about your own length; never flat on your belly. A second player sees the same. First person
+   is unchanged. Out of wind flight (R, then dive): the same, with no moment lying flat first.
 1. `/power set @s wind`, survival. Fly up 30 blocks or more, look straight down and tap X: the flight drops, you plunge
    spinning with the cloud spiral round you, and land in a ring of wind. You can't walk or jump for about 1.5 s.
 2. Zombies near the landing: thrown outward and up, a little damage. A fire near the landing goes out.
