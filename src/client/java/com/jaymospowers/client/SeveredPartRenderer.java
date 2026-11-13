@@ -150,14 +150,46 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		ModelPart root = renderer instanceof LivingEntityRenderer<?, ?, ?> living ? living.getModel().root() : null;
 		ModelPart own = root != null ? Dismembered.limb(root, part) : null;
 		Vector3f mid = own != null ? middle(root, own) : null;
+		Float geoHeight = mid == null ? geoHeight(renderer, bodyState, part) : null;
 		if (mid != null) {
 			// drawn turned round (facing 0), flipped and lifted: model units to blocks from its feet
 			state.centre.set(mid.x / 16.0F, 1.501F - mid.y / 16.0F, -mid.z / 16.0F).mul(scale);
+		} else if (geoHeight != null) {
+			// a GeckoLib mob's bone (pivots measured up from its feet): at that height, on its middle line
+			state.centre.set(0.0F, geoHeight / 16.0F * scale, 0.0F);
 		} else {
 			state.centre.set(0.0F, entity.bodyHeight() * 0.85F, 0.0F);
 		}
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
+	}
+
+	/**
+	 * How high up a GeckoLib mob's (an Imp's) bone for {@code part} sits as it rests (model units from its feet): halfway
+	 * from the bone's pivot (a shoulder, a hip, the neck) to its first child's (an elbow, a knee), or a head's pivot a few
+	 * units up. Null for any other renderer, or a model without that bone.
+	 */
+	private static @Nullable Float geoHeight(EntityRenderer<?, ?> renderer, EntityRenderState bodyState, int part) {
+		if (!(renderer instanceof com.geckolib.renderer.GeoEntityRenderer<?, ?> geo) || !((Object)bodyState instanceof com.geckolib.renderer.base.GeoRenderState geoState)) {
+			return null;
+		}
+		try {
+			com.geckolib.cache.model.BakedGeoModel model = geo.getGeoModel().getBakedModel(geo.getGeoModel().getModelResource(geoState));
+			for (String name : Dismembered.names(part)) {
+				var found = model.getBone(name);
+				if (found.isPresent()) {
+					com.geckolib.cache.model.GeoBone bone = found.get();
+					if (part == com.jaymospowers.core.Dismember.HEAD) {
+						return bone.pivotY() + 4.0F;
+					}
+					com.geckolib.cache.model.GeoBone[] children = bone.children();
+					return children.length > 0 ? (bone.pivotY() + children[0].pivotY()) / 2.0F : bone.pivotY() - 3.0F;
+				}
+			}
+		} catch (RuntimeException e) {
+			// a model that isn't loaded: the middle of the body
+		}
+		return null;
 	}
 
 	/** The middle of a part of the model as it rests (model units), from its pivot and its box. */

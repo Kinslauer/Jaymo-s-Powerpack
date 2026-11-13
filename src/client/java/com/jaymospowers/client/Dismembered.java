@@ -197,6 +197,51 @@ public final class Dismembered {
 	}
 
 	/**
+	 * The same on a GeckoLib model (a Kingdoms Imp), whose bones carry the game's names: in this render pass, the lost
+	 * parts' bones (and what hangs off them) aren't drawn, or for a severed part only its bones are. Runs as the pass's
+	 * last bone update, after the renderer's own.
+	 */
+	public static void hideGeo(com.geckolib.renderer.base.RenderPassInfo<?> info) {
+		if (!((Object)info.renderState() instanceof EntityRenderState renderState)) {
+			return;
+		}
+		Integer only = renderState.getData(ONLY);
+		Integer missing = renderState.getData(MISSING);
+		if (only == null && missing == null) {
+			return;
+		}
+		info.addBoneUpdater((pass, snapshots) -> {
+			com.geckolib.cache.model.BakedGeoModel model = pass.model();
+			if (only != null) {
+				java.util.Set<com.geckolib.cache.model.GeoBone> keep = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+				for (String name : names(only)) {
+					model.getBone(name).ifPresent(bone -> keepWithChildren(bone, keep));
+				}
+				for (com.geckolib.cache.model.GeoBone bone : model.boneLookup().get().values()) {
+					if (!keep.contains(bone)) {
+						snapshots.get(bone).skipRender(true);
+					}
+				}
+				return;
+			}
+			for (int part : Dismember.PARTS) {
+				if ((missing & part) != 0) {
+					for (String name : names(part)) {
+						snapshots.ifPresent(name, bone -> bone.skipRender(true).skipChildrenRender(true));
+					}
+				}
+			}
+		});
+	}
+
+	private static void keepWithChildren(com.geckolib.cache.model.GeoBone bone, java.util.Set<com.geckolib.cache.model.GeoBone> keep) {
+		keep.add(bone);
+		for (com.geckolib.cache.model.GeoBone child : bone.children()) {
+			keepWithChildren(child, keep);
+		}
+	}
+
+	/**
 	 * Broken limbs (Wounds' broken parts, (0.14.2); before, Fractures') hang limp: an arm dangles at the side, a leg drags
 	 * straight, neither swings. (0.14.5) A splinted leg ({@code gait} under 1) only goes halfway there.
 	 */
