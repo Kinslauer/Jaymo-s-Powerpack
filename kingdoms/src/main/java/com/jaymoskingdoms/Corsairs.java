@@ -331,7 +331,12 @@ final class Corsairs implements Ship.Captaincy {
 			// bound somewhere: a merchantman to her harbour, a pirate to his cove's raid
 			double d = Math.sqrt(Raids.horizontal(ship.blockPosition(), crew.bound));
 			if (crew.side == Crew.Side.MERCHANT && d < ARRIVE) {
-				Navies.arrived(level, ship, crew);
+				if (BlossomTraders.is(crew)) {
+					// a blossom trader home at the harbour she trades at: she lies there again
+					BlossomTraders.arrived(level, ship, crew);
+				} else {
+					Navies.arrived(level, ship, crew);
+				}
 				return;
 			}
 			crew.mode = crew.side == Crew.Side.MERCHANT ? "voyage" : "raid";

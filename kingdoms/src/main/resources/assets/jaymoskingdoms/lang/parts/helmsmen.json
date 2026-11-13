@@ -54,5 +54,16 @@
   "talk.jaymoskingdoms.gossip.east.sailor.2": "You want to go east? Find a hand who's made the crossing. There's a few of us about the harbours. No chart will take you.",
   "talk.jaymoskingdoms.gossip.east.sailor.3": "The traders with the fan sails pay in steel and take their water on at the fish folk's islands. I've watched them do it. They don't linger.",
   "talk.jaymoskingdoms.gossip.east.sailor.4": "A mate of mine followed one of them home. Came back with a cask of rice wine and a bow in his manners. Wouldn't sign on with us again.",
-  "talk.jaymoskingdoms.gossip.east.sailor.5": "There's a navy out there, in the far east water. Hails you polite, with the guns run out. So I heard. I've not been so far myself."
+  "talk.jaymoskingdoms.gossip.east.sailor.5": "There's a navy out there, in the far east water. Hails you polite, with the guns run out. So I heard. I've not been so far myself.",
+  "gui.button.act.passage": "Buy Passage",
+  "talk.jaymoskingdoms.blossom_trader.captain": "%s. We trade here a day, then go home. Home is east. Blow a horn if you want my hold opened.",
+  "talk.jaymoskingdoms.blossom_trader.ask": "You wish to see where we come from. It is two days and two nights. %s in coin, and you bring your own food. We sail at once.",
+  "talk.jaymoskingdoms.blossom_trader.ask.home": "Back over the water to your own harbour. Two days and two nights. %s in coin. We sail at once.",
+  "talk.jaymoskingdoms.blossom_trader.option.pay": "Pay for the crossing (%s)",
+  "talk.jaymoskingdoms.blossom_trader.paid": "Then you are my guest. Find a berth. There is nothing to see until the fish folk's islands.",
+  "talk.jaymoskingdoms.blossom_trader.paid.home": "Then you are my guest again. Find a berth.",
+  "talk.jaymoskingdoms.blossom_trader.landfall": "Mohknee. We lie here until this hour tomorrow. Go ashore if you wish.",
+  "talk.jaymoskingdoms.blossom_trader.home": "Your harbour. We lie here a day, then east again.",
+  "command.jaymoskingdoms.blossomtrader.none": "No realm harbour is loaded near enough, or there was no open water by it.",
+  "command.jaymoskingdoms.blossomtrader.done": "%1$s lies off %2$s's harbour at %3$s, %4$s."
 }

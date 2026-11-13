@@ -59,6 +59,8 @@ public final class Crew {
 	public int boundFor = -1;
 	/** An escort quest she's on ("" none). */
 	public String quest = "";
+	/** What else she is ("" nothing): a blossom trader from over the eastern sea, lying to trade or carrying passengers ({@code BlossomTraders}). */
+	public String flag = "";
 	/** Her hold's chest (its place in her frame, packed; 0 with none is never a chest: the keel's middle). */
 	public long hold;
 	/** Gun (packed place) → its gunner. */
@@ -134,7 +136,7 @@ public final class Crew {
 	}
 
 	private record Saved(String side, int faction, String name, Optional<UUID> captain, BlockPos home, Optional<BlockPos> bound, int boundFor,
-		String quest, long hold, Map<String, String> gunners, Map<String, List<ItemStack>> plunder, long born, String mode) {
+		String quest, long hold, Map<String, String> gunners, Map<String, List<ItemStack>> plunder, long born, String mode, String flag) {
 	}
 
 	public static final Codec<Crew> CODEC = RecordCodecBuilder.<Saved>create(i -> i.group(
@@ -150,7 +152,8 @@ public final class Crew {
 			Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("gunners", Map.of()).forGetter(Saved::gunners),
 			Codec.unboundedMap(Codec.STRING, ItemStack.OPTIONAL_CODEC.listOf()).optionalFieldOf("plunder", Map.of()).forGetter(Saved::plunder),
 			Codec.LONG.optionalFieldOf("born", 0L).forGetter(Saved::born),
-			Codec.STRING.optionalFieldOf("mode", "patrol").forGetter(Saved::mode))
+			Codec.STRING.optionalFieldOf("mode", "patrol").forGetter(Saved::mode),
+			Codec.STRING.optionalFieldOf("flag", "").forGetter(Saved::flag))
 		.apply(i, Saved::new)).xmap(Crew::of, Crew::saved);
 
 	private static Crew of(Saved s) {
@@ -174,6 +177,7 @@ public final class Crew {
 		}
 		c.born = s.born();
 		c.mode = s.mode();
+		c.flag = s.flag();
 		return c;
 	}
 
@@ -183,6 +187,6 @@ public final class Crew {
 		Map<String, List<ItemStack>> loot = new HashMap<>();
 		this.plunder.forEach((k, v) -> loot.put(k.toString(), List.copyOf(v)));
 		return new Saved(this.side.id(), this.faction, this.name, Optional.ofNullable(this.captain), this.home, Optional.ofNullable(this.bound),
-			this.boundFor, this.quest, this.hold, guns, loot, this.born, this.mode);
+			this.boundFor, this.quest, this.hold, guns, loot, this.born, this.mode, this.flag);
 	}
 }

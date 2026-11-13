@@ -83,6 +83,9 @@ public final class ShipTalk {
 		} else if (captain && SeaTrade.talk(level, player, speaker, ship)) {
 			// (hove to for a hail: he opens his hold)
 			return;
+		} else if (captain && BlossomTraders.is(ship.crew)) {
+			// a trader from over the eastern sea: where she's from he doesn't say
+			words = Component.translatable("talk.jaymoskingdoms.blossom_trader.captain", name);
 		} else if (captain && side == Crew.Side.MERCHANT) {
 			Faction from = Factions.get(level.getServer(), ship.crew.faction);
 			Faction to = ship.crew.boundFor < 0 ? null : Factions.get(level.getServer(), ship.crew.boundFor);
