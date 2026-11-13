@@ -577,6 +577,14 @@ A flower or a candle given to one is enough: it thanks whoever came and goes to 
 after the third night just the same. Nobody alive says why they wait; the ghosts only say things like "I keep waiting
 to be called."
 
+**(new) Out of the body** (models thread; Andy, 2026-11-12: "the ghost should also be how the player character appears
+while in limbo, so you can kind of haunt your friends"). The buried are not the only ones who stand outside themselves.
+Someone left for dead, not yet dead and not yet back, comes loose from the body the same way: pale blue and see-through,
+a hand off the ground, able to drift a little way from where they lie and no further. They can touch nothing and nothing
+touches them; beasts and monsters don't see them. The living do, and hear them, thin and far off, as if from the bottom
+of a well. Carry the body and the ghost comes after it. The moment the body wakes, or is brought round, there is no ghost.
+Nobody is told this: a player finds it out by being left for dead, and their friends by seeing who is standing over them.
+
 **The Skeleton Lord's curse.** His laughter settles in the bones of those he strikes; die with it in you and you
 rise as one of his, light, "with very little left of you to feel". Gold burns it out, as it burns out the blight.
 
