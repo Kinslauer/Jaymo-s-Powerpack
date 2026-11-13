@@ -3894,3 +3894,13 @@ enter limbo if they don't come to."
 - **Returning thrown weapons** (`armory/ThrownWeapon`): a thrown weapon a Tinkerer has given the returning infusion flies back to the hand.
 - **Limbo ghost** (`core/wounds/OutOfBody`): a player waiting in Limbo is seen by everyone else as the same ghost a left-for-dead player is, at the spot they watch from.
 - Built; not played.
+
+## 0.22.107 (2026-11-13): The clinging coil and the deep tooth
+
+- **Clinging Coil** (charm slot, rare): the dried tip of an arm on a cord, left by the thing under the wreck
+  (Kingdoms). It does nothing until you would die under water, of drowning or of anything else. Then it is used up
+  instead: you are left on 4 hearts with a full breath, half a minute of water breathing, a little regeneration and a
+  shove toward the surface.
+- **Deep Tooth:** one of the hooks from its arms. A plain item for now; it becomes a Tinkers material with dragon
+  bone in the next patch.
+- Both have a JEI page saying where they come from.
