@@ -55,7 +55,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class WindMoves {
 	/** The pose kinds in {@link Move}. */
-	public static final int GATHER = 0, PUSH = 1, ARMS_OUT = 2, SPIN = 3, LANCE = 4;
+	public static final int GATHER = 0, PUSH = 1, ARMS_OUT = 2, SPIN = 3, LANCE = 4, DIVE = 5;
 
 	/** A pose under way: which, and the game time it began. Synced to everyone. */
 	public record Move(int kind, long start) {
@@ -74,6 +74,8 @@ public final class WindMoves {
 
 	/** How long the release poses hold (ticks): the push and uppercut, arms out after the barrier, the spin, the lance's throw. */
 	public static final int PUSH_TICKS = 12, ARMS_OUT_HOLD = 14, SPIN_TICKS = 40, LANCE_WINDUP = 24, LANCE_THROW = 8;
+	/** The Spiral Dive's pose holds until the dive ends it ({@code WindSpiralDive}); this is only the longest it could last (ticks). */
+	public static final int DIVE_TICKS = 400;
 	/** The push lands at this tick of the push pose and the uppercut sends the gust off at this one. */
 	public static final int PUSH_HIT = 4, UPPERCUT_HIT = 8;
 
@@ -132,6 +134,7 @@ public final class WindMoves {
 			case ARMS_OUT -> ARMS_OUT_HOLD;
 			case SPIN -> SPIN_TICKS;
 			case LANCE -> LANCE_WINDUP + LANCE_THROW;
+			case DIVE -> DIVE_TICKS;
 			default -> -1;
 		};
 	}
