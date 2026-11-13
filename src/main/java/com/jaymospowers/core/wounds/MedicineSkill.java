@@ -45,7 +45,12 @@ public final class MedicineSkill {
 	/** The scoreboard tag on a player who just finished a treatment (Kingdoms' {@code Skills.TREATED_TAG}). */
 	public static final String XP_TAG = "jaymospowers_treated";
 
+	/** The Healer feat (Kingdoms' fifth edition picks): bandages and rags heal this share more, every treatment goes this share quicker. */
+	public static final float HEALER_DRESSING = 0.5F, HEALER_QUICKER = 0.2F;
+
 	private static final @Nullable Method KINGDOMS_RANK;
+	/** Kingdoms' {@code Feats.has(Player, String)}: null without Kingdoms or on an older one. */
+	private static final @Nullable Method KINGDOMS_FEAT;
 	/** (0.20.8) Kingdoms' {@code Patrons.blessing(Player, String)}: null without Kingdoms or on an older one. */
 	private static final @Nullable Method KINGDOMS_BLESSING;
 
@@ -65,6 +70,15 @@ public final class MedicineSkill {
 			}
 		}
 		KINGDOMS_RANK = rank;
+		Method feat = null;
+		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
+			try {
+				feat = Class.forName("com.jaymoskingdoms.Feats").getMethod("has", Player.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				feat = null;
+			}
+		}
+		KINGDOMS_FEAT = feat;
 		KINGDOMS_BLESSING = blessing;
 	}
 
@@ -83,6 +97,18 @@ public final class MedicineSkill {
 		}
 	}
 
+	/** Whether {@code healer} has taken the Healer feat. */
+	static boolean healer(@Nullable LivingEntity healer) {
+		if (KINGDOMS_FEAT == null || !(healer instanceof Player player)) {
+			return false;
+		}
+		try {
+			return (boolean) KINGDOMS_FEAT.invoke(null, player, "healer");
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.20.8) A blessing's strength for {@code healer} (a share, 0 to 1): 0 for anything but a player, or on any failure. */
 	static float blessing(@Nullable LivingEntity healer, String key) {
 		if (KINGDOMS_BLESSING == null || !(healer instanceof Player player)) {
@@ -97,12 +123,12 @@ public final class MedicineSkill {
 
 	/** How long {@code healer} takes over what takes {@code ticks} (Steady Hands, and (0.20.8) the Hearthkeeper's Gentle Hands), at least a tick. */
 	static int ticks(@Nullable LivingEntity healer, int ticks) {
-		return Math.max(1, Math.round(ticks * (1.0F - STEADY_HANDS_PER_RANK * rank(healer, "steady_hands")) * (1.0F - blessing(healer, "gentle_hands"))));
+		return Math.max(1, Math.round(ticks * (1.0F - STEADY_HANDS_PER_RANK * rank(healer, "steady_hands")) * (1.0F - blessing(healer, "gentle_hands")) * (healer(healer) ? 1.0F - HEALER_QUICKER : 1.0F)));
 	}
 
 	/** A bandage's or a rag's {@code heal}, tied by {@code healer} (Field Dresser). */
 	static float dressing(@Nullable LivingEntity healer, float heal) {
-		return heal * (1.0F + FIELD_DRESSER_PER_RANK * rank(healer, "field_dresser"));
+		return heal * (1.0F + FIELD_DRESSER_PER_RANK * rank(healer, "field_dresser") + (healer(healer) ? HEALER_DRESSING : 0.0F));
 	}
 
 	static boolean bonesetter(@Nullable LivingEntity healer) {

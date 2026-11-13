@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:warden",
+    "jaymoskingdoms:wraith",
+    { "id": "jaymoskingdoms:lich", "required": false },
+    { "id": "jaymoskingdoms:hag", "required": false }
+  ]
+}

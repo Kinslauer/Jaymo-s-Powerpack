@@ -231,6 +231,7 @@ public final class Money {
 		}
 		giveCoins(player, changeCoin, coinsLeft);
 		giveCoins(player, Currency.BIT, bitsLeft);
+		com.jaymoskingdoms.Lifestyle.spent(player, milli);
 		return true;
 	}
 

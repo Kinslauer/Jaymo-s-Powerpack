@@ -363,8 +363,9 @@ public final class Stomach {
 					if (next.size() < meals.size()) {
 						// (0.5.73) a meal wore off: its hearts that are still full stay, the empty ones are gone
 						float cap = foodCap(player);
-						float lost = Math.min(foodHealth(meals), cap) - Math.min(foodHealth(next), cap);
-						float stomachMax = STARTING_HEALTH + Math.min(foodHealth(next), cap);
+						float boost = mealBoost(player);
+						float lost = Math.min(foodHealth(meals) * boost, cap) - Math.min(foodHealth(next) * boost, cap);
+						float stomachMax = STARTING_HEALTH + Math.min(foodHealth(next) * boost, cap);
 						setLeftover(player, Math.min(leftover(player) + lost, player.getHealth() - stomachMax));
 					}
 					meals = List.copyOf(next);
@@ -386,7 +387,7 @@ public final class Stomach {
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		if (health != null) {
 			// Andy's TFC Hardrock picks: a balanced diet adds up to two hearts, one food group alone takes one off (FoodGroups)
-			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) + leftover(player), foodCap(player)) + FoodGroups.bonus(meals);
+			double bonus = STARTING_HEALTH - 20.0F + Math.min(foodHealth(meals) * mealBoost(player) + leftover(player), foodCap(player)) + FoodGroups.bonus(meals);
 			AttributeModifier current = health.getModifier(HEALTH_ID);
 			if (current == null || current.amount() != bonus) {
 				health.addOrUpdateTransientModifier(new AttributeModifier(HEALTH_ID, bonus, AttributeModifier.Operation.ADD_VALUE));
@@ -422,6 +423,26 @@ public final class Stomach {
 		} else {
 			player.setAttached(LEFTOVER, Math.min(amount, foodCap(player)));
 		}
+	}
+
+	private static final java.util.List<java.util.function.ToDoubleFunction<Player>> MEAL_BOOSTS = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	/** Other mods (by reflection): {@code boost} gives the factor on the health meals give each player, and the speed they mend (1 for none). */
+	public static void addMealBoost(java.util.function.ToDoubleFunction<Player> boost) {
+		MEAL_BOOSTS.add(boost);
+	}
+
+	/** The factor on the health {@code player}'s meals give: 1 unless another mod (a Chef's feat) says more. */
+	public static float mealBoost(Player player) {
+		float factor = 1.0F;
+		for (java.util.function.ToDoubleFunction<Player> boost : MEAL_BOOSTS) {
+			try {
+				factor *= (float) boost.applyAsDouble(player);
+			} catch (RuntimeException e) {
+				// a broken boost counts for nothing
+			}
+		}
+		return factor;
 	}
 
 	/** Health every meal adds together (a drink adds its own and makes the food count more). */
@@ -462,7 +483,7 @@ public final class Stomach {
 		if (now - LAST_HURT.getOrDefault(id, Long.MIN_VALUE / 2) < REGEN_DELAY) {
 			return;
 		}
-		float rate = regenRate(meals) * (player.entityTags().contains(UNPATCHED_TAG) ? UNPATCHED_REGEN : 1.0F);
+		float rate = regenRate(meals) * mealBoost(player) * (player.entityTags().contains(UNPATCHED_TAG) ? UNPATCHED_REGEN : 1.0F);
 		float progress = REGEN_PROGRESS.getOrDefault(id, 0.0F) + rate / REGEN_INTERVAL;
 		if (progress >= 1.0F) {
 			player.heal(1.0F);

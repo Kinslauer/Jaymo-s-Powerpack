@@ -34,6 +34,11 @@ public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
 	protected void init() {
 		super.init();
 		BaublesTab.add(this, true);
+		// the bonds: how many things you are bonded to, and a way to let one go
+		int used = this.minecraft != null && this.minecraft.player != null ? com.jaymospowers.baubles.Bonds.bonds(this.minecraft.player).size() : 0;
+		this.addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
+			Component.translatable("screen.jaymospowers.bonds.button", used, com.jaymospowers.baubles.Bonds.MOST),
+			b -> this.minecraft.gui.setScreen(new BondsScreen())).bounds(this.leftPos + 52, this.topPos + 62, 92, 14).build());
 	}
 
 	@Override

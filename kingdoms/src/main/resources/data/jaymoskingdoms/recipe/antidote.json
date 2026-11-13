@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:poison",
+  "ingredients": [
+    "minecraft:honey_bottle",
+    "minecraft:glistering_melon_slice",
+    "minecraft:glow_berries"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:antidote"
+  }
+}

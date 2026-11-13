@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "fed=0": {
+      "model": "jaymoskingdoms:block/slime_mould_hungry"
+    },
+    "fed=1": {
+      "model": "jaymoskingdoms:block/slime_mould_hungry"
+    },
+    "fed=2": {
+      "model": "jaymoskingdoms:block/slime_mould"
+    },
+    "fed=3": {
+      "model": "jaymoskingdoms:block/slime_mould"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+ "width": 64,
+ "height": 64,
+ "scale": 0.8,
+ "translucent": false,
+ "parts": [
+  {
+   "name": "arm",
+   "parent": null,
+   "pivot": [
+    0,
+    16,
+    0
+   ],
+   "box": [
+    -3,
+    -16,
+    -3,
+    5,
+    17,
+    5
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "crawl",
+   "rot": null
+  },
+  {
+   "name": "hand",
+   "parent": "arm",
+   "pivot": [
+    0,
+    -16,
+    0
+   ],
+   "box": [
+    -3,
+    -3,
+    -3,
+    7,
+    4,
+    5
+   ],
+   "uv": [
+    20,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  }
+ ]
+}

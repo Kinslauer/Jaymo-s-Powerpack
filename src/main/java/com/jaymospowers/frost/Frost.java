@@ -123,10 +123,16 @@ public final class Frost {
 	private static void world() {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("frozen_cave_patch"), FrostFeatures.FrozenCave.CODEC);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("thin_ice"), FrostFeatures.ThinIce.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("lake_crust"), FrostFeatures.LakeCrust.CODEC);
 		var cold = BiomeSelectors.foundInOverworld().and(BiomeSelectors.tag(ConventionalBiomeTags.IS_SNOWY)
 			.or(BiomeSelectors.tag(ConventionalBiomeTags.IS_ICY)));
 		BiomeModifications.addFeature(cold, GenerationStep.Decoration.UNDERGROUND_DECORATION, placed("frozen_cave_patch"));
 		BiomeModifications.addFeature(cold, GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placed("thin_ice"));
+		// (Andy's F3) cold lakes that have not frozen through wear a crust of thin ice too
+		var chilly = BiomeSelectors.foundInOverworld().and(BiomeSelectors.tag(ConventionalBiomeTags.IS_COLD_OVERWORLD))
+			.and(BiomeSelectors.tag(ConventionalBiomeTags.IS_SNOWY).negate()).and(BiomeSelectors.tag(ConventionalBiomeTags.IS_ICY).negate())
+			.and(BiomeSelectors.tag(ConventionalBiomeTags.IS_AQUATIC).negate());
+		BiomeModifications.addFeature(chilly, GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placed("lake_crust"));
 		BiomeModifications.addSpawn(cold, MobCategory.MONSTER, FROSTBITE, FROSTBITE_WEIGHT, FROSTBITE_MIN, FROSTBITE_MAX);
 	}
 

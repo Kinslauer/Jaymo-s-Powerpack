@@ -83,10 +83,18 @@ public final class RangedTactics {
 	/** The chance a shooter, repositioning, cries out. */
 	static final float SPEAK_CHANCE = 0.3F;
 	static final int SPEECH_LINES = 4;
+	/**
+	 * (Fifth edition, cover that counts) Having loosed a shot, a shooter ducks behind cover this often, if some stands within
+	 * {@link #COVER_REACH} blocks ({@link Cover#spot}); it crouches there for {@link #DUCK_LEAST} to {@link #DUCK_MOST} ticks
+	 * and then leans out (stands) to shoot again.
+	 */
+	static final float DUCK_CHANCE = 0.35F;
+	static final double COVER_REACH = 8.0;
+	static final int DUCK_LEAST = 30, DUCK_MOST = 70;
 
 	/** What a shooter does about failing. */
 	enum Plan {
-		NONE, STRAFE, SEEK_SIGHT, CLOSE_IN, BACK_OFF, FLANK, COVER
+		NONE, STRAFE, SEEK_SIGHT, CLOSE_IN, BACK_OFF, FLANK, COVER, TAKE_COVER
 	}
 
 	/** One shooter's record: failures, where it is in the plans, and the plan it is following. */
@@ -99,6 +107,8 @@ public final class RangedTactics {
 		long planEnds, planStarted, holdUntil, meleeUntil;
 		boolean side;
 		boolean holding;
+		/** Crouched behind cover (so it is stood up again when the plan ends). */
+		boolean ducking;
 	}
 
 	/** A shot in the air. */
@@ -156,10 +166,29 @@ public final class RangedTactics {
 				Shot shot = new Shot(projectile, shooter, target.getUUID());
 				SHOTS.add(shot);
 				BY_PROJECTILE.put(projectile, shot);
+				if (shooter.getRandom().nextFloat() < DUCK_CHANCE) {
+					duck(shooter, target);
+				}
 			}
 		} else if ((entity instanceof AbstractSkeleton || entity instanceof Pillager) && GIVEN.add((Mob)entity)) {
 			// (the game's own bowmen and crossbowmen; our folk and the Hornkin add the goal themselves)
 			((MobAccessor)entity).jaymoskingdoms$goals().addGoal(0, new RepositionGoal((Mob)entity));
+		}
+	}
+
+	/** Having shot, a shooter goes to cover nearby, if there is any, and crouches there before leaning out again. */
+	private static void duck(Mob shooter, LivingEntity target) {
+		if (!(shooter.level() instanceof ServerLevel level) || active(shooter) || melee(shooter) || shooter.distanceToSqr(target) > RANGE * RANGE) {
+			return;
+		}
+		BlockPos spot = Cover.spot(level, shooter, target, COVER_REACH, SAMPLES);
+		if (spot == null) {
+			return;
+		}
+		Path path = shooter.getNavigation().createPath(spot, 0);
+		if (path != null && path.canReach()) {
+			State s = state(shooter);
+			begin(level, shooter, s, Plan.TAKE_COVER, Vec3.atBottomCenterOf(spot), level.getGameTime());
 		}
 	}
 
@@ -469,6 +498,15 @@ public final class RangedTactics {
 		s.blocked = 0;
 	}
 
+	/** Ends a plan; a shooter that was crouching behind cover stands up (leans out). */
+	private static void finish(Mob mob, State s) {
+		if (s.ducking) {
+			s.ducking = false;
+			mob.setShiftKeyDown(false);
+		}
+		end(s);
+	}
+
 	/** Moves the shooter along its plan. False once the plan is over (reached, timed out, or the target gone). */
 	private static boolean drive(Mob mob) {
 		State s = STATES.get(mob);
@@ -478,28 +516,33 @@ public final class RangedTactics {
 		long now = mob.level().getGameTime();
 		LivingEntity target = mob.getTarget();
 		if (target == null || !target.isAlive() || now >= s.planEnds || mob.isPassenger() || Downed.isDowned(mob)) {
-			end(s);
+			finish(mob, s);
 			return false;
 		}
 		mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 		Vec3 d = s.dest;
 		boolean there = mob.distanceToSqr(d.x, d.y, d.z) < 2.25 || mob.tickCount % 10 == 0 && mob.getNavigation().isDone() && now - s.planStarted > 10;
 		boolean sees = mob.getSensing().hasLineOfSight(target);
-		if (s.plan == Plan.COVER) {
+		if (s.plan == Plan.COVER || s.plan == Plan.TAKE_COVER) {
 			if (there && !s.holding) {
 				s.holding = true;
-				s.holdUntil = now + COVER_HOLD;
+				s.holdUntil = now + (s.plan == Plan.TAKE_COVER ? DUCK_LEAST + mob.getRandom().nextInt(DUCK_MOST - DUCK_LEAST + 1) : COVER_HOLD);
+				s.planEnds = Math.max(s.planEnds, s.holdUntil);
 			}
 			if (s.holding) {
 				mob.getNavigation().stop();
+				if (s.plan == Plan.TAKE_COVER) {
+					mob.setShiftKeyDown(true);
+					s.ducking = true;
+				}
 				if (now >= s.holdUntil) {
-					end(s);
+					finish(mob, s);
 					return false;
 				}
 				return true;
 			}
 		} else if (there || s.plan == Plan.SEEK_SIGHT && sees && now - s.planStarted > 10) {
-			end(s);
+			finish(mob, s);
 			return false;
 		}
 		if (mob.tickCount % 10 == 0 || mob.getNavigation().isDone()) {

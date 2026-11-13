@@ -238,6 +238,8 @@ public final class Cannon extends Entity {
 		dir = dir.add(level.getRandom().triangle(0.0, stray), level.getRandom().triangle(0.0, stray * 0.5), level.getRandom().triangle(0.0, stray)).normalize();
 		Vec3 muzzle = pivot.add(dir.scale(MUZZLE));
 		Cannonball.fire(level, gunner, muzzle, dir);
+		// the report rings the ears of those standing near
+		Deafened.blast(level, muzzle, Deafened.BLAST);
 		level.sendParticles(ParticleTypes.EXPLOSION, muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
 		// (0.7.490) the flash at the muzzle, a bank of smoke rolling out, a little off the vent
 		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFE9A8), muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);

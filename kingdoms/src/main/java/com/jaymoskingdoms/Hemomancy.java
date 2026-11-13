@@ -133,7 +133,7 @@ public final class Hemomancy {
 
 	/** A Blood Sorcerer. */
 	public static boolean bloodMage(Player player) {
-		return Classes.is(player, PlayerClass.SORCERER) && "blood".equals(Classes.of(player).option());
+		return "blood".equals(Classes.optionOf(player, PlayerClass.SORCERER));
 	}
 
 	/** The reservoir, on either side. */

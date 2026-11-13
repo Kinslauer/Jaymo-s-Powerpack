@@ -1,0 +1,18 @@
+{
+  "tooltip.jaymospowers.bonded": "Bonded to you (%s of %s)",
+  "tooltip.jaymospowers.unbonded": "Not bonded: rest with it on you to bond. It does nothing until then.",
+  "tooltip.jaymospowers.unknown": "Its powers are not known yet. Use it a while, or have a wizard or a sage look at it.",
+  "tooltip.jaymospowers.curse.clinging": "Cursed: you cannot put it down.",
+  "tooltip.jaymospowers.curse.thirst": "Cursed: it drinks your blood with each kill.",
+  "tooltip.jaymospowers.curse.whispers": "Cursed: it whispers you toward your friends.",
+  "tooltip.jaymospowers.curse.misfortune": "Cursed: it brings bad luck.",
+  "screen.jaymospowers.bonds.title": "Bonds",
+  "screen.jaymospowers.bonds.sub": "%s of %s",
+  "screen.jaymospowers.bonds.free": "Free to bond",
+  "screen.jaymospowers.bonds.hint": "Click a bond to let it go.",
+  "screen.jaymospowers.bonds.button": "Bonds %s/%s",
+  "item.jaymospowers.boots_of_long_strides": "Boots of Long Strides",
+  "item.jaymospowers.cloak_of_the_depths": "Cloak of the Depths",
+  "tooltip.jaymospowers.artifact.boots_of_long_strides": "A longer stride, and a step up a block and a half without a jump.",
+  "tooltip.jaymospowers.artifact.cloak_of_the_depths": "More breath, and while it is on you breathe under water."
+}

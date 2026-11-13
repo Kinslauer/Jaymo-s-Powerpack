@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -133,17 +134,22 @@ final class Remedies {
 
 	/** {@code v} stands in (or at the door of) a standing tavern of the realm whose land it is. */
 	static boolean inTavern(ServerLevel level, Villager v) {
+		return tavernAt(level, v.position());
+	}
+
+	/** {@code at} is in (or at the door of) a standing tavern of the realm whose land it is. */
+	static boolean tavernAt(ServerLevel level, Vec3 at) {
 		MinecraftServer server = level.getServer();
 		if (level != Factions.level(server)) {
 			return false;
 		}
-		Faction owner = Banners.owner(server, ChunkPos.containing(v.blockPosition()));
+		Faction owner = Banners.owner(server, ChunkPos.containing(BlockPos.containing(at)));
 		if (owner == null || owner.fallen()) {
 			return false;
 		}
 		for (Works.Built b : Works.of(server, owner.id()).built()) {
 			if (b.entry().equals(Planner.TAVERN) && b.ruined() == 0
-				&& new AABB(Vec3.atLowerCornerOf(b.min()), Vec3.atLowerCornerOf(b.max()).add(1, 1, 1)).inflate(TAVERN_REACH).contains(v.position())) {
+				&& new AABB(Vec3.atLowerCornerOf(b.min()), Vec3.atLowerCornerOf(b.max()).add(1, 1, 1)).inflate(TAVERN_REACH).contains(at)) {
 				return true;
 			}
 		}

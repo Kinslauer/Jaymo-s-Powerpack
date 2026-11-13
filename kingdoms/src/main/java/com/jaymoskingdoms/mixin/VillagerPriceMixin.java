@@ -26,9 +26,15 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.Treaties.prices((Villager)(Object)this, player);
 		// (0.7.523) and how they feel about you: fond ones charge less, sour ones more
 		com.jaymoskingdoms.Bearings.prices((Villager)(Object)this, player);
+		// a charmed trader charges their charmer less
+		com.jaymoskingdoms.Charm.prices((Villager)(Object)this, player);
 		// a haggler companion by you (docs/Pawn-Plan.md row G2)
 		com.jaymoskingdoms.Specialties.prices((Villager)(Object)this, player);
 		// (0.7.490) priced in the coin of the town it stands in, or a money-changer's counter
+		// a start's lasting perk, a trader talked round today, and one who lies about the price
+		com.jaymoskingdoms.StartPerks.prices((Villager)(Object)this, player);
+		com.jaymoskingdoms.Persuasion.prices((Villager)(Object)this, player);
+		com.jaymoskingdoms.Liars.prices((Villager)(Object)this, player);
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}
 }

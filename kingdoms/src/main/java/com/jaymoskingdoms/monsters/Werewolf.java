@@ -148,6 +148,14 @@ public class Werewolf extends LegendMonster {
 		entityData.define(LEAN, false);
 	}
 
+	/** A moonbeam lights it until this game time: it cannot keep its day face. */
+	private long moonlit;
+
+	/** A moonbeam holds this one in its true form until {@code until} (game time). */
+	public void moonlight(long until) {
+		this.moonlit = Math.max(this.moonlit, until);
+	}
+
 	public boolean isHuman() {
 		return this.entityData.get(HUMAN);
 	}
@@ -268,7 +276,7 @@ public class Werewolf extends LegendMonster {
 			}
 			return;
 		}
-		boolean night = level.isDarkOutside();
+		boolean night = level.isDarkOutside() || level.getGameTime() < this.moonlit;
 		if (this.changing > 0) {
 			this.getNavigation().stop();
 			if (this.random.nextInt(3) == 0) {

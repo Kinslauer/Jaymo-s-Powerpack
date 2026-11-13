@@ -283,6 +283,10 @@ public final class Will {
 		if (e instanceof com.jaymoskingdoms.monsters.LegendMonster || e.getType() == EntityTypes.ELDER_GUARDIAN) {
 			return 3;
 		}
+		int made = com.jaymoskingdoms.creatures.Creatures.tier(e);
+		if (made >= 0) {
+			return made;
+		}
 		if (WILDLANDS.contains(e.getType()) || e instanceof com.jaymoskingdoms.nether.Hornkin || Assassins.is(e)) {
 			return 2;
 		}

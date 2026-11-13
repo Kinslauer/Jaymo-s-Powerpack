@@ -49,6 +49,18 @@ public final class Speech {
 		PayloadTypeRegistry.clientboundPlay().register(Said.TYPE, Said.CODEC);
 	}
 
+	/**
+	 * A bubble over {@code speaker} that only {@code player} sees (a whisper, an animal heard by one ear); nothing is sent to
+	 * anyone else, and a player without the mod gets a line of chat.
+	 */
+	public static void privately(Entity speaker, ServerPlayer player, Component words, int color) {
+		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
+		} else {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
+		}
+	}
+
 	/** (0.7.20) {@code speaker} says {@code words} to {@code player} alone, slowly enough to follow in any tongue. */
 	public static void sayTo(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
 		if (speaker instanceof IronGolem) {
@@ -98,6 +110,10 @@ public final class Speech {
 			return;
 		}
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(range))) {
+			// one whose ears ring hears no callouts but from close by
+			if (Deafened.unheard(p, speaker)) {
+				continue;
+			}
 			// (0.7.20) in a tongue they don't speak, it's words they don't know
 			Component heard = Languages.heard(p, speaker, words);
 			if (ServerPlayNetworking.canSend(p, Said.TYPE)) {

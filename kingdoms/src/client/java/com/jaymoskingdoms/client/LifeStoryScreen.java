@@ -110,6 +110,9 @@ final class LifeStoryScreen extends Screen {
 		int gender = -1;
 		/** (0.7.420) The flaws taken (a bit each, {@link Flaws.Flaw#bit}) and the hard-road switches ({@link Flaws#WARY} and the rest). */
 		int flaws, switches;
+		/** The ideal, bond and flaw picked: a position 1-3 in each offered list, 0 for none ({@link com.jaymoskingdoms.Sparks}). */
+		final int[] sparks = new int[3];
+		boolean sparksTouched;
 		/** (0.7.474) A half-orc's skin on the greenskin road's slider (0 to 1, {@link GreenskinLife#TONE}). */
 		float tone = GreenskinLife.TONE_DEFAULT;
 
@@ -772,7 +775,7 @@ final class LifeStoryScreen extends Screen {
 		Answer raised = picked(Question.RAISED), road = picked(Question.ROAD);
 		ClientPlayNetworking.send(new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
 			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, draft.gender,
-			draft.flaws, draft.switches));
+			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6));
 		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
 		onClose();
 	}
@@ -1549,6 +1552,57 @@ final class LifeStoryScreen extends Screen {
 			}
 			y += rh;
 		}
+		return sparkRows(graphics, mouseX, mouseY, y, px, pw, textW);
+	}
+
+	/** The first choice index of the spark picks: 3 lists of 3, ideal then bond then flaw. */
+	private static final int SPARK_BASE = 8;
+
+	/** (After heritage and class) the ideal, bond and flaw to play true to: three offered by the start for each. */
+	private int sparkRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, int y, int px, int pw, int textW) {
+		Answer road = picked(Question.ROAD);
+		com.jaymoskingdoms.LifeStory.Start start = road == null ? null : road.start();
+		if (!draft.sparksTouched && draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0) {
+			Arrays.fill(draft.sparks, 1);
+		}
+		y += 6;
+		Ui.rule(graphics, px + 6, px + pw - 6, y - 3);
+		graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.sparks"), px + 10, y, ACCENT);
+		y += 11;
+		for (String line : new String[] {"gui.jaymoskingdoms.story.sparks.about"}) {
+			for (FormattedCharSequence l : this.font.split(Component.translatable(line), textW)) {
+				graphics.text(this.font, l, px + 10, y, Ui.DIM);
+				y += Ui.LINE;
+			}
+		}
+		String[] kinds = {"ideal", "bond", "flaw"};
+		for (int kind = 0; kind < 3; kind++) {
+			y += 4;
+			graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.story.sparks." + kinds[kind]), px + 10, y, Ui.DIM);
+			y += 11;
+			List<String> offered = com.jaymoskingdoms.Sparks.options(start, kind);
+			for (int pos = 0; pos < offered.size(); pos++) {
+				int index = SPARK_BASE + kind * 3 + pos;
+				boolean on = draft.sparks[kind] == pos + 1;
+				Component fx = Component.translatable("spark." + kinds[kind] + "." + offered.get(pos) + ".fx");
+				List<FormattedCharSequence> split = this.font.split(fx, textW - 14);
+				int rh = (1 + split.size()) * Ui.LINE + 5;
+				boolean hover = Ui.over(mouseX, mouseY, px + 6, y, pw - 14, rh - 1) && mouseY >= top() + HEADER && mouseY < top() + panelH() - FOOTER;
+				this.choiceRows.add(new int[] {y + this.scroll, rh, index});
+				if (on) {
+					graphics.fill(px + 6, y, px + pw - 8, y + rh - 1, Ui.ROW_PICKED);
+					graphics.fill(px + 6, y, px + 8, y + rh - 1, ACCENT);
+				} else {
+					Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, index, hover);
+				}
+				graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(Component.translatable("spark." + kinds[kind] + "." + offered.get(pos))),
+					px + 12, y + 2, on ? ACCENT : Ui.TEXT);
+				for (int l = 0; l < split.size(); l++) {
+					graphics.text(this.font, split.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, Ui.DIM);
+				}
+				y += rh;
+			}
+		}
 		return y;
 	}
 
@@ -1568,6 +1622,12 @@ final class LifeStoryScreen extends Screen {
 
 	/** Flips choice {@code i}: a flaw (never a third), or a switch. */
 	private static void flip(int i) {
+		if (i >= SPARK_BASE) {
+			int kind = (i - SPARK_BASE) / 3, pos = (i - SPARK_BASE) % 3 + 1;
+			draft.sparks[kind] = draft.sparks[kind] == pos ? 0 : pos;
+			draft.sparksTouched = true;
+			return;
+		}
 		if (!choosable(i)) {
 			return;
 		}

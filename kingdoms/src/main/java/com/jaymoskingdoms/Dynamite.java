@@ -258,6 +258,8 @@ public final class Dynamite extends Projectile implements ItemSupplier {
 
 	private void burst(ServerLevel level) {
 		Vec3 at = this.position().add(0.0, 0.15, 0.0);
+		// the blast rings the ears of those near
+		Deafened.blast(level, at, Deafened.BLAST);
 		Entity owner = this.getOwner();
 		DamageSource source = this.damageSources().explosion(this, owner);
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BURST_RADIUS),

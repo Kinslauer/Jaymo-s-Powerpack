@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.mixin;
 
+import com.jaymospowers.core.MagicMoves;
 import com.jaymospowers.power.xenoform.XenoformState;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -23,7 +24,8 @@ abstract class SkitterClimbMixin {
 	@Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$skitterClimbs(CallbackInfoReturnable<Boolean> cir) {
 		if ((Object)this instanceof Player player && !player.isSpectator() && !player.isInWater()
-			&& "skitter".equals(player.getAttached(XenoformState.FORM)) && (player.horizontalCollision || !player.onGround() && besideWall(player))) {
+			&& ("skitter".equals(player.getAttached(XenoformState.FORM)) || MagicMoves.climbing(player))
+			&& (player.horizontalCollision || !player.onGround() && besideWall(player))) {
 			cir.setReturnValue(true);
 		}
 	}

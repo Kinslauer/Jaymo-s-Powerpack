@@ -164,6 +164,24 @@ public final class Busts {
 		return player.hasAttached(JAILED);
 	}
 
+	/** A prisoner's sentence runs {@code ticks} longer (a forged writ seen through). */
+	static void longer(ServerPlayer player, long ticks) {
+		Jail jail = player.getAttached(JAILED);
+		if (jail != null) {
+			player.setAttached(JAILED, new Jail(jail.realm(), jail.cell(), jail.until() + ticks));
+		}
+	}
+
+	/** A prisoner is let out now, the cell door opened for them (a forged writ that held). */
+	static void letOut(ServerLevel level, ServerPlayer player) {
+		Jail jail = player.getAttached(JAILED);
+		if (jail != null) {
+			player.removeAttached(JAILED);
+			Speakeasy.openDoor(level, jail.cell());
+			level.playSound(null, Speakeasy.doorAt(jail.cell()), SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, 0.9F);
+		}
+	}
+
 	// ---- the tick ------------------------------------------------------------------------------------------------------
 
 	private static void tick(MinecraftServer server) {
@@ -245,6 +263,21 @@ public final class Busts {
 	private static void sentence(ServerLevel level, ServerPlayer player, Faction f, String crime, PathfinderMob guard, boolean yielded) {
 		RandomSource random = level.getRandom();
 		String key = Integer.toString(f.id());
+		// a forged pardon shown to the guard who takes you: dropped if it holds, forgery if it is spotted
+		// the jailer speaks a circle of truth over the prisoner: no forged paper passes in it
+		Truth.court(level, guard.position());
+		int pardon = ForgedPapers.pardon(level, player, guard, f);
+		if (pardon == 1) {
+			drop(player, key);
+			Theft.clearWanted(player, f.id());
+			for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(Theft.PURSUIT_RANGE), m -> m.getTarget() == player)) {
+				m.setTarget(null);
+			}
+			return;
+		}
+		if (pardon == 2) {
+			crime = "forgery";
+		}
 		int offences = player.getAttachedOrElse(OFFENCES, Map.of()).getOrDefault(key, 0);
 		Tempers.Temper temper = Tempers.of(f);
 		int lean = Arrests.TEMPER_LEAN[temper == null ? Arrests.TEMPER_LEAN.length - 1 : temper.ordinal()];
@@ -283,24 +316,7 @@ public final class Busts {
 		long now = level.getGameTime();
 		switch (s) {
 			case FLOG -> FLOGGINGS.put(player.getUUID(), new Flogging(player.getUUID(), guard, now + FLOG_GAP * 2L));
-			case JAIL -> {
-				Underworld.Den d = Underworld.den(level.getServer(), f.id());
-				BlockPos cell = Speakeasy.cell(level, f, d == null ? null : d.cell().orElse(null));
-				if (d != null) {
-					Underworld.putCell(level.getServer(), d, cell);
-				}
-				// (0.7.571) a door and a stair up, so the way out is walked
-				Speakeasy.cellDoor(level, cell);
-				long until = now + JAIL_TICKS + offences * JAIL_PER_OFFENCE;
-				player.setAttached(JAILED, new Jail(f.id(), cell, until));
-				// (0.7.419) a road deed: someone locked in a realm's cells
-				Deeds.done(player, "cells.held");
-				Vec3 c = Vec3.atBottomCenterOf(cell);
-				player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
-				level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
-				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.cells", (until - now) / 1200L).withStyle(ChatFormatting.RED));
-				Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.jailed", name, f.name()));
-			}
+			case JAIL -> lockUp(level, player, f, now + JAIL_TICKS + offences * JAIL_PER_OFFENCE, name);
 			case EXECUTE -> {
 				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 1.0F, 0.8F);
@@ -314,6 +330,25 @@ public final class Busts {
 				player.kill(level);
 			}
 		}
+	}
+
+	/** Shuts {@code player} in {@code f}'s cells (dug if they are not yet) until game time {@code until}. */
+	static void lockUp(ServerLevel level, ServerPlayer player, Faction f, long until, Component name) {
+		long now = level.getGameTime();
+		Underworld.Den d = Underworld.den(level.getServer(), f.id());
+		BlockPos cell = Speakeasy.cell(level, f, d == null ? null : d.cell().orElse(null));
+		if (d != null) {
+			Underworld.putCell(level.getServer(), d, cell);
+		}
+		// (a door and a stair up, so the way out is walked)
+		Speakeasy.cellDoor(level, cell);
+		player.setAttached(JAILED, new Jail(f.id(), cell, until));
+		Deeds.done(player, "cells.held");
+		Vec3 c = Vec3.atBottomCenterOf(cell);
+		player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
+		level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bust.cells", (until - now) / 1200L).withStyle(ChatFormatting.RED));
+		Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.underworld.jailed", name, f.name()));
 	}
 
 	/** Every bit of contraband on {@code player} taken; how much. */

@@ -1,0 +1,14 @@
+{
+  "values": [
+    { "id": "jaymoskingdoms:spirit_javelin", "required": false },
+    { "id": "jaymoskingdoms:harpoon", "required": false },
+    { "id": "weaponmod:bullet", "required": false },
+    { "id": "jaymoskingdoms:imp_fireball", "required": false },
+    { "id": "jaymospowers:arsenal_frost_lance", "required": false },
+    { "id": "jaymospowers:thrown_gear", "required": false },
+    { "id": "minecraft:small_fireball", "required": false },
+    { "id": "minecraft:trident", "required": false },
+    { "id": "minecraft:llama_spit", "required": false },
+    { "id": "minecraft:shulker_bullet", "required": false }
+  ]
+}

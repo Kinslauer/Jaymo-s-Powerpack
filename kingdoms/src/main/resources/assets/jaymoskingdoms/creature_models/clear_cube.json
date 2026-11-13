@@ -1,0 +1,54 @@
+{
+ "width": 128,
+ "height": 128,
+ "scale": 1.0,
+ "translucent": true,
+ "parts": [
+  {
+   "name": "body",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -15,
+    -30,
+    -15,
+    30,
+    30,
+    30
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "wobble",
+   "rot": null
+  },
+  {
+   "name": "nucleus",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -3,
+    -17,
+    -3,
+    6,
+    6,
+    6
+   ],
+   "uv": [
+    0,
+    60
+   ],
+   "anim": "",
+   "rot": null
+  }
+ ]
+}

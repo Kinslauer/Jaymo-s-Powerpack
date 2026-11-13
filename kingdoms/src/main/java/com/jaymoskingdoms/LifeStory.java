@@ -516,8 +516,8 @@ public final class LifeStory {
 				Answer.youth("levy", Items.IRON_AXE, Classes.PlayerClass.WARLORD),
 				Answer.youth("apprentice", Items.BOOKSHELF, Classes.PlayerClass.MAGE),
 				Answer.youth("hermit", Items.BLAZE_POWDER, Classes.PlayerClass.SORCERER),
-				Answer.youth("hunted", Items.ARROW, Classes.PlayerClass.ARCHER),
-				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.SURVIVALIST),
+				Answer.youth("hunted", Items.ARROW, Classes.PlayerClass.RANGER),
+				Answer.youth("winter", Items.STONE_AXE, Classes.PlayerClass.RANGER),
 				Answer.youth("pits", Items.SHIELD, Classes.PlayerClass.BRUTE),
 				Answer.youth("gunsmith", Items.GUNPOWDER, Classes.PlayerClass.MARKSMAN),
 				Answer.youth("messenger", Items.SADDLE, Classes.PlayerClass.RIDER)));
@@ -707,8 +707,10 @@ public final class LifeStory {
 	 * {@code heritage} and {@code cls}: (Andy: "allow a player override AFTER the result") a heritage or class ordinal
 	 * picked over the story's on its last page (-1: the story's). (0.7.420) {@code flaws}: the flaws taken, a bit each
 	 * ({@link Flaws.Flaw#bit}); {@code switches}: the hard-road options and start from nothing ({@link Flaws#WARY} and the rest).
+	 * {@code sparks}: the ideal, bond and flaw picked, a position 1-3 in each offered list, 3 bits apiece ({@link Sparks#choose}).
 	 */
-	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls, int gender, int flaws, int switches) implements CustomPacketPayload {
+	public record Live(List<Integer> answers, int raisedRealm, int roadRealm, int look, int option, int heritage, int cls, int gender, int flaws, int switches,
+		int sparks) implements CustomPacketPayload {
 		public static final Type<Live> TYPE = new Type<>(JaymosKingdoms.id("story_live"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Live> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -725,6 +727,7 @@ public final class LifeStory {
 				buf.writeVarInt(p.gender + 1);
 				buf.writeVarInt(p.flaws);
 				buf.writeVarInt(p.switches);
+				buf.writeVarInt(p.sparks);
 			}, buf -> {
 				int n = Math.min(buf.readVarInt(), Question.values().length);
 				List<Integer> answers = new ArrayList<>(n);
@@ -732,7 +735,7 @@ public final class LifeStory {
 					answers.add(buf.readVarInt() - 1);
 				}
 				return new Live(List.copyOf(answers), buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt() - 1,
-					buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt());
+					buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt() - 1, buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
 			});
 
 		@Override
@@ -1050,6 +1053,8 @@ public final class LifeStory {
 		PlayerTemperaments.settle(player, road != null);
 		// (0.7.420) the harder life they chose: flaws, hard-road options, the points given up (counted off the story just saved)
 		Flaws.choose(player, live.flaws(), live.switches());
+		// the ideal, bond and flaw they play true to (Sparks)
+		Sparks.choose(player, live.sparks(), road == null ? null : road.start);
 		Heritage.set(player, heritage);
 		// (0.7.509) the patron of their blood is known; a devout upbringing starts sworn
 		Patrons.storyStart(player);
@@ -1242,6 +1247,7 @@ public final class LifeStory {
 				}
 			}
 			landed = begin(player, start, roadRealm, bornAs, random);
+			StartPerks.landed(player, landed);
 		} finally {
 			OTHERS = java.util.Map.of();
 		}

@@ -79,7 +79,7 @@ final class StoryMeds {
 		for (Need n : road(landed)) {
 			add(out, n.id, n.count);
 		}
-		if (cls == Classes.PlayerClass.SURVIVALIST) {
+		if (cls == Classes.PlayerClass.RANGER) {
 			add(out, GRASS, SURVIVALIST_GRASS);
 		}
 		return out;

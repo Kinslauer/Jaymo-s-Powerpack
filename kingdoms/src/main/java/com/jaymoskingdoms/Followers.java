@@ -153,7 +153,7 @@ public final class Followers {
 		ServerLevel level = player.level();
 		List<Villager> asked = new ArrayList<>();
 		if (target >= 0) {
-			if (level.getEntity(target) instanceof Villager v && v.distanceToSqr(player) <= ONE_RANGE * ONE_RANGE) {
+			if (level.getEntity(target) instanceof Villager v && v.distanceToSqr(player) <= Presence.reach(player, ONE_RANGE) * Presence.reach(player, ONE_RANGE)) {
 				if (!takesOrders(v, player)) {
 					player.sendOverlayMessage(Component.translatable("mca.jaymoskingdoms.stranger", Strangers.TRUSTED_HEARTS).withStyle(ChatFormatting.GRAY));
 					return;
@@ -161,7 +161,7 @@ public final class Followers {
 				asked.add(v);
 			}
 		} else {
-			asked.addAll(level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(ALL_RANGE), v -> takesOrders(v, player)));
+			asked.addAll(level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, ALL_RANGE)), v -> takesOrders(v, player)));
 		}
 		int taken = 0;
 		for (Villager v : asked) {

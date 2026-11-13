@@ -1,0 +1,106 @@
+# fifth edition picks - upper hand, saves, opportunity attacks, noticing, held spells, conditions, poisons, nets, fight moves
+- **Upper hand and bad footing** (`UpperHand`): blows land harder (and sometimes telling) on a foe who is down, blind or below you, and softer (sometimes only glancing) when you wade, stand on ice, are poisoned or blind, or strike into darkness you can't see in. Both cancel.
+- **Saves** (`Saves`, mixin `fifth/EffectSaveMixin`): your attributes resist things. Endurance shortens poisons, Grit shortens slowness and weakness and keeps a held spell through a blow, Agility softens blasts on the move, Arcana throws off the werewolf's and vampire's bite. Mobs have a plain chance, bosses a better one.
+- **Opportunity attacks and polearms** (`Opportunity`, tag `polearms`): stepping out of a foe's reach gets you a free blow unless you dodge out or back off shield up; spears, halberds and glaives also strike a foe stepping in and stop them. Works for mobs too.
+- **Noticing** (`Notice`): each second, by Wits, tripwires, shut mimics and hunters out of sight may give themselves away to you with a sound and a glint. Sneaking helps, sprinting or riding hard hurts.
+- **One held spell** (`Concentration`): raised thralls, wards, sanctuary circles and chants are held; casting another ends the first, and a blow may break it.
+- **Frightened** (`Fear`, tag `frightful`): players and people alike won't be carried toward what scares them and shake while it's in view; dragons, the Wither, the Warden, wraiths, a witch's curse and brutal kills cause it; a Grit save or losing sight of it ends it.
+- **Charmed** (`Charm`): a vampire's gaze or a witch's song turns a body's swings from its charmer; charmed traders charge the charmer less and haggle softer; hurting the charmed breaks it; a Wits save resists.
+- **Held fast** (`HeldFast`, client input lock): spiders and paralysing claws (wraiths, husks) can freeze a body with only its eyes free; every close blow on it is a crit; a Grit save breaks it.
+- **Deafened** (`Deafened`): explosions, thunderbolts, dynamite and cannons close by muffle the world under a whine, hide footsteps, callouts and far speech, and spoil spoken spells.
+- **Weighted nets** (`Nets`, `ThrownNet`): thrown and spent; the netted crawl and swing badly until a Might save or a blade frees them. Weaponsmiths sell them; guards making arrests and orc slave-keepers throw them.
+- **Poisons** (`Poisons`, `PoisonItems`, `GasBottle`): poison vial, sleep draught, stiffening venom, truth draught and midnight poison; coat a blade (three blows), smear a door handle, dose a dish or drink, or fill a gas bottle to throw. Clerics sell the antidote. Poisoned hands shake.
+- **Caught unawares** (`Surprise`): a foe you ambush, and you when ambushed, freeze for a heartbeat.
+- **Sneak attack** (`ThiefSneak`): a Thief's light blade or bow bursts on a foe busy with a friend or unaware, once a second.
+- **Reckless blows** (`RecklessBlows`): sneak while swinging a two-hander or loosing a bow: likelier to glance, much harder if not, and foes have the upper hand on you for a moment.
+- **Shove and trip** (`Shoves`, key default Insert under Jaymo's Fight Moves): an empty hand or shield shoves a foe back a block; a hooked weapon trips them prone.
+- **Lend a hand** (`LendAHand`): a friend at your side picks locks faster with you, speeds a carry, calls "watch out" at a foe you can't see (your next blow has the upper hand) and backs a haggle.
+- **Cover** (`Cover`, mixin `fifth/ProjectileCoverMixin`, `RangedTactics`): crouched behind a fence, low wall or cart, arrows, bolts and bullets hit the cover more and stick in it; archers and musketeers duck behind cover and lean out to shoot.
+- **Damage kinds** (`DamageKinds`, tags `ghostly`, `fiery`, `metal_golems`): every hit has a kind, and families take more or less: skeletons shrug arrows and break under maces, zombies ignore poison, ghosts (vexes, wraiths) take only enchanted, silver or holy blows, slimes split when cut, iron golems shrug off plain iron, fire creatures heal in fire.
+- **Under water** (`UnderWater`, tag `works_under_water`): swords and axes swing slow and weak; spears, tridents and daggers work; arrows barely fly; crossbow bolts work close.
+- **Catching your breath** (`CatchBreath`): sit a minute at a fire, on a bench or a still horse to heal from a daily reserve sized by Endurance and class; a night's sleep refills it. Food hearts still never heal back.
+- **Keeping watch** (`NightWatch`): sleeping out, one by the fire keeps watch and shouts everyone awake; unwatched camps draw wolves, bandits and a pack thief.
+- **Travel pace** (`Pace`, key "Walk slowly", default Caps Lock): walking slowly is quiet, hard to see and notices more; riding hard is as loud as sprinting.
+- **Darkvision by blood** (`Darkvision`, client post effect): grey shapes out to 16 blocks for Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves and the lizard, feline and arachnid beast folk; it replaces the eye perks' night vision. The five human bloods need light.
+- **Weather in the fight** (`FieldWeather`): gales push arrows and blow out placed torches, rain puts out fire arrows and shortens mobs' sight, deep snow slows a charge and a horse.
+- **Legendary resistance** (`Legendary`): bosses shrug off their first two or three holds, charms, nets, frights and stuns (and Powers' Chrono, Darktide and Gravity lockdowns), each with a flake off the hide and a stagger; one comes back a day.
+- **Moves between your blows** (`BossMoves`): every fourth blow, after a growl, a big boss answers: dragons sweep their tail (jump it), brutes dash, casters shriek and ring your ears.
+- **Lair beats** (`LairBeats`): fight a boss in its home (a dragon's den, a ruler's throne room, the minotaur's labyrinth, the necromancer's crypt) and the place joins in every few seconds: falling rocks, grasping roots, fog, flaring fires.
+- **The land around a lair** (`GreatLairs`, `LairLand`, mixins `fifth/LairSpawnMixin`, `fifth/BirdSongMixin`): foul springs, scarce animals, quiet birds, bad dreams, withering crops; all lifts when the master dies.
+- **The one who comes back** (`GreatNecromancer`, `Necropolis`, `Vessel`, `CryptWords`): Halvard the Hollow sleeps in a deep crypt in the wilds and rises days after each death until his soul urn, hidden under a cairn nearby, is smashed. A sexton's tally, a page in his chest and village talk point the way.
+- **Presence** (`Presence`, `Stats.PRESENCE`): an eighth attribute for talk: haggling, persuading, lying, threatening, how fast strangers warm, how far companion orders carry. Everyone gets 10 free points (20 for Warlords and Sorcerers); old saves load.
+- **Sparks** (`Sparks`): pick an ideal, a bond and a flaw on the story page; acting on them earns one spark, which turns your next failed parry, lockpick or fright into a success, or can be given to a friend from the new Standing screen.
+- **Starts that keep giving** (`StartPerks`): every start leaves a lasting circle of folk who favour you (discounts, trust, a salute) or do you a favour once a day (food, a hiding place, a bed, news, passage, a lesson).
+- **Talk them round** (`Persuasion`): persuade, lie or threaten a villager, by Presence or Wits, their nature and mood; failures are remembered, threats seen are a crime.
+- **Liars** (`Liars`): traders cheat prices, strangers point the wrong way, guards claim their post; sharp Wits sees the tell; the truth draught stops it, and a bribed guard confesses.
+- **A night on the town** (`Carousing`, `RecallScreen`): pay for a night at a tavern or speakeasy and wake to a first-person recall of what you did: a new friend, a treasure rumour, a debt to a crook, a rival, a black eye and a cell, or a betrothal.
+- **Dice and twenty-one** (`Tables`, `GameScreen`): at tavern tables and the speakeasy dicer, for coin, up to four players together or against the house; cheat by Finesse, get caught by Wits.
+- **Chalk marks** (`ChalkMarks`, chalk item): the Underworld chalks safe houses, bribable guards, dogs, rich marks and danger; only the trusted can read them; chalk your own.
+- **Forged papers** (`ForgedPapers`): travel passes and pardons, sold only by speakeasy fences and shady crooks; show them at checkpoints, haven gates or sentencing; a sharp guard spots the fake (a new crime, forgery).
+- **How you live shows** (`Lifestyle`): where you sleep, what you spend, fresh tailor's clothes and baths open courts to you, or get you watched by guards and pitied by priests.
+- **Teachers** (`Lessons`): pay a villager to teach a tongue, a trade or a fighting style over a few days.
+- **Looking it up** (`Research`, `ResearchScreen`, `FoeStudy`): a sage or a library teaches what a foe fears (foe knowledge stars: harder blows, softer hits) or where Halvard's heart is hid.
+- **Words, hands and things** (`SpellParts`, `Gags`, diamond dust): staff, tome, scroll and Spell Engine casts need a voice and a free hand; a gag, a silence bubble or bonds stop them. Great spells spend a part (diamond dust, a pearl, bones); a staff, tome or holy focus stands in for the cheap ones. New Rag Gag for helpless captives.
+- **Magic screen** (key Page Up, `MagicMenu`, `MagicScreen`): rituals, cantrips and counterspell in one place.
+- **Rituals** (`Rituals`, `ItemCurses`): ten still seconds with a book open, no mana: ward line, find magic, identify (shows enchantments, curses and imbues), speak with animals.
+- **Counterspell and dispel** (`Counterspell`, `Dispel`): NPC casters show a turning sigil before a spell lands; rival casters and players who know counterspell can snuff it. Dispel ends lasting spells, frights, charms, holds, nets, curses and fields; court wizards and camp shamans undo each other's work.
+- **Cantrips** (`Cantrips`): light on the staff tip, mend a tool (never in a fight), wash off blood, warm or chill a dish, whisper to someone in sight, tell tomorrow's weather.
+- **Scrolls above your skill** (`ScrollGamble`): below Knowledge 4 a scroll can still be tried; it works once, fizzles, or bites back.
+- **Twenty new spells** (`NewSpells`, `CampSpells`, `Strides`, `BattleSpells`, `Fields`) on their own scrolls: ward line, dome of force, create food, purify food, feather fall, spider climb, water walk, long jump, misty step, web, grease, fog, darkness, silence, spike growth and the rituals; ward lines and domes keep a camp's watch.
+- **New creatures** (`creatures/`, placed by `Haunts` as you near a place, gated by world tier): the troll of the swamps (heals, cut limbs crawl back, stays dead only once burned), the iron-eating rust beast of the caves, the basilisk in its ring of statues (its gaze turns you to stone; a hand mirror turns it back; a friend's pickaxe frees you), the clear cube in old mines and strongholds (swallows you, acid, gear floating inside), piercers dropping from cave roofs, the lamp-snuffing cloak flier, singing harpies on sea cliffs (Wits save, ear wax or a boat keeps you safe), digger warrens ringed with hidden pits, shadows in ruins and bog lights that lead you into quicksand.
+- **Blood bats** (`BloodBat`, `Latches`): latch on, drink, bleed you, fly off fat and slow; pull them off or swat them. The vampire bats now do the same.
+- **Pack tactics** (`Packs`): goblins, diggers and wolves have the upper hand when another of them is beside you.
+- **Old vampire rules** (`OldRules`): vampires, players included, can't enter a home uninvited (sneak-use to invite), can't cross running water unaided, and die for good to a stake while asleep in a coffin.
+- **Stolen lives** (`Doubles`, `Shapeshifter`): villagers found shut underground (Grim ruins, villages, cellars, dungeons) are the real ones whose lives a shapeshifter stole; freed, they say they were kidnapped and lead you home, where the copy slips on a spouse's name or the dog and turns on you when unmasked.
+- **Shadows drain Might** (`ShadowDrain`): at nothing you go down, and your own shadow peels off to join them; kill it to get your strength back.
+- New acid damage, hand mirror, ear wax, quicksand and trap cover; stand-in art from `tools/gen_creatures.py`.
+- **Sixteen more spells** on their own scrolls: charm, command (flee, drop, grovel), suggestion, hold, zone of truth, geas, modify memory, locate object, locate creature, augury, scrying, plant growth, control weather, moonbeam, heroes' feast and find familiar (`MindSpells`, `Truth`, `Geas`, `Forgetting`, `Divination`, `Scrying`, `NatureRites`, `Moonbeam`, `HeroesFeast`, `Familiars`).
+- **Circles of truth**: judges, rulers at audience and jailers raise one; inside it nobody lies, and verdicts follow the record.
+- **Geas**: binds captives and sworn captains to their word; breaking it burns.
+- **Locks of hair** (`Hair`): snipped from the helpless or taken from a bed; locate a creature or scry them in a water cauldron (a living map of their surroundings).
+- **Augury**: thrown bones answer in gold light or dark smoke, never in words.
+- **Speak with animals** now tells who passed by (`Passers`).
+- **Moonbeam**: forces werewolves, disguised dragons and shapeshifter copies into their true form.
+- **Familiars** (owl, raven, cat, rat, frog): follow, scout, carry an item, deliver touch spells; hold Page Down to see through their eyes; a ritual calls them back from their ash.
+- **Wild magic** (`WildMagic`): a wild Sorcerer bloodline, and casting in a great lair's blighted land, can surge into a random effect.
+- **Bonding, curses and unknown relics** (`ItemBonds`, `BondRest`, `RelicCurses`, `SlotCurseMixin`, `PlayerDropMixin`): found relics and baubles work only once bonded over a rest (three at most), show their powers only once used a while, identified, read by a court wizard or looked up, and some carry a curse (clinging, thirst, whispers, misfortune) that a cleric at a shrine, dispel, or the dispel rite lifts.
+- **Blades with a will** (`SentientBlades`): a rare relic that wants the undead slain, the weak guarded or gold, speaks to you alone, argues, and at the third grudge tries to take your arm.
+- **Charged wands** (`ChargedWand`): embers, frost, mending, binding, gales and warding; charges refill at dawn; the last charge may crumble it.
+- **Wondrous gadgets** (`GadgetLoot`): immovable rod, climbing rope, endless jug (clean water, puts out flames), floating light, stone hound, horn of breaking (spares others' land, locked and hard blocks), bottle of endless smoke.
+- **Deck of Fates**: name how many you'll draw, then a keep with servants, a nemesis, ruin, a wish (four boons), a new class, a lost memory, a death knight's duel, and more.
+- **Potion clashes** (mixin on `PotionContents.onConsume`): a second potion while one works may cancel, double, sour or blow up in your belly (hurts you, never the ground); Wits lowers the odds.
+- **Calling back the fallen** (`CallingBack`, `DeathCompat`): within a minute of a final death, a settlement cleric (for a diamond or its dust, then rests three days) or a player with the Calling Back scroll and diamond dust can bring them back weak and sick; it isn't one of the two wake-ups.
+- **Keeping the dead** (`BodyKeeping`, rite of keeping, salt-and-herb wrap): a kept body stays fresh for days, can't be raised by necromancers, and waits for burial; the wrap also preserves food. Clerics keep the dead near them.
+- **Graves** (`Graves`, `GraveBlock`): bury a body with a shovel; dig it up and it comes back.
+- **Rebirth** (`Rebirths`, `Groves`, `DeathRites`): an old druid at a forest grove, or a player with the Scroll of Rebirth there, brings a dead-for-good player back within ten days, with the body, in a new random blood: name, memories, class, skills and belongings kept; the old blood's gifts lost.
+- **Nature's traps** (`traps/Traps`): quicksand pits in deserts and swamps; cave moulds: a cold mould that feeds on fire, a spore mould you hold your breath (sneak) past, and a slime mould that eats wood and metal and dies to fire or vinegar (new vinegar item).
+- **Seven new classes** (`Clerics`, `Druids`, `Monks`, `Paladins`, `Rangers`, `Warlocks`, `Tinkerers`, `Abilities`, `Rests`, `ClassCasters`, `ClassTeachers`): the class key (J) works for each; pools come back on a short rest or a night's sleep; no starting gear, village teachers sell the recipes.
+- **Cleric**: sworn to a patron; raise the holy symbol and the dead flee or crumble; healing prayers; bless the band; may learn Calling Back and the rite of keeping.
+- **Druid**: watch a wolf, bear, hawk or fish to learn its shape, then wear it for three minutes (the hawk flies, the fish breathes water); born knowing nature's rites.
+- **Monk**: bare hands hit like weapons (built on the boxing styles); catch an arrow (the real one) and throw it back; slow fall beside walls; a stunning blow.
+- **Paladin**: an oath of mercy, justice or honour; holy smites; laying on hands from a daily pool; an aura that steadies friends; break the oath and it all goes until you atone at a shrine or with a priest.
+- **Ranger** replaces the Archer and the Survivalist (old characters load as Rangers, keeping Headshot and Second Wind): a favoured foe (harder blows, its trail read farther and standing out) and a favoured land (never lose the trail, move quietly).
+- **Warlock**: a pact with a patron: two strong spells that come back on a short rest, and a debt the patron calls in favour, an errand, blood or coin, and collects if left.
+- **Tinkerer**: infuses gear at the tinkering stations (a returning trident, sword or throwing weapon, springing boots, a glowing shield that lights the way, three at a time) and learns to build five of the wondrous gadgets.
+- **A second class** (`SecondClass`): a master villager (top profession rank) of a matching trade teaches one for 60 silver once you hold knowledge level 3; it works at half strength. It has its own key (Right Alt unless rebound), since Left Alt rolls. A master librarian wakes a Sorcerer's element. The Writ of Rebirth unmakes both classes, the paths and the feats.
+- **Feats** (`Feats`, `FeatsBody`, `FeatsFight`, `FeatsTrade`, `GrowthScreen`): one per knowledge level, picked on the new Feats and Paths tab of the H menu: Alert, Lucky, Mobile, Sentinel, Tough, Healer, Chef, Shield Master, Mage Slayer, Skulker, Observant, Mounted Fighter, Charger, Linguist, Actor, Inspiring Leader, Crossbow Expert, Dungeon Delver.
+- **Paths** (`Paths`): every class picks one of two or three paths once (Thief: assassin, burglar, swashbuckler; Mage: evocation, abjuration, divination; Warlord: champion, battlemaster; and so on for all fourteen).
+- **After the row-by-row check** (every picked row read against the code):
+  - The upper hand counts a foe who hasn't noticed you, and a foe gets it on you when it strikes from out of sight while you are at ease; villagers and folk of a blood without darkvision fight badly in the dark, as players do.
+  - Noticing also grows with the Stealth tree and now catches hidden levers, buttons and plates in the gloom (away from settlements), a warren's covered pits, things hanging overhead, archers after you from farther off, and a crook's hand going for your purse.
+  - A bandit band or war party that jumps you from out of sight startles you as a monster does. Finesse has a save too: slipping a web before it closes.
+  - A Sorcerer's bolt and a court wizard's can burst on the cover their target crouches behind; tridents, fireballs, frost lances and thrown gear stick in cover too.
+  - **Forged writ under the lord's seal** (lets you out of the cells, or a week's pass) and **forged deed** (a householder in that realm for thirty days), from fences and the most notorious crooks only; new Show the Lord's Seal and Show a Deed options on guards.
+  - Where you slept is graded for your standing: your own house or manor (land you are lord of, or a deed), a tavern's bed, any bed, a stable's floor, the open ground.
+  - A deafened caster's big spells fail outright. The light cantrip burns on a staff, wand, tome or holy symbol held in the hand and goes out when it is put away.
+  - **Geas** now has a task the caster names: serve at my side (and fight who I fight), guard this spot, or be gone and stay away. Breaking it burns.
+  - **Gorgons** have the gaze that turns you to stone (a mirror turns it back), and a gorgon's ring of broken columns with her statues is found by ruins as often as a basilisk's den.
+  - Bog lights lead to a witch's hut when one stands near, as well as into quicksand.
+- **After the class check** (the eleven class rows read against the code):
+  - A Ranger names the land they know from a list, as well as their quarry. An old Archer or Survivalist is asked both when they next join. On that land the quarry's trail shows by itself.
+  - The Ranger keeps the Survivalist's lighter step as well as the Archer's.
+  - The Tinkerer's returning infusion goes on swords and throwing weapons too, and a glowing shield gives real light.
+  - A Druid who dies in a beast's shape leaves it behind.
+  - A Warlock learned as a second class pays the pact only for the patron's own spells; a Mage, Cleric or Druid who learns it second keeps casting from mana.
+  - Class lines that went to chat (oaths, debts, lessons, the Tinkerer's first hint) show over the hotbar instead.
+- Built; not played.

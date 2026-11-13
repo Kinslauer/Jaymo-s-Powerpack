@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "id": "jaymoskingdoms:net",
+    "count": 2
+  },
+  "max_uses": 8,
+  "reputation_discount": 0.2,
+  "wants": {
+    "count": 5,
+    "id": "minecraft:emerald"
+  },
+  "xp": 8
+}

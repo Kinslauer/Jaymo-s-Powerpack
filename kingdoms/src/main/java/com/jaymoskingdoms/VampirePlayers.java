@@ -157,7 +157,8 @@ public final class VampirePlayers {
 
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
 	static void bitten(ServerPlayer player) {
-		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN)) {
+		// (a strong enough Arcana throws the curse off: fifth edition's save)
+		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN) && !Saves.resist(player, Saves.Kind.CURSE)) {
 			player.setAttached(Vampires.BITTEN, player.level().getOverworldClockTime());
 		}
 	}

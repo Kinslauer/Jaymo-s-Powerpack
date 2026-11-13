@@ -270,6 +270,8 @@ public final class Mortality {
 		final ResourceKey<Level> dimension;
 		final BlockPos fell;
 		final long moveAt;
+		/** The server tick they were left for dead on. */
+		long since;
 		final @Nullable Entity by;
 		/** (0.20.27) What they rise as (see {@link #TURNINGS}), or null for a plain wake. */
 		final @Nullable Runnable turn;
@@ -521,6 +523,22 @@ public final class Mortality {
 			player.getBoundingBox().inflate(IGNORE_RANGE), mob -> mob.getTarget() == player)) {
 			mob.setTarget(null);
 		}
+	}
+
+	/**
+	 * Whether {@code player} was left for dead within the last {@code window} ticks and lies there still, not yet moved to
+	 * where they'd wake and not rising as anything else: a death a reviver may still call back ({@link Revival}).
+	 */
+	static boolean freshlyLeft(ServerPlayer player, int window) {
+		Wake wake = WAKES.get(player.getUUID());
+		return wake != null && wake.turn == null && !wake.midTurn && !wake.chosen && wake.far == null
+			&& player.level().getServer().getTickCount() - wake.since <= window;
+	}
+
+	/** A reviver called back one left for dead: no waking anywhere, and the sure wake it spent is theirs again (the caller stands them up). */
+	static void calledBack(ServerPlayer player) {
+		cancelWake(player);
+		player.removeAttached(WAKE_LINE);
 	}
 
 	/** (0.20.50) Chrono rewound a left-for-dead: they won't wake anywhere (the caller stands them up). */
@@ -866,6 +884,7 @@ public final class Mortality {
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
+		wake.since = level.getServer().getTickCount();
 		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
 		if (turn != null) {
 			wake.chosen = true;
@@ -926,7 +945,7 @@ public final class Mortality {
 				// ((0.20.117) not while a Chrono is held back from the death for R: the rewind undoes it. Andy's Chrono pressed R
 				// and was born again anyway: the rebirth had started inside the window)
 				if (isFinal(player) && player.isAlive() && !ZFighterAfterlife.among(player) && !REBIRTHS.containsKey(player.getUUID())
-					&& !com.jaymospowers.power.chrono.ChronoCheatDeath.held(player)) {
+					&& !com.jaymospowers.power.chrono.ChronoCheatDeath.held(player) && !Revival.held(player) && !Limbo.in(player)) {
 					REBIRTHS.put(player.getUUID(), server.getTickCount() + REBIRTH_DELAY);
 					// ((0.20.94) and black until the new character is made)
 					player.setAttached(REBORNING, (long)server.getTickCount());
@@ -950,8 +969,8 @@ public final class Mortality {
 					continue;
 				}
 				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-				if (player != null && com.jaymospowers.power.chrono.ChronoCheatDeath.held(player)) {
-					continue; // ((0.20.117) a Chrono may still rewind it)
+				if (player != null && (com.jaymospowers.power.chrono.ChronoCheatDeath.held(player) || Limbo.in(player))) {
+					continue; // a Chrono may still rewind it; one in Limbo waits to be brought back
 				}
 				it.remove();
 				if (player != null && player.isAlive() && isFinal(player) && !ZFighterAfterlife.among(player)) {
@@ -1322,6 +1341,29 @@ public final class Mortality {
 		if (!ZFighterAfterlife.bornAnew(player)) {
 			JaymosPowers.LOGGER.info("{}'s life ended, but no life story could be told anew (no Kingdoms, or its screen)", player.getScoreboardName());
 		}
+	}
+
+	/**
+	 * Coming back in another body (the druid's rite, {@link Limbo#reborn}): what was the old body's goes, and nothing else. The
+	 * power, the breaks, scars, afflictions and wounds of it are gone, as are an arrow lodged in it; the name, the memories
+	 * and the things carried stay.
+	 */
+	public static void shedGifts(ServerPlayer player) {
+		player.removeAttached(SURVIVOR);
+		Afflictions.clear(player);
+		Scars.clear(player);
+		Breaks.clearAll(player);
+		Wounds.healAll(player);
+		player.removeAttached(Lodged.LODGED);
+		if (Powers.of(player) != null) {
+			Powers.set(player, null);
+		}
+		player.removeAttached(Powers.AWAKEN_IN);
+	}
+
+	/** The sure wakes a life starts with used up already, for a body born again by the rite ({@link Limbo#reborn}). */
+	static void setWoken(ServerPlayer player, int woken) {
+		player.setAttached(WOKEN, woken);
 	}
 
 	/**

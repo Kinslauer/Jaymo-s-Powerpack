@@ -220,7 +220,7 @@ public final class Mana {
 
 	/** A natural: an attuned Mage or Sorcerer. */
 	public static boolean natural(Player player) {
-		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER));
+		return attuned(player) && (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player));
 	}
 
 	public static float current(Player player) {
@@ -314,7 +314,7 @@ public final class Mana {
 
 	/** (0.7.244) What a cast at this {@code cost} really takes from {@code player}: dearer sick, or near the corrupt. */
 	static float price(ServerPlayer player, float cost) {
-		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player);
+		return cost * ManaSickness.costTimes(player) * ManaAlchemy.smother(player) * Paths.manaFactor(player);
 	}
 
 	/** Whether {@code player} has {@code cost} to spend (a word on the screen if not). Creative players always have. */
@@ -373,7 +373,7 @@ public final class Mana {
 
 	/** (0.7.244) What {@code what} (a spell, a key, an element) is for. */
 	static int intent(String what) {
-		return INTENT.getOrDefault(what, HARM);
+		return INTENT.getOrDefault(what, NewSpells.INTENT.getOrDefault(what, HARM));
 	}
 
 	/** (0.7.244) {@code caster}'s aura ripples with a cast's {@code intent} (once a tick; only the attuned have an aura). */
@@ -420,7 +420,7 @@ public final class Mana {
 
 	/** The cost of {@code what} (a spell, or a Sorcerer's key: imbue, bolt, mend, renewal, rekindle). */
 	static float cost(String what) {
-		return COST.getOrDefault(what, 10.0F);
+		return COST.getOrDefault(what, NewSpells.COST.getOrDefault(what, 10.0F));
 	}
 
 	static void set(ServerPlayer player, float mana) {
@@ -482,7 +482,7 @@ public final class Mana {
 		long now = player.level().getGameTime();
 		if (!attuned(player)) {
 			// (0.7.247) never while a newcomer can't see it: the flare waits till they're out from the story's screens
-			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER)) {
+			if (Classes.is(player, PlayerClass.MAGE) || Classes.is(player, PlayerClass.SORCERER) || ClassCasters.natural(player)) {
 				if (!StoryGround.unseen(player)) {
 					attune(player);
 				}

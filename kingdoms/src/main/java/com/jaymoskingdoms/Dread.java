@@ -67,12 +67,14 @@ public final class Dread {
 		Vec3 at = victim.position();
 		long now = level.getGameTime();
 		boolean spoke = false;
-		List<Mob> near = level.getEntitiesOfClass(Mob.class, victim.getBoundingBox().inflate(RANGE), m -> m != victim && m.isAlive() && scares(m, killer));
+		List<Mob> near = level.getEntitiesOfClass(Mob.class, victim.getBoundingBox().inflate(RANGE), m -> m != victim && m.isAlive() && !Legendary.boss(m) && scares(m, killer));
 		for (Mob m : near) {
 			if (!(m instanceof PathfinderMob pm) || !m.getSensing().hasLineOfSight(killer) || level.getRandom().nextFloat() >= chance(m)) {
 				continue;
 			}
 			FRIGHTS.put(pm, new Fright(at, now + RUN_TICKS));
+			// (and the fright proper: its feet won't carry it back toward the killer)
+			Fear.frighten(pm, killer, RUN_TICKS);
 			pm.setTarget(null);
 			// (Powers' Crowds' tag: no blows, no closing in, while it runs)
 			pm.addTag(MobCombat.WAITING_TAG);

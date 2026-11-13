@@ -125,10 +125,27 @@ public final class KitchenCompat {
 		}
 		try {
 			java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player> brawn = player ->
-				Stats.value(player, Stats.Stat.MIGHT) / MIGHT_PER_BRAWN + (Skills.rank(player, Skills.Perk.PACKHORSE) > 0 ? 1 : 0);
+				Stats.value(player, Stats.Stat.MIGHT) / MIGHT_PER_BRAWN + (Skills.rank(player, Skills.Perk.PACKHORSE) > 0 ? 1 : 0)
+					+ LendAHand.brawn(player);
 			Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("addBrawn", java.util.function.ToIntFunction.class).invoke(null, brawn);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for strength to ease hauling (needs 0.5.36): {}", e.toString());
+		}
+	}
+
+	/**
+	 * The Chef feat ({@link FeatsTrade}): Kitchen's {@code Stomach.addMealBoost}, so a Chef's meals give more health and mend them faster.
+	 * Without that Kitchen, nothing.
+	 */
+	static void registerChef() {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return;
+		}
+		try {
+			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> boost = FeatsTrade::meals;
+			Class.forName("com.jaymoskitchen.stomach.Stomach").getMethod("addMealBoost", java.util.function.ToDoubleFunction.class).invoke(null, boost);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for a Chef's meals to heal more (needs addMealBoost): {}", e.toString());
 		}
 	}
 
@@ -260,6 +277,11 @@ public final class KitchenCompat {
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Downpours::bodyHeat);
+			// a warmed or chilled dish keeps the body so for a while, and a dome of force keeps the weather off it
+			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) Cantrips::bodyHeat);
+			bodyHeat.getMethod("addTemperate", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) CampSpells::domed);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
 		}
@@ -474,10 +496,11 @@ public final class KitchenCompat {
 		return Boolean.TRUE.equals(call(HOSTILE, corpse));
 	}
 
-	/** (0.5.37) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */
+	/** A corpse a necromancer can raise: lying free, not a player's (their things stay safe), and not kept fresh by a rite or a wrap. */
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
-			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity));
+			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
+			&& !BodyKeeping.isPreserved(entity);
 	}
 
 	/** (0.5.37) What the corpse was in life, or null. */
@@ -566,6 +589,20 @@ public final class KitchenCompat {
 			addOnDrink.invoke(null, hook);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hook Kitchen's bottled blood: {}", e.toString());
+		}
+	}
+
+	/** Kitchen's drunkenness ({@code Drunk.drink}): {@code points} more for {@code player}; false without that Kitchen. */
+	static boolean getDrunk(net.minecraft.server.level.ServerPlayer player, int points) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.brewing.Drunk").getMethod("drink", net.minecraft.server.level.ServerPlayer.class, int.class).invoke(null, player, points);
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's drink failed: {}", e.toString());
+			return false;
 		}
 	}
 

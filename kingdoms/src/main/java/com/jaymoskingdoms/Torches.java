@@ -169,7 +169,7 @@ public final class Torches {
 	/** A torch's random tick (mixin.TorchBlockMixin): maybe it burns out, sooner in the rain. */
 	public static void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		boolean out = level.isRainingAt(pos) ? random.nextInt(RAIN_DOUSE_CHANCE) == 0
-			: random.nextInt((int) (BURN_TICKS / RANDOM_TICK_EVERY)) == 0;
+			: FieldWeather.blowsOut(level, pos, random) || random.nextInt((int) (BURN_TICKS / RANDOM_TICK_EVERY)) == 0;
 		if (out) {
 			goOut(level, pos, state);
 		}

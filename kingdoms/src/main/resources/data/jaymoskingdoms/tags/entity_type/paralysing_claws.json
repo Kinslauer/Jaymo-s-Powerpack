@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:wraith",
+    "minecraft:husk",
+    { "id": "jaymoskingdoms:ghoul", "required": false }
+  ]
+}

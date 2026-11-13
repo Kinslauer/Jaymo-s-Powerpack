@@ -245,7 +245,7 @@ public final class Questioning {
 		ServerLevel level = (ServerLevel) body.level();
 		// (Interrogation) no lie gets past you
 		Temperament temper = Temperaments.of(body);
-		boolean lies = !has(player, WILL) && (temper == Temperament.PROUD || temper == Temperament.SPITEFUL) && body.getRandom().nextFloat() < LIE_CHANCE;
+		boolean lies = !has(player, WILL) && !Liars.honest(body) && (temper == Temperament.PROUD || temper == Temperament.SPITEFUL) && body.getRandom().nextFloat() < LIE_CHANCE;
 		if (SWEAR.equals(answer)) {
 			Recollections.remember(body, player, Recollections.Kind.SWORE, Component.empty());
 			return line("swear", body, player);

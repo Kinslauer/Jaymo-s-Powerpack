@@ -44,6 +44,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #LEASH} from the body, which stays where it fell to be carried, brought round or come back to (sneak, as
  * before). Everyone else sees the ghost. It can't touch, be touched or be seen by mobs. Where each ghost is can be asked
  * from any thread ({@link #ghostAt}): Kingdoms' voice chat plugin speaks and hears from there.
+ * <p>One who chose {@link Limbo} after their last death is seen as the same ghost, at the place they watch from.
  */
 public final class OutOfBody {
 	/** How far from its body a ghost can drift (blocks), and how far over the body it rises. */
@@ -112,17 +113,28 @@ public final class OutOfBody {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			UUID id = player.getUUID();
 			PlayerGhost ghost = GHOSTS.get(id);
-			boolean out = Mortality.outOfBody(player);
-			if (ghost != null && (!out || ghost.isRemoved() || ghost.level() != player.level())) {
+			// one waiting in Limbo is seen the same way: the ghost is where their own view already is
+			boolean limbo = Limbo.in(player) && player.isAlive() && player.isSpectator();
+			boolean out = !limbo && Mortality.outOfBody(player);
+			if (ghost != null && (!out && !limbo || limbo == player.hasAttached(OUT) || ghost.isRemoved() || ghost.level() != player.level())) {
 				back(player, ghost);
 				ghost = null;
 			}
 			if (ghost == null) {
-				if (out) {
-					rise(player);
+				if (out || limbo) {
+					rise(player, limbo);
 				} else if (player.hasAttached(OUT)) {
 					player.removeAttached(OUT);
 				}
+				continue;
+			}
+			if (limbo) {
+				ghost.setPos(player.position());
+				ghost.setYRot(player.getYRot());
+				ghost.setXRot(player.getXRot());
+				ghost.setYHeadRot(player.getYRot());
+				ghost.setYBodyRot(player.getYRot());
+				PLACES.put(id, player.position());
 				continue;
 			}
 			// (a carried body takes its ghost along at the leash's end)
@@ -143,7 +155,8 @@ public final class OutOfBody {
 		}
 	}
 
-	private static void rise(ServerPlayer player) {
+	/** {@code player}'s ghost appears ({@code limbo}: where they watch from in Limbo, their view staying their own). */
+	private static void rise(ServerPlayer player, boolean limbo) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
@@ -151,13 +164,16 @@ public final class OutOfBody {
 		if (ghost == null) {
 			return;
 		}
-		ghost.snapTo(player.getX(), player.getY() + RISE, player.getZ(), player.getYRot(), 0.0F);
+		ghost.snapTo(player.getX(), player.getY() + (limbo ? 0.0 : RISE), player.getZ(), player.getYRot(), 0.0F);
 		ghost.owner(player);
 		level.addFreshEntity(ghost);
 		GHOSTS.put(player.getUUID(), ghost);
 		PLACES.put(player.getUUID(), ghost.position());
-		player.setAttached(OUT, true);
 		motes(level, ghost);
+		if (limbo) {
+			return;
+		}
+		player.setAttached(OUT, true);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.out_of_body.out").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 	}
 

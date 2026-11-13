@@ -176,6 +176,8 @@ final class SkillScreen extends Screen {
 			// (0.7.82) the world tiers, beside Done
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.button"), b -> this.minecraft.gui.setScreen(new TierScreen(this)))
 				.bounds(right - 60 - 4 - 80, fy, 80, 16).build());
+			addRenderableWidget(Button.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
+				.bounds(right - 60 - 4 - 80 - 4 - 70, fy, 70, 16).build());
 			// a small arrow on the panel's left edge collapses it; the strip on the left brings it back
 			if (!panelCollapsed) {
 				addRenderableWidget(Button.builder(Component.literal("<"), b -> {
@@ -197,6 +199,8 @@ final class SkillScreen extends Screen {
 			.bounds(right - 60 - 4 - 80 - 4 - 60, fy, 60, 16).build());
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.web.center"), b -> fit())
 			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60, fy, 60, 16).build());
+		addRenderableWidget(Button.builder(Component.translatable("standing.jaymoskingdoms.button"), b -> this.minecraft.gui.setScreen(new StandingScreen(this)))
+			.bounds(right - 60 - 4 - 80 - 4 - 60 - 4 - 60 - 4 - 70, fy, 70, 16).build());
 	}
 
 	/** The three tabs: the web, Attributes, Jobs. */

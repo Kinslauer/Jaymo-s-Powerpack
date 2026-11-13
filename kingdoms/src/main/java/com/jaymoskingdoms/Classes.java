@@ -74,6 +74,8 @@ import com.jaymoskingdoms.money.Money;
  * {@code /kingdom class get <player>}.
  */
 public final class Classes {
+	/** The share of a class's perks, pools and numbers its holder has when it is their second class. */
+	public static final float SECOND_SHARE = 0.5F;
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
 	static final long WRIT_EVERY = 24000L * 7L;
 	/** What he asks for one. */
@@ -86,10 +88,21 @@ public final class Classes {
 	/** The chance a rare chest holds a wizard's staff (a Mage's "find one"); a slain court wizard drops his this often. */
 	static final float STAFF_LOOT_CHANCE = 0.1F, STAFF_DROP_CHANCE = 0.5F;
 
-	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
+	/** The two classes the Ranger replaced; a character saved as either is a Ranger when it loads. */
+	static final java.util.Set<String> LEGACY = java.util.Set.of("archer", "survivalist");
+
+	/**
+	 * The classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element, a Cleric's and a
+	 * Warlock's patron, a Paladin's oath, a Ranger's favoured foe). The Ranger took over the old Archer and Survivalist:
+	 * {@link #byKey} still reads their keys, so old saves come in as Rangers.
+	 */
 	public enum PlayerClass {
-		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), ARCHER, SURVIVALIST, BRUTE, MARKSMAN,
-		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood"), RIDER;
+		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), BRUTE, MARKSMAN,
+		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood", "wild"), RIDER,
+		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
+		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
+		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
+		TINKERER;
 
 		public final List<String> options;
 
@@ -107,7 +120,8 @@ public final class Classes {
 					return c;
 				}
 			}
-			return null;
+			// the Archer and the Survivalist are Rangers now
+			return LEGACY.contains(key) ? RANGER : null;
 		}
 	}
 
@@ -117,12 +131,12 @@ public final class Classes {
 	 */
 	public record Chosen(String cls, String option, List<String> spells, int selected) {
 		public static final Chosen NONE = new Chosen("", "", List.of(), 0);
-		static final Codec<Chosen> CODEC = RecordCodecBuilder.create(i -> i.group(
+		static final Codec<Chosen> CODEC = RecordCodecBuilder.<Chosen>create(i -> i.group(
 			Codec.STRING.optionalFieldOf("class", "").forGetter(Chosen::cls),
 			Codec.STRING.optionalFieldOf("option", "").forGetter(Chosen::option),
 			Codec.STRING.listOf().optionalFieldOf("spells", List.of()).forGetter(Chosen::spells),
 			Codec.INT.optionalFieldOf("selected", 0).forGetter(Chosen::selected)
-		).apply(i, Chosen::new));
+		).apply(i, Chosen::new)).xmap(Chosen::migrated, c -> c);
 		static final StreamCodec<RegistryFriendlyByteBuf, Chosen> STREAM_CODEC = StreamCodec.of(
 			(buf, c) -> {
 				buf.writeUtf(c.cls);
@@ -142,6 +156,14 @@ public final class Classes {
 				return new Chosen(cls, option, List.copyOf(spells), buf.readVarInt());
 			});
 
+		/**
+		 * A character saved as an Archer or a Survivalist is a Ranger: the favoured foe is still to pick (they are asked, see
+		 * {@link Rangers}), and what they had picked besides is dropped.
+		 */
+		Chosen migrated() {
+			return LEGACY.contains(this.cls) ? new Chosen(PlayerClass.RANGER.key(), "", List.of(), 0) : this;
+		}
+
 		/** The spell on the staff, or "" with none. */
 		public String spell() {
 			return this.spells.isEmpty() ? "" : this.spells.get(Math.floorMod(this.selected, this.spells.size()));
@@ -155,15 +177,24 @@ public final class Classes {
 	/** Each player's class. Saved, kept through death, synced to its own player (the screens). */
 	public static final AttachmentType<Chosen> CLASS = AttachmentRegistry.create(JaymosKingdoms.id("class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** The second class a player learned from a master ({@link SecondClass}); same shape as the first. Saved, kept through death, synced to its own player. */
+	public static final AttachmentType<Chosen> SECOND = AttachmentRegistry.create(JaymosKingdoms.id("second_class"),
+		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
-	/** Server → player: pick a class (the screen opens; {@code forced}: it can't be shut without picking). */
-	public record Open(boolean forced) implements CustomPacketPayload {
+	/**
+	 * Server → player: pick a class (the screen opens; {@code forced}: it can't be shut without picking). {@code second}: 0 for the
+	 * first class, else one more than the ordinal of the class a master is teaching them as their second (the screen shows only that).
+	 */
+	public record Open(boolean forced, int second) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("class_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
+			(p, buf) -> {
+				buf.writeBoolean(p.forced);
+				buf.writeVarInt(p.second);
+			}, buf -> new Open(buf.readBoolean(), buf.readVarInt()));
 
 		@Override
 		public Type<Open> type() {
@@ -171,14 +202,15 @@ public final class Classes {
 		}
 	}
 
-	/** Player → server: they picked class {@code cls} (its ordinal) and {@code option} (an index into its options, or -1). */
-	public record Choose(int cls, int option) implements CustomPacketPayload {
+	/** Player → server: they picked class {@code cls} (its ordinal) and {@code option} (an index into its options, or -1); {@code second}: as the class a master teaches. */
+	public record Choose(int cls, int option, boolean second) implements CustomPacketPayload {
 		public static final Type<Choose> TYPE = new Type<>(JaymosKingdoms.id("class_choose"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Choose> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.cls);
 				buf.writeVarInt(p.option + 1);
-			}, buf -> new Choose(buf.readVarInt(), buf.readVarInt() - 1));
+				buf.writeBoolean(p.second);
+			}, buf -> new Choose(buf.readVarInt(), buf.readVarInt() - 1, buf.readBoolean()));
 
 		@Override
 		public Type<Choose> type() {
@@ -230,7 +262,26 @@ public final class Classes {
 		if (Javelins.WEAPONMOD_LOADED) {
 			WeaponModGuns.register();
 		}
+		Clerics.register();
+		Druids.register();
+		Monks.register();
+		Paladins.register();
+		Rangers.register();
+		Warlocks.register();
+		Tinkerers.register();
+		ClassTeachers.register();
+		Rests.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			Clerics.clear();
+			Druids.clear();
+			Monks.clear();
+			Paladins.clear();
+			Rangers.clear();
+			Tinkerers.clear();
+			ClassTeachers.clear();
+			SecondClass.clear();
+			Feats.clear();
+			Paths.clear();
 			WRIT_OFFERS.clear();
 			OFFER_KINDS.clear();
 			ClassPerks.clear();
@@ -265,6 +316,7 @@ public final class Classes {
 			}
 			if (player.isAlive() && !player.isSpectator()) {
 				ClassPerks.tick(player);
+				Paths.tick(player);
 				Spellcraft.tick(player);
 				Mana.tick(player);
 				com.jaymoskingdoms.spirits.Spirits.tick(player);
@@ -280,8 +332,40 @@ public final class Classes {
 		return of(player).playerClass();
 	}
 
+	/** Whether {@code player} holds {@code cls}, as their first class or the second they learned. */
 	public static boolean is(Player player, PlayerClass cls) {
-		return classOf(player) == cls;
+		return classOf(player) == cls || second(player) == cls;
+	}
+
+	/** The second class {@code player} learned from a master, or null. */
+	public static @Nullable PlayerClass second(Player player) {
+		return player.getAttachedOrElse(SECOND, Chosen.NONE).playerClass();
+	}
+
+	/** What {@code player} picked with their second class. */
+	public static Chosen secondOf(Player player) {
+		return player.getAttachedOrElse(SECOND, Chosen.NONE);
+	}
+
+	/** The classes {@code player} holds: the first, then the second (none for a character not yet made). */
+	public static List<PlayerClass> both(Player player) {
+		PlayerClass first = classOf(player), second = second(player);
+		return first == null ? List.of() : second == null ? List.of(first) : List.of(first, second);
+	}
+
+	/** How much of {@code cls}'s numbers {@code player} has: all of the first class, {@link #SECOND_SHARE} of the second, none of the rest. */
+	public static float share(Player player, PlayerClass cls) {
+		return classOf(player) == cls ? 1.0F : second(player) == cls ? SECOND_SHARE : 0.0F;
+	}
+
+	/** What {@code player} picked with {@code cls} (a patron, an oath, a foe), from whichever slot holds it. */
+	public static String optionOf(Player player, PlayerClass cls) {
+		return classOf(player) == cls ? of(player).option() : second(player) == cls ? secondOf(player).option() : "";
+	}
+
+	/** A pool of {@code n} (turnings, shapes, ki) as {@code player} has it in {@code cls}: the second class's is a share of it, at least one. */
+	public static int scaled(Player player, PlayerClass cls, int n) {
+		return share(player, cls) >= 1.0F ? n : Math.max(1, Math.round(n * SECOND_SHARE));
 	}
 
 	/** Puts {@code player}'s class on them as they stand (their attributes). */
@@ -289,6 +373,9 @@ public final class Classes {
 		ClassPerks.attributes(player);
 		// (0.7.57) a class gives a free point in its favoured attribute
 		Stats.attributes(player);
+		// feats and paths that work through the body
+		Feats.attributes(player);
+		Paths.attributes(player);
 	}
 
 	/**
@@ -325,19 +412,23 @@ public final class Classes {
 	/** Opens the class screen for {@code player} (if their client has this mod). */
 	static void ask(ServerPlayer player, boolean forced) {
 		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
-			ServerPlayNetworking.send(player, new Open(forced));
+			ServerPlayNetworking.send(player, new Open(forced, 0));
 		}
 	}
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
 		// (a creative player may switch, from the H menu's class tab)
-		if (choose.cls() < 0 || choose.cls() >= all.length || classOf(player) != null && !player.isCreative()) {
+		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null && !player.isCreative()) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
 		String option = choose.option() >= 0 && choose.option() < cls.options.size() ? cls.options.get(choose.option()) : "";
 		if (!cls.options.isEmpty() && option.isEmpty()) {
+			return;
+		}
+		if (choose.second()) {
+			SecondClass.chosen(player, cls, option);
 			return;
 		}
 		if (classOf(player) != null) {
@@ -346,10 +437,24 @@ public final class Classes {
 		set(player, cls, option);
 	}
 
+	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */
+	static List<String> startingSpells(PlayerClass cls, String option) {
+		return switch (cls) {
+			case MAGE -> List.of(option);
+			case CLERIC, DRUID, WARLOCK -> ClassCasters.starting(cls, option);
+			default -> List.of();
+		};
+	}
+
 	/** Makes {@code player} a {@code cls}: their attributes, their first things (a Mage's staff), the word of it. */
 	static void set(ServerPlayer player, PlayerClass cls, String option) {
-		player.setAttached(CLASS, new Chosen(cls.key(), option, cls == PlayerClass.MAGE ? List.of(option) : List.of(), 0));
+		// a first class that is the second one already held takes its place
+		if (second(player) == cls) {
+			player.removeAttached(SECOND);
+		}
+		player.setAttached(CLASS, new Chosen(cls.key(), option, startingSpells(cls, option), 0));
 		refresh(player);
+		begin(player, cls, option);
 		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
@@ -363,8 +468,33 @@ public final class Classes {
 			.withStyle(ChatFormatting.GOLD));
 	}
 
-	/** Takes {@code player}'s class away (their attributes with it). */
+	/** The classes' own beginnings: a patron sworn, an oath taken, a foe and land to pick, a first style of fighting. */
+	static void begin(ServerPlayer player, PlayerClass cls, String option) {
+		switch (cls) {
+			case CLERIC -> Clerics.begin(player, option);
+			case PALADIN -> Paladins.begin(player, option);
+			case RANGER -> Rangers.begin(player);
+			case WARLOCK -> Warlocks.begin(player, option);
+			case MONK -> Monks.begin(player);
+			case DRUID -> Druids.begin(player);
+			case TINKERER -> Tinkerers.begin(player);
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * Takes {@code player}'s classes away (their attributes with them), and what the classes gave them: the second class, the
+	 * paths and the feats too (a Writ of Rebirth remakes the whole character).
+	 */
 	static void clear(ServerPlayer player) {
+		Druids.unmake(player);
+		Paladins.unmake(player);
+		Warlocks.unmake(player);
+		SecondClass.unmake(player);
+		Feats.unmake(player);
+		Paths.unmake(player);
+		player.removeAttached(SECOND);
 		player.removeAttached(CLASS);
 		refresh(player);
 	}
@@ -389,9 +519,22 @@ public final class Classes {
 				case "warding" -> Arcana.SCROLL_WARDING;
 				default -> Arcana.SCROLL_ARCANE;
 			}, 3), RpgKit.or("wizards:wizard_robe_head", "minecraft:leather_helmet"), any(1, "wizards:wizard_robe_chest"));
-			case ARCHER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), any(1, "archers:small_quiver"),
-				RpgKit.or("archers:archer_armor_head", "minecraft:leather_helmet"), RpgKit.or("archers:archer_armor_feet", "minecraft:leather_boots"));
-			case SURVIVALIST -> List.of(any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), new ItemStack(Items.BREAD, 8), new ItemStack(Items.LEATHER_BOOTS));
+			// the old Archer's and Survivalist's gear, folded into one: a bow and quiver, a hand axe, and the boots
+			case RANGER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), any(1, "archers:small_quiver"),
+				any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), RpgKit.or("archers:archer_armor_head", "minecraft:leather_helmet"),
+				RpgKit.or("archers:archer_armor_feet", "minecraft:leather_boots"));
+			case CLERIC -> List.of(new ItemStack(Clerics.HOLY_SYMBOL), new ItemStack(Arcana.HEALER_STAFF), new ItemStack(Arcana.SCROLL_MENDING),
+				new ItemStack(Items.CHAINMAIL_CHESTPLATE), new ItemStack(Items.SHIELD));
+			case DRUID -> List.of(new ItemStack(Druids.SPRIG), new ItemStack(Items.OAK_SAPLING), new ItemStack(Items.BONE_MEAL), new ItemStack(Items.LEATHER_CHESTPLATE),
+				new ItemStack(Items.LEATHER_BOOTS));
+			case MONK -> List.of(new ItemStack(Items.LEATHER_HELMET), any(1, "jaymospowers:iron_cestus", "minecraft:leather_boots"), new ItemStack(Items.PAPER),
+				new ItemStack(Items.FEATHER));
+			case PALADIN -> List.of(new ItemStack(Clerics.HOLY_SYMBOL), any(1, "jaymospowers:iron_longsword", "minecraft:iron_sword"), new ItemStack(Items.SHIELD),
+				new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.IRON_BOOTS));
+			case WARLOCK -> List.of(new ItemStack(Warlocks.SEAL), new ItemStack(Arcana.SCROLL_ARCANE), new ItemStack(Items.LEATHER_CHESTPLATE),
+				new ItemStack(Items.BOOK), new ItemStack(Items.AMETHYST_SHARD));
+			case TINKERER -> List.of(any(1, "jaymospowers:tool_station", "minecraft:crafting_table"), any(1, "jaymospowers:iron_dagger", "minecraft:iron_pickaxe"),
+				new ItemStack(Items.GOLDEN_BOOTS), new ItemStack(Items.SHIELD), new ItemStack(Items.REDSTONE));
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD),
 				RpgKit.or("rogues:berserker_armor_chest", "minecraft:chainmail_chestplate"));
 			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"),
@@ -506,7 +649,7 @@ public final class Classes {
 	static boolean answer(ServerPlayer player, TalkNet.Answer answer) {
 		Integer offer = WRIT_OFFERS.get(player.getUUID());
 		if (offer == null || offer != answer.entityId()) {
-			return Restoration.answer(player, answer);
+			return Restoration.answer(player, answer) || ClassTeachers.answer(player, answer);
 		}
 		WRIT_OFFERS.remove(player.getUUID());
 		List<String> kinds = OFFER_KINDS.remove(player.getUUID());

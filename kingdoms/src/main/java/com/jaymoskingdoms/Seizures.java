@@ -55,7 +55,9 @@ public final class Seizures {
 		/** The wolf (a werewolf's beast). */
 		FERAL,
 		/** The wolf tearing its way out (no prey: you hold still and fight it down). */
-		CHANGE;
+		CHANGE,
+		/** A relic with a will of its own, driving the hand that holds it at what it wants ({@link SentientBlades}). */
+		BLADE;
 
 		public static Kind of(int id) {
 			Kind[] all = values();
@@ -210,6 +212,7 @@ public final class Seizures {
 			case FEVER -> BloodFever.released(player, hold, how);
 			case FERAL -> FeralCurse.released(player, hold, how);
 			case CHANGE -> FeralCurse.heldBack(player, hold, how);
+			case BLADE -> SentientBlades.released(player, hold, how);
 		}
 	}
 
@@ -275,7 +278,11 @@ public final class Seizures {
 				}
 				continue;
 			}
-			if (hold.kind == Kind.FEVER ? !Vampires.isVampire(player) : !WerewolfPlayers.beastUp(player)) {
+			if (switch (hold.kind) {
+				case FEVER -> !Vampires.isVampire(player);
+				case BLADE -> !SentientBlades.wields(player);
+				default -> !WerewolfPlayers.beastUp(player);
+			}) {
 				end(player, End.CUT);
 				continue;
 			}
@@ -283,7 +290,7 @@ public final class Seizures {
 			if (!(e instanceof LivingEntity target) || !target.isAlive() || target.distanceTo(player) > LOST_RANGE) {
 				// (it fell: it's had what it came for, unless it wants more)
 				boolean fell = e instanceof LivingEntity dead && !dead.isAlive();
-				LivingEntity next = hold.kind == Kind.FEVER ? BloodFever.nextPrey(player, hold) : FeralCurse.nextPrey(player, hold);
+				LivingEntity next = hold.kind == Kind.FEVER ? BloodFever.nextPrey(player, hold) : hold.kind == Kind.BLADE ? null : FeralCurse.nextPrey(player, hold);
 				if (next != null) {
 					retarget(player, hold, next, 0);
 				} else if (fell) {
@@ -307,7 +314,9 @@ public final class Seizures {
 			} else {
 				hold.nextBlow = now + BLOW_EVERY;
 				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-				WerewolfPlayers.clawAt(player);
+				if (hold.kind != Kind.BLADE) {
+					WerewolfPlayers.clawAt(player);
+				}
 				player.attack(target);
 				player.resetAttackStrengthTicker();
 			}

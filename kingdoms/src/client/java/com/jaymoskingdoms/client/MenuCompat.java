@@ -46,7 +46,7 @@ public final class MenuCompat {
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
-	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
+	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -73,6 +73,8 @@ public final class MenuCompat {
 				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative());
 			tab(register, "story", ORDER_STORY, () -> new ItemStack(Items.WRITABLE_BOOK), "menu.jaymoskingdoms.tab.story",
 				() -> Minecraft.getInstance().gui.setScreen(new RetakingScreen()), s -> s instanceof RetakingScreen, s -> ((RetakingScreen)s).corner());
+			tab(register, "growth", ORDER_GROWTH, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.growth",
+				() -> Minecraft.getInstance().gui.setScreen(new GrowthScreen()), s -> s instanceof GrowthScreen, s -> ((GrowthScreen)s).corner());
 			tab(register, "journal", ORDER_JOURNAL, () -> new ItemStack(Journal.JOURNAL), "menu.jaymoskingdoms.tab.journal", MenuCompat::openJournal,
 				s -> s instanceof JournalScreen, s -> ((JournalScreen)s).corner());
 			tab(register, "faction", ORDER_FACTION, () -> new ItemStack(Items.BELL), "menu.jaymoskingdoms.tab.faction",
@@ -130,6 +132,10 @@ public final class MenuCompat {
 		rows.add(row("menu.jaymoskingdoms.character.heritage", heritage == null ? none : Component.translatable("heritage.jaymoskingdoms." + heritage.key())));
 		Classes.PlayerClass cls = Classes.classOf(player);
 		rows.add(row("menu.jaymoskingdoms.character.class", cls == null ? none : Component.translatable("class.jaymoskingdoms." + cls.key())));
+		Classes.PlayerClass second = Classes.second(player);
+		if (second != null) {
+			rows.add(row("menu.jaymoskingdoms.character.second", Component.translatable("class.jaymoskingdoms." + second.key())));
+		}
 		Component career = Careers.title(player);
 		rows.add(row("menu.jaymoskingdoms.character.career", career == null ? none : career));
 		Integer code = player.getAttached(Renown.TITLE);

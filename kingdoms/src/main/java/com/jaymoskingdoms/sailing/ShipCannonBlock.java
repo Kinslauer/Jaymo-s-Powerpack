@@ -184,6 +184,8 @@ public final class ShipCannonBlock extends Block {
 		double fx = flat < 1.0E-4 ? 0.0 : dir.x / flat, fz = flat < 1.0E-4 ? 0.0 : dir.z / flat;
 		Vec3 muzzle = centre.add(fx * MUZZLE, 0.15, fz * MUZZLE);
 		ShipShot.fire(level, gunner, ship, muzzle, dir, kind);
+		// the report rings the ears of those standing near
+		com.jaymoskingdoms.Deafened.blast(level, muzzle, com.jaymoskingdoms.Deafened.BLAST);
 		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.5F, 0.6F);
 		// (0.7.490) the muzzle flash, a wall of smoke rolling out ahead of her and a puff drifting back off the breech
 		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFFE9A8), muzzle.x + fx * 0.3, muzzle.y, muzzle.z + fz * 0.3, 1, 0.0, 0.0, 0.0, 0.0);

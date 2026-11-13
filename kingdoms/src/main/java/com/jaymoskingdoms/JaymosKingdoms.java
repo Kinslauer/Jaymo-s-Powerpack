@@ -863,6 +863,61 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("body attachment: {}", Bodies.BODY);
 		// BWM batch 5: iron and emerald beacons keep watch (and its attachment)
 		BeaconWatch.register();
+		// fifth edition picks: free blows on breaking off, noticing without looking, one held spell
+		Opportunity.register();
+		Notice.register();
+		Concentration.register();
+		SecondClass.register();
+		Feats.register();
+		Paths.register();
+		FeatsBody.register();
+		FeatsFight.register();
+		FeatsTrade.register();
+		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
+		Gadgets.register();
+		RelicCurses.register();
+		Unknowns.register();
+		SentientBlades.register();
+		BondRest.register();
+		Nemesis.register();
+		PotionClash.register();
+		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
+		NewSpells.register();
+		com.jaymoskingdoms.traps.Traps.register();
+		DeathRites.register();
+		com.jaymoskingdoms.creatures.Creatures.register();
+		Necropolis.register();
+		Presence.register();
+		Sparks.register();
+		StartPerks.register();
+		FoeStudy.register();
+		Carousing.register();
+		Tables.register();
+		ForgedPapers.register();
+		ChalkMarks.register();
+		Lifestyle.register();
+		Research.register();
+		// fifth edition picks, patch 2: conditions and fight moves
+		Afflictions.register();
+		HeldFast.register();
+		Fear.register();
+		Charm.register();
+		Deafened.register();
+		Nets.register();
+		Poisons.register();
+		Surprise.register();
+		ThiefSneak.register();
+		RecklessBlows.register();
+		Shoves.register();
+		// fifth edition picks, the field: sight in the dark, a helping hand, kinds of damage, cover, water, breath, watch, pace, weather
+		Darkvision.register();
+		LendAHand.register();
+		DamageKinds.register();
+		UnderWater.register();
+		CatchBreath.register();
+		NightWatch.register();
+		Pace.register();
+		FieldWeather.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jaymoskingdoms:block/immovable_rod",
+    "side": "jaymoskingdoms:block/immovable_rod"
+  }
+}
