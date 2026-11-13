@@ -81,6 +81,12 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   Dimension 5.0.3 stacking the Overworld over the Nether: the Overworld band keeps its own heights (Y -64 to 319), its
   rivers are carved, the Nether band's generator never carves. Without CustomChunks nothing changes.
 
+- **Joining no longer waits on river building**: on login, respawn and dimension change the server sent each nearby
+  main-river region with `MainRivers.getRegion`, which builds it (or waits for a build already under way) on the
+  server thread; on the Steam Deck that ran past the 60 s watchdog and the server shut down as a player joined. The
+  sync now uses `MainRivers.getRegionAsync`: cached regions go out at once, the rest are built on the prefetch threads
+  and sent from the server thread when ready (if the player is still on).
+
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary
   `argument1`/`argument2` → `left`/`right`, unary `argument` → `input` (all built-in packs, compat packs included).

@@ -121,6 +121,23 @@ public final class MainRivers
         }
     }
 
+    /**
+     * Hands {@code then} the region's rivers without blocking the caller: at once when they are cached, otherwise
+     * from a prefetch thread once they are built. For the server thread (a player joining), which the watchdog kills
+     * if it waits on a region build.
+     */
+    public static void getRegionAsync(int rx, int rz, ChunkGenerator generator, LevelHeightAccessor level,
+        RandomState randomState, java.util.function.Consumer<List<RiverGraphEdge>> then)
+    {
+        final List<RiverGraphEdge> cached = regionCache.get(RiverMathUtils.pack(rx, rz));
+        if (cached != null)
+        {
+            then.accept(cached);
+            return;
+        }
+        PREFETCH_POOL.submit(() -> then.accept(getRegion(rx, rz, generator, level, randomState)));
+    }
+
     public static List<RiverGraphEdge> getRegion(int rx, int rz,
         ChunkGenerator generator, LevelHeightAccessor level, RandomState randomState)
     {
