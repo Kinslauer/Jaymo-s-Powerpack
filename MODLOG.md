@@ -4237,3 +4237,9 @@ enter limbo if they don't come to."
 - GeckoLib mobs (a Kingdoms Imp) can show lost parts too: DismemberGeoEntityRendererMixin puts the lost parts on GeoEntityRenderer's render state and hides those bones (and what hangs off them) in each render pass (Dismembered.hideGeo); a severed GeckoLib limb is drawn alone, at its bone's height (SeveredPartRenderer.geoHeight). No stumps or limp broken limbs on GeckoLib models.
 - Classes: Dismember (SMALL_HEIGHT, SMALL_MAX, smallScale), BlastGore.chance, client Dismembered.names/limb, SeveredPartRenderer.middle.
 - Built; not played.
+
+## 0.23.23 (2026-11-13): scene music - a music disc under the ultimate's film and the beam battle
+
+- **Music under the films** (client/sound/SceneMusic, new; the same player Jaymo's Kingdoms has). Andy: "it should fade in with the letterboxing and out as it ends. lingering for 5s", and "any of the discs can play for the other scenes too". Your own ultimate's film and a beam battle draw a music disc at random (never the same twice running; disc 11 left out, it's footsteps and breathing, not music). It fades in as the bars slide in, plays through, and from when the bars start to go it fades out, gone about 5 s after they are. Someone who only watches an ultimate gets the bars and no music.
+- Plays as Music, so the Music slider rules it; the game's own music is stopped while it sounds and comes back after. Shares the stage with Jaymo's Kingdoms' films so the two never play at once.
+- Built; not played.
