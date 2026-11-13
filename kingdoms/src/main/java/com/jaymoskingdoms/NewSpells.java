@@ -31,7 +31,8 @@ public final class NewSpells {
 		"create_food", "purify_food", "feather_fall", "spider_climb", "water_walk", "long_jump", "misty_step", "web", "grease", "fog", "darkness",
 		"silence", "spike_growth", "charm", "command", "suggestion", "hold", "zone_of_truth", "geas", "modify_memory", "locate_object",
 		"locate_creature", "augury", "scrying", "plant_growth", "control_weather", "moonbeam", "heroes_feast", "find_familiar",
-		"calling_back", "keeping", "rebirth");
+		"calling_back", "keeping", "rebirth", "glass_shards", "glass_spires", "glass_skin", "molten_glass", "fire_ring", "fire_pillars", "fire_lance",
+		"black_flame", "storm_cloak");
 
 	/** What each costs in mana at the staff. */
 	static final Map<String, Float> COST = Map.ofEntries(
@@ -44,7 +45,10 @@ public final class NewSpells {
 		Map.entry("geas", 30.0F), Map.entry("modify_memory", 24.0F), Map.entry("locate_object", 10.0F), Map.entry("locate_creature", 12.0F),
 		Map.entry("augury", 8.0F), Map.entry("scrying", 28.0F), Map.entry("plant_growth", 30.0F), Map.entry("control_weather", 60.0F),
 		Map.entry("moonbeam", 24.0F), Map.entry("heroes_feast", 50.0F), Map.entry("find_familiar", 20.0F),
-		Map.entry("calling_back", 70.0F), Map.entry("keeping", 12.0F), Map.entry("rebirth", 80.0F));
+		Map.entry("calling_back", 70.0F), Map.entry("keeping", 12.0F), Map.entry("rebirth", 80.0F),
+		Map.entry("glass_shards", 14.0F), Map.entry("glass_spires", 20.0F), Map.entry("glass_skin", 24.0F), Map.entry("molten_glass", 26.0F),
+		Map.entry("fire_ring", 22.0F), Map.entry("fire_pillars", 28.0F), Map.entry("fire_lance", 30.0F), Map.entry("black_flame", 26.0F),
+		Map.entry("storm_cloak", 24.0F));
 	/** The wait after a staff cast of each (ticks). */
 	static final Map<String, Integer> COOLDOWN = Map.ofEntries(
 		Map.entry("counterspell", 20 * 3), Map.entry("dispel", 20 * 8), Map.entry("ward_line", 20 * 20), Map.entry("find_magic", 20 * 5),
@@ -56,7 +60,10 @@ public final class NewSpells {
 		Map.entry("geas", 20 * 60), Map.entry("modify_memory", 20 * 60), Map.entry("locate_object", 20 * 10), Map.entry("locate_creature", 20 * 10),
 		Map.entry("augury", 20 * 30), Map.entry("scrying", 20 * 60), Map.entry("plant_growth", 20 * 60), Map.entry("control_weather", 20 * 60 * 5),
 		Map.entry("moonbeam", 20 * 40), Map.entry("heroes_feast", 20 * 60 * 5), Map.entry("find_familiar", 20 * 60 * 2),
-		Map.entry("calling_back", 20 * 60 * 10), Map.entry("keeping", 20 * 30), Map.entry("rebirth", 20 * 60 * 20));
+		Map.entry("calling_back", 20 * 60 * 10), Map.entry("keeping", 20 * 30), Map.entry("rebirth", 20 * 60 * 20),
+		Map.entry("glass_shards", 20 * 6), Map.entry("glass_spires", 20 * 12), Map.entry("glass_skin", 20 * 45), Map.entry("molten_glass", 20 * 20),
+		Map.entry("fire_ring", 20 * 30), Map.entry("fire_pillars", 20 * 30), Map.entry("fire_lance", 20 * 25), Map.entry("black_flame", 20 * 40),
+		Map.entry("storm_cloak", 20 * 45));
 	/** What each is for, as {@link Mana} counts it (harm is the default). */
 	static final Map<String, Integer> INTENT = Map.ofEntries(
 		Map.entry("counterspell", Mana.WARD), Map.entry("dispel", Mana.WILL), Map.entry("ward_line", Mana.WARD), Map.entry("find_magic", Mana.WILL),
@@ -68,7 +75,8 @@ public final class NewSpells {
 		Map.entry("zone_of_truth", Mana.WARD), Map.entry("geas", Mana.WILL), Map.entry("modify_memory", Mana.WILL), Map.entry("locate_object", Mana.WILL),
 		Map.entry("locate_creature", Mana.WILL), Map.entry("augury", Mana.WILL), Map.entry("scrying", Mana.WILL), Map.entry("plant_growth", Mana.HEAL),
 		Map.entry("control_weather", Mana.WILL), Map.entry("moonbeam", Mana.WARD), Map.entry("heroes_feast", Mana.HEAL), Map.entry("find_familiar", Mana.WARD),
-		Map.entry("calling_back", Mana.HEAL), Map.entry("keeping", Mana.WARD), Map.entry("rebirth", Mana.HEAL));
+		Map.entry("calling_back", Mana.HEAL), Map.entry("keeping", Mana.WARD), Map.entry("rebirth", Mana.HEAL),
+		Map.entry("glass_skin", Mana.WARD), Map.entry("fire_ring", Mana.WARD), Map.entry("storm_cloak", Mana.WARD));
 	/** The small useful ones that can be cast slowly with no mana ({@link Rituals}). */
 	public static final Set<String> RITUALS = Set.of("ward_line", "dispel", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar", "keeping");
 	/** The rite of calling a familiar back from its ash: no spell of its own, known with the one that bound it. */
@@ -112,6 +120,7 @@ public final class NewSpells {
 		HeroesFeast.register();
 		Familiars.register();
 		WildMagic.register();
+		ElementSpells.register();
 	}
 
 	/** Whether {@code spell} is one of these. */
@@ -138,6 +147,9 @@ public final class NewSpells {
 		}
 		if (NatureRites.ours(spell)) {
 			return NatureRites.cast(spell, level, player, power);
+		}
+		if (ElementSpells.ours(spell)) {
+			return ElementSpells.cast(spell, level, player, power);
 		}
 		if (DeathRites.ours(spell)) {
 			return DeathRites.cast(spell, level, player, power);

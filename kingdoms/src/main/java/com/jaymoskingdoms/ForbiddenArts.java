@@ -26,6 +26,8 @@ public final class ForbiddenArts {
 	/** The forbidden spells a scroll or a staff can hold. */
 	static final List<String> DEATH_SPELLS = List.of("raising", "draining", "blight", "whispers", "speak_with_dead", "deaths_door", "dominion");
 	static final List<String> BLOOD_SPELLS = List.of("hemorrhage", "blood_grip", "frenzy");
+	/** Forbidden, and neither death's nor blood's: the flame that does not go out ({@link ElementSpells}). */
+	static final List<String> FLAME_SPELLS = List.of("black_flame");
 
 	private ForbiddenArts() {
 	}
@@ -39,7 +41,7 @@ public final class ForbiddenArts {
 	}
 
 	static boolean forbidden(String spellOrElement) {
-		return death(spellOrElement) || blood(spellOrElement);
+		return death(spellOrElement) || blood(spellOrElement) || FLAME_SPELLS.contains(spellOrElement);
 	}
 
 	/** A known practitioner: a Death or Blood Sorcerer, or a caster who has learned a forbidden spell (raising and draining excepted: old, common scrolls). */

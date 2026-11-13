@@ -57,8 +57,10 @@ public final class BeamClashClient {
 	static final int PANEL_W = 96, PANEL_H = 25;
 	private static final int CHIP = 20;
 	private static final float PUSH_FULL = BeamClash.BASE_PUSH * 2.0F + BeamClash.SURGE_MAX;
-	/** Colours by kind: wind, smoke, soot, ki. */
-	private static final int[] COLORS = {0xBFF4EA, 0x9A9A9A, 0x3A3030, 0xFFE070};
+	/** Colours by kind: wind, smoke, soot, ki, fire. */
+	private static final int[] COLORS = {0xBFF4EA, 0x9A9A9A, 0x3A3030, 0xFFE070, 0xFF7A2A};
+	/** A spell's fire stream is pushed with Jaymo's Kingdoms' class key. */
+	private static final String FIRE_KEY_NAME = "key.jaymoskingdoms.imbue";
 	/** The power skill key (registered in {@code WebSymbioteClient}); a ki beam is pushed with V (ability 3). */
 	private static final String KEY_NAME = "key.jaymospowers.web_symbiote", KI_KEY_NAME = "key.jaymospowers.ability_3";
 
@@ -171,6 +173,7 @@ public final class BeamClashClient {
 			Vec3 v = dir.scale(0.12 + 0.2 * force);
 			ParticleOptions particle = kind == BeamClash.KIND_WIND ? (random.nextInt(4) == 0 ? ParticleTypes.CLOUD : ParticleTypes.WHITE_SMOKE)
 				: kind == BeamClash.KIND_SOOT ? (random.nextInt(5) == 0 ? ParticleTypes.SQUID_INK : ParticleTypes.LARGE_SMOKE)
+				: kind == BeamClash.KIND_FIRE ? (random.nextInt(4) == 0 ? ParticleTypes.SMALL_FLAME : ParticleTypes.FLAME)
 				: (share > 0.4 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE);
 			level.addParticle(particle, p.x + random.nextGaussian() * r, p.y + random.nextGaussian() * r, p.z + random.nextGaussian() * r, v.x, v.y, v.z);
 		}
@@ -204,6 +207,7 @@ public final class BeamClashClient {
 				ParticleOptions particle = kind == BeamClash.KIND_WIND ? (i % 3 == 0 ? ParticleTypes.CLOUD : ParticleTypes.WHITE_SMOKE)
 					: kind == BeamClash.KIND_KI ? (i % 3 == 0 ? MagicFx.LIGHT : MagicFx.CRACKLE)
 					: kind == BeamClash.KIND_SOOT ? (i % 3 == 0 ? ParticleTypes.SQUID_INK : ParticleTypes.LARGE_SMOKE)
+					: kind == BeamClash.KIND_FIRE ? (i % 3 == 0 ? ParticleTypes.SMALL_FLAME : ParticleTypes.FLAME)
 					: (i % 2 == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE);
 				if (particle == ParticleTypes.CAMPFIRE_COSY_SMOKE && random.nextInt(3) != 0) {
 					particle = ParticleTypes.SMOKE;
@@ -226,6 +230,7 @@ public final class BeamClashClient {
 		if (state.age() % every == 0) {
 			level.addParticle(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), k.x, k.y, k.z, 0.0, 0.0, 0.0);
 			boolean smoky = state.kind() != BeamClash.KIND_WIND && state.theirKind() != BeamClash.KIND_WIND
+				&& state.kind() != BeamClash.KIND_FIRE && state.theirKind() != BeamClash.KIND_FIRE
 				&& (state.kind() != BeamClash.KIND_KI || state.theirKind() != BeamClash.KIND_KI);
 			for (int i = 0; i < RING_PUFFS; i++) {
 				double a = i * Mth.TWO_PI / RING_PUFFS;
@@ -290,7 +295,7 @@ public final class BeamClashClient {
 		graphics.outline(x, y, PANEL_W, PANEL_H, 0xC0000000 | rim);
 		// the title, and the key to mash
 		boolean ki = state.kind() == BeamClash.KIND_KI;
-		KeyMapping mapping = key(minecraft, ki ? KI_KEY_NAME : KEY_NAME);
+		KeyMapping mapping = key(minecraft, ki ? KI_KEY_NAME : state.kind() == BeamClash.KIND_FIRE ? FIRE_KEY_NAME : KEY_NAME);
 		String keyLabel = mapping == null ? (ki ? "V" : "X") : mapping.getTranslatedKeyMessage().getString();
 		graphics.text(font, Component.translatable("hud.jaymospowers.beam_clash.title"), x + 3, y + 3, 0xFFFFFFFF, true);
 		Component mash = Component.translatable("hud.jaymospowers.beam_clash.mash", keyLabel);

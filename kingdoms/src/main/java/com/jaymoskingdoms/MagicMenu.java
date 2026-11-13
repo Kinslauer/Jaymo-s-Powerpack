@@ -13,8 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * The Magic screen's two packets. The player's choice from the screen goes up ({@link Pick}): a cantrip, a ritual to begin, or
- * the counterspell key. A page of plain lines comes down ({@link Page}): what an identify finds, shown on a screen and not in
+ * The Magic screen's two packets. The player's choice from the screen goes up ({@link Pick}): a cantrip, a ritual to begin, a
+ * spell a Sorcerer keeps ({@link ElementSpells}), or the counterspell key. A page of plain lines comes down ({@link Page}): what an identify finds, shown on a screen and not in
  * chat.
  */
 public final class MagicMenu {
@@ -37,11 +37,12 @@ public final class MagicMenu {
 	}
 
 	/** Server to player: open the Magic screen (the cantrips and rituals they know, listed by id). */
-	public record Open(List<String> cantrips, List<String> rituals, List<String> choices) implements CustomPacketPayload {
+	public record Open(List<String> cantrips, List<String> rituals, List<String> choices, List<String> spells) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("magic_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(
 			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::cantrips, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::rituals,
-			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::choices, Open::new);
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::choices, ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), Open::spells,
+			Open::new);
 
 		@Override
 		public Type<Open> type() {
@@ -82,7 +83,7 @@ public final class MagicMenu {
 		if (Counterspell.key(player, level)) {
 			return;
 		}
-		ServerPlayNetworking.send(player, new Open(Cantrips.IDS, Rituals.known(player), Choices.open(player)));
+		ServerPlayNetworking.send(player, new Open(Cantrips.IDS, Rituals.known(player), Choices.open(player), ElementSpells.known(player)));
 	}
 
 	/** Shows {@code player} a page of lines. */
@@ -108,6 +109,8 @@ public final class MagicMenu {
 				Choices.cycle(player, key);
 				key(player);
 			}
+		} else if (pick.id().startsWith("cast.")) {
+			ElementSpells.castKnown(player, level, pick.id().substring("cast.".length()));
 		} else if (pick.id().equals("scry_stop")) {
 			Scrying.stop(player);
 		} else if ((NewSpells.RITUALS.contains(pick.id()) || pick.id().equals(NewSpells.CALL_FAMILIAR)) && NewSpells.knows(player, pick.id())) {

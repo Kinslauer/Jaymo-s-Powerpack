@@ -140,10 +140,10 @@ public final class Arcana {
 		if (random.nextInt(NEW_SCROLL_ONE_IN) == 0) {
 			List<String> kept = switch (role) {
 				case Sorcery.WIZARD -> List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "hut", "feather_fall", "misty_step", "fog",
-					"create_food", "purify_food");
+					"create_food", "purify_food", "glass_shards", "glass_skin", "fire_ring", "fire_lance");
 				case Sorcery.SHAMAN, Orcs.SHAMAN -> List.of("speak_animals", "spider_climb", "water_walk", "long_jump", "web", "grease", "spike_growth",
-					"purify_food");
-				case Sorcery.NECROMANCER -> List.of("darkness", "silence", "web");
+					"purify_food", "glass_spires", "molten_glass", "fire_pillars", "storm_cloak");
+				case Sorcery.NECROMANCER -> List.of("darkness", "silence", "web", "black_flame");
 				default -> List.<String>of();
 			};
 			if (!kept.isEmpty()) {
@@ -288,7 +288,7 @@ public final class Arcana {
 					stack.consume(1, player);
 					return InteractionResult.SUCCESS;
 				}
-			} else if (reader != null && Spellcraft.learn(reader, this.spell)) {
+			} else if (reader != null && (Spellcraft.learn(reader, this.spell) || ElementSpells.learn(reader, this.spell))) {
 				stack.consume(1, player);
 				return InteractionResult.SUCCESS;
 			}

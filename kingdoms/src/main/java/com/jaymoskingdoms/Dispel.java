@@ -133,6 +133,9 @@ public final class Dispel {
 			any = true;
 		}
 		Necromancy.cleanse(who);
+		if (ElementSpells.quench(who)) {
+			any = true;
+		}
 		PowersCompat.endMoves(who, null);
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			ItemStack stack = who.getItemBySlot(slot);

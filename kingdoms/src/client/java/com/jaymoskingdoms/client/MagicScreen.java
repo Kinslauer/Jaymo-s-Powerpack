@@ -11,18 +11,19 @@ import net.minecraft.network.chat.Component;
 
 /**
  * The Magic screen: the everyday spells every caster knows, then the rituals they know to begin (ten seconds still, a book
- * open), and a line for a whisper. A choice goes to the server and the screen closes.
+ * open), a line for a whisper, and last the spells a Sorcerer has learned for good. A choice goes to the server and the screen closes.
  */
 final class MagicScreen extends Screen {
 	private static final int W = 230, PAD = 10, BUTTON_H = 16, GAP = 3;
-	private final List<String> cantrips, rituals, choices;
+	private final List<String> cantrips, rituals, choices, spells;
 	private EditBox whisper;
 
-	MagicScreen(List<String> cantrips, List<String> rituals, List<String> choices) {
+	MagicScreen(List<String> cantrips, List<String> rituals, List<String> choices, List<String> spells) {
 		super(Component.translatable("gui.jaymoskingdoms.magic.title"));
 		this.cantrips = cantrips;
 		this.rituals = rituals;
 		this.choices = choices;
+		this.spells = spells;
 	}
 
 	@Override
@@ -31,7 +32,7 @@ final class MagicScreen extends Screen {
 	}
 
 	private int height() {
-		int rows = (this.cantrips.size() + 1) / 2 + this.rituals.size() + this.choices.size();
+		int rows = (this.cantrips.size() + 1) / 2 + this.rituals.size() + this.choices.size() + (this.spells.size() + 1) / 2;
 		return 44 + rows * (BUTTON_H + GAP) + 30;
 	}
 
@@ -63,6 +64,15 @@ final class MagicScreen extends Screen {
 			addRenderableWidget(Button.builder(Component.translatable("magic.jaymoskingdoms.choice", Component.translatable("magic.jaymoskingdoms.choice." + key),
 				Component.translatable("magic.jaymoskingdoms.choice." + key + "." + option)), b -> pick("choose." + key)).bounds(left + PAD, y, W - 2 * PAD, BUTTON_H).build());
 			y += BUTTON_H + GAP;
+		}
+		// the spells a Sorcerer keeps: one press casts
+		for (int i = 0; i < this.spells.size(); i++) {
+			String id = this.spells.get(i);
+			int x = left + PAD + (i % 2) * (half + GAP);
+			addRenderableWidget(Button.builder(Component.translatable("class.jaymoskingdoms.option." + id), b -> pick("cast." + id)).bounds(x, y, half, BUTTON_H).build());
+			if (i % 2 == 1) {
+				y += BUTTON_H + GAP;
+			}
 		}
 	}
 
