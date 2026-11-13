@@ -113,6 +113,8 @@ final class IllagerSites {
 	static final int ROAM = 8, LEADER_ROAM = 4, PEACE_ROAM = 10;
 	/** The most people a place takes on (its posts beyond this stay empty), and at least this many in a hold. */
 	static final int MOST_CREW = 40, LEAST_CREW = 2;
+	/** Places that take on more than {@link #MOST_CREW} (Andy: the citadel "back to 60"). */
+	static final Map<String, Integer> MOST_CREW_AT = Map.of("ocean_citadel", 60);
 	/** Captives where a pick says so but the template penned nobody: this many at most. */
 	static final int CAPTIVES_MOST = 3;
 	/** A leader missing (the place loaded, him nowhere) this long (ticks) is replaced. */
@@ -647,8 +649,8 @@ final class IllagerSites {
 	private static int man(ServerLevel level, Faction camp, String dweller, String path, List<BlockPos> posts, CharSequence kinds, BlockPos seat,
 		Plan plan, RandomSource random) {
 		crown(level, camp, dweller, seat);
-		int hands = 0;
-		for (int i = 0; i < posts.size() && hands < MOST_CREW; i++) {
+		int hands = 0, most = MOST_CREW_AT.getOrDefault(path, MOST_CREW);
+		for (int i = 0; i < posts.size() && hands < most; i++) {
 			char k = kinds.charAt(i);
 			if (k == 'P' || k == 'W' || posts.get(i).equals(seat) && k != 'R') {
 				continue;
