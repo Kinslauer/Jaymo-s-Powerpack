@@ -107,6 +107,8 @@ public final class AetherBlocks {
 	public static Block ARKENIUM_BLOCK, GLINT_BLOCK, CORROBONITE_BLOCK, GOLDEN_AMBER_BLOCK, GRAVITITE_BLOCK;
 	public static Block SCATTERGLASS, SCATTERGLASS_PANE, QUICKSOIL_GLASS_PANE;
 	public static Block GREEN_AERCLOUD, PURPLE_AERCLOUD, STORM_AERCLOUD;
+	/** What the Cloud Sea is made of ({@link com.jaymospowers.aether.cloudsea.CloudSea}). */
+	public static Block CLOUDBANK;
 	public static Block CLOUDWOOL, CLOUDWOOL_CARPET;
 	public static Block ARKENIUM_LANTERN, ARKENIUM_CHAIN, ARKENIUM_BARS;
 	/** The stairs, slabs and walls ("holystone_stairs", ...) and the dyed cloudwool and carpets ("red_cloudwool"), by id. */
@@ -354,6 +356,7 @@ public final class AetherBlocks {
 		GREEN_AERCLOUD = add("green_aercloud", GreenAercloudBlock::new, cloud(MapColor.COLOR_LIGHT_GREEN));
 		PURPLE_AERCLOUD = add("purple_aercloud", PurpleAercloudBlock::new, cloud(MapColor.COLOR_PURPLE));
 		STORM_AERCLOUD = add("storm_aercloud", StormAercloudBlock::new, cloud(MapColor.COLOR_GRAY));
+		CLOUDBANK = add("cloudbank", com.jaymospowers.aether.cloudsea.CloudbankBlock::new, cloud(MapColor.SNOW));
 	}
 
 	private static void initBuilding() {

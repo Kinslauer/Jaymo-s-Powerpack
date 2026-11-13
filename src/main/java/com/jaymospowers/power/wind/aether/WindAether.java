@@ -2,6 +2,7 @@ package com.jaymospowers.power.wind.aether;
 
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.aether.cloudsea.CloudSea;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.compat.Stacked;
 import com.jaymospowers.core.Mastery;
@@ -131,7 +132,8 @@ public final class WindAether {
 	/**
 	 * (0.20.30) A One Dimension world with the Aether stacked over the Overworld ({@link Stacked}): nobody rises or falls home
 	 * by a jump any more, they fly or climb up into the islands and fall out of them into the Overworld's sky. What the jumps
-	 * gave stays: the first time in, the Aether's lore; falling out, Slow Falling, so the drop home is not a death.
+	 * gave stays: the first time in, the Aether's lore; falling out, Slow Falling, so the drop home is not a death. Where the
+	 * Cloud Sea lies between ({@link CloudSea}) the Slow Falling comes as you drop out of its floor.
 	 */
 	private static void stackedTick(MinecraftServer server) {
 		for (ServerPlayer player : server.overworld().players()) {
@@ -146,11 +148,15 @@ public final class WindAether {
 					player.setAttached(VISITED, true);
 					player.sendSystemMessage(Component.translatable("message.jaymospowers.aether.lore").withStyle(ChatFormatting.GRAY));
 				}
-			} else if (was == AETHER && now == Level.OVERWORLD && player.getDeltaMovement().y < 0.0 && !player.getAbilities().flying) {
+			} else if ((was == AETHER || was == CloudSea.REALM) && now == Level.OVERWORLD && player.getDeltaMovement().y < 0.0
+				&& !player.getAbilities().flying) {
+				// (with the Cloud Sea under the Aether the fall out of the islands ends on its overcast, or goes on down a well
+				// and through here: either way this is where the Overworld's sky starts)
 				player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SLOW_FALL_TICKS, 0, false, false));
 				player.resetFallDistance();
 				burst(server.overworld(), player.position());
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.aether.home").withStyle(ChatFormatting.AQUA));
+				player.sendOverlayMessage(Component.translatable(was == AETHER ? "message.jaymospowers.aether.home" : "message.jaymospowers.cloud_sea.home")
+					.withStyle(ChatFormatting.AQUA));
 			}
 		}
 		if (server.getTickCount() % 1200 == 0) {
