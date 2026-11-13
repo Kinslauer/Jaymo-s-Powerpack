@@ -4358,3 +4358,9 @@ enter limbo if they don't come to."
 - A part that comes off a body lying dead (Jaymo's Kitchen: a skeleton falling to pieces, a rotten limb torn away when you try to lift a zombie, a corpse struck where it lies) is a real severed part: drawn as that body's head, arm or leg, kicked about, carried and thrown like any other, and it drips only if the body bled. A limb that tears off in a lift is in your hand at once.
 - Code: `SeveredPart.drop`, `Carry.takePart`, `KitchenCompat.registerCorpseBlood` (Kitchen's `setOnPart`, by reflection: an older Kitchen changes nothing).
 - Built; not played.
+
+## 0.23.33 (2026-11-13): stored reads wait for the land (Deck watchdog crash) (#1472)
+
+- **Floods, river ice floes, Arsenal portals**: they no longer read blocks in land that isn't made and loaded yet. A flood waits a step if the land around its gap isn't there, a floe stays tracked and drifts when its land (or the water ahead) comes back, and a portal pass waits until the far exit's land is loaded. Nothing is dropped; nobody sees a change except no more server hangs.
+- Classes: `Floods`, `RiverIce`, `ArsenalStanding`, all through `core.Loaded`.
+- Built; tested on the Deck server.
