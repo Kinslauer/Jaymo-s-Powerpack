@@ -168,6 +168,7 @@ public class Gorgon extends ActingMonster implements RangedAttackMob {
 		@Nullable SpawnGroupData data) {
 		data = super.finalizeSpawn(level, difficulty, reason, data);
 		this.populateDefaultEquipmentSlots(level.getRandom(), difficulty);
+		com.jaymoskingdoms.BeastLairs.gorgon(level, this.blockPosition(), reason);
 		return data;
 	}
 

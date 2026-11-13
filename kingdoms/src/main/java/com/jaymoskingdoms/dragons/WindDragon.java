@@ -166,6 +166,9 @@ public abstract class WindDragon extends AbstractHorse {
 	private boolean flying;
 	protected @Nullable Vec3 home;
 	private @Nullable BlockPos perch;
+	/** Called down to a roost ({@link #comeDownOn}): it stays there {@link #CALLED_STAY} ticks once landed. */
+	private boolean called;
+	static final int CALLED_STAY = 20 * 60 * 4;
 	private double circleAngle;
 	private @Nullable Vec3 swoopFrom;
 	private int breathTicks, biteIn, sweepIn, breathIn;
@@ -695,6 +698,24 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 	}
 
+	/**
+	 * A wild flier that isn't fighting comes down on {@code top} (the block it will stand on): it flies there from
+	 * wherever it is, lands with a roar and keeps the perch {@link #CALLED_STAY} ticks ({@code nether.DragonRoosts}).
+	 * False if it is tamed, fighting, grounded or can't fly.
+	 */
+	public boolean comeDownOn(BlockPos top) {
+		if (this.isTamed() || !flies() || grounded() || this.getTarget() != null || fighting()) {
+			return false;
+		}
+		this.perch = top.immutable();
+		this.home = Vec3.atBottomCenterOf(top.above());
+		this.wild = Wild.PERCH_GO;
+		this.wildTicks = 0;
+		this.called = true;
+		setFlying(true);
+		return true;
+	}
+
 	// ---- wild: roaming --------------------------------------------------------------------------------------------
 
 	private void roam(ServerLevel level) {
@@ -720,7 +741,8 @@ public abstract class WindDragon extends AbstractHorse {
 					land();
 					this.wild = Wild.PERCHED;
 					this.wildTicks = 0;
-					this.wildFor = Mth.nextInt(this.random, PERCH_MIN, PERCH_MAX);
+					this.wildFor = this.called ? CALLED_STAY : Mth.nextInt(this.random, PERCH_MIN, PERCH_MAX);
+					this.called = false;
 					level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 2.0F, 0.55F);
 				}
 			}
@@ -896,6 +918,18 @@ public abstract class WindDragon extends AbstractHorse {
 		}
 		this.foe = target;
 		return target;
+	}
+
+	/**
+	 * Its roost is its own: perched and wild, it turns on {@code intruder} (someone on its tower, {@code nether.DragonRoosts}).
+	 * False if it is tamed, not perched, fighting someone already, or they are out of its reach.
+	 */
+	public boolean defend(LivingEntity intruder) {
+		if (this.isTamed() || this.wild != Wild.PERCHED || grounded() || this.foe != null || !valid(intruder)) {
+			return false;
+		}
+		this.foe = intruder;
+		return true;
 	}
 
 	private boolean valid(@Nullable LivingEntity e) {
