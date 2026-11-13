@@ -96,21 +96,37 @@ red concrete, the one-block stone lantern, tatami through `KitchenCompat`). Slid
 (Kitchen's rice through `KitchenCompat`). Thatched minka for poor villages. A Blossom graveyard for `McaGraves`.
 Outlying farmsteads, and a lighthouse where a village meets the sea.
 
+*Built (2026-11-13, `BlossomVillages.Kind`, `farmsteads`, `Blossom.paddy`, `Buildings.Kit`, `Bearers.headstone`): thatch
+until tier 3, the paddy, hamlet / market / temple villages, farmsteads, andesite grave posts. Not built: stilt and snow
+villages (villages rise only in cherry groves), the lighthouse.*
+
 ## Patch 5: halls (bv_teahouse, bv_brewery, bv_bath, bv_dojo, bv_inn, bv_pagoda, bv_wayside)
 
 `JobHalls`: tea house (on `Cafe`), rice wine brewery (brewer career, `Carousing`), bath house round a hot spring
 (`Resting`), dojo (guards drill, `Bouts`, a master teaches Weapon Forms). Roadside inns. The pagoda as a
 `WalledTowns` tier building. Wayside shrines, each kept to one of the eight faiths.
 
+*Built (2026-11-13, `Blossom.teaHouse`, `dojo`, `bathHouse`, `pagoda`, `wayside`): the tea house is the Blossom tavern
+(`Buildings.tavern`), the dojo the Blossom training hall (`JobHalls.trainingHall`), bath house at tier 3 and pagoda at
+tier 4 in `WalledTowns`, a wayside shrine by each farmstead. Not built: a separate brewery, roadside inns.*
+
 ## Patch 6: folk and dress (fk_hats, fk_dress, fk_fibre, fk_houses)
 
 Straw hats, basket hat and rain cape. Blossom outfits in `Uniforms`. A fibre crop for string and cloth. Each blossom
 kingdom gets a house crest and colours.
 
+*Built (2026-11-13, `blossomland.BlossomDress`, `Uniforms.BLOSSOM_WOMEN/MEN`): straw hat, basket hat and straw cape as
+worn items, eight robe outfits for blossom settlements' people, ramie (cut and come again) with a row by each farmstead.
+Not built: villagers in hats, house crests.*
+
 ## Patch 7: soldiers (fk_levy, fk_monks, fk_riders, bv_outpost, ar_matchlock)
 
 A levy rank with spears and matchlocks under the ronin-armoured sworn men. Shrine and pagoda guards with glaives.
 Mounted road patrols. Border watch forts. A matchlock look for our musket.
+
+*Built (2026-11-13, `BlossomVillages.sworn`, `dressGuards`, `watchTower`): the levy (two guards in three, straw hat and
+spear) under the sworn men, a watch tower on the road to each new village. Not built: matchlocks, glaive guards, mounted
+patrols, guards posted in the towers.*
 
 ## Patch 8: the forge (ar_heads, ar_steel, ar_heirloom, ar_suit)
 
@@ -119,14 +135,26 @@ riverbeds and folded steel as a Tinkers material: **blossom smiths teach the pro
 and at their forge, and it cannot be made before one has shown you. One heirloom per house. The shadow suit and the
 lord's armour.
 
+*Built (2026-11-13, `BlossomSteel`): iron sand from Mohknee's riverbeds, the bloom (blast furnace), folding on an anvil
+into Powers' steel ingot, taught in three steps by a Blossom smith ("Ask About Steel"). Not built: new weapon heads (the
+Armory has the glaive, claymore and flanged mace), heirlooms, the shadow suit, the lord's armour.*
+
 ## Patch 9: shadows, the warlord and ruins (fk_shadow, fk_warlord, bv_ruins)
 
 Hired shadows sent by rival lords. A rare outlaw castle held by a warlord (`BossPosture`, `BossTurns`). Blossom ruins
 as quest sites.
 
+*Built (2026-11-13, `Blossom.ruin`, `BlossomVillages.ruin`, loot `chests/blossom_ruin`): a fallen house outside about
+half of new villages, its chest left behind. Not built: hired shadows, the warlord's castle, ruins as quest sites.*
+
 ## Patch 10: the land (wl_autumn, wl_flowers, wl_bamboo, wl_koi)
 
 Maple and ginkgo that turn with the seasons, flower fields, wisteria, bamboo stands villagers cut, koi ponds in towns.
+
+*Built (2026-11-13, `blossomland.BlossomWilds`, `Koi`, `BlossomAnimals`, `Blossom.koiPond`, `tools/gen_blossom_wilds.py`,
+`tools/gen_blossom_creatures.py`): maple and ginkgo with turning leaves and saplings, red spider lily (graves, patches),
+wisteria, bamboo thickets, the koi pond and koi that are fed, grow and breed. Not built: villagers cutting bamboo, pink
+moss fields, bare winter trees.*
 
 ## Patch 11: animals I (wl_monkey, wl_crane, wl_deer)
 
@@ -134,20 +162,36 @@ Maple and ginkgo that turn with the seasons, flower fields, wisteria, bamboo sta
 
 Each by the three rules (sympathy, feedback loops, stewardship), as written in the pick list rows.
 
+*Built (2026-11-13, `blossomland.BlossomAnimal`, `SnowMonkey`, `Crane`, `ShrineDeer`, `RaccoonDog`, `Serow`, `Hornet`,
+`HornetNest`, `Salamander`): all seven, each a first cut of its three rules. Not built: monkeys raiding stalls, crane
+nests, boar in the fields, the hunting lodge's part. Not seen in game.*
+
 ## Patch 13: night things I (ng_river, ng_mountain, ng_moon)
 
 ## Patch 14: night things II (ng_snow, ng_bones, ng_crow, ng_sea)
 
 Our own names; told of by blossom folk, never explained on screen. The sea giant belongs to the crossing.
 
+*Built (2026-11-13, `blossomland.NightThings`, `RiverChild`, `SnowWidow`, `Unburied`, `BlackSwell`): the moon's phases
+on open-sky monster spawns, the River Child, the Snow Widow, the Unburied, the Black Swell, and ten lines of blossom
+gossip. Not built: the mountain beasts, the crow-winged hermit, festivals on full moons. Not seen in game.*
+
 ## Patch 15: the pale grove in the Nether (ow_yomi_biome)
 
 A Nether biome, not a replacement: pale wisteria, a slow river, an ogre keep as a demon stronghold. It is the
 blossom folk's telling of the demons' country.
 
+*Built (2026-11-13, `BlossomWilds.addBiomes`, `worldgen/biome/pale_grove.json`, `tools/gen_blossom_wilds.py`): the
+biome with pale moss, pale oaks and hanging Pale Wisteria, pale fog, fire ogres. Not built: the slow river, the ogre
+keep. Generates on the dev server; not seen in game.*
+
 ## Patch 16: the sunken palace (ow_palace)
 
 A rare drowned palace in the deep sea off the far land, guarded by sea folk.
+
+*Built (2026-11-13, `blossomland.SunkenPalace`, `/kingdom mohknee palace`): three palaces at seed-fixed places in the
+deep water, built when a player first comes near, guardians, four chests, two gossip hints. Not built: Tideborn
+keepers. Builds on the dev server; not seen in game.*
 
 ## Open questions
 
@@ -157,4 +201,4 @@ A rare drowned palace in the deep sea off the far land, guarded by sea folk.
 3. **Blossom villages already standing on the home continent** in the worlds we have. Proposed: they stay, as
    settlers from over the sea; no new ones rise there.
 4. **The land's name**: answered, **Mohknee** (Andy, 2026-11-12). The houses' names are still open.
-5. **Starts.** A blossom-born life story start on the far land: wanted, or is everyone a stranger there?
+5. **Starts.** Answered (Andy, 2026-11-13): no starts there. Nobody begins on Mohknee; everyone arrives as a stranger.

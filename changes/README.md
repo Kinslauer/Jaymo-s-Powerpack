@@ -16,6 +16,8 @@ what wasn't tested). Example, `changes/powers/fishing-tackle.md`:
 
 A bigger version step, only when Andy asks for one: put a line `bump: minor` in the note (0.21.109 -> 0.22.0), or
 `bump: major` (-> 1.0.0). The line is left out of the MODLOG. Without it every note is a patch bump.
+A patch bump never reaches .100: the release after x.y.99 is x.(y+1).0 by itself, so each mod's minor version steps
+every 100 patch releases (`PATCH_ROLLOVER` in `tools/release.py`). A mod already past .99 rolls over on its next release.
 
 A PR that touches two mods adds two notes. After the merge, the Release workflow (`.github/workflows/release.yml`,
 running `tools/release.py`) bumps each mod's patch version once per note, appends

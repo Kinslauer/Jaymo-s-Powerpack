@@ -76,8 +76,6 @@ public final class WindSpiralDive {
 	/** The spiral round the diver: its radius (blocks), how far it turns a tick (radians) and the puffs in each of its two strands. */
 	static final double SPIRAL_RADIUS = 0.9, SPIRAL_TURN = 0.7;
 	static final int SPIRAL_PUFFS = 3;
-	/** The spin's pose is renewed this often (ticks), before it runs out. */
-	static final int SPIN_RENEW = WindMoves.SPIN_TICKS - 4;
 
 	private static final Identifier WINDED = JaymosPowers.id("wind_spiral_dive_winded");
 
@@ -148,7 +146,7 @@ public final class WindSpiralDive {
 		WindStorm.onCast(player);
 		WindModes.onCast(player);
 		player.causeFoodExhaustion(EXHAUSTION);
-		WindMoves.restart(player, WindMoves.SPIN);
+		WindMoves.restart(player, WindMoves.DIVE);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.9F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.8F);
 		level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -158,7 +156,7 @@ public final class WindSpiralDive {
 	/** Ends a dive with no ring (downed, the power lost). */
 	static void stop(ServerPlayer player) {
 		if (DIVES.remove(player.getUUID()) != null) {
-			WindMoves.unpose(player, WindMoves.SPIN);
+			WindMoves.unpose(player, WindMoves.DIVE);
 		}
 		if (WINDED_LEFT.remove(player.getUUID()) != null) {
 			unroot(player);
@@ -185,7 +183,7 @@ public final class WindSpiralDive {
 			}
 			if (!player.isAlive() || player.isSpectator() || !Powers.has(player, WindPower.INSTANCE)) {
 				it.remove();
-				WindMoves.unpose(player, WindMoves.SPIN);
+				WindMoves.unpose(player, WindMoves.DIVE);
 				continue;
 			}
 			int age = player.tickCount - dive.startTick();
@@ -196,14 +194,14 @@ public final class WindSpiralDive {
 				} else {
 					// taking flight again pulls you out of it
 					it.remove();
-					WindMoves.unpose(player, WindMoves.SPIN);
+					WindMoves.unpose(player, WindMoves.DIVE);
 					continue;
 				}
 			}
 			if (player.isInWater() || !WindFlight.canFly(player) || age > MAX_TICKS || age < 0) {
 				// into water, onto a mount, picked up, downed or out of time: the dive just ends (the fall is whatever it is)
 				it.remove();
-				WindMoves.unpose(player, WindMoves.SPIN);
+				WindMoves.unpose(player, WindMoves.DIVE);
 				continue;
 			}
 			if (age >= 2 && (player.onGround() || player.verticalCollisionBelow)) {
@@ -218,9 +216,6 @@ public final class WindSpiralDive {
 			double speed = Math.min(DIVE_SPEED, DIVE_SPEED_START + age * DIVE_ACCEL);
 			player.setDeltaMovement(steer.x, -speed, steer.z);
 			player.syncVelocity = true;
-			if (age > 0 && age % SPIN_RENEW == 0) {
-				WindMoves.restart(player, WindMoves.SPIN);
-			}
 			spiral(player, age);
 		}
 	}
@@ -249,7 +244,7 @@ public final class WindSpiralDive {
 	/** The ring of wind from where you landed. Fall damage is not ours: the game and {@link WindFall} deal it. */
 	private static void land(ServerPlayer player, Dive dive) {
 		ServerLevel level = player.level();
-		WindMoves.unpose(player, WindMoves.SPIN);
+		WindMoves.unpose(player, WindMoves.DIVE);
 		double dropped = Math.max(0.0, dive.startY() - player.getY());
 		float power = (float)Mth.clamp(dropped / FULL_DROP, 0.0, 1.0);
 		double radius = Mth.lerp(power, RADIUS_MIN, RADIUS_MAX);

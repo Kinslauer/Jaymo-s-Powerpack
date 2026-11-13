@@ -1978,3 +1978,7 @@ From the camping-campfire Blockbench model Andy uploaded.
 - Kingdoms' cold mould counts as cold for food.
 - `Stomach.addMealBoost`: another mod can raise what meals heal per player (Kingdoms' Chef feat).
 - Built; not played.
+
+## 0.6.0 (2026-11-13): Clearer bone-boiling messages (#1416)
+
+- Two messages from the bone pot and the beetle box read more simply: "The bones boil, about N minutes" and "The beetles return to the flesh".

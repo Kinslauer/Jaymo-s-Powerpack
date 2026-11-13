@@ -34,7 +34,32 @@ final class Blossom {
 	private static final BlockState VERMILION = BlossomBlocks.RED_LACQUER.defaultBlockState();
 	private static final BlockState BONSAI = named("potted_cherry_sapling", Blocks.FLOWER_POT);
 
+	/** A Blossom village roofs in thatch until it is this tier ({@link WalledTowns#tier}: a walled town); from then on, in tile. */
+	static final int TILE_TIER = 3;
+	/** The paddy: how wide and deep, bund and all. */
+	static final int PADDY_WIDTH = 9, PADDY_DEPTH = 7;
+
 	private Blossom() {
+	}
+
+	/**
+	 * A rice paddy ({@link #PADDY_WIDTH} x {@link #PADDY_DEPTH}): a bund of packed mud one block high round a bed of mud
+	 * under standing water, Kitchen's rice planted in it. Null without Kitchen (the village has no paddy then).
+	 */
+	static @org.jspecify.annotations.Nullable Blueprint paddy() {
+		Block rice = KitchenCompat.riceCrop();
+		if (rice == null) {
+			return null;
+		}
+		Buildings.Sketch s = new Buildings.Sketch("blossom_paddy", PADDY_WIDTH, PADDY_DEPTH, 3);
+		for (int x = 0; x < PADDY_WIDTH; x++) {
+			for (int z = 0; z < PADDY_DEPTH; z++) {
+				boolean bund = x == 0 || x == PADDY_WIDTH - 1 || z == 0 || z == PADDY_DEPTH - 1;
+				s.set(x, 0, z, (bund ? Blocks.PACKED_MUD : Blocks.MUD).defaultBlockState());
+				s.set(x, 1, z, bund ? Blocks.PACKED_MUD.defaultBlockState() : rice.defaultBlockState());
+			}
+		}
+		return s.done();
 	}
 
 	/**
@@ -186,7 +211,7 @@ final class Blossom {
 			s.set(x, 6, 2, Blocks.DARK_OAK_PLANKS.defaultBlockState());
 		}
 		s.set(3, 2, 3, Blocks.BARREL.defaultBlockState());
-		s.set(3, 2, 5, BONSAI);
+		s.set(3, 2, 5, Healing.SHRINE.defaultBlockState());
 		s.hip(0, 6, 0, 6, 5, Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState(), Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
 		s.set(3, 6, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
 		// the stone lanterns
@@ -194,6 +219,299 @@ final class Blossom {
 			s.set(x, 1, 0, Blocks.STONE_BRICK_WALL.defaultBlockState());
 			s.set(x, 2, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
 		}
+		return s.done();
+	}
+
+	/**
+	 * Walls round x0..x1, z0..z1 from y0 to y1 with posts at the corners only: boards on the first row, shoji on the
+	 * second, plaster above, and the top plate over them.
+	 */
+	private static void frame(Buildings.Sketch s, Buildings.Kit k, int x0, int x1, int z0, int z1, int y0, int y1, BlockState post) {
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (x != x0 && x != x1 && z != z0 && z != z1) {
+					continue;
+				}
+				boolean alongX = z == z0 || z == z1, corner = (x == x0 || x == x1) && alongX;
+				for (int y = y0; y <= y1; y++) {
+					s.set(x, y, z, corner ? post : y == y0 ? k.p.planks() : y == y0 + 1 ? PAPER : k.infill);
+				}
+				s.set(x, y1 + 1, z, corner ? post : Buildings.Sketch.lying(BEAM, alongX ? Direction.Axis.X : Direction.Axis.Z));
+			}
+		}
+	}
+
+	/**
+	 * The tea house (13 x 11, the Blossom land's tavern): a long minka with tables on the tatami, the hearth in the
+	 * middle, and along the back the counter's stores and the brewer's corner (a cauldron, a brewing stand on a cask).
+	 */
+	static Blueprint teaHouse(Buildings.Kit k) {
+		int w = 11, d = 9, mid = (w + 1) / 2;
+		Buildings.Sketch s = new Buildings.Sketch("tavern", w + 2, d + 2, 14);
+		for (int x = 1; x <= w; x++) {
+			for (int z = 1; z <= d; z++) {
+				s.set(x, 0, z, x == 1 || x == w || z == 1 || z == d ? k.p.wall() : TATAMI);
+			}
+		}
+		storey(s, k, 1, w, 1, d, 1, 3, 0);
+		s.door(mid, 1, 1, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.hip(0, w + 1, 0, d + 1, 4, k.roofStairs, k.roofSlab);
+		for (int x : new int[] {3, w - 2}) {
+			Buildings.table(s, k, x, 1, 3, false);
+			Buildings.table(s, k, x, 1, 6, false);
+		}
+		s.set(mid, 1, 5, BlossomFurnishings.HEARTH.defaultBlockState());
+		for (int x = 3; x <= w - 4; x++) {
+			s.set(x, 1, d - 1, BlossomFurnishings.TANSU.defaultBlockState().setValue(BarrelBlock.FACING, Direction.NORTH));
+		}
+		s.set(w - 2, 1, d - 1, Blocks.BARREL.defaultBlockState());
+		s.set(w - 2, 2, d - 1, Blocks.BREWING_STAND.defaultBlockState());
+		s.set(w - 1, 1, d - 1, Blocks.WATER_CAULDRON.defaultBlockState().setValue(net.minecraft.world.level.block.LayeredCauldronBlock.LEVEL, 3));
+		s.set(2, 1, d - 1, BONSAI);
+		int ridge = 4 + (d + 1) / 2;
+		s.set(mid, ridge - 1, (d + 1) / 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(mid + 1, 3, 0, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The dojo (9 x 9, the Blossom land's training hall; the school master stands at its middle): a bare tatami floor
+	 * inside shoji walls, training posts and racks at the back, under a hipped roof.
+	 */
+	static Blueprint dojo(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("training_hall", 9, 9, 12);
+		for (int x = 1; x <= 7; x++) {
+			for (int z = 1; z <= 7; z++) {
+				s.set(x, 0, z, x == 1 || x == 7 || z == 1 || z == 7 ? k.p.wall() : TATAMI);
+			}
+		}
+		frame(s, k, 1, 7, 1, 7, 1, 3, TIMBER);
+		s.door(4, 1, 1, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.hip(0, 8, 0, 8, 4, k.roofStairs, k.roofSlab);
+		BlockState post = JobHalls.trainingPost();
+		s.set(2, 1, 6, post);
+		s.set(6, 1, 6, post);
+		BlockState rack = Displays.rack(Direction.NORTH);
+		if (rack != null) {
+			s.set(3, 2, 6, rack);
+			s.set(5, 2, 6, rack);
+		}
+		s.set(4, 7, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The koi pond (9 x 7): a garden pool a block deep inside a rim of mossy stone, lily pads on it, a stone lantern at one
+	 * corner and at one end a timber arbour hung with wisteria. Koi find their own way into it
+	 * ({@link com.jaymoskingdoms.blossomland.Koi}).
+	 */
+	static Blueprint koiPond(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("koi_pond", 9, 7, 6);
+		BlockState rim = Blocks.MOSSY_COBBLESTONE.defaultBlockState(), stone = Blocks.COBBLESTONE.defaultBlockState();
+		for (int x = 0; x <= 8; x++) {
+			for (int z = 0; z <= 6; z++) {
+				boolean edge = x == 0 || x == 8 || z == 0 || z == 6;
+				boolean corner = (x == 1 || x == 7) && (z == 1 || z == 5);
+				s.set(x, 0, z, edge || corner ? ((x * 3 + z * 5) % 4 == 0 ? stone : rim) : Blocks.WATER.defaultBlockState());
+			}
+		}
+		for (int[] pad : new int[][] {{2, 2}, {3, 4}, {6, 3}, {5, 1}}) {
+			s.set(pad[0], 1, pad[1], Blocks.LILY_PAD.defaultBlockState());
+		}
+		s.set(8, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		// the arbour over the far end
+		for (int z : new int[] {0, 6}) {
+			for (int y = 1; y <= 3; y++) {
+				s.set(0, y, z, TIMBER);
+				s.set(2, y, z, TIMBER);
+			}
+		}
+		BlockState wisteria = com.jaymoskingdoms.blossomland.BlossomWilds.WISTERIA.defaultBlockState();
+		for (int z = 0; z <= 6; z++) {
+			s.set(0, 4, z, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(2, 4, z, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(1, 4, z, k.roofSlab);
+			if (z >= 1 && z <= 5) {
+				s.set(z % 2 == 0 ? 0 : 2, 3, z, wisteria);
+				if (z % 3 == 0) {
+					s.set(1, 3, z, wisteria);
+				}
+			}
+		}
+		return s.done();
+	}
+
+	/**
+	 * The bath house (9 x 9): a stone floor round a pool one block deep, open on three sides under a hipped roof on four
+	 * posts, a screen along the back. Its water is still, so a soak in it counts as a bath ({@link Lifestyle}).
+	 */
+	static Blueprint bathHouse(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("bath_house", 9, 9, 10);
+		for (int x = 0; x <= 8; x++) {
+			for (int z = 0; z <= 8; z++) {
+				boolean pool = x >= 2 && x <= 6 && z >= 3 && z <= 5;
+				s.set(x, 0, z, pool ? Blocks.WATER.defaultBlockState() : k.p.wall());
+			}
+		}
+		for (int x : new int[] {1, 7}) {
+			for (int z : new int[] {1, 7}) {
+				for (int y = 1; y <= 3; y++) {
+					s.set(x, y, z, TIMBER);
+				}
+			}
+		}
+		for (int i = 1; i <= 7; i++) {
+			s.set(i, 4, 1, Buildings.Sketch.lying(BEAM, Direction.Axis.X));
+			s.set(i, 4, 7, Buildings.Sketch.lying(BEAM, Direction.Axis.X));
+			s.set(1, 4, i, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+			s.set(7, 4, i, Buildings.Sketch.lying(BEAM, Direction.Axis.Z));
+		}
+		for (int x = 2; x <= 6; x++) {
+			s.set(x, 1, 7, k.p.planks());
+			s.set(x, 2, 7, PAPER);
+			s.set(x, 3, 7, k.infill);
+		}
+		s.hip(0, 8, 0, 8, 4, k.roofStairs, k.roofSlab);
+		s.set(1, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(7, 1, 0, BlossomBlocks.STONE_LANTERN.defaultBlockState());
+		s.set(4, 7, 4, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/**
+	 * The pagoda (11 x 11, 20 high): three storeys, each standing a block inside the one below under its own skirt of
+	 * roof, red posts, shoji and plaster, an altar on the ground floor and a spire on top. A walled town's building.
+	 */
+	static Blueprint pagoda(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("pagoda", 11, 11, 21);
+		BlockState stone = Blocks.STONE_BRICKS.defaultBlockState();
+		for (int x = 1; x <= 9; x++) {
+			for (int z = 1; z <= 9; z++) {
+				s.set(x, 0, z, stone);
+			}
+		}
+		// each storey: its walls' first and last column, its first and last row
+		int[][] storeys = {{2, 8, 1, 4}, {3, 7, 6, 9}, {4, 6, 11, 13}};
+		for (int[] st : storeys) {
+			frame(s, k, st[0], st[1], st[0], st[1], st[2], st[3], VERMILION);
+			if (st[2] > 1) {
+				ceiling(s, Blocks.DARK_OAK_PLANKS.defaultBlockState(), st[0] - 1, st[1] + 1, st[0] - 1, st[1] + 1, st[2] - 1);
+			}
+		}
+		skirt(s, 0, 10, 0, 10, 4, 2, k.roofStairs);
+		skirt(s, 1, 9, 1, 9, 9, 2, k.roofStairs);
+		s.hip(2, 8, 2, 8, 13, k.roofStairs, k.roofSlab);
+		s.door(5, 1, 2, Direction.NORTH, BlossomFurnishings.SLIDING_DOOR);
+		s.set(5, 1, 7, Healing.SHRINE.defaultBlockState());
+		s.set(5, 4, 5, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		s.set(5, 17, 5, Blocks.STONE_BRICK_WALL.defaultBlockState());
+		s.set(5, 18, 5, Blocks.STONE_BRICK_WALL.defaultBlockState());
+		s.set(5, 19, 5, named("lightning_rod", Blocks.IRON_BARS));
+		return s.done();
+	}
+
+	/** How much of a ruined minka is gone, by height: its floor stays, the first row mostly, the walls by halves, the roof nearly all. */
+	static final float RUIN_LOW = 0.15F, RUIN_WALL = 0.45F, RUIN_ROOF = 0.8F;
+	/** The share of a ruin's mats that have rotted to earth. */
+	static final float RUIN_ROT = 0.4F;
+
+	/**
+	 * A ruined minka: a house of {@code k} with its door, bedding and lanterns gone, its hearth cold, more of it fallen
+	 * the higher it stood, and its tansu still against the wall (the one who places it fills that).
+	 */
+	static Blueprint ruin(Buildings.Kit k, net.minecraft.util.RandomSource random) {
+		Blueprint whole = minka(k);
+		java.util.List<Blueprint.Placement> left = new java.util.ArrayList<>();
+		for (Blueprint.Placement p : whole.blocks()) {
+			BlockState state = p.state();
+			Block block = state.getBlock();
+			if (block instanceof net.minecraft.world.level.block.DoorBlock || block instanceof net.minecraft.world.level.block.BedBlock
+				|| block == BlossomBlocks.PAPER_LANTERN || state.is(BONSAI.getBlock())) {
+				continue;
+			}
+			int y = p.offset().getY();
+			float gone = y == 0 || block == BlossomFurnishings.TANSU ? 0.0F : y == 1 ? RUIN_LOW : y <= 3 ? RUIN_WALL : RUIN_ROOF;
+			if (random.nextFloat() < gone) {
+				continue;
+			}
+			if (block == BlossomFurnishings.HEARTH) {
+				state = state.setValue(net.minecraft.world.level.block.CampfireBlock.LIT, false);
+			} else if (block == BlossomBlocks.TATAMI && random.nextFloat() < RUIN_ROT) {
+				state = Blocks.COARSE_DIRT.defaultBlockState();
+			}
+			left.add(new Blueprint.Placement(p.offset(), state));
+		}
+		return new Blueprint("blossom_ruin", whole.width(), whole.depth(), whole.height(), java.util.List.copyOf(left));
+	}
+
+	/** The watch tower's footprint (square). */
+	static final int WATCH_SIZE = 5;
+
+	/**
+	 * A watch tower (5 x 5, 11 high) out on the road: four timber legs braced with fences, a ladder up the middle of the
+	 * back, a railed deck, and a small hipped roof over a lantern. Open below, so the road runs under it.
+	 */
+	static Blueprint watchTower(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_watch", WATCH_SIZE, WATCH_SIZE, 12);
+		int last = WATCH_SIZE - 1;
+		for (int x = 0; x <= last; x++) {
+			for (int z = 0; z <= last; z++) {
+				boolean leg = (x == 0 || x == last) && (z == 0 || z == last);
+				boolean edge = x == 0 || x == last || z == 0 || z == last;
+				if (leg) {
+					for (int y = 1; y <= 8; y++) {
+						s.set(x, y, z, TIMBER);
+					}
+				}
+				// the deck, and its rail
+				if (!(x == 2 && z == last - 1)) {
+					s.set(x, 5, z, leg ? TIMBER : k.p.planks());
+				}
+				if (edge && !leg) {
+					s.set(x, 6, z, k.p.fence());
+				}
+			}
+		}
+		BlockState ladder = Buildings.Sketch.facing(Blocks.LADDER, Direction.NORTH);
+		for (int y = 1; y <= 5; y++) {
+			s.set(2, y, last - 1, ladder);
+		}
+		for (int y = 1; y <= 4; y++) {
+			s.set(2, y, last, y == 4 ? Buildings.Sketch.lying(BEAM, Direction.Axis.X) : k.p.planks());
+		}
+		s.hip(0, last, 0, last, 9, k.roofStairs, k.roofSlab);
+		s.set(2, 10, 2, Buildings.Sketch.hanging(BlossomBlocks.PAPER_LANTERN));
+		return s.done();
+	}
+
+	/** A row of ramie (1 x {@link #PADDY_DEPTH}) on tilled ground along a paddy's bund, which keeps it wet: half grown, and one stand ready to cut. */
+	static Blueprint fibreRow() {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_fibre", 1, PADDY_DEPTH, 3);
+		for (int z = 0; z < PADDY_DEPTH; z++) {
+			s.set(0, 0, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE, 7));
+			s.set(0, 1, z, com.jaymoskingdoms.blossomland.BlossomDress.RAMIE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.CropBlock.AGE, z == PADDY_DEPTH / 2 ? 7 : 3 + z % 3));
+		}
+		return s.done();
+	}
+
+	/**
+	 * A wayside shrine (3 x 3): an altar on a stone footing between two red posts, under a thatch cap. {@code altar} is
+	 * the altar as it stands (given to one of the eight, or plain).
+	 */
+	static Blueprint wayside(BlockState altar) {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_wayside", 3, 3, 5);
+		for (int x = 0; x < 3; x++) {
+			for (int z = 0; z < 3; z++) {
+				s.set(x, 0, z, Blocks.STONE_BRICKS.defaultBlockState());
+				s.set(x, 3, z, BlossomBlocks.THATCH_SLAB.defaultBlockState());
+			}
+		}
+		for (int x : new int[] {0, 2}) {
+			s.set(x, 1, 2, VERMILION);
+			s.set(x, 2, 2, VERMILION);
+		}
+		s.set(1, 1, 1, altar);
 		return s.done();
 	}
 

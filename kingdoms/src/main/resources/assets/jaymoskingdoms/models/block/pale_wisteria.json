@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "jaymoskingdoms:block/pale_wisteria"
+  }
+}

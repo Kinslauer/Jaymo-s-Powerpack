@@ -640,13 +640,19 @@ client half is `client/BeamClashClient`.
   inside one tick sends both; the server routes Hold packets to `BeamClash.input` first while clashing.
 - Every number is a constant at the top of `BeamClash` (and the look at the top of `BeamClashClient`). Not playtested.
 
-## Airflow sense (always on; client `WindAirSense`)
+## Airflow sense (crouch and hold V; client `WindAirSense`)
 
 Jung's idea: a Wind user feels the air that moving things stir. It is information, not strength.
 
-- **What you see:** round the crosshair, a faint pale streak on the side each moving thing is on (ahead is up, behind is
+- **Turning it on** (Jung's call; it was always on, and too faint to notice): crouch, then hold V. That hold of V
+  is the sense's: the core reports V as up (`WindAirSense.route`, in `JaymosPowersClient`'s key loop, beside the Flame
+  Avatar's), so V's own channel doesn't start, and it stays the sense's until V is let go. Standing up mid-hold stops
+  the sense. A faint ring of `RING_TICKS` 12 ticks round the crosshair shows it is on, even when nothing stirs. V
+  without crouching is V's ability as before.
+- **What you see:** round the crosshair, a pale streak (five dots, each 3 pixels across with a dark edge, never
+  fainter than `MIN_ALPHA` 130 of 255 at its first dot) on the side each moving thing is on (ahead is up, behind is
   down, like the incoming-blow cues). It is brighter the faster the thing moves and the nearer it is, thicker for
-  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall), and fades over about a second once it stops (`FADE`
+  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall; 5 pixels), and fades over about a second once it stops (`FADE`
   0.05 a tick). At most `MAX_MARKS` 12 streaks, the strongest.
 - **What it feels:** any living thing but you (and your mount or rider) within reach that moved `MOVE_MIN` 0.08 b/t or
   more this tick, through walls, in the dark, invisible or not. Full strength at `MOVE_FULL` 0.3 b/t.
@@ -663,7 +669,10 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
 
 ### Testing (airflow sense)
-1. `/power set @s wind`. Stand in the open with zombies or animals walking near: a streak shows round the crosshair on
+0. Stand still, crouch and hold V: a faint ring of ticks round the crosshair, and V's ability doesn't charge. Let go
+   of V: the ring goes. Hold V without crouching: V's ability charges as before, no ring. Crouch + hold V, then stand
+   up still holding V: the ring goes and V still doesn't charge until you let go and press again.
+1. `/power set @s wind`. Crouch and hold V in the open with zombies or animals walking near: a streak shows round the crosshair on
    each one's side and follows it as you turn. When one stops, its streak fades in about a second.
 2. Put a wall between you and a walking zombie: the streak still shows.
 3. A second player walks near you: a streak. They sneak or stand still: nothing.
@@ -716,9 +725,11 @@ Jung's move: a way down and a way to clear a landing, not a damage move.
   packet, key or client code. For a fully mastered Wind user this takes one thing away: a Tempest Kick aimed steeply
   down from 6 or more blocks up is now the dive.
 - **The plunge:** the server sets your speed every tick, down from `DIVE_SPEED_START` 0.7 to `DIVE_SPEED` 1.6 b/t
-  (`DIVE_ACCEL` 0.09 a tick), with `STEER` 0.45 of your aim's sideways heading. You spin (the Zephyr's spin pose,
-  `WindMoves.SPIN`, renewed while the dive lasts) and two strands of cloud wind round you, with a breeze whirl every
-  10 ticks. It runs at most `MAX_TICKS` 100.
+  (`DIVE_ACCEL` 0.09 a tick), with `STEER` 0.45 of your aim's sideways heading. You go down head first, spinning
+  about your own length like a drill, arms together ahead and legs together behind (its own pose, `WindMoves.DIVE`,
+  drawn by `WindMovePose`: `DIVE_TIP` 172 degrees over, `DIVE_SPIN` 24 degrees a tick, tipped over in `DIVE_EASE` 6
+  ticks). The slow belly-down tip a falling Wind user gets (`FreefallPose`) is off while it lasts. Two strands of
+  cloud wind round you, with a breeze whirl every 10 ticks. It runs at most `MAX_TICKS` 100.
 - **Pulling out:** taking flight again (R) later than `FLIGHT_GRACE` 10 ticks into the dive ends it with no ring.
   Water, a mount, being picked up or going down end it too.
 - **The landing:** a ring of wind runs out along the ground. By how far you fell (full at `FULL_DROP` 30 blocks):
@@ -736,6 +747,10 @@ Jung's move: a way down and a way to clear a landing, not a damage move.
 - There is no HUD chip for its cooldown yet.
 
 ### Testing (Spiral Dive)
+
+0. F5, then dive: within a third of a second you are upside down, head toward the ground, arms pointing down past
+   your head, spinning about your own length; never flat on your belly. A second player sees the same. First person
+   is unchanged. Out of wind flight (R, then dive): the same, with no moment lying flat first.
 1. `/power set @s wind`, survival. Fly up 30 blocks or more, look straight down and tap X: the flight drops, you plunge
    spinning with the cloud spiral round you, and land in a ring of wind. You can't walk or jump for about 1.5 s.
 2. Zombies near the landing: thrown outward and up, a little damage. A fire near the landing goes out.

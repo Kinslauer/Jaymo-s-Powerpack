@@ -52,8 +52,10 @@ public final class InteractActions {
 	public static final String HELM = Helmsmen.HELM, HIRE_HELM = Helmsmen.HIRE;
 	/** Buy Passage: aboard a blossom trader lying off a harbour ({@link BlossomTraders}). */
 	public static final String PASSAGE = BlossomTraders.ACTION;
+	/** Ask About Steel: a Blossom smith tells the next step of their steel ({@link BlossomSteel}). */
+	public static final String STEEL = BlossomSteel.ACTION;
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE, STEEL);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -123,6 +125,7 @@ public final class InteractActions {
 			case HELM -> Helmsmen.offersHelm(player, v);
 			case HIRE_HELM -> Helmsmen.offersHire(player, v);
 			case PASSAGE -> BlossomTraders.offers(player, v);
+			case STEEL -> BlossomSteel.offers(player, v);
 			default -> false;
 		};
 	}
@@ -235,6 +238,10 @@ public final class InteractActions {
 			}
 			case PASSAGE -> {
 				BlossomTraders.talk(player, v);
+				return null;
+			}
+			case STEEL -> {
+				BlossomSteel.talk(player, v);
 				return null;
 			}
 			case SEAL, DEED -> {

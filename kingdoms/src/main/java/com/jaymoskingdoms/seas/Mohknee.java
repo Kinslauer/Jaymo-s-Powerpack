@@ -144,10 +144,11 @@ public final class Mohknee {
 
 	// ---- operators ------------------------------------------------------------------------------------------------------
 
-	/** {@code /kingdom mohknee}: where the land lies from here; {@code go}: sets you down on its western shore; {@code map [blocks per pixel] [reach] [x z]}: a picture of what the world makes of it. */
+	/** {@code /kingdom mohknee}: where the land lies from here; {@code go}: sets you down on its western shore; {@code palace}: where the nearest sunken palace stands ({@code palace build}: one on the seabed here, for testing); {@code map [blocks per pixel] [reach] [x z]}: a picture of what the world makes of it. */
 	public static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("mohknee").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(Mohknee::where)
 			.then(Commands.literal("go").executes(Mohknee::go))
+			.then(Commands.literal("palace").executes(Mohknee::palace).then(Commands.literal("build").executes(Mohknee::buildPalace)))
 			.then(Commands.literal("map").executes(c -> map(c, 48, edge() + 1500, CENTRE_X, CENTRE_Z))
 				.then(Commands.argument("scale", IntegerArgumentType.integer(4, 256))
 					.executes(c -> map(c, IntegerArgumentType.getInteger(c, "scale"), edge() + 1500, CENTRE_X, CENTRE_Z))
@@ -185,6 +186,25 @@ public final class Mohknee {
 		player.teleportTo(level, x + 0.5, y, CENTRE_Z + 0.5, java.util.Set.of(), -90.0F, 0.0F, false);
 		int at = x;
 		c.getSource().sendSuccess(() -> Component.literal("Set down on Mohknee's western shore at " + at + ", " + y + ", " + CENTRE_Z + "."), false);
+		return 1;
+	}
+
+	private static int palace(CommandContext<CommandSourceStack> c) {
+		Vec3 at = c.getSource().getPosition();
+		ServerLevel level = c.getSource().getServer().overworld();
+		BlockPos site = com.jaymoskingdoms.blossomland.SunkenPalace.nearest(level, at.x, at.z);
+		String text = site == null ? "This world has no sunken palace (no deep water off Mohknee on any of its headings)."
+			: "The nearest sunken palace stands on the seabed under " + site.getX() + ", " + site.getZ() + " ("
+				+ com.jaymoskingdoms.blossomland.SunkenPalace.sites(level).size() + " in this world). It is built when someone first comes near.";
+		c.getSource().sendSuccess(() -> Component.literal(text), false);
+		return site == null ? 0 : 1;
+	}
+
+	private static int buildPalace(CommandContext<CommandSourceStack> c) {
+		ServerLevel level = c.getSource().getLevel();
+		BlockPos floor = level.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, BlockPos.containing(c.getSource().getPosition()));
+		com.jaymoskingdoms.blossomland.SunkenPalace.build(level, floor, level.getRandom());
+		c.getSource().sendSuccess(() -> Component.literal("A sunken palace built at " + floor.getX() + ", " + floor.getY() + ", " + floor.getZ() + "."), true);
 		return 1;
 	}
 

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "turned=false": {
+      "model": "jaymoskingdoms:block/maple_leaves"
+    },
+    "turned=true": {
+      "model": "jaymoskingdoms:block/maple_leaves_turned"
+    }
+  }
+}

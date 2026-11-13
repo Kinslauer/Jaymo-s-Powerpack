@@ -196,6 +196,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		ShipTalk.register();
 		Helmsmen.register();
 		BlossomTraders.register();
+		BlossomSteel.register();
 		ZFighterFolk.register();
 		// 0.7.130: the purist ruler's townsfolk mind a stranger's blood
 		Purists.register();

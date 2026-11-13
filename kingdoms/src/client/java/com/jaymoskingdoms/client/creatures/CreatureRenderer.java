@@ -25,7 +25,9 @@ final class CreatureRenderer<T extends Mob> extends MobRenderer<T, CreatureState
 	private final CreatureModel.Spec spec;
 	private final Identifier texture;
 	private final int lieAt, flapsFrom;
-	private final boolean glows;
+	private final boolean glows, grows;
+	/** The share of its full size a creature that grows starts at. */
+	private static final float GROWS_FROM = 0.4F;
 
 	CreatureRenderer(EntityRendererProvider.Context context, String name, CreatureModel.Spec spec, float shadow, int lieAt, int flapsFrom, boolean glows) {
 		super(context, new CreatureModel(CreatureModel.layer(spec).bakeRoot(), spec), shadow);
@@ -34,6 +36,7 @@ final class CreatureRenderer<T extends Mob> extends MobRenderer<T, CreatureState
 		this.lieAt = lieAt;
 		this.flapsFrom = flapsFrom;
 		this.glows = glows;
+		this.grows = name.equals("koi");
 		if (name.equals("clear_cube")) {
 			this.addLayer(new Floating(this));
 		}
@@ -69,7 +72,9 @@ final class CreatureRenderer<T extends Mob> extends MobRenderer<T, CreatureState
 
 	@Override
 	protected void scale(CreatureState state, PoseStack poseStack) {
-		poseStack.scale(this.spec.scale(), this.spec.scale(), this.spec.scale());
+		// a koi is drawn by how well it has been kept, from a fry to a full fish
+		float scale = this.grows ? this.spec.scale() * (GROWS_FROM + (1.0F - GROWS_FROM) * state.full) : this.spec.scale();
+		poseStack.scale(scale, scale, scale);
 	}
 
 	@Override

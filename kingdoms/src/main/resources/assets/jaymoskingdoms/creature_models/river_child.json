@@ -1,0 +1,169 @@
+{
+ "width": 64,
+ "height": 64,
+ "scale": 0.8,
+ "translucent": false,
+ "parts": [
+  {
+   "name": "body",
+   "parent": null,
+   "pivot": [
+    0,
+    16,
+    0
+   ],
+   "box": [
+    -3,
+    -7,
+    -2,
+    6,
+    7,
+    4
+   ],
+   "uv": [
+    44,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "head",
+   "parent": "body",
+   "pivot": [
+    0,
+    -7,
+    0
+   ],
+   "box": [
+    -3.5,
+    -5,
+    -3.5,
+    7,
+    5,
+    7
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "neck",
+   "rot": null
+  },
+  {
+   "name": "fringe",
+   "parent": "head",
+   "pivot": [
+    0,
+    -5,
+    0
+   ],
+   "box": [
+    -4,
+    -1,
+    -4,
+    8,
+    2,
+    8
+   ],
+   "uv": [
+    24,
+    12
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "armR",
+   "parent": "body",
+   "pivot": [
+    -4,
+    -6,
+    0
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    10,
+    2
+   ],
+   "uv": [
+    28,
+    0
+   ],
+   "anim": "armR",
+   "rot": null
+  },
+  {
+   "name": "armL",
+   "parent": "body",
+   "pivot": [
+    4,
+    -6,
+    0
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    10,
+    2
+   ],
+   "uv": [
+    36,
+    0
+   ],
+   "anim": "armL",
+   "rot": null
+  },
+  {
+   "name": "legR",
+   "parent": null,
+   "pivot": [
+    -1.5,
+    16,
+    0
+   ],
+   "box": [
+    -1.5,
+    0,
+    -1.5,
+    3,
+    8,
+    3
+   ],
+   "uv": [
+    0,
+    12
+   ],
+   "anim": "legR",
+   "rot": null
+  },
+  {
+   "name": "legL",
+   "parent": null,
+   "pivot": [
+    1.5,
+    16,
+    0
+   ],
+   "box": [
+    -1.5,
+    0,
+    -1.5,
+    3,
+    8,
+    3
+   ],
+   "uv": [
+    12,
+    12
+   ],
+   "anim": "legL",
+   "rot": null
+  }
+ ]
+}

@@ -21,6 +21,8 @@ import net.minecraft.world.entity.HumanoidArm;
  * <li>the Gale Barrier: both arms flung out to the sides at shoulder height;</li>
  * <li>Zephyr's Breath: spinning round in the spiral, arms and legs loose and trailing;</li>
  * <li>Cyclone Lance: the lead arm drawn far back, the other aiming, body wound up; then the throw.</li>
+ * <li>(Jung) the Spiral Dive: tipped right over, head first, arms together ahead like a spear's point and legs together
+ * behind, the whole body spinning about its own length like a drill.</li>
  * </ul>
  * Turning the whole body (twists and the spin) is done in the PoseStack; the head is turned back against a twist so the
  * eyes stay on the target.
@@ -38,6 +40,12 @@ final class WindMovePose {
 	private static final float PUSH_TWIST = 28.0F, LANCE_TWIST = 35.0F;
 	/** The spin: degrees a tick, and the forward tip into it. */
 	private static final float SPIN_RATE = 40.0F, SPIN_TIP = 12.0F;
+	/**
+	 * The Spiral Dive: how far over the body tips (degrees; 180 is straight down, a little less keeps the head leading
+	 * the way it steers), how fast it spins about its own length (degrees a tick: a turn and a third a second), and how
+	 * long it takes to tip over (ticks).
+	 */
+	private static final float DIVE_TIP = 172.0F, DIVE_SPIN = 24.0F, DIVE_EASE = 6.0F;
 
 	private WindMovePose() {
 	}
@@ -53,6 +61,11 @@ final class WindMovePose {
 
 	/** How much of the pose shows: eased in at the start and, for a timed one, out at the end. */
 	private static float amount(Pose p) {
+		if (p.kind() == WindMoves.DIVE) {
+			// tipped over once and held until the dive ends
+			float over = Mth.clamp(p.t() / DIVE_EASE, 0.0F, 1.0F);
+			return over * over * (3.0F - 2.0F * over);
+		}
 		float in = Mth.clamp(p.t() / EASE, 0.0F, 1.0F);
 		float length = switch (p.kind()) {
 			case WindMoves.PUSH -> WindMoves.PUSH_TICKS;
@@ -96,6 +109,15 @@ final class WindMovePose {
 			poseStack.rotateDegrees(Axis.YP, p.t() * SPIN_RATE * a);
 			poseStack.translate(0.0F, h, 0.0F);
 			poseStack.rotateDegrees(Axis.XP, -SPIN_TIP * a);
+			poseStack.translate(0.0F, -h, 0.0F);
+			return;
+		}
+		if (p.kind() == WindMoves.DIVE) {
+			// about the body's middle: over, head first (a negative turn about X tips the top forward), then round its own length
+			float h = state.boundingBoxHeight * 0.5F;
+			poseStack.translate(0.0F, h, 0.0F);
+			poseStack.rotateDegrees(Axis.XP, -DIVE_TIP * a);
+			poseStack.rotateDegrees(Axis.YP, p.t() * DIVE_SPIN * a);
 			poseStack.translate(0.0F, -h, 0.0F);
 			return;
 		}
@@ -152,6 +174,16 @@ final class WindMovePose {
 				pose(h.rightLeg, 0.3F - flutter, 0.0F, 0.35F, a);
 				pose(h.leftLeg, 0.15F + flutter, 0.0F, -0.35F, a);
 				pose(h.head, 0.15F, 0.0F, 0.0F, a);
+			}
+			case WindMoves.DIVE -> {
+				// a spear: both arms straight past the head, hands together, legs together and trailing, eyes on the ground
+				float shiver = Mth.sin(state.ageInTicks * 1.7F) * 0.03F;
+				// (an arm raised past the head swings the other way about Z: + brings the right one in)
+				pose(h.rightArm, -Mth.PI + 0.08F, 0.0F, 0.22F + shiver, a);
+				pose(h.leftArm, -Mth.PI + 0.08F, 0.0F, -0.22F - shiver, a);
+				pose(h.rightLeg, 0.06F, 0.0F, 0.02F, a);
+				pose(h.leftLeg, 0.06F, 0.0F, -0.02F, a);
+				pose(h.head, -0.55F, 0.0F, 0.0F, a);
 			}
 			case WindMoves.LANCE -> {
 				float thrown = smooth(WindMoves.LANCE_WINDUP, WindMoves.LANCE_WINDUP + 2.5F, t);
