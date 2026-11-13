@@ -11,9 +11,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Spooky Doors takes the use key pressed on its door for a drag (the mouse swings the door), so the click never reaches the
- * lock. On a door locked against this player the press is left alone: it's an ordinary use, which the lock answers (its
- * lockpicking game, or "locked up for the night") as on any locked door. Skipped without Spooky Doors.
+ * Spooky Doors takes the use key pressed on its door for a drag (the mouse swings the door partway), so a click no longer
+ * opened or shut it, and never reached the lock. Andy (2026-11-13): "can everyone also open doors with a click like the
+ * old function?" A plain click is an ordinary use again: the door swings fully open or shut (Spooky Doors' own creak), and
+ * a locked door answers as any locked door does (its lockpicking game, or "locked up for the night"). Sneaking while you
+ * press use still drags the door partway, on a door with no lock fitted (sneaking at a lock is for its key). Skipped
+ * without Spooky Doors.
  */
 @Pseudo
 @Mixin(targets = "net.blay09.mods.spookydoors.client.SpookyDoorsClient", remap = false)
@@ -22,7 +25,7 @@ abstract class SpookyDoorsDragLockMixin {
 	private static final int PRESS = 1;
 
 	@Inject(method = "handleUseInput(I)Z", at = @At("HEAD"), cancellable = true, require = 0)
-	private static void jaymoskingdoms$locked(int action, CallbackInfoReturnable<Boolean> cir) {
+	private static void jaymoskingdoms$click(int action, CallbackInfoReturnable<Boolean> cir) {
 		if (action != PRESS) {
 			return;
 		}
@@ -30,8 +33,8 @@ abstract class SpookyDoorsDragLockMixin {
 		if (mc.level == null || mc.player == null || !(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) {
 			return;
 		}
-		Locks.Fitted f = Locks.lockOn(mc.level, hit.getBlockPos());
-		if (f != null && f.locked() && !mc.player.isCreative() && !Locks.holdsKey(mc.player, f.key())) {
+		if (!mc.player.isShiftKeyDown() || Locks.lockOn(mc.level, hit.getBlockPos()) != null) {
+			// a click: the door opens or shuts whole, or its lock answers
 			cir.setReturnValue(false);
 		}
 	}
