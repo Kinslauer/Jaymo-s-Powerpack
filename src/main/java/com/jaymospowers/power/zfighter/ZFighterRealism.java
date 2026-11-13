@@ -49,6 +49,8 @@ public final class ZFighterRealism {
 	static final String AFTERLIFE_SETTING = "afterlife";
 	/** (0.20.26) {@code death_by_cause=true} (the default): a player's death is rolled on its cause (Mortality); and {@code final_odds}, a scale on those odds. */
 	static final String DEATH_SETTING = "death_by_cause", ODDS_SETTING = "final_odds";
+	/** {@code pvp_ability_cap}: the most of a player's full health one ability hit from another player may take (0, the default: no cap; {@code mortal/PvpCap}). */
+	static final String PVP_CAP_SETTING = "pvp_ability_cap";
 
 	/** What a ki attack and any other blow do (multiplied). */
 	static final float KI_DAMAGE = 2.0F;
@@ -70,6 +72,7 @@ public final class ZFighterRealism {
 	private static boolean afterlife = true;
 	private static boolean deathByCause = true;
 	private static float finalOdds = 1.0F;
+	private static float pvpAbilityCap;
 	private static final Map<UUID, Float> LAST_HEALTH = new HashMap<>();
 
 	private ZFighterRealism() {
@@ -101,6 +104,11 @@ public final class ZFighterRealism {
 	}
 
 	/** (0.17.62) Whether a Z Fighter's death takes him to the Other World ({@code afterlife} in the server properties; on by default). */
+	/** The share of a player's full health one ability hit from another player may take (0: no cap). */
+	public static float pvpAbilityCap() {
+		return pvpAbilityCap;
+	}
+
 	public static boolean afterlife() {
 		return afterlife;
 	}
@@ -204,8 +212,13 @@ public final class ZFighterRealism {
 				} catch (NumberFormatException e) {
 					finalOdds = 1.0F;
 				}
+				try {
+					pvpAbilityCap = Math.clamp(Float.parseFloat(properties.getProperty(PVP_CAP_SETTING, "0").trim()), 0.0F, 1.0F);
+				} catch (NumberFormatException e) {
+					pvpAbilityCap = 0.0F;
+				}
 				if (properties.getProperty(AFTERLIFE_SETTING) == null || properties.getProperty(DEATH_SETTING) == null
-					|| properties.getProperty(ODDS_SETTING) == null) {
+					|| properties.getProperty(ODDS_SETTING) == null || properties.getProperty(PVP_CAP_SETTING) == null) {
 					save();
 				}
 			} else {
@@ -213,6 +226,7 @@ public final class ZFighterRealism {
 				afterlife = true;
 				deathByCause = true;
 				finalOdds = 1.0F;
+				pvpAbilityCap = 0.0F;
 				save();
 			}
 		} catch (IOException e) {
@@ -227,6 +241,7 @@ public final class ZFighterRealism {
 		properties.setProperty(AFTERLIFE_SETTING, Boolean.toString(afterlife));
 		properties.setProperty(DEATH_SETTING, Boolean.toString(deathByCause));
 		properties.setProperty(ODDS_SETTING, Float.toString(finalOdds));
+		properties.setProperty(PVP_CAP_SETTING, Float.toString(pvpAbilityCap));
 		try {
 			Files.createDirectories(file.getParent());
 			try (Writer writer = Files.newBufferedWriter(file)) {
@@ -235,7 +250,8 @@ public final class ZFighterRealism {
 					+ ", natural healing x" + HEALTH_REGEN + " in a fight, and hard blows may break limbs (docs/Abilities.md, Realistic mode). "
 					+ "afterlife=false stops a Z Fighter who dies from waking in the Other World (default true). "
 					+ "death_by_cause=false turns off death by cause (a death's chance to be final, else waking left for dead; default true), "
-					+ "final_odds scales those chances (default 1.0).");
+					+ "final_odds scales those chances (default 1.0). "
+					+ "pvp_ability_cap is the most of a player's full health one ability hit from another player may take (0.25 = a quarter; 0 = no cap, the default).");
 			}
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Couldn't write {}", file, e);

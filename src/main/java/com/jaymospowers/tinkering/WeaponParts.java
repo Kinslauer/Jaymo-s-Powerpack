@@ -41,7 +41,9 @@ public final class WeaponParts {
 		GUARD_ROD(PartType.CROSSGUARD, PartType.TOOL_HANDLE), GUARD_TOUGH(PartType.CROSSGUARD, PartType.TOUGH_HANDLE),
 		BINDING(PartType.TOOL_BINDING), ALONE(),
 		/** (0.18.50) The Sealed Helm: its seal and a plain glass block, nothing else. */
-		GLASS(Items.GLASS);
+		GLASS(Items.GLASS),
+		/** The chain axe: a Tool Handle and a length of chain. */
+		ROD_CHAIN(Items.IRON_CHAIN, PartType.TOOL_HANDLE);
 
 		public final List<PartType> parts;
 		/** (0.18.50) A plain item that goes in beside the head and the parts (a glass block), or null. */
@@ -54,6 +56,11 @@ public final class WeaponParts {
 
 		Assembly(Item extra) {
 			this.parts = List.of();
+			this.extra = extra;
+		}
+
+		Assembly(Item extra, PartType... parts) {
+			this.parts = List.of(parts);
 			this.extra = extra;
 		}
 	}
@@ -275,6 +282,8 @@ public final class WeaponParts {
 		add(new Kind("caltrops_blank", "jaymospowers:caltrops", Scheme.SINGLE, 4 * Molten.NUGGET, Assembly.ALONE, 4));
 		add(new Kind("dart_tip_blank", "jaymospowers:bleeding_dart", Scheme.SINGLE, 3 * Molten.NUGGET, Assembly.ALONE, 4));
 		add(new Kind("trap_jaws_blank", "jaymospowers:bear_trap", Scheme.SINGLE, 3 * INGOT, Assembly.ALONE, 1));
+		// the axe on a chain (mortal/ChainAxeItem)
+		add(new Kind("chain_axe_head", "jaymospowers:chain_axe", Scheme.SINGLE, 3 * INGOT, Assembly.ROD_CHAIN, 1));
 		java.util.Set<String> found = new java.util.HashSet<>(KINGS);
 		found.addAll(PATRONS);
 		found.addAll(BANES);

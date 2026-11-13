@@ -237,7 +237,12 @@ public final class Powers {
 				}
 				// ((0.17.183) acting: what it moves of someone else is Will Over Flesh's to lessen)
 				if (!paused(player)) {
-					com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+					acting++;
+					try {
+						com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.tick(player));
+					} finally {
+						acting--;
+					}
 				}
 				Mastery.tick(player);
 				continue;
@@ -282,11 +287,23 @@ public final class Powers {
 		}
 	}
 
+	/** How deep the server is inside a power's own code (its tick, a key of its): harm dealt in there is the power's. */
+	private static int acting;
+
+	/** Whether a power's tick or key is running right now ({@code mortal/PvpCap}). */
+	public static boolean actingNow() {
+		return acting > 0;
+	}
+
 	static void key(ServerPlayer player, PowerKey key, boolean down) {
 		Power power = of(player);
 		// (0.17.108) no power of their own: R is a swallowed one's
 		if (power == null && key == PowerKey.ABILITY_1 && SwallowedPower.key(player, down)) {
 			return;
+		}
+		// no power at all: the four keys are the moves anyone has
+		if (power == null) {
+			com.jaymospowers.mortal.MortalKit.key(player, key, down);
 		}
 		if (power != null && !Mastery.isUsable(player, key)) {
 			if (down) {
@@ -309,7 +326,12 @@ public final class Powers {
 		PowerInput.set(player, key, down);
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			// a broken one throws the aim off
-			LimbUse.aimed(player, need, () -> com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.onKey(player, key, down)));
+			acting++;
+			try {
+				LimbUse.aimed(player, need, () -> com.jaymospowers.core.wounds.WillSkill.acting(player, () -> power.onKey(player, key, down)));
+			} finally {
+				acting--;
+			}
 			if (down) {
 				Mastery.used(player);
 				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);

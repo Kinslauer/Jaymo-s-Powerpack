@@ -125,6 +125,10 @@ public final class SpiritSickness {
 			player.setAttached(Spirits.SICK, sick.pushed(PUSH_BRUSH));
 			return;
 		}
+		if (!com.jaymoskingdoms.PowersCompat.brinkPast(player)) {
+			// (only deep in a real fight: a fall or a fire at death's door wakes nothing)
+			return;
+		}
 		BRUSHED.put(player.getUUID(), now);
 		if (player.getRandom().nextInt(BRUSH_CHANCE) != 0) {
 			return;

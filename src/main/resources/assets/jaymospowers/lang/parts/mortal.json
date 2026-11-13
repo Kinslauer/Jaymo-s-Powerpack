@@ -1,0 +1,11 @@
+{
+  "item.jaymospowers.chain_axe": "Chain Axe",
+  "item.jaymospowers.chain_axe_head": "Chain Axe Head",
+  "jei.jaymospowers.chain_axe": "An axe on a length of chain. Right click throws it out nine blocks and hauls it back: whoever it meets is cut and tugged toward you. Sneak as you throw to drag them all the way in. Forged at the Tool Station from a Chain Axe Head, a Tool Handle and an iron chain.",
+  "message.jaymospowers.mortal.power_strike": "Power Strike",
+  "message.jaymospowers.mortal.sweep_kick": "Sweep Kick",
+  "message.jaymospowers.mortal.second_wind": "Second Wind",
+  "message.jaymospowers.mortal.battle_cry": "Battle Cry",
+  "message.jaymospowers.mortal.wait": "%s: %s s",
+  "message.jaymospowers.mortal.second_wind.fresh": "You have breath enough."
+}
