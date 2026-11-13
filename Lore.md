@@ -944,9 +944,10 @@ guards have seen more than most and stand it better; the brave do not feel it at
 leaves a little knowledge behind, and the folk say that a woman who has seen enough starts to hear what she cannot see,
 then to see what walks unseen, and at the last to see through the faces of the hidden cursed. The other side notices
 those who look back at it, though: its wounds can follow you into sleep as a **living nightmare**, and you wake with
-the pale fliers of the night sky coming at your face, gone the instant before they strike. Nobody else sees them. The
-phantoms were only ever this, a thing of sleepless and haunted minds; no living phantom has been caught or killed, and
-the membrane the alchemists sell is a wraith's. A priest's or a cleric's restoration lifts the curse, as it lifts any.
+phantoms coming at your face, gone the instant before they strike. They are not the phantoms that hunt the sleepless
+from the night sky, which are flesh enough to kill and skin; these are the nightmare's own, and nobody else sees them
+but those attuned to ki, who can watch another's nightmare circle them and know it for what it is. A priest's or a
+cleric's restoration lifts the curse, as it lifts any.
 
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
