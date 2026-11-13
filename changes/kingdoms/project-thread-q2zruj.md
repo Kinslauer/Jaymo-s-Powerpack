@@ -17,3 +17,9 @@ From two Blockbench models Andy uploaded (goblin-scout, ghost).
 - Credits: Blockbench Workshop, CC BY 4.0 (Andy); the makers' names are still to be filled in.
 - Compiled (`compileClientJava`); not played. Unseen in game: the scout's size and animation timing, the ghost's
   see-through look, whether MCA goblins answer the cackle.
+- **A ghost's voice** (`VoiceMasks.Mask.GHOST`, `VoiceRange`). Andy: "the voice changer automatically makes you sound
+  like a ghost if you speak otherwise it is muted." A player out of their body, left for dead (Powers), speaks with a ghost's
+  voice through Simple Voice Voice Changer, forced like a curse: thin, a little high, wavering, mostly echo. The voice
+  comes from where the ghost is, not the body, and the ghost hears what is said near it though its body lies out of
+  earshot. A ghost whose client has no voice changer is not heard at all. Group calls and text chat are left alone.
+  Not heard in game: the ghost voice's numbers are guesses.

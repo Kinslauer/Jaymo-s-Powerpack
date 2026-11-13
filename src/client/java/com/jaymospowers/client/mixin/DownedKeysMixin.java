@@ -63,7 +63,9 @@ abstract class DownedKeysMixin {
 	private boolean deadWhileDown() {
 		if (MOVING.contains(this.name)) {
 			LocalPlayer player = Minecraft.getInstance().player;
-			return player != null && Downed.isDowned(player) && Downed.adrift(player);
+			// (out of their body the moving keys steer the ghost, wherever the body floats: OutOfBodyClient)
+			return player != null && Downed.isDowned(player) && Downed.adrift(player)
+				&& !com.jaymospowers.client.wounds.OutOfBodyClient.drifting();
 		}
 		if (!this.name.startsWith(OURS) && !ACTING.contains(this.name)) {
 			return false;
