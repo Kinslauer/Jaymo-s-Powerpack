@@ -253,3 +253,22 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
   model); the wish is four boons (life, riches, learning, mercy), never free-form.
 - **I8** (potion clash mixin): ~45% clash chance, lowered by Wits.
 - Art: `tools/gen_fifth_p8.py`.
+
+### Patch 10
+- **E3** (Powers `Revival`, Kingdoms `CallingBack`): a final death is held up to 60 s if a reviver is near (a cleric
+  within 28 with the fallen carrying a diamond or dust; a player within 12 who knows Calling Back with dust); not for
+  beheaded, void or lava deaths; the death screen says someone may reach you; no reviver for 15 s and it goes ahead.
+  Back at 30% health, weak and slow 5 minutes, half the levels kept; not a wake-up. Chrono's R comes first, untouched.
+- **E4** (`BodyKeeping`, Kitchen `Keeping`): rite of keeping (ritual, 10 days, bodies within 6), wrap (6 days; also
+  `Freshness.preserve` on food), clerics keep nearby dead 4 days at a time; kept bodies don't rot or rise and can't
+  be raised. `BodyKeeping.isPreserved` for Speak with Dead (not on master). Also shovel graves (`Graves`, Kitchen
+  `Burial`).
+- **E5** (Powers `Limbo`, Kingdoms `Rebirths`, `Groves`, `DeathRites`): Andy's Limbo button: spectator tethered 14
+  blocks from the body in a black frame, kept across logouts; Reincarnate from Limbo by holding Backspace 3 s. Rebirth
+  within 10 days at a grove (5+ logs, 40+ leaves in 7 blocks) with the body (corpse or grave): an old druid (a still
+  villager in 35% of 128-block forest cells; bring the body to them) or the Scroll of Rebirth. New random blood
+  (not the old one, not earned or brood bloods); keeps name, knowledge, map, reputation, class, skills, inventory and
+  the body's hotbar; loses blood powers and heritage perks; wakes downed at the grove.
+- **F3** (Powers lake crust, Kingdoms `traps/Traps`, `ColdMouldBlock`, `SporeMouldBlock`, `SlimeMouldBlock`):
+  holding your breath is sneaking (air drains, spores take you when it's out); vinegar is a new item (bottle +
+  2 apples), Kitchen has none. Moulds drop themselves; textures from `tools/gen_fifth_p10.py`.

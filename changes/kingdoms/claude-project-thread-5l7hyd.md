@@ -69,4 +69,9 @@
 - **Wondrous gadgets** (`GadgetLoot`): immovable rod, climbing rope, endless jug (clean water, puts out flames), floating light, stone hound, horn of breaking (spares others' land, locked and hard blocks), bottle of endless smoke.
 - **Deck of Fates**: name how many you'll draw, then a keep with servants, a nemesis, ruin, a wish (four boons), a new class, a lost memory, a death knight's duel, and more.
 - **Potion clashes** (mixin on `PotionContents.onConsume`): a second potion while one works may cancel, double, sour or blow up in your belly (hurts you, never the ground); Wits lowers the odds.
+- **Calling back the fallen** (`CallingBack`, `DeathCompat`): within a minute of a final death, a settlement cleric (for a diamond or its dust, then rests three days) or a player with the Calling Back scroll and diamond dust can bring them back weak and sick; it isn't one of the two wake-ups.
+- **Keeping the dead** (`BodyKeeping`, rite of keeping, salt-and-herb wrap): a kept body stays fresh for days, can't be raised by necromancers, and waits for burial; the wrap also preserves food. Clerics keep the dead near them.
+- **Graves** (`Graves`, `GraveBlock`): bury a body with a shovel; dig it up and it comes back.
+- **Rebirth** (`Rebirths`, `Groves`, `DeathRites`): an old druid at a forest grove, or a player with the Scroll of Rebirth there, brings a dead-for-good player back within ten days, with the body, in a new random blood: name, memories, class, skills and belongings kept; the old blood's gifts lost.
+- **Nature's traps** (`traps/Traps`): quicksand pits in deserts and swamps; cave moulds: a cold mould that feeds on fire, a spore mould you hold your breath (sneak) past, and a slime mould that eats wood and metal and dies to fire or vinegar (new vinegar item).
 - Built; not played.

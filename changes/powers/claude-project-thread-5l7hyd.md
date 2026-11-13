@@ -8,4 +8,7 @@
 - **Clean cantrip** (`core/blood/MagicWash`): washes blood off a body's coat and gear.
 - **Bonding baubles** (`baubles/Bonds`, client `BondsScreen`): found baubles and relics do nothing until bonded on a full night's sleep (or Kingdoms' seated rest); three at most; a Bonds button on the bauble screen and tooltip lines.
 - **Boots of Long Strides and Cloak of the Depths** (`Wondrous`): found baubles.
+- **Held deaths** (`core/wounds/Revival`, mixin `RevivalRespawnMixin`): a final death with a reviver near waits up to a minute ("Someone may yet reach you"); Reincarnate still works at once.
+- **Limbo** (`Limbo`, `LimboHud`, mixin `DeathScreenLimboMixin`): a Limbo button beside Reincarnate on the final death screen: a black frame where you watch over your own body (14 blocks) while friends bury you or bring you back in a new blood; kept across logouts; hold Backspace to choose Reincarnate after all.
+- **Thin ice** (`frost/FrostFeatures.LakeCrust`): still shallow water in cold lands gets a crust of brittle ice that cracks under weight.
 - Built; not played.
