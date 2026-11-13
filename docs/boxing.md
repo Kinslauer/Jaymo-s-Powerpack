@@ -134,12 +134,12 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   style's own stance replaces the plain fists-up guard. The shapes are copied from fight footage Jung sent ("Every
   Boxing Guard Explained in 8 Minutes": its peekaboo, long guard and Philly shell parts). The arms bend at the elbow
   (`KneeBend`, as the crawl's and the climb's do), and the worn fist gear turns with the forearm.
-  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves on the cheeks, a forward crouch with the chin down, the knees bent with
+  - Arrow Slit (peekaboo): elbows in, forearms up, both gloves together in front of the chin with a slit between them, a forward crouch with the chin down, the knees bent with
     the feet flat. The shoulders and head sway from side to side without stopping; the hips and feet stay put.
   - Long Guard: the lead arm out at shoulder height, all but straight, pawing a little; the rear glove by the chin; the body
     upright, a little back, stood at an angle from the feet up (lead shoulder and lead foot forward).
-  - Bastion (Philly shell): side on with the right shoulder forward and held up by the chin, the lead forearm folded
-    across the belly, the rear glove folded up by the cheek, the weight back, the head tipped toward the rear
+  - Bastion (Philly shell): side on with the right shoulder rolled forward and up by the chin, the lead upper arm
+    hanging down and in with the forearm across the belly, the rear elbow down in front of the ribs and the glove at the chin, the weight back, the head tipped toward the rear
     shoulder with the chin tucked; it still shrugs its lead shoulder now and then.
   - Each stands on a base (`BoxingPoses.base`): feet apart, lead foot ahead, knees bent, feet flat; the bladed
     styles' toes turn with the body. Shapes after reference pictures Jung sent (Bivol, Mayweather, a peekaboo crouch).
@@ -162,6 +162,9 @@ shell): Jung's names, kept by Andy on 2026-11-11 over the brief's Close Guard an
   the legs, and the neck, head and shoulders ride the top of the trunk; a crouch or duck sinks the hips by what the
   bent legs shorten, so the feet stay on the ground. Punches lean the trunk in over the hit and sit a little into the
   knees (`JAB_LEAN`, `CROSS_LEAN`, `HOOK_LEAN`, `HOOK_TILT`, the `_DUCK`s); a punching arm keeps its own aim.
+- **No air between the parts:** the body sits `HIP_TUCK` (1 px) down over the thighs, and a turned upper arm's
+  shoulder is moved in onto the chest's side (`BoxingPoses.seat`). Elbows, knees and the waist are drawn bent with
+  their cut mitred (`KneeBend`), so they close.
 - **Evades** step in and duck, the body kept together: a slip leans off the line about the hips and goes a little
   forward with the knees bending (`SLIP_LEAN`, `SLIP_FORWARD`, `SLIP_DUCK`); a bob folds forward and sinks into the
   knees (`BOB_DUCK`, `BOB_KNEES`); the pull shifts the weight back over the rear leg, still sitting into the knees;

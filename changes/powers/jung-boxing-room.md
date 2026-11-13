@@ -32,3 +32,12 @@
   into the face; the punching arm turns with the body until it fires. A straight's windup coils the body, not the
   glove back into the chin. The Arrow Slit's gloves are a touch apart so they don't sink into the face as it leans in.
   Gassed hands hang a little further forward, off the belly.
+- (Jung, in Blockbench: "they still separate") No air between the body's parts: the body sits 1 px down over the
+  tops of the thighs (`HIP_TUCK`), and an upper arm turned off the line of the chest has its shoulder moved in so it
+  stays on the chest's side (`BoxingPoses.seat`). The Blockbench projects get a filler at each elbow, knee and the
+  waist (the game draws those joints closed already; two hinged cubes opened a wedge).
+- Bastion rebuilt on Mayweather's shell: the lead shoulder rolled forward and up, the lead upper arm hanging down
+  and swung in across the body (`BASTION_LEAD_ADDUCT`) with the forearm across the belly; the rear elbow down and in
+  front of the ribs, the glove at the chin. Its block lifts the lead shoulder and forearm higher.
+- Arrow Slit's gloves sit together in front of the chin, a slit between them, the forearms up and in (the arms are
+  too short in a Minecraft body to reach the cheeks in front of the face without going into it).

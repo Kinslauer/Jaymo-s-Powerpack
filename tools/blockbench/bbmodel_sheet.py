@@ -58,7 +58,8 @@ def main():
     for n in d["outliner"]:
         walk(n, None)
     colors = {"head": (198, 140, 104), "chest": (60, 92, 128), "belly": (52, 82, 116), "upper arm": (60, 92, 128),
-              "forearm": (198, 140, 104), "hand wrap": (226, 214, 188), "thigh": (54, 58, 74), "shin": (40, 36, 34)}
+              "forearm": (198, 140, 104), "hand wrap": (226, 214, 188), "thigh": (54, 58, 74), "shin": (40, 36, 34),
+              "elbow": (60, 92, 128), "knee": (54, 58, 74), "waist joint": (60, 92, 128)}
     anims = d["animations"]
     cols, cw, ch = 5, 170, 210
     img = Image.new("RGB", (cols * cw + 150, len(anims) * ch), (236, 232, 222))

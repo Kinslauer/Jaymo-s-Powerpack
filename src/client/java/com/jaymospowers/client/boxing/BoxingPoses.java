@@ -51,8 +51,8 @@ public final class BoxingPoses {
 	/** The elbow: this far down the arm from the shoulder (pixels; the arm reaches 10, so the forearm is as long as the upper arm). */
 	public static final float ELBOW = 5.0F;
 	/** The Arrow Slit's guard (both arms: elbows in, forearms up, gloves on the cheeks), its sway (radians, and radians a tick), and its block. */
-	static final float SLIT_PITCH = -1.6F, SLIT_IN = -0.15F, SLIT_FOLD = -0.6F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
-	static final float SLIT_BLOCK_PITCH = -1.35F, SLIT_BLOCK_IN = 0.1F, SLIT_BLOCK_FOLD = -0.9F;
+	static final float SLIT_PITCH = -1.2F, SLIT_IN = 0.25F, SLIT_FOLD = -0.8F, SLIT_SWAY = 0.12F, SLIT_SWAY_RATE = 0.14F;
+	static final float SLIT_BLOCK_PITCH = -1.3F, SLIT_BLOCK_IN = 0.25F, SLIT_BLOCK_FOLD = -0.8F;
 	/** The Arrow Slit's forward crouch (radians), standing and behind its block; the head stays up. */
 	static final float SLIT_CROUCH = 0.25F, SLIT_BLOCK_CROUCH = 0.3F;
 	/** Its rounded back: the upper half of the spine curled this much further forward than the lower (radians). */
@@ -73,7 +73,7 @@ public final class BoxingPoses {
 	 */
 	static final float LONG_SPREAD = 0.1F, LONG_STAGGER = 0.2F, LONG_KNEES = 0.2F, FEET_TURN = 0.8F;
 	/** The Bastion's lead arm: the upper arm down and a little forward, the forearm folded across the belly. Its rear glove by the cheek. */
-	static final float BASTION_LEAD_PITCH = -0.75F, BASTION_LEAD_IN = 0.3F, BASTION_LEAD_ACROSS = 1.4F, BASTION_REAR_PITCH = -1.1F, BASTION_REAR_IN = 0.2F, BASTION_REAR_FOLD = -1.2F;
+	static final float BASTION_LEAD_PITCH = -0.19F, BASTION_LEAD_IN = 0.06F, BASTION_LEAD_ACROSS = 0.5F, BASTION_REAR_PITCH = -1.17F, BASTION_REAR_IN = 0.06F, BASTION_REAR_FOLD = -1.71F;
 	/** Its base: feet under the shoulders, the lead one ahead, the knees soft. */
 	static final float BASTION_SPREAD = 0.22F, BASTION_STAGGER = 0.2F, BASTION_KNEES = 0.34F;
 	/** The Bastion side on (its lead shoulder turned forward, radians), that shoulder held up (pixels), the weight back, the head tipped to the rear shoulder and the chin tucked. */
@@ -81,11 +81,13 @@ public final class BoxingPoses {
 	/** How much further side on its block stands. */
 	static final float BASTION_BLOCK_BLADE = 0.45F;
 	/** (Jung: "make it look like the video with overlapping") How far forward each shoulder rolls round the chest (pixels). */
-	static final float BASTION_LEAD_ROLL = 2.0F, BASTION_REAR_ROLL = 2.5F;
+	static final float BASTION_LEAD_ROLL = 2.9F, BASTION_REAR_ROLL = 3.35F;
+	/** How far the lead upper arm swings in across the body, in the stance and the block (radians). */
+	static final float BASTION_LEAD_ADDUCT = 0.48F, BASTION_BLOCK_ADDUCT = 0.51F;
 	/** The shrug: every this many ticks, this long, this high (pixels). */
 	static final float SHRUG_EVERY = 90.0F, SHRUG_TICKS = 12.0F, SHRUG_UP = 1.0F;
 	/** The Bastion's block: the lead shoulder higher, the forearm a little higher over the body, the rear glove tight to the jaw. */
-	static final float BASTION_BLOCK_LEAD_PITCH = -0.95F, BASTION_BLOCK_UP = 0.4F, BASTION_BLOCK_ACROSS = 1.6F, BASTION_BLOCK_REAR_PITCH = -1.1F, BASTION_BLOCK_REAR_IN = 0.1F, BASTION_BLOCK_REAR_FOLD = -1.2F;
+	static final float BASTION_BLOCK_LEAD_PITCH = -0.2F, BASTION_BLOCK_UP = 0.85F, BASTION_BLOCK_ACROSS = 0.66F, BASTION_BLOCK_REAR_PITCH = -1.3F, BASTION_BLOCK_REAR_IN = 0.1F, BASTION_BLOCK_REAR_FOLD = -1.6F;
 	/**
 	 * A punch lasts this long (ticks), whatever the game's own arm swing does; a straight one is at full reach this
 	 * far through (it snaps out and comes home slower).
@@ -147,6 +149,12 @@ public final class BoxingPoses {
 	static final float ROLL_SIDE = 0.14F, ROLL_FORWARD = 0.12F, ROLL_DUCK = 0.3F, ROLL_HEAD = 0.15F;
 	/** A model's shoulders are this far from its middle, and its hips this far below its neck (pixels). */
 	static final float SHOULDER_OUT = 5.0F, TORSO = 12.0F;
+	/**
+	 * (Jung: "no air between body portions") The body sits this far down over the tops of the thighs (pixels), so a
+	 * thigh tipped forward or out doesn't open a gap under it; the chest's half width and half depth (plus a little,
+	 * pixels), and how much of the gap a turned arm opens at its shoulder is closed by moving the shoulder in.
+	 */
+	static final float HIP_TUCK = 1.0F, CHEST_SIDE = 4.0F, CHEST_DEPTH = 2.6F, SHOULDER_SEAT = 0.8F;
 	/** A leg's thigh, and its shin (pixels). */
 	static final float THIGH = 6.0F, SHIN = 6.0F;
 	/** Gassed: the hands dropped, the shoulders' heave (pixels, radians a tick), the slump. */
@@ -371,7 +379,7 @@ public final class BoxingPoses {
 					set(lead, leadRight, BASTION_BLOCK_LEAD_PITCH, BASTION_LEAD_IN);
 					leadElbow.across(BASTION_BLOCK_ACROSS);
 					lead.y -= BASTION_BLOCK_UP;
-					rollShoulders(lead, rear);
+					rollShoulders(lead, rear, leadRight, BASTION_BLOCK_ADDUCT);
 					set(rear, !leadRight, BASTION_BLOCK_REAR_PITCH, BASTION_BLOCK_REAR_IN);
 					rearElbow.forward(BASTION_BLOCK_REAR_FOLD);
 					turn += BASTION_BLOCK_BLADE;
@@ -473,7 +481,7 @@ public final class BoxingPoses {
 				leadElbow.across(BASTION_LEAD_ACROSS);
 				rearElbow.forward(BASTION_REAR_FOLD);
 				lead.y -= BASTION_SHOULDER;
-				rollShoulders(lead, rear);
+				rollShoulders(lead, rear, leadRight, BASTION_LEAD_ADDUCT);
 				float phase = time % SHRUG_EVERY / SHRUG_TICKS;
 				if (phase < 1.0F) {
 					lead.y -= Mth.sin(phase * Mth.PI) * SHRUG_UP;
@@ -710,7 +718,7 @@ public final class BoxingPoses {
 		float[] lower = times(times(turnZ(t.side), turnY(t.twist)), turnX(t.pitch));
 		float[] top = times(times(turnZ(t.side), turnY(t.twist)), turnX(upper));
 		// the hips, and from them up the lower back, then the upper back, to the neck
-		float hipY = TORSO + sink, half = TORSO * 0.5F;
+		float hipY = TORSO + sink + HIP_TUCK, half = TORSO * 0.5F;
 		float neckX = -(lower[1] + top[1]) * half, neckY = hipY - (lower[4] + top[4]) * half, neckZ = -(lower[7] + top[7]) * half;
 		model.body.x += neckX;
 		model.body.y += neckY;
@@ -729,13 +737,43 @@ public final class BoxingPoses {
 			arm.x = neckX + top[0] * x + top[1] * y + top[2] * z;
 			arm.y = neckY + top[3] * x + top[4] * y + top[5] * z;
 			arm.z = neckZ + top[6] * x + top[7] * y + top[8] * z;
+			float[] m = times(guard, times(times(turnZ(arm.zRot), turnY(arm.yRot)), turnX(arm.xRot)));
 			if (t.evadeSide != 0.0F || t.guardTwist != 0.0F) {
-				float[] m = times(guard, times(times(turnZ(arm.zRot), turnY(arm.yRot)), turnX(arm.xRot)));
 				arm.yRot = -(float) Math.asin(Mth.clamp(m[6], -1.0F, 1.0F));
 				arm.xRot = (float) Math.atan2(m[7], m[8]);
 				arm.zRot = (float) Math.atan2(m[3], m[0]);
 			}
+			seat(arm, arm == model.rightArm, m, top, neckX, neckY, neckZ);
 		}
+	}
+
+	/**
+	 * (Jung: "no air between body portions") Keeps an upper arm against the side of the chest. A box arm turned in
+	 * or out about its shoulder swings the back of its inside face off the chest; this finds how far the corners of
+	 * that face that are beside the chest stand off it, and moves the shoulder in by {@link #SHOULDER_SEAT} of that.
+	 * {@code m}: the arm's turn; {@code top}: the upper back's; the neck's place.
+	 */
+	private static void seat(ModelPart arm, boolean right, float[] m, float[] top, float neckX, float neckY, float neckZ) {
+		// the inside face of the upper arm (the part's own box: x from -3 to 1 on the right arm, -1 to 3 on the left;
+		// y from 2 above the shoulder down to the elbow; z from -2 to 2), and the chest's side, from the neck
+		float inside = right ? 1.0F : -1.0F, chest = right ? -CHEST_SIDE : CHEST_SIDE, off = 0.0F;
+		for (float cy : new float[] {-2.0F, ELBOW}) {
+			for (float cz : new float[] {-2.0F, 2.0F}) {
+				float wx = arm.x - neckX + m[0] * inside + m[1] * cy + m[2] * cz;
+				float wy = arm.y - neckY + m[3] * inside + m[4] * cy + m[5] * cz;
+				float wz = arm.z - neckZ + m[6] * inside + m[7] * cy + m[8] * cz;
+				float bx = top[0] * wx + top[3] * wy + top[6] * wz;
+				float by = top[1] * wx + top[4] * wy + top[7] * wz;
+				float bz = top[2] * wx + top[5] * wy + top[8] * wz;
+				if (Math.abs(bz) <= CHEST_DEPTH && by >= 0.0F && by <= TORSO) {
+					off = Math.max(off, right ? chest - bx : bx - chest);
+				}
+			}
+		}
+		float in = SHOULDER_SEAT * off * (right ? 1.0F : -1.0F);
+		arm.x += top[0] * in;
+		arm.y += top[3] * in;
+		arm.z += top[6] * in;
 	}
 
 	/**
@@ -790,11 +828,14 @@ public final class BoxingPoses {
 	/**
 	 * The Bastion's shoulders rolled forward round the chest ({@link #BASTION_LEAD_ROLL}, {@link #BASTION_REAR_ROLL},
 	 * pixels): the arms stay against the body's sides, a little further forward, so the lead forearm can lie across the
-	 * belly and the rear glove reach the chin past a body turned side on.
+	 * belly and the rear glove reach the chin past a body turned side on. The lead upper arm also swings in across the
+	 * body by {@code adduct} (radians).
 	 */
-	private static void rollShoulders(ModelPart lead, ModelPart rear) {
+	private static void rollShoulders(ModelPart lead, ModelPart rear, boolean leadRight, float adduct) {
 		lead.z -= BASTION_LEAD_ROLL;
 		rear.z -= BASTION_REAR_ROLL;
+		// the lead upper arm swung in across the front of the body, so its forearm can reach across the belly
+		lead.zRot += leadRight ? -adduct : adduct;
 	}
 
 	/** Tips the body and head to the side ({@code amount} radians; positive is the boxer's left). */

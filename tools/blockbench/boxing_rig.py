@@ -12,7 +12,10 @@ The rig is the player model, cut where the game bends it: each arm at the elbow 
 (6 px down) and the body at the waist (6 px down). A forearm, shin or waist turns about X to fold forward or back; the
 Bastion's lead forearm and a hook's forearm fold across about Z. The fist gear (a wrap block on each hand) rides the
 forearm. Bones are named the way Player Animation Library names the player's (head, body, right_arm, left_arm,
-right_leg, left_leg), plus right_forearm, left_forearm, right_shin, left_shin and waist for the bends.
+right_leg, left_leg), plus right_forearm, left_forearm, right_shin, left_shin and waist for the bends. The game draws a
+bent limb with its cut mitred (KneeBend), so it closes; two cubes hinged here would open a wedge on the outside of the
+bend, so each lower bone carries a filler cube (elbow, knee, waist joint) reaching 2 px up into the part above it,
+coloured like that part, hidden inside it while the joint is straight.
 
 Axes: Blockbench's (up is +Y, forward is -Z, the player's right is +X). A model part's rotation (x, y, z) in the game
 is (-x, -y, z) here, and its offset (x, y, z) is (-x, -y, z): the game's model has Y down and its right on -X.
@@ -157,7 +160,7 @@ def pose(style, mode, time, thrown=None, move=None):
         top = mul(mul(RZ(t["side"]), RY(t["twist"])), RX(upper))
         half = K["TORSO"] * 0.5
         nx = -(low[1] + top[1]) * half
-        ny = K["TORSO"] + sink - (low[4] + top[4]) * half
+        ny = K["TORSO"] + sink + K["HIP_TUCK"] - (low[4] + top[4]) * half
         nz = -(low[7] + top[7]) * half
         body.x += nx; body.y += ny; body.z += nz
         body.xRot += upper; body.yRot += t["twist"]; body.zRot += t["side"]
@@ -169,8 +172,23 @@ def pose(style, mode, time, thrown=None, move=None):
             arm.x = nx + top[0] * x + top[1] * y + top[2] * z
             arm.y = ny + top[3] * x + top[4] * y + top[5] * z
             arm.z = nz + top[6] * x + top[7] * y + top[8] * z
+            M = mul(guard, mul(mul(RZ(arm.zRot), RY(arm.yRot)), RX(arm.xRot)))
             if t["evadeSide"] != 0 or t["guardTwist"] != 0:
-                arm.xRot, arm.yRot, arm.zRot = euler(mul(guard, mul(mul(RZ(arm.zRot), RY(arm.yRot)), RX(arm.xRot))))
+                arm.xRot, arm.yRot, arm.zRot = euler(M)
+            # BoxingPoses.seat: the shoulder moved in so the upper arm's inside face stays on the chest
+            right = arm is rightArm
+            inside, chest, off = (1.0, -K["CHEST_SIDE"], 0.0) if right else (-1.0, K["CHEST_SIDE"], 0.0)
+            for cy in (-2.0, K["ELBOW"]):
+                for cz in (-2.0, 2.0):
+                    w = [arm.x - nx + M[0] * inside + M[1] * cy + M[2] * cz, arm.y - ny + M[3] * inside + M[4] * cy + M[5] * cz,
+                         arm.z - nz + M[6] * inside + M[7] * cy + M[8] * cz]
+                    bx = top[0] * w[0] + top[3] * w[1] + top[6] * w[2]
+                    by = top[1] * w[0] + top[4] * w[1] + top[7] * w[2]
+                    bz = top[2] * w[0] + top[5] * w[1] + top[8] * w[2]
+                    if abs(bz) <= K["CHEST_DEPTH"] and 0 <= by <= K["TORSO"]:
+                        off = max(off, chest - bx if right else bx - chest)
+            sh = K["SHOULDER_SEAT"] * off * (1 if right else -1)
+            arm.x += top[0] * sh; arm.y += top[3] * sh; arm.z += top[6] * sh
         m.spine = -t["curl"]
 
     def shell_head():
@@ -221,6 +239,7 @@ def pose(style, mode, time, thrown=None, move=None):
             lead.y -= K["BASTION_BLOCK_UP"]
             lead.z -= K["BASTION_LEAD_ROLL"]
             rear.z -= K["BASTION_REAR_ROLL"]
+            lead.zRot += -K["BASTION_BLOCK_ADDUCT"] if lead_right else K["BASTION_BLOCK_ADDUCT"]
             set_(rear, not lead_right, K["BASTION_BLOCK_REAR_PITCH"], K["BASTION_BLOCK_REAR_IN"])
             re_["fold"] = K["BASTION_BLOCK_REAR_FOLD"]
             turn += K["BASTION_BLOCK_BLADE"]
@@ -254,6 +273,7 @@ def pose(style, mode, time, thrown=None, move=None):
         lead.y -= K["BASTION_SHOULDER"]
         lead.z -= K["BASTION_LEAD_ROLL"]
         rear.z -= K["BASTION_REAR_ROLL"]
+        lead.zRot += -K["BASTION_LEAD_ADDUCT"] if lead_right else K["BASTION_LEAD_ADDUCT"]
         phase = (time % K["SHRUG_EVERY"]) / K["SHRUG_TICKS"]
         if phase < 1:
             lead.y -= math.sin(phase * math.pi) * K["SHRUG_UP"]
@@ -400,21 +420,25 @@ BONES = [
 ]
 CUBES = {
     "body": [("chest", [-4, 18, -2], [4, 24, 2], "shirt", 0)],
-    "waist": [("belly", [-4, 12, -2], [4, 18, 2], "shirt2", 0)],
+    "waist": [("belly", [-4, 12, -2], [4, 18, 2], "shirt2", 0), ("waist joint", [-3.85, 18, -1.85], [3.85, 20, 1.85], "shirt_j", 0)],
     "head": [("head", [-4, 24, -4], [4, 32, 4], "head", 0)],
     "right_arm": [("upper arm", [4, 17, -2], [8, 24, 2], "sleeve", 0)],
-    "right_forearm": [("forearm", [4, 12, -2], [8, 17, 2], "skin", 0), ("hand wrap", [4, 12, -2], [8, 16, 2], "wrap", 0.55)],
+    "right_forearm": [("forearm", [4, 12, -2], [8, 17, 2], "skin", 0), ("hand wrap", [4, 12, -2], [8, 16, 2], "wrap", 0.55),
+                      ("elbow", [4.15, 17, -1.85], [7.85, 19, 1.85], "sleeve_j", 0)],
     "left_arm": [("upper arm", [-8, 17, -2], [-4, 24, 2], "sleeve", 0)],
-    "left_forearm": [("forearm", [-8, 12, -2], [-4, 17, 2], "skin", 0), ("hand wrap", [-8, 12, -2], [-4, 16, 2], "wrap", 0.55)],
+    "left_forearm": [("forearm", [-8, 12, -2], [-4, 17, 2], "skin", 0), ("hand wrap", [-8, 12, -2], [-4, 16, 2], "wrap", 0.55),
+                     ("elbow", [-7.85, 17, -1.85], [-4.15, 19, 1.85], "sleeve_j", 0)],
     "right_leg": [("thigh", [-0.1, 6, -2], [3.9, 12, 2], "pants", 0)],
-    "right_shin": [("shin", [-0.1, 0, -2], [3.9, 6, 2], "boot", 0)],
+    "right_shin": [("shin", [-0.1, 0, -2], [3.9, 6, 2], "boot", 0), ("knee", [0.05, 6, -1.85], [3.75, 8, 1.85], "pants_j", 0)],
     "left_leg": [("thigh", [-3.9, 6, -2], [0.1, 12, 2], "pants", 0)],
-    "left_shin": [("shin", [-3.9, 0, -2], [0.1, 6, 2], "boot", 0)],
+    "left_shin": [("shin", [-3.9, 0, -2], [0.1, 6, 2], "boot", 0), ("knee", [-3.75, 6, -1.85], [-0.05, 8, 1.85], "pants_j", 0)],
 }
 # 64x64 texture: each block is a box-UV patch, (u, v, colour)
 UV = {"head": (0, 0, (198, 140, 104)), "shirt": (32, 0, (60, 92, 128)), "shirt2": (32, 10, (52, 82, 116)),
       "sleeve": (0, 16, (60, 92, 128)), "skin": (16, 16, (198, 140, 104)), "wrap": (32, 20, (226, 214, 188)),
-      "pants": (0, 32, (54, 58, 74)), "boot": (16, 32, (40, 36, 34))}
+      "pants": (0, 32, (54, 58, 74)), "boot": (16, 32, (40, 36, 34)),
+      # the joints' fillers (BONES' note): the colour of the part above the joint
+      "sleeve_j": (0, 48, (60, 92, 128)), "pants_j": (16, 48, (54, 58, 74)), "shirt_j": (32, 48, (60, 92, 128))}
 
 
 def texture():
