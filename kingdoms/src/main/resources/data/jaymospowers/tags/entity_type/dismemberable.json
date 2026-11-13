@@ -1,0 +1,10 @@
+{
+	"replace": false,
+	"values": [
+		"jaymoskingdoms:digger",
+		"jaymoskingdoms:goblin_scout",
+		"jaymoskingdoms:loot_goblin",
+		"jaymoskingdoms:imp",
+		"jaymoskingdoms:zombified_imp"
+	]
+}
