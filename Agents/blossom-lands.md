@@ -1,9 +1,9 @@
 ---
-status: working
+status: in-review
 task: Sengoku Jidai picks for the blossom villages, on a far continent
 branch: claude/project-thread-795vuu-p2b
 with: Andy
-pr: 
+pr: 1411
 mods: kingdoms
 versions: 
 started: 2026-11-12
@@ -28,3 +28,4 @@ Patch 1 built and checked in a Kingdoms dev server (map command, /locate, one is
 Patch 1 merged 2026-11-13 (PR #1407). Patch 2 next, on branch claude/project-thread-795vuu-p2 from master.
 Patch 2 first half (Helmsmen, MohkneeTalk) is PR #1410, 2026-11-13. Left for patch 2: blossom merchantmen, bought passage, rutter.
 PR #1410 merged 2026-11-13. Second half of patch 2 (blossom merchantmen, bought passage) next on -p2b.
+Patch 2 second half (BlossomTraders, passage) is PR #1411, 2026-11-13.
