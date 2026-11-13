@@ -12725,3 +12725,9 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - **It leaves no body of its own.** Killed, the dead it was made of are all that is left (it used to leave a giant's corpse as well, which could be picked up whole; Kitchen's `no_corpse` tag).
 - Code: `blossomland/Unburied` (`tick`, `nightAndDay`, `finalizeSpawn`), `KitchenCompat.bodyOf`/`makesCorpses`.
 - Built; not played. The screenshot's fire is not from us (the Unburied is not in `burn_in_daylight`); left as it is.
+
+## 0.8.39 (2026-11-13): stored positions wait for their land (Deck watchdog) (#1471)
+
+- **Nothing to see in play**: code that reads a saved position (a road's goal, a web, a door, a board, a camp's rotting blocks, a siege's banner and keep, a cab's stand, a shooing's door, a mine site, a lair's ground) now waits until that chunk is made and loaded, instead of making the server thread wait on world generation. Nothing is dropped: the record is kept and retried on a later tick.
+- Classes: `Emigrants` (putBack no longer forces a chunk), `BeastLairs`, `SpiderKinds`, `DoorPounding` (expiry runs first, with no world read), `Bounties`, `Cabs`, `BaneHolds`, `Strays` (a door that can't be shut yet is shut later), `Camps`, `Mines`.
+- Built; tested on the Deck server.
