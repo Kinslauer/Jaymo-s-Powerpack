@@ -59,10 +59,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.61) Captives to rescue: villagers held in chains in barbarian, illager, goblin, orc and pirate camps, and now and
  * then in a dungeon (a monster spawner's mossy room), each taken from the nearest settlement. Bound, they can't move and
- * nothing harms them (no monster even sees them); they cry for help when anyone comes near. Right-click one to break
- * their chains: they follow you, and once you've brought them into their home settlement they're home safe, they reward
- * you, and the whole place knows what you did ({@link Deeds}). Leave them too far behind for too long and they make their
- * own way. A camp that's lost its captives takes new ones in a few days.
+ * nothing harms them (no monster even sees them); they cry for help when anyone comes near. A plain right-click only
+ * gets them begging you to hear them out (Andy: "just right clicking shouldnt accept their request. you have to know
+ * where theyre going"): sneak and right-click to talk ({@link #talk}), and they tell you who they are, where they were
+ * taken from and which way it lies, and ask you to take them there. Say yes and you break their chains: they follow you,
+ * and once you've brought them into their home settlement they're home safe, they reward you, and the whole place knows
+ * what you did ({@link Deeds}). Say not now and they stay in their chains. A gagged one can only mumble until you pull
+ * the gag out (on the same talk card). Leave them too far behind for too long and they make their own way. A camp
+ * that's lost its captives takes new ones in a few days.
  */
 public final class Captives {
 	/** A camp's captives when a player first comes near: how many, and the chance it has any. */
@@ -88,6 +92,10 @@ public final class Captives {
 	static final long LOST_TICKS = 600L, ESCORT_TICKS = 3L * 24000L;
 	/** How often captives think (ticks); how often camps and dungeons are looked at for new ones. */
 	static final int THINK = 20, LOOK = 200;
+	/** A plain right-click on a captive gets them begging you to talk first, at most this often (ticks). */
+	static final long WAIT_GAP = 40L;
+	/** Past {@link Directions#FAR}, how far home is, in paces, is rounded to this. */
+	static final int FAR_ROUND = 50;
 	/** (0.7.100) Who a captive is at home: one of its folk, one of its guards, or kin of its ruler (rolled when they're taken). */
 	static final int FOLK = 0, GUARD = 1, KIN = 2;
 	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
@@ -139,7 +147,7 @@ public final class Captives {
 
 	/** On a villager: they're a captive (bound or being led home). Saved. */
 	static final AttachmentType<Captive> CAPTIVE = AttachmentRegistry.create(JaymosKingdoms.id("captive"), builder -> builder.persistent(Captive.CODEC));
-	/** On a villager while in chains: synced, so clients know a right-click frees them (and opens no screen). */
+	/** On a villager while in chains: synced, so clients know a right-click goes to us (and opens no MCA screen). */
 	public static final AttachmentType<Boolean> BOUND = AttachmentRegistry.create(JaymosKingdoms.id("bound"),
 		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** On a monster spawner: when it was looked at for a captive (so each dungeon is only once). Saved. */
@@ -154,7 +162,7 @@ public final class Captives {
 
 	private static final Set<Villager> LOADED = new HashSet<>();
 	private static final Set<BlockPos> SPAWNERS = new HashSet<>();
-	private static final Map<UUID, Long> PLEADED = new HashMap<>(), LOST = new HashMap<>();
+	private static final Map<UUID, Long> PLEADED = new HashMap<>(), LOST = new HashMap<>(), WAITED = new HashMap<>();
 
 	private Captives() {
 	}
@@ -184,9 +192,19 @@ public final class Captives {
 			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Villager v) || !bound(v) || player.isSpectator()) {
 				return InteractionResult.PASS;
 			}
-			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server) {
-				free(server, sp, v);
+			if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server)) {
+				return InteractionResult.SUCCESS;
 			}
+			if (!sp.isShiftKeyDown()) {
+				if (sp.getMainHandItem().is(Gags.RAG) && !Gags.gagged(v)) {
+					// a rag gag goes on (Gags)
+					return InteractionResult.PASS;
+				}
+				// a plain right-click never frees them: they beg you to hear them out first
+				hearMeOut(server, sp, v);
+				return InteractionResult.SUCCESS;
+			}
+			talk(server, sp, v);
 			return InteractionResult.SUCCESS;
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -202,6 +220,7 @@ public final class Captives {
 			SPAWNERS.clear();
 			PLEADED.clear();
 			LOST.clear();
+			WAITED.clear();
 		});
 	}
 
@@ -377,7 +396,101 @@ public final class Captives {
 		return free.isEmpty() ? null : free.get(random.nextInt(free.size()));
 	}
 
-	// ---- freeing and leading home -------------------------------------------------------------------------------------
+	// ---- talking, freeing and leading home ----------------------------------------------------------------------------
+
+	/** A plain right-click: the captive turns to {@code player} and begs them to talk first (a speech bubble, no chat). */
+	private static void hearMeOut(ServerLevel level, ServerPlayer player, Villager v) {
+		face(v, player);
+		long now = level.getGameTime();
+		Long last = WAITED.get(v.getUUID());
+		if (last != null && now - last < WAIT_GAP) {
+			return;
+		}
+		WAITED.put(v.getUUID(), now);
+		PLEADED.put(v.getUUID(), now);
+		boolean gagged = Gags.gagged(v);
+		Speech.tell(level, v, player, Component.translatable(gagged ? "speech.jaymoskingdoms.gagged"
+			: Oddities.line("talk.jaymoskingdoms.deed.rescue.wait", level.getRandom())), gagged ? Speech.WHITE : Speech.YELLOW);
+		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.0F);
+	}
+
+	/**
+	 * Sneak and right-click a captive in chains: they say who they are, where they were taken from (by name, how far and
+	 * which way from here) and ask to be taken there. Take them, and their chains are broken ({@link #free}); not now, and
+	 * they stay as they are. A gagged one only mumbles, and the one thing to do is pull the gag out, then they talk.
+	 */
+	static void talk(ServerLevel level, ServerPlayer player, Villager v) {
+		face(v, player);
+		PLEADED.put(v.getUUID(), level.getGameTime());
+		if (Gags.gagged(v)) {
+			Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.gagged"), List.of(
+				Menus.Choice.of(Component.translatable("talk.jaymoskingdoms.captive.ungag"), p -> {
+					if (bound(v) && Gags.gagged(v)) {
+						Gags.ungag(v, p);
+						talk(level, p, v);
+					}
+				}),
+				Menus.Choice.of(Component.translatable("talk.jaymoskingdoms.captive.leave"), p -> {
+				})));
+			return;
+		}
+		Captive c = v.getAttached(CAPTIVE);
+		Faction home = c == null || c.home() < 0 ? null : Factions.get(level.getServer(), c.home());
+		if (home != null && home.fallen()) {
+			home = null;
+		}
+		Component words, take;
+		if (home != null) {
+			String who = switch (c.standingIndex()) {
+				case GUARD -> "guard";
+				case KIN -> "kin";
+				default -> "folk";
+			};
+			words = Component.translatable("talk.jaymoskingdoms.captive.ask." + who, home.name(), far(v, home), Directions.heading(v.position(), Vec3.atCenterOf(home.seat())));
+			take = Component.translatable("talk.jaymoskingdoms.captive.take", home.name());
+		} else {
+			// (their home is gone, or they were taken from nowhere: any town that will have them will do)
+			Faction near = nearestSettlement(level.getServer(), v.blockPosition());
+			if (near != null) {
+				words = Component.translatable("talk.jaymoskingdoms.captive.ask.homeless", near.name(), far(v, near), Directions.heading(v.position(), Vec3.atCenterOf(near.seat())));
+				take = Component.translatable("talk.jaymoskingdoms.captive.take.any", near.name());
+			} else {
+				words = Component.translatable("talk.jaymoskingdoms.captive.ask.nowhere");
+				take = Component.translatable("talk.jaymoskingdoms.captive.take.nowhere");
+			}
+		}
+		Menus.ask(player, v, words, List.of(
+			Menus.Choice.of(take, p -> {
+				if (bound(v) && v.isAlive()) {
+					free(level, p, v);
+				}
+			}),
+			Menus.Choice.of(Component.translatable("talk.jaymoskingdoms.captive.decline"), p -> {
+				if (bound(v) && v.isAlive()) {
+					face(v, p);
+					Speech.tell(level, v, p, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.later", level.getRandom())), Speech.YELLOW);
+					level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.9F);
+				}
+			})));
+	}
+
+	/** How far {@code to}'s seat is from {@code v}, as they'd say it: a stone's throw, or about so many paces. */
+	private static Component far(Villager v, Faction to) {
+		double dx = to.seat().getX() + 0.5 - v.getX(), dz = to.seat().getZ() + 0.5 - v.getZ();
+		double blocks = Math.sqrt(dx * dx + dz * dz);
+		if (blocks <= Directions.FAR) {
+			return Directions.distance(blocks);
+		}
+		return Component.translatable("directions.jaymoskingdoms.dist.paces", Math.round(blocks / FAR_ROUND) * FAR_ROUND);
+	}
+
+	/** A captive in chains has no AI to turn their head: it's turned by hand, toward {@code who}. */
+	private static void face(Villager v, Entity who) {
+		double dx = who.getX() - v.getX(), dz = who.getZ() - v.getZ();
+		float yaw = (float)(Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
+		v.setYHeadRot(yaw);
+		v.setYRot(yaw);
+	}
 
 	/** {@code player} breaks {@code captive}'s chains: they follow them home. */
 	static void free(ServerLevel level, ServerPlayer player, Villager captive) {
@@ -435,11 +548,7 @@ public final class Captives {
 		if (near == null || near.isSpectator()) {
 			return;
 		}
-		// (no AI to turn their head: turned by hand)
-		double dx = near.getX() - v.getX(), dz = near.getZ() - v.getZ();
-		float yaw = (float)(Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
-		v.setYHeadRot(yaw);
-		v.setYRot(yaw);
+		face(v, near);
 		Long last = PLEADED.get(v.getUUID());
 		if (last != null && now - last < PLEAD_GAP) {
 			return;
