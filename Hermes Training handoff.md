@@ -190,6 +190,48 @@ Skip steps 2 and 5 (they were for a paid provider); Groq's key is already set.
       input/output tokens per day per bot, and how many 429s came from NVIDIA. Then time one fixed prompt (with a
       tool call, e.g. "read README.md and list its headings") on each provider already in config.yaml: seconds to
       first token and total seconds. Put the table under this section.
+  - [x] **Done Nov 12, 10:20 PM (PC Claude). Result: Groq free can't be the primary. Step 3 is on hold for Andy.**
+
+    **Groq free tier = 8,000 tokens per minute on gpt-oss-120b** (read from Groq's own `x-ratelimit-limit-tokens`
+    header). A ~20k-token request gets `413 Request too large ... tokens per minute (TPM): Limit 8000`. Real bot
+    calls are far bigger: YOUTH's median call is ~64k-135k input tokens (e.g. 9:59 PM tonight: in=118,235). YOUTH's
+    system prompt + tools alone are over 8k. So Groq would refuse every bot call, not just after 200k/day.
+    Worse: Hermes treats a 413 as "payload too large", not a rate limit (`error_classifier.py:1361`, then
+    `turn_overflow.py:_recover_payload_too_large`): it **compresses the conversation and retries** instead of falling
+    through to NVIDIA. With Groq first, every YOUTH turn would start by deleting history, then fail. The same risk
+    already exists wherever Groq sits in a chain (YOUTH fallback 3, Quill and Prometheus fallback 2).
+
+    Usage per bot (session DBs, `session_model_usage`; "in" = fresh input, cache reads come on top):
+
+    | Bot | Nov 10 | Nov 11 | Nov 12 (to 10 PM) |
+    |---|---|---|---|
+    | YOUTH | 910 calls, 9.6M in, 0.67M out | 207 calls, 4.9M in, 0.56M out | 414 calls, 8.0M in, 0.75M out |
+    | Quill | 686 calls, 5.8M in, 0.14M out | 189 calls, 2.0M in, 0.19M out | 66 calls, 0.52M in, 0.05M out |
+    | Hephaestus | 961 calls, 2.2M in, 0.35M out | 317 calls, 0.88M in, 0.13M out | 0 |
+    | Bacchus | 707 calls, 2.2M in, 0.38M out | 0 | 14 calls, 0.08M in, 0.01M out |
+    | Apollo | 405 calls, 1.5M in, 0.19M out | 25 calls, 0.35M in | 0 |
+    | Prometheus | 0 | 75 calls, 0.27M in, 0.08M out | 0 |
+
+    **429s from NVIDIA, Nov 10-12: zero** in all logs. All ~3,700 429s were Ollama (monthly limit, 3,200) and Fable
+    (free tier ended, 538). NVIDIA is slow by queueing, not by refusing: per-call latency (agent.log):
+
+    | Day | NVIDIA Super median / p90 | Lightning median / p90 | Ultra median / p90 |
+    |---|---|---|---|
+    | Nov 10 | 3.6 s / 17.7 s | 3.2 s / 16.7 s | 4.6 s / 17.0 s |
+    | Nov 11 | **31.1 s / 70.2 s** | 3.4 s / 27.9 s | 9.6 s / 370 s |
+    | Nov 12 | 8.3 s / 43.1 s | (unused) | (unused) |
+
+    Fixed prompt with a tool call ("Read README.md and list its headings", streaming, Nov 12 ~10:15 PM):
+
+    | Provider | small prompt: first token / total | ~20k-token prompt: first / total |
+    |---|---|---|
+    | Groq gpt-oss-120b | 0.4 s / 0.5 s | **413 refused (8k TPM)** |
+    | NVIDIA Super | 0.4 s / 0.6 s | 1.4 s / 1.6 s |
+    | NVIDIA Lightning | 0.3 s / 1.2 s | 0.5 s / 2.9 s |
+    | Gemini Flash | 503 "high demand" | 503 "high demand" |
+    | OpenRouter :free | no `OPENROUTER_API_KEY` in Hermes `.env` | - |
+
+    Nothing in config.yaml was changed.
 - [ ] 2. If Andy picks a paid fast primary: he makes the account (Cerebras or Groq Developer) and sets the key
       himself as an environment variable / in Hermes's `.env`. Never put a key in a command, file or chat.
 - [ ] 3. Back up `E:/hermes/config.yaml` (and Quill's profile config). In the ONE existing `providers:` block, add
