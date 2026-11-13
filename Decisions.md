@@ -482,3 +482,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 12:00 PM ET (Make every UI screen match thread): Andy: "put them all on the same pr" and "ill merge after". Every UI patch goes onto PR #1434; Claude does not merge it, Andy does when all are in.
 - 2026-11-13: Illagers can be talked with once the player learns the illager tongue, from their books, paintings/banners and time in their structures (thread: Let players learn illager language).
 - 2026-11-13 2:11 PM ET: Andy approved the Lore.md paragraph "The illager tongue".
+- 2026-11-13 5:20 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "can we add another dimension that is just clouds and air between the overworld and aether? that way players wont be able to see it or get there at all easily". An exception to "no new dimensions", for this one: built as a band of the One Dimension stack (the Cloud Sea), not a place with a portal. New worlds only.

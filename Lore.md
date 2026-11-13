@@ -460,6 +460,16 @@ trees on top, clouds you can walk into. Wind is the way in; there is no portal. 
 **Highfields** (green and windy), the **Magnetic** lands (floating lodestone pillars), the **Arctic** (frozen peaks)
 and the **Irradiated** (Ambrosium-sick forests that glow).
 
+(new) **The Cloud Sea** (cloud layer thread; Andy, 2026-11-13: "another dimension that is just clouds and air between
+the overworld and aether ... that way players wont be able to see it or get there at all easily"; the name and the
+detail are Claude's placement for him to approve). Between the world's own clouds and the Aether's islands lies a great
+depth of empty sky, and near the top of it one bank of cloud from horizon to horizon: the **overcast**. Nobody made it.
+It is the Aether's own weather, the same soft cloud its islands trail, gathered under them. It is why nobody below has
+ever seen the islands, and why the things that fall come out of a clear sky "from nowhere". The cloud is soft to walk
+into and too deep to push up through. Here and there a **well** stands open in it, a shaft of blue: the geese go up by
+the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
+whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
+
 The Aether scattered remnants of itself across the Overworld. The last surviving pieces are the **monoliths** and
 their **Giants**: a broken pillar with a heart floating in it, and one Giant for each highland's element (Highfield,
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
