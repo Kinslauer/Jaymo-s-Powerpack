@@ -47,6 +47,7 @@ public final class Beasts {
 	public static EntityType<ScalebaneArcher> SCALEBANE;
 	/** (0.7.339) The third batch. */
 	public static EntityType<Gorgon> GORGON;
+	public static EntityType<SandWorm> SAND_WORM;
 	public static EntityType<com.jaymoskingdoms.WarBarrel> WAR_BARREL;
 	public static EntityType<HauntedStand> HAUNTED_STAND;
 
@@ -88,6 +89,9 @@ public final class Beasts {
 		SpawnPlacements.register(REDSTONE_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, RedstoneGolem::checkSpawn);
 		SpawnPlacements.register(SKULK_GOLEM, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SkulkGolem::checkSpawn);
 		SpawnPlacements.register(WILD_BOAR, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules);
+		SAND_WORM = type("sand_worm", EntityType.Builder.of(SandWorm::new, MobCategory.MONSTER).sized(3.0F, 8.0F).fireImmune().clientTrackingRange(12),
+			SandWorm.createAttributes());
+		SandWorm.register();
 		SpawnPlacements.register(GORGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Gorgon::checkSpawn);
 		SpawnPlacements.register(HAUNTED_STAND, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, HauntedStand::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GORGON), MobCategory.MONSTER, GORGON, GORGON_WEIGHT, 1, 1);
