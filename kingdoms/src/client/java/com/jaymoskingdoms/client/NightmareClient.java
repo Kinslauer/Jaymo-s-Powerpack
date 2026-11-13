@@ -26,16 +26,19 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The phantoms of a living nightmare or a sleepless night ({@link LivingNightmare}), seen by this player alone. The server
- * only says how many and over how long ({@link LivingNightmare.Visions}); each is a phantom made on this client and never
- * known to the server or anyone else. It comes out of the dark some way off and above, circles closer, then dives
- * straight at your face, and is gone the instant before it strikes: a bite in your ears, a jolt, a flash of dark. Struck
- * at, it is gone at once. Through a waking nightmare the edges of the screen breathe a cold, dark blue.
+ * The phantoms of a living nightmare ({@link LivingNightmare}), seen by the dreamer and by the ki attuned near them. The
+ * server only says how many, over how long, whose and from which seed ({@link LivingNightmare.Visions}); each is a phantom
+ * made on this client and never known to the server, and every client that sees one nightmare draws the same phantoms from
+ * the seed. It comes out of the dark some way off and above the dreamer, circles closer, then dives straight at their face
+ * and is gone the instant before it strikes. Your own: a bite in your ears, a jolt, a flash of dark, and through a waking
+ * nightmare the edges of the screen breathe a cold, dark blue. Another's, watched: only the bite, at them. Struck at, a
+ * vision is gone at once.
  */
 public final class NightmareClient {
 	// ================================================================================================================
@@ -62,22 +65,43 @@ public final class NightmareClient {
 
 	private static final class Vision {
 		final Phantom phantom;
+		/** Whose nightmare (entity id), and whether it is this player's own. */
+		final int dreamer;
+		final boolean own;
 		final double angle0;
 		final int circleFor;
 		int age;
 		boolean diving;
 		Vec3 dive = Vec3.ZERO;
 
-		Vision(Phantom phantom, double angle0, int circleFor) {
+		Vision(Phantom phantom, int dreamer, boolean own, double angle0, int circleFor) {
 			this.phantom = phantom;
+			this.dreamer = dreamer;
+			this.own = own;
 			this.angle0 = angle0;
 			this.circleFor = circleFor;
 		}
 	}
 
+	/** A vision still to come: in how many ticks, whose, and where and how it comes (drawn from the nightmare's seed). */
+	private static final class Coming {
+		int left;
+		final int dreamer, size, circleFor;
+		final double angle, far, up;
+
+		Coming(int left, int dreamer, RandomSource random) {
+			this.left = left;
+			this.dreamer = dreamer;
+			this.angle = random.nextDouble() * Math.PI * 2.0;
+			this.far = SPAWN_FAR + random.nextDouble() * SPAWN_MORE;
+			this.up = SPAWN_UP + random.nextDouble() * SPAWN_UP_MORE;
+			this.size = random.nextInt(3);
+			this.circleFor = CIRCLE_TICKS + random.nextInt(CIRCLE_MORE);
+		}
+	}
+
 	private static final List<Vision> VISIONS = new ArrayList<>();
-	/** Ticks until each vision still to come shows. */
-	private static final List<Integer> COMING = new ArrayList<>();
+	private static final List<Coming> COMING = new ArrayList<>();
 	/** Ticks of the waking nightmare left, and the dark flash. */
 	private static int waking, flash;
 	private static int nextId = FIRST_ID;
@@ -112,11 +136,11 @@ public final class NightmareClient {
 	private static void begin(LivingNightmare.Visions payload) {
 		int count = Mth.clamp(payload.count(), 1, 8);
 		int ticks = Math.max(20, payload.ticks());
-		RandomSource random = RandomSource.create();
+		RandomSource random = RandomSource.create(payload.seed());
 		for (int i = 0; i < count; i++) {
 			// spread over the time, the first soon
 			int at = i * ticks / (count + 1) + random.nextInt(Math.max(1, ticks / (count + 1)));
-			COMING.add(i == 0 ? 20 + random.nextInt(40) : at);
+			COMING.add(new Coming(i == 0 ? 20 + random.nextInt(40) : at, payload.dreamer(), random));
 		}
 		if (payload.waking()) {
 			waking = Math.max(waking, ticks);
@@ -156,39 +180,37 @@ public final class NightmareClient {
 			flash--;
 		}
 		for (int i = COMING.size() - 1; i >= 0; i--) {
-			int left = COMING.get(i) - 1;
-			if (left <= 0) {
+			Coming c = COMING.get(i);
+			if (--c.left <= 0) {
 				COMING.remove(i);
-				appear(level, self);
-			} else {
-				COMING.set(i, left);
+				if (level.getEntity(c.dreamer) instanceof LivingEntity dreamer && dreamer.isAlive()) {
+					appear(level, dreamer, dreamer == self, c);
+				}
 			}
 		}
 		for (Vision v : new ArrayList<>(VISIONS)) {
-			if (v.phantom.level() != level || !self.isAlive()) {
+			if (v.phantom.level() != level || !(level.getEntity(v.dreamer) instanceof LivingEntity dreamer) || !dreamer.isAlive()) {
 				vanish(v, false);
 				continue;
 			}
-			fly(v, self);
+			fly(v, dreamer);
 		}
 	}
 
-	/** A vision comes out of the dark, some way off and above. */
-	private static void appear(ClientLevel level, LocalPlayer self) {
-		RandomSource random = self.getRandom();
+	/** A vision comes out of the dark, some way off and above the dreamer. */
+	private static void appear(ClientLevel level, LivingEntity dreamer, boolean own, Coming c) {
+		RandomSource random = level.getRandom();
 		Phantom phantom = new Phantom(EntityTypes.PHANTOM, level);
 		phantom.setId(nextId--);
 		phantom.noPhysics = true;
 		phantom.setNoGravity(true);
-		phantom.setPhantomSize(random.nextInt(3));
-		double angle = random.nextDouble() * Math.PI * 2.0;
-		double far = SPAWN_FAR + random.nextDouble() * SPAWN_MORE;
-		Vec3 eye = self.getEyePosition();
-		Vec3 at = eye.add(Math.cos(angle) * far, SPAWN_UP + random.nextDouble() * SPAWN_UP_MORE, Math.sin(angle) * far);
+		phantom.setPhantomSize(c.size);
+		Vec3 eye = dreamer.getEyePosition();
+		Vec3 at = eye.add(Math.cos(c.angle) * c.far, c.up, Math.sin(c.angle) * c.far);
 		phantom.setPos(at.x, at.y, at.z);
 		phantom.setOldPosAndRot();
 		level.addEntity(phantom);
-		VISIONS.add(new Vision(phantom, angle, CIRCLE_TICKS + random.nextInt(CIRCLE_MORE)));
+		VISIONS.add(new Vision(phantom, dreamer.getId(), own, c.angle, c.circleFor));
 		for (int i = 0; i < 6; i++) {
 			level.addParticle(ParticleTypes.LARGE_SMOKE, at.x + random.nextGaussian() * 0.4, at.y + random.nextGaussian() * 0.3, at.z + random.nextGaussian() * 0.4,
 				0.0, 0.02, 0.0);
@@ -196,8 +218,8 @@ public final class NightmareClient {
 		level.playLocalSound(at.x, at.y, at.z, SoundEvents.PHANTOM_AMBIENT, SoundSource.HOSTILE, 1.0F, 0.8F + random.nextFloat() * 0.2F, false);
 	}
 
-	/** One tick of a vision's flight: circling closer, then the dive at your face. */
-	private static void fly(Vision v, LocalPlayer self) {
+	/** One tick of a vision's flight: circling closer, then the dive at the dreamer's face. */
+	private static void fly(Vision v, LivingEntity self) {
 		Phantom p = v.phantom;
 		v.age++;
 		Vec3 eye = self.getEyePosition();
@@ -253,13 +275,16 @@ public final class NightmareClient {
 				level.addParticle(ParticleTypes.LARGE_SMOKE, p.getX() + random.nextGaussian() * 0.3, p.getY() + random.nextGaussian() * 0.3,
 					p.getZ() + random.nextGaussian() * 0.3, 0.0, 0.03, 0.0);
 			}
-			if (atYou && minecraft.player != null) {
+			if (atYou && v.own && minecraft.player != null) {
 				LocalPlayer self = minecraft.player;
 				level.playLocalSound(self.getX(), self.getEyeY(), self.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.HOSTILE, 1.2F, 0.8F, false);
 				level.playLocalSound(self.getX(), self.getEyeY(), self.getZ(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F, 1.4F, false);
 				self.setXRot(Mth.clamp(self.getXRot() + (random.nextFloat() - 0.6F) * JOLT * 2.0F, -90.0F, 90.0F));
 				self.setYRot(self.getYRot() + (random.nextFloat() - 0.5F) * JOLT * 2.0F);
 				flash = FLASH_TICKS;
+			} else if (atYou) {
+				// another's nightmare reaching them: only the bite, at them
+				level.playLocalSound(p.getX(), p.getY(), p.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.HOSTILE, 0.9F, 0.8F, false);
 			} else {
 				level.playLocalSound(p.getX(), p.getY(), p.getZ(), SoundEvents.PHANTOM_HURT, SoundSource.HOSTILE, 0.7F, 1.4F, false);
 			}
