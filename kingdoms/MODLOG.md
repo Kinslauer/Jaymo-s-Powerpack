@@ -12678,3 +12678,12 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - **Armor Model API pieces** (Rogues & Warriors' Warrior Helmet and the other RPG-series 3D sets) now follow the body the way vanilla armour does. Fresh Animations moves the head and body as they are drawn, and these pieces stayed in the plain pose, so the head turned and bobbed through the helmet. They now take the same kept pose our own worn pieces use (`GeoArmourFit`, `WornModel.loadKeptBody`, mixin `GeoArmourPoseMixin` on the API's `PoseCopyingModel`, skipped without the API).
 - On MCA bodies (players and villagers), these pieces also take MCA's head size, so a child's or teen's bigger head no longer pokes through (`McaHeadSize`).
 - Checked in a cloud test game with Fresh Animations on an MCA player: the helmet now turns with the head. Not played in the pack.
+
+## 0.8.33 (2026-11-13): Loaded-land checks wait for nothing (Deck crash 3:36 PM) (#1459)
+
+- **Fix (watchdog crashes)**: in 26.3 `Level.isLoaded` and `hasChunkAt` are also true for a chunk only scheduled and still
+  being made, so the reads they guarded waited on the server thread for it to generate. On the Deck, a quicksand-pit
+  roll beside a player just set down on Mohknee (all fresh land) waited 44 s on chunk [1748, 1] and the server shut
+  down (2026-11-13 15:36). Every such guard now goes through `Loaded.made`: on the server, true only for land that is
+  made and loaded (`getChunkNow`); on the client and in world generation, the game's own check as before.
+- Built; tested on the Deck server.
