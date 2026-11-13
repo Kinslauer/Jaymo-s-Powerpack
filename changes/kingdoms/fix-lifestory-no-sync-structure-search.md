@@ -1,4 +1,0 @@
-# stop Life Story starts, rumours and quests freezing the server while they look for a place
-- Setting out on the village road froze the Steam Deck server past its watchdog (crash 2026-11-13 07:43), like the farmhand road before it: looking for the nearest village made each likely chunk on the server thread, and right after a join the world generation queue is long, so the server waited behind it. Every structure search in Kingdoms (Life Story villages and wrecks, rumours, villager and king quests, the Grue) now works the place out without making any chunk (Scout): vanilla's own check whether one can be made there, taken as the answer.
-- A village or shipwreck start now has its land made ready in the background before you're put there; you wait behind the loading screen a little longer meanwhile (its tips stay up).
-- Built in CI; not played.

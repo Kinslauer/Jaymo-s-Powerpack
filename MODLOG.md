@@ -4103,3 +4103,8 @@ enter limbo if they don't come to."
 - `Fainting.overcome(ServerPlayer)` / `ofOvercome(Entity)`: Kingdoms' Overcome drops a player in the same faint (letterbox, fall on your face, a blow brings you round) when a sight of the other side is too much, starting a little further into the swoon than hunger's. Not while downed, carried, on adrenaline and the rest, as before.
 - Xenoform's Wisp now also scans from ghosts: a player's limbo ghost, Kingdoms' wraiths, flame wraiths and grave ghosts (as well as phantoms).
 - Built; not played.
+
+## 0.23.11 (2026-11-13): stop the Verdant start and the chapel's pull freezing the server (#1429)
+
+- The Verdant start's village search and the darkened chapel's pull made each likely chunk on the server thread while looking, which on the Steam Deck can wait behind a long world generation queue past the server's watchdog. They now work the place out without making any chunk (Scout), like Kingdoms' starts.
+- Built in CI; not played.
