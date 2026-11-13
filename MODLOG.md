@@ -4364,3 +4364,9 @@ enter limbo if they don't come to."
 - **Floods, river ice floes, Arsenal portals**: they no longer read blocks in land that isn't made and loaded yet. A flood waits a step if the land around its gap isn't there, a floe stays tracked and drifts when its land (or the water ahead) comes back, and a portal pass waits until the far exit's land is loaded. Nothing is dropped; nobody sees a change except no more server hangs.
 - Classes: `Floods`, `RiverIce`, `ArsenalStanding`, all through `core.Loaded`.
 - Built; tested on the Deck server.
+
+## 0.23.34 (2026-11-13): new worlds stop hanging on the loading screen
+
+- A new world sat on "Selecting global world spawn" for about 9 minutes (13 on one run) before this: the spawn search waits for Dynamic Waters to lay out its first river region, and Dynamic Waters measured the ground height point by point with no caching. Mohknee's continent terrain made each point about 3x dearer, which is what pushed it from a few minutes to most of ten. Closing the game during that wait leaves a half-made save that then won't open ("Errors in the currently selected data pack(s)"), because its world settings were never written.
+- Dynamic Waters (ports/dynamicwaters, `CoarseHeightField`) now reads each block of heights through one caching context, so the parts of the terrain that don't change with height are worked out once per column. Same heights (2,048 columns compared against the old way: no difference), so rivers in existing worlds don't move. Same seed on the cloud test server: ready in 82 s instead of 533 s.
+- Built and booted with the full Deck mod set on a fresh world; not played.

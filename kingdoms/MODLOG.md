@@ -12731,3 +12731,9 @@ The server thread no longer waits for chunks to be made. Road milestone searches
 - **Nothing to see in play**: code that reads a saved position (a road's goal, a web, a door, a board, a camp's rotting blocks, a siege's banner and keep, a cab's stand, a shooing's door, a mine site, a lair's ground) now waits until that chunk is made and loaded, instead of making the server thread wait on world generation. Nothing is dropped: the record is kept and retried on a later tick.
 - Classes: `Emigrants` (putBack no longer forces a chunk), `BeastLairs`, `SpiderKinds`, `DoorPounding` (expiry runs first, with no world read), `Bounties`, `Cabs`, `BaneHolds`, `Strays` (a door that can't be shut yet is shut later), `Camps`, `Mines`.
 - Built; tested on the Deck server.
+
+## 0.8.40 (2026-11-13): no more armour-look errors on every launch
+
+- The heavenly, kintsugi, primal and reverent armour sets had equipment look files with no layers, which 26.3 rejects with "Map must have contents" in the log on every launch. Those sets are drawn by their own models, so the files are gone; the game draws no extra layer for them either way.
+- `tools/check_data_refs.py` (PR checks) now fails a PR with any data or asset JSON that doesn't parse, or an equipment look with no layers.
+- Built; not played.
