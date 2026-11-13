@@ -48,7 +48,9 @@ import org.jspecify.annotations.Nullable;
  * boxer is locked onto the attacker) is a <b>perfect evade</b>, and the next punch inside {@link #STRONG_TICKS} is the
  * style's strong attack: the uppercut out of a bob, the pull counter out of a pull (the longest reach in boxing and a
  * hard shove), the roll straight out of a shoulder roll (the hardest hit). A shoulder roll that isn't perfect still
- * turns the blow to a glance ({@link #GLANCE} of it) and earns a weaker straight.
+ * turns the blow to a glance ({@link #GLANCE} of it) and earns a weaker straight. After a pull or a shoulder roll the
+ * boxer stays hard to hit for {@link #OFF_LINE_TICKS} more: blows and shots miss at {@link #PULL_MISS} or
+ * {@link #ROLL_MISS} odds (no strong attack from those).
  *
  * <p>A strong attack earned by a perfect evade <b>blurs</b> a player it lands on ({@link #BLUR}, drawn by the client;
  * not again for {@link #BLUR_COOLDOWN}) and <b>dazes</b> a mob for as long (never the undead; a boss for
@@ -90,6 +92,13 @@ public final class BoxingEvades {
 	public static final int BOSS_DAZE = 30;
 	/** The share of a blow a plain shoulder roll lets through. */
 	public static final float GLANCE = 0.5F;
+	/**
+	 * (Andy, from Jung) Hard to hit after a pull or a shoulder roll: once the evade's sure miss ({@link #EVADE_TICKS}) is
+	 * over, blows and shots aimed at the boxer still miss at these odds for this many ticks more, while they are moving
+	 * off the line or turned behind the shoulder.
+	 */
+	public static final int OFF_LINE_TICKS = 12;
+	public static final float PULL_MISS = 0.4F, ROLL_MISS = 0.3F;
 	/** The combo breaker: punches in a row, the pause (ticks) that ends a row, the shove away and how long the boxer can't reach them. */
 	public static final int BREAKER_HITS = 6, BREAKER_RESET = 40, BREAKER_TICKS = 20;
 	static final double BREAKER_SHOVE = 0.7, BREAKER_UP = 0.1;
@@ -219,11 +228,20 @@ public final class BoxingEvades {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		long age = now - state.evaded;
-		if (age < 0 || age > EVADE_TICKS || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypeTags.IS_EXPLOSION)) {
+		if (age < 0 || age > EVADE_TICKS + OFF_LINE_TICKS || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		}
 		if (!(source.getDirectEntity() instanceof Projectile) && !(source.getDirectEntity() instanceof LivingEntity)) {
 			return false;
+		}
+		if (age > EVADE_TICKS) {
+			// past the sure miss: a pull or a shoulder roll still leaves them hard to hit for a moment
+			float odds = state.move == Move.PULL ? PULL_MISS : state.move == Move.ROLL ? ROLL_MISS : 0.0F;
+			if (age > EVADE_TICKS + OFF_LINE_TICKS || odds <= 0.0F || player.getRandom().nextFloat() >= odds) {
+				return false;
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.5F, 1.3F);
+			return true;
 		}
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity living ? living : null;
 		int window = Guard.PERFECT_TICKS + (attacker != null && LockOn.target(player) == attacker ? Guard.LOCK_PERFECT_BONUS : 0);
