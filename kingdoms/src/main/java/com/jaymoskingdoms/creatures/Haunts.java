@@ -222,7 +222,7 @@ public final class Haunts {
 	private static void ground(ServerLevel level, ServerPlayer player) {
 		RandomSource random = level.getRandom();
 		int cx = player.chunkPosition().x() + random.nextInt(13) - 6, cz = player.chunkPosition().z() + random.nextInt(13) - 6;
-		if (!level.hasChunk(cx, cz)) {
+		if (level.getChunkSource().getChunkNow(cx, cz) == null) {
 			return;
 		}
 		BlockPos at = new ChunkPos(cx, cz).getMiddleBlockPosition(0).offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);

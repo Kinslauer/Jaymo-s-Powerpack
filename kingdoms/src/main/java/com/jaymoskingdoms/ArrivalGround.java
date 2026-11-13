@@ -104,7 +104,7 @@ public final class ArrivalGround {
 				continue;
 			}
 			ChunkPos pos = job.left().poll();
-			if (level.getChunkSource().hasChunk(pos.x(), pos.z())) {
+			if (level.getChunkSource().getChunkNow(pos.x(), pos.z()) != null) {
 				continue;
 			}
 			MAKING.add(new Making(job.dimension(), pos, level.getChunkSource().addTicketAndLoadWithRadius(AHEAD, pos, 0)));

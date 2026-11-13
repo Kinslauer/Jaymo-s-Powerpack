@@ -116,7 +116,7 @@ public final class BogLights {
 		int cx = player.chunkPosition().x(), cz = player.chunkPosition().z();
 		for (int dx = -HUT_CHUNKS; dx <= HUT_CHUNKS; dx++) {
 			for (int dz = -HUT_CHUNKS; dz <= HUT_CHUNKS; dz++) {
-				if (!level.hasChunk(cx + dx, cz + dz)) {
+				if (level.getChunkSource().getChunkNow(cx + dx, cz + dz) == null) {
 					continue;
 				}
 				for (var start : level.structureManager().startsForStructure(cx + dx, cz + dz, s -> s == structure)) {

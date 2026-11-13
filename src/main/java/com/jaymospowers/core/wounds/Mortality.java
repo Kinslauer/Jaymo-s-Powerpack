@@ -1115,7 +1115,7 @@ public final class Mortality {
 		double r = min + random.nextDouble() * (max - min);
 		int x = (int)Math.floor(from.getX() + Math.cos(angle) * r);
 		int z = (int)Math.floor(from.getZ() + Math.sin(angle) * r);
-		if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 			return null;
 		}
 		return ground(level, x, z, awayFromTowns);
@@ -1130,7 +1130,7 @@ public final class Mortality {
 				double angle = start + Math.PI * 2.0 * i / steps;
 				int x = (int)Math.floor(from.getX() + Math.cos(angle) * r);
 				int z = (int)Math.floor(from.getZ() + Math.sin(angle) * r);
-				if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+				if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 					continue;
 				}
 				BlockPos ground = ground(level, x, z, false);
@@ -1144,7 +1144,7 @@ public final class Mortality {
 
 	private static boolean besideWater(ServerLevel level, BlockPos at) {
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-4, -2, -4), at.offset(4, 0, 4))) {
-			if (level.getChunkSource().hasChunk(p.getX() >> 4, p.getZ() >> 4) && level.getFluidState(p).is(net.minecraft.tags.FluidTags.WATER)) {
+			if (level.getChunkSource().getChunkNow(p.getX() >> 4, p.getZ() >> 4) != null && level.getFluidState(p).is(net.minecraft.tags.FluidTags.WATER)) {
 				return true;
 			}
 		}
@@ -1156,7 +1156,7 @@ public final class Mortality {
 	 * that burns or pricks, with room to stand; {@code awayFromTowns}: and no villager near. Null if not.
 	 */
 	public static @Nullable BlockPos ground(ServerLevel level, int x, int z, boolean awayFromTowns) {
-		if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+		if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 			return null;
 		}
 		BlockPos feet = null;

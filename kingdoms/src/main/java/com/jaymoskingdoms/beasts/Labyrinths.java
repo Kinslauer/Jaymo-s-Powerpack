@@ -96,7 +96,7 @@ public final class Labyrinths {
 			for (int dx = -LOOK_CHUNKS; dx <= LOOK_CHUNKS; dx++) {
 				for (int dz = -LOOK_CHUNKS; dz <= LOOK_CHUNKS; dz++) {
 					int cx = middle.x() + dx, cz = middle.z() + dz;
-					if (!level.hasChunk(cx, cz)) {
+					if (level.getChunkSource().getChunkNow(cx, cz) == null) {
 						continue;
 					}
 					for (StructureStart start : level.structureManager().startsForStructure(cx, cz, s -> labyrinth(structures, s))) {

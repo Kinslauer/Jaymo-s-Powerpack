@@ -101,7 +101,7 @@ public final class Shelter {
 		for (int x = -BED_REACH; x <= BED_REACH; x++) {
 			for (int z = -BED_REACH; z <= BED_REACH; z++) {
 				int bx = seat.getX() + x, bz = seat.getZ() + z;
-				if (!level.getChunkSource().hasChunk(bx >> 4, bz >> 4)) {
+				if (level.getChunkSource().getChunkNow(bx >> 4, bz >> 4) == null) {
 					continue;
 				}
 				for (int y = -BED_HEIGHT; y <= BED_HEIGHT; y++) {
