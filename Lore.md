@@ -1736,8 +1736,10 @@ clean, and a river that has one is counted a good river.
 to do. In the rivers by the villages lives the River Child, which pulls swimmers under and thins the paddies, and
 which is paid in food left at the water. On winter nights when the snow lies under the cherry a woman in white walks,
 the Snow Widow, and the cold walks with her; she is gone by morning. Where many dead are left lying together they get
-up as one, the Unburied, a giant of all their bones, which is the reason the blossom folk bury friend and enemy alike
-and at once. On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
+up as one, the Unburied, a giant heaped together out of the dead themselves, their bodies its legs and arms and
+trunk, which is the reason the blossom folk bury friend and enemy alike and at once. It cannot bear the day: at first
+light it comes apart where it stands and lets its dead fall, and those left lying there will rise again with the next
+dark (amended 2026-11-13, the Unburied made of its bodies, for Andy to approve). On the sea round the far land, in fog, at night, a black round thing called the Black Swell rises ahead
 of a ship; it wants a barrel, and every blossom captain carries an empty one. And all of it follows the moon: at the
 full nothing walks under the open sky, which is when they hold their feasts, and in the dark of the moon twice as much
 does. None of these are the demons' or the Aether's; they are older than the folk and belong to the land.
