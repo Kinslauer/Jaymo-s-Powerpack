@@ -100,6 +100,16 @@ public final class SeaTrade {
 		return crew.side == Crew.Side.MERCHANT || crew.side == Crew.Side.FISHER;
 	}
 
+	/** {@code ship} lies to until {@code until} (game time) as if hailed, and trades meanwhile (a blossom trader at a harbour). */
+	static void lie(Ship ship, long until) {
+		HOVE.put(ship.getUUID(), until);
+	}
+
+	/** {@code ship} gets under way again now, whoever is near her. */
+	static void sail(Ship ship) {
+		HOVE.remove(ship.getUUID());
+	}
+
 	/** Whether {@code ship} lies hove to for a hail now (kept so while a player is near her). */
 	static boolean hoveTo(ServerLevel level, Ship ship) {
 		Long until = HOVE.get(ship.getUUID());
@@ -157,6 +167,19 @@ public final class SeaTrade {
 			sell(offers, coin, 1, new ItemStack(Items.KELP, 16));
 			sell(offers, coin, 1, new ItemStack(Items.STRING, 4));
 			buy(offers, coin, new ItemStack(Items.BREAD, 6), 1);
+			return offers;
+		}
+		if (BlossomTraders.is(crew)) {
+			// what the home continent has none of its own; the rest of her cargo comes with the blossom land's own goods
+			sell(offers, coin, 1, new ItemStack(Items.PAPER, 12));
+			sell(offers, coin, 1, new ItemStack(Items.BAMBOO, 16));
+			sell(offers, coin, 2, new ItemStack(Items.CHERRY_SAPLING, 2));
+			sell(offers, coin, 1, new ItemStack(Items.PINK_PETALS, 8));
+			sell(offers, coin, 2, new ItemStack(Items.LANTERN, 2));
+			sell(offers, coin, 3, new ItemStack(Items.IRON_INGOT, 6));
+			buy(offers, coin, new ItemStack(Items.LEATHER, 6), 1);
+			buy(offers, coin, new ItemStack(Items.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE), 8), 1);
+			buy(offers, coin, new ItemStack(com.jaymoskingdoms.whaling.Whaling.WHALE_OIL, 2), 3);
 			return offers;
 		}
 		sell(offers, coin, 1, new ItemStack(Items.BREAD, 6));

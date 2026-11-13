@@ -1206,6 +1206,10 @@ public final class Approaches {
 			// (0.7.270) a talk about work aboard ship: your berth, your lay
 			return;
 		}
+		if (BlossomTraders.answer(player, answer)) {
+			// a blossom trader's captain named his price for the crossing
+			return;
+		}
 		if (Helmsmen.answer(player, answer)) {
 			// a helmsman asked for his course
 			return;

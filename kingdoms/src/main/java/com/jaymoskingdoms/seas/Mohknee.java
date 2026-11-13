@@ -69,6 +69,9 @@ public final class Mohknee {
 	/** A map reaching no further than this also reads the ground's height. */
 	static final int MAP_CLOSE = 1200;
 
+	/** A ship lies to with the land's shore this near ahead of her (blocks). */
+	public static final int SHORE_AHEAD = 96;
+
 	private Mohknee() {
 	}
 
@@ -90,6 +93,27 @@ public final class Mohknee {
 	/** {@code pos} in {@code level} is on Mohknee: the Overworld only. */
 	public static boolean on(Level level, BlockPos pos) {
 		return level.dimension() == Level.OVERWORLD && on(pos.getX(), pos.getZ());
+	}
+
+	/**
+	 * Whether Mohknee's own shore lies close ahead of a ship at {@code x, z} making for the land's middle: within the
+	 * land's widest reach, and dry ground at the sea's level within {@link #SHORE_AHEAD} blocks on that line (in loaded
+	 * chunks only). Where a ship that knows the crossing lies to.
+	 */
+	public static boolean shoreAhead(net.minecraft.server.level.ServerLevel level, double x, double z) {
+		double d = distance(x, z);
+		if (level.dimension() != Level.OVERWORLD || d > LAND + WOBBLE + SHORE_AHEAD || d < 1.0) {
+			return false;
+		}
+		double fx = (CENTRE_X - x) / d, fz = (CENTRE_Z - z) / d;
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+		for (int step = 16; step <= SHORE_AHEAD; step += 16) {
+			p.set(net.minecraft.util.Mth.floor(x + fx * step), level.getSeaLevel() - 1, net.minecraft.util.Mth.floor(z + fz * step));
+			if (level.hasChunkAt(p) && level.getFluidState(p).isEmpty() && !level.getBlockState(p).isAir()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** {@code x, z} is on (or just off) one of the crossing's islands. */

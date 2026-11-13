@@ -52,9 +52,10 @@ No code shapes the land: 26.3 has `minecraft:distance_to_point`, `slice`, `lerp`
 
 ## Patch 2: word of it, and the way there
 
-*Built so far (2026-11-13, `Helmsmen`, `MohkneeTalk`): the gossip, the hired sea captain, a companion at the helm, and
-the course to Mohknee from a sailor who has made the crossing (one in three). Still to build: blossom merchantmen,
-bought passage, the rutter and latitude, the navy patrol, and keeping coaches and fares off the land.*
+*Built (2026-11-13, `Helmsmen`, `MohkneeTalk`, `BlossomTraders`): the gossip, the hired sea captain, a companion at
+the helm, the course to Mohknee from a sailor who has made the crossing (one in three), blossom traders calling at
+realm harbours, and bought passage both ways. Not built: the rutter and latitude (the sailor who has crossed stands in
+for it), the navy patrol, keeping coaches and fares off the land, and a harbour town on Mohknee (patch 4).*
 
 - **Spoken of.** Harbour folk, sailors, merchants and old soldiers on the home continent bring it up in talk
   (`WorkTalk`, `ShipTalk`, `TableTalk`): a land east over the water, what comes from it, who went and did not come

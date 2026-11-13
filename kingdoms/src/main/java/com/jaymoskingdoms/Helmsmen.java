@@ -71,8 +71,6 @@ public final class Helmsmen implements Ship.Helmsmanship {
 	static final double CALL_RANGE = 16.0;
 	/** One sailor in this many has made the eastern crossing. */
 	static final int CROSSED_IN = 3;
-	/** He heaves to this far off Mohknee's shore line (blocks past the land's own reach). */
-	static final int LANDFALL = 120;
 	static final String CAPTAIN_TAG = "jaymoskingdoms.sea_captain";
 	public static final String HELM = "helm", HIRE = "hire_helm";
 
@@ -521,7 +519,7 @@ public final class Helmsmen implements Ship.Helmsmanship {
 			} else if (off < FOLLOW_ASTERN * 2.0) {
 				sail = Math.min(sail, 0.4);
 			}
-		} else if (FAR.equals(order.course()) && Mohknee.distance(ship.getX(), ship.getZ()) < Mohknee.LAND + Mohknee.WOBBLE + LANDFALL) {
+		} else if (FAR.equals(order.course()) && Mohknee.shoreAhead(level, ship.getX(), ship.getZ())) {
 			// the far shore under her bow: he lies off it, and where she goes in is her owner's to say
 			ship.setAttached(ORDER, order.with(HOVE));
 			say(level, hand, owner, "landfall");

@@ -50,8 +50,10 @@ public final class InteractActions {
 	public static final String SEAL = "seal", DEED = "deed";
 	/** Take the Helm and Hire as Captain: someone else to sail your ship ({@link Helmsmen}). */
 	public static final String HELM = Helmsmen.HELM, HIRE_HELM = Helmsmen.HIRE;
+	/** Buy Passage: aboard a blossom trader lying off a harbour ({@link BlossomTraders}). */
+	public static final String PASSAGE = BlossomTraders.ACTION;
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -120,6 +122,7 @@ public final class InteractActions {
 				&& !ForgedPapers.householder(player, guardRealm(player, v));
 			case HELM -> Helmsmen.offersHelm(player, v);
 			case HIRE_HELM -> Helmsmen.offersHire(player, v);
+			case PASSAGE -> BlossomTraders.offers(player, v);
 			default -> false;
 		};
 	}
@@ -228,6 +231,10 @@ public final class InteractActions {
 			}
 			case HIRE_HELM -> {
 				Helmsmen.hire(player, v);
+				return null;
+			}
+			case PASSAGE -> {
+				BlossomTraders.talk(player, v);
 				return null;
 			}
 			case SEAL, DEED -> {
