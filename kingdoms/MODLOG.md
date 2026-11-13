@@ -12543,3 +12543,8 @@ giants being worked on, as its own upright model."
 ## 0.8.15 (2026-11-13): Screens can be vanilla grey (#1436)
 
 - With `/screenlook grey` (Jaymo's Powers) this mod's screens are drawn as vanilla's bevelled grey window with grey slots and dark text after a restart. Dark stays the default.
+
+## 0.8.16 (2026-11-13): loading-screen hint: purifying water (#1442)
+
+- New loading-screen hint (158): river water is unpurified; boil it, or run it through a water filter; the glass comes back when you drink.
+- Built; not played.

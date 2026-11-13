@@ -1,7 +1,0 @@
-# unpurified water: bottles give their glass back, more ways to purify
-- **Unpurified Water**: a plain water bottle is now called Unpurified Water, and its tooltip says it may make you sick and how to make it safe. Drinking it still risks a parasite (35% a bottle, 25% a waterskin sip, 15% a sip from the bank; Iron Stomach is still immune).
-- **The glass comes back**: drinking a water bottle or a Clean Water always gives the glass bottle back (`WaterBottleBackMixin`). Both items already named the glass bottle as what's left, so this only steps in when a stack reaches the drink without that and the glass would be lost.
-- **More ways to boil**: use a water bottle or a waterskin on a lit campfire, firepit or bonfire (as before), and now also on a lit bonfire edge, a lit hearth, or a cooking pot or frying pan standing on heat (`Climate.purifiesAt`). A glass bottle dipped in a water cauldron standing over heat comes out as Clean Water (`Climate.drawBoiled`). Pots and cauldrons now also heat on a bonfire and its edge (`heat_sources` tag).
-- **Water Filter**: a new item crafted from wool, charcoal and sand stacked in a column (24 uses). Hold unpurified water in your other hand and use the filter: a bottle becomes Clean Water, and a waterskin's river water becomes clean (one use per sip). Filtered water is clean but not hot. `WaterFilterItem`; placeholder 16x16 art.
-- Clean Water's tooltip reads "Purified"; the waterskin's dirty line says how to purify it. JEI info on Clean Water and the filter.
-- Built; not played.
