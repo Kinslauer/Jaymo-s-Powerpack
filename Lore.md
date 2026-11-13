@@ -526,6 +526,12 @@ anyone told him to; his sword lies with him and nowhere else.
 **The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
 Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
 
+(new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
+watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
+where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
+its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
+
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
 witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
@@ -1513,3 +1519,15 @@ a handle on its owner, and hedge-witches and court wizards alike will pay for on
 or smoke. A familiar is a small spirit given a body, owl, raven, cat, rat or frog, bound to one caster and born
 again from its ash. Moonlight called down by a caster shows a shapechanger for what it is. Some Sorcerers' blood is
 wild, and so is the well in a great lair's blighted land: there a spell can come out as something else entirely.
+
+(new) **Relics, wands and the Deck of Fates** (Claude's placement for the fifth edition picks, patch 8, 2026-11-13, for Andy to approve). Old things found in deep places keep their own minds. A relic, a ring or an old pair of boots is made by someone long gone, and it takes to one carrier at a time: it must be borne through a night's rest to bond, and no one can bond more than three. Until it is known it shows no face; use wears the veil off, and a court wizard will read one for a fee. Some carry a curse laid by their makers (clinging, thirst, whispers, misfortune); a cleric at a shrine can lift it. A few blades wake with a will and a want (the dead, the weak, gold) and take the arm of one who ignores them. Wands and staffs are cut from a dead tree's heartwood and fill again at dawn. The wondrous gadgets (rod, rope, jug, lantern, stone hound, horn, bottle of smoke) are the work of smiths of the ages this world has forgotten, found in its ruins and deep places. The Deck of Fates is a fortune-teller's gift to a king who wished to be told his end; whoever draws from it draws from the old gods, and it is not kind. Potions drunk close together clash, for the brewer's craft was never meant to be mixed in the belly.
+
+(new) **The body kept and the body given** (Claude's placement for the fifth edition picks, patch 10, 2026-11-13, for
+Andy to approve; under "The dead"). A cleric can call the freshly fallen back before the Judge opens the book, a
+minute at most, for the price of a diamond, and rests three days after. The settlements' priests keep their dead
+in salt and herbs so they wait whole for the burying and no necromancer can lift them. One who has died for good may
+wait in the dark beside their own body, watching their friends bury it. The old druids of the forest groves, hermits
+no village names, can give such a one a new body within ten days, laid at their feet, in a blood the wood chooses:
+they keep their name and memory and lose what the old blood gave them. In the caves the damp grows its own moulds:
+a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
+and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
