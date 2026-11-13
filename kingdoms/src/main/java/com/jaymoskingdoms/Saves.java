@@ -27,6 +27,7 @@ import java.util.Set;
  * <li><b>Wits</b>: charms and illusions are seen through more often.</li>
  * <li><b>Arcana</b>: a curse's bite (the wolf's, the vampire's) and possession are thrown off more often.</li>
  * <li><b>Might</b>: nets and grabs are broken more often.</li>
+ * <li><b>Finesse</b>: a web that would catch you is slipped before it closes more often.</li>
  * </ul>
  * Everyone else has a plain chance, and a boss a much better one. No numbers are shown; a save that holds is heard.
  */
@@ -49,7 +50,8 @@ public final class Saves {
 	/** What a save is against, and the attribute behind it. */
 	public enum Kind {
 		BLAST(Stat.AGILITY), POISON(Stat.ENDURANCE), FEAR(Stat.GRIT), HOLD(Stat.GRIT), CHARM(Stat.WITS), ILLUSION(Stat.WITS),
-		CURSE(Stat.ARCANA), POSSESSION(Stat.ARCANA), GRAB(Stat.MIGHT), FOCUS(Stat.GRIT);
+		CURSE(Stat.ARCANA), POSSESSION(Stat.ARCANA), GRAB(Stat.MIGHT), FOCUS(Stat.GRIT),
+		SLIP(Stat.FINESSE);
 
 		public final Stat stat;
 

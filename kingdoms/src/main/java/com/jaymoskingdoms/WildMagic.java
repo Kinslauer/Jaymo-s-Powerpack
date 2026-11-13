@@ -106,7 +106,7 @@ public final class WildMagic {
 
 	/** Whether {@code player} is a Sorcerer of the wild bloodline. */
 	public static boolean wild(ServerPlayer player) {
-		return Classes.is(player, Classes.PlayerClass.SORCERER) && WILD.equals(Classes.of(player).option());
+		return WILD.equals(Classes.optionOf(player, Classes.PlayerClass.SORCERER));
 	}
 
 	/** The element a wild Sorcerer's blade or bolt takes this time. */

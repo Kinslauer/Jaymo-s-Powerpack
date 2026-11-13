@@ -296,3 +296,42 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
 - **K8 Tinkerer** (`Tinkerers`): infusions at Powers tinkering stations, 3 at once: returning (tridents only, real
   Loyalty), springing boots, glowing shield (night vision + glow, no placed light); recipes for rod, rope, jug,
   light, smoke bottle (invented, need a balance pass); hound and horn stay loot-only.
+
+### Patch 11b (second class, feats, paths)
+- **K9 Second class** (`SecondClass`): taught by a master villager (profession level 5) of a matching trade, knowledge
+  level 3, 60 silver. `Classes.SECOND_SHARE` = 50% on perks, pools, spell power and cooldown, tomes, counterspell,
+  catch-breath and paths; the bespoke systems (brute rage, thief sneak attack, riders, valor, weapon forms) switch on
+  at full strength for a second class. Alt+J answers the second class. One patron only. The Sorcerer was first left
+  out by the builder; the lead put it back (a master librarian wakes the element; the element readers now use
+  `Classes.optionOf`, the bolt scales by share, Alt+J runs the imbue).
+- **K10 Feats** (`Feats*`, `GrowthScreen`): one owed per knowledge level, picked on the H menu's Feats and Paths tab
+  (an unbound key as a fallback). All eighteen hooked. Differences: Mounted Fighter uses the horse-trust system, not
+  Free Rein or Horseman; Crossbow Expert is a faster load and harder bolts (the game has no close-range penalty to
+  remove); Tough's per-level health applies at the next attribute refresh.
+- **K11 Paths** (`Paths`): two or three per class for all fourteen, picked once on the same tab; a second class's
+  path runs at half.
+
+### After the row-by-row check (three independent reads of the code against the rows)
+Patches 1 to 10: 81 rows, 65 built in full, 16 with a part missing, none broken. Closed:
+- **A1**: unaware is an upper-hand reason both ways (`Senses.unaware`; `Surprise.offGuard`); darkness footing for
+  anyone of a blood (`VillagerHeritage.of`).
+- **A2**: Finesse has a save (`Saves.Kind.SLIP`: a web's catch).
+- **A5**: `Notice.chance` adds the Stealth tree; finders for hidden levers/buttons/plates (dim light, off settlement
+  land), warren pit covers, hanging piercers, ranged hunters to 26 blocks, and `Crooks.picking`.
+- **C4**: any mob out for the player ambushes (`Surprise.hostile`), not only monsters.
+- **C3**: `Cover.takesBolt` for the hitscan bolts (`Spellcraft.bolt`, `Sorcery.arcaneBolt`); more ids in `cover_stops`.
+- **G7**: `ForgedPapers.SEAL` (jail release or a 7-day pass; spotted in the cells = a day longer) and `DEED`
+  (householder 30 days: gate pass, own-house sleep), sold by fences and crooks of notoriety 2+.
+- **G8**: `Lifestyle.Living.place`: own house/manor +4, inn +3, bed +2, stable floor -1, open ground -3.
+- **E3**: `Revival.revive` also calls back one left for dead within the minute (`Mortality.freshlyLeft`,
+  `calledBack`): the first two deaths are covered and the wake is not spent.
+- **H2**: a deafened caster fails any spell with listed parts. Spell Engine spells keep Spell Engine's own runes as
+  their component (no second component added).
+- **H5**: the light cantrip needs a focus in hand and goes out without it (still a light block just ahead of you).
+- **H9**: `Geas` tasks: serve, guard, begone.
+- **J3**: `Gaze` runs for the existing gorgon too; `Statues.den(…, gorgon)` builds her ruin.
+- **J9**: bog lights lead to a swamp hut when one is within 5 chunks (there are no hags: J7 was not picked).
+Left as they are, for Andy to know: F4 rain shortens mob sight only (players already have rain fog); NPC guards and
+orcs throw one net a day from a tally rather than a held item; scrying is a top-down live map; plant growth is
+instant; Limbo is a tethered spectator with a black frame; the death knight is a strengthened wither skeleton; the
+returning infusion works on tridents only; new mobs, familiars and druid shapes use stand-in art.

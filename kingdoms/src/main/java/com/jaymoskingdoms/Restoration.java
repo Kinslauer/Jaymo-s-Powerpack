@@ -191,7 +191,7 @@ public final class Restoration {
 
 	/** A Restoration Sorcerer. */
 	static boolean restorer(Player player) {
-		return Classes.is(player, PlayerClass.SORCERER) && "restoration".equals(Classes.of(player).option());
+		return "restoration".equals(Classes.optionOf(player, PlayerClass.SORCERER));
 	}
 
 	static boolean undead(LivingEntity e) {

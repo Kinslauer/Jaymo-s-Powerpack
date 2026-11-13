@@ -163,8 +163,7 @@ public final class SorceryPicks {
 
 	/** The spell on {@code player}'s skill bar: their element's, once they know the higher arts; else null. */
 	public static @Nullable String barSpell(Player player) {
-		Classes.Chosen chosen = Classes.of(player);
-		String spell = chosen.playerClass() == Classes.PlayerClass.SORCERER ? spellOf(chosen.option()) : null;
+		String spell = spellOf(Classes.optionOf(player, Classes.PlayerClass.SORCERER));
 		return spell != null && Knowledge.has(player, Knowledge.HIGHER_ARTS) ? spell : null;
 	}
 

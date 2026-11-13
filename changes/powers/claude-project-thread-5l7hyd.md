@@ -11,4 +11,6 @@
 - **Held deaths** (`core/wounds/Revival`, mixin `RevivalRespawnMixin`): a final death with a reviver near waits up to a minute ("Someone may yet reach you"); Reincarnate still works at once.
 - **Limbo** (`Limbo`, `LimboHud`, mixin `DeathScreenLimboMixin`): a Limbo button beside Reincarnate on the final death screen: a black frame where you watch over your own body (14 blocks) while friends bury you or bring you back in a new blood; kept across logouts; hold Backspace to choose Reincarnate after all.
 - **Thin ice** (`frost/FrostFeatures.LakeCrust`): still shallow water in cold lands gets a crust of brittle ice that cracks under weight.
+- **Calling back the first deaths**: for a minute after a player is left for dead (one of the two deaths that always wake), a cleric or a scroll of Calling Back can stand them up where they lie; they wake nowhere and the sure wake is not spent.
+- **Healer feat**: bandages heal half as much again and treatments go a fifth quicker (read from Kingdoms).
 - Built; not played.

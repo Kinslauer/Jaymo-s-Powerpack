@@ -34,8 +34,8 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
  * <p>
  * The second class climbs slower: its perks, pools and spell power are {@link Classes#SECOND_SHARE} of the first class's
  * ({@link Classes#share}). Both classes' abilities work: the class key {@code J} answers the first; held with {@code Alt}
- * it answers the second ({@link Abilities#second}), each with sneak as before. A Sorcerer's gift is born in the blood and
- * is never taught, so it is the one class no master teaches. The Writ of Rebirth unmakes both classes (and the paths and
+ * it answers the second ({@link Abilities#second}), each with sneak as before. A Sorcerer's element is woken, not
+ * taught: a master librarian knows the rite, and the element is picked as it wakes. The Writ of Rebirth unmakes both classes (and the paths and
  * feats with them).
  */
 public final class SecondClass {
@@ -61,6 +61,8 @@ public final class SecondClass {
 		MASTERS.put(PlayerClass.PALADIN, Set.of(VillagerProfession.CLERIC, VillagerProfession.ARMORER));
 		MASTERS.put(PlayerClass.RANGER, Set.of(VillagerProfession.FLETCHER, VillagerProfession.BUTCHER));
 		MASTERS.put(PlayerClass.WARLOCK, Set.of(VillagerProfession.LIBRARIAN));
+		// (an element is woken, not taught: the keeper of the old books knows the rite that wakes it)
+		MASTERS.put(PlayerClass.SORCERER, Set.of(VillagerProfession.LIBRARIAN));
 		MASTERS.put(PlayerClass.TINKERER, Set.of(VillagerProfession.TOOLSMITH, VillagerProfession.WEAPONSMITH, VillagerProfession.ARMORER));
 	}
 
@@ -103,7 +105,7 @@ public final class SecondClass {
 	/** Whether {@code player} may take {@code cls} as a second class now. */
 	public static boolean may(ServerPlayer player, PlayerClass cls) {
 		PlayerClass first = Classes.classOf(player);
-		return first != null && first != cls && Classes.second(player) == null && cls != PlayerClass.SORCERER
+		return first != null && first != cls && Classes.second(player) == null
 			&& (player.isCreative() || Knowledge.level(player) >= KNOWLEDGE_NEEDED);
 	}
 

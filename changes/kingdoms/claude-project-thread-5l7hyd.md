@@ -82,4 +82,18 @@
 - **Ranger** replaces the Archer and the Survivalist (old characters load as Rangers, keeping Headshot and Second Wind): a favoured foe (harder blows, its trail read farther and standing out) and a favoured land (never lose the trail, move quietly).
 - **Warlock**: a pact with a patron: two strong spells that come back on a short rest, and a debt the patron calls in favour, an errand, blood or coin, and collects if left.
 - **Tinkerer**: infuses gear at the tinkering stations (a returning trident, springing boots, a glowing shield, three at a time) and learns to build five of the wondrous gadgets.
+- **A second class** (`SecondClass`): a master villager (top profession rank) of a matching trade teaches one for 60 silver once you hold knowledge level 3; it works at half strength. Alt+J is its class key. A master librarian wakes a Sorcerer's element. The Writ of Rebirth unmakes both classes, the paths and the feats.
+- **Feats** (`Feats`, `FeatsBody`, `FeatsFight`, `FeatsTrade`, `GrowthScreen`): one per knowledge level, picked on the new Feats and Paths tab of the H menu: Alert, Lucky, Mobile, Sentinel, Tough, Healer, Chef, Shield Master, Mage Slayer, Skulker, Observant, Mounted Fighter, Charger, Linguist, Actor, Inspiring Leader, Crossbow Expert, Dungeon Delver.
+- **Paths** (`Paths`): every class picks one of two or three paths once (Thief: assassin, burglar, swashbuckler; Mage: evocation, abjuration, divination; Warlord: champion, battlemaster; and so on for all fourteen).
+- **After the row-by-row check** (every picked row read against the code):
+  - The upper hand counts a foe who hasn't noticed you, and a foe gets it on you when it strikes from out of sight while you are at ease; villagers and folk of a blood without darkvision fight badly in the dark, as players do.
+  - Noticing also grows with the Stealth tree and now catches hidden levers, buttons and plates in the gloom (away from settlements), a warren's covered pits, things hanging overhead, archers after you from farther off, and a crook's hand going for your purse.
+  - A bandit band or war party that jumps you from out of sight startles you as a monster does. Finesse has a save too: slipping a web before it closes.
+  - A Sorcerer's bolt and a court wizard's can burst on the cover their target crouches behind; tridents, fireballs, frost lances and thrown gear stick in cover too.
+  - **Forged writ under the lord's seal** (lets you out of the cells, or a week's pass) and **forged deed** (a householder in that realm for thirty days), from fences and the most notorious crooks only; new Show the Lord's Seal and Show a Deed options on guards.
+  - Where you slept is graded for your standing: your own house or manor (land you are lord of, or a deed), a tavern's bed, any bed, a stable's floor, the open ground.
+  - A deafened caster's big spells fail outright. The light cantrip burns on a staff, wand, tome or holy symbol held in the hand and goes out when it is put away.
+  - **Geas** now has a task the caster names: serve at my side (and fight who I fight), guard this spot, or be gone and stay away. Breaking it burns.
+  - **Gorgons** have the gaze that turns you to stone (a mirror turns it back), and a gorgon's ring of broken columns with her statues is found by ruins as often as a basilisk's den.
+  - Bog lights lead to a witch's hut when one stands near, as well as into quicksand.
 - Built; not played.

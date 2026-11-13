@@ -386,10 +386,9 @@ public final class Spellcraft {
 		return false;
 	}
 
-	/** The Sorcerer's element, or "" for anyone else. */
+	/** The Sorcerer's element (as a first class or a second), or "" for anyone else. */
 	static String element(ServerPlayer player) {
-		Classes.Chosen c = Classes.of(player);
-		return c.playerClass() == PlayerClass.SORCERER ? c.option() : "";
+		return Classes.optionOf(player, PlayerClass.SORCERER);
 	}
 
 	/** A blade the Imbue takes: a sword, or anything the classes count as a blade. */
@@ -402,6 +401,11 @@ public final class Spellcraft {
 		if (Abilities.key(player, bolt)) {
 			return;
 		}
+		sorcerer(player, bolt);
+	}
+
+	/** The Sorcerer's own answer to the class key: the imbue, the bolt, their element's spell. */
+	static void sorcerer(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
@@ -504,7 +508,7 @@ public final class Spellcraft {
 			afterCast(player, level, element);
 			return;
 		}
-		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE);
+		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE * Math.max(Classes.SECOND_SHARE, Classes.share(player, PlayerClass.SORCERER)));
 		strike(level, player, target, element, true);
 		afterCast(player, level, element);
 	}

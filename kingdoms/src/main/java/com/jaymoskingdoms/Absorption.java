@@ -220,7 +220,7 @@ public final class Absorption {
 		if (!Classes.is(player, PlayerClass.SORCERER)) {
 			return "";
 		}
-		String option = Classes.of(player).option();
+		String option = Classes.optionOf(player, PlayerClass.SORCERER);
 		return option == null || option.equals("blood") || option.equals("wild") ? "" : option;
 	}
 

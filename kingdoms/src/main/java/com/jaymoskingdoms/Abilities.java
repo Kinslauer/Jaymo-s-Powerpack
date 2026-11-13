@@ -22,6 +22,7 @@ public final class Abilities {
 	static void second(ServerPlayer player, boolean sneak) {
 		PlayerClass cls = Classes.second(player);
 		if (cls == PlayerClass.SORCERER) {
+			Spellcraft.sorcerer(player, sneak);
 			return;
 		}
 		answer(player, cls, sneak);

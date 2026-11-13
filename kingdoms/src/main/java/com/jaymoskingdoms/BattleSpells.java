@@ -188,7 +188,8 @@ public final class BattleSpells {
 				continue;
 			}
 			f.acted.put(e.getUUID(), now);
-			if (!Saves.resist(e, Saves.Kind.GRAB)) {
+			// (light feet slip a web before it closes; once caught, it is Might that tears it)
+			if (!Saves.resist(e, Saves.Kind.SLIP)) {
 				Nets.catchIn(e, owner);
 			}
 		}
