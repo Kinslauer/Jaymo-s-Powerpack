@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.core.Sitting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.HashMap;
@@ -49,6 +50,11 @@ import org.jspecify.annotations.Nullable;
  * glide, a swing, a flight, an elytra, riding, a ladder, water, a ledge hang, a freerun move, being carried or thrown,
  * held by a web, a grip or a power, downed, limp as a ragdoll. Someone carrying a body only kicks their legs (the arms
  * keep the hold). On landing it eases out over {@link #LAND_FADE} ticks. Your own body isn't tipped over in first person.
+ * <p>
+ * A player can choose their own: the Sit key in midair goes round the styles ({@link Sitting#FALL_POSE}, Andy 2026-11-13:
+ * "the sit key in midair should swap the falling pose and it should remember the last you chose next fall"). The chosen
+ * one turns in at once, and every fall after holds it from start to finish in place of the random picks, still bracing
+ * for the ground before landing.
  */
 public final class FreefallPose {
 	// ===== the knobs ================================================================================================
@@ -179,7 +185,7 @@ public final class FreefallPose {
 		if (track == null) {
 			track = new Track(entity, now);
 			look(entity, track, now);
-			begin(track);
+			begin(entity, track);
 			TRACKS.put(id, track);
 		}
 		track.lastSeen = now;
@@ -300,8 +306,33 @@ public final class FreefallPose {
 		track.groundY = Double.NaN;
 	}
 
-	/** The fall's animations, picked when it starts. */
-	private static void begin(Track track) {
+	/** The falling pose this body's player chose with the Sit key in midair, or null (none: random picks). */
+	static @Nullable Style chosen(LivingEntity entity) {
+		if (!(entity instanceof Player player)) {
+			return null;
+		}
+		Integer pick = player.getAttached(Sitting.FALL_POSE);
+		return pick == null || pick < 0 || pick >= Sitting.FALL_POSES ? null : Style.values()[pick];
+	}
+
+	/**
+	 * For the Sit key: -2 if this player isn't falling the way these poses show (on the ground, flying, diving, held...:
+	 * the key sits as usual), else the pose their fall shows now (-1: none yet), to go on to the next.
+	 */
+	public static int fallKeyShown(Player player) {
+		if (player.onGround() || !person(player) || otherwise(player) || dives(player)) {
+			return -2;
+		}
+		Track track = TRACKS.get(player.getId());
+		Style shown = track == null ? null : track.to != Style.IMPACT ? track.to : track.from != Style.IMPACT ? track.from : null;
+		if (shown == null) {
+			shown = chosen(player);
+		}
+		return shown == null ? -1 : shown.ordinal();
+	}
+
+	/** The fall's animations, picked when it starts (all one chosen pose, if the player chose one). */
+	private static void begin(LivingEntity entity, Track track) {
 		double drop = Double.isNaN(track.groundY) ? Double.MAX_VALUE : track.startY - track.groundY;
 		track.drop = drop < MEDIUM_DROP ? Drop.SHORT : drop < LONG_DROP ? Drop.MEDIUM : Drop.LONG;
 		int seed = track.seed;
@@ -309,6 +340,12 @@ public final class FreefallPose {
 		track.settle = LONG_POOL[Math.floorMod(seed >>> 8, LONG_POOL.length)];
 		// the second is never the first again
 		track.second = LONG_POOL[Math.floorMod(Math.floorMod(seed >>> 16, LONG_POOL.length - 1) + 1 + track.settle.ordinal() - Style.ARCH.ordinal(), LONG_POOL.length)];
+		Style chosen = chosen(entity);
+		if (chosen != null) {
+			track.panic = chosen;
+			track.settle = chosen;
+			track.second = chosen;
+		}
 		track.from = track.panic;
 		track.to = track.panic;
 	}
@@ -319,8 +356,12 @@ public final class FreefallPose {
 		boolean known = !Double.isNaN(track.groundY);
 		double below = known ? entity.getY() - track.groundY : Double.MAX_VALUE;
 		Style want;
+		Style chosen = chosen(entity);
 		if (track.drop != Drop.SHORT && known && age > BRACE_AFTER && below / Math.max(falling, 0.1F) < BRACE_TICKS) {
 			want = Style.IMPACT;
+		} else if (chosen != null) {
+			// chosen with the Sit key (maybe just now, mid-fall: it turns in like any other change)
+			want = chosen;
 		} else if (age > SECOND_TICKS && (track.drop == Drop.LONG || below > LONG_DROP * 0.5)) {
 			want = track.second;
 		} else if (age > SETTLE_TICKS && (track.drop == Drop.LONG || below > LONG_DROP * 0.5)) {
@@ -505,6 +546,7 @@ public final class FreefallPose {
 	 * forward, face to the ground; {@link #roll} over to the right; {@link #yaw} turned to the left). {@code age}: ticks
 	 * since it began; {@code t}: the animation clock.
 	 */
+	/** (The Sit key's falling poses are the first {@link Sitting#FALL_POSES} of these, in this order: the brace stays last.) */
 	public enum Style {
 		/** Our own flail (this class's first one): arms thrown up and out, windmilling, legs kicking apart, looking down at the ground. */
 		WINDMILL {

@@ -11,7 +11,8 @@ import net.minecraft.client.Minecraft;
 
 /**
  * The Meditate key (I by default; shown as Shadowbox since Motion patch 0): held, it tells the server; let go (or a screen
- * opens), it tells it again. (0.19.67) The Sit key (] by default): each press tells the server (see {@link Sitting}).
+ * opens), it tells it again. (0.19.67) The Sit key (] by default): each press tells the server (see {@link Sitting}); in
+ * midair, falling, it asks for the next falling pose instead (see {@link FreefallPose#fallKeyShown}).
  */
 final class MeditateClient {
 	private static KeyMapping key;
@@ -37,7 +38,12 @@ final class MeditateClient {
 		}
 		while (sit.consumeClick()) {
 			if (minecraft.gui.screen() == null) {
-				ClientPlayNetworking.send(new Sitting.Key());
+				int shown = FreefallPose.fallKeyShown(minecraft.player);
+				if (shown >= -1) {
+					ClientPlayNetworking.send(new Sitting.FallKey(shown));
+				} else {
+					ClientPlayNetworking.send(new Sitting.Key());
+				}
 			}
 		}
 		boolean down = key.isDown() && minecraft.gui.screen() == null;
