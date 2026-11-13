@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_mole_underground",
+      "weight": 3
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 50,
+    "separation": 20,
+    "spread_type": "triangular",
+    "salt": 841632
+  }
+}

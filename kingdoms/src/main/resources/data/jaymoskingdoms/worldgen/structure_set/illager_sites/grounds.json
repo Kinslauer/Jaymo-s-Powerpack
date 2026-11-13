@@ -1,0 +1,87 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:illager_sites/well",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/tipi",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/simple_well",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/totem",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/lone_house",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/simple_cart",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_tower",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_tower2",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_tower3",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_tipi_camp",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/lava_extractor",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_stable",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_camp",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/balloon_tower",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_fort",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/smeltery",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_mole_maintenance",
+      "weight": 3
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_balloon",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/illager_mole_surface",
+      "weight": 3
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 50,
+    "separation": 20,
+    "spread_type": "triangular",
+    "salt": 73841632
+  }
+}

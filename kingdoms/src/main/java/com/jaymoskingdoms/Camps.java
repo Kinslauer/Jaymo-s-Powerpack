@@ -506,7 +506,14 @@ public final class Camps {
 				grow(level, camp, (int)Math.min(MAX_CATCH_UP, today - data.lastDay()));
 				updateData(server, id, d -> d.withLastDay(today));
 			}
-			if (data.illager()) {
+			if (IllagerSites.is(server, id)) {
+				// a camp held in one of Illager Structures' places: it keeps its leader, and never builds
+				Faction held = Factions.get(server, id);
+				CampData fresh = data(server, id);
+				if (held != null && fresh != null) {
+					IllagerSites.campTick(level, held, fresh);
+				}
+			} else if (data.illager()) {
 				Faction grown = Factions.get(server, id);
 				CampData fresh = data(server, id);
 				if (grown != null && fresh != null) {
@@ -537,6 +544,11 @@ public final class Camps {
 	/** {@code days}' growth: what the camp takes in by its own hands, and (as it ages) another raider. */
 	static void grow(ServerLevel level, Faction camp, int days) {
 		MinecraftServer server = level.getServer();
+		if (IllagerSites.is(server, camp.id())) {
+			// (a held place's people bring in their own, and are made up again at their posts)
+			IllagerSites.grow(level, camp, days);
+			return;
+		}
 		if (illager(server, camp.id())) {
 			IllagerCamps.grow(level, camp, days);
 			return;
@@ -650,7 +662,8 @@ public final class Camps {
 		}
 		boolean illagers = illager(server, camp.id()), goblins = goblin(server, camp.id()), orcs = orc(server, camp.id());
 		boolean pirates = pirate(server, camp.id());
-		String cleared = pirates ? "pirate_cove" : orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
+		String site = IllagerSites.clearedKey(server, camp.id());
+		String cleared = site != null ? site : pirates ? "pirate_cove" : orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms." + cleared + ".cleared",
 			camp.name(),

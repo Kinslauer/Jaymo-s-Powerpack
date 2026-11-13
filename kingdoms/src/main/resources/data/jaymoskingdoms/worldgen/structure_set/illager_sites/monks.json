@@ -1,0 +1,23 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:illager_sites/herbalist_house",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/monk_tower",
+      "weight": 5
+    },
+    {
+      "structure": "jaymoskingdoms:illager_sites/monastery",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 50,
+    "separation": 20,
+    "spread_type": "triangular",
+    "salt": 51179227
+  }
+}

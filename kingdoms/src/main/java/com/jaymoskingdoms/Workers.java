@@ -112,6 +112,10 @@ public final class Workers {
 			// (0.7.295) a looter: his creeping and robbing are Looters' doing
 			return true;
 		}
+		if (IllagerSites.isPeaceRole(w.role()) && !(mob instanceof Folk)) {
+			// a monk, herbalist or recluse in one of Illager Structures' places: kept home, visitors greeted
+			return IllagerSites.peaceStep(level, w);
+		}
 		if (w.role() == Assassins.ASSASSIN) {
 			// (0.7.295) an assassin, his own doings in place of his brain
 			Assassins.act(level, mob);

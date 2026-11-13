@@ -200,6 +200,11 @@ public final class Barbarians {
 
 	/** What {@code camp}'s raiders attack on sight: (0.7.148) not an outlaw it spares ({@link #spares}). */
 	static boolean prey(int camp, LivingEntity target) {
+		MinecraftServer server = target.level().getServer();
+		if (server != null && IllagerSites.wary(server, camp)) {
+			// a smugglers' den lets everyone be but whoever struck one of them or touched their goods
+			return IllagerSites.provoked(camp, target);
+		}
 		if (Captives.bound(target)) {
 			// (0.7.311) a captive in chains
 			return false;
@@ -361,6 +366,7 @@ public final class Barbarians {
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, folk.factionId());
 		return camp != null && !camp.fallen() && camp.type() == FactionType.BARBARIAN && level.dimension() == Level.OVERWORLD
-			&& (Pirates.isPirate(folk.role()) ? Camps.pirate(server, camp.id()) : Camps.BARBARIAN.equals(Camps.kind(server, camp.id())));
+			&& (Pirates.isPirate(folk.role()) ? Camps.pirate(server, camp.id())
+				: Camps.BARBARIAN.equals(Camps.kind(server, camp.id())) || IllagerSites.villagerKind(Camps.kind(server, camp.id())));
 	}
 }

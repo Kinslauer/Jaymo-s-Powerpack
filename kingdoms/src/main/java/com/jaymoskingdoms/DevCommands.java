@@ -29,7 +29,12 @@ final class DevCommands {
 		net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
 			net.minecraft.commands.Commands.literal("kingdomsdev")
 				.then(net.minecraft.commands.Commands.literal("fell").executes(c -> fell(c.getSource().getPlayerOrException(), STAND_OFF)))
-				.then(net.minecraft.commands.Commands.literal("stock").executes(c -> stock(c.getSource().getPlayerOrException())))));
+				.then(net.minecraft.commands.Commands.literal("stock").executes(c -> stock(c.getSource().getPlayerOrException())))
+				// an Illager Structures place at x z moved into now, whoever is or isn't near (IllagerSites)
+				.then(net.minecraft.commands.Commands.literal("site").then(net.minecraft.commands.Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+					.then(net.minecraft.commands.Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+						.executes(c -> IllagerSites.devSettle(c.getSource().getLevel(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "x"),
+							com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "z"))))))));
 	}
 
 	/** (0.5.21) {@code /kingdomsdev stock}: the faction nearest the tester gets a stack or four of common building stuff in storage. */

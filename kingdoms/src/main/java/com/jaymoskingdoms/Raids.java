@@ -211,7 +211,7 @@ final class Raids {
 			boolean hungry = data != null && (data.orc() || data.goblin()) && HordeEconomy.hungry(server, camp.id());
 			// ((0.7.491) a greenskin realm on the warpath: it and its vassals all go for the one target, often)
 			Faction warpath = data == null ? null : warpathTarget(server, level, camp);
-			if (data == null || data.clearedAt() >= 0
+			if (data == null || data.clearedAt() >= 0 || IllagerSites.noRaids(server, camp.id())
 				|| now - data.lastRaid() < (warpath != null ? COOLDOWN_TICKS / 4 : hungry ? COOLDOWN_TICKS / 2 : COOLDOWN_TICKS)
 				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin() && !hungry && warpath == null) {
 				// (goblin villages don't raid: they're somewhere to go, unless they're starving or their king calls)
@@ -371,6 +371,8 @@ final class Raids {
 			: goblins ? i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Goblins.SLINGER : Goblins.GOBLIN
 			: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 		raider.setup(role, camp, home, radius);
+		// (a bandit hold's raiders in their masks)
+		IllagerSites.dress(raider, camp.id(), false);
 		level.addFreshEntity(raider);
 		// (0.7.295) with MCA, an MCA villager in his place (Andy, retiring the folk: "all mca please")
 		if (McaCompat.raider(level, raider) instanceof Mob v && v instanceof Worker) {
