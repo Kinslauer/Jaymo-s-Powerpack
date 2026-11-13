@@ -46,6 +46,8 @@ import org.jspecify.annotations.Nullable;
  * whales (which turn on the boats that strike them) and the white whale now and then;</li>
  * <li><b>reward</b>: the old bulls of the far grounds are fatter: her hold comes home {@link #RICHER} more for each step
  * out, pods are bigger, and ambergris is likelier;</li>
+ * <li>from step {@link #THING_FROM}, with somebody aboard her, the thing that lies under the wrecks may come up under her
+ * ({@code beasts/WreckThing});</li>
  * <li>a voyage made out of anyone's sight may not come home at all ({@link #UNSEEN_LOSS} a step out).</li>
  * </ul>
  */
@@ -74,6 +76,11 @@ final class FarGrounds {
 	/** Sharks under her boats: from this step, this chance a roll for each step out. */
 	static final int SHARKS_FROM = 2;
 	static final float SHARK_PER_FAR = 0.07F;
+	/** The thing under the wrecks comes up under her, somebody aboard: from this step, this chance a roll for each step out, how far under her, none other this near. */
+	static final int THING_FROM = 6;
+	static final float THING_PER_FAR = 0.012F;
+	static final int THING_UNDER = 10;
+	static final double THING_ALONE = 160.0;
 	/** A voyage made unseen is lost with this chance for each step out (at most this). */
 	static final float UNSEEN_LOSS = 0.04F, UNSEEN_LOSS_MOST = 0.35F;
 
@@ -184,6 +191,11 @@ final class FarGrounds {
 						rover.crew != null ? rover.crew.name : "").withStyle(ChatFormatting.RED));
 				}
 			}
+		}
+		// far enough out, what lies under the wrecks lies under open water too (nobody says so: sailors never name it)
+		if (v.far >= THING_FROM && random.nextFloat() < THING_PER_FAR * v.far && !Corsairs.playersAboard(level, ship).isEmpty()
+			&& level.getEntities(com.jaymoskingdoms.beasts.Beasts.WRECK_THING, ship.getBoundingBox().inflate(THING_ALONE), thing -> true).isEmpty()) {
+			com.jaymoskingdoms.beasts.WreckThing.lieAt(level, BlockPos.containing(ship.getX(), ship.getY() - THING_UNDER, ship.getZ()));
 		}
 		if (v.far >= SHARKS_FROM && !boats.isEmpty() && random.nextFloat() < SHARK_PER_FAR * v.far) {
 			AbstractBoat boat = boats.get(random.nextInt(boats.size()));

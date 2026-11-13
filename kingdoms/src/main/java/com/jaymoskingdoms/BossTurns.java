@@ -104,6 +104,7 @@ public final class BossTurns {
 	static boolean ownFight(Entity entity) {
 		return entity instanceof PatronChampion || entity instanceof WindDragon || entity instanceof Folk || entity instanceof EnderDragon
 			|| entity instanceof WitherBoss || entity instanceof com.jaymoskingdoms.wild.Grizzly || entity instanceof com.jaymoskingdoms.beasts.SandWorm
+			|| entity instanceof com.jaymoskingdoms.beasts.WreckThing
 			|| OgreHolds.king(entity);
 	}
 

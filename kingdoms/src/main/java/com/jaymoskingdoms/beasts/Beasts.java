@@ -48,6 +48,7 @@ public final class Beasts {
 	/** (0.7.339) The third batch. */
 	public static EntityType<Gorgon> GORGON;
 	public static EntityType<SandWorm> SAND_WORM;
+	public static EntityType<WreckThing> WRECK_THING;
 	public static EntityType<com.jaymoskingdoms.WarBarrel> WAR_BARREL;
 	public static EntityType<HauntedStand> HAUNTED_STAND;
 	/** The goblin villages' scouts, and the ghosts at fresh graves. */
@@ -115,6 +116,8 @@ public final class Beasts {
 		SAND_WORM = type("sand_worm", EntityType.Builder.of(SandWorm::new, MobCategory.MONSTER).sized(3.0F, 8.0F).fireImmune().clientTrackingRange(12),
 			SandWorm.createAttributes());
 		SandWorm.register();
+		WRECK_THING = type("wreck_thing", EntityType.Builder.of(WreckThing::new, MobCategory.MONSTER).sized(3.2F, 3.0F).clientTrackingRange(12),
+			WreckThing.createAttributes());
 		SpawnPlacements.register(GORGON, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Gorgon::checkSpawn);
 		SpawnPlacements.register(HAUNTED_STAND, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, HauntedStand::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_GORGON), MobCategory.MONSTER, GORGON, GORGON_WEIGHT, 1, 1);

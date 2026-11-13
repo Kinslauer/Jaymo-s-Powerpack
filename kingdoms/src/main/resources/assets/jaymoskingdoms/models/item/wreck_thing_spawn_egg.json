@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "jaymoskingdoms:item/wreck_thing_spawn_egg"
+	}
+}

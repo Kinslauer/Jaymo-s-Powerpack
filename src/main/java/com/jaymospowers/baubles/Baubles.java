@@ -148,6 +148,8 @@ public final class Baubles {
 		com.jaymospowers.baubles.artifacts.ArtifactBaubles.init();
 		// the ticking charm: clicks faster the nearer the blight
 		TickingCharm.init();
+		// what the thing under the wreck leaves: a charm that saves its wearer from the water once, and a tooth
+		ClingingCoil.init();
 		// the boots of long strides and the cloak of the depths
 		Wondrous.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
