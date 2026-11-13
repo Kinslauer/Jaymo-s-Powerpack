@@ -103,11 +103,26 @@ public final class Sightings {
 		if (Factions.around(server, level, at, Encounters.SETTLEMENT_CLEARANCE) != null) {
 			return;
 		}
-		Encounters.Encounter e = Encounters.pick(level.getBiome(at), true, random, true);
+		Encounters.Encounter e = Encounters.pick(biome(level, at), true, random, true);
 		EntityType<?> type = e == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(e.mob())).orElse(null);
 		if (type != null) {
 			seen(level, type, at);
 		}
+	}
+
+	/**
+	 * The biome at {@code at}, never loading land to read it: a rumour's place is hundreds of blocks out, mostly in
+	 * chunks not loaded (or still being made), and {@code level.getBiome} there waited on the server thread for them
+	 * (Deck watchdog crash 2026-11-13 14:23). Loaded land is read as it is; elsewhere the world's own biome source says
+	 * what it is (the same answer for land not changed since it was made).
+	 */
+	private static net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> biome(ServerLevel level, BlockPos at) {
+		if (level.getChunkSource().getChunkNow(at.getX() >> 4, at.getZ() >> 4) != null) {
+			return level.getBiome(at);
+		}
+		return level.getChunkSource().getGenerator().getBiomeSource().createUncachedResolver(level.getChunkSource().randomState())
+			.getNoiseBiome(net.minecraft.core.QuartPos.fromBlock(at.getX()), net.minecraft.core.QuartPos.fromBlock(at.getY()),
+				net.minecraft.core.QuartPos.fromBlock(at.getZ()));
 	}
 
 	/** The latest sighting within {@code range} of {@code pos}, if any. */
