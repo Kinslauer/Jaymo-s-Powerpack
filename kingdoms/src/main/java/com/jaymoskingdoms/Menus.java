@@ -41,6 +41,11 @@ final class Menus {
 
 	/** {@code speaker} says {@code words} to {@code player} and offers {@code choices}. */
 	static void ask(ServerPlayer player, LivingEntity speaker, Component words, List<Choice> choices) {
+		ask(player, speaker, speaker.getDisplayName(), words, choices);
+	}
+
+	/** {@link #ask}, with the card headed {@code title} instead of the speaker's name (an illager's name and mood, IllagerTalk). */
+	static void ask(ServerPlayer player, LivingEntity speaker, Component title, Component words, List<Choice> choices) {
 		if (!ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
 			return;
 		}
@@ -54,7 +59,7 @@ final class Menus {
 			});
 		}
 		OPEN.put(player.getUUID(), new Open(speaker.getId(), actions));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), speaker.getDisplayName(), words, labels, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, words, labels, enabled));
 	}
 
 	/** An answer to one of these menus; false when it was not. */

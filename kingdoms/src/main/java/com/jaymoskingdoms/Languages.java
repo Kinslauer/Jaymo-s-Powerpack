@@ -412,6 +412,10 @@ public final class Languages {
 	 * gibberish in the speaker's tongue (the same line always comes out the same).
 	 */
 	public static Component heard(ServerPlayer player, Entity speaker, Component words) {
+		if (IllagerTongue.speaker(speaker)) {
+			// (an illager: their own tongue, learned bit by bit, IllagerTongue)
+			return IllagerTongue.heard(player, speaker, words);
+		}
 		if (understands(player, speaker)) {
 			return words;
 		}

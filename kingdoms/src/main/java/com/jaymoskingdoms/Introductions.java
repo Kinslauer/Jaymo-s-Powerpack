@@ -162,7 +162,8 @@ public final class Introductions {
 
 	/** Whose names are kept from strangers: players, and MCA's villagers. */
 	public static boolean named(Entity e) {
-		return e instanceof Player || McaCompat.isMca(e);
+		// (and an illager who has given someone its name, IllagerTalk)
+		return e instanceof Player || McaCompat.isMca(e) || IllagerTalk.named(e);
 	}
 
 	/** {@code viewer} knows {@code e}'s name (or it's no name of the kind kept: themselves, a mob). */

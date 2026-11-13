@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymoskingdoms:illager_glyphs",
+  "width": 1,
+  "height": 1,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymoskingdoms.illager_glyphs.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymoskingdoms.illager_glyphs.author"
+  }
+}
