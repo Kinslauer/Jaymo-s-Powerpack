@@ -56,10 +56,11 @@ public final class PoseTakeover {
 
 	/**
 	 * (Motion patch 6) One of our poses is on a mob: downed, tripped by a bolas, carried or thrown, a web ragdoll, held in
-	 * a symbiote's grab, or a pet's own pose. Fresh Animations (its base pack animates most vanilla mobs) steps aside.
+	 * a symbiote's grab, or a pet's own pose, or falling (FreefallPose). Fresh Animations (its base pack animates most
+	 * vanilla mobs) steps aside.
 	 */
 	public static boolean mobPosed(LivingEntityRenderState s) {
-		return com.jaymospowers.client.wounds.DownedPose.down(s) || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
+		return com.jaymospowers.client.wounds.DownedPose.down(s) || s.getData(FreefallPose.KEY) != null || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
 			|| s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
 			|| com.jaymospowers.client.pets.PetPoses.posed(s) || com.jaymospowers.client.combat.AttentionPose.on(s);
@@ -73,6 +74,10 @@ public final class PoseTakeover {
 			EmfCompat.hold(mob, posed);
 			if (posed) {
 				POSED.add(mob.intValue());
+				if (state.getData(FreefallPose.KEY) != null) {
+					// no walk in mid-air
+					state.walkAnimationSpeed = 0.0F;
+				}
 			} else {
 				POSED.remove(mob.intValue());
 			}
