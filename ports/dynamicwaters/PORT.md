@@ -96,6 +96,12 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   cache off, which built a whole 1024-block `BasinTile` on the server thread or joined another thread's build. On
   "Server thread" it now returns an empty, uncached region and queues the tile on the watershed prefetch threads
   (`buildTileLater`); a tree placed before its tile is ready just doesn't see the watershed.
+- **Height sampling caches per block**: `CoarseHeightField` read each column's ground height with
+  `SamplerContext.EMPTY_UNCACHED`, so every step of the walk down a column worked the whole terrain out again, its
+  y-independent parts (continents, erosion and the pack's own continent shapes) included. Each 16x16-cell block now
+  reads through one caching context of its own thread (`surfaceAt` makes its own). The heights are the same (2,048
+  columns checked against the old way, no difference), and a new world's first river region, which the spawn search
+  waits for, went from about 9 minutes to under 1.5 on the cloud test host.
 
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary

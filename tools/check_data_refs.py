@@ -3,7 +3,10 @@
 - a crafting/cooking recipe with a category the recipe book doesn't have ("tools" did, 2026-11-11);
 - a recipe, loot table or advancement naming one of our items that doesn't exist (jaymospowers:zanite_sword did);
 - a loot table or predicate using a condition or function name 26.3 doesn't have (block_state_property, now match_block,
-  did). The lists below are 26.3's own (LootItemConditionTypes, LootPredicates, LootItemFunctions, LootPoolEntries).
+  did). The lists below are 26.3's own (LootItemConditionTypes, LootPredicates, LootItemFunctions, LootPoolEntries);
+- any data or asset JSON that doesn't parse at all;
+- an equipment look (assets/<mod>/equipment) with no layers: 26.3 logs "Map must have contents" for it on every launch.
+  An armour drawn by its own model needs no equipment file (the game then draws no layer), so leave the file out.
 An item exists if it has assets/<mod>/items/<id>.json or blockstates/<id>.json, or its id appears as a string in the
 mod's Java (items registered without a model file). Run by the PR checks workflow; exits 1 on any finding."""
 import glob, json, os, re, sys
@@ -69,6 +72,18 @@ for ns, root in MODS.items():
 		for m in REF.finditer(text):
 			if m.group(2) not in known[m.group(1)]:
 				problems.append(f'{f}: {m.group(1)}:{m.group(2)} isn\'t an item or block of ours')
+
+for ns, root in MODS.items():
+	for f in glob.glob(f'{root}/*/resources/**/*.json', recursive=True):
+		if '/data/' not in f and '/assets/' not in f:
+			continue
+		try:
+			d = json.load(open(f, encoding='utf-8-sig'))
+		except ValueError as e:
+			problems.append(f'{f}: not valid JSON ({e})')
+			continue
+		if '/equipment/' in f and '/assets/' in f and isinstance(d, dict) and not d.get('layers'):
+			problems.append(f'{f}: equipment look with no layers (delete the file if the armour has its own model)')
 
 for p in problems:
 	print(p)
