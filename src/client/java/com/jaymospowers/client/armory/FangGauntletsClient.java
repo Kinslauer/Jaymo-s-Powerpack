@@ -143,7 +143,7 @@ public final class FangGauntletsClient {
 		return bits != null && (bits & GUARD) != 0;
 	}
 
-	/** Whether this state wears gauntlets (the main-hand item is then not drawn). */
+	/** Whether this state wears gauntlets (the main-hand item is then not drawn; PoseTakeover pauses Entity Model Features for it). */
 	public static boolean worn(AvatarRenderState state) {
 		return state.getData(KEY) != null;
 	}
