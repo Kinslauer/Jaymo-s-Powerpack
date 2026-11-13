@@ -6,6 +6,8 @@ import com.jaymospowers.core.wounds.Breaks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  * a {@link Region} of the target's body; the camera aims there ({@link #point}), the lock-on marker names it, and the
  * player's own blows, shots and power cuts on that target land on it ({@link #aimedPart}, read by the wounds' hit routing
  * and {@link Dismember#aimedPart}), so the region's part takes the damage, breaks and comes off. On top of what that part
- * already does when hurt ({@link #onAimedHit}): a head hit bites harder, a leg hit slows, an arm hit weakens.
+ * already does when hurt ({@link #onAimedHit}): a head hit bites harder (though {@link #HEAD_GLANCE} of them glance off onto
+ * the torso), a leg hit slows, an arm hit weakens.
  *
  * <p>Which regions a target has follows its {@link BodyPlan}: a person has all four, an animal or a spider head, body and
  * legs, a flyer head, body and wings (its "arms"). A part cut off is gone from the list (both arms off: no arms). A body
@@ -39,6 +42,16 @@ public final class LockOnRegions {
 	public static final int ARM_WEAK_TICKS = 40;
 	/** Damage from which a leg or arm hit's slowness or weakness is level II. */
 	public static final float HEAVY = 6.0F;
+	/**
+	 * Andy (2026-11-13), on head shots felling weaker mobs in one hit: "yes", lock-on head shots sometimes glance off. This
+	 * share of aimed head hits lands on the torso instead (no head bonus).
+	 */
+	public static final float HEAD_GLANCE = 0.35F;
+	/** The last aimed hit's roll on each victim, so the one blow asked twice (routing, then its damage) glances the same. */
+	private static final Map<LivingEntity, Rolled> ROLLED = new WeakHashMap<>();
+
+	private record Rolled(DamageSource source, BodyPart part) {
+	}
 
 	/** Where on the body the lock aims, top to bottom (the scroll wheel's order). */
 	public enum Region {
@@ -199,8 +212,17 @@ public final class LockOnRegions {
 		if (LockOn.target(player) != victim) {
 			return null;
 		}
+		Rolled rolled = ROLLED.get(victim);
+		if (rolled != null && rolled.source() == source) {
+			return plan.index(rolled.part()) >= 0 ? rolled.part() : null;
+		}
 		Region region = fit(victim, LockOn.region(player));
+		// a head shot may glance off onto the torso
+		if (region == Region.HEAD && victim.getRandom().nextFloat() < HEAD_GLANCE) {
+			region = Region.TORSO;
+		}
 		BodyPart part = part(victim, plan, region, player.getEyePosition());
+		ROLLED.put(victim, new Rolled(source, part));
 		return plan.index(part) >= 0 ? part : null;
 	}
 
@@ -216,6 +238,13 @@ public final class LockOnRegions {
 		Region region = fit(target, LockOn.region(player));
 		if (region == Region.TORSO) {
 			return null;
+		}
+		if (region == Region.HEAD && target.getRandom().nextFloat() < HEAD_GLANCE) {
+			// glanced off the head onto the shoulder: the nearer arm (the torso itself never comes off)
+			region = regions(target).contains(Region.ARMS) ? Region.ARMS : Region.LEGS;
+			if (!regions(target).contains(region)) {
+				return null;
+			}
 		}
 		int limb = Breaks.limb(part(target, plan, region, player.getEyePosition()));
 		return limb == 0 ? null : limb;
