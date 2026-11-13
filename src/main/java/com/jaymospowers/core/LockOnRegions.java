@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.ToDoubleFunction;
 import net.minecraft.network.chat.Component;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -56,6 +57,16 @@ public final class LockOnRegions {
 	public static final float HEAD_GLANCE = 0.35F;
 	/** Andy (2026-11-13): "hits toward the head are less accurate too, so you have a higher chance to miss". This share of aimed head hits misses outright. */
 	public static final float HEAD_MISS = 0.2F;
+	/**
+	 * Andy (2026-11-13): "finesse stat should increase accuracy". At full Finesse a head shot misses and glances this much
+	 * less (a share of {@link #HEAD_MISS} and {@link #HEAD_GLANCE}), in step with the stat.
+	 */
+	public static final float FINESSE_AIM = 0.75F;
+	/**
+	 * How far {@code player}'s Finesse has come, 0 to 1. Jaymo's Kingdoms holds the stat and sets this at server start
+	 * (its {@code PowersCompat}); without Kingdoms nobody has any.
+	 */
+	public static ToDoubleFunction<Player> finesse = player -> 0.0;
 	/** The last aimed hit's roll on each victim, so the one blow asked twice (routing, then its damage) glances the same. */
 	private static final Map<LivingEntity, Rolled> ROLLED = new WeakHashMap<>();
 
@@ -91,12 +102,23 @@ public final class LockOnRegions {
 
 	/** Whether this blow, aimed at {@code victim}'s head through the lock, misses ({@link #HEAD_MISS}); a whiff is heard. */
 	private static boolean missesHead(LivingEntity victim, DamageSource source) {
-		if (aimedRegion(victim, source) != Region.HEAD || victim.getRandom().nextFloat() >= HEAD_MISS
-			|| !(victim.level() instanceof ServerLevel level)) {
+		if (aimedRegion(victim, source) != Region.HEAD || !(source.getEntity() instanceof Player player)
+			|| victim.getRandom().nextFloat() >= HEAD_MISS * steadiness(player) || !(victim.level() instanceof ServerLevel level)) {
 			return false;
 		}
 		level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		return true;
+	}
+
+	/** What's left of the head's miss and glance chances for {@code player}: 1 with no Finesse, {@code 1 - FINESSE_AIM} at full. */
+	static float steadiness(Player player) {
+		double share;
+		try {
+			share = finesse.applyAsDouble(player);
+		} catch (RuntimeException e) {
+			share = 0.0;
+		}
+		return 1.0F - FINESSE_AIM * (float)Math.clamp(share, 0.0, 1.0);
 	}
 
 	/** A blow, shot or throw that lands on one place (not a fall, blast, fire, drowning or magic). */
@@ -274,7 +296,7 @@ public final class LockOnRegions {
 		}
 		Region region = aimed;
 		// a head shot may glance off onto the torso
-		if (region == Region.HEAD && victim.getRandom().nextFloat() < HEAD_GLANCE) {
+		if (region == Region.HEAD && victim.getRandom().nextFloat() < HEAD_GLANCE * steadiness(player)) {
 			region = Region.TORSO;
 		}
 		BodyPart part = part(victim, plan, region, player.getEyePosition());
@@ -295,7 +317,7 @@ public final class LockOnRegions {
 		if (region == Region.TORSO || region == Region.TAIL) {
 			return null;
 		}
-		if (region == Region.HEAD && target.getRandom().nextFloat() < HEAD_GLANCE) {
+		if (region == Region.HEAD && target.getRandom().nextFloat() < HEAD_GLANCE * steadiness(player)) {
 			// glanced off the head onto the shoulder: the nearer arm (the torso itself never comes off)
 			region = regions(target).contains(Region.ARMS) ? Region.ARMS : Region.LEGS;
 			if (!regions(target).contains(region)) {

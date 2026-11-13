@@ -47,6 +47,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
 		McaCompat.register();
+		// lock-on aim: Finesse steadies head shots (Powers' LockOnRegions)
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server -> PowersCompat.shareFinesse());
 		// (0.7.162) OmniCrossbow's Omni enchantment never turns up: Make Do is the only way to it
 		OmniCrossbows.register();
 		// (0.7.251) spoken lines: the narrator and the spirits
