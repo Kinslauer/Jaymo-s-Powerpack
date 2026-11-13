@@ -9,6 +9,13 @@ import com.geckolib.animation.object.PlayState;
 import com.geckolib.util.GeckoLibUtil;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -56,7 +63,12 @@ import org.jspecify.annotations.Nullable;
  * the cave shake loose. By day one with nothing to hunt goes back down into the rock.
  *
  * <p>A fed one stops hunting: once it has killed, it leaves everything alone for a while (unless it is hit), so a cave
- * that feeds its Impaler gets quieter, not busier.
+ * that feeds its Impaler gets quieter, not busier. Its spikes concuss what they hit ({@link ImpalerGear}); dead, it gives
+ * up the ones still on its arm, so one that has thrown them all leaves none.
+ *
+ * <p>Its coat follows its rock, as Inhabitants' four do (Andy 2026-11-13: "sure"): dark slate in the dripstone caves,
+ * rust-brown under the badlands (Inhabitants' Forlorn Hollows coat; that biome isn't in the pack), the plain tan
+ * elsewhere, and now and then, anywhere, an albino.
  */
 public class Impaler extends Monster implements GeoEntity {
 	static final double HEALTH = 40.0, SPEED = 0.24, ARMOR = 4.0, FOLLOW = 48.0, KNOCKBACK_RESISTANCE = 0.4;
@@ -89,6 +101,21 @@ public class Impaler extends Monster implements GeoEntity {
 	static final int SPAWN_BELOW_SEA = 20;
 	static final double SPAWN_APART = 40.0;
 	public static final int SPAWN_WEIGHT = 6;
+	/** One in this many is born albino, wherever it is. */
+	static final int ALBINO_ONE_IN = 25;
+	/** What it leaves, dead: this many spikes for each throw's worth still on its arm (up to, at random). */
+	static final int SPIKES_DROPPED_EACH = 2;
+
+	/** Its coats (textures/entity/impaler/{@code name}.png, each with a glowing {@code _glowmask}). */
+	public enum Coat {
+		DEFAULT("default"), DRIPSTONE("dripstone"), FORLORN("forlorn_hollows"), ALBINO("albino");
+
+		public final String texture;
+
+		Coat(String texture) {
+			this.texture = texture;
+		}
+	}
 
 	enum Act { NONE, BITING, THROWING, SCREAMING }
 
@@ -101,6 +128,7 @@ public class Impaler extends Monster implements GeoEntity {
 	static final RawAnimation HURT = RawAnimation.begin().thenPlay("hurt");
 
 	private static final EntityDataAccessor<Integer> SPIKES_LEFT = SynchedEntityData.defineId(Impaler.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> COAT = SynchedEntityData.defineId(Impaler.class, EntityDataSerializers.INT);
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	/** (Server) what it is in the middle of, and for how many more ticks; ticks until it may bite, throw or scream again. */
@@ -136,6 +164,31 @@ public class Impaler extends Monster implements GeoEntity {
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(SPIKES_LEFT, SPIKES);
+		entityData.define(COAT, Coat.DEFAULT.ordinal());
+	}
+
+	public Coat coat() {
+		Coat[] coats = Coat.values();
+		return coats[Mth.clamp(this.entityData.get(COAT), 0, coats.length - 1)];
+	}
+
+	@Override
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+		@Nullable SpawnGroupData data) {
+		this.entityData.set(COAT, coatFor(level, this.blockPosition(), this.random).ordinal());
+		return super.finalizeSpawn(level, difficulty, reason, data);
+	}
+
+	/** The coat of one born here: its rock's colour, or rarely an albino. */
+	static Coat coatFor(ServerLevelAccessor level, BlockPos pos, RandomSource random) {
+		if (random.nextInt(ALBINO_ONE_IN) == 0) {
+			return Coat.ALBINO;
+		}
+		Holder<Biome> biome = level.getBiome(pos);
+		if (biome.is(Biomes.DRIPSTONE_CAVES)) {
+			return Coat.DRIPSTONE;
+		}
+		return biome.is(BiomeTags.IS_BADLANDS) ? Coat.FORLORN : Coat.DEFAULT;
 	}
 
 	/** How many throws' worth of spikes it has on its arm. */
@@ -260,7 +313,7 @@ public class Impaler extends Monster implements GeoEntity {
 			spike.shoot(dx, dy, dz, SPIKE_SPEED, SPIKE_SPREAD);
 			level.addFreshEntity(spike);
 		}
-		this.playSound(SoundEvents.POINTED_DRIPSTONE_BREAK, 1.2F, 0.7F);
+		this.playSound(SoundEvents.POINTED_DRIPSTONE_BREAK, 1.0F, 0.8F);
 	}
 
 	/** Its scream shakes the stalactites over the cave loose: each one hanging near it falls. */
@@ -304,7 +357,7 @@ public class Impaler extends Monster implements GeoEntity {
 			if (this.screamCooldown <= 0 && this.act != Act.THROWING) {
 				this.screamCooldown = SCREAM_COOLDOWN;
 				this.start(Act.SCREAMING, SCREAM_TICKS, "scream");
-				this.playSound(SoundEvents.ENDERMAN_SCREAM, 2.5F, 0.55F);
+				this.playSound(ImpalerGear.IMPALER_SCREAM, 2.5F, 1.0F);
 			} else if (!this.busy()) {
 				this.triggerAnim("hurt", "hurt");
 			}
@@ -332,22 +385,30 @@ public class Impaler extends Monster implements GeoEntity {
 
 	@Override
 	protected @Nullable SoundEvent getAmbientSound() {
-		return this.getTarget() == null ? SoundEvents.SILVERFISH_AMBIENT : SoundEvents.RAVAGER_AMBIENT;
-	}
-
-	@Override
-	public float getVoicePitch() {
-		return super.getVoicePitch() * 0.7F;
+		return ImpalerGear.IMPALER_IDLE;
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.RAVAGER_HURT;
+		return ImpalerGear.IMPALER_HURT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.RAVAGER_DEATH;
+		return ImpalerGear.IMPALER_DEATH;
+	}
+
+	/** The spikes still on its arm. */
+	@Override
+	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		int count = 0;
+		for (int i = 0; i < this.spikes(); i++) {
+			count += 1 + this.random.nextInt(SPIKES_DROPPED_EACH);
+		}
+		if (count > 0) {
+			this.spawnAtLocation(level, new ItemStack(ImpalerGear.IMPALER_SPIKE, count));
+		}
 	}
 
 	@Override
@@ -360,6 +421,7 @@ public class Impaler extends Monster implements GeoEntity {
 		super.addAdditionalSaveData(output);
 		output.putInt("spikes", this.spikes());
 		output.putInt("sated", this.sated);
+		output.putString("coat", this.coat().texture);
 	}
 
 	@Override
@@ -367,6 +429,12 @@ public class Impaler extends Monster implements GeoEntity {
 		super.readAdditionalSaveData(input);
 		this.entityData.set(SPIKES_LEFT, Mth.clamp(input.getIntOr("spikes", SPIKES), 0, SPIKES));
 		this.sated = input.getIntOr("sated", 0);
+		String coat = input.getStringOr("coat", Coat.DEFAULT.texture);
+		for (Coat c : Coat.values()) {
+			if (c.texture.equals(coat)) {
+				this.entityData.set(COAT, c.ordinal());
+			}
+		}
 	}
 
 	/** It runs its foe down and bites; at a foe it can see but can't reach, it throws its spikes. */
@@ -406,7 +474,7 @@ public class Impaler extends Monster implements GeoEntity {
 				if (self.biteCooldown <= 0) {
 					self.biteCooldown = BITE_COOLDOWN;
 					self.start(Act.BITING, BITE_TICKS, "bite");
-					self.playSound(SoundEvents.RAVAGER_ATTACK, 1.2F, 1.2F);
+					self.playSound(ImpalerGear.IMPALER_ATTACK, 1.2F, 1.0F);
 				}
 				return;
 			}
@@ -415,6 +483,7 @@ public class Impaler extends Monster implements GeoEntity {
 				&& (stuck || self.random.nextInt(60) == 0)) {
 				self.throwCooldown = THROW_COOLDOWN;
 				self.start(Act.THROWING, THROW_TICKS, "spike throw");
+				self.playSound(ImpalerGear.IMPALER_SPIKES, 1.2F, 1.0F);
 				return;
 			}
 			self.setSprinting(true);

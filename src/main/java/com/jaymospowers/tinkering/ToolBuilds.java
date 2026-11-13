@@ -137,6 +137,9 @@ public final class ToolBuilds {
 		// ---- Jaymo's Kingdoms ----
 		b.add(build("jaymoskingdoms:hoof_pick", List.of(part(PartType.PICK_HEAD, Family.METAL), part(handle, Family.ANY))));
 		b.add(build("jaymoskingdoms:oar", List.of(part(tough, Family.WOOD), part(plate, Family.WOOD), part(binding, Family.ANY))));
+		b.add(build("jaymoskingdoms:harpoon", List.of(part(PartType.ARROW_HEAD, Family.METAL), part(tough, Family.WOOD)), "minecraft:lead"));
+		b.add(build("jaymoskingdoms:spike_drill", List.of(part(plate, Family.COPPER), part(tough, Family.COPPER)), "jaymoskingdoms:impaler_spike",
+			"jaymoskingdoms:impaler_spike", "jaymoskingdoms:impaler_spike", "minecraft:redstone"));
 		// ---- Jaymo's Armory: the bone knife (the flint one stays a first tool in the grid) ----
 		b.add(build("jaymospowers:bone_knife", List.of(part(PartType.SMALL_BLADE, Family.BONE), part(handle, Family.ANY)), "minecraft:string"));
 		// ---- MCA's kit ----

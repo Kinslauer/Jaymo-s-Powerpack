@@ -55,6 +55,7 @@ public final class Inhabitants {
 	}
 
 	public static void register() {
+		ImpalerGear.register();
 		BARROW_BEETLE = Beasts.type("barrow_beetle", EntityType.Builder.of(BarrowBeetle::new, MobCategory.AMBIENT).sized(0.6F, 0.4F)
 			.clientTrackingRange(8), BarrowBeetle.createAttributes());
 		DRAUGR = Beasts.type("draugr", EntityType.Builder.of(Draugr::new, MobCategory.MONSTER).sized(0.7F, 2.2F).clientTrackingRange(8),
