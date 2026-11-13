@@ -22,6 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
@@ -29,6 +30,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -242,7 +244,11 @@ public final class Elders {
 
 	/** Puts the elder on {@code road} back in the world, on the ground where they've got to; the walker, or null. */
 	private static @Nullable PathfinderMob putBack(ServerLevel level, Road road, BlockPos at) {
-		level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+		if (level.getChunkSource().getChunkNow(at.getX() >> 4, at.getZ() >> 4) == null) {
+			// (not made yet: ask for it without waiting, and try again at the next check)
+			level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(at), 0);
+			return null;
+		}
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
 		Entity there = level.getEntity(road.elder());
 		PathfinderMob elder;

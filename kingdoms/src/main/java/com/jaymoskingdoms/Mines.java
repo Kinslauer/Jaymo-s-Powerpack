@@ -577,6 +577,19 @@ public final class Mines {
 		return DIGGER_SET.getOrDefault(f.id(), Set.of()).contains(b.getUUID());
 	}
 
+	/** Whether the chunks round where {@code m} is digging now are all made and loaded (so digging never makes one). */
+	static boolean loaded(ServerLevel level, Mine m) {
+		BlockPos c = m.inPit() ? MinePit.center(m) : m.cell(m.step());
+		for (int dx = -CAVE_REACH; dx <= CAVE_REACH; dx += CAVE_REACH) {
+			for (int dz = -CAVE_REACH; dz <= CAVE_REACH; dz += CAVE_REACH) {
+				if (level.getChunkSource().getChunkNow(c.getX() + dx >> 4, c.getZ() + dz >> 4) == null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Step {@code m.step()} is open: its floor made good, its posts and torch (and at the mouth its frame and roof) put
 	 * up, then on to the next, unless it broke into a cave, or what's ahead is water, lava, bedrock or too deep. Returns
@@ -768,7 +781,7 @@ public final class Mines {
 	static int catchUp(ServerLevel level, Faction f, int blocks) {
 		int dug = 0;
 		Mine m = of(level.getServer(), f.id());
-		while (m != null && !m.done() && dug < blocks) {
+		while (m != null && !m.done() && dug < blocks && loaded(level, m)) {
 			boolean any = false;
 			for (BlockPos q : m.inPit() ? MinePit.left(level, m) : m.section(m.step())) {
 				if (dug >= blocks) {
