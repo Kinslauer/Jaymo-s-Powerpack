@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:paper_pulp"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/hornet_nest"
+}

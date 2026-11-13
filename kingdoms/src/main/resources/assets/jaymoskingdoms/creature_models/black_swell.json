@@ -1,0 +1,54 @@
+{
+ "width": 128,
+ "height": 128,
+ "scale": 2.2,
+ "translucent": false,
+ "parts": [
+  {
+   "name": "body",
+   "parent": null,
+   "pivot": [
+    0,
+    24,
+    0
+   ],
+   "box": [
+    -12,
+    -22,
+    -12,
+    24,
+    22,
+    24
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "wobble",
+   "rot": null
+  },
+  {
+   "name": "head",
+   "parent": null,
+   "pivot": [
+    0,
+    2,
+    0
+   ],
+   "box": [
+    -9,
+    -32,
+    -9,
+    18,
+    10,
+    18
+   ],
+   "uv": [
+    0,
+    46
+   ],
+   "anim": "",
+   "rot": null
+  }
+ ]
+}

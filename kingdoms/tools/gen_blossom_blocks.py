@@ -420,7 +420,105 @@ def draw_sap():
     save_item(img, "lacquer_sap")
 
 
+LEAF = [(0x2f, 0x5a, 0x2a), (0x3f, 0x76, 0x34), (0x55, 0x92, 0x40), (0x7a, 0xb0, 0x58)]
+FIBRE = [(0xb9, 0xb0, 0x8e), (0xd2, 0xca, 0xa8), (0xe6, 0xdf, 0xc2), (0xf3, 0xee, 0xdc)]
+
+
+def draw_ramie():
+    """four stages of a nettle-like stand: thin stalks, broad toothed leaves pale underneath, taller each stage"""
+    rng = random.Random(31)
+    for stage, height in enumerate((4, 8, 12, 15)):
+        img = canvas()
+        for stalk in (3, 7, 11, 13):
+            top = 16 - height + rng.choice([0, 1, 2])
+            for y in range(top, 16):
+                put(img, stalk, y, LEAF[0] if y % 3 else LEAF[1])
+            for y in range(top, 15, 3):
+                side = 1 if (y + stalk) % 2 else -1
+                put(img, stalk + side, y, LEAF[2])
+                put(img, stalk + 2 * side, y, LEAF[3 if stage == 3 else 2])
+                put(img, stalk + side, y + 1, LEAF[1])
+                put(img, stalk - side, y + 1, LEAF[2])
+        if stage == 3:
+            for stalk in (3, 7, 11, 13):
+                put(img, stalk, 16 - height, FIBRE[1])
+                put(img, stalk, 17 - height, FIBRE[0])
+        save(img, "ramie_stage%d" % stage)
+    seeds = canvas()
+    for x, y in ((5, 6), (9, 5), (7, 9), (11, 9), (4, 11), (9, 12), (6, 13)):
+        put(seeds, x, y, (0x6a, 0x58, 0x3a))
+        put(seeds, x + 1, y, (0x8a, 0x76, 0x50))
+        put(seeds, x, y + 1, (0x4c, 0x3e, 0x28))
+    save_item(seeds, "ramie_seeds")
+    hank = canvas()
+    for y in range(2, 14):
+        for x in range(5, 11):
+            wave = (y // 2) % 2
+            put(hank, x + wave, y, FIBRE[(x + y) % 3 + (1 if x in (7, 8) else 0)])
+    for x in range(5, 12):
+        put(hank, x, 7, WOOD[2])
+    save_item(hank, "ramie_fibre")
+
+
+def draw_dress():
+    """the basket hat's weave with its eye slit, the straw cape's icon, and the cape as worn (the humanoid layer, 64 x 32)"""
+    rng = random.Random(32)
+    basket = canvas()
+    for y in range(16):
+        for x in range(16):
+            put(basket, x, y, STRAW[1 + ((x // 2 + y // 2) % 2) * 2] if (x + y) % 4 else STRAW[0])
+    for x in range(3, 13):
+        put(basket, x, 9, COAL[0] if x % 2 else STRAW[0])
+    save(basket, "basket_hat")
+    icon = canvas()
+    for y in range(2, 15):
+        half = 2 + (y - 2) * 5 // 12
+        for x in range(8 - half, 8 + half):
+            put(icon, x, y, STRAW[0] if y in (5, 9, 13) else STRAW[rng.choice([1, 2, 2, 3, 4])])
+    for x in range(6, 10):
+        put(icon, x, 2, WOOD[1])
+    save_item(icon, "straw_cape")
+    worn = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    def straw(x0, y0, w, h):
+        for y in range(y0, y0 + h):
+            for x in range(x0, x0 + w):
+                row = (y - y0) % 4
+                worn.putpixel((x, y), tuple(STRAW[0] if row == 3 else STRAW[rng.choice([1, 2, 2, 3, 4])]) + (255,))
+    straw(16, 16, 24, 4)      # the body's top and bottom
+    straw(16, 20, 24, 12)     # round the body
+    straw(40, 16, 16, 4)      # the shoulders
+    straw(40, 20, 16, 7)      # the upper arms
+    path = ASSETS + "textures/entity/equipment/humanoid/straw_cape.png"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    worn.save(path)
+
+
+def draw_steel():
+    """a heap of black river sand with a few bright grains, and a rough bloom: dark iron, slag pits, a hot seam"""
+    rng = random.Random(41)
+    sand = canvas()
+    for y in range(7, 14):
+        half = 1 + (y - 7) * 6 // 6
+        for x in range(8 - half, 8 + half):
+            put(sand, x, y, IRON[rng.choice([0, 0, 0, 1])] if rng.random() > 0.08 else IRON[2])
+    save_item(sand, "iron_sand")
+    bloom = canvas()
+    rows = {4: (6, 10), 5: (4, 11), 6: (3, 12), 7: (3, 13), 8: (2, 13), 9: (3, 13), 10: (3, 12), 11: (4, 11), 12: (6, 9)}
+    for y, (a, b) in rows.items():
+        for x in range(a, b + 1):
+            edge = x in (a, b) or y in (4, 12)
+            put(bloom, x, y, COAL[0] if edge else IRON[rng.choice([0, 1, 1, 2])])
+    for x, y in ((5, 6), (9, 9), (11, 7), (6, 10)):
+        put(bloom, x, y, COAL[0])
+    for x, y in ((7, 7), (8, 8), (9, 8)):
+        put(bloom, x, y, GLOW[0])
+    save_item(bloom, "steel_bloom")
+
+
 def textures():
+    draw_steel()
+    draw_ramie()
+    draw_dress()
     draw_shoji()
     draw_tatami()
     draw_plaster()
@@ -660,7 +758,49 @@ def sliding_door():
     flat_item("sliding_door")
 
 
+GUI = {"gui": {"rotation": [30, 225, 0], "translation": [0, -3, 0], "scale": [0.42, 0.42, 0.42]},
+       "ground": {"translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]},
+       "fixed": {"rotation": [0, 180, 0], "scale": [0.5, 0.5, 0.5]},
+       "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 0, 1], "scale": [0.3, 0.3, 0.3]},
+       "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 2, 0], "scale": [0.3, 0.3, 0.3]}}
+
+
+def hat(name, texture, boxes):
+    """a hat worn from its own model: the head's middle is the model's (8, 8, 8), its crown near y 14"""
+    elements = []
+    for lo, hi in boxes:
+        f = face([0, 0, 16, 16], "#hat")
+        thin = face([0, 0, 16, max(1, min(16, hi[1] - lo[1]))], "#hat")
+        elements.append({"from": lo, "to": hi, "faces": {"up": f, "down": f, "north": thin, "south": thin, "east": thin, "west": thin}})
+    write(ASSETS + "models/item/" + name + ".json", {"textures": {"hat": texture, "particle": texture}, "elements": elements, "display": GUI})
+    item(name, NS + ":item/" + name)
+
+
+def dress():
+    hat("straw_hat", tex("thatch"), [([-4, 12, -4], [20, 13, 20]), ([-1, 13, -1], [17, 15, 17]), ([2, 15, 2], [14, 17, 14]),
+        ([5, 17, 5], [11, 19, 11]), ([7, 19, 7], [9, 20, 9])])
+    hat("basket_hat", tex("basket_hat"), [([0.5, 1, 0.5], [15.5, 17, 15.5])])
+    for name in ("straw_cape", "ramie_seeds", "ramie_fibre", "iron_sand", "steel_bloom"):
+        flat_item(name)
+    write(ASSETS + "equipment/straw_cape.json", {"layers": {"humanoid": [{"texture": NS + ":straw_cape"}]}})
+    variants = {}
+    for age in range(8):
+        stage = (0, 0, 1, 1, 2, 2, 2, 3)[age]
+        variants["age=%d" % age] = {"model": mdl("ramie_stage%d" % stage)}
+    for stage in range(4):
+        write(ASSETS + "models/block/ramie_stage%d.json" % stage, {"parent": "minecraft:block/crop",
+            "textures": {"crop": tex("ramie_stage%d" % stage)}})
+    write(ASSETS + "blockstates/ramie.json", {"variants": variants})
+    grown = {"type": "minecraft:match_block", "blocks": NS + ":ramie", "state": {"age": "7"}}
+    write(DATA + "loot_table/blocks/ramie.json", {"type": "minecraft:block", "modifier": {"type": "minecraft:explosion_decay"}, "pools": [
+        {"rolls": 1, "entries": [{"type": "minecraft:item", "name": NS + ":ramie_seeds"}]},
+        {"rolls": 1, "condition": grown, "entries": [{"type": "minecraft:item", "name": NS + ":ramie_seeds"}]},
+        {"rolls": 1, "condition": grown, "entries": [{"type": "minecraft:item", "name": NS + ":ramie_fibre"}]}],
+        "random_sequence": NS + ":blocks/ramie"})
+
+
 def furnishings():
+    dress()
     tansu()
     futon()
     hearth()
@@ -731,6 +871,13 @@ def recipes():
     shaped("futon", ["WWW", "TTT"], {"W": "#minecraft:wool", "T": own("thatch")}, 1, "misc")
     shaped("sunken_hearth", ["PSP", "PCP", "PPP"], {"P": "#minecraft:planks", "S": mc("sand"), "C": "#minecraft:coals"}, 1, "misc")
     shaped("sliding_door", ["SS", "SS", "SS"], {"S": own("shoji")}, 3, "misc")
+    shaped("straw_hat", ["TTT", "T T"], {"T": own("thatch")}, 1, "equipment")
+    shaped("basket_hat", ["MMM", "M M", "M M"], {"M": own("tatami")}, 1, "equipment")
+    shaped("straw_cape", ["T T", "TTT", "TTT"], {"T": own("thatch")}, 1, "equipment")
+    write(DATA + "recipe/steel_bloom_from_blasting_iron_sand.json", {"type": "minecraft:blasting", "cookingtime": 200, "experience": 0.3,
+        "ingredient": own("iron_sand"), "result": {"id": own("steel_bloom")}})
+    write(DATA + "recipe/string_from_ramie_fibre.json", {"type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": [own("ramie_fibre")] * 3, "result": {"count": 2, "id": "minecraft:string"}})
 
 
 def merge_tag(path, values):
@@ -760,6 +907,8 @@ def tags():
     merge_tag(RES + "data/minecraft/tags/block/campfires.json", own(["sunken_hearth"]))
     merge_tag(RES + "data/minecraft/tags/block/wooden_doors.json", own(["sliding_door"]))
     merge_tag(RES + "data/minecraft/tags/item/wooden_doors.json", own(["sliding_door"]))
+    merge_tag(RES + "data/minecraft/tags/block/crops.json", own(["ramie"]))
+    merge_tag(RES + "data/minecraft/tags/block/maintains_farmland.json", own(["ramie"]))
 
 
 def lang():
@@ -767,6 +916,9 @@ def lang():
     names = {"block." + NS + "." + k: v for k, v in NAMES.items()}
     names["item." + NS + ".lacquer_sap"] = "Bowl of Lacquer Sap"
     names["container." + NS + ".tansu"] = "Tansu"
+    names.update({"item." + NS + ".straw_hat": "Straw Hat", "item." + NS + ".basket_hat": "Basket Hat",
+        "item." + NS + ".straw_cape": "Straw Cape", "item." + NS + ".ramie_seeds": "Ramie Seeds",
+        "item." + NS + ".ramie_fibre": "Ramie Fibre", "block." + NS + ".ramie": "Ramie"})
     write(path, names)
 
 

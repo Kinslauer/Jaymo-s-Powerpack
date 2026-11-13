@@ -1,0 +1,238 @@
+{
+ "width": 64,
+ "height": 64,
+ "scale": 1.0,
+ "translucent": false,
+ "parts": [
+  {
+   "name": "body",
+   "parent": null,
+   "pivot": [
+    0,
+    12,
+    0
+   ],
+   "box": [
+    -3,
+    -4,
+    -6,
+    6,
+    8,
+    12
+   ],
+   "uv": [
+    0,
+    0
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "neck",
+   "parent": "body",
+   "pivot": [
+    0,
+    -3,
+    -5
+   ],
+   "box": [
+    -2,
+    -5,
+    -2,
+    4,
+    6,
+    4
+   ],
+   "uv": [
+    36,
+    0
+   ],
+   "anim": "neck",
+   "rot": null
+  },
+  {
+   "name": "head",
+   "parent": "neck",
+   "pivot": [
+    0,
+    -5,
+    0
+   ],
+   "box": [
+    -2,
+    -3,
+    -5,
+    4,
+    4,
+    6
+   ],
+   "uv": [
+    0,
+    20
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "throat",
+   "parent": "head",
+   "pivot": [
+    0,
+    1,
+    -2
+   ],
+   "box": [
+    -1.5,
+    0,
+    -1,
+    3,
+    2,
+    3
+   ],
+   "uv": [
+    52,
+    20
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "hornL",
+   "parent": "head",
+   "pivot": [
+    1.5,
+    -3,
+    0
+   ],
+   "box": [
+    -0.5,
+    -3,
+    0,
+    1,
+    3,
+    1
+   ],
+   "uv": [
+    0,
+    30
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "hornR",
+   "parent": "head",
+   "pivot": [
+    -1.5,
+    -3,
+    0
+   ],
+   "box": [
+    -0.5,
+    -3,
+    0,
+    1,
+    3,
+    1
+   ],
+   "uv": [
+    4,
+    30
+   ],
+   "anim": "",
+   "rot": null
+  },
+  {
+   "name": "legFR",
+   "parent": null,
+   "pivot": [
+    -2,
+    16,
+    -4
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    8,
+    2
+   ],
+   "uv": [
+    20,
+    20
+   ],
+   "anim": "legR",
+   "rot": null
+  },
+  {
+   "name": "legFL",
+   "parent": null,
+   "pivot": [
+    2,
+    16,
+    -4
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    8,
+    2
+   ],
+   "uv": [
+    28,
+    20
+   ],
+   "anim": "legL",
+   "rot": null
+  },
+  {
+   "name": "legBR",
+   "parent": null,
+   "pivot": [
+    -2,
+    16,
+    4
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    8,
+    2
+   ],
+   "uv": [
+    36,
+    20
+   ],
+   "anim": "legL",
+   "rot": null
+  },
+  {
+   "name": "legBL",
+   "parent": null,
+   "pivot": [
+    2,
+    16,
+    4
+   ],
+   "box": [
+    -1,
+    0,
+    -1,
+    2,
+    8,
+    2
+   ],
+   "uv": [
+    44,
+    20
+   ],
+   "anim": "legR",
+   "rot": null
+  }
+ ]
+}

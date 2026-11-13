@@ -511,6 +511,34 @@ def havens(out):
         numbered(out, "haven/%s/folk" % blood, haven_folk(blood))
 
 
+# ---- the Blossom land (docs/BlossomLands-Plan.md, patch 6) -----------------------------------------------------------
+
+# cloth, collar and cuffs, sash
+KOSODE_WOMEN = [((178, 62, 80), (240, 226, 214), (228, 184, 78)), ((92, 110, 160), (236, 232, 222), (150, 40, 52)),
+                ((120, 150, 104), (240, 232, 210), (90, 54, 110)), ((214, 168, 180), (250, 244, 236), (70, 90, 130))]
+# jacket, collar, trousers, sash
+KOSODE_MEN = [((70, 84, 110), (220, 214, 200), (46, 44, 52), (150, 150, 150)), ((104, 88, 66), (226, 218, 198), (58, 50, 44), (40, 40, 46)),
+              ((60, 96, 84), (224, 220, 206), (44, 48, 56), (190, 170, 110)), ((120, 60, 56), (232, 224, 208), (40, 38, 44), (96, 96, 104))]
+
+
+def collar(img, colour):
+    """the robe crossed left over right: a collar from each shoulder down to the sash"""
+    x0, y0, w, h = folk.BODY["front"]
+    for i in range(4):
+        img.putpixel((x0 + 2 + i, y0 + i), colour + (255,))
+        img.putpixel((x0 + 5 - i, y0 + i), colour + (255,))
+    for y in range(y0 + 4, y0 + 8):
+        img.putpixel((x0 + 3, y), folk.shade(colour, -14) + (255,))
+    return img
+
+
+def blossoms(out):
+    numbered(out, "blossom/kosode_f", [collar(gown(cloth, trim, seed=300 + i, sash=sash), trim)
+                                       for i, (cloth, trim, sash) in enumerate(KOSODE_WOMEN)])
+    numbered(out, "blossom/kosode_m", [collar(gown(trousers, trim, seed=320 + i, sleeves=jacket, bodice=jacket, sash=sash), trim)
+                                       for i, (jacket, trim, trousers, sash) in enumerate(KOSODE_MEN)])
+
+
 # ---- all of them ----------------------------------------------------------------------------------------------------
 
 def numbered(out, name, imgs):
@@ -546,6 +574,7 @@ def all_outfits():
                                                 for i, t in enumerate(WIZARD_TRIMS)])
     greenskins(out)
     havens(out)
+    blossoms(out)
     return out
 
 
@@ -591,6 +620,14 @@ if __name__ == "__main__":
         for name, img in outfits.items():
             save(img, name)
         preview(outfits, "build/havens-preview.png")
+        sys.exit(0)
+    if sys.argv[1:] == ["blossom"]:
+        # (Blossom Lands patch 6) only the Blossom land's dress
+        outfits = {}
+        blossoms(outfits)
+        for name, img in outfits.items():
+            save(img, name)
+        preview(outfits, "build/blossom-preview.png")
         sys.exit(0)
     outfits = all_outfits()
     for name, img in outfits.items():

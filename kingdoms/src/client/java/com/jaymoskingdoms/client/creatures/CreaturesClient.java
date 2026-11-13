@@ -28,6 +28,20 @@ public final class CreaturesClient {
 		creature(Creatures.SHADOW, "shadow", 0.0F, -1, -1, false);
 		creature(Creatures.SHAPESHIFTER, "shapeshifter", 0.5F, -1, -1, false);
 		creature(Creatures.BOG_LIGHT, "bog_light", 0.0F, -1, -1, true);
+		// the blossom lands' animals
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.KOI, "koi", 0.15F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SNOW_MONKEY, "snow_monkey", 0.35F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.CRANE, "crane", 0.35F, -1, com.jaymoskingdoms.blossomland.Crane.DANCING, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SHRINE_DEER, "shrine_deer", 0.4F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.RACCOON_DOG, "raccoon_dog", 0.3F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SEROW, "serow", 0.5F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.HORNET, "hornet", 0.1F, -1, 0, false);
+		creature(com.jaymoskingdoms.blossomland.BlossomAnimals.SALAMANDER, "giant_salamander", 0.5F, -1, -1, false);
+		// and their night things
+		creature(com.jaymoskingdoms.blossomland.NightThings.RIVER_CHILD, "river_child", 0.3F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.SNOW_WIDOW, "snow_widow", 0.4F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.UNBURIED, "unburied", 1.4F, -1, -1, false);
+		creature(com.jaymoskingdoms.blossomland.NightThings.BLACK_SWELL, "black_swell", 0.0F, -1, -1, false);
 	}
 
 	private static <T extends Mob> void creature(EntityType<T> type, String name, float shadow, int lieAt, int flapsFrom, boolean glows) {

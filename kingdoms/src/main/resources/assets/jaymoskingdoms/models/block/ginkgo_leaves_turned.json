@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "jaymoskingdoms:block/ginkgo_leaves_turned"
+  }
+}

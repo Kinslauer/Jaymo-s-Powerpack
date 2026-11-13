@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:ramie_fibre",
+    "jaymoskingdoms:ramie_fibre",
+    "jaymoskingdoms:ramie_fibre"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:string"
+  }
+}

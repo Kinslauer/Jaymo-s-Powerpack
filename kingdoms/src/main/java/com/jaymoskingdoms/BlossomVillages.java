@@ -10,6 +10,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -42,7 +46,7 @@ import org.jspecify.annotations.Nullable;
  * {@link Armory}: a realm's folk guards through {@link Outfits}, and (with MCA) the village's own MCA guards here, in
  * the settlement's colour.
  */
-final class BlossomVillages {
+public final class BlossomVillages {
 	/** How often (ticks) a Blossom village may rise near a player, and the chance each time. */
 	static final int RISE_TICKS = 20 * 60;
 	static final float RISE_CHANCE = 0.35F;
@@ -79,6 +83,41 @@ final class BlossomVillages {
 	private static final List<Spot> HALLS = List.of(new Spot("butcher", -6, 15, 1, 7), new Spot("hunting_lodge", 6, 15, 3, 9));
 	private static final List<Spot> STALLS = List.of(new Spot("stall", -5, -17, 1, 5), new Spot("stall", 5, -17, 3, 5));
 	private static final Spot SHRINE = new Spot("blossom_shrine", 0, 5, 0, 7);
+	/** Behind the shrine, between the halls: the paddy, or a market village's square. */
+	private static final Spot PADDY = new Spot("blossom_paddy", 0, 14, 0, Blossom.PADDY_WIDTH);
+	private static final Spot SQUARE = new Spot("market", 0, 13, 0, 9);
+	/** A temple village's second torii, close before the shrine, and the lanterns behind it. */
+	private static final Spot INNER_TORII = new Spot("blossom_torii", 0, 1, 0, 7);
+	private static final int[][] TEMPLE_LANTERNS = {{-4, 12}, {4, 12}};
+
+	/**
+	 * What a village is, by its ground: a temple village on high ground (a second torii before its shrine, more
+	 * lanterns), a market village now and then on low ground (a market square where the paddy would be), else a
+	 * hamlet (its paddy behind the shrine). All of them thatch, and all send out farmsteads.
+	 */
+	enum Kind {
+		HAMLET, MARKET, TEMPLE
+	}
+
+	/** A village this far above the sea is a temple village; lower, this share are market villages. */
+	static final int TEMPLE_ABOVE_SEA = 40;
+	static final float MARKET_SHARE = 0.3F;
+	/** Farmsteads: how many are tried for, how far from the bell (at least, plus up to), their ground's radius and the most it may rise and fall. */
+	static final int FARMSTEADS = 2, FARMSTEAD_MIN = 44, FARMSTEAD_SPREAD = 16, FARMSTEAD_RADIUS = 13, FARMSTEAD_SLOPE = 5, FARMSTEAD_TRIES = 6;
+	/** A farmstead in the frame of its own middle, its front toward the village: the paddy before the house. */
+	private static final Spot FARM_HOUSE = new Spot("house", 0, 1, 0, 0);
+	private static final Spot FARM_PADDY = new Spot("blossom_paddy", 0, -8, 0, Blossom.PADDY_WIDTH);
+	/** The ramie row along the paddy's other side. */
+	private static final Spot FARM_FIBRE = new Spot("blossom_fibre", -5, -8, 0, 1);
+	/** The watch tower: how far out along the road from the torii (at least, plus up to), its ground's radius, and the most that may rise and fall. */
+	static final int WATCH_MIN = 52, WATCH_SPREAD = 12, WATCH_RADIUS = 4, WATCH_SLOPE = 4;
+	private static final Spot WATCH = new Spot("blossom_watch", 0, -2, 0, Blossom.WATCH_SIZE);
+	/** The wayside shrine by a farmstead's paddy, facing the way to the village. */
+	private static final Spot FARM_SHRINE = new Spot("blossom_wayside", 7, -5, 0, 3);
+
+	static Kind kind(ServerLevel level, int floor, RandomSource random) {
+		return floor - level.getSeaLevel() >= TEMPLE_ABOVE_SEA ? Kind.TEMPLE : random.nextFloat() < MARKET_SHARE ? Kind.MARKET : Kind.HAMLET;
+	}
 	private static final Spot TORII = new Spot("blossom_torii", 0, -18, 0, 7);
 	private static final int[][] LANTERNS = {{-3, -12}, {3, -12}, {-3, -3}, {3, -3}};
 	/** The gravel roads: from the torii to the shrine, and across to each pair of houses (x0, z0, x1, z1). */
@@ -345,6 +384,23 @@ final class BlossomVillages {
 		}
 		List<BlockPos> homes = new ArrayList<>(), halls = new ArrayList<>();
 		List<Works.Built> built = new ArrayList<>();
+		Kind kind = kind(level, floor, random);
+		Blueprint paddy = Blossom.paddy();
+		if (kind == Kind.MARKET) {
+			place(level, Buildings.market(kit(level, village, random)), SQUARE, bell, gate, built);
+		} else if (paddy != null) {
+			place(level, paddy, PADDY, bell, gate, null);
+		}
+		if (kind == Kind.TEMPLE) {
+			place(level, Blossom.torii(), INNER_TORII, bell, gate, null);
+			for (int[] lantern : TEMPLE_LANTERNS) {
+				place(level, Blossom.stoneLantern(), new Spot("blossom_lantern", lantern[0], lantern[1], 0, 1), bell, gate, null);
+			}
+		}
+		farmsteads(level, village, bell, random, homes, built);
+		watchTower(level, village, bell, gate, random);
+		ruin(level, village, bell, random);
+		com.jaymoskingdoms.blossomland.BlossomWilds.plantRound(level, bell, random);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));
 			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
@@ -390,6 +446,95 @@ final class BlossomVillages {
 		return out != null ? out : village;
 	}
 
+	/**
+	 * Outlying farmsteads: up to {@link #FARMSTEADS} round the village on ground that will take one (loaded, dry, level
+	 * enough), each a minka facing the village with its paddy before it. Their houses are the village's ({@code built})
+	 * and are peopled as its own are ({@code homes}).
+	 */
+	private static void farmsteads(ServerLevel level, Faction village, BlockPos bell, RandomSource random, List<BlockPos> homes, List<Works.Built> built) {
+		int raised = 0;
+		for (int tries = 0; tries < FARMSTEAD_TRIES && raised < FARMSTEADS; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = FARMSTEAD_MIN + random.nextInt(FARMSTEAD_SPREAD);
+			BlockPos at = bell.offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			int floor = IllagerBuildings.floor(level, at, FARMSTEAD_SLOPE, FARMSTEAD_RADIUS);
+			if (floor == Integer.MIN_VALUE || Math.abs(floor - bell.getY()) > MAX_SPREAD * 2) {
+				continue;
+			}
+			// on the village's own land or nobody's
+			Faction owner = Factions.at(level.getServer(), level, at);
+			if (owner != null && owner.id() != village.id()) {
+				continue;
+			}
+			BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+			CampBuildings.level(level, middle, FARMSTEAD_RADIUS, CLEAR_HEIGHT);
+			Direction toVillage = Direction.getApproximateNearest(bell.getX() - at.getX(), 0, bell.getZ() - at.getZ());
+			Blueprint house = Blossom.minka(kit(level, village, random));
+			homes.add(place(level, house, new Spot(FARM_HOUSE.id(), FARM_HOUSE.x(), FARM_HOUSE.z(), FARM_HOUSE.turns(), house.width()), middle, toVillage, built));
+			Blueprint paddy = Blossom.paddy();
+			place(level, paddy != null ? paddy : Buildings.farm(kit(level, village, random)), FARM_PADDY, middle, toVillage, paddy != null ? null : built);
+			if (paddy != null) {
+				place(level, Blossom.fibreRow(), FARM_FIBRE, middle, toVillage, null);
+			}
+			// its wayside shrine, kept to one of the eight
+			Shrine.Dedication[] patrons = Shrine.Dedication.values();
+			Shrine.Dedication patron = patrons[random.nextInt(patrons.length)];
+			place(level, Blossom.wayside(Healing.SHRINE.defaultBlockState().setValue(Shrine.DEDICATION, patron)), FARM_SHRINE, middle, toVillage, null);
+			raised++;
+		}
+	}
+
+	/** A ruin: how often a new village has one near, how far from the bell (at least, plus up to), its ground's radius and the most it may rise and fall. */
+	static final float RUIN_CHANCE = 0.5F;
+	static final int RUIN_MIN = 72, RUIN_SPREAD = 24, RUIN_RADIUS = 8, RUIN_SLOPE = 5, RUIN_TRIES = 4;
+	/** What is left in a ruin's tansu. */
+	static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> RUIN_LOOT = net.minecraft.resources.ResourceKey.create(
+		net.minecraft.core.registries.Registries.LOOT_TABLE, JaymosKingdoms.id("chests/blossom_ruin"));
+
+	/**
+	 * Now and then, an older house that did not last: a ruined minka out beyond the farmsteads on nobody's land, what its
+	 * people left still in its tansu.
+	 */
+	private static void ruin(ServerLevel level, Faction village, BlockPos bell, RandomSource random) {
+		if (random.nextFloat() >= RUIN_CHANCE) {
+			return;
+		}
+		for (int tries = 0; tries < RUIN_TRIES; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = RUIN_MIN + random.nextInt(RUIN_SPREAD);
+			BlockPos at = bell.offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			int floor = IllagerBuildings.floor(level, at, RUIN_SLOPE, RUIN_RADIUS);
+			Faction owner = Factions.at(level.getServer(), level, at);
+			if (floor == Integer.MIN_VALUE || owner != null && owner.id() != village.id()) {
+				continue;
+			}
+			BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+			Blueprint house = Blossom.ruin(kit(level, village, random), random);
+			BlockPos inside = place(level, house, new Spot("blossom_ruin", 0, -house.depth() / 2, 0, house.width()), middle, Direction.NORTH, null);
+			for (BlockPos p : BlockPos.betweenClosed(inside.offset(-RUIN_RADIUS, -2, -RUIN_RADIUS), inside.offset(RUIN_RADIUS, 2, RUIN_RADIUS))) {
+				if (level.getBlockEntity(p) instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity store
+					&& level.getBlockState(p).is(com.jaymoskingdoms.blossomland.BlossomFurnishings.TANSU)) {
+					store.setLootTable(RUIN_LOOT, random.nextLong());
+				}
+			}
+			return;
+		}
+	}
+
+	/** A watch tower out along the way to the village's torii, if the ground there will take one (loaded, dry, level enough, nobody else's). */
+	private static void watchTower(ServerLevel level, Faction village, BlockPos bell, Direction gate, RandomSource random) {
+		int r = WATCH_MIN + random.nextInt(WATCH_SPREAD);
+		BlockPos at = bell.relative(gate, r);
+		int floor = IllagerBuildings.floor(level, at, WATCH_SLOPE, WATCH_RADIUS);
+		Faction owner = Factions.at(level.getServer(), level, at);
+		if (floor == Integer.MIN_VALUE || owner != null && owner.id() != village.id()) {
+			return;
+		}
+		BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+		CampBuildings.level(level, middle, WATCH_RADIUS, CLEAR_HEIGHT);
+		place(level, Blossom.watchTower(kit(level, village, random)), WATCH, middle, gate, null);
+	}
+
 	/** One building's kit from the village's own look, its materials and details rolled (never the plain design). */
 	private static Buildings.Kit kit(ServerLevel level, Faction village, RandomSource random) {
 		long variant = random.nextLong();
@@ -432,7 +577,18 @@ final class BlossomVillages {
 
 	// ---- the Blossom land's guards -----------------------------------------------------------------------------------------
 
-	/** With MCA: every settlement among the cherry trees puts its MCA guards in the ronin harness, in its colour. */
+	/** One guard in this many is a sworn man in the ronin harness; the rest are the levy. */
+	static final int SWORN_ONE_IN = 3;
+
+	/** {@code guard} is one of the lord's sworn men (the same guard always is, or never). */
+	static boolean sworn(Entity guard) {
+		return Math.floorMod(guard.getUUID().hashCode(), SWORN_ONE_IN) == 0;
+	}
+
+	/**
+	 * With MCA: every settlement among the cherry trees arms its MCA guards its own way. One in {@link #SWORN_ONE_IN}
+	 * is a sworn man in the ronin harness, in its colour; the rest are the levy, in straw hats with spears.
+	 */
 	private static void dressGuards(ServerLevel level) {
 		if (!McaCompat.LOADED) {
 			return;
@@ -444,14 +600,22 @@ final class BlossomVillages {
 			}
 			DyeColor colour = f.styleColor(server);
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(GUARD_RANGE),
-				v -> v.isAlive() && !v.isBaby() && McaCompat.isGuard(v) && !Outfits.wearsRonin(v))) {
-				Outfits.ronin(v, colour);
+				v -> v.isAlive() && !v.isBaby() && McaCompat.isGuard(v))) {
+				if (sworn(v)) {
+					if (!Outfits.wearsRonin(v)) {
+						Outfits.ronin(v, colour);
+					}
+				} else if (!v.getItemBySlot(EquipmentSlot.HEAD).is(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT)) {
+					// the levy: a straw hat and a spear, no harness
+					v.setItemSlot(EquipmentSlot.HEAD, new ItemStack(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT));
+					v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SPEAR));
+				}
 			}
 		}
 	}
 
 	/** (0.7.490) {@code f} stands among the cherry trees: it walls itself in the Blossom way ({@link WalledTowns}). */
-	static boolean blossom(ServerLevel level, Faction f) {
+	public static boolean blossom(ServerLevel level, Faction f) {
 		return climate(level, f) == Climate.CHERRY;
 	}
 

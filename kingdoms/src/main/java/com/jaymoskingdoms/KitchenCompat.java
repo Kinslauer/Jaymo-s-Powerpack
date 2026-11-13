@@ -370,6 +370,13 @@ public final class KitchenCompat {
 		return null;
 	}
 
+	/** Kitchen's rice plant (it stands in one block of water over mud or dirt), or null without Kitchen. */
+	static net.minecraft.world.level.block.@Nullable Block riceCrop() {
+		net.minecraft.world.level.block.Block rice = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "rice"));
+		return rice == net.minecraft.world.level.block.Blocks.AIR ? null : rice;
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
@@ -395,6 +402,23 @@ public final class KitchenCompat {
 			}
 		}
 		return best;
+	}
+
+	/**
+	 * The unburied dead within {@code range} of {@code at}: free corpses of people and monsters (not animals, never a
+	 * player's). Empty without Kitchen.
+	 */
+	public static java.util.List<Entity> fallenNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range) {
+		if (CORPSE == null) {
+			return java.util.List.of();
+		}
+		return level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), e -> {
+			if (!isFreeCorpse(e) || isPlayerCorpse(e)) {
+				return false;
+			}
+			net.minecraft.world.entity.EntityType<?> was = sourceType(e);
+			return was != null && (was.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER || was.getCategory() == net.minecraft.world.entity.MobCategory.MISC);
+		});
 	}
 
 	/** (0.7.132) Kitchen is new enough for {@link Bearers} and {@link Looters} (0.5.9). */

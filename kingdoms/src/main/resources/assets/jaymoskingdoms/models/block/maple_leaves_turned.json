@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "jaymoskingdoms:block/maple_leaves_turned"
+  }
+}

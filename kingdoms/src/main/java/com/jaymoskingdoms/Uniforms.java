@@ -53,6 +53,7 @@ public final class Uniforms {
 	 * six plain wools ({@code tools/gen_nobody_rags.py}); Nobodies still in a deckhand's slops change when they load.
 	 */
 	static final List<String> POOR = ids("poor/rags", 6);
+	static final List<String> BLOSSOM_WOMEN = ids("blossom/kosode_f"), BLOSSOM_MEN = ids("blossom/kosode_m");
 	/** The sky folk's ({@link SkyFolk#outfits}, art from tools/gen_sky_folk.py). */
 	static final List<String> SKY_DIVINE = ids("sky/divine"), SKY_HALFWAY = ids("sky/halfway"), SKY_LORDS = ids("sky/lord"),
 		SKY_WARDENS = ids("sky/warden");
@@ -193,6 +194,11 @@ public final class Uniforms {
 		if (blood != null) {
 			// (0.7.438, Havens patch 6) a haven's guards and folk dress in their blood's way
 			return ids("haven/" + blood + "/" + (role == Folk.GUARD || villager.isGuard() ? "guard" : "folk"));
+		}
+		if (f != null && role != Folk.GUARD && !villager.isGuard() && villager.level() instanceof ServerLevel blossomLevel
+			&& BlossomVillages.blossom(blossomLevel, f)) {
+			// the Blossom land's people: a crossed robe and sash, the men's over dark trousers
+			return female ? BLOSSOM_WOMEN : BLOSSOM_MEN;
 		}
 		if (role == Folk.GUARD || villager.isGuard()) {
 			int land = f == null || !(villager.level() instanceof ServerLevel level) ? 0

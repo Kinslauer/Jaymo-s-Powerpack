@@ -80,6 +80,11 @@ public final class BlossomBlocks {
 			.ignitedByLava().noOcclusion().noCollision()), PAPER_BURN, PAPER_SPREAD);
 		PoiHelper.register(JaymosKingdoms.id("ward_rope"), 0, 1, WARD_ROPE);
 		BlossomFurnishings.register();
+		BlossomDress.register();
+		BlossomWilds.register();
+		BlossomAnimals.register();
+		NightThings.register();
+		SunkenPalace.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output -> ITEMS.forEach(output::accept));
 	}
 

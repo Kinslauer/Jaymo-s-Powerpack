@@ -991,6 +991,10 @@ public final class Approaches {
 					said = MohkneeTalk.gossip(level, a.mob);
 				}
 				if (said == null) {
+					// what the blossom folk say of the night (NightThings), never more than a hint
+					said = com.jaymoskingdoms.blossomland.NightThings.gossip(level, a.mob);
+				}
+				if (said == null) {
 					said = Oddities.gossip(level, a.mob);
 				}
 				if (said == null) {

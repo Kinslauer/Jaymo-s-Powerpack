@@ -712,6 +712,16 @@ public final class Bearers {
 		}
 		BlockState stone = headstone(level, f, random);
 		level.setBlock(head, Block.updateFromNeighbourShapes(stone, level, head), Block.UPDATE_ALL);
+		if (BlossomVillages.blossom(level, f)) {
+			// the blossom folk plant the red lily on their dead; it comes up beside the stone
+			for (net.minecraft.core.Direction side : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+				BlockPos by = head.relative(side);
+				if (!by.equals(plot) && level.getBlockState(by).isAir() && level.getBlockState(by.below()).is(net.minecraft.tags.BlockTags.DIRT)) {
+					level.setBlock(by, com.jaymoskingdoms.blossomland.BlossomWilds.SPIDER_LILY.defaultBlockState(), Block.UPDATE_ALL);
+					break;
+				}
+			}
+		}
 		if (d.royal && level.getBlockState(head.above()).isAir()) {
 			// (0.7.546) a ruler's grave: a candle kept lit on the stone
 			level.setBlock(head.above(), Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.LIT, true), Block.UPDATE_ALL);
@@ -757,12 +767,15 @@ public final class Bearers {
 
 	// ---- the graveyard ----------------------------------------------------------------------------------------------
 
-	/** The headstone for {@code f}: sandstone in the desert, stone brick in a realm, cobblestone in a village; now and then mossy. */
+	/** The headstone for {@code f}: an andesite post in the Blossom land, sandstone in the desert, stone brick in a realm, cobblestone in a village; now and then mossy. */
 	private static BlockState headstone(ServerLevel level, Faction f, RandomSource random) {
 		Climate climate = Climate.at(level, f.seat());
 		boolean mossy = random.nextFloat() < MOSSY;
 		Block block;
-		if (climate == Climate.DESERT || climate == Climate.BADLANDS) {
+		if (climate == Climate.CHERRY) {
+			// the Blossom land's graves: a narrow post of grey stone
+			block = mossy ? Blocks.MOSSY_STONE_BRICK_WALL : Blocks.ANDESITE_WALL;
+		} else if (climate == Climate.DESERT || climate == Climate.BADLANDS) {
 			block = Blocks.SANDSTONE_WALL;
 		} else if (f.type() == FactionType.VILLAGE) {
 			block = mossy ? Blocks.MOSSY_COBBLESTONE_WALL : Blocks.COBBLESTONE_WALL;

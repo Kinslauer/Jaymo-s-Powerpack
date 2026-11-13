@@ -30,6 +30,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		// the pale grove joins the Nether's biomes once every mod's main entrypoint has run
+		com.jaymoskingdoms.blossomland.BlossomWilds.addBiomes();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
 		// great foes' themes, and the trophy stand's item
