@@ -4,6 +4,10 @@
     {
       "id": "jaymospowers:fang_gauntlets",
       "required": false
+    },
+    {
+      "id": "jaymospowers:rimeclaw",
+      "required": false
     }
   ]
 }
