@@ -653,6 +653,49 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Fainting.overcome(ServerPlayer)} and {@code Fainting.ofOvercome(Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle faintOvercome, faintOfOvercome;
+	private static boolean lookedForOvercome;
+
+	private static void lookForOvercome() {
+		if (lookedForOvercome) {
+			return;
+		}
+		lookedForOvercome = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> c = Class.forName("com.jaymospowers.core.wounds.Fainting");
+			var lookup = java.lang.invoke.MethodHandles.publicLookup();
+			faintOvercome = lookup.findStatic(c, "overcome", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class));
+			faintOfOvercome = lookup.findStatic(c, "ofOvercome", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Entity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Fainting.overcome (older Powers?)", e);
+			faintOvercome = faintOfOvercome = null;
+		}
+	}
+
+	/** {@code player} faints at the sight of something too much for them ({@link Overcome}); false without Powers or if they can't now. */
+	public static boolean overcome(net.minecraft.server.level.ServerPlayer player) {
+		lookForOvercome();
+		try {
+			return faintOvercome != null && (boolean)faintOvercome.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Whether {@code entity}'s faint is from such a sight, not hunger or thirst. */
+	public static boolean faintedOfOvercome(net.minecraft.world.entity.Entity entity) {
+		lookForOvercome();
+		try {
+			return faintOfOvercome != null && (boolean)faintOfOvercome.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle ape;
 	private static boolean lookedForApe;
@@ -1606,7 +1649,8 @@ public final class PowersCompat {
 	 * the moon's curse lets go, and so does the alchemist's mark (Powers 0.18.83). True if either was lifted.
 	 */
 	public static boolean cureCurses(net.minecraft.world.entity.LivingEntity entity) {
-		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && (MoonCurse.cure(player) | com.jaymoskingdoms.remnants.Blight.cure(player) | com.jaymoskingdoms.hunger.HungerCurse.cure(player));
+		boolean cured = entity instanceof net.minecraft.server.level.ServerPlayer player && (MoonCurse.cure(player) | com.jaymoskingdoms.remnants.Blight.cure(player) | com.jaymoskingdoms.hunger.HungerCurse.cure(player)
+			| LivingNightmare.cure(player));
 		if (!lookedForWashOut) {
 			lookedForWashOut = true;
 			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {

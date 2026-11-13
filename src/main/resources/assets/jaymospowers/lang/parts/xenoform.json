@@ -46,7 +46,7 @@
 	"power.jaymospowers.xenoform.key.mode.pyre.name": "Turn Back",
 	"power.jaymospowers.xenoform.key.mode.blur": "Hold and let go: turn back into yourself (a reforged band keeps the charge left; before that it recharges for a minute). Hold and scroll, then let go: quick change, a quarter of the charge",
 	"power.jaymospowers.xenoform.key.mode.blur.name": "Turn Back",
-	"power.jaymospowers.xenoform.key.special": "Scan (hold, as yourself): point at a creature for 3 seconds; if it carries an alien's DNA, the band learns that alien. Iron golem, blaze, horse, shulker, phantom, silverfish, the Warden and the Ender Dragon",
+	"power.jaymospowers.xenoform.key.special": "Scan (hold, as yourself): point at a creature for 3 seconds; if it carries an alien's DNA, the band learns that alien. Iron golem, blaze, horse, shulker, wraith, silverfish, the Warden and the Ender Dragon",
 	"power.jaymospowers.xenoform.key.special.name": "Scan",
 	"power.jaymospowers.xenoform.key.ultimate": "Ultimate (once the band is complete and the power mastered, the power ascends): on a reforged band, %6$s turns an alien into its Ultimate, its own evolved body and moves with a health bar of its own on top, until the charge runs out. As the Ultimate, tap %6$s for its big move; hold %6$s to drop back to the base alien. If the Ultimate's health runs out it breaks and is locked for the change. Before the reforge it comes on by itself, once per change, when a great foe is about to kill you. As yourself, nothing: slam first",
 	"power.jaymospowers.xenoform.key.ultimate.name": "Ultimate",

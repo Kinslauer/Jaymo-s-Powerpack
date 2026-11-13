@@ -41,6 +41,7 @@
 		"jaymoskingdoms.spellengine.mixins.json",
 		"jaymoskingdoms.wild.mixins.json",
 		"jaymoskingdoms.fifth.mixins.json",
+		"jaymoskingdoms.occult.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
@@ -57,7 +58,8 @@
 		{ "config": "jaymoskingdoms.iris.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.tomes.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.nightforms.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.fifth.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.fifth.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.occult.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

@@ -25,7 +25,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Wisp, the ghost (scanned from a phantom): your size, only 16 health, never hurt by a fall.
+ * Wisp, the ghost (scanned from a phantom, or from one of Kingdoms' wraiths: phantoms come only as nightmares now and
+ * can't be scanned in a world that never spawns them): your size, only 16 health, never hurt by a fall.
  * <ul>
  * <li>R (hold), Phase: for up to {@link #PHASE_TICKS} ticks nothing solid stops it ({@code WispPhaseMixin}, both sides): it
  * walks through walls, and floats as on B, so Jump lifts it through a ceiling and sneaking sinks it through the floor (the
@@ -84,8 +85,11 @@ public final class Wisp extends XenoForm {
 
 	@Override
 	public boolean scans(Entity creature) {
-		return creature instanceof Phantom;
+		return creature instanceof Phantom || WRAITHS.contains(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(creature.getType()).toString());
 	}
+
+	/** Kingdoms' ghosts that scan as a Wisp (by id, so Powers needs no Kingdoms). */
+	private static final java.util.Set<String> WRAITHS = java.util.Set.of("jaymoskingdoms:wraith", "jaymoskingdoms:flame_wraith");
 
 	@Override
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {

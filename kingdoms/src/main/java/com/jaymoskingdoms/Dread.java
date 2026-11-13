@@ -139,6 +139,20 @@ public final class Dread {
 		}
 	}
 
+	/**
+	 * {@code pm} breaks off and runs from {@code from} for {@code ticks}, the way a witness of a brutal kill does (used by
+	 * {@link Overcome} for those who withdraw from something too much for them): its feet won't carry it back toward
+	 * {@code source} meanwhile.
+	 */
+	static void flee(PathfinderMob pm, net.minecraft.world.entity.Entity source, int ticks) {
+		long now = pm.level().getGameTime();
+		FRIGHTS.put(pm, new Fright(source.position(), now + ticks));
+		Fear.frighten(pm, source, ticks);
+		pm.setTarget(null);
+		pm.addTag(MobCombat.WAITING_TAG);
+		pm.getNavigation().stop();
+	}
+
 	/** Whether {@code m} is running in fright just now. */
 	static boolean frightened(Mob m) {
 		return m instanceof PathfinderMob pm && FRIGHTS.containsKey(pm);

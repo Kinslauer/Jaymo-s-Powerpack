@@ -1,0 +1,52 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:wither",
+    "minecraft:warden",
+    "minecraft:ender_dragon",
+    {
+      "id": "jaymoskingdoms:great_necromancer",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:skeleton_lord",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:night_bleeder",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:revenant",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:unburied",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:wreck_thing",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:black_swell",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:tide_bride",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:cinder_shade",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:werewolf",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:gaunt",
+      "required": false
+    }
+  ]
+}

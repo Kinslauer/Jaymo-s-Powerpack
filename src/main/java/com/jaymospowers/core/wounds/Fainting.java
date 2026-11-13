@@ -42,6 +42,10 @@ import java.util.UUID;
  * them round at once.</li>
  * <li><b>Coming round:</b> they get up and the letterbox opens over {@link #WAKE}. No fainting again for {@link #COOLDOWN}.</li>
  * </ul>
+ * <b>Overcome:</b> Kingdoms' {@code Overcome} drops a player of little occult exposure in the same faint at the sight of an
+ * especially strong supernatural thing ({@link #overcome}); the swoon, the fall and the waking are the same, only shorter
+ * to start ({@link #OVERCOME_SWOON}).
+ * <p>
  * Not while downed, carried, held in Chrono's window, left for dead, on adrenaline (it keeps them up), riding, asleep, in
  * creative or spectating. Passed out, nobody walks up to talk ({@link com.jaymospowers.core.OutOfPlay}). No text: a slow
  * heartbeat in their own ears is the only sound.
@@ -57,6 +61,8 @@ public final class Fainting {
 	static final float EXERTION = 2.0F;
 	/** Going (letterbox closing, keys lost), lying out, and coming round (ticks). */
 	public static final int SWOON = 80, OUT = 260, WAKE = 60;
+	/** An overcome faint starts this far into the swoon (ticks), so it comes on faster than hunger's. */
+	static final int OVERCOME_SWOON = 40;
 	/** After coming round, no fainting again for this long (ticks). */
 	static final int COOLDOWN = 1200;
 	/** The collapse: tipped forward this fast (blocks a tick), on top of whatever speed they still had. */
@@ -75,6 +81,8 @@ public final class Fainting {
 	private static final Map<UUID, Long> RESTED = new HashMap<>();
 	/** Server: fainting players who have already been tipped over. */
 	private static final Map<UUID, Boolean> TIPPED = new HashMap<>();
+	/** Server: players whose faint is from something they saw (Kingdoms' {@code Overcome}), not hunger or thirst. */
+	private static final java.util.Set<UUID> OVERCOME = new java.util.HashSet<>();
 
 	private Fainting() {
 	}
@@ -90,6 +98,7 @@ public final class Fainting {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			RESTED.clear();
 			TIPPED.clear();
+			OVERCOME.clear();
 		});
 	}
 
@@ -122,6 +131,29 @@ public final class Fainting {
 		}
 		player.setAttached(FAINT, player.level().getGameTime() - SWOON - OUT);
 		return true;
+	}
+
+	/**
+	 * Kingdoms' {@code Overcome}: {@code player} faints at the sight of something too much for them, whatever their food and
+	 * water. Returns whether the faint started (not if they can't faint just now, or are already going).
+	 */
+	public static boolean overcome(ServerPlayer player) {
+		if (player.hasAttached(FAINT) || !able(player)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		player.setAttached(FAINT, now - OVERCOME_SWOON);
+		TIPPED.remove(player.getUUID());
+		OVERCOME.add(player.getUUID());
+		player.setSprinting(false);
+		player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.WARDEN_HEARTBEAT),
+			SoundSource.PLAYERS, player.getX(), player.getEyeY(), player.getZ(), 1.0F, 0.7F, player.getRandom().nextLong()));
+		return true;
+	}
+
+	/** Whether {@code entity}'s faint is from something they saw ({@link #overcome}). Server side. */
+	public static boolean ofOvercome(Entity entity) {
+		return OVERCOME.contains(entity.getUUID()) && is(entity);
 	}
 
 	/** Water left (Kitchen's thirst), or full without it. */
@@ -197,6 +229,7 @@ public final class Fainting {
 			|| player.isSpectator() || t >= SWOON + OUT + WAKE) {
 			player.removeAttached(FAINT);
 			TIPPED.remove(id);
+			OVERCOME.remove(id);
 			RESTED.put(id, now + COOLDOWN);
 			return;
 		}

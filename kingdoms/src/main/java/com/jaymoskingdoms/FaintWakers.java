@@ -240,10 +240,12 @@ public final class FaintWakers {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
-		boolean thirst = PowersCompat.faintedOfThirst(player);
+		// (Overcome) a faint at something they saw: the wakers speak of that, and a drink steadies them all the same
+		boolean overcome = PowersCompat.faintedOfOvercome(player);
+		boolean thirst = overcome || PowersCompat.faintedOfThirst(player);
 		String tone = SharedHistory.toneNoGreed(w.mob).key();
 		String moment = w.deed == Deed.TELL ? "tell" : "hint";
-		Component line = Component.translatable("faint.jaymoskingdoms." + moment + "." + (thirst ? "thirst" : "hunger") + "." + tone + "."
+		Component line = Component.translatable("faint.jaymoskingdoms." + moment + "." + (overcome ? "overcome" : thirst ? "thirst" : "hunger") + "." + tone + "."
 			+ w.mob.getRandom().nextInt(LINES), Recollections.nameTo(player, w.mob));
 		Speech.tell(level, w.mob, player, line, Speech.WHITE);
 		if (w.deed == Deed.TELL) {

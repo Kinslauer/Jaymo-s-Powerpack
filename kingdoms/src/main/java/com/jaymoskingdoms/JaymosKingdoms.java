@@ -908,6 +908,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Afflictions.register();
 		HeldFast.register();
 		Fear.register();
+		// occult exposure, the living nightmare, and being overcome at the sight of the other side
+		Exposure.register();
+		LivingNightmare.register();
+		Overcome.register();
 		Charm.register();
 		Deafened.register();
 		Nets.register();
