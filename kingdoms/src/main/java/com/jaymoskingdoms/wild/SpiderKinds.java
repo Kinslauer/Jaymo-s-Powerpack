@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.wild;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Loaded;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -247,6 +248,9 @@ public final class SpiderKinds {
 		for (Iterator<SpatWeb> it = WEBS.iterator(); it.hasNext(); ) {
 			SpatWeb web = it.next();
 			if (web.level().getGameTime() >= web.until()) {
+				if (!Loaded.made(web.level(), web.pos())) {
+					continue;
+				}
 				if (web.level().getBlockState(web.pos()).is(Blocks.COBWEB)) {
 					web.level().removeBlock(web.pos(), false);
 				}

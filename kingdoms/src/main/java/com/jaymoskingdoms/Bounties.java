@@ -1458,6 +1458,12 @@ public final class Bounties {
 		for (var it = ERRANDS.values().iterator(); it.hasNext();) {
 			Errand e = it.next();
 			Villager v = level.getEntity(e.villager()) instanceof Villager found ? found : null;
+			if (!Loaded.made(level, e.slot())) {
+				if (now > e.until()) {
+					it.remove();
+				}
+				continue;
+			}
 			BlockState state = level.getBlockState(e.slot());
 			Bounty b = all.get(e.key());
 			boolean works = TownProjects.is(e.key()); // (0.7.530)

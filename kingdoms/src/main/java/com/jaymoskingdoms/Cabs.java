@@ -75,6 +75,17 @@ public final class Cabs {
 		return Construction.standable(level, f.seat().offset(-4, 0, 3), 5);
 	}
 
+	/** Every chunk of the square of {@code radius} around {@code near} is made and loaded (its four corners and middle cover it). */
+	private static boolean made(ServerLevel level, BlockPos near, int radius) {
+		return Loaded.made(level, near) && Loaded.made(level, near.offset(-radius, 0, -radius)) && Loaded.made(level, near.offset(radius, 0, -radius))
+			&& Loaded.made(level, near.offset(-radius, 0, radius)) && Loaded.made(level, near.offset(radius, 0, radius));
+	}
+
+	/** The stand's search square is made and loaded, so {@link #stand} reads nothing that waits. */
+	private static boolean standMade(ServerLevel level, Faction f) {
+		return made(level, f.seat().offset(-4, 0, 3), 5);
+	}
+
 	/** {@code f}'s cab, if it's about. */
 	static @Nullable Wagon of(ServerLevel level, Faction f) {
 		List<Wagon> found = level.getEntitiesOfClass(Wagon.class, new AABB(f.seat()).inflate(RANGE),
@@ -181,7 +192,7 @@ public final class Cabs {
 		if (job.phase == WAIT && aboard instanceof ServerPlayer && cab.ride() >= 0) {
 			// (back from a restart with a fare aboard)
 			Faction to = Factions.get(level.getServer(), cab.ride());
-			if (to != null) {
+			if (to != null && made(level, to.seat(), 6)) {
 				start(job, HIRED, Construction.standable(level, to.seat(), 6), now);
 			}
 		}
@@ -211,13 +222,16 @@ public final class Cabs {
 				}
 			}
 			case RETURN -> {
+				if (!standMade(level, f)) {
+					return;
+				}
 				BlockPos stand = stand(level, f);
 				if (homeUnseen(level, horse, cab, stand) || drive(level, driver, horse, cab, job, stand, STAND_REACH, BACK_SPEED, now)) {
 					start(job, WAIT, null, now);
 				}
 			}
 			default -> {
-				if (now % 40 == 0 && horse.distanceToSqr(Vec3.atBottomCenterOf(stand(level, f))) > 36.0) {
+				if (now % 40 == 0 && standMade(level, f) && horse.distanceToSqr(Vec3.atBottomCenterOf(stand(level, f))) > 36.0) {
 					start(job, RETURN, null, now);
 				}
 			}

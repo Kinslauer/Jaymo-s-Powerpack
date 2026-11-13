@@ -2,9 +2,11 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
@@ -92,6 +94,8 @@ final class Strays {
 
 	/** Shooings under way, by animal. */
 	private static final Map<UUID, Shoo> SHOOS = new HashMap<>();
+	/** Doors opened for a shooing that ended while their land wasn't loaded; shut when it is. */
+	private static final Set<BlockPos> SHUT_LATER = new HashSet<>();
 	/** Animals minded lately (animal → until when it's left be). */
 	private static final Map<UUID, Long> RESTING = new HashMap<>();
 	/** When each villager last spoke of a stray. */
@@ -104,6 +108,7 @@ final class Strays {
 		ServerTickEvents.END_SERVER_TICK.register(Strays::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			SHOOS.clear();
+			SHUT_LATER.clear();
 			RESTING.clear();
 			SPOKE.clear();
 		});
@@ -112,6 +117,9 @@ final class Strays {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
+		if (now % DRIVE == 0 && !SHUT_LATER.isEmpty()) {
+			SHUT_LATER.removeIf(door -> shutDoor(level, door));
+		}
 		if (now % DRIVE == 0 && !SHOOS.isEmpty()) {
 			Iterator<Shoo> it = SHOOS.values().iterator();
 			while (it.hasNext()) {
@@ -409,12 +417,23 @@ final class Strays {
 	/** The door opened for it is shut again. */
 	private static void shut(ServerLevel level, Shoo s) {
 		if (s.door != null) {
-			BlockState state = level.getBlockState(s.door);
-			if (state.getBlock() instanceof DoorBlock db && db.isOpen(state)) {
-				db.setOpen(null, level, state, s.door, false);
+			if (!shutDoor(level, s.door)) {
+				SHUT_LATER.add(s.door);
 			}
 			s.door = null;
 		}
+	}
+
+	/** The door at {@code door} is shut if it was open; false (untouched) while its land isn't loaded. */
+	private static boolean shutDoor(ServerLevel level, BlockPos door) {
+		if (!Loaded.made(level, door)) {
+			return false;
+		}
+		BlockState state = level.getBlockState(door);
+		if (state.getBlock() instanceof DoorBlock db && db.isOpen(state)) {
+			db.setOpen(null, level, state, door, false);
+		}
+		return true;
 	}
 
 	/** It goes after {@code a}: through its brain if it walks by one, else its navigation. */

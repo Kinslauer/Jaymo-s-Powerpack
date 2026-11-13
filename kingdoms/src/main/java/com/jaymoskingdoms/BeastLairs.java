@@ -82,6 +82,9 @@ public final class BeastLairs {
 
 	/** The natural ground block in column ({@code x}, {@code z}) near {@code nearY}, or null (water, a roof, laid blocks, too far up or down). */
 	private static @Nullable BlockPos ground(ServerLevel level, int x, int z, int nearY) {
+		if (!Loaded.made(level, x, z)) {
+			return null;
+		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, nearY, z)).below();
 		BlockState state = level.getBlockState(top);
 		if (Math.abs(top.getY() + 1 - nearY) > GROUND_REACH || !state.getFluidState().isEmpty()

@@ -748,6 +748,9 @@ public final class Camps {
 		for (int i = 0; i < count && !left.isEmpty(); i++) {
 			int pick = random.nextInt(left.size());
 			BlockPos pos = BlockPos.of(left.get(pick));
+			if (!Loaded.made(level, pos)) {
+				continue; // its land isn't loaded: it stays in the list for a later step
+			}
 			BlockState state = level.getBlockState(pos);
 			if (state.is(Blocks.CAMPFIRE) && state.getValue(CampfireBlock.LIT)) {
 				level.setBlock(pos, state.setValue(CampfireBlock.LIT, false), Block.UPDATE_ALL);
