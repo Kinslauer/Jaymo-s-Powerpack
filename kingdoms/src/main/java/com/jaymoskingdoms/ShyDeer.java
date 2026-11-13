@@ -207,6 +207,11 @@ public final class ShyDeer {
 			return null;
 		}
 		BlockPos at = bed.respawnData().pos();
+		// (a bed far from its sleeper is often in land not loaded: reading it waited on the server thread for it, behind the
+		// world generation queue, Deck crash 2026-11-13 16:45; not loaded, it's simply not known this time)
+		if (!Loaded.made(player.level(), at)) {
+			return null;
+		}
 		return player.level().getBlockState(at).getBlock() instanceof BedBlock ? at : null;
 	}
 

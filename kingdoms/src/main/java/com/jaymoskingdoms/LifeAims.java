@@ -608,7 +608,8 @@ public final class LifeAims {
 		}
 		ServerLevel overworld = server.overworld();
 		BlockPos at = bed.respawnData().pos();
-		if (!(overworld.getBlockState(at).getBlock() instanceof AbstractBedBlock)) {
+		// (the bed's land not loaded: not read, it waits on the server thread for it; it counts once it's loaded again)
+		if (!Loaded.made(overworld, at) || !(overworld.getBlockState(at).getBlock() instanceof AbstractBedBlock)) {
 			return false;
 		}
 		Faction f = Factions.around(server, overworld, at, BED_RANGE);
