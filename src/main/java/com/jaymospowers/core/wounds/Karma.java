@@ -105,6 +105,8 @@ public final class Karma {
 	static final int BELOW_FOOD = 6;
 	/** How long (ticks) the Nether's chunks may take to load before they are loaded on the spot. */
 	static final int LOAD_LIMIT = 20 * 45;
+	/** Chunk radius loaded around the wake spot, so the blocks read beside its edge columns are made too. */
+	static final int WAKE_RADIUS = 1;
 	/** How long they're out cold while the way down opens (ticks; cut short when it has). */
 	static final int SINK_TICKS = 20 * 60;
 	/** How often (ticks) the Nether's own turn on one sent below, how far round, and how often the draught is felt. */
@@ -446,7 +448,7 @@ public final class Karma {
 		}
 		CompletableFuture<?> exitLoad = standing.isPresent() ? CompletableFuture.completedFuture(null)
 			: nether.getChunkSource().addTicketAndLoadWithRadius(DESCENT, ChunkPos.containing(exit), 2);
-		CompletableFuture<?> wakeLoad = nether.getChunkSource().addTicketAndLoadWithRadius(DESCENT, ChunkPos.containing(wake), 0);
+		CompletableFuture<?> wakeLoad = nether.getChunkSource().addTicketAndLoadWithRadius(DESCENT, ChunkPos.containing(wake), WAKE_RADIUS);
 		DESCENTS.put(player.getUUID(), new Descent(exit, standing.isEmpty(), wake, exitLoad, wakeLoad, server.getTickCount()));
 		String line = "message.jaymospowers.mortality.wake.sinking";
 		Downed.knockOut(player.level(), player, SINK_TICKS, false, line, false);
@@ -466,7 +468,18 @@ public final class Karma {
 				continue;
 			}
 			boolean late = server.getTickCount() - descent.since() > LOAD_LIMIT;
-			if (!late && !(descent.exitLoad().isDone() && descent.wakeLoad().isDone())) {
+			if (!(descent.exitLoad().isDone() && descent.wakeLoad().isDone())) {
+				if (!late) {
+					continue;
+				}
+				// (the Nether chunks never came: landing would make them on the server thread, so their life ends as any other)
+				it.remove();
+				release(nether, descent);
+				JaymosPowers.LOGGER.warn("{} couldn't be sent below: the Nether chunks were not ready in time", player.getScoreboardName());
+				over(player);
+				if (Downed.isDowned(player)) {
+					Downed.forgetQuietly(player);
+				}
 				continue;
 			}
 			it.remove();
@@ -490,7 +503,7 @@ public final class Karma {
 		if (descent.build()) {
 			nether.getChunkSource().removeTicketWithRadius(DESCENT, ChunkPos.containing(descent.exit()), 2);
 		}
-		nether.getChunkSource().removeTicketWithRadius(DESCENT, ChunkPos.containing(descent.wake()), 0);
+		nether.getChunkSource().removeTicketWithRadius(DESCENT, ChunkPos.containing(descent.wake()), WAKE_RADIUS);
 	}
 
 	/** The way down is open: the way up is built if none stood near, and they wake far from it, hurt and hungry. */

@@ -519,7 +519,8 @@ public final class Milestones {
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.milestone.coach_off", way.name(), fare).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		// (0.7.266) seen setting off along the road, then the road screen: the road itself is never driven
-		BlockPos end = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, arrival(way)), 4);
+		BlockPos far = Journeys.ground(level, arrival(way));
+		BlockPos end = Construction.standable(level, far != null ? far : arrival(way), 4);
 		Journeys.begin(level, player, coach, way.name(), end, (int)line.length(), fare, realm.id(), RIDE);
 		return 1;
 	}

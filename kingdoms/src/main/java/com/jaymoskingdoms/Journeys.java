@@ -23,12 +23,15 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.266) Andy: "this cutscene system should replace our carriage rides, they always get stuck and you cant see
@@ -206,12 +209,26 @@ public final class Journeys {
 		}
 	}
 
+	/** The top of the ground at {@code pos}, or null (the chunk is asked for, without waiting) while it isn't made and loaded. */
+	static @Nullable BlockPos ground(ServerLevel level, BlockPos pos) {
+		if (level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+			level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(pos), 1);
+			return null;
+		}
+		return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos);
+	}
+
 	/** There: the ride is moved to the far end, the traveller set down beside it. */
 	private static void arrive(ServerLevel level, ServerPlayer player, Trip trip) {
+		BlockPos top = ground(level, trip.at);
+		if (top == null) {
+			// (the far end isn't made yet: it's asked for, and the ride waits and tries again next tick)
+			return;
+		}
 		TRIPS.remove(trip.player);
 		Wagon wagon = trip.wagon;
 		player.stopRiding();
-		BlockPos at = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, trip.at), 4);
+		BlockPos at = Construction.standable(level, top, 4);
 		Vec3 to = Vec3.atBottomCenterOf(at);
 		float yaw = player.getYRot();
 		// (the traveller first, so the far end is loading for them before the ride comes)

@@ -30,6 +30,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -938,7 +939,9 @@ public final class Roads {
 				if (d >= bestD || !free.test(sign)) {
 					continue;
 				}
-				level.getChunk(sign.getX() >> 4, sign.getZ() >> 4);
+				if (level.getChunkSource().getChunkNow(sign.getX() >> 4, sign.getZ() >> 4) == null) {
+					continue;
+				}
 				if (level.getBlockState(sign).getBlock() instanceof StandingSignBlock) {
 					best = new Stone(sign, end == 0 ? road.b() : road.a());
 					bestD = d;
@@ -982,7 +985,7 @@ public final class Roads {
 			}
 			for (BlockPos at : new BlockPos[] {road.stoneA() == NONE ? beside(pts, a, HALF + 2) : null, road.stoneB() == NONE ? beside(pts, b, -(HALF + 2)) : null}) {
 				if (at != null) {
-					level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+					level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(at), 1);
 					first = first == null ? at : first;
 				}
 			}
