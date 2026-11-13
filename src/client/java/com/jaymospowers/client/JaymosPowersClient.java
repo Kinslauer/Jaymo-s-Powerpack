@@ -151,6 +151,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
 		// (0.17.56) shaders off and Fast graphics on weak PCs, once per install; /lowend on|off
 		LowEndMode.init();
+		com.jaymospowers.client.packlook.DarkPanels.init();
 		// (0.15.124) Iris (with a shader pack on) first asks for the enchantment glint textures while a render pass is
 		// open, and loading them then crashes the game ("Close the existing render pass"). Load them up front instead.
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(client -> {

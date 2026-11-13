@@ -1,4 +1,5 @@
 {
   "gui.jaymoskingdoms.story.hint.126": "No two people wake in the same place. If your story's starting spot is taken, it finds you another; a party mate on the same road still wakes beside you.",
-  "message.jaymoskingdoms.story.realm_taken": "%s was already someone else's beginning; your road began in %s instead."
+  "message.jaymoskingdoms.story.realm_taken": "%s was already someone else's beginning; your road began in %s instead.",
+  "message.jaymoskingdoms.story.realm_aloft": "%s lies in the sky, where only the Divine-born are raised; your road began in %s instead."
 }
