@@ -1339,6 +1339,13 @@ a few sailors about the home harbours have made it once, in the wake of a blosso
 again. One such hand, hired between voyages, is the way there for anyone without the knowledge. The rest of the
 harbour will sail any course you name and has only stories about the east.
 
+(new) **What the blossom folk build with** (Blossom lands thread, 2026-11-13; Andy picked the blocks, the placement is
+Claude's for him to approve). Paper screens in wooden lattice, rush mats, lime plaster, planks under red or black
+lacquer, paper and stone lanterns: these are Mohknee's crafts, and what little of them the home continent has came
+over in a trader's hold or was copied from one. Thatch is everyone's. The ward rope is theirs too: straw twisted
+sunwise and hung with folded paper across a gate or round a shrine, asking the eight to keep the dark out. It is a
+prayer that is answered: nothing comes out of the night close to one.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
