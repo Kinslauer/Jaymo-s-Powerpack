@@ -493,3 +493,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-13 5:34 PM ET (same thread): Andy approved the Lore.md paragraph "The wood-wisps".
 - 2026-11-13 5:55 PM (Andy, Deck admin session): /screenlook keeps its live full reload; the fix for its out-of-memory crash is more memory (CurseForge profile 8 GB), not a code change.
 - 2026-11-13 6:10 PM (Andy, Deck admin session): start a NEW world on the Deck with Chunky pre-generating 2,500 blocks round spawn (the old world is renamed on the Deck, kept).
+- 2026-11-13 5:42 PM ET (Add a cloud layer between overworld and Aether thread): Andy: "its fine" to the Lore.md paragraph "The Cloud Sea". Approved; the (new) mark is off.
+- 2026-11-13 5:51 PM ET (Add a cloud layer between overworld and Aether thread): Andy said "merge" for PR #1469 (the Cloud Sea). Squash-merged.
