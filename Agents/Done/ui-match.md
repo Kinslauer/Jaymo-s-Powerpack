@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: 
 branch: claude/project-thread-0hjevc
 with: Claude (cloud, "Make every UI screen match" thread)
@@ -37,3 +37,5 @@ owns:
 ## Done
 
 2026-11-13: all six patches are on PR 1434 (4 commits). Andy merges it himself. Other-mods list added to the checklist artifact, awaiting picks.
+2026-11-13: PR 1434 merged on Andy's word.
+- 2026-11-13 17:13 PR #1434 is merged into master; moved to Agents/Done.
