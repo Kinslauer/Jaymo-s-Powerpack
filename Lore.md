@@ -528,7 +528,7 @@ Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, w
 
 (new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
 watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
-for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. A **gorgon** keeps an old ruin:
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. It is violently territorial about it (Andy). A **gorgon** keeps an old ruin:
 where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
 its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
 
