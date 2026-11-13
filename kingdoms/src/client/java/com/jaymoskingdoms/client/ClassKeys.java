@@ -25,11 +25,22 @@ final class ClassKeys {
 	/** (0.7.570) Any other Sorcerer's J is down (Absorption.Hold sent). */
 	private static boolean elementHeld;
 
+	/** The "classes" key category; 26.3 throws if a category id is registered twice, so every class key shares this one. */
+	private static KeyMapping.Category category;
+
 	private ClassKeys() {
 	}
 
+	/** The shared "classes" key category, registered the first time it's asked for. */
+	static KeyMapping.Category category() {
+		if (category == null) {
+			category = KeyMapping.Category.register(JaymosKingdoms.id("classes"));
+		}
+		return category;
+	}
+
 	static void register() {
-		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("classes"));
+		KeyMapping.Category category = category();
 		imbue = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.imbue", InputConstants.KEY_J, category));
 		// the feats and paths screen, for a pack without the H menu (unbound unless the player binds it)
 		growth = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.growth", InputConstants.UNKNOWN.getValue(), category));

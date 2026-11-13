@@ -25,7 +25,7 @@ public final class MagicKeys {
 
 	public static void register() {
 		magic = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.magic", InputConstants.KEY_PAGEUP,
-			KeyMapping.Category.register(JaymosKingdoms.id("classes"))));
+			ClassKeys.category()));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (magic.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null) {
