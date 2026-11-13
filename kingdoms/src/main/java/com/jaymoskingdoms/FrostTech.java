@@ -36,7 +36,9 @@ import org.jspecify.annotations.Nullable;
  * <b>What they start with</b> ({@link #innate}) is worked out from who they are (their UUID), so it never changes, needs
  * no saving and reads the same on the server and every client. A Frostborn not raised on the Overworld
  * ({@link #RAISED_HERE} of them were) wears a scouter ({@link #SCOUTER}), a made arm ({@link #ARM}) or a made leg
- * ({@link #LEG}), and always at least one. Anyone else, an Overworld-raised Frostborn included, only now and then
+ * ({@link #LEG}), each rolled on its own. (Andy, 2026-11-13: "the scouters are way too common on the frostborn we find on
+ * the overworld": the scouter went from 0.7 to 0.12, and the rule that one who rolled nothing wore a scouter anyway is gone,
+ * so about one Frostborn in ten wears one, down from six in ten.) Anyone else, an Overworld-raised Frostborn included, only now and then
  * ({@link #OTHER_SCOUTER}, {@link #OTHER_ARM}, {@link #OTHER_LEG}; the star-travelled bloods a little more often,
  * {@link #TRAVELLED}). A galactic patrolman wears a scouter unless he is the rare one without ({@link #PATROL_BARE}).
  * These are a look and a thing to talk about: the scouter reads nothing for them and the limb is as good as their own.
@@ -55,7 +57,7 @@ public final class FrostTech {
 	/** The share of Frostborn born and raised on the Overworld: they wear it no more often than anyone else. */
 	static final float RAISED_HERE = 0.35F;
 	/** Of the other Frostborn: who wears a scouter, who a made arm, who a made leg (each rolled on its own). */
-	static final float SCOUTER = 0.7F, ARM = 0.3F, LEG = 0.12F;
+	static final float SCOUTER = 0.12F, ARM = 0.3F, LEG = 0.12F;
 	/** Everyone else: bought, traded for or handed down. The bloods that crossed the void wear it this many times as often. */
 	static final float OTHER_SCOUTER = 0.05F, OTHER_ARM = 0.03F, OTHER_LEG = 0.015F, TRAVELLED = 2.0F;
 	/** The rare galactic patrolman without a scouter. */
@@ -145,9 +147,6 @@ public final class FrostTech {
 		}
 		if (roll(id, 5) < (proud ? LEG : OTHER_LEG * often)) {
 			worn |= roll(id, 6) < 0.5F ? RIGHT_LEG : LEFT_LEG;
-		}
-		if (proud && worn == 0) {
-			worn = SCOUTER_BIT;
 		}
 		if (patrolman(entity)) {
 			worn = roll(id, 7) < PATROL_BARE ? worn & ~SCOUTER_BIT : worn | SCOUTER_BIT;
