@@ -426,3 +426,12 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:29 PM ET (Sengoku picks thread): Andy, after reading the lore paragraph: "it is called Mohknee and you
   can encounter tideborn islands on the way." The blossom continent is Mohknee; Tideborn island villages stand along
   the crossing. Taken as his yes to the paragraph (my reading); patch 1 started.
+- 2026-11-13 (Boss anim mods thread, patch 11, my calls, not yet confirmed by Andy): nine Sorcerer spells, each with a
+  scroll. Glass (Shards, Spires, Skin, Molten Glass) and Black Flame can be kept by a Sorcerer of any element; Fire
+  Ring, Fire Pillars and Fire Lance only by a fire Sorcerer, Storm Cloak only by a lightning one (anyone can still
+  read a scroll once; Mages and other staff casters learn them as any spell). A Sorcerer learns them for good by
+  reading the scroll (Knowledge 4) and casts them from the Magic screen, since the class key is full. Black Flame is a
+  third forbidden art (crime and corruption as Death's); healing magic or a dispel puts it out; it leaps once to the
+  nearest body, friend or foe. Fire Lance joins Powers' beam clashes as a fifth kind (fire); the class key shoves.
+  Scrolls come from wizards, shamans and (Black Flame) necromancers; Warlocks may learn glass, fire and Black Flame,
+  Druids Storm Cloak. Lore placement added as a (new) paragraph: the glass is from the demons' country.
