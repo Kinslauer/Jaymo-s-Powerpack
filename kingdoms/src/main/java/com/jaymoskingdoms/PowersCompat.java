@@ -3600,4 +3600,65 @@ public final class PowersCompat {
 			JaymosKingdoms.LOGGER.warn("Couldn't hand Jaymo's Powers' guard the sparks", e);
 		}
 	}
+
+	// ---- fifth edition picks, patch 6: walking spells and the wash cantrip ----
+
+	/** Powers' {@code MagicMoves.grant}, {@code MagicMoves.clear} and {@code MagicWash.wash}. */
+	private static java.lang.invoke.@Nullable MethodHandle grantMove, clearMove, washBlood;
+	private static boolean lookedForMagic;
+
+	private static void lookForMagic() {
+		if (lookedForMagic) {
+			return;
+		}
+		lookedForMagic = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> moves = Class.forName("com.jaymospowers.core.MagicMoves");
+			grantMove = lookup.findStatic(moves, "grant", java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, String.class, int.class));
+			clearMove = lookup.findStatic(moves, "clear", java.lang.invoke.MethodType.methodType(void.class, LivingEntity.class, String.class));
+			washBlood = lookup.findStatic(Class.forName("com.jaymospowers.core.blood.MagicWash"), "wash",
+				java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no walking spells or blood wash (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * A walking spell on {@code who} for {@code ticks}: {@code "water"}, {@code "climb"} or {@code "jump"} (Powers'
+	 * {@code MagicMoves}); false without Powers.
+	 */
+	public static boolean moves(LivingEntity who, String kind, int ticks) {
+		lookForMagic();
+		try {
+			return grantMove != null && (boolean)grantMove.invoke(who, kind, ticks);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Ends a walking spell on {@code who} ({@code null}: all three). */
+	public static void endMoves(LivingEntity who, @Nullable String kind) {
+		lookForMagic();
+		try {
+			if (clearMove != null) {
+				clearMove.invoke(who, kind);
+			}
+		} catch (Throwable e) {
+			// nothing to end without Powers
+		}
+	}
+
+	/** Scrubs the blood off {@code body}'s coat and what it wears and holds (Powers' {@code MagicWash}); false if none, or without Powers. */
+	public static boolean washBlood(LivingEntity body) {
+		lookForMagic();
+		try {
+			return washBlood != null && (boolean)washBlood.invoke(body);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 }

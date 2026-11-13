@@ -69,6 +69,11 @@ public final class Deafened {
 		}
 	}
 
+	/** Stops {@code who}'s ears ringing (a dispel); true if they were. */
+	public static boolean clear(LivingEntity who) {
+		return UNTIL.remove(who) != null;
+	}
+
 	/** Until when {@code who}'s ears ring (game time), or 0. */
 	public static long until(LivingEntity who) {
 		Long u = UNTIL.get(who);

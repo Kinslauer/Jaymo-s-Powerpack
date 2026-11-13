@@ -230,6 +230,11 @@ public final class KitchenCompat {
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Calamities::bodyHeat);
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) com.jaymoskingdoms.disasters.Downpours::bodyHeat);
+			// a warmed or chilled dish keeps the body so for a while, and a dome of force keeps the weather off it
+			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) Cantrips::bodyHeat);
+			bodyHeat.getMethod("addTemperate", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) CampSpells::domed);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for body heat (needs 0.5.25): {}", e.toString());
 		}

@@ -268,10 +268,15 @@ public final class Spellcraft {
 			}
 			return;
 		}
+		// words, a free hand and what the spell spends
+		if (!SpellParts.allow(player, spell, null)) {
+			return;
+		}
 		if (!Arcana.cast(spell, level, player, (mage ? MAGE_POWER : ATTUNED_POWER) * (blood ? Hemomancy.power(player) : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
+		SpellParts.spend(player, spell);
 		if (blood) {
 			Hemomancy.pay(player, cost);
 		} else {
@@ -291,7 +296,7 @@ public final class Spellcraft {
 			// the spell echoes: no cooldown this time
 			level.sendParticles(Fx.LIGHT, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
 		} else {
-			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, 40);
+			int cooldown = MAGE_COOLDOWN.getOrDefault(spell, NewSpells.COOLDOWN.getOrDefault(spell, 40));
 			player.getCooldowns().addCooldown(staff, mage ? cooldown : Math.round(cooldown * ATTUNED_COOLDOWN));
 		}
 		afterCast(player, level, spell);
@@ -341,6 +346,15 @@ public final class Spellcraft {
 		});
 	}
 
+	/** Takes any imbued element out of {@code stack} (a dispel); true if there was one. */
+	static boolean unimbue(ItemStack stack) {
+		if (charge(stack) == null) {
+			return false;
+		}
+		strip(stack);
+		return true;
+	}
+
 	private static void strip(ItemStack stack) {
 		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(CHARGE_KEY));
 	}
@@ -368,6 +382,10 @@ public final class Spellcraft {
 	static void imbue(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+		// a cast in the window is answered first, if they know counterspell
+		if (Counterspell.key(player, level)) {
 			return;
 		}
 		if (element.equals("restoration")) {

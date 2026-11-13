@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:totem_of_undying",
+    "minecraft:enchanted_book",
+    {
+      "id": "jaymoskingdoms:totem_staff",
+      "required": false
+    }
+  ]
+}

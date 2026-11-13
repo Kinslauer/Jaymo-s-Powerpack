@@ -133,7 +133,7 @@ public final class RpgSeriesGate {
 				Identifier spell = args.spell().unwrapKey().map(key -> key.identifier()).orElse(null);
 				if (spell == null || mayCast(args.caster(), spell)) {
 					// ears ringing from a blast: the words go wrong
-					return Deafened.spoils(args.caster()) ? SpellCast.Attempt.none() : null;
+					return Deafened.spoils(args.caster()) || SpellParts.engineBlocked(args.caster(), spell) ? SpellCast.Attempt.none() : null;
 				}
 				tell(args.caster(), spell);
 				return SpellCast.Attempt.none();

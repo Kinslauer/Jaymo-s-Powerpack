@@ -373,7 +373,7 @@ public final class Mana {
 
 	/** (0.7.244) What {@code what} (a spell, a key, an element) is for. */
 	static int intent(String what) {
-		return INTENT.getOrDefault(what, HARM);
+		return INTENT.getOrDefault(what, NewSpells.INTENT.getOrDefault(what, HARM));
 	}
 
 	/** (0.7.244) {@code caster}'s aura ripples with a cast's {@code intent} (once a tick; only the attuned have an aura). */
@@ -420,7 +420,7 @@ public final class Mana {
 
 	/** The cost of {@code what} (a spell, or a Sorcerer's key: imbue, bolt, mend, renewal, rekindle). */
 	static float cost(String what) {
-		return COST.getOrDefault(what, 10.0F);
+		return COST.getOrDefault(what, NewSpells.COST.getOrDefault(what, 10.0F));
 	}
 
 	static void set(ServerPlayer player, float mana) {

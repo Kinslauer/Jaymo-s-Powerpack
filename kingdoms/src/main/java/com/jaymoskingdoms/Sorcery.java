@@ -432,6 +432,7 @@ public final class Sorcery {
 		switch (folk.role()) {
 			case BLOOD_WITCH, SHAMAN, Orcs.SHAMAN -> support(level, of(folk));
 			case WIZARD -> {
+				Dispel.answer(level, of(folk));
 				com.jaymoskingdoms.spirits.FolkSpirits.tick(level, folk, target);
 				List<Folk> fighting = fightingAllies(level, folk);
 				if (timers[T_WARD] <= 0 && (target != null || !fighting.isEmpty())) {
@@ -458,6 +459,22 @@ public final class Sorcery {
 		PathfinderMob mob = caster.mob();
 		// ((0.7.342) not while a Spellbreaker Blow has them hushed: Will)
 		if (!(mob.level() instanceof ServerLevel level) || Will.hushed(mob)) {
+			return;
+		}
+		// a gagged caster, or one in a bubble of silence, only mumbles
+		if (!SpellParts.canSpeak(mob)) {
+			return;
+		}
+		// the spell takes a moment, with a tell a rival caster (or a player who knows counterspell) can answer
+		if (Counterspell.wind(caster, () -> perform(level, caster, target))) {
+			return;
+		}
+	}
+
+	/** The spell itself, once its window has passed unsnuffed. */
+	static void perform(ServerLevel level, Caster caster, LivingEntity target) {
+		PathfinderMob mob = caster.mob();
+		if (!mob.isAlive() || !target.isAlive() || Will.hushed(mob) || !SpellParts.canSpeak(mob)) {
 			return;
 		}
 		int[] timers = caster.timers();
@@ -506,6 +523,7 @@ public final class Sorcery {
 			return;
 		}
 		int[] timers = caster.timers();
+		Dispel.answer(level, caster);
 		switch (caster.role()) {
 			case BLOOD_WITCH -> Hemomancy.witchTick(level, caster);
 			case SHAMAN, Orcs.SHAMAN -> {

@@ -18,6 +18,7 @@ abstract class DosedDishMixin {
 	@Inject(method = "completeUsingItem", at = @At("HEAD"))
 	private void jaymoskingdoms$dosed(CallbackInfo ci) {
 		Poisons.eaten((LivingEntity) (Object) this, this.useItem);
+		com.jaymoskingdoms.Cantrips.eaten((LivingEntity) (Object) this, this.useItem);
 		com.jaymoskingdoms.LairLand.sipped((LivingEntity) (Object) this, this.useItem);
 	}
 }

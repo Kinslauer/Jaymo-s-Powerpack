@@ -170,6 +170,10 @@ public final class NightWatch {
 		ServerPlayer first = camp.get(0);
 		LivingEntity watcher = watcher(level, camp);
 		if (watcher == null) {
+			// a ward line or a dome of force keeps its own watch over the camp
+			if (CampSpells.watching(level, first.position())) {
+				return;
+			}
 			if (now - VISITED.getOrDefault(first.getUUID(), -VISIT_GAP) >= VISIT_GAP && level.isDarkOutside() && level.getRandom().nextFloat() < VISIT_CHANCE) {
 				VISITED.put(first.getUUID(), now);
 				visit(level, camp);

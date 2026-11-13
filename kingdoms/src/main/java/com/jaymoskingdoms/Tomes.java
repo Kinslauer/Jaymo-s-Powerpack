@@ -577,10 +577,14 @@ public final class Tomes {
 			return false;
 		}
 		boolean own = ((Tome) tome.getItem()).element.equals(SPELL_ELEMENT.get(spell));
+		if (!SpellParts.allow(player, spell, null)) {
+			return false;
+		}
 		if (!Arcana.cast(spell, level, player, strength(player) * (own ? OWN_PAGE : 1.0F) * (blood ? Hemomancy.power(player) : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return false;
 		}
+		SpellParts.spend(player, spell);
 		if (blood) {
 			Hemomancy.pay(player, cost);
 		} else {

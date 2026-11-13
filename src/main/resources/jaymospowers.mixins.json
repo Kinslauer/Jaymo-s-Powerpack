@@ -33,6 +33,7 @@
 		"CostumeTabListMixin",
 		"IchorclothMagicMixin",
 		"CrawlJumpMixin",
+		"SpellJumpMixin",
 		"ZombieFrostMixin",
 		"XenoformWispStepMixin",
 		"CrawlPlayerMixin",

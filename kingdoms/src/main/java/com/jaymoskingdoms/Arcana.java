@@ -68,6 +68,8 @@ public final class Arcana {
 	/** Warding: how long, how strong, how far it spreads to other players. */
 	static final int SCROLL_WARD_TICKS = 20 * 30, SCROLL_WARD_LEVEL = 2;
 	static final double SCROLL_WARD_RANGE = 6.0;
+	/** One scroll in this many from a caster is one of the magic rules' spells. */
+	static final int NEW_SCROLL_ONE_IN = 4;
 	/** A pause after reading one (ticks), so a stack isn't read all at once. */
 	static final int SCROLL_COOLDOWN = 20;
 
@@ -79,6 +81,8 @@ public final class Arcana {
 	/** Bulwark, Tide Pearl and Harrying Gale ({@link SorceryPicks}). */
 	public static Item SCROLL_BULWARK, SCROLL_TIDE_PEARL, SCROLL_HARRYING_GALE;
 	public static Item SCROLL_BLIGHT, SCROLL_WHISPERS, SCROLL_DEATHS_DOOR, SCROLL_HEMORRHAGE, SCROLL_BLOOD_GRIP, SCROLL_FRENZY;
+	/** The scrolls of the magic rules' spells ({@link NewSpells}), by spell. */
+	static final java.util.Map<String, Item> NEW_SCROLLS = new java.util.HashMap<>();
 	/** (0.7.103) A bat's wing (bats drop 0-1, more with Looting): the reagent of a written Scroll of Draining. */
 	public static Item BAT_WING;
 
@@ -121,13 +125,27 @@ public final class Arcana {
 		});
 	}
 
-	private static Item item(String name, Function<Item.Properties, Item> make) {
+	static Item item(String name, Function<Item.Properties, Item> make) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
 		return Registry.register(BuiltInRegistries.ITEM, key, make.apply(new Item.Properties().setId(key).rarity(Rarity.UNCOMMON)));
 	}
 
 	/** A scroll from a slain caster of {@code role}. */
 	static ItemStack scrollFor(int role, RandomSource random) {
+		// now and then a caster carries one of the magic rules' spells instead
+		if (random.nextInt(NEW_SCROLL_ONE_IN) == 0) {
+			List<String> kept = switch (role) {
+				case Sorcery.WIZARD -> List.of("counterspell", "dispel", "ward_line", "find_magic", "identify", "hut", "feather_fall", "misty_step", "fog",
+					"create_food", "purify_food");
+				case Sorcery.SHAMAN, Orcs.SHAMAN -> List.of("speak_animals", "spider_climb", "water_walk", "long_jump", "web", "grease", "spike_growth",
+					"purify_food");
+				case Sorcery.NECROMANCER -> List.of("darkness", "silence", "web");
+				default -> List.<String>of();
+			};
+			if (!kept.isEmpty()) {
+				return new ItemStack(NEW_SCROLLS.get(kept.get(random.nextInt(kept.size()))));
+			}
+		}
 		return new ItemStack(switch (role) {
 			// (0.7.231) and now and then one of death's new three
 			case Sorcery.NECROMANCER -> switch (random.nextInt(6)) {
@@ -164,6 +182,12 @@ public final class Arcana {
 	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
 	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising", "mending", "sanctuary", "restoration",
 		"blight", "whispers", "deaths_door", "hemorrhage", "blood_grip", "frenzy", "bulwark", "tide_pearl", "harrying_gale");
+	/** Every spell with a scroll, the magic rules' too. */
+	public static List<String> allSpells() {
+		List<String> all = new java.util.ArrayList<>(SPELLS);
+		all.addAll(NewSpells.IDS);
+		return all;
+	}
 
 	/**
 	 * Casts {@code spell} for {@code player} at {@code power} (1 off a scroll; a Mage's staff casts harder): true if it
@@ -197,7 +221,7 @@ public final class Arcana {
 			case "hemorrhage" -> Hemomancy.hemorrhage(level, player, power, false);
 			case "blood_grip" -> Hemomancy.gripSpell(level, player, power);
 			case "frenzy" -> Hemomancy.frenzy(level, player, power);
-			default -> SorceryPicks.ours(spell) && SorceryPicks.cast(spell, level, player, power);
+			default -> NewSpells.ours(spell) ? NewSpells.cast(spell, level, player, power) : SorceryPicks.ours(spell) && SorceryPicks.cast(spell, level, player, power);
 		};
 	}
 
@@ -220,7 +244,7 @@ public final class Arcana {
 			case "bulwark" -> SCROLL_BULWARK;
 			case "tide_pearl" -> SCROLL_TIDE_PEARL;
 			case "harrying_gale" -> SCROLL_HARRYING_GALE;
-			default -> SCROLL_ARCANE;
+			default -> NEW_SCROLLS.getOrDefault(spell, SCROLL_ARCANE);
 		};
 	}
 
@@ -239,14 +263,22 @@ public final class Arcana {
 			if (!(level instanceof ServerLevel server)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (player instanceof ServerPlayer mage && Spellcraft.learn(mage, this.spell)) {
+			ServerPlayer reader = player instanceof ServerPlayer sp ? sp : null;
+			if (reader != null && !SpellParts.allow(reader, this.spell, stack)) {
+				return InteractionResult.FAIL;
+			}
+			// a scroll above the reader's skill is a gamble, not a refusal
+			if (reader != null && ScrollGamble.above(reader) && (Spellcraft.staffCaster(reader) && !Classes.of(reader).spells().contains(this.spell)
+				|| Classes.is(reader, Classes.PlayerClass.SORCERER) && List.of("raising", "warding", "sanctuary", "restoration").contains(this.spell))) {
+				ScrollGamble.Outcome outcome = ScrollGamble.roll(reader, server);
+				if (outcome != ScrollGamble.Outcome.WORKS) {
+					reader.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
+					stack.consume(1, player);
+					return InteractionResult.SUCCESS;
+				}
+			} else if (reader != null && Spellcraft.learn(reader, this.spell)) {
 				stack.consume(1, player);
 				return InteractionResult.SUCCESS;
-			}
-			// (a Sorcerer's magic is quick and small: the great scrolls are beyond them)
-			if (Classes.is(player, Classes.PlayerClass.SORCERER) && List.of("raising", "warding", "sanctuary", "restoration").contains(this.spell)) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_beyond"));
-				return InteractionResult.FAIL;
 			}
 			if (!cast(this.spell, server, player, 1.0F)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
@@ -256,7 +288,7 @@ public final class Arcana {
 			server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
 			player.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
 			stack.consume(1, player);
-			if (player instanceof ServerPlayer reader) {
+			if (reader != null) {
 				// (0.7.231) death's and blood's are forbidden everywhere
 				Spellcraft.afterCast(reader, server, this.spell);
 			}

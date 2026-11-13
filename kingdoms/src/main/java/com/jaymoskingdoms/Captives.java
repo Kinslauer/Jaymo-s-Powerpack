@@ -444,8 +444,9 @@ public final class Captives {
 			return;
 		}
 		PLEADED.put(v.getUUID(), now);
-		Speech.say(level, v, Component.translatable(Oddities.line("talk.jaymoskingdoms.deed.rescue.plead", level.getRandom())), Speech.YELLOW,
-			PLEAD_RANGE + 4.0);
+		// (a gagged captive can only mumble)
+		Speech.say(level, v, Component.translatable(Gags.gagged(v) ? "speech.jaymoskingdoms.gagged" : Oddities.line("talk.jaymoskingdoms.deed.rescue.plead", level.getRandom())),
+			Gags.gagged(v) ? Speech.WHITE : Speech.YELLOW, PLEAD_RANGE + 4.0);
 		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.0F);
 	}
 

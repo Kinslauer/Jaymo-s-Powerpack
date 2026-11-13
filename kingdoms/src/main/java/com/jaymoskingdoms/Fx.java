@@ -18,14 +18,14 @@ import org.jspecify.annotations.Nullable;
  * Z Fighter's wave are the same beam.
  * <ul>
  * <li>{@link #wisp}: a mote of light, or a puff of miasma if the colour is dark. Where a redstone dust was.</li>
- * <li>{@link #beam}, {@link #blast}, {@link #ring}, {@link #orb}, {@link #sigil}: the shapes.</li>
+ * <li>{@link #beam}, {@link #blast}, {@link #ring}, {@link #orb}, {@link #sigil}, {@link #pool}: the shapes.</li>
  * <li>{@link #burst}: what a one-off cloud of dust was: a blast with motes thrown out of it.</li>
  * </ul>
  * Without Powers a wisp is the old dust, a beam a line of it, a blast and a ring a cloud of it, and the rest nothing.
  */
 public final class Fx {
 	private static boolean looked;
-	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst;
+	private static @Nullable MethodHandle wisp, mote, miasma, spark, rune, beam, blast, ring, orb, sigil, burst, pool;
 
 	private Fx() {
 	}
@@ -54,8 +54,9 @@ public final class Fx {
 			sigil = lookup.findStatic(fx, "sigil", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class, int.class));
 			burst = lookup.findStatic(fx, "burst", MethodType.methodType(void.class, ServerLevel.class, double.class, double.class, double.class, int.class,
 				float.class, int.class, double.class, double.class, double.class));
+			pool = lookup.findStatic(fx, "pool", MethodType.methodType(void.class, ServerLevel.class, Vec3.class, float.class, int.class, int.class));
 		} catch (ReflectiveOperationException | LinkageError e) {
-			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = null;
+			wisp = mote = miasma = spark = rune = beam = blast = ring = orb = sigil = burst = pool = null;
 		}
 	}
 
@@ -185,6 +186,18 @@ public final class Fx {
 		if (orb != null) {
 			try {
 				orb.invoke(level, at, radius, color, ticks);
+			} catch (Throwable e) {
+				// nothing without Powers
+			}
+		}
+	}
+
+	/** A flat sheet lying on the ground at {@code at}, {@code radius} wide, for {@code ticks} (a slick, a web, a mirror of shadow). */
+	public static void pool(ServerLevel level, Vec3 at, float radius, int color, int ticks) {
+		look();
+		if (pool != null) {
+			try {
+				pool.invoke(level, at, radius, color, ticks);
 			} catch (Throwable e) {
 				// nothing without Powers
 			}
