@@ -404,3 +404,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:16 PM ET (Sengoku picks thread): Andy chose "Two days and nights" for the sail to the blossom
   continent: 16,000 blocks of open sea (about 40 real minutes in an ordinary ship). Land radius 2,500 and centre
   34,000 east are my figures.
+- 2026-11-12 10:17 PM ET (Sengoku picks thread): Andy: "can there be an MCA captain or companion that can pilot the
+  ship for you? thats just too long to be sailing manually." Added to patch 2 of docs/BlossomLands-Plan.md: a hired MCA
+  sea captain or a companion takes the helm of your ship, or you buy passage on a blossom merchantman.
