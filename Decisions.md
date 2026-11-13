@@ -477,3 +477,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-13 11:15 AM (Andy, Deck admin session): a start waiting for its land should give up after about a minute and use the fallback (#1431, LAND_WAIT_MS = 60 s).
 - 2026-11-13 11:51 AM ET (Make every UI screen match thread): Andy saved his picks on the UI Match Checklist: every pack-wide fix except "Baubles on the dark panel", and nearly every screen and HUD row. Notes: H menu frame = "Solid for H menu, vanilla for inventory"; wheels = "i think the symbiote looks best, but maybe show me all these before you build and ill pick".
+- 2026-11-13 11:58 AM ET (Make every UI screen match thread): Andy said "merge" for PR #1434 (UI look, part 1: shared style and flat button). Set to squash-merge once CI is green.
