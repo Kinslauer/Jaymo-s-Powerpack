@@ -944,9 +944,10 @@ guards have seen more than most and stand it better; the brave do not feel it at
 leaves a little knowledge behind, and the folk say that a woman who has seen enough starts to hear what she cannot see,
 then to see what walks unseen, and at the last to see through the faces of the hidden cursed. The other side notices
 those who look back at it, though: its wounds can follow you into sleep as a **living nightmare**, and you wake with
-the pale fliers of the night sky coming at your face, gone the instant before they strike. Nobody else sees them. The
-phantoms were only ever this, a thing of sleepless and haunted minds; no living phantom has been caught or killed, and
-the membrane the alchemists sell is a wraith's. A priest's or a cleric's restoration lifts the curse, as it lifts any.
+phantoms coming at your face, gone the instant before they strike. They are not the phantoms that hunt the sleepless
+from the night sky, which are flesh enough to kill and skin; these are the nightmare's own, and nobody else sees them
+but those attuned to ki, who can watch another's nightmare circle them and know it for what it is. A priest's or a
+cleric's restoration lifts the curse, as it lifts any.
 
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
@@ -1413,8 +1414,8 @@ crystal buds, and what it eats grows out of its shell. A few of them keep a geod
 amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
 crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
-(new) **The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
-placement for him to approve). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
+**The old pillager holds** (Illager Structures, 2026-11-13; who lives where is Andy's pick, the rest Claude's
+placement, approved by Andy). When the pillagers rose to fill the Warrior-born's vacuum they built for it: forts,
 towers and lookouts, balloon towers, tipi camps, stables, and on the cold seas citadels, galleons, icebound yards and
 small iron boats that go under the water. They also dug: the copper works (the lava extractor and the smeltery) and the
 moles, great boring engines for copper and iron. As the world is retaken the pillagers have pulled back to their best
