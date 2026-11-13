@@ -1346,6 +1346,12 @@ over in a trader's hold or was copied from one. Thatch is everyone's. The ward r
 sunwise and hung with folded paper across a gate or round a shrine, asking the eight to keep the dark out. It is a
 prayer that is answered: nothing comes out of the night close to one.
 
+(new) **Inside a blossom house** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). The
+house is lived in on the floor: a hearth sunk in the middle of the mats with its coals banked under ash, bedding that
+is rolled out at night, a chest of drawers bound in iron, doors that slide along the wall. The lacquer on that chest
+is the blossom tree's own sap, scored from the bark of a living tree into a bowl. A log gives once and is left bare, so
+a grove is tapped a little each year and planted behind, and lacquer is dear on the home continent for that reason.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
