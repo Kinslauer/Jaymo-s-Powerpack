@@ -417,7 +417,7 @@ final class WalledTowns {
 				day(level, f, today);
 			}
 			Faction fresh = Factions.get(server, f.id());
-			if (fresh != null && level.isLoaded(fresh.seat())) {
+			if (fresh != null && com.jaymoskingdoms.Loaded.made(level, fresh.seat())) {
 				step(level, fresh, false);
 			}
 		}
@@ -541,7 +541,7 @@ final class WalledTowns {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double d = 4.0 + random.nextDouble() * Math.max(4.0, r - 10.0);
 			BlockPos at = frame.at((int)Math.round(Math.sin(a) * d), 0, (int)Math.round(-Math.cos(a) * d));
-			if (!level.isLoaded(at) || Raids.playerNear(level, at, BUILD_HIDE_RANGE)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || Raids.playerNear(level, at, BUILD_HIDE_RANGE)) {
 				continue;
 			}
 			EntityTypes.VILLAGER.spawn(level, Construction.standable(level, at, 4), EntitySpawnReason.STRUCTURE);
@@ -549,7 +549,7 @@ final class WalledTowns {
 		// (0.7.490) counted over the whole town, so the golem at the gate and newcomers out by the wall are seen
 		int golems = level.getEntitiesOfClass(IronGolem.class, home(f, kind, t.tier()), IronGolem::isAlive).size();
 		BlockPos gate = frame.at(0, 0, -(r - 5));
-		if (golems < GOLEMS[t.tier() - 1] && level.isLoaded(gate) && !Raids.playerNear(level, gate, BUILD_HIDE_RANGE)) {
+		if (golems < GOLEMS[t.tier() - 1] && com.jaymoskingdoms.Loaded.made(level, gate) && !Raids.playerNear(level, gate, BUILD_HIDE_RANGE)) {
 			EntityTypes.IRON_GOLEM.spawn(level, Construction.standable(level, gate, 4), EntitySpawnReason.STRUCTURE);
 		}
 	}
@@ -565,7 +565,7 @@ final class WalledTowns {
 		MinecraftServer server = level.getServer();
 		Town t = town(server, f.id());
 		Kind kind = kind(level, f);
-		if (t.tier() < 2 || !all && !level.isLoaded(f.seat())) {
+		if (t.tier() < 2 || !all && !com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 			return false;
 		}
 		long days = Math.max(0L, level.getGameTime() / Camps.DAY_TICKS - t.since());
@@ -712,11 +712,11 @@ final class WalledTowns {
 		// (the whole arc loaded, or it waits: no gaps left for want of a chunk)
 		for (double edge : new double[] {-0.5, 0.5}) {
 			double a = Math.toRadians((arc + edge) * 360.0 / ARCS);
-			if (!level.isLoaded(frame.at((int)Math.round(Math.sin(a) * (r + 1)), 0, (int)Math.round(-Math.cos(a) * (r + 1))))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, frame.at((int)Math.round(Math.sin(a) * (r + 1)), 0, (int)Math.round(-Math.cos(a) * (r + 1))))) {
 				return false;
 			}
 		}
-		if (!level.isLoaded(middle) || !all && Raids.playerNear(level, middle, BUILD_HIDE_RANGE)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, middle) || !all && Raids.playerNear(level, middle, BUILD_HIDE_RANGE)) {
 			return false;
 		}
 		int floor = f.seat().getY();
@@ -861,7 +861,7 @@ final class WalledTowns {
 		CampBuildings.Placer frame = new CampBuildings.Placer(f.seat(), gateOf(t, f), 0);
 		// (the four ways out loaded from the heart to past the new wall, or it waits)
 		for (int[] end : new int[][] {{0, -now - 2}, {now + 2, 0}, {0, now + 2}, {-now - 2, 0}}) {
-			if (!level.isLoaded(frame.at(end[0], 0, end[1]))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, frame.at(end[0], 0, end[1]))) {
 				return false;
 			}
 		}
@@ -1130,7 +1130,7 @@ final class WalledTowns {
 		for (int x = b[0]; x <= b[2]; x++) {
 			for (int z = b[1]; z <= b[3]; z++) {
 				BlockPos column = flat.at(x, 0, z);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return Raise.WAIT;
 				}
 				if (!Hordes.ours(level, f, column)) {

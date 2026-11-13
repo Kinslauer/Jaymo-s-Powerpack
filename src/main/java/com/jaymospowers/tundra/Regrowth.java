@@ -90,7 +90,7 @@ public final class Regrowth {
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < SAMPLES; i++) {
 			int x = centre.getX() + random.nextInt(RADIUS * 2 + 1) - RADIUS, z = centre.getZ() + random.nextInt(RADIUS * 2 + 1) - RADIUS;
-			if (!level.hasChunkAt(new BlockPos(x, centre.getY(), z))) {
+			if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, centre.getY(), z))) {
 				continue;
 			}
 			BlockPos above = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);

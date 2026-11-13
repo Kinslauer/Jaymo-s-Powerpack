@@ -150,7 +150,7 @@ public class RigForgeBlock extends Block implements EntityBlock {
 	/** From the Forge's screen: the pick, the paints (each costs one dye of that colour unless it is what the Forge has), and the build. */
 	static void set(ServerPlayer player, RigNet.ForgeSet set) {
 		BlockPos pos = set.pos();
-		if (player.distanceToSqr(Vec3.atCenterOf(pos)) > SCREEN_REACH_SQR || !player.level().isLoaded(pos)) {
+		if (player.distanceToSqr(Vec3.atCenterOf(pos)) > SCREEN_REACH_SQR || !com.jaymospowers.core.Loaded.made(player.level(), pos)) {
 			return;
 		}
 		BlockState state = player.level().getBlockState(pos);

@@ -98,7 +98,7 @@ final class ZFighterDrillBeam {
 		List<BlockPos> breaks = new ArrayList<>();
 		for (double d = STEP; d <= RANGE; d += STEP) {
 			BlockPos pos = BlockPos.containing(from.add(look.scale(d)));
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 				length = d - STEP;
 				break;
 			}

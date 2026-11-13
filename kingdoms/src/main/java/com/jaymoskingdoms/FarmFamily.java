@@ -777,7 +777,7 @@ public final class FarmFamily {
 	/** Their house chest, if it's still there. */
 	private static @Nullable Container chest(ServerLevel level, PathfinderMob mob) {
 		BlockPos at = tagPos(mob, CHEST_TAG);
-		if (at == null || !level.isLoaded(at)) {
+		if (at == null || !com.jaymoskingdoms.Loaded.made(level, at)) {
 			return null;
 		}
 		BlockState state = level.getBlockState(at);

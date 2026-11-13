@@ -69,7 +69,7 @@ public final class Hearths {
 				for (int z = Math.max(box.minZ(), around.minZ()); z <= Math.min(box.maxZ(), around.maxZ()); z++) {
 					for (int y = box.minY(); y <= box.maxY(); y++) {
 						BlockPos at = new BlockPos(x, y, z);
-						if (level.hasChunkAt(at) && isFire(level.getBlockState(at))) {
+						if (com.jaymoskingdoms.Loaded.made(level, at) && isFire(level.getBlockState(at))) {
 							fires.add(at);
 						}
 					}
@@ -103,7 +103,7 @@ public final class Hearths {
 						continue;
 					}
 					BlockPos at = fire.offset(dx, dy, dz);
-					if (!level.hasChunkAt(at)) {
+					if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 						continue;
 					}
 					BlockState state = level.getBlockState(at);
@@ -123,7 +123,7 @@ public final class Hearths {
 		int flueTop = top < 0 ? fire.getY() + FLUE_LEAST : top + STACK;
 		for (int y = fire.getY() + 1; y <= flueTop; y++) {
 			BlockPos at = new BlockPos(fire.getX(), y, fire.getZ());
-			if (!level.hasChunkAt(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(at);
@@ -140,7 +140,7 @@ public final class Hearths {
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dz = -1; dz <= 1; dz++) {
 					BlockPos at = new BlockPos(fire.getX() + dx, y, fire.getZ() + dz);
-					if (!level.hasChunkAt(at)) {
+					if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 						continue;
 					}
 					BlockState state = level.getBlockState(at);

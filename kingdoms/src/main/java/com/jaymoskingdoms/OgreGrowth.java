@@ -106,7 +106,7 @@ final class OgreGrowth {
 	static List<Container> stash(ServerLevel level, OgreHolds.Site site) {
 		List<Container> out = new ArrayList<>();
 		for (BlockPos pos : site.stash()) {
-			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof Container c) {
+			if (com.jaymoskingdoms.Loaded.made(level, pos) && level.getBlockEntity(pos) instanceof Container c) {
 				out.add(c);
 			}
 		}
@@ -123,7 +123,7 @@ final class OgreGrowth {
 		List<BlockPos> kept = new ArrayList<>();
 		for (BlockPos pos : site.stash()) {
 			// (one whose chunk isn't loaded is kept: it can't be told gone)
-			if (!level.isLoaded(pos) || level.getBlockEntity(pos) instanceof Container) {
+			if (!com.jaymoskingdoms.Loaded.made(level, pos) || level.getBlockEntity(pos) instanceof Container) {
 				kept.add(pos);
 			}
 		}
@@ -139,7 +139,7 @@ final class OgreGrowth {
 		BlockPos found = null;
 		double best = Double.MAX_VALUE;
 		for (BlockPos pos : BlockPos.betweenClosed(site.at().offset(-r, -1, -r), site.at().offset(r, 3, r))) {
-			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof ChestBlockEntity && pos.distSqr(site.at()) < best) {
+			if (com.jaymoskingdoms.Loaded.made(level, pos) && level.getBlockEntity(pos) instanceof ChestBlockEntity && pos.distSqr(site.at()) < best) {
 				best = pos.distSqr(site.at());
 				found = pos.immutable();
 			}
@@ -172,7 +172,7 @@ final class OgreGrowth {
 						continue;
 					}
 					BlockPos column = site.at().offset(dx, 0, dz);
-					if (!level.isLoaded(column)) {
+					if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 						continue;
 					}
 					BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -438,7 +438,7 @@ final class OgreGrowth {
 	private static boolean recruit(ServerLevel level, OgreHolds.Site site) {
 		RandomSource random = level.getRandom();
 		BlockPos column = site.at().offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

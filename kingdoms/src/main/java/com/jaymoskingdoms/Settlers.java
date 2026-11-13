@@ -87,7 +87,7 @@ public final class Settlers {
 		Spot spot = spots.get(random.nextInt(spots.size()));
 		Heritage.Kind kind = kindFor(server, spot.faction(), random);
 		float odds = odds(server, spot.faction(), spot.center(), kind, random);
-		if (odds <= 0.0F || random.nextFloat() >= odds || !level.isLoaded(spot.center()) || crowded(level, spot.center())) {
+		if (odds <= 0.0F || random.nextFloat() >= odds || !com.jaymoskingdoms.Loaded.made(level, spot.center()) || crowded(level, spot.center())) {
 			return;
 		}
 		// ((0.7.490) never load or make chunks to look for ground: the whole search square must be in already)
@@ -97,7 +97,7 @@ public final class Settlers {
 			return;
 		}
 		BlockPos at = ShutIn.openGround(level, spot.center());
-		if (at == null || !level.isLoaded(at) || !level.isPositionEntityTicking(at)) {
+		if (at == null || !com.jaymoskingdoms.Loaded.made(level, at) || !level.isPositionEntityTicking(at)) {
 			return;
 		}
 		for (ServerPlayer q : level.players()) {

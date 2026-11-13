@@ -139,7 +139,7 @@ public final class BogLights {
 			double a = random.nextDouble() * Math.PI * 2;
 			int d = GOAL_MIN + random.nextInt(GOAL_MAX - GOAL_MIN + 1);
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
-			if (!level.isLoaded(top)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, top)) {
 				continue;
 			}
 			BlockPos under = top.below();
@@ -163,7 +163,7 @@ public final class BogLights {
 			double a = random.nextDouble() * Math.PI * 2;
 			int d = GOAL_MIN + random.nextInt(GOAL_MAX - GOAL_MIN + 1);
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
-			if (!level.isLoaded(top) || !bog(level, top)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, top) || !bog(level, top)) {
 				continue;
 			}
 			BlockPos surface = top.below();

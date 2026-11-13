@@ -79,7 +79,7 @@ public final class SunExposure {
         double z = at.z;
         for (int i = 0; i < REACH; i++) {
             pos.set(x, y, z);
-            if (!level.isLoaded(pos)) {
+            if (!com.jaymospowers.core.Loaded.made(level, pos)) {
                 return true;
             }
             if (level.getBlockState(pos).isSolidRender()) {

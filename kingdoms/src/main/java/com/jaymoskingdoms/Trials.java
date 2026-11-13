@@ -180,7 +180,7 @@ public final class Trials {
 		for (Faction camp : Factions.all(server, FactionType.BARBARIAN)) {
 			Camps.CampData data = camp.fallen() ? null : Camps.data(server, camp.id());
 			BlockPos throne = data == null || data.clearedAt() >= 0 ? null : throne(server, camp.id());
-			if (throne == null || !level.isLoaded(throne) || !Storage.loaded(level, camp)
+			if (throne == null || !com.jaymoskingdoms.Loaded.made(level, throne) || !Storage.loaded(level, camp)
 				|| day - mustered.getOrDefault(Integer.toString(camp.id()), -GUARD_DAYS - 1L) < GUARD_DAYS
 				|| level.getNearestPlayer(throne.getX(), throne.getY(), throne.getZ(), GUARD_HIDE, false) != null) {
 				continue;

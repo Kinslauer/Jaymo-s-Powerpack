@@ -48,7 +48,7 @@ final class Cannons {
 
 	static void tick(MinecraftServer server, ServerLevel level) {
 		for (Faction f : Factions.all(server)) {
-			if (!Muskets.afford(f, Muskets.ARM_TREASURY) || !level.isLoaded(f.seat())) {
+			if (!Muskets.afford(f, Muskets.ARM_TREASURY) || !com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 				continue;
 			}
 			List<Cannon> have = new ArrayList<>(level.getEntitiesOfClass(Cannon.class, new AABB(f.seat()).inflate(RANGE), c -> c.isAlive() && c.faction() == f.id()));
@@ -57,7 +57,7 @@ final class Cannons {
 				if (have.size() >= want) {
 					break;
 				}
-				if (!level.isLoaded(spot) || have.stream().anyMatch(c -> c.position().distanceTo(net.minecraft.world.phys.Vec3.atBottomCenterOf(spot)) < APART)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, spot) || have.stream().anyMatch(c -> c.position().distanceTo(net.minecraft.world.phys.Vec3.atBottomCenterOf(spot)) < APART)) {
 					continue;
 				}
 				double dx = spot.getX() - f.seat().getX(), dz = spot.getZ() - f.seat().getZ();
@@ -96,7 +96,7 @@ final class Cannons {
 
 	/** The open ground at {@code at}'s column, if there's firm footing and room. */
 	private static void ground(ServerLevel level, BlockPos at, List<BlockPos> out) {
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);

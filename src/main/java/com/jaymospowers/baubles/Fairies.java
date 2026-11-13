@@ -164,7 +164,7 @@ public final class Fairies {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int dist = Mth.nextInt(random, NEAR, FAR);
 			int x = Mth.floor(player.getX() + Math.cos(angle) * dist), z = Mth.floor(player.getZ() + Math.sin(angle) * dist);
-			if (!level.isLoaded(new BlockPos(x, 0, z))) {
+			if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, 0, z));

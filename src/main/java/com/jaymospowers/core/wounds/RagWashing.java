@@ -207,7 +207,7 @@ public final class RagWashing {
 				it.remove();
 				continue;
 			}
-			if (!level.isLoaded(boil.pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, boil.pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(boil.pos);

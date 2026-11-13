@@ -87,7 +87,7 @@ public final class RiverIce {
 
 	/** The top of the water in the column {@code x}, {@code z}, or null if it isn't open river. */
 	private static BlockPos surface(ServerLevel level, int x, int z) {
-		if (!level.hasChunkAt(new BlockPos(x, level.getSeaLevel(), z))) {
+		if (!com.jaymospowers.core.Loaded.made(level, new BlockPos(x, level.getSeaLevel(), z))) {
 			return null;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(x, 0, z)).below();
@@ -160,7 +160,7 @@ public final class RiverIce {
 		for (long packed : all) {
 			BlockPos from = BlockPos.of(packed);
 			floes.remove(packed);
-			if (!level.hasChunkAt(from) || !level.getBlockState(from).is(Blocks.ICE)) {
+			if (!com.jaymospowers.core.Loaded.made(level, from) || !level.getBlockState(from).is(Blocks.ICE)) {
 				continue;
 			}
 			if (!cold(level, from)) {
@@ -175,7 +175,7 @@ public final class RiverIce {
 				heading.z + (random.nextDouble() - 0.5) * 0.4);
 			BlockPos to = from.relative(dir);
 			BlockState ahead = level.getBlockState(to);
-			if (!level.hasChunkAt(to) || !ahead.is(Blocks.WATER) || !level.getBlockState(to.above()).isAir()) {
+			if (!com.jaymospowers.core.Loaded.made(level, to) || !ahead.is(Blocks.WATER) || !level.getBlockState(to.above()).isAir()) {
 				// jammed against the bank or other ice: it stays and joins the sheet
 				continue;
 			}

@@ -286,7 +286,7 @@ public final class Skeletons {
 			Map<String, Boil> next = new HashMap<>();
 			for (Map.Entry<String, Boil> entry : boiling.entrySet()) {
 				BlockPos pos = BlockPos.of(Long.parseLong(entry.getKey()));
-				if (!level.isLoaded(pos)) {
+				if (!com.jaymoskitchen.Loaded.made(level, pos)) {
 					next.put(entry.getKey(), entry.getValue());
 					continue;
 				}

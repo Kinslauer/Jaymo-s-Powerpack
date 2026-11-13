@@ -571,7 +571,7 @@ public final class MasonTable {
 				Map<Item, Integer> need = new LinkedHashMap<>();
 				for (int i = this.index; i < ops.size(); i++) {
 					Op op = ops.get(i);
-					BlockState here = level.isLoaded(op.pos()) ? level.getBlockState(op.pos()) : null;
+					BlockState here = com.jaymoskingdoms.Loaded.made(level, op.pos()) ? level.getBlockState(op.pos()) : null;
 					Item item = cost(op.state());
 					if (item != null && !secondHalf(op.state()) && (here == null || !here.is(op.state().getBlock()))) {
 						need.merge(item, 1, Integer::sum);
@@ -651,7 +651,7 @@ public final class MasonTable {
 			}
 			for (int n = 0; n < SKIP_PER_STEP && this.index < ops.size(); n++) {
 				Op op = ops.get(this.index);
-				if (!level.isLoaded(op.pos())) {
+				if (!com.jaymoskingdoms.Loaded.made(level, op.pos())) {
 					return;
 				}
 				BlockState here = level.getBlockState(op.pos());

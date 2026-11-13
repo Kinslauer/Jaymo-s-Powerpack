@@ -253,7 +253,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 			// out of everyone's sight: underground the rest of the way, and up again just short of them
 			Vec3 back = toward.normalize().scale(-PURSUE_SURFACE);
 			BlockPos column = BlockPos.containing(target.getX() + back.x, target.getY(), target.getZ() + back.z);
-			if (level.isLoaded(column)) {
+			if (com.jaymospowers.core.Loaded.made(level, column)) {
 				int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
 				this.snapTo(column.getX() + 0.5, y, column.getZ() + 0.5, this.getYRot(), 0.0F);
 				this.getNavigation().stop();

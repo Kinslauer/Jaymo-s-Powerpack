@@ -392,7 +392,7 @@ public final class ZFighterInvasions {
 				continue;
 			}
 			BlockPos last = inv.seen.get(id);
-			if (entity == null && last != null && !inv.level.hasChunkAt(last)) {
+			if (entity == null && last != null && !com.jaymospowers.core.Loaded.made(inv.level, last)) {
 				// asleep in an unloaded chunk: not beaten yet
 				continue;
 			}
@@ -644,7 +644,7 @@ public final class ZFighterInvasions {
 		for (double share : new double[] {0.8, 0.65, 0.5, 0.3}) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int x = (int)Math.floor(c.x + Math.cos(angle) * BOUNDARY * share), z = (int)Math.floor(c.z + Math.sin(angle) * BOUNDARY * share);
-			if (inv.level.hasChunkAt(new BlockPos(x, inv.seat.getY(), z))) {
+			if (com.jaymospowers.core.Loaded.made(inv.level, new BlockPos(x, inv.seat.getY(), z))) {
 				return new Vec3(x + 0.5, inv.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z + 0.5);
 			}
 		}

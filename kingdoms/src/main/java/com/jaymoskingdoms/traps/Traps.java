@@ -176,7 +176,7 @@ public final class Traps {
 		for (int i = 0; i < CAVE_TRIES; i++) {
 			BlockPos at = player.blockPosition().offset(random.nextInt(CAVE_REACH * 2 + 1) - CAVE_REACH, random.nextInt(21) - 10,
 				random.nextInt(CAVE_REACH * 2 + 1) - CAVE_REACH);
-			if (!level.isLoaded(at) || at.distSqr(player.blockPosition()) < 12 * 12 || !Surfaces.inCave(level, at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || at.distSqr(player.blockPosition()) < 12 * 12 || !Surfaces.inCave(level, at)) {
 				continue;
 			}
 			long key = key(Math.floorDiv(at.getX(), CELL), Math.floorDiv(at.getY(), 24), Math.floorDiv(at.getZ(), CELL), 0);
@@ -217,7 +217,7 @@ public final class Traps {
 		double a = random.nextDouble() * Math.PI * 2;
 		int d = PIT_MIN + random.nextInt(PIT_MAX - PIT_MIN + 1);
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition().offset((int) (Math.cos(a) * d), 0, (int) (Math.sin(a) * d)));
-		if (!level.isLoaded(top)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, top)) {
 			return;
 		}
 		boolean desert = level.getBiome(top).is(Biomes.DESERT);

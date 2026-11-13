@@ -1422,7 +1422,7 @@ public class CorpseEntity extends Entity {
 		}
 		for (int i = 0; i < 4; i++) {
 			BlockPos pos = at.offset(random.nextInt(3) - 1, random.nextInt(2), random.nextInt(3) - 1);
-			if (level.isLoaded(pos) && level.getBlockState(pos).isAir() && flammableBeside(level, pos)) {
+			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && flammableBeside(level, pos)) {
 				level.setBlockAndUpdate(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos));
 				firesLit++;
 				return;
@@ -1434,7 +1434,7 @@ public class CorpseEntity extends Entity {
 	private static boolean flammableBeside(ServerLevel level, BlockPos pos) {
 		for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
 			BlockPos next = pos.relative(d);
-			if (!level.isLoaded(next)) {
+			if (!com.jaymoskitchen.Loaded.made(level, next)) {
 				continue;
 			}
 			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(next);

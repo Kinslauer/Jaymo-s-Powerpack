@@ -544,7 +544,7 @@ public final class ElderWyrm extends XenoUltimate {
 		for (int drop = 0; drop <= 3; drop++) {
 			Vec3 feet = new Vec3(point.x, point.y - player.getEyeHeight() - drop, point.z);
 			BlockPos block = BlockPos.containing(feet);
-			if (!level.hasChunkAt(block) || !level.getWorldBorder().isWithinBounds(feet)
+			if (!com.jaymospowers.core.Loaded.made(level, block) || !level.getWorldBorder().isWithinBounds(feet)
 				|| !level.noCollision(player, box.move(feet.subtract(player.position())))) {
 				continue;
 			}

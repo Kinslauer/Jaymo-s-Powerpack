@@ -356,7 +356,7 @@ final class IllagerBuildings {
 		int ring = Math.min(OUT_MOST, OUT_START + k / OUT_PER_RING * OUT_STEP);
 		double angle = k * Outbuild.GOLDEN;
 		int x = (int)Math.round(Math.cos(angle) * ring), z = (int)Math.round(Math.sin(angle) * ring);
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return null;
 		}
 		BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
@@ -404,14 +404,14 @@ final class IllagerBuildings {
 
 	/** (0.7.490) Outlying building number {@code k}'s ground is loaded, so {@link #outlying} can say whether it will do. */
 	static boolean outlyingLoaded(ServerLevel level, BlockPos fire, Direction gate, int k) {
-		return level.isLoaded(outlyingColumn(fire, gate, k));
+		return com.jaymoskingdoms.Loaded.made(level, outlyingColumn(fire, gate, k));
 	}
 
 	/** (0.7.490) Every block of {@code spot}'s footprint is loaded (so a failed {@link #clear} means something's really in the way). */
 	static boolean footprintLoaded(ServerLevel level, Spot spot, BlockPos fire, Direction gate) {
 		CampBuildings.Placer placer = spot.placer(fire, gate);
 		for (Blueprint.Placement p : spot.design().get().blocks()) {
-			if (!level.isLoaded(placer.at(p.offset()))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, placer.at(p.offset()))) {
 				return false;
 			}
 		}
@@ -439,7 +439,7 @@ final class IllagerBuildings {
 					continue;
 				}
 				BlockPos column = center.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return Integer.MIN_VALUE;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -560,7 +560,7 @@ final class IllagerBuildings {
 		CampBuildings.Placer placer = spot.placer(fire, gate);
 		for (Blueprint.Placement p : spot.design().get().blocks()) {
 			BlockPos at = placer.at(p.offset());
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				return false;
 			}
 			BlockState there = level.getBlockState(at);

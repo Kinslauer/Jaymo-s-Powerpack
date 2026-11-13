@@ -227,7 +227,7 @@ public final class BlossomVillages {
 		}
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, 0, -RADIUS), at.offset(-RADIUS, 0, RADIUS),
 			at.offset(RADIUS, 0, RADIUS)}) {
-			if (!level.isLoaded(corner) || !level.getBiome(corner).is(Biomes.CHERRY_GROVE) || Factions.at(server, level, corner) != null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, corner) || !level.getBiome(corner).is(Biomes.CHERRY_GROVE) || Factions.at(server, level, corner) != null) {
 				return false;
 			}
 		}

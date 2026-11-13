@@ -28,7 +28,7 @@ public final class Shafts {
 		BlockPos.MutableBlockPos pos = from.mutable().move(dir);
 		int shafts = 0;
 		boolean cornered = false;
-		while (level.isLoaded(pos)) {
+		while (com.jaymoskitchen.Loaded.made(level, pos)) {
 			BlockState state = level.getBlockState(pos);
 			if (state.getBlock() instanceof ShaftBlock) {
 				if (state.getValue(ShaftBlock.AXIS) != dir.getAxis() || ++shafts > SHAFT_MAX) {
@@ -64,7 +64,7 @@ public final class Shafts {
 
 	/** Sets a shaft piece turning or still (just for the look), if it is one and isn't already. */
 	static void setTurning(Level level, BlockPos pos, boolean turning) {
-		if (!level.isLoaded(pos)) {
+		if (!com.jaymoskitchen.Loaded.made(level, pos)) {
 			return;
 		}
 		BlockState state = level.getBlockState(pos);

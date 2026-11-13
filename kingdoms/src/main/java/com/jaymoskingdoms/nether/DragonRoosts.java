@@ -215,7 +215,7 @@ public final class DragonRoosts {
 			int distance = ARRIVE_FROM - (i / 6) * 8;
 			BlockPos at = BlockPos.containing(top.getX() + 0.5 + Math.cos(angle) * distance, top.getY() + ARRIVE_ABOVE - (i % 3) * 2,
 				top.getZ() + 0.5 + Math.sin(angle) * distance);
-			if (!nether.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(nether, at)) {
 				continue;
 			}
 			IgnivorusDragon dragon = Dragons.IGNIVORUS_DRAGON.create(nether, EntitySpawnReason.EVENT);

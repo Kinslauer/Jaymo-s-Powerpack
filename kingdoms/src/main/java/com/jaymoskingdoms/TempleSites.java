@@ -97,7 +97,7 @@ final class TempleSites {
 			return true;
 		}
 		BlockPos probe = spot == Spot.NETHER ? new BlockPos(at.getX(), playerPos.getY(), at.getZ()) : at;
-		if (!level.isLoaded(probe)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, probe)) {
 			return false;
 		}
 		return level.getBiome(probe).is(tag(tagName(p, spot)));
@@ -130,7 +130,7 @@ final class TempleSites {
 		int nearY = playerPos.getY();
 		for (int dx : new int[] {-r, r}) {
 			for (int dz : new int[] {-r, r}) {
-				if (!level.isLoaded(new BlockPos(x + dx, nearY, z + dz))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x + dx, nearY, z + dz))) {
 					return null;
 				}
 			}
@@ -142,12 +142,12 @@ final class TempleSites {
 			for (Direction d : Direction.Plane.HORIZONTAL) {
 				for (int dist = r; dist <= reach; dist += 8) {
 					BlockPos far = column.relative(d, dist);
-					if (!level.isLoaded(far) || Factions.at(level.getServer(), level, far) != null) {
+					if (!com.jaymoskingdoms.Loaded.made(level, far) || Factions.at(level.getServer(), level, far) != null) {
 						return null;
 					}
 				}
 				BlockPos tip = column.relative(d, reach);
-				if (!level.isLoaded(tip) || Factions.at(level.getServer(), level, tip) != null) {
+				if (!com.jaymoskingdoms.Loaded.made(level, tip) || Factions.at(level.getServer(), level, tip) != null) {
 					return null;
 				}
 			}
@@ -197,7 +197,7 @@ final class TempleSites {
 
 	/** The top solid block's y in the column, or MIN_VALUE if it is not loaded, wet or has none. */
 	private static int surface(ServerLevel level, int x, int z) {
-		if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) {
+		if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, level.getSeaLevel(), z))) {
 			return Integer.MIN_VALUE;
 		}
 		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
@@ -245,7 +245,7 @@ final class TempleSites {
 		for (int i = 0; i < FOREST_SAMPLES; i++) {
 			int sx = x + level.getRandom().nextInt(FOREST_RADIUS * 2 + 1) - FOREST_RADIUS;
 			int sz = z + level.getRandom().nextInt(FOREST_RADIUS * 2 + 1) - FOREST_RADIUS;
-			if (!level.isLoaded(new BlockPos(sx, level.getSeaLevel(), sz))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(sx, level.getSeaLevel(), sz))) {
 				continue;
 			}
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sx, sz) - 1;
@@ -343,7 +343,7 @@ final class TempleSites {
 		for (int dx : steps) {
 			for (int dz : steps) {
 				int sx = x + dx, sz = z + dz;
-				if (!level.isLoaded(new BlockPos(sx, sea, sz))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(sx, sea, sz))) {
 					return null;
 				}
 				int floor = level.getHeight(Heightmap.Types.OCEAN_FLOOR, sx, sz) - 1;

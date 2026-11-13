@@ -55,7 +55,7 @@ public final class Groves {
 	public static boolean isGrove(ServerLevel level, BlockPos at) {
 		int logs = 0, leaves = 0;
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-REACH, -3, -REACH), at.offset(REACH, HEIGHT, REACH))) {
-			if (!level.isLoaded(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				continue;
 			}
 			BlockState s = level.getBlockState(p);
@@ -100,7 +100,7 @@ public final class Groves {
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < 12; tries++) {
 			BlockPos spot = here.offset(random.nextInt(48) - 24, 0, random.nextInt(48) - 24);
-			if (Math.abs(spot.getX() - here.getX()) < 12 && Math.abs(spot.getZ() - here.getZ()) < 12 || !level.isLoaded(spot)) {
+			if (Math.abs(spot.getX() - here.getX()) < 12 && Math.abs(spot.getZ() - here.getZ()) < 12 || !com.jaymoskingdoms.Loaded.made(level, spot)) {
 				continue;
 			}
 			BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spot);

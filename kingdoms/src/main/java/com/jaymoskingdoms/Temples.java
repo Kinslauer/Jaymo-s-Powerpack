@@ -224,7 +224,7 @@ public final class Temples {
 			double a = level.getRandom().nextDouble() * Math.PI * 2.0;
 			double d = SITE_MIN + level.getRandom().nextDouble() * (SITE_MAX - SITE_MIN);
 			int x = (int)(sp.getX() + Math.cos(a) * d), z = (int)(sp.getZ() + Math.sin(a) * d);
-			if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, level.getSeaLevel(), z))) {
 				continue;
 			}
 			int y = Stacked.in(sp, Level.OVERWORLD) ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z)
@@ -436,7 +436,7 @@ public final class Temples {
 		}
 		Temple t = nearest(level.getServer(), level, sp.blockPosition(), 4000.0);
 		Patron p = t == null ? null : t.patronOf();
-		if (t == null || p == null || !level.isLoaded(t.altar())) {
+		if (t == null || p == null || !com.jaymoskingdoms.Loaded.made(level, t.altar())) {
 			c.getSource().sendFailure(Component.literal("No loaded temple near."));
 			return 0;
 		}

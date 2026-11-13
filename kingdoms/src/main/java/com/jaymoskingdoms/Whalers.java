@@ -486,7 +486,7 @@ public final class Whalers {
 			double d = Mth.nextDouble(random, GROUND_MIN, GROUND_MAX) + far * FarGrounds.STEP;
 			BlockPos at = BlockPos.containing(h.mooring().getX() + Mth.cos(angle) * d, level.getSeaLevel() - 1, h.mooring().getZ() + Mth.sin(angle) * d);
 			// (unloaded is fine: it's taken on trust, and she'll cruise for open water when she's there)
-			if (!level.isLoaded(at) || level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(8)).is(FluidTags.WATER)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(8)).is(FluidTags.WATER)) {
 				return at;
 			}
 		}
@@ -1278,7 +1278,7 @@ public final class Whalers {
 		for (int tries = 0; tries < 6; tries++) {
 			float angle = random.nextFloat() * Mth.TWO_PI;
 			BlockPos at = BlockPos.containing(ship.getX() + Mth.cos(angle) * POD_OFF, level.getSeaLevel() - 8, ship.getZ() + Mth.sin(angle) * POD_OFF);
-			if (level.isLoaded(at) && level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(3)).is(FluidTags.WATER)
+			if (com.jaymoskingdoms.Loaded.made(level, at) && level.getFluidState(at).is(FluidTags.WATER) && level.getFluidState(at.below(3)).is(FluidTags.WATER)
 				&& !Raids.playerNear(level, at, POD_HIDE)) {
 				// (0.7.437) bigger pods on the far grounds, sperm whales and the white whale among them
 				int n = FarGrounds.pod(1 + random.nextInt(2), far);

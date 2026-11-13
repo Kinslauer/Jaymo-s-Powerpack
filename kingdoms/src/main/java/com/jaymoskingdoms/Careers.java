@@ -919,7 +919,7 @@ public final class Careers {
 			edit(player, k -> k.withStall(Optional.empty(), -1));
 			return;
 		}
-		if (!store.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(store, at)) {
 			return;
 		}
 		if (!(store.getBlockEntity(at) instanceof Container box)) {

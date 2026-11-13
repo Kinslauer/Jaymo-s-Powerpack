@@ -1050,7 +1050,7 @@ final class Caravans {
 			len = flat.length();
 		}
 		BlockPos column = BlockPos.containing(ahead);
-		if (level.isLoaded(column)) {
+		if (com.jaymoskingdoms.Loaded.made(level, column)) {
 			column = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 		}
 		HEADING.put(carts.getFirst()[0].getUUID(), Vec3.atBottomCenterOf(column));

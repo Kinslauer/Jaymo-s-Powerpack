@@ -1070,7 +1070,7 @@ public final class ZFighterAfterlife {
 					break;
 				}
 			}
-			if (!near || !world.hasChunkAt(spot)) {
+			if (!near || !com.jaymospowers.core.Loaded.made(world, spot)) {
 				continue;
 			}
 			AABB around = new AABB(spot).inflate(6.0, 4.0, 6.0);

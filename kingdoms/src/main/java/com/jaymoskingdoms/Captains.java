@@ -780,7 +780,7 @@ public final class Captains {
 				return;
 			}
 		}
-		if (c.chief() || !level.isLoaded(center) || level.getNearestPlayer(center.getX(), center.getY(), center.getZ(), MUSTER_HIDE, false) != null) {
+		if (c.chief() || !com.jaymoskingdoms.Loaded.made(level, center) || level.getNearestPlayer(center.getX(), center.getY(), center.getZ(), MUSTER_HIDE, false) != null) {
 			return;
 		}
 		muster(level, c, camp, center, center, HOME_RADIUS);

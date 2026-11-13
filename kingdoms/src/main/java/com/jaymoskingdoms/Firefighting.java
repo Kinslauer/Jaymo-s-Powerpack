@@ -125,7 +125,7 @@ public final class Firefighting {
 		for (Iterator<Splash> it = SPLASHES.iterator(); it.hasNext(); ) {
 			Splash s = it.next();
 			if (now >= s.until()) {
-				if (level.isLoaded(s.fire()) && level.getBlockState(s.fire()).is(BlockTags.FIRE)) {
+				if (com.jaymoskingdoms.Loaded.made(level, s.fire()) && level.getBlockState(s.fire()).is(BlockTags.FIRE)) {
 					FIRES.add(s.fire());
 				}
 				it.remove();
@@ -135,7 +135,7 @@ public final class Firefighting {
 			return;
 		}
 		FIRES.removeIf(p -> {
-			if (!level.isLoaded(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				return true;
 			}
 			if (level.getBlockState(p).is(BlockTags.FIRE)) {

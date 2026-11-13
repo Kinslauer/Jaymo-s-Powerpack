@@ -111,7 +111,7 @@ public final class WitchHuts {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int dist = SITE_MIN + random.nextInt(SITE_MAX - SITE_MIN + 1);
 			BlockPos column = middle.offset((int) Math.round(Math.cos(angle) * dist), 0, (int) Math.round(Math.sin(angle) * dist));
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

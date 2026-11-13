@@ -152,7 +152,7 @@ public final class MonolithGlyphs {
 		ServerLevel level = Factions.level(server);
 		for (ServerPlayer player : level.players()) {
 			Monoliths.Monolith m = Monoliths.nearest(level, player.blockPosition(), CARVE_RANGE);
-			if (m != null && !CARVED.contains(m.pos()) && level.isLoaded(m.pos())) {
+			if (m != null && !CARVED.contains(m.pos()) && com.jaymoskingdoms.Loaded.made(level, m.pos())) {
 				if (carved(level, m)) {
 					CARVED.add(m.pos());
 				} else {

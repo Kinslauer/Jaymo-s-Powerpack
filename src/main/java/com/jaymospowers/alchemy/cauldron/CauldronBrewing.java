@@ -327,7 +327,7 @@ public final class CauldronBrewing {
 		}
 		for (Iterator<Long> it = active.iterator(); it.hasNext(); ) {
 			BlockPos pos = BlockPos.of(it.next());
-			if (!level.isLoaded(pos)) {
+			if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 				it.remove();
 				continue;
 			}

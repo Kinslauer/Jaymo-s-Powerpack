@@ -244,7 +244,7 @@ public class GoblinScout extends ActingMonster {
 	 * about it. Only while the fire's ground is loaded.
 	 */
 	static void hire(ServerLevel level, int camp, BlockPos fire, int count) {
-		if (Beasts.GOBLIN_SCOUT == null || !level.isLoaded(fire)) {
+		if (Beasts.GOBLIN_SCOUT == null || !com.jaymoskingdoms.Loaded.made(level, fire)) {
 			return;
 		}
 		int near = level.getEntitiesOfClass(GoblinScout.class, new AABB(fire).inflate(COUNT_RANGE), s -> s.camp == camp).size();

@@ -607,7 +607,7 @@ final class TempleBuildings {
 
 	/** The deep forge-hall's tunnel end: a ladder shaft up to the surface, lined, so the hall can be found and left. */
 	private static void tunnelShaft(ServerLevel level, BlockPos end, Direction facing) {
-		if (!level.isLoaded(end) || Factions.at(level.getServer(), level, end) != null) {
+		if (!com.jaymoskingdoms.Loaded.made(level, end) || Factions.at(level.getServer(), level, end) != null) {
 			return;
 		}
 		int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, end.getX(), end.getZ());

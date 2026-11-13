@@ -3327,7 +3327,7 @@ public final class WebSymbiote {
 		for (double turn : new double[] {0.0, 0.5, -0.5, 1.0, -1.0}) {
 			Vec3 dir = way.yRot((float)turn);
 			BlockPos column = BlockPos.containing(player.getX() + dir.x * length, 0.0, player.getZ() + dir.z * length);
-			if (!level.hasChunkAt(column)) {
+			if (!com.jaymospowers.core.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -3434,7 +3434,7 @@ public final class WebSymbiote {
 			double angle = player.getRandom().nextDouble() * Math.PI * 2.0;
 			double d = TOUR_MIN + player.getRandom().nextDouble() * (TOUR_MAX - TOUR_MIN);
 			BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * d, 0.0, player.getZ() + Math.sin(angle) * d);
-			if (!level.hasChunkAt(column)) {
+			if (!com.jaymospowers.core.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

@@ -322,7 +322,7 @@ public final class Trees {
 		int grown = 0;
 		for (int i = 0; i < list.size(); i++) {
 			Growing g = list.get(i);
-			if (!level.isLoaded(g.pos()) || !level.isPositionEntityTicking(g.pos())) {
+			if (!com.jaymoskingdoms.Loaded.made(level, g.pos()) || !level.isPositionEntityTicking(g.pos())) {
 				continue;
 			}
 			// (cut down, or dug up, meanwhile: forgotten)
@@ -449,7 +449,7 @@ public final class Trees {
 		}
 		for (int tries = 0; tries < 8; tries++) {
 			BlockPos column = near.offset(random.nextInt(SEED_RANGE * 2 + 1) - SEED_RANGE, 0, random.nextInt(SEED_RANGE * 2 + 1) - SEED_RANGE);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).below();

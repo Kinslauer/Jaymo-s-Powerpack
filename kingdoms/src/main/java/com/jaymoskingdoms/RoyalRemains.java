@@ -172,7 +172,7 @@ public final class RoyalRemains {
 			LEFT.values().removeIf(until -> until < now);
 			for (Faction f : Factions.all(server)) {
 				// (a realm in ruin too: its townsfolk may still be about)
-				if (f.type().isRealm() && level.isLoaded(f.seat())) {
+				if (f.type().isRealm() && com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 					assign(level, f, now);
 				}
 			}
@@ -455,7 +455,7 @@ public final class RoyalRemains {
 	/** What was taken off the body goes into the realm's stores; what won't fit is left at its seat. */
 	private static void store(ServerLevel level, Faction f, List<ItemStack> taken, Vec3 fallback) {
 		BlockPos seat = f.seat();
-		Vec3 drop = level.isLoaded(seat) ? Vec3.atCenterOf(seat.above()) : fallback;
+		Vec3 drop = com.jaymoskingdoms.Loaded.made(level, seat) ? Vec3.atCenterOf(seat.above()) : fallback;
 		for (ItemStack stack : taken) {
 			ItemStack left = f.fallen() ? stack : Storage.put(level, f, stack);
 			if (!left.isEmpty()) {

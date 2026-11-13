@@ -108,7 +108,7 @@ public final class RatSpawning {
 			int dist = SPAWN_MIN + random.nextInt(SPAWN_MAX - SPAWN_MIN + 1);
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			BlockPos pos = store.offset((int) Math.round(Math.cos(angle) * dist), random.nextInt(5) - 2, (int) Math.round(Math.sin(angle) * dist));
-			if (!level.hasChunkAt(pos) || !level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
+			if (!com.jaymoskitchen.Loaded.made(level, pos) || !level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
 				|| !level.getFluidState(pos).isEmpty()) {
 				continue;
 			}

@@ -152,7 +152,7 @@ public final class Bombardment {
 			for (ServerPlayer p : job.level.players()) {
 				near |= p.distanceToSqr(job.centre.getX(), job.centre.getY(), job.centre.getZ()) <= NEAR * NEAR;
 			}
-			if (!near || !job.level.hasChunkAt(job.centre)) {
+			if (!near || !com.jaymoskingdoms.Loaded.made(job.level, job.centre)) {
 				if (++job.wait > MOST_WAIT) {
 					pending -= job.columns.size() - job.column;
 					it.remove();
@@ -192,7 +192,7 @@ public final class Bombardment {
 				BlockPos pos = new BlockPos(col[0], job.y, col[1]);
 				job.y--;
 				looked++;
-				if (!level.hasChunkAt(pos)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 					continue;
 				}
 				BlockState state = level.getBlockState(pos);

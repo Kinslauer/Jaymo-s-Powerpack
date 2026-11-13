@@ -409,7 +409,7 @@ public final class Turning {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = TRIAL_BOLT_NEAR_MIN + random.nextDouble() * (TRIAL_BOLT_NEAR_MAX - TRIAL_BOLT_NEAR_MIN);
 			BlockPos column = new BlockPos(Mth.floor(p.getX() + Math.cos(a) * r), level.getMinY(), Mth.floor(p.getZ() + Math.sin(a) * r));
-			if (level.isLoaded(column)) {
+			if (com.jaymoskingdoms.Loaded.made(level, column)) {
 				return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column);
 			}
 		}

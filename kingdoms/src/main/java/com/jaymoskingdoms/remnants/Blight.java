@@ -315,7 +315,7 @@ public final class Blight {
 	/** The wolves denning at one monolith: another round for each, and the change when it is time. */
 	private static void den(ServerLevel level, Monoliths.Monolith m) {
 		BlockPos at = m.pos();
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return;
 		}
 		AABB box = new AABB(at).inflate(DEN_RADIUS, DEN_HEIGHT, DEN_RADIUS);

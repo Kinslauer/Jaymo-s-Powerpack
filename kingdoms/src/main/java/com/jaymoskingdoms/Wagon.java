@@ -330,7 +330,7 @@ public final class Wagon extends Entity {
 	/** (0.7.490) Whether there is open water under {@code (x, z)}, its chunk loaded. */
 	static boolean water(ServerLevel level, double x, double z) {
 		BlockPos at = BlockPos.containing(x, 0.0, z);
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return false;
 		}
 		int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, at.getX(), at.getZ());
@@ -426,7 +426,7 @@ public final class Wagon extends Entity {
 	static double ground(Level level, double x, double y, double z) {
 		int bx = Mth.floor(x), bz = Mth.floor(z), by = Mth.floor(y);
 		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(bx, by, bz);
-		if (!level.isLoaded(p)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 			return y;
 		}
 		double best = y, bestGap = Double.MAX_VALUE;

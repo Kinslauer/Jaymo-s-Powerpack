@@ -401,7 +401,7 @@ final class SpellThrows {
 
 	/** The weapon carries on from where the spell ended, or goes back to its thrower if it can't. */
 	private static void land(Flight flight, ServerLevel level, Vec3 at, Vec3 motion, boolean struck) {
-		if (!level.isLoaded(BlockPos.containing(at))) {
+		if (!com.jaymospowers.core.Loaded.made(level, BlockPos.containing(at))) {
 			giveBack(flight);
 			return;
 		}

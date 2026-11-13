@@ -118,7 +118,7 @@ public final class WebSpit {
 		for (Iterator<Glob> it = GLOBS.iterator(); it.hasNext(); ) {
 			Glob glob = it.next();
 			ServerLevel level = server.getLevel(glob.dimension);
-			if (level == null || !level.isLoaded(BlockPos.containing(glob.pos))) {
+			if (level == null || !com.jaymospowers.core.Loaded.made(level, BlockPos.containing(glob.pos))) {
 				it.remove();
 				continue;
 			}

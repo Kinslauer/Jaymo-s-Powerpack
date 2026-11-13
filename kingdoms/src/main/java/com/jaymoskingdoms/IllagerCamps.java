@@ -161,7 +161,7 @@ final class IllagerCamps {
 	static BlockPos spot(ServerLevel level, BlockPos fire, RandomSource random) {
 		for (int tries = 0; tries < 16; tries++) {
 			BlockPos column = fire.offset(random.nextInt(13) - 6, 0, random.nextInt(13) - 6);
-			if (column.distManhattan(fire) < 3 || !level.isLoaded(column)) {
+			if (column.distManhattan(fire) < 3 || !com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

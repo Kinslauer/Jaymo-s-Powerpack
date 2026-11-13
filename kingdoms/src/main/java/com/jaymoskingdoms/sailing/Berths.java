@@ -163,7 +163,7 @@ public final class Berths {
 			}
 			return;
 		}
-		boolean bed = level != null && level.isLoaded(at.pos()) && level.getBlockState(at.pos()).getBlock() instanceof AbstractBedBlock;
+		boolean bed = level != null && com.jaymoskingdoms.Loaded.made(level, at.pos()) && level.getBlockState(at.pos()).getBlock() instanceof AbstractBedBlock;
 		put(server, player.getUUID(), bed ? new Berth(at, Optional.empty(), 0, 0, 0, false, false) : null);
 	}
 
@@ -422,7 +422,7 @@ public final class Berths {
 			return GlobalPos.of(level.dimension(), b.at().pos().above());
 		}
 		BlockPos at = b.at().pos();
-		if (level.isLoaded(at) && !(level.getBlockState(at).getBlock() instanceof AbstractBedBlock)) {
+		if (com.jaymoskingdoms.Loaded.made(level, at) && !(level.getBlockState(at).getBlock() instanceof AbstractBedBlock)) {
 			return null;
 		}
 		return GlobalPos.of(level.dimension(), at.above());

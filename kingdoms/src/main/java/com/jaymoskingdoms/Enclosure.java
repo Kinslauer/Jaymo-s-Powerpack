@@ -57,7 +57,7 @@ final class Enclosure {
 				continue;
 			}
 			BlockPos middle = p.origin().offset(2, 0, 2);
-			if (!level.isLoaded(middle)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, middle)) {
 				continue;
 			}
 			int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle.getX(), middle.getZ()) - 1;

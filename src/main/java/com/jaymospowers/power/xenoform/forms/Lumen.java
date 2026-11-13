@@ -174,7 +174,7 @@ public final class Lumen extends XenoForm {
 	}
 
 	private static void out(ServerLevel level, BlockPos at) {
-		if (level.isLoaded(at) && level.getBlockState(at).is(Blocks.LIGHT)) {
+		if (com.jaymospowers.core.Loaded.made(level, at) && level.getBlockState(at).is(Blocks.LIGHT)) {
 			level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
 		}
 	}

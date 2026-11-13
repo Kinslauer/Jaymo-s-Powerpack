@@ -161,7 +161,7 @@ public final class Graves {
 		for (ServerLevel level : server.getAllLevels()) {
 			for (Grave g : List.copyOf(all(level))) {
 				BlockPos pos = BlockPos.of(g.pos);
-				if (level.isLoaded(pos) && !level.getBlockState(pos).is(GRAVE)) {
+				if (com.jaymoskingdoms.Loaded.made(level, pos) && !level.getBlockState(pos).is(GRAVE)) {
 					opened(level, pos);
 				}
 			}

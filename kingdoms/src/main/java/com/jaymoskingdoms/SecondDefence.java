@@ -147,7 +147,7 @@ public final class SecondDefence {
 	private static void look(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		Ford.Site site = Ford.site(server);
-		if (site == null || !level.hasChunkAt(site.ford()) || !level.hasChunkAt(site.keep())) {
+		if (site == null || !com.jaymoskingdoms.Loaded.made(level, site.ford()) || !com.jaymoskingdoms.Loaded.made(level, site.keep())) {
 			return;
 		}
 		clearLeftovers(level, site);
@@ -230,7 +230,7 @@ public final class SecondDefence {
 			}
 		}
 		f.empty = anyone ? 0 : f.empty + FIGHT_TICKS;
-		if (f.empty >= GIVE_UP || !level.hasChunkAt(f.site.ford())) {
+		if (f.empty >= GIVE_UP || !com.jaymoskingdoms.Loaded.made(level, f.site.ford())) {
 			lost(level, f);
 			return;
 		}
@@ -311,7 +311,7 @@ public final class SecondDefence {
 		for (int tries = 0; tries < 6; tries++) {
 			Vec3 at = Vec3.atBottomCenterOf(f.site.ford()).add(f.away.scale(out + tries * 2)).add(across.scale(side));
 			BlockPos column = BlockPos.containing(at);
-			if (!level.hasChunkAt(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

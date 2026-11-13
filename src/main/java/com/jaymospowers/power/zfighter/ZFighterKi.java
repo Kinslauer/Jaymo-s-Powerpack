@@ -619,7 +619,7 @@ public final class ZFighterKi {
 				if (!seen.add(pos)) {
 					continue;
 				}
-				if (!level.isLoaded(pos)) {
+				if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 					reach = d;
 					stopped = true;
 					break scan;

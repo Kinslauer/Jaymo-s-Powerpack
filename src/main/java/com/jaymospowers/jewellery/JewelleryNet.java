@@ -113,7 +113,7 @@ public final class JewelleryNet {
 	}
 
 	private static @Nullable LapidaryWheelEntity wheel(ServerPlayer player, BlockPos pos) {
-		if (player.blockPosition().distSqr(pos) > REACH_SQ || !player.level().isLoaded(pos)) {
+		if (player.blockPosition().distSqr(pos) > REACH_SQ || !com.jaymospowers.core.Loaded.made(player.level(), pos)) {
 			return null;
 		}
 		return player.level().getBlockEntity(pos) instanceof LapidaryWheelEntity wheel ? wheel : null;

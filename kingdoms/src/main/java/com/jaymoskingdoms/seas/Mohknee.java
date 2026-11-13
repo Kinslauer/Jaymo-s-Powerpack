@@ -112,7 +112,7 @@ public final class Mohknee {
 		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
 		for (int step = 16; step <= SHORE_AHEAD; step += 16) {
 			p.set(net.minecraft.util.Mth.floor(x + fx * step), level.getSeaLevel() - 1, net.minecraft.util.Mth.floor(z + fz * step));
-			if (level.hasChunkAt(p) && level.getFluidState(p).isEmpty() && !level.getBlockState(p).isAir()) {
+			if (com.jaymoskingdoms.Loaded.made(level, p) && level.getFluidState(p).isEmpty() && !level.getBlockState(p).isAir()) {
 				return true;
 			}
 		}

@@ -175,7 +175,7 @@ public final class HerdPull {
 			Vec3 off = goal.subtract(from).multiply(1.0, 0.0, 1.0);
 			Vec3 at = off.lengthSqr() <= STROLL * STROLL ? goal : from.add(off.normalize().scale(STROLL));
 			BlockPos column = BlockPos.containing(at.x, from.y, at.z);
-			return level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : null;
+			return com.jaymoskingdoms.Loaded.made(level, column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : null;
 		}
 
 		@Override

@@ -58,7 +58,7 @@ public final class EssenceJars {
 		java.util.List<JarEntity> jars = new java.util.ArrayList<>();
 		long limit = (long) radius * radius;
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-radius, -radius, -radius), centre.offset(radius, radius, radius))) {
-			if (pos.distSqr(centre) > limit || !level.hasChunkAt(pos) || !level.getBlockState(pos).is(Crucibles.ESSENCE_JAR)) {
+			if (pos.distSqr(centre) > limit || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).is(Crucibles.ESSENCE_JAR)) {
 				continue;
 			}
 			if (level.getBlockEntity(pos) instanceof JarEntity jar) {

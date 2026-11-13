@@ -129,7 +129,7 @@ public final class CryoBlizzard {
 			int x = (int)Math.floor(center.x + (random.nextDouble() * 2.0 - 1.0) * RADIUS);
 			int z = (int)Math.floor(center.z + (random.nextDouble() * 2.0 - 1.0) * RADIUS);
 			BlockPos pos = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z), z);
-			if (Vec3.atCenterOf(pos).distanceToSqr(center) > RADIUS * RADIUS || !level.isLoaded(pos) || !level.getBlockState(pos).isAir()) {
+			if (Vec3.atCenterOf(pos).distanceToSqr(center) > RADIUS * RADIUS || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).isAir()) {
 				continue;
 			}
 			BlockPos floor = pos.below();

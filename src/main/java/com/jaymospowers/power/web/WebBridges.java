@@ -90,7 +90,7 @@ public final class WebBridges {
 			// a stopping server takes its weblines with it (nothing left hanging in the save)
 			for (Plank plank : PLANKS) {
 				ServerLevel level = server.getLevel(plank.dimension());
-				if (level != null && level.isLoaded(plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
+				if (level != null && com.jaymospowers.core.Loaded.made(level, plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
 					level.setBlock(plank.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 				}
 			}
@@ -155,7 +155,7 @@ public final class WebBridges {
 				continue;
 			}
 			it.remove();
-			if (level.isLoaded(plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
+			if (com.jaymospowers.core.Loaded.made(level, plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
 				level.setBlock(plank.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
@@ -170,7 +170,7 @@ public final class WebBridges {
 	private static void burn(MinecraftServer server) {
 		for (Line line : List.copyOf(LINES)) {
 			ServerLevel level = server.getLevel(line.dimension());
-			if (level == null || !level.isLoaded(BlockPos.containing(line.span().from())) || !level.isLoaded(BlockPos.containing(line.span().to()))) {
+			if (level == null || !com.jaymospowers.core.Loaded.made(level, BlockPos.containing(line.span().from())) || !com.jaymospowers.core.Loaded.made(level, BlockPos.containing(line.span().to()))) {
 				continue;
 			}
 			Vec3 at = WebHeft.burning(level, line.span().from(), line.span().to(), null, null);
@@ -225,7 +225,7 @@ public final class WebBridges {
 				it.remove();
 				continue;
 			}
-			if (!level.isLoaded(plank.pos())) {
+			if (!com.jaymospowers.core.Loaded.made(level, plank.pos())) {
 				continue; // wait for its chunk to come back
 			}
 			it.remove();

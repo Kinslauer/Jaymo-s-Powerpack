@@ -330,7 +330,7 @@ final class TradeRoutes {
 	 * cart) at {@link #HAND_PACE}; a skiff on unseen water at full pace.
 	 */
 	static double pace(ServerLevel level, Caravans.Caravan c) {
-		if (c.rig() == HAND || c.rig() == BOAT && level.isLoaded(c.at()) && rigNow(level, c) == HAND) {
+		if (c.rig() == HAND || c.rig() == BOAT && com.jaymoskingdoms.Loaded.made(level, c.at()) && rigNow(level, c) == HAND) {
 			return HAND_PACE;
 		}
 		return 1.0;

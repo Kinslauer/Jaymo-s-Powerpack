@@ -492,7 +492,7 @@ public final class Meals {
 		}
 		BlockPos found = null;
 		GlobalPos home = McaCompat.home(v).orElse(null);
-		if (home != null && home.dimension() == level.dimension() && level.isLoaded(home.pos())) {
+		if (home != null && home.dimension() == level.dimension() && com.jaymoskingdoms.Loaded.made(level, home.pos())) {
 			double best = Double.MAX_VALUE;
 			for (BlockPos p : BlockPos.betweenClosed(home.pos().offset(-STOVE_REACH, -2, -STOVE_REACH), home.pos().offset(STOVE_REACH, 2, STOVE_REACH))) {
 				BlockState state = level.getBlockState(p);
@@ -537,7 +537,7 @@ public final class Meals {
 	/** Where an eatery's meals are handed over: its smoker (the kitchen), else its middle. */
 	private static BlockPos counter(ServerLevel level, Works.Built b) {
 		BlockPos top = b.top();
-		if (level.isLoaded(b.min()) && level.isLoaded(top)) {
+		if (com.jaymoskingdoms.Loaded.made(level, b.min()) && com.jaymoskingdoms.Loaded.made(level, top)) {
 			for (BlockPos p : BlockPos.betweenClosed(b.min(), new BlockPos(top.getX(), Math.min(top.getY(), b.min().getY() + 3), top.getZ()))) {
 				if (level.getBlockState(p).is(Blocks.SMOKER)) {
 					return p.immutable();

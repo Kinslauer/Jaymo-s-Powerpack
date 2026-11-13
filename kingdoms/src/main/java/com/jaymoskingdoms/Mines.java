@@ -300,7 +300,7 @@ public final class Mines {
 					continue;
 				}
 				BlockPos column = seat.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -338,7 +338,7 @@ public final class Mines {
 			BlockPos ahead = m.entrance().relative(m.facing(), a);
 			for (int s = -WIDE / 2 - 1; s <= WIDE / 2 + 1; s++) {
 				BlockPos column = ahead.relative(m.side(), s);
-				if (!level.isLoaded(column)
+				if (!com.jaymoskingdoms.Loaded.made(level, column)
 					|| level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).getY() < m.entrance().getY() + CLIFF_HIGH) {
 					return false;
 				}

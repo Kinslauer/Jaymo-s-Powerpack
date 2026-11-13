@@ -614,7 +614,7 @@ final class Raids {
 		BlockPos goal = to;
 		if (len > WAYPOINT) {
 			BlockPos column = BlockPos.containing(raider.getX() + dx / len * WAYPOINT, raider.getY(), raider.getZ() + dz / len * WAYPOINT);
-			goal = level.isLoaded(column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
+			goal = com.jaymoskingdoms.Loaded.made(level, column) ? level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column) : column;
 		}
 		raider.getNavigation().moveTo(goal.getX() + 0.5, goal.getY(), goal.getZ() + 0.5, MARCH_SPEED);
 	}

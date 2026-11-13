@@ -149,7 +149,7 @@ public final class MythicMounts {
 	private static @Nullable BlockPos near(ServerLevel level, ServerPlayer player, RandomSource random) {
 		for (int i = 0; i < 12; i++) {
 			BlockPos at = player.blockPosition().offset(random.nextInt(33) - 16, random.nextInt(9) - 4, random.nextInt(33) - 16);
-			if (level.isLoaded(at) && level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir()
+			if (com.jaymoskingdoms.Loaded.made(level, at) && level.getBlockState(at).isAir() && level.getBlockState(at.above()).isAir()
 				&& level.getBlockState(at.above(2)).isAir() && level.getBlockState(at.below()).isSolid() && player.blockPosition().distSqr(at) > 64.0) {
 				return at;
 			}

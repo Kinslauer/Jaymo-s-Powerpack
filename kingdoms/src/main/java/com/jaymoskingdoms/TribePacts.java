@@ -247,7 +247,7 @@ public final class TribePacts {
 
 	/** The tribute goes into a chest of the king's hold, if it's loaded ((0.7.490) as bent copper, so many to the emerald). */
 	private static void hoard(ServerLevel level, BlockPos at, int emeralds) {
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return;
 		}
 		int r = OgreHolds.HOLD_RADIUS;
@@ -363,7 +363,7 @@ public final class TribePacts {
 		toward = toward.lengthSqr() < 1.0 ? new Vec3(1.0, 0.0, 0.0) : toward.normalize();
 		int r = CALL_NEAR + random.nextInt(CALL_FAR - CALL_NEAR);
 		BlockPos column = BlockPos.containing(target.seat().getX() + toward.x * r, target.seat().getY(), target.seat().getZ() + toward.z * r);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

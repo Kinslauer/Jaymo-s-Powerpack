@@ -207,7 +207,7 @@ public class ScalebaneArcher extends Monster implements RangedAttackMob, Acting 
 	 * its fire. Only while the fire's ground is loaded.
 	 */
 	static void hire(ServerLevel level, int camp, BlockPos fire, int count) {
-		if (Beasts.SCALEBANE == null || !level.isLoaded(fire)) {
+		if (Beasts.SCALEBANE == null || !com.jaymoskingdoms.Loaded.made(level, fire)) {
 			return;
 		}
 		int near = level.getEntitiesOfClass(ScalebaneArcher.class, new net.minecraft.world.phys.AABB(fire).inflate(COUNT_RANGE), s -> s.camp == camp).size();

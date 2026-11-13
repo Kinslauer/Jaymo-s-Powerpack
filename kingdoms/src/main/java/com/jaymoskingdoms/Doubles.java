@@ -361,7 +361,7 @@ public final class Doubles {
 	private static boolean make(ServerLevel level, Pending p, BlockPos seat) {
 		RandomSourceHolder r = new RandomSourceHolder(level);
 		int x = seat.getX() + r.spread(), z = seat.getZ() + r.spread();
-		if (!level.hasChunkAt(new BlockPos(x, seat.getY(), z))) {
+		if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, seat.getY(), z))) {
 			return false;
 		}
 		BlockPos ground = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, seat.getY(), z));

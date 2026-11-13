@@ -205,7 +205,7 @@ public final class Production {
 		for (int dx = -FARM_RANGE; dx <= FARM_RANGE; dx++) {
 			for (int dz = -FARM_RANGE; dz <= FARM_RANGE; dz++) {
 				BlockPos column = seat.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -218,7 +218,7 @@ public final class Production {
 		for (int dx = -LAND_RANGE; dx <= LAND_RANGE; dx += LAND_STEP) {
 			for (int dz = -LAND_RANGE; dz <= LAND_RANGE; dz += LAND_STEP) {
 				BlockPos column = seat.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockState top = level.getBlockState(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column).below());

@@ -416,7 +416,7 @@ public final class OgreHolds {
 		BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * r, 0, player.getZ() + Math.sin(angle) * r);
 		for (int dx : new int[] {-radius, radius}) {
 			for (int dz : new int[] {-radius, radius}) {
-				if (!level.isLoaded(column.offset(dx, 0, dz))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column.offset(dx, 0, dz))) {
 					return null;
 				}
 			}

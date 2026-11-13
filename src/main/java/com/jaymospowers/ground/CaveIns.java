@@ -58,7 +58,7 @@ public final class CaveIns {
 	private static void tick(MinecraftServer server) {
 		for (Iterator<Shaking> it = SHAKING.iterator(); it.hasNext(); ) {
 			Shaking s = it.next();
-			if (!s.level.isLoaded(s.pos)) {
+			if (!com.jaymospowers.core.Loaded.made(s.level, s.pos)) {
 				it.remove();
 				continue;
 			}

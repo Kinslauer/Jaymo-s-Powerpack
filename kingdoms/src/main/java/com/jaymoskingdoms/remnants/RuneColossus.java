@@ -130,7 +130,7 @@ public class RuneColossus extends ActingMonster {
 			Entity mine = level.getEntity(this.giant);
 			if (!(mine instanceof AetherGiant g) || !g.isAlive()) {
 				// (only once its Giant is known gone: one out of sight in unloaded ground is still standing)
-				if (mine != null || level.isLoaded(this.blockPosition()) && this.tickCount > 200 && !this.giantNear(level)) {
+				if (mine != null || com.jaymoskingdoms.Loaded.made(level, this.blockPosition()) && this.tickCount > 200 && !this.giantNear(level)) {
 					this.kill(level);
 					return;
 				}
@@ -302,7 +302,7 @@ public class RuneColossus extends ActingMonster {
 				double turn = random.nextDouble() * Math.PI * 2.0, far = Mth.lerp(random.nextDouble(), RISE_MIN, RISE_MAX);
 				BlockPos column = BlockPos.containing(giant.getX() + Math.cos(turn) * far, giant.getY(), giant.getZ() + Math.sin(turn) * far);
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
-				if (level.isLoaded(top) && Math.abs(top.getY() - giant.getY()) < 12 && level.getFluidState(top).isEmpty()
+				if (com.jaymoskingdoms.Loaded.made(level, top) && Math.abs(top.getY() - giant.getY()) < 12 && level.getFluidState(top).isEmpty()
 					&& level.noCollision(colossus.getType().getSpawnAABB(top.getX() + 0.5, top.getY(), top.getZ() + 0.5))) {
 					at = top;
 				}

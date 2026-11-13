@@ -568,7 +568,7 @@ final class WebTakeoverPath {
 			return known;
 		}
 		int kind;
-		if (!level.isLoaded(pos)) {
+		if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 			kind = UNLOADED;
 		} else {
 			BlockState state = level.getBlockState(pos);

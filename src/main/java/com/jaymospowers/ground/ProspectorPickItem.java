@@ -72,7 +72,7 @@ public class ProspectorPickItem extends Item {
 		for (int dx = -RADIUS; dx <= RADIUS; dx++) {
 			for (int dz = -RADIUS; dz <= RADIUS; dz++) {
 				p.set(at.getX() + dx, at.getY(), at.getZ() + dz);
-				if (!level.isLoaded(p)) {
+				if (!com.jaymospowers.core.Loaded.made(level, p)) {
 					continue;
 				}
 				for (int dy = -RADIUS; dy <= RADIUS; dy++) {

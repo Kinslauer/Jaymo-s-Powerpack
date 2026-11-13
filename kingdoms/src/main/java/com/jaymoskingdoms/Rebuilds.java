@@ -60,7 +60,7 @@ final class Rebuilds {
 			return;
 		}
 		Works.Built b = built.get(Math.floorMod(NEXT.merge(f.id(), 1, Integer::sum), built.size()));
-		if (b.rotation().isEmpty() || !level.isLoaded(b.min()) || !level.isLoaded(b.max())) {
+		if (b.rotation().isEmpty() || !com.jaymoskingdoms.Loaded.made(level, b.min()) || !com.jaymoskingdoms.Loaded.made(level, b.max())) {
 			return;
 		}
 		Blueprint.Entry entry = Planner.entry(f, b.entry());

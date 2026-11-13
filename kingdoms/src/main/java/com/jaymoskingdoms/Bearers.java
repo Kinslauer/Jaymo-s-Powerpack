@@ -367,7 +367,7 @@ public final class Bearers {
 				}
 			}
 			for (Faction f : Factions.all(server)) {
-				if (!f.fallen() && f.type() != FactionType.BARBARIAN && level.isLoaded(f.seat())) {
+				if (!f.fallen() && f.type() != FactionType.BARBARIAN && com.jaymoskingdoms.Loaded.made(level, f.seat())) {
 					assign(level, f, now);
 				}
 			}
@@ -860,7 +860,7 @@ public final class Bearers {
 	/** The first free block above the ground at {@code x, z} (loaded only), or null. */
 	private static @Nullable BlockPos surface(ServerLevel level, int x, int z) {
 		BlockPos column = new BlockPos(x, 0, z);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return null;
 		}
 		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
@@ -935,7 +935,7 @@ public final class Bearers {
 	private static boolean untouched(ServerLevel level, BlockPos head) {
 		List<Grave> graves = level.getAttachedOrElse(GRAVES, List.of());
 		for (BlockPos p : BlockPos.betweenClosed(head.offset(-2, -1, -2), head.offset(2, 1, 3))) {
-			if (!level.isLoaded(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				return false;
 			}
 			BlockState s = level.getBlockState(p);
@@ -1176,7 +1176,7 @@ public final class Bearers {
 		for (Grave g : level.getAttachedOrElse(GRAVES, List.of())) {
 			Optional<UUID> dead = g.deadId();
 			BlockPos head = g.headPos();
-			if (dead.isEmpty() || day - g.day() > VISIT_DAYS || !level.isLoaded(head) || random.nextFloat() >= VISIT_CHANCE) {
+			if (dead.isEmpty() || day - g.day() > VISIT_DAYS || !com.jaymoskingdoms.Loaded.made(level, head) || random.nextFloat() >= VISIT_CHANCE) {
 				continue;
 			}
 			AABB box = new AABB(head).inflate(MOURN_REACH, 16.0, MOURN_REACH);

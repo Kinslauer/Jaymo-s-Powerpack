@@ -238,7 +238,7 @@ public class ZephyrusDragon extends WindDragon implements GeoEntity {
 		for (int i = 0; i < WATER_TRIES; i++) {
 			int x = Mth.floor(centre.x) + this.random.nextInt(WATER_SEARCH * 2 + 1) - WATER_SEARCH;
 			int z = Mth.floor(centre.z) + this.random.nextInt(WATER_SEARCH * 2 + 1) - WATER_SEARCH;
-			if (!level.isLoaded(new BlockPos(x, 0, z))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, 0, z))) {
 				continue;
 			}
 			// (the heightmap counts water as solid: this is the top water block)

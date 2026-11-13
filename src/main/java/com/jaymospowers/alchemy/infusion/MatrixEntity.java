@@ -302,7 +302,7 @@ public class MatrixEntity extends BlockEntity {
 		int r = Infusion.JAR_RANGE;
 		for (BlockPos pos : BlockPos.betweenClosed(worldPosition.offset(-r, -r, -r), worldPosition.offset(r, r, r))) {
 			double d = pos.distSqr(worldPosition);
-			if (d > (long) r * r || d >= bestDist || !level.hasChunkAt(pos) || !level.getBlockState(pos).is(Crucibles.ESSENCE_JAR)) {
+			if (d > (long) r * r || d >= bestDist || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getBlockState(pos).is(Crucibles.ESSENCE_JAR)) {
 				continue;
 			}
 			if (level.getBlockEntity(pos) instanceof JarEntity jar && jar.essence() == essence && jar.amount() > 0) {

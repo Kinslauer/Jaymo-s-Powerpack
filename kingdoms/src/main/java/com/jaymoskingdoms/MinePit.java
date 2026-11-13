@@ -211,7 +211,7 @@ final class MinePit {
 	/** The column at {@code x, z} is natural, dry ground within a block of {@code y0}. */
 	static boolean level(ServerLevel level, int x, int z, int y0) {
 		BlockPos column = new BlockPos(x, y0, z);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return false;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -235,7 +235,7 @@ final class MinePit {
 					continue;
 				}
 				BlockPos column = seat.offset(dx, 0, dz);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					continue;
 				}
 				BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

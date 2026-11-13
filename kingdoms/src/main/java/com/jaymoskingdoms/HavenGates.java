@@ -122,7 +122,7 @@ public final class HavenGates {
 		ServerLevel store = Factions.level(server);
 		List<Integer> done = store.getAttachedOrElse(BANNERED, List.of());
 		for (Faction f : Factions.all(server)) {
-			if (f.fallen() || done.contains(f.id()) || !level.isLoaded(f.seat()) || !Havens.is(server, f)) {
+			if (f.fallen() || done.contains(f.id()) || !com.jaymoskingdoms.Loaded.made(level, f.seat()) || !Havens.is(server, f)) {
 				continue;
 			}
 			if (raise(level, f)) {

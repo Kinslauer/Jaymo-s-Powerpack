@@ -177,7 +177,7 @@ final class GoblinVillages {
 	static BlockPos spot(ServerLevel level, BlockPos fire, RandomSource random) {
 		for (int tries = 0; tries < 16; tries++) {
 			BlockPos column = fire.offset(random.nextInt(15) - 7, 0, random.nextInt(15) - 7);
-			if (column.distManhattan(fire) < 3 || !level.isLoaded(column)) {
+			if (column.distManhattan(fire) < 3 || !com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos at = ground(level, column);
@@ -291,7 +291,7 @@ final class GoblinVillages {
 				continue;
 			}
 			BlockPos at = placer.at(p.offset());
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				return false;
 			}
 			BlockState there = level.getBlockState(at);

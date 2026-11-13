@@ -916,7 +916,7 @@ public final class Ship extends Entity {
 	static double surface(Level level, double x, double fromY, double z) {
 		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(Mth.floor(x), Mth.floor(fromY), Mth.floor(z));
 		for (int i = 0; i < 10; i++, p.move(Direction.DOWN)) {
-			if (!level.hasChunkAt(p)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				return Double.NEGATIVE_INFINITY;
 			}
 			FluidState fluid = level.getFluidState(p);
@@ -952,7 +952,7 @@ public final class Ship extends Entity {
 			Piece p = h.pieces.get(i);
 			Vec3 w = toWorld(p.x(), p.y() + (h.lo[i] + Math.min(1.0F, h.hi[i])) * 0.5, p.z(), at, yaw);
 			q.set(Mth.floor(w.x), Mth.floor(w.y), Mth.floor(w.z));
-			if (!level.hasChunkAt(q)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, q)) {
 				// (never into the unloaded)
 				return Integer.MAX_VALUE;
 			}
@@ -1241,7 +1241,7 @@ public final class Ship extends Entity {
 		for (Piece p : h.pieces) {
 			BlockPos at = origin.offset(new BlockPos(p.x(), p.y(), p.z()).rotate(turn));
 			BlockState there = level.getBlockState(at);
-			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || !there.getFluidState().isEmpty() && !part(there))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || !(there.isAir() || there.canBeReplaced() || !there.getFluidState().isEmpty() && !part(there))) {
 				return null;
 			}
 			where.add(at);
@@ -2038,7 +2038,7 @@ public final class Ship extends Entity {
 			Piece p = h.pieces.get(i);
 			BlockPos at = origin.offset(new BlockPos(p.x(), p.y(), p.z()).rotate(turn));
 			BlockState there = level.getBlockState(at);
-			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || !there.getFluidState().isEmpty() && !part(there))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || !(there.isAir() || there.canBeReplaced() || !there.getFluidState().isEmpty() && !part(there))) {
 				continue;
 			}
 			BlockState state = p.blockState().rotate(turn);
@@ -2094,14 +2094,14 @@ public final class Ship extends Entity {
 		}
 		// what no longer matches is taken up; what something else took up (a bucket, a fill) is put back below
 		this.lit.long2IntEntrySet().removeIf(e -> want.get(e.getLongKey()) != e.getIntValue()
-			|| level.hasChunkAt(BlockPos.of(e.getLongKey())) && !level.getBlockState(BlockPos.of(e.getLongKey())).is(Blocks.LIGHT));
+			|| com.jaymoskingdoms.Loaded.made(level, BlockPos.of(e.getLongKey())) && !level.getBlockState(BlockPos.of(e.getLongKey())).is(Blocks.LIGHT));
 		for (it.unimi.dsi.fastutil.longs.Long2IntMap.Entry e : want.long2IntEntrySet()) {
 			long key = e.getLongKey();
 			if (this.lit.containsKey(key)) {
 				continue;
 			}
 			BlockPos at = BlockPos.of(key);
-			if (!level.hasChunkAt(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				continue;
 			}
 			BlockState there = level.getBlockState(at);
@@ -2124,7 +2124,7 @@ public final class Ship extends Entity {
 	}
 
 	private static void douse(ServerLevel level, BlockPos at) {
-		if (!level.hasChunkAt(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return;
 		}
 		BlockState there = level.getBlockState(at);

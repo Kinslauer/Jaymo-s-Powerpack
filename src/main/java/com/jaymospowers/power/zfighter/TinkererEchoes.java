@@ -132,7 +132,7 @@ public final class TinkererEchoes {
 			}
 			it.remove();
 			ServerLevel level = server.getLevel(owed.dimension);
-			if (level != null && level.isLoaded(BlockPos.containing(owed.at))) {
+			if (level != null && com.jaymospowers.core.Loaded.made(level, BlockPos.containing(owed.at))) {
 				step(level, owed);
 			}
 		}

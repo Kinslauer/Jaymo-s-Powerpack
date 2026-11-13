@@ -189,7 +189,7 @@ public final class Storehouse {
 			for (int i = 0; i < SITE_ANGLES; i++) {
 				double a = (i + (r / SITE_STEP) * 0.5) / SITE_ANGLES * Math.PI * 2.0;
 				BlockPos center = anchor.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
-				if (!level.isLoaded(center)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, center)) {
 					continue;
 				}
 				Direction facing = Direction.getApproximateNearest(anchor.getX() - center.getX(), 0, anchor.getZ() - center.getZ());
@@ -223,7 +223,7 @@ public final class Storehouse {
 		for (int x = -half - 1; x <= half + 1; x++) {
 			for (int z = -1; z <= depth + 1; z++) {
 				BlockPos column = f.at(x, 0, z);
-				if (!level.isLoaded(column)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 					return -1;
 				}
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);

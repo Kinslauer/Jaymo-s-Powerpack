@@ -300,11 +300,11 @@ public final class Necropolis {
 					continue;
 				}
 				// the urn gone by any other means (an explosion, a piston)
-				if (c.whole() && level.hasChunkAt(c.vessel()) && !level.getBlockState(c.vessel()).is(Vessel.BLOCK)) {
+				if (c.whole() && com.jaymoskingdoms.Loaded.made(level, c.vessel()) && !level.getBlockState(c.vessel()).is(Vessel.BLOCK)) {
 					shatter(level, c);
 					continue;
 				}
-				if (c.risesAt() > 0L && level.getGameTime() >= c.risesAt() && level.hasChunkAt(c.hall())) {
+				if (c.risesAt() > 0L && level.getGameTime() >= c.risesAt() && com.jaymoskingdoms.Loaded.made(level, c.hall())) {
 					rise(level, c);
 				}
 			}

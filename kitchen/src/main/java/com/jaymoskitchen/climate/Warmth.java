@@ -252,7 +252,7 @@ public final class Warmth {
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {
 				BlockPos p = at.offset(dx * DAMP_REACH, 0, dz * DAMP_REACH);
-				if (!level.hasChunkAt(p)) {
+				if (!com.jaymoskitchen.Loaded.made(level, p)) {
 					continue;
 				}
 				n++;

@@ -311,7 +311,7 @@ public final class Storms {
 		double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * s.radius * 0.85;
 		int x = Mth.floor(s.x + Math.cos(a) * r), z = Mth.floor(s.z + Math.sin(a) * r);
 		BlockPos column = new BlockPos(x, level.getMinY(), z);
-		if (!level.isLoaded(column)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 			return;
 		}
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column);

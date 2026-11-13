@@ -92,7 +92,7 @@ public final class StoneAnvil {
 	private static boolean crumble(Spot spot) {
 		ServerLevel level = spot.level();
 		BlockPos pos = spot.pos();
-		if (!level.isLoaded(pos)) {
+		if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 			return false;
 		}
 		BlockState state = level.getBlockState(pos);

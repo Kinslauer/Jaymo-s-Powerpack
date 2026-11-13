@@ -133,7 +133,7 @@ final class WebSymbioteDig {
 	/** Cuts step {@code k}: its three-block column, a floor if it has none. False if something is in the way. */
 	private static boolean carve(ServerPlayer player, ServerLevel level, Dig dig, int k) {
 		BlockPos foot = cell(dig, k);
-		if (!level.hasChunkAt(foot)) {
+		if (!com.jaymospowers.core.Loaded.made(level, foot)) {
 			return false;
 		}
 		// no water or lava in it, under it, round it or over it

@@ -312,7 +312,7 @@ public final class PlanSites {
 					continue;
 				}
 				at.set(c.pos[i]);
-				if (!level.isLoaded(at)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 					// (not all of it loaded: start again later)
 					c.cursor = 0;
 					c.found = 0;

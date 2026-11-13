@@ -339,7 +339,7 @@ public final class NetherForts {
 
 	/** Looks after a standing fort while it's loaded: a new recruit now and then, and a war host when one's due. */
 	private static void tend(ServerLevel nether, Fort fort, long now) {
-		if (!nether.isLoaded(fort.center())) {
+		if (!com.jaymoskingdoms.Loaded.made(nether, fort.center())) {
 			return;
 		}
 		Fort rival = fort(nether, fort.rival());
@@ -643,7 +643,7 @@ public final class NetherForts {
 		BlockPos probe = new BlockPos(x, nearY, z);
 		for (int dx : new int[] {-radius, radius}) {
 			for (int dz : new int[] {-radius, radius}) {
-				if (!nether.isLoaded(probe.offset(dx, 0, dz))) {
+				if (!com.jaymoskingdoms.Loaded.made(nether, probe.offset(dx, 0, dz))) {
 					return null;
 				}
 			}

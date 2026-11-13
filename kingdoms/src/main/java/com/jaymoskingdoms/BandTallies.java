@@ -169,7 +169,7 @@ public final class BandTallies {
 			}
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(m.getRandom().nextInt(7) - 3, 0,
 				m.getRandom().nextInt(7) - 3));
-			if (!level.isLoaded(at) || level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), 24.0, false) != null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at) || level.getNearestPlayer(at.getX(), at.getY(), at.getZ(), 24.0, false) != null) {
 				continue;
 			}
 			// (they come over the land with the party: the muster is out of anyone's sight, as the party's own arrival is)

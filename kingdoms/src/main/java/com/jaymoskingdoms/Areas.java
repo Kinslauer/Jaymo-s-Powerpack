@@ -276,7 +276,7 @@ public final class Areas {
 		all.sort(Comparator.comparingDouble(q -> q.min().atY(near.getY()).distSqr(near)));
 		long now = level.getGameTime();
 		for (Works.Built q : all) {
-			if (!level.isLoaded(q.min()) || !level.isLoaded(q.max()) || now < RESTING.getOrDefault(q.min(), 0L)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, q.min()) || !com.jaymoskingdoms.Loaded.made(level, q.max()) || now < RESTING.getOrDefault(q.min(), 0L)) {
 				continue;
 			}
 			for (int y = q.max().getY(); y >= q.min().getY(); y--) {

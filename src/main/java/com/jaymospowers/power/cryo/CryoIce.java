@@ -72,7 +72,7 @@ public final class CryoIce {
 
 	/** Whether ice may go at {@code pos} in this {@code mode}. */
 	static boolean fits(ServerLevel level, BlockPos pos, Mode mode) {
-		if (level.isOutsideBuildHeight(pos) || !level.isLoaded(pos) || !level.getWorldBorder().isWithinBounds(pos)) {
+		if (level.isOutsideBuildHeight(pos) || !com.jaymospowers.core.Loaded.made(level, pos) || !level.getWorldBorder().isWithinBounds(pos)) {
 			return false;
 		}
 		BlockState state = level.getBlockState(pos);
@@ -144,7 +144,7 @@ public final class CryoIce {
 			for (Map.Entry<Long, Placed> entry : level.getValue().entrySet()) {
 				Placed placed = entry.getValue();
 				BlockPos at = BlockPos.of(entry.getKey());
-				if (world.isLoaded(at) && !world.getBlockState(at).is(placed.ice)) {
+				if (com.jaymospowers.core.Loaded.made(world, at) && !world.getBlockState(at).is(placed.ice)) {
 					// broken, blown up or built over: no longer ours, so forget it without touching what's there
 					done.add(entry.getKey());
 					continue;
@@ -153,7 +153,7 @@ public final class CryoIce {
 					continue;
 				}
 				BlockPos pos = BlockPos.of(entry.getKey());
-				if (!world.isLoaded(pos)) {
+				if (!com.jaymospowers.core.Loaded.made(world, pos)) {
 					placed.until = now + UNLOADED_RETRY;
 					continue;
 				}

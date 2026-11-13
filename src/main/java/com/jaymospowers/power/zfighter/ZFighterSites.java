@@ -248,7 +248,7 @@ public final class ZFighterSites {
 			return true;
 		}
 		BlockPos chest = chestPos(overworld, data.shrines().get(orb));
-		if (chest == null || !overworld.isLoaded(chest)) {
+		if (chest == null || !com.jaymospowers.core.Loaded.made(overworld, chest)) {
 			return true;
 		}
 		if (!(overworld.getBlockEntity(chest) instanceof Container container)) {
@@ -274,7 +274,7 @@ public final class ZFighterSites {
 
 	/** Where a shrine's chest sits: under the middle stone (the shrine's floor is at the spot's surface, built once). */
 	private static BlockPos chestPos(ServerLevel level, BlockPos spot) {
-		if (!level.isLoaded(spot)) {
+		if (!com.jaymospowers.core.Loaded.made(level, spot)) {
 			return null;
 		}
 		for (int y = level.getMaxY(); y > level.getMinY(); y--) {

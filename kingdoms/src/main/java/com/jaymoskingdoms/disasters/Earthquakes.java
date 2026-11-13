@@ -127,7 +127,7 @@ public final class Earthquakes {
 	private static void loosen(ServerLevel level, BlockPos near, RandomSource random) {
 		BlockPos.MutableBlockPos at = near.offset(random.nextInt(LOOSE_RANGE * 2 + 1) - LOOSE_RANGE,
 			random.nextInt(LOOSE_BELOW + LOOSE_ABOVE + 1) - LOOSE_BELOW, random.nextInt(LOOSE_RANGE * 2 + 1) - LOOSE_RANGE).mutable();
-		if (!level.isLoaded(at)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 			return;
 		}
 		// up through the open air to what's over it
@@ -170,7 +170,7 @@ public final class Earthquakes {
 			x += Math.cos(heading);
 			z += Math.sin(heading);
 			BlockPos column = BlockPos.containing(x, near.getY(), z);
-			if (!level.isLoaded(column)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, column)) {
 				return;
 			}
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).below();
@@ -195,7 +195,7 @@ public final class Earthquakes {
 
 	/** The ground at {@code center} gives way: a round pit, its sides crumbling in. */
 	private static void sinkhole(ServerLevel level, BlockPos center, RandomSource random) {
-		if (!level.isLoaded(center)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, center)) {
 			return;
 		}
 		int radius = Mth.nextInt(random, SINK_RADIUS_MIN, SINK_RADIUS_MAX), depth = Mth.nextInt(random, SINK_DEPTH_MIN, SINK_DEPTH_MAX);

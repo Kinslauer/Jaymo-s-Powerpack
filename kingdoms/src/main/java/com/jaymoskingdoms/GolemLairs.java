@@ -162,7 +162,7 @@ public final class GolemLairs {
 				continue;
 			}
 			for (BlockPos pos : new ArrayList<>(e.getValue())) {
-				if (!level.isLoaded(pos)) {
+				if (!com.jaymoskingdoms.Loaded.made(level, pos)) {
 					e.getValue().remove(pos);
 					continue;
 				}

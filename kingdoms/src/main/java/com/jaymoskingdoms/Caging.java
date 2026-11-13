@@ -119,9 +119,9 @@ public final class Caging {
 					continue;
 				}
 				if (Math.abs(next.getX() - start.getX()) > RADIUS || Math.abs(next.getY() - start.getY()) > RADIUS
-					|| Math.abs(next.getZ() - start.getZ()) > RADIUS || !level.isLoaded(next)) {
+					|| Math.abs(next.getZ() - start.getZ()) > RADIUS || !com.jaymoskingdoms.Loaded.made(level, next)) {
 					// (open to the outside, or too big to be a room)
-					if (level.isLoaded(next) && !open(level, next)) {
+					if (com.jaymoskingdoms.Loaded.made(level, next) && !open(level, next)) {
 						continue;
 					}
 					return null;

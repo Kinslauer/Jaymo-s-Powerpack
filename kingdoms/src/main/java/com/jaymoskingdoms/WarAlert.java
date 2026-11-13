@@ -264,7 +264,7 @@ final class WarAlert {
 		Direction.Axis along = Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle)) ? Direction.Axis.Z : Direction.Axis.X;
 		for (int k = -(length / 2); k <= length / 2; k++) {
 			int x = cx + (along == Direction.Axis.X ? k : 0), z = cz + (along == Direction.Axis.Z ? k : 0);
-			if (!level.isLoaded(new BlockPos(x, seat.getY(), z))) {
+			if (!com.jaymoskingdoms.Loaded.made(level, new BlockPos(x, seat.getY(), z))) {
 				continue;
 			}
 			BlockPos p = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
@@ -379,7 +379,7 @@ final class WarAlert {
 	}
 
 	private static void lay(ServerLevel level, Faction f, BlockPos p, Direction.Axis axis) {
-		if (!level.isLoaded(p) || !fit(level, p)) {
+		if (!com.jaymoskingdoms.Loaded.made(level, p) || !fit(level, p)) {
 			return;
 		}
 		BlockState bag = Sandbags.raised(axis);

@@ -166,7 +166,7 @@ public class SandWorm extends ActingMonster {
 				double angle = random.nextDouble() * Math.PI * 2.0;
 				int x = middle.getX() + (int) Math.round(Math.cos(angle) * WAKE_OUT), z = middle.getZ() + (int) Math.round(Math.sin(angle) * WAKE_OUT);
 				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(x, middle.getY(), z));
-				if (!level.isLoaded(top) || !loose(level.getBlockState(top.below()))) {
+				if (!com.jaymoskingdoms.Loaded.made(level, top) || !loose(level.getBlockState(top.below()))) {
 					continue;
 				}
 				SandWorm worm = Beasts.SAND_WORM.create(level, EntitySpawnReason.EVENT);
@@ -274,7 +274,7 @@ public class SandWorm extends ActingMonster {
 			Vec3 step = to.scale(Math.min(BURROW_SPEED, flat) / flat);
 			double x = this.getX() + step.x, z = this.getZ() + step.z;
 			BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(x, this.getY(), z));
-			if (level.isLoaded(top) && loose(level.getBlockState(top.below())) && Math.abs(top.getY() - this.getY()) <= BURROW_STEP) {
+			if (com.jaymoskingdoms.Loaded.made(level, top) && loose(level.getBlockState(top.below())) && Math.abs(top.getY() - this.getY()) <= BURROW_STEP) {
 				this.setPos(x, top.getY(), z);
 				this.setYRot((float) (Math.atan2(step.z, step.x) * 180.0 / Math.PI) - 90.0F);
 			}

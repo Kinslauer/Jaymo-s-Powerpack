@@ -243,7 +243,7 @@ public final class ChalkMarks {
 				for (int dz = -r; dz <= r; dz++) {
 					for (int dy = 0; dy <= 2; dy++) {
 						BlockPos solid = around.offset(dx, dy, dz);
-						if (!level.hasChunkAt(solid) || !level.getBlockState(solid).isSolid()) {
+						if (!com.jaymoskingdoms.Loaded.made(level, solid) || !level.getBlockState(solid).isSolid()) {
 							continue;
 						}
 						for (Direction d : Direction.Plane.HORIZONTAL) {
@@ -274,7 +274,7 @@ public final class ChalkMarks {
 				continue;
 			}
 			BlockPos seat = f.seat();
-			if (!level.hasChunkAt(seat)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, seat)) {
 				continue;
 			}
 			add(all, wall(level, den.hatch(), SAFE, day));

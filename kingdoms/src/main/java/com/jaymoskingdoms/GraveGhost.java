@@ -115,7 +115,7 @@ public class GraveGhost extends PathfinderMob implements Acting {
 			if (standing != null && level.getEntity(standing) instanceof GraveGhost ghost && ghost.isAlive()) {
 				continue;
 			}
-			if (!level.isLoaded(head) || level.getNearestPlayer(head.getX() + 0.5, head.getY(), head.getZ() + 0.5, SHOW_RANGE, false) == null) {
+			if (!com.jaymoskingdoms.Loaded.made(level, head) || level.getNearestPlayer(head.getX() + 0.5, head.getY(), head.getZ() + 0.5, SHOW_RANGE, false) == null) {
 				continue;
 			}
 			raise(level, g);

@@ -107,7 +107,7 @@ public final class Ambushes {
 			}
 			ServerLevel level = server.overworld();
 			for (ServerLevel l : server.getAllLevels()) {
-				if (l.getBlockState(e.getKey()).is(net.minecraft.world.level.block.Blocks.COBWEB) && l.isLoaded(e.getKey())) {
+				if (l.getBlockState(e.getKey()).is(net.minecraft.world.level.block.Blocks.COBWEB) && com.jaymoskingdoms.Loaded.made(l, e.getKey())) {
 					level = l;
 					break;
 				}
@@ -274,7 +274,7 @@ public final class Ambushes {
 		for (int i = 0; i < 16; i++) {
 			double a = Math.PI * 2.0 * i / 16.0;
 			net.minecraft.core.BlockPos col = net.minecraft.core.BlockPos.containing(m.getX() + Math.cos(a) * RISE_NEAR, m.getY(), m.getZ() + Math.sin(a) * RISE_NEAR);
-			if (!level.isLoaded(col)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, col)) {
 				continue;
 			}
 			net.minecraft.core.BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, col);

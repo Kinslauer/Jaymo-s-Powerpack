@@ -234,7 +234,7 @@ public final class CinderForge {
 
 	/** Near the built forge: Ignis seen (or back a day after he was last seen). */
 	private static void watch(ServerLevel nether, Forge forge) {
-		if (!nether.isLoaded(forge.site())) {
+		if (!com.jaymoskingdoms.Loaded.made(nether, forge.site())) {
 			return;
 		}
 		// (a chunk's blocks load before its entities: until they're in, Ignis would look gone and a second be made)

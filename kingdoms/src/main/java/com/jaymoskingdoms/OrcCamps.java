@@ -201,7 +201,7 @@ final class OrcCamps {
 	static BlockPos spot(ServerLevel level, BlockPos fire, RandomSource random) {
 		for (int tries = 0; tries < 16; tries++) {
 			BlockPos column = fire.offset(random.nextInt(15) - 7, 0, random.nextInt(15) - 7);
-			if (column.distManhattan(fire) < 3 || !level.isLoaded(column)) {
+			if (column.distManhattan(fire) < 3 || !com.jaymoskingdoms.Loaded.made(level, column)) {
 				continue;
 			}
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
@@ -322,7 +322,7 @@ final class OrcCamps {
 				continue;
 			}
 			BlockPos at = placer.at(p.offset());
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				return false;
 			}
 			BlockState there = level.getBlockState(at);

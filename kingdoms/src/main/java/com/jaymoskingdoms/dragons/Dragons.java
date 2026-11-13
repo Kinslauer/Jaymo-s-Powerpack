@@ -336,7 +336,7 @@ public final class Dragons {
 			int distance = IGNIVORUS_MIN + random.nextInt(IGNIVORUS_MAX - IGNIVORUS_MIN + 1);
 			BlockPos at = BlockPos.containing(player.getX() + Math.cos(angle) * distance, player.getY() + 4 + random.nextInt(12),
 				player.getZ() + Math.sin(angle) * distance);
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				continue;
 			}
 			T dragon = type.create(level, EntitySpawnReason.EVENT);
@@ -360,7 +360,7 @@ public final class Dragons {
 			int distance = NETHER_MIN + random.nextInt(NETHER_MAX - NETHER_MIN + 1);
 			BlockPos at = BlockPos.containing(player.getX() + Math.cos(angle) * distance, player.getY() + random.nextInt(9) - 2,
 				player.getZ() + Math.sin(angle) * distance);
-			if (!level.isLoaded(at)) {
+			if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 				continue;
 			}
 			boolean room = true;

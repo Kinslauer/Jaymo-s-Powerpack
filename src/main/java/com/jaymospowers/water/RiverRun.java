@@ -30,7 +30,7 @@ public final class RiverRun {
 
 	/** Whether the biome at {@code pos} is a river. */
 	public static boolean river(Level level, BlockPos pos) {
-		return level.hasChunkAt(pos) && level.getBiome(pos).is(BiomeTags.IS_RIVER);
+		return com.jaymospowers.core.Loaded.made(level, pos) && level.getBiome(pos).is(BiomeTags.IS_RIVER);
 	}
 
 	/** The unit heading downstream at {@code pos} (zero if there is no river there). */
@@ -93,7 +93,7 @@ public final class RiverRun {
 	/** The land's height where {@code pos} + {@code by} lies (very high if unloaded, so it never counts as downhill). */
 	private static double height(Level level, BlockPos pos, Vec3 by) {
 		BlockPos there = pos.offset((int) by.x, 0, (int) by.z);
-		if (!level.hasChunkAt(there)) {
+		if (!com.jaymospowers.core.Loaded.made(level, there)) {
 			return 1.0E6;
 		}
 		return level.getHeight(Heightmap.Types.OCEAN_FLOOR, there.getX(), there.getZ());

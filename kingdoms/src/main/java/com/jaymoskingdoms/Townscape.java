@@ -90,7 +90,7 @@ final class Townscape {
 			for (int x = box.minX(); x <= box.maxX() && read < MAX_BLOCKS; x++) {
 				for (int z = box.minZ(); z <= box.maxZ() && read < MAX_BLOCKS; z++) {
 					at.set(x, box.minY(), z);
-					if (!level.isLoaded(at)) {
+					if (!com.jaymoskingdoms.Loaded.made(level, at)) {
 						continue;
 					}
 					for (int y = box.minY(); y <= box.maxY(); y++, read++) {
