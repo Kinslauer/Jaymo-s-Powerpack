@@ -16,6 +16,8 @@ public final class CreaturesClient {
 	}
 
 	public static void register() {
+		// a pit's lid dressed as grass is tinted as grass is (the other looks have no tinted faces)
+		net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry.register(java.util.List.of(net.minecraft.client.color.block.BlockTintSources.grassBlock()), Creatures.TRAP_COVER);
 		creature(Creatures.TROLL, "troll", 1.0F, Troll.FALLEN, -1, false);
 		creature(Creatures.TROLL_LIMB, "troll_limb", 0.3F, -1, -1, false);
 		creature(Creatures.RUST_BEAST, "rust_beast", 0.9F, -1, -1, false);

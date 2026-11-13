@@ -117,7 +117,7 @@ public final class Creatures {
 		QUICKSAND = Registry.register(BuiltInRegistries.BLOCK, sandKey, new QuicksandBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
 			.strength(0.5F).sound(SoundType.SAND).noCollision().noOcclusion().setId(sandKey)));
 		ResourceKey<Block> coverKey = ResourceKey.create(Registries.BLOCK, JaymosKingdoms.id("trap_cover"));
-		TRAP_COVER = Registry.register(BuiltInRegistries.BLOCK, coverKey, new TrapCoverBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+		TRAP_COVER = Registry.register(BuiltInRegistries.BLOCK, coverKey, new TrapCoverBlock(BlockBehaviour.Properties.of().mapColor(state -> state.getValue(TrapCoverBlock.LOOK).color)
 			.strength(0.2F).sound(SoundType.GRASS).setId(coverKey)));
 		QUICKSAND_ITEM = blockItem("quicksand", QUICKSAND);
 		TRAP_COVER_ITEM = blockItem("trap_cover", TRAP_COVER);
