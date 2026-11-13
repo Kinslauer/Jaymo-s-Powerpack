@@ -361,7 +361,7 @@ PC Claude's part (ready to start):
     key to a third party. **Andy:** open https://developer.amd.com.cn/radeon/tokenfactory, copy the key from the
     **Your API key** card (it starts with `rc-`) and replace the `AMD_API_KEY` value in `E:\hermes\.env` yourself.
     If the card has no key, the account may still be under review. Steps 2-5 wait for a working key. Test script:
-    `amd_check.py` (lists models, then `amd_check.py <model-id>` makes one tool call with timing; never prints the key).
+    `py -3 -I E:/hermes/scripts/amd_check.py` (lists models; add a model ID to make one tool call with timing; never prints the key).
 - [ ] 2. Back up `E:/hermes/config.yaml` and Quill's profile config. In the ONE existing `providers:` block add an
       OpenAI-compatible provider `amd` (base URL above, key from `AMD_API_KEY`), the same way NVIDIA is set up.
       Don't make a second `providers:` block.
