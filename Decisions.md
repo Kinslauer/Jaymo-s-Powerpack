@@ -413,3 +413,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 10:17 PM ET (Sengoku picks thread): Andy: "can there be an MCA captain or companion that can pilot the
   ship for you? thats just too long to be sailing manually." Added to patch 2 of docs/BlossomLands-Plan.md: a hired MCA
   sea captain or a companion takes the helm of your ship, or you buy passage on a blossom merchantman.
+- 2026-11-12 10:30 PM ET (Andy, PC Claude thread): Groq-first is off. Hermes bots stay on NVIDIA Super first, then Lightning; Groq taken out of every fallback chain. Reason: Groq free allows 8,000 tokens a minute and a bot call is 64k-135k, so it refuses every call (413) and Hermes compresses history on a 413. Measurements in Hermes Training handoff.md.
