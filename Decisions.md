@@ -435,3 +435,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
   nearest body, friend or foe. Fire Lance joins Powers' beam clashes as a fifth kind (fire); the class key shoves.
   Scrolls come from wizards, shamans and (Black Flame) necromancers; Warlocks may learn glass, fire and Black Flame,
   Druids Storm Cloak. Lore placement added as a (new) paragraph: the glass is from the demons' country.
+- 2026-11-12 10:50 PM ET (Andy): add OpenRouter :free models after NVIDIA in every Hermes bot chain as the non-NVIDIA backup; Andy makes and sets OPENROUTER_API_KEY himself. Steps: Hermes Training handoff.md, "OpenRouter free models".
