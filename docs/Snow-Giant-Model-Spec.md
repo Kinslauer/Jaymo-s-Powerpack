@@ -24,7 +24,7 @@ pixels, then list every difference left. No other model's boxes, UVs or pixels a
 | --- | --- | --- | --- |
 | F1 | Upright, its own body, not the grizzly's | Andy | two jointed legs, a chest, two jointed arms; 15 bones |
 | F2 | White and shaggy | R2 | white coat, a longer greyer mantle over shoulders and back |
-| F3 | A giant: its hitbox is 3.4 wide and 3.3 tall | R1 | 55 px to the crown (3.4 blocks), 48 px across the arms (3 blocks) |
+| F3 | A giant, twice the size it was first built (Andy, 2026-11-12: "make it twice as large") | Andy | 55 px to the crown, drawn 2x: 6.9 blocks tall, 6 across the arms; hitbox 4.0 x 6.8 |
 | F4 | It rears, lifts both arms and brings its weight down | R1 | `rear`: up by 12 ticks, down on its fists at 26 |
 | F5 | It throws blocks of ice from over its head | R1 | in `rear` both paws are over the head at tick 18, when the ice leaves them |
 | F6 | It swipes with either paw | R1 | `swipe_left`, `swipe_right`: long arms, the blow at tick 7 |
@@ -74,5 +74,6 @@ Checked with `gen_snow_giant.py --preview` renders (kingdoms/art/snow_giant-rend
 - The coat is flat boxes with a noisy skin; it has no hanging tufts.
 - Bent over in the slam and the maul the chest and mantle hide most of the head from the front.
 - With a barrage of thrown ice the `rear` animation ends (arms down) while later blocks still leave from over its head.
-- The hitbox stays 3.4 x 3.3 (set with the beast, not here); the horn tips stand 0.5 above it.
+- The hitbox is 4.0 wide (its trunk; the arms hang outside it, so its blows still start at the old distances) and 6.8 tall;
+  the horn tips stand 0.8 above it. Drawn 2x, a texel is 1/8 block.
 - Not yet seen in game.

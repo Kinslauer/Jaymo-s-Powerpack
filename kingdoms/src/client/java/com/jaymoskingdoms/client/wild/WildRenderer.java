@@ -25,8 +25,11 @@ import org.jspecify.annotations.Nullable;
  * them (the coyote's only while it's hostile), the moose 1.5x.
  */
 public final class WildRenderer<T extends Mob & WildLook> extends MobRenderer<T, WildRenderer.State, WildModel> {
-	/** The snow giant: drawn at its model's own size (3.4 blocks to the crown), its shadow, the seconds of its walk to a block, and how fast it must go to run. */
-	static final float SNOW_GIANT_SCALE = 1.0F, SNOW_GIANT_SHADOW = 1.6F, SNOW_GIANT_WALK = 0.6F, SNOW_GIANT_RUN = 0.9F;
+	/**
+	 * The snow giant: drawn twice its model's size (Andy: "make it twice as large"; 6.9 blocks to the crown), its shadow, the
+	 * seconds of its walk to a block, and how fast it must go to run.
+	 */
+	static final float SNOW_GIANT_SCALE = 2.0F, SNOW_GIANT_SHADOW = 3.0F, SNOW_GIANT_WALK = 0.3F, SNOW_GIANT_RUN = 0.9F;
 	public static final class State extends LivingEntityRenderState {
 		int variant;
 		boolean hostile;

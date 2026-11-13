@@ -12,7 +12,7 @@ giants being worked on, as its own upright model."
 - Changes you may see: the fall is one of two (right arm out or left) instead of mixed at random per Giant, and an arm
   that is striking or grabbing no longer twists with the stride.
 - **Snow giant** (`wild/SnowGiant`). Its own upright body in place of the white grizzly at twice the size: a shaggy
-  white giant 3.4 blocks tall with a mantle, a bare slate face, two short horns, a beard of icicles, a jaw that opens,
+  white giant 6.9 blocks tall (Andy: "make it twice as large"; hitbox 4.0 x 6.8, once 3.4 x 3.3) with a mantle, a bare slate face, two short horns, a beard of icicles, a jaw that opens,
   elbows and knees (`kingdoms/art/snow_giant.bbmodel`, by `kingdoms/tools/gen_snow_giant.py`; spec in
   `docs/Snow-Giant-Model-Spec.md`). Its animations are named for the moves it already had and last as long (rear and
   slam, swipes, charge, maul, roar, stagger, plus idle, walk, run and death), so nothing about how it fights changed.
