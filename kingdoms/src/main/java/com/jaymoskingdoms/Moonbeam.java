@@ -59,7 +59,7 @@ public final class Moonbeam {
 		// a shapeshifter wearing a stolen life drops its face in the moonlight
 		addReveal((level, who, caster, until) -> {
 			if (who instanceof Villager v && Doubles.isCopy(v)) {
-				Doubles.expose(level, v);
+				Doubles.expose(level, v, caster);
 				return true;
 			}
 			return false;
