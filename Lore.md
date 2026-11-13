@@ -465,6 +465,13 @@ their **Giants**: a broken pillar with a heart floating in it, and one Giant for
 Magnetic, Arctic, Irradiated). A Giant rises beside its monolith and never strays far. When it falls, the monolith's
 heart goes out for good, and the first one to fall raises the world tier.
 
+(new) **The pillar's stone** (models thread; Andy, 2026-11-12: the colossi "can spawn among the high field giant as
+fodder"; the rest is Claude's placement for him to approve). A monolith is more than its Giant. When the Highfield Giant
+has someone to fight, broken blocks of its pillar get up out of the ground round it: **rune-bound colossi**, half again
+a man's height and more, grey holystone banded in moss-green, cut with gold runes that are the same hum folk say the
+old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
+it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
+
 What folk believe about the sky (village talk, not proven):
 
 - Some stars never move with the rest, "because they aren't hung on the same nail".
@@ -1289,6 +1296,12 @@ boar, tarantulas and the grizzly. Barrow beetles live in the cold barrows and ca
 flowers of a quiet forest on the darkest nights; folk say a fairy keeps death off the one who carries her, once, and
 would kill for one. Frostbites, frozen dead, walk the powder snow. Rats get into stores. Pets are named, and folk say a
 name shapes a beast ("Call a beast Midas and it'll shine like coin").
+
+(new) **Crystal beetles** (models thread; Andy, 2026-11-12: "these should spawn in amethyst geodes"; the rest is Claude's
+placement for him to approve). The barrow beetle has a cousin that lives only inside amethyst geodes. It grazes the
+crystal buds, and what it eats grows out of its shell. A few of them keep a geode alive: where they have fed, plain
+amethyst starts to bud again. Too many gnaw it bare and stop breeding until it recovers. Miners who know them shear the
+crystal off their backs and leave the buds alone; it grows back. They bite only what hurts them.
 
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
