@@ -14,6 +14,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/armor-pngs-vanilla-style|armor-pngs-vanilla-style]] · for 🔥 Prometheus · #1313 · changes · fixing review notes
 - [ ] [[Inbox/pr1377-round4-text-pass|pr1377-round4-text-pass]] · 🪶 Quill · #1416 · claimed
+- [ ] [[Agents/dungeon-mods-chapel-echo-bow|dungeon-mods-chapel-echo-bow]] · 💻 Odysseus · running
 
 
 ## In review
