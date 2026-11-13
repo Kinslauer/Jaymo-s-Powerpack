@@ -12241,3 +12241,8 @@ giants being worked on, as its own upright model."
   It sits on the belt and on the skill bar like any form (`ClawForms`), and is not offered while the hand is open.
 - The gauntlet is in the claw family, so Rending Claw and Feral Pounce work with it.
 - Compiles; not played in game.
+
+## 0.7.807 (2026-11-13): fix the startup crash from the "classes" key category being registered twice (#1404)
+
+- The game crashed on launch ("Category 'jaymoskingdoms:classes' is already registered"): the Magic key and the familiar's-eyes key each registered the classes key category again after the class keys had. All three now share one category (`ClassKeys.category()`), so they still sit together under Classes in Controls.
+- Built; launch not tested here.
