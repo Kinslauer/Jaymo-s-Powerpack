@@ -1374,6 +1374,13 @@ is rolled out at night, a chest of drawers bound in iron, doors that slide along
 is the blossom tree's own sap, scored from the bark of a living tree into a bowl. A log gives once and is left bare, so
 a grove is tapped a little each year and planted behind, and lacquer is dear on the home continent for that reason.
 
+(new) **How a blossom village lives** (Blossom lands thread, 2026-11-13; placement is Claude's for Andy to approve). A
+village thatches and a walled town tiles: tile is what a lord's walls pay for. Rice stands in flooded paddies behind a
+bund of packed mud, and beside it a row of ramie, the nettle whose bark is their thread, cut and left to come again.
+Farmsteads stand a little way out, each with a wayside shrine kept to whichever of the eight that family holds to.
+High villages gather round their shrine and low ones round a market. A town has a tea house where the home continent
+has a tavern, a dojo, a bath of still water, and in time a pagoda. The dead lie under narrow posts of grey stone.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
