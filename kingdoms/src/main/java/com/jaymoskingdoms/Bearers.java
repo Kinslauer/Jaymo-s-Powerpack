@@ -757,12 +757,15 @@ public final class Bearers {
 
 	// ---- the graveyard ----------------------------------------------------------------------------------------------
 
-	/** The headstone for {@code f}: sandstone in the desert, stone brick in a realm, cobblestone in a village; now and then mossy. */
+	/** The headstone for {@code f}: an andesite post in the Blossom land, sandstone in the desert, stone brick in a realm, cobblestone in a village; now and then mossy. */
 	private static BlockState headstone(ServerLevel level, Faction f, RandomSource random) {
 		Climate climate = Climate.at(level, f.seat());
 		boolean mossy = random.nextFloat() < MOSSY;
 		Block block;
-		if (climate == Climate.DESERT || climate == Climate.BADLANDS) {
+		if (climate == Climate.CHERRY) {
+			// the Blossom land's graves: a narrow post of grey stone
+			block = mossy ? Blocks.MOSSY_STONE_BRICK_WALL : Blocks.ANDESITE_WALL;
+		} else if (climate == Climate.DESERT || climate == Climate.BADLANDS) {
 			block = Blocks.SANDSTONE_WALL;
 		} else if (f.type() == FactionType.VILLAGE) {
 			block = mossy ? Blocks.MOSSY_COBBLESTONE_WALL : Blocks.COBBLESTONE_WALL;

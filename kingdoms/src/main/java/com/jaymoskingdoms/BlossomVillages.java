@@ -79,6 +79,34 @@ final class BlossomVillages {
 	private static final List<Spot> HALLS = List.of(new Spot("butcher", -6, 15, 1, 7), new Spot("hunting_lodge", 6, 15, 3, 9));
 	private static final List<Spot> STALLS = List.of(new Spot("stall", -5, -17, 1, 5), new Spot("stall", 5, -17, 3, 5));
 	private static final Spot SHRINE = new Spot("blossom_shrine", 0, 5, 0, 7);
+	/** Behind the shrine, between the halls: the paddy, or a market village's square. */
+	private static final Spot PADDY = new Spot("blossom_paddy", 0, 14, 0, Blossom.PADDY_WIDTH);
+	private static final Spot SQUARE = new Spot("market", 0, 13, 0, 9);
+	/** A temple village's second torii, close before the shrine, and the lanterns behind it. */
+	private static final Spot INNER_TORII = new Spot("blossom_torii", 0, 1, 0, 7);
+	private static final int[][] TEMPLE_LANTERNS = {{-4, 12}, {4, 12}};
+
+	/**
+	 * What a village is, by its ground: a temple village on high ground (a second torii before its shrine, more
+	 * lanterns), a market village now and then on low ground (a market square where the paddy would be), else a
+	 * hamlet (its paddy behind the shrine). All of them thatch, and all send out farmsteads.
+	 */
+	enum Kind {
+		HAMLET, MARKET, TEMPLE
+	}
+
+	/** A village this far above the sea is a temple village; lower, this share are market villages. */
+	static final int TEMPLE_ABOVE_SEA = 40;
+	static final float MARKET_SHARE = 0.3F;
+	/** Farmsteads: how many are tried for, how far from the bell (at least, plus up to), their ground's radius and the most it may rise and fall. */
+	static final int FARMSTEADS = 2, FARMSTEAD_MIN = 44, FARMSTEAD_SPREAD = 16, FARMSTEAD_RADIUS = 13, FARMSTEAD_SLOPE = 5, FARMSTEAD_TRIES = 6;
+	/** A farmstead in the frame of its own middle, its front toward the village: the paddy before the house. */
+	private static final Spot FARM_HOUSE = new Spot("house", 0, 1, 0, 0);
+	private static final Spot FARM_PADDY = new Spot("blossom_paddy", 0, -8, 0, Blossom.PADDY_WIDTH);
+
+	static Kind kind(ServerLevel level, int floor, RandomSource random) {
+		return floor - level.getSeaLevel() >= TEMPLE_ABOVE_SEA ? Kind.TEMPLE : random.nextFloat() < MARKET_SHARE ? Kind.MARKET : Kind.HAMLET;
+	}
 	private static final Spot TORII = new Spot("blossom_torii", 0, -18, 0, 7);
 	private static final int[][] LANTERNS = {{-3, -12}, {3, -12}, {-3, -3}, {3, -3}};
 	/** The gravel roads: from the torii to the shrine, and across to each pair of houses (x0, z0, x1, z1). */
@@ -345,6 +373,20 @@ final class BlossomVillages {
 		}
 		List<BlockPos> homes = new ArrayList<>(), halls = new ArrayList<>();
 		List<Works.Built> built = new ArrayList<>();
+		Kind kind = kind(level, floor, random);
+		Blueprint paddy = Blossom.paddy();
+		if (kind == Kind.MARKET) {
+			place(level, Buildings.market(kit(level, village, random)), SQUARE, bell, gate, built);
+		} else if (paddy != null) {
+			place(level, paddy, PADDY, bell, gate, null);
+		}
+		if (kind == Kind.TEMPLE) {
+			place(level, Blossom.torii(), INNER_TORII, bell, gate, null);
+			for (int[] lantern : TEMPLE_LANTERNS) {
+				place(level, Blossom.stoneLantern(), new Spot("blossom_lantern", lantern[0], lantern[1], 0, 1), bell, gate, null);
+			}
+		}
+		farmsteads(level, village, bell, random, homes, built);
 		for (Spot s : HOUSES) {
 			Blueprint house = Blossom.minka(kit(level, village, random));
 			homes.add(place(level, house, new Spot(s.id(), s.x(), s.z(), s.turns(), house.width()), bell, gate, built));
@@ -388,6 +430,37 @@ final class BlossomVillages {
 		JaymosKingdoms.LOGGER.info("A Blossom village, {}, rose at {}", village.name(), bell);
 		Faction out = Factions.get(server, id);
 		return out != null ? out : village;
+	}
+
+	/**
+	 * Outlying farmsteads: up to {@link #FARMSTEADS} round the village on ground that will take one (loaded, dry, level
+	 * enough), each a minka facing the village with its paddy before it. Their houses are the village's ({@code built})
+	 * and are peopled as its own are ({@code homes}).
+	 */
+	private static void farmsteads(ServerLevel level, Faction village, BlockPos bell, RandomSource random, List<BlockPos> homes, List<Works.Built> built) {
+		int raised = 0;
+		for (int tries = 0; tries < FARMSTEAD_TRIES && raised < FARMSTEADS; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = FARMSTEAD_MIN + random.nextInt(FARMSTEAD_SPREAD);
+			BlockPos at = bell.offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			int floor = IllagerBuildings.floor(level, at, FARMSTEAD_SLOPE, FARMSTEAD_RADIUS);
+			if (floor == Integer.MIN_VALUE || Math.abs(floor - bell.getY()) > MAX_SPREAD * 2) {
+				continue;
+			}
+			// on the village's own land or nobody's
+			Faction owner = Factions.at(level.getServer(), level, at);
+			if (owner != null && owner.id() != village.id()) {
+				continue;
+			}
+			BlockPos middle = new BlockPos(at.getX(), floor, at.getZ());
+			CampBuildings.level(level, middle, FARMSTEAD_RADIUS, CLEAR_HEIGHT);
+			Direction toVillage = Direction.getApproximateNearest(bell.getX() - at.getX(), 0, bell.getZ() - at.getZ());
+			Blueprint house = Blossom.minka(kit(level, village, random));
+			homes.add(place(level, house, new Spot(FARM_HOUSE.id(), FARM_HOUSE.x(), FARM_HOUSE.z(), FARM_HOUSE.turns(), house.width()), middle, toVillage, built));
+			Blueprint paddy = Blossom.paddy();
+			place(level, paddy != null ? paddy : Buildings.farm(kit(level, village, random)), FARM_PADDY, middle, toVillage, paddy != null ? null : built);
+			raised++;
+		}
 	}
 
 	/** One building's kit from the village's own look, its materials and details rolled (never the plain design). */

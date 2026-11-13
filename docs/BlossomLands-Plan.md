@@ -96,6 +96,10 @@ red concrete, the one-block stone lantern, tatami through `KitchenCompat`). Slid
 (Kitchen's rice through `KitchenCompat`). Thatched minka for poor villages. A Blossom graveyard for `McaGraves`.
 Outlying farmsteads, and a lighthouse where a village meets the sea.
 
+*Built (2026-11-13, `BlossomVillages.Kind`, `farmsteads`, `Blossom.paddy`, `Buildings.Kit`, `Bearers.headstone`): thatch
+until tier 3, the paddy, hamlet / market / temple villages, farmsteads, andesite grave posts. Not built: stilt and snow
+villages (villages rise only in cherry groves), the lighthouse.*
+
 ## Patch 5: halls (bv_teahouse, bv_brewery, bv_bath, bv_dojo, bv_inn, bv_pagoda, bv_wayside)
 
 `JobHalls`: tea house (on `Cafe`), rice wine brewery (brewer career, `Carousing`), bath house round a hot spring

@@ -1613,6 +1613,12 @@ final class Buildings {
 				roofSlab = Blocks.DEEPSLATE_TILE_SLAB;
 				roofBlock = Blocks.DEEPSLATE_TILES;
 				infill = com.jaymoskingdoms.blossomland.BlossomBlocks.PLASTER.defaultBlockState();
+				if (village && WalledTowns.tier(level.getServer(), faction.id()) < Blossom.TILE_TIER) {
+					// a village thatches; tile is for a town that has walled itself, and for the castle towns
+					roofStairs = com.jaymoskingdoms.blossomland.BlossomBlocks.THATCH_STAIRS;
+					roofSlab = com.jaymoskingdoms.blossomland.BlossomBlocks.THATCH_SLAB;
+					roofBlock = com.jaymoskingdoms.blossomland.BlossomBlocks.THATCH;
+				}
 			}
 			return new Kit(p, village, wood, main, accent, roofStairs.defaultBlockState(), roofSlab.defaultBlockState(), roofBlock.defaultBlockState(),
 				infill, colours, dry, blossom, land, RandomSource.create(details ^ 0x5DEECE66DL));

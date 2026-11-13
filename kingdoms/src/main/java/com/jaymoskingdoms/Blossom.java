@@ -34,7 +34,32 @@ final class Blossom {
 	private static final BlockState VERMILION = BlossomBlocks.RED_LACQUER.defaultBlockState();
 	private static final BlockState BONSAI = named("potted_cherry_sapling", Blocks.FLOWER_POT);
 
+	/** A Blossom village roofs in thatch until it is this tier ({@link WalledTowns#tier}: a walled town); from then on, in tile. */
+	static final int TILE_TIER = 3;
+	/** The paddy: how wide and deep, bund and all. */
+	static final int PADDY_WIDTH = 9, PADDY_DEPTH = 7;
+
 	private Blossom() {
+	}
+
+	/**
+	 * A rice paddy ({@link #PADDY_WIDTH} x {@link #PADDY_DEPTH}): a bund of packed mud one block high round a bed of mud
+	 * under standing water, Kitchen's rice planted in it. Null without Kitchen (the village has no paddy then).
+	 */
+	static @org.jspecify.annotations.Nullable Blueprint paddy() {
+		Block rice = KitchenCompat.riceCrop();
+		if (rice == null) {
+			return null;
+		}
+		Buildings.Sketch s = new Buildings.Sketch("blossom_paddy", PADDY_WIDTH, PADDY_DEPTH, 3);
+		for (int x = 0; x < PADDY_WIDTH; x++) {
+			for (int z = 0; z < PADDY_DEPTH; z++) {
+				boolean bund = x == 0 || x == PADDY_WIDTH - 1 || z == 0 || z == PADDY_DEPTH - 1;
+				s.set(x, 0, z, (bund ? Blocks.PACKED_MUD : Blocks.MUD).defaultBlockState());
+				s.set(x, 1, z, bund ? Blocks.PACKED_MUD.defaultBlockState() : rice.defaultBlockState());
+			}
+		}
+		return s.done();
 	}
 
 	/**

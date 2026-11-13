@@ -370,6 +370,13 @@ public final class KitchenCompat {
 		return null;
 	}
 
+	/** Kitchen's rice plant (it stands in one block of water over mud or dirt), or null without Kitchen. */
+	static net.minecraft.world.level.block.@Nullable Block riceCrop() {
+		net.minecraft.world.level.block.Block rice = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "rice"));
+		return rice == net.minecraft.world.level.block.Blocks.AIR ? null : rice;
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
