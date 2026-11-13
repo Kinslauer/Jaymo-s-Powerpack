@@ -12592,3 +12592,11 @@ giants being worked on, as its own upright model."
 - The keen-eye hint (Notice: a few sparkles and a rustle only the player who spotted it gets) is unchanged.
 - Classes: `TrapCoverBlock` (`LOOK`, `Ground`), `Warrens.pit/lurker`, `Digger.lurk/watchPit/ReturnGoal`, `CreaturesClient`.
 - Compiled (`compileClientJava`); not played. Only warrens generated after this get the nooks.
+
+## 0.8.22 (2026-11-13): Loading hint for the Whirlwind spin's dizziness
+
+- New loading-screen hint 162: a big axe's Whirlwind makes you dizzy, and holding it a few seconds past the sway drops
+  you out cold (Powers' `SpinDizzy`).
+- `StoryHoldScreen` passes over a hint number with no line yet (another open branch's hint), so the screen never shows a
+  bare key while hints from different PRs land out of order.
+- Built; not played.
