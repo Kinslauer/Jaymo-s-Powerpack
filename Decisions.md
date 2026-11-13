@@ -370,3 +370,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12: sand worm built** (BossRise plan patch 6). Claude's calls, unconfirmed: one wakes per desert pyramid when a player goes inside; it only moves through sand, gravel and earth; 380 health, hurt only while it stands up; our own hand-coded ring model; Stoneborn players faint too (12 s knock-out, once a fight), not only villagers; it drops nothing special yet (trophies are patch 8).
 - **Nov 12, 9:33 PM: PR #1390 merged** (models thread, Andy: "merge"). Scouts, ghosts, colossi, crystal beetles, barrow knights, revenant, spit frame.
 - **Nov 12, 9:33 PM: PR #1396 merged** (Andy: "merge"). The sand worm (BossRise plan, patch 6).
+- **Nov 12, night: giants PR #1398 opened** (models thread). Aether Giants on GeckoLib from a Blockbench project; Snow Giant's own upright body. Awaiting Andy's merge.
