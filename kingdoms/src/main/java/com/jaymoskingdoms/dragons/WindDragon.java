@@ -920,6 +920,18 @@ public abstract class WindDragon extends AbstractHorse {
 		return target;
 	}
 
+	/**
+	 * Its roost is its own: perched and wild, it turns on {@code intruder} (someone on its tower, {@code nether.DragonRoosts}).
+	 * False if it is tamed, not perched, fighting someone already, or they are out of its reach.
+	 */
+	public boolean defend(LivingEntity intruder) {
+		if (this.isTamed() || this.wild != Wild.PERCHED || grounded() || this.foe != null || !valid(intruder)) {
+			return false;
+		}
+		this.foe = intruder;
+		return true;
+	}
+
 	private boolean valid(@Nullable LivingEntity e) {
 		return e != null && e.isAlive() && e.level() == this.level() && e.distanceToSqr(this) < LOSE_RANGE * LOSE_RANGE
 			&& !(e instanceof Player p && (p.isCreative() || p.isSpectator()));

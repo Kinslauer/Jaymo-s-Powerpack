@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
  * to an open roof. Whoever climbs out onto the roof calls the dragon: a wild Ignivorus near by (or a new one, some way
  * off) flies in and comes down on the tower ({@link WindDragon#comeDownOn}), and as it nears, everyone on the roof
  * who has never met one gets its entrance film staged for them ({@link BossIntros#stage}): the fly-in, the landing,
- * the roar. Ops: {@code /kingdom roost found | call | info}.
+ * the roar. Once it is down the roof is its own, and it goes for anyone on it. Ops: {@code /kingdom roost found | call | info}.
  */
 public final class DragonRoosts {
 	/** How often a roost may rise near each player in the Nether (ticks), the chance it does, and how many places are tried. */
@@ -76,6 +76,8 @@ public final class DragonRoosts {
 	/** The film starts when the dragon is this near the roof; a call that hasn't got there in this long is dropped (ticks). */
 	static final double STAGE_RANGE = 26.0, WATCH_RANGE = 24.0;
 	static final int CALL_TIMEOUT = 20 * 60;
+	/** A dragon perched within this of the roof's middle counts as on it, and defends it. */
+	static final double DEFEND_RANGE = 10.0;
 
 	/** A roost: the ground block under its middle, how tall it is, and when it last called its dragon. */
 	public record Roost(int id, BlockPos base, int height, long lastCall) {
@@ -139,6 +141,7 @@ public final class DragonRoosts {
 		}
 		if (now % 20 == 0) {
 			for (Roost roost : roosts(nether)) {
+				guardRoof(nether, roost);
 				if (now - roost.lastCall() < CALL_EVERY && roost.lastCall() != 0L || CALLS.containsKey(roost.id())) {
 					continue;
 				}
@@ -156,6 +159,19 @@ public final class DragonRoosts {
 				if (!player.isSpectator() && random.nextFloat() < FOUND_CHANCE) {
 					tryFound(nether, player);
 				}
+			}
+		}
+	}
+
+	/** A dragon sitting on the roost is violently territorial (Andy): it turns on whoever is up there with it. */
+	private static void guardRoof(ServerLevel nether, Roost roost) {
+		BlockPos top = roost.top();
+		for (ServerPlayer player : Stacked.players(nether.getServer(), Level.NETHER)) {
+			if (player.isSpectator() || !onRoof(roost, player)) {
+				continue;
+			}
+			for (IgnivorusDragon dragon : nether.getEntitiesOfClass(IgnivorusDragon.class, new net.minecraft.world.phys.AABB(top).inflate(DEFEND_RANGE))) {
+				dragon.defend(player);
 			}
 		}
 	}
