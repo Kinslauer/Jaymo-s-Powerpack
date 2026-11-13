@@ -450,3 +450,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-12 11:24 PM ET (Boss anim mods thread): Andy: "the lore is fine". Approved the four BossRise paragraphs in
   Lore.md: "The roosts, the ring and the den", "What the great ones leave", "The chain axe", "Volcanic glass and the
   black flame" (the (new) marks are off). All twelve BossRise patches are merged (last: #1406).
+- 2026-11-12 11:32 PM ET (Blossom lands thread): Andy said "merge" for PR #1410 (helmsmen and talk of the east, patch 2 first half). Merged by squash.
