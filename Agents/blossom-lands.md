@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Sengoku Jidai picks for the blossom villages, on a far continent
 branch: claude/project-thread-795vuu
 with: Andy
@@ -22,3 +22,4 @@ owns:
 
 ## Done
 Nothing built yet.
+- 2026-11-12 22:45 No sign of work for 30 min: marked stalled (whoever ran it stopped).
