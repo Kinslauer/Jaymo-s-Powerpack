@@ -1,22 +1,22 @@
 ---
-updated: 2026-11-13 11:39
+updated: 2026-11-13 17:32
 ---
 # Open PRs
 
-3 open, as of 2026-11-13 11:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-13 17:32. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
-- **Branch:** `claude/armor-pngs-vanilla-style` · **Updated:** 2026-11-11 (1 day ago)
+- **Branch:** `claude/armor-pngs-vanilla-style` · **Updated:** 2026-11-11 (2 days ago)
 - **Checks:** ✅ 4 passed
 - **Agent:** [[armor-pngs-vanilla-style]]
 
-## [#1432](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1432) Night locks hold, real house keys, click opens doors again, villager clothes stay on a swing
-- **Branch:** `claude/project-thread-ach0x9` · **Updated:** 2026-11-13 (today)
-- **Checks:** ⏳ 4 of 4 running
+## [#1465](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1465) Wind: the airflow sense's focus (quieter world, grey view)
+- **Branch:** `jung/wind-sense-focus` · **Updated:** 2026-11-13 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
 
-## [#1433](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1433) Sky town builders dig Aether rock; no thin-air frostbite in the Aether; bed chat fades
-- **Branch:** `claude/project-thread-j3uqle` · **Updated:** 2026-11-13 (today)
-- **Checks:** ⏳ 4 of 4 running
+## [#1467](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1467) Youth, the wood-wisp: a Sylvan body for Hermes in game
+- **Branch:** `claude/project-thread-f24uld` · **Updated:** 2026-11-13 (today)
+- **Checks:** ✅ 4 passed
 - **Agent:** no agent note
