@@ -169,7 +169,7 @@ public final class Crewmen {
 
 	/** Whether a {@code side}'s {@code role} goes aboard as a sailor (MCA's fisherman) rather than a fighting man (MCA's guard). */
 	static boolean sailor(Crew.Side side, int role) {
-		return side == Crew.Side.MERCHANT || side == Crew.Side.WHALER || role == Pirates.POWDER_MONKEY;
+		return side == Crew.Side.MERCHANT || side == Crew.Side.WHALER || side == Crew.Side.FISHER || role == Pirates.POWDER_MONKEY;
 	}
 
 	/**
@@ -939,6 +939,7 @@ public final class Crewmen {
 			case NAVY -> "a warship" + of + ", that hunts pirates and the realm's enemies";
 			case MERCHANT -> "a merchantman" + of + ", carrying goods between realms' harbours";
 			case WHALER -> "a whaler" + of + ", out hunting great whales for their oil";
+			case FISHER -> "a fishing smack" + of + ", out to the fishing grounds and home with the catch";
 		};
 		return "You serve as " + as + " aboard " + crew.name + ", " + what + ". You live at sea and are aboard her now.";
 	}

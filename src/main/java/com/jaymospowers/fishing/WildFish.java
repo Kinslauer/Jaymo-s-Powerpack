@@ -90,7 +90,7 @@ public class WildFish extends AbstractSchoolingFish {
 	public float weight() {
 		float kg = this.entityData.get(WEIGHT);
 		if (kg <= 0.0F && !level().isClientSide()) {
-			kg = species().rollKg(getRandom(), false);
+			kg = FishCatch.deeper(species().rollKg(getRandom(), false), FishCatch.depth(level(), blockPosition()), species().kgMax);
 			setWeight(kg);
 		}
 		return Math.max(0.01F, kg);

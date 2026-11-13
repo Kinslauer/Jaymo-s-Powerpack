@@ -301,6 +301,10 @@ public final class FishingReal {
             kg = critter.weight();
         } else {
             kg = FishCatch.roll(fishKind, player.getRandom());
+            Species kind = Species.of(fishKind);
+            if (kind != null) {
+                kg = FishCatch.deeper(kg, FishCatch.depth(player.level(), hook.blockPosition()), kind.kgMax);
+            }
         }
         strength *= FishCatch.pull(fishKind, kg);
         if (!sharkLike(fishKind) && !(fish instanceof WildFish) && !(fish instanceof Critter)) {

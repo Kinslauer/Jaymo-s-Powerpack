@@ -27,7 +27,9 @@ public final class Crew {
 	public enum Side {
 		PIRATE, NAVY, MERCHANT,
 		/** (0.7.210) A realm's whaler ({@code Whalers}). */
-		WHALER;
+		WHALER,
+		/** A realm's fishing smack ({@code Fishers}): out to the grounds, a day's fishing, home with the catch. */
+		FISHER;
 
 		public String id() {
 			return this.name().toLowerCase(Locale.ROOT);

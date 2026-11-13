@@ -92,6 +92,8 @@ public class GreatWhale extends WaterAnimal {
 	 * hard to kill, quick to turn on any boat that strikes it, faster in the charge.
 	 */
 	static final int WHITE_RARITY = 60;
+	/** The white whale is born only this far out to open sea (Offshore#far): never near any coast. */
+	static final float WHITE_FAR = 0.5F;
 	static final double WHITE_HEALTH = 520.0, WHITE_CHARGE = 0.42;
 	static final float WHITE_RAM_CHANCE = 0.8F;
 
@@ -149,7 +151,8 @@ public class GreatWhale extends WaterAnimal {
 	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
 		@Nullable SpawnGroupData group) {
 		boolean wild = reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.CHUNK_GENERATION;
-		if (wild && this.random.nextInt(WHITE_RARITY) == 0) {
+		if (wild && this.random.nextInt(WHITE_RARITY) == 0 && level.getLevel().dimension() == Level.OVERWORLD
+			&& com.jaymoskingdoms.seas.Offshore.far(level.getLevel(), this.getBlockX(), this.getBlockZ()) >= WHITE_FAR) {
 			this.entityData.set(VARIANT, WHITE);
 			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(WHITE_HEALTH);
 			this.setHealth(this.getMaxHealth());

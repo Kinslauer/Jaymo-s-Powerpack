@@ -32,6 +32,13 @@ public final class FishCatch {
      * kind's range, so half of all fish are in the bottom fifth of it and about one in a hundred in the top tenth.
      */
     static final double SIZE_CURVE = 3.8;
+    /**
+     * Deep water grows big fish (Andy's ocean pick-list, "Something worth sailing for"): a fish found over at least
+     * {@link #DEEP_FROM} blocks of water is heavier, up to {@link #DEEP_MOST} times at {@link #DEEP_FULL} blocks, never past
+     * its kind's most; so the heaviest are out at sea.
+     */
+    static final int DEEP_FROM = 12, DEEP_FULL = 40;
+    static final float DEEP_MOST = 1.6F;
     /** A fish's pull on the line grows with its weight (weight / usual), held between these. */
     static final float PULL_LEAST = 0.7F, PULL_MOST = 1.6F;
     /** (Track D) A landed fish stays alive out of the water this long (ticks), to be put back or kept in a keepnet. */
@@ -118,6 +125,27 @@ public final class FishCatch {
         double t = -Math.log(1.0 - u * (1.0 - Math.exp(-SIZE_CURVE))) / SIZE_CURVE;
         float kg = (float) (min + (max - min) * t);
         return kg < 1.0F ? Math.round(kg * 100.0F) / 100.0F : Math.round(kg * 10.0F) / 10.0F;
+    }
+
+    /** {@code kg} as it runs over {@code depth} blocks of water ({@link #DEEP_MOST}), held to {@code most}. */
+    public static float deeper(float kg, int depth, float most) {
+        float deep = 1.0F + (DEEP_MOST - 1.0F) * Mth.clamp((depth - DEEP_FROM) / (float) (DEEP_FULL - DEEP_FROM), 0.0F, 1.0F);
+        float grown = Math.min(Math.max(kg, most), kg * deep);
+        return grown < 1.0F ? Math.round(grown * 100.0F) / 100.0F : Math.round(grown * 10.0F) / 10.0F;
+    }
+
+    /** How many blocks of water lie under {@code pos}, counted down to {@link #DEEP_FULL}. */
+    public static int depth(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+        net.minecraft.core.BlockPos.MutableBlockPos at = pos.mutable();
+        if (!level.getFluidState(at).is(net.minecraft.tags.FluidTags.WATER)) {
+            at.move(net.minecraft.core.Direction.DOWN); // a bobber floats just above the water
+        }
+        int n = 0;
+        while (n < DEEP_FULL && level.getFluidState(at).is(net.minecraft.tags.FluidTags.WATER)) {
+            n++;
+            at.move(net.minecraft.core.Direction.DOWN);
+        }
+        return n;
     }
 
     /** How much harder (or softer) a fish of {@code kind} weighing {@code kg} pulls than one of its usual size. */
