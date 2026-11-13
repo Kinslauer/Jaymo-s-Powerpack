@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymospowers:votive_2",
+  "width": 4,
+  "height": 6,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymospowers.votive_2.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymospowers.votive.author"
+  }
+}

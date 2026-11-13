@@ -545,7 +545,9 @@ public final class ZFighterDemonRealm {
 			!today && Powers.has(player, ZFighterPower.INSTANCE), () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, true), () -> talk(player, master)))));
 		// the Cinder Pact, offered to a corrupted holder only
 		options.addAll(com.jaymospowers.alchemy.picks.Pacts.offer(player, master, () -> talk(player, master)));
-		ZFighterNpcs.ask(player, master, Component.translatable(today ? "talk.jaymospowers.demon_master.greet_today" : "talk.jaymospowers.demon_master.greet"), options);
+		// in the Darkened Chapel he has come up to them, so he greets them differently
+		String greet = ZFighterChapel.inChapel(master) ? "talk.jaymospowers.demon_master.chapel_greet" : "talk.jaymospowers.demon_master.greet";
+		ZFighterNpcs.ask(player, master, Component.translatable(today ? greet + "_today" : greet), options);
 	}
 
 	private static void teach(ServerPlayer player, net.minecraft.world.entity.Entity master) {
