@@ -94,6 +94,8 @@ public final class SpeechBubbles {
 	}
 
 	static void add(int entityId, Component text, int color) {
+		// (an illager's line, as far as you know their tongue)
+		text = IllagerWords.resolve(text);
 		Font font = Minecraft.getInstance().font;
 		long now = Util.getMillis();
 		long lasts = Math.min(MAX_MS, BASE_MS + PER_CHAR_MS * text.getString().length());

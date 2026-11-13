@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymoskingdoms:illager_rite",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymoskingdoms.illager_rite.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymoskingdoms.illager_rite.author"
+  }
+}

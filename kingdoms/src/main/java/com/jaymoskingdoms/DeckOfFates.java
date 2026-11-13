@@ -320,6 +320,7 @@ public final class DeckOfFates {
 		player.removeAttached(FoeStudy.TAUGHT);
 		player.removeAttached(FoeStudy.LEARNED);
 		player.removeAttached(Languages.LEARNED);
+		IllagerTongue.forget(player);
 	}
 
 	/** A death knight rises to duel you; its bar shows, and a relic falls to the one who fells it. */

@@ -1,0 +1,13 @@
+{
+  "asset_id": "jaymoskingdoms:illager_warlord",
+  "width": 1,
+  "height": 2,
+  "title": {
+    "color": "yellow",
+    "translate": "painting.jaymoskingdoms.illager_warlord.title"
+  },
+  "author": {
+    "color": "gray",
+    "translate": "painting.jaymoskingdoms.illager_warlord.author"
+  }
+}
