@@ -340,3 +340,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12: higher wavy sea** (same thread, Andy picked "Waves and a higher sea" on the decision card). The Overworld's sea stands 8 blocks higher in worlds made from now on (old worlds keep theirs); low caves under the new sea flood; a drawn swell rolls on open ocean.
 
 - 2026-11-12 (Andy): merged PR #1389 (tools/discord_thread.py, YOUTH opens Discord threads).
+- **Nov 13: how much land** (same thread, Andy picked "Higher sea only (about 25% land)" on a card). The continents go back to where they were (offset -0.06); the sea 8 blocks higher alone makes the larger oceans. Measured on seed 4242: about 46% land before, about 25% with the higher sea.
