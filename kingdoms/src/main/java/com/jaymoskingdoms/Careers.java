@@ -1046,8 +1046,7 @@ public final class Careers {
 		if (rankFor(after) > rankFor(before)) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.job.rank_up", f.name(), title(job, rankFor(after)),
 				Component.translatable("job.jaymoskingdoms." + job.key + ".perk." + rankFor(after))).withStyle(ChatFormatting.GOLD));
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP,
-				net.minecraft.sounds.SoundSource.PLAYERS, 0.6F, 1.2F);
+			// (the experience meter chimes for the promotion on the client)
 			refreshTitles(level.getServer());
 		}
 	}

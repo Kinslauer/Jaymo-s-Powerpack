@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.client.mixin.tweaks",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["RoadPaceFovMixin", "IntroNameTagMixin", "IntroTabListMixin", "MaskedTabFaceMixin", "MaskedSocialEntryMixin", "HandshakeCameraMixin", "FilmPlainFovMixin", "ClashInputMixin", "GrueInputMixin", "GrueHandsMixin", "SpiritFirstPersonMixin", "SpiritCullingMixin", "FilmHidesViewerMixin", "FilmNightMixin", "BlightedWolfTintMixin", "HungerPoseRendererMixin", "HungerPoseModelMixin"],
+	"client": ["RoadPaceFovMixin", "IntroNameTagMixin", "IntroTabListMixin", "MaskedTabFaceMixin", "MaskedSocialEntryMixin", "HandshakeCameraMixin", "FilmPlainFovMixin", "ClashInputMixin", "GrueInputMixin", "GrueHandsMixin", "SpiritFirstPersonMixin", "SpiritCullingMixin", "FilmHidesViewerMixin", "FilmNightMixin", "BlightedWolfTintMixin", "HungerPoseRendererMixin", "HungerPoseModelMixin", "BossHealthOverlayAccessor"],
 	"injectors": { "defaultRequire": 1 }
 }
