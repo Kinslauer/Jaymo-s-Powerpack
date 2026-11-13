@@ -66,7 +66,7 @@ public final class GearPicks {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			HEADS.values().forEach(output::accept);
 			for (ArrowHead head : ArrowHead.values()) {
-				output.accept(HeadedArrowItem.of(head, 16));
+				output.accept(HeadedArrowItem.of(head, 1));
 			}
 			output.accept(LEATHER_BELT);
 			output.accept(IRON_BELT);
