@@ -392,3 +392,12 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Nov 12, 9:55 PM: giants PR merged** (models thread, Andy: "merge"). PR #1398 squash-merged: Aether Giants on GeckoLib from Blockbench, Snow Giant upright body at 2x. Not played before merge.
 
 - 2026-11-12 10:08 PM ET (boss-mods thread): Andy said "merge" for patch 8; PR #1399 (trophy looks, dragon bone, deep tooth, dragonhide shield) merged.
+
+- 2026-11-12 10:07 PM ET (Sengoku picks thread): Andy ticked 59 of 63 rows of the Sengoku Jidai pick list
+  (https://claude.ai/artifact/GEmrtBD44ntMuLdmnj3Rz6); not the throwing blades ("we have kunai") nor the three
+  rule-breaking rows. His notes, verbatim. Rework vanilla: "yeah absolutely not, but i would like all this to be on a
+  seperate continent spoken about by villagers, and reached by LONG sailing, if that is at all achievable then we add
+  all of this. if not, it can be sidelined." Replace the Nether: "can we add it as a biome instead?" Folded steel:
+  "their smiths will teach you about the process". Found achievable in the Overworld (our own continents density
+  files + one density function type); plan docs/BlossomLands-Plan.md, 16 patches, 5 open questions (my proposals, not
+  yet confirmed by Andy: 8,000 blocks of sea, 22,000 east; no pods or coaches there; old mainland blossom villages stay).

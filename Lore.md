@@ -1308,6 +1308,18 @@ no chart shows there are caches someone buried and never came back for. The **wh
 only far out. Merchantmen and smacks heave to for a horn blown at sea and trade over the rail, and a merchant may sell
 the charted plans of a ship drawn in some far yard.
 
+(new) **The land east over the water** (Sengoku picks thread, 2026-11-12; Andy: "i would like all this to be on a
+seperate continent spoken about by villagers, and reached by LONG sailing"). The blossom folk have a country of their
+own, a whole continent a day and a night's sail east across empty deep water, with no island on the way. It is in the
+Overworld like everything else under this sky; only the sea is between. Nobody on the home continent has a map of it.
+Harbour folk, sailors and old soldiers speak of it sideways: the ships of strange build that come in now and then with
+tea, rice wine, lacquer, paper and a steel no smith here can make, the men who sailed east after them, the ones who
+came back. There the cherry groves, the villages and towns of red gates and lantern roads, the lords' castles and the
+rival houses are at home; the groves on the home continent are wild ones, and any blossom village standing among them
+was raised by settlers from over the sea. No road, coach or milestone reaches it. The blossom folk keep the same eight
+faiths as everyone, at their own shrines and pagodas, and tell the old stories their own way: what the home
+continent calls the demons' country they tell of as a pale grove by a slow river. Its name is not yet chosen.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
