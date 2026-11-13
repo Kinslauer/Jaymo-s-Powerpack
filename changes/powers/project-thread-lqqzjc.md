@@ -17,4 +17,5 @@
   (`WindAether.stackedTick`), where it used to come as you left the Aether.
 - Nothing spawns in the Cloud Sea and nothing is built there. The cloud shapes are world generation data from
   `tools/gen_cloud_sea.py` (deck heights, cover, thickness, wells: tune them at the top of that file).
-- Compiled; the world generation data was loaded by a test server; not played in a stacked world.
+- Compiled. The world generation data was loaded by a plain 26.3 server, which made the decks as planned (the overcast in
+  every column probed, clear air between the decks). Not played in a stacked world.
