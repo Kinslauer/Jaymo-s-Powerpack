@@ -4074,3 +4074,10 @@ enter limbo if they don't come to."
   pixels a streak). Crouch and hold V: a faint ring of ticks shows round the crosshair so you know it is on, and each
   moving thing near you draws a streak of five larger dots with a dark edge on its side of the ring. That hold of V
   is the sense's, so V's own ability doesn't charge; V without crouching is unchanged.
+
+## 0.23.8 (2026-11-13): keep starts, pod trips, the chapel pull and growing trees from freezing the server (#1427)
+
+- The Verdant start looked for its village 100 rings of village spacing out (findNearestMapStructure counts spacings, not chunks), making each candidate chunk on the server thread; it now reaches 8 rings (still thousands of blocks). The darkened chapel's pull reached 64 rings of its 60-chunk spacing and now reaches 2 (about 2000 blocks).
+- Spot searches on far worlds (pod trip landings, a world's first landing pad, the moon and Verdant starts' spots and gates) tried 24 to 40 random places in land nobody had seen, making each chunk while the server waited. Each search now makes at most 6 new chunks and looks only at land already made after that, then falls back as before.
+- Dynamic Waters: a tree growing (sapling or bonemeal) in land whose watershed wasn't built yet built the whole 1024-block basin on the server thread. It's now built in the background, and that tree just doesn't see the watershed.
+- Built in CI (Dynamic Waters isn't built by CI; it's built by the pbdr); not played.
