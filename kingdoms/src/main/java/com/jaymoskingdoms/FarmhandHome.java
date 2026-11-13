@@ -176,8 +176,9 @@ public final class FarmhandHome {
 		for (Villager v : folk) {
 			v.setAttached(FARMHAND_FAMILY, player.getUUID());
 		}
-		// (they may notice your blood, and say so kindly: it never costs anything)
-		if (!folk.isEmpty()) {
+		// (they may notice your blood, and say so kindly: it never costs anything; one waking in their bed hears it from the
+		// farmer in the wake film instead, FarmhandWake, not behind the loading screen)
+		if (!folk.isEmpty() && house.bed() == null) {
 			Villager speaker = folk.stream().filter(v -> !v.isBaby()).findFirst().orElseGet(() -> folk.get(0));
 			Heritage.Kind kind = Heritage.of(player);
 			Component line = Prejudice.degree(kind) > 0
