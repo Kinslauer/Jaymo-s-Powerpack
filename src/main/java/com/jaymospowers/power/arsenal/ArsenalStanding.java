@@ -35,6 +35,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -439,7 +440,12 @@ public final class ArsenalStanding {
 		for (Entity entity : level.getEntitiesOfClass(Entity.class, box)) {
 			if (passable(entity) && tick - LAST_PASS.getOrDefault(entity.getUUID(), -1000L) > PASS_COOLDOWN) {
 				if (exitOk == null) {
-					exitOk = roomAhead(to, other);
+					Vec3 exit = other.pos().add(other.normal().scale(EXIT_DISTANCE));
+					exitOk = com.jaymospowers.core.Loaded.made(to, Mth.floor(exit.x - 0.3), Mth.floor(exit.z - 0.3))
+						&& com.jaymospowers.core.Loaded.made(to, Mth.floor(exit.x + 0.3), Mth.floor(exit.z - 0.3))
+						&& com.jaymospowers.core.Loaded.made(to, Mth.floor(exit.x - 0.3), Mth.floor(exit.z + 0.3))
+						&& com.jaymospowers.core.Loaded.made(to, Mth.floor(exit.x + 0.3), Mth.floor(exit.z + 0.3))
+						&& roomAhead(to, other);
 				}
 				if (!exitOk) {
 					return;
