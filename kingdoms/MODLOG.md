@@ -12504,3 +12504,12 @@ giants being worked on, as its own upright model."
 - **Builders in the Aether**: a kingdom's builders now count the Aether's own ground as natural ground (new block tag `jaymoskingdoms:natural_ground`: holystone, ferrosite, quicksoil, aether dirt and grass, icestone, undershale, agiosite, arctic snow and ice and the rest, all optional entries). Before, they could neither dig it out nor build where it stood, so a house on uneven Aether ground was left sunk into the rock with ferrosite over its floor and lumps of holystone in its rooms (Andy's Morkeep house). Site picking, levelling, foundations and roads all use the same check. Houses already built that way keep their rock until it's mined out.
 - **Chat in bed**: lying in bed (and through the night's timelapse film) the chat no longer stands on screen in full: until you type in the bed's chat box it shows as with the chat closed, new lines fading after a while (`ChatScreenBedMixin`). Typing brings the whole chat back.
 - Built; not played.
+
+## 0.8.11 (2026-11-13): Checks for loaded land no longer wait for land being made (#1435)
+
+- **Fix (possible watchdog crash)**: `level.hasChunk` in 26.3 is also true for a chunk still being generated, so the
+  reads it guarded could wait on the server thread (the Deck crash at 2026-11-13 11:57 came from the same guard in
+  Powers). Every server-side guard now uses `getChunkSource().getChunkNow(...)`, true only for land that's made and
+  loaded: `ArrivalGround`, `Labyrinths`, `BogLights`, `Haunts`, `Debris`, `Groundwork`, `QuestFoes`, `Roads`,
+  `Seats`, `Shelter`, `Weathering`.
+- Built; tested on the Deck server.

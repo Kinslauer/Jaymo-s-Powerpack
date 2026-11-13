@@ -4108,3 +4108,13 @@ enter limbo if they don't come to."
 
 - The Verdant start's village search and the darkened chapel's pull made each likely chunk on the server thread while looking, which on the Steam Deck can wait behind a long world generation queue past the server's watchdog. They now work the place out without making any chunk (Scout), like Kingdoms' starts.
 - Built in CI; not played.
+
+## 0.23.12 (2026-11-13): Server froze reading land still being made (Deck crash 11:57) (#1435)
+
+- **Fix (watchdog crash)**: `level.hasChunk` in 26.3 is true for a chunk that's only scheduled (its holder at FULL
+  ticket level) and not made yet, so reading it waited on the server thread for it to generate. Right after a join
+  `SkyfallCleanup`'s sweep (21x21 chunks round each player) read such a chunk and held the server 60 s (Deck crash
+  2026-11-13 11:57). Every server-side `hasChunk` guard now uses `getChunkSource().getChunkNow(...)`, which only
+  answers for a chunk that is made and loaded: `SkyfallCleanup` (also the blocks beside a spring), `WildRoom`,
+  `Mortality`, `GravityMeteorSweep`, `ZFighterAfterlife`. `SkySpringFeature` (world generation) is unchanged.
+- Built; tested on the Deck server.
