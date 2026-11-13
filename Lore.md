@@ -860,6 +860,18 @@ none.
 given back to the one who keeps the dark at bay. The dead that walk are his to put down, and the blood-drinkers hate
 his light.
 
+(new) **The barrow's oath** (models thread, 2026-11-13; Andy asked for lore for yair's Cryptbound Revenant and Zombie
+Knight and fixed two points: the knight "needs a different head and should wield a sword from our pack, and
+correctly"; the rest is Claude's placement for him to approve). Before the kingdoms there were lords on the moor who were
+buried with their household, and the greatest of them swore to the Lantern Warden to keep the light over their own
+dead. They are keeping it still. The old barrows are the buried cobblestone rooms under the Overworld. In about half
+of them two or three **barrow knights** stand: dead villagers' faces under rusted kettle helms, each with a real forged
+sword in his fist. In the deepest, their lord stands with them, the **cryptbound revenant**, in rusted plate with the
+Warden's blue light in his helm, his breast and along his blade. They let pass whoever comes carrying a lantern, as the
+lantern-keepers of the barrows do, and they fight anyone else, and anyone who strikes one of them. Hard pressed, the
+revenant raises his sword, the blue light rings out, and more of his knights climb out of the floor. He leaves a soul
+lantern behind. They are not a Bane's barrow-host: a Bane's dead hunt one person, these only keep a grave.
+
 **The Crowned Sun**: kings, law and war. He takes tribute as a king does: gold in small coin, the sunflower, glowstone,
 the golden root. He is warm to those who serve a crown and march under a banner. Thieves, and the smoke they hide in,
 are his shame.
