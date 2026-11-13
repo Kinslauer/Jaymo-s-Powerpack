@@ -28,14 +28,14 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * The endless jug: a clay jug that never runs dry. Use it on a cauldron to fill it; on farmland to soak it (and the soil
  * round it); on a fire to put it out; on a campfire to douse it. Use it in the air with an empty bucket in your other hand to
- * fill the bucket. Used in the air bare, it is a drink: it puts out any flame on you and settles a hungry belly a little.
+ * fill the bucket. Used in the air bare, it is a drink of clean water: it puts out any flame on you and quenches thirst (or, without Kitchen, settles a hungry belly a little).
  * It sets no water loose in the world: only what a jug can fill, nothing that flows.
  */
 public final class EndlessJug {
 	/** Farmland round the one used is soaked this far (blocks). */
 	static final int SOAK = 1;
-	/** A drink's food points, and the wait after (ticks). */
-	static final int DRINK_FOOD = 1, COOLDOWN = 20 * 3;
+	/** A drink's water (Kitchen's thirst), its food points without Kitchen, and the wait after (ticks). */
+	static final int DRINK_WATER = 4, DRINK_FOOD = 1, COOLDOWN = 20 * 3;
 	public static Item ITEM;
 
 	private EndlessJug() {
@@ -108,7 +108,10 @@ public final class EndlessJug {
 				if (player.isOnFire()) {
 					player.clearFire();
 				}
-				player.getFoodData().eat(DRINK_FOOD, 0.0F);
+				// clean water for the thirst (Kitchen); without Kitchen, a little settles the belly
+				if (!(player instanceof net.minecraft.server.level.ServerPlayer sp && KitchenCompat.drink(sp, DRINK_WATER))) {
+					player.getFoodData().eat(DRINK_FOOD, 0.0F);
+				}
 				server.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.8F, 1.1F);
 			}
 			player.getCooldowns().addCooldown(jug, COOLDOWN);

@@ -233,3 +233,23 @@ works on NPCs too. Speak with Dead and the Stranger death messages belong to the
   (stand-ins); eyes key Page Down; send to hand an item over; touch spells through its eyes; ash and recall ritual.
 - **H13** (`WildMagic`): Sorcerer "wild" option (1 in 6 casts) and great-lair land or `addCursedPlace` (1 in 8);
   13 surges; the fireball can hurt a very low-health caster (players go down, not die).
+
+### Patch 8
+(Restarted after a machine restart.)
+- **I1** (Powers `baubles/Bonds`, Kingdoms `ItemBonds`, `BondRest`): per Andy, found baubles work this way; found
+  relics, willed blades and unknown items do nothing until bonded on a full sleep or a 1-minute calm seated rest;
+  3 at most; Bonds screen on the bauble screen. Quest-gifted relics also need bonding.
+- **I2** (`RelicCurses`): clinging (can't drop or unequip), thirst (2 HP per kill, never kills), whispers, misfortune
+  (Luck -3). Lifted by a cleric (14 coins, 4 at a shrine), `Dispel`, or dispel done as a slow rite (the lead made
+  dispel a ritual: the remove-curse rite).
+- **I3**: unknown until 10 minutes' bonded use, identify, a Research topic, or a court wizard (6 coins).
+- **I4** (`SentientBlades`, `Seizures` BLADE, `OwnSpeechHud`): wants undead/weak/gold; grudges; a POSSESSION save
+  before it takes the arm.
+- **I5** (`ChargedWand`): six new wands; 25% crumble on the last charge. Other mods' staffs untouched.
+- **I6** (Kingdoms gadgets, Powers `Wondrous` boots and cloak): loot only. The jug gives Kitchen clean water (lead's
+  fix). The horn skips any faction's land unless you rule it, locked blocks, block entities, fluids, hardness > 5.
+- **I7** (Deck of Fates): 1-3 draws chosen first; 12 cards; the throne raises a keep via
+  `KingdomEvents.found(..KEEP)` or gives a keep deed; the death knight is a strengthened wither skeleton (no own
+  model); the wish is four boons (life, riches, learning, mercy), never free-form.
+- **I8** (potion clash mixin): ~45% clash chance, lowered by Wits.
+- Art: `tools/gen_fifth_p8.py`.

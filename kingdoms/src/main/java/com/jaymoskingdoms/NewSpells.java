@@ -66,7 +66,7 @@ public final class NewSpells {
 		Map.entry("locate_creature", Mana.WILL), Map.entry("augury", Mana.WILL), Map.entry("scrying", Mana.WILL), Map.entry("plant_growth", Mana.HEAL),
 		Map.entry("control_weather", Mana.WILL), Map.entry("moonbeam", Mana.WARD), Map.entry("heroes_feast", Mana.HEAL), Map.entry("find_familiar", Mana.WARD));
 	/** The small useful ones that can be cast slowly with no mana ({@link Rituals}). */
-	public static final Set<String> RITUALS = Set.of("ward_line", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar");
+	public static final Set<String> RITUALS = Set.of("ward_line", "dispel", "find_magic", "identify", "speak_animals", "control_weather", "find_familiar");
 	/** The rite of calling a familiar back from its ash: no spell of its own, known with the one that bound it. */
 	public static final String CALL_FAMILIAR = "call_familiar";
 	/** What a Sorcerer is born knowing: the quick, small ones. */

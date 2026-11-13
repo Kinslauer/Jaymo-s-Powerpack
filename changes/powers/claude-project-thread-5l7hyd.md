@@ -6,4 +6,6 @@
 - **Guard**: a Kingdoms spark can turn a missed parry into a parry (`Guard.SPARK` hook).
 - **Walking spells** (`core/MagicMoves`, mixin `SpellJumpMixin`; `ChronoWaterRunMixin`, `SkitterClimbMixin`): Kingdoms' water walk, spider climb and long jump spells.
 - **Clean cantrip** (`core/blood/MagicWash`): washes blood off a body's coat and gear.
+- **Bonding baubles** (`baubles/Bonds`, client `BondsScreen`): found baubles and relics do nothing until bonded on a full night's sleep (or Kingdoms' seated rest); three at most; a Bonds button on the bauble screen and tooltip lines.
+- **Boots of Long Strides and Cloak of the Depths** (`Wondrous`): found baubles.
 - Built; not played.

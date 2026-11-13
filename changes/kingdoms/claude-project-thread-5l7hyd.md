@@ -63,4 +63,10 @@
 - **Moonbeam**: forces werewolves, disguised dragons and shapeshifter copies into their true form.
 - **Familiars** (owl, raven, cat, rat, frog): follow, scout, carry an item, deliver touch spells; hold Page Down to see through their eyes; a ritual calls them back from their ash.
 - **Wild magic** (`WildMagic`): a wild Sorcerer bloodline, and casting in a great lair's blighted land, can surge into a random effect.
+- **Bonding, curses and unknown relics** (`ItemBonds`, `BondRest`, `RelicCurses`, `SlotCurseMixin`, `PlayerDropMixin`): found relics and baubles work only once bonded over a rest (three at most), show their powers only once used a while, identified, read by a court wizard or looked up, and some carry a curse (clinging, thirst, whispers, misfortune) that a cleric at a shrine, dispel, or the dispel rite lifts.
+- **Blades with a will** (`SentientBlades`): a rare relic that wants the undead slain, the weak guarded or gold, speaks to you alone, argues, and at the third grudge tries to take your arm.
+- **Charged wands** (`ChargedWand`): embers, frost, mending, binding, gales and warding; charges refill at dawn; the last charge may crumble it.
+- **Wondrous gadgets** (`GadgetLoot`): immovable rod, climbing rope, endless jug (clean water, puts out flames), floating light, stone hound, horn of breaking (spares others' land, locked and hard blocks), bottle of endless smoke.
+- **Deck of Fates**: name how many you'll draw, then a keep with servants, a nemesis, ruin, a wish (four boons), a new class, a lost memory, a death knight's duel, and more.
+- **Potion clashes** (mixin on `PotionContents.onConsume`): a second potion while one works may cancel, double, sour or blow up in your belly (hurts you, never the ground); Wits lowers the odds.
 - Built; not played.
