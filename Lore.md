@@ -1381,6 +1381,12 @@ Farmsteads stand a little way out, each with a wayside shrine kept to whichever 
 High villages gather round their shrine and low ones round a market. A town has a tea house where the home continent
 has a tavern, a dojo, a bath of still water, and in time a pagoda. The dead lie under narrow posts of grey stone.
 
+(new) **The blossom smiths' steel** (Blossom lands thread, 2026-11-13; Andy: "their smiths will teach you about the
+process"; the steps are Claude's for him to approve). Mohknee has little ore. Its iron is washed out of the rivers as
+black sand, burnt to a rough bloom, and folded on the anvil until the slag is gone. It is the same steel the home
+continent alloys in a smeltery, come at another way. The smiths do not write it down. They tell it a step at a time,
+each step to someone who has done the one before.
+
 ## The wild
 
 **Beasts.** The wild has its feral wolves (who smell you on the wind and hunt as a pack), coyotes, moose, wild
