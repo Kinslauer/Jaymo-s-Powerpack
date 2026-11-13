@@ -526,6 +526,12 @@ anyone told him to; his sword lies with him and nowhere else.
 **The glass gauntlet** (Andy approved, 2026-11-12). A gauntlet of volcanic glass that is every tool and a weapon besides.
 Nobody makes one. It is only ever pulled out of somewhere else by the Arsenal, which keeps it.
 
+(new) **The roosts, the ring and the den** (BossRise patch 3, 2026-11-13). The **roosts** are the demons' country's own
+watchtowers from the old war, blackstone, still held by the fortress' dead on every floor. The Ignivorus took their roofs
+for perches long ago, and one comes down on a tower when somebody climbs out onto its roof. A **gorgon** keeps an old ruin:
+where one lives there is a broken ring of mossy columns, older than anyone's memory of who raised it. A **grizzly** has
+its den ground: bare scraped earth, a tree rubbed clean of its bark, the bones of what it ate.
+
 (new) **Who keeps company with whom** (Andy, 2026-11-11). Every orc war camp keeps a band of ogres and a Bogre by its fire,
 its heavy hands. The mud golems are common in the swamps, and they are the witches' allies: they rise out of the mud by a
 witch's hut, guard it, and go for anyone who strikes a witch. The minotaur no longer roams the mountains, and it is
