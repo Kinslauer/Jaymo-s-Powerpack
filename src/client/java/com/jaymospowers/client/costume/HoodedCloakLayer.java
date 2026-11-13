@@ -1,5 +1,6 @@
 package com.jaymospowers.client.costume;
 
+import com.jaymospowers.client.WornPose;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.HiddenArmor;
 import com.jaymospowers.costume.Costume;
@@ -157,6 +158,19 @@ public final class HoodedCloakLayer {
 			this.leftMantle = this.leftArm.getChild("mantle");
 		}
 
+		/**
+		 * Posed as it is drawn: the model is set up again from the render state right before it is drawn
+		 * (ModelFeatureRenderer), which put every part back to rest, so the cloak's own sway set when it was submitted never
+		 * showed. The body as Fresh Animations moved it and MCA's head size come first (WornPose); the hood is down when the
+		 * head slot was cleared in extract().
+		 */
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			WornPose.fit(this, state);
+			pose(state, state.headEquipment.isEmpty());
+		}
+
 		void pose(AvatarRenderState state, boolean down) {
 			for (ModelPart part : new ModelPart[] {collar, back, hem, point, cowl, rightMantle, leftMantle}) {
 				part.resetPose();
@@ -210,11 +224,8 @@ public final class HoodedCloakLayer {
 			if (texture == null || state.isInvisible) {
 				return;
 			}
-			// hood down when the head slot was cleared in extract()
-			boolean down = state.headEquipment.isEmpty();
+			// (posed as it is drawn: Model.setupAnim)
 			Model model = model(state.skin != null && state.skin.model() == PlayerModelType.SLIM);
-			model.setupAnim(state);
-			model.pose(state, down);
 			collector.submitModel(model, state, poseStack, RenderTypes.entityCutout(texture), lightCoords, OverlayTexture.NO_OVERLAY, -1,
 				null, state.outlineColor);
 		}

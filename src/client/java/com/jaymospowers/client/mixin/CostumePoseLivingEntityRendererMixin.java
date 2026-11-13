@@ -15,7 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.11.78) Just before the render layers, when Entity Model Features has animated the body for them: its pose is kept
- * for the costume drawn over it (CostumeBody), which otherwise stayed in the vanilla pose under Fresh Animations.
+ * for the costume drawn over it (CostumeBody), which otherwise stayed in the vanilla pose under Fresh Animations, and for
+ * the other pieces worn over the body (WornPose: bauble looks, Artifacts trinkets, the hooded cloak, Kitchen's quiver).
  */
 @Mixin(LivingEntityRenderer.class)
 abstract class CostumePoseLivingEntityRendererMixin {
@@ -28,5 +29,6 @@ abstract class CostumePoseLivingEntityRendererMixin {
 	private void jaymospowers$keepCostumeBody(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera,
 		CallbackInfo ci) {
 		CostumeBody.keep(state, this.model);
+		com.jaymospowers.client.WornPose.keep(state, this.model);
 	}
 }

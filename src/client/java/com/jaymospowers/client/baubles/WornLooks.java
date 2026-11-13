@@ -343,6 +343,8 @@ public final class WornLooks {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
+			// the body as Fresh Animations moved it, and MCA's head size (WornPose)
+			com.jaymospowers.client.WornPose.fit(this, state);
 			float stride = state.walkAnimationPos * 0.6662F;
 			float pace = Math.min(1.0F, state.walkAnimationSpeed);
 			for (Moving m : moving) {
