@@ -63,7 +63,7 @@ public final class TinkerUi {
 
 	/** The screen's title in the accent and the inventory's in dim, where vanilla puts them. */
 	public static void labels(GuiGraphicsExtractor graphics, Font font, Component title, int titleX, int titleY, Component inventory, int invX, int invY) {
-		graphics.text(font, title, titleX, titleY, ACCENT, false);
-		graphics.text(font, inventory, invX, invY, DIM, false);
+		graphics.text(font, title, titleX, titleY, ACCENT);
+		graphics.text(font, inventory, invX, invY, DIM);
 	}
 }

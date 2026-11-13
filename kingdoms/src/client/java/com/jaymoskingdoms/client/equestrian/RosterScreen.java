@@ -109,14 +109,14 @@ final class RosterScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, height(), Ui.GOLD);
-		graphics.text(this.font, this.title, x + 8, y + 8, Ui.GOLD, false);
+		graphics.text(this.font, this.title, x + 8, y + 8, Ui.GOLD);
 		if (roster == null || roster.isEmpty()) {
 			Component note = Component.translatable(roster == null ? "screen.jaymoskingdoms.roster.asking" : "screen.jaymoskingdoms.roster.none");
 			Ui.line(graphics, this.font, note, x + 8, y + HEADER + 6, W - 16, Ui.DIM);
 		} else {
 			if (roster.size() > ROWS) {
 				String page = (this.scroll + 1) + "-" + Math.min(roster.size(), this.scroll + ROWS) + " / " + roster.size();
-				graphics.text(this.font, page, x + W - 8 - this.font.width(page), y + 8, Ui.HINT, false);
+				graphics.text(this.font, page, x + W - 8 - this.font.width(page), y + 8, Ui.HINT);
 			}
 			for (int i = 0; i < ROWS && i + this.scroll < roster.size(); i++) {
 				row(graphics, roster.get(i + this.scroll), x, y + HEADER + i * ROW, i, mouseX, mouseY);

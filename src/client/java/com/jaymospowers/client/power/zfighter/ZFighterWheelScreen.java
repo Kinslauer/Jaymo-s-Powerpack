@@ -149,23 +149,10 @@ final class ZFighterWheelScreen extends Screen {
 
 		// a dark disc behind the ring, a thin ring, and the pointer
 		int outer = RADIUS + TILE / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0081018);
-		}
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
-		}
+		UiStyle.wheel(graphics, cx, cy, RADIUS, TILE);
 		if (selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			UiStyle.wheelPointer(graphics, cx, cy, RADIUS, TILE, t, ACCENT);
 		}
 
 		for (int i = 0; i < ZFighterSlots.SLOTS; i++) {
@@ -176,9 +163,7 @@ final class ZFighterWheelScreen extends Screen {
 			boolean empty = technique == ZFighterSlots.EMPTY;
 			boolean picked = i == selected;
 			boolean on = !empty && onKey(player, technique);
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : on ? 0xA0000000 | ZFighterPower.COLOR : empty ? UiStyle.ROW_ALT : 0x60FFFFFF);
+			UiStyle.wheelTile(graphics, x, y, TILE, i, picked, picked ? ACCENT : on ? 0xA0000000 | ZFighterPower.COLOR : empty ? UiStyle.ROW_ALT : 0x60FFFFFF);
 			if (empty) {
 				String number = Integer.toString(i + 1);
 				graphics.text(font, number, x + TILE / 2 - font.width(number) / 2, y + TILE / 2 - 4, UiStyle.HINT);

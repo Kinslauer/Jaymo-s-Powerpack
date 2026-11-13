@@ -75,7 +75,7 @@ import org.jspecify.annotations.Nullable;
 public final class {cls} {{
 	public static final int PANEL = 0xD0101018, ROW = 0x30FFFFFF, ROW_ALT = 0x18FFFFFF, ROW_HOVER = 0x50FFFFFF, ROW_PICKED = 0x40FFFFFF,
 		CHIP = 0xA0000000, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, BAR_BACK = 0xFF303030, WELL_EDGE = 0xFF34343E,
-		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050;
+		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050, WHEEL_DISC = 0xA0101018;
 	/** The H character menu's solid window ({{@link #window}}, {{@link #recess}}). */
 	public static final int WINDOW_EDGE = 0xFF0A0A0E, WINDOW_LIGHT = 0xFF4A4A52, WINDOW_SHADE = 0xFF141418, WINDOW_BODY = 0xFF2B2B2F,
 		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;

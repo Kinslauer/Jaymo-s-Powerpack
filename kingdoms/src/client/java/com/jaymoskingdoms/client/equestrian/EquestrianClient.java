@@ -408,7 +408,7 @@ public final class EquestrianClient {
 		graphics.fill(x - 2, y + 10, x + 92, y + 11 + STATS.length * 9 + 1, 0x90000000);
 		for (int i = 0; i < STATS.length; i++) {
 			int row = y + 12 + i * 9;
-			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT);
 			int bx = x + 46;
 			int bw = 40;
 			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);
@@ -470,7 +470,7 @@ public final class EquestrianClient {
 		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
 		for (int i = 0; i < STATS.length; i++) {
 			int row = y + 11 + i * 9;
-			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT);
 			int bx = x + 46;
 			int bw = 40;
 			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);

@@ -32,6 +32,6 @@ public final class HeartHud {
         if (hearts <= 0) {
             return;
         }
-        graphics.text(minecraft.font, Component.literal("+" + hearts + " hearts"), 2, 26, 0x808080, false);
+        graphics.text(minecraft.font, Component.literal("+" + hearts + " hearts"), 2, 26, 0x808080);
     }
 }

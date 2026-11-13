@@ -367,7 +367,7 @@ final class ClassScreen extends Screen {
 	/** Every class down the left, the picked one marked. */
 	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int x = left(), y = top();
-		Ui.line(graphics, this.font, this.title, x + 8, y + 8, LIST_W - 12, Ui.TEXT);
+		Ui.line(graphics, this.font, this.title, x + 8, y + 7, LIST_W - 12, Ui.GOLD);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.class.sub"), x + 8, y + 19, LIST_W - 12, Ui.DIM);
 		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
 		PlayerClass[] all = PlayerClass.values();

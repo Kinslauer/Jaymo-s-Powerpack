@@ -200,23 +200,10 @@ final class ArsenalPlacesScreen extends Screen {
 
 		// a dark disc behind the ring, a thin ring, and the pointer
 		int outer = RADIUS + TILE / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0100818);
-		}
-		for (int k = 0; k < 96; k++) {
-			double t = k * Math.PI * 2.0 / 96.0;
-			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
-			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
-		}
+		UiStyle.wheel(graphics, cx, cy, RADIUS, TILE);
 		if (selected >= 0) {
 			double t = Math.atan2(dy, dx);
-			for (int r = DEAD_ZONE; r < RADIUS - TILE / 2 - 6; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			UiStyle.wheelPointer(graphics, cx, cy, RADIUS, TILE, t, ACCENT);
 		}
 
 		for (int i = 0; i < n; i++) {
@@ -225,9 +212,7 @@ final class ArsenalPlacesScreen extends Screen {
 			int y = cy + (int)Math.round(Math.sin(t) * RADIUS) - TILE / 2;
 			boolean picked = i == selected;
 			boolean close = i >= places.size();
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : close ? 0x80FF7070 : 0x60FFFFFF);
+			UiStyle.wheelTile(graphics, x, y, TILE, i, picked, picked ? ACCENT : close ? 0x80FF7070 : 0x60FFFFFF);
 			Item item = close ? Items.BARRIER : icon(places.get(i).dimension());
 			graphics.item(new ItemStack(item), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!close) {

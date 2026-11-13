@@ -104,7 +104,7 @@ public class TackScreen extends AbstractContainerScreen<TackMenu> {
 	}
 
 	private void row(GuiGraphicsExtractor graphics, int x, int y, Component label, float share, int color) {
-		graphics.text(this.font, label, x, y, TEXT, false);
+		graphics.text(this.font, label, x, y, TEXT);
 		int bx = x + BAR_X;
 		graphics.fill(bx, y + 3, bx + BAR_W, y + 6, Ui.BAR_BACK);
 		graphics.fill(bx, y + 3, bx + Mth.ceil(BAR_W * Mth.clamp(share, 0.0F, 1.0F)), y + 6, 0xFF000000 | color);
@@ -112,8 +112,8 @@ public class TackScreen extends AbstractContainerScreen<TackMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, Ui.GOLD, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, Ui.DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, Ui.GOLD);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, Ui.DIM);
 	}
 
 	static int trustColor(float trust) {

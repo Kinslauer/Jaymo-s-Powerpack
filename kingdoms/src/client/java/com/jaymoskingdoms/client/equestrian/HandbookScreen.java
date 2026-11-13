@@ -71,9 +71,9 @@ final class HandbookScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		Ui.panel(graphics, x, y, W, H, Ui.GOLD);
-		graphics.text(this.font, this.title, x + MARGIN, y + 8, Ui.DIM, false);
+		graphics.text(this.font, this.title, x + MARGIN, y + 8, Ui.DIM);
 		String count = this.page + " / " + PAGES;
-		graphics.text(this.font, count, x + W - MARGIN - this.font.width(count), y + 8, Ui.HINT, false);
+		graphics.text(this.font, count, x + W - MARGIN - this.font.width(count), y + 8, Ui.HINT);
 		Ui.line(graphics, this.font, Component.translatable("handbook.jaymoskingdoms." + this.page + ".title"), x + MARGIN, y + 22, W - 2 * MARGIN,
 			Ui.GOLD);
 		Ui.rule(graphics, x + 4, x + W - 4, y + 33);

@@ -69,10 +69,10 @@ public class AltarScreen extends AbstractContainerScreen<AltarMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM);
 		int needed = this.menu.needed();
 		Component line = needed > 0 ? Component.translatable("gui.jaymospowers.altar.shards", needed) : Component.translatable("gui.jaymospowers.altar.idle");
-		graphics.text(this.font, line, 44, 78, needed > 0 ? TEXT : DIM, false);
+		graphics.text(this.font, line, 44, 78, needed > 0 ? TEXT : DIM);
 	}
 }

@@ -166,7 +166,7 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 			if (viaEssence) {
 				graphics.fill(tx + 2, ty + 5, tx + 8, ty + 11, ACCENT);
 			}
-			graphics.text(font, Component.translatable("gui.jaymospowers.enchanting.essence"), tx + 14, ty + 4, over ? UiStyle.TEXT : UiStyle.DIM, false);
+			graphics.text(font, Component.translatable("gui.jaymospowers.enchanting.essence"), tx + 14, ty + 4, over ? UiStyle.TEXT : UiStyle.DIM);
 		}
 		boolean hover = UiStyle.over(mouseX, mouseY, x + BUTTON_X, y + BUTTON_Y, BUTTON_W, BUTTON_H);
 		int bx = x + BUTTON_X, by = y + BUTTON_Y;
@@ -181,8 +181,8 @@ public class EnchantingScreen extends AbstractContainerScreen<EnchantingMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(font, title, 8, 6, ACCENT, false);
-		graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, UiStyle.DIM, false);
+		graphics.text(font, title, 8, 6, ACCENT);
+		graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, UiStyle.DIM);
 	}
 
 	@Override

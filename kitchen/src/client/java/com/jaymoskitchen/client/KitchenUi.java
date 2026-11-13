@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 public final class KitchenUi {
 	public static final int PANEL = 0xD0101018, ROW = 0x30FFFFFF, ROW_ALT = 0x18FFFFFF, ROW_HOVER = 0x50FFFFFF, ROW_PICKED = 0x40FFFFFF,
 		CHIP = 0xA0000000, TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, BAR_BACK = 0xFF303030, WELL_EDGE = 0xFF34343E,
-		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050;
+		WELL = 0xFF0C0C12, BUTTON_RIM_OFF = 0xA0505050, WHEEL_DISC = 0xA0101018;
 	/** The H character menu's solid window ({@link #window}, {@link #recess}). */
 	public static final int WINDOW_EDGE = 0xFF0A0A0E, WINDOW_LIGHT = 0xFF4A4A52, WINDOW_SHADE = 0xFF141418, WINDOW_BODY = 0xFF2B2B2F,
 		WINDOW_CANVAS = 0xFF1E1E22, WINDOW_WELL_LIGHT = 0xFF3E3E46;
@@ -140,6 +140,46 @@ public final class KitchenUi {
 		graphics.fill(x, y + 1, x + 1, y + h - 1, rim);
 		graphics.fill(x + w - 1, y + 1, x + w, y + h - 1, rim);
 		lineCentred(graphics, font, label, x + w / 2, y + (h - 8) / 2, w - 6, active ? TEXT : HINT);
+	}
+
+	/**
+	 * The wheel every hold-a-key menu shares (the symbiote's look): a dark disc behind the tiles and a thin ring just
+	 * inside them. {@code radius} is from the centre to the tiles' centres, {@code tile} a tile's size.
+	 */
+	public static void wheel(GuiGraphicsExtractor graphics, int cx, int cy, int radius, int tile) {
+		int outer = radius + tile / 2 + 6, inner = wheelInner(radius, tile);
+		for (int y = -outer; y <= outer; y++) {
+			int half = (int)Math.sqrt(outer * outer - y * y);
+			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, WHEEL_DISC);
+		}
+		for (int k = 0; k < 120; k++) {
+			double t = k * Math.PI * 2.0 / 120.0;
+			int x = cx + (int)Math.round(Math.cos(t) * inner), y = cy + (int)Math.round(Math.sin(t) * inner);
+			graphics.fill(x, y, x + 1, y + 1, ROW);
+		}
+	}
+
+	/** The radius of a {@link #wheel}'s thin ring: the room its middle has for a name, a bar or toggle chips. */
+	public static int wheelInner(int radius, int tile) {
+		return radius - tile / 2 - 6;
+	}
+
+	/** A wheel's pointer: dots in the accent from the ring toward the picked tile, along {@code angle} (radians). */
+	public static void wheelPointer(GuiGraphicsExtractor graphics, int cx, int cy, int radius, int tile, double angle, int accent) {
+		for (int r = wheelInner(radius, tile) + 4; r < radius - tile / 2 - 2; r += 4) {
+			int x = cx + (int)Math.round(Math.cos(angle) * r), y = cy + (int)Math.round(Math.sin(angle) * r);
+			graphics.fill(x, y, x + 2, y + 2, accent);
+		}
+	}
+
+	/** One tile of a wheel (or a toggle chip in its middle): a dark plate, lighter when picked, with a 1 px rim. */
+	public static void wheelTile(GuiGraphicsExtractor graphics, int x, int y, int size, int index, boolean picked, int rim) {
+		graphics.fill(x, y, x + size, y + size, CHIP);
+		graphics.fill(x, y, x + size, y + size, picked ? ROW_HOVER : index % 2 == 0 ? ROW : ROW_ALT);
+		graphics.fill(x, y, x + size, y + 1, rim);
+		graphics.fill(x, y + size - 1, x + size, y + size, rim);
+		graphics.fill(x, y + 1, x + 1, y + size - 1, rim);
+		graphics.fill(x + size - 1, y + 1, x + size, y + size - 1, rim);
 	}
 
 	/** A thin bar, {@code share} of it filled. */

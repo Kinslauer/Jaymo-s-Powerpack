@@ -237,7 +237,7 @@ final class RigTableScreen extends Screen {
 			int px = mx + (int)at[0], py = my + (int)at[1];
 			graphics.fill(px - 3, py - 3, px + 4, py + 4, 0xFF1E4A5A);
 			graphics.fill(px - 2, py - 2, px + 3, py + 3, 0xFF5FE6FF);
-			graphics.text(font, Integer.toString(k + 1), px - 2, py - 4, 0xFF20140A, false);
+			graphics.text(font, Integer.toString(k + 1), px - 2, py - 4, 0xFF20140A);
 		}
 		pin(graphics, mx, my, player.getX(), player.getY() + 1.0, player.getZ(), 0xFFFFFFFF, 3, 2);
 		graphics.disableScissor();

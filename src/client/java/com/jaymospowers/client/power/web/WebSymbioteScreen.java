@@ -187,25 +187,11 @@ final class WebSymbioteScreen extends Screen {
 
 		// a dark disc behind the ring
 		int outer = RADIUS + TILE / 2 + 6;
-		for (int y = -outer; y <= outer; y++) {
-			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0101018);
-		}
-		// a thin ring
-		for (int k = 0; k < 120; k++) {
-			double t = k * Math.PI * 2.0 / 120.0;
-			int x = cx + (int)Math.round(Math.cos(t) * INNER);
-			int y = cy + (int)Math.round(Math.sin(t) * INNER);
-			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
-		}
+		UiStyle.wheel(graphics, cx, cy, RADIUS, TILE);
 		// pointer: dots from the inner ring toward the picked tile
 		if (selected >= 0 && selected < WebSymbiote.ABILITIES) {
 			double t = Math.atan2(dy, dx);
-			for (int r = INNER + 4; r < RADIUS - TILE / 2 - 2; r += 4) {
-				int x = cx + (int)Math.round(Math.cos(t) * r);
-				int y = cy + (int)Math.round(Math.sin(t) * r);
-				graphics.fill(x, y, x + 2, y + 2, ACCENT);
-			}
+			UiStyle.wheelPointer(graphics, cx, cy, RADIUS, TILE, t, ACCENT);
 		}
 
 		WebSymbioteState state = WebSymbiote.state(player);
@@ -229,9 +215,7 @@ final class WebSymbioteScreen extends Screen {
 			boolean affordable = state.satiety() >= WebSymbiote.COST[i] || player.isCreative();
 			boolean on = suit ? form > WebSymbiote.FORM_SKIN : i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
 			boolean picked = i == selected;
-			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : slot % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : ready && affordable ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			UiStyle.wheelTile(graphics, x, y, TILE, slot, picked, picked ? ACCENT : ready && affordable ? 0x60FFFFFF : UiStyle.ROW_ALT);
 			graphics.item(new ItemStack(ICONS[i]), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!ready) {
 				int shade = (int)Math.ceil((TILE - 2) * Math.min(1.0, left / (double)WebSymbiote.COOLDOWN[i]));

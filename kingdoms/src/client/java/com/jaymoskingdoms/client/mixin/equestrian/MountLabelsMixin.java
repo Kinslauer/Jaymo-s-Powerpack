@@ -37,8 +37,8 @@ abstract class MountLabelsMixin extends Screen {
 	private void jaymoskingdoms$labels(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
 		if ((Object)this instanceof AbstractMountInventoryScreen<?>) {
 			Font font = this.font;
-			graphics.text(font, this.title, this.titleLabelX, this.titleLabelY, Ui.GOLD, false);
-			graphics.text(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, Ui.DIM, false);
+			graphics.text(font, this.title, this.titleLabelX, this.titleLabelY, Ui.GOLD);
+			graphics.text(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, Ui.DIM);
 			ci.cancel();
 		}
 	}

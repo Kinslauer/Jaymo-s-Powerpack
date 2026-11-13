@@ -67,18 +67,18 @@ public class BombGliderScreen extends AbstractContainerScreen<BombGliderMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT, false);
-		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM, false);
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, ACCENT);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, DIM);
 		graphics.text(this.font, Component.translatable("gui.jaymospowers.bomb_glider.fuel"), BombGliderMenu.FUEL_X - 2, BombGliderMenu.FUEL_Y - 12, DIM,
 			false);
 		Component rack = Component.translatable("gui.jaymospowers.bomb_glider.rack");
-		graphics.text(this.font, rack, BombGliderMenu.RACK_X + 8 - this.font.width(rack) / 2, BombGliderMenu.RACK_Y - 12, DIM, false);
+		graphics.text(this.font, rack, BombGliderMenu.RACK_X + 8 - this.font.width(rack) / 2, BombGliderMenu.RACK_Y - 12, DIM);
 		int count = this.menu.getSlot(BombGlider.DYNAMITE_SLOT).getItem().getCount();
 		Component of = Component.translatable("gui.jaymospowers.bomb_glider.count", count, BombGlider.MAX_DYNAMITE);
-		graphics.text(this.font, of, BombGliderMenu.RACK_X + 8 - this.font.width(of) / 2, BombGliderMenu.RACK_Y + 20, TEXT, false);
+		graphics.text(this.font, of, BombGliderMenu.RACK_X + 8 - this.font.width(of) / 2, BombGliderMenu.RACK_Y + 20, TEXT);
 		if (this.menu.burn() > 0) {
 			Component left = Component.translatable("gui.jaymospowers.bomb_glider.seconds", (this.menu.burn() + 19) / 20);
-			graphics.text(this.font, left, GAUGE_X + GAUGE_W + 4, BombGliderMenu.FUEL_Y + 4, TEXT, false);
+			graphics.text(this.font, left, GAUGE_X + GAUGE_W + 4, BombGliderMenu.FUEL_Y + 4, TEXT);
 		}
 	}
 }

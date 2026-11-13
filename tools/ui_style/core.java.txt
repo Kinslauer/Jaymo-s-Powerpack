@@ -101,6 +101,46 @@
 		lineCentred(graphics, font, label, x + w / 2, y + (h - 8) / 2, w - 6, active ? TEXT : HINT);
 	}
 
+	/**
+	 * The wheel every hold-a-key menu shares (the symbiote's look): a dark disc behind the tiles and a thin ring just
+	 * inside them. {@code radius} is from the centre to the tiles' centres, {@code tile} a tile's size.
+	 */
+	public static void wheel(GuiGraphicsExtractor graphics, int cx, int cy, int radius, int tile) {
+		int outer = radius + tile / 2 + 6, inner = wheelInner(radius, tile);
+		for (int y = -outer; y <= outer; y++) {
+			int half = (int)Math.sqrt(outer * outer - y * y);
+			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, WHEEL_DISC);
+		}
+		for (int k = 0; k < 120; k++) {
+			double t = k * Math.PI * 2.0 / 120.0;
+			int x = cx + (int)Math.round(Math.cos(t) * inner), y = cy + (int)Math.round(Math.sin(t) * inner);
+			graphics.fill(x, y, x + 1, y + 1, ROW);
+		}
+	}
+
+	/** The radius of a {@link #wheel}'s thin ring: the room its middle has for a name, a bar or toggle chips. */
+	public static int wheelInner(int radius, int tile) {
+		return radius - tile / 2 - 6;
+	}
+
+	/** A wheel's pointer: dots in the accent from the ring toward the picked tile, along {@code angle} (radians). */
+	public static void wheelPointer(GuiGraphicsExtractor graphics, int cx, int cy, int radius, int tile, double angle, int accent) {
+		for (int r = wheelInner(radius, tile) + 4; r < radius - tile / 2 - 2; r += 4) {
+			int x = cx + (int)Math.round(Math.cos(angle) * r), y = cy + (int)Math.round(Math.sin(angle) * r);
+			graphics.fill(x, y, x + 2, y + 2, accent);
+		}
+	}
+
+	/** One tile of a wheel (or a toggle chip in its middle): a dark plate, lighter when picked, with a 1 px rim. */
+	public static void wheelTile(GuiGraphicsExtractor graphics, int x, int y, int size, int index, boolean picked, int rim) {
+		graphics.fill(x, y, x + size, y + size, CHIP);
+		graphics.fill(x, y, x + size, y + size, picked ? ROW_HOVER : index % 2 == 0 ? ROW : ROW_ALT);
+		graphics.fill(x, y, x + size, y + 1, rim);
+		graphics.fill(x, y + size - 1, x + size, y + size, rim);
+		graphics.fill(x, y + 1, x + 1, y + size - 1, rim);
+		graphics.fill(x + size - 1, y + 1, x + size, y + size - 1, rim);
+	}
+
 	/** A thin bar, {@code share} of it filled. */
 	public static void bar(GuiGraphicsExtractor graphics, int x, int y, int w, int h, float share, int color) {
 		graphics.fill(x, y, x + w, y + h, BAR_BACK);

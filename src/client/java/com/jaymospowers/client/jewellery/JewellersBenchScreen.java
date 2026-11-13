@@ -35,11 +35,11 @@ public class JewellersBenchScreen extends AbstractContainerScreen<JewellersBench
 		TinkerUi.arrowRight(graphics, leftPos + 98, topPos + 55, 30, has ? TinkerUi.ACCENT : TinkerUi.DIM);
 		Component refusal = menu.refusal();
 		if (refusal != null) {
-			graphics.text(font, refusal, leftPos + 8, topPos + 28, REFUSAL_COLOR, false);
+			graphics.text(font, refusal, leftPos + 8, topPos + 28, REFUSAL_COLOR);
 		} else if (has) {
 			Component line = bonusLine(menu.getSlot(2).getItem());
 			if (line != null) {
-				graphics.text(font, line, leftPos + 8, topPos + 28, TinkerUi.DIM, false);
+				graphics.text(font, line, leftPos + 8, topPos + 28, TinkerUi.DIM);
 			}
 		}
 	}

@@ -4,3 +4,5 @@
 - **A shared header at last**: `Ui` is now written by `tools/ui_style.py` from the same source as Powers' `UiStyle` and Kitchen's `KitchenUi`, so it has the header, centred sliding line, wrapped block and item wells the others had. Screens still place their own titles; moving them onto the header is a later patch.
 - Compiled; not played.
 - **One H menu frame** (Andy: "Solid for H menu, vanilla for inventory"): the Kingdoms tabs of the character menu (Skills, Story, Feats and paths, Faction, Party) now draw the same solid bevelled window as the Character, Powers and Map pages, in place of the see-through striped panel, so flipping tabs no longer changes the window. `Ui.window` / `Ui.recess`.
+- **One wheel**: the horse command wheel draws the same disc, ring, pointer and tiles as the symbiote's (`Ui.wheel`).
+- **Titles and shadows**: the class, heritage, tier, feats and story screens' titles are gold like every other title (they were white), and labels on the tack, roster, handbook and mount inventory panels have the drop shadow the other panels' text has.
