@@ -1432,6 +1432,16 @@ A lone house far out is home to one **recluse** with a past (an old soldier, a w
 the totem, the icebergs, the tower ruin and the ruined church are only what they look like. None of these places is
 lived in until the land round it has opened up (the world's tiers), and nobody moves in while someone watches.
 
+(new) **The illager tongue** (Andy, 2026-11-13: illagers can be talked with once you learn their language, from their
+books, their paintings and time in their holds; the rest is Claude's placement for him to approve). The pillagers kept
+their own tongue through the long raiding years, and it is older than any realm's: their evokers say the marks on the
+ominous banner are its oldest letters, and still answer when spoken right. Nobody grows up speaking it and no village
+teacher knows it. It is learned the hard way: from the pages, ledgers and evokers' grimoires left in their holds and on
+their dead, from the banners and the paintings they hung in every fort, tower and mine they built (the raid, the warlord,
+the rite, the march, and lessons in their letters), and from time spent within those walls listening. Knowing their words
+doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
+lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
