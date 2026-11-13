@@ -936,6 +936,18 @@ then he did not answer"); that the crucible does not talk when the flux runs hig
 you hear your own name in it, put the lid on and go outside. Do not answer. Somebody answered, once, a long time ago."
 It hints at the sorcerer who became the Grue without naming him.
 
+(new) **The other side, and what it does to the unready** (Claude's placement for Andy's living nightmares, 2026-11-13,
+for Andy to approve). Most folk live their whole lives without looking straight at anything from the other side, and
+the first time is the worst: the heart hammers, the edges of the world go cold, and plenty simply drop where they stand.
+The world's people call it being overcome, and there is no shame in it, though nobody likes to be told. Priests and
+guards have seen more than most and stand it better; the brave do not feel it at all. Each sight that is lived through
+leaves a little knowledge behind, and the folk say that a woman who has seen enough starts to hear what she cannot see,
+then to see what walks unseen, and at the last to see through the faces of the hidden cursed. The other side notices
+those who look back at it, though: its wounds can follow you into sleep as a **living nightmare**, and you wake with
+the pale fliers of the night sky coming at your face, gone the instant before they strike. Nobody else sees them. The
+phantoms were only ever this, a thing of sleepless and haunted minds; no living phantom has been caught or killed, and
+the membrane the alchemists sell is a wraith's. A priest's or a cleric's restoration lifts the curse, as it lifts any.
+
 **The hollow blight** is a cold that gets in through a wound taken from the dead, and spreads. Hunger nothing fills,
 grey hands, a slow heart. The zombies leave the blighted alone and talk to them like kin: *"You smell like us now."*
 *"There's no hunger where we go. Only the one."* It is cured with weakness first, then a golden apple before it
