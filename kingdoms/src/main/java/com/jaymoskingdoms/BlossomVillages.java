@@ -103,6 +103,8 @@ final class BlossomVillages {
 	/** A farmstead in the frame of its own middle, its front toward the village: the paddy before the house. */
 	private static final Spot FARM_HOUSE = new Spot("house", 0, 1, 0, 0);
 	private static final Spot FARM_PADDY = new Spot("blossom_paddy", 0, -8, 0, Blossom.PADDY_WIDTH);
+	/** The ramie row along the paddy's other side. */
+	private static final Spot FARM_FIBRE = new Spot("blossom_fibre", -5, -8, 0, 1);
 	/** The wayside shrine by a farmstead's paddy, facing the way to the village. */
 	private static final Spot FARM_SHRINE = new Spot("blossom_wayside", 7, -5, 0, 3);
 
@@ -461,6 +463,9 @@ final class BlossomVillages {
 			homes.add(place(level, house, new Spot(FARM_HOUSE.id(), FARM_HOUSE.x(), FARM_HOUSE.z(), FARM_HOUSE.turns(), house.width()), middle, toVillage, built));
 			Blueprint paddy = Blossom.paddy();
 			place(level, paddy != null ? paddy : Buildings.farm(kit(level, village, random)), FARM_PADDY, middle, toVillage, paddy != null ? null : built);
+			if (paddy != null) {
+				place(level, Blossom.fibreRow(), FARM_FIBRE, middle, toVillage, null);
+			}
 			// its wayside shrine, kept to one of the eight
 			Shrine.Dedication[] patrons = Shrine.Dedication.values();
 			Shrine.Dedication patron = patrons[random.nextInt(patrons.length)];

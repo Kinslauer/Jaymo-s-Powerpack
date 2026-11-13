@@ -11,3 +11,7 @@
 - **Pagoda** (walled Blossom towns, tier 4): three storeys under skirts of roof, an altar on the ground floor.
 - **Wayside shrines**: one by each farmstead, its altar given to one of the eight (or plain). The village shrine now holds an altar too.
 - Not built from patch 5: a separate brewery (it is the tea house's back corner), roadside inns away from a village. None of these halls has been seen in game.
+- **Blossom dress**: the people of a Blossom settlement (not its guards) wear a crossed robe and sash, eight outfits in all, the men's over dark trousers (`Uniforms`, `tools/gen_uniforms.py blossom`).
+- **Straw Hat, Basket Hat, Straw Cape**: craftable from thatch and tatami, worn on the head and chest. The hats are drawn from their own models.
+- **Ramie**, a fibre crop: a grown stand is cut by hand for 2 to 4 fibre and comes again from the root half grown; one cut in five leaves the root spent and it starts over. Breaking a grown stand gives seed. Three fibre make two string. A row of it grows by each farmstead's paddy, which is where seed comes from.
+- Not built from patch 6: villagers wearing the hats, and a crest for each blossom house. The hats have not been seen on a head.

@@ -15,5 +15,11 @@
   "block.jaymoskingdoms.sunken_hearth": "Sunken Hearth",
   "block.jaymoskingdoms.sliding_door": "Sliding Door",
   "item.jaymoskingdoms.lacquer_sap": "Bowl of Lacquer Sap",
-  "container.jaymoskingdoms.tansu": "Tansu"
+  "container.jaymoskingdoms.tansu": "Tansu",
+  "item.jaymoskingdoms.straw_hat": "Straw Hat",
+  "item.jaymoskingdoms.basket_hat": "Basket Hat",
+  "item.jaymoskingdoms.straw_cape": "Straw Cape",
+  "item.jaymoskingdoms.ramie_seeds": "Ramie Seeds",
+  "item.jaymoskingdoms.ramie_fibre": "Ramie Fibre",
+  "block.jaymoskingdoms.ramie": "Ramie"
 }

@@ -369,6 +369,17 @@ final class Blossom {
 		return s.done();
 	}
 
+	/** A row of ramie (1 x {@link #PADDY_DEPTH}) on tilled ground along a paddy's bund, which keeps it wet: half grown, and one stand ready to cut. */
+	static Blueprint fibreRow() {
+		Buildings.Sketch s = new Buildings.Sketch("blossom_fibre", 1, PADDY_DEPTH, 3);
+		for (int z = 0; z < PADDY_DEPTH; z++) {
+			s.set(0, 0, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE, 7));
+			s.set(0, 1, z, com.jaymoskingdoms.blossomland.BlossomDress.RAMIE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.CropBlock.AGE, z == PADDY_DEPTH / 2 ? 7 : 3 + z % 3));
+		}
+		return s.done();
+	}
+
 	/**
 	 * A wayside shrine (3 x 3): an altar on a stone footing between two red posts, under a thatch cap. {@code altar} is
 	 * the altar as it stands (given to one of the eight, or plain).

@@ -115,6 +115,10 @@ tier 4 in `WalledTowns`, a wayside shrine by each farmstead. Not built: a separa
 Straw hats, basket hat and rain cape. Blossom outfits in `Uniforms`. A fibre crop for string and cloth. Each blossom
 kingdom gets a house crest and colours.
 
+*Built (2026-11-13, `blossomland.BlossomDress`, `Uniforms.BLOSSOM_WOMEN/MEN`): straw hat, basket hat and straw cape as
+worn items, eight robe outfits for blossom settlements' people, ramie (cut and come again) with a row by each farmstead.
+Not built: villagers in hats, house crests.*
+
 ## Patch 7: soldiers (fk_levy, fk_monks, fk_riders, bv_outpost, ar_matchlock)
 
 A levy rank with spears and matchlocks under the ronin-armoured sworn men. Shrine and pagoda guards with glaives.
