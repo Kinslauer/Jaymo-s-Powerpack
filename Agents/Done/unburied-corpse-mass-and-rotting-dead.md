@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Unburied stood whole by day with no corpses; the long dead come apart
 branch: claude/project-thread-gy0d2v
 with: Claude (cloud thread "Fix the Unburied's corpse mass")
