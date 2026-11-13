@@ -1,12 +1,25 @@
 package com.jaymospowers.client.packlook;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.UiStyle;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.brigadier.Command;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 /**
@@ -19,6 +32,10 @@ import net.minecraft.resources.Identifier;
  * pixel (arrows, icons, their own art) is left as it is. Those screens write their labels in vanilla's dark grey, which
  * would vanish on the dark panel, so while one of {@link #SCREENS} is open that grey is drawn light ({@link #text}).
  * Screens of the same mods that use vanilla's own chest texture are not listed, and stay as vanilla as the inventory.
+ *
+ * <p>Andy: "can you do the same but in the vanilla grey, and allow us to swap between". {@code /screenlook dark|grey}
+ * picks, per player, kept in {@link #FILE}: grey leaves those mods' screens exactly as they ship them. Swapping reloads
+ * the textures, as F3+T does.
  */
 public final class DarkPanels {
 	/** Vanilla's inventory greys (panel, bevel light, bevel shade, slot, slot edge, a mid step) and what each becomes. */
@@ -70,6 +87,9 @@ public final class DarkPanels {
 		"de.maxhenkel.voicechat.gui.volume.AdjustVolumesScreen");
 
 	private static final Map<Class<?>, Boolean> KNOWN = new ConcurrentHashMap<>();
+	private static final String FILE = "jaymospowers-screenlook.properties";
+	/** Whether the repaint is on (dark), read before the first texture loads. */
+	private static volatile boolean dark = !"grey".equals(load().getProperty("look", "dark"));
 
 	private DarkPanels() {
 	}
@@ -78,9 +98,57 @@ public final class DarkPanels {
 		return Identifier.fromNamespaceAndPath(namespace, "textures/gui/" + name + ".png");
 	}
 
+	/** True while the other mods' screens are painted dark (false: left vanilla grey). */
+	public static boolean dark() {
+		return dark;
+	}
+
+	public static void init() {
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(
+			ClientCommands.literal("screenlook")
+				.executes(c -> {
+					c.getSource().sendFeedback(Component.translatable(dark ? "message.jaymospowers.screenlook.is_dark" : "message.jaymospowers.screenlook.is_grey"));
+					return Command.SINGLE_SUCCESS;
+				})
+				.then(ClientCommands.literal("dark").executes(c -> pick(c.getSource(), true)))
+				.then(ClientCommands.literal("grey").executes(c -> pick(c.getSource(), false)))));
+	}
+
+	private static int pick(FabricClientCommandSource source, boolean wanted) {
+		if (wanted != dark) {
+			dark = wanted;
+			Properties state = new Properties();
+			state.setProperty("look", wanted ? "dark" : "grey");
+			try (OutputStream out = Files.newOutputStream(path())) {
+				state.store(out, "Jaymo's Powers: other mods' screens dark or vanilla grey (/screenlook dark|grey).");
+			} catch (IOException e) {
+				JaymosPowers.LOGGER.warn("Couldn't write {}", path(), e);
+			}
+			source.getClient().reloadResourcePacks();
+		}
+		source.sendFeedback(Component.translatable(wanted ? "message.jaymospowers.screenlook.dark" : "message.jaymospowers.screenlook.grey"));
+		return Command.SINGLE_SUCCESS;
+	}
+
+	private static Path path() {
+		return FabricLoader.getInstance().getConfigDir().resolve(FILE);
+	}
+
+	private static Properties load() {
+		Properties state = new Properties();
+		if (Files.exists(path())) {
+			try (InputStream in = Files.newInputStream(path())) {
+				state.load(in);
+			} catch (IOException e) {
+				JaymosPowers.LOGGER.warn("Couldn't read {}", path(), e);
+			}
+		}
+		return state;
+	}
+
 	/** Swaps vanilla's inventory greys in {@code image} for the dark window's, if {@code texture} is one of ours to repaint. */
 	public static void repaint(Identifier texture, NativeImage image) {
-		if (!TEXTURES.contains(texture)) {
+		if (!dark || !TEXTURES.contains(texture)) {
 			return;
 		}
 		for (int y = 0; y < image.getHeight(); y++) {
@@ -101,7 +169,7 @@ public final class DarkPanels {
 
 	/** The colour to draw text in: vanilla's label grey turned light while a repainted screen is open, else unchanged. */
 	public static int text(int color) {
-		if (color != LABEL) {
+		if (color != LABEL || !dark) {
 			return color;
 		}
 		Screen screen = Minecraft.getInstance().gui.screen();
