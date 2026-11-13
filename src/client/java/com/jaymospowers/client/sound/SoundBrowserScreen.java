@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -77,14 +78,14 @@ public class SoundBrowserScreen extends Screen {
 			scroll = 0;
 			rebuild();
 		});
-		thin = addRenderableWidget(Button.builder(thinLabel(), b -> {
+		thin = addRenderableWidget(FlatButton.builder(thinLabel(), b -> {
 			SoundTuning.setThinning(!SoundTuning.thinning());
 			b.setMessage(thinLabel());
-		}).bounds(x + w - 8 - 62 - 96, y - 2, 94, 20).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.sound_browser.reset"), b -> {
+		}).bounds(x + w - 8 - 62 - 96, y - 2, 94, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.sound_browser.reset"), b -> {
 			SoundTuning.resetAll();
 			rebuild();
-		}).bounds(x + w - 8 - 62, y - 2, 62, 20).build());
+		}).bounds(x + w - 8 - 62, y - 2, 62, 16).build());
 		rebuild();
 	}
 

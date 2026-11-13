@@ -2,9 +2,9 @@ package com.jaymoskingdoms.client.astronomy;
 
 import com.jaymoskingdoms.astronomy.ArmillaryNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -36,10 +36,10 @@ public final class ArmillaryScreen extends Screen {
     @Override
     protected void init() {
         int cx = this.width / 2, cy = this.height / 2;
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.armillary.record"),
-                button -> this.record()).bounds(cx - 106, cy + 52, 100, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.armillary.done"),
-                button -> Minecraft.getInstance().gui.setScreen(null)).bounds(cx + 6, cy + 52, 100, 20).build());
+        this.addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.armillary.record"),
+                button -> this.record()).bounds(cx - 106, cy + 52, 100, 16).build());
+        this.addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.armillary.done"),
+                button -> Minecraft.getInstance().gui.setScreen(null)).bounds(cx + 6, cy + 52, 100, 16).build());
     }
 
     /** Ask the server to take a reading here; its answer comes back to {@link #reading}. */

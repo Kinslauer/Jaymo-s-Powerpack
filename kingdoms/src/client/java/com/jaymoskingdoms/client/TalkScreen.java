@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.TalkNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -81,7 +82,7 @@ final class TalkScreen extends Screen {
 		int y = top() + 24 + this.font.split(this.ask.words(), textWidth()).size() * 10 + 8;
 		for (int i = 0; i < this.ask.options().size(); i++) {
 			int option = i;
-			Button b = Button.builder(this.ask.options().get(i), button -> pick(option)).bounds(left() + PAD, y, PANEL_W - PAD * 2, BUTTON_H).build();
+			Button b = FlatButton.builder(this.ask.options().get(i), button -> pick(option)).bounds(left() + PAD, y, PANEL_W - PAD * 2, BUTTON_H).build();
 			b.active = this.ask.enabled().get(i);
 			addRenderableWidget(b);
 			y += BUTTON_H + GAP;

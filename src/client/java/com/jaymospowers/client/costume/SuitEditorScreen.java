@@ -5,6 +5,7 @@ import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeKit;
 import com.jaymospowers.costume.CostumeSets;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -106,20 +107,20 @@ public class SuitEditorScreen extends Screen {
 		this.belt = row(mx, y, 5, () -> step(Slot.BELT, 1));
 		this.helm = row(mx, y, 6, () -> step(Slot.HELM, 1));
 		this.fins = row(mx, y, 7, () -> step(Slot.FINS, 1));
-		this.follow = addRenderableWidget(Button.builder(Component.empty(), b -> {
+		this.follow = addRenderableWidget(FlatButton.builder(Component.empty(), b -> {
 			CostumeKit kit = design().kit();
 			set(design().withKit(kit.followsSecondary() ? kit.withTrim(design().secondary()) : kit.withTrim(null)));
 		}).bounds(rightX(), swatchY(2) + 2 * SWATCH_H + 2, SWATCHES_PER_ROW * SWATCH_W, 12).build());
 		int by = top() + H - 20;
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.suit.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.suit.done"), b -> onClose())
 			.bounds(left() + W - 8 - 64, by, 64, 14).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.suit.reset"), b -> set(design().withKit(CostumeKit.NONE)))
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.suit.reset"), b -> set(design().withKit(CostumeKit.NONE)))
 			.bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
 		labels();
 	}
 
 	private Button row(int x, int y, int index, Runnable press) {
-		return addRenderableWidget(Button.builder(Component.empty(), b -> press.run()).bounds(x, y + index * BUTTON_PITCH, MIDDLE_W, BUTTON_H).build());
+		return addRenderableWidget(FlatButton.builder(Component.empty(), b -> press.run()).bounds(x, y + index * BUTTON_PITCH, MIDDLE_W, BUTTON_H).build());
 	}
 
 	/** The parts the editor steps through. */

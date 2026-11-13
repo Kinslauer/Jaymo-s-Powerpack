@@ -2,8 +2,8 @@ package com.jaymoskingdoms.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -35,7 +35,7 @@ final class MagicPageScreen extends Screen {
 			this.wrapped.addAll(this.font.split(c, W - 2 * PAD));
 		}
 		int left = (this.width - W) / 2, top = (this.height - height()) / 2;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.magic.close"), b -> onClose()).bounds(left + W / 2 - 40, top + height() - 24, 80, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.magic.close"), b -> onClose()).bounds(left + W / 2 - 40, top + height() - 24, 80, 16).build());
 	}
 
 	@Override

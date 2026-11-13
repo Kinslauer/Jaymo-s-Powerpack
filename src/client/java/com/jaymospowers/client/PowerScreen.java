@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -185,15 +186,15 @@ public class PowerScreen extends Screen {
 		this.clearButton = null;
 		int bottom = cy() + CANVAS_H - 20;
 		if (this.tab == Tab.ABILITIES) {
-			this.useButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.use"), b -> use(this.picked))
+			this.useButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.use"), b -> use(this.picked))
 				.bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
 		} else if (this.tab == Tab.POWERS) {
-			this.chooseButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.choose"), b -> {
+			this.chooseButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.choose"), b -> {
 				if (this.selected != null) {
 					choose(this.selected.id().toString());
 				}
 			}).bounds(cx() + CANVAS_W - 64, bottom, 60, 16).build());
-			this.clearButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.clear"), b -> choose(""))
+			this.clearButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.clear"), b -> choose(""))
 				.bounds(cx() + 4, bottom, 90, 16).build());
 		}
 	}
@@ -455,7 +456,7 @@ public class PowerScreen extends Screen {
 			badgeColor = COLOR_GOLD;
 		} else if (Fate.isCorrupted(player)) {
 			badge = Component.translatable("screen.jaymospowers.badge.corrupted");
-			badgeColor = 0xFFD05050;
+			badgeColor = UiStyle.BAD;
 		} else {
 			badge = Component.translatable("screen.jaymospowers.badge.mortal");
 			badgeColor = COLOR_DIM;

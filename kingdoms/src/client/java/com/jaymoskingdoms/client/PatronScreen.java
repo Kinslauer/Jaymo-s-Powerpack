@@ -5,8 +5,8 @@ import com.jaymoskingdoms.Patrons;
 import com.jaymoskingdoms.Turning;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -95,7 +95,7 @@ final class PatronScreen extends Screen {
 		}
 		int y = top() + panelH() - FOOTER + 4;
 		int right = paneX() + paneW() - 6;
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
 	}
 
 	private @Nullable Patron rowAt(int mouseX, int mouseY) {

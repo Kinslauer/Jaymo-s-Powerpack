@@ -2,8 +2,8 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.ChalkMarks;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -44,7 +44,7 @@ final class ChalkScreen extends Screen {
 		for (int i = 0; i < count(); i++) {
 			int glyph = this.reads ? i : ChalkMarks.SCRIBBLE;
 			String name = ChalkMarks.NAMES.get(glyph);
-			addRenderableWidget(Button.builder(Component.translatable("chalk.jaymoskingdoms.pick." + name), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("chalk.jaymoskingdoms.pick." + name), b -> {
 				ClientPlayNetworking.send(new ChalkMarks.Place(this.pos, this.face, glyph));
 				onClose();
 			}).bounds(x + PAD, y, W - PAD * 2, BUTTON_H).build());

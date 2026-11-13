@@ -8,6 +8,7 @@ import com.jaymoskingdoms.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -65,15 +66,15 @@ final class GrowthScreen extends Screen {
 	@Override
 	protected void init() {
 		int y = top() + panelH() - FOOTER + 4;
-		this.featsTab = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.feats"), b -> {
+		this.featsTab = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.feats"), b -> {
 			this.feats = true;
 			this.scroll = 0;
 		}).bounds(left() + panelW() - 150, top() + 7, 68, 16).build());
-		this.pathsTab = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.paths"), b -> {
+		this.pathsTab = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.paths"), b -> {
 			this.feats = false;
 			this.scroll = 0;
 		}).bounds(left() + panelW() - 78, top() + 7, 68, 16).build());
-		this.take = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.growth.take"), b -> confirm())
+		this.take = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.take"), b -> confirm())
 			.bounds(left() + panelW() - 130, y, 120, 16).build());
 	}
 

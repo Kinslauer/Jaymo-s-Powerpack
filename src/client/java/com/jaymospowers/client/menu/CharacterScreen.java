@@ -77,7 +77,7 @@ public class CharacterScreen extends Screen {
 		}
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.health"),
 			Component.translatable("menu.jaymospowers.character.of", Mth.ceil(player.getHealth()), Mth.ceil(player.getMaxHealth())), -1.0F, PowerScreen.COLOR_TEXT));
-		rows.add(new Row(Component.empty(), null, player.getMaxHealth() <= 0.0F ? 0.0F : player.getHealth() / player.getMaxHealth(), 0xFFD84040));
+		rows.add(new Row(Component.empty(), null, player.getMaxHealth() <= 0.0F ? 0.0F : player.getHealth() / player.getMaxHealth(), UiStyle.BAD));
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.armour"), Component.literal(Integer.toString(player.getArmorValue())), -1.0F,
 			PowerScreen.COLOR_TEXT));
 		rows.add(new Row(Component.translatable("menu.jaymospowers.character.level"), Component.literal(Integer.toString(player.experienceLevel)), -1.0F,

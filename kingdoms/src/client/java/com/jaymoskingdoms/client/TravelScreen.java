@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -141,13 +142,13 @@ final class TravelScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.turnBack = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.journey.turn_back"), b -> {
+		this.turnBack = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.journey.turn_back"), b -> {
 			if (!turning) {
 				turning = true;
 				b.active = false;
 				ClientPlayNetworking.send(new Journeys.TurnBack());
 			}
-		}).bounds(this.width - 92, this.height - 26, 84, 18).build());
+		}).bounds(this.width - 92, this.height - 26, 84, 16).build());
 		this.turnBack.active = !turning;
 	}
 

@@ -4,8 +4,8 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterSensesNet;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -63,7 +63,7 @@ public class ZFighterTeleportScreen extends Screen {
 			int row = i % PER_COLUMN;
 			Component label = Component.translatable(dest.master() ? "screen.jaymospowers.zfighter_senses.teleport_master" : "screen.jaymospowers.zfighter_senses.teleport_friend",
 				dest.name(), dest.distance());
-			addRenderableWidget(Button.builder(label, b -> {
+			addRenderableWidget(FlatButton.builder(label, b -> {
 				ClientPlayNetworking.send(new ZFighterSensesNet.TeleportTo(dest.id()));
 				this.onClose();
 			}).bounds(left() + 6 + column * COLUMN_W, top() + UiStyle.HEADER + row * ROW, COLUMN_W - 4, ROW - 2).build());

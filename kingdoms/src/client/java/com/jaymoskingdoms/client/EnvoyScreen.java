@@ -4,8 +4,8 @@ import com.jaymoskingdoms.DiplomacyNet;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -53,10 +53,10 @@ final class EnvoyScreen extends Screen {
 		}
 		this.lines = out;
 		int x = left() + PAD, y = top() + panelH() - PAD - 2 * BUTTON_H - GAP, bw = (W - 2 * PAD - GAP) / 2;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.envoy.sign"), b -> answer(DiplomacyNet.SIGN)).bounds(x, y, bw, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.envoy.refuse"), b -> answer(DiplomacyNet.REFUSE))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.envoy.sign"), b -> answer(DiplomacyNet.SIGN)).bounds(x, y, bw, BUTTON_H).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.envoy.refuse"), b -> answer(DiplomacyNet.REFUSE))
 			.bounds(x + bw + GAP, y, bw, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.envoy.later"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.envoy.later"), b -> onClose())
 			.bounds(x, y + BUTTON_H + GAP, W - 2 * PAD, BUTTON_H).build());
 	}
 

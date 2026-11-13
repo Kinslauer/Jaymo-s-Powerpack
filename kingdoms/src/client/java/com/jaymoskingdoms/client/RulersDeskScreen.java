@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -80,7 +81,7 @@ final class RulersDeskScreen extends Screen {
 	protected void init() {
 		this.renounce.clear();
 		int x = left(), y = top();
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.desk.close"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.desk.close"), b -> onClose())
 			.bounds(x + W - PAD - 70, y + H - PAD - BUTTON_H, 70, BUTTON_H).build());
 		DiplomacyNet.Row r = row();
 		if (r == null) {
@@ -89,7 +90,7 @@ final class RulersDeskScreen extends Screen {
 		int rx = rightX(), rw = rightW();
 		for (int i = 0; i < r.kinds().size(); i++) {
 			int idx = indexOf(r.kinds().get(i));
-			Button b = Button.builder(Component.translatable("gui.jaymoskingdoms.desk.renounce"), btn -> renounce(r, idx))
+			Button b = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.desk.renounce"), btn -> renounce(r, idx))
 				.bounds(rx + rw - 62, y + 46 + i * 13, 62, 12).build();
 			this.renounce.put(idx, b);
 			addRenderableWidget(b);
@@ -97,7 +98,7 @@ final class RulersDeskScreen extends Screen {
 		int kw = (rw - 4) / 2;
 		for (int k = 0; k < KINDS.length; k++) {
 			int kk = k;
-			Button b = Button.builder(Component.translatable("treaty.jaymoskingdoms." + KINDS[k]), btn -> {
+			Button b = FlatButton.builder(Component.translatable("treaty.jaymoskingdoms." + KINDS[k]), btn -> {
 				this.kind = kk;
 				rebuildWidgets();
 			}).bounds(rx + (k % 2) * (kw + 4), y + 102 + (k / 2) * 16, kw, 14).build();
@@ -107,7 +108,7 @@ final class RulersDeskScreen extends Screen {
 			this.kindButtons[k] = b;
 			addRenderableWidget(b);
 		}
-		Button send = Button.builder(Component.translatable("gui.jaymoskingdoms.desk.send", this.desk.cost()), b -> act(DiplomacyNet.SEND, r.id(), this.kind))
+		Button send = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.desk.send", this.desk.cost()), b -> act(DiplomacyNet.SEND, r.id(), this.kind))
 			.bounds(rx, y + 148, rw, BUTTON_H).build();
 		send.active = r.odds().get(this.kind) != -1 && !r.envoyOut();
 		addRenderableWidget(send);

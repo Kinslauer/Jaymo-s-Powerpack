@@ -8,6 +8,7 @@ import com.jaymospowers.power.zfighter.ZFighterSideQuests;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -79,20 +80,20 @@ public class ZFighterStoryScreen extends Screen {
 		startButtons.clear();
 		jobButtons.clear();
 		int w = panelW();
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_story.back"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_story.back"), b -> onClose())
 			.bounds(left() + 8, top() + 7, 44, 14).build());
-		difficultyButton = addRenderableWidget(Button.builder(Component.empty(), b -> difficulty = (difficulty + 1) % ZFighterSagas.DIFFICULTY_KEYS.length)
+		difficultyButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> difficulty = (difficulty + 1) % ZFighterSagas.DIFFICULTY_KEYS.length)
 			.bounds(left() + w - 92, top() + 28, 86, 16).build());
 		for (int i = 0; i < ZFighterSagas.sagaCount(); i++) {
 			int saga = i;
-			startButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_story.begin"),
+			startButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_story.begin"),
 				b -> send(ZFighterNet.SAGA_START, saga * 3 + difficulty)).bounds(buttonX(), sagasY() + i * ROW - 3, BUTTON_W, 14).build()));
 		}
-		abandonButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter_story.abandon"),
+		abandonButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_story.abandon"),
 			b -> send(ZFighterNet.SAGA_ABANDON, 0)).bounds(buttonX(), questY() - 3, BUTTON_W, 14).build());
 		for (int i = 0; i < ZFighterSideQuests.MAX_JOBS; i++) {
 			int job = i;
-			jobButtons.add(addRenderableWidget(Button.builder(Component.literal("x"), b -> send(ZFighterNet.JOB_ABANDON, job))
+			jobButtons.add(addRenderableWidget(FlatButton.builder(Component.literal("x"), b -> send(ZFighterNet.JOB_ABANDON, job))
 				.bounds(left() + w - 26, jobsY() + 12 + i * ROW - 3, 20, 14).build()));
 		}
 	}

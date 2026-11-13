@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Research;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -45,8 +46,8 @@ final class ResearchScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.done = addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-			.bounds((this.width - 80) / 2, (this.height + H) / 2 - 28, 80, 18).build());
+		this.done = addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose())
+			.bounds((this.width - 80) / 2, (this.height + H) / 2 - 28, 80, 16).build());
 		this.done.visible = this.closed;
 	}
 

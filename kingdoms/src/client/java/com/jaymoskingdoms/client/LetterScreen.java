@@ -4,9 +4,9 @@ import com.jaymoskingdoms.Letters;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -73,8 +73,8 @@ final class LetterScreen extends Screen {
 			this.body.setCharacterLimit(Letters.TEXT_MAX);
 			addRenderableWidget(this.body);
 			int by = y + 16 + GAP + BODY_H + GAP, bw = (w - GAP) / 2;
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.letter.seal"), b -> seal()).bounds(x, by, bw, BUTTON_H).build());
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.letter.cancel"), b -> onClose()).bounds(x + bw + GAP, by, bw, BUTTON_H)
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.letter.seal"), b -> seal()).bounds(x, by, bw, BUTTON_H).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.letter.cancel"), b -> onClose()).bounds(x + bw + GAP, by, bw, BUTTON_H)
 				.build());
 			setInitialFocus(this.to);
 			return;
@@ -88,7 +88,7 @@ final class LetterScreen extends Screen {
 			out.removeLast();
 		}
 		this.lines = out;
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.letter.close"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.letter.close"), b -> onClose())
 			.bounds(x, top() + panelH() - PAD - BUTTON_H, w, BUTTON_H).build());
 	}
 

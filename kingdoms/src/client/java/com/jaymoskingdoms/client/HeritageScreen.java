@@ -7,6 +7,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -178,10 +179,10 @@ final class HeritageScreen extends Screen {
 		int y = top() + panelH() - FOOTER + 4;
 		int right = paneX() + paneW() - 6;
 		if (!this.forced) {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
 			right -= 60;
 		}
-		this.choose = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
+		this.choose = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {
 				ClientPlayNetworking.send(new Heritage.Choose(this.picked.ordinal(), this.pickedVariant));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
@@ -189,7 +190,7 @@ final class HeritageScreen extends Screen {
 			}
 		}).bounds(right - 120, y, 120, 16).build());
 		// (0.7.214) the picked heritage's look, stepped through on each press
-		this.variant = addRenderableWidget(Button.builder(Component.empty(), b -> {
+		this.variant = addRenderableWidget(FlatButton.builder(Component.empty(), b -> {
 			if (this.picked != null) {
 				this.pickedVariant = (this.pickedVariant + 1) % (HeritageVariants.of(this.picked).size() + 1);
 			}

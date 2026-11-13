@@ -9,6 +9,7 @@ import com.jaymospowers.core.KingdomsMoney;
 import com.jaymospowers.costume.CostumeTailoring;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -156,18 +157,18 @@ public class CostumeScreen extends Screen {
 		this.name.setValue(design.name());
 		this.name.setHint(Component.translatable("screen.jaymospowers.costume.name_hint"));
 		this.name.setResponder(s -> design = design.withName(s));
-		this.cut = addRenderableWidget(Button.builder(Component.empty(), b -> cycleCut(1)).bounds(mx, y + 30, MIDDLE_W, 14).build());
-		this.mask = addRenderableWidget(Button.builder(Component.empty(), b -> cycleMask(1)).bounds(mx, y + 46, MIDDLE_W, 14).build());
-		this.cape = addRenderableWidget(Button.builder(Component.empty(), b -> cycleCape(1)).bounds(mx, y + 62, MIDDLE_W, 14).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.clear"), b -> {
+		this.cut = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleCut(1)).bounds(mx, y + 30, MIDDLE_W, 14).build());
+		this.mask = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleMask(1)).bounds(mx, y + 46, MIDDLE_W, 14).build());
+		this.cape = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleCape(1)).bounds(mx, y + 62, MIDDLE_W, 14).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.clear"), b -> {
 			this.pixels = new byte[CostumeDesign.EMBLEM_PIXELS];
 			design = design.withEmblem(this.pixels);
 		}).bounds(emblemX(), paletteY() + CHIP + 14, CostumeDesign.EMBLEM_SIZE * CELL, 14).build());
 		// (0.17.60) the suit editor: the gi and armour patterns, gloves, boots, belt, helmet, fins, three colours, chest marks
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.suit_editor"),
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.suit_editor"),
 			b -> this.minecraft.gui.setScreen(new SuitEditorScreen(this))).bounds(left() + W - 8 - 84, top() + 7, 84, 14).build());
 		int by = top() + H - 20;
-		this.sew = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.sew"), b -> {
+		this.sew = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.sew"), b -> {
 			if (this.pos != null) {
 				ClientPlayNetworking.send(new CostumeNet.Sew(this.pos, design));
 			} else {
@@ -175,14 +176,14 @@ public class CostumeScreen extends Screen {
 				onClose();
 			}
 		}).bounds(left() + W - 8 - 64, by, 64, 14).build());
-		this.takeOff = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.take_off"), b -> {
+		this.takeOff = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.take_off"), b -> {
 			if (this.pos != null) {
 				ClientPlayNetworking.send(new CostumeNet.TakeOff(this.pos));
 			}
 		}).bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
 		this.takeOff.visible = !tailoring();
 		// (0.12.3) the worn costume's mask off / on (the mask key's, here too)
-		this.maskToggle = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.mask_off"),
+		this.maskToggle = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.costume.mask_off"),
 			b -> CostumeClient.toggleMask()).bounds(left() + W - 8 - 64 - 4 - 64 - 4 - 64, by, 64, 14).build());
 		labels();
 	}

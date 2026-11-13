@@ -6,10 +6,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -88,7 +88,7 @@ public final class FollowersScreen extends Screen {
 		int x = (this.width - W) / 2, y = (this.height - height0()) / 2 + TOP;
 		for (int i = 0; i < ORDERS.length; i++) {
 			int kind = ORDERS[i];
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.followers.order." + kind), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.followers.order." + kind), b -> {
 				ClientPlayNetworking.send(new Followers.Give(this.target, kind));
 				onClose();
 			}).bounds(x + 8, y + i * ROW, W - 16, 18)

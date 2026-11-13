@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.LoreCodex;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -64,9 +65,9 @@ final class LoreCodexScreen extends Screen {
 	protected void init() {
 		int y = top() + PANEL_H - FOOTER + 4;
 		int px = left() + LIST_W + 12;
-		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(px, y, 20, 16).build());
-		this.next = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(px + 24, y, 20, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + PANEL_W - 66, y, 60, 16).build());
+		this.prev = addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> turn(-1)).bounds(px, y, 20, 16).build());
+		this.next = addRenderableWidget(FlatButton.builder(Component.literal(">"), b -> turn(1)).bounds(px + 24, y, 20, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + PANEL_W - 66, y, 60, 16).build());
 		turn(0);
 	}
 

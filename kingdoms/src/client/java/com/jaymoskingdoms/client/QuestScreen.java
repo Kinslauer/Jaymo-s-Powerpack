@@ -4,6 +4,7 @@ import com.jaymoskingdoms.QuestNet;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -76,39 +77,39 @@ final class QuestScreen extends Screen {
 		if (v != null && projects()) {
 			// (0.7.530) a board's town works: give goods or coin to a project still open; a finished one has no buttons
 			if (v.state() == QuestNet.OFFER) {
-				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.goods"), b -> act(v, GIVE_GOODS))
+				addRenderableWidget(FlatButton.builder(Component.translatable("project.jaymoskingdoms.button.goods"), b -> act(v, GIVE_GOODS))
 					.bounds(x + 6, y, 90, 16).build());
-				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.coin"), b -> act(v, GIVE_COIN))
+				addRenderableWidget(FlatButton.builder(Component.translatable("project.jaymoskingdoms.button.coin"), b -> act(v, GIVE_COIN))
 					.bounds(x + 100, y, 70, 16).build());
-				addRenderableWidget(Button.builder(Component.translatable("project.jaymoskingdoms.button.coins"), b -> act(v, GIVE_COINS))
+				addRenderableWidget(FlatButton.builder(Component.translatable("project.jaymoskingdoms.button.coins"), b -> act(v, GIVE_COINS))
 					.bounds(x + 174, y, 70, 16).build());
 			}
 		} else if (v != null && orders()) {
 			// (0.7.256) a board's merchant orders: order a ware (not one sold out to you today), or cancel an order not yet sent
 			if (v.state() == QuestNet.OFFER) {
-				Button order = Button.builder(Component.translatable("orders.jaymoskingdoms.button.order"), b -> act(v, QuestNet.ACCEPT))
+				Button order = FlatButton.builder(Component.translatable("orders.jaymoskingdoms.button.order"), b -> act(v, QuestNet.ACCEPT))
 					.bounds(x + 6, y, 100, 16).build();
 				order.active = !v.royal();
 				addRenderableWidget(order);
 			} else {
-				addRenderableWidget(Button.builder(Component.translatable("orders.jaymoskingdoms.button.cancel"), b -> act(v, QuestNet.ABANDON))
+				addRenderableWidget(FlatButton.builder(Component.translatable("orders.jaymoskingdoms.button.cancel"), b -> act(v, QuestNet.ABANDON))
 					.bounds(x + 6, y, 100, 16).build());
 			}
 		} else if (v != null) {
 			if (v.state() == QuestNet.OFFER) {
-				addRenderableWidget(Button.builder(Component.translatable(board() ? "bounty.jaymoskingdoms.button.take"
+				addRenderableWidget(FlatButton.builder(Component.translatable(board() ? "bounty.jaymoskingdoms.button.take"
 						: v.royal() ? "quest.jaymoskingdoms.button.accept.king" : "quest.jaymoskingdoms.button.accept"),
 					b -> act(v, QuestNet.ACCEPT)).bounds(x + 6, y, 100, 16).build());
 			} else {
-				Button turnIn = Button.builder(Component.translatable("quest.jaymoskingdoms.button.turn_in"), b -> act(v, QuestNet.TURN_IN))
+				Button turnIn = FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.turn_in"), b -> act(v, QuestNet.TURN_IN))
 					.bounds(x + 6, y, 90, 16).build();
 				turnIn.active = v.state() == QuestNet.READY;
 				addRenderableWidget(turnIn);
-				addRenderableWidget(Button.builder(Component.translatable("quest.jaymoskingdoms.button.abandon"), b -> act(v, QuestNet.ABANDON))
+				addRenderableWidget(FlatButton.builder(Component.translatable("quest.jaymoskingdoms.button.abandon"), b -> act(v, QuestNet.ABANDON))
 					.bounds(x + 100, y, 70, 16).build());
 			}
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(x + PANEL_W - 66, y, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(x + PANEL_W - 66, y, 60, 16).build());
 	}
 
 	@Override

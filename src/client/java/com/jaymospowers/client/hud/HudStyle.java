@@ -20,7 +20,7 @@ public final class HudStyle {
 	/** A bar's empty part, behind the fill. */
 	public static final int TRACK = 0x30FFFFFF;
 	/** Text: plain, secondary, hints and keys while not ready; gold for something special, red for a warning. */
-	public static final int TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, GOLD = 0xFFFFD54A, WARN = 0xFFE04040;
+	public static final int TEXT = 0xFFFFFFFF, DIM = 0xFFA8A8B8, HINT = 0xFF707080, GOLD = 0xFFFFD54A, WARN = 0xFFE05050;
 	/** Chip size and the gap between chips. */
 	public static final int CHIP = 20, CHIP_GAP = 2;
 	/** A labelled bar over the crosshair: width, bar height, and the whole piece's height (label, gap, bar, frame). */

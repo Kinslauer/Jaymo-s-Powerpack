@@ -5,6 +5,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Journal;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -120,16 +121,16 @@ final class JournalScreen extends Screen {
 		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
 			int bx = left() + 12 + mapSize() + 12;
-			Button in = Button.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
-			Button out = Button.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
+			Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
+			Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
 			in.active = zoom > 0;
 			out.active = zoom < ZOOMS.length - 1;
 			addRenderableWidget(in);
 			addRenderableWidget(out);
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
 		// ((0.7.618, Rivals patch 3) the ladders of captains you know of)
-		addRenderableWidget(Button.builder(Component.translatable("ladder.jaymoskingdoms.button"), b -> LadderScreen.ask()).bounds(left() + 6, fy, 70, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("ladder.jaymoskingdoms.button"), b -> LadderScreen.ask()).bounds(left() + 6, fy, 70, 16).build());
 	}
 
 	private void show(int which) {

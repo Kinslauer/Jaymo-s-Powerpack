@@ -4,6 +4,7 @@ import com.jaymoskingdoms.MasonNet;
 import com.mojang.blaze3d.Blaze3D;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -141,14 +142,14 @@ final class MasonScreen extends Screen {
 	protected void init() {
 		int x = left() + PAD, cw = colW();
 		// open the folder, beside the left list's heading
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.mason.open_folder"), b -> Blaze3D.openPath(DesignUploadClient.ensureFolder()))
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.open_folder"), b -> Blaze3D.openPath(DesignUploadClient.ensureFolder()))
 			.bounds(x + cw - 70, top() + HEADER - 1, 70, 12).build());
 		// draw on a plan; offer to the settlement
-		Button draw = Button.builder(Component.translatable("gui.jaymoskingdoms.mason.draw"), b -> draw()).bounds(x, actionsY(), cw, BUTTON_H).build();
+		Button draw = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.draw"), b -> draw()).bounds(x, actionsY(), cw, BUTTON_H).build();
 		draw.active = this.picked != null && this.open.blankPlans() > 0;
 		addRenderableWidget(draw);
 		MasonNet.Design design = pickedDesign();
-		Button submit = Button.builder(Component.translatable("gui.jaymoskingdoms.mason.submit"), b -> send(MasonNet.SUBMIT, this.picked))
+		Button submit = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.submit"), b -> send(MasonNet.SUBMIT, this.picked))
 			.bounds(x + cw + GAP, actionsY(), cw, BUTTON_H).build();
 		submit.active = design != null && design.crews();
 		addRenderableWidget(submit);
@@ -160,7 +161,7 @@ final class MasonScreen extends Screen {
 		this.saveName.active = this.open.marked();
 		this.saveName.setEditable(this.open.marked());
 		addRenderableWidget(this.saveName);
-		Button save = Button.builder(Component.translatable("gui.jaymoskingdoms.mason.save"), b -> {
+		Button save = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.save"), b -> {
 			String n = this.saveName.getValue().strip();
 			if (!n.isEmpty()) {
 				send(MasonNet.SAVE, n);
@@ -171,10 +172,10 @@ final class MasonScreen extends Screen {
 		// the table's plan
 		int by = top() + panelH() - PAD - 12 - GAP - BUTTON_H;
 		if (!this.open.plan().isEmpty()) {
-			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.mason.take"), b -> send(MasonNet.TAKE, "")).bounds(x, by, cw, BUTTON_H)
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.take"), b -> send(MasonNet.TAKE, "")).bounds(x, by, cw, BUTTON_H)
 				.build());
 			if (this.open.done() && this.open.skipped() > 0) {
-				addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.mason.retry", this.open.skipped()), b -> send(MasonNet.RETRY, ""))
+				addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.retry", this.open.skipped()), b -> send(MasonNet.RETRY, ""))
 					.bounds(x + cw + GAP, by, cw, BUTTON_H).build());
 			}
 		}

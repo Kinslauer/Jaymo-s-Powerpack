@@ -103,6 +103,11 @@ def main():
         errors.append("docs/codemap/ changed: leave it out of the PR (git checkout origin/master -- docs/codemap); "
                       "the release step regenerates it after the merge.")
 
+    # 1b. the shared screen style: UiStyle, Ui, KitchenUi and each FlatButton are generated copies
+    styled = subprocess.run([sys.executable, str(ROOT / "tools" / "ui_style.py"), "--check"], capture_output=True, text=True)
+    if styled.returncode:
+        errors.append(styled.stdout.strip().replace("\n", " "))
+
     # 2. old jars in libs/
     jars = {}
     for jar in (ROOT / "libs").glob("*.jar"):

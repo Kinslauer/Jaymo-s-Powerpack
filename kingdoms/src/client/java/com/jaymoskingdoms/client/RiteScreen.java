@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Patron;
 import com.jaymoskingdoms.Rites;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -49,12 +50,12 @@ final class RiteScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left(), y = top() + H - 24;
-		Button pay = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.rite.pay"), b -> {
+		Button pay = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.rite.pay"), b -> {
 			ClientPlayNetworking.send(new Rites.TakeRite(this.offer.entityId()));
 			onClose();
 		}).bounds(x + 10, y, 80, 16).build());
 		pay.active = this.offer.canPay();
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.rite.leave"), b -> onClose()).bounds(x + W - 90, y, 80, 16).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.rite.leave"), b -> onClose()).bounds(x + W - 90, y, 80, 16).build());
 	}
 
 	private int paragraph(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color) {

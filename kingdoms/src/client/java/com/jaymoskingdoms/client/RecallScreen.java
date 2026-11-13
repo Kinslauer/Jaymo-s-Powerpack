@@ -3,8 +3,8 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Carousing;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -35,8 +35,8 @@ final class RecallScreen extends Screen {
 
 	@Override
 	protected void init() {
-		addRenderableWidget(Button.builder(Component.translatable("recall.jaymoskingdoms.night.rise"), b -> onClose())
-			.bounds((this.width - 120) / 2, this.height - 36, 120, 20).build());
+		addRenderableWidget(FlatButton.builder(Component.translatable("recall.jaymoskingdoms.night.rise"), b -> onClose())
+			.bounds((this.width - 120) / 2, this.height - 36, 120, 16).build());
 	}
 
 	@Override

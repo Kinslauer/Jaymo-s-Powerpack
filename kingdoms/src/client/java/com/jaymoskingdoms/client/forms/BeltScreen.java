@@ -5,6 +5,7 @@ import com.jaymoskingdoms.forms.Forms;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,10 +32,10 @@ final class BeltScreen extends Screen {
 		this.top = (this.height - (HEAD + Forms.BELT_SLOTS * ROW + 50)) / 2;
 		for (int i = 0; i < Forms.BELT_SLOTS; i++) {
 			int slot = i;
-			this.slots[i] = addRenderableWidget(Button.builder(Component.empty(), b -> cycle(slot))
+			this.slots[i] = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycle(slot))
 				.bounds(this.left + PAD, this.top + HEAD + i * ROW, WIDTH - 2 * PAD, BUTTON_H).build());
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.belt.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.belt.done"), b -> onClose())
 			.bounds(this.left + PAD, this.top + HEAD + Forms.BELT_SLOTS * ROW + 22, WIDTH - 2 * PAD, BUTTON_H).build());
 		labels();
 	}

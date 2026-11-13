@@ -9,6 +9,7 @@ import com.jaymospowers.power.xenoform.XenoformState;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -100,7 +101,7 @@ public class BandScreen extends Screen {
 		int tabW = (w - 12 - 4 * (TAB_KEYS.length - 1)) / TAB_KEYS.length;
 		for (int i = 0; i < TAB_KEYS.length; i++) {
 			int t = i;
-			Button b = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.band.tab." + TAB_KEYS[i]), btn -> {
+			Button b = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.band.tab." + TAB_KEYS[i]), btn -> {
 				tab = t;
 				armed = null;
 				rebuildWidgets();
@@ -123,7 +124,7 @@ public class BandScreen extends Screen {
 			boolean known = up.knows(m), fitted = up.fitted().contains(m.id);
 			Component label = known ? m.title() : Component.translatable("screen.jaymospowers.band.unknown");
 			details.add(new Component[] {label, Component.translatable(known ? "band.jaymospowers.module." + m.id + ".desc" : "screen.jaymospowers.band.unknown.desc")});
-			Button b = addRenderableWidget(Button.builder(Component.translatable(fitted ? "screen.jaymospowers.band.unfit" : "screen.jaymospowers.band.fit"),
+			Button b = addRenderableWidget(FlatButton.builder(Component.translatable(fitted ? "screen.jaymospowers.band.unfit" : "screen.jaymospowers.band.fit"),
 				btn -> send(fitted ? "unfit" : "fit", m.id)).bounds(bx, rowY(i) + 2, 80, 16).build());
 			b.active = up.reforged() && known && (fitted || up.fitted().size() < BandUpgrades.SLOTS);
 			i++;
@@ -136,7 +137,7 @@ public class BandScreen extends Screen {
 		for (BandUpgrades.Skill s : BandUpgrades.Skill.values()) {
 			int rank = up.rank(s);
 			details.add(new Component[] {s.title(), Component.translatable("band.jaymospowers.skill." + s.id + ".desc")});
-			Button b = addRenderableWidget(Button.builder(rank >= s.ranks ? Component.translatable("screen.jaymospowers.band.owned")
+			Button b = addRenderableWidget(FlatButton.builder(rank >= s.ranks ? Component.translatable("screen.jaymospowers.band.owned")
 				: Component.translatable("screen.jaymospowers.band.buy", s.cost), btn -> send("buy", s.id)).bounds(bx, rowY(i) + 2, 80, 16).build());
 			b.active = rank < s.ranks && points >= s.cost;
 			i++;
@@ -162,7 +163,7 @@ public class BandScreen extends Screen {
 			Component name = form == null ? Component.literal(id) : form.name();
 			details.add(new Component[] {name, Component.translatable("screen.jaymospowers.band.forget.desc")});
 			boolean sure = id.equals(armed);
-			addRenderableWidget(Button.builder(Component.translatable(sure ? "screen.jaymospowers.band.sure" : "screen.jaymospowers.band.forget")
+			addRenderableWidget(FlatButton.builder(Component.translatable(sure ? "screen.jaymospowers.band.sure" : "screen.jaymospowers.band.forget")
 				.withStyle(sure ? ChatFormatting.RED : ChatFormatting.RESET), btn -> {
 				if (id.equals(armed)) {
 					armed = null;
@@ -174,18 +175,18 @@ public class BandScreen extends Screen {
 			}).bounds(bx, rowY(i) + 2, 80, 16).build());
 		}
 		int fy = rowY(rows) + 2, x = left();
-		Button prev = addRenderableWidget(Button.builder(Component.literal("<"), btn -> {
+		Button prev = addRenderableWidget(FlatButton.builder(Component.literal("<"), btn -> {
 			page--;
 			rebuildWidgets();
 		}).bounds(x + 6, fy, 20, 16).build());
 		prev.active = page > 0;
-		Button next = addRenderableWidget(Button.builder(Component.literal(">"), btn -> {
+		Button next = addRenderableWidget(FlatButton.builder(Component.literal(">"), btn -> {
 			page++;
 			rebuildWidgets();
 		}).bounds(x + 30, fy, 20, 16).build());
 		next.active = page < pages - 1;
 		boolean sure = "wipe".equals(armed);
-		addRenderableWidget(Button.builder(Component.translatable(sure ? "screen.jaymospowers.band.wipe_sure" : "screen.jaymospowers.band.wipe")
+		addRenderableWidget(FlatButton.builder(Component.translatable(sure ? "screen.jaymospowers.band.wipe_sure" : "screen.jaymospowers.band.wipe")
 			.withStyle(sure ? ChatFormatting.RED : ChatFormatting.RESET), btn -> {
 			if ("wipe".equals(armed)) {
 				armed = null;
@@ -232,18 +233,18 @@ public class BandScreen extends Screen {
 	}
 
 	private void lookButton(int bx, int row, Component label, String what, String arg) {
-		addRenderableWidget(Button.builder(label, btn -> send(what, arg)).bounds(bx, rowY(row) + 2, 80, 16).build());
+		addRenderableWidget(FlatButton.builder(label, btn -> send(what, arg)).bounds(bx, rowY(row) + 2, 80, 16).build());
 	}
 
 	/** The page buttons under the rows. */
 	private void pager(int pages) {
 		int fy = rowY(rows()) + 2, x = left();
-		Button prev = addRenderableWidget(Button.builder(Component.literal("<"), btn -> {
+		Button prev = addRenderableWidget(FlatButton.builder(Component.literal("<"), btn -> {
 			page--;
 			rebuildWidgets();
 		}).bounds(x + 6, fy, 20, 16).build());
 		prev.active = page > 0;
-		Button next = addRenderableWidget(Button.builder(Component.literal(">"), btn -> {
+		Button next = addRenderableWidget(FlatButton.builder(Component.literal(">"), btn -> {
 			page++;
 			rebuildWidgets();
 		}).bounds(x + 30, fy, 20, 16).build());

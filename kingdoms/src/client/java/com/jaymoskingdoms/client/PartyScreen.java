@@ -3,8 +3,8 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Parties;
 import java.util.ArrayList;
 import java.util.List;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -93,29 +93,29 @@ final class PartyScreen extends Screen {
 	protected void init() {
 		int x = left(), w = panelW(), fy = top() + PANEL_H - FOOTER + 4;
 		if (inParty()) {
-			addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.leave"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.leave"), b -> {
 				command("party leave");
 				onClose();
 			}).bounds(x + 6, fy, 70, 16).build());
 			if (leads()) {
-				addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.pvp_on"), b -> command("party pvp on"))
+				addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.pvp_on"), b -> command("party pvp on"))
 					.bounds(x + 80, fy, 70, 16).build());
-				addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.pvp_off"), b -> command("party pvp off"))
+				addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.pvp_off"), b -> command("party pvp off"))
 					.bounds(x + 154, fy, 70, 16).build());
 			}
 		} else {
-			addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.accept"), b -> {
+			addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.accept"), b -> {
 				command("party accept");
 				onClose();
 			}).bounds(x + 6, fy, 90, 16).build());
-			addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.decline"), b -> command("party decline"))
+			addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.decline"), b -> command("party decline"))
 				.bounds(x + 100, fy, 90, 16).build());
 		}
 		// invite someone near you
 		int ny = nearTop();
 		for (Player p : near()) {
 			String name = p.getGameProfile().name();
-			addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.party.invite"), b -> command("party invite " + name))
+			addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.party.invite"), b -> command("party invite " + name))
 				.bounds(x + w - 66, ny, 60, 16).build());
 			ny += NEAR_ROW;
 		}

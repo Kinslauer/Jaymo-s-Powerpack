@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -62,7 +63,7 @@ final class RetakingScreen extends Screen {
 			ClientPlayNetworking.send(new Retaking.Ask());
 		}
 		int px = left() + LIST_W, pw = panelW() - LIST_W;
-		this.roadButton = addRenderableWidget(Button.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> {
+		this.roadButton = addRenderableWidget(FlatButton.builder(Component.translatable("menu.jaymoskingdoms.story.road_open"), b -> {
 			if (this.roadOpen != null) {
 				RoadCompat.open(this.roadOpen, this);
 			}

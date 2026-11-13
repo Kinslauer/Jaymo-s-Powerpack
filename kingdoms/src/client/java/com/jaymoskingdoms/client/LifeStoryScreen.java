@@ -19,6 +19,7 @@ import java.util.Locale;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -591,40 +592,40 @@ final class LifeStoryScreen extends Screen {
 		}
 		int y = top() + panelH() - FOOTER + 4;
 		int right = paneX() + paneW() - 6;
-		this.next = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.next"), b -> forward()).bounds(right - 110, y, 110, 16).build());
-		this.back = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.back"), b -> {
+		this.next = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.next"), b -> forward()).bounds(right - 110, y, 110, 16).build());
+		this.back = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.back"), b -> {
 			draft.step = Math.max(0, draft.step - 1);
 			this.scroll = 0;
 		}).bounds(paneX() + 6, y, 60, 16).build());
 		// on the story page: the heritage's look, stepped through on each press
-		this.look = addRenderableWidget(Button.builder(Component.empty(), b -> cycleLook(1)).bounds(left() + 6, y, TELL_W - 12, 16).build());
+		this.look = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleLook(1)).bounds(left() + 6, y, TELL_W - 12, 16).build());
 		// (Andy: "allow a player override AFTER the result") the heritage and class, stepped past the story's on each press
-		this.heritageButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleHeritage(1)).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
-		this.classButton = addRenderableWidget(Button.builder(Component.empty(), b -> cycleClass(1)).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
+		this.heritageButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleHeritage(1)).bounds(left() + 6, y - 40, TELL_W - 12, 16).build());
+		this.classButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> cycleClass(1)).bounds(left() + 6, y - 20, TELL_W - 12, 16).build());
 		if (!this.forced) {
-			this.later = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
+			this.later = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(paneX() + 70, y, 50, 16).build());
 		}
 		// (0.7.275) Andy: "a button that says 'on second thought...' then asks if you would like to skip the story"; on the
 		// question pages it sits where the story page's look button does
-		this.skip = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip"), b -> this.asking = true)
+		this.skip = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip"), b -> this.asking = true)
 			.bounds(left() + 6, y, TELL_W - 12, 16).build());
 		// (0.7.356) the road's carousel: a turn back and a turn on, either side of the stage
 		int arrowY = top() + HEADER + (panelH() - HEADER - FOOTER - STRIP_H - 4) / 2 - 10;
-		this.prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 20).build());
-		this.after = addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 20).build());
+		this.prev = addRenderableWidget(FlatButton.builder(Component.literal("<"), b -> turn(-1)).bounds(left() + 4, arrowY, ARROW_W, 16).build());
+		this.after = addRenderableWidget(FlatButton.builder(Component.literal(">"), b -> turn(1)).bounds(left() + panelW() - 4 - ARROW_W, arrowY, ARROW_W, 16).build());
 		// (0.7.474) Andy: "half orcs should look just like these green skins, just with a skin color slider that includes more
 		// than green": on the greenskin road, under you (placed as the page is drawn)
 		this.tone = addRenderableWidget(new ToneSlider());
 		// (0.7.451) the locked starts, in a menu of their own
-		this.lockedButton = addRenderableWidget(Button.builder(Component.empty(), b -> flipLocked())
+		this.lockedButton = addRenderableWidget(FlatButton.builder(Component.empty(), b -> flipLocked())
 			.bounds(left() + panelW() - 8 - LOCKED_W - 64, top() + 4, LOCKED_W, 14).build());
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
-		this.skipYes = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
+		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
 			randomize();
 			this.asking = false;
 			this.scroll = 0;
 		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
-		this.skipNo = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
+		this.skipNo = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
 			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 	}
 

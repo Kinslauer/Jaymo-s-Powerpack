@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskitchen.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -187,9 +187,9 @@ public class CookingScreen extends Screen {
 		if (game instanceof LarderGames.Roast) {
 			int cx = this.width / 2;
 			int by = top() + PANEL_H - 24;
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.turn"), b -> game.press())
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.turn"), b -> game.press())
 				.bounds(cx - 105, by, 100, BUTTON_H).build());
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.take_off"), b -> game.serve())
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.take_off"), b -> game.serve())
 				.bounds(cx + 5, by, 100, BUTTON_H).build());
 		}
 	}
@@ -219,7 +219,7 @@ public class CookingScreen extends Screen {
 			Step step = board.get(i);
 			int col = i % 2;
 			int row = i / 2;
-			addRenderableWidget(Button.builder(Component.literal("    ").append(Component.translatable(step.translationKey())),
+			addRenderableWidget(FlatButton.builder(Component.literal("    ").append(Component.translatable(step.translationKey())),
 					b -> pressStep(step))
 				.bounds(x0 + col * (BUTTON_W + 6), y0 + row * (BUTTON_H + 4), BUTTON_W, BUTTON_H)
 				.build());
@@ -228,11 +228,11 @@ public class CookingScreen extends Screen {
 
 	private void initResult() {
 		int cx = this.width / 2;
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.again"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.again"), b -> {
 			phase = Phase.SELECT;
 			rebuildWidgets();
 		}).bounds(cx - 105, top() + PANEL_H - 32, 100, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.done"), b -> onClose())
 			.bounds(cx + 5, top() + PANEL_H - 32, 100, BUTTON_H).build());
 	}
 
@@ -291,13 +291,13 @@ public class CookingScreen extends Screen {
 		int cx = this.width / 2;
 		int by = top() + PANEL_H - 24;
 		if (isOven()) {
-			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.remove"), b -> serve())
+			addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.remove"), b -> serve())
 				.bounds(cx - 50, by, 100, BUTTON_H).build());
 			return;
 		}
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.flip"), b -> flip())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.flip"), b -> flip())
 			.bounds(cx - 105, by, 100, BUTTON_H).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.serve"), b -> serve())
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskitchen.serve"), b -> serve())
 			.bounds(cx + 5, by, 100, BUTTON_H).build());
 	}
 
@@ -761,10 +761,10 @@ public class CookingScreen extends Screen {
 		if (phase == Phase.COOKING) {
 			Component strikes = Component.translatable("screen.jaymoskitchen.mistakes", mistakes, Quality.MAX_MISTAKES);
 			int w = this.font.width(strikes);
-			graphics.text(this.font, strikes, right - w, y + 8, mistakes > 0 ? COLOR_BAD : COLOR_DIM);
+			graphics.text(this.font, strikes, right - w, y + 7, mistakes > 0 ? COLOR_BAD : COLOR_DIM);
 			right -= w + 8;
 		}
-		KitchenUi.header(graphics, this.font, x, y, PANEL_W, icon.isEmpty() ? null : icon, name, sub, COLOR_CURRENT, right);
+		KitchenUi.header(graphics, this.font, x, y, PANEL_W, icon.isEmpty() ? null : icon, name, sub, COLOR_CURRENT, right - x - (icon.isEmpty() ? 8 : 28));
 	}
 
 	private void drawCooking(GuiGraphicsExtractor graphics, int x, int y) {
@@ -801,7 +801,7 @@ public class CookingScreen extends Screen {
 		ItemStack stack = new ItemStack(ModItems.dish(dish));
 		result.apply(stack, dish);
 		KitchenUi.outputWell(graphics, this.font, stack, cx - 8, y + 50);
-		KitchenUi.lineCentered(graphics, this.font, stack.getHoverName(), cx, y + 82, PANEL_W - 18, COLOR_CURRENT);
+		KitchenUi.lineCentred(graphics, this.font, stack.getHoverName(), cx, y + 82, PANEL_W - 18, COLOR_CURRENT);
 		String prefix = switch (dish.method()) {
 			case SEQUENCE -> "result.jaymoskitchen.";
 			case GRILL -> "result.jaymoskitchen.grill.";

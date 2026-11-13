@@ -8,6 +8,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -107,8 +108,8 @@ final class TierScreen extends Screen {
 		}
 		int y = top() + panelH() - FOOTER + 4;
 		int right = paneX() + paneW() - 6;
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
-		this.enter = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.tier.enter_plain"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
+		this.enter = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.tier.enter_plain"), b -> {
 			if (this.picked != null && this.picked != current() && open(this.picked)) {
 				ClientPlayNetworking.send(new WorldTiers.Choose(this.picked.ordinal()));
 			}

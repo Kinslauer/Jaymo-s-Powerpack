@@ -7,6 +7,7 @@ import com.jaymospowers.net.PowerPayloads;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -115,10 +116,10 @@ public class AffinityScreen extends Screen {
 	protected void init() {
 		int y = top() + panelH() - FOOTER + 4;
 		int half = (panelW() - 18) / 2;
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.affinity.fate"), b -> choose(Affinity.FATE.toString()))
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.affinity.fate"), b -> choose(Affinity.FATE.toString()))
 			.bounds(left() + 6, y, half, 16)
 			.build());
-		leanButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.affinity.choose"), b -> {
+		leanButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.affinity.choose"), b -> {
 			if (picked != null) {
 				choose(picked.id().toString());
 			}

@@ -6,6 +6,7 @@ import com.jaymoskingdoms.equestrian.Herd;
 import com.jaymoskingdoms.equestrian.Herding;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -68,9 +69,9 @@ final class RosterScreen extends Screen {
 	@Override
 	protected void init() {
 		int x = left(), y = top();
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose())
 			.bounds(x + W - 62, y + height() - FOOTER + 5, 56, 16).build());
-		addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskingdoms.roster.refresh"), b -> {
+		addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskingdoms.roster.refresh"), b -> {
 			ClientPlayNetworking.send(new Herding.AskRoster());
 		}).bounds(x + 6, y + height() - FOOTER + 5, 56, 16).build());
 		if (roster == null) {
@@ -80,9 +81,9 @@ final class RosterScreen extends Screen {
 			Herding.Entry e = roster.get(i + this.scroll);
 			int ry = y + HEADER + i * ROW + (ROW - BUTTON_H) / 2;
 			int bx = x + W - 8 - BUTTON_W * 2 - 4;
-			Button call = addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskingdoms.roster.call"),
+			Button call = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskingdoms.roster.call"),
 				b -> act(e, Herding.CALL)).bounds(bx, ry, BUTTON_W, BUTTON_H).build());
-			Button home = addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskingdoms.roster.home"),
+			Button home = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymoskingdoms.roster.home"),
 				b -> act(e, Herding.SEND_HOME)).bounds(bx + BUTTON_W + 4, ry, BUTTON_W, BUTTON_H).build());
 			call.active = !e.foal();
 			home.active = e.order() != Herd.Order.HOME.ordinal();
