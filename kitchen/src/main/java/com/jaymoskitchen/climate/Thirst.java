@@ -51,9 +51,10 @@ import net.minecraft.world.phys.HitResult;
  * faster when you're hot ({@link BodyHeat}). Low on water you can't sprint ({@link #NO_SPRINT}), then you're parched
  * (weak), and at nothing it hurts you, as starving does.
  * <p>
- * River water is dirty: a bottle from a pond or a sip from the bank ({@link #trySip}: sneak and use an empty hand on
- * water) may turn your stomach ({@link #SICK_CHANCE}). Boiled over a lit campfire it's Clean Water, which also cools
- * you down; rain caught on the tongue (sneak, look up, use an empty hand) is clean too. A {@link WaterskinItem} carries
+ * River water is dirty: a bottle from a pond (named Unpurified Water) or a sip from the bank ({@link #trySip}: sneak and
+ * use an empty hand on water) may turn your stomach ({@link #SICK_CHANCE}). Purified it's Clean Water, which also cools
+ * you down: boiled on any fire you can cook on, drawn from a cauldron over heat, or poured through a
+ * {@link WaterFilterItem} ({@link Climate#purifiesAt}). Every bottle gives its glass back when drunk; rain caught on the tongue (sneak, look up, use an empty hand) is clean too. A {@link WaterskinItem} carries
  * several drinks. Milk, Kitchen's brews, stews and juicy fruit all count a little; strong spirits take water away.
  * <p>
  * (0.5.48) <b>Fire drinkers</b> (Kingdoms' Emberborn, set by {@link #setFireDrinker}) keep a thermal core instead: water
@@ -244,6 +245,18 @@ public final class Thirst {
 		if (stack.is(ParasiteEffect.CURES) && player.removeEffect(ParasiteEffect.PARASITE)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.thirst.cured").withStyle(ChatFormatting.GREEN));
 		}
+	}
+
+	/** A bottle of water, unpurified (a vanilla water bottle) or clean: what leaves its glass when drunk. */
+	public static boolean bottledWater(ItemStack stack) {
+		if (stack.is(Climate.CLEAN_WATER)) {
+			return true;
+		}
+		if (!stack.is(Items.POTION)) {
+			return false;
+		}
+		PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
+		return contents != null && contents.is(Potions.WATER);
 	}
 
 	/** Water in a food or drink that isn't water itself (0 for most). */

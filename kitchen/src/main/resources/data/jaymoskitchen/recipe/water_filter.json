@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "w",
+    "c",
+    "s"
+  ],
+  "key": {
+    "w": "#minecraft:wool",
+    "c": "minecraft:charcoal",
+    "s": "#minecraft:sand"
+  },
+  "result": {
+    "id": "jaymoskitchen:water_filter"
+  }
+}

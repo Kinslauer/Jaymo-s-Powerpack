@@ -104,6 +104,9 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.ICEBOX_BLOCK, note("icebox"));
 		registration.addIngredientInfo(com.jaymoskitchen.climate.Warmth.THERMOMETER, note("thermometer"));
 		registration.addIngredientInfo(Items.LOOM, note("lining"));
+		// unpurified water and the ways to purify it
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.CLEAN_WATER, note("purifying_water"));
+		registration.addIngredientInfo(com.jaymoskitchen.climate.Climate.WATER_FILTER, note("purifying_water"));
 		for (Item skin : List.of(com.jaymoskitchen.climate.Climate.WATERSKIN_LEATHER, com.jaymoskitchen.climate.Climate.WATERSKIN_IRON,
 			com.jaymoskitchen.climate.Climate.WATERSKIN_DRAGON)) {
 			registration.addIngredientInfo(skin, note("waterskin_temp"));

@@ -46,7 +46,8 @@
 		"StructureProcessorListAccessor",
 		"StructureTemplatePoolAccessor",
 		"ThirstSprintMixin",
-		"VillageWindmillMixin"
+		"VillageWindmillMixin",
+		"WaterBottleBackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
