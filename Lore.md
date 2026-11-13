@@ -1538,3 +1538,11 @@ no village names, can give such a one a new body within ten days, laid at their 
 they keep their name and memory and lose what the old blood gave them. In the caves the damp grows its own moulds:
 a cold one that eats fire, a spore mould you hold your breath past, and a slime that eats wood and metal, which fire
 and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
+
+(new) **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, for Andy to
+approve). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
+Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
+the Druid and the Ranger to the wild the villages keep out of (the Ranger is what the realms now call their archers
+and survivalists alike), the Monk to the discipline the boxers teach, and the Tinkerer to the smiths' benches.
+Priests teach the symbol, farmers the sprig, librarians the seal and smiths the gadgets. The Warrior-born have none
+of them.
