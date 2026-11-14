@@ -95,6 +95,13 @@ public final class RigPose {
 	static final float CALL_ARM_FORWARD = -0.12F, CALL_ARM_OUT = 1.0F, CALL_SPREAD = 0.12F, CALL_CHIN = 0.14F;
 	/** Wrist table: the off forearm up and across the chest, the head down and turned to it. */
 	static final float TABLE_ARM_UP = -1.15F, TABLE_ARM_ACROSS = 0.7F, TABLE_HEAD = 0.35F, TABLE_TURN = 0.2F;
+	/** Thruster dash: the coil's drop and lean, then the lunge's lean, the arms swept back and out, the trailing leg. */
+	static final float DASH_DROP = 1.8F, DASH_COIL = 0.25F, DASH_LEAN = 0.5F, DASH_ARMS_BACK = 0.9F, DASH_ARMS_OUT = 0.25F, DASH_TRAIL = 0.5F;
+	/** Powered punch: the fist driven along the look and past it, the shoulder turned in behind it, the off arm pulled back, the step. */
+	static final float PUNCH_THROUGH = 0.3F, PUNCH_TURN = 0.3F, PUNCH_OFF_BACK = 0.5F, PUNCH_STEP = 0.3F, PUNCH_LEAN = 0.16F;
+	/** Barrage: the deep brace's drop and lean, the fists planted low and wide, the feet apart, the head up to watch them go; each missile's thump. */
+	static final float BARRAGE_DROP = 2.4F, BARRAGE_LEAN = 0.3F, BARRAGE_ARM_BACK = 0.2F, BARRAGE_ARM_OUT = 0.5F, BARRAGE_SPREAD = 0.2F, BARRAGE_CHIN = 0.3F,
+		BARRAGE_THUMP = 0.5F, BARRAGE_POD_DOWN_AT = 28.0F;
 	/** Walking at this share of full pace or more, a move leaves the legs to the walk. */
 	static final float STILL_PACE = 0.35F;
 
@@ -124,10 +131,12 @@ public final class RigPose {
 	static float pods(Player player, float partialTicks) {
 		RigMoves.Move move = RigMoves.get(player);
 		Minecraft minecraft = Minecraft.getInstance();
-		if (move == null || move.kind() != RigMoves.LAUNCHER || minecraft.level == null) {
+		if (move == null || move.kind() != RigMoves.LAUNCHER && move.kind() != RigMoves.BARRAGE || minecraft.level == null) {
 			return 0.0F;
 		}
-		return pods(minecraft.level.getGameTime() - move.start() + partialTicks);
+		float t = minecraft.level.getGameTime() - move.start() + partialTicks;
+		return move.kind() == RigMoves.LAUNCHER ? pods(t)
+			: RigBeats.at(t, 0.0F, 0.0F, LINEAR, POD_UP, 1.0F, BACK, BARRAGE_POD_DOWN_AT, 1.0F, LINEAR, RigMoves.BARRAGE_TICKS, 0.0F, SINE);
 	}
 
 	/** From the avatar renderer's extractRenderState (RigSuitAvatarRendererMixin). */
@@ -311,6 +320,41 @@ public final class RigPose {
 				set(off, TABLE_ARM_UP, side * TABLE_ARM_ACROSS, 0.0F, amount);
 				h.head.xRot += TABLE_HEAD * amount;
 				h.head.yRot += -side * TABLE_TURN * amount;
+			}
+			case RigMoves.DASH -> {
+				// wind-up: a coil, hips down and arms swept back; release: thrown forward flat behind the head, a leg trailing; settle
+				float fire = RigMoves.DASH_FIRE;
+				float coil = RigBeats.at(t, 0.0F, 0.0F, LINEAR, fire, 1.0F, OUT, fire + 2.0F, 0.0F, IN);
+				float lunge = RigBeats.at(t, fire, 0.0F, LINEAR, fire + 2.0F, 1.0F, BACK, RigMoves.DASH_TICKS - 4.0F, 1.0F, LINEAR, RigMoves.DASH_TICKS, 0.0F, SINE);
+				float amount = Math.max(coil, Math.min(lunge, 1.0F));
+				crouch(h, DASH_DROP * coil, DASH_COIL * coil + DASH_LEAN * lunge);
+				set(h.rightArm, DASH_ARMS_BACK, 0.0F, DASH_ARMS_OUT, amount);
+				set(h.leftArm, DASH_ARMS_BACK, 0.0F, -DASH_ARMS_OUT, amount);
+				brace(front, rear, side, DASH_TRAIL * lunge);
+				h.head.xRot -= DASH_LEAN * 0.8F * lunge;
+			}
+			case RigMoves.PUNCH -> {
+				// no wind-up (the blow has landed): the fist driven through past the line, the shoulder behind it, then back
+				float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 1.0F, 1.0F, BACK, 3.0F, 1.0F, LINEAR, RigMoves.PUNCH_TICKS, 0.0F, SINE);
+				crouch(h, 0.0F, PUNCH_LEAN * amount);
+				h.body.yRot += -side * PUNCH_TURN * amount;
+				set(main, -Mth.HALF_PI + h.head.xRot - PUNCH_THROUGH * 0.3F, h.head.yRot - side * PUNCH_THROUGH, 0.0F, Math.min(amount, 1.0F));
+				set(off, PUNCH_OFF_BACK, 0.0F, -side * 0.2F, Math.min(amount, 1.0F));
+				brace(front, rear, side, PUNCH_STEP * amount * still);
+			}
+			case RigMoves.BARRAGE -> {
+				// wind-up: down into a deep brace, fists low and wide, as the pods rise; release: each missile thumps the hips
+				// down while the head comes up to watch them go; settle as the pods lower
+				float fire = RigMoves.BARRAGE_FIRE;
+				float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, fire, 1.0F, OUT, BARRAGE_POD_DOWN_AT, 1.0F, LINEAR, RigMoves.BARRAGE_TICKS, 0.0F, SINE);
+				float firing = t >= fire && t < BARRAGE_POD_DOWN_AT - 6.0F ? 1.0F : 0.0F;
+				float thump = firing * recoil * pulse((t - fire) % 2.0F, 0.5F, 2.0F);
+				float watch = RigBeats.at(t, fire, 0.0F, LINEAR, fire + 4.0F, 1.0F, SINE, BARRAGE_POD_DOWN_AT, 1.0F, LINEAR, RigMoves.BARRAGE_TICKS, 0.0F, SINE);
+				crouch(h, BARRAGE_DROP * amount + BARRAGE_THUMP * thump, BARRAGE_LEAN * amount);
+				set(h.rightArm, BARRAGE_ARM_BACK, 0.0F, BARRAGE_ARM_OUT, amount);
+				set(h.leftArm, BARRAGE_ARM_BACK, 0.0F, -BARRAGE_ARM_OUT, amount);
+				spread(h, BARRAGE_SPREAD * amount * still);
+				h.head.xRot -= (BARRAGE_LEAN + BARRAGE_CHIN) * watch;
 			}
 			default -> {
 			}

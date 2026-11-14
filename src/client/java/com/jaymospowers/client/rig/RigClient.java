@@ -62,6 +62,8 @@ public final class RigClient {
 
 	/** A Rig menu switch kept on this side only (never sent): whether a take-off goes straight on into full flight. */
 	static final int JET_START = -2;
+	/** The Rig menu's switch for the Unibeam's slow beat ({@link RigImpact}); the client's own too. */
+	static final int SLOW_BEAT = -3;
 
 	private static KeyMapping rigKey;
 	private static final boolean[] powerKeysDown = new boolean[PowerKey.values().length];
@@ -149,6 +151,10 @@ public final class RigClient {
 			RigFlightFeel.toggleJetStart();
 			return;
 		}
+		if (action == SLOW_BEAT) {
+			RigImpact.toggleSlowBeat();
+			return;
+		}
 		if (action != RigNet.FACEPLATE && action != RigNet.NIGHT && action != RigNet.SENTRY && action != com.jaymospowers.rig.RigPicks.TABLE) {
 			selected = action;
 		}
@@ -168,6 +174,7 @@ public final class RigClient {
 			volleyActive = false;
 			takeoverTicks = 0;
 			RigScanClient.clear();
+			RigImpact.clear(minecraft);
 			return;
 		}
 		boolean wearing = Rig.wearsAny(player);
@@ -251,6 +258,7 @@ public final class RigClient {
 		}
 		RigScanClient.tick(minecraft, player);
 		RigFlightFeel.tick(minecraft, player);
+		RigImpact.tick(minecraft, player);
 	}
 
 	/** The Rig key: a tap uses the active (Sneak: picks the next), a hold locks on. With nothing worn, it calls a parked suit. */

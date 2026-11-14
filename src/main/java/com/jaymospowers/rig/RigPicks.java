@@ -21,6 +21,8 @@ import net.minecraft.server.level.ServerPlayer;
 public final class RigPicks {
 	public static final int FIRST = 20;
 	public static final int DRONES = 20, MARK = 21, TABLE = 22, DECOY = 23, FIELD = 24, BANK = 25;
+	/** The thruster dash and the artillery barrage ({@link RigStrikes}). */
+	public static final int DASH = 26, BARRAGE = 27;
 
 	private RigPicks() {
 	}
@@ -33,17 +35,19 @@ public final class RigPicks {
 		RigDecoy.init();
 		RigField.init();
 		RigBank.init();
+		RigStrikes.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				RigDrones.tick(player);
 				RigField.tick(player);
+				RigStrikes.tick(player);
 			}
 		});
 	}
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= BANK;
+		return action >= FIRST && action <= BARRAGE;
 	}
 
 	/** A Rig menu entry from the client. */
@@ -62,6 +66,8 @@ public final class RigPicks {
 			case DECOY -> RigDecoy.use(player);
 			case FIELD -> RigField.use(player);
 			case BANK -> RigBank.toggle(player);
+			case DASH -> RigStrikes.dash(player);
+			case BARRAGE -> RigStrikes.barrage(player);
 			default -> {
 			}
 		}

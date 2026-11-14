@@ -53,6 +53,8 @@ public final class RigActives {
 	static final int PALM_COST = 60, PALM_COOLDOWN = 15;
 	static final double PALM_RANGE = 24.0, PALM_KNOCKBACK = 0.9;
 	static final float PALM_DAMAGE = 6.0F;
+	/** The palm blast's kick on the wearer's screen. */
+	static final float PALM_SHAKE = 0.4F;
 	/** Augments: Xenoform's reach, Resonance's knockback, Web's slow (ticks, amplifier), Smoke's blinding (ticks). */
 	static final double XENO_RANGE = 1.5, RESONANCE_KNOCKBACK = 1.5;
 	static final int WEB_SLOW_TICKS = 60, WEB_SLOW_LEVEL = 1, SMOKE_BLIND_TICKS = 40;
@@ -547,6 +549,8 @@ public final class RigActives {
 		Vec3 dir = end.subtract(from).normalize();
 		MagicFx.beam(level, from, from.add(dir.scale(length)), over ? 0.16F : 0.08F, over ? OVER_COLOR : RigForgeBlock.FX_COLOR, 5);
 		MagicFx.blast(level, end, over ? 0.9F : 0.5F, over ? OVER_COLOR : RigForgeBlock.FX_COLOR);
+		// the kick, on the wearer's own screen
+		com.jaymospowers.core.Shakes.send(player, PALM_SHAKE * (over ? 1.5F : 1.0F), end);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.9F);
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
 			DamageSource source = level.damageSources().playerAttack(player);
@@ -589,13 +593,17 @@ public final class RigActives {
 			Vec3 look = player.getLookAngle();
 			Vec3 right = right(look);
 			Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
+			// with no lock, each missile takes a tagged target of its own
+			LivingEntity lock = locked(player);
+			List<LivingEntity> tagged = lock == null ? RigStrikes.tagged(player) : List.of();
 			for (int i = 0; i < count; i++) {
 				// alternate shoulders, a touch of spread
 				double side = (i % 2 == 0 ? 0.45 : -0.45) * (1 + i / 2);
 				Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
 				Vec3 velocity = look.add(level.getRandom().nextGaussian() * MISSILE_SPREAD, level.getRandom().nextGaussian() * MISSILE_SPREAD,
 					level.getRandom().nextGaussian() * MISSILE_SPREAD).normalize().scale(MISSILE_SPEED);
-				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], locked(player), burst));
+				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1],
+					lock != null ? lock : RigStrikes.target(tagged, i), burst));
 			}
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.7F);
 			com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
