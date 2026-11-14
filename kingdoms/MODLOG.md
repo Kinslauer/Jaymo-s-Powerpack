@@ -13132,3 +13132,19 @@ Andy: "i like undead illagers, waging war for the reaper" (after Immersive Pilla
 - **Seen risen Hollow**: a player who died and rose one of the Hollow is met with it by every townsperson the first time they see them (12 blocks, in sight): one who knew them (10+ MCA hearts) cries out their name and grieves (-15 hearts), a stranger screams that the dead are walking (-5 hearts), a child shrieks. Those who mind the Hollow, and every child, run. Each remembers it for good (`Recollections.Kind.SAW_TURNED`), brings it up later and tells others. A full mask hides it; those born Hollow aren't met this way (`HollowSighting`, attachment `hollow_risen`, lang part `hollow_sighting.json`).
 - **Not taken in**: a village no longer carries a Hollow player home to tend after a death (`Shelter.take`). Andy's risen Hollow was carried into Caelreach and hit again there.
 - Built; not played.
+
+## 0.8.72 (2026-11-14): lasso: a 3D coil in the hand and a physics rope like the whip's (#1534)
+
+- Andy: "the chain axe and lasso should operate similar to the [whip] and flail, therefore they need blockbench models".
+- **In the hand** the lasso is a 3D coil of rope (`lasso_coil`). A short tail hangs off it with the loop (a 3D model,
+  `lasso_loop`) swinging on its end.
+- **The rope** is a line of points on physics now (`client/forms/LassoRope`: gravity, drag, fixed links, resting on
+  blocks), from the top of the coil as it is really drawn (`LassoSockets` and four `LassoSocket*` mixins, the way
+  Powers finds a flail's handle) instead of a straight sagging line from a guessed spot under your eyes.
+- **Thrown**, the loop is the 3D loop flying on the end of the rope (it was the flat inventory icon with no rope);
+  **holding** something, the rope ends in a noose round its middle.
+- Dropped or in a frame the lasso is the coil and loop in 3D (`lasso_whole`); the inventory icon is unchanged. The
+  lasso's rules (reach, hauling, wrapping, breaking out) are untouched.
+- Blockbench project `kingdoms/art/lasso.bbmodel`, written by `tools/gen_chain_weapons.py`.
+- Compiled; not played. To look at in game: where the coil sits in the fist, and that the rope meets it in first and
+  third person.
