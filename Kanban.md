@@ -4,11 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-13 18:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-13 19:17). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/minecraft-server-bot-experiment|minecraft-server-bot-experiment]] · pc-claude · #1467 · open
 
 
 ## Being built
@@ -28,6 +27,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/minecraft-server-bot-experiment|minecraft-server-bot-experiment]]
 - [x] [[Inbox/Done/pr1377-round4-text-pass|pr1377-round4-text-pass]]
 - [x] [[Inbox/Done/pirateface-worth-rescuing-experiment|pirateface-worth-rescuing-experiment]]
 - [x] [[Inbox/Done/pr1377-text-pass|pr1377-text-pass]]
@@ -35,7 +35,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/water-belly-flop-damage|water-belly-flop-damage]]
 - [x] [[Inbox/Done/undead-seek-real-shelter|undead-seek-real-shelter]]
 - [x] [[Inbox/Done/frostborn-tech-villagers|frostborn-tech-villagers]]
-- [x] [[Inbox/Done/tinkerer-cheats-death|tinkerer-cheats-death]]
 
 
 %% kanban:settings
