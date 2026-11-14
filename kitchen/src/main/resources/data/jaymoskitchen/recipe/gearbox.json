@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PSP",
+    "SRS",
+    "PSP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "jaymoskitchen:shaft",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "jaymoskitchen:gearbox"
+  }
+}

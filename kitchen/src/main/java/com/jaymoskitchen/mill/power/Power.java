@@ -23,8 +23,9 @@ import net.minecraft.world.level.material.MapColor;
 /**
  * Wind and water power for the mill machines (after Better With Mods' axles, windmills and waterwheels; MIT, our own
  * code and art): a wooden shaft carries the turn of a windmill or a waterwheel to a horse mill, horse chopper or horse
- * press at its other end, which then works as if a horse were walking it (see {@link ShaftDriven}). No gearboxes, no
- * networks: one source, up to {@link Shafts#SHAFT_MAX} shafts and at most one corner, one machine.
+ * press at its other end, which then works as if a horse were walking it (see {@link ShaftDriven}). No power
+ * networks: one source, up to {@link Shafts#SHAFT_MAX} shafts and at most one corner, one machine; or one
+ * {@link GearboxBlock gearbox} on the run, sharing the turn among up to five machines.
  */
 public final class Power {
 	/** What a windmill's sails can be sewn from: any wool, or hemp cloth. */
@@ -35,6 +36,9 @@ public final class Power {
 	public static RotorBlock WINDMILL;
 	public static RotorBlock WATERWHEEL;
 	public static PowerPartBlock PART;
+	public static GearboxBlock GEARBOX;
+	public static BlockEntityType<GearboxEntity> GEARBOX_ENTITY;
+	public static Item GEARBOX_ITEM;
 	public static BlockEntityType<RotorEntity> ROTOR_ENTITY;
 	public static Item SHAFT_ITEM;
 	public static Item CORNER_ITEM;
@@ -52,16 +56,20 @@ public final class Power {
 		PART = block("power_part", PowerPartBlock::new, BlockBehaviour.Properties.of().noCollision().noOcclusion().noLootTable());
 		ROTOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("rotor"),
 			new BlockEntityType<>(RotorEntity::new, java.util.Set.of(WINDMILL, WATERWHEEL)));
+		GEARBOX = block("gearbox", GearboxBlock::new, wood());
+		GEARBOX_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("gearbox"),
+			new BlockEntityType<>(GearboxEntity::new, java.util.Set.of(GEARBOX)));
 
 		SHAFT_ITEM = blockItem("shaft", SHAFT);
 		CORNER_ITEM = blockItem("shaft_corner", CORNER);
+		GEARBOX_ITEM = blockItem("gearbox", GEARBOX);
 		WINDMILL_ITEM = item("windmill", props -> new RotorItem(Rotor.WINDMILL, props), new Item.Properties().stacksTo(1));
 		WATERWHEEL_ITEM = item("waterwheel", props -> new RotorItem(Rotor.WATERWHEEL, props), new Item.Properties().stacksTo(1));
 
 		VillageWindmills.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
-			for (Item item : List.of(SHAFT_ITEM, CORNER_ITEM, WINDMILL_ITEM, WATERWHEEL_ITEM)) {
+			for (Item item : List.of(SHAFT_ITEM, CORNER_ITEM, GEARBOX_ITEM, WINDMILL_ITEM, WATERWHEEL_ITEM)) {
 				output.accept(new ItemStack(item));
 			}
 		});

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "jaymoskitchen:block/gearbox_output",
+    "north": "jaymoskitchen:block/gearbox_input",
+    "south": "jaymoskitchen:block/gearbox_output",
+    "east": "jaymoskitchen:block/gearbox_output",
+    "west": "jaymoskitchen:block/gearbox_output",
+    "up": "jaymoskitchen:block/gearbox_output",
+    "down": "jaymoskitchen:block/gearbox_output"
+  }
+}
