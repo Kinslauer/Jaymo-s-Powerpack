@@ -84,3 +84,5 @@ ends the body for good. Compiled, not played.
   and build more of her from the plans. The long ships' barbarians have to be dealt with first. Nothing of Moog's is
   copied into our files. NPC crews don't sail these hulls yet. Boats found before this update keep no helm. Compiled,
   not played: whether each of Moog's hulls floats and steers well as built is untested.
+- **Elbows and knees.** The draugr and the Raid-King bend at the elbow and the knee in every one of their own moves
+  (standing, walking, each blow, the shot, the roar, the rush), where before only the shoulders and hips turned.

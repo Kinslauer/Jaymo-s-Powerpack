@@ -74,6 +74,35 @@ def bone_uuids_of(model):
 	return out
 
 
+def bend(anims, keep=()):
+	"""Elbows and knees for moves keyed on the shoulders and hips alone: a forearm follows its arm (a loose crook hanging,
+	folded more the higher the arm is, thrown straight on the way down in a blow) and a shin its leg (the knee gives more
+	the further forward the thigh is). A move that keys a forearm or shin itself keeps its own; {@code keep} names moves
+	to leave alone."""
+	for a in anims:
+		if a["name"] in keep:
+			continue
+		t = a["tracks"]
+		for side in ("right", "left"):
+			arm = t.get(side + "_arm", {}).get("rotation")
+			if arm and side + "_forearm" not in t:
+				keys, last, lf = [], None, 0
+				for time, (x, _, _) in arm:
+					if last is not None and abs(x - last) < 5:
+						f = lf
+					elif last is not None and last - x > 60:
+						f = 6
+					else:
+						f = 22 + 0.3 * max(0, min(180, x))
+					keys.append((time, (round(f, 1), 0, 0)))
+					last, lf = x, f
+				t[side + "_forearm"] = {"rotation": keys}
+			leg = t.get(side + "_leg", {}).get("rotation")
+			if leg and side + "_shin" not in t:
+				t[side + "_shin"] = {"rotation": [(time, (round(-(6 + 0.8 * max(0, x)), 1), 0, 0)) for time, (x, _, _) in leg]}
+	return anims
+
+
 Z = (0, 0, 0)
 
 # ---------------------------------------------------------------- painting
@@ -358,6 +387,11 @@ def draugr():
 	walk = {
 		"right_leg": {"rotation": [(0, (25, 0, 0)), (0.5, (-25, 0, 0)), (1.0, (25, 0, 0))]},
 		"left_leg": {"rotation": [(0, (-25, 0, 0)), (0.5, (25, 0, 0)), (1.0, (-25, 0, 0))]},
+		# the knee folds as the leg swings through, and is all but straight when the foot lands
+		"right_shin": {"rotation": [(0, (-4, 0, 0)), (0.5, (-12, 0, 0)), (0.75, (-50, 0, 0)), (1.0, (-4, 0, 0))]},
+		"left_shin": {"rotation": [(0, (-12, 0, 0)), (0.25, (-50, 0, 0)), (0.5, (-4, 0, 0)), (1.0, (-12, 0, 0))]},
+		"right_forearm": {"rotation": [(0, (25, 0, 0)), (0.5, (40, 0, 0)), (1.0, (25, 0, 0))]},
+		"left_forearm": {"rotation": [(0, (40, 0, 0)), (0.5, (25, 0, 0)), (1.0, (40, 0, 0))]},
 		"right_arm": {"rotation": [(0, (5, 0, 4)), (0.5, (25, 0, 4)), (1.0, (5, 0, 4))]},
 		"left_arm": {"rotation": [(0, (25, 0, -4)), (0.5, (5, 0, -4)), (1.0, (25, 0, -4))]},
 		"waist": {"rotation": [(0, (0, 6, 0)), (0.5, (0, -6, 0)), (1.0, (0, 6, 0))]},
@@ -370,6 +404,13 @@ def draugr():
 			"head": {"rotation": [(0, (6, 0, 0)), (1.5, (10, 4, 2)), (3.0, (6, 0, 0))]},
 			"right_arm": {"rotation": [(0, (25, 0, 6)), (1.5, (28, 0, 8)), (3.0, (25, 0, 6))]},
 			"left_arm": {"rotation": [(0, (35, 0, -8)), (1.5, (38, 0, -10)), (3.0, (35, 0, -8))]},
+			"right_forearm": {"rotation": [(0, (32, 0, 0)), (1.5, (38, 0, 0)), (3.0, (32, 0, 0))]},
+			"left_forearm": {"rotation": [(0, (36, 0, 0)), (1.5, (41, 0, 0)), (3.0, (36, 0, 0))]},
+			# a fighter's stand: the right foot forward, both knees soft
+			"right_leg": {"rotation": [(0, (12, 0, 0)), (3.0, (12, 0, 0))]},
+			"right_shin": {"rotation": [(0, (-20, 0, 0)), (1.5, (-23, 0, 0)), (3.0, (-20, 0, 0))]},
+			"left_leg": {"rotation": [(0, (-6, 0, 0)), (3.0, (-6, 0, 0))]},
+			"left_shin": {"rotation": [(0, (-8, 0, 0)), (1.5, (-11, 0, 0)), (3.0, (-8, 0, 0))]},
 			"shield": {"rotation": [(0, (0, 40, 0)), (3.0, (0, 40, 0))]},
 		}),
 		anim("walk", 1.0, "loop", walk),
@@ -386,6 +427,7 @@ def draugr():
 		}),
 		anim("block", 0.5, "hold", {
 			"left_arm": {"rotation": [(0, (35, 0, -8)), (0.2, (85, 0, 0)), (0.5, (85, 0, 0))]},
+			"left_forearm": {"rotation": [(0, (36, 0, 0)), (0.2, (20, 0, 0)), (0.5, (20, 0, 0))]},
 			"shield": {"rotation": [(0, (0, 40, 0)), (0.2, (0, 0, 90)), (0.5, (0, 0, 90))]},
 			"body": {"rotation": [(0, Z), (0.2, (-8, 12, 0)), (0.5, (-8, 12, 0))]},
 		}),
@@ -397,6 +439,7 @@ def draugr():
 		}),
 		anim("shoot", 1.0, "once", {
 			"left_arm": {"rotation": [(0, (35, 0, -8)), (0.3, (90, 0, 0)), (0.85, (90, 0, 0)), (1.0, (35, 0, -8))]},
+			"left_forearm": {"rotation": [(0, (36, 0, 0)), (0.3, (6, 0, 0)), (0.85, (6, 0, 0)), (1.0, (36, 0, 0))]},
 			"right_arm": {"rotation": [(0, (25, 0, 6)), (0.3, (90, 0, -18)), (0.75, (90, 0, -18)), (1.0, (25, 0, 6))]},
 			"right_forearm": {"rotation": [(0, Z), (0.3, (20, 0, 0)), (0.7, (110, 0, 0)), (0.8, (30, 0, 0)), (1.0, Z)]},
 			"body": {"rotation": [(0, Z), (0.3, (-4, 0, 0)), (0.75, (-8, 0, 0)), (0.85, (2, 0, 0)), (1.0, Z)]},
@@ -416,6 +459,7 @@ def draugr():
 		}),
 	]
 	# and every move of the humanoid library it has no move of its own for (the lore films' Warrior-born use them)
+	bend(anims)
 	import humanoid_moves
 	own = {a["name"] for a in anims}
 	anims += [a for a in humanoid_moves.moves(leg=15.0, cape=False) if a["name"] not in own]
@@ -559,6 +603,12 @@ def raid_king():
 			"head": {"rotation": [(0, (4, -6, 0)), (2.0, (7, 6, 1)), (4.0, (4, -6, 0))]},
 			"right_arm": {"rotation": [(0, RA), (2.0, (23, 0, 10)), (4.0, RA)]},
 			"left_arm": {"rotation": [(0, LA), (2.0, (18, 0, -10)), (4.0, LA)]},
+			"right_forearm": {"rotation": [(0, (34, 0, 0)), (2.0, (40, 0, 0)), (4.0, (34, 0, 0))]},
+			"left_forearm": {"rotation": [(0, (28, 0, 0)), (2.0, (33, 0, 0)), (4.0, (28, 0, 0))]},
+			"right_leg": {"rotation": [(0, (12, 0, 0)), (4.0, (12, 0, 0))]},
+			"right_shin": {"rotation": [(0, (-20, 0, 0)), (2.0, (-24, 0, 0)), (4.0, (-20, 0, 0))]},
+			"left_leg": {"rotation": [(0, (-6, 0, 0)), (4.0, (-6, 0, 0))]},
+			"left_shin": {"rotation": [(0, (-8, 0, 0)), (2.0, (-12, 0, 0)), (4.0, (-8, 0, 0))]},
 			"cape_1": {"rotation": [(0, (-2, 0, 0)), (2.0, (-5, 0, 0)), (4.0, (-2, 0, 0))]},
 			"cape_3": {"rotation": [(0, (-3, 0, 0)), (2.0, (-8, 0, 0)), (4.0, (-3, 0, 0))]},
 			"tail_0": {"rotation": [(0, (0, -12, 0)), (2.0, (0, 14, 6)), (4.0, (0, -12, 0))]},
@@ -568,8 +618,8 @@ def raid_king():
 		anim("walk", 1.4, "loop", {
 			"right_leg": {"rotation": [(0, (28, 0, 0)), (0.7, (-28, 0, 0)), (1.4, (28, 0, 0))]},
 			"left_leg": {"rotation": [(0, (-28, 0, 0)), (0.7, (28, 0, 0)), (1.4, (-28, 0, 0))]},
-			"right_shin": {"rotation": [(0, Z), (0.35, (-30, 0, 0)), (0.7, Z), (1.4, Z)]},
-			"left_shin": {"rotation": [(0, Z), (0.7, Z), (1.05, (-30, 0, 0)), (1.4, Z)]},
+			"right_shin": {"rotation": [(0, (-4, 0, 0)), (0.7, (-12, 0, 0)), (1.05, (-50, 0, 0)), (1.4, (-4, 0, 0))]},
+			"left_shin": {"rotation": [(0, (-12, 0, 0)), (0.35, (-50, 0, 0)), (0.7, (-4, 0, 0)), (1.4, (-12, 0, 0))]},
 			"right_arm": {"rotation": [(0, (10, 0, 8)), (0.7, (26, 0, 8)), (1.4, (10, 0, 8))]},
 			"left_arm": {"rotation": [(0, (26, 0, -8)), (0.7, (4, 0, -8)), (1.4, (26, 0, -8))]},
 			"waist": {"rotation": [(0, (0, 7, 0)), (0.7, (0, -7, 0)), (1.4, (0, 7, 0))]},
@@ -688,6 +738,7 @@ def raid_king():
 				"rotation": [(0, Z), (1.6, Z), (2.3, (-86, 0, 0)), (2.6, (-86, 0, 0))]},
 		}),
 	]
+	bend(anims)
 	import humanoid_moves
 	own = {a["name"] for a in anims}
 	anims += [a for a in humanoid_moves.moves(leg=21.0, cape=True) if a["name"] not in own]
