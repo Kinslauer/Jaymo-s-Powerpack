@@ -1,0 +1,6 @@
+{ "jobs": ["farmer", "*"], "when": "any", "lines": [
+  ["a", "Hay's up again. Two a bale at the crossroads."],
+  ["b", "Two! For grass. Dead grass."],
+  ["a", "You could always grow your own."],
+  ["b", "I do grow my own. I'm the one charging two."]
+] }

@@ -6,7 +6,7 @@
     "netwife": { "name": ["Maren Skerry", "Dorcas Skerry", "Hetta Skerry"], "body": "villager", "job": "fisherman", "female": true, "at": "loft" },
     "mender": { "name": ["Brenna Skerry", "Gwenna Skerry", "Tamsin Skerry"], "body": "villager", "job": "fisherman", "female": true, "at": "loft" },
     "smith": { "name": ["Aldous Holt", "Brand Holt", "Corwin Holt"], "body": "villager", "job": "toolsmith", "female": false, "at": "forge" },
-    "heir": { "name": ["Jorah Holt", "Emeric Holt", "Tobin Holt"], "body": "villager", "job": "toolsmith", "female": false, "at": "forge" },
+    "heir": { "name": ["Garrick Holt", "Emeric Holt", "Tobin Holt"], "body": "villager", "job": "toolsmith", "female": false, "at": "forge" },
     "chandler": { "name": ["Lucan Fairweather", "Piers Aldane", "Osric Penhallow"], "body": "villager", "job": "cartographer", "female": false, "at": "shop" },
     "watcher": { "name": ["Hob Tully", "Sim Cray", "Ned Tully"], "body": "villager", "job": "nitwit", "female": false, "at": "strand" }
   },

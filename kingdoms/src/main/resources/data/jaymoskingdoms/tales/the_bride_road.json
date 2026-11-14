@@ -1,0 +1,273 @@
+{
+  "title": "The Bride Road",
+  "start": { "by": "giver", "weight": 1 },
+  "roll": { "hand": ["bride", "suitor", "kin"] },
+  "cast": {
+    "bride": { "name": ["Linnet Ashdown", "Rosamund Ashdown", "Cecily Ashdown"], "body": "villager", "job": "none", "female": true, "at": "yard" },
+    "groom": { "name": ["Godfrey Pell", "Walter Pell", "Ambrose Pell"], "body": "villager", "job": "farmer", "female": false, "at": "mill" },
+    "stepson": { "name": ["Rafe Pell", "Simon Pell", "Hugh Pell"], "body": "villager", "job": "farmer", "female": false },
+    "suitor": { "name": ["Colm Wade", "Jack Thorley", "Dickon Reeve"], "body": "villager", "job": "farmer", "female": false },
+    "raider": { "name": ["Gil Harrow", "Ned Skaith", "Hob Varley"], "body": "fighter", "female": false, "at": "milestone", "health": 50, "damage": 6, "armor": 6, "hand": "minecraft:stone_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "yard": { "at": "home", "name": "the yard" },
+    "milestone": { "at": "road", "from": "home", "dist": [200, 380], "name": "the ninth milestone" },
+    "far": { "at": "other_town", "name": "the next town" },
+    "mill": { "at": "near", "from": "far", "dist": [30, 80], "name": "Pell's mill" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "You have the look of somebody who has walked roads and come back off them. I need a body walked to {place:far}. {bride}, old Ashdown's girl. She is to wed {groom}, the miller there, at the week's end.",
+        "Her brother was to take her, and has put his leg through a barn floor. Her father cannot leave his bed. I stood witness to the match, so it falls to me to see her delivered, and I cannot leave my work. There is {coins:14} when she stands at the mill door."
+      ],
+      "replies": [
+        { "say": "I'll walk her.", "then": "meet_bride", "journal": "{giver} hired me to walk a bride, {bride}, to {place:far}, where she is to wed the miller {groom}. {coins:14} when she stands at his door." },
+        { "say": "Is she willing?", "then": "ask_more" },
+        { "say": "I'm no drover of brides.", "then": "end:refused" }
+      ]
+    },
+    "ask_more": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "Willing. There is a word. She put her mark to the contract, and nobody held her hand to do it.",
+        "I'll tell you how it stands, since you ask. Three bad harvests, and the Ashdowns owe {groom} for every sack they have had ground since. He forgives the lot on the day she is his wife. That is the bride-gift. He is a widower, forty and some, with a grown son, and he never raised a hand to man or beast that I heard of.",
+        "There are worse bargains struck in this town every market day. Now, will you walk her or not?"
+      ],
+      "replies": [
+        { "say": "I'll walk her.", "then": "meet_bride", "journal": "{giver} hired me to walk a bride, {bride}, to {place:far}, where she is to wed the miller {groom}. Her family owes him three harvests' milling, and the match wipes it out. {coins:14} when she stands at his door." },
+        { "say": "Find another.", "then": "end:refused" }
+      ]
+    },
+    "meet_bride": {
+      "do": "talk", "who": "bride", "goal": "Meet {bride} in {place:yard}",
+      "say": [
+        "You are the escort. Good. I had wagered on a cousin with a cudgel. Has {giver} told you what I am worth? Three harvests of flour, ground fine. I have done the sum. It comes to rather less than a good cow.",
+        "I can walk twenty miles in a day and I do not need to be talked to. Two things. I carry my own bundle. And if I say we stop, we stop, and you do not ask why."
+      ],
+      "replies": [
+        { "say": "Agreed. Your bundle, your pace.", "then": "meet_bride_more" },
+        { "say": "My charge is to get you there. We stop where it is safe.", "then": "meet_bride_more" }
+      ]
+    },
+    "meet_bride_more": {
+      "do": "talk", "who": "bride",
+      "say": "Then we understand each other. One question, and answer it honestly, for I shall know. If I asked you to walk slowly: would you?",
+      "replies": [
+        { "say": "As slowly as you like.", "then": "escort_road", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I would." },
+        { "say": "I was hired to arrive.", "then": "escort_road", "journal": "{bride} asked whether I would walk slowly if she wished it. I said I was hired to arrive." }
+      ]
+    },
+    "escort_road": {
+      "do": "escort", "who": "bride", "to": "milestone", "goal": "Walk {bride} as far as {place:milestone}",
+      "journal": "We walked the first day. She set the pace, and it was not a fast one. She kept looking at the hills to the west.",
+      "then": "ambush"
+    },
+    "ambush": {
+      "do": "foe", "who": "raider", "goal": "Fight off the men at the milestone",
+      "taunt": {
+        "?hand=kin": "That's her, in the grey hood. Make it quick, and make it look as if the road did it.",
+        "?": "That's her, in the grey hood. Take the girl, and do not mark her."
+      },
+      "plea": {
+        "?hand=bride": "Quarter! Quarter. Ask her. Go on, ask the bride who paid us. It was her own ring. We were to carry her off gently and set her down on the coast road, and nobody the wiser.",
+        "?hand=suitor": "Quarter! A lad from her own town paid us. {suitor}. We were to bring her to the old barn at the crossroads, not a hair harmed, and he would do the rest. He said she would thank him for it.",
+        "?": "Quarter! I'll give you the name. {stepson}. The miller's son. He paid in mill tokens, and he said she was not to reach the door. I never asked why. I never ask."
+      },
+      "mercy": "Get off this road.",
+      "thanks": "Gone. We are gone. You'll not see us this side of the hills.",
+      "journal": "Three men were waiting at the ninth milestone. They were not after my purse. They knew her hood.",
+      "slain": "search_raider", "spared": "fire"
+    },
+    "search_raider": {
+      "do": "search", "at": "milestone", "goal": "Search the dead man",
+      "clues": [
+        { "name": "A hire purse", "item": "minecraft:leather", "lore": ["Paid in advance, and paid well for three men and a day's work.", "Road thieves are not paid. Somebody hired this."], "journal": "The men at the milestone were hired. Their leader carried his advance in a purse." },
+        { "name": "A woman's ring", "item": "minecraft:gold_nugget", "lore": ["A thin gold band, worn smooth, too small for his hand. It was in the purse with the coin.", "{bride} looked at it once, and then at the hills."], "journal": "Part of the hire was a woman's ring. {bride} knew it when she saw it.", "if": "hand=bride" },
+        { "name": "A scrawled note", "item": "minecraft:paper", "lore": ["'The girl in the grey hood. Not a hair harmed. The old barn at the crossroads.'", "A farm lad's hand, pressed hard. It is signed {suitor}."], "journal": "The dead man carried a note from one {suitor}: the girl unharmed, to a barn at the crossroads.", "if": "hand=suitor" },
+        { "name": "A handful of mill tokens", "item": "minecraft:iron_nugget", "lore": ["A miller's tally tokens, stamped with a wheel and the letter P.", "Pell's mill pays its carters in these. The purse is full of them."], "journal": "The dead man was paid in tally tokens from Pell's mill. Somebody in the groom's own house hired him.", "if": "hand=kin" }
+      ],
+      "then": "fire"
+    },
+    "fire": {
+      "do": "talk", "who": "bride", "goal": "Speak with {bride} at the fire",
+      "say": {
+        "?hand=bride": [
+          "Well. Now you know. It was my grandmother's ring, and it was the one thing I had that was mine to spend.",
+          "They were to carry me off, gently, and set me down on the coast road. My father would weep and say the road took me. Pell would pity him and forgive the debt, for you cannot dun a man whose daughter was stolen on the way to your bed. Nobody shamed. Nobody owing. And then {giver} went and hired somebody good at the work."
+        ],
+        "?hand=suitor": [
+          "{suitor}. Of course it was. I laughed at his jokes at the harvest supper, and he has taken that for a promise ever since.",
+          "He would have had me carried to a barn and kept there until I was grateful. That is the man who loves me. At the end of this road is the man who has bought me, and behind me is the man who sold me. I am well supplied with men who know what is best. I do not want to arrive. But I'll not be fetched, either."
+        ],
+        "?": [
+          "{stepson}. The son. I have never set eyes on him. He would have had me dead in a ditch for his father's mill, and I have not even got there yet.",
+          "So that is the house I am being walked to. A husband I did not choose, and at his table every night the man who paid for my throat. I had thought the worst of it was that nobody asked me. It seems that was the best of it."
+        ]
+      },
+      "journal": {
+        "?hand=bride": "{bride} hired the men herself, with her grandmother's ring. They were to carry her off so that she need never arrive, and her father could keep the bride-gift out of the miller's pity.",
+        "?hand=suitor": "The men were hired by {suitor}, a lad of her own town, to carry {bride} off to a barn. She wants neither him nor the miller.",
+        "?": "The men were hired by {stepson}, the miller's own son, and {bride} was not meant to reach the mill alive."
+      },
+      "replies": [
+        { "say": "What do you want to do?", "then": "fire_more" },
+        { "say": "You might have told me at the start.", "then": "fire_more" }
+      ]
+    },
+    "fire_more": {
+      "do": "talk", "who": "bride",
+      "say": {
+        "?hand=bride": "Want. You are the first to ask. I want the coast. The Tideborn smacks take on hands for the far grounds and do not ask whose daughter you are. I want you to walk back and say the road took me, and let the plan stand as I built it. That is what I want. What you will do is another matter. You were paid to arrive.",
+        "?hand=suitor": "Want. You are the first to ask. If I go on, it is to a mill. If I go back, it is to {suitor}, and a father with the debt still round his neck. There is the coast. The Tideborn smacks take on hands and ask nothing. I have thought of it every night for a month and never had the nerve alone.",
+        "?": "Want. You are the first to ask. I want to see his face when I walk in alive. Or I want the coast road, and a smack that asks no questions, and never to see one of them. I change my mind each time the fire pops. You choose the road tonight. I'll choose at the end of it."
+      },
+      "replies": [
+        { "say": "We go on. Speak for yourself at the mill door.", "then": "escort_far", "journal": "I told {bride} we go on to the mill, and that she can speak for herself when we get there." },
+        { "say": "Take the coast road. I'll say what needs saying.", "then": "report_gone", "mark": "let_the_bride_go", "journal": "I let {bride} take the coast road at first light. She did not look back. I turned for home to tell them something." }
+      ]
+    },
+    "escort_far": { "do": "escort", "who": "bride", "to": "mill", "goal": "Walk {bride} on to {place:mill}", "then": "groom_talk" },
+    "groom_talk": {
+      "do": "talk", "who": "groom", "goal": "Speak with {groom} at the mill door",
+      "say": [
+        "You have brought her. I had begun to think... Well. She is thinner than her father said. Come in out of the wind, the pair of you. There is broth.",
+        "Before you go, I will ask you what I asked her father in my letter. He answered me about flour. Is she willing? You have walked two days beside her. I have seen her once, across a market. You would know better than I."
+      ],
+      "replies": [
+        { "say": "She is here. Ask her yourself.", "then": "wait_wed", "journal": "{groom} asked me whether {bride} was willing. I told him to ask her. I do not know what she said. The wedding went ahead." },
+        { "say": "Willing enough.", "then": "wait_wed", "mark": "bride_road_vouched", "journal": "{groom} asked me whether {bride} was willing. I said she was. The wedding went ahead." },
+        { "say": "She is not willing. She never was.", "then": "groom_unwilling" },
+        { "say": "Your son paid men to kill her on the road.", "if": "hand=kin", "then": "groom_son" }
+      ]
+    },
+    "groom_unwilling": {
+      "do": "talk", "who": "groom",
+      "say": [
+        "No. I thought not. A man knows, when the answer he gets is about flour. I am forty-six and I talk to millstones. I wanted somebody at the table. I told myself that was not much to want.",
+        "She may go where she likes, and I'll give her the fare. But I am not a rich man, whatever they think in her town, and three harvests is three harvests. The debt stands. I will give old Ashdown two more years on it. That is as kind as I can afford to be. Tell her so. I do not think I can."
+      ],
+      "journal": "{groom} would not wed an unwilling bride. He released her and gave her the fare to go where she liked. The Ashdowns' debt stands, with two years' grace.",
+      "then": "wait_released"
+    },
+    "groom_son": {
+      "do": "talk", "who": "groom",
+      "say": [
+        "{stepson}. I would call you a liar. But when I told him of the match he asked me what becomes of the mill if there are more children, and I took it for a boy's question. And there are forty tokens gone from the chest that I had put down to my own bad counting.",
+        "He will be gone by morning. I'll not give him to the watch. He is my son. But he is done at this mill, and he will know why. As for her: I'll not hold her to a contract made with a house that tried to kill her. Ask her what she wants. Whatever it is, the Ashdown debt is forgiven. I owe them that much for the road."
+      ],
+      "journal": "I told {groom} that his son {stepson} paid for the ambush. He believed it. He is putting the son out of the mill, and has forgiven the Ashdowns' debt whether {bride} stays or goes.",
+      "then": "wait_son"
+    },
+    "wait_wed": {
+      "do": "wait", "days": [6, 10], "wake": "letter",
+      "letter": { "from": "{bride}", "lines": [
+        "I am wed. It was a short business, and the broth was good.",
+        "Come to the mill when your road allows. There is a thing I want to say to the one person who knows how I came here."
+      ] },
+      "then": "wed_after"
+    },
+    "wed_after": {
+      "do": "talk", "who": "bride", "goal": "Visit {bride} at {place:mill}",
+      "say": {
+        "?hand=bride": [
+          "He is kind. I had been ready for anything but that, and I find I have no plan for it. He asks before he comes into a room. He has shown me the sluice and the tallies.",
+          "I tried the coast in my head again last night. It was further off than it used to be. I do not know whether that is contentment, or only a door shutting quietly. You stopped me on the road. I have not decided whether to thank you for it."
+        ],
+        "?hand=suitor": [
+          "{suitor} came to the mill gate on the third day, shouting that I had been stolen from him. {groom} went out and stood there and said nothing at all, until the boy ran out of words and went home. It was the first thing either of them did that I liked.",
+          "I did not choose this. I want that written down somewhere, if only in your book. But I am learning the sluice and the tallies, and nobody here has tried to fetch me anywhere."
+        ],
+        "?": [
+          "I showed {stepson} the token at table the first night. Under the cloth, where his father could not see. He passes me the salt very civilly now, and he has asked to be sent to the mill's other wheel, up the valley.",
+          "{groom} does not know. He is a kind man with a son he loves, and I find I will not be the one to take that from him. So I keep a secret with a man who wanted me dead, and I have a husband I did not choose who asks before he comes into a room. Tell nobody."
+        ]
+      },
+      "replies": [
+        { "say": "I hope it comes out well for you.", "then": "end:wed" },
+        { "say": "The coast is still there.", "then": "end:wed" }
+      ]
+    },
+    "wait_released": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{bride}", "lines": [
+        "I am writing from the coast. A smack called the Grey Hen has taken me on to gut and to mend, and the Tideborn aboard think it very funny that the swell makes me sick each morning.",
+        "My father has written. The debt stands, and I am to blame for it, and for my brother's leg, and the weather. I send him half of what I earn. He has not sent it back.",
+        "The miller gave me the fare and could not look at me while he did it. He was the only one in the whole business who asked the right question. I think of that more than I expected to."
+      ] },
+      "then": "end:released"
+    },
+    "wait_son": {
+      "do": "wait", "days": [5, 8], "wake": "letter",
+      "letter": { "from": "{groom}", "lines": [
+        "My son went up the valley road the morning after you left, with what was his. I have not heard from him and I have not asked.",
+        "She stayed. I did not ask it of her. She said a man who would put out his own son for a stranger he had not yet married was either a fool or worth a month's trial, and that she would stay the month and learn which. She has already put my tallies in order.",
+        "The mill is very quiet at supper. I wanted somebody at the table, and I have that. I had a son at it before. I do not know how to cast that account. I wondered if you did."
+      ] },
+      "then": "end:son_out"
+    },
+    "report_gone": {
+      "do": "talk", "who": "giver", "goal": "Go back to {giver} without her",
+      "say": "You are back, and alone, and two days early. Sit down. No. Stand. Tell me where {bride} is, and tell it carefully, because whatever you say I shall have to say again to her father and to the miller, and I shall need to get it right.",
+      "replies": [
+        { "say": "Men took her at the ninth milestone. I could not hold them.", "then": "wait_gone_lie", "mark": "bride_road_lie", "journal": "I told {giver} that raiders carried {bride} off at the ninth milestone." },
+        { "say": "She chose her own road. I let her take it.", "then": "wait_gone_truth", "journal": "I told {giver} the truth: {bride} chose her own road, and I let her take it." }
+      ]
+    },
+    "wait_gone_lie": {
+      "do": "wait", "days": [5, 9], "wake": "letter",
+      "letter": { "from": "{bride}", "lines": [
+        "The Grey Hen took me on at the coast, to gut and to mend. The swell makes me sick each morning and the Tideborn aboard think it very funny.",
+        "I hear my father wept in the square, and that the miller forgave the debt before he was asked, and sent a ham. You carried a lie twenty miles and told it straight. I know what that costs a certain kind of person.",
+        "They have hunted the hills for me for a week. Men who should be at harvest. I did not think of that part. If anyone ever asks you where the Ashdown girl went, I would take it kindly if the road still had her."
+      ] },
+      "then": "end:taken_lie"
+    },
+    "wait_gone_truth": { "do": "wait", "days": [5, 9], "wake": "giver", "then": "gone_after" },
+    "gone_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} has to say",
+      "say": [
+        "Well, I said it as you said it, word for word. Her father turned his face to the wall. The miller heard me out and said, 'Then she was never willing.' The debt stands, with two years' grace, which is more than I would give.",
+        "Half the town says you were paid to lose her. The other half says no escort worth the name lets a girl of nineteen walk off into the hills. Nobody says she was right to go. Privately, I am not sure she was wrong. But I'll not say so in the square, and I'll not be hiring you again. Here is what the walk was worth."
+      ],
+      "then": "end:own_road"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {giver} to find another escort for the bride.", "failed": true },
+    "wed": {
+      "text": "{bride} is wed to {groom} and lives at the mill. Nobody asked her. She is making of it what she can.",
+      "reward": { "coins": 14, "hearts": 6, "reputation": 10 },
+      "marks": ["bride_road_delivered"],
+      "town": ["The Ashdown girl's wed and the debt's forgiven. Her father's up out of his bed, would you believe.", "A good match. Everybody says so. I notice she doesn't write."]
+    },
+    "released": {
+      "text": "{groom} would not wed an unwilling bride. {bride} went to the coast with his fare in her pocket, and her family's debt stands.",
+      "reward": { "coins": 7, "hearts": 8, "reputation": 2 },
+      "marks": ["bride_road_released"],
+      "town": ["Sent back by the miller! Or sent on. Nobody's sure which, and the Ashdowns aren't saying.", "Old Ashdown has two years to find three harvests. He'll not find them."],
+      "returns": { "who": "groom", "days": [9, 14], "as": "thanks", "say": "I was at the coast, selling flour to the smacks. I saw her on a deck with a knife in her hand and fish scales to the elbow, laughing at something a Tideborn said. She did not see me. I came away. I thought you would want to know that I looked, and that I came away. Take a miller's thanks, for what they are worth.", "gift": ["minecraft:bread*6", "minecraft:cake*1"] }
+    },
+    "son_out": {
+      "text": "{groom} put his own son out of the mill and forgave the Ashdowns' debt. {bride} stayed, by her own choice, on a month's trial.",
+      "reward": { "coins": 14, "hearts": 8, "reputation": 10 },
+      "marks": ["bride_road_delivered", "bride_road_named_stepson"],
+      "town": ["The miller's boy is gone up the valley and nobody will say why. Fell out over the new wife, I expect.", "She kept the mill books a fortnight and found where four sacks a month were going. Sharp, that one."]
+    },
+    "taken_lie": {
+      "text": "I told {giver} the road took {bride}. The debt was forgiven out of pity. She is on a smack at the coast, and men are still searching the hills for her.",
+      "reward": { "hearts": 4 },
+      "marks": ["let_the_bride_go", "bride_road_lie"],
+      "town": ["Carried off at the ninth milestone, poor lamb. And the escort without a scratch. Makes you think.", "The men have been eight days on the hills looking. My barley's standing uncut."],
+      "returns": { "who": "bride", "days": [12, 18], "as": "thanks", "say": "I am ashore for one tide. Do not say my name. I earned this gutting, and it is the first money I ever had that nobody could call a bride-gift. Half goes to my father, by a carter who thinks it is from an aunt. This is yours. If you are ever at the coast and want a smack that asks no questions, ask for the Grey Hen.", "gift": ["minecraft:cod*6", "minecraft:nautilus_shell*1"] }
+    },
+    "own_road": {
+      "text": "I told {giver} the truth: {bride} chose her own road and I let her take it. The debt stands. The town holds it against me, and against her.",
+      "reward": { "coins": 4 },
+      "marks": ["let_the_bride_go"],
+      "town": ["Let her walk off into the hills, and then came back and said so, bold as you please.", "Nineteen, and gone off alone. Good luck to her, I say. Don't tell my husband I said it."]
+    }
+  }
+}

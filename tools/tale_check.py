@@ -24,13 +24,13 @@ STEP_FIELDS = {
     "bring": {"who", "item", "count", "say"},
     "slay": {"target", "count"},
     "wait": {"days", "wake", "letter"},
-    "defend": {"at", "waves", "foes", "stars"},
-    "escort": {"who", "to"},
+    "defend": {"at", "waves", "foes", "stars", "failed"},
+    "escort": {"who", "to", "failed"},
     "pack": {"at", "foes", "count", "stars"},
     "build": {"at", "blocks", "count"},
     "blast": {"at"},
     "stash": {"at", "item", "count"},
-    "lamps": {"at", "count"},
+    "lamps": {"at", "count", "failed"},
 }
 COMMON = {"do", "goal", "journal", "then", "give", "mark", "pay", "hidden"}
 REQUIRED = {
@@ -73,6 +73,10 @@ def branches(value):
 def check_condition(c, where, cond, tale):
     if not isinstance(cond, str):
         c.err(where, f"condition must be a string, got {cond!r}")
+        return
+    if "&" in cond:
+        for part in cond.split("&"):
+            check_condition(c, where, part.strip(), tale)
         return
     body = cond[1:] if cond.startswith("!") else cond
     if body == "powers" or body.startswith("mark:") or body.startswith("done:"):
@@ -240,7 +244,9 @@ def check_tale(path):
             c.err(where, f"body '{body}' must be villager, fighter or an entity id")
         if "at" in who:
             check_place(c, where, who["at"], tale)
-        unknown = set(who) - {"name", "body", "job", "female", "at", "health", "damage", "armor", "hand", "head", "chest", "men", "men_body"}
+        if "if" in who:
+            check_condition(c, where, who["if"], tale)
+        unknown = set(who) - {"name", "body", "job", "female", "at", "if", "late", "health", "damage", "armor", "hand", "head", "chest", "men", "men_body"}
         if unknown:
             c.err(where, f"unknown fields {sorted(unknown)}")
         for slot in ("hand", "head", "chest"):
@@ -287,6 +293,8 @@ def check_tale(path):
             c.err(where, "missing 'then'")
         if "then" in step:
             check_then(c, where, step["then"], tale, edges)
+        if "failed" in step:
+            check_then(c, where + ".failed", step["failed"], tale, edges)
         if "goal" not in step and do not in ("talk", "wait") and not step.get("hidden"):
             c.err(where, "missing 'goal' (the tracker line)")
         for give in step.get("give", []):
@@ -417,7 +425,7 @@ def check_tale(path):
 
     used = set()
     for sid, step in steps.items():
-        for field in ("then", "slain", "spared"):
+        for field in ("then", "slain", "spared", "failed"):
             for t in branches(step.get(field, [])) if field in step else []:
                 if isinstance(t, str) and t.startswith("end:"):
                     used.add(t[4:])

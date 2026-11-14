@@ -1,0 +1,357 @@
+{
+  "title": "The One Who Walks At Moonrise",
+  "start": { "by": "giver", "jobs": ["cleric", "butcher", "shepherd", "farmer"], "weight": 2 },
+  "roll": { "truth": ["cursed", "wolf", "murder"] },
+  "cast": {
+    "sleeper": { "name": ["Wynn Harrow", "Colm Tressel", "Edrin Vale"], "body": "villager", "job": "fletcher", "at": "cottage" },
+    "witness": { "name": ["Dob", "Kit", "Perkin"], "body": "villager", "job": "shepherd", "at": "common" },
+    "heir": { "name": ["Lyle Carrick", "Tobias Carrick", "Maddock Carrick"], "body": "villager", "job": "farmer", "at": "stead" },
+    "lampbearer": { "name": ["Edda Lorne", "Marit Soll", "Hesk Farrow"], "body": "villager", "job": "none", "female": true, "at": "lodging" },
+    "examiner": { "name": ["Aldhelm Crewe", "Sabin Hurst", "Corbin Leck"], "body": "villager", "job": "cleric", "at": "bookhouse" },
+    "priest": { "name": ["Benet Roe", "Hugh Pardoe", "Osgar Wheal"], "body": "villager", "job": "cleric", "at": "chapel" },
+    "beast": { "late": true, "name": "the one who walks", "body": "minecraft:wolf", "at": "pond", "health": 90, "damage": 9 },
+    "greywolf": { "name": "the lame grey", "body": "minecraft:wolf", "at": "thicket", "health": 45, "damage": 6 }
+  },
+  "places": {
+    "common": { "at": "near", "from": "home", "dist": [60, 110], "name": "the common" },
+    "pond": { "at": "near", "from": "common", "dist": [30, 60], "name": "the pond on the common" },
+    "cottage": { "at": "near", "from": "home", "dist": [30, 60], "name": "the fletcher's cottage" },
+    "stead": { "at": "near", "from": "home", "dist": [90, 150], "name": "the Carrick farm" },
+    "lodging": { "at": "near", "from": "home", "dist": [20, 50], "name": "the lamp-bearer's lodging" },
+    "bookhouse": { "at": "near", "from": "home", "dist": [40, 80], "name": "the bookhouse" },
+    "chapel": { "at": "other_town", "name": "the old priest's chapel" },
+    "thicket": { "at": "wild", "from": "home", "dist": [180, 320], "name": "the thicket to the north" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "Three moons of it. First a ewe on the common, then two goats, then the cooper's dog. Each found at dawn, and none of them eaten. Folk said a wolf, and then counted the nights, and found every one of them was the night the moon was full.",
+        "This morning it was old Hobb Carrick, by the pond. I'll not tell you how he looked. The street has a name for it already: the one who walks at moonrise.",
+        "{examiner} wants every soul in {town} stood before the book, and a lamp-bearer of the Warden came up the road at noon, which they only do for one reason. Before they find someone to burn, I'd have it found properly."
+      ],
+      "replies": [
+        { "say": "I'll find it properly.", "then": "search_common", "journal": "Beasts have been found torn on the common at {town} on three full moons, and now a man, Hobb Carrick. The street talks of one who walks at moonrise. {giver} wants the truth before someone is burned for it." },
+        { "say": "What do you think it is?", "then": "ask_more" },
+        { "say": "That is work for the Warden's people.", "then": "end:refused" }
+      ]
+    },
+    "ask_more": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "I think three things, and I don't like any of them. It's a beast, and we've a hard winter of penning stock ahead. Or it's one of us, carrying the curse and not knowing it, and we shall have to do a thing I'd not ask of a dog.",
+        "Or it's one of us wearing nothing but a neighbour's face. That's the worst, because that one knew what he was doing. And I'll say the name the street is saying, so you hear it from me: {sleeper}, the fletcher's boy, who walks in his sleep."
+      ],
+      "replies": [
+        { "say": "I'll find out which.", "then": "search_common", "journal": "Beasts have been found torn on the common at {town} on three full moons, and now a man, Hobb Carrick. The street says it is {sleeper}, who walks in his sleep. {giver} wants the truth before someone is burned for it." },
+        { "say": "That is work for the Warden's people.", "then": "end:refused" }
+      ]
+    },
+    "search_common": {
+      "do": "search", "at": "common", "need": 3, "goal": "Look over the common where Carrick was found",
+      "clues": [
+        { "name": "The dead man's purse", "item": "minecraft:gold_nugget", "lore": ["Still on his belt, and heavy.", "Whatever walked here did not want money."], "journal": "Carrick's purse was left on him, full." },
+        { "name": "A sleeper's footprints", "item": "minecraft:packed_mud", "lore": ["A man's bare feet, from the lane to the pond and back, unhurried.", "Someone walks here asleep."], "journal": "A man walked barefoot from the lane to the pond and back, at a sleeper's pace." },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw as wide as a spread hand.", "Two strides on, the same track is a bare human foot."], "journal": "By the pond a great paw print becomes, within two strides, the print of a bare foot.", "if": "truth=cursed" },
+        { "name": "A split nightshirt", "item": "minecraft:white_wool", "lore": ["Linen, burst along every seam from the inside.", "As if it was outgrown in a breath."], "journal": "A nightshirt lay in the reeds, burst at every seam from within.", "if": "truth=cursed" },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A wolf's paw, with one pad dragged.", "The beast is old, and lame in a hind leg."], "journal": "A wolf's track by the pond, lame in one hind leg.", "if": "truth=wolf" },
+        { "name": "Grey hair on the thorn", "item": "minecraft:string", "lore": ["Coarse and grey, with the rank smell of a den.", "There is no more to it than that."], "journal": "Coarse grey hair was caught on the thorn hedge. It smells of a den.", "if": "truth=wolf" },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw, pressed square, as deep at the heel as at the toe.", "A beast rolls its foot. This was stamped."], "journal": "The paw print by the pond is the same depth all over. It was stamped, not trodden.", "if": "truth=murder" },
+        { "name": "A broken iron tine", "item": "minecraft:iron_nugget", "lore": ["Snapped from a rake or a wool comb.", "The break is bright, and there is something dark dried in it."], "journal": "A snapped iron tine lay in the grass where Carrick fell.", "if": "truth=murder" }
+      ],
+      "then": "witness"
+    },
+    "witness": {
+      "do": "talk", "who": "witness", "goal": "Ask the shepherd lad what he saw",
+      "say": {
+        "?truth=cursed": "I saw it. I've told nobody, because nobody believes a lad who sleeps at his work. It came along the hedge on four legs, big as a calf. Then it got to the wall and it stood up. On two. To look over. Things on four legs don't stand up to look over a wall. I put my face in the grass and said my letters till it went.",
+        "?truth=wolf": "I saw it. Big and grey, and it went on three legs and a bit, like our old dog before he died. It looked at me as if I was more trouble than I was worth, and it was right. That's a wolf, isn't it? Only a wolf. But nobody wants it to be only a wolf. You can't stand a wolf before the book.",
+        "?": "I didn't see any beast. That's the thing. I had the flock right by the pond lane and they never stirred, and sheep know. I heard old Carrick, though. He shouted a name. Angry, not afraid. You don't shout a name at a beast. I couldn't tell you which name. I've tried and tried."
+      },
+      "replies": [
+        { "say": "And {sleeper}? They say he walks at night.", "then": "witness_more" },
+        { "say": "Who else was on the common?", "then": "witness_more" }
+      ]
+    },
+    "witness_more": {
+      "do": "talk", "who": "witness",
+      "say": {
+        "?truth=cursed": "{sleeper} walks, aye. Down the lane to the pond and back in his nightshirt, eyes open and nobody home. I've turned him round and pointed him at his door myself. He says thank you and doesn't know he's said it. I didn't see him that night, though. Not once. And I'd have seen him.",
+        "?": "{sleeper} walks, aye. Down the lane to the pond and back in his nightshirt, eyes open and nobody home. I've turned him round and pointed him at his door myself. He was out that night. I saw him by the pond, after. Standing over old Carrick with his hands hanging. I didn't turn him round. I ran."
+      },
+      "journal": {
+        "?truth=cursed": "The shepherd lad saw a beast as big as a calf stand up on two legs to look over a wall. He did not see {sleeper} walking that night at all.",
+        "?truth=wolf": "The shepherd lad saw a big grey wolf, lame in one leg. He also saw {sleeper} standing asleep over Carrick's body afterwards.",
+        "?": "The shepherd lad saw no beast, and his sheep never stirred. He heard Carrick shout a name in anger. He also saw {sleeper} standing asleep over the body afterwards."
+      },
+      "then": "see_sleeper"
+    },
+    "see_sleeper": {
+      "do": "talk", "who": "sleeper", "goal": "Speak with {sleeper}",
+      "say": {
+        "?truth=cursed": [
+          "They've sent you about the walking. I know what the street says. I'd say it too. I wake with wet feet and grass in my hair, and I can't tell you where I've been, and now there's old Carrick.",
+          "My mother ties my ankle to the bedpost with a hair ribbon. It has always held. Yesterday morning the ribbon was whole, and still on my ankle, and the bedpost was in two pieces. Oak. I can't break oak. I make arrows. Look at my arms."
+        ],
+        "?": [
+          "They've sent you about the walking. I know what the street says. I'd say it too. I wake with wet feet and grass in my hair, and I can't tell you where I've been, and now there's old Carrick.",
+          "My mother ties my ankle to the bedpost with a hair ribbon. Yesterday morning it was untied, the bow pulled out neat. I must do it in my sleep. I woke on the step with mud to the knee. I've a picture in my head of the pond, and something lying by it, and it won't go."
+        ]
+      },
+      "replies": [
+        { "say": "Has anything ever bitten you?", "then": "sleeper_more" },
+        { "say": "Would you stand before the book, if it came to it?", "then": "sleeper_more" }
+      ]
+    },
+    "sleeper_more": {
+      "do": "talk", "who": "sleeper",
+      "say": {
+        "?truth=cursed": "A dog bit me on the drove road, at the autumn fair. A big grey brute. It healed in two days, which the herb-woman said she had never seen, and left no scar. Why do you ask? I'd stand before the book. I'd stand before anything that could tell me. If it's me, I want it out of me, or I want stopping. I mean that. Write down that I said it.",
+        "?": "A dog bit me on the drove road, at the autumn fair. It took a month to close, and it aches yet when it rains. Why do you ask? I'd stand before the book. I'd stand before anything that could tell me. If it's me, I want it out of me, or I want stopping. I mean that. Write down that I said it."
+      },
+      "journal": {
+        "?truth=cursed": "{sleeper} remembers nothing of his walking. On the morning Carrick was found, his oak bedpost was broken in two. A grey dog bit him at the autumn fair, and the bite healed in two days without a scar. He says that if it is him he wants it stopped.",
+        "?": "{sleeper} remembers nothing of his walking, only a picture of the pond and something lying by it. A dog bit him at the autumn fair, and the bite was a month healing. He says that if it is him he wants it stopped."
+      },
+      "then": "see_heir"
+    },
+    "see_heir": {
+      "do": "talk", "who": "heir", "goal": "Speak with the dead man's nephew",
+      "say": [
+        "You're {giver}'s finder. Good. Then find quicker. My uncle is on a board in the bookhouse, and the thing that put him there is asleep in a fletcher's cottage with its ankle on a ribbon. A ribbon!",
+        "Everyone knows who walks at night in {town}. I'm not a hard man. But I've the farm to think of now, and the stock, and I'll not pen my ewes every full moon for the rest of my life because the street is soft about a neighbour's boy."
+      ],
+      "replies": [
+        { "say": "You inherit, then.", "then": "heir_more" },
+        { "say": "When did you last see your uncle?", "then": "heir_more" }
+      ]
+    },
+    "heir_more": {
+      "do": "talk", "who": "heir",
+      "say": {
+        "?truth=murder": "I inherit forty acres, his debts and his temper. Don't look at me as if that's a prize. I saw him at supper. He went out to look at the pond sluice, as he did every night of his life, moon or no moon, and I went to bed. I told the watch all this. Now, if you've done, I've his hay rake to mend. He broke it last week.",
+        "?": "I inherit forty acres, his debts and his temper. Don't look at me as if that's a prize. I saw him at supper. He went out to look at the pond sluice, as he did every night of his life. I told him not to, with the moon as it was, and he called me an old woman. That's the last thing he said to me. Old woman. I want the thing found."
+      },
+      "journal": {
+        "?truth=murder": "{heir}, Carrick's nephew, inherits the farm and wants {sleeper} dealt with. He says his uncle went out to the sluice as always and he went to bed. He was mending a hay rake.",
+        "?": "{heir}, Carrick's nephew, inherits the farm and wants {sleeper} dealt with. He says he warned his uncle not to go out under that moon."
+      },
+      "then": "see_lamp"
+    },
+    "see_lamp": {
+      "do": "talk", "who": "lampbearer", "goal": "Speak with the Warden's lamp-bearer",
+      "say": [
+        "Sit in the light, where I can see you. No offence meant. It's a habit that has kept me alive.",
+        "I've put down eleven of them. Nine were strangers to themselves by then, and glad of it at the end, I think. Two didn't know what they were until I told them. Those are the two I light a candle for. If it's the fletcher's boy, he's the gentlest soul in {town} every night but one, and I'm sorry for him, and being sorry doesn't change what I'm for."
+      ],
+      "replies": [
+        { "say": "Is there no way but yours?", "then": "lamp_more" },
+        { "say": "How would you know for certain?", "then": "lamp_more" }
+      ]
+    },
+    "lamp_more": {
+      "do": "talk", "who": "lampbearer",
+      "say": [
+        "Two ways to know. Stand him before the Truth's book: the cursed can't hide from it. But {examiner} will shout the word, and then the whole street has it, and it's out of your hands and mine. Or wait for the next moon behind a good door, and listen. That's quieter. It costs you the days between.",
+        "And since you asked: there's an old priest, {priest}, a village over. He keeps a rite older than his chapel. I've seen it lift the curse twice and fail once. I'd sooner it worked. I'm not fond of my trade. I'm only good at it."
+      ],
+      "replies": [
+        { "say": "Then we wait for the moon, behind a door.", "then": "wait_moon", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to wait for the next moon, with {sleeper} behind a locked door." },
+        { "say": "The book is quicker. Let {examiner} look at him.", "then": "book", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to stand {sleeper} before the Truth's book." }
+      ]
+    },
+    "book": {
+      "do": "talk", "who": "examiner", "goal": "Stand {sleeper} before {examiner} and the book",
+      "say": {
+        "?truth=cursed": [
+          "Bring him in. Stand him there, before the open page. The Truth needs no moon and no lantern. It needs only that he stand still.",
+          "Abomination! It walks among us! There, in his eyes: see how it turns from the page! No, lamp-bearer, I know the custom. He is yours, and I'll not dispute it. But the street has heard me, and let it hear. The Truth is not a thing one says quietly."
+        ],
+        "?": [
+          "Bring him in. Stand him there, before the open page. The Truth needs no moon and no lantern. It needs only that he stand still.",
+          "Nothing. He looks at the page as you or I would. The Truth sees a tired young man who walks in his sleep. I was wrong, and the Truth has no trouble saying so. I shall say it from the step. Whatever killed Hobb Carrick is still to find, and has one neighbour fewer to hide behind."
+        ]
+      },
+      "journal": {
+        "?truth=cursed": "Before the book {examiner} cried abomination, loud enough for the street. {sleeper} carries the curse, and now all of {town} knows it.",
+        "?": "Before the book {examiner} found nothing in {sleeper} but a tired young man, and said so from the step. The moon will show the rest."
+      },
+      "mark": "moon_stood_before_book",
+      "then": { "?truth=cursed": "knows", "?": "wait_moon" }
+    },
+    "wait_moon": { "do": "wait", "days": [5, 8], "wake": "giver", "then": "moon_after" },
+    "moon_after": {
+      "do": "talk", "who": "giver", "goal": "Hear how the night of the moon went",
+      "say": {
+        "?truth=cursed": [
+          "We put him in my root cellar all the same, behind the oak door and the iron bar, and his mother sat on the top step with her sewing. At moonrise the sewing stopped.",
+          "The door held. Only just. There are marks on the inside of it that I must plane out before anyone sees. It went on till first light, and then there was only a young man weeping, asking his mother what he had done to her door. So now we know. {lampbearer} is sharpening something. I asked her for a day, for you."
+        ],
+        "?truth=wolf": [
+          "We put him in my root cellar all the same, behind the oak door and the iron bar. He slept like a child. Walked twice round the cellar about midnight, begged a barrel's pardon, and lay down again.",
+          "And at dawn there was a ewe dead on the far side of the common, the same as before. So it isn't him. The shepherd lad found a trail going off north, toward the thicket. A plain trail. Paws, and one of them dragging."
+        ],
+        "?": [
+          "We put him in my root cellar all the same, behind the oak door and the iron bar. He slept like a child. Walked twice round the cellar about midnight, begged a barrel's pardon, and lay down again.",
+          "And nothing was killed. Not a hen. The first full moon in four with nothing dead on the common. I've been turning it over since dawn. Three beasts, to set the street talking, then one old man, then nothing. As if whatever walks got what it wanted from Hobb Carrick."
+        ]
+      },
+      "journal": {
+        "?truth=cursed": "At the full moon {sleeper} was locked in {giver}'s cellar. The door held, barely. He is the one who walks, and he did not know it.",
+        "?truth=wolf": "At the full moon {sleeper} slept in a locked cellar while a ewe was killed on the common. It is not him. A lame beast's trail leads north to the thicket.",
+        "?": "At the full moon {sleeper} slept in a locked cellar, and nothing at all was killed. Whatever walks seems to have had what it wanted when Carrick died."
+      },
+      "then": { "?truth=cursed": "knows", "?truth=wolf": "to_thicket", "?": "search_barn" }
+    },
+
+    "knows": {
+      "do": "talk", "who": "sleeper", "goal": "Speak with {sleeper}",
+      "say": [
+        "So it's me. I've been sitting here trying to feel it in there, and I can't. That's the horror of it. There's nothing to feel. I'm only me, and tired.",
+        "Old Carrick used to hand me windfall apples over the wall. I keep coming back to that. The lamp-bearer was kind. She told me what she does and how quick it is, the way you'd tell a horse. I'm not ungrateful. What would you do, if you were me? No. What will you do? That's the one that counts."
+      ],
+      "replies": [
+        { "say": "There's a priest who keeps a rite. We try that first.", "then": "to_chapel", "journal": "{sleeper} knows now what he is. I mean to try the old priest's rite before anything else." },
+        { "say": "Not in a cellar. At the next moon, by the pond, under the sky. I'll be quick.", "then": "wait_last", "journal": "{sleeper} knows now what he is, and asked what I would do. I told him I would meet him at the pond at the next moon and be quick. He thanked me." },
+        { "say": "The south road, tonight. Run far, and learn to hold it.", "if": "!mark:moon_stood_before_book", "then": "wait_ran", "journal": "{sleeper} knows now what he is. I unbarred the door and sent him down the south road before {lampbearer} came for him." },
+        { "say": "The south road, tonight. Here is {coins:10} for the watchman's blind eye.", "if": "mark:moon_stood_before_book", "needs_coins": 10, "then": "wait_ran", "journal": "{sleeper} knows now what he is, and so does the whole street. I paid the watchman {coins:10} to look away and sent him down the south road." }
+      ]
+    },
+    "to_chapel": { "do": "go", "to": "chapel", "goal": "Go to {priest}'s chapel", "then": "see_priest" },
+    "see_priest": {
+      "do": "talk", "who": "priest", "goal": "Ask {priest} about the old rite",
+      "say": [
+        "The rite. Yes. {lampbearer} sends them to me, the ones she would sooner not put down. She is a better woman than her trade.",
+        "I'll tell you what it is, so that you can tell him, for he must choose it knowing. Three lanterns, lit at dusk, and he sits between them until dawn while I read. The wolf goes out of him toward the dark, and the lanterns stop it at the edge. Two times in three.",
+        "What it takes with it is the year. Everything since the bite: every face, every day. He'll come out the far side missing a twelvemonth, and never know why his mother weeps when he asks after old Carrick. Bring me three lanterns that have never burned over a grave. And bring him at dusk."
+      ],
+      "replies": [
+        { "say": "He'll choose it. You'll have your lanterns.", "then": "bring_lanterns", "journal": "{priest}'s rite can draw the wolf out between three lanterns. It works two times in three, and it takes the whole year since the bite out of the one it saves." },
+        { "say": "A year of his life. Does he get it back?", "then": "bring_lanterns", "journal": "{priest}'s rite can draw the wolf out between three lanterns. It works two times in three, and it takes the whole year since the bite out of the one it saves. He does not get it back. The priest says most would not want it." }
+      ]
+    },
+    "bring_lanterns": {
+      "do": "bring", "who": "priest", "item": "minecraft:lantern", "count": 3, "goal": "Bring {priest} three new lanterns",
+      "journal": "I brought {priest} three lanterns, and {sleeper} at dusk. He chose it knowing what it would take.",
+      "then": "wait_rite"
+    },
+    "wait_rite": {
+      "do": "wait", "days": [1, 2], "wake": "letter",
+      "letter": { "from": "{priest}", "lines": [
+        "It is done. I read from dusk to first light and my voice is gone, so I write.",
+        "The wolf went out of him a little before dawn. It stood at the edge of the lantern light a long while, looking back at him. Then it was not there.",
+        "He woke asking whether the autumn fair had come yet. His mother has taken him home. Do not speak to him of this year. He has not had it."
+      ] },
+      "then": "end:cured"
+    },
+    "wait_last": { "do": "wait", "days": [5, 8], "wake": "none", "then": "beast_fight" },
+    "beast_fight": {
+      "do": "foe", "who": "beast", "goal": "Meet {sleeper} at the pond at moonrise",
+      "journal": "At moonrise I met him by the pond, as I had said I would. I was quick. In the morning it was only {sleeper} lying there, and his mother came with a blanket.",
+      "slain": "end:killed"
+    },
+    "wait_ran": {
+      "do": "wait", "days": [6, 9], "wake": "letter",
+      "letter": { "from": "{sleeper}", "lines": [
+        "I write from a barn I'll not name. I sat out the moon behind a door I bolted myself, with the key thrown through the grate, and in the morning nobody was hurt.",
+        "There are folk on the road who know about holding it. One says there is a way to run lean and stay yourself. I am to learn it or die learning.",
+        "Tell my mother the ribbon held. It's a lie. Tell her anyway."
+      ] },
+      "then": "end:ran"
+    },
+
+    "to_thicket": { "do": "go", "to": "thicket", "goal": "Follow the lame trail north to the thicket", "then": "wolf_fight" },
+    "wolf_fight": {
+      "do": "foe", "who": "greywolf", "goal": "Put down the lame grey wolf",
+      "journal": "It was a wolf. Old, grey, lame in the off hind, too slow for deer and too hungry to leave a penned ewe alone.",
+      "slain": "report_wolf"
+    },
+    "report_wolf": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} what walked on the common",
+      "say": [
+        "Only a wolf. Old and lame and too slow for anything but what we'd penned for it. Hobb Carrick must have walked up on it at a kill, and he was never a man to back away from anything.",
+        "{examiner} is quite put out. There's nothing to stand before the book. And {sleeper} still walks, and the street still crosses the lane when he passes, cleared or no. A name sticks. {lampbearer} looked at the pelt a long while, said 'this time', and went to pack."
+      ],
+      "then": "end:wolf"
+    },
+
+    "search_barn": {
+      "do": "search", "at": "stead", "need": 2, "goal": "Look over the Carrick barn",
+      "clues": [
+        { "name": "A hay rake, one tine short", "item": "minecraft:iron_hoe", "lore": ["The break is bright. The other tines have been scrubbed, and scrubbed again.", "It matches the iron found on the common."], "journal": "The Carrick hay rake is missing the tine I found on the common. The rest has been scrubbed." },
+        { "name": "A carved paw on a pole", "item": "minecraft:stick", "lore": ["Limewood, whittled into a pad and four toes, lashed to a broom handle.", "Pressed straight down, it leaves a print as deep at the heel as at the toe."], "journal": "Hidden in the barn was a wooden paw on a pole, made to stamp a beast's print." },
+        { "name": "A lender's note", "item": "minecraft:paper", "lore": ["The farm stands surety for a large sum, borrowed by the nephew without the uncle's mark.", "Across it, in an old man's hand: 'I know. Sunday I go to the elders.'"], "journal": "{heir} had borrowed against the farm behind his uncle's back. Carrick had found out, and meant to go to the elders." }
+      ],
+      "then": "confront"
+    },
+    "confront": {
+      "do": "talk", "who": "heir", "goal": "Put it to {heir}",
+      "say": [
+        "That's my uncle's rake. And that's a child's toy. And that paper is private. You've been in my barn.",
+        "All right. All right. The ewe and the goats and the dog were nothing to do with me. A wolf, a stray, I don't know. I only saw what the street made of them.",
+        "Then he found the note. He was going to the elders, and they'd have put me off the land with a thief's name. He went out to the sluice. I went after him to talk. I took the rake because of the moon. I swear that's why I took the rake."
+      ],
+      "replies": [
+        { "say": "And the carved paw? Was that because of the moon as well?", "then": "confront2" },
+        { "say": "The elders will hear it now.", "then": "report_murder", "journal": "{heir} killed his uncle with a hay rake, over a debt, and let the street's fear of the moon cover it. I'm taking it to {giver}." }
+      ]
+    },
+    "confront2": {
+      "do": "talk", "who": "heir",
+      "say": "No. I made that the week before. There. There's {coins:25} in the house, and it's yours. A beast did it. The street already believes a beast did it. You've only to say you found nothing. The lamp-bearer goes home, the fletcher's boy is cleared by the cellar anyway, and who is hurt? One old man who'd have died in a year or two, shouting at somebody.",
+      "replies": [
+        { "say": "The elders will hear it.", "then": "report_murder", "journal": "{heir} made a false paw a week before he killed his uncle. It was planned. He offered me {coins:25} to say a beast did it. I'm taking it to {giver}." },
+        { "say": "Give me the purse. A beast did it.", "then": "end:bought", "mark": "moon_took_purse", "journal": "{heir} made a false paw a week before he killed his uncle. It was planned. He offered me {coins:25} to say a beast did it, and I took it." }
+      ]
+    },
+    "report_murder": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} what walked on the common",
+      "say": [
+        "A rake. A rake, and a whittled paw. He sat at the wake and took my hand, and said the street was too soft on that boy.",
+        "The elders will give him the Sun's law before the week is out. And still nobody knows what killed the ewe, the goats and the dog. He swears that wasn't him, and I believe that much. So {lampbearer} is stopping another moon. She says where there's a tale of a beast, there is usually a beast somewhere behind it."
+      ],
+      "then": "end:murder_named"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I left {town} to its moon, its book and its lamp-bearer.", "failed": true },
+    "cured": {
+      "text": "{priest} read {sleeper} through the night between three lanterns, and the wolf went out of him. So did the year. He does not know what he was, or what he did, or why Carrick's farm has a new master.",
+      "reward": { "coins": 16, "hearts": 12, "reputation": 12 },
+      "marks": ["moon_cured"],
+      "town": ["{sleeper} asked me yesterday how old Carrick was keeping. I said well. What else do you say?", "The lamp-bearer left without lighting her candle. First time, she said. She didn't look sure she liked it."]
+    },
+    "killed": {
+      "text": "I met the one who walks at the pond at moonrise, and in the morning it was {sleeper}. He had asked to be stopped. His mother does not speak to me, and has not said I was wrong.",
+      "reward": { "coins": 20, "hearts": 6, "reputation": 12 },
+      "marks": ["moon_killed_cursed"],
+      "town": ["It was the fletcher's boy all along. He asked for it to be done, they say. Asked. I couldn't have.", "There's a lantern on the pond wall every dusk now. Nobody's said who lights it."]
+    },
+    "ran": {
+      "text": "I let {sleeper} take the south road with the curse still in him. Nobody in {town} died at the next moon. Somewhere else has him now.",
+      "reward": { "coins": 8, "hearts": 8, "reputation": 4 },
+      "marks": ["moon_let_run"],
+      "town": ["The fletcher's boy slipped off in the night, the day before the lamp-bearer was to see him. She went after. South.", "His mother still ties a ribbon to the bedpost. To nothing. Just ties it."],
+      "returns": { "who": "sleeper", "days": [16, 24], "as": "thanks", "say": "Don't be afraid. It's a long way from the moon. I've learned to hold it, nearly. I run lean now, on four legs, and I know my own name the whole night through. I took nothing that wasn't a hare. These are for you. I caught them as myself.", "gift": ["minecraft:rabbit*4", "minecraft:rabbit_foot*1", "minecraft:arrow*16"] }
+    },
+    "wolf": {
+      "text": "It was a wolf. Old, grey and lame. {sleeper} only ever walked in his sleep, and {town} crosses the lane from him all the same.",
+      "reward": { "coins": 18, "items": ["minecraft:mutton*3"], "hearts": 10, "reputation": 12 },
+      "marks": ["moon_plain_wolf"],
+      "town": ["Only a wolf, after all that. I'd nearly sooner it had been something.", "{sleeper}'s cleared, they say. Cleared. I still bolt the door when he's out in his nightshirt."]
+    },
+    "murder_named": {
+      "text": "{heir} killed his uncle with a hay rake for the farm, and stamped a beast's prints round him. The elders have him. What killed the ewe, the goats and the dog is still out there.",
+      "reward": { "coins": 22, "hearts": 10, "reputation": 15 },
+      "marks": ["moon_named_heir"],
+      "town": ["A rake and a wooden paw. And him stood at the wake taking everyone's hand.", "The lamp-bearer's stopping another moon. Says there's a beast somewhere behind every tale of one. Cheerful woman."]
+    },
+    "bought": {
+      "text": "I took {heir}'s purse and said a beast did it. He has the farm. The street has its tale. {sleeper} is cleared by the cellar door and by nothing I said.",
+      "reward": { "coins": 25, "reputation": 2 },
+      "marks": ["moon_took_purse"],
+      "town": ["Nothing found. A beast, they suppose, and gone. {heir}'s bought two more fields already.", "I don't go by the pond after dark. Nobody was ever named for old Carrick, you see. So it could be anyone's turn."]
+    }
+  }
+}

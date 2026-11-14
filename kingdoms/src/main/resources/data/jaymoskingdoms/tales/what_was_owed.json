@@ -1,0 +1,283 @@
+{
+  "title": "What Was Owed",
+  "start": { "by": "companion", "weight": 1 },
+  "roll": { "truth": ["ran", "talked", "struck"] },
+  "cast": {
+    "carter": { "name": ["Tobias Arkle", "Matthew Arkle", "Jonas Arkle"], "body": "villager", "job": "none", "female": false },
+    "widow": { "name": ["Hilda Arkle", "Margery Arkle", "Joan Arkle"], "body": "villager", "job": "farmer", "female": true, "at": "farm" },
+    "son": { "name": ["Will Arkle", "Robin Arkle", "Adam Arkle"], "body": "fighter", "female": false, "at": "ford", "health": 34, "damage": 4, "armor": 2, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate" }
+  },
+  "places": {
+    "village": { "at": "other_town", "name": "the next town" },
+    "farm": { "at": "near", "from": "village", "dist": [60, 120], "name": "the Arkle steading" },
+    "grave": { "at": "near", "from": "farm", "dist": [20, 40], "name": "the grave on the hill" },
+    "ford": { "at": "road", "from": "farm", "dist": [150, 300], "name": "the ford where it happened" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "A word, before we go further. Not about pay. You have never asked where I was before you hired me, and I have been glad of it.",
+        "There is a young man going from town to town asking after a hired guard with my name. A carter told me so at the last inn. The lad is called Arkle. I knew an Arkle. I was paid to keep him alive, six winters back, and he is dead and I am not."
+      ],
+      "replies": [
+        { "say": "Tell me the rest.", "then": "ask_more" },
+        { "say": "Who was he?", "then": "ask_more" },
+        { "say": "Your past is your own. Leave me out of it.", "then": "end:refused" }
+      ]
+    },
+    "ask_more": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "{carter}. A salt carter. One wagon, eleven days' road, and me on the box with half my hire in my purse in advance. Raiders came out of the willows at a ford. He died there. I did not. I never went to his people. Not a word, not the half hire back, nothing.",
+        "He had a wife, and a boy of twelve or so, on a steading near {place:village}. I think the boy has grown up and bought a sword. I can let him find me on some road with nobody by. Or I can go there first. There is a grave I have never stood at. I would sooner not stand at it alone."
+      ],
+      "replies": [
+        { "say": "Then we go to the grave.", "then": "to_grave", "journal": "{giver} was once hired to guard a salt carter, {carter}, who died at a ford six winters ago. {giver} lived, kept the advance, and never faced the family. The carter's son is now hunting a guard of that name. We are going to the grave first." },
+        { "say": "This is yours to carry. Not mine.", "then": "end:refused" }
+      ]
+    },
+    "to_grave": { "do": "go", "to": "grave", "goal": "Go with {giver} to {place:grave}", "then": "search_grave" },
+    "search_grave": {
+      "do": "search", "at": "grave", "goal": "Look at what has been left on the grave",
+      "clues": [
+        { "name": "A marker of split oak", "item": "minecraft:oak_sign", "lore": ["{carter}. Carter. The letters are a child's, cut deep, and gone over since by a steadier hand.", "Beneath the name: He was waited for."], "journal": "The marker on {carter}'s grave was cut by a child and deepened later. It says: He was waited for." },
+        { "name": "A row of white pebbles", "item": "minecraft:quartz", "lore": ["Laid along the foot of the grave, one beside the next. Seventy and more.", "One for each month. Somebody still comes."], "journal": "Somebody has laid a white pebble on the grave each month for six years." },
+        { "name": "A salt-master's letter", "item": "minecraft:paper", "lore": ["Kept dry under a slate. '...your husband's hired guard was seen at the north toll within the hour, running, with not a mark on him. The advance was not recovered.'", "It has been unfolded and read many times."], "journal": "Under a slate on the grave is a letter from the salt-master: the guard was seen running from the ford within the hour, unmarked.", "if": "truth=ran" },
+        { "name": "An innkeeper's letter", "item": "minecraft:paper", "lore": ["Kept dry under a slate. '...the guard drank with a stranger the night before, on the stranger's coin, and talked freely of salt and of the ford road.'", "It has been unfolded and read many times."], "journal": "Under a slate on the grave is a letter from an innkeeper: the night before, the guard drank with a stranger and talked of the load and the road.", "if": "truth=talked" },
+        { "name": "A carter's belt knife", "item": "minecraft:iron_sword", "lore": ["Kept dry under a slate, cleaned and oiled. His name is burnt into the grip.", "This made the wound that killed him. Raiders do not use a man's own knife and leave it behind."], "journal": "Under a slate on the grave is {carter}'s own belt knife, cleaned and oiled. It is the blade that killed him.", "if": "truth=struck" }
+      ],
+      "then": "grave_talk"
+    },
+    "grave_talk": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver} at the grave",
+      "say": {
+        "?truth=ran": [
+          "A letter from the salt-master. So she has known. Six years she has known which way I went, and she never sent after me.",
+          "Then you had better hear the rest from me before you hear it from her. I told you raiders came and he died. That is true. It is not all of it."
+        ],
+        "?truth=talked": [
+          "An innkeeper's letter. So she has known. Six years she has known what I did the night before, and she never sent after me.",
+          "Then you had better hear the rest from me before you hear it from her. I told you raiders came and he died. That is true. It is not all of it."
+        ],
+        "?": [
+          "His knife. She kept it. Then she has known it was no raider's blade, six years, and she never sent after me.",
+          "Then you had better hear the rest from me before you hear it from her. I told you raiders came and he died. That is true. It is not all of it."
+        ]
+      },
+      "replies": [
+        { "say": "Say it, then.", "then": "grave_truth" },
+        { "say": "You owe me the truth as well as her.", "then": "grave_truth" }
+      ]
+    },
+    "grave_truth": {
+      "do": "talk", "who": "giver",
+      "say": {
+        "?truth=ran": [
+          "I was on the box when they came out of the willows. Six of them. I got down on the far side of the wagon and I ran. I did not draw. I did not so much as shout a warning.",
+          "He called my name. Twice. I heard it both times and I did not turn my head. I have been a good guard to you. I have stood when I might have run. Every time, that is why.",
+          "The house is over the rise. I cannot make my feet do it. Will you go up the path first?"
+        ],
+        "?truth=talked": [
+          "The night before the ford I drank at an inn with a pleasant stranger who was buying. He asked what we carried and which road we meant to take. I told him. He was buying.",
+          "They were waiting in the willows. I fought. I have the scar, and I have shown it to people as though it were to my credit. But I put them there. For the price of a jug.",
+          "The house is over the rise. I cannot make my feet do it. Will you go up the path first?"
+        ],
+        "?": [
+          "They left him gut-cut in the shallows, and me for dead beside him. When I came round he was still alive. That wound takes a long time. He asked me. Three times he asked me. My own blade was gone, so I used his.",
+          "Then I took his purse, to carry to his wife with the news. I got as far as the next town, and I drank it. All of it. Every road toward this farm since, my feet have stopped. So. Now you know who has been watching your back.",
+          "The house is over the rise. I cannot make my feet do it. Will you go up the path first?"
+        ]
+      },
+      "journal": {
+        "?truth=ran": "At the grave {giver} told me the rest. When the raiders came, {giver} ran without drawing. The carter called the name twice.",
+        "?truth=talked": "At the grave {giver} told me the rest. The night before, {giver} told a stranger at an inn what the wagon carried and by which road. The raiders were waiting.",
+        "?": "At the grave {giver} told me the rest. The raiders left the carter dying. He begged for an end, and {giver} gave it with the carter's own knife. Then {giver} drank the purse that was meant for the widow."
+      },
+      "replies": [
+        { "say": "I'll go up first. Wait by the wall.", "then": "see_widow" },
+        { "say": "I'll go. But you will follow, in the end.", "then": "see_widow" }
+      ]
+    },
+    "see_widow": {
+      "do": "talk", "who": "widow", "goal": "Go up to the door of {place:farm}",
+      "say": [
+        "You have been at the grave. I saw you from the yard, and the one hanging back by the wall. So {giver} has come at last, and sends a friend up the path first. That is of a piece.",
+        "I am {widow}. It was my man you were looking at. I have nothing to say to that one at the wall yet. But my boy {son} took the sword money out of the seed chest four months ago and went looking. He is nineteen. He has never cut anything but hay."
+      ],
+      "replies": [
+        { "say": "What is it you want of {giver}?", "then": "widow_more" },
+        { "say": "{giver} told me all of it, at the grave.", "then": "widow_more" }
+      ]
+    },
+    "widow_more": {
+      "do": "talk", "who": "widow",
+      "say": [
+        "Three things, and I have had six years to put them in order. The half hire that was never earned: {coins:12}. It was {carter}'s money, and it has been owing since. Then the telling. Not from a letter, and not from a friend. At my table, to my face, all of it.",
+        "And my boy home with his blood in him. That one first. He has sent word that he will have it out at the ford where his father died. He thinks that is fitting. Bring him back to me. I do not much mind how {giver} comes out of it."
+      ],
+      "journal": "{widow}, the carter's widow, has known much of it for six years. She wants three things: the half hire of {coins:12}, the whole truth from {giver} at her own table, and above all her son {son} brought home alive.",
+      "then": "wait_son"
+    },
+    "wait_son": {
+      "do": "wait", "days": [2, 3], "wake": "letter",
+      "letter": { "from": "{son}", "lines": [
+        "To the guard {giver}, by whoever travels with you.",
+        "I know you are at my mother's. I'll not do it on her doorstep. The ford where he died, at first light. Come, or I come up to the farm."
+      ] },
+      "then": "to_ford"
+    },
+    "to_ford": { "do": "go", "to": "ford", "goal": "Go to {place:ford}", "then": "son_talk" },
+    "son_talk": {
+      "do": "talk", "who": "son", "goal": "Speak with {son}",
+      "say": [
+        "You are not the guard. You are the one the guard travels with. Stand aside. I have walked four months and spent the seed money, and I have practised every day against a post.",
+        "My father died at this ford with a hired guard beside him, and the guard walked away and never sent so much as a word. I was twelve. I cut his marker myself, because nobody else was going to."
+      ],
+      "replies": [
+        { "say": "{giver} came here to answer. Hear it first.", "then": "son_hears" },
+        { "say": "You will have to come through me.", "then": "fight_son" }
+      ]
+    },
+    "son_hears": {
+      "do": "talk", "who": "son",
+      "say": {
+        "?truth=ran": "Ran. Mother has had that in a letter for six years and would never let me read it. So it is true. And now the guard stands behind a hired friend a second time. No. I have come too far to be told a thing I already knew, and go home.",
+        "?truth=talked": "For a jug. My father's road, sold to a stranger for a jug of ale. And I am to hear that, and nod, and go home to the hay? No. I have come too far.",
+        "?": "His own knife. Mother keeps it under a slate and would never say why. You are telling me he asked. That the guard stayed with him, and did that, because he asked. I have walked four months to kill the one soul who did not leave him."
+      },
+      "journal": {
+        "?truth=ran": "I told {son} what {giver} told me. He already half knew it. It did not turn him.",
+        "?truth=talked": "I told {son} what {giver} told me. It made him worse.",
+        "?": "I told {son} what {giver} told me: that his father asked for the knife. He had not known."
+      },
+      "replies": [
+        { "say": "Your mother wants you home. It was the first thing she asked.", "then": { "?truth=struck": "son_down", "?": "fight_son" } },
+        { "say": "Then try me. Not {giver}.", "then": "fight_son" }
+      ]
+    },
+    "fight_son": {
+      "do": "foe", "who": "son", "goal": "Stop {son}",
+      "taunt": "For my father. Stand still, damn you!",
+      "plea": "I can't. I can't do it. Four months against a post, and I can't. He is dead, and I cannot even do this.",
+      "mercy": "Go home to your mother. You have done enough.",
+      "thanks": "I'll hear the guard at my mother's table, or not at all. Tell {giver} that.",
+      "slain": "son_dead", "spared": "reckon"
+    },
+    "son_down": {
+      "do": "talk", "who": "son",
+      "say": [
+        "I do not know what to do with this sword now. I sold the seed corn for it.",
+        "I'll go home. Tell the guard to come and say it to her. All of it, the purse as well. If she can hear it, so can I."
+      ],
+      "journal": "{son} lowered his sword when he heard how his father died. He has gone home.",
+      "then": "reckon"
+    },
+    "son_dead": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "He was nineteen. He had practised against a post.",
+        "I came here owing that woman a husband. Tell me what I owe her now. No. Do not. There is no sum for it. We carry him up to the farm, and it is said at her door, and then we go, and we never use this road again."
+      ],
+      "journal": "{son} is dead at the ford where his father died. He would not stop, and I did not hold my hand.",
+      "replies": [
+        { "say": "We carry him home.", "then": "wait_second" },
+        { "say": "I struck the blow. She should hear that from me.", "then": "wait_second" }
+      ]
+    },
+    "wait_second": {
+      "do": "wait", "days": [4, 7], "wake": "letter",
+      "letter": { "from": "{widow}", "lines": [
+        "There are two markers on the hill now. I cut the second myself.",
+        "I asked for one thing first. I said I did not much mind how the guard came out of it. I minded how my boy did.",
+        "Do not come up the path again, either of you. There is nothing here that is owed you, and nothing more that you can owe."
+      ] },
+      "then": "end:second_grave"
+    },
+    "reckon": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver} outside the Arkle door",
+      "say": [
+        "The boy is alive and gone up the path. That was your doing and not mine. Now there is the table.",
+        "I have stood in a shield line with less water in my knees. Tell me to go in and say all of it, and I will go in. Tell me the coin is enough, and I will believe you, because I want to."
+      ],
+      "replies": [
+        { "say": "Go in. Say all of it.", "then": "wait_told", "journal": "{son} went home alive. I told {giver} to go in to the widow's table and say all of it." },
+        { "say": "Pay the half hire. Leave the rest unsaid.", "then": "wait_paid", "journal": "{son} went home alive. I told {giver} to pay the widow the half hire and leave the rest unsaid." },
+        { "say": "The boy is home. That is enough. We go.", "then": "wait_left", "journal": "{son} went home alive. I told {giver} that was enough, and we left the steading." }
+      ]
+    },
+    "wait_told": { "do": "wait", "days": [5, 9], "wake": "giver", "then": "told_after" },
+    "told_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} has to say",
+      "say": {
+        "?truth=ran": [
+          "I have not told you how it went in that house, and you have not asked, and I thank you for both. I said it. That I ran, and that he called me, twice. She let me finish.",
+          "Then she said: I know. I have had the salt-master's letter six years. I wanted to see whether you could say it. And she set a bowl in front of me. I could not eat. She sat there until I did.",
+          "A share of every hire goes up to that farm from now on, until the half is paid twice over. That was my offer and not her asking. I find I stand a little easier on a wagon box."
+        ],
+        "?truth=talked": [
+          "I have not told you how it went in that house, and you have not asked, and I thank you for both. I said it. The inn, the stranger, the jug. She let me finish.",
+          "Then she said: so it was not cowardice. It was a loose mouth. I had hoped for cowardice. A coward I could have pitied. She took the money. She did not set a bowl.",
+          "A share of every hire goes up to that farm from now on, whether she wants it or not. The boy saw me to the gate. He said that if I am ever on the ford road again, he will not have been practising on a post. That is fair. I do not drink with strangers now. You may have noticed."
+        ],
+        "?": [
+          "I have not told you how it went in that house, and you have not asked, and I thank you for both. I said it. The knife, and that he asked, three times. And the purse. She was quiet a long while.",
+          "Then she asked me one thing. Was he afraid. I said no. That was a lie. It is the only one I told in that house, and I would tell it again.",
+          "She gave me the knife. She said it had done him the last kindness anybody did him, and she would not keep it under a slate. A share of every hire goes up to that farm now, for the purse. I carry the knife. I do not know yet whether that is a gift or a sentence."
+        ]
+      },
+      "then": "end:told"
+    },
+    "wait_paid": { "do": "wait", "days": [5, 9], "wake": "giver", "then": "paid_after" },
+    "paid_after": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} has to say",
+      "say": [
+        "I have been turning it over since the farm. She took the purse and weighed it in her hand, and she said: this is the half he never earned. Where is the half you owe? I said I did not take her meaning. She said I did. Then she shut the door.",
+        "So it is paid. It does not feel paid. You told me the rest would only hurt her. I think it was me it would have hurt. You were being kind, and I let you. I do not hold it against you. I only wanted it said to somebody."
+      ],
+      "then": "end:paid_only"
+    },
+    "wait_left": {
+      "do": "wait", "days": [5, 9], "wake": "letter",
+      "letter": { "from": "{widow}", "lines": [
+        "My boy is home, and I thank whoever sent him. I think it was you and not the other.",
+        "The other stood at my wall a quarter of an hour and then went down the path. I watched. Six years, and a quarter of an hour at a wall.",
+        "I lay a pebble each month. I shall go on. Tell {giver} there is still a chair, and that I do not look to see it filled."
+      ] },
+      "then": "end:unsaid"
+    }
+  },
+  "endings": {
+    "refused": { "text": "I told {giver} the past was no business of mine.", "failed": true },
+    "told": {
+      "text": {
+        "?truth=ran": "{giver} sat at the Arkle table and owned to running. {widow} had known six years. She wanted to hear whether it could be said. It could.",
+        "?truth=talked": "{giver} sat at the Arkle table and owned to the loose talk that killed {carter}. {widow} took the money and gave no pardon. It was said, all the same.",
+        "?": "{giver} sat at the Arkle table and owned to the knife, and to the purse. {widow} gave the knife back. {giver} carries it now."
+      },
+      "reward": { "hearts": 12, "reputation": 8 },
+      "marks": ["companion_made_it_right"],
+      "town": ["Some hired sword sends coin up to the Arkle steading every season. The widow takes it and says nothing.", "Young Arkle's back at the hay. Sold his sword for seed corn, and got a poor price."],
+      "returns": { "who": "son", "days": [10, 16], "as": "thanks", "say": "Mother sent me with this, for the road. I am not here to make friends with the guard. I only wanted to see the pair of you once in daylight, without a sword in my hand, so that I can stop seeing you the other way. That is all. Go well.", "gift": ["minecraft:bread*4", "minecraft:apple*4"] }
+    },
+    "paid_only": {
+      "text": "{giver} paid the half hire and left the rest unsaid, on my advice. {widow} took the coin and shut the door.",
+      "reward": { "hearts": 4, "reputation": 4 },
+      "marks": ["companion_paid_in_coin"],
+      "town": ["The Arkle widow was paid some old debt of her man's. She didn't look glad of it.", "Young Arkle's back at the hay. He looks at the road a good deal."]
+    },
+    "unsaid": {
+      "text": "{son} went home alive. {giver} stood a quarter of an hour at the Arkle wall, then came away. Nothing was paid and nothing was said.",
+      "reward": { "hearts": 2 },
+      "marks": ["companion_left_it_owing"],
+      "town": ["Young Arkle came home with a sword he never used. His mother burned his boots so he'd stay.", "The widow still lays her pebble each month. She looks down the path first, every time."]
+    },
+    "second_grave": {
+      "text": "{son} lies beside his father. {giver} came to settle one debt, and I made it two.",
+      "failed": true,
+      "marks": ["slew_the_carters_son"],
+      "town": ["Two Arkles on the hill now. The widow works the steading alone and speaks to nobody.", "A hired sword and a friend came up that path, they say. I'd not care to meet either on a dark road."]
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{ "jobs": ["guard", "*"], "when": "any", "lines": [
+  ["a", "Somebody has left charcoal on the Sun's step again."],
+  ["b", "Children."],
+  ["a", "Children don't leave it in a neat little heap with a feather on top."],
+  ["b", "Then sweep it up before the reeve sees. And don't tell me who you think it was."]
+] }

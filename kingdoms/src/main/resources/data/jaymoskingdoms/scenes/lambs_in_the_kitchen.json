@@ -1,0 +1,7 @@
+{ "jobs": ["shepherd", "*"], "when": "rain", "lines": [
+  ["a", "This rain's turning to sleet, and I've lambs on the top field."],
+  ["b", "Bring them down, then."],
+  ["a", "I have brought them down. They're in the kitchen."],
+  ["b", "And your wife?"],
+  ["a", "On the top field, I think. She was very cross."]
+] }

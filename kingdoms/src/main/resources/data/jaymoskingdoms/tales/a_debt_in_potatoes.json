@@ -6,7 +6,7 @@
       "title": "Dunnock's Tally",
       "author": "Hob Dunnock",
       "pages": [
-        "Hob Dunnock, carter. Potatoes and wheat, town to town, by handcart. If the watch is reading this: it is potatoes and wheat.\n\nSeed month. 9 sacks potato, 2 wheat. Under: 3 bricks. Serjeant at the gate, 2. Home dry.\n\nHay month. 11 potato. Under: 4 bricks, 1 pouch of the leaf. Serjeant at the gate, 2. Wheel split at the ford, lost a day.\n\nHarvest. 8 potato, 4 wheat. Under: 4. The serjeant wants 3 now. Paid 3.",
+        "Hob Dunnock, carter. Potatoes and wheat, town to town, by handcart. If the watch is reading this: it is potatoes and wheat.\n\nSeed month. 9 sacks potato, 2 wheat. Under: 3 bricks. Sergeant at the gate, 2. Home dry.\n\nHay month. 11 potato. Under: 4 bricks, 1 pouch of the leaf. Sergeant at the gate, 2. Wheel split at the ford, lost a day.\n\nHarvest. 8 potato, 4 wheat. Under: 4. The sergeant wants 3 now. Paid 3.",
         "Cart taken at the ford, load and all. Six bricks gone that were not mine. The Room says I owe for them: 24. I said the ford was never watched before. The Room says that is my trouble.\n\nThe Room's man came to the lodging. He did not touch the boy. He looked at him a good while. Then he said: the dark of the moon, carter.",
         "Borrowed a cart. Last run. 10 potato, 4 bricks under. This clears the 24 and I am done with it. I swear it on the boy.\n\nIf I am late: the load goes in the chest at the old lime kiln. Bricks only, lid shut, and walk away. The Room's runner lifts it by night. Do not wait to see him. He does not like to be seen.",
         "Somebody is on the road behind me. Two days now. Not the watch. The watch does not trouble to hide.\n\nIf you are reading this and you are not me, then I am dead or taken, and the cart is in the alders by the ford with the load still under the sacks. Put it in the kiln and my boy is left alone. Or take it to the watch and be thanked. I would not blame you.\n\nBut he is nine, and he lodges with my sister behind the tannery, and the Room knows the door."
@@ -42,7 +42,7 @@
       "clues": [
         { "name": "The load, under the sacks", "item": "minecraft:potato", "lore": ["Ten sacks of potatoes, sprouting. Under them, four bricks sewn in oilcloth.", "They smell of nothing at all, which is the point of the oilcloth."], "journal": "The cart is where the tally said. The load is still under the potatoes: four wrapped bricks." },
         { "name": "A black-fletched bolt", "item": "minecraft:arrow", "lore": ["Sunk in the tailboard to the feathers. A raider's make.", "Two more stand in the alder behind. Nobody was shooting at potatoes."], "journal": "There are raiders' bolts in the tailboard. Dunnock was shot at here, and the load was never touched." },
-        { "name": "A gate tally", "item": "minecraft:paper", "lore": ["Folded small in the axle box. A date on each line, and beside it: serjeant, 2. Later, serjeant, 3.", "The last line: 'He asked which night I cross the ford. Told him. Why would a gate man ask that?'"], "journal": "Dunnock paid the serjeant at the town gate on every run. Before the last one the serjeant asked which night he would cross the ford, and Dunnock told him." },
+        { "name": "A gate tally", "item": "minecraft:paper", "lore": ["Folded small in the axle box. A date on each line, and beside it: sergeant, 2. Later, sergeant, 3.", "The last line: 'He asked which night I cross the ford. Told him. Why would a gate man ask that?'"], "journal": "Dunnock paid the sergeant at the town gate on every run. Before the last one the sergeant asked which night he would cross the ford, and Dunnock told him." },
         { "name": "A wooden horse, half carved", "item": "minecraft:stick", "lore": ["Whittled from alder. Three legs are done.", "Knife work by firelight, for somebody small."], "journal": "There was a toy horse in the cart, three legs carved. For the boy." }
       ],
       "then": "to_lodging"
@@ -84,18 +84,19 @@
         "I know the Tallow Room is there. Every watch knows where its dens are. I have never had a reason the ruler would sign, and I have never known which night the goods go down the ladder. Now I have a book that names a drop."
       ],
       "replies": [
-        { "say": "There is a gate serjeant in that book too.", "then": "captain_more" },
+        { "say": "There is a gate sergeant in that book too.", "then": "captain_more" },
         { "say": "What do you want of me?", "then": "captain_more" }
       ]
     },
     "captain_more": {
       "do": "talk", "who": "captain",
       "say": [
-        "I can read. 'Serjeant, two.' That is {sergeant}, eleven years on my gate. I'll not take him tonight. A man who takes two a cart is one thing. A man who asks a carter which night he crosses the ford is another, and I want to see who he runs to.",
-        "Here is what you will do. Take the bricks back. Make the drop at the kiln exactly as the carter wrote, lid shut, and walk away. My men will lie up in the furze and follow the runner to the hatch, and we go down the ladder the same night, in force. You will have the watch's thanks and {coins:12}. The sister will have my word that her door is watched."
+        "I can read. 'Sergeant, two.' That is {sergeant}, eleven years on my gate. I'll not take him tonight. A man who takes two a cart is one thing. A man who asks a carter which night he crosses the ford is another, and I want to see who he runs to.",
+        "Here is what you will do. Take the bricks back. Make the drop at the kiln exactly as the carter wrote, lid shut, and walk away. My men will lie up in the furze and follow the runner to the hatch, and we go down the ladder the same night, in force.",
+        "You will have the watch's thanks and {coins:12}. The sister will have my word that her door is watched."
       ],
       "replies": [
-        { "say": "Your word. I'll hold you to it.", "then": "drop", "mark": "potato_told_watch", "journal": "{captain} of the watch wants the drop made as written, so his men can follow the runner down the hatch and raid the Room. He knows his own serjeant, {sergeant}, is in the book, and is letting him run a while." },
+        { "say": "Your word. I'll hold you to it.", "then": "drop", "mark": "potato_told_watch", "journal": "{captain} of the watch wants the drop made as written, so his men can follow the runner down the hatch and raid the Room. He knows his own sergeant, {sergeant}, is in the book, and is letting him run a while." },
         { "say": "And the boy? The Room knows his door.", "then": "drop", "mark": "potato_told_watch", "journal": "{captain} of the watch wants the drop made as written, so his men can follow the runner down the hatch and raid the Room. I asked about the boy. He said the door would be watched, and said it twice." }
       ]
     },
@@ -121,7 +122,7 @@
         "He did not die of bad luck. That ford was never watched in nine years. Then twice in a season, both times on the dark night, both times a cart of mine. Somebody is selling my carters to the camp. I have lost three. Hob wrote something of it, I think, or you would not be looking at me like that."
       ],
       "replies": [
-        { "say": "The gate serjeant asked him which night he would cross.", "then": "fence_more" },
+        { "say": "The gate sergeant asked him which night he would cross.", "then": "fence_more" },
         { "say": "What is the name worth to you?", "then": "fence_more" }
       ]
     },
@@ -129,11 +130,11 @@
       "do": "talk", "who": "fence",
       "say": [
         "{sergeant}. Eleven years I have paid that man to look at the sky when my carts go by. And all the while he takes a third from the camp for telling them which carts carry more than potatoes. Paid at both ends. I could almost admire it.",
-        "He meets the camp's runners at the toll stone, {way:toll}, on the nights after a taking. Go and make it stop. I do not tell you how. There is {coins:20} when it has stopped. And if you wonder why I do not send my own: a dead serjeant with my knife in him is a raid. A dead serjeant with a stranger's is a mystery."
+        "He meets the camp's runners at the toll stone, {way:toll}, on the nights after a taking. Go and make it stop. I do not tell you how. There is {coins:20} when it has stopped. And if you wonder why I do not send my own: a dead sergeant with my knife in him is a raid. A dead sergeant with a stranger's is a mystery."
       ],
       "replies": [
-        { "say": "I'll go to the toll stone.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate serjeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. She will pay {coins:20} to have it stopped." },
-        { "say": "For Hob. Not for you.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate serjeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. I am going after him, and not on her account." }
+        { "say": "I'll go to the toll stone.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate sergeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. She will pay {coins:20} to have it stopped." },
+        { "say": "For Hob. Not for you.", "then": "to_toll", "journal": "{fence}, who keeps the Tallow Room, says the gate sergeant {sergeant} sells her carters' routes to the raider camp for a third share. That is how Dunnock died. I am going after him, and not on her account." }
       ]
     },
     "wait_raid": {
@@ -141,7 +142,7 @@
       "letter": { "from": "{captain}", "lines": [
         "We went down the ladder last night. {fence} and six of hers are before the ruler this morning, and the hatch is nailed shut under iron. It will hold a few days. That trade always creeps back, but a few days is what I am paid for.",
         "Two things went wrong. {sergeant} was not at muster. Somebody warned him, or he can count. And the carter's sister had her door kicked in before my man reached it. She and the boy are unhurt. She is asking for you, and not kindly.",
-        "He will have run to his friends on the camp road. There is a toll stone, {way:toll}. I cannot send the watch against its own serjeant on a carter's scribble. You are not the watch."
+        "He will have run to his friends on the camp road. There is a toll stone, {way:toll}. I cannot send the watch against its own sergeant on a carter's scribble. You are not the watch."
       ] },
       "then": "sister_raid"
     },
@@ -152,17 +153,17 @@
         "I asked you for nothing. Hob asked you for one thing, in writing. The watch will mind my door for a week, and then it will not. So. Is it finished? Is the one who sold my brother at least to answer for it?"
       ],
       "replies": [
-        { "say": "The serjeant sold him. I am going after him now.", "then": "to_toll" },
+        { "say": "The sergeant sold him. I am going after him now.", "then": "to_toll" },
         { "say": "I did what I thought right.", "then": "to_toll" }
       ],
-      "journal": "The watch raided the Tallow Room. Before it did, one of the Room's men kicked in {sister}'s door looking for who told. She had hidden the boy. The serjeant has run for the camp road."
+      "journal": "The watch raided the Tallow Room. Before it did, one of the Room's men kicked in {sister}'s door looking for who told. She had hidden the boy. The sergeant has run for the camp road."
     },
     "to_toll": { "do": "go", "to": "toll", "goal": "Find {sergeant} at {place:toll}", "then": "see_sergeant" },
     "see_sergeant": {
       "do": "talk", "who": "sergeant", "goal": "Face {sergeant}",
       "say": [
         "Stop there. You are the one with Dunnock's book. I knew that book would be the end of me. I told him not to write things down. He said a carter who cannot show his tally is a thief.",
-        "Before you draw, do a sum. There are forty in that camp. Six winters back they came down on the east farms twice a year. Then I went up and made an arrangement. I tell them which carts carry more than potatoes. They take those and leave the farms be. Smugglers. Men nobody counts. Six years, and not one farmer buried. Now tell me which of us has kept this town."
+        "Before you draw, do a sum. Forty in that camp. Six winters back they came down on the east farms twice a year. So I made an arrangement. I tell them which carts carry more than potatoes. They take those and leave the farms be. Smugglers. Men nobody counts. Six years, and not one farmer buried. Now tell me which of us has kept this town."
       ],
       "replies": [
         { "say": "You took a third for it.", "then": "sergeant_more" },
@@ -230,15 +231,15 @@
       "text": "{sergeant} is dead at the toll stone, and the Tallow Room has stopped losing carters. The camp is no longer fed. It has gone back to the farms.",
       "reward": { "coins": 20, "reputation": 4 },
       "marks": ["nobody_sent_you", "slew_gate_sergeant"],
-      "town": ["The serjeant's to have a stone. Died defending us, the captain says. From what, on the camp road, at night?", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
-      "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a little over what was agreed, because you never asked what was in the bricks. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:emerald*3", "minecraft:baked_potato*8"] }
+      "town": ["The sergeant's to have a stone. Died defending us, the captain says. From what, on the camp road, at night?", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
+      "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a thing over and above what was agreed, because you never asked what was in the bricks. It is for seeing the watch before the watch sees you. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:spyglass*1", "minecraft:baked_potato*8"] }
     },
     "clean_gate": {
       "text": "The Tallow Room is nailed shut and {sergeant} is dead at the toll stone. The gate is clean. The camp is no longer fed and has gone back to the farms, and the carter's sister bars her door.",
       "reward": { "coins": 12, "hearts": 4, "reputation": 14 },
       "marks": ["potato_told_watch", "slew_gate_sergeant"],
       "town": ["They nailed the hatch behind the chandlers' row. Give it a week. That trade's like damp.", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
-      "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door on the eighth day, as I said it would. On the ninth there was a potato on the step, cut in half. I know what that means and so do you. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] }
+      "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door, as I said it would. Next morning there was a potato on the step, cut in half. You know what that means. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] }
     },
     "let_walk": {
       "text": {

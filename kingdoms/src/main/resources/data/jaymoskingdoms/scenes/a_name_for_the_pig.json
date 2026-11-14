@@ -1,0 +1,6 @@
+{ "jobs": ["farmer", "butcher"], "when": "any", "lines": [
+  ["a", "The children have named the pig."],
+  ["b", "You never name a pig. Not one that's for the block."],
+  ["a", "They've named it Midas."],
+  ["b", "Well. Wait a month. See if it shines."]
+] }

@@ -1,0 +1,6 @@
+{ "jobs": ["fisherman", "*"], "when": "rain", "lines": [
+  ["a", "Not a bite since dawn."],
+  ["b", "It's the rain. Fish don't care to get wet."],
+  ["a", "You'd know. You've never caught one."],
+  ["b", "Never wanted to. I've seen where they live."]
+] }

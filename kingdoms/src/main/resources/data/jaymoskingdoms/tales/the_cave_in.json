@@ -6,7 +6,7 @@
     "quiet": { "name": ["Harl Dunmere", "Brand Ostrey", "Wace Tolliver"], "body": "fighter", "at": "minehead", "health": 60, "damage": 6, "armor": 6, "hand": "minecraft:iron_pickaxe" },
     "hurt": { "name": ["Osric Lunt", "Ebb Carrow", "Dag Fennimore"], "body": "villager", "job": "toolsmith", "at": "minehead" },
     "healer": { "name": ["Wenna Ashby", "Jude Marlow", "Sabra Kell"], "body": "villager", "job": "cleric", "female": true, "at": "minehead" },
-    "hunter": { "name": ["Rafe Holloway", "Gerent Voss", "Mather Crane"], "body": "fighter", "at": "ford", "health": 80, "damage": 8, "armor": 10, "hand": "minecraft:iron_sword", "chest": "minecraft:iron_chestplate", "men": 2 }
+    "hunter": { "name": ["Ralf Stannard", "Gerent Voss", "Mather Crane"], "body": "fighter", "at": "ford", "health": 80, "damage": 8, "armor": 10, "hand": "minecraft:iron_sword", "chest": "minecraft:iron_chestplate", "men": 2 }
   },
   "places": {
     "mine": { "at": "wild", "from": "home", "dist": [150, 300], "name": "the Number Two heading" },
@@ -173,7 +173,7 @@
       "say": {
         "?past=deserter": [
           "{hunter}. Yes. He'd come himself.",
-          "I was a serjeant of the fourth file. We took a village that had already opened its gates, and the order came down to fire the granary with the people's winter in it, so that the next village would open quicker. I said don't light it. They lit it. I walked out of camp that night with my tag still on. That's desertion. It's also the only order I ever refused.",
+          "I was a serjeant of the fourth file. We took a village that had opened its gates, and the order came to fire the granary with the people's winter in it, so the next village would open quicker. I said don't light it. They lit it. I walked out of camp that night with my tag still on. That's desertion. It's also the only order I ever refused.",
           "He'll hang me at the ford and call it the count coming right. He isn't a cruel man. He's a tidy one."
         ],
         "?past=outlaw": [
@@ -284,7 +284,7 @@
       "say": {
         "?past=deserter": [
           "They hanged him at the ford the same evening, from the alder. He walked down to them himself when he was called. {hunter} read out the charge and the number, wrote it in his book, and had his men bury him decent. I'll grant him that.",
-          "Then he gave me the tag, for my tally. I've forty years of men's names in that box, and that's the first I've been handed like a receipt. {hurt} hasn't spoken to me since. He'd speak to you, he says, only he has nothing to say."
+          "Then he had me strike the name from my tally while he watched. I've forty years of men's names in that book, and that's the first I've crossed out to order. {hurt} hasn't spoken to me since. He'd speak to you, he says, only he has nothing to say."
         ],
         "?past=outlaw": [
           "They took him south in irons, to hang where the toll-keeper's widow can see it done. He walked down to them himself when he was called, and went quietly.",

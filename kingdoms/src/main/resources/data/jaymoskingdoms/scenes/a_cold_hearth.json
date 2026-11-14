@@ -1,0 +1,6 @@
+{ "jobs": ["*", "*"], "when": "any", "lines": [
+  ["a", "Old Marrow's hearth has been cold a week."],
+  ["b", "She's gone to her son's."],
+  ["a", "Cold a week, though. The Hearthkeeper forgets a cold hearth."],
+  ["b", "Then go in and light it. You've a key. Everyone has."]
+] }

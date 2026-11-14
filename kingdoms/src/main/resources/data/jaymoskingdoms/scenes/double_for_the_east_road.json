@@ -1,0 +1,6 @@
+{ "jobs": ["leatherworker", "*"], "when": "any", "lines": [
+  ["a", "The carter wants double for the east road now."],
+  ["b", "What's on the east road?"],
+  ["a", "He wouldn't say. He only wants double."],
+  ["b", "Then pay it. A man who won't say has seen it."]
+] }

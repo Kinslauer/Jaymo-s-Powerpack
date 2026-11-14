@@ -568,6 +568,11 @@ public final class Quests {
 			}
 		}
 		remove(player, q.id());
+		if (q.kind() >= Quest.PACK) {
+			// (board work: what it put in the world is cleared, and the board's name grows)
+			QuestJobs.over(level, player, q);
+			BoardWork.done(level, f, q);
+		}
 		// (its kind is known now to the companions who saw it through: docs/Pawn-Plan.md row B3)
 		Remarks.questDone(player, q);
 		// (0.7.0) a priest's hunt: the rite, there and then
@@ -613,6 +618,9 @@ public final class Quests {
 			return;
 		}
 		remove(player, id);
+		if (q.kind() >= Quest.PACK) {
+			QuestJobs.over(level, player, q);
+		}
 		if (q.kind() == Quest.DELIVER) {
 			int slot = find(player, id);
 			if (slot >= 0) {
@@ -672,6 +680,9 @@ public final class Quests {
 			return false;
 		}
 		remove(player, id);
+		if (q.kind() >= Quest.PACK && player.level() instanceof ServerLevel level) {
+			QuestJobs.over(level, player, q);
+		}
 		disappoint(player, q);
 		sync(player, true);
 		return true;

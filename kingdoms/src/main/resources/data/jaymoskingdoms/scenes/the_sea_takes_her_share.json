@@ -1,0 +1,6 @@
+{ "jobs": ["fisherman", "fisherman"], "when": "any", "lines": [
+  ["a", "You threw the biggest one back."],
+  ["b", "For the Deep Mother. A little of what she gives."],
+  ["a", "A little! That was supper for four."],
+  ["b", "My father gave her sprats. Ask me where his boat is."]
+] }

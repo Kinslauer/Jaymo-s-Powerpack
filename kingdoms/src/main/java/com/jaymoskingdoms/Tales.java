@@ -390,6 +390,15 @@ public final class Tales {
 
 	/** Whether {@code cond} holds for {@code player} in {@code run} (null: before any run, for a tale's needs and bars). */
 	static boolean holds(ServerPlayer player, @Nullable Run run, String cond) {
+		if (cond.indexOf('&') >= 0) {
+			// (several things at once: each must hold)
+			for (String part : cond.split("&")) {
+				if (!holds(player, run, part.trim())) {
+					return false;
+				}
+			}
+			return true;
+		}
 		boolean not = cond.startsWith("!");
 		String c = not ? cond.substring(1) : cond;
 		State s = stateOrNull(player);
@@ -543,7 +552,7 @@ public final class Tales {
 		return nearest(server, from, own, false);
 	}
 
-	private static @Nullable Faction nearest(MinecraftServer server, BlockPos from, @Nullable Faction not, boolean camp) {
+	static @Nullable Faction nearest(MinecraftServer server, BlockPos from, @Nullable Faction not, boolean camp) {
 		Faction best = null;
 		double bestD = 2000.0 * 2000.0;
 		for (Faction f : Factions.all(server)) {
@@ -560,7 +569,7 @@ public final class Tales {
 	}
 
 	/** Open ground about {@code dist} blocks from {@code from}: dry land if any direction has it. Its height is the land's as the world would make it. */
-	private static BlockPos wild(ServerLevel level, BlockPos from, int dist, RandomSource random) {
+	static BlockPos wild(ServerLevel level, BlockPos from, int dist, RandomSource random) {
 		net.minecraft.world.level.chunk.ChunkGenerator generator = level.getChunkSource().getGenerator();
 		net.minecraft.world.level.levelgen.RandomState state = level.getChunkSource().randomState();
 		int dry = generator.getSeaLevel() + 1;
@@ -731,6 +740,8 @@ public final class Tales {
 				names.put(e.getKey(), choices.get(random.nextInt(choices.size())));
 			}
 		}
+		// (begun again after being given up: what it marked the first time is forgotten)
+		state(player).marks.removeAll(tale.marks());
 		Run run = new Run(UUID.randomUUID().toString(), tale.id, tale.first(), giver == null ? "" : giver.getUUID().toString(),
 			giver == null ? "" : giver.getName().getString(), giver == null ? "" : job(giver), faction, home.asLong(), -1L, false, vars, Map.of(), names,
 			Map.of(), Map.of(), List.of());
@@ -1076,6 +1087,11 @@ public final class Tales {
 		String key = placeKey(player, run, tale, step, kind);
 		Optional<BlockPos> pos = key != null ? Optional.of(place(level, run, tale, key))
 			: who.equals("giver") || kind.equals("defend") || kind.equals("lamps") ? Optional.of(BlockPos.of(run.home)) : Optional.empty();
+		Long left = run.places.get("@" + who);
+		if (left != null && (kind.equals("talk") || kind.equals("bring") || kind.equals("foe"))) {
+			// (they were walked somewhere else: that's where they are now)
+			pos = Optional.of(BlockPos.of(left));
+		}
 		UUID giver = run.giverId();
 		Optional<UUID> other = who.equals("giver") || kind.equals("defend") ? Optional.ofNullable(giver) : Optional.ofNullable(uuid(run.cast.get(who)));
 		String otherName = who.equals("giver") ? run.giverName : run.names.getOrDefault(who, "");
@@ -1155,6 +1171,13 @@ public final class Tales {
 		Tale tale = run == null ? null : Tale.get(run.tale);
 		JsonObject step = tale == null ? null : tale.step(run.step);
 		if (step != null) {
+			if (q.kind() == Quest.TREK && q.objective().other().isPresent() && player.level() instanceof ServerLevel level
+				&& level.getEntity(q.objective().other().get()) instanceof Mob charge) {
+				// (the one walked there stays there)
+				String who = Tale.pickString(step, "who", facts(player, run), "");
+				long at = charge.blockPosition().asLong();
+				each(player, run, r -> r.places.put("@" + who, at));
+			}
 			go(player, run, step.get("then"), null);
 		}
 	}

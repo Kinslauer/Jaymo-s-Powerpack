@@ -4,9 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.resources.FileToIdConverter;
@@ -91,6 +93,32 @@ final class Tale {
 	}
 
 	// ---- its parts ----------------------------------------------------------------------------------------------------
+
+	/** Every mark this tale can set (a reply's or a step's {@code mark}, an ending's {@code marks}). */
+	Set<String> marks() {
+		Set<String> out = new HashSet<>();
+		marks(this.json, out);
+		return out;
+	}
+
+	private static void marks(JsonElement e, Set<String> out) {
+		if (e.isJsonArray()) {
+			e.getAsJsonArray().forEach(x -> marks(x, out));
+		} else if (e.isJsonObject()) {
+			for (Map.Entry<String, JsonElement> x : e.getAsJsonObject().entrySet()) {
+				if (x.getKey().equals("mark") || x.getKey().equals("marks")) {
+					if (x.getValue().isJsonObject()) {
+						// (a switch: whichever arm)
+						x.getValue().getAsJsonObject().asMap().values().forEach(arm -> out.addAll(strings(arm)));
+					} else {
+						out.addAll(strings(x.getValue()));
+					}
+				} else {
+					marks(x.getValue(), out);
+				}
+			}
+		}
+	}
 
 	String title() {
 		return string(json, "title", id);

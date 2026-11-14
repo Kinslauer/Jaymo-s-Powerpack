@@ -1,0 +1,6 @@
+{ "jobs": ["*", "*"], "when": "any", "lines": [
+  ["a", "The watch went down a hatch on Tanner's Row last night. Brought six up."],
+  ["b", "Tanner's Row. Well. It would be."],
+  ["a", "You buy your potatoes on Tanner's Row."],
+  ["b", "Good potatoes. Heavy sacks. I never ask."]
+] }

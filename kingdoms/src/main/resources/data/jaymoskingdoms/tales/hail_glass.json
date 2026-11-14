@@ -193,11 +193,11 @@
       "say": {
         "?thief=clerk": [
           "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
-          "Who brought it? A boy with ink to the elbows, squinting like a mole. Wanted {coins:6}. I gave him four, and he counted them holding each one up to his nose. Whatever he stole it for, it wasn't to get rich."
+          "Who brought it? A boy with ink to the elbows, squinting like a mole. Wanted {coins:6}. I gave him {coins:4}, and he counted it holding each piece up to his nose. Whatever he stole it for, it wasn't to get rich."
         ],
         "?thief=traveller": [
           "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
-          "Who brought it? Why, the frost-man himself. Came down my ladder with his hood up, as if anyone else in {town} is that shape. Wanted {coins:40} for passage north, took twenty, and asked me to forget his face. I've done my best. It isn't a face that helps."
+          "Who brought it? Why, the frost-man himself. Came down my ladder with his hood up, as if anyone else in {town} is that shape. Wanted {coins:40} for passage north, took {coins:20}, and asked me to forget his face. I've done my best. It isn't a face that helps."
         ],
         "?": [
           "There. Mind the strap. And don't look at the sun through it, the last fool is still blinking.",
@@ -205,7 +205,7 @@
         ]
       },
       "journal": {
-        "?thief=clerk": "The fence says the glass was sold to her by a squinting boy with inky hands, for four coins. That is {clerk}.",
+        "?thief=clerk": "The fence says the glass was sold to her by a squinting boy with inky hands, for {coins:4}. That is {clerk}.",
         "?thief=traveller": "The fence says {traveller} sold her the glass himself, hooded, for passage money, and asked her to forget his face.",
         "?": "The fence says her own man stole the glass from {ember}'s bench. {ember} had already had it a night, and had drawn it six ways."
       },
@@ -226,8 +226,8 @@
     "fence_name": {
       "do": "talk", "who": "fence",
       "say": {
-        "?thief=clerk": "A boy with ink to the elbows, squinting like a mole. He asked six and I gave him four. Now go up my ladder and don't come down it again.",
-        "?thief=traveller": "The frost-man himself, with his hood up, wanting passage money. He took twenty and asked me to forget his face. Now go up my ladder and don't come down it again.",
+        "?thief=clerk": "A boy with ink to the elbows, squinting like a mole. He asked {coins:6} and I gave him {coins:4}. Now go up my ladder and don't come down it again.",
+        "?thief=traveller": "The frost-man himself, with his hood up, wanting passage money. He took {coins:20} and asked me to forget his face. Now go up my ladder and don't come down it again.",
         "?": "Nobody sold it. The man you've just killed lifted it off the Emberborn's bench. She'd had it a night and drawn it six ways. Now go up my ladder and don't come down it again."
       },
       "journal": {
@@ -241,9 +241,9 @@
     "clerk_truth": {
       "do": "talk", "who": "clerk", "goal": "Put it to {clerk}",
       "say": [
-        "Four coins. She told you four. I asked six, and I couldn't even get that right.",
+        "{coins:4}. She told you that. I asked {coins:6}, and I couldn't even get that right.",
         "I can't see the rule lines any more. They swim. A copyist who can't keep a line is a mouth {giver} feeds out of pity, and then not even that. I heard the glass brings far things near. I thought if it would only show me the page. It showed me numbers. Cold little numbers beside everything. Beside my own hand.",
-        "So I sold it, to be rid of it. The four coins went to the herb-woman for an eye wash. It stings and does nothing. Are you going to tell them?"
+        "So I sold it, to be rid of it. All of it went to the herb-woman for an eye wash. It stings and does nothing. Are you going to tell them?"
       ],
       "replies": [
         { "say": "He must be told. And {giver}.", "then": "return_named", "journal": "{clerk} took the glass. He is going blind, and hoped it would show him the page. I mean to tell {traveller} and {giver} all of it." },
@@ -288,7 +288,7 @@
       "say": {
         "?thief=clerk": [
           "The copyist. The one who brings the water and spills it.",
-          "He looked through it. Then he has seen what I see, and it frightened him, and he sold my mother's glass for four coins. I will have him before your elders. On Hail I would not need to ask. Give it here. It is warm. Everything you people touch is warm."
+          "He looked through it. Then he has seen what I see, and it frightened him, and he sold my mother's glass for {coins:4}. I will have him before your elders. On Hail I would not need to ask. Give it here. It is warm. Everything you people touch is warm."
         ],
         "?": [
           "The Emberborn. So the street was right, and for the wrong reason, which is how streets are right.",

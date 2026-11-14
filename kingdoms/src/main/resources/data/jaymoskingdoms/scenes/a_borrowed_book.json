@@ -1,0 +1,6 @@
+{ "jobs": ["librarian", "*"], "when": "any", "lines": [
+  ["a", "That book. You've had it since the thaw."],
+  ["b", "I'm a slow reader."],
+  ["a", "It's a book of pictures."],
+  ["b", "I'm a slow looker."]
+] }

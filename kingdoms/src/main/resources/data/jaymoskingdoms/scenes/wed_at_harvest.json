@@ -1,0 +1,6 @@
+{ "jobs": ["*", "weaponsmith"], "when": "any", "lines": [
+  ["a", "They're to be wed at harvest. The cooper's girl and the miller's lad."],
+  ["b", "A cooper and a miller. That's barrels and flour."],
+  ["a", "It's a love match."],
+  ["b", "It's a brewery. Give them five years."]
+] }

@@ -1,0 +1,6 @@
+{ "jobs": ["*", "cartographer"], "when": "any", "lines": [
+  ["a", "I sent a pigeon to my brother at midsummer."],
+  ["b", "Any answer?"],
+  ["a", "The pigeon came back fatter."],
+  ["b", "That's your answer. He's well, and he still can't write."]
+] }

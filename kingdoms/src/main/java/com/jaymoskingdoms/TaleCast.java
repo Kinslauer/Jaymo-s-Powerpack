@@ -344,6 +344,7 @@ final class TaleCast {
 	 * begins, the foe yields, the foe is let go by being left.
 	 */
 	static void tend(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step, String kind) {
+		String who = Tale.pickString(step, "who", c -> Tales.holds(player, run, c), "");
 		for (Map.Entry<String, JsonElement> e : Tale.object(tale.json, "cast").entrySet()) {
 			if (!e.getValue().isJsonObject() || run.cast.containsKey(e.getKey())) {
 				continue;
@@ -353,12 +354,16 @@ final class TaleCast {
 			if (key.isEmpty() || flat(player, Tales.place(level, run, tale, key)) > Tales.SET_OUT_RANGE) {
 				continue;
 			}
+			// (someone who's only in some tellings isn't there in the others, unless the open step is about them)
+			String only = Tale.string(body, "if", "");
+			if (!e.getKey().equals(who) && (Tale.flag(body, "late") || !only.isEmpty() && !Tales.holds(player, run, only))) {
+				continue;
+			}
 			BlockPos ground = Tales.ground(level, run, tale, key);
 			if (ground != null) {
 				setOut(level, player, run, e.getKey(), body, ground);
 			}
 		}
-		String who = Tale.pickString(step, "who", c -> Tales.holds(player, run, c), "");
 		JsonObject body = who.isEmpty() || who.equals("giver") ? null : tale.role(who);
 		if (body == null || !run.cast.containsKey(who)) {
 			return;
@@ -367,7 +372,8 @@ final class TaleCast {
 		if (mob == null) {
 			// (gone missing: killed while nobody was by, or lost with their chunk. They're there again when the player is.)
 			String key = Tale.string(body, "at", "");
-			BlockPos ground = key.isEmpty() ? null : Tales.ground(level, run, tale, key);
+			Long left = run.places.get("@" + who);
+			BlockPos ground = left != null ? BlockPos.of(left) : key.isEmpty() ? null : Tales.ground(level, run, tale, key);
 			if (ground != null && flat(player, ground) <= BACK_WITHIN && level.isPositionEntityTicking(ground)) {
 				int missed = parse(run.scratch.getOrDefault("missed", "0")) + 1;
 				run.scratch.put("missed", Integer.toString(missed));
@@ -507,6 +513,14 @@ final class TaleCast {
 				mob.setAttached(CAST, c.done(level.getGameTime()));
 				calm(mob);
 			}
+		}
+	}
+
+	/** ({@link QuestJobs}) {@code mob} is being walked somewhere: where it stands is where it belongs now. */
+	static void moved(Mob mob) {
+		Cast c = mob.getAttached(CAST);
+		if (c != null && !c.over()) {
+			mob.setAttached(CAST, new Cast(c.instance(), c.role(), mob.blockPosition().asLong(), c.fight(), c.yielded(), c.over(), c.since()));
 		}
 	}
 

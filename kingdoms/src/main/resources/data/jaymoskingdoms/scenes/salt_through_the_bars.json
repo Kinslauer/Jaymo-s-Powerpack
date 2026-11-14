@@ -1,0 +1,7 @@
+{ "jobs": ["guard", "*"], "when": "any", "lines": [
+  ["a", "One of the den-folk came to the gate. Fur, tail, all of it. Wanted to buy salt."],
+  ["b", "Did you let it in?"],
+  ["a", "I sold it salt through the bars."],
+  ["b", "At what price?"],
+  ["a", "The same as you pay. Don't look at me like that. Near the same."]
+] }

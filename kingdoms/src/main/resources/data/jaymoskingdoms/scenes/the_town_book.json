@@ -1,0 +1,6 @@
+{ "jobs": ["librarian", "*"], "when": "day", "lines": [
+  ["a", "I fetched down the town book. It says the store holds forty sacks of grain."],
+  ["b", "And?"],
+  ["a", "I counted. Thirty-one."],
+  ["b", "Then count again when the miller isn't helping you."]
+] }

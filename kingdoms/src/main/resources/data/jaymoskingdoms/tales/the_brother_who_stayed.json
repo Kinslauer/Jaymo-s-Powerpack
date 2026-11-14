@@ -1,0 +1,320 @@
+{
+  "title": "The Brother Who Stayed",
+  "start": { "by": "companion", "weight": 2 },
+  "roll": { "fate": ["buried", "bitter", "outlaw"] },
+  "cast": {
+    "neighbour": { "name": ["Agnes Whitlow", "Marta Dunn", "Bess Yarrow"], "body": "villager", "job": "farmer", "female": true, "at": "village" },
+    "widow": { "name": ["Tilda", "Rhona", "Elsbeth"], "body": "villager", "job": "shepherd", "female": true, "at": "cottage" },
+    "brother": { "name": "Corin", "body": "villager", "job": "farmer", "at": "farm" },
+    "brother_armed": { "name": "Corin", "body": "fighter", "at": "camp", "health": 70, "damage": 7, "armor": 8, "hand": "minecraft:iron_axe", "chest": "minecraft:leather_chestplate", "men": 2 }
+  },
+  "places": {
+    "village": { "at": "other_town", "name": "the old village" },
+    "grave": { "at": "near", "from": "village", "dist": [60, 120], "name": "the burying ground" },
+    "cottage": { "at": "near", "from": "village", "dist": [40, 80], "name": "the cottage by the ash tree" },
+    "farm": { "at": "near", "from": "village", "dist": [80, 140], "name": "the family farm" },
+    "pasture": { "at": "near", "from": "farm", "dist": [20, 45], "name": "the low pasture" },
+    "camp": { "at": "wild", "from": "village", "dist": [200, 350], "name": "the camp in the birch wood" }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "A word, if you've a moment. It isn't about pay, and it isn't about the road.",
+        "I had a brother. Have. I don't know which, and that's the trouble. Corin. I left him on our father's farm the year the barley failed, with the old man sick and our mother not strong, and I've not been back.",
+        "A carter knew my face last week. He said, 'You're Corin's blood. You'd best go home.' He wouldn't say why. I'd take it kindly if I didn't go alone."
+      ],
+      "replies": [
+        { "say": "Then we go.", "then": "to_village", "journal": "{giver} left a brother, Corin, on the family farm years ago and has never been back. A carter has told {giver} to go home. I said we'd go together." },
+        { "say": "Why did you leave?", "then": "ask_why" },
+        { "say": "A past like that is walked alone.", "then": "end:refused" }
+      ]
+    },
+    "ask_why": {
+      "do": "talk", "who": "giver",
+      "say": [
+        "One of us had to stay. The farm couldn't feed four and couldn't be left. We said we'd draw straws for it, him and me, on the Sunday.",
+        "I went on the Saturday night. Out of the window, with the money from the sold calf, and half of that was his. I told myself I'd send for him inside a year. Then it was two years and no good news to send, and then it was easier to be someone who had no brother. That's the why. It doesn't improve with telling."
+      ],
+      "replies": [
+        { "say": "We go. Tomorrow.", "then": "to_village", "journal": "{giver} left a brother, Corin, on the family farm twelve years ago: went out of a window the night before they were to draw straws for who stayed, and took the calf money. A carter has told {giver} to go home. I said we'd go together." },
+        { "say": "Some windows are best left shut.", "then": "end:refused" }
+      ]
+    },
+    "to_village": { "do": "go", "to": "village", "goal": "Travel with {giver} to the village they left", "journal": "We came to the village {giver} left twelve years ago.", "then": "ask_neighbour" },
+    "ask_neighbour": {
+      "do": "talk", "who": "neighbour", "goal": "Ask in the village after Corin",
+      "say": {
+        "?fate=buried": [
+          "Well. Look what the road has brought back. I knew you by the walk. You had it at six. Don't stand there like a pedlar. You'll be wanting Corin.",
+          "Then you're two winters late. The lung fever, the year it took nine of us. He's in the burying ground, north side, by your mother. His wife is at the cottage by the ash still. {widow}. You'd not know her, she came after you went. It was her sent word round by the carters. She wants something of you. I'll let her say what."
+        ],
+        "?fate=bitter": [
+          "Well. Look what the road has brought back. I knew you by the walk. You had it at six. Don't stand there like a pedlar. You'll be wanting Corin.",
+          "He's up at the farm, where you left him. Where else? He has never been further than the mill in his life. He buried your father the first winter and your mother the fourth, alone both times. There was a girl once, and he couldn't leave the old ones to go courting her. She married a cooper. I'd wipe your feet before you go up."
+        ],
+        "?": [
+          "Well. Look what the road has brought back. I knew you by the walk. You had it at six. Don't stand there like a pedlar. You'll be wanting Corin.",
+          "Then you'll not find him at the farm. There's been a steward's man in your father's house these three years. The barley failed twice more, the realm wanted its due all the same, and when Corin couldn't pay they took the land and gave him a day to carry out what he could.",
+          "He carried out an axe. He's in the birch wood now with others like him, and the carts go round by the long road."
+        ]
+      },
+      "replies": [
+        { "say": "Who sent word for {giver}?", "then": "neighbour_more" },
+        { "say": "Did he ever speak of {giver}?", "then": "neighbour_more" }
+      ]
+    },
+    "neighbour_more": {
+      "do": "talk", "who": "neighbour",
+      "say": {
+        "?fate=buried": "He spoke of you at the end, {widow} says. I wasn't there. I'll tell you what I saw myself. Every market day for ten years he asked every carter the same question, and every one said no, and he stood them a drink anyway for the trouble. That's who you left. Go and see his grave, and then go and see his wife.",
+        "?fate=bitter": "Speak of you? Not in my hearing. Not once in all these years. Which tells you how often he thinks of it. I sent the word myself, by the carters. Somebody had to. He's forty and talks to his plough ox. Go up. He'll not thank either of us.",
+        "?": "He sent word himself, I'd say, in his way. He stopped a carter last month and took nothing off him. Only asked whether the man had ever met one with your face on the roads. Then let him go, cart and all. The carter came in here white as flour. Go to the birch wood if you must. Go in daylight, with your hands open."
+      },
+      "journal": {
+        "?fate=buried": "Corin died of the lung fever two winters ago and lies in the burying ground by his mother. For ten years he asked every carter for news of {giver}. His widow, {widow}, sent for us. She wants something.",
+        "?fate=bitter": "Corin is alive, on the farm, where he has been all along. He buried both parents alone and lost the girl he would have married. He has not spoken {giver}'s name in twelve years. A neighbour sent for us, not he.",
+        "?": "The realm took the farm for unpaid dues three years ago. Corin went into the birch wood with an axe and robs the road now. Last month he stopped a carter only to ask after one with {giver}'s face."
+      },
+      "then": "take_it"
+    },
+    "take_it": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": {
+        "?fate=buried": "Two winters. I was at a fair two winters ago. I remember it. I won at dice. Give me a night. I can't go up to a grave today as I am. I'd only stand there. I want to have something to say to him. I've had twelve years and not found it, so asking one more night is cheek. I know.",
+        "?fate=bitter": "Alone both times. She said that so I'd hear it, and I heard it. Give me a night. I walked out of a window on that man. I'd like to go in by the door, sober, in the morning. And I'll want you there. Not to talk. He'll not hit me in front of a stranger. I think.",
+        "?": "They gave him a day. One day, for a farm our grandfather cleared. And I had the calf money. Give me a night. If I go into that wood now I'll go in angry, and I've no right to be the angry one. Tomorrow. Daylight, hands open, as she says."
+      },
+      "replies": [
+        { "say": "Take the night.", "then": "wait_night" },
+        { "say": "Take two, if you need them.", "then": "wait_night" }
+      ]
+    },
+    "wait_night": { "do": "wait", "days": [1, 2], "wake": "giver", "then": "ready" },
+    "ready": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": "I'm as ready as I'll be, which is not very. Let's go before I think of a reason not to.",
+      "then": { "?fate=buried": "to_grave", "?fate=bitter": "to_farm", "?": "to_camp" }
+    },
+
+    "to_grave": { "do": "go", "to": "grave", "goal": "Go with {giver} to the burying ground", "then": "at_grave" },
+    "at_grave": {
+      "do": "talk", "who": "giver", "goal": "Stand with {giver} at Corin's grave",
+      "say": [
+        "There. By our mother. Somebody has kept it weeded. Somebody has kept a lantern here: look, the wick's trimmed. That'll be the wife.",
+        "I had a speech. It's gone. Corin. I took the calf money, and half was yours. I've carried it in every purse I've owned since, the exact sum, and never spent down to it, as if that made it not stolen. I'll leave it with your wife. It's late. You'd say it's late. You'd say it, and then you'd ask if I had eaten."
+      ],
+      "replies": [
+        { "say": "Light a lantern for him before we go.", "needs_item": { "item": "minecraft:lantern", "count": 1 }, "then": "see_widow", "mark": "brother_lit_lantern", "journal": "{giver} stood at Corin's grave and owned to the calf money. I gave a lantern, and {giver} lit it and set it by the stone." },
+        { "say": "He'd have asked if you had eaten. That's your answer.", "then": "see_widow", "journal": "{giver} stood at Corin's grave and owned to the calf money. I said a brother who would ask if you had eaten had already answered." },
+        { "say": "Say no more. Standing here is the speech.", "then": "see_widow", "journal": "{giver} stood at Corin's grave and owned to the calf money. We stood a while and said nothing else." }
+      ]
+    },
+    "see_widow": {
+      "do": "talk", "who": "widow", "goal": "Speak with Corin's widow",
+      "say": [
+        "So you're the one who went out of the window. You've his chin. Sit. I'll not pretend I have thought well of you. But I never met you, and he'd not hear a word against you, which was very tiresome to live with.",
+        "I sent for you because of the land. It's in your father's name, and by the custom here it goes to blood before it goes to a wife. To you. I've worked it alone two years. I can't sell it and I can't borrow on it, and the steward says I'll not hold it past this harvest unless the blood heir puts a mark to it.",
+        "Sign it to me, and I can sell, and go to my sister's. Or take it up yourself. Or do nothing, and the realm has it by first frost."
+      ],
+      "replies": [
+        { "say": "Did he leave any word for {giver}?", "then": "widow_more" },
+        { "say": "What do you want, yourself?", "then": "widow_more" }
+      ]
+    },
+    "widow_more": {
+      "do": "talk", "who": "widow",
+      "give": [{ "item": "minecraft:paper", "count": 1, "name": "Corin's letter", "lore": ["'I drew the straws on the Sunday, both of them, on my own.'", "'I drew you the short one and me the long, so it came out as it was.'", "'You'd have stayed and hated it. I stayed and didn't, much. Eat something.'"] }],
+      "say": [
+        "He left a letter. I've not read it. He wrote it the third night of the fever, while he still could, and said to give it to the one with his chin, should that one ever come. Here.",
+        "What do I want? I want to stop. I have buried a husband and carried his farm two years to keep it warm for a stranger. I'd like the price of it, and my sister's kitchen, and never to see barley again. But that ground was his whole life. I'll not tell you it's easy, selling a man's whole life. I'm only telling you I would."
+      ],
+      "replies": [
+        { "say": "{giver} will need a day or two with that letter.", "then": "wait_land", "journal": "The farm passes by custom to {giver}, not to Corin's widow, and she cannot sell or keep it without {giver}'s mark. She wants to sell and be done. She gave {giver} a letter Corin wrote in his last days." }
+      ]
+    },
+    "wait_land": { "do": "wait", "days": [2, 4], "wake": "giver", "then": "decide" },
+    "decide": {
+      "do": "talk", "who": "giver", "goal": "Hear what {giver} makes of the letter and the land",
+      "say": [
+        "I've read it forty times. He drew the straws by himself on the Sunday, both of them, and gave me the short one and himself the long, 'so it came out as it was'. He forgave me before I had been gone a day. And I spent twelve years not knowing it. I'd almost sooner he hadn't.",
+        "The land. If I sign it to her, it's sold to a stranger and that's the end of our name on that ground. If I keep my name on it and let her hold it free, she's tied to barley she hates, for the sake of my conscience. I can't see it straight. You've seen all of it from outside. Say what you'd do."
+      ],
+      "replies": [
+        { "say": "Sign it to her. She has earned the price of it.", "then": "end:land_signed", "journal": "Corin's letter said he drew the straws alone and gave himself the staying one. {giver} asked me about the land. I said to sign it to the widow." },
+        { "say": "Keep your name on it. Let her hold it free, and sell when she chooses.", "then": "end:land_kept", "journal": "Corin's letter said he drew the straws alone and gave himself the staying one. {giver} asked me about the land. I said to keep the family's name on it and let the widow hold it." }
+      ]
+    },
+
+    "to_farm": { "do": "go", "to": "farm", "goal": "Go up to the farm with {giver}", "then": "see_brother" },
+    "see_brother": {
+      "do": "talk", "who": "brother", "goal": "Speak with Corin",
+      "say": [
+        "I saw you from the top field an hour since. I thought, that walks like someone I used to know. Then I thought, no, that one's dead, or as good as. Mind the gate. The hinge has gone and I've not had the time.",
+        "You'll have a speech. Say it to the ox, he's patient. I've the fence down on the low pasture since the gales, and forty ewes that know it.",
+        "Who's this? Your witness? Good. Then witness. Father, the first winter. Mother, the fourth. Both in ground I dug myself, because the sexton wanted paying, and the calf money had gone out of the window."
+      ],
+      "replies": [
+        { "say": "{giver} came to answer for it.", "then": "brother2" },
+        { "say": "{giver} has carried that calf money ever since. The exact sum.", "then": "brother2" }
+      ]
+    },
+    "brother2": {
+      "do": "talk", "who": "brother",
+      "say": [
+        "Answer for it. With what? Have you twelve years in that pack?",
+        "There was a girl. I'll not say her name. She is another man's wife and has been these nine years. She waited two, while I couldn't leave the old ones, and then she stopped waiting. I don't blame her. I don't even blame the one who went. I only did the work. Somebody had to, and there was nobody in the room but me."
+      ],
+      "replies": [
+        { "say": "There's a fence down on the low pasture, you said.", "then": "mend", "journal": "Corin would not hear a speech. He buried both parents alone and lost the girl he would have married. I asked about the fence he said was down." },
+        { "say": "Here is the calf money, with twelve years on it. {coins:20}.", "needs_coins": 20, "then": "brother_paid", "mark": "brother_paid_calf" },
+        { "say": "We've said what we came to say. We'll go.", "then": "carry_left", "journal": "Corin would not hear a speech. He buried both parents alone and lost the girl he would have married. We left him to his work." }
+      ]
+    },
+    "mend": {
+      "do": "build", "at": "pasture", "blocks": "#minecraft:fences", "count": 10, "goal": "Mend the fence on the low pasture",
+      "journal": "We mended the low pasture fence, the three of us. Nobody said anything for most of the afternoon.",
+      "then": "brother_mended"
+    },
+    "brother_mended": {
+      "do": "talk", "who": "brother", "goal": "Speak with Corin",
+      "say": [
+        "It'll hold. It isn't how I'd have done the corner. That's the first day's work anyone but me has given this farm since the fourth winter.",
+        "I'm forgiving nothing. I want that understood. But there's the barley to get in next month, and it's a two-man job I have done as a one-man job eleven times. If someone were passing. I'm not asking. I'm saying when it is."
+      ],
+      "then": "wait_mended"
+    },
+    "wait_mended": { "do": "wait", "days": [3, 6], "wake": "giver", "then": "carry_mended" },
+    "carry_mended": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "Next month, for the barley. He said it to the fence post, not to me.",
+        "I'd like to go back for it. If you can spare me the days. Or come and swing a scythe yourself, he'd say nothing against a third. He'll not forgive me. He said so. But he told me when the barley is. From Corin that's a letter with a seal on it."
+      ],
+      "then": "end:mended"
+    },
+    "brother_paid": {
+      "do": "talk", "who": "brother",
+      "say": [
+        "{coins:20}. Somebody has reckoned the interest. I'll take it. I'm not proud, and I've a roof to mend.",
+        "But hear what it's bought. It has bought the calf. That is all that was ever for sale. The rest wasn't money and can't be paid in money, and I think you both knew that and brought a purse anyway, because a purse is easier to hold out than a hand. Go on. The road is where you left it."
+      ],
+      "journal": "Corin would not hear a speech. I counted out the calf money with twelve years on it. He took it, and said it had bought the calf and nothing else.",
+      "then": "carry_left"
+    },
+    "carry_left": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "Well. I've seen him. He's alive, and he's got the gate still hanging by one hinge the way father left it, and he looked at me as you'd look at weather.",
+        "I thought I'd come away lighter, either way it went. I've come away knowing the weight to the ounce. Father, first winter. Mother, fourth. A girl who waited two years. Maybe that's what I came for. Not to be let off. To be told the sum."
+      ],
+      "then": "end:left_bitter"
+    },
+
+    "to_camp": { "do": "go", "to": "camp", "goal": "Go to the camp in the birch wood with {giver}", "then": "parley" },
+    "parley": {
+      "do": "talk", "who": "brother_armed", "goal": "Speak with Corin",
+      "say": [
+        "Hands open. Good. Somebody in the village still gives sound advice. Lads, look here. This is the one I told you of. The one who got out.",
+        "You look well. Fed. I had a farm to give you a seat at, once. Now I've a log. They gave me one day. I stood in father's kitchen with a steward's man counting our spoons, and I thought: there were two of us meant to hold this, and one of us is at a fair somewhere.",
+        "So I took the axe down off the wall. It's the only thing of father's I have left. What did you take? Remind me."
+      ],
+      "replies": [
+        { "say": "The calf money. {giver} has it here, the exact sum.", "then": "parley2" },
+        { "say": "{giver} came to take you out of this wood.", "then": "parley2" }
+      ]
+    },
+    "parley2": {
+      "do": "talk", "who": "brother_armed",
+      "say": [
+        "Out of the wood. To what? I've a rope waiting in three towns. The Sun's law doesn't ask why a man took to the road, only whether he did.",
+        "Here's what is left for us. You walk back down that path, and you were never here. Or we settle it the way father would have had us settle it at ten years old, behind the barn. Only I've an axe now."
+      ],
+      "replies": [
+        { "say": "We were never here.", "then": "carry_walked", "journal": "Corin leads outlaws in the birch wood and would not be taken out of it. He told us to walk away as if we had never come. We did." },
+        { "say": "Behind the barn, then.", "then": "fight", "journal": "Corin leads outlaws in the birch wood and would not be taken out of it. It came to blows, as it would have when they were ten." }
+      ]
+    },
+    "fight": {
+      "do": "foe", "who": "brother_armed", "goal": "Stand with {giver} against Corin",
+      "taunt": "Come on, then. You owe me a Sunday.",
+      "plea": "Enough. Enough. Look at us. Father would take a strap to the pair of us. Finish it or don't, but don't stand there looking sorry.",
+      "mercy": "Nobody is finishing anything. Get up, Corin.",
+      "thanks": "Get up, they say. Twelve years late and I'm still being told what to do. Go on. Go, before I think better of it.",
+      "slain": "carry_slain", "spared": "carry_spared"
+    },
+    "carry_slain": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "Don't. Don't tell me it was him or us. I know what it was.",
+        "I came to find my brother, and I've found him, and now I must dig for him, as he dug for the other two. That's fair. It's the first fair thing in all of it. Help me carry him to the burying ground. North side, by our mother. Then we go, and I'll not speak of this again, and you'll let me not."
+      ],
+      "then": "end:brother_slain"
+    },
+    "carry_spared": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "He let me help him up. Did you see? He took the hand. Swore at me, and took the hand.",
+        "He'll not leave the wood. He says so. But he asked which roads we walk. He asked as if it didn't matter, and Corin never in his life asked a thing that didn't matter."
+      ],
+      "then": "end:brother_spared"
+    },
+    "carry_walked": {
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "say": [
+        "'You were never here.' He gave me the same road I took the first time, and I took it the same way.",
+        "I left the calf money on a stump at the wood's edge. The exact sum. It'll be gone by now, and I'll never know whether he took it or some passer did. That's about right. That's about what I've earned to know."
+      ],
+      "then": "end:walked"
+    }
+  },
+  "endings": {
+    "refused": { "text": "{giver} asked me to come home with them, and I said no. They have not asked again.", "failed": true },
+    "land_signed": {
+      "text": "Corin died two winters before we came. {giver} signed the farm to his widow, who sold it and went to her sister's. {giver} carries his letter, and no land.",
+      "reward": { "hearts": 12, "reputation": 6 },
+      "marks": ["brother_buried", "brother_land_signed"],
+      "town": ["That companion of the stranger's went home after twelve years. Found a grave, they say, and gave away a farm.", "Gave the land to the widow outright. I'd not have. Well. I'd have thought about not."],
+      "returns": { "who": "widow", "days": [10, 18], "as": "thanks", "say": "My sister's kitchen has a window that faces away from every field in the realm. I sold well. This is the calf money, back again. He would have wanted it out of the family's pocket at last, and into a stranger's. Tell the one with his chin that I've stopped being tiresome about them.", "gift": ["minecraft:gold_ingot*3", "minecraft:honey_bottle*2"] }
+    },
+    "land_kept": {
+      "text": "Corin died two winters before we came. {giver} kept the family's name on the farm and left his widow to hold it. She did not thank us. {giver} carries his letter, and a field of barley someone else must cut.",
+      "reward": { "hearts": 10, "reputation": 6 },
+      "marks": ["brother_buried", "brother_land_kept"],
+      "town": ["That companion of the stranger's went home after twelve years. Found a grave, they say, and a farm with their name on it.", "Kept the land and left the widow working it. That's conscience for you. Somebody else always does the reaping."]
+    },
+    "mended": {
+      "text": "Corin is alive and forgives nothing. We mended his fence, and he told us when the barley is. {giver} means to be there for it.",
+      "reward": { "coins": 6, "hearts": 12, "reputation": 8 },
+      "marks": ["brother_alive", "brother_mended"],
+      "town": ["That companion of the stranger's went home after twelve years. Got set to mending fences, I heard. Real ones.", "Twelve years gone and the brother put them straight to work. That's family."],
+      "returns": { "who": "brother", "days": [12, 20], "as": "thanks", "say": "The barley's in. I'm not stopping, I was passing. It took two days less with the extra back, and I'll say so once. This is from the farm. Don't tell that one I carried it all this way.", "gift": ["minecraft:bread*8", "minecraft:wheat*16", "minecraft:mutton*4"] }
+    },
+    "left_bitter": {
+      "text": "Corin is alive, on the farm he never left. He would not forgive {giver}, and we did not stay. {giver} came away knowing the sum of it, to the ounce.",
+      "reward": { "hearts": 6, "reputation": 4 },
+      "marks": ["brother_alive", "brother_left"],
+      "town": ["That companion of the stranger's went home after twelve years. The brother wouldn't have it. Can you blame him?", "They say you can't go home. You can. It's the staying they don't let you do."]
+    },
+    "brother_slain": {
+      "text": "Corin had turned outlaw, and it came to blows, and he is dead. {giver} buried him by their mother, as he had buried the other two. We do not speak of it.",
+      "reward": { "coins": 8, "hearts": 4, "reputation": 4 },
+      "marks": ["brother_outlaw", "brother_slain"],
+      "town": ["There's a new grave in a village east of here, and they say a brother dug it for a brother. I didn't ask more.", "The carts go by the birch wood again. Somebody cleared it. Nobody's proud."]
+    },
+    "brother_spared": {
+      "text": "Corin had turned outlaw, and it came to blows, and nobody finished it. He took {giver}'s hand to get up. He asked which roads we walk.",
+      "reward": { "coins": 8, "hearts": 10, "reputation": 6 },
+      "marks": ["brother_outlaw", "brother_spared"],
+      "town": ["Two of one blood had it out in a birch wood, they say, and both walked off. Whatever it was about, that's settled it or nothing will.", "The carters say the man in the birch wood let three carts by last week. Just watched them. Like he was looking for a face."],
+      "returns": { "who": "brother_armed", "days": [6, 12], "as": "recruit", "say": "Don't make a speech. The steward's men burnt the camp, the lads have scattered, and I've an axe and no farm and one living relation, who let me up when I'd have split their skull. Which roads, I asked. I've come to find out. I'll walk behind. I'm used to it." }
+    },
+    "walked": {
+      "text": "Corin had turned outlaw, and told us we were never there. {giver} left the calf money on a stump at the wood's edge and walked away from him a second time.",
+      "reward": { "hearts": 4, "reputation": 2 },
+      "marks": ["brother_outlaw", "brother_walked"],
+      "town": ["That companion of the stranger's went looking for kin and came back quieter. Found them, I'd say.", "There's a man in a birch wood east of here who robs carts and asks every carter the same question. Nobody knows the answer he wants."]
+    }
+  }
+}

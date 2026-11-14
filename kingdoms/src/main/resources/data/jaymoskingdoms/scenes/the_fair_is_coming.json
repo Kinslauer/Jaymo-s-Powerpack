@@ -1,0 +1,7 @@
+{ "jobs": ["farmer", "nitwit"], "when": "any", "lines": [
+  ["a", "The fair's due by the new moon. Lock up your hens."],
+  ["b", "Fair folk don't steal hens."],
+  ["a", "The bendy one swallowed mine whole. I'd paid to watch before I saw whose hen it was."],
+  ["b", "Was it good?"],
+  ["a", "It clucked for an hour after. I'll give it that."]
+] }

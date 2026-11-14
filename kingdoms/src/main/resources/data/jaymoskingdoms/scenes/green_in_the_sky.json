@@ -1,0 +1,6 @@
+{ "jobs": ["farmer", "*"], "when": "rain", "lines": [
+  ["a", "I don't like that sky. There's green in it."],
+  ["b", "It's only rain."],
+  ["a", "My grandfather saw green in it once. Then he saw his barn go past."],
+  ["b", "I'll get the hens in."]
+] }

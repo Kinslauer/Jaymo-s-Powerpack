@@ -83,7 +83,7 @@
       ]
     },
     "hold": {
-      "do": "defend", "at": "square", "waves": 3, "foes": ["minecraft:pillager", "minecraft:vindicator"], "stars": 2,
+      "do": "defend", "at": "square", "waves": 3, "foes": "minecraft:pillager", "stars": 2,
       "goal": "Hold {town} until dawn", "pay": 10,
       "journal": "They came at the dark of the moon, and we held the square until it was light.",
       "then": "after"
@@ -292,7 +292,7 @@
       "say": [
         "Keep your voice down. My girl's in the house.",
         "I owe the den. Dice, two winters of it. They sold the debt on to somebody who trades with the fort, and a man came and said the debt was gone if one door stood open for one night. He said nobody would be hurt who stayed in bed. I tied the rope up so they would stay in bed.",
-        "I was going to be two towns off before anyone counted. I've {coins:9} and a daughter. Take the nine."
+        "I was going to be two towns off before anyone counted. I've {coins:9} and a daughter. Take it, all of it."
       ],
       "replies": [
         { "say": "Keep your money. The elders must hear it.", "then": "wait_judged", "journal": "{carter} opened the postern to clear a dicing debt that had been sold on to the fort's friends. He offered me his purse. I left him to the elders." },
@@ -355,11 +355,13 @@
     "let_lie": {
       "text": "We held {town}, and I didn't ask who lifted the bar. Nobody asks it aloud. Everybody asks it quietly.",
       "reward": { "coins": 10, "hearts": 6, "reputation": 8 },
+      "marks": ["bell_let_lie"],
       "town": ["Someone opened the river door that night. Could be anyone. Could be you, for all I know.", "I bar my own door twice now. Once against the fort, once against the street."]
     },
     "unnamed": {
       "text": "I would not guess with someone's neck. {giver} has three names and no proof, and has to live beside all of them.",
       "reward": { "coins": 14, "hearts": 8, "reputation": 8 },
+      "marks": ["bell_unnamed"],
       "town": ["It lies between three of them, they say. All three still buy bread. It's a strange thing, selling bread to that.", "{giver} watches the river door every night now. In person."]
     },
     "judged": {

@@ -45,15 +45,15 @@
       "do": "talk", "who": "child", "goal": "Speak with the child in {giver}'s shed",
       "say": {
         "?why=driven": [
-          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "Step up, step up! {coins:1} to see the Boneless Wonder, and nothing at all if you've brought cake. Have you brought cake?",
           "There was shouting, and lanterns, and men with sticks. Ma says when there's shouting you get under something and stay under. So I got under the cooper's shed and stayed. When I came out, the field was just a field."
         ],
         "?why=given": [
-          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "Step up, step up! {coins:1} to see the Boneless Wonder, and nothing at all if you've brought cake. Have you brought cake?",
           "I went to sleep in the third wagon and I woke up in straw, and the door was a different door. There was a honey cake by my head, and my other shirt, folded twice. Ma folds things twice. So it's a trick. She's good at tricks. I just haven't worked out the end of it yet."
         ],
         "?": [
-          "Step up, step up! One coin to see the Boneless Wonder, and no coin at all if you've brought cake. Have you brought cake?",
+          "Step up, step up! {coins:1} to see the Boneless Wonder, and nothing at all if you've brought cake. Have you brought cake?",
           "I overslept. That's all. Wagons go at dawn and I'm a terrible sleeper, everyone says so. They'll have counted by now. They always count. Any day they'll be back up that road, any day at all, and won't I get a hiding."
         ]
       },
@@ -330,6 +330,7 @@
     "reunited": {
       "text": "{child} is back on the third wagon of {master}'s fair, with {mother}. {giver}'s shed is empty, and swept.",
       "reward": { "coins": 10, "hearts": 8, "reputation": 8 },
+      "marks": ["fair_reunited"],
       "town": ["The bendy child's gone back to the fair. Good. Well. Good.", "{giver} still puts a plate out by the shed. Habit, {giver} says."],
       "returns": { "who": "child", "days": [10, 16], "as": "thanks", "say": "Step up, step up! The fair went by on the east road and I ran ahead. Ma says this is yours. It was a whole pie when I set out, and I only bounced on it twice.", "gift": ["minecraft:pumpkin_pie*1", "minecraft:cookie*8"] }
     },
@@ -350,7 +351,7 @@
       "text": "I bought {child}'s bond and {mother} burnt it. The fair goes north with the thaw, and a baron's steward has been told the Wonder died of a chill.",
       "reward": { "hearts": 12, "reputation": 10 },
       "marks": ["fair_bought_bond"],
-      "town": ["{giver} had a letter from the fair. Read it at the door, went in, and baked all night.", "Somebody paid a fair child's bond, they say. Thirty. For one that eats hens."]
+      "town": ["{giver} had a letter from the fair. Read it at the door, went in, and baked all night.", "Somebody paid a fair child's bond, they say. {coins:30}, for one that eats hens."]
     },
     "sold": {
       "text": "The paper stood. {child} goes to a baron's hall for seven years, to fold up small when the guests are bored. The fair will eat this winter.",

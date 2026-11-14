@@ -1,0 +1,6 @@
+{ "jobs": ["*", "*"], "when": "day", "lines": [
+  ["a", "How many have you now? I've lost count."],
+  ["b", "Five. No. Six. One's at my sister's."],
+  ["a", "You've lost count yourself."],
+  ["b", "I count at supper. Whoever's at the table, that's how many."]
+] }

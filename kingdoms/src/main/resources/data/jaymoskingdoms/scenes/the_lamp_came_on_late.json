@@ -1,0 +1,6 @@
+{ "jobs": ["guard", "*"], "when": "night", "lines": [
+  ["a", "The lamp warden lit late tonight. I counted. Late."],
+  ["b", "It's stone. Stone doesn't keep the hours."],
+  ["a", "That one does, to the breath. Something has put it off."],
+  ["b", "Well, now you've put me off. Walk me home."]
+] }

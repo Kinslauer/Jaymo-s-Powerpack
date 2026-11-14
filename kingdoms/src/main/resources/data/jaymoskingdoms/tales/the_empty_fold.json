@@ -3,11 +3,11 @@
   "start": { "by": "giver", "jobs": ["shepherd", "farmer", "butcher", "leatherworker"], "weight": 2 },
   "roll": { "culprit": ["neighbour", "denfolk", "wolves"] },
   "cast": {
-    "neighbour": { "name": ["Odo Marrec", "Hale Brandt", "Tam Corwick"], "body": "villager", "job": "farmer", "at": "steading" },
+    "neighbour": { "if": "culprit=neighbour", "name": ["Odo Marrec", "Hale Brandt", "Tam Corwick"], "body": "villager", "job": "farmer", "at": "steading" },
     "herdboy": { "name": ["Pip", "Wren", "Jory"], "body": "villager", "job": "none", "at": "fold" },
-    "collector": { "name": ["Garrow Vane", "Silas Dunmore"], "body": "fighter", "at": "crossing", "health": 60, "damage": 6, "armor": 8, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate", "men": 2 },
-    "denmother": { "name": ["Ashka", "Merrow", "Senna"], "body": "villager", "job": "none", "female": true, "at": "den" },
-    "packleader": { "name": "the grey one", "body": "minecraft:wolf", "at": "den", "health": 50, "damage": 7, "men": 4 }
+    "collector": { "if": "culprit=neighbour", "name": ["Garrow Vane", "Silas Dunmore"], "body": "fighter", "at": "crossing", "health": 60, "damage": 6, "armor": 8, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate", "men": 2 },
+    "denmother": { "if": "culprit=denfolk", "name": ["Ashka", "Merrow", "Senna"], "body": "villager", "job": "none", "female": true, "at": "den" },
+    "packleader": { "if": "culprit=wolves", "name": "the grey one", "body": "minecraft:wolf", "at": "den", "health": 50, "damage": 7, "men": 4 }
   },
   "places": {
     "fold": { "at": "near", "from": "home", "dist": [40, 70], "name": "the fold" },

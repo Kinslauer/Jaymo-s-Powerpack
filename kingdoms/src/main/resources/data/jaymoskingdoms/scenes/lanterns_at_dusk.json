@@ -1,0 +1,7 @@
+{ "jobs": ["*", "*"], "when": "night", "lines": [
+  ["a", "You've not lit yours tonight."],
+  ["b", "I'm out of oil till market."],
+  ["a", "Then take mine. I'll not have your gran wandering lost because you were short."],
+  ["b", "She's been dead six years."],
+  ["a", "And never once lost. Take the lantern."]
+] }

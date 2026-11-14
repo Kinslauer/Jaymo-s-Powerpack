@@ -1,0 +1,7 @@
+{ "jobs": ["farmer", "farmer"], "when": "rain", "lines": [
+  ["a", "Third day of rain. The seed is rotting in the furrow."],
+  ["b", "Last year you said it was baking in the furrow."],
+  ["a", "It was."],
+  ["b", "One year I'd like to hear what a good furrow sounds like."],
+  ["a", "So would I."]
+] }

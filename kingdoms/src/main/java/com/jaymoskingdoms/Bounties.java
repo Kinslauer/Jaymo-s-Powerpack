@@ -1426,7 +1426,9 @@ public final class Bounties {
 				}
 			}
 			// (0.7.168) no bounty to post: now and then a town notice instead, an errand or a bit of news, a few at a time
-			boolean news = next == null && town < TownNotices.MOST && random.nextFloat() < TownNotices.CHANCE;
+			// (a board whose work gets done holds more, more often: BoardWork)
+			Faction boardTown = next != null ? null : Factions.around(level.getServer(), level, anchor, Villages.VILLAGE_RADIUS);
+			boolean news = next == null && town < BoardWork.room(level, boardTown) && random.nextFloat() < BoardWork.chance(level, boardTown);
 			Villager v = next == null && !news ? null : poster(level, anchor);
 			String key = v == null ? null : next != null ? next.key() : TownNotices.pick(v, up, now, random, anchor.asLong());
 			if (key == null) {
