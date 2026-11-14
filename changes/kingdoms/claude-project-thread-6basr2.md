@@ -4,6 +4,9 @@
   so whatever roamed there downed them before they could see. Now nothing harms a player who can't see the world yet
   (loading screen up, land settling, or the 2 s after it lifts; `StoryGround.unseen`) and mobs going for them are called
   off (`StoryStasis`), and the stay-where-you-are fallback gives the arrival grace too (`LifeStory.arrive`).
+- **A start that gives up lands on its own land** (Andy: "yes i want that"): when the start and then the wild both find
+  nowhere (the land budget ran out in a new, lagging world), the player is put on the land made for that start while they
+  waited (`LifeStory.madeGround`: open ground first, then any floor, then its origin), not left at the world's spawn.
 - **Death Sorcerers are never attuned** (Andy: "death magic is not ki, but it does draw on mana"): they hold and spend mana
   as a natural caster (`Mana.hasMana`), with no attuning flare or line, no glow the attuned can read, no sight of others'
   mana or spirits, and an amethyst seam doesn't take. One already attuned loses it and keeps the mana; a fresh one starts
