@@ -67,9 +67,13 @@ public final class Hanging {
 	private static final List<ToIntFunction<Player>> EXTRA_CUTS = new ArrayList<>();
 	private static final List<BiConsumer<Player, Entity>> ON_DONE = new ArrayList<>();
 
-	/** How practised a butcher someone is (0 up): Jaymo's Kingdoms' Butcher's Hand ranks. */
-	private static ToIntFunction<Player> skill = player -> 0;
-	/** A skinning pull fewer per point of skill (never under one pull); at this much, what a rough death spoiled is saved ({@link CleanKill}). */
+	/**
+	 * How practised a butcher someone is: Jaymo's Kingdoms' Butcher's Hand ranks. Andy: "only the skilled can do it at
+	 * all everyone else uses the butcher table". With none, a carcass on a hook can't be worked; with nobody to say
+	 * (Kitchen alone), everyone can.
+	 */
+	private static ToIntFunction<Player> skill = player -> 1;
+	/** A skinning pull fewer per point of skill past the first (never under one pull); at this much, what a rough death spoiled is saved ({@link CleanKill}). */
 	static final int SKILL_SAVES = 3;
 
 	/** For other mods (by reflection): {@code ranks} says how practised a butcher a player is. */
@@ -252,6 +256,14 @@ public final class Hanging {
 		boolean hung = corpse.hook() != null;
 		int stage = corpse.butcherStage();
 		boolean cleaver = held.is(Butchery.CLEAVERS), knife = held.is(Butchery.SKINNING_KNIVES);
+		if (skill(player) < 1) {
+			// never learned the hook's work: it's the butcher block (or a rough job where it lies) for them
+			if (hung && (cleaver || knife)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.unskilled"));
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			return null;
+		}
 		if (!hung) {
 			if (stage == BLEEDING) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
@@ -362,7 +374,7 @@ public final class Hanging {
 
 	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
 		int strokes = Math.max(1, SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
-			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - skill(player));
+			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - (skill(player) - 1));
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		int made = corpse.addSkinStroke();
 		if (made < strokes) {

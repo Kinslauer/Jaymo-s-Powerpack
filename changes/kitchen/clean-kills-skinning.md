@@ -11,9 +11,18 @@
 - **Skinning in strokes** (`corpse/Hanging`): the skin comes off in 3 knife pulls instead of one click, each wearing
   the knife ("Skinning: pull 1 of 3"). A chicken or rabbit takes 2, a big carcass 5, and a flint or bone knife
   (new tag `jaymoskitchen:poor_knives`) 2 more. The skins and scraps still come on the last pull.
-- **A skill** (Andy: "This should be a skill in the survivalist tree"): `Hanging.setButcherSkill` lets another mod say
-  how practised a butcher a player is. Each point is a skinning pull fewer (never under one); at 3, the first click on
-  a mauled or battered body puts back what was lost ("You trim round the damage: nothing is lost"). A burnt hide stays
-  lost. What was lost is saved with the body (`Spoiled`). Jaymo's Kingdoms' Butcher's Hand perk feeds it.
+- **The hook is for the skilled** (Andy: "only the skilled can do it at all everyone else uses the buther table and
+  now gets less returns"): `Hanging.setButcherSkill` lets another mod say how practised a butcher a player is
+  (Jaymo's Kingdoms' Butcher's Hand ranks; with Kitchen alone everyone counts as 1). At 0, a carcass on a meat hook
+  can't be worked ("You don't know the hook's work. Take it to a Butcher Block"), and a big carcass can't be bled
+  where it lies. Each point past the first is a skinning pull fewer (never under one). At 3, the first click on a
+  mauled or battered body puts back what was lost ("You trim round the damage: nothing is lost"); a burnt hide stays
+  lost. What was lost is saved with the body (`Spoiled`).
+- **The butcher block gives less**: just what the animal would have dropped. The extras (1-2 more meat and
+  `ButcheringBonus`'s hides, bones and rare finds) now come only off the hook, or from a butcher villager. The
+  ground is still about half.
+- **Deer dropped venison the moment they died** (Andy): Cube Animals' 27 animals throw their death loot with
+  `LivingEntity.drop`, which adds the item to the world directly, so the body never got it. `LivingEntityMixin`
+  catches it into the body now (found by reading the mod's jar; the earlier `strayCarcassLoot` guess missed it).
 - Only animal bodies are judged; monsters, villagers and players are as before. Bodies from before this are clean.
 - Compiled with Gradle (compileJava, compileClientJava, processResources); not played.

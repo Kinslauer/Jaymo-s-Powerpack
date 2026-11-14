@@ -2287,8 +2287,8 @@ public class CorpseEntity extends Entity {
 
 	/** Chopped up on the butcher block: out comes the loot, plus a bit extra for doing it properly. */
 	/**
-	 * Chopped up. On a butcher block: everything it would have dropped, extra meat, and the block-only extras (see
-	 * {@link ButcheringBonus}). On the ground: a rough job, about half the usual.
+	 * Chopped up. On a butcher block: everything it would have dropped. On the ground: a rough job, about half the usual.
+	 * The extras (more meat, {@link ButcheringBonus}) come only off a meat hook ({@link Hanging}) or from a village butcher.
 	 */
 	private void butcher(ServerLevel level, boolean onBlock) {
 		if (isMachine()) {
@@ -2297,14 +2297,8 @@ public class CorpseEntity extends Entity {
 		// (0.5.51) never bled: its raw meat spoils in a few days (Spoilage)
 		boolean unbled = butcherStage < Hanging.DRAINED || entityTags().contains(com.jaymoskitchen.rats.Rats.GNAWED_TAG);
 		long day = level.getOverworldClockTime() / 24000L;
-		if (onBlock) {
-			for (ItemStack extra : blockExtras()) {
-				if (unbled) {
-					com.jaymoskitchen.butchery.Spoilage.mark(extra, day);
-				}
-				spawnAtLocation(level, extra, 0.4F);
-			}
-		} else {
+		// on a block it's all there, and no more: the extras ({@link #blockExtras}) are the hook's now (Hanging), and a village butcher's
+		if (!onBlock) {
 			List<ItemStack> rough = new ArrayList<>();
 			for (ItemStack stack : loot) {
 				int count = stack.getCount() / 2;

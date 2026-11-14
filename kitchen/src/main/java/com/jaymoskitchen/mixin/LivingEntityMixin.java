@@ -75,6 +75,23 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		jaymoskitchen$loot.add(stack.copy());
 	}
 
+	/**
+	 * Andy: "the deer seems to drop venison as soon as it is killed". Cube Animals' animals throw their death loot with
+	 * {@code drop}, which puts the item straight into the world (no {@code spawnAtLocation}, so {@code EntityMixin} never
+	 * saw it): caught here for the body too.
+	 */
+	@Inject(
+		method = "drop(Lnet/minecraft/world/item/ItemStack;ZLnet/minecraft/util/Prediction;)Lnet/minecraft/world/entity/item/ItemEntity;",
+		at = @At("HEAD"),
+		cancellable = true)
+	private void jaymoskitchen$catchThrownLoot(ItemStack stack, boolean randomly, net.minecraft.util.Prediction prediction,
+		org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<net.minecraft.world.entity.item.ItemEntity> cir) {
+		if (jaymoskitchen$capturing && !stack.isEmpty()) {
+			jaymoskitchen$capture(stack);
+			cir.setReturnValue(null);
+		}
+	}
+
 	@Inject(method = "dropAllDeathLoot", at = @At("HEAD"))
 	private void jaymoskitchen$startCapture(ServerLevel level, DamageSource source, CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
