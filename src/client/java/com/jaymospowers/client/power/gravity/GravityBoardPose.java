@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.gravity;
 
+import com.jaymospowers.power.arsenal.ArsenalRide;
 import com.jaymospowers.power.gravity.GravityPower;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -66,9 +67,10 @@ public final class GravityBoardPose {
 	/**
 	 * {@code lean}: degrees, + is to the rider's left; {@code pitch}: degrees forward from the hips; {@code tilt}: the
 	 * board's nose-up (degrees, the rider tips with it); {@code climb}: -1 sinking to 1 climbing; {@code bob}: blocks;
-	 * {@code goofy}: right foot forward (left-handed players).
+	 * {@code goofy}: right foot forward (left-handed players); {@code freeArms}: the arms are left to whatever they
+	 * were doing (an Arsenal user on a ridden blade, who fights from it).
 	 */
-	public record Ride(float lean, float pitch, float time, float tilt, float climb, float bob, boolean goofy) {
+	public record Ride(float lean, float pitch, float time, float tilt, float climb, float bob, boolean goofy, boolean freeArms) {
 	}
 
 	public static final RenderStateDataKey<Ride> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_board");
@@ -81,7 +83,8 @@ public final class GravityBoardPose {
 	}
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (!(entity instanceof Player player) || player.getAttached(GravityPower.ROCK_FLIGHT) == null || player.isPassenger()) {
+		if (!(entity instanceof Player player) || player.isPassenger()
+			|| player.getAttached(GravityPower.ROCK_FLIGHT) == null && player.getAttached(ArsenalRide.RIDE) == null) {
 			SPRINGS.remove(entity.getId());
 			state.setData(KEY, null);
 			return;
@@ -116,7 +119,8 @@ public final class GravityBoardPose {
 		spring(s, CLIMB, climb, dt);
 		spring(s, PITCH_EXTRA, SPEED_PITCH * ahead, dt);
 		float bob = Mth.sin(time * BOB_RATE) * BOB * (1.0F - 0.5F * ahead);
-		return new Ride(s[LEAN], PITCH + s[PITCH_EXTRA], time, s[TILT], s[CLIMB], bob, player.getMainArm() == HumanoidArm.LEFT);
+		return new Ride(s[LEAN], PITCH + s[PITCH_EXTRA], time, s[TILT], s[CLIMB], bob, player.getMainArm() == HumanoidArm.LEFT,
+			player.getAttached(GravityPower.ROCK_FLIGHT) == null);
 	}
 
 	/** One damped spring (value at {@code i}, its speed at {@code i + 1}) stepped {@code dt} ticks toward {@code target}. */
@@ -169,8 +173,10 @@ public final class GravityBoardPose {
 		float swing = -heel * ARM_LEAN;
 		// the lead arm out over the nose, the back arm out over the tail; a heel-side lean swings both forward
 		ModelPart lead = ride.goofy() ? h.rightArm : h.leftArm, trail = ride.goofy() ? h.leftArm : h.rightArm;
-		set(lead, -LEAD_FORWARD + swing + sway, 0.0F, -LEAD_OUT * side + sway * 0.5F);
-		set(trail, -TRAIL_FORWARD + swing - sway, 0.0F, TRAIL_OUT * side - sway * 0.5F);
+		if (!ride.freeArms()) {
+			set(lead, -LEAD_FORWARD + swing + sway, 0.0F, -LEAD_OUT * side + sway * 0.5F);
+			set(trail, -TRAIL_FORWARD + swing - sway, 0.0F, TRAIL_OUT * side - sway * 0.5F);
+		}
 		// the legs stand back up against the hinge, wide apart along the board
 		float spread = spread(ride);
 		set(h.rightLeg, -pitch, 0.0F, spread);

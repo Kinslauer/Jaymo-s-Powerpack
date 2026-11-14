@@ -58,6 +58,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalWingRenderer::render);
 		// Blade Storm: the shoulder rift and the blades on their loops
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalStormRenderer::render);
+		// Blade riding: the blade under its rider's feet
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalRideRenderer::render);
 		// Rift Chains: the rifts around whatever is bound, and their chains
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalChainsRenderer::render);
 		ArsenalPortalRenderer.init();
@@ -83,6 +85,12 @@ public final class ArsenalPowerClient implements PowerClient {
 				.withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC);
 			lines.add(Math.min(1, lines.size()), line);
 		});
+	}
+
+	/** Blade riding: Jump tapped twice, and the ridden blade's flight. */
+	@Override
+	public void tick(Minecraft minecraft, LocalPlayer player) {
+		ArsenalRideClient.tick(minecraft, player);
 	}
 
 	/** (0.15.58) Sneak + G (once B is unlocked): the places menu; it picks on letting go. The server skips Return for it. */

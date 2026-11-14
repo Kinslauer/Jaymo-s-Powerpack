@@ -29,7 +29,7 @@ of 36 rows on the pick page (https://claude.ai/artifact/FdTQFbbhv8615nRy6t3QnC).
 | Harry / steer | Sneak + B tap / hold, with the blades out | same |
 | Hand the wing what you hold | G with the blades out | same |
 | Blade Storm | hold V (a tap is still Barrage, on letting go); also on the wheel | on the wheel |
-| Blade riding (patch 4) | double tap Jump | same |
+| Blade riding (step on, and step off and send it) | double tap Jump | same |
 
 The Void Arsenal differs because its Sneak + V already steps through gates.
 
@@ -45,8 +45,11 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
    (`ArsenalStorm.place`), not entities, so they follow the holder's aim. Each loop is spread to one side so a storm
    covers a crowd; the wing feeds the storm; own weapons and rocks on the wing take turns in it; echo blades ignore walls;
    ribbon and flash through `MagicFx`. The holder is slowed. Not done here: wing strikes still fly straight (`RiftBlade`).
-4. **Blade riding**: double tap Jump, fight from the blade, step off and send it, riding with broken legs (`LimbUse`
-   wobble). Until mastered the ridden blade can go home at random (with a short warning shake).
+4. **Blade riding** (built, `ArsenalRide` + client `ArsenalRideClient`, `ArsenalRideRenderer`): double tap Jump. The
+   rider's client flies it the way they look; hands stay free, so they fight from the blade and the wing still takes its
+   orders. Double tap Jump again steps off and sends the blade on as one heavy hit. Broken legs wobble it (`LimbMotion`).
+   Until every ability is unlocked it can go home early, after a short warning shake. The stance is the earthboard's
+   (`GravityBoardPose`) with the arms left free.
 5. **Big moves**: Closing Ring, step to a blade, wing combos (Kingdoms' Weapon Forms engine through `PowersCompat`), the
    wing joining Hundred Blades and the Sword of Damocles.
 6. **Look and who else**: the Void wing (corruption per strike, Endermen notice), guns on the wing, relic gifts carry
