@@ -1,10 +1,23 @@
 {
   "entity.jaymoskingdoms.youth_wisp": "Youth",
-  "message.jaymoskingdoms.youth_wisp.how": "Ask me in chat: \"youth, how does ... work?\"",
+  "message.jaymoskingdoms.youth_wisp.how": "Just say \"youth\" in chat and ask me. Lost? Cry \"help!\" while I'm in sight and I'll fly you to your bed.",
   "message.jaymoskingdoms.youth_wisp.hold.0": "Studying that! Back soon.",
   "message.jaymoskingdoms.youth_wisp.hold.1": "Be right back!",
   "message.jaymoskingdoms.youth_wisp.hold.2": "I'd have to check. Back in a moment!",
   "message.jaymoskingdoms.youth_wisp.hold.3": "Ooh, good one. Let me go look it up!",
   "message.jaymoskingdoms.youth_wisp.hold.4": "Off to ask the elders. Back soon!",
-  "message.jaymoskingdoms.youth_wisp.hold.5": "That needs some reading. Be right back!"
+  "message.jaymoskingdoms.youth_wisp.hold.5": "That needs some reading. Be right back!",
+  "message.jaymoskingdoms.youth_wisp.home.0": "Home you go!",
+  "message.jaymoskingdoms.youth_wisp.home.1": "Hold on tight! Second star to the right...",
+  "message.jaymoskingdoms.youth_wisp.home.2": "Off to bed with you!",
+  "message.jaymoskingdoms.youth_wisp.no_bed": "You've no bed for me to fly you to! Sleep in one first.",
+  "message.jaymoskingdoms.youth_wisp.bed_gone": "Your bed's gone! I can't find the way.",
+  "talk.jaymoskingdoms.gossip.youth.0": "Got a question about how the world works? Just say \"youth\" aloud. Something small comes to answer.",
+  "talk.jaymoskingdoms.gossip.youth.1": "My gran swore by it: say \"youth\" and the elders' wisp comes and answers you.",
+  "talk.jaymoskingdoms.gossip.youth.2": "Don't ask me, ask the wisp. You know its name. Just say it.",
+  "talk.jaymoskingdoms.gossip.youth.3": "There's a little green thing with wings that comes when it's called by name. Young-looking. Always young-looking.",
+  "talk.jaymoskingdoms.gossip.youth.4": "The Sylvan elders forget nothing, they say. Their wisps carry it to anyone who asks aloud.",
+  "talk.jaymoskingdoms.gossip.youth.5": "If you're ever lost and a wisp's in sight, cry for help. It'll have you home in your bed before you blink.",
+  "talk.jaymoskingdoms.gossip.youth.6": "I said its name once, half joking. And there it was, turning cartwheels in the air, grinning at me.",
+  "talk.jaymoskingdoms.gossip.youth.7": "The children shout \"youth!\" in the fields all day. Half the time something answers."
 }

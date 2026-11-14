@@ -54,12 +54,13 @@ public final class ProximityChat {
 	static void register() {
 		ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> {
 			String text = message.signedContent().strip();
-			// a question for Youth goes in the server log in one fixed form, for Hermes to read
-			com.jaymoskingdoms.inhabitants.YouthWisp.heard(sender, text);
 			// (0.7.465) the Grue keeps your words to wear later; and while it has you, yours don't come out
 			if (!text.isEmpty() && com.jaymoskingdoms.spirits.Grue.heard(sender, text)) {
 				speak(sender, text);
 			}
+			// Youth's name calls its wisp, and the line goes in the server log for Hermes; a cry for help in a wisp's sight
+			// carries the crier home (after the line is spoken, so it's heard where it was cried)
+			com.jaymoskingdoms.inhabitants.YouthWisp.heard(sender, text);
 			// never the vanilla broadcast to everyone
 			return false;
 		});

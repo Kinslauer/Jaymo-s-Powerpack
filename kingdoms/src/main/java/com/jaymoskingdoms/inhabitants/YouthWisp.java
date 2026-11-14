@@ -48,9 +48,21 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final int IDLE_TIMEOUT = 2 * 60 * 20;
 	/** Ticks between two right-click hints from the same wisp. */
 	static final int HINT_COOLDOWN = 5 * 20;
-	/** A chat line that calls Youth: its name first (any case), then the question ("youth, how does Crush work?"). */
-	static final java.util.regex.Pattern CALL = java.util.regex.Pattern.compile("^[!*]?\\s*youth\\b[\\s,:!.?-]*(.*)$",
+	/** A chat line that calls Youth: its name anywhere in it, as a word, in any case ("youth, how does Crush work?"). */
+	static final java.util.regex.Pattern CALL = java.util.regex.Pattern.compile("\\byouth\\b", java.util.regex.Pattern.CASE_INSENSITIVE);
+	/** Its name at the front of a line, and what follows it (the question). */
+	static final java.util.regex.Pattern LEAD = java.util.regex.Pattern.compile("^[!*]?\\s*youth\\b[\\s,:!.?-]*(.*)$",
 		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/** A cry for help ("HELP", "help me!", "youth, help me"), which carries its crier home if a wisp is in sight. */
+	static final java.util.regex.Pattern HELP = java.util.regex.Pattern.compile("^help(\\s+me)?[\\s!.]*$", java.util.regex.Pattern.CASE_INSENSITIVE);
+	/** A wisp is in sight for a cry for help this near (blocks), in clear view and within this cosine of where they look. */
+	static final double HELP_RANGE = 24.0, HELP_VIEW = 0.45;
+	/** The flash of the trip home: leaf green (0xRRGGBB). */
+	static final int HOME_COLOUR = 0x5CE07A;
+	/** How many lines it says as it carries someone home, and how many villager gossip lines there are of it. */
+	static final int HOME_LINES = 3, GOSSIP_LINES = 8;
+	/** How often a villager's gossip is of the wisps (Overworld only). */
+	static final float GOSSIP_CHANCE = 0.03F;
 
 	/** How many "be right back" lines it has (message.jaymoskingdoms.youth_wisp.hold.0 ...). */
 	static final int HOLD_LINES = 6;
@@ -63,17 +75,17 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** How far it drifts about its spot while it waits (blocks), and how quickly it follows (share of the gap a tick). */
 	static final double DRIFT = 0.6, FOLLOW = 0.12;
 	/** How long the vanish animation plays before it is gone (ticks). */
-	static final int VANISH_TICKS = 20;
-	/** The pause between two idles (ticks, a random length between these). */
-	static final int GAP_MIN = 40, GAP_MAX = 120;
+	static final int VANISH_TICKS = 10;
+	/** The pause between two idles (ticks, a random length between these): short, it's never still for long. */
+	static final int GAP_MIN = 10, GAP_MAX = 40;
 	/** Its light: a pale leaf-green (0xRRGGBB), for its motes and its name in chat. */
 	static final int COLOUR = 0xBEF0D6;
 	/** How often (ticks) a mote drifts off it while it waits. */
 	static final int MOTE_EVERY = 12;
 
 	/** The eight idles, as named in its .animation.json, how long each plays (seconds), and how often each is picked. */
-	static final String[] IDLES = {"hover", "flutter", "loop", "sit", "stretch", "peer", "twirl", "cup"};
-	static final float[] IDLE_SECONDS = {2.4F, 1.6F, 2.0F, 3.2F, 2.4F, 2.6F, 2.4F, 3.0F};
+	static final String[] IDLES = {"hover", "crow", "flip", "sit", "swoop", "lounge", "spin", "laugh"};
+	static final float[] IDLE_SECONDS = {1.2F, 1.3F, 0.7F, 1.8F, 0.8F, 1.8F, 0.6F, 1.2F};
 	static final int[] IDLE_WEIGHT = {3, 1, 1, 1, 1, 1, 1, 1};
 	static final RawAnimation HOVER = RawAnimation.begin().thenLoop("hover");
 	static final RawAnimation APPEAR = RawAnimation.begin().thenPlay("appear");
@@ -161,17 +173,113 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	}
 
 	/**
-	 * A chat line someone said: if it calls Youth, it goes in the server log as
-	 * {@code [youth-ask] <account name> <question>} (an empty question when they only said its name). Chat here is
-	 * proximity chat, which never reaches the log in vanilla's form, and shows nicknames ("Stranger"), so this fixed line
-	 * is what Hermes's listener reads. The account name is what {@code /youth summon} and {@code /youth say} take.
+	 * A chat line someone said. A cry for help ({@link #HELP}) with a wisp in sight carries them home ({@link #carryHome}).
+	 * Otherwise, if it names Youth anywhere, their wisp comes, and the line goes in the server log as
+	 * {@code [youth-ask] <account name> <question>} (the words after its name when it leads, else the whole line; empty
+	 * when they only said its name). Chat here is proximity chat, which never reaches the log in vanilla's form, and shows
+	 * nicknames ("Stranger"), so this fixed line is what Hermes's listener reads. The account name is what
+	 * {@code /youth summon} and {@code /youth say} take.
 	 */
 	public static void heard(ServerPlayer player, String text) {
-		java.util.regex.Matcher m = CALL.matcher(text);
-		if (m.matches()) {
-			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(),
-				m.group(1).replaceAll("\\s+", " ").strip());
+		java.util.regex.Matcher lead = LEAD.matcher(text);
+		String rest = lead.matches() ? lead.group(1) : text;
+		if (HELP.matcher(rest.strip()).matches()) {
+			YouthWisp seen = inSight(player);
+			if (seen != null) {
+				seen.carryHome(player);
+				return;
+			}
 		}
+		if (CALL.matcher(text).find()) {
+			YouthWisp wisp = summon(player);
+			if (wisp != null) {
+				wisp.lastAsked = wisp.tickCount;
+			}
+			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(),
+				rest.replaceAll("\\s+", " ").strip());
+		}
+	}
+
+	/** The nearest wisp {@code player} can see on their screen (near, in clear view, before them), or null. */
+	static @Nullable YouthWisp inSight(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition(), look = player.getLookAngle();
+		YouthWisp best = null;
+		double bestSq = HELP_RANGE * HELP_RANGE;
+		for (YouthWisp wisp : BY_ASKER.values()) {
+			if (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.level() != player.level()) {
+				continue;
+			}
+			Vec3 to = wisp.getBoundingBox().getCenter().subtract(eye);
+			double sq = to.lengthSqr();
+			if (sq < bestSq && (sq < 1.0 || to.normalize().dot(look) >= HELP_VIEW) && player.hasLineOfSight(wisp)) {
+				best = wisp;
+				bestSq = sq;
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * {@code player} cried for help where this wisp could see them: it carries them to their bed (or wherever they'd wake),
+	 * in a green flash, leaves and light rising where they stood and falling where they land, and goes home itself. With
+	 * no bed to go to, it says so and stays.
+	 */
+	void carryHome(ServerPlayer player) {
+		this.triggerAnim("action", "talk");
+		this.lastAsked = this.tickCount;
+		net.minecraft.world.level.portal.TeleportTransition home = player.getRespawnConfig() == null ? null
+			: player.findRespawnPositionAndUseSpawnBlock(false, net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING);
+		if (home == null || home.missingRespawnBlock()) {
+			player.sendSystemMessage(line(Component.translatable(home == null
+				? "message.jaymoskingdoms.youth_wisp.no_bed" : "message.jaymoskingdoms.youth_wisp.bed_gone")));
+			return;
+		}
+		player.sendSystemMessage(line(Component.translatable("message.jaymoskingdoms.youth_wisp.home." + this.random.nextInt(HOME_LINES))));
+		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HomeFlash.TYPE)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HomeFlash());
+		}
+		homeLight(player.level(), player.position(), true);
+		player.stopRiding();
+		if (player.teleport(home) != null) {
+			homeLight(home.newLevel(), home.position(), false);
+		}
+		this.vanish();
+	}
+
+	/** The layered light of a trip home at {@code at}: a sigil and ring at the feet, a blast, and leaves and motes rising (or falling). */
+	private static void homeLight(ServerLevel level, Vec3 at, boolean leaving) {
+		Fx.sigil(level, at.add(0, 0.05, 0), 1.6F, HOME_COLOUR, 30);
+		Fx.ring(level, at, 2.5F, HOME_COLOUR);
+		Fx.blast(level, at.add(0, 1.0, 0), 1.2F, COLOUR);
+		Fx.burst(level, at.x, at.y + 1.0, at.z, HOME_COLOUR, 0.9F, 30, 0.4, 0.8, 0.4);
+		double rise = leaving ? 0.12 : -0.08;
+		level.sendParticles(Fx.wisp(COLOUR, 0.8F), at.x, at.y + (leaving ? 0.2 : 2.2), at.z, 16, 0.35, 0.3, 0.35, 0.02);
+		level.sendParticles(Fx.mote(HOME_COLOUR, 0.7F), at.x, at.y + 1.0, at.z, 0, 0.0, rise, 0.0, 1.0);
+		for (int i = 0; i < 12; i++) {
+			double a = i * Math.PI / 6.0;
+			level.sendParticles(Fx.mote(i % 2 == 0 ? HOME_COLOUR : COLOUR, 0.6F), at.x + Math.cos(a) * 0.8, at.y + 0.2 + i * 0.15,
+				at.z + Math.sin(a) * 0.8, 0, 0.0, rise, 0.0, 1.0);
+		}
+	}
+
+	/** Server to the one carried home: flash the screen green. */
+	public record HomeFlash() implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<HomeFlash> TYPE = new Type<>(com.jaymoskingdoms.JaymosKingdoms.id("youth_home_flash"));
+		public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, HomeFlash> CODEC =
+			net.minecraft.network.codec.StreamCodec.unit(new HomeFlash());
+
+		@Override
+		public Type<HomeFlash> type() {
+			return TYPE;
+		}
+	}
+
+	/** Now and then, a villager's word of the wisps: just say its name; or, sideways, what it does. Null most times. */
+	public static @Nullable Component gossip(ServerLevel level) {
+		if (level.dimension() != Level.OVERWORLD || level.getRandom().nextFloat() >= GOSSIP_CHANCE) {
+			return null;
+		}
+		return Component.translatable("talk.jaymoskingdoms.gossip.youth." + level.getRandom().nextInt(GOSSIP_LINES));
 	}
 
 	/** Sends {@code player}'s wisp home; false if they had none. */
