@@ -277,6 +277,14 @@ public final class StoryHard {
 		LifeStory.startHunt(level.getServer(), player, shackle.camp());
 	}
 
+	/** The shackle comes off quietly, with no hunt: a captive their captors killed ({@link CaptiveConduct#executed}). */
+	static void release(ServerPlayer player) {
+		player.removeAttached(SHACKLE);
+		Shackles.untie(player);
+		SLIPPING.remove(player.getUUID());
+		STOOD.remove(player.getUUID());
+	}
+
 	// ---- sentenced -----------------------------------------------------------------------------------------------------
 
 	/**
