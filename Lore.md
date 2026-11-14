@@ -212,6 +212,23 @@ sink deep enough into corruption to read magic: no glow on a wizard, no mana win
 mage hands, no clash of spirits. Their own mana, if they have any, they still feel. Valor wakes and grows in them as in
 any other power user.
 
+(new) **The gods of the elements** (Jung's Elemental Corruption, 2026-11-13; the gods are Claude's placement, for Andy
+to approve). The wind, the smoke, the weight of things and the cold are older than the eight faiths, and something
+old answers for each: not patrons, they keep no shrines and take no offerings, and folk who speak of them at all say
+only "the gods of the power". They let a holder corrupt the gift and say nothing. What they will not stand is the gift
+used to murder the innocent in their name: a villager of any people but the camps (the barbarians follow the
+Unseeing and are nothing to them). The first such killing, a voice in the holder's head; the second, a warning; the
+third, they take the gift back. The element turns on the land around the killer (a storm and its lightning, a fog,
+the ground thrown into the air, a flash freeze), and for a while the power runs wild in them: twice as strong, it
+wounds them with every blow they strike and burns them where they stand, and every creature that can flees them.
+Then it is gone for three days. The gods give it back still spoiled, unless the holder has made penance meanwhile:
+a Purifying Draught drunk while the gift is gone cleanses it. Jung counted Wind among the elements for this, beside
+the three that Andy named.
+(new) **The cold that kills** (Cryokinesis' corruption, 2026-11-13, Claude's placement for Andy to approve). A
+Cryokinesis holder who lets the cold do their killing, creature after creature frozen to death, finds it hungry: the
+power corrupts, and frost sheds off them. Warmth is the cure: a Purifying Draught drunk beside a lit campfire thaws it
+for good.
+
 **Powers in everyday life** (Andy, 2026-11-11). Many power users don't care for theatrics and simply use their power
 outright, mostly to make daily life easier: putting out a fire, keeping a food store or a home cold.
 
