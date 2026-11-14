@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.reaped.Reaped;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,7 +85,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Andy's picks from the two mods (2026-11-14), each in its place below: what a horde is ({@link Kind}: the dead, skeletons
  * (never creepers), drowned by the water, the dead with archers behind, the Nether's (never blazes), and the illagers' hit
- * squads sent after a player who's become a threat); grave-captains with a boss bar, undead pirate lobbers with powder
+ * squads sent after a player who's become a threat; and the Reaper's host, {@link Reaped}, dead illagers who march on the
+ * nearest settlement or camp and take the living illagers they kill into their ranks); grave-captains with a boss bar, undead pirate lobbers with powder
  * kegs, one member now and then carrying loot that's sure to drop, and more health and harm as the danger climbs
  * ({@link #special}); climbing over each other, crossing water and breaking through ({@link HordeMoves}); bell wards
  * ({@link HordeWards}); the grave scent and the grave lure ({@link HordeLure}); the danger hinted at in the Rung Journal.
@@ -157,7 +159,13 @@ public final class ZombieHordes {
 	/** Which kind a horde is, by the danger: skeletons from this, the dead with archers from this, hit squads from this (or Wildlands). */
 	static final float SKELETON_DANGER = 0.2F, MIXED_DANGER = 0.5F, SQUAD_DANGER = 0.6F;
 	static final float SKELETON_CHANCE = 0.25F, MIXED_CHANCE = 0.2F, DROWNED_CHANCE = 0.5F, SQUAD_CHANCE = 0.06F;
-	/** A hit squad has an evoker leading it from this world tier (Dread). */
+	/** The Reaper's host: from this danger, this chance (under a blood moon, the second). */
+	static final float REAPED_DANGER = 0.3F, REAPED_CHANCE = 0.1F, REAPED_BLOOD_CHANCE = 0.15F;
+	/** It marches on the nearest settlement or camp whose seat is within this many blocks of where it rose, and holds within this many of the seat. */
+	static final double WAR_REACH = 128.0, WAR_HOLD = 12.0;
+	/** A warlord leads it: this chance at no danger plus the extra at full. */
+	static final float WARLORD_CHANCE = 0.2F, WARLORD_CHANCE_DANGER = 0.4F;
+	/** A hit squad has an evoker leading it from this world tier (Dread); so has the Reaper's host. */
 	static final int EVOKER_TIER = 3;
 
 	/** Extra health and harm for every member, at full danger (shares of their own). */
@@ -201,7 +209,9 @@ public final class ZombieHordes {
 		/** The Nether's: piglins, hoglins, wither skeletons, magma cubes (never blazes, Andy). */
 		NETHER,
 		/** The illagers' hit squad, put together to deal with a player who's become a threat (Andy): it never loses them. */
-		SQUAD;
+		SQUAD,
+		/** The Reaper's host ({@link Reaped}): dead illagers, at war with the living. They don't burn, and when the host breaks up the Reaper takes them back. */
+		REAPED;
 
 		boolean dead() {
 			return this == DEAD || this == DROWNED || this == MIXED;
@@ -217,6 +227,8 @@ public final class ZombieHordes {
 		final List<Mob> members = new ArrayList<>();
 		final long born;
 		Vec3 goal;
+		/** The seat the Reaper's host marches on, if one was in reach. */
+		@Nullable Vec3 war;
 
 		Horde(ServerLevel level, UUID hunted, Kind kind, boolean blood, boolean cave, float danger, Vec3 goal) {
 			this.level = level;
@@ -231,7 +243,7 @@ public final class ZombieHordes {
 
 		/** It stays out by day: underground, in the Nether, or the illagers (they don't burn). */
 		boolean daylit() {
-			return this.cave || this.kind == Kind.NETHER || this.kind == Kind.SQUAD;
+			return this.cave || this.kind == Kind.NETHER || this.kind == Kind.SQUAD || this.kind == Kind.REAPED;
 		}
 	}
 
@@ -242,6 +254,9 @@ public final class ZombieHordes {
 	private static final Map<Mob, ServerBossEvent> CAPTAINS = new WeakHashMap<>();
 	/** Lobbers loaded, and when each last threw. */
 	private static final Map<Mob, Long> LOBBERS = new WeakHashMap<>();
+
+	/** The kind the next horde sent is, whatever would have come ({@code /kingdom horde reaped}). */
+	private static @Nullable Kind forced;
 
 	private ZombieHordes() {
 	}
@@ -279,7 +294,16 @@ public final class ZombieHordes {
 			.then(Commands.literal("horde").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> {
 				ServerPlayer player = c.getSource().getPlayerOrException();
 				return send(player, Moons.now(c.getSource().getServer())) > 0 ? 1 : 0;
-			}))));
+			}).then(Commands.literal("reaped").executes(c -> {
+				// the Reaper's host, whatever the danger
+				ServerPlayer player = c.getSource().getPlayerOrException();
+				forced = Kind.REAPED;
+				try {
+					return send(player, Moons.Moon.NONE) > 0 ? 1 : 0;
+				} finally {
+					forced = null;
+				}
+			})))));
 	}
 
 	// ---- the danger -----------------------------------------------------------------------------------------------------
@@ -329,7 +353,7 @@ public final class ZombieHordes {
 		long ticks = server.getTickCount();
 		if (!HORDES.isEmpty()) {
 			for (Horde horde : HORDES) {
-				HordeMoves.tick(horde.level, horde.members, horde.goal, horde.danger, horde.kind.dead() || horde.kind == Kind.SQUAD || horde.kind == Kind.NETHER);
+				HordeMoves.tick(horde.level, horde.members, horde.goal, horde.danger, horde.kind.dead() || horde.kind == Kind.SQUAD || horde.kind == Kind.NETHER || horde.kind == Kind.REAPED);
 			}
 			if (ticks % MARCH_EVERY == 0) {
 				march();
@@ -393,8 +417,14 @@ public final class ZombieHordes {
 
 	/** What kind of horde comes for {@code player} at {@code centre}. */
 	private static Kind kind(ServerLevel level, ServerPlayer player, BlockPos centre, float danger, boolean blood, RandomSource random) {
+		if (forced != null) {
+			return forced;
+		}
 		if (level.dimension() == Level.NETHER) {
 			return Kind.NETHER;
+		}
+		if (danger >= REAPED_DANGER && random.nextFloat() < (blood ? REAPED_BLOOD_CHANCE : REAPED_CHANCE)) {
+			return Kind.REAPED;
 		}
 		if (blood) {
 			// a blood moon wakes the dead
@@ -441,6 +471,7 @@ public final class ZombieHordes {
 				float r = random.nextFloat();
 				yield r < 0.3F ? EntityTypes.PIGLIN : r < 0.5F ? EntityTypes.HOGLIN : r < 0.8F ? EntityTypes.WITHER_SKELETON : EntityTypes.MAGMA_CUBE;
 			}
+			case REAPED -> index == 0 && tier >= EVOKER_TIER ? Reaped.evoker() : random.nextFloat() < 0.55F ? Reaped.vindicator() : Reaped.pillager();
 			case SQUAD -> index == 0 && tier >= EVOKER_TIER ? EntityTypes.EVOKER : random.nextFloat() < 0.6F ? EntityTypes.VINDICATOR : EntityTypes.PILLAGER;
 		};
 	}
@@ -487,6 +518,9 @@ public final class ZombieHordes {
 				continue;
 			}
 			special(level, horde, tier, random);
+			if (kind == Kind.REAPED) {
+				horde.war = warSeat(level, centre);
+			}
 			HORDES.add(horde);
 			level.playSound(null, centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5, groan(kind), SoundSource.HOSTILE, GROAN_VOLUME, 0.55F);
 			JaymosKingdoms.LOGGER.debug("a {} horde of {} came for {} (danger {})", kind, horde.members.size(), player.getScoreboardName(), danger);
@@ -495,8 +529,26 @@ public final class ZombieHordes {
 		return 0;
 	}
 
+	/** Where the Reaper's host goes to war: the seat of the nearest standing settlement or camp within {@link #WAR_REACH} of {@code centre}, or null. */
+	private static @Nullable Vec3 warSeat(ServerLevel level, BlockPos centre) {
+		if (level.dimension() != Level.OVERWORLD) {
+			return null;
+		}
+		Faction best = null;
+		double bestD = WAR_REACH * WAR_REACH;
+		for (Faction f : Factions.all(level.getServer())) {
+			double d = f.seat().distSqr(centre);
+			if (!f.fallen() && d <= bestD) {
+				best = f;
+				bestD = d;
+			}
+		}
+		return best == null ? null : Vec3.atBottomCenterOf(best.seat());
+	}
+
 	private static net.minecraft.sounds.SoundEvent groan(Kind kind) {
 		return switch (kind) {
+			case REAPED -> SoundEvents.RAID_HORN.value();
 			case SKELETONS -> SoundEvents.SKELETON_AMBIENT;
 			case DROWNED -> SoundEvents.DROWNED_AMBIENT;
 			case NETHER -> SoundEvents.HOGLIN_ANGRY;
@@ -628,10 +680,16 @@ public final class ZombieHordes {
 		Collections.shuffle(pool, new java.util.Random(random.nextLong()));
 		Iterator<Mob> next = pool.iterator();
 		float danger = horde.danger;
+		if (horde.kind == Kind.REAPED && random.nextFloat() < WARLORD_CHANCE + WARLORD_CHANCE_DANGER * danger) {
+			Mob m = nextOf(next, Vindicator.class);
+			if (m != null) {
+				captain(m, "entity.jaymoskingdoms.reaped_warlord");
+			}
+		}
 		if (horde.kind.dead() && danger >= CAPTAIN_DANGER && random.nextFloat() < CAPTAIN_CHANCE + CAPTAIN_CHANCE_DANGER * danger) {
 			Mob m = nextOf(next, Zombie.class);
 			if (m != null) {
-				captain(m);
+				captain(m, "entity.jaymoskingdoms.grave_captain");
 			}
 		}
 		if (horde.kind.dead() && danger >= LOBBER_DANGER
@@ -665,7 +723,7 @@ public final class ZombieHordes {
 	}
 
 	/** {@code mob} leads the dead: bigger, much tougher, harder hitting, hard to shove, and its own bar. */
-	private static void captain(Mob mob) {
+	private static void captain(Mob mob, String name) {
 		mob.addTag(CAPTAIN_TAG);
 		modify(mob, Attributes.SCALE, CAPTAIN_SCALE_ID, CAPTAIN_SCALE);
 		modify(mob, Attributes.MAX_HEALTH, CAPTAIN_HEALTH_ID, CAPTAIN_HEALTH);
@@ -675,12 +733,12 @@ public final class ZombieHordes {
 			knock.addOrReplacePermanentModifier(new AttributeModifier(CAPTAIN_KNOCKBACK_ID, CAPTAIN_KNOCKBACK, AttributeModifier.Operation.ADD_VALUE));
 		}
 		mob.setHealth(mob.getMaxHealth());
-		mob.setCustomName(Component.translatable("entity.jaymoskingdoms.grave_captain"));
+		mob.setCustomName(Component.translatable(name));
 		CAPTAINS.computeIfAbsent(mob, ZombieHordes::bar);
 	}
 
 	private static ServerBossEvent bar(Mob mob) {
-		ServerBossEvent bar = new ServerBossEvent(mob.getUUID(), Component.translatable("entity.jaymoskingdoms.grave_captain"),
+		ServerBossEvent bar = new ServerBossEvent(mob.getUUID(), mob.getCustomName() != null ? mob.getCustomName() : Component.translatable("entity.jaymoskingdoms.grave_captain"),
 			BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10);
 		return bar;
 	}
@@ -787,8 +845,11 @@ public final class ZombieHordes {
 			boolean over = horde.members.isEmpty() || level.getGameTime() - horde.born > MAX_AGE
 				|| !horde.daylit() && !surfaceWeather(overworld);
 			if (over) {
-				// sunrise, or it's had its night: ordinary monsters again
+				// sunrise, or it's had its night: ordinary monsters again (the Reaper's host is taken back)
 				horde.members.forEach(m -> m.removeTag(TAG));
+				if (horde.kind == Kind.REAPED) {
+					horde.members.forEach(m -> takeBack(level, m));
+				}
 				it.remove();
 				continue;
 			}
@@ -820,6 +881,10 @@ public final class ZombieHordes {
 				}
 				continue;
 			}
+			// the Reaper's host goes to its war first; once it stands on the seat it turns on whoever it came up behind
+			if (horde.war != null && horde.war.distanceTo(centre) > WAR_HOLD) {
+				horde.goal = horde.war;
+			} else
 			// the one they came for, while they're near enough (a hit squad: anywhere here); lost, it wanders on
 			if (hunted != null && (horde.kind == Kind.SQUAD || hunted.position().distanceTo(centre) < TRACK_RANGE)) {
 				horde.goal = hunted.position();
@@ -849,6 +914,28 @@ public final class ZombieHordes {
 				}
 			}
 		}
+	}
+
+	/** The Reaper takes one of its host back: gone in smoke, leaving nothing. */
+	private static void takeBack(ServerLevel level, Mob mob) {
+		level.sendParticles(Fx.miasma(Reaper.SMOKE, 1.4F), mob.getX(), mob.getY() + 1.0, mob.getZ(), 12, 0.3, 0.6, 0.3, 0.01);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 0.8F, 0.5F);
+		mob.discard();
+	}
+
+	/** {@code newcomer} (an illager the Reaper's host killed, got up again) falls in with the horde {@code member} marches with, if there's room. */
+	public static boolean enlist(Mob member, Mob newcomer) {
+		for (Horde horde : HORDES) {
+			if (horde.members.contains(member)) {
+				if (horde.members.size() >= MAX_MEMBERS) {
+					return false;
+				}
+				join(newcomer, horde.danger);
+				horde.members.add(newcomer);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Leads {@code mob} to {@code spot}: through its senses, and the Nether's beasts (who think with a brain) by their walk target. */

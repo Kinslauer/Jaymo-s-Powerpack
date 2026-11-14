@@ -3,7 +3,7 @@
   "values": [
     "minecraft:phantom",
     "minecraft:vex",
-    "minecraft:evoker",
+    "minecraft:evoker", "jaymoskingdoms:reaped_pillager", "jaymoskingdoms:reaped_vindicator", "jaymoskingdoms:reaped_evoker",
     "minecraft:illusioner",
     "minecraft:witch",
     "minecraft:enderman",
