@@ -4,6 +4,8 @@ import com.jaymoskingdoms.Sparks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -90,10 +92,13 @@ public final class CreatorTab {
 		/** The box's lines; null is the gap between two paragraphs. */
 		private final List<@Nullable FormattedCharSequence> lines = new ArrayList<>();
 		private final int textH;
+		/** A click on the picture or in the box: the pick stepped on (1) or, a right click, back (-1). */
+		private final Consumer<Integer> step;
 		private int scroll;
 
-		Card(Font font, int x, int y, int h, Component header, ItemStack icon, Component name, List<Component> text) {
+		Card(Font font, int x, int y, int h, Component header, ItemStack icon, Component name, List<Component> text, Consumer<Integer> step) {
 			super(x, y, W, h, name);
+			this.step = step;
 			this.font = font;
 			this.header = header;
 			this.icon = icon;
@@ -169,10 +174,17 @@ public final class CreatorTab {
 			return true;
 		}
 
-		/** Nothing to press: a click falls through. */
+		/** Andy: "you need to be able to toggle the selections in the box": a click on the picture or in the box steps the pick on, a right click back. */
 		@Override
 		public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-			return false;
+			int mx = (int)event.x(), my = (int)event.y(), wx = getX() + (W - WELL) / 2, wy = getY() + wellTop();
+			boolean picture = Ui.over(mx, my, wx, wy, WELL, WELL), box = Ui.over(mx, my, getX(), boxTop(), W, getY() + getHeight() - boxTop());
+			if (!this.visible || !picture && !box) {
+				return false;
+			}
+			playDownSound(Minecraft.getInstance().getSoundManager());
+			this.step.accept(event.button() == InputConstants.MOUSE_BUTTON_RIGHT ? -1 : 1);
+			return true;
 		}
 
 		@Override
@@ -184,18 +196,29 @@ public final class CreatorTab {
 	/**
 	 * One thing to set, as a {@link Card} from {@code y} down to the tab's foot: the arrows either side of its picture step
 	 * the pick, the two buttons under it go to the thing before and the next ({@code at} of {@code count}, by {@code go}).
+	 * {@code before}: where Back goes from the first thing (the Life page's: back to the story), or null.
 	 */
 	private static void card(Consumer<AbstractWidget> add, Runnable rebuild, Font font, int x, int y, int bottom, Component label, int at, int count,
-			ItemStack icon, Component name, List<Component> text, Consumer<Integer> step, Consumer<Integer> go) {
+			ItemStack icon, Component name, List<Component> text, Consumer<Integer> step, Consumer<Integer> go, @Nullable Runnable before) {
 		int navY = bottom - ROW_H, half = (W - 2) / 2;
 		Component header = Component.empty().append(label).append(" " + (at + 1) + "/" + count);
-		add.accept(new Card(font, x, y, navY - 3 - y, header, icon, name, text));
+		add.accept(new Card(font, x, y, navY - 3 - y, header, icon, name, text, dir -> {
+			step.accept(dir);
+			rebuild.run();
+		}));
 		int ay = y + Card.wellTop() + (WELL - ROW_H) / 2, ax = x + (W - WELL) / 2;
 		add.accept(button(Component.literal("<"), ax - ARROW - 6, ay, ARROW, () -> step.accept(-1), rebuild));
 		add.accept(button(Component.literal(">"), ax + WELL + 6, ay, ARROW, () -> step.accept(1), rebuild));
-		Button back = button(Component.translatable("gui.jaymoskingdoms.creator.prev"), x, navY, half, () -> go.accept(at - 1), rebuild);
-		back.active = at > 0;
-		add.accept(back);
+		if (at == 0 && before != null) {
+			// (Andy: "they run alongside one another not separate") back from the first thing: the story, told after all
+			Button tell = Button.builder(Component.translatable("gui.jaymoskingdoms.creator.tell"), b -> before.run()).bounds(x, navY, half, ROW_H).build();
+			tell.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.creator.tell.desc")));
+			add.accept(tell);
+		} else {
+			Button back = button(Component.translatable("gui.jaymoskingdoms.creator.prev"), x, navY, half, () -> go.accept(at - 1), rebuild);
+			back.active = at > 0;
+			add.accept(back);
+		}
 		Button next = button(Component.translatable("gui.jaymoskingdoms.creator.next"), x + half + 2, navY, half, () -> go.accept(at + 1), rebuild);
 		next.active = at < count - 1;
 		add.accept(next);
@@ -226,7 +249,7 @@ public final class CreatorTab {
 				lifeAt = Math.clamp(lifeAt, 0, fields.size() - 1);
 				LifeStoryScreen.Field f = fields.get(lifeAt);
 				card(add, rebuild, font, x, y, bottom, LifeStoryScreen.fieldLabel(f), lifeAt, fields.size(), LifeStoryScreen.fieldIcon(f), LifeStoryScreen.fieldValue(f),
-					LifeStoryScreen.fieldText(f), dir -> LifeStoryScreen.cycle(f, dir), to -> lifeAt = to);
+					LifeStoryScreen.fieldText(f), dir -> LifeStoryScreen.cycle(f, dir), to -> lifeAt = to, LifeStoryScreen::tellInstead);
 			}
 			case 1 -> {
 				for (int i = 0; i < 8; i++) {
@@ -249,7 +272,7 @@ public final class CreatorTab {
 				card(add, rebuild, font, x, y, bottom, Component.translatable("gui.jaymoskingdoms.story.sparks." + SPARKS[kind]), kind, SPARKS.length,
 					new ItemStack(SPARK_ICONS[kind]), Component.translatable(key == null ? "gui.jaymoskingdoms.creator.none" : key),
 					List.of(Component.translatable(key == null ? "gui.jaymoskingdoms.story.sparks.about" : key + ".fx")),
-					dir -> LifeStoryScreen.cycleSpark(kind, dir), to -> natureAt = to);
+					dir -> LifeStoryScreen.cycleSpark(kind, dir), to -> natureAt = to, null);
 			}
 			default -> {
 				EditBox name = new EditBox(font, x + 1, y, W - 2, ROW_H, Component.translatable("gui.jaymoskingdoms.creator.preset.name"));

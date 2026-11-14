@@ -702,6 +702,7 @@ final class LifeStoryScreen extends Screen {
 				Arrays.fill(draft.sparks, 1);
 			}
 			this.asking = false;
+			callCreator();
 			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
 			if (tabbed()) {
 				hush();
@@ -894,6 +895,34 @@ final class LifeStoryScreen extends Screen {
 		return new LifeStory.Live(List.copyOf(answers), raised != null && raised.realm() ? draft.raisedRealm : -1,
 			road != null && road.realm() ? draft.roadRealm : -1, lookIndex(), draft.option, draft.heritage, draft.cls, gender,
 			draft.flaws, draft.switches, draft.sparks[0] | draft.sparks[1] << 3 | draft.sparks[2] << 6);
+	}
+
+	/**
+	 * Andy: "you should be able to go back to the MCA menu with the on second thought button... they run alongside one
+	 * another not separate". MCA's creator is asked for, for one whose story is untold: it opens once of its own accord,
+	 * so after a turn back to the story (or a rejoin partway through it) the server sends it again. Should it not come,
+	 * the creator's page here takes over as ever ({@link #TAB_WAIT_MS}).
+	 */
+	private static void callCreator() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (McaCompat.LOADED && minecraft.player != null && LifeStory.of(minecraft.player) == null && !roadOnly()
+			&& ClientPlayNetworking.canSend(LifeStory.Creator.TYPE)) {
+			ClientPlayNetworking.send(new LifeStory.Creator());
+			creatorAhead = true;
+		}
+	}
+
+	/**
+	 * From the tab in MCA's creator: the story told after all. The creator steps aside for this screen at the story's first
+	 * page (the gender stays as picked), and is asked for again so it follows the story, as for one who never skipped.
+	 */
+	static void tellInstead() {
+		if (tabbed()) {
+			draft.explicit = false;
+			draft.step = 0;
+			callCreator();
+			Minecraft.getInstance().gui.setScreen(new LifeStoryScreen(true));
+		}
 	}
 
 	/** From the tab in MCA's creator, as the creator is finished: the skipped story is sealed, as the gender the creator made. */
