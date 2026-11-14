@@ -225,6 +225,10 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 			// a sky blade only darkens; a Barrage blade is a summoned weapon in void hands: darkness and wither
 			com.jaymospowers.power.arsenal.ArsenalVoid.voidHit(living, owner, !isSkyBlade());
 		}
+		if (hurt && entity instanceof LivingEntity living && owner instanceof LivingEntity by && this.level() instanceof ServerLevel server) {
+			// a relic in flight keeps its gift
+			com.jaymospowers.power.arsenal.RelicWeapons.flyingCut(server, this.getItem(), living, by, impactDamage);
+		}
 		if (hurt && entity instanceof LivingEntity living) {
 			this.doKnockback(living, source);
 			Vec3 push = this.getDeltaMovement().multiply(1, 0, 1).normalize().scale(0.35);

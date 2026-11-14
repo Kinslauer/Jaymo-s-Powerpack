@@ -55,8 +55,11 @@ The Void Arsenal differs because its Sneak + V already steps through gates.
    wing combos are a five-hit chain counted in Powers by itself (Weapon Forms has no combo counter to share, so nothing
    here needs Kingdoms): the Fan's chain is thrust, thrust, cross, cross, every blade; the Halo's and Flank's is thrust,
    sweep, cross, sweep, every blade. The wing joins Hundred Blades and the Sword of Damocles (`ArsenalWingMoves.join`).
-6. **Look and who else**: the Void wing (corruption per strike, Endermen notice), guns on the wing, relic gifts carry
-   over, working hands (tools dig), gifted villagers get two.
+6. **Look and who else** (built, `ArsenalWingKit`): guns and bows on the wing fire from where they hang (a gun once,
+   then home); tools on a steered wing dig the block looked at; a relic on a flying blade keeps its on-cut gift
+   (`RelicWeapons.flyingCut`); Endermen near a Void wing turn on its holder (a Void holder is already fully corrupted,
+   so there is no meter left to add to); gifted Arsenal villagers keep two blades at their shoulders in a fight, strike
+   with them and ward with them (`ArsenalGift`). Not done: the Sword in the Stone's gift on the wing.
 7. **Gravity's rocks**: the same orders for `GravityRocks` (formation, strike, harry, steer, whirl, ward, storm, ring),
    no riding.
 

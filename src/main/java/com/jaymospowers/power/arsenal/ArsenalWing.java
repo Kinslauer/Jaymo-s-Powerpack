@@ -78,6 +78,8 @@ import org.jspecify.annotations.Nullable;
  * weapon or tool of your own, or one loose rock off the stack. Your own things never go home by themselves and are
  * never lost: they come back to your pack when the wing is sent home, and the wing is saved with you.
  *
+ * <p>Guns, bows and tools on the wing do their own work, and the Void wing draws Endermen: {@link ArsenalWingKit}.
+ *
  * <p>The whole wing is one attachment ({@link #WING}, synced to everyone); the places come from one formula both sides
  * use ({@link #slot}). A blade on its way to a target is a {@link RiftBlade}; docked ones are drawn by
  * {@code ArsenalWingRenderer}.
@@ -316,7 +318,7 @@ public final class ArsenalWing {
 	}
 
 	/** A blade leaving the wing: one of the holder's own goes back into their pack (or at their feet). */
-	private static void home(ServerPlayer player, Blade blade) {
+	static void home(ServerPlayer player, Blade blade) {
 		if (blade.own() && !blade.item().isEmpty()) {
 			player.getInventory().placeItemBackInInventory(blade.item().copy(), Prediction.SERVER_ONLY);
 		}
@@ -345,6 +347,10 @@ public final class ArsenalWing {
 		List<Blade> kept = new ArrayList<>();
 		for (int i = 0; i < wing.blades().size(); i++) {
 			Blade blade = wing.blades().get(i);
+			if (blade.item().isEmpty()) {
+				// one of their own tools, worn through at its work
+				continue;
+			}
 			if (blade.own() || now < blade.expires() || now < blade.back()) {
 				kept.add(blade);
 			} else {
@@ -374,9 +380,12 @@ public final class ArsenalWing {
 				commit(player, wing);
 			} else {
 				cut(player, wing, STEER_DAMAGE, STEER_HIT_GAP, true);
+				ArsenalWingKit.work(player, wing);
 			}
 			return;
 		}
+		ArsenalWingKit.stopWork(player);
+		ArsenalWingKit.notice(player);
 		if (wing.mode() == RING) {
 			ArsenalWingMoves.tickRing(player, wing);
 			return;
@@ -470,6 +479,10 @@ public final class ArsenalWing {
 			Blade blade = wing.blades().get(i);
 			if (wing.out(i, now) < 1.0F || !blade.own() && now + RETURN_TICKS >= blade.expires()) {
 				continue;
+			}
+			if (ArsenalWingKit.shoots(blade.item())) {
+				ArsenalWingKit.shoot(player, wing, i, target);
+				return true;
 			}
 			boolean corrupted = Fate.isCorrupted(player);
 			Vec3 from = slot(player, wing, i, now, 1.0F);
@@ -858,6 +871,7 @@ public final class ArsenalWing {
 		SPARED.remove(id);
 		CUT.remove(id);
 		ArsenalWingMoves.onLost(player);
+		ArsenalWingKit.stopWork(player);
 		Wing wing = player.getAttached(WING);
 		if (wing != null) {
 			wing.blades().forEach(blade -> home(player, blade));
