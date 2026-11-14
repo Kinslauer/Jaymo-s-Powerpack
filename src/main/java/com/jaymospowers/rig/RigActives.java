@@ -60,6 +60,8 @@ public final class RigActives {
 	static final int LAUNCHER_COST = 120, LAUNCHER_COOLDOWN = 60, MISSILES = 2, MISSILE_LIFE = 60;
 	static final double MISSILE_SPEED = 1.6, MISSILE_SPREAD = 0.04;
 	static final float MISSILE_BURST = 1.6F;
+	/** The thump on the wearer's screen as the missiles leave the pods. */
+	static final float LAUNCHER_SHAKE = 0.5F;
 	/** How often the HUD's status goes out (ticks). */
 	static final int STATUS_EVERY = 5;
 	/** (0.11.87) Lock-on: how far a lock can be taken, and how far it holds before it breaks. */
@@ -89,6 +91,8 @@ public final class RigActives {
 	static final double FLAME_DOWN = 0.28, FLAME_TRAIL = 1.4, FLAME_SWING = 0.045;
 	/** The lift-off blast: how far its ring runs (blocks) and how hard it shakes the screen. */
 	static final float LAUNCH_RING = 2.2F, LAUNCH_SHAKE = 0.9F;
+	/** The same as full flight opens up in the air: a smaller ring, a lighter shake. */
+	static final float FLIGHT_RING = 1.4F, FLIGHT_SHAKE = 0.6F;
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
 	private static final List<Missile> MISSILES_IN_FLIGHT = new ArrayList<>();
@@ -121,6 +125,17 @@ public final class RigActives {
 		/** The jets' last position and facing, for flames that swing with the steering. */
 		@Nullable Vec3 jetPos;
 		float jetYaw;
+	}
+
+	/** Something that happens a few ticks after its key: a shot at the end of its wind-up, a lift-off after its crouch. */
+	private record Deferred(ServerPlayer player, long at, Runnable run) {
+	}
+
+	private static final List<Deferred> DEFERRED = new ArrayList<>();
+
+	/** Runs {@code run} in {@code ticks} ticks, if the player is still there and alive. */
+	static void later(ServerPlayer player, int ticks, Runnable run) {
+		DEFERRED.add(new Deferred(player, player.level().getGameTime() + ticks, run));
 	}
 
 	private record Missile(ServerLevel level, ServerPlayer owner, Vec3[] at, Vec3[] velocity, int[] age, @Nullable Entity target, float burst) {
@@ -301,13 +316,19 @@ public final class RigActives {
 		state.jetPos = null;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.6F);
 		if (player.onGround() && player.level() instanceof ServerLevel level) {
-			// off the ground in a burst: the client lifts hard for a few ticks, and the ground takes the blast
-			Vec3 feet = player.position();
-			MagicFx.ring(level, feet.add(0.0, 0.1, 0.0), LAUNCH_RING, FLAME_COLOR);
-			MagicFx.blast(level, feet.add(0.0, 0.2, 0.0), 1.1F, FLAME_HOT);
-			level.playSound(null, feet.x, feet.y, feet.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
-			com.jaymospowers.core.Shakes.send(player, LAUNCH_SHAKE, feet);
+			// off the ground in a burst: a crouch first (the client holds the lift for it), then the ground takes the blast
+			RigMoves.start(player, RigMoves.TAKEOFF);
+			later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, LAUNCH_RING, LAUNCH_SHAKE));
 		}
+	}
+
+	/** The thrusters firing at the end of a take-off's crouch: a ring and a blast under the boots, and a shake. */
+	private static void liftOff(ServerLevel level, ServerPlayer player, float ring, float shake) {
+		Vec3 feet = player.position();
+		MagicFx.ring(level, feet.add(0.0, 0.1, 0.0), ring, FLAME_COLOR);
+		MagicFx.blast(level, feet.add(0.0, 0.2, 0.0), 1.1F, FLAME_HOT);
+		level.playSound(null, feet.x, feet.y, feet.z, SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
+		com.jaymospowers.core.Shakes.send(player, shake, feet);
 	}
 
 	private static void stopHover(ServerPlayer player, State state) {
@@ -332,9 +353,10 @@ public final class RigActives {
 		}
 		state.flying = true;
 		state.lastPos = null;
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 0.8F, 0.8F);
+		// a tuck in the air, then the thrusters open up
+		RigMoves.start(player, RigMoves.TAKEOFF);
 		if (player.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY(), player.getZ(), 14, 0.2, 0.05, 0.2, 0.08);
+			later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, FLIGHT_RING, FLIGHT_SHAKE));
 		}
 	}
 
@@ -430,6 +452,14 @@ public final class RigActives {
 		}
 		state.palmCooldown = over ? (int)(PALM_COOLDOWN * OVER_COOLDOWN_SHARE) : PALM_COOLDOWN;
 		RigMoves.start(player, RigMoves.PALM);
+		// the arm comes up first; the shot leaves at the end of the wind-up
+		later(player, RigMoves.PALM_FIRE, () -> firePalm(player, over));
+	}
+
+	private static void firePalm(ServerPlayer player, boolean over) {
+		if (!Rig.fullSet(player)) {
+			return;
+		}
 		ServerLevel level = player.level();
 		Rig.Augment augment = Rig.augment(player);
 		double range = PALM_RANGE * (augment == Rig.Augment.XENOFORM ? XENO_RANGE : 1.0);
@@ -496,19 +526,28 @@ public final class RigActives {
 		RigFrame frame = Rig.frame(player);
 		int count = MISSILES + frame.extraMissiles + (Rig.augment(player) == Rig.Augment.ARSENAL ? 1 : 0);
 		float burst = burstSize(frame, over);
-		Vec3 look = player.getLookAngle();
+		// the pods rise first; the missiles leave once they are up
+		later(player, RigMoves.LAUNCHER_FIRE, () -> {
+			Vec3 look = player.getLookAngle();
+			Vec3 right = right(look);
+			Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
+			for (int i = 0; i < count; i++) {
+				// alternate shoulders, a touch of spread
+				double side = (i % 2 == 0 ? 0.45 : -0.45) * (1 + i / 2);
+				Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
+				Vec3 velocity = look.add(level.getRandom().nextGaussian() * MISSILE_SPREAD, level.getRandom().nextGaussian() * MISSILE_SPREAD,
+					level.getRandom().nextGaussian() * MISSILE_SPREAD).normalize().scale(MISSILE_SPEED);
+				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], locked(player), burst));
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.7F);
+			com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
+		});
+	}
+
+	/** Level with the ground and square to {@code look}, on its right. */
+	private static Vec3 right(Vec3 look) {
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
-		right = right.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
-		Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
-		for (int i = 0; i < count; i++) {
-			// alternate shoulders, a touch of spread
-			double side = (i % 2 == 0 ? 0.45 : -0.45) * (1 + i / 2);
-			Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
-			Vec3 velocity = look.add(level.getRandom().nextGaussian() * MISSILE_SPREAD, level.getRandom().nextGaussian() * MISSILE_SPREAD,
-				level.getRandom().nextGaussian() * MISSILE_SPREAD).normalize().scale(MISSILE_SPEED);
-			MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], locked(player), burst));
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.7F);
+		return right.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
 	}
 
 	/** How big this frame's missiles burst (the Siege shoulder gun's are bigger; so are an overcharge's). */
@@ -551,19 +590,21 @@ public final class RigActives {
 		RigMoves.start(player, RigMoves.LAUNCHER);
 		ServerLevel level = player.level();
 		float burst = burstSize(Rig.frame(player), over);
-		Vec3 look = player.getLookAngle();
-		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
-		right = right.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
-		Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
-		for (int i = 0; i < marks.size(); i++) {
-			// the pods spit them out in a fan (alternating sides, rising), and they turn in on their marks
-			double side = (i % 2 == 0 ? 1 : -1) * (0.45 + 0.2 * (i / 2));
-			Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
-			Vec3 fan = right.scale(Math.signum(side) * VOLLEY_SPREAD * (1 + i / 2)).add(0.0, VOLLEY_SPREAD * 0.8, 0.0);
-			Vec3 velocity = look.add(fan).normalize().scale(MISSILE_SPEED);
-			MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], marks.get(i), burst));
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
+		later(player, RigMoves.LAUNCHER_FIRE, () -> {
+			Vec3 look = player.getLookAngle();
+			Vec3 right = right(look);
+			Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
+			for (int i = 0; i < marks.size(); i++) {
+				// the pods spit them out in a fan (alternating sides, rising), and they turn in on their marks
+				double side = (i % 2 == 0 ? 1 : -1) * (0.45 + 0.2 * (i / 2));
+				Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
+				Vec3 fan = right.scale(Math.signum(side) * VOLLEY_SPREAD * (1 + i / 2)).add(0.0, VOLLEY_SPREAD * 0.8, 0.0);
+				Vec3 velocity = look.add(fan).normalize().scale(MISSILE_SPEED);
+				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], marks.get(i), burst));
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
+			com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
+		});
 		sendStatus(player, state);
 	}
 
@@ -587,6 +628,15 @@ public final class RigActives {
 	}
 
 	static void tickMissiles(MinecraftServer server) {
+		for (int i = 0; i < DEFERRED.size(); i++) {
+			Deferred deferred = DEFERRED.get(i);
+			if (deferred.player().isRemoved() || !deferred.player().isAlive()) {
+				DEFERRED.remove(i--);
+			} else if (deferred.player().level().getGameTime() >= deferred.at()) {
+				DEFERRED.remove(i--);
+				deferred.run().run();
+			}
+		}
 		for (Iterator<Missile> it = MISSILES_IN_FLIGHT.iterator(); it.hasNext();) {
 			Missile missile = it.next();
 			ServerLevel level = missile.level();

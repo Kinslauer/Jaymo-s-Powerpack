@@ -55,6 +55,7 @@ public final class RigScan {
 			return;
 		}
 		state.scanCooldown = SCAN_COOLDOWN;
+		RigMoves.start(player, RigMoves.SCAN);
 		ServerLevel level = player.level();
 
 		List<Integer> ids = new ArrayList<>();

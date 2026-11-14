@@ -397,9 +397,13 @@ public final class RigClient {
 		float air = Rig.frame(player).airSpeed;
 		Vec3 motion = player.getDeltaMovement();
 		double vy;
-		if (launching && hoverTicks <= LAUNCH_TICKS) {
+		int crouch = com.jaymospowers.rig.RigMoves.TAKEOFF_CROUCH;
+		if (launching && hoverTicks <= crouch) {
+			// the take-off's crouch: still on the ground until the thrusters fire
+			vy = motion.y;
+		} else if (launching && hoverTicks <= crouch + LAUNCH_TICKS) {
 			// off the ground in a burst, dying away into the hover
-			vy = LAUNCH_SPEED * (1.0 - (hoverTicks - 1) / (double)LAUNCH_TICKS);
+			vy = LAUNCH_SPEED * (1.0 - (hoverTicks - crouch - 1) / (double)LAUNCH_TICKS);
 		} else if (minecraft.options.keyJump.isDown()) {
 			vy = HOVER_RISE;
 		} else if (minecraft.options.keyShift.isDown()) {

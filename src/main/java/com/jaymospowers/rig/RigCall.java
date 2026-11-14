@@ -134,6 +134,8 @@ public final class RigCall {
 			FROM.put(player.getUUID(), post);
 		}
 		player.setAttached(FLYING_IN, true);
+		// arms out and feet planted while it builds on
+		RigMoves.start(player, RigMoves.CALL);
 		CALLING.put(player.getUUID(), new int[1]);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.calling"));

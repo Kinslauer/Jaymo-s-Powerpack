@@ -132,6 +132,9 @@ public final class RigTable {
 			com.jaymospowers.power.xenoform.forms.HiveSwarm.formation(RigDrones.KIT, player), RigDrones.flags(player), RigDrones.count(player),
 			RigDecoy.trio(player), RigBank.on(player), RigField.blows(player), RigDrones.route(player), drones.size() > MAX_POINTS ? drones.subList(0, MAX_POINTS) : drones,
 			ids, kills, lens);
+		if (open && RigMoves.get(player) == null) {
+			RigMoves.start(player, RigMoves.TABLE);
+		}
 		ServerPlayNetworking.send(player, new Show(open, data));
 	}
 }

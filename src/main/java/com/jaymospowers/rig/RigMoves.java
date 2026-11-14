@@ -21,11 +21,20 @@ public final class RigMoves {
 	public static final int PALM = 1, LAUNCHER = 2, UNIBEAM = 3;
 	/** The one-knee landing ({@link RigLanding}) and a Rig prosthetic leg's kick ({@link RigLimbs}). */
 	public static final int KNEE = 4, KICK = 5;
-	public static final int KNEE_TICKS = 26, KICK_TICKS = 10;
+	public static final int KNEE_TICKS = 26, KICK_TICKS = 12;
+	/**
+	 * The take-off (a crouch, then the thrusters fire), and three quiet gestures: a scan (fingers to the helm), a suit call
+	 * (arms out, feet planted while it builds) and the wrist table (a glance at the forearm).
+	 */
+	public static final int TAKEOFF = 6, SCAN = 7, CALL = 8, TABLE = 9;
+	/** The take-off's crouch (ticks before the thrusters fire) and its whole length; the gestures' lengths. */
+	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
 	/** {@link #THRUST} values. */
 	public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
 	/** How long a palm blast's and a launch's poses play (ticks); the Unibeam's is its charge and beam and the let-down. */
-	public static final int PALM_TICKS = 10, LAUNCHER_TICKS = 14, UNIBEAM_SETTLE = 6;
+	public static final int PALM_TICKS = 13, LAUNCHER_TICKS = 17, UNIBEAM_SETTLE = 8;
+	/** The wind-up: ticks from the key to the palm blast's shot, and to the launcher's missiles leaving. */
+	public static final int PALM_FIRE = 2, LAUNCHER_FIRE = 3;
 
 	public record Move(int kind, long start) {
 		public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::kind, ByteBufCodecs.VAR_LONG,
@@ -47,6 +56,10 @@ public final class RigMoves {
 			case LAUNCHER -> LAUNCHER_TICKS;
 			case KNEE -> KNEE_TICKS;
 			case KICK -> KICK_TICKS;
+			case TAKEOFF -> TAKEOFF_TICKS;
+			case SCAN -> SCAN_TICKS;
+			case CALL -> CALL_TICKS;
+			case TABLE -> TABLE_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
 			default -> 0;
 		};
