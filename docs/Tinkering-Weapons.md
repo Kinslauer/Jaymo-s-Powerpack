@@ -189,7 +189,12 @@ How the numbers work (all constants in `ToolStats` and `ToolType.Ranged`):
 * A fired arrow is a vanilla `Arrow` (its model is the vanilla arrow). Thrown blades show their item model.
 * The crossbow does not use Tinkers' blocking-with-it model, its firework special case beyond showing the rocket, or the bow's "ammo
   drawn in the model".
-* No fishing rod (not part of this track), no staves.
+* **Fishing rod** (`ToolType.FISHING_ROD`, `ranged/TinkerRodItem`): Tinkers' definition, a bow limb (the rod), a bowstring (the
+  line) and an arrow head (the hook, half a share of the durability), durability x1.5. It is a `MetalFishingRodItem`, so it
+  casts, charges and reels as our rods do; a metal hook makes it a sea rod (`FishingReal.isMetalRodItem`), any other hook
+  fishes like a plain rod. Sprites: `tinkering_assets.fishing_rod` (Tinkers draws the rod and line per material; hooks are its
+  grey template in each material's head colours), shown cast while the hook is out.
+* No staves.
 * Limb/grip stats stand in only for the materials Tinkers gives them: wood, bone and metals. Stone, flint, seared stone, leather
   can't make them.
 * Draw speed shortens the real draw; the pulling sprites still follow vanilla timing (a fast bow looks drawn late).

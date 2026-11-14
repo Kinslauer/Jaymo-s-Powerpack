@@ -84,7 +84,21 @@ public final class TinkeringJei implements IModPlugin {
 		registration.addCraftingStation(CASTING, Tinkering.CASTING_TABLE);
 		registration.addCraftingStation(CASTING_BASIN, Tinkering.CASTING_BASIN);
 		registration.addCraftingStation(MELTING, Tinkering.SMELTERY);
+		registration.addCraftingStation(MELTING, com.jaymospowers.tinkering.smeltery.SmelteryExtras.MELTER);
 		registration.addCraftingStation(ALLOYING, Tinkering.SMELTERY);
+		registration.addCraftingStation(ALLOYING, com.jaymospowers.tinkering.smeltery.SmelteryExtras.ALLOYER);
+		registration.addCraftingStation(MELTING, com.jaymospowers.tinkering.smeltery.SmelteryExtras.FOUNDRY);
+		registration.addCraftingStation(mezz.jei.api.constants.RecipeTypes.CRAFTING, com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION);
+	}
+
+	/** The Crafting Station takes a crafting recipe's "+" like a crafting table: its grid is filled from the player's inventory. */
+	@Override
+	public void registerRecipeTransferHandlers(mezz.jei.api.registration.IRecipeTransferRegistration registration) {
+		registration.addRecipeTransferHandler(com.jaymospowers.tinkering.table.CraftingStationMenu.class,
+			com.jaymospowers.tinkering.table.Tables.CRAFTING_STATION_MENU, mezz.jei.api.constants.RecipeTypes.CRAFTING,
+			com.jaymospowers.tinkering.table.CraftingStationMenu.GRID_START, com.jaymospowers.tinkering.table.CraftingStationMenu.GRID,
+			com.jaymospowers.tinkering.table.CraftingStationMenu.PLAYER_START,
+			com.jaymospowers.tinkering.table.CraftingStationMenu.PLAYER_END - com.jaymospowers.tinkering.table.CraftingStationMenu.PLAYER_START);
 	}
 
 	@Override

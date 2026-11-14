@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": "jaymospowers:nether_grout",
+  "result": {
+    "id": "jaymospowers:scorched_brick"
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}

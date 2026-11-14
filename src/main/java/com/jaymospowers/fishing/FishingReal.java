@@ -458,11 +458,11 @@ public final class FishingReal {
 
     /** True while the player's main hand holds the metal fishing rod. */
     public static boolean isMetalRod(ServerPlayer player) {
-        return METAL_ROD != null && player.getItemInHand(InteractionHand.MAIN_HAND).is(METAL_ROD);
+        return isMetalRodItem(player.getItemInHand(InteractionHand.MAIN_HAND));
     }
 
-    /** Whether {@code stack} is the metal fishing rod. */
+    /** Whether {@code stack} is the metal fishing rod, or a Tinkering rod with a metal hook. */
     public static boolean isMetalRodItem(ItemStack stack) {
-        return METAL_ROD != null && stack.is(METAL_ROD);
+        return METAL_ROD != null && stack.is(METAL_ROD) || com.jaymospowers.tinkering.ranged.TinkerRodItem.seaRod(stack);
     }
 }

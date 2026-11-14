@@ -69,7 +69,7 @@ public class SmelteryBlock extends HorizontalDirectionalBlock implements EntityB
 
 				@Override
 				public Component getDisplayName() {
-					return Component.translatable("container.jaymospowers.smeltery");
+					return Component.translatable(state.is(SmelteryExtras.FOUNDRY) ? "container.jaymospowers.foundry" : "container.jaymospowers.smeltery");
 				}
 
 				@Override

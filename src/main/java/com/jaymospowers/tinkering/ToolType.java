@@ -78,7 +78,12 @@ public enum ToolType {
 	THROWING_AXE("throwing_axe", parts(PartType.ARROW_HEAD, 1, PartType.ARROW_SHAFT, 1),
 		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.THROWN, new Ranged(0, 0.5F, 0, 1.5F * 2.5F, 1.6F, 2, 10)),
 	SHURIKEN("shuriken", parts(PartType.ARROW_HEAD, 1, PartType.ARROW_HEAD, 1),
-		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.THROWN, new Ranged(0, 0.75F, 0, 1.5F * 1.5F, 3.0F, 4, 6));
+		0.0F, 1.0F, 1.0F, 1.0F, 1.0F, Map.of(), Style.THROWN, new Ranged(0, 0.75F, 0, 1.5F * 1.5F, 3.0F, 4, 6)),
+
+	// Tinkers' fishing rod (its definition: a limb for the rod, a bowstring for the line, an arrow head for the hook; durability
+	// half again). It fishes as our rods do (com.jaymospowers.fishing); a metal hook makes it a sea rod (TinkerRodItem)
+	FISHING_ROD("fishing_rod", parts(PartType.BOW_LIMB, 1, PartType.BOWSTRING, 1, PartType.ARROW_HEAD, 0.5F),
+		0.0F, 2.0F, 1.0F, 1.5F, 1.0F, Map.of(), Style.ROD, Ranged.NONE);
 
 	/** A slot on the tool: the part it takes and its share of that part kind's stats. */
 	public record Slot(PartType part, float scale) {
@@ -91,7 +96,9 @@ public enum ToolType {
 	public enum Style {
 		TOOL, SWORD, WEAPON,
 		/** (0.15.x) Ranged: a bow, a crossbow, a thrown spear (also strikes), a stack of arrows and a stack of thrown blades. */
-		BOW, CROSSBOW, JAVELIN, ARROW, THROWN;
+		BOW, CROSSBOW, JAVELIN, ARROW, THROWN,
+		/** A fishing rod: casts a hook, digs nothing. */
+		ROD;
 
 		/** A tool you wear down and mend, with modifiers (the arrows and thrown blades are plain stacks). */
 		public boolean durable() {

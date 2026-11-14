@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "s": "jaymospowers:scorched_brick"
+  },
+  "pattern": [
+    "sss",
+    "s s",
+    "sss"
+  ],
+  "result": {
+    "id": "jaymospowers:foundry_controller",
+    "count": 1
+  }
+}

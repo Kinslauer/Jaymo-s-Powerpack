@@ -85,7 +85,8 @@ public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
 		if (smeltery != null && !smeltery.formed()) {
 			graphics.fill(leftPos + POOL_X, topPos + POOL_Y, leftPos + POOL_X + POOL_W, topPos + POOL_Y + POOL_H, 0xA0000000);
 			int y = topPos + POOL_Y + POOL_H / 2 - 10;
-			for (var line : font.split(Component.translatable("gui.jaymospowers.smeltery.unformed"), POOL_W - 8)) {
+			for (var line : font.split(Component.translatable(smeltery.getBlockState().is(com.jaymospowers.tinkering.smeltery.SmelteryExtras.FOUNDRY)
+				? "gui.jaymospowers.foundry.unformed" : "gui.jaymospowers.smeltery.unformed"), POOL_W - 8)) {
 				graphics.text(font, line, leftPos + POOL_X + 4, y, 0xFFFF8080, true);
 				y += 10;
 			}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "s": "jaymospowers:scorched_brick",
+    "q": "minecraft:quartz"
+  },
+  "pattern": [
+    "sqs",
+    "sss"
+  ],
+  "result": {
+    "id": "jaymospowers:scorched_alloyer",
+    "count": 1
+  }
+}

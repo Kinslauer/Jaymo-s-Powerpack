@@ -159,6 +159,14 @@
     "jaymospowers:deepslate_sulphur_ore",
     "jaymospowers:nether_sulphur_ore",
     "jaymospowers:saltpetre_ore",
-    "jaymospowers:sandstone_saltpetre_ore"
+    "jaymospowers:sandstone_saltpetre_ore",
+    "jaymospowers:seared_tank",
+    "jaymospowers:seared_melter",
+    "jaymospowers:seared_channel",
+    "jaymospowers:scorched_bricks",
+    "jaymospowers:scorched_glass",
+    "jaymospowers:foundry_controller",
+    "jaymospowers:scorched_drain",
+    "jaymospowers:scorched_alloyer"
   ]
 }

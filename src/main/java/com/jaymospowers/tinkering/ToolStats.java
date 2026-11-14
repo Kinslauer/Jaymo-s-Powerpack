@@ -348,7 +348,7 @@ public final class ToolStats {
 	}
 
 	private static Tool tool(ToolType type, Stats stats, TinkerMaterial.Tier tier) {
-		if (type.style == ToolType.Style.WEAPON || type.style.shoots() || type.style.thrown()) {
+		if (type.style == ToolType.Style.WEAPON || type.style == ToolType.Style.ROD || type.style.shoots() || type.style.thrown()) {
 			return new Tool(List.of(), 1.0F, 1, false);
 		}
 		if (type.style == ToolType.Style.SWORD) {
