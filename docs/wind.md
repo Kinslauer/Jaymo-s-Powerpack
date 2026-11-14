@@ -647,50 +647,59 @@ Jung's idea: a Wind user feels the air that moving things stir. It is informatio
 - **Turning it on** (Jung's call; it was always on, and too faint to notice): crouch, then hold V. That hold of V
   is the sense's: the core reports V as up (`WindAirSense.route`, in `JaymosPowersClient`'s key loop, beside the Flame
   Avatar's), so V's own channel doesn't start, and it stays the sense's until V is let go. Standing up mid-hold stops
-  the sense. A faint ring of `RING_TICKS` 12 ticks round the crosshair shows it is on, even when nothing stirs. V
-  without crouching is V's ability as before.
-- **What you see:** round the crosshair, a pale streak (five dots, each 3 pixels across with a dark edge, never
-  fainter than `MIN_ALPHA` 130 of 255 at its first dot) on the side each moving thing is on (ahead is up, behind is
-  down, like the incoming-blow cues). It is brighter the faster the thing moves and the nearer it is, thicker for
-  something big (`BIG_WIDTH` 1.2 wide or `BIG_HEIGHT` 2.4 tall; 5 pixels), and fades over about a second once it stops (`FADE`
-  0.05 a tick). At most `MAX_MARKS` 12 streaks, the strongest.
+  the sense. The focus (below: the grey, the hush and the breeze) shows it is on, even when nothing stirs. V without
+  crouching is V's ability as before.
+- **What you see** (Jung's rework): nothing in the middle of the screen. At its edge, where the direction of each
+  thing felt meets it (ahead is the top edge, behind the bottom, left and right the sides, `EDGE_INSET` 14 px in), a
+  ripple: a few wavy lines lying along the edge, their waves running along them. Nearer is bigger and clearer: from
+  `LENGTH_FAR` 18 to `LENGTH_NEAR` 64 px long, waves `RISE_FAR` 1 to `RISE_NEAR` 3 px high, one line to
+  `LINES_NEAR` 3, 1 to 2 px thick, `ALPHA_FAR` 110 to `ALPHA_NEAR` 235 opaque, with a faint dark edge so they show on a
+  pale sky. Things within `CROWD_DEGREES` 20 of each other make one **crowd**: each more one in it makes its ripple
+  `CROWD_SIZE` 30% longer (up to `SIZE_MAX` x2; its waves up to `CROWD_RISE_MAX` x1.5 higher) and its waves run `CROWD_RUN` faster (from `RUN` 0.2 up to `RUN_MAX`
+  0.65 radians a tick). At most `MAX_CROWDS` 12, the nearest. A ripple fades over about a second once its makers stop
+  (`FADE` 0.05 a tick).
 - **What it feels:** any living thing but you (and your mount or rider) within reach that moved `MOVE_MIN` 0.08 b/t or
   more this tick, through walls, in the dark, invisible or not. Full strength at `MOVE_FULL` 0.3 b/t.
 - **What it can't feel:** anything still or moving softly. A sneak is about 0.065 b/t, under `MOVE_MIN`, so standing
   still or sneaking hides you from it. It gives a side only: no outline, no distance, no height.
-- **Reach:** `RANGE_BASE` 8 + `RANGE_PER_ABILITY` 4 per unlocked ability (12 blocks at one, 24 at four), from
-  `MIN_MASTERY` 1. By the sky over you (`WindWeather.sky`): `SHELTERED_RANGE` x0.5 with no sky overhead,
-  `OTHERWORLD_RANGE` x0.75 where there is no weather, `STORM_RANGE` x1.25 in a thunderstorm.
-- **Weather:** in a storm the streaks wander up to `STORM_WOBBLE` 20 degrees off true, so it reaches further and tells
-  you less. In the rain or the cold (`WindCold`) soft movement is lost: the least it feels is `DULLED_MIN` x1.5.
+- **Reach** (Jung): `RANGE` 64 blocks (four chunks) under a clear day sky, from `MIN_MASTERY` 1 (no longer growing
+  with mastery). By the sky over you (`WindWeather.sky`): `NIGHT_RANGE` x0.75 on a clear night, `RAIN_RANGE` x0.6 in
+  the rain, `STORM_RANGE` x0.5 in a thunderstorm (and Stormbound), `SHELTERED_RANGE` x0.5 with no sky overhead,
+  `OTHERWORLD_RANGE` x0.75 where there is no weather. The client only knows things within the server's entity tracking
+  range, which is about this far for mobs.
+- **Weather:** in a storm the ripples wander up to `STORM_WOBBLE` 20 degrees off true, so it tells you less. In the rain or the cold (`WindCold`) soft movement is lost: the least it feels is `DULLED_MIN` x1.5.
 - **Under water** (eyes in water) it feels nothing.
-- **The focus** (Jung): while listening, the world goes quiet and grey. Over `FOCUS_IN` 8 ticks every world sound
-  drops to `HUSH` 0.3 of its volume (music, records, menus and voices keep theirs; `WindSenseSoundMixin`, the same two
-  places the sound browser's volume works: a sound's start, and the volume of one that keeps it up to date), and the
-  view fades toward an even grey (`GREY` at up to `GREY_ALPHA` 0x5A) under a soft white frame (`FRAME_ALPHA` 0x6E at
-  the edge, gone `FRAME_DEPTH` 0.2 of the way in). No tunnel: the middle is as clear as the edges, only greyer, and
-  the streaks are drawn over it. Letting go brings it back over `FOCUS_OUT` 6 ticks.
+- **The focus** (Jung): while listening, the world goes quiet and grey. Over `FOCUS_IN` 8 ticks every game sound,
+  music, records and ambience too, sinks to `HUSH` 0.05 of its volume; only menu clicks keep theirs
+  (`WindSenseSoundMixin` for sounds as they start and as they update; `WindAirSense.refresh` sets the sound categories
+  again as the hush moves, so music already playing follows it). In its place a soft, steady breeze plays (the
+  flight's wind at `BREEZE_PITCH` 0.55, up to `BREEZE_VOLUME` 0.18, on the master category, which the hush leaves
+  alone). The view fades toward an even grey (`GREY` at up to `GREY_ALPHA` 0x5A) under a soft white frame
+  (`FRAME_ALPHA` 0x6E at the edge, gone `FRAME_DEPTH` 0.2 of the way in). No tunnel: the middle is as clear as the
+  edges, only greyer, and the ripples are drawn over it. Letting go brings it back over `FOCUS_OUT` 6 ticks.
 - **Client side only**, from what the client already knows of the things round it (so never beyond the server's entity
   tracking range): no packets, no server code, no cost. Run from `WindPowerClient.tick` and `renderHud`.
 - Not in it yet: a hunger cost, the Gale Barrier muffling it, an active pulse, tracking.
 
 ### Testing (airflow sense)
-0. Stand still, crouch and hold V: a faint ring of ticks round the crosshair, and V's ability doesn't charge. Let go
-   of V: the ring goes. Hold V without crouching: V's ability charges as before, no ring. Crouch + hold V, then stand
-   up still holding V: the ring goes and V still doesn't charge until you let go and press again.
-1. `/power set @s wind`. Crouch and hold V in the open with zombies or animals walking near: a streak shows round the crosshair on
-   each one's side and follows it as you turn. When one stops, its streak fades in about a second.
-2. Put a wall between you and a walking zombie: the streak still shows.
-3. A second player walks near you: a streak. They sneak or stand still: nothing.
-4. Go under a roof or into a cave: things have to be about half as close to show.
-5. `/weather thunder` in a rainy biome, outside: it reaches further and the streaks wander from side to side.
-6. `/weather rain`, or a snowy biome: slow mobs (a shuffling zombie) stop showing; a running one still does.
-7. Put your head under water: no streaks.
-8. `/power level @s 0`: no streaks. `/power level @s 1`: 12 blocks. `/power level @s 4`: 24 blocks.
-9. Another power, or no power: no streaks.
-10. Crouch and hold V by a noisy farm or a river: over a moment the sounds drop to about a third and the screen
-    greys under a white edge; you can still see clearly through the middle. Music and menu clicks stay as loud. Let
-    go of V: sound and colour come back in about a third of a second. Log out mid-focus and back in: sound is normal.
+0. Stand still, crouch and hold V: the screen greys under a white edge, the game goes almost silent and a soft breeze
+   plays; V's ability doesn't charge. Let go of V: sound and colour come back. Hold V without crouching: V's ability
+   charges as before. Crouch + hold V, then stand up still holding V: the focus ends and V still doesn't charge until
+   you let go and press again.
+1. `/power set @s wind`, a clear day. Crouch and hold V with zombies or animals walking round you: a wavy ripple at
+   the screen's edge on each one's side (one ahead: the top edge; behind you: the bottom), moving round the edge as
+   you turn. A near one is long, tall and bright with three lines; one 50 blocks off is short, low and faint. When one
+   stops, its ripple fades in about a second.
+2. Walk a herd of five past on one side: one big ripple there whose waves run fast. One walker on the other side: a
+   small, slow ripple.
+3. Put a wall between you and a walking zombie: the ripple still shows. A player sneaking or standing still: nothing.
+4. Reach: a walker 60 blocks off on a clear day shows; at night it must be within about 48; in the rain about 38; in
+   a storm or under a roof about 32 (and in a storm the ripples wander).
+5. `/weather rain`, or a snowy biome: slow mobs (a shuffling zombie) stop showing; a running one still does.
+6. Put your head under water: no ripples. `/power level @s 0`: nothing. Another power: nothing.
+7. With music playing, crouch and hold V: the music sinks almost to nothing along with mob noises and your own
+   footsteps; menu clicks (Esc, a button) stay as loud. Let go: the music comes back. Log out mid-focus and back in:
+   sound is normal.
 
 ## 0.15.58: the way into the Aether (`power/wind/aether/WindAether.java`)
 

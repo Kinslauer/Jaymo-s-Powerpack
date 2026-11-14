@@ -11,9 +11,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (Jung) The airflow sense's focus quiets the world ({@link WindAirSense#hush}): a sound that starts while it is on starts
- * quieter, and a sound that keeps its volume up to date (a moving minecart, a looped ambience) follows it down and back.
- * Music, records, menu clicks and voices are left alone. Same two places the sound browser's volume works in.
+ * (Jung) The airflow sense's focus quiets the game ({@link WindAirSense#hush}): a sound that starts while it is on starts
+ * hushed, and one already playing follows it down and back (each time {@code WindAirSense} sets the categories again,
+ * and as a sound that keeps its volume up to date goes on). Music too: only menu clicks, the master category and the
+ * focus's own breeze are left alone. Same two places the sound browser's volume works in.
  */
 @Mixin(SoundEngine.class)
 abstract class WindSenseSoundMixin {
@@ -30,8 +31,7 @@ abstract class WindSenseSoundMixin {
 
 	private static float jaymospowers$hush(SoundInstance sound) {
 		SoundSource source = sound.getSource();
-		if (source == SoundSource.MUSIC || source == SoundSource.RECORDS || source == SoundSource.UI || source == SoundSource.VOICE
-			|| source == SoundSource.MASTER) {
+		if (source == SoundSource.UI || source == SoundSource.MASTER || WindAirSense.isBreeze(sound)) {
 			return 1.0F;
 		}
 		return WindAirSense.hush();
